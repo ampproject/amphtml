@@ -1,3 +1,10 @@
+---
+$category@: media
+formats:
+  - websites
+teaser:
+  text: Displays a Springboard Platform video player.
+---
 <!---
 Copyright 2016 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,13 +21,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-springboard-player"></a> `amp-springboard-player`
+# amp-springboard-player
+
+Displays the Springboard Player used in the <a href="http://publishers.springboardplatform.com">Springboard
 
 <table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Displays the Springboard Player used in the <a href="http://publishers.springboardplatform.com">Springboard</a> Video Platform.
-  </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-springboard-player" src="https://cdn.ampproject.org/v0/amp-springboard-player-0.1.js">&lt;/script></code></td>
@@ -55,34 +60,36 @@ The `width` and `height` attributes determine the aspect ratio of the player emb
 ```
 
 ## Attributes
-
-##### data-site-id (required)
-
-The SpringBoard site ID. Specific to every partner.
-
-##### data-mode (required)
-
-The SpringBoard player mode: `video` or `playlist`.
-
-##### data-content-id (required)
-
-The SpringBoard player content ID (video or playlist ID).
-
-##### data-player-id (required)
-
-The Springboard player ID.
-
-##### data-domain (required)
-
-The Springboard partner domain.
-
-##### data-items (required)
-
-The number of videos in the playlist.
-
-##### common attributes
-
-This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
+<table>
+  <tr>
+    <td width="40%"><strong>data-site-id (required)</strong></td>
+    <td>The SpringBoard site ID. Specific to every partner.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-mode (required)</strong></td>
+    <td>The SpringBoard player mode: <code>video</code> or <code>playlist</code>.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-content-id (required)</strong></td>
+    <td>The SpringBoard player content ID (video or playlist ID).</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-player-id (required)</strong></td>
+    <td>The Springboard player ID.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-domain (required)</strong></td>
+    <td>The Springboard partner domain.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-items (required)</strong></td>
+    <td>The number of videos in the playlist.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>common attributes</strong></td>
+    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
+  </tr>
+</table>
 
 ## Validation
 

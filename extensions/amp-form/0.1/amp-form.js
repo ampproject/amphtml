@@ -16,6 +16,7 @@
 
 import {ActionTrust} from '../../../src/action-constants';
 import {AmpEvents} from '../../../src/amp-events';
+import {AmpFormTextarea} from './amp-form-textarea';
 import {
   AsyncInputAttributes,
   AsyncInputClasses,
@@ -36,7 +37,6 @@ import {
   ancestorElementsByTag,
   childElementByAttr,
   createElementWithAttributes,
-  escapeCssSelectorIdent,
   iterateCursor,
   removeElement,
   tryFocus,
@@ -45,6 +45,7 @@ import {createCustomEvent} from '../../../src/event-helper';
 import {createFormDataWrapper} from '../../../src/form-data-wrapper';
 import {deepMerge, dict} from '../../../src/utils/object';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
+import {escapeCssSelectorIdent} from '../../../src/css';
 import {
   formOrNullForElement,
   getFormAsObject,
@@ -55,13 +56,14 @@ import {
   isCheckValiditySupported,
 } from './form-validators';
 import {getMode} from '../../../src/mode';
-import {installFormProxy} from './form-proxy';
-import {installStylesForDoc} from '../../../src/style-installer';
 import {
+  getViewerAuthTokenIfAvailable,
   setupAMPCors,
   setupInit,
   setupInput,
 } from '../../../src/utils/xhr-utils';
+import {installFormProxy} from './form-proxy';
+import {installStylesForDoc} from '../../../src/style-installer';
 import {toArray, toWin} from '../../../src/types';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
@@ -243,7 +245,7 @@ export class AmpForm {
    * @param {string} method
    * @param {!Object<string, string>=} opt_extraFields
    * @param {!Array<string>=} opt_fieldBlacklist
-   * @return {!FetchRequestDef}
+   * @return {!Promise<!FetchRequestDef>}
    */
   requestForFormFetch(url, method, opt_extraFields, opt_fieldBlacklist) {
     let xhrUrl, body;
@@ -274,7 +276,9 @@ export class AmpForm {
         body.append(key, opt_extraFields[key]);
       }
     }
-    return {
+
+    /** @type {!FetchRequestDef}*/
+    const request = {
       xhrUrl,
       fetchOpt: dict({
         'body': body,
@@ -283,6 +287,15 @@ export class AmpForm {
         'headers': dict({'Accept': 'application/json'}),
       }),
     };
+
+    return getViewerAuthTokenIfAvailable(this.win_, this.form_).then(token => {
+      if (token) {
+        userAssert(request.fetchOpt['method'] == 'POST',
+            'Cannot attach auth token with GET request.');
+        body.append('ampViewerAuthToken', token);
+      }
+      return request;
+    });
   }
 
   /**
@@ -527,11 +540,19 @@ export class AmpForm {
           this.urlReplacement_.expandInputValueSync(varSubsFields[i]);
         }
 
-        this.handleNonXhrGet_(event);
+        /**
+         * If the submit was called with an event, then we shouldn't
+         * manually submit the form
+         */
+        const shouldSubmitFormElement = !event;
+
+        this.handleNonXhrGet_(shouldSubmitFormElement);
         return Promise.resolve();
       }
 
-      event.preventDefault();
+      if (event) {
+        event.preventDefault();
+      }
     }
 
     // Set ourselves to the SUBMITTING State
@@ -548,7 +569,7 @@ export class AmpForm {
         presubmitPromises,
         SUBMIT_TIMEOUT
     ).then(
-        () => this.handlePresubmitSuccess_(trust, event),
+        () => this.handlePresubmitSuccess_(trust),
         error => this.handlePresubmitError_(/**@type {!Error}*/(error))
     );
   }
@@ -566,16 +587,15 @@ export class AmpForm {
   /**
    * Handle successful presubmit tasks
    * @param {!ActionTrust} trust
-   * @param {?Event} event
    * @return {!Promise}
    */
-  handlePresubmitSuccess_(trust, event) {
+  handlePresubmitSuccess_(trust) {
     if (this.xhrAction_) {
       return this.handleXhrSubmit_(trust);
     } else if (this.method_ == 'POST') {
       this.handleNonXhrPost_();
     } else if (this.method_ == 'GET') {
-      this.handleNonXhrGet_(event);
+      this.handleNonXhrGet_(/*shouldSubmitFormElement*/true);
     }
 
     return Promise.resolve();
@@ -649,12 +669,12 @@ export class AmpForm {
     // Render template for the form submitting state.
     const values = this.getFormAsObject_();
     return this.renderTemplate_(values)
-        .then(() => {
-          this.actions_.trigger(
-              this.form_, FormEvents.SUBMIT, /* event */ null, trust);
-        }).then(() => {
-          request = this.requestForFormFetch(
-              dev().assertString(this.xhrAction_), this.method_);
+        .then(() => this.actions_.trigger(
+            this.form_, FormEvents.SUBMIT, /* event */ null, trust))
+        .then(() => this.requestForFormFetch(
+            dev().assertString(this.xhrAction_), this.method_))
+        .then(formRequest => {
+          request = formRequest;
           request.fetchOpt = setupInit(request.fetchOpt);
           request.fetchOpt = setupAMPCors(
               this.win_, request.xhrUrl, request.fetchOpt);
@@ -804,9 +824,9 @@ export class AmpForm {
    */
   doXhr_(url, method, opt_extraFields, opt_fieldBlacklist) {
     this.assertSsrTemplate_(false, 'XHRs should be proxied.');
-    const request = this.requestForFormFetch(
-        url, method, opt_extraFields, opt_fieldBlacklist);
-    return this.xhr_.fetch(request.xhrUrl, request.fetchOpt);
+    return this.requestForFormFetch(
+        url, method, opt_extraFields, opt_fieldBlacklist)
+        .then(request => this.xhr_.fetch(request.xhrUrl, request.fetchOpt));
   }
 
   /**
@@ -889,12 +909,14 @@ export class AmpForm {
 
   /**
    * Triggers Submit Analytics,
-   * and Form Element submit if not triggered by an event
-   * @param {?Event} event
+   * and Form Element submit if passed by param.
+   * shouldSubmitFormElement should ONLY be true
+   * If the submit event.preventDefault was called
+   * @param {boolean} shouldSubmitFormElement
    */
-  handleNonXhrGet_(event) {
+  handleNonXhrGet_(shouldSubmitFormElement) {
     this.triggerFormSubmitInAnalytics_('amp-form-submit');
-    if (!event) {
+    if (shouldSubmitFormElement) {
       this.form_.submit();
     }
     this.setState_(FormState.INITIAL);
@@ -1288,9 +1310,11 @@ export class AmpFormService {
    */
   installHandlers_(ampdoc) {
     return ampdoc.whenReady().then(() => {
-      this.installSubmissionHandlers_(
-          ampdoc.getRootNode().querySelectorAll('form'));
-      this.installGlobalEventListener_(ampdoc.getRootNode());
+      const root = ampdoc.getRootNode();
+
+      this.installSubmissionHandlers_(root.querySelectorAll('form'));
+      AmpFormTextarea.install(ampdoc);
+      this.installGlobalEventListener_(root);
     });
   }
 

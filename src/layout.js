@@ -96,24 +96,34 @@ export const naturalDimensions_ = {
  * @private  Visible for testing only!
  */
 export const LOADING_ELEMENTS_ = {
+  'AMP-AD': true,
   'AMP-ANIM': true,
   'AMP-BRIGHTCOVE': true,
-  'AMP-GOOGLE-DOCUMENT-EMBED': true,
+  'AMP-DAILYMOTION': true,
   'AMP-EMBED': true,
   'AMP-FACEBOOK': true,
   'AMP-FACEBOOK-COMMENTS': true,
   'AMP-FACEBOOK-LIKE': true,
   'AMP-FACEBOOK-PAGE': true,
+  'AMP-GOOGLE-DOCUMENT-EMBED': true,
   'AMP-IFRAME': true,
   'AMP-IMG': true,
   'AMP-INSTAGRAM': true,
   'AMP-LIST': true,
-  'AMP-OOYALA-PLAYER': true,
   'AMP-PINTEREST': true,
   'AMP-PLAYBUZZ': true,
-  'AMP-VIDEO': true,
   'AMP-YOUTUBE': true,
+  'AMP-VIMEO': true,
 };
+
+
+/**
+ * All video player components must either have a) "video" or b) "player" in
+ * their name. A few components don't follow this convention for historical
+ * reasons, so they're present in the LOADING_ELEMENTS_ whitelist.
+ * @private @const {!RegExp}
+ */
+const videoPlayerTagNameRe = /^amp\-(video|.+player)/i;
 
 
 /**
@@ -297,10 +307,19 @@ export function getNaturalDimensions(element) {
  */
 export function isLoadingAllowed(element) {
   const tagName = element.tagName.toUpperCase();
-  if (tagName == 'AMP-AD' || tagName == 'AMP-EMBED') {
-    return true;
-  }
-  return LOADING_ELEMENTS_[tagName] || false;
+  return LOADING_ELEMENTS_[tagName] || isVideoPlayerComponent(tagName);
+}
+
+
+/**
+ * All video player components must either have a) "video" or b) "player" in
+ * their name. A few components don't follow this convention for historical
+ * reasons, so they're present in the LOADING_ELEMENTS_ whitelist.
+ * @param {string} tagName
+ * @return {boolean}
+ */
+function isVideoPlayerComponent(tagName) {
+  return videoPlayerTagNameRe.test(tagName);
 }
 
 
@@ -321,9 +340,10 @@ export function isLoadingAllowed(element) {
  * @return {!Layout}
  */
 export function applyStaticLayout(element) {
-  // Check if the layout has already been done by server-side rendering. The
-  // document may be visible to the user if the boilerplate was removed so
-  // please take care in making changes here.
+  // Check if the layout has already been done by server-side rendering or
+  // client-side rendering and the element was cloned. The document may be
+  // visible to the user if the boilerplate was removed so please take care in
+  // making changes here.
   const completedLayoutAttr = element.getAttribute('i-amphtml-layout');
   if (completedLayoutAttr) {
     const layout = /** @type {!Layout} */ (devAssert(
@@ -460,7 +480,7 @@ export function applyStaticLayout(element) {
     // i-amphtml-sizer element
     const sizer = htmlFor(element)`
       <i-amphtml-sizer class="i-amphtml-sizer">
-        <img alt="" role="presentation" aria-hidden="true" 
+        <img alt="" role="presentation" aria-hidden="true"
              class="i-amphtml-intrinsic-sizer" />
       </i-amphtml-sizer>`;
     const intrinsicSizer = sizer.firstElementChild;
@@ -490,5 +510,8 @@ export function applyStaticLayout(element) {
     }
     setStyle(element, 'height', 0);
   }
+  // Mark the element as having completed static layout, in case it is cloned
+  // in the future.
+  element.setAttribute('i-amphtml-layout', layout);
   return layout;
 }

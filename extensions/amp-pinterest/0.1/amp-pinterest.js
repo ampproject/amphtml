@@ -37,7 +37,7 @@
 
 import {CSS} from '../../../build/amp-pinterest-0.1.css';
 import {FollowButton} from './follow-button';
-import {PinItButton} from './pinit-button';
+import {SaveButton} from './save-button';
 
 import {PinWidget} from './pin-widget';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -46,7 +46,7 @@ import {user, userAssert} from '../../../src/log';
 /**
  * AMP Pinterest
  * @attr data-do
- *    - buttonPin: Pin It button
+ *    - buttonPin: Save button
  *    - buttonFollow: User follow button
  */
 class AmpPinterest extends AMP.BaseElement {
@@ -85,7 +85,7 @@ class AmpPinterest extends AMP.BaseElement {
       case 'embedPin':
         return new PinWidget(this.element).render();
       case 'buttonPin':
-        return new PinItButton(this.element).render();
+        return new SaveButton(this.element).render();
       case 'buttonFollow':
         return new FollowButton(this.element).render();
     }

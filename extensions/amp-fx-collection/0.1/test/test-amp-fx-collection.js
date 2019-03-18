@@ -17,7 +17,7 @@
 import {AmpFxCollection} from '../amp-fx-collection';
 import {createElementWithAttributes} from '../../../../src/dom';
 
-describes.realWin('Creates the relevant fx presets correctly', {
+describes.fakeWin('amp-fx-collection', {
   amp: {
     ampdoc: 'single',
     extensions: ['amp-fx-collection'],
@@ -38,7 +38,8 @@ describes.realWin('Creates the relevant fx presets correctly', {
     return ampFxCollection;
   }
 
-  it('creates amp-fx components correctly', () => {
+  // TODO(alanorozco): Actually write tests. Like the goggles, these do nothing!
+  it.skip('creates amp-fx components correctly', () => {
     let ampFx = createAmpFx('parallax', {
       'data-parallax-factor': 1.2,
     });

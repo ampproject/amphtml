@@ -95,6 +95,11 @@ t.run('Viewer Visibility State', () => {
       notifyPass = noop;
       shouldPass = false;
 
+      const vsync = Services.vsyncFor(win);
+      sandbox.stub(vsync, 'mutate').callsFake(mutator => {
+        mutator();
+      });
+
       return Services.viewerPromiseForDoc(win.document).then(v => {
         viewer = v;
         const docState = Services.documentStateFor(win);

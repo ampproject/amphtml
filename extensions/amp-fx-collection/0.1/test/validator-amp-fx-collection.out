@@ -29,33 +29,70 @@ PASS
 |    <script async custom-element="amp-fx-collection" src="https://cdn.ampproject.org/v0/amp-fx-collection-0.1.js"></script>
 |  </head>
 |  <body>
+|    <!-- Valid -->
 |    <div amp-fx="parallax" data-parallax-factor="0.8"></div>
+|
+|    <!-- Valid -->
 |    <amp-img amp-fx="parallax" data-parallax-factor="1.2" width="20" height="20" layout="responsive" src="https://example.com"></amp-img>
+|
+|    <!-- Valid -->
 |    <div>
 |      <h1 amp-fx="parallax"></h1>
 |    </div>
+|
+|    <!-- Valid -->
 |    <div amp-fx="fade-in"></div>
+|
+|    <!-- Valid -->
 |    <amp-img amp-fx="fade-in" width="20" height="20" layout="responsive" src="https://example.com"></amp-img>
+|
+|    <!-- Valid -->
 |    <div>
 |      <h1 amp-fx="fade-in"></h1>
 |    </div>
+|
+|    <!-- Valid -->
 |    <amp-img amp-fx="fade-in-scroll" width="20" height="20" layout="responsive" src="https://example.com"></amp-img>
+|
+|    <!-- Valid -->
 |    <div>
 |      <h1 amp-fx="fly-in-bottom"></h1>
 |    </div>
+|
+|    <!-- Valid -->
 |    <div>
 |        <h1 amp-fx="fly-in-left"></h1>
 |    </div>
+|
+|    <!-- Valid -->
 |    <div>
 |        <h1 amp-fx="fly-in-right"></h1>
 |    </div>
+|
+|    <!-- Valid -->
 |    <div>
 |        <h1 amp-fx="fly-in-top"></h1>
 |    </div>
+|
+|    <!-- Valid -->
 |    <div amp-fx="fade-in fly-in-bottom"></div>
+|
+|    <!-- Valid -->
 |    <amp-img amp-fx="fade-in parallax" width="20" height="20" layout="responsive" src="https://example.com"></amp-img>
+|
+|    <!-- Valid -->
 |    <div>
 |      <h1 amp-fx="fade-in-scroll parallax"></h1>
+|    </div>
+|
+|    <!-- Valid -->
+|    <div>
+|      <h1 amp-fx="float-in-top"></h1>
+|    </div>
+|
+|    <!-- Valid -->
+|    <div>
+|      <h1 amp-fx="float-in-bottom"></h1>
 |    </div>
 |  </body>
 |  </html>

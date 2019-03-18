@@ -160,6 +160,7 @@ import {improvedigital} from '../ads/improvedigital';
 import {inmobi} from '../ads/inmobi';
 import {innity} from '../ads/innity';
 import {ix} from '../ads/ix';
+import {jubna} from '../ads/jubna';
 import {kargo} from '../ads/kargo';
 import {kiosked} from '../ads/kiosked';
 import {kixer} from '../ads/kixer';
@@ -198,6 +199,7 @@ import {polymorphicads} from '../ads/polymorphicads';
 import {popin} from '../ads/popin';
 import {postquare} from '../ads/postquare';
 import {pressboard} from '../ads/pressboard';
+import {promoteiq} from '../ads/promoteiq';
 import {pubexchange} from '../ads/pubexchange';
 import {pubguru} from '../ads/pubguru';
 import {pubmatic} from '../ads/pubmatic';
@@ -214,6 +216,7 @@ import {revjet} from '../ads/revjet';
 import {rfp} from '../ads/rfp';
 import {rubicon} from '../ads/rubicon';
 import {runative} from '../ads/runative';
+import {sas} from '../ads/sas';
 import {sekindo} from '../ads/sekindo';
 import {sharethrough} from '../ads/sharethrough';
 import {sklik} from '../ads/sklik';
@@ -230,9 +233,11 @@ import {swoop} from '../ads/swoop';
 import {taboola} from '../ads/taboola';
 import {tcsemotion} from '../ads/tcsemotion';
 import {teads} from '../ads/teads';
+import {torimochi} from '../ads/torimochi';
 import {triplelift} from '../ads/triplelift';
 import {trugaze} from '../ads/trugaze';
 import {uas} from '../ads/uas';
+import {ucfunnel} from '../ads/ucfunnel';
 import {unruly} from '../ads/unruly';
 import {uzou} from '../ads/uzou';
 import {valuecommerce} from '../ads/valuecommerce';
@@ -266,13 +271,13 @@ import {speakol} from '../ads/speakol';
  * @const {!Object<string, boolean>}
  */
 const AMP_EMBED_ALLOWED = {
-  aja: true,
   _ping_: true,
   '24smi': true,
   bringhub: true,
   dable: true,
   engageya: true,
   epeex: true,
+  jubna: true,
   kuadio: true,
   'mantis-recommend': true,
   miximedia: true,
@@ -394,6 +399,7 @@ register('industrybrains', industrybrains);
 register('inmobi', inmobi);
 register('innity', innity);
 register('ix', ix);
+register('jubna', jubna);
 register('kargo', kargo);
 register('kiosked', kiosked);
 register('kixer', kixer);
@@ -434,6 +440,7 @@ register('polymorphicads', polymorphicads);
 register('popin', popin);
 register('postquare', postquare);
 register('pressboard', pressboard);
+register('promoteiq', promoteiq);
 register('pubexchange', pubexchange);
 register('pubguru', pubguru);
 register('pubmatic', pubmatic);
@@ -451,6 +458,7 @@ register('revjet', revjet);
 register('rfp', rfp);
 register('rubicon', rubicon);
 register('runative', runative);
+register('sas', sas);
 register('sekindo', sekindo);
 register('sharethrough', sharethrough);
 register('sklik', sklik);
@@ -467,10 +475,12 @@ register('swoop', swoop);
 register('taboola', taboola);
 register('tcsemotion', tcsemotion);
 register('teads', teads);
+register('torimochi', torimochi);
 register('triplelift', triplelift);
 register('trugaze', trugaze);
 register('twitter', twitter);
 register('uas', uas);
+register('ucfunnel', ucfunnel);
 register('unruly', unruly);
 register('uzou', uzou);
 register('valuecommerce', valuecommerce);

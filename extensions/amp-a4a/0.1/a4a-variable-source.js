@@ -93,15 +93,23 @@ export class A4AVariableSource extends VariableSource {
 
   /** @override */
   initialize() {
-    this.set('AD_NAV_TIMING', (startAttribute, endAttribute) => {
-      userAssert(startAttribute, 'The first argument to AD_NAV_TIMING, the' +
+    // Initiate whitelisted varaibles first in case the resolver function needs
+    // to be overwritten.
+    for (let v = 0; v < WHITELISTED_VARIABLES.length; v++) {
+      const varName = WHITELISTED_VARIABLES[v];
+      const resolvers = this.globalVariableSource_.get(varName);
+      this.set(varName, resolvers.sync).setAsync(varName, resolvers.async);
+    }
+
+    this.set('NAV_TIMING', (startAttribute, endAttribute) => {
+      userAssert(startAttribute, 'The first argument to NAV_TIMING, the' +
           ' start attribute name, is required');
       return getTimingDataSync(
           this.win_,
           /**@type {string}*/(startAttribute),
           /**@type {string}*/(endAttribute));
-    }).setAsync('AD_NAV_TIMING', (startAttribute, endAttribute) => {
-      userAssert(startAttribute, 'The first argument to AD_NAV_TIMING, the' +
+    }).setAsync('NAV_TIMING', (startAttribute, endAttribute) => {
+      userAssert(startAttribute, 'The first argument to NAV_TIMING, the' +
           ' start attribute name, is required');
       return getTimingDataAsync(
           this.win_,
@@ -109,11 +117,11 @@ export class A4AVariableSource extends VariableSource {
           /**@type {string}*/(endAttribute));
     });
 
-    this.set('AD_NAV_TYPE', () => {
+    this.set('NAV_TYPE', () => {
       return getNavigationData(this.win_, 'type');
     });
 
-    this.set('AD_NAV_REDIRECT_COUNT', () => {
+    this.set('NAV_REDIRECT_COUNT', () => {
       return getNavigationData(this.win_, 'redirectCount');
     });
 
@@ -121,12 +129,6 @@ export class A4AVariableSource extends VariableSource {
         /** @type {function(...*)} */(this.htmlAttributeBinding_.bind(this)));
 
     this.set('CLIENT_ID', () => null);
-
-    for (let v = 0; v < WHITELISTED_VARIABLES.length; v++) {
-      const varName = WHITELISTED_VARIABLES[v];
-      const resolvers = this.globalVariableSource_.get(varName);
-      this.set(varName, resolvers.sync).setAsync(varName, resolvers.async);
-    }
   }
 
   /**

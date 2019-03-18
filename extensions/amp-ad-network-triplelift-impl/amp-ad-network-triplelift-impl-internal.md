@@ -14,13 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-ad-network-triplelift-impl"></a> `amp-ad-network-triplelift-impl`
+# amp-ad-network-triplelift-impl
+
+TripleLift implementation of AMP Ad tag which requests early by XHR and renders natively within the page if a valid AMP Ad is returned. Should not be directly referenced by pages and instead is dynamically loaded via the amp-ad tag. However, in order to remove an async script load of this library, publishers can include its script declaration.
 
 <table>
-  <tr>
-    <td class="col-fourty"><strong>Description</strong></td>
-    <td>TripleLift implementation of AMP Ad tag which requests early by XHR and renders natively within the page if a valid AMP Ad is returned. Should not be directly referenced by pages and instead is dynamically loaded via the amp-ad tag. However, in order to remove an async script load of this library, publishers can include its script declaration.</td>
-  </tr>
   <tr>
     <td class="col-fourty" width="40%"><strong>Availability</strong></td>
     <td>In Development</td>
@@ -45,8 +43,15 @@ valid signature for the text of the `creative` field.
 
 ## Attributes
 
+
 TripleLift impl  uses the same tags as `<amp-ad>`.
 
-**data-use-a4a**  If non-empty, TripleLift will attempt to render via the A4A
-pathway (i.e., fast rendering for AMP creatives).  Otherwise, it will attempt
-to render via the delayed iframe path.
+<table>
+  <tr>
+    <td width="40%"><strong>data-use-a4a</strong></td>
+    <td>If non-empty, TripleLift will attempt to render via the A4A
+    pathway (i.e., fast rendering for AMP creatives).  Otherwise, it will attempt
+    to render via the delayed iframe path.
+</td>
+  </tr>
+</table>

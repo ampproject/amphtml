@@ -5,7 +5,8 @@
   <title>JWPlayer AMP Example</title>
   <link rel="canonical" href="amps.html" >
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
-  <link href='https://fonts.googleapis.com/css?family=Georgia|Open+Sans|Roboto' rel='stylesheet' type='text/css'>
+  <meta property="og:title" content="title_tag" />
+  <link href='https://fonts.googleapis.com/css?family=Georgia%7COpen+Sans%7CRoboto' rel='stylesheet' type='text/css'>
   <script async custom-element="amp-jwplayer" src="https://cdn.ampproject.org/v0/amp-jwplayer-0.1.js"></script>
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
@@ -29,5 +30,16 @@
       width="480" height="270">
   </amp-jwplayer>
 
+  <h3>Responsive contextual</h3>
+
+    <amp-jwplayer
+        data-player-id="uoIbMPm3"
+        data-media-id="BZ6tc0gy"
+        data-content-search="__CONTEXTUAL__"
+        data-content-contextual=true
+        data-content-recency="9D"
+        data-content-backfill=true
+        layout="responsive" width="480" height="270">
+    </amp-jwplayer>
 </body>
 </html>

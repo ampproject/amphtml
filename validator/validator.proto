@@ -23,7 +23,7 @@ package amp.validator;
 message AttrTriggerSpec {
   // If set, attribute's value must match to also require attribute(s).
   // If not set, attribute automatically also require attribute(s).
-  optional string if_value_regex = 1;       // case sensitive
+  optional string if_value_regex = 1;  // case sensitive
 
   // If set, other attributes - identified by their name string - must
   // be present as well.
@@ -75,8 +75,18 @@ message CssDeclaration {
 // Attributes that are not covered by at least one of these specs are
 // disallowed. Within a given context (e.g., for a given TagSpec),
 // names are unique.
-// NEXT AVAILABLE TAG: 22
+// NEXT AVAILABLE TAG: 25
 message AttrSpec {
+  // If provided, the Type Identifier(s) that either enable or disable
+  // this AttrSpec. If a Type Identifier is in enabled_by then this
+  // AttrSpec will be used in validating parsed documents with that Type
+  // Identifier. If a Type Identifier is in disabled_by then this
+  // AttrSpec will not be used in validating parsed documents with that
+  // Type Identifier. An AttrSpec can not have both enabled_by and disabled_by
+  // set.
+  repeated string enabled_by = 23;
+  repeated string disabled_by = 24;
+
   // Use lower-case attribute names only.
   optional string name = 1;
   repeated string alternative_names = 2;
@@ -148,6 +158,10 @@ message AttrSpec {
   // requires that the named extended component script tag is present on the
   // page.
   repeated string requires_extension = 19;
+
+  // If set, this attr is invalid unless the current tag has an ancestor
+  // tag which set one or more of the required markers.
+  optional AncestorMarker requires_ancestor = 22;
 }
 
 // Some tags share several attributes, so they're identified by unique key
@@ -201,7 +215,7 @@ message AtRuleSpec {
   // should be encoded as 'media'. A value of '$DEFAULT' indicates the default
   // AT rule which will match any AT rule not present in any other AtRuleSpec.
   optional string name = 1;
-  optional BlockType type = 2 [default=PARSE_AS_ERROR];
+  optional BlockType type = 2 [default = PARSE_AS_ERROR];
 
   // A MediaQuerySpec may only be set for an AtRuleSpec with the name
   // "media". If not set, media queries will be left unparsed, so no errors or
@@ -233,7 +247,7 @@ message CssSpec {
 // NEXT AVAILABLE TAG: 10
 message CdataSpec {
   // If set, the cdata contents cannot be greater than this length, in bytes.
-  optional int32 max_bytes = 1 [ default = -1 ];
+  optional int32 max_bytes = 1 [default = -1];
   // If false, bytes inside URLs are not included in the byte calculation for
   // max_bytes. This is used for handling signed exchange transformations which
   // can potentially take the number of bytes over the 50,000 byte limit due
@@ -296,6 +310,20 @@ message AmpLayout {
   optional bool defines_default_height = 3;
 }
 
+// An AncestorMarker is a state maintained on the stack of matching tags.
+// When a TagSpec with an AncestorMarker matches, this Marker is placed on the
+// stack until the matched html tag is popped from the stack. Other rules may be
+// triggered by the presence of a specific AncestorMarker on the stack.
+message AncestorMarker {
+  enum Marker {
+    UNKNOWN = 0;
+    // Set by <amp-sidebar> tags to allow autoscroll attributes on descendants.
+    // See https://github.com/ampproject/amphtml/20524 for more context.
+    AUTOSCROLL = 1;
+  }
+  repeated Marker marker = 1;
+}
+
 // TagSpec::child_tags uses this configuration to specify which child tags
 // are expected for a specific tag.
 //
@@ -309,7 +337,7 @@ message AmpLayout {
 message ChildTagSpec {
   // Unless set to -1 (the default), the parent tag must have exactly
   // |mandatory_num_child_tags| immediate child tags.
-  optional int32 mandatory_num_child_tags = 1 [ default = -1 ];
+  optional int32 mandatory_num_child_tags = 1 [default = -1];
   // If at least one tag name is specified, then the first child of the
   // parent tag must have one of the provided names.
   repeated string first_child_tag_name_oneof = 2;
@@ -425,13 +453,23 @@ message HtmlFormat {
 // Some tags are mandatory. Note that the tag name is not unique, that is,
 // there can be multiple tag specs covering the same name, e.g., for
 // multiple meta tags (with different attributes).
-// NEXT AVAILABLE TAG: 37
+// NEXT AVAILABLE TAG: 39
 message TagSpec {
   // The html_format field tells the validator for which html formats
   // (ie: (<html ⚡> vs <html a4⚡>) this HTML TagSpec is allowed to validate.
   // The repeated field is not allowed to be empty, it must have at least one
   // HtmlFormat.
   repeated HtmlFormat.Code html_format = 21;
+
+  // If provided, the Type Identifier(s) that either enable or disable
+  // this TagSpec. If a Type Identifier is in enabled_by then this
+  // TagSpec will be used in validating parsed documents with that Type
+  // Identifier. If a Type Identifier is in disabled_by then this
+  // TagSpec will not be used in validating parsed documents with that
+  // Type Identifier. A TagSpec can not have both enabled_by and disabled_by
+  // set.
+  repeated string enabled_by = 35;
+  repeated string disabled_by = 36;
 
   // Use UPPER-CASE tag names only. If adding the same tag twice, then they must
   // also have a spec_name string which is unique throughout all detail.
@@ -445,16 +483,6 @@ message TagSpec {
   // parameters for error messages and other usages that require or
   // benefit from a unique identifier.
   optional string spec_name = 2;
-
-  // If provided, the Type Identifier(s) that either enable or disable
-  // this TagSpec. If a Type Identifier is in enabled_by then this
-  // TagSpec will be used in validating parsed documents with that Type
-  // Identifier. If a Type Identifier is in disabled_by then this
-  // TagSpec will not be used in validating parsed documents with that
-  // Type Identifier. A TagSpec can not have both enabled_by and disabled_by
-  // set.
-  repeated string enabled_by = 35;
-  repeated string disabled_by = 36;
 
   // NamedId's are used to uniquely identify specific TagSpecs in the
   // validator rules in a stable manner. Most TagSpecs have no set NamedId.
@@ -574,6 +602,9 @@ message TagSpec {
   // If set, specifies which AMP Layouts are supported by this element.
   optional AmpLayout amp_layout = 11;
 
+  // If set, triggers related validation rules for descendants of this tag.
+  optional AncestorMarker mark_descendants = 38;
+
   // Deprecated fields, do not reuse.
   // reserved 14, 26;
 }
@@ -609,7 +640,7 @@ message ValidatorRules {
   // The min file revision for validator.cc which can digest this file.
   optional int32 min_validator_revision_required = 4;
   // See comment in validator.protoascii.
-  optional int32 spec_file_revision = 6 [ default = -1 ];
+  optional int32 spec_file_revision = 6 [default = -1];
 
   // Spec URL for information about mustache templates.
   optional string template_spec_url = 8;
@@ -691,8 +722,8 @@ message ValidationError {
     WARNING = 4;
     // DO NOT REASSIGN the previously used values 2, 3.
   }
-  optional Severity severity = 6 [ default = ERROR ];
-  // NEXT AVAILABLE TAG: 107
+  optional Severity severity = 6 [default = ERROR];
+  // NEXT AVAILABLE TAG: 108
   enum Code {
     UNKNOWN_CODE = 0;
     MANDATORY_TAG_MISSING = 1;
@@ -793,6 +824,7 @@ message ValidationError {
     CSS_SYNTAX_DISALLOWED_MEDIA_TYPE = 99;
     CSS_SYNTAX_DISALLOWED_MEDIA_FEATURE = 100;
     CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE = 71;
+    CSS_EXCESSIVELY_NESTED = 107;
 
     // The following codes are currently used only by A4A CSS validation.
     CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE_WITH_HINT = 72;
@@ -804,7 +836,7 @@ message ValidationError {
     // reserved 13;
   }
   optional Code code = 1;
-  optional int32 line = 2 [ default = 1 ];
+  optional int32 line = 2 [default = 1];
   optional int32 col = 3;
   optional string spec_url = 5;
   repeated string params = 7;
@@ -847,8 +879,8 @@ message ValidationResult {
   }
   optional Status status = 2;
   repeated ValidationError errors = 1;
-  optional int32 validator_revision = 3 [ default = -1];
-  optional int32 spec_file_revision = 4 [ default = -1];
+  optional int32 validator_revision = 3 [default = -1];
+  optional int32 spec_file_revision = 4 [default = -1];
   // If the AMP document is a transformed AMP document, then this is the
   // version of the transformers that were used to transform it. If the document
   // is not transformed, then the transformer_version's value will be 0.
@@ -869,7 +901,7 @@ message ValidatorInfo {
   // Path from which the spec file was loaded.
   optional string rules_path = 1;
   // The file revision of validator.cc.
-  optional int32 validator_revision = 2 [ default = -1];
+  optional int32 validator_revision = 2 [default = -1];
   // The file revision of the spec file (validator.protoascii).
-  optional int32 spec_file_revision = 3 [ default = -1];
+  optional int32 spec_file_revision = 3 [default = -1];
 }

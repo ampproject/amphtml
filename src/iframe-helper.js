@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {addAttributesToElement, closestBySelector} from './dom';
+import {addAttributesToElement, closestAncestorElementBySelector} from './dom';
 import {deserializeMessage, isAmpMessage} from './3p-frame-messaging';
 import {dev, devAssert} from './log';
 import {dict} from './utils/object';
@@ -495,7 +495,7 @@ export function looksLikeTrackingIframe(element) {
     return false;
   }
   // Iframe is not tracking iframe if open with user interaction
-  return !closestBySelector(element, '.i-amphtml-overlay');
+  return !closestAncestorElementBySelector(element, '.i-amphtml-overlay');
 }
 
 // Most common ad sizes
@@ -545,4 +545,26 @@ export function disableScrollingOnIframe(iframe) {
   setStyle(iframe, 'overflow', 'hidden');
 
   return iframe;
+}
+
+/**
+ * Returns true if win's properties can be accessed and win is defined.
+ * This functioned is used to determine if a window is cross-domained
+ * from the perspective of the current window.
+ * @param {!Window} win
+ * @return {boolean}
+ * @private
+ */
+export function canInspectWindow(win) {
+  // TODO: this is not reliable.  The compiler assumes that property reads are
+  // side-effect free.  The recommended fix is to use goog.reflect.sinkValue
+  // but since we're not using the closure library I'm not sure how to do this.
+  // See https://github.com/google/closure-compiler/issues/3156
+  try {
+    // win['test'] could be truthy but not true the compiler shouldn't be able
+    // to optimize this check away.
+    return !!win.location.href && (win['test'] || true);
+  } catch (unusedErr) { // eslint-disable-line no-unused-vars
+    return false;
+  }
 }

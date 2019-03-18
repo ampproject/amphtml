@@ -29,6 +29,7 @@ goog.require('amp.htmlparser.HtmlParser');
 goog.require('amp.htmlparser.HtmlSaxHandlerWithLocation');
 goog.require('amp.htmlparser.ParsedHtmlTag');
 goog.require('amp.validator.AmpLayout');
+goog.require('amp.validator.AncestorMarker');
 goog.require('amp.validator.AtRuleSpec');
 goog.require('amp.validator.AtRuleSpec.BlockType');
 goog.require('amp.validator.AttrSpec');
@@ -338,6 +339,17 @@ class ParsedAttrSpec {
   getCssDeclarationByName() {
     return this.cssDeclarationByName_;
   }
+
+  /**
+   * Returns true if this AttrSpec should be used for the given type identifiers
+   * based on the AttrSpec's disabled_by or enabled_by fields.
+   * @param {!Array<string>} typeIdentifiers
+   * @return {boolean}
+   */
+  isUsedForTypeIdentifiers(typeIdentifiers) {
+    return isUsedForTypeIdentifiers(
+        typeIdentifiers, this.spec_.enabledBy, this.spec_.disabledBy);
+  }
 }
 
 /**
@@ -379,6 +391,38 @@ function getTagSpecUrl(tagSpec) {
   }
 
   return '';
+}
+
+/**
+ * Returns true if this spec should be used for the given type identifiers
+ * based on the spec's disabled_by or enabled_by fields.
+ * @param {!Array<string>} typeIdentifiers
+ * @param {!Array<string>} enabledBys
+ * @param {!Array<string>} disabledBys
+ * @return {boolean}
+ */
+function isUsedForTypeIdentifiers(typeIdentifiers, enabledBys, disabledBys) {
+  if (enabledBys.length > 0) {
+    for (const enabledBy of enabledBys) {
+      // Is enabled by a given type identifier, use.
+      if (typeIdentifiers.includes(enabledBy)) {
+        return true;
+      }
+    }
+    // Is not enabled for these type identifiers, do not use.
+    return false;
+  } else if (disabledBys.length > 0) {
+    for (const disabledBy of disabledBys) {
+      // Is disabled by a given type identifier, do not use.
+      if (typeIdentifiers.includes(disabledBy)) {
+        return false;
+      }
+    }
+    // Is not disabled for these type identifiers, use.
+    return true;
+  }
+  // Is not enabled nor disabled for any type identifiers, use.
+  return true;
 }
 
 /**
@@ -753,33 +797,14 @@ class ParsedTagSpec {
   }
 
   /**
-   * Returns true if this tagSpec should be used for the given type identifiers
+   * Returns true if this TagSpec should be used for the given type identifiers
    * based on the TagSpec's disabled_by or enabled_by fields.
    * @param {!Array<string>} typeIdentifiers
    * @return {boolean}
    */
   isUsedForTypeIdentifiers(typeIdentifiers) {
-    if (this.spec_.enabledBy.length > 0) {
-      for (const enabledBy of this.spec_.enabledBy) {
-        // TagSpec is enabled by a given type identifier, use.
-        if (typeIdentifiers.includes(enabledBy)) {
-          return true;
-        }
-      }
-      // TagSpec is not enabled for these type identifiers, do not use.
-      return false;
-    } else if (this.spec_.disabledBy.length > 0) {
-      for (const disabledBy of this.spec_.disabledBy) {
-        // TagSpec is disabled by a given type identifier, do not use.
-        if (typeIdentifiers.includes(disabledBy)) {
-          return false;
-        }
-      }
-      // TagSpec is not disabled for these type identifiers, use.
-      return true;
-    }
-    // TagSpec is not enabled nor disabled for any type identifiers, use.
-    return true;
+    return isUsedForTypeIdentifiers(
+        typeIdentifiers, this.spec_.enabledBy, this.spec_.disabledBy);
   }
 
   /**
@@ -1664,6 +1689,24 @@ class TagStack {
       if ((this.stack_[i].tagSpec !== null) &&
           (this.stack_[i].tagSpec.getSpec().specName === ancestor)) {
         return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Returns true if the current tag has an ancestor which set the given marker.
+   * @param {!amp.validator.AncestorMarker.Marker} query
+   * @return {boolean}
+   */
+  hasAncestorMarker(query) {
+    goog.asserts.assert(query !== amp.validator.AncestorMarker.Marker.UNKNOWN);
+    // Skip the first element, which is "$ROOT".
+    for (let i = 1; i < this.stack_.length; ++i) {
+      const spec = this.stack_[i].tagSpec.getSpec();
+      if (spec.markDescendants === null) {continue;}
+      for (const marker of spec.markDescendants.marker) {
+        if (marker === query) {return true;}
       }
     }
     return false;
@@ -2686,6 +2729,14 @@ class Context {
   }
 
   /**
+   * Returns true iff "transformed" is a type identifier in this document.
+   * @return {boolean}
+   */
+  isTransformed() {
+    return this.typeIdentifiers_.includes('transformed');
+  }
+
+  /**
    * Record that this document contains a tag which is a member of a list
    * of mandatory alternatives.
    * @param {!ParsedTagSpec} parsedTagSpec
@@ -3136,6 +3187,46 @@ function validateNonTemplateAttrValueAgainstSpec(
 }
 
 /**
+ * @param {!amp.validator.AmpLayout.Layout} layout
+ * @return {string}
+ */
+function getLayoutClass(layout) {
+  return 'i-amphtml-layout-' + getLayoutName(layout);
+}
+
+/**
+ * @param {!amp.validator.AmpLayout.Layout} layout
+ * @return {string}
+ */
+function getLayoutName(layout) {
+  const idx = amp.validator.AmpLayout.Layout_ValuesByIndex.indexOf(layout);
+  return amp.validator.AmpLayout.Layout_NamesByIndex[idx].toLowerCase().replace(
+      '_', '-');
+}
+
+/**
+ * @return {string}
+ */
+function getLayoutSizeDefinedClass() {
+  return 'i-amphtml-layout-size-defined';
+}
+
+/**
+ * @param {!amp.validator.AmpLayout.Layout} layout
+ * @return {boolean}
+ */
+function isLayoutSizeDefined(layout) {
+  return (
+    layout === amp.validator.AmpLayout.Layout.FILL ||
+      layout === amp.validator.AmpLayout.Layout.FIXED ||
+      layout === amp.validator.AmpLayout.Layout.FIXED_HEIGHT ||
+      layout === amp.validator.AmpLayout.Layout.FLEX_ITEM ||
+      layout === amp.validator.AmpLayout.Layout.FLUID ||
+      layout === amp.validator.AmpLayout.Layout.INTRINSIC ||
+      layout === amp.validator.AmpLayout.Layout.RESPONSIVE);
+}
+
+/**
  * @param {string} layout
  * @return {!amp.validator.AmpLayout.Layout}
  */
@@ -3222,7 +3313,31 @@ amp.validator.CssLength = class {
 };
 
 /**
- * Calculates the effective width from the input layout and width.
+ * Calculates the effective width from the input layout, input width and tag.
+ * For certain tags it uses explicit dimensions.
+ * @param {!amp.validator.AmpLayout.Layout} inputLayout
+ * @param {!amp.validator.CssLength} inputWidth
+ * @param {string} tagName
+ * @return {!amp.validator.CssLength}
+ */
+function CalculateWidthForTag(inputLayout, inputWidth, tagName) {
+  if ((inputLayout === amp.validator.AmpLayout.Layout.UNKNOWN ||
+       inputLayout === amp.validator.AmpLayout.Layout.FIXED) &&
+      !inputWidth.isSet) {
+    if (tagName === 'AMP-ANALYTICS' || tagName === 'AMP-PIXEL') {
+      return new amp.validator.CssLength(
+          '1px', /* allowAuto */ false, /* allowFluid */ false);
+    }
+    if (tagName === 'AMP-SOCIAL-SHARE') {
+      return new amp.validator.CssLength(
+          '60px', /* allowAuto */ false, /* allowFluid */ false);
+    }
+  }
+  return inputWidth;
+}
+
+/**
+ * Calculates the effective width from the input layout and input width.
  * This involves considering that some elements, such as amp-audio and
  * amp-pixel, have natural dimensions (browser or implementation-specific
  * defaults for width / height).
@@ -3239,6 +3354,31 @@ function CalculateWidth(spec, inputLayout, inputWidth) {
         '1px', /* allowAuto */ false, /* allowFluid */ false);
   }
   return inputWidth;
+}
+
+/**
+ * Calculates the effective height from the input layout, input height and tag.
+ * For certain tags it uses explicit dimensions.
+ * @param {!amp.validator.AmpLayout.Layout} inputLayout
+ * @param {!amp.validator.CssLength} inputHeight
+ * @param {string} tagName
+ * @return {!amp.validator.CssLength}
+ */
+function CalculateHeightForTag(inputLayout, inputHeight, tagName) {
+  if ((inputLayout === amp.validator.AmpLayout.Layout.UNKNOWN ||
+       inputLayout === amp.validator.AmpLayout.Layout.FIXED ||
+       inputLayout === amp.validator.AmpLayout.Layout.FIXED_HEIGHT) &&
+      !inputHeight.isSet) {
+    if (tagName === 'AMP-ANALYTICS' || tagName === 'AMP-PIXEL') {
+      return new amp.validator.CssLength(
+          '1px', /* allowAuto */ false, /* allowFluid */ false);
+    }
+    if (tagName === 'AMP-SOCIAL-SHARE') {
+      return new amp.validator.CssLength(
+          '44px', /* allowAuto */ false, /* allowFluid */ false);
+    }
+  }
+  return inputHeight;
 }
 
 /**
@@ -3627,6 +3767,79 @@ function validateAncestorTags(parsedTagSpec, context, validationResult) {
 }
 
 /**
+ * Helper method for validateLayout.
+ * Validates the server-side rendering related attributes for the given layout.
+ * @param {!amp.validator.TagSpec} spec
+ * @param {!amp.htmlparser.ParsedHtmlTag} encounteredTag
+ * @param {!amp.validator.AmpLayout.Layout} inputLayout
+ * @param {!amp.validator.CssLength} inputWidth
+ * @param {!amp.validator.CssLength} inputHeight
+ * @param {string} sizesAttr
+ * @param {string} heightsAttr
+ * @param {!Context} context
+ * @param {!amp.validator.ValidationResult} result
+ */
+function validateSsrLayout(
+  spec, encounteredTag, inputLayout, inputWidth, inputHeight, sizesAttr,
+  heightsAttr, context, result) {
+  // Only applies to transformed AMP and custom elements (<amp-...>).
+  if (!context.isTransformed() ||
+      !goog.string./*OK*/ startsWith(encounteredTag.lowerName(), 'amp-')) {
+    return;
+  }
+
+  // calculate effective ssr layout
+  const width =
+      CalculateWidthForTag(inputLayout, inputWidth, encounteredTag.upperName());
+  const height = CalculateHeightForTag(
+      inputLayout, inputHeight, encounteredTag.upperName());
+  const layout =
+      CalculateLayout(inputLayout, width, height, sizesAttr, heightsAttr);
+
+  const attrsByKey = encounteredTag.attrsByKey();
+
+  // class attribute
+  const classAttr = attrsByKey['class'];
+  if (classAttr !== undefined) {
+    // i-amphtml-layout-{layout_name}
+    const validInternalClasses = Object.create(null);
+    validInternalClasses[getLayoutClass(layout)] = 0;
+    if (isLayoutSizeDefined(layout)) {
+      // i-amphtml-layout-size-defined
+      validInternalClasses[getLayoutSizeDefinedClass()] = 0;
+    }
+    const classes = classAttr.split(/[\s+]/);
+    for (const classValue of classes) {
+      if (goog.string./*OK*/ startsWith(classValue, 'i-amphtml-') &&
+          !(classValue in validInternalClasses)) {
+        context.addError(
+            amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
+            context.getLineCol(),
+            /* params */['class', getTagSpecName(spec), classAttr],
+            getTagSpecUrl(spec), result);
+      }
+    }
+  }
+
+  // i-amphtml-layout attribute
+  const ssrAttr = attrsByKey['i-amphtml-layout'];
+  if (ssrAttr !== undefined) {
+    const layoutName = getLayoutName(layout);
+    if (layoutName !== ssrAttr.toLowerCase()) {
+      context.addError(
+          amp.validator.ValidationError.Code.ATTR_VALUE_REQUIRED_BY_LAYOUT,
+          context.getLineCol(),
+          /* params */
+          [
+            ssrAttr, 'i-amphtml-layout', getTagSpecName(spec),
+            layoutName.toUpperCase(), layoutName,
+          ],
+          getTagSpecUrl(spec), result);
+    }
+  }
+}
+
+/**
  * Validates the layout for the given tag. This involves checking the
  * layout, width, height, sizes attributes with AMP specific logic.
  * @param {!ParsedTagSpec} parsedTagSpec
@@ -3695,6 +3908,11 @@ function validateLayout(parsedTagSpec, context, encounteredTag, result) {
   const height = CalculateHeight(spec.ampLayout, inputLayout, inputHeight);
   const layout =
       CalculateLayout(inputLayout, width, height, sizesAttr, heightsAttr);
+
+  // Validate for transformed AMP the server-side rendering layout.
+  validateSsrLayout(
+      spec, encounteredTag, inputLayout, inputWidth, inputHeight, sizesAttr,
+      heightsAttr, context, result);
 
   // Only FLEX_ITEM allows for height to be set to auto.
   if (height.isAuto && layout !== amp.validator.AmpLayout.Layout.FLEX_ITEM) {
@@ -4051,6 +4269,12 @@ function validateAttributes(
   // values. We skip over this array 2 at a time to iterate over the keys.
   const attrsByName = parsedTagSpec.getAttrsByName();
   for (const attr of encounteredTag.attrs()) {
+    // For transformed AMP, attributes `class` and `i-amphtml-layout` are
+    // handled within validateSsrLayout.
+    if (context.isTransformed() &&
+        (attr.name === 'class' || attr.name === 'i-amphtml-layout')) {
+      continue;
+    }
     if (!(attr.name in attrsByName)) {
       // The HTML tag specifies type identifiers which are validated in
       // validateHtmlTag(), so we skip them here.
@@ -4101,6 +4325,16 @@ function validateAttributes(
     }
     const parsedAttrSpec =
         context.getRules().getParsedAttrSpecs().getByAttrSpecId(attrId);
+    // If this attribute isn't used for these type identifiers, then error.
+    if (!parsedAttrSpec.isUsedForTypeIdentifiers(
+        context.getTypeIdentifiers())) {
+      context.addError(
+          amp.validator.ValidationError.Code.DISALLOWED_ATTR,
+          context.getLineCol(),
+          /* params */[attr.name, getTagSpecName(spec)], getTagSpecUrl(spec),
+          result);
+      continue;
+    }
     const attrSpec = parsedAttrSpec.getSpec();
     if (attrSpec.deprecation !== null) {
       context.addWarning(
@@ -4168,6 +4402,28 @@ function validateAttributes(
         continue;
       }
       mandatoryOneofsSeen.push(mandatoryOneof);
+    }
+    if (attrSpec.requiresAncestor !== null) {
+      const markers = attrSpec.requiresAncestor.marker;
+      let matchesMarker = false;
+      for (const marker of markers) {
+        if (context.getTagStack().hasAncestorMarker(marker)) {
+          matchesMarker = true;
+          break;
+        }
+      }
+      if (!matchesMarker) {
+        context.addError(
+            amp.validator.ValidationError.Code.DISALLOWED_ATTR,
+            context.getLineCol(),
+            /* params */
+            [
+              attr.name,
+              getTagSpecName(spec),
+            ],
+            getTagSpecUrl(spec), result);
+        continue;
+      }
     }
     const {mandatoryAnyof} = attrSpec;
     if (mandatoryAnyof !== null) {
@@ -4473,9 +4729,22 @@ function validateTagAgainstSpec(
 function validateTag(encounteredTag, bestMatchReferencePoint, context) {
   const tagSpecDispatch =
       context.getRules().dispatchForTagName(encounteredTag.upperName());
+  // Filter TagSpecDispatch.AllTagSpecs by type identifiers.
+  const filteredTagSpecs = [];
+  if (tagSpecDispatch !== undefined) {
+    for (const tagSpecId of tagSpecDispatch.allTagSpecs()) {
+      const parsedTagSpec = context.getRules().getByTagSpecId(tagSpecId);
+      // Keep TagSpecs that are used for these type identifiers.
+      if (parsedTagSpec.isUsedForTypeIdentifiers(
+          context.getTypeIdentifiers())) {
+        filteredTagSpecs.push(parsedTagSpec);
+      }
+    }
+  }
   // If there are no dispatch keys matching the tag name, ex: tag name is
   // "foo", set a disallowed tag error.
-  if (tagSpecDispatch === undefined) {
+  if (tagSpecDispatch === undefined ||
+      (!tagSpecDispatch.hasDispatchKeys() && filteredTagSpecs.length === 0)) {
     const result = new amp.validator.ValidationResult();
     let specUrl = '';
     // Special case the spec_url for font tags to be slightly more useful.
@@ -4523,27 +4792,27 @@ function validateTag(encounteredTag, bestMatchReferencePoint, context) {
         };
       }
     }
-    // If none of the dispatch tagspecs matched and passed and there are no
-    // non-dispatch tagspecs, consider this a 'generally' disallowed tag,
-    // which gives an error that reads "tag foo is disallowed except in
-    // specific forms".
-    if (!tagSpecDispatch.hasTagSpecs()) {
-      const result = new amp.validator.ValidationResult();
-      if (encounteredTag.upperName() === 'SCRIPT') {
-        // Special case for <script> tags to produce better error messages.
-        context.addError(
-            amp.validator.ValidationError.Code.DISALLOWED_SCRIPT_TAG,
-            context.getLineCol(),
-            /* params */[], context.getRules().getScriptSpecUrl(), result);
-      } else {
-        context.addError(
-            amp.validator.ValidationError.Code.GENERAL_DISALLOWED_TAG,
-            context.getLineCol(),
-            /* params */[encounteredTag.lowerName()],
-            /* specUrl */ '', result);
-      }
-      return {validationResult: result, bestMatchTagSpec: null};
+  }
+  // None of the dispatch tagspecs matched and passed. If there are no
+  // non-dispatch tagspecs, consider this a 'generally' disallowed tag,
+  // which gives an error that reads "tag foo is disallowed except in
+  // specific forms".
+  if (filteredTagSpecs.length === 0) {
+    const result = new amp.validator.ValidationResult();
+    if (encounteredTag.upperName() === 'SCRIPT') {
+      // Special case for <script> tags to produce better error messages.
+      context.addError(
+          amp.validator.ValidationError.Code.DISALLOWED_SCRIPT_TAG,
+          context.getLineCol(),
+          /* params */[], context.getRules().getScriptSpecUrl(), result);
+    } else {
+      context.addError(
+          amp.validator.ValidationError.Code.GENERAL_DISALLOWED_TAG,
+          context.getLineCol(),
+          /* params */[encounteredTag.lowerName()],
+          /* specUrl */ '', result);
     }
+    return {validationResult: result, bestMatchTagSpec: null};
   }
   // Validate against all remaining tagspecs. Each tagspec will produce a
   // different set of errors. Even if none of them match, we only want to
@@ -4552,12 +4821,7 @@ function validateTag(encounteredTag, bestMatchReferencePoint, context) {
   // tried them all.
   const resultForBestAttempt = new amp.validator.ValidationResult();
   resultForBestAttempt.status = amp.validator.ValidationResult.Status.UNKNOWN;
-  for (const tagSpecId of tagSpecDispatch.allTagSpecs()) {
-    const parsedTagSpec = context.getRules().getByTagSpecId(tagSpecId);
-    // Skip TagSpecs that aren't used for these type identifiers.
-    if (!parsedTagSpec.isUsedForTypeIdentifiers(context.getTypeIdentifiers())) {
-      continue;
-    }
+  for (const parsedTagSpec of filteredTagSpecs) {
     const resultForAttempt = validateTagAgainstSpec(
         parsedTagSpec, bestMatchReferencePoint, context, encounteredTag);
     if (context.getRules().betterValidationResultThan(
@@ -4952,15 +5216,12 @@ class ParsedValidatorRules {
         this.validateTypeIdentifiers(
             htmlTag.attrs(), ['⚡', 'amp', 'actions'], context,
             validationResult);
-        // TODO(honeybadgerdontcare): require "actions" as a type identifier
-        // when publishers are ready. Uncomment code below and update test.
-        // if (validationResult.typeIdentifier.indexOf("actions") === -1) {
-        //   context.addError(
-        //       amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING,
-        //       context.getLineCol(), /*params=*/["actions", 'html'],
-        //       'https://www.ampproject.org/docs/reference/spec#required-markup',
-        //       validationResult);
-        // }
+        if (validationResult.typeIdentifier.indexOf('actions') === -1) {
+          context.addError(
+              amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING,
+              context.getLineCol(), /* params */['actions', 'html'],
+              /* url */'', validationResult);
+        }
         break;
     }
   }

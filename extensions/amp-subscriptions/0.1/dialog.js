@@ -154,7 +154,9 @@ export class Dialog {
         },
         mutate: () => {
           this.viewport_.updatePaddingBottom(offsetHeight);
-          this.viewport_.addToFixedLayer(this.wrapper_, true);
+          // TODO(dvoytenko, #20608): add to fixed layer, once the SwG/FL
+          // conflict is resolved.
+          // this.viewport_.addToFixedLayer(this.wrapper_, true);
         },
       });
     });
@@ -173,6 +175,7 @@ export class Dialog {
       setImportantStyles(this.wrapper_, {
         transform: 'translateY(100%)',
       });
+    }).then(() => {
       return this.timer_.promise(300);
     }).then(() => {
       return this.vsync_.mutatePromise(() => {

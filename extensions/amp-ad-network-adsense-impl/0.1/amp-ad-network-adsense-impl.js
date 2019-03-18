@@ -24,13 +24,10 @@ import {
   ADSENSE_MCRSPV_TAG,
   ADSENSE_RSPV_TAG,
   ADSENSE_RSPV_WHITELISTED_HEIGHT,
-  getMatchedContentResponsiveHeight,
+  getMatchedContentResponsiveHeightAndUpdatePubParams,
 } from '../../../ads/google/utils';
-import {AdsenseSharedState} from './adsense-shared-state';
-import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
-import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
-import {Navigation} from '../../../src/service/navigation';
 import {
+  ADX_ADY_EXP,
   QQID_HEADER,
   SANDBOX_HEADER,
   ValidAdContainerTypes,
@@ -46,6 +43,10 @@ import {
   isReportingEnabled,
   maybeAppendErrorParameter,
 } from '../../../ads/google/a4a/utils';
+import {AdsenseSharedState} from './adsense-shared-state';
+import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
+import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
+import {Navigation} from '../../../src/service/navigation';
 import {Services} from '../../../src/services';
 import {
   addExperimentIdToElement,
@@ -60,11 +61,9 @@ import {
 import {dev, devAssert, user} from '../../../src/log';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {
-  getAdSenseAmpAutoAdsExpBranch,
-} from '../../../ads/google/adsense-amp-auto-ads';
-import {
   getAdSenseAmpAutoAdsResponsiveExperimentBranch,
 } from '../../../ads/google/adsense-amp-auto-ads-responsive';
+import {getAmpAdRenderOutsideViewport} from '../../amp-ad/0.1/concurrent-load';
 import {getDefaultBootstrapBaseUrl} from '../../../src/3p-frame';
 import {
   getExperimentBranch,
@@ -74,6 +73,7 @@ import {getMode} from '../../../src/mode';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {removeElement} from '../../../src/dom';
 import {stringHash32} from '../../../src/string';
+import {utf8Decode} from '../../../src/utils/bytes';
 
 /** @const {string} */
 const ADSENSE_BASE_URL = 'https://googleads.g.doubleclick.net/pagead/ads';
@@ -234,7 +234,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
   /** @override */
   delayAdRequestEnabled() {
-    return true;
+    return getAmpAdRenderOutsideViewport(this.element) || 3;
   }
 
   /** @override */
@@ -254,7 +254,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       const viewportSize = this.getViewport().getSize();
       return this.attemptChangeSize(
           AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
-              this.autoFormat_, viewportSize),
+              this.autoFormat_, viewportSize, this.element),
           viewportSize.width).catch(() => {});
     }
     // This should happen last, as some diversion criteria rely on some of the
@@ -282,6 +282,10 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
             Number(this.element.getAttribute('width')) > 0 &&
             Number(this.element.getAttribute('height')) > 0,
           branches: ['21062003', '21062004'],
+        },
+        [[ADX_ADY_EXP.branch]]: {
+          isTrafficEligible: () => true,
+          branches: [[ADX_ADY_EXP.control], [ADX_ADY_EXP.experiment]],
         },
       });
     const setExps = randomlySelectUnsetExperiments(this.win, experimentInfoMap);
@@ -373,12 +377,8 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     };
 
     const experimentIds = [];
-    const ampAutoAdsBranch = getAdSenseAmpAutoAdsExpBranch(this.win);
     const ampAutoAdsResponsiveBranch =
       getAdSenseAmpAutoAdsResponsiveExperimentBranch(this.win);
-    if (ampAutoAdsBranch) {
-      experimentIds.push(ampAutoAdsBranch);
-    }
     if (ampAutoAdsResponsiveBranch) {
       experimentIds.push(ampAutoAdsResponsiveBranch);
     }
@@ -405,6 +405,17 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   onNetworkFailure(error, adUrl) {
     dev().info(TAG, 'network error, attempt adding of error parameter', error);
     return {adUrl: maybeAppendErrorParameter(adUrl, 'n')};
+  }
+
+  /** @override */
+  maybeValidateAmpCreative(bytes, headers) {
+    if (headers.get('AMP-Verification-Checksum-Algorithm') !== 'djb2a-32') {
+      return super.maybeValidateAmpCreative(bytes, headers);
+    }
+    const checksum = headers.get('AMP-Verification-Checksum');
+    return Promise.resolve(
+        checksum && stringHash32(utf8Decode(bytes)) == atob(checksum)
+          ? bytes : null);
   }
 
   /** @override */
@@ -570,10 +581,11 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
    * given width.
    * @param {string} autoFormat
    * @param {!{width: number, height: number}} viewportSize
+   * @param {!Element} element <amp-ad> added by publisher.
    * @return {number}
    * @private
    */
-  static getResponsiveHeightForContext_(autoFormat, viewportSize) {
+  static getResponsiveHeightForContext_(autoFormat, viewportSize, element) {
     switch (autoFormat) {
       case ADSENSE_RSPV_TAG:
         const minHeight = 100;
@@ -582,7 +594,8 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
         const idealHeight = Math.round(viewportSize.width / 1.2);
         return clamp(idealHeight, minHeight, maxHeight);
       case ADSENSE_MCRSPV_TAG:
-        return getMatchedContentResponsiveHeight(viewportSize.width);
+        return getMatchedContentResponsiveHeightAndUpdatePubParams(
+            viewportSize.width, element);
       default:
         return 0;
     }

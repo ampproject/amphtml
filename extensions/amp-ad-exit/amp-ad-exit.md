@@ -1,3 +1,11 @@
+---
+$category@: ads-analytics
+formats:
+  - websites
+  - ads
+teaser:
+  text: Provides configurable behavior for ad exits for A4A (AMP for Ads).
+---
 <!--
 Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,7 +22,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-ad-exit"></a> `amp-ad-exit`
+# amp-ad-exit
 
 [TOC]
 
@@ -391,10 +399,12 @@ The `amp-ad-exit` element exposes an `exit` action that other elements reference
 See the `AmpAdExitConfig` typedef in [config.js](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-exit/0.1/config.js).
 
 ## Attributes
-
-##### id
-
-An `id` is required so that `amp-exit` can be referenced by tappable elements.
+<table>
+  <tr>
+    <td width="40%"><strong>id</strong></td>
+    <td>An <code>id</code> is required so that <code>amp-exit</code> can be referenced by tappable elements.</td>
+  </tr>
+</table>
 
 ## Validation
 The `amp-ad-exit` element is only available for [AMPHTML ads)](https://www.ampproject.org/docs/ads/amphtml_ads).

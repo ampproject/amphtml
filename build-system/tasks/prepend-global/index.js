@@ -23,6 +23,7 @@ const colors = require('ansi-colors');
 const fs = BBPromise.promisifyAll(require('fs'));
 const gulp = require('gulp-help')(require('gulp'));
 const log = require('fancy-log');
+const {isTravisBuild} = require('../../travis');
 
 const {red, cyan} = colors;
 
@@ -154,7 +155,7 @@ function applyConfig(
         return writeTarget(target, fileString, argv.dryrun);
       })
       .then(() => {
-        if (!process.env.TRAVIS) {
+        if (!isTravisBuild()) {
           log('Wrote', cyan(config), 'AMP config to', cyan(target));
         }
       });
@@ -168,7 +169,7 @@ function applyConfig(
  */
 function enableLocalDev(config, target, configJson) {
   let LOCAL_DEV_AMP_CONFIG = {localDev: true};
-  if (!process.env.TRAVIS) {
+  if (!isTravisBuild()) {
     log('Enabled local development mode in', cyan(target));
   }
   const TESTING_HOST = process.env.AMP_TESTING_HOST;
@@ -183,7 +184,7 @@ function enableLocalDev(config, target, configJson) {
       thirdPartyFrameHost: TESTING_HOST_NO_PROTOCOL,
       thirdPartyFrameRegex: TESTING_HOST_NO_PROTOCOL,
     });
-    if (!process.env.TRAVIS) {
+    if (!isTravisBuild()) {
       log('Set', cyan('TESTING_HOST'), 'to', cyan(TESTING_HOST),
           'in', cyan(target));
     }
@@ -200,7 +201,7 @@ function removeConfig(target) {
       .then(file => {
         let contents = file.toString();
         if (numConfigs(contents) == 0) {
-          if (!process.env.TRAVIS) {
+          if (!isTravisBuild()) {
             log('No configs found in', cyan(target));
           }
           return Promise.resolve();
@@ -210,7 +211,7 @@ function removeConfig(target) {
         /self\.AMP_CONFIG\|\|\(self\.AMP_CONFIG=.*?\/\*AMP_CONFIG\*\//;
         contents = contents.replace(config, '');
         return writeTarget(target, contents, argv.dryrun).then(() => {
-          if (!process.env.TRAVIS) {
+          if (!isTravisBuild()) {
             log('Removed existing config from', cyan(target));
           }
         });

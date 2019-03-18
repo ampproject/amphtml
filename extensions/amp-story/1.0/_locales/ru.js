@@ -78,11 +78,8 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_WHATSAPP]: {
     string: 'WhatsApp',
   },
-  [LocalizedStringId.AMP_STORY_SYSTEM_LAYER_SHARE_WIDGET_LABEL]: {
-    string: 'Поделиться',
-  },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT]: {
-    string: 'Полный просмотр возможен только при развернутом окне браузера',
+    fallback: 'Полный просмотр возможен только при развернутом окне браузера',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
     string: 'Для дальнейшего просмотра вы должны загрузить amp-story ' +

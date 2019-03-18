@@ -18,7 +18,7 @@ import {CommonSignals} from './common-signals';
 import {Observable} from './observable';
 import {Services} from './services';
 import {Signals} from './utils/signals';
-import {closestBySelector, escapeHtml} from './dom';
+import {closestAncestorElementBySelector, escapeHtml} from './dom';
 import {dev, rethrowAsync, userAssert} from './log';
 import {disposeServicesForEmbed, getTopWindow} from './service';
 import {isDocumentReady} from './document-ready';
@@ -627,5 +627,6 @@ export function whenContentIniLoad(elementOrAmpDoc, hostWin, rect) {
  * @return {boolean}
  */
 export function isInFie(element) {
-  return !!closestBySelector(element, '.i-amphtml-fie');
+  return element.classList.contains('i-amphtml-fie') ||
+    !!closestAncestorElementBySelector(element, '.i-amphtml-fie');
 }

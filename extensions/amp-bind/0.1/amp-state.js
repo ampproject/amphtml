@@ -23,6 +23,7 @@ import {
 } from '../../../src/batched-json';
 import {dev, devAssert, userAssert} from '../../../src/log';
 import {getSourceOrigin} from '../../../src/url';
+import {getViewerAuthTokenIfAvailable} from '../../../src/utils/xhr-utils';
 import {isJsonScriptTag} from '../../../src/dom';
 import {map} from '../../../src/utils/object';
 import {toggle} from '../../../src/style';
@@ -50,14 +51,34 @@ export class AmpState extends AMP.BaseElement {
     toggle(this.element, /* opt_display */ false);
     this.element.setAttribute('aria-hidden', 'true');
 
-    // Don't parse or fetch in prerender mode.
-    const viewer = Services.viewerForDoc(this.getAmpDoc());
-    viewer.whenFirstVisible().then(() => this.initialize_());
+    const {element} = this;
+    if (element.hasAttribute('overridable')) {
+      Services.bindForDocOrNull(element).then(bind => {
+        devAssert(bind);
+        bind.addOverridableKey(element.getAttribute('id'));
+      });
+    }
+    // Parse child <script> tag and/or fetch JSON from `src` attribute.
+    // The latter is allowed to overwrite the former.
+    const {children} = element;
+    if (children.length > 0) {
+      // Bind relies on this happening synchronously in buildCallback().
+      this.parseAndUpdate_();
+    }
+    if (this.element.hasAttribute('src')) {
+      this.fetchAndUpdate_(/* isInit */ true);
+    }
+
+    this.registerAction('refresh', () => {
+      userAssert(this.element.hasAttribute('src'),
+          'Can\'t refresh <amp-state> without "src" attribute.');
+      this.fetchAndUpdate_(/* isInit */ false, /* opt_refresh */ true);
+    }, ActionTrust.HIGH);
   }
 
   /** @override */
   mutatedAttributesCallback(mutations) {
-    const viewer = Services.viewerForDoc(this.getAmpDoc());
+    const viewer = Services.viewerForDoc(this.element);
     if (!viewer.hasBeenVisible()) {
       const TAG = this.getName_();
       dev().error(TAG, 'Viewer must be visible before mutation.');
@@ -75,40 +96,15 @@ export class AmpState extends AMP.BaseElement {
     return true;
   }
 
-  /** @private */
-  initialize_() {
-    const {element} = this;
-    if (element.hasAttribute('overridable')) {
-      Services.bindForDocOrNull(element).then(bind => {
-        devAssert(bind, 'Bind service can not be found.');
-        bind.makeStateKeyOverridable(element.getAttribute('id'));
-      });
-    }
-    // Parse child script tag and/or fetch JSON from endpoint at `src`
-    // attribute, with the latter taking priority.
-    const {children} = element;
-    if (children.length > 0) {
-      this.parseChildAndUpdateState_();
-    }
-    if (this.element.hasAttribute('src')) {
-      this.fetchAndUpdate_(/* isInit */ true);
-    }
-    this.registerAction('refresh', () => {
-      this.fetchAndUpdate_(/* isInit */ false, /* opt_refresh */ true);
-    }, ActionTrust.HIGH);
-  }
-
-
   /**
-   * Parses JSON in child script element and updates state.
+   * Parses JSON in child <script> and updates state.
    * @private
    */
-  parseChildAndUpdateState_() {
+  parseAndUpdate_() {
     const TAG = this.getName_();
     const {children} = this.element;
     if (children.length != 1) {
-      this.user().error(
-          TAG, 'Should contain exactly one <script> child.');
+      this.user().error(TAG, 'Should contain exactly one <script> child.');
       return;
     }
     const firstChild = children[0];
@@ -118,8 +114,7 @@ export class AmpState extends AMP.BaseElement {
       return;
     }
     const json = tryParseJson(firstChild.textContent, e => {
-      this.user().error(
-          TAG, 'Failed to parse state. Is it valid JSON?', e);
+      this.user().error(TAG, 'Failed to parse state. Is it valid JSON?', e);
     });
     this.updateState_(json, /* isInit */ true);
   }
@@ -128,13 +123,27 @@ export class AmpState extends AMP.BaseElement {
    * Wrapper to stub during testing.
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!Element} element
+   * @param {!UrlReplacementPolicy} policy
+   * @param {boolean=} opt_refresh
+   * @param {string=} token
+   * @return {!Promise<!JsonObject|!Array<JsonObject>>}
+   * @private
+   */
+  fetch_(ampdoc, element, policy, opt_refresh, token = undefined) {
+    return batchFetchJsonFor(ampdoc, element, /* opt_expr */ undefined, policy,
+        opt_refresh, token);
+  }
+
+  /**
+   * Transforms and prepares the fetch request.
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!Element} element
    * @param {boolean} isInit
    * @param {boolean=} opt_refresh
-   * @return {!Promise}
+   * @return {!Promise<!JsonObject|!Array<JsonObject>>}
    */
-  fetch_(ampdoc, element, isInit, opt_refresh) {
+  prepareAndSendFetch_(ampdoc, element, isInit, opt_refresh) {
     const src = element.getAttribute('src');
-
     // Require opt-in for URL variable replacements on CORS fetches triggered
     // by [src] mutation. @see spec/amp-var-substitutions.md
     let policy = UrlReplacementPolicy.OPT_IN;
@@ -142,22 +151,26 @@ export class AmpState extends AMP.BaseElement {
       (getSourceOrigin(src) == getSourceOrigin(ampdoc.win.location))) {
       policy = UrlReplacementPolicy.ALL;
     }
-    return batchFetchJsonFor(
-        ampdoc, element, /* opt_expr */ undefined, policy, opt_refresh);
+
+    return getViewerAuthTokenIfAvailable(ampdoc.win, element).then(token =>
+      this.fetch_(ampdoc, element, policy, opt_refresh, token)
+    );
   }
 
   /**
    * @param {boolean} isInit
    * @param {boolean=} opt_refresh
-   * @return {!Promise}
+   * @return {!Promise<undefined>}
    * @private
    */
   fetchAndUpdate_(isInit, opt_refresh) {
     const ampdoc = this.getAmpDoc();
-    return this.fetch_(ampdoc, this.element, isInit, opt_refresh)
-        .then(json => {
-          this.updateState_(json, isInit);
-        });
+    // Don't fetch in prerender mode.
+    const viewer = Services.viewerForDoc(this.element);
+    return viewer.whenFirstVisible()
+        .then(() => this.prepareAndSendFetch_(
+            ampdoc, this.element, isInit, opt_refresh))
+        .then(json => this.updateState_(json, isInit));
   }
 
   /**
@@ -170,12 +183,14 @@ export class AmpState extends AMP.BaseElement {
       return;
     }
     const id = userAssert(this.element.id, '<amp-state> must have an id.');
-    const state = /** @type {!JsonObject} */ (map());
-    state[id] = json;
     Services.bindForDocOrNull(this.element).then(bind => {
-      devAssert(bind, 'Bind service can not be found.');
-      bind.setState(state,
-          /* opt_skipEval */ isInit, /* opt_isAmpStateMutation */ !isInit);
+      devAssert(bind);
+      const state = /** @type {!JsonObject} */ (map());
+      state[id] = json;
+      // As a rule, initialization should skip evaluation.
+      // If we're not initializing then this must be a mutation, so we must
+      // skip <amp-state> evaluation to prevent update cycles.
+      bind.setState(state, /* skipEval */ isInit, /* skipAmpState */ !isInit);
     });
   }
 

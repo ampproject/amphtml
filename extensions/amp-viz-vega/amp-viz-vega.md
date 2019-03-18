@@ -1,3 +1,10 @@
+---
+$category@: presentation
+formats:
+  - websites
+teaser:
+  text: Displays visualizations created by using Vega visualization grammar.
+---
 <!---
 Copyright 2016 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,13 +21,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-viz-vega"></a> `amp-viz-vega`
+# amp-viz-vega
+
+Displays visualizations created using <a href="https://vega.github.io/vega/">Vega</a> visualization grammar.
 
 <table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Displays visualizations created using <a href="https://vega.github.io/vega/">Vega</a> visualization grammar.</td>
-  </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
     <td><a href="https://www.ampproject.org/docs/reference/experimental.html">Experimental</a></td>
@@ -126,29 +131,29 @@ to learn more and play with samples.
 
 ## Attributes
 
-##### src
-
-This attribute can be used to load a Vega specification data file
-from a specified remote URL. The URL must use https scheme.
-
-Alternatively specification data can be included in `<script type="application/json">`
-as the only child of `<amp-viz-vega>`.
-
-Only either `src` or `<script>` should be specified. Using both will result in error.
-
-##### use-data-width and use-data-height
-
-To support responsive visualization, by default `<amp-viz-vega>` overrides `width`
-and `height` values defined in the Vega specification data with the actual width
-and height of the `<amp-viz-vega>` element and re-renders when the size of the
-element changes (e.g. going to landscape from portrait on phones).
-
-`use-data-width` and `use-data-height` attribute can be set to instruct `<amp-viz-vega>`
-not to override the data-defined width and height values. It is recommended to avoid
-using these attributes as they may result in visualizations that require vertical
-and/or horizontal scrolling to be fully viewable. But they can be used in certain
-cases where it may not be possible for the visualization to scale to fit the given
-width and height. For example, the *World Map* visualization in the
-[examples](https://github.com/ampproject/amphtml/blob/master/examples/viz-vega.amp.html)
-can not realistically scale to the given width and still be usable so it `use-data-width`
-and allows user to scroll horizontally.
+<table>
+  <tr>
+    <td width="40%"><strong>src</strong></td>
+    <td><p>This attribute can be used to load a Vega specification data file
+  from a specified remote URL. The URL must use https scheme.</p>
+<p>Alternatively specification data can be included in <code>&lt;script type="application/json"&gt;</code>
+  as the only child of <code>&lt;amp-viz-vega&gt;</code>.<br></p>
+<p>Only either <code>src</code> or <code>&lt;script&gt;</code> should be specified. Using both will result in error.</p></td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>use-data-width and use-data-height</strong></td>
+    <td><p>To support responsive visualization, by default <code>&lt;amp-viz-vega&gt;</code> overrides <code>width</code>
+  and <code>height</code> values defined in the Vega specification data with the actual width
+  and height of the <code>&lt;amp-viz-vega&gt;</code> element and re-renders when the size of the
+  element changes (e.g. going to landscape from portrait on phones).</p>
+<p><code>use-data-width</code> and <code>use-data-height</code> attribute can be set to instruct <code>&lt;amp-viz-vega&gt;</code>
+  not to override the data-defined width and height values. It is recommended to avoid
+  using these attributes as they may result in visualizations that require vertical
+  and/or horizontal scrolling to be fully viewable. But they can be used in certain
+  cases where it may not be possible for the visualization to scale to fit the given
+  width and height. For example, the <em>World Map</em> visualization in the
+  <a href="https://github.com/ampproject/amphtml/blob/master/examples/viz-vega.amp.html">examples</a>
+  can not realistically scale to the given width and still be usable so it <code>use-data-width</code>
+  and allows user to scroll horizontally.</p></td>
+  </tr>
+</table>

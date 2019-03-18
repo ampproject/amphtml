@@ -1,3 +1,10 @@
+---
+$category@: social
+formats:
+  - websites
+teaser:
+  text: Displays a Reddit comment or post embed.
+---
 <!---
 Copyright 2016 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,13 +21,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-reddit"></a> `amp-reddit`
+# amp-reddit
+
+Displays a Reddit comment or post embed.
 
 <table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Displays a Reddit comment or post embed.</td>
-  </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-reddit" src="https://cdn.ampproject.org/v0/amp-reddit-0.1.js">&lt;/script></code></td>
@@ -71,33 +76,36 @@ Use the `amp-reddit` component to embed a Reddit post or comment.
 
 ## Attributes
 
-##### data-embedtype (required)
-
-The type of embed, either `post` or `comment`.
-
-##### data-src (required)
-
-The permamlink uri for the post or comment.
-
-##### data-uuid
-
-The provided UUID for the comment embed. Supported when `data-embedtype` is `comment`. 
-
-##### data-embedcreated
-
-The datetime string for the comment embed. Supported when `data-embedtype` is `comment`. 
-
-##### data-embedparent
-
- Indicates whether the parent comment should be included in the embed. Supported when `data-embedtype` is `comment`.
-
-##### data-embedlive
-
- Indicates whether the embedded comment should update if the original comment is updated. Supported when `data-embedtype` is `comment`.
-
-##### common attributes
-
-This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
+<table>
+  <tr>
+    <td width="40%"><strong>data-embedtype (required)</strong></td>
+    <td>The type of embed, either <code>post</code> or <code>comment</code>.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-src (required)</strong></td>
+    <td>The permamlink uri for the post or comment.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-uuid</strong></td>
+    <td>The provided UUID for the comment embed. Supported when <code>data-embedtype</code> is <code>comment</code>.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-embedcreated</strong></td>
+    <td>The datetime string for the comment embed. Supported when <code>data-embedtype</code> is <code>comment</code>.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-embedparent</strong></td>
+    <td>The datetime string for the comment embed. Supported when <code>data-embedtype</code> is <code>comment</code>.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-embedlive</strong></td>
+    <td>Indicates whether the embedded comment should update if the original comment is updated. Supported when <code>data-embedtype</code> is <code>comment</code>.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>common attributes</strong></td>
+    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
+  </tr>
+</table>
 
 ## Validation
 

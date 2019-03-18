@@ -23,6 +23,7 @@ const app = require('express')();
 const bacon = require('baconipsum');
 const BBPromise = require('bluebird');
 const bodyParser = require('body-parser');
+const cors = require('./amp-cors');
 const devDashboard = require('./app-index/index');
 const formidable = require('formidable');
 const fs = BBPromise.promisifyAll(require('fs'));
@@ -31,12 +32,11 @@ const multer = require('multer');
 const path = require('path');
 const request = require('request');
 const pc = process;
-const countries = require('../examples/countries.json');
 const runVideoTestBench = require('./app-video-testbench');
 const {
   recaptchaFrameRequestHandler,
   recaptchaRouter,
-} = require('./recaptcha-router.js');
+} = require('./recaptcha-router');
 const {renderShadowViewer} = require('./shadow-viewer');
 const {replaceUrls} = require('./app-utils');
 
@@ -45,6 +45,7 @@ const upload = multer();
 app.use(bodyParser.text());
 app.use('/amp4test', require('./amp4test').app);
 app.use('/analytics', require('./routes/analytics'));
+app.use('/list/', require('./routes/list'));
 
 // Append ?csp=1 to the URL to turn on the CSP header.
 // TODO: shall we turn on CSP all the time?
@@ -77,11 +78,7 @@ app.get('/serve_mode=:mode', (req, res) => {
 });
 
 if (!global.AMP_TESTING) {
-  if (process.env.DISABLE_DEV_DASHBOARD_CACHE &&
-      process.env.DISABLE_DEV_DASHBOARD_CACHE !== 'false') {
-    devDashboard.setCacheStatus(false);
-  }
-
+  // Dev dashboard routes break test scaffolding since they're global.
   devDashboard.installExpressMiddleware(app);
 }
 
@@ -108,23 +105,73 @@ app.get('/serve_mode_change', (req, res) => {
 //
 // Mode can be one of:
 //   - '/', empty string, or unset for an unwrapped doc
-//   - 'a4a' for an AMP4ADS wrapper
-//   - 'a4a-3p' for a 3P AMP4ADS wrapper
-//   - 'inabox' for an AMP inabox wrapper
-//   - 'shadow' for a shadow-wrapped document
+//   - '/a4a/' for an AMP4ADS wrapper
+//   - '/a4a-3p/' for a 3P AMP4ADS wrapper
+//   - '/inabox/' for an AMP inabox wrapper
+//   - '/shadow/' for a shadow-wrapped document
 //
 // Examples:
 //   - /proxy/?url=hello.com 👉 /proxy/s/hello.com
-//   - /proxy/?url=hello.com?mode=shadow 👉 /shadow/proxy/s/hello.com
+//   - /proxy/?url=hello.com?mode=/shadow/ 👉 /shadow/proxy/s/hello.com
+//   - /proxy/?url=https://hello.com 👉 /proxy/s/hello.com
+//   - /proxy/?url=https://www.google.com/amp/s/hello.com 👉 /proxy/s/hello.com
+//   - /proxy/?url=hello.com/canonical 👉 /proxy/s/hello.com/amp
 //
 // This passthrough is useful to generate the URL from <form> values,
-// (See ./app-index/proxy-fom.js)
-app.get('/proxy', (req, res) => {
+// (See ./app-index/proxy-form.js)
+app.get('/proxy', async(req, res, next) => {
   const {mode, url} = req.query;
-  const prefix = (mode || '').replace(/\/$/, '');
-  const sufix = url.replace(/^http(s?):\/\//i, '');
-  res.redirect(`${prefix}/proxy/s/${sufix}`);
+  const urlSuffixClearPrefixReStr =
+      '^https?://' +
+      '((www\.)?google\.(com?|[a-z]{2}|com?\.[a-z]{2}|cat)/amp/s/)?';
+  const urlSuffix = url.replace(new RegExp(urlSuffixClearPrefixReStr, 'i'), '');
+
+  try {
+    const ampdocUrl = await requestAmphtmlDocUrl(urlSuffix);
+    const ampdocUrlSuffix = ampdocUrl.replace(/^https?:\/\//, '');
+    const modePrefix = (mode || '').replace(/\/$/, '');
+    const proxyUrl = `${modePrefix}/proxy/s/${ampdocUrlSuffix}`;
+    res.redirect(proxyUrl);
+  } catch ({message}) {
+    console.log(`ERROR: ${message}`);
+    next();
+  }
 });
+
+
+/**
+ * Resolves an AMPHTML URL from a canonical URL. If AMPHTML is canonical, same
+ * URL is returned.
+ * @param {string} urlSuffix URL without protocol or google.com/amp/s/...
+ * @param {string=} protocol 'https' or 'http'. 'https' retries using 'http'.
+ * @return {!Promise<string>}
+ */
+function requestAmphtmlDocUrl(urlSuffix, protocol = 'https') {
+  const defaultUrl = `${protocol}://${urlSuffix}`;
+  console.log(`Fetching URL: ${defaultUrl}`);
+  return new Promise((resolve, reject) => {
+    request(defaultUrl, (error, response, body) => {
+      if (error || (response && (
+        response.statusCode < 200 || response.statusCode >= 300))) {
+
+        if (protocol == 'https') {
+          return requestAmphtmlDocUrl(urlSuffix, 'http');
+        }
+        return reject(new Error(error || `Status: ${response.statusCode}`));
+      }
+      const {window} = new jsdom.JSDOM(body);
+      const linkRelAmphtml = window.document.querySelector('link[rel=amphtml]');
+      if (!linkRelAmphtml) {
+        return resolve(defaultUrl);
+      }
+      const amphtmlUrl = linkRelAmphtml.getAttribute('href');
+      if (!amphtmlUrl) {
+        return resolve(defaultUrl);
+      }
+      return resolve(amphtmlUrl);
+    });
+  });
+}
 
 /*
  * Intercept Recaptcha frame for,
@@ -132,7 +179,7 @@ app.get('/proxy', (req, res) => {
  * out the recaptcha api.
  */
 app.get(
-    '/dist.3p/current*/recaptcha.*html',
+    '/dist.3p/*/recaptcha.*html',
     recaptchaFrameRequestHandler
 );
 app.use(
@@ -200,26 +247,8 @@ app.use('/api/echo/post', (req, res) => {
   res.end(req.body);
 });
 
-/**
- * In practice this would be *.ampproject.org and the publishers
- * origin. Please see AMP CORS docs for more details:
- *    https://goo.gl/F6uCAY
- * @type {RegExp}
- */
-const ORIGIN_REGEX = new RegExp('^http://localhost:8000|' +
-    '^https?://.+\.herokuapp\.com');
-
-/**
- * In practice this would be the publishers origin.
- * Please see AMP CORS docs for more details:
- *    https://goo.gl/F6uCAY
- * @type {RegExp}
- */
-const SOURCE_ORIGIN_REGEX = new RegExp('^http://localhost:8000|' +
-    '^https?://.+\.herokuapp\.com');
-
 app.use('/form/html/post', (req, res) => {
-  assertCors(req, res, ['POST']);
+  cors.assertCors(req, res, ['POST']);
 
   const form = new formidable.IncomingForm();
   form.parse(req, (err, fields) => {
@@ -241,14 +270,14 @@ app.use('/form/html/post', (req, res) => {
 
 
 app.use('/form/redirect-to/post', (req, res) => {
-  assertCors(req, res, ['POST'], ['AMP-Redirect-To']);
+  cors.assertCors(req, res, ['POST'], ['AMP-Redirect-To']);
   res.setHeader('AMP-Redirect-To', 'https://google.com');
   res.end('{}');
 });
 
 
 app.use('/form/echo-json/post', (req, res) => {
-  assertCors(req, res, ['POST']);
+  cors.assertCors(req, res, ['POST']);
   const form = new formidable.IncomingForm();
   form.parse(req, (err, fields) => {
     res.setHeader('Content-Type', 'application/json; charset=utf-8');
@@ -260,7 +289,7 @@ app.use('/form/echo-json/post', (req, res) => {
 });
 
 app.use('/form/json/poll1', (req, res) => {
-  assertCors(req, res, ['POST']);
+  cors.assertCors(req, res, ['POST']);
   const form = new formidable.IncomingForm();
   form.parse(req, () => {
     res.setHeader('Content-Type', 'application/json');
@@ -283,7 +312,7 @@ app.use('/form/json/poll1', (req, res) => {
 });
 
 app.post('/form/json/upload', upload.fields([{name: 'myFile'}]), (req, res) => {
-  assertCors(req, res, ['POST']);
+  cors.assertCors(req, res, ['POST']);
 
   /** @type {!Array<!File>|undefined} */
   const myFile = req.files['myFile'];
@@ -312,9 +341,10 @@ app.use('/form/search-html/get', (req, res) => {
 
 
 app.use('/form/search-json/get', (req, res) => {
-  assertCors(req, res, ['GET']);
+  cors.assertCors(req, res, ['GET']);
   res.json({
     term: req.query.term,
+    additionalFields: req.query.additionalFields,
     results: [{title: 'Result 1'}, {title: 'Result 2'}, {title: 'Result 3'}],
   });
 });
@@ -325,7 +355,7 @@ const autosuggestLanguages = ['ActionScript', 'AppleScript', 'Asp', 'BASIC',
   'Ruby', 'Scala', 'Scheme'];
 
 app.use('/form/autosuggest/query', (req, res) => {
-  assertCors(req, res, ['GET']);
+  cors.assertCors(req, res, ['GET']);
   const MAX_RESULTS = 4;
   const query = req.query.q;
   if (!query) {
@@ -343,7 +373,7 @@ app.use('/form/autosuggest/query', (req, res) => {
 });
 
 app.use('/form/autosuggest/search', (req, res) => {
-  assertCors(req, res, ['POST']);
+  cors.assertCors(req, res, ['POST']);
   const form = new formidable.IncomingForm();
   form.parse(req, function(err, fields) {
     res.json({
@@ -354,7 +384,7 @@ app.use('/form/autosuggest/search', (req, res) => {
 });
 
 app.use('/form/verify-search-json/post', (req, res) => {
-  assertCors(req, res, ['POST']);
+  cors.assertCors(req, res, ['POST']);
   const form = new formidable.IncomingForm();
   form.parse(req, (err, fields) => {
     res.setHeader('Content-Type', 'application/json; charset=utf-8');
@@ -422,7 +452,7 @@ function proxyToAmpProxy(req, res, mode) {
     if (inabox) {
       // Allow CORS requests for A4A.
       const origin = req.headers.origin || urlPrefix;
-      enableCors(req, res, origin);
+      cors.enableCors(req, res, origin);
     }
     res.status(response.statusCode).send(body);
   });
@@ -634,7 +664,7 @@ app.use('/examples/bind/live-list.amp.html',
     });
 
 app.use('/impression-proxy/', (req, res) => {
-  assertCors(req, res, ['GET']);
+  cors.assertCors(req, res, ['GET']);
   // Fake response with the following optional fields:
   // location: The Url the that server would have sent redirect to w/o ALP
   // tracking_url: URL that should be requested to track click
@@ -650,7 +680,7 @@ app.use('/impression-proxy/', (req, res) => {
 });
 
 app.post('/get-consent-v1/', (req, res) => {
-  assertCors(req, res, ['POST']);
+  cors.assertCors(req, res, ['POST']);
   const body = {
     'promptIfUnknown': true,
     'sharedData': {
@@ -662,7 +692,7 @@ app.post('/get-consent-v1/', (req, res) => {
 });
 
 app.post('/get-consent-no-prompt/', (req, res) => {
-  assertCors(req, res, ['POST']);
+  cors.assertCors(req, res, ['POST']);
   const body = {};
   res.json(body);
 });
@@ -691,7 +721,7 @@ app.get('/iframe/*', (req, res) => {
 });
 
 app.get('/a4a_template/*', (req, res) => {
-  assertCors(req, res, ['GET'], undefined, true);
+  cors.assertCors(req, res, ['GET'], undefined, true);
   const match = /^\/a4a_template\/([a-z-]+)\/(\d+)$/.exec(req.path);
   if (!match) {
     res.status(404);
@@ -793,13 +823,14 @@ app.use('/examples/analytics.config.json', (req, res, next) => {
   next();
 });
 
-app.use(['/examples/*', '/extensions/*'], (req, res, next) => {
-  const sourceOrigin = req.query['__amp_source_origin'];
-  if (sourceOrigin) {
-    res.setHeader('AMP-Access-Control-Allow-Source-Origin', sourceOrigin);
-  }
-  next();
-});
+app.use(['/examples/*', '/extensions/*', '/test/manual/*'],
+    (req, res, next) => {
+      const sourceOrigin = req.query['__amp_source_origin'];
+      if (sourceOrigin) {
+        res.setHeader('AMP-Access-Control-Allow-Source-Origin', sourceOrigin);
+      }
+      next();
+    });
 
 /**
  * Append ?sleep=5 to any included JS file in examples to emulate delay in
@@ -834,7 +865,7 @@ app.get(['/examples/*.html', '/test/manual/*.html'], (req, res, next) => {
 
     if (inabox && req.headers.origin && req.query.__amp_source_origin) {
       // Allow CORS requests for A4A.
-      enableCors(req, res, req.headers.origin);
+      cors.enableCors(req, res, req.headers.origin);
     } else {
       file = replaceUrls(mode, file, '', inabox);
     }
@@ -886,13 +917,13 @@ function escapeRegExp(string) {
 function elementExtractor(tagName, type) {
   type = escapeRegExp(type);
   return new RegExp(
-      `<${tagName} [^>]*['"]${type}['"][^>]*>([\\s\\S]+?)</${tagName}>`,
+      `<${tagName}[\\s][^>]*['"]${type}['"][^>]*>([\\s\\S]+?)</${tagName}>`,
       'gm');
 }
 
 // Data for example: http://localhost:8000/examples/bind/xhr.amp.html
 app.use('/bind/form/get', (req, res) => {
-  assertCors(req, res, ['GET']);
+  cors.assertCors(req, res, ['GET']);
   res.json({
     bindXhrResult: 'I was fetched from the server!',
   });
@@ -900,7 +931,7 @@ app.use('/bind/form/get', (req, res) => {
 
 // Data for example: http://localhost:8000/examples/bind/ecommerce.amp.html
 app.use('/bind/ecommerce/sizes', (req, res) => {
-  assertCors(req, res, ['GET']);
+  cors.assertCors(req, res, ['GET']);
   setTimeout(() => {
     const prices = {
       '0': {
@@ -963,31 +994,9 @@ app.use('/bind/ecommerce/sizes', (req, res) => {
   }, 1000); // Simulate network delay.
 });
 
-app.use('/list/fruit-data/get', (req, res) => {
-  assertCors(req, res, ['GET']);
-  res.json({
-    items: [
-      {name: 'apple', quantity: 47, unitPrice: '0.33'},
-      {name: 'pear', quantity: 538, unitPrice: '0.54'},
-      {name: 'tomato', quantity: 0, unitPrice: '0.23'},
-    ],
-  });
-});
-
-app.use('/list/vegetable-data/get', (req, res) => {
-  assertCors(req, res, ['GET']);
-  res.json({
-    items: [
-      {name: 'cabbage', quantity: 5, unitPrice: '1.05'},
-      {name: 'carrot', quantity: 10, unitPrice: '0.01'},
-      {name: 'brocoli', quantity: 7, unitPrice: '0.02'},
-    ],
-  });
-});
-
 // Simulated subscription entitlement
 app.use('/subscription/:id/entitlements', (req, res) => {
-  assertCors(req, res, ['GET']);
+  cors.assertCors(req, res, ['GET']);
   res.json({
     source: 'local' + req.params.id,
     granted: true,
@@ -999,7 +1008,7 @@ app.use('/subscription/:id/entitlements', (req, res) => {
 });
 
 app.use('/subscription/pingback', (req, res) => {
-  assertCors(req, res, ['POST']);
+  cors.assertCors(req, res, ['POST']);
   res.json({
     done: true,
   });
@@ -1007,7 +1016,7 @@ app.use('/subscription/pingback', (req, res) => {
 
 // Simulated adzerk ad server and AMP cache CDN.
 app.get('/adzerk/*', (req, res) => {
-  assertCors(req, res, ['GET'], ['AMP-template-amp-creative']);
+  cors.assertCors(req, res, ['GET'], ['AMP-template-amp-creative']);
   const match = /\/(\d+)/.exec(req.path);
   if (!match || !match[1]) {
     res.status(404);
@@ -1189,109 +1198,6 @@ app.get('/dist/ww(.max)?.js', (req, res) => {
   });
 });
 
-/*
- * Infinite scroll related endpoints.
- */
-const randInt = n => {
-  return Math.floor(Math.random() * Math.floor(n));
-};
-
-const squareImgUrl = width => {
-  return `http://picsum.photos/${width}?${randInt(50)}`;
-};
-
-const generateJson = numberOfItems => {
-  const results = [];
-  for (let i = 0; i < numberOfItems; i++) {
-    const imageUrl = squareImgUrl(200);
-    const r = {
-      'title': 'Item ' + randInt(100),
-      imageUrl,
-      'price': randInt(8) + 0.99,
-    };
-    results.push(r);
-  }
-  return results;
-};
-
-const generateResults = (category, count = 2) => {
-  const r = {};
-  const items = [];
-  for (let i = 0; i < count; i++) {
-    const buster = randInt(10000);
-    const item = {};
-    item.src = `https://placeimg.com/600/400/${category}?${buster}`;
-    items.push(item);
-  }
-
-  r.items = items;
-  r['load-more-src'] =
-      `/infinite-scroll-random/${category}?${randInt(10000)}`;
-
-  return r;
-};
-
-app.get('/infinite-scroll-random/:category', function(request, response) {
-  const {category} = request.params;
-  const result = generateResults(category);
-  response.json(result);
-});
-
-app.get('/infinite-scroll-faulty', function(req, res) {
-  const {query} = req;
-  const code = query['code'];
-  const items = generateJson(12);
-  let next = '/infinite-scroll-error';
-  if (code) {
-    next += '?code=' + code;
-  }
-  res.json({items, next});
-});
-
-app.get('/infinite-scroll-error', function(req, res) {
-  const {query} = req;
-  const code = query['code'] || 404;
-  res.status(code);
-  res.json({'msg': code});
-});
-
-app.get('/infinite-scroll', function(req, res) {
-  const {query} = req;
-  const numberOfItems = query['items'] || 10;
-  const pagesLeft = query['left'] || 1;
-  const latency = query['latency'] || 0;
-
-  const items = generateJson(numberOfItems);
-
-  const nextUrl = '/infinite-scroll?items=' +
-    numberOfItems + '&left=' + (pagesLeft - 1) +
-    '&latency=' + latency;
-
-  const randomFalsy = () => {
-    const rand = Math.floor(Math.random() * Math.floor(3));
-    switch (rand) {
-      case 1: return null;
-      case 2: return undefined;
-      case 3: return '';
-      default: return false;
-    }
-  };
-
-  const next = pagesLeft == 0 ? randomFalsy() : nextUrl;
-  const results = next === false ? {items}
-    : {items, next,
-      'loadMoreButtonText': 'test',
-      'loadMoreEndText': 'end',
-    };
-
-  if (latency) {
-    setTimeout(() => res.json(results), latency);
-  } else {
-    res.json(results);
-  }
-});
-
-
 /**
  * Shadow viewer
  */
@@ -1307,29 +1213,6 @@ app.use('/shadow/', (req, res) => {
     src: req.url.replace(/^\//, ''),
     baseHref,
   }));
-});
-
-
-/**
- * Autosuggest endpoint
- */
-app.get('/search/countries', function(req, res) {
-  let filtered = [];
-  if (req.query.hasOwnProperty('q')) {
-    const query = req.query.q.toLowerCase();
-
-    filtered = countries.items
-        .filter(country => country.name.toLowerCase().startsWith(query));
-  }
-
-  const results = {
-    'items': [
-      {
-        'results': filtered,
-      },
-    ],
-  };
-  res.send(results);
 });
 
 /**
@@ -1380,63 +1263,6 @@ function addQueryParam(url, param, value) {
   return url;
 }
 
-function enableCors(req, res, origin, opt_exposeHeaders) {
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Allow-Origin', origin);
-  res.setHeader('Access-Control-Expose-Headers',
-      ['AMP-Access-Control-Allow-Source-Origin']
-          .concat(opt_exposeHeaders || []).join(', '));
-  if (req.query.__amp_source_origin) {
-    res.setHeader('AMP-Access-Control-Allow-Source-Origin',
-        req.query.__amp_source_origin);
-  }
-}
-
-function assertCors(req, res, opt_validMethods, opt_exposeHeaders,
-  opt_ignoreMissingSourceOrigin) {
-  // Allow disable CORS check (iframe fixtures have origin 'about:srcdoc').
-  if (req.query.cors == '0') {
-    return;
-  }
-
-  const validMethods = opt_validMethods || ['GET', 'POST', 'OPTIONS'];
-  const invalidMethod = req.method + ' method is not allowed. Use POST.';
-  const invalidOrigin = 'Origin header is invalid.';
-  const invalidSourceOrigin = '__amp_source_origin parameter is invalid.';
-  const unauthorized = 'Unauthorized Request';
-  let origin;
-
-  if (validMethods.indexOf(req.method) == -1) {
-    res.statusCode = 405;
-    res.end(JSON.stringify({message: invalidMethod}));
-    throw invalidMethod;
-  }
-
-  if (req.headers.origin) {
-    origin = req.headers.origin;
-    if (!ORIGIN_REGEX.test(req.headers.origin)) {
-      res.statusCode = 500;
-      res.end(JSON.stringify({message: invalidOrigin}));
-      throw invalidOrigin;
-    }
-
-    if (!opt_ignoreMissingSourceOrigin &&
-        !SOURCE_ORIGIN_REGEX.test(req.query.__amp_source_origin)) {
-      res.statusCode = 500;
-      res.end(JSON.stringify({message: invalidSourceOrigin}));
-      throw invalidSourceOrigin;
-    }
-  } else if (req.headers['amp-same-origin'] == 'true') {
-    origin = getUrlPrefix(req);
-  } else {
-    res.statusCode = 401;
-    res.end(JSON.stringify({message: unauthorized}));
-    throw unauthorized;
-  }
-
-  enableCors(req, res, origin, opt_exposeHeaders);
-}
-
 
 function generateInfo(filePath) {
   const mode = pc.env.SERVE_MODE;
@@ -1454,7 +1280,4 @@ function generateInfo(filePath) {
       '<h3><a href = /serve_mode=cdn>Change to CDN mode (prod JS)</a></h3>';
 }
 
-module.exports = {
-  middleware: app,
-  beforeServeTasks: devDashboard.beforeServeTasks,
-};
+module.exports = app;

@@ -105,16 +105,15 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6217',
   },
   {
-    id: 'amp-auto-ads-adsense-holdout',
-    name: 'AMP Auto Ads AdSense Holdout',
-    spec: 'https://github.com/ampproject/amphtml/issues/6196',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/9247',
-  },
-  {
     id: 'amp-auto-ads-adsense-responsive',
     name: 'AMP Auto Ads AdSense Responsive',
     spec: '',
     cleanupIssue: '',
+  },
+  {
+    id: 'amp-base-carousel',
+    name: 'AMP extension for a basic, flexible, carousel',
+    spec: 'https://github.com/ampproject/amphtml/issues/20595',
   },
   {
     id: 'amp-google-vrview-image',
@@ -226,11 +225,6 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/9277',
   },
   {
-    id: 'user-error-reporting',
-    name: 'Report error to publishers',
-    spec: 'https://github.com/ampproject/amphtml/issues/6415',
-  },
-  {
     id: 'disable-rtc',
     name: 'Disable AMP RTC',
     spec: 'https://github.com/ampproject/amphtml/issues/8551',
@@ -265,6 +259,13 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/15960',
   },
   {
+    id: 'amp-story-desktop-background',
+    name: 'Removes blurred background images from the amp-story component\'s ' +
+        'three-panel desktop UI.',
+    spec: 'https://github.com/ampproject/amphtml/issues/21287',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/21288',
+  },
+  {
     id: 'amp-next-page',
     name: 'Document level next page recommendations and infinite scroll',
     spec: 'https://github.com/ampproject/amphtml/issues/12945',
@@ -297,12 +298,6 @@ const EXPERIMENTS = [
     name: 'Applies a sandbox to ad iframes.',
     spec: 'https://github.com/ampproject/amphtml/issues/14240',
     cleanupIssue: 'TODO',
-  },
-  {
-    id: 'video-service',
-    name: 'Enables new implementation of unified Video Interface services.',
-    spec: 'https://github.com/ampproject/amphtml/issues/13674',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/13955',
   },
   {
     id: 'iframe-messaging',
@@ -407,16 +402,42 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/19004',
   },
   {
-    id: 'amp-list-viewport-resize',
-    name: 'Enables amp-list to resize on viewport resize',
-    spec: 'https://github.com/ampproject/amphtml/issues/19945',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/19945',
-  },
-  {
     id: 'amp-auto-lightbox',
     name: 'Automatically detects images to place in a lightbox.',
     spec: 'https://github.com/ampproject/amphtml/issues/20395',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/20394',
+  },
+  {
+    id: 'amp-auto-lightbox-carousel',
+    name: 'Automatically detects carousels to group in a lightbox.',
+    spec: 'https://github.com/ampproject/amphtml/issues/20395',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/20394',
+  },
+  {
+    id: 'fixed-elements-in-lightbox',
+    name: 'Transfer fixed elements in lightboxes for smooth iOS scrolling',
+    spec: 'https://github.com/ampproject/amphtml/issues/20964',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/20965',
+  },
+  {
+    id: 'amp-img-auto-sizes',
+    name: 'Automatically generates sizes for amp-img if not given',
+    spec: 'https://github.com/ampproject/amphtml/issues/19513',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/20517',
+  },
+  {
+    id: 'amp-autocomplete',
+    name: 'AMP Autocomplete provides a set of suggestions to' +
+        ' complete a user query in an input field.',
+    spec: 'https://github.com/ampproject/amphtml/issues/9785',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/21021',
+  },
+  {
+    id: 'inabox-viewport-friendly',
+    name: 'Inabox viewport measures the host window directly if ' +
+        'within friendly iframe',
+    spec: 'https://github.com/ampproject/amphtml/issues/19869',
+    cleanupIssue: 'TODO',
   },
 ];
 

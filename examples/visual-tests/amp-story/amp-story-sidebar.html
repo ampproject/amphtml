@@ -13,22 +13,13 @@
     <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
     <style amp-custom>
       amp-story-page {
-        background: black;
+        background: white;
         color: white;
         font-family: sans-serif;
       }
       .i-amphtml-story-spinner-container {
         /* Hide the spinner for loading pages, since this causes flakes */
         display: none;
-      }
-      /*
-       * The share pill text does not show in the same place consistently, and
-       * as such causes the visual tests to be flaky.  This hides the share pill
-       * with visibility: hidden, so as to keep other elements in the same place
-       * that they would otherwise be, while deflaking the tests.  See #19890.
-       */
-       .i-amphtml-story-share-pill {
-        visibility: hidden;
       }
       h1.hello-world {
         color: white;
@@ -44,6 +35,7 @@
         poster-landscape-src="https://picsum.photos/1600/900?image=981"
         poster-square-src="https://picsum.photos/1600/1600?image=981">
       <amp-sidebar id="sidebar1" layout="nodisplay" >
+        <button id="close-button" on="tap:sidebar1.close"> close </button>
         <ul>
           <li>Nav item 1</li>
           <li><a href="#idTwo" on="tap:idTwo.scrollTo">Nav item 2</a></li>
@@ -55,8 +47,6 @@
       </amp-sidebar>
       <amp-story-page id="cover">
         <amp-story-grid-layer template="fill">
-          <amp-video autoplay layout="fill" poster="https://picsum.photos/1600/900?image=980">
-          </amp-video>
         </amp-story-grid-layer>
         <amp-story-grid-layer template="vertical">
           <h1 class="hello-world">Hello world!</h1>
@@ -66,8 +56,6 @@
 
       <amp-story-page id="page-2">
         <amp-story-grid-layer template="fill">
-          <amp-video autoplay layout="fill" poster="https://picsum.photos/1600/900?image=981">
-          </amp-video>
         </amp-story-grid-layer>
         <amp-story-grid-layer template="vertical">
           <h1 class="hello-world">Hello world!</h1>

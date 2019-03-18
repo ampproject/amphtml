@@ -1135,7 +1135,7 @@ describe('Resources discoverWork', () => {
         VisibilityState.VISIBLE
     );
     viewportMock.expects('getRect').returns(
-        layoutRectLtwh(0, 0, 300, 400)).once();
+        layoutRectLtwh(0, 0, 300, 400));
     resource1.isBuilt = () => false;
     const mediaSpy = sandbox.stub(resource1.element, 'applySizesAndMediaQuery');
     expect(resource1.hasBeenMeasured()).to.be.false;
@@ -1153,7 +1153,7 @@ describe('Resources discoverWork', () => {
         VisibilityState.VISIBLE
     );
     viewportMock.expects('getRect').returns(
-        layoutRectLtwh(0, 0, 300, 400)).once();
+        layoutRectLtwh(0, 0, 300, 400));
 
     resources.discoverWork_();
 
@@ -1170,7 +1170,7 @@ describe('Resources discoverWork', () => {
         VisibilityState.VISIBLE
     );
     viewportMock.expects('getRect').returns(
-        layoutRectLtwh(0, 0, 300, 400)).once();
+        layoutRectLtwh(0, 0, 300, 400));
 
     resources.discoverWork_();
 
@@ -1193,7 +1193,7 @@ describe('Resources discoverWork', () => {
     resources.relayoutAll_ = false;
     resources.relayoutTop_ = 1000;
     viewportMock.expects('getRect').returns(
-        layoutRectLtwh(0, 0, 300, 400)).once();
+        layoutRectLtwh(0, 0, 300, 400));
 
     resources.discoverWork_();
 
@@ -1211,7 +1211,7 @@ describe('Resources discoverWork', () => {
     );
     resources.prerenderSize_ = 1;
     viewportMock.expects('getRect').returns(
-        layoutRectLtwh(0, 0, 300, 1009)).once();
+        layoutRectLtwh(0, 0, 300, 1009));
 
     resources.discoverWork_();
 
@@ -1226,7 +1226,7 @@ describe('Resources discoverWork', () => {
     );
     resources.prerenderSize_ = 0;
     viewportMock.expects('getRect').returns(
-        layoutRectLtwh(0, 0, 300, 400)).once();
+        layoutRectLtwh(0, 0, 300, 400));
 
     resources.discoverWork_();
 
@@ -1242,7 +1242,7 @@ describe('Resources discoverWork', () => {
         VisibilityState.VISIBLE
     );
     viewportMock.expects('getRect').returns(
-        layoutRectLtwh(0, 0, 300, 400)).atLeast(1);
+        layoutRectLtwh(0, 0, 300, 400));
 
     const resource1MeasureStub = sandbox.stub(resource1, 'measure').callsFake(
         resource1.measure.bind(resource1));
@@ -1452,7 +1452,7 @@ describe('Resources discoverWork', () => {
             VisibilityState.VISIBLE
         );
         viewportMock.expects('getRect').returns(
-            layoutRectLtwh(0, 0, 300, 400)).once();
+            layoutRectLtwh(0, 0, 300, 400));
         const setInViewport = sandbox.spy(resource1, 'setInViewport');
         const schedule = sandbox.spy(resources, 'scheduleLayoutOrPreload_');
 
@@ -2236,7 +2236,7 @@ describe('Resources changeSize', () => {
 
       viewportMock.expects('getRect').returns({
         top: 10, left: 0, right: 100, bottom: 210, height: 200,
-      }).once();
+      });
       resource1.layoutBox_ = {top: -1200, left: 0, right: 100, bottom: -1100,
         height: 100};
       resource2.layoutBox_ = {top: -1300, left: 0, right: 100, bottom: -1200,
@@ -2468,7 +2468,7 @@ describe('Resources changeSize', () => {
 
     beforeEach(() => {
       viewportMock.expects('getRect').returns(
-          {top: 0, left: 0, right: 100, bottom: 10000, height: 200}).atLeast(1);
+          {top: 0, left: 0, right: 100, bottom: 10000, height: 200});
       resource1.layoutBox_ = resource1.initialLayoutBox_ =
           layoutRectLtwh(0, 10, 100, 100);
     });

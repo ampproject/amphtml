@@ -34,3 +34,7 @@ As an example if we executed `perf.tick('label')` we assume we have a counterpar
 | On First Visible | `ofv` | The first time the page has been turned visible. |
 | First paint time | `fp` | The time on the first non-blank paint of the page. |
 | First contentful paint time | `fcp` | First paint with content. See https://github.com/WICG/paint-timing |
+| First input delay | `fid` | Millisecond delay in handling the first user input on the page. See https://github.com/WICG/event-timing |
+| First input delay, polyfill value | `fid-polyfill` | Millisecond delay in handling the first user input on the page, reported by [a polyfill](https://github.com/GoogleChromeLabs/first-input-delay) |
+| Layout Jank, first exit | `lj` | The aggregate jank score when the user leaves the page (navigation, tab switching, dismissing application) for the first time. See https://gist.github.com/skobes/2f296da1b0a88cc785a4bf10a42bca07 |
+| Layout Jank, second exit | `lj-2` | The aggregate jank score when the user leaves the page (navigation, tab switching, dismissing application) for the second time. |

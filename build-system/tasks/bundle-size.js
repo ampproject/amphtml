@@ -20,10 +20,15 @@ const BBPromise = require('bluebird');
 const colors = require('ansi-colors');
 const gulp = require('gulp-help')(require('gulp'));
 const log = require('fancy-log');
-const octokit = require('@octokit/rest')();
+const Octokit = require('@octokit/rest');
 const path = require('path');
 const requestPost = BBPromise.promisify(require('request').post);
 const url = require('url');
+const {
+  isTravisPullRequestBuild,
+  isTravisPushBuild,
+  travisRepoSlug,
+} = require('../travis');
 const {getStdout} = require('../exec');
 const {gitCommitHash, gitTravisMasterBaseline} = require('../git');
 
@@ -58,28 +63,19 @@ function getGzippedBundleSize() {
 }
 
 /**
- * Return true if this task is running on Travis as part of a pull request.
- *
- * @return {boolean} true if running on Travis as part of a pull request.
- */
-function isPullRequest() {
-  return process.env.TRAVIS && process.env.TRAVIS_EVENT_TYPE === 'pull_request';
-}
-
-/**
  * Store the bundle size of a commit hash in the build artifacts storage
  * repository to the passed value.
  *
  * @return {!Promise}
  */
 function storeBundleSize() {
-  if (!process.env.TRAVIS || process.env.TRAVIS_EVENT_TYPE !== 'push') {
+  if (!isTravisPushBuild()) {
     log(yellow('Skipping'), cyan('--on_push_build') + ':',
         'this action can only be performed on `push` builds on Travis');
     return;
   }
 
-  if (process.env.TRAVIS_REPO_SLUG !== expectedGitHubRepoSlug) {
+  if (travisRepoSlug() !== expectedGitHubRepoSlug) {
     log(yellow('Skipping'), cyan('--on_push_build') + ':',
         'this action can only be performed on Travis builds on the',
         cyan(expectedGitHubRepoSlug), 'repository');
@@ -99,9 +95,8 @@ function storeBundleSize() {
     path: path.join('bundle-size', commitHash),
   });
 
-  octokit.authenticate({
-    type: 'token',
-    token: process.env.GITHUB_ARTIFACTS_RW_TOKEN,
+  const octokit = new Octokit({
+    auth: `token ${process.env.GITHUB_ARTIFACTS_RW_TOKEN}`,
   });
 
   return octokit.repos.getContents(githubApiCallOptions).then(() => {
@@ -127,7 +122,7 @@ function storeBundleSize() {
  * Mark a pull request on Travis as skipped, via the AMP bundle-size GitHub App.
  */
 async function skipBundleSize() {
-  if (isPullRequest()) {
+  if (isTravisPullRequestBuild()) {
     const commitHash = gitCommitHash();
     try {
       const response = await requestPost(url.resolve(bundleSizeAppBaseUrl,
@@ -153,7 +148,7 @@ async function skipBundleSize() {
  * Report the size to the bundle-size GitHub App, to determine size changes.
  */
 async function reportBundleSize() {
-  if (isPullRequest()) {
+  if (isTravisPullRequestBuild()) {
     const baseSha = gitTravisMasterBaseline();
     const bundleSize = parseFloat(getGzippedBundleSize());
     const commitHash = gitCommitHash();
