@@ -734,9 +734,7 @@ describes.realWin('amp-analytics', {
     });
   });
 
-  // TODO(leeandrew1693): This block tests backwards compatible optout code for
-  // GTM. Remove this once GTM updates.
-  describe('optout backwards compatible', () => {
+  describe('optout by function', () => {
 
     beforeEach(() => {
       sandbox.stub(AnalyticsConfig.prototype, 'loadConfig')
@@ -781,53 +779,6 @@ describes.realWin('amp-analytics', {
     });
   });
 
-  describe('optout by function', () => {
-
-    beforeEach(() => {
-      sandbox.stub(AnalyticsConfig.prototype, 'loadConfig')
-          .returns(Promise.resolve({
-            'requests': {
-              'foo': {
-                baseUrl: 'https://example.com/bar',
-              },
-            },
-            'triggers': {
-              'pageview': {'on': 'visible', 'request': 'foo'},
-            },
-            'transport': {
-              'image': true,
-              'xhrpost': false,
-              'beacon': false,
-            },
-            'vars': {},
-            'optout': {
-              'function': 'foo.bar',
-            },
-          }));
-    });
-
-    it('sends hit when config optout function returns false', function() {
-      win['foo'] = {'bar': () => false};
-      const analytics = getAnalyticsTag(trivialConfig);
-      return waitForSendRequest(analytics).then(() => {
-        requestVerifier.verifyRequest('https://example.com/bar');
-      });
-    });
-
-    it('doesnt send hit when config optout function returns true', function() {
-      win['foo'] = {'bar': function() { return true; }};
-      const analytics = getAnalyticsTag(trivialConfig, {'type': 'testVendor'});
-      return waitForNoSendRequest(analytics);
-    });
-
-    it('sends hit when config optout function is not defined', function() {
-      const analytics = getAnalyticsTag(trivialConfig, {'type': 'testVendor'});
-      return waitForSendRequest(analytics).then(() => {
-        requestVerifier.verifyRequest('https://example.com/bar');
-      });
-    });
-  });
-
   describe('optout by id', () => {
 
     beforeEach(() => {
@@ -847,9 +798,7 @@ describes.realWin('amp-analytics', {
               'beacon': false,
             },
             'vars': {},
-            'optout': {
-              'id': 'elementId',
-            },
+            'optoutElementId': 'elementId',
           }));
     });
 

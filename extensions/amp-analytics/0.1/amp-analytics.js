@@ -409,44 +409,22 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @return {boolean} true if the user has opted out.
    */
   hasOptedOut_() {
-    if (!this.config_['optout']) {
-      return false;
-    }
-
-    // TODO(leeandrew1693): This block is to support backwards compatibility
-    // for GTM. Remove this block once GTM updates.
-    if (typeof this.config_['optout'] === 'string') {
-      const props = this.config_['optout'].split('.');
-      let k = this.win;
-      for (let i = 0; i < props.length; i++) {
-        if (!k) {
-          return false;
-        }
-        k = k[props[i]];
-      }
-      // The actual property being called is controlled by vendor configs only
-      // that are approved in code reviews. User customization of the `optout`
-      // property is not allowed.
-      return k();
-    }
-
-    const elementId = this.config_['optout']['id'];
+    const elementId = this.config_['optoutElementId'];
     if (elementId && this.win.document.getElementById(elementId)) {
       return true;
     }
 
-    const functionName = this.config_['optout']['function'];
-    if (!functionName) {
+    if (!this.config_['optout']) {
       return false;
     }
 
-    const functionNameComponents = functionName.split('.');
+    const props = this.config_['optout'].split('.');
     let k = this.win;
-    for (let i = 0; i < functionNameComponents.length; i++) {
+    for (let i = 0; i < props.length; i++) {
       if (!k) {
         return false;
       }
-      k = k[functionNameComponents[i]];
+      k = k[props[i]];
     }
     // The actual property being called is controlled by vendor configs only
     // that are approved in code reviews. User customization of the `optout`
