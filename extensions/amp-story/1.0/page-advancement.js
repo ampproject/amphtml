@@ -452,7 +452,7 @@ class ManualAdvancement extends AdvancementConfig {
 
   /**
    * For an element to trigger a tooltip it has to be descendant of
-   * amp-story-page but not of amp-story-cta-layer or amp-story-page-attachment.
+   * amp-story-page but not of amp-story-page-attachment.
    * @param {!Event} event
    * @return {boolean}
    * @private
@@ -464,8 +464,7 @@ class ManualAdvancement extends AdvancementConfig {
     return !!closest(dev().assertElement(event.target), el => {
       tagName = el.tagName.toLowerCase();
 
-      if (tagName === 'amp-story-cta-layer' ||
-          tagName === 'amp-story-page-attachment') {
+      if (tagName === 'amp-story-page-attachment') {
         valid = false;
         return false;
       }
