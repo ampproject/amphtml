@@ -59,10 +59,9 @@ function postReport(action) {
       log(green('Info:', 'reported', cyan(action),
           'to the test-status GitHub App. Response status code:',
           cyan(response.statusCode), cyan(response.statusMessage)));
-      if (response.statusCode > 299) {
-        log(green('Warning:'), 'response from test-status was:\n',
-            body.substr(0, 100));
-      }
+      log(response.statusCode > 299 ? green('Info:') : yellow('Warning:'),
+          'response from test-status was',
+          body.length ? 'empty' : cyan(body.substr(0, 100)));
     });
   }
 }
