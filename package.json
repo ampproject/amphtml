@@ -112,7 +112,7 @@
     "gzip-size": "5.0.0",
     "html-minifier": "3.5.21",
     "is-running": "2.1.0",
-    "jest": "24.1.0",
+    "jest": "24.5.0",
     "jest-dot-reporter": "1.0.7",
     "jison": "0.4.18",
     "jsdom": "13.2.0",
