@@ -258,6 +258,7 @@ tags: {
   attrs: { name: "animate-in-delay" }
   attrs: { name: "animate-in-duration" }
   attrs: { name: "animate-in-timing-function" }
+  attrs: { name: "interactive" }
   attrs: { name: "grid-area" }
   attrs: {
     name: "scale-end"
@@ -347,6 +348,7 @@ tags: {
   attrs: { name: "animate-in-delay" }
   attrs: { name: "animate-in-duration" }
   attrs: { name: "animate-in-timing-function" }
+  attrs: { name: "interactive" }
   attrs: {
     name: "scale-end"
     value_regex: "[0-9]+([.][0-9]+)?"
