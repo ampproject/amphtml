@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,47 +14,52 @@
  * limitations under the License.
  */
 
-export const KENSHOO_CONFIG = ({
+export const KENSHOO_CONFIG = /** @type {!JsonObject} */ ({
   'vars': {
     'clientId': 'CLIENT_ID(ken_amp_id)',
     'channelClickId': 'QUERY_PARAM(gclid)',
     'tid': 'KT-XXXXX-XXX',
-    'userId': '<USER_ID>'
+    'userId': '<USER_ID>',
   },
   'requests': {
     'host': 'https://amp.xg4ken.com/',
-    'parameters': 'ampcid=${clientId}&chcid=${channelClickId}&tid=${tid}&uid=${userId}&domain=${canonicalHostname}',
-    'landingPage': '${host}/amp/v1/match?${parameters}'
+    'parameters':
+      'ampcid=${clientId}' +
+      '&chcid=${channelClickId}' +
+      '&tid=${tid}' +
+      '&uid=${userId}' +
+      '&domain=${canonicalHostname}',
+    'landingPage': '${host}/amp/v1/match?${parameters}',
   },
   'triggers': {
     'trackLandingPage': {
       'enabled': 'QUERY_PARAM(gclid)',
       'on': 'visible',
-      'request': 'landingPage'
-    }
+      'request': 'landingPage',
+    },
   },
   'transport': {
     'beacon': false,
     'xhrpost': false,
-    'image': true
+    'image': true,
   },
   'linkers': {
     'linker': {
       'ids': {
         'clientId': '${clientId}',
-        'channelClickId': '${channelClickId}'
+        'channelClickId': '${channelClickId}',
       },
       'proxyOnly': false,
-      'enabled': true
-    }
+      'enabled': true,
+    },
   },
   'cookies': {
     'enabled': true,
     'ken_gclid': {
-      'value': 'QUERY_PARAM(gclid)'
+      'value': 'QUERY_PARAM(gclid)',
     },
     'ken_amp_gclid': {
-      'value': 'QUERY_PARAM(gclid)'
-    }
-  }
+      'value': 'QUERY_PARAM(gclid)',
+    },
+  },
 });

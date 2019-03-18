@@ -358,8 +358,8 @@
   },
   "kenshoo": {
     "host": "https://amp.xg4ken.com/",
-    "parameters": "ampcid=${clientId}&chcid=${channelClickId}&tid=${tid}&uid=${userId}&domain=${canonicalHostname}",
-    "landingPage": "https://amp.xg4ken.com/amp/v1/match?ampcid=!clientId&chcid=!channelClickId&tid=!tid&uid=!userId&domain=!canonicalHostname"
+    "parameters": "ampcid=_client_id_&chcid=_channel_click_id_&tid=_tid_&uid=_user_id_&domain=_canonical_hostname_",
+    "landingPage": "https://amp.xg4ken.com/amp/v1/match?ampcid=_client_id_&chcid=_channel_click_id_&tid=_tid_&uid=_user_id_&domain=_canonical_hostname"
   },
   "retargetly": {
     "host": "https://api.retargetly.com",
