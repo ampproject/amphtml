@@ -485,10 +485,14 @@
       new Response
       return Promise.resolve({
         "html":
-            "<ul>" +
-              "<li><p [text]='data.foo'></p></li>" +
-              "<li>Some list item</li>" +
-              "<li>Some list item</li></ul>",
+        "<div role='list' class='i-amphtml-fill-content i-amphtml-replaced-content'>"
+          + "<div [text]='data.fruit'' role='listitem''></div>"
+          + "<div class='product' role='listitem'>Apple</div>"
+          + "<div class='product' role='listitem'>Orange</div>"
+          + "<div class='product' role='listitem'>Pear</div>"
+          + "<div class='product' role='listitem'>Banana</div>"
+          + "<div class='product' role='listitem'>Watermelon</div>"
+        + "</div>",
         "body" : "",
         "init" : {
           "headers": {
@@ -657,14 +661,14 @@
       new Viewer(
           'container6',
           '6',
-          './mustache-to-amp-view-host.amp.html?amp_js_v=0.1',
+          './amp-list.ssr.html?amp_js_v=0.1',
           false).start();
       addShowContainer('6');
 
       new Viewer(
           'container7',
           '7',
-          './form-proxy-template-to-viewer-host.amp.html?amp_js_v=0.1',
+          './amp-form.ssr.html?amp_js_v=0.1',
           false).start();
       addShowContainer('7');
 

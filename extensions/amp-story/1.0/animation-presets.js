@@ -86,8 +86,8 @@ export const getPresetDef = (name, options) => {
   switch (name) {
     case 'pulse':
       return {
-        duration: 500,
-        easing: 'linear',
+        duration: 400,
+        easing: 'cubic-bezier(0.4, 0.0, 0.2, 1)',
         keyframes: [
           {
             offset: 0,
@@ -109,8 +109,8 @@ export const getPresetDef = (name, options) => {
       };
     case 'fly-in-left':
       return {
-        duration: 500,
-        easing: 'ease-out',
+        duration: 400,
+        easing: 'cubic-bezier(0.0, 0.0, 0.2, 1)',
         keyframes(dimensions) {
           const offsetX = -(dimensions.targetX + dimensions.targetWidth);
           return translate2d(offsetX, 0, 0, 0);
@@ -118,8 +118,8 @@ export const getPresetDef = (name, options) => {
       };
     case 'fly-in-right':
       return {
-        duration: 500,
-        easing: 'ease-out',
+        duration: 400,
+        easing: 'cubic-bezier(0.0, 0.0, 0.2, 1)',
         keyframes(dimensions) {
           const offsetX = dimensions.pageWidth - dimensions.targetX;
           return translate2d(offsetX, 0, 0, 0);
@@ -127,8 +127,8 @@ export const getPresetDef = (name, options) => {
       };
     case 'fly-in-top':
       return {
-        duration: 500,
-        easing: 'ease-out',
+        duration: 400,
+        easing: 'cubic-bezier(0.0, 0.0, 0.2, 1)',
         keyframes(dimensions) {
           const offsetY = -(dimensions.targetY + dimensions.targetHeight);
           return translate2d(0, offsetY, 0, 0);
@@ -136,8 +136,8 @@ export const getPresetDef = (name, options) => {
       };
     case 'fly-in-bottom':
       return {
-        duration: 500,
-        easing: 'ease-out',
+        duration: 400,
+        easing: 'cubic-bezier(0.0, 0.0, 0.2, 1)',
         keyframes(dimensions) {
           const offsetY = dimensions.pageHeight - dimensions.targetY;
           return translate2d(0, offsetY, 0, 0);
@@ -145,8 +145,8 @@ export const getPresetDef = (name, options) => {
       };
     case 'rotate-in-left':
       return {
-        duration: 700,
-        easing: 'ease-out',
+        duration: 600,
+        easing: 'cubic-bezier(0.0, 0.0, 0.2, 1)',
         keyframes(dimensions) {
           const offsetX = -(dimensions.targetX + dimensions.targetWidth);
           return rotateAndTranslate(offsetX, 0, 0, 0, -1);
@@ -154,8 +154,8 @@ export const getPresetDef = (name, options) => {
       };
     case 'rotate-in-right':
       return {
-        duration: 700,
-        easing: 'ease-out',
+        duration: 600,
+        easing: 'cubic-bezier(0.0, 0.0, 0.2, 1)',
         keyframes(dimensions) {
           const offsetX = dimensions.pageWidth - dimensions.targetX;
           return rotateAndTranslate(offsetX, 0, 0, 0, 1);
@@ -163,8 +163,8 @@ export const getPresetDef = (name, options) => {
       };
     case 'fade-in':
       return {
-        duration: 500,
-        easing: 'ease-out',
+        duration: 400,
+        easing: 'cubic-bezier(0.0, 0.0, 0.2, 1)',
         keyframes: [
           {
             opacity: 0,
@@ -232,8 +232,8 @@ export const getPresetDef = (name, options) => {
       };
     case 'whoosh-in-left':
       return {
-        duration: 500,
-        easing: 'ease-out',
+        duration: 400,
+        easing: 'cubic-bezier(0.0, 0.0, 0.2, 1)',
         keyframes(dimensions) {
           const offsetX = -(dimensions.targetX + dimensions.targetWidth);
           return whooshIn(offsetX, 0, 0, 0);
@@ -241,8 +241,8 @@ export const getPresetDef = (name, options) => {
       };
     case 'whoosh-in-right':
       return {
-        duration: 500,
-        easing: 'ease-out',
+        duration: 400,
+        easing: 'cubic-bezier(0.0, 0.0, 0.2, 1)',
         keyframes(dimensions) {
           const offsetX = dimensions.pageWidth - dimensions.targetX;
           return whooshIn(offsetX, 0, 0, 0);

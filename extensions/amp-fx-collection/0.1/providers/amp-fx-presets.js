@@ -37,21 +37,28 @@ let FxPresetDef;
 
 /**
  * @param {!./fx-provider.FxElement} fxElement
- * @param {string} axis 'left' or 'top'
+ * @param {string} axis 'X' or 'Y' (uppercase)
  * @param {number} coeff 1 or -1
  */
 function flyIn(fxElement, axis, coeff) {
-  devAssert(axis == 'top' || axis == 'left');
+  devAssert(axis == 'X' || axis == 'Y');
   devAssert(Math.abs(coeff) == 1);
 
   const element = dev().assertElement(fxElement.element);
-  const flyInDistance = coeff * fxElement.flyInDistance;
+
+  const axisIsX = axis == 'X';
+
+  // Not using interpolation in the following assignment since closure compiles
+  // to a leading, useless empty string.
+  const flyInDistanceAsLength =
+      coeff * fxElement.flyInDistance + (axisIsX ? 'vw' : 'vh');
 
   // only do this on the first element
   if (!fxElement.initialTrigger) {
     Services.resourcesForDoc(element).mutateElement(element, () => {
       const style = computedStyle(fxElement.win, element);
-      const axisAsLength = style[axis] === 'auto' ? '0px' : style[axis];
+      const prop = axisIsX ? 'left' : 'top';
+      const propAsLength = style[prop] === 'auto' ? '0px' : style[prop];
       const position =
           style.position === 'static' ?
             'relative' :
@@ -60,18 +67,18 @@ function flyIn(fxElement, axis, coeff) {
         position,
         visibility: 'visible',
       };
-      styles[axis] = `calc(${axisAsLength} + (${-flyInDistance}vw))`;
+      styles[prop] = `calc(${propAsLength} - ${flyInDistanceAsLength})`;
       setStyles(element, assertDoesNotContainDisplay(styles));
-      fxElement.initialTrigger = true;
     });
+    fxElement.initialTrigger = true;
   }
 
-  // If above the threshold of trigger-position
-  // Translate the element offset pixels.
+  // If above the threshold of trigger-position, translate the element by
+  // distance as [vw|vh].
   setStyles(element, {
     'transition-duration': fxElement.duration,
     'transition-timing-function': fxElement.easing,
-    'transform': `translateX(${flyInDistance}vw)`,
+    'transform': `translate${axis}(${flyInDistanceAsLength})`,
   });
 }
 
@@ -167,7 +174,7 @@ export const Presets = {
       if (!isInViewportForTopAxis(entry, fxElement, /* coeff */ -1)) {
         return;
       }
-      flyIn(fxElement, 'top', /* coeff */ -1);
+      flyIn(fxElement, 'Y', /* coeff */ -1);
     },
   },
   [FxType.FLY_IN_LEFT]: {
@@ -178,7 +185,7 @@ export const Presets = {
       if (!isInViewportConsideringMargins(entry, fxElement)) {
         return;
       }
-      flyIn(fxElement, 'left', /* coeff */ 1);
+      flyIn(fxElement, 'X', /* coeff */ 1);
     },
   },
   [FxType.FLY_IN_RIGHT]: {
@@ -189,7 +196,7 @@ export const Presets = {
       if (!isInViewportConsideringMargins(entry, fxElement)) {
         return;
       }
-      flyIn(fxElement, 'left', /* coeff */ -1);
+      flyIn(fxElement, 'X', /* coeff */ -1);
     },
   },
   [FxType.FLY_IN_TOP]: {
@@ -200,7 +207,7 @@ export const Presets = {
       if (!isInViewportForTopAxis(entry, fxElement, /* coeff */ 1)) {
         return;
       }
-      flyIn(fxElement, 'top', /* coeff */ 1);
+      flyIn(fxElement, 'Y', /* coeff */ 1);
     },
   },
   [FxType.FADE_IN]: {

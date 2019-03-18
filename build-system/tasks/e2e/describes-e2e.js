@@ -19,11 +19,15 @@ require('chromedriver'); // eslint-disable-line no-unused-vars
 const {AmpDriver, AmpdocEnvironment} = require('./amp-driver');
 const {Builder, Capabilities} = require('selenium-webdriver');
 const {clearLastExpectError, getLastExpectError} = require('./expect');
-const {SeleniumWebDriverController} = require('./selenium-webdriver-controller');
+const {installRepl, uninstallRepl} = require('./repl');
+const {SeleniumWebDriverController} = require(
+    './selenium-webdriver-controller');
 
 /** Should have something in the name, otherwise nothing is shown. */
 const SUB = ' ';
 const TIMEOUT = 20000;
+
+const DEFAULT_E2E_INITIAL_RECT = {width: 800, height: 600};
 
 /**
  * TODO(estherkim): use this to specify browsers/fixtures to opt in/out of
@@ -52,11 +56,14 @@ const EnvironmentVariantMap = {
       {name: 'Standalone environment', value: {environment: 'single'}},
   [AmpdocEnvironment.VIEWER_DEMO]:
       {name: 'Viewer environment', value: {environment: 'viewer-demo'}},
+  [AmpdocEnvironment.SHADOW_DEMO]:
+      {name: 'Shadow environment', value: {environment: 'shadow-demo'}},
 };
 
 const defaultEnvironments = [
   AmpdocEnvironment.SINGLE,
   AmpdocEnvironment.VIEWER_DEMO,
+  AmpdocEnvironment.SHADOW_DEMO,
 ];
 
 /**
@@ -99,20 +106,12 @@ function describeEnv(factory) {
       const env = Object.create(variant);
       let asyncErrorTimerId;
       this.timeout(TIMEOUT);
-      beforeEach(() => {
-        let totalPromise = undefined;
+      beforeEach(async() => {
         // Set up all fixtures.
-        fixtures.forEach((fixture, unusedIndex) => {
-          if (totalPromise) {
-            totalPromise = totalPromise.then(() => fixture.setup(env));
-          } else {
-            const res = fixture.setup(env);
-            if (res && typeof res.then == 'function') {
-              totalPromise = res;
-            }
-          }
-        });
-        return totalPromise;
+        for (const fixture of fixtures) {
+          await fixture.setup(env);
+        }
+        installRepl(global, env);
       });
 
       afterEach(function() {
@@ -131,6 +130,8 @@ function describeEnv(factory) {
         for (const key in env) {
           delete env[key];
         }
+
+        uninstallRepl();
       });
 
       after(function() {
@@ -244,22 +245,18 @@ class AmpPageFixture {
 
     const {
       testUrl,
-      experiments,
-      initialRect,
+      experiments = [],
+      initialRect = DEFAULT_E2E_INITIAL_RECT,
     } = this.spec;
     const {
       environment,
       // TODO(estherkim): browser
     } = env;
 
-    if (Array.isArray(experiments)) {
-      await toggleExperiments(ampDriver, testUrl, experiments);
-    }
+    await toggleExperiments(ampDriver, testUrl, experiments);
 
-    if (initialRect) {
-      const {width, height} = initialRect;
-      await controller.setWindowRect({width, height});
-    }
+    const {width, height} = initialRect;
+    await controller.setWindowRect({width, height});
 
     await ampDriver.navigateToEnvironment(environment, testUrl);
   }
@@ -285,6 +282,10 @@ class AmpPageFixture {
  * @return {!Promise}
  */
 async function toggleExperiments(ampDriver, testUrl, experiments) {
+  if (!experiments.length) {
+    return;
+  }
+
   await ampDriver.navigateToEnvironment(AmpdocEnvironment.SINGLE, testUrl);
 
   for (const experiment of experiments) {

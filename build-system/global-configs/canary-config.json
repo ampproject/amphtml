@@ -5,7 +5,8 @@
     "ampdoc-shell",
     "disable-amp-story-desktop",
     "linker-meta-opt-in",
-    "inabox-viewport-friendly"
+    "inabox-viewport-friendly",
+    "amp-img-auto-sizes"
   ],
   "allow-url-opt-in": [
     "pump-early-frame",
@@ -56,6 +57,7 @@
   "amp-list-viewport-resize": 1,
   "amp-list-resizable-children": 1,
   "amp-auto-lightbox": 1,
-  "adsense-ff-number-delay": 0.01,
-  "amp-img-auto-sizes": 1
+  "amp-img-auto-sizes": 1,
+  "amp-list-load-more": 1,
+  "amp-ad-ff-adx-ady": 0.01
 }

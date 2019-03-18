@@ -99,35 +99,51 @@ const INTERACTIVE_COMPONENTS = Object.assign({}, EXPANDABLE_COMPONENTS,
 /**
  * Gets the list of components with their respective selectors.
  * @param {!Object} components
+ * @param {string=} opt_predicate
  * @return {!Object<string, string>}
  */
-function getComponentSelectors(components) {
-  const obj = {};
+function getComponentSelectors(components, opt_predicate) {
+  const componentSelectors = {};
 
-  Object.keys(components).forEach(key => {
-    obj[key] = components[key].selector;
+  Object.keys(components).forEach(componentName => {
+    componentSelectors[componentName] = opt_predicate ?
+      components[componentName].selector + opt_predicate :
+      components[componentName].selector;
   });
 
-  return obj;
+  return componentSelectors;
+}
+
+/** @const {string} */
+const INTERACTIVE_ATTR_NAME = '[interactive]:not([interactive=false])';
+
+/**
+ * Selectors of elements that can go into expanded view.
+ * @return {!Object}
+ */
+export function expandableElementsSelectors() {
+  // Using indirect invocation to prevent no-export-side-effect issue.
+  return getComponentSelectors(EXPANDABLE_COMPONENTS, INTERACTIVE_ATTR_NAME);
 }
 
 /**
  * Contains all interactive component CSS selectors.
  * @type {!Object}
  */
-const interactiveComponentSelectors = Object.assign({},
-    getComponentSelectors(INTERACTIVE_COMPONENTS),
+const interactiveSelectors = Object.assign({},
+    getComponentSelectors(LAUNCHABLE_COMPONENTS),
+    getComponentSelectors(EXPANDABLE_COMPONENTS, INTERACTIVE_ATTR_NAME),
     {EXPANDED_VIEW_OVERLAY: '.i-amphtml-story-expanded-view-overflow, ' +
     '.i-amphtml-expanded-view-close-button',
     });
 
 /**
- * Selectors that should delegate to AmpStoryEmbeddedComponent.
+ * All selectors that should delegate to the AmpStoryEmbeddedComponent class.
  * @return {!Object}
  */
-export function embeddedComponentSelectors() {
+export function interactiveElementsSelectors() {
   // Using indirect invocation to prevent no-export-side-effect issue.
-  return interactiveComponentSelectors;
+  return interactiveSelectors;
 }
 
 /**
@@ -299,6 +315,9 @@ export class AmpStoryEmbeddedComponent {
     /** @private */
     this.expandComponentHandler_ = this.onExpandComponent_.bind(this);
 
+    /** @private */
+    this.embedsToBePaused_ = [];
+
     this.storeService_.subscribe(StateProperty.INTERACTIVE_COMPONENT_STATE,
         /** @param {!InteractiveComponentDef} component */ component => {
           this.onComponentStateUpdate_(component);
@@ -365,11 +384,27 @@ export class AmpStoryEmbeddedComponent {
       case EmbeddedComponentState.EXPANDED:
         this.state_ = state;
         this.onFocusedStateUpdate_(null);
+        this.scheduleEmbedToPause_(component.element);
         this.toggleExpandedView_(component.element);
         break;
       default:
         dev().warn(TAG, `EmbeddedComponentState ${this.state_} does not exist`);
         break;
+    }
+  }
+
+  /**
+   * Schedules embeds to be paused.
+   * @param {!Element} embedEl
+   * @private
+   */
+  scheduleEmbedToPause_(embedEl) {
+    // Resources that previously called `schedulePause` must also call
+    // `scheduleResume`. Calling `scheduleResume` on resources that did not
+    // previously call `schedulePause` has no effect.
+    this.resources_.scheduleResume(this.storyEl_, embedEl);
+    if (!this.embedsToBePaused_.includes(embedEl)) {
+      this.embedsToBePaused_.push(embedEl);
     }
   }
 
@@ -444,25 +479,6 @@ export class AmpStoryEmbeddedComponent {
     this.focusedStateOverlay_
         .addEventListener('click', event => this.onOutsideTooltipClick_(event));
 
-    this.storeService_.subscribe(StateProperty.UI_STATE, uiState => {
-      this.onUIStateUpdate_(uiState);
-    }, true /** callToInitialize */);
-
-    this.storeService_.subscribe(StateProperty.CURRENT_PAGE_ID, () => {
-      // Hide active tooltip when page switch is triggered by keyboard or
-      // desktop buttons.
-      if (this.state_ === EmbeddedComponentState.FOCUSED) {
-        this.close_();
-      }
-
-      // Hide expanded view when page switch is triggered by keyboard or desktop
-      // buttons.
-      if (this.state_ === EmbeddedComponentState.EXPANDED) {
-        this.maybeCloseExpandedView_(null /** target */,
-            true /** forceClose */);
-      }
-    });
-
     return this.shadowRoot_;
   }
 
@@ -493,8 +509,10 @@ export class AmpStoryEmbeddedComponent {
       return;
     }
 
+    // First time attaching the overlay. Runs only once.
     if (!this.focusedStateOverlay_) {
       this.storyEl_.appendChild(this.buildFocusedState_());
+      this.initializeListeners_();
     }
 
     this.updateTooltipBehavior_(component.element);
@@ -509,6 +527,37 @@ export class AmpStoryEmbeddedComponent {
           this.focusedStateOverlay_
               .classList.toggle('i-amphtml-hidden', false);
         });
+  }
+
+  /**
+   * Attaches listeners that listen for UI updates.
+   * @private
+   */
+  initializeListeners_() {
+    this.storeService_.subscribe(StateProperty.UI_STATE, uiState => {
+      this.onUIStateUpdate_(uiState);
+    }, true /** callToInitialize */);
+
+    this.storeService_.subscribe(StateProperty.CURRENT_PAGE_ID, () => {
+      // Hide active tooltip when page switch is triggered by keyboard or
+      // desktop buttons.
+      if (this.state_ === EmbeddedComponentState.FOCUSED) {
+        this.close_();
+      }
+
+      // Hide expanded view when page switch is triggered by keyboard or desktop
+      // buttons.
+      if (this.state_ === EmbeddedComponentState.EXPANDED) {
+        this.maybeCloseExpandedView_(null /** target */,
+            true /** forceClose */);
+      }
+
+      // Pauses content inside embeds when a page change occurs.
+      while (this.embedsToBePaused_.length > 0) {
+        const embedEl = this.embedsToBePaused_.pop();
+        this.resources_.schedulePause(this.storyEl_, embedEl);
+      }
+    });
   }
 
   /**
@@ -719,10 +768,8 @@ export class AmpStoryEmbeddedComponent {
         },
         /** mutate */
         () => {
-          element.classList.add('i-amphtml-embedded-component');
-
           elId = elId ? elId : ++embedIds;
-          if (!element.hasAttribute(EMBED_ID_ATTRIBUTE_NAME)) { // First time creating embed style element.
+          if (!element.hasAttribute(EMBED_ID_ATTRIBUTE_NAME)) { // First time creating <style> element for embed.
             const html = htmlFor(pageEl);
             const embedStyleEl = html`<style></style>`;
 
