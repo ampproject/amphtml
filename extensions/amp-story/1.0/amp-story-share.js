@@ -98,31 +98,37 @@ const TEMPLATE = {
 
 /** @private @const {!./simple-template.ElementDef} */
 const SHARE_PAGE_TEMPLATE = {
-  tag: 'label',
+  tag: 'div',
   attrs: dict({
-    'class': 'i-amphtml-page-share-label',
-    'for': 'page-share',
+    'class': 'i-amphtml-page-share-div',
   }),
-  children: [
-    {
-      tag: 'input',
-      attrs: dict(
-          {
-            'class': 'i-amphtml-page-share-check',
-            'type': 'checkbox',
-            'id': 'page-share',
-          }),
-    },
-    {
-      tag: 'span',
-      attrs: dict({
-        'id': 'page-share-span',
-        'class': 'i-amphtml-page-share-span',
-        'for': 'page-share',
-      }),
-      localizedStringId: LocalizedStringId.AMP_STORY_SHARING_PAGE_BUTTON_LABEL,
-    },
-  ],
+  children: [{
+    tag: 'label',
+    attrs: dict({
+      'class': 'i-amphtml-page-share-label',
+      'for': 'page-share',
+    }),
+    children: [
+      {
+        tag: 'input',
+        attrs: dict(
+            {
+              'class': 'i-amphtml-page-share-check',
+              'type': 'checkbox',
+              'id': 'page-share',
+            }),
+      },
+      {
+        tag: 'span',
+        attrs: dict({
+          'id': 'page-share-span',
+          'class': 'i-amphtml-page-share-span',
+          'for': 'page-share',
+        }),
+        localizedStringId: LocalizedStringId.AMP_STORY_SHARING_PAGE_LABEL,
+      },
+    ],
+  }],
 };
 
 /** @private @const {!./simple-template.ElementDef} */
@@ -330,11 +336,10 @@ export class ShareWidget {
           StateProperty.UI_STATE) === UIType.DESKTOP_FULLBLEED;
 
     if (isExperimentOn(this.win, 'amp-story-branching') && isDesktopUi) {
-
+      const list = devAssert(this.root).firstChild;
       const sharePageCheck =
         renderAsElement(this.win.document, SHARE_PAGE_TEMPLATE);
-
-      this.root.appendChild(sharePageCheck);
+      this.root.insertBefore(sharePageCheck, list);
     }
   }
 
@@ -452,7 +457,7 @@ export class ShareWidget {
    * @private
    */
   add_(node) {
-    const list = devAssert(this.root).firstElementChild;
+    const list = devAssert(this.root).lastElementChild;
     const item = renderAsElement(this.win.document, SHARE_ITEM_TEMPLATE);
 
     item.appendChild(node);
