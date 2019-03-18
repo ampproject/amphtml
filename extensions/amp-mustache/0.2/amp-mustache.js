@@ -56,12 +56,6 @@ export class AmpMustache extends AMP.BaseTemplate {
     /** @private @const {!JsonObject} */
     this.nestedTemplates_ = dict();
 
-    /**
-     * Used to encode html entities in delimiters.
-     * @private {!Element}
-     */
-    this.textArea_ = document.createElement('textarea');
-
     /** @private @const {string} */
     this.template_ = this.initTemplateString_();
 
@@ -99,16 +93,17 @@ export class AmpMustache extends AMP.BaseTemplate {
     const {element} = this;
     if (element.hasAttribute(CUSTOM_DELIMITERS_ATTR)) {
       const delimitersStr = element.getAttribute(CUSTOM_DELIMITERS_ATTR);
-      userAssert(delimitersStr.split(',').length == 2,
-          'Beginning and ending delimiter is required: %s.', element);
       delimiters = delimitersStr.split(',');
+      userAssert(delimiters.length == 2,
+          'Beginning and ending delimiter is required: %s.', element);
       // If using a template encode any html entities used in a delimiter.
       // This is required as the template will also contain decoded delimiters
       // prior to being parsed by mustache.
       if (element.tagName == 'TEMPLATE') {
+        cont textArea = document.createElement('textarea');
         for (let i = 0; i < delimiters.length; i++) {
           const delimiter = delimiters[i];
-          this.textArea_.textContent = delimiter;
+          textArea.textContent = delimiter;
           delimiters[i] = this.textArea_.innerHTML;
         }
       }
