@@ -14,17 +14,9 @@
  * limitations under the License.
  */
 
-import {
-  getListContainer,
-  getListItems,
-  verifyContainer,
-} from '../../../../test/fixtures/e2e/amp-list/helpers';
-
-
 describes.endtoend('amp-list SSR templates', {
   testUrl: 'http://localhost:8000/test/fixtures/e2e/amp-list/amp-list.html',
   environments: ['viewer-demo'],
-  experiments: ['layers'],
 }, async env => {
   let controller;
 
@@ -47,3 +39,40 @@ describes.endtoend('amp-list SSR templates', {
   });
 
 });
+
+describes.endtoend('amp-list', {
+  testUrl: 'http://localhost:8000/test/fixtures/e2e/amp-list/amp-list.html',
+  environments: ['single'],
+}, async env => {
+  let controller;
+
+  beforeEach(async() => {
+    controller = env.controller;
+  });
+
+  it('should render list', async function() {
+    const container = await getListContainer(controller);
+    await verifyContainer(controller, container);
+
+    // Verify that all items rendered.
+    const listItems = await getListItems(controller);
+    await expect(listItems).to.have.length(5);
+
+    await controller.takeScreenshot('screenshots/amp-list.png');
+  });
+
+});
+
+
+function getListContainer(controller) {
+  return controller.findElement('div[role=list]');
+}
+
+function getListItems(controller) {
+  return controller.findElements('div[role=listitem]');
+}
+
+async function verifyContainer(controller, container) {
+  await expect(controller.getElementAttribute(container, 'class'))
+      .to.equal('i-amphtml-fill-content i-amphtml-replaced-content');
+}
