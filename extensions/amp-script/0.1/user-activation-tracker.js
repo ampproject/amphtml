@@ -22,7 +22,7 @@ const ACTIVATION_EVENTS = ['click', 'input', 'dblclick', 'keypress', 'submit'];
 
 /**
  * See https://github.com/dtapuska/useractivation for inspiration.
- * @implements {../service.Disposable}
+ * @implements {../../../src/service.Disposable}
  */
 export class UserActivationTracker {
 

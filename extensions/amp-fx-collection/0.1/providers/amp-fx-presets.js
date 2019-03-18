@@ -58,7 +58,7 @@ function flyIn(fxElement, axis, coeff) {
     Services.resourcesForDoc(element).mutateElement(element, () => {
       const style = computedStyle(fxElement.win, element);
       const prop = axisIsX ? 'left' : 'top';
-      const propAsLength = style[prop] === 'auto' ? 0 : style[prop];
+      const propAsLength = style[prop] === 'auto' ? '0px' : style[prop];
       const position =
           style.position === 'static' ?
             'relative' :
