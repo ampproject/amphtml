@@ -15,7 +15,7 @@
  */
 'use strict';
 
-const {verifySelectorsVisible} = require('../../../build-system/tasks/visual-diff/helpers');
+const {verifySelectorsVisible, verifySelectorsInvisible} = require('../../../build-system/tasks/visual-diff/helpers');
 
 module.exports = {
   'tapping on a clickable anchor should show the tooltip': async (page, name) => {
@@ -40,7 +40,7 @@ module.exports = {
     await verifySelectorsVisible(
       page, name, ['.i-amphtml-story-focused-state-layer.i-amphtml-hidden']);
   },
-  'tapping on tooltip should keep it open': async (page, name) => {
+  'tapping on anchor tooltip should keep it open': async (page, name) => {
     const screen = page.touchscreen;
     await screen.tap(200, 240);
     await page.waitFor('amp-story-page#page-2[active]');
@@ -62,5 +62,31 @@ module.exports = {
     await page.tap('button.i-amphtml-story-tooltip-nav-button-left');
     await page.waitFor(150); // For animations to finish.
     await verifySelectorsVisible(page, name, ['amp-story-page#cover[active]']);
+  },
+  'tapping on embed tooltip should expand the component': async (page, name) => {
+    const screen = page.touchscreen;
+    await screen.tap(200, 240);
+    await page.waitFor('amp-story-page#page-2[active]');
+    await page.waitFor(150); // For animations to finish.
+    await page.tap('amp-twitter.blue');
+    await page.waitFor('a.i-amphtml-story-tooltip');
+    await page.waitFor(300); // For animations to finish.
+    await page.tap('a.i-amphtml-story-tooltip');
+    await page.waitFor(300); // For animations to finish.
+    await verifySelectorsVisible(page, name, ['amp-story-page.i-amphtml-expanded-mode']);
+  },
+  'tapping on closing button should exit expanded view': async (page, name) => {
+    const screen = page.touchscreen;
+    await screen.tap(200, 240);
+    await page.waitFor('amp-story-page#page-2[active]');
+    await page.waitFor(150); // For animations to finish.
+    await page.tap('amp-twitter.blue');
+    await page.waitFor('a.i-amphtml-story-tooltip');
+    await page.waitFor(300); // For animations to finish.
+    await page.tap('a.i-amphtml-story-tooltip');
+    await page.waitFor('amp-story-page.i-amphtml-expanded-mode');
+    await page.waitFor(300); // For animations to finish.
+    await page.tap('span.i-amphtml-expanded-view-close-button');
+    await verifySelectorsInvisible(page, name, ['amp-story-page.i-amphtml-expanded-mode']);
   },
  };
