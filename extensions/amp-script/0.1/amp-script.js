@@ -38,6 +38,11 @@ const TAG = 'amp-script';
 /** @const {number} */
 const MAX_SCRIPT_SIZE = 150000;
 
+/**
+ * Size-contained elements up to 300px are allowed to mutate freely.
+ */
+const MAX_FREE_MUTATION_HEIGHT = 300;
+
 const PHASE_MUTATING = 2;
 
 export class AmpScript extends AMP.BaseElement {
@@ -149,15 +154,18 @@ export class AmpScript extends AMP.BaseElement {
    * @private
    */
   mutationPump_(flush, phase) {
-    // Hydration is always allowed.
-    if (phase != PHASE_MUTATING) {
-      this.vsync_.mutate(flush);
-      return;
-    }
+    const allowMutation = (
+      // Hydration is always allowed.
+      phase != PHASE_MUTATING
+      // Mutation depends on the gesture state.
+      // TODO(dvoytenko): support "long tasks".
+      || this.userActivation_.isActive()
+      // If the element is size-contained and small enough.
+      || (isLayoutSizeDefined(this.getLayout())
+          && this.getLayoutBox().height <= MAX_FREE_MUTATION_HEIGHT)
+    );
 
-    // Mutation depends on the gesture state.
-    // TODO(dvoytenko): support "long tasks".
-    if (this.userActivation_.isActive()) {
+    if (allowMutation) {
       this.vsync_.mutate(flush);
       return;
     }
