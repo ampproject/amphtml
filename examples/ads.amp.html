@@ -742,9 +742,18 @@
   </amp-ad>
 
   <h2>CA ProFit-X</h2>
+  <!-- Ad placement with data-tagid is deprecated.
+    It will become invalid after all CA ProFit-X's
+    inventories are replaced by data-mediaid -->
   <amp-ad width="320" height="50"
       type="caprofitx"
       data-tagid="17359">
+  </amp-ad>
+
+  <amp-ad width="320" height="50"
+      type="caprofitx"
+      data-mediaid="3752"
+      data-tag-places="17359">
   </amp-ad>
 
   <h2>Cedato</h2>
@@ -1474,7 +1483,7 @@
       data-params='{"slot": 1160, "targets": { "category": ["6222", "16158", "274", "17912"]}, "count": 1}'
       data-sfcallback="if (!Array.isArray(response)) { response = [response]; }; for (i = 0; i < response.length; i++) { const prod = response[i]; let outerCtr = document.createElement('div'); let img = document.createElement('img'); img.src = prod['product']['imageLarge']; img.style = 'height:250px; width:250px'; outerCtr.appendChild(img); document.body.appendChild(outerCtr); }">
   </amp-ad>
-  
+
   <h2>PubExchange</h2>
   <amp-embed width="640" height="320"
       heights="(max-width:480px) 400%, (max-width:650px) 100%, 75%"
@@ -1832,7 +1841,7 @@
       type="ucfunnel"
       data-site-id="test-ad-83444226E44368D1E32E49EEBE6D29">
   </amp-ad>
-  
+
   <h2>UZOU</h2>
   <amp-ad width="120" height="1630"
       type="uzou"
