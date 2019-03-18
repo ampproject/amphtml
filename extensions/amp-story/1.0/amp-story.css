@@ -218,6 +218,10 @@ amp-story-page:not([active]) {
   transform: translateY(1000vh) !important;
 }
 
+/**
+ * Note: If updating the [active] or [distance] attributes names, please also
+ * update them in the amp.css file.
+ */
 amp-story-page[active],
 amp-story-page[distance="0"],
 amp-story-page[distance="1"] {
