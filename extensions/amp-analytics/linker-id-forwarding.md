@@ -84,14 +84,15 @@ Example:
   "proxyOnly" : false,
   "linker1" : {
     "ids" : {
-      "cid": "CLIENT_ID(_ga)",
+      "cid": "CLIENT_ID(_ga)"
     }
   },
   "linker2" : {
     "proxyOnly": true
     "ids" : {
-      "gid": "CLIENT_ID(foo)",
+      "gid": "CLIENT_ID(foo)"
     }
+  }
 }
 ```
 
