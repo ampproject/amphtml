@@ -14,18 +14,54 @@
  * limitations under the License.
  */
 
+/* NOTE: styles that affect sizing are in amp.css to avoid FOUC */
+
+/* haw scratch
+   xs: 4px
+   s: 8px
+   m: 16px
+   l: 24px
+   xl: 32px
+ */
+
+amp-autocomplete,
+amp-autocomplete > input {
+  font-family: sans-serif; /* default font stack */
+}
+
+amp-autocomplete > input {
+  border-radius: 4px; /* amp border radius */
+}
+
 .i-amphtml-autocomplete-results {
   position: absolute;
   top: 100%;
-  width: 100%;
-  margin-top: 4px;
+  width: calc(100% + 16px);
+  margin-top: .5rem; /* amp-space-small */
+  margin-left: -.5rem; /* amp-space-small */
+  border-radius: 4px; /* amp border radius */
+  box-shadow: 0px 2px 4px 0px rgba(0,0,0,.5); /* amp box shadow subject to change */
+
+  /* FIXIT FOR NOW */
+  height: auto;
+  max-height: none;
+  min-height: auto;
+  max-width: none;
+  min-width: auto;
 }
 
 .i-amphtml-autocomplete-item {
-  background-color: white;
-  border: 1px solid black;
-  padding: 4px;
   position: relative;
+  padding: .5rem 1rem; /* amp-space-small amp-space-medium */
+  cursor: pointer;
+}
+
+.i-amphtml-autocomplete-item:first-child {
+  border-radius: 4px 4px 0px 0px; /* amp border radius */
+}
+
+.i-amphtml-autocomplete-item:nth-last-child(2) {
+  border-radius: 0px 0px 4px 4px; /* amp border radius */
 }
 
 .i-amphtml-autocomplete-item:last-child {
@@ -33,9 +69,9 @@
 }
 
 .i-amphtml-autocomplete-item:hover {
-  background-color: #d3d3d3;
+  background-color: rgba(0,0,0,.15); /* maybe one of our shades */
 }
 
 .i-amphtml-autocomplete-item-active {
-  background-color: #d3d3d3;
+  background-color: rgba(0,0,0,.15); /* maybe one of our shades */
 }

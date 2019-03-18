@@ -871,7 +871,14 @@ amp-autocomplete {
 }
 
 amp-autocomplete > input {
-  padding: 4px !important;
+  padding: .5rem; /* amp-space-large */
+  border: 1px solid rgba(0,0,0,.33) /* maybe one of our shades */
+}
+
+amp-autocomplete > input,
+.i-amphtml-autocomplete-results {
+  font-size: 1rem; /* default font size */
+  line-height: 1.5rem; /* amp-space-large */
 }
 
 /**
