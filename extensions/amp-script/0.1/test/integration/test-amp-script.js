@@ -28,7 +28,7 @@ describe.configure().skipSinglePass().run('amp-script', function() {
 
   let browser, doc, element;
 
-  describes.integration('basic', {
+  describes.integration('container ', {
     /* eslint-disable max-len */
     body: `
       <amp-script layout=container src="/examples/amp-script/hello-world.js">
@@ -48,14 +48,14 @@ describe.configure().skipSinglePass().run('amp-script', function() {
     it('should say "hello world"', function*() {
       yield poll('<amp-script> to be hydrated',
           () => element.classList.contains('i-amphtml-hydrated'));
-      const impl = element.implementation_;
+      const impl = yield element.getImpl();
 
       // Give event listeners in hydration a moment to attach.
       yield browser.wait(100);
 
       sandbox.stub(impl.userActivation_, 'isActive').callsFake(() => true);
       browser.click('button#hello');
-      yield poll('Hello World!', () => {
+      yield poll('mutations applied', () => {
         const h1 = doc.querySelector('h1');
         return h1 && h1.textContent == 'Hello World!';
       });
@@ -64,7 +64,80 @@ describe.configure().skipSinglePass().run('amp-script', function() {
     it('should terminate without gesture', function*() {
       yield poll('<amp-script> to be hydrated',
           () => element.classList.contains('i-amphtml-hydrated'));
-      const impl = element.implementation_;
+      const impl = yield element.getImpl();
+
+      // Give event listeners in hydration a moment to attach.
+      yield browser.wait(100);
+
+      sandbox.stub(impl.userActivation_, 'isActive').callsFake(() => false);
+      browser.click('button#hello');
+
+      // Give mutations time to apply.
+      yield browser.wait(100);
+      yield poll('terminated', () => {
+        return element.classList.contains('i-amphtml-broken');
+      });
+    });
+  });
+
+  describes.integration('fixed small', {
+    /* eslint-disable max-len */
+    body: `
+      <amp-script layout=fixed width=300 height=200
+          src="/examples/amp-script/hello-world.js">
+        <button id="hello">Insert</button>
+      </amp-script>
+    `,
+    /* eslint-enable max-len */
+    extensions: ['amp-script'],
+    experiments: ['amp-script'],
+  }, env => {
+    beforeEach(() => {
+      browser = new BrowserController(env.win);
+      doc = env.win.document;
+      element = doc.querySelector('amp-script');
+    });
+
+    it('should allow without gesture for small size-defined', function*() {
+      yield poll('<amp-script> to be hydrated',
+          () => element.classList.contains('i-amphtml-hydrated'));
+      const impl = yield element.getImpl();
+
+      // Give event listeners in hydration a moment to attach.
+      yield browser.wait(100);
+
+      sandbox.stub(impl.userActivation_, 'isActive').callsFake(() => false);
+      browser.click('button#hello');
+      yield poll('mutations applied', () => {
+        const h1 = doc.querySelector('h1');
+        return h1 && h1.textContent == 'Hello World!';
+      });
+    });
+  });
+
+
+  describes.integration('fixed big', {
+    /* eslint-disable max-len */
+    body: `
+      <amp-script layout=fixed width=300 height=301
+          src="/examples/amp-script/hello-world.js">
+        <button id="hello">Insert</button>
+      </amp-script>
+    `,
+    /* eslint-enable max-len */
+    extensions: ['amp-script'],
+    experiments: ['amp-script'],
+  }, env => {
+    beforeEach(() => {
+      browser = new BrowserController(env.win);
+      doc = env.win.document;
+      element = doc.querySelector('amp-script');
+    });
+
+    it('should terminate without gesture for big size-defined', function*() {
+      yield poll('<amp-script> to be hydrated',
+          () => element.classList.contains('i-amphtml-hydrated'));
+      const impl = yield element.getImpl();
 
       // Give event listeners in hydration a moment to attach.
       yield browser.wait(100);
