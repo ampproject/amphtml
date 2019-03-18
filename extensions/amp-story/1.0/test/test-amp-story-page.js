@@ -53,6 +53,7 @@ describes.realWin('amp-story-page', {amp: true}, env => {
     win.document.body.appendChild(story);
 
     page = new AmpStoryPage(element);
+    page.element.getResources = () => win.services.resources.obj;
   });
 
   afterEach(() => {
