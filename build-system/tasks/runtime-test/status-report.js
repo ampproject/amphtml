@@ -24,22 +24,22 @@ const {isTravisPullRequestBuild} = require('../../travis');
 
 const reportBaseUrl = 'https://amp-test-status-bot.appspot.com/v0/tests/';
 
+const IS_INTEGRATION = !!argv.integration;
+const IS_LOCAL_CHANGES = !!argv['local-changes'];
+const IS_SAUCELABS = !!(argv.saucelabs || argv.saucelabs_lite);
+const IS_SINGLE_PASS = !!argv.single_pass;
+const IS_UNIT = !!argv.unit;
+
 function inferTestType() {
-  if (argv['local-changes']) {
+  if (IS_INTEGRATION && IS_SAUCELABS) {
+    // TODO(danielrozenberg): report integration on saucelabs
+    return IS_SAUCELABS ? null : 'integration';
+  } else if (IS_LOCAL_CHANGES) {
     return 'local-changes';
-  }
-  if (argv.single_pass) {
-    return null;
-  }
-  let type;
-  if (argv.integration) {
-    type = 'integration';
-  }
-  if (argv.unit) {
-    type = 'unit';
-  }
-  if (type !== null && (argv.saucelabs || argv.saucelabs_lite)) {
-    type += '/saucelabs';
+  } else if (IS_SINGLE_PASS) {
+    return 'single-pass';
+  } else if (IS_UNIT) {
+    return 'unit' + IS_SAUCELABS ? '/saucelabs' : '';
   }
   return null;
 }
