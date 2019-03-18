@@ -96,15 +96,11 @@ export class InaboxMessagingHost {
     /** @private {!FrameOverlayManager} */
     this.frameOverlayManager_ = new FrameOverlayManager(hostWin);
 
-    // Start listening only if the top level window can be read, because
-    // otherwise positioning info cannot be guaranteed to be accurate.
-    if (canInspectWindow(win.top)) {
-      this.msgObservable_.listen(
-          MessageType.HOST_BROADCAST, this.handleHostBroadcast_);
+    this.msgObservable_.listen(
+        MessageType.HOST_BROADCAST, this.handleHostBroadcast_);
 
-      this.msgObservable_.listen(
-          MessageType.SEND_POSITIONS, this.handleSendPositions_);
-    }
+    this.msgObservable_.listen(
+        MessageType.SEND_POSITIONS, this.handleSendPositions_);
 
     this.msgObservable_.listen(
         MessageType.FULL_OVERLAY_FRAME, this.handleEnterFullOverlay_);
