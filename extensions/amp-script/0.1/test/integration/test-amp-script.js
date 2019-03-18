@@ -89,9 +89,12 @@ describe.configure().skipSinglePass().run('amp-script', function() {
       yield browser.wait(100);
 
       sandbox.stub(impl.userActivation_, 'isActive').callsFake(() => true);
+      // TODO(dvoytenko): Find a way to test this with the race condition when
+      // the resource is fetched before the first polling iteration.
+      const stub = sandbox.stub(impl.userActivation_, 'expandLongTask');
       browser.click('button#long');
       yield poll('long task started', () => {
-        return impl.userActivation_.isInLongTask();
+        return stub.callCount > 0;
       });
     });
   });

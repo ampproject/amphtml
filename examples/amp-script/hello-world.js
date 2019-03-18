@@ -28,7 +28,7 @@ document.getElementById('hello').addEventListener('click', () => {
 // Long task.
 if (document.getElementById('long')) {
   document.getElementById('long').addEventListener('click', () => {
-    fetch('http://localhost:8000/examples/amp-script/hello-world-data.json')
+    fetch('/examples/amp-script/hello-world-data.json')
         .then(response => response.json())
         .then(json => {
           const el = document.createElement('h1');
