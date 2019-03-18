@@ -134,7 +134,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
         this.templates_.findTemplate(this.element,
             'template, script[template]');
       // Dummy render to verify existence of "value" attribute.
-      this.templates_.renderTemplate(this.templateElement_, {}).then(
+      this.templates_.renderTemplate(this.templateElement_,
+          /** @type {!JsonObject} */{}).then(
           renderedEl => {
             userAssert(renderedEl.hasAttribute('value'),
                 `${TAG} requires <template> tag to have "value" attribute.`);
@@ -513,11 +514,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
         return Promise.resolve();
       case Keys.ESCAPE:
         // Select user's partial input and hide results.
-        let partialInputChild;
-        return this.measureMutateElement(() => {
-          partialInputChild = this.container_.lastChild;
-        }, () => {
-          this.selectItem_(partialInputChild);
+        return this.mutateElement(() => {
+          this.selectItem_(this.container_.lastElementChild);
           this.resetActiveElement_();
           this.toggleResults_(false);
         });
