@@ -56,16 +56,16 @@ export class AmpMustache extends AMP.BaseTemplate {
     /** @private @const {!JsonObject} */
     this.nestedTemplates_ = dict();
 
-    /** @private {!Array<string>} */
-    this.delimiters_ = [];
-
-    /** @private {!Element} */
+    /**
+     * Used to encode html entities in delimiters.
+     * @private {!Element}
+     */
     this.textArea_ = document.createElement('textarea');
 
     /** @private @const {string} */
     this.template_ = this.initTemplateString_();
 
-    mustache.parse(this.template_, /* tags */ this.delimiters_);
+    mustache.parse(this.template_, /* tags */ this.getDelimiters_());
   }
 
   /**
@@ -74,19 +74,11 @@ export class AmpMustache extends AMP.BaseTemplate {
    */
   initTemplateString_() {
     const {element} = this;
-    const CUSTOM_DELIMITERS_ATTR = 'data-custom-delimiters';
-    if (element.hasAttribute(CUSTOM_DELIMITERS_ATTR)) {
-      const delimitersStr = element.getAttribute(CUSTOM_DELIMITERS_ATTR);
-      devAssert(delimitersStr.split(',').length == 2,
-          'Beginning and ending delimiter is required: %s.', element);
-      this.delimiters_ = delimitersStr.split(',');
-    }
     if (element.tagName == 'TEMPLATE') {
       const content = templateContentClone(element);
       this.processNestedTemplates_(content);
       const container = element.ownerDocument.createElement('div');
       container.appendChild(content);
-      this.escapeHtmlEntitiesInDelimiter();
       return container./*OK*/innerHTML;
     } else if (element.tagName == 'SCRIPT') {
       return element.textContent;
@@ -95,19 +87,35 @@ export class AmpMustache extends AMP.BaseTemplate {
     return '';
   }
 
-
   /**
-   * Escape any html entities that should be escaped in a delimiter.
-   * This is required as the template also escapes the delimiters when
-   * it is parsed.
+   * Initialize the delimiters.
+   * @return {?Array<string>} delimiters or null. Null rather than empty array
+   *     so that default mustache delimiters are used.
+   * @private
    */
-  escapeHtmlEntitiesInDelimiter() {
-    for (let i = 0; i < this.delimiters_.length; i++) {
-      const delimiter = this.delimiters_[i];
-      this.textArea_.textContent = delimiter;
-      this.delimiters_[i] = this.textArea_.innerHTML;
+  getDelimiters_() {
+    const CUSTOM_DELIMITERS_ATTR = 'data-custom-delimiters';
+    let delimiters = null;
+    const {element} = this;
+    if (element.hasAttribute(CUSTOM_DELIMITERS_ATTR)) {
+      const delimitersStr = element.getAttribute(CUSTOM_DELIMITERS_ATTR);
+      devAssert(delimitersStr.split(',').length == 2,
+          'Beginning and ending delimiter is required: %s.', element);
+      delimiters = delimitersStr.split(',');
+      // If using a template encode any html entities used in a delimiter.
+      // This is required as the template will also contain decoded delimiters
+      // prior to being parsed by mustache.
+      if (element.tagName == 'TEMPLATE') {
+        for (let i = 0; i < delimiters.length; i++) {
+          const delimiter = delimiters[i];
+          this.textArea_.textContent = delimiter;
+          delimiters[i] = this.textArea_.innerHTML;
+        }
+      }
     }
+    return delimiters;
   }
+
 
   /**
    * Stores and replaces nested templates with custom triple-mustache pointers.

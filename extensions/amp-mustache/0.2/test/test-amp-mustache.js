@@ -110,6 +110,41 @@ describes.repeated('amp-mustache 0.2', {
         .equal('<a href="javascript:alert(0)">abc</a>');
   });
 
+  describe('custom delimiters', () => {
+    it('should require beginning and ending delimiter', () => {
+      templateElement.setAttribute('data-custom-delimiters', '<%');
+      innerHtmlSetup(
+          'value = <<%value%> href="https://www.test.org">abc</<%value%>>');
+      expect(() => {
+        template.compileCallback();
+      }).to.throw(/Beginning and ending delimiter is required/);
+    });
+
+    it('should allow for custom delimiters', () => {
+      templateElement.setAttribute('data-custom-delimiters', '<%,%>');
+      innerHtmlSetup(
+          'value = <<%value%> href="https://www.test.org">abc</<%value%>>');
+      template.compileCallback();
+      const result = template.render({
+        value: 'a',
+      });
+      expect(result./*OK*/innerHTML).to.not
+          .equal('<a href="http://www.test.org">abc</a>');
+    });
+
+    it('should allow for mismatched custom delimiters', () => {
+      templateElement.setAttribute('data-custom-delimiters', '<%,}}');
+      innerHtmlSetup(
+          'value = <<%value}}> href="https://www.test.org">abc</<%value}}>');
+      template.compileCallback();
+      const result = template.render({
+        value: 'a',
+      });
+      expect(result./*OK*/innerHTML).to.not
+          .equal('<a href="http://www.test.org">abc</a>');
+    });
+  });
+
   describe('Sanitizing data- attributes', () => {
 
     it('should sanitize templated attribute names', () => {
