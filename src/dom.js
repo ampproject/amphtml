@@ -22,9 +22,9 @@ import {
 } from './css';
 import {dev, devAssert} from './log';
 import {dict} from './utils/object';
+import {onDocumentReady} from './document-ready';
 import {startsWith} from './string';
 import {toWin} from './types';
-import {whenDocumentReady} from './document-ready';
 
 const HTML_ESCAPE_CHARS = {
   '&': '&amp;',
@@ -106,9 +106,7 @@ export function waitForHead(doc, callback) {
  * @return {!Promise}
  */
 export function waitForHeadPromise(doc) {
-  return new Promise(resolve => {
-    waitForHead(doc, resolve);
-  });
+  return new Promise(resolve => waitForHead(doc, resolve));
 }
 
 /**
@@ -119,7 +117,7 @@ export function waitForHeadPromise(doc) {
  * @param {function()} callback
  */
 export function waitForBody(doc, callback) {
-  waitForBodyPromise(doc).then(callback);
+  onDocumentReady(doc, () => waitForHead(doc, callback));
 }
 
 
@@ -129,9 +127,7 @@ export function waitForBody(doc, callback) {
  * @return {!Promise}
  */
 export function waitForBodyPromise(doc) {
-  return whenDocumentReady(doc).then(() => {
-    return waitForChildPromise(doc.documentElement, () => !!doc.body);
-  });
+  return new Promise(resolve => waitForBody(doc, resolve));
 }
 
 
