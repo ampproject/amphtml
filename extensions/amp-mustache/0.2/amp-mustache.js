@@ -15,12 +15,12 @@
  */
 
 import {Services} from '../../../src/services';
-import {devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {isExperimentOn} from '../../../src/experiments';
 import {iterateCursor, templateContentClone} from '../../../src/dom';
 import {purifyHtml, purifyTagsForTripleMustache} from '../../../src/purifier';
+import {userAssert} from '../../../src/log';
 import mustache from '../../../third_party/mustache/mustache';
 
 const TAG = 'amp-mustache';
@@ -99,7 +99,7 @@ export class AmpMustache extends AMP.BaseTemplate {
     const {element} = this;
     if (element.hasAttribute(CUSTOM_DELIMITERS_ATTR)) {
       const delimitersStr = element.getAttribute(CUSTOM_DELIMITERS_ATTR);
-      devAssert(delimitersStr.split(',').length == 2,
+      userAssert(delimitersStr.split(',').length == 2,
           'Beginning and ending delimiter is required: %s.', element);
       delimiters = delimitersStr.split(',');
       // If using a template encode any html entities used in a delimiter.
