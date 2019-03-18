@@ -81,6 +81,7 @@ describes.realWin('UserActivationTracker', {}, env => {
       tracker.activated_({isTrusted: true});
       tracker.expandLongTask(promise);
       expect(tracker.isActive()).to.be.true;
+      expect(tracker.isInLongTask()).to.be.true;
 
       clock.tick(ACTIVATION_TIMEOUT + 1);
       expect(tracker.isActive()).to.be.true;
@@ -94,6 +95,7 @@ describes.realWin('UserActivationTracker', {}, env => {
       }).then(() => {
         // The gesture window is expanded for an extra window.
         expect(tracker.isActive()).to.be.true;
+        expect(tracker.isInLongTask()).to.be.false;
 
         clock.tick(ACTIVATION_TIMEOUT - 1);
         expect(tracker.isActive()).to.be.true;

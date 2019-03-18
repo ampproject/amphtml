@@ -15,7 +15,6 @@
  */
 
 import {BrowserController} from '../../../../../testing/test-helper';
-import {Layout} from '../../../../../src/layout';
 import {poll as classicPoll} from '../../../../../testing/iframe';
 
 const TIMEOUT = 10000;
@@ -80,6 +79,21 @@ describe.configure().skipSinglePass().run('amp-script', function() {
         return element.classList.contains('i-amphtml-broken');
       });
     });
+
+    it('should start long task', function*() {
+      yield poll('<amp-script> to be hydrated',
+          () => element.classList.contains('i-amphtml-hydrated'));
+      const impl = yield element.getImpl();
+
+      // Give event listeners in hydration a moment to attach.
+      yield browser.wait(100);
+
+      sandbox.stub(impl.userActivation_, 'isActive').callsFake(() => true);
+      browser.click('button#long');
+      yield poll('long task started', () => {
+        return impl.userActivation_.isInLongTask();
+      });
+    });
   });
 
   describes.integration('fixed small', {
@@ -117,7 +131,6 @@ describe.configure().skipSinglePass().run('amp-script', function() {
     });
   });
 
-
   describes.integration('fixed big', {
     /* eslint-disable max-len */
     body: `
@@ -151,65 +164,6 @@ describe.configure().skipSinglePass().run('amp-script', function() {
       yield browser.wait(100);
       yield poll('terminated', () => {
         return element.classList.contains('i-amphtml-broken');
-      });
-    });
-
-    it('should allow without gesture for small size-defined', function*() {
-      yield poll('<amp-script> to be hydrated',
-          () => element.classList.contains('i-amphtml-hydrated'));
-      const impl = element.implementation_;
-
-      // Give event listeners in hydration a moment to attach.
-      yield browser.wait(100);
-
-      sandbox.stub(impl.userActivation_, 'isActive').callsFake(() => false);
-      sandbox.stub(impl, 'getLayout').callsFake(() => Layout.FIXED);
-      sandbox.stub(impl, 'getLayoutBox').callsFake(() => {
-        return {height: 300};
-      });
-      browser.click('button#hello');
-      yield poll('mutations applied', () => {
-        const h1 = doc.querySelector('h1');
-        return h1 && h1.textContent == 'Hello World!';
-      });
-    });
-
-    it('should terminate without gesture for big size-defined', function*() {
-      yield poll('<amp-script> to be hydrated',
-          () => element.classList.contains('i-amphtml-hydrated'));
-      const impl = element.implementation_;
-
-      // Give event listeners in hydration a moment to attach.
-      yield browser.wait(100);
-
-      sandbox.stub(impl.userActivation_, 'isActive').callsFake(() => false);
-      sandbox.stub(impl, 'getLayout').callsFake(() => Layout.FIXED);
-      sandbox.stub(impl, 'getLayoutBox').callsFake(() => {
-        return {height: 301};
-      });
-      let terminated = false;
-      sandbox.stub(impl.workerDom_, 'terminate').callsFake(() => {
-        terminated = true;
-      });
-      browser.click('button#hello');
-      yield poll('terminated', () => {
-        return element.classList.contains('i-amphtml-broken') && terminated;
-      });
-    });
-
-    it('should start long task', function*() {
-      yield poll('<amp-script> to be hydrated',
-          () => element.classList.contains('i-amphtml-hydrated'));
-      const impl = element.implementation_;
-
-      // Give event listeners in hydration a moment to attach.
-      yield browser.wait(100);
-
-      const userActivation = impl.userActivation_;
-      sandbox.stub(userActivation, 'isActive').callsFake(() => true);
-      browser.click('button#long');
-      yield poll('long task started', () => {
-        return userActivation.isInLongTask();
       });
     });
   });
