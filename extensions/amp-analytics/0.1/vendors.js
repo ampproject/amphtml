@@ -98,6 +98,7 @@ import {BG_CONFIG} from './vendors/bg';
 import {UPSCORE_CONFIG} from './vendors/upscore';
 import {REPPUBLIKA_CONFIG} from './vendors/reppublika';
 import {NAVEGG_CONFIG} from './vendors/navegg';
+import {KENSHOO_CONFIG} from './vendors/kenshoo';
 
 /**
  * @const {!JsonObject}
@@ -244,6 +245,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
   'upscore': UPSCORE_CONFIG,
   'webtrekk': WEBTREKK_CONFIG,
   'webtrekk_v2': WEBTREKK_V2_CONFIG,
+  'kenshoo': KENSHOO_CONFIG,
 });
 
 if (getMode().test || getMode().localDev) {

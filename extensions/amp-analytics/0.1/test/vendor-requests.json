@@ -356,6 +356,11 @@
 	  "baseSuffix": "Service=!service&Category=!category&Url=_source_url_&Device=!device&uid=_random_",
 	  "pageview": "https://t5.mindtake.com/tag/cid/!code/track.gif?Service=!service&Category=!category&Url=_source_url_&Device=!device&uid=_random_"
   },
+  "kenshoo": {
+    "host": "https://amp.xg4ken.com/",
+    "parameters": "ampcid=${clientId}&chcid=${channelClickId}&tid=${tid}&uid=${userId}&domain=${canonicalHostname}",
+    "landingPage": "https://amp.xg4ken.com/amp/v1/match?ampcid=!clientId&chcid=!channelClickId&tid=!tid&uid=!userId&domain=!canonicalHostname"
+  },
   "retargetly": {
     "host": "https://api.retargetly.com",
     "page": "https://api.retargetly.com/api?id=!accountId&src=!sourceId&url=_source_url_&n=_title_&ref=_document_referrer_&ua=_user_agent_&random=_random_&bl=_browser_language_&source=amp"
