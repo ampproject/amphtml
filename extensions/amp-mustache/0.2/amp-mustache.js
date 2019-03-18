@@ -100,11 +100,11 @@ export class AmpMustache extends AMP.BaseTemplate {
       // This is required as the template will also contain decoded delimiters
       // prior to being parsed by mustache.
       if (element.tagName == 'TEMPLATE') {
-        cont textArea = document.createElement('textarea');
+        const textArea = document.createElement('textarea');
         for (let i = 0; i < delimiters.length; i++) {
           const delimiter = delimiters[i];
           textArea.textContent = delimiter;
-          delimiters[i] = this.textArea_.innerHTML;
+          delimiters[i] = textArea.innerHTML;
         }
       }
     }

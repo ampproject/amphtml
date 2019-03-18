@@ -64,11 +64,7 @@ describes.repeated('amp-mustache 0.2', {
       }
     };
     innerHtmlSetup = html => {
-      if (isTemplateType) {
-        templateElement./*OK*/innerHTML = html;
-      } else if (isTemplateTypeScript) {
-        templateElement.textContent = html;
-      }
+      templateElement./*OK*/innerHTML = html;
     };
   });
 
