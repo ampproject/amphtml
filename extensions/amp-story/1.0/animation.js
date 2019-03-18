@@ -57,6 +57,8 @@ const SCALE_END_ATTRIBUTE_NAME = 'scale-end';
 const TRANSLATE_X_ATTRIBUTE_NAME = 'translate-x';
 /** const {string} */
 const TRANSLATE_Y_ATTRIBUTE_NAME = 'translate-y';
+/** const {string} */
+const DEFAULT_EASING = 'cubic-bezier(0.4, 0.0, 0.2, 1)';
 
 /**
  * @param {!Element} element
@@ -121,7 +123,7 @@ class AnimationRunner {
 
     /** @private @const */
     this.easing_ = animationDef.easing || this.presetDef_.easing ||
-        'cubic-bezier(0.4, 0.0, 0.2, 1)';
+        DEFAULT_EASING;
 
     /**
      * @private @const {!Promise<
