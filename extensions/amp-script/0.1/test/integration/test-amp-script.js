@@ -15,7 +15,6 @@
  */
 
 import {BrowserController} from '../../../../../testing/test-helper';
-import {Layout} from '../../../../../src/layout';
 import {poll as classicPoll} from '../../../../../testing/iframe';
 
 const TIMEOUT = 10000;
