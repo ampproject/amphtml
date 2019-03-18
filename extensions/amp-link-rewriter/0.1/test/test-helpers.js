@@ -22,10 +22,11 @@ const helpersMaker = () => {
       const element = document.createElement('amp-link-rewriter');
       element.setAttribute('layout', 'nodisplay');
 
-      element.innerHTML = '<script type="application/json">' +
-        JSON.stringify(config) +
-        '</script>';
+      const script = document.createElement('script');
+      script.setAttribute('type', 'application/json');
+      script.innerHTML = JSON.stringify(config);
 
+      element.append(script);
       return element;
     },
   };

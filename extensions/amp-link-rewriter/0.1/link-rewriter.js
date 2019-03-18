@@ -30,6 +30,10 @@ const WL_ANCHOR_ATTR = [
 ];
 const PREFIX_DATA_ATTR = /^vars(.+)/;
 const REG_DOMAIN_URL = /^https?:\/\/(www\.)?([^\/:]*)(:\d+)?(\/.*)?$/;
+const PAGE_PROP_WHITELIST = {
+  'SOURCE_URL': true,
+  'DOCUMENT_REFERRER': true,
+};
 
 export class LinkRewriter {
   /**
@@ -46,26 +50,17 @@ export class LinkRewriter {
     /** @private {?Event} */
     this.event_ = null;
 
-    /** @public {string} */
-    this.rewrittenUrl = '';
-
     /** @private {?Object} */
     this.configOpts_ = getConfigOpts(ampElement);
+
+    /** @public {string} */
+    this.rewrittenUrl = this.configOpts_.output;
 
     /** @private {boolean|number|string} */
     this.ctxAttrValue_ = CTX_ATTR_VALUE().toString();
 
-    /** @private {Promise<Object>} */
-    this.vars_ = this.viewer_.getReferrerUrl().then(referrerUrl => {
-      const pageAttributes = {
-        referrer: referrerUrl,
-        location: Services.documentInfoForDoc(ampDoc).sourceUrl,
-      };
-
-      Object.assign(pageAttributes, this.configOpts_.vars);
-
-      return pageAttributes;
-    });
+    /** @private {!../../../src/service/url-replacements-impl.UrlReplacements} */
+    this.urlReplacementService_ = Services.urlReplacementsForDoc(ampElement);
   }
 
   /**
@@ -129,7 +124,9 @@ export class LinkRewriter {
   setRedirectUrl_(htmlElement) {
     const oldValHref = htmlElement.getAttribute('href');
 
-    return this.vars_.then(vars => {
+    return this.replacePageProp_().then(() => {
+      const {vars} = this.configOpts_;
+
       if (vars instanceof Object) {
         htmlElement.href = this.replaceVars_(htmlElement, vars);
       }
@@ -154,13 +151,25 @@ export class LinkRewriter {
   }
 
   /**
+   * @return {Promise}
+   */
+  replacePageProp_() {
+    return this.urlReplacementService_.expandStringAsync(
+        this.rewrittenUrl,
+        {},
+        PAGE_PROP_WHITELIST
+    ).then(value => {
+      this.rewrittenUrl = value;
+
+    });
+  }
+
+  /**
    * @param {!Element} htmlElement
    * @param {!Object} vars
    * @return {string}
    */
   replaceVars_(htmlElement, vars) {
-    let {output} = this.configOpts_;
-
     /**
      * Merge vars with attributes of the anchor element
      */
@@ -192,7 +201,7 @@ export class LinkRewriter {
      */
     Object.keys(vars).forEach(key => {
       if (vars[key]) {
-        output = output.replace(
+        this.rewrittenUrl = this.rewrittenUrl.replace(
             '${' + key + '}',
             encodeURIComponent(vars[key]));
       }
@@ -202,11 +211,11 @@ export class LinkRewriter {
      * Finally to clean up we leave empty all placeholders that
      * were not replace in previous steps
      */
-    output = output.replace(/\${[A-Za-z0-9]+}+/, () => {
-      return '';
-    });
+    this.rewrittenUrl = this.rewrittenUrl
+        .replace(/\${[A-Za-z0-9]+}+/, () => {
+          return '';
+        });
 
-    this.rewrittenUrl = output;
     return this.rewrittenUrl;
   }
 }
