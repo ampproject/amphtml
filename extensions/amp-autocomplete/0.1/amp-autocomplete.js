@@ -135,7 +135,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
             'template, script[template]');
       // Dummy render to verify existence of "value" attribute.
       this.templates_.renderTemplate(this.templateElement_,
-          /** @type {!JsonObject} */{}).then(
+          /** @type {!JsonObject} */({})).then(
           renderedEl => {
             userAssert(renderedEl.hasAttribute('value'),
                 `${TAG} requires <template> tag to have "value" attribute.`);
