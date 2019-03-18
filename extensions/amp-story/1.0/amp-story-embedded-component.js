@@ -99,35 +99,51 @@ const INTERACTIVE_COMPONENTS = Object.assign({}, EXPANDABLE_COMPONENTS,
 /**
  * Gets the list of components with their respective selectors.
  * @param {!Object} components
+ * @param {string=} opt_predicate
  * @return {!Object<string, string>}
  */
-function getComponentSelectors(components) {
-  const obj = {};
+function getComponentSelectors(components, opt_predicate) {
+  const componentSelectors = {};
 
-  Object.keys(components).forEach(key => {
-    obj[key] = components[key].selector;
+  Object.keys(components).forEach(componentName => {
+    componentSelectors[componentName] = opt_predicate ?
+      components[componentName].selector + opt_predicate :
+      components[componentName].selector;
   });
 
-  return obj;
+  return componentSelectors;
+}
+
+/** @const {string} */
+const INTERACTIVE_ATTR_NAME = '[interactive]:not([interactive=false])';
+
+/**
+ * Selectors of elements that can go into expanded view.
+ * @return {!Object}
+ */
+export function expandableElementsSelectors() {
+  // Using indirect invocation to prevent no-export-side-effect issue.
+  return getComponentSelectors(EXPANDABLE_COMPONENTS, INTERACTIVE_ATTR_NAME);
 }
 
 /**
  * Contains all interactive component CSS selectors.
  * @type {!Object}
  */
-const interactiveComponentSelectors = Object.assign({},
-    getComponentSelectors(INTERACTIVE_COMPONENTS),
+const interactiveSelectors = Object.assign({},
+    getComponentSelectors(LAUNCHABLE_COMPONENTS),
+    getComponentSelectors(EXPANDABLE_COMPONENTS, INTERACTIVE_ATTR_NAME),
     {EXPANDED_VIEW_OVERLAY: '.i-amphtml-story-expanded-view-overflow, ' +
     '.i-amphtml-expanded-view-close-button',
     });
 
 /**
- * Selectors that should delegate to AmpStoryEmbeddedComponent.
+ * All selectors that should delegate to the AmpStoryEmbeddedComponent class.
  * @return {!Object}
  */
-export function embeddedComponentSelectors() {
+export function interactiveElementsSelectors() {
   // Using indirect invocation to prevent no-export-side-effect issue.
-  return interactiveComponentSelectors;
+  return interactiveSelectors;
 }
 
 /**
@@ -752,10 +768,8 @@ export class AmpStoryEmbeddedComponent {
         },
         /** mutate */
         () => {
-          element.classList.add('i-amphtml-embedded-component');
-
           elId = elId ? elId : ++embedIds;
-          if (!element.hasAttribute(EMBED_ID_ATTRIBUTE_NAME)) { // First time creating embed style element.
+          if (!element.hasAttribute(EMBED_ID_ATTRIBUTE_NAME)) { // First time creating <style> element for embed.
             const html = htmlFor(pageEl);
             const embedStyleEl = html`<style></style>`;
 

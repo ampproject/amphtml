@@ -35,6 +35,7 @@ import {
   AmpStoryEmbeddedComponent,
   EMBED_ID_ATTRIBUTE_NAME,
   EXPANDABLE_COMPONENTS,
+  expandableElementsSelectors,
 } from './amp-story-embedded-component';
 import {
   AnimationManager,
@@ -100,6 +101,10 @@ const Selectors = {
 /** @private @const {string} */
 const EMBEDDED_COMPONENTS_SELECTORS =
   Object.keys(EXPANDABLE_COMPONENTS).join(', ');
+
+/** @private @const {string} */
+const INTERACTIVE_EMBEDDED_COMPONENTS_SELECTORS = Object.values(
+    expandableElementsSelectors()).join(',');
 
 /** @private @const {number} */
 const RESIZE_TIMEOUT_MS = 350;
@@ -471,13 +476,43 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
   /**
-   * Finds embedded components in page and prepares them for their expanded view
-   * animation.
+   * Finds embedded components in page and prepares them.
    * @param {boolean=} forceResize
    * @private
    */
   findAndPrepareEmbeddedComponents_(forceResize = false) {
-    scopedQuerySelectorAll(this.element, EMBEDDED_COMPONENTS_SELECTORS)
+    this.addClickShieldToEmbeddedComponents_();
+    this.resizeInteractiveEmbeddedComponents_(forceResize);
+  }
+
+  /**
+   * Adds a pseudo element on top of the embed to block clicks from going into
+   * the iframe.
+   * @private
+   */
+  addClickShieldToEmbeddedComponents_() {
+    const componentEls = scopedQuerySelectorAll(this.element,
+        EMBEDDED_COMPONENTS_SELECTORS);
+
+    if (componentEls.length <= 0) {
+      return;
+    }
+
+    this.mutateElement(() => {
+      componentEls.forEach(el => {
+        el.classList.add('i-amphtml-embedded-component');
+      });
+    });
+  }
+
+  /**
+   * Resizes interactive embeds to prepare them for their expanded animation.
+   * @param {boolean} forceResize
+   * @private
+   */
+  resizeInteractiveEmbeddedComponents_(forceResize) {
+    scopedQuerySelectorAll(this.element,
+        INTERACTIVE_EMBEDDED_COMPONENTS_SELECTORS)
         .forEach(el => {
           const debouncePrepareForAnimation =
             debounceEmbedResize(this.win, this.element, this.resources_);
@@ -1001,7 +1036,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   toggleLoadingSpinner_(isActive) {
-    this.getVsync().mutate(() => {
+    this.mutateElement(() => {
       if (!this.loadingSpinner_) {
         this.buildAndAppendLoadingSpinner_();
       }
