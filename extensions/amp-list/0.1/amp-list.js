@@ -920,8 +920,9 @@ export class AmpList extends AMP.BaseElement {
   loadMoreCallback_(opt_reload = false) {
     if (!!this.loadMoreSrc_) {
       this.element.setAttribute('src', this.loadMoreSrc_);
+      this.loadMoreSrc_ = null;
     } else if (!opt_reload) {
-      // Nothing more to load
+      // Nothing more to load or previous fetch still inflight
       return Promise.resolve();
     }
     this.mutateElement(() => {
