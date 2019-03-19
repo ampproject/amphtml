@@ -115,7 +115,7 @@ function getComponentSelectors(components, opt_predicate) {
 }
 
 /** @const {string} */
-const INTERACTIVE_ATTR_NAME = '[interactive]:not([interactive=false])';
+const INTERACTIVE_EMBED_SELECTOR = '[interactive]';
 
 /**
  * Selectors of elements that can go into expanded view.
@@ -123,7 +123,8 @@ const INTERACTIVE_ATTR_NAME = '[interactive]:not([interactive=false])';
  */
 export function expandableElementsSelectors() {
   // Using indirect invocation to prevent no-export-side-effect issue.
-  return getComponentSelectors(EXPANDABLE_COMPONENTS, INTERACTIVE_ATTR_NAME);
+  return getComponentSelectors(EXPANDABLE_COMPONENTS,
+      INTERACTIVE_EMBED_SELECTOR);
 }
 
 /**
@@ -132,7 +133,7 @@ export function expandableElementsSelectors() {
  */
 const interactiveSelectors = Object.assign({},
     getComponentSelectors(LAUNCHABLE_COMPONENTS),
-    getComponentSelectors(EXPANDABLE_COMPONENTS, INTERACTIVE_ATTR_NAME),
+    getComponentSelectors(EXPANDABLE_COMPONENTS, INTERACTIVE_EMBED_SELECTOR),
     {EXPANDED_VIEW_OVERLAY: '.i-amphtml-story-expanded-view-overflow, ' +
     '.i-amphtml-expanded-view-close-button',
     });
