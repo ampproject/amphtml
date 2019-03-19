@@ -177,16 +177,17 @@ export class Linkmate {
    * @public
    */
   mapLinks_() {
-    return this.linkmateResponse_.map(smartLink => {
-      return Array.prototype.slice.call(this.anchorList_)
-          .map(anchor => {
-            return {
-              anchor,
-              replacementUrl: anchor[this.linkAttribute_] === smartLink['url']
-                && smartLink['auction_id']
-                ? `https://shop-links.co/${smartLink['auction_id']}/?amp=true` : null,
-            };
-          });
-    })[0];
+    const mappings = [];
+    this.anchorList_.forEach(anchor => {
+      this.linkmateResponse_.forEach(smartLink => {
+        if (anchor[this.linkAttribute_] === smartLink['url']
+            && smartLink['auction_id']) {
+          mappings.push({anchor, replacementUrl:
+              `https://shop-links.co/${smartLink['auction_id']}/?amp=true`});
+        }
+      });
+    });
+
+    return mappings;
   }
 }

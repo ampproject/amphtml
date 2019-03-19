@@ -383,7 +383,8 @@ describes.fakeWin('amp-smartlinks',
           anchorList = [
             'http://fakelink.example/',
             'http://fakelink2.example/',
-            'https://examplelocklink.example/#locklink',
+            'http://fakelink2.example/',
+            'https://nonmonetizedlink.example/',
           ].map(helpers.createAnchor);
         });
 
@@ -394,6 +395,11 @@ describes.fakeWin('amp-smartlinks',
             'exclusive_match_requested': false,
             'pub_id': 999,
             'url': 'http://fakelink.example/',
+          }, {
+            'auction_id': '1667546956215651271',
+            'exclusive_match_requested': false,
+            'pub_id': 999,
+            'url': 'http://fakelink2.example/',
           }];
           linkmate.anchorList_ = anchorList;
           linkmate.linkmateResponse_ = linkmateResponse;
@@ -403,10 +409,10 @@ describes.fakeWin('amp-smartlinks',
             replacementUrl: `https://shop-links.co/${linkmateResponse[0]['auction_id']}/?amp=true`,
           }, {
             anchor: anchorList[1],
-            replacementUrl: null,
+            replacementUrl: `https://shop-links.co/${linkmateResponse[1]['auction_id']}/?amp=true`,
           }, {
             anchor: anchorList[2],
-            replacementUrl: null,
+            replacementUrl: `https://shop-links.co/${linkmateResponse[1]['auction_id']}/?amp=true`,
           }];
 
           const actualMapping = linkmate.mapLinks_();
