@@ -20,6 +20,11 @@ import {Services} from '../../../../src/services';
 import {isExperimentOn, toggleExperiment} from '../../../../src/experiments';
 
 
+const HAS_MORE_ITEMS_PAYLOAD = {
+  'items': ['1', '2', '3'],
+  'load-more-src': '/list/infinite-scroll?items=2&left=1',
+};
+
 describes.realWin('amp-list component', {
   amp: {
     ampdoc: 'single',
@@ -145,5 +150,65 @@ describes.realWin('amp-list component', {
       await list.layoutCallback();
       expect(attemptChangeHeightSpy).to.be.calledOnceWith(50);
     });
+
+
+
+
+  });
+
+  describe('loading states', () => {
+
+    beforeEach(() => {
+      expect(isExperimentOn(win, 'amp-list-load-more')).to.be.true;
+
+      element = doc.createElement('amp-list');
+      list = new AmpList(element);
+
+      sandbox.stub(list, 'getAmpDoc').returns(ampdoc);
+      sandbox.stub(list, 'getFallback').returns(null);
+
+      sandbox.stub(list, 'mutateElement').callsFake(mutator => {
+        mutator();
+        return Promise.resolve();
+      });
+
+      sandbox.stub(list, 'measureElement').callsFake(measurer => {
+        measurer();
+        return Promise.resolve();
+      });
+
+      sandbox.stub(list, 'measureMutateElement').callsFake(
+          (measurer, mutator) => {
+            measurer();
+            mutator();
+            return Promise.resolve();
+          });
+
+      element.setAttribute('src', '/list/infinite-scroll?items=2&left=1');
+      element.setAttribute('load-more', 'manual');
+      element.setAttribute('layout', 'fixed');
+      element.setAttribute('width', '50');
+      element.setAttribute('height', '10');
+
+      element.style.height = '10px';
+      doc.body.appendChild(element);
+
+      sandbox.stub(list, 'getOverflowElement').returns(null);
+      sandbox.stub(list, 'fetch_').returns(
+          Promise.resolve(HAS_MORE_ITEMS_PAYLOAD));
+      list.element.changeSize = () => {};
+      list.buildCallback();
+    });
+
+    it('should not fetch the same url more than once', async() => {
+      const fetchListSpy = sandbox.spy(list, 'fetchList_');
+      sandbox.stub(list, 'scheduleRender_').returns(Promise.resolve());
+      await list.layoutCallback();
+      expect(fetchListSpy).to.be.calledOnce;
+      list.loadMoreCallback_();
+      await list.loadMoreCallback_();
+      expect(fetchListSpy).to.be.calledTwice;
+    });
+
   });
 });
