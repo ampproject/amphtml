@@ -15,7 +15,7 @@
  */
 import {Services} from '../../../../src/services';
 import {assertConfig} from '../config';
-import {parseUrlDeprecated} from '../../../../src/url';
+import {parseUrlDeprecated} from '../../../../src/url-utils';
 
 describe('amp-next-page config', () => {
 

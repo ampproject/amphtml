@@ -40,7 +40,7 @@ import {
   mockWindowInterface,
   stubServiceForDoc,
 } from '../../testing/test-helper';
-import {parseUrlDeprecated} from '../../src/url';
+import {parseUrlDeprecated} from '../../src/url-utils';
 import {registerServiceBuilder} from '../../src/service';
 import {setCookie} from '../../src/cookies';
 import {user} from '../../src/log';

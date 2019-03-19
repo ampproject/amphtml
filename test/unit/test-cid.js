@@ -40,7 +40,7 @@ import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
 import {macroTask} from '../../testing/yield';
-import {parseUrlDeprecated} from '../../src/url';
+import {parseUrlDeprecated} from '../../src/url-utils';
 import {stubServiceForDoc} from '../../testing/test-helper';
 
 const DAY = 24 * 3600 * 1000;

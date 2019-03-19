@@ -17,7 +17,7 @@
 import '../amp-powr-player';
 import {VideoEvents} from '../../../../src/video-interface';
 import {listenOncePromise} from '../../../../src/event-helper';
-import {parseUrlDeprecated} from '../../../../src/url';
+import {parseUrlDeprecated} from '../../../../src/url-utils';
 
 
 describes.realWin('amp-powr-player', {

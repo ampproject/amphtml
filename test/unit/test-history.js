@@ -24,7 +24,7 @@ import {
 import {Services} from '../../src/services';
 import {installTimerService} from '../../src/service/timer-impl';
 import {listenOncePromise} from '../../src/event-helper';
-import {parseUrlDeprecated} from '../../src/url';
+import {parseUrlDeprecated} from '../../src/url-utils';
 
 
 describes.fakeWin('History', {

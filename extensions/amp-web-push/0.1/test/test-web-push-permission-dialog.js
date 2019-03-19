@@ -18,7 +18,7 @@ import {AmpWebPushPermissionDialog} from '../amp-web-push-permission-dialog';
 import {WebPushConfigAttributes} from '../amp-web-push-config';
 import {WebPushService} from '../web-push-service';
 import {WindowMessenger} from '../window-messenger';
-import {parseUrlDeprecated} from '../../../../src/url';
+import {parseUrlDeprecated} from '../../../../src/url-utils';
 
 const FAKE_IFRAME_URL =
   '//ads.localhost:9876/test/fixtures/served/iframe-stub.html#';

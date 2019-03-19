@@ -17,7 +17,8 @@
 import {DEFAULT_SKIM_OPTIONS, pubcode} from './constants';
 import {Waypoint} from '../waypoint';
 import {XCUST_ATTRIBUTE_NAME} from '../constants';
-import {parseQueryString, parseUrlDeprecated} from '../../../../src/url';
+import {parseQueryString} from '../../../../src/url';
+import {parseUrlDeprecated} from '../../../../src/url-utils';
 import helpersFactory from './helpers';
 
 describes.fakeWin(

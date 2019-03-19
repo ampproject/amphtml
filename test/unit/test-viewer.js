@@ -23,7 +23,8 @@ import {installDocumentInfoServiceForDoc} from
 import {installDocumentStateService} from '../../src/service/document-state';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
-import {parseUrlDeprecated, removeFragment} from '../../src/url';
+import {parseUrlDeprecated} from '../../src/url-utils';
+import {removeFragment} from '../../src/url';
 
 
 describe('Viewer', () => {

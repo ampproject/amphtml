@@ -18,7 +18,7 @@ import {
   installFormProxy,
   setBlacklistedPropertiesForTesting,
 } from '../form-proxy';
-import {parseUrlDeprecated} from '../../../../src/url';
+import {parseUrlDeprecated} from '../../../../src/url-utils';
 
 const PROPS = ['id', 'action', 'method', 'style', 'acceptCharset',
   'attributes', 'elements', 'children', 'draggable', 'hidden',

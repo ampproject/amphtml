@@ -26,7 +26,7 @@ import {forceExperimentBranch} from '../../../../src/experiments';
 import {
   isInExperiment,
 } from '../../../../ads/google/a4a/traffic-experiments';
-import {isProxyOrigin, parseUrlDeprecated} from '../../../../src/url';
+import {isProxyOrigin, parseUrlDeprecated} from '../../../../src/url-utils';
 import {urls} from '../../../../src/config';
 
 describe('adsense-a4a-config', () => {

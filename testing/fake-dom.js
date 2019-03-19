@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {parseUrlDeprecated, resolveRelativeUrl} from '../src/url';
+import {parseUrlDeprecated} from '../src/url-utils.js';
+import {resolveRelativeUrl} from '../src/url';
 
 
 /**

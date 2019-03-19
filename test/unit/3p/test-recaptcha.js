@@ -20,7 +20,7 @@ import {
 } from '../../../3p/recaptcha';
 import {
   parseUrlDeprecated,
-} from '../../../src/url';
+} from '../../../src/url-utils';
 import {urls} from '../../../src/config';
 
 describe('3p recaptcha.js', () => {
