@@ -154,7 +154,7 @@ export class LinkRewriter {
    * @return {Promise}
    */
   replacePageProp_() {
-    return this.urlReplacementService_.expandStringAsync(
+    return this.urlReplacementService_.expandUrlAsync(
         this.rewrittenUrl,
         {},
         PAGE_PROP_WHITELIST
