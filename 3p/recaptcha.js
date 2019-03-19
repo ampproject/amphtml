@@ -29,7 +29,7 @@ import {
   user,
 } from '../src/log';
 import {dict} from '../src/utils/object';
-import {isProxyOrigin, parseUrlDeprecated} from '../src/url';
+import {isProxyOrigin, parseUrlDeprecated} from '../src/url-utils';
 import {loadScript} from './3p';
 import {parseJson} from '../src/json';
 

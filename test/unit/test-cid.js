@@ -15,7 +15,7 @@
  */
 
 import * as lolex from 'lolex';
-import * as url from '../../src/url';
+import * as urlUtils from '../../src/url-utils';
 import {Crypto, installCryptoService} from '../../src/service/crypto-impl';
 import {Services} from '../../src/services';
 import {
@@ -772,7 +772,7 @@ describes.realWin('cid', {amp: true}, env => {
         .returns(Promise.resolve(true));
     stubServiceForDoc(sandbox, ampdoc, 'viewer', 'hasCapability')
         .withArgs('cid').returns(true);
-    sandbox.stub(url, 'isProxyOrigin').returns(true);
+    sandbox.stub(urlUtils, 'isProxyOrigin').returns(true);
     return expect(cid.get({scope: 'foo'}, hasConsent))
         .to.eventually.equal('cid-from-viewer');
   });
@@ -787,7 +787,7 @@ describes.realWin('cid', {amp: true}, env => {
         .returns(Promise.resolve(true));
     const storageGetStub = stubServiceForDoc(sandbox, ampdoc, 'storage', 'get');
     storageGetStub.withArgs('amp-cid-optout').returns(Promise.resolve(false));
-    sandbox.stub(url, 'isProxyOrigin').returns(true);
+    sandbox.stub(urlUtils, 'isProxyOrigin').returns(true);
     let scopedCid = undefined;
     let resolved = false;
     cid.get({scope: 'foo'}, hasConsent)
@@ -806,7 +806,7 @@ describes.realWin('cid', {amp: true}, env => {
   describe('pub origin, CID API opt in', () => {
 
     beforeEach(() => {
-      sandbox.stub(url, 'isProxyOrigin').returns(false);
+      sandbox.stub(urlUtils, 'isProxyOrigin').returns(false);
       ampdoc.win.document.head.innerHTML +=
           '<meta name="amp-google-client-id-api" content="googleanalytics">';
       setCookie(win, '_ga', '', 0);
