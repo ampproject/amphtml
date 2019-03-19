@@ -15,34 +15,26 @@
  */
 
 /* NOTE: styles that affect sizing are in amp.css to avoid FOUC */
-
-/* haw scratch
-   xs: 4px
-   s: 8px
-   m: 16px
-   l: 24px
-   xl: 32px
- */
-
 amp-autocomplete,
 amp-autocomplete > input {
-  font-family: sans-serif; /* default font stack */
+  font-family: sans-serif; /* default-ui-font-stack */
 }
 
 amp-autocomplete > input {
-  border-radius: 4px; /* amp border radius */
+  border-radius: 4px; /* default-ui-border-radius */
 }
 
 .i-amphtml-autocomplete-results {
   position: absolute;
   top: 100%;
   width: calc(100% + 16px);
-  margin-top: .5rem; /* amp-space-small */
-  margin-left: -.5rem; /* amp-space-small */
-  border-radius: 4px; /* amp border radius */
-  box-shadow: 0px 2px 4px 0px rgba(0,0,0,.5); /* amp box shadow subject to change */
+  margin-top: .5rem; /* default-ui-space-small */
+  margin-left: -.5rem; /* default-ui-space-small */
+  border-radius: 4px; /* default-ui-border-radius */
+  box-shadow: 0px 2px 4px 0px rgba(0,0,0,.5); /* default-ui-box-shadow */
 
-  /* FIXIT FOR NOW */
+  /* Reset i-amphtml-fill-content styles
+     until we figure out how to remove that */
   height: auto;
   max-height: none;
   min-height: auto;
@@ -52,16 +44,16 @@ amp-autocomplete > input {
 
 .i-amphtml-autocomplete-item {
   position: relative;
-  padding: .5rem 1rem; /* amp-space-small amp-space-medium */
+  padding: .5rem 1rem; /* default-ui-space-small default-ui-space-medium */
   cursor: pointer;
 }
 
 .i-amphtml-autocomplete-item:first-child {
-  border-radius: 4px 4px 0px 0px; /* amp border radius */
+  border-radius: 4px 4px 0px 0px; /* default-ui-border-radiuss */
 }
 
 .i-amphtml-autocomplete-item:nth-last-child(2) {
-  border-radius: 0px 0px 4px 4px; /* amp border radius */
+  border-radius: 0px 0px 4px 4px; /* default-ui-border-radius */
 }
 
 .i-amphtml-autocomplete-item:last-child {
@@ -69,9 +61,9 @@ amp-autocomplete > input {
 }
 
 .i-amphtml-autocomplete-item:hover {
-  background-color: rgba(0,0,0,.15); /* maybe one of our shades */
+  background-color: rgba(0,0,0,.15); /* default-ui-light-gray */
 }
 
 .i-amphtml-autocomplete-item-active {
-  background-color: rgba(0,0,0,.15); /* maybe one of our shades */
+  background-color: rgba(0,0,0,.15); /* default-ui-light-gray */
 }
