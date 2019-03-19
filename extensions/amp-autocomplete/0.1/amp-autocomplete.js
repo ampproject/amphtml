@@ -444,26 +444,15 @@ export class AmpAutocomplete extends AMP.BaseElement {
    * @private
    */
   updateActiveItem_(delta) {
-    if (delta === 0) {
+    if (delta === 0 || !this.resultsShowing_()) {
       return Promise.resolve();
     }
     const keyUpWhenNoneActive = this.activeIndex_ === -1 && delta < 0;
     const index = keyUpWhenNoneActive ? delta : this.activeIndex_ + delta;
-    let resultsShowing;
-    let newActiveElement;
-    let newValue;
-    return this.measureMutateElement(() => {
-      resultsShowing = this.resultsShowing_();
-      if (resultsShowing) {
-        this.activeIndex_ = mod(index, this.container_.children.length);
-        newActiveElement = this.container_.children[this.activeIndex_];
-        newValue = newActiveElement.getAttribute('value');
-      }
-    }, () => {
-      if (!resultsShowing) {
-        return;
-      }
-      this.inputElement_.value = newValue;
+    this.activeIndex_ = mod(index, this.container_.children.length);
+    const newActiveElement = this.container_.children[this.activeIndex_];
+    this.inputElement_.value = newActiveElement.getAttribute('value');
+    return this.mutateElement(() => {
       this.resetActiveElement_();
       newActiveElement.classList.add('i-amphtml-autocomplete-item-active');
       this.activeElement_ = newActiveElement;
