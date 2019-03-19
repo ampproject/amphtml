@@ -24,6 +24,7 @@ const {isTravisPullRequestBuild} = require('../../travis');
 
 const reportBaseUrl = 'https://amp-test-status-bot.appspot.com/v0/tests';
 
+const IS_COVERAGE = !!argv.coverage;
 const IS_INTEGRATION = !!argv.integration;
 const IS_LOCAL_CHANGES = !!argv['local-changes'];
 const IS_SAUCELABS = !!(argv.saucelabs || argv.saucelabs_lite);
@@ -31,7 +32,9 @@ const IS_SINGLE_PASS = !!argv.single_pass;
 const IS_UNIT = !!argv.unit;
 
 function inferTestType() {
-  if (IS_INTEGRATION && IS_SAUCELABS) {
+  if (IS_COVERAGE) {
+    return null;
+  } else if (IS_INTEGRATION) {
     // TODO(danielrozenberg): report integration on saucelabs
     return IS_SAUCELABS ? null : 'integration';
   } else if (IS_LOCAL_CHANGES) {
