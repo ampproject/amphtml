@@ -459,7 +459,10 @@ export class AmpAutocomplete extends AMP.BaseElement {
     });
   }
 
-  /** Displays the user's partial input in the input field. */
+  /**
+   * Displays the user's partial input in the input field.
+   * @private
+   */
   displayUserInput_() {
     this.inputElement_.value = this.userInput_;
     this.resetActiveElement_();
