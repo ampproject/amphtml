@@ -314,7 +314,7 @@ class PuppeteerController {
   getElementCssValue(handle, styleProperty) {
     const element = handle.getElement();
     const getter = (element, styleProperty) => {
-      return window./*OK*/getComputedStyle(element)[styleProperty];
+      return window/*OK*/['getComputedStyle'](element)[styleProperty];
     };
     return new ControllerPromise(
         this.evaluate(getter, element, styleProperty),

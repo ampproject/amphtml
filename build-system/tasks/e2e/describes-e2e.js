@@ -54,7 +54,7 @@ let PuppeteerConfigDef;
 let SeleniumConfigDef;
 
 /** @const {?DescribesConfigDef} */
-const describesConfig = null;
+let describesConfig = null;
 
 /**
  * Configure all tests. This may only be called once, since it is only read once
@@ -62,10 +62,11 @@ const describesConfig = null;
  * @param {!DescribesConfigDef} config
  */
 function configure(config) {
-  if (!describesConfig) {
-    describesConfig = Object.assign({}, config);
+  if (describesConfig) {
+    throw new Error('describes.config should only be called once');
   }
-  throw new Error('describes.config should only be called once');
+
+  describesConfig = Object.assign({}, config);
 }
 
 /**
