@@ -270,8 +270,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
   * @private
   */
   inputHandler_() {
+    this.userInput_ = this.inputElement_.value;
     return this.mutateElement(() => {
-      this.userInput_ = this.inputElement_.value;
       this.renderResults_();
       this.toggleResults_(true);
     });
@@ -449,7 +449,9 @@ export class AmpAutocomplete extends AMP.BaseElement {
     }
     const keyUpWhenNoneActive = this.activeIndex_ === -1 && delta < 0;
     const index = keyUpWhenNoneActive ? delta : this.activeIndex_ + delta;
-    let resultsShowing, newActiveElement, newValue;
+    let resultsShowing;
+    let newActiveElement;
+    let newValue;
     return this.measureMutateElement(() => {
       resultsShowing = this.resultsShowing_();
       if (resultsShowing) {
@@ -510,18 +512,16 @@ export class AmpAutocomplete extends AMP.BaseElement {
         if (this.activeIndex_ === this.container_.children.length - 1) {
           this.displayUserInput_();
           return Promise.resolve();
-        } else {
-          return this.updateActiveItem_(1);
         }
+        return this.updateActiveItem_(1);
       case Keys.UP_ARROW:
         event.preventDefault();
         // Disrupt loop around to display user input.
         if (this.activeIndex_ === 0) {
           this.displayUserInput_();
           return Promise.resolve();
-        } else {
-          return this.updateActiveItem_(-1);
         }
+        return this.updateActiveItem_(-1);
       case Keys.ENTER:
         if (this.activeElement_) {
           // Only prevent if submit-on-enter === false.
