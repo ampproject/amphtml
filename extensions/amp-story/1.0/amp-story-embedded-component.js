@@ -115,7 +115,7 @@ function getComponentSelectors(components, opt_predicate) {
 }
 
 /** @const {string} */
-const INTERACTIVE_EMBED_SELECTOR = '[interactive=""]';
+const INTERACTIVE_EMBED_SELECTOR = '[interactive]';
 
 /**
  * Selectors of elements that can go into expanded view.
