@@ -42,7 +42,7 @@ function inferTestType() {
   } else if (IS_SINGLE_PASS) {
     return 'single-pass';
   } else if (IS_UNIT) {
-    return 'unit' + (IS_SAUCELABS ? '/saucelabs' : '');
+    return 'unit' + (IS_SAUCELABS ? '-saucelabs' : '');
   }
   return null;
 }
