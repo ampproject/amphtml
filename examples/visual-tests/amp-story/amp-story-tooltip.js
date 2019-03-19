@@ -68,14 +68,14 @@ module.exports = {
     await screen.tap(200, 240);
     await page.waitFor('amp-story-page#page-2[active]');
     await page.waitFor(150); // For animations to finish.
-    await page.tap('amp-twitter.blue');
+    await page.tap('amp-twitter.interactive-embed');
     await page.waitFor('a.i-amphtml-story-tooltip');
     await page.waitFor(300); // For animations to finish.
     await page.tap('a.i-amphtml-story-tooltip');
     await page.waitFor(300); // For animations to finish.
     await verifySelectorsVisible(page, name, ['amp-story-page.i-amphtml-expanded-mode']);
   },
-  'tapping on dead embed should not show tooltip or block navigation': async (page, name) => {
+  'tapping on non-interactive embed should not show tooltip or block navigation': async (page, name) => {
     const screen = page.touchscreen;
     await screen.tap(200, 240);
     await page.waitFor('amp-story-page#page-2[active]');
@@ -83,7 +83,7 @@ module.exports = {
     await screen.tap(200, 240);
     await page.waitFor('amp-story-page#page-3[active]');
     await page.waitFor(150); // For animations to finish.
-    await page.tap('amp-twitter.blue');
+    await page.tap('amp-twitter.non-interactive-embed');
     await page.waitFor(150); // For animations to finish.
     await verifySelectorsInvisible(page, name, ['a.i-amphtml-story-tooltip']);
   },
@@ -92,7 +92,7 @@ module.exports = {
     await screen.tap(200, 240);
     await page.waitFor('amp-story-page#page-2[active]');
     await page.waitFor(150); // For animations to finish.
-    await page.tap('amp-twitter.blue');
+    await page.tap('amp-twitter.interactive-embed');
     await page.waitFor('a.i-amphtml-story-tooltip');
     await page.waitFor(300); // For animations to finish.
     await page.tap('a.i-amphtml-story-tooltip');
