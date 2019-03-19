@@ -22,7 +22,7 @@ const {cyan, green, yellow} = require('ansi-colors');
 const {gitCommitHash} = require('../../git');
 const {isTravisPullRequestBuild} = require('../../travis');
 
-const reportBaseUrl = 'https://amp-test-status-bot.appspot.com/v0/tests/';
+const reportBaseUrl = 'https://amp-test-status-bot.appspot.com/v0/tests';
 
 const IS_INTEGRATION = !!argv.integration;
 const IS_LOCAL_CHANGES = !!argv['local-changes'];
@@ -39,7 +39,7 @@ function inferTestType() {
   } else if (IS_SINGLE_PASS) {
     return 'single-pass';
   } else if (IS_UNIT) {
-    return 'unit' + IS_SAUCELABS ? '/saucelabs' : '';
+    return 'unit' + (IS_SAUCELABS ? '/saucelabs' : '');
   }
   return null;
 }
