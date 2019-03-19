@@ -170,28 +170,21 @@
 
 .i-amphtml-page-share-check {
   width: 20px !important;
-  height: 20px !important;
+  margin: 0 !important;
 }
 
 .i-amphtml-page-share-span {
   color: #333 !important;
-  padding: 1px 8px !important;
+  margin-left: 8px !important;
   font-family: 'Roboto', regular !important;
   font-weight: 400 !important;
   line-height: 13px !important;
   font-size: 13px !important;
-  vertical-align: middle !important;
-}
-
-.i-amphtml-page-share-label {
-  position: relative !important;
-  left: 32px !important;
-  text-align: center !important;
-  display: flex !important;
-  vertical-align: middle !important;
 }
 
 .i-amphtml-page-share-div{
   display: flex !important;
-  float: left !important;
+  margin-left: 16px !important;
+  margin-right: 16px !important;
+  align-items: center !important;
 }

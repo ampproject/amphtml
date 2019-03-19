@@ -331,14 +331,15 @@ export class ShareWidget {
    * @private
   */
   maybeAddPageShareButton_() {
+    const uiState = this.storeService_.get(StateProperty.UI_STATE);
     const isDesktopUi =
-      this.storeService_.get(
-          StateProperty.UI_STATE) === UIType.DESKTOP_FULLBLEED;
+        uiState === UIType.DESKTOP_FULLBLEED ||
+        uiState === UIType.DESKTOP_PANELS;
 
     if (isExperimentOn(this.win, 'amp-story-branching') && isDesktopUi) {
       const list = devAssert(this.root).firstChild;
       const sharePageCheck =
-        renderAsElement(this.win.document, SHARE_PAGE_TEMPLATE);
+          renderAsElement(this.win.document, SHARE_PAGE_TEMPLATE);
       this.root.insertBefore(sharePageCheck, list);
     }
   }
