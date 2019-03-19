@@ -912,6 +912,7 @@ const forbiddenTermsSrcInclusive = {
     message: 'use startsWith helper in src/string.js',
     whitelist: [
       'dist.3p/current/integration.js',
+      'build-system/app.js',
     ],
   },
   '\\.indexOf\\(.*===?.*\\.length': 'use endsWith helper in src/string.js',
