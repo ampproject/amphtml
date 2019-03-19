@@ -217,13 +217,13 @@ function assertVariant(variant, experimentName, variantName) {
 
   // Assert the variant weight
   userAssert(
-      variant.weight !== undefined &&
-    typeof variant.weight === 'number',
+      variant['weight'] !== undefined &&
+    typeof variant['weight'] === 'number',
       `${experimentName}.${variantName} must have a weight.`);
 
   // Assert the variant mutations
   userAssert(
-      isArray(variant.mutations),
+      isArray(variant['mutations']),
       `${experimentName}.${variantName} must have a mutations array.`);
 }
 

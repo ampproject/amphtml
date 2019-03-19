@@ -17,7 +17,7 @@
 import {Layout} from '../../../src/layout';
 import {
   Variants,
-  allocateVariant
+  allocateVariant,
 } from './variant';
 import {devAssert, userAssert} from '../../../src/log';
 import {getServicePromiseForDoc} from '../../../src/service';
@@ -50,7 +50,7 @@ export class AmpExperiment extends AMP.BaseElement {
             /** @private @const {!Promise<!Object<string, ?string>>} */
             const experimentVariants = Promise.all(variants)
                 .then(() => results)
-              .then(this.applyExperimentVariants_.bind(this, config));
+                .then(this.applyExperimentVariants_.bind(this, config));
 
             variantsService.init(experimentVariants);
           } catch (e) {
@@ -91,21 +91,22 @@ export class AmpExperiment extends AMP.BaseElement {
 
     for (const name in experiments) {
       if (experiments[name]) {
+        const variantObject = config[name]['variants'][experiments[name]];
         appliedExperimentVariantPromises.push(
-          this.applyMutations_(name, experiments[name])
+            this.applyMutations_(name, variantObject)
         );
       }
     }
 
     return Promise.all(appliedExperimentVariantPromises)
-      .then(() => experiments);
+        .then(() => experiments);
   }
 
   /**
    * Passes the given experimentName and variantObject pairs
    * to the mutation service to be applied to the document.
-   * @param {!string} experimentName
-   * @param {!Object} variantObject
+   * @param {string} experimentName
+   * @param {!JsonObject} variantObject
    * @return {!Promise}
    * @private
    */
@@ -114,8 +115,9 @@ export class AmpExperiment extends AMP.BaseElement {
     return doc.whenBodyAvailable().then(body => {
       // TODO (torch2424): Use a mutation service,
       // and apply mutations
-      // Placehodler to pass linting
-      body.setAttribute(experimentName, variantObject);
+      // Placehodler to pass linting for code review
+      // and keep PRs small
+      body.setAttribute(experimentName, JSON.stringify(variantObject));
     });
   }
 }
