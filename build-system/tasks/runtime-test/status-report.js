@@ -32,12 +32,13 @@ const IS_UNIT = !!argv.unit;
 
 function inferTestType() {
   if (IS_INTEGRATION) {
-    // TODO(danielrozenberg): report integration on saucelabs
-    return IS_SAUCELABS ? null : 'integration';
+    if (IS_SAUCELABS) {
+      // TODO(danielrozenberg): report integration on saucelabs
+      return null;
+    }
+    return 'integration' + (IS_SINGLE_PASS ? '-single-pass' : '');
   } else if (IS_LOCAL_CHANGES) {
     return 'local-changes';
-  } else if (IS_SINGLE_PASS) {
-    return 'single-pass';
   } else if (IS_UNIT) {
     return 'unit' + (IS_SAUCELABS ? '-saucelabs' : '');
   }
