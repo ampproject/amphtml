@@ -179,39 +179,59 @@ describes.realWin('amp-autocomplete unit tests', {
     });
   });
 
-  it('should call keyDownHandler_() on Down and Up arrow', () => {
+  describe('keyDownHandler_() on arrow keys', () => {
     const event = {key: Keys.DOWN_ARROW, preventDefault: () => {}};
-    const displayInputSpy = sandbox.spy(impl, 'displayUserInput_');
-    const updateActiveSpy = sandbox.spy(impl, 'updateActiveItem_');
-    const preventSpy = sandbox.spy(event, 'preventDefault');
-    return element.layoutCallback().then(() => {
-      return impl.keyDownHandler_(event);
-    }).then(() => {
-      expect(preventSpy).to.have.been.calledOnce;
-      expect(displayInputSpy).to.have.been.calledOnce;
-      expect(updateActiveSpy).not.to.have.been.called;
-      impl.activeIndex_ = 0;
-      event.key = Keys.UP_ARROW;
-      return impl.keyDownHandler_(event);
-    }).then(() => {
-      expect(preventSpy).to.have.been.calledTwice;
-      expect(displayInputSpy).to.have.been.calledTwice;
-      expect(updateActiveSpy).not.to.have.been.called;
-      impl.activeIndex_ = 1;
-      return impl.keyDownHandler_(event);
-    }).then(() => {
-      expect(displayInputSpy).to.have.been.calledTwice;
-      expect(preventSpy).to.have.been.calledThrice;
-      expect(updateActiveSpy).to.have.been.calledWith(-1);
-      impl.activeIndex_ = 0;
-      event.key = Keys.DOWN_ARROW;
-      return impl.keyDownHandler_(event);
-    })
-        .then(() => {
-          expect(displayInputSpy).to.have.been.calledTwice;
-          expect(preventSpy).to.have.callCount(4);
-          expect(updateActiveSpy).to.have.been.calledWith(1);
-        });
+    let displayInputSpy, updateActiveSpy, eventPreventSpy;
+
+    beforeEach(() => {
+      displayInputSpy = sandbox.spy(impl, 'displayUserInput_');
+      updateActiveSpy = sandbox.spy(impl, 'updateActiveItem_');
+      eventPreventSpy = sandbox.spy(event, 'preventDefault');
+    });
+
+    it('should updateActiveItem_ on Down arrow', () => {
+      return element.layoutCallback().then(() => {
+        impl.activeIndex_ = 0;
+        return impl.keyDownHandler_(event);
+      }).then(() => {
+        expect(eventPreventSpy).to.have.been.calledOnce;
+        expect(displayInputSpy).not.to.have.been.called;
+        expect(updateActiveSpy).to.have.been.calledWith(1);
+      });
+    });
+
+    it('should displayUserInput_ when looping on Down arrow', () => {
+      return element.layoutCallback().then(() => {
+        return impl.keyDownHandler_(event);
+      }).then(() => {
+        expect(eventPreventSpy).to.have.been.calledOnce;
+        expect(displayInputSpy).to.have.been.calledOnce;
+        expect(updateActiveSpy).not.to.have.been.called;
+      });
+    });
+
+    it('should updateActiveItem_ on Up arrow', () => {
+      return element.layoutCallback().then(() => {
+        event.key = Keys.UP_ARROW;
+        return impl.keyDownHandler_(event);
+      }).then(() => {
+        expect(eventPreventSpy).to.have.been.calledOnce;
+        expect(displayInputSpy).not.to.have.been.called;
+        expect(updateActiveSpy).to.have.been.calledWith(-1);
+      });
+    });
+
+    it('should displayUserInput_ when looping on Up arrow', () => {
+      return element.layoutCallback().then(() => {
+        event.key = Keys.UP_ARROW;
+        impl.activeIndex_ = 0;
+        return impl.keyDownHandler_(event);
+      }).then(() => {
+        expect(eventPreventSpy).to.have.been.calledOnce;
+        expect(displayInputSpy).to.have.been.calledOnce;
+        expect(updateActiveSpy).not.to.have.been.called;
+      });
+    });
   });
 
   it('should call keyDownHandler_() on Enter', () => {
