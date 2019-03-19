@@ -41,6 +41,12 @@
         width: 100px;
         height: 200px;
       }
+
+      amp-twitter.red {
+        background-color: red;
+        width: 50px;
+        height: 200px;
+      }
     </style>
   </head>
 
@@ -54,14 +60,14 @@
       <amp-story-page id="cover">
         <amp-story-grid-layer template="vertical">
           <h1 class="hello-world">Hello world!</h1>
-          <p>Page one of two</p>
+          <p>Page one of three</p>
         </amp-story-grid-layer>
       </amp-story-page>
 
       <amp-story-page id="page-2">
         <amp-story-grid-layer template="vertical">
           <h1 class="hello-world">Hello world!</h1>
-          <p>Page two of two</p>
+          <p>Page two of three</p>
           <a href="google.com" role="link" data-tooltip-text="Hola" class="title-small center">Click me!</a>
           <amp-twitter class="blue" interactive></amp-twitter>
           <p>Text under embed</p>
@@ -70,10 +76,9 @@
 
       <amp-story-page id="page-3">
         <amp-story-grid-layer template="vertical">
-          <h1 class="hello-world">Hello world!</h1>
-          <p>Page two of two</p>
-          <a href="google.com" role="link" data-tooltip-text="Hola" class="title-small center">Click me!</a>
-          <amp-twitter class="blue"></amp-twitter>
+          <h1 class="hello-world">Page with dead embed</h1>
+          <p>Page three of three</p>
+          <amp-twitter class="red"></amp-twitter>
           <p>Text under embed</p>
         </amp-story-grid-layer>
       </amp-story-page>

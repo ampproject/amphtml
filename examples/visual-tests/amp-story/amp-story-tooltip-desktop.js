@@ -56,7 +56,7 @@ module.exports = {
     await page.tap('a.title-small.center');
     await page.waitFor('a.i-amphtml-story-tooltip');
     await page.waitFor(300); // For animations to finish.
-    await page.tap('.prev-container > button.i-amphtml-story-button-move');
+    await page.tap('.next-container > button.i-amphtml-story-button-move');
     await page.waitFor(300); // For animations to finish.
     await verifySelectorsVisible(page, name, ['amp-story-page#cover[active]']);
   },
