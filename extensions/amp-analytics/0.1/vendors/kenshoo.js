@@ -22,7 +22,7 @@ export const KENSHOO_CONFIG = /** @type {!JsonObject} */ ({
     'userId': '<USER_ID>',
   },
   'requests': {
-    'host': 'https://amp.xg4ken.com/',
+    'host': 'https://amp.xg4ken.com',
     'parameters':
       'ampcid=${clientId}' +
       '&chcid=${channelClickId}' +

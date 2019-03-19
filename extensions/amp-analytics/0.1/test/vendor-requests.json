@@ -357,9 +357,9 @@
 	  "pageview": "https://t5.mindtake.com/tag/cid/!code/track.gif?Service=!service&Category=!category&Url=_source_url_&Device=!device&uid=_random_"
   },
   "kenshoo": {
-    "host": "https://amp.xg4ken.com/",
-    "parameters": "ampcid=_client_id_&chcid=_channel_click_id_&tid=_tid_&uid=_user_id_&domain=_canonical_hostname_",
-    "landingPage": "https://amp.xg4ken.com/amp/v1/match?ampcid=_client_id_&chcid=_channel_click_id_&tid=_tid_&uid=_user_id_&domain=_canonical_hostname"
+    "host": "https://amp.xg4ken.com",
+    "parameters": "ampcid=_client_id_&chcid=_query_param_&tid=KT-XXXXX-XXX&uid=%3CUSER_ID%3E&domain=_canonical_hostname_",
+    "landingPage": "https://amp.xg4ken.com/amp/v1/match?ampcid=_client_id_&chcid=_query_param_&tid=KT-XXXXX-XXX&uid=%3CUSER_ID%3E&domain=_canonical_hostname_"
   },
   "retargetly": {
     "host": "https://api.retargetly.com",
