@@ -86,6 +86,7 @@ module.exports = {
     await page.tap('amp-twitter.non-interactive-embed');
     await page.waitFor(150); // For animations to finish.
     await verifySelectorsInvisible(page, name, ['a.i-amphtml-story-tooltip']);
+    await verifySelectorsVisible(page, name, ['amp-story-page#page-2[active]']);
   },
   'tapping on closing button should exit expanded view': async (page, name) => {
     const screen = page.touchscreen;
