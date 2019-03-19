@@ -332,12 +332,10 @@ class AmpPageFixture {
  * Get the controller object for the configured engine.
  * @param {!DescribesConfigDef} describesConfig
  */
-async function getController(describesConfig) {
-  const {
-    engine = 'selenium',
-    headless = false,
-  } = describesConfig;
-
+async function getController({
+  engine = 'selenium',
+  headless = false,
+}) {
   if (engine == 'puppeteer') {
     const browser = await createPuppeteer({headless});
     return new PuppeteerController(browser);
