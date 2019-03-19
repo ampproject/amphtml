@@ -689,6 +689,38 @@ describes.sandboxed('DOM', {}, env => {
         expect(document.body).to.exist;
       });
     });
+
+    it('should wait for body even if doc is complete', () => {
+      return new Promise((resolve, reject) => {
+        const doc = {
+          readyState: 'complete',
+          body: null,
+          documentElement: {
+            ownerDocument: {
+              defaultView: {
+                setInterval() {
+                  return window.setInterval.apply(window, arguments);
+                },
+                clearInterval() {
+                  return window.clearInterval.apply(window, arguments);
+                },
+              },
+            },
+          },
+        };
+        setTimeout(() => {
+          doc.body = {};
+        }, 50);
+        dom.waitForBody(doc, () => {
+          try {
+            expect(doc.body).to.exist;
+            resolve();
+          } catch (e) {
+            reject(new Error("body doesn't exist"));
+          }
+        });
+      });
+    });
   });
 
   describe('getDataParamsFromAttributes', () => {
