@@ -151,9 +151,6 @@ describes.realWin('amp-list component', {
       expect(attemptChangeHeightSpy).to.be.calledOnceWith(50);
     });
 
-
-
-
   });
 
   describe('loading states', () => {
@@ -189,7 +186,6 @@ describes.realWin('amp-list component', {
       element.setAttribute('layout', 'fixed');
       element.setAttribute('width', '50');
       element.setAttribute('height', '10');
-
       element.style.height = '10px';
       doc.body.appendChild(element);
 
