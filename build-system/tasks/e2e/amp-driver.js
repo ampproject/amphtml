@@ -81,7 +81,9 @@ class AmpDriver {
    */
   async toggleExperiment(name, toggle) {
     await this.controller_.evaluate((name, toggle) => {
-      window.AMP.toggleExperiment(name, toggle);
+      (window.AMP = window.AMP || []).push(AMP => {
+        AMP.toggleExperiment(name, toggle);
+      });
     }, name, toggle);
   }
 

@@ -22,8 +22,8 @@ describes.endtoend('AMP list load-more=manual', {
       'load-more-manual.amp.html',
   experiments: ['amp-list-load-more'],
   initialRect: {width: pageWidth, height: pageHeight},
-  // TODO(cathyxz, cvializ): figure out why 'viewer' only shows 'FALLBACK'
-  environments: ['single'],
+  // TODO(cathyxz, cvializ): figure out why 'viewer-demo' only shows 'FALLBACK'
+  environments: ['single', 'shadow-demo'],
 }, async env => {
   let controller;
 
