@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
-import {loadScript} from '../3p/3p';
 
-/**
- * @param {!Window} global
- * @param {!Object} data
- */
-export function caprofitx(global, data) {
+document.getElementById('simple').addEventListener('click', () => {
+  const el = document.createElement('h1');
+  el.textContent = 'Hello World!';
+  document.body.appendChild(el);
+});
 
-  global.caprofitxConfig = data;
-  loadScript(global, 'https://cdn.caprofitx.com/tags/amp/profitx_amp.js');
-}
+document.getElementById('tail').addEventListener('click', () => {
+  setTimeout(function() {
+    const el = document.createElement('h1');
+    el.textContent = 'Hello World!';
+    document.body.appendChild(el);
+  }, 6000);
+});

@@ -824,13 +824,14 @@ app.use('/examples/analytics.config.json', (req, res, next) => {
   next();
 });
 
-app.use(['/examples/*', '/extensions/*'], (req, res, next) => {
-  const sourceOrigin = req.query['__amp_source_origin'];
-  if (sourceOrigin) {
-    res.setHeader('AMP-Access-Control-Allow-Source-Origin', sourceOrigin);
-  }
-  next();
-});
+app.use(['/examples/*', '/extensions/*', '/test/manual/*'],
+    (req, res, next) => {
+      const sourceOrigin = req.query['__amp_source_origin'];
+      if (sourceOrigin) {
+        res.setHeader('AMP-Access-Control-Allow-Source-Origin', sourceOrigin);
+      }
+      next();
+    });
 
 /**
  * Append ?sleep=5 to any included JS file in examples to emulate delay in
