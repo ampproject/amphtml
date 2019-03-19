@@ -68,7 +68,7 @@ describes.realWin('amp-autocomplete unit tests', {
   it('renderResults_() should update the container_ with plain text', () => {
     expect(impl.container_).not.to.be.null;
     expect(impl.container_.children.length).to.equal(0);
-    impl.inputElement_.value = 'ap';
+    impl.userInput_ = 'ap';
     const clearAllItemsSpy = sandbox.spy(impl, 'clearAllItems_');
     const filterDataSpy = sandbox.spy(impl, 'filterData_');
 
@@ -81,9 +81,8 @@ describes.realWin('amp-autocomplete unit tests', {
       impl.minChars_ = 2;
       return impl.renderResults_();
     }).then(() => {
-      expect(impl.container_.children.length).to.equal(2);
+      expect(impl.container_.children.length).to.equal(1);
       expect(impl.container_.children[0].innerText).to.equal('apple');
-      expect(impl.container_.children[1].innerText).to.equal('ap');
       expect(clearAllItemsSpy).to.have.been.calledTwice;
       expect(filterDataSpy).to.have.been.calledOnce;
     });
@@ -100,7 +99,7 @@ describes.realWin('amp-autocomplete unit tests', {
     });
     sandbox.stub(impl.templates_, 'renderTemplateArray').returns(
         Promise.resolve(renderedChildren));
-    impl.inputElement_.value = '';
+    impl.userInput_ = '';
     const clearAllItemsSpy = sandbox.spy(impl, 'clearAllItems_');
     const filterDataSpy = sandbox.spy(impl, 'filterData_');
 
@@ -113,15 +112,13 @@ describes.realWin('amp-autocomplete unit tests', {
       impl.minChars_ = 0;
       return impl.renderResults_();
     }).then(() => {
-      expect(impl.container_.children.length).to.equal(4);
+      expect(impl.container_.children.length).to.equal(3);
       expect(impl.container_.children[0].getAttribute('value')).to.equal(
           'apple');
       expect(impl.container_.children[1].getAttribute('value')).to.equal(
           'mango');
       expect(impl.container_.children[2].getAttribute('value')).to.equal(
           'pear');
-      expect(impl.container_.children[3].getAttribute('value')).to.equal(
-          '');
       expect(clearAllItemsSpy).to.have.been.calledTwice;
       expect(filterDataSpy).to.have.been.calledOnce;
     });
@@ -158,7 +155,7 @@ describes.realWin('amp-autocomplete unit tests', {
 
   it('should show and hide results on toggle', () => {
     expect(impl.resultsShowing_()).to.be.false;
-    impl.inputElement_.value = 'ap';
+    impl.userInput_ = 'ap';
     return impl.renderResults_().then(() => {
       expect(impl.resultsShowing_()).to.be.false;
       impl.toggleResults_(true);
@@ -178,25 +175,43 @@ describes.realWin('amp-autocomplete unit tests', {
     }).then(() => {
       expect(renderSpy).to.have.been.calledOnce;
       expect(toggleResultsSpy).to.have.been.calledWith(true);
-      expect(impl.container_.children.length).to.equal(4);
+      expect(impl.container_.children.length).to.equal(3);
     });
   });
 
   it('should call keyDownHandler_() on Down and Up arrow', () => {
     const event = {key: Keys.DOWN_ARROW, preventDefault: () => {}};
+    const displayInputSpy = sandbox.spy(impl, 'displayUserInput_');
     const updateActiveSpy = sandbox.spy(impl, 'updateActiveItem_');
     const preventSpy = sandbox.spy(event, 'preventDefault');
     return element.layoutCallback().then(() => {
       return impl.keyDownHandler_(event);
     }).then(() => {
       expect(preventSpy).to.have.been.calledOnce;
-      expect(updateActiveSpy).to.have.been.calledWith(1);
+      expect(displayInputSpy).to.have.been.calledOnce;
+      expect(updateActiveSpy).not.to.have.been.called;
+      impl.activeIndex_ = 0;
       event.key = Keys.UP_ARROW;
       return impl.keyDownHandler_(event);
     }).then(() => {
       expect(preventSpy).to.have.been.calledTwice;
+      expect(displayInputSpy).to.have.been.calledTwice;
+      expect(updateActiveSpy).not.to.have.been.called;
+      impl.activeIndex_ = 1;
+      return impl.keyDownHandler_(event);
+    }).then(() => {
+      expect(displayInputSpy).to.have.been.calledTwice;
+      expect(preventSpy).to.have.been.calledThrice;
       expect(updateActiveSpy).to.have.been.calledWith(-1);
-    });
+      impl.activeIndex_ = 0;
+      event.key = Keys.DOWN_ARROW;
+      return impl.keyDownHandler_(event);
+    })
+        .then(() => {
+          expect(displayInputSpy).to.have.been.calledTwice;
+          expect(preventSpy).to.have.callCount(4);
+          expect(updateActiveSpy).to.have.been.calledWith(1);
+        });
   });
 
   it('should call keyDownHandler_() on Enter', () => {
@@ -228,19 +243,19 @@ describes.realWin('amp-autocomplete unit tests', {
 
   it('should call keyDownHandler_() on Esc', () => {
     const event = {key: Keys.ESCAPE};
-    const selectItemSpy = sandbox.spy(impl, 'selectItem_');
+    const displayInputSpy = sandbox.spy(impl, 'displayUserInput_');
     const resetSpy = sandbox.spy(impl, 'resetActiveElement_');
     const toggleResultsSpy = sandbox.spy(impl, 'toggleResults_');
     return element.layoutCallback().then(() => {
-      impl.inputElement_.value = 'a';
+      impl.userInput_ = 'a';
       return impl.renderResults_();
     }).then(() => {
-      expect(impl.container_.children.length).to.equal(4);
+      expect(impl.container_.children.length).to.equal(3);
       impl.toggleResults_(true);
       expect(impl.resultsShowing_()).to.be.true;
       return impl.keyDownHandler_(event);
     }).then(() => {
-      expect(selectItemSpy).to.have.been.calledOnce;
+      expect(displayInputSpy).to.have.been.calledOnce;
       expect(resetSpy).to.have.been.calledOnce;
       expect(toggleResultsSpy).to.have.been.calledWith(false);
       expect(impl.resultsShowing_()).to.be.false;
@@ -295,10 +310,10 @@ describes.realWin('amp-autocomplete unit tests', {
     return element.layoutCallback().then(() => {
       expect(impl.activeElement_).to.be.null;
       expect(impl.activeIndex_).to.equal(-1);
-      impl.inputElement_.value = 'a';
+      impl.userInput_ = 'a';
       return impl.renderResults_();
     }).then(() => {
-      expect(impl.container_.children.length).to.equal(4);
+      expect(impl.container_.children.length).to.equal(3);
       impl.activeElement_ = doc.createElement('div');
       expect(impl.activeElement_).not.to.be.null;
       expect(impl.resetActiveElement_()).to.equal();
@@ -319,35 +334,35 @@ describes.realWin('amp-autocomplete unit tests', {
       return impl.updateActiveItem_(-1);
     }).then(() => {
       expect(resetSpy).to.have.been.calledTwice;
-      expect(impl.activeIndex_).to.equal(3);
-      expect(impl.activeElement_).to.be.null;
+      expect(impl.activeIndex_).to.equal(2);
+      expect(impl.activeElement_).not.to.be.null;
+      expect(impl.activeElement_).to.have.class(
+          'i-amphtml-autocomplete-item-active');
       expect(impl.container_.children[0]).not.to.have.class(
           'i-amphtml-autocomplete-item-active');
       expect(impl.container_.children[1]).not.to.have.class(
-          'i-amphtml-autocomplete-item-active');
-      expect(impl.container_.children[2]).not.to.have.class(
-          'i-amphtml-autocomplete-item-active');
-      expect(impl.container_.children[3]).not.to.have.class(
           'i-amphtml-autocomplete-item-active');
       return impl.updateActiveItem_(-1);
     }).then(() => {
       expect(resetSpy).to.have.been.calledThrice;
-      expect(impl.activeIndex_).to.equal(2);
+      expect(impl.activeIndex_).to.equal(1);
       expect(impl.activeElement_).not.to.be.null;
       expect(impl.activeElement_).to.have.class(
           'i-amphtml-autocomplete-item-active');
       expect(impl.container_.children[0]).not.to.have.class(
           'i-amphtml-autocomplete-item-active');
-      expect(impl.container_.children[1]).not.to.have.class(
-          'i-amphtml-autocomplete-item-active');
-      expect(impl.container_.children[3]).not.to.have.class(
+      expect(impl.container_.children[2]).not.to.have.class(
           'i-amphtml-autocomplete-item-active');
       return impl.updateActiveItem_(0);
     }).then(() => {
       expect(resetSpy).to.have.been.calledThrice;
-      expect(impl.activeIndex_).to.equal(2);
+      expect(impl.activeIndex_).to.equal(1);
       expect(impl.activeElement_).not.to.be.null;
       expect(impl.activeElement_).to.have.class(
+          'i-amphtml-autocomplete-item-active');
+      expect(impl.container_.children[0]).not.to.have.class(
+          'i-amphtml-autocomplete-item-active');
+      expect(impl.container_.children[2]).not.to.have.class(
           'i-amphtml-autocomplete-item-active');
     });
   });

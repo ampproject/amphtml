@@ -66,6 +66,12 @@ export class AmpAutocomplete extends AMP.BaseElement {
     this.inputElement_ = null;
 
     /**
+     * The partial user input used to generate suggestions.
+     * @private {string}
+     */
+    this.userInput_ = '';
+
+    /**
      * The value of the "filter" attribute on <autocomplete>.
      * @private {string}
      */
@@ -265,6 +271,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
   */
   inputHandler_() {
     return this.mutateElement(() => {
+      this.userInput_ = this.inputElement_.value;
       this.renderResults_();
       this.toggleResults_(true);
     });
@@ -289,13 +296,12 @@ export class AmpAutocomplete extends AMP.BaseElement {
    * @private
    */
   renderResults_() {
-    const userInput = this.inputElement_.value;
     this.clearAllItems_();
-    if (userInput.length < this.minChars_ || !this.inlineData_) {
+    if (this.userInput_.length < this.minChars_ || !this.inlineData_) {
       return Promise.resolve();
     }
 
-    const filteredData = this.filterData_(this.inlineData_, userInput);
+    const filteredData = this.filterData_(this.inlineData_, this.userInput_);
     let renderPromise = Promise.resolve();
     if (this.templateElement_) {
       renderPromise = this.templates_.renderTemplateArray(this.templateElement_,
@@ -314,10 +320,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
             this.createElementFromItem_(item));
       });
     }
-    return renderPromise.then(() => {
-      // Append the partial user-provided input to navigate back to.
-      this.container_.appendChild(this.createElementFromItem_(userInput));
-    });
+    return renderPromise;
   }
 
   /**
@@ -444,15 +447,15 @@ export class AmpAutocomplete extends AMP.BaseElement {
     if (delta === 0) {
       return Promise.resolve();
     }
-    const index = this.activeIndex_ + delta;
-    let resultsShowing, newActiveElement, newValue, validItem;
+    const keyUpWhenNoneActive = this.activeIndex_ === -1 && delta < 0;
+    const index = keyUpWhenNoneActive ? delta : this.activeIndex_ + delta;
+    let resultsShowing, newActiveElement, newValue;
     return this.measureMutateElement(() => {
       resultsShowing = this.resultsShowing_();
       if (resultsShowing) {
         this.activeIndex_ = mod(index, this.container_.children.length);
         newActiveElement = this.container_.children[this.activeIndex_];
         newValue = newActiveElement.getAttribute('value');
-        validItem = this.activeIndex_ !== this.container_.children.length - 1;
       }
     }, () => {
       if (!resultsShowing) {
@@ -460,11 +463,16 @@ export class AmpAutocomplete extends AMP.BaseElement {
       }
       this.inputElement_.value = newValue;
       this.resetActiveElement_();
-      if (validItem) {
-        newActiveElement.classList.add('i-amphtml-autocomplete-item-active');
-        this.activeElement_ = newActiveElement;
-      }
+      newActiveElement.classList.add('i-amphtml-autocomplete-item-active');
+      this.activeElement_ = newActiveElement;
     });
+  }
+
+  /** Displays the user's partial input in the input field. */
+  displayUserInput_() {
+    this.inputElement_.value = this.userInput_;
+    this.resetActiveElement_();
+    this.activeIndex_ = -1;
   }
 
   /**
@@ -498,10 +506,22 @@ export class AmpAutocomplete extends AMP.BaseElement {
     switch (event.key) {
       case Keys.DOWN_ARROW:
         event.preventDefault();
-        return this.updateActiveItem_(1);
+        // Disrupt loop around to display user input.
+        if (this.activeIndex_ === this.container_.children.length - 1) {
+          this.displayUserInput_();
+          return Promise.resolve();
+        } else {
+          return this.updateActiveItem_(1);
+        }
       case Keys.UP_ARROW:
         event.preventDefault();
-        return this.updateActiveItem_(-1);
+        // Disrupt loop around to display user input.
+        if (this.activeIndex_ === 0) {
+          this.displayUserInput_();
+          return Promise.resolve();
+        } else {
+          return this.updateActiveItem_(-1);
+        }
       case Keys.ENTER:
         if (this.activeElement_) {
           // Only prevent if submit-on-enter === false.
@@ -515,8 +535,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
       case Keys.ESCAPE:
         // Select user's partial input and hide results.
         return this.mutateElement(() => {
-          this.selectItem_(this.container_.lastElementChild);
-          this.resetActiveElement_();
+          this.displayUserInput_();
           this.toggleResults_(false);
         });
       default:
