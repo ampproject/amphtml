@@ -19,10 +19,12 @@ import {Services} from '../../../../src/services';
 import {
   assertHttpsUrl,
   getSourceOrigin,
-  isProxyOrigin,
   isSecureUrlDeprecated,
-  parseUrlDeprecated,
 } from '../../../../src/url';
+import {
+  isProxyOrigin,
+  parseUrlDeprecated,
+} from '../../../../src/url-utils';
 import {loadPromise} from '../../../../src/event-helper';
 import {
   registerServiceBuilder,

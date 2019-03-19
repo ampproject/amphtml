@@ -22,6 +22,7 @@ import {
 import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
+import {isProxyOrigin} from '../../../src/url-utils';
 import {listen} from '../../../src/event-helper';
 import {removeFragment} from '../../../src/url';
 import {startsWith} from '../../../src/string';
@@ -63,8 +64,8 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
     const src = this.element.getAttribute('src');
     urlService.assertHttpsUrl(src, this.element);
 
-    if ((urlService.isProxyOrigin(src) ||
-        urlService.isProxyOrigin(win.location.href)) && !this.isSafari_) {
+    if ((isProxyOrigin(src) ||
+        isProxyOrigin(win.location.href)) && !this.isSafari_) {
       const iframeSrc = this.element.getAttribute('data-iframe-src');
       if (iframeSrc) {
         urlService.assertHttpsUrl(iframeSrc, this.element);
@@ -94,8 +95,8 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
           'match the current origin: ' + src);
     }
 
-    if ((urlService.isProxyOrigin(src) ||
-    urlService.isProxyOrigin(win.location.href)) && this.isSafari_) {
+    if ((isProxyOrigin(src) ||
+        isProxyOrigin(win.location.href)) && this.isSafari_) {
       // https://webkit.org/blog/8090/workers-at-your-service/
       this.user().error(TAG,
           'Did not install ServiceWorker because of safari double keyring ' +
