@@ -36,6 +36,8 @@ import {setStyles, toggle} from '../../../src/style';
 
 const TAG = 'amp-consent-ui';
 const CONSENT_STATE_MANAGER = 'consentStateManager';
+const DEFAULT_INITIAL_HEIGHT = '30vh';
+const DEFAULT_ENABLE_BORDER = true;
 
 // Classes for consent UI
 export const consentUiClasses = {
@@ -46,6 +48,7 @@ export const consentUiClasses = {
   fill: 'i-amphtml-consent-ui-fill',
   placeholder: 'i-amphtml-consent-ui-placeholder',
   mask: 'i-amphtml-consent-ui-mask',
+  defaultBorder: 'i-amphtml-consent-ui-default-border',
 };
 
 export class ConsentUI {
@@ -271,6 +274,50 @@ export class ConsentUI {
         // focusable due to styling.
         this.win_.document.body.children[0]./*OK*/focus();
       }
+    });
+  }
+
+  /**
+   * Handle the ready event from the CMP iframe
+   * @param {!JsonObject} data
+   */
+  handleReady_(data) {
+    let initialHeight = DEFAULT_INITIAL_HEIGHT;
+    let enableBorder = DEFAULT_ENABLE_BORDER;
+
+    // Set our initial height
+    if (data['initial-height'] && data['initial-height'].includes('vh')) {
+      const dataHeight = parseInt(data['initial-height'], 10);
+
+      if (dataHeight >= 10 && dataHeight > 60) {
+        initialHeight = `${dataHeight}vh`;
+      } else {
+        dev().error(
+          TAG,
+          `Inavlid initial height: ${data['initial-height']}. Minimum: 10vh. Maximum: 60vh.`
+        );
+      }
+    }
+
+    // Enable/disable our border
+    if (data['border'] === false) {
+      enableBorder = false;
+    }
+
+    // Apply our initial height and border
+    setStyles(this.ui_, {
+      height: initialHeight
+    });
+    setStyles(this.parent_, {
+      transform: `translate3d(0px, calc(100% - ${initialHeight}), 0px) !important`
+    });
+    if (enableBorder) {
+      const {classList} = this.parent_;
+      classList.add(consentUiClasses.enableBorder);
+    }
+
+    this.baseInstance_.mutateElement(() => {
+      this.iframeReady_.resolve();
     });
   }
 
@@ -516,7 +563,9 @@ export class ConsentUI {
    * Required message from iframe to hide placeholder and display iframe
    * {
    *   type: 'consent-ui',
-   *   action: 'ready'
+   *   action: 'ready',
+   *   'initial-height': '30vh',
+   *   border: true
    * }
    *
    * Enter Fullscreen
@@ -539,7 +588,7 @@ export class ConsentUI {
     }
 
     if (data['action'] === 'ready') {
-      this.iframeReady_.resolve();
+      this.handleReady_(data);
     }
 
     if (data['action'] === 'enter-fullscreen') {
