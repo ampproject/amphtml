@@ -1548,7 +1548,7 @@ describe('Resources discoverWork', () => {
       resources.ampdoc.signals().signal('ready-scan');
     });
 
-    it('should wait until ready-scan', () => {
+    it.skip('should wait until ready-scan', () => {
       const rect = layoutRectLtwh(0, 0, 100, 100);
       resources.ampdoc.signals().reset('ready-scan');
       expect(resource1.hasBeenMeasured()).to.be.false;
