@@ -40,12 +40,10 @@ describes.repeated('amp-mustache 0.2', {
 
   // This test suite runs twice. First by creating templates of type template
   // and then by creating templates encapsulated within script.
-  let innerHtmlSetup;
-  let isTemplateType;
   let isTemplateTypeScript;
+  let isTemplateType;
   let template;
   let templateElement;
-  let textContentSetup;
 
   beforeEach(() => {
     const {templateType} = variant;
@@ -56,37 +54,27 @@ describes.repeated('amp-mustache 0.2', {
     template = new AmpMustache(templateElement);
     isTemplateTypeScript = templateType == 'script';
     isTemplateType = templateType == 'template';
-    textContentSetup = contents => {
-      if (isTemplateType) {
-        templateElement.content.textContent = contents;
-      } else if (isTemplateTypeScript) {
-        templateElement.textContent = contents;
-      }
-    };
-    innerHtmlSetup = html => {
-      templateElement./*OK*/innerHTML = html;
-    };
   });
 
   afterEach(() => viewerCanRenderTemplates = false);
 
   it('should render', () => {
-    textContentSetup('value = {{value}}');
+    templateElement./*OK*/innerHTML = 'value = {{value}}';
     template.compileCallback();
     const result = template.render({value: 'abc'});
     expect(result./*OK*/innerHTML).to.equal('value = abc');
   });
 
   it('should render {{.}} from string', () => {
-    textContentSetup('value = {{.}}');
+    templateElement./*OK*/innerHTML = 'value = {{.}}';
     template.compileCallback();
     const result = template.render('abc');
     expect(result./*OK*/innerHTML).to.equal('value = abc');
   });
 
   it('should sanitize output', () => {
-    innerHtmlSetup(
-        'value = <a href="{{value}}">abc</a>');
+    templateElement./*OK*/innerHTML =
+        'value = <a href="{{value}}">abc</a>';
     template.compileCallback();
     const result = template.render({
       value: /*eslint no-script-url: 0*/ 'javascript:alert();',
@@ -96,8 +84,8 @@ describes.repeated('amp-mustache 0.2', {
   });
 
   it('should sanitize templated tag names', () => {
-    innerHtmlSetup(
-        'value = <{{value}} href="javascript:alert(0)">abc</{{value}}>');
+    templateElement./*OK*/innerHTML =
+        'value = <{{value}} href="javascript:alert(0)">abc</{{value}}>';
     template.compileCallback();
     const result = template.render({
       value: 'a',
@@ -109,17 +97,26 @@ describes.repeated('amp-mustache 0.2', {
   describe('custom delimiters', () => {
     it('should require beginning and ending delimiter', () => {
       templateElement.setAttribute('data-custom-delimiters', '<%');
-      innerHtmlSetup(
-          'value = <<%value%> href="https://www.test.org">abc</<%value%>>');
+      templateElement./*OK*/innerHTML =
+          'value = <<%value%> href="https://www.test.org">abc</<%value%>>';
       expect(() => {
         template.compileCallback();
       }).to.throw(/Beginning and ending delimiter is required/);
     });
 
+    it('should not allow invalid delimiters', () => {
+      templateElement.setAttribute('data-custom-delimiters', '=,');
+      templateElement./*OK*/innerHTML =
+          'value = <<%value%> href="https://www.test.org">abc</<%value%>>';
+      expect(() => {
+        template.compileCallback();
+      }).to.throw(/Empty space and "=" are invalid delimiters/);
+    });
+
     it('should allow for custom delimiters', () => {
       templateElement.setAttribute('data-custom-delimiters', '<%,%>');
-      innerHtmlSetup(
-          'value = <<%value%> href="https://www.test.org">abc</<%value%>>');
+      templateElement./*OK*/innerHTML =
+          'value = <<%value%> href="https://www.test.org">abc</<%value%>>';
       template.compileCallback();
       const result = template.render({
         value: 'a',
@@ -130,8 +127,8 @@ describes.repeated('amp-mustache 0.2', {
 
     it('should allow for mismatched custom delimiters', () => {
       templateElement.setAttribute('data-custom-delimiters', '<%,}}');
-      innerHtmlSetup(
-          'value = <<%value}}> href="https://www.test.org">abc</<%value}}>');
+      templateElement./*OK*/innerHTML =
+          'value = <<%value}}> href="https://www.test.org">abc</<%value}}>';
       template.compileCallback();
       const result = template.render({
         value: 'a',
@@ -144,8 +141,8 @@ describes.repeated('amp-mustache 0.2', {
   describe('Sanitizing data- attributes', () => {
 
     it('should sanitize templated attribute names', () => {
-      innerHtmlSetup(
-          'value = <a {{value}}="javascript:alert(0)">abc</a>');
+      templateElement./*OK*/innerHTML =
+          'value = <a {{value}}="javascript:alert(0)">abc</a>';
       template.compileCallback();
       const result = template.render({
         value: 'href',
@@ -155,8 +152,8 @@ describes.repeated('amp-mustache 0.2', {
     });
 
     it('should sanitize templated bind attribute names', () => {
-      innerHtmlSetup(
-          'value = <p [{{value}}]="javascript:alert()">ALERT</p>');
+      templateElement./*OK*/innerHTML =
+          'value = <p [{{value}}]="javascript:alert()">ALERT</p>';
       template.compileCallback();
       const result = template.render({
         value: 'onclick',
@@ -168,8 +165,8 @@ describes.repeated('amp-mustache 0.2', {
     });
 
     it('should parse data-&style=value output correctly', () => {
-      innerHtmlSetup('value = <a href="{{value}}"' +
-          ' data-&style="color:red;">abc</a>');
+      templateElement./*OK*/innerHTML = 'value = <a href="{{value}}"' +
+          ' data-&style="color:red;">abc</a>';
       template.compileCallback();
       const result = template.render({
         value: /*eslint no-script-url: 0*/ 'javascript:alert();',
@@ -179,7 +176,8 @@ describes.repeated('amp-mustache 0.2', {
     });
 
     it('should parse data-&attr=value output correctly', () => {
-      innerHtmlSetup('value = <a data-&href="{{value}}">abc</a>');
+      templateElement./*OK*/innerHTML =
+          'value = <a data-&href="{{value}}">abc</a>';
       template.compileCallback();
       const result = template.render({
         value: 'https://google.com/',
@@ -188,9 +186,9 @@ describes.repeated('amp-mustache 0.2', {
     });
 
     it('should allow for data-attr=value to output correctly', () => {
-      innerHtmlSetup('value = ' +
+      templateElement./*OK*/innerHTML = 'value = ' +
           '<a data-my-attr="{{invalidValue}}" ' +
-          'data-my-id="{{value}}">abc</a>');
+          'data-my-id="{{value}}">abc</a>';
       template.compileCallback();
       const result = template.render({
         value: 'myid',
@@ -203,8 +201,8 @@ describes.repeated('amp-mustache 0.2', {
 
   describe('Rendering Form Fields', () => {
     it('should allow rendering inputs', () => {
-      innerHtmlSetup('value = ' +
-          '<input value="{{value}}" onchange="{{invalidValue}}">');
+      templateElement./*OK*/innerHTML = 'value = ' +
+          '<input value="{{value}}" onchange="{{invalidValue}}">';
       template.compileCallback();
       const result = template.render({
         value: 'myid',
@@ -215,7 +213,8 @@ describes.repeated('amp-mustache 0.2', {
     });
 
     it('should allow rendering textarea', () => {
-      innerHtmlSetup('value = <textarea>{{value}}</textarea>');
+      templateElement./*OK*/innerHTML =
+          'value = <textarea>{{value}}</textarea>';
       template.compileCallback();
       const result = template.render({
         value: 'Cool story bro.',
@@ -225,8 +224,8 @@ describes.repeated('amp-mustache 0.2', {
     });
 
     it('should not allow image/file input types rendering', () => {
-      innerHtmlSetup('value = ' +
-          '<input value="{{value}}" type="{{type}}">');
+      templateElement./*OK*/innerHTML = 'value = ' +
+          '<input value="{{value}}" type="{{type}}">';
       template.compileCallback();
       allowConsoleError(() => {
         const result = template.render({
@@ -262,8 +261,8 @@ describes.repeated('amp-mustache 0.2', {
     });
 
     it('should allow text input type rendering', () => {
-      innerHtmlSetup('value = ' +
-          '<input value="{{value}}" type="{{type}}">');
+      templateElement./*OK*/innerHTML = 'value = ' +
+          '<input value="{{value}}" type="{{type}}">';
       template.compileCallback();
       const result = template.render({
         value: 'myid',
@@ -274,11 +273,11 @@ describes.repeated('amp-mustache 0.2', {
     });
 
     it('should sanitize form-related attrs properly', () => {
-      innerHtmlSetup('value = ' +
+      templateElement./*OK*/innerHTML = 'value = ' +
           '<input value="{{value}}" ' +
           'formaction="javascript:javascript:alert(1)" ' +
           'formmethod="get" form="form1" formtarget="blank" formnovalidate ' +
-          'formenctype="">');
+          'formenctype="">';
       template.compileCallback();
       allowConsoleError(() => {
         const result = template.render({
@@ -290,8 +289,8 @@ describes.repeated('amp-mustache 0.2', {
     });
 
     it('should not sanitize form tags', () => {
-      innerHtmlSetup('value = ' +
-          '<form><input value="{{value}}"></form><input value="hello">');
+      templateElement./*OK*/innerHTML = 'value = ' +
+          '<form><input value="{{value}}"></form><input value="hello">';
       template.compileCallback();
       const result = template.render({
         value: 'myid',
@@ -303,10 +302,10 @@ describes.repeated('amp-mustache 0.2', {
 
   describe('Nested templates', () => {
     it('should not sanitize nested amp-mustache templates', () => {
-      innerHtmlSetup(
+      templateElement./*OK*/innerHTML =
           'text before a template ' +
           '<template type="amp-mustache">text inside template</template> ' +
-          'text after a template');
+          'text after a template';
       template.compileCallback();
       const result = template.render({});
       expect(result./*OK*/innerHTML).to.equal(
@@ -318,10 +317,10 @@ describes.repeated('amp-mustache 0.2', {
     if (isTemplateType) {
       it('should sanitize nested templates without type="amp-mustache"',
           () => {
-            innerHtmlSetup(
+            templateElement./*OK*/innerHTML =
                 'text before a template ' +
                 '<template>text inside template</template> ' +
-                'text after a template');
+                'text after a template';
             template.compileCallback();
             const result = template.render({});
             expect(result./*OK*/innerHTML).to.equal(
@@ -329,10 +328,10 @@ describes.repeated('amp-mustache 0.2', {
           });
 
       it('should not render variables inside a nested template', () => {
-        innerHtmlSetup(
+        templateElement./*OK*/innerHTML =
             'outer: {{outerOnlyValue}} {{mutualValue}} ' +
             '<template type="amp-mustache">nested: {{nestedOnlyValue}}' +
-            ' {{mutualValue}}</template>');
+            ' {{mutualValue}}</template>';
         template.compileCallback();
         const result = template.render({
           outerOnlyValue: 'Outer',
@@ -419,7 +418,7 @@ describes.repeated('amp-mustache 0.2', {
       const html =
           '1<template type="amp-mustache">2</template>3<template>'
           + '4</template>5';
-      innerHtmlSetup('{{{html}}}');
+      templateElement./*OK*/innerHTML = '{{{html}}}';
       template.compileCallback();
       const result = template.render({html});
       expect(result./*OK*/innerHTML).to.equal(
@@ -429,7 +428,7 @@ describes.repeated('amp-mustache 0.2', {
 
   describe('triple-mustache', () => {
     it('should sanitize text formatting elements', () => {
-      textContentSetup('value = {{{value}}}');
+      templateElement./*OK*/innerHTML = 'value = {{{value}}}';
       template.compileCallback();
       const result = template.render({
         value: '<b>abc</b><img><div>def</div>'
@@ -448,7 +447,7 @@ describes.repeated('amp-mustache 0.2', {
     });
 
     it('should sanitize table related elements and anchor tags', () => {
-      textContentSetup('value = {{{value}}}');
+      templateElement./*OK*/innerHTML = 'value = {{{value}}}';
       template.compileCallback();
       const result = template.render({
         value: '<table class="valid-class">'
@@ -477,7 +476,7 @@ describes.repeated('amp-mustache 0.2', {
     });
 
     it('should sanitize tags, removing unsafe attributes', () => {
-      textContentSetup('value = {{{value}}}');
+      templateElement./*OK*/innerHTML = 'value = {{{value}}}';
       template.compileCallback();
       const result = template.render({
         value: '<a href="javascript:alert(\'XSS\')">test</a>'
@@ -490,7 +489,7 @@ describes.repeated('amp-mustache 0.2', {
 
   describe('tables', () => {
     beforeEach(() => {
-      textContentSetup(
+      templateElement./*OK*/innerHTML =
           '<table>' +
             '<tbody>' +
               '<tr>' +
@@ -502,7 +501,7 @@ describes.repeated('amp-mustache 0.2', {
               '</tr>' +
             '{{/replies}}' +
             '</tbody>' +
-          '</table>');
+          '</table>';
       template.compileCallback();
     });
     if (isTemplateTypeScript) {

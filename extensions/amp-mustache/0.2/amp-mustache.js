@@ -23,7 +23,11 @@ import {purifyHtml, purifyTagsForTripleMustache} from '../../../src/purifier';
 import {userAssert} from '../../../src/log';
 import mustache from '../../../third_party/mustache/mustache';
 
+/** @const {string} */
 const TAG = 'amp-mustache';
+
+/** @const {string} */
+const CUSTOM_DELIMITERS_ATTR = 'data-custom-delimiters';
 
 /**
  * Implements an AMP template for Mustache.js.
@@ -59,7 +63,11 @@ export class AmpMustache extends AMP.BaseTemplate {
     /** @private @const {string} */
     this.template_ = this.initTemplateString_();
 
-    mustache.parse(this.template_, /* tags */ this.getDelimiters_());
+    try {
+      mustache.parse(this.template_, /* tags */ this.getDelimiters_());
+    } catch (e) {
+      userAssert(false, 'Error parsing template: %s', e);
+    }
   }
 
   /**
@@ -88,7 +96,6 @@ export class AmpMustache extends AMP.BaseTemplate {
    * @private
    */
   getDelimiters_() {
-    const CUSTOM_DELIMITERS_ATTR = 'data-custom-delimiters';
     let delimiters = null;
     const {element} = this;
     if (element.hasAttribute(CUSTOM_DELIMITERS_ATTR)) {
@@ -96,21 +103,39 @@ export class AmpMustache extends AMP.BaseTemplate {
       delimiters = delimitersStr.split(',');
       userAssert(delimiters.length == 2,
           'Beginning and ending delimiter is required: %s.', element);
-      // If using a template encode any html entities used in a delimiter.
-      // This is required as the template will also contain decoded delimiters
-      // prior to being parsed by mustache.
+      userAssert(this.validDelimiters_(delimiters),
+          'Empty space and "=" are invalid delimiters');
       if (element.tagName == 'TEMPLATE') {
-        const textArea = document.createElement('textarea');
-        for (let i = 0; i < delimiters.length; i++) {
-          const delimiter = delimiters[i];
-          textArea.textContent = delimiter;
-          delimiters[i] = textArea./*OK*/innerHTML;
-        }
+        this.encodeHtmlEntitiesInDelimiter_(delimiters);
       }
     }
     return delimiters;
   }
 
+  /**
+   * @param {Array<string>} delimiters
+   * @return {boolean}
+   * @private
+   */
+  validDelimiters_(delimiters) {
+    return delimiters.some(delimiter => {
+      return delimiter.trim() !== '' && delimiter !== '=';
+    });
+  }
+  /**
+   * Encode the html entities in a delimiter. We use a textarea
+   * to encode any html entities. e.g. '<' is encoded to '&lt;'
+   * @param {!Array<string>} delimiters
+   * @private
+   */
+  encodeHtmlEntitiesInDelimiter_(delimiters) {
+    const textArea = document.createElement('textarea');
+    for (let i = 0; i < delimiters.length; i++) {
+      const delimiter = delimiters[i];
+      textArea.textContent = delimiter;
+      delimiters[i] = textArea./*OK*/innerHTML;
+    }
+  }
 
   /**
    * Stores and replaces nested templates with custom triple-mustache pointers.
