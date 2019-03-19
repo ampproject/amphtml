@@ -58,7 +58,7 @@ function postReport(action) {
               body.length ? 'empty' : cyan(body.substr(0, 100)));
         }).catch(error => {
           log(yellow('Warning:'), 'failed to report', cyan(`${type}/${action}`),
-              'to the test-status GitHub App:\n', error);
+              'to the test-status GitHub App:\n', error.message.substr(0, 100));
           return;
         });
   }
