@@ -17,7 +17,7 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const log = require('fancy-log');
-const request = require('request');
+const requestPromise = require('request-promise');
 const {cyan, green, yellow} = require('ansi-colors');
 const {gitCommitHash} = require('../../git');
 const {isTravisPullRequestBuild} = require('../../travis');
@@ -49,39 +49,37 @@ function postReport(action) {
   if (type !== null && isTravisPullRequestBuild()) {
     const commitHash = gitCommitHash();
     const postUrl = `${reportBaseUrl}/${commitHash}/${type}/${action}`;
-    request.post(postUrl, (error, response, body) => {
-      if (error) {
-        log(yellow('Warning:'), 'failed to report', cyan(action),
-            'to the test-status GitHub App:\n', error);
-        return;
-      }
-
-      log(green('Info:', 'reported', cyan(action),
-          'to the test-status GitHub App. Response status code:',
-          cyan(response.statusCode), cyan(response.statusMessage)));
-      log(response.statusCode > 299 ? green('Info:') : yellow('Warning:'),
-          'response from test-status was',
-          body.length ? 'empty' : cyan(body.substr(0, 100)));
-    });
+    return requestPromise.post(postUrl)
+        .then(body => {
+          log(green('Info:'), 'reported', cyan(action),
+              'to the test-status GitHub App');
+          log(green('Info:'), 'response from test-status was',
+              body.length ? 'empty' : cyan(body.substr(0, 100)));
+        }).catch(error => {
+          log(yellow('Warning:'), 'failed to report', cyan(action),
+              'to the test-status GitHub App:\n', error);
+          return;
+        });
   }
+  return Promise.resolve();
 }
 
 exports.reportTestErrored = () => {
-  postReport('report/errored');
+  return postReport('report/errored');
 };
 
 exports.reportTestFinished = (success, failed) => {
-  postReport(`report/${success}/${failed}`);
+  return postReport(`report/${success}/${failed}`);
 };
 
 exports.reportTestQueued = () => {
-  postReport('queued');
+  return postReport('queued');
 };
 
 exports.reportTestStarted = () => {
-  postReport('started');
+  return postReport('started');
 };
 
 exports.reportTestSkipped = () => {
-  postReport('skipped');
+  return postReport('skipped');
 };
