@@ -50,7 +50,6 @@ function postReport(action) {
   if (type !== null && isTravisPullRequestBuild()) {
     const commitHash = gitCommitHash();
     const postUrl = `${reportBaseUrl}/${commitHash}/${type}/${action}`;
-    log(green('DEBUG:'), type, commitHash, postUrl);
     return requestPromise.post(postUrl)
         .then(body => {
           log(green('Info:'), 'reported', cyan(`${type}/${action}`),
@@ -63,8 +62,6 @@ function postReport(action) {
           return;
         });
   }
-  log(green('DEBUG:'), IS_INTEGRATION, IS_LOCAL_CHANGES, IS_SAUCELABS,
-      IS_SINGLE_PASS, IS_UNIT, type);
   return Promise.resolve();
 }
 
