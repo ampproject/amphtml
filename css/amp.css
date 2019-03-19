@@ -863,6 +863,15 @@ amp-story .i-amphtml-loader {
 }
 
 /**
+ * Uses a selector that stops targeting amp-story-page elements once they have a
+ * [distance] or [active] attribute, so amp-story.css doesn't have to rely on
+ * CSS specificity hacks to override these styles after the JavaScript ran.
+ */
+amp-story-page:not(:first-of-type):not([distance]):not([active]) {
+  transform: translateY(1000vh) !important;
+}
+
+/**
  * amp-autocomplete to avoid FOUC.
  */
 amp-autocomplete {
