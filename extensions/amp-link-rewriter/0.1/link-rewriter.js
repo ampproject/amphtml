@@ -18,10 +18,6 @@ import {Services} from '../../../src/services';
 import {getConfigOpts} from './config-options';
 import {getDataParamsFromAttributes} from '../../../src/dom';
 
-const CTX_ATTR_NAME = 'shiftedctx';
-const CTX_ATTR_VALUE = () => {
-  return Date.now();
-};
 const WL_ANCHOR_ATTR = [
   'href',
   'id',
@@ -56,9 +52,6 @@ export class LinkRewriter {
     /** @public {string} */
     this.rewrittenUrl = this.configOpts_.output;
 
-    /** @private {boolean|number|string} */
-    this.ctxAttrValue_ = CTX_ATTR_VALUE().toString();
-
     /** @private {!../../../src/service/url-replacements-impl.UrlReplacements} */
     this.urlReplacementService_ = Services.urlReplacementsForDoc(ampElement);
   }
@@ -81,27 +74,12 @@ export class LinkRewriter {
       return;
     }
 
-    if (this.isRewritten_(htmlElement)) {
-      return;
-    }
-
     if (this.isInternalLink_(htmlElement, sourceTrimmedDomain)
       || this.isInternalLink_(htmlElement, canonicalTrimmedDomain)) {
       return;
     }
 
     this.setRedirectUrl_(htmlElement);
-  }
-
-  /**
-   * Check if the anchor element was already shifted
-   * @param {?Element} htmlElement
-   * @return {boolean}
-   * @private
-   */
-  isRewritten_(htmlElement) {
-    return (htmlElement[CTX_ATTR_NAME]) &&
-        (htmlElement[CTX_ATTR_NAME] === this.ctxAttrValue_);
   }
 
   /**
@@ -131,21 +109,9 @@ export class LinkRewriter {
         htmlElement.href = this.replaceVars_(htmlElement, vars);
       }
 
-      // If the link has been "activated" via contextmenu,
-      // we have to keep the shifting in mind
-      if (this.event_.type === 'contextmenu') {
-        this.ctxAttrValue_ = CTX_ATTR_VALUE().toString();
-        htmlElement[CTX_ATTR_NAME] = this.ctxAttrValue_;
-      }
-
       this.viewer_.win.setTimeout(() => {
         htmlElement.href = oldValHref;
-
-        if (htmlElement[CTX_ATTR_NAME]) {
-          htmlElement[CTX_ATTR_NAME] = null;
-        }
-
-      }, ((this.event_.type === 'contextmenu') ? 15000 : 500));
+      }, 500);
 
     });
   }
