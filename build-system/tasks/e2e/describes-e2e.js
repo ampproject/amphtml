@@ -53,15 +53,33 @@ let PuppeteerConfigDef;
  */
 let SeleniumConfigDef;
 
-/** @const {!DescribesConfigDef} */
-const describesConfig = {};
+/** @const {?DescribesConfigDef} */
+const describesConfig = null;
 
 /**
- * Configure all tests.
+ * Configure all tests. This may only be called once, since it is only read once
+ * and writes after reading will not have any effect.
  * @param {!DescribesConfigDef} config
  */
 function configure(config) {
-  Object.assign(describesConfig, config);
+  if (!describesConfig) {
+    describesConfig = Object.assign({}, config);
+  }
+  throw new Error('describes.config should only be called once');
+}
+
+/**
+ * Retrieve the describes config if set.
+ * If not set, it sets the config to an empty object and returns it.
+ * After getting the config the first time, the config may not be changed.
+ * @return {!DescribesConfigDef}
+ */
+function getConfig() {
+  if (!describesConfig) {
+    describesConfig = {};
+  }
+
+  return describesConfig;
 }
 
 /**
@@ -295,7 +313,8 @@ class AmpPageFixture {
 
   /** @override */
   async setup(env) {
-    const controller = await getController(describesConfig);
+    const config = getConfig();
+    const controller = await getController(config);
     const ampDriver = new AmpDriver(controller);
     env.controller = controller;
     env.ampDriver = ampDriver;
