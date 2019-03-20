@@ -160,10 +160,15 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
     description: 'Button label for the share target that shares a link via ' +
         'WhatsApp.',
   },
+  [LocalizedStringId.AMP_STORY_TOOLTIP_EXPAND_INSTAGRAM]: {
+    string: 'Expand Post',
+    description: 'Label in the tooltip text that appears when an Instagram ' +
+        'interactive embed is clicked. It invites users to expand the embed.',
+  },
   [LocalizedStringId.AMP_STORY_TOOLTIP_EXPAND_TWEET]: {
     string: 'Expand Tweet',
-    description: 'Label in the tooltip text for when a Twitter embed is ' +
-        'expandable.',
+    description: 'Label in the tooltip text that appears when a Twitter ' +
+        'interactive embed is clicked. It invites users to expand the embed.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_HEIGHT_SIZE_TEXT]: {
     string: 'Expand the height of your window to view this experience',

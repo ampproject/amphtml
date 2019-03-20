@@ -66,6 +66,12 @@ export const EXPANDABLE_COMPONENTS = {
     localizedStringId: LocalizedStringId.AMP_STORY_TOOLTIP_EXPAND_TWEET,
     selector: 'amp-twitter',
   },
+  'amp-instagram': {
+    customIconClassName: 'amp-social-share-instagram',
+    actionIcon: ActionIcon.EXPAND,
+    localizedStringId: LocalizedStringId.AMP_STORY_TOOLTIP_EXPAND_INSTAGRAM,
+    selector: 'amp-instagram',
+  },
 };
 
 /**
