@@ -132,6 +132,7 @@ tags: {
   html_format: AMP4ADS
   html_format: ACTIONS
   tag_name: "TEMPLATE"
+  mandatory_ancestor: "BODY"
   # <template> tags may not be nested inside other <template> tags.
   disallowed_ancestor: "TEMPLATE"
   # <templates> tags inside <amp-date-picker> have additional requirements
@@ -159,6 +160,7 @@ tags: {
   html_format: AMP4EMAIL
   tag_name: "TEMPLATE"
   spec_name: "TEMPLATE (AMP4EMAIL)"
+  mandatory_ancestor: "BODY"
   # <template> tags may not be nested inside other <template> tags.
   disallowed_ancestor: "TEMPLATE (AMP4EMAIL)"
   # <templates> tags inside <amp-date-picker> have additional requirements
