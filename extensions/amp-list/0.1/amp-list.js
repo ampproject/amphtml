@@ -921,6 +921,7 @@ export class AmpList extends AMP.BaseElement {
   loadMoreCallback_(opt_reload = false) {
     if (!!this.loadMoreSrc_) {
       this.element.setAttribute('src', this.loadMoreSrc_);
+      // Clear url to avoid repeated fetches from same url
       this.loadMoreSrc_ = null;
     } else if (!opt_reload) {
       // Nothing more to load or previous fetch still inflight
