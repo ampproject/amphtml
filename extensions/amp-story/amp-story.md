@@ -718,14 +718,6 @@ An `amp-story-grid-layer` can contain any of the following elements:
     </td>
   </tr>
   <tr>
-    <td>Embeds</td>
-    <td>
-      <ul>
-        <li><code>&lt;amp-twitter></code></li>
-      </ul>
-    </td>
-  </tr>
-  <tr>
     <td>Other</td>
     <td>
       <ul>
@@ -1402,7 +1394,6 @@ The following are other components usable in AMP stories that require some story
 
 - [amp-consent](https://www.ampproject.org/docs/reference/components/amp-consent#prompt-ui-for-stories)
 - [amp-sidebar](https://www.ampproject.org/docs/reference/components/amp-sidebar)
-- [amp-twitter](https://www.ampproject.org/docs/reference/components/amp-twitter)
 
 For more generally usable components see the [list of allowed children](https://www.ampproject.org/docs/reference/components/amp-story#children).
 
