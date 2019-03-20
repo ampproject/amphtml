@@ -83,12 +83,12 @@ const randomFalsy = () => {
   }
 };
 
-const generateJson = numberOfItems => {
+const generateJson = (numberOfItems, pagesLeft) => {
   const results = [];
   for (let i = 0; i < numberOfItems; i++) {
     const imageUrl = squareImgUrl(200);
     const r = {
-      'title': 'Item ' + randInt(100),
+      'title': i + pagesLeft * 100,
       imageUrl,
       'price': randInt(8) + 0.99,
     };
@@ -144,7 +144,7 @@ router.get('/infinite-scroll', function(req, res) {
   const pagesLeft = query['left'] || 1;
   const latency = query['latency'] || 0;
 
-  const items = generateJson(numberOfItems);
+  const items = generateJson(numberOfItems, pagesLeft);
 
   const nextUrl = '/list/infinite-scroll?items=' +
     numberOfItems + '&left=' + (pagesLeft - 1) +
@@ -162,7 +162,6 @@ router.get('/infinite-scroll', function(req, res) {
     res.json(results);
   }
 });
-
 
 const generateJsonWithState = (numberOfItems, pagesLeft) => {
   const results = generateJson(numberOfItems);
