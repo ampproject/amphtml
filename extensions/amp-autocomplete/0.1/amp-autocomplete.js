@@ -257,7 +257,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
   mutatedAttributesCallback(mutations) {
     const src = mutations['src'];
     if (src === undefined || src === null) {
-      return Promise.resolve;
+      return Promise.resolve();
     }
     if (typeof src === 'string') {
       return this.getRemoteData_().then(remoteData => {

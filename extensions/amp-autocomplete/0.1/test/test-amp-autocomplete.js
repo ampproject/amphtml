@@ -51,6 +51,68 @@ describes.realWin('amp-autocomplete unit tests', {
     });
   });
 
+  describe('mutatedAttributesCallback_()', () => {
+    let remoteDataSpy;
+    let filterAndRenderSpy;
+
+    beforeEach(() => {
+      remoteDataSpy = sandbox.stub(impl, 'getRemoteData_').resolves(
+          ['a', 'b', 'c']);
+      filterAndRenderSpy = sandbox.spy(impl, 'filterDataAndRenderResults_');
+    });
+
+    it('should resolve when param is {}', () => {
+      return impl.mutatedAttributesCallback({}).then(() => {
+        expect(remoteDataSpy).not.to.have.been.called;
+        expect(filterAndRenderSpy).not.to.have.been.called;
+      });
+    });
+
+    it('should resolve when src is undefined', () => {
+      return impl.mutatedAttributesCallback({'src': undefined}).then(() => {
+        expect(remoteDataSpy).not.to.have.been.called;
+        expect(filterAndRenderSpy).not.to.have.been.called;
+      });
+    });
+
+    it('should resolve when src is null', () => {
+      return impl.mutatedAttributesCallback({'src': null}).then(() => {
+        expect(remoteDataSpy).not.to.have.been.called;
+        expect(filterAndRenderSpy).not.to.have.been.called;
+      });
+    });
+
+    it('should pass on calls when src is type str', () => {
+      return impl.mutatedAttributesCallback(
+          {'src': 'example.json'}).then(() => {
+        expect(remoteDataSpy).to.have.been.calledOnce;
+        expect(impl.sourceData_).to.have.ordered.members(['a', 'b', 'c']);
+        expect(filterAndRenderSpy).to.have.been.calledOnce;
+        expect(filterAndRenderSpy).to.have.been.calledWith(['a', 'b', 'c'], '');
+      });
+    });
+
+    it('should pass on calls when src is type object with "items"', () => {
+      return impl.mutatedAttributesCallback(
+          {'src': {'items': ['a', 'b', 'c']}}).then(() => {
+        expect(remoteDataSpy).not.to.have.been.called;
+        expect(impl.sourceData_).to.have.ordered.members(['a', 'b', 'c']);
+        expect(filterAndRenderSpy).to.have.been.calledOnce;
+        expect(filterAndRenderSpy).to.have.been.calledWith(['a', 'b', 'c'], '');
+      });
+    });
+
+    it('should pass on calls when src is type object without "items"', () => {
+      return impl.mutatedAttributesCallback(
+          {'src': {'random': 'value'}}).then(() => {
+        expect(remoteDataSpy).not.to.have.been.called;
+        expect(impl.sourceData_).to.be.an('array').that.is.empty;
+        expect(filterAndRenderSpy).to.have.been.calledOnce;
+        expect(filterAndRenderSpy).to.have.been.calledWith([], '');
+      });
+    });
+  });
+
   it('createElementFromItem_() should return element', () => {
     let element = impl.createElementFromItem_('hello');
     expect(element).not.to.be.null;
@@ -65,7 +127,7 @@ describes.realWin('amp-autocomplete unit tests', {
     expect(element.innerText).to.equal('');
   });
 
-  describe('filterDataAndRenderResults_() should pass on necessary calls',
+  describe('filterDataAndRenderResults_()',
       () => {
         let clearAllItemsSpy;
         let renderSpy;
