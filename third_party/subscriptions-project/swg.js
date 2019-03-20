@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.45 */
+/** Version: 0.1.22.47 */
 /**
  * @license
  * Copyright 2017 The Web Activities Authors. All Rights Reserved.
@@ -157,6 +157,44 @@ class ActivityPort {
    * @return {!Promise<!ActivityResult>}
    */
   acceptResult() {}
+}
+
+
+/**
+ * Activity client-side binding for messaging.
+ *
+ * Whether the host can or cannot receive a message depends on the type of
+ * host and its state. Ensure that the code has an alternative path if
+ * messaging is not available.
+ *
+ * @interface
+ */
+class ActivityMessagingPort {
+
+  /**
+   * Returns the target window where host is loaded. May be unavailable.
+   * @return {?Window}
+   */
+  getTargetWin() {}
+
+  /**
+   * Sends a message to the host.
+   * @param {!Object} payload
+   */
+  message(payload) {}
+
+  /**
+   * Registers a callback to receive messages from the host.
+   * @param {function(!Object)} callback
+   */
+  onMessage(callback) {}
+
+  /**
+   * Creates a new communication channel or returns an existing one.
+   * @param {string=} opt_name
+   * @return {!Promise<!MessagePort>}
+   */
+  messageChannel(opt_name) {}
 }
 
 
@@ -857,6 +895,7 @@ function closePort(port) {
  * to size requests.
  *
  * @implements {ActivityPort}
+ * @implements {ActivityMessagingPort}
  */
 class ActivityIframePort {
 
@@ -951,27 +990,22 @@ class ActivityIframePort {
     return this.resultPromise_;
   }
 
-  /**
-   * Sends a message to the host.
-   * @param {!Object} payload
-   */
+  /** @override */
+  getTargetWin() {
+    return this.iframe_.contentWindow || null;
+  }
+
+  /** @override */
   message(payload) {
     this.messenger_.customMessage(payload);
   }
 
-  /**
-   * Registers a callback to receive messages from the host.
-   * @param {function(!Object)} callback
-   */
+  /** @override */
   onMessage(callback) {
     this.messenger_.onCustomMessage(callback);
   }
 
-  /**
-   * Creates a new communication channel or returns an existing one.
-   * @param {string=} opt_name
-   * @return {!Promise<!MessagePort>}
-   */
+  /** @override */
   messageChannel(opt_name) {
     return this.messenger_.askChannel(opt_name);
   }
@@ -1064,6 +1098,7 @@ class ActivityIframePort {
  * client executed as a popup.
  *
  * @implements {ActivityPort}
+ * @implements {ActivityMessagingPort}
  */
 class ActivityWindowPort {
 
@@ -1096,6 +1131,14 @@ class ActivityWindowPort {
     this.args_ = opt_args || null;
     /** @private @const {!ActivityOpenOptions} */
     this.options_ = opt_options || {};
+
+    /** @private {?function()} */
+    this.connectedResolver_ = null;
+
+    /** @private @const {!Promise} */
+    this.connectedPromise_ = new Promise(resolve => {
+      this.connectedResolver_ = resolve;
+    });
 
     /** @private {?function((!ActivityResult|!Promise))} */
     this.resultResolver_ = null;
@@ -1135,10 +1178,11 @@ class ActivityWindowPort {
   }
 
   /**
-   * @return {?Window}
+   * Waits until the activity port is connected to the host.
+   * @return {!Promise}
    */
-  getTargetWin() {
-    return this.targetWin_;
+  whenConnected() {
+    return this.connectedPromise_;
   }
 
   /**
@@ -1166,8 +1210,46 @@ class ActivityWindowPort {
   }
 
   /** @override */
+  getTargetWin() {
+    return this.targetWin_;
+  }
+
+  /** @override */
   acceptResult() {
     return this.resultPromise_;
+  }
+
+  /**
+   * Sends a message to the host.
+   * Whether the host can or cannot receive a message depends on the type of
+   * host and its state. Ensure that the code has an alternative path if
+   * messaging is not available.
+   * @override
+   */
+  message(payload) {
+    this.messenger_.customMessage(payload);
+  }
+
+  /**
+   * Registers a callback to receive messages from the host.
+   * Whether the host can or cannot receive a message depends on the type of
+   * host and its state. Ensure that the code has an alternative path if
+   * messaging is not available.
+   * @override
+   */
+  onMessage(callback) {
+    this.messenger_.onCustomMessage(callback);
+  }
+
+  /**
+   * Creates a new communication channel or returns an existing one.
+   * Whether the host can or cannot receive a message depends on the type of
+   * host and its state. Ensure that the code has an alternative path if
+   * messaging is not available.
+   * @override
+   */
+  messageChannel(opt_name) {
+    return this.messenger_.askChannel(opt_name);
   }
 
   /**
@@ -1401,6 +1483,7 @@ class ActivityWindowPort {
     if (cmd == 'connect') {
       // First ever message. Indicates that the receiver is listening.
       this.messenger_.sendStartCommand(this.args_);
+      this.connectedResolver_();
     } else if (cmd == 'result') {
       // The last message. Indicates that the result has been received.
       const code = /** @type {!ActivityResultCode} */ (payload['code']);
@@ -1524,7 +1607,7 @@ class ActivityPorts {
    */
   constructor(win) {
     /** @const {string} */
-    this.version = '1.22';
+    this.version = '1.23';
 
     /** @private @const {!Window} */
     this.win_ = win;
@@ -1590,14 +1673,26 @@ class ActivityPorts {
    * @return {{targetWin: ?Window}}
    */
   open(requestId, url, target, opt_args, opt_options) {
-    const port = new ActivityWindowPort(
-        this.win_, requestId, url, target, opt_args, opt_options);
-    port.open().then(() => {
-      // Await result if possible. Notice that when falling back to "redirect",
-      // the result will never arrive through this port.
-      this.consumeResultAll_(requestId, port);
-    });
+    const port = this.openWin_(requestId, url, target, opt_args, opt_options);
     return {targetWin: port.getTargetWin()};
+  }
+
+  /**
+   * Start an activity in a separate window and tries to setup messaging with
+   * this window.
+   *
+   * See `open()` method for more details, including `onResult` callback.
+   *
+   * @param {string} requestId
+   * @param {string} url
+   * @param {string} target
+   * @param {?Object=} opt_args
+   * @param {?ActivityOpenOptions=} opt_options
+   * @return {!Promise<!ActivityMessagingPort>}
+   */
+  openWithMessaging(requestId, url, target, opt_args, opt_options) {
+    const port = this.openWin_(requestId, url, target, opt_args, opt_options);
+    return port.whenConnected().then(() => port);
   }
 
   /**
@@ -1651,6 +1746,25 @@ class ActivityPorts {
    */
   onRedirectError(handler) {
     this.redirectErrorPromise_.then(handler);
+  }
+
+  /**
+   * @param {string} requestId
+   * @param {string} url
+   * @param {string} target
+   * @param {?Object=} opt_args
+   * @param {?ActivityOpenOptions=} opt_options
+   * @return {!ActivityWindowPort}
+   */
+  openWin_(requestId, url, target, opt_args, opt_options) {
+    const port = new ActivityWindowPort(
+        this.win_, requestId, url, target, opt_args, opt_options);
+    port.open().then(() => {
+      // Await result if possible. Notice that when falling back to "redirect",
+      // the result will never arrive through this port.
+      this.consumeResultAll_(requestId, port);
+    });
+    return port;
   }
 
   /**
@@ -1709,6 +1823,7 @@ class ActivityPorts {
 var activityPorts = {
   ActivityPorts,
   ActivityIframePort,
+  ActivityMessagingPort,
   ActivityMode,
   ActivityOpenOptions,
   ActivityPort,
@@ -1720,8 +1835,8 @@ var activityPorts = {
   isAbortError,
 };
 var activityPorts_1 = activityPorts.ActivityPorts;
-var activityPorts_10 = activityPorts.createAbortError;
-var activityPorts_11 = activityPorts.isAbortError;
+var activityPorts_11 = activityPorts.createAbortError;
+var activityPorts_12 = activityPorts.isAbortError;
 
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
@@ -2604,30 +2719,33 @@ function msg(map, langOrElement) {
  * limitations under the License.
  */
 
+/**
+ * The button title should match that of button's SVG.
+ */
 /** @type {!Object<string, string>} */
 const TITLE_LANG_MAP = {
   'en': 'Subscribe with Google',
-  'ar': 'الاشتراك عبر Google',
+  'ar': 'Google اشترك مع',
   'de': 'Abonnieren mit Google',
   'es': 'Suscríbete con Google',
-  'es-latam': 'Suscribirse con Google',
-  'es-latn': 'Suscribirse con Google',
+  'es-latam': 'Suscríbete con Google',
+  'es-latn': 'Suscríbete con Google',
   'fr': 'S\'abonner avec Google',
-  'hi': 'Google की सदस्यता लें',
+  'hi': 'Google के ज़रिये सदस्यता',
   'id': 'Berlangganan dengan Google',
   'it': 'Abbonati con Google',
   'jp': 'Google で購読',
-  'ko': 'Google 을(를) 통해 구독',
+  'ko': 'Google 을 통한구독',
   'ms': 'Langgan dengan Google',
-  'nl': 'Abonneren met Google',
+  'nl': 'Abonneren via Google',
   'no': 'Abonner med Google',
   'pl': 'Subskrybuj z Google',
   'pt': 'Subscrever com o Google',
-  'pt-br': 'Faça sua assinatura com Google',
-  'ru': 'Подпишитесь через Google',
+  'pt-br': 'Assine com o Google',
+  'ru': 'Подпиcka через Google',
   'se': 'Prenumerera med Google',
-  'th': 'สมัครรับข้อมูลด้วย Google',
-  'tr': 'Google ile abone olun',
+  'th': 'สมัครฟาน Google',
+  'tr': 'Google ile Abone Ol',
   'uk': 'Підписатися через Google',
   'zh-tw': '透過 Google 訂閱',
 };
@@ -2737,6 +2855,7 @@ const CallbackId = {
   LINK_COMPLETE: 6,
   FLOW_STARTED: 7,
   FLOW_CANCELED: 8,
+  CONTRIBUTION_RESPONSE: 9,
 };
 
 
@@ -2861,6 +2980,13 @@ class Callbacks {
   }
 
   /**
+   * @param {function(!Promise<*>)} callback
+   */
+  setOnContributionResponse(callback) {
+    this.setCallback_(CallbackId.CONTRIBUTION_RESPONSE, callback);
+  }
+
+  /**
    * @param {!Promise<*>} responsePromise
    * @return {boolean} Whether the callback has been found.
    */
@@ -2871,10 +2997,27 @@ class Callbacks {
   }
 
   /**
+   * @param {!Promise<*>} responsePromise
+   * @return {boolean} Whether the callback has been found.
+   */
+  triggerContributionResponse(responsePromise) {
+    return this.trigger_(
+        CallbackId.CONTRIBUTION_RESPONSE,
+        responsePromise.then(res => res.clone()));
+  }
+
+  /**
    * @return {boolean}
    */
   hasSubscribeResponsePending() {
     return !!this.resultBuffer_[CallbackId.SUBSCRIBE_RESPONSE];
+  }
+
+  /**
+   * @return {boolean}
+   */
+  hasContributionResponsePending() {
+    return !!this.resultBuffer_[CallbackId.CONTRIBUTION_RESPONSE];
   }
 
   /**
@@ -3062,7 +3205,7 @@ class View {
  * @return {boolean}
  */
 function isCancelError(error) {
-  return activityPorts_11(error);
+  return activityPorts_12(error);
 }
 
 
@@ -3074,7 +3217,7 @@ function isCancelError(error) {
  * @return {!DOMException}
  */
 function createCancelError(win, opt_message) {
-  return activityPorts_10(win, opt_message);
+  return activityPorts_11(win, opt_message);
 }
 
 
@@ -3912,9 +4055,11 @@ class SubscribeResponse {
    * @param {!PurchaseData} purchaseData
    * @param {?UserData} userData
    * @param {?Entitlements} entitlements
+   * @param {!string} productType
    * @param {function():!Promise} completeHandler
    */
-  constructor(raw, purchaseData, userData, entitlements, completeHandler) {
+  constructor(raw, purchaseData, userData, entitlements, productType,
+      completeHandler) {
     /** @const {string} */
     this.raw = raw;
     /** @const {!PurchaseData} */
@@ -3923,6 +4068,8 @@ class SubscribeResponse {
     this.userData = userData;
     /** @const {?Entitlements} */
     this.entitlements = entitlements;
+    /** @const {string} */
+    this.productType = productType;
     /** @private @const {function():!Promise} */
     this.completeHandler_ = completeHandler;
   }
@@ -3936,6 +4083,7 @@ class SubscribeResponse {
         this.purchaseData,
         this.userData,
         this.entitlements,
+        this.productType,
         this.completeHandler_);
   }
 
@@ -3947,6 +4095,7 @@ class SubscribeResponse {
       'purchaseData': this.purchaseData.json(),
       'userData': this.userData ? this.userData.json() : null,
       'entitlements': this.entitlements ? this.entitlements.json() : null,
+      'productType': this.productType,
     };
   }
 
@@ -4127,6 +4276,7 @@ const SubscriptionFlows = {
   SHOW_ABBRV_OFFER: 'showAbbrvOffer',
   SHOW_CONTRIBUTION_OPTIONS: 'showContributionOptions',
   SUBSCRIBE: 'subscribe',
+  CONTRIBUTE: 'contribute',
   COMPLETE_DEFERRED_ACCOUNT_CREATION: 'completeDeferredAccountCreation',
   LINK_ACCOUNT: 'linkAccount',
   SHOW_LOGIN_PROMPT: 'showLoginPrompt',
@@ -4149,6 +4299,17 @@ const WindowOpenMode = {
   REDIRECT: 'redirect',
 };
 
+/**
+ * The Offers/Contributions UI is rendered differently based on the
+ * ProductType. The ProductType parameter is passed to the Payments flow, and
+ * then passed back to the Payments confirmation page to render messages/text
+ * based on the ProductType.
+ * @enum {string}
+ */
+const ProductType = {
+  SUBSCRIPTION: 'SUBSCRIPTION',
+  UI_CONTRIBUTION: 'UI_CONTRIBUTION',
+};
 
 /**
  * @return {!Config}
@@ -4392,7 +4553,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.45',
+    '_client': 'SwG 0.1.22.47',
   });
 }
 
@@ -4458,8 +4619,12 @@ class PayStartFlow {
   /**
    * @param {*} deps
    * @param {*} skuOrSubscriptionRequest
+   * @param {*} productType
    */
-  constructor(deps, skuOrSubscriptionRequest) {
+  constructor(
+        deps,
+        skuOrSubscriptionRequest,
+        productType = ProductType.SUBSCRIPTION) {
     /** @private @const {*} */
     this.deps_ = deps;
 
@@ -4476,6 +4641,9 @@ class PayStartFlow {
     this.subscriptionRequest_ =
         typeof skuOrSubscriptionRequest == 'string' ?
             {'skuId': skuOrSubscriptionRequest} : skuOrSubscriptionRequest;
+
+    /**@private @const {!ProductType} */
+    this.productType_ = productType;
 
     /** @private @const {*} */
     this.analyticsService_ = deps.analytics();
@@ -4513,6 +4681,7 @@ class PayStartFlow {
       'i': {
         'startTimeMs': Date.now(),
         'googleTransactionId': this.analyticsService_.getTransactionId(),
+        'productType': this.productType_,
       },
     }, {
       forceRedirect:
@@ -4600,6 +4769,7 @@ class PayCompleteFlow {
     this.response_ = response;
     const args = {
       'publicationId': this.deps_.pageConfig().getPublicationId(),
+      'productType': this.response_['productType'],
     };
     // TODO(dvoytenko, #400): cleanup once entitlements is launched everywhere.
     if (response.userData && response.entitlements) {
@@ -4675,6 +4845,7 @@ function validatePayResponse(deps, payPromise, completeHandler) {
 function parseSubscriptionResponse(deps, data, completeHandler) {
   let swgData = null;
   let raw = null;
+  let productType = null;
   if (data) {
     if (typeof data == 'string') {
       raw = /** @type {string} */ (data);
@@ -4682,12 +4853,18 @@ function parseSubscriptionResponse(deps, data, completeHandler) {
       // Assume it's a json object in the format:
       // `{integratorClientCallbackData: "..."}` or `{swgCallbackData: "..."}`.
       const json = /** @type {!Object} */ (data);
+      if ('productType' in data) {
+        productType = data['productType'];
+      }
       if ('swgCallbackData' in json) {
         swgData = /** @type {!Object} */ (json['swgCallbackData']);
       } else if ('integratorClientCallbackData' in json) {
         raw = json['integratorClientCallbackData'];
       }
     }
+  }
+  if (!productType) {
+    productType = ProductType.SUBSCRIPTION;
   }
   if (raw && !swgData) {
     raw = atob(raw);
@@ -4705,6 +4882,7 @@ function parseSubscriptionResponse(deps, data, completeHandler) {
       parsePurchaseData(swgData),
       parseUserData(swgData),
       parseEntitlements(deps, swgData),
+      productType,
       completeHandler);
 }
 
@@ -4810,6 +4988,7 @@ class ContributionsFlow {
         feArgs({
           'productId': deps.pageConfig().getProductId(),
           'publicationId': deps.pageConfig().getPublicationId(),
+          'productType': ProductType.UI_CONTRIBUTION,
           'list': options && options.list || 'default',
           'skus': options && options.skus || null,
           'isClosable': isClosable,
@@ -4841,7 +5020,8 @@ class ContributionsFlow {
       if (result['sku']) {
         new PayStartFlow(
             this.deps_,
-            /** @type {string} */ (result['sku']))
+            /** @type {string} */ (result['sku']),
+            ProductType.UI_CONTRIBUTION)
             .start();
         return;
       }
@@ -4962,6 +5142,7 @@ class DeferredAccountFlow {
     // Parse the response.
     const entitlementsJwt = data['entitlements'];
     const idToken = data['idToken'];
+    const productType = data['productType'];
     const entitlements = this.deps_.entitlementsManager()
         .parseEntitlements({'signedEntitlements': entitlementsJwt});
     const userData = new UserData(
@@ -4995,6 +5176,7 @@ class DeferredAccountFlow {
         purchaseDataList[0],
         userData,
         entitlements,
+        productType,
         () => Promise.resolve()  // completeHandler doesn't matter in this case
     ));
     return response;
@@ -11562,6 +11744,7 @@ class OffersFlow {
           'productId': deps.pageConfig().getProductId(),
           'publicationId': deps.pageConfig().getPublicationId(),
           'showNative': deps.callbacks().hasSubscribeRequestCallback(),
+          'productType': ProductType.SUBSCRIPTION,
           'list': options && options.list || 'default',
           'skus': options && options.skus || null,
           'isClosable': isClosable,
@@ -12585,6 +12768,23 @@ class ConfiguredRuntime {
     }
     return this.documentParsed_.then(() => {
       return new PayStartFlow(this, skuOrSubscriptionRequest).start();
+    });
+  }
+
+  /** @override */
+  setOnContributionResponse(callback) {
+    this.callbacks_.setOnContributionResponse(callback);
+  }
+
+  /** @override */
+  contribute(skuOrSubscriptionRequest) {
+    if (!isExperimentOn(this.win_, ExperimentFlags.CONTRIBUTIONS)) {
+      throw new Error('Not yet launched!');
+    }
+
+    return this.documentParsed_.then(() => {
+      return new PayStartFlow(
+          this, skuOrSubscriptionRequest, ProductType.UI_CONTRIBUTION).start();
     });
   }
 
