@@ -32,6 +32,10 @@ tags: {  # <amp-brid-player>
   requires_extension: "amp-brid-player"
   attrs: { name: "autoplay" }
   attrs: {
+    name: "data-dynamic"
+    value_regex: "[a-z]+"
+  }
+  attrs: {
     name: "data-outstream"
     mandatory_oneof: "['data-outstream', 'data-playlist', 'data-video']"
     value_regex: "[0-9]+"
@@ -50,10 +54,6 @@ tags: {  # <amp-brid-player>
     name: "data-playlist"
     mandatory_oneof: "['data-outstream', 'data-playlist', 'data-video']"
     value_regex: ".+"
-  }
-  attrs: {
-    name: "data-dynamic"
-    value_regex: "[a-z]+"
   }
   attrs: {
     name: "data-video"

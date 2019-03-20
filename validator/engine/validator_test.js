@@ -132,7 +132,7 @@ function findHtmlFilesRelativeToTestdata() {
   const testFiles = [];
   for (const entry of testSubdirs) {
     for (const candidate of readdir(path.join(entry.root, entry.subdir))) {
-      if (candidate.match(/^.*.html/g)) {
+      if (candidate.match(/\.html$/)) {
         testFiles.push(path.join(entry.subdir, candidate));
       }
     }
