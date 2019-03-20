@@ -22,7 +22,7 @@ import {UrlReplacementPolicy,
   batchFetchJsonFor} from '../../../src/batched-json';
 import {childElementsByTag, isJsonScriptTag,
   removeChildren} from '../../../src/dom';
-import {dev, userAssert} from '../../../src/log';
+import {dev, user, userAssert} from '../../../src/log';
 import {getValueForExpr, tryParseJson} from '../../../src/json';
 import {includes, startsWith} from '../../../src/string';
 import {isEnumValue} from '../../../src/types';
@@ -116,11 +116,12 @@ export class AmpAutocomplete extends AMP.BaseElement {
     userAssert(isExperimentOn(this.win, 'amp-autocomplete'),
         `Experiment ${EXPERIMENT} is not turned on.`);
 
-    if (!this.element.hasAttribute('src')) {
     const scripts = childElementsByTag(this.element, 'SCRIPT');
-      userAssert(scripts.length,
-          `${TAG} expected a <script> child or a URL specified in "src".`);
+    if (scripts.length) {
       this.inlineData_ = this.getInlineData_(scripts);
+    } else if (!this.element.hasAttribute('src')) {
+      user().warn(TAG, 
+        'Expected a <script> child or a URL specified in "src".')
     }
 
     const inputElements = childElementsByTag(this.element, 'INPUT');
@@ -186,8 +187,6 @@ export class AmpAutocomplete extends AMP.BaseElement {
    * @private
    */
   getRemoteData_() {
-    userAssert(!childElementsByTag(this.element, 'SCRIPT').length, `${TAG} 
-      should contain a <script> child OR a URL specified in "src", not both.`);
     const ampdoc = this.getAmpDoc();
     const policy = UrlReplacementPolicy.ALL;
     return batchFetchJsonFor(ampdoc, this.element, /* opt_expr */ undefined,
@@ -234,6 +233,10 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
     let dataPromise = Promise.resolve();
     if (this.element.hasAttribute('src')) {
+      if (this.inlineData_) {
+        user().warn(TAG, 'Discovered both inline <script> and remote "src"'
+        + ' data. Was providing two datasets intended?');
+      }
       dataPromise = this.getRemoteData_();
     }
 
