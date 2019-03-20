@@ -19,14 +19,19 @@ import {
   sanitizeTagsForTripleMustache,
 } from '../../src/sanitizer';
 
-const html = document.createElement('html');
-const documentEl = {documentElement: html};
 
-function sanitize(html, opt_diffing = false) {
-  return sanitizeHtml(html, documentEl, opt_diffing);
-}
+let sanitize;
+let html;
 
 describe('Caja-based', () => {
+  beforeEach(() => {
+    html = document.createElement('html');
+    const documentEl = {documentElement: html};
+    sanitize = (html, opt_diffing = false) => {
+      return sanitizeHtml(html, documentEl, opt_diffing);
+    };
+  });
+
   runSanitizerTests();
 
   describe('Caja-specific sanitization', () => {
@@ -345,7 +350,7 @@ function runSanitizerTests() {
       expect(sanitize('<amp-img [text]="foo"></amp-img>', true)).to.match(
           /<amp-img \[text\]="foo" i-amphtml-binding="" i-amphtml-key="(\d+)"><\/amp-img>/);
       // Other elements should NOT have i-amphtml-key-set.
-      expect(sanitize('<p></p>')).to.equal('<p></p>');
+      expect(sanitize('<p></p>', true)).to.equal('<p></p>');
     });
 
     it('should sanitize invalid attributes', () => {

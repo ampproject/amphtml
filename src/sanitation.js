@@ -174,6 +174,12 @@ const AMP4EMAIL_BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES = dict({
   },
 });
 
+/** @const {!Object<string, !Array<string>>} */
+const AMP4EMAIL_BLACKLISTED_TAG_SPECIFIC_ATTRS = dict({
+  'form': ['name'],
+  'amp-anim': ['controls'],
+});
+
 /** @const {!Array<string>} */
 const BLACKLISTED_FIELDS_ATTR = [
   'form',
@@ -248,19 +254,14 @@ export function isValidAttr(
     return false;
   }
 
-  let attrBlacklist;
-  let attrNameBlacklist;
+  let attrBlacklist = BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES[tagName];
+  let attrNameBlacklist = BLACKLISTED_TAG_SPECIFIC_ATTRS[tagName];
+
   if (isAmp4Email(doc)) {
     attrBlacklist = AMP4EMAIL_BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES[tagName];
-    /** @const {!Object<string, !Array<string>>} */
-    const AMP4EMAIL_BLACKLISTED_TAG_SPECIFIC_ATTRS =
-    /** @type {!JsonObject} */ (Object.assign(
-          {'form': ['name'], 'amp-anim': ['controls']},
-          BLACKLISTED_TAG_SPECIFIC_ATTRS));
-    attrNameBlacklist = AMP4EMAIL_BLACKLISTED_TAG_SPECIFIC_ATTRS[tagName];
-  } else {
-    attrBlacklist = BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES[tagName];
-    attrNameBlacklist = BLACKLISTED_TAG_SPECIFIC_ATTRS[tagName];
+    attrNameBlacklist = (/** @type {!JsonObject} */ (Object.assign(
+        AMP4EMAIL_BLACKLISTED_TAG_SPECIFIC_ATTRS, attrNameBlacklist)))
+        [tagName];
   }
 
   // Remove blacklisted attributes from specific tags e.g. input[formaction].
@@ -284,7 +285,7 @@ export function isValidAttr(
 /**
  * Checks that the document is of an AMP format type.
  * @param {!Array<string>} formats
- * @param {?Document|undefined} doc
+ * @param {!Document} doc
  * @return {boolean}
  */
 function isAmpFormatType(formats, doc) {
@@ -298,7 +299,7 @@ function isAmpFormatType(formats, doc) {
 }
 
 /**
- * @param {?Document|undefined} doc
+ * @param {!Document} doc
  * @return {boolean}
  */
 export function isAmp4Email(doc) {

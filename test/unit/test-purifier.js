@@ -19,21 +19,28 @@ import {
   purifyTagsForTripleMustache,
 } from '../../src/purifier';
 
-const html = document.createElement('html');
-const documentEl = {documentElement: html};
-/**
- * Helper that serializes output of purifyHtml() to string.
- * @param {string} html
- * @param {Document=} doc
- * @param {boolean=} diffing
- * @return {string}
- */
-function purify(html, diffing = false) {
-  const body = purifyHtml(html, documentEl, diffing);
-  return body.innerHTML;
-}
+
+let purify;
+let html;
 
 describe('DOMPurify-based', () => {
+
+  beforeEach(() => {
+    html = document.createElement('html');
+    const documentEl = {documentElement: html};
+    /**
+     * Helper that serializes output of purifyHtml() to string.
+     * @param {string} html
+     * @param {Document=} doc
+     * @param {boolean=} diffing
+     * @return {string}
+     */
+    purify = (html, diffing = false) => {
+      const body = purifyHtml(html, documentEl, diffing);
+      return body.innerHTML;
+    };
+  });
+
   runSanitizerTests();
 
   describe('<script>', () => {
