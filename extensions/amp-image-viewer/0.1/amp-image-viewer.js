@@ -173,7 +173,7 @@ export class AmpImageViewer extends AMP.BaseElement {
     }
     const ampImg = dev().assertElement(this.sourceAmpImage_);
     this.scheduleLayout(ampImg);
-    
+
     return ampImg.signals()
         .whenSignal(CommonSignals.LOAD_END)
         .then(() => this.init_())
