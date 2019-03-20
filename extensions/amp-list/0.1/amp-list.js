@@ -223,22 +223,23 @@ export class AmpList extends AMP.BaseElement {
       this.maybeResizeListToFitItems_();
     });
 
-    this.loadMoreEnabledPromise_.then(enabled => {
-      if (enabled) {
-        this.mutateElement(() => {
-          this.getLoadMoreService_().initializeLoadMore();
-          const overflowElement = this.getOverflowElement();
-          if (overflowElement) {
-            toggle(overflowElement, false);
+    const loadMorePromise = this.loadMoreEnabledPromise_
+        .then(enabled => {
+          if (enabled) {
+            this.mutateElement(() => {
+              this.getLoadMoreService_().initializeLoadMore();
+              const overflowElement = this.getOverflowElement();
+              if (overflowElement) {
+                toggle(overflowElement, false);
+              }
+              this.element.warnOnMissingOverflow = false;
+            }).then(() => {
+              this.adjustContainerForLoadMoreButton_();
+            });
           }
-          this.element.warnOnMissingOverflow = false;
-        }).then(() => {
-          this.adjustContainerForLoadMoreButton_();
         });
-      }
-    });
 
-    return this.fetchList_();
+    return Promise.all([loadMorePromise, this.fetchList_()]);
   }
 
   /**
@@ -914,8 +915,10 @@ export class AmpList extends AMP.BaseElement {
   loadMoreCallback_(opt_reload = false) {
     if (!!this.loadMoreSrc_) {
       this.element.setAttribute('src', this.loadMoreSrc_);
+      // Clear url to avoid repeated fetches from same url
+      this.loadMoreSrc_ = null;
     } else if (!opt_reload) {
-      // Nothing more to load
+      // Nothing more to load or previous fetch still inflight
       return Promise.resolve();
     }
     this.mutateElement(() => {
