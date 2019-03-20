@@ -263,7 +263,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
       this.renderResults_();
       return Promise.resolve();
     }
-    throw new Error('Unexpected "src" type: ' + src);
+    user().error(TAG, 'Unexpected "src" type: ' + src);
   }
 
   /**
