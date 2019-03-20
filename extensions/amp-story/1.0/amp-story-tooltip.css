@@ -26,6 +26,7 @@
 .i-amphtml-story-focused-state-layer.i-amphtml-hidden {
   opacity: 0 !important;
   pointer-events: none !important;
+  /* If duration is modified, also modify TOOLTIP_CLOSE_ANIMATION_MS in amp-story-embedded-component.js. */
   transition: opacity 0.1s cubic-bezier(0.4, 0.0, 1, 1) !important;
 }
 
