@@ -395,6 +395,7 @@ const forbiddenTerms = {
       'extensions/amp-access/0.1/amp-access.js',
       'extensions/amp-subscriptions/0.1/amp-subscriptions.js',
       'extensions/amp-experiment/0.1/variant.js',
+      'extensions/amp-experiment/1.0/variant.js',
       'extensions/amp-user-notification/0.1/amp-user-notification.js',
       'extensions/amp-consent/0.1/consent-state-manager.js',
     ],
@@ -912,6 +913,7 @@ const forbiddenTermsSrcInclusive = {
     message: 'use startsWith helper in src/string.js',
     whitelist: [
       'dist.3p/current/integration.js',
+      'build-system/app.js',
     ],
   },
   '\\.indexOf\\(.*===?.*\\.length': 'use endsWith helper in src/string.js',

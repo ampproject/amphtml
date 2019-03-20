@@ -87,6 +87,10 @@ Example:
     <td>Required if `filter==custom`</td>
   </tr>
   <tr>
+    <td width="40%"><strong>filter-value [optional]</strong></td>
+    <td>If data is an array of JsonObjects, the filter-value is the property name that will be accessed for client side filtering. This attribute is unnecessary if filter is none. Defaults to "value".</td>
+  </tr>
+  <tr>
     <td width="40%"><strong>min-characters [optional]</strong></td>
     <td>
       The min character length of a user input to provide results, default 1
