@@ -480,19 +480,22 @@
       }
     };
 
+    // TODO(alabiaga): We mock the template but don't verify the data
+    // that should be used to construct it. The data should be used
+    // and verified to an extent.
     Viewer.prototype.ssrRenderAmpListTemplate_ = function(data) {
       // Mocked response.
       new Response
       return Promise.resolve({
         "html":
-        "<div role='list' class='i-amphtml-fill-content i-amphtml-replaced-content'>"
-          + "<div [text]='data.fruit'' role='listitem''></div>"
-          + "<div class='product' role='listitem'>Apple</div>"
-          + "<div class='product' role='listitem'>Orange</div>"
-          + "<div class='product' role='listitem'>Pear</div>"
-          + "<div class='product' role='listitem'>Banana</div>"
-          + "<div class='product' role='listitem'>Watermelon</div>"
-        + "</div>",
+          "<div role='list' class='i-amphtml-fill-content i-amphtml-replaced-content'>"
+            + "<div [text]='data.fruit' role='listitem''></div>"
+            + "<div class='product' role='listitem'>Apple</div>"
+            + "<div class='product' role='listitem'>Orange</div>"
+            + "<div class='product' role='listitem'>Pear</div>"
+            + "<div class='product' role='listitem'>Banana</div>"
+            + "<div class='product' role='listitem'>Watermelon</div>"
+          + "</div>",
         "body" : "",
         "init" : {
           "headers": {
@@ -502,10 +505,13 @@
       });
     };
 
+    // TODO(alabiaga): We mock the template but don't verify the data
+    // that should be used to construct it. The data should be used
+    // and verified to an extent.
     Viewer.prototype.ssrRenderAmpFormTemplate_ = function(data) {
       // Mocked response.
       return Promise.resolve({
-        "html": "<div>Server side rendered search result</div>",
+        "html": "<h1>SSR response<h1>",
         "body": "",
         "init" : {
           "headers": {

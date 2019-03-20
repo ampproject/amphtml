@@ -15,7 +15,6 @@
  */
 
 import {BrowserController} from '../../../../../testing/test-helper';
-import {isExperimentOn} from '../../../../../src/experiments';
 import {poll} from '../../../../../testing/iframe';
 
 const TIMEOUT = 15000;
@@ -84,7 +83,6 @@ describe('amp-list (integration)', function() {
         </template>
       </amp-list>`,
     extensions: ['amp-list', 'amp-mustache'],
-    experiments: ['amp-list-resizable-children'],
   }, env => {
     let browser;
     let doc;
@@ -97,8 +95,6 @@ describe('amp-list (integration)', function() {
     });
 
     it('should change to layout container as action', function*() {
-      expect(isExperimentOn(win, 'amp-list-resizable-children')).to.be.true;
-
       const list = doc.querySelector('amp-list');
 
       yield browser.waitForElementLayout('amp-list', TIMEOUT);
@@ -127,7 +123,6 @@ describe('amp-list (integration)', function() {
       </template>
     </amp-list>`,
     extensions: ['amp-list', 'amp-mustache', 'amp-bind'],
-    experiments: ['amp-list-resizable-children'],
   }, env => {
     let browser;
     let doc;
@@ -140,8 +135,6 @@ describe('amp-list (integration)', function() {
     });
 
     it('should change to layout container as on bind', function*() {
-      expect(isExperimentOn(win, 'amp-list-resizable-children')).to.be.true;
-
       const list = doc.querySelector('amp-list');
 
       yield browser.waitForElementLayout('amp-list', TIMEOUT);
