@@ -64,11 +64,12 @@ function createIframeMessagingClient(win) {
       resolve(iframeClient);
     });
     do {
+      const id = getRandom(win);
       hostWin = hostWin.parent;
-      wins[j] = hostWin;
+      wins[id] = hostWin;
       iframeClient.setHostWindow(hostWin);
       iframeClient./*OK*/sendMessage(
-          MessageType.HOST_BROADCAST, dict({'id': j}));
+          MessageType.HOST_BROADCAST, dict({'id': id}));
       j++;
     } while (hostWin != win.top && j < 10);
   });
