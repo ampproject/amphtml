@@ -109,10 +109,10 @@ describes.repeated('amp-mustache 0.1', {
       });
       expect(sanitizer.sanitizeHtml).to.have.been.calledWith(
           sinon.match.string,
-          false,
           sinon.match(arg => {
             return !!arg.documentElement;
-          })
+          }),
+          false
       );
     });
   });

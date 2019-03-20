@@ -19,14 +19,17 @@ import {
   purifyTagsForTripleMustache,
 } from '../../src/purifier';
 
+const html = document.createElement('html');
+const documentEl = {documentElement: html};
 /**
  * Helper that serializes output of purifyHtml() to string.
  * @param {string} html
+ * @param {Document=} doc
  * @param {boolean=} diffing
  * @return {string}
  */
 function purify(html, diffing = false) {
-  const body = purifyHtml(html, diffing);
+  const body = purifyHtml(html, documentEl, diffing);
   return body.innerHTML;
 }
 
@@ -432,7 +435,7 @@ function runSanitizerTests() {
       expect(purify('<amp-img [x]="y"></amp-img>', true)).to.match(
           /<amp-img i-amphtml-key="(\d+)" data-amp-bind-x="y" i-amphtml-binding=""><\/amp-img>/);
       // Other elements should NOT have i-amphtml-key-set.
-      expect(purify('<p></p>')).to.equal('<p></p>');
+      expect(purify('<p></p>', true)).to.equal('<p></p>');
     });
 
     it('should resolve URLs', () => {
@@ -440,6 +443,32 @@ function runSanitizerTests() {
       expect(purify('<amp-img src="/path"></amp-img>')).to.match(/http/);
       expect(purify('<amp-img srcset="/path"></amp-img>'))
           .to.match(/http/);
+    });
+  });
+
+  describe('should sanitize based on AMP doc format type', () => {
+    afterEach(() => {
+      html.removeAttribute('amp4Email');
+    });
+
+    it('should allow for input type file and password', () => {
+      // Given that the doc is not provided.
+      allowConsoleError(() => {
+        expect(purify('<input type="file">')).to.equal('<input type="file">');
+        expect(purify('<input type="password">'))
+            .to.equal('<input type="password">');
+      });
+    });
+
+    it('should disallow certain attributes on form for AMP4Email', () => {
+      html.setAttribute('amp4email', '');
+      allowConsoleError(() => {
+        expect(purify('<input type="password">')).to.equal('<input>');
+        expect(purify('<form name="form-name"></form>'))
+            .to.equal('<form></form>');
+        expect(purify('<amp-anim controls></amp-anim>'))
+            .to.equal('<amp-anim></amp-anim>');
+      });
     });
   });
 

@@ -168,7 +168,7 @@ const BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES = dict({
 });
 
 /** @const {!Object<string, !Object<string, !RegExp>>} */
-const STRICT_BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES = dict({
+const AMP4EMAIL_BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES = dict({
   'input': {
     'type': /(?:button|file|image|password)/i,
   },
@@ -191,12 +191,6 @@ const BLACKLISTED_TAG_SPECIFIC_ATTRS = dict({
   'select': BLACKLISTED_FIELDS_ATTR,
 });
 
-/** @const {!Object<string, !Array<string>>} */
-const AMP4EMAIL_BLACKLISTED_TAG_SPECIFIC_ATTRS =
-/** @type {!JsonObject} */ (Object.assign(
-      {'form': ['name'], 'amp-anim': ['controls']},
-      BLACKLISTED_TAG_SPECIFIC_ATTRS));
-
 /**
  * Test for invalid `style` attribute values.
  *
@@ -215,13 +209,13 @@ const INVALID_INLINE_STYLE_REGEX =
  * @param {string} tagName Lowercase tag name.
  * @param {string} attrName Lowercase attribute name.
  * @param {string} attrValue
+ * @param {!Document} doc
  * @param {boolean} opt_purify Is true, skips some attribute sanitizations
  *     that are already covered by DOMPurify.
- * @param {Document=} opt_doc
  * @return {boolean}
  */
 export function isValidAttr(
-  tagName, attrName, attrValue, opt_purify = false, opt_doc) {
+  tagName, attrName, attrValue, doc, opt_purify = false) {
   if (!opt_purify) {
     // "on*" attributes are not allowed.
     if (startsWith(attrName, 'on') && attrName != 'on') {
@@ -256,8 +250,13 @@ export function isValidAttr(
 
   let attrBlacklist;
   let attrNameBlacklist;
-  if (isAmp4Email_(opt_doc)) {
-    attrBlacklist = STRICT_BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES[tagName];
+  if (isAmp4Email_(doc)) {
+    attrBlacklist = AMP4EMAIL_BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES[tagName];
+    /** @const {!Object<string, !Array<string>>} */
+    const AMP4EMAIL_BLACKLISTED_TAG_SPECIFIC_ATTRS =
+    /** @type {!JsonObject} */ (Object.assign(
+          {'form': ['name'], 'amp-anim': ['controls']},
+          BLACKLISTED_TAG_SPECIFIC_ATTRS));
     attrNameBlacklist = AMP4EMAIL_BLACKLISTED_TAG_SPECIFIC_ATTRS[tagName];
   } else {
     attrBlacklist = BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES[tagName];
