@@ -48,7 +48,7 @@ Allows rendering of <a href="https://github.com/janl/mustache.js/">Mustache.js</
 
 | Version | Description |
 | ------- | ----- |
-| 0.2 | Support for `<svg>` elements and reduced bundle size (12.2KB vs. 20.5KB, gzipped).<br><br>Migrates to a more modern HTML sanitizer library (Caja to DOMPurify). This may cause minor breaking changes due to differences in the tag and attribute whitelisting. We recommend testing your pages first before pushing to production to make sure the changes in generated markup do not affect functionality. |
+| 0.2 | Support for `<svg>` elements and reduced bundle size (12.2KB vs. 20.5KB, gzipped).<br><br>Support for custom mustache delimiters via the data-custom-delimiters attribute. See Custom Delimiters.<br><br>Migrates to a more modern HTML sanitizer library (Caja to DOMPurify). This may cause minor breaking changes due to differences in the tag and attribute whitelisting. We recommend testing your pages first before pushing to production to make sure the changes in generated markup do not affect functionality. |
 | 0.1 | Initial implementation. |
 
 ## Syntax
@@ -92,6 +92,27 @@ or
 Use `template` tag wherever possible, as AMP validation provides useful dev-x hints. Use the `script` template for edge cases and issues with templating in the context of tables. See the "Tables" section further below.
 
 How templates are discovered, when they are rendered, how data is provided is all decided by the target AMP element that uses this template to render its content (for example, in an [amp-list](../amp-list/amp-list.md), [amp-form](../amp-form/amp-form.md), etc.).
+
+## Custom Delimiters
+
+In version 0.2, we support the usage of custom mustache delimiters. The delimiters is specified via the `data-custom-delimiters` attribute on the `template` or `script` tag. The attribute expects the beginning and ending
+delimiter to be specified.
+
+```html
+<!-- Using template tag. -->
+<template type="amp-mustache" data-custom-delimiters="<%, %>">
+  Hello <%world%>!
+</template>
+```
+or
+
+<!-- Using script tag. -->
+```html
+<script type="text/plain" template="amp-mustache"
+    data-custom-delimiters="$BEG-, -END$>">
+  Hello $BEG-world-END$!
+</script>
+```
 
 ## Restrictions
 
