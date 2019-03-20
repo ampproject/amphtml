@@ -54,15 +54,6 @@ FAIL
 |        layout="responsive"
 |        width="480" height="270">
 |    </amp-brid-player>
-|    <!-- Alternate valid example using a dynamic playlist. -->
-|    <amp-brid-player
-|        data-partner="264"
-|        data-player="4144"
-|        data-playlist="test tag"
-|        data-dynamic="tag"
-|        layout="responsive"
-|        width="480" height="270">
-|    </amp-brid-player>
 |    <!-- Alternate valid example using a outstream. -->
 |    <amp-brid-player
 |        data-partner="6205"
