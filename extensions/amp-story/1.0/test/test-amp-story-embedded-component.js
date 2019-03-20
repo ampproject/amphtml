@@ -160,12 +160,11 @@ describes.realWin('amp-story-embedded-component', {amp: true}, env => {
     fakePage.appendChild(clickableEl);
     storeService.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT, fakeComponent);
 
-    const tooltipIconEl = component.focusedStateOverlay_
-        .querySelector('.i-amphtml-story-tooltip-icon').firstElementChild;
+    const tooltipIconEl = component.focusedStateOverlay_.querySelector(
+        '.i-amphtml-story-tooltip-icon');
 
-    expect(tooltipIconEl).to.have.attribute('src');
-    expect(tooltipIconEl.getAttribute('src'))
-        .to.equal('http://localhost:9876/my-icon');
+    expect(tooltipIconEl.style['background-image'])
+        .to.equal('url("http://localhost:9876/my-icon")');
   });
 
   it('should find invalid urls', () => {
@@ -177,9 +176,10 @@ describes.realWin('amp-story-embedded-component', {amp: true}, env => {
         '[amp-story-embedded-component] The tooltip icon url is invalid');
 
     storeService.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT, fakeComponent);
-    const tooltipIconEl = component.focusedStateOverlay_
-        .querySelector('.i-amphtml-story-tooltip-icon').firstElementChild;
-    expect(tooltipIconEl).to.not.have.attribute('src');
+    const tooltipIconEl = component.focusedStateOverlay_.querySelector(
+        '.i-amphtml-story-tooltip-icon');
+
+    expect(tooltipIconEl.style['background-image']).to.equal('');
   });
 
   it('should append text when text attribute is present', () => {
