@@ -189,7 +189,6 @@ The `<amp-list>` element exposes a `refresh` action that other elements can refe
 ```
 
 ### Dynamic Resizing
-##### Experimental: amp-list-resizable-children
 In several cases, we may need the `<amp-list>` to resize on user interaction. For example, when the `<amp-list>` contains an amp-accordion that a user may tap on, when the contents of the `<amp-list>` change size due to bound CSS classes, or when the number of items inside an `<amp-list>` changes due to a bound `[src]` attribute. The `changeToLayoutContainer` action handles this by changing the amp list to `layout="CONTAINER"` when triggering this action. See the following example:
 
 ```html
@@ -202,8 +201,6 @@ In several cases, we may need the `<amp-list>` to resize on user interaction. Fo
     </template>
   </amp-list>
 ```
-
-This action is experimentally available under `amp-list-resizable-children`.
 
 ## Attributes
 

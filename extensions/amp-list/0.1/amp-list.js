@@ -136,11 +136,9 @@ export class AmpList extends AMP.BaseElement {
       }
     }, ActionTrust.HIGH);
 
-    if (isExperimentOn(this.win, 'amp-list-resizable-children')) {
-      this.registerAction('changeToLayoutContainer',
-          () => this.changeToLayoutContainer_(),
-          ActionTrust.HIGH);
-    }
+    this.registerAction('changeToLayoutContainer',
+        () => this.changeToLayoutContainer_(),
+        ActionTrust.HIGH);
 
     /** @private {?../../../src/ssr-template-helper.SsrTemplateHelper} */
     this.ssrTemplateHelper_ = null;
@@ -849,10 +847,6 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   changeToLayoutContainer_() {
-    // TODO (#18875): cleanup resizable-children experiment
-    userAssert(isExperimentOn(this.win, 'amp-list-resizable-children'),
-        'Experiment amp-list-resizable-children is disabled');
-
     const previousLayout = this.element.getAttribute('layout');
     // If we have already changed to layout container, no need to run again.
     if (previousLayout == Layout.CONTAINER) {
