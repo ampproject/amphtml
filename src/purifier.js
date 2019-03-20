@@ -21,6 +21,7 @@ import {
   WHITELISTED_ATTRS,
   WHITELISTED_ATTRS_BY_TAGS,
   WHITELISTED_TARGETS,
+  isAmp4Email,
   isValidAttr,
 } from './sanitation';
 import {remove} from './utils/array';
@@ -278,6 +279,18 @@ export function addPurifyHooks(purifier, diffing, doc) {
       delete allowedAttributes[attr];
     });
     allowedAttributesChanges.length = 0;
+
+    // Remove input type file if applicable. The purifier will actually
+    // not remove this attribute because of a Safari bug where removing it
+    // will result in not being able to add it programmatically afterwards.
+    // For AMP HTML's usage, this is fine.
+    const tagName = node.nodeName.toLowerCase();
+    if (tagName == 'input') {
+      const inputType = node.getAttribute('type');
+      if (inputType == 'file' && isAmp4Email(doc)) {
+        node.removeAttribute('type');
+      }
+    }
 
     // Restore the `on` attribute which DOMPurify incorrectly flags as an
     // unknown protocol due to presence of the `:` character.

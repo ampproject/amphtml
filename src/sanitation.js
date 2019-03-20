@@ -250,7 +250,7 @@ export function isValidAttr(
 
   let attrBlacklist;
   let attrNameBlacklist;
-  if (isAmp4Email_(doc)) {
+  if (isAmp4Email(doc)) {
     attrBlacklist = AMP4EMAIL_BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES[tagName];
     /** @const {!Object<string, !Array<string>>} */
     const AMP4EMAIL_BLACKLISTED_TAG_SPECIFIC_ATTRS =
@@ -300,9 +300,8 @@ function isAmpFormatType(formats, doc) {
 /**
  * @param {?Document|undefined} doc
  * @return {boolean}
- * @private
  */
-function isAmp4Email_(doc) {
+export function isAmp4Email(doc) {
   return isAmpFormatType(['⚡4email', 'amp4email'], doc);
 }
 

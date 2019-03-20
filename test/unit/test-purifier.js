@@ -464,6 +464,7 @@ function runSanitizerTests() {
       html.setAttribute('amp4email', '');
       allowConsoleError(() => {
         expect(purify('<input type="password">')).to.equal('<input>');
+        expect(purify('<input type="file">')).to.equal('<input>');
         expect(purify('<form name="form-name"></form>'))
             .to.equal('<form></form>');
         expect(purify('<amp-anim controls></amp-anim>'))
