@@ -6371,7 +6371,6 @@ amp.validator.categorizeError = function(error) {
       error.code ===
           amp.validator.ValidationError.Code
               .WARNING_EXTENSION_DEPRECATED_VERSION ||
-
       error.code ===
           amp.validator.ValidationError.Code.WARNING_TAG_REQUIRED_BY_MISSING) {
     return amp.validator.ErrorCategory.Code.DEPRECATION;
