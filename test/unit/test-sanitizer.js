@@ -355,7 +355,7 @@ function runSanitizerTests() {
 
     it('should sanitize invalid attributes', () => {
       allowConsoleError(() => {
-        expect(sanitize('<input type="button">', false)).to.equal('<input>');
+        expect(sanitize('<input type="button">')).to.equal('<input>');
         expect(sanitize('<input type="image">')).to.equal('<input>');
       });
     });
