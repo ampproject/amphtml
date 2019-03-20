@@ -36,6 +36,7 @@ import {htmlFor, htmlRefs} from '../../../src/static-template';
 import {isProtocolValid, parseUrlDeprecated} from '../../../src/url';
 import {
   px,
+  resetStyles,
   setImportantStyles,
   toggle,
 } from '../../../src/style';
@@ -51,24 +52,23 @@ const ActionIcon = {
 };
 
 /**
+ * Blank icon when no data-tooltip-icon src is specified.
+ * @const {string}
+ */
+const DEFAULT_ICON_SRC =
+  'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
+
+/** @private @const {number} */
+const TOOLTIP_CLOSE_ANIMATION_MS = 100;
+
+/**
  * Components that can be expanded.
  * @const {!Object}
  * @private
  */
 export const EXPANDABLE_COMPONENTS = {
   'amp-twitter': {
-    componentIcon: 'data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.' +
-    'w3.org/2000/svg" width="400" height="400"><g fill="none" fill-rule="eve' +
-    'nodd"><path d="M0 0h400v400H0z"/><path fill="%231da1f2" fill-rule="nonz' +
-    'ero" d="M153.62 301.59c94.34 0 145.94-78.16 145.94-145.94 0-2.22 0-4.43' +
-    '-.15-6.63A104.36 104.36 0 0 0 325 122.47a102.38 102.38 0 0 1-29.46 8.07 ' +
-    '51.47 51.47 0 0 0 22.55-28.37 102.79 102.79 0 0 1-32.57 12.45c-15.9-16.' +
-    '906-41.163-21.044-61.625-10.093-20.461 10.95-31.032 34.266-25.785 56.87' +
-    '3A145.62 145.62 0 0 1 92.4 107.81c-13.614 23.436-6.66 53.419 15.88 68.4' +
-    '7A50.91 50.91 0 0 1 85 169.86v.65c.007 24.416 17.218 45.445 41.15 50.28' +
-    'a51.21 51.21 0 0 1-23.16.88c6.72 20.894 25.976 35.208 47.92 35.62a102.9' +
-    '2 102.92 0 0 1-63.7 22 104.41 104.41 0 0 1-12.21-.74 145.21 145.21 0 0 ' +
-    '0 78.62 23"/></g></svg>',
+    componentIcon: 'amp-social-share-twitter-no-background',
     actionIcon: ActionIcon.EXPAND,
     localizedStringId: LocalizedStringId.AMP_STORY_TOOLTIP_EXPAND_TWEET,
     selector: 'amp-twitter',
@@ -82,7 +82,7 @@ export const EXPANDABLE_COMPONENTS = {
  */
 const LAUNCHABLE_COMPONENTS = {
   'a': {
-    componentIcon: 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=',
+    componentIcon: DEFAULT_ICON_SRC,
     actionIcon: ActionIcon.LAUNCH,
     selector: 'a[href]',
   },
@@ -246,13 +246,6 @@ const HORIZONTAL_EDGE_PADDING = 32;
 const TOOLTIP_ARROW_RIGHT_PADDING = 24;
 
 /**
- * Blank icon when no data-tooltip-icon src is specified.
- * @const {string}
- */
-const DEFAULT_ICON_SRC =
-  'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
-
-/**
  * @struct @typedef {{
  *   tooltip: !Element,
  *   buttonLeft: !Element,
@@ -296,6 +289,9 @@ export class AmpStoryEmbeddedComponent {
 
     /** @private @const {!../../../src/service/resources-impl.Resources} */
     this.resources_ = Services.resourcesForDoc(getAmpdoc(this.win_.document));
+
+    /** @private @const {!../../../src/service/timer-impl.Timer} */
+    this.timer_ = Services.timerFor(this.win_);
 
     /** @private {?Element} */
     this.expandedViewOverlay_ = null;
@@ -488,7 +484,12 @@ export class AmpStoryEmbeddedComponent {
    * @private
    */
   close_() {
-    this.clearTooltip_();
+    // Wait until tooltip closing animation is finished before clearing it.
+    // Otherwise jank is noticeable.
+    this.timer_.delay(() => {
+      this.clearTooltip_();
+    }, TOOLTIP_CLOSE_ANIMATION_MS);
+
     this.storeService_.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT,
         {state: EmbeddedComponentState.HIDDEN});
   }
@@ -839,19 +840,26 @@ export class AmpStoryEmbeddedComponent {
       user().error(TAG, 'The tooltip icon url is invalid');
       return;
     }
-    const iconSrc = iconUrl ? parseUrlDeprecated(iconUrl).href :
-      embedConfig.componentIcon;
 
-    const existingTooltipIcon =
+    const tooltipCustomIcon =
       this.tooltip_.querySelector('.i-amphtml-story-tooltip-icon');
 
-    if (existingTooltipIcon.firstElementChild) {
-      addAttributesToElement(existingTooltipIcon.firstElementChild,
-          dict({'src': iconSrc}));
+    if (iconUrl) {
+      this.resources_.mutateElement(devAssert(tooltipCustomIcon), () => {
+        setImportantStyles(devAssert(tooltipCustomIcon),
+            {'background-image': `url(${parseUrlDeprecated(iconUrl).href})`});
+      });
+      return;
     }
 
-    existingTooltipIcon.classList.toggle('i-amphtml-hidden',
-        iconSrc == DEFAULT_ICON_SRC);
+    if (embedConfig.componentIcon === DEFAULT_ICON_SRC) { // Fallback, no icon specified.
+      tooltipCustomIcon.classList.toggle('i-amphtml-hidden', true);
+      return;
+    }
+
+    this.resources_.mutateElement(devAssert(tooltipCustomIcon), () => {
+      tooltipCustomIcon.classList.add(embedConfig.componentIcon);
+    });
   }
 
   /**
@@ -953,8 +961,12 @@ export class AmpStoryEmbeddedComponent {
     this.resources_.mutateElement(devAssert(this.tooltip_), () => {
       const actionIcon =
         this.tooltip_.querySelector('.i-amphtml-tooltip-action-icon');
-      actionIcon.classList.toggle(ActionIcon.LAUNCH, false);
-      actionIcon.classList.toggle(ActionIcon.EXPAND, false);
+      actionIcon.className = 'i-amphtml-tooltip-action-icon';
+
+      const customIcon =
+        this.tooltip_.querySelector('.i-amphtml-story-tooltip-icon');
+      customIcon.className = 'i-amphtml-story-tooltip-icon';
+      resetStyles(customIcon, ['background-image']);
 
       this.tooltip_.removeEventListener('click', this.expandComponentHandler_,
           true);
@@ -989,7 +1001,7 @@ export class AmpStoryEmbeddedComponent {
             </button>
           </div>
           <a class="i-amphtml-story-tooltip" target="_blank" ref="tooltip">
-            <div class="i-amphtml-story-tooltip-icon"><img ref="icon"></div>
+            <div class="i-amphtml-story-tooltip-icon"></div>
             <p class="i-amphtml-tooltip-text" ref="text"></p>
             <div class="i-amphtml-tooltip-action-icon"></div>
             <div class="i-amphtml-story-tooltip-arrow" ref="arrow"></div>
