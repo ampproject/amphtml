@@ -225,22 +225,23 @@ export class AmpList extends AMP.BaseElement {
       this.maybeResizeListToFitItems_();
     });
 
-    this.loadMoreEnabledPromise_.then(enabled => {
-      if (enabled) {
-        this.mutateElement(() => {
-          this.getLoadMoreService_().initializeLoadMore();
-          const overflowElement = this.getOverflowElement();
-          if (overflowElement) {
-            toggle(overflowElement, false);
+    const loadMorePromise = this.loadMoreEnabledPromise_
+        .then(enabled => {
+          if (enabled) {
+            this.mutateElement(() => {
+              this.getLoadMoreService_().initializeLoadMore();
+              const overflowElement = this.getOverflowElement();
+              if (overflowElement) {
+                toggle(overflowElement, false);
+              }
+              this.element.warnOnMissingOverflow = false;
+            }).then(() => {
+              this.adjustContainerForLoadMoreButton_();
+            });
           }
-          this.element.warnOnMissingOverflow = false;
-        }).then(() => {
-          this.adjustContainerForLoadMoreButton_();
         });
-      }
-    });
 
-    return this.fetchList_();
+    return Promise.all([loadMorePromise, this.fetchList_()]);
   }
 
   /**
