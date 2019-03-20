@@ -65,53 +65,82 @@ describes.realWin('amp-autocomplete unit tests', {
     expect(element.innerText).to.equal('');
   });
 
-  it('renderResults_() should update the container_ with plain text', () => {
-    expect(impl.container_).not.to.be.null;
-    expect(impl.container_.children.length).to.equal(0);
-    impl.userInput_ = 'ap';
-    const clearAllItemsSpy = sandbox.spy(impl, 'clearAllItems_');
-    const filterDataSpy = sandbox.spy(impl, 'filterData_');
+  describe('filterDataAndRenderResults_() should pass on necessary calls',
+      () => {
+        let clearAllItemsSpy;
+        let renderSpy;
+        let filterDataSpy;
+        beforeEach(() => {
+          expect(impl.container_).not.to.be.null;
+          expect(impl.container_.children.length).to.equal(0);
+          clearAllItemsSpy = sandbox.spy(impl, 'clearAllItems_');
+          filterDataSpy = sandbox.spy(impl, 'filterData_');
+          renderSpy = sandbox.spy(impl, 'renderResults_');
+        });
 
-    // Only clear if input < minChars_
-    impl.minChars_ = 3;
-    return impl.renderResults_().then(() => {
-      expect(clearAllItemsSpy).to.have.been.calledOnce;
-      expect(filterDataSpy).not.to.have.been.called;
-    }).then(() => {
-      impl.minChars_ = 2;
-      return impl.renderResults_();
-    }).then(() => {
+        it('should only clear if input < minChars_', () => {
+          impl.minChars_ = 3;
+          return impl.filterDataAndRenderResults_([], 'ap').then(() => {
+            expect(clearAllItemsSpy).to.have.been.calledOnce;
+            expect(filterDataSpy).not.to.have.been.called;
+            expect(renderSpy).not.to.have.been.called;
+          });
+        });
+
+        it('should only clear if data is null', () => {
+          return impl.filterDataAndRenderResults_(null, 'ap').then(() => {
+            expect(clearAllItemsSpy).to.have.been.calledOnce;
+            expect(filterDataSpy).not.to.have.been.called;
+            expect(renderSpy).not.to.have.been.called;
+          });
+        });
+
+        it('should only clear if data is []', () => {
+          return impl.filterDataAndRenderResults_([], 'ap').then(() => {
+            expect(clearAllItemsSpy).to.have.been.calledOnce;
+            expect(filterDataSpy).not.to.have.been.called;
+            expect(renderSpy).not.to.have.been.called;
+          });
+        });
+
+        it('should pass on valid arguments', () => {
+          impl.minChars_ = 2;
+          return impl.filterDataAndRenderResults_(impl.sourceData_, 'ap').then(
+              () => {
+                expect(clearAllItemsSpy).to.have.been.calledOnce;
+                expect(filterDataSpy).to.have.been.calledWith(
+                  impl.sourceData_, 'ap');
+                expect(renderSpy).to.have.been.calledWith(
+                  ['apple'], impl.container_);
+                expect(impl.container_.children.length).to.equal(1);
+                expect(impl.container_.children[0].innerText).to.equal('apple');
+          });
+        });
+      });
+
+  it('renderResults_() should update the container_ with plain text', () => {
+    const createSpy = sandbox.spy(impl, 'createElementFromItem_');
+    return impl.renderResults_(['apple'], impl.container_).then(() => {
       expect(impl.container_.children.length).to.equal(1);
       expect(impl.container_.children[0].innerText).to.equal('apple');
-      expect(clearAllItemsSpy).to.have.been.calledTwice;
-      expect(filterDataSpy).to.have.been.calledOnce;
+      expect(createSpy).to.have.been.calledOnce;
+      expect(createSpy).to.have.been.calledWith('apple');
     });
   });
 
   it('renderResults_() should update the container_ with rich text', () => {
-    impl.inlineData_ = [{value: 'apple'}, {value: 'mango'}, {value: 'pear'}];
+    const sourceData = [{value: 'apple'}, {value: 'mango'}, {value: 'pear'}];
     impl.templateElement_ = doc.createElement('template');
     const renderedChildren = [];
-    impl.inlineData_.forEach(item => {
+    sourceData.forEach(item => {
       const renderedChild = doc.createElement('div');
       renderedChild.setAttribute('value', item.value);
       renderedChildren.push(renderedChild);
     });
-    sandbox.stub(impl.templates_, 'renderTemplateArray').returns(
+    const renderTemplateSpy = sandbox.stub(impl.templates_, 'renderTemplateArray').returns(
         Promise.resolve(renderedChildren));
-    impl.userInput_ = '';
-    const clearAllItemsSpy = sandbox.spy(impl, 'clearAllItems_');
-    const filterDataSpy = sandbox.spy(impl, 'filterData_');
 
-    // Only clear if input < minChars_
-    impl.minChars_ = 3;
-    return impl.renderResults_().then(() => {
-      expect(clearAllItemsSpy).to.have.been.calledOnce;
-      expect(filterDataSpy).not.to.have.been.called;
-    }).then(() => {
-      impl.minChars_ = 0;
-      return impl.renderResults_();
-    }).then(() => {
+    return impl.renderResults_(sourceData, impl.container_).then(() => {
       expect(impl.container_.children.length).to.equal(3);
       expect(impl.container_.children[0].getAttribute('value')).to.equal(
           'apple');
@@ -119,8 +148,7 @@ describes.realWin('amp-autocomplete unit tests', {
           'mango');
       expect(impl.container_.children[2].getAttribute('value')).to.equal(
           'pear');
-      expect(clearAllItemsSpy).to.have.been.calledTwice;
-      expect(filterDataSpy).to.have.been.calledOnce;
+      expect(renderTemplateSpy).to.have.been.calledOnce;
     });
   });
 
@@ -155,8 +183,7 @@ describes.realWin('amp-autocomplete unit tests', {
 
   it('should show and hide results on toggle', () => {
     expect(impl.resultsShowing_()).to.be.false;
-    impl.userInput_ = 'ap';
-    return impl.renderResults_().then(() => {
+    return impl.renderResults_(['apple'], impl.container_).then(() => {
       expect(impl.resultsShowing_()).to.be.false;
       impl.toggleResults_(true);
       expect(impl.resultsShowing_()).to.be.true;
@@ -268,7 +295,7 @@ describes.realWin('amp-autocomplete unit tests', {
     const toggleResultsSpy = sandbox.spy(impl, 'toggleResults_');
     return element.layoutCallback().then(() => {
       impl.userInput_ = 'a';
-      return impl.renderResults_();
+      return impl.renderResults_(impl.sourceData_, impl.container_);
     }).then(() => {
       expect(impl.container_.children.length).to.equal(3);
       impl.toggleResults_(true);
@@ -331,7 +358,7 @@ describes.realWin('amp-autocomplete unit tests', {
       expect(impl.activeElement_).to.be.null;
       expect(impl.activeIndex_).to.equal(-1);
       impl.userInput_ = 'a';
-      return impl.renderResults_();
+      return impl.renderResults_(impl.sourceData_, impl.container_);
     }).then(() => {
       expect(impl.container_.children.length).to.equal(3);
       impl.activeElement_ = doc.createElement('div');

@@ -57,7 +57,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
      * as a child. For use with static data.
      * @private {?Array<!JsonObject|string>}
      */
-    this.inlineData_ = null;
+    this.sourceData_ = null;
 
     /**
      * The reference to the <input> tag provided as a child.
@@ -124,7 +124,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
     const scripts = childElementsByTag(this.element, 'SCRIPT');
     if (scripts.length) {
-      this.inlineData_ = this.getInlineData_(scripts);
+      this.sourceData_ = this.getInlineData_(scripts);
     } else if (!this.element.hasAttribute('src')) {
       user().warn(TAG,
           'Expected a <script> child or a URL specified in "src".');
@@ -237,18 +237,19 @@ export class AmpAutocomplete extends AMP.BaseElement {
       this.selectHandler_(e);
     });
 
-    let dataPromise = Promise.resolve();
+    let remoteDataPromise = Promise.resolve();
     if (this.element.hasAttribute('src')) {
-      if (this.inlineData_) {
+      if (this.sourceData_) {
         user().warn(TAG, 'Discovered both inline <script> and remote "src"'
         + ' data. Was providing two datasets intended?');
       }
-      dataPromise = this.getRemoteData_();
+      remoteDataPromise = this.getRemoteData_();
     }
 
-    return dataPromise.then(value => {
-      this.inlineData_ = value || this.inlineData_;
-      this.renderResults_();
+    return remoteDataPromise.then(remoteData => {
+      // If both types of data are provided, display remote data.
+      this.sourceData_ = remoteData || this.sourceData_;
+      this.filterDataAndRenderResults_(this.sourceData_);
     });
   }
 
@@ -259,15 +260,15 @@ export class AmpAutocomplete extends AMP.BaseElement {
       return Promise.resolve;
     }
     if (typeof src === 'string') {
-      return this.getRemoteData_().then(value => {
-        this.inlineData_ = value;
-        this.renderResults_();
+      return this.getRemoteData_().then(remoteData => {
+        this.sourceData_ = remoteData;
+        this.filterDataAndRenderResults_(this.sourceData_, this.userInput_);
       });
     }
     if (typeof src === 'object') {
-      this.inlineData_ = src['items'] || [];
-      this.renderResults_();
-      return Promise.resolve();
+      this.sourceData_ = src['items'] || [];
+      return this.filterDataAndRenderResults_(this.sourceData_,
+          this.userInput_);
     }
     user().error(TAG, 'Unexpected "src" type: ' + src);
   }
@@ -295,7 +296,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
   inputHandler_() {
     this.userInput_ = this.inputElement_.value;
     return this.mutateElement(() => {
-      this.renderResults_();
+      this.filterDataAndRenderResults_(this.sourceData_, this.userInput_);
       this.toggleResults_(true);
     });
   }
@@ -314,17 +315,30 @@ export class AmpAutocomplete extends AMP.BaseElement {
   }
 
   /**
-   * Render filtered results on the current input and update the container_.
+   * Filter the source data according to the given input and render it in
+   * the results container_.
+   * @param {Array<!JsonObject|string>=} sourceData
+   * @param {string=} input
    * @return {!Promise}
    * @private
    */
-  renderResults_() {
+  filterDataAndRenderResults_(sourceData, input = '') {
     this.clearAllItems_();
-    if (this.userInput_.length < this.minChars_ || !this.inlineData_) {
+    if (input.length < this.minChars_ || !sourceData || !sourceData.length) {
       return Promise.resolve();
     }
+    const filteredData = this.filterData_(sourceData, input);
+    return this.renderResults_(filteredData, this.container_);
+  }
 
-    const filteredData = this.filterData_(this.inlineData_, this.userInput_);
+  /**
+   * Render the given data into item elements in the given container element.
+   * @param {!Array<!JsonObject|string>} filteredData
+   * @param {!Element} container
+   * @return {!Promise}
+   * @private
+   */
+  renderResults_(filteredData, container) {
     let renderPromise = Promise.resolve();
     if (this.templateElement_) {
       renderPromise = this.templates_.renderTemplateArray(this.templateElement_,
@@ -332,15 +346,14 @@ export class AmpAutocomplete extends AMP.BaseElement {
         renderedChildren.map(child => {
           child.classList.add('i-amphtml-autocomplete-item');
           child.setAttribute('role', 'listitem');
-          this.container_.appendChild(child);
+          container.appendChild(child);
         });
       });
     } else {
       filteredData.forEach(item => {
         userAssert(typeof item === 'string',
             `${TAG} data must provide template for non-string items.`);
-        this.container_.appendChild(
-            this.createElementFromItem_(item));
+        container.appendChild(this.createElementFromItem_(item));
       });
     }
     return renderPromise;
