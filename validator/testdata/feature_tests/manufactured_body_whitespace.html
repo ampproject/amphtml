@@ -15,25 +15,20 @@
 -->
 <!--
   Test Description:
-  Tests support for the amp-sidebar tag.
+  This contains a U+3000 IDEOGRAPHIC SPACE in the <head> element (before the
+  <meta name="viewport">), which causes an implicit <body> tag to be
+  manufactured.
 -->
 <!doctype html>
 <html ⚡>
 <head>
   <meta charset="utf-8">
   <link rel="canonical" href="./regular-html-version.html">
-  <meta name="viewport" content="width=device-width,minimum-scale=1">
+　<meta name="viewport" content="width=device-width">
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
-  <script async custom-element="amp-sidebar" src="https://cdn.ampproject.org/v0/amp-sidebar-0.1.js"></script>
 </head>
 <body>
-  <!-- Invalid: Use of autoscroll outside amp-sidebar with autoscroll-->
-  <div autoscroll></div>
-
-    <!-- testing with a parent that does not have a matching tag. -->
-  <does-not-exist>
-    <div autoscroll></div>
-  </does-not-exist>
+Hello, world.
 </body>
 </html>
