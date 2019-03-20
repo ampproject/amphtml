@@ -109,12 +109,12 @@ describes.realWin('amp-autocomplete unit tests', {
               () => {
                 expect(clearAllItemsSpy).to.have.been.calledOnce;
                 expect(filterDataSpy).to.have.been.calledWith(
-                  impl.sourceData_, 'ap');
+                    impl.sourceData_, 'ap');
                 expect(renderSpy).to.have.been.calledWith(
-                  ['apple'], impl.container_);
+                    ['apple'], impl.container_);
                 expect(impl.container_.children.length).to.equal(1);
                 expect(impl.container_.children[0].innerText).to.equal('apple');
-          });
+              });
         });
       });
 
@@ -137,8 +137,9 @@ describes.realWin('amp-autocomplete unit tests', {
       renderedChild.setAttribute('value', item.value);
       renderedChildren.push(renderedChild);
     });
-    const renderTemplateSpy = sandbox.stub(impl.templates_, 'renderTemplateArray').returns(
-        Promise.resolve(renderedChildren));
+    const renderTemplateSpy =
+        sandbox.stub(impl.templates_, 'renderTemplateArray').returns(
+            Promise.resolve(renderedChildren));
 
     return impl.renderResults_(sourceData, impl.container_).then(() => {
       expect(impl.container_.children.length).to.equal(3);
