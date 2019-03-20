@@ -334,12 +334,15 @@ export class AmpAutocomplete extends AMP.BaseElement {
   /**
    * Render the given data into item elements in the given container element.
    * @param {!Array<!JsonObject|string>} filteredData
-   * @param {!Element} container
+   * @param {?Element} container
    * @return {!Promise}
    * @private
    */
   renderResults_(filteredData, container) {
     let renderPromise = Promise.resolve();
+    if (!container) {
+      return renderPromise;
+    }
     if (this.templateElement_) {
       renderPromise = this.templates_.renderTemplateArray(this.templateElement_,
           filteredData).then(renderedChildren => {
