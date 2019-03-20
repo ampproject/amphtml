@@ -120,8 +120,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
     if (scripts.length) {
       this.inlineData_ = this.getInlineData_(scripts);
     } else if (!this.element.hasAttribute('src')) {
-      user().warn(TAG, 
-        'Expected a <script> child or a URL specified in "src".')
+      user().warn(TAG,
+          'Expected a <script> child or a URL specified in "src".');
     }
 
     const inputElements = childElementsByTag(this.element, 'INPUT');
