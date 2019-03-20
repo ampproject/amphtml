@@ -730,7 +730,7 @@ An `amp-story-grid-layer` can contain any of the following elements:
 
 #### Clickable elements and embeds in amp-story-grid-layer
 
-Whenever a clickable element is tapped, a tooltip will be shown - deferring the corresponding action until the user clicks on the tooltip. This is because we want to keep navigation smooth and avoid accidental clicks.
+Whenever a clickable element is tapped a tooltip will be shown - deferring the corresponding action until the user clicks on the tooltip. This is because we want to keep navigation smooth and avoid accidental clicks.
 
 #### Customizing tooltip for clickable elements
 
@@ -742,7 +742,6 @@ You can customize the contents of the tooltip displayed on top of a clickable it
   <noscript><img width="300" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/amp-story-tooltip.gif" /></noscript>
   </amp-anim>
 </figure>
-
 
 ##### `data-tooltip-icon`
 
