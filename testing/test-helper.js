@@ -307,3 +307,15 @@ export class ImagePixelVerifier {
     return this.imagePixels_[this.imagePixels_.length - 1].src;
   }
 }
+
+export function measureMutateElementStub(measure, mutate) {
+  return Promise.resolve().then(measure).then(mutate);
+}
+
+export function measureElementStub(measure) {
+  return measureMutateElementStub(measure);
+}
+
+export function mutateElementStub(mutate) {
+  return measureMutateElementStub(undefined, mutate);
+}
