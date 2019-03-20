@@ -722,8 +722,6 @@ An `amp-story-grid-layer` can contain any of the following elements:
     <td>
       <ul>
         <li><code>&lt;amp-twitter></code></li>
-        <li><code>&lt;amp-youtube></code></li>
-        <li><code>&lt;amp-instagram></code></li>
       </ul>
     </td>
   </tr>
@@ -740,7 +738,7 @@ An `amp-story-grid-layer` can contain any of the following elements:
 
 #### Clickable elements and embeds in amp-story-grid-layer
 
-Whenever an embed is clicked, a tooltip will be shown before the element is expanded to a full-screen view. This is because we want to keep navigation smooth and avoid accidental clicks.
+Whenever a clickable element is tapped, a tooltip will be shown - deferring the corresponding action until the user clicks on the tooltip. This is because we want to keep navigation smooth and avoid accidental clicks.
 
 #### Customizing tooltip for clickable elements
 
@@ -1402,8 +1400,9 @@ The `<amp-story-bookend>` must have a `src` attribute pointing to the JSON confi
 ## Other components usable in AMP stories
 The following are other components usable in AMP stories that require some story-specific caveats.
 
-- [amp-sidebar](https://www.ampproject.org/docs/reference/components/amp-sidebar#sidebar-for-stories)
 - [amp-consent](https://www.ampproject.org/docs/reference/components/amp-consent#prompt-ui-for-stories)
+- [amp-sidebar](https://www.ampproject.org/docs/reference/components/amp-sidebar)
+- [amp-twitter](https://www.ampproject.org/docs/reference/components/amp-twitter)
 
 For more generally usable components see the [list of allowed children](https://www.ampproject.org/docs/reference/components/amp-story#children).
 
