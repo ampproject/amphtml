@@ -18,7 +18,11 @@ import {AmpDocService} from '../../../../src/service/ampdoc-impl';
 import {AmpList} from '../amp-list';
 import {Services} from '../../../../src/services';
 import {isExperimentOn, toggleExperiment} from '../../../../src/experiments';
-
+import {
+  measureElementStub,
+  measureMutateElementStub,
+  mutateElementStub,
+} from '../../../../testing/test-helper';
 
 const HAS_MORE_ITEMS_PAYLOAD = {
   'items': ['1', '2', '3'],
@@ -66,22 +70,10 @@ describes.realWin('amp-list component', {
       sandbox.stub(list, 'getAmpDoc').returns(ampdoc);
       sandbox.stub(list, 'getFallback').returns(null);
 
-      sandbox.stub(list, 'mutateElement').callsFake(mutator => {
-        mutator();
-        return Promise.resolve();
-      });
-
-      sandbox.stub(list, 'measureElement').callsFake(measurer => {
-        measurer();
-        return Promise.resolve();
-      });
-
+      sandbox.stub(list, 'mutateElement').callsFake(mutateElementStub);
+      sandbox.stub(list, 'measureElement').callsFake(measureElementStub);
       sandbox.stub(list, 'measureMutateElement').callsFake(
-          (measurer, mutator) => {
-            measurer();
-            mutator();
-            return Promise.resolve();
-          });
+          measureMutateElementStub);
 
       element.setAttribute('src', '/list/infinite-scroll?items=2&left=1');
       element.setAttribute('load-more', 'manual');
@@ -164,22 +156,10 @@ describes.realWin('amp-list component', {
       sandbox.stub(list, 'getAmpDoc').returns(ampdoc);
       sandbox.stub(list, 'getFallback').returns(null);
 
-      sandbox.stub(list, 'mutateElement').callsFake(mutator => {
-        mutator();
-        return Promise.resolve();
-      });
-
-      sandbox.stub(list, 'measureElement').callsFake(measurer => {
-        measurer();
-        return Promise.resolve();
-      });
-
+      sandbox.stub(list, 'mutateElement').callsFake(mutateElementStub);
+      sandbox.stub(list, 'measureElement').callsFake(measureElementStub);
       sandbox.stub(list, 'measureMutateElement').callsFake(
-          (measurer, mutator) => {
-            measurer();
-            mutator();
-            return Promise.resolve();
-          });
+          measureMutateElementStub);
 
       element.setAttribute('src', '/list/infinite-scroll?items=2&left=1');
       element.setAttribute('load-more', 'manual');
