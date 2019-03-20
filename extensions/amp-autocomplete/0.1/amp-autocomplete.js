@@ -117,7 +117,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
         `Experiment ${EXPERIMENT} is not turned on.`);
 
     if (!this.element.hasAttribute('src')) {
-      const scripts = childElementsByTag(this.element, 'SCRIPT');
+    const scripts = childElementsByTag(this.element, 'SCRIPT');
       userAssert(scripts.length,
           `${TAG} expected a <script> child or a URL specified in "src".`);
       this.inlineData_ = this.getInlineData_(scripts);
@@ -241,6 +241,26 @@ export class AmpAutocomplete extends AMP.BaseElement {
       this.inlineData_ = value || this.inlineData_;
       this.renderResults_();
     });
+  }
+
+  /** @override */
+  mutatedAttributesCallback(mutations) {
+    const src = mutations['src'];
+    if (src === undefined || src === null) {
+      return Promise.resolve;
+    }
+    if (typeof src === 'string') {
+      return this.getRemoteData_().then(value => {
+        this.inlineData_ = value;
+        this.renderResults_();
+      });
+    }
+    if (typeof src === 'object') {
+      this.inlineData_ = src['items'] || [];
+      this.renderResults_();
+      return Promise.resolve();
+    }
+    throw new Error('Unexpected "src" type: ' + src);
   }
 
   /**
