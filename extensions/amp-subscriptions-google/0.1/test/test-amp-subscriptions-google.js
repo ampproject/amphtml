@@ -295,13 +295,16 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
         .withExactArgs(PLATFORM_ID, 'subscribe', 'success')
         .once();
     const promise = Promise.resolve();
-    const response = new SubscribeResponse(null, null, null, null,
+    const response = new SubscribeResponse(null, null, null, null, null,
         () => promise);
-    serviceAdapterMock.expects('resetPlatforms')
-        .once();
+    const resetPlatformsPromise = new Promise(resolve => {
+      sandbox.stub(serviceAdapter, 'resetPlatforms').callsFake(() => {
+        resolve();
+      });
+    });
     callback(callbacks.subscribeResponse)(Promise.resolve(response));
     expect(methods.reset).to.not.be.called;
-    return promise;
+    return resetPlatformsPromise;
   });
 
   it('should delegate native subscribe request', () => {
