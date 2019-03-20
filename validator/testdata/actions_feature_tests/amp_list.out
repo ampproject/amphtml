@@ -72,16 +72,6 @@ actions_feature_tests/amp_list.html:31:2 The extension 'amp-mustache' is referen
 |      </template>
 |    </amp-list>
 |
-|    <!-- Valid: Should allow crossorigin -->
-|    <amp-list width="auto" height="100" layout="fixed-height"
-|      src="https://someserver.json" crossorigin="amp-viewer-auth-token-via-post" credentials="123">
-|      <template type="amp-mustache">
-|        <div class="url-entry">
-|          <a href="https://somelink.com">{{blah}}</a>
-|        </div>
-|      </template>
-|    </amp-list>
-|
 |    <!-- Valid: Should allow cross-origin -->
 |    <amp-list width="auto" height="100" layout="fixed-height"
 >>   ^~~~~~~~~
