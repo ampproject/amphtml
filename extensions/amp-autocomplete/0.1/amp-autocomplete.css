@@ -28,10 +28,6 @@
   position: relative;
 }
 
-.i-amphtml-autocomplete-item:last-child {
-  display: none;
-}
-
 .i-amphtml-autocomplete-item:hover {
   background-color: #d3d3d3;
 }
