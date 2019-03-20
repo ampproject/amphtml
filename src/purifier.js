@@ -280,14 +280,16 @@ export function addPurifyHooks(purifier, diffing, doc) {
     });
     allowedAttributesChanges.length = 0;
 
+    // TODO(alabiaga): Revert this change once DOM Purifier patch to make
+    // this work is live.
     // Remove input type file if applicable. The purifier will actually
     // not remove this attribute because of a Safari bug where removing it
     // will result in not being able to add it programmatically afterwards.
     // For AMP HTML's usage, this is fine.
-    const tagName = node.nodeName.toLowerCase();
-    if (tagName == 'input') {
+    const nodeName = node.nodeName.toLowerCase();
+    if (nodeName == 'input') {
       const inputType = node.getAttribute('type');
-      if (inputType == 'file' && isAmp4Email(doc)) {
+      if (inputType && inputType.toLowerCase() == 'file' && isAmp4Email(doc)) {
         node.removeAttribute('type');
       }
     }
