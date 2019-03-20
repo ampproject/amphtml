@@ -174,12 +174,6 @@ const AMP4EMAIL_BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES = dict({
   },
 });
 
-/** @const {!Object<string, !Array<string>>} */
-const AMP4EMAIL_BLACKLISTED_TAG_SPECIFIC_ATTRS = dict({
-  'form': ['name'],
-  'amp-anim': ['controls'],
-});
-
 /** @const {!Array<string>} */
 const BLACKLISTED_FIELDS_ATTR = [
   'form',
@@ -260,7 +254,7 @@ export function isValidAttr(
   if (isAmp4Email(doc)) {
     attrBlacklist = AMP4EMAIL_BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES[tagName];
     attrNameBlacklist = (/** @type {!JsonObject} */ (Object.assign(
-        AMP4EMAIL_BLACKLISTED_TAG_SPECIFIC_ATTRS, attrNameBlacklist)))
+        {'form': ['name'], 'amp-anim': ['controls']}, attrNameBlacklist)))
         [tagName];
   }
 
