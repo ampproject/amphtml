@@ -172,7 +172,8 @@ export class AmpImageViewer extends AMP.BaseElement {
       return Promise.resolve();
     }
     const ampImg = dev().assertElement(this.sourceAmpImage_);
-    const hasCompletedLayout = !!ampImg.querySelector('img');
+    const hasCompletedLayout = !!ampImg.querySelector(
+        '.i-amphtml-replaced-content');
     const laidOutPromise = hasCompletedLayout
       ? Promise.resolve()
       : ampImg.signals().whenSignal(CommonSignals.LOAD_END);
