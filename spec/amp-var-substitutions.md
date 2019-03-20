@@ -687,7 +687,7 @@ requested attribute names and the object values are the elements' values for tho
 
 #### Initial Scroll Depth
 
-Provides the scroll depth at the time the element was loaded, relative to a given element. The value will indicate whether the scroll position was above/at/below the element.
+Provides the scroll depth at the time the element was loaded, relative to the target. The value will indicate whether the scroll position was above/at/below the target.
 
 * **platform variable**: N/A
 * **amp-analytics variable**: `${initialScrollDepth}`
@@ -741,7 +741,7 @@ Provides the maximum amount of continuous time an element has met the `visibilit
 
 #### Max Scroll Depth
 
-Provides the maximum amount that the user has scrolled down the page, relative to a given element. The value will indicate whether the scroll position was above/at/below the element.
+Provides the maximum amount that the user has scrolled down the page, relative to the target. The value will indicate whether the scroll position was above/at/below the target.
 
 * **platform variable**: N/A
 * **amp-analytics variable**: `${maxScrollDepth}`
