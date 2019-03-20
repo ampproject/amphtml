@@ -1703,6 +1703,7 @@ class TagStack {
     goog.asserts.assert(query !== amp.validator.AncestorMarker.Marker.UNKNOWN);
     // Skip the first element, which is "$ROOT".
     for (let i = 1; i < this.stack_.length; ++i) {
+      if (this.stack_[i].tagSpec === null) {continue;}
       const spec = this.stack_[i].tagSpec.getSpec();
       if (spec.markDescendants === null) {continue;}
       for (const marker of spec.markDescendants.marker) {
