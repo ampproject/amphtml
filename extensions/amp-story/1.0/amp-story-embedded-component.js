@@ -53,9 +53,9 @@ const ActionIcon = {
 
 /**
  * Blank icon when no data-tooltip-icon src is specified.
- * @const {string}
+ * @private @const {string}
  */
-const DEFAULT_ICON_SRC =
+const BLANK_ICON_SRC =
   'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
 
 /** @private @const {number} */
@@ -82,7 +82,7 @@ export const EXPANDABLE_COMPONENTS = {
  */
 const LAUNCHABLE_COMPONENTS = {
   'a': {
-    componentIcon: DEFAULT_ICON_SRC,
+    componentIcon: BLANK_ICON_SRC,
     actionIcon: ActionIcon.LAUNCH,
     selector: 'a[href]',
   },
@@ -844,6 +844,7 @@ export class AmpStoryEmbeddedComponent {
     const tooltipCustomIcon =
       this.tooltip_.querySelector('.i-amphtml-story-tooltip-icon');
 
+    // Publisher specified a valid icon url.
     if (iconUrl) {
       this.resources_.mutateElement(devAssert(tooltipCustomIcon), () => {
         setImportantStyles(devAssert(tooltipCustomIcon),
@@ -852,11 +853,13 @@ export class AmpStoryEmbeddedComponent {
       return;
     }
 
-    if (embedConfig.componentIcon === DEFAULT_ICON_SRC) { // Fallback, no icon specified.
+    // No icon src specified by publisher and no default icon in config.
+    if (embedConfig.componentIcon === BLANK_ICON_SRC) {
       tooltipCustomIcon.classList.toggle('i-amphtml-hidden', true);
       return;
     }
 
+    // No icon src specified by publisher. Use default icon found in the config.
     this.resources_.mutateElement(devAssert(tooltipCustomIcon), () => {
       tooltipCustomIcon.classList.add(embedConfig.componentIcon);
     });
