@@ -183,7 +183,13 @@ export class AmpAutocomplete extends AMP.BaseElement {
         error => {
           throw error;
         });
-    return json['items'] || [];
+    const items = json['items'];
+    if (!items) {
+      user().warn(TAG, 'Expected key "items" in data but found nothing. '
+        + 'Rendering empty results.');
+      return [];
+    }
+    return items;
   }
 
   /**
@@ -197,7 +203,13 @@ export class AmpAutocomplete extends AMP.BaseElement {
     const policy = UrlReplacementPolicy.ALL;
     return batchFetchJsonFor(ampdoc, this.element, /* opt_expr */ undefined,
         policy).then(json => {
-      return json['items'] || [];
+      const items = json['items'];
+      if (!items) {
+        user().warn(TAG, 'Expected key "items" in data but found nothing. '
+          + 'Rendering empty results.');
+        return [];
+      }
+      return items;
     });
   }
 
