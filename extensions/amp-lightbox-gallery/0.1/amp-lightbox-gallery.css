@@ -193,6 +193,7 @@ amp-lightbox-gallery amp-carousel {
 .i-amphtml-lbg-desc-text {
   padding: 20px !important;
   position: relative !important;
+  z-index: 1 !important;
 }
 
 .i-amphtml-lbg-desc-box.i-amphtml-lbg-overflow .i-amphtml-lbg-desc-text {
