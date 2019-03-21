@@ -20,7 +20,7 @@ import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {UrlReplacementPolicy,
   batchFetchJsonFor} from '../../../src/batched-json';
-import {childElementsByTag, isJsonScriptTag,
+import {childElementsByTag,
   removeChildren} from '../../../src/dom';
 import {dev, user, userAssert} from '../../../src/log';
 import {getValueForExpr, tryParseJson} from '../../../src/json';
@@ -122,12 +122,13 @@ export class AmpAutocomplete extends AMP.BaseElement {
     userAssert(isExperimentOn(this.win, 'amp-autocomplete'),
         `Experiment ${EXPERIMENT} is not turned on.`);
 
-    const scripts = childElementsByTag(this.element, 'SCRIPT');
-    if (scripts.length) {
-      this.sourceData_ = this.getInlineData_(scripts);
+    const jsonScript =
+      this.element.querySelector('script[type="application/json"]');
+    if (jsonScript) {
+      this.sourceData_ = this.getInlineData_(jsonScript);
     } else if (!this.element.hasAttribute('src')) {
-      user().warn(TAG,
-          'Expected a <script> child or a URL specified in "src".');
+      user().warn(TAG, 'Expected a <script type="application/json"> child or '
+        + 'a URL specified in "src".');
     }
 
     const inputElements = childElementsByTag(this.element, 'INPUT');
@@ -166,20 +167,12 @@ export class AmpAutocomplete extends AMP.BaseElement {
   /**
    * Reads the 'items' data from the child <script> element.
    * For use with static local data.
-   * @param {!NodeList<!Element>} scripts
+   * @param {!Element} script
    * @return {!Array<!JsonObject|string>}
    * @private
    */
-  getInlineData_(scripts) {
-    const jsonScripts = [];
-    scripts.forEach(script => {
-      if (isJsonScriptTag(script)) {
-        jsonScripts.push(script);
-      }
-    });
-    userAssert(jsonScripts.length,
-        `${TAG} expected data in a <script type="application/json"> tag.`);
-    const json = tryParseJson(jsonScripts[0].textContent,
+  getInlineData_(script) {
+    const json = tryParseJson(script.textContent,
         error => {
           throw error;
         });
@@ -425,10 +418,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
    * @private
    */
   toggleResults_(opt_display) {
-    if (!this.container_) {
-      return;
-    }
-    toggle(this.container_, opt_display);
+    toggle(dev().assertElement(this.container_), opt_display);
   }
 
   /**
