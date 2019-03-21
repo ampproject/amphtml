@@ -453,13 +453,21 @@ function runSanitizerTests() {
     });
   });
 
-  describe('should sanitize based on AMP doc format type', () => {
-    afterEach(() => {
-      html.removeAttribute('amp4Email');
-    });
+  describe('purify based on AMP format type', () => {
+    it('should blacklist input[type="image"] and input[type="button"] in AMP',
+        () => {
+          // Given the AMP format type.
+          html.setAttribute('amp', '');
+          allowConsoleError(() => {
+            expect(purify('<input type="image">')).to.equal('<input>');
+            expect(purify('<input type="button">')).to.equal('<input>');
+          });
+        });
 
-    it('should allow for input type file and password', () => {
-      // Given that the doc is not provided.
+    it('should allow input[type="file"] and input[type="password"]', () => {
+      // Given that the AMP format does not blacklist input types file and
+      // password.
+      html.setAttribute('amp', '');
       allowConsoleError(() => {
         expect(purify('<input type="file">')).to.equal('<input type="file">');
         expect(purify('<input type="password">'))
@@ -467,7 +475,7 @@ function runSanitizerTests() {
       });
     });
 
-    it('should disallow certain attributes on form for AMP4Email', () => {
+    it('should sanitize certain tag attributes for AMP4Email', () => {
       html.setAttribute('amp4email', '');
       allowConsoleError(() => {
         expect(purify('<input type="password">')).to.equal('<input>');

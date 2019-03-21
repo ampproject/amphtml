@@ -160,17 +160,17 @@ const BLACKLISTED_ATTR_VALUES = [
   /*eslint no-script-url: 0*/ '</script',
 ];
 
-/** @const {!Object<string, !Object<string, !RegExp>>} */
+/** @const {!Object<string, !Object<string, !Array<string>>>} */
 const BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES = dict({
   'input': {
-    'type': /(?:image|button)/i,
+    'type': ['image', 'button'],
   },
 });
 
-/** @const {!Object<string, !Object<string, !RegExp>>} */
+/** @const {!Object<string, !Object<string, !Array<string>>>} */
 const AMP4EMAIL_BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES = dict({
   'input': {
-    'type': /(?:button|file|image|password)/i,
+    'type': ['file', 'password'],
   },
 });
 
@@ -248,11 +248,14 @@ export function isValidAttr(
     return false;
   }
 
-  let attrBlacklist = BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES[tagName];
+  const attrBlacklist = BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES[tagName];
   let attrNameBlacklist = BLACKLISTED_TAG_SPECIFIC_ATTRS[tagName];
+  let amp4EmailAttrBlacklist;
 
   if (isAmp4Email(doc)) {
-    attrBlacklist = AMP4EMAIL_BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES[tagName];
+    amp4EmailAttrBlacklist =
+        AMP4EMAIL_BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES[tagName];
+    // AMP4Email adds additional tag attrs that need to be blacklisted.
     attrNameBlacklist = (/** @type {!JsonObject} */ (Object.assign(
         {'form': ['name'], 'amp-anim': ['controls']}, attrNameBlacklist)))
         [tagName];
@@ -266,9 +269,12 @@ export function isValidAttr(
   // Remove blacklisted values for specific attributes for specific tags
   // e.g. input[type=image].
   if (attrBlacklist) {
-    const blacklistedValuesRegex = attrBlacklist[attrName];
-    if (blacklistedValuesRegex &&
-        attrValue.search(blacklistedValuesRegex) != -1) {
+    let blacklistedValues = attrBlacklist[attrName] || [];
+    if (amp4EmailAttrBlacklist) {
+      blacklistedValues =
+          blacklistedValues.concat(amp4EmailAttrBlacklist[attrName] || []);
+    }
+    if (blacklistedValues.includes(attrValue)) {
       return false;
     }
   }
@@ -283,9 +289,6 @@ export function isValidAttr(
  * @return {boolean}
  */
 function isAmpFormatType(formats, doc) {
-  if (!doc) {
-    return false;
-  }
   const html = doc.documentElement;
   const isFormatType =
       formats.some(format => html.hasAttribute(format));
