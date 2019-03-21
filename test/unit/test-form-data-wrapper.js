@@ -50,7 +50,7 @@ describes.realWin('FormDataWrapper', {}, env => {
         description: 'when native `entries` is available',
 
         beforeEach() {
-          // Do nothing as `FormData.prototype` already has `entires`.
+          // Do nothing as `FormData.prototype` already has `entries`.
         },
 
         afterEach() {
@@ -299,6 +299,55 @@ describes.realWin('FormDataWrapper', {}, env => {
             ['foo2', 'bar'],
             ['foo1', 'baz'],
             ['42', 'bang'],
+          ]);
+        });
+
+        it('includes the focused submit input at submit-time', () => {
+          const form = env.win.document.createElement('form');
+
+          const input = env.win.document.createElement('input');
+          input.type = 'text';
+          input.name = 'foo1';
+          input.value = 'bar';
+
+          const submit = env.win.document.createElement('input');
+          submit.type = 'submit';
+          submit.name = 'foo2';
+          submit.value = 'baz';
+
+          form.appendChild(input);
+          form.appendChild(submit);
+          env.win.document.body.appendChild(form);
+
+          submit.focus();
+          const formData = createFormDataWrapper(env.win, form);
+          expect(fromIterator(formData.entries())).to.have.deep.members([
+            ['foo1', 'bar'],
+            ['foo2', 'baz'],
+          ]);
+        });
+
+        it('includes the focused submit button at submit-time', () => {
+          const form = env.win.document.createElement('form');
+
+          const input = env.win.document.createElement('input');
+          input.type = 'text';
+          input.name = 'foo1';
+          input.value = 'bar';
+
+          const submit = env.win.document.createElement('button');
+          submit.name = 'foo2';
+          submit.innerText = 'baz';
+
+          form.appendChild(input);
+          form.appendChild(submit);
+          env.win.document.body.appendChild(form);
+
+          submit.focus();
+          const formData = createFormDataWrapper(env.win, form);
+          expect(fromIterator(formData.entries())).to.have.deep.members([
+            ['foo1', 'bar'],
+            ['foo2', ''],
           ]);
         });
       });

@@ -124,8 +124,13 @@ export class PolyfillFormDataWrapper {
 }
 
 /**
- * Wrap the native FormData implementation.
+ * Wrap the native `FormData` implementation.
  *
+ * NOTE: This differs from the standard `FormData` constructor. This constructor
+ * includes a submit button if it was used to submit the `opt_form`, where
+ * the native `FormData` constructor does not include the submit button used to
+ * submit the form.
+ * {@link https://xhr.spec.whatwg.org/#dom-formdata}
  * @implements {FormDataWrapperInterface}
  */
 class NativeFormDataWrapper {
@@ -133,6 +138,30 @@ class NativeFormDataWrapper {
   constructor(opt_form) {
     /** @private @const {!FormData} */
     this.formData_ = new FormData(opt_form);
+
+    if (!opt_form) {
+      return;
+    }
+
+    // Include the submit button to match browser default submit behavior
+    const {activeElement} = opt_form.ownerDocument;
+    const {elements} = opt_form;
+    const {length} = elements;
+    for (let i = 0; i < length; i++) {
+      const element = elements[i];
+      if (element !== activeElement) {
+        continue;
+      }
+
+      const {
+        tagName,
+        type,
+      } = element;
+      if (type == 'submit' || tagName == 'BUTTON') {
+        this.append(element.name, element.value);
+        break;
+      }
+    }
   }
 
   /**
@@ -216,6 +245,10 @@ class FormDataWrapperInterface {
    * only way to implement `entries` in this class is to capture the fields in
    * the form passed to the constructor (and the arguments passed to the
    * `append` method).
+   *
+   * This constructor should also add the submitter element as defined in the
+   * HTML spec for Form Submission Algorithm, but is not defined by the standard
+   * when using the `FormData` constructor directly.
    *
    * For more details on this, see http://mdn.io/FormData.
    *
