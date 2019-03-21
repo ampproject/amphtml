@@ -31,18 +31,29 @@ const IS_SINGLE_PASS = !!argv.single_pass;
 const IS_UNIT = !!argv.unit;
 
 function inferTestType() {
-  if (IS_INTEGRATION) {
+  let type;
+  if (IS_UNIT) {
+    type = 'unit';
+  } else if (IS_INTEGRATION) {
+    type = 'integration';
+
+    // TODO(danielrozenberg): report integration on saucelabs
     if (IS_SAUCELABS) {
-      // TODO(danielrozenberg): report integration on saucelabs
       return null;
     }
-    return 'integration' + (IS_SINGLE_PASS ? '-single-pass' : '');
-  } else if (IS_LOCAL_CHANGES) {
-    return 'local-changes';
-  } else if (IS_UNIT) {
-    return 'unit' + (IS_SAUCELABS ? '-saucelabs' : '');
+  } else {
+    return null;
   }
-  return null;
+
+  if (IS_LOCAL_CHANGES) {
+    return `${type}/local-changes`;
+  } else if (IS_SAUCELABS) {
+    return `${type}/saucelabs`;
+  } else if (IS_SINGLE_PASS) {
+    return `${type}/single-pass`;
+  } else {
+    return `${type}/standard`;
+  }
 }
 
 function postReport(action) {
