@@ -7,10 +7,27 @@
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
   <style amp-custom>
+    .large {
+      width: 1200px;
+    }
+
+    .small {
+      width: 200px;
+    }
   </style>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+
 </head>
 <body>
+
+  <amp-state id="data">
+    <script type="application/json">
+      "small"
+    </script>
+  </amp-state>
+
+
   <h1>amp-img</h1>
 
   <h2>Layout INTRINSIC</h2>
@@ -35,5 +52,15 @@
             style="display: inline-block"
             layout="intrinsic"></amp-img>
 
+  <h2>Change size on bind</h2>
+  <button on="tap:AMP.setState({data: data == 'large' ? 'small' : 'large'})">Toggle Image Size</button>
+
+  <div id="container" class="small" [class]="data">
+    <amp-img srcset="/examples/img/hero@1x.jpg 641w,
+                    /examples/img/hero@2x.jpg 1282w"
+      sizes="1282px"
+      width=641 height=480 layout="intrinsic" noloading>
+    </amp-img>
+  </div>
 </body>
 </html>
