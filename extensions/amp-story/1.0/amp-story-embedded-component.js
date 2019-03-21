@@ -51,13 +51,6 @@ const ActionIcon = {
   EXPAND: 'i-amphtml-tooltip-action-icon-expand',
 };
 
-/**
- * Blank icon when no data-tooltip-icon src is specified.
- * @private @const {string}
- */
-const BLANK_ICON_SRC =
-  'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
-
 /** @private @const {number} */
 const TOOLTIP_CLOSE_ANIMATION_MS = 100;
 
@@ -68,7 +61,7 @@ const TOOLTIP_CLOSE_ANIMATION_MS = 100;
  */
 export const EXPANDABLE_COMPONENTS = {
   'amp-twitter': {
-    componentIcon: 'amp-social-share-twitter-no-background',
+    customIconClassName: 'amp-social-share-twitter-no-background',
     actionIcon: ActionIcon.EXPAND,
     localizedStringId: LocalizedStringId.AMP_STORY_TOOLTIP_EXPAND_TWEET,
     selector: 'amp-twitter',
@@ -82,7 +75,6 @@ export const EXPANDABLE_COMPONENTS = {
  */
 const LAUNCHABLE_COMPONENTS = {
   'a': {
-    componentIcon: BLANK_ICON_SRC,
     actionIcon: ActionIcon.LAUNCH,
     selector: 'a[href]',
   },
@@ -511,17 +503,31 @@ export class AmpStoryEmbeddedComponent {
       return;
     }
 
+    this.triggeringTarget_ = component.element;
+
     // First time attaching the overlay. Runs only once.
     if (!this.focusedStateOverlay_) {
       this.storyEl_.appendChild(this.buildFocusedState_());
       this.initializeListeners_();
     }
 
+    // Delay building the tooltip to make sure it runs after clearTooltip_,
+    // in the case the user taps on a target in quick succession.
+    this.timer_.delay(() => {
+      this.buildTooltip_(component);
+    }, TOOLTIP_CLOSE_ANIMATION_MS);
+  }
+
+  /**
+   * Builds and displays tooltip
+   * @param {?InteractiveComponentDef} component
+   * @private
+   */
+  buildTooltip_(component) {
     this.updateTooltipBehavior_(component.element);
     this.updateTooltipEl_(component);
     this.componentPage_ = devAssert(this.storyEl_.querySelector(
         'amp-story-page[active]'));
-    this.triggeringTarget_ = component.element;
 
     this.resources_.mutateElement(
         devAssert(this.focusedStateOverlay_),
@@ -842,7 +848,13 @@ export class AmpStoryEmbeddedComponent {
     }
 
     const tooltipCustomIcon =
-      this.tooltip_.querySelector('.i-amphtml-story-tooltip-icon');
+      this.tooltip_.querySelector('.i-amphtml-story-tooltip-custom-icon');
+
+    // No icon src specified by publisher and no default icon in config.
+    if (!iconUrl && !embedConfig.customIconClassName) {
+      tooltipCustomIcon.classList.toggle('i-amphtml-hidden', true);
+      return;
+    }
 
     // Publisher specified a valid icon url.
     if (iconUrl) {
@@ -853,15 +865,9 @@ export class AmpStoryEmbeddedComponent {
       return;
     }
 
-    // No icon src specified by publisher and no default icon in config.
-    if (embedConfig.componentIcon === BLANK_ICON_SRC) {
-      tooltipCustomIcon.classList.toggle('i-amphtml-hidden', true);
-      return;
-    }
-
     // No icon src specified by publisher. Use default icon found in the config.
     this.resources_.mutateElement(devAssert(tooltipCustomIcon), () => {
-      tooltipCustomIcon.classList.add(embedConfig.componentIcon);
+      tooltipCustomIcon.classList.add(embedConfig.customIconClassName);
     });
   }
 
@@ -967,8 +973,8 @@ export class AmpStoryEmbeddedComponent {
       actionIcon.className = 'i-amphtml-tooltip-action-icon';
 
       const customIcon =
-        this.tooltip_.querySelector('.i-amphtml-story-tooltip-icon');
-      customIcon.className = 'i-amphtml-story-tooltip-icon';
+        this.tooltip_.querySelector('.i-amphtml-story-tooltip-custom-icon');
+      customIcon.className = 'i-amphtml-story-tooltip-custom-icon';
       resetStyles(customIcon, ['background-image']);
 
       this.tooltip_.removeEventListener('click', this.expandComponentHandler_,
@@ -1004,7 +1010,7 @@ export class AmpStoryEmbeddedComponent {
             </button>
           </div>
           <a class="i-amphtml-story-tooltip" target="_blank" ref="tooltip">
-            <div class="i-amphtml-story-tooltip-icon"></div>
+            <div class="i-amphtml-story-tooltip-custom-icon"></div>
             <p class="i-amphtml-tooltip-text" ref="text"></p>
             <div class="i-amphtml-tooltip-action-icon"></div>
             <div class="i-amphtml-story-tooltip-arrow" ref="arrow"></div>

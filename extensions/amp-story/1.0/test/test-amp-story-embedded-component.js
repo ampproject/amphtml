@@ -161,7 +161,7 @@ describes.realWin('amp-story-embedded-component', {amp: true}, env => {
     storeService.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT, fakeComponent);
 
     const tooltipIconEl = component.focusedStateOverlay_.querySelector(
-        '.i-amphtml-story-tooltip-icon');
+        '.i-amphtml-story-tooltip-custom-icon');
 
     expect(tooltipIconEl.style['background-image'])
         .to.equal('url("http://localhost:9876/my-icon")');
@@ -177,7 +177,7 @@ describes.realWin('amp-story-embedded-component', {amp: true}, env => {
 
     storeService.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT, fakeComponent);
     const tooltipIconEl = component.focusedStateOverlay_.querySelector(
-        '.i-amphtml-story-tooltip-icon');
+        '.i-amphtml-story-tooltip-custom-icon');
 
     expect(tooltipIconEl.style['background-image']).to.equal('');
   });
