@@ -355,6 +355,7 @@ describe('Layout', () => {
     expect(applyStaticLayout(div)).to.equal(Layout.INTRINSIC);
     expect(div.style.width).to.equal('');
     expect(div.style.height).to.equal('');
+    expect(div.style['max-width']).to.equal('100px');
     expect(div).to.have.class('i-amphtml-layout-intrinsic');
     expect(div).to.have.class('i-amphtml-layout-size-defined');
     expect(div.children.length).to.equal(1);
