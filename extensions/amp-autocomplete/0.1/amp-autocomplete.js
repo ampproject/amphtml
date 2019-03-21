@@ -327,34 +327,33 @@ export class AmpAutocomplete extends AMP.BaseElement {
   }
 
   /**
-   * Filter the source data according to the given input and render it in
+   * Filter the source data according to the given opt_input and render it in
    * the results container_.
-   * @param {Array<!JsonObject|string>=} sourceData
-   * @param {string=} input
+   * @param {?Array<!JsonObject|string>} sourceData
+   * @param {string=} opt_input
    * @return {!Promise}
    * @private
    */
-  filterDataAndRenderResults_(sourceData, input = '') {
+  filterDataAndRenderResults_(sourceData, opt_input = '') {
     this.clearAllItems_();
-    if (input.length < this.minChars_ || !sourceData || !sourceData.length) {
+    if (opt_input.length < this.minChars_ || !sourceData ||
+      !sourceData.length) {
       return Promise.resolve();
     }
-    const filteredData = this.filterData_(sourceData, input);
-    return this.renderResults_(filteredData, this.container_);
+    const filteredData = this.filterData_(sourceData, opt_input);
+    return this.renderResults_(filteredData,
+        dev().assertElement(this.container_));
   }
 
   /**
    * Render the given data into item elements in the given container element.
    * @param {!Array<!JsonObject|string>} filteredData
-   * @param {?Element} container
+   * @param {!Element} container
    * @return {!Promise}
    * @private
    */
   renderResults_(filteredData, container) {
     let renderPromise = Promise.resolve();
-    if (!container) {
-      return renderPromise;
-    }
     if (this.templateElement_) {
       renderPromise = this.templates_.renderTemplateArray(this.templateElement_,
           filteredData).then(renderedChildren => {
@@ -483,7 +482,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     if (element === null) {
       return;
     }
-    this.inputElement_.value = element.getAttribute('value');
+    this.inputElement_.value = this.userInput_ = element.getAttribute('value');
     this.clearAllItems_();
   }
 
