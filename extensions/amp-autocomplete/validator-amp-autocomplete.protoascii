@@ -24,9 +24,10 @@ tags: {  # amp-autocomplete
   }
   attr_lists: "common-extension-attrs"
 }
-tags: {  # <amp-autocomplete>
+tags: {  # <amp-autocomplete> with inline data
   html_format: AMP
   tag_name: "AMP-AUTOCOMPLETE"
+  spec_name: "amp-autocomplete with inline data"
   requires_extension: "amp-autocomplete"
   attrs: {
     name: "filter"
@@ -49,12 +50,19 @@ tags: {  # <amp-autocomplete>
   attrs: { name: "max-entries" }
   attrs: { name: "suggest-first" }
   attrs: { name: "submit-on-enter" }
+  attrs: { name: "template" }
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-autocomplete"
   amp_layout: {
     supported_layouts: CONTAINER
   }
   mandatory_ancestor: "FORM"
+  child_tags: {	
+    mandatory_min_num_child_tags: 2
+    child_tag_name_oneof: "INPUT"	
+    child_tag_name_oneof: "SCRIPT"	
+    child_tag_name_oneof: "TEMPLATE"	
+  }
   reference_points: {
     tag_spec_name: "amp-autocomplete > input"
     mandatory: true
@@ -62,6 +70,62 @@ tags: {  # <amp-autocomplete>
   }
   reference_points: {
     tag_spec_name: "amp-autocomplete JSON"
+    mandatory: true
+    unique: true
+  }
+}
+tags: {  # <amp-autocomplete src>
+  html_format: AMP
+  tag_name: "AMP-AUTOCOMPLETE"
+  spec_name: "amp-autocomplete with src attribute"
+  requires_extension: "amp-autocomplete"
+  attrs: {
+    name: "filter"
+    value_casei: "substring"
+    value_casei: "token-prefix"
+    value_casei: "prefix"
+    value_casei: "fuzzy"
+    value_casei: "custom"
+    value_casei: "none"
+    trigger: {
+      if_value_regex: "custom"
+      also_requires_attr: "filter-expr"
+    }
+  }
+  attrs: {
+    name: "filter-expr"
+    requires_extension: "amp-bind"
+  }
+  attrs: { name: "min-characters" }
+  attrs: { name: "max-entries" }
+  attrs: { name: "suggest-first" }
+  attrs: { name: "submit-on-enter" }
+  attrs: { name: "template" }
+  attrs: {
+    name: "src"
+    mandatory_anyof: "['src','[src]']"
+    value_url: {
+      protocol: "https"
+      allow_relative: false
+    }
+  }
+  attrs: {
+    name: "[src]"
+    mandatory_anyof: "['src','[src]']"
+  }
+  attr_lists: "extended-amp-global"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-autocomplete"
+  amp_layout: {
+    supported_layouts: CONTAINER
+  }
+  mandatory_ancestor: "FORM"
+  child_tags: {	
+    mandatory_min_num_child_tags: 1
+    child_tag_name_oneof: "INPUT"	
+  }
+  reference_points: {
+    tag_spec_name: "amp-autocomplete > input"
+    mandatory: true
     unique: true
   }
 }

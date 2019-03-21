@@ -192,7 +192,9 @@
             <label>
                 <span>Your name</span>
                 <amp-autocomplete filter="substring" min-characters="0" max-entries="2">
-                    <input type="text" name="name" required>
+                    <div>
+                      <input type="text" name="name" required>
+                    </div>
                     <script type="application/json">
                         { "items" : ["hello a", "hello b", "hello c"] }
                     </script>
