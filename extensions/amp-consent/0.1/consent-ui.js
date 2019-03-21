@@ -32,7 +32,7 @@ import {getData} from '../../../src/event-helper';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
-import {setStyles, setImportantStyles, toggle} from '../../../src/style';
+import {setImportantStyles, setStyles, toggle} from '../../../src/style';
 
 const TAG = 'amp-consent-ui';
 const CONSENT_STATE_MANAGER = 'consentStateManager';
@@ -119,10 +119,10 @@ export class ConsentUI {
     /** @private {?Element} */
     this.placeholder_ = null;
 
-    /** @private {!String} */
+    /** @private {string} */
     this.initialHeight_ = DEFAULT_INITIAL_HEIGHT;
 
-    /** @private {!Boolean} */
+    /** @private {boolean} */
     this.enableBorder_ = DEFAULT_ENABLE_BORDER;
 
     /** @private @const {!Function} */
@@ -300,8 +300,9 @@ export class ConsentUI {
         this.initialHeight_ = `${dataHeight}vh`;
       } else {
         dev().error(
-          TAG,
-          `Inavlid initial height: ${data['initialHeight']}. Must be in 'vh' units. Minimum: 10vh. Maximum: 60vh.`
+            TAG,
+            `Inavlid initial height: ${data['initialHeight']}.` +
+          'Must be in "vh" units. Minimum: 10vh. Maximum: 60vh.'
         );
       }
     }
@@ -466,18 +467,7 @@ export class ConsentUI {
       this.baseInstance_.mutateElement(() => {
         classList.add(consentUiClasses.in);
         this.isIframeVisible_ = true;
-
-        // Apply our initial height and border
-        setStyles(this.ui_, {
-          height: this.initialHeight_
-        });
-        setImportantStyles(this.parent_, {
-          transform: `translate3d(0px, calc(100% - ${this.initialHeight_}), 0px)`
-        });
-        if (this.enableBorder_) {
-          const {classList} = this.parent_;
-          classList.add(consentUiClasses.enableBorder);
-        }
+        this.applyInitialStyles_();
       });
     });
   }
@@ -510,8 +500,25 @@ export class ConsentUI {
   resetAnimationStyles_() {
     setStyles(this.parent_, {
       transform: '',
-      transition: ''
+      transition: '',
     });
+  }
+
+  /**
+   * Apply styles for ready event
+   */
+  applyInitialStyles_() {
+    // Apply our initial height and border
+    setStyles(this.ui_, {
+      height: this.initialHeight_,
+    });
+    setImportantStyles(this.parent_, {
+      transform: `translate3d(0px, calc(100% - ${this.initialHeight_}), 0px)`,
+    });
+    if (this.enableBorder_) {
+      const {classList} = this.parent_;
+      classList.add(consentUiClasses.enableBorder);
+    }
   }
 
   /**
