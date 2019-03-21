@@ -443,6 +443,7 @@ function runSanitizerTests() {
     });
   });
 
+
   describe('purifyTagsForTripleMustache', () => {
     it('should output basic text', () => {
       expect(purifyTagsForTripleMustache('abc')).to.be.equal('abc');
@@ -490,6 +491,41 @@ function runSanitizerTests() {
     it('should support list tags', () => {
       const html = '<ol><li></li></ol><ul></ul>';
       expect(purifyTagsForTripleMustache(html)).to.be.equal(html);
+    });
+
+    it('should sanitize formatting related elements', () => {
+      const html = '<b>abc</b><img><div>def</div>'
+          + '<br><code></code><del></del><em></em>'
+          + '<i></i><ins></ins><mark></mark><s></s>'
+          + '<small></small><strong></strong><sub></sub>'
+          + '<sup></sup><time></time><u></u><hr>';
+      expect(purifyTagsForTripleMustache(html)).to.be.equal(
+          '<b>abc</b><div>def</div>'
+          + '<br><code></code><del></del><em></em>'
+          + '<i></i><ins></ins><mark></mark><s></s>'
+          + '<small></small><strong></strong><sub></sub>'
+          + '<sup></sup><time></time><u></u><hr>'
+      );
+    });
+
+    it('should sanitize table related elements and anchor tags', () => {
+      const html = '<table class="valid-class">'
+          + '<caption>caption</caption>'
+          + '<thead><tr><th colspan="2">header</th></tr></thead>'
+          + '<tbody><tr><td>'
+          + '<a href="http://www.google.com">google</a>'
+          + '</td></tr></tbody>'
+          + '<tfoot><tr>'
+          + '<td colspan="2"><span>footer</span></td>'
+          + '</tr></tfoot>'
+          + '</table>';
+      expect(purifyTagsForTripleMustache(html)).to.be.equal(html);
+    });
+
+    it('should sanitize tags, removing unsafe attributes', () => {
+      const html = '<a href="javascript:alert(\'XSS\')">test</a>'
+          + '<img src="x" onerror="alert(\'XSS\')" />';
+      expect(purifyTagsForTripleMustache(html)).to.be.equal('<a>test</a>');
     });
 
     describe('should sanitize `style` attribute', () => {
