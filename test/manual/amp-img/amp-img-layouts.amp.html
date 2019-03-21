@@ -1,0 +1,39 @@
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>AMP #0</title>
+  <link rel="canonical" href="amps.html" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
+  <style amp-custom>
+  </style>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+</head>
+<body>
+  <h1>amp-img</h1>
+
+  <h2>Layout INTRINSIC</h2>
+  <p>This following are regression tests for specific bugs with amp-img
+    under layout intrinsic.</p>
+  <h3>Image overstretches under display: block</h3>
+  <p>Expected behavior: image is rendered according to natural aspect ratio.</p>
+  <p>Buggy behavior: image fills parent.</p>
+  <div style="width: 100%; height: 400px">
+    <amp-img src="https://placekitten.com/400/400"
+            width="400"
+            height="400"
+            style="display: block"
+            layout="intrinsic"></amp-img>
+  </div>
+
+  <h3>display: inline-block</h3>
+  <p>Expected Behavior: The element takes the space available to it and resizes its height automatically to the aspect ratio given by the width and height attributes until it reaches the element's natural size or reaches a CSS constraint (e.g., max-width). </p>
+  <amp-img src="https://placekitten.com/400/400"
+            width="400"
+            height="400"
+            style="display: inline-block"
+            layout="intrinsic"></amp-img>
+
+</body>
+</html>
