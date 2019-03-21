@@ -1418,10 +1418,12 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Shared functionality for cross-domain iframe-based rendering methods.
    * @param {!JsonObject<string, string>} attributes The attributes of the iframe.
+   * @param {boolean} letCreativeTriggerRenderStart Whether amp-ad-xorigin should let
+   *    the creative trigger render-start, or simply trigger it itself.
    * @return {!Promise} awaiting load event for ad frame
    * @private
    */
-  iframeRenderHelper_(attributes) {
+  iframeRenderHelper_(attributes, letCreativeTriggerRenderStart) {
     const mergedAttributes = Object.assign(attributes, dict({
       'height': this.creativeSize_.height,
       'width': this.creativeSize_.width,
@@ -1449,7 +1451,8 @@ export class AmpA4A extends AMP.BaseElement {
     // Executive onCreativeRender after init to ensure it can get reference
     // to frame but prior to load to allow for earlier access.
     const frameLoadPromise =
-        this.xOriginIframeHandler_.init(this.iframe, /* opt_isA4A */ true);
+          this.xOriginIframeHandler_.init(
+	      this.iframe, /* opt_isA4A */ true, letCreativeTriggerRenderStart);
     protectFunctionWrapper(this.onCreativeRender, this, err => {
       dev().error(TAG, this.element.getAttribute('type'),
           'Error executing onCreativeRender', err);
@@ -1483,7 +1486,17 @@ export class AmpA4A extends AMP.BaseElement {
       'src': Services.xhrFor(this.win).getCorsUrl(this.win, adUrl),
       'name': JSON.stringify(
           getContextMetadata(this.win, this.element, this.sentinel)),
-    }));
+    }), this.letCreativeTriggerRenderStart());
+  }
+
+  /**
+   * Whether AMP Ad Xorigin Iframe handler should wait for the creative to
+   * call render-start, rather than triggering it itself. Example use case
+   * is that amp-sticky-ad should trigger render-start itself so that the
+   * sticky container isn't shown before an ad is ready.
+   */
+  letCreativeTriggerRenderStart() {
+    return false;
   }
 
   /**
@@ -1537,7 +1550,8 @@ export class AmpA4A extends AMP.BaseElement {
         name = `${this.safeframeVersion};${creative.length};${creative}` +
             `${contextMetadata}`;
       }
-      return this.iframeRenderHelper_(dict({'src': srcPath, 'name': name}));
+      return this.iframeRenderHelper_(
+	  dict({'src': srcPath, 'name': name}), false);
     });
   }
 
@@ -1765,6 +1779,15 @@ export class AmpA4A extends AMP.BaseElement {
    */
   isVerifiedAmpCreative() {
     return this.isVerifiedAmpCreative_;
+  }
+
+  /**
+   * Whether AMP sticky-ad should use the load-end signal from the creative
+   * to trigger showing the sticky-ad container.
+   * @return {boolean}
+   */
+  ignoreLoadEndSignalForAmpStickyAd() {
+    return false;
   }
 }
 

@@ -195,7 +195,11 @@ class AmpStickyAd extends AMP.BaseElement {
     const signals = ad.signals();
     return this.ad_.getImpl().then(impl => {
       const promises = [signals.whenSignal(CommonSignals.RENDER_START)];
-      if (!(impl.config || {}).renderStartImplemented) {
+      const {config} = impl;
+      if ((config && !config.renderStartImplemented) ||
+	  (!config && (
+	      !impl.ignoreLoadEndForAmpStickyAd ||
+		!impl.ignoreLoadEndForAmpStickyAd()))) {
         promises.push(signals.whenSignal(CommonSignals.LOAD_END));
       }
       return Promise.race(promises);

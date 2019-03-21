@@ -581,6 +581,25 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     return getCsiAmpAnalyticsConfig();
   }
 
+  /** @override */
+  letCreativeTriggerRenderStart() {
+    if (this.element && this.element.parentElement &&
+	this.element.parentElement.tagName == 'AMP-STICKY-AD') {
+      this.win.addEventListener('message', event => {
+        if (event['data'] == 'fill_sticky') {
+          this.renderStarted();
+        }
+      });
+      return true;
+    }
+    return false;
+  }
+
+  /** @override */
+  ignoreLoadEndForAmpStickyAd() {
+    return true;
+  }
+
   /**
    * Calculates the appropriate height for a full-width responsive ad of the
    * given width.

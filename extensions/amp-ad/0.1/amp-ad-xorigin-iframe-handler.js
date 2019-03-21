@@ -103,9 +103,11 @@ export class AmpAdXOriginIframeHandler {
    * Sets up listeners and iframe state for iframe containing ad creative.
    * @param {!Element} iframe
    * @param {boolean=} opt_isA4A when true do not listen to ad response
+   * @param {boolean=} opt_letCreativeTriggerRenderStart Whether to wait for
+   *    render start from the creative, or simply trigger it in here.
    * @return {!Promise} awaiting render complete promise
    */
-  init(iframe, opt_isA4A) {
+  init(iframe, opt_isA4A, opt_letCreativeTriggerRenderStart) {
     devAssert(
         !this.iframe, 'multiple invocations of init without destroy!');
     this.iframe = iframe;
@@ -243,7 +245,7 @@ export class AmpAdXOriginIframeHandler {
     });
 
     this.element_.appendChild(this.iframe);
-    if (opt_isA4A) {
+    if (opt_isA4A && !opt_letCreativeTriggerRenderStart) {
       // A4A writes creative frame directly to page once creative is received
       // and therefore does not require render start message so attach and
       // impose no loader delay.  Network is using renderStart or
