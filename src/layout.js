@@ -488,7 +488,10 @@ export function applyStaticLayout(element) {
         `data:image/svg+xml;charset=utf-8,<svg height="${height}" width="${width}" xmlns="http://www.w3.org/2000/svg" version="1.1"/>`);
     element.insertBefore(sizer, element.firstChild);
     element.sizerElement = sizer;
-    setStyle(element, 'max-width', width);
+    if (!sizesAttr) {
+      // Force layout INTRINSIC to behave to spec with display: block
+      setStyle(element, 'max-width', width);
+    }
   } else if (layout == Layout.FILL) {
     // Do nothing.
   } else if (layout == Layout.CONTAINER) {
