@@ -710,7 +710,7 @@ An `amp-story-grid-layer` can contain any of the following elements:
     </td>
   </tr>
   <tr>
-    <td>Clickable elements</td>
+    <td>User Interactive Elements</td>
     <td>
       <ul>
         <li><code>&lt;a></code></li>
@@ -728,13 +728,13 @@ An `amp-story-grid-layer` can contain any of the following elements:
   </tr>
 </table>
 
-#### Clickable elements and embeds in amp-story-grid-layer
+#### User interactive elements in amp-story-grid-layer
 
-Whenever a clickable element is tapped a tooltip will be shown - deferring the corresponding action until the user clicks on the tooltip. This is because we want to keep navigation smooth and avoid accidental clicks.
+Whenever an interactive element is tapped a tooltip will be shown - deferring the corresponding action until the user taps again in the tooltip.
 
-#### Customizing tooltip for clickable elements
+#### Customizing tooltip for tappable elements
 
-You can customize the contents of the tooltip displayed on top of a clickable item by specifying the following attributes. If they are not specified, a fallback value will be provided automatically.
+You can customize the contents of the tooltip displayed on top of a user interactive element by specifying the following attributes. If they are not specified, a fallback value will be provided automatically.
 
 <figure class="centered-fig">
   <span class="special-char">Example:</span>
