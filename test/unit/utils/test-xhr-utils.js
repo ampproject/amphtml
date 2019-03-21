@@ -16,6 +16,7 @@
 
 import {
   ALLOW_SOURCE_ORIGIN_HEADER,
+  getViewerAuthTokenIfAvailable,
   getViewerInterceptResponse,
   setupAMPCors,
   setupInit,
@@ -199,6 +200,49 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
             expect(viewer.sendMessageAwaitResponse)
                 .to.have.been.calledWith('xhr', msgPayload);
           });
+    });
+  });
+
+  describe('getViewerAuthTokenIfAvailable', () => {
+    it('should return undefined if crossorigin attr is not present', () => {
+      const el = document.createElement('html');
+      return getViewerAuthTokenIfAvailable(el)
+          .then(token => {
+            expect(token).to.equal(undefined);
+          });
+    });
+    it('should return undefined if crossorigin attr does not contain' +
+       'exactly "amp-viewer-auth-token-post"', () => {
+      const el = document.createElement('html');
+      el.setAttribute('crossorigin', '');
+      return getViewerAuthTokenIfAvailable(el)
+          .then(token => {
+            expect(token).to.equal(undefined);
+          });
+    });
+    it('should return an auth token if one is present', () => {
+      sandbox.stub(Services, 'viewerAssistanceForDocOrNull').returns(
+          Promise.resolve({
+            getIdTokenPromise: (() => Promise.resolve('idToken')),
+          }));
+      const el = document.createElement('html');
+      el.setAttribute('crossorigin', 'amp-viewer-auth-token-via-post');
+      return getViewerAuthTokenIfAvailable(el)
+          .then(token => {
+            expect(token).to.equal('idToken');
+          });
+    });
+    it('should assert that amp-viewer-assistance extension is present', () => {
+      sandbox.stub(Services, 'viewerAssistanceForDocOrNull').returns(
+          Promise.resolve());
+      const el = document.createElement('html');
+      el.setAttribute('crossorigin', 'amp-viewer-auth-token-via-post');
+      expectAsyncConsoleError(
+          'crossorigin="amp-viewer-auth-token-post" ' +
+          'requires amp-viewer-assistance extension.', 1);
+      return getViewerAuthTokenIfAvailable(el)
+          .then(undefined,
+              e => expect(e).to.not.equal(undefined));
     });
   });
 
