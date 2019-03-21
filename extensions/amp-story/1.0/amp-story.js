@@ -95,7 +95,6 @@ import {
   setImportantStyles,
   toggle,
 } from '../../../src/style';
-import {startsWith} from '../../../src/string';
 import {debounce} from '../../../src/utils/rate-limit';
 import {dev, devAssert, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
@@ -107,6 +106,7 @@ import {getMode} from '../../../src/mode';
 import {isExperimentOn} from '../../../src/experiments';
 import {parseQueryString} from '../../../src/url';
 import {registerServiceBuilder} from '../../../src/service';
+import {startsWith} from '../../../src/string';
 import {upgradeBackgroundAudio} from './audio';
 import LocalizedStringsAr from './_locales/ar';
 import LocalizedStringsDe from './_locales/de';
