@@ -10,32 +10,10 @@
   <script async custom-element="amp-user-notification" src="https://cdn.ampproject.org/v0/amp-user-notification-0.1.js"></script>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
   <style amp-custom>
-    body[amp-x-background-color-test=yellow] {
-      background-color: yellow;
-    }
-    body[amp-x-background-color-test=green] {
-      background-color: green;
-    }
-    body[amp-x-font-color-test=red] {
-      color: red;
-    }
-    body[amp-x-font-color-test=blue] {
-      color: blue;
-    }
-    body[amp-x-border-test=solid] h1 {
-      border: 1px solid black;
-    }
-    body[amp-x-border-test=dashed] h1 {
-      border: 1px dashed black;
-    }
-    amp-user-notification {
-      background-color: darkgray;
-      padding: 5px;
-    }
   </style>
 </head>
 <body>
-  <h1>Background color is user sticky; text color may change on a refresh</h1>
+  <h1>Title TBD</h1>
 
   <ul>
     <li><a href="#amp-x-background-color-test=yellow" target="_blank">#amp-x-background-color-test=yellow</a></li>
@@ -47,22 +25,40 @@
       {
         "background-color-test": {
           "variants": {
-            "yellow": 50,
-            "green": 50
+            "yellow": {
+              "weight": 50,
+              "mutations": []
+            },
+            "green": {
+              "weight": 50,
+              "mutations": []
+            }
           }
         },
         "font-color-test": {
           "sticky": false,
           "variants": {
-            "blue": 20,
-            "red": 20
+            "blue": {
+              "weight": 20,
+              "mutations": []
+            },
+            "red": {
+              "weight": 20,
+              "mutations": []
+            }
           }
         },
         "border-test": {
           "consentNotificationId": "amp-user-notification",
           "variants": {
-            "solid": 50,
-            "dashed": 50
+            "solid": {
+              "weight": 50,
+              "mutations": []
+            },
+            "dashed": {
+              "weight": 50,
+              "mutations": []
+            }
           }
         }
       }
