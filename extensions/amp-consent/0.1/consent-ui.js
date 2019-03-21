@@ -261,6 +261,8 @@ export class ConsentUI {
       this.maybeHideOverlay_();
       // Enable the scroll, in case we were fullscreen with no overlay
       this.enableScroll_();
+      // Reset any animation styles set by style attribute
+      this.resetAnimationStyles_();
 
       // NOTE (torch2424): This is very sensitive. Fixed layer applies
       // a `top: calc(0px)` in order to fix some bugs, thus
