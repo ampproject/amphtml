@@ -128,6 +128,8 @@ class AmpAddThis extends AMP.BaseElement {
 
     /** @private {string} */
     this.containerClassName_ = '';
+
+    this.callSrc_ = `${ORIGIN}/dc/amp-addthis.html`;
   }
 
   /**
@@ -137,6 +139,9 @@ class AmpAddThis extends AMP.BaseElement {
     const pubId = this.element.getAttribute('data-pub-id') || '';
     const widgetId = this.element.getAttribute('data-widget-id') || '';
     const productCode = this.element.getAttribute('data-product-code') || '';
+    if (this.win.innerWidth >= 979){
+      this.callSrc_ += '?mode=desktop';
+    }
     if (getAddThisMode({pubId, widgetId, productCode}) === -1) {
       if (isPubId(pubId)) {
         if (!isProductCode(productCode) && !isWidgetId(widgetId)) {
@@ -275,7 +280,7 @@ class AmpAddThis extends AMP.BaseElement {
         dict({
           'frameborder': 0,
           'title': ALT_TEXT,
-          'src': `${ORIGIN}/dc/amp-addthis.html`,
+          'src': this.callSrc_,
           'id': this.widgetId_,
           'pco': this.productCode_,
           'containerClassName': this.containerClassName_,
