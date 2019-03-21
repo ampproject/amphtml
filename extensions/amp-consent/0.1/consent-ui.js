@@ -293,16 +293,26 @@ export class ConsentUI {
     this.enableBorder_ = DEFAULT_ENABLE_BORDER;
 
     // Set our initial height
-    if (data['initialHeight'] && data['initialHeight'].includes('vh')) {
-      const dataHeight = parseInt(data['initialHeight'], 10);
+    if (data['initialHeight']) {
+      if (typeof data['initialHeight'] === 'string' &&
+        data['initialHeight'].indexOf('vh') >= 0) {
 
-      if (dataHeight >= 10 && dataHeight <= 60) {
-        this.initialHeight_ = `${dataHeight}vh`;
+        const dataHeight = parseInt(data['initialHeight'], 10);
+
+        if (dataHeight >= 10 && dataHeight <= 60) {
+          this.initialHeight_ = `${dataHeight}vh`;
+        } else {
+          dev().error(
+              TAG,
+              `Inavlid initial height: ${data['initialHeight']}.` +
+            'Minimum: 10vh. Maximum: 60vh.'
+          );
+        }
       } else {
         dev().error(
             TAG,
             `Inavlid initial height: ${data['initialHeight']}.` +
-          'Must be in "vh" units. Minimum: 10vh. Maximum: 60vh.'
+          'Must be a string in "vh" units.'
         );
       }
     }
@@ -509,9 +519,11 @@ export class ConsentUI {
    */
   applyInitialStyles_() {
     // Apply our initial height and border
-    setStyles(this.ui_, {
-      height: this.initialHeight_,
-    });
+    if (this.ui_) {
+      setStyles(this.ui_, {
+        height: this.initialHeight_,
+      });
+    }
     setImportantStyles(this.parent_, {
       transform: `translate3d(0px, calc(100% - ${this.initialHeight_}), 0px)`,
     });
@@ -611,7 +623,7 @@ export class ConsentUI {
     }
 
     if (data['action'] === 'ready') {
-      this.handleReady_(data);
+      this.handleReady_(/** @type {!JsonObject} */(data));
     }
 
     if (data['action'] === 'enter-fullscreen') {
