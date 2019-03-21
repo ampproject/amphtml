@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
+import {ActionTrust} from '../../../../src/action-constants';
 import {AmpDocService} from '../../../../src/service/ampdoc-impl';
 import {AmpEvents} from '../../../../src/amp-events';
 import {AmpList} from '../amp-list';
 import {Deferred} from '../../../../src/utils/promise';
 import {Services} from '../../../../src/services';
 import {toggleExperiment} from '../../../../src/experiments';
-import { ActionTrust } from '../../../../src/action-constants';
 
 describes.repeated('amp-list', {
   'with script[type=text/plain][template=amp-mustache]':
