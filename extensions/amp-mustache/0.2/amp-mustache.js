@@ -118,7 +118,7 @@ export class AmpMustache extends AMP.BaseTemplate {
    * @private
    */
   validDelimiters_(delimiters) {
-    return delimiters.some(delimiter => {
+    return delimiters.every(delimiter => {
       return delimiter.trim() !== '' && delimiter !== '=';
     });
   }

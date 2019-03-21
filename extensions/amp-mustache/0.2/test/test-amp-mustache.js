@@ -111,6 +111,13 @@ describes.repeated('amp-mustache 0.2', {
       expect(() => {
         template.compileCallback();
       }).to.throw(/Empty space and "=" are invalid delimiters/);
+
+      templateElement.setAttribute('data-custom-delimiters', '<%,=');
+      templateElement./*OK*/innerHTML =
+          'value = <<%value%> href="https://www.test.org">abc</<%value%>>';
+      expect(() => {
+        template.compileCallback();
+      }).to.throw(/Empty space and "=" are invalid delimiters/);
     });
 
     it('should allow for custom delimiters', () => {
