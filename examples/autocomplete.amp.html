@@ -87,12 +87,12 @@
     </form>
 
     <h2>Search context</h2>
-    <h3>Plain Text</h3>
+    <h3>Plain Text, Submit on enter</h3>
     <form method="get" action-xhr="/form/search-json/get" target="_blank">
         <fieldset>
             <label>
                 <span>Search for</span>
-                <amp-autocomplete filter="token-prefix">
+                <amp-autocomplete filter="token-prefix" submit-on-enter>
                     <input type="search" name="term" required>
                     <script type="application/json">
                         { "items" : ["apple", "pineapple", "coconut", "pine apple"] }
