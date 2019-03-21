@@ -152,7 +152,8 @@
     "awConversion": "https://www.googleadservices.com/pagead/conversion/!conversionId/?cv=amp3&label=!conversionLabel&random=_random_&url=_source_url_&ref=_document_referrer_&fst=_page_view_id_&num=_counter_&fmt=3&async=1&u_h=_screen_height_&u_w=_screen_width_&u_ah=_available_screen_height_&u_aw=_available_screen_width_&u_cd=_screen_color_depth_&u_tz=_timezone_&tiba=_title_&guid=ON&script=0",
     "awRemarketing": "https://googleads.g.doubleclick.net/pagead/viewthroughconversion/!conversionId/?cv=amp3&label=!conversionLabel&random=_random_&url=_source_url_&ref=_document_referrer_&fst=_page_view_id_&num=_counter_&fmt=3&async=1&u_h=_screen_height_&u_w=_screen_width_&u_ah=_available_screen_height_&u_aw=_available_screen_width_&u_cd=_screen_color_depth_&u_tz=_timezone_&tiba=_title_&guid=ON&script=0",
     "flBase": "https://ad.doubleclick.net/activity;src=!flSrc;type=!flType;cat=!flCat",
-    "dnsBase": "https://ad.doubleclick.net/ddm/clk/",
+    "flDynamicBase": "https://!flSrc.fls.doubleclick.net/activityi;src=!flSrc;type=!flType;cat=!flCat",
+    "dnsBase": "https://ad.doubleclick.net/ddm/clk/"
   },
   "ibeatanalytics": {
     "host": "https://ibeat.indiatimes.com",

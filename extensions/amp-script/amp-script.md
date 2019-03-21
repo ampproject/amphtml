@@ -87,6 +87,16 @@ For additional code samples, see [`examples/amp-script/`](https://github.com/amp
 For design details, see the ["Intent to Implement" issue](https://github.com/ampproject/amphtml/issues/13471).
 For more information on `worker-dom`, see the [@ampproject/worker-dom](https://github.com/ampproject/worker-dom/) repository.
 
+### Mutations and user actions
+
+`amp-script` generally requires a user action to perform mutates to avoid unexpected UI jumps without user's input, but there are some exception to this rule.
+
+Overall mutation rules are:
+
+1. Mutations are always accepted after a user action for a user action interval of 5 seconds.
+2. The 5 seconds interval is extended if the user script performs a `fetch()` operation.
+3. Smaller `amp-script` elements with height under `300px` and non-`container` layout are allowed unlimitted mutations.
+
 ## Interested in using `<amp-script>`?
 
 We recommend developing against a local build of `amp-script`. This enables dev-only debugging hooks e.g. human-readable `postMessage` events.
