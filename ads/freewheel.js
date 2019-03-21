@@ -29,7 +29,7 @@ export function freewheel(global, data) {
   validateData(
       data,
       ['zone'],
-      ['zone','gdpr','gdpr_consent','useCMP','zIndex','blurDisplay',
+      ['zone','gdpr','gdpr_consent','gdpr_consented_providers','useCMP','zIndex','blurDisplay',
         'timeline','soundButton','defaultMute','onOver','closeAction',
         'errorAction','pauseRatio','label','vastUrlParams']
   );

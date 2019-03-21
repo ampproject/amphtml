@@ -58,4 +58,5 @@ All parameters are optional, unless otherwise stated
 - `data-vastUrlParams`
 - `data-gdpr`
 - `data-gdpr_consent`
+- `data-gdpr_consented_providers`
 - `data-useCMP`
