@@ -710,7 +710,7 @@ An `amp-story-grid-layer` can contain any of the following elements:
     </td>
   </tr>
   <tr>
-    <td>User Interactive Elements</td>
+    <td>Links</td>
     <td>
       <ul>
         <li><code>&lt;a></code></li>
@@ -728,11 +728,11 @@ An `amp-story-grid-layer` can contain any of the following elements:
   </tr>
 </table>
 
-#### User interactive elements in amp-story-grid-layer
+#### Links in amp-story-grid-layer
 
-Whenever an interactive element is tapped a tooltip will be shown - deferring the corresponding action until the user taps again in the tooltip.
+We support inline links `<a>` as a descendant of `amp-story-grid-layer`. Whenever a link is tapped a tooltip will be shown - deferring the corresponding action until the user taps again in the tooltip.
 
-#### Customizing tooltip for tappable elements
+#### Customizing tooltip for links
 
 You can customize the contents of the tooltip displayed on top of a user interactive element by specifying the following attributes. If they are not specified, a fallback value will be provided automatically.
 
