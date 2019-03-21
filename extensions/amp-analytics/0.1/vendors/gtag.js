@@ -115,7 +115,7 @@ export const GTAG_CONFIG = /** @type {!JsonObject} */ ({
          'guid=ON&script=0',
     'awConversion': '${awConversionPrefix}${awCommonParams}',
     'awRemarketing': '${awRemarketingPrefix}${awCommonParams}',
-    'flBase': 'https://ad.doubleclick.net/activity;src=${flSrc};type=${flType};cat=${flCat}',
+    'flBase': 'https://ad.doubleclick.net/activity${flDynamic};src=${flSrc};type=${flType};cat=${flCat}',
     'dnsBase': 'https://ad.doubleclick.net/ddm/clk/',
   },
   'transport': {
