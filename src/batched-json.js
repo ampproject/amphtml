@@ -56,13 +56,16 @@ export function batchFetchJsonFor(
   const xhr = Services.batchedXhrFor(ampdoc.win);
   return requestForBatchFetch(element, opt_urlReplacement, opt_refresh)
       .then(data => {
-        if (opt_token) {
+        const crossOriginAttr = element.getAttribute('cross-origin') ||
+            element.getAttribute('crossorigin');
+        if (crossOriginAttr &&
+            crossOriginAttr.trim() === 'amp-viewer-auth-token-via-post') {
           data.fetchOpt['method'] = 'POST';
           data.fetchOpt['headers'] = {
             'Content-Type': 'application/x-www-form-urlencoded',
           };
           data.fetchOpt['body'] = {
-            'ampViewerAuthToken': opt_token,
+            'ampViewerAuthToken': opt_token || '',
           };
         }
         return xhr.fetchJson(data.xhrUrl, data.fetchOpt);
