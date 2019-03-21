@@ -106,7 +106,7 @@ amp-consent.i-amphtml-consent-ui-iframe-active {
   transform: translate3d(0px, 100vh, 0px) !important;
 }
 
-amp-consent.i-amphtml-consent-ui-iframe-active.i-amphtml-consent-ui-default-border {
+amp-consent.i-amphtml-consent-ui-iframe-active.i-amphtml-consent-ui-enable-border {
   border-top-left-radius: 8px !important;
   border-top-right-radius: 8px !important;
   box-shadow: 0 0 5px 0 rgba(0,0,0, 0.2) !important;

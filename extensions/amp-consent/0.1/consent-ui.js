@@ -32,7 +32,7 @@ import {getData} from '../../../src/event-helper';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
-import {setStyles, toggle} from '../../../src/style';
+import {setStyles, setImportantStyles, toggle} from '../../../src/style';
 
 const TAG = 'amp-consent-ui';
 const CONSENT_STATE_MANAGER = 'consentStateManager';
@@ -48,7 +48,7 @@ export const consentUiClasses = {
   fill: 'i-amphtml-consent-ui-fill',
   placeholder: 'i-amphtml-consent-ui-placeholder',
   mask: 'i-amphtml-consent-ui-mask',
-  defaultBorder: 'i-amphtml-consent-ui-default-border',
+  enableBorder: 'i-amphtml-consent-ui-enable-border',
 };
 
 export class ConsentUI {
@@ -118,6 +118,12 @@ export class ConsentUI {
 
     /** @private {?Element} */
     this.placeholder_ = null;
+
+    /** @private {!String} */
+    this.initialHeight_ = DEFAULT_INITIAL_HEIGHT;
+
+    /** @private {!Boolean} */
+    this.enableBorder_ = DEFAULT_ENABLE_BORDER;
 
     /** @private @const {!Function} */
     this.boundHandleIframeMessages_ = this.handleIframeMessages_.bind(this);
@@ -282,43 +288,30 @@ export class ConsentUI {
    * @param {!JsonObject} data
    */
   handleReady_(data) {
-    let initialHeight = DEFAULT_INITIAL_HEIGHT;
-    let enableBorder = DEFAULT_ENABLE_BORDER;
+
+    this.initialHeight_ = DEFAULT_INITIAL_HEIGHT;
+    this.enableBorder_ = DEFAULT_ENABLE_BORDER;
 
     // Set our initial height
-    if (data['initial-height'] && data['initial-height'].includes('vh')) {
-      const dataHeight = parseInt(data['initial-height'], 10);
+    if (data['initialHeight'] && data['initialHeight'].includes('vh')) {
+      const dataHeight = parseInt(data['initialHeight'], 10);
 
-      if (dataHeight >= 10 && dataHeight > 60) {
-        initialHeight = `${dataHeight}vh`;
+      if (dataHeight >= 10 && dataHeight <= 60) {
+        this.initialHeight_ = `${dataHeight}vh`;
       } else {
         dev().error(
           TAG,
-          `Inavlid initial height: ${data['initial-height']}. Minimum: 10vh. Maximum: 60vh.`
+          `Inavlid initial height: ${data['initialHeight']}. Must be in 'vh' units. Minimum: 10vh. Maximum: 60vh.`
         );
       }
     }
 
     // Enable/disable our border
     if (data['border'] === false) {
-      enableBorder = false;
+      this.enableBorder_ = false;
     }
 
-    // Apply our initial height and border
-    setStyles(this.ui_, {
-      height: initialHeight
-    });
-    setStyles(this.parent_, {
-      transform: `translate3d(0px, calc(100% - ${initialHeight}), 0px) !important`
-    });
-    if (enableBorder) {
-      const {classList} = this.parent_;
-      classList.add(consentUiClasses.enableBorder);
-    }
-
-    this.baseInstance_.mutateElement(() => {
-      this.iframeReady_.resolve();
-    });
+    this.iframeReady_.resolve();
   }
 
   /**
@@ -328,6 +321,8 @@ export class ConsentUI {
     if (!this.ui_ || !this.isVisible_ || this.isFullscreen_) {
       return;
     }
+
+    this.resetAnimationStyles_();
 
     const {classList} = this.parent_;
     classList.add(consentUiClasses.iframeFullscreen);
@@ -454,11 +449,9 @@ export class ConsentUI {
     toggle(dev().assertElement(this.placeholder_), false);
     toggle(dev().assertElement(this.ui_), true);
 
-    // Remove transition/transform styles added by the fixed layer
-    setStyles(this.parent_, {
-      transform: '',
-      transition: '',
-    });
+    // Remove transition styles added by the fixed layer
+    // Transform styles applied by us for the animation.
+    this.resetAnimationStyles_();
 
     /**
      * Waiting for mutation twice here.
@@ -473,6 +466,18 @@ export class ConsentUI {
       this.baseInstance_.mutateElement(() => {
         classList.add(consentUiClasses.in);
         this.isIframeVisible_ = true;
+
+        // Apply our initial height and border
+        setStyles(this.ui_, {
+          height: this.initialHeight_
+        });
+        setImportantStyles(this.parent_, {
+          transform: `translate3d(0px, calc(100% - ${this.initialHeight_}), 0px)`
+        });
+        if (this.enableBorder_) {
+          const {classList} = this.parent_;
+          classList.add(consentUiClasses.enableBorder);
+        }
       });
     });
   }
@@ -496,6 +501,17 @@ export class ConsentUI {
     this.isIframeVisible_ = false;
     this.ui_.removeAttribute('name');
     removeElement(dev().assertElement(this.ui_));
+  }
+
+  /**
+   * Reset transition and transform styles
+   * Set by the fixed layer, and us
+   */
+  resetAnimationStyles_() {
+    setStyles(this.parent_, {
+      transform: '',
+      transition: ''
+    });
   }
 
   /**
@@ -564,7 +580,7 @@ export class ConsentUI {
    * {
    *   type: 'consent-ui',
    *   action: 'ready',
-   *   'initial-height': '30vh',
+   *   initialHeight: '30vh',
    *   border: true
    * }
    *
