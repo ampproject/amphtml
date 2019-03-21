@@ -411,13 +411,19 @@ export class AmpStory extends AMP.BaseElement {
               Action.SET_ADVANCEMENT_MODE, AdvancementMode.GO_TO_PAGE);
 
           if (caller['offsetParent'].tagName === 'AMP-SIDEBAR') {
-            this.sidebar_.getImpl()
-                .then(sidebarImpl => sidebarImpl.close_());
+            const pageId = args['id'];
+            Services.historyForDoc(this.getAmpDoc()).goBack().then(() => {
+              this.win.requestAnimationFrame(() => {
+                if (this.isActualPage_(pageId)) {
+                  this.switchTo_(pageId, NavigationDirection.NEXT)
+                      .then(() => this.closeOpacityMask_());
+                }
+              });
+            });
+          } else {
             this.switchTo_(args['id'], NavigationDirection.NEXT);
-            this.closeOpacityMask_();
           }
         }
-        this.switchTo_(args['id'], NavigationDirection.NEXT);
       });
     }
   }
@@ -661,6 +667,24 @@ export class AmpStory extends AMP.BaseElement {
       }
     });
 
+<<<<<<< HEAD
+=======
+    if (isExperimentOn(this.win, 'amp-story-branching')) {
+      this.win.addEventListener('hashchange', () => {
+        const maybePageId = parseQueryString(this.win.location.hash)['page'];
+        if (this.isActualPage_(maybePageId)) {
+          this.switchTo_(maybePageId, NavigationDirection.NEXT).then(() => {
+            this.closeOpacityMask_();
+          });
+          // Remove the fragment parameter from the URL
+          const {history} = this.win;
+          history.pushState(
+              '', this.win.document.title, this.win.location.pathname);
+        }
+      });
+    }
+
+>>>>>>> 7c21725ce... addressed PR comments
     // TODO(#16795): Remove once the runtime triggers pause/resume callbacks
     // on document visibility change (eg: user switches tab).
     this.documentState_.onVisibilityChanged(() => this.onVisibilityChanged_());
@@ -801,6 +825,7 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   layoutStory_() {
+
     const firstPageEl = user().assertElement(
         this.element.querySelector('amp-story-page'),
         'Story must have at least one page.');
@@ -2219,26 +2244,25 @@ export class AmpStory extends AMP.BaseElement {
     }
 
     if (isExperimentOn(this.win,'amp-story-branching')) {
-      this.sidebar_.addEventListener('click', e => {
+      const linkEls =
+          Array.prototype.slice.call(this.sidebar_.querySelectorAll('a'));
 
-        if (e.target.tagName === 'A') {
-          const url = e.target.getAttribute('href');
-          if (url.indexOf('#page=') >= 0) {
-            // Do not let the browser scroll
-            e.preventDefault();
-
-            // Handle for absolute URLs, in addition to fragments only.
+      linkEls.forEach(linkEl => {
+        const url = linkEl.getAttribute('href');
+        // Handles both anchor links (#page=someId) and absolute links; click
+        // handler should not be added to absolute links from same domain but
+        // different story.
+        if (url.indexOf('#page=') >= 0 && (url.indexOf('#') === 0 ||
+            url.indexOf(this.win.location.pathname) >= 0)) {
+          linkEl.addEventListener('click', () => {
+            // Do not prevent default; in safari, preventing default and
+            // appending a hash to a URL without a preceding slash fails.
             this.win.location.hash = url.slice(url.search('\#(.*)'));
-
-            const actions = Services.actionServiceForDoc(this.element);
-            actions.execute(dev().assertElement(this.sidebar_),
-                'close', /* args */ null, /* source */ null, /* caller */ null,
-                /* event */ null, ActionTrust.HIGH);
-            this.closeOpacityMask_();
-          }
+          });
         }
       });
     }
+
 
     this.mutateElement(() => {
       this.sidebar_.classList.add(SIDEBAR_CLASS_NAME);
