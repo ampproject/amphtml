@@ -133,5 +133,58 @@ describe('batchFetchJsonFor', () => {
     });
   });
 
+  describe('POST based identity with crossorigin attribute', () => {
+    it('should send POST request with auth token if attribute ' +
+    'crossorigin=amp-viewer-auth-token-via-post is present', () => {
+      const el = element('https://data.com');
+      el.setAttribute('crossorigin', 'amp-viewer-auth-token-via-post');
+      const all = UrlReplacementPolicy.ALL;
+
+      urlReplacements.expandUrlAsync
+          .withArgs('https://data.com')
+          .returns(Promise.resolve('https://data.com'));
+
+      const expectedRequest = {
+        'body': {'ampViewerAuthToken': 'idtoken'},
+        'headers': {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        'method': 'POST',
+        'requireAmpResponseSourceOrigin': false,
+      };
+
+      return batchFetchJsonFor(ampdoc, el, null, all, false, 'idtoken')
+          .then(() => {
+            expect(fetchJson).to.be.calledWithExactly(
+                'https://data.com', expectedRequest);
+          });
+    });
+
+    it('should send POST request with crossorigin attribute present with no' +
+        ' identity token', () => {
+      const el = element('https://data.com');
+      el.setAttribute('crossorigin', 'amp-viewer-auth-token-via-post');
+      const all = UrlReplacementPolicy.ALL;
+
+      urlReplacements.expandUrlAsync
+          .withArgs('https://data.com')
+          .returns(Promise.resolve('https://data.com'));
+
+      const expectedRequest = {
+        'body': {'ampViewerAuthToken': ''},
+        'headers': {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        'method': 'POST',
+        'requireAmpResponseSourceOrigin': false,
+      };
+
+      return batchFetchJsonFor(ampdoc, el, null, all, false, '')
+          .then(() => {
+            expect(fetchJson).to.be.calledWithExactly(
+                'https://data.com', expectedRequest);
+          });
+    });
+  });
   // TODO(choumx): Add tests for normal fetch functionality.
 });

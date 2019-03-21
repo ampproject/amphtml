@@ -414,11 +414,10 @@ export function assertSuccess(response) {
  * Returns a promise resolving to a string identity token if the element
  * contains the 'crossorigin' attribute and the amp-viewer-assistance extension
  * is present. Resolves to undefined otherwise.
- * @param {!Window} win
  * @param {!Element} element
  * @return {!Promise<string|undefined>}
  */
-export function getViewerAuthTokenIfAvailable(win, element) {
+export function getViewerAuthTokenIfAvailable(element) {
   const crossOriginAttr = element.getAttribute('cross-origin') ||
       element.getAttribute('crossorigin');
   if (crossOriginAttr &&
