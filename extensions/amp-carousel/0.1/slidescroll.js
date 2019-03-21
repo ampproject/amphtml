@@ -22,6 +22,7 @@ import {bezierCurve} from '../../../src/curve';
 import {closestAncestorElementBySelector} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
+import {listen} from '../../../src/event-helper';
 import {dict} from '../../../src/utils/object';
 import {getStyle, setStyle} from '../../../src/style';
 import {isExperimentOn} from '../../../src/experiments';
@@ -200,14 +201,9 @@ export class AmpSlideScroll extends BaseSlides {
 
     this.cancelTouchEvents_();
 
-    this.slidesContainer_.addEventListener(
-        'scroll', this.scrollHandler_.bind(this));
-
-    this.slidesContainer_.addEventListener(
-        'touchmove', this.touchMoveHandler_.bind(this));
-
-    this.slidesContainer_.addEventListener(
-        'touchend', this.touchEndHandler_.bind(this));
+    listen(this.slidesContainer_, 'scroll', this.scrollHandler_.bind(this));
+    listen(this.slidesContainer_, 'touchmove', this.touchMoveHandler_.bind(this));
+    listen(this.slidesContainer_, 'touchend', this.touchEndHandler_.bind(this));
 
     this.registerAction('goToSlide', invocation => {
       const {args} = invocation;
@@ -232,9 +228,11 @@ export class AmpSlideScroll extends BaseSlides {
 
   /**
    * Handles touchmove event.
+   * @param {!Event}
    * @private
    */
-  touchMoveHandler_() {
+  touchMoveHandler_(event) {
+    event.stopPropagation();
     this.clearAutoplay();
     if (!this.hasNativeSnapPoints_) {
       return;
@@ -769,7 +767,7 @@ export class AmpSlideScroll extends BaseSlides {
   cancelTouchEvents_() {
     // TODO(aghassemi, #4754): Ideally we only stop propagation of horizontal
     // touchmove events.
-    this.element.addEventListener('touchmove', event => {
+    listen(this.element, 'touchmove', event => {
       event.stopPropagation();
     });
   }
