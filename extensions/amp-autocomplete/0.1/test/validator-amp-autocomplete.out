@@ -30,6 +30,7 @@ FAIL
 |    <script async custom-element="amp-autocomplete" src="https://cdn.ampproject.org/v0/amp-autocomplete-0.1.js"></script>
 |    <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
 |    <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+|    <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
 |  </head>
 |  <body>
@@ -194,10 +195,94 @@ FAIL
 |        <input type="text">
 |      </amp-autocomplete> 
 |
+|      <!-- Valid: amp-component with static data and rich content template -->
+|      <amp-autocomplete>
+|        <input type="text">
+|        <script type="application/json"></script>
+|        <template type="amp-mustache" id="amp-template-default">
+>>       ^~~~~~~~~
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:201:6 The tag 'template', a child tag of 'amp-autocomplete with inline data', does not satisfy one of the acceptable reference points: amp-autocomplete > input, amp-autocomplete JSON. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_TAG_PROBLEM]
+|          <div class="city-item" value="{{value}}">
+>>         ^~~~~~~~~
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:202:8 The attribute 'value' may not appear in tag 'div'. [DISALLOWED_HTML]
+|              <div>{{value}}</div>
+|              <div class="custom-population">Population: {{population}}</div>        
+|          </div>
+|        </template>
+|      </amp-autocomplete> 
+|
+|      <!-- Valid: amp-component with remote data and rich content template -->
+|      <amp-autocomplete src="https://data.com/articles.json?ref=CANONICAL_URL">
+|        <input type="text">
+|        <template type="amp-mustache" id="amp-template-default">
+>>       ^~~~~~~~~
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:212:6 The attribute 'type' in tag 'amp-autocomplete > input' is set to the invalid value 'amp-mustache'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [DISALLOWED_HTML]
+>>       ^~~~~~~~~
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:212:6 The tag 'template', a child tag of 'amp-autocomplete with src attribute', does not satisfy the reference point 'amp-autocomplete > input'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_TAG_PROBLEM]
+|          <div class="city-item" value="{{value}}">
+>>         ^~~~~~~~~
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:213:8 The attribute 'value' may not appear in tag 'div'. [DISALLOWED_HTML]
+|              <div>{{value}}</div>
+|              <div class="custom-population">Population: {{population}}</div>        
+|          </div>
+|        </template>
+|      </amp-autocomplete> 
+|
+|      <!-- Valid: amp-component with static data and template attr -->
+|      <amp-autocomplete template="my-template-id">
+|        <input type="text">
+|        <script type="application/json"></script>
+|      </amp-autocomplete> 
+|      
+|      <!-- Valid: amp-component with remote data and template attr -->
+|      <amp-autocomplete src="https://data.com/articles.json?ref=CANONICAL_URL" template="my-template-id">
+|        <input type="text">
+|      </amp-autocomplete> 
+|
+|      <!-- Valid: amp-component with static data and template script child -->
+|      <amp-autocomplete>
+|        <input type="text">
+|        <script type="application/json"></script>
+|        <script type="text/plain" template="">
+>>       ^~~~~~~~~
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:235:6 The tag 'script', a child tag of 'amp-autocomplete with inline data', does not satisfy one of the acceptable reference points: amp-autocomplete > input, amp-autocomplete JSON. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_TAG_PROBLEM]
+>>       ^~~~~~~~~
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:235:6 Custom JavaScript is not allowed. (see https://www.ampproject.org/docs/reference/spec#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
+|          <div class="city-item" value="{{value}}">
+|            <div>{{value}}</div>
+|            <div class="custom-population">Population: {{population}}</div>        
+|          </div>
+|        </script>
+|      </amp-autocomplete> 
+|      
+|      <!-- Valid: amp-component with remote data and template attr -->
+|      <amp-autocomplete src="https://data.com/articles.json?ref=CANONICAL_URL">
+|        <input type="text">
+|        <script type="application/json"></script>
+>>       ^~~~~~~~~
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:246:6 The attribute 'type' in tag 'amp-autocomplete > input' is set to the invalid value 'application/json'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [DISALLOWED_HTML]
+>>       ^~~~~~~~~
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:246:6 The tag 'script', a child tag of 'amp-autocomplete with src attribute', does not satisfy the reference point 'amp-autocomplete > input'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_TAG_PROBLEM]
+|        <script type="text/plain" template="">
+>>       ^~~~~~~~~
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:247:6 The attribute 'template' may not appear in tag 'amp-autocomplete > input'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [DISALLOWED_HTML]
+>>       ^~~~~~~~~
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:247:6 The attribute 'type' in tag 'amp-autocomplete > input' is set to the invalid value 'text/plain'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [DISALLOWED_HTML]
+>>       ^~~~~~~~~
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:247:6 The tag 'script', a child tag of 'amp-autocomplete with src attribute', does not satisfy the reference point 'amp-autocomplete > input'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_TAG_PROBLEM]
+>>       ^~~~~~~~~
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:247:6 Custom JavaScript is not allowed. (see https://www.ampproject.org/docs/reference/spec#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
+|          <div class="city-item" value="{{value}}">
+|            <div>{{value}}</div>
+|            <div class="custom-population">Population: {{population}}</div>        
+|          </div>
+|        </script>
+|      </amp-autocomplete> 
+|
 |      <!-- Invalid: width is mistyped -->
 |      <amp-autocomplete widht=100>
 >>     ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:197:4 The attribute 'widht' may not appear in tag 'amp-autocomplete with inline data'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [DISALLOWED_HTML]
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:256:4 The attribute 'widht' may not appear in tag 'amp-autocomplete with inline data'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [DISALLOWED_HTML]
 |          <input type="text">
 |          <script type="application/json"></script>
 |      </amp-autocomplete>  
@@ -205,7 +290,7 @@ amp-autocomplete/0.1/test/validator-amp-autocomplete.html:197:4 The attribute 'w
 |      <!-- Invalid: responsive layout is not supported -->
 |      <amp-autocomplete layout="responsive">
 >>     ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:203:4 The specified layout 'RESPONSIVE' is not supported by tag 'amp-autocomplete with inline data'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_LAYOUT_PROBLEM]
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:262:4 The specified layout 'RESPONSIVE' is not supported by tag 'amp-autocomplete with inline data'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_LAYOUT_PROBLEM]
 |          <input type="text">
 |          <script type="application/json"></script>
 |      </amp-autocomplete>  
@@ -213,43 +298,43 @@ amp-autocomplete/0.1/test/validator-amp-autocomplete.html:203:4 The specified la
 |      <!-- Invalid: no children -->
 |      <amp-autocomplete>
 >>     ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:209:4 Tag 'amp-autocomplete with inline data' must have a minimum of 2 child tags - saw 0 child tags. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [GENERIC]
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:268:4 Tag 'amp-autocomplete with inline data' must have a minimum of 2 child tags - saw 0 child tags. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [GENERIC]
 >>     ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:209:4 The mandatory reference point 'amp-autocomplete > input' for 'amp-autocomplete with inline data' is missing. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_TAG_PROBLEM]
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:268:4 The mandatory reference point 'amp-autocomplete > input' for 'amp-autocomplete with inline data' is missing. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_TAG_PROBLEM]
 >>     ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:209:4 The mandatory reference point 'amp-autocomplete JSON' for 'amp-autocomplete with inline data' is missing. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_TAG_PROBLEM]
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:268:4 The mandatory reference point 'amp-autocomplete JSON' for 'amp-autocomplete with inline data' is missing. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_TAG_PROBLEM]
 |      </amp-autocomplete>  
 |      
 |      <!-- Invalid: input tag only (no data source) -->
 |      <amp-autocomplete>
 >>     ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:213:4 Tag 'amp-autocomplete with inline data' must have a minimum of 2 child tags - saw 1 child tags. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [GENERIC]
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:272:4 Tag 'amp-autocomplete with inline data' must have a minimum of 2 child tags - saw 1 child tags. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [GENERIC]
 >>     ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:213:4 The mandatory reference point 'amp-autocomplete JSON' for 'amp-autocomplete with inline data' is missing. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_TAG_PROBLEM]
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:272:4 The mandatory reference point 'amp-autocomplete JSON' for 'amp-autocomplete with inline data' is missing. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_TAG_PROBLEM]
 |        <input type="text">
 |      </amp-autocomplete>  
 |
 |      <!-- Invalid: script tag present with input tag excluded -->
 |      <amp-autocomplete>
 >>     ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:218:4 Tag 'amp-autocomplete with inline data' must have a minimum of 2 child tags - saw 1 child tags. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [GENERIC]
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:277:4 Tag 'amp-autocomplete with inline data' must have a minimum of 2 child tags - saw 1 child tags. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [GENERIC]
 >>     ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:218:4 The mandatory reference point 'amp-autocomplete > input' for 'amp-autocomplete with inline data' is missing. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_TAG_PROBLEM]
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:277:4 The mandatory reference point 'amp-autocomplete > input' for 'amp-autocomplete with inline data' is missing. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_TAG_PROBLEM]
 |        <script type="application/json"></script>
 |      </amp-autocomplete>  
 |
 |      <!-- Invalid: src attr only with input tag excluded -->
 |      <amp-autocomplete src="https://data.com/articles.json?ref=CANONICAL_URL">
 >>     ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:223:4 Tag 'amp-autocomplete with src attribute' must have a minimum of 1 child tags - saw 0 child tags. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [GENERIC]
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:282:4 Tag 'amp-autocomplete with src attribute' must have a minimum of 1 child tags - saw 0 child tags. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [GENERIC]
 >>     ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:223:4 The mandatory reference point 'amp-autocomplete > input' for 'amp-autocomplete with src attribute' is missing. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_TAG_PROBLEM]
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:282:4 The mandatory reference point 'amp-autocomplete > input' for 'amp-autocomplete with src attribute' is missing. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_TAG_PROBLEM]
 |      </amp-autocomplete>  
 |
 |      <!-- Invalid: two input tags -->
 |      <amp-autocomplete src="https://data.com/articles.json?ref=CANONICAL_URL">
 >>     ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:227:4 The reference point 'amp-autocomplete > input' for 'amp-autocomplete with src attribute' must be unique but a duplicate was encountered. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_TAG_PROBLEM]
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:286:4 The reference point 'amp-autocomplete > input' for 'amp-autocomplete with src attribute' must be unique but a duplicate was encountered. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_TAG_PROBLEM]
 |          <input type="text">
 |          <input type="text">
 |      </amp-autocomplete>  
@@ -257,33 +342,33 @@ amp-autocomplete/0.1/test/validator-amp-autocomplete.html:227:4 The reference po
 |      <!-- Invalid: input tag with type != "text" | "search" -->
 |      <amp-autocomplete>
 >>     ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:233:4 The mandatory reference point 'amp-autocomplete > input' for 'amp-autocomplete with inline data' is missing. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_TAG_PROBLEM]
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:292:4 The mandatory reference point 'amp-autocomplete > input' for 'amp-autocomplete with inline data' is missing. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_TAG_PROBLEM]
 |        <input type="checkbox">
 >>       ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:234:6 The tag 'input', a child tag of 'amp-autocomplete with inline data', does not satisfy one of the acceptable reference points: amp-autocomplete > input, amp-autocomplete JSON. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_TAG_PROBLEM]
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:293:6 The tag 'input', a child tag of 'amp-autocomplete with inline data', does not satisfy one of the acceptable reference points: amp-autocomplete > input, amp-autocomplete JSON. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_TAG_PROBLEM]
 |        <script type="application/json"></script>
 |      </amp-autocomplete>  
 |
 |      <!-- Invalid: input tag with type != "text" | "search" -->
 |      <amp-autocomplete src="https://data.com/articles.json?ref=CANONICAL_URL">
 >>     ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:239:4 The mandatory reference point 'amp-autocomplete > input' for 'amp-autocomplete with src attribute' is missing. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_TAG_PROBLEM]
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:298:4 The mandatory reference point 'amp-autocomplete > input' for 'amp-autocomplete with src attribute' is missing. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_TAG_PROBLEM]
 |        <input type="button">
 >>       ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:240:6 The attribute 'type' in tag 'amp-autocomplete > input' is set to the invalid value 'button'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [DISALLOWED_HTML]
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:299:6 The attribute 'type' in tag 'amp-autocomplete > input' is set to the invalid value 'button'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [DISALLOWED_HTML]
 >>       ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:240:6 The tag 'input', a child tag of 'amp-autocomplete with src attribute', does not satisfy the reference point 'amp-autocomplete > input'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_TAG_PROBLEM]
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:299:6 The tag 'input', a child tag of 'amp-autocomplete with src attribute', does not satisfy the reference point 'amp-autocomplete > input'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_TAG_PROBLEM]
 >>       ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:240:6 The attribute 'type' in tag 'input' is set to the invalid value 'button'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:299:6 The attribute 'type' in tag 'input' is set to the invalid value 'button'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
 |      </amp-autocomplete>  
 |
 |      <!-- Invalid: input tag with type != "text" | "search" -->
 |      <amp-autocomplete>
 >>     ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:244:4 The mandatory reference point 'amp-autocomplete > input' for 'amp-autocomplete with inline data' is missing. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_TAG_PROBLEM]
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:303:4 The mandatory reference point 'amp-autocomplete > input' for 'amp-autocomplete with inline data' is missing. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_TAG_PROBLEM]
 |        <input type="submit">
 >>       ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:245:6 The tag 'input', a child tag of 'amp-autocomplete with inline data', does not satisfy one of the acceptable reference points: amp-autocomplete > input, amp-autocomplete JSON. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_TAG_PROBLEM]
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:304:6 The tag 'input', a child tag of 'amp-autocomplete with inline data', does not satisfy one of the acceptable reference points: amp-autocomplete > input, amp-autocomplete JSON. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_TAG_PROBLEM]
 |        <script type="application/json"></script>
 |      </amp-autocomplete>
 |
@@ -292,17 +377,15 @@ amp-autocomplete/0.1/test/validator-amp-autocomplete.html:245:6 The tag 'input',
 |        <input type="text">
 |        <script type="application/json"></script>
 >>       ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:252:6 Tag 'script' is disallowed as child of tag 'amp-autocomplete with src attribute'. Child tag must be one of ['input']. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_TAG_PROBLEM]
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:311:6 The attribute 'type' in tag 'amp-autocomplete > input' is set to the invalid value 'application/json'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [DISALLOWED_HTML]
 >>       ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:252:6 The tag 'script', a child tag of 'amp-autocomplete with src attribute', does not satisfy the reference point 'amp-autocomplete > input'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_TAG_PROBLEM]
->>       ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:252:6 Tag 'script' is disallowed as child of tag 'amp-autocomplete with src attribute'. Child tag must be one of ['input']. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_TAG_PROBLEM]
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:311:6 The tag 'script', a child tag of 'amp-autocomplete with src attribute', does not satisfy the reference point 'amp-autocomplete > input'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_TAG_PROBLEM]
 |      </amp-autocomplete>
 |
 |      <!-- Invalid: amp-autocomplete with filter=custom and no filter-expr attribute -->
 |      <amp-autocomplete filter="custom">
 >>     ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:256:4 The attribute 'filter-expr' in tag 'amp-autocomplete with inline data' is missing or incorrect, but required by attribute 'filter'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [DISALLOWED_HTML]
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:315:4 The attribute 'filter-expr' in tag 'amp-autocomplete with inline data' is missing or incorrect, but required by attribute 'filter'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [DISALLOWED_HTML]
 |        <input type="text">
 |        <script type="application/json"></script>
 |      </amp-autocomplete>
@@ -310,14 +393,14 @@ amp-autocomplete/0.1/test/validator-amp-autocomplete.html:256:4 The attribute 'f
 |      <!-- Invalid: amp-autocomplete with filter=custom and no filter-expr attribute -->
 |      <amp-autocomplete filter="custom" src="https://data.com/articles.json?ref=CANONICAL_URL">
 >>     ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:262:4 The attribute 'filter-expr' in tag 'amp-autocomplete with src attribute' is missing or incorrect, but required by attribute 'filter'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [DISALLOWED_HTML]
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:321:4 The attribute 'filter-expr' in tag 'amp-autocomplete with src attribute' is missing or incorrect, but required by attribute 'filter'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [DISALLOWED_HTML]
 |        <input type="text">
 |      </amp-autocomplete>
 |
 |      <!-- Invalid: amp-autocomplete with unexpected filter -->
 |      <amp-autocomplete filter="random">
 >>     ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:267:4 The attribute 'filter' in tag 'amp-autocomplete with inline data' is set to the invalid value 'random'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [DISALLOWED_HTML]
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:326:4 The attribute 'filter' in tag 'amp-autocomplete with inline data' is set to the invalid value 'random'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [DISALLOWED_HTML]
 |        <input type="text">
 |        <script type="application/json"></script>
 |      </amp-autocomplete>
@@ -325,7 +408,7 @@ amp-autocomplete/0.1/test/validator-amp-autocomplete.html:267:4 The attribute 'f
 |      <!-- Invalid: amp-autocomplete with unexpected filter and src attr -->
 |      <amp-autocomplete filter="random" src="https://data.com/articles.json?ref=CANONICAL_URL">
 >>     ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:273:4 The attribute 'filter' in tag 'amp-autocomplete with src attribute' is set to the invalid value 'random'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [DISALLOWED_HTML]
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:332:4 The attribute 'filter' in tag 'amp-autocomplete with src attribute' is set to the invalid value 'random'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [DISALLOWED_HTML]
 |        <input type="text">
 |      </amp-autocomplete>
 |    </form>
@@ -333,7 +416,7 @@ amp-autocomplete/0.1/test/validator-amp-autocomplete.html:273:4 The attribute 'f
 |    <!-- Invalid: amp-autocomplete with static data without FORM ancestor -->
 |    <amp-autocomplete>
 >>   ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:279:2 The tag 'amp-autocomplete with inline data' may only appear as a descendant of tag 'form'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_TAG_PROBLEM]
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:338:2 The tag 'amp-autocomplete with inline data' may only appear as a descendant of tag 'form'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_TAG_PROBLEM]
 |      <input type="text">
 |      <script type="application/json"></script>
 |    </amp-autocomplete>
@@ -341,9 +424,9 @@ amp-autocomplete/0.1/test/validator-amp-autocomplete.html:279:2 The tag 'amp-aut
 |    <!-- Invalid: amp-autocomplete with remote data without FORM ancestor -->
 |    <amp-autocomplete src="https://data.com/articles.json?ref=CANONICAL_URL">
 >>   ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:285:2 The tag 'amp-autocomplete with inline data' may only appear as a descendant of tag 'form'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_TAG_PROBLEM]
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:344:2 The tag 'amp-autocomplete with inline data' may only appear as a descendant of tag 'form'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_TAG_PROBLEM]
 >>   ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:285:2 The mandatory reference point 'amp-autocomplete JSON' for 'amp-autocomplete with inline data' is missing. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_TAG_PROBLEM]
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:344:2 The mandatory reference point 'amp-autocomplete JSON' for 'amp-autocomplete with inline data' is missing. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_TAG_PROBLEM]
 |      <input type="text">
 |    </amp-autocomplete>
 |
