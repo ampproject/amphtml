@@ -465,7 +465,8 @@ export class AmpList extends AMP.BaseElement {
       this.showFallback_(error);
 
       const actions = Services.actionServiceForDoc(this.element);
-      actions.trigger(this.element, 'fetch-error', /* event */ null, ActionTrust.LOW);
+      actions.trigger(this.element, 'fetch-error', /* event */ null,
+          ActionTrust.LOW);
     });
   }
 
