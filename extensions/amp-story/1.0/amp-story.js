@@ -95,6 +95,7 @@ import {
   setImportantStyles,
   toggle,
 } from '../../../src/style';
+import {startsWith} from '../../../src/string';
 import {debounce} from '../../../src/utils/rate-limit';
 import {dev, devAssert, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
@@ -2252,7 +2253,7 @@ export class AmpStory extends AMP.BaseElement {
         // Handles both anchor links (#page=someId) and absolute links; click
         // handler should not be added to absolute links from same domain but
         // different story.
-        if (url.indexOf('#page=') >= 0 && (url.indexOf('#') === 0 ||
+        if (url.indexOf('#page=') >= 0 && (startsWith(url,'#') ||
             url.indexOf(this.win.location.pathname) >= 0)) {
           linkEl.addEventListener('click', () => {
             // Do not prevent default; in safari, preventing default and
