@@ -35,6 +35,10 @@ import {getConfigManager} from '../amp-addthis';
 import {getDetailsForMeta, getMetaElements} from './../addthis-utils/meta';
 import {getKeywordsString} from './../addthis-utils/classify';
 import {getSessionId} from '../addthis-utils/session';
+import {getWidgetOverload} from
+  '../addthis-utils/getWidgetIdOverloadedWithJSONForAnonymousMode';
+import {isBoolean} from '../addthis-utils/boolean';
+import {isNumber} from '../addthis-utils/number';
 import {isString} from '../addthis-utils/string';
 import {toArray} from '../../../../src/types';
 
@@ -523,6 +527,102 @@ describes.realWin('amp-addthis', {
     expect(isString([])).to.equal(false);
     expect(isString(void 0)).to.equal(false);
     expect(isString(null)).to.equal(false);
+  });
+
+  it('isNumber: knows if a thing is a number or not', () => {
+    expect(isNumber(1)).to.equal(true);
+    expect(isNumber(Number('0x1'))).to.equal(true);
+    expect(isNumber(Number())).to.equal(true);
+    expect(isNumber(Infinity)).to.equal(true);
+    expect(isNumber('0')).to.equal(false);
+    expect(isNumber(0x1)).to.equal(true);
+    expect(isNumber({})).to.equal(false);
+    expect(isNumber([])).to.equal(false);
+    expect(isNumber(void 0)).to.equal(false);
+    expect(isNumber(null)).to.equal(false);
+  });
+
+  it('isBoolean: knows if a thing is a boolean or not', () => {
+    expect(isBoolean(true)).to.equal(true);
+    expect(isBoolean(false)).to.equal(true);
+    expect(isBoolean(Boolean())).to.equal(true);
+    expect(isBoolean(Boolean(1))).to.equal(true);
+    expect(isBoolean('false')).to.equal(false);
+    expect(isBoolean('true')).to.equal(false);
+    expect(isBoolean({})).to.equal(false);
+    expect(isBoolean([])).to.equal(false);
+    expect(isBoolean(void 0)).to.equal(false);
+    expect(isBoolean(null)).to.equal(false);
+  });
+
+  it('getWidgetOverload: self.element.getAttribute function argument', () => {
+    expect(getWidgetOverload({})).to.equal('');
+    expect(getWidgetOverload({element: {}})).to.equal('');
+    const result = '{"counts":"none","numPreferredServices":5}';
+    const mock = {
+      'data-attr-counts': 'none',
+      'data-attr-numPreferredServices': 5,
+    };
+    const getAttribute = key => mock[key] ;
+    const self = {element: {getAttribute}};
+    expect(getWidgetOverload(self)).to.equal(result);
+  });
+
+  it('getWidgetOverload: doesnt pass unknown perams', () => {
+    const mock = {
+      'data-attr-csounts': 'none',
+      'data-attr-nsumPreferredServices': 5,
+    };
+    const getAttribute = key => mock[key] ;
+    const self = {element: {getAttribute}};
+    expect(getWidgetOverload(self)).to.equal('');
+  });
+
+  it('getWidgetOverload: only saves string, boolean, number', () => {
+    const mock = {
+      'data-attr-backgroundColor': undefined,
+      'data-attr-counterColor': null,
+      'data-attr-counts': [],
+      'data-attr-countsFontSize': {},
+      'data-attr-desktopPosition': new Function(),
+    };
+    const getAttribute = key => mock[key] ;
+    const self = {element: {getAttribute}};
+    expect(getWidgetOverload(self)).to.equal('');
+  });
+
+  it('getWidgetOverload: passes all params correctly', () => {
+    const result = '{"backgroundColor":1,"counterColor":1,"counts":1,"countsFontSize":1,"desktopPosition":1,"elements":1,"hideDevice":1,"hideEmailSharingConfirmation":1,"hideLabel":1,"iconColor":1,"mobilePosition":1,"numPreferredServices":1,"offset":1,"originalServices":1,"postShareFollowMsg":1,"postShareRecommendedMsg":1,"postShareTitle":1,"responsive":1,"shareCountThreshold":1,"size":1,"style":1,"textColor":1,"thankyou":1,"titleFontSize":1,"__hideOnHomepage":1}';
+    const mock = {
+      'data-attr-backgroundColor': 1,
+      'data-attr-counterColor': 1,
+      'data-attr-counts': 1,
+      'data-attr-countsFontSize': 1,
+      'data-attr-desktopPosition': 1,
+      'data-attr-elements': 1,
+      'data-attr-hideDevice': 1,
+      'data-attr-hideEmailSharingConfirmation': 1,
+      'data-attr-hideLabel': 1,
+      'data-attr-iconColor': 1,
+      'data-attr-mobilePosition': 1,
+      'data-attr-numPreferredServices': 1,
+      'data-attr-offset': 1,
+      'data-attr-originalServices': 1,
+      'data-attr-postShareFollowMsg': 1,
+      'data-attr-postShareRecommendedMsg': 1,
+      'data-attr-postShareTitle': 1,
+      'data-attr-responsive': 1,
+      'data-attr-shareCountThreshold': 1,
+      'data-attr-size': 1,
+      'data-attr-style': 1,
+      'data-attr-textColor': 1,
+      'data-attr-thankyou': 1,
+      'data-attr-titleFontSize': 1,
+      'data-attr-__hideOnHomepage': 1,
+    };
+    const getAttribute = key => mock[key] ;
+    const self = {element: {getAttribute}};
+    expect(getWidgetOverload(self)).to.equal(result);
   });
 
   it('getSessionId: returns a string of 16 characters containing 0-9 a-f',
