@@ -69,6 +69,7 @@ export class AmpViewerAssistance {
    * @private
    */
   actionHandler_(invocation) {
+    // TODO(choumx): updateActionState is low-trust but signIn is high-trust.
     const {method, args} = invocation;
     if (method == 'updateActionState' && !!args) {
       this.viewer_./*OK*/sendMessageAwaitResponse(method, args).catch(error => {
@@ -141,7 +142,7 @@ export class AmpViewerAssistance {
       if (token) {
         this.setIdTokenStatus_(/*available=*/true);
         this.action_.trigger(
-            this.assistanceElement_, 'signedIn', null, ActionTrust.LOW);
+            this.assistanceElement_, 'signedIn', null, ActionTrust.HIGH);
       } else {
         this.setIdTokenStatus_(/*available=*/false);
       }
