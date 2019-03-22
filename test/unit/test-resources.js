@@ -1445,8 +1445,9 @@ describe('Resources discoverWork', () => {
   });
 
   // TODO (#16156): this test results in too many calls to getRect on Safari
-  it.configure().skipSafari()
-      .run('should update inViewport before scheduling layouts', () => {
+  // it.configure().skipSafari().run(
+  it
+      .skip('should update inViewport before scheduling layouts', () => {
         resources.visible_ = true;
         sandbox.stub(resources.viewer_, 'getVisibilityState').returns(
             VisibilityState.VISIBLE
