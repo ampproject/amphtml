@@ -217,17 +217,59 @@ describes.realWin('getFormAsObject', {}, env => {
     expect(getFormAsObject(form)).to.deep.equal({'foo': ['bar', 'bang']});
   });
 
+  it('returns the first submit input entries if none focused', () => {
+    const input = env.win.document.createElement('input');
+    input.type = 'submit';
+    input.name = 'foo';
+    input.value = 'bar';
+    form.appendChild(input);
+
+    const input2 = env.win.document.createElement('input');
+    input2.type = 'submit';
+    input2.name = 'baz';
+    input2.value = 'quux';
+    form.appendChild(input2);
+
+    Object.defineProperty(form, 'ownerDocument', {get() {
+      return {activeElement: input};
+    }});
+    expect(getFormAsObject(form)).to.deep.equal({'foo': ['bar']});
+  });
+
   it('returns focused submit input entries', () => {
     const input = env.win.document.createElement('input');
     input.type = 'submit';
     input.name = 'foo';
     input.value = 'bar';
-
     form.appendChild(input);
-    expect(getFormAsObject(form)).to.deep.equal({});
+
+    const input2 = env.win.document.createElement('input');
+    input2.type = 'submit';
+    input2.name = 'baz';
+    input2.value = 'quux';
+    form.appendChild(input2);
+
+    expect(getFormAsObject(form)).to.deep.equal({'foo': ['bar']});
 
     Object.defineProperty(form, 'ownerDocument', {get() {
-      return {activeElement: input};
+      return {activeElement: input2};
+    }});
+    expect(getFormAsObject(form)).to.deep.equal({'baz': ['quux']});
+  });
+
+  it('returns the first submit button entries if none focused', () => {
+    const input = env.win.document.createElement('button');
+    input.name = 'foo';
+    input.value = 'bar';
+    form.appendChild(input);
+
+    const input2 = env.win.document.createElement('button');
+    input2.name = 'baz';
+    input2.value = 'quux';
+    form.appendChild(input2);
+
+    Object.defineProperty(form, 'ownerDocument', {get() {
+      return {activeElement: env.win.document.body};
     }});
     expect(getFormAsObject(form)).to.deep.equal({'foo': ['bar']});
   });
@@ -236,14 +278,19 @@ describes.realWin('getFormAsObject', {}, env => {
     const input = env.win.document.createElement('button');
     input.name = 'foo';
     input.value = 'bar';
-
     form.appendChild(input);
-    expect(getFormAsObject(form)).to.deep.equal({});
+
+    const input2 = env.win.document.createElement('button');
+    input2.name = 'baz';
+    input2.value = 'quux';
+    form.appendChild(input2);
+
+    expect(getFormAsObject(form)).to.deep.equal({'foo': ['bar']});
 
     Object.defineProperty(form, 'ownerDocument', {get() {
-      return {activeElement: input};
+      return {activeElement: input2};
     }});
-    expect(getFormAsObject(form)).to.deep.equal({'foo': ['bar']});
+    expect(getFormAsObject(form)).to.deep.equal({'baz': ['quux']});
   });
 
   it('returns multiple form entries', () => {
