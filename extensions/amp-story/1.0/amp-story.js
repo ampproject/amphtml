@@ -897,23 +897,30 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   getInitialPageId_(firstPageEl) {
-    const isActualPage =
-      pageId =>
-        findIndex(this.pages_, page => page.element.id === pageId) >= 0;
     const historyPage = getHistoryState(this.win, HistoryState.PAGE_ID);
 
     if (isExperimentOn(this.win, 'amp-story-branching')) {
       const maybePageId = parseQueryString(this.win.location.hash)['page'];
-      if (maybePageId && isActualPage(maybePageId)) {
+      if (maybePageId && this.isActualPage_(maybePageId)) {
         return maybePageId;
       }
     }
 
-    if (historyPage && isActualPage(historyPage)) {
+    if (historyPage && this.isActualPage_(historyPage)) {
       return historyPage;
     }
 
     return firstPageEl.id;
+  }
+
+  /**
+  * Checks to see if a page ID refers to an actual page in the story.
+  * @param {string} pageId
+  * @return {boolean}
+  * @private
+  */
+  isActualPage_(pageId) {
+    return findIndex(this.pages_, page => page.element.id === pageId) >= 0;
   }
 
   /**
@@ -1218,11 +1225,6 @@ export class AmpStory extends AMP.BaseElement {
           }
         }
 
-        this.storeService_.dispatch(Action.CHANGE_PAGE, {
-          id: targetPageId,
-          index: pageIndex,
-        });
-
         if (targetPage.isAd()) {
           this.storeService_.dispatch(Action.TOGGLE_AD, true);
           setAttributeInMutate(this, Attributes.AD_SHOWING);
@@ -1274,6 +1276,11 @@ export class AmpStory extends AMP.BaseElement {
         this.systemLayer_.resetDeveloperLogs();
         this.systemLayer_
             .setDeveloperLogContextString(this.activePage_.element.id);
+
+        this.storeService_.dispatch(Action.CHANGE_PAGE, {
+          id: targetPageId,
+          index: pageIndex,
+        });
       },
     ];
 
@@ -2240,7 +2247,6 @@ export class AmpStory extends AMP.BaseElement {
     if (!this.sidebar_) {
       return;
     }
-
     if (isExperimentOn(this.win,'amp-story-branching')) {
       const linkEls =
           Array.prototype.slice.call(this.sidebar_.querySelectorAll('a'));
@@ -2270,12 +2276,13 @@ export class AmpStory extends AMP.BaseElement {
     this.storeService_.dispatch(Action.TOGGLE_HAS_SIDEBAR,
         !!this.sidebar_);
 
-    const actions = [
+    const sidebarActions = [
       {tagOrTarget: 'AMP-SIDEBAR', method: 'open'},
       {tagOrTarget: 'AMP-SIDEBAR', method: 'close'},
       {tagOrTarget: 'AMP-SIDEBAR', method: 'toggle'},
     ];
-    this.storeService_.dispatch(Action.ADD_TO_ACTIONS_WHITELIST, actions);
+    this.storeService_.dispatch(
+        Action.ADD_TO_ACTIONS_WHITELIST, sidebarActions);
   }
 
   /**
