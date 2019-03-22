@@ -668,8 +668,6 @@ export class AmpStory extends AMP.BaseElement {
       }
     });
 
-<<<<<<< HEAD
-=======
     if (isExperimentOn(this.win, 'amp-story-branching')) {
       this.win.addEventListener('hashchange', () => {
         const maybePageId = parseQueryString(this.win.location.hash)['page'];
@@ -685,7 +683,6 @@ export class AmpStory extends AMP.BaseElement {
       });
     }
 
->>>>>>> 7c21725ce... addressed PR comments
     // TODO(#16795): Remove once the runtime triggers pause/resume callbacks
     // on document visibility change (eg: user switches tab).
     this.documentState_.onVisibilityChanged(() => this.onVisibilityChanged_());
