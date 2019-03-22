@@ -131,6 +131,7 @@ describe('inabox', function() {
         <script src="/examples/inabox-tag-integration.js"></script>
         `,
     }, env => {
+      // TODO(zombifier, #21545): fix this flaky test
       it.skip('should layout amp-img, amp-pixel, amp-analytics', () => {
         // See amp4test.js for creative content
         return testAmpComponents();
