@@ -31,107 +31,81 @@ tags: {  # <amp-addthis>
   requires_extension: "amp-addthis"
   attrs: {
     name: "data-attr-backgroundColor"
-    mandatory: false
   }
   attrs: {
     name: "data-attr-borderRadius"
-    mandatory: false
   }
   attrs: {
     name: "data-attr-counterColor"
-    mandatory: false
   }
   attrs: {
     name: "data-attr-counts"
-    mandatory: false
   }
   attrs: {
     name: "data-attr-countsFontSize"
-    mandatory: false
   }
   attrs: {
     name: "data-attr-desktopPosition"
-    mandatory: false
   }
   attrs: {
     name: "data-attr-elements"
-    mandatory: false
   }
   attrs: {
     name: "data-attr-hideDevice"
-    mandatory: false
   }
   attrs: {
     name: "data-attr-hideEmailSharingConfirmation"
-    mandatory: false
   }
   attrs: {
     name: "data-attr-hideLabel"
-    mandatory: false
   }
   attrs: {
     name: "data-attr-iconColor"
-    mandatory: false
   }
   attrs: {
     name: "data-attr-mobilePosition"
-    mandatory: false
   }
   attrs: {
     name: "data-attr-numPreferredServices"
-    mandatory: false
   }
   attrs: {
     name: "data-attr-offset"
-    mandatory: false
   }
   attrs: {
     name: "data-attr-originalServices"
-    mandatory: false
   }
   attrs: {
     name: "data-attr-postShareFollowMsg"
-    mandatory: false
   }
   attrs: {
     name: "data-attr-postShareRecommendedMsg"
-    mandatory: false
   }
   attrs: {
     name: "data-attr-postShareTitle"
-    mandatory: false
   }
   attrs: {
     name: "data-attr-responsive"
-    mandatory: false
   }
   attrs: {
     name: "data-attr-shareCountThreshold"
-    mandatory: false
   }
   attrs: {
     name: "data-attr-size"
-    mandatory: false
   }
   attrs: {
     name: "data-attr-style"
-    mandatory: false
   }
   attrs: {
     name: "data-attr-textColor"
-    mandatory: false
   }
   attrs: {
     name: "data-attr-thankyou"
-    mandatory: false
   }
   attrs: {
     name: "data-attr-titleFontSize"
-    mandatory: false
   }
   attrs: {
     name: "data-attr-__hideOnHomepage"
-    mandatory: false
   }
   attrs: {
     name: "data-class-name"
