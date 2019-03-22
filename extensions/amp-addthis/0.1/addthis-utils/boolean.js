@@ -18,6 +18,7 @@
  * @param {*} candidate
  * @return {boolean}
  */
-export function isString(candidate) {
-  return Object.prototype.toString.call(candidate) === '[object String]';
+export function isBoolean(candidate) {
+  return candidate === true || candidate === false ||
+    Object.prototype.toString.call(candidate) === '[object Boolean]';
 }

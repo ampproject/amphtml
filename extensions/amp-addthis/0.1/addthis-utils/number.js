@@ -18,6 +18,7 @@
  * @param {*} candidate
  * @return {boolean}
  */
-export function isString(candidate) {
-  return Object.prototype.toString.call(candidate) === '[object String]';
+export function isNumber(candidate) {
+  return !isNaN(candidate) &&
+    Object.prototype.toString.call(candidate) === '[object Number]';
 }
