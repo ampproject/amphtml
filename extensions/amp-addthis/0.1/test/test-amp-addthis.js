@@ -568,7 +568,7 @@ describes.realWin('amp-addthis', {
     expect(getWidgetOverload(self)).to.equal(result);
   });
 
-  it('getWidgetOverload: doesnt pass unknown perams', () => {
+  it('getWidgetOverload: doesn\'t pass unknown params', () => {
     const mock = {
       'data-attr-csounts': 'none',
       'data-attr-nsumPreferredServices': 5,
