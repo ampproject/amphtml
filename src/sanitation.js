@@ -57,6 +57,7 @@ export const TRIPLE_MUSTACHE_WHITELISTED_TAGS = [
   'del',
   'div',
   'em',
+  'hr',
   'i',
   'ins',
   'li',
