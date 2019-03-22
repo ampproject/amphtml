@@ -59,13 +59,13 @@ function getConfig() {
     return Object.assign({}, karmaDefault, {browsers: ['Edge']});
   }
   if (argv.ie) {
-    return Object.assign({}, karmaDefault, {browsers: ['IE_no_addons'],
-    customLaunchers: {
-      IE_no_addons: {
-        base:  'IE',
-        flags: ['-extoff']
-      }
-    }});
+    return Object.assign({}, karmaDefault, {browsers: ['IE'],
+      customLaunchers: {
+        IeNoAddOns: {
+          base: 'IE',
+          flags: ['-extoff'],
+        },
+      }});
   }
   if (argv.chrome_canary && !argv.chrome_flags) {
     return Object.assign({}, karmaDefault, {browsers: ['ChromeCanary']});
