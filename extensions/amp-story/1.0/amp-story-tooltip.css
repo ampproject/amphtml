@@ -26,6 +26,7 @@
 .i-amphtml-story-focused-state-layer.i-amphtml-hidden {
   opacity: 0 !important;
   pointer-events: none !important;
+  /* If duration is modified, also modify TOOLTIP_CLOSE_ANIMATION_MS in amp-story-embedded-component.js. */
   transition: opacity 0.1s cubic-bezier(0.4, 0.0, 1, 1) !important;
 }
 
@@ -128,20 +129,17 @@
   line-height: 20px !important;
 }
 
-.i-amphtml-story-tooltip-icon {
+.i-amphtml-story-tooltip-custom-icon {
   width: 24px !important;
   height: 24px !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
   filter: drop-shadow(0px 0px 8px rgba(0, 0, 0, 0.08)) !important;
 }
 
-.i-amphtml-story-tooltip-icon.i-amphtml-hidden {
+.i-amphtml-story-tooltip-custom-icon.i-amphtml-hidden {
   display: none !important;
-}
-
-.i-amphtml-story-tooltip-icon > img {
-  object-fit: cover !important;
-  width: 100% !important;
-  height: 100% !important;
 }
 
 .i-amphtml-tooltip-action-icon {
