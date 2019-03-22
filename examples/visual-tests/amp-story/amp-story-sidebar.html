@@ -29,7 +29,7 @@
   </head>
 
   <body>
-    <amp-story standalone publisher="AMP Team" title="Visual Diff Test"
+    <amp-story id = "story" standalone publisher="AMP Team" title="Visual Diff Test"
         publisher-logo-src="https://www.ampproject.org/static/img/icons/120.png"
         poster-portrait-src="https://picsum.photos/900/1600?image=981"
         poster-landscape-src="https://picsum.photos/1600/900?image=981"
@@ -37,10 +37,12 @@
       <amp-sidebar id="sidebar1" layout="nodisplay" >
         <button id="close-button" on="tap:sidebar1.close"> close </button>
         <ul>
-          <li>Nav item 1</li>
-          <li><a href="#idTwo" on="tap:idTwo.scrollTo">Nav item 2</a></li>
-          <li>Nav item 3</li>
-          <li><a href="#idFour" on="tap:idFour.scrollTo">Nav item 4</a></li>
+          <li><span><a href="http://google.com">Out item 1</a></span></li>
+          <li><span><a href="http://localhost:8000/examples/visual-tests/amp-story/amp-story-sidebar.html#page=page-2">Absolute fragment link</a></span></li>
+          <li><a href="http://localhost:8000/examples/visual-tests/amp-story/amp-story-tooltip.html#page=page-2"> Link to another story using fragment </a></li>
+          <li><a href="#page=page-3"> In Link Hash </a> </li>
+
+          <li on="tap:story.goToPage(id=page-3)">In Link Action</li>
           <li>Nav item 5</li>
           <li>Nav item 6</li>
         </ul>
@@ -50,7 +52,7 @@
         </amp-story-grid-layer>
         <amp-story-grid-layer template="vertical">
           <h1 class="hello-world">Hello world!</h1>
-          <p>Page one of two</p>
+          <p>Page one of three</p>
         </amp-story-grid-layer>
       </amp-story-page>
 
@@ -59,7 +61,16 @@
         </amp-story-grid-layer>
         <amp-story-grid-layer template="vertical">
           <h1 class="hello-world">Hello world!</h1>
-          <p>Page two of two</p>
+          <p>Page two of three</p>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+        <amp-story-page id="page-3">
+        <amp-story-grid-layer template="fill">
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <h1 class="hello-world">Hello world!</h1>
+          <p>Page three of three</p>
         </amp-story-grid-layer>
       </amp-story-page>
 

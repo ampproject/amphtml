@@ -826,7 +826,6 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   layoutStory_() {
-
     const firstPageEl = user().assertElement(
         this.element.querySelector('amp-story-page'),
         'Story must have at least one page.');
