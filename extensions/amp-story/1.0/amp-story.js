@@ -406,7 +406,8 @@ export class AmpStory extends AMP.BaseElement {
 
     if (isExperimentOn(this.win, 'amp-story-branching')) {
       this.registerAction('goToPage', invocation => {
-        const {args} = invocation;
+        const {args, caller} = invocation;
+
         if (args) {
           this.storeService_.dispatch(
               Action.SET_ADVANCEMENT_MODE, AdvancementMode.GO_TO_PAGE);
