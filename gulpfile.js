@@ -105,6 +105,19 @@ const MINIMAL_EXTENSION_SET = [
   'amp-video',
 ];
 
+/**
+ * Extensions to build when `--offline`.
+ * @private @const {!Array<string>}
+ */
+const OFFLINE_EXTENSION_SET = [
+  'amp-bind',
+  'amp-list',
+  'amp-lightbox',
+  'amp-selector',
+  'amp-mustache',
+  'amp-form',
+];
+
 
 /**
  * @typedef {{
@@ -275,6 +288,10 @@ function getExtensionsToBuild() {
   if (!!argv.extensions_from) {
     const extensionsFrom = getExtensionsFromArg(argv.extensions_from);
     extensionsToBuild = dedupe(extensionsToBuild.concat(extensionsFrom));
+  }
+
+  if (!!argv.offline) {
+    extensionsToBuild = dedupe(extensionsToBuild.concat(OFFLINE_EXTENSION_SET));
   }
 
   return extensionsToBuild;
@@ -829,7 +846,7 @@ function parseExtensionFlags() {
         cyan('article.amp.html') + green('.');
     const extensionsFromMessage = green('⤷ Use ') +
         cyan('--extensions_from=examples/foo.amp.html ') +
-        green('to build extensions from example docs.');
+      green('to build extensions from example docs.');
     if (argv.extensions) {
       if (typeof (argv.extensions) !== 'string') {
         log(red('ERROR:'), 'Missing list of extensions.');
@@ -849,6 +866,12 @@ function parseExtensionFlags() {
       log(green('Not building any AMP extensions.'));
     } else {
       log(green('Building all AMP extensions.'));
+    }
+    if (argv.offline) {
+      log(green(
+          'Extension list includes the extensions from the ' +
+        'Development Dashboard for offline development'
+      ));
     }
     log(noExtensionsMessage);
     log(extensionsMessage);
@@ -1741,6 +1764,8 @@ gulp.task('default', 'Runs "watch" and then "serve"',
         extensions_from: '  Watches and builds only the extensions from the ' +
             'listed AMP(s).',
         noextensions: '  Watches and builds with no extensions.',
+        offline: '  Serve the dashboard using locally built extensions ' +
+        'for offline development.',
       },
     });
 gulp.task('dist', 'Build production binaries', maybeUpdatePackages, dist, {

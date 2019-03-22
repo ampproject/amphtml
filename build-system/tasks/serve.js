@@ -47,8 +47,12 @@ function serve() {
   // Get if we are offline
   if (argv.offline) {
     process.env.OFFLINE = true;
-    log(colors.red('OFFLINE MODE. SERVING DASHBOARD v0 AND EXTENSIONS FROM dist/ .'));
-    log(colors.green('Offline only works after running `gulp build`. Broken extensions will break the dashboard.'));
+    log(colors.red(
+        'OFFLINE MODE. SERVING DASHBOARD v0 AND EXTENSIONS FROM dist/ .'
+    ));
+    log(colors.green(
+        'Broken extensions in offline mode, will break the dashboard.'
+    ));
   }
 
   const config = {
@@ -101,7 +105,8 @@ gulp.task(
         'cache': '  Make local resources cacheable by the browser ' +
             '(default: false)',
         'inspect': '  Run nodemon in `inspect` mode',
-        'offline': '  Serve the dashboard using locally built extensions for offline development.'
+        'offline': '  Serve the dashboard using locally built extensions ' +
+        'for offline development.',
       },
     }
 );

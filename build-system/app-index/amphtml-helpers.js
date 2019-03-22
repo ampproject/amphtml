@@ -17,7 +17,6 @@
 /* eslint-disable amphtml-internal/html-template */
 
 const assert = require('assert');
-const minimist = require('minimist');
 
 const boilerPlate = require('./boilerplate');
 const {html, joinFragments} = require('./html');
