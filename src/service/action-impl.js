@@ -396,7 +396,9 @@ export class ActionService {
   /**
    * Installs action handler for the specified element. The action handler is
    * responsible for checking invocation trust.
-   * @note For AMP elements, use base-element.registerAction() instead.
+   *
+   * For AMP elements, use base-element.registerAction() instead.
+   *
    * @param {!Element} target
    * @param {ActionHandlerDef} handler
    */
