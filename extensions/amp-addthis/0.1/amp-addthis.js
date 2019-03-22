@@ -62,6 +62,8 @@ import {dict} from '../../../src/utils/object';
 import {
   getAddThisMode, isProductCode, isPubId, isWidgetId,
 } from './addthis-utils/mode';
+import {getWidgetOverload}
+  from './addthis-utils/getWidgetIdOverloadedWithJSONForAnonymousMode';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listen} from '../../../src/event-helper';
 import {parseUrlDeprecated} from '../../../src/url';
@@ -127,6 +129,9 @@ class AmpAddThis extends AMP.BaseElement {
     this.widgetType_ = '';
 
     /** @private {string} */
+    this.mode_ = '';
+
+    /** @private {string} */
     this.containerClassName_ = '';
   }
 
@@ -137,7 +142,8 @@ class AmpAddThis extends AMP.BaseElement {
     const pubId = this.element.getAttribute('data-pub-id') || '';
     const widgetId = this.element.getAttribute('data-widget-id') || '';
     const productCode = this.element.getAttribute('data-product-code') || '';
-    if (getAddThisMode({pubId, widgetId, productCode}) === -1) {
+    this.mode_ = getAddThisMode({pubId, widgetId, productCode});
+    if (this.mode_ === -1) {
       if (isPubId(pubId)) {
         if (!isProductCode(productCode) && !isWidgetId(widgetId)) {
           userAssert(
@@ -164,9 +170,8 @@ class AmpAddThis extends AMP.BaseElement {
     this.containerClassName_ =
       this.element.getAttribute('data-class-name') || '';
 
-    // Required attributes (at least one or more of the following is required)
     this.pubId_ = pubId;
-    this.widgetId_ = widgetId;
+    this.widgetId_ = this.mode_ === 3 ? getWidgetOverload(this) : widgetId;
     this.productCode_ = productCode;
 
     // sets the widget type when we use a product code for WP modes
@@ -282,7 +287,6 @@ class AmpAddThis extends AMP.BaseElement {
         })
     );
     const iframeLoadPromise = this.loadPromise(iframe);
-    setStyle(iframe, 'margin-bottom', '-5px');
 
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
@@ -378,13 +382,13 @@ class AmpAddThis extends AMP.BaseElement {
    * Sets up listeners.
    *
    * @param {!Object} input
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc} [input.ampdoc]
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} [input.ampDoc]
    * @param {*} [input.loc]
    * @param {*} [input.pubId]
    * @memberof AmpAddThis
    */
   setupListeners_({ampDoc, loc, pubId}) {
-    // Send "engagement" analytics on page hide.
+    // Send 'engagement' analytics on page hide.
     listen(ampDoc.win, 'pagehide', () => callEng({
       monitors: {
         dwellMonitor,
@@ -404,7 +408,7 @@ class AmpAddThis extends AMP.BaseElement {
 
     listen(ampDoc.win, 'message', pmHandler);
 
-    // Trigger "pjson" call when a share occurs.
+    // Trigger 'pjson' call when a share occurs.
     postMessageDispatcher.on(SHARE_EVENT, data => callPjson({
       data,
       loc,
@@ -427,3 +431,56 @@ class AmpAddThis extends AMP.BaseElement {
 AMP.extension('amp-addthis', '0.1', AMP => {
   AMP.registerElement('amp-addthis', AmpAddThis);
 });
+
+
+
+export const shin = {
+  borderRadius: '0px',
+  counterColor: '#666666',
+  counts: 'one',
+  countsFontSize: '60px',
+  elements: '.addthis_inline_share_toolbox',
+  hideDevice: 'none',
+  hideEmailSharingConfirmation: false,
+  iconColor: '#FFFFFF',
+  id: 'shin',
+  label: 'SHARES',
+  numPreferredServices: 5,
+  originalServices:
+    'facebook_like,tweet,pinterest_pinit,google_plusone,counter',
+  responsive: '979px',
+  shareCountThreshold: 0,
+  size: '32px',
+  style: 'responsive',
+  titleFontSize: '18px',
+  widgetId: 'shin',
+  __hideOnHomepage: false,
+};
+export const shfs = {
+  hideEmailSharingConfirmation: false,
+  backgroundColor: '#FFFFFF',
+  thankyou: true,
+  postShareRecommendedMsg: 'Recommended for you',
+  offset: {
+    top: '20%',
+  },
+  counts: 'each',
+  widgetId: 'shfs',
+  shareCountThreshold: 0,
+  label: '',
+  textColor: '#222222',
+  __hideOnHomepage: false,
+  desktopPosition: 'left',
+  numPreferredServices: 5,
+  borderRadius: '0%',
+  responsive: '979px',
+  postShareFollowMsg: 'Follow',
+  iconColor: '#FFFFFF',
+  style: 'modern',
+  id: 'shfs',
+  mobilePosition: 'bottom',
+  postShareTitle: 'Thanks for sharing!',
+  hideLabel: false,
+};
+
+
