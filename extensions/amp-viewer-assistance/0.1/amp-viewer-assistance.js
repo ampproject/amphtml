@@ -102,7 +102,7 @@ export class AmpViewerAssistance {
       }
       this.action_.installActionHandler(
           this.assistanceElement_, this.actionHandler_.bind(this),
-          ActionTrust.HIGH);
+          ActionTrust.LOW);
 
       this.getIdTokenPromise();
 
@@ -141,7 +141,7 @@ export class AmpViewerAssistance {
       if (token) {
         this.setIdTokenStatus_(/*available=*/true);
         this.action_.trigger(
-            this.assistanceElement_, 'signedIn', null, ActionTrust.HIGH);
+            this.assistanceElement_, 'signedIn', null, ActionTrust.LOW);
       } else {
         this.setIdTokenStatus_(/*available=*/false);
       }

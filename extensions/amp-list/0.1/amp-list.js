@@ -458,15 +458,13 @@ export class AmpList extends AMP.BaseElement {
     }
 
     return fetch.catch(error => {
-      // Don't show fallback or trigger events if this fetch is a "load-more".
+      const actions = Services.actionServiceForDoc(this.element);
+      actions.trigger(this.element, 'fetch-error', null, ActionTrust.LOW);
+
       if (opt_append) {
         throw error;
       }
-      this.showFallback_(error);
-
-      const actions = Services.actionServiceForDoc(this.element);
-      actions.trigger(this.element, 'fetch-error', /* event */ null,
-          ActionTrust.LOW);
+      this.showFallbackOrThrow_(error);
     });
   }
 
@@ -1041,7 +1039,7 @@ export class AmpList extends AMP.BaseElement {
    * @throws {!Error} If fallback element is not present.
    * @private
    */
-  showFallback_(error) {
+  showFallbackOrThrow_(error) {
     this.toggleLoading(false);
     if (this.getFallback()) {
       this.toggleFallback_(true);
