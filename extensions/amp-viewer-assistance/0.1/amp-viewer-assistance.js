@@ -69,16 +69,19 @@ export class AmpViewerAssistance {
    * @private
    */
   actionHandler_(invocation) {
-    // TODO(choumx): updateActionState is low-trust but signIn is high-trust.
     const {method, args} = invocation;
-    if (method == 'updateActionState' && !!args) {
-      this.viewer_./*OK*/sendMessageAwaitResponse(method, args).catch(error => {
-        user().error(TAG, error.toString());
-      });
-    } else if (method == 'signIn') {
-      this.requestSignIn_();
+    if (method === 'updateActionState') {
+      // "updateActionState" requires a low-trust event.
+      if (invocation.satisfiesTrust(ActionTrust.LOW) && args) {
+        this.viewer_./*OK*/sendMessageAwaitResponse(method, args)
+            .catch(error => user().error(TAG, error.toString()));
+      }
+    } else if (method === 'signIn') {
+      // "signIn" requires a high-trust event.
+      if (invocation.satisfiesTrust(ActionTrust.HIGH)) {
+        this.requestSignIn_();
+      }
     }
-
     return null;
   }
 
@@ -102,8 +105,7 @@ export class AmpViewerAssistance {
         return this;
       }
       this.action_.installActionHandler(
-          this.assistanceElement_, this.actionHandler_.bind(this),
-          ActionTrust.LOW);
+          this.assistanceElement_, this.actionHandler_.bind(this));
 
       this.getIdTokenPromise();
 
