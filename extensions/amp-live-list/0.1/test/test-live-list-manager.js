@@ -496,6 +496,58 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
     });
   });
 
+  it('should fetch with url from the cache if on cache origin ' +
+      'and is transformed', () => {
+    sandbox.stub(Math, 'random').callsFake(() => 1);
+    sandbox.stub(viewer, 'isVisible').returns(true);
+    manager.url_ = 'www.example.com/foo/bar?hello=world#dev=1';
+    manager.isTransformed_ = true;
+    manager.location_ = 'https://cdn.ampproject.org' +
+        '/c/s/www.example.com/foo/bar?hello=world#dev=1';
+    ready();
+    const fetchSpy = sandbox.spy(manager, 'work_');
+    liveList.buildCallback();
+    return manager.whenDocReady_().then(() => {
+      const interval = liveList.getInterval();
+      const tick = interval - jitterOffset;
+      expect(manager.poller_.isRunning()).to.be.true;
+      expect(fetchSpy).to.have.not.been.called;
+      clock.tick(tick);
+      expect(fetchSpy).to.be.calledOnce;
+      return xhrs[0].then(xhr => {
+        expect(xhr.url).to.match(/^https:\/\/cdn\.ampproject\.org\/c\/www\.example\.com\/foo\/bar\?hello=world/);
+        expect(xhr.url).to.match(/#dev=1/);
+        expect(xhr.url).to.match(/amp_latest_update_time/);
+      });
+    });
+  });
+
+  it('should not fetch with url from the cache if on cache origin ' +
+      'and is not transformed', () => {
+    sandbox.stub(Math, 'random').callsFake(() => 1);
+    sandbox.stub(viewer, 'isVisible').returns(true);
+    manager.url_ = 'www.example.com/foo/bar?hello=world#dev=1';
+    manager.isTransformed_ = false;
+    manager.location_ = 'https://cdn.ampproject.org' +
+        '/c/s/www.example.com/foo/bar?hello=world#dev=1';
+    ready();
+    const fetchSpy = sandbox.spy(manager, 'work_');
+    liveList.buildCallback();
+    return manager.whenDocReady_().then(() => {
+      const interval = liveList.getInterval();
+      const tick = interval - jitterOffset;
+      expect(manager.poller_.isRunning()).to.be.true;
+      expect(fetchSpy).to.have.not.been.called;
+      clock.tick(tick);
+      expect(fetchSpy).to.be.calledOnce;
+      return xhrs[0].then(xhr => {
+        expect(xhr.url).to.match(/^www\.example\.com\/foo\/bar\?hello=world/);
+        expect(xhr.url).to.match(/#dev=1/);
+        expect(xhr.url).to.match(/amp_latest_update_time/);
+      });
+    });
+  });
+
   it('should find highest "update time" from amp-live-list elements', () => {
     const doc = [];
     const list1 = getLiveList(undefined, 'id1');

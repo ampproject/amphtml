@@ -141,6 +141,30 @@ export class Url {
   getWinOrigin(win) {
     return win.origin || this.parse(win.location.href).origin;
   }
+
+  /**
+   * If the current location is on a CDN, then convert the given resource
+   * URL to a path that resolves to the same resource served on the cache.
+   * @param {!Location|string} currentLocation The URL of the window
+   * @param {string} resourceUrl The URL of the document to load
+   * @return {string}
+   */
+  getCdnUrlOnCdn(currentLocation, resourceUrl) {
+    if (!isProxyOrigin(currentLocation)) {
+      return resourceUrl;
+    }
+
+    const {host} = (currentLocation instanceof Location ?
+      currentLocation :
+      this.parse(currentLocation));
+    const {
+      hash,
+      pathname,
+      search,
+    } = this.parse(resourceUrl);
+
+    return `https://${host}/c${pathname}${search}${hash}`;
+  }
 }
 
 

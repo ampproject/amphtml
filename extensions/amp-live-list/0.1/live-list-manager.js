@@ -23,6 +23,7 @@ import {
   getServiceForDoc,
   registerServiceBuilderForDoc,
 } from '../../../src/service';
+import {startsWith} from '../../../src/string';
 import {toArray} from '../../../src/types';
 import {userAssert} from '../../../src/log';
 
@@ -65,11 +66,17 @@ export class LiveListManager {
     /** @private @const {string} */
     this.url_ = this.ampdoc.getUrl();
 
+    /** @private @const {!Location} */
+    this.location_ = this.ampdoc.win.location;
+
     /** @private {time} */
     this.latestUpdateTime_ = 0;
 
     /** @private @const {function(): Promise} */
     this.work_ = this.fetchDocument_.bind(this);
+
+    /** @private @const {boolean} */
+    this.isTransformed_ = isDocTransformed(ampdoc.getRootNode());
 
     // Only start polling when doc is ready and when the viewer is visible.
     this.whenDocReady_().then(() => {
@@ -126,13 +133,20 @@ export class LiveListManager {
    * @private
    */
   fetchDocument_() {
+    const {win} = this.ampdoc;
     let url = this.url_;
     if (this.latestUpdateTime_ > 0) {
       url = addParamToUrl(url, 'amp_latest_update_time',
           String(this.latestUpdateTime_));
     }
+
+    if (this.isTransformed_) {
+      const urlService = Services.urlForDoc(this.ampdoc.getBody());
+      url = urlService.getCdnUrlOnCdn(this.location_, url);
+    }
+
     // TODO(erwinm): add update time here when possible.
-    return fetchDocument(this.ampdoc.win, url, {
+    return fetchDocument(win, url, {
       requireAmpResponseSourceOrigin: false,
     }).then(this.getLiveLists_.bind(this));
   }
@@ -251,6 +265,22 @@ export class LiveListManager {
   static getMinDataMaxItemsPerPage() {
     return 1;
   }
+}
+
+/**
+ * Detects if a document has has transforms applied
+ * e.g. by a domain with signed exchange domain enabled.
+ * @param {!Document|!ShadowRoot} root
+ * @return {boolean}
+ */
+function isDocTransformed(root) {
+  const {documentElement} = (root.ownerDocument || root);
+  const transformed = documentElement.getAttribute('transformed');
+  if (!transformed) {
+    return false;
+  }
+
+  return startsWith(transformed, 'google;v=');
 }
 
 /**
