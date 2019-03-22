@@ -382,13 +382,13 @@ class AmpAddThis extends AMP.BaseElement {
    * Sets up listeners.
    *
    * @param {!Object} input
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc} [input.ampDoc]
+   * @param {!../../../src/service/ampdoc-impl.Ampdoc} [input.ampDoc]
    * @param {*} [input.loc]
    * @param {*} [input.pubId]
    * @memberof AmpAddThis
    */
   setupListeners_({ampDoc, loc, pubId}) {
-    // Send 'engagement' analytics on page hide.
+    // Send "engagement" analytics on page hide.
     listen(ampDoc.win, 'pagehide', () => callEng({
       monitors: {
         dwellMonitor,
@@ -408,7 +408,7 @@ class AmpAddThis extends AMP.BaseElement {
 
     listen(ampDoc.win, 'message', pmHandler);
 
-    // Trigger 'pjson' call when a share occurs.
+    // Trigger "pjson" call when a share occurs.
     postMessageDispatcher.on(SHARE_EVENT, data => callPjson({
       data,
       loc,
@@ -431,56 +431,5 @@ class AmpAddThis extends AMP.BaseElement {
 AMP.extension('amp-addthis', '0.1', AMP => {
   AMP.registerElement('amp-addthis', AmpAddThis);
 });
-
-
-
-export const shin = {
-  borderRadius: '0px',
-  counterColor: '#666666',
-  counts: 'one',
-  countsFontSize: '60px',
-  elements: '.addthis_inline_share_toolbox',
-  hideDevice: 'none',
-  hideEmailSharingConfirmation: false,
-  iconColor: '#FFFFFF',
-  id: 'shin',
-  label: 'SHARES',
-  numPreferredServices: 5,
-  originalServices:
-    'facebook_like,tweet,pinterest_pinit,google_plusone,counter',
-  responsive: '979px',
-  shareCountThreshold: 0,
-  size: '32px',
-  style: 'responsive',
-  titleFontSize: '18px',
-  widgetId: 'shin',
-  __hideOnHomepage: false,
-};
-export const shfs = {
-  hideEmailSharingConfirmation: false,
-  backgroundColor: '#FFFFFF',
-  thankyou: true,
-  postShareRecommendedMsg: 'Recommended for you',
-  offset: {
-    top: '20%',
-  },
-  counts: 'each',
-  widgetId: 'shfs',
-  shareCountThreshold: 0,
-  label: '',
-  textColor: '#222222',
-  __hideOnHomepage: false,
-  desktopPosition: 'left',
-  numPreferredServices: 5,
-  borderRadius: '0%',
-  responsive: '979px',
-  postShareFollowMsg: 'Follow',
-  iconColor: '#FFFFFF',
-  style: 'modern',
-  id: 'shfs',
-  mobilePosition: 'bottom',
-  postShareTitle: 'Thanks for sharing!',
-  hideLabel: false,
-};
 
 
