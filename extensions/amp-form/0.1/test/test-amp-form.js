@@ -129,7 +129,7 @@ describes.repeated('', {
     }
 
     function getVerificationForm() {
-      const form = getForm();
+      const form = getForm(/*button1*/ false);
       form.setAttribute('verify-xhr', '');
 
       const noVerifyInput = createElement('input');
