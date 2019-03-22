@@ -493,22 +493,21 @@ function runSanitizerTests() {
       expect(purifyTagsForTripleMustache(html)).to.be.equal(html);
     });
 
-    it('should sanitize formatting related elements', () => {
-      const html = '<b>abc</b><img><div>def</div>'
+    it('should whitelist formatting related elements', () => {
+      const nonWhiteListedTag = '<img>';
+      const whiteListedFormattingTags = '<b>abc</b><div>def</div>'
           + '<br><code></code><del></del><em></em>'
           + '<i></i><ins></ins><mark></mark><s></s>'
           + '<small></small><strong></strong><sub></sub>'
           + '<sup></sup><time></time><u></u><hr>';
-      expect(purifyTagsForTripleMustache(html)).to.be.equal(
-          '<b>abc</b><div>def</div>'
-          + '<br><code></code><del></del><em></em>'
-          + '<i></i><ins></ins><mark></mark><s></s>'
-          + '<small></small><strong></strong><sub></sub>'
-          + '<sup></sup><time></time><u></u><hr>'
-      );
+      const html = `${whiteListedFormattingTags}${nonWhiteListedTag}`;
+      // Expect the purifier to unescape the whitelisted tags and to sanitize
+      // and remove the img tag.
+      expect(purifyTagsForTripleMustache(html))
+          .to.be.equal(whiteListedFormattingTags);
     });
 
-    it('should sanitize table related elements and anchor tags', () => {
+    it('should whitelist table related elements and anchor tags', () => {
       const html = '<table class="valid-class">'
           + '<caption>caption</caption>'
           + '<thead><tr><th colspan="2">header</th></tr></thead>'
