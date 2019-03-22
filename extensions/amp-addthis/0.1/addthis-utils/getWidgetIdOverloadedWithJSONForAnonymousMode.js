@@ -1,4 +1,5 @@
 import {isBoolean} from './boolean';
+import {isFunction} from './function';
 import {isNumber} from './number';
 import {isString} from './string';
 
@@ -21,8 +22,9 @@ const overrideKeys = ['backgroundColor', 'borderRadius', 'counterColor',
  * @return {string} JSON | empty string means there is no override object
  */
 export const getWidgetOverload = self => {
-  const getAttribute = self && self.element && self.element.getAttribute;
-  if (!getAttribute) {
+  const hasGetAttributeFunction = self && self.element &&
+    self.element.getAttribute && isFunction(self.element.getAttribute);
+  if (!hasGetAttributeFunction) {
     return '';
   }
   const override = {};
@@ -35,7 +37,7 @@ export const getWidgetOverload = self => {
     }
   });
   let returnValue = '';
-  if (Object.keys(override).length > 0) {
+  if (override && Object.keys(override).length > 0) {
     try {
       returnValue = JSON.stringify(override);
     } catch (e) {}
