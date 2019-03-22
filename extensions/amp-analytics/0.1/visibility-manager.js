@@ -35,6 +35,7 @@ const VISIBILITY_ID_PROP = '__AMP_VIS_ID';
 /** @type {number} */
 let visibilityIdCounter = 1;
 
+/** @enum {string} */
 export const RelativePosition = {
   ABOVE: 'above',
   AT: 'at',
@@ -460,7 +461,7 @@ export class VisibilityManager {
    * @param {number} scrollPos The scroll position, e.g. the document y position
    *                 at the top of the viewport.
    * @param {number} viewportHeight The height of the viewport.
-   * @return {string}
+   * @return {!RelativePosition}
    * @private
    */
   getRelativePosition_(elementTop, elementHeight, scrollPos, viewportHeight) {
