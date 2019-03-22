@@ -1363,7 +1363,7 @@ See [amp-story rules](https://github.com/ampproject/amphtml/blob/master/extensio
 
 ## Localization
 
-To localize your story, include the language code in the `lang` attribute on the `<html>` tag of your story, such as `<html lang="en">` for English.  The supported language codes are:
+To localize your story, include the language code in the `lang` attribute on the `<html>` tag of your story, such as `<html ⚡ lang="en">` for English.  The supported language codes are:
 
 * ar (Arabic)
 * de (German)
@@ -1388,7 +1388,7 @@ To localize your story, include the language code in the `lang` attribute on the
 * zh-TW (Traditional Chinese)
 * zh (Simplified Chinese)
 
-Additionally, for right-to-left languages, you may include the `dir="rtl"` attribute on the `<html>` tag of your story.  This may be used in conjunction with the language code as well, e.g. `<html lang="ar" dir="rtl">`.
+Additionally, for right-to-left languages, you may include the `dir="rtl"` attribute on the `<html>` tag of your story.  This may be used in conjunction with the language code as well, e.g. `<html ⚡ lang="ar" dir="rtl">`.
 
 ## Related resources
 
