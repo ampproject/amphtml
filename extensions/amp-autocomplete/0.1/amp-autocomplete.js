@@ -20,9 +20,9 @@ import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {UrlReplacementPolicy,
   batchFetchJsonFor} from '../../../src/batched-json';
-import {childElementsByTag, isJsonScriptTag,
+import {childElementsByTag,
   removeChildren} from '../../../src/dom';
-import {dev, userAssert} from '../../../src/log';
+import {dev, user, userAssert} from '../../../src/log';
 import {getValueForExpr, tryParseJson} from '../../../src/json';
 import {includes, startsWith} from '../../../src/string';
 import {isEnumValue} from '../../../src/types';
@@ -57,13 +57,19 @@ export class AmpAutocomplete extends AMP.BaseElement {
      * as a child. For use with static data.
      * @private {?Array<!JsonObject|string>}
      */
-    this.inlineData_ = null;
+    this.sourceData_ = null;
 
     /**
      * The reference to the <input> tag provided as a child.
      * @private {?HTMLElement}
      */
     this.inputElement_ = null;
+
+    /**
+     * The partial user input used to generate suggestions.
+     * @private {string}
+     */
+    this.userInput_ = '';
 
     /**
      * The value of the "filter" attribute on <autocomplete>.
@@ -82,6 +88,11 @@ export class AmpAutocomplete extends AMP.BaseElement {
      * @private {?number}
      */
     this.maxEntries_ = null;
+
+    /**
+     * If the "submit-on-enter" attribute is present on <autocomplete>.
+     */
+    this.submitOnEnter_ = false;
 
     /**
      * The index of the active suggested item.
@@ -116,11 +127,13 @@ export class AmpAutocomplete extends AMP.BaseElement {
     userAssert(isExperimentOn(this.win, 'amp-autocomplete'),
         `Experiment ${EXPERIMENT} is not turned on.`);
 
-    if (!this.element.hasAttribute('src')) {
-      const scripts = childElementsByTag(this.element, 'SCRIPT');
-      userAssert(scripts.length,
-          `${TAG} expected a <script> child or a URL specified in "src".`);
-      this.inlineData_ = this.getInlineData_(scripts);
+    const jsonScript =
+      this.element.querySelector('script[type="application/json"]');
+    if (jsonScript) {
+      this.sourceData_ = this.getInlineData_(jsonScript);
+    } else if (!this.element.hasAttribute('src')) {
+      user().warn(TAG, 'Expected a <script type="application/json"> child or '
+        + 'a URL specified in "src".');
     }
 
     const inputElements = childElementsByTag(this.element, 'INPUT');
@@ -151,6 +164,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
       parseInt(this.element.getAttribute('min-characters'), 10) : 1;
     this.maxEntries_ = this.element.hasAttribute('max-entries') ?
       parseInt(this.element.getAttribute('max-entries'), 10) : null;
+    this.submitOnEnter_ = this.element.hasAttribute('submit-on-enter');
 
     this.container_ = this.createContainer_();
     this.element.appendChild(this.container_);
@@ -159,24 +173,22 @@ export class AmpAutocomplete extends AMP.BaseElement {
   /**
    * Reads the 'items' data from the child <script> element.
    * For use with static local data.
-   * @param {!NodeList<!Element>} scripts
+   * @param {!Element} script
    * @return {!Array<!JsonObject|string>}
    * @private
    */
-  getInlineData_(scripts) {
-    const jsonScripts = [];
-    scripts.forEach(script => {
-      if (isJsonScriptTag(script)) {
-        jsonScripts.push(script);
-      }
-    });
-    userAssert(jsonScripts.length,
-        `${TAG} expected data in a <script type="application/json"> tag.`);
-    const json = tryParseJson(jsonScripts[0].textContent,
+  getInlineData_(script) {
+    const json = tryParseJson(script.textContent,
         error => {
           throw error;
         });
-    return json['items'] || [];
+    const items = json['items'];
+    if (!items) {
+      user().warn(TAG, 'Expected key "items" in data but found nothing. '
+        + 'Rendering empty results.');
+      return [];
+    }
+    return items;
   }
 
   /**
@@ -186,13 +198,17 @@ export class AmpAutocomplete extends AMP.BaseElement {
    * @private
    */
   getRemoteData_() {
-    userAssert(!childElementsByTag(this.element, 'SCRIPT').length, `${TAG} 
-      should contain a <script> child OR a URL specified in "src", not both.`);
     const ampdoc = this.getAmpDoc();
     const policy = UrlReplacementPolicy.ALL;
     return batchFetchJsonFor(ampdoc, this.element, /* opt_expr */ undefined,
         policy).then(json => {
-      return json['items'] || [];
+      const items = json['items'];
+      if (!items) {
+        user().warn(TAG, 'Expected key "items" in data but found nothing. '
+          + 'Rendering empty results.');
+        return [];
+      }
+      return items;
     });
   }
 
@@ -232,15 +248,40 @@ export class AmpAutocomplete extends AMP.BaseElement {
       this.selectHandler_(e);
     });
 
-    let dataPromise = Promise.resolve();
+    let remoteDataPromise = Promise.resolve();
     if (this.element.hasAttribute('src')) {
-      dataPromise = this.getRemoteData_();
+      if (this.sourceData_) {
+        user().warn(TAG, 'Discovered both inline <script> and remote "src"'
+        + ' data. Was providing two datasets intended?');
+      }
+      remoteDataPromise = this.getRemoteData_();
     }
 
-    return dataPromise.then(value => {
-      this.inlineData_ = value || this.inlineData_;
-      this.renderResults_();
+    return remoteDataPromise.then(remoteData => {
+      // If both types of data are provided, display remote data.
+      this.sourceData_ = remoteData || this.sourceData_;
+      this.filterDataAndRenderResults_(this.sourceData_);
     });
+  }
+
+  /** @override */
+  mutatedAttributesCallback(mutations) {
+    const src = mutations['src'];
+    if (src === undefined || src === null) {
+      return Promise.resolve();
+    }
+    if (typeof src === 'string') {
+      return this.getRemoteData_().then(remoteData => {
+        this.sourceData_ = remoteData;
+        this.filterDataAndRenderResults_(this.sourceData_, this.userInput_);
+      });
+    }
+    if (typeof src === 'object') {
+      this.sourceData_ = src['items'] || [];
+      return this.filterDataAndRenderResults_(this.sourceData_,
+          this.userInput_);
+    }
+    user().error(TAG, 'Unexpected "src" type: ' + src);
   }
 
   /**
@@ -264,8 +305,9 @@ export class AmpAutocomplete extends AMP.BaseElement {
   * @private
   */
   inputHandler_() {
+    this.userInput_ = this.inputElement_.value;
     return this.mutateElement(() => {
-      this.renderResults_();
+      this.filterDataAndRenderResults_(this.sourceData_, this.userInput_);
       this.toggleResults_(true);
     });
   }
@@ -284,18 +326,32 @@ export class AmpAutocomplete extends AMP.BaseElement {
   }
 
   /**
-   * Render filtered results on the current input and update the container_.
+   * Filter the source data according to the given opt_input and render it in
+   * the results container_.
+   * @param {?Array<!JsonObject|string>} sourceData
+   * @param {string=} opt_input
    * @return {!Promise}
    * @private
    */
-  renderResults_() {
-    const userInput = this.inputElement_.value;
+  filterDataAndRenderResults_(sourceData, opt_input = '') {
     this.clearAllItems_();
-    if (userInput.length < this.minChars_ || !this.inlineData_) {
+    if (opt_input.length < this.minChars_ || !sourceData ||
+      !sourceData.length) {
       return Promise.resolve();
     }
+    const filteredData = this.filterData_(sourceData, opt_input);
+    return this.renderResults_(filteredData,
+        dev().assertElement(this.container_));
+  }
 
-    const filteredData = this.filterData_(this.inlineData_, userInput);
+  /**
+   * Render the given data into item elements in the given container element.
+   * @param {!Array<!JsonObject|string>} filteredData
+   * @param {!Element} container
+   * @return {!Promise}
+   * @private
+   */
+  renderResults_(filteredData, container) {
     let renderPromise = Promise.resolve();
     if (this.templateElement_) {
       renderPromise = this.templates_.renderTemplateArray(this.templateElement_,
@@ -303,21 +359,17 @@ export class AmpAutocomplete extends AMP.BaseElement {
         renderedChildren.map(child => {
           child.classList.add('i-amphtml-autocomplete-item');
           child.setAttribute('role', 'listitem');
-          this.container_.appendChild(child);
+          container.appendChild(child);
         });
       });
     } else {
       filteredData.forEach(item => {
         userAssert(typeof item === 'string',
             `${TAG} data must provide template for non-string items.`);
-        this.container_.appendChild(
-            this.createElementFromItem_(item));
+        container.appendChild(this.createElementFromItem_(item));
       });
     }
-    return renderPromise.then(() => {
-      // Append the partial user-provided input to navigate back to.
-      this.container_.appendChild(this.createElementFromItem_(userInput));
-    });
+    return renderPromise;
   }
 
   /**
@@ -372,10 +424,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
    * @private
    */
   toggleResults_(opt_display) {
-    if (!this.container_) {
-      return;
-    }
-    toggle(this.container_, opt_display);
+    toggle(dev().assertElement(this.container_), opt_display);
   }
 
   /**
@@ -429,7 +478,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     if (element === null) {
       return;
     }
-    this.inputElement_.value = element.getAttribute('value');
+    this.inputElement_.value = this.userInput_ = element.getAttribute('value');
     this.clearAllItems_();
   }
 
@@ -441,30 +490,29 @@ export class AmpAutocomplete extends AMP.BaseElement {
    * @private
    */
   updateActiveItem_(delta) {
-    if (delta === 0) {
+    if (delta === 0 || !this.resultsShowing_()) {
       return Promise.resolve();
     }
-    const index = this.activeIndex_ + delta;
-    let resultsShowing, newActiveElement, newValue, validItem;
-    return this.measureMutateElement(() => {
-      resultsShowing = this.resultsShowing_();
-      if (resultsShowing) {
-        this.activeIndex_ = mod(index, this.container_.children.length);
-        newActiveElement = this.container_.children[this.activeIndex_];
-        newValue = newActiveElement.getAttribute('value');
-        validItem = this.activeIndex_ !== this.container_.children.length - 1;
-      }
-    }, () => {
-      if (!resultsShowing) {
-        return;
-      }
-      this.inputElement_.value = newValue;
+    const keyUpWhenNoneActive = this.activeIndex_ === -1 && delta < 0;
+    const index = keyUpWhenNoneActive ? delta : this.activeIndex_ + delta;
+    this.activeIndex_ = mod(index, this.container_.children.length);
+    const newActiveElement = this.container_.children[this.activeIndex_];
+    this.inputElement_.value = newActiveElement.getAttribute('value');
+    return this.mutateElement(() => {
       this.resetActiveElement_();
-      if (validItem) {
-        newActiveElement.classList.add('i-amphtml-autocomplete-item-active');
-        this.activeElement_ = newActiveElement;
-      }
+      newActiveElement.classList.add('i-amphtml-autocomplete-item-active');
+      this.activeElement_ = newActiveElement;
     });
+  }
+
+  /**
+   * Displays the user's partial input in the input field.
+   * @private
+   */
+  displayUserInput_() {
+    this.inputElement_.value = this.userInput_;
+    this.resetActiveElement_();
+    this.activeIndex_ = -1;
   }
 
   /**
@@ -498,14 +546,25 @@ export class AmpAutocomplete extends AMP.BaseElement {
     switch (event.key) {
       case Keys.DOWN_ARROW:
         event.preventDefault();
+        // Disrupt loop around to display user input.
+        if (this.activeIndex_ === this.container_.children.length - 1) {
+          this.displayUserInput_();
+          return Promise.resolve();
+        }
         return this.updateActiveItem_(1);
       case Keys.UP_ARROW:
         event.preventDefault();
+        // Disrupt loop around to display user input.
+        if (this.activeIndex_ === 0) {
+          this.displayUserInput_();
+          return Promise.resolve();
+        }
         return this.updateActiveItem_(-1);
       case Keys.ENTER:
         if (this.activeElement_) {
-          // Only prevent if submit-on-enter === false.
-          event.preventDefault();
+          if (!this.submitOnEnter_) {
+            event.preventDefault();
+          }
           return this.mutateElement(() => {
             this.selectItem_(this.activeElement_);
             this.resetActiveElement_();
@@ -515,8 +574,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
       case Keys.ESCAPE:
         // Select user's partial input and hide results.
         return this.mutateElement(() => {
-          this.selectItem_(this.container_.lastElementChild);
-          this.resetActiveElement_();
+          this.displayUserInput_();
           this.toggleResults_(false);
         });
       default:

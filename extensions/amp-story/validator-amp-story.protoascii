@@ -260,6 +260,10 @@ tags: {
   attrs: { name: "animate-in-timing-function" }
   attrs: { name: "grid-area" }
   attrs: {
+    name: "interactive"
+    value: ""
+  }
+  attrs: {
     name: "scale-end"
     value_regex: "[0-9]+([.][0-9]+)?"
   }
@@ -347,6 +351,10 @@ tags: {
   attrs: { name: "animate-in-delay" }
   attrs: { name: "animate-in-duration" }
   attrs: { name: "animate-in-timing-function" }
+  attrs: {
+    name: "interactive"
+    value: ""
+  }
   attrs: {
     name: "scale-end"
     value_regex: "[0-9]+([.][0-9]+)?"
@@ -605,6 +613,7 @@ descendant_tag_list: {
   tag: "AMP-GIST"
   tag: "AMP-GOOGLE-VRVIEW-IMAGE"
   tag: "AMP-IMG"
+  tag: "AMP-INSTAGRAM"
   tag: "AMP-INSTALL-SERVICEWORKER"
   tag: "AMP-LIST"
   tag: "AMP-LIVE-LIST"
