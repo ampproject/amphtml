@@ -63,12 +63,12 @@ function postReport(action) {
     const postUrl = `${reportBaseUrl}/${commitHash}/${type}/${action}`;
     return requestPromise.post(postUrl)
         .then(body => {
-          log(green('Info:'), 'reported', cyan(`${type}/${action}`),
+          log(green('INFO:'), 'reported', cyan(`${type}/${action}`),
               'to the test-status GitHub App');
-          log(green('Info:'), 'response from test-status was',
+          log(green('INFO:'), 'response from test-status was',
               body.length ? 'empty' : cyan(body.substr(0, 100)));
         }).catch(error => {
-          log(yellow('Warning:'), 'failed to report', cyan(`${type}/${action}`),
+          log(yellow('WARNING:'), 'failed to report', cyan(`${type}/${action}`),
               'to the test-status GitHub App:\n', error.message.substr(0, 100));
           return;
         });
