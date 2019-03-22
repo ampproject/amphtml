@@ -69,7 +69,7 @@ The `amp-viewer-assistance` extension currently has two functions that can be in
 
 ## Messages Sent
 
-There are several messages that can be sent from the amp-viewer-assistance extension to the external viewer. 
+There are several messages that can be sent from the amp-viewer-assistance extension to the external viewer.
 
 <table>
   <tr>
@@ -103,8 +103,8 @@ In order to act upon a successful sign in from the viewer assistance, a `signedI
 {
   "myConfigItem1": {
     "foo": 123,
-    "bar": 456,
-  },
+    "bar": 456
+  }
 }
 </script>
 <div id="success-message" hidden>
@@ -133,7 +133,7 @@ Here are some examples:
 
 `amp-state:`
 ```html
-<amp-state id="myRemoteState" src="https://data.com/articles.json" 
+<amp-state id="myRemoteState" src="https://data.com/articles.json"
      crossorigin=”amp-viewer-auth-token-via-post”>
 </amp-state>
 ```

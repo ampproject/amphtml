@@ -15,6 +15,7 @@
  */
 
 import {ActionInvocation} from '../../../../src/service/action-impl';
+import {ActionTrust} from '../../../../src/action-constants';
 import {AmpViewerAssistance} from '../amp-viewer-assistance';
 import {mockServiceForDoc} from '../../../../testing/test-helper';
 
@@ -102,8 +103,9 @@ describes.fakeWin('AmpViewerAssistance', {
     };
     return service.start_().then(() => {
       sendMessageStub.resetHistory();
-      const invocation = new ActionInvocation(
-          element, 'updateActionState', invocationArgs);
+      const invocation = new ActionInvocation(element, 'updateActionState',
+          invocationArgs, /*source*/null, /*caller*/null, /*event*/null,
+          ActionTrust.LOW);
       service.actionHandler_(invocation);
       expect(sendMessageStub).to.be.calledOnce;
       expect(sendMessageStub.firstCall.args[0]).to.equal('updateActionState');
@@ -136,7 +138,14 @@ describes.fakeWin('AmpViewerAssistance', {
     return service.start_().then(() => {
       sendMessageStub.resetHistory();
       sendMessageStub.returns(Promise.reject());
+
       const invocation = new ActionInvocation(element, 'signIn');
+      invocation.trust = ActionTrust.LOW;
+      service.actionHandler_(invocation);
+      expect(sendMessageStub).to.not.be.called;
+
+      // signIn requires high-trust.
+      invocation.trust = ActionTrust.HIGH;
       service.actionHandler_(invocation);
       expect(sendMessageStub).to.be.calledOnce;
       expect(sendMessageStub.firstCall.args[0]).to.equal('requestSignIn');
