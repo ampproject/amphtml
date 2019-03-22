@@ -52,7 +52,7 @@ function inferTestType() {
   } else if (IS_SINGLE_PASS) {
     return `${type}/single-pass`;
   } else {
-    return `${type}/standard`;
+    return `${type}/default`;
   }
 }
 
