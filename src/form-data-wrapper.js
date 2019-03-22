@@ -15,7 +15,10 @@
  */
 
 import {Services} from './services';
-import {getFormAsObject} from './form';
+import {
+  getFormAsObject,
+  getSubmitButtonUsed,
+} from './form';
 import {iterateCursor} from './dom';
 import {map} from './utils/object';
 
@@ -144,8 +147,8 @@ class NativeFormDataWrapper {
 
   /**
    * If a submit button is focused (because it was used to submit the form),
-   * add its name and value to the `FormData`, since publishers expect the
-   * submit button to be present.
+   * or was the first submit button present, add its name and value to the
+   * `FormData`, since publishers expect the submit button to be present.
    * @param {!HTMLFormElement=} opt_form
    * @private
    */
@@ -156,31 +159,9 @@ class NativeFormDataWrapper {
       return;
     }
 
-    // If the focused element is not a submit button or does not have a name,
-    // then it does not need to be included in the `FormData`
-    const {activeElement} = opt_form.ownerDocument;
-    const {
-      name,
-      tagName,
-      type,
-    } = activeElement;
-    if (!name) {
-      return;
-    }
-    if (tagName != 'BUTTON' && type != 'submit') {
-      return;
-    }
-
-    // Finally, if the focused element is a field of the form,
-    // then it must be added to the `FormData`.
-    const {elements} = opt_form;
-    const {length} = elements;
-    for (let i = 0; i < length; i++) {
-      const element = elements[i];
-      if (element === activeElement) {
-        this.append(element.name, element.value);
-        break;
-      }
+    const button = getSubmitButtonUsed(opt_form);
+    if (button) {
+      this.append(button.name, button.value);
     }
   }
 

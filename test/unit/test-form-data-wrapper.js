@@ -350,6 +350,30 @@ describes.realWin('FormDataWrapper', {}, env => {
             ['foo2', ''],
           ]);
         });
+
+        it('includes the first submit button at submit-time if' +
+            ' none is focused', () => {
+          const form = env.win.document.createElement('form');
+
+          const input = env.win.document.createElement('input');
+          input.type = 'text';
+          input.name = 'foo1';
+          input.value = 'bar';
+
+          const submit = env.win.document.createElement('button');
+          submit.name = 'foo2';
+          submit.innerText = 'baz';
+
+          form.appendChild(input);
+          form.appendChild(submit);
+          env.win.document.body.appendChild(form);
+
+          const formData = createFormDataWrapper(env.win, form);
+          expect(fromIterator(formData.entries())).to.have.deep.members([
+            ['foo1', 'bar'],
+            ['foo2', ''],
+          ]);
+        });
       });
     });
 
