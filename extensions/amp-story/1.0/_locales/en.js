@@ -162,13 +162,13 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
   },
   [LocalizedStringId.AMP_STORY_TOOLTIP_EXPAND_INSTAGRAM]: {
     string: 'Expand Post',
-    description: 'Label in the tooltip text that appears when an Instagram ' +
-        'interactive embed is clicked. It invites users to expand the embed.',
+    description: 'Button label that appears when an Instagram post is tapped ' +
+    'and allows user to enlarge it. Try to limit translations to 15 characters',
   },
   [LocalizedStringId.AMP_STORY_TOOLTIP_EXPAND_TWEET]: {
     string: 'Expand Tweet',
-    description: 'Label in the tooltip text that appears when a Twitter ' +
-        'interactive embed is clicked. It invites users to expand the embed.',
+    description: 'Button label that appears when an Twitter post is tapped ' +
+    'and allows user to enlarge it. Try to limit translations to 15 characters',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_HEIGHT_SIZE_TEXT]: {
     string: 'Expand the height of your window to view this experience',
