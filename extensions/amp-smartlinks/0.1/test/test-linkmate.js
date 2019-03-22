@@ -35,9 +35,9 @@ const helpersFactory = env => {
 
       return new AmpSmartlinks(ampTag);
     },
-    createAnchor(href) {
+    createAnchor(linkOptions) {
       const anchor = win.document.createElement('a');
-      anchor.href = href;
+      anchor.setAttribute(linkOptions['attributeName'], linkOptions['link']);
 
       return anchor;
     },
@@ -79,9 +79,9 @@ describes.fakeWin('amp-smartlinks',
               linkmateOptions,
           );
           anchorList = [
-            'http://fakelink.example',
-            'http://fakelink2.example',
-            'https://examplelocklink.example/#locklink',
+            {attributeName: 'href', link: 'http://fakelink.example'},
+            {attributeName: 'href', link: 'http://fakelink2.example'},
+            {attributeName: 'href', link: 'https://examplelocklink.example/#locklink'},
           ].map(helpers.createAnchor);
         });
 
@@ -124,9 +124,9 @@ describes.fakeWin('amp-smartlinks',
 
           linkmate.anchorList_ = anchorList;
           const newAnchorList = [
-            'http://totallynewlink.example',
-            'http://fakelink2.example',
-            'https://examplelocklink.example/#locklink',
+            {attributeName: 'href', link: 'http://totallynewlink.example'},
+            {attributeName: 'href', link: 'http://fakelink2.example'},
+            {attributeName: 'href', link: 'https://examplelocklink.example/#locklink'},
           ].map(helpers.createAnchor);
 
           mockFetch
@@ -153,9 +153,9 @@ describes.fakeWin('amp-smartlinks',
           linkmate.anchorList_ = anchorList;
           linkmate.linkmateResponse_ = [{a: 'b'}];
           const newAnchorList = [
-            'http://totallynewlink.example',
-            'http://fakelink2.example',
-            'https://examplelocklink.example/#locklink',
+            {attributeName: 'href', link: 'http://totallynewlink.example'},
+            {attributeName: 'href', link: 'http://fakelink2.example'},
+            {attributeName: 'href', link: 'https://examplelocklink.example/#locklink'},
           ].map(helpers.createAnchor);
 
           mockFetch
@@ -251,9 +251,9 @@ describes.fakeWin('amp-smartlinks',
           );
 
           anchorList = [
-            'http://fakelink.example',
-            'http://fakelink2.example',
-            'https://examplelocklink.example/#locklink',
+            {attributeName: 'href', link: 'http://fakelink.example/'},
+            {attributeName: 'href', link: 'http://fakelink2.example/'},
+            {attributeName: 'href', link: 'https://examplelocklink.example/#locklink'},
           ].map(helpers.createAnchor);
         });
 
@@ -300,9 +300,9 @@ describes.fakeWin('amp-smartlinks',
           env.sandbox.spy(linkmate, 'buildLinksPayload_');
 
           anchorList = [
-            'http://fakelink.example',
-            'http://http://shop-links.co/999',
-            'https://examplelocklink.example/#locklink',
+            {attributeName: 'href', link: 'http://fakelink.example/'},
+            {attributeName: 'href', link: 'http://shop-links.co/999'},
+            {attributeName: 'href', link: 'https://examplelocklink.example/#locklink'},
           ].map(helpers.createAnchor);
 
           const expectedPayload = [{
@@ -322,15 +322,52 @@ describes.fakeWin('amp-smartlinks',
           env.sandbox.spy(linkmate, 'buildLinksPayload_');
 
           anchorList = [
-            'http://http://shop-links.co/999',
+            {attributeName: 'href', link: 'http://shop-links.co/999'},
           ].map(helpers.createAnchor);
 
-          const expectedAnchor = 'http://http//shop-links.co/999?amp=true';
+          const expectedAnchor = 'http://shop-links.co/999?amp=true';
 
           const linkPayload = linkmate.buildLinksPayload_(anchorList);
 
           expect(linkPayload).to.deep.equal([]);
           expect(anchorList[0].href).to.equal(expectedAnchor);
+        });
+
+        it('Should build payload from anchorList with custom selector', () => {
+          env.sandbox.spy(linkmate, 'buildLinksPayload_');
+
+          const linkmateOptions = {
+            exclusiveLinks: false,
+            publisherID: 999,
+            linkSelector: 'a[data-outbound-vars]',
+            linkAttribute: 'data-outbound-vars',
+          };
+          linkmate = new Linkmate(
+              env.ampdoc,
+              xhr,
+              linkmateOptions,
+          );
+
+          anchorList = [
+            {attributeName: 'data-outbound-vars', link: 'http://fakelink.example/'},
+            {attributeName: 'data-outbound-vars', link: 'http://fakelink2.example/'},
+            {attributeName: 'data-outbound-vars', link: 'https://examplelocklink.example/#locklink'},
+          ].map(helpers.createAnchor);
+
+          const expectedPayload = [{
+            'raw_url': 'http://fakelink.example/',
+            'exclusive_match_requested': false,
+          }, {
+            'raw_url': 'http://fakelink2.example/',
+            'exclusive_match_requested': false,
+          }, {
+            'raw_url': 'https://examplelocklink.example/#locklink',
+            'exclusive_match_requested': true,
+          }];
+
+          const linkPayload = linkmate.buildLinksPayload_(anchorList);
+
+          expect(linkPayload).to.deep.equal(expectedPayload);
         });
       });
 
@@ -381,9 +418,10 @@ describes.fakeWin('amp-smartlinks',
           );
 
           anchorList = [
-            'http://fakelink.example/',
-            'http://fakelink2.example/',
-            'https://examplelocklink.example/#locklink',
+            {attributeName: 'href', link: 'http://fakelink.example/'},
+            {attributeName: 'href', link: 'http://fakelink2.example/'},
+            {attributeName: 'href', link: 'http://fakelink2.example/'},
+            {attributeName: 'href', link: 'https://examplelocklink.example/#locklink'},
           ].map(helpers.createAnchor);
         });
 
@@ -394,6 +432,11 @@ describes.fakeWin('amp-smartlinks',
             'exclusive_match_requested': false,
             'pub_id': 999,
             'url': 'http://fakelink.example/',
+          }, {
+            'auction_id': '1667546956215651271',
+            'exclusive_match_requested': false,
+            'pub_id': 999,
+            'url': 'http://fakelink2.example/',
           }];
           linkmate.anchorList_ = anchorList;
           linkmate.linkmateResponse_ = linkmateResponse;
@@ -403,10 +446,61 @@ describes.fakeWin('amp-smartlinks',
             replacementUrl: `https://shop-links.co/${linkmateResponse[0]['auction_id']}/?amp=true`,
           }, {
             anchor: anchorList[1],
-            replacementUrl: null,
+            replacementUrl: `https://shop-links.co/${linkmateResponse[1]['auction_id']}/?amp=true`,
           }, {
             anchor: anchorList[2],
-            replacementUrl: null,
+            replacementUrl: `https://shop-links.co/${linkmateResponse[1]['auction_id']}/?amp=true`,
+          }];
+
+          const actualMapping = linkmate.mapLinks_();
+
+          expect(actualMapping).to.deep.equal(expectedMapping);
+        });
+
+        it('Should map API response to anchorList with attribute', () => {
+          env.sandbox.spy(linkmate, 'mapLinks_');
+
+          const linkmateOptions = {
+            exclusiveLinks: false,
+            publisherID: 999,
+            linkAttribute: 'data-outbound-vars',
+          };
+          linkmate = new Linkmate(
+              env.ampdoc,
+              xhr,
+              linkmateOptions,
+          );
+
+          anchorList = [
+            {attributeName: 'data-outbound-vars', link: 'http://fakelink.example/'},
+            {attributeName: 'data-outbound-vars', link: 'http://fakelink2.example/'},
+            {attributeName: 'data-outbound-vars', link: 'http://fakelink2.example/'},
+            {attributeName: 'data-outbound-vars', link: 'https://examplelocklink.example/#locklink'},
+          ].map(helpers.createAnchor);
+
+          const linkmateResponse = [{
+            'auction_id': '1661245605416735203',
+            'exclusive_match_requested': false,
+            'pub_id': 999,
+            'url': 'http://fakelink.example/',
+          }, {
+            'auction_id': '1667546956215651271',
+            'exclusive_match_requested': false,
+            'pub_id': 999,
+            'url': 'http://fakelink2.example/',
+          }];
+          linkmate.anchorList_ = anchorList;
+          linkmate.linkmateResponse_ = linkmateResponse;
+
+          const expectedMapping = [{
+            anchor: anchorList[0],
+            replacementUrl: `https://shop-links.co/${linkmateResponse[0]['auction_id']}/?amp=true`,
+          }, {
+            anchor: anchorList[1],
+            replacementUrl: `https://shop-links.co/${linkmateResponse[1]['auction_id']}/?amp=true`,
+          }, {
+            anchor: anchorList[2],
+            replacementUrl: `https://shop-links.co/${linkmateResponse[1]['auction_id']}/?amp=true`,
           }];
 
           const actualMapping = linkmate.mapLinks_();
