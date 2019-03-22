@@ -30,10 +30,8 @@ export const getWidgetOverload = self => {
   const override = {};
   overrideKeys.forEach(item => {
     const data = self.element.getAttribute(`data-attr-${item}`);
-    if (data !== null) {
-      if (isString(data) || isNumber(data) || isBoolean(data)) {
-        override[item] = data;
-      }
+    if (isString(data) || isNumber(data) || isBoolean(data)) {
+      override[item] = data;
     }
   });
   let returnValue = '';
