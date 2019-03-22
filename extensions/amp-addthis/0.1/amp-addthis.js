@@ -382,7 +382,7 @@ class AmpAddThis extends AMP.BaseElement {
    * Sets up listeners.
    *
    * @param {!Object} input
-   * @param {!../../../src/service/ampdoc-impl.Ampdoc} [input.ampDoc]
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} [input.ampdoc]
    * @param {*} [input.loc]
    * @param {*} [input.pubId]
    * @memberof AmpAddThis
