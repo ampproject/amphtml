@@ -206,7 +206,7 @@ export class AmpForm {
         this.form_, () => this.handleXhrVerify_());
 
     this.actions_.installActionHandler(
-        this.form_, this.actionHandler_.bind(this), ActionTrust.HIGH);
+        this.form_, this.actionHandler_.bind(this));
     this.installEventHandlers_();
     this.installInputMasking_();
 
@@ -313,6 +313,9 @@ export class AmpForm {
    * @private
    */
   actionHandler_(invocation) {
+    if (!invocation.satisfiesTrust(ActionTrust.HIGH)) {
+      return null;
+    }
     if (invocation.method == 'submit') {
       return this.whenDependenciesReady_().then(() => {
         return this.handleSubmitAction_(invocation);
