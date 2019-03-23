@@ -58,5 +58,7 @@
   "amp-list-resizable-children": 1,
   "amp-auto-lightbox": 0.5,
   "amp-list-load-more": 1,
-  "amp-ad-ff-adx-ady": 0.01
+  "amp-ad-ff-adx-ady": 0.01,
+  "amp-img-auto-sizes": 0.1,
+  "blurry-placeholder": 1
 }

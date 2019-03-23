@@ -58,22 +58,53 @@ describes.realWin('amp-autocomplete init', {
     return ampAutocomplete.build().then(() => ampAutocomplete);
   }
 
-  it('should render with experiment on', () => {
-    let impl, renderSpy;
+  it('should layout with experiment on', () => {
+    let impl, filterAndRenderSpy, clearAllSpy, filterSpy, renderSpy;
     return getAutocomplete({
       'filter': 'substring',
     }).then(ampAutocomplete => {
       impl = ampAutocomplete.implementation_;
       const expectedItems = ['apple', 'banana', 'orange'];
-      expect(impl.inlineData_).to.have.ordered.members(expectedItems);
-      expect(impl.inputElement__).not.to.be.null;
+      expect(impl.sourceData_).to.have.ordered.members(expectedItems);
+      expect(impl.inputElement_).not.to.be.null;
       expect(impl.container_).not.to.be.null;
       expect(impl.filter_).to.equal('substring');
-
+      filterAndRenderSpy = sandbox.spy(impl, 'filterDataAndRenderResults_');
+      clearAllSpy = sandbox.spy(impl, 'clearAllItems_');
+      filterSpy = sandbox.spy(impl, 'filterData_');
       renderSpy = sandbox.spy(impl, 'renderResults_');
       return ampAutocomplete.layoutCallback();
     }).then(() => {
       expect(impl.inputElement_.hasAttribute('autocomplete')).to.be.true;
+      expect(filterAndRenderSpy).to.have.been.calledOnce;
+      expect(clearAllSpy).to.have.been.calledOnce;
+      expect(filterSpy).not.to.have.been.called;
+      expect(renderSpy).not.to.have.been.called;
+    });
+  });
+
+  it('should render with experiment on', () => {
+    let impl, filterAndRenderSpy, clearAllSpy, filterSpy, renderSpy;
+    return getAutocomplete({
+      'filter': 'substring',
+      'min-characters': '0',
+    }).then(ampAutocomplete => {
+      impl = ampAutocomplete.implementation_;
+      const expectedItems = ['apple', 'banana', 'orange'];
+      expect(impl.sourceData_).to.have.ordered.members(expectedItems);
+      expect(impl.inputElement_).not.to.be.null;
+      expect(impl.container_).not.to.be.null;
+      expect(impl.filter_).to.equal('substring');
+      filterAndRenderSpy = sandbox.spy(impl, 'filterDataAndRenderResults_');
+      clearAllSpy = sandbox.spy(impl, 'clearAllItems_');
+      filterSpy = sandbox.spy(impl, 'filterData_');
+      renderSpy = sandbox.spy(impl, 'renderResults_');
+      return ampAutocomplete.layoutCallback();
+    }).then(() => {
+      expect(impl.inputElement_.hasAttribute('autocomplete')).to.be.true;
+      expect(filterAndRenderSpy).to.have.been.calledOnce;
+      expect(clearAllSpy).to.have.been.calledOnce;
+      expect(filterSpy).to.have.been.calledOnce;
       expect(renderSpy).to.have.been.calledOnce;
     });
   });
@@ -133,7 +164,7 @@ describes.realWin('amp-autocomplete init', {
       'filter': 'substring',
     }, '{}').then(ampAutocomplete => {
       const impl = ampAutocomplete.implementation_;
-      expect(impl.inlineData_).to.be.an('array').that.is.empty;
+      expect(impl.sourceData_).to.be.an('array').that.is.empty;
     });
   });
 
@@ -142,7 +173,7 @@ describes.realWin('amp-autocomplete init', {
       'filter': 'substring',
     }, '{ "items" : [] }').then(ampAutocomplete => {
       const impl = ampAutocomplete.implementation_;
-      expect(impl.inlineData_).to.be.an('array').that.is.empty;
+      expect(impl.sourceData_).to.be.an('array').that.is.empty;
     });
   });
 
@@ -162,7 +193,7 @@ describes.realWin('amp-autocomplete init', {
     }, data, false).then(ampAutocomplete => {
       ampAutocomplete.layoutCallback().then(() => {
         const impl = ampAutocomplete.implementation_;
-        expect(impl.inlineData_).to.have.ordered.members(data.items);
+        expect(impl.sourceData_).to.have.ordered.members(data.items);
       });
     });
   });
