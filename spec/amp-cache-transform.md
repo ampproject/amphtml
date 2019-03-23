@@ -250,6 +250,26 @@ The above is merely informational; a cache may choose any strategy that doesn't
 serve mismatched responses (i.e. obeys the "Server behavior" specification
 above).
 
+## Future work
+
+As this defines a new content negotiation header field, we should ensure that it
+meets the criteria set for integration with [HTTP
+Variants](https://tools.ietf.org/html/draft-ietf-httpbis-variants-04#section-6).
+
+## Alternatives considered
+
+### q-values and media type parameters
+
+Alternatively, one could use
+[q-values](https://tools.ietf.org/html/rfc7231#section-5.3.1) for specifying
+preference of `application/signed-exchange` over other variants, and [media type
+parameters](https://tools.ietf.org/html/rfc7231#section-3.1.1.1) for specifying
+target and version requirements. These are idiomatic applications of existing
+syntaxes, but may come with some downsides. This is an area under investigation
+and
+[discussion](https://lists.w3.org/Archives/Public/ietf-http-wg/2019JanMar/0174.html);
+feel free to get involved.
+
 ## Example
 
 A requestor wishing to receive an SXG, without any constraints on its
