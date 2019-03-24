@@ -38,11 +38,6 @@ export const KENSHOO_CONFIG = /** @type {!JsonObject} */ ({
       'request': 'landingPage',
     },
   },
-  'transport': {
-    'beacon': true,
-    'xhrpost': true,
-    'image': true,
-  },
   'linkers': {
     'linker': {
       'ids': {
