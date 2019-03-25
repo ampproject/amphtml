@@ -28,6 +28,7 @@ import {
   installServiceInEmbedScope,
   registerServiceBuilderForDoc,
 } from '../service';
+import {urls} from '../config';
 
 const SERVICE = 'url';
 
@@ -140,24 +141,23 @@ export class Url {
   }
 
   /**
-   * If the current location is on a CDN, then convert the given resource
-   * URL to a path that resolves to the same resource served on the cache.
-   * @param {!Location|string} currentLocation The URL of the window
+   * If the resource URL is referenced from the publisher's origin,
+   * convert the URL to be referenced from the cache.
    * @param {string} resourceUrl The URL of the document to load
    * @return {string}
    */
-  getCdnUrlOnOrigin(currentLocation, resourceUrl) {
-    if (isProxyOrigin(currentLocation)) {
+  getCdnUrlOnOrigin(resourceUrl) {
+    if (isProxyOrigin(resourceUrl)) {
       return resourceUrl;
     }
 
     const {
+      host,
       hash,
       pathname,
       search,
     } = this.parse(resourceUrl);
-
-    return `https://cdn.ampproject.org/c${pathname}${search}${hash}`;
+    return `${urls.cdn}/c/${host}${pathname}${search}${hash}`;
   }
 }
 

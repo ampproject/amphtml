@@ -67,9 +67,6 @@ export class LiveListManager {
     /** @private @const {string} */
     this.url_ = this.ampdoc.getUrl();
 
-    /** @private @const {!Location} */
-    this.location_ = this.ampdoc.win.location;
-
     /** @private {time} */
     this.latestUpdateTime_ = 0;
 
@@ -142,7 +139,7 @@ export class LiveListManager {
 
     if (this.isTransformed_) {
       const urlService = Services.urlForDoc(this.ampdoc.getBody());
-      url = urlService.getCdnUrlOnOrigin(this.location_, url);
+      url = urlService.getCdnUrlOnOrigin(url);
     }
 
     // TODO(erwinm): add update time here when possible.
