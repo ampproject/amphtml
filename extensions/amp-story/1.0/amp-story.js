@@ -1225,6 +1225,11 @@ export class AmpStory extends AMP.BaseElement {
           }
         }
 
+        this.storeService_.dispatch(Action.CHANGE_PAGE, {
+          id: targetPageId,
+          index: pageIndex,
+        });
+
         if (targetPage.isAd()) {
           this.storeService_.dispatch(Action.TOGGLE_AD, true);
           setAttributeInMutate(this, Attributes.AD_SHOWING);
@@ -1276,11 +1281,6 @@ export class AmpStory extends AMP.BaseElement {
         this.systemLayer_.resetDeveloperLogs();
         this.systemLayer_
             .setDeveloperLogContextString(this.activePage_.element.id);
-
-        this.storeService_.dispatch(Action.CHANGE_PAGE, {
-          id: targetPageId,
-          index: pageIndex,
-        });
       },
     ];
 
