@@ -247,7 +247,7 @@ export class InaboxMessagingHost {
   handleHostBroadcast_(iframe, request, source, origin) {
     source./*OK*/postMessage(
         serializeMessage(MessageType.HOST_RESPONSE, request.sentinel,
-            dict({'id': request.id})), origin);
+            dict({})), origin);
 
     return true;
   }

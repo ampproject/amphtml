@@ -55,26 +55,22 @@ function createIframeMessagingClient(win) {
 
   iframeClient.setBroadcastMode(true);
   return new Promise(resolve => {
-    const wins = {};
     let hostWin = win;
     let j = 0;
-    const unlisten = iframeClient.registerCallback(MessageType.HOST_RESPONSE, message => {
-      if (wins[message['id']]) {
-        iframeClient.setBroadcastMode(false);
-        iframeClient.setHostWindow(wins[message['id']]);
-        unlisten();
-        resolve(iframeClient);
-      }
-    });
-    do {
-      const id = getRandom(win);
+    const unlisten = iframeClient.registerCallback(MessageType.HOST_RESPONSE,
+        message => {
+          iframeClient.setBroadcastMode(false);
+          iframeClient.setHostWindow(message.source);
+          unlisten();
+          resolve(iframeClient);
+        });
+    while (hostWin != win.top && j < 10) {
       hostWin = hostWin.parent;
-      wins[id] = hostWin;
       iframeClient.setHostWindow(hostWin);
       iframeClient./*OK*/sendMessage(
-          MessageType.HOST_BROADCAST, dict({'id': id}));
+          MessageType.HOST_BROADCAST, dict({}));
       j++;
-    } while (hostWin != win.top && j < 10);
+    }
   });
 }
 

@@ -158,6 +158,10 @@ export class IframeMessagingClient {
 
       message['origin'] = event.origin;
 
+      if (this.broadcastMode_) {
+        message['source'] = event.source;
+      }
+
       this.fireObservable_(message['type'], message);
     });
   }
