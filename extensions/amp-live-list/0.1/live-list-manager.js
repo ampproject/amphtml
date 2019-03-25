@@ -142,7 +142,7 @@ export class LiveListManager {
 
     if (this.isTransformed_) {
       const urlService = Services.urlForDoc(this.ampdoc.getBody());
-      url = urlService.getCdnUrlOnCdnOrigin(this.location_, url);
+      url = urlService.getCdnUrlOnOrigin(this.location_, url);
     }
 
     // TODO(erwinm): add update time here when possible.
@@ -274,7 +274,10 @@ export class LiveListManager {
  * @return {boolean}
  */
 function isDocTransformed(root) {
-  const {documentElement} = (root.ownerDocument || root);
+  if (!root.ownerDocument) {
+    return false;
+  }
+  const {documentElement} = root.ownerDocument;
   const transformed = documentElement.getAttribute('transformed');
   return Boolean(transformed) && startsWith(transformed, TRANSFORMED_PREFIX);
 }

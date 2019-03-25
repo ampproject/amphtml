@@ -496,14 +496,13 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
     });
   });
 
-  it('should fetch with url from the cache if on cache origin ' +
+  it('should fetch with url from the cache if on publisher origin ' +
       'and is transformed', () => {
     sandbox.stub(Math, 'random').callsFake(() => 1);
     sandbox.stub(viewer, 'isVisible').returns(true);
     manager.url_ = 'www.example.com/foo/bar?hello=world#dev=1';
     manager.isTransformed_ = true;
-    manager.location_ = 'https://cdn.ampproject.org' +
-        '/c/s/www.example.com/foo/bar?hello=world#dev=1';
+    manager.location_ = 'https://www.example.com/foo/bar?hello=world#dev=1';
     ready();
     const fetchSpy = sandbox.spy(manager, 'work_');
     liveList.buildCallback();

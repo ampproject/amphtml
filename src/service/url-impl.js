@@ -146,21 +146,18 @@ export class Url {
    * @param {string} resourceUrl The URL of the document to load
    * @return {string}
    */
-  getCdnUrlOnCdnOrigin(currentLocation, resourceUrl) {
-    if (!isProxyOrigin(currentLocation)) {
+  getCdnUrlOnOrigin(currentLocation, resourceUrl) {
+    if (isProxyOrigin(currentLocation)) {
       return resourceUrl;
     }
 
-    const {host} = (typeof currentLocation == 'string' ?
-      this.parse(currentLocation) :
-      currentLocation);
     const {
       hash,
       pathname,
       search,
     } = this.parse(resourceUrl);
 
-    return `https://${host}/c${pathname}${search}${hash}`;
+    return `https://cdn.ampproject.org/c${pathname}${search}${hash}`;
   }
 }
 
