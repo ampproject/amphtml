@@ -21,6 +21,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.javascript.jscomp.CommandLineRunner;
 import com.google.javascript.jscomp.CompilerOptions;
 import com.google.javascript.jscomp.CustomPassExecutionTime;
+import com.google.javascript.jscomp.FlagUsageException;
 import com.google.javascript.jscomp.PropertyRenamingPolicy;
 import com.google.javascript.jscomp.VariableRenamingPolicy;
 import com.google.javascript.rhino.IR;
@@ -73,7 +74,7 @@ public class AmpCommandLineRunner extends CommandLineRunner {
       return createTypeCheckingOptions();
     }
     CompilerOptions options = super.createOptions();
-    options.setCollapseProperties(true);
+    options.setCollapsePropertiesLevel(CompilerOptions.PropertyCollapseLevel.ALL);
     AmpPass ampPass = new AmpPass(getCompiler(), is_production_env, suffixTypes,
         assignmentReplacements, prodAssignmentReplacements);
     options.addCustomPass(CustomPassExecutionTime.BEFORE_OPTIMIZATIONS, ampPass);
