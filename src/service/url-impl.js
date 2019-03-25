@@ -157,7 +157,8 @@ export class Url {
       pathname,
       search,
     } = this.parse(resourceUrl);
-    return `${urls.cdn}/c/${host}${pathname}${search}${hash}`;
+    const encodedHost = encodeURIComponent(host);
+    return `${urls.cdn}/c/${encodedHost}${pathname}${search}${hash}`;
   }
 }
 
