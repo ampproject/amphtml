@@ -680,7 +680,12 @@ exports.extensionBundles = [
     name: 'amp-story-auto-ads',
     version: '0.1',
     latestVersion: '0.1',
-    options: {hasCss: true},
+    options: {
+      hasCss: true,
+      cssBinaries: [
+        'amp-story-auto-ads-attribution',
+      ],
+    },
     type: TYPES.MISC,
   },
   {
