@@ -1452,20 +1452,15 @@ export class AmpDatePicker extends AMP.BaseElement {
    * @private
    */
   iterateDateRange_(startDate, endDate, cb) {
-    if (startDate.isSame(endDate)) {
-      cb(startDate);
-      return;
-    }
-
     const normalizedEndDate = endDate || startDate;
-    if (!normalizedEndDate.isAfter(startDate)) {
+    if (!normalizedEndDate.isAfter(startDate) &&
+        !normalizedEndDate.isSame(startDate)) {
       return;
     }
 
-    const index = startDate.clone();
-    while (!index.isAfter(normalizedEndDate)) {
-      cb(index.clone());
-      index.add(1, 'days');
+    const days = normalizedEndDate.diff(startDate, 'days') + 1;
+    for (let i = 0; i < days; i++) {
+      cb(startDate.clone().add(i + 1, 'days'));
     }
   }
 
