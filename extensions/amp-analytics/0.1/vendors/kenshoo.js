@@ -18,8 +18,6 @@ export const KENSHOO_CONFIG = /** @type {!JsonObject} */ ({
   'vars': {
     'clientId': 'CLIENT_ID(ken_amp_id)',
     'channelClickId': 'QUERY_PARAM(gclid)',
-    'tid': 'KT-XXXXX-XXX',
-    'userId': '<USER_ID>',
   },
   'requests': {
     'host': 'https://amp.xg4ken.com',
