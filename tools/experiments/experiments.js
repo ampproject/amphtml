@@ -111,6 +111,11 @@ const EXPERIMENTS = [
     cleanupIssue: '',
   },
   {
+    id: 'amp-base-carousel',
+    name: 'AMP extension for a basic, flexible, carousel',
+    spec: 'https://github.com/ampproject/amphtml/issues/20595',
+  },
+  {
     id: 'amp-google-vrview-image',
     name: 'AMP VR Viewer for images via Google VRView',
     spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
@@ -254,6 +259,13 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/15960',
   },
   {
+    id: 'amp-story-desktop-background',
+    name: 'Removes blurred background images from the amp-story component\'s ' +
+        'three-panel desktop UI.',
+    spec: 'https://github.com/ampproject/amphtml/issues/21287',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/21288',
+  },
+  {
     id: 'amp-next-page',
     name: 'Document level next page recommendations and infinite scroll',
     spec: 'https://github.com/ampproject/amphtml/issues/12945',
@@ -394,6 +406,38 @@ const EXPERIMENTS = [
     name: 'Automatically detects images to place in a lightbox.',
     spec: 'https://github.com/ampproject/amphtml/issues/20395',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/20394',
+  },
+  {
+    id: 'amp-auto-lightbox-carousel',
+    name: 'Automatically detects carousels to group in a lightbox.',
+    spec: 'https://github.com/ampproject/amphtml/issues/20395',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/20394',
+  },
+  {
+    id: 'fixed-elements-in-lightbox',
+    name: 'Transfer fixed elements in lightboxes for smooth iOS scrolling',
+    spec: 'https://github.com/ampproject/amphtml/issues/20964',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/20965',
+  },
+  {
+    id: 'amp-img-auto-sizes',
+    name: 'Automatically generates sizes for amp-img if not given',
+    spec: 'https://github.com/ampproject/amphtml/issues/19513',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/20517',
+  },
+  {
+    id: 'amp-autocomplete',
+    name: 'AMP Autocomplete provides a set of suggestions to' +
+        ' complete a user query in an input field.',
+    spec: 'https://github.com/ampproject/amphtml/issues/9785',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/21021',
+  },
+  {
+    id: 'inabox-viewport-friendly',
+    name: 'Inabox viewport measures the host window directly if ' +
+        'within friendly iframe',
+    spec: 'https://github.com/ampproject/amphtml/issues/19869',
+    cleanupIssue: 'TODO',
   },
 ];
 

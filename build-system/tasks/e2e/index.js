@@ -28,6 +28,7 @@ const {execOrDie, execScriptAsync} = require('../../exec');
 const HOST = 'localhost';
 const PORT = 8000;
 const WEBSERVER_TIMEOUT_RETRIES = 10;
+const SLOW_TEST_THRESHOLD_MS = 2500;
 
 let webServerProcess_;
 
@@ -78,7 +79,11 @@ async function e2e() {
 
   // create mocha instance
   require('@babel/register');
-  require('./helper');
+  const {describes} = require('./helper');
+  describes.configure({
+    engine: argv.engine,
+    headless: argv.headless,
+  });
 
   const mocha = new Mocha({
     reporter: argv.testnames ? '' : ciReporter,
@@ -105,6 +110,9 @@ async function e2e() {
 
   // start up web server
   await launchWebServer_();
+  // e2e tests have a different standard for when a test is too slow,
+  // so we set a non-default threshold.
+  mocha.slow(SLOW_TEST_THRESHOLD_MS);
 
   // run tests
   mocha.run(failures => {

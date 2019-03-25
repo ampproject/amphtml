@@ -233,9 +233,11 @@ import {swoop} from '../ads/swoop';
 import {taboola} from '../ads/taboola';
 import {tcsemotion} from '../ads/tcsemotion';
 import {teads} from '../ads/teads';
+import {torimochi} from '../ads/torimochi';
 import {triplelift} from '../ads/triplelift';
 import {trugaze} from '../ads/trugaze';
 import {uas} from '../ads/uas';
+import {ucfunnel} from '../ads/ucfunnel';
 import {unruly} from '../ads/unruly';
 import {uzou} from '../ads/uzou';
 import {valuecommerce} from '../ads/valuecommerce';
@@ -269,7 +271,6 @@ import {speakol} from '../ads/speakol';
  * @const {!Object<string, boolean>}
  */
 const AMP_EMBED_ALLOWED = {
-  aja: true,
   _ping_: true,
   '24smi': true,
   bringhub: true,
@@ -474,10 +475,12 @@ register('swoop', swoop);
 register('taboola', taboola);
 register('tcsemotion', tcsemotion);
 register('teads', teads);
+register('torimochi', torimochi);
 register('triplelift', triplelift);
 register('trugaze', trugaze);
 register('twitter', twitter);
 register('uas', uas);
+register('ucfunnel', ucfunnel);
 register('unruly', unruly);
 register('uzou', uzou);
 register('valuecommerce', valuecommerce);

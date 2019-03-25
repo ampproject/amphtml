@@ -168,6 +168,17 @@
       text-decoration: underline;
     }
 
+    viewer[data-show-container="dynamic"] #container-dynamic {
+      visibility: visible;
+      -webkit-transform: none;
+      -ms-transform: none;
+      transform: none;
+    }
+
+    viewer[data-show-container="dynamic"] #show-container-dynamic-anchor {
+      text-decoration: underline;
+    }
+
     viewer.natural container {
       overflow-y: hidden;
     }
@@ -197,6 +208,8 @@
       this.visibilityState_ = visible ? 'visible' : 'hidden';
       this.prerenderSize_ = 1;
       this.csi_ = 1;
+      this.startResolve_ = null;
+      this.startPromise_ = null;
 
       this.isIos_ = /iPhone|iPad|iPod/i.test(window.navigator.userAgent);
 
@@ -261,24 +274,29 @@
         this.frameOrigin_, this.processRequest_.bind(this),
         /* logs id */ this.id);
 
-      this.iframe.onload = this.loaded_.bind(this);
       setTimeout(function() {
         this.iframe.style.visibility = 'hidden';
         this.iframe.style.display = '';
         this.iframe.setAttribute('src', url);
       }.bind(this));
+
+      return this.startPromise_ = new Promise(resolve => {
+        this.startResolve_ = resolve;
+      });
     };
 
     Viewer.prototype.toggleVisibility = function(visible, updateToggle) {
       log('Viewer ' + this.id + ' visibility -> ', visible);
-      this.visibilityState_ = visible ? 'visible' : 'hidden';
-      this.ampViewerHost_.sendRequest('visibilitychange', {
-        state: this.visibilityState_,
-        prerenderSize: this.prerenderSize
-      }, true);
-      if (updateToggle) {
-        this.updateVisibilityToggle_();
-      }
+      this.startPromise_.then(() => {
+        this.visibilityState_ = visible ? 'visible' : 'hidden';
+        this.ampViewerHost_.sendRequest('visibilitychange', {
+          state: this.visibilityState_,
+          prerenderSize: this.prerenderSize
+        }, true);
+        if (updateToggle) {
+          this.updateVisibilityToggle_();
+        }
+      });
     };
 
     Viewer.prototype.loaded_ = function() {
@@ -291,6 +309,7 @@
       if (waiter) {
         waiter.parentElement.removeChild(waiter);
       }
+      this.iframe.dataset['loaded'] = '';
       this.iframe.style.display = '';
       this.iframe.style.visibility = '';
       this.iframe.contentWindow.onbeforeunload = (function() {
@@ -298,6 +317,7 @@
         this.container.textContent =
             'Unload of the AMP iframe is not allowed!';
       }).bind(this);
+      this.startResolve_();
     };
 
 
@@ -460,15 +480,22 @@
       }
     };
 
+    // TODO(alabiaga): We mock the template but don't verify the data
+    // that should be used to construct it. The data should be used
+    // and verified to an extent.
     Viewer.prototype.ssrRenderAmpListTemplate_ = function(data) {
       // Mocked response.
       new Response
       return Promise.resolve({
         "html":
-            "<ul>" +
-              "<li><p [text]='data.foo'></p></li>" +
-              "<li>Some list item</li>" +
-              "<li>Some list item</li></ul>",
+          "<div role='list' class='i-amphtml-fill-content i-amphtml-replaced-content'>"
+            + "<div [text]='data.fruit' role='listitem''></div>"
+            + "<div class='product' role='listitem'>Apple</div>"
+            + "<div class='product' role='listitem'>Orange</div>"
+            + "<div class='product' role='listitem'>Pear</div>"
+            + "<div class='product' role='listitem'>Banana</div>"
+            + "<div class='product' role='listitem'>Watermelon</div>"
+          + "</div>",
         "body" : "",
         "init" : {
           "headers": {
@@ -478,10 +505,13 @@
       });
     };
 
+    // TODO(alabiaga): We mock the template but don't verify the data
+    // that should be used to construct it. The data should be used
+    // and verified to an extent.
     Viewer.prototype.ssrRenderAmpFormTemplate_ = function(data) {
       // Mocked response.
       return Promise.resolve({
-        "html": "<div>Server side rendered search result</div>",
+        "html": "<h1>SSR response<h1>",
         "body": "",
         "init" : {
           "headers": {
@@ -539,13 +569,71 @@
       return s;
     }
 
+    /**
+     * Parses the query string of an URL. This method returns a simple key/value
+     * map. If there are duplicate keys the latest value is returned.
+     * @param {string} queryString
+     * @return {!Object<string>}
+     */
+    function parseQueryString(queryString) {
+      const params = Object.create(null);
+      if (!queryString) {
+        return params;
+      }
+      if (startsWith(queryString, '?') || startsWith(queryString, '#')) {
+        queryString = queryString.substr(1);
+      }
+      const pairs = queryString.split('&');
+      for (let i = 0; i < pairs.length; i++) {
+        const pair = pairs[i];
+        const eqIndex = pair.indexOf('=');
+        let name;
+        let value;
+        if (eqIndex != -1) {
+          name = decodeURIComponent(pair.substring(0, eqIndex)).trim();
+          value = decodeURIComponent(pair.substring(eqIndex + 1)).trim();
+        } else {
+          name = decodeURIComponent(pair).trim();
+          value = '';
+        }
+        if (name) {
+          params[name] = value;
+        }
+      }
+      return params;
+    }
+
+    function startsWith(string, prefix) {
+      return string.lastIndexOf(prefix, 0) == 0;
+    }
+
+    /**
+     * @param {string} url
+     * @param {string} param
+     * @param {*} value
+     * @return {string}
+     */
+    function addQueryParam(url, param, value) {
+      const paramValue =
+          encodeURIComponent(param) + '=' + encodeURIComponent(value);
+      if (!url.includes('?')) {
+        url += '?' + paramValue;
+      } else {
+        url += '&' + paramValue;
+      }
+      return url;
+    }
 
     function loadAmpDoc() {
+      const hash = window.location.hash;
+      const hashParams = parseQueryString(hash);
+      const href = hashParams['href'];
+
       new Viewer(
           'container1',
           '1',
           './everything.amp.html?amp_js_v=0.1',
-          true).start();
+          !href).start();
       addShowContainer('1');
 
       new Viewer(
@@ -579,19 +667,32 @@
       new Viewer(
           'container6',
           '6',
-          './mustache-to-amp-view-host.amp.html?amp_js_v=0.1',
+          './amp-list.ssr.html?amp_js_v=0.1',
           false).start();
       addShowContainer('6');
 
       new Viewer(
           'container7',
           '7',
-          './form-proxy-template-to-viewer-host.amp.html?amp_js_v=0.1',
+          './amp-form.ssr.html?amp_js_v=0.1',
           false).start();
       addShowContainer('7');
 
-      showContainer('1');
+      if (href) {
+        new Viewer(
+            'container-dynamic',
+            'dynamic',
+            addQueryParam(href, 'amp_js_v', '0.1'),
+            true).start();
+        document.getElementById('show-containerdynamic-anchor').hidden = false;
+        addShowContainer('dynamic');
+        showContainer('dynamic');
+      } else {
+        showContainer('1');
+      }
     }
+
+
 
     function addShowContainer(id) {
       var anchor = document.getElementById('show-container' + id + '-anchor');
@@ -634,6 +735,7 @@
       <a class="show-container-anchor" id="show-container5-anchor">Five</a>
       <a class="show-container-anchor" id="show-container6-anchor">Six</a>
       <a class="show-container-anchor" id="show-container7-anchor">Seven</a>
+      <a class="show-container-anchor" id="show-containerdynamic-anchor" hidden>Dynamic</a>
       <a>|</a>
       <a id="visibilityToggle">Visible</a>
     </header>
@@ -671,7 +773,12 @@
     <div class="wait">
       Please wait, the AMP doc will appear here...
     </div>
-</container>
+    </container>
+    <container id="container-dynamic">
+    <div class="wait">
+      Please wait, the AMP doc will appear here...
+    </div>
+    </container>
   </viewer>
 </body>
 </html>

@@ -41,17 +41,17 @@ import {
 } from '../../../src/event-helper';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {
-  escapeCssSelectorIdent,
-  isRTL,
-  removeElement,
-  scopedQuerySelector,
-} from '../../../src/dom';
+import {escapeCssSelectorIdent} from '../../../src/css';
 import {getInternalVideoElementFor} from '../../../src/utils/video';
 import {getServiceForDoc} from '../../../src/service';
 import {htmlFor, htmlRefs} from '../../../src/static-template';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {isFiniteNumber} from '../../../src/types';
+import {
+  isRTL,
+  removeElement,
+  scopedQuerySelector,
+} from '../../../src/dom';
 import {layoutRectLtwh, moveLayoutRect} from '../../../src/layout-rect';
 import {mapRange} from '../../../src/utils/math';
 import {once} from '../../../src/utils/function';
@@ -386,6 +386,10 @@ export class VideoDocking {
 
   /** @private */
   registerAll_() {
+    if (!this.isEnabled_()) {
+      return;
+    }
+
     const ampdoc = this.ampdoc_;
 
     const dockableSelector =
@@ -408,6 +412,19 @@ export class VideoDocking {
         this.registerElement(target);
       }
     });
+  }
+
+  /**
+   * @return {boolean}
+   * @private
+   */
+  isEnabled_() {
+    // iOS is impossible in the viewer. See https://bit.ly/2BJcNjV
+    if (Services.platformFor(this.ampdoc_.win).isIos() &&
+        Services.viewerForDoc(this.ampdoc_).isEmbedded()) {
+      return false;
+    }
+    return true;
   }
 
   /**

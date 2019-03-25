@@ -16,7 +16,6 @@
 
 import {Services} from '../../../src/services';
 
-
 /**
  * Strips everything but the domain from referrer string.
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
@@ -150,13 +149,29 @@ function addRuntimeClasses(ampdoc) {
   addViewerClass(ampdoc);
 }
 
+/** @implements {../../../src/render-delaying-services.RenderDelayingService} */
+class AmpDynamicCssClasses {
+  /**
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   */
+  constructor(ampdoc) {
+    addRuntimeClasses(ampdoc);
+  }
+
+  /**
+   * Function to return a promise for when
+   * it is finished delaying render, and is ready.
+   * Implemented from RenderDelayingService
+   * @return {!Promise}
+   */
+  whenReady() {
+    return Promise.resolve();
+  }
+}
 
 // Register doc-service factory.
 AMP.extension('amp-dynamic-css-classes', '0.1', AMP => {
   AMP.registerServiceForDoc(
       'amp-dynamic-css-classes',
-      function(ampdoc) {
-        addRuntimeClasses(ampdoc);
-        return {};
-      });
+      AmpDynamicCssClasses);
 });

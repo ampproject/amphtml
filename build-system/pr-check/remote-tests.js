@@ -39,15 +39,18 @@ const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
 const timedExecOrDie =
   (cmd, unusedFileName) => timedExecOrDieBase(cmd, FILENAME);
 
-function main() {
+async function main() {
   const startTime = startTimer(FILENAME, FILENAME);
   const buildTargets = determineBuildTargets();
 
   if (!isTravisPullRequestBuild()) {
     downloadDistOutput(FILENAME);
-    startSauceConnect(FILENAME);
+    timedExecOrDie('gulp update-packages');
+
+    await startSauceConnect(FILENAME);
     timedExecOrDie('gulp test --unit --nobuild --saucelabs_lite');
     timedExecOrDie('gulp test --integration --nobuild --compiled --saucelabs');
+
     stopSauceConnect(FILENAME);
   } else {
     printChangeSummary(FILENAME);
@@ -61,10 +64,11 @@ function main() {
           'because this commit does not affect the runtime, ' +
           'build system, or integration test files.');
       stopTimer(FILENAME, FILENAME, startTime);
-      return 0;
+      return;
     }
     downloadBuildOutput(FILENAME);
-    startSauceConnect(FILENAME);
+    timedExecOrDie('gulp update-packages');
+    await startSauceConnect(FILENAME);
 
     if (buildTargets.has('RUNTIME') ||
         buildTargets.has('BUILD_SYSTEM') ||
@@ -81,7 +85,6 @@ function main() {
   }
 
   stopTimer(FILENAME, FILENAME, startTime);
-  return 0;
 }
 
-process.exit(main());
+main();

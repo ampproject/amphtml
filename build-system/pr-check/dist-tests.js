@@ -38,7 +38,8 @@ const timedExecOrDie =
 
 function runSinglePassTest_() {
   timedExecOrDie('gulp clean');
-  timedExecOrDie('gulp dist --fortesting --single_pass --psuedonames');
+  timedExecOrDie('gulp update-packages');
+  timedExecOrDie('gulp dist --fortesting --single_pass --pseudo_names');
   timedExecOrDie('gulp test --integration ' +
       '--nobuild --compiled --single_pass --headless');
 }
@@ -48,7 +49,8 @@ function main() {
   const buildTargets = determineBuildTargets();
 
   if (!isTravisPullRequestBuild()) {
-    downloadDistOutput();
+    timedExecOrDie('gulp update-packages');
+    downloadDistOutput(FILENAME);
     timedExecOrDie('gulp bundle-size --on_push_build');
     runSinglePassTest_();
   } else {
@@ -56,6 +58,7 @@ function main() {
     let ranTests = false;
 
     if (buildTargets.has('RUNTIME')) {
+      timedExecOrDie('gulp update-packages');
       timedExecOrDie('gulp dist --fortesting --noextensions');
       timedExecOrDie('gulp bundle-size --on_pr_build');
       ranTests = true;
@@ -80,7 +83,6 @@ function main() {
   }
 
   stopTimer(FILENAME, FILENAME, startTime);
-  return 0;
 }
 
-process.exit(main());
+main();

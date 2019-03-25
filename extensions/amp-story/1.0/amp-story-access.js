@@ -23,7 +23,7 @@ import {Layout} from '../../../src/layout';
 import {assertHttpsUrl} from '../../../src/url';
 import {
   closest,
-  closestAncestorElementByTag,
+  closestAncestorElementBySelector,
   copyChildren,
   removeChildren,
 } from '../../../src/dom';
@@ -243,7 +243,7 @@ export class AmpStoryAccess extends AMP.BaseElement {
    */
   getLogoSrc_() {
     const storyEl = dev().assertElement(
-        closestAncestorElementByTag(this.element, 'AMP-STORY'));
+        closestAncestorElementBySelector(this.element, 'AMP-STORY'));
     const logoSrc = storyEl && storyEl.getAttribute('publisher-logo-src');
 
     logoSrc ?

@@ -79,7 +79,7 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
     string: 'WhatsApp',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT]: {
-    string: 'Полный просмотр возможен только при развернутом окне браузера',
+    fallback: 'Полный просмотр возможен только при развернутом окне браузера',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
     string: 'Для дальнейшего просмотра вы должны загрузить amp-story ' +

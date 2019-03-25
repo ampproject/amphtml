@@ -79,7 +79,7 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
     string: 'WhatsApp',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT]: {
-    string: 'Utvid vinduet for å se denne opplevelsen',
+    fallback: 'Utvid vinduet for å se denne opplevelsen',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
     string: 'Du må aktivere amp-story-eksperimentet for å få tilgang til ' +

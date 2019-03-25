@@ -25,7 +25,7 @@ import {parseJson} from '../../../src/json';
  *   - NOT be reused; to deprecate an ID, comment it out and prefix its key with
  *     the string "DEPRECATED_"
  *
- * Next ID: 39
+ * Next ID: 62
  *
  * @const @enum {string}
  */
@@ -66,6 +66,32 @@ export const LocalizedStringId = {
   AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT: '19',
   AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT: '20',
   AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT: '21',
+
+  // amp-story-auto-ads
+  AMP_STORY_AUTO_ADS_BUTTON_LABEL_APPLY_NOW: '39',
+  AMP_STORY_AUTO_ADS_BUTTON_LABEL_BOOK_NOW: '40',
+  AMP_STORY_AUTO_ADS_BUTTON_LABEL_BUY_TICKETS: '41',
+  AMP_STORY_AUTO_ADS_BUTTON_LABEL_DOWNLOAD: '42',
+  AMP_STORY_AUTO_ADS_BUTTON_LABEL_EXPLORE: '43',
+  AMP_STORY_AUTO_ADS_BUTTON_LABEL_GET_NOW: '44',
+  AMP_STORY_AUTO_ADS_BUTTON_LABEL_INSTALL: '45',
+  AMP_STORY_AUTO_ADS_BUTTON_LABEL_LEARN_MORE: '46',
+  AMP_STORY_AUTO_ADS_BUTTON_LABEL_LISTEN: '47',
+  AMP_STORY_AUTO_ADS_BUTTON_LABEL_MORE: '48',
+  AMP_STORY_AUTO_ADS_BUTTON_LABEL_OPEN_APP: '49',
+  AMP_STORY_AUTO_ADS_BUTTON_LABEL_ORDER_NOW: '50',
+  AMP_STORY_AUTO_ADS_BUTTON_LABEL_PLAY: '51',
+  AMP_STORY_AUTO_ADS_BUTTON_LABEL_READ: '52',
+  AMP_STORY_AUTO_ADS_BUTTON_LABEL_SHOP: '53',
+  AMP_STORY_AUTO_ADS_BUTTON_LABEL_SHOW: '54',
+  AMP_STORY_AUTO_ADS_BUTTON_LABEL_SHOWTIMES: '55',
+  AMP_STORY_AUTO_ADS_BUTTON_LABEL_SIGN_UP: '56',
+  AMP_STORY_AUTO_ADS_BUTTON_LABEL_SUBSCRIBE: '57',
+  AMP_STORY_AUTO_ADS_BUTTON_LABEL_USE_APP: '58',
+  AMP_STORY_AUTO_ADS_BUTTON_LABEL_VIEW: '59',
+  AMP_STORY_AUTO_ADS_BUTTON_LABEL_WATCH: '60',
+  AMP_STORY_AUTO_ADS_BUTTON_LABEL_WATCH_EPISODE: '61',
+
   // DEPRECATED_AMP_STORY_EXPERIMENT_ENABLE_BUTTON_LABEL: '0',
   // DEPRECATED_AMP_STORY_EXPERIMENT_ENABLED_TEXT: '1',
   // DEPRECATED_AMP_STORY_CONSENT_DISMISS_DIALOG_BUTTON_LABEL: '24',
@@ -133,10 +159,10 @@ function findLocalizedString(localizedStringBundles, languageCodes,
 
   languageCodes.some(languageCode => {
     const localizedStringBundle = localizedStringBundles[languageCode];
-    if (localizedStringBundle && localizedStringBundle[localizedStringId] &&
-        localizedStringBundle[localizedStringId].string) {
-      localizedString = localizedStringBundle[localizedStringId].string;
-      return true;
+    if (localizedStringBundle && localizedStringBundle[localizedStringId]) {
+      localizedString = localizedStringBundle[localizedStringId].string ||
+          localizedStringBundle[localizedStringId].fallback;
+      return !!localizedString;
     }
 
     return false;
@@ -176,6 +202,8 @@ export function createPseudoLocale(localizedStringBundle, localizationFn) {
     /** @type {!LocalizedStringId} */ (localizedStringIdAsStr);
     pseudoLocaleStringBundle[localizedStringId].string =
         localizationFn(localizedStringBundle[localizedStringId].string);
+    pseudoLocaleStringBundle[localizedStringId].fallback =
+        localizationFn(localizedStringBundle[localizedStringId].fallback);
   });
 
   return pseudoLocaleStringBundle;

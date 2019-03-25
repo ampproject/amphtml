@@ -180,6 +180,7 @@ const forbiddenTerms = {
       'src/service/action-impl.js',
       'extensions/amp-access/0.1/amp-access.js',
       'extensions/amp-form/0.1/amp-form.js',
+      'extensions/amp-viewer-assistance/0.1/amp-viewer-assistance.js',
     ],
   },
   'installActivityService': {
@@ -394,6 +395,7 @@ const forbiddenTerms = {
       'extensions/amp-access/0.1/amp-access.js',
       'extensions/amp-subscriptions/0.1/amp-subscriptions.js',
       'extensions/amp-experiment/0.1/variant.js',
+      'extensions/amp-experiment/1.0/variant.js',
       'extensions/amp-user-notification/0.1/amp-user-notification.js',
       'extensions/amp-consent/0.1/consent-state-manager.js',
     ],
@@ -416,6 +418,7 @@ const forbiddenTerms = {
       'src/inabox/inabox-viewer.js',
       'src/service/cid-impl.js',
       'src/impression.js',
+      'extensions/amp-viewer-assistance/0.1/amp-viewer-assistance.js',
     ],
   },
   'eval\\(': {
@@ -814,12 +817,6 @@ const forbiddenTermsSrcInclusive = {
       'extensions/amp-bind/0.1/bind-expr-impl.js',
     ],
   },
-  'scopeSelectorForTesting': {
-    message: 'scopeSelector is not intended to be used outside of dom.js',
-    whitelist: [
-      'src/dom.js',
-    ],
-  },
   '[^.]loadPromise': {
     message: 'Most users should use BaseElement…loadPromise.',
     whitelist: [
@@ -916,6 +913,7 @@ const forbiddenTermsSrcInclusive = {
     message: 'use startsWith helper in src/string.js',
     whitelist: [
       'dist.3p/current/integration.js',
+      'build-system/app.js',
     ],
   },
   '\\.indexOf\\(.*===?.*\\.length': 'use endsWith helper in src/string.js',

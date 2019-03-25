@@ -23,15 +23,16 @@ import {
   DoubletapRecognizer,
   PinchRecognizer,
   SwipeXYRecognizer,
+  TapRecognizer,
   TapzoomRecognizer,
 } from '../../../src/gesture-recognizers';
 import {Gestures} from '../../../src/gesture';
 import {Layout} from '../../../src/layout';
 import {bezierCurve} from '../../../src/curve';
+import {closestAncestorElementBySelector, elementByTag} from '../../../src/dom';
 import {continueMotion} from '../../../src/motion';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, userAssert} from '../../../src/log';
-import {elementByTag} from '../../../src/dom';
 import {
   expandLayoutRect,
   layoutRectFromDomRect,
@@ -145,6 +146,14 @@ export class AmpImageViewer extends AMP.BaseElement {
 
   /** @override */
   onMeasureChanged() {
+    // TODO(sparhami) #19259 Tracks a more generic way to do this. Remove once
+    // we have something better.
+    const isScaled = closestAncestorElementBySelector(
+        this.element, '[i-amphtml-scale-animation]');
+    if (isScaled) {
+      return;
+    }
+
     if (this.loadPromise_) {
       this.loadPromise_.then(() => this.resetImageDimensions_());
     }
@@ -155,22 +164,21 @@ export class AmpImageViewer extends AMP.BaseElement {
     if (this.loadPromise_) {
       return this.loadPromise_;
     }
-    const ampImg = dev().assertElement(this.sourceAmpImage_);
-    const isLaidOut = ampImg.hasAttribute('i-amphtml-layout') ||
-      ampImg.classList.contains('i-amphtml-layout');
-    const laidOutPromise = isLaidOut
-      ? Promise.resolve()
-      : ampImg.signals().whenSignal(CommonSignals.LOAD_END);
-
-    if (!isLaidOut) {
-      this.scheduleLayout(ampImg);
+    // TODO(sparhami) #19259 Tracks a more generic way to do this. Remove once
+    // we have something better.
+    const isScaled = closestAncestorElementBySelector(
+        this.element, '[i-amphtml-scale-animation]');
+    if (isScaled) {
+      return Promise.resolve();
     }
+    const ampImg = dev().assertElement(this.sourceAmpImage_);
+    this.scheduleLayout(ampImg);
 
-    this.loadPromise_ = laidOutPromise
+    return ampImg.signals()
+        .whenSignal(CommonSignals.LOAD_END)
         .then(() => this.init_())
         .then(() => this.resetImageDimensions_())
         .then(() => this.setupGestures_());
-    return this.loadPromise_;
   }
 
   /** @override */
@@ -190,9 +198,8 @@ export class AmpImageViewer extends AMP.BaseElement {
       return;
     }
     this.loadPromise_.then(() => {
-      if (!this.gestures_) {
-        this.setupGestures_();
-      }
+      this.resetImageDimensions_();
+      this.setupGestures_();
     });
   }
 
@@ -415,6 +422,13 @@ export class AmpImageViewer extends AMP.BaseElement {
       });
     });
 
+    // Propagate click on tap, since the double tap gesture would prevent it
+    // from occurring otherwise. This allows interested parties (e.g. lightbox
+    // gallery) to react to clicks, though there will be a delay.
+    this.gestures_.onGesture(TapRecognizer, gesture => {
+      this.propagateClickEvent_(gesture.data.target);
+    });
+
     this.gestures_.onGesture(TapzoomRecognizer, gesture => {
       const {data} = gesture;
       this.onTapZoom_(data.centerClientX, data.centerClientY,
@@ -465,11 +479,9 @@ export class AmpImageViewer extends AMP.BaseElement {
           }
         });
 
-    this.unlistenOnClickHaltMotion_ = this.gestures_.onPointerDown(event => {
+    this.unlistenOnClickHaltMotion_ = this.gestures_.onPointerDown(() => {
       if (this.motion_) {
         this.motion_.halt();
-      } else {
-        this.propagateClickEvent_(event.target);
       }
     });
   }

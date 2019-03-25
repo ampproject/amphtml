@@ -327,6 +327,15 @@ export class Services {
   }
 
   /**
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @return {!Promise<!./service/resources-impl.Resources>}
+   */
+  static resourcesPromiseForDoc(elementOrAmpDoc) {
+    return /** @type {!Promise<!./service/resources-impl.Resources>} */ (
+      getServicePromiseForDoc(elementOrAmpDoc, 'resources'));
+  }
+
+  /**
    * @param {!Window} win
    * @return {?Promise<?{incomingFragment: string, outgoingFragment: string}>}
    */
@@ -576,6 +585,17 @@ export class Services {
   static videoManagerForDoc(elementOrAmpDoc) {
     return (/** @type {!./service/video-manager-impl.VideoManager} */ (
       getServiceForDoc(elementOrAmpDoc, 'video-manager')));
+  }
+
+  /**
+   * @param {!Element|!ShadowRoot} element
+   * @return {!Promise<?../extensions/amp-viewer-assistance/0.1/amp-viewer-assistance.AmpViewerAssistance>}
+   */
+  static viewerAssistanceForDocOrNull(element) {
+    return (
+    /** @type {!Promise<?../extensions/amp-viewer-assistance/0.1/amp-viewer-assistance.AmpViewerAssistance>} */
+      (getElementServiceIfAvailableForDoc(element, 'amp-viewer-assistance',
+          'amp-viewer-assistance')));
   }
 
   /**

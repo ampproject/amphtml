@@ -43,6 +43,7 @@ function main() {
 
   if (!isTravisPullRequestBuild()) {
     downloadBuildOutput(FILENAME);
+    timedExecOrDie('gulp update-packages');
     process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
     timedExecOrDie('gulp visual-diff --nobuild --master');
   } else {
@@ -55,6 +56,7 @@ function main() {
         buildTargets.has('FLAG_CONFIG')) {
 
       downloadBuildOutput(FILENAME);
+      timedExecOrDie('gulp update-packages');
       timedExecOrDie('gulp visual-diff --nobuild');
     } else {
       timedExecOrDie('gulp visual-diff --nobuild --empty');
@@ -67,7 +69,6 @@ function main() {
   }
 
   stopTimer(FILENAME, FILENAME, startTime);
-  return 0;
 }
 
-process.exit(main());
+main();

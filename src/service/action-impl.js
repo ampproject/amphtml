@@ -54,7 +54,7 @@ const DEFAULT_DEBOUNCE_WAIT = 300; // ms
 const DEFAULT_THROTTLE_INTERVAL = 100; // ms
 
 /** @const {!Object<string,!Array<string>>} */
-const ELEMENTS_ACTIONS_MAP_ = {
+const NON_AMP_ELEMENTS_ACTIONS_ = {
   'form': ['submit', 'clear'],
 };
 
@@ -254,6 +254,7 @@ export class ActionService {
      * @const @private {!Object<string, {handler: ActionHandlerDef, minTrust: ActionTrust}>}
      */
     this.globalMethodHandlers_ = map();
+
     // Add core events.
     this.addEvent('tap');
     this.addEvent('submit');
@@ -393,39 +394,37 @@ export class ActionService {
   }
 
   /**
-   * Installs action handler for the specified element.
+   * Installs action handler for the specified element. The action handler is
+   * responsible for checking invocation trust.
+   *
+   * For AMP elements, use base-element.registerAction() instead.
+   *
    * @param {!Element} target
    * @param {ActionHandlerDef} handler
-   * @param {ActionTrust} minTrust
    */
-  installActionHandler(target, handler, minTrust = ActionTrust.HIGH) {
+  installActionHandler(target, handler) {
     // TODO(dvoytenko, #7063): switch back to `target.id` with form proxy.
     const targetId = target.getAttribute('id') || '';
-    const debugId = target.tagName + '#' + targetId;
-    devAssert((targetId && targetId.substring(0, 4) == 'amp-') ||
-        target.tagName.toLowerCase() in ELEMENTS_ACTIONS_MAP_,
-    'AMP element or a whitelisted target element is expected: %s', debugId);
+
+    devAssert(isAmpTagName(targetId) ||
+        target.tagName.toLowerCase() in NON_AMP_ELEMENTS_ACTIONS_,
+    'AMP or special element expected: %s', target.tagName + '#' + targetId);
 
     if (target[ACTION_HANDLER_]) {
       dev().error(TAG_, `Action handler already installed for ${target}`);
       return;
     }
+    target[ACTION_HANDLER_] = handler;
 
     /** @const {Array<!ActionInvocation>} */
-    const currentQueue = target[ACTION_QUEUE_];
-
-    target[ACTION_HANDLER_] = {handler, minTrust};
-
-    // Dequeue the current queue.
-    if (isArray(currentQueue)) {
+    const queuedInvocations = target[ACTION_QUEUE_];
+    if (isArray(queuedInvocations)) {
+      // Invoke and clear all queued invocations now handler is installed.
       Services.timerFor(toWin(target.ownerDocument.defaultView)).delay(() => {
         // TODO(dvoytenko, #1260): dedupe actions.
-        currentQueue.forEach(invocation => {
+        queuedInvocations.forEach(invocation => {
           try {
-            if (invocation.satisfiesTrust(
-                /** @type {ActionTrust} */ (minTrust))) {
-              handler(invocation);
-            }
+            handler(invocation);
           } catch (e) {
             dev().error(TAG_, 'Action execution failed:', invocation, e);
           }
@@ -552,7 +551,6 @@ export class ActionService {
     }
   }
 
-
   /**
    * @param {!ActionInvocation} invocation
    * @return {?Promise}
@@ -563,7 +561,7 @@ export class ActionService {
 
     // Check that this action is whitelisted (if a whitelist is set).
     if (this.whitelist_) {
-      if (!isActionWhitelisted_(invocation, this.whitelist_)) {
+      if (!isActionWhitelisted(invocation, this.whitelist_)) {
         this.error_(`"${tagOrTarget}.${method}" is not whitelisted ${
           JSON.stringify(this.whitelist_)}.`);
         return null;
@@ -587,7 +585,7 @@ export class ActionService {
 
     // Handle element-specific actions.
     const lowerTagName = node.tagName.toLowerCase();
-    if (lowerTagName.substring(0, 4) == 'amp-') {
+    if (isAmpTagName(lowerTagName)) {
       if (node.enqueAction) {
         node.enqueAction(invocation);
       } else {
@@ -596,18 +594,15 @@ export class ActionService {
       return null;
     }
 
-    // Special elements with AMP ID or known supported actions.
-    const supportedActions = ELEMENTS_ACTIONS_MAP_[lowerTagName];
+    // Special non-AMP elements with AMP ID or known supported actions.
+    const nonAmpActions = NON_AMP_ELEMENTS_ACTIONS_[lowerTagName];
     // TODO(dvoytenko, #7063): switch back to `target.id` with form proxy.
     const targetId = node.getAttribute('id') || '';
-    if ((targetId && targetId.substring(0, 4) == 'amp-') ||
-        (supportedActions && supportedActions.indexOf(method) > -1)) {
-      const holder = node[ACTION_HANDLER_];
-      if (holder) {
-        const {handler, minTrust} = holder;
-        if (invocation.satisfiesTrust(minTrust)) {
-          handler(invocation);
-        }
+    if (isAmpTagName(targetId) ||
+        (nonAmpActions && nonAmpActions.indexOf(method) > -1)) {
+      const handler = node[ACTION_HANDLER_];
+      if (handler) {
+        handler(invocation);
       } else {
         node[ACTION_QUEUE_] = node[ACTION_QUEUE_] || [];
         node[ACTION_QUEUE_].push(invocation);
@@ -767,6 +762,15 @@ export class ActionService {
 }
 
 /**
+ * @param {string} lowercaseTagName
+ * @return {boolean}
+ * @private
+ */
+function isAmpTagName(lowercaseTagName) {
+  return lowercaseTagName.substring(0, 4) === 'amp-';
+}
+
+/**
  * Returns `true` if the given action invocation is whitelisted in the given
  * whitelist. Default actions' alias, 'activate', are automatically
  * whitelisted if their corresponding registered alias is whitelisted.
@@ -775,7 +779,7 @@ export class ActionService {
  * @return {boolean}
  * @private
  */
-function isActionWhitelisted_(invocation, whitelist) {
+function isActionWhitelisted(invocation, whitelist) {
   let {method} = invocation;
   const {node, tagOrTarget} = invocation;
   // Use alias if default action is invoked.
@@ -811,9 +815,6 @@ export class DeferredEvent {
   constructor(event) {
     /** @type {?Object} */
     this.detail = null;
-
-    /** @type {?Object} */
-    this.additionalViewportData;
 
     cloneWithoutFunctions(event, this);
   }

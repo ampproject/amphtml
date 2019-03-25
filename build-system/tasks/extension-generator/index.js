@@ -72,6 +72,28 @@ tags: {  # <${name}>
 
 function getMarkdownExtensionFile(name) {
   return `<!--
+  1. Change "category" below to one of:
+       ads-analytics
+       dynamic-content
+       layout
+       media
+       presentation
+       social
+
+  2. Remove any of the "formats" that don't apply.
+     You can also add the "ads" and "stories" formats if they apply.
+
+  3. And remove this comment! (no empty lines before "---")
+-->
+---
+$category: presentation
+formats:
+  - websites
+  - email
+teaser:
+  text: FILL THIS IN.
+---
+<!--
 Copyright ${year} The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -119,6 +141,13 @@ FILL THIS IN. What does this extension do?
 ## Attributes
 
 FILL THIS IN. Does this extension allow for properties to configure?
+
+<table>
+  <tr>
+    <td width="40%"><strong>data-my-attribute</strong></td>
+    <td>FILL THIS IN. This table <strong>must</strong> be written in HTML.</td>
+  </tr>
+</table>
 
 ## Validation
 See [${name} rules](https://github.com/ampproject/amphtml/blob/master/extensions/${name}/validator-${name}.protoascii) in the AMP validator specification.
@@ -214,7 +243,9 @@ export class ${className} extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('${name}', ${className});
+AMP.extension('${name}', '0.1', AMP => {
+  AMP.registerElement('${name}', ${className});
+});
 `;
 }
 

@@ -66,6 +66,31 @@ describes.fakeWin('localization', {}, env => {
           .to.equal('test string content');
     });
 
+    it('should utilize fallback if string is missing', () => {
+      const localizationService = new LocalizationService(env.win);
+      localizationService.registerLocalizedStringBundle('en', {
+        'test_string_id': {
+          fallback: 'test fallback content',
+        },
+      });
+
+      expect(localizationService.getLocalizedString('test_string_id'))
+          .to.equal('test fallback content');
+    });
+
+    it('should not utilize fallback if string is present', () => {
+      const localizationService = new LocalizationService(env.win);
+      localizationService.registerLocalizedStringBundle('en', {
+        'test_string_id': {
+          string: 'test string content',
+          fallback: 'test fallback content',
+        },
+      });
+
+      expect(localizationService.getLocalizedString('test_string_id'))
+          .to.equal('test string content');
+    });
+
     it('should have language fallbacks', () => {
       expect(getLanguageCodesFromString('de-hi-1')).to
           .deep.equal(['de-hi-1', 'de-hi', 'de', 'default']);

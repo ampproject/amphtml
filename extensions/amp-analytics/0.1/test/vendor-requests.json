@@ -152,7 +152,8 @@
     "awConversion": "https://www.googleadservices.com/pagead/conversion/!conversionId/?cv=amp3&label=!conversionLabel&random=_random_&url=_source_url_&ref=_document_referrer_&fst=_page_view_id_&num=_counter_&fmt=3&async=1&u_h=_screen_height_&u_w=_screen_width_&u_ah=_available_screen_height_&u_aw=_available_screen_width_&u_cd=_screen_color_depth_&u_tz=_timezone_&tiba=_title_&guid=ON&script=0",
     "awRemarketing": "https://googleads.g.doubleclick.net/pagead/viewthroughconversion/!conversionId/?cv=amp3&label=!conversionLabel&random=_random_&url=_source_url_&ref=_document_referrer_&fst=_page_view_id_&num=_counter_&fmt=3&async=1&u_h=_screen_height_&u_w=_screen_width_&u_ah=_available_screen_height_&u_aw=_available_screen_width_&u_cd=_screen_color_depth_&u_tz=_timezone_&tiba=_title_&guid=ON&script=0",
     "flBase": "https://ad.doubleclick.net/activity;src=!flSrc;type=!flType;cat=!flCat",
-    "dnsBase": "https://ad.doubleclick.net/ddm/clk/",
+    "flDynamicBase": "https://!flSrc.fls.doubleclick.net/activityi;src=!flSrc;type=!flType;cat=!flCat",
+    "dnsBase": "https://ad.doubleclick.net/ddm/clk/"
   },
   "ibeatanalytics": {
     "host": "https://ibeat.indiatimes.com",
@@ -345,6 +346,12 @@
     "base": "?api.api_key=!writeKey&prop._platform=amp&prop._device_id=_client_id_&prop.locale=_browser_language_&prop.path=_canonical_path_&prop.url=_canonical_url_&prop.color_depth=_screen_color_depth_&prop._referrer=_document_referrer_&prop.title=_title_&prop.timezone=_timezone_&prop._time=_timestamp_&prop.resolution=_screen_width_ × _screen_height_",
     "pageview": "https://!apiEndpoint/event/pixel?api.api_key=!writeKey&prop._platform=amp&prop._device_id=_client_id_&prop.locale=_browser_language_&prop.path=_canonical_path_&prop.url=_canonical_url_&prop.color_depth=_screen_color_depth_&prop._referrer=_document_referrer_&prop.title=_title_&prop.timezone=_timezone_&prop._time=_timestamp_&prop.resolution=_screen_width_ × _screen_height_&collection=!pageViewName",
     "custom": "https://!apiEndpoint/event/pixel?api.api_key=!writeKey&prop._platform=amp&prop._device_id=_client_id_&prop.locale=_browser_language_&prop.path=_canonical_path_&prop.url=_canonical_url_&prop.color_depth=_screen_color_depth_&prop._referrer=_document_referrer_&prop.title=_title_&prop.timezone=_timezone_&prop._time=_timestamp_&prop.resolution=_screen_width_ × _screen_height_&collection=!collection"
+  },
+  "reppublika": {
+	  "host": "https://t5.mindtake.com",
+	  "basePrefix": "/tag/cid/",
+	  "baseSuffix": "Service=!service&Category=!category&Url=_source_url_&Device=!device&uid=_random_",
+	  "pageview": "https://t5.mindtake.com/tag/cid/!code/track.gif?Service=!service&Category=!category&Url=_source_url_&Device=!device&uid=_random_"
   },
   "retargetly": {
     "host": "https://api.retargetly.com",

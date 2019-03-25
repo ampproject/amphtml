@@ -86,7 +86,7 @@ exports.rules = [
       'src/sanitizer.js->third_party/caja/html-sanitizer.js',
       'extensions/amp-viz-vega/**->third_party/vega/vega.js',
       'extensions/amp-viz-vega/**->third_party/d3/d3.js',
-      'src/dom.js->third_party/css-escape/css-escape.js',
+      'src/css.js->third_party/css-escape/css-escape.js',
       'src/shadow-embed.js->third_party/webcomponentsjs/ShadowCSS.js',
       'third_party/timeagojs/timeago.js->' +
           'third_party/timeagojs/timeago-locales.js',
@@ -165,6 +165,7 @@ exports.rules = [
       'ads/google/a4a/**->src/experiments.js',
       'ads/google/a4a/**->src/services.js',
       'ads/google/a4a/utils.js->src/service/variable-source.js',
+      'ads/google/a4a/utils.js->src/layout.js',
       // alp handler needs to depend on src files
       'ads/alp/handler.js->src/dom.js',
       'ads/alp/handler.js->src/config.js',
@@ -259,6 +260,10 @@ exports.rules = [
       'extensions/amp-subscriptions-google/0.1/amp-subscriptions-google.js->extensions/amp-subscriptions/0.1/doc-impl.js',
       'extensions/amp-subscriptions-google/0.1/amp-subscriptions-google.js->extensions/amp-subscriptions/0.1/entitlement.js',
       'extensions/amp-subscriptions-google/0.1/amp-subscriptions-google.js->extensions/amp-subscriptions/0.1/score-factors.js',
+
+      // amp-smartlinks depends on amp-skimlinks/link-rewriter
+      'extensions/amp-smartlinks/0.1/amp-smartlinks.js->extensions/amp-skimlinks/0.1/link-rewriter/link-rewriter-manager.js',
+      'extensions/amp-smartlinks/0.1/linkmate.js->extensions/amp-skimlinks/0.1/link-rewriter/two-steps-response.js',
     ],
   },
   {

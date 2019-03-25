@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.44 */
+/** Version: 0.1.22.47 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -332,6 +332,25 @@ class PageConfig {
  * limitations under the License.
  */
 
+ /**
+  * Debug logger, only log message if #swg.log=1
+  * @param {...*} var_args [decription]
+  */
+function debugLog(var_args) {
+  if (/swg.debug=1/.test(self.location.hash)) {
+    const logArgs = Array.prototype.slice.call(arguments, 0);
+    logArgs.unshift('[Subscriptions]');
+    log.apply(log, logArgs);
+  }
+}
+
+/**
+ * @param  {...*} var_args [description]
+ */
+function log(var_args) {
+  console.log.apply(console, arguments);
+}
+
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -507,6 +526,21 @@ function tryParseJson(json, opt_onFailed) {
 
 const ALREADY_SEEN = '__SWG-SEEN__';
 
+const ALLOWED_TYPES = [
+  'CreativeWork',
+  'Article',
+  'NewsArticle',
+  'Blog',
+  'Comment',
+  'Course',
+  'HowTo',
+  'Message',
+  'Review',
+  'WebPage',
+];
+
+// RegExp for quickly scanning LD+JSON for allowed types
+const RE_ALLOWED_TYPES = new RegExp(ALLOWED_TYPES.join('|'));
 
 /**
  */
@@ -569,10 +603,65 @@ class PageConfigResolver {
           new Error('No config could be discovered in the page')));
       this.configResolver_ = null;
     }
+    debugLog(config);
     return config;
   }
 }
 
+class TypeChecker {
+  constructor() {
+  }
+
+  /**
+   * Check value from json
+   * @param {?Array|string} value
+   * @param {Array<string>} expectedTypes
+   * @return {boolean}
+   */
+  checkValue(value, expectedTypes) {
+    if (!value) {
+      return false;
+    }
+    return this.checkArray(this.toArray_(value), expectedTypes);
+  }
+
+  /**
+   * Checks space delimited list of types
+   * @param {?string} itemtype
+   * @param {Array<string>} expectedTypes
+   * @return {boolean}
+   */
+  checkString(itemtype, expectedTypes) {
+    if (!itemtype) {
+      return false;
+    }
+    return this.checkArray(itemtype.split(/\s+/), expectedTypes);
+  }
+
+  /**
+   * @param {Array<?string>} typeArray
+   * @param {Array<string>} expectedTypes
+   * @return {boolean}
+   */
+  checkArray(typeArray, expectedTypes) {
+    let found = false;
+    typeArray.forEach(candidateType => {
+      found = found || expectedTypes.includes(
+          candidateType.replace(/^http:\/\/schema.org\//i,'')
+      );
+    });
+    return found;
+  }
+
+  /*
+   * @param {?Array|string} value
+   * @return {Array}
+   * @private
+   */
+  toArray_(value) {
+    return isArray(value) ? value : [value];
+  }
+}
 
 class MetaParser {
   /**
@@ -617,6 +706,8 @@ class JsonLdParser {
   constructor(doc) {
     /** @private @const {!Doc} */
     this.doc_ = doc;
+    /** @private @const @function */
+    this.checkType_ = new TypeChecker();
   }
 
   /**
@@ -641,7 +732,7 @@ class JsonLdParser {
         continue;
       }
       element[ALREADY_SEEN] = true;
-      if (element.textContent.indexOf('NewsArticle') == -1) {
+      if (!RE_ALLOWED_TYPES.test(element.textContent)) {
         continue;
       }
       const possibleConfig = this.tryExtractConfig_(element);
@@ -662,8 +753,8 @@ class JsonLdParser {
       return null;
     }
 
-    // Must be a NewsArticle.
-    if (!this.checkType_(json, 'NewsArticle')) {
+    // Must be an ALLOWED_TYPE
+    if (!this.checkType_.checkValue(json['@type'], ALLOWED_TYPES)) {
       return null;
     }
 
@@ -720,7 +811,7 @@ class JsonLdParser {
    */
   discoverProductId_(json) {
     // Must have type `Product`.
-    if (!this.checkType_(json, 'Product')) {
+    if (!this.checkType_.checkValue(json['@type'], ['Product'])) {
       return null;
     }
     return /** @type {?string} */ (this.singleValue_(json, 'productID'));
@@ -749,20 +840,6 @@ class JsonLdParser {
     const value = valueArray && valueArray[0];
     return (value == null || value === '') ? null : value;
   }
-
-  /**
-   * @param {!Object} json
-   * @param {string} expectedType
-   * @return {boolean}
-   */
-  checkType_(json, expectedType) {
-    const typeArray = this.valueArray_(json, '@type');
-    if (!typeArray) {
-      return false;
-    }
-    return (typeArray.includes(expectedType) ||
-        typeArray.includes('http://schema.org/' + expectedType));
-  }
 }
 
 class MicrodataParser {
@@ -776,11 +853,13 @@ class MicrodataParser {
     this.access_ = null;
     /** @private {?string} */
     this.productId_ = null;
+    /** @private @const @function */
+    this.checkType_ = new TypeChecker();
   }
 
   /**
    * Returns false if access is restricted, otherwise true
-   * @param {!Element} root An element that is an item of type 'NewsArticle'
+   * @param {!Element} root An element that is an item of type in ALLOWED_TYPES list
    * @return {?boolean} locked access
    * @private
    */
@@ -809,7 +888,7 @@ class MicrodataParser {
 
   /**
    * Verifies if an element is valid based on the following
-   * - child of an item of type 'NewsArticle'
+   * - child of an item of one the the ALLOWED_TYPES
    * - not a child of an item of any other type
    * - not seen before, marked using the alreadySeen tag
    * @param {?Element} current the element to be verified
@@ -822,14 +901,11 @@ class MicrodataParser {
     for (let node = current;
         node && !node[alreadySeen]; node = node.parentNode) {
       node[alreadySeen] = true;
-      if (node.hasAttribute('itemscope')) {
+      // document nodes don't have hasAttribute
+      if (node.hasAttribute && node.hasAttribute('itemscope')) {
         /**{?string} */
         const type = node.getAttribute('itemtype');
-        if (type.indexOf('http://schema.org/NewsArticle') >= 0) {
-          return true;
-        } else {
-          return false;
-        }
+        return this.checkType_.checkString(type, ALLOWED_TYPES);
       }
     }
     return false;
@@ -837,10 +913,10 @@ class MicrodataParser {
 
   /**
    * Obtains the product ID that meets the requirements
-   * - child of an item of type 'NewsArticle'
+   * - child of an item of one of ALLOWED_TYPES
    * - Not a child of an item of type 'Section'
    * - child of an item of type 'productID'
-   * @param {!Element} root An element that is an item of type 'NewsArticle'
+   * @param {!Element} root An element that is an item of an ALLOWED_TYPES
    * @return {?string} product ID, if found
    * @private
    */
@@ -890,8 +966,15 @@ class MicrodataParser {
     if (config) {
       return config;
     }
-    const nodeList = this.doc_.getRootNode().querySelectorAll(
-        '[itemscope][itemtype*="http://schema.org/NewsArticle"]');
+
+    // Grab all the nodes with an itemtype and filter for our allowed types
+    const nodeList = Array.prototype.slice.call(
+        this.doc_.getRootNode().querySelectorAll('[itemscope][itemtype]')
+    ).filter(
+        node => this.checkType_.checkString(
+            node.getAttribute('itemtype'), ALLOWED_TYPES)
+    );
+
     for (let i = 0; nodeList[i] && config == null; i++) {
       const element = nodeList[i];
       if (this.access_ == null) {

@@ -285,7 +285,7 @@ describe.configure().ifChrome().run('Bind', function() {
 
       history = bind.historyForTesting();
 
-      clock = lolex.install({target: win});
+      clock = lolex.install({target: win, toFake: ['Date', 'setTimeout']});
     });
 
     afterEach(() => {
@@ -294,10 +294,28 @@ describe.configure().ifChrome().run('Bind', function() {
 
     it('should send "bindReady" to viewer on init', () => {
       expect(viewer.sendMessage).to.not.be.called;
+
       return onBindReady(env, bind).then(() => {
         expect(viewer.sendMessage).to.be.calledOnce;
-        expect(viewer.sendMessage)
-            .to.be.calledWithExactly('bindReady', undefined);
+        expect(viewer.sendMessage).to.be.calledWith('bindReady');
+      });
+    });
+
+    it('should not send "bindReady" until all <amp-state> are built', () => {
+      const element = createElement(env, container, '', 'amp-state', true);
+      let buildAmpState;
+      const builtPromise = new Promise(resolve => {
+        buildAmpState = resolve;
+      });
+      element.whenBuilt = () => builtPromise;
+
+      return onBindReady(env, bind).then(() => {
+        expect(viewer.sendMessage).to.not.be.called;
+        buildAmpState();
+        return element.whenBuilt();
+      }).then(() => {
+        expect(viewer.sendMessage).to.be.calledOnce;
+        expect(viewer.sendMessage).to.be.calledWith('bindReady');
       });
     });
 
@@ -747,7 +765,9 @@ describe.configure().ifChrome().run('Bind', function() {
 
     it('should ignore <amp-state> updates if specified in setState()', () => {
       const element = createElement(env, container, '[src]="foo"', 'amp-state');
+      element.whenBuilt = () => Promise.resolve();
       expect(element.getAttribute('src')).to.be.null;
+
       const promise = onBindReadyAndSetState(env, bind,
           {foo: '/foo'}, /* opt_isAmpStateMutation */ true);
       return promise.then(() => {
@@ -872,8 +892,9 @@ describe.configure().ifChrome().run('Bind', function() {
     });
 
     it('should update premutate keys that are overridable', () => {
-      bind.makeStateKeyOverridable('foo');
-      bind.makeStateKeyOverridable('bar');
+      bind.addOverridableKey('foo');
+      bind.addOverridableKey('bar');
+
       const foo = createElement(env, container, '[text]="foo"');
       const bar = createElement(env, container, '[text]="bar"');
       const baz = createElement(env, container, '[text]="baz"');

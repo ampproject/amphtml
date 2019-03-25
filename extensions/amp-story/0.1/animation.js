@@ -29,12 +29,12 @@ import {
 } from '../../amp-animation/0.1/web-animation-types';
 import {assertDoesNotContainDisplay, setStyles} from '../../../src/style';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
+import {escapeCssSelectorIdent} from '../../../src/css';
+import {map, omit} from '../../../src/utils/object';
 import {
-  escapeCssSelectorIdent,
   scopedQuerySelector,
   scopedQuerySelectorAll,
 } from '../../../src/dom';
-import {map, omit} from '../../../src/utils/object';
 import {timeStrToMillis, unscaledClientRect} from './utils';
 
 /** const {string} */

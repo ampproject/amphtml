@@ -85,7 +85,6 @@ import {
   childElements,
   closest,
   createElementWithAttributes,
-  escapeCssSelectorIdent,
   isRTL,
   scopedQuerySelectorAll,
 } from '../../../src/dom';
@@ -99,6 +98,7 @@ import {
 import {debounce} from '../../../src/utils/rate-limit';
 import {dev, devAssert, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {escapeCssSelectorIdent} from '../../../src/css';
 import {findIndex} from '../../../src/utils/array';
 import {getConsentPolicyState} from '../../../src/consent';
 import {getDetail} from '../../../src/event-helper';
@@ -497,7 +497,7 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   updateViewportSizeStyles_() {
-    if (!this.activePage_) {
+    if (!this.activePage_ || !this.isStandalone_()) {
       return;
     }
 
@@ -509,7 +509,7 @@ export class AmpStory extends AMP.BaseElement {
         state.vmax = Math.max(state.vh, state.vw);
       },
       mutate: state => {
-        this.element.setAttribute('style',
+        this.win.document.documentElement.setAttribute('style',
             `--i-amphtml-story-vh: ${px(state.vh)};` +
             `--i-amphtml-story-vw: ${px(state.vw)};` +
             `--i-amphtml-story-vmin: ${px(state.vmin)};` +
@@ -695,8 +695,8 @@ export class AmpStory extends AMP.BaseElement {
         }
         return;
       }
-      if (gesture.event && (gesture.event.defaultPrevented ||
-          !this.isSwipeLargeEnoughForHint_(deltaX, deltaY))) {
+      if ((gesture.event && gesture.event.defaultPrevented) ||
+          !this.isSwipeLargeEnoughForHint_(deltaX, deltaY)) {
         return;
       }
 
@@ -1526,7 +1526,8 @@ export class AmpStory extends AMP.BaseElement {
           this.element.classList.add('i-amphtml-story-desktop-panels');
           this.element.classList.remove('i-amphtml-story-desktop-fullbleed');
         });
-        if (!this.background_) {
+        if (!this.background_ &&
+            isExperimentOn(this.win, 'amp-story-desktop-background')) {
           this.background_ = new AmpStoryBackground(this.win, this.element);
           this.background_.attach();
         }
@@ -1632,6 +1633,7 @@ export class AmpStory extends AMP.BaseElement {
             /* source */ null, /* caller */ null, /* event */ null,
             ActionTrust.HIGH);
       } else {
+        this.closeOpacityMask_();
         this.sidebarObserver_.disconnect();
       }
     } else if (this.sidebar_ && sidebarState) {

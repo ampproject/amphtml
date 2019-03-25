@@ -16,7 +16,7 @@
 'use strict';
 
 const app = require('express').Router();
-const enableCors = require('./amp-cors');
+const cors = require('./amp-cors');
 const minimist = require('minimist');
 const argv = minimist(
     process.argv.slice(2), {boolean: ['strictBabelTransform']});
@@ -108,7 +108,7 @@ app.use(
     '/request-bank/:bid/deposit/:id/',
     upload.array(),
     (req, res) => {
-      enableCors(req, res);
+      cors.enableCors(req, res);
       if (!bank[req.params.bid]) {
         bank[req.params.bid] = {};
       }
@@ -128,7 +128,7 @@ app.use(
  * The same request cannot be withdrawn twice at the same time.
  */
 app.use('/request-bank/:bid/withdraw/:id/', (req, res) => {
-  enableCors(req, res);
+  cors.enableCors(req, res);
   if (!bank[req.params.bid]) {
     bank[req.params.bid] = {};
   }
@@ -220,7 +220,6 @@ app.get('/a4a/:bid', (req, res) => {
     body,
     css: 'body { background-color: #f4f4f4; }',
     extensions: ['amp-analytics'],
-    mode: 'cdn',
   });
   res.send(doc);
 });

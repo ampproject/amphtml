@@ -27,7 +27,7 @@ import {Services} from '../../../src/services';
 import {assertAbsoluteHttpOrHttpsUrl, assertHttpsUrl} from '../../../src/url';
 import {
   childElementByTag,
-  closestAncestorElementByTag,
+  closestAncestorElementBySelector,
   isJsonScriptTag,
 } from '../../../src/dom';
 import {computedStyle, setImportantStyles} from '../../../src/style';
@@ -201,8 +201,9 @@ export class AmpStoryConsent extends AMP.BaseElement {
     this.assertAndParseConfig_();
 
     const storyEl = dev().assertElement(
-        closestAncestorElementByTag(this.element, 'AMP-STORY'));
-    const consentEl = closestAncestorElementByTag(this.element, 'AMP-CONSENT');
+        closestAncestorElementBySelector(this.element, 'AMP-STORY'));
+    const consentEl = closestAncestorElementBySelector(this.element,
+        'AMP-CONSENT');
     const consentId = consentEl.id;
 
     this.storeConsentId_(consentId);

@@ -189,7 +189,6 @@ The `<amp-list>` element exposes a `refresh` action that other elements can refe
 ```
 
 ### Dynamic Resizing
-##### Experimental: amp-list-resizable-children
 In several cases, we may need the `<amp-list>` to resize on user interaction. For example, when the `<amp-list>` contains an amp-accordion that a user may tap on, when the contents of the `<amp-list>` change size due to bound CSS classes, or when the number of items inside an `<amp-list>` changes due to a bound `[src]` attribute. The `changeToLayoutContainer` action handles this by changing the amp list to `layout="CONTAINER"` when triggering this action. See the following example:
 
 ```html
@@ -202,8 +201,6 @@ In several cases, we may need the `<amp-list>` to resize on user interaction. Fo
     </template>
   </amp-list>
 ```
-
-This action is experimentally available under `amp-list-resizable-children`.
 
 ## Attributes
 
@@ -287,7 +284,7 @@ We recommend using `binding="no"` or `binding="refresh"` for faster performance.
 If `binding` attribute is not provided, default is `always`.
 
 ## Experimental: Load More and Infinite Scroll (amp-list-load-more)
-We've introduced the `amp-list-load-more` experiment as an implementation for pagination and infinite scroll in `<amp-list>`. You can enable this feature by turning on the 'amp-list-load-more' experiment on the [experiments page](https://cdn.ampproject.org/experiments.html) and adding the `load-more` attribute to `<amp-list>`. This is an experimental feature, and final APIs may change.
+We've introduced the `amp-list-load-more` experiment as an implementation for pagination and infinite scroll in `<amp-list>`. You can enable this feature by turning on the 'amp-list-load-more' experiment on the [experiments page](https://cdn.ampproject.org/experiments.html) and adding the `load-more` attribute to `<amp-list>`. This is a feature currently in origin trial, and final APIs may change.
 
 #### Sample Usage
 
@@ -299,6 +296,8 @@ We've introduced the `amp-list-load-more` experiment as an implementation for pa
 </amp-list>
 
 ```
+
+For working examples, please see [test/manual/amp-list/infinite-scroll-1.amp.html](../../test/manual/amp-list/infinite-scroll-1.amp.html) and [test/manual/amp-list/infinite-scroll-2.amp.html](../../test/manual/amp-list/infinite-scroll-1.amp.html).
 
 ### Attributes
 #### load-more (mandatory)
@@ -364,6 +363,20 @@ A `<amp-list-load-more>` element containing the `load-more-failed` attribute tha
   ...
   <amp-list-load-more load-more-failed>
     <button>Unable to Load More</button>
+  </amp-list-load-more>
+</amp-list>
+```
+
+In the above example, the entire `load-more-failed` element is clickable. However, a common pattern for this element is a general unclickable "loading failed" element that contains a clickable "reload" button. To account for this, you can have a generally unclickable element with a button containing the `load-more-clickable` element. For example:
+
+```html
+<amp-list load-more="auto" src="https://www.load.more.example.com/" width="200" height="500">
+  ...
+  <amp-list-load-more load-more-failed>
+    <div>
+      Here is some unclickable text saying sorry loading failed.
+    </div>
+    <button load-more-clickable>Click me to reload!</button>
   </amp-list-load-more>
 </amp-list>
 ```

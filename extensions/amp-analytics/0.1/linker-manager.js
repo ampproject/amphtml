@@ -284,28 +284,37 @@ export class LinkerManager {
       return false;
     }
 
-    // See if any domains match.
-    if (domains && !domains.includes(hostname)) {
+    // If domains are given we check for exact match or wildcard match.
+    if (domains) {
+      for (let i = 0; i < domains.length; i++) {
+        const domain = domains[i];
+        // Exact match.
+        if (domain === hostname) {
+          return true;
+        }
+        // Allow wildcard subdomain matching.
+        if (domain.indexOf('*') !== -1 && isWildCardMatch(hostname, domain)) {
+          return true;
+        }
+      }
       return false;
     }
 
     // If no domains given, default to friendly domain matching.
-    if (!domains) {
-      // Don't append linker for exact domain match, relative urls, or
-      // fragments.
-      const winHostname = WindowInterface.getHostname(this.ampdoc_.win);
-      if (winHostname === hostname) {
-        return false;
-      }
+    // Don't append linker for exact domain match, relative urls, or
+    // fragments.
+    const winHostname = WindowInterface.getHostname(this.ampdoc_.win);
+    if (winHostname === hostname) {
+      return false;
+    }
 
-      const {sourceUrl, canonicalUrl} =
-          Services.documentInfoForDoc(this.ampdoc_);
-      const sourceOrigin = this.urlService_.parse(sourceUrl).hostname;
-      const canonicalOrigin = this.urlService_.parse(canonicalUrl).hostname;
-      if (!areFriendlyDomains(sourceOrigin, hostname)
-          && !areFriendlyDomains(canonicalOrigin, hostname)) {
-        return false;
-      }
+    const {sourceUrl, canonicalUrl} =
+        Services.documentInfoForDoc(this.ampdoc_);
+    const sourceOrigin = this.urlService_.parse(sourceUrl).hostname;
+    const canonicalOrigin = this.urlService_.parse(canonicalUrl).hostname;
+    if (!areFriendlyDomains(sourceOrigin, hostname)
+        && !areFriendlyDomains(canonicalOrigin, hostname)) {
+      return false;
     }
     return true;
   }
@@ -423,4 +432,28 @@ export function areFriendlyDomains(domain1, domain2) {
  */
 function getBaseDomain(domain) {
   return domain.replace(/^(?:www\.|m\.|amp\.)+/, '');
+}
+
+/**
+ * Escape any regex flags other than `*`
+ * @param {string} str
+ */
+function regexEscape(str) {
+  return str.replace(/[-\/\\^$+?.()|[\]{}]/g, '\\$&');
+}
+
+/**
+   * Allows specified wildcard matching of domains.
+   * Example:
+   *    `*.foo.com` matches `amp.foo.com`
+   *    `*.foo.com*` matches `amp.foo.com.uk`
+   * @param {string} hostname
+   * @param {string} domain
+   * @return {boolean}
+   * @visibleForTesting
+   */
+export function isWildCardMatch(hostname, domain) {
+  const escaped = regexEscape(domain);
+  const regex = escaped.replace(/\*/g, '.*');
+  return new RegExp('^' + regex + '$').test(hostname);
 }
