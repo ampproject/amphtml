@@ -29,6 +29,7 @@ import {userAssert} from '../../../src/log';
 
 const SERVICE_ID = 'liveListManager';
 
+const TRANSFORMED_PREFIX = 'google;v=';
 
 /**
  * Manages registered AmpLiveList components.
@@ -276,11 +277,7 @@ export class LiveListManager {
 function isDocTransformed(root) {
   const {documentElement} = (root.ownerDocument || root);
   const transformed = documentElement.getAttribute('transformed');
-  if (!transformed) {
-    return false;
-  }
-
-  return startsWith(transformed, 'google;v=');
+  return transformed && startsWith(transformed, TRANSFORMED_PREFIX);
 }
 
 /**

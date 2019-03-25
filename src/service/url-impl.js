@@ -40,9 +40,6 @@ export class Url {
    * @param {(!Document|!ShadowRoot)=} opt_rootNode
    */
   constructor(ampdoc, opt_rootNode) {
-    /** @private @const {!./ampdoc-impl.AmpDoc} */
-    this.ampdoc_ = ampdoc;
-
     const root = opt_rootNode || ampdoc.getRootNode();
     const doc = root.ownerDocument || root;
 
