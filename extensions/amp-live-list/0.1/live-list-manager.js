@@ -142,7 +142,7 @@ export class LiveListManager {
 
     if (this.isTransformed_) {
       const urlService = Services.urlForDoc(this.ampdoc.getBody());
-      url = urlService.getCdnUrlOnCdn(this.location_, url);
+      url = urlService.getCdnUrlOnCdnOrigin(this.location_, url);
     }
 
     // TODO(erwinm): add update time here when possible.

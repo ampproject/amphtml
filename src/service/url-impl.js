@@ -149,14 +149,14 @@ export class Url {
    * @param {string} resourceUrl The URL of the document to load
    * @return {string}
    */
-  getCdnUrlOnCdn(currentLocation, resourceUrl) {
+  getCdnUrlOnCdnOrigin(currentLocation, resourceUrl) {
     if (!isProxyOrigin(currentLocation)) {
       return resourceUrl;
     }
 
-    const {host} = (currentLocation instanceof Location ?
-      currentLocation :
-      this.parse(currentLocation));
+    const {host} = (typeof currentLocation == 'string' ?
+      this.parse(currentLocation) :
+      currentLocation);
     const {
       hash,
       pathname,
