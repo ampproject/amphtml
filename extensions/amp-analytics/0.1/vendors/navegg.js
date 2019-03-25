@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,15 @@
 
 export const NAVEGG_CONFIG = /** @type {!JsonObject} */ ({
   'requests': {
-    'host': 'amp.navdmp.com',
-    'path': 'amp',
-    'params':
-      'aid=${clientId(navegg_id)}' +
-      '&url=${canonicalUrl}' +
-      '&ref=${documentReferrer}' +
-      '&tit=${title}' +
-      '&lan=${browserLanguage}',
     'pageview':
-      'https://${host}/${path}?${params}&acc=${account}&v=7',
+      'https://amp.navdmp.com/amp?' +
+        'aid=${clientId(navegg_id)}&' +
+        'url=${canonicalUrl}&' +
+        'ref=${documentReferrer}&' +
+        'tit=${title}&' +
+        'lan=${browserLanguage}' +
+        '&acc=${account}&' +
+        'v=7',
   },
   'triggers': {
     'trackpageview': {
@@ -34,8 +33,11 @@ export const NAVEGG_CONFIG = /** @type {!JsonObject} */ ({
     },
   },
   'transport': {
-    'xhrpost': false,
     'beacon': false,
+    'xhrpost': false,
     'image': true,
+  },
+  'image': {
+    'suppressWarnings': true,
   },
 });
