@@ -58,10 +58,13 @@ function createIframeMessagingClient(win) {
     const wins = {};
     let hostWin = win;
     let j = 0;
-    iframeClient.registerCallback(MessageType.HOST_RESPONSE, message => {
-      iframeClient.setBroadcastMode(false);
-      iframeClient.setHostWindow(wins[message['id']]);
-      resolve(iframeClient);
+    const unlisten = iframeClient.registerCallback(MessageType.HOST_RESPONSE, message => {
+      if (wins[message['id']]) {
+        iframeClient.setBroadcastMode(false);
+        iframeClient.setHostWindow(wins[message['id']]);
+        unlisten();
+        resolve(iframeClient);
+      }
     });
     do {
       const id = getRandom(win);
