@@ -36,7 +36,7 @@ describes.fakeWin('amp-link-rewriter', {
     helpers = helpersMaker(env);
 
     config = {
-      'output': 'https://visit.digidip.net?pid=110&url=${href}&cid=${customerId}&ref=DOCUMENT_REFERRER&location=SOURCE_URL&rel=${rel}&productId=${eventId}',
+      'output': 'https://visit.digidip.net/visit?pid=110&url=${href}&cid=${customerId}&ref=DOCUMENT_REFERRER&location=SOURCE_URL&rel=${rel}&productId=${eventId}',
       'section': [
         '#track-section',
       ],
@@ -62,7 +62,7 @@ describes.fakeWin('amp-link-rewriter', {
     env.sandbox.restore();
   });
 
-  it('Should match the built url', done => {
+  it('Should match the built url', () => {
     const linkRewriterElement = helpers.createLinkRewriterElement(config);
     env.ampdoc.getRootNode().body.appendChild(linkRewriterElement);
 
@@ -78,11 +78,9 @@ describes.fakeWin('amp-link-rewriter', {
       type: EVENTS.CLICK,
     };
 
-    rewriter.setRedirectUrl_(anchorElement).then(() => {
-      expect(rewriter.rewrittenUrl)
-          .to.equal('https://visit.digidip.net?pid=110&url=http%3A%2F%2Fexample.com&cid=12345&ref=&location=http%3A%2F%2Fmydealz.com%2F123&rel=235&productId=567');
-
-    }).then(() => done(), done);
+    rewriter.setRedirectUrl_(anchorElement);
+    expect(anchorElement.href)
+        .to.equal('https://visit.digidip.net/visit?pid=110&url=http%3A%2F%2Fexample.com&cid=12345&ref=&location=http%3A%2F%2Fmydealz.com%2F123&rel=235&productId=567');
   });
 
   it('Should return the number of anchors that match the config', () => {

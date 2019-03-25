@@ -19,7 +19,7 @@
  *
  * @param {?../../../src/service/ampdoc-impl.AmpDoc} ampDoc
  * @param {!Object} configOpts
- * @return {*}
+ * @return {!Array<!Element>}
  */
 export function getScopeElements(ampDoc, configOpts) {
 
@@ -50,21 +50,12 @@ export function getScopeElements(ampDoc, configOpts) {
  * @param {!Object} configOpts
  */
 function hasAttributeValues(htmlElement, configOpts) {
-
   const anchorAttr = configOpts.attribute;
   const attrKeys = Object.keys(anchorAttr);
-  let test = true;
 
-  if (attrKeys.length === 0) {
-    return true;
-  }
+  return attrKeys.every(key => {
+    const reg = new RegExp(anchorAttr[key]);
 
-  attrKeys.forEach(key => {
-    const value = anchorAttr[key];
-    const reg = new RegExp(value);
-
-    test = test && reg.test(htmlElement.getAttribute(key));
+    return reg.test(htmlElement.getAttribute(key));
   });
-
-  return test;
 }

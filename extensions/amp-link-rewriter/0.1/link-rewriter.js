@@ -49,8 +49,8 @@ export class LinkRewriter {
     /** @private {?Object} */
     this.configOpts_ = getConfigOpts(ampElement);
 
-    /** @public {string} */
-    this.rewrittenUrl = this.configOpts_.output;
+    /** @private {string} */
+    this.rewrittenUrl_ = this.configOpts_.output;
 
     /** @private {!../../../src/service/url-replacements-impl.UrlReplacements} */
     this.urlReplacementService_ = Services.urlReplacementsForDoc(ampElement);
@@ -65,17 +65,17 @@ export class LinkRewriter {
     const htmlElement = this.event_.srcElement;
     const sourceTrimmedDomain = Services
         .documentInfoForDoc(this.ampDoc_)
-        .sourceUrl.replace(/(www\.)?(.*)/, '$2');
+        .sourceUrl.match(/^(?:https?:)?(?:\/\/)?([^\/?]+)/i)[1];
     const canonicalTrimmedDomain = Services
         .documentInfoForDoc(this.ampDoc_)
-        .sourceUrl.replace(/(www\.)?(.*)/, '$2');
+        .canonicalUrl.match(/^(?:https?:)?(?:\/\/)?([^\/?]+)/i)[1];
 
     if (!htmlElement) {
       return;
     }
 
-    if (this.isInternalLink_(htmlElement, sourceTrimmedDomain)
-      || this.isInternalLink_(htmlElement, canonicalTrimmedDomain)) {
+    if (this.isInternalLink_(htmlElement,
+        [sourceTrimmedDomain, canonicalTrimmedDomain])) {
       return;
     }
 
@@ -85,49 +85,52 @@ export class LinkRewriter {
   /**
    * Check if the anchor element leads to an internal link
    * @param {?Element} htmlElement
-   * @param {?string} trimmedDomain
+   * @param {?Array<string>=} trimmedDomains
    * @return {boolean}
    */
-  isInternalLink_(htmlElement, trimmedDomain) {
+  isInternalLink_(htmlElement, trimmedDomains) {
+    let result = true;
     const href = htmlElement.getAttribute('href');
 
-    return !(href && REG_DOMAIN_URL.test(href) &&
-            RegExp.$2 !== trimmedDomain);
+    trimmedDomains.forEach(domain => {
+      result = result &&
+        !(href && REG_DOMAIN_URL.test(href) && RegExp.$2 !== domain);
+    });
+
+    return result;
   }
 
   /**
    * @param {!Element} htmlElement
-   * return {Promise}
+   * return {void}
    */
   setRedirectUrl_(htmlElement) {
     const oldValHref = htmlElement.getAttribute('href');
 
-    return this.replacePageProp_().then(() => {
-      const {vars} = this.configOpts_;
+    this.rewrittenUrl_ = this.replacePageProp_();
 
-      if (vars instanceof Object) {
-        htmlElement.href = this.replaceVars_(htmlElement, vars);
-      }
+    const {vars} = this.configOpts_;
 
-      this.viewer_.win.setTimeout(() => {
-        htmlElement.href = oldValHref;
-      }, 500);
+    if (vars instanceof Object) {
+      htmlElement.href = this.replaceVars_(htmlElement, vars);
+    }
 
-    });
+    this.viewer_.win.setTimeout(() => {
+      htmlElement.href = oldValHref;
+    }, 500);
   }
 
   /**
-   * @return {Promise}
+   * @return {string}
    */
   replacePageProp_() {
-    return this.urlReplacementService_.expandUrlAsync(
-        this.rewrittenUrl,
-        {},
-        PAGE_PROP_WHITELIST
-    ).then(value => {
-      this.rewrittenUrl = value;
-
-    });
+    return this.urlReplacementService_
+        .expandUrlSync(
+            this.rewrittenUrl_,
+            {},
+            undefined,
+            PAGE_PROP_WHITELIST
+        );
   }
 
   /**
@@ -167,7 +170,7 @@ export class LinkRewriter {
      */
     Object.keys(vars).forEach(key => {
       if (vars[key]) {
-        this.rewrittenUrl = this.rewrittenUrl.replace(
+        this.rewrittenUrl_ = this.rewrittenUrl_.replace(
             '${' + key + '}',
             encodeURIComponent(vars[key]));
       }
@@ -177,11 +180,10 @@ export class LinkRewriter {
      * Finally to clean up we leave empty all placeholders that
      * were not replace in previous steps
      */
-    this.rewrittenUrl = this.rewrittenUrl
+    this.rewrittenUrl_ = this.rewrittenUrl_
         .replace(/\${[A-Za-z0-9]+}+/, () => {
           return '';
         });
-
-    return this.rewrittenUrl;
+    return this.rewrittenUrl_;
   }
 }

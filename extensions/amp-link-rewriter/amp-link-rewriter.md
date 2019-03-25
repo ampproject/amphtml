@@ -47,7 +47,7 @@ Code:
 ```
 
 **Add the amp-link-rewriter extension**
-Inside the `<body>...</body>` section of your AMP page, insert this code:
+Inside the `<body>...</body>` section of your AMP page, insert code as shown below the example (it has to be customized for every vendor use case):
 
 Code:
 ```html

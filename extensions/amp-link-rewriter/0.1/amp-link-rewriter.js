@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Layout} from '../../../src/layout';
 import {LinkRewriter} from './link-rewriter';
 import {Priority} from '../../../src/service/navigation';
 import {Services} from '../../../src/services';
@@ -78,8 +79,8 @@ export class AmpLinkRewriter extends AMP.BaseElement {
   }
 
   /** @override */
-  isLayoutSupported() {
-    return true;
+  isLayoutSupported(layout) {
+    return layout === Layout.NODISPLAY;
   }
 }
 

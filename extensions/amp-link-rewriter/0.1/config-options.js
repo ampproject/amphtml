@@ -15,11 +15,10 @@
  */
 import {getChildJsonConfig} from '../../../src/json';
 import {hasOwn} from '../../../src/utils/object';
-import {userAssert} from '../../../src/log';
-
-const errors = {
-  REQUIRED_OUTPUT: 'output config property is required',
-};
+import {
+  user,
+  userAssert,
+} from '../../../src/log';
 
 /**
  * @param {!AmpElement} element
@@ -27,8 +26,9 @@ const errors = {
  */
 export function getConfigOpts(element) {
 
-  const config = getChildJsonConfig(element);
-  enforceConfigOpt(config['output'], errors.REQUIRED_OUTPUT);
+  const config = getConfigJson(element);
+  userAssert(config['output'],
+      'amp-link-rewriter: output config property is required');
 
   return {
     output: config['output'].toString(),
@@ -43,14 +43,17 @@ export function getConfigOpts(element) {
 }
 
 /**
- * @param {*} condition
- * @param {string} message
+ * @param {!AmpElement} element
+ * @return {JsonObject}
  */
-function enforceConfigOpt(condition, message) {
-  userAssert(
-      condition,
-      `There is something wrong with your config: ${message}`
-  );
+function getConfigJson(element) {
+  const TAG = 'amp-link-rewriter';
+
+  try {
+    return getChildJsonConfig(element);
+  } catch (e) {
+    throw user(element).createError('%s: %s', TAG, e);
+  }
 }
 
 /**
