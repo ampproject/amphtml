@@ -139,7 +139,7 @@ class AmpAddThis extends AMP.BaseElement {
     const pubId = this.element.getAttribute('data-pub-id') || '';
     const widgetId = this.element.getAttribute('data-widget-id') || '';
     const productCode = this.element.getAttribute('data-product-code') || '';
-    if (this.win.innerWidth >= 979){
+    if (this.getViewport().getWidth() >= 979){
       this.callSrc_ += '?mode=desktop';
     }
     if (getAddThisMode({pubId, widgetId, productCode}) === -1) {
