@@ -134,7 +134,6 @@ export class LiveListManager {
    * @private
    */
   fetchDocument_() {
-    const {win} = this.ampdoc;
     let url = this.url_;
     if (this.latestUpdateTime_ > 0) {
       url = addParamToUrl(url, 'amp_latest_update_time',
@@ -147,7 +146,7 @@ export class LiveListManager {
     }
 
     // TODO(erwinm): add update time here when possible.
-    return fetchDocument(win, url, {
+    return fetchDocument(this.ampdoc.win, url, {
       requireAmpResponseSourceOrigin: false,
     }).then(this.getLiveLists_.bind(this));
   }
@@ -269,7 +268,7 @@ export class LiveListManager {
 }
 
 /**
- * Detects if a document has has transforms applied
+ * Detects if a document has had transforms applied
  * e.g. by a domain with signed exchange domain enabled.
  * @param {!Document|!ShadowRoot} root
  * @return {boolean}
@@ -277,7 +276,7 @@ export class LiveListManager {
 function isDocTransformed(root) {
   const {documentElement} = (root.ownerDocument || root);
   const transformed = documentElement.getAttribute('transformed');
-  return transformed && startsWith(transformed, TRANSFORMED_PREFIX);
+  return Boolean(transformed) && startsWith(transformed, TRANSFORMED_PREFIX);
 }
 
 /**
