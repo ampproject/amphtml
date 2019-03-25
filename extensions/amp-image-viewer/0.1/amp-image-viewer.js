@@ -23,6 +23,7 @@ import {
   DoubletapRecognizer,
   PinchRecognizer,
   SwipeXYRecognizer,
+  TapRecognizer,
   TapzoomRecognizer,
 } from '../../../src/gesture-recognizers';
 import {Gestures} from '../../../src/gesture';
@@ -171,21 +172,13 @@ export class AmpImageViewer extends AMP.BaseElement {
       return Promise.resolve();
     }
     const ampImg = dev().assertElement(this.sourceAmpImage_);
-    const isLaidOut = ampImg.hasAttribute('i-amphtml-layout') ||
-      ampImg.classList.contains('i-amphtml-layout');
-    const laidOutPromise = isLaidOut
-      ? Promise.resolve()
-      : ampImg.signals().whenSignal(CommonSignals.LOAD_END);
+    this.scheduleLayout(ampImg);
 
-    if (!isLaidOut) {
-      this.scheduleLayout(ampImg);
-    }
-
-    this.loadPromise_ = laidOutPromise
+    return ampImg.signals()
+        .whenSignal(CommonSignals.LOAD_END)
         .then(() => this.init_())
         .then(() => this.resetImageDimensions_())
         .then(() => this.setupGestures_());
-    return this.loadPromise_;
   }
 
   /** @override */
@@ -429,6 +422,13 @@ export class AmpImageViewer extends AMP.BaseElement {
       });
     });
 
+    // Propagate click on tap, since the double tap gesture would prevent it
+    // from occurring otherwise. This allows interested parties (e.g. lightbox
+    // gallery) to react to clicks, though there will be a delay.
+    this.gestures_.onGesture(TapRecognizer, gesture => {
+      this.propagateClickEvent_(gesture.data.target);
+    });
+
     this.gestures_.onGesture(TapzoomRecognizer, gesture => {
       const {data} = gesture;
       this.onTapZoom_(data.centerClientX, data.centerClientY,
@@ -479,11 +479,9 @@ export class AmpImageViewer extends AMP.BaseElement {
           }
         });
 
-    this.unlistenOnClickHaltMotion_ = this.gestures_.onPointerDown(event => {
+    this.unlistenOnClickHaltMotion_ = this.gestures_.onPointerDown(() => {
       if (this.motion_) {
         this.motion_.halt();
-      } else {
-        this.propagateClickEvent_(event.target);
       }
     });
   }

@@ -25,6 +25,19 @@ document.getElementById('hello').addEventListener('click', () => {
   document.body.appendChild(el);
 });
 
+// Long task.
+if (document.getElementById('long')) {
+  document.getElementById('long').addEventListener('click', () => {
+    fetch('/examples/amp-script/hello-world-data.json')
+        .then(response => response.json())
+        .then(json => {
+          const el = document.createElement('h1');
+          el.textContent = 'Hello ' + json.year + ' World!';
+          document.body.appendChild(el);
+        });
+  });
+}
+
 // <amp-img> should be allowed.
 const ampImg = document.getElementById('amp-img');
 if (ampImg) {

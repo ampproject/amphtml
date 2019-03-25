@@ -64,7 +64,8 @@ export class AmpScrollableCarousel extends BaseCarousel {
     this.container_.classList.add('i-amphtml-scrollable-carousel-container');
     this.element.appendChild(this.container_);
 
-    this.useLayers_ = isExperimentOn(this.win, 'layers');
+    this.useLayers_ = isExperimentOn(this.win, 'layers') && isExperimentOn(
+        this.win, 'layers-prioritization');
 
     this.cells_.forEach(cell => {
       if (!this.useLayers_) {

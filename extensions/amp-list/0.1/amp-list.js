@@ -136,11 +136,9 @@ export class AmpList extends AMP.BaseElement {
       }
     }, ActionTrust.HIGH);
 
-    if (isExperimentOn(this.win, 'amp-list-resizable-children')) {
-      this.registerAction('changeToLayoutContainer',
-          () => this.changeToLayoutContainer_(),
-          ActionTrust.HIGH);
-    }
+    this.registerAction('changeToLayoutContainer',
+        () => this.changeToLayoutContainer_(),
+        ActionTrust.HIGH);
 
     /** @private {?../../../src/ssr-template-helper.SsrTemplateHelper} */
     this.ssrTemplateHelper_ = null;
@@ -222,26 +220,50 @@ export class AmpList extends AMP.BaseElement {
     }
 
     this.viewport_.onResize(() => {
-      this.attemptToFit_(dev().assertElement(this.container_));
+      this.maybeResizeListToFitItems_();
     });
 
+    const loadMorePromise = this.loadMoreEnabledPromise_
+        .then(enabled => {
+          if (enabled) {
+            this.mutateElement(() => {
+              this.getLoadMoreService_().initializeLoadMore();
+              const overflowElement = this.getOverflowElement();
+              if (overflowElement) {
+                toggle(overflowElement, false);
+              }
+              this.element.warnOnMissingOverflow = false;
+            }).then(() => {
+              this.adjustContainerForLoadMoreButton_();
+            });
+          }
+        });
+
+    return Promise.all([loadMorePromise, this.fetchList_()]);
+  }
+
+  /**
+   * @private
+   */
+  maybeResizeListToFitItems_() {
     this.loadMoreEnabledPromise_.then(enabled => {
       if (enabled) {
-        this.loadMoreService_ = new LoadMoreService(this.element);
-        this.mutateElement(() => {
-          this.loadMoreService_.initializeLoadMore();
-          const overflowElement = this.getOverflowElement();
-          if (overflowElement) {
-            toggle(overflowElement, false);
-          }
-          this.element.warnOnMissingOverflow = false;
-        }).then(() => {
-          this.adjustContainerForLoadMoreButton_();
-        });
+        this.attemptToFitLoadMore_(dev().assertElement(this.container_));
+      } else {
+        this.attemptToFit_(dev().assertElement(this.container_));
       }
     });
+  }
 
-    return this.fetchList_();
+  /**
+   * @return {!LoadMoreService}
+   * @private
+   */
+  getLoadMoreService_() {
+    if (!this.loadMoreService_) {
+      this.loadMoreService_ = new LoadMoreService(this.element);
+    }
+    return this.loadMoreService_;
   }
 
   /**
@@ -257,7 +279,7 @@ export class AmpList extends AMP.BaseElement {
     let listHeight;
     return this.measureMutateElement(
         () => {
-          buttonHeight = this.loadMoreService_
+          buttonHeight = this.getLoadMoreService_()
               .getLoadMoreButton()./*OK*/offsetHeight;
           listHeight = this.element./*OK*/offsetHeight;
         },
@@ -594,9 +616,9 @@ export class AmpList extends AMP.BaseElement {
       if (enabled) {
         const promises = [];
         promises.push(this.maybeRenderLoadMoreElement_(
-            this.loadMoreService_.getLoadMoreButton(), data));
+            this.getLoadMoreService_().getLoadMoreButton(), data));
         promises.push(this.maybeRenderLoadMoreElement_(
-            this.loadMoreService_.getLoadMoreEndElement(), data));
+            this.getLoadMoreService_().getLoadMoreEndElement(), data));
         return Promise.all(promises);
       }
     });
@@ -704,7 +726,7 @@ export class AmpList extends AMP.BaseElement {
       const r = this.element.getResources().getResourceForElement(this.element);
       r.resetPendingChangeSize();
 
-      this.attemptToFit_(dev().assertElement(this.container_));
+      this.maybeResizeListToFitItems_();
     });
   }
 
@@ -721,22 +743,25 @@ export class AmpList extends AMP.BaseElement {
     if (this.element.getAttribute('layout') == Layout.CONTAINER) {
       return;
     }
-    this.loadMoreEnabledPromise_.then(enabled => {
-      if (enabled) {
-        const element = !!this.loadMoreSrc_ ?
-          this.loadMoreService_.getLoadMoreButton() :
-          this.loadMoreService_.getLoadMoreEndElement();
-        this.attemptToFitLoadMoreElement_(element, target);
-      } else {
-        this.measureElement(() => {
-          const targetHeight = target./*OK*/scrollHeight;
-          const height = this.element./*OK*/offsetHeight;
-          if (targetHeight > height) {
-            this.attemptChangeHeight(targetHeight).catch(() => {});
-          }
-        });
+    this.measureElement(() => {
+      const targetHeight = target./*OK*/scrollHeight;
+      const height = this.element./*OK*/offsetHeight;
+      if (targetHeight > height) {
+        this.attemptChangeHeight(targetHeight).catch(() => {});
       }
     });
+  }
+
+  /**
+   *
+   * @param {!Element} target
+   * @private
+   */
+  attemptToFitLoadMore_(target) {
+    const element = !!this.loadMoreSrc_ ?
+      this.getLoadMoreService_().getLoadMoreButton() :
+      this.getLoadMoreService_().getLoadMoreEndElement();
+    this.attemptToFitLoadMoreElement_(element, target);
   }
 
   /**
@@ -745,6 +770,9 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   attemptToFitLoadMoreElement_(element, target) {
+    if (this.element.getAttribute('layout') == Layout.CONTAINER) {
+      return;
+    }
     this.measureElement(() => {
       const targetHeight = target./*OK*/scrollHeight;
       const height = this.element./*OK*/offsetHeight;
@@ -820,10 +848,6 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   changeToLayoutContainer_() {
-    // TODO (#18875): cleanup resizable-children experiment
-    userAssert(isExperimentOn(this.win, 'amp-list-resizable-children'),
-        'Experiment amp-list-resizable-children is disabled');
-
     const previousLayout = this.element.getAttribute('layout');
     // If we have already changed to layout container, no need to run again.
     if (previousLayout == Layout.CONTAINER) {
@@ -863,19 +887,19 @@ export class AmpList extends AMP.BaseElement {
           this.setupLoadMoreAuto_();
         }
         return this.mutateElement(() => {
-          this.loadMoreService_.toggleLoadMoreLoading(false);
+          this.getLoadMoreService_().toggleLoadMoreLoading(false);
           // Set back to visible because there are actually more elements
           // to load. See comment in initializeLoadMoreButton_ for context.
-          setStyles(this.loadMoreService_.getLoadMoreButton(), {
+          setStyles(this.getLoadMoreService_().getLoadMoreButton(), {
             visibility: '',
           });
           this.unlistenLoadMore_ = listen(
-              this.loadMoreService_.getLoadMoreButtonClickable(),
+              this.getLoadMoreService_().getLoadMoreButtonClickable(),
               'click', () => this.loadMoreCallback_());
         });
       } else {
         return this.mutateElement(
-            () => this.loadMoreService_.setLoadMoreEnded());
+            () => this.getLoadMoreService_().setLoadMoreEnded());
       }
     });
   }
@@ -891,12 +915,14 @@ export class AmpList extends AMP.BaseElement {
   loadMoreCallback_(opt_reload = false) {
     if (!!this.loadMoreSrc_) {
       this.element.setAttribute('src', this.loadMoreSrc_);
+      // Clear url to avoid repeated fetches from same url
+      this.loadMoreSrc_ = null;
     } else if (!opt_reload) {
-      // Nothing more to load
+      // Nothing more to load or previous fetch still inflight
       return Promise.resolve();
     }
     this.mutateElement(() => {
-      this.loadMoreService_.toggleLoadMoreLoading(true);
+      this.getLoadMoreService_().toggleLoadMoreLoading(true);
     });
     return this.fetchList_(/* opt_append */ true)
         .then(() => {
@@ -906,21 +932,22 @@ export class AmpList extends AMP.BaseElement {
           }
           return this.mutateElement(() => {
             if (this.loadMoreSrc_) {
-              this.loadMoreService_.toggleLoadMoreLoading(false);
+              this.getLoadMoreService_().toggleLoadMoreLoading(false);
             } else {
-              this.loadMoreService_.setLoadMoreEnded();
+              this.getLoadMoreService_().setLoadMoreEnded();
             }
           });
         }).then(() => {
           // Necessary since load-more elements are toggled in the above block
-          this.attemptToFit_(dev().assertElement(this.container_));
+          this.attemptToFitLoadMore_(dev().assertElement(this.container_));
         }).catch(() => {
-          this.mutateElement(() => this.loadMoreService_.setLoadMoreFailed())
+          this.mutateElement(() =>
+            this.getLoadMoreService_().setLoadMoreFailed())
               .then(() => {
                 this.attemptToFitLoadMoreElement_(
-                    this.loadMoreService_.getLoadMoreFailedElement(),
+                    this.getLoadMoreService_().getLoadMoreFailedElement(),
                     dev().assertElement(this.container_));
-                const loadMoreFailedClickable = this.loadMoreService_
+                const loadMoreFailedClickable = this.getLoadMoreService_()
                     .getLoadMoreFailedClickable();
                 this.unlistenLoadMore_ = listen(
                     loadMoreFailedClickable,

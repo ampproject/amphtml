@@ -138,7 +138,8 @@ export class AmpImageSlider extends AMP.BaseElement {
         '2 <amp-img>s must be provided for comparison');
 
     // TODO(kqian): remove this after layer launch
-    if (!isExperimentOn(this.win, 'layers')) {
+    if (!isExperimentOn(this.win, 'layers') ||
+        !isExperimentOn(this.win, 'layers-prioritization')) {
       // see comment in layoutCallback
       // When layers not enabled
       this.setAsOwner(dev().assertElement(this.leftAmpImage_));

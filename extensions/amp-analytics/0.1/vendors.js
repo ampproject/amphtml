@@ -109,9 +109,6 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
     'transport': {'beacon': true, 'xhrpost': true, 'image': true},
     'vars': {
       'accessReaderId': 'ACCESS_READER_ID',
-      'adNavTiming': 'AD_NAV_TIMING', // only available in A4A embeds
-      'adNavType': 'AD_NAV_TYPE', // only available in A4A embeds
-      'adRedirectCount': 'AD_NAV_REDIRECT_COUNT', // only available in A4A
       'ampdocHost': 'AMPDOC_HOST',
       'ampdocHostname': 'AMPDOC_HOSTNAME',
       'ampdocUrl': 'AMPDOC_URL',
