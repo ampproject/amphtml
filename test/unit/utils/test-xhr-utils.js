@@ -211,7 +211,7 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
             expect(token).to.equal(undefined);
           });
     });
-    it('should return undefined if crossorigin attr does not contain' +
+    it('should return undefined if crossorigin attr does not contain ' +
        'exactly "amp-viewer-auth-token-post"', () => {
       const el = document.createElement('html');
       el.setAttribute('crossorigin', '');
