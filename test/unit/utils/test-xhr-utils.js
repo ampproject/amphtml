@@ -232,6 +232,31 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
             expect(token).to.equal('idToken');
           });
     });
+    it('should return an empty auth token if there is not one present', () => {
+      sandbox.stub(Services, 'viewerAssistanceForDocOrNull').returns(
+          Promise.resolve({
+            getIdTokenPromise: (() => Promise.resolve(undefined)),
+          }));
+      const el = document.createElement('html');
+      el.setAttribute('crossorigin', 'amp-viewer-auth-token-via-post');
+      return getViewerAuthTokenIfAvailable(el)
+          .then(token => {
+            expect(token).to.equal('');
+          });
+    });
+    it('should return an empty auth token if there is an issue retrieving ' +
+        'the identity token', () => {
+      sandbox.stub(Services, 'viewerAssistanceForDocOrNull').returns(
+          Promise.reject({
+            getIdTokenPromise: (() => Promise.reject()),
+          }));
+      const el = document.createElement('html');
+      el.setAttribute('crossorigin', 'amp-viewer-auth-token-via-post');
+      return getViewerAuthTokenIfAvailable(el)
+          .then(token => {
+            expect(token).to.equal('');
+          });
+    });
     it('should assert that amp-viewer-assistance extension is present', () => {
       sandbox.stub(Services, 'viewerAssistanceForDocOrNull').returns(
           Promise.resolve());

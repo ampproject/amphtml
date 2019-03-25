@@ -420,15 +420,16 @@ export function assertSuccess(response) {
 export function getViewerAuthTokenIfAvailable(element) {
   const crossOriginAttr = element.getAttribute('cross-origin') ||
       element.getAttribute('crossorigin');
-  if (crossOriginAttr &&
-      crossOriginAttr.trim() === 'amp-viewer-auth-token-via-post') {
-    return Services.viewerAssistanceForDocOrNull(element)
-        .then(viewerAssistance => {
-          userAssert(viewerAssistance,
-              'crossorigin="amp-viewer-auth-token-post" ' +
-              'requires amp-viewer-assistance extension.');
-          return viewerAssistance.getIdTokenPromise();
-        });
+  if (crossOriginAttr
+      && crossOriginAttr.trim() === 'amp-viewer-auth-token-via-post') {
+    return Services.viewerAssistanceForDocOrNull(element).then(va => {
+      userAssert(va, 'crossorigin="amp-viewer-auth-token-post" '
+          + 'requires amp-viewer-assistance extension.');
+      return va.getIdTokenPromise();
+    })
+        // If crossorigin attr is present, resolve with token or empty string.
+        .then(token => token || '').catch(() => '');
   }
-  return Promise.resolve();
+  // If crossorigin attribute is missing, always resolve with undefined.
+  return Promise.resolve(undefined);
 }
