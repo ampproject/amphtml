@@ -99,8 +99,11 @@ describes.realWin('amp-story-embedded-component', {amp: true}, env => {
 
     storeService.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT, fakeComponent);
 
-    expect(component.focusedStateOverlay_).to.not.have
-        .class('i-amphtml-hidden');
+    // Wait for TOOLTIP_CLOSE_ANIMATION_MS is finished before showing tooltip.
+    return timeout(150).then(() => {
+      expect(component.focusedStateOverlay_).to.not.have
+          .class('i-amphtml-hidden');
+    });
   });
 
   it('should hide the tooltip when switching page', () => {
@@ -160,12 +163,14 @@ describes.realWin('amp-story-embedded-component', {amp: true}, env => {
     fakePage.appendChild(clickableEl);
     storeService.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT, fakeComponent);
 
-    const tooltipIconEl = component.focusedStateOverlay_
-        .querySelector('.i-amphtml-story-tooltip-icon').firstElementChild;
+    const tooltipIconEl = component.focusedStateOverlay_.querySelector(
+        '.i-amphtml-story-tooltip-custom-icon');
 
-    expect(tooltipIconEl).to.have.attribute('src');
-    expect(tooltipIconEl.getAttribute('src'))
-        .to.equal('http://localhost:9876/my-icon');
+    // Wait for TOOLTIP_CLOSE_ANIMATION_MS is finished before building tooltip.
+    return timeout(150).then(() => {
+      expect(tooltipIconEl.style['background-image'])
+          .to.equal('url("http://localhost:9876/my-icon")');
+    });
   });
 
   it('should find invalid urls', () => {
@@ -177,9 +182,10 @@ describes.realWin('amp-story-embedded-component', {amp: true}, env => {
         '[amp-story-embedded-component] The tooltip icon url is invalid');
 
     storeService.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT, fakeComponent);
-    const tooltipIconEl = component.focusedStateOverlay_
-        .querySelector('.i-amphtml-story-tooltip-icon').firstElementChild;
-    expect(tooltipIconEl).to.not.have.attribute('src');
+    const tooltipIconEl = component.focusedStateOverlay_.querySelector(
+        '.i-amphtml-story-tooltip-custom-icon');
+
+    expect(tooltipIconEl.style['background-image']).to.equal('');
   });
 
   it('should append text when text attribute is present', () => {
@@ -190,7 +196,10 @@ describes.realWin('amp-story-embedded-component', {amp: true}, env => {
     const tooltipTextEl = component.focusedStateOverlay_
         .querySelector('.i-amphtml-tooltip-text');
 
-    expect(tooltipTextEl.textContent).to.equal('my cool text');
+    // Wait for TOOLTIP_CLOSE_ANIMATION_MS is finished before building tooltip.
+    return timeout(150).then(() => {
+      expect(tooltipTextEl.textContent).to.equal('my cool text');
+    });
   });
 
   it('should append href url when text attribute is not present', () => {
@@ -200,6 +209,17 @@ describes.realWin('amp-story-embedded-component', {amp: true}, env => {
     const tooltipTextEl = component.focusedStateOverlay_
         .querySelector('.i-amphtml-tooltip-text');
 
-    expect(tooltipTextEl.textContent).to.equal('google.com');
+    // Wait for TOOLTIP_CLOSE_ANIMATION_MS is finished before building tooltip.
+    return timeout(150).then(() => {
+      expect(tooltipTextEl.textContent).to.equal('google.com');
+    });
   });
 });
+
+/**
+ * @param {number} ms
+ * @return {!Promise}
+ */
+function timeout(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
