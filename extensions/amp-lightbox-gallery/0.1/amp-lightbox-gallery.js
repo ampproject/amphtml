@@ -44,6 +44,7 @@ import {
   getElementServiceForDoc,
 } from '../../../src/element-service';
 import {htmlFor} from '../../../src/static-template';
+import {isExperimentOn} from '../../../src/experiments';
 import {
   prepareImageAnimation,
 } from '@ampproject/animations/dist/animations.mjs';
@@ -191,6 +192,10 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
+
+    /** @private @const {boolean} */
+    this.useBaseCarousel_ =
+        isExperimentOn(this.win, 'amp-lightbox-gallery-base-carousel');
 
     /** @private {Document} */
     this.doc_ = this.win.document;
@@ -404,8 +409,9 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    */
   findOrBuildCarousel_(lightboxGroupId) {
     devAssert(this.container_);
+    const tag = this.useBaseCarousel_ ? 'amp-base-carousel' : 'amp-carousel';
     const existingCarousel = this.element.querySelector(
-        `amp-carousel[amp-lightbox-group=${
+        `${escapeCssSelectorIdent(tag)}[amp-lightbox-group=${
           escapeCssSelectorIdent(lightboxGroupId)
         }]`);
     if (existingCarousel) {
@@ -436,16 +442,26 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @private
    */
   buildCarousel_(lightboxGroupId) {
+    const extension = this.useBaseCarousel_ ? 'amp-base-carousel' :
+      'amp-carousel';
     return Promise.all([
       Services.extensionsFor(this.win).installExtensionForDoc(
-          this.getAmpDoc(), 'amp-carousel'),
+          this.getAmpDoc(), extension),
       Services.extensionsFor(this.win).installExtensionForDoc(
           this.getAmpDoc(), 'amp-image-viewer'),
     ]).then(() => {
       return this.manager_.getElementsForLightboxGroup(lightboxGroupId);
     }).then(list => {
-      this.carousel_ = htmlFor(this.doc_)`
-        <amp-carousel type="slides" layout="fill" loop="true"></amp-carousel>`;
+      this.carousel_ = this.useBaseCarousel_ ?
+        htmlFor(this.doc_)`
+          <amp-base-carousel type="slides" layout="fill" loop="true">
+            <div slot="prev-arrow"></div>
+            <div slot="next-arrow"></div>
+          </amp-base-carousel>
+        ` :
+        htmlFor(this.doc_)`
+          <amp-carousel type="slides" layout="fill" loop="true"></amp-carousel>
+        `;
       this.carousel_.setAttribute('amp-lightbox-group', lightboxGroupId);
       this.buildCarouselSlides_(list);
       return this.mutateElement(() => {
@@ -1426,7 +1442,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     // TODO(#13011): change to a tag selector after `<amp-carousel>`
     // type='carousel' starts supporting goToSlide.
     return closestAncestorElementBySelector(
-        sourceElement, 'amp-carousel[type="slides"]');
+        sourceElement, 'amp-carousel[type="slides"], amp-base-carousel');
   }
 
   /**
