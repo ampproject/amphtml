@@ -102,7 +102,7 @@ Once you have found a reviewer, make sure to @-mention them on any issues / PRs 
   - Make sure the presubmit checks shown on your PR on GitHub passes (e.g. no lint and type check errors, tests are passing).
   - Add reviewers to your PR that will fulfill the requirements of code review and approval documented in the [Code review and approval](#code-review-and-approval) section.  (Your reviewer can help with this.)
   - [Respond to feedback](./getting-started-e2e.md#respond-to-pull-request-comments).
-- After your PR is approved, it will merged by one of the Reviewers/Collaborators who reviewed your code.
+- After your PR has all of the necessary approvals, your code may be merged into the repository by any Collaborator/Reviewer.  Your reviewer will typically handle this; reach out to them if your code is not merged soon after it has been approved. 
 - To check on your changes and find out when they get into production, read [See your changes in production](./getting-started-quick.md#see-your-changes-in-production).
 - [Clean up](./getting-started-quick.md#delete-your-branch-after-your-changes-are-merged-optional): After your changes are merged, you can delete your working branch.
 
