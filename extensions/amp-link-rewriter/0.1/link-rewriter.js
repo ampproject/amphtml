@@ -43,26 +43,28 @@ export class LinkRewriter {
     /** @private {!../../../src/service/viewer-impl.Viewer} */
     this.viewer_ = Services.viewerForDoc(this.ampDoc_);
 
-    /** @private {?Event} */
-    this.event_ = null;
-
     /** @private {?Object} */
     this.configOpts_ = getConfigOpts(ampElement);
 
+    /** @private {Array<!Element>|null} */
+    this.listElements_ = null;
+
     /** @private {string} */
-    this.rewrittenUrl_ = this.configOpts_.output;
+    this.rewrittenUrl_ = '';
 
     /** @private {!../../../src/service/url-replacements-impl.UrlReplacements} */
     this.urlReplacementService_ = Services.urlReplacementsForDoc(ampElement);
   }
 
   /**
-   * @param {!Event} event
+   * @param {!Element} anchor
    */
-  handleClick(event) {
-    this.event_ = event;
+  handleClick(anchor) {
+    this.rewrittenUrl_ = this.configOpts_.output;
 
-    const htmlElement = this.event_.srcElement;
+    if (!this.isListed_(anchor)) {
+      return;
+    }
     const sourceTrimmedDomain = Services
         .documentInfoForDoc(this.ampDoc_)
         .sourceUrl.match(/^(?:https?:)?(?:\/\/)?([^\/?]+)/i)[1];
@@ -70,16 +72,36 @@ export class LinkRewriter {
         .documentInfoForDoc(this.ampDoc_)
         .canonicalUrl.match(/^(?:https?:)?(?:\/\/)?([^\/?]+)/i)[1];
 
-    if (!htmlElement) {
+    if (!anchor) {
       return;
     }
 
-    if (this.isInternalLink_(htmlElement,
+    if (this.isInternalLink_(anchor,
         [sourceTrimmedDomain, canonicalTrimmedDomain])) {
       return;
     }
 
-    this.setRedirectUrl_(htmlElement);
+    this.setRedirectUrl_(anchor);
+  }
+
+  /**
+   * @param {!Element} anchor
+   * @return {boolean}
+   */
+  isListed_(anchor) {
+    if (this.listElements_ === null || this.listElements_.length === 0) {
+      return true;
+    }
+
+    const filtered = this.listElements_.filter(element => {
+      return element === anchor;
+    });
+
+    if (filtered.length > 0) {
+      return true;
+    }
+
+    return false;
   }
 
   /**
@@ -102,7 +124,6 @@ export class LinkRewriter {
 
   /**
    * @param {!Element} htmlElement
-   * return {void}
    */
   setRedirectUrl_(htmlElement) {
     const oldValHref = htmlElement.getAttribute('href');
@@ -185,5 +206,12 @@ export class LinkRewriter {
           return '';
         });
     return this.rewrittenUrl_;
+  }
+
+  /**
+   * @param {!Array<!Element>|null} listElements
+   */
+  setListElements(listElements) {
+    this.listElements_ = listElements;
   }
 }

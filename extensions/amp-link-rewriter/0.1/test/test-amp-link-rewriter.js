@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {EVENTS} from '../../../amp-skimlinks/0.1/link-rewriter/constants';
 import {LinkRewriter} from '../link-rewriter';
 import {getConfigOpts} from '../config-options';
 import {getScopeElements} from '../scope';
@@ -74,11 +73,8 @@ describes.fakeWin('amp-link-rewriter', {
     anchorElement.rel = '235';
     anchorElement.setAttribute('data-vars-event-id', '567');
 
-    rewriter.event_ = {
-      type: EVENTS.CLICK,
-    };
-
-    rewriter.setRedirectUrl_(anchorElement);
+    rewriter.setListElements([anchorElement]);
+    rewriter.handleClick(anchorElement);
     expect(anchorElement.href)
         .to.equal('https://visit.digidip.net/visit?pid=110&url=http%3A%2F%2Fexample.com&cid=12345&ref=&location=http%3A%2F%2Fmydealz.com%2F123&rel=235&productId=567');
   });

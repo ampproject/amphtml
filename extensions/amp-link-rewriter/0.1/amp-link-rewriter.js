@@ -36,7 +36,9 @@ export class AmpLinkRewriter extends AMP.BaseElement {
     /** @private {?Object} */
     this.configOpts_ = {};
 
-    /** @private {?Object} */
+    this.navigation_ = Services.navigationForDoc(this.ampDoc_);
+
+    /** @private {?Array<!Element>} */
     this.listElements_ = null;
   }
 
@@ -56,6 +58,10 @@ export class AmpLinkRewriter extends AMP.BaseElement {
         this.element,
         this.ampDoc_);
 
+    this.listElements_ = getScopeElements(
+        this.ampDoc_,
+        this.configOpts_);
+
     this.attachClickEvent_();
   }
 
@@ -63,17 +69,11 @@ export class AmpLinkRewriter extends AMP.BaseElement {
    * @private
    */
   attachClickEvent_() {
-    this.listElements_ = getScopeElements(
-        this.ampDoc_,
-        this.configOpts_);
+    this.rewriter_.setListElements(this.listElements_);
 
-    this.listElements_.forEach(nodeElement => {
-
-      const navigation = Services.navigationForDoc(nodeElement);
-      navigation.registerAnchorMutator((anchor, event) => {
-        this.rewriter_.handleClick(event);
-      }, Priority.LINK_REWRITER_MANAGER);
-    });
+    this.navigation_.registerAnchorMutator(anchor => {
+      this.rewriter_.handleClick(anchor);
+    }, Priority.LINK_REWRITER_MANAGER);
 
     return true;
   }
