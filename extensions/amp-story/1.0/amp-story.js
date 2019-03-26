@@ -413,7 +413,8 @@ export class AmpStory extends AMP.BaseElement {
           this.storeService_.dispatch(
               Action.SET_ADVANCEMENT_MODE, AdvancementMode.GO_TO_PAGE);
 
-          if (closestAncestorElementBySelector(caller, 'AMP-SIDEBAR')) {
+          if (closestAncestorElementBySelector(
+              dev().assertElement(caller), 'AMP-SIDEBAR')) {
             const pageId = args['id'];
             Services.historyForDoc(this.getAmpDoc()).goBack().then(() => {
               this.win.requestAnimationFrame(() => {
