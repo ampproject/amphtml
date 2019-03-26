@@ -104,11 +104,11 @@ describe('LinkerReader', () => {
       expect(mockWin.location.href).to.equal('https://example.com/?var=foo');
     });
 
-    it('return null when read the same id', () => {
+    it('returns same value when reading the same id', () => {
       mockWin.location.href = 'https://example.com?' +
         'test=1*1f66u1p*key1*dmFsdWUx&var=foo';
       expect(linkerReader.get('test', 'key1')).to.equal('value1');
-      expect(linkerReader.get('test', 'key1')).to.equal(null);
+      expect(linkerReader.get('test', 'key1')).to.equal('value1');
     });
   });
 });
