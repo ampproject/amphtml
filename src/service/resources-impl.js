@@ -23,7 +23,12 @@ import {Services} from '../services';
 import {TaskQueue} from './task-queue';
 import {VisibilityState} from '../visibility-state';
 import {areMarginsChanged, expandLayoutRect} from '../layout-rect';
-import {closest, hasNextNodeInDocumentOrder} from '../dom';
+import {
+  closest,
+  hasNextNodeInDocumentOrder,
+  isAmpElement,
+  whenUpgradedToCustomElement,
+} from '../dom';
 import {computedStyle} from '../style';
 import {dev, devAssert} from '../log';
 import {dict, hasOwn} from '../utils/object';
@@ -78,6 +83,9 @@ export class Resources {
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
+    // TODO: opt in from the viewer params, and find a good a name.
+    this.isTopDownPrerender_ = true;
+
     /** @const {!./ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
@@ -560,12 +568,17 @@ export class Resources {
     // During prerender mode, don't build elements that aren't allowed to be
     // prerendered. This avoids wasting our prerender build quota.
     // See grantBuildPermission() for more details.
-    const shouldBuildResource =
-        this.viewer_.getVisibilityState() != VisibilityState.PRERENDER
-        || resource.prerenderAllowed();
+    const isPrerendering =
+        this.viewer_.getVisibilityState() == VisibilityState.PRERENDER;
+    const shouldBuildResource = !isPrerendering || resource.prerenderAllowed();
 
     if (buildingEnabled && shouldBuildResource) {
       if (this.documentReady_) {
+        if (isPrerendering && this.isTopDownPrerender_) {
+          this.topDownPrerender_(resource);
+          return;
+        }
+
         // Build resource immediately, the document has already been parsed.
         this.buildResourceUnsafe_(resource, scheduleWhenBuilt);
       } else if (!resource.isBuilt() && !resource.isBuilding()) {
@@ -576,6 +589,35 @@ export class Resources {
         }
       }
     }
+  }
+
+  /**
+   * @param {!Resource} resource
+   * @private
+   */
+  topDownPrerender_(resource) {
+    if (!resource.prerenderAllowed()) {
+      return;
+    }
+
+    const parentElement = closest(resource.element, el => {
+      return isAmpElement(el) && el !== resource.element;
+    }, this.ampdoc.getBody() /** opt_stopAt */);
+
+    const buildIfNotBuilt = r => {
+      if (r.getState() === ResourceState.NOT_BUILT && !r.isBuilding()) {
+        this.buildResourceUnsafe_(r, false);
+      }
+    }
+
+    if (!parentElement) {
+      buildIfNotBuilt(resource);
+      return;
+    }
+
+    whenUpgradedToCustomElement(parentElement)
+        .then(parentElement => parentElement.whenBuilt())
+        .then(() => buildIfNotBuilt(resource));
   }
 
   /**
