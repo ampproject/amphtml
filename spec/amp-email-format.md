@@ -35,7 +35,7 @@ The AMP for Email format provides a subset of AMP components that you can use in
 
 The following code represents the minimum amount of markup that makes up a valid AMP email message:
 
-[sourcecode:html]
+```html
 <!doctype html>
 <html ⚡4email>
 <head>
@@ -47,7 +47,7 @@ The following code represents the minimum amount of markup that makes up a valid
 Hello, world.
 </body>
 </html>
-[/sourcecode]
+```
 
 An AMP email message MUST
 
@@ -102,7 +102,7 @@ The following is the list of [AMP components](https://amp.dev/documentation/comp
 
 All CSS in any AMP document must be included in a `<style amp-custom>` tag within the header or as inline `style` attributes.
 
-[sourcecode:html]
+```html
 ...
 <style amp-custom>
   /* any custom styles go here. */
@@ -118,13 +118,9 @@ All CSS in any AMP document must be included in a `<style amp-custom>` tag withi
 </style>
 ...
 </head>
-[/sourcecode]
+```
 
-[tip type="note"]
-
-The entire `<style>` tag cannot exceed 50,000 bytes. The validator will check for this.
-
-[/tip]
+Note: The entire `<style>` tag cannot exceed 50,000 bytes. The validator will check for this.
 
 ### CSS Restrictions
 The AMP4EMAIL validator spec does not contain CSS restrictions beyond the [standard AMP CSS restrictions](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages.html). However, email clients may have their own CSS restrictions.
@@ -176,8 +172,8 @@ This section provides some [AMP for Email code examples](https://amp.dev/documen
 
 The following is a fictional email that includes an updated list of featured products retrieved from an endpoint. This example shows the basic usage of [`<amp-list>`](https://amp.dev/documentation/components/reference/amp-list.html).
 
-[sourcecode:html]
-{% raw %}<!doctype html>
+```html
+<!doctype html>
 <html ⚡4email>
 <head>
   <meta charset="utf-8">
@@ -206,13 +202,13 @@ The following is a fictional email that includes an updated list of featured pro
   </amp-list>
 </body>
 </html>
-{% endraw %}[/sourcecode]
+```
 
 ### Basic usage of `<amp-bind>`
 
 The following is a fictional email that shows interactivity features by using [`<amp-bind>`](https://amp.dev/documentation/components/reference/amp-bind.html).
 
-[sourcecode:html]
+```html
 <!doctype html>
 <html ⚡4email>
 <head>
@@ -238,13 +234,15 @@ The following is a fictional email that shows interactivity features by using [`
   </button>
 </body>
 </html>
-[/sourcecode]
+```
+
 ## Adding AMP to existing emails
 
 Email is structured as a [MIME tree](https://en.wikipedia.org/wiki/MIME). This MIME tree contains the message body and any attachments to the email.
 
 Embedding AMP within an email is simple, add a new MIME part with a content type of `text/x-amp-html` as a descendant of `multipart/alternative`. It should live alongside the existing `text/html` or `text/plain` parts. This ensures that the email message works on all clients.
 
+```html
 <amp-img alt="AMP for Email MIME Parts Diagram"
     layout="responsive"
     width="752" height="246"
@@ -253,6 +251,7 @@ Embedding AMP within an email is simple, add a new MIME part with a content type
     <img alt="AMP for Email MIME Parts Diagram" src="img/amp-email-mime-parts.png" />
   </noscript>
 </amp-img>
+```
 
 Important things to note:
 
@@ -262,7 +261,7 @@ Important things to note:
 
 See the following example:
 
-[sourcecode:text]
+```
 From:  Person A <persona@gmail.com>
 To: Person B <personb@gmail.com>
 Subject: An AMP email!
@@ -292,7 +291,7 @@ Content-Type: text/html; charset="UTF-8"
 
 <span>Hello World in HTML!</span>
 --001a114634ac3555ae05525685ae
-[/sourcecode]
+```
 
 ## Feedback & Support
 
