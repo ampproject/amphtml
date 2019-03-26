@@ -23,11 +23,13 @@ import {
   getServiceForDoc,
   registerServiceBuilderForDoc,
 } from '../../../src/service';
+import {startsWith} from '../../../src/string';
 import {toArray} from '../../../src/types';
 import {userAssert} from '../../../src/log';
 
 const SERVICE_ID = 'liveListManager';
 
+const TRANSFORMED_PREFIX = 'google;v=';
 
 /**
  * Manages registered AmpLiveList components.
@@ -70,6 +72,9 @@ export class LiveListManager {
 
     /** @private @const {function(): Promise} */
     this.work_ = this.fetchDocument_.bind(this);
+
+    /** @private @const {boolean} */
+    this.isTransformed_ = isDocTransformed(ampdoc.getRootNode());
 
     // Only start polling when doc is ready and when the viewer is visible.
     this.whenDocReady_().then(() => {
@@ -131,6 +136,12 @@ export class LiveListManager {
       url = addParamToUrl(url, 'amp_latest_update_time',
           String(this.latestUpdateTime_));
     }
+
+    if (this.isTransformed_) {
+      const urlService = Services.urlForDoc(this.ampdoc.getBody());
+      url = urlService.getCdnUrlOnOrigin(url);
+    }
+
     // TODO(erwinm): add update time here when possible.
     return fetchDocument(this.ampdoc.win, url, {
       requireAmpResponseSourceOrigin: false,
@@ -251,6 +262,21 @@ export class LiveListManager {
   static getMinDataMaxItemsPerPage() {
     return 1;
   }
+}
+
+/**
+ * Detects if a document has had transforms applied
+ * e.g. by a domain with signed exchange domain enabled.
+ * @param {!Document|!ShadowRoot} root
+ * @return {boolean}
+ */
+function isDocTransformed(root) {
+  if (!root.ownerDocument) {
+    return false;
+  }
+  const {documentElement} = root.ownerDocument;
+  const transformed = documentElement.getAttribute('transformed');
+  return Boolean(transformed) && startsWith(transformed, TRANSFORMED_PREFIX);
 }
 
 /**

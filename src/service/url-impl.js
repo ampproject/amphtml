@@ -28,6 +28,7 @@ import {
   installServiceInEmbedScope,
   registerServiceBuilderForDoc,
 } from '../service';
+import {urls} from '../config';
 
 const SERVICE = 'url';
 
@@ -40,9 +41,6 @@ export class Url {
    * @param {(!Document|!ShadowRoot)=} opt_rootNode
    */
   constructor(ampdoc, opt_rootNode) {
-    /** @private @const {!./ampdoc-impl.AmpDoc} */
-    this.ampdoc_ = ampdoc;
-
     const root = opt_rootNode || ampdoc.getRootNode();
     const doc = root.ownerDocument || root;
 
@@ -140,6 +138,27 @@ export class Url {
    */
   getWinOrigin(win) {
     return win.origin || this.parse(win.location.href).origin;
+  }
+
+  /**
+   * If the resource URL is referenced from the publisher's origin,
+   * convert the URL to be referenced from the cache.
+   * @param {string} resourceUrl The URL of the document to load
+   * @return {string}
+   */
+  getCdnUrlOnOrigin(resourceUrl) {
+    if (isProxyOrigin(resourceUrl)) {
+      return resourceUrl;
+    }
+
+    const {
+      host,
+      hash,
+      pathname,
+      search,
+    } = this.parse(resourceUrl);
+    const encodedHost = encodeURIComponent(host);
+    return `${urls.cdn}/c/${encodedHost}${pathname}${search}${hash}`;
   }
 }
 
