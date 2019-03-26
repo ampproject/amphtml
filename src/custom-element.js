@@ -103,7 +103,8 @@ function isTemplateTagSupported() {
  * @return {!Function} The custom element class.
  */
 export function createCustomElementClass(win, name) {
-  const baseCustomElement = createBaseCustomElementClass(win);
+  const baseCustomElement =
+      /** @type {HTMLElement} */ (createBaseCustomElementClass(win));
   /** @extends {HTMLElement} */
   class CustomAmpElement extends baseCustomElement {
     /**
@@ -136,7 +137,7 @@ function createBaseCustomElementClass(win) {
   if (win.BaseCustomElementClass) {
     return win.BaseCustomElementClass;
   }
-  const htmlElement = win.HTMLElement;
+  const htmlElement = /** @type {HTMLElement} */ (win.HTMLElement);
   /** @abstract @extends {HTMLElement} */
   class BaseCustomElement extends htmlElement {
     /**
