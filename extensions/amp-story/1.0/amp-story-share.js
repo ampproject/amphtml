@@ -17,7 +17,6 @@ import {LocalizedStringId} from './localization';
 import {Services} from '../../../src/services';
 import {
   StateProperty,
-  UIType,
   getStoreService,
 } from './amp-story-store-service';
 import {Toast} from './toast';
@@ -331,7 +330,7 @@ export class ShareWidget {
    * @private
   */
   maybeAddPageShareButton_() {
-    if (isExperimentOn(this.win, 'amp-story-branching') && isDesktopUi) {
+    if (isExperimentOn(this.win, 'amp-story-branching')) {
       const list = devAssert(this.root).firstChild;
       const sharePageCheck =
           renderAsElement(this.win.document, SHARE_PAGE_TEMPLATE);
