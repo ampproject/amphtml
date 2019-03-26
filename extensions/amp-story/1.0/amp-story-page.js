@@ -89,6 +89,7 @@ const Selectors = {
   ALL_AMP_MEDIA: 'amp-story-grid-layer amp-audio, ' +
       'amp-story-grid-layer amp-video, amp-story-grid-layer amp-img, ' +
       'amp-story-grid-layer amp-anim',
+  ALL_IFRAMED_MEDIA: 'audio, video',
   // TODO(gmajoulet): Refactor the way these selectors are used. They will be
   // passed to scopedQuerySelectorAll which expects only one selector and not
   // multiple separated by commas. `> audio` has to be kept first of the list to
@@ -585,8 +586,8 @@ export class AmpStoryPage extends AMP.BaseElement {
       return mediaSet;
     }
 
-    iterateCursor(scopedQuerySelectorAll(fie.win.document.body, selector),
-        el => mediaSet.push(el));
+    iterateCursor(scopedQuerySelectorAll(fie.win.document.body,
+        Selectors.ALL_IFRAMED_MEDIA), el => mediaSet.push(el));
     return mediaSet;
   }
 
