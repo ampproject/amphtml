@@ -115,3 +115,19 @@ Example:
     </td>
   </tr>
 </table>
+
+## Events
+
+Events may trigger actions on other AMP components using the `on` attribute.
+e.g. `on="select: my-tab.show"`
+
+Read more about [AMP Actions and Events](../../spec/amp-actions-and-events.md).
+
+<table>
+  <tr>
+    <td width="40%"><strong>select</strong></td>
+    <td>`amp-autocomplete` triggers the `select` event when the user selects an option via click, tap, keyboard navigation or accepting typeahead.
+    `event` contains the `value` attribute value of the selected element.
+  </tr>
+
+</table>
