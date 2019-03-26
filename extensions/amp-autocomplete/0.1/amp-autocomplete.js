@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-autocomplete-0.1.css';
 import {Keys} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
@@ -29,6 +30,7 @@ import {isEnumValue} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {mod} from '../../../src/utils/math';
 import {toggle} from '../../../src/style';
+import {createCustomEvent} from '../../../src/event-helper';
 
 const EXPERIMENT = 'amp-autocomplete';
 const TAG = 'amp-autocomplete';
@@ -120,6 +122,9 @@ export class AmpAutocomplete extends AMP.BaseElement {
      * @private {?Element}
      */
     this.templateElement_ = null;
+
+    /** @private {?../../../src/service/action-impl.ActionService} */
+    this.action_ = null;
   }
 
   /** @override */
@@ -127,6 +132,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     userAssert(isExperimentOn(this.win, 'amp-autocomplete'),
         `Experiment ${EXPERIMENT} is not turned on.`);
 
+    this.action_ = Services.actionServiceForDoc(this.element);
     const jsonScript =
       this.element.querySelector('script[type="application/json"]');
     if (jsonScript) {
@@ -222,7 +228,6 @@ export class AmpAutocomplete extends AMP.BaseElement {
     container.classList.add('i-amphtml-autocomplete-results');
     container.setAttribute('role', 'list');
     toggle(container, false);
-    this.applyFillContent(container, /* replacedContent */ true);
     return container;
   }
 
@@ -479,7 +484,19 @@ export class AmpAutocomplete extends AMP.BaseElement {
       return;
     }
     this.inputElement_.value = this.userInput_ = element.getAttribute('value');
+    this.fireSelectEvent_(element);
     this.clearAllItems_();
+  }
+
+   /**
+   * Triggers a 'select' event with this.userInput_ as the value emitted.
+   * @private
+   */
+  fireSelectEvent_() {
+    const name = 'select';
+    const selectEvent = createCustomEvent(this.win, 
+      `amp-autocomplete.${name}`, this.userInput_);
+    this.action_.trigger(this.element, name, selectEvent, ActionTrust.HIGH);
   }
 
   /**
