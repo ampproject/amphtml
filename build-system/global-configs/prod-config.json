@@ -60,5 +60,6 @@
   "amp-list-load-more": 1,
   "amp-ad-ff-adx-ady": 0.01,
   "amp-img-auto-sizes": 0.1,
-  "blurry-placeholder": 1
+  "blurry-placeholder": 1,
+  "flexAdSlots": 0.01
 }
