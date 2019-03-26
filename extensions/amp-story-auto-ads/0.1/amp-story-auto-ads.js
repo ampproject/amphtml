@@ -336,10 +336,6 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    */
   schedulePage_() {
     const page = this.createAdPage_();
-    if (!page) {
-      // Creation of ad has failed.
-      return;
-    }
     this.adPageEls_.push(page);
 
     this.ampStory_.element.appendChild(page);
@@ -432,7 +428,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
 
   /**
-   * @return {Element}
+   * @return {!Element}
    * @private
    */
   createAdElement_() {
@@ -461,10 +457,8 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
     if (type === 'fake') {
       const id = this.element.getAttribute('id');
-      if (!id || !startsWith(id, 'i-amphtml-demo-')) {
-        user().warn(TAG, 'id must start with i-amphtml-demo- to use fake ads');
-        return null;
-      }
+      userAssert(id && startsWith(id, 'i-amphtml-demo-'),
+          `${TAG} id must start with i-amphtml-demo- to use fake ads`);
       configAttrs['id'] = `i-amphtml-demo-${this.adPagesCreated_}`;
     }
 
