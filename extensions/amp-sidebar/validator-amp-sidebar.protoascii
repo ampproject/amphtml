@@ -92,7 +92,7 @@ tags: {  # amp-sidebar > nav
   }
   child_tags: {
     mandatory_num_child_tags: 1
-    child_tag_name_oneof: "UL"
     child_tag_name_oneof: "OL"
+    child_tag_name_oneof: "UL"
   }
 }
