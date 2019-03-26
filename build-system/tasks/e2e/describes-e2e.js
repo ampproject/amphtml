@@ -112,7 +112,9 @@ async function createSelenium(opt_config = {}) {
   //   session: undefined,
   // };
 
-  const args = ['--no-sandbox'];
+  const args = [];
+  args.push('--no-sandbox');
+  args.push('--disable-gpu');
   if (opt_config.headless) {
     args.push('--headless');
   }

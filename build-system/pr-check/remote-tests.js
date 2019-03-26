@@ -47,7 +47,7 @@ async function main() {
   if (!isTravisPullRequestBuild()) {
     downloadDistOutput(FILENAME);
     timedExecOrDie('gulp update-packages');
-    timedExec('gulp e2e --nobuild');
+    timedExec('gulp e2e --nobuild --headless');
     await startSauceConnect(FILENAME);
     timedExec('gulp test --unit --nobuild --saucelabs_lite');
     timedExec('gulp test --integration --nobuild --compiled --saucelabs');
@@ -69,7 +69,7 @@ async function main() {
     }
     downloadBuildOutput(FILENAME);
     timedExecOrDie('gulp update-packages');
-    timedExec('gulp e2e --nobuild');
+    timedExec('gulp e2e --nobuild --headless');
     await startSauceConnect(FILENAME);
 
     if (buildTargets.has('RUNTIME') ||
