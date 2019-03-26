@@ -28,7 +28,7 @@ import {user} from '../../../src/log';
 const TAG = 'amp-analytics/linker-reader';
 
 
-class LinkerReader {
+export class LinkerReader {
 
   /**
    * @param {!Window} win
@@ -58,10 +58,7 @@ class LinkerReader {
     }
 
     if (this.linkerParams_[name] && this.linkerParams_[name][id]) {
-      // Return the id value and remove the id from the object
-      const value = this.linkerParams_[name][id];
-      delete this.linkerParams_[name][id];
-      return value;
+      return this.linkerParams_[name][id];
     }
 
     return null;
@@ -109,7 +106,7 @@ class LinkerReader {
  * @param {!Window} win
  */
 export function installLinkerReaderService(win) {
-  registerServiceBuilder(win, 'amp-analyitcs-linker-reader',
+  registerServiceBuilder(win, 'amp-analytics-linker-reader',
       LinkerReader);
 }
 
@@ -118,5 +115,5 @@ export function installLinkerReaderService(win) {
  * @return {!LinkerReader}
  */
 export function linkerReaderServiceFor(win) {
-  return getService(win, 'amp-analyitcs-linker-reader');
+  return getService(win, 'amp-analytics-linker-reader');
 }

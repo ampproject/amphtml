@@ -15,6 +15,7 @@
  */
 
 import {getResourceTiming} from '../resource-timing';
+import {installLinkerReaderService} from '../linker-reader';
 import {installVariableService} from '../variables';
 
 /**
@@ -100,6 +101,7 @@ describes.realWin('resourceTiming', {amp: true}, env => {
   beforeEach(() => {
     win = env.win;
     installVariableService(win);
+    installLinkerReaderService(win);
   });
 
   it('should return empty if the performance API is not supported', () => {
