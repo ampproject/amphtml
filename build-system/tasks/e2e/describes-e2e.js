@@ -112,7 +112,7 @@ async function createSelenium(opt_config = {}) {
   //   session: undefined,
   // };
 
-  const args = [];
+  const args = ['--no-sandbox'];
   if (opt_config.headless) {
     args.push('--headless');
   }

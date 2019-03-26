@@ -30,6 +30,7 @@ const {
   stopTimer,
   startSauceConnect,
   stopSauceConnect,
+  timedExec,
   timedExecOrDie: timedExecOrDieBase} = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
 const {isTravisPullRequestBuild} = require('../travis');
@@ -46,15 +47,14 @@ async function main() {
   if (!isTravisPullRequestBuild()) {
     downloadDistOutput(FILENAME);
     timedExecOrDie('gulp update-packages');
-    timedExecOrDie('gulp e2e --nobuild');
+    timedExec('gulp e2e --nobuild');
     await startSauceConnect(FILENAME);
-    timedExecOrDie('gulp test --unit --nobuild --saucelabs_lite');
-    timedExecOrDie('gulp test --integration --nobuild --compiled --saucelabs');
+    timedExec('gulp test --unit --nobuild --saucelabs_lite');
+    timedExec('gulp test --integration --nobuild --compiled --saucelabs');
 
     stopSauceConnect(FILENAME);
   } else {
     printChangeSummary(FILENAME);
-    timedExecOrDie('gulp e2e --nobuild');
     if (!(buildTargets.has('RUNTIME') ||
           buildTargets.has('BUILD_SYSTEM') ||
           buildTargets.has('UNIT_TEST') ||
@@ -69,18 +69,19 @@ async function main() {
     }
     downloadBuildOutput(FILENAME);
     timedExecOrDie('gulp update-packages');
+    timedExec('gulp e2e --nobuild');
     await startSauceConnect(FILENAME);
 
     if (buildTargets.has('RUNTIME') ||
         buildTargets.has('BUILD_SYSTEM') ||
         buildTargets.has('UNIT_TEST')) {
-      timedExecOrDie('gulp test --unit --nobuild --saucelabs_lite');
+      timedExec('gulp test --unit --nobuild --saucelabs_lite');
     }
 
     if (buildTargets.has('RUNTIME') ||
         buildTargets.has('BUILD_SYSTEM') ||
         buildTargets.has('INTEGRATION_TEST')) {
-      timedExecOrDie('gulp test --integration --nobuild --saucelabs');
+      timedExec('gulp test --integration --nobuild --saucelabs');
     }
     stopSauceConnect(FILENAME);
   }
