@@ -331,11 +331,6 @@ export class ShareWidget {
    * @private
   */
   maybeAddPageShareButton_() {
-    const uiState = this.storeService_.get(StateProperty.UI_STATE);
-    const isDesktopUi =
-        uiState === UIType.DESKTOP_FULLBLEED ||
-        uiState === UIType.DESKTOP_PANELS;
-
     if (isExperimentOn(this.win, 'amp-story-branching') && isDesktopUi) {
       const list = devAssert(this.root).firstChild;
       const sharePageCheck =
