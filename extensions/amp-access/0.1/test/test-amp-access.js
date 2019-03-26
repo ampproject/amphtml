@@ -1025,7 +1025,8 @@ describes.fakeWin('AccessService refresh', {
         .withExactArgs()
         .once();
     const event = {preventDefault: sandbox.spy()};
-    service.handleAction_({method: 'refresh', event});
+    service.handleAction_(
+        {method: 'refresh', event, satisfiesTrust() { return true; }});
     expect(event.preventDefault).to.be.calledOnce;
   });
 });
@@ -1096,7 +1097,8 @@ describes.fakeWin('AccessService login', {
         .withExactArgs('')
         .once();
     const event = {preventDefault: sandbox.spy()};
-    service.handleAction_({method: 'login', event});
+    service.handleAction_(
+        {method: 'login', event, satisfiesTrust() { return true; }});
     expect(event.preventDefault).to.be.calledOnce;
   });
 
@@ -1105,7 +1107,8 @@ describes.fakeWin('AccessService login', {
         .withExactArgs('other')
         .once();
     const event = {preventDefault: sandbox.spy()};
-    service.handleAction_({method: 'login-other', event});
+    service.handleAction_(
+        {method: 'login-other', event, satisfiesTrust() { return true; }});
     expect(event.preventDefault).to.be.calledOnce;
   });
 
