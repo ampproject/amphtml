@@ -36,7 +36,7 @@ export class Gesture {
   /**
    * @param {string} type The gesture's string type.
    * @param {DATA} data The data of the gesture.
-   * @param {time} time The time that the gesture has been emitted.
+   * @param {Date} time The time that the gesture has been emitted.
    * @param {?Event} event An optional browser event that resulted in the
    *   gesture.
    */
@@ -45,7 +45,7 @@ export class Gesture {
     this.type = type;
     /** @const {DATA} */
     this.data = data;
-    /** @const {time} */
+    /** @const {Date} */
     this.time = time;
     /** @const {?Event} */
     this.event = event;

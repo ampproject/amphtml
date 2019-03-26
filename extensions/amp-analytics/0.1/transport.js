@@ -263,7 +263,6 @@ export class Transport {
     if (!XMLHttpRequest) {
       return false;
     }
-    /** @const {XMLHttpRequest} */
     const xhr = new XMLHttpRequest();
     if (!('withCredentials' in xhr)) {
       return false; // Looks like XHR level 1 - CORS is not supported.
