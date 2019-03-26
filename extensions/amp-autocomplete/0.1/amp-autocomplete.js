@@ -23,6 +23,7 @@ import {UrlReplacementPolicy,
   batchFetchJsonFor} from '../../../src/batched-json';
 import {childElementsByTag,
   removeChildren} from '../../../src/dom';
+import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user, userAssert} from '../../../src/log';
 import {getValueForExpr, tryParseJson} from '../../../src/json';
 import {includes, startsWith} from '../../../src/string';
@@ -30,7 +31,6 @@ import {isEnumValue} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {mod} from '../../../src/utils/math';
 import {toggle} from '../../../src/style';
-import {createCustomEvent} from '../../../src/event-helper';
 
 const EXPERIMENT = 'amp-autocomplete';
 const TAG = 'amp-autocomplete';
@@ -484,18 +484,19 @@ export class AmpAutocomplete extends AMP.BaseElement {
       return;
     }
     this.inputElement_.value = this.userInput_ = element.getAttribute('value');
-    this.fireSelectEvent_(element);
+    this.fireSelectEvent_(this.userInput_);
     this.clearAllItems_();
   }
 
-   /**
-   * Triggers a 'select' event with this.userInput_ as the value emitted.
+  /**
+   * Triggers a 'select' event with the given value as the value emitted.
+   * @param {string} value
    * @private
    */
-  fireSelectEvent_() {
+  fireSelectEvent_(value) {
     const name = 'select';
-    const selectEvent = createCustomEvent(this.win, 
-      `amp-autocomplete.${name}`, this.userInput_);
+    const selectEvent = createCustomEvent(this.win,
+        `amp-autocomplete.${name}`, value);
     this.action_.trigger(this.element, name, selectEvent, ActionTrust.HIGH);
   }
 
