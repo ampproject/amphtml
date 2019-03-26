@@ -25,6 +25,9 @@
  */
 html {
   overflow-x: hidden !important;
+  /* Our Viewer Header offsetting variables */
+  --i-amphtml-fixed-top: 0px;
+  --i-amphtml-is-fixed: 0;
 }
 html, body {
   height: auto !important;
@@ -134,6 +137,7 @@ html.i-amphtml-ios-embed {
   bottom: 0 !important;
   margin: 0 !important;
   display: block !important;
+  --i-amphtml-fixed-top: unset;
 }
 
 /**
@@ -161,6 +165,9 @@ html.i-amphtml-ios-embed.i-amphtml-ios-overscroll > #i-amphtml-wrapper {
  * Most transferred fixed elements are hidden when a lightbox is opened. This
  * prevents fixed elements from being displayed on top of lightboxes.
  */
+#i-amphtml-wrapper + body {
+  visibility: visible;
+}
 #i-amphtml-wrapper + body[i-amphtml-lightbox] {
   visibility: hidden;
 }
@@ -174,6 +181,31 @@ html.i-amphtml-ios-embed.i-amphtml-ios-overscroll > #i-amphtml-wrapper {
 }
 #i-amphtml-wrapper + body[i-amphtml-lightbox] .i-amphtml-lightbox-element {
   visibility: visible;
+}
+
+/**
+ * [i-amphtml-is-fixed] is our attribute flag to indicate that the element is
+ * currently fixed-position, and participates in Viewer Header offsetting.
+ */
+[i-amphtml-is-fixed] > * {
+  --i-amphtml-is-fixed: 0;
+  --i-amphtml-is-sticky: 0;
+}
+/**
+ * These must come after the general reset rule above, because they share the
+ * same specificity.
+ */
+[i-amphtml-is-fixed],
+[i-amphtml-is-fixed] > [i-amphtml-is-fixed] {
+  --i-amphtml-is-fixed: 1;
+}
+/**
+ * Yes, the general --i-amphtml-is-fixed will also apply if the attr is sticky.
+ * It's a complicated dance to fix sticky elements in iOS.
+ */
+[i-amphtml-is-fixed=sticky],
+[i-amphtml-is-fixed] > [i-amphtml-is-fixed=sticky] {
+  --i-amphtml-is-sticky: 1;
 }
 
 

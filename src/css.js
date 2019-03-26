@@ -96,6 +96,40 @@ export function prependSelectorsWith(selector, distribute) {
 }
 
 /**
+ * @param {!CSSRule} rule
+ * @param {!Element} element
+ * @param {!Window} win
+ * @return {boolean}
+ */
+function ruleMatches(rule, element, win) {
+  switch (rule.type) {
+    case /* CSSRule.STYLE_RULE */ 1:
+      return element.matches(rule.selectorText);
+    case /* CSSRule.MEDIA_RULE */ 4:
+      return win.matchMedia(rule.conditionText).matches;
+    case /* CSSRule.SUPPORTS_RULE */ 12:
+      return CSS.supports(rule.conditionText);
+  }
+  devAssert(!(rule instanceof CSSConditionRule), 'Unknown CSS Condition Rule');
+}
+
+/**
+ * Checks to see if a CSS Object Model CSSRule matches the element.
+ * @param {!CSSRule} rule
+ * @param {!Element} element
+ * @return {boolean}
+ */
+export function cssRuleMatches(rule, element) {
+  const window = devAssert(element.ownerDocument.defaultView);
+  for (let r = rule; r; r = r.parentRule) {
+    if (!ruleMatches(r, element, window)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+/**
  * Escapes an ident (ID or a class name) to be used as a CSS selector.
  *
  * See https://drafts.csswg.org/cssom/#serialize-an-identifier.
