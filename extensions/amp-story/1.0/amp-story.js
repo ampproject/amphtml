@@ -84,6 +84,7 @@ import {
   childElementByTag,
   childElements,
   closest,
+  closestAncestorElementBySelector,
   createElementWithAttributes,
   isRTL,
   scopedQuerySelectorAll,
@@ -412,7 +413,7 @@ export class AmpStory extends AMP.BaseElement {
           this.storeService_.dispatch(
               Action.SET_ADVANCEMENT_MODE, AdvancementMode.GO_TO_PAGE);
 
-          if (caller['offsetParent'].tagName === 'AMP-SIDEBAR') {
+          if (closestAncestorElementBySelector(caller, 'AMP-SIDEBAR')) {
             const pageId = args['id'];
             Services.historyForDoc(this.getAmpDoc()).goBack().then(() => {
               this.win.requestAnimationFrame(() => {
@@ -678,8 +679,8 @@ export class AmpStory extends AMP.BaseElement {
           });
           // Remove the fragment parameter from the URL
           const {history} = this.win;
-          history.pushState(
-              '', this.win.document.title, this.win.location.pathname);
+          history.pushState(/* data */ '', /* title */ this.win.document.title,
+              /* URL */ this.win.location.pathname);
         }
       });
     }
