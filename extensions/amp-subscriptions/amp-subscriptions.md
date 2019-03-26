@@ -254,9 +254,13 @@ The Entitlement response returned by the authorization endpoint must conform to 
 ```
 
 The properties in the Entitlement response are:
- - "granted" - boolean stating if the access to the document is granted or not.
- - "grantReason" - the string of the reason for giving the access to the document, recognized reasons are either SUBSCRIBER meaning the user is fully subscribed or METERING meaning user is on metering.
- - "data" - any free form data which can be used for render templating.
+ - `granted` - boolean stating if the access to the document is granted or not.
+
+ - `grantReason` - the string of the reason for giving the access to the document, recognized reasons are either SUBSCRIBER meaning the user is fully subscribed or METERING meaning user is on metering.
+
+ - `data` - free-form data which can be used for template rendering, e.g. messaging related to metering or article count.
+
+In cases where the access is granted by a means other than the Entitlement response, messaging via the data property may not be seen by the user.  Do not use `data` for granting/denying access to content, conditional display of content based on user access, or displaying user or account related information.
 
 Notice, while it's not explicitly visible, all vendor services also implement authorization endpoints of their own and conform to the same response format.
 
