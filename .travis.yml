@@ -73,7 +73,7 @@ jobs:
       script:
         - node build-system/pr-check/local-tests.js
     - stage: test
-      name: "Remote (Sauce Labs) Tests"
+      name: "E2E and Remote (Sauce Labs) Tests"
       script:
         - node build-system/pr-check/remote-tests.js
       after_script:
