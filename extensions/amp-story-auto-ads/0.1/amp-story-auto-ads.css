@@ -76,7 +76,7 @@ amp-story-page[active] .i-amphtml-story-ad-link {
   right: 0 !important;
 }
 
-[desktop] .i-amphtml-ad-overlay-container {
+[desktop]:not([supports-landscape]) .i-amphtml-ad-overlay-container {
   /* On desktop a story page has a with of 45vh. */
   left: calc(50vw - 22.5vh) !important;
   /* And a height of 75 vh. */
@@ -87,34 +87,6 @@ amp-story-page[active] .i-amphtml-story-ad-link {
   left: auto !important;
   /* On desktop a story page has a with of 45vh. */
   right: calc(50vw - 22.5vh) !important;
-}
-
-.i-amphtml-story-ad-attribution {
-  color: #FFFFFF !important;
-  font-size: 18px !important;
-  font-family: 'Roboto', sans-serif !important;
-  font-weight: bold !important;
-  letter-spacing: 0.5px !important;
-  margin: 0 0 0 16px !important;
-  opacity: 0 !important;
-  padding: 0 !important;
-  visibility: hidden !important;
-}
-
-[dir=rtl] .i-amphtml-story-ad-attribution {
-  margin-left: 0px !important;
-  margin-right: 16px !important;
-}
-
-amp-story[ad-showing][desktop] .i-amphtml-story-ad-attribution {
-  /* Have to wait for page to slide in. */
-  transition: opacity 0.1s linear 0.3s;
-}
-
-
-amp-story[ad-showing] .i-amphtml-story-ad-attribution {
-  visibility: visible !important;
-  opacity: 1 !important;
 }
 
 .i-amphtml-glass-pane {
