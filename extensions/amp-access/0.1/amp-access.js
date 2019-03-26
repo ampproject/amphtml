@@ -650,7 +650,7 @@ export class AccessService {
    */
   handleAction_(invocation) {
     if (!invocation.satisfiesTrust(ActionTrust.HIGH)) {
-      return;
+      return null;
     }
     if (invocation.method == 'login') {
       if (invocation.event) {
