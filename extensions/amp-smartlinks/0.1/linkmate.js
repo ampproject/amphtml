@@ -42,7 +42,7 @@ export class Linkmate {
     /** @private {?number} */
     this.publisherID_ = linkmateOptions.publisherID;
 
-    /** @private {?string} */
+    /** @private {string} */
     this.linkAttribute_ = linkmateOptions.linkAttribute;
 
     /** @private {!Document|!ShadowRoot} */
@@ -133,7 +133,7 @@ export class Linkmate {
     // for later association with the response
     const postLinks = [];
     anchorList.forEach(anchor => {
-      const link = anchor[this.linkAttribute_];
+      const link = anchor.getAttribute(this.linkAttribute_);
       // If a link is already a Narrativ link.
       if (/shop-links.co/.test(link)) {
         // Check if amp flag is there. Add if necessary. Don't add to payload.
@@ -177,16 +177,17 @@ export class Linkmate {
    * @public
    */
   mapLinks_() {
-    return this.linkmateResponse_.map(smartLink => {
-      return Array.prototype.slice.call(this.anchorList_)
-          .map(anchor => {
-            return {
-              anchor,
-              replacementUrl: anchor[this.linkAttribute_] === smartLink['url']
-                && smartLink['auction_id']
-                ? `https://shop-links.co/${smartLink['auction_id']}/?amp=true` : null,
-            };
-          });
-    })[0];
+    const mappings = [];
+    this.anchorList_.forEach(anchor => {
+      this.linkmateResponse_.forEach(smartLink => {
+        if (anchor.getAttribute(this.linkAttribute_) === smartLink['url']
+            && smartLink['auction_id']) {
+          mappings.push({anchor, replacementUrl:
+              `https://shop-links.co/${smartLink['auction_id']}/?amp=true`});
+        }
+      });
+    });
+
+    return mappings;
   }
 }

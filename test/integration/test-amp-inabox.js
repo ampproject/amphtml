@@ -131,8 +131,7 @@ describe('inabox', function() {
         <script src="/examples/inabox-tag-integration.js"></script>
         `,
     }, env => {
-      it('should layout amp-img, amp-pixel, ' +
-          'amp-analytics', () => {
+      it('should layout amp-img, amp-pixel, amp-analytics', () => {
         // See amp4test.js for creative content
         return testAmpComponents();
       });
@@ -161,8 +160,9 @@ describe('inabox', function() {
         env.iframe.style.height = '100vh';
       });
 
-      it.configure().skipSafari().run('should layout amp-img, amp-pixel, ' +
-          'amp-analytics', () => {
+      // TODO(zombifier, #21545): fix this flaky test. Was using configuration:
+      // it.configure().skipSafari().run(...
+      it.skip('should layout amp-img, amp-pixel, amp-analytics', () => {
         // See amp4test.js for creative content
         return testAmpComponentsBTF(env.win);
       });

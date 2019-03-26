@@ -136,11 +136,9 @@ export class AmpList extends AMP.BaseElement {
       }
     }, ActionTrust.HIGH);
 
-    if (isExperimentOn(this.win, 'amp-list-resizable-children')) {
-      this.registerAction('changeToLayoutContainer',
-          () => this.changeToLayoutContainer_(),
-          ActionTrust.HIGH);
-    }
+    this.registerAction('changeToLayoutContainer',
+        () => this.changeToLayoutContainer_(),
+        ActionTrust.HIGH);
 
     /** @private {?../../../src/ssr-template-helper.SsrTemplateHelper} */
     this.ssrTemplateHelper_ = null;
@@ -225,22 +223,23 @@ export class AmpList extends AMP.BaseElement {
       this.maybeResizeListToFitItems_();
     });
 
-    this.loadMoreEnabledPromise_.then(enabled => {
-      if (enabled) {
-        this.mutateElement(() => {
-          this.getLoadMoreService_().initializeLoadMore();
-          const overflowElement = this.getOverflowElement();
-          if (overflowElement) {
-            toggle(overflowElement, false);
+    const loadMorePromise = this.loadMoreEnabledPromise_
+        .then(enabled => {
+          if (enabled) {
+            this.mutateElement(() => {
+              this.getLoadMoreService_().initializeLoadMore();
+              const overflowElement = this.getOverflowElement();
+              if (overflowElement) {
+                toggle(overflowElement, false);
+              }
+              this.element.warnOnMissingOverflow = false;
+            }).then(() => {
+              this.adjustContainerForLoadMoreButton_();
+            });
           }
-          this.element.warnOnMissingOverflow = false;
-        }).then(() => {
-          this.adjustContainerForLoadMoreButton_();
         });
-      }
-    });
 
-    return this.fetchList_();
+    return Promise.all([loadMorePromise, this.fetchList_()]);
   }
 
   /**
@@ -849,10 +848,6 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   changeToLayoutContainer_() {
-    // TODO (#18875): cleanup resizable-children experiment
-    userAssert(isExperimentOn(this.win, 'amp-list-resizable-children'),
-        'Experiment amp-list-resizable-children is disabled');
-
     const previousLayout = this.element.getAttribute('layout');
     // If we have already changed to layout container, no need to run again.
     if (previousLayout == Layout.CONTAINER) {
@@ -920,8 +915,10 @@ export class AmpList extends AMP.BaseElement {
   loadMoreCallback_(opt_reload = false) {
     if (!!this.loadMoreSrc_) {
       this.element.setAttribute('src', this.loadMoreSrc_);
+      // Clear url to avoid repeated fetches from same url
+      this.loadMoreSrc_ = null;
     } else if (!opt_reload) {
-      // Nothing more to load
+      // Nothing more to load or previous fetch still inflight
       return Promise.resolve();
     }
     this.mutateElement(() => {
