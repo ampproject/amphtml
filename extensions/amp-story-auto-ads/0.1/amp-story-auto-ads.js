@@ -22,7 +22,10 @@ import {
   StateChangeType,
 } from '../../amp-story/1.0/navigation-state';
 import {StateProperty} from '../../amp-story/1.0/amp-story-store-service';
+import {CSS as attributionCSS}
+  from '../../../build/amp-story-auto-ads-attribution-0.1.css';
 import {createElementWithAttributes, isJsonScriptTag} from '../../../src/dom';
+import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict, hasOwn, map} from '../../../src/utils/object';
 import {getUniqueId} from './utils';
@@ -308,7 +311,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     span.className = 'i-amphtml-story-ad-attribution';
     span.textContent = 'Ad';
 
-    container.appendChild(span);
+    createShadowRootWithStyle(container, span, attributionCSS);
     this.ampStory_.element.appendChild(container);
   }
 
