@@ -17,178 +17,178 @@
 import {LocalizedStringBundleDef, LocalizedStringId} from '../localization';
 
 /**
- * Localized string bundle used for ru strings.
+ * Localized string bundle used for fa strings.
  * @const {!LocalizedStringBundleDef}
  */
 export default /** @const {!LocalizedStringBundleDef} */ ({
   [LocalizedStringId.AMP_STORY_HINT_UI_PREVIOUS_LABEL]: {
-    string: 'Нажмите "Назад"',
+    string: 'روی «برگشت» ضربه بزنید',
   },
   [LocalizedStringId.AMP_STORY_TOOLTIP_EXPAND_TWEET]: {
-    string: 'Развернуть твит',
+    string: 'بزرگ کردن Tweet',
   },
   [LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LABEL]: {
-    string: 'Исходный домен:',
+    string: 'مشاهده در دامنه اصلی:',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_HEIGHT_SIZE_TEXT]: {
-    string: 'Увеличьте высоту окна браузера, чтобы посмотреть контент.',
+    string: 'برای مشاهده این تجربه، ارتفاع پنجره‌تان را افزایش دهید.',
   },
   [LocalizedStringId.AMP_STORY_CONSENT_ACCEPT_BUTTON_LABEL]: {
-    string: 'Принять',
+    string: 'پذیرش',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_DOWNLOAD]: {
-    string: 'Скачать',
+    string: 'بارگیری',
   },
   [LocalizedStringId.AMP_STORY_CONTINUE_ANYWAY_BUTTON_LABEL]: {
-    string: 'Все равно продолжить',
+    string: 'ادامه درهر صورت',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_PINTEREST]: {
     string: 'Pinterest',
   },
   [LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT]: {
-    string: 'Ваш браузер не поддерживает эту функцию.',
+    string: 'متأسفیم، به‌نظر می‌رسد مرورگرتان این تجربه را پشتیبانی نمی‌کند',
   },
   [LocalizedStringId.AMP_STORY_HINT_UI_NEXT_LABEL]: {
-    string: 'Нажмите "Далее"',
+    string: 'روی «بعدی» ضربه بزنید',
   },
   [LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_SUCCESS_TEXT]: {
-    string: 'Ссылка скопирована',
+    string: 'پیوند کپی شد!',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_ORDER_NOW]: {
-    string: 'Заказать',
+    string: 'اکنون سفارش داده شود',
   },
   [LocalizedStringId.AMP_STORY_BOOKEND_PRIVACY_SETTINGS_BUTTON_LABEL]: {
-    string: 'Настройки доступа к данным',
+    string: 'تغییر تنظیمات حریم خصوصی داده‌ها',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_GOOGLE_PLUS]: {
-    string: 'Google+',
+    string: 'Google+‎',
   },
   [LocalizedStringId.AMP_STORY_PAGE_PLAY_VIDEO]: {
-    string: 'Воспроизвести видео',
+    string: 'پخش ویدیو',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_FACEBOOK]: {
     string: 'Facebook',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_EXPLORE]: {
-    string: 'Изучить',
+    string: 'کاوش',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_LEARN_MORE]: {
-    string: 'Подробнее',
+    string: 'بیشتر بدانید',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_LISTEN]: {
-    string: 'Слушать',
+    string: 'گوش دادن',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SIGN_UP]: {
-    string: 'Зарегистрироваться',
+    string: 'ثبت‌نام',
   },
   [LocalizedStringId.AMP_STORY_CONSENT_DECLINE_BUTTON_LABEL]: {
-    string: 'Отклонить',
+    string: 'نپذیرفتن',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_TUMBLR]: {
     string: 'Tumblr',
   },
   [LocalizedStringId.AMP_STORY_BOOKEND_MORE_TO_READ_LABEL]: {
-    string: 'Ещё статьи',
+    string: 'موارد بیشتر برای خواندن',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINK]: {
-    string: 'Получить ссылку',
+    string: 'دریافت پیوند',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINKEDIN]: {
     string: 'LinkedIn',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT]: {
-    string: 'Увеличьте высоту и ширину окна браузера, чтобы посмотреть контент.',
+    string: 'برای مشاهده این تجربه، عرض و ارتفاع پنجره را افزایش دهید',
   },
   [LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT]: {
-    string: 'Не удалось скопировать ссылку в буфер обмена.',
+    string: 'پیوند در بریده‌دان کپی نشد :(',
   },
   [LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT]: {
-    string: 'Звук отключен',
+    string: 'صدا خاموش است',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
-    string: 'Страница доступна только в вертикальной ориентации.',
+    string: 'این صفحه درحالت چهره بهتر دیده می‌شود',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_READ]: {
-    string: 'Читать',
+    string: 'خواندن',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SHOW]: {
-    string: 'Показать',
+    string: 'نمایش',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_USE_APP]: {
-    string: 'Использовать приложение',
+    string: 'استفاده از برنامه',
   },
   [LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL]: {
-    string: 'Провести вверх',
+    string: 'تند کشیدن به بالا',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_WATCH_EPISODE]: {
-    string: 'Смотреть серию',
+    string: 'تماشای قسمت',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SHOP]: {
-    string: 'Купить',
+    string: 'خرید',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_PLAY]: {
-    string: 'Воспроизвести',
+    string: 'پخش',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_OPEN_APP]: {
-    string: 'Открыть приложение',
+    string: 'باز کردن برنامه',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_WATCH]: {
-    string: 'Смотреть',
+    string: 'تماشا',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SHOWTIMES]: {
-    string: 'Время сеансов',
+    string: 'زمان‌های نمایش',
   },
   [LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_SOUND_TEXT]: {
-    string: 'Звук включен',
+    string: 'صدا روشن است',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_INSTALL]: {
-    string: 'Установить',
+    string: 'اکنون نصب شود',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
-    string: 'Для доступа к этому контенту нужно включить эксперимент с AMP-историями.',
+    string: 'برای دیدن این محتوا، باید آزمایش داستان amp را فعال کنید.',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_BOOK_NOW]: {
-    string: 'Забронировать',
+    string: 'رزرو',
   },
   [LocalizedStringId.AMP_STORY_BOOKEND_PRIVACY_SETTINGS_TITLE]: {
-    string: 'Настройки доступа.',
+    string: 'تنظیمات حریم خصوصی',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_WIDTH_SIZE_TEXT]: {
-    string: 'Увеличьте ширину окна браузера, чтобы посмотреть контент.',
+    string: 'برای مشاهده این تجربه، عرض صفحه را افزایش دهید',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_BUY_TICKETS]: {
-    string: 'Купить билеты',
+    string: 'خرید بلیت',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_GET_NOW]: {
-    string: 'Скачать',
+    string: 'اکنون دریافت کنید',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_TWITTER]: {
-    string: 'Твиттер',
+    string: 'Twitter',
   },
   [LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_NO_SOUND_TEXT]: {
-    string: 'В контенте на странице нет звука.',
+    string: 'این صفحه صدا ندارد',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_MORE]: {
-    string: 'Ещё',
+    string: 'بیشتر',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_APPLY_NOW]: {
-    string: 'Подать заявку',
+    string: 'اکنون اعمال شود',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SUBSCRIBE]: {
-    string: 'Подписаться',
+    string: 'همین‌حالا مشترک شوید',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_VIEW]: {
-    string: 'Смотреть',
+    string: 'مشاهده',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_EMAIL]: {
-    string: 'По электронной почте',
+    string: 'ایمیل',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_WHATSAPP]: {
     string: 'WhatsApp',
   },
   [LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LINK]: {
-    string: 'Сведения о AMP-результатах',
+    string: 'اطلاعات بیشتر درباره نتایج AMP',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_SMS]: {
-    string: 'SMS',
+    string: 'پیامک',
   },});

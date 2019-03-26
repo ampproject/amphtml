@@ -17,178 +17,178 @@
 import {LocalizedStringBundleDef, LocalizedStringId} from '../localization';
 
 /**
- * Localized string bundle used for ru strings.
+ * Localized string bundle used for si strings.
  * @const {!LocalizedStringBundleDef}
  */
 export default /** @const {!LocalizedStringBundleDef} */ ({
   [LocalizedStringId.AMP_STORY_HINT_UI_PREVIOUS_LABEL]: {
-    string: 'Нажмите "Назад"',
+    string: '\'ආපසු\' තට්ටු කරන්න',
   },
   [LocalizedStringId.AMP_STORY_TOOLTIP_EXPAND_TWEET]: {
-    string: 'Развернуть твит',
+    string: 'ට්වීට් එක දිග හරින්න',
   },
   [LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LABEL]: {
-    string: 'Исходный домен:',
+    string: 'මුල් වසහ මත බලන්න:',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_HEIGHT_SIZE_TEXT]: {
-    string: 'Увеличьте высоту окна браузера, чтобы посмотреть контент.',
+    string: 'මෙම අත්දැකීම බැලීමට ඔබේ කවුළුවේ උස දිග හරින්න',
   },
   [LocalizedStringId.AMP_STORY_CONSENT_ACCEPT_BUTTON_LABEL]: {
-    string: 'Принять',
+    string: 'පිළිගන්න',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_DOWNLOAD]: {
-    string: 'Скачать',
+    string: 'බාගන්න',
   },
   [LocalizedStringId.AMP_STORY_CONTINUE_ANYWAY_BUTTON_LABEL]: {
-    string: 'Все равно продолжить',
+    string: 'කෙසේ හෝ ඉදිරියට යන්න',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_PINTEREST]: {
     string: 'Pinterest',
   },
   [LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT]: {
-    string: 'Ваш браузер не поддерживает эту функцию.',
+    string: 'කනගාටුයි, ඔබේ බ්‍රවුසරය මෙම අත්දැකීමට සහය නොදක්වන බව පෙනේ',
   },
   [LocalizedStringId.AMP_STORY_HINT_UI_NEXT_LABEL]: {
-    string: 'Нажмите "Далее"',
+    string: '\'මීළඟ\' තට්ටු කරන්න',
   },
   [LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_SUCCESS_TEXT]: {
-    string: 'Ссылка скопирована',
+    string: 'සබැඳිය පිටපත් විය!',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_ORDER_NOW]: {
-    string: 'Заказать',
+    string: 'දැන් ඇණවුම් කරන්න',
   },
   [LocalizedStringId.AMP_STORY_BOOKEND_PRIVACY_SETTINGS_BUTTON_LABEL]: {
-    string: 'Настройки доступа к данным',
+    string: 'දත්ත පෞද්ගලිකත්ව සැකසීම් වෙනස් කරන්න',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_GOOGLE_PLUS]: {
     string: 'Google+',
   },
   [LocalizedStringId.AMP_STORY_PAGE_PLAY_VIDEO]: {
-    string: 'Воспроизвести видео',
+    string: 'වීඩියෝව ධාවන කරන්න',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_FACEBOOK]: {
     string: 'Facebook',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_EXPLORE]: {
-    string: 'Изучить',
+    string: 'ගවේෂණය',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_LEARN_MORE]: {
-    string: 'Подробнее',
+    string: 'තවත් දැන ගන්න',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_LISTEN]: {
-    string: 'Слушать',
+    string: 'සවන් දෙන්න',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SIGN_UP]: {
-    string: 'Зарегистрироваться',
+    string: 'ලියාපදිංචි වන්න',
   },
   [LocalizedStringId.AMP_STORY_CONSENT_DECLINE_BUTTON_LABEL]: {
-    string: 'Отклонить',
+    string: 'ප්‍රතික්‍ෂේප කරන්න',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_TUMBLR]: {
     string: 'Tumblr',
   },
   [LocalizedStringId.AMP_STORY_BOOKEND_MORE_TO_READ_LABEL]: {
-    string: 'Ещё статьи',
+    string: 'තවත් කියවීමට',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINK]: {
-    string: 'Получить ссылку',
+    string: 'සබැඳිය ලබා ගන්න',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINKEDIN]: {
     string: 'LinkedIn',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT]: {
-    string: 'Увеличьте высоту и ширину окна браузера, чтобы посмотреть контент.',
+    string: 'මෙම අත්දැකීම බැලීමට ඔබේ කවුළුවේ දිග සහ පළල යන දෙකම දිග හරින්න',
   },
   [LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT]: {
-    string: 'Не удалось скопировать ссылку в буфер обмена.',
+    string: 'සබැඳිය පසුරු පුවරුවට පිටපත් කිරීමට නොහැකි විය :(',
   },
   [LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT]: {
-    string: 'Звук отключен',
+    string: 'හඬ ක්‍රියා විරහිතයි',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
-    string: 'Страница доступна только в вертикальной ориентации.',
+    string: 'පිටුව හොඳටම බැලිය හැක්කේ ආලේඛ්‍ය ප්‍රකාරයෙනි',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_READ]: {
-    string: 'Читать',
+    string: 'කියවන්න',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SHOW]: {
-    string: 'Показать',
+    string: 'පෙන්වන්න',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_USE_APP]: {
-    string: 'Использовать приложение',
+    string: 'යෙදුම භාවිත කරන්න',
   },
   [LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL]: {
-    string: 'Провести вверх',
+    string: 'ඉහළට ස්වයිප් කරන්න',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_WATCH_EPISODE]: {
-    string: 'Смотреть серию',
+    string: 'කතාංගය බලන්න',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SHOP]: {
-    string: 'Купить',
+    string: 'සාප්පු යන්න',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_PLAY]: {
-    string: 'Воспроизвести',
+    string: 'ධාවන කරන්න',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_OPEN_APP]: {
-    string: 'Открыть приложение',
+    string: 'යෙදුම විවෘත කරන්න',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_WATCH]: {
-    string: 'Смотреть',
+    string: 'නරඹන්න',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SHOWTIMES]: {
-    string: 'Время сеансов',
+    string: 'දර්ශන වේලා',
   },
   [LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_SOUND_TEXT]: {
-    string: 'Звук включен',
+    string: 'හඬ ක්‍රියාත්මකයි',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_INSTALL]: {
-    string: 'Установить',
+    string: 'දැන් ස්ථාපනය කරන්න',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
-    string: 'Для доступа к этому контенту нужно включить эксперимент с AMP-историями.',
+    string: 'ඔබ මෙම අන්තර්ගතය බැලීමට amp-කතා අත්හදා බැලීම සබල කළ යුතුමයි.',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_BOOK_NOW]: {
-    string: 'Забронировать',
+    string: 'වෙන් කිරීම',
   },
   [LocalizedStringId.AMP_STORY_BOOKEND_PRIVACY_SETTINGS_TITLE]: {
-    string: 'Настройки доступа.',
+    string: 'පෞද්ගලිකත්ව සැකසීම්',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_WIDTH_SIZE_TEXT]: {
-    string: 'Увеличьте ширину окна браузера, чтобы посмотреть контент.',
+    string: 'මෙම අත්දැකීම බැලීමට ඔබේ කවුළුවේ පළල දිග හරින්න',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_BUY_TICKETS]: {
-    string: 'Купить билеты',
+    string: 'ප්‍රවේශ පත්‍ර මිල දී ගන්න',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_GET_NOW]: {
-    string: 'Скачать',
+    string: 'දැන් ගන්න',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_TWITTER]: {
-    string: 'Твиттер',
+    string: 'Twitter',
   },
   [LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_NO_SOUND_TEXT]: {
-    string: 'В контенте на странице нет звука.',
+    string: 'මෙම පිටුවේ ශබ්ද නැත',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_MORE]: {
-    string: 'Ещё',
+    string: 'තවත්',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_APPLY_NOW]: {
-    string: 'Подать заявку',
+    string: 'දැන් අයැදුම් කරන්න',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SUBSCRIBE]: {
-    string: 'Подписаться',
+    string: 'දැන් දායක වන්න',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_VIEW]: {
-    string: 'Смотреть',
+    string: 'බලන්න',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_EMAIL]: {
-    string: 'По электронной почте',
+    string: 'ඉ-තැපෑල',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_WHATSAPP]: {
     string: 'WhatsApp',
   },
   [LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LINK]: {
-    string: 'Сведения о AMP-результатах',
+    string: 'AMP ප්‍රතිඵල ගැන තවත්',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_SMS]: {
-    string: 'SMS',
+    string: 'කෙටිපණිවුඩ',
   },});
