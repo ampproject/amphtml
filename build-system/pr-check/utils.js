@@ -130,9 +130,9 @@ function stopTimer(functionName, fileName, startTime) {
  * @return {<Object>} Process info.
  */
 function timedExec(cmd) {
-  const startTime = startTimer(cmd);
+  const startTime = startTimer(cmd, fileName);
   const p = exec(cmd);
-  stopTimer(cmd, startTime);
+  stopTimer(cmd, fileName, startTime);
   return p;
 }
 
