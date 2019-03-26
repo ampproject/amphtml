@@ -191,6 +191,7 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
   },
   [LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT]: {
     string: 'សូម​អភ័យទោស ' +
+        // eslint-disable-next-line max-len
         'កម្មវិធីរុករកតាមអ៊ីនធឺណិត​របស់អ្នក​ហាក់ដូចជា​មិនស្គាល់​បទពិសោធន៍​នេះ​ទេ',
   },
 });
