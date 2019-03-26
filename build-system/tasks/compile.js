@@ -286,6 +286,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       // Don't include tests.
       '!**_test.js',
       '!**/test-*.js',
+      '!**/test-e2e/*.js',
       '!**/*.extern.js',
     ];
     // Add needed path for extensions.
