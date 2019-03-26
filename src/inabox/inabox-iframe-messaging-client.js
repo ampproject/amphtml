@@ -60,7 +60,7 @@ function createIframeMessagingClient(win) {
     const unlisten = iframeClient.registerCallback(MessageType.HOST_RESPONSE,
         message => {
           iframeClient.setBroadcastMode(false);
-          iframeClient.setHostWindow(message.source);
+          iframeClient.setHostWindow(message['source']);
           unlisten();
           resolve(iframeClient);
         });
