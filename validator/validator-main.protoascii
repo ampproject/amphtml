@@ -2634,6 +2634,17 @@ tags: {
 }
 tags: {
   html_format: AMP
+  tag_name: "TRACK"
+  spec_name: "amp-ima-video > track"
+  mandatory_parent: "AMP-IMA-VIDEO"
+  # <amp-bind>
+  attrs: { name: "[label]" }
+  attrs: { name: "[src]" }
+  attrs: { name: "[srclang]" }
+  attr_lists: "track-attrs-no-subtitles"
+}
+tags: {
+  html_format: AMP
   html_format: AMP4ADS
   html_format: ACTIONS
   tag_name: "TRACK"
