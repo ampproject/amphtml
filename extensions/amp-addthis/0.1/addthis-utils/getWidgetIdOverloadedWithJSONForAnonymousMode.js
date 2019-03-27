@@ -34,7 +34,7 @@ const overrideKeys = ['backgroundColor', 'borderRadius', 'counterColor',
  * If object is not empty, return only the JSON of the override object
  * If an error happens return empty string
  * @param {AMP.BaseElement} self
- * @return {string} JSON | empty string means there is no override object
+ * @return {JsonObject} JSON | empty string means there is no override object
  */
 export const getWidgetOverload = self => {
   const hasGetAttributeFunction = self && self.element &&
