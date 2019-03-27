@@ -118,11 +118,12 @@ class AmpBrightcove extends AMP.BaseElement {
     this.playerReadyResolver_ = deferred.resolve;
 
     // Warn if the player does not have video interface support
-    this.readyTimeout_ = Services.timerFor(window).delay(() => {
-      user().warn(TAG,
-          'Did not receive ready callback from player %s.' +
-        ' Ensure it has the videojs-amp-support plugin.', this.playerId_);
-    }, 3000);
+    this.readyTimeout_ = /** @type {number} */ (
+      Services.timerFor(window).delay(() => {
+        user().warn(TAG,
+            'Did not receive ready callback from player %s.' +
+          ' Ensure it has the videojs-amp-support plugin.', this.playerId_);
+      }, 3000));
 
     this.playerReadyResolver_(this.iframe_);
   }
@@ -443,17 +444,17 @@ class AmpBrightcove extends AMP.BaseElement {
 
   /** @override */
   getCurrentTime() {
-    return this.currentTime_;
+    return /** @type {number} */ (this.currentTime_);
   }
 
   /** @override */
   getDuration() {
-    return this.duration_;
+    return /** @type {number} */ (this.duration_);
   }
 
   /** @override */
   getPlayedRanges() {
-    return this.playedRanges_;
+    return /** @type {!Array<Array<number>>} */ (this.playedRanges_);
   }
 
   /** @override */

@@ -1302,7 +1302,7 @@ export class Resources {
       let aboveVpHeightChange = 0;
       for (let i = 0; i < requestsChangeSize.length; i++) {
         const request = requestsChangeSize[i];
-        const {resource} = /** @const {!Resource} */ (request);
+        const {resource} = /** @type {!ChangeSizeRequestDef} */ (request);
         const box = resource.getLayoutBox();
 
         let topMarginDiff = 0;

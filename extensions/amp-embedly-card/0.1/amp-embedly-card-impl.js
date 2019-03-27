@@ -83,7 +83,7 @@ export class AmpEmbedlyCard extends AMP.BaseElement {
       this.element.appendChild(iframe);
     });
 
-    this.iframe_ = iframe;
+    this.iframe_ = /** @type {HTMLIFrameElement} */ (iframe);
 
     return this.loadPromise(iframe);
   }

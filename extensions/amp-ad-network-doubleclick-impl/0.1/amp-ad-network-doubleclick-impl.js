@@ -194,8 +194,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     /** @type {?Object<string,*>}*/
     this.jsonTargeting = null;
 
-    /** @type {number} */
-    this.adKey = 0;
+    /** @type {string} */
+    this.adKey = '0';
 
     /** @type {!Array<string>} */
     this.experimentIds = [];
@@ -530,9 +530,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       'msz': msz,
       'psz': psz,
       'scp': serializeTargeting(
-          (this.jsonTargeting && this.jsonTargeting['targeting']) || null,
-          (this.jsonTargeting &&
-            this.jsonTargeting['categoryExclusions']) || null),
+          /** @type {?Object<string, (!Array<string>|string)>} */ (
+              (this.jsonTargeting && this.jsonTargeting['targeting']) || null),
+          /** @type {?(!Array<string>|string)} */ (
+              (this.jsonTargeting &&
+                  this.jsonTargeting['categoryExclusions']) || null)),
       'spsa': this.isSinglePageStoryAd ?
         `${pageLayoutBox.width}x${pageLayoutBox.height}` : null,
     }, googleBlockParameters(this));
@@ -676,8 +678,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
               rtcResponse.callout);
           this.jsonTargeting['targeting'] =
               !!this.jsonTargeting['targeting'] ?
-                deepMerge(this.jsonTargeting['targeting'],
-                    rewrittenResponse) :
+                deepMerge(/** @type {!Object} */ (
+                    this.jsonTargeting['targeting']),
+                        rewrittenResponse) :
                 rewrittenResponse;
         }
         if (rtcResponse.response['categoryExclusions']) {

@@ -75,7 +75,7 @@ export class AmpMathml extends AMP.BaseElement {
           this.element, data['height'], data['width']);
     }, /* opt_is3P */true);
     this.element.appendChild(iframe);
-    this.iframe_ = iframe;
+    this.iframe_ = /** @type {?HTMLIFrameElement} */ (iframe);
     return this.loadPromise(iframe);
   }
 

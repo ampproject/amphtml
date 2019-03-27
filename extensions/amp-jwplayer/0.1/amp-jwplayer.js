@@ -82,12 +82,10 @@ class AmpJWPlayer extends AMP.BaseElement {
 
     this.contentSearch_ = element.getAttribute('data-content-search') ||
         '';
-    this.contentContextual_ = element.getAttribute('data-content-contextual') ||
-        false;
+    this.contentContextual_ = element.hasAttribute('data-content-contextual');
     this.contentRecency_ = element.getAttribute('data-content-recency') ||
         '';
-    this.contentBackfill_ = element.getAttribute('data-content-backfill') ||
-        false;
+    this.contentBackfill_ = element.hasAttribute('data-content-backfill');
   }
 
 
@@ -111,7 +109,7 @@ class AmpJWPlayer extends AMP.BaseElement {
     iframe.src = src;
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
-    this.iframe_ = iframe;
+    this.iframe_ = /** @type {?HTMLIFrameElement} */ (iframe);
     return this.loadPromise(iframe);
   }
 

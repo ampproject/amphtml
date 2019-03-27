@@ -106,7 +106,7 @@ export class AmpSelector extends AMP.BaseElement {
     } else {
       kbSelectMode = KEYBOARD_SELECT_MODES.NONE;
     }
-    this.kbSelectMode_ = kbSelectMode;
+    this.kbSelectMode_ = /** @type {!KEYBOARD_SELECT_MODES} */ (kbSelectMode);
 
     this.registerAction('clear', this.clearAllSelections_.bind(this));
 
@@ -537,7 +537,7 @@ export class AmpSelector extends AMP.BaseElement {
   selectionKeyDownHandler_(event) {
     const {key} = event;
     if (key == Keys.SPACE || key == Keys.ENTER) {
-      if (this.elements_.includes(event.target)) {
+      if (this.elements_.includes(/** @type {!Element} */ (event.target))) {
         event.preventDefault();
         const el = dev().assertElement(event.target);
         this.onOptionPicked_(el);

@@ -372,7 +372,7 @@ export class AmpIframe extends AMP.BaseElement {
 
     const iframe = this.element.ownerDocument.createElement('iframe');
 
-    this.iframe_ = iframe;
+    this.iframe_ = /** @type {?HTMLIFrameElement} */ (iframe);
 
     this.applyFillContent(iframe);
     iframe.name = 'amp_iframe' + count++;
@@ -494,7 +494,8 @@ export class AmpIframe extends AMP.BaseElement {
   mutatedAttributesCallback(mutations) {
     const src = mutations['src'];
     if (src !== undefined) {
-      this.iframeSrc = this.transformSrc_(src);
+      this.iframeSrc =
+        /** @type {?string} */ (this.transformSrc_(src));
       if (this.iframe_) {
         this.iframe_.src = this.assertSource_(
             /** @type {string} */ (this.iframeSrc),

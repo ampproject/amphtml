@@ -409,7 +409,7 @@ export class Gestures {
         'Recognizer is not currently allowed: %s', recognizer.getType());
     const overserver = this.overservers_[recognizer.getType()];
     if (overserver) {
-      overserver.fire(new Gesture(recognizer.getType(), data, Date.now(),
+      overserver.fire(new Gesture(recognizer.getType(), data, new Date(),
           event));
     }
   }

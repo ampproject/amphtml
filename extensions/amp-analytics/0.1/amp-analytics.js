@@ -163,7 +163,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       this.linkerManager_ = null;
     }
 
-    for (let i = 0; i < this.requests_.length; i++) {
+    for (const i of this.requests_.keys()) {
       this.requests_[i].dispose();
       delete this.requests_[i];
     }
@@ -224,7 +224,7 @@ export class AmpAnalytics extends AMP.BaseElement {
               return new AnalyticsConfig(this.element).loadConfig();
             })
             .then(config => {
-              this.config_ = config;
+              this.config_ = /** @type {!JsonObject} */ (config);
               return new CookieWriter(this.win,
                   this.element, this.config_).write();
             })
@@ -492,7 +492,7 @@ export class AmpAnalytics extends AMP.BaseElement {
   initializeLinker_() {
     const type = this.element.getAttribute('type');
     this.linkerManager_ = new LinkerManager(this.getAmpDoc(),
-        this.config_, type, this.element);
+        /** @type {!JsonObject} */ (this.config_), type, this.element);
     this.linkerManager_.init();
   }
 

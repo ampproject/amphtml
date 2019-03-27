@@ -140,7 +140,7 @@ export class Transport {
    *
    * @param {!Window} win
    * @param {!Element} element
-   * @param {!../../../src/preconnect.Preconnect|undefined} opt_preconnect
+   * @param {(!../../../src/preconnect.Preconnect|undefined)=} opt_preconnect
    */
   maybeInitIframeTransport(win, element, opt_preconnect) {
     if (!this.options_['iframe'] || this.iframeTransport_) {

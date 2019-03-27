@@ -58,7 +58,7 @@ class AmpAccordion extends AMP.BaseElement {
     /** @private {boolean} */
     this.sessionOptOut_ = false;
 
-    /** @private {Element} */
+    /** @private {?Array<!Element>} */
     this.sections_ = null;
 
     /** @private {?../../../src/service/action-impl.ActionService} */
@@ -548,7 +548,8 @@ class AmpAccordion extends AMP.BaseElement {
       if (newFocusIndex < 0) {
         newFocusIndex = newFocusIndex + this.headers_.length;
       }
-      const newFocusHeader = this.headers_[newFocusIndex];
+      const newFocusHeader =
+          /** @type {!Element} */ (this.headers_[newFocusIndex]);
       tryFocus(newFocusHeader);
     }
   }

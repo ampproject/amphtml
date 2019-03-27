@@ -606,7 +606,6 @@ AMP.AmpAdUIHandler = class {
   constructor(baseInstance) {}
 };
 
-/** @type {BaseElement$$module$src$base_element} */
 AMP.BaseTemplate;
 
 AMP.RealTimeConfigManager;

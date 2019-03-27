@@ -201,8 +201,8 @@ class AmpAddThis extends AMP.BaseElement {
               loc,
               title: this.canonicalTitle_,
               pubId: this.pubId_,
-              atConfig: this.atConfig_,
-              referrer,
+              atConfig: /** @type {?JsonObject} */ (this.atConfig_),
+              referrer: /** @type {string} */ (referrer),
               ampDoc,
             });
 
@@ -286,7 +286,7 @@ class AmpAddThis extends AMP.BaseElement {
 
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
-    this.iframe_ = iframe;
+    this.iframe_ = /** @type {?HTMLIFrameElement} */ (iframe);
 
     configManager.register({
       pubId: this.pubId_,

@@ -95,9 +95,11 @@ export class AmpAnimation extends AMP.BaseElement {
     const scriptElement = userAssert(
         childElementByTag(this.element, 'script'),
         '"<script type=application/json>" must be present');
-    this.configJson_ = tryParseJson(scriptElement.textContent, error => {
-      throw user().createError('failed to parse animation script', error);
-    });
+    this.configJson_ = /** @type {?JsonObject} */ (
+        tryParseJson(scriptElement.textContent, error => {
+          throw user().createError('failed to parse animation script', error);
+        })
+    );
 
     if (this.triggerOnVisibility_) {
       // Make the element minimally displayed to make sure that `layoutCallback`

@@ -90,7 +90,8 @@ class AmpSocialShare extends AMP.BaseElement {
     Object.assign(this.params_, typeConfig['defaultParams'],
         getDataParamsFromAttributes(element));
 
-    const hrefWithVars = addParamsToUrl(this.shareEndpoint_, this.params_);
+    const hrefWithVars = addParamsToUrl(
+        /** @type {string} */ (this.shareEndpoint_), this.params_);
     const urlReplacements = Services.urlReplacementsForDoc(this.element);
     const bindingVars = typeConfig['bindings'];
     const bindings = {};

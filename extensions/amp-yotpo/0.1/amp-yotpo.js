@@ -58,7 +58,7 @@ export class AmpYotpo extends AMP.BaseElement {
     this.unlisteners_.push(unlisten);
 
     this.element.appendChild(iframe);
-    this.iframe_ = iframe;
+    this.iframe_ = /** @type {?HTMLIFrameElement} */ (iframe);
     return this.loadPromise(iframe);
   }
 

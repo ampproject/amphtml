@@ -146,7 +146,7 @@ class AmpTwitter extends AMP.BaseElement {
       this.updateForFailureState_();
     }, /* opt_is3P */true);
     this.element.appendChild(iframe);
-    this.iframe_ = iframe;
+    this.iframe_ = /** @type {?HTMLIFrameElement} */ (iframe);
     return this.loadPromise(iframe);
   }
 
