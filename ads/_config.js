@@ -734,6 +734,11 @@ export const adConfig = {
     ],
     consentHandlingOverride: true,
   },
+  
+   'performancenative': {
+	prefetch: 'https://api.performancenative.com/assets/pn.js',
+    renderStartImplemented: true,
+  },
 
   'pixels': {
     prefetch: 'https://cdn.adsfactor.net/amp/pixels-amp.min.js',
