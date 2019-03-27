@@ -145,7 +145,9 @@ export const adConfig = {
     ],
   },
 
-  'adocean': {},
+  'adocean': {
+    consentHandlingOverride: true,
+  },
 
   'adpicker': {
     renderStartImplemented: true,
