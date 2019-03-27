@@ -26,7 +26,10 @@ import {dict, map} from '../../../src/utils/object';
 import {getMinOpacity} from './opacity';
 import {getMode} from '../../../src/mode';
 import {isArray, isFiniteNumber} from '../../../src/types';
-import {layoutRectLtwh} from '../../../src/layout-rect';
+import {
+  layoutPositionRelativeToScrolledViewport,
+  layoutRectLtwh,
+} from '../../../src/layout-rect';
 
 const TAG = 'amp-analytics/visibility-manager';
 
@@ -34,13 +37,6 @@ const VISIBILITY_ID_PROP = '__AMP_VIS_ID';
 
 /** @type {number} */
 let visibilityIdCounter = 1;
-
-/** @enum {string} */
-export const RelativePosition = {
-  ABOVE: 'above',
-  AT: 'at',
-  BELOW: 'below',
-};
 
 /**
  * @param {!Element} element
@@ -411,18 +407,11 @@ export class VisibilityManager {
           'elementWidth': layoutBox.width,
           'elementHeight': layoutBox.height,
         }));
+        state['initialScrollDepth'] = layoutPositionRelativeToScrolledViewport(
+            layoutBox, viewport, model.getInitialScrollDepth());
+        state['maxScrollDepth'] = layoutPositionRelativeToScrolledViewport(
+            layoutBox, viewport, this.getMaxScrollDepth());
       }
-
-      state['initialScrollDepth'] = this.getRelativePosition_(
-          layoutBox.top,
-          layoutBox.height,
-          model.getInitialScrollDepth(),
-          viewport.getHeight());
-      state['maxScrollDepth'] = this.getRelativePosition_(
-          layoutBox.top,
-          layoutBox.height,
-          this.getMaxScrollDepth(),
-          viewport.getHeight());
 
       callback(state);
     });
@@ -449,32 +438,6 @@ export class VisibilityManager {
     return function() {
       model.dispose();
     };
-  }
-
-  /**
-   * Given the vertical dimensions of an element, a scroll position, and the
-   * viewport height, returns an indication of whether the viewport was
-   * above the element, or below the element, or included the element.
-   *
-   * @param {number} elementTop The top of the element's bounding box.
-   * @param {number} elementHeight The height of the element's bounding box.
-   * @param {number} scrollPos The scroll position, e.g. the document y position
-   *                 at the top of the viewport.
-   * @param {number} viewportHeight The height of the viewport.
-   * @return {!RelativePosition}
-   * @private
-   */
-  getRelativePosition_(elementTop, elementHeight, scrollPos, viewportHeight) {
-    if (scrollPos > elementTop + elementHeight) {
-      // The scroll position (the top of the page) is below the element.
-      return RelativePosition.BELOW;
-    }
-    if (scrollPos + viewportHeight < elementTop) {
-      // The bottom of the viewport is above the element.
-      return RelativePosition.ABOVE;
-    }
-    // Some portion of the element is within the viewport.
-    return RelativePosition.AT;
   }
 
   /**
