@@ -232,7 +232,7 @@ export class AmpSlideScroll extends BaseSlides {
    * @private
    */
   touchMoveHandler_(event) {
-    event.stopPropagation();
+    event.preventDefault();
     this.clearAutoplay();
     if (!this.hasNativeSnapPoints_) {
       return;
@@ -249,6 +249,7 @@ export class AmpSlideScroll extends BaseSlides {
    */
   touchEndHandler_() {
     if (this.hasTouchMoved_) {
+      event.preventDefault();
       if (this.scrollTimeout_) {
         Services.timerFor(this.win).cancel(this.scrollTimeout_);
       }
