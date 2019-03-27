@@ -354,14 +354,14 @@ export class VisibilityManager {
     }
 
     const viewport = Services.viewportForDoc(this.ampdoc);
+    const scrollDepth = viewport.getScrollTop();
+    model.maybeSetInitialScrollDepth(scrollDepth);
+    this.maybeUpdateMaxScrollDepth(scrollDepth);
 
     // Block visibility.
     if (readyPromise) {
       model.setReady(false);
       readyPromise.then(() => {
-        const scrollDepth = viewport.getScrollTop();
-        model.maybeSetInitialScrollDepth(scrollDepth);
-        this.maybeUpdateMaxScrollDepth(scrollDepth);
         model.setReady(true);
       });
     }
