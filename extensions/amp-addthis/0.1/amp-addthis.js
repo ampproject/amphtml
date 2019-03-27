@@ -182,7 +182,7 @@ class AmpAddThis extends AMP.BaseElement {
     // Optional attributes
     const ampDoc = this.getAmpDoc();
     this.canonicalUrl_ = this.element.getAttribute('data-canonical-url') ||
-        ampDoc.getUrl();
+      Services.documentInfoForDoc(this.element).canonicalUrl || ampDoc.getUrl();
     this.canonicalTitle_ = this.element.getAttribute('data-canonical-title') ||
         ampDoc.win.document.title;
     this.widgetType_ = this.element.getAttribute('data-widget-type');
