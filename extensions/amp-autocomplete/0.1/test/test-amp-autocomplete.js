@@ -229,6 +229,10 @@ describes.realWin('amp-autocomplete unit tests', {
     impl.filter_ = 'token-prefix';
     expect(impl.filterData_(['a', 'b a', 'ab', 'ba', 'c a'], 'a')).to.have
         .ordered.members(['a', 'b a', 'ab', 'c a']);
+    // None filter 
+    impl.filter_ = 'none';
+    expect(impl.filterData_(['a', 'b a', 'ab', 'ba', 'c a'], 'a')).to.have
+    .ordered.members(['a', 'b a', 'ab', 'ba', 'c a']);
     // Remaining filters should error
     impl.filter_ = 'fuzzy';
     expect(() => impl.filterData_(['a', 'b', 'c'], 'a')).to.throw(
@@ -236,12 +240,17 @@ describes.realWin('amp-autocomplete unit tests', {
     impl.filter_ = 'custom';
     expect(() => impl.filterData_(['a', 'b', 'c'], 'a')).to.throw(
         'Filter not yet supported: custom');
-    impl.filter_ = 'none';
-    expect(() => impl.filterData_(['a', 'b', 'c'], 'a')).to.throw(
-        'Filter not yet supported: none');
     impl.filter_ = 'invalid';
     expect(() => impl.filterData_(['a', 'b', 'c'], 'a')).to.throw(
         'Unexpected filter: invalid');
+  });
+
+  it('truncateToMaxEntries_() should truncate given data', () => {
+    expect(impl.truncateToMaxEntries_(['a', 'b', 'c', 'd'])).to.have.ordered.members(['a', 'b', 'c', 'd']);
+    impl.maxEntries_ = 3;
+    expect(impl.truncateToMaxEntries_(['a', 'b', 'c', 'd'])).to.have.ordered.members(['a', 'b', 'c']);
+    expect(impl.truncateToMaxEntries_(['a', 'b', 'c'])).to.have.ordered.members(['a', 'b', 'c']);
+    expect(impl.truncateToMaxEntries_(['a', 'b'])).to.have.ordered.members(['a', 'b']);
   });
 
   it('should show and hide results on toggle', () => {
