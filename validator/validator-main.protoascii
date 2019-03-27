@@ -2645,8 +2645,6 @@ tags: {
 }
 tags: {
   html_format: AMP
-  html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "TRACK"
   spec_name: "amp-ima-video > track[kind=subtitles]"
   mandatory_parent: "AMP-IMA-VIDEO"
