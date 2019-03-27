@@ -48,6 +48,7 @@ import {AmpStoryGridLayer} from './amp-story-grid-layer';
 import {AmpStoryHint} from './amp-story-hint';
 import {AmpStoryPage, NavigationDirection, PageState} from './amp-story-page';
 import {AmpStoryPageAttachment} from './amp-story-page-attachment';
+import {AmpStoryRenderService} from './amp-story-render-service';
 import {AmpStoryVariableService} from './variable-service';
 import {CSS} from '../../../build/amp-story-1.0.css';
 import {CommonSignals} from '../../../src/common-signals';
@@ -501,7 +502,7 @@ export class AmpStory extends AMP.BaseElement {
       return;
     }
 
-    this.vsync_.run({
+    return this.vsync_.runPromise({
       measure: state => {
         state.vh = this.activePage_.element./*OK*/clientHeight / 100;
         state.vw = this.activePage_.element./*OK*/clientWidth / 100;
@@ -2360,32 +2361,6 @@ export class AmpStory extends AMP.BaseElement {
   }
 }
 
-/** @implements {../../../src/render-delaying-services.RenderDelayingService} */
-class AmpStoryRender {
-  /**
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-   */
-  constructor(ampdoc) {
-    /**
-     * @private {!Element}
-     */
-    this.storyEl_ = ampdoc.getRootNode().querySelector('amp-story[standalone]');
-  }
-
-  /**
-   * Function to return a promise for when it is finished delaying render, and
-   * is ready.  Implemented from RenderDelayingService
-   * @return {!Promise}
-   */
-  whenReady() {
-    if (!this.storyEl_) {
-      return Promise.resolve();
-    }
-
-    return this.storyEl_.signals().whenSignal(CommonSignals.LOAD_END);
-  }
-}
-
 AMP.extension('amp-story', '1.0', AMP => {
   AMP.registerElement('amp-story', AmpStory, CSS);
   AMP.registerElement('amp-story-access', AmpStoryAccess);
@@ -2395,5 +2370,5 @@ AMP.extension('amp-story', '1.0', AMP => {
   AMP.registerElement('amp-story-grid-layer', AmpStoryGridLayer);
   AMP.registerElement('amp-story-page', AmpStoryPage);
   AMP.registerElement('amp-story-page-attachment', AmpStoryPageAttachment);
-  AMP.registerServiceForDoc('amp-story-render', AmpStoryRender);
+  AMP.registerServiceForDoc('amp-story-render', AmpStoryRenderService);
 });
