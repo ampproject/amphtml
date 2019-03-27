@@ -62,7 +62,7 @@ Example:
   <amp-autocomplete filter="substring" id="myAutocomplete">
     <input type="text">
     <script type="application/json">
-      { items: ["a", "b", "c"] }
+      { "items": ["a", "b", "c"] }
     </script>
   </amp-autocomplete>
 ```
@@ -79,12 +79,12 @@ Example:
       <li><strong>token-prefix</strong>: if the user input is a prefix of any word in a multi-worded item, then the item gets suggested; example “je” is a token-prefix in “blue jeans”</li>
       <li><strong>fuzzy</strong>: typos in the input field can result in partial match items appearing in the filtered results—need further research</li>
       <li><strong>none</strong>: no client-side rendering; a provided server endpoint will be queried for results</li>
-      <li><strong>custom</strong>: a conditional statement involving an item and a user input to be applied to each item such that evaluating to true implies the item gets suggested; using this filter requires including `amp-bind`; if `filter==custom`, an additional attribute `filter-expr` is required to specify a boolean expression by which to perform the custom filter.</li>
+      <li><strong>custom</strong>: a conditional statement involving an item and a user input to be applied to each item such that evaluating to true implies the item gets suggested; using this filter requires including <code>amp-bind</code> if <code>filter==custom</code>, an additional attribute <code>filter-expr</code> is required to specify a boolean expression by which to perform the custom filter.</li>
     </td>
   </tr>
   <tr>
     <td width="40%"><strong>filter-expr [optional]</strong></td>
-    <td>Required if `filter==custom`</td>
+    <td>Required if <code>filter==custom</code></td>
   </tr>
   <tr>
     <td width="40%"><strong>filter-value [optional]</strong></td>
@@ -105,7 +105,7 @@ Example:
   <tr>
     <td width="40%"><strong>suggest-first [optional]</strong></td>
     <td>
-      Suggest the first entry in the list of results by marking it active; only possible if `filter==prefix` (does nothing otherwise)
+      Suggest the first entry in the list of results by marking it active; only possible if <code>filter==prefix</code> (does nothing otherwise)
     </td>
   </tr>
   <tr>
@@ -126,8 +126,8 @@ Read more about [AMP Actions and Events](../../spec/amp-actions-and-events.md).
 <table>
   <tr>
     <td width="40%"><strong>select</strong></td>
-    <td>`amp-autocomplete` triggers the `select` event when the user selects an option via click, tap, keyboard navigation or accepting typeahead.
-    `event` contains the `value` attribute value of the selected element.
+    <td><code>amp-autocomplete</code> triggers the <code>select</code> event when the user selects an option via click, tap, keyboard navigation or accepting typeahead.
+    <code>event</code> contains the <code>value</code> attribute value of the selected element.</td>
   </tr>
 
 </table>
