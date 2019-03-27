@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 import {closest} from '../dom';
-import {parseJson} from '../json';
 
 /**
  * A unique identifier for each localized string.  Localized string IDs should:
