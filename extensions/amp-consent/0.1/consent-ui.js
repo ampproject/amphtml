@@ -304,14 +304,14 @@ export class ConsentUI {
         if (dataHeight >= 10 && dataHeight <= 60) {
           this.initialHeight_ = `${dataHeight}vh`;
         } else {
-          dev().error(
+          user().error(
               TAG,
               `Inavlid initial height: ${data['initialHeight']}.` +
             'Minimum: 10vh. Maximum: 60vh.'
           );
         }
       } else {
-        dev().error(
+        user().error(
             TAG,
             `Inavlid initial height: ${data['initialHeight']}.` +
           'Must be a string in "vh" units.'
