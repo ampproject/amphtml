@@ -120,7 +120,7 @@ const command = {
     } else if (opt_mode === 'master') {
       cmd += ' --master';
     }
-    const {status} = timedExec(cmd);
+    const status = timedExec(cmd);
     if (status != 0) {
       console.error(FILELOGPREFIX, colors.red('ERROR:'),
           'Found errors while running', colors.cyan(cmd));

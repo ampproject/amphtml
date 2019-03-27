@@ -45,14 +45,18 @@ const timedExecOrDie =
 async function main() {
   const startTime = startTimer(FILENAME, FILENAME);
   const buildTargets = determineBuildTargets();
+  const exitCodes = [];
 
   if (!isTravisPullRequestBuild()) {
     downloadDistOutput(FILENAME);
     timedExecOrDie('gulp update-packages');
-    timedExec('gulp e2e --nobuild --headless');
+    exitCodes.push(
+        timedExec('gulp e2e --nobuild --headless'));
     await startSauceConnect(FILENAME);
-    timedExec('gulp test --unit --nobuild --saucelabs_lite');
-    timedExec('gulp test --integration --nobuild --compiled --saucelabs');
+    exitCodes.push(
+        timedExec('gulp test --unit --nobuild --saucelabs_lite'));
+    exitCodes.push(
+        timedExec('gulp test --integration --nobuild --compiled --saucelabs'));
 
     stopSauceConnect(FILENAME);
   } else {
@@ -71,23 +75,27 @@ async function main() {
     }
     downloadBuildOutput(FILENAME);
     timedExecOrDie('gulp update-packages');
-    timedExec('gulp e2e --nobuild --headless');
+    exitCodes.push(
+        timedExec('gulp e2e --nobuild --headless'));
     await startSauceConnect(FILENAME);
 
     if (buildTargets.has('RUNTIME') ||
         buildTargets.has('BUILD_SYSTEM') ||
         buildTargets.has('UNIT_TEST')) {
-      timedExec('gulp test --unit --nobuild --saucelabs_lite');
+      exitCodes.push(
+          timedExec('gulp test --unit --nobuild --saucelabs_lite'));
     }
 
     if (buildTargets.has('RUNTIME') ||
         buildTargets.has('BUILD_SYSTEM') ||
         buildTargets.has('INTEGRATION_TEST')) {
-      timedExec('gulp test --integration --nobuild --saucelabs');
+      exitCodes.push(
+          timedExec('gulp test --integration --nobuild --saucelabs'));
     }
     stopSauceConnect(FILENAME);
   }
 
+  process.exitCode = exitCodes.some(code => code != 0) ? 1 : 0;
   stopTimer(FILENAME, FILENAME, startTime);
 }
 
