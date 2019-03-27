@@ -1,4 +1,4 @@
-FAIL
+PASS
 |  <!--
 |    Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 |
@@ -47,9 +47,7 @@ FAIL
 |      data-poster="path/to/poster.png">
 |      <source src="https://s0.2mdn.net/4253510/google_ddm_animation_480P.mpeg" type="application/x-mpegURL">
 |      <source src="https://s0.2mdn.net/4253510/google_ddm_animation_480P.mp4" type="video/mp4"> >
-|      <track kind="subtitle" srclang="en" src="https://s0.2mdn.net/4253510/google_ddm_animation_480P.mp4.track">
->>     ^~~~~~~~~
-amp-ima-video/0.1/test/validator-amp-ima-video.html:49:4 The attribute 'kind' in tag 'amp-ima-video > track' is set to the invalid value 'subtitle'. [DISALLOWED_HTML]
+|      <track kind="subtitles" srclang="en" src="https://s0.2mdn.net/4253510/google_ddm_animation_480P.mp4.track">
 |    </amp-ima-video>
 |  </body>
 |  </html>
