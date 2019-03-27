@@ -379,7 +379,11 @@ exports.rules = [
       // For action macros.
       'extensions/amp-action-macro/0.1/amp-action-macro.js->' +
             'src/service/action-impl.js',
-
+      // For localization.
+      'extensions/amp-story/0.1/amp-story.js->' +
+            'src/service/localization.js',
+      'extensions/amp-story/1.0/amp-story.js->' +
+            'src/service/localization.js',
     ],
   },
   {
