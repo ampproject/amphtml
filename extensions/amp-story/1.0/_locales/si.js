@@ -22,7 +22,7 @@ import {
  * Localized string bundle used for si strings.
  * @const {!LocalizedStringBundleDef}
  */
-export default /** @const {!LocalizedStringBundleDef} */ ({
+const strings = {
   [LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT]: {
     string: 'හඬ ක්‍රියා විරහිතයි',
   },
@@ -125,4 +125,6 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
   [LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT]: {
     string: 'කනගාටුයි, ඔබේ බ්‍රවුසරය මෙම අත්දැකීමට සහය නොදක්වන බව පෙනේ',
   },
-});
+};
+
+export {strings as default};

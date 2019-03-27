@@ -22,7 +22,7 @@ import {
  * Localized string bundle used for nl strings.
  * @const {!LocalizedStringBundleDef}
  */
-export default /** @const {!LocalizedStringBundleDef} */ ({
+const strings = {
   [LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT]: {
     string: 'Geluid uit',
   },
@@ -127,4 +127,6 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
   [LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT]: {
     string: 'Je browser ondersteunt deze functionaliteit niet',
   },
-});
+};
+
+export {strings as default};

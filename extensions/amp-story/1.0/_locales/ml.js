@@ -22,7 +22,7 @@ import {
  * Localized string bundle used for ml strings.
  * @const {!LocalizedStringBundleDef}
  */
-export default /** @const {!LocalizedStringBundleDef} */ ({
+const strings = {
   [LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT]: {
     string: 'ശബ്‌ദം ഓഫ് ചെയ്യുക',
   },
@@ -127,4 +127,6 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
     string: 'ക്ഷമിക്കണം, നിങ്ങളുടെ ബ്രൗസർ ഈ അനുഭവത്തെ ' +
         'പിന്തുണയ്ക്കുന്നില്ലെന്ന് തോന്നുന്നു',
   },
-});
+};
+
+export {strings as default};

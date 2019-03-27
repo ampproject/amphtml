@@ -22,7 +22,7 @@ import {
  * Localized string bundle used for ne strings.
  * @const {!LocalizedStringBundleDef}
  */
-export default /** @const {!LocalizedStringBundleDef} */ ({
+const strings = {
   [LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT]: {
     string: 'ध्वनि निष्क्रिय भयो',
   },
@@ -127,4 +127,6 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
     string: 'माफ गर्नुहोला, तपाईंको ब्राउजरले यो अनुभवको समर्थन गर्दैन जस्तो ' +
         'देखिन्छ',
   },
-});
+};
+
+export {strings as default};

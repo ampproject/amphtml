@@ -22,7 +22,7 @@ import {
  * Localized string bundle used for el strings.
  * @const {!LocalizedStringBundleDef}
  */
-export default /** @const {!LocalizedStringBundleDef} */ ({
+const strings = {
   [LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT]: {
     string: 'Απενεργοποίηση ήχου',
   },
@@ -131,4 +131,6 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
     string: 'Δυστυχώς, απ\' ό,τι φαίνεται, το πρόγραμμα περιήγησής σας δεν ' +
         'υποστηρίζει αυτήν την εμπειρία',
   },
-});
+};
+
+export {strings as default};

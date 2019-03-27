@@ -22,7 +22,7 @@ import {
  * Localized string bundle used for vi strings.
  * @const {!LocalizedStringBundleDef}
  */
-export default /** @const {!LocalizedStringBundleDef} */ ({
+const strings = {
   [LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT]: {
     string: 'Tắt âm thanh',
   },
@@ -126,4 +126,6 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
     string: 'Rất tiếc, có vẻ như trình duyệt của bạn không hỗ trợ trải ' +
         'nghiệm này',
   },
-});
+};
+
+export {strings as default};

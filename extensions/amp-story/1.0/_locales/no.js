@@ -22,7 +22,7 @@ import {
  * Localized string bundle used for no strings.
  * @const {!LocalizedStringBundleDef}
  */
-export default /** @const {!LocalizedStringBundleDef} */ ({
+const strings = {
   [LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT]: {
     string: 'Lyd av',
   },
@@ -127,4 +127,6 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
     string: 'Beklager, men det ser ut til at nettleseren din ikke støtter ' +
         'denne opplevelsen',
   },
-});
+};
+
+export {strings as default};

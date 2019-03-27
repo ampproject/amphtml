@@ -22,7 +22,7 @@ import {
  * Localized string bundle used for fa strings.
  * @const {!LocalizedStringBundleDef}
  */
-export default /** @const {!LocalizedStringBundleDef} */ ({
+const strings = {
   [LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT]: {
     string: 'صدا خاموش است',
   },
@@ -125,4 +125,6 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
   [LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT]: {
     string: 'متأسفیم، به‌نظر می‌رسد مرورگرتان این تجربه را پشتیبانی نمی‌کند',
   },
-});
+};
+
+export {strings as default};

@@ -22,7 +22,7 @@ import {
  * Localized string bundle used for lt strings.
  * @const {!LocalizedStringBundleDef}
  */
-export default /** @const {!LocalizedStringBundleDef} */ ({
+const strings = {
   [LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT]: {
     string: 'Garsas išjungtas',
   },
@@ -128,4 +128,6 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
     string: 'Apgailestaujame, bet panašu, kad jūsų naršyklėje ši funkcija ' +
         'nepalaikoma',
   },
-});
+};
+
+export {strings as default};

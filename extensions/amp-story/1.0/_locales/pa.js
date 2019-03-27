@@ -22,7 +22,7 @@ import {
  * Localized string bundle used for pa strings.
  * @const {!LocalizedStringBundleDef}
  */
-export default /** @const {!LocalizedStringBundleDef} */ ({
+const strings = {
   [LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT]: {
     string: 'ਧੁਨੀ ਬੰਦ',
   },
@@ -127,4 +127,6 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
     string: 'ਮਾਫ਼ ਕਰਨਾ, ਇੰਝ ਲੱਗਦਾ ਹੈ ਕਿ ਤੁਹਾਡੇ ਬ੍ਰਾਊਜ਼ਰ ਵਿੱਚ ਇਸ ਅਨੁਭਵ ਦੀ ' +
         'ਸੁਵਿਧਾ ਨਹੀਂ ਹੈ',
   },
-});
+};
+
+export {strings as default};

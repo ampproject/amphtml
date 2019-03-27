@@ -22,7 +22,7 @@ import {
  * Localized string bundle used for ms strings.
  * @const {!LocalizedStringBundleDef}
  */
-export default /** @const {!LocalizedStringBundleDef} */ ({
+const strings = {
   [LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT]: {
     string: 'Bunyi dimatikan',
   },
@@ -129,4 +129,6 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
     string: 'Maaf, nampaknya penyemak imbas anda tidak menyokong pengalaman ' +
         'ini',
   },
-});
+};
+
+export {strings as default};

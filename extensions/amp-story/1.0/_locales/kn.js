@@ -22,7 +22,7 @@ import {
  * Localized string bundle used for kn strings.
  * @const {!LocalizedStringBundleDef}
  */
-export default /** @const {!LocalizedStringBundleDef} */ ({
+const strings = {
   [LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT]: {
     string: 'ಧ್ವನಿ ಆಫ್ ಆಗಿದೆ',
   },
@@ -128,4 +128,6 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
     string: 'ನಮ್ಮನ್ನು ಕ್ಷಮಿಸಿ, ಈ ಅನುಭವವನ್ನು ನಿಮ್ಮ ಬ್ರೌಸರ್ ಬೆಂಬಲಿಸುವಂತೆ ' +
         'ಕಾಣುತ್ತಿಲ್ಲ',
   },
-});
+};
+
+export {strings as default};

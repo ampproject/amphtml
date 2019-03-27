@@ -22,7 +22,7 @@ import {
  * Localized string bundle used for am strings.
  * @const {!LocalizedStringBundleDef}
  */
-export default /** @const {!LocalizedStringBundleDef} */ ({
+const strings = {
   [LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT]: {
     string: 'ድምፅ ጠፍቷል',
   },
@@ -125,4 +125,6 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
   [LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT]: {
     string: 'እናዝናለን፣ የእርስዎ አሳሽ ይህን ተሞክሮ የሚደግፍ አይመስልም',
   },
-});
+};
+
+export {strings as default};
