@@ -388,7 +388,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
         create_source_map: intermediateFilename + '.map',
         source_map_location_mapping:
             '|' + sourceMapBase,
-        warning_level: 'DEFAULT',
+        warning_level: options.verboseLogging ? 'VERBOSE' : 'DEFAULT',
         jscomp_error: [],
         // moduleLoad: Demote "module not found" errors to ignore missing files
         //     in type declarations in the swg.js bundle.
