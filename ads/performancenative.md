@@ -21,7 +21,7 @@ limitations under the License.
 ```html
 <amp-ad width="300" height="250"
 	  type="performancenative"
-	  data-section_key="HnhbImrC1zc="
+	  data-section_key="WqlnqMg1mwk="
 	  data-content_scope=".test"
 	  data-amp_page="true"
 	  data-html-access-allowed
