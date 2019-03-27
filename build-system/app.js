@@ -350,7 +350,7 @@ app.use('/form/search-json/get', (req, res) => {
   });
 });
 
-const autocompleteColors = ['red', 'orange', 'yellow', 'green', 'blue', 
+const autocompleteColors = ['red', 'orange', 'yellow', 'green', 'blue',
   'purple', 'pink', 'black', 'white'];
 
 app.use('/form/autocomplete/query', (req, res) => {
