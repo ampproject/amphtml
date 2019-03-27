@@ -258,9 +258,6 @@
     "onvisible": "https://!beacon_url?h.d=!h.d&h.key=!h.key&h.t=!h.t&h.cr=!h.cr&rt.start=navigation&rt.si=_client_id_&rt.ss=_timestamp_&rt.end=_timestamp_&t_resp=_nav_timing_&t_page=_nav_timing_&t_done=_nav_timing_&nt_nav_type=_nav_type_&nt_red_cnt=_nav_redirect_count_&nt_nav_st=_nav_timing_&nt_red_st=_nav_timing_&nt_red_end=_nav_timing_&nt_fet_st=_nav_timing_&nt_dns_st=_nav_timing_&nt_dns_end=_nav_timing_&nt_con_st=_nav_timing_&nt_ssl_st=_nav_timing_&nt_con_end=_nav_timing_&nt_req_st=_nav_timing_&nt_res_st=_nav_timing_&nt_unload_st=_nav_timing_&nt_unload_end=_nav_timing_&nt_domloading=_nav_timing_&nt_res_end=_nav_timing_&nt_domint=_nav_timing_&nt_domcontloaded_st=_nav_timing_&nt_domcontloaded_end=_nav_timing_&nt_domcomp=_nav_timing_&nt_load_st=_nav_timing_&nt_load_end=_nav_timing_&v=1&http.initiator=amp&u=_source_url_&amp.u=_ampdoc_url_&r2=_document_referrer_&scr.xy=_screen_width_x_screen_height_"
   },
   "navegg": {
-    "host": "amp.navdmp.com",
-    "path": "amp",
-    "params": "aid=_client_id_&url=_canonical_url_&ref=_document_referrer_&tit=_title_&lan=_browser_language_",
     "pageview": "https://amp.navdmp.com/amp?aid=_client_id_&url=_canonical_url_&ref=_document_referrer_&tit=_title_&lan=_browser_language_&acc=!account&v=7"
   },
   "newrelic": {
