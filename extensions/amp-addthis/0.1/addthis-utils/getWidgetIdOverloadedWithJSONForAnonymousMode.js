@@ -33,7 +33,7 @@ const overrideKeys = ['backgroundColor', 'borderRadius', 'counterColor',
  * For each existing attribute: `data-attr-NAME`, check and add value for key
  * If object is not empty, return only the JSON of the override object
  * If an error happens return empty string
- * @param {AmpAddThis} self
+ * @param {AMP.BaseElement} self
  * @return {string} JSON | empty string means there is no override object
  */
 export const getWidgetOverload = self => {
