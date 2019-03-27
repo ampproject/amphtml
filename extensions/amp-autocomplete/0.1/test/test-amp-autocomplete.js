@@ -487,6 +487,20 @@ describes.realWin('amp-autocomplete unit tests', {
     });
   });
 
+  it('should fire select event from selectItem_', () => {
+    const fireEventSpy = sandbox.spy(impl, 'fireSelectEvent_');
+    const triggerSpy = sandbox.spy(impl.action_, 'trigger');
+    const mockEl = doc.createElement('div');
+    return element.layoutCallback().then(() => {
+      impl.toggleResults_(true);
+      mockEl.setAttribute('value', 'test');
+      impl.selectItem_(mockEl);
+      expect(fireEventSpy).to.have.been.calledOnce;
+      expect(fireEventSpy).to.have.been.calledWith('test');
+      expect(triggerSpy).to.have.been.calledOnce;
+    });
+  });
+
   it('should support marking active items', () => {
     let resetSpy;
     return element.layoutCallback().then(() => {
