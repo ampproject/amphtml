@@ -117,7 +117,6 @@ import LocalizedStringsEnGb from './_locales/en-GB';
 import LocalizedStringsEs from './_locales/es';
 import LocalizedStringsEs419 from './_locales/es-419';
 import LocalizedStringsFr from './_locales/fr';
-import LocalizedStringsFrCa from './_locales/fr-CA';
 import LocalizedStringsHi from './_locales/hi';
 import LocalizedStringsId from './_locales/id';
 import LocalizedStringsIt from './_locales/it';
@@ -125,12 +124,12 @@ import LocalizedStringsJa from './_locales/ja';
 import LocalizedStringsKo from './_locales/ko';
 import LocalizedStringsNl from './_locales/nl';
 import LocalizedStringsNo from './_locales/no';
-import LocalizedStringsPt from './_locales/pt';
 import LocalizedStringsPtBr from './_locales/pt-BR';
+import LocalizedStringsPtPt from './_locales/pt-PT';
 import LocalizedStringsRu from './_locales/ru';
 import LocalizedStringsTr from './_locales/tr';
 import LocalizedStringsVi from './_locales/vi';
-import LocalizedStringsZh from './_locales/zh';
+import LocalizedStringsZhCn from './_locales/zh-CN';
 import LocalizedStringsZhTw from './_locales/zh-TW';
 
 /** @private @const {number} */
@@ -349,7 +348,6 @@ export class AmpStory extends AMP.BaseElement {
         .registerLocalizedStringBundle('es', LocalizedStringsEs)
         .registerLocalizedStringBundle('es-419', LocalizedStringsEs419)
         .registerLocalizedStringBundle('fr', LocalizedStringsFr)
-        .registerLocalizedStringBundle('fr-CA', LocalizedStringsFrCa)
         .registerLocalizedStringBundle('hi', LocalizedStringsHi)
         .registerLocalizedStringBundle('id', LocalizedStringsId)
         .registerLocalizedStringBundle('it', LocalizedStringsIt)
@@ -357,12 +355,12 @@ export class AmpStory extends AMP.BaseElement {
         .registerLocalizedStringBundle('ko', LocalizedStringsKo)
         .registerLocalizedStringBundle('nl', LocalizedStringsNl)
         .registerLocalizedStringBundle('no', LocalizedStringsNo)
-        .registerLocalizedStringBundle('pt', LocalizedStringsPt)
+        .registerLocalizedStringBundle('pt-PT', LocalizedStringsPtPt)
         .registerLocalizedStringBundle('pt-BR', LocalizedStringsPtBr)
         .registerLocalizedStringBundle('ru', LocalizedStringsRu)
         .registerLocalizedStringBundle('tr', LocalizedStringsTr)
         .registerLocalizedStringBundle('vi', LocalizedStringsVi)
-        .registerLocalizedStringBundle('zh', LocalizedStringsZh)
+        .registerLocalizedStringBundle('zh-CN', LocalizedStringsZhCn)
         .registerLocalizedStringBundle('zh-TW', LocalizedStringsZhTw);
 
     const enXaPseudoLocaleBundle =
