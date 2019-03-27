@@ -350,6 +350,21 @@ app.use('/form/search-json/get', (req, res) => {
   });
 });
 
+const autocompleteColors = ['red', 'orange', 'yellow', 'green', 'blue', 
+  'purple', 'pink', 'black', 'white'];
+
+app.use('/form/autocomplete/query', (req, res) => {
+  const query = req.query.q;
+  if (!query) {
+    res.json({items: autocompleteColors});
+  } else {
+    const lowerCaseQuery = query.toLowerCase();
+    const filtered = autocompleteColors.filter(
+        l => l.toLowerCase().includes(lowerCaseQuery));
+    res.json({items: filtered});
+  }
+});
+
 const autosuggestLanguages = ['ActionScript', 'AppleScript', 'Asp', 'BASIC',
   'C', 'C++', 'Clojure', 'COBOL', 'ColdFusion', 'Erlang', 'Fortran', 'Go',
   'Groovy', 'Haskell', 'Java', 'JavaScript', 'Lisp', 'Perl', 'PHP', 'Python',
