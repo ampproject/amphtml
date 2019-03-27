@@ -671,7 +671,8 @@ export class AmpAnalytics extends AMP.BaseElement {
   expandTemplateWithUrlParams_(spec, expansionOptions) {
     return this.variableService_.expandTemplate(spec, expansionOptions)
         .then(key => Services.urlReplacementsForDoc(
-            this.element).expandUrlAsync(key));
+            this.element).expandUrlAsync(key,
+            this.variableService_.getMacros()));
   }
 
   /**
