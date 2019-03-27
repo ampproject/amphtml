@@ -127,9 +127,10 @@ function stopTimer(functionName, fileName, startTime) {
 /**
  * Executes the provided command and times it. Errors, if any, are printed.
  * @param {string} cmd
+ * @param {string} fileName
  * @return {<Object>} Process info.
  */
-function timedExec(cmd) {
+function timedExec(cmd, fileName = 'utils.js') {
   const startTime = startTimer(cmd, fileName);
   const p = exec(cmd);
   stopTimer(cmd, fileName, startTime);
