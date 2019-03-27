@@ -643,8 +643,10 @@ export class AmpStoryPage extends AMP.BaseElement {
           // Auto playing the media failed, which could be caused by a data
           // saver, or a battery saving mode. Display a message so we can
           // get a user gesture to bless the media elements, and play them.
-          this.debounceToggleLoadingSpinner_(false);
-          this.togglePlayMessage_(true);
+          if (mediaEl.tagName === 'VIDEO') {
+            this.debounceToggleLoadingSpinner_(false);
+            this.togglePlayMessage_(true);
+          }
         });
       }
     });
@@ -691,9 +693,20 @@ export class AmpStoryPage extends AMP.BaseElement {
       if (this.isBotUserAgent_) {
         mediaEl.muted = false;
         mediaEl.removeAttribute('muted');
+        if (mediaEl.tagName === 'AUDIO' && mediaEl.paused) {
+          mediaEl.play();
+        }
       } else {
-        return mediaPool.unmute(
-            /** @type {!./media-pool.DomElementDef} */ (mediaEl));
+        mediaEl = /** @type {!./media-pool.DomElementDef} */ (mediaEl);
+        const promises = [mediaPool.unmute(mediaEl)];
+
+        // Audio element on the first page of a story would not be playing since
+        // there was no user intent. On unmute, make sure they are playing.
+        if (mediaEl.tagName === 'AUDIO' && mediaEl.paused) {
+          promises.push(mediaPool.play(mediaEl));
+        }
+
+        return Promise.all(promises);
       }
     });
   }
