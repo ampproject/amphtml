@@ -34,7 +34,7 @@ const overrideKeys = ['backgroundColor', 'borderRadius', 'counterColor',
  * If object is not empty, return only the JSON of the override object
  * If an error happens return empty string
  * @param {AMP.BaseElement} self
- * @return {JsonObject|string} empty string means there is no override object
+ * @return {string} empty string means there is no override object
  */
 export const getWidgetOverload = self => {
   const hasGetAttributeFunction = self && self.element &&
@@ -46,14 +46,29 @@ export const getWidgetOverload = self => {
   overrideKeys.forEach(item => {
     const data = self.element.getAttribute(`data-attr-${item}`);
     if (isString(data) || isNumber(data) || isBoolean(data)) {
-      override[item] = data;
+      override[String(item)] = data;
     }
   });
+  const keys = override && Object.keys(override);
   let returnValue = '';
-  if (override && Object.keys(override).length > 0) {
-    try {
-      returnValue = JSON.stringify(override);
-    } catch (e) {}
+  let isFirstItem = true;
+  if (keys && keys.length > 0) {
+    returnValue = '{';
+    keys.forEach(function(key) {
+      if (!isFirstItem) {
+        returnValue += ',';
+      } else {
+        isFirstItem = false;
+      }
+      returnValue += `"${key}":`;
+      const value = override[key];
+      if (isString(value)) {
+        returnValue += `"${override[key]}"`;
+      } else if (isNumber(value) || isBoolean(value)) {
+        returnValue += value;
+      }
+    });
+    returnValue += '}';
   }
   return returnValue;
 };
