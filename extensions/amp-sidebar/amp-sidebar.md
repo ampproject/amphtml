@@ -131,7 +131,7 @@ You can create a `toolbar` element that displays in the `<body>` by specifying t
 - The sidebar may implement toolbars by adding nav elements with the `toolbar` attribute and `toolbar-target` attribute.
 - The nav element must be a child of `<amp-sidebar>` and follow this format: `<nav toolbar="(media-query)" toolbar-target="elementID">`.
     - For instance, this would be a valid use of toolbar: `<nav toolbar="(max-width: 1024px)" toolbar-target="target-element">`.
-- The nav containing the toolbar attribute must only contain a single `<ul>` element, that contains `<li>` elements.
+- The nav containing the toolbar attribute must only contain a single `<ul>` or `<ol>` element, that contains `<li>` elements.
     - The `<li>` elements may contain any valid HTML elements (supported by AMP), or any of the AMP elements that `<amp-sidebar>` supports.
 - Toolbar behavior is only applied while the `toolbar` attribute media-query is valid. Also, an element with the `toolbar-target` attribute id must exist on the page for the toolbar to be applied.
 
