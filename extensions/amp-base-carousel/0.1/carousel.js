@@ -149,7 +149,6 @@ export class Carousel {
   *   win: !Window,
   *   element: !Element,
   *   scrollContainer: !Element,
-  *   initialIndex: (number|undefined),
   *   runMutate: function(function()),
   * }} config
   */
@@ -157,7 +156,6 @@ export class Carousel {
     win,
     element,
     scrollContainer,
-    initialIndex = 0,
     runMutate,
   }) {
     /** @private @const */
@@ -230,6 +228,15 @@ export class Carousel {
     this.currentElementOffset_ = 0;
 
     /**
+     * Keeps track of an index that was requested to be scrolled to
+     * prograatically. This is used to make sure that the carousel ends on the
+     * right slide if a UI update was requested during a programmatic scroll.
+     * This is cleared when the user manually scrolls.
+     * @private {number?}
+     */
+    this.requestedIndex_ = null;
+
+    /**
     * The reference index where the the scrollable area last stopped
     * scrolling. This slide is not translated and other slides are translated
     * to move before  or after as needed. This is also used when looping to
@@ -267,7 +274,7 @@ export class Carousel {
      * restingIndex to currentIndex.
      * @private {number}
      */
-    this.currentIndex_ = initialIndex;
+    this.currentIndex_ = 0;
 
     /** @private {boolean} */
     this.loop_ = false;
@@ -379,6 +386,7 @@ export class Carousel {
       return;
     }
 
+    this.requestedIndex_ = index;
     this.actionSource_ = actionSource;
     this.scrollSlideIntoView_(this.slides_[index], {smoothScroll});
   }
@@ -568,6 +576,7 @@ export class Carousel {
   handleTouchStart_() {
     this.touching_ = true;
     this.actionSource_ = ActionSource.TOUCH;
+    this.requestedIndex_ = null;
 
     listenOnce(window, 'touchend', () => {
       this.touching_ = false;
@@ -583,6 +592,7 @@ export class Carousel {
    */
   handleWheel_() {
     this.actionSource_ = ActionSource.WHEEL;
+    this.requestedIndex_ = null;
   }
 
   /**
@@ -828,6 +838,8 @@ export class Carousel {
    * @private
    */
   resetScrollReferencePoint_(force = false) {
+    const hasRequestedIndex = this.requestedIndex_ !==  null;
+
     // Make sure if the user is in the middle of a drag, we do not move
     // anything.
     if (this.touching_) {
@@ -835,8 +847,15 @@ export class Carousel {
     }
 
     // We are still on the same slide, so nothing needs to move.
-    if (this.restingIndex_ == this.currentIndex_ && !force) {
+    if (this.restingIndex_ == this.currentIndex_ && !force && !hasRequestedIndex) {
       return;
+    }
+
+    // We are updating during a programmatic scroll, so go to the correct
+    // index.
+    if (hasRequestedIndex) {
+      this.currentIndex_ = this.requestedIndex_;
+      this.requestedIndex_ = null;
     }
 
     const totalLength = sum(this.getSlideLengths_());
