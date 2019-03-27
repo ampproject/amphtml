@@ -30,31 +30,26 @@ const {
   stopTimer,
   startSauceConnect,
   stopSauceConnect,
-  timedExec: timedExecBase,
   timedExecOrDie: timedExecOrDieBase} = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
 const {isTravisPullRequestBuild} = require('../travis');
 
 const FILENAME = 'remote-tests.js';
 const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
-const timedExec =
-  (cmd, unusedFileName) => timedExecBase(cmd, FILENAME);
 const timedExecOrDie =
   (cmd, unusedFileName) => timedExecOrDieBase(cmd, FILENAME);
 
 async function main() {
   const startTime = startTimer(FILENAME, FILENAME);
   const buildTargets = determineBuildTargets();
-  const exitCodes = [];
 
   if (!isTravisPullRequestBuild()) {
     downloadDistOutput(FILENAME);
     timedExecOrDie('gulp update-packages');
+
     await startSauceConnect(FILENAME);
-    exitCodes.push(
-        timedExec('gulp test --unit --nobuild --saucelabs_lite'));
-    exitCodes.push(
-        timedExec('gulp test --integration --nobuild --compiled --saucelabs'));
+    timedExecOrDie('gulp test --unit --nobuild --saucelabs_lite');
+    timedExecOrDie('gulp test --integration --nobuild --compiled --saucelabs');
 
     stopSauceConnect(FILENAME);
   } else {
@@ -78,20 +73,17 @@ async function main() {
     if (buildTargets.has('RUNTIME') ||
         buildTargets.has('BUILD_SYSTEM') ||
         buildTargets.has('UNIT_TEST')) {
-      exitCodes.push(
-          timedExec('gulp test --unit --nobuild --saucelabs_lite'));
+      timedExecOrDie('gulp test --unit --nobuild --saucelabs_lite');
     }
 
     if (buildTargets.has('RUNTIME') ||
         buildTargets.has('BUILD_SYSTEM') ||
         buildTargets.has('INTEGRATION_TEST')) {
-      exitCodes.push(
-          timedExec('gulp test --integration --nobuild --saucelabs'));
+      timedExecOrDie('gulp test --integration --nobuild --saucelabs');
     }
     stopSauceConnect(FILENAME);
   }
 
-  process.exitCode = exitCodes.some(code => code != 0) ? 1 : 0;
   stopTimer(FILENAME, FILENAME, startTime);
 }
 
