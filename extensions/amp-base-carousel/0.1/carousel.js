@@ -838,7 +838,7 @@ export class Carousel {
    * @private
    */
   resetScrollReferencePoint_(force = false) {
-    const hasRequestedIndex = this.requestedIndex_ !==  null;
+    const hasRequestedIndex = this.requestedIndex_ !== null;
 
     // Make sure if the user is in the middle of a drag, we do not move
     // anything.
@@ -847,7 +847,9 @@ export class Carousel {
     }
 
     // We are still on the same slide, so nothing needs to move.
-    if (this.restingIndex_ == this.currentIndex_ && !force && !hasRequestedIndex) {
+    if (this.restingIndex_ == this.currentIndex_ &&
+        !force &&
+        !hasRequestedIndex) {
       return;
     }
 
