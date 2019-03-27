@@ -428,7 +428,6 @@ export function imaVideo(global, data) {
   if (data.crossorigin != null) {
     videoPlayer.setAttribute('crossorigin', data.crossorigin);
   }
-  videoPlayer.setAttribute('poster', data.poster);
   videoPlayer.setAttribute('playsinline', true);
   videoPlayer.setAttribute(
       'controlsList', 'nodownload nofullscreen noremoteplayback');
