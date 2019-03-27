@@ -55,8 +55,6 @@ function createIframeMessagingClient(win) {
 
   iframeClient.setBroadcastMode(true);
   return new Promise(resolve => {
-    let hostWin = win;
-    let j = 0;
     const unlisten = iframeClient.registerCallback(MessageType.HOST_RESPONSE,
         message => {
           iframeClient.setBroadcastMode(false);
@@ -64,7 +62,9 @@ function createIframeMessagingClient(win) {
           unlisten();
           resolve(iframeClient);
         });
-    while (hostWin != win.top && j < 10) {
+    for (let j = 0, hostWin = win.parent;
+      j < 10 && hostWin != win.top;
+      j++, hostWin = hostWin.parent) {
       hostWin = hostWin.parent;
       iframeClient.setHostWindow(hostWin);
       iframeClient./*OK*/sendMessage(

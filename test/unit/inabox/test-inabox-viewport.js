@@ -240,7 +240,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
             height: 2000,
           },
         }),
-        false, true);
+        /* opt_sync */ false, /* opt_once */ true);
 
     return binding.updateLightboxMode(true).then(() => {
       expect(prepareContainer).to.be.calledOnce;
@@ -261,7 +261,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
         'cancel-full-overlay-frame',
         'cancel-full-overlay-frame-response',
         (req, res, cb) => cb({success: true}),
-        false, true);
+        /* opt_sync */ false, /* opt_once */ true);
 
     return binding.updateLightboxMode(false).then(() => {
       expect(resetContainer).to.be.calledOnce;
@@ -286,7 +286,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
         'full-overlay-frame',
         'full-overlay-frame-response',
         (req, res, cb) => cb({success: true, boxRect}),
-        false, true);
+        /* opt_sync */ false, /* opt_once */ true);
 
     sandbox.stub(binding, 'prepareBodyForOverlay_').returns(Promise.resolve());
 
@@ -312,7 +312,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
         'cancel-full-overlay-frame',
         'cancel-full-overlay-frame-response',
         (req, res, cb) => cb({success: true, boxRect}),
-        false, true);
+        /* opt_sync */ false, /* opt_once */ true);
 
     sandbox.stub(binding, 'resetBodyForOverlay_').returns(Promise.resolve());
 
@@ -368,7 +368,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
         (req, res, cb) => cb({
           targetRect: layoutRectLtwh(10, 20, 100, 100),
           viewportRect: layoutRectLtwh(1, 1, 1, 1),
-        }), undefined, true);
+        }), /* opt_sync */ false, /* opt_once */ true);
     return binding.getRootClientRectAsync().then(rect => {
       expect(rect).to.jsonEqual(layoutRectLtwh(10, 20, 100, 100));
       expect(requestSpy).to.be.calledOnce;
