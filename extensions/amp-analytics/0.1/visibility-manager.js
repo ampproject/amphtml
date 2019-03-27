@@ -412,7 +412,6 @@ export class VisibilityManager {
         state['maxScrollDepth'] = layoutPositionRelativeToScrolledViewport(
             layoutBox, viewport, this.getMaxScrollDepth());
       }
-
       callback(state);
     });
 
