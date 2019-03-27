@@ -44,7 +44,7 @@ FAIL
 |      </amp-accordion>
 |      <amp-img layout="fill" src="img"></amp-img>
 |    </amp-sidebar>
-|    <!-- Valid: Example of amp-sidebar with toolbar usage -->
+|    <!-- Valid: Example of amp-sidebar with toolbar usage and ul -->
 |    <amp-sidebar layout="nodisplay">
 |      <nav toolbar="(min-width: 0px) and (max-width: 768px)" toolbar-target="id">
 |        <ul>
@@ -52,6 +52,17 @@ FAIL
 |          <li>Nav item 2</li>
 |          <li>Nav item 3</li>
 |        </ul>
+|      </nav>
+|      <amp-img layout="fill" src="img"></amp-img>
+|    </amp-sidebar>
+|    <!-- Valid: Example of amp-sidebar with toolbar usage and ol-->
+|    <amp-sidebar layout="nodisplay">
+|      <nav toolbar="(min-width: 0px) and (max-width: 768px)" toolbar-target="id">
+|        <ol>
+|          <li>Nav item 1</li>
+|          <li>Nav item 2</li>
+|          <li>Nav item 3</li>
+|        </ol>
 |      </nav>
 |      <amp-img layout="fill" src="img"></amp-img>
 |    </amp-sidebar>
@@ -59,7 +70,7 @@ FAIL
 |    <amp-sidebar layout="nodisplay">
 |      <nav toolbar="(min-width: 0px) and (max-width: 768px)" toolbar-target="id">
 >>     ^~~~~~~~~
-amp-sidebar/0.1/test/validator-amp-sidebar.html:59:4 Tag 'amp-sidebar > nav' must have 1 child tags - saw 2 child tags. [AMP_TAG_PROBLEM]
+amp-sidebar/0.1/test/validator-amp-sidebar.html:70:4 Tag 'amp-sidebar > nav' must have 1 child tags - saw 2 child tags. [AMP_TAG_PROBLEM]
 |        <ul>
 |          <li>Nav item 1</li>
 |        </ul>
@@ -70,9 +81,39 @@ amp-sidebar/0.1/test/validator-amp-sidebar.html:59:4 Tag 'amp-sidebar > nav' mus
 |      </nav>
 |      <amp-img layout="fill" src="img"></amp-img>
 |    </amp-sidebar>
+|    <!-- Invalid: more than one <ol> tag -->
+|    <amp-sidebar layout="nodisplay">
+|      <nav toolbar="(min-width: 0px) and (max-width: 768px)" toolbar-target="id">
+>>     ^~~~~~~~~
+amp-sidebar/0.1/test/validator-amp-sidebar.html:83:4 Tag 'amp-sidebar > nav' must have 1 child tags - saw 2 child tags. [AMP_TAG_PROBLEM]
+|        <ol>
+|          <li>Nav item 1</li>
+|        </ol>
+|        <ol>
+|          <li>Nav item 2</li>
+|          <li>Nav item 3</li>
+|        </ol>
+|      </nav>
+|      <amp-img layout="fill" src="img"></amp-img>
+|    </amp-sidebar>
+|    <!-- Invalid: both <ul> and <ol> tags -->
+|      <amp-sidebar layout="nodisplay">
+|        <nav toolbar="(min-width: 0px) and (max-width: 768px)" toolbar-target="id">
+>>       ^~~~~~~~~
+amp-sidebar/0.1/test/validator-amp-sidebar.html:96:6 Tag 'amp-sidebar > nav' must have 1 child tags - saw 2 child tags. [AMP_TAG_PROBLEM]
+|          <ul>
+|            <li>Nav item 1</li>
+|          </ul>
+|          <ol>
+|            <li>Nav item 2</li>
+|            <li>Nav item 3</li>
+|          </ol>
+|        </nav>
+|        <amp-img layout="fill" src="img"></amp-img>
+|      </amp-sidebar>
 |    <!-- Invalid: incorrect side value -->
 |    <amp-sidebar side="center" layout="nodisplay"></amp-sidebar>
 >>   ^~~~~~~~~
-amp-sidebar/0.1/test/validator-amp-sidebar.html:71:2 The attribute 'side' in tag 'amp-sidebar' is set to the invalid value 'center'. (see https://www.ampproject.org/docs/reference/components/amp-sidebar) [DISALLOWED_HTML]
+amp-sidebar/0.1/test/validator-amp-sidebar.html:108:2 The attribute 'side' in tag 'amp-sidebar' is set to the invalid value 'center'. (see https://www.ampproject.org/docs/reference/components/amp-sidebar) [DISALLOWED_HTML]
 |  </body>
 |  </html>

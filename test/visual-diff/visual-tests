@@ -227,6 +227,17 @@
       "interactive_tests": "examples/visual-tests/amp-sidebar/amp-sidebar.js",
     },
     {
+      "url": "examples/visual-tests/amp-sidebar/amp-sidebar-toolbar-ol.amp.html",
+      "name": "amp-sidebar toolbar > ol",
+      "viewport": {"width": 400, "height": 800},
+      "interactive_tests": "examples/visual-tests/amp-sidebar/amp-sidebar-toolbar.js",
+    },{
+      "url": "examples/visual-tests/amp-sidebar/amp-sidebar-toolbar-ul.amp.html",
+      "name": "amp-sidebar toolbar > ul",
+      "viewport": {"width": 400, "height": 800},
+      "interactive_tests": "examples/visual-tests/amp-sidebar/amp-sidebar-toolbar.js",
+    },
+    {
       "url": "examples/visual-tests/amp-sticky-ad/amp-sticky-ad.amp.html",
       "name": "AMP Sticky Ad",
       "viewport": {
