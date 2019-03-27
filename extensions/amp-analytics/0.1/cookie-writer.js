@@ -17,12 +17,11 @@
 import {BASE_CID_MAX_AGE_MILLIS} from '../../../src/service/cid-impl';
 import {Services} from '../../../src/services';
 import {getMode} from '../../../src/mode';
-import {getNameArgs} from './variables';
+import {getNameArgs, variableServiceFor} from './variables';
 import {hasOwn} from '../../../src/utils/object';
 import {isInFie} from '../../../src/friendly-iframe-embed';
 import {isObject} from '../../../src/types';
 import {isProxyOrigin} from '../../../src/url';
-import {linkerReaderServiceFor} from './linker-reader';
 import {setCookie} from '../../../src/cookies';
 import {user} from '../../../src/log';
 
@@ -59,15 +58,14 @@ export class CookieWriter {
     /** @private {!../../../src/service/url-replacements-impl.UrlReplacements} */
     this.urlReplacementService_ = Services.urlReplacementsForDoc(element);
 
-    this.linkerReader_ = linkerReaderServiceFor(win);
-
     /** @private {?Promise} */
     this.writePromise_ = null;
 
     /** @private {!JsonObject} */
     this.config_ = config;
 
-    this.binding_ = {};
+    /** @const @private {!JsonObject} */
+    this.bindings_ = variableServiceFor(this.win_).getMacros();
   }
 
   /**
@@ -116,7 +114,6 @@ export class CookieWriter {
       return Promise.resolve();
     }
 
-    this.registerDynamicBinding_();
     const inputConfig = this.config_['cookies'];
 
     if (inputConfig['enabled'] === false) {
@@ -187,7 +184,7 @@ export class CookieWriter {
     // Note: Have to use `expandStringAsync` because QUERY_PARAM can wait for
     // trackImpressionPromise and resolve async
     return this.urlReplacementService_.expandStringAsync(cookieValue,
-        this.binding_, EXPAND_WHITELIST).then(
+        this.bindings_, EXPAND_WHITELIST).then(
         value => {
           // Note: We ignore empty cookieValue, that means currently we don't
           // provide a way to overwrite or erase existing cookie
@@ -199,16 +196,4 @@ export class CookieWriter {
       user().error(TAG, 'Error expanding cookie string', e);
     });
   }
-
-  /**
-   * register the dynamic binding.
-   * Supported MACRO is LINKER_PARAM(name, id)
-   */
-  registerDynamicBinding_() {
-    this.binding_['LINKER_PARAM'] = (name, id) => {
-      return this.linkerReader_.get(name, id);
-    };
-  }
 }
-
-
