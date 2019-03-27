@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,141 +17,141 @@
 import {LocalizedStringBundleDef, LocalizedStringId} from '../localization';
 
 /**
- * Localized string bundle used for fr strings.
+ * Localized string bundle used for iw strings.
  * @const {!LocalizedStringBundleDef}
  */
 export default /** @const {!LocalizedStringBundleDef} */ ({
   [LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT]: {
-    string: 'Son désactivé',
+    string: 'ללא קול',
   },
   [LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_NO_SOUND_TEXT]: {
-    string: 'Cette page n\'a pas de son',
+    string: 'בדף הזה אין קול',
   },
   [LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_SOUND_TEXT]: {
-    string: 'Son activé',
+    string: 'הקול פועל',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_APPLY_NOW]: {
-    string: 'Inscrivez-vous dès maintenant',
+    string: 'לשליחת הבקשה',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_BOOK_NOW]: {
-    string: 'Réserver',
+    string: 'לביצוע הזמנה',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_BUY_TICKETS]: {
-    string: 'Acheter des billets',
+    string: 'לקניית כרטיסים',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_DOWNLOAD]: {
-    string: 'Télécharger',
+    string: 'הורדה',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_EXPLORE]: {
-    string: 'Découvrir',
+    string: 'מה יש כאן',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_GET_NOW]: {
-    string: 'Obtenir',
+    string: 'אני רוצה להוריד עכשיו',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_INSTALL]: {
-    string: 'Installer',
+    string: 'אני רוצה להתקין עכשיו',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_LEARN_MORE]: {
-    string: 'En savoir plus',
+    string: 'מידע נוסף',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_LISTEN]: {
-    string: 'Écouter',
+    string: 'האזנה',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_MORE]: {
-    string: 'Plus',
+    string: 'עוד',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_OPEN_APP]: {
-    string: 'Ouvrir l\'application',
+    string: 'פתיחת אפליקציה',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_ORDER_NOW]: {
-    string: 'Commander',
+    string: 'אני רוצה להזמין עכשיו',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_PLAY]: {
-    string: 'Lire',
+    string: 'הפעלה',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_READ]: {
-    string: 'Lire',
+    string: 'לקריאה',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SHOP]: {
-    string: 'Acheter',
+    string: 'אני רוצה לקנות',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SHOW]: {
-    string: 'Afficher',
+    string: 'להצגת התוכן',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SHOWTIMES]: {
-    string: 'Horaires des séances',
+    string: 'מועדי הקרנה',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SIGN_UP]: {
-    string: 'S\'inscrire',
+    string: 'הרשמה',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SUBSCRIBE]: {
-    string: 'S\'abonner',
+    string: 'אני רוצה להירשם עכשיו',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_USE_APP]: {
-    string: 'Utiliser l\'application',
+    string: 'שימוש באפליקציה',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_VIEW]: {
-    string: 'Afficher',
+    string: 'תצוגה',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_WATCH]: {
-    string: 'Regarder',
+    string: 'לצפייה',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_WATCH_EPISODE]: {
-    string: 'Regarder l\'épisode',
+    string: 'לצפייה בפרק',
   },
   [LocalizedStringId.AMP_STORY_BOOKEND_MORE_TO_READ_LABEL]: {
-    string: 'Autres articles à lire',
+    string: 'לקריאה נוספת',
   },
   [LocalizedStringId.AMP_STORY_BOOKEND_PRIVACY_SETTINGS_BUTTON_LABEL]: {
-    string: 'Modifier les paramètres de confidentialité des données',
+    string: 'שינוי הגדרות הפרטיות של הנתונים',
   },
   [LocalizedStringId.AMP_STORY_BOOKEND_PRIVACY_SETTINGS_TITLE]: {
-    string: 'Paramètres de confidentialité',
+    string: 'הגדרות פרטיות',
   },
   [LocalizedStringId.AMP_STORY_CONSENT_ACCEPT_BUTTON_LABEL]: {
-    string: 'Accepter',
+    string: 'אישור',
   },
   [LocalizedStringId.AMP_STORY_CONSENT_DECLINE_BUTTON_LABEL]: {
-    string: 'Refuser',
+    string: 'דחייה',
   },
   [LocalizedStringId.AMP_STORY_CONTINUE_ANYWAY_BUTTON_LABEL]: {
-    string: 'Continuer quand même',
+    string: 'אני רוצה להמשיך בכל זאת',
   },
   [LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LABEL]: {
-    string: 'Afficher sur le domaine d\'origine :',
+    string: 'להצגה בדומיין המקורי:',
   },
   [LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LINK]: {
-    string: 'En savoir plus sur les résultats AMP',
+    string: 'מידע נוסף על תוצאות AMP',
   },
   [LocalizedStringId.AMP_STORY_HINT_UI_NEXT_LABEL]: {
-    string: 'Appuyer sur Suivant',
+    string: 'יש להקיש על \'הבא\'',
   },
   [LocalizedStringId.AMP_STORY_HINT_UI_PREVIOUS_LABEL]: {
-    string: 'Appuyer sur Retour',
+    string: 'יש להקיש על \'הקודם\'',
   },
   [LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL]: {
-    string: 'Balayer l\'écran vers le haut',
+    string: 'החלקה למעלה',
   },
   [LocalizedStringId.AMP_STORY_PAGE_PLAY_VIDEO]: {
-    string: 'Regarder la vidéo',
+    string: 'הפעלת הסרטון',
   },
   [LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT]: {
-    string: 'Impossible de copier le lien dans le presse-papiers :(',
+    string: 'לא ניתן להעתיק את הקישור ללוח :(',
   },
   [LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_SUCCESS_TEXT]: {
-    string: 'Lien copié.',
+    string: 'הקישור הועתק',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_EMAIL]: {
-    string: 'E-mail',
+    string: 'אימייל',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_FACEBOOK]: {
     string: 'Facebook',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_GOOGLE_PLUS]: {
-    string: 'Google+',
+    string: 'Google+‎',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINK]: {
-    string: 'Obtenir le lien',
+    string: 'לקבלת קישור',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINKEDIN]: {
     string: 'LinkedIn',
@@ -172,26 +172,24 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
     string: 'WhatsApp',
   },
   [LocalizedStringId.AMP_STORY_TOOLTIP_EXPAND_TWEET]: {
-    string: 'Développer le tweet',
+    string: 'הרחבת הציוץ',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_HEIGHT_SIZE_TEXT]: {
-    string: 'Augmentez la hauteur de votre fenêtre pour voir cette expérience',
+    string: 'כדי להציג את החוויה, יש להגדיל את גובה החלון',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT]: {
-    string: 'Modifiez la hauteur et la largeur de la fenêtre pour voir cette ' +
-        'expérience',
+    string: 'כדי להציג את החוויה, יש להגדיל את הגובה וגם את הרוחב של החלון',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_WIDTH_SIZE_TEXT]: {
-    string: 'Élargissez la fenêtre pour voir cette expérience',
+    string: 'כדי להציג את החוויה, יש להגדיל את רוחב החלון',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
-    string: 'Vous devez activer l\'expérience story AMP pour voir ce contenu.',
+    string: 'יש להפעיל את הניסוי של סטורי ב-AMP כדי להציג תוכן זה.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
-    string: 'La page s\'affiche mieux en mode Portrait',
+    string: 'לחוויית הצפייה הטובה ביותר בדף, יש להשתמש במצב \'הדגשת דיוקן\'',
   },
   [LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT]: {
-    string: 'Nous sommes désolés, mais votre navigateur n\'est pas ' +
-        'compatible avec cette expérience',
+    string: 'לצערנו, נראה שהדפדפן שלך לא תומך בחוויה הזו',
   },
 });

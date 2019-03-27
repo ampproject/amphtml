@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,132 +17,132 @@
 import {LocalizedStringBundleDef, LocalizedStringId} from '../localization';
 
 /**
- * Localized string bundle used for fr strings.
+ * Localized string bundle used for ml strings.
  * @const {!LocalizedStringBundleDef}
  */
 export default /** @const {!LocalizedStringBundleDef} */ ({
   [LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT]: {
-    string: 'Son désactivé',
+    string: 'ശബ്‌ദം ഓഫ് ചെയ്യുക',
   },
   [LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_NO_SOUND_TEXT]: {
-    string: 'Cette page n\'a pas de son',
+    string: 'ഈ പേജിന് ശബ്‌ദമില്ല',
   },
   [LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_SOUND_TEXT]: {
-    string: 'Son activé',
+    string: 'ശബ്‌ദം ഓണാണ്',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_APPLY_NOW]: {
-    string: 'Inscrivez-vous dès maintenant',
+    string: 'ഇപ്പോൾ പ്രയോഗിക്കുക',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_BOOK_NOW]: {
-    string: 'Réserver',
+    string: 'ബുക്ക് ചെയ്യുക',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_BUY_TICKETS]: {
-    string: 'Acheter des billets',
+    string: 'ടിക്കറ്റുകൾ വാങ്ങുക',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_DOWNLOAD]: {
-    string: 'Télécharger',
+    string: 'ഡൗൺലോഡ് ചെയ്യുക',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_EXPLORE]: {
-    string: 'Découvrir',
+    string: 'അടുത്തറിയുക',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_GET_NOW]: {
-    string: 'Obtenir',
+    string: 'ഇപ്പോൾ നേടുക',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_INSTALL]: {
-    string: 'Installer',
+    string: 'ഇപ്പോൾ ഇൻസ്‌റ്റാൾ ചെയ്യുക',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_LEARN_MORE]: {
-    string: 'En savoir plus',
+    string: 'കൂടുതലറിയുക',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_LISTEN]: {
-    string: 'Écouter',
+    string: 'കേൾക്കുക',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_MORE]: {
-    string: 'Plus',
+    string: 'കൂടുതൽ',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_OPEN_APP]: {
-    string: 'Ouvrir l\'application',
+    string: 'ആപ്പ് തുറക്കുക',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_ORDER_NOW]: {
-    string: 'Commander',
+    string: 'ഇപ്പോൾ ഓർഡർ ചെയ്യുക',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_PLAY]: {
-    string: 'Lire',
+    string: 'പ്ലേ ചെയ്യുക',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_READ]: {
-    string: 'Lire',
+    string: 'വായിക്കുക',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SHOP]: {
-    string: 'Acheter',
+    string: 'ഷോപ്പ് ചെയ്യുക',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SHOW]: {
-    string: 'Afficher',
+    string: 'കാണിക്കുക',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SHOWTIMES]: {
-    string: 'Horaires des séances',
+    string: 'പ്രദർശനസമയങ്ങൾ',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SIGN_UP]: {
-    string: 'S\'inscrire',
+    string: 'സൈൻ അപ്പ്',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SUBSCRIBE]: {
-    string: 'S\'abonner',
+    string: 'ഇപ്പോൾ വരിക്കാരാവുക',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_USE_APP]: {
-    string: 'Utiliser l\'application',
+    string: 'ആപ്പ് ഉപയോഗിക്കുക',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_VIEW]: {
-    string: 'Afficher',
+    string: 'കാണുക',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_WATCH]: {
-    string: 'Regarder',
+    string: 'കാണുക',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_WATCH_EPISODE]: {
-    string: 'Regarder l\'épisode',
+    string: 'എപ്പിസോഡ് കാണുക',
   },
   [LocalizedStringId.AMP_STORY_BOOKEND_MORE_TO_READ_LABEL]: {
-    string: 'Autres articles à lire',
+    string: 'വായിക്കാൻ കൂടുതൽ',
   },
   [LocalizedStringId.AMP_STORY_BOOKEND_PRIVACY_SETTINGS_BUTTON_LABEL]: {
-    string: 'Modifier les paramètres de confidentialité des données',
+    string: 'ഡാറ്റ സ്വകാര്യതാ ക്രമീകരണം മാറ്റുക',
   },
   [LocalizedStringId.AMP_STORY_BOOKEND_PRIVACY_SETTINGS_TITLE]: {
-    string: 'Paramètres de confidentialité',
+    string: 'സ്വകാര്യത ക്രമീകരണം',
   },
   [LocalizedStringId.AMP_STORY_CONSENT_ACCEPT_BUTTON_LABEL]: {
-    string: 'Accepter',
+    string: 'അംഗീകരിക്കുക',
   },
   [LocalizedStringId.AMP_STORY_CONSENT_DECLINE_BUTTON_LABEL]: {
-    string: 'Refuser',
+    string: 'നിരസിക്കുക',
   },
   [LocalizedStringId.AMP_STORY_CONTINUE_ANYWAY_BUTTON_LABEL]: {
-    string: 'Continuer quand même',
+    string: 'എന്തായാലും തുടരുക',
   },
   [LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LABEL]: {
-    string: 'Afficher sur le domaine d\'origine :',
+    string: 'ഒറിജിനൽ ഡൊമെയ്‌നിൽ കാണുക:',
   },
   [LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LINK]: {
-    string: 'En savoir plus sur les résultats AMP',
+    string: 'AMP ഫലങ്ങളെക്കുറിച്ച് കൂടുതൽ',
   },
   [LocalizedStringId.AMP_STORY_HINT_UI_NEXT_LABEL]: {
-    string: 'Appuyer sur Suivant',
+    string: '\'അടുത്തത്\' ടാപ്പ് ചെയ്യുക',
   },
   [LocalizedStringId.AMP_STORY_HINT_UI_PREVIOUS_LABEL]: {
-    string: 'Appuyer sur Retour',
+    string: '\'മടങ്ങുക\' ടാപ്പ് ചെയ്യുക',
   },
   [LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL]: {
-    string: 'Balayer l\'écran vers le haut',
+    string: 'മുകളിലോട്ട് സ്വൈപ്പ് ചെയ്യുക',
   },
   [LocalizedStringId.AMP_STORY_PAGE_PLAY_VIDEO]: {
-    string: 'Regarder la vidéo',
+    string: 'വീഡിയോ പ്ലേ ചെയ്യുക',
   },
   [LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT]: {
-    string: 'Impossible de copier le lien dans le presse-papiers :(',
+    string: 'ക്ലിപ്പ്ബോർഡിലേക്ക് ലിങ്ക് പകർത്താനായില്ല :(',
   },
   [LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_SUCCESS_TEXT]: {
-    string: 'Lien copié.',
+    string: 'ലിങ്ക് പകർത്തി!',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_EMAIL]: {
-    string: 'E-mail',
+    string: 'ഇമെയിൽ',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_FACEBOOK]: {
     string: 'Facebook',
@@ -151,7 +151,7 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
     string: 'Google+',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINK]: {
-    string: 'Obtenir le lien',
+    string: 'ലിങ്ക് സ്വന്തമാക്കുക',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINKEDIN]: {
     string: 'LinkedIn',
@@ -172,26 +172,26 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
     string: 'WhatsApp',
   },
   [LocalizedStringId.AMP_STORY_TOOLTIP_EXPAND_TWEET]: {
-    string: 'Développer le tweet',
+    string: 'ട്വീറ്റ് വികസിപ്പിക്കുക',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_HEIGHT_SIZE_TEXT]: {
-    string: 'Augmentez la hauteur de votre fenêtre pour voir cette expérience',
+    string: 'ഈ അനുഭവം കാണാൻ നിങ്ങളുടെ വിൻഡോയുടെ ഉയരം കൂട്ടുക',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT]: {
-    string: 'Modifiez la hauteur et la largeur de la fenêtre pour voir cette ' +
-        'expérience',
+    string: 'ഈ അനുഭവം കാണാൻ നിങ്ങളുടെ വിൻഡോയുടെ ഉയരവും വീതിയും കൂട്ടുക',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_WIDTH_SIZE_TEXT]: {
-    string: 'Élargissez la fenêtre pour voir cette expérience',
+    string: 'ഈ അനുഭവം കാണാൻ നിങ്ങളുടെ വിൻഡോയുടെ വീതി കൂട്ടുക',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
-    string: 'Vous devez activer l\'expérience story AMP pour voir ce contenu.',
+    string: 'ഈ ഉള്ളടക്കം കാണാൻ AMP സ്‌റ്റോറി പരീക്ഷണം നിങ്ങൾ ' +
+        'പ്രവർത്തനക്ഷമമാക്കേണ്ടതുണ്ട്.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
-    string: 'La page s\'affiche mieux en mode Portrait',
+    string: 'പോർട്രെയ്‌റ്റ് മോഡിൽ ഈ പേജ് ഏറ്റവും മികച്ചതായി കാണാനാകും',
   },
   [LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT]: {
-    string: 'Nous sommes désolés, mais votre navigateur n\'est pas ' +
-        'compatible avec cette expérience',
+    string: 'ക്ഷമിക്കണം, നിങ്ങളുടെ ബ്രൗസർ ഈ അനുഭവത്തെ ' +
+        'പിന്തുണയ്ക്കുന്നില്ലെന്ന് തോന്നുന്നു',
   },
 });

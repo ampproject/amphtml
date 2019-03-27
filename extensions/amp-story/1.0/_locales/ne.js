@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,132 +17,132 @@
 import {LocalizedStringBundleDef, LocalizedStringId} from '../localization';
 
 /**
- * Localized string bundle used for fr strings.
+ * Localized string bundle used for ne strings.
  * @const {!LocalizedStringBundleDef}
  */
 export default /** @const {!LocalizedStringBundleDef} */ ({
   [LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT]: {
-    string: 'Son désactivé',
+    string: 'ध्वनि निष्क्रिय भयो',
   },
   [LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_NO_SOUND_TEXT]: {
-    string: 'Cette page n\'a pas de son',
+    string: 'यो पृष्ठ आवाजविहीन छ',
   },
   [LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_SOUND_TEXT]: {
-    string: 'Son activé',
+    string: 'ध्वनि सक्रिय भयो',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_APPLY_NOW]: {
-    string: 'Inscrivez-vous dès maintenant',
+    string: 'अहिले नै आवेदन दिनुहोस्',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_BOOK_NOW]: {
-    string: 'Réserver',
+    string: 'बुक गर्नुहोस्',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_BUY_TICKETS]: {
-    string: 'Acheter des billets',
+    string: 'टिकट किन्नुहोस्',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_DOWNLOAD]: {
-    string: 'Télécharger',
+    string: 'डाउनलोड गर्नुहोस्',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_EXPLORE]: {
-    string: 'Découvrir',
+    string: 'अन्वेषण गर्नुहोस्',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_GET_NOW]: {
-    string: 'Obtenir',
+    string: 'अहिले नै प्राप्त गर्नुहोस्',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_INSTALL]: {
-    string: 'Installer',
+    string: 'अहिले नै स्थापना गर्नुहोस्',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_LEARN_MORE]: {
-    string: 'En savoir plus',
+    string: 'थप जान्नुहोस्',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_LISTEN]: {
-    string: 'Écouter',
+    string: 'सुन्नुहोस्',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_MORE]: {
-    string: 'Plus',
+    string: 'थप',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_OPEN_APP]: {
-    string: 'Ouvrir l\'application',
+    string: 'अनुप्रयोग खोल्नुहोस्',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_ORDER_NOW]: {
-    string: 'Commander',
+    string: 'अहिले नै अर्डर गर्नुहोस्',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_PLAY]: {
-    string: 'Lire',
+    string: 'खेल्नुहोस्',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_READ]: {
-    string: 'Lire',
+    string: 'पढ्नुहोस्',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SHOP]: {
-    string: 'Acheter',
+    string: 'किनमेल गर्नुहोस्',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SHOW]: {
-    string: 'Afficher',
+    string: 'देखाउनुहोस्',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SHOWTIMES]: {
-    string: 'Horaires des séances',
+    string: 'सो समय',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SIGN_UP]: {
-    string: 'S\'inscrire',
+    string: 'साइन अप गर्नुहोस्',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SUBSCRIBE]: {
-    string: 'S\'abonner',
+    string: 'अहिले नै सदस्यता लिनुहोस्',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_USE_APP]: {
-    string: 'Utiliser l\'application',
+    string: 'अनुप्रयोग चलाउनुहोस्',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_VIEW]: {
-    string: 'Afficher',
+    string: 'हेर्नुहोस्',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_WATCH]: {
-    string: 'Regarder',
+    string: 'हेर्नुहोस्',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_WATCH_EPISODE]: {
-    string: 'Regarder l\'épisode',
+    string: 'एपिसोड हेर्नुहोस्',
   },
   [LocalizedStringId.AMP_STORY_BOOKEND_MORE_TO_READ_LABEL]: {
-    string: 'Autres articles à lire',
+    string: 'पढ्न सकिने थप कुरा',
   },
   [LocalizedStringId.AMP_STORY_BOOKEND_PRIVACY_SETTINGS_BUTTON_LABEL]: {
-    string: 'Modifier les paramètres de confidentialité des données',
+    string: 'डेटाको गोपनीयतासम्बन्धी सेटिङहरू परिवर्तन गर्नुहोस्',
   },
   [LocalizedStringId.AMP_STORY_BOOKEND_PRIVACY_SETTINGS_TITLE]: {
-    string: 'Paramètres de confidentialité',
+    string: 'गोपनीयतासम्बन्धी सेटिङहरू',
   },
   [LocalizedStringId.AMP_STORY_CONSENT_ACCEPT_BUTTON_LABEL]: {
-    string: 'Accepter',
+    string: 'स्वीकार गर्नुहोस्',
   },
   [LocalizedStringId.AMP_STORY_CONSENT_DECLINE_BUTTON_LABEL]: {
-    string: 'Refuser',
+    string: 'अस्वीकार गर्नुहोस्',
   },
   [LocalizedStringId.AMP_STORY_CONTINUE_ANYWAY_BUTTON_LABEL]: {
-    string: 'Continuer quand même',
+    string: 'जे भए पनि जारी राख्नुहोस्',
   },
   [LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LABEL]: {
-    string: 'Afficher sur le domaine d\'origine :',
+    string: 'मूल डोमेनमा हेर्नुहोस्:',
   },
   [LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LINK]: {
-    string: 'En savoir plus sur les résultats AMP',
+    string: 'AMP का परिणामबारे थप जानकारी',
   },
   [LocalizedStringId.AMP_STORY_HINT_UI_NEXT_LABEL]: {
-    string: 'Appuyer sur Suivant',
+    string: 'अर्को नामक विकल्पमा ट्याप गर्नुहोस्',
   },
   [LocalizedStringId.AMP_STORY_HINT_UI_PREVIOUS_LABEL]: {
-    string: 'Appuyer sur Retour',
+    string: 'पछाडि नामक विकल्पमा ट्याप गर्नुहोस्',
   },
   [LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL]: {
-    string: 'Balayer l\'écran vers le haut',
+    string: 'माथितिर स्वाइप गर्नुहोस्',
   },
   [LocalizedStringId.AMP_STORY_PAGE_PLAY_VIDEO]: {
-    string: 'Regarder la vidéo',
+    string: 'भिडियो प्ले गर्नुहोस्',
   },
   [LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT]: {
-    string: 'Impossible de copier le lien dans le presse-papiers :(',
+    string: 'क्लिपबोर्डमा लिंक प्रतिलिपि गर्न सकिएन :(',
   },
   [LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_SUCCESS_TEXT]: {
-    string: 'Lien copié.',
+    string: 'लिंक प्रतिलिपि गरियो!',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_EMAIL]: {
-    string: 'E-mail',
+    string: 'इमेल',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_FACEBOOK]: {
     string: 'Facebook',
@@ -151,7 +151,7 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
     string: 'Google+',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINK]: {
-    string: 'Obtenir le lien',
+    string: 'लिंक प्राप्त गर्नुहोस्',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINKEDIN]: {
     string: 'LinkedIn',
@@ -172,26 +172,26 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
     string: 'WhatsApp',
   },
   [LocalizedStringId.AMP_STORY_TOOLTIP_EXPAND_TWEET]: {
-    string: 'Développer le tweet',
+    string: 'ट्विट विस्तृत गर्नुहोस्',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_HEIGHT_SIZE_TEXT]: {
-    string: 'Augmentez la hauteur de votre fenêtre pour voir cette expérience',
+    string: 'यो अनुभव हेर्न आफ्नो विन्डोको उचाइ बढाउनुहोस्',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT]: {
-    string: 'Modifiez la hauteur et la largeur de la fenêtre pour voir cette ' +
-        'expérience',
+    string: 'यो अनुभव हेर्न आफ्नो विन्डोको उचाइ र चौडाइ दुवै बढाउनुहोस्',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_WIDTH_SIZE_TEXT]: {
-    string: 'Élargissez la fenêtre pour voir cette expérience',
+    string: 'यो अनुभव हेर्न आफ्नो विन्डोको चौडाइ बढाउनुहोस्',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
-    string: 'Vous devez activer l\'expérience story AMP pour voir ce contenu.',
+    string: 'यो सामग्री हेर्न तपाईंले अनिवार्य रूपमा amp स्टोरीको परीक्षण ' +
+        'सक्षम पार्नु पर्छ।',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
-    string: 'La page s\'affiche mieux en mode Portrait',
+    string: 'यो पृष्ठ पोर्ट्रेट मोडमा हेर्दा राम्रो देखिन्छ',
   },
   [LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT]: {
-    string: 'Nous sommes désolés, mais votre navigateur n\'est pas ' +
-        'compatible avec cette expérience',
+    string: 'माफ गर्नुहोला, तपाईंको ब्राउजरले यो अनुभवको समर्थन गर्दैन जस्तो ' +
+        'देखिन्छ',
   },
 });

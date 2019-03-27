@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,132 +17,132 @@
 import {LocalizedStringBundleDef, LocalizedStringId} from '../localization';
 
 /**
- * Localized string bundle used for fr strings.
+ * Localized string bundle used for te strings.
  * @const {!LocalizedStringBundleDef}
  */
 export default /** @const {!LocalizedStringBundleDef} */ ({
   [LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT]: {
-    string: 'Son désactivé',
+    string: 'ధ్వని ఆఫ్‌లో ఉంది',
   },
   [LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_NO_SOUND_TEXT]: {
-    string: 'Cette page n\'a pas de son',
+    string: 'ఈ పేజీలో ధ్వని లేదు',
   },
   [LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_SOUND_TEXT]: {
-    string: 'Son activé',
+    string: 'ధ్వని ఆన్‌లో ఉంది',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_APPLY_NOW]: {
-    string: 'Inscrivez-vous dès maintenant',
+    string: 'ఇప్పుడే వర్తింప చేయి',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_BOOK_NOW]: {
-    string: 'Réserver',
+    string: 'బుక్ చేయి',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_BUY_TICKETS]: {
-    string: 'Acheter des billets',
+    string: 'టిక్కెట్లను కొనుగోలు చేయి',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_DOWNLOAD]: {
-    string: 'Télécharger',
+    string: 'డౌన్‌లోడ్ చేయి',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_EXPLORE]: {
-    string: 'Découvrir',
+    string: 'అన్వేషించు',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_GET_NOW]: {
-    string: 'Obtenir',
+    string: 'ఇప్పుడే పొందండి',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_INSTALL]: {
-    string: 'Installer',
+    string: 'ఇప్పుడు ఇన్‌స్టాల్ చేయి',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_LEARN_MORE]: {
-    string: 'En savoir plus',
+    string: 'మరింత తెలుసుకోండి',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_LISTEN]: {
-    string: 'Écouter',
+    string: 'వినండి',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_MORE]: {
-    string: 'Plus',
+    string: 'మరిన్ని',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_OPEN_APP]: {
-    string: 'Ouvrir l\'application',
+    string: 'యాప్‌ను తెరువు',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_ORDER_NOW]: {
-    string: 'Commander',
+    string: 'ఇప్పుడే ఆర్డర్ చేయి',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_PLAY]: {
-    string: 'Lire',
+    string: 'ప్లే చేయి',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_READ]: {
-    string: 'Lire',
+    string: 'చదువు',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SHOP]: {
-    string: 'Acheter',
+    string: 'షాపింగ్ చేయి',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SHOW]: {
-    string: 'Afficher',
+    string: 'చూపు',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SHOWTIMES]: {
-    string: 'Horaires des séances',
+    string: 'ప్రదర్శన సమయాలు',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SIGN_UP]: {
-    string: 'S\'inscrire',
+    string: 'సైన్ అప్ చేయి',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SUBSCRIBE]: {
-    string: 'S\'abonner',
+    string: 'ఇప్పుడే సభ్యత్వాన్ని పొందండి',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_USE_APP]: {
-    string: 'Utiliser l\'application',
+    string: 'యాప్‌ను ఉపయోగించు',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_VIEW]: {
-    string: 'Afficher',
+    string: 'చూడండి',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_WATCH]: {
-    string: 'Regarder',
+    string: 'చూడు',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_WATCH_EPISODE]: {
-    string: 'Regarder l\'épisode',
+    string: 'ఎపిసోడ్‌ను చూడండి',
   },
   [LocalizedStringId.AMP_STORY_BOOKEND_MORE_TO_READ_LABEL]: {
-    string: 'Autres articles à lire',
+    string: 'ఇంకా ఉంది',
   },
   [LocalizedStringId.AMP_STORY_BOOKEND_PRIVACY_SETTINGS_BUTTON_LABEL]: {
-    string: 'Modifier les paramètres de confidentialité des données',
+    string: 'గోప్యతా సెట్టింగ్‌లను మార్చు',
   },
   [LocalizedStringId.AMP_STORY_BOOKEND_PRIVACY_SETTINGS_TITLE]: {
-    string: 'Paramètres de confidentialité',
+    string: 'గోప్యతా సెట్టింగ్‌లు',
   },
   [LocalizedStringId.AMP_STORY_CONSENT_ACCEPT_BUTTON_LABEL]: {
-    string: 'Accepter',
+    string: 'ఆమోదించు',
   },
   [LocalizedStringId.AMP_STORY_CONSENT_DECLINE_BUTTON_LABEL]: {
-    string: 'Refuser',
+    string: 'తిరస్కరించు',
   },
   [LocalizedStringId.AMP_STORY_CONTINUE_ANYWAY_BUTTON_LABEL]: {
-    string: 'Continuer quand même',
+    string: 'ఏదేమైనా కొనసాగించు',
   },
   [LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LABEL]: {
-    string: 'Afficher sur le domaine d\'origine :',
+    string: 'అసలైన డొమైన్‌లో చూడండి:',
   },
   [LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LINK]: {
-    string: 'En savoir plus sur les résultats AMP',
+    string: 'AMP ఫలితాల గురించి మరింత తెలుసుకోండి',
   },
   [LocalizedStringId.AMP_STORY_HINT_UI_NEXT_LABEL]: {
-    string: 'Appuyer sur Suivant',
+    string: 'తర్వాత నొక్కండి',
   },
   [LocalizedStringId.AMP_STORY_HINT_UI_PREVIOUS_LABEL]: {
-    string: 'Appuyer sur Retour',
+    string: 'వెనుకకు వెళ్ళడానికి నొక్కండి',
   },
   [LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL]: {
-    string: 'Balayer l\'écran vers le haut',
+    string: 'పైకి స్వైప్ చేయి',
   },
   [LocalizedStringId.AMP_STORY_PAGE_PLAY_VIDEO]: {
-    string: 'Regarder la vidéo',
+    string: 'వీడియోను ప్లే చేయి',
   },
   [LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT]: {
-    string: 'Impossible de copier le lien dans le presse-papiers :(',
+    string: 'లింక్‌ను క్లిప్‌బోర్డ్‌కు కాపీ చేయడం సాధ్యపడలేదు :(',
   },
   [LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_SUCCESS_TEXT]: {
-    string: 'Lien copié.',
+    string: 'లింక్ కాపీ చేయబడింది!',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_EMAIL]: {
-    string: 'E-mail',
+    string: 'ఇమెయిల్',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_FACEBOOK]: {
     string: 'Facebook',
@@ -151,7 +151,7 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
     string: 'Google+',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINK]: {
-    string: 'Obtenir le lien',
+    string: 'లింక్‌ను పొందండి',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINKEDIN]: {
     string: 'LinkedIn',
@@ -172,26 +172,25 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
     string: 'WhatsApp',
   },
   [LocalizedStringId.AMP_STORY_TOOLTIP_EXPAND_TWEET]: {
-    string: 'Développer le tweet',
+    string: 'ట్వీట్‌ను విస్తరించండి',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_HEIGHT_SIZE_TEXT]: {
-    string: 'Augmentez la hauteur de votre fenêtre pour voir cette expérience',
+    string: 'ఈ కథనాన్ని చూడడానికి మీ విండో యొక్క ఎత్తును పెంచండి',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT]: {
-    string: 'Modifiez la hauteur et la largeur de la fenêtre pour voir cette ' +
-        'expérience',
+    string: 'ఈ కథనాన్ని చూడడానికి మీ విండో యొక్క ఎత్తు మరియు వెడల్పును ' +
+        'పెంచండి',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_WIDTH_SIZE_TEXT]: {
-    string: 'Élargissez la fenêtre pour voir cette expérience',
+    string: 'ఈ కథనాన్ని చూడడానికి మీ విండో యొక్క వెడల్పును పెంచండి',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
-    string: 'Vous devez activer l\'expérience story AMP pour voir ce contenu.',
+    string: 'ఈ కంటెంట్‌ను చూడడానికి మీరు amp కథనం ప్రయోగాన్ని ప్రారంభించాలి.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
-    string: 'La page s\'affiche mieux en mode Portrait',
+    string: 'పోర్ట్రెయిట్ మోడ్‌లో ఈ పేజీ బాగా కనబడుతుంది',
   },
   [LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT]: {
-    string: 'Nous sommes désolés, mais votre navigateur n\'est pas ' +
-        'compatible avec cette expérience',
+    string: 'క్షమించండి, మీ బ్రౌజర్‌లో ఈ కథనానికి మద్దతు లేదని అనిపిస్తుంది',
   },
 });

@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,132 +17,132 @@
 import {LocalizedStringBundleDef, LocalizedStringId} from '../localization';
 
 /**
- * Localized string bundle used for fr strings.
+ * Localized string bundle used for si strings.
  * @const {!LocalizedStringBundleDef}
  */
 export default /** @const {!LocalizedStringBundleDef} */ ({
   [LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT]: {
-    string: 'Son désactivé',
+    string: 'හඬ ක්‍රියා විරහිතයි',
   },
   [LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_NO_SOUND_TEXT]: {
-    string: 'Cette page n\'a pas de son',
+    string: 'මෙම පිටුවේ ශබ්ද නැත',
   },
   [LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_SOUND_TEXT]: {
-    string: 'Son activé',
+    string: 'හඬ ක්‍රියාත්මකයි',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_APPLY_NOW]: {
-    string: 'Inscrivez-vous dès maintenant',
+    string: 'දැන් අයැදුම් කරන්න',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_BOOK_NOW]: {
-    string: 'Réserver',
+    string: 'වෙන් කිරීම',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_BUY_TICKETS]: {
-    string: 'Acheter des billets',
+    string: 'ප්‍රවේශ පත්‍ර මිල දී ගන්න',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_DOWNLOAD]: {
-    string: 'Télécharger',
+    string: 'බාගන්න',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_EXPLORE]: {
-    string: 'Découvrir',
+    string: 'ගවේෂණය',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_GET_NOW]: {
-    string: 'Obtenir',
+    string: 'දැන් ගන්න',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_INSTALL]: {
-    string: 'Installer',
+    string: 'දැන් ස්ථාපනය කරන්න',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_LEARN_MORE]: {
-    string: 'En savoir plus',
+    string: 'තවත් දැන ගන්න',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_LISTEN]: {
-    string: 'Écouter',
+    string: 'සවන් දෙන්න',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_MORE]: {
-    string: 'Plus',
+    string: 'තවත්',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_OPEN_APP]: {
-    string: 'Ouvrir l\'application',
+    string: 'යෙදුම විවෘත කරන්න',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_ORDER_NOW]: {
-    string: 'Commander',
+    string: 'දැන් ඇණවුම් කරන්න',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_PLAY]: {
-    string: 'Lire',
+    string: 'ධාවන කරන්න',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_READ]: {
-    string: 'Lire',
+    string: 'කියවන්න',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SHOP]: {
-    string: 'Acheter',
+    string: 'සාප්පු යන්න',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SHOW]: {
-    string: 'Afficher',
+    string: 'පෙන්වන්න',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SHOWTIMES]: {
-    string: 'Horaires des séances',
+    string: 'දර්ශන වේලා',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SIGN_UP]: {
-    string: 'S\'inscrire',
+    string: 'ලියාපදිංචි වන්න',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SUBSCRIBE]: {
-    string: 'S\'abonner',
+    string: 'දැන් දායක වන්න',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_USE_APP]: {
-    string: 'Utiliser l\'application',
+    string: 'යෙදුම භාවිත කරන්න',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_VIEW]: {
-    string: 'Afficher',
+    string: 'බලන්න',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_WATCH]: {
-    string: 'Regarder',
+    string: 'නරඹන්න',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_WATCH_EPISODE]: {
-    string: 'Regarder l\'épisode',
+    string: 'කතාංගය බලන්න',
   },
   [LocalizedStringId.AMP_STORY_BOOKEND_MORE_TO_READ_LABEL]: {
-    string: 'Autres articles à lire',
+    string: 'තවත් කියවීමට',
   },
   [LocalizedStringId.AMP_STORY_BOOKEND_PRIVACY_SETTINGS_BUTTON_LABEL]: {
-    string: 'Modifier les paramètres de confidentialité des données',
+    string: 'දත්ත පෞද්ගලිකත්ව සැකසීම් වෙනස් කරන්න',
   },
   [LocalizedStringId.AMP_STORY_BOOKEND_PRIVACY_SETTINGS_TITLE]: {
-    string: 'Paramètres de confidentialité',
+    string: 'පෞද්ගලිකත්ව සැකසීම්',
   },
   [LocalizedStringId.AMP_STORY_CONSENT_ACCEPT_BUTTON_LABEL]: {
-    string: 'Accepter',
+    string: 'පිළිගන්න',
   },
   [LocalizedStringId.AMP_STORY_CONSENT_DECLINE_BUTTON_LABEL]: {
-    string: 'Refuser',
+    string: 'ප්‍රතික්‍ෂේප කරන්න',
   },
   [LocalizedStringId.AMP_STORY_CONTINUE_ANYWAY_BUTTON_LABEL]: {
-    string: 'Continuer quand même',
+    string: 'කෙසේ හෝ ඉදිරියට යන්න',
   },
   [LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LABEL]: {
-    string: 'Afficher sur le domaine d\'origine :',
+    string: 'මුල් වසහ මත බලන්න:',
   },
   [LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LINK]: {
-    string: 'En savoir plus sur les résultats AMP',
+    string: 'AMP ප්‍රතිඵල ගැන තවත්',
   },
   [LocalizedStringId.AMP_STORY_HINT_UI_NEXT_LABEL]: {
-    string: 'Appuyer sur Suivant',
+    string: '\'මීළඟ\' තට්ටු කරන්න',
   },
   [LocalizedStringId.AMP_STORY_HINT_UI_PREVIOUS_LABEL]: {
-    string: 'Appuyer sur Retour',
+    string: '\'ආපසු\' තට්ටු කරන්න',
   },
   [LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL]: {
-    string: 'Balayer l\'écran vers le haut',
+    string: 'ඉහළට ස්වයිප් කරන්න',
   },
   [LocalizedStringId.AMP_STORY_PAGE_PLAY_VIDEO]: {
-    string: 'Regarder la vidéo',
+    string: 'වීඩියෝව ධාවන කරන්න',
   },
   [LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT]: {
-    string: 'Impossible de copier le lien dans le presse-papiers :(',
+    string: 'සබැඳිය පසුරු පුවරුවට පිටපත් කිරීමට නොහැකි විය :(',
   },
   [LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_SUCCESS_TEXT]: {
-    string: 'Lien copié.',
+    string: 'සබැඳිය පිටපත් විය!',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_EMAIL]: {
-    string: 'E-mail',
+    string: 'ඉ-තැපෑල',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_FACEBOOK]: {
     string: 'Facebook',
@@ -151,7 +151,7 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
     string: 'Google+',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINK]: {
-    string: 'Obtenir le lien',
+    string: 'සබැඳිය ලබා ගන්න',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINKEDIN]: {
     string: 'LinkedIn',
@@ -160,7 +160,7 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
     string: 'Pinterest',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_SMS]: {
-    string: 'SMS',
+    string: 'කෙටිපණිවුඩ',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_TUMBLR]: {
     string: 'Tumblr',
@@ -172,26 +172,24 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
     string: 'WhatsApp',
   },
   [LocalizedStringId.AMP_STORY_TOOLTIP_EXPAND_TWEET]: {
-    string: 'Développer le tweet',
+    string: 'ට්වීට් එක දිග හරින්න',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_HEIGHT_SIZE_TEXT]: {
-    string: 'Augmentez la hauteur de votre fenêtre pour voir cette expérience',
+    string: 'මෙම අත්දැකීම බැලීමට ඔබේ කවුළුවේ උස දිග හරින්න',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT]: {
-    string: 'Modifiez la hauteur et la largeur de la fenêtre pour voir cette ' +
-        'expérience',
+    string: 'මෙම අත්දැකීම බැලීමට ඔබේ කවුළුවේ දිග සහ පළල යන දෙකම දිග හරින්න',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_WIDTH_SIZE_TEXT]: {
-    string: 'Élargissez la fenêtre pour voir cette expérience',
+    string: 'මෙම අත්දැකීම බැලීමට ඔබේ කවුළුවේ පළල දිග හරින්න',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
-    string: 'Vous devez activer l\'expérience story AMP pour voir ce contenu.',
+    string: 'ඔබ මෙම අන්තර්ගතය බැලීමට amp-කතා අත්හදා බැලීම සබල කළ යුතුමයි.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
-    string: 'La page s\'affiche mieux en mode Portrait',
+    string: 'පිටුව හොඳටම බැලිය හැක්කේ ආලේඛ්‍ය ප්‍රකාරයෙනි',
   },
   [LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT]: {
-    string: 'Nous sommes désolés, mais votre navigateur n\'est pas ' +
-        'compatible avec cette expérience',
+    string: 'කනගාටුයි, ඔබේ බ්‍රවුසරය මෙම අත්දැකීමට සහය නොදක්වන බව පෙනේ',
   },
 });
