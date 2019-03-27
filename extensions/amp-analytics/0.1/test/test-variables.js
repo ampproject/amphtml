@@ -24,12 +24,18 @@ import {
   variableServiceFor,
 } from '../variables';
 import {Services} from '../../../../src/services';
+import {
+  installLinkerReaderService,
+  linkerReaderServiceFor,
+} from '../linker-reader';
 
 describe('amp-analytics.VariableService', function() {
   let variables;
 
   beforeEach(() => {
-    variables = new VariableService({});
+    const fakeWin = {};
+    installLinkerReaderService(fakeWin);
+    variables = new VariableService(fakeWin);
   });
 
   describe('encodeVars', () => {
@@ -163,9 +169,12 @@ describe('amp-analytics.VariableService', function() {
   describes.fakeWin('macros', {amp: true}, env => {
     let win;
     let urlReplacementService;
+    let sandbox;
 
     beforeEach(() => {
+      sandbox = env.sandbox;
       win = env.win;
+      installLinkerReaderService(win);
       installVariableService(win);
       variables = variableServiceFor(win);
       const {documentElement} = win.document;
@@ -247,6 +256,15 @@ describe('amp-analytics.VariableService', function() {
 
     it('replace with no third arg', () => {
       return check('$REPLACE(thi@s-is-a-te@st, `-|@`)', 'thisisatest');
+    });
+
+    it('replaces LINKER_PARAM', () => {
+      const linkerReader = linkerReaderServiceFor(win);
+      const linkerReaderStub = sandbox.stub(linkerReader, 'get');
+      linkerReaderStub.withArgs('gl', 'cid').returns('a1b2c3');
+      linkerReaderStub.withArgs('gl', 'gclid').returns(123);
+      return check('LINKER_PARAM(gl, cid)&LINKER_PARAM(gl, gclid)',
+          'a1b2c3&123');
     });
   });
 
