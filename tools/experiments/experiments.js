@@ -439,6 +439,18 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/19869',
     cleanupIssue: 'TODO',
   },
+  {
+    id: 'new-loaders',
+    name: 'New default loaders excluding amp-ad',
+    spec: 'https://github.com/ampproject/amphtml/issues/20237',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/21485',
+  },
+  {
+    id: 'new-loaders-ad',
+    name: 'New default loader for amp-ad',
+    spec: 'https://github.com/ampproject/amphtml/issues/20237',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/21485',
+  },
 ];
 
 if (getMode().localDev) {

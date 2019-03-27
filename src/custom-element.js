@@ -1601,7 +1601,7 @@ function createBaseCustomElementClass(win) {
             <div class="i-amphtml-loading-container i-amphtml-fill-content
               amp-hidden"></div>`;
 
-        const element = createLoaderElement(doc, this.elementName());
+        const element = createLoaderElement(doc, this);
         container.appendChild(element);
 
         this.appendChild(container);

@@ -1,0 +1,166 @@
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>Loaders</title>
+  <link rel="canonical" href="http://nonblocking.io/" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+
+  <script>
+    // Hack to delay everything!
+    window.AMP_MODE = {test: true};
+    const delay = parseInt(window.location.search.replace('?','')) || 3000;
+    document.addEventListener('amp:attached', e => {
+        const lc = e.srcElement.implementation_.layoutCallback.bind(e.srcElement.implementation_);
+        e.srcElement.implementation_.layoutCallback = function() {
+          return new Promise(function(resolve) {
+              setTimeout(() => {
+                lc().then(resolve);
+              }, delay);
+          });
+        };
+      }, true);
+
+    function toggleExp(name) {
+      const isOn = AMP.isExperimentOn(name);
+      AMP.toggleExperiment(name, !isOn);
+      window.location.reload();
+    }
+  </script>
+  <script src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
+  <script async custom-element="amp-youtube" src="https://cdn.ampproject.org/v0/amp-youtube-0.1.js"></script>
+  <script async custom-element="amp-twitter" src="https://cdn.ampproject.org/v0/amp-twitter-0.1.js"></script>
+  <script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
+  <style amp-custom>
+    /* boring boiler place stuff */
+    main {
+      max-width: 600px;
+      margin: auto;
+      border-left: 1px #eee solid;
+      border-right: 1px #eee solid;
+      min-height: 100vh;
+      font-family: 'Courier New', Courier, monospace;
+      padding: 0 5px;
+      text-align: center;
+      padding-bottom: 20vh;
+    }
+    button {
+      background: #5E35B1;
+      padding: 7px;
+      border: 1px solid #311B92;
+      color: #fafafa;
+      font-size: 12pt;
+      display: inline-block;
+    }
+
+    .toolbar {
+      text-align: center;
+      padding: 10px;
+      border-bottom: 1px solid #eee;
+    }
+    h2 {
+      border-top: 1px solid #f1f1f1;
+      padding-top: 10px;
+      color: #2196F3;
+      margin-bottom: 50px;
+    }
+
+    h1 {
+      color: #E91E63;
+    }
+
+    .info {
+      padding: 5px;
+      font-size: 80%;
+      color: #444;
+      text-align: left;
+    }
+    /* END boring boiler place stuff */
+
+   /* Custom loader from ABE */
+  .custom-loader-1 .amp-active {
+    max-width: 10%;
+    max-height: 50%;
+    width: 2em;
+    height: 2em;
+    background-color: #333;
+
+    margin: -1em auto;
+    animation: sk-rotateplane 1.2s infinite ease-in-out;
+  }
+  @keyframes sk-rotateplane {
+    0% { transform: perspective(120px); }
+    50% { transform: perspective(120px) rotateX(-180deg); }
+    100% { transform: perspective(120px) rotateX(-180deg) rotateY(-180deg); }
+  }
+  /* Hide the three default dots */
+  .custom-loader-1 .amp-active > div {
+    display: none;
+  }
+
+  </style>
+</head>
+<body>
+  <main>
+      <div class="info">
+        <div>- Default delay is ~4 seconds</div>
+        <div>- You can change the delay by adding ?{number} (e.g. ?5000) to the Url</div>
+      </div>
+      <div class="toolbar">
+          <button onclick="toggleExp('new-loaders')">Toggle New/Old Default Loaders</button>
+          <button onclick="toggleExp('new-loaders-ad')">Toggle New/Old Ads Loaders</button>
+      </div>
+
+      <h1>Not customized</h1>
+
+      <h2>amp-img</h2>
+      <amp-img src="https://picsum.photos/1600/900?image=110"
+        layout=responsive
+        width="1600"
+        height="900"></amp-img>
+
+      <h2>amp-youtube</h2>
+      <amp-youtube
+        id="myVideo"
+        data-videoid="lBTCB7yLs8Y"
+        width="358"
+        height="204"
+        layout="responsive">
+      </amp-youtube>
+
+      <h2>amp-twitter</h2>
+      <amp-twitter width=486 height=657
+        layout="responsive"
+        data-tweetID="585110598171631616"></amp-twitter>
+
+      <h2>amp-ad: 300x250</h2>
+      <amp-ad width="300" height="250"
+          type="contentad"
+          data-id="7902c314-4cad-466e-9264-ecd333a2c757"
+          data-d="bm9uYmxvY2tpbmcuaW8="
+          data-wid="218705"
+          data-url="nonblocking.io">
+      </amp-ad>
+
+      <h2>amp-ad: banner</h2>
+      <amp-ad width="320" height="50"
+          type="adstir"
+          data-app-id="MEDIA-343ded3e"
+          data-ad-spot="1">
+      </amp-ad>
+
+    <hr>
+      <h1>Customized</h1>
+      <h5>Should not change regardless of New or Old loader experiments.</h5>
+      <h2>amp-img</h2>
+      <amp-img src="https://picsum.photos/1600/900?image=110"
+        class="custom-loader-1"
+        layout=responsive
+        width="1600"
+        height="900"></amp-img>
+
+  </main>
+</body>
+</html>
