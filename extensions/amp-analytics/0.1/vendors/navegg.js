@@ -35,9 +35,6 @@ export const NAVEGG_CONFIG = /** @type {!JsonObject} */ ({
   'transport': {
     'beacon': false,
     'xhrpost': false,
-    'image': true,
-  },
-  'image': {
-    'suppressWarnings': true,
+    'image': {'suppressWarnings': true},
   },
 });
