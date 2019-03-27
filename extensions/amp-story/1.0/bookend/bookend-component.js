@@ -107,7 +107,7 @@ function componentBuilderInstanceFor(type) {
  * Prepend a heading to the related articles section if first component is not a
  * heading already.
  * @param {!Array<BookendComponentDef>} components
- * @param {?../../../../src/servoce/localization.LocalizationService} localizationService
+ * @param {?../../../../src/service/localization.LocalizationService} localizationService
  * @return {!Array<BookendComponentDef>}
  */
 function prependTitle(components, localizationService) {
@@ -153,7 +153,7 @@ export class BookendComponent {
    * class and appending the elements to the container.
    * @param {!Array<BookendComponentDef>} components
    * @param {!Document} doc
-   * @param {?../../../../src/servoce/localization.LocalizationService} localizationService
+   * @param {?../../../../src/service/localization.LocalizationService} localizationService
    * @return {!DocumentFragment}
    */
   static buildElements(components, doc, localizationService) {

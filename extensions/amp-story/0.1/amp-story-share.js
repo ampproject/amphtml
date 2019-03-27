@@ -198,7 +198,7 @@ export class ShareWidget {
     /** @protected {?Element} */
     this.root = null;
 
-    /** @private {?Promise<?./../../../src/servoce/localization.LocalizationService>} */
+    /** @private {?Promise<?./../../../src/service/localization.LocalizationService>} */
     this.localizationServicePromise_ = null;
 
     /** @private @const {!./amp-story-request-service.AmpStoryRequestService} */

@@ -84,7 +84,7 @@ export class ViewportWarningLayer {
     // TODO: at this point the localization service is not registered yet. We
     // should refactor the way it is registered it so it works like the store
     // and analytics services.
-    /** @private {?../../../src/servoce/localization.LocalizationService} */
+    /** @private {?../../../src/service/localization.LocalizationService} */
     this.localizationService_ = null;
 
     /** @private {?Element} */
