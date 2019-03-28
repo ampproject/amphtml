@@ -499,13 +499,13 @@ export class MediaPool {
   swapPoolMediaElementIntoDom_(placeholderEl, poolMediaEl, sources) {
     const ampMediaForPoolEl = ampMediaElementFor(poolMediaEl);
     const ampMediaForDomEl = ampMediaElementFor(placeholderEl);
+    poolMediaEl[REPLACED_MEDIA_PROPERTY_NAME] = placeholderEl.id;
 
     return this.enqueueMediaElementTask_(poolMediaEl,
         new SwapIntoDomTask(placeholderEl))
         .then(() => {
           this.maybeResetAmpMedia_(ampMediaForPoolEl);
           this.maybeResetAmpMedia_(ampMediaForDomEl);
-          poolMediaEl[REPLACED_MEDIA_PROPERTY_NAME] = placeholderEl.id;
           this.enqueueMediaElementTask_(poolMediaEl,
               new UpdateSourcesTask(sources));
           this.enqueueMediaElementTask_(poolMediaEl, new LoadTask());
@@ -566,12 +566,10 @@ export class MediaPool {
     const placeholderEl = /** @type {!PlaceholderElementDef} */ (
       dev().assertElement(this.placeholderEls_[placeholderElId],
           'No media element to put back into DOM after eviction.'));
+    poolMediaEl[REPLACED_MEDIA_PROPERTY_NAME] = null;
 
     const swapOutOfDom = this.enqueueMediaElementTask_(poolMediaEl,
-        new SwapOutOfDomTask(placeholderEl))
-        .then(() => {
-          poolMediaEl[REPLACED_MEDIA_PROPERTY_NAME] = null;
-        });
+        new SwapOutOfDomTask(placeholderEl));
 
     this.resetPoolMediaElementSource_(poolMediaEl);
     return swapOutOfDom;

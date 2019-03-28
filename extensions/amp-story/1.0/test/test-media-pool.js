@@ -67,6 +67,21 @@ describes.realWin('media-pool', {}, env => {
   }
 
   /**
+   * @param {!Array<!HTMLMediaElement>} elements
+   * @return {function(!Element): number} The distance
+   */
+  function arrayOrderDistanceFn(elements) {
+    return (element) => {
+      const index = elements.indexOf(element);
+      if (index < 0) {
+        return 9999;
+      }
+
+      return index;
+    };
+  }
+
+  /**
    * @param {!Object|!Array} poolOrPools
    * @return {!Array<!HTMLMediaElement>}
    */
@@ -123,14 +138,8 @@ describes.realWin('media-pool', {}, env => {
 
   it.skip('should evict the element with the highest distance first', () => {
     const elements = createMediaElements('video', 3);
-    mediaPool = new MediaPool(win, {'video': 2}, element => {
-      const index = elements.indexOf(element);
-      if (index < 0) {
-        return 9999;
-      }
-
-      return index;
-    });
+    mediaPool = new MediaPool(win, {'video': 2},
+        arrayOrderDistanceFn(elements));
 
     elements.forEach(element => mediaPool.register(element));
     elements.forEach(element => mediaPool.play(element));
@@ -142,5 +151,21 @@ describes.realWin('media-pool', {}, env => {
         .to.be.true;
     expect(isElementInPool(mediaPool.allocated['video'], elements[2]))
         .to.be.false;
+  });
+
+  it('should be able to play alot of videos', () => {
+    const alot = 100;
+    const elements = createMediaElements('video', alot);
+    mediaPool = new MediaPool(win, {'video': 2},
+        arrayOrderDistanceFn(elements));
+
+    elements.forEach(element => mediaPool.register(element));
+    elements.forEach(element => {
+      mediaPool.play(element).then(playbackSucceeded => {
+        expect(playbackSucceeded).to.be.true;
+      }, error => {
+        throw error;
+      });
+    });
   });
 });
