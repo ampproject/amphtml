@@ -87,7 +87,15 @@ export class MraidInitializer {
 
     // It looks like we're initiating a network load for mraid from a relative
     // url, but this will actually be intercepted by the mobile app SDK and
-    // handled locally.
+    // handled locally.  To be safe, first we inject an invalid base tag which
+    // prevents any real relative loads.  This works because the validator
+    // prohibits <base href=...> for ads and only allows <base target=...>.
+    const head = document.getElementsByTagName('head').item(0);
+
+    const base = document.createElement('base');
+    base.setAttribute('href', '//invalid.invalid');
+    head.appendChild(base);
+
     const mraidJs = document.createElement('script');
     mraidJs.setAttribute('type', 'text/javascript');
     mraidJs.setAttribute('src', 'mraid.js');

@@ -4090,6 +4090,24 @@ function validateAttrValueBelowTemplateTag(
 }
 
 /**
+ * Determines the name of the attribute where you find the name of this sort of
+ * extension.  Typically, this will return 'custom-element'.
+ *
+ * @param {!amp.validator.ExtensionSpec} extensionSpec
+ * @return {string}
+ */
+function getExtensionNameAttribute(extensionSpec) {
+  switch (extensionSpec.extensionType) {
+    case amp.validator.ExtensionSpec.ExtensionType.CUSTOM_TEMPLATE:
+      return 'custom-template';
+    case amp.validator.ExtensionSpec.ExtensionType.HOST_SCRIPT:
+      return 'host-script';
+    default:
+      return 'custom-element';
+  }
+}
+
+/**
  * Validates whether an encountered attribute is validated by an ExtensionSpec.
  * ExtensionSpec's validate the 'custom-element', 'custom-template', and 'src'
  * attributes. If an error is found, it is added to the |result|. The return
@@ -4106,18 +4124,11 @@ function validateAttributeInExtension(tagSpec, context, attr, result) {
 
   const {extensionSpec} = tagSpec;
   // TagSpecs with extensions will only be evaluated if their dispatch_key
-  // matches, which is based on this custom-element/custom-template field
-  // attribute value. The dispatch key matching is case-insensitive for
-  // faster lookups, so it still possible for the attribute value to not
-  // match if it contains upper-case letters.
-  if (!extensionSpec.isCustomTemplate && attr.name === 'custom-element') {
-    if (extensionSpec.name !== attr.value) {
-      goog.asserts.assert(extensionSpec.name === attr.value.toLowerCase());
-      return false;
-    }
-    return true;
-  } else if (
-    extensionSpec.isCustomTemplate && attr.name === 'custom-template') {
+  // matches, which is based on this custom-element/custom-template/host-script
+  // field attribute value. The dispatch key matching is case-insensitive for
+  // faster lookups, so it still possible for the attribute value to not match
+  // if it contains upper-case letters.
+  if (getExtensionNameAttribute(extensionSpec) === attr.name) {
     if (extensionSpec.name !== attr.value) {
       goog.asserts.assert(extensionSpec.name === attr.value.toLowerCase());
       return false;
@@ -4292,9 +4303,9 @@ function validateAttributes(
       {continue;}
 
       // If |spec| is an extension, then we ad-hoc validate 'custom-element',
-      // 'custom-template', and 'src' attributes by calling this method.
-      // For 'src', we also keep track whether we validated it this way,
-      // (seen_src_attr), since it's a mandatory attr.
+      // 'custom-template', 'host-script', and 'src' attributes by calling this
+      // method.  For 'src', we also keep track whether we validated it this
+      // way, (seen_src_attr), since it's a mandatory attr.
       if (spec.extensionSpec !== null &&
           validateAttributeInExtension(spec, context, attr, result)) {
         if (attr.name === 'src') {seenExtensionSrcAttr = true;}
@@ -4977,12 +4988,10 @@ class ParsedValidatorRules {
           // This tag is an extension. Compute and register a dispatch key
           // for it.
           let dispatchKey;
-          const attrName = tag.extensionSpec.isCustomTemplate ?
-            'custom-template' :
-            'custom-element';
           dispatchKey = makeDispatchKey(
               amp.validator.AttrSpec.DispatchKeyType.NAME_VALUE_DISPATCH,
-              attrName, /** @type {string} */ (tag.extensionSpec.name), '');
+              getExtensionNameAttribute(tag.extensionSpec),
+              /** @type {string} */ (tag.extensionSpec.name), '');
           tagnameDispatch.registerDispatchKey(dispatchKey, tagSpecId);
         } else {
           const dispatchKey = this.rules_.dispatchKeyByTagSpecId[tagSpecId];
