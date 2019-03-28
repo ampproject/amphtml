@@ -97,6 +97,7 @@ import {MOAT_CONFIG} from './vendors/moat';
 import {BG_CONFIG} from './vendors/bg';
 import {UPSCORE_CONFIG} from './vendors/upscore';
 import {REPPUBLIKA_CONFIG} from './vendors/reppublika';
+import {NAVEGG_CONFIG} from './vendors/navegg';
 
 /**
  * @const {!JsonObject}
@@ -213,6 +214,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
   'mobify': MOBIFY_CONFIG,
   'mparticle': MPARTICLE_CONFIG,
   'mpulse': MPULSE_CONFIG,
+  'navegg': NAVEGG_CONFIG,
   'newrelic': NEWRELIC_CONFIG,
   'nielsen': NIELSEN_CONFIG,
   'nielsen-marketing-cloud': NIELSEN_MARKETING_CLOUD_CONFIG,
