@@ -227,7 +227,7 @@ export class LocalizationService {
 
 
   /**
-   * @param {!!../localized-strings.LocalizedStringId} LocalizedStringId
+   * @param {!../localized-strings.LocalizedStringId} LocalizedStringId
    * @param {!Element=} elementToUse The element where the string will be
    *     used.  The language is based on the language at that part of the
    *     document.  If unspecified, will use the document-level language, if
