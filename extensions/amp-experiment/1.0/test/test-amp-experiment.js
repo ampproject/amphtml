@@ -29,19 +29,34 @@ describes.realWin('amp-experiment', {
   const config = {
     'experiment-1': {
       variants: {
-        'variant-a': 50,
-        'variant-b': 50,
+        'variant-a': {
+          weight: 50,
+          mutations: [{}]
+        },
+        'variant-b': {
+          weight: 50,
+          mutations: [{}]
+        },
       },
     },
     'experiment-2': {
       variants: {
-        'variant-c': 50,
-        'variant-d': 50,
+        'variant-c': {
+          weight: 50,
+          mutations: [{}]
+        },
+        'variant-d': {
+          weight: 50,
+          mutations: [{}]
+        },
       },
     },
     'experiment-3': {
       variants: {
-        'variant-e': 1,
+        'variant-e': {
+          weight: 1,
+          mutations: [{}]
+        },
       },
     },
   };
@@ -124,7 +139,7 @@ describes.realWin('amp-experiment', {
     });
   });
 
-  it('should add attributes to body element for the allocated variants', () => {
+  it('should apply the mutations from the variant', () => {
     addConfigElement('script');
     const stub = sandbox.stub(variant, 'allocateVariant');
     stub.withArgs(ampdoc, 'experiment-1', config['experiment-1'])
@@ -132,7 +147,9 @@ describes.realWin('amp-experiment', {
     stub.withArgs(ampdoc, 'experiment-2', config['experiment-2'])
         .returns(Promise.resolve('variant-d'));
     stub.withArgs(ampdoc, 'experiment-3', config['experiment-3'])
-        .returns(Promise.resolve(null));
+      .returns(Promise.resolve(null));
+
+    const applySpy = sandbox.spy(experiment, 'applyMutations_');
 
     experiment.buildCallback();
     return Services.variantsForDocOrNull(ampdoc.getHeadNode())
@@ -143,12 +160,8 @@ describes.realWin('amp-experiment', {
             'experiment-2': 'variant-d',
             'experiment-3': null,
           });
-          expectBodyHasAttributes({
-            'amp-x-experiment-1': 'variant-a',
-            'amp-x-experiment-2': 'variant-d',
-          });
-          expect(doc.body.getAttribute('amp-x-experiment-3'))
-              .to.equal(null);
+
+          expect(applySpy).to.be.calledTwice;
         });
   });
 });

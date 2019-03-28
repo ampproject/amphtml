@@ -41,7 +41,7 @@ export class Variants {
   }
 
   /**
-   * @param {!Promise<!Object<string, ?string>>} variants
+   * @param {!Promise<!Object>} variants
    * @package
    * @restricted
    */
