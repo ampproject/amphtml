@@ -141,6 +141,31 @@ describe('inabox', function() {
       });
     });
 
+    const srcdoc = `
+        <iframe
+        src='//ads.localhost:9876/amp4test/a4a/${RequestBank.getBrowserId()}'
+        width='300' height='250' scrolling='no' frameborder=0>
+        </iframe>
+        `;
+    describes.integration('rendered on non-AMP page ATF nested', {
+      amp: false,
+      body: `
+        <iframe srcdoc="${srcdoc}"
+            scrolling="no" id="inabox"
+            width="300" height="250">
+        </iframe>
+        <script src="/examples/inabox-tag-integration.js"></script>
+        `,
+    }, env => {
+      it('should layout amp-img, amp-pixel, amp-analytics', () => {
+        return testAmpComponents();
+      });
+
+      afterEach(() => {
+        unregisterIframe(env.win.document.getElementById('inabox'));
+      });
+    });
+
     describes.integration('AMPHTML ads rendered on non-AMP page BTF', {
       amp: false,
       body: `

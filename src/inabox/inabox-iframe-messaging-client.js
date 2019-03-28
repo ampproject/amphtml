@@ -62,9 +62,7 @@ function createIframeMessagingClient(win) {
           unlisten();
           resolve(iframeClient);
         });
-    for (let j = 0, hostWin = win.parent;
-      j < 10 && hostWin != win.top;
-      j++, hostWin = hostWin.parent) {
+    for (let j = 0, hostWin = win; j < 10 && hostWin != win.top; j++) {
       hostWin = hostWin.parent;
       iframeClient.setHostWindow(hostWin);
       iframeClient./*OK*/sendMessage(
