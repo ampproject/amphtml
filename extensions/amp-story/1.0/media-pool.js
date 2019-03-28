@@ -912,7 +912,7 @@ export class MediaPool {
           });
     };
 
-    if (true) {
+    if (task.requiresSynchronousExecution()) {
       executionFn.call(this);
     } else {
       this.timer_.delay(executionFn.bind(this), 0);
