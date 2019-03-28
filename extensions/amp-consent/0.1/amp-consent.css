@@ -89,7 +89,7 @@ amp-consent.amp-hidden {
   position: absolute;
   top: 0;
   left: 0;
-  height: 30vh;
+  /* Initial height (Default 30vh) will be set through styles */
   width: 100%;
 }
 
@@ -103,16 +103,18 @@ amp-consent.i-amphtml-consent-ui-iframe-active {
   padding: 0px !important;
   margin: 0px !important;
 
+  transform: translate3d(0px, 100vh, 0px) !important;
+}
+
+amp-consent.i-amphtml-consent-ui-iframe-active.i-amphtml-consent-ui-enable-border {
   border-top-left-radius: 8px !important;
   border-top-right-radius: 8px !important;
   box-shadow: 0 0 5px 0 rgba(0,0,0, 0.2) !important;
-
-  transform: translate3d(0px, 100vh, 0px) !important;
 }
 
 amp-consent.i-amphtml-consent-ui-iframe-active.i-amphtml-consent-ui-in {
   transition: transform 0.5s ease-out !important;
-  transform: translate3d(0px, calc(100% - 30vh), 0px) !important;
+  /* Initial height transform will be set through styles */
 }
 
 amp-consent.i-amphtml-consent-ui-iframe-active.i-amphtml-consent-ui-in.i-amphtml-consent-ui-iframe-fullscreen {
