@@ -668,6 +668,11 @@ exports.rules = [
           'src/service/localization.js',
       'extensions/amp-story-auto-ads/0.1/_locales/zu.js->' +
           'src/service/localization.js',
+      // For BaseTemplate.
+      'extensions/amp-mustache/0.1/amp-mustache.js->' +
+            'src/service/template-impl.js',
+      'extensions/amp-mustache/0.2/amp-mustache.js->' +
+            'src/service/template-impl.js',
     ],
   },
   {
