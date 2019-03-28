@@ -70,6 +70,7 @@
       <option>infonline</option>
       <option>iplabel</option>
       <option>keen</option>
+      <option>kenshoo</option>
       <option>krux</option>
       <option>linkpulse</option>
       <option>lotame</option>
@@ -95,7 +96,6 @@
       <option>quantcast</option>
       <option>rakam</option>
       <option>reppublika</option>
-      <option>kenshoo</option>
       <option>retargetly</option>
       <option>segment</option>
       <option>shinystat</option>
@@ -689,6 +689,19 @@ For complete documentation and additional examples please see: https://marketing
 </amp-analytics>
 <!-- End Keen Analytics tracking -->
 
+<!-- Kenshoo example -->
+<amp-analytics type="kenshoo" id="kenshoo">
+  <script type="application/json">
+    {
+      "vars": {
+        "tid": "KT-XXXXX-XXX",
+        "userId": "<USER_ID>"
+      }
+    }
+  </script>
+</amp-analytics>
+<!-- End Kenshoo example -->
+
 <!-- Krux tracking. Ensure you replace KMnP7vhh with your configuration ID. -->
 <amp-analytics type="krux" id="krux" config="https://cdn.krxd.net/controltag/amp/KMnP7vhh.json">
 <script type="application/json">
@@ -1147,19 +1160,6 @@ For complete documentation and additional examples please see: https://marketing
 </script>
 </amp-analytics>
 <!-- End Reppublika example -->
-
-<!-- Kenshoo example -->
-<amp-analytics type="kenshoo" id="kenshoo">
-  <script type="application/json">
-    {
-      "vars": {
-        "tid": "KT-XXXXX-XXX",
-        "userId": "<USER_ID>"
-      }
-    }
-  </script>
-</amp-analytics>
-<!-- End Kenshoo example -->
 
 <!-- Retargetly example -->
 <amp-analytics data-credentials="include" type="retargetly" id="retargetly">

@@ -45,6 +45,7 @@ import {GOOGLEADWORDS_CONFIG} from './vendors/googleadwords';
 import {GTAG_CONFIG} from './vendors/gtag';
 import {GOOGLEANALYTICS_CONFIG} from './vendors/googleanalytics';
 import {KEEN_CONFIG} from './vendors/keen';
+import {KENSHOO_CONFIG} from './vendors/kenshoo';
 import {KRUX_CONFIG} from './vendors/krux';
 import {IPLABEL_CONFIG} from './vendors/iplabel';
 import {LOTAME_CONFIG} from './vendors/lotame';
@@ -98,7 +99,6 @@ import {BG_CONFIG} from './vendors/bg';
 import {UPSCORE_CONFIG} from './vendors/upscore';
 import {REPPUBLIKA_CONFIG} from './vendors/reppublika';
 import {NAVEGG_CONFIG} from './vendors/navegg';
-import {KENSHOO_CONFIG} from './vendors/kenshoo';
 
 /**
  * @const {!JsonObject}
@@ -203,6 +203,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
   'infonline': INFONLINE_CONFIG,
   'iplabel': IPLABEL_CONFIG,
   'keen': KEEN_CONFIG,
+  'kenshoo': KENSHOO_CONFIG,
   'krux': KRUX_CONFIG,
   'linkpulse': LINKPULSE_CONFIG,
   'lotame': LOTAME_CONFIG,
@@ -245,7 +246,6 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
   'upscore': UPSCORE_CONFIG,
   'webtrekk': WEBTREKK_CONFIG,
   'webtrekk_v2': WEBTREKK_V2_CONFIG,
-  'kenshoo': KENSHOO_CONFIG,
 });
 
 if (getMode().test || getMode().localDev) {
