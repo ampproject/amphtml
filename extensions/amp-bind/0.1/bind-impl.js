@@ -302,7 +302,7 @@ export class Bind {
    */
   setStateWithExpression(expression, scope) {
     dev().info(TAG, 'setState:', `"${expression}"`);
-    this.setStatePromise_ = this.evaluateExpression_(expression, scope)
+    this.setStatePromise_ = this.evaluateExpression(expression, scope)
         .then(result => this.setState(result))
         .then(() => this.getDataForHistory_())
         .then(data => {
@@ -324,7 +324,7 @@ export class Bind {
    */
   pushStateWithExpression(expression, scope) {
     dev().info(TAG, 'pushState:', expression);
-    return this.evaluateExpression_(expression, scope).then(result => {
+    return this.evaluateExpression(expression, scope).then(result => {
       // Store the current values of each referenced variable in `expression`
       // so that we can restore them on history-pop.
       const oldState = map();
@@ -874,7 +874,7 @@ export class Bind {
    * @param {!JsonObject} scope
    * @return {!Promise<!JsonObject>}
    */
-  evaluateExpression_(expression, scope) {
+  evaluateExpression(expression, scope) {
     return this.initializePromise_.then(() => {
       // Allow expression to reference current state in addition to event state.
       Object.assign(scope, this.state_);
@@ -1487,7 +1487,7 @@ export class Bind {
     const {boundProperties} = this.boundElements_[index];
     boundProperties.forEach(boundProperty => {
       const {expressionString} = boundProperty;
-      promises.push(this.evaluateExpression_(expressionString, this.state_));
+      promises.push(this.evaluateExpression(expressionString, this.state_));
     });
     // Print the map of attribute to expression value for `element`.
     Promise.all(promises).then(results => {
@@ -1504,7 +1504,7 @@ export class Bind {
    * @param {string} expression
    */
   debugEvaluate_(expression) {
-    this.evaluateExpression_(expression, this.state_).then(result => {
+    this.evaluateExpression(expression, this.state_).then(result => {
       user().info(TAG, result);
     });
   }

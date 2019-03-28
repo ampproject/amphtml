@@ -15,8 +15,8 @@
  */
 import {LayoutPriority} from '../../../src/layout';
 import {Services} from '../../../src/services';
+import {dev, userAssert} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
-import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-action-macro';
@@ -33,6 +33,9 @@ export class AmpActionMacro extends AMP.BaseElement {
     /** @private {?../../../src/service/action-impl.ActionService} */
     this.actions_ = null;
 
+    /** @private {?../../../extensions/amp-bind/0.1/bind-impl.Bind} */
+    this.bind_ = null;
+
     /** @private {!Array<string>} */
     this.arguments_ = [];
   }
@@ -42,9 +45,15 @@ export class AmpActionMacro extends AMP.BaseElement {
     userAssert(isExperimentOn(this.win, 'amp-action-macro'),
         'Experiment is off');
     const {element} = this;
-
     this.actions_ = Services.actionServiceForDoc(element);
-
+    if (element.hasAttribute('conditional-exp')) {
+      Services.bindForDocOrNull(element).then(bind => {
+        if (!bind) {
+          return;
+        }
+        this.bind_ = bind;
+      });
+    }
     const argVarNames = element.getAttribute('arguments');
     if (argVarNames) {
       this.arguments_ = argVarNames.split(',').map(s => s.trim());
@@ -66,6 +75,38 @@ export class AmpActionMacro extends AMP.BaseElement {
    */
   execute_(invocation) {
     const {actionEventType, args, event, trust} = invocation;
+    this.validateExecute_(invocation, args);
+    const conditionalInvocationExp_ =
+        this.element.getAttribute('conditional-exp');
+    // If the action is gated by a conditional, then evaluate that condition to
+    // check if it can be executed.
+    if (this.bind_ && conditionalInvocationExp_) {
+      this.bind_.evaluateExpression(
+          conditionalInvocationExp_, /** @type {!JsonObject} */ ({}))
+          .then(canExecute => {
+            if (!!canExecute) {
+              this.actions_.trigger(
+                  this.element, `${actionEventType}`, event, trust, args);
+            } else {
+              dev().info(
+                  TAG, 'action did not execute because conditional did not '
+                      + ' evaluate to true: %s', this.element);
+            }
+          });
+    } else {
+      // Otherwise just trigger the macro's action.
+      this.actions_.trigger(
+          this.element, `${actionEventType}`, event, trust, args);
+    }
+  }
+
+  /**
+   * Verifies that the action macro can be executed.
+   * @param {!../../../src/service/action-impl.ActionInvocation} invocation
+   * @param {?JsonObject=} args
+   * @private
+   */
+  validateExecute_(invocation, args) {
     if (args && this.arguments_.length > 0) {
       // Verify that the argument variable names defined on the macro are used
       // in the caller invocation.
@@ -75,15 +116,18 @@ export class AmpActionMacro extends AMP.BaseElement {
             arg, this.element);
       }
     }
+    const conditionalInvocationExp_ =
+        this.element.getAttribute('conditional-exp');
+    if (conditionalInvocationExp_) {
+      userAssert(conditionalInvocationExp_.trim() != '',
+          'Action macro condition must be set: %s', this.element);
+    }
     if (invocation.caller.tagName.toLowerCase() === TAG) {
       userAssert(this.isValidMacroReference_(
           invocation.caller),
       'Action macro with ID "%s" cannot reference itself or macros defined '
           + 'after it', this.element.getAttribute('id'));
     }
-    // Trigger the macro's action.
-    this.actions_.trigger(
-        this.element, `${actionEventType}`, event, trust, args);
   }
 
   /** @override */

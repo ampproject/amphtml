@@ -12,6 +12,7 @@
   <!-- ## Setup -->
   <!-- Import the `amp-action-macro` component ... -->
   <script async custom-element="amp-action-macro" src="https://cdn.ampproject.org/v0/amp-action-macro-0.1.js"></script>
+  <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
   <!-- Import the `amp-carousel` component ... -->
   <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script> -->
   <link rel="canonical" href="https://ampbyexample.com/components/amp-action-macro/">
@@ -19,6 +20,14 @@
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
 </head>
 <body>
+
+<amp-state id="data">
+    <script type="application/json">
+    {
+      "value": 7
+    }
+    </script>
+</amp-state>
 
 <amp-carousel
     id="scrollable-carousel"
@@ -82,6 +91,14 @@
   arguments="x">
 </amp-action-macro>
 
+<!-- An amp action macro with a condition for invocation. -->
+<amp-action-macro
+  id="scrollable-carousel-macro-conditional"
+  conditional-exp= "data.value == 7"
+  execute="scrollable-carousel-macro-args.execute(x=1)"
+  arguments="x">
+</amp-action-macro>
+
 <!-- Call to action-macro. -->
 <button on="tap:scrollable-carousel-macro.execute()">Go to slide 1</button>
 
@@ -97,6 +114,9 @@
 
 <!-- Invalid call action macro call. Action macro referenced -->
 <button on="tap:scrollable-carousel-macro-refers-an-action-macro-defined-after-it.execute()">Invalid call</button>
+
+<!-- Call action macro with a condition for invocation. -->
+<button on="tap:scrollable-carousel-macro-conditional.execute()">Call gated by a condition</button>
 
 </body>
 </html>

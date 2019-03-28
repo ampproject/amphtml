@@ -103,3 +103,26 @@ e.g.
 
 Used to define arguments that can be used in the called invocation and substituted
 in the amp action macro call.
+
+##### condition
+
+Used to gate the invocation of the action. Only if the expression evaluates to truthy is when the action is invoked.
+
+<!--
+  Given the following state.
+-->
+```html
+<amp-state id="state">
+  {
+    "value" : 6
+  }
+</amp-state>
+
+<!--
+  The following condition will evaluate to true and will allow for the invocation of this macro.
+-->
+<amp-action-macro
+    id="closeNavigations"
+    execute="AMP.setState({nav1: 'close', nav2: 'close})"
+    condition="state.value > 5"></amp-action-macro>
+```
