@@ -1424,22 +1424,30 @@ The following example shows a story with a quiz experience. The first page acts 
 ```html
 <amp-story id="story" standalone>
     <amp-story-page id="cover">
+        <amp-story-grid-layer>
         <p> What is your favourite food? </p>
-        <button on="tap:story.goToPage(id=bacon-answer)"> Bacon! </button>
-        <button on="tap:story.goToPage(id=boba-answer)"> Boba! </button>
-        <button on="tap:story.goToPage(id=pizza-answer)"> Pizza! </button>
+          <button on="tap:story.goToPage(id=bacon-answer)"> Bacon! </button>
+          <button on="tap:story.goToPage(id=boba-answer)"> Boba! </button>
+          <button on="tap:story.goToPage(id=pizza-answer)"> Pizza! </button>
+        </amp-story-grid-layer>
     </amp-story-page>
 
     <amp-story-page id="bacon-answer">
-        <p> Bacon, of course! </p>
+        <amp-story-grid-layer>
+          <p> Bacon, of course! </p>
+        </amp-story-grid-layer>
     </amp-story-page>
 
     <amp-story-page id="boba-answer">
-        <p> Boba, because it's a perfect drink! </p>
+        <amp-story-grid-layer>
+          <p> Boba, because it's a perfect drink! </p>
+        </amp-story-grid-layer>
     </amp-story-page>
 
     <amp-story-page id="pizza-answer">
+        <amp-story-grid-layer>
         <p> Pizza, it's a true classic! </p>
+        </amp-story-grid-layer>
     </amp-story-page>
     ...
 </amp-story>
@@ -1468,31 +1476,41 @@ The following is a modification of the previous [story with a quiz experience](#
 ```html
 <amp-story id="story" standalone>
     <amp-story-page id="cover" advance-to="fallback-answer">
-        <p> What is your favourite food? </p>
-        <button on="tap:story.goToPage(id=bacon-answer)"> Bacon! </button>
-        <button on="tap:story.goToPage(id=boba-answer)"> Boba! </button>
-        <button on="tap:story.goToPage(id=pizza-answer)"> Pizza! </button>
+        <amp-story-grid-layer>
+          <p> What is your favourite food? </p>
+          <button on="tap:story.goToPage(id=bacon-answer)"> Bacon! </button>
+          <button on="tap:story.goToPage(id=boba-answer)"> Boba! </button>
+          <button on="tap:story.goToPage(id=pizza-answer)"> Pizza! </button>
+        </amp-story-grid-layer>
     </amp-story-page>
 
     <amp-story-page id="bacon-answer">
-        <p> Bacon, of course! </p>
+        <amp-story-grid-layer>
+          <p> Bacon, of course! </p>
+        </amp-story-grid-layer>
     </amp-story-page>
 
     <amp-story-page id="boba-answer">
+        <amp-story-grid-layer>
         <p> Boba, because it's a perfect drink! </p>
+        </amp-story-grid-layer>
     </amp-story-page>
 
     <amp-story-page id="pizza-answer">
-        <p> Pizza, it's a true classic! </p>
+        <amp-story-grid-layer>
+          <p> Pizza, it's a true classic! </p>
+        </th>amp-story-grid-layer>
     </amp-story-page>
 
     <amp-story-page id="fallback-answer">
-        <p> It looks like you like something else. You're very unique! </p>
+        <amp-story-grid-layer>
+          <p> It looks like you like something else. You're very unique! </p>
+        </amp-story-grid-layer>
     </amp-story-page>
     ...
 </amp-story>
 ```
-If we had not used the `advance-to` attribute with the specified value, if the user chose not to tap on any of the buttons on the first page of the story and advance forward, they would see the `bacon-answer` page.
+If we had not used the `advance-to` attribute with the specified value and the user chose not to tap on any of the buttons on the first page of the story and advance forward, they would see the `bacon-answer` page.
 
 ## Sharing Options
 We've added support for creating and sharing URLs to specific pages within the story.
@@ -1502,16 +1520,16 @@ With branching, AMP Stories now supports URLs in the form of:
 ```
 https://www.mydomain.com/good-story/#page=<page-id>
 ```
-where `page-id` refers to the unique id of an `amp-story-page`. You can also use the fragment parameter and the `page-id` value like an anchor link (using the absolute URL like the one that users copy when sharing a story is not necessary). See [Integration with Sidebar for Stories](#integrationwithsidebarforstories) for an example.
+where `page-id` refers to the unique id of an `amp-story-page`. You can also use the fragment parameter and the `page-id` value like an anchor link in some use cases. See [Integration with Sidebar for Stories](#integrationwithsidebarforstories) for an example.
 ### Sharing a Specific Story Page
-With branching turned on, users will have the option to share the story from the page the currently seeing.
+With branching turned on, users will have the option to share the story from the page they are currently seeing. If a user selects the option to share from the page they are currently seeing, the URL generated will be in the form described above. Note that the implication is that `amp-story-page` ids may be exposed to the user.
 
 ## Integration with Sidebar for Stories
 The use of `amp-sidebar` is supported for use within `amp-story`. See the [Sidebar for Stories documentation](https://amp.dev/documentation/components/reference/amp-sidebar.html?format=websites#sidebar-for-stories) for information on limitations and caveats.
 
 By combining both branching features and `amp-sidebar`, we can create stories that have a table of contents. In order to do this, we make use of the `goToPage` action and URL fragment parameter.
 
-The following is a modification of the previous [story with a quiz experience](#quiz-example). We add an `amp-sidebar` that has in it both a table of contents and out-links to other links of interest. Note how there are many ways to link to pages within the story. All methods are equally valid.
+The following is a modification of the previous [story with a quiz experience](#quiz-example). We add an `amp-sidebar` that has in it both a table of contents and out-links to other links of interest. While there are two valid ways to link to pages within the story within a sidebar, we recommend using the `goToPage` action.
 
 ```html
 <amp-story id="story" standalone>
@@ -1519,24 +1537,23 @@ The following is a modification of the previous [story with a quiz experience](#
             <ul>
                 <li on="tap:story.goToPage(id=cover)"> Cover Page </li>
                 <li> <a href="#page=bacon-answer"> Bacon page </a></li>
-                <li> <a href="https://www.currentdomain.com/food-story/#page=boba-answer"> Boba Page </a></li>
-                <li><a href="https://www.amp.dev"> External Link </a></li>
+                <li> <a href="https://www.amp.dev"> External Link </a></li>
             </ul>
      </amp-sidebar>
 
     <amp-story-page id="cover" advance-to="fallback-answer">
-        <p> What is your favourite food? </p>
-        <button on="tap:story.goToPage(id=bacon-answer)"> Bacon! </button>
-        <button on="tap:story.goToPage(id=boba-answer)"> Boba! </button>
-        <button on="tap:story.goToPage(id=pizza-answer)"> Pizza! </button>
+        <amp-story-grid-layer>
+          <p> What is your favourite food? </p>
+          <button on="tap:story.goToPage(id=bacon-answer)"> Bacon! </button>
+          <button on="tap:story.goToPage(id=boba-answer)"> Boba! </button>
+          <button on="tap:story.goToPage(id=pizza-answer)"> Pizza! </button>
+        </amp-story-grid-layer>
     </amp-story-page>
 
     <amp-story-page id="bacon-answer">
-        <p> Bacon, of course! </p>
-    </amp-story-page>
-
-    <amp-story-page id="boba-answer">
-        <p> Boba, because it's a perfect drink! </p>
+        <amp-story-grid-layer>
+          <p> Bacon, of course! </p>
+        </amp-story-grid-layer>
     </amp-story-page>
     ...
 </amp-story>
