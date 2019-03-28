@@ -1473,6 +1473,8 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   setOrientationAttribute_(isLandscape, isLandscapeSupported) {
+    // TODO(#20832) base this check on the size of the amp-story-page, once it
+    // is stored as a store state.
     this.mutateElement(() => {
       this.element.setAttribute(
           Attributes.ORIENTATION,
