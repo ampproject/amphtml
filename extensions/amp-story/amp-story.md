@@ -1389,19 +1389,19 @@ The `<amp-story-bookend>` must have a `src` attribute pointing to the JSON confi
 ```
 ## Experimental Feature: Branching
 
-We’ve created implemented additional features to allow for the construction of non-linear stories. By utilizing these features, you can create stories that start from somewhere other than the beginning, share specific pages of stories, or even allow users to jump around within a story.  Example use cases include quizzes, choose-your-own-story experiences, and story table of contents.
+We’ve implemented additional features to allow for the construction of non-linear stories. By utilizing these features, you can create stories that start from somewhere other than the beginning, share specific pages of stories, or even allow users to jump around within a story.  Example use cases include quizzes, choose-your-own-story experiences, and story table of contents.
 
 Note that all branching features are behind an `amp-story-branching` experiment. To turn on the experiment, enable it in your dev console:
 
-``` AMP.toggleExperiment(‘amp-story-branching) ```
+``` AMP.toggleExperiment('amp-story-branching') ```
 
-For more information see, [experimental features](https://amp.dev/documentation/guides-and-tutorials/learn/experimental.html?format=stories)
+For more information see, [experimental features](https://amp.dev/documentation/guides-and-tutorials/learn/experimental.html?format=stories).
 
 ## Manipulating Navigation
 The features listed below allow you to manipulate navigation within a story. Note that when using branching features, navigation throughout the story from a 'branch-off point' will follow the path that a user takes. That is, if a user navigates from page-1 to page-5 and then page-6, navigating backwards will follow this exact path (page-6 to page-5 and finally page-1). The other pages will not be exposed to the user.
 
 ### The `goToPage` Action
-A new `goToPage` action allows for 'jumping' from one page within a story to another. The action can be used with allowed elements in `amp-story` and their respective events. Clicking on an element with this action should bring the user to another page within the same story. Using this action **requires** that you give the `amp-story` element an id, a unique identifier, as the story itself is the target.  Read more about actions and events in AMP [here](https://amp.dev/documentation/guides-and-tutorials/learn/amp-actions-and-events.html?format=stories)
+A new `goToPage` action allows for 'jumping' from one page within a story to another. The action can be used with allowed elements in `amp-story` and their respective events. Clicking on an element with this action should bring the user to another page within the same story. Using this action **requires** that you give the `amp-story` element an id, a unique identifier, as the story itself is the target.  Read more about actions and events in AMP [here](https://amp.dev/documentation/guides-and-tutorials/learn/amp-actions-and-events.html?format=stories).
 
 
 <table>
@@ -1414,20 +1414,20 @@ A new `goToPage` action allows for 'jumping' from one page within a story to ano
 <tbody>
 <tr>
 <td>goToPage(id=STRING)</td>
-<td>Navigates to a target page. Id refers to the [required page id](https://amp.dev/documentation/components/reference/amp-story.html?format=websites#id-[required]) </td>
+<td>Navigates to a target page. Id refers to the <a href="https://amp.dev/documentation/components/reference/amp-story.html?format=websites#id-[required]">required page id</a> </td>
 </tr>
 </tbody>
 </table>
 
-The following example shows the a story with a quiz experience. The first page acts as a branch off point that allows the user to select the path that the story takes.
+The following example shows a story with a quiz experience. The first page acts as a branch off point that allows the user to select the path that the story takes. <a name="quiz-example"></a>
 
 ```
 ... <body>
         <amp-story id="story" standalone>
             <amp-story-page id="cover">
                 <p> What is your favourite food? </p>
-                <button on="tap:story.goToPage(id=bacon-answer)"> Bacon!. </button>
-                <button on="tap:story.goToPage(id=boba-answer)"> Boba!</button>
+                <button on="tap:story.goToPage(id=bacon-answer)"> Bacon! </button>
+                <button on="tap:story.goToPage(id=boba-answer)"> Boba! </button>
                 <button on="tap:story.goToPage(id=pizza-answer)"> Pizza! </button>
             </amp-story-page>
             <amp-story-page id="bacon-answer">
@@ -1462,15 +1462,15 @@ The `advance-to` attribute allows you to specify what page should follow a given
 </tbody>
 </table>
 
-The following is a modification of the previous story with a quiz experience. By using the `advance-to` attribute, we create a fallback page to navigate to should the user not select any of the food items listed.
+The following is a modification of the previous [story with a quiz experience](#quiz-example). By using the `advance-to` attribute, we create a fallback page to navigate to should the user not select any of the food items listed.
 
 ```
 ... <body>
         <amp-story id="story" standalone>
             <amp-story-page id="cover" advance-to="fallback-answer">
                 <p> What is your favourite food? </p>
-                <button on="tap:story.goToPage(id=bacon-answer)"> Bacon!. </button>
-                <button on="tap:story.goToPage(id=boba-answer)"> Boba!</button>
+                <button on="tap:story.goToPage(id=bacon-answer)"> Bacon! </button>
+                <button on="tap:story.goToPage(id=boba-answer)"> Boba! </button>
                 <button on="tap:story.goToPage(id=pizza-answer)"> Pizza! </button>
             </amp-story-page>
             <amp-story-page id="bacon-answer">
@@ -1492,9 +1492,51 @@ The following is a modification of the previous story with a quiz experience. By
 If we had not used the `advance-to` attribute with the specified value, if the user chose not to tap on any of the buttons on the first page of the story and advance forward, they would see the `bacon-answer` page.
 
 ## Sharing Options
+We've added support for creating and sharing URLs to specific pages within the story.
 
 ### URL Fragment Parameter
+With branching, AMP Stories now supports URLs in the form of:
+```
+https://www.mydomain.com/good-story/#page=<page-id>
+```
+where page-id refers to the unique id of a story page. You can also use the fragment parameter and the page-id value as like an anchor link. See [Intergretion with Sidebar for Stories](#integrationwithsidebarforstories) for an example.
 ### Sharing a Specific Story Page
+With branching turned on, users will have the option to share the story from the page the currently seeing.
+
+## Integration with Sidebar for Stories
+The use of `amp-sidebar` is supported for use within `amp-story`. See the [Sidebar for Stories documentation](https://amp.dev/documentation/components/reference/amp-sidebar.html?format=websites#sidebar-for-stories) for information on limitations and caveats.
+
+By combining both branching features and `amp-sidebar`, we can create stories that have a table of contents. In order to do this, we make use of the `goToPage` action and URL fragment parameter.
+
+The following is a modification of the previous [story with a quiz experience](#quiz-example). We add a `amp-sidebar` that has in it both a table of contents and outlinks to other links of interest. Note how there are many ways to link to pages within the story. All methods are equally valid.
+
+```
+... <body>
+        <amp-story id="story" standalone>
+            <amp-sidebar id="sidebar1" layout="nodisplay">
+                    <ul>
+                        <li on="tap:story.goToPage(id=cover)"> Cover Page </li>
+                        <li> <a href="#page=bacon-answer"> Bacon page </a></li>
+                        <li> <a href="https://www.currentdomain.com/food-story/#page=boba-answer"> Boba Page </a></li>
+                        <li><a href="https://www.ampproject.org"> External Link </a></li>
+                    </ul>
+             </amp-sidebar>
+            <amp-story-page id="cover" advance-to="fallback-answer">
+                <p> What is your favourite food? </p>
+                <button on="tap:story.goToPage(id=bacon-answer)"> Bacon! </button>
+                <button on="tap:story.goToPage(id=boba-answer)"> Boba! </button>
+                <button on="tap:story.goToPage(id=pizza-answer)"> Pizza! </button>
+            </amp-story-page>
+            <amp-story-page id="bacon-answer">
+                <p>  Bacon, of course! </p>
+            </amp-story-page>
+            <amp-story-page id="boba-answer">
+                <p> Boba, because it's a perfect drink! </p>
+            </amp-story-page>
+            ...
+        </amp-story>
+    </body>
+```
 
 ## Other components usable in AMP stories
 The following are other components usable in AMP stories that require some story-specific caveats.
