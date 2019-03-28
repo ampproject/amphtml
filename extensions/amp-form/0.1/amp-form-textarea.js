@@ -290,7 +290,7 @@ function getShrinkHeight(textarea) {
   let shouldKeepTop = false;
 
   return resources.measureMutateElement(
-      /** @type {!Element} */ (body), () => {
+      dev().assertElement(body), () => {
         const computed = computedStyle(/** @type {!Window} */ (win), textarea);
         const maxHeight = parseInt(computed.getPropertyValue('max-height'), 10); // TODO(cvializ): what if it's a percent?
 
@@ -306,7 +306,7 @@ function getShrinkHeight(textarea) {
         doc.body.appendChild(clone);
       }).then(() => {
     return resources.measureMutateElement(
-        /** @type {!Element} */ (body), () => {
+        dev().assertElement(body), () => {
           height = clone./*OK*/scrollHeight;
         }, () => {
           removeElement(clone);

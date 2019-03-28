@@ -17,7 +17,7 @@
 import {AmpEvents} from '../../../src/amp-events';
 import {Services} from '../../../src/services';
 import {createCustomEvent} from '../../../src/event-helper';
-import {devAssert, userAssert} from '../../../src/log';
+import {dev, devAssert, userAssert} from '../../../src/log';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeChildren} from '../../../src/dom';
 
@@ -281,7 +281,7 @@ export class AmpDateDisplay extends AMP.BaseElement {
    */
   rendered_(element) {
     this.mutateElement(() => {
-      removeChildren(/** @type {!Element} */ (devAssert(this.container_)));
+      removeChildren(dev().assertElement(devAssert(this.container_)));
       this.container_.appendChild(element);
 
       const event = createCustomEvent(

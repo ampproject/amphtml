@@ -549,7 +549,7 @@ class AmpAccordion extends AMP.BaseElement {
         newFocusIndex = newFocusIndex + this.headers_.length;
       }
       const newFocusHeader =
-      /** @type {!Element} */ (this.headers_[newFocusIndex]);
+      dev().assertElement(this.headers_[newFocusIndex]);
       tryFocus(newFocusHeader);
     }
   }

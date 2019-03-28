@@ -537,7 +537,7 @@ export class AmpSelector extends AMP.BaseElement {
   selectionKeyDownHandler_(event) {
     const {key} = event;
     if (key == Keys.SPACE || key == Keys.ENTER) {
-      if (this.elements_.includes(/** @type {!Element} */ (event.target))) {
+      if (this.elements_.includes(dev().assertElement(event.target))) {
         event.preventDefault();
         const el = dev().assertElement(event.target);
         this.onOptionPicked_(el);

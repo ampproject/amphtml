@@ -806,7 +806,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     }
 
     const ctaCreated = this.maybeCreateCtaLayer_(
-        /** @type {!Element} */ (nextAdPageEl));
+        dev().assertElement(nextAdPageEl));
     if (!ctaCreated) {
       // failed on ad-server response format
       return AD_STATE.FAILED;
