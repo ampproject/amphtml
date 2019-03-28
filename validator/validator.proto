@@ -401,7 +401,7 @@ message ExtensionSpec {
   enum ExtensionType {
     CUSTOM_ELEMENT = 1;
     CUSTOM_TEMPLATE = 2;
-    HOST_SCRIPT = 3;
+    HOST_SERVICE = 3;
   }
   optional ExtensionType extension_type = 8 [default = CUSTOM_ELEMENT];
 

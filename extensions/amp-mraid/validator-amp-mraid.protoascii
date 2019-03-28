@@ -21,7 +21,7 @@ tags: {  # amp-mraid
     name: "amp-mraid"
     version: "0.1"
     version: "latest"
-    extension_type: HOST_SCRIPT
+    extension_type: HOST_SERVICE
     requires_usage: NONE
   }
   attr_lists: "common-extension-attrs"

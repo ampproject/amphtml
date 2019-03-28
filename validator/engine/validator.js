@@ -4100,8 +4100,8 @@ function getExtensionNameAttribute(extensionSpec) {
   switch (extensionSpec.extensionType) {
     case amp.validator.ExtensionSpec.ExtensionType.CUSTOM_TEMPLATE:
       return 'custom-template';
-    case amp.validator.ExtensionSpec.ExtensionType.HOST_SCRIPT:
-      return 'host-script';
+    case amp.validator.ExtensionSpec.ExtensionType.HOST_SERVICE:
+      return 'host-service';
     default:
       return 'custom-element';
   }
@@ -4124,7 +4124,7 @@ function validateAttributeInExtension(tagSpec, context, attr, result) {
 
   const {extensionSpec} = tagSpec;
   // TagSpecs with extensions will only be evaluated if their dispatch_key
-  // matches, which is based on this custom-element/custom-template/host-script
+  // matches, which is based on this custom-element/custom-template/host-service
   // field attribute value. The dispatch key matching is case-insensitive for
   // faster lookups, so it still possible for the attribute value to not match
   // if it contains upper-case letters.
@@ -4303,7 +4303,7 @@ function validateAttributes(
       {continue;}
 
       // If |spec| is an extension, then we ad-hoc validate 'custom-element',
-      // 'custom-template', 'host-script', and 'src' attributes by calling this
+      // 'custom-template', 'host-service', and 'src' attributes by calling this
       // method.  For 'src', we also keep track whether we validated it this
       // way, (seen_src_attr), since it's a mandatory attr.
       if (spec.extensionSpec !== null &&
