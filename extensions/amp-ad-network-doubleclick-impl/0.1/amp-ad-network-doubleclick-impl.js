@@ -531,9 +531,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       'psz': psz,
       'scp': serializeTargeting(
           /** @type {?Object<string, (!Array<string>|string)>} */ (
-              (this.jsonTargeting && this.jsonTargeting['targeting']) || null),
+            (this.jsonTargeting && this.jsonTargeting['targeting']) || null),
           /** @type {?(!Array<string>|string)} */ (
-              (this.jsonTargeting &&
+            (this.jsonTargeting &&
                   this.jsonTargeting['categoryExclusions']) || null)),
       'spsa': this.isSinglePageStoryAd ?
         `${pageLayoutBox.width}x${pageLayoutBox.height}` : null,
@@ -679,8 +679,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           this.jsonTargeting['targeting'] =
               !!this.jsonTargeting['targeting'] ?
                 deepMerge(/** @type {!Object} */ (
-                    this.jsonTargeting['targeting']),
-                        rewrittenResponse) :
+                  this.jsonTargeting['targeting']),
+                rewrittenResponse) :
                 rewrittenResponse;
         }
         if (rtcResponse.response['categoryExclusions']) {

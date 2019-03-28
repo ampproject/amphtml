@@ -202,7 +202,7 @@ class AmpAddThis extends AMP.BaseElement {
               title: this.canonicalTitle_,
               pubId: this.pubId_,
               atConfig: /** @type {?JsonObject} */ (this.atConfig_),
-              referrer: /** @type {string} */ (referrer),
+              referrer,
               ampDoc,
             });
 

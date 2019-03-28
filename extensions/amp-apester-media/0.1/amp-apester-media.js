@@ -139,7 +139,7 @@ class AmpApesterMedia extends AMP.BaseElement {
     this.width_ = getLengthNumeral(width);
     this.height_ = getLengthNumeral(height);
     this.random_ = false;
-    this.mediaAttribute_ = /** @type {!string} */ (userAssert(
+    this.mediaAttribute_ = /** @type {string} */ (userAssert(
         this.element.getAttribute('data-apester-media-id') ||
         (this.random_ = this.element.hasAttribute(
             'data-apester-channel-token'
@@ -468,7 +468,7 @@ class AmpApesterMedia extends AMP.BaseElement {
         this.win,
         /** @type {!Element}*/ (this.iframe_),
         /** @type {!Array} */ (this.unlisteners_)
-        );
+    );
     registerEvent(
         apesterEventNames.RESIZE_UNIT,
         data => {

@@ -128,4 +128,4 @@ const strings = {
   },
 };
 
-export {strings as default};
+export default strings;

@@ -183,9 +183,9 @@ export function getTargetingAndExclusions(impls) {
       hasScp = true;
       scps.push(serializeTargeting(
           /** @type {?Object<string, (!Array<string>|string)>} */ (
-              impl.jsonTargeting['targeting'] || null),
+            impl.jsonTargeting['targeting'] || null),
           /** @type {?(!Array<string>|string)} */ (
-              impl.jsonTargeting['categoryExclusions'] || null)));
+            impl.jsonTargeting['categoryExclusions'] || null)));
     } else {
       scps.push('');
     }

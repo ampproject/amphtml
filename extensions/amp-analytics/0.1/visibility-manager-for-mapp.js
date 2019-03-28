@@ -108,7 +108,7 @@ export class VisibilityManagerForMApp extends VisibilityManager {
     // By the time `#getRootLayoutBox` is called, it is guaranteed that
     // onVisibilityChangeHandler has been called at least once
     return /** @type {!../../../src/layout-rect.LayoutRectDef} */ (
-        devAssert(this.intersectionRect_));
+      devAssert(this.intersectionRect_));
   }
 
   /**

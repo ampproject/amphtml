@@ -96,9 +96,9 @@ export class AmpAnimation extends AMP.BaseElement {
         childElementByTag(this.element, 'script'),
         '"<script type=application/json>" must be present');
     this.configJson_ = /** @type {?JsonObject} */ (
-        tryParseJson(scriptElement.textContent, error => {
-          throw user().createError('failed to parse animation script', error);
-        })
+      tryParseJson(scriptElement.textContent, error => {
+        throw user().createError('failed to parse animation script', error);
+      })
     );
 
     if (this.triggerOnVisibility_) {
