@@ -82,7 +82,13 @@ let ElementTaskDef;
 /**
  * @const {string}
  */
-const PLACEHOLDER_ELEMENT_ID_PREFIX = 'i-amphtml-media-';
+const PLACEHOLDER_ELEMENT_ID_PREFIX = 'i-amphtml-placeholder-media-';
+
+
+/**
+ * @const {string}
+ */
+const POOL_ELEMENT_ID_PREFIX = 'i-amphtml-pool-media-';
 
 
 /**
@@ -115,9 +121,6 @@ const instances = {};
  * @type {number}
  */
 let nextInstanceId = 0;
-
-
-let elId = 0;
 
 
 /**
@@ -176,10 +179,10 @@ export class MediaPool {
     this.placeholderEls_ = {};
 
     /**
-     * Counter used to produce unique IDs for media elements.
+     * Counter used to produce unique IDs for placeholder media elements.
      * @private {number}
      */
-    this.idCounter_ = 0;
+    this.placeholderIdCounter_ = 0;
 
     /**
      * Whether the media elements in this MediaPool instance have been "blessed"
@@ -239,6 +242,8 @@ export class MediaPool {
    * @private
    */
   initializeMediaPool_(maxCounts) {
+    let poolIdCounter = 0;
+
     this.forEachMediaType_(key => {
       const type = MediaType[key];
       const count = maxCounts[type] || 0;
@@ -265,7 +270,7 @@ export class MediaPool {
             // Use seed element at end of set to prevent wasting it.
             (i == 1 ? mediaElSeed : mediaElSeed.cloneNode(/* deep */ true));
         const sources = this.getDefaultSource_(type);
-        mediaEl.setAttribute('pool-element', elId++);
+        mediaEl.id = POOL_ELEMENT_ID_PREFIX + poolIdCounter++;
         this.enqueueMediaElementTask_(mediaEl,
             new UpdateSourcesTask(sources));
         // TODO(newmuis): Check the 'error' field to see if MEDIA_ERR_DECODE
@@ -312,7 +317,17 @@ export class MediaPool {
    * @private
    */
   createPlaceholderElementId_() {
-    return PLACEHOLDER_ELEMENT_ID_PREFIX + this.idCounter_++;
+    return PLACEHOLDER_ELEMENT_ID_PREFIX + this.placeholderIdCounter_++;
+  }
+
+
+  /**
+   * @param {!PoolBoundElementDef|!PlaceholderElementDef} mediaElement
+   * @return {boolean}
+   * @private
+   */
+  isPoolMediaElement_(mediaElement) {
+    return mediaElement.classList.contains('i-amphtml-pool-media');
   }
 
   /**
@@ -565,7 +580,7 @@ export class MediaPool {
     const placeholderElId = poolMediaEl[REPLACED_MEDIA_PROPERTY_NAME];
     const placeholderEl = /** @type {!PlaceholderElementDef} */ (
       dev().assertElement(this.placeholderEls_[placeholderElId],
-          'No media element to put back into DOM after eviction.'));
+          `No media element ${placeholderElId} to put back into DOM after eviction.`));
     poolMediaEl[REPLACED_MEDIA_PROPERTY_NAME] = null;
 
     const swapOutOfDom = this.enqueueMediaElementTask_(poolMediaEl,
@@ -680,14 +695,12 @@ export class MediaPool {
    *     successfully registered, or rejected otherwise.
    */
   register(domMediaEl) {
-    const mediaType = this.getMediaType_(domMediaEl);
-
     const parent = domMediaEl.parentNode;
-    if (parent.signals) {
+    if (parent && parent.signals) {
       this.trackAmpElementToBless_(/** @type {!AmpElement} */ (parent));
     }
 
-    if (this.isAllocatedMediaElement_(mediaType, domMediaEl)) {
+    if (this.isPoolMediaElement_(domMediaEl)) {
       // This media element originated from the media pool.
       return Promise.resolve();
     }
@@ -899,7 +912,7 @@ export class MediaPool {
           });
     };
 
-    if (task.requiresSynchronousExecution()) {
+    if (true) {
       executionFn.call(this);
     } else {
       this.timer_.delay(executionFn.bind(this), 0);
