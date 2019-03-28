@@ -46,7 +46,9 @@ export class Variants {
    * @restricted
    */
   init(variants) {
-    variants.then(this.variantsDeferred_.resolve);
+    variants.then(result =>
+      this.variantsDeferred_.resolve(result)
+    );
   }
 
   /**
@@ -117,7 +119,7 @@ export function allocateVariant(ampdoc, experimentName, config) {
           // enumeration is implementation (browser) dependent.
           const variantNames = Object.keys(config['variants']).sort();
           for (let i = 0; i < variantNames.length; i++) {
-            upperBound += config['variants'][variantNames[i]].weight;
+            upperBound += config['variants'][variantNames[i]]['weight'];
             if (ticket < upperBound) {
               return variantNames[i];
             }
@@ -153,13 +155,7 @@ function validateConfig(experimentName, config) {
           variantName
       );
 
-      const percentage = variant.weight;
-
-      userAssert(
-          percentage && percentage > 0 && percentage < 100,
-          'Invalid percentage %s:%s.'
-        + ' Has to be greater than 0 and less than 100',
-          variantName, percentage);
+      const percentage = variant['weight'];
       totalPercentage += percentage;
     }
   }
@@ -221,9 +217,26 @@ function assertVariant(variant, experimentName, variantName) {
     typeof variant['weight'] === 'number',
       `${experimentName}.${variantName} must have a weight.`);
 
+  // Assert the variant weight is a percentage
+  const percentage = variant['weight'];
+  userAssert(
+      percentage > 0 && percentage < 100,
+      'Invalid weight percentage %s.'
+    + ` ${experimentName}.${variantName}` +
+    ' Has to be greater than 0 and less than 100',
+      percentage);
+
+
   // Assert the variant mutations
   userAssert(
-      isArray(variant['mutations']),
+      variant['mutations'] && isArray(variant['mutations']),
       `${experimentName}.${variantName} must have a mutations array.`);
+
+  // Assert the variant has mutations
+  userAssert(
+      variant['mutations'].length > 0,
+      `${experimentName}.${variantName} mutations,`
+    + 'must have at least one mutation.');
+
 }
 
