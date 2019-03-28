@@ -72,15 +72,15 @@ export class Variants {
 
 /**
  * Allocates the current page view to an experiment variant based on the given
- * experiment config.
+ * experiment from the config.
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @param {string} experimentName
- * @param {!JsonObject} config
+ * @param {!JsonObject} experimentObject
  * @return {!Promise<?string>}
  */
-export function allocateVariant(ampdoc, experimentName, config) {
+export function allocateVariant(ampdoc, experimentName, experimentObject) {
   assertName(experimentName);
-  validateConfig(experimentName, config);
+  validateExperiment(experimentName, experimentObject);
 
   // Variant can be overridden from URL fragment.
   const viewer = Services.viewerForDoc(ampdoc);
@@ -89,19 +89,19 @@ export function allocateVariant(ampdoc, experimentName, config) {
     return Promise.resolve(/** @type {?string} */ (override));
   }
 
-  const sticky = config['sticky'] !== false;
-  const cidScope = config['cidScope'] || 'amp-experiment';
+  const sticky = experimentObject['sticky'] !== false;
+  const cidScope = experimentObject['cidScope'] || 'amp-experiment';
 
   let hasConsentPromise = Promise.resolve(true);
 
-  if (sticky && config['consentNotificationId']) {
+  if (sticky && experimentObject['consentNotificationId']) {
     const element = ampdoc.getHeadNode();
     hasConsentPromise = Services.userNotificationManagerForDoc(element)
         .then(manager => manager.getNotification(
-            config['consentNotificationId']))
+          experimentObject['consentNotificationId']))
         .then(userNotification => {
           userAssert(userNotification,
-              `Notification not found: ${config['consentNotificationId']}`);
+            `Notification not found: ${experimentObject['consentNotificationId']}`);
           return userNotification.isDismissed();
         });
   }
@@ -110,16 +110,17 @@ export function allocateVariant(ampdoc, experimentName, config) {
     if (!hasConsent) {
       return null;
     }
-    const group = config['group'] || experimentName;
+    const group = experimentObject['group'] || experimentName;
     return getBucketTicket(ampdoc, group, sticky ? cidScope : null)
         .then(ticket => {
           let upperBound = 0;
 
           // Loop through keys in a specific order since the default object key
           // enumeration is implementation (browser) dependent.
-          const variantNames = Object.keys(config['variants']).sort();
+          const variants = experimentObject['variants'];
+          const variantNames = Object.keys(variants).sort();
           for (let i = 0; i < variantNames.length; i++) {
-            upperBound += config['variants'][variantNames[i]]['weight'];
+            upperBound += variants[variantNames[i]]['weight'];
             if (ticket < upperBound) {
               return variantNames[i];
             }
@@ -130,17 +131,17 @@ export function allocateVariant(ampdoc, experimentName, config) {
 }
 
 /**
- * Validates an experiment config.
+ * Validates an experiment from the config.
  * @param {string} experimentName
- * @param {!JsonObject} config
+ * @param {!JsonObject} experimentObject
  * @throws {!Error}
  */
-function validateConfig(experimentName, config) {
-  const variants = config['variants'];
+function validateExperiment(experimentName, experimentObject) {
+  const variants = experimentObject['variants'];
   userAssert(isObject(variants) && Object.keys(variants).length > 0,
-      'Missing experiment variants config.');
-  if (config['group']) {
-    assertName(config['group']);
+      'Missing variants from experiment.');
+  if (experimentObject['group']) {
+    assertName(experimentObject['group']);
   }
 
   let totalPercentage = 0;
@@ -209,34 +210,33 @@ function assertVariant(variant, experimentName, variantName) {
   // Assert that the variant is an object
   userAssert(
       isObject(variant),
-      `${experimentName}.${variantName} must be an object.`);
+      `${experimentName}.variants.${variantName} must be an object.`);
 
   // Assert the variant weight
   userAssert(
       variant['weight'] !== undefined &&
     typeof variant['weight'] === 'number',
-      `${experimentName}.${variantName} must have a weight.`);
+    `${experimentName}.variants.${variantName} must have a weight.`);
 
   // Assert the variant weight is a percentage
   const percentage = variant['weight'];
   userAssert(
-      percentage > 0 && percentage < 100,
-      'Invalid weight percentage %s.'
-    + ` ${experimentName}.${variantName}` +
+    percentage > 0 && percentage < 100,
+    'Invalid weight percentage %s.'
+    + ` ${experimentName}.variants.${variantName}` +
     ' Has to be greater than 0 and less than 100',
-      percentage);
+    percentage);
 
 
   // Assert the variant mutations
   userAssert(
       variant['mutations'] && isArray(variant['mutations']),
-      `${experimentName}.${variantName} must have a mutations array.`);
+    `${experimentName}.variants.${variantName} must have a mutations array.`);
 
   // Assert the variant has mutations
   userAssert(
-      variant['mutations'].length > 0,
-      `${experimentName}.${variantName} mutations,`
-    + 'must have at least one mutation.');
-
+    variant['mutations'].length > 0,
+    `${experimentName}.variants.${variantName} mutations`
+    + ' must have at least one mutation.');
 }
 

@@ -61,7 +61,23 @@ export class AmpExperiment extends AMP.BaseElement {
         });
   }
 
-  /** @return {!JsonObject} [description] */
+  /**
+   * The experiment config can be represented as:
+   * const config = {
+   *   experimentObject: {
+   *     // General experiment settings e.g schedule.
+   *     variants: {
+   *       variantObject: {
+   *         // Objects that represent what
+   *         // should change (mutations) when
+   *         // this variant of the experiment is
+   *         // applied (weight)
+   *       }
+   *     }
+   *   }
+   * }
+   * @return {!JsonObject} [description]
+   */
   getConfig_() {
     const {children} = this.element;
     userAssert(
@@ -80,26 +96,27 @@ export class AmpExperiment extends AMP.BaseElement {
    * to apply the experiment to the document.
    * Experiment with no variant assigned (null) will be skipped.
    * @param {!JsonObject} config
-   * @param {!Object<string, ?string>} experiments
+   * @param {!Object<string, ?string>} experimentResults
    * @return {!Promise<!Object<string, ?string>>} a promise of the original
    *     param passed in
    * @private
    */
-  applyExperimentVariants_(config, experiments) {
+  applyExperimentVariants_(config, experimentToVariant) {
 
-    const appliedExperimentVariantPromises = [];
+    const appliedExperimentToVariantPromises = [];
 
-    for (const name in experiments) {
-      if (experiments[name]) {
-        const variantObject = config[name]['variants'][experiments[name]];
-        appliedExperimentVariantPromises.push(
-            this.applyMutations_(name, variantObject)
+    for (const experimentName in experimentToVariant) {
+      const variantName = experimentToVariant[experimentName];
+      if (variantName) {
+        const variantObject = config[experimentName]['variants'][variantName];
+        appliedExperimentToVariantPromises.push(
+            this.applyMutations_(experimentName, variantObject)
         );
       }
     }
 
-    return Promise.all(appliedExperimentVariantPromises)
-        .then(() => experiments);
+    return Promise.all(appliedExperimentToVariantPromises)
+        .then(() => experimentToVariant);
   }
 
   /**
