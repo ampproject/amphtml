@@ -54,6 +54,14 @@ export const ACTION_TYPE = {
   DISMISS: 'dismiss',
 };
 
+/**
+ * @enum {string}
+ */
+export const PROMPT_TRIGGER = {
+  ACTION: 'action',
+  FORCE_PROMPT_ON_NEXT: 'force-prompt-on-next',
+}
+
 
 export class AmpConsent extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -139,7 +147,6 @@ export class AmpConsent extends AMP.BaseElement {
      *   'postPromptUI': ...
      * }
      */
-
     const policyConfig = this.consentConfig_['policy'] || dict({});
 
     this.policyConfig_ = expandPolicyConfig(policyConfig, this.consentId_);
@@ -209,7 +216,7 @@ export class AmpConsent extends AMP.BaseElement {
     });
 
     this.registerAction('prompt', () => {
-      this.scheduleDisplay_();
+      this.scheduleDisplay_(PROMPT_TRIGGER.ACTION);
     });
 
     this.enableExternalInteractions_();
@@ -267,8 +274,14 @@ export class AmpConsent extends AMP.BaseElement {
 
   /**
    * Returns a promise that attempt to show prompt UI
+   * @param {string} promptTrigger
    */
-  scheduleDisplay_() {
+  scheduleDisplay_(promptTrigger) {
+    if (promptTrigger && !isEnumValue(PROMPT_TRIGGER, promptTrigger)) {
+      // Unrecognized promptTrigger
+      return;
+    }
+
     if (!this.notificationUiManager_) {
       dev().error(TAG, 'notification ui manager not found');
     }
@@ -288,22 +301,23 @@ export class AmpConsent extends AMP.BaseElement {
     }
 
     this.consentUIPending_ = true;
-    this.notificationUiManager_.registerUI(this.show_.bind(this));
+    this.notificationUiManager_.registerUI(this.show_.bind(this, promptTrigger));
   }
 
   /**
    * Show prompt UI
    * Do not invoke the function except in scheduleDisplay_
+   * @param {string} promptTrigger
    * @return {!Promise}
    */
-  show_() {
+  show_(promptTrigger) {
     if (this.isPromptUIOn_) {
       dev().error(TAG,
           'Attempt to show an already displayed prompt UI');
     }
 
     this.vsync_.mutate(() => {
-      this.consentUI_.show();
+      this.consentUI_.show(promptTrigger);
       this.isPromptUIOn_ = true;
     });
 
