@@ -32,10 +32,12 @@ import {getData} from '../../../src/event-helper';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
-import {setStyles, toggle} from '../../../src/style';
+import {setImportantStyles, setStyles, toggle} from '../../../src/style';
 
 const TAG = 'amp-consent-ui';
 const CONSENT_STATE_MANAGER = 'consentStateManager';
+const DEFAULT_INITIAL_HEIGHT = '30vh';
+const DEFAULT_ENABLE_BORDER = true;
 
 // Classes for consent UI
 export const consentUiClasses = {
@@ -46,6 +48,7 @@ export const consentUiClasses = {
   fill: 'i-amphtml-consent-ui-fill',
   placeholder: 'i-amphtml-consent-ui-placeholder',
   mask: 'i-amphtml-consent-ui-mask',
+  enableBorder: 'i-amphtml-consent-ui-enable-border',
 };
 
 export class ConsentUI {
@@ -115,6 +118,12 @@ export class ConsentUI {
 
     /** @private {?Element} */
     this.placeholder_ = null;
+
+    /** @private {string} */
+    this.initialHeight_ = DEFAULT_INITIAL_HEIGHT;
+
+    /** @private {boolean} */
+    this.enableBorder_ = DEFAULT_ENABLE_BORDER;
 
     /** @private @const {!Function} */
     this.boundHandleIframeMessages_ = this.handleIframeMessages_.bind(this);
@@ -252,6 +261,8 @@ export class ConsentUI {
       this.maybeHideOverlay_();
       // Enable the scroll, in case we were fullscreen with no overlay
       this.enableScroll_();
+      // Reset any animation styles set by style attribute
+      this.resetAnimationStyles_();
 
       // NOTE (torch2424): This is very sensitive. Fixed layer applies
       // a `top: calc(0px)` in order to fix some bugs, thus
@@ -275,12 +286,56 @@ export class ConsentUI {
   }
 
   /**
+   * Handle the ready event from the CMP iframe
+   * @param {!JsonObject} data
+   */
+  handleReady_(data) {
+
+    this.initialHeight_ = DEFAULT_INITIAL_HEIGHT;
+    this.enableBorder_ = DEFAULT_ENABLE_BORDER;
+
+    // Set our initial height
+    if (data['initialHeight']) {
+      if (typeof data['initialHeight'] === 'string' &&
+        data['initialHeight'].indexOf('vh') >= 0) {
+
+        const dataHeight = parseInt(data['initialHeight'], 10);
+
+        if (dataHeight >= 10 && dataHeight <= 60) {
+          this.initialHeight_ = `${dataHeight}vh`;
+        } else {
+          user().error(
+              TAG,
+              `Inavlid initial height: ${data['initialHeight']}.` +
+            'Minimum: 10vh. Maximum: 60vh.'
+          );
+        }
+      } else {
+        user().error(
+            TAG,
+            `Inavlid initial height: ${data['initialHeight']}.` +
+          'Must be a string in "vh" units.'
+        );
+      }
+    }
+
+    // Enable/disable our border
+    if (data['border'] === false) {
+      this.enableBorder_ = false;
+    }
+
+    this.iframeReady_.resolve();
+  }
+
+  /**
    * Enter the fullscreen state for the UI
    */
   enterFullscreen_() {
     if (!this.ui_ || !this.isVisible_ || this.isFullscreen_) {
       return;
     }
+
+    this.resetAnimationStyles_();
 
     const {classList} = this.parent_;
     classList.add(consentUiClasses.iframeFullscreen);
@@ -407,11 +462,9 @@ export class ConsentUI {
     toggle(dev().assertElement(this.placeholder_), false);
     toggle(dev().assertElement(this.ui_), true);
 
-    // Remove transition/transform styles added by the fixed layer
-    setStyles(this.parent_, {
-      transform: '',
-      transition: '',
-    });
+    // Remove transition styles added by the fixed layer
+    // Transform styles applied by us for the animation.
+    this.resetAnimationStyles_();
 
     /**
      * Waiting for mutation twice here.
@@ -426,6 +479,7 @@ export class ConsentUI {
       this.baseInstance_.mutateElement(() => {
         classList.add(consentUiClasses.in);
         this.isIframeVisible_ = true;
+        this.applyInitialStyles_();
       });
     });
   }
@@ -449,6 +503,36 @@ export class ConsentUI {
     this.isIframeVisible_ = false;
     this.ui_.removeAttribute('name');
     removeElement(dev().assertElement(this.ui_));
+  }
+
+  /**
+   * Reset transition and transform styles
+   * Set by the fixed layer, and us
+   */
+  resetAnimationStyles_() {
+    setStyles(this.parent_, {
+      transform: '',
+      transition: '',
+    });
+  }
+
+  /**
+   * Apply styles for ready event
+   */
+  applyInitialStyles_() {
+    // Apply our initial height and border
+    if (this.ui_) {
+      setStyles(this.ui_, {
+        height: this.initialHeight_,
+      });
+    }
+    setImportantStyles(this.parent_, {
+      transform: `translate3d(0px, calc(100% - ${this.initialHeight_}), 0px)`,
+    });
+    if (this.enableBorder_) {
+      const {classList} = this.parent_;
+      classList.add(consentUiClasses.enableBorder);
+    }
   }
 
   /**
@@ -516,7 +600,9 @@ export class ConsentUI {
    * Required message from iframe to hide placeholder and display iframe
    * {
    *   type: 'consent-ui',
-   *   action: 'ready'
+   *   action: 'ready',
+   *   initialHeight: '30vh',
+   *   border: true
    * }
    *
    * Enter Fullscreen
@@ -539,7 +625,7 @@ export class ConsentUI {
     }
 
     if (data['action'] === 'ready') {
-      this.iframeReady_.resolve();
+      this.handleReady_(/** @type {!JsonObject} */(data));
     }
 
     if (data['action'] === 'enter-fullscreen') {
