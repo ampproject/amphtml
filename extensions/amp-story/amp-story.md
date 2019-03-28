@@ -1421,30 +1421,28 @@ A new `goToPage` action allows for 'jumping' from one page within a story to ano
 
 The following example shows a story with a quiz experience. The first page acts as a branch off point that allows the user to select the path that the story takes. <a name="quiz-example"></a>
 
-```
-... <body>
-        <amp-story id="story" standalone>
-            <amp-story-page id="cover">
-                <p> What is your favourite food? </p>
-                <button on="tap:story.goToPage(id=bacon-answer)"> Bacon! </button>
-                <button on="tap:story.goToPage(id=boba-answer)"> Boba! </button>
-                <button on="tap:story.goToPage(id=pizza-answer)"> Pizza! </button>
-            </amp-story-page>
+```html
+<amp-story id="story" standalone>
+    <amp-story-page id="cover">
+        <p> What is your favourite food? </p>
+        <button on="tap:story.goToPage(id=bacon-answer)"> Bacon! </button>
+        <button on="tap:story.goToPage(id=boba-answer)"> Boba! </button>
+        <button on="tap:story.goToPage(id=pizza-answer)"> Pizza! </button>
+    </amp-story-page>
 
-            <amp-story-page id="bacon-answer">
-                <p> Bacon, of course! </p>
-            </amp-story-page>
+    <amp-story-page id="bacon-answer">
+        <p> Bacon, of course! </p>
+    </amp-story-page>
 
-            <amp-story-page id="boba-answer">
-                <p> Boba, because it's a perfect drink! </p>
-            </amp-story-page>
+    <amp-story-page id="boba-answer">
+        <p> Boba, because it's a perfect drink! </p>
+    </amp-story-page>
 
-            <amp-story-page id="pizza-answer">
-                <p> Pizza, it's a true classic! </p>
-            </amp-story-page>
-            ...
-        </amp-story>
-    </body>
+    <amp-story-page id="pizza-answer">
+        <p> Pizza, it's a true classic! </p>
+    </amp-story-page>
+    ...
+</amp-story>
 ```
 
 ### The `advance-to` Attribute
@@ -1467,34 +1465,32 @@ The `advance-to` attribute allows you to specify what page should follow a given
 
 The following is a modification of the previous [story with a quiz experience](#quiz-example). By using the `advance-to` attribute, we create a fallback page to navigate to should the user not select any of the food items listed.
 
-```
-... <body>
-        <amp-story id="story" standalone>
-            <amp-story-page id="cover" advance-to="fallback-answer">
-                <p> What is your favourite food? </p>
-                <button on="tap:story.goToPage(id=bacon-answer)"> Bacon! </button>
-                <button on="tap:story.goToPage(id=boba-answer)"> Boba! </button>
-                <button on="tap:story.goToPage(id=pizza-answer)"> Pizza! </button>
-            </amp-story-page>
+```html
+<amp-story id="story" standalone>
+    <amp-story-page id="cover" advance-to="fallback-answer">
+        <p> What is your favourite food? </p>
+        <button on="tap:story.goToPage(id=bacon-answer)"> Bacon! </button>
+        <button on="tap:story.goToPage(id=boba-answer)"> Boba! </button>
+        <button on="tap:story.goToPage(id=pizza-answer)"> Pizza! </button>
+    </amp-story-page>
 
-            <amp-story-page id="bacon-answer">
-                <p> Bacon, of course! </p>
-            </amp-story-page>
+    <amp-story-page id="bacon-answer">
+        <p> Bacon, of course! </p>
+    </amp-story-page>
 
-            <amp-story-page id="boba-answer">
-                <p> Boba, because it's a perfect drink! </p>
-            </amp-story-page>
+    <amp-story-page id="boba-answer">
+        <p> Boba, because it's a perfect drink! </p>
+    </amp-story-page>
 
-            <amp-story-page id="pizza-answer">
-                <p> Pizza, it's a true classic! </p>
-            </amp-story-page>
+    <amp-story-page id="pizza-answer">
+        <p> Pizza, it's a true classic! </p>
+    </amp-story-page>
 
-            <amp-story-page id="fallback-answer">
-                <p> It looks like you like something else. You're very unique! </p>
-            </amp-story-page>
-            ...
-        </amp-story>
-    </body>
+    <amp-story-page id="fallback-answer">
+        <p> It looks like you like something else. You're very unique! </p>
+    </amp-story-page>
+    ...
+</amp-story>
 ```
 If we had not used the `advance-to` attribute with the specified value, if the user chose not to tap on any of the buttons on the first page of the story and advance forward, they would see the `bacon-answer` page.
 
@@ -1517,35 +1513,33 @@ By combining both branching features and `amp-sidebar`, we can create stories th
 
 The following is a modification of the previous [story with a quiz experience](#quiz-example). We add an `amp-sidebar` that has in it both a table of contents and out-links to other links of interest. Note how there are many ways to link to pages within the story. All methods are equally valid.
 
-```
-... <body>
-        <amp-story id="story" standalone>
-            <amp-sidebar id="sidebar1" layout="nodisplay">
-                    <ul>
-                        <li on="tap:story.goToPage(id=cover)"> Cover Page </li>
-                        <li> <a href="#page=bacon-answer"> Bacon page </a></li>
-                        <li> <a href="https://www.currentdomain.com/food-story/#page=boba-answer"> Boba Page </a></li>
-                        <li><a href="https://www.amp.dev"> External Link </a></li>
-                    </ul>
-             </amp-sidebar>
+```html
+<amp-story id="story" standalone>
+    <amp-sidebar id="sidebar1" layout="nodisplay">
+            <ul>
+                <li on="tap:story.goToPage(id=cover)"> Cover Page </li>
+                <li> <a href="#page=bacon-answer"> Bacon page </a></li>
+                <li> <a href="https://www.currentdomain.com/food-story/#page=boba-answer"> Boba Page </a></li>
+                <li><a href="https://www.amp.dev"> External Link </a></li>
+            </ul>
+     </amp-sidebar>
 
-            <amp-story-page id="cover" advance-to="fallback-answer">
-                <p> What is your favourite food? </p>
-                <button on="tap:story.goToPage(id=bacon-answer)"> Bacon! </button>
-                <button on="tap:story.goToPage(id=boba-answer)"> Boba! </button>
-                <button on="tap:story.goToPage(id=pizza-answer)"> Pizza! </button>
-            </amp-story-page>
+    <amp-story-page id="cover" advance-to="fallback-answer">
+        <p> What is your favourite food? </p>
+        <button on="tap:story.goToPage(id=bacon-answer)"> Bacon! </button>
+        <button on="tap:story.goToPage(id=boba-answer)"> Boba! </button>
+        <button on="tap:story.goToPage(id=pizza-answer)"> Pizza! </button>
+    </amp-story-page>
 
-            <amp-story-page id="bacon-answer">
-                <p> Bacon, of course! </p>
-            </amp-story-page>
+    <amp-story-page id="bacon-answer">
+        <p> Bacon, of course! </p>
+    </amp-story-page>
 
-            <amp-story-page id="boba-answer">
-                <p> Boba, because it's a perfect drink! </p>
-            </amp-story-page>
-            ...
-        </amp-story>
-    </body>
+    <amp-story-page id="boba-answer">
+        <p> Boba, because it's a perfect drink! </p>
+    </amp-story-page>
+    ...
+</amp-story>
 ```
 
 ## Other components usable in AMP stories
