@@ -78,6 +78,14 @@ import {upgradeBackgroundAudio} from './audio';
 const PAGE_LOADED_CLASS_NAME = 'i-amphtml-story-page-loaded';
 
 /**
+ * Property of an audio element we want to play when the story gets unmuted. Its
+ * value is a timestamp, set when we first tried to play the story.
+ * @const {string}
+ */
+const PLAY_AUDIO_ELEMENT_FROM_TIMESTAMP_PROPERTY_NAME =
+    '__AMP_STORY_PLAY_AUDIO_FROM_TIMESTAMP__';
+
+/**
  * Selectors for media elements.
  * Only get the page media: direct children of amp-story-page (ie:
  * background-audio), or descendant of amp-story-grid-layer. That excludes media
@@ -647,6 +655,11 @@ export class AmpStoryPage extends AMP.BaseElement {
             this.debounceToggleLoadingSpinner_(false);
             this.togglePlayMessage_(true);
           }
+
+          if (mediaEl.tagName === 'AUDIO') {
+            mediaEl[PLAY_AUDIO_ELEMENT_FROM_TIMESTAMP_PROPERTY_NAME] =
+                Date.now();
+          }
         });
       }
     });
@@ -700,9 +713,16 @@ export class AmpStoryPage extends AMP.BaseElement {
         mediaEl = /** @type {!./media-pool.DomElementDef} */ (mediaEl);
         const promises = [mediaPool.unmute(mediaEl)];
 
-        // Audio element on the first page of a story would not be playing since
-        // there was no user intent. On unmute, make sure they are playing.
-        if (mediaEl.tagName === 'AUDIO' && mediaEl.paused) {
+        // Audio element might not be playing if the page navigation did not
+        // happen after a user intent, and the media element was not "blessed".
+        // On unmute, make sure this audio element is playing, at the expected
+        // currentTime.
+        if (mediaEl[PLAY_AUDIO_ELEMENT_FROM_TIMESTAMP_PROPERTY_NAME]) {
+          const timeStart =
+              mediaEl[PLAY_AUDIO_ELEMENT_FROM_TIMESTAMP_PROPERTY_NAME];
+          let currentTime = (Date.now() - timeStart) / 1000;
+          mediaEl.duration && (currentTime = currentTime % mediaEl.duration);
+          mediaEl.currentTime = currentTime;
           promises.push(mediaPool.play(mediaEl));
         }
 
