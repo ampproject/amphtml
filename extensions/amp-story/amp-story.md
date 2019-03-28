@@ -1395,13 +1395,13 @@ Note that all branching features are behind an `amp-story-branching` experiment.
 
 ``` AMP.toggleExperiment(‘amp-story-branching) ```
 
-For more information see, [experimental features](https://amp.dev/documentation/guides-and-tutorials/learn/experimental.html?format=stories).
+For more information see, [experimental features](https://amp.dev/documentation/guides-and-tutorials/learn/experimental.html?format=stories)
 
 ## Manipulating Navigation
 The features listed below allow you to manipulate navigation within a story. Note that when using branching features, navigation throughout the story from a 'branch-off point' will follow the path that a user takes. That is, if a user navigates from page-1 to page-5 and then page-6, navigating backwards will follow this exact path (page-6 to page-5 and finally page-1). The other pages will not be exposed to the user.
 
 ### The `goToPage` Action
-A new `goToPage` action allows for 'jumping' from one page within a story to another. The action can be used with allowed elements in `amp-story` and their respective events. Clicking on an element with this action should bring the user to another page within the same story. Using this action **requires** that you give the `amp-story` element an id, a unique identifier, as the story itself is the target.  Read more about actions and events in AMP [here](https://amp.dev/documentation/guides-and-tutorials/learn/amp-actions-and-events.html?format=stories).
+A new `goToPage` action allows for 'jumping' from one page within a story to another. The action can be used with allowed elements in `amp-story` and their respective events. Clicking on an element with this action should bring the user to another page within the same story. Using this action **requires** that you give the `amp-story` element an id, a unique identifier, as the story itself is the target.  Read more about actions and events in AMP [here](https://amp.dev/documentation/guides-and-tutorials/learn/amp-actions-and-events.html?format=stories)
 
 
 <table>
