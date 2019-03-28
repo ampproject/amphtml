@@ -457,19 +457,6 @@ describes.realWin('amp-story', {
         });
   });
 
-  it('should add a mobile attribute', () => {
-    createPages(story.element, 2, ['cover', '1']);
-
-    story.desktopMedia_ = {matches: false};
-
-    story.buildCallback();
-
-    return story.layoutCallback()
-        .then(() => {
-          expect(story.element).to.have.attribute('mobile');
-        });
-  });
-
   it('should have a meta tag that sets the theme color', () => {
     createPages(story.element, 2);
     story.buildCallback();
@@ -533,13 +520,23 @@ describes.realWin('amp-story', {
   it('should update the orientation landscape attribute', () => {
     createPages(story.element, 2, ['cover', 'page-1']);
 
-    story.storeService_.dispatch(Action.TOGGLE_LANDSCAPE, true);
+    story.landscapeOrientationMedia_ = {matches: true};
+    story.element.setAttribute('standalone', '');
+    story.element.setAttribute('supports-landscape', '');
+    sandbox.stub(story, 'mutateElement').callsFake(fn => fn());
 
-    return story.mutateElement(() => {
-      expect(story.element).to.have.attribute('orientation');
-      expect(story.element.getAttribute('orientation'))
-          .to.equal('landscape');
-    });
+    story.buildCallback();
+
+    return story.layoutCallback()
+        .then(() => {
+          story.landscapeOrientationMedia_ = {matches: false};
+          story.onResize();
+        })
+        .then(() => {
+          expect(story.element).to.have.attribute('orientation');
+          expect(story.element.getAttribute('orientation'))
+              .to.equal('portrait');
+        });
   });
 
   describe('amp-story consent', () => {

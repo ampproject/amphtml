@@ -633,10 +633,6 @@ export class AmpStory extends AMP.BaseElement {
       this.onCurrentPageIdUpdate_(pageId);
     });
 
-    this.storeService_.subscribe(StateProperty.LANDSCAPE_STATE, isLandscape => {
-      this.onLandscapeStateUpdate_(isLandscape);
-    }, true /** callToInitialize */);
-
     this.storeService_.subscribe(StateProperty.PAUSED_STATE, isPaused => {
       this.onPausedStateUpdate_(isPaused);
     });
@@ -1454,8 +1450,8 @@ export class AmpStory extends AMP.BaseElement {
 
     const isLandscape = this.isLandscape_();
     const isLandscapeSupported = this.isLandscapeSupported_();
-    this.storeService_.dispatch(
-        Action.TOGGLE_LANDSCAPE, isLandscapeSupported && isLandscape);
+
+    this.setOrientationAttribute_(isLandscape, isLandscapeSupported);
 
     if (uiState !== UIType.MOBILE || isLandscapeSupported) {
       // Hides the UI that prevents users from using the LANDSCAPE orientation.
@@ -1466,6 +1462,22 @@ export class AmpStory extends AMP.BaseElement {
     // Only called when the desktop media query is not matched and the landscape
     // mode is not enabled.
     this.maybeTriggerViewportWarning_(isLandscape);
+  }
+
+  /**
+   * Adds an orientation=landscape|portrait attribute.
+   * If the story doesn't explicitly support landscape via the opt-in attribute,
+   * it is always in a portrait orientation.
+   * @param {boolean} isLandscape Whether the viewport is landscape or portrait
+   * @param {boolean} isLandscapeSupported Whether the story supports landscape
+   * @private
+   */
+  setOrientationAttribute_(isLandscape, isLandscapeSupported) {
+    this.mutateElement(() => {
+      this.element.setAttribute(
+          Attributes.ORIENTATION,
+          isLandscapeSupported && isLandscape ? 'landscape' : 'portrait');
+    });
   }
 
   /**
@@ -1611,18 +1623,6 @@ export class AmpStory extends AMP.BaseElement {
    */
   isLandscapeSupported_() {
     return this.element.hasAttribute(Attributes.SUPPORTS_LANDSCAPE);
-  }
-
-  /**
-   * Reacts to landscape state updates.
-   * @param {boolean} isLandscape
-   * @private
-   */
-  onLandscapeStateUpdate_(isLandscape) {
-    this.mutateElement(() => {
-      this.element.setAttribute(
-          Attributes.ORIENTATION, isLandscape ? 'landscape' : 'portrait');
-    });
   }
 
   /**
