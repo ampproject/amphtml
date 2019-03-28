@@ -102,7 +102,7 @@ Once you have found a reviewer, make sure to @-mention them on any issues / PRs 
   - Make sure the presubmit checks shown on your PR on GitHub passes (e.g. no lint and type check errors, tests are passing).
   - Add reviewers to your PR that will fulfill the requirements of code review and approval documented in the [Code review and approval](#code-review-and-approval) section.  (Your reviewer can help with this.)
   - [Respond to feedback](./getting-started-e2e.md#respond-to-pull-request-comments).
-- After your PR has all of the necessary approvals, your code may be merged into the repository by any Collaborator/Reviewer.  Your reviewer will typically handle this; reach out to them if your code is not merged soon after it has been approved. 
+- After your PR has all of the necessary approvals, your code may be merged into the repository by any Collaborator/Reviewer.  Your reviewer will typically handle this; reach out to them if your code is not merged soon after it has been approved.
 - To check on your changes and find out when they get into production, read [See your changes in production](./getting-started-quick.md#see-your-changes-in-production).
 - [Clean up](./getting-started-quick.md#delete-your-branch-after-your-changes-are-merged-optional): After your changes are merged, you can delete your working branch.
 
@@ -155,13 +155,13 @@ These guidelines are specific to the amphtml repository.  Other ampproject repos
 #### Collaborators
   * Review, approve and merge PRs in the repository for which they are Collaborators.
   * Collaborator status is granted to folks who have proven basic familiarity with the respective repository.
-  * A person may become a Collaborator after 2 merged PRs that are non-trivial (not only fixing typos, not only config changes) and a +1 from 1 current Reviewer.
+  * A person may become a Collaborator after 2 merged PRs that are non-trivial (not only fixing typos, not only config changes) and a +1 from 1 current Reviewer.  To request becoming a Collaborator file an issue in the repository in which you are requesting to be a Collaborator and cc a [Reviewer](#reviewers) in that repository.
   * The list of Collaborators is maintained in the [Collaborators (amphtml)](https://github.com/orgs/ampproject/teams/collaborators-amphtml) GitHub team.
 
 #### Reviewers
   * Review, approve and merge PRs in the repository for which they are Reviewers.
   * Reviewer status is granted to folks who have demonstrated deep familiarity with the code-style and conventions of the respective repository.
-  * A person may become a Reviewer after 10 merged PRs or 10 high quality reviews of complex PRs and a +1 from 1 current Reviewer.  Qualifying PRs must be non-trivial (not only fixing typos, not only config changes) and should have implemented or documented at least 2 new features.
+  * A person may become a Reviewer after 10 merged PRs or 10 high quality reviews of complex PRs and a +1 from 1 current Reviewer.  Qualifying PRs must be non-trivial (not only fixing typos, not only config changes) and should have implemented or documented at least 2 new features.  To request becoming a Reviewer file an issue in the repository in which you are requesting to be a Reviewer and assign/cc a Reviewer in that repository.
   * The list of Reviewers is maintained in the [Reviewers (amphtml)](https://github.com/orgs/ampproject/teams/reviewers-amphtml) GitHub team.
 
 #### Owners
@@ -170,5 +170,5 @@ These guidelines are specific to the amphtml repository.  Other ampproject repos
     * Demonstrated expertise in the area in which they are an Owner.
     * Any GitHub user (including those who are not Reviewers or Collaborators) may be an Owner.
     * When creating a new directory (such as when creating a new AMP extension) the author of the pull request should designate themselves as an Owner of that directory.
-    * Owners of an area may approve other Owners at or below their area of expertise following the normal PR process.
+    * Owners of an area may approve other Owners at or below their area of expertise following the normal PR process.  To request becoming an Owner create a PR adding yourself to the appropriate OWNERS.yaml file and assign/cc a current Owner for that directory.
   * The list of Owners for a directory can be found in the [OWNERS.yaml](https://github.com/ampproject/amphtml/search?o=asc&q=filename%3AOWNERS.yaml&s=indexed) file in the directory or a parent directory.
