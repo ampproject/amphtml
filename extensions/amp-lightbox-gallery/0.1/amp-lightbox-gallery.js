@@ -1071,15 +1071,17 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     const lightboxGroupId = element.getAttribute('lightbox')
       || 'default';
     this.currentLightboxGroupId_ = lightboxGroupId;
-    this.hasVerticalScrollbarWidth_ = this.getViewport().getVerticalScrollbarWidth() > 0;
+    this.hasVerticalScrollbarWidth_ =
+        this.getViewport().getVerticalScrollbarWidth() > 0;
 
     return this.findOrInitializeLightbox_(lightboxGroupId).then(() => {
+      return this.getViewport().enterLightboxMode();
+    }).then(() => {
       return this.mutateElement(() => {
         toggle(this.element, true);
         setStyle(this.element, 'opacity', 0);
         this.controlsContainer_.classList.remove('i-amphtml-lbg-fade-in');
         this.controlsContainer_.classList.add('i-amphtml-lbg-hidden');
-        this.getViewport().enterLightboxMode();
       });
     }).then(() => {
       this.isActive_ = true;
