@@ -71,7 +71,7 @@ describes.realWin('media-pool', {}, env => {
    * @return {function(!Element): number} The distance
    */
   function arrayOrderDistanceFn(elements) {
-    return (element) => {
+    return element => {
       const index = elements.indexOf(element);
       if (index < 0) {
         return 9999;
@@ -160,12 +160,6 @@ describes.realWin('media-pool', {}, env => {
         arrayOrderDistanceFn(elements));
 
     elements.forEach(element => mediaPool.register(element));
-    elements.forEach(element => {
-      mediaPool.play(element).then(playbackSucceeded => {
-        expect(playbackSucceeded).to.be.true;
-      }, error => {
-        throw error;
-      });
-    });
+    elements.forEach(element => mediaPool.play(element));
   });
 });
