@@ -151,6 +151,7 @@ tags: {
 # 4.2.3 the base element
 tags: {
   html_format: AMP
+  html_format: AMP4ADS
   html_format: ACTIONS
   tag_name: "BASE"
   unique: true
@@ -162,24 +163,6 @@ tags: {
     name: "href"
     value: "/"
   }
-  attrs: {
-    name: "target"
-    value_casei: "_blank"
-    value_casei: "_self"
-    value_casei: "_top"
-  }
-}
-tags: {
-  html_format: AMP4ADS
-  tag_name: "BASE"
-  unique: true
-  mandatory_parent: "HEAD"
-  # We don't allow any <base href> in ads because amp-mraid injects an invalid
-  # base tag for security, and that only works if there isn't a prior
-  # <base href>.
-  #
-  # We do still allow target, since it's reasonable to want to specify where
-  # urls in ads will open by default.
   attrs: {
     name: "target"
     value_casei: "_blank"
