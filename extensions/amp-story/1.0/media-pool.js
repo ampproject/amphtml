@@ -580,7 +580,8 @@ export class MediaPool {
     const placeholderElId = poolMediaEl[REPLACED_MEDIA_PROPERTY_NAME];
     const placeholderEl = /** @type {!PlaceholderElementDef} */ (
       dev().assertElement(this.placeholderEls_[placeholderElId],
-          `No media element ${placeholderElId} to put back into DOM after eviction.`));
+          `No media element ${placeholderElId} to put back into DOM after` +
+          'eviction.'));
     poolMediaEl[REPLACED_MEDIA_PROPERTY_NAME] = null;
 
     const swapOutOfDom = this.enqueueMediaElementTask_(poolMediaEl,
