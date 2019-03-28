@@ -217,7 +217,7 @@ function assertVariant(variant, experimentName, variantName) {
   userAssert(
       variant['weight'] !== undefined &&
     typeof variant['weight'] === 'number',
-      `${experimentName}.variants.${variantName} must have a weight.`);
+      `${experimentName}.variants.${variantName} must have a number weight.`);
 
   // Assert the variant weight is a percentage
   const percentage = variant['weight'];
