@@ -140,7 +140,7 @@ export function allocateVariant(ampdoc, experimentName, experimentObject) {
 function validateExperiment(experimentName, experimentObject) {
   const variants = experimentObject['variants'];
   userAssert(isObject(variants) && Object.keys(variants).length > 0,
-      'Missing variants from experiment.');
+      'Missing variants object from experiment.');
   if (experimentObject['group']) {
     assertName(experimentObject['group']);
   }

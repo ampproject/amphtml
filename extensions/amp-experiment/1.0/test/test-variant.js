@@ -87,6 +87,10 @@ describes.sandboxed('allocateVariant', {}, env => {
     }).to.throw(/Missing variants/); });
 
     allowConsoleError(() => { expect(() => {
+      allocateVariant(ampdoc, 'name', {variants: 52});
+    }).to.throw(/Missing variants/); });
+
+    allowConsoleError(() => { expect(() => {
       allocateVariant(ampdoc, 'name', {variants: {}});
     }).to.throw(/Missing variants/); });
 
@@ -179,6 +183,31 @@ describes.sandboxed('allocateVariant', {}, env => {
         },
       });
     }).to.throw(/Invalid name/); });
+  });
+
+  it('should check that mutations exist', () => {
+    allowConsoleError(() => { expect(() => {
+      allocateVariant(ampdoc, 'name', {
+        variants: {
+          'variant_1': {
+            weight: 50
+          },
+        },
+      });
+    }).to.throw(/mutations array/); });
+  });
+
+  it('should check that has at least one mutation', () => {
+    allowConsoleError(() => { expect(() => {
+      allocateVariant(ampdoc, 'name', {
+        variants: {
+          'variant_1': {
+            weight: 50,
+            mutations: []
+          },
+        },
+      });
+    }).to.throw(/one mutation/); });
   });
 
   it('should work around float rounding error', () => {
