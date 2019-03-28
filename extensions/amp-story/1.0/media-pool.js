@@ -46,6 +46,12 @@ export const MediaType = {
   VIDEO: 'video',
 };
 
+/** @const @enum {string} */
+const MediaElementOrigin = {
+  PLACEHOLDER: 'placeholder',
+  POOL: 'pool',
+};
+
 /**
  * A marker type to indicate an element that originated in the document that is
  * being swapped for an element from the pool.
@@ -101,6 +107,12 @@ const POOL_MEDIA_ELEMENT_PROPERTY_NAME = '__AMP_MEDIA_POOL_ID__';
  * @const {string}
  */
 const ELEMENT_TASK_QUEUE_PROPERTY_NAME = '__AMP_MEDIA_ELEMENT_TASKS__';
+
+
+/**
+ * @const {string}
+ */
+const MEDIA_ELEMENT_ORIGIN_PROPERTY_NAME = '__AMP_MEDIA_ELEMENT_ORIGIN__';
 
 
 /**
@@ -271,6 +283,7 @@ export class MediaPool {
             (i == 1 ? mediaElSeed : mediaElSeed.cloneNode(/* deep */ true));
         const sources = this.getDefaultSource_(type);
         mediaEl.id = POOL_ELEMENT_ID_PREFIX + poolIdCounter++;
+        mediaEl[MEDIA_ELEMENT_ORIGIN_PROPERTY_NAME] = MediaElementOrigin.POOL;
         this.enqueueMediaElementTask_(mediaEl,
             new UpdateSourcesTask(sources));
         // TODO(newmuis): Check the 'error' field to see if MEDIA_ERR_DECODE
@@ -322,12 +335,13 @@ export class MediaPool {
 
 
   /**
-   * @param {!PoolBoundElementDef|!PlaceholderElementDef} mediaElement
+   * @param {!DomElementDef} mediaElement
    * @return {boolean}
    * @private
    */
   isPoolMediaElement_(mediaElement) {
-    return mediaElement.classList.contains('i-amphtml-pool-media');
+    return mediaElement[MEDIA_ELEMENT_ORIGIN_PROPERTY_NAME] ===
+        MediaElementOrigin.POOL;
   }
 
   /**
@@ -709,6 +723,8 @@ export class MediaPool {
     // Since this is not an existing pool media element, we can be certain that
     // it is a placeholder element.
     const placeholderEl = /** @type {!PlaceholderElementDef} */ (domMediaEl);
+    placeholderEl[MEDIA_ELEMENT_ORIGIN_PROPERTY_NAME] =
+        MediaElementOrigin.PLACEHOLDER;
 
     const id = placeholderEl.id || this.createPlaceholderElementId_();
     if (this.sources_[id] && this.placeholderEls_[id]) {
