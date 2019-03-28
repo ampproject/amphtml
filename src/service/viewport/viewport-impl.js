@@ -856,7 +856,7 @@ export class Viewport {
     const {documentElement} = win.document;
 
     this.vsync_.mutate(() => {
-      setStyle(documentElement, 'margin-right', 0);
+      setStyle(documentElement, 'margin-right', '');
       this.binding_.resetScroll();
     });
   }
