@@ -121,11 +121,8 @@ async function e2e() {
 
     // end task
     if (failures) {
-      process.exit(1);
       return rejecter();
     }
-
-    process.exit();
     return resolver();
   });
 
