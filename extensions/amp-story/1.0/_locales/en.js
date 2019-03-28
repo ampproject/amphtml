@@ -95,6 +95,12 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
     description: 'Label indicating that users can navigate to the previous ' +
         'page, in the amp-story hint UI.',
   },
+  [LocalizedStringId.AMP_STORY_SHARING_PAGE_LABEL]: {
+    string: 'Share starting from this page',
+    description: 'Checkbox label when the branching experiment is turned on ' +
+        ' and the story is in landscape mode; checking the checkbox lets the ' +
+        'user share the story from the current page.',
+  },
   [LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT]: {
     string: 'Could not copy link to clipboard :(',
     description: 'String shown in a failure message to inform the user that ' +
