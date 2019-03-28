@@ -24,9 +24,9 @@ export class AmpStoryRenderService {
    */
   constructor(ampdoc) {
     /**
-     * @private {!Element}
+     * @private {!../../../src/service/ampdoc-impl.AmpDoc}
      */
-    this.ampdoc_ = ampdoc; //ampdoc.getRootNode());
+    this.ampdoc_ = ampdoc;
   }
 
   /**
