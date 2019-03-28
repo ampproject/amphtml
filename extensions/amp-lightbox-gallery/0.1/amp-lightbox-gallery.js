@@ -1483,6 +1483,14 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     gestures.cleanup();
 
     return this.mutateElement(() => {
+      // If we do not have a vertical scrollbar taking width, immediately
+      // leave lightbox mode so that the user can scroll the page. This makes
+      // things feel much more responsive. When we have a vertical scrollbar,
+      // taking width we do not leave lightbox mode here as it will cause jank
+      // at the start of the animation. On browsers with non-overlaying
+      // scrollbars, this is still consistent, as they cannot scroll during
+      // the animation if it has  a width, or if it does not (i.e. there is no
+      // overflow to scroll).
       if (!this.hasVerticalScrollbarWidth_) {
         this.getViewport().leaveLightboxMode();
       }
@@ -1496,6 +1504,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       this.clearDescOverflowState_();
     }).then(() => this.exit_())
         .then(() => {
+          // Leave lightbox mode now that it will not affect the animation.
           if (this.hasVerticalScrollbarWidth_) {
             this.getViewport().leaveLightboxMode();
           }
