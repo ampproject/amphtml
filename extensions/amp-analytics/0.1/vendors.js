@@ -45,6 +45,7 @@ import {GOOGLEADWORDS_CONFIG} from './vendors/googleadwords';
 import {GTAG_CONFIG} from './vendors/gtag';
 import {GOOGLEANALYTICS_CONFIG} from './vendors/googleanalytics';
 import {KEEN_CONFIG} from './vendors/keen';
+import {KENSHOO_CONFIG} from './vendors/kenshoo';
 import {KRUX_CONFIG} from './vendors/krux';
 import {IPLABEL_CONFIG} from './vendors/iplabel';
 import {LOTAME_CONFIG} from './vendors/lotame';
@@ -202,6 +203,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
   'infonline': INFONLINE_CONFIG,
   'iplabel': IPLABEL_CONFIG,
   'keen': KEEN_CONFIG,
+  'kenshoo': KENSHOO_CONFIG,
   'krux': KRUX_CONFIG,
   'linkpulse': LINKPULSE_CONFIG,
   'lotame': LOTAME_CONFIG,
