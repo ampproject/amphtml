@@ -107,11 +107,11 @@ describes.sandboxed('allocateVariant', {}, env => {
         variants: {
           'variant_1': {
             weight: 51,
-            mutations: [{}]
+            mutations: [{}],
           },
           'variant_2': {
             weight: 51,
-            mutations: [{}]
+            mutations: [{}],
           },
         },
       });
@@ -122,7 +122,7 @@ describes.sandboxed('allocateVariant', {}, env => {
         variants: {
           'negative_percentage': {
             weight: -1,
-            mutations: [{}]
+            mutations: [{}],
           },
         },
       });
@@ -133,7 +133,7 @@ describes.sandboxed('allocateVariant', {}, env => {
         variants: {
           'too_big_percentage': {
             weight: 101,
-            mutations: [{}]
+            mutations: [{}],
           },
         },
       });
@@ -144,7 +144,7 @@ describes.sandboxed('allocateVariant', {}, env => {
         variants: {
           'non_number_percentage': {
             weight: '50',
-            mutations: [{}]
+            mutations: [{}],
           },
         },
       });
@@ -155,7 +155,7 @@ describes.sandboxed('allocateVariant', {}, env => {
         variants: {
           'variant_1': {
             weight: 50,
-            mutations: [{}]
+            mutations: [{}],
           },
         },
       });
@@ -166,7 +166,7 @@ describes.sandboxed('allocateVariant', {}, env => {
         variants: {
           'variant_1': {
             weight: 50,
-            mutations: [{}]
+            mutations: [{}],
           },
         },
       });
@@ -178,7 +178,7 @@ describes.sandboxed('allocateVariant', {}, env => {
         variants: {
           'variant_1': {
             weight: 50,
-            mutations: [{}]
+            mutations: [{}],
           },
         },
       });
@@ -190,7 +190,7 @@ describes.sandboxed('allocateVariant', {}, env => {
       allocateVariant(ampdoc, 'name', {
         variants: {
           'variant_1': {
-            weight: 50
+            weight: 50,
           },
         },
       });
@@ -203,7 +203,7 @@ describes.sandboxed('allocateVariant', {}, env => {
         variants: {
           'variant_1': {
             weight: 50,
-            mutations: []
+            mutations: [],
           },
         },
       });
@@ -216,19 +216,19 @@ describes.sandboxed('allocateVariant', {}, env => {
         variants: {
           'a': {
             weight: 50.1,
-            mutations: [{}]
+            mutations: [{}],
           },
           'b': {
             weight: 40.3,
-            mutations: [{}]
+            mutations: [{}],
           },
           'c': {
             weight: 9.2,
-            mutations: [{}]
+            mutations: [{}],
           },
           'd': {
             weight: 0.4,
-            mutations: [{}]
+            mutations: [{}],
           },
           // They add up to 100.00000000000001​​​ in JS
         },
@@ -242,12 +242,12 @@ describes.sandboxed('allocateVariant', {}, env => {
       variants: {
         '-Variant_1': {
           weight: 56.1,
-          mutations: [{}]
+          mutations: [{}],
         },
         '-Variant_2': {
           weight: 23.3,
-          mutations: [{}]
-        }
+          mutations: [{}],
+        },
       },
     })).to.eventually.equal('-Variant_2');
   });
@@ -258,12 +258,12 @@ describes.sandboxed('allocateVariant', {}, env => {
       variants: {
         '-Variant_2': {
           weight: 50,
-          mutations: [{}]
+          mutations: [{}],
         },
         '-Variant_1': {
           weight: 50,
-          mutations: [{}]
-        }
+          mutations: [{}],
+        },
       },
     })).to.eventually.equal('-Variant_2');
   });
@@ -274,15 +274,15 @@ describes.sandboxed('allocateVariant', {}, env => {
       variants: {
         '-Variant_1': {
           weight: 2.1,
-          mutations: [{}]
+          mutations: [{}],
         },
         '-Variant_2': {
           weight: 23.3,
-          mutations: [{}]
+          mutations: [{}],
         },
         '-Variant_3': {
           weight: 20.123,
-          mutations: [{}]
+          mutations: [{}],
         },
       },
     })).to.eventually.equal(null);
@@ -295,11 +295,11 @@ describes.sandboxed('allocateVariant', {}, env => {
       variants: {
         '-Variant_1': {
           weight: 50,
-          mutations: [{}]
+          mutations: [{}],
         },
         '-Variant_2': {
           weight: 50,
-          mutations: [{}]
+          mutations: [{}],
         },
       },
     })).to.eventually.equal('-Variant_1');
@@ -312,11 +312,11 @@ describes.sandboxed('allocateVariant', {}, env => {
       variants: {
         '-Variant_1': {
           weight: 50,
-          mutations: [{}]
+          mutations: [{}],
         },
         '-Variant_2': {
           weight: 50,
-          mutations: [{}]
+          mutations: [{}],
         },
       },
     })).to.eventually.equal('-Variant_2');
@@ -332,11 +332,11 @@ describes.sandboxed('allocateVariant', {}, env => {
       variants: {
         '-Variant_1': {
           weight: 50,
-          mutations: [{}]
+          mutations: [{}],
         },
         '-Variant_2': {
           weight: 50,
-          mutations: [{}]
+          mutations: [{}],
         },
       },
     })).to.eventually.equal('-Variant_1');
@@ -353,11 +353,11 @@ describes.sandboxed('allocateVariant', {}, env => {
       variants: {
         '-Variant_1': {
           weight: 50,
-          mutations: [{}]
+          mutations: [{}],
         },
         '-Variant_2': {
           weight: 50,
-          mutations: [{}]
+          mutations: [{}],
         },
       },
     })).to.eventually.equal('-Variant_1');
@@ -374,11 +374,11 @@ describes.sandboxed('allocateVariant', {}, env => {
       variants: {
         '-Variant_1': {
           weight: 50,
-          mutations: [{}]
+          mutations: [{}],
         },
         '-Variant_2': {
           weight: 50,
-          mutations: [{}]
+          mutations: [{}],
         },
       },
     })).to.eventually.equal('-Variant_1');
@@ -402,11 +402,11 @@ describes.sandboxed('allocateVariant', {}, env => {
       variants: {
         '-Variant_1': {
           weight: 50,
-          mutations: [{}]
+          mutations: [{}],
         },
         '-Variant_2': {
           weight: 50,
-          mutations: [{}]
+          mutations: [{}],
         },
       },
     })).to.eventually.equal('-Variant_1');
@@ -421,11 +421,11 @@ describes.sandboxed('allocateVariant', {}, env => {
       variants: {
         '-Variant_1': {
           weight: 50,
-          mutations: [{}]
+          mutations: [{}],
         },
         '-Variant_2': {
           weight: 50,
-          mutations: [{}]
+          mutations: [{}],
         },
       },
     })).to.eventually.be.rejectedWith('Notification not found: notif-1');
@@ -446,11 +446,11 @@ describes.sandboxed('allocateVariant', {}, env => {
       variants: {
         '-Variant_1': {
           weight: 50,
-          mutations: [{}]
+          mutations: [{}],
         },
         '-Variant_2': {
           weight: 50,
-          mutations: [{}]
+          mutations: [{}],
         },
       },
     })).to.eventually.equal(null);

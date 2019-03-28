@@ -50,7 +50,7 @@ export class AmpExperiment extends AMP.BaseElement {
             /** @private @const {!Promise<!Object<string, ?string>>} */
             const experimentVariants = Promise.all(variants)
                 .then(() => results)
-              .then(this.applyExperimentVariants_.bind(this, config));
+                .then(this.applyExperimentVariants_.bind(this, config));
 
             variantsService.init(experimentVariants);
           } catch (e) {

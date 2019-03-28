@@ -17,8 +17,6 @@
 import * as variant from '../variant';
 import {AmpExperiment} from '../amp-experiment';
 import {Services} from '../../../../src/services';
-import {hasOwn} from '../../../../src/utils/object';
-
 
 describes.realWin('amp-experiment', {
   amp: {
@@ -31,11 +29,11 @@ describes.realWin('amp-experiment', {
       variants: {
         'variant-a': {
           weight: 50,
-          mutations: [{}]
+          mutations: [{}],
         },
         'variant-b': {
           weight: 50,
-          mutations: [{}]
+          mutations: [{}],
         },
       },
     },
@@ -43,11 +41,11 @@ describes.realWin('amp-experiment', {
       variants: {
         'variant-c': {
           weight: 50,
-          mutations: [{}]
+          mutations: [{}],
         },
         'variant-d': {
           weight: 50,
-          mutations: [{}]
+          mutations: [{}],
         },
       },
     },
@@ -55,7 +53,7 @@ describes.realWin('amp-experiment', {
       variants: {
         'variant-e': {
           weight: 1,
-          mutations: [{}]
+          mutations: [{}],
         },
       },
     },
@@ -79,15 +77,6 @@ describes.realWin('amp-experiment', {
     child.setAttribute('type', opt_type || 'application/json');
     child.textContent = opt_textContent || JSON.stringify(config);
     experiment.element.appendChild(child);
-  }
-
-  function expectBodyHasAttributes(attributes) {
-    for (const attributeName in attributes) {
-      if (hasOwn(attributes, attributeName)) {
-        expect(doc.body.getAttribute(attributeName))
-            .to.equal(attributes[attributeName]);
-      }
-    }
   }
 
   it('should not throw on valid config', () => {
@@ -147,7 +136,7 @@ describes.realWin('amp-experiment', {
     stub.withArgs(ampdoc, 'experiment-2', config['experiment-2'])
         .returns(Promise.resolve('variant-d'));
     stub.withArgs(ampdoc, 'experiment-3', config['experiment-3'])
-      .returns(Promise.resolve(null));
+        .returns(Promise.resolve(null));
 
     const applySpy = sandbox.spy(experiment, 'applyMutations_');
 
