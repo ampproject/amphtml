@@ -85,7 +85,7 @@ export function allocateVariant(ampdoc, experimentName, experimentObject) {
   // Variant can be overridden from URL fragment.
   const viewer = Services.viewerForDoc(ampdoc);
   const override = viewer.getParam(ATTR_PREFIX + experimentName);
-  if (override && hasOwn(config['variants'], override)) {
+  if (override && hasOwn(experimentObject['variants'], override)) {
     return Promise.resolve(/** @type {?string} */ (override));
   }
 
@@ -98,10 +98,11 @@ export function allocateVariant(ampdoc, experimentName, experimentObject) {
     const element = ampdoc.getHeadNode();
     hasConsentPromise = Services.userNotificationManagerForDoc(element)
         .then(manager => manager.getNotification(
-          experimentObject['consentNotificationId']))
+            experimentObject['consentNotificationId']))
         .then(userNotification => {
           userAssert(userNotification,
-            `Notification not found: ${experimentObject['consentNotificationId']}`);
+              'Notification not found: ' +
+            `${experimentObject['consentNotificationId']}`);
           return userNotification.isDismissed();
         });
   }
@@ -216,27 +217,27 @@ function assertVariant(variant, experimentName, variantName) {
   userAssert(
       variant['weight'] !== undefined &&
     typeof variant['weight'] === 'number',
-    `${experimentName}.variants.${variantName} must have a weight.`);
+      `${experimentName}.variants.${variantName} must have a weight.`);
 
   // Assert the variant weight is a percentage
   const percentage = variant['weight'];
   userAssert(
-    percentage > 0 && percentage < 100,
-    'Invalid weight percentage %s.'
+      percentage > 0 && percentage < 100,
+      'Invalid weight percentage %s.'
     + ` ${experimentName}.variants.${variantName}` +
     ' Has to be greater than 0 and less than 100',
-    percentage);
+      percentage);
 
 
   // Assert the variant mutations
   userAssert(
       variant['mutations'] && isArray(variant['mutations']),
-    `${experimentName}.variants.${variantName} must have a mutations array.`);
+      `${experimentName}.variants.${variantName} must have a mutations array.`);
 
   // Assert the variant has mutations
   userAssert(
-    variant['mutations'].length > 0,
-    `${experimentName}.variants.${variantName} mutations`
+      variant['mutations'].length > 0,
+      `${experimentName}.variants.${variantName} mutations`
     + ' must have at least one mutation.');
 }
 

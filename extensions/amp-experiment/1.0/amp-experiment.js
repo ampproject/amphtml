@@ -96,7 +96,7 @@ export class AmpExperiment extends AMP.BaseElement {
    * to apply the experiment to the document.
    * Experiment with no variant assigned (null) will be skipped.
    * @param {!JsonObject} config
-   * @param {!Object<string, ?string>} experimentResults
+   * @param {!Object<string, ?string>} experimentToVariant
    * @return {!Promise<!Object<string, ?string>>} a promise of the original
    *     param passed in
    * @private
