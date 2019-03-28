@@ -160,6 +160,8 @@ describes.realWin('media-pool', {}, env => {
         arrayOrderDistanceFn(elements));
 
     elements.forEach(element => mediaPool.register(element));
+
+    // Call play() to ensure it doesn't throw.
     elements.forEach(element => mediaPool.play(element));
   });
 });
