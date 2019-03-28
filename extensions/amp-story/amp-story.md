@@ -1430,12 +1430,15 @@ The following example shows a story with a quiz experience. The first page acts 
                 <button on="tap:story.goToPage(id=boba-answer)"> Boba! </button>
                 <button on="tap:story.goToPage(id=pizza-answer)"> Pizza! </button>
             </amp-story-page>
+
             <amp-story-page id="bacon-answer">
                 <p> Bacon, of course! </p>
             </amp-story-page>
+
             <amp-story-page id="boba-answer">
                 <p> Boba, because it's a perfect drink! </p>
             </amp-story-page>
+
             <amp-story-page id="pizza-answer">
                 <p> Pizza, it's a true classic! </p>
             </amp-story-page>
@@ -1473,15 +1476,19 @@ The following is a modification of the previous [story with a quiz experience](#
                 <button on="tap:story.goToPage(id=boba-answer)"> Boba! </button>
                 <button on="tap:story.goToPage(id=pizza-answer)"> Pizza! </button>
             </amp-story-page>
+
             <amp-story-page id="bacon-answer">
                 <p> Bacon, of course! </p>
             </amp-story-page>
+
             <amp-story-page id="boba-answer">
                 <p> Boba, because it's a perfect drink! </p>
             </amp-story-page>
+
             <amp-story-page id="pizza-answer">
                 <p> Pizza, it's a true classic! </p>
             </amp-story-page>
+
             <amp-story-page id="fallback-answer">
                 <p> It looks like you like something else. You're very unique! </p>
             </amp-story-page>
@@ -1521,15 +1528,18 @@ The following is a modification of the previous [story with a quiz experience](#
                         <li><a href="https://www.amp.dev"> External Link </a></li>
                     </ul>
              </amp-sidebar>
+
             <amp-story-page id="cover" advance-to="fallback-answer">
                 <p> What is your favourite food? </p>
                 <button on="tap:story.goToPage(id=bacon-answer)"> Bacon! </button>
                 <button on="tap:story.goToPage(id=boba-answer)"> Boba! </button>
                 <button on="tap:story.goToPage(id=pizza-answer)"> Pizza! </button>
             </amp-story-page>
+
             <amp-story-page id="bacon-answer">
                 <p> Bacon, of course! </p>
             </amp-story-page>
+
             <amp-story-page id="boba-answer">
                 <p> Boba, because it's a perfect drink! </p>
             </amp-story-page>
