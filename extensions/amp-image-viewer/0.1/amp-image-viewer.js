@@ -171,14 +171,22 @@ export class AmpImageViewer extends AMP.BaseElement {
     if (isScaled) {
       return Promise.resolve();
     }
+    // Check to see if have an image that we created already. This is necessary
+    // as we hide the original amp-img, so it will never finish layout again
+    // after the first time we do layout. This ends up preventing Safari from
+    // re-opening a lightbox gallery. This does not affect Chrome as the
+    // image viewer does not seem to unlayout there. This may be related to the
+    // fixed layer logic.
+    // TODO(sparhami, cathyxz) Refactor image viewer once auto sizes lands to
+    // use the amp-img as-is, which means we can simplify this logic to just
+    // wait for the layout signal.
     const ampImg = dev().assertElement(this.sourceAmpImage_);
-    const isLaidOut = ampImg.hasAttribute('i-amphtml-layout') ||
-      ampImg.classList.contains('i-amphtml-layout');
-    const laidOutPromise = isLaidOut
+    const haveImg = !!this.image_;
+    const laidOutPromise = haveImg
       ? Promise.resolve()
       : ampImg.signals().whenSignal(CommonSignals.LOAD_END);
 
-    if (!isLaidOut) {
+    if (!haveImg) {
       this.scheduleLayout(ampImg);
     }
 
