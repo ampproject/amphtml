@@ -1431,7 +1431,7 @@ The following example shows a story with a quiz experience. The first page acts 
                 <button on="tap:story.goToPage(id=pizza-answer)"> Pizza! </button>
             </amp-story-page>
             <amp-story-page id="bacon-answer">
-                <p>  Bacon, of course! </p>
+                <p> Bacon, of course! </p>
             </amp-story-page>
             <amp-story-page id="boba-answer">
                 <p> Boba, because it's a perfect drink! </p>
@@ -1457,7 +1457,7 @@ The `advance-to` attribute allows you to specify what page should follow a given
 <tbody>
 <tr>
 <td>advance-to</td>
-<td>Specifies what page should follow when the user andvances next. The id of the page that should follow is required.</td>
+<td>Specifies what page should follow when the user advances next. The id of the page that should follow is required.</td>
 </tr>
 </tbody>
 </table>
@@ -1474,7 +1474,7 @@ The following is a modification of the previous [story with a quiz experience](#
                 <button on="tap:story.goToPage(id=pizza-answer)"> Pizza! </button>
             </amp-story-page>
             <amp-story-page id="bacon-answer">
-                <p>  Bacon, of course! </p>
+                <p> Bacon, of course! </p>
             </amp-story-page>
             <amp-story-page id="boba-answer">
                 <p> Boba, because it's a perfect drink! </p>
@@ -1499,7 +1499,7 @@ With branching, AMP Stories now supports URLs in the form of:
 ```
 https://www.mydomain.com/good-story/#page=<page-id>
 ```
-where page-id refers to the unique id of a story page. You can also use the fragment parameter and the page-id value as like an anchor link. See [Intergretion with Sidebar for Stories](#integrationwithsidebarforstories) for an example.
+where `page-id` refers to the unique id of an `amp-story-page`. You can also use the fragment parameter and the `page-id` value like an anchor link (using the absolute URL like the one that users copy when sharing a story is not necessary). See [Integration with Sidebar for Stories](#integrationwithsidebarforstories) for an example.
 ### Sharing a Specific Story Page
 With branching turned on, users will have the option to share the story from the page the currently seeing.
 
@@ -1508,7 +1508,7 @@ The use of `amp-sidebar` is supported for use within `amp-story`. See the [Sideb
 
 By combining both branching features and `amp-sidebar`, we can create stories that have a table of contents. In order to do this, we make use of the `goToPage` action and URL fragment parameter.
 
-The following is a modification of the previous [story with a quiz experience](#quiz-example). We add a `amp-sidebar` that has in it both a table of contents and outlinks to other links of interest. Note how there are many ways to link to pages within the story. All methods are equally valid.
+The following is a modification of the previous [story with a quiz experience](#quiz-example). We add an `amp-sidebar` that has in it both a table of contents and out-links to other links of interest. Note how there are many ways to link to pages within the story. All methods are equally valid.
 
 ```
 ... <body>
@@ -1518,7 +1518,7 @@ The following is a modification of the previous [story with a quiz experience](#
                         <li on="tap:story.goToPage(id=cover)"> Cover Page </li>
                         <li> <a href="#page=bacon-answer"> Bacon page </a></li>
                         <li> <a href="https://www.currentdomain.com/food-story/#page=boba-answer"> Boba Page </a></li>
-                        <li><a href="https://www.ampproject.org"> External Link </a></li>
+                        <li><a href="https://www.amp.dev"> External Link </a></li>
                     </ul>
              </amp-sidebar>
             <amp-story-page id="cover" advance-to="fallback-answer">
@@ -1528,7 +1528,7 @@ The following is a modification of the previous [story with a quiz experience](#
                 <button on="tap:story.goToPage(id=pizza-answer)"> Pizza! </button>
             </amp-story-page>
             <amp-story-page id="bacon-answer">
-                <p>  Bacon, of course! </p>
+                <p> Bacon, of course! </p>
             </amp-story-page>
             <amp-story-page id="boba-answer">
                 <p> Boba, because it's a perfect drink! </p>
