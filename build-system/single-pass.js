@@ -103,6 +103,7 @@ exports.getFlags = function(config) {
     language_out: config.language_out || 'ES5',
     module_output_path_prefix: config.writeTo || 'out/',
     module_resolution: 'NODE',
+    dependency_mode: 'LOOSE',
     externs: config.externs,
     define: config.define,
     // Turn off warning for "Unknown @define" since we use define to pass
