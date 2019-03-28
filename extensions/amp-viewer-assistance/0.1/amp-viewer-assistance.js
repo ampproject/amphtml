@@ -28,6 +28,13 @@ const TAG = 'amp-viewer-assistance';
 /** @const {string} */
 const GSI_TOKEN_PROVIDER = 'actions-on-google-gsi';
 
+/** @const {Array<string>} */
+const ACTION_STATUS_WHITELIST = [
+  'ACTIVE_ACTION_STATUS',
+  'FAILED_ACTION_STATUS',
+  'COMPLETED_ACTION_STATUS',
+];
+
 export class AmpViewerAssistance {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
@@ -70,7 +77,8 @@ export class AmpViewerAssistance {
    */
   actionHandler_(invocation) {
     const {method, args} = invocation;
-    if (method == 'updateActionState' && !!args) {
+    if (method == 'updateActionState' && args
+        && this.isValidActionStatusArgs_(args)) {
       this.viewer_./*OK*/sendMessageAwaitResponse(method, args).catch(error => {
         user().error(TAG, error.toString());
       });
@@ -148,6 +156,32 @@ export class AmpViewerAssistance {
     });
   }
 
+
+  /**
+   * Checks the 'actionStatus' field of the updateActionState arguments against
+   * a whitelist.
+   * @private
+   * @param {!Object} args
+   * @return {boolean}
+   */
+  isValidActionStatusArgs_(args) {
+    const update = args['update'];
+    if (!update || !update['actionStatus']) {
+      user().error(TAG, 'Invalid arguments for updateActionState! Must have' +
+          ' an "update" object with an "actionStatus" field.');
+      return false;
+    }
+
+    if (!ACTION_STATUS_WHITELIST.includes(update['actionStatus'])) {
+      user().error(TAG, 'Invalid actionStatus for updateActionState! '
+          + update['actionStatus']);
+      return false;
+    }
+
+    user().info(TAG, 'Sending actionStatus: ' + update['actionStatus']);
+    return true;
+  }
+
   /**
    * Toggles the CSS classes related to the status of the identity token.
    * @private
@@ -178,7 +212,6 @@ export class AmpViewerAssistance {
     this.vsync_.mutate(() => {
       this.getRootElement_().classList.toggle(className, on);
     });
-
   }
 }
 
