@@ -268,9 +268,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     /** @private {?Element} */
     this.sourceElement_ = null;
 
-    /** @private {boolean} */
-    this.hasScrollbarWidth_ = false;
-
     /**
      * A listener is set up to prevent carousel scrolling when we do a swipe to
      * dismiss gesture. This is used to clean up the listener when no longer
@@ -278,6 +275,11 @@ export class AmpLightboxGallery extends AMP.BaseElement {
      * @private {?function()}
      */
     this.preventCarouselScrollUnlistener_ = null;
+
+    /**
+     * @private {boolean}
+     */
+    this.hasVerticalScrollbarWidth_ = false;
   }
 
   /** @override */
@@ -1069,43 +1071,34 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     const lightboxGroupId = element.getAttribute('lightbox')
       || 'default';
     this.currentLightboxGroupId_ = lightboxGroupId;
-    this.hasScrollbarWidth_ = this.getViewport()
-        .getVerticalScrollbarWidth() > 0;
+    this.hasVerticalScrollbarWidth_ = this.getViewport().getVerticalScrollbarWidth() > 0;
 
-    return this.findOrInitializeLightbox_(lightboxGroupId)
-        .then(() => {
-        // Enter lightbox mode first so that any vertical scrollbar is removed.
-        // This allows us to measure the correct size for elements that will be
-        // in the lightbox. It also makes sure the user cannot scroll the page
-        // by accident during the transition.
-          this.getViewport().enterLightboxMode();
-        })
-        .then(() => {
-          return this.mutateElement(() => {
-            toggle(this.element, true);
-            setStyle(this.element, 'opacity', 0);
-            this.controlsContainer_.classList.remove('i-amphtml-lbg-fade-in');
-            this.controlsContainer_.classList.add('i-amphtml-lbg-hidden');
-          });
-        }).then(() => {
-          this.isActive_ = true;
+    return this.findOrInitializeLightbox_(lightboxGroupId).then(() => {
+      return this.mutateElement(() => {
+        toggle(this.element, true);
+        setStyle(this.element, 'opacity', 0);
+        this.controlsContainer_.classList.remove('i-amphtml-lbg-fade-in');
+        this.controlsContainer_.classList.add('i-amphtml-lbg-hidden');
+        this.getViewport().enterLightboxMode();
+      });
+    }).then(() => {
+      this.isActive_ = true;
 
-          this.updateInViewport(dev().assertElement(this.container_), true);
-          this.scheduleLayout(dev().assertElement(this.container_));
+      this.updateInViewport(dev().assertElement(this.container_), true);
+      this.scheduleLayout(dev().assertElement(this.container_));
 
-          this.doc_.documentElement.addEventListener(
-              'keydown', this.boundOnKeyDown_);
+      this.doc_.documentElement.addEventListener(
+          'keydown', this.boundOnKeyDown_);
 
-          this.carousel_.addEventListener(
-              'slideChange', event => this.slideChangeHandler_(event)
-          );
+      this.carousel_.addEventListener(
+          'slideChange', event => this.slideChangeHandler_(event)
+      );
 
-          this.setupGestures_();
-          this.setupEventListeners_();
+      this.setupGestures_();
+      this.setupEventListeners_();
 
-          return this.carousel_.signals().whenSignal(CommonSignals.LOAD_END);
-        })
-        .then(() => this.openLightboxForElement_(element))
+      return this.carousel_.signals().whenSignal(CommonSignals.LOAD_END);
+    }).then(() => this.openLightboxForElement_(element))
         .then(() => {
           setStyle(this.element, 'opacity', '');
           this.showControls_();
@@ -1487,30 +1480,21 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     const gestures = Gestures.get(dev().assertElement(this.carousel_));
     gestures.cleanup();
 
-    return Promise.resolve()
-        .then(() => {
-          // If we do not have a scrollbar, exit now so that the user can
-          // scroll during the exit animation. If we do have one, we need to
-          // wait so that the animation plays correctly.
-          if (!this.hasScrollbarWidth_) {
-            this.getViewport().leaveLightboxMode();
-          }
-        })
-        .then(() => {
-          return this.mutateElement(() => {
-            // If there's gallery, set gallery to display none
-            this.container_.removeAttribute('gallery-view');
+    return this.mutateElement(() => {
+      if (!this.hasVerticalScrollbarWidth_) {
+        this.getViewport().leaveLightboxMode();
+      }
+      // If there's gallery, set gallery to display none
+      this.container_.removeAttribute('gallery-view');
 
-            if (this.gallery_) {
-              this.gallery_.classList.add('i-amphtml-ghost');
-              this.gallery_ = null;
-            }
-            this.clearDescOverflowState_();
-          });
-        })
-        .then(() => this.exit_())
+      if (this.gallery_) {
+        this.gallery_.classList.add('i-amphtml-ghost');
+        this.gallery_ = null;
+      }
+      this.clearDescOverflowState_();
+    }).then(() => this.exit_())
         .then(() => {
-          if (this.hasScrollbarWidth_) {
+          if (this.hasVerticalScrollbarWidth_) {
             this.getViewport().leaveLightboxMode();
           }
           this.schedulePause(dev().assertElement(this.container_));
