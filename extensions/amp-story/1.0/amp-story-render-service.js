@@ -15,6 +15,7 @@
  */
 
 import {CommonSignals} from '../../../src/common-signals';
+import {whenUpgradedToCustomElement} from '../../../src/dom';
 
 /** @implements {../../../src/render-delaying-services.RenderDelayingService} */
 export class AmpStoryRenderService {
@@ -41,7 +42,8 @@ export class AmpStoryRenderService {
         return;
       }
 
-      return storyEl.signals().whenSignal(CommonSignals.LOAD_END);
+      return whenUpgradedToCustomElement(storyEl).signals()
+          .whenSignal(CommonSignals.LOAD_END);
     });
   }
 }
