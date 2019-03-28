@@ -21,6 +21,8 @@ FAIL
 |    <meta charset="utf-8">
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
 |    <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-0.1.js"></script>
+>>   ^~~~~~~~~
+amp-story/0.1/test/validator-amp-story-cta-layer-error.html:22:2 The extension 'amp-story' is referenced at version '0.1' which is a deprecated version. Please use a more recent version of this extension. This may become an error in the future. (see https://www.ampproject.org/docs/reference/components/amp-story) [DEPRECATION]
 |    <title>My Story</title>
 |    <meta name="description" content="Get started with amp-story">
 |    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">

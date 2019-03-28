@@ -22,6 +22,7 @@ tags: {  # amp-story
     version: "0.1"
     version: "1.0"
     version: "latest"
+    deprecated_version: "0.1"
   }
   attr_lists: "common-extension-attrs"
 }
