@@ -128,8 +128,8 @@ class AmpAddThis extends AMP.BaseElement {
     /** @private {string} */
     this.widgetType_ = '';
 
-    /** @private {string} */
-    this.mode_ = '';
+    /** @private {number} */
+    this.mode_ = -1;
 
     /** @private {string} */
     this.containerClassName_ = '';
