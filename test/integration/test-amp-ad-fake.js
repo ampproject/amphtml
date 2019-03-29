@@ -80,8 +80,7 @@ describe('A4A', function() {
       </amp-ad>
       `,
   }, env => {
-    // TODO(choumx, #21618): This test times out.
-    it.skip('p[text]', function*() {
+    it('p[text]', function*() {
       // Wait for the amp-ad to construct its child iframe.
       const ad = env.win.document.getElementById('i-amphtml-demo-id');
       yield poll('amp-ad > iframe', () => ad.querySelector('iframe'));
