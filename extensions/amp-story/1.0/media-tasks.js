@@ -143,8 +143,9 @@ function copyAttributes(fromEl, toEl) {
 export class MediaTask {
   /**
    * @param {string} name
+   * @param {!Object=} options
    */
-  constructor(name) {
+  constructor(name, options = {}) {
     /** @private @const {string} */
     this.name_ = name;
 
@@ -152,6 +153,9 @@ export class MediaTask {
 
     /** @private @const {!Promise} */
     this.completionPromise_ = deferred.promise;
+
+    /** @protected @const {!Object} */
+    this.options = options;
 
     /** @private {?function()} */
     this.resolve_ = deferred.resolve;
@@ -300,19 +304,19 @@ export class MuteTask extends MediaTask {
 
 
 /**
- * Seeks the specified media element to the beginning.
+ * Seeks the specified media element to the provided time, in seconds.
  */
-export class RewindTask extends MediaTask {
+export class SetCurrentTimeTask extends MediaTask {
   /**
-   * @public
+   * @param {!Object=} options
    */
-  constructor() {
-    super('rewind');
+  constructor(options = {currentTime: 0}) {
+    super('setCurrentTime', options);
   }
 
   /** @override */
   executeInternal(mediaEl) {
-    mediaEl.currentTime = 0;
+    mediaEl.currentTime = this.options.currentTime;
     return Promise.resolve();
   }
 }

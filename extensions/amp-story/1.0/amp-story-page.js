@@ -721,8 +721,10 @@ export class AmpStoryPage extends AMP.BaseElement {
           const timeStart =
               mediaEl[PLAY_AUDIO_ELEMENT_FROM_TIMESTAMP_PROPERTY_NAME];
           let currentTime = (Date.now() - timeStart) / 1000;
-          mediaEl.duration && (currentTime = currentTime % mediaEl.duration);
-          mediaEl.currentTime = currentTime;
+          if (mediaEl.duration) {
+            currentTime = currentTime % mediaEl.duration;
+          }
+          promises.push(mediaPool.setCurrentTime(mediaEl, currentTime));
           promises.push(mediaPool.play(mediaEl));
         }
 

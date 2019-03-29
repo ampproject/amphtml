@@ -22,7 +22,7 @@ import {
   MuteTask,
   PauseTask,
   PlayTask,
-  RewindTask,
+  SetCurrentTimeTask,
   SwapIntoDomTask,
   SwapOutOfDomTask,
   UnmuteTask,
@@ -812,7 +812,7 @@ export class MediaPool {
           if (rewindToBeginning) {
             this.enqueueMediaElementTask_(
                 /** @type {!PoolBoundElementDef} */ (poolMediaEl),
-                new RewindTask());
+                new SetCurrentTimeTask());
           }
         });
   }
@@ -825,6 +825,18 @@ export class MediaPool {
    *     specified media element has been successfully rewound.
    */
   rewindToBeginning(domMediaEl) {
+    return this.setCurrentTime(domMediaEl, 0 /** currentTime */);
+  }
+
+
+  /**
+   * Sets currentTime for a specified media element in the DOM.
+   * @param {!DomElementDef} domMediaEl The media element.
+   * @param {number} currentTime The time to seek to, in seconds.
+   * @return {!Promise} A promise that is resolved when the
+   *     specified media element has been successfully set to the given time.
+   */
+  setCurrentTime(domMediaEl, currentTime) {
     const mediaType = this.getMediaType_(domMediaEl);
     const poolMediaEl =
         this.getMatchingMediaElementFromPool_(mediaType, domMediaEl);
@@ -833,7 +845,8 @@ export class MediaPool {
       return Promise.resolve();
     }
 
-    return this.enqueueMediaElementTask_(poolMediaEl, new RewindTask());
+    return this.enqueueMediaElementTask_(
+        poolMediaEl, new SetCurrentTimeTask({currentTime}));
   }
 
 
