@@ -1780,15 +1780,6 @@ export class AmpA4A extends AMP.BaseElement {
   isVerifiedAmpCreative() {
     return this.isVerifiedAmpCreative_;
   }
-
-  /**
-   * Whether AMP sticky-ad should use the load-end signal from the creative
-   * to trigger showing the sticky-ad container.
-   * @return {boolean}
-   */
-  ignoreLoadEndSignalForAmpStickyAd() {
-    return false;
-  }
 }
 
 /**
