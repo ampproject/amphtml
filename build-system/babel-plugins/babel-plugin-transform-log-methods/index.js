@@ -89,9 +89,8 @@ function getErrorMap() {
  * Retrieves the error map from the json file.
  */
 function writeErrorMap(obj) {
-  const json = JSON.stringify(obj);
-  console.log(json);
-  return JSON.parse(fs.writeFileSync(logMessagesPath), json);
+  const json = JSON.stringify(obj, null, 2);
+  fs.writeFileSync(logMessagesPath, json);
 }
 
 function getHexId(message) {
@@ -106,10 +105,10 @@ function getHexId(message) {
   } else {
     hexId = convertFromBase10ToBase16(Object.keys(errorMap).length + 1);
     errorMap[message] = hexId;
-    console.log('i am in AAAA', hexId);
+    console.log('i am in AAAA', errorMap);
     writeErrorMap(errorMap);
-    console.log('i am in BBBB', hexId);
   }
+  return hexId;
 }
 
 
@@ -159,9 +158,10 @@ module.exports = function(babel) {
         // Construct a String Literal from the argument. This is because
         // There could be other Nodes like Template Literals, Binary
         // Expressions, Method calls etc.
+        console.log('message?', messageArg, ':', otherArgs);
         const message = buildMessage(messageArg, otherArgs);
 
-        let hexId = getHexId();
+        let hexId = getHexId(message);
 
         const newArgs = path.node.arguments.slice(0, metadata.startPos);
         const interpolateArgs = path.node.arguments
@@ -210,5 +210,5 @@ function buildMessage(node, otherNodes) {
   }
 
   otherNodes.push(node);
-  return '%';
+  return '%s';
 }
