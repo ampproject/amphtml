@@ -84,7 +84,6 @@ export let ElementDistanceFnDef;
  */
 let ElementTaskDef;
 
-
 /**
  * @const {string}
  */
