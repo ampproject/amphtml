@@ -52,7 +52,8 @@ export class SubscriptionPlatform {
   reset() {}
 
   /**
-   * set true is this platform can fetch entitlement safely in pre-render
+   * True if this platform can fetch entitlement safely in pre-render
+   * without leaking information to the publisher or a 3rd party
    * @return {boolean}
    */
   isPrerenderSafe() {}
