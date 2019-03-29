@@ -72,13 +72,13 @@ Example:
 <table>
   <tr>
     <td width="40%"><strong>filter [required]</strong></td>
-    <td>The filtering mechanism applied to source data to produce filtered results for user input. In all cases the filtered results will be displayed in array order of data retrieved. If filtering is being done (filter != none), it is done client side. The following are supported values:
+    <td>The filtering mechanism applied to source data to produce filtered results for user input. In all cases the filtered results will be displayed in array order of data retrieved. If filtering is being done (<code>filter != none</code>), it is done client side. The following are supported values:
     <ul>
       <li><strong>substring</strong>: if the user input is a substring of an item, then the item is suggested</li>
       <li><strong>prefix</strong>: if the user input is a prefix of an item, then the item gets suggested</li>
       <li><strong>token-prefix</strong>: if the user input is a prefix of any word in a multi-worded item, then the item gets suggested; example “je” is a token-prefix in “blue jeans”</li>
       <li><strong>fuzzy</strong>: typos in the input field can result in partial match items appearing in the filtered results—need further research</li>
-      <li><strong>none</strong>: no client-side rendering; a provided server endpoint will be queried for results</li>
+      <li><strong>none</strong>: no client-side filter; renders retrieved data based on bound <code>[src]</code> attribute; truncates to <code>max-entries</code> attribute if provided</li>
       <li><strong>custom</strong>: a conditional statement involving an item and a user input to be applied to each item such that evaluating to true implies the item gets suggested; using this filter requires including <code>amp-bind</code> if <code>filter==custom</code>, an additional attribute <code>filter-expr</code> is required to specify a boolean expression by which to perform the custom filter.</li>
     </td>
   </tr>

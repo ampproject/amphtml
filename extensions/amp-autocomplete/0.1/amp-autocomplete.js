@@ -385,9 +385,15 @@ export class AmpAutocomplete extends AMP.BaseElement {
    * @private
    */
   filterData_(data, input) {
+    // Server-side filtering.
+    if (this.filter_ === FilterType.NONE) {
+      return this.truncateToMaxEntries_(data);
+    }
+
+    // Client-side filtering.
     input = input.toLowerCase();
     const itemsExpr = this.element.getAttribute('filter-value') || 'value';
-    let filteredData = data.filter(item => {
+    const filteredData = data.filter(item => {
       if (typeof item === 'object') {
         item = getValueForExpr(/** @type {!JsonObject} */(item), itemsExpr);
       }
@@ -407,20 +413,25 @@ export class AmpAutocomplete extends AMP.BaseElement {
           throw new Error(`Filter not yet supported: ${this.filter_}`);
         case FilterType.CUSTOM:
           throw new Error(`Filter not yet supported: ${this.filter_}`);
-        case FilterType.NONE:
-          // Query server endpoint.
-          throw new Error(`Filter not yet supported: ${this.filter_}`);
         default:
           throw new Error(`Unexpected filter: ${this.filter_}`);
       }
     });
 
-    // Truncate to max-entries.
-    if (this.maxEntries_ && this.maxEntries_ < filteredData.length) {
-      filteredData = filteredData.slice(0, this.maxEntries_);
-    }
+    return this.truncateToMaxEntries_(filteredData);
+  }
 
-    return filteredData;
+  /**
+   * Truncate the given data to a maximum length of the max-entries attribute.
+   * @param {!Array<!JsonObject|string>} data
+   * @return {!Array<!JsonObject|string>}
+   * @private
+   */
+  truncateToMaxEntries_(data) {
+    if (this.maxEntries_ && this.maxEntries_ < data.length) {
+      data = data.slice(0, this.maxEntries_);
+    }
+    return data;
   }
 
   /**
