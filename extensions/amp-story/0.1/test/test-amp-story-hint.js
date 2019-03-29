@@ -45,8 +45,7 @@ describes.fakeWin('amp-story hint layer', {}, env => {
     expect(getHintContainerFromHost(host)).to.be.null;
   });
 
-  // TODO(@newmuis, #21618): Fails in AmpStoryHint.showHint_.
-  it.skip('should be able to show navigation help overlay', () => {
+  it('should be able to show navigation help overlay', () => {
     const hideAfterTimeoutStub =
         sandbox.stub(ampStoryHint, 'hideAfterTimeout').callsFake(NOOP);
 
@@ -60,8 +59,7 @@ describes.fakeWin('amp-story hint layer', {}, env => {
     expect(hideAfterTimeoutStub).to.be.calledOnce;
   });
 
-  // TODO(@newmuis, #21618): Fails in AmpStoryHint.showHint_.
-  it.skip('should be able to show no previous page help overlay', () => {
+  it('should be able to show no previous page help overlay', () => {
     const hideAfterTimeoutStub =
         sandbox.stub(ampStoryHint, 'hideAfterTimeout').callsFake(NOOP);
 
@@ -75,8 +73,7 @@ describes.fakeWin('amp-story hint layer', {}, env => {
     expect(hideAfterTimeoutStub).to.be.calledOnce;
   });
 
-  // TODO(@newmuis, #21618): Fails in AmpStoryHint.showHint_.
-  it.skip('should be able to hide shown hint', () => {
+  it('should be able to hide shown hint', () => {
     ampStoryHint.showNavigationOverlay();
     ampStoryHint.hideAllNavigationHint();
 
