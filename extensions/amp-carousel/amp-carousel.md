@@ -92,7 +92,7 @@ In the following example, we have a carousel of three images with preview button
 <table>
   <tr>
     <td width="40%"><strong>type</strong></td>
-    <td>Specifies the display type for the carousel items, which can be:</p>
+    <td>Specifies the display type for the carousel items, which can be:
 <ul>
   <li>**`carousel`** (default): All slides are shown and are scrollable horizontally. This type supports only the following layouts: `fixed`, `fixed-height`, and `nodisplay`.</li>
   <li>**`slides`**: Shows a single slide at a time. This type supports the following layouts: `fill`, `fixed`, `fixed-height`, `flex-item`, `nodisplay`, and `responsive`.</li>
