@@ -179,6 +179,12 @@ export class LocalSubscriptionPlatform {
   }
 
   /** @override */
+  isPrerenderSafe() {
+    // Local platform can never be allowed to prerender in a viewer
+    false;
+  }
+
+  /** @override */
   getEntitlements() {
     return this.urlBuilder_.buildUrl(this.authorizationUrl_,
         /* useAuthData */ false)

@@ -216,6 +216,11 @@ export class GoogleSubscriptionsPlatform {
   }
 
   /** @override */
+  isPrerenderSafe() {
+    return true;
+  }
+
+  /** @override */
   getEntitlements() {
     return this.runtime_.getEntitlements().then(swgEntitlements => {
       // Get and store the isReadyToPay signal which is independent of
