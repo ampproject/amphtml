@@ -266,6 +266,28 @@ describes.realWin('consent-ui', {
         'consentString': 'test',
       }));
     });
+
+    it('should pass the promptTrigger to the iframe', function* () {
+      const config = dict({
+        'promptUISrc': 'https//promptUISrc',
+        'clientConfig': {
+          'test': 'ABC',
+        },
+      });
+      consentUI = new ConsentUI(mockInstance, config);
+      consentUI.show('test-prompt-trigger');
+      yield macroTask();
+
+      expect(consentUI.ui_.getAttribute('name')).to.deep.equal(JSON.stringify({
+        'clientConfig': {
+          'test': 'ABC',
+        },
+        'consentState': 'accepted',
+        'consentString': 'test',
+        'promptTrigger': 'test-prompt-trigger'
+      }));
+    });
+
   });
 
   describe('overlay', () => {
