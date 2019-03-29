@@ -223,7 +223,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     /** @private {boolean} */
     this.isCurrentAdLoaded_ = false;
 
-    /** @private {Object<string, string>} */
+    /** @private {Object<string, Object>} */
     this.config_ = {};
 
     /** @private {Object<number, *>} */
@@ -499,7 +499,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       'amp-story': '',
     };
 
-    const configAttrs = {'ad-attributes': this.config_['ad-attributes']};
+    const configAttrs = this.config_['ad-attributes'];
 
     for (const attr in configAttrs) {
       const value = configAttrs[attr];

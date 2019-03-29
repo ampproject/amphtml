@@ -77,7 +77,7 @@ export class AmpFormTextarea {
     this.doc_ = (root.ownerDocument || root);
 
     /** @private @const */
-    this.win_ = devAssert(this.doc_.defaultView);
+    this.win_ = /** @type {!Window} */ (devAssert(this.doc_.defaultView));
 
     /** @private @const */
     this.viewport_ = Services.viewportForDoc(ampdoc);
@@ -114,7 +114,7 @@ export class AmpFormTextarea {
       cachedTextareaElements = root.querySelectorAll('textarea');
     }));
     const throttledResize = throttle(
-        /** @type {!Window} */ (this.win_), e => {
+        this.win_, e => {
           if (e.relayoutAll) {
             resizeTextareaElements(cachedTextareaElements);
           }

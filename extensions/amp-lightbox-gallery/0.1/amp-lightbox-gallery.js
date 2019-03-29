@@ -197,7 +197,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     this.useBaseCarousel_ =
         isExperimentOn(this.win, 'amp-lightbox-gallery-base-carousel');
 
-    /** @private {Document} */
+    /** @private {!Document} */
     this.doc_ = this.win.document;
 
     /** @private {boolean} */
@@ -384,7 +384,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       const clonedNode = this.cloneLightboxableElement_(element);
       const descText = this.manager_.getDescription(element);
       const metadata = {
-        descriptionText: /** @type {string} */ (descText),
+        descriptionText: descText,
         tagName: /** @type {string} */ (clonedNode.tagName),
         sourceElement: element,
         element: dev().assertElement(clonedNode),
@@ -458,13 +458,13 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       return this.manager_.getElementsForLightboxGroup(lightboxGroupId);
     }).then(list => {
       this.carousel_ = this.useBaseCarousel_ ?
-        htmlFor(/** @type {!Document} */ (this.doc_))`
+        htmlFor(this.doc_)`
           <amp-base-carousel type="slides" layout="fill" loop="true">
             <div slot="prev-arrow"></div>
             <div slot="next-arrow"></div>
           </amp-base-carousel>
         ` :
-        htmlFor(/** @type {!Document} */ (this.doc_))`
+        htmlFor(this.doc_)`
           <amp-carousel type="slides" layout="fill" loop="true"></amp-carousel>
         `;
       this.carousel_.setAttribute('amp-lightbox-group', lightboxGroupId);
@@ -509,7 +509,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @private
    */
   buildDescriptionBox_() {
-    this.descriptionBox_ = htmlFor(/** @type {!Document} */ (this.doc_))`
+    this.descriptionBox_ = htmlFor(this.doc_)`
       <div class="i-amphtml-lbg-desc-box i-amphtml-lbg-standard">
         <div class="i-amphtml-lbg-desc-text"></div>
         <div class="i-amphtml-lbg-desc-mask"></div>
@@ -847,15 +847,15 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     const duration = finalDistance * SWIPE_TO_CLOSE_SNAP_BACK_TIME_FACTOR;
 
     return this.mutateElement(() => {
-      setStyles(dev().assertElement(devAssert(this.carousel_)), {
+      setStyles(dev().assertElement(this.carousel_), {
         transform: '',
         transition: `${duration}ms transform ease-out`,
       });
-      setStyles(dev().assertElement(devAssert(this.mask_)), {
+      setStyles(dev().assertElement(this.mask_), {
         opacity: '',
         transition: `${duration}ms opacity ease-out`,
       });
-      setStyles(dev().assertElement(devAssert(this.controlsContainer_)), {
+      setStyles(dev().assertElement(this.controlsContainer_), {
         opacity: '',
         transition: `${duration}ms opacity ease-out`,
       });
@@ -882,7 +882,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       transform: carouselTransform,
       transition: '',
     });
-    setStyles(dev().assertElement(devAssert(this.mask_)), {
+    setStyles(dev().assertElement(this.mask_), {
       opacity: maskOpacity,
       transition: '',
     });
@@ -946,7 +946,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     // We do not want the user dragging around to make the carousel think that
     // a scroll happened.
     this.preventCarouselScrollUnlistener_ = listen(
-        dev().assertElement(devAssert(this.carousel_)),
+        dev().assertElement(this.carousel_),
         'scroll', event => {
           event.stopPropagation();
         }, {
@@ -1363,7 +1363,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
 
     return this.mutateElement(() => {
       if (fadeIn) {
-        toggle(dev().assertElement(devAssert(this.carousel_)), true);
+        toggle(dev().assertElement(this.carousel_), true);
         toggle(this.element, true);
       }
 
@@ -1384,7 +1384,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
           });
 
           if (!fadeIn) {
-            toggle(dev().assertElement(devAssert(this.carousel_)), false);
+            toggle(dev().assertElement(this.carousel_), false);
             toggle(this.element, false);
           }
         });

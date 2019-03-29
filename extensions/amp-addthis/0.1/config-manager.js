@@ -281,7 +281,7 @@ ConfigManager.PubIdData; // purely for typedef
  *   productCode:string,
  *   shareConfig:(Object<string,string>|undefined),
  *   iframe: Element,
- *   atConfig: Object,
+ *   atConfig: JsonObject,
  *   containerClassName: string
  * }}
  */

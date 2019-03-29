@@ -1072,7 +1072,7 @@ export class AmpForm {
               rendered.id = messageId;
               rendered.setAttribute('i-amphtml-rendered', '');
               return this.resources_.mutateElement(
-                  dev().assertElement(devAssert(container)),
+                  dev().assertElement(container),
                   () => {
                     container.appendChild(rendered);
                     const renderedEvent = createCustomEvent(

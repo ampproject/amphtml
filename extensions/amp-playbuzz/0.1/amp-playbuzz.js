@@ -198,7 +198,7 @@ class AmpPlaybuzz extends AMP.BaseElement {
     return this.iframePromise_ = this.loadPromise(iframe).then(function() {
       this.iframeLoaded_ = true;
       this.attemptChangeHeight(
-          /** @type {number} */ (this.itemHeight_)).catch(() => {/* die */ });
+        dev().assertNumber(this.itemHeight_)).catch(() => {/* die */ });
 
       const unlisten = this.getViewport().onChanged(
           this.sendScrollDataToItem_.bind(this));
