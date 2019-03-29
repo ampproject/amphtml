@@ -74,7 +74,7 @@ describes.realWin('media-pool', {}, env => {
     return element => {
       const index = elements.indexOf(element);
       if (index < 0) {
-        return 9999;
+        return Infinity;
       }
 
       return index;
