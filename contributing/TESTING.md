@@ -120,6 +120,7 @@ Command                                                                 | Descri
 `gulp e2e --testnames`                                                  | Lists the name of each test being run, and prints a summary at the end.
 `gulp e2e --engine=ENGINE`                                              | Runs end-to-end tests with the given Web Driver engine. Allowed values are `puppeteer` and `selenium`.
 `gulp e2e --headless`                                                   | Runs end-to-end tests in a headless browser instance.
+`gulp e2e --watch`                                                      | Watches for changes in test files, runs tests.
 
 ## Manual testing
 
