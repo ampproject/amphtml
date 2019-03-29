@@ -163,7 +163,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       this.linkerManager_ = null;
     }
 
-    for (const i in this.requests_.keys()) {
+    for (const i in this.requests_) {
       this.requests_[i].dispose();
       delete this.requests_[i];
     }

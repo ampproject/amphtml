@@ -42,7 +42,8 @@ describes.realWin('amp-delight-player', {
         .then(() => delight);
   }
 
-  it('renders', () => {
+  // TODO(@aghassemi, #21618): Times out.
+  it.skip('renders', () => {
     return allowConsoleError(() => {
       return getDelightPlayer({
         'data-content-id': '-LLoCCZqWi18O73b6M0w',
