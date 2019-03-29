@@ -425,7 +425,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
         .on('error', function(err) {
           const {message} = err;
           console./*OK*/error(colors.red(
-              'Compiler issues for ' + outputFilename + ':\n') +
+              'Compilation failed for ' + outputFilename + ':\n') +
               formatClosureCompilerError(message));
           process.exit(1);
         });
