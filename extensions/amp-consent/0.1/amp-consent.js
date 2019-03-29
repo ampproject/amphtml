@@ -274,11 +274,12 @@ export class AmpConsent extends AMP.BaseElement {
 
   /**
    * Returns a promise that attempt to show prompt UI
-   * @param {string} promptTrigger
+   * @param {string=} opt_promptTrigger
    */
-  scheduleDisplay_(promptTrigger) {
-    if (promptTrigger && !isEnumValue(PROMPT_TRIGGER, promptTrigger)) {
-      // Unrecognized promptTrigger
+  scheduleDisplay_(opt_promptTrigger) {
+    if (opt_promptTrigger && !isEnumValue(PROMPT_TRIGGER, opt_promptTrigger)) {
+      // Unrecognized opt_promptTrigger
+      dev().error(TAG, 'Unrecognized PROMPT_TRIGGER');
       return;
     }
 
@@ -302,24 +303,24 @@ export class AmpConsent extends AMP.BaseElement {
 
     this.consentUIPending_ = true;
     this.notificationUiManager_.registerUI(
-        this.show_.bind(this, promptTrigger)
+        this.show_.bind(this, opt_promptTrigger)
     );
   }
 
   /**
    * Show prompt UI
    * Do not invoke the function except in scheduleDisplay_
-   * @param {string} promptTrigger
+   * @param {string=} opt_promptTrigger
    * @return {!Promise}
    */
-  show_(promptTrigger) {
+  show_(opt_promptTrigger) {
     if (this.isPromptUIOn_) {
       dev().error(TAG,
           'Attempt to show an already displayed prompt UI');
     }
 
     this.vsync_.mutate(() => {
-      this.consentUI_.show(promptTrigger);
+      this.consentUI_.show(opt_promptTrigger);
       this.isPromptUIOn_ = true;
     });
 

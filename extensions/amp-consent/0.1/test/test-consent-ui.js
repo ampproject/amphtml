@@ -267,7 +267,7 @@ describes.realWin('consent-ui', {
       }));
     });
 
-    it('should pass the promptTrigger to the iframe', function* () {
+    it('should pass the opt_promptTrigger to the iframe', function* () {
       const config = dict({
         'promptUISrc': 'https//promptUISrc',
         'clientConfig': {
