@@ -437,8 +437,7 @@ message ExtensionSpec {
   optional ExtensionUsageRequirement requires_usage = 7 [default = ERROR];
 
   // Deprecated fields, do not reuse.
-  // reserved 4;
-  // reserved 5;
+  // reserved 4, 5;
 }
 
 // The HtmlFormat is the declared format in the top-level html tag, which
