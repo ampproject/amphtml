@@ -108,7 +108,6 @@ export class MraidInitializer {
         this.handleMismatch_();
       }
     });
-    const head = document.getElementsByTagName('head').item(0);
     head.appendChild(mraidJs);
   }
 
