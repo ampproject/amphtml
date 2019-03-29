@@ -281,7 +281,7 @@ export class AmpDateDisplay extends AMP.BaseElement {
    */
   rendered_(element) {
     this.mutateElement(() => {
-      removeChildren(dev().assertElement(devAssert(this.container_)));
+      removeChildren(dev().assertElement(this.container_));
       this.container_.appendChild(element);
 
       const event = createCustomEvent(

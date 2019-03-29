@@ -79,7 +79,7 @@ class AmpBeOpinion extends AMP.BaseElement {
       // else keep placeholder displayed since there's no fallback
     }, /* opt_is3P */true);
     this.element.appendChild(iframe);
-    this.iframe_ = /** @type {HTMLIFrameElement} */ (iframe);
+    this.iframe_ = iframe;
     return this.loadPromise(iframe);
   }
 

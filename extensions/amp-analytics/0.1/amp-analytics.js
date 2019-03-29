@@ -78,7 +78,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     this.requests_ = {};
 
     /**
-     * @private {JsonObject}
+     * @private {!JsonObject}
      */
     this.config_ = dict();
 
@@ -163,9 +163,9 @@ export class AmpAnalytics extends AMP.BaseElement {
       this.linkerManager_ = null;
     }
 
-    for (const i in this.requests_) {
-      this.requests_[i].dispose();
-      delete this.requests_[i];
+    for (const request in this.requests_) {
+      this.requests_[request].dispose();
+      delete this.requests_[request];
     }
   }
 
@@ -492,7 +492,7 @@ export class AmpAnalytics extends AMP.BaseElement {
   initializeLinker_() {
     const type = this.element.getAttribute('type');
     this.linkerManager_ = new LinkerManager(this.getAmpDoc(),
-        /** @type {!JsonObject} */ (this.config_), type, this.element);
+        this.config_, type, this.element);
     this.linkerManager_.init();
   }
 

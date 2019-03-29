@@ -84,7 +84,7 @@ class AmpFacebookPage extends AMP.BaseElement {
     );
     this.toggleLoading(true);
     this.element.appendChild(iframe);
-    this.iframe_ = /** @type {HTMLIFrameElement} */ (iframe);
+    this.iframe_ = iframe;
     return this.loadPromise(iframe);
   }
 

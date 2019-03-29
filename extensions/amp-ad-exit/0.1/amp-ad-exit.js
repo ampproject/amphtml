@@ -104,7 +104,7 @@ export class AmpAdExit extends AMP.BaseElement {
     }
     const substituteVariables =
         this.getUrlVariableRewriter_(
-            args, event, /** @type {!JsonObject} */ (target));
+            args, event, target);
     if (target.trackingUrls) {
       target.trackingUrls.map(substituteVariables)
           .forEach(url => this.pingTrackingUrl_(url));
@@ -131,7 +131,7 @@ export class AmpAdExit extends AMP.BaseElement {
   /**
    * @param {!Object<string, string|number|boolean>} args
    * @param {!../../../src/service/action-impl.ActionEventDef} event
-   * @param {!JsonObject} target
+   * @param {!NavigationTargetDef} target
    * @return {function(string): string}
    */
   getUrlVariableRewriter_(args, event, target) {

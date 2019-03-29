@@ -63,7 +63,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
     /**
      * The reference to the <input> tag provided as a child.
-     * @private {?HTMLElement}
+     * @private {?HTMLInputElement}
      */
     this.inputElement_ = null;
 
@@ -145,7 +145,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     const inputElements = childElementsByTag(this.element, 'INPUT');
     userAssert(inputElements.length === 1,
         `${TAG} should contain exactly one <input> child`);
-    this.inputElement_ = /** @type {HTMLElement} */ (inputElements[0]);
+    this.inputElement_ = /** @type {HTMLInputElement} */ (inputElements[0]);
 
     if (this.templates_.hasTemplate(
         this.element, 'template, script[template]')) {

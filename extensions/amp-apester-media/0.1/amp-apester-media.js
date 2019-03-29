@@ -94,7 +94,7 @@ class AmpApesterMedia extends AMP.BaseElement {
      * @private {?string}
      */
     this.mediaId_ = null;
-    /** @private {Array<Function>} */
+    /** @private {!Array<Function>} */
     this.unlisteners_ = [];
     /** @private {?IntersectionObserverApi} */
     this.intersectionObserverApi_ = null;
@@ -455,7 +455,7 @@ class AmpApesterMedia extends AMP.BaseElement {
         },
         this.win,
         /** @type {!Element}*/ (this.iframe_),
-        /** @type {!Array} */ (this.unlisteners_)
+        this.unlisteners_
     );
     registerEvent(
         apesterEventNames.REMOVE_FULL_SCREEN,
@@ -467,7 +467,7 @@ class AmpApesterMedia extends AMP.BaseElement {
         },
         this.win,
         /** @type {!Element}*/ (this.iframe_),
-        /** @type {!Array} */ (this.unlisteners_)
+        this.unlisteners_
     );
     registerEvent(
         apesterEventNames.RESIZE_UNIT,
@@ -478,7 +478,7 @@ class AmpApesterMedia extends AMP.BaseElement {
         },
         this.win,
         /** @type {!Element}*/ (this.iframe_),
-        /** @type {!Array} */ (this.unlisteners_)
+        this.unlisteners_
     );
   }
 }

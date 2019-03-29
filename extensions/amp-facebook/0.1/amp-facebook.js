@@ -90,7 +90,7 @@ class AmpFacebook extends AMP.BaseElement {
       this.toggleLoadingCounter_++;
     }
     this.element.appendChild(iframe);
-    this.iframe_ = /** @type {HTMLIFrameElement} */ (iframe);
+    this.iframe_ = iframe;
     return this.loadPromise(iframe);
   }
 

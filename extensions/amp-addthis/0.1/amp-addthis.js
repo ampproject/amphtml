@@ -120,7 +120,7 @@ class AmpAddThis extends AMP.BaseElement {
     /** @private {(?JsonObject<string, string>|null)} */
     this.shareConfig_ = null;
 
-    /** @private {(?Object<string, string>|null)} */
+    /** @private {(?JsonObject<AtConfigDef>)} */
     this.atConfig_ = null;
 
     /** @private {string} */
@@ -201,7 +201,7 @@ class AmpAddThis extends AMP.BaseElement {
               loc,
               title: this.canonicalTitle_,
               pubId: this.pubId_,
-              atConfig: /** @type {?JsonObject} */ (this.atConfig_),
+              atConfig: this.atConfig_,
               referrer,
               ampDoc,
             });

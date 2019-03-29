@@ -66,7 +66,7 @@ export class AmpGist extends AMP.BaseElement {
     }, /* opt_is3P */true);
 
     this.element.appendChild(iframe);
-    this.iframe_ = /** @type {HTMLIFrameElement} */ (iframe);
+    this.iframe_ = iframe;
     return this.loadPromise(iframe);
   }
 

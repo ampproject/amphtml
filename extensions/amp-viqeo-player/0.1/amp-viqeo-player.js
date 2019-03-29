@@ -135,7 +135,7 @@ class AmpViqeoPlayer extends AMP.BaseElement {
 
     return this.mutateElement(() => {
       this.element.appendChild(iframe);
-      this.iframe_ = /** @type {HTMLIFrameElement} */ (iframe);
+      this.iframe_ = iframe;
       this.applyFillContent(iframe);
     }).then(() => {
       return this.playerReadyPromise_;
