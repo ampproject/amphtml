@@ -1389,19 +1389,19 @@ The `<amp-story-bookend>` must have a `src` attribute pointing to the JSON confi
 ```
 ## Experimental Feature: Branching
 
-We’ve implemented additional features to allow for the construction of non-linear stories. By utilizing these features, you can create stories that start from somewhere other than the beginning, share specific pages of stories, or even allow users to jump around within a story.  Example use cases include quizzes, choose-your-own-story experiences, and story table of contents.
+Branching is a set of experimental features that allow the construction of non-linear stories. By utilizing these features, you can create stories that start from somewhere other than the beginning, share specific pages of stories, or even allow users to jump around within a story.  Example use cases include quizzes, choose-your-own-story experiences, and story table of contents.
 
-Note that all branching features are behind an `amp-story-branching` experiment. To turn on the experiment, enable it in your dev console:
+All branching features are behind an `amp-story-branching` experiment. To turn on the experiment, enable it in your dev console:
 
 ``` AMP.toggleExperiment('amp-story-branching') ```
 
 For more information see, [experimental features](https://amp.dev/documentation/guides-and-tutorials/learn/experimental.html?format=stories).
 
 ## Manipulating Navigation
-The features listed below allow you to manipulate navigation within a story. Note that when using branching features, navigation throughout the story from a 'branch-off point' will follow the path that a user takes. That is, if a user navigates from page-1 to page-5 and then page-6, navigating backwards will follow this exact path (page-6 to page-5 and finally page-1). The other pages will not be exposed to the user.
+The features listed below allow you to manipulate navigation within a story. When using branching features, navigation throughout the story from a 'branch-off point' will follow the path that a user takes. That is, if a user navigates from page-1 to page-5 and then page-6, navigating backwards will follow this exact path (page-6 to page-5 and finally page-1). The other pages will not be exposed to the user.
 
-### The `goToPage` Action
-A new `goToPage` action allows for 'jumping' from one page within a story to another. The action can be used with allowed elements in `amp-story` and their respective events. Clicking on an element with this action should bring the user to another page within the same story. Using this action **requires** that you give the `amp-story` element an id, a unique identifier, as the story itself is the target.  Read more about actions and events in AMP [here](https://amp.dev/documentation/guides-and-tutorials/learn/amp-actions-and-events.html?format=stories).
+### `goToPage` action
+The `goToPage` action allows for 'jumping' from one page within a story to another. The action can be used with allowed elements in `amp-story` and their respective events. Clicking on an element with this action should bring the user to another page within the same story. Using this action **requires** that you give the `amp-story` element an id, a unique identifier, as the story itself is the target.  Read more about actions and events in AMP [here](https://amp.dev/documentation/guides-and-tutorials/learn/amp-actions-and-events.html?format=stories).
 
 
 <table>
@@ -1453,8 +1453,8 @@ The following example shows a story with a quiz experience. The first page acts 
 </amp-story>
 ```
 
-### The `advance-to` Attribute
-The `advance-to` attribute allows you to specify what page should follow a given `amp-story-page` when the user advances through the story. Recall that without branching the next page is by default the next `amp-story-page` in the DOM. This is still the default behavior should you choose not to use this attribute when creating non-linear stories.
+### `advance-to` attribute
+The `advance-to` attribute specifies which page should follow a given `amp-story-page` as the user advances through the story. Without branching, the following page defaults to the next `amp-story-page` in the DOM. This will still be the default behavior if you choose to not specify the advance-to attribute when creating non-linear stories.
 
 <table>
 <thead>
@@ -1510,7 +1510,7 @@ The following is a modification of the previous [story with a quiz experience](#
     ...
 </amp-story>
 ```
-If we had not used the `advance-to` attribute with the specified value and the user chose not to tap on any of the buttons on the first page of the story and advance forward, they would see the `bacon-answer` page.
+If the `advance-to` attribute had not been used with the `fallback-answer` value and the user advanced forward without selecting a choice, the story would have presented the the `bacon-answer` page.
 
 ## Sharing Options
 We've added support for creating and sharing URLs to specific pages within the story.
@@ -1522,12 +1522,12 @@ https://www.mydomain.com/good-story/#page=<page-id>
 ```
 where `page-id` refers to the unique id of an `amp-story-page`. You can also use the fragment parameter and the `page-id` value like an anchor link in some use cases. See [Integration with Sidebar for Stories](#integrationwithsidebarforstories) for an example.
 ### Sharing a Specific Story Page
-With branching turned on, users will have the option to share the story from the page they are currently seeing. If a user selects the option to share from the page they are currently seeing, the URL generated will be in the form described above. Note that the implication is that `amp-story-page` ids may be exposed to the user.
+With branching turned on, users will have the option to share the story from the page they are currently seeing. If a user selects the option to share from the page they are currently seeing, the URL generated will be in the form described above. **Important**, branching may expose the `amp-story-page` ids to the user.
 
 ## Integration with Sidebar for Stories
 The use of `amp-sidebar` is supported for use within `amp-story`. See the [Sidebar for Stories documentation](https://amp.dev/documentation/components/reference/amp-sidebar.html?format=websites#sidebar-for-stories) for information on limitations and caveats.
 
-By combining both branching features and `amp-sidebar`, we can create stories that have a table of contents. In order to do this, we make use of the `goToPage` action and URL fragment parameter.
+By using both branching features and `amp-sidebar`, you can create stories that have a table of contents. To do this, make use of the goToPage action and URL fragment parameter.
 
 The following is a modification of the previous [story with a quiz experience](#quiz-example). We add an `amp-sidebar` that has in it both a table of contents and out-links to other links of interest. While there are two valid ways to link to pages within the story within a sidebar, we recommend using the `goToPage` action.
 
