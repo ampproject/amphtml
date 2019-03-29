@@ -245,7 +245,7 @@ export class SubscriptionService {
     // Prerender safe platforms don't have to wait for the
     // page to become visible, all others wait for whenFirstVisible()
     const visiblePromise = subscriptionPlatform.isPrerenderSafe() ?
-        Promise.resolve() : this.viewer_.whenFirstVisible();
+      Promise.resolve() : this.viewer_.whenFirstVisible();
     return visiblePromise.then(() => {
       return this.timer_.timeoutPromise(
           timeout,
