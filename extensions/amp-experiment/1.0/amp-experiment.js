@@ -95,6 +95,16 @@ export class AmpExperiment extends AMP.BaseElement {
    * Passes the given experiment and variant pairs to the correct handler,
    * to apply the experiment to the document.
    * Experiment with no variant assigned (null) will be skipped.
+   *
+   * For example, the `experimentToVariant` object looks like:
+   * {
+   *   'appliedExperimentName': 'chosenVariantName',
+   *   'anotherAppliedExperimentName': 'chosenVariantName'
+   * }
+   * Which is a simplified version of the config and
+   * represents what variant of each experiment
+   * should be applied.
+   *
    * @param {!JsonObject} config
    * @param {!Object<string, ?string>} experimentToVariant
    * @return {!Promise<!Object<string, ?string>>} a promise of the original
@@ -129,12 +139,13 @@ export class AmpExperiment extends AMP.BaseElement {
    */
   applyMutations_(experimentName, variantObject) {
     const doc = this.getAmpDoc();
-    return doc.whenBodyAvailable().then(body => {
+    return doc.whenBodyAvailable().then(() => {
       // TODO (torch2424): Use a mutation service,
       // and apply mutations
       // Placehodler to pass linting for code review
       // and keep PRs small
-      body.setAttribute(experimentName, JSON.stringify(variantObject));
+      // This is a NOOP
+      variantObject[experimentName] = experimentName;
     });
   }
 }
