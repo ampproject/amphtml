@@ -66,7 +66,7 @@ export class ViewerSubscriptionPlatform {
 
   /** @override */
   isPrerenderSafe() {
-    true;
+    return true;
   }
 
   /** @override */

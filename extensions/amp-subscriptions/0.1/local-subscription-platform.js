@@ -181,7 +181,7 @@ export class LocalSubscriptionPlatform {
   /** @override */
   isPrerenderSafe() {
     // Local platform can never be allowed to prerender in a viewer
-    false;
+    return false;
   }
 
   /** @override */
