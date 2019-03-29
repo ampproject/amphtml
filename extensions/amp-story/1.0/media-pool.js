@@ -46,6 +46,12 @@ export const MediaType = {
   VIDEO: 'video',
 };
 
+/** @const @enum {string} */
+const MediaElementOrigin = {
+  PLACEHOLDER: 'placeholder',
+  POOL: 'pool',
+};
+
 /**
  * A marker type to indicate an element that originated in the document that is
  * being swapped for an element from the pool.
@@ -78,11 +84,16 @@ export let ElementDistanceFnDef;
  */
 let ElementTaskDef;
 
+/**
+ * @const {string}
+ */
+const PLACEHOLDER_ELEMENT_ID_PREFIX = 'i-amphtml-placeholder-media-';
+
 
 /**
  * @const {string}
  */
-const PLACEHOLDER_ELEMENT_ID_PREFIX = 'i-amphtml-media-';
+const POOL_ELEMENT_ID_PREFIX = 'i-amphtml-pool-media-';
 
 
 /**
@@ -95,6 +106,12 @@ const POOL_MEDIA_ELEMENT_PROPERTY_NAME = '__AMP_MEDIA_POOL_ID__';
  * @const {string}
  */
 const ELEMENT_TASK_QUEUE_PROPERTY_NAME = '__AMP_MEDIA_ELEMENT_TASKS__';
+
+
+/**
+ * @const {string}
+ */
+const MEDIA_ELEMENT_ORIGIN_PROPERTY_NAME = '__AMP_MEDIA_ELEMENT_ORIGIN__';
 
 
 /**
@@ -115,9 +132,6 @@ const instances = {};
  * @type {number}
  */
 let nextInstanceId = 0;
-
-
-let elId = 0;
 
 
 /**
@@ -176,10 +190,10 @@ export class MediaPool {
     this.placeholderEls_ = {};
 
     /**
-     * Counter used to produce unique IDs for media elements.
+     * Counter used to produce unique IDs for placeholder media elements.
      * @private {number}
      */
-    this.idCounter_ = 0;
+    this.placeholderIdCounter_ = 0;
 
     /**
      * Whether the media elements in this MediaPool instance have been "blessed"
@@ -239,6 +253,8 @@ export class MediaPool {
    * @private
    */
   initializeMediaPool_(maxCounts) {
+    let poolIdCounter = 0;
+
     this.forEachMediaType_(key => {
       const type = MediaType[key];
       const count = maxCounts[type] || 0;
@@ -265,7 +281,8 @@ export class MediaPool {
             // Use seed element at end of set to prevent wasting it.
             (i == 1 ? mediaElSeed : mediaElSeed.cloneNode(/* deep */ true));
         const sources = this.getDefaultSource_(type);
-        mediaEl.setAttribute('pool-element', elId++);
+        mediaEl.id = POOL_ELEMENT_ID_PREFIX + poolIdCounter++;
+        mediaEl[MEDIA_ELEMENT_ORIGIN_PROPERTY_NAME] = MediaElementOrigin.POOL;
         this.enqueueMediaElementTask_(mediaEl,
             new UpdateSourcesTask(sources));
         // TODO(newmuis): Check the 'error' field to see if MEDIA_ERR_DECODE
@@ -312,7 +329,18 @@ export class MediaPool {
    * @private
    */
   createPlaceholderElementId_() {
-    return PLACEHOLDER_ELEMENT_ID_PREFIX + this.idCounter_++;
+    return PLACEHOLDER_ELEMENT_ID_PREFIX + this.placeholderIdCounter_++;
+  }
+
+
+  /**
+   * @param {!DomElementDef} mediaElement
+   * @return {boolean}
+   * @private
+   */
+  isPoolMediaElement_(mediaElement) {
+    return mediaElement[MEDIA_ELEMENT_ORIGIN_PROPERTY_NAME] ===
+        MediaElementOrigin.POOL;
   }
 
   /**
@@ -565,7 +593,8 @@ export class MediaPool {
     const placeholderElId = poolMediaEl[REPLACED_MEDIA_PROPERTY_NAME];
     const placeholderEl = /** @type {!PlaceholderElementDef} */ (
       dev().assertElement(this.placeholderEls_[placeholderElId],
-          'No media element to put back into DOM after eviction.'));
+          `No media element ${placeholderElId} to put back into DOM after` +
+          'eviction.'));
     poolMediaEl[REPLACED_MEDIA_PROPERTY_NAME] = null;
 
     const swapOutOfDom = this.enqueueMediaElementTask_(poolMediaEl,
@@ -680,14 +709,12 @@ export class MediaPool {
    *     successfully registered, or rejected otherwise.
    */
   register(domMediaEl) {
-    const mediaType = this.getMediaType_(domMediaEl);
-
     const parent = domMediaEl.parentNode;
-    if (parent.signals) {
+    if (parent && parent.signals) {
       this.trackAmpElementToBless_(/** @type {!AmpElement} */ (parent));
     }
 
-    if (this.isAllocatedMediaElement_(mediaType, domMediaEl)) {
+    if (this.isPoolMediaElement_(domMediaEl)) {
       // This media element originated from the media pool.
       return Promise.resolve();
     }
@@ -695,6 +722,8 @@ export class MediaPool {
     // Since this is not an existing pool media element, we can be certain that
     // it is a placeholder element.
     const placeholderEl = /** @type {!PlaceholderElementDef} */ (domMediaEl);
+    placeholderEl[MEDIA_ELEMENT_ORIGIN_PROPERTY_NAME] =
+        MediaElementOrigin.PLACEHOLDER;
 
     const id = placeholderEl.id || this.createPlaceholderElementId_();
     if (this.sources_[id] && this.placeholderEls_[id]) {
