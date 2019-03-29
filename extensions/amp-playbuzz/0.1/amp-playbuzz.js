@@ -48,11 +48,11 @@ import {
   parseUrlDeprecated,
   removeFragment,
 } from '../../../src/url';
+import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
 import {logo, showMoreArrow} from './images';
 import {removeElement} from '../../../src/dom';
-import {userAssert} from '../../../src/log';
 
 class AmpPlaybuzz extends AMP.BaseElement {
 
@@ -198,7 +198,7 @@ class AmpPlaybuzz extends AMP.BaseElement {
     return this.iframePromise_ = this.loadPromise(iframe).then(function() {
       this.iframeLoaded_ = true;
       this.attemptChangeHeight(
-        dev().assertNumber(this.itemHeight_)).catch(() => {/* die */ });
+          dev().assertNumber(this.itemHeight_)).catch(() => {/* die */ });
 
       const unlisten = this.getViewport().onChanged(
           this.sendScrollDataToItem_.bind(this));
