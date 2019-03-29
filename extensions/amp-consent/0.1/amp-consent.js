@@ -60,7 +60,7 @@ export const ACTION_TYPE = {
 export const PROMPT_TRIGGER = {
   ACTION: 'action',
   FORCE_PROMPT_ON_NEXT: 'force-prompt-on-next',
-}
+};
 
 
 export class AmpConsent extends AMP.BaseElement {
@@ -301,7 +301,9 @@ export class AmpConsent extends AMP.BaseElement {
     }
 
     this.consentUIPending_ = true;
-    this.notificationUiManager_.registerUI(this.show_.bind(this, promptTrigger));
+    this.notificationUiManager_.registerUI(
+        this.show_.bind(this, promptTrigger)
+    );
   }
 
   /**

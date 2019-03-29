@@ -284,7 +284,7 @@ describes.realWin('consent-ui', {
         },
         'consentState': 'accepted',
         'consentString': 'test',
-        'promptTrigger': 'test-prompt-trigger'
+        'promptTrigger': 'test-prompt-trigger',
       }));
     });
 
