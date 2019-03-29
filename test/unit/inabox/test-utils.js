@@ -56,6 +56,9 @@ describes.realWin('inabox-utils', {}, env => {
     env.win.document.createEvent =
        () => ({initCustomEvent: initCustomEventStub});
     env.win.dispatchEvent = dispatchEventStub;
+    env.win.sf_ = {
+      cfg: {uid: 12},
+    };
   });
 
   it('should fire custom event and postMessage', () => {
@@ -71,8 +74,12 @@ describes.realWin('inabox-utils', {}, env => {
       expect(dispatchEventStub).to.be.calledOnce;
       expect(initCustomEventStub)
           .to.be.calledWith('amp-ini-load');
-      expect(parentPostMessageStub)
+      expect(parentPostMessageStub.firstCall)
           .to.be.calledWith('amp-ini-load', '*');
+      const sfMessage = JSON.parse(parentPostMessageStub.secondCall.args[0]);
+      expect(sfMessage['c']).to.equal('sfchannel12');
+      expect(sfMessage['s']).to.equal('creative_geometry_update');
+      expect(JSON.parse(sfMessage['p'])['uid']).to.equal(12);
     });
   });
 

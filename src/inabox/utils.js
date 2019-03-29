@@ -16,6 +16,8 @@
 
 import {Services} from '../services';
 import {createCustomEvent} from '../event-helper.js';
+import {dict} from '../utils/object';
+import {isObject} from '../types';
 import {whenContentIniLoad} from '../friendly-iframe-embed';
 
 /**
@@ -35,6 +37,21 @@ export function registerIniLoadListener(ampdoc) {
             win, 'amp-ini-load', /* detail */ null, {bubbles: true}));
         if (win.parent) {
           win.parent./*OK*/postMessage('amp-ini-load', '*');
+
+          // Fire a safeframe message to report creative size on init as well
+          if (isObject(win.sf_) && isObject(win.sf_.cfg)) {
+            const payload = dict({
+              'uid': win.sf_.cfg.uid,
+              'width': win.document.body.offsetWidth,
+              'height': win.document.body.offsetHeight,
+            });
+            const message = dict({
+              /* CHANNEL */ 'c': 'sfchannel' + win.sf_.cfg.uid,
+              /* SERVICE */ 's': 'creative_geometry_update',
+              /* PAYLOAD */ 'p': JSON.stringify(payload),
+            });
+            win.parent./*OK*/postMessage(JSON.stringify(message), '*');
+          }
         }
       });
 }
