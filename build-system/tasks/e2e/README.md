@@ -182,3 +182,7 @@ Add `repl(/* mochaThis */ this)` to a test to pause execution at that line witho
 ```
 
 In the Node debugger, the `repl` global provides a reference to the test controller at `repl.controller`. To continue a test after using `repl`, call `repl.continue()` which will resolve the Promise returned by the `repl(this)` call and allow execution to continue past the `await`.
+
+### watch mode
+
+Debug tests in `watch` mode with the `--watch` flag. This will allow you to make changes to test files without having to rerun the `gulp e2e` task.
