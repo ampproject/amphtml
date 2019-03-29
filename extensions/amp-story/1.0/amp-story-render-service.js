@@ -45,7 +45,6 @@ export class AmpStoryRenderService {
       return whenUpgradedToCustomElement(storyEl).then(() => {
         return storyEl.signals().whenSignal(CommonSignals.LOAD_END);
       })
-          .whenSignal(CommonSignals.LOAD_END);
     });
   }
 }
