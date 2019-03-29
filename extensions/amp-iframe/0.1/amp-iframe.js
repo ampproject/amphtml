@@ -372,7 +372,7 @@ export class AmpIframe extends AMP.BaseElement {
 
     const iframe = this.element.ownerDocument.createElement('iframe');
 
-    this.iframe_ = /** @type {?HTMLIFrameElement} */ (iframe);
+    this.iframe_ = /** @type {HTMLIFrameElement} */ (iframe);
 
     this.applyFillContent(iframe);
     iframe.name = 'amp_iframe' + count++;

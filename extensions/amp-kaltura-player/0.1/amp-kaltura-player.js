@@ -73,7 +73,7 @@ class AmpKaltura extends AMP.BaseElement {
     iframe.src = src;
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
-    this.iframe_ = /** @type {?HTMLIFrameElement} */ (iframe);
+    this.iframe_ = /** @type {HTMLIFrameElement} */ (iframe);
     return this.loadPromise(iframe);
   }
 

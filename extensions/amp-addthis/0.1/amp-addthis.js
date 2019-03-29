@@ -286,7 +286,7 @@ class AmpAddThis extends AMP.BaseElement {
 
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
-    this.iframe_ = /** @type {?HTMLIFrameElement} */ (iframe);
+    this.iframe_ = /** @type {HTMLIFrameElement} */ (iframe);
 
     configManager.register({
       pubId: this.pubId_,

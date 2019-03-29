@@ -106,7 +106,7 @@ class AmpO2Player extends AMP.BaseElement {
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');
     iframe.src = this.src_;
-    this.iframe_ = /** @type {?HTMLIFrameElement} */ (iframe);
+    this.iframe_ = /** @type {HTMLIFrameElement} */ (iframe);
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
     return this.loadPromise(iframe);

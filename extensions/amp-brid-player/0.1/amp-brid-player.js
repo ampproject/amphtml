@@ -159,7 +159,7 @@ class AmpBridPlayer extends AMP.BaseElement {
   layoutCallback() {
     const iframe = createFrameFor(this, this.getVideoIframeSrc_());
 
-    this.iframe_ = /** @type {?HTMLIFrameElement} */ (iframe);
+    this.iframe_ = /** @type {HTMLIFrameElement} */ (iframe);
 
     this.unlistenMessage_ = listen(
         this.win,
