@@ -78,14 +78,6 @@ import {upgradeBackgroundAudio} from './audio';
 const PAGE_LOADED_CLASS_NAME = 'i-amphtml-story-page-loaded';
 
 /**
- * Property of an audio element we want to play when the story gets unmuted. Its
- * value is a timestamp, set when we first tried to play the story.
- * @const {string}
- */
-const PLAY_AUDIO_ELEMENT_FROM_TIMESTAMP_PROPERTY_NAME =
-    '__AMP_STORY_PLAY_AUDIO_FROM_TIMESTAMP__';
-
-/**
  * Selectors for media elements.
  * Only get the page media: direct children of amp-story-page (ie:
  * background-audio), or descendant of amp-story-grid-layer. That excludes media
@@ -263,6 +255,9 @@ export class AmpStoryPage extends AMP.BaseElement {
      * @private @const {boolean}
      */
     this.isBotUserAgent_ = Services.platformFor(this.win).isBot();
+
+    /** @private {?number} Time at which an audio element failed playing. */
+    this.playAudioElementFromTimestamp_ = null;
   }
 
   /**
@@ -383,6 +378,7 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     this.stopListeningToVideoEvents_();
     this.togglePlayMessage_(false);
+    this.playAudioElementFromTimestamp_ = null;
 
     if (this.storeService_.get(StateProperty.UI_STATE) ===
         UIType.DESKTOP_PANELS) {
@@ -657,8 +653,7 @@ export class AmpStoryPage extends AMP.BaseElement {
           }
 
           if (mediaEl.tagName === 'AUDIO') {
-            mediaEl[PLAY_AUDIO_ELEMENT_FROM_TIMESTAMP_PROPERTY_NAME] =
-                Date.now();
+            this.playAudioElementFromTimestamp_ = Date.now();
           }
         });
       }
@@ -717,15 +712,17 @@ export class AmpStoryPage extends AMP.BaseElement {
         // happen after a user intent, and the media element was not "blessed".
         // On unmute, make sure this audio element is playing, at the expected
         // currentTime.
-        if (mediaEl[PLAY_AUDIO_ELEMENT_FROM_TIMESTAMP_PROPERTY_NAME]) {
-          const timeStart =
-              mediaEl[PLAY_AUDIO_ELEMENT_FROM_TIMESTAMP_PROPERTY_NAME];
-          let currentTime = (Date.now() - timeStart) / 1000;
-          if (mediaEl.duration) {
-            currentTime = currentTime % mediaEl.duration;
+        if (mediaEl.tagName === 'AUDIO' && mediaEl.paused) {
+          const currentTime =
+              (Date.now() - this.playAudioElementFromTimestamp_) / 1000;
+          if (mediaEl.hasAttribute('loop') || currentTime < mediaEl.duration) {
+            promises.push(
+                mediaPool.setCurrentTime(
+                    mediaEl, currentTime % mediaEl.duration));
+            promises.push(mediaPool.play(mediaEl));
           }
-          promises.push(mediaPool.setCurrentTime(mediaEl, currentTime));
-          promises.push(mediaPool.play(mediaEl));
+
+          this.playAudioElementFromTimestamp_ = null;
         }
 
         return Promise.all(promises);

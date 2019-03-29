@@ -812,7 +812,7 @@ export class MediaPool {
           if (rewindToBeginning) {
             this.enqueueMediaElementTask_(
                 /** @type {!PoolBoundElementDef} */ (poolMediaEl),
-                new SetCurrentTimeTask());
+                new SetCurrentTimeTask({currentTime: 0}));
           }
         });
   }
