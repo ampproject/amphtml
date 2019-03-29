@@ -133,6 +133,7 @@ async function e2e() {
       if (failures) {
         rejecter();
       }
+      process.exit();
       resolver();
     });
   }
@@ -152,11 +153,6 @@ async function e2e() {
   }
 
   return deferred;
-}
-
-
-function e2e2(cb) {
-  setTimeout(cb, 5000);
 }
 
 gulp.task('e2e', 'Runs e2e tests', e2e, {
