@@ -46,8 +46,8 @@ If you're making a minor fix and just want to find someone to review/approve you
 (It is acceptable for one person to fulfill both roles.)
 
 After you've found your reviewers:
-- add them as reviewers on your PR to them if you are able to
-- cc them by adding the text "/cc @username" in the PR description/comment
+- add them as reviewers on your PR if you are able to
+- or cc them by adding the text "/cc @username" in the PR description/comment
 
 If the reviewers you find aren't responsive, ping the [#contributing channel](https://amphtml.slack.com/messages/C9HRJ1GPN/) on [Slack](https://bit.ly/amp-slack-signup).  You can also reach out to mrjoro on Slack or cc him on your GitHub issue/PR.
 
