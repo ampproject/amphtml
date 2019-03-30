@@ -48,6 +48,7 @@ import {AmpStoryGridLayer} from './amp-story-grid-layer';
 import {AmpStoryHint} from './amp-story-hint';
 import {AmpStoryPage, NavigationDirection, PageState} from './amp-story-page';
 import {AmpStoryPageAttachment} from './amp-story-page-attachment';
+import {AmpStoryRenderService} from './amp-story-render-service';
 import {AmpStoryVariableService} from './variable-service';
 import {CSS} from '../../../build/amp-story-1.0.css';
 import {CommonSignals} from '../../../src/common-signals';
@@ -499,7 +500,7 @@ export class AmpStory extends AMP.BaseElement {
       return;
     }
 
-    this.vsync_.run({
+    return this.vsync_.runPromise({
       measure: state => {
         state.vh = this.activePage_.element./*OK*/clientHeight / 100;
         state.vw = this.activePage_.element./*OK*/clientWidth / 100;
@@ -2368,4 +2369,5 @@ AMP.extension('amp-story', '1.0', AMP => {
   AMP.registerElement('amp-story-grid-layer', AmpStoryGridLayer);
   AMP.registerElement('amp-story-page', AmpStoryPage);
   AMP.registerElement('amp-story-page-attachment', AmpStoryPageAttachment);
+  AMP.registerServiceForDoc('amp-story-render', AmpStoryRenderService);
 });
