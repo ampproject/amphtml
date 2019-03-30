@@ -20,7 +20,7 @@ import {
   Axis,
   findOverlappingIndex,
   getDimension,
-  getOffsetStart,
+  getScrollPosition,
   scrollContainerToElement,
   setScrollPosition,
   setTransformTranslateStyle,
@@ -288,6 +288,17 @@ export class Carousel {
     this.axis_ = Axis.X;
 
     /**
+     * Whether slides are laid out in the forwards or reverse direction. When
+     * using rtl (right to left), this should be false. This is used to set the
+     * transforms for slides and spacers correctly when the flex direction is
+     * reversed due to a rtl direction. TODO(sparhami) is there some way we
+     * could get this to work without needing to be explicitly told what the
+     * direction is?
+     * @private {boolean}
+     */
+    this.forwards_ = true;
+
+    /**
      * TODO(sparhami) Rename this to `activeIndex`. We do not want to expose
      * this as it changes, only when the user stops scrolling. Also change
      * restingIndex to currentIndex.
@@ -499,6 +510,15 @@ export class Carousel {
   }
 
   /**
+   * @param {boolean} forwards Whether or not the advancement direction is
+   *    forwards (e.g. ltr) or reverse (e.g. rtl).
+   */
+  updateForwards(forwards) {
+    this.forwards_ = forwards;
+    this.updateUi();
+  }
+
+  /**
    * @param {boolean} horizontal Whether the scrollable should lay out
    *    horizontally or vertically.
    */
@@ -688,8 +708,9 @@ export class Carousel {
    * @private
    */
   setElementTransform_(el, revolutions, revolutionLength) {
-    setTransformTranslateStyle(
-        this.axis_, el, revolutions * revolutionLength);
+    const dir = this.forwards_ ? 1 : -1;
+    const delta = revolutions * revolutionLength * dir;
+    setTransformTranslateStyle(this.axis_, el, delta);
     el._revolutions = revolutions;
   }
 
@@ -920,7 +941,7 @@ export class Carousel {
     // event. If we have a programmatic scroll request, we still need to move
     // to that index.
     if (this.restingIndex_ == this.currentIndex_ &&
-        this.requestedIndex_ != null &&
+        this.requestedIndex_ == null &&
         !force) {
       return;
     }
@@ -960,14 +981,15 @@ export class Carousel {
       slides_,
     } = this;
     const currentElement = slides_[currentIndex_];
-    const {length, start} = getDimension(axis_, scrollContainer_);
-    const currentElementStart = Math.abs(currentElementOffset_) <= length ?
+    const {
+      length: containerLength,
+      start: containerStart,
+    } = getDimension(axis_, scrollContainer_);
+    const {start: elementStart} = getDimension(axis_, currentElement);
+    const scrollPos = getScrollPosition(axis_, scrollContainer_);
+    const offset = Math.abs(currentElementOffset_) <= containerLength ?
       currentElementOffset_ : 0;
-    // Use the offsetStart to figure out the scroll position of the current
-    // element. Note that this only works because the element is not translated
-    // at this point.
-    const offsetStart = getOffsetStart(axis_, currentElement);
-    const pos = offsetStart - currentElementStart + start;
+    const pos = elementStart - offset + containerStart + scrollPos;
 
     this.ignoreNextScroll_ = true;
     runDisablingSmoothScroll(scrollContainer_, () => {
