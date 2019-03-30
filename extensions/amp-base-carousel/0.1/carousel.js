@@ -27,6 +27,7 @@ import {
   updateLengthStyle,
 } from './dimensions.js';
 import {AutoAdvance} from './auto-advance';
+import {CarouselAccessibility} from './carousel-accessibility';
 import {
   backwardWrappingDistance,
   forwardWrappingDistance,
@@ -175,6 +176,15 @@ export class Carousel {
       win,
       scrollContainer,
       advanceable: this,
+    });
+
+    /** @private @const */
+    this.carouselAccessibility_ = new CarouselAccessibility({
+      win,
+      element,
+      scrollContainer,
+      runMutate,
+      autoAdvance: this.autoAdvance_,
     });
 
     /** @private @const */
@@ -375,6 +385,21 @@ export class Carousel {
   }
 
   /**
+   * Pauses the auto advance temporarily. This can be resumed by calling
+   * resumeAutoAdvance.
+   */
+  pauseAutoAdvance() {
+    this.autoAdvance_.pause();
+  }
+
+  /**
+   * Resumes auto advance when paused by pauseAutoAdvance.
+   */
+  resumeAutoAdvance() {
+    this.autoAdvance_.resume();
+  }
+
+  /**
    * @return {number} The current index of the carousel.
    */
   getCurrentIndex() {
@@ -487,6 +512,7 @@ export class Carousel {
    */
   updateMixedLength(mixedLength) {
     this.mixedLength_ = mixedLength;
+    this.carouselAccessibility_.updateMixedLength(mixedLength);
     this.updateUi();
   }
 
@@ -497,6 +523,7 @@ export class Carousel {
    */
   updateSlides(slides) {
     this.slides_ = slides;
+    this.carouselAccessibility_.updateSlides(slides);
     this.updateUi();
   }
 
@@ -571,6 +598,7 @@ export class Carousel {
    */
   updateVisibleCount(visibleCount) {
     this.visibleCount_ = Math.max(1, visibleCount);
+    this.carouselAccessibility_.updateVisibleCount(visibleCount);
     this.updateUi();
   }
 

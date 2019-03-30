@@ -23,7 +23,11 @@ import {
   getResponsiveAttributeValue,
 } from './responsive-attributes';
 import {Services} from '../../../src/services';
-import {closestAncestorElementBySelector} from '../../../src/dom';
+import {
+  closestAncestorElementBySelector,
+  iterateCursor,
+  toggleAttribute,
+} from '../../../src/dom';
 import {createCustomEvent, getDetail} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
@@ -31,6 +35,7 @@ import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {toArray} from '../../../src/types';
+
 
 /**
  * @param {!Element} el The Element to check.
@@ -53,6 +58,12 @@ class AmpCarousel extends AMP.BaseElement {
 
     /** @private {!Array<!Element>} */
     this.slides_ = [];
+
+    /** @private {!Element} */
+    this.nextArrowSlot_ = null;
+
+    /** @private {!Element} */
+    this.prevArrowSlow_ = null;
 
     /**
      * Whether or not the user has interacted with the carousel using touch in
@@ -151,13 +162,13 @@ class AmpCarousel extends AMP.BaseElement {
       slide.classList.add('i-amphtml-carousel-slotted');
       scrollContainer.appendChild(slide);
     });
-    const prevArrowSlot = this.element.querySelector(
+    this.prevArrowSlot_ = this.element.querySelector(
         '.i-amphtml-carousel-arrow-prev-slot');
-    const nextArrowSlot = this.element.querySelector(
+    this.nextArrowSlot_ = this.element.querySelector(
         '.i-amphtml-carousel-arrow-next-slot');
     // Slot the arrows, with defaults
-    prevArrowSlot.appendChild(prevArrow || this.createPrevArrow_());
-    nextArrowSlot.appendChild(nextArrow || this.createNextArrow_());
+    this.prevArrowSlot_.appendChild(prevArrow || this.createPrevArrow_());
+    this.nextArrowSlot_.appendChild(nextArrow || this.createNextArrow_());
 
     // Handle the initial set of attributes
     toArray(this.element.attributes).forEach(attr => {
@@ -169,10 +180,10 @@ class AmpCarousel extends AMP.BaseElement {
     this.element.addEventListener('indexchange', event => {
       this.onIndexChanged_(event);
     });
-    prevArrowSlot.addEventListener('click', () => {
+    this.prevArrowSlot_.addEventListener('click', () => {
       this.carousel_.prev(ActionSource.GENERIC_HIGH_TRUST);
     });
-    nextArrowSlot.addEventListener('click', () => {
+    this.nextArrowSlot_.addEventListener('click', () => {
       this.carousel_.next(ActionSource.GENERIC_HIGH_TRUST);
     });
 
@@ -199,6 +210,16 @@ class AmpCarousel extends AMP.BaseElement {
 
     this.carousel_.updateUi();
     return Promise.resolve();
+  }
+
+  /** @override */
+  pauseCallback() {
+    this.carousel_.pauseAutoAdvance();
+  }
+
+  /** @override */
+  resumeCallback() {
+    this.carousel_.resumeAutoAdvance();
   }
 
   /** @override */
@@ -240,9 +261,9 @@ class AmpCarousel extends AMP.BaseElement {
     const html = htmlFor(this.element);
     return html`
       <div class="i-amphtml-carousel-content">
-        <div class="i-amphtml-carousel-scroll"></div>
-        <div class="i-amphtml-carousel-arrow-next-slot"></div>
         <div class="i-amphtml-carousel-arrow-prev-slot"></div>
+        <div class="i-amphtml-carousel-arrow-next-slot"></div>
+        <div class="i-amphtml-carousel-scroll"></div>
       </div>
     `;
   }
@@ -308,11 +329,16 @@ class AmpCarousel extends AMP.BaseElement {
    */
   updateUi_() {
     const index = this.carousel_.getCurrentIndex();
-    this.element.setAttribute('i-amphtml-carousel-at-start', index == 0);
-    this.element.setAttribute(
-        'i-amphtml-carousel-at-end', index == this.slides_.length - 1);
-    this.element.setAttribute(
-        'i-amphtml-carousel-hide-buttons', this.hadTouch_);
+    // TODO(sparhami) for Shadow DOM, we will need to get the assigned nodes
+    // instead.
+    iterateCursor(this.prevArrowSlot_.children, child => {
+      toggleAttribute(child, 'disabled', index == 0);
+    });
+    iterateCursor(this.nextArrowSlot_.children, child => {
+      toggleAttribute(child, 'disabled', index == this.slides_.length - 1);
+    });
+    toggleAttribute(
+        this.element, 'i-amphtml-carousel-hide-buttons', this.hadTouch_);
   }
 
   /**

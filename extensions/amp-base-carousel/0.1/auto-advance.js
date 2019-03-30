@@ -71,6 +71,9 @@ export class AutoAdvance {
     /** @private {boolean} */
     this.paused_ = false;
 
+    /** @private {boolean} */
+    this.stopped_ = false;
+
     /** @private {?function()} */
     this.debouncedAdvance_ = null;
 
@@ -82,6 +85,29 @@ export class AutoAdvance {
         'scroll', () => this.handleScroll_(), true);
     this.scrollContainer_.addEventListener(
         'touchstart', () => this.handleTouchStart_(), true);
+  }
+
+  /**
+   * Stops the auto advance. Once stopped, auto advance cannot be started
+   * again.
+   */
+  stop() {
+    this.stopped_ = true;
+  }
+
+  /**
+   * Pauses the auto advance. It can be resumed again by calling `resume`.
+   */
+  pause() {
+    this.paused_ = true;
+  }
+
+  /**
+   * Resumes the auto advance as long as it is not stopped.
+   */
+  resume() {
+    this.paused_ = false;
+    this.resetAutoAdvance_();
   }
 
   /**
@@ -135,11 +161,10 @@ export class AutoAdvance {
    * Handles touchstart, pausing the autoadvance until the user lets go.
    */
   handleTouchStart_() {
-    this.paused_ = true;
+    this.pause();
 
     listenOnce(window, 'touchend', () => {
-      this.paused_ = false;
-      this.resetAutoAdvance_();
+      this.resume();
     }, {
       capture: true,
     });
@@ -152,6 +177,7 @@ export class AutoAdvance {
   shouldAutoAdvance_() {
     return this.autoAdvance_ &&
         !this.paused_ &&
+        !this.stopped_ &&
         this.advances_ < this.maxAdvances_;
   }
 
