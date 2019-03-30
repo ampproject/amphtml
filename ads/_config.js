@@ -735,8 +735,8 @@ export const adConfig = {
     consentHandlingOverride: true,
   },
   
-   'performancenative': {
-	prefetch: 'https://api.performancenative.com/assets/pn.js',
+  'performancenative': {
+    prefetch: 'https://api.performancenative.com/assets/pn.js',
     renderStartImplemented: true,
   },
 
