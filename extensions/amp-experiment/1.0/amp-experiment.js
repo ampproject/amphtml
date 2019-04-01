@@ -28,7 +28,6 @@ import {
 import {isExperimentOn} from '../../../src/experiments';
 import {parseJson} from '../../../src/json';
 
-
 const TAG = 'amp-experiment';
 
 export class AmpExperiment extends AMP.BaseElement {
