@@ -20,7 +20,6 @@ branches:
     - release
     - canary
     - /^amp-release-.*$/
-    - /^revert-.*$/
 addons:
   apt:
     packages:
