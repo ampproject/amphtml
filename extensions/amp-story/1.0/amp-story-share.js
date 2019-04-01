@@ -99,35 +99,26 @@ const TEMPLATE = {
 const SHARE_PAGE_TEMPLATE = {
   tag: 'div',
   attrs: dict({
-    'class': 'i-amphtml-page-share-div',
+    'class': 'i-amphtml-story-page-share',
   }),
-  children: [{
-    tag: 'label',
-    attrs: dict({
-      'class': 'i-amphtml-page-share-label',
-      'for': 'page-share',
-    }),
-    children: [
-      {
-        tag: 'input',
-        attrs: dict(
-            {
-              'class': 'i-amphtml-page-share-check',
-              'type': 'checkbox',
-              'id': 'page-share',
-            }),
-      },
-      {
-        tag: 'span',
-        attrs: dict({
-          'id': 'page-share-span',
-          'class': 'i-amphtml-page-share-span',
-          'for': 'page-share',
-        }),
-        localizedStringId: LocalizedStringId.AMP_STORY_SHARING_PAGE_LABEL,
-      },
-    ],
-  }],
+  children: [
+    {
+      tag: 'input',
+      attrs: dict({
+        'class': 'i-amphtml-story-page-share-input',
+        'type': 'checkbox',
+        'id': 'page-share',
+      }),
+    },
+    {
+      tag: 'label',
+      attrs: dict({
+        'class': 'i-amphtml-story-page-share-label',
+        'for': 'page-share',
+      }),
+      localizedStringId: LocalizedStringId.AMP_STORY_SHARING_PAGE_LABEL,
+    },
+  ],
 };
 
 /** @private @const {!./simple-template.ElementDef} */
@@ -317,7 +308,6 @@ export class ShareWidget {
 
     this.add_(linkShareButton);
 
-    // TODO(alanorozco): Listen for proper tap event (i.e. fastclick)
     listen(linkShareButton, 'click', e => {
       e.preventDefault();
       this.copyUrlToClipboard_(this.root.querySelector('#page-share').checked);
@@ -339,13 +329,13 @@ export class ShareWidget {
   }
 
   /**
-   * @param {boolean=} opt_sharePage
+   * @param {boolean=} sharePage
    * @private
    */
-  copyUrlToClipboard_(opt_sharePage) {
+  copyUrlToClipboard_(sharePage = false) {
     const currentPageId = this.storeService_.get(StateProperty.CURRENT_PAGE_ID);
     const shouldAddFragment =
-      (isExperimentOn(this.win, 'amp-story-branching') && opt_sharePage);
+      (isExperimentOn(this.win, 'amp-story-branching') && sharePage);
 
     const url = Services.documentInfoForDoc(this.getAmpDoc_()).canonicalUrl +
     (shouldAddFragment ? '#page=' + currentPageId : '');
