@@ -408,9 +408,7 @@ export class AmpStoryEmbeddedComponent {
         this.resources_.mutateElement(this.expandedViewOverlay_, () => {
           this.componentPage_.classList.toggle(
               'i-amphtml-expanded-mode', false);
-          toggle(
-              dev().assertElement(devAssert(this.expandedViewOverlay_)),
-              false);
+          toggle(dev().assertElement(this.expandedViewOverlay_), false);
           this.closeExpandedEl_();
         });
       return;
@@ -424,11 +422,8 @@ export class AmpStoryEmbeddedComponent {
       this.buildAndAppendExpandedViewOverlay_();
     }
     this.resources_.mutateElement(
-        dev().assertElement(devAssert(this.expandedViewOverlay_)),
-        () => {
-          toggle(
-              dev().assertElement(devAssert(this.expandedViewOverlay_)),
-              true);
+        dev().assertElement(this.expandedViewOverlay_), () => {
+          toggle(dev().assertElement(this.expandedViewOverlay_), true);
           this.componentPage_.classList.toggle('i-amphtml-expanded-mode', true);
         });
   }
@@ -439,8 +434,7 @@ export class AmpStoryEmbeddedComponent {
    */
   buildAndAppendExpandedViewOverlay_() {
     this.expandedViewOverlay_ = buildExpandedViewOverlay(this.storyEl_);
-    this.resources_.mutateElement(
-        dev().assertElement(devAssert(this.componentPage_)),
+    this.resources_.mutateElement(dev().assertElement(this.componentPage_),
         () => this.componentPage_.appendChild(this.expandedViewOverlay_));
   }
 
@@ -502,7 +496,7 @@ export class AmpStoryEmbeddedComponent {
   onFocusedStateUpdate_(component) {
     if (!component) {
       this.resources_.mutateElement(
-          dev().assertElement(devAssert(this.focusedStateOverlay_)),
+          dev().assertElement(this.focusedStateOverlay_),
           () => {
             this.focusedStateOverlay_
                 .classList.toggle('i-amphtml-hidden', true);
@@ -537,7 +531,7 @@ export class AmpStoryEmbeddedComponent {
         'amp-story-page[active]'));
 
     this.resources_.mutateElement(
-        dev().assertElement(devAssert(this.focusedStateOverlay_)),
+        dev().assertElement(this.focusedStateOverlay_),
         () => {
           this.focusedStateOverlay_
               .classList.toggle('i-amphtml-hidden', false);
@@ -583,7 +577,7 @@ export class AmpStoryEmbeddedComponent {
    */
   onUIStateUpdate_(uiState) {
     this.resources_.mutateElement(
-        dev().assertElement(devAssert(this.focusedStateOverlay_)),
+        dev().assertElement(this.focusedStateOverlay_),
         () => {
           [UIType.DESKTOP_FULLBLEED, UIType.DESKTOP_PANELS].includes(uiState) ?
             this.focusedStateOverlay_.setAttribute('desktop', '') :
@@ -614,7 +608,7 @@ export class AmpStoryEmbeddedComponent {
    */
   updateTooltipBehavior_(target) {
     if (matches(target, LAUNCHABLE_COMPONENTS['a'].selector)) {
-      addAttributesToElement(dev().assertElement(devAssert(this.tooltip_)),
+      addAttributesToElement(dev().assertElement(this.tooltip_),
           dict({'href': this.getElementHref_(target)}));
       return;
     }
@@ -836,10 +830,9 @@ export class AmpStoryEmbeddedComponent {
     const actionIcon =
       this.tooltip_.querySelector('.i-amphtml-tooltip-action-icon');
 
-    this.resources_.mutateElement(
-        dev().assertElement(devAssert(actionIcon)), () => {
-          actionIcon.classList.toggle(embedConfig.actionIcon, true);
-        });
+    this.resources_.mutateElement(dev().assertElement(actionIcon), () => {
+      actionIcon.classList.toggle(embedConfig.actionIcon, true);
+    });
   }
 
   /**
@@ -868,20 +861,17 @@ export class AmpStoryEmbeddedComponent {
     // Publisher specified a valid icon url.
     if (iconUrl) {
       this.resources_.mutateElement(
-          dev().assertElement(devAssert(tooltipCustomIcon)), () => {
-            setImportantStyles(
-                dev().assertElement(devAssert(tooltipCustomIcon)),
-                {
-                  'background-image':
-                      `url(${parseUrlDeprecated(iconUrl).href})`,
-                });
+          dev().assertElement(tooltipCustomIcon), () => {
+            setImportantStyles(dev().assertElement(tooltipCustomIcon),
+                {'background-image':
+                      `url(${parseUrlDeprecated(iconUrl).href})`});
           });
       return;
     }
 
     // No icon src specified by publisher. Use default icon found in the config.
     this.resources_.mutateElement(
-        dev().assertElement(devAssert(tooltipCustomIcon)), () => {
+        dev().assertElement(tooltipCustomIcon), () => {
           tooltipCustomIcon.classList.add(embedConfig.customIconClassName);
         });
   }
@@ -909,11 +899,9 @@ export class AmpStoryEmbeddedComponent {
           this.tooltip_.classList.toggle('i-amphtml-tooltip-arrow-on-top',
               state.arrowOnTop);
 
-          setImportantStyles(
-              dev().assertElement(devAssert(this.tooltipArrow_)),
+          setImportantStyles(dev().assertElement(this.tooltipArrow_),
               {left: `${state.arrowLeftOffset}px`});
-          setImportantStyles(
-              dev().assertElement(devAssert(this.tooltip_)),
+          setImportantStyles(devAssert(this.tooltip_),
               {top: `${state.tooltipTop}px`, left: `${state.tooltipLeft}px`});
         });
   }
@@ -984,22 +972,20 @@ export class AmpStoryEmbeddedComponent {
    * @private
    */
   clearTooltip_() {
-    this.resources_.mutateElement(
-        dev().assertElement(devAssert(this.tooltip_)), () => {
-          const actionIcon =
-            this.tooltip_.querySelector('.i-amphtml-tooltip-action-icon');
-          actionIcon.className = 'i-amphtml-tooltip-action-icon';
+    this.resources_.mutateElement(dev().assertElement(this.tooltip_), () => {
+      const actionIcon =
+        this.tooltip_.querySelector('.i-amphtml-tooltip-action-icon');
+      actionIcon.className = 'i-amphtml-tooltip-action-icon';
 
-          const customIcon =
-            this.tooltip_.querySelector('.i-amphtml-story-tooltip-custom-icon');
-          customIcon.className = 'i-amphtml-story-tooltip-custom-icon';
-          resetStyles(customIcon, ['background-image']);
+      const customIcon =
+        this.tooltip_.querySelector('.i-amphtml-story-tooltip-custom-icon');
+      customIcon.className = 'i-amphtml-story-tooltip-custom-icon';
+      resetStyles(customIcon, ['background-image']);
 
-          this.tooltip_.removeEventListener(
-              'click', this.expandComponentHandler_,
-              true);
-          this.tooltip_.removeAttribute('href');
-        });
+      this.tooltip_.removeEventListener('click', this.expandComponentHandler_,
+          true);
+      this.tooltip_.removeAttribute('href');
+    });
   }
 
   /**
@@ -1067,7 +1053,7 @@ export class AmpStoryEmbeddedComponent {
         Action.SET_ADVANCEMENT_MODE, AdvancementMode.MANUAL_ADVANCE);
     dispatch(
         this.win_,
-        dev().assertElement(devAssert(this.shadowRoot_)),
+        dev().assertElement(this.shadowRoot_),
         direction,
         undefined,
         {bubbles: true});
