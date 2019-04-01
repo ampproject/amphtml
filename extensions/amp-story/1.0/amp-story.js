@@ -2269,7 +2269,8 @@ export class AmpStory extends AMP.BaseElement {
     const historyNavigationPath =
       getHistoryState(this.win, HistoryState.NAVIGATION_PATH);
     if (historyNavigationPath) {
-      this.storyNavigationPath_.push(historyNavigationPath);
+      this.storyNavigationPath_ =
+          this.storyNavigationPath_.concat([historyNavigationPath]);
     }
   }
 
