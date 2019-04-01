@@ -454,7 +454,7 @@ class AmpBrightcove extends AMP.BaseElement {
 
   /** @override */
   getPlayedRanges() {
-    return /** @type {!Array<Array<number>>} */ (this.playedRanges_);
+    return /** @type {!Array<!Array<number>>} */ (this.playedRanges_);
   }
 
   /** @override */

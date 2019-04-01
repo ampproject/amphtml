@@ -94,7 +94,7 @@ class AmpApesterMedia extends AMP.BaseElement {
      * @private {?string}
      */
     this.mediaId_ = null;
-    /** @private {!Array<Function>} */
+    /** @private {!Array<function()>} */
     this.unlisteners_ = [];
     /** @private {?IntersectionObserverApi} */
     this.intersectionObserverApi_ = null;
