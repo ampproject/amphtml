@@ -15,14 +15,15 @@
  */
 
 import {Layout} from '../../../src/layout';
-import {Variants, allocateVariant} from './variant';
-import {dev, devAssert, userAssert} from '../../../src/log';
+import {
+  Variants,
+  allocateVariant,
+} from './variant';
+import {devAssert, userAssert} from '../../../src/log';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {parseJson} from '../../../src/json';
 
 const TAG = 'amp-experiment';
-const ATTR_PREFIX = 'amp-x-';
-
 
 export class AmpExperiment extends AMP.BaseElement {
 
@@ -49,18 +50,34 @@ export class AmpExperiment extends AMP.BaseElement {
             /** @private @const {!Promise<!Object<string, ?string>>} */
             const experimentVariants = Promise.all(variants)
                 .then(() => results)
-                .then(this.addToBody_.bind(this));
+                .then(this.applyExperimentVariants_.bind(this, config));
 
             variantsService.init(experimentVariants);
           } catch (e) {
             // Ensure downstream consumers don't wait for the promise forever.
-            variantsService.init({});
+            variantsService.init(Promise.resolve({}));
             throw e;
           }
         });
   }
 
-  /** @return {!JsonObject} [description] */
+  /**
+   * The experiment config can be represented as:
+   * const config = {
+   *   experimentObject: {
+   *     // General experiment settings e.g schedule.
+   *     variants: {
+   *       variantObject: {
+   *         // Objects that represent what
+   *         // should change (mutations) when
+   *         // this variant of the experiment is
+   *         // applied (weight)
+   *       }
+   *     }
+   *   }
+   * }
+   * @return {!JsonObject} [description]
+   */
   getConfig_() {
     const {children} = this.element;
     userAssert(
@@ -75,23 +92,60 @@ export class AmpExperiment extends AMP.BaseElement {
   }
 
   /**
-   * Adds the given experiment and variant pairs to body element as attributes
-   * and values. Experiment with no variant assigned (null) will be skipped.
-   * @param {!Object<string, ?string>} experiments
+   * Passes the given experiment and variant pairs to the correct handler,
+   * to apply the experiment to the document.
+   * Experiment with no variant assigned (null) will be skipped.
+   *
+   * For example, the `experimentToVariant` object looks like:
+   * {
+   *   'appliedExperimentName': 'chosenVariantName',
+   *   'anotherAppliedExperimentName': 'chosenVariantName'
+   * }
+   * Which is a simplified version of the config and
+   * represents what variant of each experiment
+   * should be applied.
+   *
+   * @param {!JsonObject} config
+   * @param {!Object<string, ?string>} experimentToVariant
    * @return {!Promise<!Object<string, ?string>>} a promise of the original
    *     param passed in
    * @private
    */
-  addToBody_(experiments) {
-    const doc = this.getAmpDoc();
-    return doc.whenBodyAvailable().then(body => {
-      for (const name in experiments) {
-        if (experiments[name]) {
-          body.setAttribute(ATTR_PREFIX + name,
-              dev().assertString(experiments[name]));
-        }
+  applyExperimentVariants_(config, experimentToVariant) {
+
+    const appliedExperimentToVariantPromises = [];
+
+    for (const experimentName in experimentToVariant) {
+      const variantName = experimentToVariant[experimentName];
+      if (variantName) {
+        const variantObject = config[experimentName]['variants'][variantName];
+        appliedExperimentToVariantPromises.push(
+            this.applyMutations_(experimentName, variantObject)
+        );
       }
-      return experiments;
+    }
+
+    return Promise.all(appliedExperimentToVariantPromises)
+        .then(() => experimentToVariant);
+  }
+
+  /**
+   * Passes the given experimentName and variantObject pairs
+   * to the mutation service to be applied to the document.
+   * @param {string} experimentName
+   * @param {!JsonObject} variantObject
+   * @return {!Promise}
+   * @private
+   */
+  applyMutations_(experimentName, variantObject) {
+    const doc = this.getAmpDoc();
+    return doc.whenBodyAvailable().then(() => {
+      // TODO (torch2424): Use a mutation service,
+      // and apply mutations
+      // Placehodler to pass linting for code review
+      // and keep PRs small
+      // This is a NOOP
+      variantObject[experimentName] = experimentName;
     });
   }
 }
