@@ -19,7 +19,7 @@ TIP: Cherry-picks into production most likely require a cherry-pick into RC too.
 
 | Issue | PR  | Production? | RC? | [Release issue](https://github.com/ampproject/amphtml/labels/Type%3A%20Release) |
 | :---: | :-: | :---------: | :-: | :-----------: |
-| #<_ISSUE_NUMBER_> | #<_PR_NUMBER_> | **<Y/N>** | **<Y/N>** | #<_RELEASE_ISSUE_> |
+| #<_ISSUE_NUMBER_> | #<_PR_NUMBER_> | **<YES/NO>** | **<YES/NO>** | #<_RELEASE_ISSUE_> |
 
 ## Why does this issue meet the [cherry-pick criteria](https://github.com/ampproject/amphtml/blob/master/contributing/release-schedule.md#cherry-pick-criteria)?
 
@@ -36,7 +36,9 @@ CONDITION: Cherry-picking into production but _not_ RC. Otherwise, delete.
 <_YOUR_REASONS_>
 
 <!--
-NOTE: Filling out this mini-PM template is required after the deployment of a production cherry-pick.
+MUST: Filling out the mini-PM template is required _after_ the deployment of a production cherry-pick. If this cherry-pick does not include production, the mini-PM section can be deleted.
+
+MUST: This issue cannot be closed until the mini-PM is written and its action items are completed.
 -->
 # Mini-postmortem
 
@@ -54,8 +56,6 @@ TIP: A few sentences summarizing the problem and impact.
 ## Root Causes
 
 1.
-2.
-3.
 
 ## Action Items
 
