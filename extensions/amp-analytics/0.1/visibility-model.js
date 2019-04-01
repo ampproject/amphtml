@@ -297,9 +297,6 @@ export class VisibilityModel {
       'loadTimeVisibility': this.loadTimeVisibility_ * 100 || 0,
       'minVisiblePercentage': this.minVisiblePercentage_ * 100,
       'maxVisiblePercentage': this.maxVisiblePercentage_ * 100,
-
-      // Scroll depth (max scroll depth will be added by VisibilityManager)
-      'initialScrollDepth': this.initialScrollDepth_,
     });
   }
 
