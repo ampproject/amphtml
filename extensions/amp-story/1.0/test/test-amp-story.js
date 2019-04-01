@@ -444,6 +444,19 @@ describes.realWin('amp-story', {
         });
   });
 
+  it('should add a desktop attribute', () => {
+    createPages(story.element, 2, ['cover', '1']);
+
+    story.desktopMedia_ = {matches: true};
+
+    story.buildCallback();
+
+    return story.layoutCallback()
+        .then(() => {
+          expect(story.element).to.have.attribute('desktop');
+        });
+  });
+
   it('should have a meta tag that sets the theme color', () => {
     createPages(story.element, 2);
     story.buildCallback();
@@ -451,6 +464,78 @@ describes.realWin('amp-story', {
         .then(() => {
           const metaTag = win.document.querySelector('meta[name=theme-color]');
           expect(metaTag).to.not.be.null;
+        });
+  });
+
+  it('should set the orientation portrait attribute on render', () => {
+    createPages(story.element, 2, ['cover', 'page-1']);
+
+    story.landscapeOrientationMedia_ = {matches: false};
+    story.element.setAttribute('standalone', '');
+    story.element.setAttribute('supports-landscape', '');
+
+    story.buildCallback();
+
+    return story.layoutCallback()
+        .then(() => {
+          expect(story.element).to.have.attribute('orientation');
+          expect(story.element.getAttribute('orientation'))
+              .to.equal('portrait');
+        });
+  });
+
+  it('should set the orientation landscape attribute on render', () => {
+    createPages(story.element, 2, ['cover', 'page-1']);
+
+    story.landscapeOrientationMedia_ = {matches: true};
+    story.element.setAttribute('standalone', '');
+    story.element.setAttribute('supports-landscape', '');
+
+    story.buildCallback();
+
+    return story.layoutCallback()
+        .then(() => {
+          expect(story.element).to.have.attribute('orientation');
+          expect(story.element.getAttribute('orientation'))
+              .to.equal('landscape');
+        });
+  });
+
+  it('should not set orientation landscape if no supports-landscape', () => {
+    createPages(story.element, 2, ['cover', 'page-1']);
+
+    story.landscapeOrientationMedia_ = {matches: true};
+    story.element.setAttribute('standalone', '');
+
+    story.buildCallback();
+
+    return story.layoutCallback()
+        .then(() => {
+          expect(story.element).to.have.attribute('orientation');
+          expect(story.element.getAttribute('orientation'))
+              .to.equal('portrait');
+        });
+  });
+
+  it('should update the orientation landscape attribute', () => {
+    createPages(story.element, 2, ['cover', 'page-1']);
+
+    story.landscapeOrientationMedia_ = {matches: true};
+    story.element.setAttribute('standalone', '');
+    story.element.setAttribute('supports-landscape', '');
+    sandbox.stub(story, 'mutateElement').callsFake(fn => fn());
+
+    story.buildCallback();
+
+    return story.layoutCallback()
+        .then(() => {
+          story.landscapeOrientationMedia_ = {matches: false};
+          story.onResize();
+        })
+        .then(() => {
+          expect(story.element).to.have.attribute('orientation');
+          expect(story.element.getAttribute('orientation'))
+              .to.equal('portrait');
         });
   });
 
