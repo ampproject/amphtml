@@ -284,8 +284,6 @@ describes.sandboxed('VisibilityModel', {}, () => {
         loadTimeVisibility: 10,
         minVisiblePercentage: 20,
         maxVisiblePercentage: 30,
-        // Scroll Depth:
-        initialScrollDepth: 123,
       });
     });
 
@@ -340,7 +338,6 @@ describes.sandboxed('VisibilityModel', {}, () => {
         loadTimeVisibility: 10,
         minVisiblePercentage: 0,
         maxVisiblePercentage: 0,
-        initialScrollDepth: 123,
       });
       expect(vh.eventResolver_).to.not.be.null;
     });
