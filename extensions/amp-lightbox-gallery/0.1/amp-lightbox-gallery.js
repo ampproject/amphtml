@@ -280,6 +280,11 @@ export class AmpLightboxGallery extends AMP.BaseElement {
      * @private {?function()}
      */
     this.preventCarouselScrollUnlistener_ = null;
+
+    /**
+     * @private {boolean}
+     */
+    this.hasVerticalScrollbarWidth_ = false;
   }
 
   /** @override */
@@ -1082,13 +1087,17 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     const lightboxGroupId = element.getAttribute('lightbox')
       || 'default';
     this.currentLightboxGroupId_ = lightboxGroupId;
+    this.hasVerticalScrollbarWidth_ =
+        this.getViewport().getVerticalScrollbarWidth() > 0;
+
     return this.findOrInitializeLightbox_(lightboxGroupId).then(() => {
+      return this.getViewport().enterLightboxMode();
+    }).then(() => {
       return this.mutateElement(() => {
         toggle(this.element, true);
         setStyle(this.element, 'opacity', 0);
         this.controlsContainer_.classList.remove('i-amphtml-lbg-fade-in');
         this.controlsContainer_.classList.add('i-amphtml-lbg-hidden');
-        this.getViewport().enterLightboxMode();
       });
     }).then(() => {
       this.isActive_ = true;
@@ -1490,7 +1499,17 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     gestures.cleanup();
 
     return this.mutateElement(() => {
-      this.getViewport().leaveLightboxMode();
+      // If we do not have a vertical scrollbar taking width, immediately
+      // leave lightbox mode so that the user can scroll the page. This makes
+      // things feel much more responsive. When we have a vertical scrollbar,
+      // taking width we do not leave lightbox mode here as it will cause jank
+      // at the start of the animation. On browsers with non-overlaying
+      // scrollbars, this is still consistent, as they cannot scroll during
+      // the animation if it has  a width, or if it does not (i.e. there is no
+      // overflow to scroll).
+      if (!this.hasVerticalScrollbarWidth_) {
+        this.getViewport().leaveLightboxMode();
+      }
       // If there's gallery, set gallery to display none
       this.container_.removeAttribute('gallery-view');
 
@@ -1501,6 +1520,10 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       this.clearDescOverflowState_();
     }).then(() => this.exit_())
         .then(() => {
+          // Leave lightbox mode now that it will not affect the animation.
+          if (this.hasVerticalScrollbarWidth_) {
+            this.getViewport().leaveLightboxMode();
+          }
           this.schedulePause(dev().assertElement(this.container_));
           this.pauseLightboxChildren_();
           this.carousel_ = null;

@@ -27,7 +27,7 @@
   "pump-early-frame": 1,
   "amp-auto-ads": 1,
   "amp-auto-ads-adsense-holdout": 0.1,
-  "amp-auto-ads-adsense-responsive": 0.05,
+  "amp-auto-ads-adsense-responsive": 0.1,
   "version-locking": 1,
   "as-use-attr-for-format": 0.01,
   "a4aFastFetchDoubleclickLaunched": 0,
@@ -60,5 +60,6 @@
   "amp-img-auto-sizes": 1,
   "amp-list-load-more": 1,
   "amp-ad-ff-adx-ady": 0.01,
-  "blurry-placeholder": 1
+  "blurry-placeholder": 1,
+  "flexAdSlots": 0.01
 }

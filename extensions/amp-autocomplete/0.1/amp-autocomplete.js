@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-autocomplete-0.1.css';
 import {Keys} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
@@ -22,6 +23,7 @@ import {UrlReplacementPolicy,
   batchFetchJsonFor} from '../../../src/batched-json';
 import {childElementsByTag,
   removeChildren} from '../../../src/dom';
+import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user, userAssert} from '../../../src/log';
 import {getValueForExpr, tryParseJson} from '../../../src/json';
 import {includes, startsWith} from '../../../src/string';
@@ -120,6 +122,9 @@ export class AmpAutocomplete extends AMP.BaseElement {
      * @private {?Element}
      */
     this.templateElement_ = null;
+
+    /** @private {?../../../src/service/action-impl.ActionService} */
+    this.action_ = null;
   }
 
   /** @override */
@@ -127,6 +132,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     userAssert(isExperimentOn(this.win, 'amp-autocomplete'),
         `Experiment ${EXPERIMENT} is not turned on.`);
 
+    this.action_ = Services.actionServiceForDoc(this.element);
     const jsonScript =
       this.element.querySelector('script[type="application/json"]');
     if (jsonScript) {
@@ -222,7 +228,6 @@ export class AmpAutocomplete extends AMP.BaseElement {
     container.classList.add('i-amphtml-autocomplete-results');
     container.setAttribute('role', 'list');
     toggle(container, false);
-    this.applyFillContent(container, /* replacedContent */ true);
     return container;
   }
 
@@ -380,9 +385,15 @@ export class AmpAutocomplete extends AMP.BaseElement {
    * @private
    */
   filterData_(data, input) {
+    // Server-side filtering.
+    if (this.filter_ === FilterType.NONE) {
+      return this.truncateToMaxEntries_(data);
+    }
+
+    // Client-side filtering.
     input = input.toLowerCase();
     const itemsExpr = this.element.getAttribute('filter-value') || 'value';
-    let filteredData = data.filter(item => {
+    const filteredData = data.filter(item => {
       if (typeof item === 'object') {
         item = getValueForExpr(/** @type {!JsonObject} */(item), itemsExpr);
       }
@@ -402,20 +413,25 @@ export class AmpAutocomplete extends AMP.BaseElement {
           throw new Error(`Filter not yet supported: ${this.filter_}`);
         case FilterType.CUSTOM:
           throw new Error(`Filter not yet supported: ${this.filter_}`);
-        case FilterType.NONE:
-          // Query server endpoint.
-          throw new Error(`Filter not yet supported: ${this.filter_}`);
         default:
           throw new Error(`Unexpected filter: ${this.filter_}`);
       }
     });
 
-    // Truncate to max-entries.
-    if (this.maxEntries_ && this.maxEntries_ < filteredData.length) {
-      filteredData = filteredData.slice(0, this.maxEntries_);
-    }
+    return this.truncateToMaxEntries_(filteredData);
+  }
 
-    return filteredData;
+  /**
+   * Truncate the given data to a maximum length of the max-entries attribute.
+   * @param {!Array<!JsonObject|string>} data
+   * @return {!Array<!JsonObject|string>}
+   * @private
+   */
+  truncateToMaxEntries_(data) {
+    if (this.maxEntries_ && this.maxEntries_ < data.length) {
+      data = data.slice(0, this.maxEntries_);
+    }
+    return data;
   }
 
   /**
@@ -479,7 +495,20 @@ export class AmpAutocomplete extends AMP.BaseElement {
       return;
     }
     this.inputElement_.value = this.userInput_ = element.getAttribute('value');
+    this.fireSelectEvent_(this.userInput_);
     this.clearAllItems_();
+  }
+
+  /**
+   * Triggers a 'select' event with the given value as the value emitted.
+   * @param {string} value
+   * @private
+   */
+  fireSelectEvent_(value) {
+    const name = 'select';
+    const selectEvent = createCustomEvent(this.win,
+        `amp-autocomplete.${name}`, value);
+    this.action_.trigger(this.element, name, selectEvent, ActionTrust.HIGH);
   }
 
   /**

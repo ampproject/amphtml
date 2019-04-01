@@ -17,9 +17,11 @@
 import {Services} from '../../../src/services';
 import {base64UrlEncodeFromString} from '../../../src/utils/base64';
 import {devAssert, user, userAssert} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {getConsentPolicyState} from '../../../src/consent';
 import {getService, registerServiceBuilder} from '../../../src/service';
 import {isArray, isFiniteNumber} from '../../../src/types';
+import {linkerReaderServiceFor} from './linker-reader';
 import {tryResolve} from '../../../src/utils/promise';
 
 /** @const {string} */
@@ -147,8 +149,11 @@ export class VariableService {
     /** @private {!Window} */
     this.win_ = window;
 
-    /** @private {!Object<string, *>} */
-    this.macros_ = {};
+    /** @private {!JsonObject} */
+    this.macros_ = dict({});
+
+    /** @const @private {!./linker-reader.LinkerReader} */
+    this.linkerReader_ = linkerReaderServiceFor(this.win_);
 
     this.register_('$DEFAULT', defaultMacro);
     this.register_('$SUBSTR', substrMacro);
@@ -161,10 +166,14 @@ export class VariableService {
     this.register_('$IF',
         (value, thenValue, elseValue) => value ? thenValue : elseValue);
     this.register_('$REPLACE', replaceMacro);
+    // TODO(ccordry): Make sure this stays a window level service when this
+    // VariableService is migrated to document level.
+    this.register_('LINKER_PARAM', (name, id) =>
+      this.linkerReader_.get(name, id));
   }
 
   /**
-   * @return {!Object} contains all registered macros
+   * @return {!JsonObject} contains all registered macros
    */
   getMacros() {
     return this.macros_;
