@@ -84,11 +84,15 @@ describes.sandboxed('allocateVariant', {}, env => {
 
     allowConsoleError(() => { expect(() => {
       allocateVariant(ampdoc, 'name', {});
-    }).to.throw(/Missing experiment variants config/); });
+    }).to.throw(/Missing variants/); });
+
+    allowConsoleError(() => { expect(() => {
+      allocateVariant(ampdoc, 'name', {variants: 52});
+    }).to.throw(/Missing variants/); });
 
     allowConsoleError(() => { expect(() => {
       allocateVariant(ampdoc, 'name', {variants: {}});
-    }).to.throw(/Missing experiment variants config/); });
+    }).to.throw(/Missing variants/); });
 
     allowConsoleError(() => { expect(() => {
       allocateVariant(ampdoc, 'name', {
@@ -101,8 +105,14 @@ describes.sandboxed('allocateVariant', {}, env => {
     allowConsoleError(() => { expect(() => {
       allocateVariant(ampdoc, 'name', {
         variants: {
-          'variant_1': 50,
-          'variant_2': 51,
+          'variant_1': {
+            weight: 51,
+            mutations: [{}],
+          },
+          'variant_2': {
+            weight: 51,
+            mutations: [{}],
+          },
         },
       });
     }).to.throw(/Total percentage is bigger than 100/); });
@@ -110,31 +120,43 @@ describes.sandboxed('allocateVariant', {}, env => {
     allowConsoleError(() => { expect(() => {
       allocateVariant(ampdoc, 'name', {
         variants: {
-          'negative_percentage': -1,
+          'negative_percentage': {
+            weight: -1,
+            mutations: [{}],
+          },
         },
       });
-    }).to.throw(/Invalid percentage/); });
+    }).to.throw(/Invalid weight percentage/); });
 
     allowConsoleError(() => { expect(() => {
       allocateVariant(ampdoc, 'name', {
         variants: {
-          'too_big_percentage': 101,
+          'too_big_percentage': {
+            weight: 101,
+            mutations: [{}],
+          },
         },
       });
-    }).to.throw(/Invalid percentage/); });
+    }).to.throw(/Invalid weight percentage/); });
 
     allowConsoleError(() => { expect(() => {
       allocateVariant(ampdoc, 'name', {
         variants: {
-          'non_number_percentage': '50',
+          'non_number_percentage': {
+            weight: '50',
+            mutations: [{}],
+          },
         },
       });
-    }).to.throw(/Invalid percentage/); });
+    }).to.throw(/must have a number weight/); });
 
     allowConsoleError(() => { expect(() => {
       allocateVariant(ampdoc, 'invalid_name!', {
         variants: {
-          'variant_1': 50,
+          'variant_1': {
+            weight: 50,
+            mutations: [{}],
+          },
         },
       });
     }).to.throw(/Invalid name/); });
@@ -142,7 +164,10 @@ describes.sandboxed('allocateVariant', {}, env => {
     allowConsoleError(() => { expect(() => {
       allocateVariant(ampdoc, '', {
         variants: {
-          'variant_1': 50,
+          'variant_1': {
+            weight: 50,
+            mutations: [{}],
+          },
         },
       });
     }).to.throw(/Invalid name/); });
@@ -151,20 +176,60 @@ describes.sandboxed('allocateVariant', {}, env => {
       allocateVariant(ampdoc, 'name', {
         group: 'invalid_group_name!',
         variants: {
-          'variant_1': 50,
+          'variant_1': {
+            weight: 50,
+            mutations: [{}],
+          },
         },
       });
     }).to.throw(/Invalid name/); });
+  });
+
+  it('should check that mutations exist', () => {
+    allowConsoleError(() => { expect(() => {
+      allocateVariant(ampdoc, 'name', {
+        variants: {
+          'variant_1': {
+            weight: 50,
+          },
+        },
+      });
+    }).to.throw(/mutations array/); });
+  });
+
+  it('should check that has at least one mutation', () => {
+    allowConsoleError(() => { expect(() => {
+      allocateVariant(ampdoc, 'name', {
+        variants: {
+          'variant_1': {
+            weight: 50,
+            mutations: [],
+          },
+        },
+      });
+    }).to.throw(/one mutation/); });
   });
 
   it('should work around float rounding error', () => {
     expect(() => {
       allocateVariant(ampdoc, 'name', {
         variants: {
-          'a': 50.1,
-          'b': 40.3,
-          'c': 9.2,
-          'd': 0.4,
+          'a': {
+            weight: 50.1,
+            mutations: [{}],
+          },
+          'b': {
+            weight: 40.3,
+            mutations: [{}],
+          },
+          'c': {
+            weight: 9.2,
+            mutations: [{}],
+          },
+          'd': {
+            weight: 0.4,
+            mutations: [{}],
+          },
           // They add up to 100.00000000000001​​​ in JS
         },
       });
@@ -175,8 +240,14 @@ describes.sandboxed('allocateVariant', {}, env => {
     return expect(allocateVariant(ampdoc, 'name', {
       sticky: false,
       variants: {
-        '-Variant_1': 56.1,
-        '-Variant_2': 23.3,
+        '-Variant_1': {
+          weight: 56.1,
+          mutations: [{}],
+        },
+        '-Variant_2': {
+          weight: 23.3,
+          mutations: [{}],
+        },
       },
     })).to.eventually.equal('-Variant_2');
   });
@@ -185,8 +256,14 @@ describes.sandboxed('allocateVariant', {}, env => {
     return expect(allocateVariant(ampdoc, 'name', {
       sticky: false,
       variants: {
-        '-Variant_2': 50,
-        '-Variant_1': 50,
+        '-Variant_2': {
+          weight: 50,
+          mutations: [{}],
+        },
+        '-Variant_1': {
+          weight: 50,
+          mutations: [{}],
+        },
       },
     })).to.eventually.equal('-Variant_2');
   });
@@ -195,9 +272,18 @@ describes.sandboxed('allocateVariant', {}, env => {
     return expect(allocateVariant(ampdoc, 'name', {
       sticky: false,
       variants: {
-        '-Variant_1': 2.1,
-        '-Variant_2': 23.3,
-        '-Variant_3': 20.123,
+        '-Variant_1': {
+          weight: 2.1,
+          mutations: [{}],
+        },
+        '-Variant_2': {
+          weight: 23.3,
+          mutations: [{}],
+        },
+        '-Variant_3': {
+          weight: 20.123,
+          mutations: [{}],
+        },
       },
     })).to.eventually.equal(null);
   });
@@ -207,8 +293,14 @@ describes.sandboxed('allocateVariant', {}, env => {
     return expect(allocateVariant(ampdoc, 'Name', {
       sticky: false,
       variants: {
-        '-Variant_1': 50,
-        '-Variant_2': 50,
+        '-Variant_1': {
+          weight: 50,
+          mutations: [{}],
+        },
+        '-Variant_2': {
+          weight: 50,
+          mutations: [{}],
+        },
       },
     })).to.eventually.equal('-Variant_1');
   });
@@ -218,8 +310,14 @@ describes.sandboxed('allocateVariant', {}, env => {
     return expect(allocateVariant(ampdoc, 'name', {
       sticky: false,
       variants: {
-        '-Variant_1': 50,
-        '-Variant_2': 50,
+        '-Variant_1': {
+          weight: 50,
+          mutations: [{}],
+        },
+        '-Variant_2': {
+          weight: 50,
+          mutations: [{}],
+        },
       },
     })).to.eventually.equal('-Variant_2');
   });
@@ -232,8 +330,14 @@ describes.sandboxed('allocateVariant', {}, env => {
     uniformStub.withArgs('name:123abc').returns(Promise.resolve(0.4));
     return expect(allocateVariant(ampdoc, 'name', {
       variants: {
-        '-Variant_1': 50,
-        '-Variant_2': 50,
+        '-Variant_1': {
+          weight: 50,
+          mutations: [{}],
+        },
+        '-Variant_2': {
+          weight: 50,
+          mutations: [{}],
+        },
       },
     })).to.eventually.equal('-Variant_1');
   });
@@ -247,8 +351,14 @@ describes.sandboxed('allocateVariant', {}, env => {
     return expect(allocateVariant(ampdoc, 'name', {
       cidScope: 'custom-scope',
       variants: {
-        '-Variant_1': 50,
-        '-Variant_2': 50,
+        '-Variant_1': {
+          weight: 50,
+          mutations: [{}],
+        },
+        '-Variant_2': {
+          weight: 50,
+          mutations: [{}],
+        },
       },
     })).to.eventually.equal('-Variant_1');
   });
@@ -262,8 +372,14 @@ describes.sandboxed('allocateVariant', {}, env => {
     return expect(allocateVariant(ampdoc, 'name', {
       group: 'custom-group',
       variants: {
-        '-Variant_1': 50,
-        '-Variant_2': 50,
+        '-Variant_1': {
+          weight: 50,
+          mutations: [{}],
+        },
+        '-Variant_2': {
+          weight: 50,
+          mutations: [{}],
+        },
       },
     })).to.eventually.equal('-Variant_1');
   });
@@ -284,8 +400,14 @@ describes.sandboxed('allocateVariant', {}, env => {
     return expect(allocateVariant(ampdoc, 'name', {
       consentNotificationId: 'notif-1',
       variants: {
-        '-Variant_1': 50,
-        '-Variant_2': 50,
+        '-Variant_1': {
+          weight: 50,
+          mutations: [{}],
+        },
+        '-Variant_2': {
+          weight: 50,
+          mutations: [{}],
+        },
       },
     })).to.eventually.equal('-Variant_1');
   });
@@ -297,8 +419,14 @@ describes.sandboxed('allocateVariant', {}, env => {
     return expect(allocateVariant(ampdoc, 'name', {
       consentNotificationId: 'notif-1',
       variants: {
-        '-Variant_1': 50,
-        '-Variant_2': 50,
+        '-Variant_1': {
+          weight: 50,
+          mutations: [{}],
+        },
+        '-Variant_2': {
+          weight: 50,
+          mutations: [{}],
+        },
       },
     })).to.eventually.be.rejectedWith('Notification not found: notif-1');
   });
@@ -316,8 +444,14 @@ describes.sandboxed('allocateVariant', {}, env => {
     return expect(allocateVariant(ampdoc, 'name', {
       consentNotificationId: 'notif-1',
       variants: {
-        '-Variant_1': 50,
-        '-Variant_2': 50,
+        '-Variant_1': {
+          weight: 50,
+          mutations: [{}],
+        },
+        '-Variant_2': {
+          weight: 50,
+          mutations: [{}],
+        },
       },
     })).to.eventually.equal(null);
   });
