@@ -61,7 +61,6 @@ export class AmpExperiment extends AMP.BaseElement {
         );
       }
 
-
       try {
         const config = this.getConfig_();
         const results = Object.create(null);

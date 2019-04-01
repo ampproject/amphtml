@@ -22,7 +22,6 @@ import {toggleExperiment} from '../../../../src/experiments';
 describes.realWin('amp-experiment', {
   amp: {
     extensions: ['amp-experiment:1.0'],
-
   },
 }, env => {
 
@@ -64,6 +63,7 @@ describes.realWin('amp-experiment', {
   let win, doc;
   let ampdoc;
   let experiment;
+  let el;
 
   beforeEach(() => {
     win = env.win;
@@ -72,7 +72,7 @@ describes.realWin('amp-experiment', {
 
     toggleExperiment(win, 'amp-experiment-1.0', true);
 
-    const el = doc.createElement('amp-experiment');
+    el = doc.createElement('amp-experiment');
     el.ampdoc_ = ampdoc;
     experiment = new AmpExperiment(el);
   });
@@ -83,6 +83,18 @@ describes.realWin('amp-experiment', {
     child.textContent = opt_textContent || JSON.stringify(config);
     experiment.element.appendChild(child);
   }
+
+  it('Rejects because experiment is not enabled', () => {
+    toggleExperiment(win, 'amp-experiment-1.0', false);
+
+    expectAsyncConsoleError(/Experiment/);
+    addConfigElement('script');
+    doc.body.appendChild(el);
+    return experiment.buildCallback()
+        .should.eventually.be.rejectedWith(
+            /Experiment/
+        );
+  });
 
   it('should not throw on valid config', () => {
     expect(() => {
