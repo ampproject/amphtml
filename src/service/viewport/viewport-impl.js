@@ -29,6 +29,7 @@ import {ViewportBindingNatural_} from './viewport-binding-natural';
 import {VisibilityState} from '../../visibility-state';
 import {clamp} from '../../utils/math';
 import {closestAncestorElementBySelector, isIframed} from '../../dom';
+import {computedStyle, setStyle} from '../../style';
 import {dev, devAssert} from '../../log';
 import {dict} from '../../utils/object';
 import {getFriendlyIframeEmbedOptional} from '../../friendly-iframe-embed';
@@ -45,7 +46,6 @@ import {
   moveLayoutRect,
 } from '../../layout-rect';
 import {numeric} from '../../transition';
-import {setStyle} from '../../style';
 import {tryResolve} from '../../utils/promise';
 
 
@@ -294,6 +294,18 @@ export class Viewport {
   setScrollTop(scrollPos) {
     this./*OK*/scrollTop_ = null;
     this.binding_.setScrollTop(scrollPos);
+  }
+
+  /**
+   * @return {number} The width of the vertical scrollbar, in pixels.
+   */
+  getVerticalScrollbarWidth() {
+    const {win} = this.ampdoc;
+    const {documentElement} = win.document;
+    const windowWidth = win./*OK*/innerWidth ;
+    const documentWidth = documentElement./*OK*/clientWidth;
+
+    return windowWidth - documentWidth;
   }
 
   /**
@@ -816,7 +828,22 @@ export class Viewport {
    * Should only be used for temporarily disabling scroll.
    */
   disableScroll() {
+    const {win} = this.ampdoc;
+    const {documentElement} = win.document;
+    let requestedMarginRight;
+
+    // Calculate the scrollbar width so we can set it as a right margin. This
+    // is so that we do not cause content to shift when we disable scroll on
+    // platforms that have a width-taking scrollbar.
+    this.vsync_.measure(() => {
+      const existingMargin = computedStyle(win, documentElement).marginRight;
+      const scrollbarWidth = this.getVerticalScrollbarWidth();
+
+      requestedMarginRight = parseInt(existingMargin, 10) + scrollbarWidth;
+    });
+
     this.vsync_.mutate(() => {
+      setStyle(documentElement, 'margin-right', requestedMarginRight, 'px');
       this.binding_.disableScroll();
     });
   }
@@ -825,7 +852,11 @@ export class Viewport {
    * Reset the scrolling by removing overflow: hidden.
    */
   resetScroll() {
+    const {win} = this.ampdoc;
+    const {documentElement} = win.document;
+
     this.vsync_.mutate(() => {
+      setStyle(documentElement, 'margin-right', '');
       this.binding_.resetScroll();
     });
   }
