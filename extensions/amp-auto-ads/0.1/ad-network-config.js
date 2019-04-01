@@ -175,7 +175,7 @@ class AdSenseNetworkConfig {
    */
   isResponsiveEnabled(win) {
     const branch = getAdSenseAmpAutoAdsResponsiveExperimentBranch(win);
-    return branch != AdSenseAmpAutoAdsResponsiveBranches.CONTROL;
+    return branch != AdSenseAmpAutoAdsResponsiveBranches.EXPERIMENT;
   }
 
   /** @override */
