@@ -211,15 +211,17 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
             expect(token).to.equal(undefined);
           });
     });
+
     it('should return undefined if crossorigin attr does not contain ' +
        'exactly "amp-viewer-auth-token-post"', () => {
       const el = document.createElement('html');
       el.setAttribute('crossorigin', '');
       return getViewerAuthTokenIfAvailable(el)
           .then(token => {
-            expect(token).to.equal(undefined);
+            expect(token).to.be.undefined;
           });
     });
+
     it('should return an auth token if one is present', () => {
       sandbox.stub(Services, 'viewerAssistanceForDocOrNull').returns(
           Promise.resolve({
@@ -232,6 +234,7 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
             expect(token).to.equal('idToken');
           });
     });
+
     it('should return an empty auth token if there is not one present', () => {
       sandbox.stub(Services, 'viewerAssistanceForDocOrNull').returns(
           Promise.resolve({
@@ -244,6 +247,7 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
             expect(token).to.equal('');
           });
     });
+
     it('should return an empty auth token if there is an issue retrieving ' +
         'the identity token', () => {
       sandbox.stub(Services, 'viewerAssistanceForDocOrNull').returns(
@@ -257,6 +261,7 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
             expect(token).to.equal('');
           });
     });
+
     it('should assert that amp-viewer-assistance extension is present', () => {
       sandbox.stub(Services, 'viewerAssistanceForDocOrNull').returns(
           Promise.resolve());
@@ -267,8 +272,7 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
           'requires amp-viewer-assistance extension.', 1);
       return getViewerAuthTokenIfAvailable(el)
           .then(undefined,
-              e => expect(e).to.not.equal(undefined));
+              e => expect(e).to.not.be.undefined);
     });
   });
-
 });

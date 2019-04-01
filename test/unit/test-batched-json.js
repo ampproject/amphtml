@@ -140,13 +140,12 @@ describe('batchFetchJsonFor', () => {
           .withArgs('https://data.com')
           .returns(Promise.resolve('https://data.com'));
 
-      return batchFetchJsonFor(ampdoc, el, null, all, false, '')
+      const token = '';
+      return batchFetchJsonFor(ampdoc, el, null, all, false, token)
           .then(() => {
-            const fetchArgs = fetchJson['firstCall']['args'];
-            expect(fetchArgs[1]['body']['ampViewerAuthToken'])
-                .to.equal('');
-            expect(fetchArgs[1]['method'])
-                .to.equal('POST');
+            const fetchOpt = fetchJson.firstCall.args[1];
+            expect(fetchOpt.body.ampViewerAuthToken).to.equal('');
+            expect(fetchOpt.method).to.equal('POST');
           });
     });
 
