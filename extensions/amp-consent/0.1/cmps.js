@@ -33,4 +33,10 @@ if (getMode().test || getMode().localDev) {
     'checkConsentHref': '/get-consent-v1',
     'promptUISrc': '/test/manual/diy-consent.html',
   };
+
+  CMP_CONFIG['didomi'] = {
+    'consentInstanceId': 'didomi',
+    'checkConsentHref': 'https://api.privacy-center.org/amp/check-consent',
+    'promptUISrc': 'https://sdk-amp.privacy-center.org/loader.html',
+  };
 }
