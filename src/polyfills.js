@@ -45,7 +45,8 @@ installGetBoundingClientRect(self);
 // isExperimentOn() must be called after Object.assign polyfill is installed.
 // TODO(jridgewell): Ship custom-elements-v1. For now, we use this hack so it
 // is DCE'd from production builds.
-if ((false && isExperimentOn(self, 'custom-elements-v1')) || getMode().test) {
+if ((false && isExperimentOn(self, 'custom-elements-v1')) ||
+    (getMode().test && !getMode().testIe)) {
   installCustomElements(self);
 } else {
   installRegisterElement(self, 'auto');
