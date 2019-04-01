@@ -1,0 +1,239 @@
+<!doctype html>
+<html amp lang="en">
+  <head>
+    <meta charset="utf-8">
+    <script async custom-element="amp-live-list" src="https://cdn.ampproject.org/v0/amp-live-list-0.1.js"></script>
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script async custom-element="amp-story"
+        src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+    <script async custom-element="amp-video"
+        src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
+    <link href='https://fonts.googleapis.com/css?family=Georgia|Open+Sans|Roboto' rel='stylesheet' type='text/css'>
+    <link href="https://fonts.googleapis.com/css?family=Roboto+Condensed" rel="stylesheet">
+    <title>Live Story Demo</title>
+    <meta name="viewport"
+          content="width=device-width,minimum-scale=1,initial-scale=1">
+    <link rel="canonical" href="index.html">
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <style amp-custom>
+      body {
+        font-family: 'Roboto', sans-serif;
+        color: #fff;
+      }
+
+      amp-story-page {
+        background-color: #FFF;
+      }
+
+      .pretitle {
+        font-family: 'Roboto Condensed', sans-serif;
+        font-weight: normal;
+        font-size: 20px;
+        padding: 0 50px 0 0;
+      }
+
+      .title {
+        font-family: 'Roboto Condensed', sans-serif;
+        font-weight: normal;
+        font-size: 48px;
+        text-transform: uppercase;
+        line-height: 1em;
+      }
+
+      .title-small {
+        font-family: 'Roboto Condensed', sans-serif;
+        font-weight: normal;
+        font-size: 20px;
+        text-transform: uppercase;
+      }
+
+      .excerpt {
+        font-size: 13px;
+      }
+
+      .credit-container {
+        display: flex;
+        justify-content: space-between;
+      }
+
+      .credit {
+        font-size: 12px;
+        margin: 0;
+        color: rgba(255, 255, 255, 0.75);
+      }
+
+      .center {
+        text-align: center;
+      }
+
+      amp-img.center {
+        margin: 0 auto;
+      }
+
+      .vertical-center {
+        align-content: center;
+      }
+
+      .bottom {
+        align-content: end;
+      }
+
+      .text {
+        font-size: 15px;
+        line-height: 1.6em;
+        text-align: center;
+        padding: 0 4px;
+      }
+
+      amp-story-cta-layer .link {
+        position: absolute;
+        bottom: 40px;
+        color: #fff;
+        text-decoration: none;
+        background: rgba(255, 255, 255, 0.3);
+        padding: 6px 18px;
+        height: 26px;
+        line-height: 26px;
+        font-size: 14px;
+        border-radius: 32px;
+        border: 1px solid #FFF;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+
+      amp-story-cta-layer .link-filled {
+        position: absolute;
+        bottom: 40px;
+        color: #000;
+        text-decoration: none;
+        background: #FFF;
+        padding: 6px 18px;
+        height: 26px;
+        line-height: 26px;
+        font-size: 14px;
+        border-radius: 32px;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+
+      .blue-mask {
+        background: rgba(5, 35, 41, 0.70);
+      }
+
+      .bottom-gradient {
+        background: linear-gradient(to bottom, transparent, transparent 65%, rgba(0,0,0,0.8))
+      }
+
+      .blue-bottom-gradient {
+        background: linear-gradient(to bottom, transparent, transparent 25%, rgba(5, 35, 41, 0.75))
+      }
+
+      amp-story-grid-layer[template=vertical] {
+        grid-gap: 8px;
+      }
+      #btn {
+      position: fixed;
+      top: 0;
+      left: 0;
+      border-radius: 20px;
+      border: 1px solid blue;
+      line-height: 24px;
+      padding: 4px;
+      margin-top: 5px;
+      text-decoration: none;
+      background-color: orange;
+      cursor: pointer;
+    }
+    </style>
+    <script type="application/ld+json">
+      {
+        "@context": "http://schema.org",
+        "@type": "NewsArticle",
+        "mainEntityOfPage": {
+          "@type": "WebPage",
+          "@id": "./index.html"
+        },
+        "headline": "Fantasy Figures",
+        "image":["./assets/replay.jpg"],
+        "datePublished": "2018-01-01T00:00:00+00:00",
+        "dateModified": "2018-01-01T00:00:00+00:00",
+        "author": {
+          "@type": "Organization",
+          "name": "AMP Project"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "AMP Project",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "http://placehold.it/128x128"
+          }
+        },
+        "description": "Fantasy Figures"
+      }
+    </script>
+  </head>
+
+  <body>
+    <amp-story live-story poster-portrait-src="./assets/replay.jpg" publisher-logo-src="./assets/replay.jpg" publisher="Google Images" title="Fantasy Figures">
+      <amp-story-page id="cover" data-sort-time="1552330790">
+        <amp-story-grid-layer template="fill">
+          <amp-img layout="fill" src="./assets/GettyImages-1023059890.jpg"></amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical" class="bottom blue-bottom-gradient">
+          <p class="pretitle">Daegu International<br/> 2018 Bodypainting Festival</p>
+          <h1 class="title">FANTASY FIGURES</h1>
+          <p class="excerpt">Human canvases are transformed into mind-blowing works of art in South Korea.</p>
+          <div class="credit-container">
+            <p class="credit">August 27, 2018</p>
+            <p class="credit">Chung Sung-Jun/Getty Images</p>
+          </div>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="page1" data-sort-time="1552330791">
+        <amp-story-grid-layer template="fill">
+          <amp-img layout="fill" src="./assets/GettyImages-1023059890.jpg"></amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical" class="vertical-center blue-mask">
+          <p class="text">
+            The 2018 Daegu International Bodypainting Festival brought all the colors of the rainbow to Daegu, South Korea this weekend. Sixty-one teams representing 14 countries participated in the fantasy exhibition, where makeup artists turned models into walking works of art for the public’s viewing pleasure. Here, photos of some of this year’s most eye-catching creations.
+          </p>
+        </amp-story-grid-layer>
+        <amp-story-cta-layer class="center">
+          <a href="https://foto.gettyimages.com/news/culture/daegu-international-bodypainting-festival-2018-photos/" class="link">Read full story here</a>
+        </amp-story-cta-layer>
+        <amp-story-page-attachment layout="nodisplay">
+          <div>
+            <h1>Some really cool video</h1>
+              <p style="color: black">
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+              </p>
+          </div>
+        </amp-story-page-attachment>
+      </amp-story-page>
+
+      <amp-story-page id="page2" auto-advance-after="1027700750"
+        data-sort-time="1552330792">
+        <amp-story-grid-layer template="fill">
+          <amp-video id="1027700750" poster="./assets/GettyImages-1027700750poster.jpg" autoplay layout="fill">
+            <source src="./assets/GettyImages-1027700750.mp4" type="video/mp4" />
+          </amp-video>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical" class="bottom bottom-gradient">
+          <h1 class="title-small center">ARTISTIC TOUCH</h1>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="page3"
+        data-sort-time="1552330793">
+        <amp-story-grid-layer template="fill">
+          <amp-img layout="fill" src="./assets/GettyImages-1023059608.jpg"></amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical" class="bottom bottom-gradient">
+          <h1 class="title-small center">PAINTED AND POISED</h1>
+        </amp-story-grid-layer>
+      </amp-story-page>
+    </amp-story>
+  </body>
+</html>

@@ -18,18 +18,10 @@ import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-live-list-0.1.css';
 import {Layout} from '../../../src/layout';
 import {LiveListManager, liveListManagerForDoc} from './live-list-manager';
-import {childElementByAttr, childElementByTag, childElementsByTag} from '../../../src/dom';
+import {childElementByAttr, childElementsByTag} from '../../../src/dom';
+import {getChildJsonConfig} from '../../../src/json';
 import {isExperimentOn} from '../../../src/experiments';
-import {user, userAssert} from '../../../src/log';
-
-/**
- * Defines supported extensions with their equivalent 'items' children.
- */
-const supportedExtensions = {
-  'amp-story': 'amp-story-page',
-};
-
-const supportedExtensionsTagNames = Object.values(supportedExtensions);
+import {userAssert} from '../../../src/log';
 
 /**
  * @enum {string}
@@ -234,12 +226,7 @@ export class AmpLiveList extends AMP.BaseElement {
       this.isReverseOrder_ = this.element.getAttribute('sort') === 'ascending';
     }
 
-    // TODO: find better way to do this.
-    const reverseSortingDefault = supportedExtensionsTagNames.indexOf(
-        this.element.parentElement.tagName) > -1;
-    if (reverseSortingDefault) {
-      this.isReverseOrder_ = true;
-    }
+    this.customConfig_ = this.getCustomConfig_();
 
     this.manager_.register(this.liveListId_, this);
 
@@ -252,12 +239,22 @@ export class AmpLiveList extends AMP.BaseElement {
     this.curNumOfLiveItems_ = this.validateLiveListItems_(
         this.itemsSlot_.children, true);
 
-    // TODO: register syonym action only for amp-story.
+    // TODO: register syonym action only accessible by the runtime.
     this.registerDefaultAction(this.updateAction_.bind(this), 'update');
 
     if (!this.element.hasAttribute('aria-live')) {
       this.element.setAttribute('aria-live', 'polite');
     }
+  }
+
+  /**
+   * Gets custom configuration specified by extension.
+   */
+  getCustomConfig_() {
+    if (this.element.hasAttribute('i-amphtml-custom-list')) {
+      return getChildJsonConfig(this.element);
+    }
+    return false;
   }
 
   /** @override */
@@ -371,15 +368,14 @@ export class AmpLiveList extends AMP.BaseElement {
       });
     }
 
-    const disableScrolling = supportedExtensionsTagNames.indexOf(
-        parent.parentElement.tagName) > -1;
-    if (hasInsertItems && !disableScrolling) {
+
+    if (hasInsertItems &&
+      (this.customConfig_ && !this.customConfig_.disableScrolling)) {
       promise = promise.then(() => {
         const elementToScrollTo = this.isReverseOrder_ &&
           this.itemsSlot_.lastElementChild ?
           this.itemsSlot_.lastElementChild : this.element;
         const pos = this.isReverseOrder_ ? 'bottom' : 'top';
-
         return this.viewport_.animateScrollIntoView(elementToScrollTo, pos);
       });
     }
@@ -394,7 +390,12 @@ export class AmpLiveList extends AMP.BaseElement {
    * @private
    */
   toggleUpdateButton_(visible) {
-    // TODO: dispatch update action to amp-story system-layer.
+    if (this.customConfig_ && this.customConfig_.updateSlotEvent) {
+      const event = this.win.document.createEvent('Event');
+      event.initEvent(this.customConfig_.updateSlotEvent, true, true);
+      this.customConfig_.dispatchEvent(event);
+      return;
+    }
     this.updateSlot_.classList.toggle('amp-hidden', !visible);
     this.updateSlot_.classList.toggle('amp-active', visible);
   }
@@ -434,18 +435,9 @@ export class AmpLiveList extends AMP.BaseElement {
             const child = this.itemsSlot_.children[i];
             const childSortTime = this.getSortTime_(child);
             if (orphanSortTime >= childSortTime) {
-              const nextElementSibling = this.itemsSlot_.children[i - 1];
-              if (nextElementSibling) {
-                this.itemsSlot_.container.insertBefore(orphan,
-                    nextElementSibling);
-                count++;
-                break;
-              } else {
-                // What if there's a <bookend> in between the pages?
-                this.itemsSlot_.container.appendChild(orphan);
-                count++;
-                break;
-              }
+              this.itemsSlot_.container.insertBefore(orphan,
+                  child.nextElementSibling);
+              count++;
             // If we've exhausted the list it should be appended as the first
             // item.
             } else if (!child.previousElementSibling) {
@@ -471,8 +463,8 @@ export class AmpLiveList extends AMP.BaseElement {
             // We've exhausted the children list and the current orphan
             // can be the last item.
             } else if (i + 1 >= this.itemsSlot_.children.length) {
-              // What if there's a <bookend> in between the pages?
-              this.itemsSlot_.container.appendChild(orphan);
+              this.itemsSlot_.container.insertBefore(orphan,
+                  child.nextElementSibling);
               count++;
               break;
             }
@@ -850,15 +842,12 @@ export class AmpLiveList extends AMP.BaseElement {
   }
 
   /**
-   * @param {!Element} parent
+   * @param {?Element} parent
    * @private
    */
   getUpdateSlot_(parent) {
-    // TODO: find better way to do this.
-    if (supportedExtensionsTagNames.indexOf(
-        parent.parentElement.tagName) > -1) {
-      // TODO: return dispatcher that will notify amp-story system-layer about
-      // new update.
+    if (this.customConfig_ && this.customConfig_.updateSlotEvent) {
+      return this.customConfig_.container;
     }
     return childElementByAttr(parent, 'update');
   }
@@ -870,13 +859,14 @@ export class AmpLiveList extends AMP.BaseElement {
    */
   getItemsSlot_(parent) {
     const obj = {};
-    if (supportedExtensionsTagNames.indexOf(
-        parent.parentElement.tagName) > -1) {
-      obj.container = parent.parentElement; // amp-story
-      obj.children = childElementsByTag(obj.container, 'amp-story-page');
+    if (this.customConfig_) {
+      obj.container = childElementsByTag(this.win.document.body,
+          this.customConfig_.container);
+      obj.children = childElementsByTag(obj.container,
+          this.customConfig_.children);
       return obj;
     }
-    obj.container = childElementByAttr(parent, 'items'); // amp-live-list
+    obj.container = childElementByAttr(parent, 'items');
     obj.children = obj.container.children;
     return obj;
   }
@@ -887,9 +877,7 @@ export class AmpLiveList extends AMP.BaseElement {
    * @private
    */
   getPaginationSlot_(parent) {
-    // TODO: find better way to do this.
-    if (supportedExtensionsTagNames.indexOf(
-        parent.parentElement.tagName) > -1) {
+    if (this.customConfig_ && this.customConfig_.disableScrolling) {
       return null;
     }
     return childElementByAttr(parent, 'pagination');

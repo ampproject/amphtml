@@ -389,6 +389,7 @@ export class AmpStory extends AMP.BaseElement {
     this.initializeStyles_();
     this.initializeListeners_();
     this.initializeListenersForDev_();
+    this.initializeLiveList_();
 
     this.storeService_.dispatch(Action.TOGGLE_UI, this.getUIType_());
 
@@ -410,6 +411,35 @@ export class AmpStory extends AMP.BaseElement {
           this.switchTo_(args['id'], NavigationDirection.NEXT);
         }
       });
+    }
+  }
+
+  /**
+   * Initializes an amp-live-list component if specified by publisher.
+   * @private
+   */
+  initializeLiveList_() {
+    if (this.element.hasAttribute('live-story')) {
+      const liveListEl = createElementWithAttributes(this.win.document,
+          'amp-live-list', dict({
+            'id': 'amp-story-live-list',
+            'data-poll-interval': this.element.getAttribute('live-story'),
+            'sort': 'ascending',
+            'i-amphtml-custom-list': '',
+          }));
+
+      const configEl = createElementWithAttributes(this.win.document,
+          'script', dict({'type': 'application/json'}));
+      configEl.textContent = {
+        'container': 'amp-story',
+        'children': 'amp-story-page',
+        'disableScrolling': true,
+        'disablePagination': true,
+        'updateEvent': EventType.UPDATE_STORY_LIVE_LIST,
+      };
+      liveListEl.appendChild(configEl);
+
+      this.element.insertBefore(liveListEl, this.element.firstElementChild);
     }
   }
 
