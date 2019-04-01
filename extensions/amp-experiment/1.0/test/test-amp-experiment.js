@@ -17,10 +17,12 @@
 import * as variant from '../variant';
 import {AmpExperiment} from '../amp-experiment';
 import {Services} from '../../../../src/services';
+import {toggleExperiment} from '../../../../src/experiments';
 
 describes.realWin('amp-experiment', {
   amp: {
     extensions: ['amp-experiment:1.0'],
+
   },
 }, env => {
 
@@ -67,6 +69,9 @@ describes.realWin('amp-experiment', {
     win = env.win;
     doc = win.document;
     ampdoc = env.ampdoc;
+
+    toggleExperiment(win, 'amp-experiment-1.0', true);
+
     const el = doc.createElement('amp-experiment');
     el.ampdoc_ = ampdoc;
     experiment = new AmpExperiment(el);

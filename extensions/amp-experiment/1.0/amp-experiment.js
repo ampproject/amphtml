@@ -19,9 +19,15 @@ import {
   Variants,
   allocateVariant,
 } from './variant';
-import {devAssert, userAssert} from '../../../src/log';
+import {devAssert, user, userAssert} from '../../../src/log';
 import {getServicePromiseForDoc} from '../../../src/service';
+import {
+  installOriginExperimentsForDoc,
+  originExperimentsForDoc,
+} from '../../../src/service/origin-experiments-impl';
+import {isExperimentOn} from '../../../src/experiments';
 import {parseJson} from '../../../src/json';
+
 
 const TAG = 'amp-experiment';
 
@@ -34,31 +40,51 @@ export class AmpExperiment extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    return getServicePromiseForDoc(this.getAmpDoc(), 'variant')
-        .then(variantsService => {
-          try {
-            const config = this.getConfig_();
-            const results = Object.create(null);
-            const variants = Object.keys(config).map(experimentName => {
-              return allocateVariant(
-                  this.getAmpDoc(), experimentName, config[experimentName])
-                  .then(variantName => {
-                    results[experimentName] = variantName;
-                  });
-            });
 
-            /** @private @const {!Promise<!Object<string, ?string>>} */
-            const experimentVariants = Promise.all(variants)
-                .then(() => results)
-                .then(this.applyExperimentVariants_.bind(this, config));
+    const buildCallbackPromises = [
+      getServicePromiseForDoc(this.getAmpDoc(), 'variant'),
+      this.isExperimentEnabled_(),
+    ];
 
-            variantsService.init(experimentVariants);
-          } catch (e) {
-            // Ensure downstream consumers don't wait for the promise forever.
-            variantsService.init(Promise.resolve({}));
-            throw e;
-          }
+    return Promise.all(buildCallbackPromises).then(responses => {
+      const variantsService = responses[0];
+      const enabled = responses[1];
+
+      if (!enabled) {
+        user().error(TAG, 'Experiment amp-experiment-1.0 is not enabled.');
+
+        // Ensure downstream consumers don't wait for the promise forever.
+        variantsService.init(Promise.resolve({}));
+
+        return Promise.reject(
+            'Experiment amp-experiment-1.0 is not enabled.'
+        );
+      }
+
+
+      try {
+        const config = this.getConfig_();
+        const results = Object.create(null);
+        const variants = Object.keys(config).map(experimentName => {
+          return allocateVariant(
+              this.getAmpDoc(), experimentName, config[experimentName])
+              .then(variantName => {
+                results[experimentName] = variantName;
+              });
         });
+
+        /** @private @const {!Promise<!Object<string, ?string>>} */
+        const experimentVariants = Promise.all(variants)
+            .then(() => results)
+            .then(this.applyExperimentVariants_.bind(this, config));
+
+        variantsService.init(experimentVariants);
+      } catch (e) {
+        // Ensure downstream consumers don't wait for the promise forever.
+        variantsService.init(Promise.resolve({}));
+        throw e;
+      }
+    });
   }
 
   /**
@@ -147,6 +173,27 @@ export class AmpExperiment extends AMP.BaseElement {
       // This is a NOOP
       variantObject[experimentName] = experimentName;
     });
+  }
+
+  /**
+   * Function to check if recaptcha experiment is enabled,
+   * through origin trial, or AMP.toggleExperiment
+   * @return {!Promise<boolean>}
+   */
+  isExperimentEnabled_() {
+
+    // Check if we are enabled by AMP.toggleExperiment
+    if (isExperimentOn(this.win, 'amp-experiment-1.0')) {
+      return Promise.resolve(true);
+    }
+
+    // Check if we are enabled by an origin trial
+    installOriginExperimentsForDoc(this.getAmpDoc());
+    return originExperimentsForDoc(this.element)
+        .getExperiments()
+        .then(trials => {
+          return trials && trials.includes('amp-experiment-1.0');
+        });
   }
 }
 
