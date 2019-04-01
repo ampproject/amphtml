@@ -16,6 +16,7 @@
 
 import {AccessSource, AccessType} from './amp-access-source';
 import {AccessVars} from './access-vars';
+import {ActionTrust} from '../../../src/action-constants';
 import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-access-0.1.css';
 import {Observable} from '../../../src/observable';
@@ -652,6 +653,9 @@ export class AccessService {
    * @private
    */
   handleAction_(invocation) {
+    if (!invocation.satisfiesTrust(ActionTrust.HIGH)) {
+      return;
+    }
     if (invocation.method == 'login') {
       if (invocation.event) {
         invocation.event.preventDefault();
