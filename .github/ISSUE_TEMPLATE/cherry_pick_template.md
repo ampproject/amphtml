@@ -1,14 +1,13 @@
 ---
 name: Cherry-pick template
 about: Used to request a cherry-pick. See bit.ly/amp-cherry-pick
-title: "\U0001F338 Cherry-pick request for #<ISSUE_NUMBER> into #<RELEASE_ISSUE>
-  (Pending)"
+title: "\U0001F338 Cherry-pick request for #<ISSUE_NUMBER> into #<RELEASE_ISSUE> (Pending)"
 labels: 'Type: Release'
 assignees: cramforce
 ---
 
 <!--
-Replace *everything* in square brackets in the title AND body of this issue.
+Replace *everything* in angle brackets in the title AND body of this issue.
 
 If you have any questions see the [cherry-pick documentation](https://github.com/ampproject/amphtml/blob/master/contributing/release-schedule.md#cherry-picks).
 -->
@@ -23,26 +22,26 @@ Release issues: https://github.com/ampproject/amphtml/labels/Type%3A%20Release
 
 | Issue | PR  | Production? | RC? | Release issue |
 | :---: | :-: | :---------: | :-: | :-----------: |
-| #[_Issue number_] | #[_PR number_] | **[Y/N]** | **[Y/N]** | #[_Release issue_] |
+| #<_ISSUE_NUMBER_> | #<_PR_NUMBER_> | **<Y/N>** | **<Y/N>** | #<_RELEASE_ISSUE_> |
 
 ## Why does this issue meet the [cherry-pick criteria](https://github.com/ampproject/amphtml/blob/master/contributing/release-schedule.md#cherry-pick-criteria)?
 
 <!-- Be specific. -->
-[_Your reasons_]
+<_YOUR_REASONS_>
 
 <!--
 IF: Cherry-picking into production but _not_ RC.
 -->
 ## Why is a RC cherry-pick not needed?
 
-[_Your reasons_]
+<_YOUR_REASONS_>
 
 <!-- NOTE: Filling out this mini-PM template is required after the deployment of a production cherry-pick. -->
 # Mini-postmortem
 
 | Users affected | Impact |
 | -------------- | ------ |
-| [_Which users were affected? Roughly how many?_] | [_How were users affected? E.g. partial or complete loss of functionality?_] |
+| <_Which users were affected? Roughly how many?_> | <_How were users affected? E.g. partial or complete loss of functionality?_> |
 
 ## Root Causes
 
@@ -54,7 +53,7 @@ IF: Cherry-picking into production but _not_ RC.
 
 | Action Item | Type | Owner | PR # |
 | ----------- | :--: | :---: | :--: |
-| [_E.g. add integration test_] | [_Investigate/Mitigate/Prevent_] | @[_Username_] | #[_Issue_] |
+| <_E.g. Add integration test_> | <_Investigate/Mitigate/Prevent_> | @<_USERNAME_> | #<_PR_NUMBER_> |
 
 ## Lessons Learned
 
