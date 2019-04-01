@@ -40,7 +40,6 @@ export class AmpLinkRewriter extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.configOpts_ = getConfigOpts(this.element);
     const viewer = Services.viewerForDoc(this.ampDoc_);
 
     /**
