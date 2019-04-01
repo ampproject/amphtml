@@ -1025,7 +1025,8 @@ describes.fakeWin('AccessService refresh', {
         .withExactArgs()
         .once();
     const event = {preventDefault: sandbox.spy()};
-    service.handleAction_({method: 'refresh', event});
+    const invocation = {method: 'refresh', event, satisfiesTrust: () => true};
+    service.handleAction_(invocation);
     expect(event.preventDefault).to.be.calledOnce;
   });
 });
@@ -1041,6 +1042,7 @@ describes.fakeWin('AccessService login', {
   let serviceMock;
   let sourceMock;
   let service;
+  let satisfiesTrust;
 
   beforeEach(() => {
     win = env.win;
@@ -1083,6 +1085,8 @@ describes.fakeWin('AccessService login', {
       isVisible: () => true,
       onVisibilityChanged: () => {},
     };
+
+    satisfiesTrust = () => true;
   });
 
   afterEach(() => {
@@ -1096,7 +1100,7 @@ describes.fakeWin('AccessService login', {
         .withExactArgs('')
         .once();
     const event = {preventDefault: sandbox.spy()};
-    service.handleAction_({method: 'login', event});
+    service.handleAction_({method: 'login', event, satisfiesTrust});
     expect(event.preventDefault).to.be.calledOnce;
   });
 
@@ -1105,7 +1109,7 @@ describes.fakeWin('AccessService login', {
         .withExactArgs('other')
         .once();
     const event = {preventDefault: sandbox.spy()};
-    service.handleAction_({method: 'login-other', event});
+    service.handleAction_({method: 'login-other', event, satisfiesTrust});
     expect(event.preventDefault).to.be.calledOnce;
   });
 
