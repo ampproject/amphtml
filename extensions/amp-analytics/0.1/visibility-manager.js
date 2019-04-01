@@ -355,7 +355,6 @@ export class VisibilityManager {
 
     const viewport = Services.viewportForDoc(this.ampdoc);
     const scrollDepth = viewport.getScrollTop();
-    model.maybeSetInitialScrollDepth(scrollDepth);
     this.maybeUpdateMaxScrollDepth(scrollDepth);
 
     // Block visibility.
@@ -363,7 +362,10 @@ export class VisibilityManager {
       model.setReady(false);
       readyPromise.then(() => {
         model.setReady(true);
+        model.maybeSetInitialScrollDepth(scrollDepth);
       });
+    } else {
+      model.maybeSetInitialScrollDepth(scrollDepth);
     }
 
     // Process the event.
