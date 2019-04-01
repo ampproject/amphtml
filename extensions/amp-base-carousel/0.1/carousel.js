@@ -838,24 +838,24 @@ export class Carousel {
    * @private
    */
   resetScrollReferencePoint_(force = false) {
-    const hasRequestedIndex = this.requestedIndex_ !== null;
-
     // Make sure if the user is in the middle of a drag, we do not move
     // anything.
     if (this.touching_) {
       return;
     }
 
-    // We are still on the same slide, so nothing needs to move.
+    // If we are still on the same slide, nothing needs to move. If there is
+    // a programmatic scroll to an index, we may need to move things
+    // accordingly.
     if (this.restingIndex_ == this.currentIndex_ &&
-        !force &&
-        !hasRequestedIndex) {
+        this.requestedIndex_ != null &&
+        !force) {
       return;
     }
 
     // We are updating during a programmatic scroll, so go to the correct
     // index.
-    if (hasRequestedIndex) {
+    if (this.requestedIndex_ != null) {
       this.currentIndex_ = this.requestedIndex_;
       this.requestedIndex_ = null;
     }
