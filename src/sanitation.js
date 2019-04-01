@@ -209,7 +209,7 @@ const INVALID_INLINE_STYLE_REGEX =
  * Whether the attribute/value is valid.
  * @param {string} tagName Lowercase tag name.
  * @param {string} attrName Lowercase attribute name.
- * @param {string} attrValue
+ * @param {string} attrValue Lowercase attribute value
  * @param {!Document} doc
  * @param {boolean} opt_purify Is true, skips some attribute sanitizations
  *     that are already covered by DOMPurify.
@@ -249,35 +249,34 @@ export function isValidAttr(
     return false;
   }
 
-  const attrBlacklist = BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES[tagName];
-  let attrNameBlacklist = BLACKLISTED_TAG_SPECIFIC_ATTRS[tagName];
-  let amp4EmailAttrBlacklist;
-
-  if (isAmp4Email(doc)) {
-    amp4EmailAttrBlacklist =
-        AMP4EMAIL_BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES[tagName];
-    // AMP4Email adds additional tag attrs that need to be blacklisted.
-    attrNameBlacklist = (/** @type {!JsonObject} */ (Object.assign(
-        {'form': ['name'], 'amp-anim': ['controls']}, attrNameBlacklist)))
-        [tagName];
-  }
-
   // Remove blacklisted attributes from specific tags e.g. input[formaction].
-  if (attrNameBlacklist && attrNameBlacklist.indexOf(attrName) != -1) {
+  let attrBlacklist = BLACKLISTED_TAG_SPECIFIC_ATTRS[tagName] || [];
+  if (isAmp4Email(doc)) {
+    const amp4EmailAttrBlacklist =
+        {'form': ['name'], 'amp-anim': ['controls']}[tagName] || [];
+    attrBlacklist = attrBlacklist.concat(amp4EmailAttrBlacklist);
+  }
+  if (attrBlacklist.indexOf(attrName) != -1) {
     return false;
   }
 
   // Remove blacklisted values for specific attributes for specific tags
   // e.g. input[type=image].
-  if (attrBlacklist) {
-    let blacklistedValues = attrBlacklist[attrName] || [];
-    if (amp4EmailAttrBlacklist) {
-      blacklistedValues =
-          blacklistedValues.concat(amp4EmailAttrBlacklist[attrName] || []);
+  const attrValueBlacklist =
+      BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES[tagName] || dict();
+  let blacklistedValues = attrValueBlacklist[attrName] || [];
+  if (isAmp4Email(doc)) {
+    const amp4EmailAttrValueBlacklist =
+        AMP4EMAIL_BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES[tagName];
+    if (amp4EmailAttrValueBlacklist) {
+      const blacklistAmp4EmailValues =
+          amp4EmailAttrValueBlacklist[attrName] || [];
+      blacklistedValues = blacklistedValues.concat(blacklistAmp4EmailValues);
     }
-    if (blacklistedValues.includes(attrValue)) {
-      return false;
-    }
+  }
+
+  if (blacklistedValues.indexOf(attrValue) != -1) {
+    return false;
   }
 
   return true;

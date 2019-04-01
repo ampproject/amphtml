@@ -252,7 +252,7 @@ export function addPurifyHooks(purifier, diffing, doc) {
       disableDiffingFor(node);
     }
 
-    if (isValidAttr(tagName, attrName, attrValue,
+    if (isValidAttr(tagName, attrName.toLowerCase(), attrValue.toLowerCase(),
         /* doc */ doc, /* opt_purify */ true)) {
       if (attrValue && !startsWith(attrName, 'data-amp-bind-')) {
         attrValue = rewriteAttributeValue(tagName, attrName, attrValue);

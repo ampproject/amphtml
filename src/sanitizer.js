@@ -204,8 +204,8 @@ export function sanitizeHtml(html, doc, diffing) {
       emit('<');
       emit(tagName);
       for (let i = 0; i < attribs.length; i += 2) {
-        const attrName = attribs[i];
-        const attrValue = attribs[i + 1];
+        const attrName = attribs[i].toLowerCase();
+        const attrValue = attribs[i + 1].toLowerCase();
         if (!isValidAttr(tagName, attrName, attrValue, doc, false)) {
           user().error(TAG, `Removing "${attrName}" attribute with invalid `
               + `value in <${tagName} ${attrName}="${attrValue}">.`);
