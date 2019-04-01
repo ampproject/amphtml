@@ -29,12 +29,12 @@
 <amp-link-rewriter layout="nodisplay">
   <script type="application/json">
     {
-      "output": "https://visit.digidip.net?pid=110&url=${href}&cid=${data.customerId}&mid=${data.merchantId}&ref=DOCUMENT_REFERRER&location=SOURCE_URL&rel=${rel}",
+      "output": "https://visit.foo.net?pid=110&url=${href}&cid=${data.customerId}&mid=${data.merchantId}&ref=DOCUMENT_REFERRER&location=SOURCE_URL&rel=${rel}",
       "section": [
         "#track-section"
       ],
       "attribute": {
-        "href": "((?!\bgmail\\.com\b|\byoutube\\.com\b).)*",
+        "href": "((?!\bskip\\.com\b).)*",
         "class": "content"
       },
       "vars": {

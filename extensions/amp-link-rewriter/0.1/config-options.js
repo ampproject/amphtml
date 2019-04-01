@@ -21,8 +21,13 @@ import {
 } from '../../../src/log';
 
 /**
+ * @typedef {{output: string, section:Array, attribute:Object, vars:Object}}
+ */
+let ConfigOptsDef;
+
+/**
  * @param {!AmpElement} element
- * @return {!{output: string, section:Array, attribute:Object, vars:Object}}
+ * @return {!ConfigOptsDef}
  */
 export function getConfigOpts(element) {
 

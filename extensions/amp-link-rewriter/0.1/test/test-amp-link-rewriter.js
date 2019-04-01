@@ -21,27 +21,28 @@ import helpersMaker from './test-helpers';
 
 describes.fakeWin('amp-link-rewriter', {
   win: {
-    location: 'http://mydealz.com/123',
+    location: 'http://partnersite.com/123',
   },
   amp: {
     extensions: ['amp-link-rewriter'],
   },
 }, env => {
 
-  let config, helpers, mockedHtml;
+  let config, helpers, mockedHtml, win;
 
   beforeEach(() => {
+    win = env.win;
 
     helpers = helpersMaker(env);
 
     config = {
-      'output': 'https://visit.digidip.net/visit?pid=110&url=${href}&cid=${customerId}&ref=DOCUMENT_REFERRER&location=SOURCE_URL&rel=${rel}&productId=${eventId}',
+      'output': 'https://visit.foo.net/visit?pid=110&url=${href}&cid=${customerId}&ref=DOCUMENT_REFERRER&location=SOURCE_URL&rel=${rel}&productId=${eventId}',
       'section': [
         '#track-section',
       ],
       'attribute': {
         'class': 'sidebar',
-        'href': '((?!\\bgmail\\.com\\b).)*',
+        'href': '((?!\\bskip\\.com\\b).)*',
       },
       'vars': {
         'customerId': '12345',
@@ -49,11 +50,11 @@ describes.fakeWin('amp-link-rewriter', {
     };
 
     mockedHtml = '<div>' +
-      '<a class="sidebar" href="http://youtube.com">you tube</a>' +
+      '<a class="sidebar" href="http://example.com">Example</a>' +
       '</div>' +
       '<div id="track-section">' +
-      '<a class="sidebar" href="http://vendor.com">Vendor1</a>' +
-      '<a class="sidebar" href="https://gmail.com">Vendor2</a>' +
+      '<a class="sidebar" href="http://retailer1.com">Retailer 1</a>' +
+      '<a class="sidebar" href="https://skip.com">Retailer 2</a>' +
       '</div>';
   });
 
@@ -65,18 +66,17 @@ describes.fakeWin('amp-link-rewriter', {
     const linkRewriterElement = helpers.createLinkRewriterElement(config);
     env.ampdoc.getRootNode().body.appendChild(linkRewriterElement);
 
-    const rewriter = new LinkRewriter(linkRewriterElement, env.ampdoc);
+    const rewriter = new LinkRewriter('', linkRewriterElement, env.ampdoc);
 
-    const anchorElement = document.createElement('a');
+    const anchorElement = win.document.createElement('a');
 
     anchorElement.href = 'http://example.com';
     anchorElement.rel = '235';
     anchorElement.setAttribute('data-vars-event-id', '567');
 
-    rewriter.setListElements([anchorElement]);
     rewriter.handleClick(anchorElement);
     expect(anchorElement.href)
-        .to.equal('https://visit.digidip.net/visit?pid=110&url=http%3A%2F%2Fexample.com&cid=12345&ref=&location=http%3A%2F%2Fmydealz.com%2F123&rel=235&productId=567');
+        .to.equal('https://visit.foo.net/visit?pid=110&url=http%3A%2F%2Fexample.com&cid=12345&ref=&location=http%3A%2F%2Fpartnersite.com%2F123&rel=235&productId=567');
   });
 
   it('Should return the number of anchors that match the config', () => {
@@ -93,5 +93,4 @@ describes.fakeWin('amp-link-rewriter', {
 
     expect(list.length).to.equal(1);
   });
-
 });

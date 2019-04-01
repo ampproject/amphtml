@@ -56,13 +56,13 @@ Code:
 
         <script type="application/json">
                 {
-                    "output": "https://visit.digidip.net?pid=110&url=${href}&cid=${customerId}",
+                    "output": "https://visit.foo.net?pid=110&url=${href}&cid=${customerId}",
                     "section": [
                         "#product-listing-1",
                         "#product-listing-2",
                     ],
                     "attribute": {
-                        "href": "((?!(https:\/\/youtube\.com)|(https:\/\/mobile\.vodafone\.de)).)*",
+                        "href": "((?!(https:\/\/skip\.com)).)*",
                         "id": "comments",
                         "class": "sidebar",
                         "rel": "(?!(skip))*",
@@ -95,13 +95,13 @@ The final code should look like:
 
         <script type="application/json">
                 {
-                    "output": "https://visit.digidip.net?pid=110&url=${href}&cid=${customerId}",
+                    "output": "https://visit.foo.net?pid=110&url=${href}&cid=${customerId}",
                     "section": [
                         "#product-listing-1",
                         "#product-listing-2",
                     ],
                     "attribute": {
-                        "href": "`((?!(https:\/\/youtube\.com)|(https:\/\/mobile\.vodafone\.de)).)*`",
+                        "href": "`((?!(https:\/\/skip\.com)).)*`",
                         "id": "comments",
                         "class": "sidebar",
                         "rel": "(?!(skip))*",
@@ -131,7 +131,7 @@ Example:
 
         <script type="application/json">
                 {
-                    "output": "https://visit.digidip.net?pid=110&cid=${customerId}`",
+                    "output": "https://visit.foo.net?pid=110&cid=${customerId}`",
                     "vars": {
                         "customerId": "12345"
                     }
@@ -150,13 +150,13 @@ The config could be something like:
 
 ```json
     {
-      "output": "https://visit.digidip.net?eid=${eventId}&cid=${customerId}"
+      "output": "https://visit.foo.net?eid=${eventId}&cid=${customerId}"
 
     }
 ```
 The resulting, rewritten URL would be:
 ```url
-`https://visit.digidip.net?eid=231&cid=12345`
+`https://visit.foo.net?eid=231&cid=12345`
 ```
 
 Apart from vars defined in the *vars* property of the JSON configuration, or as a data attribute, there are other pre-defined *vars* which are AMP URL MACROs plus anchor attributes id and href that could be used for replacing values in the output pattern. The AMP URL MACROs available are DOCUMENT_REFERRER and SOURCE_URL. The following table shows the relationship between defined data and placeholders.
@@ -164,9 +164,9 @@ Apart from vars defined in the *vars* property of the JSON configuration, or as 
 | value          | source     |       example                                         |    placeholder       
 | -------------- | ---------- |-------------------------------------------------------|----------------------
 | data-vars-*    | anchor     |    `<a href="..." data-vars-merchant-id="123" />`     |  `${merchantId}`
-| href           | anchor     |    `<a href="https://amazon.com" />`                  |  `${href}`            
+| href           | anchor     |    `<a href="https://retailer.com" />`                  |  `${href}`            
 | id             | anchor     |    `<a href="..." id="link" />`                       |  `${id}`              
-| location       | page       |    `https://www.pepper.com/`                          |  `SOURCE_URL`        
+| location       | page       |    `https://www.partnerweb.com/`                          |  `SOURCE_URL`        
 | random         | page       |    `Math.random().toString(32).substr(2)`             |  `${random}`
 | referrer       | page       |    `https://google.de/`                               |  `DOCUMENT_REFERRER`        
 | rel            | anchor     |    `<a href="..." rel="pass" />`                      |  `${rel}`             
@@ -181,7 +181,7 @@ The "section" property defines an array of css selector expressions that filter 
 Example:
 ```json
      {
-        "output": "https://visit.digidip.net?pid=110&url=${href}&cid=${customerId}",
+        "output": "https://visit.foo.net?pid=110&url=${href}&cid=${customerId}",
         "section": [
             "#product-listing-1",
             "#product-listing-2"
@@ -203,7 +203,7 @@ Example:
                  "#product-listing-1"
              ],
       "attribute": {
-                        "href": "((?!(https:\/\/youtube\.com)|(https:\/\/mobile\.vodafone\.de)).)*",
+                        "href": "((?!(https:\/\/skip\.com)).)*",
                         "class": "comments"
                    }
     }

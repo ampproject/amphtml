@@ -13,12 +13,12 @@
 <amp-link-rewriter layout="nodisplay">
     <script type="application/json">
         {
-            "output": "https://visit.digidip.net/visit?pid=110&url=${href}&cid=${customerId}&mid=${merchantId}&ref=DOCUMENT_REFERRER&location=SOURCE_URL&rel=${rel}",
+            "output": "https://visit.foo.net/visit?pid=110&url=${href}&cid=${customerId}&mid=${merchantId}&ref=DOCUMENT_REFERRER&location=SOURCE_URL&rel=${rel}",
             "section": [
                 "#track-section"
             ],
             "attribute": {
-                "href": "((?!\bgmail\\.com\b|\byoutube\\.com\b).)*",
+                "href": "((?!\bskip-example\\.com\b|\balso-skip\\.com\b).)*",
                 "class": "content"
             },
             "vars": {
@@ -31,7 +31,7 @@
 </amp-link-rewriter>
 
 <p id="track-section">
-  <a class="content" href="https://www.amazon.de/dp/B01KU8Z8P8/">Stelton Theo Milk Jug</a>
+    <a class="content" href="https://www.amazon.de/dp/B01KU8Z8P8/">Stelton Theo Milk Jug</a>
 </p>
 
 </body>

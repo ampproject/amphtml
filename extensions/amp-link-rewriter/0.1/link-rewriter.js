@@ -17,6 +17,7 @@
 import {Services} from '../../../src/services';
 import {getConfigOpts} from './config-options';
 import {getDataParamsFromAttributes} from '../../../src/dom';
+import {getScopeElements} from './scope';
 
 const WL_ANCHOR_ATTR = [
   'href',
@@ -25,7 +26,7 @@ const WL_ANCHOR_ATTR = [
   'rev',
 ];
 const PREFIX_DATA_ATTR = /^vars(.+)/;
-const REG_DOMAIN_URL = /^https?:\/\/(www\.)?([^\/:]*)(:\d+)?(\/.*)?$/;
+const REG_DOMAIN_URL = /^(?:https?:)?(?:\/\/)?([^\/?]+)/i;
 const PAGE_PROP_WHITELIST = {
   'SOURCE_URL': true,
   'DOCUMENT_REFERRER': true,
@@ -33,21 +34,22 @@ const PAGE_PROP_WHITELIST = {
 
 export class LinkRewriter {
   /**
+   * @param {string} referrer
    * @param {!AmpElement} ampElement
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampDoc
    */
-  constructor(ampElement, ampDoc) {
+  constructor(referrer, ampElement, ampDoc) {
     /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampDoc_ = ampDoc;
-
-    /** @private {!../../../src/service/viewer-impl.Viewer} */
-    this.viewer_ = Services.viewerForDoc(this.ampDoc_);
 
     /** @private {?Object} */
     this.configOpts_ = getConfigOpts(ampElement);
 
-    /** @private {Array<!Element>|null} */
-    this.listElements_ = null;
+    /** @private {Array<!Element>} */
+    this.listElements_ = getScopeElements(this.ampDoc_, this.configOpts_);
+
+    /** @private {string} */
+    this.referrer_ = referrer;
 
     /** @private {string} */
     this.rewrittenUrl_ = '';
@@ -60,21 +62,26 @@ export class LinkRewriter {
    * @param {!Element} anchor
    */
   handleClick(anchor) {
+    if (!anchor) {
+      return;
+    }
+
     this.rewrittenUrl_ = this.configOpts_.output;
+
+    if (this.isRewritten_(anchor)) {
+      return;
+    }
 
     if (!this.isListed_(anchor)) {
       return;
     }
     const sourceTrimmedDomain = Services
         .documentInfoForDoc(this.ampDoc_)
-        .sourceUrl.match(/^(?:https?:)?(?:\/\/)?([^\/?]+)/i)[1];
+        .sourceUrl.match(REG_DOMAIN_URL)[1];
+
     const canonicalTrimmedDomain = Services
         .documentInfoForDoc(this.ampDoc_)
-        .canonicalUrl.match(/^(?:https?:)?(?:\/\/)?([^\/?]+)/i)[1];
-
-    if (!anchor) {
-      return;
-    }
+        .canonicalUrl.match(REG_DOMAIN_URL)[1];
 
     if (this.isInternalLink_(anchor,
         [sourceTrimmedDomain, canonicalTrimmedDomain])) {
@@ -82,6 +89,17 @@ export class LinkRewriter {
     }
 
     this.setRedirectUrl_(anchor);
+  }
+
+  /**
+   * Check if the anchor element was already shifted
+   * @param {!Element} anchor
+   * @return {boolean}
+   * @private
+   */
+  isRewritten_(anchor) {
+    return anchor.href.match(REG_DOMAIN_URL)[1] ===
+      this.rewrittenUrl_.match(REG_DOMAIN_URL)[1];
   }
 
   /**
@@ -111,23 +129,21 @@ export class LinkRewriter {
    * @return {boolean}
    */
   isInternalLink_(htmlElement, trimmedDomains) {
-    let result = true;
-    const href = htmlElement.getAttribute('href');
+    const {href} = htmlElement;
 
-    trimmedDomains.forEach(domain => {
-      result = result &&
-        !(href && REG_DOMAIN_URL.test(href) && RegExp.$2 !== domain);
+    return trimmedDomains.some(domain => {
+      const domainHrefMatch = href.match(REG_DOMAIN_URL);
+      if (!domainHrefMatch) {
+        return true;
+      }
+      return REG_DOMAIN_URL.test(href) && domainHrefMatch[1] === domain;
     });
-
-    return result;
   }
 
   /**
    * @param {!Element} htmlElement
    */
   setRedirectUrl_(htmlElement) {
-    const oldValHref = htmlElement.getAttribute('href');
-
     this.rewrittenUrl_ = this.replacePageProp_();
 
     const {vars} = this.configOpts_;
@@ -135,10 +151,6 @@ export class LinkRewriter {
     if (vars instanceof Object) {
       htmlElement.href = this.replaceVars_(htmlElement, vars);
     }
-
-    this.viewer_.win.setTimeout(() => {
-      htmlElement.href = oldValHref;
-    }, 500);
   }
 
   /**
@@ -148,7 +160,8 @@ export class LinkRewriter {
     return this.urlReplacementService_
         .expandUrlSync(
             this.rewrittenUrl_,
-            {},
+            /** expandUrlSync doesn't fill DOCUMENT_REFERRER so we pass it*/
+            {DOCUMENT_REFERRER: this.referrer_},
             undefined,
             PAGE_PROP_WHITELIST
         );
@@ -206,12 +219,5 @@ export class LinkRewriter {
           return '';
         });
     return this.rewrittenUrl_;
-  }
-
-  /**
-   * @param {!Array<!Element>|null} listElements
-   */
-  setListElements(listElements) {
-    this.listElements_ = listElements;
   }
 }
