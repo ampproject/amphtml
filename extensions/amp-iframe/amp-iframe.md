@@ -58,7 +58,7 @@ Displays an iframe.
     sandbox="allow-scripts allow-same-origin"
     layout="responsive"
     frameborder="0"
-    src="https://www.google.com/maps/embed/v1/place?key=AIzaSyDG9YXIhKBhqclZizcSzJ0ROiE0qgVfwzI&q=iceland">
+    src="https://www.google.com/maps/embed/v1/place?key=AIzaSyAyAS599A2GGPKTmtNr9CptD61LE4gN6oQ&q=iceland">
 </amp-iframe>
 ```
 
@@ -68,7 +68,7 @@ Renders as:
     sandbox="allow-scripts allow-same-origin"
     layout="responsive"
     frameborder="0"
-    src="https://www.google.com/maps/embed/v1/place?key=AIzaSyDG9YXIhKBhqclZizcSzJ0ROiE0qgVfwzI&q=iceland">
+    src="https://www.google.com/maps/embed/v1/place?key=AIzaSyAyAS599A2GGPKTmtNr9CptD61LE4gN6oQ&q=iceland">
 </amp-iframe>
 
 {% call callout('Tip', type='success') %}
