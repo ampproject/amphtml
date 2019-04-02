@@ -17,6 +17,7 @@
 import * as variant from '../variant';
 import {AmpExperiment} from '../amp-experiment';
 import {Services} from '../../../../src/services';
+import {toggleExperiment} from '../../../../src/experiments';
 
 describes.realWin('amp-experiment', {
   amp: {
@@ -62,12 +63,16 @@ describes.realWin('amp-experiment', {
   let win, doc;
   let ampdoc;
   let experiment;
+  let el;
 
   beforeEach(() => {
     win = env.win;
     doc = win.document;
     ampdoc = env.ampdoc;
-    const el = doc.createElement('amp-experiment');
+
+    toggleExperiment(win, 'amp-experiment-1.0', true);
+
+    el = doc.createElement('amp-experiment');
     el.ampdoc_ = ampdoc;
     experiment = new AmpExperiment(el);
   });
@@ -78,6 +83,18 @@ describes.realWin('amp-experiment', {
     child.textContent = opt_textContent || JSON.stringify(config);
     experiment.element.appendChild(child);
   }
+
+  it('Rejects because experiment is not enabled', () => {
+    toggleExperiment(win, 'amp-experiment-1.0', false);
+
+    expectAsyncConsoleError(/Experiment/);
+    addConfigElement('script');
+    doc.body.appendChild(el);
+    return experiment.buildCallback()
+        .should.eventually.be.rejectedWith(
+            /Experiment/
+        );
+  });
 
   it('should not throw on valid config', () => {
     expect(() => {
