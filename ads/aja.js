@@ -37,6 +37,8 @@ export function aja(global, data) {
   elStyle.setAttribute('marginwidth', '0');
   elStyle.setAttribute('allowfullscreen', 'true');
   elStyle.setAttribute('scrolling', 'no');
+  elStyle.setAttribute('sandbox', 'allow-same-origin allow-top-navigation allow-scripts allow-popups');
+  elStyle.setAttribute('potision', 'absolute');
   elStyle.src = 'https://static.aja-recommend.com/html/amp.html?ssp_code=' + encodeURIComponent(data['sspCode']);
   global.document.body.appendChild(elStyle);
 
