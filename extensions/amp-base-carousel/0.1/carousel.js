@@ -229,9 +229,9 @@ export class Carousel {
 
     /**
      * Keeps track of an index that was requested to be scrolled to
-     * prograatically. This is used to make sure that the carousel ends on the
-     * right slide if a UI update was requested during a programmatic scroll.
-     * This is cleared when the user manually scrolls.
+     * programmatically. This is used to make sure that the carousel ends on
+     * the  right slide if a UI update was requested during a programmatic
+     * scroll. This is cleared when the user manually scrolls.
      * @private {number?}
      */
     this.requestedIndex_ = null;
@@ -239,7 +239,7 @@ export class Carousel {
     /**
     * The reference index where the the scrollable area last stopped
     * scrolling. This slide is not translated and other slides are translated
-    * to move before  or after as needed. This is also used when looping to
+    * to move before or after as needed. This is also used when looping to
     * prevent a single swipe from wrapping past the starting point.
     * @private {number}
     */
@@ -555,15 +555,15 @@ export class Carousel {
   }
 
   /**
-   * Updates the current index as well as firing an event.
-   * @param {number} currentIndex The new current index.
+   * Updates the resting index as well as firing an event.
+   * @param {number} restingIndex The new resting index.
    * @private
    */
-  updateCurrentIndex_(currentIndex) {
-    this.currentIndex_ = currentIndex;
+  updateRestingIndex_(restingIndex) {
+    this.restingIndex_ = restingIndex;
     this.element_.dispatchEvent(
         createCustomEvent(this.win_, 'indexchange', dict({
-          'index': currentIndex,
+          'index': restingIndex,
           'actionSource': this.actionSource_,
         })));
   }
@@ -844,9 +844,10 @@ export class Carousel {
       return;
     }
 
-    // If we are still on the same slide, nothing needs to move. If there is
-    // a programmatic scroll to an index, we may need to move things
-    // accordingly.
+    // Check if the resting index we are centered around is the same as where
+    // we stopped scrolling. If so, we do not want move anything or fire an
+    // event. If we have a programmatic scroll request, we still need to move
+    // to that index.
     if (this.restingIndex_ == this.currentIndex_ &&
         this.requestedIndex_ != null &&
         !force) {
@@ -863,8 +864,7 @@ export class Carousel {
     const totalLength = sum(this.getSlideLengths_());
 
     this.runMutate_(() => {
-      this.restingIndex_ = this.currentIndex_;
-      this.updateCurrentIndex_(this.restingIndex_);
+      this.updateRestingIndex_(this.currentIndex_);
 
       this.resetSlideTransforms_(totalLength);
       this.hideSpacersAndSlides_();
