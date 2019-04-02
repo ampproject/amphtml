@@ -19,7 +19,7 @@ import {ArticleComponent} from './components/article';
 import {CtaLinkComponent} from './components/cta-link';
 import {HeadingComponent} from './components/heading';
 import {LandscapeComponent} from './components/landscape';
-import {LocalizedStringId} from '../localization';
+import {LocalizedStringId} from '../../../../src/localized-strings';
 import {PortraitComponent} from './components/portrait';
 import {TextBoxComponent} from './components/text-box';
 import {dev} from '../../../../src/log';
@@ -107,7 +107,7 @@ function componentBuilderInstanceFor(type) {
  * Prepend a heading to the related articles section if first component is not a
  * heading already.
  * @param {!Array<BookendComponentDef>} components
- * @param {?../localization.LocalizationService} localizationService
+ * @param {?../../../../src/service/localization.LocalizationService} localizationService
  * @return {!Array<BookendComponentDef>}
  */
 function prependTitle(components, localizationService) {
@@ -153,7 +153,7 @@ export class BookendComponent {
    * class and appending the elements to the container.
    * @param {!Array<BookendComponentDef>} components
    * @param {!Document} doc
-   * @param {?../localization.LocalizationService} localizationService
+   * @param {?../../../../src/service/localization.LocalizationService} localizationService
    * @return {!DocumentFragment}
    */
   static buildElements(components, doc, localizationService) {

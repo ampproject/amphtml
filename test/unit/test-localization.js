@@ -16,10 +16,12 @@
 
 import {
   LocalizationService,
+  getLanguageCodesFromString,
+} from '../../src/service/localization';
+import {
   LocalizedStringId,
   createPseudoLocale,
-  getLanguageCodesFromString,
-} from '../localization';
+} from '../../src/localized-strings';
 
 describes.fakeWin('localization', {}, env => {
   describe('localized string IDs', () => {
@@ -101,7 +103,7 @@ describes.fakeWin('localization', {}, env => {
     });
   });
 
-  describe('en-XA pseudolocale', () => {
+  describe('pseudolocales', () => {
     it('should transform strings', () => {
       const originalStringBundle = {
         'test_string_id': {string: 'foo'},

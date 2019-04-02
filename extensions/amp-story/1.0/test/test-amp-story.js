@@ -27,7 +27,7 @@ import {AmpStory} from '../amp-story';
 import {AmpStoryBookend} from '../bookend/amp-story-bookend';
 import {AmpStoryConsent} from '../amp-story-consent';
 import {Keys} from '../../../../src/utils/key-codes';
-import {LocalizationService} from '../localization';
+import {LocalizationService} from '../../../../src/service/localization';
 import {MediaType} from '../media-pool';
 import {PageState} from '../amp-story-page';
 import {PaginationButtons} from '../pagination-buttons';

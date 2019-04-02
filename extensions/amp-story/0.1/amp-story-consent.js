@@ -18,7 +18,7 @@ import {Action} from './amp-story-store-service';
 import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-story-consent-0.1.css';
 import {Layout} from '../../../src/layout';
-import {LocalizedStringId} from './localization';
+import {LocalizedStringId} from '../../../src/localized-strings';
 import {Services} from '../../../src/services';
 import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
 import {

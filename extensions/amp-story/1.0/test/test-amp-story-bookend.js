@@ -20,7 +20,7 @@ import {AmpStoryRequestService} from '../amp-story-request-service';
 import {ArticleComponent} from '../bookend/components/article';
 import {CtaLinkComponent} from '../bookend/components/cta-link';
 import {LandscapeComponent} from '../bookend/components/landscape';
-import {LocalizationService} from '../localization';
+import {LocalizationService} from '../../../../src/service/localization';
 import {PortraitComponent} from '../bookend/components/portrait';
 import {Services} from '../../../../src/services';
 import {TextBoxComponent} from '../bookend/components/text-box';
