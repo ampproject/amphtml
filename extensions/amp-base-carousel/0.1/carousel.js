@@ -255,6 +255,15 @@ export class Carousel {
     this.touching_ = false;
 
     /**
+     * Whether or not there is a scroll in progress. This is tracked from the
+     * first scroll event, until RESET_SCROLL_REFERENCE_POINT_WAIT_MS after the
+     * last scroll event is received. This is used to prevent programmatic
+     * scroll requests while a scroll is in progress.
+     * @private {boolean}
+     */
+    this.scrolling_ = false;
+
+    /**
      * Tracks the source of what cause the carousel to change index. This can
      * be provided when moving the carousel programmatically, and the value
      * will be propagated.
@@ -335,19 +344,23 @@ export class Carousel {
    * @param {!ActionSource=} actionSource
    */
   advance(delta, actionSource) {
-    const {slides_: slides, currentIndex_} = this;
+    const {slides_, currentIndex_, requestedIndex_} = this;
 
-    const newIndex = currentIndex_ + delta;
-    const endIndex = slides.length - 1;
-    const atStart = currentIndex_ == 0;
-    const atEnd = currentIndex_ == endIndex;
+    // If we have a requested index, use that as the reference point. The
+    // current index may not be updated yet.This allows calling `advance`
+    // multiple times in a row and ending on the correct slide.
+    const index = requestedIndex_ != null ? requestedIndex_ : currentIndex_;
+    const newIndex = index + delta;
+    const endIndex = slides_.length - 1;
+    const atStart = index == 0;
+    const atEnd = index == endIndex;
     const passingStart = newIndex < 0;
     const passingEnd = newIndex > endIndex;
 
     let slideIndex;
     if (this.loop_) {
       slideIndex = mod(newIndex, endIndex + 1);
-    } else if (delta > 0 && this.inLastWindow_(currentIndex_) &&
+    } else if (delta > 0 && this.inLastWindow_(index) &&
         this.inLastWindow_(newIndex)) {
       slideIndex = 0;
     } else if ((passingStart && atStart) || (passingEnd && !atEnd)) {
@@ -383,6 +396,13 @@ export class Carousel {
     }
 
     if (index == this.currentIndex_) {
+      return;
+    }
+
+    // If the user is interacting with the carousel, either by touching or by
+    // a momentum scroll, ignore programmatic requests as the user's
+    // interaction is much more important.
+    if (this.touching_ || this.isUserScrolling_()) {
       return;
     }
 
@@ -569,8 +589,8 @@ export class Carousel {
   }
 
   /**
-   * Handles a touch start, preventing the restWindow_ from running until the
-   * user stops touching.
+   * Handles a touch start, preventing `resetScrollReferencePoint_` from
+   * running until the user stops touching.
    * @private
    */
   handleTouchStart_() {
@@ -606,8 +626,19 @@ export class Carousel {
       return;
     }
 
+    this.scrolling_ = true;
     this.updateCurrent_();
     this.debouncedResetScrollReferencePoint_();
+  }
+
+  /**
+   * @return {boolean} Whether or not the user is scrolling. For example, the
+   *    user flicked the carousel and there is a momentum scroll in progress.
+   */
+  isUserScrolling_() {
+    return this.scrolling_ && (
+      this.actionSource_ == ActionSource.TOUCH ||
+      this.actionSource_ == ActionSource.WHEEL);
   }
 
   /**
@@ -838,6 +869,8 @@ export class Carousel {
    * @private
    */
   resetScrollReferencePoint_(force = false) {
+    this.scrolling_ = false;
+
     // Make sure if the user is in the middle of a drag, we do not move
     // anything.
     if (this.touching_) {
