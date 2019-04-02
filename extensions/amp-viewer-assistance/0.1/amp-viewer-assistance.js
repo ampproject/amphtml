@@ -28,7 +28,7 @@ const TAG = 'amp-viewer-assistance';
 /** @const {string} */
 const GSI_TOKEN_PROVIDER = 'actions-on-google-gsi';
 
-/** @const {Array<string>} */
+/** @const {!Array<string>} */
 const ACTION_STATUS_WHITELIST = [
   'ACTIVE_ACTION_STATUS',
   'FAILED_ACTION_STATUS',
@@ -77,11 +77,13 @@ export class AmpViewerAssistance {
    */
   actionHandler_(invocation) {
     const {method, args} = invocation;
-    if (method == 'updateActionState' && args
-        && this.isValidActionStatusArgs_(args)) {
-      this.viewer_./*OK*/sendMessageAwaitResponse(method, args).catch(error => {
-        user().error(TAG, error.toString());
-      });
+    if (method == 'updateActionState') {
+      if (args && this.isValidActionStatusArgs_(args)) {
+        this.viewer_./*OK*/sendMessageAwaitResponse(method, args)
+            .catch(error => {
+              user().error(TAG, error.toString());
+            });
+      }
     } else if (method == 'signIn') {
       this.requestSignIn_();
     }
@@ -166,19 +168,20 @@ export class AmpViewerAssistance {
    */
   isValidActionStatusArgs_(args) {
     const update = args['update'];
-    if (!update || !update['actionStatus']) {
+    const actionStatus = update ? update['actionStatus'] : undefined;
+    if (!update || !actionStatus) {
       user().error(TAG, 'Invalid arguments for updateActionState! Must have' +
           ' an "update" object with an "actionStatus" field.');
       return false;
     }
 
-    if (!ACTION_STATUS_WHITELIST.includes(update['actionStatus'])) {
+    if (!ACTION_STATUS_WHITELIST.includes(actionStatus)) {
       user().error(TAG, 'Invalid actionStatus for updateActionState! '
-          + update['actionStatus']);
+          + actionStatus);
       return false;
     }
 
-    user().info(TAG, 'Sending actionStatus: ' + update['actionStatus']);
+    user().info(TAG, 'Sending actionStatus: ' + actionStatus);
     return true;
   }
 
