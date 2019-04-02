@@ -251,6 +251,8 @@ exports.rules = [
       // Story ads
       'extensions/amp-story-auto-ads/0.1/amp-story-auto-ads.js->extensions/amp-story/1.0/amp-story-store-service.js',
       'extensions/amp-story-auto-ads/0.1/amp-story-auto-ads.js->extensions/amp-story/1.0/navigation-state.js',
+      // TODO(ccordry): remove this after createShadowRootWithStyle is moved to src
+      'extensions/amp-story-auto-ads/0.1/amp-story-auto-ads.js->extensions/amp-story/1.0/utils.js',
 
       // Subscriptions.
       'extensions/amp-subscriptions/0.1/expr.js->extensions/amp-access/0.1/access-expr.js',
@@ -377,7 +379,151 @@ exports.rules = [
       // For action macros.
       'extensions/amp-action-macro/0.1/amp-action-macro.js->' +
             'src/service/action-impl.js',
-
+      // For localization.
+      'extensions/amp-story/0.1/amp-story.js->' +
+            'src/service/localization.js',
+      'extensions/amp-story/1.0/amp-story.js->' +
+            'src/service/localization.js',
+      'extensions/amp-story/1.0/_locales/af.js->' +
+          'src/service/localization.js',
+      'extensions/amp-story/1.0/_locales/am.js->' +
+          'src/service/localization.js',
+      'extensions/amp-story/1.0/_locales/ar.js->' +
+          'src/service/localization.js',
+      'extensions/amp-story/1.0/_locales/bg.js->' +
+          'src/service/localization.js',
+      'extensions/amp-story/1.0/_locales/bn.js->' +
+          'src/service/localization.js',
+      'extensions/amp-story/1.0/_locales/bs.js->' +
+          'src/service/localization.js',
+      'extensions/amp-story/1.0/_locales/ca.js->' +
+          'src/service/localization.js',
+      'extensions/amp-story/1.0/_locales/cs.js->' +
+          'src/service/localization.js',
+      'extensions/amp-story/1.0/_locales/da.js->' +
+          'src/service/localization.js',
+      'extensions/amp-story/1.0/_locales/de.js->' +
+          'src/service/localization.js',
+      'extensions/amp-story/1.0/_locales/default.js->' +
+          'src/service/localization.js',
+      'extensions/amp-story/1.0/_locales/el.js->' +
+          'src/service/localization.js',
+      'extensions/amp-story/1.0/_locales/en-GB.js->' +
+          'src/service/localization.js',
+      'extensions/amp-story/1.0/_locales/en.js->' +
+          'src/service/localization.js',
+      'extensions/amp-story/1.0/_locales/es-419.js->' +
+          'src/service/localization.js',
+      'extensions/amp-story/1.0/_locales/es.js->' +
+          'src/service/localization.js',
+      'extensions/amp-story/1.0/_locales/et.js->' +
+          'src/service/localization.js',
+      'extensions/amp-story/1.0/_locales/eu.js->' +
+          'src/service/localization.js',
+      'extensions/amp-story/1.0/_locales/fa.js->' +
+          'src/service/localization.js',
+      'extensions/amp-story/1.0/_locales/fi.js->' +
+          'src/service/localization.js',
+      'extensions/amp-story/1.0/_locales/fil.js->' +
+          'src/service/localization.js',
+      'extensions/amp-story/1.0/_locales/fr.js->' +
+          'src/service/localization.js',
+      'extensions/amp-story/1.0/_locales/gl.js->' +
+          'src/service/localization.js',
+      'extensions/amp-story/1.0/_locales/gu.js->' +
+          'src/service/localization.js',
+      'extensions/amp-story/1.0/_locales/hi.js->' +
+          'src/service/localization.js',
+      'extensions/amp-story/1.0/_locales/hr.js->' +
+          'src/service/localization.js',
+      'extensions/amp-story/1.0/_locales/hu.js->' +
+          'src/service/localization.js',
+      'extensions/amp-story/1.0/_locales/id.js->' +
+          'src/service/localization.js',
+      'extensions/amp-story/1.0/_locales/is.js->' +
+          'src/service/localization.js',
+      'extensions/amp-story/1.0/_locales/it.js->' +
+          'src/service/localization.js',
+      'extensions/amp-story/1.0/_locales/iw.js->' +
+          'src/service/localization.js',
+      'extensions/amp-story/1.0/_locales/ja.js->' +
+          'src/service/localization.js',
+      'extensions/amp-story/1.0/_locales/ka.js->' +
+          'src/service/localization.js',
+      'extensions/amp-story/1.0/_locales/km.js->' +
+          'src/service/localization.js',
+      'extensions/amp-story/1.0/_locales/kn.js->' +
+          'src/service/localization.js',
+      'extensions/amp-story/1.0/_locales/ko.js->' +
+          'src/service/localization.js',
+      'extensions/amp-story/1.0/_locales/lo.js->' +
+          'src/service/localization.js',
+      'extensions/amp-story/1.0/_locales/lt.js->' +
+          'src/service/localization.js',
+      'extensions/amp-story/1.0/_locales/lv.js->' +
+          'src/service/localization.js',
+      'extensions/amp-story/1.0/_locales/mk.js->' +
+          'src/service/localization.js',
+      'extensions/amp-story/1.0/_locales/ml.js->' +
+          'src/service/localization.js',
+      'extensions/amp-story/1.0/_locales/mn.js->' +
+          'src/service/localization.js',
+      'extensions/amp-story/1.0/_locales/mr.js->' +
+          'src/service/localization.js',
+      'extensions/amp-story/1.0/_locales/ms.js->' +
+          'src/service/localization.js',
+      'extensions/amp-story/1.0/_locales/my.js->' +
+          'src/service/localization.js',
+      'extensions/amp-story/1.0/_locales/ne.js->' +
+          'src/service/localization.js',
+      'extensions/amp-story/1.0/_locales/nl.js->' +
+          'src/service/localization.js',
+      'extensions/amp-story/1.0/_locales/no.js->' +
+          'src/service/localization.js',
+      'extensions/amp-story/1.0/_locales/pa.js->' +
+          'src/service/localization.js',
+      'extensions/amp-story/1.0/_locales/pt-BR.js->' +
+          'src/service/localization.js',
+      'extensions/amp-story/1.0/_locales/pt-PT.js->' +
+          'src/service/localization.js',
+      'extensions/amp-story/1.0/_locales/ro.js->' +
+          'src/service/localization.js',
+      'extensions/amp-story/1.0/_locales/ru.js->' +
+          'src/service/localization.js',
+      'extensions/amp-story/1.0/_locales/si.js->' +
+          'src/service/localization.js',
+      'extensions/amp-story/1.0/_locales/sk.js->' +
+          'src/service/localization.js',
+      'extensions/amp-story/1.0/_locales/sl.js->' +
+          'src/service/localization.js',
+      'extensions/amp-story/1.0/_locales/sq.js->' +
+          'src/service/localization.js',
+      'extensions/amp-story/1.0/_locales/sr.js->' +
+          'src/service/localization.js',
+      'extensions/amp-story/1.0/_locales/sv.js->' +
+          'src/service/localization.js',
+      'extensions/amp-story/1.0/_locales/sw.js->' +
+          'src/service/localization.js',
+      'extensions/amp-story/1.0/_locales/ta.js->' +
+          'src/service/localization.js',
+      'extensions/amp-story/1.0/_locales/te.js->' +
+          'src/service/localization.js',
+      'extensions/amp-story/1.0/_locales/th.js->' +
+          'src/service/localization.js',
+      'extensions/amp-story/1.0/_locales/tr.js->' +
+          'src/service/localization.js',
+      'extensions/amp-story/1.0/_locales/uk.js->' +
+          'src/service/localization.js',
+      'extensions/amp-story/1.0/_locales/ur.js->' +
+          'src/service/localization.js',
+      'extensions/amp-story/1.0/_locales/vi.js->' +
+          'src/service/localization.js',
+      'extensions/amp-story/1.0/_locales/zh-CN.js->' +
+          'src/service/localization.js',
+      'extensions/amp-story/1.0/_locales/zh-TW.js->' +
+          'src/service/localization.js',
+      'extensions/amp-story/1.0/_locales/zu.js->' +
+          'src/service/localization.js',
     ],
   },
   {

@@ -918,8 +918,11 @@ amp-autocomplete > input,
     bottom: 0;
   }
 }
-@media only screen and (min-width: 980px) {
+@media only screen and (min-width: 979px) {
   amp-addthis[data-widget-type="floating"] {
-    display:none;
+    position: fixed !important;
+    width: 70px !important;
+    height: 320px!important;
+    top: 200px;
   }
 }
