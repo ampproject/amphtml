@@ -17,11 +17,11 @@
 import {
   LocalizationService,
   getLanguageCodesFromString,
-} from '../../../../src/service/localization';
+} from '../../src/service/localization';
 import {
   LocalizedStringId,
   createPseudoLocale,
-} from '../../../../src/localized-strings';
+} from '../../src/localized-strings';
 
 describes.fakeWin('localization', {}, env => {
   describe('localized string IDs', () => {
@@ -58,7 +58,7 @@ describes.fakeWin('localization', {}, env => {
   describe('localization service', () => {
     it('should get string text', () => {
       const localizationService = new LocalizationService(env.win);
-      localizationService.registerLocalizedStringBundle('default', {
+      localizationService.registerLocalizedStringBundle('en', {
         'test_string_id': {
           string: 'test string content',
         },
@@ -68,9 +68,34 @@ describes.fakeWin('localization', {}, env => {
           .to.equal('test string content');
     });
 
+    it('should utilize fallback if string is missing', () => {
+      const localizationService = new LocalizationService(env.win);
+      localizationService.registerLocalizedStringBundle('en', {
+        'test_string_id': {
+          fallback: 'test fallback content',
+        },
+      });
+
+      expect(localizationService.getLocalizedString('test_string_id'))
+          .to.equal('test fallback content');
+    });
+
+    it('should not utilize fallback if string is present', () => {
+      const localizationService = new LocalizationService(env.win);
+      localizationService.registerLocalizedStringBundle('en', {
+        'test_string_id': {
+          string: 'test string content',
+          fallback: 'test fallback content',
+        },
+      });
+
+      expect(localizationService.getLocalizedString('test_string_id'))
+          .to.equal('test string content');
+    });
+
     it('should have language fallbacks', () => {
-      expect(getLanguageCodesFromString('en-US-123')).to
-          .deep.equal(['en-us-123', 'en-us', 'en', 'default']);
+      expect(getLanguageCodesFromString('de-hi-1')).to
+          .deep.equal(['de-hi-1', 'de-hi', 'de', 'default']);
     });
 
     it('should default to English', () => {
@@ -78,7 +103,7 @@ describes.fakeWin('localization', {}, env => {
     });
   });
 
-  describe('en-XA pseudolocale', () => {
+  describe('pseudolocales', () => {
     it('should transform strings', () => {
       const originalStringBundle = {
         'test_string_id': {string: 'foo'},
