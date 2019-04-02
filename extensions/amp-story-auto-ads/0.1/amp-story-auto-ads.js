@@ -16,11 +16,11 @@
 
 import {CSS} from '../../../build/amp-story-auto-ads-0.1.css';
 import {CommonSignals} from '../../../src/common-signals';
+import {LocalizationService} from '../../../src/service/localization';
 import {
-  LocalizationService,
   LocalizedStringId,
   createPseudoLocale,
-} from '../../../src/services/localization';
+} from '../../../src/localized-strings';
 import {Services} from '../../../src/services';
 import {
   StateChangeEventDef,

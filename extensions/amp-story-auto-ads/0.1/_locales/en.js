@@ -16,7 +16,7 @@
 import {
   LocalizedStringBundleDef,
   LocalizedStringId,
-} from '../../../../src/services/localization';
+} from '../../../../src/localized-strings';
 
 
 /**
