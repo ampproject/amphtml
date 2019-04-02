@@ -152,7 +152,7 @@ export class AmpState extends AMP.BaseElement {
       policy = UrlReplacementPolicy.ALL;
     }
 
-    return getViewerAuthTokenIfAvailable(ampdoc.win, element).then(token =>
+    return getViewerAuthTokenIfAvailable(element).then(token =>
       this.fetch_(ampdoc, element, policy, opt_refresh, token)
     );
   }
