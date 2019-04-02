@@ -41,7 +41,7 @@ limitations under the License.
 
 ## Configuration
 
-For details on the configuration semantics, please contact the FreeWheel support team : clientsidesdk@freewheel.tv
+For details on the configuration semantics, please contact the FreeWheel support team : clientsidesdk@freewheel.tv 
 
 Supported parameters:  
 All parameters are optional, unless otherwise stated  
