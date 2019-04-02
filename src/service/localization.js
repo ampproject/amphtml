@@ -13,6 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+// The LocalizedStringId type is imported even though it is not used because the
+// compiler does not output types for enums, but we want to distinguish between
+// LocalizedStringId enum values and any other strings.
+// eslint-disable-next-line no-unused-vars
+import {LocalizedStringId} from '../localized-strings';
 import {closest} from '../dom';
 
 
@@ -129,18 +134,18 @@ export class LocalizationService {
 
 
   /**
-   * @param {!../localized-strings.LocalizedStringId} LocalizedStringId
+   * @param {!LocalizedStringId} localizedStringId
    * @param {!Element=} elementToUse The element where the string will be
    *     used.  The language is based on the language at that part of the
    *     document.  If unspecified, will use the document-level language, if
    *     one exists, or the default otherwise.
    */
-  getLocalizedString(LocalizedStringId, elementToUse = undefined) {
+  getLocalizedString(localizedStringId, elementToUse = undefined) {
     const languageCodes = elementToUse ?
       this.getLanguageCodesForElement_(elementToUse) :
       this.rootLanguageCodes_;
 
     return findLocalizedString(this.localizedStringBundles_, languageCodes,
-        LocalizedStringId);
+        localizedStringId);
   }
 }

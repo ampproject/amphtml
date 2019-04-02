@@ -165,8 +165,8 @@ const SHARE_WIDGET_PILL_CONTAINER = {
     {
       tag: 'span',
       attrs: dict({'class': 'i-amphtml-story-share-pill-label'}),
-      localizedStringId:
-          LocalizedStringId.AMP_STORY_SYSTEM_LAYER_SHARE_WIDGET_LABEL,
+      localizedStringId: LocalizedStringId
+          .DEPRECATED_AMP_STORY_SYSTEM_LAYER_SHARE_WIDGET_LABEL,
     },
   ],
 };
@@ -755,14 +755,14 @@ export class AmpStory extends AMP.BaseElement {
 
     const experimentsLinkEl = this.win.document.createElement('button');
     experimentsLinkEl.textContent = this.localizationService_
-        .getLocalizedString(
-            LocalizedStringId.AMP_STORY_EXPERIMENT_ENABLE_BUTTON_LABEL);
+        .getLocalizedString(LocalizedStringId
+            .DEPRECATED_AMP_STORY_EXPERIMENT_ENABLE_BUTTON_LABEL);
     experimentsLinkEl.addEventListener('click', () => {
       toggleExperiment(this.win, 'amp-story', true);
       errorIconEl.classList.remove('i-amphtml-story-experiment-icon-error');
       errorIconEl.classList.add('i-amphtml-story-experiment-icon-done');
       errorMsgEl.textContent = this.localizationService_.getLocalizedString(
-          LocalizedStringId.AMP_STORY_EXPERIMENT_ENABLED_TEXT);
+          LocalizedStringId.DEPRECATED_AMP_STORY_EXPERIMENT_ENABLED_TEXT);
       removeElement(experimentsLinkEl);
     });
 
