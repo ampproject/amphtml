@@ -18,6 +18,17 @@ import {isObject} from '../../../src/types';
 import {userAssert} from '../../../src/log';
 
 /**
+ * Types of possibile mutations
+ * from the WorkerDOM MutationRecord.
+ * This is the value set to the 'type' key.
+ */
+const MUTATION_TYPES = [
+  'attributes',
+  'characterData',
+  'childList',
+];
+
+/**
  * Function to find all selectors of the mutation
  * and return a function to apply the identified
  * MutationRecord
@@ -69,13 +80,8 @@ function assertMutationRecord_(mutation) {
       `Mutation ${JSON.stringify(mutation)} must have a type.`);
 
   // Assert the mutation type is one of the following keys
-  const mutationTypes = [
-    'attributes',
-    'characterData',
-    'childList',
-  ];
   userAssert(
-      mutationTypes.indexOf(mutation['type']) >= 0,
+      MUTATION_TYPES.indexOf(mutation['type']) >= 0,
       `Mutation ${JSON.stringify(mutation)} must have a type.`);
 
   // Assert the mutation target
