@@ -18,7 +18,7 @@
 
 /* All top-level bookend elements need to set their own left/right margins */
 .i-amphtml-story-share-widget {
-  display: flex !important;
+  display: block !important;
   margin: 16px 8px !important;
 }
 
@@ -166,4 +166,25 @@
   line-height: 11px !important;
   font-size: 11px !important;
   text-align: center !important;
+}
+
+.i-amphtml-page-share-check {
+  width: 20px !important;
+  margin: 0 !important;
+}
+
+.i-amphtml-page-share-span {
+  color: #333 !important;
+  margin-left: 8px !important;
+  font-family: 'Roboto', regular !important;
+  font-weight: 400 !important;
+  line-height: 13px !important;
+  font-size: 13px !important;
+}
+
+.i-amphtml-page-share-div{
+  display: flex !important;
+  margin-left: 16px !important;
+  margin-right: 16px !important;
+  align-items: center !important;
 }
