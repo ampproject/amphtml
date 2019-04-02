@@ -41,7 +41,7 @@ export function aja(global, data) {
   elStyle.setAttribute('sandbox', 'allow-top-navigation');
   elStyle.setAttribute('sandbox', 'allow-scripts');
   elStyle.setAttribute('sandbox', 'allow-popups');
-  elStyle.setAttribute('position', 'absolute');
+  elStyle.setAttribute('style', 'position:absolute');
   elStyle.src = 'https://static.aja-recommend.com/html/amp.html?ssp_code=' + encodeURIComponent(data['sspCode']);
   global.document.body.appendChild(elStyle);
 
