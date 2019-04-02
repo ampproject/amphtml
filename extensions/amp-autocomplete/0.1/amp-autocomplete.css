@@ -36,14 +36,6 @@ amp-autocomplete > input {
   background-color: white; /* default-ui-background-color */
   box-shadow: 0px 2px 4px 0px rgba(0,0,0,.5); /* default-ui-box-shadow */
   z-index: 10;
-
-  /* Reset i-amphtml-fill-content styles
-     until we figure out how to remove that */
-  height: auto;
-  max-height: none;
-  min-height: auto;
-  max-width: none;
-  min-width: auto;
 }
 
 .i-amphtml-autocomplete-item {
