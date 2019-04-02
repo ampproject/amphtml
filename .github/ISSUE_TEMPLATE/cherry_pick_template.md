@@ -42,6 +42,8 @@ MUST: This issue cannot be closed until the mini-PM is written and its action it
 -->
 # Mini-postmortem
 
+> **TODO:** This postmortem will be written after the cherry-pick deployment and before this issue is closed. Delete this TODO when the postmortem is ready.
+
 ## Summary
 
 <!--
