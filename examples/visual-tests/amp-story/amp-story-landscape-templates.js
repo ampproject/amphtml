@@ -17,7 +17,7 @@
 
 module.exports = {
   'shows half-half template with image on the left': async (page, name) => {
-    await page.waitFor(1600);
+    await page.waitFor('amp-story-page#cover[active]');
   },
   'shows half-half template with image on the right': async (page, name) => {
     await page.tap('.next-container > button.i-amphtml-story-button-move');
