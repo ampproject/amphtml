@@ -209,7 +209,7 @@ const INVALID_INLINE_STYLE_REGEX =
  * Whether the attribute/value is valid.
  * @param {string} tagName Lowercase tag name.
  * @param {string} attrName Lowercase attribute name.
- * @param {string} attrValue Lowercase attribute value
+ * @param {string} attrValue attribute value
  * @param {!Document} doc
  * @param {boolean} opt_purify Is true, skips some attribute sanitizations
  *     that are already covered by DOMPurify.
@@ -275,7 +275,8 @@ export function isValidAttr(
     }
   }
 
-  if (blacklistedValues.indexOf(attrValue) != -1) {
+  if (attrValue
+    && blacklistedValues.indexOf(attrValue.toLowerCase()) != -1) {
     return false;
   }
 

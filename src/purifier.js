@@ -252,7 +252,7 @@ export function addPurifyHooks(purifier, diffing, doc) {
       disableDiffingFor(node);
     }
 
-    if (isValidAttr(tagName, attrName.toLowerCase(), attrValue.toLowerCase(),
+    if (isValidAttr(tagName, attrName.toLowerCase(), attrValue,
         /* doc */ doc, /* opt_purify */ true)) {
       if (attrValue && !startsWith(attrName, 'data-amp-bind-')) {
         attrValue = rewriteAttributeValue(tagName, attrName, attrValue);
@@ -281,7 +281,7 @@ export function addPurifyHooks(purifier, diffing, doc) {
     allowedAttributesChanges.length = 0;
 
     // TODO(alabiaga): Revert this change once DOM Purifier patch to make
-    // this work is live.
+    // this work is live. https://github.com/cure53/DOMPurify/pull/329
     // Remove input type file if applicable. The purifier will actually
     // not remove this attribute because of a Safari bug where removing it
     // will result in not being able to add it programmatically afterwards.
