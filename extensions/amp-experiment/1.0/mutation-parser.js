@@ -23,7 +23,7 @@ import {userAssert} from '../../../src/log';
  * MutationRecord
  * @param {!JsonObject} mutation
  * @param {!Document} document
- * @returns {!Function}
+ * @return {!Function}
  */
 export function parseMutation(mutation, document) {
 
@@ -41,7 +41,9 @@ export function parseMutation(mutation, document) {
   } else if (mutationRecord['type'] === 'characterData') {
     // NOOP for small PRs
     return noopFunction;
-  } else if (mutationRecord['type'] === 'childList') {
+  } else {
+    // childList type of mutation
+
     // NOOP for small PRs
     return noopFunction;
   }
@@ -57,30 +59,30 @@ function assertMutationRecord_(mutation) {
 
   // Assert that the mutation is an object
   userAssert(
-    isObject(mutation),
-    `Mutation ${JSON.stringify(mutation)} must be an object.`);
+      isObject(mutation),
+      `Mutation ${JSON.stringify(mutation)} must be an object.`);
 
   // Assert the mutation type
   userAssert(
-    mutation['type'] !== undefined &&
+      mutation['type'] !== undefined &&
     typeof mutation['type'] === 'string',
-    `Mutation ${JSON.stringify(mutation)} must have a type.`);
+      `Mutation ${JSON.stringify(mutation)} must have a type.`);
 
   // Assert the mutation type is one of the following keys
   const mutationTypes = [
     'attributes',
     'characterData',
-    'childList'
+    'childList',
   ];
   userAssert(
-    mutationTypes.indexOf(mutation['type']) >= 0,
-    `Mutation ${JSON.stringify(mutation)} must have a type.`);
+      mutationTypes.indexOf(mutation['type']) >= 0,
+      `Mutation ${JSON.stringify(mutation)} must have a type.`);
 
   // Assert the mutation target
   userAssert(
-    mutation['target'] !== undefined &&
+      mutation['target'] !== undefined &&
     typeof mutation['target'] === 'string',
-    `Mutation ${JSON.stringify(mutation)} must have a target.`);
+      `Mutation ${JSON.stringify(mutation)} must have a target.`);
 
   return mutation;
 }
@@ -89,17 +91,16 @@ function assertMutationRecord_(mutation) {
  * Function to set the target element from the
  * target selector to the target selector key,
  * and assert that we found the element.
+ * @param {string} selectorKey
  * @param {!Object} mutationRecord
- * @param {!String} selectorKey
  * @param {!Document} document
- * @param
  */
 function setSelectorToElement_(selectorKey, mutationRecord, document) {
   const targetElement = document.querySelector(mutationRecord[selectorKey]);
 
   userAssert(
-    targetElement !== null,
-    'No element on the document matches the selector, ' +
+      targetElement !== null,
+      'No element on the document matches the selector, ' +
     `${mutationRecord[selectorKey]} .`);
 
   mutationRecord[selectorKey] = targetElement;
