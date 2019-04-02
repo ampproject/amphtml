@@ -910,7 +910,7 @@ Provides the screen height in pixels. The value is retrieved from `window.screen
 
 #### Screen Width
 
-Provides the screen height in pixels. The value is retrieved from `window.screen.width`.
+Provides the screen width in pixels. The value is retrieved from `window.screen.width`.
 
 * **platform variable**: `SCREEN_WIDTH`
   *  Example: <br>
