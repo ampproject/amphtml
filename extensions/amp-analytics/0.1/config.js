@@ -391,7 +391,8 @@ export function mergeObjects(from, to, opt_predefinedConfig) {
   // that is already being used in the wild.
   userAssert(opt_predefinedConfig
       || !from || !from['optout']
-      || from['optout'] == '_gaUserPrefs.ioo',
+      || from['optout'] == '_gaUserPrefs.ioo'
+      || from['optoutElementId'] == '__gaOptOutExtension',
   'optout property is only available to vendor config.');
 
   for (const property in from) {

@@ -105,6 +105,7 @@ export const GOOGLEANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
     'metric': 'cm',
   },
   'optout': '_gaUserPrefs.ioo',
+  'optoutElementId': '__gaOptOutExtension',
   'linkers': {
     '_gl': {
       'ids': {
