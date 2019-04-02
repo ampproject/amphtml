@@ -29,6 +29,7 @@
     </style>
 </head>
 <body>
+
     <h1>amp-ima-video</h1>
     <h3>Resources</h3>
     <ul>
@@ -108,7 +109,7 @@
         <amp-ima-video id="Video4"
             autoplay
             width="640" height="360" layout="responsive"
-            data-tag="https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/single_ad_samples&ciu_szs=300x250&impl=s&gdfp_req=1&env=vp&output=vast&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ct%3Dskippablelinear&correlator=" 
+            data-tag="https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/single_ad_samples&ciu_szs=300x250&impl=s&gdfp_req=1&env=vp&output=vast&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ct%3Dskippablelinear&correlator="
             data-poster="/examples/img/ima-poster.png">
             <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4">
         </amp-ima-video>
@@ -119,5 +120,22 @@
     <button on="tap:Video4.mute">Mute</button>
     <button on="tap:Video4.unmute">Unmute</button>
     <button on="tap:Video4.fullscreen">Fullscreen</button>
+
+    <h2>Video5</h2>
+    <div class="player-wrapper">
+    <div class="description">
+        With Source and Track Captions
+    </div>
+    <amp-ima-video id="Video4"
+    width="640" height="360" layout="responsive"
+    data-tag="https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/single_ad_samples&ciu_szs=300x250&impl=s&gdfp_req=1&env=vp&output=vast&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ct%3Dskippablelinear&correlator="
+    data-poster="/examples/img/ima-poster.png"
+    data-crossorigin>
+        <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4">
+        <track kind="captions" srclang="en" src="https://brightcove.hs.llnwd.net/v2/unsecured/media/5359769197001/201903/2015/5359769197001_581bc84b-c6d3-425e-9537-a1f27209782e.vtt?pubId=5359769197001&videoId=6013200383001">
+    </div>
+</amp-ima-video>
+
+
 </body>
 </html>

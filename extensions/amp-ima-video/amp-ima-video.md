@@ -54,7 +54,7 @@ VAST-compliant ad response (for examples, see
 
 The component HTML accepts the following types of HTML nodes as children:
 * `source` tags for content video, used in the same way as the standard `video` tag.
-* `track` tags for subtitles, in the same way as the standard `video` tag.
+* `track` tags for subtitles, in the same way as the standard `video` tag. If the track is hosted on a different origin than the document, you must add the `data-crossorigin` attribute to the `<amp-ima-video>` tag.
 * a `script` tag of type `application/json` used to provide [ImaSdkSettings](https://developers.google.com/interactive-media-ads/docs/sdks/html5/v3/apis#ima.ImaSdkSettings). Provide the property-translation of the setters in the linked documentation (e.g. to call `setNumRedirects(4)`, provide `{"numRedirects": 4}`).
 
 ## Example
@@ -85,6 +85,10 @@ The component HTML accepts the following types of HTML nodes as children:
   <tr>
     <td width="40%"><strong>data-src</strong></td>
     <td>The URL of your video content. A relative URL or a URL that uses https protocol. This attribute is required if no <code>&lt;source&gt;</code> children are present.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-crossorigin</strong></td>
+    <td>Required if a <code>track</code> resource is hosted on a different origin than the document.</td>
   </tr>
   <tr>
     <td width="40%"><strong>data-poster (optional)</strong></td>
