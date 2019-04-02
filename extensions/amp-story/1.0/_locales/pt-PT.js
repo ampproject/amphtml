@@ -16,7 +16,7 @@
 import {
   LocalizedStringBundleDef,
   LocalizedStringId,
-} from '../../../../src/service/localization';
+} from '../../../../src/localized-strings';
 
 /**
  * Localized string bundle used for pt-PT strings.
