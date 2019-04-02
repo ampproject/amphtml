@@ -425,8 +425,8 @@ export function imaVideo(global, data) {
     'background-color': 'black',
   });
   videoPlayer.setAttribute('poster', data.poster);
-  if (data.crossorigin != null) {
-    videoPlayer.setAttribute('crossorigin', data.crossorigin);
+  if (data['crossorigin'] != null) {
+    videoPlayer.setAttribute('crossorigin', data['crossorigin']);
   }
   videoPlayer.setAttribute('playsinline', true);
   videoPlayer.setAttribute(
