@@ -21,7 +21,7 @@
 import {AmpStory} from '../amp-story';
 import {AmpStoryPage} from '../amp-story-page';
 import {AmpStoryStoreService} from '../amp-story-store-service';
-import {LocalizationService} from '../localization';
+import {LocalizationService} from '../../../../src/service/localization';
 import {Services} from '../../../../src/services';
 import {
   calculateTargetScalingFactor,

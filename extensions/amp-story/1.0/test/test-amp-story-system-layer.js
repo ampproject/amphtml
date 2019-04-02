@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {Action, AmpStoryStoreService} from '../amp-story-store-service';
-import {LocalizationService} from '../localization';
+import {LocalizationService} from '../../../../src/service/localization';
 import {ProgressBar} from '../progress-bar';
 import {Services} from '../../../../src/services';
 import {SystemLayer} from '../amp-story-system-layer';
