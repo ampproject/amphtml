@@ -1122,4 +1122,12 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  'svknative': {
+    renderStartImplemented: true,
+    prefetch: 'https://widget.svk-native.ru/js/embed.js',
+    preconnect: [
+      'https://widget.svk-native.ru',
+    ],
+  },
+
 };
