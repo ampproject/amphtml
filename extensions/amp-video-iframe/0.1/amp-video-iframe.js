@@ -210,6 +210,13 @@ class AmpVideoIframe extends AMP.BaseElement {
     return true; // layout again.
   }
 
+  /**
+   * @override
+   */
+  createLoaderBrandCallback() {
+    return createVideoLoaderBrand(this.element);
+  }
+
   /** @private */
   removeIframe_() {
     this.canPlay_ = false;

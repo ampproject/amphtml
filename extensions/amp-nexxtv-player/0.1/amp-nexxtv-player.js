@@ -187,6 +187,13 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
   }
 
   /**
+   * @override
+   */
+  createLoaderBrandCallback() {
+    return createVideoLoaderBrand(this.element);
+  }
+
+  /**
    * @param  {string} command
    * @private
    */

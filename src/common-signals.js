@@ -42,6 +42,11 @@ export const CommonSignals = {
   LOAD_START: 'load-start',
 
   /**
+   * Fired when it is known whether element has a placeholder
+   */
+  PLACEHOLDER_RESOLVED: 'ini-load',
+
+  /**
    * Rendering has been confirmed to have been started.
    */
   RENDER_START: 'render-start',

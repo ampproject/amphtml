@@ -9,10 +9,7 @@
     "amp-img-auto-sizes"
   ],
   "allow-url-opt-in": [
-    "pump-early-frame",
-    "twitter-default-placeholder",
-    "twitter-default-placeholder-pulse",
-    "twitter-default-placeholder-fade"
+    "pump-early-frame"
   ],
 
   "canary": 0,

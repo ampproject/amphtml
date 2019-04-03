@@ -504,6 +504,13 @@ class AmpVideo extends AMP.BaseElement {
     }
   }
 
+  /**
+   * @override
+   */
+  createLoaderBrandCallback() {
+    return createVideoLoaderBrand(this.element);
+  }
+
   /** @private */
   isVideoSupported_() {
     return !!this.video_.play;

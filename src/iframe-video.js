@@ -151,3 +151,12 @@ export function addUnsafeAllowAutoplay(iframe) {
   val += 'autoplay;';
   iframe.setAttribute('allow', val);
 }
+
+/**
+ * @param {Element} element
+ * @return {Element};
+ */
+export function createVideoLoaderBrand(element) {
+  return htmlFor(element)`
+      <path fill="#aaaaaa" d="M65,58.5V55c0-0.5-0.4-1-1-1H51c-0.5,0-1,0.5-1,1v10c0,0.6,0.5,1,1,1h13c0.6,0,1-0.4,1-1v-3.5l5,4v-11L65,58.5z"></path>`;
+}

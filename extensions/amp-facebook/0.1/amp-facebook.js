@@ -95,6 +95,16 @@ class AmpFacebook extends AMP.BaseElement {
   }
 
   /**
+   * @override
+   */
+  createLoaderBrandCallback() {
+    return htmlFor(this.element)`
+        <path fill="#4267B2" d="M68.9,50H51.1c-0.6,0-1.1,0.5-1.1,1.1v17.8c0,0.6,0.5,1.1,1.1,1.1c0,0,0,0,0,0h9.6v-7.7h-2.6v-3h2.6V57
+        c0-2.6,1.6-4,3.9-4c0.8,0,1.6,0,2.3,0.1v2.7h-1.6c-1.3,0-1.5,0.6-1.5,1.5v1.9h3l-0.4,3h-2.6V70h5.1c0.6,0,1.1-0.5,1.1-1.1l0,0V51.1
+        C70,50.5,69.5,50,68.9,50C68.9,50,68.9,50,68.9,50z"></path>`;
+  }
+
+  /**
    * @param {!Event} event
    * @private
    */

@@ -294,6 +294,13 @@ class AmpDailymotion extends AMP.BaseElement {
   /**
    * @override
    */
+  createLoaderBrandCallback() {
+    return createVideoLoaderBrand(this.element);
+  }
+
+  /**
+   * @override
+   */
   play(isAutoplay) {
     this.sendCommand_('play');
     // Hack to solve autoplay problem on Chrome Android

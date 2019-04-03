@@ -112,6 +112,7 @@ export const LOADING_ELEMENTS_ = {
   'AMP-LIST': true,
   'AMP-PINTEREST': true,
   'AMP-PLAYBUZZ': true,
+  'AMP-TWITTER': true,
   'AMP-YOUTUBE': true,
   'AMP-VIMEO': true,
 };
@@ -299,7 +300,7 @@ export function getNaturalDimensions(element) {
 
 
 /**
- * Whether the loading can be shown for the specified elemeent. This set has
+ * Whether the loading can be shown for the specified element. This set has
  * to be externalized since the element's implementation may not be
  * downloaded yet.
  * @param {!Element} element

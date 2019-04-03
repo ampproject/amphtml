@@ -137,6 +137,13 @@ class AmpWistiaPlayer extends AMP.BaseElement {
     return true;
   }
 
+  /**
+   * @override
+   */
+  createLoaderBrandCallback() {
+    return createVideoLoaderBrand(this.element);
+  }
+
   /** @override */
   viewportCallback(visible) {
     this.element.dispatchCustomEvent(VideoEvents.VISIBILITY, {visible});

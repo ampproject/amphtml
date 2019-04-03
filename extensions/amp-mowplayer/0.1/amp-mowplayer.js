@@ -170,6 +170,13 @@ class AmpMowplayer extends AMP.BaseElement {
     return true; // Call layoutCallback again.
   }
 
+  /**
+   * @override
+   */
+  createLoaderBrandCallback() {
+    return createVideoLoaderBrand(this.element);
+  }
+
   /** @override */
   pauseCallback() {
     if (this.iframe_ && this.iframe_.contentWindow) {

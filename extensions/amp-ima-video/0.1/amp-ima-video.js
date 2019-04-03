@@ -217,6 +217,13 @@ class AmpImaVideo extends AMP.BaseElement {
     return true;
   }
 
+  /**
+   * @override
+   */
+  createLoaderBrandCallback() {
+    return createVideoLoaderBrand(this.element);
+  }
+
   /** @override */
   onLayoutMeasure() {
     if (!this.iframe_) {

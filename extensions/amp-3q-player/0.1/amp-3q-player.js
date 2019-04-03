@@ -19,6 +19,7 @@ import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {
   createFrameFor,
+  createVideoLoaderBrand,
   objOrParseJson,
   redispatch,
 } from '../../../src/iframe-video';
@@ -119,6 +120,13 @@ class Amp3QPlayer extends AMP.BaseElement {
     this.playerReadyResolver_ = deferred.resolve;
 
     return true;
+  }
+
+  /**
+   * @override
+   */
+  createLoaderBrandCallback() {
+    return createVideoLoaderBrand(this.element);
   }
 
   /** @override */

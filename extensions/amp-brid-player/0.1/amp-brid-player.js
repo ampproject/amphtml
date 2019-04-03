@@ -227,6 +227,13 @@ class AmpBridPlayer extends AMP.BaseElement {
   }
 
   /**
+   * @override
+   */
+  createLoaderBrandCallback() {
+    return createVideoLoaderBrand(this.element);
+  }
+
+  /**
    * Sends a command to the player through postMessage.
    * @param {string} command
    * @param {*=} opt_arg

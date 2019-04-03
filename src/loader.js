@@ -29,35 +29,28 @@ function isAd(element) {
  * @param {!Element} element
  * @return {boolean}
  */
-function hasBrandedLoader(element) {
-  return false;
-}
-
-/**
- * @param {!Element} element
- * @return {boolean}
- */
-function hasImagePlaceholder(element) {
-  return false;
+function isImage(element) {
+  return element.tagName == 'IMG' || element.tagName == 'AMP-IMG';
 }
 
 /**
  * Creates a default "loading indicator" element. This element accepts
  * `amp-active` class in which case it may choose to run an animation.
  * @param {!Document} doc
- * @param {!Element} element
+ * @param {!Element} container
+ * @param {!AmpElement} element
  * @return {!Element}
  */
-export function createLoaderElement(doc, element) {
+export function createLoaderElement(doc, container, element) {
   const win = doc.defaultView;
 
-  if (isAd(element)) {
-    const useNewAdLoader = isExperimentOn(win, 'new-loaders-ad');
-    return useNewAdLoader ? createNewAdLoader(doc) : createOldAdLoader(doc);
+  if (isAd(element) && !isExperimentOn(win, 'new-loaders-ad')) {
+    return createOldAdLoader(doc);
   }
 
-  const useNewLoaders = isExperimentOn(win, 'new-loaders');
-  return useNewLoaders ? createNewLoader(doc) : createOldLoader(doc);
+  return isExperimentOn(win, 'new-loaders') ?
+    createNewLoader(doc, container, element) :
+    createOldLoader(doc);
 }
 
 /**
@@ -82,24 +75,59 @@ function createOldLoader(doc) {
 
 /**
  * @param {!Document} doc
+ * @param {!Element} container
+ * @param {!AmpElement} element
  */
-function createNewAdLoader(doc) {
-  return createNewLoader(doc);
-}
+function createNewLoader(doc, container, element) {
+  const placeholder = element.getPlaceholder();
+  const loaderBrand = element.createLoaderBrand();
 
-/**
- * @param {!Document} doc
- */
-function createNewLoader(doc) {
-  return htmlFor(doc)`
-  <div class="i-amphtml-new-loader">
+  const loaderElement = htmlFor(doc)`
+<div class="i-amphtml-new-loader">
   <div><svg xmlns="http://www.w3.org/2000/svg" viewBox="24 24 72 72">
   <circle class="i-amphtml-new-loader-circle" cx="60" cy="60" r="12"></circle>
   <g class="i-amphtml-new-loader-spinner">
-    <circle class="i-amphtml-new-loader-spinner-segment" cx="60" cy="60" r="22"></circle>
-    <circle class="i-amphtml-new-loader-spinner-segment" cx="60" cy="60" r="22"></circle>
-    <circle class="i-amphtml-new-loader-spinner-segment" cx="60" cy="60" r="22"></circle>
-    <circle class="i-amphtml-new-loader-spinner-segment" cx="60" cy="60" r="22"></circle>
+    <circle class="i-amphtml-new-loader-spinner-segment" cx="60" cy="60" r="22">
+    </circle>
+    <circle class="i-amphtml-new-loader-spinner-segment" cx="60" cy="60" r="22">
+    </circle>
+    <circle class="i-amphtml-new-loader-spinner-segment" cx="60" cy="60" r="22">
+    </circle>
+    <circle class="i-amphtml-new-loader-spinner-segment" cx="60" cy="60" r="22">
+    </circle>
   </svg></div>
-  </div>`;
+</div>`;
+
+  if (!placeholder) {
+    container.classList.add('i-amphtml-loading-container-grey');
+  }
+  if (placeholder && isImage(placeholder)) {
+    loaderElement.classList.add('i-amphtml-new-loader-overlay');
+  }
+  if (isAd(element)) {
+    loaderElement.classList.add('i-amphtml-new-loader-ad');
+  }
+  if (isSmall(element)) {
+    loaderElement.classList.add('i-amphtml-new-loader-small');
+  }
+  if (loaderBrand) {
+    loaderElement.classList.add('i-amphtml-new-loader-branded');
+    loaderElement.appendChild(loaderBrand);
+  }
+  return loaderElement;
+}
+
+const SmallLoaderSizeThreshold = 150;
+/**
+ * @param {!AmpElement} element
+ * @return {boolean}
+ */
+function isSmall(element) {
+  const box = element.getLayoutBox();
+  if (box.width < SmallLoaderSizeThreshold ||
+      box.height < SmallLoaderSizeThreshold) {
+    return true;
+  }
+
+  return false;
 }

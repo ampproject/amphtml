@@ -977,6 +977,14 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
+     * @return {?Element}
+     * @final @this {!Element}
+     */
+    createLoaderBrand() {
+      return this.implementation_.createLoaderBrandCallback();
+    }
+
+    /**
      * Whether the element should ever render when it is not in viewport.
      * @return {boolean|number}
      * @final @this {!Element}
@@ -1601,7 +1609,7 @@ function createBaseCustomElementClass(win) {
             <div class="i-amphtml-loading-container i-amphtml-fill-content
               amp-hidden"></div>`;
 
-        const element = createLoaderElement(doc, this);
+        const element = createLoaderElement(doc, container, this, this.implementation_);
         container.appendChild(element);
 
         this.appendChild(container);

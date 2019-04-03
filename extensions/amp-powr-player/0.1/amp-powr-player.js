@@ -328,6 +328,13 @@ class AmpPowrPlayer extends AMP.BaseElement {
     return true; // Call layoutCallback again.
   }
 
+  /**
+   * @override
+   */
+  createLoaderBrandCallback() {
+    return createVideoLoaderBrand(this.element);
+  }
+
   /** @override */
   supportsPlatform() {
     return true;

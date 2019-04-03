@@ -167,6 +167,13 @@ class AmpVimeo extends AMP.BaseElement {
     return true; // layout again.
   }
 
+  /**
+   * @override
+   */
+  createLoaderBrandCallback() {
+    return createVideoLoaderBrand(this.element);
+  }
+
   /** @private */
   removeIframe_() {
     if (this.iframe_) {

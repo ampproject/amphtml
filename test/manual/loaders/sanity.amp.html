@@ -12,6 +12,9 @@
     window.AMP_MODE = {test: true};
     const delay = parseInt(window.location.search.replace('?','')) || 3000;
     document.addEventListener('amp:attached', e => {
+        if (e.srcElement.hasAttribute('placeholder')) {
+          return;
+        }
         const lc = e.srcElement.implementation_.layoutCallback.bind(e.srcElement.implementation_);
         e.srcElement.implementation_.layoutCallback = function() {
           return new Promise(function(resolve) {
@@ -32,7 +35,9 @@
   <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
   <script async custom-element="amp-youtube" src="https://cdn.ampproject.org/v0/amp-youtube-0.1.js"></script>
   <script async custom-element="amp-twitter" src="https://cdn.ampproject.org/v0/amp-twitter-0.1.js"></script>
+  <script async custom-element="amp-iframe" src="https://cdn.ampproject.org/v0/amp-iframe-0.1.js"></script>
   <script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
   <style amp-custom>
     /* boring boiler place stuff */
     main {
@@ -121,6 +126,64 @@
         width="1600"
         height="900"></amp-img>
 
+        <h2>amp-img - with blurry placeholder</h2>
+        <amp-img src="https://rawcdn.githack.com/ampproject/amp-toolbox/6e4d9e794cf7bd0e98ea80224516d7180096c867/optimizer/spec/transformers/bball.jpg"
+          layout=responsive
+          width="1600"
+          height="900">
+          <img placeholder class="i-amphtml-blurry-placeholder" src="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http%3A//www.w3.org/2000/svg' xmlns%3Axlink='http%3A//www.w3.org/1999/xlink' viewBox='0 0 9 7'%3E%3Cfilter id='b' color-interpolation-filters='sRGB'%3E%3CfeGaussianBlur stdDeviation='.5'%3E%3C/feGaussianBlur%3E%3CfeComponentTransfer%3E%3CfeFuncA type='discrete' tableValues='1 1'%3E%3C/feFuncA%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Cimage filter='url(%23b)' x='0' y='0' height='100%25' width='100%25' xlink%3Ahref='data%3Aimage/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAAHCAYAAADam2dgAAAA4klEQVR4ARXBO04CURSA4f/OnHkpA4TRWGhFMg3oFlyCjTuwYRsULMEtuAgTGzUhttpZkagREwhEhwvjvI7x+8z0aqAHXYj3wA/gfpZz82yZXCakPYf8u0LspmGbGTxXaUfK21fJ7atltGiRHvn4cYOYXIl8RRSkVj5+Sv5JXvD7qWQrg2QW3BqWlDzOtuycGhSe3nOSdkmaeIjdKXfzjMNQGA1asF9wMXQ4G1Z0ogqxipuZYNyVkH4YsVg7FGuh73qcnAvecczqwSBL49AJI6a1QSolLJTexnB6bRC/4WUe8AdyJ1gLZ2JPFwAAAABJRU5ErkJggg=='%3E%3C/image%3E%3C/svg%3E" style="object-fit: cover">
+        </amp-img>
+
+      <h2>amp-twitter</h2>
+      <amp-twitter width=458 height=480
+        layout="responsive"
+        data-tweetID="585110598171631616"></amp-twitter>
+
+        <h2>amp-twitter - with placeholder</h2>
+        <amp-twitter width=458 height=480
+          layout="responsive"
+          data-tweetID="585110598171631616">
+          <blockquote placeholder>
+             The story how I became what some people would call a frontend engineer and an exploration into what that even meanshttps://medium.com/@cramforce/anecdotes-about-frontend-and-backend-engineering-e65601a312be …
+
+              Anecdotes about frontend and backend engineering
+              This is the story about how I became what some people would call a frontend engineer and an exploration into what that even means.
+
+              medium.com</blockquote>
+        </amp-twitter>
+
+      <h2>amp-list</h2>
+      <amp-list width="auto" height="600" layout="fixed-height" src="https://ampbyexample.com/json/examples.json">
+        <template type="amp-mustache">
+          <div>
+            <amp-img src="https://picsum.photos/150/150/?random"
+              layout=fixed
+              width="150"
+              height="150"></amp-img>
+          </div>
+        </template>
+      </amp-list>
+
+      <h2>amp-iframe - no placeholder</h2>
+      <amp-iframe width=300 height=200
+          sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
+          layout="responsive"
+          frameborder="0"
+          src="https://www.google.com/maps/embed/v1/place?q=place_id:ChIJ2eUgeAK6j4ARbn5u_wAGqWA&key=AIzaSyCNCZ0Twm_HFRaZ5i-FuPDYs3rLwm4_848">
+      </amp-iframe>
+
+      <h2>amp-iframe - image placeholder</h2>
+      <amp-iframe width=300 height=200
+          sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
+          layout="responsive"
+          frameborder="0"
+          src="https://www.google.com/maps/embed/v1/place?q=place_id:ChIJ2eUgeAK6j4ARbn5u_wAGqWA&key=AIzaSyCNCZ0Twm_HFRaZ5i-FuPDYs3rLwm4_848">
+        <amp-img placeholder src="https://picsum.photos/1600/900?image=26"
+          layout=responsive
+          width="1600"
+          height="900"></amp-img>
+      </amp-iframe>
+
       <h2>amp-youtube</h2>
       <amp-youtube
         id="myVideo"
@@ -130,26 +193,6 @@
         layout="responsive">
       </amp-youtube>
 
-      <h2>amp-twitter</h2>
-      <amp-twitter width=486 height=657
-        layout="responsive"
-        data-tweetID="585110598171631616"></amp-twitter>
-
-      <h2>amp-ad: 300x250</h2>
-      <amp-ad width="300" height="250"
-          type="contentad"
-          data-id="7902c314-4cad-466e-9264-ecd333a2c757"
-          data-d="bm9uYmxvY2tpbmcuaW8="
-          data-wid="218705"
-          data-url="nonblocking.io">
-      </amp-ad>
-
-      <h2>amp-ad: banner</h2>
-      <amp-ad width="320" height="50"
-          type="adstir"
-          data-app-id="MEDIA-343ded3e"
-          data-ad-spot="1">
-      </amp-ad>
 
     <hr>
       <h1>Customized</h1>

@@ -190,6 +190,13 @@ class AmpDelightPlayer extends AMP.BaseElement {
     return true;
   }
 
+  /**
+   * @override
+   */
+  createLoaderBrandCallback() {
+    return createVideoLoaderBrand(this.element);
+  }
+
   /** @override */
   isLayoutSupported(layout) {
     return isLayoutSizeDefined(layout);
