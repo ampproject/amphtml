@@ -79,11 +79,11 @@ export class AmpViewerAssistance {
     const {method, args} = invocation;
     if (method == 'updateActionState') {
       // "updateActionState" requires a low-trust event.
-      if (invocation.satisfiesTrust(ActionTrust.LOW) && args && this.isValidActionStatusArgs_(args)) {
-        this.viewer_./*OK*/sendMessageAwaitResponse(method, args)
-            .catch(error => {
-              user().error(TAG, error.toString());
-            });
+      if (invocation.satisfiesTrust(ActionTrust.LOW)
+          && this.isValidActionStatusArgs_(args)) {
+        this.viewer_./*OK*/sendMessageAwaitResponse(method, args).catch(err => {
+          user().error(TAG, err.toString());
+        });
       }
     } else if (method == 'signIn') {
       // "signIn" requires a high-trust event.
