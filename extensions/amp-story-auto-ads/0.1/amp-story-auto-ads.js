@@ -38,7 +38,27 @@ import {isObject} from '../../../src/types';
 import {parseJson} from '../../../src/json';
 import {setStyles} from '../../../src/style';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
+import LocalizedStringsAr from './_locales/ar';
+import LocalizedStringsDe from './_locales/de';
 import LocalizedStringsEn from './_locales/en';
+import LocalizedStringsEnGb from './_locales/en-GB';
+import LocalizedStringsEs from './_locales/es';
+import LocalizedStringsEs419 from './_locales/es-419';
+import LocalizedStringsFr from './_locales/fr';
+import LocalizedStringsHi from './_locales/hi';
+import LocalizedStringsId from './_locales/id';
+import LocalizedStringsIt from './_locales/it';
+import LocalizedStringsJa from './_locales/ja';
+import LocalizedStringsKo from './_locales/ko';
+import LocalizedStringsNl from './_locales/nl';
+import LocalizedStringsNo from './_locales/no';
+import LocalizedStringsPtBr from './_locales/pt-BR';
+import LocalizedStringsPtPt from './_locales/pt-PT';
+import LocalizedStringsRu from './_locales/ru';
+import LocalizedStringsTr from './_locales/tr';
+import LocalizedStringsVi from './_locales/vi';
+import LocalizedStringsZhCn from './_locales/zh-CN';
+import LocalizedStringsZhTw from './_locales/zh-TW';
 
 /** @const {number} */
 const FIRST_AD_MIN = 7;
@@ -230,7 +250,27 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     this.localizationService_ = new LocalizationService(this.win);
     this.localizationService_
         .registerLocalizedStringBundle('default', LocalizedStringsEn)
-        .registerLocalizedStringBundle('en', LocalizedStringsEn);
+        .registerLocalizedStringBundle('ar', LocalizedStringsAr)
+        .registerLocalizedStringBundle('de', LocalizedStringsDe)
+        .registerLocalizedStringBundle('en', LocalizedStringsEn)
+        .registerLocalizedStringBundle('en-GB', LocalizedStringsEnGb)
+        .registerLocalizedStringBundle('es', LocalizedStringsEs)
+        .registerLocalizedStringBundle('es-419', LocalizedStringsEs419)
+        .registerLocalizedStringBundle('fr', LocalizedStringsFr)
+        .registerLocalizedStringBundle('hi', LocalizedStringsHi)
+        .registerLocalizedStringBundle('id', LocalizedStringsId)
+        .registerLocalizedStringBundle('it', LocalizedStringsIt)
+        .registerLocalizedStringBundle('ja', LocalizedStringsJa)
+        .registerLocalizedStringBundle('ko', LocalizedStringsKo)
+        .registerLocalizedStringBundle('nl', LocalizedStringsNl)
+        .registerLocalizedStringBundle('no', LocalizedStringsNo)
+        .registerLocalizedStringBundle('pt-PT', LocalizedStringsPtPt)
+        .registerLocalizedStringBundle('pt-BR', LocalizedStringsPtBr)
+        .registerLocalizedStringBundle('ru', LocalizedStringsRu)
+        .registerLocalizedStringBundle('tr', LocalizedStringsTr)
+        .registerLocalizedStringBundle('vi', LocalizedStringsVi)
+        .registerLocalizedStringBundle('zh-CN', LocalizedStringsZhCn)
+        .registerLocalizedStringBundle('zh-TW', LocalizedStringsZhTw);
 
     const enXaPseudoLocaleBundle =
         createPseudoLocale(LocalizedStringsEn, s => `[${s} one two]`);
