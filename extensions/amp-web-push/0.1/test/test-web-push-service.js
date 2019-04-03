@@ -185,6 +185,8 @@ describes.realWin('web-push-service helper frame messaging', {
       FAKE_IFRAME_URL;
     webPushConfig[WebPushConfigAttributes.SERVICE_WORKER_URL] =
       FAKE_IFRAME_URL;
+    webPushConfig[WebPushConfigAttributes.SERVICE_WORKER_SCOPE] =
+      FAKE_IFRAME_URL;  
   }
 
   function setupHelperIframe() {
@@ -254,6 +256,8 @@ describes.realWin('web-push-service widget visibilities', {
     webPushConfig[WebPushConfigAttributes.PERMISSION_DIALOG_URL] =
       FAKE_IFRAME_URL;
     webPushConfig[WebPushConfigAttributes.SERVICE_WORKER_URL] =
+      FAKE_IFRAME_URL;
+    webPushConfig[WebPushConfigAttributes.SERVICE_WORKER_SCOPE] =
       FAKE_IFRAME_URL;
   }
 
@@ -537,6 +541,8 @@ describes.realWin('web-push-service subscribing', {
       FAKE_IFRAME_URL;
     webPushConfig[WebPushConfigAttributes.SERVICE_WORKER_URL] =
       FAKE_IFRAME_URL;
+    webPushConfig[WebPushConfigAttributes.SERVICE_WORKER_SCOPE] =
+      FAKE_IFRAME_URL;  
   }
 
   function setupHelperIframe() {
@@ -586,10 +592,9 @@ describes.realWin('web-push-service subscribing', {
           .withArgs(
               webPushConfig[WebPushConfigAttributes.SERVICE_WORKER_URL],
               {
-                scope: '/',
+                scope: webPushConfig[WebPushConfigAttributes.SERVICE_WORKER_SCOPE],
               })
           .returns(Promise.resolve(true));
-
       return webPush.registerServiceWorker();
     }).then(() => {
       helperFrameSwMessageMock.verify();
@@ -682,6 +687,8 @@ describes.realWin('web-push-service unsubscribing', {
       FAKE_IFRAME_URL;
     webPushConfig[WebPushConfigAttributes.SERVICE_WORKER_URL] =
       FAKE_IFRAME_URL;
+    webPushConfig[WebPushConfigAttributes.SERVICE_WORKER_SCOPE] =
+      FAKE_IFRAME_URL;  
   }
 
   function setupHelperIframe() {
