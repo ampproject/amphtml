@@ -425,19 +425,10 @@ export class AmpStory extends AMP.BaseElement {
             'id': 'amp-story-live-list',
             'data-poll-interval': this.element.getAttribute('live-story'),
             'sort': 'ascending',
-            'i-amphtml-custom-list': '',
+            'disable-scrolling': '',
+            'disable-pagination': '',
+            'i-amphtml-container': 'amp-story',
           }));
-
-      const configEl = createElementWithAttributes(this.win.document,
-          'script', dict({'type': 'application/json'}));
-      configEl.textContent = {
-        'container': 'amp-story',
-        'children': 'amp-story-page',
-        'disableScrolling': true,
-        'disablePagination': true,
-        'updateEvent': EventType.UPDATE_STORY_LIVE_LIST,
-      };
-      liveListEl.appendChild(configEl);
 
       this.element.insertBefore(liveListEl, this.element.firstElementChild);
     }

@@ -18,10 +18,9 @@ import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-live-list-0.1.css';
 import {Layout} from '../../../src/layout';
 import {LiveListManager, liveListManagerForDoc} from './live-list-manager';
-import {childElementByAttr, childElementsByTag} from '../../../src/dom';
-import {getChildJsonConfig} from '../../../src/json';
+import {childElementByAttr, childElementsByTag, childElementByTag} from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';
-import {userAssert} from '../../../src/log';
+import {userAssert, user} from '../../../src/log';
 
 /**
  * @enum {string}
@@ -121,11 +120,6 @@ export class AmpLiveList extends AMP.BaseElement {
     /** @private {?Element} */
     this.updateSlot_ = null;
 
-    /**
-     * Examples of what itemSlot_ could be:
-     * itemsSlot_ = { container: <div items>, children: Array<...>}
-     * itemsSlot_ = { container: <amp-story>, children: Array<'amp-story-page'>}
-     */
     /** @private {?Element} */
     this.itemsSlot_ = null;
 
@@ -191,6 +185,8 @@ export class AmpLiveList extends AMP.BaseElement {
 
     this.manager_ = liveListManagerForDoc(this.getAmpDoc());
 
+    this.customContainer_ = this.getCustomContainer_();
+
     this.updateSlot_ = userAssert(
         this.getUpdateSlot_(this.element),
         'amp-live-list must have an "update" slot.');
@@ -226,35 +222,22 @@ export class AmpLiveList extends AMP.BaseElement {
       this.isReverseOrder_ = this.element.getAttribute('sort') === 'ascending';
     }
 
-    this.customConfig_ = this.getCustomConfig_();
-
     this.manager_.register(this.liveListId_, this);
 
     // Make sure we hide the button
     this.toggleUpdateButton_(false);
-    this.itemsSlot_.children.forEach(item => {
+    this.eachChildElement_(this.itemsSlot_, item => {
       item.classList.add(classes.ITEM);
     });
 
-    this.curNumOfLiveItems_ = this.validateLiveListItems_(
-        this.itemsSlot_.children, true);
+    this.curNumOfLiveItems_ = this.countValidLiveListItems_(
+        this.itemsSlot_, true);
 
-    // TODO: register syonym action only accessible by the runtime.
     this.registerDefaultAction(this.updateAction_.bind(this), 'update');
 
     if (!this.element.hasAttribute('aria-live')) {
       this.element.setAttribute('aria-live', 'polite');
     }
-  }
-
-  /**
-   * Gets custom configuration specified by extension.
-   */
-  getCustomConfig_() {
-    if (this.element.hasAttribute('i-amphtml-custom-list')) {
-      return getChildJsonConfig(this.element);
-    }
-    return false;
   }
 
   /** @override */
@@ -273,12 +256,12 @@ export class AmpLiveList extends AMP.BaseElement {
 
   /** @override */
   update(updatedElement) {
-    const items = this.getItemsSlot_(updatedElement);
-    if (!items) {
+    const container = this.getItemsSlot_(updatedElement);
+    if (!container) {
       return this.updateTime_;
     }
-    this.validateLiveListItems_(items.children);
-    const mutateItems = this.getUpdates_(items.children);
+    this.countValidLiveListItems_(container);
+    const mutateItems = this.getUpdates_(container);
 
     this.preparePendingItemsInsert_(mutateItems.insert);
     this.preparePendingItemsReplace_(mutateItems.replace);
@@ -318,26 +301,28 @@ export class AmpLiveList extends AMP.BaseElement {
     const updateHasNewItems = hasInsertItems || hasReplaceItems;
 
     let promise = this.mutateElement(() => {
+      const itemsSlot = user().assertElement(this.itemsSlot_);
+
       if (hasInsertItems) {
         // Remove the new class from the previously inserted items if
         // we are inserting new items.
-        this.itemsSlot_.children.forEach(child => {
+        this.eachChildElement_(itemsSlot, child => {
           child.classList.remove(classes.NEW_ITEM);
         });
 
         this.curNumOfLiveItems_ += this.insert_(
-            this.itemsSlot_.container, this.pendingItemsInsert_);
+            itemsSlot, this.pendingItemsInsert_);
         this.pendingItemsInsert_.length = 0;
       }
 
       if (this.pendingItemsReplace_.length > 0) {
-        this.replace_(this.itemsSlot_.container, this.pendingItemsReplace_);
+        this.replace_(itemsSlot, this.pendingItemsReplace_);
         this.pendingItemsReplace_.length = 0;
       }
 
       if (this.pendingItemsTombstone_.length > 0) {
         this.curNumOfLiveItems_ -= this.tombstone_(
-            this.itemsSlot_.container, this.pendingItemsTombstone_);
+            itemsSlot, this.pendingItemsTombstone_);
         this.pendingItemsTombstone_.length = 0;
       }
 
@@ -358,7 +343,7 @@ export class AmpLiveList extends AMP.BaseElement {
 
       // Insert and tombstone operations must happen first before we measure
       // number of items to delete down to `data-max-items-per-page`.
-      return this.removeOverflowItems_(this.itemsSlot_.container);
+      return this.removeOverflowItems_(itemsSlot);
       // TODO(erwinm, #3332) compensate scroll position here.
     });
 
@@ -368,9 +353,7 @@ export class AmpLiveList extends AMP.BaseElement {
       });
     }
 
-
-    if (hasInsertItems &&
-      (this.customConfig_ && !this.customConfig_.disableScrolling)) {
+    if (hasInsertItems && !this.element.hasAttribute('disable-scrolling')) {
       promise = promise.then(() => {
         const elementToScrollTo = this.isReverseOrder_ &&
           this.itemsSlot_.lastElementChild ?
@@ -390,10 +373,8 @@ export class AmpLiveList extends AMP.BaseElement {
    * @private
    */
   toggleUpdateButton_(visible) {
-    if (this.customConfig_ && this.customConfig_.updateSlotEvent) {
-      const event = this.win.document.createEvent('Event');
-      event.initEvent(this.customConfig_.updateSlotEvent, true, true);
-      this.customConfig_.dispatchEvent(event);
+    if (this.customContainer_) {
+      // Don't show default button for customized amp-live-lists.
       return;
     }
     this.updateSlot_.classList.toggle('amp-hidden', !visible);
@@ -413,35 +394,28 @@ export class AmpLiveList extends AMP.BaseElement {
     let count = 0;
 
     orphans.forEach(orphan => {
-      if (this.itemsSlot_.children.length === 0) {
-        // When appending to amp-story, the last children of its substree could
-        // be other elements that are not <amp-story-page>, like the bookend.
-        // It could have other children at the top too, like <amp-story-access>
-        // And we need all of the <amp-story-page>s to be together.
-        // Solutions:
-        // A. Have a copy of children needed to be appended to the container
-        // (could be amp-story or amp-live-list). Then append everything at
-        // the end in certain position.
-        //
-        // B. Append wherever in the subtree, as long as the amp-story-pages
-        // are together it should be fine. Validation step already passed
-        // anyways.
-        this.itemsSlot_.container.appendChild(orphan);
+      if (this.itemsSlot_.childElementCount === 0) {
+        this.itemsSlot_.appendChild(orphan);
       } else {
         const orphanSortTime = this.getSortTime_(orphan);
 
         if (this.isReverseOrder_) {
-          for (let i = this.itemsSlot_.children.length - 1; i >= 0; i--) {
-            const child = this.itemsSlot_.children[i];
+          for (let child = this.itemsSlot_.lastElementChild; child;
+            child = child.previousElementSibling) {
+
             const childSortTime = this.getSortTime_(child);
+            if (!childSortTime) {
+              continue;
+            }
+
             if (orphanSortTime >= childSortTime) {
-              this.itemsSlot_.container.insertBefore(orphan,
+              this.itemsSlot_.insertBefore(orphan,
                   child.nextElementSibling);
               count++;
             // If we've exhausted the list it should be appended as the first
             // item.
             } else if (!child.previousElementSibling) {
-              this.itemsSlot_.container.insertBefore(orphan, child);
+              this.itemsSlot_.insertBefore(orphan, child);
               count++;
               break;
             }
@@ -451,20 +425,20 @@ export class AmpLiveList extends AMP.BaseElement {
             continue;
           }
         } else {
-          for (let i = 0; i < this.itemsSlot_.children.length; i++) {
-            const child = this.itemsSlot_.children[i];
+          for (let child = this.itemsSlot_.firstElementChild; child;
+            child = child.nextElementSibling) {
             const childSortTime = this.getSortTime_(child);
+            if (!childSortTime) {
+              continue;
+            }
             if (orphanSortTime >= childSortTime) {
-              // But then I also have to append to the .children array?
-              // Or will it will get populated automatically at getItemsSlot_
-              this.itemsSlot_.container.insertBefore(orphan, child);
+              this.itemsSlot_.insertBefore(orphan, child);
               count++;
               break;
             // We've exhausted the children list and the current orphan
             // can be the last item.
-            } else if (i + 1 >= this.itemsSlot_.children.length) {
-              this.itemsSlot_.container.insertBefore(orphan,
-                  child.nextElementSibling);
+            } else if (!child.nextElementSibling) {
+              this.itemsSlot_.appendChild(orphan);
               count++;
               break;
             }
@@ -550,8 +524,8 @@ export class AmpLiveList extends AMP.BaseElement {
     const actualDeleteItems = [];
 
     if (this.isReverseOrder_) {
-      for (let i = 0; i < this.itemsSlot_.children.length; i++) {
-        const child = this.itemsSlot_.children[i];
+      for (let child = parent.firstElementChild; child;
+        child = child.nextElementSibling) {
         if (deleteItemsCandidates.length >= numOfItemsToDelete) {
           break;
         }
@@ -563,8 +537,8 @@ export class AmpLiveList extends AMP.BaseElement {
       // Walk through the children from last to first.
       // Only accumulate the items in this loop. Removing them here
       // will break the prev reference.
-      for (let i = this.itemsSlot_.children - 1; i >= 0; i--) {
-        const child = this.itemsSlot_.children[i];
+      for (let child = parent.lastElementChild; child;
+        child = child.previousElementSibling) {
         if (deleteItemsCandidates.length >= numOfItemsToDelete) {
           break;
         }
@@ -680,11 +654,11 @@ export class AmpLiveList extends AMP.BaseElement {
   /**
    * Seggregates new, updated and tombstoned elements.
    *
-   * @param {!Array<Element>} updatedChildren
+   * @param {!Element} updatedElement
    * @return {!MutateItemsDef}
    * @private
    */
-  getUpdates_(updatedChildren) {
+  getUpdates_(updatedElement) {
     // NOTE: We need to import the node for custom-element implementation
     // to run. Reparenting directly or doing cloneNode alone won't work.
     // We don't import the parent as importing the whole tree will
@@ -694,8 +668,13 @@ export class AmpLiveList extends AMP.BaseElement {
     const replace = [];
     const tombstone = [];
 
-    updatedChildren.forEach(child => {
+    for (let child = updatedElement.firstElementChild; child;
+      child = child.nextElementSibling) {
       const id = child.getAttribute('id');
+      const sortTime = child.getAttribute('data-sort-time');
+      if (!id || !sortTime) {
+        continue;
+      }
 
       if (this.isChildNew_(child)) {
         const orphan = this.win.document.importNode(child, true);
@@ -714,7 +693,7 @@ export class AmpLiveList extends AMP.BaseElement {
         this.knownItems_[id] = -1;
         tombstone.push(child);
       }
-    });
+    }
 
     return {insert, replace, tombstone};
   }
@@ -808,37 +787,60 @@ export class AmpLiveList extends AMP.BaseElement {
    * @private
    */
   isValidChild_(child) {
-    return !!child.hasAttribute('id') &&
-        Number(child.getAttribute('data-sort-time')) > 0;
+    return !!child.hasAttribute('id') && child.hasAttribute('data-sort-time') ?
+      Number(child.getAttribute('data-sort-time')) > 0 :
+      true;
   }
 
   /**
-   * Runs through all the children of the current live-list and validates
-   * them. Has optional opt_cacheIds flag which caches the ids while we iterate
+   * Runs through all the children of the current live-list and counts valid
+   * ones. Has optional opt_cacheIds flag which caches the ids while we iterate
    * through the children.
    *
-   * @param {!Array<Element>} children
+   * @param {!Element} element
    * @param {boolean=} opt_cacheIds
    * @return {number}
    * @private
    */
-  validateLiveListItems_(children, opt_cacheIds) {
+  countValidLiveListItems_(element, opt_cacheIds) {
     let numItems = 0;
-    let foundInvalid = false;
-    children.forEach(child => {
-      if (!this.isValidChild_(child)) {
-        foundInvalid = true;
-      } else if (opt_cacheIds) {
-        this.cacheChild_(child);
+
+    this.eachChildElement_(element, child => {
+      if (this.isValidChild_(child)) {
+        numItems++;
+        if (opt_cacheIds) {
+          this.cacheChild_(child);
+        }
       }
-      numItems++;
     });
-    userAssert(!foundInvalid,
-        'All amp-live-list-items under amp-live-list#%s children must '
-        + 'have id and data-sort-time attributes. data-sort-time must be a '
-        + 'Number greater than 0.',
-        this.liveListId_);
+
     return numItems;
+  }
+
+  /**
+   * Iterates over the child elements from first to last and invokes the
+   * callback with the current child element passed in as the first argument.
+   *
+   * @param {!Element} parent
+   * @param {function(!Element)} cb
+   * @private
+   */
+  eachChildElement_(parent, cb) {
+    for (let child = parent.firstElementChild; child;
+      child = child.nextElementSibling) {
+      cb(child);
+    }
+  }
+
+   /**
+    *
+    */
+  getCustomContainer_() {
+    const customContainer = this.element.getAttribute('i-amphtml-container');
+    if (customContainer) {
+      return childElementByTag(this.win.document.body, customContainer);
+    }
+    return null;
   }
 
   /**
@@ -846,29 +848,16 @@ export class AmpLiveList extends AMP.BaseElement {
    * @private
    */
   getUpdateSlot_(parent) {
-    if (this.customConfig_ && this.customConfig_.updateSlotEvent) {
-      return this.customConfig_.container;
-    }
-    return childElementByAttr(parent, 'update');
+    return this.customContainer_ || childElementByAttr(parent, 'update');
   }
 
   /**
    * @param {!Element} parent
-   * @return {!Object<?Element, Array<?Element>>}
+   * @return {?Element}
    * @private
    */
   getItemsSlot_(parent) {
-    const obj = {};
-    if (this.customConfig_) {
-      obj.container = childElementsByTag(this.win.document.body,
-          this.customConfig_.container);
-      obj.children = childElementsByTag(obj.container,
-          this.customConfig_.children);
-      return obj;
-    }
-    obj.container = childElementByAttr(parent, 'items');
-    obj.children = obj.container.children;
-    return obj;
+    return this.customContainer_ || childElementByAttr(parent, 'items');
   }
 
   /**
@@ -877,7 +866,8 @@ export class AmpLiveList extends AMP.BaseElement {
    * @private
    */
   getPaginationSlot_(parent) {
-    if (this.customConfig_ && this.customConfig_.disableScrolling) {
+    const disablePagination = this.element.getAttribute('disable-pagination');
+    if (disablePagination) {
       return null;
     }
     return childElementByAttr(parent, 'pagination');
