@@ -524,6 +524,8 @@ exports.rules = [
           'src/service/localization.js',
       'extensions/amp-story/1.0/_locales/zu.js->' +
           'src/service/localization.js',
+      'extensions/amp-story-auto-ads/0.1/amp-story-auto-ads.js->' +
+          'src/service/localization.js',
       'extensions/amp-story-auto-ads/0.1/_locales/af.js->' +
           'src/service/localization.js',
       'extensions/amp-story-auto-ads/0.1/_locales/am.js->' +
