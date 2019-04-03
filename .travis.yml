@@ -38,6 +38,7 @@ addons:
     # Requested by some tests because they need a valid font host,
     # but should not resolve in tests.
     - fonts.googleapis.com
+env: # Required at top level for allowed_failures logic
 stages:
   - build
   - test
