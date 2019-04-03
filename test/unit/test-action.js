@@ -869,20 +869,19 @@ describe('installActionHandler', () => {
     expect(callArgs.trust).to.be.equal(ActionTrust.HIGH);
   });
 
-  it('should check trust level before invoking action', () => {
+  it('should not check trust level (handler should check)', () => {
     const handlerSpy = sandbox.spy();
     const target = document.createElement('form');
-    action.installActionHandler(target, handlerSpy, ActionTrust.HIGH);
+    action.installActionHandler(target, handlerSpy);
 
-    action.invoke_(new ActionInvocation(target, 'submit', /* args */ null,
-        'button', 'button', 'tapEvent', ActionTrust.HIGH));
+    const invocation = new ActionInvocation(target, 'submit', /* args */ null,
+        'button', 'button', 'tapEvent', ActionTrust.HIGH);
+    action.invoke_(invocation);
     expect(handlerSpy).to.be.calledOnce;
 
-    return allowConsoleError(() => {
-      action.invoke_(new ActionInvocation(target, 'submit', /* args */ null,
-          'button', 'button', 'tapEvent', ActionTrust.LOW));
-      expect(handlerSpy).to.be.calledOnce;
-    });
+    invocation.trust = ActionTrust.LOW;
+    action.invoke_(invocation);
+    expect(handlerSpy).to.be.calledTwice;
   });
 });
 
