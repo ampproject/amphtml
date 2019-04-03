@@ -19,6 +19,9 @@ import {FakeMutationObserver, FakeWindow} from '../../testing/fake-dom';
 import {FixedLayer} from '../../src/service/fixed-layer';
 import {Services} from '../../src/services';
 import {endsWith} from '../../src/string';
+import {
+  installHiddenObserverForDoc,
+} from '../../src/service/hidden-observer-impl';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 import {toggle} from '../../src/style';
@@ -160,6 +163,7 @@ describes.sandboxed('FixedLayer', {}, () => {
     };
     documentApi.defaultView.document = documentApi;
     ampdoc = new AmpDocSingle(documentApi.defaultView);
+    installHiddenObserverForDoc(ampdoc);
     installPlatformService(documentApi.defaultView);
     installTimerService(documentApi.defaultView);
     timer = Services.timerFor(documentApi.defaultView);
@@ -1126,10 +1130,13 @@ describes.sandboxed('FixedLayer', {}, () => {
     });
 
     describe('hidden toggle', () => {
+      let mutationObserver;
       beforeEach(() => {
         toggleExperiment(documentApi.defaultView, 'hidden-mutation-observer',
             true);
         fixedLayer.observeHiddenMutations();
+        mutationObserver =
+          Services.hiddenObserverForDoc(ampdoc).mutationObserver_;
       });
 
       it('should trigger an update', () => {
@@ -1149,7 +1156,7 @@ describes.sandboxed('FixedLayer', {}, () => {
         sandbox.stub(timer, 'delay').callsFake(callback => {
           callback();
         });
-        return fixedLayer.mutationObserver_.__mutate({
+        return mutationObserver.__mutate({
           attributeName: 'hidden',
         }).then(() => {
           expect(vsyncTasks).to.have.length(2);
@@ -1477,10 +1484,13 @@ describes.sandboxed('FixedLayer', {}, () => {
     });
 
     describe('hidden toggle', () => {
+      let mutationObserver;
       beforeEach(() => {
         toggleExperiment(documentApi.defaultView, 'hidden-mutation-observer',
             true);
         fixedLayer.observeHiddenMutations();
+        mutationObserver =
+          Services.hiddenObserverForDoc(ampdoc).mutationObserver_;
       });
 
       it('should trigger an update', () => {
@@ -1500,7 +1510,7 @@ describes.sandboxed('FixedLayer', {}, () => {
         sandbox.stub(timer, 'delay').callsFake(callback => {
           callback();
         });
-        return fixedLayer.mutationObserver_.__mutate({
+        return mutationObserver.__mutate({
           attributeName: 'hidden',
         }).then(() => {
           expect(vsyncTasks).to.have.length(2);
