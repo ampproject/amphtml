@@ -161,17 +161,17 @@ const BLACKLISTED_ATTR_VALUES = [
   /*eslint no-script-url: 0*/ '</script',
 ];
 
-/** @const {!Object<string, !Object<string, !Array<string>>>} */
+/** @const {!Object<string, !Object<string, !RegExp>>} */
 const BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES = dict({
   'input': {
-    'type': ['image', 'button'],
+    'type': /(?:image|button)/i,
   },
 });
 
-/** @const {!Object<string, !Object<string, !Array<string>>>} */
-const AMP4EMAIL_BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES = dict({
+/** @const {!Object<string, !Object<string, !RegExp>>} */
+const EMAIL_BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES = dict({
   'input': {
-    'type': ['file', 'password'],
+    'type': /(?:button|file|image|password)/i,
   },
 });
 
@@ -263,21 +263,17 @@ export function isValidAttr(
   // Remove blacklisted values for specific attributes for specific tags
   // e.g. input[type=image].
   const attrValueBlacklist =
-      BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES[tagName] || dict();
-  let blacklistedValues = attrValueBlacklist[attrName] || [];
+      BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES[tagName];
   if (isAmp4Email(doc)) {
-    const amp4EmailAttrValueBlacklist =
-        AMP4EMAIL_BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES[tagName];
-    if (amp4EmailAttrValueBlacklist) {
-      const blacklistAmp4EmailValues =
-          amp4EmailAttrValueBlacklist[attrName] || [];
-      blacklistedValues = blacklistedValues.concat(blacklistAmp4EmailValues);
-    }
+    Object.assign(attrValueBlacklist,
+        EMAIL_BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES[tagName]);
   }
-
-  if (attrValue
-    && blacklistedValues.indexOf(attrValue.toLowerCase()) != -1) {
-    return false;
+  if (attrValueBlacklist) {
+    const blacklistedValuesRegex = attrValueBlacklist[attrName];
+    if (blacklistedValuesRegex &&
+        attrValue.search(blacklistedValuesRegex) != -1) {
+      return false;
+    }
   }
 
   return true;
