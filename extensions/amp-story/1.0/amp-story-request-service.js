@@ -66,12 +66,8 @@ export class AmpStoryRequestService {
 
     if (bookendEl.hasAttribute(BOOKEND_CONFIG_ATTRIBUTE_NAME)) {
       const rawUrl = bookendEl.getAttribute(BOOKEND_CONFIG_ATTRIBUTE_NAME);
-      let credentials = undefined;
-      if (bookendEl.hasAttribute(BOOKEND_CREDENTIALS_ATTRIBUTE_NAME)) {
-        credentials = bookendEl.getAttribute(
-            BOOKEND_CREDENTIALS_ATTRIBUTE_NAME
-        );
-      }
+      const credentials =
+        bookendEl.getAttribute(BOOKEND_CREDENTIALS_ATTRIBUTE_NAME);
       return this.loadJsonFromAttribute_(rawUrl, credentials);
     }
 
@@ -86,7 +82,7 @@ export class AmpStoryRequestService {
 
   /**
    * @param {string} rawUrl
-   * @param {string=} credentials
+   * @param {string|null} credentials
    * @return {(!Promise<!JsonObject>|!Promise<null>)}
    * @private
    */
