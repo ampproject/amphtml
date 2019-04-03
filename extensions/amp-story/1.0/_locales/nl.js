@@ -13,22 +13,114 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {LocalizedStringBundleDef, LocalizedStringId} from '../localization';
-
+import {
+  LocalizedStringBundleDef,
+  LocalizedStringId,
+} from '../../../../src/localized-strings';
 
 /**
- * Localized string bundle used for Dutch strings.
+ * Localized string bundle used for nl strings.
  * @const {!LocalizedStringBundleDef}
  */
 export default /** @const {!LocalizedStringBundleDef} */ ({
+  [LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT]: {
+    string: 'Geluid uit',
+  },
+  [LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_NO_SOUND_TEXT]: {
+    string: 'Deze pagina heeft geen geluid',
+  },
+  [LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_SOUND_TEXT]: {
+    string: 'Geluid aan',
+  },
+  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_APPLY_NOW]: {
+    string: 'Nu toepassen',
+  },
+  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_BOOK_NOW]: {
+    string: 'Boeken',
+  },
+  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_BUY_TICKETS]: {
+    string: 'Kaartjes kopen',
+  },
+  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_DOWNLOAD]: {
+    string: 'Downloaden',
+  },
+  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_EXPLORE]: {
+    string: 'Verkennen',
+  },
+  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_GET_NOW]: {
+    string: 'Nu ophalen',
+  },
+  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_INSTALL]: {
+    string: 'Nu installeren',
+  },
+  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_LEARN_MORE]: {
+    string: 'Meer informatie',
+  },
+  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_LISTEN]: {
+    string: 'Luisteren',
+  },
+  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_MORE]: {
+    string: 'Meer',
+  },
+  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_OPEN_APP]: {
+    string: 'App openen',
+  },
+  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_ORDER_NOW]: {
+    string: 'Nu bestellen',
+  },
+  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_PLAY]: {
+    string: 'Afspelen',
+  },
+  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_READ]: {
+    string: 'Lezen',
+  },
+  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SHOP]: {
+    string: 'Winkelen',
+  },
+  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SHOW]: {
+    string: 'Weergeven',
+  },
+  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SHOWTIMES]: {
+    string: 'Aanvangstijden',
+  },
+  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SIGN_UP]: {
+    string: 'Aanmelden',
+  },
+  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SUBSCRIBE]: {
+    string: 'Nu abonneren',
+  },
+  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_USE_APP]: {
+    string: 'App gebruiken',
+  },
+  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_VIEW]: {
+    string: 'Bekijken',
+  },
+  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_WATCH]: {
+    string: 'Bekijken',
+  },
+  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_WATCH_EPISODE]: {
+    string: 'Aflevering bekijken',
+  },
+  [LocalizedStringId.AMP_STORY_BOOKEND_MORE_TO_READ_LABEL]: {
+    string: 'Meer om te lezen',
+  },
+  [LocalizedStringId.AMP_STORY_BOOKEND_PRIVACY_SETTINGS_BUTTON_LABEL]: {
+    string: 'Privacyinstellingen voor gegevens wijzigen',
+  },
+  [LocalizedStringId.AMP_STORY_BOOKEND_PRIVACY_SETTINGS_TITLE]: {
+    string: 'Privacyinstellingen',
+  },
   [LocalizedStringId.AMP_STORY_CONSENT_ACCEPT_BUTTON_LABEL]: {
     string: 'Accepteren',
   },
   [LocalizedStringId.AMP_STORY_CONSENT_DECLINE_BUTTON_LABEL]: {
     string: 'Weigeren',
   },
+  [LocalizedStringId.AMP_STORY_CONTINUE_ANYWAY_BUTTON_LABEL]: {
+    string: 'Toch doorgaan',
+  },
   [LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LABEL]: {
-    string: 'Bekijk op het originele domein:',
+    string: 'Bekijken op oorspronkelijk domein:',
   },
   [LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LINK]: {
     string: 'Meer over AMP-resultaten',
@@ -39,14 +131,20 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
   [LocalizedStringId.AMP_STORY_HINT_UI_PREVIOUS_LABEL]: {
     string: 'Tik op Terug',
   },
+  [LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL]: {
+    string: 'Omhoog vegen',
+  },
+  [LocalizedStringId.AMP_STORY_PAGE_PLAY_VIDEO]: {
+    string: 'Video afspelen',
+  },
   [LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT]: {
-    string: 'Kan de link niet naar het klembord kopiëren :(',
+    string: 'Kan link niet kopiëren naar klembord :(',
   },
   [LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_SUCCESS_TEXT]: {
-    string: 'Link gekopieerd!',
+    string: 'Link gekopieerd',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_EMAIL]: {
-    string: 'Email',
+    string: 'E-mail',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_FACEBOOK]: {
     string: 'Facebook',
@@ -55,7 +153,7 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
     string: 'Google+',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINK]: {
-    string: 'Link selecteren',
+    string: 'Link ophalen',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINKEDIN]: {
     string: 'LinkedIn',
@@ -64,10 +162,7 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
     string: 'Pinterest',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_SMS]: {
-    string: 'SMS',
-  },
-  [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_SYSTEM]: {
-    string: 'Meer',
+    string: 'Sms',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_TUMBLR]: {
     string: 'Tumblr',
@@ -78,17 +173,27 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_WHATSAPP]: {
     string: 'WhatsApp',
   },
+  [LocalizedStringId.AMP_STORY_TOOLTIP_EXPAND_TWEET]: {
+    string: 'Tweet uitvouwen',
+  },
+  [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_HEIGHT_SIZE_TEXT]: {
+    string: 'Maak je venster hoger om deze functionaliteit te bekijken',
+  },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT]: {
-    fallback: 'Vergroot je venster om deze inhoud te bekijken',
+    string: 'Maak je venster hoger en breder om deze functionaliteit te ' +
+        'bekijken',
+  },
+  [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_WIDTH_SIZE_TEXT]: {
+    string: 'Maak je venster breder om deze functionaliteit te bekijken',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
-    string: 'U moet het amp-story-experiment inschakelen om deze inhoud te ' +
-        'kunnen bekijken',
+    string: 'Je moet het amp-story-experiment inschakelen om deze content te ' +
+        'bekijken.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
-    string: 'De pagina kan het best in portretmodus bekeken worden',
+    string: 'De pagina kan het beste worden bekeken in de staande modus',
   },
   [LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT]: {
-    string: 'Helaas ondersteunt uw browser deze inhoud niet',
+    string: 'Je browser ondersteunt deze functionaliteit niet',
   },
 });

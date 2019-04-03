@@ -409,6 +409,11 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @return {boolean} true if the user has opted out.
    */
   hasOptedOut_() {
+    const elementId = this.config_['optoutElementId'];
+    if (elementId && this.win.document.getElementById(elementId)) {
+      return true;
+    }
+
     if (!this.config_['optout']) {
       return false;
     }
@@ -671,7 +676,8 @@ export class AmpAnalytics extends AMP.BaseElement {
   expandTemplateWithUrlParams_(spec, expansionOptions) {
     return this.variableService_.expandTemplate(spec, expansionOptions)
         .then(key => Services.urlReplacementsForDoc(
-            this.element).expandUrlAsync(key));
+            this.element).expandUrlAsync(key,
+            this.variableService_.getMacros()));
   }
 
   /**

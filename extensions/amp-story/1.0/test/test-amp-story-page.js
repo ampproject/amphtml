@@ -19,6 +19,8 @@ import {AmpStoryPage, PageState} from '../amp-story-page';
 import {AmpStoryStoreService} from '../amp-story-store-service';
 import {MediaType} from '../media-pool';
 import {createElementWithAttributes} from '../../../../src/dom';
+import {installFriendlyIframeEmbed}
+  from '../../../../src/friendly-iframe-embed';
 import {registerServiceBuilder} from '../../../../src/service';
 
 
@@ -157,6 +159,53 @@ describes.realWin('amp-story-page', {amp: true}, env => {
             done();
           });
         });
+  });
+
+  it('should perform media operations on fie video when active', done => {
+    const iframe = win.document.createElement('iframe');
+    const fiePromise = installFriendlyIframeEmbed(iframe, gridLayerEl, {
+      url: 'https://amp.dev',
+      html: '<video src="https://example.com/video.mp3"></video>',
+    });
+
+    fiePromise.then(fie => {
+      const fieDoc = fie.win.document;
+      const videoEl = fieDoc.querySelector('video');
+
+      let mediaPoolMock;
+
+      page.buildCallback();
+      page.layoutCallback()
+          .then(() => page.mediaPoolPromise_)
+          .then(mediaPool => {
+            mediaPoolMock = sandbox.mock(mediaPool);
+            mediaPoolMock
+                .expects('register')
+                .withExactArgs(videoEl)
+                .once();
+
+            mediaPoolMock
+                .expects('preload')
+                .withExactArgs(videoEl)
+                .returns(Promise.resolve())
+                .once();
+
+            mediaPoolMock
+                .expects('play')
+                .withExactArgs(videoEl)
+                .once();
+
+            page.setState(PageState.PLAYING);
+
+            // `setState` runs code that creates subtasks (Promise callbacks).
+            // Waits for the next frame to make sure all the subtasks are
+            // already executed when we run the assertions.
+            win.requestAnimationFrame(() => {
+              mediaPoolMock.verify();
+              done();
+            });
+          });
+    });
   });
 
   it('should stop the advancement when state becomes not active', () => {

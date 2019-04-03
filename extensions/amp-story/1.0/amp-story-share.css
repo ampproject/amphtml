@@ -18,7 +18,7 @@
 
 /* All top-level bookend elements need to set their own left/right margins */
 .i-amphtml-story-share-widget {
-  display: flex !important;
+  display: block !important;
   margin: 16px 8px !important;
 }
 
@@ -158,7 +158,7 @@
   bottom: -18px !important;
   left: 0 !important;
   width: 100% !important;
-  color: #333 !important;
+  color: rgba(0, 0, 0, 0.87) !important;
   padding-top: 7px !important; /* Making sure the whole icon is clickable. */
   text-transform: capitalize !important;
   font-family: 'Roboto', sans-serif !important;
@@ -166,4 +166,23 @@
   line-height: 11px !important;
   font-size: 11px !important;
   text-align: center !important;
+}
+
+.i-amphtml-story-page-share {
+  display: flex !important;
+  margin: 0 24px 12px !important;
+  align-items: center !important;
+}
+
+.i-amphtml-story-page-share-input {
+  height: 18px !important;
+  width: 18px !important;
+  margin: 0 !important;
+}
+
+.i-amphtml-story-page-share-label {
+  color: rgba(0, 0, 0, 0.87) !important;
+  margin-left: 8px !important;
+  font-family: 'Roboto', regular !important;
+  font-size: 13px !important;
 }
