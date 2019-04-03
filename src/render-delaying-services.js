@@ -39,6 +39,7 @@ import {getServicePromise} from './service';
 const SERVICES = {
   'amp-dynamic-css-classes': '[custom-element=amp-dynamic-css-classes]',
   'variant': 'amp-experiment',
+  'amp-story-render': 'amp-story[standalone]',
 };
 
 /**

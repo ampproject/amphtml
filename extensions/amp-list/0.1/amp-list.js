@@ -1001,7 +1001,7 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   prepareAndSendFetch_(opt_refresh = false) {
-    return getViewerAuthTokenIfAvailable(this.win, this.element).then(token =>
+    return getViewerAuthTokenIfAvailable(this.element).then(token =>
       this.fetch_(opt_refresh, token)
     );
   }

@@ -152,13 +152,13 @@ export class AmpState extends AMP.BaseElement {
       ? UrlReplacementPolicy.OPT_IN
       : UrlReplacementPolicy.ALL;
 
-    return getViewerAuthTokenIfAvailable(ampdoc.win, element).then(token => {
-      return this.fetch_(ampdoc, policy, opt_refresh, token).catch(() => {
+    return getViewerAuthTokenIfAvailable(element).then(token =>
+      this.fetch_(ampdoc, element, policy, opt_refresh, token).catch(() => {
         // Trigger "fetch-error" event on fetch failure.
         const actions = Services.actionServiceForDoc(element);
         actions.trigger(element, 'fetch-error', null, ActionTrust.LOW);
-      });
-    });
+      }
+    );
   }
 
   /**

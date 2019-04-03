@@ -29,6 +29,7 @@ import {getSourceOrigin} from '../../../src/url';
 import {getValueForExpr, tryParseJson} from '../../../src/json';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {isArray} from '../../../src/types';
+import {isJsonScriptTag} from '../../../src/dom';
 import {listenOnce} from '../../../src/event-helper';
 import {startsWith} from '../../../src/string';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
@@ -185,6 +186,9 @@ export class AccessService {
    * @private
    */
   parseConfig_() {
+    userAssert(isJsonScriptTag(this.accessElement_),
+        `${TAG} config should ` +
+        'be inside a <script> tag with type="application/json"');
     const rawContent = tryParseJson(this.accessElement_.textContent, e => {
       throw user().createError('Failed to parse "amp-access" JSON: ' + e);
     });
@@ -650,7 +654,7 @@ export class AccessService {
    */
   handleAction_(invocation) {
     if (!invocation.satisfiesTrust(ActionTrust.HIGH)) {
-      return;
+      return null;
     }
     if (invocation.method == 'login') {
       if (invocation.event) {

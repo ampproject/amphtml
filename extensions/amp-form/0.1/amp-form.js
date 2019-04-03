@@ -288,7 +288,7 @@ export class AmpForm {
       }),
     };
 
-    return getViewerAuthTokenIfAvailable(this.win_, this.form_).then(token => {
+    return getViewerAuthTokenIfAvailable(this.form_).then(token => {
       if (token) {
         userAssert(request.fetchOpt['method'] == 'POST',
             'Cannot attach auth token with GET request.');
