@@ -85,6 +85,10 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
     expect(localSubscriptionPlatform.getBaseScore()).to.be.equal(99);
   });
 
+  it('Should not allow prerender', () => {
+    expect(localSubscriptionPlatform.isPrerenderSafe()).to.be.false;
+  });
+
   it('should fetch the entitlements on getEntitlements', () => {
     const fetchStub = sandbox.stub(localSubscriptionPlatform.xhr_, 'fetchJson')
         .callsFake(() => Promise.resolve({json: () => Promise.resolve(json)}));
