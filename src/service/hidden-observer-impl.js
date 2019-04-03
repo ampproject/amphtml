@@ -15,6 +15,7 @@
  */
 
 import {Observable} from '../observable';
+import {devAssert} from '../log';
 import {
   installServiceInEmbedScope,
   registerServiceBuilderForDoc,
@@ -34,8 +35,8 @@ const OBSERVER_OPTIONS = {
  * A document level service that will listen for mutations on the `hidden`
  * attribute and notify listeners. The `hidden` attribute is used to toggle
  * `display: none` on elements.
- * @implements {../../../src/service.EmbeddableService}
- * @implements {../../../src/service.Disposable}
+ * @implements {../service.EmbeddableService}
+ * @implements {../service.Disposable}
  */
 export class HiddenObserver {
   /**
@@ -46,8 +47,10 @@ export class HiddenObserver {
     /** @const {!Document|!ShadowRoot} */
     this.root_ = opt_root || ampdoc.getRootNode();
 
+    const doc = opt_root ? opt_root.ownerDocument : this.root_;
+
     /** @const {!Window} */
-    this.win_ = (opt_root ? opt_root.ownerDocument : this.root_).defaultView;
+    this.win_ = devAssert(doc.defaultView);
 
     /** @private {?MutationObserver} */
     this.mutationObserver_ = null;
@@ -89,7 +92,9 @@ export class HiddenObserver {
     this.observable_ = new Observable();
 
     const mo = new this.win_.MutationObserver(mutations => {
-      this.observable_.fire(mutations);
+      if (mutations) {
+        this.observable_.fire(mutations);
+      }
     });
     this.mutationObserver_ = mo;
     mo.observe(this.root_, OBSERVER_OPTIONS);
