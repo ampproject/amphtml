@@ -165,25 +165,26 @@ export class AmpViewerAssistance {
    * Checks the 'actionStatus' field of the updateActionState arguments against
    * a whitelist.
    * @private
-   * @param {!Object} args
+   * @param {?Object} args
    * @return {boolean}
    */
   isValidActionStatusArgs_(args) {
+    if (!args) {
+      return false;
+    }
     const update = args['update'];
-    const actionStatus = update ? update['actionStatus'] : undefined;
+    const actionStatus = update && update['actionStatus'];
     if (!update || !actionStatus) {
-      user().error(TAG, 'Invalid arguments for updateActionState! Must have' +
-          ' an "update" object with an "actionStatus" field.');
+      user().error(TAG, '"updateActionState" action must have an' +
+          ' an "update" parameter containing an "actionStatus" field.');
       return false;
     }
-
     if (!ACTION_STATUS_WHITELIST.includes(actionStatus)) {
-      user().error(TAG, 'Invalid actionStatus for updateActionState! '
-          + actionStatus);
+      user().error(TAG, 'Invalid "update.actionStatus" value for ' +
+          '"updateActionState":', actionStatus);
       return false;
     }
-
-    user().info(TAG, 'Sending actionStatus: ' + actionStatus);
+    user().info(TAG, 'Sending "actionStatus":', actionStatus);
     return true;
   }
 
