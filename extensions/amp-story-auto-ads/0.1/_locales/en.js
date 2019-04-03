@@ -24,6 +24,11 @@ import {
  * @const {!LocalizedStringBundleDef}
  */
 export default /** @const {!LocalizedStringBundleDef} */ ({
+  [LocalizedStringId.AMP_STORY_AUTO_ADS_ATTRIBUTION_LABEL]: {
+    string: 'Ad',
+    description: 'A label that indicates that a piece of content is an ' +
+        'advertisement.',
+  },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_APPLY_NOW]: {
     string: 'Apply Now',
     description: 'Button label for an ad call to action button that asks ' +

@@ -367,7 +367,8 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
     const span = this.win.document.createElement('p');
     span.className = 'i-amphtml-story-ad-attribution';
-    span.textContent = 'Ad';
+    span.textContent = this.localizationService_.getLocalizedString(
+        LocalizedStringId.AMP_STORY_AUTO_ADS_ATTRIBUTION_LABEL);
 
     createShadowRootWithStyle(container, span, attributionCSS);
     this.ampStory_.element.appendChild(container);
