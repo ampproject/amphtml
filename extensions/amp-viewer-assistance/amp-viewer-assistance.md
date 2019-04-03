@@ -63,7 +63,13 @@ The `amp-viewer-assistance` extension currently has two functions that can be in
   </tr>
   <tr>
     <td class="col-fourty"><code>updateActionState</code></td>
-    <td>A function to send a message to the outer viewer representing a state change. Should contain an argument of the resulting state change.</td>
+    <td>A function to send a message to the outer viewer representing a state change. Requires an <code>update</code> object parameter of the following format:
+    
+    {
+      "actionStatus": "COMPLETED_ACTION_STATUS" | "ACTIVE_ACTION_STATUS" |
+          "FAILED_ACTION_STATUS",
+      "result": { ... }, // optional field used with COMPLETED_ACTION_STATUS
+    }
   </tr>
 </table>
 
