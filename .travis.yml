@@ -38,7 +38,6 @@ addons:
     # Requested by some tests because they need a valid font host,
     # but should not resolve in tests.
     - fonts.googleapis.com
-env: # Required at top level for allowed_failures logic
 stages:
   - build
   - test
@@ -79,19 +78,18 @@ jobs:
         - node build-system/pr-check/remote-tests.js
       after_script:
         - build-system/sauce_connect/stop_sauce_connect.sh
-      env:
-        - ALLOWED_TO_FAIL=true
     - stage: test
       name: "End to End Tests"
       script:
         - node build-system/pr-check/e2e-tests.js
-      env: 
-        - ALLOWED_TO_FAIL=true
   fast_finish: true
 
   # TODO(ampproject/wg-infra): remove when remote tests stabilize
   allow_failures:
-    - env: ALLOWED_TO_FAIL=true
+    - script:
+      - node build-system/pr-check/remote-tests.js
+    - script:
+      - node build-system/pr-check/e2e-tests.js
 cache:
   directories:
     - node_modules
