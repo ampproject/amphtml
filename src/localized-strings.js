@@ -18,7 +18,7 @@ import {parseJson} from './json';
 /**
  * A unique identifier for each localized string.  Localized string IDs should:
  *
- *   - Maintain alphabetical order
+ *   - Maintain alphabetical order, by component
  *   - Be prefixed with the name of the extension that uses the string
  *     (e.g. "AMP_STORY_"), or with "AMP_" if they are general
  *   - NOT be reused; to deprecate an ID, comment it out and prefix its key with
