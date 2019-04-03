@@ -78,17 +78,19 @@ jobs:
         - node build-system/pr-check/remote-tests.js
       after_script:
         - build-system/sauce_connect/stop_sauce_connect.sh
+      env:
+        - ALLOWED_TO_FAIL=true
     - stage: test
       name: "End to End Tests"
       script:
         - node build-system/pr-check/e2e-tests.js
+      env: 
+        - ALLOWED_TO_FAIL=true
   fast_finish: true
 
   # TODO(ampproject/wg-infra): remove when remote tests stabilize
   allow_failures:
-    - script:
-      - node build-system/pr-check/remote-tests.js
-      - node build-system/pr-check/e2e-tests.js
+    - env: ALLOWED_TO_FAIL=true
 cache:
   directories:
     - node_modules
