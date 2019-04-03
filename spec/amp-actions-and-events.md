@@ -205,6 +205,20 @@ event.index</pre></td>
   </tr>
 </table>
 
+### amp-list
+<table>
+  <tr>
+    <th width="25%">Event</th>
+    <th width="35%">Description</th>
+    <th width="40%">Data</th>
+  </tr>
+  <tr>
+    <td><code>fetch-error</code>(low-trust)</td>
+    <td>Fired when fetching data fails.</td>
+    <td>None</td>
+  </tr>
+</table>
+
 ### amp-selector
 <table>
   <tr>
@@ -238,6 +252,20 @@ event.selectedOptions</pre></td>
   <tr>
     <td><code>sidebarClose</code></td>
     <td>Fired when sidebar is fully closed after transition has ended.</td>
+    <td>None</td>
+  </tr>
+</table>
+
+### amp-state
+<table>
+  <tr>
+    <th width="25%">Event</th>
+    <th width="35%">Description</th>
+    <th width="40%">Data</th>
+  </tr>
+  <tr>
+    <td><code>fetch-error</code>(low-trust)</td>
+    <td>Fired when fetching data fails.</td>
     <td>None</td>
   </tr>
 </table>
