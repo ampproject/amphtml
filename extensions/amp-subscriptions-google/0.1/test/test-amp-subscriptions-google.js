@@ -258,6 +258,11 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     expect(methods.linkAccount).to.not.be.called;
   });
 
+  it('should not allow prerender for non-google viewer', () => {
+    platform.isGoogleViewer_ = false;
+    expect(platform.isPrerenderSafe()).to.be.false;
+  });
+
   it('should reauthorize on complete linking', () => {
     analyticsMock.expects('actionEvent')
         .withExactArgs(PLATFORM_ID, 'link', 'success')
@@ -387,6 +392,12 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     }).then(() => {
       expect(platform.isGoogleViewer_).to.be.true;
     });
+  });
+
+  it('should allow prerender if in a google viewer', () => {
+    viewer.params_['viewerUrl'] = 'https://www.google.com/other';
+    platform = new GoogleSubscriptionsPlatform(ampdoc, {}, serviceAdapter);
+    expect(platform.isPrerenderSafe()).to.be.true;
   });
 
   it('should attach button given to decorateUI', () => {
