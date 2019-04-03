@@ -89,6 +89,10 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
     });
   });
 
+  it('Should  allow prerender', () => {
+    expect(viewerPlatform.isPrerenderSafe()).to.be.true;
+  });
+
   describe('verifyAuthToken_', () => {
     const entitlement = Entitlement.parseFromJson(entitlementData);
     entitlement.service = 'local';
