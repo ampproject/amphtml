@@ -14,15 +14,23 @@
  * limitations under the License.
  */
 
-/** position="landscape-half-left" template. */
-[orientation=landscape] [position*="landscape-half-left"] {
+/**
+ * position="landscape-half-left" template.
+ * This attribute is specified on an <amp-story-grid-layer> tag, wich is
+ * absolute positioned.
+ */
+[orientation=landscape] [position="landscape-half-left"] {
   width: 50% !important;
   left: 0 !important;
   right: auto !important;
 }
 
-/** position="landscape-half-right" template. */
-[orientation=landscape] [position*="landscape-half-right"] {
+/**
+ * position="landscape-half-right" template.
+ * This attribute is specified on an <amp-story-grid-layer> tag, wich is
+ * absolute positioned.
+ */
+[orientation=landscape] [position="landscape-half-right"] {
   width: 50% !important;
   left: auto !important;
   right: 0 !important;
