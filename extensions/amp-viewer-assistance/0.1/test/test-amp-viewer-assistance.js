@@ -15,6 +15,7 @@
  */
 
 import {ActionInvocation} from '../../../../src/service/action-impl';
+import {ActionTrust} from '../../../../src/action-constants';
 import {AmpViewerAssistance} from '../amp-viewer-assistance';
 import {mockServiceForDoc} from '../../../../testing/test-helper';
 
@@ -91,79 +92,71 @@ describes.fakeWin('AmpViewerAssistance', {
   });
 
   describe('updateActionState', () => {
-    it('should send updateActionState to the viewer', () => {
+    let service;
+    let sendMessageStub;
+
+    beforeEach(() => {
       const config = {
         'providerId': 'foo-bar',
       };
       element.textContent = JSON.stringify(config);
-      const service = new AmpViewerAssistance(ampdoc);
-      const sendMessageStub = service.viewer_.sendMessageAwaitResponse;
-      const invocationArgs = {
+
+      service = new AmpViewerAssistance(ampdoc);
+      sendMessageStub = service.viewer_.sendMessageAwaitResponse;
+    });
+
+    it('should send if params are well-formed', () => {
+      const args = {
         'update': {'actionStatus': 'COMPLETED_ACTION_STATUS'},
       };
+      const invoke = new ActionInvocation(element, 'updateActionState', args);
+      invoke.trust = ActionTrust.LOW;
+
       return service.start_().then(() => {
         sendMessageStub.resetHistory();
-        const invocation = new ActionInvocation(
-            element, 'updateActionState', invocationArgs);
-        service.actionHandler_(invocation);
+        service.actionHandler_(invoke);
         expect(sendMessageStub).to.be.calledOnce;
         expect(sendMessageStub.firstCall.args[0]).to.equal('updateActionState');
-        expect(sendMessageStub.firstCall.args[1]).to.deep.equal(invocationArgs);
+        expect(sendMessageStub.firstCall.args[1]).to.deep.equal(args);
       });
     });
 
-    it('should fail to send updateActionState if args are missing', () => {
-      const config = {
-        'providerId': 'foo-bar',
-      };
-      element.textContent = JSON.stringify(config);
-      const service = new AmpViewerAssistance(ampdoc);
-      const sendMessageStub = service.viewer_.sendMessageAwaitResponse;
+    it('should not send if "update" param is missing', () => {
+      const invoke = new ActionInvocation(element, 'updateActionState');
+      invoke.trust = ActionTrust.LOW;
+
       return service.start_().then(() => {
         sendMessageStub.resetHistory();
-        const invocation = new ActionInvocation(element, 'updateActionState');
-        service.actionHandler_(invocation);
+        service.actionHandler_(invoke);
         expect(sendMessageStub).to.not.be.called;
       });
     });
 
-    it('should fail to send updateActionState if args is missing update ' +
-        'object', () => {
-      const config = {
-        'providerId': 'foo-bar',
-      };
-      element.textContent = JSON.stringify(config);
-      const service = new AmpViewerAssistance(ampdoc);
-      const sendMessageStub = service.viewer_.sendMessageAwaitResponse;
+    it('should not send if "update.actionStatus" param is missing', () => {
+      const args = {'update': {}};
+      const invoke = new ActionInvocation(element, 'updateActionState', args);
+      invoke.trust = ActionTrust.LOW;
+
       return service.start_().then(() => {
         sendMessageStub.reset();
-        const invocationArgs = {'update': {}};
-        const invocation = new ActionInvocation(element, 'updateActionState',
-            invocationArgs);
         allowConsoleError(() => {
-          service.actionHandler_(invocation);
+          service.actionHandler_(invoke);
         });
         expect(sendMessageStub).to.not.be.called;
       });
     });
 
-    it('should fail to send updateActionState if args has an invalid ' +
-        'actionStatus', () => {
-      const config = {
-        'providerId': 'foo-bar',
+    it('should not send if "update.actionStatus" param is invalid', () => {
+      const args = {
+        'update': {'actionStatus': 'INVALID_ACTION_STATUS'},
       };
-      element.textContent = JSON.stringify(config);
-      const service = new AmpViewerAssistance(ampdoc);
-      const sendMessageStub = service.viewer_.sendMessageAwaitResponse;
+      const invoke = new ActionInvocation(element, 'updateActionState', args);
+      invoke.trust = ActionTrust.LOW;
+
       return service.start_().then(() => {
         sendMessageStub.reset();
-        const invocationArgs = {
-          'update': {'actionStatus': 'INVALID_ACTION_STATUS'},
-        };
-        const invocation = new ActionInvocation(element, 'updateActionState',
-            invocationArgs);
         allowConsoleError(() => {
-          service.actionHandler_(invocation);
+          service.actionHandler_(invoke);
         });
         expect(sendMessageStub).to.not.be.called;
       });
@@ -180,7 +173,14 @@ describes.fakeWin('AmpViewerAssistance', {
     return service.start_().then(() => {
       sendMessageStub.resetHistory();
       sendMessageStub.returns(Promise.reject());
+
       const invocation = new ActionInvocation(element, 'signIn');
+      invocation.trust = ActionTrust.LOW;
+      service.actionHandler_(invocation);
+      expect(sendMessageStub).to.not.be.called;
+
+      // signIn requires high-trust.
+      invocation.trust = ActionTrust.HIGH;
       service.actionHandler_(invocation);
       expect(sendMessageStub).to.be.calledOnce;
       expect(sendMessageStub.firstCall.args[0]).to.equal('requestSignIn');
