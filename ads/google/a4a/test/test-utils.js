@@ -16,8 +16,8 @@
 
 import '../../../../extensions/amp-ad/0.1/amp-ad-ui';
 import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
-import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 import {
+  ADX_ADY_EXP,
   EXPERIMENT_ATTRIBUTE,
   TRUNCATION_PARAM,
   ValidAdContainerTypes,
@@ -37,6 +37,7 @@ import {
   maybeAppendErrorParameter,
   mergeExperimentIds,
 } from '../utils';
+import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 import {
   MockA4AImpl,
 } from '../../../../extensions/amp-a4a/0.1/test/utils';
@@ -67,17 +68,15 @@ function setupForAdTesting(fixture) {
 // Because of the way the element is constructed, it doesn't have all of the
 // machinery that AMP expects it to have, so just no-op the irrelevant
 // functions.
-function noopMethods(impl, doc, sandbox) {
+function noopMethods(impl, doc, sandbox, pageLayoutBox = {
+  top: 11, left: 12, right: 0, bottom: 0, width: 0, height: 0,
+}) {
   const noop = () => {};
   impl.element.build = noop;
   impl.element.getPlaceholder = noop;
   impl.element.createPlaceholder = noop;
-  sandbox.stub(impl, 'getAmpDoc').callsFake(() => doc);
-  sandbox.stub(impl, 'getPageLayoutBox').callsFake(() => {
-    return {
-      top: 11, left: 12, right: 0, bottom: 0, width: 0, height: 0,
-    };
-  });
+  sandbox.stub(impl, 'getAmpDoc').returns(doc);
+  sandbox.stub(impl, 'getPageLayoutBox').returns(pageLayoutBox);
 }
 
 describe('Google A4A utils', () => {
@@ -528,6 +527,30 @@ describe('Google A4A utils', () => {
             expect(url).to.match(/[&?]bdt=[1-9][0-9]*[&$]/);
           });
         });
+      });
+    });
+
+    it('should set adx/ady as 1 with experiment enabled', () => {
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
+        const {doc} = fixture;
+        doc.win = fixture.win;
+        const elem = createElementWithAttributes(doc, 'amp-a4a', {});
+        const impl = new MockA4AImpl(elem);
+        noopMethods(impl, doc, sandbox, {
+          top: 0, left: 0, right: 0, bottom: 0, width: 0, height: 0,
+        });
+        return fixture.addElement(elem).then(() =>
+          googleAdUrl(impl, '', Date.now(), [], []).then(url => {
+            expect(url).to.match(/[&?]adx=0[&$]/);
+            expect(url).to.match(/[&?]adx=0[&$]/);
+            elem.setAttribute(
+                'data-experiment-id', `123,${ADX_ADY_EXP.experiment},789`,);
+            return googleAdUrl(impl, '', Date.now(), [], []).then(url => {
+              expect(url).to.match(/[&?]adx=1[&$]/);
+              expect(url).to.match(/[&?]adx=1[&$]/);
+            });
+          }));
       });
     });
   });

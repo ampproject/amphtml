@@ -48,6 +48,7 @@ import {AmpStoryGridLayer} from './amp-story-grid-layer';
 import {AmpStoryHint} from './amp-story-hint';
 import {AmpStoryPage, NavigationDirection, PageState} from './amp-story-page';
 import {AmpStoryPageAttachment} from './amp-story-page-attachment';
+import {AmpStoryRenderService} from './amp-story-render-service';
 import {AmpStoryVariableService} from './variable-service';
 import {CSS} from '../../../build/amp-story-1.0.css';
 import {CommonSignals} from '../../../src/common-signals';
@@ -63,10 +64,7 @@ import {
 import {InfoDialog} from './amp-story-info-dialog';
 import {Keys} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
-import {
-  LocalizationService,
-  createPseudoLocale,
-} from './localization';
+import {LocalizationService} from '../../../src/service/localization';
 import {MediaPool, MediaType} from './media-pool';
 import {NavigationState} from './navigation-state';
 import {PaginationButtons} from './pagination-buttons';
@@ -95,6 +93,7 @@ import {
   setImportantStyles,
   toggle,
 } from '../../../src/style';
+import {createPseudoLocale} from '../../../src/localized-strings';
 import {debounce} from '../../../src/utils/rate-limit';
 import {dev, devAssert, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
@@ -115,7 +114,6 @@ import LocalizedStringsEnGb from './_locales/en-GB';
 import LocalizedStringsEs from './_locales/es';
 import LocalizedStringsEs419 from './_locales/es-419';
 import LocalizedStringsFr from './_locales/fr';
-import LocalizedStringsFrCa from './_locales/fr-CA';
 import LocalizedStringsHi from './_locales/hi';
 import LocalizedStringsId from './_locales/id';
 import LocalizedStringsIt from './_locales/it';
@@ -123,12 +121,12 @@ import LocalizedStringsJa from './_locales/ja';
 import LocalizedStringsKo from './_locales/ko';
 import LocalizedStringsNl from './_locales/nl';
 import LocalizedStringsNo from './_locales/no';
-import LocalizedStringsPt from './_locales/pt';
 import LocalizedStringsPtBr from './_locales/pt-BR';
+import LocalizedStringsPtPt from './_locales/pt-PT';
 import LocalizedStringsRu from './_locales/ru';
 import LocalizedStringsTr from './_locales/tr';
 import LocalizedStringsVi from './_locales/vi';
-import LocalizedStringsZh from './_locales/zh';
+import LocalizedStringsZhCn from './_locales/zh-CN';
 import LocalizedStringsZhTw from './_locales/zh-TW';
 
 /** @private @const {number} */
@@ -142,17 +140,18 @@ const MIN_SWIPE_FOR_HINT_OVERLAY_PX = 50;
 
 /** @enum {string} */
 const Attributes = {
-  STANDALONE: 'standalone',
+  AD_SHOWING: 'ad-showing',
   ADVANCE_TO: 'i-amphtml-advance-to',
+  AUTO_ADVANCE_AFTER: 'auto-advance-after',
+  AUTO_ADVANCE_TO: 'auto-advance-to',
+  DESKTOP_POSITION: 'i-amphtml-desktop-position',
+  ORIENTATION: 'orientation',
   PUBLIC_ADVANCE_TO: 'advance-to',
   RETURN_TO: 'i-amphtml-return-to',
-  AUTO_ADVANCE_TO: 'auto-advance-to',
-  AD_SHOWING: 'ad-showing',
-  // Attributes that desktop css looks for to decide where pages will be placed
-  DESKTOP_POSITION: 'i-amphtml-desktop-position',
-  VISITED: 'i-amphtml-visited', // stacked offscreen to left
-  AUTO_ADVANCE_AFTER: 'auto-advance-after',
+  STANDALONE: 'standalone',
   SUPPORTS_LANDSCAPE: 'supports-landscape',
+  // Attributes that desktop css looks for to decide where pages will be placed
+  VISITED: 'i-amphtml-visited', // stacked offscreen to left
 };
 
 /**
@@ -290,6 +289,10 @@ export class AmpStory extends AMP.BaseElement {
         `(min-width: ${DESKTOP_HEIGHT_THRESHOLD}px) and ` +
         `(min-height: ${DESKTOP_WIDTH_THRESHOLD}px)`);
 
+    /** @private @const */
+    this.landscapeOrientationMedia_ =
+        this.win.matchMedia('(orientation: landscape)');
+
     /** @private {?AmpStoryBackground} */
     this.background_ = null;
 
@@ -347,7 +350,6 @@ export class AmpStory extends AMP.BaseElement {
         .registerLocalizedStringBundle('es', LocalizedStringsEs)
         .registerLocalizedStringBundle('es-419', LocalizedStringsEs419)
         .registerLocalizedStringBundle('fr', LocalizedStringsFr)
-        .registerLocalizedStringBundle('fr-CA', LocalizedStringsFrCa)
         .registerLocalizedStringBundle('hi', LocalizedStringsHi)
         .registerLocalizedStringBundle('id', LocalizedStringsId)
         .registerLocalizedStringBundle('it', LocalizedStringsIt)
@@ -355,12 +357,12 @@ export class AmpStory extends AMP.BaseElement {
         .registerLocalizedStringBundle('ko', LocalizedStringsKo)
         .registerLocalizedStringBundle('nl', LocalizedStringsNl)
         .registerLocalizedStringBundle('no', LocalizedStringsNo)
-        .registerLocalizedStringBundle('pt', LocalizedStringsPt)
+        .registerLocalizedStringBundle('pt-PT', LocalizedStringsPtPt)
         .registerLocalizedStringBundle('pt-BR', LocalizedStringsPtBr)
         .registerLocalizedStringBundle('ru', LocalizedStringsRu)
         .registerLocalizedStringBundle('tr', LocalizedStringsTr)
         .registerLocalizedStringBundle('vi', LocalizedStringsVi)
-        .registerLocalizedStringBundle('zh', LocalizedStringsZh)
+        .registerLocalizedStringBundle('zh-CN', LocalizedStringsZhCn)
         .registerLocalizedStringBundle('zh-TW', LocalizedStringsZhTw);
 
     const enXaPseudoLocaleBundle =
@@ -501,7 +503,7 @@ export class AmpStory extends AMP.BaseElement {
       return;
     }
 
-    this.vsync_.run({
+    return this.vsync_.runPromise({
       measure: state => {
         state.vh = this.activePage_.element./*OK*/clientHeight / 100;
         state.vw = this.activePage_.element./*OK*/clientWidth / 100;
@@ -695,8 +697,8 @@ export class AmpStory extends AMP.BaseElement {
         }
         return;
       }
-      if (gesture.event && (gesture.event.defaultPrevented ||
-          !this.isSwipeLargeEnoughForHint_(deltaX, deltaY))) {
+      if ((gesture.event && gesture.event.defaultPrevented) ||
+          !this.isSwipeLargeEnoughForHint_(deltaX, deltaY)) {
         return;
       }
 
@@ -1445,39 +1447,63 @@ export class AmpStory extends AMP.BaseElement {
     const uiState = this.getUIType_();
     this.storeService_.dispatch(Action.TOGGLE_UI, uiState);
 
-    if (uiState !== UIType.MOBILE || this.isLandscapeSupported_()) {
+    const isLandscape = this.isLandscape_();
+    const isLandscapeSupported = this.isLandscapeSupported_();
+
+    this.setOrientationAttribute_(isLandscape, isLandscapeSupported);
+
+    if (uiState !== UIType.MOBILE || isLandscapeSupported) {
       // Hides the UI that prevents users from using the LANDSCAPE orientation.
       this.storeService_.dispatch(Action.TOGGLE_VIEWPORT_WARNING, false);
       return;
     }
 
-    // On mobile, maybe display the landscape overlay warning and pause the
-    // story.
-    this.vsync_.run({
-      measure: state => {
-        const {offsetWidth, offsetHeight} = this.element;
-        state.isLandscape = offsetWidth > offsetHeight;
-      },
-      mutate: state => {
-        const viewportWarningState =
-            this.storeService_.get(StateProperty.VIEWPORT_WARNING_STATE);
+    // Only called when the desktop media query is not matched and the landscape
+    // mode is not enabled.
+    this.maybeTriggerViewportWarning_(isLandscape);
+  }
 
-        if (viewportWarningState === state.isLandscape) {
-          return;
-        }
+  /**
+   * Adds an orientation=landscape|portrait attribute.
+   * If the story doesn't explicitly support landscape via the opt-in attribute,
+   * it is always in a portrait orientation.
+   * @param {boolean} isLandscape Whether the viewport is landscape or portrait
+   * @param {boolean} isLandscapeSupported Whether the story supports landscape
+   * @private
+   */
+  setOrientationAttribute_(isLandscape, isLandscapeSupported) {
+    // TODO(#20832) base this check on the size of the amp-story-page, once it
+    // is stored as a store state.
+    this.mutateElement(() => {
+      this.element.setAttribute(
+          Attributes.ORIENTATION,
+          isLandscapeSupported && isLandscape ? 'landscape' : 'portrait');
+    });
+  }
 
-        if (state.isLandscape) {
-          this.pausedStateToRestore_ =
-              !!this.storeService_.get(StateProperty.PAUSED_STATE);
-          this.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
-          this.storeService_.dispatch(Action.TOGGLE_VIEWPORT_WARNING, true);
-        } else {
-          this.storeService_
-              .dispatch(Action.TOGGLE_PAUSED, this.pausedStateToRestore_);
-          this.storeService_.dispatch(Action.TOGGLE_VIEWPORT_WARNING, false);
-        }
-      },
-    }, {});
+  /**
+   * Maybe triggers the viewport warning overlay.
+   * @param {boolean} isLandscape
+   * @private
+   */
+  maybeTriggerViewportWarning_(isLandscape) {
+    if (isLandscape ===
+        this.storeService_.get(StateProperty.VIEWPORT_WARNING_STATE)) {
+      return;
+    }
+
+    this.mutateElement(() => {
+      if (isLandscape) {
+        this.pausedStateToRestore_ =
+            !!this.storeService_.get(StateProperty.PAUSED_STATE);
+        this.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
+        this.storeService_.dispatch(Action.TOGGLE_VIEWPORT_WARNING, true);
+      } else {
+        this.storeService_
+            .dispatch(Action.TOGGLE_PAUSED, this.pausedStateToRestore_);
+        this.storeService_.dispatch(Action.TOGGLE_VIEWPORT_WARNING, false);
+      }
+    });
   }
 
   /**
@@ -1574,6 +1600,14 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
+   * @return {boolean} True if the screen orientation is landscape.
+   * @private
+   */
+  isLandscape_() {
+    return this.landscapeOrientationMedia_.matches;
+  }
+
+  /**
    * @return {boolean} true if this is a standalone story (i.e. this story is
    *     the only content of the document).
    * @private
@@ -1633,6 +1667,7 @@ export class AmpStory extends AMP.BaseElement {
             /* source */ null, /* caller */ null, /* event */ null,
             ActionTrust.HIGH);
       } else {
+        this.closeOpacityMask_();
         this.sidebarObserver_.disconnect();
       }
     } else if (this.sidebar_ && sidebarState) {
@@ -2369,4 +2404,5 @@ AMP.extension('amp-story', '1.0', AMP => {
   AMP.registerElement('amp-story-grid-layer', AmpStoryGridLayer);
   AMP.registerElement('amp-story-page', AmpStoryPage);
   AMP.registerElement('amp-story-page-attachment', AmpStoryPageAttachment);
+  AMP.registerServiceForDoc('amp-story-render', AmpStoryRenderService);
 });

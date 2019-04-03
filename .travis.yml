@@ -10,8 +10,6 @@ notifications:
       - amp-build-cop@grotations.appspotmail.com
     on_success: change
     on_failure: change
-  webhooks:
-    - http://savage.nonblocking.io:8080/savage/travis
 before_install:
   # Override Xenial's default Java version (github.com/travis-ci/travis-ci/issues/10290)
   - export PATH=$(echo "$PATH" | sed -e 's/:\/usr\/local\/lib\/jvm\/openjdk11\/bin//')
@@ -22,7 +20,6 @@ branches:
     - release
     - canary
     - /^amp-release-.*$/
-    - /^revert-.*$/
 addons:
   apt:
     packages:

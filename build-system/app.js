@@ -191,6 +191,7 @@ app.use(
 app.get([
   '/examples/*.(min|max).html',
   '/test/manual/*.(min|max).html',
+  '/test/fixtures/e2e/*/*.(min|max).html',
   '/dist/cache-sw.(min|max).html',
 ], (req, res) => {
   const filePath = req.url;
@@ -347,6 +348,21 @@ app.use('/form/search-json/get', (req, res) => {
     additionalFields: req.query.additionalFields,
     results: [{title: 'Result 1'}, {title: 'Result 2'}, {title: 'Result 3'}],
   });
+});
+
+const autocompleteColors = ['red', 'orange', 'yellow', 'green', 'blue',
+  'purple', 'pink', 'black', 'white'];
+
+app.use('/form/autocomplete/query', (req, res) => {
+  const query = req.query.q;
+  if (!query) {
+    res.json({items: autocompleteColors});
+  } else {
+    const lowerCaseQuery = query.toLowerCase();
+    const filtered = autocompleteColors.filter(
+        l => l.toLowerCase().includes(lowerCaseQuery));
+    res.json({items: filtered});
+  }
 });
 
 const autosuggestLanguages = ['ActionScript', 'AppleScript', 'Asp', 'BASIC',
@@ -823,13 +839,14 @@ app.use('/examples/analytics.config.json', (req, res, next) => {
   next();
 });
 
-app.use(['/examples/*', '/extensions/*'], (req, res, next) => {
-  const sourceOrigin = req.query['__amp_source_origin'];
-  if (sourceOrigin) {
-    res.setHeader('AMP-Access-Control-Allow-Source-Origin', sourceOrigin);
-  }
-  next();
-});
+app.use(['/examples/*', '/extensions/*', '/test/manual/*'],
+    (req, res, next) => {
+      const sourceOrigin = req.query['__amp_source_origin'];
+      if (sourceOrigin) {
+        res.setHeader('AMP-Access-Control-Allow-Source-Origin', sourceOrigin);
+      }
+      next();
+    });
 
 /**
  * Append ?sleep=5 to any included JS file in examples to emulate delay in
@@ -851,7 +868,10 @@ app.use(['/dist/v0/amp-*.js'], (req, res, next) => {
  */
 app.get('/test/manual/amp-video.amp.html', runVideoTestBench);
 
-app.get(['/examples/*.html', '/test/manual/*.html'], (req, res, next) => {
+app.get([
+  '/examples/*.html',
+  '/test/manual/*.html',
+  '/test/fixtures/e2e/*/*.html'], (req, res, next) => {
   const filePath = req.path;
   const mode = pc.env.SERVE_MODE;
   const inabox = req.query['inabox'];

@@ -1703,6 +1703,7 @@ class TagStack {
     goog.asserts.assert(query !== amp.validator.AncestorMarker.Marker.UNKNOWN);
     // Skip the first element, which is "$ROOT".
     for (let i = 1; i < this.stack_.length; ++i) {
+      if (this.stack_[i].tagSpec === null) {continue;}
       const spec = this.stack_[i].tagSpec.getSpec();
       if (spec.markDescendants === null) {continue;}
       for (const marker of spec.markDescendants.marker) {
@@ -5225,15 +5226,12 @@ class ParsedValidatorRules {
         this.validateTypeIdentifiers(
             htmlTag.attrs(), ['⚡', 'amp', 'actions'], context,
             validationResult);
-        // TODO(honeybadgerdontcare): require "actions" as a type identifier
-        // when publishers are ready. Uncomment code below and update test.
-        // if (validationResult.typeIdentifier.indexOf("actions") === -1) {
-        //   context.addError(
-        //       amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING,
-        //       context.getLineCol(), /*params=*/["actions", 'html'],
-        //       'https://www.ampproject.org/docs/reference/spec#required-markup',
-        //       validationResult);
-        // }
+        if (validationResult.typeIdentifier.indexOf('actions') === -1) {
+          context.addError(
+              amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING,
+              context.getLineCol(), /* params */['actions', 'html'],
+              /* url */'', validationResult);
+        }
         break;
     }
   }
@@ -6382,7 +6380,6 @@ amp.validator.categorizeError = function(error) {
       error.code ===
           amp.validator.ValidationError.Code
               .WARNING_EXTENSION_DEPRECATED_VERSION ||
-
       error.code ===
           amp.validator.ValidationError.Code.WARNING_TAG_REQUIRED_BY_MISSING) {
     return amp.validator.ErrorCategory.Code.DEPRECATION;
