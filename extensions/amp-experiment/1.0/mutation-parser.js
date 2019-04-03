@@ -38,9 +38,9 @@ const MUTATION_TYPES = [
  */
 export function parseMutation(mutation, document) {
 
-  const mutationRecord = assertMutationRecord_(mutation);
+  const mutationRecord = assertMutationRecord(mutation);
 
-  setSelectorToElement_('target', mutationRecord, document);
+  setSelectorToElement('target', mutationRecord, document);
 
   // TODO (torch2424): Remove this NOOP after reviews
   // This is done to allow for small PRS
@@ -48,6 +48,9 @@ export function parseMutation(mutation, document) {
 
   if (mutationRecord['type'] === 'attributes') {
     // NOOP for small PRs
+    // TODO (torch2424): Be sure to validate supported
+    // attributes (e.g style), and their values for
+    // security, and AMP validation (position: fixed).
     return noopFunction;
   } else if (mutationRecord['type'] === 'characterData') {
     // NOOP for small PRs
@@ -66,7 +69,7 @@ export function parseMutation(mutation, document) {
  * @param {!JsonObject} mutation
  * @return {!Object}
  */
-function assertMutationRecord_(mutation) {
+function assertMutationRecord(mutation) {
 
   // Assert that the mutation is an object
   userAssert(
@@ -101,7 +104,7 @@ function assertMutationRecord_(mutation) {
  * @param {!Object} mutationRecord
  * @param {!Document} document
  */
-function setSelectorToElement_(selectorKey, mutationRecord, document) {
+function setSelectorToElement(selectorKey, mutationRecord, document) {
   const targetElement = document.querySelector(mutationRecord[selectorKey]);
 
   userAssert(
