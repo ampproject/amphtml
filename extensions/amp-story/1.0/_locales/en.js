@@ -206,29 +206,4 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
     description: 'Text for a warning screen that informs the user that ' +
         'their browser does not support stories.',
   },
-
-  // TODO(#21253): Move these to amp-story-auto-ads code.
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
 });
