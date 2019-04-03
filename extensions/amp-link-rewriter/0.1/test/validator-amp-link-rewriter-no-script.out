@@ -26,28 +26,9 @@ FAIL
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
 |  </head>
 |  <body>
-|  <!-- Example of a valid amp-link-rewriter -->
-|  <amp-link-rewriter layout="nodisplay">
-|    <script type="application/json">
-|      {
-|        "output": "https://visit.foo.net?pid=110&url=${href}&cid=${data.customerId}&mid=${data.merchantId}&ref=DOCUMENT_REFERRER&location=SOURCE_URL&rel=${rel}",
-|        "section": [
-|          "#track-section"
-|        ],
-|        "attribute": {
-|          "href": "((?!\bskip\\.com\b).)*",
-|          "class": "content"
-|        },
-|        "vars": {
-|          "customerId": "12345",
-|          "merchantId": "3234"
-|        }
-|      }
-|    </script>
-|  </amp-link-rewriter>
-|  <!-- Example of duplicate amp-link-rewriter tag -->
+|  <!-- Example of invalid amp-link-rewriter missing a script tag -->
 |  <amp-link-rewriter layout="nodisplay"></amp-link-rewriter>
 >> ^~~~~~~~~
-amp-link-rewriter/0.1/test/validator-amp-link-rewriter.html:48:0 The tag 'amp-link-rewriter' appears more than once in the document. (see https://www.ampproject.org/docs/reference/components/amp-link-rewriter) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+amp-link-rewriter/0.1/test/validator-amp-link-rewriter-no-script.html:29:0 Tag 'amp-link-rewriter' must have 1 child tags - saw 0 child tags. (see https://www.ampproject.org/docs/reference/components/amp-link-rewriter) [AMP_TAG_PROBLEM]
 |  </body>
 |  </html>

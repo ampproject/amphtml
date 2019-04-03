@@ -49,6 +49,7 @@ tags: {  # amp-link-rewriter (json)
 tags: {  # <amp-link-rewriter>
   html_format: AMP
   tag_name: "AMP-LINK-REWRITER"
+  unique: true
   requires_extension: "amp-link-rewriter"
   child_tags: {
     mandatory_num_child_tags: 1

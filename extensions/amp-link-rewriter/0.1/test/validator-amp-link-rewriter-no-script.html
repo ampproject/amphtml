@@ -25,26 +25,7 @@
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
 <body>
-<!-- Example of a valid amp-link-rewriter -->
-<amp-link-rewriter layout="nodisplay">
-  <script type="application/json">
-    {
-      "output": "https://visit.foo.net?pid=110&url=${href}&cid=${data.customerId}&mid=${data.merchantId}&ref=DOCUMENT_REFERRER&location=SOURCE_URL&rel=${rel}",
-      "section": [
-        "#track-section"
-      ],
-      "attribute": {
-        "href": "((?!\bskip\\.com\b).)*",
-        "class": "content"
-      },
-      "vars": {
-        "customerId": "12345",
-        "merchantId": "3234"
-      }
-    }
-  </script>
-</amp-link-rewriter>
-<!-- Example of duplicate amp-link-rewriter tag -->
+<!-- Example of invalid amp-link-rewriter missing a script tag -->
 <amp-link-rewriter layout="nodisplay"></amp-link-rewriter>
 </body>
 </html>
