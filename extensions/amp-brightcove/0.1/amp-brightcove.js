@@ -156,7 +156,7 @@ class AmpBrightcove extends AMP.BaseElement {
         this.iframe_.contentWindow. /*OK*/ postMessage(JSON.stringify(dict({
           'command': command,
           'args': arg,
-        })), {targetOrigin: 'https://players.brightcove.net', transferUserActivation: true});
+        })), 'https://players.brightcove.net');
       }
     });
   }
