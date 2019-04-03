@@ -23,6 +23,9 @@ import {
   intersectionRatio,
 } from '../../src/intersection-observer-polyfill';
 import {Services} from '../../src/services';
+import {
+  installHiddenObserverForDoc,
+} from '../../src/service/hidden-observer-impl';
 import {layoutRectLtwh} from '../../src/layout-rect';
 
 const fakeAmpDoc = {
@@ -30,6 +33,7 @@ const fakeAmpDoc = {
   win: window,
   isSingleDoc: () => {return true;},
 };
+installHiddenObserverForDoc(fakeAmpDoc);
 
 describe('IntersectionObserverApi', () => {
   let sandbox;
@@ -394,23 +398,7 @@ describe('IntersectionObserverPolyfill', () => {
           return layoutRectLtwh(0, 0, 100, 100);
         };
         io.observe(element);
-        expect(io.mutationObserver_).to.be.ok;
-      });
-
-      it('should not create a mutation observer,' +
-        ' if one already exists', () => {
-        io = new IntersectionObserverPolyfill(callbackSpy, {
-          threshold: [0, 1],
-        });
-        element.getLayoutBox = () => {
-          return layoutRectLtwh(0, 0, 100, 100);
-        };
-        io.observe(element);
-        expect(io.mutationObserver_).to.be.ok;
-        const mutationObserver = io.mutationObserver_;
-        io.observe(element);
-        expect(io.mutationObserver_).to.be.ok;
-        expect(io.mutationObserver_).to.be.equal(mutationObserver);
+        expect(io.hiddenObserverUnlistener_).to.be.ok;
       });
 
       it('should remove mutation observer,' +
@@ -422,9 +410,9 @@ describe('IntersectionObserverPolyfill', () => {
           return layoutRectLtwh(0, 0, 100, 100);
         };
         io.observe(element);
-        expect(io.mutationObserver_).to.be.ok;
+        expect(io.hiddenObserverUnlistener_).to.be.ok;
         io.disconnect();
-        expect(io.mutationObserver_).to.not.be.ok;
+        expect(io.hiddenObserverUnlistener_).to.not.be.ok;
       });
     });
 
