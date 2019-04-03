@@ -111,8 +111,7 @@ export class AmpViewerAssistance {
         return this;
       }
       this.action_.installActionHandler(
-          this.assistanceElement_, this.actionHandler_.bind(this),
-          ActionTrust.HIGH);
+          this.assistanceElement_, this.actionHandler_.bind(this));
 
       this.getIdTokenPromise();
 
