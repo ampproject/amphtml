@@ -69,7 +69,7 @@ export function uas(global, data) {
       global.Phoenix.enableSingleRequestCallMode();
       global.Phoenix.setInfo('AMP', 1);// Need to set the AMP flag
       global.Phoenix.setInfo('ACCID', data.accId);
-      global.Phoenix.setInfo('PAGEURL', (global.context.sourceUrl || global.context.location.href));
+      global.Phoenix.setInfo('PAGEURL', (global.context.sourceUrl || global.context.location.href)); // eslint-disable-line max-len
       data.pageURL && global.Phoenix.setInfo('PAGEURL', data.pageURL);
       data.locLat && global.Phoenix.setInfo('LAT', data.locLat);
       data.locLon && global.Phoenix.setInfo('LON', data.locLon);
