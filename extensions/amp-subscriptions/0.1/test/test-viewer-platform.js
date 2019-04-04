@@ -99,7 +99,8 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
       (messageCallback)();
       expect(resetPlatformsStub).to.be.called;
     });
-    
+  });
+
   it('Should  allow prerender', () => {
     expect(viewerPlatform.isPrerenderSafe()).to.be.true;
   });
