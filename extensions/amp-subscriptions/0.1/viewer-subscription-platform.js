@@ -50,6 +50,8 @@ export class ViewerSubscriptionPlatform {
 
     /** @const @private {!../../../src/service/viewer-impl.Viewer} */
     this.viewer_ = Services.viewerForDoc(this.ampdoc_);
+    this.viewer_.onMessage('subscriptionchange',
+      this.subscriptionChange_.bind(this));
 
     /** @private @const {!JwtHelper} */
     this.jwtHelper_ = new JwtHelper(ampdoc.win);
@@ -206,6 +208,15 @@ export class ViewerSubscriptionPlatform {
   /** @override */
   decorateUI(element, action, options) {
     return this.platform_.decorateUI(element, action, options);
+  }
+
+  /** 
+   * Handles a reset message from the viewer which indicates
+   * subscription state changed.  Eventually that will trigger
+   * a new getEntitlements() message exchange.
+   */
+  subscriptionChange_() {
+    this.serviceAdapter.resetPlatforms();
   }
 }
 
