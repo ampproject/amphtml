@@ -150,8 +150,7 @@ describes.realWin(
               .to.equal('Loading - scintilating video');
         });
       });
-      // TODO(@aghassemi, #21618): Fails because mediaAttribute_ isn't a string.
-      it.skip('render playlist', () => {
+      it('render playlist', () => {
         return getApester({
           'data-apester-channel-token': '57a36e1e96cd505a7f01ed12',
         }).then(ape => {

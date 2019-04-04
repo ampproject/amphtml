@@ -138,16 +138,14 @@ class AmpApesterMedia extends AMP.BaseElement {
     const height = this.element.getAttribute('height');
     this.width_ = getLengthNumeral(width);
     this.height_ = getLengthNumeral(height);
-    this.random_ = false;
-    this.mediaAttribute_ = /** @type {string} */ (userAssert(
+    this.random_ = this.element.hasAttribute('data-apester-channel-token');
+    this.mediaAttribute_ = userAssert(
         this.element.getAttribute('data-apester-media-id') ||
-        (this.random_ = this.element.hasAttribute(
-            'data-apester-channel-token'
-        )),
+        this.element.getAttribute('data-apester-channel-token'),
         'Either the data-apester-media-id or the data-apester-channel-token ' +
         'attributes must be specified for <amp-apester-media> %s',
         this.element
-    ));
+    );
     this.embedOptions_ = {
       playlist: this.random_,
       idOrToken: this.mediaAttribute_,
