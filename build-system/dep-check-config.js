@@ -381,6 +381,8 @@ exports.rules = [
       // For action macros.
       'extensions/amp-action-macro/0.1/amp-action-macro.js->' +
             'src/service/action-impl.js',
+      'extensions/amp-link-rewriter/0.1/amp-link-rewriter.js->' +
+            'src/service/navigation.js',
       // For localization.
       'extensions/amp-story/0.1/amp-story.js->' +
             'src/service/localization.js',
