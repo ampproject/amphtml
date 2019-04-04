@@ -25,35 +25,27 @@ export function svknative(global, data) {
   // ensure we have valid widgetid value
   validateData(data, ['widgetid']);
 
-  var s = global.document.createElement('script');
-  var script_key = 'svknativeampwidget_' + Math.floor(Math.random() * 10000000);
+  let s = global.document.createElement('script');
+  let scriptKey = 'svknativeampwidget_' + Math.floor(Math.random() * 10000000);
 
-  s.setAttribute('data-key', script_key)
+  s.setAttribute('data-key', scriptKey);
   global.document.getElementById('c').appendChild(s);
 
   (function(w, a) {
     (w[a] = w[a] || []).push({
-      'script_key': script_key,
+      'script_key': scriptKey,
       'settings': {
         'w': data['widgetid'],
-	'amp': true
-      }
+        'amp': true,
+      },
     });
 
-    if(w['_SVKNative_embed'])
+    if (w['_SVKNative_embed']) {
       w['_SVKNative_embed'].initWidgets();
+    }
 
   })(global, '_svk_n_widgets');
 
   // load the SVK Native AMP JS file
   loadScript(global, 'https://widget.svk-native.ru/js/embed.js');
 }
-
-/**
- * @param {!Window} global
- * @param {string} widgetId
- */
-function createContainer(global, widgetId) {
-  return id;
-}
-
