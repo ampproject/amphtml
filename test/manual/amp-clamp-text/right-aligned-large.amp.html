@@ -1,0 +1,48 @@
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>amp-clamp-text right aligned, large</title>
+  <link rel="canonical" href="amps.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <style amp-custom>
+    .text {
+      position: relative;
+      font-size: 1em;
+      line-height: 1.25;
+      height: 3.75em;
+      width: 150px;
+      overflow: hidden;
+    }
+
+    .overflow-button {
+      color: #1b61e0;
+    }
+
+    .overflow-button.large {
+      height: 2em;
+      padding: 0 0.5em;
+      border-radius: 0;
+      background-color: #eee;
+    }
+
+    .right-aligned {
+      float: right;
+    }
+  </style>
+  <script async custom-element="amp-clamp-text" src="https://cdn.ampproject.org/v0/amp-clamp-text-0.1.js"></script>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+</head>
+<body>
+  <h1>Button, right aligned, that is taller than one line</h1>
+
+  <amp-clamp-text layout="container" class="text">
+    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur ullamcorper turpis vel commodo scelerisque. Phasellus
+    luctus nunc ut elit cursus, et imperdiet diam vehicula. Duis et nisi sed urna blandit bibendum et sit amet erat.
+    Suspendisse potenti. Curabitur consequat volutpat arcu nec elementum. Etiam a turpis ac libero varius condimentum.
+    Maecenas sollicitudin felis aliquam tortor vulputate, ac posuere velit semper.
+    <button slot="expand" class="overflow-button large right-aligned">See more</button>
+  </amp-clamp-text>
+</body>
+</html>
