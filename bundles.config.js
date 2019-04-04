@@ -913,6 +913,12 @@ exports.extensionBundles = [
     latestVersion: '0.1',
     type: TYPES.AD,
   },
+  {
+    name: 'amp-link-rewriter',
+    version: '0.1',
+    latestVersion: '0.1',
+    type: TYPES.MISC,
+  },
 ];
 
 exports.aliasBundles = [
