@@ -924,9 +924,6 @@ export const adConfig = {
   'svknative': {
     renderStartImplemented: true,
     prefetch: 'https://widget.svk-native.ru/js/embed.js',
-    preconnect: [
-      'https://widget.svk-native.ru',
-    ],
   },
 
   'swoop': {
