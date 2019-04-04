@@ -19,7 +19,7 @@ import {Deferred} from '../../src/utils/promise';
 import {poll} from '../../testing/iframe';
 
 // TODO(torch2424, #20541): These tests fail on firefox.
-describe.configure().skipSinglePass().skipFirefox().run('amp-recaptcha-' +
+describe.configure().skipFirefox().run('amp-recaptcha-' +
     'input', function() {
 
   describes.integration('with form and amp-mustache', {
@@ -109,7 +109,7 @@ describe.configure().skipSinglePass().skipFirefox().run('amp-recaptcha-' +
       }
     `,
     /* eslint-enable max-len */
-    extensions: ['amp-recaptcha-input', 'amp-form', 'amp-mustache'],
+    extensions: ['amp-recaptcha-input', 'amp-form', 'amp-mustache:0.2'],
     experiments: ['amp-recaptcha-input'],
   }, env => {
     let doc;

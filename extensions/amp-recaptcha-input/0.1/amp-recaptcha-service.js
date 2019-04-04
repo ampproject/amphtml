@@ -343,20 +343,36 @@ export class AmpRecaptchaService {
 
   /**
    * Function to handle token messages from the recaptcha iframe
+   *
+   * NOTE: Use bracket notation to access message properties,
+   * As the externs were a little too generic.
+   *
    * @param {Object} data
    */
   tokenMessageHandler_(data) {
-    this.executeMap_[data.id].resolve(data.token);
-    delete this.executeMap_[data.id];
+
+    const id = data['id'];
+    const token = data['token'];
+
+    this.executeMap_[id].resolve(token);
+    delete this.executeMap_[id];
   }
 
   /**
    * Function to handle error messages from the recaptcha iframe
+   *
+   * NOTE: Use bracket notation to access message properties,
+   * As the externs were a little too generic.
+   *
    * @param {Object} data
    */
   errorMessageHandler_(data) {
-    this.executeMap_[data.id].reject(new Error(data.error));
-    delete this.executeMap_[data.id];
+
+    const id = data['id'];
+    const error = data['error'];
+
+    this.executeMap_[id].reject(new Error(error));
+    delete this.executeMap_[id];
   }
 }
 
