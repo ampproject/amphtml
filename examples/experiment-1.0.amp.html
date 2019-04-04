@@ -1,0 +1,117 @@
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>amp-experiment</title>
+  <link rel="canonical" href="amps.html" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async custom-element="amp-experiment" src="https://cdn.ampproject.org/v0/amp-experiment-1.0.js"></script>
+  <script async custom-element="amp-user-notification" src="https://cdn.ampproject.org/v0/amp-user-notification-0.1.js"></script>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <style amp-custom>
+  </style>
+</head>
+<body>
+  <h1>Title TBD</h1>
+
+  <ul>
+    <li><a href="#amp-x-background-color-test=yellow" target="_blank">#amp-x-background-color-test=yellow</a></li>
+    <li><a href="#amp-x-background-color-test=green" target="_blank">#amp-x-background-color-test=green</a></li>
+  </ul>
+
+  <amp-experiment>
+    <script type="application/json">
+      {
+        "background-color-test": {
+          "variants": {
+            "yellow": {
+              "weight": 50,
+              "mutations": [
+                {
+                  "type": "attributes",
+                  "target": "h1",
+                  "attributeName": "style",
+                  "value": "color: yellow"
+                }
+              ]
+            },
+            "green": {
+              "weight": 50,
+              "mutations": [
+                {
+                  "type": "attributes",
+                  "target": "h1",
+                  "attributeName": "style",
+                  "value": "color: green"
+                }
+              ]
+            }
+          }
+        },
+        "font-color-test": {
+          "sticky": false,
+          "variants": {
+            "blue": {
+              "weight": 20,
+              "mutations": [
+                {
+                  "type": "attributes",
+                  "target": "h1",
+                  "attributeName": "style",
+                  "value": "color: blue"
+                }
+              ]
+            },
+            "red": {
+              "weight": 20,
+              "mutations": [
+                {
+                  "type": "attributes",
+                  "target": "h1",
+                  "attributeName": "style",
+                  "value": "color: red"
+                }
+              ]
+            }
+          }
+        },
+        "border-test": {
+          "consentNotificationId": "amp-user-notification",
+          "variants": {
+            "solid": {
+              "weight": 50,
+              "mutations": [
+                {
+                  "type": "attributes",
+                  "target": "h1",
+                  "attributeName": "style",
+                  "value": "border: 1px black solid"
+                }
+              ]
+            },
+            "dashed": {
+              "weight": 50,
+              "mutations": [
+                {
+                  "type": "attributes",
+                  "target": "h1",
+                  "attributeName": "style",
+                  "value": "border: 1px black dashed"
+                }
+              ]
+            }
+          }
+        }
+      }
+    </script>
+  </amp-experiment>
+  <amp-pixel src="https://donot.worry/?background-color-test=VARIANT(background-color-test)&font-color-test=VARIANT(font-color-test)&variants=VARIANTS"></amp-pixel>
+  <amp-user-notification
+      layout=nodisplay
+      id="amp-user-notification">
+    Dismiss this notification to see a border around title on your next visit.
+    <button on="tap:amp-user-notification.dismiss" role="button">I accept</button>
+  </amp-user-notification>
+</body>
+</html>

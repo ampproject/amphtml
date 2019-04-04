@@ -26,6 +26,11 @@ const log = require('fancy-log');
 const opn = require('opn');
 const path = require('path');
 const webserver = require('gulp-webserver');
+const {
+  reportTestErrored,
+  reportTestFinished,
+  reportTestStarted,
+} = require('./status-report');
 const {app} = require('../../test-server');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../../ctrlcHandler');
 const {getAdTypes, unitTestsToRun} = require('./helpers');
@@ -59,7 +64,13 @@ function getConfig() {
     return Object.assign({}, karmaDefault, {browsers: ['Edge']});
   }
   if (argv.ie) {
-    return Object.assign({}, karmaDefault, {browsers: ['IE']});
+    return Object.assign({}, karmaDefault, {browsers: ['IE'],
+      customLaunchers: {
+        IeNoAddOns: {
+          base: 'IE',
+          flags: ['-extoff'],
+        },
+      }});
   }
   if (argv.chrome_canary && !argv.chrome_flags) {
     return Object.assign({}, karmaDefault, {browsers: ['ChromeCanary']});
@@ -482,6 +493,7 @@ async function runTests() {
       if (!argv.saucelabs && !argv.saucelabs_lite) {
         log(green('Running tests locally...'));
       }
+      reportTestStarted();
     }).on('browsers_ready', function() {
       console./*OK*/log('\n');
       log(green('Done. Running tests...'));
@@ -490,9 +502,11 @@ async function runTests() {
       // Prevent cases where Karma detects zero tests and still passes. #16851.
       if (result.total == 0) {
         log(red('ERROR: Zero tests detected by Karma. Something went wrong.'));
-        if (!argv.watch) {
-          process.exit(1);
-        }
+        reportTestErrored().finally(() => {
+          if (!argv.watch) {
+            process.exit(1);
+          }
+        });
       }
       // Print a summary for each browser as soon as tests complete.
       let message = `${browser.name}: Executed ` +
@@ -506,6 +520,12 @@ async function runTests() {
       message += '\n';
       console./*OK*/log('\n');
       log(message);
+    }).on('run_complete', (browsers, results) => {
+      if (results.error) {
+        reportTestErrored();
+      } else {
+        reportTestFinished(results.success, results.failed);
+      }
     }).start();
     return deferred;
   }

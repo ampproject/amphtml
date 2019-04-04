@@ -26,7 +26,7 @@ min_validator_revision_required: 375
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 846
+spec_file_revision: 855
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 script_spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
@@ -2634,8 +2634,17 @@ tags: {
 }
 tags: {
   html_format: AMP
-  html_format: AMP4ADS
-  html_format: ACTIONS
+  tag_name: "TRACK"
+  spec_name: "amp-ima-video > track"
+  mandatory_parent: "AMP-IMA-VIDEO"
+  # <amp-bind>
+  attrs: { name: "[label]" }
+  attrs: { name: "[src]" }
+  attrs: { name: "[srclang]" }
+  attr_lists: "track-attrs-no-subtitles"
+}
+tags: {
+  html_format: AMP
   tag_name: "TRACK"
   spec_name: "amp-ima-video > track[kind=subtitles]"
   mandatory_parent: "AMP-IMA-VIDEO"

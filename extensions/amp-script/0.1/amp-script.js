@@ -128,6 +128,10 @@ export class AmpScript extends AMP.BaseElement {
         dev().info(TAG, 'From worker:', data);
       },
       onMutationPump: this.mutationPump_.bind(this),
+      onLongTask: promise => {
+        this.userActivation_.expandLongTask(promise);
+        // TODO(dvoytenko): consider additional "progress" UI.
+      },
     },
     /* debug */ true).then(workerDom => {
       this.workerDom_ = workerDom;
@@ -157,8 +161,7 @@ export class AmpScript extends AMP.BaseElement {
     const allowMutation = (
       // Hydration is always allowed.
       phase != PHASE_MUTATING
-      // Mutation depends on the gesture state.
-      // TODO(dvoytenko): support "long tasks".
+      // Mutation depends on the gesture state and long tasks.
       || this.userActivation_.isActive()
       // If the element is size-contained and small enough.
       || (isLayoutSizeDefined(this.getLayout())

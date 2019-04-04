@@ -28,6 +28,13 @@ const TAG = 'amp-viewer-assistance';
 /** @const {string} */
 const GSI_TOKEN_PROVIDER = 'actions-on-google-gsi';
 
+/** @const {!Array<string>} */
+const ACTION_STATUS_WHITELIST = [
+  'ACTIVE_ACTION_STATUS',
+  'FAILED_ACTION_STATUS',
+  'COMPLETED_ACTION_STATUS',
+];
+
 export class AmpViewerAssistance {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
@@ -70,14 +77,20 @@ export class AmpViewerAssistance {
    */
   actionHandler_(invocation) {
     const {method, args} = invocation;
-    if (method == 'updateActionState' && !!args) {
-      this.viewer_./*OK*/sendMessageAwaitResponse(method, args).catch(error => {
-        user().error(TAG, error.toString());
-      });
+    if (method == 'updateActionState') {
+      // "updateActionState" requires a low-trust event.
+      if (invocation.satisfiesTrust(ActionTrust.LOW)
+          && this.isValidActionStatusArgs_(args)) {
+        this.viewer_./*OK*/sendMessageAwaitResponse(method, args).catch(err => {
+          user().error(TAG, err.toString());
+        });
+      }
     } else if (method == 'signIn') {
-      this.requestSignIn_();
+      // "signIn" requires a high-trust event.
+      if (invocation.satisfiesTrust(ActionTrust.HIGH)) {
+        this.requestSignIn_();
+      }
     }
-
     return null;
   }
 
@@ -101,8 +114,7 @@ export class AmpViewerAssistance {
         return this;
       }
       this.action_.installActionHandler(
-          this.assistanceElement_, this.actionHandler_.bind(this),
-          ActionTrust.HIGH);
+          this.assistanceElement_, this.actionHandler_.bind(this));
 
       this.getIdTokenPromise();
 
@@ -148,6 +160,34 @@ export class AmpViewerAssistance {
     });
   }
 
+
+  /**
+   * Checks the 'actionStatus' field of the updateActionState arguments against
+   * a whitelist.
+   * @private
+   * @param {?Object} args
+   * @return {boolean}
+   */
+  isValidActionStatusArgs_(args) {
+    if (!args) {
+      return false;
+    }
+    const update = args['update'];
+    const actionStatus = update && update['actionStatus'];
+    if (!update || !actionStatus) {
+      user().error(TAG, '"updateActionState" action must have an' +
+          ' an "update" parameter containing an "actionStatus" field.');
+      return false;
+    }
+    if (!ACTION_STATUS_WHITELIST.includes(actionStatus)) {
+      user().error(TAG, 'Invalid "update.actionStatus" value for ' +
+          '"updateActionState":', actionStatus);
+      return false;
+    }
+    user().info(TAG, 'Sending "actionStatus":', actionStatus);
+    return true;
+  }
+
   /**
    * Toggles the CSS classes related to the status of the identity token.
    * @private
@@ -178,7 +218,6 @@ export class AmpViewerAssistance {
     this.vsync_.mutate(() => {
       this.getRootElement_().classList.toggle(className, on);
     });
-
   }
 }
 

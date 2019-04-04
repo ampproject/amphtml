@@ -10,6 +10,13 @@
   <script async custom-element="amp-autocomplete" src="https://cdn.ampproject.org/v0/amp-autocomplete-0.1.js"></script>
   <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
   <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
+  <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+  <style amp-custom>
+    .custom-population {
+        padding-top: 4px;
+        font: 8pt 'Courier New', Courier, monospace;
+    }
+  </style>
   <script>
       (self.AMP=self.AMP||[]).push((AMP) => {
         AMP.toggleExperiment('amp-autocomplete', true);
@@ -18,10 +25,168 @@
 </head>
 <body>
     <h1>Autocomplete</h1>
-    <h2>Form context</h2>
-    <h3>Static data</h3>
+    <h2>Attributes</h2>
+    <p>no attributes</p>
+    <form method="post" action-xhr="/form/echo-json/post" target="_blank">
+      <amp-autocomplete filter="substring" src="autocomplete-cities.example.json">
+          <input type="text" name="input1" required>
+      </amp-autocomplete>
+      <input name="submit-button" type="submit" value="Submit">
+    <div submit-success>
+        <template type="amp-mustache">
+            Success! {{input1}}
+        </template>
+    </div>
+    </form>
+
+    <p>min-characters = 0</p>
+    <form method="post" action-xhr="/form/echo-json/post" target="_blank">
+      <amp-autocomplete filter="substring" min-characters="0" src="autocomplete-cities.example.json">
+          <input type="text" name="input2" required>
+      </amp-autocomplete>
+      <input name="submit-button" type="submit" value="Submit">
+    <div submit-success>
+        <template type="amp-mustache">
+            Success! {{input2}}
+        </template>
+    </div>
+    </form>
+
+    <p>min-characters = 3</p>
+    <form method="post" action-xhr="/form/echo-json/post" target="_blank">
+      <amp-autocomplete filter="substring" min-characters="3" src="autocomplete-cities.example.json">
+          <input type="text" name="input3" required>
+      </amp-autocomplete>
+      <input name="submit-button" type="submit" value="Submit">
+    <div submit-success>
+        <template type="amp-mustache">
+            Success! {{input3}}
+        </template>
+    </div>
+    </form>
+
+    <p>max-entries = 3</p>
+    <form method="post" action-xhr="/form/echo-json/post" target="_blank">
+      <amp-autocomplete filter="substring" max-entries="3" src="autocomplete-cities.example.json">
+          <input type="text" name="input4" required>
+      </amp-autocomplete>
+      <input name="submit-button" type="submit" value="Submit">
+    <div submit-success>
+        <template type="amp-mustache">
+            Success! {{input4}}
+        </template>
+    </div>
+    </form>
+
+    <p>max-entries = 10, min-characters = 0</p>
+    <form method="post" action-xhr="/form/echo-json/post" target="_blank">
+      <amp-autocomplete filter="substring" max-entries="10" min-characters="0"  src="autocomplete-cities.example.json">
+          <input type="text" name="input5" required>
+      </amp-autocomplete>
+      <input name="submit-button" type="submit" value="Submit">
+    <div submit-success>
+        <template type="amp-mustache">
+            Success! {{input5}}
+        </template>
+    </div>
+    </form>
+
+    <p>submit-on-enter</p>
+    <form method="post" action-xhr="/form/echo-json/post" target="_blank">
+      <amp-autocomplete filter="substring"
+        src="autocomplete-cities.example.json" submit-on-enter>
+          <input type="text" name="input6" required>
+      </amp-autocomplete>
+      <input name="submit-button" type="submit" value="Submit">
+    <div submit-success>
+        <template type="amp-mustache">
+            Success! {{input6}}
+        </template>
+    </div>
+    </form>
+
+    <h2>Filters</h2>
+    <p>substring</p>
+    <form method="post" action-xhr="/form/echo-json/post" target="_blank">
+      <amp-autocomplete filter="substring" min-characters="0"
+        src="autocomplete-cities.example.json" submit-on-enter>
+          <input type="text" name="input7" required>
+      </amp-autocomplete>
+      <input name="submit-button" type="submit" value="Submit">
+    <div submit-success>
+        <template type="amp-mustache">
+            Success! {{input7}}
+        </template>
+    </div>
+    </form>
+
+    <p>prefix</p>
+    <form method="post" action-xhr="/form/echo-json/post" target="_blank">
+      <amp-autocomplete filter="prefix" min-characters="0"
+        src="autocomplete-cities.example.json" submit-on-enter>
+          <input type="text" name="input8" required>
+      </amp-autocomplete>
+      <input name="submit-button" type="submit" value="Submit">
+    <div submit-success>
+        <template type="amp-mustache">
+            Success! {{input8}}
+        </template>
+    </div>
+    </form>
+
+    <p>token-prefix</p>
+    <form method="post" action-xhr="/form/echo-json/post" target="_blank">
+      <amp-autocomplete filter="token-prefix" min-characters="0"
+        src="autocomplete-cities.example.json" submit-on-enter>
+          <input type="text" name="input9" required>
+      </amp-autocomplete>
+      <input name="submit-button" type="submit" value="Submit">
+    <div submit-success>
+        <template type="amp-mustache">
+            Success! {{input9}}
+        </template>
+    </div>
+    </form>
+
+    <p>none to inline data</p>
+    <form method="post" action-xhr="/form/echo-json/post" target="_blank">
+      <amp-autocomplete filter="none" min-characters="0"
+        [src]="manualFilterData" submit-on-enter>
+          <input type="text" name="input10" required 
+            on="input-debounced:AMP.setState({ manualFilterData: 
+              { 'items' : [event.value + ' 1', event.value + ' 2', event.value + ' 3'] } })">
+          <script type=application/json>
+           { "items" : [] }
+          </script>
+      </amp-autocomplete>
+      <input name="submit-button" type="submit" value="Submit">
+    <div submit-success>
+        <template type="amp-mustache">
+            Success! {{input10}}
+        </template>
+    </div>
+    </form>
+
+    <p>none to endpoint</p>
+    <form method="post" action-xhr="/form/echo-json/post" target="_blank">
+      <amp-autocomplete filter="none" min-characters="0"
+        src="/form/autocomplete/query"
+        [src]="'/form/autocomplete/query?q=' + (query || '')" submit-on-enter>
+          <input type="text" name="input11" required 
+            on="input-debounced:AMP.setState({ query: event.value })">
+      </amp-autocomplete>
+      <input name="submit-button" type="submit" value="Submit">
+    <div submit-success>
+        <template type="amp-mustache">
+            Success! {{input11}}
+        </template>
+    </div>
+    </form>
+
+    <h2>Datasources in form context</h2>
+    <p>Static data</p>
     <form method="post"
-        action-xhr="http://amp.localhost:8000/form/echo-json/post"
+        action-xhr="/form/echo-json/post"
         target="_blank">
         <fieldset>
             <label>
@@ -29,7 +194,7 @@
                 <amp-autocomplete filter="substring" min-characters="0" max-entries="2">
                     <input type="text" name="name" required>
                     <script type="application/json">
-                    { "items" : ["hello a", "hello b", "hello c"] }
+                        { "items" : ["hello a", "hello b", "hello c"] }
                     </script>
                 </amp-autocomplete>
             </label>
@@ -58,9 +223,9 @@
         </div>
     </form>
 
-    <h3>Dynamic data</h3>
+    <p>Remote data</p>
     <form method="post"
-        action-xhr="http://amp.localhost:8000/form/echo-json/post"
+        action-xhr="/form/echo-json/post"
         target="_blank">
         <fieldset>
             <label>
@@ -80,15 +245,263 @@
         </div>
     </form>
 
-    <h2>Search context</h2>
+    <p>Both data sources provided (should cause warning and display remote data)</p>
+    <form method="post"
+        action-xhr="/form/echo-json/post"
+        target="_blank">
+        <fieldset>
+            <label>
+                <span>Your hometown</span>
+                <amp-autocomplete filter="substring" min-characters="0"
+                    src="autocomplete-cities.example.json">
+                    <input type="text" name="city" required>
+                    <script type="application/json">
+                      { "items" : ["hello a", "hello b", "hello c"] }
+                    </script>
+                </amp-autocomplete>
+            </label>
+            <input name="submit-button" type="submit" value="Submit">
+        </fieldset>
+
+        <div submit-success>
+            <template type="amp-mustache">
+                Success! Mailing a postcard to {{city}}.
+            </template>
+        </div>
+    </form>
+
+    <p>Neither data sources provided (should cause warning)</p>
+    <form method="post"
+        action-xhr="/form/echo-json/post"
+        target="_blank">
+        <fieldset>
+            <label>
+                <span>Your hometown</span>
+                <amp-autocomplete filter="substring" min-characters="0">
+                    <input type="text" name="city" required>
+                </amp-autocomplete>
+            </label>
+            <input name="submit-button" type="submit" value="Submit">
+        </fieldset>
+
+        <div submit-success>
+            <template type="amp-mustache">
+                Success! Mailing a postcard to {{city}}.
+            </template>
+        </div>
+    </form>
+
+    <p>Dynamic data, changing json path</p>
+    <form method="post"
+        action-xhr="/form/echo-json/post"
+        target="_blank">
+        <fieldset>
+            <label>
+                <span>Your hometown</span>
+                <amp-autocomplete filter="substring" min-characters="0"
+                    src="autocomplete-cities.example.json"
+                    [src]="srcUrl">
+                    <input type="text" name="value" required>
+                </amp-autocomplete>
+            </label>
+            <input name="submit-button" type="submit" value="Submit"><br>
+        </fieldset>
+
+        <div submit-success>
+            <template type="amp-mustache">
+                Success! Mailing a postcard to {{value}}.
+            </template>
+        </div>
+    </form>
+    <button on="tap:AMP.setState({ srcUrl: 'autocomplete-countries.example.json' })">Suggest countries</button>
+    <button on="tap:AMP.setState({ srcUrl: 'autocomplete-cities.example.json' })">Suggest US cities</button>
+
+    <p>Dynamic data, changing json object</p>
+    <form method="post"
+        action-xhr="/form/echo-json/post"
+        target="_blank">
+        <fieldset>
+            <label>
+                <span>Your message</span>
+                <amp-autocomplete filter="substring" min-characters="0"
+                    [src]="srcJson">
+                    <input type="text" name="value" required>
+                    <script type="application/json">
+                      { "items" : ["hello a", "hello b", "hello c"] }
+                    </script>
+                </amp-autocomplete>
+            </label>
+            <input name="submit-button" type="submit" value="Submit"><br>
+        </fieldset>
+
+        <div submit-success>
+            <template type="amp-mustache">
+                Thanks for submitting "{{value}}".
+            </template>
+        </div>
+    </form>
+    <button on="tap:AMP.setState({ srcJson: { 'items' : ['apple', 'banana', 'coconut']} })">Suggest fruit</button>
+    <button on="tap:AMP.setState({ srcJson: { 'items' : ['hello a', 'hello b', 'hello c'] } })">Suggest hellos</button>
+
+    <p>Dynamic data, changing json path and object</p>
+    <form method="post"
+        action-xhr="/form/echo-json/post"
+        target="_blank">
+        <fieldset>
+            <label>
+                <span>Your hometown</span>
+                <amp-autocomplete filter="substring" min-characters="0"
+                    [src]="srcData">
+                    <input type="text" name="value" required>
+                    <script type="application/json">
+                      { "items" : ["hello a", "hello b", "hello c"] }
+                    </script>
+                </amp-autocomplete>
+            </label>
+            <input name="submit-button" type="submit" value="Submit"><br>
+        </fieldset>
+
+        <div submit-success>
+            <template type="amp-mustache">
+                Success! Mailing a postcard to {{value}}.
+            </template>
+        </div>
+    </form>
+    <button on="tap:AMP.setState({ srcData: { 'items' : ['apple', 'banana', 'coconut']} })">Suggest fruit</button>
+    <button on="tap:AMP.setState({ srcData: 'autocomplete-cities.example.json' })">Suggest US cities</button>
+
+
+    <h2>Templates in search context</h2>
+    <p>Plain Text, Submit on enter</p>
     <form method="get" action-xhr="/form/search-json/get" target="_blank">
         <fieldset>
             <label>
                 <span>Search for</span>
-                <amp-autocomplete filter="token-prefix">
+                <amp-autocomplete filter="token-prefix" submit-on-enter>
                     <input type="search" name="term" required>
                     <script type="application/json">
                         { "items" : ["apple", "pineapple", "coconut", "pine apple"] }
+                    </script>
+                </amp-autocomplete>
+            </label>
+            <input type="submit" value="Search">
+        </fieldset>
+        <div submit-success>
+            <template type="amp-mustache">
+                <div>Here are the results for the search: {{term}}</div>
+            </template>
+        </div>
+    </form>
+
+    <p>Rich Text, Template Child, Default Value Property</p>
+    <form method="get" action-xhr="/form/search-json/get" target="_blank">
+        <fieldset>
+            <label>
+                <span>Search for</span>
+                <amp-autocomplete filter="token-prefix" min-characters="0">
+                    <input type="search" name="term" required>
+                    <script type="application/json">
+                        { "items" : [
+                            {
+                                "value" : "Albany, New York",
+                                "areaCode" : 518,
+                                "population" : 98251
+                            }, {
+                                "value" : "Annapolis, Maryland",
+                                "areaCode" : 410,
+                                "population" : 39321
+                            }, {
+                                "value" : "Trenton, New Jersey",
+                                "areaCode" : 609,
+                                "population" : 84964
+                            }
+                        ] }
+                    </script>
+                    <template type="amp-mustache" id="amp-template-default">
+                        <div class="city-item" value="{{value}}">
+                            <div>{{value}}</div>
+                            <div class="custom-population">Population: {{population}}</div>        
+                        </div>
+                        </template>
+                </amp-autocomplete>
+            </label>
+            <input type="submit" value="Search">
+        </fieldset>
+        <div submit-success>
+            <template type="amp-mustache">
+                <div>Here are the results for the search: {{term}}</div>
+            </template>
+        </div>
+    </form>
+
+    <p>Rich Text, Template Child, Custom Value Property</p>
+    <form method="get" action-xhr="/form/search-json/get" target="_blank">
+        <fieldset>
+            <label>
+                <span>Search for</span>
+                <amp-autocomplete filter="token-prefix" filter-value="city" min-characters="0">
+                    <input type="search" name="term" required>
+                    <script type="application/json">
+                        { "items" : [
+                            {
+                                "city" : "Albany",
+                                "state" : "New York", 
+                                "areaCode" : 518,
+                                "population" : 98251
+                            }, {
+                                "city" : "Annapolis",
+                                "state" : "Maryland",
+                                "areaCode" : 410,
+                                "population" : 39321
+                            }, {
+                                "city" : "Trenton",
+                                "state" : "New Jersey",
+                                "areaCode" : 609,
+                                "population" : 84964
+                            }
+                        ] }
+                    </script>
+                    <template type="amp-mustache" id="amp-template-custom">
+                        <div class="city-item" value="{{city}}, {{state}}">
+                            <div>{{city}}, {{state}}</div>
+                            <div class="custom-population">Population: {{population}}</div>        
+                        </div>
+                    </template>
+                </amp-autocomplete>
+            </label>
+            <input type="submit" value="Search">
+        </fieldset>
+        <div submit-success>
+            <template type="amp-mustache">
+                <div>Here are the results for the search: {{term}}</div>
+            </template>
+        </div>
+    </form>
+
+    <p>Rich Text, Template Attribute, Default Value Property</p>
+    <form method="get" action-xhr="/form/search-json/get" target="_blank">
+        <fieldset>
+            <label>
+                <span>Search for</span>
+                <amp-autocomplete filter="token-prefix" min-characters="0"
+                    template="amp-template-default">
+                    <input type="search" name="term" required>
+                    <script type="application/json">
+                        { "items" : [
+                            {
+                                "value" : "Albany, New York",
+                                "areaCode" : 518,
+                                "population" : 98251
+                            }, {
+                                "value" : "Annapolis, Maryland",
+                                "areaCode" : 410,
+                                "population" : 39321
+                            }, {
+                                "value" : "Trenton, New Jersey",
+                                "areaCode" : 609,
+                                "population" : 84964
+                            }
+                        ] }
                     </script>
                 </amp-autocomplete>
             </label>

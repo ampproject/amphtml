@@ -22,7 +22,7 @@ import {
 } from './css';
 import {dev, devAssert} from './log';
 import {dict} from './utils/object';
-import {onDocumentReady, whenDocumentReady} from './document-ready';
+import {onDocumentReady} from './document-ready';
 import {startsWith} from './string';
 import {toWin} from './types';
 
@@ -106,9 +106,7 @@ export function waitForHead(doc, callback) {
  * @return {!Promise}
  */
 export function waitForHeadPromise(doc) {
-  return new Promise(resolve => {
-    waitForHead(doc, resolve);
-  });
+  return new Promise(resolve => waitForHead(doc, resolve));
 }
 
 /**
@@ -119,7 +117,7 @@ export function waitForHeadPromise(doc) {
  * @param {function()} callback
  */
 export function waitForBody(doc, callback) {
-  return onDocumentReady(doc, callback);
+  onDocumentReady(doc, () => waitForHead(doc, callback));
 }
 
 
@@ -129,7 +127,7 @@ export function waitForBody(doc, callback) {
  * @return {!Promise}
  */
 export function waitForBodyPromise(doc) {
-  return whenDocumentReady(doc);
+  return new Promise(resolve => waitForBody(doc, resolve));
 }
 
 
