@@ -131,8 +131,10 @@ async function e2e() {
 
       // end task
       if (failures) {
+        process.exitCode = 1;
         rejecter();
       }
+      process.exit();
       resolver();
     });
   }

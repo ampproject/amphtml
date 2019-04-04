@@ -113,6 +113,8 @@ async function createSelenium(opt_config = {}) {
   // };
 
   const args = [];
+  args.push('--no-sandbox');
+  args.push('--disable-gpu');
   if (opt_config.headless) {
     args.push('--headless');
   }
@@ -147,7 +149,6 @@ let TestSpec;
  */
 const endtoend = describeEnv(spec => [
   new AmpPageFixture(spec),
-  // TODO(estherkim): add fixtures for viewer, shadow, cache, etc
 ]);
 
 /**
@@ -239,7 +240,6 @@ function describeEnv(factory) {
       after(function() {
         clearTimeout(asyncErrorTimerId);
       });
-
 
       describe(SUB, function() {
         // If there is an async expect error, throw it in the final state.
