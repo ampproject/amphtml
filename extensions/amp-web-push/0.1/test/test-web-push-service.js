@@ -186,7 +186,7 @@ describes.realWin('web-push-service helper frame messaging', {
     webPushConfig[WebPushConfigAttributes.SERVICE_WORKER_URL] =
       FAKE_IFRAME_URL;
     webPushConfig[WebPushConfigAttributes.SERVICE_WORKER_SCOPE] =
-      FAKE_IFRAME_URL;  
+      FAKE_IFRAME_URL;
   }
 
   function setupHelperIframe() {
@@ -542,7 +542,7 @@ describes.realWin('web-push-service subscribing', {
     webPushConfig[WebPushConfigAttributes.SERVICE_WORKER_URL] =
       FAKE_IFRAME_URL;
     webPushConfig[WebPushConfigAttributes.SERVICE_WORKER_SCOPE] =
-      FAKE_IFRAME_URL;  
+      FAKE_IFRAME_URL;
   }
 
   function setupHelperIframe() {
@@ -582,6 +582,8 @@ describes.realWin('web-push-service subscribing', {
 
   it('should register service worker', () => {
     let helperFrameSwMessageMock = null;
+    const swUrl = webPushConfig[WebPushConfigAttributes.SERVICE_WORKER_URL];
+    const swScope = webPushConfig[WebPushConfigAttributes.SERVICE_WORKER_SCOPE];
 
     return setupHelperIframe().then(() => {
       helperFrameSwMessageMock = sandbox./*OK*/mock(
@@ -589,11 +591,7 @@ describes.realWin('web-push-service subscribing', {
       );
       helperFrameSwMessageMock.expects('register')
           .once()
-          .withArgs(
-              webPushConfig[WebPushConfigAttributes.SERVICE_WORKER_URL],
-              {
-                scope: webPushConfig[WebPushConfigAttributes.SERVICE_WORKER_SCOPE],
-              })
+          .withArgs(swUrl, {scope: swScope})
           .returns(Promise.resolve(true));
       return webPush.registerServiceWorker();
     }).then(() => {
@@ -688,7 +686,7 @@ describes.realWin('web-push-service unsubscribing', {
     webPushConfig[WebPushConfigAttributes.SERVICE_WORKER_URL] =
       FAKE_IFRAME_URL;
     webPushConfig[WebPushConfigAttributes.SERVICE_WORKER_SCOPE] =
-      FAKE_IFRAME_URL;  
+      FAKE_IFRAME_URL;
   }
 
   function setupHelperIframe() {
