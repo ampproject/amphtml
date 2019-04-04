@@ -132,7 +132,7 @@ export class AmpList extends AMP.BaseElement {
     this.registerAction('refresh', () => {
       if (this.layoutCompleted_) {
         this.resetIfNecessary_();
-        return this.fetchList_(/*opt_append*/false, /* opt_refresh */ true);
+        return this.fetchList_(/* opt_append */ false, /* opt_refresh */ true);
       }
     }, ActionTrust.HIGH);
 
@@ -223,21 +223,20 @@ export class AmpList extends AMP.BaseElement {
       this.maybeResizeListToFitItems_();
     });
 
-    const loadMorePromise = this.loadMoreEnabledPromise_
-        .then(enabled => {
-          if (enabled) {
-            this.mutateElement(() => {
-              this.getLoadMoreService_().initializeLoadMore();
-              const overflowElement = this.getOverflowElement();
-              if (overflowElement) {
-                toggle(overflowElement, false);
-              }
-              this.element.warnOnMissingOverflow = false;
-            }).then(() => {
-              this.adjustContainerForLoadMoreButton_();
-            });
+    const loadMorePromise = this.loadMoreEnabledPromise_.then(enabled => {
+      if (enabled) {
+        this.mutateElement(() => {
+          this.getLoadMoreService_().initializeLoadMore();
+          const overflowElement = this.getOverflowElement();
+          if (overflowElement) {
+            toggle(overflowElement, false);
           }
+          this.element.warnOnMissingOverflow = false;
+        }).then(() => {
+          this.adjustContainerForLoadMoreButton_();
         });
+      }
+    });
 
     return Promise.all([loadMorePromise, this.fetchList_()]);
   }
@@ -277,18 +276,16 @@ export class AmpList extends AMP.BaseElement {
   adjustContainerForLoadMoreButton_() {
     let buttonHeight;
     let listHeight;
-    return this.measureMutateElement(
-        () => {
-          buttonHeight = this.getLoadMoreService_()
-              .getLoadMoreButton()./*OK*/offsetHeight;
-          listHeight = this.element./*OK*/offsetHeight;
-        },
-        () => {
-          setStyles(dev().assertElement(this.container_), {
-            'max-height': `calc(100% - ${px(buttonHeight)})`,
-          });
-          this.element./*OK*/changeSize(listHeight + buttonHeight);
-        });
+    return this.measureMutateElement(/* measurer */ () => {
+      buttonHeight = this.getLoadMoreService_()
+          .getLoadMoreButton()./*OK*/offsetHeight;
+      listHeight = this.element./*OK*/offsetHeight;
+    }, /* mutator */ () => {
+      setStyles(dev().assertElement(this.container_), {
+        'max-height': `calc(100% - ${px(buttonHeight)})`,
+      });
+      this.element./*OK*/changeSize(listHeight + buttonHeight);
+    });
   }
 
   /** @override */
@@ -461,10 +458,13 @@ export class AmpList extends AMP.BaseElement {
     }
 
     return fetch.catch(error => {
+      const actions = Services.actionServiceForDoc(this.element);
+      actions.trigger(this.element, 'fetch-error', null, ActionTrust.LOW);
+
       if (opt_append) {
         throw error;
       }
-      this.showFallback_(error);
+      this.showFallbackOrThrow_(error);
     });
   }
 
@@ -522,9 +522,8 @@ export class AmpList extends AMP.BaseElement {
       return this.ssrTemplateHelper_.fetchAndRenderTemplate(
           this.element, request, /* opt_templates */ null, attributes);
     }).then(response => {
-      userAssert(response && !!response['html'],
-          'Expected response with format {html: <string>}. Received: ',
-          response);
+      userAssert(response && response['html'], 'Expected response with ' +
+          'format {html: <string>}. Received: ', response);
       request.fetchOpt.responseType = 'application/json';
       this.ssrTemplateHelper_.verifySsrResponse(this.win, response, request);
       return response;
@@ -1040,7 +1039,7 @@ export class AmpList extends AMP.BaseElement {
    * @throws {!Error} If fallback element is not present.
    * @private
    */
-  showFallback_(error) {
+  showFallbackOrThrow_(error) {
     this.toggleLoading(false);
     if (this.getFallback()) {
       this.toggleFallback_(true);
