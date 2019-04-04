@@ -28,21 +28,21 @@ describes.realWin('amp-experiment mutation-parser', {}, env => {
   function getAttributeMutation() {
     const targetId = 'mutation-parser-test';
     const targetElement = createElementWithAttributes(
-      doc,
-      'div',
-      {
-        'id': targetId
-      }
+        doc,
+        'div',
+        {
+          'id': targetId,
+        }
     );
 
     doc.body.appendChild(targetElement);
 
     return {
-      type: "attributes",
+      type: 'attributes',
       target: `#${targetId}`,
-      attributeName: "style",
-      value: "color: red"
-    }
+      attributeName: 'style',
+      value: 'color: red',
+    };
   }
 
   it('should allow a valid mutation', () => {
@@ -54,7 +54,7 @@ describes.realWin('amp-experiment mutation-parser', {}, env => {
   it('should error when no mutation', () => {
     allowConsoleError(() => {
       expect(() => {
-        parseMutation(undefined, doc)
+        parseMutation(undefined, doc);
       }).to.throw(/object/);
     });
   });
@@ -64,7 +64,7 @@ describes.realWin('amp-experiment mutation-parser', {}, env => {
     delete mutation['type'];
     allowConsoleError(() => {
       expect(() => {
-        parseMutation(mutation, doc)
+        parseMutation(mutation, doc);
       }).to.throw(/type/);
     });
   });
@@ -74,7 +74,7 @@ describes.realWin('amp-experiment mutation-parser', {}, env => {
     mutation['type'] = 'test';
     allowConsoleError(() => {
       expect(() => {
-        parseMutation(mutation, doc)
+        parseMutation(mutation, doc);
       }).to.throw(/type/);
     });
   });
@@ -84,7 +84,7 @@ describes.realWin('amp-experiment mutation-parser', {}, env => {
     delete mutation['target'];
     allowConsoleError(() => {
       expect(() => {
-        parseMutation(mutation, doc)
+        parseMutation(mutation, doc);
       }).to.throw(/target/);
     });
   });
@@ -94,7 +94,7 @@ describes.realWin('amp-experiment mutation-parser', {}, env => {
     doc.body.querySelector(mutation['target']).remove();
     allowConsoleError(() => {
       expect(() => {
-        parseMutation(mutation, doc)
+        parseMutation(mutation, doc);
       }).to.throw(/selector/);
     });
   });
