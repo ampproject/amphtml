@@ -25,8 +25,8 @@ export function svknative(global, data) {
   // ensure we have valid widgetid value
   validateData(data, ['widgetid']);
 
-  let s = global.document.createElement('script');
-  let scriptKey = 'svknativeampwidget_' + Math.floor(Math.random() * 10000000);
+  const s = global.document.createElement('script');
+  const scriptKey = 'svknativeampwidget_' + Math.floor(Math.random() * 10000000);
 
   s.setAttribute('data-key', scriptKey);
   global.document.getElementById('c').appendChild(s);
