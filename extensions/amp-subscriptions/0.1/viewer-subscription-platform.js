@@ -70,6 +70,11 @@ export class ViewerSubscriptionPlatform {
   }
 
   /** @override */
+  isPrerenderSafe() {
+    return true;
+  }
+
+  /** @override */
   getEntitlements() {
     devAssert(this.currentProductId_, 'Current product is not set');
 
