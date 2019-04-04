@@ -93,8 +93,10 @@ export class AmpScript extends AMP.BaseElement {
     });
     // Create worker and hydrate.
     const authorUrl = this.element.getAttribute('src');
+    const domUrl = this.getAmpDoc().getUrl();
     const workerUrl = this.workerThreadUrl_();
-    dev().info(TAG, 'Author URL:', authorUrl, ', worker URL:', workerUrl);
+    dev().info(TAG, 'Author URL:', authorUrl, ', DOM URL: ', domUrl,
+        ', worker URL:', workerUrl);
 
     const xhr = Services.xhrFor(this.win);
     const fetches = Promise.all([
@@ -110,10 +112,19 @@ export class AmpScript extends AMP.BaseElement {
             + MAX_SCRIPT_SIZE);
         return [];
       }
-      return [workerScript, authorScript, authorUrl];
+      return [workerScript, authorScript];
     }),
-    // Configure callbacks.
+    // WorkerDOMConfiguration
     {
+      authorURL: authorUrl,
+      domURL: domUrl,
+      mutationPump: this.mutationPump_.bind(this),
+      longTask: promise => {
+        this.userActivation_.expandLongTask(promise);
+        // TODO(dvoytenko): consider additional "progress" UI.
+      },
+
+      // Callbacks.
       onCreateWorker: data => {
         dev().info(TAG, 'Create worker:', data);
       },
@@ -126,11 +137,6 @@ export class AmpScript extends AMP.BaseElement {
       },
       onReceiveMessage: data => {
         dev().info(TAG, 'From worker:', data);
-      },
-      onMutationPump: this.mutationPump_.bind(this),
-      onLongTask: promise => {
-        this.userActivation_.expandLongTask(promise);
-        // TODO(dvoytenko): consider additional "progress" UI.
       },
     },
     /* debug */ true).then(workerDom => {
