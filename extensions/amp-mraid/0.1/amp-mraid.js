@@ -42,7 +42,6 @@ const FALLBACK_ON = 'fallback-on';
  */
 const FallbackErrorNames = {
   MISMATCH: 'mismatch',
-  UNSUPPORTED: 'unsupported',
 };
 
 /**
