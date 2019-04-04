@@ -433,6 +433,23 @@ export class ViewportBindingInabox {
     }
   }
 
+  /** @override */
+  getScrollWidth() {
+    // Get actual width of document body, regardless of iframe size.
+    return this.getBodyElement()./*OK*/offsetWidth;
+  }
+
+  /** @override */
+  getScrollHeight() {
+    // Get actual height of document body, regardless of iframe size.
+    return this.getBodyElement()./*OK*/offsetHeight;
+  }
+
+  /** @override */
+  getContentHeight() {
+    return this.getBodyElement()./*OK*/offsetHeight;
+  }
+
   /** @override */ updatePaddingTop() {/* no-op */}
   /** @override */ hideViewerHeader() {/* no-op */}
   /** @override */ showViewerHeader() {/* no-op */}
@@ -440,9 +457,6 @@ export class ViewportBindingInabox {
   /** @override */ resetScroll() {/* no-op */}
   /** @override */ ensureReadyForElements() {/* no-op */}
   /** @override */ setScrollTop() {/* no-op */}
-  /** @override */ getScrollWidth() {return 0;}
-  /** @override */ getScrollHeight() {return 0;}
-  /** @override */ getContentHeight() {return 0;}
   /** @override */ contentHeightChanged() {}
   /** @override */ getBorderTop() {return 0;}
   /** @override */ requiresFixedLayerTransfer() {return false;}
