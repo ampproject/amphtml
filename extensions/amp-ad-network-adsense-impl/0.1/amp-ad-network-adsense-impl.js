@@ -414,8 +414,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     }
     const checksum = headers.get('AMP-Verification-Checksum');
     return Promise.resolve(
-        checksum && stringHash32(utf8Decode(bytes)) == atob(checksum)
-          ? bytes : null);
+        checksum && stringHash32(utf8Decode(bytes)) == checksum ? bytes : null);
   }
 
   /** @override */
