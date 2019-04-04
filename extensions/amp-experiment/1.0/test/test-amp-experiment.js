@@ -25,6 +25,8 @@ describes.realWin('amp-experiment', {
   },
 }, env => {
 
+  // Config has empty mutations
+  // As mutation parser tests will handle this
   const config = {
     'experiment-1': {
       variants: {
@@ -155,7 +157,7 @@ describes.realWin('amp-experiment', {
     stub.withArgs(ampdoc, 'experiment-3', config['experiment-3'])
         .returns(Promise.resolve(null));
 
-    const applySpy = sandbox.spy(experiment, 'applyMutations_');
+    const applyStub = sandbox.stub(experiment, 'applyMutations_');
 
     experiment.buildCallback();
     return Services.variantsForDocOrNull(ampdoc.getHeadNode())
@@ -167,7 +169,7 @@ describes.realWin('amp-experiment', {
             'experiment-3': null,
           });
 
-          expect(applySpy).to.be.calledTwice;
+          expect(applyStub).to.be.calledTwice;
         });
   });
 });

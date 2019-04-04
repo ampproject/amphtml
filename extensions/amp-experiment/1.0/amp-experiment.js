@@ -27,6 +27,7 @@ import {
 } from '../../../src/service/origin-experiments-impl';
 import {isExperimentOn} from '../../../src/experiments';
 import {parseJson} from '../../../src/json';
+import {parseMutation} from './mutation-parser';
 
 const TAG = 'amp-experiment';
 
@@ -164,12 +165,16 @@ export class AmpExperiment extends AMP.BaseElement {
   applyMutations_(experimentName, variantObject) {
     const doc = this.getAmpDoc();
     return doc.whenBodyAvailable().then(() => {
-      // TODO (torch2424): Use a mutation service,
-      // and apply mutations
-      // Placehodler to pass linting for code review
-      // and keep PRs small
-      // This is a NOOP
-      variantObject[experimentName] = experimentName;
+
+      // Parse / Validate all of our mutations
+      const mutationOperations = variantObject['mutations'].map(
+          mutation => parseMutation(mutation, this.win.document)
+      );
+
+      // Apply our mutations
+      mutationOperations.forEach(
+          mutationOperation => mutationOperation()
+      );
     });
   }
 
