@@ -91,13 +91,13 @@ export class MraidInitializer {
     // prevents any real relative loads.  This works because post-transformation
     // creatives won't have <base>, and so we're injecting the first <base> tag
     // on the page.
-    const head = document.getElementsByTagName('head').item(0);
+    const head = this.win.document.getElementsByTagName('head').item(0);
 
-    const base = document.createElement('base');
+    const base = this.win.document.createElement('base');
     base.setAttribute('href', '//invalid.invalid');
     head.appendChild(base);
 
-    const mraidJs = document.createElement('script');
+    const mraidJs = this.win.document.createElement('script');
     mraidJs.setAttribute('type', 'text/javascript');
     mraidJs.setAttribute('src', 'mraid.js');
     mraidJs.addEventListener('load', () => {
