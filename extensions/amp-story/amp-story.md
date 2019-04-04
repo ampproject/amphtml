@@ -2,6 +2,7 @@
 $category@: presentation
 formats:
   - websites
+  - stories
 teaser:
   text: A rich, visual storytelling format.
 ---
