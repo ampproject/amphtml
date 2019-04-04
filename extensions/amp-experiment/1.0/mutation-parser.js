@@ -74,24 +74,32 @@ function assertMutationRecord(mutation) {
   // Assert that the mutation is an object
   userAssert(
       isObject(mutation),
-      `Mutation ${JSON.stringify(mutation)} must be an object.`);
+      'Mutation %s must be an object.',
+      JSON.stringify(mutation)
+  );
 
   // Assert the mutation type
   userAssert(
       mutation['type'] !== undefined &&
     typeof mutation['type'] === 'string',
-      `Mutation ${JSON.stringify(mutation)} must have a type.`);
+      'Mutation %s must have a type.',
+      JSON.stringify(mutation)
+  );
 
   // Assert the mutation type is one of the following keys
   userAssert(
       MUTATION_TYPES.indexOf(mutation['type']) >= 0,
-      `Mutation ${JSON.stringify(mutation)} must have a type.`);
+      'Mutation %s must have a type.',
+      JSON.stringify(mutation)
+  );
 
   // Assert the mutation target
   userAssert(
       mutation['target'] !== undefined &&
     typeof mutation['target'] === 'string',
-      `Mutation ${JSON.stringify(mutation)} must have a target.`);
+      'Mutation %s must have a target.',
+      JSON.stringify(mutation)
+  );
 
   return mutation;
 }
@@ -109,8 +117,9 @@ function setSelectorToElement(selectorKey, mutationRecord, document) {
 
   userAssert(
       targetElement !== null,
-      'No element on the document matches the selector, ' +
-    `${mutationRecord[selectorKey]} .`);
+      'No element on the document matches the selector, %s .',
+      mutationRecord[selectorKey]
+  );
 
   mutationRecord[selectorKey] = targetElement;
 }
