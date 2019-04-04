@@ -40,11 +40,6 @@ export function svknative(global, data) {
         'amp': true,
       },
     });
-
-    if (w['_SVKNative_embed']) {
-      w['_SVKNative_embed'].initWidgets();
-    }
-
   })(global, '_svk_n_widgets');
 
   // load the SVK Native AMP JS file
