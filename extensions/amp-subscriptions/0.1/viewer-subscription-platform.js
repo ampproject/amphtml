@@ -41,6 +41,9 @@ export class ViewerSubscriptionPlatform {
     /** @private @const */
     this.ampdoc_ = ampdoc;
 
+    /** @private @const */
+    this.serviceAdapter_ = serviceAdapter;
+
     /** @private @const {!PageConfig} */
     this.pageConfig_ = serviceAdapter.getPageConfig();
 
@@ -216,7 +219,7 @@ export class ViewerSubscriptionPlatform {
    * a new getEntitlements() message exchange.
    */
   subscriptionChange_() {
-    this.serviceAdapter.resetPlatforms();
+    this.serviceAdapter_.resetPlatforms();
   }
 }
 
