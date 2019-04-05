@@ -24,6 +24,7 @@
     <script type="application/json">
       {
         "background-color-test": {
+          "consentNotificationId": "amp-user-notification",
           "variants": {
             "yellow": {
               "weight": 50,
@@ -32,72 +33,43 @@
                   "type": "attributes",
                   "target": "h1",
                   "attributeName": "style",
-                  "value": "color: yellow"
-                }
-              ]
-            },
-            "green": {
-              "weight": 50,
-              "mutations": [
-                {
-                  "type": "attributes",
-                  "target": "h1",
-                  "attributeName": "style",
-                  "value": "color: green"
-                }
-              ]
-            }
-          }
-        },
-        "font-color-test": {
-          "sticky": false,
-          "variants": {
-            "blue": {
-              "weight": 20,
-              "mutations": [
-                {
-                  "type": "attributes",
-                  "target": "h1",
-                  "attributeName": "style",
-                  "value": "color: blue"
+                  "value": "background-color: #FFFF00"
                 }
               ]
             },
             "red": {
-              "weight": 20,
+              "weight": 50,
               "mutations": [
                 {
                   "type": "attributes",
                   "target": "h1",
                   "attributeName": "style",
-                  "value": "color: red"
+                  "value": "background-color: #FF0000"
                 }
               ]
             }
           }
         },
-        "border-test": {
-          "consentNotificationId": "amp-user-notification",
+        "text-content-test": {
+          "sticky": false,
           "variants": {
-            "solid": {
+            "firstVariant": {
               "weight": 50,
               "mutations": [
                 {
-                  "type": "attributes",
+                  "type": "characterData",
                   "target": "h1",
-                  "attributeName": "style",
-                  "value": "border: 1px black solid"
+                  "value": "First characterData Variant"
                 }
               ]
             },
-            "dashed": {
+            "secondVariant": {
               "weight": 50,
               "mutations": [
                 {
-                  "type": "attributes",
+                  "type": "characterData",
                   "target": "h1",
-                  "attributeName": "style",
-                  "value": "border: 1px black dashed"
+                  "value": "Second characterData Variant"
                 }
               ]
             }
@@ -106,11 +78,11 @@
       }
     </script>
   </amp-experiment>
-  <amp-pixel src="https://donot.worry/?background-color-test=VARIANT(background-color-test)&font-color-test=VARIANT(font-color-test)&variants=VARIANTS"></amp-pixel>
+  <amp-pixel src="https://donot.worry/?background-color-test=VARIANT(background-color-test)&text-content-test=VARIANT(text-content-test)&variants=VARIANTS"></amp-pixel>
   <amp-user-notification
       layout=nodisplay
       id="amp-user-notification">
-    Dismiss this notification to see a border around title on your next visit.
+    Dismiss this notification to see a background-color on the title on your next visit.
     <button on="tap:amp-user-notification.dismiss" role="button">I accept</button>
   </amp-user-notification>
 </body>
