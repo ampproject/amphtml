@@ -104,10 +104,10 @@ module.exports.format = function(logger) {
     let report = file.relative + ': ';
     if (validationResult.status === STATUS_PASS) {
       report += colors.green(validationResult.status);
-      report += '\n Important: Valid AMP pages should also be tested for '
-          + 'proper CORS handling when served from an AMP cache. For details '
-          + 'please see '
-          + 'https://www.ampproject.org/docs/fundamentals/amp-cors-requests';
+      report += '\nReview our \'Publishing checklist\' to ensure '
+          + 'successful AMP document distribution. '
+          + 'https://amp.dev/documentation/guides-and-tutorials/'
+          + 'optimize-and-measure/publishing_checklist.html?format=websites';
     } else if (validationResult.status === STATUS_UNKNOWN) {
       report += colors.red(validationResult.status);
     } else {
