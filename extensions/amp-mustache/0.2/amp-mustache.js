@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {BaseTemplate} from '../../../src/service/template-impl';
 import {Services} from '../../../src/services';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
@@ -26,13 +25,19 @@ import mustache from '../../../third_party/mustache/mustache';
 const TAG = 'amp-mustache';
 
 /**
+ * @typedef {BaseTemplate$$module$src$service$template_impl}
+ */
+let BaseTemplateDef;
+
+/**
  * Implements an AMP template for Mustache.js.
  * See {@link https://github.com/janl/mustache.js/}.
  *
  * @private Visible for testing.
- * @extends {BaseTemplate}
+ * @extends {BaseTemplateDef}
+ * @suppress {checkTypes}
  */
-export class AmpMustache extends BaseTemplate {
+export class AmpMustache extends BaseTemplateDef {
   /**
    * @param {!Element} element
    * @param {!Window} win
