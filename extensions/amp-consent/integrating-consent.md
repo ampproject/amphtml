@@ -122,8 +122,8 @@ Once you have the remote endpoint and prompt UI iframe ready, you are ready to a
         1. `consentInstanceId`: The localStorage key to store/retrieve the user consent response.
         1. `checkConsentHref`: Your remote endpoint destination.
         1. `promptUISrc`: Your prompt UI iframe src.
-    1. Create and example AMP page using your service.
-    1. Add documentation.
+    1. Add an example to the [`cmp-vendors.amp.html`](../../examples/cmp-vendors.amp.html) using your service. Note, the examples and filters should be in alphabetical order, and `_ping_` should be the first example.
+    1. Add documentation for your configuration in [`extensions/amp-consent/cmp`](./cmps). See the [`_ping_`](./cmps/_ping_.md) documentation as an example.
     1. Add your GH user name as the POC for future maintenance issue.
 1. Run end to end test on the new example you create.
 1. Submit a Pull Request with this patch, referencing the Intent-To-Implement issue. @ampproject/wg-monetization for review.
