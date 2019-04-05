@@ -17,6 +17,8 @@
 import {isObject} from '../../../src/types';
 import {userAssert} from '../../../src/log';
 
+const TAG = 'amp-experiment mutation-parser';
+
 /**
  * Types of possibile mutations
  * from the WorkerDOM MutationRecord.
@@ -27,6 +29,34 @@ const MUTATION_TYPES = [
   'characterData',
   'childList',
 ];
+
+const SUPPORTED_ATTRIBUTES = {
+  style: (value) => {
+
+    // Do not allow Important or HTML Comments
+    if (value.match(/(!\s*important|<!--)/g)) {
+      return false;
+    }
+
+    // Allow Color
+    if (value.match(/^color:\s#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/g)) {
+      return true;
+    }
+
+    // Allow Background color
+    if (value.match(/^background-color:\s#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/g)) {
+      return true;
+    }
+
+    return false;
+  },
+  src: () => {
+    return value.match(/^https:\/\//g);
+  },
+  href: () => {
+    return value.match(/^https:\/\//g);
+  }
+}
 
 /**
  * Function to find all selectors of the mutation
@@ -42,24 +72,35 @@ export function parseMutation(mutation, document) {
 
   setSelectorToElement('target', mutationRecord, document);
 
-  // TODO (torch2424): Remove this NOOP after reviews
-  // This is done to allow for small PRS
-  const noopFunction = () => {};
-
   if (mutationRecord['type'] === 'attributes') {
-    // NOOP for small PRs
-    // TODO (torch2424): Be sure to validate supported
-    // attributes (e.g style), and their values for
-    // security, and AMP validation (position: fixed).
-    return noopFunction;
+
+    assertAttributeMutation(mutationRecord);
+
+    return () => {
+      mutationRecord['target'].setAttribute(
+        mutationRecord['attributeName'],
+        mutationRecord['value']
+      );
+    };
   } else if (mutationRecord['type'] === 'characterData') {
-    // NOOP for small PRs
-    return noopFunction;
+
+    assertCharacterDataMutation(mutationRecord);
+
+    return () => {
+      mutationRecord['target'].textContent = mutationRecord['value'];
+    };
   } else {
     // childList type of mutation
 
-    // NOOP for small PRs
-    return noopFunction;
+    user().error(
+      TAG,
+      'childList mutations not supported ' +
+      'in the current experiment state.'
+    );
+
+    // TODO (torch2424): Remove this NOOP after reviews
+    // This is done to allow for small(er) PRS
+    return () => {};
   }
 }
 
@@ -122,4 +163,59 @@ function setSelectorToElement(selectorKey, mutationRecord, document) {
   );
 
   mutationRecord[selectorKey] = targetElement;
+}
+
+/**
+ * Function to assert allowing setting the textContent
+ * of a node.
+ * @param {!Object} mutationRecord
+ */
+function assertAttributeMutation(mutationRecord) {
+  // Assert the mutation value
+  userAssert(
+    mutationRecord['value'] !== undefined &&
+    typeof mutationRecord['value'] === 'string',
+    'Mutation %s must have a value.',
+    JSON.stringify(mutationRecord)
+  );
+
+  // Assert mutation attributeName
+  userAssert(
+    mutationRecord['attributeName'] !== undefined &&
+    typeof mutationRecord['attributeName'] === 'string',
+    'Mutation %s must have a attributeName.',
+    JSON.stringify(mutationRecord)
+  );
+
+  const supportedAttributeKeys =
+    Object.keys(SUPPORTED_ATTRIBUTES);
+
+  // Assert the mutation attribute is one of the following keys
+  userAssert(
+    supportedAttributeKeys.indexOf(mutationRecord['attributeName']) >= 0,
+    'Mutation %s has an unsupported attributeName.',
+    JSON.stringify(mutationRecord)
+  );
+
+  // Assert the mutation attribute passes it's check
+  userAssert(
+    SUPPORTED_ATTRIBUTES[mutationRecord['attributeName']](mutationRecord['value']),
+    'Mutation %s has an an unsupported value.',
+    JSON.stringify(mutationRecord)
+  );
+}
+
+/**
+ * Function to assert allowing setting the textContent
+ * of a node.
+ * @param {!Object} mutationRecord
+ */
+function assertCharacterDataMutation(mutationRecord) {
+  // Assert the mutation value
+  userAssert(
+    mutationRecord['value'] !== undefined &&
+    typeof mutationRecord['value'] === 'string',
+    'Mutation %s must have a value.',
+    JSON.stringify(mutationRecord)
+  );
 }
