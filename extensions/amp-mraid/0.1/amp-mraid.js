@@ -71,7 +71,8 @@ export class MraidInitializer {
       return;
     }
 
-    const ampMraidScripts = this.ampdoc_.getHeadNode().querySelectorAll(
+    const head = this.ampdoc_.getHeadNode();
+    const ampMraidScripts = head.querySelectorAll(
         'script[host-service="amp-mraid"]');
     if (ampMraidScripts.length > 1) {
       dev().error(TAG, 'Multiple amp-mraid scripts.');
@@ -91,13 +92,11 @@ export class MraidInitializer {
     // prevents any real relative loads.  This works because post-transformation
     // creatives won't have <base>, and so we're injecting the first <base> tag
     // on the page.
-    const head = this.win.document.getElementsByTagName('head').item(0);
-
-    const base = this.win.document.createElement('base');
+    const base = this.ampdoc_.win.document.createElement('base');
     base.setAttribute('href', '//invalid.invalid');
     head.appendChild(base);
 
-    const mraidJs = this.win.document.createElement('script');
+    const mraidJs = this.ampdoc_.win.document.createElement('script');
     mraidJs.setAttribute('type', 'text/javascript');
     mraidJs.setAttribute('src', 'mraid.js');
     mraidJs.addEventListener('load', () => {
