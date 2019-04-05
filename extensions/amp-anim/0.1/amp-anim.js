@@ -17,6 +17,7 @@
 import * as st from '../../../src/style';
 import {dev} from '../../../src/log';
 import {guaranteeSrcForSrcsetUnsupportedBrowsers} from '../../../src/utils/img';
+import {installObjectCropStyles} from '../../../src/style';
 import {isLayoutSizeDefined} from '../../../src/layout';
 
 const TAG = 'amp-anim';
@@ -51,6 +52,7 @@ export class AmpAnim extends AMP.BaseElement {
     this.img_.setAttribute('decoding', 'async');
     this.propagateAttributes(BUILD_ATTRIBUTES, this.img_);
     this.applyFillContent(this.img_, true);
+    installObjectCropStyles(this.element, this.img_);
 
     // Remove role=img otherwise this breaks screen-readers focus and
     // only read "Graphic" when using only 'alt'.

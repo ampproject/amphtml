@@ -40,6 +40,7 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {listen} from '../../../src/event-helper';
 import {mutedOrUnmutedEvent} from '../../../src/iframe-video';
 import {
+  installObjectCropStyles,
   setImportantStyles,
   setInitialDisplay,
   setStyles,
@@ -206,6 +207,7 @@ class AmpVideo extends AMP.BaseElement {
         /* opt_removeMissingAttrs */ true);
     this.installEventHandlers_();
     this.applyFillContent(this.video_, true);
+    installObjectCropStyles(this.element, this.video_);
 
     this.createPosterForAndroidBug_();
     element.appendChild(this.video_);

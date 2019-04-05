@@ -335,3 +335,20 @@ export function resetStyles(element, properties) {
     setStyle(element, properties[i], null);
   }
 }
+
+/**
+ * Propagates the object-fit/position element attributes as styles on the
+ * childElement.
+ * @param {!Element} element ie: amp-img
+ * @param {!Element} childElement ie: the img within amp-img
+ */
+export function installObjectCropStyles(element, childElement) {
+  if (element.hasAttribute('object-fit')) {
+    setStyle(childElement, 'object-fit', element.getAttribute('object-fit'));
+  }
+
+  if (element.hasAttribute('object-position')) {
+    setStyle(childElement, 'object-position',
+        element.getAttribute('object-position'));
+  }
+}
