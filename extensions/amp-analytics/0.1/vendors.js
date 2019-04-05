@@ -45,6 +45,7 @@ import {GOOGLEADWORDS_CONFIG} from './vendors/googleadwords';
 import {GTAG_CONFIG} from './vendors/gtag';
 import {GOOGLEANALYTICS_CONFIG} from './vendors/googleanalytics';
 import {KEEN_CONFIG} from './vendors/keen';
+import {KENSHOO_CONFIG} from './vendors/kenshoo';
 import {KRUX_CONFIG} from './vendors/krux';
 import {IPLABEL_CONFIG} from './vendors/iplabel';
 import {LOTAME_CONFIG} from './vendors/lotame';
@@ -97,6 +98,7 @@ import {MOAT_CONFIG} from './vendors/moat';
 import {BG_CONFIG} from './vendors/bg';
 import {UPSCORE_CONFIG} from './vendors/upscore';
 import {REPPUBLIKA_CONFIG} from './vendors/reppublika';
+import {NAVEGG_CONFIG} from './vendors/navegg';
 
 /**
  * @const {!JsonObject}
@@ -108,9 +110,6 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
     'transport': {'beacon': true, 'xhrpost': true, 'image': true},
     'vars': {
       'accessReaderId': 'ACCESS_READER_ID',
-      'adNavTiming': 'AD_NAV_TIMING', // only available in A4A embeds
-      'adNavType': 'AD_NAV_TYPE', // only available in A4A embeds
-      'adRedirectCount': 'AD_NAV_REDIRECT_COUNT', // only available in A4A
       'ampdocHost': 'AMPDOC_HOST',
       'ampdocHostname': 'AMPDOC_HOSTNAME',
       'ampdocUrl': 'AMPDOC_URL',
@@ -204,6 +203,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
   'infonline': INFONLINE_CONFIG,
   'iplabel': IPLABEL_CONFIG,
   'keen': KEEN_CONFIG,
+  'kenshoo': KENSHOO_CONFIG,
   'krux': KRUX_CONFIG,
   'linkpulse': LINKPULSE_CONFIG,
   'lotame': LOTAME_CONFIG,
@@ -216,6 +216,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
   'mobify': MOBIFY_CONFIG,
   'mparticle': MPARTICLE_CONFIG,
   'mpulse': MPULSE_CONFIG,
+  'navegg': NAVEGG_CONFIG,
   'newrelic': NEWRELIC_CONFIG,
   'nielsen': NIELSEN_CONFIG,
   'nielsen-marketing-cloud': NIELSEN_MARKETING_CLOUD_CONFIG,

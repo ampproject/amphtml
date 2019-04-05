@@ -22,6 +22,7 @@ tags: {  # amp-story
     version: "0.1"
     version: "1.0"
     version: "latest"
+    deprecated_version: "0.1"
   }
   attr_lists: "common-extension-attrs"
 }
@@ -257,7 +258,12 @@ tags: {
   attrs: { name: "animate-in-after" }
   attrs: { name: "animate-in-delay" }
   attrs: { name: "animate-in-duration" }
+  attrs: { name: "animate-in-timing-function" }
   attrs: { name: "grid-area" }
+  attrs: {
+    name: "interactive"
+    value: ""
+  }
   attrs: {
     name: "scale-end"
     value_regex: "[0-9]+([.][0-9]+)?"
@@ -345,6 +351,11 @@ tags: {
   attrs: { name: "animate-in-after" }
   attrs: { name: "animate-in-delay" }
   attrs: { name: "animate-in-duration" }
+  attrs: { name: "animate-in-timing-function" }
+  attrs: {
+    name: "interactive"
+    value: ""
+  }
   attrs: {
     name: "scale-end"
     value_regex: "[0-9]+([.][0-9]+)?"
@@ -497,6 +508,7 @@ tags: {
   attrs: { name: "animate-in-after" }
   attrs: { name: "animate-in-delay" }
   attrs: { name: "animate-in-duration" }
+  attrs: { name: "animate-in-timing-function" }
   attrs: {
     name: "scale-end"
     value_regex: "[0-9]+([.][0-9]+)?"
@@ -556,6 +568,7 @@ descendant_tag_list: {
   tag: "HGROUP"
   tag: "HR"
   tag: "I"
+  tag: "I-AMPHTML-SIZER"  # Only allowed when document is transformed AMP
   tag: "INS"
   tag: "KBD"
   tag: "LI"
@@ -606,6 +619,7 @@ descendant_tag_list: {
   tag: "AMP-LIVE-LIST"
   tag: "AMP-PIXEL"
   tag: "AMP-TIMEAGO"
+  tag: "AMP-TWITTER"
   tag: "AMP-VIDEO"
   tag: "ARTICLE"
   tag: "ASIDE"
@@ -640,6 +654,7 @@ descendant_tag_list: {
   tag: "HGROUP"
   tag: "HR"
   tag: "I"
+  tag: "I-AMPHTML-SIZER"  # Only allowed when document is transformed AMP
   tag: "INS"
   tag: "KBD"
   tag: "LI"
@@ -798,6 +813,7 @@ descendant_tag_list {
   tag: "HGROUP"
   tag: "HR"
   tag: "I"
+  tag: "I-AMPHTML-SIZER"  # Only allowed when document is transformed AMP
   tag: "INS"
   tag: "KBD"
   tag: "LI"

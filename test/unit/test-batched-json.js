@@ -107,5 +107,66 @@ describe('batchFetchJsonFor', () => {
     });
   });
 
+  describe('POST based identity', () => {
+    it('should send POST request with auth token is present', () => {
+      const el = element('https://data.com');
+      const all = UrlReplacementPolicy.ALL;
+
+      urlReplacements.expandUrlAsync
+          .withArgs('https://data.com')
+          .returns(Promise.resolve('https://data.com'));
+
+      const expectedRequest = {
+        'body': {'ampViewerAuthToken': 'idtoken'},
+        'headers': {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        'method': 'POST',
+        'requireAmpResponseSourceOrigin': false,
+      };
+
+      return batchFetchJsonFor(ampdoc, el, null, all, false, 'idtoken')
+          .then(() => {
+            expect(fetchJson).to.be.calledWithExactly(
+                'https://data.com', expectedRequest);
+          });
+    });
+
+    it('should send POST request with empty, defined identity token', () => {
+      const el = element('https://data.com');
+      const all = UrlReplacementPolicy.ALL;
+
+      urlReplacements.expandUrlAsync
+          .withArgs('https://data.com')
+          .returns(Promise.resolve('https://data.com'));
+
+      const token = '';
+      return batchFetchJsonFor(ampdoc, el, null, all, false, token)
+          .then(() => {
+            const fetchOpt = fetchJson.firstCall.args[1];
+            expect(fetchOpt.body.ampViewerAuthToken).to.equal('');
+            expect(fetchOpt.method).to.equal('POST');
+          });
+    });
+
+    it('should not transform the request with an undefined token', () => {
+      const el = element('https://data.com');
+      const all = UrlReplacementPolicy.ALL;
+
+      urlReplacements.expandUrlAsync
+          .withArgs('https://data.com')
+          .returns(Promise.resolve('https://data.com'));
+
+      const expectedRequest = {
+        'requireAmpResponseSourceOrigin': false,
+      };
+
+      return batchFetchJsonFor(ampdoc, el, null, all, false)
+          .then(() => {
+            expect(fetchJson).to.be.calledWithExactly(
+                'https://data.com', expectedRequest);
+          });
+    });
+  });
   // TODO(choumx): Add tests for normal fetch functionality.
 });

@@ -36,6 +36,7 @@ This document provides details for testing and building your AMP code.
   * [Testing with ngrok](#testing-with-ngrok)
   * [Testing with Heroku](#testing-with-heroku)
   * [Testing with Firebase](#testing-with-firebase)
+- [End-to-end Tests](#end-to-end-tests)
 
 ## Testing commands
 
@@ -117,6 +118,9 @@ Command                                                                 | Descri
 `gulp e2e --files=<test-files-path-glob>`                               | Runs end-to-end tests from the specified files on the latest Chrome browser.
 `gulp e2e --nobuild`                                                    | Runs all end-to-end tests without building the runtime.
 `gulp e2e --testnames`                                                  | Lists the name of each test being run, and prints a summary at the end.
+`gulp e2e --engine=ENGINE`                                              | Runs end-to-end tests with the given Web Driver engine. Allowed values are `puppeteer` and `selenium`.
+`gulp e2e --headless`                                                   | Runs end-to-end tests in a headless browser instance.
+`gulp e2e --watch`                                                      | Watches for changes in test files, runs tests.
 
 ## Manual testing
 
@@ -344,4 +348,4 @@ gulp e2e
 
 The task will kick off `gulp build` and then `gulp serve` before running the tests. To skip building the runtime, use `--nobuild`.
 
-Create your own tests by adding them to `test\e2e` or `extensions\**\test-e2e`. For examples, see `test\e2e\test-github.js` and `extensions\amp-carousel\0.2\test-e2e\test-carousel.js`.
+[Consult the E2E testing documentation](../build-system/tasks/e2e/README.md) to learn how to create your own end-to-end tests.

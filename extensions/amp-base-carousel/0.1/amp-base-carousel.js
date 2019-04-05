@@ -90,9 +90,6 @@ class AmpCarousel extends AMP.BaseElement {
       'mixed-length': newValue => {
         this.carousel_.updateMixedLength(newValue == 'true');
       },
-      'side-slide-count': newValue => {
-        this.carousel_.updateSideSlideCount(Number(newValue) || 0);
-      },
       'slide': newValue => {
         this.carousel_.goToSlide(Number(newValue));
       },
@@ -219,6 +216,20 @@ class AmpCarousel extends AMP.BaseElement {
    */
   goToSlide(index) {
     this.carousel_.goToSlide(index, {smoothScroll: false});
+  }
+
+  /**
+   * Goes to the next slide. This should be called from a user interaction.
+   */
+  interactionNext() {
+    this.carousel_.next(ActionSource.GENERIC_HIGH_TRUST);
+  }
+
+  /**
+   * Goes to the previous slide. This should be called from a user interaction.
+   */
+  interactionPrev() {
+    this.carousel_.prev(ActionSource.GENERIC_HIGH_TRUST);
   }
 
   /**
@@ -355,7 +366,8 @@ class AmpCarousel extends AMP.BaseElement {
 }
 
 AMP.extension('amp-base-carousel', '0.1', AMP => {
-  if (!isExperimentOn(AMP.win, 'amp-base-carousel')) {
+  if (!isExperimentOn(AMP.win, 'amp-base-carousel') &&
+      !isExperimentOn(AMP.win, 'amp-lightbox-gallery-base-carousel')) {
     return;
   }
 

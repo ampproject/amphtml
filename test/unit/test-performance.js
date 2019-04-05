@@ -718,9 +718,7 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
   }
 
   describe('should forward paint metrics for performance entries', () => {
-    // TODO(ericandrewlewis, 20721): Fails on Safari.
-    it.configure().skipSafari('created before performance service ' +
-        'registered', () => {
+    it('created before performance service registered', () => {
       // Pretend that the PaintTiming API exists.
       env.win.PerformancePaintTiming = true;
 
@@ -813,9 +811,7 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
   });
 
   describe('should forward first input metrics for performance entries', () => {
-    // TODO(ericandrewlewis, 20721): Fails on Safari.
-    it.configure().skipSafari('created before performance service ' +
-        'registered', () => {
+    it('created before performance service registered', () => {
       // Pretend that the EventTiming API exists.
       env.win.PerformanceEventTiming = true;
 
@@ -929,135 +925,13 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
   });
 
   describe('forwards layout jank metric', () => {
-    it('for browsers that support the visibilitychange event', () => {
-      // Fake the window object so we can trigger visibilitychange events on the
-      // document later on.
-      const fakeWin = {
-        Date: env.win.Date,
-        PerformanceLayoutJank: true,
-        PerformanceObserver: env.sandbox.stub(),
-        addEventListener: env.sandbox.stub(),
-        dispatchEvent: env.win.dispatchEvent,
-        document: {
-          addEventListener: env.sandbox.stub(),
-          hidden: false,
-          readyState: 'complete',
-          removeEventListener: env.sandbox.stub(),
-          visibilityState: 'visible',
-        },
-        location: env.win.location,
-        performance: {
-          getEntriesByType: env.sandbox.stub(),
-        },
-        removeEventListener: env.win.removeEventListener,
-      };
+    let fakeWin;
+    let windowEventListeners;
+    let performanceObserver;
 
-      // Fake the document event bus, so we can trigger custom events.
-      const docEventListeners = {};
-      fakeWin.document.addEventListener.callsFake((eventType, handler) => {
-        if (!docEventListeners[eventType]) {
-          docEventListeners[eventType] = [];
-        }
-        docEventListeners[eventType].push(handler);
-      });
-
-      // Fake the PerformanceObserver implementation so we can send
-      // fake PerformanceEntry objects to listeners.
-      let performanceObserver;
-      fakeWin.PerformanceObserver.callsFake(callback => {
-        performanceObserver = new PerformanceObserverImpl(callback);
-        return performanceObserver;
-      });
-
-      // Install services on fakeWin so some behaviors can be stubbed.
-      installRuntimeServices(fakeWin);
-
-      // Specify an Android Chrome user agent, which supports the
-      // visibilitychange event.
-      sandbox.stub(Services.platformFor(fakeWin), 'isAndroid').returns(true);
-      sandbox.stub(Services.platformFor(fakeWin), 'isChrome').returns(true);
-      sandbox.stub(Services.platformFor(fakeWin), 'isSafari').returns(false);
-
-      // Stub the visibilityState of the document, and control the value
-      // with isHidden.
-      let isHidden = false;
-      sandbox.stub(Services.documentStateFor(fakeWin), 'isHidden')
-          .callsFake(() => isHidden);
-
-      // Fake layoutJank that occured before the Performance service is started.
-      const entries = [{
-        entryType: 'layoutJank',
-        fraction: 0.25,
-      },
-      {
-        entryType: 'layoutJank',
-        fraction: 0.3,
-      },
-      ];
-      fakeWin.performance.getEntriesByType.withArgs('layoutJank')
-          .returns(entries);
-      installPerformanceService(fakeWin);
-      const perf = Services.performanceFor(fakeWin);
-
-      // The document has become hidden, e.g. via the user switching tabs.
-      isHidden = true;
-      const firstEvent = new Event('visibilitychange');
-      if (docEventListeners['visibilitychange']) {
-        docEventListeners['visibilitychange']
-            .forEach(callback => callback(firstEvent));
-      }
-
-      expect(perf.events_.length).to.equal(1);
-      expect(perf.events_[0])
-          .to.be.jsonEqual({
-            label: 'lj',
-            delta: 0.55,
-          });
-
-      // The user returns to the tab, and more layout jank occurs.
-      isHidden = false;
-      const list = {
-        getEntries() {
-          return [{
-            entryType: 'layoutJank',
-            fraction: 1,
-          }, {
-            entryType: 'layoutJank',
-            fraction: 0.0001,
-          }];
-        },
-      };
-      performanceObserver.triggerCallback(list);
-
-      // The document has become hidden again.
-      isHidden = true;
-      const secondEvent = new Event('visibilitychange');
-      if (docEventListeners['visibilitychange']) {
-        docEventListeners['visibilitychange']
-            .forEach(callback => callback(secondEvent));
-      }
-      expect(perf.events_.length).to.equal(2);
-      expect(perf.events_[1])
-          .to.be.jsonEqual({
-            label: 'lj-2',
-            delta: 1.5501,
-          });
-
-      // Any more layout jank shouldn't be reported.
-      isHidden = false;
-      performanceObserver.triggerCallback(list);
-      isHidden = true;
-      const thirdEvent = new Event('visibilitychange');
-      if (docEventListeners['visibilitychange']) {
-        docEventListeners['visibilitychange']
-            .forEach(callback => callback(thirdEvent));
-      }
-      expect(perf.events_.length).to.equal(2);
-    });
-    it('for browsers that don\'t support the visibilitychange event', () => {
-      // Fake the window object so we can control the state
-      // of window.document.visibilityState later on.
-      const fakeWin = {
+    beforeEach(() => {
+      // Fake window to fake `document.visibilityState`.
+      fakeWin = {
         Date: env.win.Date,
         PerformanceLayoutJank: true,
         PerformanceObserver: env.sandbox.stub(),
@@ -1077,16 +951,9 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
         },
       };
 
-      // Fake the PerformanceObserver implementation so we can send
-      // fake PerformanceEntry objects to listeners.
-      let performanceObserver;
-      fakeWin.PerformanceObserver.callsFake(callback => {
-        performanceObserver = new PerformanceObserverImpl(callback);
-        return performanceObserver;
-      });
-
-      // Fake addEventListener so we can trigger fake `beforeunload` events.
-      const windowEventListeners = {};
+      // Fake window.addEventListener to fake `visibilitychange` and
+      // `beforeunload` events.
+      windowEventListeners = {};
       fakeWin.addEventListener.callsFake((eventType, handler) => {
         if (!windowEventListeners[eventType]) {
           windowEventListeners[eventType] = [];
@@ -1094,47 +961,131 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
         windowEventListeners[eventType].push(handler);
       });
 
+      // Fake the PerformanceObserver implementation so we can send
+      // fake PerformanceEntry objects to listeners.
+      fakeWin.PerformanceObserver.callsFake(callback => {
+        performanceObserver = new PerformanceObserverImpl(callback);
+        return performanceObserver;
+      });
+
       // Install services on fakeWin so some behaviors can be stubbed.
       installRuntimeServices(fakeWin);
+
+      const unresolvedPromise = new Promise(() => {});
+      const viewportSize = {width: 0, height: 0};
+      sandbox.stub(Services, 'viewerForDoc').returns({
+        isEmbedded: () => {},
+        hasBeenVisible: () => {},
+        onVisibilityChanged: () => {},
+        whenFirstVisible: () => unresolvedPromise,
+        whenMessagingReady: () => {},
+      });
+      sandbox.stub(Services, 'resourcesForDoc').returns({
+        getResourcesInRect: () => unresolvedPromise,
+      });
+      sandbox.stub(Services, 'viewportForDoc').returns({
+        getSize: () => viewportSize,
+      });
+    });
+
+    function getPerformance() {
+      installPerformanceService(fakeWin);
+      return Services.performanceFor(fakeWin);
+    }
+
+    function toggleVisibility(win, on) {
+      win.document.visibilityState = on ? 'visible' : 'hidden';
+      fireEvent('visibilitychange');
+    }
+
+    function fireEvent(eventName) {
+      const event = new Event(eventName);
+      (windowEventListeners[eventName] || []).forEach(cb => cb(event));
+    }
+
+    it('for browsers that support the visibilitychange event', () => {
+      // Specify an Android Chrome user agent, which supports the
+      // visibilitychange event.
+      sandbox.stub(Services.platformFor(fakeWin), 'isAndroid').returns(true);
+      sandbox.stub(Services.platformFor(fakeWin), 'isChrome').returns(true);
+      sandbox.stub(Services.platformFor(fakeWin), 'isSafari').returns(false);
+
+      // Document should be initially visible.
+      expect(fakeWin.document.visibilityState).to.equal('visible');
+
+      // Fake layoutJank that occured before the Performance service is started.
+      fakeWin.performance.getEntriesByType.withArgs('layoutJank').returns([
+        {entryType: 'layoutJank', fraction: 0.25},
+        {entryType: 'layoutJank', fraction: 0.3},
+      ]);
+
+      const perf = getPerformance();
+      // visibilitychange/beforeunload listeners are now added.
+      perf.coreServicesAvailable();
+
+      // The document has become hidden, e.g. via the user switching tabs.
+      toggleVisibility(fakeWin, false);
+      expect(perf.events_.length).to.equal(1);
+      expect(perf.events_[0]).to.be.jsonEqual({
+        label: 'lj',
+        delta: 0.55,
+      });
+
+      // The user returns to the tab, and more layout jank occurs.
+      toggleVisibility(fakeWin, true);
+      const list = {
+        getEntries() {
+          return [
+            {entryType: 'layoutJank', fraction: 1},
+            {entryType: 'layoutJank', fraction: 0.0001},
+          ];
+        },
+      };
+      performanceObserver.triggerCallback(list);
+
+      toggleVisibility(fakeWin, false);
+      expect(perf.events_.length).to.equal(2);
+      expect(perf.events_[1]).to.be.jsonEqual({
+        label: 'lj-2',
+        delta: 1.5501,
+      });
+
+      // Any more layout jank shouldn't be reported.
+      toggleVisibility(fakeWin, true);
+      performanceObserver.triggerCallback(list);
+
+      toggleVisibility(fakeWin, false);
+      expect(perf.events_.length).to.equal(2);
+    });
+
+    it('for browsers that don\'t support the visibilitychange event', () => {
       // Specify an iPhone Safari user agent, which does not support
       // the visibilitychange event.
       sandbox.stub(Services.platformFor(fakeWin), 'isSafari').returns(true);
 
-      // Stub the visibilityState of the document, and control the value
-      // with isHidden.
-      let isHidden = false;
-      sandbox.stub(Services.documentStateFor(fakeWin), 'isHidden')
-          .callsFake(() => isHidden);
+      // Document should be initially visible.
+      expect(fakeWin.document.visibilityState).to.equal('visible');
 
       // Fake layoutJank that occured before the Performance service is started.
-      const entries = [{
-        entryType: 'layoutJank',
-        fraction: 0.25,
-      },
-      {
-        entryType: 'layoutJank',
-        fraction: 0.3,
-      },
-      ];
-      fakeWin.performance.getEntriesByType.withArgs('layoutJank')
-          .returns(entries);
-      installPerformanceService(fakeWin);
-      const perf = Services.performanceFor(fakeWin);
+      fakeWin.performance.getEntriesByType.withArgs('layoutJank').returns([
+        {entryType: 'layoutJank', fraction: 0.25},
+        {entryType: 'layoutJank', fraction: 0.3},
+      ]);
+
+      const perf = getPerformance();
+      // visibilitychange/beforeunload listeners are now added.
+      perf.coreServicesAvailable();
 
       // The document has become hidden, e.g. via the user switching tabs.
-      isHidden = true;
-      const firstEvent = new Event('beforeunload');
-      if (windowEventListeners['beforeunload']) {
-        windowEventListeners['beforeunload']
-            .forEach(callback => callback(firstEvent));
-      }
+      // Note: Don't fire visibilitychange (not supported in this case).
+      fakeWin.document.visibilityState = 'hidden';
+      fireEvent('beforeunload');
 
       expect(perf.events_.length).to.equal(1);
-      expect(perf.events_[0])
-          .to.be.jsonEqual({
-            label: 'lj',
-            delta: 0.55,
-          });
+      expect(perf.events_[0]).to.be.jsonEqual({
+        label: 'lj',
+        delta: 0.55,
+      });
     });
   });
 

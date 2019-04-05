@@ -78,18 +78,6 @@ function screenProperty(screen, property) {
 }
 
 /**
- * @param {T} shouldBeTrueish
- * @param {string} varName
- * @param {string} extName
- * @return {!T}
- * @template T
- */
-function userAssertExtensionConfigured(shouldBeTrueish, varName, extName) {
-  return userAssert(shouldBeTrueish,
-      'To use variable %s, %s should be configured', varName, extName);
-}
-
-/**
  * Class to provide variables that pertain to top level AMP window.
  */
 export class GlobalVariableSource extends VariableSource {
@@ -571,8 +559,9 @@ export class GlobalVariableSource extends VariableSource {
 
     this.setAsync('AMP_STATE', key => {
       // This is safe since AMP_STATE is not an A4A whitelisted variable.
-      const {documentElement} = win.document;
-      return Services.bindForDocOrNull(documentElement).then(bind => {
+      const root = this.ampdoc.getRootNode();
+      const element = /** @type {!Element|!ShadowRoot} */(root.documentElement || root);
+      return Services.bindForDocOrNull(element).then(bind => {
         if (!bind) {
           return '';
         }
@@ -670,7 +659,9 @@ export class GlobalVariableSource extends VariableSource {
   getVariantsValue_(getter, expr) {
     return Services.variantsForDocOrNull(this.ampdoc.getHeadNode())
         .then(variants => {
-          userAssertExtensionConfigured(variants, expr, 'amp-experiment');
+          userAssert(variants,
+              'To use variable %s, amp-experiment should be configured',
+              expr);
           return variants.getVariants();
         }).then(variantsMap => getter(variantsMap));
   }
@@ -687,7 +678,9 @@ export class GlobalVariableSource extends VariableSource {
     const element = this.ampdoc.getHeadNode();
     return Services.geoForDocOrNull(element)
         .then(geo => {
-          userAssertExtensionConfigured(geo, expr, 'amp-geo');
+          userAssert(geo,
+              'To use variable %s, amp-geo should be configured',
+              expr);
           return getter(geo);
         });
   }
@@ -706,7 +699,9 @@ export class GlobalVariableSource extends VariableSource {
           Services.shareTrackingForOrNull(this.ampdoc.win);
     }
     return this.shareTrackingFragments_.then(fragments => {
-      userAssertExtensionConfigured(fragments, expr, 'amp-share-tracking');
+      userAssert(fragments, 'To use variable %s, ' +
+          'amp-share-tracking should be configured',
+      expr);
       return getter(/** @type {!ShareTrackingFragmentsDef} */ (fragments));
     });
   }
@@ -722,7 +717,8 @@ export class GlobalVariableSource extends VariableSource {
     return () => {
       const service = Services.storyVariableServiceForOrNull(this.ampdoc.win);
       return service.then(storyVariables => {
-        userAssertExtensionConfigured(storyVariables, name, 'amp-story');
+        userAssert(storyVariables,
+            'To use variable %s amp-story should be configured', name);
         return storyVariables[property];
       });
     };
@@ -741,10 +737,8 @@ export class GlobalVariableSource extends VariableSource {
         const service =
             Services.viewerIntegrationVariableServiceForOrNull(this.ampdoc.win);
         return service.then(viewerIntegrationVariables => {
-          userAssertExtensionConfigured(
-              viewerIntegrationVariables,
-              name,
-              'amp-viewer-integration');
+          userAssert(viewerIntegrationVariables, 'To use variable %s ' +
+              'amp-viewer-integration must be installed', name);
           return viewerIntegrationVariables[property](param, defaultValue);
         });
       });
