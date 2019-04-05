@@ -43,6 +43,7 @@ const MAX_SCRIPT_SIZE = 150000;
  */
 const MAX_FREE_MUTATION_HEIGHT = 300;
 
+const PHASE_HYDRATING = 1;
 const PHASE_MUTATING = 2;
 
 export class AmpScript extends AMP.BaseElement {
@@ -128,10 +129,6 @@ export class AmpScript extends AMP.BaseElement {
       onCreateWorker: data => {
         dev().info(TAG, 'Create worker:', data);
       },
-      onHydration: () => {
-        dev().info(TAG, 'Hydrated!');
-        this.element.classList.add('i-amphtml-hydrated');
-      },
       onSendMessage: data => {
         dev().info(TAG, 'To worker:', data);
       },
@@ -164,6 +161,11 @@ export class AmpScript extends AMP.BaseElement {
    * @private
    */
   mutationPump_(flush, phase) {
+    if (phase == PHASE_HYDRATING) {
+      this.vsync_.mutate(() => {
+        this.element.classList.add('i-amphtml-hydrated');
+      });
+    }
     const allowMutation = (
       // Hydration is always allowed.
       phase != PHASE_MUTATING
