@@ -10,6 +10,7 @@ This document describes the process you will go through to make a change in AMP.
 
 We want to make it as easy as possible to get in small fixes.  A fix for a small bug should be as easy as creating a PR with the change, adding/fixing a test, and sending it to a reviewer.
 
+- [ ] Sign the [Contributor License Agreement (CLA)](#contributor-license-agreement) as soon as possible if you haven't already done so.  If you are contributing code on behalf of your company and your company is not yet covered by a CLA it can take a few days for the CLA to be verified.
 - [ ] (optional) If you are fixing a bug and there is an existing GitHub issue, assign it to yourself or comment on it to let others know you are working on it.  If there is no GitHub issue consider filing one, but for minor fixes your Pull Request description may be enough.
 - [ ] (optional) [Find a reviewer](#find-a-reviewer) before you start coding to help you answer questions.  If you don't have any questions you can find a reviewer once you have a PR ready.
 - [ ] Follow the parts of the [Implementation](#implementation) section that makes sense for your change.  There are many parts of the process that you probably won't need to follow for a minor fix--e.g. you may not need to make validator changes or put your change behind an experiment for minor fixes.  If in doubt ask your reviewer.
@@ -19,6 +20,7 @@ We want to make it as easy as possible to get in small fixes.  A fix for a small
 Significant changes (e.g. new components or significant changes to behavior) require consultation with and approval from knowledgeable members of the community.
 
 - [ ] *Before you start coding*, [find a reviewer](#find-a-reviewer) who you can discuss your change with and who can help guide you through the process.
+- [ ] Sign the [Contributor License Agreement (CLA)](#contributor-license-agreement) as soon as possible if you haven't already done so.  If you are contributing code on behalf of your company and your company is not yet covered by a CLA it can take a few days for the CLA to be verified.
 - [ ] File an [Intent-to-implement (I2I)](https://github.com/ampproject/amphtml/issues/new?assignees=&labels=INTENT+TO+IMPLEMENT&template=intent-to-implement--i2i-.md&title=I2I:%20%3Cyour%20change/update%3E) GitHub issue and cc your reviewer on it.  The I2I should include:
   -  A description of the change you plan to implement.
   -  If you are integrating a third-party service, provide a link to the third-party's site and product.
