@@ -79,6 +79,10 @@ tags: {
     value: "amp-mustache"
     dispatch_key: NAME_VALUE_DISPATCH
   }
+  attrs: {
+    name: "custom-delimiters"
+    value_regex: "#-,-#"
+  }
   cdata: {
     blacklisted_cdata_regex: {
       regex: "<!--"
@@ -150,6 +154,10 @@ tags: {
     name: "type"
     mandatory: true
     value: "amp-mustache"
+  }
+  attrs: {
+    name: "custom-delimiters"
+    value_regex: "#-,-#"
   }
 }
 tags: {

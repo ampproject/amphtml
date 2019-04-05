@@ -124,6 +124,16 @@
 <amp-img src="{{image.url}}" width={{image.width}} height={{image.height}}></amp-img>
 </template>
 
+<!-- Template with allowed custom delimiters -->
+<template type="amp-mustache" custom-delimiters="#-,-#">
+  Hello #-name-#
+</template>
+
+<!-- Template with unsupported custom delimiters -->
+<template type="amp-mustache" custom-delimiters="<%,%>">
+    Hello #-name-#
+</template>
+
 <!--
   Script template.
   Note that no errors are emmited for malformed mustache in script templates as the contents of
@@ -200,6 +210,16 @@
 <amp-audio src="https://example.com/audio" layout="fixed" autoplay="{{invalid}}">
 <script type="text/plain" template="amp-mustache">
 <amp-audio src="https://example.com/audio" layout="fixed" autoplay="{{valid}}">
+</script>
+
+<!-- Script template with allowed custom delimiters -->
+<script type="text/plain" template="amp-mustache" custom-delimiters="#-,-#">
+  Hello #-name-#
+</script>
+
+<!-- Script template with unsupported custom delimiters -->
+<script type="text/plain" template="amp-mustache" custom-delimiters="(&,&)">
+  Hello #-name-#
 </script>
 
 <!-- Since layout calculations follow a different code path, test that layouts
