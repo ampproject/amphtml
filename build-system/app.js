@@ -907,6 +907,16 @@ app.get([
           '<div id="container">' + analytics.join('') + '</div>');
     }
 
+    // Extract amp-consent for the given 'type' specified in URL query.
+    if (req.path.indexOf(
+      '/examples/cmp-vendors.amp.html') == 0 && req.query.type) {
+      const consent = file.match(
+        elementExtractor('amp-consent', req.query.type));
+      file = file.replace(
+        /<div id="container">[\s\S]+<\/div>/m,
+        '<div id="container">' + consent.join('') + '</div>');
+    }
+
     if (stream > 0) {
       res.writeHead(200, {'Content-Type': 'text/html'});
       let pos = 0;

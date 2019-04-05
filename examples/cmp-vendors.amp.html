@@ -46,6 +46,7 @@
         <label for="filter">Vendor filter</label>
         <select id="filter" name="type">
           <option>[Select a vendor]</option>
+          <!-- This should be in alphabetical order. _ping_ should be the first -->
           <option>_ping_</option>
         </select>
         <input type="submit" value="Go">
@@ -59,36 +60,43 @@
     <h3>Image that is NOT blocked by consent</h3>
     <amp-img src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w300-h200-no-n" width=300 height=200></amp-img>
 
-    <!-- _ping_ example -->
-    <amp-consent id='ABC' layout='nodisplay' type='_ping_'>
-      <script type="application/json">
-        {
-          "consents": {},
-            "postPromptUI": "postPromptUI",
-            "clientConfig": {
-              "CMP_id": "test_id",
-              "other_info": "test_info"
-            }
-        }
-      </script>
-      <div id="ui1">
-        Please Accept to load image.
-        <button on="tap:ABC.accept" role="button">Accept</button>
-        <button on="tap:ABC.reject" role="button">Reject</button>
-        <button on="tap:ABC.dismiss" role="button">Dismiss</button>
-      </div>
-      <div id="ui2">
-        Please Accept to load image.
-        <button on="tap:ABC.accept" role="button">Accept</button>
-        <button on="tap:ABC.reject" role="button">Reject</button>
-        <button on="tap:ABC.dismiss" role="button">Dismiss</button>
-      </div>
-      <div id="postPromptUI">
-        Post Prompt UI
-        <button on="tap:ABC.prompt(consent=_ping_)" role="button">Manage</button>
-      </div>
-    </amp-consent>
-    <!-- End _ping_ example -->
 
+    <div id="container">
+      Container for amp-consent tags.
+
+      <!-- This should be in alphabetical order. _ping_ should be the first -->
+
+      <!-- _ping_ example -->
+      <amp-consent id='ABC' layout='nodisplay' type='_ping_'>
+        <script type="application/json">
+          {
+            "consents": {},
+              "postPromptUI": "postPromptUI",
+              "clientConfig": {
+                "CMP_id": "test_id",
+                "other_info": "test_info"
+              }
+          }
+        </script>
+        <div id="ui1">
+          Please Accept to load image.
+          <button on="tap:ABC.accept" role="button">Accept</button>
+          <button on="tap:ABC.reject" role="button">Reject</button>
+          <button on="tap:ABC.dismiss" role="button">Dismiss</button>
+        </div>
+        <div id="ui2">
+          Please Accept to load image.
+          <button on="tap:ABC.accept" role="button">Accept</button>
+          <button on="tap:ABC.reject" role="button">Reject</button>
+          <button on="tap:ABC.dismiss" role="button">Dismiss</button>
+        </div>
+        <div id="postPromptUI">
+          Post Prompt UI
+          <button on="tap:ABC.prompt(consent=_ping_)" role="button">Manage</button>
+        </div>
+      </amp-consent>
+      <!-- End _ping_ example -->
+
+    </div>
   </body>
 </html>
