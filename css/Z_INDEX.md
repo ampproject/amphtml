@@ -74,6 +74,7 @@ amp-story-page-attachment                                                       
 .i-amphtml-story-spinner                                                                                  |   10           |   extensions/amp-story/1.0/amp-story.css
 amp-date-picker[mode="overlay"] .i-amphtml-date-picker-container                                          |   10           |   extensions/amp-date-picker/0.1/amp-date-picker.css
 .amp-carousel-button                                                                                      |   10           |   extensions/amp-carousel/0.1/amp-carousel.css
+.amp-autocomplete-results                                                                                 |   10           |   extensions/amp-autocomplete/0.1/amp-autocomplete.css
 amp-sticky-ad                                                                                             |   11           |   extensions/amp-sticky-ad/1.0/amp-sticky-ad.css
 amp-sticky-ad-top-padding                                                                                 |   12           |   extensions/amp-sticky-ad/1.0/amp-sticky-ad.css
 amp-app-banner                                                                                            |   13           |   extensions/amp-app-banner/0.1/amp-app-banner.css
