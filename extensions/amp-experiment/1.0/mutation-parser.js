@@ -15,7 +15,7 @@
  */
 
 import {isObject} from '../../../src/types';
-import {userAssert} from '../../../src/log';
+import {user, userAssert} from '../../../src/log';
 
 const TAG = 'amp-experiment mutation-parser';
 
@@ -31,7 +31,7 @@ const MUTATION_TYPES = [
 ];
 
 const SUPPORTED_ATTRIBUTES = {
-  style: (value) => {
+  style: value => {
 
     // Do not allow Important or HTML Comments
     if (value.match(/(!\s*important|<!--)/g)) {
@@ -50,13 +50,13 @@ const SUPPORTED_ATTRIBUTES = {
 
     return false;
   },
-  src: (value) => {
+  src: value => {
     return value.match(/^https:\/\//g);
   },
-  href: (value) => {
+  href: value => {
     return value.match(/^https:\/\//g);
-  }
-}
+  },
+};
 
 /**
  * Function to find all selectors of the mutation
@@ -70,21 +70,23 @@ export function parseMutation(mutation, document) {
 
   const mutationRecord = assertMutationRecord(mutation);
 
+  const stringifiedMutation = JSON.stringify(mutation);
+
   setSelectorToElement('target', mutationRecord, document);
 
   if (mutationRecord['type'] === 'attributes') {
 
-    assertAttributeMutation(mutationRecord);
+    assertAttributeMutation(mutationRecord, stringifiedMutation);
 
     return () => {
       mutationRecord['targetElement'].setAttribute(
-        mutationRecord['attributeName'],
-        mutationRecord['value']
+          mutationRecord['attributeName'],
+          mutationRecord['value']
       );
     };
   } else if (mutationRecord['type'] === 'characterData') {
 
-    assertCharacterDataMutation(mutationRecord);
+    assertCharacterDataMutation(mutationRecord, stringifiedMutation);
 
     return () => {
       mutationRecord['targetElement'].textContent = mutationRecord['value'];
@@ -93,8 +95,8 @@ export function parseMutation(mutation, document) {
     // childList type of mutation
 
     user().error(
-      TAG,
-      'childList mutations not supported ' +
+        TAG,
+        'childList mutations not supported ' +
       'in the current experiment state.'
     );
 
@@ -169,22 +171,23 @@ function setSelectorToElement(selectorKey, mutationRecord, document) {
  * Function to assert allowing setting the textContent
  * of a node.
  * @param {!Object} mutationRecord
+ * @param {string} stringifiedMutation
  */
-function assertAttributeMutation(mutationRecord) {
+function assertAttributeMutation(mutationRecord, stringifiedMutation) {
   // Assert the mutation value
   userAssert(
-    mutationRecord['value'] !== undefined &&
+      mutationRecord['value'] !== undefined &&
     typeof mutationRecord['value'] === 'string',
-    'Mutation %s must have a value.',
-    JSON.stringify(mutationRecord)
+      'Mutation %s must have a value.',
+      stringifiedMutation
   );
 
   // Assert mutation attributeName
   userAssert(
-    mutationRecord['attributeName'] !== undefined &&
+      mutationRecord['attributeName'] !== undefined &&
     typeof mutationRecord['attributeName'] === 'string',
-    'Mutation %s must have a attributeName.',
-    JSON.stringify(mutationRecord)
+      'Mutation %s must have a attributeName.',
+      stringifiedMutation
   );
 
   const supportedAttributeKeys =
@@ -192,16 +195,18 @@ function assertAttributeMutation(mutationRecord) {
 
   // Assert the mutation attribute is one of the following keys
   userAssert(
-    supportedAttributeKeys.indexOf(mutationRecord['attributeName']) >= 0,
-    'Mutation %s has an unsupported attributeName.',
-    JSON.stringify(mutationRecord)
+      supportedAttributeKeys.indexOf(mutationRecord['attributeName']) >= 0,
+      'Mutation %s has an unsupported attributeName.',
+      stringifiedMutation
   );
 
   // Assert the mutation attribute passes it's check
   userAssert(
-    SUPPORTED_ATTRIBUTES[mutationRecord['attributeName']](mutationRecord['value']),
-    'Mutation %s has an an unsupported value.',
-    JSON.stringify(mutationRecord)
+      SUPPORTED_ATTRIBUTES[mutationRecord['attributeName']](
+          mutationRecord['value']
+      ),
+      'Mutation %s has an an unsupported value.',
+      stringifiedMutation
   );
 }
 
@@ -209,13 +214,14 @@ function assertAttributeMutation(mutationRecord) {
  * Function to assert allowing setting the textContent
  * of a node.
  * @param {!Object} mutationRecord
+ * @param {string} stringifiedMutation
  */
-function assertCharacterDataMutation(mutationRecord) {
+function assertCharacterDataMutation(mutationRecord, stringifiedMutation) {
   // Assert the mutation value
   userAssert(
-    mutationRecord['value'] !== undefined &&
+      mutationRecord['value'] !== undefined &&
     typeof mutationRecord['value'] === 'string',
-    'Mutation %s must have a value.',
-    JSON.stringify(mutationRecord)
+      'Mutation %s must have a value.',
+      stringifiedMutation
   );
 }

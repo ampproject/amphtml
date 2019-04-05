@@ -28,11 +28,11 @@ describes.realWin('amp-experiment mutation-parser', {}, env => {
   function setupMutationSelector() {
     const targetId = 'mutation-parser-test';
     const targetElement = createElementWithAttributes(
-      doc,
-      'div',
-      {
-        'id': targetId,
-      }
+        doc,
+        'div',
+        {
+          'id': targetId,
+        }
     );
 
     doc.body.appendChild(targetElement);
@@ -182,16 +182,16 @@ describes.realWin('amp-experiment mutation-parser', {}, env => {
 
     it('should return an operation that,' +
       ' changes attribute of selector', () => {
-        const expectedStyle = 'color: #FFF';
-        const mutation = getAttributeMutation('style', expectedStyle);
-        const mutationOperation = parseMutation(mutation, doc);
+      const expectedStyle = 'color: #FFF';
+      const mutation = getAttributeMutation('style', expectedStyle);
+      const mutationOperation = parseMutation(mutation, doc);
 
-        mutationOperation();
+      mutationOperation();
 
-        expect(
+      expect(
           doc.querySelector(mutation['target']).getAttribute('style')
-        ).to.be.equal(expectedStyle);
-      });
+      ).to.be.equal(expectedStyle);
+    });
   });
 
   describe('characterData', () => {
@@ -220,7 +220,7 @@ describes.realWin('amp-experiment mutation-parser', {}, env => {
       mutationOperation();
 
       expect(
-        doc.querySelector(mutation['target']).textContent
+          doc.querySelector(mutation['target']).textContent
       ).to.be.equal(expectedTextContent);
     });
   });
