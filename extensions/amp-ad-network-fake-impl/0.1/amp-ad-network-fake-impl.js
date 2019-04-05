@@ -124,6 +124,17 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
     // Metadata
     creative += '<script type="application/json" amp-ad-metadata>';
     creative += '{';
+
+    if (this.element.hasAttribute('amp-story')) {
+      const ctaTypeMeta = root.querySelector('[name=amp-cta-type]');
+      const ctaType = ctaTypeMeta && ctaTypeMeta.content;
+      creative += `"ctaType": "${ctaType}", `;
+
+      const ctaTypeUrl = root.querySelector('[name=amp-cta-url]');
+      const ctaUrl = ctaTypeUrl && ctaTypeUrl.content;
+      creative += `"ctaUrl": "${ctaUrl}", `;
+    }
+
     creative += '"ampRuntimeUtf16CharOffsets": [0, 0],';
     creative += '"customElementExtensions": [';
     for (let i = 0; i < extensions.length; i++) {

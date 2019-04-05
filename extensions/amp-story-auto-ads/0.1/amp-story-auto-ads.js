@@ -37,6 +37,7 @@ import {getUniqueId} from './utils';
 import {isObject} from '../../../src/types';
 import {parseJson} from '../../../src/json';
 import {setStyles} from '../../../src/style';
+import {startsWith} from '../../../src/string';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import LocalizedStringsAr from './_locales/ar';
 import LocalizedStringsDe from './_locales/de';
@@ -135,6 +136,7 @@ const AD_STATE = {
 const ALLOWED_AD_TYPES = map({
   'custom': true,
   'doubleclick': true,
+  'fake': true,
 });
 
 /** @enum {boolean} */
@@ -510,8 +512,16 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       }
     }
 
-    userAssert(!!ALLOWED_AD_TYPES[configAttrs.type], `${TAG}: ` +
-      `"${configAttrs.type}" ad type is not supported`);
+    const {type} = configAttrs;
+    userAssert(!!ALLOWED_AD_TYPES[type], `${TAG}: ` +
+      `"${type}" ad type is not supported`);
+
+    if (type === 'fake') {
+      const id = this.element.getAttribute('id');
+      userAssert(id && startsWith(id, 'i-amphtml-demo-'),
+          `${TAG} id must start with i-amphtml-demo- to use fake ads`);
+      configAttrs['id'] = `i-amphtml-demo-${this.adPagesCreated_}`;
+    }
 
     const attributes = /** @type {!JsonObject} */ (Object.assign({},
         configAttrs, requiredAttrs));
