@@ -36,7 +36,7 @@ export class Gesture {
   /**
    * @param {string} type The gesture's string type.
    * @param {DATA} data The data of the gesture.
-   * @param {Date} time The time that the gesture has been emitted.
+   * @param {time} time The time that the gesture has been emitted.
    * @param {?Event} event An optional browser event that resulted in the
    *   gesture.
    */
@@ -45,7 +45,7 @@ export class Gesture {
     this.type = type;
     /** @const {DATA} */
     this.data = data;
-    /** @const {Date} */
+    /** @const {number} */
     this.time = time;
     /** @const {?Event} */
     this.event = event;
@@ -409,7 +409,7 @@ export class Gestures {
         'Recognizer is not currently allowed: %s', recognizer.getType());
     const overserver = this.overservers_[recognizer.getType()];
     if (overserver) {
-      overserver.fire(new Gesture(recognizer.getType(), data, new Date(),
+      overserver.fire(new Gesture(recognizer.getType(), data, Date.now(),
           event));
     }
   }
