@@ -250,6 +250,10 @@ The [`ampproject/amphtml`](https://github.com/ampproject/amphtml) repository on 
 
 When a test run fails due to visual diffs being present, click the `details` link next to `percy/amphtml` in your PR and examine the results. By default, Percy highlights the changes between snapshots in red. Clicking on the new snapshot will show it in its raw form. If the diffs indicate a problem that is likely to be due to your PR, you can try running the visual diffs locally in order to debug (see section below). However, if you are sure that the problem is not due to your PR, you may click the green `Approve` button on Percy to approve the snapshots and unblock your PR from being merged.
 
+### Flaky Tests
+
+If a Percy test flakes and you would like to trigger a rerun, you can't do that from within Percy.  Instead, from your PR on GitHub open up the "Details" for the `continuous-integration/travis-ci/pr` check to load the Travis run for your PR.  There you should see a "passed" test shard labeled "Visual Diff Tests".  Click the "Restart Job" icon on just that shard to trigger a rerun on Percy.
+
 ### Running Visual Diff Tests Locally
 
 You can also run the visual tests locally during development. You must first create a free Percy account at [https://percy.io](https://percy.io), create a project, and set the `PERCY_PROJECT` and `PERCY_TOKEN` environment variables using the unique values you find at `https://percy.io/<org>/<project>/settings`. Once the environment variables are set up, you can run the AMP visual diff tests as described below.
