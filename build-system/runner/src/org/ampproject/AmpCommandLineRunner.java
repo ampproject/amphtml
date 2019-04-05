@@ -50,11 +50,17 @@ public class AmpCommandLineRunner extends CommandLineRunner {
   /**
    * List of string suffixes to eliminate from the AST.
    */
-  ImmutableMap<String, Set<String>> suffixTypes = ImmutableMap.of(
-      "module$src$log.dev", ImmutableSet.of(
-          "assert", "fine", "assertElement", "assertString",
-          "assertNumber", "assertBoolean", "assertArray"),
-      "module$src$log.user", ImmutableSet.of("fine"));
+  ImmutableSet<String> suffixTypes = ImmutableSet.of(
+      "dev$$module$src$log().assert()",
+      "dev$$module$src$log().fine()",
+      "dev$$module$src$log().assertElement()",
+      "dev$$module$src$log().assertString()",
+      "dev$$module$src$log().assertNumber()",
+      "dev$$module$src$log().assertArray()",
+      "dev$$module$src$log().assertBoolean()",
+      "devAssert$$module$src$log()",
+      "user$$module$src$log().fine()"
+      );
 
 
   ImmutableMap<String, Node> assignmentReplacements = ImmutableMap.of(

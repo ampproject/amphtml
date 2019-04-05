@@ -4,6 +4,7 @@ package org.ampproject;
 import java.util.Set;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.javascript.rhino.IR;
 import com.google.javascript.rhino.Node;
 import com.google.javascript.jscomp.Compiler;
@@ -17,7 +18,7 @@ import org.junit.Test;
  */
 public class AmpPassTestEnvTest extends CompilerTestCase {
 
-  ImmutableMap<String, Set<String>> suffixTypes = ImmutableMap.of();
+  ImmutableSet<String> suffixTypes = ImmutableSet.of();
   ImmutableMap<String, Node> assignmentReplacements = ImmutableMap.of(
       "IS_MINIFIED",
       IR.trueNode());
