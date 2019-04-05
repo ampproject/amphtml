@@ -52,6 +52,13 @@ export class SubscriptionPlatform {
   reset() {}
 
   /**
+   * True if this platform can fetch entitlement safely in pre-render
+   * without leaking information to the publisher or a 3rd party
+   * @return {boolean}
+   */
+  isPrerenderSafe() {}
+
+  /**
    * Returns if pingback is enabled for this platform.
    * @return {boolean}
    */
