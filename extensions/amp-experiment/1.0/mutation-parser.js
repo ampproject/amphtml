@@ -50,10 +50,10 @@ const SUPPORTED_ATTRIBUTES = {
 
     return false;
   },
-  src: () => {
+  src: (value) => {
     return value.match(/^https:\/\//g);
   },
-  href: () => {
+  href: (value) => {
     return value.match(/^https:\/\//g);
   }
 }
@@ -77,7 +77,7 @@ export function parseMutation(mutation, document) {
     assertAttributeMutation(mutationRecord);
 
     return () => {
-      mutationRecord['target'].setAttribute(
+      mutationRecord['targetElement'].setAttribute(
         mutationRecord['attributeName'],
         mutationRecord['value']
       );
@@ -87,7 +87,7 @@ export function parseMutation(mutation, document) {
     assertCharacterDataMutation(mutationRecord);
 
     return () => {
-      mutationRecord['target'].textContent = mutationRecord['value'];
+      mutationRecord['targetElement'].textContent = mutationRecord['value'];
     };
   } else {
     // childList type of mutation
@@ -162,7 +162,7 @@ function setSelectorToElement(selectorKey, mutationRecord, document) {
       mutationRecord[selectorKey]
   );
 
-  mutationRecord[selectorKey] = targetElement;
+  mutationRecord[selectorKey + 'Element'] = targetElement;
 }
 
 /**
