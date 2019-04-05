@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {assertHttpsUrl} from '../../../src/url';
 import {isObject} from '../../../src/types';
 import {user, userAssert} from '../../../src/log';
 
@@ -39,22 +40,22 @@ const SUPPORTED_ATTRIBUTES = {
     }
 
     // Allow Color
-    if (value.match(/^color:\s#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/g)) {
+    if (value.match(/^color:\s*#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3});?$/g)) {
       return true;
     }
 
     // Allow Background color
-    if (value.match(/^background-color:\s#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/g)) {
+    if (value.match(/^background-color:\s*#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3});?$/g)) {
       return true;
     }
 
     return false;
   },
   src: value => {
-    return value.match(/^https:\/\//g);
+    return assertHttpsUrl(value, 'attributes', 'mutation');
   },
   href: value => {
-    return value.match(/^https:\/\//g);
+    return assertHttpsUrl(value, 'attributes', 'mutation');
   },
 };
 
