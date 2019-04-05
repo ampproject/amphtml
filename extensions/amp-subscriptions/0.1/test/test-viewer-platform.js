@@ -19,6 +19,7 @@ import {Dialog} from '../dialog';
 import {Entitlement, GrantReason} from '../entitlement';
 import {PageConfig} from '../../../../third_party/subscriptions-project/config';
 import {ServiceAdapter} from '../service-adapter';
+import {Services} from '../../../../src/services';
 import {SubscriptionAnalytics} from '../analytics';
 import {ViewerSubscriptionPlatform} from '../viewer-subscription-platform';
 import {getWinOrigin} from '../../../../src/url';
@@ -27,6 +28,7 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
   let ampdoc, win;
   let viewerPlatform;
   let serviceAdapter, sendAuthTokenStub;
+  let resetPlatformsStub, messageCallback;
   const currentProductId = 'example.org:basic';
   const origin = 'origin';
   const entitlementData = {source: 'local', raw: 'raw',
@@ -60,6 +62,9 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
         .callsFake(() => new Dialog(ampdoc));
     sandbox.stub(serviceAdapter, 'getReaderId')
         .callsFake(() => Promise.resolve('reader1'));
+    resetPlatformsStub = sandbox.stub(serviceAdapter, 'resetPlatforms');
+    sandbox.stub(Services.viewerForDoc(ampdoc),'onMessage')
+        .callsFake((message, cb) => { messageCallback = cb; });
     viewerPlatform = new ViewerSubscriptionPlatform(
         ampdoc, serviceConfig, serviceAdapter, origin);
     sandbox.stub(viewerPlatform.viewer_,
@@ -86,6 +91,13 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
       return viewerPlatform.getEntitlements().catch(() => {
         expect(sendAuthTokenStub).to.be.calledWith(reason);
       });
+    });
+  });
+
+  describe('subscriptionchange message', () => {
+    it('should call resetPlatforms() on a subscriptionchange message', () => {
+      (messageCallback)();
+      expect(resetPlatformsStub).to.be.called;
     });
   });
 
