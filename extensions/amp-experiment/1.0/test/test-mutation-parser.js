@@ -25,7 +25,7 @@ describes.realWin('amp-experiment mutation-parser', {}, env => {
     doc = win.document;
   });
 
-  function getAttributeMutation() {
+  function setupMutationSelector() {
     const targetId = 'mutation-parser-test';
     const targetElement = createElementWithAttributes(
         doc,
@@ -37,11 +37,29 @@ describes.realWin('amp-experiment mutation-parser', {}, env => {
 
     doc.body.appendChild(targetElement);
 
+    return `#${targetId}`;
+  }
+
+  function getAttributeMutation(opt_attributeName, opt_value) {
+
+    const selector = setupMutationSelector();
+
     return {
       type: 'attributes',
-      target: `#${targetId}`,
-      attributeName: 'style',
-      value: 'color: red',
+      target: selector,
+      attributeName: opt_attributeName || 'style',
+      value: opt_value || 'color: #FF0000',
+    };
+  }
+
+  function getCharacterDataMutation(opt_value) {
+
+    const selector = setupMutationSelector();
+
+    return {
+      type: 'characterData',
+      target: selector,
+      value: opt_value || 'Testing...',
     };
   }
 
@@ -99,5 +117,111 @@ describes.realWin('amp-experiment mutation-parser', {}, env => {
     });
   });
 
+  describe('attributes', () => {
+    it('should allow a valid attributes mutation', () => {
+      const mutation = getAttributeMutation();
+      const mutationOperation = parseMutation(mutation, doc);
+      expect(mutationOperation).to.be.ok;
+    });
 
+    it('should error when no value', () => {
+      const mutation = getAttributeMutation();
+      delete mutation['value'];
+      allowConsoleError(() => {
+        expect(() => {
+          parseMutation(mutation, doc);
+        }).to.throw(/value/);
+      });
+    });
+
+    it('should error when no attributeName', () => {
+      const mutation = getAttributeMutation();
+      delete mutation['attributeName'];
+      allowConsoleError(() => {
+        expect(() => {
+          parseMutation(mutation, doc);
+        }).to.throw(/attributeName/);
+      });
+    });
+
+    it('should error when unallowed attributeName', () => {
+      const mutation = getAttributeMutation('test');
+      allowConsoleError(() => {
+        expect(() => {
+          parseMutation(mutation, doc);
+        }).to.throw(/attributeName/);
+      });
+    });
+
+    it('should error when unallowed style', () => {
+      const mutation = getAttributeMutation('style', 'position: fixed');
+      allowConsoleError(() => {
+        expect(() => {
+          parseMutation(mutation, doc);
+        }).to.throw(/value/);
+      });
+    });
+
+    it('should error when unallowed src', () => {
+      const mutation = getAttributeMutation('src', 'http://amp.dev');
+      allowConsoleError(() => {
+        expect(() => {
+          parseMutation(mutation, doc);
+        }).to.throw(/value/);
+      });
+    });
+
+    it('should error when unallowed href', () => {
+      const mutation = getAttributeMutation('href', 'http://amp.dev');
+      allowConsoleError(() => {
+        expect(() => {
+          parseMutation(mutation, doc);
+        }).to.throw(/value/);
+      });
+    });
+
+    it('should return an operation that,' +
+      ' changes attribute of selector', () => {
+      const expectedStyle = 'color: #FFF';
+      const mutation = getAttributeMutation('style', expectedStyle);
+      const mutationOperation = parseMutation(mutation, doc);
+
+      mutationOperation();
+
+      expect(
+          doc.querySelector(mutation['target']).getAttribute('style')
+      ).to.be.equal(expectedStyle);
+    });
+  });
+
+  describe('characterData', () => {
+    it('should allow valid characterData mutation', () => {
+      const mutation = getCharacterDataMutation();
+      const mutationOperation = parseMutation(mutation, doc);
+      expect(mutationOperation).to.be.ok;
+    });
+
+    it('should error when no value', () => {
+      const mutation = getCharacterDataMutation();
+      delete mutation['value'];
+      allowConsoleError(() => {
+        expect(() => {
+          parseMutation(mutation, doc);
+        }).to.throw(/value/);
+      });
+    });
+
+    it('should return an operation that,' +
+      ' changes textContent of selector', () => {
+      const expectedTextContent = 'Expected';
+      const mutation = getCharacterDataMutation(expectedTextContent);
+      const mutationOperation = parseMutation(mutation, doc);
+
+      mutationOperation();
+
+      expect(
+          doc.querySelector(mutation['target']).textContent
+      ).to.be.equal(expectedTextContent);
+    });
+  });
 });
