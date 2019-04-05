@@ -262,11 +262,11 @@ export function isValidAttr(
 
   // Remove blacklisted values for specific attributes for specific tags
   // e.g. input[type=image].
-  const attrValueBlacklist =
+  let attrValueBlacklist =
       BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES[tagName];
   if (isAmp4Email(doc)) {
-    Object.assign(attrValueBlacklist,
-        EMAIL_BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES[tagName]);
+    attrValueBlacklist =
+        EMAIL_BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES[tagName];
   }
   if (attrValueBlacklist) {
     const blacklistedValuesRegex = attrValueBlacklist[attrName];
