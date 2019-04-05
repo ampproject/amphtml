@@ -26,7 +26,10 @@ import {dict, map} from '../../../src/utils/object';
 import {getMinOpacity} from './opacity';
 import {getMode} from '../../../src/mode';
 import {isArray, isFiniteNumber} from '../../../src/types';
-import {layoutRectLtwh} from '../../../src/layout-rect';
+import {
+  layoutPositionRelativeToScrolledViewport,
+  layoutRectLtwh,
+} from '../../../src/layout-rect';
 
 const TAG = 'amp-analytics/visibility-manager';
 
@@ -34,7 +37,6 @@ const VISIBILITY_ID_PROP = '__AMP_VIS_ID';
 
 /** @type {number} */
 let visibilityIdCounter = 1;
-
 
 /**
  * @param {!Element} element
@@ -84,9 +86,17 @@ export class VisibilityManager {
     /** @const @private {!Array<!UnlistenDef>} */
     this.unsubscribe_ = [];
 
+    /** @private {number} Maximum scroll position attained */
+    this.maxScrollDepth_ = 0;
+
     if (this.parent) {
       this.parent.addChild_(this);
     }
+
+    const viewport = Services.viewportForDoc(this.ampdoc);
+    viewport.onChanged(() => {
+      this.maybeUpdateMaxScrollDepth(viewport.getScrollTop());
+    });
   }
 
   /**
@@ -203,6 +213,24 @@ export class VisibilityManager {
         this.children_[i].updateModels_();
       }
     }
+  }
+
+  /**
+   * Update the maximum amount that the user has scrolled down the page.
+   * @param {number} depth
+   */
+  maybeUpdateMaxScrollDepth(depth) {
+    if (depth > this.maxScrollDepth_) {
+      this.maxScrollDepth_ = depth;
+    }
+  }
+
+  /**
+   * Gets the maximum amount that the user has scrolled down the page.
+   * @return {number} depth
+   */
+  getMaxScrollDepth() {
+    return this.maxScrollDepth_;
   }
 
   /** @private */
@@ -325,12 +353,19 @@ export class VisibilityManager {
       model.setReportReady(createReportPromiseFunc);
     }
 
+    const viewport = Services.viewportForDoc(this.ampdoc);
+    const scrollDepth = viewport.getScrollTop();
+    this.maybeUpdateMaxScrollDepth(scrollDepth);
+
     // Block visibility.
     if (readyPromise) {
       model.setReady(false);
       readyPromise.then(() => {
         model.setReady(true);
+        model.maybeSetInitialScrollDepth(scrollDepth);
       });
+    } else {
+      model.maybeSetInitialScrollDepth(scrollDepth);
     }
 
     // Process the event.
@@ -352,7 +387,7 @@ export class VisibilityManager {
         layoutBox =
             resource ?
               resource.getLayoutBox() :
-              Services.viewportForDoc(this.ampdoc).getLayoutRect(opt_element);
+              viewport.getLayoutRect(opt_element);
         const intersectionRatio = this.getElementVisibility(opt_element);
         const intersectionRect = this.getElementIntersectionRect(opt_element);
         Object.assign(state, dict({
@@ -374,6 +409,10 @@ export class VisibilityManager {
           'elementWidth': layoutBox.width,
           'elementHeight': layoutBox.height,
         }));
+        state['initialScrollDepth'] = layoutPositionRelativeToScrolledViewport(
+            layoutBox, viewport, model.getInitialScrollDepth());
+        state['maxScrollDepth'] = layoutPositionRelativeToScrolledViewport(
+            layoutBox, viewport, this.getMaxScrollDepth());
       }
       callback(state);
     });
