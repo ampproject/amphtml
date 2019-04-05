@@ -27,7 +27,7 @@ import mustache from '../../../third_party/mustache/mustache';
 const TAG = 'amp-mustache';
 
 /** @const {string} */
-const CUSTOM_DELIMITERS_ATTR = 'data-custom-delimiters';
+const CUSTOM_DELIMITERS_ATTR = 'custom-delimiters';
 
 /**
  * Implements an AMP template for Mustache.js.
