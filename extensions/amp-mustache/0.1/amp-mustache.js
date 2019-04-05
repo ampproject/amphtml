@@ -31,17 +31,17 @@ const TAG = 'amp-mustache';
 /**
  * @typedef {BaseTemplate$$module$src$service$template_impl}
  */
-let BaseTemplateDef;
+AMP.BaseTemplate;
 
 /**
  * Implements an AMP template for Mustache.js.
  * See {@link https://github.com/janl/mustache.js/}.
  *
  * @private Visible for testing.
- * @extends {BaseTemplateDef}
+ * @extends {AMP.BaseTemplate}
  * @suppress {checkTypes}
  */
-export class AmpMustache extends BaseTemplateDef {
+export class AmpMustache extends AMP.BaseTemplate {
   /**
    * @param {!Element} element
    * @param {!Window} win
