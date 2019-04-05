@@ -437,7 +437,7 @@ describes.repeated('amp-mustache 0.2', {
   });
 
   describe('triple-mustache', () => {
-    it('should sanitize text formatting elements', () => {
+    it('should sanitize formatting related elements', () => {
       templateElement./*OK*/innerHTML = 'value = {{{value}}}';
       template.compileCallback();
       const result = template.render({
@@ -445,14 +445,14 @@ describes.repeated('amp-mustache 0.2', {
             + '<br><code></code><del></del><em></em>'
             + '<i></i><ins></ins><mark></mark><s></s>'
             + '<small></small><strong></strong><sub></sub>'
-            + '<sup></sup><time></time><u></u>',
+            + '<sup></sup><time></time><u></u><hr>',
       });
       expect(result./*OK*/innerHTML).to.equal(
           'value = <b>abc</b><div>def</div>'
             + '<br><code></code><del></del><em></em>'
             + '<i></i><ins></ins><mark></mark><s></s>'
             + '<small></small><strong></strong><sub></sub>'
-            + '<sup></sup><time></time><u></u>'
+            + '<sup></sup><time></time><u></u><hr>'
       );
     });
 

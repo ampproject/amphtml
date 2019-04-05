@@ -140,18 +140,6 @@ class FunctionalTestController {
    * {@link https://www.w3.org/TR/webdriver1/#switch-to-frame}
    *
    * @param {!ElementHandle} unusedHandle
-   * @param {function():(!Promise|undefined)} unusedFn
-   * @return {!Promise}
-   */
-  async usingFrame(unusedHandle, unusedFn) {}
-
-  /**
-   * Selects the current top-level browsing context or a child browsing context
-   * of the current browsing context to use as the current browsing context for
-   * subsequent commands.
-   * {@link https://www.w3.org/TR/webdriver1/#switch-to-frame}
-   *
-   * @param {!ElementHandle} unusedHandle
    * @return {!Promise}
    */
   async switchToFrame(unusedHandle) {}
@@ -167,12 +155,39 @@ class FunctionalTestController {
   async switchToParent() {}
 
   /**
+   * Selects a subtree inside a ShadowDOM ShadowRoot to use as the current
+   * browsing context for subsequent commands.
+   * {@link https://github.com/w3c/webdriver/pull/1320}
+   * https://github.com/SeleniumHQ/selenium/issues/5869
+   *
+   * @param {!ElementHandle} unusedHandle
+   * @return {!Promise}
+   */
+  async switchToShadow(unusedHandle) {}
+
+  /**
+   * Selects the main top-level DOM tree to use as the current
+   * browsing context for subsequent commands.
+   * {@link https://github.com/w3c/webdriver/pull/1320}
+   * https://github.com/SeleniumHQ/selenium/issues/5869
+   *
+   * @return {!Promise}
+   */
+  async switchToLight() {}
+
+  /**
    * Gets the active element of the current browsing context’s document element.
    * {@link https://www.w3.org/TR/webdriver1/#get-active-element}
    *
    * @return {!ControllerPromise<!ElementHandle>}
    */
   async getActiveElement() {}
+
+  /**
+   * Gets the root of the current document, for use in scrolling e.g.
+   * @return {!Promise<!ElementHandle>}
+   */
+  async getDocumentElement() {}
 
   /**
    * The Find Element command is used to find the first element matching the
@@ -406,6 +421,12 @@ class FunctionalTestController {
    * @package
    */
   async evaluate(unusedFn, ...unusedArgs) {}
+
+  /**
+   * Cleanup any resources
+   * @return {!Promise}
+   */
+  async dispose() {}
 }
 
 

@@ -116,6 +116,11 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/20595',
   },
   {
+    id: 'amp-lightbox-gallery-base-carousel',
+    name: 'Uses amp-base-carousel in amp-lightbox-gallery',
+    spec: 'https://github.com/ampproject/amphtml/issues/21568',
+  },
+  {
     id: 'amp-google-vrview-image',
     name: 'AMP VR Viewer for images via Google VRView',
     spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
@@ -257,6 +262,13 @@ const EXPERIMENTS = [
     name: 'Scale pages in amp-story by rewriting responsive units',
     spec: 'https://github.com/ampproject/amphtml/issues/15955',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/15960',
+  },
+  {
+    id: 'amp-story-desktop-background',
+    name: 'Removes blurred background images from the amp-story component\'s ' +
+        'three-panel desktop UI.',
+    spec: 'https://github.com/ampproject/amphtml/issues/21287',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/21288',
   },
   {
     id: 'amp-next-page',

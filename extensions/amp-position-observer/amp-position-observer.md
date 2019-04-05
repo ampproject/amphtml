@@ -230,7 +230,8 @@ as clock becomes less than 50% visible.
   </tr>
   <tr>
     <td width="40%"><strong>once (optional)</strong></td>
-    <td>Only triggers the <code>enter</code> and <code>exit</code> events once. The <code>scroll</code> event will also only perform one iteration.</td>
+    <td>Only triggers the <code>enter</code> and <code>exit</code> events once. The <code>scroll</code> event will also only perform one iteration.
+<p>The presence of the attribute represents the <code>true</code> value and the absence of the attribute represents the <code>false</code> value. If the attribute is present, its value must be an empty string, <code>once</code> or not assigned.</p></td>
   </tr>
 </table>
 

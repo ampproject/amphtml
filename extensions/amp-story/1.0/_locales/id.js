@@ -13,40 +13,69 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {LocalizedStringBundleDef, LocalizedStringId} from '../localization';
-
+import {
+  LocalizedStringBundleDef,
+  LocalizedStringId,
+} from '../../../../src/localized-strings';
 
 /**
- * Localized string bundle used for Indonesian strings.
+ * Localized string bundle used for id strings.
  * @const {!LocalizedStringBundleDef}
  */
 export default /** @const {!LocalizedStringBundleDef} */ ({
+  [LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT]: {
+    string: 'Suara nonaktif',
+  },
+  [LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_NO_SOUND_TEXT]: {
+    string: 'Suara tidak aktif di halaman ini',
+  },
+  [LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_SOUND_TEXT]: {
+    string: 'Suara aktif',
+  },
+  [LocalizedStringId.AMP_STORY_BOOKEND_MORE_TO_READ_LABEL]: {
+    string: 'Artikel lain untuk dibaca',
+  },
+  [LocalizedStringId.AMP_STORY_BOOKEND_PRIVACY_SETTINGS_BUTTON_LABEL]: {
+    string: 'Ubah setelan privasi data',
+  },
+  [LocalizedStringId.AMP_STORY_BOOKEND_PRIVACY_SETTINGS_TITLE]: {
+    string: 'Setelan privasi',
+  },
   [LocalizedStringId.AMP_STORY_CONSENT_ACCEPT_BUTTON_LABEL]: {
-    string: 'Menerima',
+    string: 'Setuju',
   },
   [LocalizedStringId.AMP_STORY_CONSENT_DECLINE_BUTTON_LABEL]: {
-    string: 'Decline',
+    string: 'Tolak',
+  },
+  [LocalizedStringId.AMP_STORY_CONTINUE_ANYWAY_BUTTON_LABEL]: {
+    string: 'Tetap Lanjutkan',
   },
   [LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LABEL]: {
-    string: 'Lihat pada domain asli:',
+    string: 'Lihat di domain asal:',
   },
   [LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LINK]: {
     string: 'Lebih lanjut tentang hasil AMP',
   },
   [LocalizedStringId.AMP_STORY_HINT_UI_NEXT_LABEL]: {
-    string: 'tekan Berikutnya',
+    string: 'Tap Berikutnya',
   },
   [LocalizedStringId.AMP_STORY_HINT_UI_PREVIOUS_LABEL]: {
-    string: 'tekan Kembali',
+    string: 'Tap Kembali.',
+  },
+  [LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL]: {
+    string: 'Geser ke atas',
+  },
+  [LocalizedStringId.AMP_STORY_PAGE_PLAY_VIDEO]: {
+    string: 'Putar video',
   },
   [LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT]: {
-    string: 'tidak bisa copy link ke clipboard :(',
+    string: 'Tidak dapat menyalin link ke papan klip :(',
   },
   [LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_SUCCESS_TEXT]: {
-    string: 'Link dicopy!',
+    string: 'Link disalin!',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_EMAIL]: {
-    string: 'E-mail',
+    string: 'Email',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_FACEBOOK]: {
     string: 'Facebook',
@@ -55,22 +84,19 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
     string: 'Google+',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINK]: {
-    string: 'Dapatkan link',
+    string: 'Dapatkan Link',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINKEDIN]: {
     string: 'LinkedIn',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_PINTEREST]: {
-    string: 'pinterest',
+    string: 'Pinterest',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_SMS]: {
     string: 'SMS',
   },
-  [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_SYSTEM]: {
-    string: 'Selebihnya',
-  },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_TUMBLR]: {
-    string: 'tumblr',
+    string: 'Tumblr',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_TWITTER]: {
     string: 'Twitter',
@@ -78,17 +104,27 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_WHATSAPP]: {
     string: 'WhatsApp',
   },
+  [LocalizedStringId.AMP_STORY_TOOLTIP_EXPAND_TWEET]: {
+    string: 'Luaskan Tweet',
+  },
+  [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_HEIGHT_SIZE_TEXT]: {
+    string: 'Luaskan tinggi jendela untuk menampilkan pengalaman ini',
+  },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT]: {
-    fallback: 'Besarkan browser window anda untuk menggunakan fitur ini',
+    string: 'Luaskan tinggi dan lebar jendela untuk menampilkan pengalaman ' +
+        'ini',
+  },
+  [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_WIDTH_SIZE_TEXT]: {
+    string: 'Luaskan lebar jendela untuk menampilkan pengalaman ini',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
-    string: 'Anda harus mengaktifkan eksperimen amp-story untuk melihat ' +
-        'konten ini',
+    string: 'Anda harus mengaktifkan eksperimen cerita AMP untuk melihat ' +
+        'konten ini.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
-    string: 'Halaman ini hanya dapat dilihat dengan menggunakan portrait mode',
+    string: 'Halaman ini ditampilkan paling baik dalam mode potret',
   },
   [LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT]: {
-    string: 'Maaf, sepertinya browser anda tidak mendukung fitur ini',
+    string: 'Maaf, sepertinya browser Anda tidak mendukung pengalaman ini',
   },
 });

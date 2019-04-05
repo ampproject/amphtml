@@ -15,6 +15,7 @@
  */
 
 import '../amp-bind';
+import * as xhrUtils from '../../../../src/utils/xhr-utils';
 import {ActionTrust} from '../../../../src/action-constants';
 import {Services} from '../../../../src/services';
 
@@ -26,6 +27,8 @@ describes.realWin('AmpState', {
 }, env => {
   let win;
   let sandbox;
+  let fetchStub;
+  let getViewerAuthTokenIfAvailableStub;
 
   let element;
   let ampState;
@@ -57,8 +60,11 @@ describes.realWin('AmpState', {
     ampState = element.implementation_;
 
     sandbox.spy(ampState, 'fetchAndUpdate_');
+    sandbox.spy(ampState, 'prepareAndSendFetch_');
     sandbox.stub(ampState, 'updateState_');
-    sandbox.stub(ampState, 'fetch_')
+    getViewerAuthTokenIfAvailableStub = sandbox.stub(
+        xhrUtils, 'getViewerAuthTokenIfAvailable').returns(Promise.resolve());
+    fetchStub = sandbox.stub(ampState, 'fetch_')
         .returns(Promise.resolve({baz: 'qux'}));
   });
 
@@ -73,10 +79,31 @@ describes.realWin('AmpState', {
     whenFirstVisiblePromiseResolve();
     return whenFirstVisiblePromise.then(() => {
       expect(ampState.fetchAndUpdate_).calledWithExactly(/* isInit */ true);
+      return getViewerAuthTokenIfAvailableStub();
+    }).then(() => {
       return ampState.fetch_();
     }).then(() => {
       expect(ampState.updateState_).calledWithMatch({baz: 'qux'});
     });
+  });
+
+  it('should trigger "fetch-error" if fetch fails', function*() {
+    whenFirstVisiblePromiseResolve();
+    fetchStub.returns(Promise.reject());
+
+    const actions = {trigger: sandbox.spy()};
+    sandbox.stub(Services, 'actionServiceForDoc').returns(actions);
+
+    element.setAttribute('src', 'https://foo.com/bar?baz=1');
+    element.build();
+
+    yield whenFirstVisiblePromise;
+    yield getViewerAuthTokenIfAvailableStub();
+    yield ampState.fetch_();
+
+    expect(ampState.updateState_).to.not.be.called;
+    expect(actions.trigger).to.be.calledWithExactly(
+        ampState, 'fetch-error', /* event */ null, ActionTrust.LOW);
   });
 
   it('should register action refresh', () => {
@@ -131,6 +158,8 @@ describes.realWin('AmpState', {
     return whenFirstVisiblePromise.then(() => {
       expect(ampState.updateState_).calledWithMatch({foo: 'bar'});
       expect(ampState.fetchAndUpdate_).calledWithExactly(/* isInit */ true);
+      return getViewerAuthTokenIfAvailableStub();
+    }).then(() => {
       return ampState.fetch_();
     }).then(() => {
       expect(ampState.updateState_).calledWithMatch({baz: 'qux'});
@@ -162,8 +191,46 @@ describes.realWin('AmpState', {
 
     whenFirstVisiblePromiseResolve();
     return whenFirstVisiblePromise
+        .then(() => getViewerAuthTokenIfAvailableStub())
         .then(() => ampState.fetch_())
         .then(() => {
+          expect(ampState.updateState_).calledWithMatch({baz: 'qux'});
+        });
+  });
+
+  it('should fetch with auth token if `crossorigin` attribute exists'
+      + ' with `amp-viewer-auth-token-via-post`', () => {
+    sandbox.stub(viewer, 'hasBeenVisible').returns(false);
+    getViewerAuthTokenIfAvailableStub.returns(Promise.resolve('idToken'));
+
+    element.setAttribute('src', 'https://foo.com/bar?baz=1');
+    element.setAttribute('crossorigin', 'amp-viewer-auth-token-via-post');
+    element.build();
+
+    // IMPORTANT: No CORS fetch should happen until viewer is visible.
+    expect(ampState.fetchAndUpdate_).to.have.been.calledOnce;
+    expect(ampState.fetch_).to.not.have.been.called;
+
+    allowConsoleError(() => {
+      element.mutatedAttributesCallback({src: 'https://foo.com/bar?baz=1'});
+    });
+
+    expect(ampState.fetchAndUpdate_).to.have.been.calledOnce;
+    expect(ampState.fetch_).to.not.have.been.called;
+
+    viewer.hasBeenVisible.returns(true);
+    element.mutatedAttributesCallback({src: 'https://foo.com/bar?baz=1'});
+
+    expect(ampState.fetchAndUpdate_).to.have.been.calledTwice;
+    expect(ampState.fetch_).to.not.have.been.called;
+
+    whenFirstVisiblePromiseResolve();
+    return whenFirstVisiblePromise
+        .then(() => ampState.prepareAndSendFetch_({win}, element))
+        .then(() => {
+          expect(fetchStub).to.have.been.called;
+          expect(fetchStub.firstCall.args.slice(-1).pop())
+              .to.be.equal('idToken');
           expect(ampState.updateState_).calledWithMatch({baz: 'qux'});
         });
   });

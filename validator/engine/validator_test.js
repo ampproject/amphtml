@@ -132,7 +132,7 @@ function findHtmlFilesRelativeToTestdata() {
   const testFiles = [];
   for (const entry of testSubdirs) {
     for (const candidate of readdir(path.join(entry.root, entry.subdir))) {
-      if (candidate.match(/^.*.html/g)) {
+      if (candidate.match(/\.html$/)) {
         testFiles.push(path.join(entry.subdir, candidate));
       }
     }
@@ -1297,47 +1297,6 @@ describe('ValidatorRulesMakeSense', () => {
                   .toBe(true);
             });
       }
-      // TagSpecs with an ExtensionSpec are extensions. We have a few
-      // additional checks for these.
-      if (tagSpec.extensionSpec !== null) {
-        const {extensionSpec} = tagSpec;
-        it('extension must have a name field value', () => {
-          expect(extensionSpec.name).toBeDefined();
-        });
-        it('extension ' + extensionSpec.name + ' must have at least two ' +
-               'versions, latest and a numeric version, e.g `1.0`',
-        () => {
-          expect(extensionSpec.version).toBeGreaterThan(1);
-        });
-        it('extension ' + extensionSpec.name + ' versions must be `latest` ' +
-               'or a numeric value',
-        () => {
-          for (const versionString of extensionSpec.version) {
-            expect(versionString).toMatch(/^(latest|[0-9.])$/);
-          }
-          for (const versionString of extensionSpec.deprecatedVersion) {
-            expect(versionString).toMatch(/^(latest|[0-9.])$/);
-          }
-        });
-        it('extension ' + extensionSpec.name + ' deprecated_version must be ' +
-               'subset of version',
-        () => {
-          const versions = {};
-          for (const versionString of extensionSpec.version) {
-            expect(versionString).toMatch(/^(latest|[0-9.])$/);
-          }
-          for (const versionString of extensionSpec.deprecatedVersion) {
-            expect(versions.hasOwnProperty(versionString)).toBe(true);
-          }
-        });
-        it('extension ' + extensionSpec.name + ' must include the ' +
-               'attr_list: "common-extension-attrs"` attr_list ',
-        () => {
-          expect(tagSpec.attrLists.length).toEqual(1);
-          expect(tagSpec.attrLists[0]).toEqual('common-extension-attrs');
-        });
-      }
-
       if (attrSpec.dispatchKey) {
         it('tag_spec ' + tagSpecName +
            ' can not have more than one dispatch_key', () => {
@@ -1345,6 +1304,51 @@ describe('ValidatorRulesMakeSense', () => {
           seenDispatchKey = true;
         });
       }
+    }
+
+    // TagSpecs with an ExtensionSpec are extensions. We have a few
+    // additional checks for these.
+    if (tagSpec.extensionSpec !== null) {
+      const {extensionSpec} = tagSpec;
+      const versionRegexp = /^(latest|[0-9]+[.][0-9]+)$/;
+      it('extension must have a name field value', () => {
+        expect(extensionSpec.name).toBeDefined();
+      });
+      it('extension ' + extensionSpec.name + ' must have at least two ' +
+             'versions, latest and a numeric version, e.g `1.0`',
+      () => {
+        expect(extensionSpec.version.length).toBeGreaterThan(1);
+      });
+      it('extension ' + extensionSpec.name + ' versions must be `latest` ' +
+             'or a numeric value',
+      () => {
+        for (const versionString of extensionSpec.version) {
+          expect(versionString).toMatch(versionRegexp);
+        }
+        for (const versionString of extensionSpec.deprecatedVersion) {
+          expect(versionString).toMatch(versionRegexp);
+        }
+      });
+      it('extension ' + extensionSpec.name + ' deprecated_version must be ' +
+             'subset of version',
+      () => {
+        for (const versionString of extensionSpec.deprecatedVersion) {
+          expect(extensionSpec.version).toContain(versionString);
+        }
+      });
+      it('extension ' + extensionSpec.name + ' must include the ' +
+             'attr_list: "common-extension-attrs"` attr_list ',
+      () => {
+        expect(tagSpec.attrLists.length).toEqual(1);
+        // TODO: what we'd like to verify here is that this AttrList is named
+        // 'common-extension-attrs'.  Unfortunately that information isn't
+        // available to us: we just have an index into
+        // Context.rules_.parsedAttrSpecs_.parsedAttrSpecs_.
+        // getNameByAttrSpecId() looks like it would do what we want, but it's
+        // sufficiently wrapped in private context inside the validator that I
+        // don't see a way to call it.  For now just gold the current index.
+        expect(tagSpec.attrLists[0]).toEqual(17);
+      });
     }
 
     // cdata

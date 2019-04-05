@@ -1,3 +1,9 @@
+---
+$category: misc
+formats: websites
+teaser: 
+  text: Suggests completed results corresponding to the user input as they type into the input field.
+---
 <!--
 Copyright 2019 The AMP HTML Authors. All Rights Reserved.
 
@@ -56,35 +62,72 @@ Example:
   <amp-autocomplete filter="substring" id="myAutocomplete">
     <input type="text">
     <script type="application/json">
-      { items: ["a", "b", "c"] }
+      { "items": ["a", "b", "c"] }
     </script>
   </amp-autocomplete>
 ```
 
 ## Attributes
 
-### filter
-The filtering mechanism applied to source data to produce filtered results for user input. In all cases the filtered results will be displayed in array order of data retrieved. If filtering is being done (`filter != none`), it is done client side. 
+<table>
+  <tr>
+    <td width="40%"><strong>filter [required]</strong></td>
+    <td>The filtering mechanism applied to source data to produce filtered results for user input. In all cases the filtered results will be displayed in array order of data retrieved. If filtering is being done (<code>filter != none</code>), it is done client side. The following are supported values:
+    <ul>
+      <li><strong>substring</strong>: if the user input is a substring of an item, then the item is suggested</li>
+      <li><strong>prefix</strong>: if the user input is a prefix of an item, then the item gets suggested</li>
+      <li><strong>token-prefix</strong>: if the user input is a prefix of any word in a multi-worded item, then the item gets suggested; example “je” is a token-prefix in “blue jeans”</li>
+      <li><strong>fuzzy</strong>: typos in the input field can result in partial match items appearing in the filtered results—need further research</li>
+      <li><strong>none</strong>: no client-side filter; renders retrieved data based on bound <code>[src]</code> attribute; truncates to <code>max-entries</code> attribute if provided</li>
+      <li><strong>custom</strong>: a conditional statement involving an item and a user input to be applied to each item such that evaluating to true implies the item gets suggested; using this filter requires including <code>amp-bind</code> if <code>filter==custom</code>, an additional attribute <code>filter-expr</code> is required to specify a boolean expression by which to perform the custom filter.</li>
+    </td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>filter-expr [optional]</strong></td>
+    <td>Required if <code>filter==custom</code></td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>filter-value [optional]</strong></td>
+    <td>If data is an array of JsonObjects, the filter-value is the property name that will be accessed for client side filtering. This attribute is unnecessary if filter is none. Defaults to "value".</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>min-characters [optional]</strong></td>
+    <td>
+      The min character length of a user input to provide results, default 1
+    </td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>max-entries [optional]</strong></td>
+    <td>
+      The max specified number of items to suggest at once based on a user input, displays all if unspecified 
+    </td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>suggest-first [optional]</strong></td>
+    <td>
+      Suggest the first entry in the list of results by marking it active; only possible if <code>filter==prefix</code> (does nothing otherwise)
+    </td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>submit-on-enter [optional]</strong></td>
+    <td>
+      The enter key is primarily used for selecting suggestions in autocomplete, so it shouldn’t also submit the form unless the developer explicitly sets it to do so (for search fields/one field forms, et cetera). Defaults to false. 
+    </td>
+  </tr>
+</table>
 
-The following are supported values:
-* `substring`: if the user input is a substring of an item, then the item is suggested
-* `prefix`: if the user input is a prefix of an item, then the item gets suggested
-* `token-prefix`: if the user input is a prefix of any word in a multi-worded item, then the item gets suggested; example “je” is a token-prefix in “blue jeans”
-* `fuzzy`: typos in the input field can result in partial match items appearing in the filtered results—need further research
-* `none`: 
-* `custom`:  a conditional statement involving an item and a user input to be applied to each item such that evaluating to true implies the item gets suggested; using this filter requires including `amp-bind`; if `filter==custom`, an additional attribute `filter-expr` is required to specify a boolean expression by which to perform the custom filter.
+## Events
 
-### filter-expr
-Required if `filter==custom`
+Events may trigger actions on other AMP components using the `on` attribute.
+e.g. `on="select: my-tab.show"`
 
-### min-characters (optional)
-The min character length of a user input to provide results, default 1
+Read more about [AMP Actions and Events](../../spec/amp-actions-and-events.md).
 
-### max-entries (optional)
-The max specified number of items to suggest at once based on a user input, displays all if unspecified 
+<table>
+  <tr>
+    <td width="40%"><strong>select</strong></td>
+    <td><code>amp-autocomplete</code> triggers the <code>select</code> event when the user selects an option via click, tap, keyboard navigation or accepting typeahead.
+    <code>event</code> contains the <code>value</code> attribute value of the selected element.</td>
+  </tr>
 
-### suggest-first (optional)
-Suggest the first entry in the list of results by marking it active; only possible if `filter==prefix` (does nothing otherwise)
-
-### submit-on-enter (optional)
-The enter key is primarily used for selecting suggestions in autocomplete, so it shouldn’t also submit the form unless the developer explicitly sets it to do so (for search fields/one field forms, et cetera). Defaults to false. 
+</table>

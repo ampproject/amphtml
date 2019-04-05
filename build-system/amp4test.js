@@ -220,7 +220,6 @@ app.get('/a4a/:bid', (req, res) => {
     body,
     css: 'body { background-color: #f4f4f4; }',
     extensions: ['amp-analytics'],
-    mode: 'cdn',
   });
   res.send(doc);
 });

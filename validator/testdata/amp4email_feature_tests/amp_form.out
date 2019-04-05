@@ -233,5 +233,15 @@ amp4email_feature_tests/amp_form.html:189:4 The attribute 'action-xhr' in tag 'F
 |        <input type="submit" value="OK">
 |      </form>
 |    </template>
+|    <!-- Invalid POST form with name. -->
+|    <form method="post" name="post-form" action-xhr="https://example.com/subscribe">
+>>   ^~~~~~~~~
+amp4email_feature_tests/amp_form.html:198:2 The attribute 'name' may not appear in tag 'FORM [method=POST] (AMP4EMAIL)'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
+|    </form>
+|    <!-- Invalid GET form with name. -->
+|    <form method="GET" name="get-form" action-xhr="https://someserver.com/endpoint">
+>>   ^~~~~~~~~
+amp4email_feature_tests/amp_form.html:201:2 The attribute 'name' may not appear in tag 'FORM [method=GET] (AMP4EMAIL)'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
+|    </form>
 |  </body>
 |  </html>

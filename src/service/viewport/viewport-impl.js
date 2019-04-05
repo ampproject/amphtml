@@ -15,7 +15,6 @@
  */
 
 import {Animation} from '../../animation';
-import {Deferred, tryResolve} from '../../utils/promise';
 import {FixedLayer} from './../fixed-layer';
 import {Observable} from '../../observable';
 import {Services} from '../../services';
@@ -30,6 +29,7 @@ import {ViewportBindingNatural_} from './viewport-binding-natural';
 import {VisibilityState} from '../../visibility-state';
 import {clamp} from '../../utils/math';
 import {closestAncestorElementBySelector, isIframed} from '../../dom';
+import {computedStyle, setStyle} from '../../style';
 import {dev, devAssert} from '../../log';
 import {dict} from '../../utils/object';
 import {getFriendlyIframeEmbedOptional} from '../../friendly-iframe-embed';
@@ -46,7 +46,7 @@ import {
   moveLayoutRect,
 } from '../../layout-rect';
 import {numeric} from '../../transition';
-import {setStyle} from '../../style';
+import {tryResolve} from '../../utils/promise';
 
 
 const TAG_ = 'Viewport';
@@ -72,17 +72,6 @@ export let ViewportChangedEventDef;
  * }}
  */
 export let ViewportResizedEventDef;
-
-/**
- * Params:
- *  - afterAnimation. Promise.
- *  - lastPaddingTop in px.
- *  - paddingTop in px.
- *
- * Returns the animation offset at beginning of animation. End will always be 0.
- * @typedef {function(!Promise, number, number):number}
- */
-export let FixedElementMeasureFnDef;
 
 /**
  * This object represents the viewport. It tracks scroll position, resize
@@ -171,40 +160,37 @@ export class Viewport {
     /** @private {string|undefined} */
     this.originalViewportMetaString_ = undefined;
 
-    /** @private {!Array<{element: !Element, measure: !FixedElementMeasureFnDef}>} */
-    this.fixedMeasurers_ = [];
-
     /** @private @const {boolean} */
     this.useLayers_ = isExperimentOn(win, 'layers');
     if (this.useLayers_) {
       installLayersServiceForDoc(ampdoc,
-          binding.getScrollingElement(),
-          binding.getScrollingElementScrollsLikeViewport());
+          this.binding_.getScrollingElement(),
+          this.binding_.getScrollingElementScrollsLikeViewport());
     }
 
     /** @private @const {!FixedLayer} */
     this.fixedLayer_ = new FixedLayer(
         ampdoc,
         this.vsync_,
-        binding.getBorderTop(),
+        this.binding_.getBorderTop(),
         this.paddingTop_,
-        binding.requiresFixedLayerTransfer());
+        this.binding_.requiresFixedLayerTransfer());
     ampdoc.whenReady().then(() => this.fixedLayer_.setup());
 
-    viewer.onMessage('viewport', this.updateOnViewportEvent_.bind(this));
-    viewer.onMessage('scroll', this.viewerSetScrollTop_.bind(this));
-    viewer.onMessage(
+    this.viewer_.onMessage('viewport', this.updateOnViewportEvent_.bind(this));
+    this.viewer_.onMessage('scroll', this.viewerSetScrollTop_.bind(this));
+    this.viewer_.onMessage(
         'disableScroll', this.disableScrollEventHandler_.bind(this));
-    binding.updatePaddingTop(this.paddingTop_);
+    this.binding_.updatePaddingTop(this.paddingTop_);
 
-    binding.onScroll(this.scroll_.bind(this));
-    binding.onResize(this.resize_.bind(this));
+    this.binding_.onScroll(this.scroll_.bind(this));
+    this.binding_.onResize(this.resize_.bind(this));
 
     this.onScroll(this.sendScrollMessage_.bind(this));
 
     /** @private {boolean} */
     this.visible_ = false;
-    viewer.onVisibilityChanged(this.updateVisibility_.bind(this));
+    this.viewer_.onVisibilityChanged(this.updateVisibility_.bind(this));
     this.updateVisibility_();
 
     // Top-level mode classes.
@@ -308,6 +294,18 @@ export class Viewport {
   setScrollTop(scrollPos) {
     this./*OK*/scrollTop_ = null;
     this.binding_.setScrollTop(scrollPos);
+  }
+
+  /**
+   * @return {number} The width of the vertical scrollbar, in pixels.
+   */
+  getVerticalScrollbarWidth() {
+    const {win} = this.ampdoc;
+    const {documentElement} = win.document;
+    const windowWidth = win./*OK*/innerWidth ;
+    const documentWidth = documentElement./*OK*/clientWidth;
+
+    return windowWidth - documentWidth;
   }
 
   /**
@@ -571,22 +569,27 @@ export class Viewport {
       this.getSize() :
       this.getLayoutRect(parent);
 
-    let offset = 0;
-    if (pos == 'bottom') {
-      offset = -parentHeight + elementRect.height;
-    }
-    if (pos == 'center') {
-      offset = (-parentHeight / 2) + (elementRect.height / 2);
+    let offset;
+    switch (pos) {
+      case 'bottom':
+        offset = -parentHeight + elementRect.height;
+        break;
+      case 'center':
+        offset = (-parentHeight / 2) + (elementRect.height / 2);
+        break;
+      default:
+        offset = 0;
+        break;
     }
 
     return this.getElementScrollTop_(parent).then(curScrollTop => {
       let newScrollTop;
       if (this.useLayers_) {
-        newScrollTop = elementRect.top + offset + curScrollTop;
+        newScrollTop = Math.max(0, elementRect.top + offset + curScrollTop);
       } else {
-        newScrollTop = elementRect.top - this.paddingTop_ + offset;
+        const calculatedScrollTop = elementRect.top - this.paddingTop_ + offset;
+        newScrollTop = Math.max(0, calculatedScrollTop);
       }
-      newScrollTop = Math.max(0, newScrollTop);
       if (newScrollTop == curScrollTop) {
         return;
       }
@@ -825,7 +828,22 @@ export class Viewport {
    * Should only be used for temporarily disabling scroll.
    */
   disableScroll() {
+    const {win} = this.ampdoc;
+    const {documentElement} = win.document;
+    let requestedMarginRight;
+
+    // Calculate the scrollbar width so we can set it as a right margin. This
+    // is so that we do not cause content to shift when we disable scroll on
+    // platforms that have a width-taking scrollbar.
+    this.vsync_.measure(() => {
+      const existingMargin = computedStyle(win, documentElement).marginRight;
+      const scrollbarWidth = this.getVerticalScrollbarWidth();
+
+      requestedMarginRight = parseInt(existingMargin, 10) + scrollbarWidth;
+    });
+
     this.vsync_.mutate(() => {
+      setStyle(documentElement, 'margin-right', requestedMarginRight, 'px');
       this.binding_.disableScroll();
     });
   }
@@ -834,7 +852,11 @@ export class Viewport {
    * Reset the scrolling by removing overflow: hidden.
    */
   resetScroll() {
+    const {win} = this.ampdoc;
+    const {documentElement} = win.document;
+
     this.vsync_.mutate(() => {
+      setStyle(documentElement, 'margin-right', '');
       this.binding_.resetScroll();
     });
   }
@@ -919,11 +941,9 @@ export class Viewport {
   /**
    * Removes the element from the fixed layer.
    * @param {!Element} element
-   * @param {boolean=} opt_onlyTearDown Keep element in transfer layer
-   * @param {boolean=} opt_keepOffset Keep offset applied per top-padding.
    */
-  removeFromFixedLayer(element, opt_onlyTearDown, opt_keepOffset) {
-    this.fixedLayer_.removeElement(element, opt_onlyTearDown, opt_keepOffset);
+  removeFromFixedLayer(element) {
+    this.fixedLayer_.removeElement(element);
   }
 
   /**
@@ -988,14 +1008,11 @@ export class Viewport {
     this.lastPaddingTop_ = this.paddingTop_;
     this.paddingTop_ = paddingTop;
 
-    const animPromise =
-        this.updateFixedElementsOffset_(duration, curve, transient);
-
+    const animPromise = this.animateFixedElements_(duration, curve, transient);
     if (paddingTop < this.lastPaddingTop_) {
       this.binding_.hideViewerHeader(transient, this.lastPaddingTop_);
       return;
     }
-
     animPromise.then(() => {
       this.binding_.showViewerHeader(transient, paddingTop);
     });
@@ -1014,81 +1031,24 @@ export class Viewport {
   }
 
   /**
-   * Specifies a callback for measuring an element's fixed offset when the
-   * viewport's padding top changes.
-   *
-   * `measure` runs in a measure phase and takes:
-   *  - afterAnimation
-   *    a promise that resolves after a running translation is finished.
-   *  - lastPaddingTop in px.
-   *  - paddingTop in px.
-   *
-   * And returns a vertical offset at start of animation. End will always be 0.
-   *
-   * This tears down the element from the fixed layer (but does NOT remove from
-   * the transfer layer), so its offset needs to be managed independently
-   * afterwards.
-   *
-   * @param {!Element} element
-   * @param {!FixedElementMeasureFnDef} measure
-   */
-  setFixedElementMeasurer(element, measure) {
-    this.removeFromFixedLayer(
-        element, /* onlyTearDown */ true, /* keepOffset */ true);
-    this.fixedMeasurers_.push({element, measure});
-  }
-
-  /**
    * @param {number} duration
    * @param {string} curve
    * @param {boolean} transient
    * @return {!Promise}
    * @private
    */
-  updateFixedElementsOffset_(duration, curve, transient) {
-    const {
-      paddingTop_: paddingTop,
-      lastPaddingTop_: lastPaddingTop,
-    } = this;
-
-    this.fixedLayer_.updatePaddingTop(paddingTop, transient);
-
-    let doneDeferred;
-
-    return this.vsync_.measurePromise(() => {
-      return this.fixedMeasurers_.map(def => {
-        doneDeferred = doneDeferred || new Deferred();
-        return def.measure(doneDeferred.promise, lastPaddingTop, paddingTop);
-      });
-    }).then(animOffsets => {
-      if (duration <= 0) {
-        return;
-      }
-
-      const interpolations =
-          animOffsets.map(animOffset => numeric(animOffset, 0));
-
-      const defaultAnimOffset = lastPaddingTop - paddingTop;
-      const defaultInterpolation = numeric(defaultAnimOffset, 0);
-
-      return Animation.animate(this.ampdoc.getRootNode(), time => {
-        this.fixedLayer_.transformMutate(
-            `translateY(${defaultInterpolation(time)}px)`);
-
-        // Translate independent elements that have their own animation offset
-        // definition.
-        interpolations.forEach((interpolation, i) => {
-          setStyle(this.fixedMeasurers_[i].element, 'transform',
-              `translateY(${interpolation(time)}px)`);
-        });
-      }, duration, curve).thenAlways(() => {
-        this.fixedLayer_.transformMutate(); // reset all transforms.
-      });
-    }).then(() => {
-      if (doneDeferred) {
-        doneDeferred.resolve();
-        doneDeferred = null; // GC
-      }
+  animateFixedElements_(duration, curve, transient) {
+    this.fixedLayer_.updatePaddingTop(this.paddingTop_, transient);
+    if (duration <= 0) {
+      return Promise.resolve();
+    }
+    // Add transit effect on position fixed element
+    const tr = numeric(this.lastPaddingTop_ - this.paddingTop_, 0);
+    return Animation.animate(this.ampdoc.getRootNode(), time => {
+      const p = tr(time);
+      this.fixedLayer_.transformMutate(`translateY(${p}px)`);
+    }, duration, curve).thenAlways(() => {
+      this.fixedLayer_.transformMutate(null);
     });
   }
 

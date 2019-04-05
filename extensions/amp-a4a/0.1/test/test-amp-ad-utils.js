@@ -32,6 +32,19 @@ describe('getAmpAdMetadata', () => {
     expect(creativeMetadata.images).to.not.be.ok;
   });
 
+  it('should parse metadata despite missing offsets', () => {
+    const creativeMetadata = getAmpAdMetadata(data.reserializedMissingOffset);
+    expect(creativeMetadata).to.be.ok;
+    expect(creativeMetadata.minifiedCreative).to.equal(data.minifiedCreative);
+    expect(creativeMetadata.customElementExtensions.length).to.equal(1);
+    expect(creativeMetadata.customElementExtensions[0]).to.equal('amp-font');
+    expect(creativeMetadata.customStylesheets.length).to.equal(1);
+    expect(creativeMetadata.customStylesheets[0]).to.deep.equal({
+      'href': 'https://fonts.googleapis.com/css?family=Questrial',
+    });
+    expect(creativeMetadata.images).to.not.be.ok;
+  });
+
   it('should return null -- bad offset', () => {
     const creativeMetadata = getAmpAdMetadata(data.reserializedInvalidOffset);
     expect(creativeMetadata).to.be.null;
