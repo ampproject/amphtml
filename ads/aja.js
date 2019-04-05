@@ -28,6 +28,7 @@ export function aja(global, data) {
     sspCode: data['sspCode'],
   });
 
+  const elAttri = 'allow-same-origin allow-top-navigation allow-scripts allow-popups';
   const elStyle = global.document.createElement('iframe');
   elStyle.setAttribute('id', 'adframe');
   elStyle.setAttribute('width', data.width);
@@ -37,12 +38,9 @@ export function aja(global, data) {
   elStyle.setAttribute('marginwidth', '0');
   elStyle.setAttribute('allowfullscreen', 'true');
   elStyle.setAttribute('scrolling', 'no');
-  elStyle.setAttribute('sandbox', 'allow-same-origin');
-  elStyle.setAttribute('sandbox', 'allow-top-navigation');
-  elStyle.setAttribute('sandbox', 'allow-scripts');
-  elStyle.setAttribute('sandbox', 'allow-popups');
+  elStyle.setAttribute('sandbox', elAttri);
   elStyle.setAttribute('style', 'position:absolute');
   elStyle.src = 'https://static.aja-recommend.com/html/amp.html?ssp_code=' + encodeURIComponent(data['sspCode']);
-  global.document.body.appendChild(elStyle);
+  global.document.getElementById('c').appendChild(elStyle);
 
 }
