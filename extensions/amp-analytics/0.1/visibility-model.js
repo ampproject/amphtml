@@ -136,6 +136,15 @@ export class VisibilityModel {
     /** @private {time} milliseconds since epoch */
     this.lastVisibleUpdateTime_ = 0;
 
+    /** @private {number} Scroll position at ini-load time */
+    this.initialScrollDepth_ = 0;
+
+    /**
+     * @private {boolean} Whether scroll position at ini-load time has
+     * been set
+     */
+    this.initialScrollDepthAlreadySet_ = false;
+
     /** @private {boolean} */
     this.waitToReset_ = false;
 
@@ -438,6 +447,27 @@ export class VisibilityModel {
         (this.totalVisibleTime_ <= this.spec_['totalTimeMax']) &&
         (this.maxContinuousVisibleTime_ >= this.spec_['continuousTimeMin']) &&
         (this.maxContinuousVisibleTime_ <= this.spec_['continuousTimeMax']);
+  }
+
+  /**
+   * Set the amount that the user had scrolled down the page at the time of
+   * page loading.
+   * @param {number} depth
+   */
+  maybeSetInitialScrollDepth(depth) {
+    if (!this.initialScrollDepthAlreadySet_) {
+      this.initialScrollDepth_ = depth;
+      this.initialScrollDepthAlreadySet_ = true;
+    }
+  }
+
+  /**
+   * Gets the amount that the user had scrolled down the page, at the time of
+   * ini-load.
+   * @return {number} depth
+   */
+  getInitialScrollDepth() {
+    return this.initialScrollDepth_;
   }
 
   /**

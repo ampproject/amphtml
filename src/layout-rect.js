@@ -165,6 +165,30 @@ export function layoutRectsRelativePos(r1, r2) {
 }
 
 /**
+ * Determines if any portion of a layoutBox would be onscreen in the given
+ * viewport, when scrolled to the specified position.
+ * @param {!LayoutRectDef} layoutBox
+ * @param {!./service/viewport/viewport-impl.Viewport} viewport
+ * @param {number} scrollPos
+ * @return {RelativePositions}
+ */
+export function layoutPositionRelativeToScrolledViewport(
+  layoutBox, viewport, scrollPos) {
+  const scrollLayoutBox =
+    layoutRectFromDomRect(/** @type {!ClientRect} */ ({
+      top: scrollPos,
+      bottom: scrollPos + viewport.getHeight(),
+      left: 0,
+      right: viewport.getWidth(),
+    }));
+  if (layoutRectsOverlap(layoutBox, scrollLayoutBox)) {
+    return RelativePositions.INSIDE;
+  } else {
+    return layoutRectsRelativePos(layoutBox, scrollLayoutBox);
+  }
+}
+
+/**
  * Expand the layout rect using multiples of width and height.
  * @param {!LayoutRectDef} rect Original rect.
  * @param {number} dw Expansion in width, specified as a multiple of width.
