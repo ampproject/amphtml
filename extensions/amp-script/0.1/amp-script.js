@@ -19,7 +19,6 @@ import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {UserActivationTracker} from './user-activation-tracker';
 import {
-  WorkerDom,
   sanitizer,
   upgrade,
 } from '@ampproject/worker-dom/dist/unminified.index.safe.mjs.patched';
@@ -57,7 +56,7 @@ export class AmpScript extends AMP.BaseElement {
     /** @private @const {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(this.win);
 
-    /** @private {?WorkerDom} */
+    /** @private {?Worker} */
     this.workerDom_ = null;
 
     /** @private {?UserActivationTracker} */
@@ -94,10 +93,8 @@ export class AmpScript extends AMP.BaseElement {
     });
     // Create worker and hydrate.
     const authorUrl = this.element.getAttribute('src');
-    const domUrl = this.getAmpDoc().getUrl();
     const workerUrl = this.workerThreadUrl_();
-    dev().info(TAG, 'Author URL:', authorUrl, ', DOM URL: ', domUrl,
-        ', worker URL:', workerUrl);
+    dev().info(TAG, 'Author URL:', authorUrl, ', worker URL:', workerUrl);
 
     const xhr = Services.xhrFor(this.win);
     const fetches = Promise.all([
@@ -118,7 +115,6 @@ export class AmpScript extends AMP.BaseElement {
     // WorkerDOMConfiguration
     {
       authorURL: authorUrl,
-      domURL: domUrl,
       mutationPump: this.mutationPump_.bind(this),
       longTask: promise => {
         this.userActivation_.expandLongTask(promise);
@@ -135,8 +131,7 @@ export class AmpScript extends AMP.BaseElement {
       onReceiveMessage: data => {
         dev().info(TAG, 'From worker:', data);
       },
-    },
-    /* debug */ true).then(workerDom => {
+    }).then(workerDom => {
       this.workerDom_ = workerDom;
     });
     return Promise.resolve();
@@ -188,11 +183,6 @@ export class AmpScript extends AMP.BaseElement {
     this.element.classList.add('i-amphtml-broken');
     user().error(TAG, '"amp-script" is terminated due to unallowed mutation.');
   }
-}
-
-/** @return {!Function} */
-export function getWorkerDomClassForTesting() {
-  return WorkerDom;
 }
 
 AMP.extension('amp-script', '0.1', function(AMP) {
