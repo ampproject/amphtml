@@ -233,7 +233,7 @@ describe('Gestures', () => {
     expect(gesture.type).to.equal('test');
     expect(gesture.data).to.equal(data);
     expect(gesture.event).to.equal(event);
-    expect(gesture.time.getTime()).to.equal(1);
+    expect(gesture.time).to.equal(1);
   });
 
 
