@@ -1200,7 +1200,7 @@ export class AutoFullscreenManager {
 
   /**
    * @param {!../video-interface.VideoOrBaseElementDef} video
-   * @return {string}
+   * @return {!../video-interface.PlayingStateDef}
    * @private
    */
   getPlayingState_(video) {
