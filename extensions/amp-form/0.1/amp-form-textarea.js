@@ -113,12 +113,11 @@ export class AmpFormTextarea {
     this.unlisteners_.push(listen(root, AmpEvents.DOM_UPDATE, () => {
       cachedTextareaElements = root.querySelectorAll('textarea');
     }));
-    const throttledResize = throttle(
-        this.win_, e => {
-          if (e.relayoutAll) {
-            resizeTextareaElements(cachedTextareaElements);
-          }
-        }, MIN_EVENT_INTERVAL_MS);
+    const throttledResize = throttle(this.win_, e => {
+      if (e.relayoutAll) {
+        resizeTextareaElements(cachedTextareaElements);
+      }
+    }, MIN_EVENT_INTERVAL_MS);
     this.unlisteners_.push(this.viewport_.onResize(throttledResize));
 
     // For now, warn if textareas with initial overflow are present, and
@@ -218,7 +217,8 @@ function maybeRemoveResizeBehavior(element, startHeight, endHeight) {
  */
 export function maybeResizeTextarea(element) {
   const resources = Services.resourcesForDoc(element);
-  const win = devAssert(element.ownerDocument.defaultView);
+  const win = /** @type {!Window} */ (
+    devAssert(element.ownerDocument.defaultView));
 
   let offset = 0;
   let scrollHeight = 0;
@@ -231,8 +231,7 @@ export function maybeResizeTextarea(element) {
   const minScrollHeightPromise = getShrinkHeight(element);
 
   return resources.measureMutateElement(element, () => {
-    const computed = computedStyle(
-        /** @type {!Window} */ (win), element);
+    const computed = computedStyle(win, element);
     scrollHeight = element./*OK*/scrollHeight;
 
     const maybeMaxHeight =
@@ -278,9 +277,9 @@ export function maybeResizeTextarea(element) {
  * @return {!Promise<number>}
  */
 function getShrinkHeight(textarea) {
-  const doc = devAssert(textarea.ownerDocument);
-  const win = devAssert(doc.defaultView);
-  const body = devAssert(doc.body);
+  const doc = /** @type {!Document} */ (devAssert(textarea.ownerDocument));
+  const win = /** @type {!Window} */ (devAssert(doc.defaultView));
+  const body = /** @type {!HTMLBodyElement} */ (devAssert(doc.body));
   const resources = Services.resourcesForDoc(textarea);
 
   const clone = textarea.cloneNode(/*deep*/ false);
@@ -289,27 +288,25 @@ function getShrinkHeight(textarea) {
   let height = 0;
   let shouldKeepTop = false;
 
-  return resources.measureMutateElement(
-      dev().assertElement(body), () => {
-        const computed = computedStyle(/** @type {!Window} */ (win), textarea);
-        const maxHeight = parseInt(computed.getPropertyValue('max-height'), 10); // TODO(cvializ): what if it's a percent?
+  return resources.measureMutateElement(body, () => {
+    const computed = computedStyle(win, textarea);
+    const maxHeight = parseInt(computed.getPropertyValue('max-height'), 10); // TODO(cvializ): what if it's a percent?
 
-        // maxHeight is NaN if the max-height property is 'none'.
-        shouldKeepTop =
+    // maxHeight is NaN if the max-height property is 'none'.
+    shouldKeepTop =
         (isNaN(maxHeight) || textarea./*OK*/scrollHeight < maxHeight);
-      }, () => {
-        // Prevent a jump from the textarea element scrolling
-        if (shouldKeepTop) {
-          textarea./*OK*/scrollTop = 0;
-        }
-        // Append the clone to the DOM so its scrollHeight can be read
-        doc.body.appendChild(clone);
-      }).then(() => {
-    return resources.measureMutateElement(
-        dev().assertElement(body), () => {
-          height = clone./*OK*/scrollHeight;
-        }, () => {
-          removeElement(clone);
-        });
+  }, () => {
+    // Prevent a jump from the textarea element scrolling
+    if (shouldKeepTop) {
+      textarea./*OK*/scrollTop = 0;
+    }
+    // Append the clone to the DOM so its scrollHeight can be read
+    doc.body.appendChild(clone);
+  }).then(() => {
+    return resources.measureMutateElement(body, () => {
+      height = clone./*OK*/scrollHeight;
+    }, () => {
+      removeElement(clone);
+    });
   }).then(() => height);
 }
