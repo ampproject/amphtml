@@ -36,10 +36,7 @@ import {getDetailsForMeta, getMetaElements} from './../addthis-utils/meta';
 import {getKeywordsString} from './../addthis-utils/classify';
 import {getSessionId} from '../addthis-utils/session';
 import {getWidgetOverload} from
-  '../addthis-utils/getWidgetIdOverloadedWithJSONForAnonymousMode';
-import {isBoolean} from '../addthis-utils/boolean';
-import {isNumber} from '../addthis-utils/number';
-import {isString} from '../addthis-utils/string';
+  '../addthis-utils/get-widget-id-overloaded-with-json-for-anonymous-mode';
 import {toArray} from '../../../../src/types';
 
 describes.realWin('amp-addthis', {
@@ -516,45 +513,6 @@ describes.realWin('amp-addthis', {
     expect(isWidgetId(null)).to.equal(false);
   });
 
-  it('isString: knows if a thing is a string or not', () => {
-    expect(isString(1)).to.equal(false);
-    expect(isString(String('mayb'))).to.equal(true);
-    expect(isString(String('101x'))).to.equal(true);
-    expect(isString('maybe')).to.equal(true);
-    expect(isString('shin')).to.equal(true);
-    expect(isString('shfs')).to.equal(true);
-    expect(isString({})).to.equal(false);
-    expect(isString([])).to.equal(false);
-    expect(isString(void 0)).to.equal(false);
-    expect(isString(null)).to.equal(false);
-  });
-
-  it('isNumber: knows if a thing is a number or not', () => {
-    expect(isNumber(1)).to.equal(true);
-    expect(isNumber(Number('0x1'))).to.equal(true);
-    expect(isNumber(Number())).to.equal(true);
-    expect(isNumber(Infinity)).to.equal(true);
-    expect(isNumber('0')).to.equal(false);
-    expect(isNumber(0x1)).to.equal(true);
-    expect(isNumber({})).to.equal(false);
-    expect(isNumber([])).to.equal(false);
-    expect(isNumber(void 0)).to.equal(false);
-    expect(isNumber(null)).to.equal(false);
-  });
-
-  it('isBoolean: knows if a thing is a boolean or not', () => {
-    expect(isBoolean(true)).to.equal(true);
-    expect(isBoolean(false)).to.equal(true);
-    expect(isBoolean(Boolean())).to.equal(true);
-    expect(isBoolean(Boolean(1))).to.equal(true);
-    expect(isBoolean('false')).to.equal(false);
-    expect(isBoolean('true')).to.equal(false);
-    expect(isBoolean({})).to.equal(false);
-    expect(isBoolean([])).to.equal(false);
-    expect(isBoolean(void 0)).to.equal(false);
-    expect(isBoolean(null)).to.equal(false);
-  });
-
   it('getWidgetOverload: self.element.getAttribute function argument', () => {
     expect(getWidgetOverload({})).to.equal('');
     expect(getWidgetOverload({element: {}})).to.equal('');
@@ -626,7 +584,7 @@ describes.realWin('amp-addthis', {
 
   it('getSessionId: returns a string of 16 characters containing 0-9 a-f',
       () => {
-        expect(isString(getSessionId())).to.equal(true);
+        expect(typeof getSessionId() === 'string').to.equal(true);
         expect(getSessionId().length).to.equal(16);
         expect(/^[0-9a-f]{16}$/.test(getSessionId())).to.equal(true);
 
@@ -637,7 +595,7 @@ describes.realWin('amp-addthis', {
       });
 
   it('createCUID: returns a string of 16 characters containing 0-9 a-f', () => {
-    expect(isString(createCUID())).to.equal(true);
+    expect(typeof createCUID() === 'string').to.equal(true);
 
     const a = createCUID();
     const b = createCUID();
