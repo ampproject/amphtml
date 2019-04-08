@@ -116,6 +116,11 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/20595',
   },
   {
+    id: 'amp-lightbox-gallery-base-carousel',
+    name: 'Uses amp-base-carousel in amp-lightbox-gallery',
+    spec: 'https://github.com/ampproject/amphtml/issues/21568',
+  },
+  {
     id: 'amp-google-vrview-image',
     name: 'AMP VR Viewer for images via Google VRView',
     spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
