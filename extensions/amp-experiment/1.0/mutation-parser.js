@@ -35,17 +35,17 @@ const SUPPORTED_ATTRIBUTES = {
   style: value => {
 
     // Do not allow Important or HTML Comments
-    if (value.match(/(!\s*important|<!--)/g)) {
+    if (value.match(/(!\s*important|<!--)/)) {
       return false;
     }
 
     // Allow Color
-    if (value.match(/^color:\s*#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3});?$/g)) {
+    if (value.match(/^color:\s*#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3});?$/)) {
       return true;
     }
 
     // Allow Background color
-    if (value.match(/^background-color:\s*#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3});?$/g)) {
+    if (value.match(/^background-color:\s*#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3});?$/)) {
       return true;
     }
 
