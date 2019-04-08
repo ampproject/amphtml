@@ -381,6 +381,19 @@ export class Bind {
    * @return {!Promise}
    */
   scanAndApply(addedElements, removedElements, timeout = 2000) {
+    return this.initializePromise_.then(() => {
+      return this.rescan_(addedElements, removedElements, timeout);
+    });
+  }
+
+  /**
+   * @param {!Array<!Element>} addedElements
+   * @param {!Array<!Element>} removedElements
+   * @param {number} timeout
+   * @return {!Promise}
+   * @private
+   */
+  rescan_(addedElements, removedElements, timeout) {
     dev().info(TAG, 'rescan:', addedElements, removedElements);
     /**
      * Helper function for cleaning up bindings in removed elements.
