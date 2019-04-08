@@ -157,9 +157,8 @@ export class AmpScript extends AMP.BaseElement {
    */
   mutationPump_(flush, phase) {
     if (phase == PHASE_HYDRATING) {
-      this.vsync_.mutate(() => {
-        this.element.classList.add('i-amphtml-hydrated');
-      });
+      this.vsync_.mutate(
+          () => this.element.classList.add('i-amphtml-hydrated'));
     }
     const allowMutation = (
       // Hydration is always allowed.
