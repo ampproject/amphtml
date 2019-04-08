@@ -157,7 +157,6 @@ export class MraidInitializer {
    * Called when we determine that MRAID isn't available.
    */
   handleMismatch_() {
-    console.log("handling mismatch: fallback="+ this.fallback_);
     HostServices.rejectVisibilityServiceForDoc(
         this.ampdoc_, {fallback: this.fallback_});
     HostServices.rejectExitServiceForDoc(
