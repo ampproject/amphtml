@@ -70,6 +70,7 @@ export function pubmine(global, data) {
   }
   const master = isMaster ? global : global.context.master;
   master.__ATA.cmd.push(function() {
+    master.__ATA.insertStyles(global);
     master.__ATA.initSlot(slotId, slotConfig);
   });
 }
