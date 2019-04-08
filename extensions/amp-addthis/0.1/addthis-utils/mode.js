@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import {isString} from './string';
-
 /**
  * Expects an object with pubId, widgetId, & productCode keys with string values
  *
@@ -29,7 +27,7 @@ import {isString} from './string';
  * @param {{pubId: string, widgetId: string, productCode: string}} _
  * @return {number} -1 indicates an error has occurred
  */
-export const getAddThisMode = _ => {
+export function getAddThisMode(_) {
   const {hasPubId, hasWidgetId, hasProductCode} = getAddThisModeObject(_);
   if (hasPubId) {
     if (hasWidgetId && !hasProductCode) {
@@ -41,7 +39,7 @@ export const getAddThisMode = _ => {
     return 3;
   }
   return -1;
-};
+}
 
 /**
  * @param {{pubId: string, widgetId: string, productCode: string}} _
@@ -51,24 +49,36 @@ export const getAddThisMode = _ => {
  * hasProductCode:boolean
  * }}
  */
-export const getAddThisModeObject = ({pubId, widgetId, productCode}) => {
+export function getAddThisModeObject({pubId, widgetId, productCode}) {
   const hasPubId = isPubId(pubId);
   // widget ids are 4-character strings with lower-case letters and numbers only
   const hasWidgetId = isWidgetId(widgetId);
   // product code is one of just a few values
-  const hasProductCode = isString(productCode) &&
+  const hasProductCode = typeof productCode === 'string' &&
     (productCode === 'shin' || productCode === 'shfs');
   return {hasPubId, hasWidgetId, hasProductCode};
-};
+}
 
-export const isPubId = candidate => {
-  return isString(candidate) && candidate.length > 0;
-};
+/**
+ * @param {Any} candidate
+ * @return {boolean}
+ */
+export function isPubId(candidate) {
+  return typeof candidate === 'string' && candidate.length > 0;
+}
 
-export const isWidgetId = candidate => {
-  return isString(candidate) && candidate.length === 4;
-};
+/**
+ * @param {Any} candidate
+ * @return {boolean}
+ */
+export function isWidgetId(candidate) {
+  return typeof candidate === 'string' && candidate.length === 4;
+}
 
-export const isProductCode = candidate => {
+/**
+ * @param {Any} candidate
+ * @return {boolean}
+ */
+export function isProductCode(candidate) {
   return candidate === 'shin' || candidate === 'shfs';
-};
+}
