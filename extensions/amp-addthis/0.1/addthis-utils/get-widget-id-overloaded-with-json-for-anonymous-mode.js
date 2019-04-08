@@ -13,10 +13,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-import {isBoolean} from './boolean';
-import {isFunction} from './function';
-import {isNumber} from './number';
-import {isString} from './string';
+import {dict} from '../../../../src/utils/object';
 
 const overrideKeys = ['backgroundColor', 'borderRadius', 'counterColor',
   'counts', 'countsFontSize', 'desktopPosition', 'elements', 'hideDevice',
@@ -36,39 +33,22 @@ const overrideKeys = ['backgroundColor', 'borderRadius', 'counterColor',
  * @param {AMP.BaseElement} self
  * @return {string} empty string means there is no override object
  */
-export const getWidgetOverload = self => {
-  const hasGetAttributeFunction = self && self.element &&
-    self.element.getAttribute && isFunction(self.element.getAttribute);
+export function getWidgetOverload(self) {
+  const hasGetAttributeFunction =
+    typeof self.element.getAttribute === 'function';
   if (!hasGetAttributeFunction) {
     return '';
   }
   const override = {};
   overrideKeys.forEach(item => {
     const data = self.element.getAttribute(`data-attr-${item}`);
-    if (isString(data) || isNumber(data) || isBoolean(data)) {
+    if (typeof data === 'string' ||
+      typeof data === 'number' ||
+      typeof data === 'boolean') {
       override[String(item)] = data;
     }
   });
-  const keys = override && Object.keys(override);
-  let returnValue = '';
-  let isFirstItem = true;
-  if (keys && keys.length > 0) {
-    returnValue = '{';
-    keys.forEach(function(key) {
-      if (!isFirstItem) {
-        returnValue += ',';
-      } else {
-        isFirstItem = false;
-      }
-      returnValue += `"${key}":`;
-      const value = override[key];
-      if (isString(value)) {
-        returnValue += `"${override[key]}"`;
-      } else if (isNumber(value) || isBoolean(value)) {
-        returnValue += value;
-      }
-    });
-    returnValue += '}';
-  }
-  return returnValue;
-};
+  const overrideDict = dict({...override});
+
+  return JSON.stringify(overrideDict);
+}
