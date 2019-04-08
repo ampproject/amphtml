@@ -101,6 +101,7 @@ import {escapeCssSelectorIdent} from '../../../src/css';
 import {findIndex} from '../../../src/utils/array';
 import {getConsentPolicyState} from '../../../src/consent';
 import {getDetail} from '../../../src/event-helper';
+import {getMediaQueryService} from './amp-story-media-query-service';
 import {getMode} from '../../../src/mode';
 import {isExperimentOn} from '../../../src/experiments';
 import {parseQueryString} from '../../../src/url';
@@ -453,12 +454,45 @@ export class AmpStory extends AMP.BaseElement {
 
   /** @private */
   initializeStyles_() {
-    const styleEl = document.querySelector('style[amp-custom]');
-    if (!styleEl) {
-      return;
+    const mediaQueryEls =
+        this.element.querySelectorAll('media-query');
+
+    if (mediaQueryEls.length) {
+      this.initializeMediaQueries_(mediaQueryEls);
     }
 
-    this.rewriteStyles_(styleEl);
+    const styleEl = document.querySelector('style[amp-custom]');
+
+    if (styleEl) {
+      this.rewriteStyles_(styleEl);
+    }
+  }
+
+  /**
+   * Registers the media queries
+   * @param {!NodeList<!Element>} mediaQueryEls
+   * @private
+   */
+  initializeMediaQueries_(mediaQueryEls) {
+    const service = getMediaQueryService(this.getAmpDoc());
+
+    const onMediaQueryMatch = (matches, attribute) => {
+      this.mutateElement(() => {
+        matches ?
+          this.element.setAttribute(attribute, '') :
+          this.element.removeAttribute(attribute);
+      });
+    };
+
+    mediaQueryEls.forEach(el => {
+      const attribute = el.getAttribute('attribute');
+      const media = el.getAttribute('media');
+
+      if (attribute && media) {
+        service.onMediaQueryMatch(
+            media, matches => onMediaQueryMatch(matches, attribute));
+      }
+    });
   }
 
   /**

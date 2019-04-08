@@ -388,6 +388,15 @@ export class Services {
   }
 
   /**
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @return {?../extensions/amp-story/1.0/amp-story-media-query-service.AmpStoryMediaQueryService}
+   */
+  static storyMediaQueryService(elementOrAmpDoc) {
+    return (/** @type {?../extensions/amp-story/1.0/amp-story-media-query-service.AmpStoryMediaQueryService} */
+      (getExistingServiceOrNull(elementOrAmpDoc, 'story-media-query')));
+  }
+
+  /**
    * @param {!Window} win
    * @return {?../extensions/amp-story/1.0/amp-story-request-service.AmpStoryRequestService}
    */
