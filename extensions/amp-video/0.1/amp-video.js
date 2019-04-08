@@ -33,18 +33,18 @@ import {dev, devAssert} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {htmlFor} from '../../../src/static-template';
 import {
+  installObjectCropStyles,
+  setImportantStyles,
+  setInitialDisplay,
+  setStyles,
+} from '../../../src/style';
+import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listen} from '../../../src/event-helper';
 import {mutedOrUnmutedEvent} from '../../../src/iframe-video';
-import {
-  installObjectCropStyles,
-  setImportantStyles,
-  setInitialDisplay,
-  setStyles,
-} from '../../../src/style';
 import {toArray} from '../../../src/types';
 
 const TAG = 'amp-video';
