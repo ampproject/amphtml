@@ -1045,6 +1045,17 @@ export class Resources {
     let relayoutAll = false;
     if (this.useLayers_) {
       this.layers_.dirty(element);
+      // Bust the Resource's cached measure state, which is independent of
+      // Layers's measurements.
+      if (element.classList.contains('i-amphtml-element')) {
+        const r = Resource.forElement(element);
+        r.requestMeasure();
+      }
+      const ampElements = element.getElementsByClassName('i-amphtml-element');
+      for (let i = 0; i < ampElements.length; i++) {
+        const r = Resource.forElement(ampElements[i]);
+        r.requestMeasure();
+      }
       // Remeasures can result in a doc height change.
       this.maybeChangeHeight_ = true;
     } else {
