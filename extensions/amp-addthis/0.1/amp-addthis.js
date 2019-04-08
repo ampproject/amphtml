@@ -63,7 +63,7 @@ import {
   getAddThisMode, isProductCode, isPubId, isWidgetId,
 } from './addthis-utils/mode';
 import {getWidgetOverload}
-  from './addthis-utils/getWidgetIdOverloadedWithJSONForAnonymousMode';
+  from './addthis-utils/get-widget-id-overloaded-with-json-for-anonymous-mode';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listen} from '../../../src/event-helper';
 import {parseUrlDeprecated} from '../../../src/url';
