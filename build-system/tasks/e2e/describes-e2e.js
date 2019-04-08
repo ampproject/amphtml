@@ -352,6 +352,11 @@ async function getController({engine = 'selenium', headless = false}) {
     const driver = await createSelenium({headless});
     return new SeleniumWebDriverController(driver);
   }
+
+  if (engine == 'gecko') {
+    const driver = await createGecko({headless});
+    return new SeleniumWebDriverController(driver);
+  }
 }
 
 /**
