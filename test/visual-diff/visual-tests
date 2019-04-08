@@ -585,6 +585,8 @@
       "interactive_tests": "examples/visual-tests/amp-story/amp-story-tooltip.js"
     },
     {
+      // TODO(#21665): Re-enable test.
+      "flaky": true,
       "url": "examples/visual-tests/amp-story/amp-story-tooltip.html",
       "name": "amp-story: tooltip desktop",
       "viewport": {"width": 1440, "height": 900},
@@ -631,6 +633,8 @@
       "interactive_tests": "examples/visual-tests/amp-story/amp-story-page-attachment-desktop.js"
     },
     {
+      // TODO(#21749): Re-enable test.
+      "flaky": true,
       "url": "examples/visual-tests/amp-story/amp-story-landscape-templates.html",
       "name": "amp-story: landscape templates",
       "viewport": {"width": 1440, "height": 900},
