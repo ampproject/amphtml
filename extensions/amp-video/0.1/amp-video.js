@@ -33,18 +33,18 @@ import {dev, devAssert} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {htmlFor} from '../../../src/static-template';
 import {
-  installObjectCropStyles,
-  setImportantStyles,
-  setInitialDisplay,
-  setStyles,
-} from '../../../src/style';
-import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listen} from '../../../src/event-helper';
 import {mutedOrUnmutedEvent} from '../../../src/iframe-video';
+import {
+  propagateObjectFitStyles,
+  setImportantStyles,
+  setInitialDisplay,
+  setStyles,
+} from '../../../src/style';
 import {toArray} from '../../../src/types';
 
 const TAG = 'amp-video';
@@ -207,7 +207,7 @@ class AmpVideo extends AMP.BaseElement {
         /* opt_removeMissingAttrs */ true);
     this.installEventHandlers_();
     this.applyFillContent(this.video_, true);
-    installObjectCropStyles(this.element, this.video_);
+    propagateObjectFitStyles(this.element, this.video_);
 
     this.createPosterForAndroidBug_();
     element.appendChild(this.video_);

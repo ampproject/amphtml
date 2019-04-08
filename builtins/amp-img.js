@@ -18,9 +18,9 @@ import {BaseElement} from '../src/base-element';
 import {Layout, isLayoutSizeDefined} from '../src/layout';
 import {dev} from '../src/log';
 import {guaranteeSrcForSrcsetUnsupportedBrowsers} from '../src/utils/img';
-import {installObjectCropStyles, setImportantStyles} from '../src/style';
 import {isExperimentOn} from '../src/experiments';
 import {listen} from '../src/event-helper';
+import {propagateObjectFitStyles, setImportantStyles} from '../src/style';
 import {registerElement} from '../src/service/custom-element-registry';
 
 /**
@@ -152,7 +152,7 @@ export class AmpImg extends BaseElement {
       this.maybeGenerateSizes_();
     }
     this.applyFillContent(this.img_, true);
-    installObjectCropStyles(this.element, this.img_);
+    propagateObjectFitStyles(this.element, this.img_);
 
     this.element.appendChild(this.img_);
   }

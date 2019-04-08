@@ -342,7 +342,7 @@ export function resetStyles(element, properties) {
  * @param {!Element} element ie: amp-img
  * @param {!Element} childElement ie: the img within amp-img
  */
-export function installObjectCropStyles(element, childElement) {
+export function propagateObjectFitStyles(element, childElement) {
   if (element.hasAttribute('object-fit')) {
     setStyle(childElement, 'object-fit', element.getAttribute('object-fit'));
   }
