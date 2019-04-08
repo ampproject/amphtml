@@ -21,45 +21,55 @@ const pubmineOptional = ['section', 'pt', 'ht'],
     pubmineURL = 'https://s.pubmine.com/head.js';
 
 /**
+ * @param {!Object} data
+ */
+function initMasterFrame(data) {
+  window.__ATA_PP = {
+    pt: 'pt' in data ? data.pt : 1,
+    ht: 'ht' in data ? data.ht : 1,
+    tn: 'amp',
+    amp: true,
+  };
+  window.__ATA = global.__ATA || {};
+  window.__ATA.cmd = global.__ATA.cmd || [];
+  writeScript(global, pubmineURL);
+}
+
+/**
+ * @param {string} slotId
+ */
+function createSlot(slotId) {
+  const containerEl = document.getElementById('c');
+  const adSlot = document.createElement('div');
+  adSlot.setAttribute('id', slotId);
+  containerEl.appendChild(adSlot);
+}
+/**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function pubmine(global, data) {
   validateData(data, pubmineRequired, pubmineOptional);
 
-  global.__ATA_PP = {
-    renderStartCallback: () => global.context.renderStart(),
-    pt: 'pt' in data ? data.pt : 1,
-    ht: 'ht' in data ? data.ht : 1,
-    tn: 'amp',
-    amp: true,
+  const sectionId = data['siteid'] + ('section' in data ? data.section : '1');
+
+  const slotConfig = {
+    sectionId,
+    height: data.height == 250 ? 250 : data.height - 15,
+    width: data.width,
+    window: global,
+    renderStart: global.context.renderStart,
   };
 
-  global.__ATA = global.__ATA || {};
-  global.__ATA.cmd = global.__ATA.cmd || [];
-  global.__ATA.criteo = global.__ATA.criteo || {};
-  global.__ATA.criteo.cmd = global.__ATA.criteo.cmd || [];
-  writeScript(global, pubmineURL);
+  const slotId = `atatags-${sectionId}`;
 
-  const o = {
-        sectionId: data['siteid'] + ('section' in data ? data.section : '1'),
-        height: data.height == 250 ? 250 : data.height - 15,
-        width: data.width,
-      },
-      wr = global.document.write;
-
-  wr.call(global.document,
-      `<div id="atatags-${o.sectionId}">
-        <script type="text/javascript">
-          __ATA.cmd.push(function() {
-            __ATA.initSlot('atatags-${o.sectionId}', {
-              collapseEmpty: 'before',
-              sectionId: ${o.sectionId},
-              width: ${o.width},
-              height: ${o.height}
-            });
-          });
-        </script>
-      </div>`
-  );
+  createSlot(slotId);
+  const {isMaster} = global.context;
+  if (isMaster) {
+    initMasterFrame(data);
+  }
+  const master = isMaster ? global : global.context.master;
+  master.__ATA.cmd.push(function() {
+    master.__ATA.initSlot(slotId, slotConfig);
+  });
 }
