@@ -329,14 +329,14 @@ export class WebPushService {
    * @return {Promise<ServiceWorkerRegistrationMessage>}
    */
   registerServiceWorker() {
+    const swUrl = this.config_['service-worker-url'];
+    const swScope = this.config_['service-worker-scope'];
+
     return this.queryHelperFrame_(
         WindowMessenger.Topics.SERVICE_WORKER_REGISTRATION,
         {
-          workerUrl: this.config_['service-worker-url'],
-          registrationOptions: this.config_.serviceWorkerRegistrationOptions ||
-            {
-              scope: '/',
-            },
+          workerUrl: swUrl,
+          registrationOptions: (swScope ? {scope: swScope} : {}),
         }
     );
   }

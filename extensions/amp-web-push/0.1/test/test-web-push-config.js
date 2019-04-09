@@ -35,6 +35,8 @@ describes.realWin('web-push-config', {
       'https://a.com/webpush/amp/subscribe?https=1';
     webPushConfig[WebPushConfigAttributes.SERVICE_WORKER_URL] =
       'https://a.com/service-worker.js?param=value';
+    webPushConfig[WebPushConfigAttributes.SERVICE_WORKER_SCOPE] =
+      '/';
     return webPushConfig;
   }
 
@@ -51,6 +53,8 @@ describes.realWin('web-push-config', {
         attributes[WebPushConfigAttributes.PERMISSION_DIALOG_URL]);
     element.setAttribute(WebPushConfigAttributes.SERVICE_WORKER_URL,
         attributes[WebPushConfigAttributes.SERVICE_WORKER_URL]);
+    element.setAttribute(WebPushConfigAttributes.SERVICE_WORKER_SCOPE,
+        attributes[WebPushConfigAttributes.SERVICE_WORKER_SCOPE]);
     element.setAttribute('id', TAG);
     win.document.body.appendChild(element);
     return element;
@@ -81,21 +85,23 @@ describes.realWin('web-push-config', {
     });
   });
 
-  it('should fail if any attribute is missing', () => {
+  it('should fail if any mandatory attribute is missing', () => {
     const promises = [];
     for (const attribute in WebPushConfigAttributes) {
       const configName = WebPushConfigAttributes[attribute];
-      const promise = env.ampdoc.whenReady().then(() => {
-        removeAllWebPushConfigElements();
-        webPushConfig = setDefaultWebPushConfig();
-        delete webPushConfig[configName];
-        const element = createConfigElementWithAttributes(webPushConfig);
-        expect(() => {
-          element.implementation_.validate();
-        }).to.throw(
-            new RegExp('must have a valid ' + configName + ' attribute'));
-      });
-      promises.push(promise);
+      if (configName !== WebPushConfigAttributes.SERVICE_WORKER_SCOPE) {
+        const promise = env.ampdoc.whenReady().then(() => {
+          removeAllWebPushConfigElements();
+          webPushConfig = setDefaultWebPushConfig();
+          delete webPushConfig[configName];
+          const element = createConfigElementWithAttributes(webPushConfig);
+          expect(() => {
+            element.implementation_.validate();
+          }).to.throw(
+              new RegExp('must have a valid ' + configName + ' attribute'));
+        });
+        promises.push(promise);
+      }
     }
     return Promise.all(promises);
   });
