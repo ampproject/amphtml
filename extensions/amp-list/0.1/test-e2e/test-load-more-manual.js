@@ -31,7 +31,7 @@ describes.endtoend('AMP list load-more=manual', {
     controller = env.controller;
   });
 
-  it('should render correctly', async() => {
+  it.skip('should render correctly', async() => {
     const listItems = await controller.findElements('.item');
     await expect(listItems).to.have.length(2);
     const seeMore = await controller.findElement('[load-more-button]');
@@ -58,7 +58,7 @@ describes.endtoend('AMP list load-more=manual', {
     await controller.takeScreenshot('screenshots/amp-list-load-more.png');
   });
 
-  it('should load more items on click', async() => {
+  it.skip('should load more items on click', async() => {
     let listItems = await controller.findElements('.item');
     await expect(listItems).to.have.length(2);
     const seeMore = await controller.findElement('[load-more-button]');
@@ -81,7 +81,7 @@ describes.endtoend('AMP list load-more=manual', {
   });
 
 
-  it('should show load-more-end when done', async() => {
+  it.skip('should show load-more-end when done', async() => {
     const seeMore = await controller.findElement('[load-more-button]');
     await controller.click(seeMore);
     await controller.findElement('div.item:nth-child(4)');
