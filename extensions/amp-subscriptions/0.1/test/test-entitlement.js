@@ -47,7 +47,7 @@ describes.realWin('EntitlementClass', {}, () => {
   it('should not return the decrypted key in the json', () => {
     const raw = 'raw';
     const entitlement = new Entitlement({source, raw, service, granted,
-      grantReason, dataObject, 'decryptedDocumentKey'});
+      grantReason, dataObject, decryptedDocumentKey: 'decryptedDocumentKey'});
     expect(entitlement.json().decryptedDocumentKey).to.be.undefined;
   });
 

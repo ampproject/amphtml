@@ -52,6 +52,14 @@ env => {
     serviceAdapter = new ServiceAdapter(subscriptionService);
   });
 
+  describe('getEncryptedDocumentKey', () => {
+    it('should call getEncryptedDocumentKey of subscription service', () => {
+      const stub = sandbox.stub(subscriptionService, 'getEncryptedDocumentKey');
+      serviceAdapter.getEncryptedDocumentKey('serviceId');
+      expect(stub).to.be.calledOnce;
+    });
+  });
+
   describe('getPageConfig', () => {
     it('should call getPageConfig of subscription service', () => {
       const stub = sandbox.stub(subscriptionService, 'getPageConfig')

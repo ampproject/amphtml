@@ -1013,11 +1013,10 @@ app.use('/bind/ecommerce/sizes', (req, res) => {
   }, 1000); // Simulate network delay.
 });
 
-//todo:chenshay: accept '?crypto=bla'
 /*
+//TODO(chenshay): Accept '?crypto=bla'
 implement authorizer here.
 this is for local testing.
-
 */
 
 // Simulated subscription entitlement
