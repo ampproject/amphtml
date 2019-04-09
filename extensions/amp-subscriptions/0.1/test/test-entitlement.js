@@ -31,6 +31,7 @@ describes.realWin('EntitlementClass', {}, () => {
       token: 'token',
     },
   };
+
   it('should give json representation of the object', () => {
     const raw = 'raw';
     const entitlement = new Entitlement({source, raw, service, granted,

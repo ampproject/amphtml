@@ -92,6 +92,8 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
   it('should fetch the entitlements on getEntitlements', () => {
     const fetchStub = sandbox.stub(localSubscriptionPlatform.xhr_, 'fetchJson')
         .callsFake(() => Promise.resolve({json: () => Promise.resolve(json)}));
+    sandbox.stub(localSubscriptionPlatform.serviceAdapter_,
+        'getEncryptedDocumentKey');
     return localSubscriptionPlatform.getEntitlements().then(() => {
       expect(fetchStub).to.be.calledOnce;
       expect(fetchStub.getCall(0).args[0]).to.be.equals(authUrl);
@@ -106,9 +108,21 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
         'buildUrl').callsFake(() => Promise.resolve(builtUrl));
     const fetchStub = sandbox.stub(localSubscriptionPlatform.xhr_,'fetchJson')
         .callsFake(() => Promise.resolve({json: () => Promise.resolve(json)}));
+    sandbox.stub(localSubscriptionPlatform.serviceAdapter_,
+        'getEncryptedDocumentKey');
     return localSubscriptionPlatform.getEntitlements().then(() => {
       expect(urlBuildingStub).to.be.calledWith(configAuthUrl, false);
       expect(fetchStub).to.be.calledWith(builtUrl, {credentials: 'include'});
+    });
+  });
+
+  it('should call getEncryptedDocumentKey with google.com', () => {
+    const getEncryptedDocumentKeyStub = sandbox.stub(
+        localSubscriptionPlatform.serviceAdapter_,
+        'getEncryptedDocumentKey'
+    );
+    return localSubscriptionPlatform.getEntitlements().then(() => {
+      expect(getEncryptedDocumentKeyStub).to.be.calledWith('google.com');
     });
   });
 
