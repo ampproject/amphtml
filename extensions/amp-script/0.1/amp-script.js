@@ -20,7 +20,6 @@ import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {UserActivationTracker} from './user-activation-tracker';
 import {
-  WorkerDom,
   upgrade,
 } from '@ampproject/worker-dom/dist/unminified.index.safe.mjs.patched';
 import {
@@ -41,6 +40,7 @@ const MAX_SCRIPT_SIZE = 150000;
  */
 const MAX_FREE_MUTATION_HEIGHT = 300;
 
+const PHASE_HYDRATING = 1;
 const PHASE_MUTATING = 2;
 
 export class AmpScript extends AMP.BaseElement {
@@ -54,7 +54,7 @@ export class AmpScript extends AMP.BaseElement {
     /** @private @const {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(this.win);
 
-    /** @private {?WorkerDom} */
+    /** @private {?Worker} */
     this.workerDom_ = null;
 
     /** @private {?UserActivationTracker} */
@@ -103,17 +103,20 @@ export class AmpScript extends AMP.BaseElement {
             + MAX_SCRIPT_SIZE);
         return [];
       }
-      return [workerScript, authorScript, authorUrl];
+      return [workerScript, authorScript];
     });
 
+    // WorkerDOMConfiguration
     const workerConfig = {
       authorURL: authorUrl,
+      mutationPump: this.mutationPump_.bind(this),
+      longTask: promise => {
+        this.userActivation_.expandLongTask(promise);
+        // TODO(dvoytenko): consider additional "progress" UI.
+      },
+      // Callbacks.
       onCreateWorker: data => {
         dev().info(TAG, 'Create worker:', data);
-      },
-      onHydration: () => {
-        dev().info(TAG, 'Hydrated!');
-        this.element.classList.add('i-amphtml-hydrated');
       },
       onSendMessage: data => {
         dev().info(TAG, 'To worker:', data);
@@ -185,6 +188,10 @@ export class AmpScript extends AMP.BaseElement {
    * @private
    */
   mutationPump_(flush, phase) {
+    if (phase == PHASE_HYDRATING) {
+      this.vsync_.mutate(
+          () => this.element.classList.add('i-amphtml-hydrated'));
+    }
     const allowMutation = (
       // Hydration is always allowed.
       phase != PHASE_MUTATING
@@ -207,11 +214,6 @@ export class AmpScript extends AMP.BaseElement {
     this.element.classList.add('i-amphtml-broken');
     user().error(TAG, '"amp-script" is terminated due to unallowed mutation.');
   }
-}
-
-/** @return {!Function} */
-export function getWorkerDomClassForTesting() {
-  return WorkerDom;
 }
 
 AMP.extension('amp-script', '0.1', function(AMP) {
