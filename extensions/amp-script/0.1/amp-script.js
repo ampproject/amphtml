@@ -15,16 +15,14 @@
  */
 
 import {CSS} from '../../../build/amp-script-0.1.css';
+import {DomPurifyDef, createPurifier} from '../../../src/purifier';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {UserActivationTracker} from './user-activation-tracker';
 import {
   WorkerDom,
-  sanitizer,
   upgrade,
 } from '@ampproject/worker-dom/dist/unminified.index.safe.mjs.patched';
-// TODO(choumx): Avoid bundling an extra copy of DOMPurify here.
-import {addPurifyHooks, purifyConfig} from '../../../src/purifier';
 import {
   calculateExtensionScriptUrl,
 } from '../../../src/service/extension-location';
@@ -61,6 +59,12 @@ export class AmpScript extends AMP.BaseElement {
 
     /** @private {?UserActivationTracker} */
     this.userActivation_ = null;
+
+    /** @private {?DomPurifyDef} */
+    this.purifier_ = null;
+
+    /** @private {?Element} */
+    this.wrapper_ = null;
   }
 
   /** @override */
@@ -78,31 +82,20 @@ export class AmpScript extends AMP.BaseElement {
 
     this.userActivation_ = new UserActivationTracker(this.element);
 
-    // Configure worker-dom's sanitizer with AMP-specific config and hooks.
-    const config = purifyConfig();
-    sanitizer.configure(config, {
-      'beforeSanitize': purify => {
-        addPurifyHooks(purify, /* diffing */ false);
-      },
-      'afterSanitize': purify => {
-        purify.removeAllHooks();
-      },
-      'nodeWasRemoved': node => {
-        user().warn(TAG, 'Node was sanitized:', node);
-      },
-    });
+    this.wrapper_ = this.win.document.createElement('div');
+    this.purifier_ = createPurifier({'IN_PLACE': true});
+
     // Create worker and hydrate.
     const authorUrl = this.element.getAttribute('src');
     const workerUrl = this.workerThreadUrl_();
     dev().info(TAG, 'Author URL:', authorUrl, ', worker URL:', workerUrl);
 
     const xhr = Services.xhrFor(this.win);
-    const fetches = Promise.all([
+    const fetchPromise = Promise.all([
       // `workerUrl` is from CDN, so no need for `ampCors`.
       xhr.fetchText(workerUrl, {ampCors: false}).then(r => r.text()),
       xhr.fetchText(authorUrl).then(r => r.text()),
-    ]);
-    upgrade(this.element, fetches.then(results => {
+    ]).then(results => {
       const workerScript = results[0];
       const authorScript = results[1];
       if (authorScript.length > MAX_SCRIPT_SIZE) {
@@ -111,9 +104,10 @@ export class AmpScript extends AMP.BaseElement {
         return [];
       }
       return [workerScript, authorScript, authorUrl];
-    }),
-    // Configure callbacks.
-    {
+    });
+
+    const workerConfig = {
+      authorURL: authorUrl,
       onCreateWorker: data => {
         dev().info(TAG, 'Create worker:', data);
       },
@@ -132,8 +126,41 @@ export class AmpScript extends AMP.BaseElement {
         this.userActivation_.expandLongTask(promise);
         // TODO(dvoytenko): consider additional "progress" UI.
       },
-    },
-    /* debug */ true).then(workerDom => {
+      sanitizer: {
+        sanitize: node => {
+          // DOMPurify sanitizes unsafe nodes by detaching them from parents.
+          // So, an unsafe `node` that has no parent will cause a runtime error.
+          // To avoid this, wrap `node` in a <div> if it has no parent.
+          const useWrapper = !node.parentNode;
+          if (useWrapper) {
+            this.wrapper_.appendChild(node);
+          }
+          const parent = node.parentNode || this.wrapper_;
+          this.purifier_.sanitize(parent);
+          const clean = parent.firstChild;
+          if (!clean) {
+            dev().info(TAG, 'Sanitized node:', node);
+            return false;
+          }
+          // Detach `node` if we used a wrapper div.
+          if (useWrapper) {
+            while (this.wrapper_.firstChild) {
+              this.wrapper_.removeChild(this.wrapper_.firstChild);
+            }
+          }
+          return true;
+        },
+        validAttribute: (tag, attr, value) => {
+          return this.purifier_.isValidAttribute(tag, attr, value);
+        },
+        validProperty: (tag, prop, value) => {
+          return this.purifier_.isValidAttribute(tag, prop, value);
+        },
+      },
+    };
+
+    const debug = true;
+    upgrade(this.element, fetchPromise, workerConfig, debug).then(workerDom => {
       this.workerDom_ = workerDom;
     });
     return Promise.resolve();

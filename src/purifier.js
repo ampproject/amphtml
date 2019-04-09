@@ -32,8 +32,9 @@ import purify from 'dompurify/dist/purify.es';
 /**
  * @typedef {{addHook: !Function, removeAllHooks: !Function, sanitize: !Function}}
  */
-let DomPurifyDef;
+export let DomPurifyDef;
 
+// TODO(choumx): Convert this into a class to avoid import side effects.
 /** @private @const {!DomPurifyDef} */
 const DomPurify = purify(self);
 
@@ -83,6 +84,18 @@ export function purifyHtml(dirty, diffing = false) {
 }
 
 /**
+ * @param {!JsonObject=} opt_config
+ * @return {!DomPurifyDef}
+ */
+export function createPurifier(opt_config) {
+  const domPurify = purify(self);
+  const config = Object.assign(opt_config || {}, purifyConfig());
+  domPurify.setConfig(config);
+  addPurifyHooks(domPurify, /* diffing */ false);
+  return domPurify;
+}
+
+/**
  * Returns DOMPurify config for normal, escaped templates.
  * Do not use for unescaped templates.
  *
@@ -93,7 +106,7 @@ export function purifyHtml(dirty, diffing = false) {
  *
  * @return {!DomPurifyConfig}
  */
-export function purifyConfig() {
+function purifyConfig() {
   const config = Object.assign({}, PURIFY_CONFIG, /** @type {!DomPurifyConfig} */ ({
     ADD_ATTR: WHITELISTED_ATTRS,
     FORBID_TAGS: Object.keys(BLACKLISTED_TAGS),
@@ -113,7 +126,7 @@ export function purifyConfig() {
  * @param {!DomPurifyDef} purifier
  * @param {boolean} diffing
  */
-export function addPurifyHooks(purifier, diffing) {
+function addPurifyHooks(purifier, diffing) {
   // Reference to DOMPurify's `allowedTags` whitelist.
   let allowedTags;
   const allowedTagsChanges = [];
