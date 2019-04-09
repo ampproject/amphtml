@@ -377,10 +377,25 @@ export class Bind {
    *
    * @param {!Array<!Element>} addedElements
    * @param {!Array<!Element>} removedElements
-   * @param {number} timeout Timeout in milliseconds.
+   * @param {number=} opt_timeout Timeout in milliseconds.
    * @return {!Promise}
    */
-  scanAndApply(addedElements, removedElements, timeout = 2000) {
+  scanAndApply(addedElements, removedElements, opt_timeout) {
+    // TODO(choumx): Dependency on init may be removed if we skip elements
+    // with .i-amphtml-binding during tree walk and extract macro setup.
+    return this.initializePromise_.then(() => {
+      return this.rescan_(addedElements, removedElements, opt_timeout || 2000);
+    });
+  }
+
+  /**
+   * @param {!Array<!Element>} addedElements
+   * @param {!Array<!Element>} removedElements
+   * @param {number} timeout
+   * @return {!Promise}
+   * @private
+   */
+  rescan_(addedElements, removedElements, timeout) {
     dev().info(TAG, 'rescan:', addedElements, removedElements);
     /**
      * Helper function for cleaning up bindings in removed elements.

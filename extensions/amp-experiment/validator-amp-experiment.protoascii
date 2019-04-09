@@ -22,6 +22,7 @@ tags: {  # amp-experiment
   extension_spec: {
     name: "amp-experiment"
     version: "0.1"
+    version: "1.0"
     version: "latest"
     requires_usage: GRANDFATHERED
     deprecated_allow_duplicates: true
