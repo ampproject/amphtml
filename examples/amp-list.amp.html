@@ -60,7 +60,7 @@
 
   <!-- ## Using alternative supported custom mustache delimiters -->
   <amp-list width="auto" height="100" layout="fixed-height" src="list.example.json" class="m1" reset-on-refresh>
-    <template type="amp-mustache" custom-delimiters="#-,-#">
+    <template type="amp-mustache" custom-delimiters="#- -#">
       <div><a href="#-url-#">#-title-#</a></div>
     </template>
   </amp-list>
@@ -85,7 +85,7 @@
 
   <!-- ## Using a script template with custom mustache delimiters. -->
   <amp-list width="auto" height="100" layout="fixed-height" src="comments.example.json">
-    <script type="text/plain" template="amp-mustache" custom-delimiters="#-,-#">
+    <script type="text/plain" template="amp-mustache" custom-delimiters="#- -#">
       <table>
         <tr>
           <td>Comment:</td>

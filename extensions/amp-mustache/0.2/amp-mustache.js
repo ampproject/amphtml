@@ -100,7 +100,7 @@ export class AmpMustache extends AMP.BaseTemplate {
     const {element} = this;
     if (element.hasAttribute(CUSTOM_DELIMITERS_ATTR)) {
       const delimitersStr = element.getAttribute(CUSTOM_DELIMITERS_ATTR);
-      delimiters = delimitersStr.split(',');
+      delimiters = delimitersStr.split(' ');
       userAssert(delimiters.length == 2,
           'Beginning and ending delimiter is required: %s.', element);
       userAssert(this.validDelimiters_(delimiters),

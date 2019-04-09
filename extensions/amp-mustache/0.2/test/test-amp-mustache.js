@@ -105,14 +105,14 @@ describes.repeated('amp-mustache 0.2', {
     });
 
     it('should not allow invalid delimiters', () => {
-      templateElement.setAttribute('custom-delimiters', '=,');
+      templateElement.setAttribute('custom-delimiters', '= ^');
       templateElement./*OK*/innerHTML =
           'value = <<%value%> href="https://www.test.org">abc</<%value%>>';
       expect(() => {
         template.compileCallback();
       }).to.throw(/Empty space and "=" are invalid delimiters/);
 
-      templateElement.setAttribute('custom-delimiters', '<%,=');
+      templateElement.setAttribute('custom-delimiters', '<% =');
       templateElement./*OK*/innerHTML =
           'value = <<%value%> href="https://www.test.org">abc</<%value%>>';
       expect(() => {
@@ -124,7 +124,7 @@ describes.repeated('amp-mustache 0.2', {
       // Note that we set a non whitelisted delimiter here. But the
       // validator actually enforces only the usage of a restricted
       // set. See /amp-mustache/validator-amp-mustache.protoascii
-      templateElement.setAttribute('custom-delimiters', '<%,%>');
+      templateElement.setAttribute('custom-delimiters', '<% %>');
       templateElement./*OK*/innerHTML =
           'value = <<%value%> href="https://www.test.org">abc</<%value%>>';
       template.compileCallback();
@@ -136,7 +136,7 @@ describes.repeated('amp-mustache 0.2', {
     });
 
     it('should allow for mismatched custom delimiters', () => {
-      templateElement.setAttribute('custom-delimiters', '<%,}}');
+      templateElement.setAttribute('custom-delimiters', '<% }}');
       templateElement./*OK*/innerHTML =
           'value = <<%value}}> href="https://www.test.org">abc</<%value}}>';
       template.compileCallback();
