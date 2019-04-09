@@ -104,10 +104,9 @@ module.exports.format = function(logger) {
     let report = file.relative + ': ';
     if (validationResult.status === STATUS_PASS) {
       report += colors.green(validationResult.status);
-      report += '\nReview our \'Publishing checklist\' to ensure '
+      report += '\nReview our \'publishing checklist\' to ensure '
           + 'successful AMP document distribution. '
-          + 'https://amp.dev/documentation/guides-and-tutorials/'
-          + 'optimize-and-measure/publishing_checklist.html?format=websites';
+          + 'See https://bit.ly/2D54tM9';
     } else if (validationResult.status === STATUS_UNKNOWN) {
       report += colors.red(validationResult.status);
     } else {

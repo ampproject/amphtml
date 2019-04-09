@@ -5932,10 +5932,8 @@ amp.validator.ValidationResult.prototype.outputToTerminal = function(
   const {status} = this;
   if (status === amp.validator.ValidationResult.Status.PASS) {
     terminal.info('AMP validation successful.');
-    terminal.info('Review our \'Publishing checklist\' to ensure '
-        + 'successful AMP document distribution. '
-        + 'https://amp.dev/documentation/guides-and-tutorials/'
-        + 'optimize-and-measure/publishing_checklist.html?format=websites');
+    terminal.info('Review our \'publishing checklist\' to ensure '
+        + 'successful AMP document distribution. See https://bit.ly/2D54tM9');
     if (this.errors.length === 0) {
       return;
     }
