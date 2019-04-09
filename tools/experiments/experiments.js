@@ -394,19 +394,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18897',
   },
   {
-    id: 'scroll-height-bounce',
-    name: 'Bounces the scrolling when scroll height changes' +
-        ' (fix for #18861 and #8798)',
-    spec: 'https://github.com/ampproject/amphtml/issues/18861',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/19004',
-  },
-  {
-    id: 'scroll-height-minheight',
-    name: 'Forces min-height on body (fix for #18861 and #8798)',
-    spec: 'https://github.com/ampproject/amphtml/issues/18861',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/19004',
-  },
-  {
     id: 'amp-auto-lightbox',
     name: 'Automatically detects images to place in a lightbox.',
     spec: 'https://github.com/ampproject/amphtml/issues/20395',
