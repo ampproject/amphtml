@@ -734,7 +734,7 @@ describes.realWin('amp-analytics', {
     });
   });
 
-  describe('optout', () => {
+  describe('optout by function', () => {
 
     beforeEach(() => {
       sandbox.stub(AnalyticsConfig.prototype, 'loadConfig')
@@ -765,13 +765,55 @@ describes.realWin('amp-analytics', {
       });
     });
 
-    it('works for vendor config when optout returns false', function() {
+    it('works for vendor config when optout returns true', function() {
       win['foo'] = {'bar': function() { return true; }};
       const analytics = getAnalyticsTag(trivialConfig, {'type': 'testVendor'});
       return waitForNoSendRequest(analytics);
     });
 
     it('works for vendor config when optout is not defined', function() {
+      const analytics = getAnalyticsTag(trivialConfig, {'type': 'testVendor'});
+      return waitForSendRequest(analytics).then(() => {
+        requestVerifier.verifyRequest('https://example.com/bar');
+      });
+    });
+  });
+
+  describe('optout by id', () => {
+
+    beforeEach(() => {
+      sandbox.stub(AnalyticsConfig.prototype, 'loadConfig')
+          .returns(Promise.resolve({
+            'requests': {
+              'foo': {
+                baseUrl: 'https://example.com/bar',
+              },
+            },
+            'triggers': {
+              'pageview': {'on': 'visible', 'request': 'foo'},
+            },
+            'transport': {
+              'image': true,
+              'xhrpost': false,
+              'beacon': false,
+            },
+            'vars': {},
+            'optoutElementId': 'elementId',
+          }));
+    });
+
+    it('doesnt send hit when config optout id is found', function() {
+      const element = doc.createElement('script');
+      element.type = 'text/javascript';
+      element.id = 'elementId';
+      doc.documentElement.insertBefore(
+          element, doc.documentElement.firstChild);
+
+      const analytics = getAnalyticsTag(trivialConfig, {'type': 'testVendor'});
+      return waitForNoSendRequest(analytics);
+    });
+
+    it('sends hit when config optout id is not found', function() {
       const analytics = getAnalyticsTag(trivialConfig, {'type': 'testVendor'});
       return waitForSendRequest(analytics).then(() => {
         requestVerifier.verifyRequest('https://example.com/bar');

@@ -216,6 +216,18 @@ export class GoogleSubscriptionsPlatform {
   }
 
   /** @override */
+  isPrerenderSafe() {
+    /**
+     * If it's a google viewer then calling google for an
+     * entitlement at prerender time does not leak any private
+     * information.  If it's not a google viewer then we wait
+     * for the page to be visible to avoid leaking that the
+     * page was prerendered
+     */
+    return this.isGoogleViewer_;
+  }
+
+  /** @override */
   getEntitlements() {
     return this.runtime_.getEntitlements().then(swgEntitlements => {
       // Get and store the isReadyToPay signal which is independent of
