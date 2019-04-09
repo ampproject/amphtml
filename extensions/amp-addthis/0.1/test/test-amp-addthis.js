@@ -514,8 +514,6 @@ describes.realWin('amp-addthis', {
   });
 
   it('getWidgetOverload: self.element.getAttribute function argument', () => {
-    expect(getWidgetOverload({})).to.equal('');
-    expect(getWidgetOverload({element: {}})).to.equal('');
     const result = '{"counts":"none","numPreferredServices":5}';
     const mock = {
       'data-attr-counts': 'none',
