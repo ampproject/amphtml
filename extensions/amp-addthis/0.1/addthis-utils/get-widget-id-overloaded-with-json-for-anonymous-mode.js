@@ -34,12 +34,7 @@ const overrideKeys = ['backgroundColor', 'borderRadius', 'counterColor',
  * @return {string} empty string means there is no override object
  */
 export function getWidgetOverload(self) {
-  const hasGetAttributeFunction =
-    typeof self.element.getAttribute === 'function';
-  if (!hasGetAttributeFunction) {
-    return '';
-  }
-  const override = {};
+  const override = dict({});
   overrideKeys.forEach(item => {
     const data = self.element.getAttribute(`data-attr-${item}`);
     if (typeof data === 'string' ||
@@ -48,7 +43,6 @@ export function getWidgetOverload(self) {
       override[String(item)] = data;
     }
   });
-  const overrideDict = dict({...override});
-
-  return JSON.stringify(overrideDict);
+  const overrideString = JSON.stringify(override);
+  return overrideString === '{}' ? '' : overrideString;
 }
