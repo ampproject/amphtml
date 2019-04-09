@@ -24,14 +24,14 @@ const pubmineOptional = ['section', 'pt', 'ht'],
  * @param {!Object} data
  */
 function initMasterFrame(data) {
-  window.__ATA_PP = {
-    pt: 'pt' in data ? data.pt : 1,
-    ht: 'ht' in data ? data.ht : 1,
+  global['__ATA_PP'] = {
+    pt: data['pt'] ? data['pt'] : 1,
+    ht: data['ht'] ? data['ht'] : 1,
     tn: 'amp',
     amp: true,
   };
-  window.__ATA = global.__ATA || {};
-  window.__ATA.cmd = global.__ATA.cmd || [];
+  global['__ATA'] = global['__ATA'] || {};
+  global['__ATA']['cmd'] = global['__ATA']['cmd'] || [];
   writeScript(global, pubmineURL);
 }
 
@@ -51,7 +51,7 @@ function createSlot(slotId) {
 export function pubmine(global, data) {
   validateData(data, pubmineRequired, pubmineOptional);
 
-  const sectionId = data['siteid'] + ('section' in data ? data.section : '1');
+  const sectionId = data['siteid'] + (data['section'] ? data['section'] : '1');
 
   const slotConfig = {
     sectionId,
@@ -69,8 +69,8 @@ export function pubmine(global, data) {
     initMasterFrame(data);
   }
   const master = isMaster ? global : global.context.master;
-  master.__ATA.cmd.push(function() {
-    master.__ATA.insertStyles(global);
-    master.__ATA.initSlot(slotId, slotConfig);
+  master['__ATA']['cmd']['push'](function() {
+    master['__ATA']['insertStyles'](global);
+    master['__ATA']['initSlot'](slotId, slotConfig);
   });
 }
