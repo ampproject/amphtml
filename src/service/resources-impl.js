@@ -23,7 +23,12 @@ import {Services} from '../services';
 import {TaskQueue} from './task-queue';
 import {VisibilityState} from '../visibility-state';
 import {areMarginsChanged, expandLayoutRect} from '../layout-rect';
-import {closest, hasNextNodeInDocumentOrder} from '../dom';
+import {
+  closest,
+  hasNextNodeInDocumentOrder,
+  isAmpElement,
+  whenUpgradedToCustomElement,
+} from '../dom';
 import {computedStyle} from '../style';
 import {dev, devAssert} from '../log';
 import {dict, hasOwn} from '../utils/object';
@@ -49,6 +54,7 @@ const POST_TASK_PASS_DELAY_ = 1000;
 const MUTATE_DEFER_DELAY_ = 500;
 const FOCUS_HISTORY_TIMEOUT_ = 1000 * 60; // 1min
 const FOUR_FRAME_DELAY_ = 70;
+const MAX_BUILDS_IN_PRERENDER = 20;
 
 
 /**
@@ -217,6 +223,16 @@ export class Resources {
 
     /** @const @private {!Array<function()>} */
     this.passCallbacks_ = [];
+
+    /** @private {?TreeWalker} */
+    this.prerenderWalker_ = null;
+
+    /** @private {number} */
+    this.discoveredElementsToPrerenderCount_ = 0;
+
+    /** @private @const {boolean} */
+    this.useDocumentOrderPrerendering_ =
+        isExperimentOn(this.win, 'amp-prerender-in-document-order');
 
     /** @private @const {!FiniteStateMachine<!VisibilityState>} */
     this.visibilityStateMachine_ = new FiniteStateMachine(
@@ -542,7 +558,8 @@ export class Resources {
     // Most documents have 10 or less AMP tags. By building 20 we should not
     // change the behavior for the vast majority of docs, and almost always
     // catch everything in the first viewport.
-    return this.buildAttemptsCount_++ < 20 || this.viewer_.hasBeenVisible();
+    return this.buildAttemptsCount_++ < MAX_BUILDS_IN_PRERENDER ||
+        this.viewer_.hasBeenVisible();
   }
 
   /**
@@ -560,11 +577,15 @@ export class Resources {
     // During prerender mode, don't build elements that aren't allowed to be
     // prerendered. This avoids wasting our prerender build quota.
     // See grantBuildPermission() for more details.
-    const shouldBuildResource =
-        this.viewer_.getVisibilityState() != VisibilityState.PRERENDER
-        || resource.prerenderAllowed();
+    const isPrerendering =
+        this.viewer_.getVisibilityState() === VisibilityState.PRERENDER;
+    const shouldBuildResource = !isPrerendering || resource.prerenderAllowed();
 
     if (buildingEnabled && shouldBuildResource) {
+      if (isPrerendering && this.useDocumentOrderPrerendering_) {
+        this.prerenderElements_();
+        return;
+      }
       if (this.documentReady_) {
         // Build resource immediately, the document has already been parsed.
         this.buildResourceUnsafe_(resource, scheduleWhenBuilt);
@@ -575,6 +596,45 @@ export class Resources {
           this.buildReadyResources_(scheduleWhenBuilt);
         }
       }
+    }
+  }
+
+  /**
+   * Builds resources in document order during prerendering.
+   * @private
+   */
+  prerenderElements_() {
+    if (!this.prerenderWalker_) {
+      this.prerenderWalker_ = this.win.document.createTreeWalker(
+          this.ampdoc.getBody(), NodeFilter.SHOW_ELEMENT, null, false);
+    }
+
+    while (this.discoveredElementsToPrerenderCount_ < MAX_BUILDS_IN_PRERENDER &&
+        this.prerenderWalker_.nextNode()) {
+      const el = dev().assertElement(this.prerenderWalker_.currentNode);
+      if (!isAmpElement(el)) {
+        continue;
+      }
+      this.discoveredElementsToPrerenderCount_++;
+      whenUpgradedToCustomElement(el)
+          .then(() => el.whenUpgradeCompleted())
+          .then(() => {
+            if (this.viewer_.getVisibilityState() !==
+                VisibilityState.PRERENDER) {
+              return;
+            }
+            const r = Resource.forElement(el);
+            if (!r.prerenderAllowed()) {
+              return Promise.reject('disallowed prerender');
+            }
+            if (!r.isBuilt() && !r.isBuilding()) {
+              this.buildResourceUnsafe_(r, false);
+            }
+          })
+          .catch(() => { // If upgrade failed, or prerendering is disallowed.
+            this.discoveredElementsToPrerenderCount_--;
+            this.prerenderElements_();
+          });
     }
   }
 

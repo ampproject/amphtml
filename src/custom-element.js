@@ -432,6 +432,7 @@ function createBaseCustomElementClass(win) {
       this.implementation_.firstAttachedCallback();
       this.dispatchCustomEventForTesting(AmpEvents.ATTACHED);
       this.getResources().upgraded(this);
+      this.signals_.signal(CommonSignals.UPGRADED);
     }
 
     /** @private */
@@ -466,6 +467,15 @@ function createBaseCustomElementClass(win) {
      */
     whenBuilt() {
       return this.signals_.whenSignal(CommonSignals.BUILT);
+    }
+
+    /**
+     * Returns the promise that's resolved when the element has been upgraded.
+     * If the upgrades fails, the resulting promise is rejected.
+     * @return {!Promise}
+     */
+    whenUpgradeCompleted() {
+      return this.signals_.whenSignal(CommonSignals.UPGRADED);
     }
 
     /**
@@ -879,6 +889,8 @@ function createBaseCustomElementClass(win) {
           this.completeUpgrade_(upgrade || impl, startTime);
         }).catch(reason => {
           this.upgradeState_ = UpgradeState.UPGRADE_FAILED;
+          this.signals_.rejectSignal(
+              CommonSignals.UPGRADED, /** @type {!Error} */ (reason));
           rethrowAsync(reason);
         });
       } else {

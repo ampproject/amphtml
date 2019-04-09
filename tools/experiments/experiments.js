@@ -426,6 +426,12 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/19869',
     cleanupIssue: 'TODO',
   },
+  {
+    id: 'amp-prerender-in-document-order',
+    name: 'Prerenders the AMP elements in document order.',
+    spec: 'https://github.com/ampproject/amphtml/issues/21791',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/21792',
+  },
 ];
 
 if (getMode().localDev) {

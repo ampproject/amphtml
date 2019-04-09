@@ -50,4 +50,9 @@ export const CommonSignals = {
    * The element has been unlaid out.
    */
   UNLOAD: 'unload',
+
+  /**
+   * The element upgrade has completed.
+   */
+  UPGRADED: 'upgraded',
 };
