@@ -237,6 +237,7 @@ export class GoogleSubscriptionsPlatform {
         granted: true, //swgEntitlements.getEntitlementForThis makes sure this is true.
         grantReason: GrantReason.SUBSCRIBER, // there is no other case of subscription for SWG as of now.
         dataObject: swgEntitlement.json(),
+        decryptedDocumentKey: swgEntitlements.decryptedDocumentKey,
       });
     });
   }
