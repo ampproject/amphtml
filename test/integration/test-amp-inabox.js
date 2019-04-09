@@ -211,6 +211,7 @@ describe('inabox', function() {
     });
   });
 
+  // TODO(zombifier, #21311): Investigate why Safari on SauceLabs timeout.
   describes.integration('AMPHTML ads rendered on non-AMP page BTF within ' +
       'friendly frame and safe frame', {
     amp: false,
@@ -346,6 +347,7 @@ describe('inabox with a complex image ad', function() {
     });
   });
 
+  // TODO(zombifier, #21311): Investigate why Safari on SauceLabs timeout.
   describes.integration('AMP Inabox Rendering BTF', {
     amp: false,
     body: `
