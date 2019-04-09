@@ -1122,4 +1122,15 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  'mgid': {
+    renderStartImplemented: true,
+  },
+
+  'lentainform': {
+    renderStartImplemented: true,
+  },
+
+  'idealmedia': {
+    renderStartImplemented: true,
+  },
 };
