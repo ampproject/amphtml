@@ -13,11 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {BindEvents} from '../../extensions/amp-bind/0.1/bind-events';
 import {BrowserController} from '../../testing/test-helper';
-import {FormEvents} from '../../extensions/amp-form/0.1/form-events';
-import {Services} from '../../src/services';
-import {poll as classicPoll, createFixtureIframe} from '../../testing/iframe';
+import {poll as classicPoll} from '../../testing/iframe';
 
 const TIMEOUT = 15000;
 
