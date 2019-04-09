@@ -63,13 +63,19 @@ The `amp-viewer-assistance` extension currently has two functions that can be in
   </tr>
   <tr>
     <td class="col-fourty"><code>updateActionState</code></td>
-    <td>A function to send a message to the outer viewer representing a state change. Should contain an argument of the resulting state change.</td>
+    <td>A function to send a message to the outer viewer representing a state change. Requires an <code>update</code> object parameter of the following format:
+    
+    {
+      "actionStatus": "COMPLETED_ACTION_STATUS" | "ACTIVE_ACTION_STATUS" |
+          "FAILED_ACTION_STATUS",
+      "result": { ... }, // optional field used with COMPLETED_ACTION_STATUS
+    }
   </tr>
 </table>
 
 ## Messages Sent
 
-There are several messages that can be sent from the amp-viewer-assistance extension to the external viewer. 
+There are several messages that can be sent from the amp-viewer-assistance extension to the external viewer.
 
 <table>
   <tr>
@@ -103,8 +109,8 @@ In order to act upon a successful sign in from the viewer assistance, a `signedI
 {
   "myConfigItem1": {
     "foo": 123,
-    "bar": 456,
-  },
+    "bar": 456
+  }
 }
 </script>
 <div id="success-message" hidden>
@@ -133,7 +139,7 @@ Here are some examples:
 
 `amp-state:`
 ```html
-<amp-state id="myRemoteState" src="https://data.com/articles.json" 
+<amp-state id="myRemoteState" src="https://data.com/articles.json"
      crossorigin=”amp-viewer-auth-token-via-post”>
 </amp-state>
 ```

@@ -1503,3 +1503,21 @@ describes.realWin('VisibilityManager integrated', {amp: true}, env => {
     });
   });
 });
+
+
+describes.fakeWin('scroll depth', {amp: true}, env => {
+  let ampdoc;
+  let root;
+
+  beforeEach(() => {
+    ampdoc = env.ampdoc;
+    root = new VisibilityManagerForDoc(ampdoc);
+  });
+
+  it('should correctly update maxScrollDepth', () => {
+    root.maybeUpdateMaxScrollDepth(200);
+    root.maybeUpdateMaxScrollDepth(400);
+    root.maybeUpdateMaxScrollDepth(100);
+    expect(root.getMaxScrollDepth()).to.equal(400);
+  });
+});

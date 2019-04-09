@@ -13,8 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import {LocalizedStringBundleDef, LocalizedStringId} from '../localization';
+import {
+  LocalizedStringBundleDef,
+  LocalizedStringId,
+} from '../../../../src/service/localization';
 
 /**
  * Localized string bundle used for bg strings.
@@ -29,75 +31,6 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
   },
   [LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_SOUND_TEXT]: {
     string: 'Звукът е включен',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_APPLY_NOW]: {
-    string: 'Кандидатстване сега',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_BOOK_NOW]: {
-    string: 'Резервиране',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_BUY_TICKETS]: {
-    string: 'Купете билети',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_DOWNLOAD]: {
-    string: 'Изтегляне',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_EXPLORE]: {
-    string: 'Разглеждане',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_GET_NOW]: {
-    string: 'Изтегляне сега',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_INSTALL]: {
-    string: 'Инсталиране сега',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_LEARN_MORE]: {
-    string: 'Научете повече',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_LISTEN]: {
-    string: 'Слушане',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_MORE]: {
-    string: 'Още',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_OPEN_APP]: {
-    string: 'Отваряне на приложението',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_ORDER_NOW]: {
-    string: 'Поръчайте сега',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_PLAY]: {
-    string: 'Пускане',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_READ]: {
-    string: 'Четене',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SHOP]: {
-    string: 'Пазаруване',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SHOW]: {
-    string: 'Показване',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SHOWTIMES]: {
-    string: 'Часове на кинопрожекции',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SIGN_UP]: {
-    string: 'Регистрация',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SUBSCRIBE]: {
-    string: 'Абониране сега',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_USE_APP]: {
-    string: 'Използване на приложението',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_VIEW]: {
-    string: 'Преглед',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_WATCH]: {
-    string: 'Гледане',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_WATCH_EPISODE]: {
-    string: 'Гледайте епизода',
   },
   [LocalizedStringId.AMP_STORY_BOOKEND_MORE_TO_READ_LABEL]: {
     string: 'Още за четене',

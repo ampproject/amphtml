@@ -11,6 +11,8 @@ assignees: ''
 Replace/remove all of the text in brackets, including this text.
 
 See https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md for help determining if you need to file an I2I for your change/fix, instructions on filling out this I2I template and how to get help if you have questions. Note that If you are implementing a minor change/fix, you likely do not need to file this I2I.
+
+If you haven't already done so, sign the Contributor License Agreement (CLA) as soon as possible to avoid delays merging your code. A signed CLA is not necessary to submit this I2I or to send a pull request, but it will be needed before your code can be merged. See https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#contributor-license-agreement for more information on CLAs.
 -->
 
 ## Summary
