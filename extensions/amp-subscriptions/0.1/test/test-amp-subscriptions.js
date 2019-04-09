@@ -828,5 +828,12 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
       return expect(subscriptionService.getAuthdataField('data.other'))
           .to.eventually.be.undefined;
     });
+
+    it('should return a null encryptedDocumentKey', () => {
+      sandbox.stub(subscriptionService.serviceAdapter_,
+          'getEncryptedDocumentKey');
+      return expect(subscriptionService.getEncryptedDocumentKey(
+          'serviceId')).to.be.null;
+    });
   });
 });
