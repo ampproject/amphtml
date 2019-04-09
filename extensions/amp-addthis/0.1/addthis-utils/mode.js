@@ -60,7 +60,7 @@ export function getAddThisModeObject({pubId, widgetId, productCode}) {
 }
 
 /**
- * @param {Any} candidate
+ * @param {*} candidate
  * @return {boolean}
  */
 export function isPubId(candidate) {
@@ -68,7 +68,7 @@ export function isPubId(candidate) {
 }
 
 /**
- * @param {Any} candidate
+ * @param {*} candidate
  * @return {boolean}
  */
 export function isWidgetId(candidate) {
@@ -76,7 +76,7 @@ export function isWidgetId(candidate) {
 }
 
 /**
- * @param {Any} candidate
+ * @param {*} candidate
  * @return {boolean}
  */
 export function isProductCode(candidate) {
