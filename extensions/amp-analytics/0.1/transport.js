@@ -140,7 +140,7 @@ export class Transport {
    *
    * @param {!Window} win
    * @param {!Element} element
-   * @param {!../../../src/preconnect.Preconnect|undefined} opt_preconnect
+   * @param {(!../../../src/preconnect.Preconnect)=} opt_preconnect
    */
   maybeInitIframeTransport(win, element, opt_preconnect) {
     if (!this.options_['iframe'] || this.iframeTransport_) {
@@ -263,7 +263,6 @@ export class Transport {
     if (!XMLHttpRequest) {
       return false;
     }
-    /** @const {XMLHttpRequest} */
     const xhr = new XMLHttpRequest();
     if (!('withCredentials' in xhr)) {
       return false; // Looks like XHR level 1 - CORS is not supported.

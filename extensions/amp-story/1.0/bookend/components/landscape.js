@@ -91,6 +91,7 @@ export class LandscapeComponent {
 
   /** @override */
   buildElement(landscapeData, doc) {
+    landscapeData = /** @type {LandscapeComponentDef} */ (landscapeData);
     const html = htmlFor(doc);
     const el =
         html`

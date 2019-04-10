@@ -22,7 +22,7 @@ import {
  * Localized string bundle used for sv strings.
  * @const {!LocalizedStringBundleDef}
  */
-export default /** @const {!LocalizedStringBundleDef} */ ({
+const strings = {
   [LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT]: {
     string: 'Ljud av',
   },
@@ -126,4 +126,6 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
   [LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT]: {
     string: 'Det verkar som om webbläsaren inte har stöd för detta.',
   },
-});
+};
+
+export default strings;

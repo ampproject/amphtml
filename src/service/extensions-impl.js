@@ -681,12 +681,14 @@ export function stubLegacyElements(win) {
  * Install polyfills in the child window (friendly iframe).
  * @param {!Window} parentWin
  * @param {!Window} childWin
+ * @suppress {suspiciousCode}
  */
 function installPolyfillsInChildWindow(parentWin, childWin) {
   installDocContains(childWin);
   installDOMTokenListToggle(childWin);
   // TODO(jridgewell): Ship custom-elements-v1. For now, we use this hack so it
-  // is DCE'd from production builds.
+  // is DCE'd from production builds. Note: When the hack is removed, remove the
+  // @suppress {suspiciousCode} annotation at the top of this function.
   if ((false && isExperimentOn(parentWin, 'custom-elements-v1')) ||
       getMode().test) {
     installCustomElements(childWin);

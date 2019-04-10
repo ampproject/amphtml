@@ -55,7 +55,7 @@ class AmpInstagram extends AMP.BaseElement {
     /** @private {?Element} */
     this.iframe_ = null;
 
-    /** @private {?string} */
+    /** @private {string} */
     this.shortcode_ = '';
 
     /** @private {?Function} */

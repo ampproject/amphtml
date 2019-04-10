@@ -22,7 +22,7 @@ import {
  * Localized string bundle used for mn strings.
  * @const {!LocalizedStringBundleDef}
  */
-export default /** @const {!LocalizedStringBundleDef} */ ({
+const strings = {
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_APPLY_NOW]: {
     string: 'Одоо хэрэгжүүлэх',
   },
@@ -92,4 +92,6 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_WATCH_EPISODE]: {
     string: 'Анги үзэх',
   },
-});
+};
+
+export default strings;

@@ -22,7 +22,7 @@ import {
  * Localized string bundle used for my strings.
  * @const {!LocalizedStringBundleDef}
  */
-export default /** @const {!LocalizedStringBundleDef} */ ({
+const strings = {
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_APPLY_NOW]: {
     string: 'ယခု လျှောက်ထားရန်',
   },
@@ -92,4 +92,6 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_WATCH_EPISODE]: {
     string: 'ဇာတ်လမ်းပိုင်းကို ကြည့်ရန်',
   },
-});
+};
+
+export default strings;

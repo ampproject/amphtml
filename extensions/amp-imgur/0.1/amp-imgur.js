@@ -47,7 +47,7 @@ export class AmpImgur extends AMP.BaseElement {
     /** @private {?Function} */
     this.unlistenMessage_ = null;
 
-    /** @private {?string} */
+    /** @private {string} */
     this.imgurid_ = '';
   }
 

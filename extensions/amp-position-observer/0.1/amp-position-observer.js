@@ -50,6 +50,11 @@ const TAG = 'amp-position-observer';
  */
 const RESIZE_THRESHOLD = 150;
 
+/**
+ * @typedef {!../../../src/service/position-observer/position-observer-worker.PositionInViewportEntryDef}
+ */
+let PositionInViewportEntryDef;
+
 export class AmpVisibilityObserver extends AMP.BaseElement {
 
   /** @param {!AmpElement} element */
@@ -130,7 +135,8 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
     this.getAmpDoc().whenReady().then(() => {
       const scene = this.discoverScene_();
       this.positionObserver_.observe(scene, PositionObserverFidelity.HIGH,
-          this.positionChanged_.bind(this)
+          /** @type {function(?PositionInViewportEntryDef)} */ (
+            this.positionChanged_.bind(this))
       );
     });
   }
@@ -189,7 +195,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
   /**
    * Called by position observer.
    * It calculates visibility and progress, and triggers the appropriate events.
-   * @param {!../../../src/service/position-observer/position-observer-worker.PositionInViewportEntryDef} entry PositionObserver entry
+   * @param {!PositionInViewportEntryDef} entry PositionObserver entry
    * @private
    */
   positionChanged_(entry) {
@@ -436,7 +442,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
    * If within, we offset calculation by the delta so that small viewport
    * changes caused by hide/show of addressbar on mobile browsers do not
    * cause jumps in scrollbond animations.
-   * @param {!../../../src/service/position-observer/position-observer-worker.PositionInViewportEntryDef} entry PositionObserver entry
+   * @param {!PositionInViewportEntryDef} entry PositionObserver entry
    */
   adjustForSmallViewportResize_(entry) {
     if (!this.initialViewportHeight_) {

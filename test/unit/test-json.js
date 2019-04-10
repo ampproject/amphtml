@@ -142,11 +142,11 @@ describe('json', () => {
       expect(result.key).to.equal('value');
     });
 
-    it('should not throw and return undefined for invalid json', () => {
+    it('should not throw and return null for invalid json', () => {
       const json = '{"key": "val';
       expect(tryParseJson.bind(null, json)).to.not.throw;
       const result = tryParseJson(json);
-      expect(result).to.be.undefined;
+      expect(result).to.be.null;
     });
 
     it('should call onFailed for invalid and not call for valid json', () => {

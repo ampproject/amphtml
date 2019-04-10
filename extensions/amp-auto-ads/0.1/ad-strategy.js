@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {DataAttributeDef, PlacementState} from './placement';
+import {PlacementState} from './placement';
 import {SizeInfoDef} from './ad-network-config';
 import {tryResolve} from '../../../src/utils/promise';
 import {user} from '../../../src/log';

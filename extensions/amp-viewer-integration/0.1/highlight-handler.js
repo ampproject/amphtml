@@ -68,7 +68,7 @@ const NUM_SENTENCES_LIMIT = 15;
 const NUM_ALL_CHARS_LIMIT = 1500;
 
 /** @typedef {{sentences: !Array<string>, skipRendering: boolean}} */
-let HighlightInfoDef;
+export let HighlightInfoDef;
 
 /**
  * The height of scrolling-down animation to highlighted texts.

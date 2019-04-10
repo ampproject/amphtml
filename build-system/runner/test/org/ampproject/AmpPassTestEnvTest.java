@@ -4,11 +4,13 @@ package org.ampproject;
 import java.util.Set;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.javascript.rhino.IR;
 import com.google.javascript.rhino.Node;
 import com.google.javascript.jscomp.Compiler;
 import com.google.javascript.jscomp.CompilerPass;
 import com.google.javascript.jscomp.CompilerTestCase;
+import org.junit.Test;
 
 
 /**
@@ -16,7 +18,7 @@ import com.google.javascript.jscomp.CompilerTestCase;
  */
 public class AmpPassTestEnvTest extends CompilerTestCase {
 
-  ImmutableMap<String, Set<String>> suffixTypes = ImmutableMap.of();
+  ImmutableSet<String> suffixTypes = ImmutableSet.of();
   ImmutableMap<String, Node> assignmentReplacements = ImmutableMap.of(
       "IS_MINIFIED",
       IR.trueNode());
@@ -35,7 +37,7 @@ public class AmpPassTestEnvTest extends CompilerTestCase {
     return 1;
   }
 
-  public void testGetModeLocalDevPropertyReplacementInTestingEnv() throws Exception {
+  @Test public void testGetModeLocalDevPropertyReplacementInTestingEnv() throws Exception {
     test(
         LINE_JOINER.join(
              "(function() {",
@@ -55,7 +57,7 @@ public class AmpPassTestEnvTest extends CompilerTestCase {
             "})()"));
   }
 
-  public void testGetModeTestPropertyReplacementInTestingEnv() throws Exception {
+  @Test public void testGetModeTestPropertyReplacementInTestingEnv() throws Exception {
     test(
         LINE_JOINER.join(
              "(function() {",
@@ -75,7 +77,7 @@ public class AmpPassTestEnvTest extends CompilerTestCase {
             "})()"));
   }
 
-  public void testGetModeMinifiedPropertyReplacementInTestingEnv() throws Exception {
+  @Test public void testGetModeMinifiedPropertyReplacementInTestingEnv() throws Exception {
     test(
         LINE_JOINER.join(
              "(function() {",
@@ -95,7 +97,7 @@ public class AmpPassTestEnvTest extends CompilerTestCase {
             "})()"));
   }
 
-  public void testOptimizeGetModeFunction() throws Exception {
+  @Test public void testOptimizeGetModeFunction() throws Exception {
     test(
         LINE_JOINER.join(
              "(function() {",

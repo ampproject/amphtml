@@ -46,7 +46,7 @@ class AmpAccordion extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {!Array<!Node>} */
+    /** @private {!Array<!Element>} */
     this.headers_ = [];
 
     /** @private {?string} */
@@ -58,7 +58,7 @@ class AmpAccordion extends AMP.BaseElement {
     /** @private {boolean} */
     this.sessionOptOut_ = false;
 
-    /** @private {Element} */
+    /** @private {?Array<!Element>} */
     this.sections_ = null;
 
     /** @private {?../../../src/service/action-impl.ActionService} */

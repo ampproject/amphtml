@@ -22,7 +22,7 @@ import {
  * Localized string bundle used for ko strings.
  * @const {!LocalizedStringBundleDef}
  */
-export default /** @const {!LocalizedStringBundleDef} */ ({
+const strings = {
   [LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT]: {
     string: '사운드 꺼짐',
   },
@@ -125,4 +125,6 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
   [LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT]: {
     string: '사용 중인 브라우저에서 이 환경을 지원하지 않는 것 같습니다.',
   },
-});
+};
+
+export default strings;

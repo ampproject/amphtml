@@ -22,7 +22,7 @@ import {
  * Localized string bundle used for mk strings.
  * @const {!LocalizedStringBundleDef}
  */
-export default /** @const {!LocalizedStringBundleDef} */ ({
+const strings = {
   [LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT]: {
     string: 'Звукот е исклучен',
   },
@@ -130,4 +130,6 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
     string: 'За жал, се чини дека вашиот прелистувач не го поддржува ова ' +
         'искуство',
   },
-});
+};
+
+export default strings;

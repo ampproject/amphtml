@@ -22,7 +22,7 @@ import {
  * Localized string bundle used for fa strings.
  * @const {!LocalizedStringBundleDef}
  */
-export default /** @const {!LocalizedStringBundleDef} */ ({
+const strings = {
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_APPLY_NOW]: {
     string: 'اکنون اعمال شود',
   },
@@ -92,4 +92,6 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_WATCH_EPISODE]: {
     string: 'تماشای قسمت',
   },
-});
+};
+
+export default strings;

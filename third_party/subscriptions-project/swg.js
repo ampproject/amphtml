@@ -5478,7 +5478,7 @@ class GlobalDoc {
   /** @override */
   getHead() {
     // `document.head` always has a chance to be parsed, at least partially.
-    return /** @type {!Element} */ (this.doc_.head);
+    return dev().assertElement(this.doc_.head);
   }
 
   /** @override */
@@ -5832,7 +5832,7 @@ class FriendlyIframe {
    * @return {!Element}
    */
   getBody() {
-    return /** @type {!Element} */ (this.getDocument().body);
+    return dev().assertElement(this.getDocument().body);
   }
 
   /**
@@ -9643,7 +9643,7 @@ class PaymentsWebActivityDelegate {
              opt_activities, opt_redirectKey) {
     this.environment_ = environment;
     /** @private @const {boolean} */
-    
+
     /** @const {!ActivityPorts} */
     this.activities = opt_activities || new activityPorts_1(window);
     /** @const @private {!Graypane} */

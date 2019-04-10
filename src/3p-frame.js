@@ -71,7 +71,7 @@ function getFrameAttributes(parentWindow, element, opt_type, opt_context) {
  *   disallowCustom,
  *   allowFullscreen,
  * }=} opt_options Options for the created iframe.
- * @return {!Element} The iframe.
+ * @return {!HTMLIFrameElement} The iframe.
  */
 export function getIframe(
   parentWindow, parentElement, opt_type, opt_context,
@@ -84,7 +84,8 @@ export function getIframe(
       'Parent element must be in DOM');
   const attributes =
       getFrameAttributes(parentWindow, parentElement, opt_type, opt_context);
-  const iframe = parentWindow.document.createElement('iframe');
+  const iframe = /** @type {!HTMLIFrameElement} */ (
+    parentWindow.document.createElement('iframe'));
 
   if (!count[attributes['type']]) {
     count[attributes['type']] = 0;

@@ -22,7 +22,7 @@ import {
  * Localized string bundle used for km strings.
  * @const {!LocalizedStringBundleDef}
  */
-export default /** @const {!LocalizedStringBundleDef} */ ({
+const strings = {
   [LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT]: {
     string: 'បិទ​សំឡេង',
   },
@@ -127,4 +127,6 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
         // eslint-disable-next-line max-len
         'កម្មវិធីរុករកតាមអ៊ីនធឺណិត​របស់អ្នក​ហាក់ដូចជា​មិនស្គាល់​បទពិសោធន៍​នេះ​ទេ',
   },
-});
+};
+
+export default strings;

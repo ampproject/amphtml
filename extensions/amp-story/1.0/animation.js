@@ -623,12 +623,12 @@ export class AnimationManager {
       el);
     }
 
-    return userAssert(
+    return /** @type {StoryAnimationPresetDef} */ (userAssert(
         getPresetDef(name, options),
         'Invalid %s preset "%s" for element %s',
         ANIMATE_IN_ATTRIBUTE_NAME,
         name,
-        el);
+        el));
   }
 }
 

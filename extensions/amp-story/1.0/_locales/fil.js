@@ -22,7 +22,7 @@ import {
  * Localized string bundle used for fil strings.
  * @const {!LocalizedStringBundleDef}
  */
-export default /** @const {!LocalizedStringBundleDef} */ ({
+const strings = {
   [LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT]: {
     string: 'I-off ang tunog',
   },
@@ -130,4 +130,6 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
     string: 'Ikinalulungkot namin, mukhang hindi sinusuportahan ng iyong ' +
         'browser ang karanasang ito',
   },
-});
+};
+
+export default strings;

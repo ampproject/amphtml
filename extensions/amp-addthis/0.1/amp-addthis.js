@@ -120,7 +120,7 @@ class AmpAddThis extends AMP.BaseElement {
     /** @private {(?JsonObject<string, string>|null)} */
     this.shareConfig_ = null;
 
-    /** @private {(?Object<string, string>|null)} */
+    /** @private {(?JsonObject<AtConfigDef>)} */
     this.atConfig_ = null;
 
     /** @private {string} */
@@ -286,7 +286,7 @@ class AmpAddThis extends AMP.BaseElement {
 
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
-    this.iframe_ = iframe;
+    this.iframe_ = /** @type {HTMLIFrameElement} */ (iframe);
 
     configManager.register({
       pubId: this.pubId_,

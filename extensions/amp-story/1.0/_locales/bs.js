@@ -22,7 +22,7 @@ import {
  * Localized string bundle used for bs strings.
  * @const {!LocalizedStringBundleDef}
  */
-export default /** @const {!LocalizedStringBundleDef} */ ({
+const strings = {
   [LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT]: {
     string: 'Zvuk je isključen',
   },
@@ -126,4 +126,6 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
     string: 'Žao nam je, ali izgleda da vaš preglednik ne podržava ovo ' +
         'iskustvo',
   },
-});
+};
+
+export default strings;

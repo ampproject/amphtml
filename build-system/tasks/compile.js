@@ -286,6 +286,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       // Don't include tests.
       '!**_test.js',
       '!**/test-*.js',
+      '!**/test-e2e/*.js',
       '!**/*.extern.js',
     ];
     // Add needed path for extensions.
@@ -387,7 +388,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
         create_source_map: intermediateFilename + '.map',
         source_map_location_mapping:
             '|' + sourceMapBase,
-        warning_level: 'DEFAULT',
+        warning_level: options.verboseLogging ? 'VERBOSE' : 'DEFAULT',
         jscomp_error: [],
         // moduleLoad: Demote "module not found" errors to ignore missing files
         //     in type declarations in the swg.js bundle.
@@ -424,7 +425,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
         .on('error', function(err) {
           const {message} = err;
           console./*OK*/error(colors.red(
-              'Compiler issues for ' + outputFilename + ':\n') +
+              'Compilation failed for ' + outputFilename + ':\n') +
               formatClosureCompilerError(message));
           process.exit(1);
         });

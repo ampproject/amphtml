@@ -91,6 +91,7 @@ export class PortraitComponent {
 
   /** @override */
   buildElement(portraitData, doc) {
+    portraitData = /** @type {PortraitComponentDef} */ (portraitData);
     const html = htmlFor(doc);
     const el =
         html`

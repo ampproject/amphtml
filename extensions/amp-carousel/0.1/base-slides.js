@@ -170,10 +170,11 @@ export class BaseSlides extends BaseCarousel {
       return;
     }
     this.clearAutoplay();
-    this.autoplayTimeoutId_ = Services.timerFor(this.win).delay(
-        this.go.bind(
-            this, /* dir */ 1, /* animate */ true, /* autoplay */ true),
-        this.autoplayDelay_);
+    this.autoplayTimeoutId_ = /** @type {number} */ (
+      Services.timerFor(this.win).delay(
+          this.go.bind(
+              this, /* dir */ 1, /* animate */ true, /* autoplay */ true),
+          this.autoplayDelay_));
   }
 
   /**

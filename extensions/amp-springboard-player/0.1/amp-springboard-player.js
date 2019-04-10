@@ -99,7 +99,7 @@ class AmpSpringboardPlayer extends AMP.BaseElement {
         encodeURIComponent(this.domain_) +
         '/' + encodeURIComponent(items);
     this.applyFillContent(iframe);
-    this.iframe_ = iframe;
+    this.iframe_ = /** @type {HTMLIFrameElement} */ (iframe);
     this.element.appendChild(iframe);
     return this.loadPromise(iframe);
   }
