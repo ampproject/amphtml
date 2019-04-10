@@ -22,7 +22,7 @@ import {
  * Localized string bundle used for sk strings.
  * @const {!LocalizedStringBundleDef}
  */
-export default /** @const {!LocalizedStringBundleDef} */ ({
+const strings = {
   [LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT]: {
     string: 'Zvuk je vypnutý',
   },
@@ -127,4 +127,6 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
   [LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT]: {
     string: 'Ľutujeme, ale váš prehliadač zrejme toto prostredie nepodporuje',
   },
-});
+};
+
+export default strings;

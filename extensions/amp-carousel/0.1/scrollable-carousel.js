@@ -203,19 +203,20 @@ export class AmpScrollableCarousel extends BaseCarousel {
    * @private
    */
   waitForScroll_(startingScrollLeft) {
-    this.scrollTimerId_ = Services.timerFor(this.win).delay(() => {
-      // TODO(yuxichen): test out the threshold for identifying fast scrolling
-      if (Math.abs(startingScrollLeft - this.pos_) < 30) {
-        dev().fine(TAG, 'slow scrolling: %s - %s',
-            startingScrollLeft, this.pos_);
-        this.scrollTimerId_ = null;
-        this.commitSwitch_(this.pos_);
-      } else {
-        dev().fine(TAG, 'fast scrolling: %s - %s',
-            startingScrollLeft, this.pos_);
-        this.waitForScroll_(this.pos_);
-      }
-    }, 100);
+    this.scrollTimerId_ = /** @type {number} */ (
+      Services.timerFor(this.win).delay(() => {
+        // TODO(yuxichen): test out the threshold for identifying fast scrolling
+        if (Math.abs(startingScrollLeft - this.pos_) < 30) {
+          dev().fine(TAG, 'slow scrolling: %s - %s',
+              startingScrollLeft, this.pos_);
+          this.scrollTimerId_ = null;
+          this.commitSwitch_(this.pos_);
+        } else {
+          dev().fine(TAG, 'fast scrolling: %s - %s',
+              startingScrollLeft, this.pos_);
+          this.waitForScroll_(this.pos_);
+        }
+      }, 100));
   }
 
   /**

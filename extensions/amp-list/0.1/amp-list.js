@@ -550,11 +550,12 @@ export class AmpList extends AMP.BaseElement {
       this.renderPass_.schedule();
     }
 
-    this.renderItems_ = {data, append, resolver, rejecter,
-      payload: opt_payload};
+    this.renderItems_ = /** @type {?RenderItems} */ (
+      {data, append, resolver, rejecter, payload: opt_payload});
 
     if (this.renderedItems_ && append) {
-      this.renderItems_.payload = opt_payload || {};
+      this.renderItems_.payload =
+        /** @type {(?JsonObject|Array<JsonObject>)} */ (opt_payload || {});
     }
 
     return promise;
@@ -574,7 +575,7 @@ export class AmpList extends AMP.BaseElement {
       if (this.renderItems_ !== current) {
         this.renderPass_.schedule(1); // Allow paint frame before next render.
       } else {
-        this.renderedItems_ = this.renderItems_.data;
+        this.renderedItems_ = /** @type {?Array} */ (this.renderItems_.data);
         this.renderItems_ = null;
       }
     };
@@ -588,7 +589,7 @@ export class AmpList extends AMP.BaseElement {
     };
     const isSSR = this.ssrTemplateHelper_.isSupported();
     let renderPromise = this.ssrTemplateHelper_.renderTemplate(
-        this.element, current.data)
+        this.element, /** @type {!Array|!JsonObject} */ (current.data))
         // For SSR, the result will be the container node that contains the
         // list items. Just pass in the list items when updating the bindings
         // and rendering else the sanitizer will strip out the class attribute
