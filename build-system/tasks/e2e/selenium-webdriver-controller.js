@@ -296,10 +296,10 @@ class SeleniumWebDriverController {
    */
   getElementAttribute(handle, attribute) {
     const webElement = handle.getElement();
-
+    const getter = (element, attribute) => element.getAttribute(attribute);
     return new ControllerPromise(
-        webElement.getAttribute(attribute),
-        this.getWaitFn_(() => webElement.getAttribute(attribute)));
+        this.evaluate(getter, webElement, attribute),
+        this.getWaitFn_(() => this.evaluate(getter, webElement, attribute)));
   }
 
   /**
