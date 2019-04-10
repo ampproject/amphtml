@@ -209,7 +209,7 @@ function describeEnv(factory) {
       const env = Object.create(variant);
       let asyncErrorTimerId;
       this.timeout(TIMEOUT);
-      before(async() => {
+      beforeEach(async() => {
         // Set up all fixtures.
         for (const fixture of fixtures) {
           await fixture.setup(env);
@@ -217,7 +217,7 @@ function describeEnv(factory) {
         installRepl(global, env);
       });
 
-      after(function() {
+      afterEach(function() {
         clearLastExpectError();
         clearTimeout(asyncErrorTimerId);
         // Tear down all fixtures.
@@ -229,7 +229,16 @@ function describeEnv(factory) {
           fixture.teardown(env);
         });
 
+        // Delete all other keys.
+        for (const key in env) {
+          delete env[key];
+        }
+
         uninstallRepl();
+      });
+
+      after(function() {
+        clearTimeout(asyncErrorTimerId);
       });
 
       describe(SUB, function() {
