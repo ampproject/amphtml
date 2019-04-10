@@ -86,6 +86,8 @@ describe('IntersectionObserverApi', () => {
       getOwner: () => {return null;},
       getLayoutBox: () => {return layoutRectLtwh(50, 100, 150, 200);},
       win: window,
+      ownerDocument: {defaultView: window},
+      nodeType: 1,
     };
 
     baseElement = {
@@ -325,6 +327,8 @@ describe('IntersectionObserverPolyfill', () => {
       element = {
         isBuilt: () => {return true;},
         getOwner: () => {return null;},
+        ownerDocument: {defaultView: window},
+        nodeType: 1,
       };
     });
 

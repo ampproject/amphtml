@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import {AmpDocSingle} from '../../src/service/ampdoc-impl';
+import {
+  AmpDocSingle,
+  installDocService,
+} from '../../src/service/ampdoc-impl';
 import {FakeMutationObserver, FakeWindow} from '../../testing/fake-dom';
 import {FixedLayer} from '../../src/service/fixed-layer';
 import {Services} from '../../src/services';
@@ -162,7 +165,8 @@ describes.sandboxed('FixedLayer', {}, () => {
       body: docBody,
     };
     documentApi.defaultView.document = documentApi;
-    ampdoc = new AmpDocSingle(documentApi.defaultView);
+    installDocService(documentApi.defaultView, /* isSingleDoc */ true);
+    ampdoc = Services.ampdocServiceFor(documentApi.defaultView).getAmpDoc();
     installHiddenObserverForDoc(ampdoc);
     installPlatformService(documentApi.defaultView);
     installTimerService(documentApi.defaultView);
@@ -209,6 +213,7 @@ describes.sandboxed('FixedLayer', {}, () => {
     const children = [];
     const elem = {
       id,
+      nodeType: 1,
       ownerDocument: documentApi,
       autoTop: '',
       tagName: id,
@@ -1135,8 +1140,8 @@ describes.sandboxed('FixedLayer', {}, () => {
         toggleExperiment(documentApi.defaultView, 'hidden-mutation-observer',
             true);
         fixedLayer.observeHiddenMutations();
-        mutationObserver =
-          Services.hiddenObserverForDoc(ampdoc).mutationObserver_;
+        mutationObserver = Services.hiddenObserverForDoc(
+            documentApi.documentElement).mutationObserver_;
       });
 
       it('should trigger an update', () => {
@@ -1489,8 +1494,8 @@ describes.sandboxed('FixedLayer', {}, () => {
         toggleExperiment(documentApi.defaultView, 'hidden-mutation-observer',
             true);
         fixedLayer.observeHiddenMutations();
-        mutationObserver =
-          Services.hiddenObserverForDoc(ampdoc).mutationObserver_;
+        mutationObserver = Services.hiddenObserverForDoc(
+            documentApi.documentElement).mutationObserver_;
       });
 
       it('should trigger an update', () => {

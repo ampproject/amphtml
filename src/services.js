@@ -254,12 +254,12 @@ export class Services {
 
   /**
    * Returns service to listen for `hidden` attribute mutations.
-   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @param {!Element|!ShadowRoot} element
    * @return {!./service/hidden-observer-impl.HiddenObserver}
    */
-  static hiddenObserverForDoc(elementOrAmpDoc) {
+  static hiddenObserverForDoc(element) {
     return /** @type {!./service/hidden-observer-impl.HiddenObserver} */ (
-      getServiceForDoc(elementOrAmpDoc, 'hidden-observer'));
+      getExistingServiceForDocInEmbedScope(element, 'hidden-observer'));
   }
 
   /**

@@ -298,7 +298,7 @@ export class IntersectionObserverPolyfill {
           ampdoc.win,
           this.handleMutationObserverPass_.bind(this, element)
       );
-      const hiddenObserver = Services.hiddenObserverForDoc(ampdoc);
+      const hiddenObserver = Services.hiddenObserverForDoc(element);
       this.hiddenObserverUnlistener_ = hiddenObserver.add(
           this.handleMutationObserverNotification_.bind(this)
       );
