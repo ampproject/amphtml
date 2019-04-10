@@ -42,7 +42,7 @@ env => {
     ampdoc = env.ampdoc;
     const element = win.document.createElement('script');
     element.id = 'amp-subscriptions';
-    element.setAttribute('type', 'json');
+    element.setAttribute('type', 'application/json');
     element.innerHTML = JSON.stringify(serviceConfig);
     win.document.body.appendChild(element);
     cryptoHandler = new CryptoHandler(ampdoc);

@@ -190,7 +190,7 @@ export class LocalSubscriptionPlatform {
         /* useAuthData */ false)
         .then(fetchUrl => {
           const encryptedDocumentKey =
-              this.serviceAdapter_.getEncryptedDocumentKey('google.com');
+              this.serviceAdapter_.getEncryptedDocumentKey('local');
           if (encryptedDocumentKey) {
             //TODO(chenshay): if crypt, switch to 'post'
             fetchUrl = addParamToUrl(fetchUrl, 'crypt', encryptedDocumentKey);

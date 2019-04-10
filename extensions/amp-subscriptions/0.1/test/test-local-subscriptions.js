@@ -116,13 +116,34 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
     });
   });
 
-  it('should call getEncryptedDocumentKey with google.com', () => {
+  it('should call getEncryptedDocumentKey with local', () => {
     const getEncryptedDocumentKeyStub = sandbox.stub(
         localSubscriptionPlatform.serviceAdapter_,
         'getEncryptedDocumentKey'
     );
     return localSubscriptionPlatform.getEntitlements().then(() => {
-      expect(getEncryptedDocumentKeyStub).to.be.calledWith('google.com');
+      expect(getEncryptedDocumentKeyStub).to.be.calledWith('local');
+    });
+  });
+
+  it('should add encryptedDocumentKey parameter to url', () => {
+    const fetchStub = sandbox.stub(localSubscriptionPlatform.xhr_, 'fetchJson')
+        .callsFake(() => Promise.resolve({json: () => Promise.resolve(json)}));
+    sandbox.stub(localSubscriptionPlatform.serviceAdapter_,
+        'getEncryptedDocumentKey').callsFake(() => {
+      return 'encryptedDocumentKey';});
+    return localSubscriptionPlatform.getEntitlements().then(() => {
+      return expect(fetchStub).to.be.calledWith('https://lipsum.com/login/authorize?rid=reader1&crypt=encryptedDocumentKey');
+    });
+  });
+
+  it('shouldnt add encryptedDocumentKey parameter to url', () => {
+    const fetchStub = sandbox.stub(localSubscriptionPlatform.xhr_, 'fetchJson')
+        .callsFake(() => Promise.resolve({json: () => Promise.resolve(json)}));
+    sandbox.stub(localSubscriptionPlatform.serviceAdapter_,
+        'getEncryptedDocumentKey');
+    return localSubscriptionPlatform.getEntitlements().then(() => {
+      return expect(fetchStub).to.be.calledWith('https://lipsum.com/login/authorize?rid=reader1');
     });
   });
 
