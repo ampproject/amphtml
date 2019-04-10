@@ -229,6 +229,7 @@ import {sortable} from '../ads/sortable';
 import {sovrn} from '../ads/sovrn';
 import {spotx} from '../ads/spotx';
 import {sunmedia} from '../ads/sunmedia';
+import {svknative} from '../ads/svknative';
 import {swoop} from '../ads/swoop';
 import {taboola} from '../ads/taboola';
 import {tcsemotion} from '../ads/tcsemotion';
@@ -289,6 +290,7 @@ const AMP_EMBED_ALLOWED = {
   rbinfox: true,
   smartclip: true,
   smi2: true,
+  svknative: true,
   taboola: true,
   zen: true,
   zergnet: true,
@@ -471,6 +473,7 @@ register('sortable', sortable);
 register('sovrn', sovrn);
 register('spotx', spotx);
 register('sunmedia', sunmedia);
+register('svknative', svknative);
 register('swoop', swoop);
 register('taboola', taboola);
 register('tcsemotion', tcsemotion);
