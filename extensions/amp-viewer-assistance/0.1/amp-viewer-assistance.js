@@ -199,8 +199,8 @@ export class AmpViewerAssistance {
    * Transforms an error response object into a suitable updateActionState
    * payload to send to the viewer.
    * @private
-   * @param {?Object} args
-   * @return {!Promise<!Object>}
+   * @param {?JsonObject} args
+   * @return {!Promise<!JsonObject>}
    */
   transformUpdateActionStateArgs_(args) {
     if (args['update']) {
