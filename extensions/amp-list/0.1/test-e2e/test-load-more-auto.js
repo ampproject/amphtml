@@ -31,6 +31,7 @@ describes.endtoend('AMP list load-more=auto', {
     controller = env.controller;
   });
 
+  // TODO(cathyxz): fails because listItems returns with length 4
   it.skip('should render correctly', async() => {
     const listItems = await controller.findElements('.item');
     await expect(listItems).to.have.length(2);
@@ -55,6 +56,7 @@ describes.endtoend('AMP list load-more=auto', {
     await controller.takeScreenshot('screenshots/amp-list-load-more.png');
   });
 
+  // TODO(cathyxz): fails because listItems returns with length 4
   it.skip('should load more items on scroll', async() => {
     let listItems = await controller.findElements('.item');
     await expect(listItems).to.have.length(2);
