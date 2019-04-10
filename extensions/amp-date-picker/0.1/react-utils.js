@@ -26,7 +26,6 @@ import {requireExternal} from '../../../src/module';
 function createDeferred_() {
   const React = requireExternal('react');
 
-  /** @extends {React.Component} */
   class DeferredType extends React.Component {
     /**
      * @param {!Object} props

@@ -318,7 +318,7 @@ export class VideoManager {
    * with it or playing through autoplay
    *
    * @param {!../video-interface.VideoInterface} video
-   * @return {!../video-interface.VideoInterface} PlayingStates
+   * @return {!../video-interface.PlayingStateDef}
    */
   getPlayingState(video) {
     return this.getEntryForVideo_(video).getPlayingState();
@@ -862,7 +862,7 @@ class VideoEntry {
   /**
    * Returns whether the video is paused or playing after the user interacted
    * with it or playing through autoplay
-   * @return {!../video-interface.VideoInterface} PlayingStates
+   * @return {!../video-interface.PlayingStateDef}
    */
   getPlayingState() {
     if (!this.isPlaying_) {
@@ -1200,7 +1200,7 @@ export class AutoFullscreenManager {
 
   /**
    * @param {!../video-interface.VideoOrBaseElementDef} video
-   * @return {!../video-interface.VideoInterface} PlayingStates
+   * @return {!../video-interface.PlayingStateDef}
    * @private
    */
   getPlayingState_(video) {

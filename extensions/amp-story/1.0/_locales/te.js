@@ -22,7 +22,7 @@ import {
  * Localized string bundle used for te strings.
  * @const {!LocalizedStringBundleDef}
  */
-export default /** @const {!LocalizedStringBundleDef} */ ({
+const strings = {
   [LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT]: {
     string: 'ధ్వని ఆఫ్‌లో ఉంది',
   },
@@ -126,4 +126,6 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
   [LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT]: {
     string: 'క్షమించండి, మీ బ్రౌజర్‌లో ఈ కథనానికి మద్దతు లేదని అనిపిస్తుంది',
   },
-});
+};
+
+export default strings;

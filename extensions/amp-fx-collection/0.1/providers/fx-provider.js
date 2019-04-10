@@ -84,7 +84,8 @@ export function installScrollToggledFx(ampdoc, element, type) {
     }
 
     dispatch.observe(isShown => {
-      scrollToggle(element, isShown, devAssert(position));
+      scrollToggle(element, isShown,
+          /** @type {!ScrollTogglePosition} */ (devAssert(position)));
     });
   };
 

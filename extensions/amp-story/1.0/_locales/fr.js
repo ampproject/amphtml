@@ -22,7 +22,7 @@ import {
  * Localized string bundle used for fr strings.
  * @const {!LocalizedStringBundleDef}
  */
-export default /** @const {!LocalizedStringBundleDef} */ ({
+const strings = {
   [LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT]: {
     string: 'Son désactivé',
   },
@@ -127,4 +127,6 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
     string: 'Nous sommes désolés, mais votre navigateur n\'est pas ' +
         'compatible avec cette expérience',
   },
-});
+};
+
+export default strings;

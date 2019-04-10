@@ -22,7 +22,7 @@ import {
  * Localized string bundle used for ta strings.
  * @const {!LocalizedStringBundleDef}
  */
-export default /** @const {!LocalizedStringBundleDef} */ ({
+const strings = {
   [LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT]: {
     string: 'ஒலி முடக்கப்பட்டுள்ளது',
   },
@@ -128,4 +128,6 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
   [LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT]: {
     string: 'உங்கள் உலாவியில் இந்த அனுபவம் ஆதரிக்கப்படாதது போல் தெரிகிறது',
   },
-});
+};
+
+export default strings;

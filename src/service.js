@@ -610,6 +610,7 @@ function disposeServiceInternal(id, service) {
  * in embed scope.
  * @param {!Window} embedWin
  * @param {function(new:Object, !./service/ampdoc-impl.AmpDoc)} serviceClass
+ * @suppress {missingProperties}
  * @return {boolean}
  */
 export function installServiceInEmbedIfEmbeddable(embedWin, serviceClass) {

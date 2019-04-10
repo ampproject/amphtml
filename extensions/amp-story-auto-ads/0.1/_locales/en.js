@@ -23,7 +23,7 @@ import {
  * Localized string bundle used for English strings.
  * @const {!LocalizedStringBundleDef}
  */
-export default /** @const {!LocalizedStringBundleDef} */ ({
+const strings = {
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_APPLY_NOW]: {
     string: 'Apply Now',
     description: 'Button label for an ad call to action button that asks ' +
@@ -139,4 +139,6 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
     description: 'Button label for an ad call to action button that asks ' +
         'users to watch an episode of something.',
   },
-});
+};
+
+export default strings;

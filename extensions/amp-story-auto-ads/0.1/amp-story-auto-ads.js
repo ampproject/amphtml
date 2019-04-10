@@ -190,10 +190,10 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {?../../amp-story/0.1/amp-story.AmpStory} */
+    /** @private {?../../amp-story/1.0/amp-story.AmpStory} */
     this.ampStory_ = null;
 
-    /** @private {?../../amp-story/0.1/navigation-state.NavigationState} */
+    /** @private {?../../amp-story/1.0/navigation-state.NavigationState} */
     this.navigationState_ = null;
 
     /** @private {number} */
@@ -223,10 +223,10 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     /** @private {boolean} */
     this.isCurrentAdLoaded_ = false;
 
-    /** @private {Object<string, string>} */
+    /** @private {Object<string, Object>} */
     this.config_ = {};
 
-    /** @private {Object<string, *>} */
+    /** @private {Object<number, *>} */
     this.analyticsData_ = {};
 
     /** @private {Object<string, number>} */
@@ -805,7 +805,8 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       return AD_STATE.PENDING;
     }
 
-    const ctaCreated = this.maybeCreateCtaLayer_(nextAdPageEl);
+    const ctaCreated = this.maybeCreateCtaLayer_(
+        dev().assertElement(nextAdPageEl));
     if (!ctaCreated) {
       // failed on ad-server response format
       return AD_STATE.FAILED;
@@ -843,7 +844,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   /**
    * Users may put an 'next-page-no-ad' attribute on their pages to prevent ads
    * from showing as the next page.
-   * @param {?../../amp-story/0.1/amp-story-page.AmpStoryPage} page
+   * @param {?../../amp-story/1.0/amp-story-page.AmpStoryPage} page
    * @return {boolean}
    * @private
    */
@@ -854,7 +855,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   /**
    * Call an analytics event with the last created Ad.
    * @param {string} eventType
-   * @param {!Object<string, string>} vars A map of vars and their values.
+   * @param {!Object<string, number>} vars A map of vars and their values.
    * @private
    */
   analyticsEventWithCurrentAd_(eventType, vars) {
@@ -866,16 +867,17 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   /**
    * Construct an analytics event and trigger it.
    * @param {string} eventType
-   * @param {!Object<string, string>} vars A map of vars and their values.
+   * @param {!Object<string, number>} vars A map of vars and their values.
    * @private
    */
   analyticsEvent_(eventType, vars) {
     const adIndex = vars['adIndex'];
-    this.analyticsData_[adIndex] = Object.assign(this.analyticsData_[adIndex],
+    this.analyticsData_[adIndex] = Object.assign(
+        /** @type {!JsonObject} */ (this.analyticsData_[adIndex]),
         vars);
 
     triggerAnalyticsEvent(this.element, eventType,
-        this.analyticsData_[adIndex]);
+        /** @type {!JsonObject} */ (this.analyticsData_[adIndex]));
   }
 }
 

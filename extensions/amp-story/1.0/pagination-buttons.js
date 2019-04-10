@@ -293,9 +293,10 @@ export class PaginationButtons {
    */
   onSystemUiIsVisibleStateUpdate_(isVisible) {
     if (isVisible) {
-      this.backButton_.updateState(devAssert(this.backButtonStateToRestore_));
-      this.forwardButton_.updateState(
-          devAssert(this.forwardButtonStateToRestore_));
+      this.backButton_.updateState(/** @type {!ButtonStateDef} */ (
+        devAssert(this.backButtonStateToRestore_)));
+      this.forwardButton_.updateState(/** @type {!ButtonStateDef} */ (
+        devAssert(this.forwardButtonStateToRestore_)));
     } else {
       this.backButtonStateToRestore_ = this.backButton_.getState();
       this.backButton_.updateState(BackButtonStates.HIDDEN);

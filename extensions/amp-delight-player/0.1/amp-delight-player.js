@@ -205,7 +205,7 @@ class AmpDelightPlayer extends AMP.BaseElement {
 
     placeholder.firstElementChild.setAttribute('src', src);
 
-    this.placeholderEl_ = placeholder;
+    this.placeholderEl_ = /** @type {HTMLElement} */ (placeholder);
 
     return placeholder;
   }
@@ -547,7 +547,7 @@ class AmpDelightPlayer extends AMP.BaseElement {
 
   /** @override */
   getPlayedRanges() {
-    return this.playedRanges_;
+    return /** @type {!Array<Array<number>>} */ (this.playedRanges_);
   }
 
   /** @override */

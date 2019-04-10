@@ -197,7 +197,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     this.useBaseCarousel_ =
         isExperimentOn(this.win, 'amp-lightbox-gallery-base-carousel');
 
-    /** @private {Document} */
+    /** @private {!Document} */
     this.doc_ = this.win.document;
 
     /** @private {boolean} */
@@ -301,7 +301,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       const viewer = Services.viewerForDoc(this.getAmpDoc());
       return viewer.whenFirstVisible();
     }).then(() => {
-      this.container_ = htmlFor(this.doc_)`
+      this.container_ = htmlFor(/** @type {!Document} */ (this.doc_))`
         <div class="i-amphtml-lbg">
           <div class="i-amphtml-lbg-mask"></div>
         </div>`;
@@ -329,7 +329,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @private
    */
   buildControls_() {
-    this.controlsContainer_ = htmlFor(this.doc_)`
+    this.controlsContainer_ = htmlFor(/** @type {!Document} */ (this.doc_))`
       <div class="i-amphtml-lbg-controls"></div>`;
     this.buildDescriptionBox_();
     this.buildTopBar_();
@@ -385,9 +385,9 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       const descText = this.manager_.getDescription(element);
       const metadata = {
         descriptionText: descText,
-        tagName: clonedNode.tagName,
+        tagName: /** @type {string} */ (clonedNode.tagName),
         sourceElement: element,
-        element: clonedNode,
+        element: dev().assertElement(clonedNode),
       };
       let slide = clonedNode;
       if (ELIGIBLE_TAP_TAGS[clonedNode.tagName]) {
@@ -714,7 +714,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   buildButton_(label, className, action) {
     devAssert(this.topBar_);
 
-    const button = htmlFor(this.doc_)`
+    const button = htmlFor(/** @type {!Document} */ (this.doc_))`
     <div role="button" class="i-amphtml-lbg-button">
       <span class="i-amphtml-lbg-icon"></span>
     </div>`;
@@ -828,7 +828,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   carrySwipeMomentum_(scale, deltaX, deltaY, velocity) {
     const duration = velocity * SWIPE_TO_CLOSE_DISTANCE_TO_TIME_FACTOR;
 
-    setStyles(devAssert(this.carousel_), {
+    setStyles(devAssert(dev().assertElement(this.carousel_)), {
       transform: `scale(${scale}) translate(${deltaX}px, ${deltaY}px)`,
       transition: `${duration}ms transform ${SWIPE_TO_CLOSE_MOMENTUM_TIMING}`,
     });
@@ -847,15 +847,15 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     const duration = finalDistance * SWIPE_TO_CLOSE_SNAP_BACK_TIME_FACTOR;
 
     return this.mutateElement(() => {
-      setStyles(devAssert(this.carousel_), {
+      setStyles(dev().assertElement(this.carousel_), {
         transform: '',
         transition: `${duration}ms transform ease-out`,
       });
-      setStyles(devAssert(this.mask_), {
+      setStyles(dev().assertElement(this.mask_), {
         opacity: '',
         transition: `${duration}ms opacity ease-out`,
       });
-      setStyles(devAssert(this.controlsContainer_), {
+      setStyles(dev().assertElement(this.controlsContainer_), {
         opacity: '',
         transition: `${duration}ms opacity ease-out`,
       });
@@ -882,11 +882,11 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       transform: carouselTransform,
       transition: '',
     });
-    setStyles(devAssert(this.mask_), {
+    setStyles(dev().assertElement(this.mask_), {
       opacity: maskOpacity,
       transition: '',
     });
-    setStyles(devAssert(this.controlsContainer_), {
+    setStyles(devAssert(dev().assertElement(this.controlsContainer_)), {
       opacity: controlsOpacity,
       transition: '',
     });
@@ -946,7 +946,8 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     // We do not want the user dragging around to make the carousel think that
     // a scroll happened.
     this.preventCarouselScrollUnlistener_ = listen(
-        devAssert(this.carousel_), 'scroll', event => {
+        dev().assertElement(this.carousel_),
+        'scroll', event => {
           event.stopPropagation();
         }, {
           capture: true,
@@ -1002,14 +1003,14 @@ export class AmpLightboxGallery extends AMP.BaseElement {
               // TODO(sparhami) These should be called in a `mutateElement`,
               // but we are already in an animationFrame, and waiting for the
               // next one will cause the UI to flicker.
-              this.adjustForSwipePosition_(carousel);
+              this.adjustForSwipePosition_(dev().assertElement(carousel));
               this.endSwipeToDismiss_(sourceElement);
             });
         return;
       }
 
       this.adjustForSwipePosition_(
-          carousel,
+          dev().assertElement(carousel),
           `scale(${scale}) translate(${deltaX}px, ${deltaY}px)`,
           maskOpacity,
           controlsOpacity);
@@ -1362,7 +1363,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
 
     return this.mutateElement(() => {
       if (fadeIn) {
-        toggle(devAssert(this.carousel_), true);
+        toggle(dev().assertElement(this.carousel_), true);
         toggle(this.element, true);
       }
 
@@ -1383,7 +1384,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
           });
 
           if (!fadeIn) {
-            toggle(devAssert(this.carousel_), false);
+            toggle(dev().assertElement(this.carousel_), false);
             toggle(this.element, false);
           }
         });
@@ -1620,7 +1621,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       this.updateVideoThumbnails_();
     } else {
       // Build gallery
-      this.gallery_ = htmlFor(this.doc_)`
+      this.gallery_ = htmlFor(/** @type {!Document} */ (this.doc_))`
       <div class="i-amphtml-lbg-gallery"></div>`;
       this.gallery_.setAttribute('amp-lightbox-group',
           this.currentLightboxGroupId_);
@@ -1727,7 +1728,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
 
   /**
    * @param {Event} event
-   * @param {string} id
+   * @param {number} id
    * @private
    */
   handleThumbnailClick_(event, id) {
@@ -1749,7 +1750,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @private
    */
   createThumbnailElement_(thumbnailObj) {
-    const element = htmlFor(this.doc_)`
+    const element = htmlFor(/** @type {!Document} */ (this.doc_))`
     <div class="i-amphtml-lbg-gallery-thumbnail">
       <img class="i-amphtml-lbg-gallery-thumbnail-img"></img>
     </div>`;
@@ -1763,7 +1764,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     element.appendChild(imgElement);
 
     if (VIDEO_TAGS[thumbnailObj.element.tagName]) {
-      const timestampDiv = htmlFor(this.doc_)`
+      const timestampDiv = htmlFor(/** @type {!Document} */ (this.doc_))`
       <div class="i-amphtml-lbg-thumbnail-timestamp-container">
         <span class="i-amphtml-lbg-thumbnail-play-icon"></span>
       <div>`;

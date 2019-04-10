@@ -58,7 +58,8 @@ export class ScrollTimelineWorkletRunner extends AnimationRunner {
   /**
   * @override
   * Initializes the players but does not change the state.
-   */
+  * @suppress {missingProperties}
+  */
   init() {
     const {documentElement} = this.win_.document;
     const viewportService = Services.viewportForDoc(documentElement);

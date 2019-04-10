@@ -18,7 +18,7 @@ import {isFiniteNumber} from '../types';
 import {loadPromise} from '../event-helper';
 
 /** @typedef {string|number|boolean|undefined|null} */
-let ResolverReturnDef;
+export let ResolverReturnDef;
 
 /** @typedef {function(...*):ResolverReturnDef} */
 export let SyncResolverDef;

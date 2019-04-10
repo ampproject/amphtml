@@ -280,7 +280,9 @@ ConfigManager.PubIdData; // purely for typedef
  *   widgetId:string,
  *   productCode:string,
  *   shareConfig:(Object<string,string>|undefined),
- *   iframe: Element
+ *   iframe: Element,
+ *   atConfig: JsonObject,
+ *   containerClassName: string
  * }}
  */
 ConfigManager.IframeDatum; // purely for typedef

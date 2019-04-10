@@ -15,10 +15,12 @@
  */
 package org.ampproject;
 
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableMap;
 import com.google.javascript.jscomp.AbstractCompiler;
 import com.google.javascript.jscomp.HotSwapCompilerPass;
 import com.google.javascript.jscomp.NodeTraversal;
@@ -43,14 +45,14 @@ import com.google.javascript.rhino.Node;
 class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
 
   final AbstractCompiler compiler;
-  private final Map<String, Set<String>> stripTypeSuffixes;
-  private final Map<String, Node> assignmentReplacements;
-  private final Map<String, Node> prodAssignmentReplacements;
+  private final ImmutableSet<String> stripTypeSuffixes;
+  private final ImmutableMap<String, Node> assignmentReplacements;
+  private final ImmutableMap<String, Node> prodAssignmentReplacements;
   final boolean isProd;
 
   public AmpPass(AbstractCompiler compiler, boolean isProd,
-        Map<String, Set<String>> stripTypeSuffixes,
-        Map<String, Node> assignmentReplacements, Map<String, Node> prodAssignmentReplacements) {
+        ImmutableSet<String> stripTypeSuffixes,
+        ImmutableMap<String, Node> assignmentReplacements, ImmutableMap<String, Node> prodAssignmentReplacements) {
     this.compiler = compiler;
     this.stripTypeSuffixes = stripTypeSuffixes;
     this.isProd = isProd;
@@ -63,7 +65,7 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
   }
 
   @Override public void hotSwapScript(Node scriptRoot, Node originalRoot) {
-    NodeTraversal.traverseEs6(compiler, scriptRoot, this);
+    NodeTraversal.traverse(compiler, scriptRoot, this);
   }
 
   @Override public void visit(NodeTraversal t, Node n, Node parent) {
@@ -166,59 +168,15 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
   }
 
   /**
-   * For a function that looks like:
-   * function fun(val) {
-   *   return dev().assert(val);
-   * }
-   *
-   * The AST would look like:
-   * RETURN 24 [length: 25] [source_file: ./src/main.js]
-   *   CALL 24 [length: 17] [source_file: ./src/main.js]
-   *     GETPROP 24 [length: 12] [source_file: ./src/main.js]
-   *       CALL 24 [length: 5] [source_file: ./src/main.js]
-   *         NAME $dev$$module$src$log$$ 38 [length: 3] [originalname: dev] [source_file: ./src/log.js]
-   *         STRING assert 24 [length: 6] [source_file: ./src/main.js]
-   *     NAME $val$$ 24 [length: 3] [source_file: ./src/main.js]
-   *
-   * We are looking for the `CALL` that has a child NAME "$dev$$module$src$log$$" (or any signature from keys)
-   * and a child STRING "assert" (or any other signature from Set<String> value)
    */
   private boolean isCallRemovable(Node n) {
     if (n == null || !n.isCall()) {
       return false;
     }
 
-    Node callGetprop = n.getFirstChild();
-    if (callGetprop == null || !callGetprop.isGetProp()) {
-      return false;
-    }
-
-    // Temp hack not needed in single pass compiler because it can inline the
-    // this itself.
-    if ("module$src$log.devAssert".equals(callGetprop.getQualifiedName())) {
-      return true;
-    }
-
-    Node parentCall = callGetprop.getFirstChild();
-    if (parentCall == null || !parentCall.isCall()) {
-      return false;
-    }
-
-    Node parentCallGetprop = parentCall.getFirstChild();
-    Node methodName = parentCall.getNext();
-    if (parentCallGetprop == null || !parentCallGetprop.isGetProp() ||
-        methodName == null || !methodName.isString()) {
-      return false;
-    }
-
-    String parentMethodName = parentCallGetprop.getQualifiedName();
-    Set<String> methodCallNames = stripTypeSuffixes.get(parentMethodName);
-    if (methodCallNames == null) {
-      return false;
-    }
-
-    for (String methodCallName : methodCallNames) {
-      if (methodCallName == methodName.getString()) {
+    String name = buildQualifiedName(n);
+    for (String removable : stripTypeSuffixes) {
+      if (name.equals(removable)) {
         return true;
       }
     }
@@ -276,6 +234,35 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
     }
 
     return false;
+  }
+
+  /**
+   * Builds a string representation of MemberExpression and CallExpressions.
+   */
+  private String buildQualifiedName(Node n) {
+    StringBuilder sb = new StringBuilder();
+    buildQualifiedNameInternal(n, sb);
+    return sb.toString();
+  }
+
+  private void buildQualifiedNameInternal(Node n, StringBuilder sb) {
+    if (n == null) {
+      sb.append("NULL");
+      return;
+    }
+
+    if (n.isCall()) {
+      buildQualifiedNameInternal(n.getFirstChild(), sb);
+      sb.append("()");
+    } else if (n.isGetProp()) {
+      buildQualifiedNameInternal(n.getFirstChild(), sb);
+      sb.append(".");
+      buildQualifiedNameInternal(n.getSecondChild(), sb);
+    } else if (n.isName() || n.isString()) {
+      sb.append(n.getString());
+    } else {
+      sb.append("UNKNOWN");
+    }
   }
 
   private void replaceWithBooleanExpression(boolean bool, Node n, Node parent) {

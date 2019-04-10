@@ -36,14 +36,14 @@ class AmpJWPlayer extends AMP.BaseElement {
     /** @private {string} */
     this.contentSearch_ = '';
 
-    /** @private {boolean} */
-    this.contentContextual_ = false;
+    /** @private {string} */
+    this.contentContextual_ = '';
 
     /** @private {string} */
     this.contentRecency_ = '';
 
-    /** @private {boolean} */
-    this.contentBackfill_ = false;
+    /** @private {string} */
+    this.contentBackfill_ = '';
 
     /** @private {?HTMLIFrameElement} */
     this.iframe_ = null;
@@ -83,11 +83,11 @@ class AmpJWPlayer extends AMP.BaseElement {
     this.contentSearch_ = element.getAttribute('data-content-search') ||
         '';
     this.contentContextual_ = element.getAttribute('data-content-contextual') ||
-        false;
+        '';
     this.contentRecency_ = element.getAttribute('data-content-recency') ||
         '';
     this.contentBackfill_ = element.getAttribute('data-content-backfill') ||
-        false;
+        '';
   }
 
 
@@ -111,7 +111,7 @@ class AmpJWPlayer extends AMP.BaseElement {
     iframe.src = src;
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
-    this.iframe_ = iframe;
+    this.iframe_ = /** @type {HTMLIFrameElement} */ (iframe);
     return this.loadPromise(iframe);
   }
 

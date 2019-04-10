@@ -80,7 +80,7 @@ export class AmpVizVega extends AMP.BaseElement {
      * appending vega and d3 minified files during the build process.
      */
     this.vega_ = /** @type {!VegaObject} */ (this.win.vg);
-    this.inlineData_ = this.getInlineData_();
+    this.inlineData_ = /** @type {string} */ (this.getInlineData_());
     this.src_ = this.element.getAttribute('src');
     this.useDataWidth_ = this.element.hasAttribute('use-data-width');
     this.useDataHeight_ = this.element.hasAttribute('use-data-height');
@@ -142,10 +142,11 @@ export class AmpVizVega extends AMP.BaseElement {
     devAssert(!this.src_ != !this.inlineData_);
 
     if (this.inlineData_) {
-      this.data_ = tryParseJson(this.inlineData_, err => {
-        userAssert(!err, 'data could not be ' +
+      this.data_ = /** @type {JsonObject} */ (
+        tryParseJson(this.inlineData_, err => {
+          userAssert(!err, 'data could not be ' +
             'parsed. Is it in a valid JSON format?: %s', err);
-      });
+        }));
       return Promise.resolve();
     } else {
       // TODO(aghassemi): We may need to expose credentials and set
@@ -191,12 +192,14 @@ export class AmpVizVega extends AMP.BaseElement {
    */
   renderGraph_() {
     const parsePromise = new Promise((resolve, reject) => {
-      this.vega_.parse.spec(this.data_, (error, chartFactory) => {
-        if (error) {
-          reject(error);
-        }
-        resolve(/** @type {!VegaChartFactory} */ (chartFactory));
-      });
+      this.vega_.parse.spec(
+          /** @type {!JsonObject} */ (this.data_),
+          (error, chartFactory) => {
+            if (error) {
+              reject(error);
+            }
+            resolve(/** @type {!VegaChartFactory} */ (chartFactory));
+          });
     });
 
     return parsePromise.then(/** @param {!VegaChartFactory} chartFactory */
@@ -226,7 +229,7 @@ export class AmpVizVega extends AMP.BaseElement {
    * @private
    */
   getDataPadding_(widthOrHeight) {
-    const p = this.data_.padding;
+    const p = this.data_['padding'];
     if (!p) {
       return 0;
     }

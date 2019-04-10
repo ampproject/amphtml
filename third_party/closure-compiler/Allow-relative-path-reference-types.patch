@@ -1,0 +1,145 @@
+diff --git a/src/com/google/javascript/jscomp/Es6RewriteModules.java b/src/com/google/javascript/jscomp/Es6RewriteModules.java
+index 42836d28b..0b3f73d3e 100644
+--- a/src/com/google/javascript/jscomp/Es6RewriteModules.java
++++ b/src/com/google/javascript/jscomp/Es6RewriteModules.java
+@@ -1009,34 +1009,66 @@ public final class Es6RewriteModules extends AbstractPostOrderCallback
+     private void fixTypeNode(NodeTraversal t, Node typeNode) {
+       if (typeNode.isString()) {
+         String name = typeNode.getString();
+-        List<String> splitted = Splitter.on('.').limit(2).splitToList(name);
+-        String baseName = splitted.get(0);
+-        String rest = "";
+-        if (splitted.size() == 2) {
+-          rest = "." + splitted.get(1);
+-        }
+-        Var var = t.getScope().getVar(baseName);
+-        if (var != null && var.isGlobal()) {
+-          maybeSetNewName(t, typeNode, name, baseName + "$$" + suffix + rest);
+-        } else if (var == null && importMap.containsKey(baseName)) {
+-          ModuleOriginalNamePair pair = importMap.get(baseName);
+-          if (pair.originalName.isEmpty()) {
+-            maybeSetNewName(t, typeNode, name, pair.module + rest);
++        if (ModuleLoader.isPathIdentifier(name)) {
++          int lastSlash = name.lastIndexOf('/');
++          int endIndex = name.indexOf('.', lastSlash);
++          String localTypeName = null;
++          if (endIndex == -1) {
++            endIndex = name.length();
+           } else {
+-            maybeSetNewName(t, typeNode, name, pair.module + "." + pair.originalName + rest);
++            localTypeName = name.substring(endIndex);
++          }
++
++          String moduleName = name.substring(0, endIndex);
++          ModuleLoader.ModulePath path =
++              t.getInput()
++                  .getPath()
++                  .resolveJsModule(
++                      moduleName,
++                      typeNode.getSourceFileName(),
++                      typeNode.getLineno(),
++                      typeNode.getCharno());
++
++          if (path == null) {
++            path = t.getInput().getPath().resolveModuleAsPath(moduleName);
++          }
++          String globalModuleName = path.toModuleName();
++
++          maybeSetNewName(
++              t,
++              typeNode,
++              name,
++              localTypeName == null ? globalModuleName : globalModuleName + localTypeName);
++        } else {
++          List<String> splitted = Splitter.on('.').limit(2).splitToList(name);
++          String baseName = splitted.get(0);
++          String rest = "";
++          if (splitted.size() == 2) {
++            rest = "." + splitted.get(1);
+           }
++          Var var = t.getScope().getVar(baseName);
++          if (var != null && var.isGlobal()) {
++            maybeSetNewName(t, typeNode, name, baseName + "$$" + suffix + rest);
++          } else if (var == null && importMap.containsKey(baseName)) {
++            ModuleOriginalNamePair pair = importMap.get(baseName);
++            if (pair.originalName.isEmpty()) {
++              maybeSetNewName(t, typeNode, name, pair.module + rest);
++            } else {
++              maybeSetNewName(t, typeNode, name, baseName + "$$" + pair.module + rest);
++            }
+ 
+-          if (preprocessorSymbolTable != null) {
+-            // Jsdoc type node is a single STRING node that spans the whole type. For example
+-            // STRING node "bar.Foo". ES6 import rewrite replaces only "module"
+-            // part of the type: "bar.Foo" => "module$full$path$bar$Foo". We have to record
+-            // "bar" as alias.
+-            Node onlyBaseName = Node.newString(baseName).useSourceInfoFrom(typeNode);
+-            onlyBaseName.setLength(baseName.length());
+-            maybeAddAliasToSymbolTable(onlyBaseName, t.getSourceName());
++            if (preprocessorSymbolTable != null) {
++              // Jsdoc type node is a single STRING node that spans the whole type. For example
++              // STRING node "bar.Foo". ES6 import rewrite replaces only "module"
++              // part of the type: "bar.Foo" => "module$full$path$bar$Foo". We have to record
++              // "bar" as alias.
++              Node onlyBaseName = Node.newString(baseName).useSourceInfoFrom(typeNode);
++              onlyBaseName.setLength(baseName.length());
++              maybeAddAliasToSymbolTable(onlyBaseName, t.getSourceName());
++            }
+           }
++          typeNode.setOriginalName(name);
+         }
+-        typeNode.setOriginalName(name);
+       }
+ 
+       for (Node child = typeNode.getFirstChild(); child != null; child = child.getNext()) {
+diff --git a/test/com/google/javascript/jscomp/Es6RewriteModulesTest.java b/test/com/google/javascript/jscomp/Es6RewriteModulesTest.java
+index 57a11eae6..3deefbaa0 100644
+--- a/test/com/google/javascript/jscomp/Es6RewriteModulesTest.java
++++ b/test/com/google/javascript/jscomp/Es6RewriteModulesTest.java
+@@ -678,6 +678,46 @@ public final class Es6RewriteModulesTest extends CompilerTestCase {
+             "/** @const */ module$testcode.Child = Child$$module$testcode;"));
+   }
+ 
++  @Test
++  public void testReferenceToTypeFromOtherModule() {
++    setModuleResolutionMode(ModuleLoader.ResolutionMode.NODE);
++    testModules(
++        lines(
++            "export class Foo {", "  /** @param {./other.Baz} baz */", "  useBaz(baz) {}", "}"),
++        lines(
++            "class Foo$$module$testcode {",
++            "  /** @param {module$other.Baz} baz */",
++            "  useBaz(baz) {}",
++            "}",
++            "/** @const */ var module$testcode = {};",
++            "/** @const */ module$testcode.Foo = Foo$$module$testcode;"));
++
++    testModules(
++        lines(
++            "export class Foo {", "  /** @param {/other.Baz} baz */", "  useBaz(baz) {}", "}"),
++        lines(
++            "class Foo$$module$testcode {",
++            "  /** @param {module$other.Baz} baz */",
++            "  useBaz(baz) {}",
++            "}",
++            "/** @const */ var module$testcode = {};",
++            "/** @const */ module$testcode.Foo = Foo$$module$testcode;"));
++
++    testModules(
++        lines(
++            "import {Parent} from './other.js';",
++            "class Child extends Parent {",
++            "  /** @param {./other.Parent} parent */",
++            "  useParent(parent) {}",
++            "}"),
++        lines(
++            "class Child$$module$testcode extends module$other.Parent {",
++            "  /** @param {module$other.Parent} parent */",
++            "  useParent(parent) {}",
++            "}",
++            "/** @const */ var module$testcode = {};"));
++  }
++
+   @Test
+   public void testRenameTypedef() {
+     testModules(

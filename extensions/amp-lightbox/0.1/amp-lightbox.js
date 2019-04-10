@@ -255,7 +255,9 @@ class AmpLightbox extends AMP.BaseElement {
       return;
     }
     this.initialize_();
-    this.boundCloseOnEscape_ = this.closeOnEscape_.bind(this);
+    this.boundCloseOnEscape_ =
+      /** @type {?function(this:AmpLightbox, Event)} */ (
+        this.closeOnEscape_.bind(this));
     this.win.document.documentElement.addEventListener(
         'keydown', this.boundCloseOnEscape_);
 
@@ -497,18 +499,19 @@ class AmpLightbox extends AMP.BaseElement {
    * @private
    */
   waitForScroll_(startingScrollTop) {
-    this.scrollTimerId_ = Services.timerFor(this.win).delay(() => {
-      if (Math.abs(startingScrollTop - this.pos_) < 30) {
-        dev().fine(TAG, 'slow scrolling: %s - %s',
-            startingScrollTop, this.pos_);
-        this.scrollTimerId_ = null;
-        this.update_(this.pos_);
-      } else {
-        dev().fine(TAG, 'fast scrolling: %s - %s',
-            startingScrollTop, this.pos_);
-        this.waitForScroll_(this.pos_);
-      }
-    }, 100);
+    this.scrollTimerId_ = /** @type {number} */ (
+      Services.timerFor(this.win).delay(() => {
+        if (Math.abs(startingScrollTop - this.pos_) < 30) {
+          dev().fine(TAG, 'slow scrolling: %s - %s',
+              startingScrollTop, this.pos_);
+          this.scrollTimerId_ = null;
+          this.update_(this.pos_);
+        } else {
+          dev().fine(TAG, 'fast scrolling: %s - %s',
+              startingScrollTop, this.pos_);
+          this.waitForScroll_(this.pos_);
+        }
+      }, 100));
   }
 
   /**

@@ -252,7 +252,7 @@ export function setHistoryState(win, stateName, value) {
  * Returns the value of a given state of the window history.
  * @param {!Window} win
  * @param {string} stateName
- * @return {?string}
+ * @return {*}
  */
 export function getHistoryState(win, stateName) {
   const {history} = win;

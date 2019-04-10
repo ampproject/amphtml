@@ -22,7 +22,7 @@ import {
  * Localized string bundle used for mr strings.
  * @const {!LocalizedStringBundleDef}
  */
-export default /** @const {!LocalizedStringBundleDef} */ ({
+const strings = {
   [LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT]: {
     string: 'आवाज बंद',
   },
@@ -128,4 +128,6 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
     string: 'आम्ही क्षमस्व आहोत, तुमचा ब्राउझर या प्रयोगाला सपोर्ट करत ' +
         'नसल्याचे दिसते',
   },
-});
+};
+
+export default strings;

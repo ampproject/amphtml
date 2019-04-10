@@ -257,15 +257,16 @@ export class AmpSlideScroll extends BaseSlides {
       const timeout = this.shouldDisableCssSnap_ ? IOS_TOUCH_TIMEOUT
         : NATIVE_TOUCH_TIMEOUT;
       // Timer that detects scroll end and/or end of snap scroll.
-      this.touchEndTimeout_ = Services.timerFor(this.win).delay(() => {
-        const currentScrollLeft = this.slidesContainer_./*OK*/scrollLeft;
+      this.touchEndTimeout_ = /** @type {number} */ (
+        Services.timerFor(this.win).delay(() => {
+          const currentScrollLeft = this.slidesContainer_./*OK*/scrollLeft;
 
-        if (this.snappingInProgress_) {
-          return;
-        }
-        this.updateOnScroll_(currentScrollLeft);
-        this.touchEndTimeout_ = null;
-      }, timeout);
+          if (this.snappingInProgress_) {
+            return;
+          }
+          this.updateOnScroll_(currentScrollLeft);
+          this.touchEndTimeout_ = null;
+        }, timeout));
     }
     this.hasTouchMoved_ = false;
   }
@@ -373,16 +374,17 @@ export class AmpSlideScroll extends BaseSlides {
       const timeout = this.hasNativeSnapPoints_ ? NATIVE_SNAP_TIMEOUT : (
         this.isIos_ ? IOS_CUSTOM_SNAP_TIMEOUT : CUSTOM_SNAP_TIMEOUT);
       // Timer that detects scroll end and/or end of snap scroll.
-      this.scrollTimeout_ = Services.timerFor(this.win).delay(() => {
-        if (this.snappingInProgress_) {
-          return;
-        }
-        if (this.hasNativeSnapPoints_) {
-          this.updateOnScroll_(currentScrollLeft);
-        } else {
-          this.customSnap_(currentScrollLeft);
-        }
-      }, timeout);
+      this.scrollTimeout_ = /** @type {number} */ (
+        Services.timerFor(this.win).delay(() => {
+          if (this.snappingInProgress_) {
+            return;
+          }
+          if (this.hasNativeSnapPoints_) {
+            this.updateOnScroll_(currentScrollLeft);
+          } else {
+            this.customSnap_(currentScrollLeft);
+          }
+        }, timeout));
     }
     this.previousScrollLeft_ = currentScrollLeft;
   }

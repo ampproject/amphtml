@@ -22,7 +22,7 @@ import {
  * Localized string bundle used for af strings.
  * @const {!LocalizedStringBundleDef}
  */
-export default /** @const {!LocalizedStringBundleDef} */ ({
+const strings = {
   [LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT]: {
     string: 'Klank af',
   },
@@ -128,4 +128,6 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
     string: 'Ons is jammer, maar dit lyk of jou blaaier nie hierdie ervaring ' +
         'steun nie',
   },
-});
+};
+
+export default strings;

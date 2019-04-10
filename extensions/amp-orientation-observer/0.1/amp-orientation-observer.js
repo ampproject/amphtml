@@ -105,15 +105,15 @@ export class AmpOrientationObserver extends AMP.BaseElement {
   deviceOrientationHandler_(event) {
     if (event instanceof DeviceOrientationEvent) {
       if (Math.abs(event.alpha - this.alphaValue_) > DELTA_CONST) {
-        this.alphaValue_ = event.alpha;
+        this.alphaValue_ = /** @type {number} */ (event.alpha);
         this.triggerEvent_('alpha', this.alphaValue_, this.alphaRange_);
       }
       if (Math.abs(event.beta - this.betaValue_) > DELTA_CONST) {
-        this.betaValue_ = event.beta;
+        this.betaValue_ = /** @type {number} */ (event.beta);
         this.triggerEvent_('beta', this.betaValue_, this.betaRange_);
       }
       if (Math.abs(event.gamma - this.gammaValue_) > DELTA_CONST) {
-        this.gammaValue_ = event.gamma;
+        this.gammaValue_ = /** @type {number} */ (event.gamma);
         this.triggerEvent_('gamma', this.gammaValue_, this.gammaRange_);
       }
     }
