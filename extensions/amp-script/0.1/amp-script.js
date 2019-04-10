@@ -20,14 +20,15 @@ import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {UserActivationTracker} from './user-activation-tracker';
 import {
-  upgrade,
-} from '@ampproject/worker-dom/dist/unminified.index.safe.mjs.patched';
-import {
   calculateExtensionScriptUrl,
 } from '../../../src/service/extension-location';
 import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {isExperimentOn} from '../../../src/experiments';
+import {
+  upgrade,
+} from '@ampproject/worker-dom/dist/unminified.index.safe.mjs.patched';
 
 /** @const {string} */
 const TAG = 'amp-script';
@@ -83,7 +84,7 @@ export class AmpScript extends AMP.BaseElement {
     this.userActivation_ = new UserActivationTracker(this.element);
 
     this.wrapper_ = this.win.document.createElement('div');
-    this.purifier_ = createPurifier({'IN_PLACE': true});
+    this.purifier_ = createPurifier(dict({'IN_PLACE': true}));
 
     // Create worker and hydrate.
     const authorUrl = this.element.getAttribute('src');
@@ -106,7 +107,7 @@ export class AmpScript extends AMP.BaseElement {
       return [workerScript, authorScript];
     });
 
-    // WorkerDOMConfiguration
+    // @see src/main-thread/configuration.WorkerDOMConfiguration in worker-dom.
     const workerConfig = {
       authorURL: authorUrl,
       mutationPump: this.mutationPump_.bind(this),
@@ -162,8 +163,7 @@ export class AmpScript extends AMP.BaseElement {
       },
     };
 
-    const debug = true;
-    upgrade(this.element, fetchPromise, workerConfig, debug).then(workerDom => {
+    upgrade(this.element, fetchPromise, workerConfig).then(workerDom => {
       this.workerDom_ = workerDom;
     });
     return Promise.resolve();
