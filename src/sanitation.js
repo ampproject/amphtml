@@ -192,6 +192,15 @@ const BLACKLISTED_TAG_SPECIFIC_ATTRS = dict({
   'select': BLACKLISTED_FIELDS_ATTR,
 });
 
+/** @const {!Object<string, !Array<string>>} */
+const BLACKLISTED_AMP4EMAIL_TAG_SPECIFIC_ATTRS = dict({
+  'amp-anim': ['controls'],
+  'form': ['name'],
+  'input': BLACKLISTED_FIELDS_ATTR,
+  'textarea': BLACKLISTED_FIELDS_ATTR,
+  'select': BLACKLISTED_FIELDS_ATTR,
+});
+
 /**
  * Test for invalid `style` attribute values.
  *
@@ -252,9 +261,8 @@ export function isValidAttr(
   // Remove blacklisted attributes from specific tags e.g. input[formaction].
   let attrBlacklist = BLACKLISTED_TAG_SPECIFIC_ATTRS[tagName] || [];
   if (isAmp4Email(doc)) {
-    const amp4EmailAttrBlacklist =
-        {'form': ['name'], 'amp-anim': ['controls']}[tagName] || [];
-    attrBlacklist = attrBlacklist.concat(amp4EmailAttrBlacklist);
+    attrBlacklist =
+        BLACKLISTED_AMP4EMAIL_TAG_SPECIFIC_ATTRS[tagName] || [];
   }
   if (attrBlacklist.indexOf(attrName) != -1) {
     return false;
