@@ -85,12 +85,19 @@ export class MraidInitializer {
         (element.getAttribute(FALLBACK_ON) || '').split(' ');
     this.fallback_ = fallbackOn.includes(FallbackErrorNames.MISMATCH);
 
-    // It looks like we're initiating a network load for mraid from a relative
-    // url, but this will actually be intercepted by the mobile app SDK and
-    // handled locally.
+    // It looks like we're initiating a network load for mraid.js, but if we're
+    // in a mobile app this will actually be intercepted by the mobile app SDK
+    // and handled locally.
+    //
+    // In cases where this won't be intercepted by an SDK we don't want it to
+    // suceed, so we intentionally use an invalid domain and TLD.  This isn't
+    // technically correct, since the MRAID spec says you must use a relative
+    // URL reference, but the interception API that platforms provide only lets
+    // them see post-resolution URLs.  Platforms just check if the URL ends with
+    // "/mraid.js".
     const mraidJs = document.createElement('script');
     mraidJs.setAttribute('type', 'text/javascript');
-    mraidJs.setAttribute('src', 'mraid.js');
+    mraidJs.setAttribute('src', 'https://invalid.invalid/mraid.js');
     mraidJs.addEventListener('load', () => {
       this.mraidLoadSuccess_();
     });
