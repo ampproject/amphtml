@@ -23,12 +23,12 @@ import {loadScript, validateData} from '../3p/3p';
 export function mgid(global, data) {
   validateData(data, ['publisher', 'widget', 'container'], ['url']);
 
-  let scriptRoot = document.createElement('div');
+  const scriptRoot = document.createElement('div');
   scriptRoot.id = data.container;
 
   document.body.appendChild(scriptRoot);
 
-  let url = `https://jsc.mgid.com/${encodeURIComponent(data.publisher[0])}/`
+  const url = `https://jsc.mgid.com/${encodeURIComponent(data.publisher[0])}/`
     + `${encodeURIComponent(data.publisher[1])}/`
     + `${encodeURIComponent(data.publisher)}.`
     + `${encodeURIComponent(data.widget)}.js?t=`
