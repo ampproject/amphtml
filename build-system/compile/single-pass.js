@@ -542,7 +542,7 @@ function wrapMainBinaries() {
     const path = `dist/${x}.js`;
     const bootstrapCode = path === 'dist/v0.js' ? '' : mainFile;
     const isAmpAltstring = path === 'dist/v0.js' ? '' : 'self.IS_AMP_ALT=1;';
-    fs.writeFileSync(path, `${isAmpAltstring}${prefix}${bootstrapCode}` +
+    fs.writeFileSync(path, `\n${isAmpAltstring}${prefix}${bootstrapCode}` +
         `${fs.readFileSync(path).toString()}${suffix}`);
   });
 }

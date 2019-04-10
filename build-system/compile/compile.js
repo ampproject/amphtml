@@ -138,11 +138,16 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
 
   return new Promise(function(resolve) {
     let entryModuleFilename;
+    let isMainBinary = false;
     if (entryModuleFilenames instanceof Array) {
       entryModuleFilename = entryModuleFilenames[0];
     } else {
       entryModuleFilename = entryModuleFilenames;
       entryModuleFilenames = [entryModuleFilename];
+
+      if (!entryModuleFilename.includes('extensions/')) {
+        isMainBinary = true;
+      }
     }
     // If undefined/null or false then we're ok executing the deletions
     // and mkdir.
@@ -155,6 +160,9 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
     let wrapper = '(function(){%output%})();';
     if (options.wrapper) {
       wrapper = options.wrapper.replace('<%= contents %>', '%output%');
+    }
+    if (isMainBinary) {
+      wrapper = '\n' + wrapper;
     }
     let sourceMapBase = 'http://localhost:8000/';
     if (isProdBuild) {
