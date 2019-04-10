@@ -437,6 +437,46 @@ describes.realWin('amp-video', {
     });
   });
 
+  it('should propagate the object-fit attribute', () => {
+    return getVideo({
+      src: 'video.mp4',
+      'object-fit': 'cover',
+    }).then(v => {
+      const video = v.querySelector('video');
+      expect(video.style.objectFit).to.equal('cover');
+    });
+  });
+
+  it('should not propagate the object-fit attribute if invalid', () => {
+    return getVideo({
+      src: 'video.mp4',
+      'object-fit': 'foo 80%',
+    }).then(v => {
+      const video = v.querySelector('video');
+      expect(video.style.objectFit).to.be.empty;
+    });
+  });
+
+  it('should propagate the object-position attribute', () => {
+    return getVideo({
+      src: 'video.mp4',
+      'object-position': '20% 80%',
+    }).then(v => {
+      const video = v.querySelector('video');
+      expect(video.style.objectPosition).to.equal('20% 80%');
+    });
+  });
+
+  it('should not propagate the object-position attribute if invalid', () => {
+    return getVideo({
+      src: 'video.mp4',
+      'object-position': 'url("example.com")',
+    }).then(v => {
+      const video = v.querySelector('video');
+      expect(video.style.objectPosition).to.be.empty;
+    });
+  });
+
   // TODO: unskip the tests in this file #19664
   it.skip('should forward certain events from video to the amp element', () => {
     return getVideo({

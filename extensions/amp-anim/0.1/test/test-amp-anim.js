@@ -81,4 +81,52 @@ describes.realWin('amp-anim', {
     impl.layoutCallback();
     expect(img.getAttribute('src')).to.equal('test.jpg');
   });
+
+  it('should propagate the object-fit attribute', () => {
+    const el = env.win.document.createElement('amp-anim');
+    el.setAttribute('src', 'test.jpg');
+    el.setAttribute('object-fit', 'cover');
+
+    const impl = new AmpAnim(el);
+    impl.buildCallback();
+    impl.layoutCallback();
+    const img = el.querySelector('img');
+    expect(img.style.objectFit).to.equal('cover');
+  });
+
+  it('should not propagate the object-fit attribute if invalid', () => {
+    const el = env.win.document.createElement('amp-anim');
+    el.setAttribute('src', 'test.jpg');
+    el.setAttribute('object-fit', 'foo 80%');
+
+    const impl = new AmpAnim(el);
+    impl.buildCallback();
+    impl.layoutCallback();
+    const img = el.querySelector('img');
+    expect(img.style.objectFit).to.be.empty;
+  });
+
+  it('should propagate the object-position attribute', () => {
+    const el = env.win.document.createElement('amp-anim');
+    el.setAttribute('src', 'test.jpg');
+    el.setAttribute('object-position', '20% 80%');
+
+    const impl = new AmpAnim(el);
+    impl.buildCallback();
+    impl.layoutCallback();
+    const img = el.querySelector('img');
+    expect(img.style.objectPosition).to.equal('20% 80%');
+  });
+
+  it('should not propagate the object-position attribute if invalid', () => {
+    const el = env.win.document.createElement('amp-anim');
+    el.setAttribute('src', 'test.jpg');
+    el.setAttribute('object-position', 'url:("example.com")');
+
+    const impl = new AmpAnim(el);
+    impl.buildCallback();
+    impl.layoutCallback();
+    const img = el.querySelector('img');
+    expect(img.style.objectPosition).to.be.empty;
+  });
 });
