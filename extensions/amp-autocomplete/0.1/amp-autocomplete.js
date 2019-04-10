@@ -590,10 +590,10 @@ export class AmpAutocomplete extends AMP.BaseElement {
         }
         return this.updateActiveItem_(-1);
       case Keys.ENTER:
-        if (this.activeElement_) {
-          if (!this.submitOnEnter_) {
+        if (this.resultsShowing_() && !this.submitOnEnter_) {
             event.preventDefault();
           }
+        if (this.activeElement_) {
           return this.mutateElement(() => {
             this.selectItem_(this.activeElement_);
             this.resetActiveElement_();
