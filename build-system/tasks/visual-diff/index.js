@@ -379,13 +379,18 @@ async function snapshotWebpages(percy, browser, webpages) {
       // modify the #anchor name.
       await page.goto('about:blank').then(() => {}, () => {});
 
-      // Puppeteer is flaky when it comes to catching navigation requests, so
-      // ignore timeouts. If this was a real non-loading page, this will be
-      // caught in the resulting Percy build. Also attempt to wait until there
-      // are no more network requests. This method is flaky since Puppeteer
-      // doesn't always understand Chrome's network activity, so ignore timeouts
-      // again.
-      const pagePromise = page.goto(fullUrl, {waitUntil: 'networkidle0'})
+      // Notes:
+      // 1. Puppeteer is flaky when it comes to catching navigation requests, so
+      //    ignore timeouts. If this was a real non-loading page, this will be
+      //    caught in the resulting Percy build.
+      // 2. Await page load by waiting on the `networkidle2` event, which is a
+      //    puppetter heuristic suitable for pages that are expected to have a
+      //    small amount of background network activity.
+      //    Reference: https://github.com/GoogleChrome/puppeteer/issues/1552
+      const pagePromise = page.goto(fullUrl, {
+        timeout: 0,
+        waitUntil: 'networkidle2',
+      })
           .then(() => {}, () => {})
           .then(async() => {
             log('verbose', 'Navigation to page', colors.yellow(name),
