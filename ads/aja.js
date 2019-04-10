@@ -22,14 +22,15 @@ import {validateData} from '../3p/3p';
  */
 export function aja(global, data) {
 
-  validateData(data, ['sspCode']);
+  validateData(data, ['asi']);
 
+  const asi = data['asi'];
   (global._aja = global._aja || {
-    sspCode: data['sspCode'],
+    sspCode: asi,
   });
 
-  const elAttri = 'allow-same-origin allow-top-navigation ';
-  const elAttri2 = 'allow-scripts allow-popups ';
+  let elAttr = 'allow-top-navigation-by-user-activation';
+  elAttr += ' allow-scripts allow-popups';
   const elStyle = global.document.createElement('iframe');
   elStyle.setAttribute('id', 'adframe');
   elStyle.setAttribute('width', data.width);
@@ -39,9 +40,9 @@ export function aja(global, data) {
   elStyle.setAttribute('marginwidth', '0');
   elStyle.setAttribute('allowfullscreen', 'true');
   elStyle.setAttribute('scrolling', 'no');
-  elStyle.setAttribute('sandbox', elAttri + elAttri2);
+  elStyle.setAttribute('sandbox', elAttr);
   elStyle.setAttribute('style', 'position:absolute');
-  elStyle.src = 'https://static.aja-recommend.com/html/amp.html?ssp_code=' + encodeURIComponent(data['sspCode']);
+  elStyle.src = 'https://static.aja-recommend.com/html/amp.html?ssp_code=' + encodeURIComponent(asi);
   global.document.getElementById('c').appendChild(elStyle);
 
 }
