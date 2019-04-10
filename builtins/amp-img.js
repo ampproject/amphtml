@@ -20,8 +20,8 @@ import {dev} from '../src/log';
 import {guaranteeSrcForSrcsetUnsupportedBrowsers} from '../src/utils/img';
 import {isExperimentOn} from '../src/experiments';
 import {listen} from '../src/event-helper';
+import {propagateObjectFitStyles, setImportantStyles} from '../src/style';
 import {registerElement} from '../src/service/custom-element-registry';
-import {setImportantStyles} from '../src/style';
 
 /**
  * Attributes to propagate to internal image when changed externally.
@@ -152,6 +152,7 @@ export class AmpImg extends BaseElement {
       this.maybeGenerateSizes_();
     }
     this.applyFillContent(this.img_, true);
+    propagateObjectFitStyles(this.element, this.img_);
 
     this.element.appendChild(this.img_);
   }

@@ -5065,6 +5065,8 @@ tags: {  # <amp-img>
   tag_name: "AMP-IMG"
   attrs: { name: "alt" }
   attrs: { name: "attribution" }
+  attrs: { name: "object-fit" }
+  attrs: { name: "object-position" }
   attrs: { name: "placeholder" }
   # <amp-bind>
   attrs: { name: "[alt]" }
@@ -5092,6 +5094,8 @@ tags: {  # <amp-img>
   spec_name: "AMP-IMG (AMP4EMAIL)"
   attrs: { name: "alt" }
   attrs: { name: "attribution" }
+  attrs: { name: "object-fit" }
+  attrs: { name: "object-position" }
   attrs: { name: "placeholder" }
   attr_lists: "extended-amp-global"
   attr_lists: "mandatory-src-amp4email"

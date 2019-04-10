@@ -335,3 +335,18 @@ export function resetStyles(element, properties) {
     setStyle(element, properties[i], null);
   }
 }
+
+/**
+ * Propagates the object-fit/position element attributes as styles.
+ * @param {!Element} fromEl ie: amp-img
+ * @param {!Element} toEl ie: the img within amp-img
+ */
+export function propagateObjectFitStyles(fromEl, toEl) {
+  if (fromEl.hasAttribute('object-fit')) {
+    setStyle(toEl, 'object-fit', fromEl.getAttribute('object-fit'));
+  }
+
+  if (fromEl.hasAttribute('object-position')) {
+    setStyle(toEl, 'object-position', fromEl.getAttribute('object-position'));
+  }
+}
