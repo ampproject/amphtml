@@ -8,6 +8,7 @@ dist.3p
 dist.tools
 out
 examples
+firebase
 third_party
 test/coverage
 **/*.extern.js
