@@ -49,6 +49,7 @@ function expect(actual, opt_message) {
     chai.use(installIsTrueWrapper);
     chai.use(installIsFalseWrapper);
     chai.use(installIsOkWrapper);
+    chai.use(installIsNullWrapper);
   }
 
   return chai.expect(actual, opt_message);
@@ -136,6 +137,15 @@ function installIsOkWrapper(chai, utils) {
   Assertion.overwriteProperty('isOk', overwrite);
   Assertion.overwriteProperty('ok', overwrite);
 }
+
+function installIsNullWrapper(chai, utils) {
+  const {Assertion} = chai;
+
+  const overwrite = overwriteAlwaysUseSuper(utils);
+  Assertion.overwriteProperty('isNull', overwrite);
+  Assertion.overwriteProperty('null', overwrite);
+}
+
 
 function overwriteAlwaysUseSuper(utils) {
   const {flag} = utils;

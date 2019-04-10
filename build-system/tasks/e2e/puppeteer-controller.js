@@ -124,12 +124,11 @@ class PuppeteerController {
    * Return a wait function. When called, the function will cause the test
    * runner to wait until the given value matches the expected value.
    * @param {function(): !Promise<?T>} valueFn
+   * @param {...*} args
    * @return {function(T,T): !Promise<?T>}
    * @template T
    */
-  getWaitFn_(valueFn) {
-    const args = Array.prototype.slice.call(arguments, 1);
-
+  getWaitFn_(valueFn, ...args) {
     return async(condition, opt_mutate) => {
       const frame = await this.getCurrentFrame_();
       return waitFor(frame, valueFn, args, condition, opt_mutate);
