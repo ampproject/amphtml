@@ -68,8 +68,8 @@ function unregisterIframe(frame) {
 
 // TODO: Unskip the cross domain tests on Firefox, which broke because localhost
 // subdomains no longer work on version 65.
-// TODO(zombifier): Unskip on Edge once these tests work.
-describe.configure().skipEdge().run('inabox', function() {
+// TODO(zombifier): Unskip on Windows once these tests work.
+describe.configure().skipWindows().run('inabox', function() {
 
   function testAmpComponents() {
     const imgPromise = RequestBank.withdraw('image').then(req => {
@@ -251,8 +251,8 @@ describe.configure().skipEdge().run('inabox', function() {
   });
 });
 
-// TODO(zombifier): Unskip on Edge once these tests work.
-describe.configure().skipEdge().run('inabox with a complex ' +
+// TODO(zombifier): Unskip on Windows once these tests work.
+describe.configure().skipWindows().run('inabox with a complex ' +
     'image ad', function() {
   const {testServerPort} = window.ampTestRuntimeConfig;
 
