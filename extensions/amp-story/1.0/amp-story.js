@@ -872,7 +872,8 @@ export class AmpStory extends AMP.BaseElement {
     const isActualPage =
       pageId =>
         findIndex(this.pages_, page => page.element.id === pageId) >= 0;
-    const historyPage = getHistoryState(this.win, HistoryState.PAGE_ID);
+    const historyPage =
+    /** @type {string} */ (getHistoryState(this.win, HistoryState.PAGE_ID));
 
     if (isExperimentOn(this.win, 'amp-story-branching')) {
       const maybePageId = parseQueryString(this.win.location.hash)['page'];
@@ -2270,7 +2271,7 @@ export class AmpStory extends AMP.BaseElement {
       getHistoryState(this.win, HistoryState.NAVIGATION_PATH);
     if (historyNavigationPath) {
       this.storyNavigationPath_ =
-          this.storyNavigationPath_.concat([historyNavigationPath]);
+        /** @type {!Array<string>} */ (historyNavigationPath);
     }
   }
 
