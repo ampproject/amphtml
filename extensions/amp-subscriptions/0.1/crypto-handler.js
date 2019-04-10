@@ -36,7 +36,15 @@ export class CryptoHandler {
         this.ampdoc_.getRootNode().querySelector('script[keys]');
     /** @type {?JsonObject} */
     this.encryptedKeys_ = (parsedEncryptedKeys &&
-        tryParseJson(parsedEncryptedKeys.textContent)) || null;
+      tryParseJson(parsedEncryptedKeys.textContent)) || null;
+  }
+
+  /**
+   * This method is used for testing.
+   * @return {?JsonObject}
+   */
+  getEncryptedKeys() {
+    return this.encryptedKeys_;
   }
 
   /**
@@ -45,10 +53,12 @@ export class CryptoHandler {
    * @return {?string}
    */
   getEncryptedDocumentKey(serviceId) {
-    if (!this.encryptedKeys_) {
+    // Doing this for testing.
+    const encryptedKeys = this.getEncryptedKeys();
+    if (!encryptedKeys) {
       return null;
     }
-    return this.encryptedKeys_[serviceId];
+    return encryptedKeys[serviceId] || null;
   }
 
   /**

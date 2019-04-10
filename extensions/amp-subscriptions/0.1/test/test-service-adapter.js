@@ -57,6 +57,7 @@ env => {
       const stub = sandbox.stub(subscriptionService, 'getEncryptedDocumentKey');
       serviceAdapter.getEncryptedDocumentKey('serviceId');
       expect(stub).to.be.calledOnce;
+      expect(stub).to.be.calledWith('serviceId');
     });
   });
 

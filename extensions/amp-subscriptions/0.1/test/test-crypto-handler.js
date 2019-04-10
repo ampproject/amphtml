@@ -24,6 +24,7 @@ env => {
   let win;
   let ampdoc;
   let cryptoHandler;
+  let encryptedLocalKey;
   const serviceConfig = {
     services: [
       {
@@ -46,12 +47,28 @@ env => {
     element.innerHTML = JSON.stringify(serviceConfig);
     win.document.body.appendChild(element);
     cryptoHandler = new CryptoHandler(ampdoc);
+    encryptedLocalKey = 'encryptedLocalKey';
   });
 
   describe('getEncryptedDocumentKey', () => {
-    it('should return null', () => {
+    it('should return null when there are no keys', () => {
+      return expect(cryptoHandler.getEncryptedDocumentKey()).to.be.null;
+    });
+
+    it('should return null when call doesnt match keys', () => {
+      sandbox.stub(cryptoHandler, 'getEncryptedKeys').callsFake(() => {
+        return {'local': encryptedLocalKey};
+      });
       return expect(cryptoHandler.getEncryptedDocumentKey(
           'serviceId')).to.be.null;
+    });
+
+    it('should return expected value to a matching key', () => {
+      sandbox.stub(cryptoHandler, 'getEncryptedKeys').callsFake(() => {
+        return {'local': encryptedLocalKey};
+      });
+      return expect(cryptoHandler.getEncryptedDocumentKey(
+          'local')).to.equal(encryptedLocalKey);
     });
   });
 
