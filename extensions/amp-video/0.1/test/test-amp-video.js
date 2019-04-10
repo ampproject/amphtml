@@ -187,7 +187,8 @@ describes.realWin('amp-video', {
     });
   });
 
-  it('should not load a video with http src', () => {
+  // TODO(#21767): re-enable this test.
+  it.skip('should not load a video with http src', () => {
     expectAsyncConsoleError(/start with/);
     return expect(getVideo({
       src: 'http://example.com/video.mp4',
@@ -201,6 +202,7 @@ describes.realWin('amp-video', {
   });
 
   it('should not load a video with http source children', () => {
+    expectAsyncConsoleError(/start with/);
     const sources = [];
     const mediatypes = ['video/ogg', 'video/mp4', 'video/webm'];
     for (let i = 0; i < mediatypes.length; i++) {
