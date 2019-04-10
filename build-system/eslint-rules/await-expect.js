@@ -15,6 +15,14 @@
  */
 'use strict';
 
+/**
+ * Forces `expect` calls to be preceded by `await` in end-to-end tests.
+ *
+ * Bad:
+ *   expect(actual).to.equal(expected);
+ * Good:
+ *   await expect(actual).to.equal(expected);
+ */
 module.exports = function(context) {
   return {
     CallExpression(node) {
