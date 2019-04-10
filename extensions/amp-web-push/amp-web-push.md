@@ -135,6 +135,14 @@ All properties are <strong>required</strong>, and all URLs must begin with the s
        </p>
     </td>
   </tr>
+  <tr>
+    <td><code>service-worker-scope (optional)</code></td>
+    <td>
+      <p>
+        The scope of the service worker to be installed.
+      </p>
+    </td>
+  </tr>
 </table>
 
 ## Validation
