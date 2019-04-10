@@ -22,7 +22,7 @@ import {
  * Localized string bundle used for bg strings.
  * @const {!LocalizedStringBundleDef}
  */
-export default /** @const {!LocalizedStringBundleDef} */ ({
+const strings = {
   [LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT]: {
     string: 'Звукът е изключен',
   },
@@ -129,4 +129,6 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
     string: 'За съжаление, изглежда, че браузърът ви не поддържа преглед на ' +
         'материали.',
   },
-});
+};
+
+export default strings;

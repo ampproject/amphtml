@@ -389,7 +389,7 @@ export class AmpDatePicker extends AMP.BaseElement {
 
     const mode = this.element.getAttribute('mode');
     if (mode) {
-      this.mode_ = mode;
+      this.mode_ = /** @type {!DatePickerMode} */ (mode);
     }
 
     this.weekDayFormat_ = this.element.getAttribute('week-day-format') ||
