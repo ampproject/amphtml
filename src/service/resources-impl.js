@@ -601,6 +601,14 @@ export class Resources {
 
   /**
    * Builds resources in document order during prerendering.
+   * This method is called every time an AMP element is attached to the DOM
+   * during prerendering. It traverses the DOM tree in document order to
+   * discover AMP elements to build. Because the DOM might still be
+   * streaming/parsing the first time the it is traversed, we rely on the
+   * element upgrade to resume the traversing, and discover new elements to
+   * prerender.
+   * If enough elements were already prerendered or the DOM is fully traversed,
+   * this is a no-op.
    * @private
    */
   prerenderElements_() {

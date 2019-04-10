@@ -427,7 +427,7 @@ const EXPERIMENTS = [
     cleanupIssue: 'TODO',
   },
   {
-    id: 'amp-prerender-in-document-order',
+    id: 'amp-document-order-prerender',
     name: 'Prerenders the AMP elements in document order.',
     spec: 'https://github.com/ampproject/amphtml/issues/21791',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/21792',
