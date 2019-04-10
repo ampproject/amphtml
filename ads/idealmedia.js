@@ -32,7 +32,7 @@ export function idealmedia(global, data) {
     + `${encodeURIComponent(data.publisher[1])}/`
     + `${encodeURIComponent(data.publisher)}.`
     + `${encodeURIComponent(data.widget)}.js?t=`
-    + Math.floor((new Date()).getTime() / 36e5);
+    + Math.floor(Date.now() / 36e5);
 
   loadScript(global, data.url || url);
 }
