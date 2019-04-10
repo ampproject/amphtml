@@ -228,11 +228,11 @@ export class Resources {
     this.prerenderWalker_ = null;
 
     /** @private {number} */
-    this.discoveredElementsToPrerenderCount_ = 0;
+    this.prerenderElementsCount_ = 0;
 
     /** @private @const {boolean} */
     this.useDocumentOrderPrerendering_ =
-        isExperimentOn(this.win, 'amp-prerender-in-document-order');
+        isExperimentOn(this.win, 'amp-document-order-prerender');
 
     /** @private @const {!FiniteStateMachine<!VisibilityState>} */
     this.visibilityStateMachine_ = new FiniteStateMachine(
@@ -609,13 +609,13 @@ export class Resources {
           this.ampdoc.getBody(), NodeFilter.SHOW_ELEMENT, null, false);
     }
 
-    while (this.discoveredElementsToPrerenderCount_ < MAX_BUILDS_IN_PRERENDER &&
+    while (this.prerenderElementsCount_ < MAX_BUILDS_IN_PRERENDER &&
         this.prerenderWalker_.nextNode()) {
       const el = dev().assertElement(this.prerenderWalker_.currentNode);
       if (!isAmpElement(el)) {
         continue;
       }
-      this.discoveredElementsToPrerenderCount_++;
+      this.prerenderElementsCount_++;
       whenUpgradedToCustomElement(el)
           .then(() => el.whenUpgradeCompleted())
           .then(() => {
@@ -625,14 +625,14 @@ export class Resources {
             }
             const r = Resource.forElement(el);
             if (!r.prerenderAllowed()) {
-              return Promise.reject('disallowed prerender');
+              throw new Error('Element disallowed prerendering.');
             }
             if (!r.isBuilt() && !r.isBuilding()) {
               this.buildResourceUnsafe_(r, false);
             }
           })
           .catch(() => { // If upgrade failed, or prerendering is disallowed.
-            this.discoveredElementsToPrerenderCount_--;
+            this.prerenderElementsCount_--;
             this.prerenderElements_();
           });
     }
