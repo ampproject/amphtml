@@ -81,7 +81,10 @@ export class AmpViewerAssistance {
       // "updateActionState" requires a low-trust event.
       if (invocation.satisfiesTrust(ActionTrust.LOW)
           && this.isValidActionStatusArgs_(args)) {
-        this.viewer_./*OK*/sendMessageAwaitResponse(method, args).catch(err => {
+        this.transformUpdateActionStateArgs_(args).then(args => {
+          return this.viewer_./*OK*/sendMessageAwaitResponse(
+              method, args);
+        }).catch(err => {
           user().error(TAG, err.toString());
         });
       }
@@ -173,19 +176,47 @@ export class AmpViewerAssistance {
       return false;
     }
     const update = args['update'];
+    const error = args['error'];
     const actionStatus = update && update['actionStatus'];
-    if (!update || !actionStatus) {
+
+    if (error) {
+      return true;
+    } else if (update) {
+      if (!actionStatus || !ACTION_STATUS_WHITELIST.includes(actionStatus)) {
+        user().error(TAG, '"updateActionState" action "update" parameter' +
+            ' must contain a valid "actionStatus" field.');
+        return false;
+      }
+      return true;
+    } else {
       user().error(TAG, '"updateActionState" action must have an' +
-          ' an "update" parameter containing an "actionStatus" field.');
+          ' "update" or "error" parameter.');
       return false;
     }
-    if (!ACTION_STATUS_WHITELIST.includes(actionStatus)) {
-      user().error(TAG, 'Invalid "update.actionStatus" value for ' +
-          '"updateActionState":', actionStatus);
-      return false;
+  }
+
+  /**
+   * Transforms an error response object into a suitable updateActionState
+   * payload to send to the viewer.
+   * @private
+   * @param {?Object} args
+   * @return {!Promise<!Object>}
+   */
+  transformUpdateActionStateArgs_(args) {
+    if (args['update']) {
+      return Promise.resolve(args);
     }
-    user().info(TAG, 'Sending "actionStatus":', actionStatus);
-    return true;
+    // Must transform 'error' Response object
+    const response = args['error'];
+    return response.text().then(errorMessage => {
+      return {
+        update: {
+          actionStatus: 'FAILED_ACTION_STATUS',
+          code: response.status,
+          message: errorMessage,
+        },
+      };
+    });
   }
 
   /**

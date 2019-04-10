@@ -114,20 +114,27 @@ describes.fakeWin('AmpViewerAssistance', {
 
       return service.start_().then(() => {
         sendMessageStub.resetHistory();
-        service.actionHandler_(invoke);
+        return service.actionHandler_(invoke);
+      }).then(() => {
         expect(sendMessageStub).to.be.calledOnce;
         expect(sendMessageStub.firstCall.args[0]).to.equal('updateActionState');
         expect(sendMessageStub.firstCall.args[1]).to.deep.equal(args);
       });
     });
 
-    it('should not send if "update" param is missing', () => {
-      const invoke = new ActionInvocation(element, 'updateActionState');
+    it('should not send if both "update" and "error" params are ' +
+        'missing', () => {
+      const invoke = new ActionInvocation(element, 'updateActionState', {});
       invoke.trust = ActionTrust.LOW;
-
+      let actionHandlerPromise;
       return service.start_().then(() => {
         sendMessageStub.resetHistory();
-        service.actionHandler_(invoke);
+        allowConsoleError(() => {
+          actionHandlerPromise = service.actionHandler_(invoke);
+        });
+        expect(actionHandlerPromise).to.be.null;
+        return actionHandlerPromise;
+      }).then(() => {
         expect(sendMessageStub).to.not.be.called;
       });
     });
@@ -136,12 +143,15 @@ describes.fakeWin('AmpViewerAssistance', {
       const args = {'update': {}};
       const invoke = new ActionInvocation(element, 'updateActionState', args);
       invoke.trust = ActionTrust.LOW;
-
+      let actionHandlerPromise;
       return service.start_().then(() => {
-        sendMessageStub.reset();
+        sendMessageStub.resetHistory();
         allowConsoleError(() => {
-          service.actionHandler_(invoke);
+          actionHandlerPromise = service.actionHandler_(invoke);
         });
+        expect(actionHandlerPromise).to.be.null;
+        return actionHandlerPromise;
+      }).then(() => {
         expect(sendMessageStub).to.not.be.called;
       });
     });
@@ -156,9 +166,39 @@ describes.fakeWin('AmpViewerAssistance', {
       return service.start_().then(() => {
         sendMessageStub.reset();
         allowConsoleError(() => {
-          service.actionHandler_(invoke);
+          expect(service.actionHandler_(invoke)).to.be.null;
         });
         expect(sendMessageStub).to.not.be.called;
+      });
+    });
+
+    it('should send if "error" param is present', () => {
+      const error = {
+        text: () => {
+          return Promise.resolve('error message');
+        },
+        status: 500,
+      };
+      const args = {
+        'error': error,
+      };
+      const invoke = new ActionInvocation(element, 'updateActionState', args);
+      invoke.trust = ActionTrust.LOW;
+
+      return service.start_().then(() => {
+        sendMessageStub.resetHistory();
+        service.actionHandler_(invoke);
+        return error.text();
+      }).then(() => {
+        expect(sendMessageStub).to.be.calledOnce;
+        expect(sendMessageStub.firstCall.args[0]).to.equal('updateActionState');
+        expect(sendMessageStub.firstCall.args[1]).to.deep.equal({
+          update: {
+            actionStatus: 'FAILED_ACTION_STATUS',
+            code: 500,
+            message: 'error message',
+          },
+        });
       });
     });
   });
@@ -176,7 +216,9 @@ describes.fakeWin('AmpViewerAssistance', {
 
       const invocation = new ActionInvocation(element, 'signIn');
       invocation.trust = ActionTrust.LOW;
-      service.actionHandler_(invocation);
+      allowConsoleError(() => {
+        service.actionHandler_(invocation);
+      });
       expect(sendMessageStub).to.not.be.called;
 
       // signIn requires high-trust.
