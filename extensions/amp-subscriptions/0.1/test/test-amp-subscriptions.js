@@ -784,6 +784,51 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
     });
   });
 
+  describe('SwG Encryption', () => {
+    let platformStore;
+    let entitlement;
+    let decryptedDocumentKey;
+
+    beforeEach(() => {
+      platformStore = new PlatformStore(['local']);
+      subscriptionService.platformStore_ = platformStore;
+      decryptedDocumentKey = 'decryptedDocumentKey';
+      entitlement = new Entitlement({
+        source: 'local',
+        raw: 'raw',
+        granted: true,
+        grantReason: GrantReason.SUBSCRIBER,
+        dataObject: {
+          test: 'a1',
+        },
+        decryptedDocumentKey,
+      });
+    });
+
+    it('should try to decrypt document', () => {
+      const stub = sandbox.stub(subscriptionService.cryptoHandler_,
+          'tryToDecryptDocument');
+      subscriptionService.resolveEntitlementsToStore_('serviceId', entitlement);
+      expect(stub).to.be.calledWith(decryptedDocumentKey);
+    });
+
+    it('should NOT try to decrypt document', () => {
+      entitlement = new Entitlement({
+        source: 'local',
+        raw: 'raw',
+        granted: true,
+        grantReason: GrantReason.SUBSCRIBER,
+        dataObject: {
+          test: 'a1',
+        },
+      });
+      const stub = sandbox.stub(subscriptionService.cryptoHandler_,
+          'tryToDecryptDocument');
+      subscriptionService.resolveEntitlementsToStore_('serviceId', entitlement);
+      expect(stub).to.not.be.called;
+    });
+  });
+
   describe('AccessVars', () => {
     let platformStore;
     let entitlement;
@@ -827,13 +872,6 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
       platformStore.resolveEntitlement('local', entitlement);
       return expect(subscriptionService.getAuthdataField('data.other'))
           .to.eventually.be.undefined;
-    });
-
-    it('should return a null encryptedDocumentKey', () => {
-      sandbox.stub(subscriptionService.serviceAdapter_,
-          'getEncryptedDocumentKey');
-      return expect(subscriptionService.getEncryptedDocumentKey(
-          'serviceId')).to.be.null;
     });
   });
 });
