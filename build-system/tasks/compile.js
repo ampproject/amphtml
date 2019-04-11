@@ -25,7 +25,6 @@ const {isTravisBuild} = require('../travis');
 const {VERSION: internalRuntimeVersion} = require('../internal-version') ;
 
 const rename = require('gulp-rename');
-const replace = require('gulp-regexp-sourcemaps');
 const rimraf = require('rimraf');
 const shortenLicense = require('../shorten-license');
 const sourcemaps = require('gulp-sourcemaps');
@@ -126,7 +125,9 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
     'third_party/moment/moment.extern.js',
     'third_party/react-externs/externs.js',
   ];
-  const define = [];
+  const define = [
+    `VERSION=${internalRuntimeVersion}`,
+  ];
   if (argv.pseudo_names) {
     define.push('PSEUDO_NAMES=true');
   }
@@ -155,12 +156,11 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
     ).then(() => {
       return new Promise((resolve, reject) => {
         const stream = gulp.src(outputDir + '/**/*.js');
-        stream.on('end', resolve);
-        stream.on('error', reject);
-        stream.pipe(
-            replace(/\$internalRuntimeVersion\$/g, internalRuntimeVersion, 'runtime-version'))
+        stream
             .pipe(shortenLicense())
-            .pipe(gulp.dest(outputDir));
+            .pipe(gulp.dest(outputDir))
+            .on('end', resolve)
+            .on('error', reject);
       });
     });
   }
@@ -433,9 +433,6 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
           .on('error', handleCompilerError)
           .pipe(rename(outputFilename))
           .pipe(sourcemaps.write('.'))
-          .pipe(replace(
-              /\$internalRuntimeVersion\$/g, internalRuntimeVersion,
-              'runtime-version'))
           .pipe(shortenLicense())
           .pipe(gulp.dest(outputDir))
           .on('end', resolve);
