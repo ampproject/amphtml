@@ -3206,10 +3206,10 @@ cli-cursor@^2.1.0:
   dependencies:
     restore-cursor "^2.0.0"
 
-cli-highlight@2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/cli-highlight/-/cli-highlight-2.0.0.tgz#e4ae60d46fd6a88e7d478499309b6618547991f0"
-  integrity sha512-cW9HBA7Z7YETTwncdScUBUUDj8AnBU4rq6qQt6NbSXG2sFLcQ1LHEAGadRWydVtNXnH6StuN4GDCX5yddJDgew==
+cli-highlight@2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/cli-highlight/-/cli-highlight-2.1.0.tgz#1e2e6770b6c3d72c4c7d4e5ea27c496f82ec2c67"
+  integrity sha512-DxaFAFBGRaB+xueXP7jlJC5f867gZUZXz74RaxeZ9juEZM2Sm/s6ilzpz0uxKiT+Mj6TzHlibtXfG/dK5bSwDA==
   dependencies:
     chalk "^2.3.0"
     highlight.js "^9.6.0"
