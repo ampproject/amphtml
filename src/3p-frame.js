@@ -330,7 +330,7 @@ function getCustomBootstrapBaseUrl(parentWindow, opt_strictForUnitTest) {
       '%s (%s) in element %s. See https://github.com/ampproject/amphtml' +
       '/blob/master/spec/amp-iframe-origin-policy.md for details.', url,
   parsed.origin, meta);
-  return url + '?${version()}';
+  return `${url}?${version()}`;
 }
 
 /**
