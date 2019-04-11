@@ -11,6 +11,9 @@
       body {
         padding: 15px;
       }
+      .country-info {
+        font: 8pt 'Courier New', Courier, monospace;
+      }
   </style>
   <script>
       (self.AMP=self.AMP||[]).push((AMP) => {
@@ -52,16 +55,18 @@
       <template type="amp-mustache">
         <div value="{{countryName}}">
           <h3>{{countryName}} ({{countryCode}})</h3>
-          <div class="country-capital">
-            The population is {{population}}, and the capital is {{capital}}.
-          </div>
-          <div class="country-currency">
-            The local currency is {{currencyCode}}.
+          <div class="country-info">
+            The population is <b>{{population}}</b>, and the capital is <b>{{capital}}</b>. The local currency is <b>{{currencyCode}}</b>.
           </div>
         </div>
       </template>
     </amp-autocomplete>
     <input type="submit" value="Submit">
+    <div submit-success>
+      <template type="amp-mustache">
+        Success!
+      </template>
+    </div>
   </form>
 </body>
 </html>
