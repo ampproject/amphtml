@@ -50,7 +50,7 @@ export class HiddenObserver {
     const doc = opt_root ? opt_root.ownerDocument : this.root_;
 
     /** @const {!Window} */
-    this.win_ = devAssert(doc.defaultView);
+    this.win_ = /** @type {!Window} */(devAssert(doc.defaultView));
 
     /** @private {?MutationObserver} */
     this.mutationObserver_ = null;
