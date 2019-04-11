@@ -18,7 +18,8 @@
  * Returns the internal AMP runtime version. Note that this is not the RTV,
  * which is a prefix and the runtime version.
  *
- * This function is replaced at compile time with a constant string.
+ * TODO: Calling this function should be replaced by a compile-time constant
+ * string. For now, function's return value is compiled, not the call site.
  *
  * @return {string}
  */

@@ -134,10 +134,10 @@ function getRtvVersion(win, isLocalDev) {
     return win.AMP_CONFIG.v;
   }
 
-  // Currently `$internalRuntimeVersion$` and thus `mode.version` contain only
+  // Currently `internalRuntimeVersion` and thus `mode.version` contain only
   // major version. The full version however must also carry the minor version.
   // We will default to production default `01` minor version for now.
-  // TODO(erwinmombay): decide whether $internalRuntimeVersion$ should contain
+  // TODO(erwinmombay): decide whether internalRuntimeVersion should contain
   // minor version.
   return `01${version()}`;
 }
