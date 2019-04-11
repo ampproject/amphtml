@@ -2609,7 +2609,7 @@ describes.realWin('AmpA4a-RTC', {amp: true}, env => {
     });
 
     it('should not add any single pass experiment ids', () => {
-      getMode().singlePassType = '';
+      getMode().singlePassType = undefined;
       a4a.maybeAddSinglePassExperiment();
 
       const isInSinglePass = isInExperiment(

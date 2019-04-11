@@ -49,8 +49,8 @@ export const MANUAL_EXPERIMENT_ID = '117152632';
  * @enum {string}
  */
 export const SINGLE_PASS_EXPERIMENT_IDS = {
-  SINGLE_PASS: '21063530',
   MULTI_PASS: '21063529',
+  SINGLE_PASS: '21063530',
 };
 
 /**
