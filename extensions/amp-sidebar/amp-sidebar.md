@@ -214,7 +214,7 @@ Use of `amp-sidebar` is supported within the `amp-story` [component](https://www
 
 ### Behavior
 - The `<amp-sidebar>` must be a direct child of `<amp-story>`.
-- The sidebar defaults to the "start" side for regular AMP documents, meaning right for left-right languages and left for right-to-left languages.
+- The sidebar defaults to the "end" side, meaning right for left-right languages and left for right-to-left languages.
 - The `<amp-sidebar>` has default background color of white and is overridable in CSS.
 - Maximum width of `<amp-sidebar>` is enforced at `280px` and at `320px` for desktop experiences.
 - A 'hamburger' style button that opens/closes the sidebar will appear on the story UI.
