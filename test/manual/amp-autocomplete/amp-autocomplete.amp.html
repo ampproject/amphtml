@@ -12,15 +12,17 @@
   <script async custom-template="amp-form" src="https://cdn.ampproject.org/v0/amp-form-latest.js"></script>
 </head>
 <body>
-  <button id="focusButton" on="tap:input.focus">Focus</button>
-  <form method="post" action-xhr="/form/echo-json/post" target="_blank"
-    on="submit-success:AMP.setState({result: event.response})">
-    <amp-autocomplete id="autocomplete" filter="substring" min-characters="0">
-      <input type="text" id="input">
-      <script type="application/json">
-        { "items" : ["apple", "banana", "orange"] }
-      </script>
-    </amp-autocomplete>
-  </form>
+  <div height="1000">
+    <button id="focusButton" on="tap:input.focus">Focus</button>
+    <form method="post" action-xhr="/form/echo-json/post" target="_blank"
+      on="submit-success:AMP.setState({result: event.response})">
+      <amp-autocomplete id="autocomplete" filter="substring" min-characters="0">
+        <input type="text" id="input">
+        <script type="application/json">
+          { "items" : ["apple", "banana", "orange"] }
+        </script>
+      </amp-autocomplete>
+    </form>
+  </div>
 </body>
 </html>
