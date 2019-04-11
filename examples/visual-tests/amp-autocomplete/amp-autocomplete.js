@@ -19,8 +19,13 @@ const {verifySelectorsVisible} = require('../../../build-system/tasks/visual-dif
 
 module.exports = {
 
-  'tap input to focus and display results': async (page, name) => {
-    await page.tap('input');
-    await verifySelectorsVisible(page, name, ['.i-amphtml-autocomplete-results']);
+  'tap input1 to focus and display results': async (page, name) => {
+    await page.tap('input#input1');
+    await verifySelectorsVisible(page, name, ['amp-autocomplete#autocomplete1 > .i-amphtml-autocomplete-results']);
+  },
+
+  'tap input2 to focus and display results': async (page, name) => {
+    await page.tap('input#input2');
+    await verifySelectorsVisible(page, name, ['amp-autocomplete#autocomplete2 > .i-amphtml-autocomplete-results']);
   },
 };

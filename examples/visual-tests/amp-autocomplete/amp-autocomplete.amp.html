@@ -23,14 +23,43 @@
   <script async custom-template="amp-form" src="https://cdn.ampproject.org/v0/amp-form-latest.js"></script>
 </head>
 <body>
-
   <h2>Plain text, inline data</h2>
-  <form>
-    <amp-autocomplete filter="substring" min-characters="0">
-      <input type="text">
+  <form
+    id="form1"
+    method="get"
+    action="/form/search-html/get"
+    action-xhr="/form/search-json/get"
+    target="_blank">
+    <amp-autocomplete id="autocomplete1" filter="substring" min-characters="0">
+      <input type="text" id="input1">
       <script type="application/json">
         { "items" : ["apple", "banana", "orange"] }
       </script>
+    </amp-autocomplete>
+    <input type="submit" value="Submit">
+  </form>
+
+  <h2>Rich content, remote data</h2>
+  <form
+    id="form2"
+    method="get"
+    action="/form/search-html/get"
+    action-xhr="/form/search-json/get"
+    target="_blank">
+    <amp-autocomplete id="autocomplete2" src="./amp-autocomplete-data.json" max-entries="5"
+      filter="prefix" filter-value="countryName" min-characters="0">
+      <input type="search" id="input2">
+      <template type="amp-mustache">
+        <div value="{{countryName}}">
+          <h3>{{countryName}} ({{countryCode}})</h3>
+          <div class="country-capital">
+            The population is {{population}}, and the capital is {{capital}}.
+          </div>
+          <div class="country-currency">
+            The local currency is {{currencyCode}}.
+          </div>
+        </div>
+      </template>
     </amp-autocomplete>
     <input type="submit" value="Submit">
   </form>
