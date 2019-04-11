@@ -20,6 +20,7 @@ import {experimentToggles, isCanary} from './experiments';
 import {getLengthNumeral} from './layout';
 import {getModeObject} from './mode-object';
 import {urls} from './config';
+import {version} from './internal-version';
 
 /**
  * Produces the attributes for the ad template.
@@ -65,9 +66,8 @@ export function getContextMetadata(
   // Please also add new introduced variable
   // name to the extern list.
   attributes['_context'] = dict({
-    'ampcontextVersion': '$internalRuntimeVersion$',
-    'ampcontextFilepath': urls.thirdParty + '/$internalRuntimeVersion$' +
-        '/ampcontext-v0.js',
+    'ampcontextVersion': version(),
+    'ampcontextFilepath': `${urls.thirdParty}/${version()}/ampcontext-v0.js`,
     'sourceUrl': docInfo.sourceUrl,
     'referrer': referrer,
     'canonicalUrl': docInfo.canonicalUrl,

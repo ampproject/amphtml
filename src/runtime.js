@@ -85,6 +85,7 @@ import {reportErrorForWin} from './error';
 import {setStyle} from './style';
 import {startupChunk} from './chunk';
 import {stubElementsForDoc} from './service/custom-element-registry';
+import {version} from './internal-version';
 
 initLogConstructor();
 setReportError(reportErrorForWin.bind(null, self));
@@ -920,11 +921,11 @@ function maybeLoadCorrectVersion(win, fnOrStruct) {
   if (typeof fnOrStruct == 'function') {
     return false;
   }
-  const version = fnOrStruct.v;
+  const {v} = fnOrStruct;
   // This is non-obvious, but we only care about the release version,
   // not about the full rtv version, because these only differ
   // in the config that is fully determined by the primary binary.
-  if ('$internalRuntimeVersion$' == version) {
+  if (version() == v) {
     return false;
   }
   // The :not is an extra prevention of recursion because it will be
