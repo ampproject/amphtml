@@ -42,6 +42,17 @@ export let A4aExperimentBranches;
 /** @type {string} @private */
 export const MANUAL_EXPERIMENT_ID = '117152632';
 
+
+/**
+ * Experiment IDs used to identify single pass experiments.
+ *
+ * @enum {string}
+ */
+export const SINGLE_PASS_EXPERIMENT_IDS = {
+  SINGLE_PASS: '21063530',
+  MULTI_PASS: '21063529',
+};
+
 /**
  * @param {!Window} win
  * @param {!Element} element Ad tag Element.

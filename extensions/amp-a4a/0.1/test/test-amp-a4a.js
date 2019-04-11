@@ -45,6 +45,10 @@ import {MockA4AImpl, TEST_URL} from './utils';
 import {
   RealTimeConfigManager,
 } from '../real-time-config-manager';
+import {
+  SINGLE_PASS_EXPERIMENT_IDS,
+  isInExperiment,
+} from '../../../../ads/google/a4a/traffic-experiments';
 import {Services} from '../../../../src/services';
 import {Signals} from '../../../../src/utils/signals';
 import {Viewer} from '../../../../src/service/viewer-impl';
@@ -52,6 +56,7 @@ import {cancellation} from '../../../../src/error';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {createIframePromise} from '../../../../testing/iframe';
 import {dev, user} from '../../../../src/log';
+import {getMode} from '../../../../src/mode';
 import {
   incrementLoadingAds,
   is3pThrottled,
@@ -2569,6 +2574,51 @@ describes.realWin('AmpA4a-RTC', {amp: true}, env => {
     it('should return true if experiment disabled', () => {
       toggleExperiment(a4a.win, 'sandbox-ads', false);
       expect(a4a.sandboxHTMLCreativeFrame()).to.be.false;
+    });
+  });
+
+  describe('single pass experiments', () => {
+    it('should add single pass id', () => {
+      getMode().singlePassType = 'sp';
+      a4a.maybeAddSinglePassExperiment();
+
+      const isInSinglePass = isInExperiment(
+          a4a.element, SINGLE_PASS_EXPERIMENT_IDS.SINGLE_PASS);
+      const isInMultiPass = isInExperiment(
+          a4a.element, SINGLE_PASS_EXPERIMENT_IDS.MULTI_PASS);
+
+      expect(isInSinglePass).to.be.true;
+      expect(isInMultiPass).to.be.false;
+
+      getMode().singlePassType = '';
+    });
+
+    it('should add multi pass id', () => {
+      getMode().singlePassType = 'mp';
+      a4a.maybeAddSinglePassExperiment();
+
+      const isInSinglePass = isInExperiment(
+          a4a.element, SINGLE_PASS_EXPERIMENT_IDS.SINGLE_PASS);
+      const isInMultiPass = isInExperiment(
+          a4a.element, SINGLE_PASS_EXPERIMENT_IDS.MULTI_PASS);
+
+      expect(isInSinglePass).to.be.false;
+      expect(isInMultiPass).to.be.true;
+
+      getMode().singlePassType = '';
+    });
+
+    it('should not add any single pass experiment ids', () => {
+      getMode().singlePassType = '';
+      a4a.maybeAddSinglePassExperiment();
+
+      const isInSinglePass = isInExperiment(
+          a4a.element, SINGLE_PASS_EXPERIMENT_IDS.SINGLE_PASS);
+      const isInMultiPass = isInExperiment(
+          a4a.element, SINGLE_PASS_EXPERIMENT_IDS.MULTI_PASS);
+
+      expect(isInSinglePass).to.be.false;
+      expect(isInMultiPass).to.be.false;
     });
   });
 });
