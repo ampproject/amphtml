@@ -12776,9 +12776,9 @@ class PropensityServer {
   /**
    * @param {string} referrer
    * @param {string} type
-   * @return {?Promise<../api/propensity-api.PropensityScore>}
+   * @return {*}
    */
-  getPropensity(referrer, type) {
+  getPropensity(referrer, type {
     const clientId = this.getClientId_();
     const init = /** @type {*} */ ({
       method: 'GET',
