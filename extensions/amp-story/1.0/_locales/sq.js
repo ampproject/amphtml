@@ -22,7 +22,7 @@ import {
  * Localized string bundle used for sq strings.
  * @const {!LocalizedStringBundleDef}
  */
-export default /** @const {!LocalizedStringBundleDef} */ ({
+const strings = {
   [LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT]: {
     string: 'Tingulli joaktiv',
   },
@@ -128,4 +128,6 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
     string: 'Na vjen keq, por duket se shfletuesi yt nuk e mbështet këtë ' +
         'eksperiencë',
   },
-});
+};
+
+export default strings;

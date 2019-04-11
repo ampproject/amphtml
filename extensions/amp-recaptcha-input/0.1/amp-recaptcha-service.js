@@ -158,7 +158,7 @@ export class AmpRecaptchaService {
 
       // Send the message
       this.postMessageToIframe_(
-          devAssert(this.recaptchaFrameOrigin_),
+          /** @type {string} */ (devAssert(this.recaptchaFrameOrigin_)),
           message
       );
     });
