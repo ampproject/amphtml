@@ -198,7 +198,7 @@ class GlobalDoc {
   /** @override */
   getHead() {
     // `document.head` always has a chance to be parsed, at least partially.
-    return dev().assertElement(this.doc_.head);
+    return /** @type {!Element} */ (this.doc_.head);
   }
 
   /** @override */
