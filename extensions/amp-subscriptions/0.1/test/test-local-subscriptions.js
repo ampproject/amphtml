@@ -25,6 +25,7 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
   let ampdoc;
   let localSubscriptionPlatform;
   let serviceAdapter;
+  let getEncryptedDocumentKeyStub;
 
   const actionMap = {
     'subscribe': 'https://lipsum.com/subscribe',
@@ -67,6 +68,9 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
         .callsFake(() => new Dialog(ampdoc));
     sandbox.stub(serviceAdapter, 'getReaderId')
         .callsFake(() => Promise.resolve('reader1'));
+    getEncryptedDocumentKeyStub = sandbox.stub(
+        serviceAdapter, 'getEncryptedDocumentKey')
+        .callsFake(() => {return null;});
     localSubscriptionPlatform = new LocalSubscriptionPlatform(ampdoc,
         serviceConfig.services[0], serviceAdapter);
   });
@@ -92,8 +96,6 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
   it('should fetch the entitlements on getEntitlements', () => {
     const fetchStub = sandbox.stub(localSubscriptionPlatform.xhr_, 'fetchJson')
         .callsFake(() => Promise.resolve({json: () => Promise.resolve(json)}));
-    sandbox.stub(localSubscriptionPlatform.serviceAdapter_,
-        'getEncryptedDocumentKey');
     return localSubscriptionPlatform.getEntitlements().then(() => {
       expect(fetchStub).to.be.calledOnce;
       expect(fetchStub.getCall(0).args[0]).to.be.equals(authUrl);
@@ -108,8 +110,6 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
         'buildUrl').callsFake(() => Promise.resolve(builtUrl));
     const fetchStub = sandbox.stub(localSubscriptionPlatform.xhr_,'fetchJson')
         .callsFake(() => Promise.resolve({json: () => Promise.resolve(json)}));
-    sandbox.stub(localSubscriptionPlatform.serviceAdapter_,
-        'getEncryptedDocumentKey');
     return localSubscriptionPlatform.getEntitlements().then(() => {
       expect(urlBuildingStub).to.be.calledWith(configAuthUrl, false);
       expect(fetchStub).to.be.calledWith(builtUrl, {credentials: 'include'});
@@ -117,10 +117,6 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
   });
 
   it('should call getEncryptedDocumentKey with local', () => {
-    const getEncryptedDocumentKeyStub = sandbox.stub(
-        localSubscriptionPlatform.serviceAdapter_,
-        'getEncryptedDocumentKey'
-    );
     return localSubscriptionPlatform.getEntitlements().then(() => {
       expect(getEncryptedDocumentKeyStub).to.be.calledWith('local');
     });
@@ -129,19 +125,16 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
   it('should add encryptedDocumentKey parameter to url', () => {
     const fetchStub = sandbox.stub(localSubscriptionPlatform.xhr_, 'fetchJson')
         .callsFake(() => Promise.resolve({json: () => Promise.resolve(json)}));
-    sandbox.stub(localSubscriptionPlatform.serviceAdapter_,
-        'getEncryptedDocumentKey').callsFake(() => {
+    getEncryptedDocumentKeyStub.callsFake(() => {
       return 'encryptedDocumentKey';});
     return localSubscriptionPlatform.getEntitlements().then(() => {
       return expect(fetchStub).to.be.calledWith('https://lipsum.com/login/authorize?rid=reader1&crypt=encryptedDocumentKey');
     });
   });
 
-  it('shouldnt add encryptedDocumentKey parameter to url', () => {
+  it('should not add encryptedDocumentKey parameter to url', () => {
     const fetchStub = sandbox.stub(localSubscriptionPlatform.xhr_, 'fetchJson')
         .callsFake(() => Promise.resolve({json: () => Promise.resolve(json)}));
-    sandbox.stub(localSubscriptionPlatform.serviceAdapter_,
-        'getEncryptedDocumentKey');
     return localSubscriptionPlatform.getEntitlements().then(() => {
       return expect(fetchStub).to.be.calledWith('https://lipsum.com/login/authorize?rid=reader1');
     });

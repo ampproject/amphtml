@@ -45,7 +45,7 @@ env => {
     element.id = 'amp-subscriptions';
     element.setAttribute('type', 'application/json');
     element.innerHTML = JSON.stringify(serviceConfig);
-    win.document.body.appendChild(element);
+    win.document.head.appendChild(element);
     cryptoHandler = new CryptoHandler(ampdoc);
     encryptedLocalKey = 'encryptedLocalKey';
   });
@@ -74,6 +74,21 @@ env => {
 
   describe('tryToDecryptDocument', () => {
     it('should return an empty array', () => {
+      return cryptoHandler.tryToDecryptDocument(
+          'decryptedDocumentKey').then(decryptedContent => {
+        expect(decryptedContent.length).to.equal(0);
+      });
+    });
+
+    it('should replace the encrypted content with decrypted content', () => {
+      debugger;
+      return cryptoHandler.tryToDecryptDocument(
+          'decryptedDocumentKey').then(decryptedContent => {
+        expect(decryptedContent.length).to.equal(0);
+      });
+    });
+
+    it('should decrypt multiple sections', () => {
       return cryptoHandler.tryToDecryptDocument(
           'decryptedDocumentKey').then(decryptedContent => {
         expect(decryptedContent.length).to.equal(0);
