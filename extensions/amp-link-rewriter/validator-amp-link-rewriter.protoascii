@@ -22,6 +22,9 @@ tags: {  # amp-link-rewriter
     version: "latest"
   }
   attr_lists: "common-extension-attrs"
+  satisfies: "amp-link-rewriter"
+  excludes: "amp-skimlinks"
+  excludes: "amp-smartlinks"
 }
 tags: {  # amp-link-rewriter (json)
   html_format: AMP
