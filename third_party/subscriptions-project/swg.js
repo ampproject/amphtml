@@ -12778,7 +12778,7 @@ class PropensityServer {
    * @param {string} type
    * @return {*}
    */
-  getPropensity(referrer, type {
+  getPropensity(referrer, type) {
     const clientId = this.getClientId_();
     const init = /** @type {*} */ ({
       method: 'GET',
