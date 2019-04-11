@@ -20,6 +20,8 @@ const closureCompiler = require('gulp-closure-compiler');
 const colors = require('ansi-colors');
 const fs = require('fs-extra');
 const gulp = require('gulp');
+const gulpIf = require('gulp-if');
+const gulpStringReplace = require('gulp-string-replace');
 const {isTravisBuild} = require('../travis');
 const {VERSION: internalRuntimeVersion} = require('../internal-version') ;
 
@@ -421,6 +423,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
     }
 
     let stream = gulp.src(srcs)
+        .pipe(gulpIf(isThirdPartyFile, gulpStringReplace('/**', '/* ')))
         .pipe(closureCompiler(compilerOptions))
         .on('error', function(err) {
           const {message} = err;
@@ -447,4 +450,8 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
     }
     return stream;
   });
+}
+
+function isThirdPartyFile(file) {
+  return file.history[0].includes('/third_party/');
 }
