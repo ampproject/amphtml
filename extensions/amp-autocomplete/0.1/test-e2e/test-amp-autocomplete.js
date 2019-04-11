@@ -1,3 +1,19 @@
+/**
+ * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 describes.endtoend('amp-autocomplete', {
   testUrl: 'http://localhost:8000/test/manual/amp-autocomplete/amp-autocomplete.amp.html',
   experiments: ['amp-autocomplete'],
@@ -13,8 +29,27 @@ describes.endtoend('amp-autocomplete', {
     controller = env.controller;
   });
 
-  it('should render correctly', async() => {
-    const autocompleteElement = await controller.findElements('amp-autocomplete');
-    await expect(autocompleteElement).not.to.be.null;
+  it('<amp-autocomplete> should render correctly', async() => {
+    const autocomplete = await controller.findElement('#autocomplete');
+    const input = await controller.findElement('#input');
+    const renderedResults =
+      await controller.findElement('.i-amphtml-autocomplete-results');
+    await expect(autocomplete).not.to.be.null;
+    await expect(input).not.to.be.null;
+    await expect(renderedResults).not.to.be.null;
   });
+
+  it('<amp-autocomplete> should display results on focus', async() => {
+    const renderedResults =
+      await controller.findElement('.i-amphtml-autocomplete-results');
+    const focusButton = await controller.findElement('#focusButton');
+    await controller.click(focusButton);
+    const itemElements =
+      await controller.findElements('.i-amphtml-autocomplete-item');
+    await expect(renderedResults).not.to.be.null;
+    await expect(controller.getElementCssValue(renderedResults, 'visibility'))
+        .to.equal('visible');
+    await expect(itemElements).to.have.length(3);
+  });
+
 });
