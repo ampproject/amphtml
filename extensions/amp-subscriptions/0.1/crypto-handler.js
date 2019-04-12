@@ -91,7 +91,9 @@ export class CryptoHandler {
    * @param {string} documentKey
    * @return {Promise<string>}
    */
-  decryptDocumentContent_(encryptedContent, documentKey) {
+  decryptDocumentContent_(
+    // eslint-disable-next-line no-unused-vars
+    encryptedContent, documentKey) {
     // Don't really return this. Placeholder for the real thing.
     // const placeholder = encryptedContent.trim() + documentKey;
     const placeholder = '<h2><i> abc </i></h2>';
