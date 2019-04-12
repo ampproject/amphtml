@@ -36,10 +36,14 @@ export function aja(global, data) {
   const params = {asis: {}};
   params.asis[asi] = {
     callback: res => {
-      const {banner, native, video} = res.ad;
-      if (!!banner) {
+      if (!res.ad) {
+        return;
+      }
+
+      if (!!res.ad.banner) {
+        const {banner} = res.ad;
         global.context.requestResize(banner.w, banner.h);
-      } else if (!!native) {
+      } else if (!!res.ad.native) {
         const timer = setInterval(() => {
           if (1 <= document.querySelectorAll('.ajaRecommend-item').length) {
             let {scrollWidth: width, scrollHeight: height} = document.body;
@@ -48,7 +52,11 @@ export function aja(global, data) {
               width = parseInt(ds.width, 10);
               height = parseInt(ds.height, 10);
               if (height === 0) {
-                const fs = computedStyle(global, d.firstElementChild);
+                const fc = d.firstElementChild;
+                if (!fc) {
+                  return;
+                }
+                const fs = computedStyle(global, fc);
                 width = parseInt(fs.width, 10);
                 height = parseInt(fs.height, 10);
               }
@@ -57,7 +65,8 @@ export function aja(global, data) {
             clearInterval(timer);
           }
         }, 100);
-      } else if (!!video) {
+      } else if (!!res.ad.video) {
+        const {video} = res.ad;
         global.context.requestResize(video.w, video.h);
       }
     },
