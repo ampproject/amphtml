@@ -18,7 +18,7 @@ describes.endtoend('amp-autocomplete', {
   testUrl: 'http://localhost:8000/test/manual/amp-autocomplete/amp-autocomplete.amp.html',
   experiments: ['amp-autocomplete'],
   // By default, the browser opens at 800x600
-  // initialRect: {width: 800, height: 600},
+  initialRect: {width: 800, height: 800},
 
   // By default, E2E tests run in all three environments
   // environments: ['single', 'viewer-demo', 'shadow-demo']
@@ -76,6 +76,25 @@ describes.endtoend('amp-autocomplete', {
     const newItemElements =
       await controller.findElements('.i-amphtml-autocomplete-item');
     await expect(newItemElements).to.have.length(2);
+  });
+
+  it('<amp-autocomplete> should select an item', async() => {
+    const renderedResults =
+      await controller.findElement('.i-amphtml-autocomplete-results');
+    const focusButton = await controller.findElement('#focusButton');
+
+    // Displays all suggested items on focus.
+    await controller.click(focusButton);
+    const itemElements =
+      await controller.findElements('.i-amphtml-autocomplete-item');
+    await expect(controller.getElementAttribute(renderedResults, 'hidden'))
+        .to.be.null;
+    await expect(itemElements).to.have.length(3);
+    await controller.click(itemElements[0]);
+
+    // Displays no items after selecting one.
+    await expect(controller.getElementAttribute(renderedResults, 'hidden'))
+        .not.to.be.null;
   });
 
 });
