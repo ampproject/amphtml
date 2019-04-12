@@ -36,8 +36,8 @@ export function aja(global, data) {
   const params = {asis: {}};
   params.asis[asi] = {
     callback: res => {
-      if (!res.ad) {
-        return;
+      if (!res.ad || res.ad.ad_type === 0) {
+        return global.context.noContentAvailable();
       }
 
       if (!!res.ad.banner) {
@@ -68,6 +68,8 @@ export function aja(global, data) {
       } else if (!!res.ad.video) {
         const {video} = res.ad;
         global.context.requestResize(video.w, video.h);
+      } else {
+        global.context.noContentAvailable();
       }
     },
   };
