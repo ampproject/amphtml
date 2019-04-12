@@ -18,6 +18,7 @@ import {BrowserController} from '../../../../../testing/test-helper';
 import {poll} from '../../../../../testing/iframe';
 
 const TIMEOUT = 15000;
+const LOCAL_TIMEOUT = 5000;
 
 describe('amp-list (integration)', function() {
   this.timeout(TIMEOUT);
@@ -134,16 +135,18 @@ describe('amp-list (integration)', function() {
       doc = win.document;
     });
 
-    it('should change to layout container as on bind', function*() {
+    it('should change to layout container on bind', function*() {
       const list = doc.querySelector('amp-list');
 
-      yield browser.waitForElementLayout('amp-list', TIMEOUT);
+      yield browser.waitForElementLayout('amp-list', LOCAL_TIMEOUT);
       browser.click('button');
 
       yield poll('changes to layout container', () => {
         const layout = list.getAttribute('layout');
         return layout == 'container';
-      }, /* onError */ undefined, TIMEOUT);
+      }, () => {
+        throw new Error('change to layout container did not complete');
+      }, LOCAL_TIMEOUT);
 
       expect(list.classList.contains('i-amphtml-layout-container')).to.be.true;
     });
