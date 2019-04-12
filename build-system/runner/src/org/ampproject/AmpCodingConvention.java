@@ -16,13 +16,14 @@
 
 package org.ampproject;
 
+import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
-import com.google.javascript.jscomp.ClosureCodingConvention.AssertFunctionByTypeName;
+import com.google.javascript.jscomp.ClosureCodingConvention;
 import com.google.javascript.jscomp.CodingConvention;
 import com.google.javascript.jscomp.CodingConvention.AssertionFunctionSpec;
 import com.google.javascript.jscomp.CodingConventions;
 import com.google.javascript.jscomp.ClosureCodingConvention;
-import com.google.javascript.jscomp.newtypes.JSType;
+import com.google.javascript.rhino.jstype.JSType;
 import com.google.javascript.rhino.jstype.JSTypeNative;
 
 import java.util.ArrayList;
@@ -51,15 +52,23 @@ public final class AmpCodingConvention extends CodingConventions.Proxy {
     super(convention);
   }
 
-  @Override public Collection<AssertionFunctionSpec> getAssertionFunctions() {
+  @Override
+  public ImmutableCollection<AssertionFunctionSpec> getAssertionFunctions() {
     return ImmutableList.of(
-      new AssertionFunctionSpec("module$src$log.devAssert", null),
-      new AssertionFunctionSpec("devAssert$$module$src$log", null),
-      new AssertionFunctionSpec("module$src$log.userAssert", null),
-      new AssertionFunctionSpec("userAssert$$module$src$log", null),
-      new AssertionFunctionSpec("assertService$$module$src$element_service", null),
-      new AssertFunctionByTypeName("module$src$layout.assertLength", "string"),
-      new AssertFunctionByTypeName("assertLength$$module$src$layout", "string")
+      AssertionFunctionSpec.makeReturnTypeAssertion(
+          "module$src$log.devAssert"),
+      AssertionFunctionSpec.makeReturnTypeAssertion(
+          "devAssert$$module$src$log"),
+      AssertionFunctionSpec.makeReturnTypeAssertion(
+          "module$src$log.userAssert"),
+      AssertionFunctionSpec.makeReturnTypeAssertion(
+          "userAssert$$module$src$log"),
+      AssertionFunctionSpec.makeReturnTypeAssertion(
+          "assertService$$module$src$element_service"),
+      AssertionFunctionSpec.makeReturnTypeAssertion(
+          "module$src$layout.assertLength"),
+      AssertionFunctionSpec.makeReturnTypeAssertion(
+          "assertLength$$module$src$layout")
     );
   }
 

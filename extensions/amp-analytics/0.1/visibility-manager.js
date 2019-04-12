@@ -187,7 +187,7 @@ export class VisibilityManager {
 
   /**
    * Returns the root's layout rect.
-   * @return {!../../../src/layout-rect.LayoutRectDef}}
+   * @return {!../../../src/layout-rect.LayoutRectDef}
    * @abstract
    */
   getRootLayoutBox() {}

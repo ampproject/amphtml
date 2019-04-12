@@ -53,7 +53,8 @@ module.exports.validate = function(validator) {
       validator.getInstance()
           .then(function(validatorInstance) {
             const inputString = file.contents.toString();
-            file.ampValidationResult = validatorInstance.validateString(inputString);
+            file.ampValidationResult =
+                validatorInstance.validateString(inputString);
             return callback(null, file);
           })
           .catch(function(err) {
@@ -93,7 +94,8 @@ module.exports.format = function(logger) {
   }
 
   function formatResults(callback) {
-    logger.log('AMP Validation results:\n\n' + results.map(printResult).join('\n'));
+    logger.log('AMP Validation results:\n\n' +
+        results.map(printResult).join('\n'));
     return callback();
   }
 
@@ -102,6 +104,9 @@ module.exports.format = function(logger) {
     let report = file.relative + ': ';
     if (validationResult.status === STATUS_PASS) {
       report += colors.green(validationResult.status);
+      report += '\nReview our \'publishing checklist\' to ensure '
+          + 'successful AMP document distribution. '
+          + 'See https://bit.ly/2D54tM9';
     } else if (validationResult.status === STATUS_UNKNOWN) {
       report += colors.red(validationResult.status);
     } else {
