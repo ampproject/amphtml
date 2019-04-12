@@ -212,8 +212,10 @@ export class AmpViewerAssistance {
       return {
         update: {
           actionStatus: 'FAILED_ACTION_STATUS',
-          code: response.status,
-          message: errorMessage,
+          result: {
+            code: response.status,
+            message: errorMessage,
+          },
         },
       };
     });

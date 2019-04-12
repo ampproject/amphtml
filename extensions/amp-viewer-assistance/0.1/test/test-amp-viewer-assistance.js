@@ -195,8 +195,10 @@ describes.fakeWin('AmpViewerAssistance', {
         expect(sendMessageStub.firstCall.args[1]).to.deep.equal({
           update: {
             actionStatus: 'FAILED_ACTION_STATUS',
-            code: 500,
-            message: 'error message',
+            result: {
+              code: 500,
+              message: 'error message',
+            },
           },
         });
       });
