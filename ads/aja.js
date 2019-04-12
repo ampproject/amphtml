@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {validateData} from '../3p/3p';
+import {loadScript, validateData} from '../3p/3p';
+import {setStyle} from '../src/style';
 
 /**
  * @param {!Window} global
@@ -24,25 +25,45 @@ export function aja(global, data) {
 
   validateData(data, ['asi']);
 
+  const {document} = global;
   const asi = data['asi'];
-  (global._aja = global._aja || {
-    sspCode: asi,
-  });
+  const d = document.createElement('div');
+  d.dataset.ajaAd = '';
+  d.dataset.ajaAsi = asi;
+  setStyle(d, 'margin', '1px');
+  document.body.appendChild(d);
 
-  let elAttr = 'allow-top-navigation-by-user-activation';
-  elAttr += ' allow-scripts allow-popups';
-  const elStyle = global.document.createElement('iframe');
-  elStyle.setAttribute('id', 'adframe');
-  elStyle.setAttribute('width', data.width);
-  elStyle.setAttribute('height', data.height);
-  elStyle.setAttribute('frameborder', '0');
-  elStyle.setAttribute('marginheight', '0');
-  elStyle.setAttribute('marginwidth', '0');
-  elStyle.setAttribute('allowfullscreen', 'true');
-  elStyle.setAttribute('scrolling', 'no');
-  elStyle.setAttribute('sandbox', elAttr);
-  elStyle.setAttribute('style', 'position:absolute');
-  elStyle.src = 'https://static.aja-recommend.com/html/amp.html?ssp_code=' + encodeURIComponent(asi);
-  global.document.getElementById('c').appendChild(elStyle);
+  const params = {asis: {}};
+  params.asis[asi] = {
+    callback: res => {
+      const {banner, native, video} = res.ad;
+      if (!!banner) {
+        global.context.requestResize(banner.w, banner.h);
+      } else if (!!native) {
+        const timer = setInterval(() => {
+          if (1 <= document.querySelectorAll('.ajaRecommend-item').length) {
+            let {scrollWidth: width, scrollHeight: height} = document.body;
+            if (height === 0) {
+              const ds = global.getComputedStyle(d);
+              width = parseInt(ds.width, 10);
+              height = parseInt(ds.height, 10);
+              if (height === 0) {
+                const fs = global.getComputedStyle(d.firstElementChild);
+                width = parseInt(fs.width, 10);
+                height = parseInt(fs.height, 10);
+              }
+            }
+            global.context.requestResize(width, height);
+            clearInterval(timer);
+          }
+        }, 100);
+      } else if (!!video) {
+        global.context.requestResize(video.w, video.h);
+      }
+    },
+  };
+  global.__ASOT__ = params;
+
+  loadScript(global, 'https://cdn.as.amanad.adtdp.com/sdk/asot-v2.js');
 
 }
