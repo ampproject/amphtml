@@ -847,9 +847,17 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   maybeSetLoadMore_() {
-    if (!this.loadMoreEnabled_) {
-      return Promise.resolve();
+    if (this.loadMoreEnabled_) {
+      return this.setLoadMore_();
     }
+    return Promise.resolve();
+  }
+
+  /**
+   * @return {!Promise}
+   * @private
+   */
+  setLoadMore_() {
     if (this.loadMoreSrc_) {
       const autoLoad = this.element.getAttribute('load-more') === 'auto';
       if (autoLoad) {
