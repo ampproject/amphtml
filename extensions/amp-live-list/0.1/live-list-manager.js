@@ -145,7 +145,21 @@ export class LiveListManager {
     // TODO(erwinm): add update time here when possible.
     return fetchDocument(this.ampdoc.win, url, {
       requireAmpResponseSourceOrigin: false,
-    }).then(this.getLiveLists_.bind(this));
+    }).then(doc => {
+      this.getLiveLists_(doc);
+      this.getDynamicLiveLists_(doc);
+    });
+  }
+
+  /**
+    * Queries for dynamically added `amp-live-lists`.
+    * @param {!Document} doc
+    */
+  getDynamicLiveLists_(doc) {
+    const dynamicListsIds = Object.keys(this.liveLists_).filter(id =>
+      this.liveLists_[id].element.hasAttribute('custom-container')
+    );
+    dynamicListsIds.forEach(this.updateCustomContainer_.bind(this, doc));
   }
 
   /**
@@ -187,6 +201,25 @@ export class LiveListManager {
       return inClientDomLiveList.update(liveList);
     }
     return 0;
+  }
+
+  /**
+   * Updates the appropriate `custom-container` with its updates from the server.
+   *
+   * @param {!Document} doc
+   * @param {string} inClientDomLiveListId
+   */
+  updateCustomContainer_(doc, inClientDomLiveListId) {
+    userAssert(inClientDomLiveListId in this.liveLists_,
+        'custom-container#%s found but did not exist on original page load.',
+        inClientDomLiveListId);
+
+    const inClientDomLiveList = this.liveLists_[inClientDomLiveListId];
+    const containerId = inClientDomLiveList.element
+        .getAttribute('custom-container');
+    const serverContainer = doc.getElementById(containerId);
+
+    return inClientDomLiveList.update(serverContainer);
   }
 
   /**
