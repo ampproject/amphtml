@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
+import {computedStyle, setStyle} from '../src/style';
 import {loadScript, validateData} from '../3p/3p';
-import {setStyle} from '../src/style';
 
 /**
  * @param {!Window} global
@@ -44,11 +44,11 @@ export function aja(global, data) {
           if (1 <= document.querySelectorAll('.ajaRecommend-item').length) {
             let {scrollWidth: width, scrollHeight: height} = document.body;
             if (height === 0) {
-              const ds = global.getComputedStyle(d);
+              const ds = computedStyle(global, d);
               width = parseInt(ds.width, 10);
               height = parseInt(ds.height, 10);
               if (height === 0) {
-                const fs = global.getComputedStyle(d.firstElementChild);
+                const fs = computedStyle(global, d.firstElementChild);
                 width = parseInt(fs.width, 10);
                 height = parseInt(fs.height, 10);
               }
