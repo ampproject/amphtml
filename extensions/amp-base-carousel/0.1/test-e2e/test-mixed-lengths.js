@@ -67,7 +67,11 @@ describes.endtoend('AMP carousel mixed length slides', {
       await assertSpacerWidth(1, slideTwoWidth);
     });
 
-    it('should snap on the center point', async() => {
+    it('should snap on the center point', async function() {
+      if (env.environment == 'shadow-demo') {
+        this.skip();
+      }
+
       const el = await getScrollingElement(controller);
       const slides = await getSlides(controller);
       const scrollAmount = 1 + (slideOneWidth + slideTwoWidth) / 2;
