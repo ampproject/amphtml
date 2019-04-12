@@ -35,7 +35,8 @@ describes.fakeWin('HiddenObserver', {
 
   beforeEach(() => {
     sandbox = env.sandbox;
-    hiddenObserver = Services.hiddenObserverForDoc(env.ampdoc);
+    hiddenObserver =
+      Services.hiddenObserverForDoc(env.win.document.documentElement);
   });
 
   it('initializes mutation observer on first listen', () => {
