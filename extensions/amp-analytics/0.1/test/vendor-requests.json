@@ -446,8 +446,8 @@
   "vponanalytics": {
     "host": "<ignore for test>",
     "sync": "<ignore for test>",
-    "scroll": "https://tags-dmp.vpadn.com/et?t=_timestamp_&sdkn=j&sdkv=1.2.0&lk=_licence_key_&en=UTF-8&ctid=_ctid_&ev=element_interact&pl={\"name\":\"_category_\",\"action\":\"_action_\",\"value\":\"_documentReferrer_\"}&is_amp=1&page_id=_page_view_id_",
-    "elementInteract": "https://tags-dmp.vpadn.com/et?t=_timestamp_&sdkn=j&sdkv=1.2.0&lk=_licence_key_&en=UTF-8&ctid=_ctid_&ev=element_interact&pl={\"name\":\"_category_\",\"action\":\"_action_\",\"value\":\"_label_\"}&is_amp=1&page_id=_page_view_id_",
+    "scroll": "https://tags-dmp.vpadn.com/et?t=_timestamp_&sdkn=j&sdkv=1.2.0&lk=_licence_key_&en=UTF-8&ctid=_ctid_&ev=element_interact&pl=_pl_&is_amp=1&page_id=_page_view_id_",
+    "elementInteract": "https://tags-dmp.vpadn.com/et?t=_timestamp_&sdkn=j&sdkv=1.2.0&lk=_licence_key_&en=UTF-8&ctid=_ctid_&ev=element_interact&pl=_pl_&is_amp=1&page_id=_page_view_id_",
     "event": "https://tags-dmp.vpadn.com/et?t=_timestamp_&sdkn=j&sdkv=1.2.0&lk=_licence_key_&en=UTF-8&ctid=_ctid_&ev=_ev_name_&pl=_payload_&is_amp=1&page_id=_page_view_id_"
   },
   "webtrekk": {
