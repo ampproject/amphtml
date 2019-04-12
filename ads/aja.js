@@ -28,8 +28,8 @@ export function aja(global, data) {
   const {document} = global;
   const asi = data['asi'];
   const d = document.createElement('div');
-  d.dataset.ajaAd = '';
-  d.dataset.ajaAsi = asi;
+  d.dataset['ajaAd'] = '';
+  d.dataset['ajaAsi'] = asi;
   setStyle(d, 'margin', '1px');
   document.body.appendChild(d);
 
