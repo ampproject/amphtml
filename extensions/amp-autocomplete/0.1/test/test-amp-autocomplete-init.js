@@ -34,6 +34,7 @@ describes.realWin('amp-autocomplete init', {
   function getAutocomplete(attributes,
     json = '{ "items" : ["apple", "banana", "orange"] }',
     wantInlineData = true) {
+    const form = doc.createElement('form');
     const ampAutocomplete = doc.createElement('amp-autocomplete');
     ampAutocomplete.setAttribute('layout', 'container');
     for (const key in attributes) {
@@ -54,7 +55,8 @@ describes.realWin('amp-autocomplete init', {
           json.items);
     }
 
-    doc.body.appendChild(ampAutocomplete);
+    form.appendChild(ampAutocomplete);
+    doc.body.appendChild(form);
     return ampAutocomplete.build().then(() => ampAutocomplete);
   }
 

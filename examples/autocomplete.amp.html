@@ -25,6 +25,37 @@
 </head>
 <body>
     <h1>Autocomplete</h1>
+    <h2>Disable browser autofill</h2>
+    <p>form has no autocomplete attr</p>
+    <form method="post" action-xhr="/form/echo-json/post" target="_blank">
+      <label for="frmEmailA">Email</label>
+      <input type="email" name="email" id="frmEmailA" placeholder="name@example.com" required autocomplete="email">
+
+      <label for="frmAddressS">Address</label>
+      <amp-autocomplete filter="substring" min-characters="0">
+        <input name="ship-address" required id="frmAddressS" placeholder="123 Any Street" autocomplete="shipping street-address">    
+        <script type="application/json">
+          { "items" : ["Address 1", "Address 2", "Address 3"]}
+        </script>
+      </amp-autocomplete>
+      <input name="submit-button" type="submit" value="Submit">
+    </form>
+
+    <p>form has autocomplete="on"</p>
+    <form method="post" action-xhr="/form/echo-json/post" target="_blank" autocomplete="on">
+      <label for="frmEmailA">Email</label>
+      <input type="email" name="email" id="frmEmailA" placeholder="name@example.com" required autocomplete="email">
+
+      <label for="frmAddressS">Address</label>
+      <amp-autocomplete filter="substring" min-characters="0">
+        <input name="ship-address" required id="frmAddressS" placeholder="123 Any Street" autocomplete="shipping street-address">    
+        <script type="application/json">
+          { "items" : ["Address 1", "Address 2", "Address 3"]}
+        </script>
+      </amp-autocomplete>
+      <input name="submit-button" type="submit" value="Submit">
+    </form>
+
     <h2>Attributes</h2>
     <p>no attributes</p>
     <form method="post" action-xhr="/form/echo-json/post" target="_blank">
