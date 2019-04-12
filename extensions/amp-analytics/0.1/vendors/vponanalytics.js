@@ -16,28 +16,31 @@
 
 export const VPONANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
   'vars': {
-    'ctid': '${clientId(vpadn-ctid)}'
+    'ctid': '${clientId(vpadn-ctid)}',
   },
   'requests': {
     'host': 'https://tags-dmp.vpadn.com',
     'sync': 'https://ids-dmp.vpadn.com/set?t=${timestamp}&dn=&ctid=${ctid}',
     'scroll': '${host}/et?t=${timestamp}&sdkn=j&sdkv=1.2.0&lk=${licence_key}' +
     '&en=UTF-8&ctid=${ctid}&ev=element_interact&' +
-    'pl={\"name\":\"${category}\",\"action\":\"${action}\",\"value\":\"${documentReferrer}\"}',
+    'pl={\"name\":\"${category}\",\"action\":\"${action}\",' +
+    '\"value\":\"${documentReferrer}\"}',
     'event': '${host}/et?t=${timestamp}&sdkn=j&sdkv=1.2.0&lk=${licence_key}' +
     '&en=UTF-8&ctid=${ctid}&ev=${ev_name}&pl=${payload}',
-    'elementInteract': '${host}/et?t=${timestamp}&sdkn=j&sdkv=1.2.0&lk=${licence_key}' +
+    'elementInteract': '${host}/et?t=${timestamp}&sdkn=j&' +
+    'sdkv=1.2.0&lk=${licence_key}' +
     '&en=UTF-8&ctid=${ctid}&ev=element_interact&'+
-    'pl={\"name\":\"${category}\",\"action\":\"${action}\",\"value\":\"${label}\"}'
+    'pl={\"name\":\"${category}\",\"action\":\"${action}\",' +
+    '\"value\":\"${label}\"}',
   },
   'extraUrlParams': {
    'is_amp': '1',
-   'page_id': '${pageViewId}'
+   'page_id': '${pageViewId}',
   },
   'triggers': {
     'cookieSync': {
       'on': 'visible',
-      'request': 'sync'
+      'request': 'sync',
     },
     'trackPageview': {
       'on': 'visible',
@@ -46,12 +49,12 @@ export const VPONANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
         'ev_name': 'page_view',
         'payload': '{\"title\":\"${title}\",\"current\":\"${canonicalUrl}\"' +
         ',\"previous\":\"${documentReferrer}\"}'
-      }
+      },
     }
   },
   'transport': {
     'beacon': false,
     'xhrpost': false,
-    'image': true
+    'image': true,
   }
 });
