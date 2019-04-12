@@ -29,13 +29,13 @@ export const VPONANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
     '&en=UTF-8&ctid=${ctid}&ev=${ev_name}&pl=${payload}',
     'elementInteract': '${host}/et?t=${timestamp}&sdkn=j&' +
     'sdkv=1.2.0&lk=${licence_key}' +
-    '&en=UTF-8&ctid=${ctid}&ev=element_interact&'+
+    '&en=UTF-8&ctid=${ctid}&ev=element_interact&' +
     'pl={\"name\":\"${category}\",\"action\":\"${action}\",' +
     '\"value\":\"${label}\"}',
   },
   'extraUrlParams': {
-   'is_amp': '1',
-   'page_id': '${pageViewId}',
+    'is_amp': '1',
+    'page_id': '${pageViewId}',
   },
   'triggers': {
     'cookieSync': {
@@ -48,13 +48,13 @@ export const VPONANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       'vars': {
         'ev_name': 'page_view',
         'payload': '{\"title\":\"${title}\",\"current\":\"${canonicalUrl}\"' +
-        ',\"previous\":\"${documentReferrer}\"}'
+        ',\"previous\":\"${documentReferrer}\"}',
       },
-    }
+    },
   },
   'transport': {
     'beacon': false,
     'xhrpost': false,
     'image': true,
-  }
+  },
 });
