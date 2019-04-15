@@ -25,8 +25,8 @@
 GREEN() { echo -e "\033[0;32m$1\033[0m"; }
 CYAN() { echo -e "\033[0;36m$1\033[0m"; }
 
-GULP_LINT_LOCAL="gulp lint --local-changes"
-GULP_TEST_LOCAL="gulp test --local-changes --headless"
+GULP_LINT_LOCAL="gulp lint --unit --local-changes"
+GULP_TEST_LOCAL="gulp test --unit --local-changes --headless"
 
 echo $(GREEN "Running") $(CYAN "pre-push") $(GREEN "hooks. (Run") $(CYAN "git push --no-verify") $(GREEN "to skip them.)")
 echo -e "\n"
