@@ -125,6 +125,7 @@ exports.rules = [
       '3p/**->src/observable.js',
       '3p/**->src/amp-events.js',
       '3p/**->src/consent-state.js',
+      '3p/**->src/internal-version.js',
       '3p/polyfills.js->src/polyfills/math-sign.js',
       '3p/polyfills.js->src/polyfills/object-assign.js',
       '3p/polyfills.js->src/polyfills/object-values.js',
@@ -154,6 +155,7 @@ exports.rules = [
       'ads/**->src/string.js',
       'ads/**->src/style.js',
       'ads/**->src/consent-state.js',
+      'ads/**->src/internal-version.js',
       'ads/google/adsense-amp-auto-ads-responsive.js->src/experiments.js',
       'ads/google/doubleclick.js->src/experiments.js',
       // ads/google/a4a doesn't contain 3P ad code and should probably move
@@ -381,6 +383,8 @@ exports.rules = [
       // For action macros.
       'extensions/amp-action-macro/0.1/amp-action-macro.js->' +
             'src/service/action-impl.js',
+      'extensions/amp-link-rewriter/0.1/amp-link-rewriter.js->' +
+            'src/service/navigation.js',
       // For localization.
       'extensions/amp-story/0.1/amp-story.js->' +
             'src/service/localization.js',

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.48 */
+/** Version: 0.1.22.49 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
