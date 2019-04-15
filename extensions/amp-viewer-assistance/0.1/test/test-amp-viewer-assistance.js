@@ -105,7 +105,7 @@ describes.fakeWin('AmpViewerAssistance', {
       sendMessageStub = service.viewer_.sendMessageAwaitResponse;
     });
 
-    it('should send if params are well-formed', () => {
+    it('should send if "update" params are well-formed', () => {
       const args = {
         'update': {'actionStatus': 'COMPLETED_ACTION_STATUS'},
       };
@@ -127,11 +127,11 @@ describes.fakeWin('AmpViewerAssistance', {
       const invoke = new ActionInvocation(element, 'updateActionState', {});
       invoke.trust = ActionTrust.LOW;
       let actionHandlerPromise;
+      expectAsyncConsoleError('[amp-viewer-assistance] "updateActionState"' +
+          ' action must have an "update" or "error" parameter.', 1);
       return service.start_().then(() => {
         sendMessageStub.resetHistory();
-        allowConsoleError(() => {
-          actionHandlerPromise = service.actionHandler_(invoke);
-        });
+        actionHandlerPromise = service.actionHandler_(invoke);
         expect(actionHandlerPromise).to.be.null;
         return actionHandlerPromise;
       }).then(() => {
@@ -144,11 +144,12 @@ describes.fakeWin('AmpViewerAssistance', {
       const invoke = new ActionInvocation(element, 'updateActionState', args);
       invoke.trust = ActionTrust.LOW;
       let actionHandlerPromise;
+      expectAsyncConsoleError('[amp-viewer-assistance] "updateActionState"' +
+          ' action "update" parameter must contain a valid "actionStatus"' +
+          ' field.', 1);
       return service.start_().then(() => {
         sendMessageStub.resetHistory();
-        allowConsoleError(() => {
-          actionHandlerPromise = service.actionHandler_(invoke);
-        });
+        actionHandlerPromise = service.actionHandler_(invoke);
         expect(actionHandlerPromise).to.be.null;
         return actionHandlerPromise;
       }).then(() => {
@@ -162,17 +163,18 @@ describes.fakeWin('AmpViewerAssistance', {
       };
       const invoke = new ActionInvocation(element, 'updateActionState', args);
       invoke.trust = ActionTrust.LOW;
+      expectAsyncConsoleError('[amp-viewer-assistance] "updateActionState"' +
+          ' action "update" parameter must contain a valid "actionStatus"' +
+          ' field.', 1);
 
       return service.start_().then(() => {
         sendMessageStub.reset();
-        allowConsoleError(() => {
-          expect(service.actionHandler_(invoke)).to.be.null;
-        });
+        expect(service.actionHandler_(invoke)).to.be.null;
         expect(sendMessageStub).to.not.be.called;
       });
     });
 
-    it('should send if "error" param is present', () => {
+    it('should send if "error" param is well-formed', () => {
       const error = {
         text: () => {
           return Promise.resolve('error message');
@@ -201,6 +203,44 @@ describes.fakeWin('AmpViewerAssistance', {
             },
           },
         });
+      });
+    });
+
+    it('should not send if "error" param is invalid', () => {
+      const error = {
+        status: 500,
+      };
+      const args = {
+        'error': error,
+      };
+      const invoke = new ActionInvocation(element, 'updateActionState', args);
+      invoke.trust = ActionTrust.LOW;
+      expectAsyncConsoleError('[amp-viewer-assistance] "updateActionState"' +
+          ' action "error" parameter must contain a valid "response"' +
+          ' object.', 1);
+
+      return service.start_().then(() => {
+        sendMessageStub.resetHistory();
+        expect(service.actionHandler_(invoke)).to.be.null;
+        expect(sendMessageStub).to.not.be.called;
+      });
+    });
+
+    it('should not send if both "update" and "error" params are' +
+        ' present', () => {
+      const args = {
+        'error': {},
+        'update': {},
+      };
+      const invoke = new ActionInvocation(element, 'updateActionState', args);
+      invoke.trust = ActionTrust.LOW;
+      expectAsyncConsoleError('[amp-viewer-assistance] "updateActionState"' +
+          ' must have only one of the parameters "error" and "update".', 1);
+
+      return service.start_().then(() => {
+        sendMessageStub.resetHistory();
+        expect(service.actionHandler_(invoke)).to.be.null;
+        expect(sendMessageStub).to.not.be.called;
       });
     });
   });

@@ -79,9 +79,8 @@ export class AmpViewerAssistance {
     const {method, args} = invocation;
     if (method == 'updateActionState') {
       // "updateActionState" requires a low-trust event.
-      if (invocation.satisfiesTrust(ActionTrust.LOW)
-          && this.isValidActionStatusArgs_(args)) {
-        this.transformUpdateActionStateArgs_(args).then(args => {
+      if (invocation.satisfiesTrust(ActionTrust.LOW)) {
+        this.validateAndTransformUpdateArgs_(args).then(args => {
           return this.viewer_./*OK*/sendMessageAwaitResponse(
               method, args);
         }).catch(err => {
@@ -163,62 +162,53 @@ export class AmpViewerAssistance {
     });
   }
 
-
   /**
-   * Checks the 'actionStatus' field of the updateActionState arguments against
-   * a whitelist.
-   * @private
-   * @param {?Object} args
-   * @return {boolean}
-   */
-  isValidActionStatusArgs_(args) {
-    if (!args) {
-      return false;
-    }
-    const update = args['update'];
-    const error = args['error'];
-    const actionStatus = update && update['actionStatus'];
-
-    if (error) {
-      return true;
-    } else if (update) {
-      if (!actionStatus || !ACTION_STATUS_WHITELIST.includes(actionStatus)) {
-        user().error(TAG, '"updateActionState" action "update" parameter' +
-            ' must contain a valid "actionStatus" field.');
-        return false;
-      }
-      return true;
-    } else {
-      user().error(TAG, '"updateActionState" action must have an' +
-          ' "update" or "error" parameter.');
-      return false;
-    }
-  }
-
-  /**
-   * Transforms an error response object into a suitable updateActionState
-   * payload to send to the viewer.
+   * Checks the arguments of 'updateActionState' to have either a valid
+   * 'update' or 'error' parameter.
    * @private
    * @param {?JsonObject} args
    * @return {!Promise<!JsonObject>}
    */
-  transformUpdateActionStateArgs_(args) {
-    if (args['update']) {
-      return Promise.resolve(args);
+  validateAndTransformUpdateArgs_(args) {
+    if (!args) {
+      return Promise.reject('"updateActionState" was called with no' +
+          ' arguments!"');
     }
-    // Must transform 'error' Response object
-    const response = args['error'];
-    return response.text().then(errorMessage => {
-      return {
-        update: {
-          actionStatus: 'FAILED_ACTION_STATUS',
-          result: {
-            code: response.status,
-            message: errorMessage,
-          },
-        },
-      };
-    });
+
+    const update = args['update'];
+    const error = args['error'];
+    if (error && update) {
+      return Promise.reject('"updateActionState" must have only one of' +
+        ' the parameters "error" and "update".');
+    } else if (error) {
+      // Must transform 'error' Response object
+      if (error && typeof error.text === 'function') {
+        return error.text().then(errorMessage => {
+          return dict({
+            'update': {
+              'actionStatus': 'FAILED_ACTION_STATUS',
+              'result': {
+                'code': error.status,
+                'message': errorMessage,
+              },
+            },
+          });
+        });
+      } else {
+        return Promise.reject('"updateActionState" action "error" parameter' +
+        ' must contain a valid "response" object.');
+      }
+    } else if (update) {
+      const actionStatus = update && update['actionStatus'];
+      if (!actionStatus || !ACTION_STATUS_WHITELIST.includes(actionStatus)) {
+        return Promise.reject('"updateActionState" action "update" parameter' +
+        ' must contain a valid "actionStatus" field.');
+      }
+      return Promise.resolve(args);
+    } else {
+      return Promise.reject('"updateActionState" action must have an' +
+      ' "update" or "error" parameter.');
+    }
   }
 
   /**
