@@ -387,9 +387,12 @@ async function snapshotWebpages(percy, browser, webpages) {
                 'is done, verifying page');
           })
           .catch(navigationError => {
-            log('error', 'Page navigator of test', colors.yellow(name),
-                'has errored with:', navigationError);
-            log('error', 'Continuing to verify page regardless...');
+            if (!isTravisBuild()) {
+              log('error', 'Page navigator of test', colors.yellow(name),
+                  'has errored with:', navigationError);
+              log('error', 'Continuing to verify page regardless...');
+            }
+            testErrors.push({name, navigationError});
           })
           .then(async() => {
             // Visibility evaluations can only be performed on the active tab,
