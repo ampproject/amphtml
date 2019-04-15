@@ -160,15 +160,6 @@ The `amp-social-share` component provides [some pre-configured providers](0.1/am
   </tr>
   </tr>
   <tr>
-    <td>G+</td>
-    <td><code>gplus</code></td>
-    <td>
-      <ul>
-        <li><code>data-param-url</code>: optional, defaults to: <code>rel=canonical</code> URL</li>
-      </ul>
-    </td>
-  </tr>
-  <tr>
     <td>Tumblr</td>
     <td><code>tumblr</code></td>
     <td>
