@@ -446,7 +446,7 @@
   "vponanalytics": {
     "host": "<ignore for test>",
     "sync": "<ignore for test>",
-    "scroll": "https://tags-dmp.vpadn.com/et?t=_timestamp_&sdkn=j&sdkv=1.2.0&lk=!licence_key&en=UTF-8&ctid=_client_id_&ev=element_interact&pl={\"name\":\"!category\",\"action\":\"!action\",\"value\":\"_document_referrer_\"}&is_amp=1&page_id=_page_view_id_",
+    "scroll": "https://tags-dmp.vpadn.com/et?t=_timestamp_&sdkn=j&sdkv=1.2.0&lk=!licence_key&en=UTF-8&ctid=_client_id_&ev=element_interact&pl={\"name\":\"!category\",\"action\":\"!action\",\"value\":\"_document_referrer_\"}&is_amp=1&page_id=_page_view_id_", 
     "elementInteract": "https://tags-dmp.vpadn.com/et?t=_timestamp_&sdkn=j&sdkv=1.2.0&lk=!licence_key&en=UTF-8&ctid=_client_id_&ev=element_interact&pl={\"name\":\"!category\",\"action\":\"!action\",\"value\":\"!label\"}&is_amp=1&page_id=_page_view_id_",
     "event": "https://tags-dmp.vpadn.com/et?t=_timestamp_&sdkn=j&sdkv=1.2.0&lk=!licence_key&en=UTF-8&ctid=_client_id_&ev=!ev_name&pl=!payload&is_amp=1&page_id=_page_view_id_"
   },
