@@ -388,7 +388,7 @@ async function snapshotWebpages(percy, browser, webpages) {
           })
           .catch(navigationError => {
             log('error', 'Page navigator of test', colors.yellow(name),
-            'has errored with:', navigationError);
+                'has errored with:', navigationError);
             log('error', 'Continuing to verify page regardless...');
           })
           .then(async() => {
