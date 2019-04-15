@@ -24,51 +24,65 @@
     <script type="application/json">
       {
         "background-color-test": {
+          "consentNotificationId": "amp-user-notification",
           "variants": {
             "yellow": {
               "weight": 50,
-              "mutations": [{}]
-            },
-            "green": {
-              "weight": 50,
-              "mutations": [{}]
-            }
-          }
-        },
-        "font-color-test": {
-          "sticky": false,
-          "variants": {
-            "blue": {
-              "weight": 20,
-              "mutations": [{}]
+              "mutations": [
+                {
+                  "type": "attributes",
+                  "target": "h1",
+                  "attributeName": "style",
+                  "value": "background-color: #FFFF00"
+                }
+              ]
             },
             "red": {
-              "weight": 20,
-              "mutations": [{}]
+              "weight": 50,
+              "mutations": [
+                {
+                  "type": "attributes",
+                  "target": "h1",
+                  "attributeName": "style",
+                  "value": "background-color: #FF0000"
+                }
+              ]
             }
           }
         },
-        "border-test": {
-          "consentNotificationId": "amp-user-notification",
+        "text-content-test": {
+          "sticky": false,
           "variants": {
-            "solid": {
+            "firstVariant": {
               "weight": 50,
-              "mutations": [{}]
+              "mutations": [
+                {
+                  "type": "characterData",
+                  "target": "h1",
+                  "value": "First characterData Variant"
+                }
+              ]
             },
-            "dashed": {
+            "secondVariant": {
               "weight": 50,
-              "mutations": [{}]
+              "mutations": [
+                {
+                  "type": "characterData",
+                  "target": "h1",
+                  "value": "Second characterData Variant"
+                }
+              ]
             }
           }
         }
       }
     </script>
   </amp-experiment>
-  <amp-pixel src="https://donot.worry/?background-color-test=VARIANT(background-color-test)&font-color-test=VARIANT(font-color-test)&variants=VARIANTS"></amp-pixel>
+  <amp-pixel src="https://donot.worry/?background-color-test=VARIANT(background-color-test)&text-content-test=VARIANT(text-content-test)&variants=VARIANTS"></amp-pixel>
   <amp-user-notification
       layout=nodisplay
       id="amp-user-notification">
-    Dismiss this notification to see a border around title on your next visit.
+    Dismiss this notification to see a background-color on the title on your next visit.
     <button on="tap:amp-user-notification.dismiss" role="button">I accept</button>
   </amp-user-notification>
 </body>

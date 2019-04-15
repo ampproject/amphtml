@@ -22,7 +22,7 @@ import {
  * Localized string bundle used for pt-BR strings.
  * @const {!LocalizedStringBundleDef}
  */
-export default /** @const {!LocalizedStringBundleDef} */ ({
+const strings = {
   [LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT]: {
     string: 'Som desativado',
   },
@@ -126,4 +126,6 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
   [LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT]: {
     string: 'Parece que o navegador não é compatível com esta experiência',
   },
-});
+};
+
+export default strings;

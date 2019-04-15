@@ -31,7 +31,6 @@ import {Signals} from '../../../../src/utils/signals';
 import {macroTask} from '../../../../testing/yield';
 
 
-
 describes.realWin('Events', {amp: 1}, env => {
   let win;
   let ampdoc;
@@ -1196,7 +1195,7 @@ describes.realWin('Events', {amp: 1}, env => {
       visibilityManagerMock.verify();
     });
 
-    it('should initalize, add listeners and dispose', () => {
+    it('should initialize, add listeners and dispose', () => {
       expect(tracker.root).to.equal(root);
     });
 

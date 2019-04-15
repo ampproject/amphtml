@@ -20,6 +20,7 @@ const colors = require('ansi-colors');
 const gulp = require('gulp-help')(require('gulp'));
 const log = require('fancy-log');
 const nodemon = require('nodemon');
+const path = require('path');
 
 const host = argv.host || 'localhost';
 const port = argv.port || process.env.PORT || 8000;
@@ -50,6 +51,9 @@ function serve() {
       require.resolve('../app.js'),
       require.resolve('../routes/analytics.js'),
       require.resolve('../server.js'),
+
+      // All devdash routes:
+      path.dirname(require.resolve('../app-index')),
     ],
     env: {
       'NODE_ENV': 'development',
