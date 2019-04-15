@@ -375,10 +375,6 @@ async function snapshotWebpages(percy, browser, webpages) {
       const page = await newPage(browser, viewport);
       log('verbose', 'Navigating to page', colors.yellow(webpage.url));
 
-      // Navigate to an empty page first to support different webpages that only
-      // modify the #anchor name.
-      await page.goto('about:blank').then(() => {}, () => {});
-
       // Puppeteer is flaky when it comes to catching navigation requests, so
       // ignore timeouts. If this was a real non-loading page, this will be
       // caught in the resulting Percy build. Also attempt to wait until there
@@ -386,11 +382,16 @@ async function snapshotWebpages(percy, browser, webpages) {
       // doesn't always understand Chrome's network activity, so ignore timeouts
       // again.
       const pagePromise = page.goto(fullUrl, {waitUntil: 'networkidle0'})
-          .then(() => {}, () => {})
-          .then(async() => {
-            log('verbose', 'Navigation to page', colors.yellow(name),
+          .then(() => {
+            log('verbose', 'Page navigation of test', colors.yellow(name),
                 'is done, verifying page');
-
+          })
+          .catch(navigationError => {
+            log('error', 'Page navigator of test', colors.yellow(name),
+            'has errored with:', navigationError);
+            log('error', 'Continuing to verify page regardless...');
+          })
+          .then(async() => {
             // Visibility evaluations can only be performed on the active tab,
             // even in the headless browser mode.
             await page.bringToFront();
