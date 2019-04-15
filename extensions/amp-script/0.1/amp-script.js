@@ -60,12 +60,6 @@ export class AmpScript extends AMP.BaseElement {
 
     /** @private {?UserActivationTracker} */
     this.userActivation_ = null;
-
-    /** @private {?DomPurifyDef} */
-    this.purifier_ = null;
-
-    /** @private {?Element} */
-    this.wrapper_ = null;
   }
 
   /** @override */
@@ -83,8 +77,7 @@ export class AmpScript extends AMP.BaseElement {
 
     this.userActivation_ = new UserActivationTracker(this.element);
 
-    this.wrapper_ = this.win.document.createElement('div');
-    this.purifier_ = createPurifier(dict({'IN_PLACE': true}));
+    this.userActivation_ = new UserActivationTracker(this.element);
 
     // Create worker and hydrate.
     const authorUrl = this.element.getAttribute('src');
@@ -130,37 +123,7 @@ export class AmpScript extends AMP.BaseElement {
         this.userActivation_.expandLongTask(promise);
         // TODO(dvoytenko): consider additional "progress" UI.
       },
-      sanitizer: {
-        sanitize: node => {
-          // DOMPurify sanitizes unsafe nodes by detaching them from parents.
-          // So, an unsafe `node` that has no parent will cause a runtime error.
-          // To avoid this, wrap `node` in a <div> if it has no parent.
-          const useWrapper = !node.parentNode;
-          if (useWrapper) {
-            this.wrapper_.appendChild(node);
-          }
-          const parent = node.parentNode || this.wrapper_;
-          this.purifier_.sanitize(parent);
-          const clean = parent.firstChild;
-          if (!clean) {
-            dev().info(TAG, 'Sanitized node:', node);
-            return false;
-          }
-          // Detach `node` if we used a wrapper div.
-          if (useWrapper) {
-            while (this.wrapper_.firstChild) {
-              this.wrapper_.removeChild(this.wrapper_.firstChild);
-            }
-          }
-          return true;
-        },
-        validAttribute: (tag, attr, value) => {
-          return this.purifier_.isValidAttribute(tag, attr, value);
-        },
-        validProperty: (tag, prop, value) => {
-          return this.purifier_.isValidAttribute(tag, prop, value);
-        },
-      },
+      sanitizer: new SanitizerImpl(this.win),
     };
 
     upgrade(this.element, fetchPromise, workerConfig).then(workerDom => {
@@ -213,6 +176,70 @@ export class AmpScript extends AMP.BaseElement {
     this.element.classList.remove('i-amphtml-hydrated');
     this.element.classList.add('i-amphtml-broken');
     user().error(TAG, '"amp-script" is terminated due to unallowed mutation.');
+  }
+}
+
+/**
+ * A DOMPurify wrapper that implements the worker-dom.Sanitizer interface.
+ */
+class SanitizerImpl {
+  /**
+   * @param {!Window} win
+   */
+  constructor(win) {
+    /** @private {!DomPurifyDef} */
+    this.purifier_ = createPurifier(dict({'IN_PLACE': true}));
+
+    /** @const @private {!Element} */
+    this.wrapper_ = win.document.createElement('div');
+  }
+
+  /**
+   * @param {!Node} node
+   * @return {boolean}
+   */
+  sanitize(node) {
+    // DOMPurify sanitizes unsafe nodes by detaching them from parents.
+    // So, an unsafe `node` that has no parent will cause a runtime error.
+    // To avoid this, wrap `node` in a <div> if it has no parent.
+    const useWrapper = !node.parentNode;
+    if (useWrapper) {
+      this.wrapper_.appendChild(node);
+    }
+    const parent = node.parentNode || this.wrapper_;
+    this.purifier_.sanitize(parent);
+    const clean = parent.firstChild;
+    if (!clean) {
+      dev().info(TAG, 'Sanitized node:', node);
+      return false;
+    }
+    // Detach `node` if we used a wrapper div.
+    if (useWrapper) {
+      while (this.wrapper_.firstChild) {
+        this.wrapper_.removeChild(this.wrapper_.firstChild);
+      }
+    }
+    return true;
+  }
+
+  /**
+   * @param {string} tag
+   * @param {string} attr
+   * @param {string} value
+   * @return {boolean}
+   */
+  validAttribute(tag, attr, value) {
+    return this.purifier_.isValidAttribute(tag, attr, value);
+  }
+
+  /**
+   * @param {string} tag
+   * @param {string} prop
+   * @param {string} value
+   * @return {boolean}
+   */
+  validProperty(tag, prop, value) {
+    return this.purifier_.isValidAttribute(tag, prop, value);
   }
 }
 
