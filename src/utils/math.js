@@ -106,3 +106,25 @@ export function clamp(val, min, max) {
 export function boundValue(val, min, max, extent) {
   return clamp(val, min - extent, max + extent);
 }
+
+/**
+ * Returns the length of a vector given in X- and Y-coordinates.
+ * @param {number} deltaX distance in the X direction.
+ * @param {number} deltaY distance in the Y direction.
+ * @return {number} the magnitude of the vector.
+ */
+export function magnitude(deltaX, deltaY) {
+  return Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+}
+
+/**
+ * Returns the distance between two points.
+ * @param {number} x1 X-coordinate of the first point.
+ * @param {number} y1 Y-coordinate of the first point.
+ * @param {number} x2 X-coordinate of the second point.
+ * @param {number} y2 Y-coordinate of the second point.
+ * @return {number} the distance between the two points.
+ */
+export function distance(x1, y1, x2, y2) {
+  return magnitude(x2 - x1, y2 - y1);
+}
