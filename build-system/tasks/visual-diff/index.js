@@ -502,8 +502,7 @@ async function snapshotWebpages(percy, browser, webpages) {
     testErrors.sort((a, b) => a.name.localeCompare(b.name));
     testErrors.forEach(logTestError);
   }
-  log('info', 'DEBUG', testErrors.map(testError => testError.fatal));
-  return testErrors.some(testError => testError.fatal);
+  return testErrors.every(testError => !testError.fatal);
 }
 
 /**
