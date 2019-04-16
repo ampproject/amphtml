@@ -242,8 +242,8 @@ function addTestError(testErrors, name, message, error, fatal) {
  * @param {!JsonObject} testError object as created by addTestError.
  */
 function logTestError(testError) {
-  log('error', 'Error in test', colors.yellow(testError.name), '\n  ',
-      testError.message, `\n  ${testError.fatal ? 'FATAL' : 'Non-fatal'}:`,
+  log(testError.fatal ? 'error' : 'warning', 'Error in test',
+      colors.yellow(testError.name), '\n  ', testError.message, `\n  `,
       testError.error);
 }
 
@@ -419,7 +419,7 @@ async function snapshotWebpages(percy, browser, webpages) {
                 'The browser test runner failed to complete the navigation ' +
                 'to the test page', navigationError, /* fatal */ false);
             if (!isTravisBuild()) {
-              log('error', 'Continuing to verify page regardless...');
+              log('warning', 'Continuing to verify page regardless...');
             }
           })
           .then(async() => {
