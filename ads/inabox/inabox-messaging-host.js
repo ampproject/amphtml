@@ -132,9 +132,11 @@ export class InaboxMessagingHost {
       return false;
     }
 
-    const allowedTypes = adFrame.iframe.dataset['ampAllowed'] || '';
-    if (allowedTypes.split(/\s*,\s*/).concat(READ_ONLY_MESSAGES)
-        .indexOf(request['type']) === -1) {
+    const allowedTypes = adFrame.iframe.dataset['ampAllowed'];
+    const allowedTypesList = allowedTypes ?
+        allowedTypes.split(/\s*,\s*/) :
+        READ_ONLY_MESSAGES;
+    if (allowedTypesList.indexOf(request['type']) === -1) {
       dev().info(TAG, 'Ignored non-whitelisted message type:', message);
       return false;
     }
