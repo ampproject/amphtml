@@ -19,6 +19,7 @@ const argv = require('minimist')(process.argv.slice(2));
 const log = require('fancy-log');
 const requestPromise = require('request-promise');
 const {cyan, green, yellow} = require('ansi-colors');
+const {determineBuildTargets} = require('./build-targets');
 const {gitCommitHash} = require('../../git');
 const {isTravisPullRequestBuild} = require('../../travis');
 
@@ -29,6 +30,15 @@ const IS_LOCAL_CHANGES = !!argv['local-changes'];
 const IS_SAUCELABS = !!(argv.saucelabs || argv.saucelabs_lite);
 const IS_SINGLE_PASS = !!argv.single_pass;
 const IS_UNIT = !!argv.unit;
+
+const TEST_TYPE_SUBTYPES = new Map({
+  integration: ['default', 'saucelabs', 'single-pass'],
+  unit: ['default', 'local-changes', 'saucelabs'],
+});
+const TEST_TYPE_ACTIVATORS = new Map({
+  integration: ['RUNTIME', 'BUILD_SYSTEM', 'INTEGRATION_TEST'],
+  unit: ['RUNTIME', 'BUILD_SYSTEM', 'UNIT_TEST'],
+});
 
 function inferTestType() {
   let type;
@@ -56,8 +66,7 @@ function inferTestType() {
   }
 }
 
-function postReport(action) {
-  const type = inferTestType();
+function postReport(type, action) {
   if (type !== null && isTravisPullRequestBuild()) {
     const commitHash = gitCommitHash();
     const postUrl = `${reportBaseUrl}/${commitHash}/${type}/${action}`;
@@ -77,21 +86,25 @@ function postReport(action) {
 }
 
 exports.reportTestErrored = () => {
-  return postReport('report/errored');
+  return postReport(inferTestType(), 'report/errored');
 };
 
 exports.reportTestFinished = (success, failed) => {
-  return postReport(`report/${success}/${failed}`);
-};
-
-exports.reportTestQueued = () => {
-  return postReport('queued');
+  return postReport(inferTestType(), `report/${success}/${failed}`);
 };
 
 exports.reportTestStarted = () => {
-  return postReport('started');
+  return postReport(inferTestType(), 'started');
 };
 
-exports.reportTestSkipped = () => {
-  return postReport('skipped');
+exports.reportAllExpectedTests = async () => {
+  const buildTargets = determineBuildTargets();
+
+  for (const [type, subTypes] of TEST_TYPE_SUBTYPES) {
+    const action = TEST_TYPE_ACTIVATORS[type].some(buildTargets.has)
+        ? 'queued' : 'skipped';
+    for (const subType of subTypes) {
+      await postReport(`${type}/${subType}`, action);
+    }
+  }
 };

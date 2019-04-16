@@ -29,6 +29,7 @@ const {
   timedExecOrDie: timedExecOrDieBase} = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
 const {isTravisPullRequestBuild} = require('../travis');
+const {reportAllExpectedTests} = require('../tasks/runtime-test/status-report');
 
 const FILENAME = 'checks.js';
 const timedExecOrDie =
@@ -71,6 +72,8 @@ function main() {
       timedExecOrDie('gulp dep-check');
       timedExecOrDie('gulp check-types');
     }
+
+    reportAllExpectedTests();
   }
 
   stopTimer(FILENAME, FILENAME, startTime);
