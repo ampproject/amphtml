@@ -24,17 +24,15 @@ import {
   DevelopmentModeLog,
   DevelopmentModeLogButtonSet,
 } from './development-ui';
-import {LocalizedStringId} from './localization';
+import {LocalizedStringId} from '../../../src/localized-strings';
 import {ProgressBar} from './progress-bar';
 import {Services} from '../../../src/services';
-import {ShareWidget} from './amp-story-share';
 import {createShadowRootWithStyle} from './utils';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {getAmpdoc} from '../../../src/service';
 import {getMode} from '../../../src/mode';
 import {matches} from '../../../src/dom';
-import {renderAsElement, renderSimpleTemplate} from './simple-template';
+import {renderAsElement} from './simple-template';
 
 
 /** @private @const {string} */
@@ -165,30 +163,6 @@ const TEMPLATE = {
 
 
 /**
- * Container for "pill-style" share widget, rendered on desktop.
- * @private @const {!./simple-template.ElementDef}
- */
-const SHARE_WIDGET_PILL_CONTAINER = {
-  tag: 'div',
-  attrs: dict({'class': 'i-amphtml-story-share-pill-container'}),
-  children: [
-    {
-      tag: 'div',
-      attrs: dict({'class': 'i-amphtml-story-share-pill'}),
-      children: [
-        {
-          tag: 'span',
-          attrs: dict({'class': 'i-amphtml-story-share-pill-label'}),
-          localizedStringId:
-              LocalizedStringId.AMP_STORY_SYSTEM_LAYER_SHARE_WIDGET_LABEL,
-        },
-      ],
-    },
-  ],
-};
-
-
-/**
  * System Layer (i.e. UI Chrome) for <amp-story>.
  * Chrome contains:
  *   - mute/unmute button
@@ -233,9 +207,6 @@ export class SystemLayer {
 
     /** @private {!DevelopmentModeLogButtonSet} */
     this.developerButtons_ = DevelopmentModeLogButtonSet.create(win);
-
-    /** @private {?Node} */
-    this.sharePillContainerNode_ = null;
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win_);
@@ -521,10 +492,6 @@ export class SystemLayer {
    * @private
    */
   onUIStateUpdate_(uiState) {
-    if (uiState === UIType.DESKTOP_PANELS) {
-      this.buildSharePill_();
-    }
-
     this.vsync_.mutate(() => {
       const shadowRoot = this.getShadowRoot();
 
@@ -626,27 +593,6 @@ export class SystemLayer {
   updateProgress(pageId, progress) {
     // TODO(newmuis) avoid passing progress logic through system-layer
     this.progressBar_.updateProgress(pageId, progress);
-  }
-
-  /**
-   * Builds and appends the share pill. Desktop only.
-   * @private
-   */
-  buildSharePill_() {
-    if (this.sharePillContainerNode_) {
-      return;
-    }
-
-    this.sharePillContainerNode_ =
-        renderSimpleTemplate(this.win_.document, SHARE_WIDGET_PILL_CONTAINER);
-
-    const shareWidget = new ShareWidget(this.win_, this.parentEl_);
-
-    this.sharePillContainerNode_
-        .querySelector('.i-amphtml-story-share-pill')
-        .appendChild(shareWidget.build(getAmpdoc(this.parentEl_)));
-
-    this.systemLayerEl_.appendChild(this.sharePillContainerNode_);
   }
 
   /**

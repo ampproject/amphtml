@@ -16,7 +16,6 @@
 
 import '../amp-recaptcha-input';
 import {createElementWithAttributes} from '../../../../src/dom';
-import {toggleExperiment} from '../../../../src/experiments';
 
 describes.realWin('amp-recaptcha-input', {
   amp: { /* amp spec */
@@ -30,7 +29,6 @@ describes.realWin('amp-recaptcha-input', {
   beforeEach(() => {
     win = env.win;
     doc = win.document;
-    toggleExperiment(win, 'amp-recaptcha-input', true);
   });
 
   const ampRecaptchaInputAttributes = {

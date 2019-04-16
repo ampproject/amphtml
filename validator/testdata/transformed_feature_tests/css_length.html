@@ -1,0 +1,36 @@
+<!--
+  Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS-IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the license.
+-->
+<!--
+  Test Description:
+  This testcase isn't run verbatim. The template string below is replaced by
+  the test harnesses with various lengths of valid CSS stylesheets. We use
+  this test to verify the max_byte_length rules for CSS author stylesheets.
+-->
+<!doctype html>
+<html ⚡ transformed="google;v=1">
+<head>
+  <meta charset="utf-8">
+  <style amp-runtime i-amphtml-version=123456789012345>.omitted-for-brevity{}</style>
+  <meta name="viewport" content="width=device-width,minimum-scale=1">
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <style amp-custom>.replace_amp_custom {}</style>
+  <link rel="canonical" href="./regular-html-version.html">
+</head>
+<body>
+  Hello, world.
+  <div style="replace_inline_style"></div>
+</body>
+</html>

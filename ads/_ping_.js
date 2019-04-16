@@ -46,6 +46,10 @@ export function _ping_(global, data) {
     devAssert(
         global.context.container == data.ad_container, 'wrong container');
   }
+  if (data.valid == 'false') {
+    // Immediately send no-content for visual diff test
+    global.context.noContentAvailable();
+  }
   if (data.valid && data.valid == 'true') {
     const img = document.createElement('img');
     if (data.url) {

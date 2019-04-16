@@ -372,7 +372,7 @@ export class AmpIframe extends AMP.BaseElement {
 
     const iframe = this.element.ownerDocument.createElement('iframe');
 
-    this.iframe_ = iframe;
+    this.iframe_ = /** @type {HTMLIFrameElement} */ (iframe);
 
     this.applyFillContent(iframe);
     iframe.name = 'amp_iframe' + count++;
@@ -382,6 +382,17 @@ export class AmpIframe extends AMP.BaseElement {
     }
 
     this.propagateAttributes(ATTRIBUTES_TO_PROPAGATE, iframe);
+
+    // TEMPORARY: disable `allow=autoplay`
+    // This is a workaround for M72-M74 user-activation breakage.
+    // If this is still here in May 2019, please ping @aghassemi
+    // See https://github.com/ampproject/amphtml/issues/21242 for details.
+    // TODO(aghassemi, #21247)
+    let allowVal = iframe.getAttribute('allow') || '';
+    // allow syntax is complex, not worth parsing for temp code.
+    allowVal = allowVal.replace('autoplay', 'autoplay-disabled');
+    iframe.setAttribute('allow', allowVal);
+
     setSandbox(this.element, iframe, this.sandbox_);
     iframe.src = this.iframeSrc;
 
@@ -483,7 +494,8 @@ export class AmpIframe extends AMP.BaseElement {
   mutatedAttributesCallback(mutations) {
     const src = mutations['src'];
     if (src !== undefined) {
-      this.iframeSrc = this.transformSrc_(src);
+      this.iframeSrc =
+        /** @type {?string} */ (this.transformSrc_(src));
       if (this.iframe_) {
         this.iframe_.src = this.assertSource_(
             /** @type {string} */ (this.iframeSrc),

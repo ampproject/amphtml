@@ -18,6 +18,7 @@ import * as ResourceTiming from '../resource-timing';
 import * as lolex from 'lolex';
 import {ExpansionOptions, installVariableService} from '../variables';
 import {RequestHandler, expandPostMessage} from '../requests';
+import {installLinkerReaderService} from '../linker-reader';
 import {macroTask} from '../../../../testing/yield';
 
 describes.realWin('Requests', {amp: 1}, env => {
@@ -29,6 +30,7 @@ describes.realWin('Requests', {amp: 1}, env => {
 
   beforeEach(() => {
     installVariableService(env.win);
+    installLinkerReaderService(env.win);
     ampdoc = env.ampdoc;
     ampdoc.defaultView = env.win;
     clock = lolex.install({target: ampdoc.win});
@@ -368,7 +370,7 @@ describes.realWin('Requests', {amp: 1}, env => {
     });
   });
 
-  it('should replace dynamic bindings', function* () {
+  it('should replace dynamic bindings RESOURCE_TIMING', function* () {
     const spy = sandbox.spy();
     const r = {'baseUrl': 'r1&${resourceTiming}'};
     const handler = createRequestHandler(r, spy);
@@ -380,6 +382,18 @@ describes.realWin('Requests', {amp: 1}, env => {
     handler.send({}, {}, expansionOptions);
     yield macroTask();
     expect(spy).to.be.calledWith('r1&resource-timing');
+  });
+
+  it('should replace dynamic bindings CONSENT_STATE', function* () {
+    const spy = sandbox.spy();
+    const r = {'baseUrl': 'r1&$CONSENT_STATEtest&${consentState}test2'};
+    const handler = createRequestHandler(r, spy);
+    const expansionOptions = new ExpansionOptions({
+      'consentState': 'CONSENT_STATE',
+    });
+    handler.send({}, {}, expansionOptions);
+    yield macroTask();
+    expect(spy).to.be.calledWith('r1&test&test2');
   });
 
   describe('expandPostMessage', () => {

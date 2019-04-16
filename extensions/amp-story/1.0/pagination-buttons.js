@@ -18,6 +18,7 @@ import {
   StateProperty,
   getStoreService,
 } from './amp-story-store-service';
+import {AdvancementMode} from './story-analytics';
 import {EventType, dispatch} from './events';
 import {devAssert} from '../../../src/log';
 import {dict} from './../../../src/utils/object';
@@ -145,6 +146,10 @@ class PaginationButton {
    */
   onClick_(e) {
     e.preventDefault();
+
+    this.storeService_.dispatch(
+        Action.SET_ADVANCEMENT_MODE, AdvancementMode.MANUAL_ADVANCE);
+
     if (this.state_.triggers) {
       dispatch(this.win_, this.element, devAssert(this.state_.triggers),
           /* payload */ undefined, {bubbles: true});
@@ -288,9 +293,10 @@ export class PaginationButtons {
    */
   onSystemUiIsVisibleStateUpdate_(isVisible) {
     if (isVisible) {
-      this.backButton_.updateState(devAssert(this.backButtonStateToRestore_));
-      this.forwardButton_.updateState(
-          devAssert(this.forwardButtonStateToRestore_));
+      this.backButton_.updateState(/** @type {!ButtonStateDef} */ (
+        devAssert(this.backButtonStateToRestore_)));
+      this.forwardButton_.updateState(/** @type {!ButtonStateDef} */ (
+        devAssert(this.forwardButtonStateToRestore_)));
     } else {
       this.backButtonStateToRestore_ = this.backButton_.getState();
       this.backButton_.updateState(BackButtonStates.HIDDEN);

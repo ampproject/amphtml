@@ -39,14 +39,35 @@ import {getServicePromise} from './service';
 const SERVICES = {
   'amp-dynamic-css-classes': '[custom-element=amp-dynamic-css-classes]',
   'variant': 'amp-experiment',
-  'amp-story': 'amp-story[standalone]',
+  'amp-story-render': 'amp-story[standalone]',
 };
+
+/**
+ * Base class for render delaying services.
+ * This should be extended to ensure the service
+ * is properly handled
+ *
+ * @interface
+ */
+export class RenderDelayingService {
+
+  /**
+   * Function to return a promise for when
+   * it is finished delaying render, and is ready.
+   * NOTE: This should simply return Promise.resolve,
+   * if your service does not need to perform any logic
+   * after being registered.
+   * @return {!Promise}
+   */
+  whenReady() {}
+}
 
 /**
  * Maximum milliseconds to wait for all extensions to load before erroring.
  * @const
  */
 const LOAD_TIMEOUT = 3000;
+
 
 /**
  * Detects any render delaying services that are required on the page, and
@@ -56,11 +77,25 @@ const LOAD_TIMEOUT = 3000;
  *     as the detected render delaying services
  */
 export function waitForServices(win) {
-  const promises = includedServices(win).map(service => {
+  const promises = includedServices(win).map(serviceId => {
+
+    const serviceReadyPromise = getServicePromise(
+        win,
+        serviceId
+    ).then(service => {
+      if (service && isRenderDelayingService(service)) {
+        return service.whenReady().then(() => {
+          return service;
+        });
+      }
+      return service;
+    });
+
     return Services.timerFor(win).timeoutPromise(
         LOAD_TIMEOUT,
-        getServicePromise(win, service),
-        `Render timeout waiting for service ${service} to be ready.`
+        serviceReadyPromise,
+        `Render timeout waiting for service ${serviceId} ` +
+        'to be ready.'
     );
   });
   return Promise.all(promises);
@@ -73,6 +108,18 @@ export function waitForServices(win) {
  */
 export function hasRenderDelayingServices(win) {
   return includedServices(win).length > 0;
+}
+
+/**
+ * Function to determine if the passed
+ * Object is a Render Delaying Service
+ * @param {!Object} service
+ * @return {boolean}
+ */
+export function isRenderDelayingService(service) {
+  const maybeRenderDelayingService =
+    /** @type {!RenderDelayingService}*/ (service);
+  return typeof maybeRenderDelayingService.whenReady == 'function';
 }
 
 /**

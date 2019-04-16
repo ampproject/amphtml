@@ -52,6 +52,7 @@ import {
 } from './3p';
 import {startsWith} from '../src/string.js';
 import {urls} from '../src/config';
+import {version} from '../src/internal-version';
 
 // Disable auto-sorting of imports from here on.
 /* eslint-disable sort-imports-es6-autofix/sort-imports-es6 */
@@ -94,6 +95,7 @@ import {adplugg} from '../ads/adplugg';
 import {adpon} from '../ads/adpon';
 import {adreactor} from '../ads/adreactor';
 import {adsense} from '../ads/google/adsense';
+import {adsensor} from '../ads/adsensor';
 import {adsnative} from '../ads/adsnative';
 import {adspeed} from '../ads/adspeed';
 import {adspirit} from '../ads/adspirit';
@@ -159,6 +161,7 @@ import {improvedigital} from '../ads/improvedigital';
 import {inmobi} from '../ads/inmobi';
 import {innity} from '../ads/innity';
 import {ix} from '../ads/ix';
+import {jubna} from '../ads/jubna';
 import {kargo} from '../ads/kargo';
 import {kiosked} from '../ads/kiosked';
 import {kixer} from '../ads/kixer';
@@ -197,6 +200,7 @@ import {polymorphicads} from '../ads/polymorphicads';
 import {popin} from '../ads/popin';
 import {postquare} from '../ads/postquare';
 import {pressboard} from '../ads/pressboard';
+import {promoteiq} from '../ads/promoteiq';
 import {pubexchange} from '../ads/pubexchange';
 import {pubguru} from '../ads/pubguru';
 import {pubmatic} from '../ads/pubmatic';
@@ -204,6 +208,7 @@ import {pubmine} from '../ads/pubmine';
 import {pulsepoint} from '../ads/pulsepoint';
 import {purch} from '../ads/purch';
 import {quoraad} from '../ads/quoraad';
+import {rbinfox} from '../ads/rbinfox';
 import {realclick} from '../ads/realclick';
 import {recomad} from '../ads/recomad';
 import {relap} from '../ads/relap';
@@ -212,6 +217,7 @@ import {revjet} from '../ads/revjet';
 import {rfp} from '../ads/rfp';
 import {rubicon} from '../ads/rubicon';
 import {runative} from '../ads/runative';
+import {sas} from '../ads/sas';
 import {sekindo} from '../ads/sekindo';
 import {sharethrough} from '../ads/sharethrough';
 import {sklik} from '../ads/sklik';
@@ -224,12 +230,16 @@ import {sortable} from '../ads/sortable';
 import {sovrn} from '../ads/sovrn';
 import {spotx} from '../ads/spotx';
 import {sunmedia} from '../ads/sunmedia';
+import {svknative} from '../ads/svknative';
 import {swoop} from '../ads/swoop';
 import {taboola} from '../ads/taboola';
+import {tcsemotion} from '../ads/tcsemotion';
 import {teads} from '../ads/teads';
+import {torimochi} from '../ads/torimochi';
 import {triplelift} from '../ads/triplelift';
 import {trugaze} from '../ads/trugaze';
 import {uas} from '../ads/uas';
+import {ucfunnel} from '../ads/ucfunnel';
 import {unruly} from '../ads/unruly';
 import {uzou} from '../ads/uzou';
 import {valuecommerce} from '../ads/valuecommerce';
@@ -263,13 +273,13 @@ import {speakol} from '../ads/speakol';
  * @const {!Object<string, boolean>}
  */
 const AMP_EMBED_ALLOWED = {
-  aja: true,
   _ping_: true,
   '24smi': true,
   bringhub: true,
   dable: true,
   engageya: true,
   epeex: true,
+  jubna: true,
   kuadio: true,
   'mantis-recommend': true,
   miximedia: true,
@@ -278,8 +288,10 @@ const AMP_EMBED_ALLOWED = {
   plista: true,
   postquare: true,
   pubexchange: true,
+  rbinfox: true,
   smartclip: true,
   smi2: true,
+  svknative: true,
   taboola: true,
   zen: true,
   zergnet: true,
@@ -318,6 +330,7 @@ register('adplugg', adplugg);
 register('adpon', adpon);
 register('adreactor', adreactor);
 register('adsense', adsense);
+register('adsensor', adsensor);
 register('adsnative', adsnative);
 register('adspeed', adspeed);
 register('adspirit', adspirit);
@@ -389,6 +402,7 @@ register('industrybrains', industrybrains);
 register('inmobi', inmobi);
 register('innity', innity);
 register('ix', ix);
+register('jubna', jubna);
 register('kargo', kargo);
 register('kiosked', kiosked);
 register('kixer', kixer);
@@ -429,6 +443,7 @@ register('polymorphicads', polymorphicads);
 register('popin', popin);
 register('postquare', postquare);
 register('pressboard', pressboard);
+register('promoteiq', promoteiq);
 register('pubexchange', pubexchange);
 register('pubguru', pubguru);
 register('pubmatic', pubmatic);
@@ -436,6 +451,7 @@ register('pubmine', pubmine);
 register('pulsepoint', pulsepoint);
 register('purch', purch);
 register('quoraad', quoraad);
+register('rbinfox', rbinfox);
 register('realclick', realclick);
 register('reddit', reddit);
 register('recomad', recomad);
@@ -445,6 +461,7 @@ register('revjet', revjet);
 register('rfp', rfp);
 register('rubicon', rubicon);
 register('runative', runative);
+register('sas', sas);
 register('sekindo', sekindo);
 register('sharethrough', sharethrough);
 register('sklik', sklik);
@@ -457,13 +474,17 @@ register('sortable', sortable);
 register('sovrn', sovrn);
 register('spotx', spotx);
 register('sunmedia', sunmedia);
+register('svknative', svknative);
 register('swoop', swoop);
 register('taboola', taboola);
+register('tcsemotion', tcsemotion);
 register('teads', teads);
+register('torimochi', torimochi);
 register('triplelift', triplelift);
 register('trugaze', trugaze);
 register('twitter', twitter);
 register('uas', uas);
+register('ucfunnel', ucfunnel);
 register('unruly', unruly);
 register('uzou', uzou);
 register('valuecommerce', valuecommerce);
@@ -748,7 +769,7 @@ export function isTagNameAllowed(type, tagName) {
  */
 function lightweightErrorReport(e, isCanary) {
   new Image().src = urls.errorReporting +
-      '?3p=1&v=' + encodeURIComponent('$internalRuntimeVersion$') +
+      '?3p=1&v=' + encodeURIComponent(version()) +
       '&m=' + encodeURIComponent(e.message) +
       '&ca=' + (isCanary ? 1 : 0) +
       '&r=' + encodeURIComponent(document.referrer) +

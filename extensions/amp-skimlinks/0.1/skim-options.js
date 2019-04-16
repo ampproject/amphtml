@@ -14,17 +14,16 @@
  * limitations under the License.
  */
 
-import {GLOBAL_DOMAIN_BLACKLIST} from './constants';
+import {getChildJsonConfig} from '../../../src/json';
 import {getNormalizedHostnameFromUrl} from './utils';
 import {userAssert} from '../../../src/log';
 
-const errors = {
-  INVALID_PUBCODE: '"publisher-code" is required.',
-  INVALID_XCUST:
-    '"custom-tracking-id" should be <=50 characters and only contain upper ' +
-    'and lowercase characters, numbers, underscores and pipes.',
-  INVALID_TRACKING_STATUS: '"tracking" possible values are "true" or "false".',
-};
+import {
+  DEFAULT_CONFIG,
+  GLOBAL_DOMAIN_BLACKLIST,
+  OPTIONS_ERRORS,
+  WAYPOINT_BASE_URL,
+} from './constants';
 
 /**
  *
@@ -48,6 +47,8 @@ export function getAmpSkimlinksOptions(element, docInfo) {
     tracking: getTrackingStatus_(element),
     customTrackingId: getCustomTrackingId_(element),
     linkSelector: getLinkSelector_(element),
+    waypointBaseUrl: getWaypointBaseUrl(element),
+    config: getConfig_(element),
   };
 }
 
@@ -55,6 +56,7 @@ export function getAmpSkimlinksOptions(element, docInfo) {
  *
  * @param {!Element} element
  * @param {!Array<string>} internalDomains
+ * @return {!Array<string>}
  */
 function getExcludedDomains_(element, internalDomains) {
   let excludedDomains = []
@@ -81,7 +83,7 @@ function getExcludedDomains_(element, internalDomains) {
  */
 function getPubCode_(element) {
   const pubCode = element.getAttribute('publisher-code');
-  assertSkimOption(pubCode, errors.INVALID_PUBCODE);
+  assertSkimOption(pubCode, OPTIONS_ERRORS.INVALID_PUBCODE);
 
   return pubCode;
 }
@@ -95,7 +97,7 @@ function getTrackingStatus_(element) {
   const tracking = element.getAttribute('tracking');
   if (tracking) {
     const isValidValue = tracking === 'true' || tracking === 'false';
-    assertSkimOption(isValidValue, errors.INVALID_TRACKING_STATUS);
+    assertSkimOption(isValidValue, OPTIONS_ERRORS.INVALID_TRACKING_STATUS);
     return tracking === 'true';
   }
 
@@ -112,7 +114,7 @@ function getCustomTrackingId_(element) {
   if (customTrackingId) {
     // TODO: Check for alphanumerical + [_|] only.
     const isValidXcust = customTrackingId.length <= 50;
-    assertSkimOption(isValidXcust, errors.INVALID_XCUST);
+    assertSkimOption(isValidXcust, OPTIONS_ERRORS.INVALID_XCUST);
   }
 
   return customTrackingId;
@@ -145,4 +147,51 @@ function getInternalDomains_(docInfo) {
   }
 
   return internalDomains;
+}
+
+/**
+ * Use CNAME domain defined in "custom-redirect-domain" option if specified
+ * or "https://go.skimresources.com" by default.
+ * @param {!Element} element
+ * @return {string}
+ */
+function getWaypointBaseUrl(element) {
+  let customSubDomain = element.getAttribute('custom-redirect-domain');
+  if (customSubDomain) {
+    // Remove potential HTTP protocol and potential trailing slash.
+    customSubDomain = customSubDomain.replace(/^\/\/|^https?:\/\/|\/$/g, '');
+
+    // Use http since publisher CNAME to go.redirectingat.com does not support
+    // https.
+    return `http://${customSubDomain}`;
+  }
+
+  return WAYPOINT_BASE_URL;
+}
+
+/**
+ * @param {!Element} element
+ * @return {!Object}
+ */
+function getConfig_(element) {
+  try {
+    // Custom config is only used for e2e tests.
+    const customConfigJson = getChildJsonConfig(element);
+    // Warning: getChildJsonConfig returns an JSON object while
+    // DEFAULT_CONFIG is a normal object with keys that can be renamed
+    // by google closure compiler on the production build. Therefore, we
+    // are converting here the JSON object keys to the internal object keys.
+    return {
+      pageTrackingUrl: customConfigJson['pageTrackingUrl'] ||
+        DEFAULT_CONFIG.pageTrackingUrl,
+      linksTrackingUrl: customConfigJson['linksTrackingUrl'] ||
+        DEFAULT_CONFIG.linksTrackingUrl,
+      nonAffiliateTrackingUrl: customConfigJson['nonAffiliateTrackingUrl'] ||
+        DEFAULT_CONFIG.nonAffiliateTrackingUrl,
+      beaconUrl: customConfigJson['beaconUrl'] ||
+        DEFAULT_CONFIG.beaconUrl,
+    };
+  } catch (err) {
+    return DEFAULT_CONFIG;
+  }
 }

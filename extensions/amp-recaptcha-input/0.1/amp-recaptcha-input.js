@@ -30,7 +30,6 @@ import {
   installRecaptchaServiceForDoc,
   recaptchaServiceForDoc,
 } from './amp-recaptcha-service';
-import {isExperimentOn} from '../../../src/experiments';
 import {setStyles, toggle} from '../../../src/style';
 import {userAssert} from '../../../src/log';
 
@@ -56,16 +55,10 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
 
     /** @private {?Promise} */
     this.registerPromise_ = null;
-
-    /** @private {boolean} */
-    this.isExperimentEnabled_ = isExperimentOn(this.win, 'amp-recaptcha-input');
   }
 
   /** @override */
   buildCallback() {
-    if (!this.isExperimentEnabled_) {
-      return;
-    }
 
     this.sitekey_ = userAssert(
         this.element.getAttribute('data-sitekey'),

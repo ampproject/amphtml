@@ -56,7 +56,7 @@ const forbiddenTerms = {
       'extensions/amp-pinterest/0.1/amp-pinterest.css',
       'extensions/amp-pinterest/0.1/follow-button.js',
       'extensions/amp-pinterest/0.1/pin-widget.js',
-      'extensions/amp-pinterest/0.1/pinit-button.js',
+      'extensions/amp-pinterest/0.1/save-button.js',
     ],
   },
   '(^i-amp-|\\Wi-amp-)': {
@@ -104,6 +104,18 @@ const forbiddenTerms = {
       'build-system/app.js',
       'build-system/amp4test.js',
       'build-system/check-package-manager.js',
+      'build-system/pr-check/build.js',
+      'build-system/pr-check/build-targets.js',
+      'build-system/pr-check/checks.js',
+      'build-system/pr-check/dist.js',
+      'build-system/pr-check/dist-tests.js',
+      'build-system/pr-check/e2e-tests.js',
+      'build-system/pr-check/local-tests.js',
+      'build-system/pr-check/remote-tests.js',
+      'build-system/pr-check/utils.js',
+      'build-system/pr-check/validator-tests.js',
+      'build-system/pr-check/visual-diff-tests.js',
+      'build-system/pr-check/yarn-checks.js',
       'validator/nodejs/index.js', // NodeJs only.
       'validator/engine/parse-css.js',
       'validator/engine/validator-in-browser.js',
@@ -148,6 +160,7 @@ const forbiddenTerms = {
     message: 'This is only available in vendor config for ' +
         'temporary workarounds.',
     whitelist: [
+      'build-system/routes/analytics.js',
       'extensions/amp-analytics/0.1/config.js',
       'extensions/amp-analytics/0.1/requests.js',
     ],
@@ -168,6 +181,7 @@ const forbiddenTerms = {
       'src/service/action-impl.js',
       'extensions/amp-access/0.1/amp-access.js',
       'extensions/amp-form/0.1/amp-form.js',
+      'extensions/amp-viewer-assistance/0.1/amp-viewer-assistance.js',
     ],
   },
   'installActivityService': {
@@ -382,6 +396,7 @@ const forbiddenTerms = {
       'extensions/amp-access/0.1/amp-access.js',
       'extensions/amp-subscriptions/0.1/amp-subscriptions.js',
       'extensions/amp-experiment/0.1/variant.js',
+      'extensions/amp-experiment/1.0/variant.js',
       'extensions/amp-user-notification/0.1/amp-user-notification.js',
       'extensions/amp-consent/0.1/consent-state-manager.js',
     ],
@@ -396,6 +411,7 @@ const forbiddenTerms = {
   'isTrustedViewer': {
     message: requiresReviewPrivacy,
     whitelist: [
+      'extensions/amp-bind/0.1/bind-impl.js',
       'src/error.js',
       'src/utils/xhr-utils.js',
       'src/service/viewer-impl.js',
@@ -403,6 +419,7 @@ const forbiddenTerms = {
       'src/inabox/inabox-viewer.js',
       'src/service/cid-impl.js',
       'src/impression.js',
+      'extensions/amp-viewer-assistance/0.1/amp-viewer-assistance.js',
     ],
   },
   'eval\\(': {
@@ -797,7 +814,7 @@ const forbiddenTermsSrcInclusive = {
     'error.cancellation() may be applicable.',
     whitelist: [
       'extensions/amp-access/0.1/access-expr-impl.js',
-      'extensions/amp-animation/0.1/css-expr-impl.js',
+      'extensions/amp-animation/0.1/parsers/css-expr-impl.js',
       'extensions/amp-bind/0.1/bind-expr-impl.js',
     ],
   },
@@ -870,7 +887,7 @@ const forbiddenTermsSrcInclusive = {
     whitelist: [
       'ads/_a4a-config.js',
       'build-system/app.js',
-      'build-system/app-index/template.js',
+      'build-system/app-index/amphtml-helpers.js',
       'build-system/amp4test.js',
       'dist.3p/current/integration.js',
       'extensions/amp-iframe/0.1/amp-iframe.js',
@@ -897,6 +914,7 @@ const forbiddenTermsSrcInclusive = {
     message: 'use startsWith helper in src/string.js',
     whitelist: [
       'dist.3p/current/integration.js',
+      'build-system/app.js',
     ],
   },
   '\\.indexOf\\(.*===?.*\\.length': 'use endsWith helper in src/string.js',
@@ -912,6 +930,14 @@ const forbiddenTermsSrcInclusive = {
     message: 'Unsupported on IE; use trim() or a helper instead.',
     whitelist: [
       'validator/engine/validator.js',
+    ],
+  },
+  'process\\.env(\\.TRAVIS|\\[\\\'TRAVIS)': {
+    message: 'Do not directly use process.env.TRAVIS. Instead, add a ' +
+        'function to build-system/travis.js',
+    whitelist: [
+      'build-system/check-package-manager.js',
+      'build-system/travis.js',
     ],
   },
   '\\.matches\\(': 'Please use matches() helper in src/dom.js',

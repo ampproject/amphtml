@@ -15,6 +15,7 @@
  */
 
 import {FilterType} from './filters/filter';
+import {HostServices} from '../../../src/inabox/host-services';
 import {
   MessageType,
   deserializeMessage,
@@ -34,6 +35,7 @@ import {makeClickDelaySpec} from './filters/click-delay';
 import {makeInactiveElementSpec} from './filters/inactive-element';
 import {parseJson} from '../../../src/json';
 import {parseUrlDeprecated} from '../../../src/url';
+
 const TAG = 'amp-ad-exit';
 
 /**
@@ -95,25 +97,40 @@ export class AmpAdExit extends AMP.BaseElement {
     event = /** @type {!../../../src/service/action-impl.ActionEventDef} */(
       event);
 
+    event.preventDefault();
     if (!this.filter_(this.defaultFilters_, event) ||
         !this.filter_(target.filters, event)) {
       return;
     }
-    event.preventDefault();
     const substituteVariables =
         this.getUrlVariableRewriter_(args, event, target);
     if (target.trackingUrls) {
       target.trackingUrls.map(substituteVariables)
           .forEach(url => this.pingTrackingUrl_(url));
     }
-    openWindowDialog(this.win, substituteVariables(target.finalUrl), '_blank');
+    const finalUrl = substituteVariables(target.finalUrl);
+    if (HostServices.isAvailable(this.getAmpDoc())) {
+      HostServices.exitForDoc(this.getAmpDoc())
+          .then(exitService => exitService.openUrl(finalUrl))
+          .catch(error => {
+            // TODO: reporting on errors
+            dev().fine(TAG, 'ExitServiceError - fallback=' + error.fallback);
+            if (error.fallback) {
+              openWindowDialog(this.win, finalUrl, '_blank');
+            }
+          });
+    } else {
+      const clickTarget = (target.behaviors && target.behaviors.clickTarget
+      && target.behaviors.clickTarget == '_top') ? '_top' : '_blank';
+      openWindowDialog(this.win, finalUrl, clickTarget);
+    }
   }
 
 
   /**
    * @param {!Object<string, string|number|boolean>} args
    * @param {!../../../src/service/action-impl.ActionEventDef} event
-   * @param {!JsonObject} target
+   * @param {!NavigationTargetDef} target
    * @return {function(string): string}
    */
   getUrlVariableRewriter_(args, event, target) {
@@ -280,6 +297,7 @@ export class AmpAdExit extends AMP.BaseElement {
           filters:
               (target['filters'] || []).map(
                   f => this.userFilters_[f]).filter(f => f),
+          behaviors: target['behaviors'] || {},
         };
         // Build a map of {vendor, origin} for 3p custom variables in the config
         for (const customVar in target['vars']) {

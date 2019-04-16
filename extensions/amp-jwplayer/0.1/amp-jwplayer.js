@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
+import {addParamsToUrl} from '../../../src/url';
+import {dict} from '../../../src/utils/object';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeElement} from '../../../src/dom';
 import {userAssert} from '../../../src/log';
+
 
 class AmpJWPlayer extends AMP.BaseElement {
 
@@ -29,6 +32,18 @@ class AmpJWPlayer extends AMP.BaseElement {
 
     /** @private {string} */
     this.playerid_ = '';
+
+    /** @private {string} */
+    this.contentSearch_ = '';
+
+    /** @private {string} */
+    this.contentContextual_ = '';
+
+    /** @private {string} */
+    this.contentRecency_ = '';
+
+    /** @private {string} */
+    this.contentBackfill_ = '';
 
     /** @private {?HTMLIFrameElement} */
     this.iframe_ = null;
@@ -52,32 +67,51 @@ class AmpJWPlayer extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    const {element} = this;
     this.contentid_ = userAssert(
-        (this.element.getAttribute('data-playlist-id') ||
-      this.element.getAttribute('data-media-id')),
+        (element.getAttribute('data-playlist-id') ||
+        element.getAttribute('data-media-id')),
         'Either the data-media-id or the data-playlist-id ' +
-      'attributes must be specified for <amp-jwplayer> %s',
-        this.element);
+        'attributes must be specified for <amp-jwplayer> %s',
+        element);
 
     this.playerid_ = userAssert(
-        this.element.getAttribute('data-player-id'),
+        element.getAttribute('data-player-id'),
         'The data-player-id attribute is required for <amp-jwplayer> %s',
-        this.element);
+        element);
+
+    this.contentSearch_ = element.getAttribute('data-content-search') ||
+        '';
+    this.contentContextual_ = element.getAttribute('data-content-contextual') ||
+        '';
+    this.contentRecency_ = element.getAttribute('data-content-recency') ||
+        '';
+    this.contentBackfill_ = element.getAttribute('data-content-backfill') ||
+        '';
   }
 
 
   /** @override */
   layoutCallback() {
     const iframe = this.element.ownerDocument.createElement('iframe');
-    const src = 'https://content.jwplatform.com/players/' +
-      encodeURIComponent(this.contentid_) + '-' +
-      encodeURIComponent(this.playerid_) + '.html';
+    const cid = encodeURIComponent(this.contentid_);
+    const pid = encodeURIComponent(this.playerid_);
+    const queryParams = dict({
+      'search': this.getContextualVal() || undefined,
+      'contextual': this.contentContextual_ || undefined,
+      'recency': this.contentRecency_ || undefined,
+      'backfill': this.contentBackfill_ || undefined,
+    });
+
+    const baseUrl = `https://content.jwplatform.com/players/${cid}-${pid}.html`;
+    const src = addParamsToUrl(baseUrl, queryParams);
+
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');
     iframe.src = src;
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
-    this.iframe_ = iframe;
+    this.iframe_ = /** @type {HTMLIFrameElement} */ (iframe);
     return this.loadPromise(iframe);
   }
 
@@ -108,7 +142,7 @@ class AmpJWPlayer extends AMP.BaseElement {
     const placeholder = this.win.document.createElement('amp-img');
     this.propagateAttributes(['aria-label'], placeholder);
     placeholder.setAttribute('src', 'https://content.jwplatform.com/thumbs/' +
-        encodeURIComponent(this.contentid_) + '-720.jpg');
+      encodeURIComponent(this.contentid_) + '-720.jpg');
     placeholder.setAttribute('layout', 'fill');
     placeholder.setAttribute('placeholder', '');
     placeholder.setAttribute('referrerpolicy', 'origin');
@@ -121,8 +155,21 @@ class AmpJWPlayer extends AMP.BaseElement {
     }
     return placeholder;
   }
+  /**
+  *
+  */
+  getContextualVal() {
+    if (this.contentSearch_ === '__CONTEXTUAL__') {
+      const context = this.getAmpDoc().getHeadNode();
+      const ogTitleElement = context.querySelector('meta[property="og:title"]');
+      const ogTitle = ogTitleElement ?
+        ogTitleElement.getAttribute('content') : null;
+      const title = (context.querySelector('title') || {}).textContent;
+      return ogTitle || title || '';
+    }
+    return this.contentSearch_ ;
+  }
 }
-
 
 AMP.extension('amp-jwplayer', '0.1', AMP => {
   AMP.registerElement('amp-jwplayer', AmpJWPlayer);

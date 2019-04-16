@@ -36,7 +36,10 @@ tags: {  # amp-viewer-assistance (json)
     value: "amp-viewer-assistance"
     dispatch_key: NAME_VALUE_DISPATCH
   }
-  attrs: { name: "nonce" }
+  attrs: {
+    disabled_by: "transformed"
+    name: "nonce"
+  }
   attrs: {
     name: "type"
     mandatory: true

@@ -67,5 +67,10 @@ amp-dailymotion/0.1/test/validator-amp-dailymotion.html:55:0 The attribute 'data
 |  <amp-dailymotion data-videoid="jx2m8pp" width="500" height="281"
 |                   data-ui-highlight="fff">
 |  </amp-dailymotion>
+|
+|  <!-- invalid: dock without amp-video-docking extension -->
+|  <amp-dailymotion data-videoid="x2m8jpp" width="500" height="281" dock></amp-dailymotion>
+>> ^~~~~~~~~
+amp-dailymotion/0.1/test/validator-amp-dailymotion.html:65:0 The attribute 'dock' requires including the 'amp-video-docking' extension JavaScript. [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |  </body>
 |  </html>

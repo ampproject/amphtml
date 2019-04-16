@@ -22,7 +22,7 @@ import {
   MuteTask,
   PauseTask,
   PlayTask,
-  RewindTask,
+  SetCurrentTimeTask,
   SwapIntoDomTask,
   SwapOutOfDomTask,
   UnmuteTask,
@@ -30,15 +30,13 @@ import {
 } from './media-tasks';
 import {Services} from '../../../src/services';
 import {Sources} from './sources';
-import {
-  VideoServiceSignals,
-} from '../../../src/service/video-service-interface';
 import {ampMediaElementFor} from './utils';
 import {dev, devAssert} from '../../../src/log';
 import {findIndex} from '../../../src/utils/array';
 import {isConnectedNode} from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';
 import {toWin} from '../../../src/types';
+import {userInteractedWith} from '../../../src/video-interface';
 
 
 /** @const @enum {string} */
@@ -46,6 +44,12 @@ export const MediaType = {
   UNSUPPORTED: 'unsupported',
   AUDIO: 'audio',
   VIDEO: 'video',
+};
+
+/** @const @enum {string} */
+const MediaElementOrigin = {
+  PLACEHOLDER: 'placeholder',
+  POOL: 'pool',
 };
 
 /**
@@ -80,11 +84,16 @@ export let ElementDistanceFnDef;
  */
 let ElementTaskDef;
 
+/**
+ * @const {string}
+ */
+const PLACEHOLDER_ELEMENT_ID_PREFIX = 'i-amphtml-placeholder-media-';
+
 
 /**
  * @const {string}
  */
-const PLACEHOLDER_ELEMENT_ID_PREFIX = 'i-amphtml-media-';
+const POOL_ELEMENT_ID_PREFIX = 'i-amphtml-pool-media-';
 
 
 /**
@@ -97,6 +106,12 @@ const POOL_MEDIA_ELEMENT_PROPERTY_NAME = '__AMP_MEDIA_POOL_ID__';
  * @const {string}
  */
 const ELEMENT_TASK_QUEUE_PROPERTY_NAME = '__AMP_MEDIA_ELEMENT_TASKS__';
+
+
+/**
+ * @const {string}
+ */
+const MEDIA_ELEMENT_ORIGIN_PROPERTY_NAME = '__AMP_MEDIA_ELEMENT_ORIGIN__';
 
 
 /**
@@ -117,9 +132,6 @@ const instances = {};
  * @type {number}
  */
 let nextInstanceId = 0;
-
-
-let elId = 0;
 
 
 /**
@@ -178,10 +190,10 @@ export class MediaPool {
     this.placeholderEls_ = {};
 
     /**
-     * Counter used to produce unique IDs for media elements.
+     * Counter used to produce unique IDs for placeholder media elements.
      * @private {number}
      */
-    this.idCounter_ = 0;
+    this.placeholderIdCounter_ = 0;
 
     /**
      * Whether the media elements in this MediaPool instance have been "blessed"
@@ -241,6 +253,8 @@ export class MediaPool {
    * @private
    */
   initializeMediaPool_(maxCounts) {
+    let poolIdCounter = 0;
+
     this.forEachMediaType_(key => {
       const type = MediaType[key];
       const count = maxCounts[type] || 0;
@@ -267,7 +281,8 @@ export class MediaPool {
             // Use seed element at end of set to prevent wasting it.
             (i == 1 ? mediaElSeed : mediaElSeed.cloneNode(/* deep */ true));
         const sources = this.getDefaultSource_(type);
-        mediaEl.setAttribute('pool-element', elId++);
+        mediaEl.id = POOL_ELEMENT_ID_PREFIX + poolIdCounter++;
+        mediaEl[MEDIA_ELEMENT_ORIGIN_PROPERTY_NAME] = MediaElementOrigin.POOL;
         this.enqueueMediaElementTask_(mediaEl,
             new UpdateSourcesTask(sources));
         // TODO(newmuis): Check the 'error' field to see if MEDIA_ERR_DECODE
@@ -314,7 +329,18 @@ export class MediaPool {
    * @private
    */
   createPlaceholderElementId_() {
-    return PLACEHOLDER_ELEMENT_ID_PREFIX + this.idCounter_++;
+    return PLACEHOLDER_ELEMENT_ID_PREFIX + this.placeholderIdCounter_++;
+  }
+
+
+  /**
+   * @param {!DomElementDef} mediaElement
+   * @return {boolean}
+   * @private
+   */
+  isPoolMediaElement_(mediaElement) {
+    return mediaElement[MEDIA_ELEMENT_ORIGIN_PROPERTY_NAME] ===
+        MediaElementOrigin.POOL;
   }
 
   /**
@@ -567,13 +593,12 @@ export class MediaPool {
     const placeholderElId = poolMediaEl[REPLACED_MEDIA_PROPERTY_NAME];
     const placeholderEl = /** @type {!PlaceholderElementDef} */ (
       dev().assertElement(this.placeholderEls_[placeholderElId],
-          'No media element to put back into DOM after eviction.'));
+          `No media element ${placeholderElId} to put back into DOM after` +
+          'eviction.'));
+    poolMediaEl[REPLACED_MEDIA_PROPERTY_NAME] = null;
 
     const swapOutOfDom = this.enqueueMediaElementTask_(poolMediaEl,
-        new SwapOutOfDomTask(placeholderEl))
-        .then(() => {
-          poolMediaEl[REPLACED_MEDIA_PROPERTY_NAME] = null;
-        });
+        new SwapOutOfDomTask(placeholderEl));
 
     this.resetPoolMediaElementSource_(poolMediaEl);
     return swapOutOfDom;
@@ -684,14 +709,12 @@ export class MediaPool {
    *     successfully registered, or rejected otherwise.
    */
   register(domMediaEl) {
-    const mediaType = this.getMediaType_(domMediaEl);
-
     const parent = domMediaEl.parentNode;
-    if (parent.signals) {
+    if (parent && parent.signals) {
       this.trackAmpElementToBless_(/** @type {!AmpElement} */ (parent));
     }
 
-    if (this.isAllocatedMediaElement_(mediaType, domMediaEl)) {
+    if (this.isPoolMediaElement_(domMediaEl)) {
       // This media element originated from the media pool.
       return Promise.resolve();
     }
@@ -699,6 +722,8 @@ export class MediaPool {
     // Since this is not an existing pool media element, we can be certain that
     // it is a placeholder element.
     const placeholderEl = /** @type {!PlaceholderElementDef} */ (domMediaEl);
+    placeholderEl[MEDIA_ELEMENT_ORIGIN_PROPERTY_NAME] =
+        MediaElementOrigin.PLACEHOLDER;
 
     const id = placeholderEl.id || this.createPlaceholderElementId_();
     if (this.sources_[id] && this.placeholderEls_[id]) {
@@ -787,7 +812,7 @@ export class MediaPool {
           if (rewindToBeginning) {
             this.enqueueMediaElementTask_(
                 /** @type {!PoolBoundElementDef} */ (poolMediaEl),
-                new RewindTask());
+                new SetCurrentTimeTask({currentTime: 0}));
           }
         });
   }
@@ -800,6 +825,18 @@ export class MediaPool {
    *     specified media element has been successfully rewound.
    */
   rewindToBeginning(domMediaEl) {
+    return this.setCurrentTime(domMediaEl, 0 /** currentTime */);
+  }
+
+
+  /**
+   * Sets currentTime for a specified media element in the DOM.
+   * @param {!DomElementDef} domMediaEl The media element.
+   * @param {number} currentTime The time to seek to, in seconds.
+   * @return {!Promise} A promise that is resolved when the
+   *     specified media element has been successfully set to the given time.
+   */
+  setCurrentTime(domMediaEl, currentTime) {
     const mediaType = this.getMediaType_(domMediaEl);
     const poolMediaEl =
         this.getMatchingMediaElementFromPool_(mediaType, domMediaEl);
@@ -808,7 +845,8 @@ export class MediaPool {
       return Promise.resolve();
     }
 
-    return this.enqueueMediaElementTask_(poolMediaEl, new RewindTask());
+    return this.enqueueMediaElementTask_(
+        poolMediaEl, new SetCurrentTimeTask({currentTime}));
   }
 
 
@@ -864,9 +902,7 @@ export class MediaPool {
 
     const blessPromises = [];
 
-    (this.ampElementsToBless_ || []).forEach(ampEl => {
-      ampEl.signals().signal(VideoServiceSignals.USER_INTERACTED);
-    });
+    (this.ampElementsToBless_ || []).forEach(userInteractedWith);
 
     this.ampElementsToBless_ = null; // GC
 
@@ -874,13 +910,11 @@ export class MediaPool {
       blessPromises.push(this.bless_(mediaEl));
     });
 
-    return Promise.all(blessPromises)
-        .then(() => {
-          this.blessed_ = true;
-        }).catch(reason => {
-          dev().expectedError('AMP-STORY', 'Blessing all media failed: ',
-              reason);
-        });
+    return Promise.all(blessPromises).then(() => {
+      this.blessed_ = true;
+    }, reason => {
+      dev().expectedError('AMP-STORY', 'Blessing all media failed: ', reason);
+    });
   }
 
 

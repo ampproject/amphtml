@@ -7,25 +7,12 @@
     <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
     <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
     <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
+    <script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
+    <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
     <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
     <script async custom-element="amp-inputmask" src="https://cdn.ampproject.org/v0/amp-inputmask-0.1.js"></script>
-    <style amp-custom>
-    [contenteditable],
-    input[type=tel],
-    input[type=search],
-    input[type=text] {
-      padding: 5px;
-      font-size: 16px;
-      border: 1px solid lightgray;
-    }
-
-    [contenteditable]:focus,
-    input[type=tel]:focus,
-    input[type=search]:focus,
-    input[type=text]:focus {
-      border-bottom: 2px solid blue;
-    }
-    </style>
+    <style amp-custom></style>
 </head>
 <body>
   <h1>Input Masking</h1>
@@ -36,21 +23,36 @@
       target="_blank"
       id="form-a">
     <p>Credit card (<code>payment-card</code>)</p>
-    <input id="a-payment-card" name="payment-card" type="text" mask="payment-card" placeholder="Card number">
+    <input id="a-payment-card" name="payment-card" type="text" mask="payment-card" mask-output="alphanumeric" placeholder="Card number">
 
     <p>mm/dd/yyyy (<code>date-mm-dd-yyyy</code>)</p>
-    <input id="a-date1" name="date1" mask="date-mm-dd-yyyy" placeholder="mm/dd/yyyy" type="tel">
+    <input id="a-date1" name="date1" mask="date-mm-dd-yyyy" mask-output="alphanumeric" placeholder="mm/dd/yyyy" type="tel">
 
     <p>dd/mm/yyyy (<code>date-dd-mm-yyyy</code>)</p>
-    <input id="a-date2" name="date2" mask="date-dd-mm-yyyy" placeholder="dd/mm/yyyy" type="tel">
+    <input id="a-date2" name="date2" mask="date-dd-mm-yyyy" mask-output="alphanumeric" placeholder="dd/mm/yyyy" type="tel">
 
     <p>yyyy-mm-dd (<code>date-yyyy-mm-dd</code>)</p>
-    <input id="a-date3" name="date3" mask="date-yyyy-mm-dd" placeholder="yyyy-mm-dd" type="tel">
+    <input id="a-date3" name="date3" mask="date-yyyy-mm-dd" mask-output="alphanumeric" placeholder="yyyy-mm-dd" type="tel">
 
     <p>mm/yy (<code>date-mm-yy</code>)</p>
-    <input id="a-date4" name="date4" type="tel" mask="date-mm-yy" placeholder="MM/YY">
+    <input id="a-date4" name="date4" type="tel" mask="date-mm-yy" mask-output="alphanumeric" placeholder="MM/YY">
 
     <input type="submit">
+
+    <div submit-success>
+      <template type="amp-mustache">
+        <table>
+          <thead><tr><th>field</th><th>value</th><th>unmasked</th></tr></thead>
+          <tbody>
+            <tr><td>payment-card</td><td>{{payment-card}}</td><td>{{payment-card-unmasked}}</td></tr>
+            <tr><td>date1</td><td>{{date1}}</td><td>{{date1-unmasked}}</td></tr>
+            <tr><td>date2</td><td>{{date2}}</td><td>{{date2-unmasked}}</td></tr>
+            <tr><td>date3</td><td>{{date3}}</td><td>{{date3-unmasked}}</td></tr>
+            <tr><td>date4</td><td>{{date4}}</td><td>{{date4-unmasked}}</td></tr>
+          </tbody>
+        </table>
+      </template>
+    </div>
   </form>
 
   <h2>Custom Masks</h2>
@@ -65,23 +67,40 @@
     <input id="b-char" name="char" mask="L" type="text">
 
     <p>Phone 2</p>
-    <input id="b-phone2" name="b-phone2" type="tel" mask="000-0000 (000)000-0000 +1(000)000-0000" placeholder="+1(555)555-5555">
+    <input id="b-phone2" name="phone2" type="tel" mask="000-0000 (000)000-0000 +1(000)000-0000" mask-output="alphanumeric" placeholder="+1(555)555-5555">
     <p>Phone (German)</p>
-    <input id="b-phone3" name="b-phone3" type="tel" mask="+4\9(0000)000-0000 +4\9(000)000-0000 +4\9(000)00-0000 +4\9(000)00-000 +4\9(000)00-00 +4\9-000-000" placeholder="+49(0000)0000-0000">
+    <input id="b-phone3" name="phone3" type="tel" mask="+4\9(0000)000-0000 +4\9(000)000-0000 +4\9(000)00-0000 +4\9(000)00-000 +4\9(000)00-00 +4\9-000-000" mask-output="alphanumeric" placeholder="+49(0000)0000-0000">
 
     <p>US Postal Code</p>
-    <input id="b-post-code-us" name="post-code-us" mask="00000 00000-0000" placeholder="10024" type="tel">
+    <input id="b-post-code-us" name="post-code-us" mask="00000 00000-0000" mask-output="alphanumeric" placeholder="10024" type="tel">
 
     <p>Canadian Postal Code</p>
-    <input id="b-post-code-ca" name="post-code-ca" mask="L0L_0L0" placeholder="A1A 1A1" type="text">
+    <input id="b-post-code-ca" name="post-code-ca" mask="L0L_0L0" mask-output="alphanumeric" placeholder="A1A 1A1" type="text">
 
     <p>US or Canada postal code</p>
-    <input id="b-post-code-both" name="post-code-both" mask="00000-0000 L0L_0L0" placeholder="Post Code" type="text">
+    <input id="b-post-code-both" name="post-code-both" mask="00000-0000 L0L_0L0" mask-output="alphanumeric" placeholder="Post Code" type="text">
 
     <p>Dollars</p>
-    <input id="b-amount" name="amount" mask="$0.00 $00.00 $000.00 $0000.00 $00000.00 $000000.00" placeholder="$0.00" type="text">
+    <input id="b-amount" name="amount" mask="$0.00 $00.00 $000.00 $0000.00 $00000.00 $000000.00" mask-output="alphanumeric" placeholder="$0.00" type="text">
 
     <input type="submit">
+
+    <div submit-success>
+      <template type="amp-mustache">
+        <table>
+          <thead><tr><th>field</th><th>value</th><th>unmasked</th></tr></thead>
+          <tbody>
+            <tr><td>text</td><td>{{text}}</td><td>{{text-unmasked}}</td></tr>
+            <tr><td>phone2</td><td>{{phone2}}</td><td>{{phone2-unmasked}}</td></tr>
+            <tr><td>phone3</td><td>{{phone3}}</td><td>{{phone3-unmasked}}</td></tr>
+            <tr><td>post-code-us</td><td>{{post-code-us}}</td><td>{{post-code-us-unmasked}}</td></tr>
+            <tr><td>post-code-ca</td><td>{{post-code-ca}}</td><td>{{post-code-ca-unmasked}}</td></tr>
+            <tr><td>post-code-both</td><td>{{post-code-both}}</td><td>{{post-code-both-unmasked}}</td></tr>
+            <tr><td>amount</td><td>{{amount}}</td><td>{{amount-unmasked}}</td></tr>
+          </tbody>
+        </table>
+      </template>
+    </div>
   </form>
 
 
@@ -115,6 +134,10 @@
     <input id="c-card" name="card" mask="payment-card" placeholder="0000 0000 0000 0000" type="tel">
 
     <input type="submit">
+
+    <div submit-success>
+      Success!
+    </div>
   </form>
 
   <h2>Forms with initial values</h2>
@@ -186,11 +209,16 @@
       </tbody>
     </table>
     <input type="submit">
+
+    <div submit-success>
+      Success!
+    </div>
   </form>
 
 
   <h2>All <code>&lt;amp-story&gt;</code> locale phone numbers</h2>
   <p>Some have multiple formats possible</p>
+  <p>(may contain incorrect masks)</p>
   <form method="post"
       action-xhr="/form/echo-json/post"
       target="_blank"
@@ -205,7 +233,7 @@
         <tr><td>Bolivia</td><td><code>+591-0-000-0000</code></td><td><input type="tel" id="e-phone-bo" name="phone-bo" mask="+5\91-0-000-0000" data-cc="BO" data-cd="Bolivia"></td></tr>
         <tr><td>Brazil</td><td><code>+55-00-0000-0000</code></td><td><input type="tel" id="e-phone-br" name="phone-br" mask="+55-00-0000-0000 +55-00-00000-0000" data-cc="BR" data-cd="Brazil"></td></tr>
         <tr><td>Chile</td><td><code>+56-0-0000-0000</code></td><td><input type="tel" id="e-phone-cl" name="phone-cl" mask="+56-0-0000-0000" data-cc="CL" data-cd="Chile"></td></tr>
-        <tr><td>China (PRC)</td><td><code>+86(000)0000-0000</code></td><td><input type="tel" id="e-phone-cn" name="phone-cn" mask="+86(000)0000-0000 +86(000)0000-000 +86-00-00000-00000" data-cc="CN" data-cd="China (PRC)"></td></tr>
+        <tr><td>China (PRC)</td><td><code>+86(000)0000-0000</code></td><td><input type="tel" id="e-phone-cn" name="phone-cn" mask="+86(000)0000-000 +86(000)0000-0000 +86-00-00000-00000" data-cc="CN" data-cd="China (PRC)"></td></tr>
         <tr><td>Colombia</td><td><code>+57(000)000-0000</code></td><td><input type="tel" id="e-phone-co" name="phone-co" mask="+57(000)000-0000" data-cc="CO" data-cd="Colombia"></td></tr>
         <tr><td>Costa Rica</td><td><code>+506-0000-0000</code></td><td><input type="tel" id="e-phone-cr" name="phone-cr" mask="+506-0000-0000" data-cc="CR" data-cd="Costa Rica"></td></tr>
         <tr><td>Cuba</td><td><code>+53-0-000-0000</code></td><td><input type="tel" id="e-phone-cu" name="phone-cu" mask="+53-0-000-0000" data-cc="CU" data-cd="Cuba"></td></tr>
@@ -217,14 +245,14 @@
         <tr><td>Guatemala</td><td><code>+502-0-000-0000</code></td><td><input type="tel" id="e-phone-gt" name="phone-gt" mask="+502-0-000-0000" data-cc="GT" data-cd="Guatemala"></td></tr>
         <tr><td>Honduras</td><td><code>+504-0000-0000</code></td><td><input type="tel" id="e-phone-hn" name="phone-hn" mask="+504-0000-0000" data-cc="HN" data-cd="Honduras"></td></tr>
         <tr><td>India</td><td><code>+91(0000)000-000</code></td><td><input type="tel" id="e-phone-in" name="phone-in" mask="+\91(0000)000-000" data-cc="IN" data-cd="India"></td></tr>
-        <tr><td>Indonesia</td><td><code>+62(800)000-0000</code></td><td><input type="tel" id="e-phone-id" name="phone-id" mask="+62(800)000-0000 +62-00-000-00 +62-00-000-000 +62-00-000-0000 +62(800)000-000 +62(800)000-00-000" data-cc="ID" data-cd="Indonesia"></td></tr>
+        <tr><td>Indonesia</td><td><code>+62(800)000-0000</code></td><td><input type="tel" id="e-phone-id" name="phone-id" mask="+62-00-000-00 +62-00-000-000 +62-00-000-0000 +62(800)000-000 +62(800)000-0000 +62(800)000-00-000" data-cc="ID" data-cd="Indonesia"></td></tr>
         <tr><td>Iraq</td><td><code>+964(000)000-0000</code></td><td><input type="tel" id="e-phone-iq" name="phone-iq" mask="+\964(000)000-0000" data-cc="IQ" data-cd="Iraq"></td></tr>
-        <tr><td>Italy</td><td><code>+39(000)0000-00-00</code></td><td><input type="tel" id="e-phone-it" name="phone-it" mask=" +3\9(000)0000-00-00 +3\9(000)0000-000 +3\9(000)000-000 +3\9(000)00-000 +3\9(000)00-00 +3\9(00)00-00 +3\9(300)000-00-00 +3\9(300)00-00-00" data-cc="IT" data-cd="Italy"></td></tr>
+        <tr><td>Italy</td><td><code>+39(000)0000-00-00</code></td><td><input type="tel" id="e-phone-it" name="phone-it" mask="+3\9(00)00-00 +3\9(000)00-00 +3\9(000)00-000 +3\9(000)000-000 +3\9(000)0000-000 +3\9(300)00-00-00 +3\9(300)000-00-00 +3\9(000)0000-00-00" data-cc="IT" data-cd="Italy"></td></tr>
         <tr><td>Japan</td><td><code>+81(000)000-000</code></td><td><input type="tel" id="e-phone-jp" name="phone-jp" mask="+81(000)000-000 +81-00-0000-0000" data-cc="JP" data-cd="Japan"></td></tr>
         <tr><td>Jordan</td><td><code>+962-0-0000-0000</code></td><td><input type="tel" id="e-phone-jo" name="phone-jo" mask="+\962-0-0000-0000" data-cc="JO" data-cd="Jordan"></td></tr>
         <tr><td>Korea (South)</td><td><code>+82-00-000-0000</code></td><td><input type="tel" id="e-phone-kr" name="phone-kr" mask="+82-00-000-0000" data-cc="KR" data-cd="Korea (South)"></td></tr>
         <tr><td>Kuwait</td><td><code>+965-0000-0000</code></td><td><input type="tel" id="e-phone-kw" name="phone-kw" mask="+\965-0000-0000" data-cc="KW" data-cd="Kuwait"></td></tr>
-        <tr><td>Lebanon</td><td><code>+961-00-000-000</code></td><td><input type="tel" id="e-phone-lb" name="phone-lb" mask="+\961-00-000-000 +\961-0-000-000" data-cc="LB" data-cd="Lebanon"></td></tr>
+        <tr><td>Lebanon</td><td><code>+961-00-000-000</code></td><td><input type="tel" id="e-phone-lb" name="phone-lb" mask="+\961-0-000-000 +\961-00-000-000" data-cc="LB" data-cd="Lebanon"></td></tr>
         <tr><td>Libya</td><td><code>+218-00-000-000</code></td><td><input type="tel" id="e-phone-ly" name="phone-ly" mask="+218-00-000-000 +218-21-000-0000" data-cc="LY" data-cd="Libya"></td></tr>
         <tr><td>Mexico</td><td><code>+52-00-00-0000</code></td><td><input type="tel" id="e-phone-mx" name="phone-mx" mask="+52-00-00-0000 +52(000)000-0000" data-cc="MX" data-cd="Mexico"></td></tr>
         <tr><td>Morocco</td><td><code>+212-00-0000-000</code></td><td><input type="tel" id="e-phone-ma" name="phone-ma" mask="+212-00-0000-000" data-cc="MA" data-cd="Morocco"></td></tr>
@@ -238,22 +266,489 @@
         <tr><td>Portugal</td><td><code>+351-00-000-0000</code></td><td><input type="tel" id="e-phone-pt" name="phone-pt" mask="+351-00-000-0000" data-cc="PT" data-cd="Portugal"></td></tr>
         <tr><td>Qatar</td><td><code>+974-0000-0000</code></td><td><input type="tel" id="e-phone-qa" name="phone-qa" mask="+\974-0000-0000" data-cc="QA" data-cd="Qatar"></td></tr>
         <tr><td>Russia</td><td><code>+7(000)000-00-00</code></td><td><input type="tel" id="e-phone-ru" name="phone-ru" mask="+7(000)000-00-00" data-cc="RU" data-cd="Russia"></td></tr>
-        <tr><td>Saudi Arabia</td><td><code>+966-5-0000-0000</code></td><td><input type="tel" id="e-phone-sa" name="phone-sa" mask="+\966-5-0000-0000 +\966-0-000-000" data-cc="SA" data-cd="Saudi Arabia"></td></tr>
+        <tr><td>Saudi Arabia</td><td><code>+966-5-0000-0000</code></td><td><input type="tel" id="e-phone-sa" name="phone-sa" mask="+\966-0-000-000 +\966-5-0000-0000" data-cc="SA" data-cd="Saudi Arabia"></td></tr>
         <tr><td>Spain</td><td><code>+34(000)000-000</code></td><td><input type="tel" id="e-phone-es" name="phone-es" mask="+34(000)000-000" data-cc="ES" data-cd="Spain"></td></tr>
         <tr><td>Syrian Arab Republic</td><td><code>+963-00-0000-000</code></td><td><input type="tel" id="e-phone-sy" name="phone-sy" mask="+\963-00-0000-000" data-cc="SY" data-cd="Syrian Arab Republic"></td></tr>
         <tr><td>Taiwan</td><td><code>+886-0000-0000</code></td><td><input type="tel" id="e-phone-tw" name="phone-tw" mask="+886-0000-0000 +886-0-0000-0000" data-cc="TW" data-cd="Taiwan"></td></tr>
         <tr><td>Tunisia</td><td><code>+216-00-000-000</code></td><td><input type="tel" id="e-phone-tn" name="phone-tn" mask="+216-00-000-000" data-cc="TN" data-cd="Tunisia"></td></tr>
         <tr><td>Turkey</td><td><code>+90(000)000-0000</code></td><td><input type="tel" id="e-phone-tr" name="phone-tr" mask="+\90(000)000-0000" data-cc="TR" data-cd="Turkey"></td></tr>
-        <tr><td>United Arab Emirates</td><td><code>+971-50-000-0000</code></td><td><input type="tel" id="e-phone-ae" name="phone-ae" mask="+\971-50-000-0000 +\971-0-000-0000" data-cc="AE" data-cd="United Arab Emirates"></td></tr>
+        <tr><td>United Arab Emirates</td><td><code>+971-50-000-0000</code></td><td><input type="tel" id="e-phone-ae" name="phone-ae" mask="+\971-0-000-0000 +\971-50-000-0000" data-cc="AE" data-cd="United Arab Emirates"></td></tr>
         <tr><td>United Kingdom<!-- https://www.area-codes.org.uk/more/about-uk-area-codes.php --></td><td><code>+44-00-0000-0000</code></td><td><input type="tel" id="e-phone-uk" name="phone-uk" mask="+44-00-0000-0000" data-cc="UK" data-cd="United Kingdom"></td></tr>
         <tr><td>Uruguay</td><td><code>+598-0-000-00-00</code></td><td><input type="tel" id="e-phone-uy" name="phone-uy" mask="+5\98-0-000-00-00" data-cc="UY" data-cd="Uruguay"></td></tr>
-        <tr><td>USA and Canada</td><td><code>+1(000)000-0000</code></td><td><input type="tel" id="e-phone-us" name="phone-us" mask="+1(000)000-0000" data-cd="USA and Canada"></td></tr>
+        <tr><td>USA and Canada</td><td><code>+1(000)000-0000</code></td><td><input type="tel" id="e-phone-us" name="phone-us" mask="+1(000)000-0000" data-cc="US" data-cd="USA and Canada"></td></tr>
         <tr><td>Venezuela</td><td><code>+58(000)000-0000</code></td><td><input type="tel" id="e-phone-ve" name="phone-ve" mask="+58(000)000-0000" data-cc="VE" data-cd="Venezuela"></td></tr>
-        <tr><td>Vietnam</td><td><code>+84(000)0000-000</code></td><td><input type="tel" id="e-phone-vn" name="phone-vn" mask="+84(000)0000-000 +84-00-0000-000" data-cc="VN" data-cd="Vietnam"></td></tr>
-        <tr><td>Yemen</td><td><code>+967-000-000-000</code></td><td><input type="tel" id="e-phone-ye" name="phone-ye" mask="+\967-000-000-000 +\967-0-000-000 +\967-00-000-000" data-cc="YE" data-cd="Yemen"></td></tr>
+        <tr><td>Vietnam</td><td><code>+84(000)0000-000</code></td><td><input type="tel" id="e-phone-vn" name="phone-vn" mask="+84-00-0000-000 +84(000)0000-000" data-cc="VN" data-cd="Vietnam"></td></tr>
+        <tr><td>Yemen</td><td><code>+967-000-000-000</code></td><td><input type="tel" id="e-phone-ye" name="phone-ye" mask="+\967-0-000-000 +\967-00-000-000 +\967-000-000-000" data-cc="YE" data-cd="Yemen"></td></tr>
       </tbody>
     </table>
     <input type="submit">
+
+    <div submit-success>
+      Success!
+    </div>
+  </form>
+
+  <h2>Combined Phone Form example (amp-list)</h2>
+  <p>(may contain incorrect masks)</p>
+  <amp-state id="bound">
+    <script type="application/json">
+    false
+    </script>
+  </amp-state>
+  <amp-state id="phoneNumber">
+    <script type="application/json">
+    ""
+    </script>
+  </amp-state>
+  <amp-state id="doubleBufferPhoneNumber">
+    <script type="application/json">
+    ""
+    </script>
+  </amp-state>
+  <amp-state id="countryCode">
+    <script type="application/json">
+    "US"
+    </script>
+  </amp-state>
+  <amp-state id="phoneCodes">
+    <script type="application/json">
+[
+  {
+    "placeholder": "+213-00-000-0000",
+    "mask": "+213-00-000-0000",
+    "cc": "DZ",
+    "cd": "Algeria"
+  },
+  {
+    "placeholder": "+54(000)000-0000",
+    "mask": "+54(000)000-0000",
+    "cc": "AR",
+    "cd": "Argentina"
+  },
+  {
+    "placeholder": "+973-0000-0000",
+    "mask": "+\\973-0000-0000",
+    "cc": "BH",
+    "cd": "Bahrain"
+  },
+  {
+    "placeholder": "+501-000-0000",
+    "mask": "+501-000-0000",
+    "cc": "BZ",
+    "cd": "Belize"
+  },
+  {
+    "placeholder": "+591-0-000-0000",
+    "mask": "+5\\91-0-000-0000",
+    "cc": "BO",
+    "cd": "Bolivia"
+  },
+  {
+    "placeholder": "+55-00-00000-0000",
+    "mask": "+55-00-0000-0000 +55-00-00000-0000",
+    "cc": "BR",
+    "cd": "Brazil"
+  },
+  {
+    "placeholder": "+56-0-0000-0000",
+    "mask": "+56-0-0000-0000",
+    "cc": "CL",
+    "cd": "Chile"
+  },
+  {
+    "placeholder": "+86-00-00000-00000",
+    "mask": "+86(000)0000-000 +86(000)0000-0000 +86-00-00000-00000",
+    "cc": "CN",
+    "cd": "China (PRC)"
+  },
+  {
+    "placeholder": "+57(000)000-0000",
+    "mask": "+57(000)000-0000",
+    "cc": "CO",
+    "cd": "Colombia"
+  },
+  {
+    "placeholder": "+506-0000-0000",
+    "mask": "+506-0000-0000",
+    "cc": "CR",
+    "cd": "Costa Rica"
+  },
+  {
+    "placeholder": "+53-0-000-0000",
+    "mask": "+53-0-000-0000",
+    "cc": "CU",
+    "cd": "Cuba"
+  },
+  {
+    "placeholder": "+593-00-000-0000",
+    "mask": "+5\\93-0-000-0000 +5\\93-00-000-0000",
+    "cc": "EC",
+    "cd": "Ecuador"
+  },
+  {
+    "placeholder": "+20(000)000-0000",
+    "mask": "+20(000)000-0000",
+    "cc": "EG",
+    "cd": "Egypt"
+  },
+  {
+    "placeholder": "+503-00-00-0000",
+    "mask": "+503-00-00-0000",
+    "cc": "SV",
+    "cd": "El Salvador"
+  },
+  {
+    "placeholder": "+33-0-00-00-00-00",
+    "mask": "+33-0-00-00-00-00",
+    "cc": "FR",
+    "cd": "France"
+  },
+  {
+    "placeholder": "+49(0000)000-0000",
+    "mask": "+4\\9-000-000 +4\\9(000)00-00 +4\\9(000)00-000 +4\\9(000)00-0000 +4\\9(000)000-0000 +4\\9(0000)000-0000",
+    "cc": "DE",
+    "cd": "Germany"
+  },
+  {
+    "placeholder": "+502-0-000-0000",
+    "mask": "+502-0-000-0000",
+    "cc": "GT",
+    "cd": "Guatemala"
+  },
+  {
+    "placeholder": "+504-0000-0000",
+    "mask": "+504-0000-0000",
+    "cc": "HN",
+    "cd": "Honduras"
+  },
+  {
+    "placeholder": "+91(0000)000-000",
+    "mask": "+\\91(0000)000-000",
+    "cc": "IN",
+    "cd": "India"
+  },
+  {
+    "placeholder": "+62(800)000-00-000",
+    "mask": "+62-00-000-00 +62-00-000-000 +62-00-000-0000 +62(800)000-000 +62(800)000-0000 +62(800)000-00-000",
+    "cc": "ID",
+    "cd": "Indonesia"
+  },
+  {
+    "placeholder": "+964(000)000-0000",
+    "mask": "+\\964(000)000-0000",
+    "cc": "IQ",
+    "cd": "Iraq"
+  },
+  {
+    "placeholder": "+39(000)0000-00-00",
+    "mask": "+3\\9(00)00-00 +3\\9(000)00-00 +3\\9(000)00-000 +3\\9(000)000-000 +3\\9(000)0000-000 +3\\9(300)00-00-00 +3\\9(300)000-00-00 +3\\9(000)0000-00-00",
+    "cc": "IT",
+    "cd": "Italy"
+  },
+  {
+    "placeholder": "+81-00-0000-0000",
+    "mask": "+81(000)000-000 +81-00-0000-0000",
+    "cc": "JP",
+    "cd": "Japan"
+  },
+  {
+    "placeholder": "+962-0-0000-0000",
+    "mask": "+\\962-0-0000-0000",
+    "cc": "JO",
+    "cd": "Jordan"
+  },
+  {
+    "placeholder": "+82-00-000-0000",
+    "mask": "+82-00-000-0000",
+    "cc": "KR",
+    "cd": "Korea (South)"
+  },
+  {
+    "placeholder": "+965-0000-0000",
+    "mask": "+\\965-0000-0000",
+    "cc": "KW",
+    "cd": "Kuwait"
+  },
+  {
+    "placeholder": "+961-00-000-000",
+    "mask": "+\\961-0-000-000 +\\961-00-000-000",
+    "cc": "LB",
+    "cd": "Lebanon"
+  },
+  {
+    "placeholder": "+218-21-000-0000",
+    "mask": "+218-00-000-000 +218-21-000-0000",
+    "cc": "LY",
+    "cd": "Libya"
+  },
+  {
+    "placeholder": "+52(000)000-0000",
+    "mask": "+52-00-00-0000 +52(000)000-0000",
+    "cc": "MX",
+    "cd": "Mexico"
+  },
+  {
+    "placeholder": "+212-00-0000-000",
+    "mask": "+212-00-0000-000",
+    "cc": "MA",
+    "cd": "Morocco"
+  },
+  {
+    "placeholder": "+31-00-000-0000",
+    "mask": "+31-00-000-0000",
+    "cc": "NL",
+    "cd": "Netherlands"
+  },
+  {
+    "placeholder": "+505-0000-0000",
+    "mask": "+505-0000-0000",
+    "cc": "NI",
+    "cd": "Nicaragua"
+  },
+  {
+    "placeholder": "+47(000)00-000",
+    "mask": "+47(000)00-000",
+    "cc": "NO",
+    "cd": "Norway"
+  },
+  {
+    "placeholder": "+968-00-000-000",
+    "mask": "+\\968-00-000-000",
+    "cc": "OM",
+    "cd": "Oman"
+  },
+  {
+    "placeholder": "+507-000-0000",
+    "mask": "+507-000-0000",
+    "cc": "PA",
+    "cd": "Panama"
+  },
+  {
+    "placeholder": "+595(000)000-000",
+    "mask": "+5\\95(000)000-000",
+    "cc": "PY",
+    "cd": "Paraguay"
+  },
+  {
+    "placeholder": "+51(000)000-000",
+    "mask": "+51(000)000-000",
+    "cc": "PE",
+    "cd": "Peru"
+  },
+  {
+    "placeholder": "+351-00-000-0000",
+    "mask": "+351-00-000-0000",
+    "cc": "PT",
+    "cd": "Portugal"
+  },
+  {
+    "placeholder": "+974-0000-0000",
+    "mask": "+\\974-0000-0000",
+    "cc": "QA",
+    "cd": "Qatar"
+  },
+  {
+    "placeholder": "+7(000)000-00-00",
+    "mask": "+7(000)000-00-00",
+    "cc": "RU",
+    "cd": "Russia"
+  },
+  {
+    "placeholder": "+966-5-0000-0000",
+    "mask": "+\\966-0-000-000 +\\966-5-0000-0000",
+    "cc": "SA",
+    "cd": "Saudi Arabia"
+  },
+  {
+    "placeholder": "+34(000)000-000",
+    "mask": "+34(000)000-000",
+    "cc": "ES",
+    "cd": "Spain"
+  },
+  {
+    "placeholder": "+963-00-0000-000",
+    "mask": "+\\963-00-0000-000",
+    "cc": "SY",
+    "cd": "Syrian Arab Republic"
+  },
+  {
+    "placeholder": "+886-0-0000-0000",
+    "mask": "+886-0000-0000 +886-0-0000-0000",
+    "cc": "TW",
+    "cd": "Taiwan"
+  },
+  {
+    "placeholder": "+216-00-000-000",
+    "mask": "+216-00-000-000",
+    "cc": "TN",
+    "cd": "Tunisia"
+  },
+  {
+    "placeholder": "+90(000)000-0000",
+    "mask": "+\\90(000)000-0000",
+    "cc": "TR",
+    "cd": "Turkey"
+  },
+  {
+    "placeholder": "+971-50-000-0000",
+    "mask": "+\\971-0-000-0000 +\\971-50-000-0000",
+    "cc": "AE",
+    "cd": "United Arab Emirates"
+  },
+  {
+    "placeholder": "+44-00-0000-0000",
+    "mask": "+44-00-0000-0000",
+    "cc": "UK",
+    "cd": "United Kingdom"
+  },
+  {
+    "placeholder": "+598-0-000-00-00",
+    "mask": "+5\\98-0-000-00-00",
+    "cc": "UY",
+    "cd": "Uruguay"
+  },
+  {
+    "placeholder": "+1(000)000-0000",
+    "mask": "+1(000)000-0000",
+    "cc": "US",
+    "cd": "USA and Canada"
+  },
+  {
+    "placeholder": "+58(000)000-0000",
+    "mask": "+58(000)000-0000",
+    "cc": "VE",
+    "cd": "Venezuela"
+  },
+  {
+    "placeholder": "+84(000)0000-000",
+    "mask": "+84-00-0000-000 +84(000)0000-000",
+    "cc": "VN",
+    "cd": "Vietnam"
+  },
+  {
+    "placeholder": "+967-000-000-000",
+    "mask": "+\\967-0-000-000 +\\967-00-000-000 +\\967-000-000-000",
+    "cc": "YE",
+    "cd": "Yemen"
+  }
+]
+    </script>
+  </amp-state>
+  <select on="change: AMP.setState({countryCode: event.value, bound: true, doubleBufferPhoneNumber: phoneNumber})">
+    <option value="DZ">Algeria</option>
+    <option value="AR">Argentina</option>
+    <option value="BH">Bahrain</option>
+    <option value="BZ">Belize</option>
+    <option value="BO">Bolivia</option>
+    <option value="BR">Brazil</option>
+    <option value="US">Canada</option>
+    <option value="CL">Chile</option>
+    <option value="CN">China (PRC)</option>
+    <option value="CO">Colombia</option>
+    <option value="CR">Costa Rica</option>
+    <option value="CU">Cuba</option>
+    <option value="EC">Ecuador</option>
+    <option value="EG">Egypt</option>
+    <option value="SV">El Salvador</option>
+    <option value="FR">France</option>
+    <option value="DE">Germany</option>
+    <option value="GT">Guatemala</option>
+    <option value="HN">Honduras</option>
+    <option value="IN">India</option>
+    <option value="ID">Indonesia</option>
+    <option value="IQ">Iraq</option>
+    <option value="IT">Italy</option>
+    <option value="JP">Japan</option>
+    <option value="JO">Jordan</option>
+    <option value="KR">Korea (South)</option>
+    <option value="KW">Kuwait</option>
+    <option value="LB">Lebanon</option>
+    <option value="LY">Libya</option>
+    <option value="MX">Mexico</option>
+    <option value="MA">Morocco</option>
+    <option value="NL">Netherlands</option>
+    <option value="NI">Nicaragua</option>
+    <option value="NO">Norway</option>
+    <option value="OM">Oman</option>
+    <option value="PA">Panama</option>
+    <option value="PY">Paraguay</option>
+    <option value="PE">Peru</option>
+    <option value="PT">Portugal</option>
+    <option value="QA">Qatar</option>
+    <option value="RU">Russia</option>
+    <option value="SA">Saudi Arabia</option>
+    <option value="ES">Spain</option>
+    <option value="SY">Syrian Arab Republic</option>
+    <option value="TW">Taiwan</option>
+    <option value="TN">Tunisia</option>
+    <option value="TR">Turkey</option>
+    <option value="AE">United Arab Emirates</option>
+    <option value="UK">United Kingdom</option>
+    <option value="UY">Uruguay</option>
+    <option value="US" selected>USA</option>
+    <option value="VE">Venezuela</option>
+    <option value="VN">Vietnam</option>
+    <option value="YE">Yemen</option>
+  </select>
+  <form method="post"
+      action-xhr="/form/echo-json/post"
+      target="_blank"
+      id="form-g">
+    <amp-layout [hidden]="bound" layout="fixed-height" height="60">
+      <table>
+        <tbody>
+          <tr>
+            <td>Phone (United States)</td>
+            <td><input
+              on="input-throttled: AMP.setState({phoneNumber: event.value})"
+              id="g-phone-nobind"
+              name="phone"
+              mask="+1(000)000-0000"
+              mask-output="alphanumeric"
+              placeholder="+1(000)000-0000"
+              [disabled]="bound"
+              type="tel">
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <input type="submit">
+    </amp-layout>
+    <amp-list hidden [hidden]="!bound" layout="fixed-height" height="60" items="." [src]="phoneCodes.filter(x => x.cc == countryCode)[0]">
+      <template type="amp-mustache">
+        <table>
+          <tbody>
+            <tr>
+              <td>Phone ({{cd}})</td>
+              <td><input
+                on="input-throttled: AMP.setState({phoneNumber: event.value})"
+                id="g-phone"
+                name="phone"
+                mask="{{mask}}"
+                mask-output="alphanumeric"
+                placeholder="{{placeholder}}"
+                disabled
+                [disabled]="!bound"
+                [value]="doubleBufferPhoneNumber"
+                type="tel">
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <input type="submit">
+      </template>
+    </amp-list>
+
+    <div submit-success>
+      <template type="amp-mustache">
+        <table>
+          <thead><tr><th>field</th><th>value</th><th>unmasked</th></tr></thead>
+          <tbody>
+            <tr><td>phone</td><td>{{phone}}</td><td>{{phone-unmasked}}</td></tr>
+          </tbody>
+        </table>
+      </template>
+    </div>
   </form>
 
   <!-- TODO(cvializ) -->

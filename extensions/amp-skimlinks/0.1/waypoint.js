@@ -15,7 +15,6 @@
  */
 
 import {
-  AFFILIATION_API,
   PLATFORM_NAME,
   XCUST_ATTRIBUTE_NAME,
 } from './constants';
@@ -31,10 +30,11 @@ import {dict} from '../../../src/utils/object';
 export class Waypoint {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!Object} skimOptions
    * @param {!./tracking.Tracking} tracking
    * @param {string} referrer
    */
-  constructor(ampdoc, tracking, referrer) {
+  constructor(ampdoc, skimOptions, tracking, referrer) {
     /** @private {?./tracking.Tracking} */
     this.tracking_ = tracking;
 
@@ -46,6 +46,9 @@ export class Waypoint {
 
     /** @private {string} */
     this.timezone_ = `${new Date().getTimezoneOffset()}`;
+
+    /** @private {!Object} */
+    this.skimOptions_ = skimOptions;
   }
 
   /**
@@ -82,7 +85,7 @@ export class Waypoint {
     if (xcust) {
       queryParams['xcust'] = xcust;
     }
-
-    return addParamsToUrl(AFFILIATION_API, /** @type {!JsonObject} */ (queryParams));
+    const affiliationUrl = this.skimOptions_.waypointBaseUrl;
+    return addParamsToUrl(affiliationUrl, /** @type {!JsonObject} */ (queryParams));
   }
 }

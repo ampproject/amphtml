@@ -50,6 +50,11 @@ const TAG = 'amp-position-observer';
  */
 const RESIZE_THRESHOLD = 150;
 
+/**
+ * @typedef {!../../../src/service/position-observer/position-observer-worker.PositionInViewportEntryDef}
+ */
+let PositionInViewportEntryDef;
+
 export class AmpVisibilityObserver extends AMP.BaseElement {
 
   /** @param {!AmpElement} element */
@@ -59,11 +64,14 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
     /** @private {?../../../src/service/action-impl.ActionService} */
     this.action_ = null;
 
-    /** @private {boolean} */
-    this.isVisible_ = false;
-
     /** @private {?../../../src/service/position-observer/position-observer-impl.PositionObserver} */
     this.positionObserver_ = null;
+
+    /** @private {?../../../src/service/viewport/viewport-impl.Viewport} */
+    this.viewport_ = null;
+
+    /** @private {boolean} */
+    this.isVisible_ = false;
 
     /** @private {number} */
     this.topRatio_ = 0;
@@ -95,6 +103,9 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
     /** @private {number} */
     this.scrollProgress_ = 0;
 
+    /** @private {number} */
+    this.remainingScrollToExit_ = 0;
+
     /** @private {boolean} */
     this.runOnce_ = false;
 
@@ -119,11 +130,13 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
   init_() {
     this.parseAttributes_();
     this.action_ = Services.actionServiceForDoc(this.element);
+    this.viewport_ = Services.viewportForDoc(this.element);
     this.maybeInstallPositionObserver_();
     this.getAmpDoc().whenReady().then(() => {
       const scene = this.discoverScene_();
       this.positionObserver_.observe(scene, PositionObserverFidelity.HIGH,
-          this.positionChanged_.bind(this)
+          /** @type {function(?PositionInViewportEntryDef)} */ (
+            this.positionChanged_.bind(this))
       );
     });
   }
@@ -154,19 +167,21 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
    * This event is triggered only when position-observer triggers which is
    * at most every animation frame.
    *
-   * @param {!../../../src/layout-rect.LayoutRectDef} adjustedViewportRect viewport rect adjusted for margins.
    * @private
    */
-  triggerScroll_(adjustedViewportRect) {
+  triggerScroll_() {
+    const scrolltop = this.viewport_.getScrollTop();
+    const positionObserverData = dict({
+      'start-scroll-offset': scrolltop,
+      'end-scroll-offset': scrolltop + this.remainingScrollToExit_,
+      'initial-inview-percent': this.scrollProgress_,
+    });
     const name = 'scroll';
     const event = createCustomEvent(this.win, `${TAG}.${name}`,
-        dict({'percent': this.scrollProgress_}));
-    event.additionalViewportData = {
-      'top-ratio': this.topRatio_,
-      'bottom-ratio': this.bottomRatio_,
-      'top-margin': adjustedViewportRect.top,
-      'bottom-margin': adjustedViewportRect.bottom,
-    };
+        dict({
+          'percent': this.scrollProgress_,
+          'positionObserverData': positionObserverData}
+        ));
     this.action_.trigger(this.element, name, event, ActionTrust.LOW);
     // TODO(nainar): We want to remove the position observer if the scroll
     // event is only used by the AnimationWorklet codepath of amp-animation.
@@ -180,7 +195,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
   /**
    * Called by position observer.
    * It calculates visibility and progress, and triggers the appropriate events.
-   * @param {!../../../src/service/position-observer/position-observer-worker.PositionInViewportEntryDef} entry PositionObserver entry
+   * @param {!PositionInViewportEntryDef} entry PositionObserver entry
    * @private
    */
   positionChanged_(entry) {
@@ -215,10 +230,12 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
       this.updateVisibility_(positionRect, adjViewportRect, relPos);
     }
 
+
+
     if (wasVisible && !this.isVisible_) {
       // Send final scroll progress state before exiting to handle fast-scroll.
       this.scrollProgress_ = relPos == RelativePositions.BOTTOM ? 0 : 1;
-      this.triggerScroll_(adjViewportRect);
+      this.triggerScroll_();
       this.triggerExit_();
       this.firstIterationComplete_ = true;
     }
@@ -230,7 +247,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
     // Send scroll progress if visible.
     if (this.isVisible_) {
       this.updateScrollProgress_(positionRect, adjViewportRect);
-      this.triggerScroll_(adjViewportRect);
+      this.triggerScroll_();
     }
   }
 
@@ -292,6 +309,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
     );
 
     this.scrollProgress_ = topOffset / totalProgress;
+    this.remainingScrollToExit_ = totalProgress - topOffset;
   }
 
   /**
@@ -424,7 +442,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
    * If within, we offset calculation by the delta so that small viewport
    * changes caused by hide/show of addressbar on mobile browsers do not
    * cause jumps in scrollbond animations.
-   * @param {!../../../src/service/position-observer/position-observer-worker.PositionInViewportEntryDef} entry PositionObserver entry
+   * @param {!PositionInViewportEntryDef} entry PositionObserver entry
    */
   adjustForSmallViewportResize_(entry) {
     if (!this.initialViewportHeight_) {

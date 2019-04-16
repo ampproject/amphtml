@@ -42,7 +42,8 @@ export let AmpAdExitConfig;
  *   finalUrl: string,
  *   trackingUrls: (!Array<string>|undefined),
  *   vars: (VariablesDef|undefined),
- *   filters: (!Array<string>|undefined)
+ *   filters: (!Array<string>|undefined),
+ *   behaviors: (BehaviorsDef|undefined)
  * }}
  */
 export let NavigationTargetConfig;
@@ -59,6 +60,17 @@ export let VariableDef;
  * @typedef {!Object<string, !VariableDef>}
  */
 export let VariablesDef;
+
+/**
+ * Supported Behaviors:
+ *  -- clickTarget -- Specifies where to try to open the click.
+ *                    Either '_blank'(default) or '_top'
+ *
+ * @typedef {{
+ *   clickTarget: (string|undefined)
+ * }}
+ */
+export let BehaviorsDef;
 
 /**
  * @typedef {{

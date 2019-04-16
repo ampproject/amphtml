@@ -16,20 +16,50 @@
 
 import {CSS} from '../../../build/amp-story-auto-ads-0.1.css';
 import {CommonSignals} from '../../../src/common-signals';
+import {LocalizationService} from '../../../src/service/localization';
+import {
+  LocalizedStringId,
+  createPseudoLocale,
+} from '../../../src/localized-strings';
 import {Services} from '../../../src/services';
 import {
   StateChangeEventDef,
   StateChangeType,
 } from '../../amp-story/1.0/navigation-state';
 import {StateProperty} from '../../amp-story/1.0/amp-story-store-service';
+import {CSS as attributionCSS}
+  from '../../../build/amp-story-auto-ads-attribution-0.1.css';
 import {createElementWithAttributes, isJsonScriptTag} from '../../../src/dom';
+import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict, hasOwn, map} from '../../../src/utils/object';
 import {getUniqueId} from './utils';
 import {isObject} from '../../../src/types';
 import {parseJson} from '../../../src/json';
 import {setStyles} from '../../../src/style';
+import {startsWith} from '../../../src/string';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
+import LocalizedStringsAr from './_locales/ar';
+import LocalizedStringsDe from './_locales/de';
+import LocalizedStringsEn from './_locales/en';
+import LocalizedStringsEnGb from './_locales/en-GB';
+import LocalizedStringsEs from './_locales/es';
+import LocalizedStringsEs419 from './_locales/es-419';
+import LocalizedStringsFr from './_locales/fr';
+import LocalizedStringsHi from './_locales/hi';
+import LocalizedStringsId from './_locales/id';
+import LocalizedStringsIt from './_locales/it';
+import LocalizedStringsJa from './_locales/ja';
+import LocalizedStringsKo from './_locales/ko';
+import LocalizedStringsNl from './_locales/nl';
+import LocalizedStringsNo from './_locales/no';
+import LocalizedStringsPtBr from './_locales/pt-BR';
+import LocalizedStringsPtPt from './_locales/pt-PT';
+import LocalizedStringsRu from './_locales/ru';
+import LocalizedStringsTr from './_locales/tr';
+import LocalizedStringsVi from './_locales/vi';
+import LocalizedStringsZhCn from './_locales/zh-CN';
+import LocalizedStringsZhTw from './_locales/zh-TW';
 
 /** @const {number} */
 const FIRST_AD_MIN = 7;
@@ -58,6 +88,9 @@ const LOADING_ATTR = 'i-amphtml-loading';
 /** @const {string} */
 const NEXT_PAGE_NO_AD = 'next-page-no-ad';
 
+/** @const {string} */
+const IFRAME_BODY_VISIBLE_ATTR = 'amp-story-visible';
+
 /** @const */
 const DATA_ATTR = {
   CTA_TYPE: 'data-vars-ctatype',
@@ -66,28 +99,30 @@ const DATA_ATTR = {
 
 /** @const */
 const CTA_TYPES = {
-  APPLY_NOW: 'Apply Now',
-  BOOK_NOW: 'Book',
-  BUY_TICKETS: 'Buy Tickets',
-  DOWNLOAD: 'Download',
-  EXPLORE: 'Explore Now',
-  GET_NOW: 'Get Now',
-  INSTALL: 'Install Now',
-  LISTEN: 'Listen Now',
-  MORE: 'More',
-  OPEN_APP: 'Open App',
-  ORDER_NOW: 'Order Now',
-  PLAY: 'Play',
-  READ: 'Read Now',
-  SHOP: 'Shop Now',
-  SHOW: 'Show',
-  SHOWTIMES: 'Showtimes',
-  SIGN_UP: 'Sign Up',
-  SUBSCRIBE: 'Subscribe Now',
-  USE_APP: 'Use App',
-  VIEW: 'View',
-  WATCH: 'Watch',
-  WATCH_EPISODE: 'Watch Episode',
+  APPLY_NOW: LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_APPLY_NOW,
+  BOOK_NOW: LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_BOOK_NOW,
+  BUY_TICKETS: LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_BUY_TICKETS,
+  DOWNLOAD: LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_DOWNLOAD,
+  EXPLORE: LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_EXPLORE,
+  GET_NOW: LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_GET_NOW,
+  INSTALL: LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_INSTALL,
+  LEARN_MORE: LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_LEARN_MORE,
+  LISTEN: LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_LISTEN,
+  MORE: LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_MORE,
+  OPEN_APP: LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_OPEN_APP,
+  ORDER_NOW: LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_ORDER_NOW,
+  PLAY: LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_PLAY,
+  READ: LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_READ,
+  SHOP: LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SHOP,
+  SHOW: LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SHOW,
+  SHOWTIMES: LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SHOWTIMES,
+  SIGN_UP: LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SIGN_UP,
+  SUBSCRIBE: LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SUBSCRIBE,
+  USE_APP: LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_USE_APP,
+  VIEW: LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_VIEW,
+  WATCH: LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_WATCH,
+  WATCH_EPISODE: LocalizedStringId
+      .AMP_STORY_AUTO_ADS_BUTTON_LABEL_WATCH_EPISODE,
 };
 
 /** @const */
@@ -101,6 +136,7 @@ const AD_STATE = {
 const ALLOWED_AD_TYPES = map({
   'custom': true,
   'doubleclick': true,
+  'fake': true,
 });
 
 /** @enum {boolean} */
@@ -154,10 +190,10 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {?../../amp-story/0.1/amp-story.AmpStory} */
+    /** @private {?../../amp-story/1.0/amp-story.AmpStory} */
     this.ampStory_ = null;
 
-    /** @private {?../../amp-story/0.1/navigation-state.NavigationState} */
+    /** @private {?../../amp-story/1.0/navigation-state.NavigationState} */
     this.navigationState_ = null;
 
     /** @private {number} */
@@ -179,15 +215,18 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     this.adPagesCreated_ = 0;
 
     /** @private {?Element} */
-    this.currentAdElement_ = null;
+    this.lastCreatedAdElement_ = null;
+
+    /** @private {?Element}} */
+    this.visibleAdBody_ = null;
 
     /** @private {boolean} */
     this.isCurrentAdLoaded_ = false;
 
-    /** @private {Object<string, string>} */
+    /** @private {Object<string, Object>} */
     this.config_ = {};
 
-    /** @private {Object<string, *>} */
+    /** @private {Object<number, *>} */
     this.analyticsData_ = {};
 
     /** @private {Object<string, number>} */
@@ -208,6 +247,37 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
      * @private {?../../amp-story/0.1/amp-story-store-service.AmpStoryStoreService|?../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService}
      */
     this.storeService_ = null;
+
+    /** @private @const {!LocalizationService} */
+    this.localizationService_ = new LocalizationService(this.win);
+    this.localizationService_
+        .registerLocalizedStringBundle('default', LocalizedStringsEn)
+        .registerLocalizedStringBundle('ar', LocalizedStringsAr)
+        .registerLocalizedStringBundle('de', LocalizedStringsDe)
+        .registerLocalizedStringBundle('en', LocalizedStringsEn)
+        .registerLocalizedStringBundle('en-GB', LocalizedStringsEnGb)
+        .registerLocalizedStringBundle('es', LocalizedStringsEs)
+        .registerLocalizedStringBundle('es-419', LocalizedStringsEs419)
+        .registerLocalizedStringBundle('fr', LocalizedStringsFr)
+        .registerLocalizedStringBundle('hi', LocalizedStringsHi)
+        .registerLocalizedStringBundle('id', LocalizedStringsId)
+        .registerLocalizedStringBundle('it', LocalizedStringsIt)
+        .registerLocalizedStringBundle('ja', LocalizedStringsJa)
+        .registerLocalizedStringBundle('ko', LocalizedStringsKo)
+        .registerLocalizedStringBundle('nl', LocalizedStringsNl)
+        .registerLocalizedStringBundle('no', LocalizedStringsNo)
+        .registerLocalizedStringBundle('pt-PT', LocalizedStringsPtPt)
+        .registerLocalizedStringBundle('pt-BR', LocalizedStringsPtBr)
+        .registerLocalizedStringBundle('ru', LocalizedStringsRu)
+        .registerLocalizedStringBundle('tr', LocalizedStringsTr)
+        .registerLocalizedStringBundle('vi', LocalizedStringsVi)
+        .registerLocalizedStringBundle('zh-CN', LocalizedStringsZhCn)
+        .registerLocalizedStringBundle('zh-TW', LocalizedStringsZhTw);
+
+    const enXaPseudoLocaleBundle =
+        createPseudoLocale(LocalizedStringsEn, s => `[${s} one two]`);
+    this.localizationService_
+        .registerLocalizedStringBundle('en-xa', enXaPseudoLocaleBundle);
   }
 
   /** @override */
@@ -301,7 +371,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     span.className = 'i-amphtml-story-ad-attribution';
     span.textContent = 'Ad';
 
-    container.appendChild(span);
+    createShadowRootWithStyle(container, span, attributionCSS);
     this.ampStory_.element.appendChild(container);
   }
 
@@ -361,7 +431,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     ampStoryAdPage.appendChild(gridLayer);
     ampStoryAdPage.appendChild(paneGridLayer);
 
-    this.currentAdElement_ = ampAd;
+    this.lastCreatedAdElement_ = ampAd;
     this.isCurrentAdLoaded_ = false;
 
     // set up listener for ad-loaded event
@@ -442,8 +512,16 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       }
     }
 
-    userAssert(!!ALLOWED_AD_TYPES[configAttrs.type], `${TAG}: ` +
-      `"${configAttrs.type}" ad type is not supported`);
+    const {type} = configAttrs;
+    userAssert(!!ALLOWED_AD_TYPES[type], `${TAG}: ` +
+      `"${type}" ad type is not supported`);
+
+    if (type === 'fake') {
+      const id = this.element.getAttribute('id');
+      userAssert(id && startsWith(id, 'i-amphtml-demo-'),
+          `${TAG} id must start with i-amphtml-demo- to use fake ads`);
+      configAttrs['id'] = `i-amphtml-demo-${this.adPagesCreated_}`;
+    }
 
     const attributes = /** @type {!JsonObject} */ (Object.assign({},
         configAttrs, requiredAttrs));
@@ -459,8 +537,8 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    */
   maybeCreateCtaLayer_(adPageElement) {
     // if making a CTA layer we need a button name & outlink url
-    const ctaUrl = this.currentAdElement_.getAttribute(DATA_ATTR.CTA_URL);
-    const ctaType = this.currentAdElement_.getAttribute(DATA_ATTR.CTA_TYPE);
+    const ctaUrl = this.lastCreatedAdElement_.getAttribute(DATA_ATTR.CTA_URL);
+    const ctaType = this.lastCreatedAdElement_.getAttribute(DATA_ATTR.CTA_TYPE);
 
     if (!ctaUrl || !ctaType) {
       user().error(TAG, 'Both CTA Type & CTA Url ' +
@@ -471,7 +549,9 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     // Store the cta-type as an accesible var for any further pings.
     this.analyticsData_[this.adPagesCreated_][Vars.CTA_TYPE] = ctaType;
 
-    const ctaText = CTA_TYPES[ctaType];
+    const ctaLocalizedStringId = CTA_TYPES[ctaType];
+    const ctaText =
+        this.localizationService_.getLocalizedString(ctaLocalizedStringId);
     if (!ctaType) {
       user().error(TAG, 'invalid "CTA Type" in ad response');
       return false;
@@ -558,7 +638,9 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     }
 
     if (this.idOfAdShowing_) {
-      // We are transitioning away from an ad, so fire the exit event.
+      // We are transitioning away from an ad
+      this.removeVisibleAttribute_();
+      // Fire the exit event.
       this.analyticsEvent_(Events.AD_EXITED, {
         [Vars.AD_EXITED]: Date.now(),
         [Vars.AD_INDEX]: this.idOfAdShowing_,
@@ -567,9 +649,11 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     }
 
     if (this.adPageIds_[pageId]) {
-      // We are switching to an ad, so fire the view event on the
-      // corresponding Ad.
+      // We are switching to an ad.
       const adIndex = this.adPageIds_[pageId];
+      // Tell the iframe that it is visible.
+      this.setVisibleAttribute_(this.adPageEls_[adIndex - 1]);
+      // Fire the view event on the corresponding Ad.
       this.analyticsEvent_(Events.AD_VIEWED, {
         [Vars.AD_VIEWED]: Date.now(),
         [Vars.AD_INDEX]: adIndex,
@@ -605,6 +689,34 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
         this.startNextAdPage_(/* failure */ true);
       }
     }
+  }
+
+  /**
+   * Sets a `amp-story-visible` attribute on the fie body so that embedded ads
+   * can know when they are visible and do things like trigger animations.
+   * @param {Element} adElement
+   */
+  setVisibleAttribute_(adElement) {
+    const friendlyIframeEmbed = adElement.querySelector('iframe');
+    const frameDoc = friendlyIframeEmbed.contentDocument ||
+      friendlyIframeEmbed.win.document;
+    const {body} = frameDoc;
+    this.mutateElement(() => {
+      body.setAttribute(IFRAME_BODY_VISIBLE_ATTR, '');
+      this.visibleAdBody_ = body;
+    });
+  }
+
+  /**
+   *  Removes `amp-story-visible` attribute from the fie body.
+   */
+  removeVisibleAttribute_() {
+    this.mutateElement(() => {
+      if (this.visibleAdBody_) {
+        this.visibleAdBody_.removeAttribute(IFRAME_BODY_VISIBLE_ATTR);
+        this.visibleAdBody_ = null;
+      }
+    });
   }
 
   /**
@@ -693,7 +805,8 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       return AD_STATE.PENDING;
     }
 
-    const ctaCreated = this.maybeCreateCtaLayer_(nextAdPageEl);
+    const ctaCreated = this.maybeCreateCtaLayer_(
+        dev().assertElement(nextAdPageEl));
     if (!ctaCreated) {
       // failed on ad-server response format
       return AD_STATE.FAILED;
@@ -731,7 +844,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   /**
    * Users may put an 'next-page-no-ad' attribute on their pages to prevent ads
    * from showing as the next page.
-   * @param {?../../amp-story/0.1/amp-story-page.AmpStoryPage} page
+   * @param {?../../amp-story/1.0/amp-story-page.AmpStoryPage} page
    * @return {boolean}
    * @private
    */
@@ -742,7 +855,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   /**
    * Call an analytics event with the last created Ad.
    * @param {string} eventType
-   * @param {!Object<string, string>} vars A map of vars and their values.
+   * @param {!Object<string, number>} vars A map of vars and their values.
    * @private
    */
   analyticsEventWithCurrentAd_(eventType, vars) {
@@ -754,16 +867,17 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   /**
    * Construct an analytics event and trigger it.
    * @param {string} eventType
-   * @param {!Object<string, string>} vars A map of vars and their values.
+   * @param {!Object<string, number>} vars A map of vars and their values.
    * @private
    */
   analyticsEvent_(eventType, vars) {
     const adIndex = vars['adIndex'];
-    this.analyticsData_[adIndex] = Object.assign(this.analyticsData_[adIndex],
+    this.analyticsData_[adIndex] = Object.assign(
+        /** @type {!JsonObject} */ (this.analyticsData_[adIndex]),
         vars);
 
     triggerAnalyticsEvent(this.element, eventType,
-        this.analyticsData_[adIndex]);
+        /** @type {!JsonObject} */ (this.analyticsData_[adIndex]));
   }
 }
 

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {WAYPOINT_BASE_URL} from '../constants';
 import {getAmpSkimlinksOptions} from '../skim-options';
 import helpersFactory from './helpers';
 
@@ -74,7 +75,6 @@ describes.fakeWin(
               .members(['go.redirectingat.com', 'go.skimresources.com']);
         });
 
-
         it('Should not overwrite internal & global blacklist when using option',
             () => {
               const element = helpers.createAmpSkimlinksElement({
@@ -89,6 +89,54 @@ describes.fakeWin(
               ]);
             }
         );
+      });
+
+      describe('custom-redirect-domain', () => {
+        const cname = 'go.publisher.com';
+
+        it('Should return normal waypoint base url if not defined', () => {
+          const element = helpers.createAmpSkimlinksElement({
+            'publisher-code': '123X123',
+          });
+          const options = getAmpSkimlinksOptions(element, docInfo);
+          expect(options.waypointBaseUrl).to.equal(WAYPOINT_BASE_URL);
+        });
+
+        it('Should overwrite waypoint base url if defined', () => {
+          const element = helpers.createAmpSkimlinksElement({
+            'publisher-code': '123X123',
+            'custom-redirect-domain': cname,
+          });
+          const options = getAmpSkimlinksOptions(element, docInfo);
+          expect(options.waypointBaseUrl).to.equal(`http://${cname}`);
+        });
+
+        it('Should accept redirect domain containing the protocol', () => {
+          const element = helpers.createAmpSkimlinksElement({
+            'publisher-code': '123X123',
+            'custom-redirect-domain': `http://${cname}`,
+          });
+          const options = getAmpSkimlinksOptions(element, docInfo);
+          expect(options.waypointBaseUrl).to.equal(`http://${cname}`);
+        });
+
+        it('Should force custom redirect base url to use http', () => {
+          const element = helpers.createAmpSkimlinksElement({
+            'publisher-code': '123X123',
+            'custom-redirect-domain': `https://${cname}`,
+          });
+          const options = getAmpSkimlinksOptions(element, docInfo);
+          expect(options.waypointBaseUrl).to.equal(`http://${cname}`);
+        });
+
+        it('Should remove trailing slash', () => {
+          const element = helpers.createAmpSkimlinksElement({
+            'publisher-code': '123X123',
+            'custom-redirect-domain': `https://${cname}/`,
+          });
+          const options = getAmpSkimlinksOptions(element, docInfo);
+          expect(options.waypointBaseUrl).to.equal(`http://${cname}`);
+        });
       });
     }
 );

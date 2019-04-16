@@ -38,6 +38,10 @@ tags: {  # <amp-brightcove>
     name: "data-account"
     mandatory: true
   }
+  attrs: {
+    name: "dock"
+    requires_extension: "amp-video-docking"
+  }
   # <amp-bind>
   attrs: { name: "[data-account]" }
   attrs: { name: "[data-embed]" }

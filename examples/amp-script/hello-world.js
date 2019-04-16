@@ -14,29 +14,56 @@
  * limitations under the License.
  */
 
+/*
+ * @fileoverview
+ * Initial DOM must contain a button#hello. Other elemenst are optional.
+ */
+
 document.getElementById('hello').addEventListener('click', () => {
   const el = document.createElement('h1');
   el.textContent = 'Hello World!';
   document.body.appendChild(el);
 });
 
+// Long task.
+if (document.getElementById('long')) {
+  document.getElementById('long').addEventListener('click', () => {
+    fetch('http://localhost:8000/examples/amp-script/hello-world-data.json')
+        .then(response => response.json())
+        .then(json => {
+          const el = document.createElement('h1');
+          el.textContent = 'Hello ' + json.year + ' World!';
+          document.body.appendChild(el);
+        });
+  });
+}
+
 // <amp-img> should be allowed.
-document.getElementById('amp-img').addEventListener('click', () => {
-  const el = document.createElement('amp-img');
-  el.setAttribute('width', '300');
-  el.setAttribute('height', '200');
-  el.setAttribute('src', '/examples/img/hero@1x.jpg')
-  document.body.appendChild(el);
-});
+const ampImg = document.getElementById('amp-img');
+if (ampImg) {
+  ampImg.addEventListener('click', () => {
+    const el = document.createElement('amp-img');
+    el.setAttribute('width', '300');
+    el.setAttribute('height', '200');
+    el.setAttribute('src', '/examples/img/hero@1x.jpg')
+    document.body.appendChild(el);
+  });
+}
 
 // <script> should be sanitized.
-document.getElementById('script').addEventListener('click', () => {
-  const el = document.createElement('script');
-  document.body.appendChild(el);
-});
+const script = document.getElementById('script');
+if (script) {
+  script.addEventListener('click', () => {
+    const el = document.createElement('script');
+    document.body.appendChild(el);
+  });
+}
 
 // <img> should be sanitized.
-document.getElementById('img').addEventListener('click', () => {
-  const el = document.createElement('img');
-  document.body.appendChild(el);
-});
+const img = document.getElementById('img');
+if (img) {
+  img.addEventListener('click', () => {
+    const el = document.createElement('img');
+    document.body.appendChild(el);
+  });
+}

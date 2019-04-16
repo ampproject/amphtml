@@ -1,3 +1,10 @@
+---
+$category@: layout
+formats:
+  - websites
+teaser:
+  text: A wrapper and minimal UI for a cross-platform, fixed-position banner showing a call-to-action to install an app.
+---
 <!--
 Copyright 2016 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,13 +21,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-app-banner"></a> `amp-app-banner`
+# amp-app-banner
+
+A wrapper and minimal UI for a cross-platform, fixed-position banner showing a call-to-action to install an app. Includes conditional logic to direct to the right app on the right platform, and to hide permanently if the user dismisses the banner.
 
 <table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>A wrapper and minimal UI for a cross-platform, fixed-position banner showing a call-to-action to install an app. Includes conditional logic to direct to the right app on the right platform, and to hide permanently if the user dismisses the banner.</td>
-  </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td>
@@ -46,7 +51,7 @@ limitations under the License.
 
 
 ## Data Sources
-To extend and promote the usage of the natively supported app banners on <a href="https://developer.apple.com/library/content/documentation/AppleApplications/Reference/SafariWebContent/PromotingAppswithAppBanners/PromotingAppswithAppBanners.html">iOS</a> and <a href="https://developers.google.com/web/updates/2015/03/increasing-engagement-with-app-install-banners-in-chrome-for-android?hl=en#span-idnativenative-app-install-bannerspan">Android</a>, we are using the exact data-sources the native app banners use on the respective platforms. iOS uses a `<meta name="apple-itunes-app">` tag in the head of the document and Android uses a `<link rel="manifest">`. 
+To extend and promote the usage of the natively supported app banners on <a href="https://developer.apple.com/library/content/documentation/AppleApplications/Reference/SafariWebContent/PromotingAppswithAppBanners/PromotingAppswithAppBanners.html">iOS</a> and <a href="https://developers.google.com/web/updates/2015/03/increasing-engagement-with-app-install-banners-in-chrome-for-android?hl=en#span-idnativenative-app-install-bannerspan">Android</a>, we are using the exact data-sources the native app banners use on the respective platforms. iOS uses a `<meta name="apple-itunes-app">` tag in the head of the document and Android uses a `<link rel="manifest">`.
 
 The AMP runtime parses the meta tag content attribute on iOS extracting the App ID and `app-argument` (usually used for deep-linking URIs - app-protocols like `whatsapp://` or `medium://`). On Android, the AMP runtimes makes an XHR request to fetch the `manifest.json` file, and parses its content to extract `app_id` from `related_applications` and it calculates the app store URL as well as open-in-app URL:
 
@@ -132,26 +137,28 @@ Currently, the banner will be displayed always unless it was dismissed. Once dis
 
 
 ## Attributes
-
-
 ### Attributes on `amp-app-banner`
 
-##### id (Required)
-
-A unique identifier for an amp-app-banner; used for persistence logic.
-
-##### layout (Required)
-
-The value must be `nodisplay`. 
+<table>
+  <tr>
+    <td width="40%"><strong>id (Required)</strong></td>
+    <td>A unique identifier for an amp-app-banner; used for persistence logic.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>layout (Required)</strong></td>
+    <td>The value must be `nodisplay`.</td>
+  </tr>
+</table>
 
 ### Attributes on `button` descendant element
-
-##### open-button (Required)
-
-The click target for the banner to install the app, or open the deep-link if the app is already installed.
-
-Not permitted: **disabled**
-
+<table>
+  <tr>
+    <td width="40%"><strong>open-button (Required)</strong></td>
+    <td>The click target for the banner to install the app, or open the deep-link if the app is already installed.<br>
+    Not permitted: **disabled**
+    </td>
+  </tr>
+</table>
 
 ## Additional Validations
 
@@ -172,7 +179,7 @@ Not permitted: **disabled**
   <link rel="manifest" href="https://link/to/manifest.json">
 </head>
 
-. . . 
+. . .
 
 <body>
   <amp-app-banner layout="nodisplay" id="demo-app-banner-2134">

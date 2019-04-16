@@ -13,14 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {LocalizedStringBundleDef, LocalizedStringId} from '../localization';
+import {
+  LocalizedStringBundleDef,
+  LocalizedStringId,
+} from '../../../../src/localized-strings';
 
 
 /**
  * Localized string bundle used for English strings.
  * @const {!LocalizedStringBundleDef}
  */
-export default /** @const {!LocalizedStringBundleDef} */ ({
+const strings = {
   [LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT]: {
     string: 'Sound off',
     description: 'Text that informs users that the sound is off after they ' +
@@ -95,6 +98,12 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
     description: 'Label indicating that users can navigate to the previous ' +
         'page, in the amp-story hint UI.',
   },
+  [LocalizedStringId.AMP_STORY_SHARING_PAGE_LABEL]: {
+    string: 'Share starting from this page',
+    description: 'Checkbox label when the branching experiment is turned on ' +
+        ' and the story is in landscape mode; checking the checkbox lets the ' +
+        'user share the story from the current page.',
+  },
   [LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT]: {
     string: 'Could not copy link to clipboard :(',
     description: 'String shown in a failure message to inform the user that ' +
@@ -160,15 +169,26 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
     description: 'Button label for the share target that shares a link via ' +
         'WhatsApp.',
   },
-  [LocalizedStringId.AMP_STORY_SYSTEM_LAYER_SHARE_WIDGET_LABEL]: {
-    string: 'Share',
-    description: 'Label for the expandable share widget shown in the ' +
-        'desktop UI.',
+  [LocalizedStringId.AMP_STORY_TOOLTIP_EXPAND_TWEET]: {
+    string: 'Expand Tweet',
+    description: 'Label in the tooltip text for when a Twitter embed is ' +
+        'expandable.',
+  },
+  [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_HEIGHT_SIZE_TEXT]: {
+    string: 'Expand the height of your window to view this experience',
+    description: 'Text for a warning screen that informs the user that ' +
+        'stories are only supported in taller browser windows.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT]: {
-    string: 'Expand your window to view this experience',
+    string: 'Expand both the height and width of your window to view this ' +
+        'experience',
     description: 'Text for a warning screen that informs the user that ' +
         'stories are only supported in larger browser windows.',
+  },
+  [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_WIDTH_SIZE_TEXT]: {
+    string: 'Expand the width of your window to view this experience',
+    description: 'Text for a warning screen that informs the user that ' +
+        'stories are only supported in wider browser windows.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
     string: 'You must enable the amp-story experiment to view this content.',
@@ -186,4 +206,6 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
     description: 'Text for a warning screen that informs the user that ' +
         'their browser does not support stories.',
   },
-});
+};
+
+export default strings;

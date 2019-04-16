@@ -13,6 +13,7 @@
     <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
     <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-latest.js"></script>
     <script async custom-element="amp-selector" src="https://cdn.ampproject.org/v0/amp-selector-0.1.js"></script>
+    <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
     <style amp-custom>
         input.user-invalid {
             background-color: #dc4e41;
@@ -205,6 +206,28 @@
     </fieldset>
 </form>
 
+<h4>Search (GET non-xhr same origin) Using AMP Bind and Amp Action (on="tap:....")</h4>
+<amp-state id="ampBindStateGetNonXhrSameOrigin">
+  <script type="application/json">
+    "Not Changed"
+  </script>
+</amp-state>
+<form id="amp-bind-form-get-non-xhr-same-origin" method="get" action="/form/search-html/get" target="_blank">
+  <fieldset>
+    <input name="clientId" type="hidden" value="CLIENT_ID(poll)" data-amp-replace="CLIENT_ID">
+    <input name="canonicalUrl" type="hidden" value="RANDOM and CANONICAL_URL" data-amp-replace="CANONICAL_URL RANDOM">
+    <label>
+      <span>Search for</span>
+      <input type="search" name="term" required>
+    </label>
+    <input hidden type="text" name="ampBind" [value]="ampBindStateGetNonXhrSameOrigin">
+  </fieldset>
+
+  <button type="button" on="tap:AMP.setState({ ampBindStateGetNonXhrSameOrigin: 'Changed Amp Bind State for ampBindStateGetNonXhrSameOrigin' }), amp-bind-form-get-non-xhr-same-origin.submit">
+    Submit AMP Bind Search
+  </button>
+</form>
+
 <h4>Search (GET xhr same origin)</h4>
 <form method="get" id="xhr-get" action="/form/search-html/get" action-xhr="/form/search-json/get" target="_blank">
     <fieldset>
@@ -245,6 +268,35 @@
             <h1>You searched for: {{term}}</h1>
         </template>
     </div>
+</form>
+
+<h4>Search (GET xhr same origin) Using AMP Bind and Amp Action (on="tap:....")</h4>
+<amp-state id="ampBindStateGetXhrSameOrigin">
+  <script type="application/json">
+    "Not Changed"
+  </script>
+</amp-state>
+<form id="amp-bind-form-get-xhr-same-origin" method="get" id="xhr-get" action="/form/search-html/get" action-xhr="/form/search-json/get" target="_blank">
+  <fieldset>
+    <input name="clientId" type="hidden" value="CLIENT_ID(poll)" data-amp-replace="CLIENT_ID">
+    <input name="canonicalUrl" type="hidden" value="RANDOM and CANONICAL_URL" data-amp-replace="CANONICAL_URL RANDOM">
+    <label>
+      <span>Search for</span>
+      <input type="search" name="term" required>
+    </label>
+    <input hidden type="text" name="additionalFields" [value]="ampBindStateGetXhrSameOrigin">
+  </fieldset>
+
+  <button type="button" on="tap:AMP.setState({ ampBindStateGetXhrSameOrigin: 'Changed Amp Bind State for ampBindStateGetXhrSameOrigin' }), amp-bind-form-get-xhr-same-origin.submit">
+    Submit AMP Bind Search
+  </button>
+
+  <div submit-success>
+    <template type="amp-mustache">
+      <h1>You searched for: {{term}}</h1>
+      <p>The submitted amp bind state was: {{additionalFields}}</p>
+    </template>
+  </div>
 </form>
 
 <h4>Subscribe to our weekly Newsletter (POST xhr same origin)</h4>

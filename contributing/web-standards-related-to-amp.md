@@ -4,9 +4,8 @@ Date: 2018-02-28
 
 | Standard/feature | Relation | Status |
 | ---------------- |:--------:| ------:|
-| [Web Packaging](https://github.com/WICG/webpackage) | Privacy-preserving preloading from cache under publisher URL | Active drafting, IETF concensus seeking |
-| [Iframe promotion](https://discourse.wicg.io/t/proposal-for-promotable-iframe/2375) | AMP Carousel like UI with navigation to publisher | Under discussion in WICG |
-| [Portals](https://github.com/KenjiBaheux/portals/blob/master/explainer.md) | AMP Carousel like UI with navigation to publisher (alternative to iframe promotion) | Early proposal |
+| [Web Packaging](https://github.com/WICG/webpackage) | Privacy-preserving preloading from cache under publisher URL | Initial version of spec final. [Shipping in Chrome M73](https://groups.google.com/a/chromium.org/forum/#!msg/blink-dev/gPH_BcOBEtc/Z41GR0mwEQAJ), IETF concensus seeking in progress |
+| [Portals](https://github.com/KenjiBaheux/portals/blob/master/explainer.md) | AMP Carousel like UI with navigation to publisher (alternative to iframe promotion) | Iterating on spec. Prototype implementation in Chromium |
 | [Performance Timeline](https://w3c.github.io/performance-timeline/) | Real world metric collection. This is the framework. New metrics may be needed. | Shipping in first browsers |
 | [Paint Timing 1](https://w3c.github.io/paint-timing/) | Initial paint related metrics (performance assessment | Shipping in first browsers |
 | Perf metric: (Initial) Layout stability | Metric for how often layout changes without user action based on elements resizing (such as when an unsized image loads or an iframe resizes) | Discussing feasibility with implementers |

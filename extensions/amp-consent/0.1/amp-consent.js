@@ -115,7 +115,7 @@ export class AmpConsent extends AMP.BaseElement {
     this.consentConfig_ = config.getConsentConfig();
 
     // ConsentConfig has verified that there's one and only one consent instance
-    this.consentId_ = this.consentConfig_['storageKey'];
+    this.consentId_ = this.consentConfig_['consentInstanceId'];
 
     if (this.consentConfig_['postPromptUI']) {
       this.postPromptUI_ =
@@ -123,10 +123,6 @@ export class AmpConsent extends AMP.BaseElement {
     }
 
     /**
-     * TODO (@zhouyx): Migrate to the new consent config format.
-     * Need to support the deprecated format as well.
-     * Have ConsentConfig.getConsentConfig auto convert configuration format.
-     *
      * Deprecated Format
      * {
      *   'consentInstanceId': {
@@ -135,18 +131,19 @@ export class AmpConsent extends AMP.BaseElement {
      *   }
      * }
      *
-     * New proposed Format
+     * New Format
      * {
-     *   'storageKey': ...
+     *   'consentInstanceId': ...
      *   'checkConsentHref': ...
      *   'promptUI': ...
      *   'postPromptUI': ...
      * }
      */
 
-    const policyConfig = config.getPolicyConfig();
+    const policyConfig = this.consentConfig_['policy'] || dict({});
 
-    this.policyConfig_ = expandPolicyConfig(policyConfig, this.consentId_);
+    this.policyConfig_ = expandPolicyConfig(
+        policyConfig, /** @type {string} */ (this.consentId_));
 
     const children = this.getRealChildren();
     for (let i = 0; i < children.length; i++) {
@@ -503,8 +500,9 @@ export class AmpConsent extends AMP.BaseElement {
    * @return {Promise<boolean>}
    */
   initPromptUI_(isConsentRequired) {
-    this.consentUI_ = new ConsentUI(this, devAssert(this.consentConfig_,
-        'consent config not found'));
+    this.consentUI_ = new ConsentUI(this,
+        /** @type {!JsonObject} */ (
+          devAssert(this.consentConfig_, 'consent config not found')));
 
     // Get current consent state
     return this.consentStateManager_.getConsentInstanceInfo()

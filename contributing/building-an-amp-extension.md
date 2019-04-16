@@ -113,7 +113,9 @@ class AmpMyElement extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-my-element', AmpMyElement, CSS);
+AMP.extension('amp-my-element', '0.1', AMP => {
+  AMP.registerElement('amp-my-element', AmpMyElement, CSS);
+});
 ```
 
 ### BaseElement callbacks
@@ -287,7 +289,9 @@ AMP; all AMP extensions are prefixed with `amp-`. This is where you
 tell AMP which class to use for this tag name and which CSS to load.
 
 ```javascript
-AMP.registerElement('amp-carousel', CarouselSelector, CSS);
+AMP.extension('amp-carousel', '0.1', AMP => {
+  AMP.registerElement('amp-carousel', CarouselSelector, CSS);
+});
 ```
 
 ## Actions and events
@@ -655,7 +659,8 @@ And then protecting your code with a check `isExperimentOn(win,
 'amp-my-element')` and only execute your code when it is on.
 
 ```javascript
-import {isExperimentOn} from '../src/experiments';
+import {isExperimentOn} from '../../../src/experiments';
+import {userAssert} from '../../../src/log';
 
 /** @const */
 const EXPERIMENT = 'amp-my-element';
@@ -679,25 +684,23 @@ Class AmpMyElement extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    if (!isExperimentOn(this.getWin(), EXPERIMENT)) {
-      user.warn('Experiment %s is not turned on.', EXPERIMENT);
-      return;
-    }
+    userAssert(isExperimentOn(this.win, 'amp-my-element'),
+        `Experiment ${EXPERIMENT} is not turned on.`);
     // get attributes, assertions of values, assign instance variables.
     // build lightweight dom and append to this.element.
   }
 
   /** @override */
   layoutCallback() {
-    if (!isExperimentOn(this.getWin(), EXPERIMENT)) {
-      user.warn('Experiment %s is not turned on.', EXPERIMENT);
-      return;
-    }
+    userAssert(isExperimentOn(this.win, 'amp-my-element'),
+        `Experiment ${EXPERIMENT} is not turned on.`);
     // actually load your resource or render more expensive resources.
   }
 }
 
-AMP.registerElement('amp-my-element', AmpMyElement, CSS);
+AMP.extension('amp-my-element', '0.1', AMP => {
+  AMP.registerElement('amp-my-element', AmpMyElement, CSS);
+});
 ```
 
 ### Enabling and removing your experiment
@@ -742,13 +745,13 @@ Also consider contributing to
 
 In order for your element to build correctly you would need to make few
 changes to bundles.config.js to tell it about your extension, its files and
-its examples. You will need to add an entry in the "extensionBundles" array.
+its examples. You will need to add an entry in the `extensionBundles` array.
 
 ```javascript
 exports.extensionBundles = [
 ...
-  {name: 'amp-kaltura-player', version: '0.1'},
-  {name: 'amp-carousel', version: '0.1', options: {hasCss: true}},
+  {name: 'amp-kaltura-player', version: '0.1', latestVersion: '0.1'},
+  {name: 'amp-carousel', version: '0.1', latestVersion: '0.1', options: {hasCss: true}},
 ...
 ];
 ```
@@ -760,6 +763,10 @@ maintained separately. If your changes to your non-experimental
 extension makes breaking changes that are not backward compatible you
 should version your extension. This would usually be by creating a 0.2
 directory next to your 0.1.
+
+When version 0.2 is under development, make sure that `latestVersion` is
+set to 0.1 for both the 0.1 and 0.2 entries in `extensionBundles`. Once 0.2
+is ready to be released, `latestVersion` can be changed to 0.2.
 
 If your extension is still in experiments breaking changes usually are
 fine so you can just update the same version.

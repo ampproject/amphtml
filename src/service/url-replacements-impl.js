@@ -45,6 +45,7 @@ import {
   registerServiceBuilderForDoc,
 } from '../service';
 import {tryResolve} from '../utils/promise';
+import {version} from '../internal-version';
 
 /** @private @const {string} */
 const TAG = 'UrlReplacements';
@@ -520,7 +521,7 @@ export class GlobalVariableSource extends VariableSource {
     });
 
     // returns the AMP version number
-    this.set('AMP_VERSION', () => '$internalRuntimeVersion$');
+    this.set('AMP_VERSION', () => version());
 
     this.set('BACKGROUND_STATE', () => {
       return Services.viewerForDoc(this.ampdoc).isVisible() ? '0' : '1';
@@ -559,8 +560,9 @@ export class GlobalVariableSource extends VariableSource {
 
     this.setAsync('AMP_STATE', key => {
       // This is safe since AMP_STATE is not an A4A whitelisted variable.
-      const {documentElement} = win.document;
-      return Services.bindForDocOrNull(documentElement).then(bind => {
+      const root = this.ampdoc.getRootNode();
+      const element = /** @type {!Element|!ShadowRoot} */(root.documentElement || root);
+      return Services.bindForDocOrNull(element).then(bind => {
         if (!bind) {
           return '';
         }

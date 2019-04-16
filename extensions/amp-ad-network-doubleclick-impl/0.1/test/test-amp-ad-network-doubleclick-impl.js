@@ -47,7 +47,7 @@ import {
 import {Services} from '../../../../src/services';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {toggleExperiment} from '../../../../src/experiments';
-import {utf8Encode} from '../../../../src/utils/bytes';
+import {utf8Decode, utf8Encode} from '../../../../src/utils/bytes';
 
 /**
  * We're allowing external resources because otherwise using realWin causes
@@ -810,6 +810,36 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       impl.getAdUrl(CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED).then(url => {
         expect(url).to.not.match(/(\?|&)npa=(&|$)/);
       }));
+
+    it('should include msz/psz if in experiment', () => {
+      sandbox.stub(impl, 'randomlySelectUnsetExperiments_').returns(
+          {flexAdSlots: '21063174'});
+      impl.setPageLevelExperiments();
+      return impl.getAdUrl().then(url => {
+        expect(url).to.match(/(\?|&)msz=[0-9]+x-1(&|$)/);
+        expect(url).to.match(/(\?|&)psz=[0-9]+x-1(&|$)/);
+        expect(url).to.match(/(=|%2C)21063174(%2C|&|$)/);
+      });
+    });
+
+    it('should not include msz/psz if not in flexAdSlots control', () => {
+      sandbox.stub(impl, 'randomlySelectUnsetExperiments_').returns(
+          {flexAdSlots: '21063173'});
+      impl.setPageLevelExperiments();
+      return impl.getAdUrl().then(url => {
+        expect(url).to.not.match(/(\?|&)msz=/);
+        expect(url).to.not.match(/(\?|&)psz=/);
+        expect(url).to.match(/(=|%2C)21063173(%2C|&|$)/);
+      });
+    });
+
+    it('should not include msz/psz if not in flexAdSlots experiment', () => {
+      return impl.getAdUrl().then(url => {
+        expect(url).to.not.match(/(\?|&)msz=/);
+        expect(url).to.not.match(/(\?|&)psz=/);
+        expect(url).to.not.match(/(=|%2C)2106317(3|4)(%2C|&|$)/);
+      });
+    });
   });
 
   describe('#getPageParameters', () => {
@@ -1573,6 +1603,67 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
           const instances = [impl1];
           expect(getPageviewStateTokensForAdRequest(instances)).to.deep.equal(
               ['DUMMY_TOKEN_2']);
+        });
+      });
+
+      describe('#checksumVerification', () => {
+        it('should call super if missing Algorithm header', () => {
+          sandbox.stub(AmpA4A.prototype, 'maybeValidateAmpCreative')
+              .returns(Promise.resolve('foo'));
+          const creative = '<html><body>This is some text</body></html>';
+          const mockHeaders = {
+            get: key => {
+              switch (key) {
+                case 'AMP-Verification-Checksum-Algorithm':
+                  return 'unknown';
+                case 'AMP-Verification-Checksum':
+                  return '2569076912';
+                default:
+                  throw new Error(`unexpected header: ${key}`);
+              }
+            },
+          };
+          expect(AmpAdNetworkDoubleclickImpl.prototype.maybeValidateAmpCreative(
+              utf8Encode(creative), mockHeaders)).to.eventually.equal('foo');
+        });
+
+        it('should properly validate checksum', () => {
+          const creative = '<html><body>This is some text</body></html>';
+          const mockHeaders = {
+            get: key => {
+              switch (key) {
+                case 'AMP-Verification-Checksum-Algorithm':
+                  return 'djb2a-32';
+                case 'AMP-Verification-Checksum':
+                  return '2569076912';
+                default:
+                  throw new Error(`unexpected header: ${key}`);
+              }
+            },
+          };
+          return AmpAdNetworkDoubleclickImpl.prototype.maybeValidateAmpCreative(
+              utf8Encode(creative), mockHeaders).then(result => {
+            expect(result).to.be.ok;
+            expect(utf8Decode(result)).to.equal(creative);
+          });
+        });
+
+        it('should fail validation if invalid checksum', () => {
+          const creative = '<html><body>This is some text</body></html>';
+          const mockHeaders = {
+            get: key => {
+              switch (key) {
+                case 'AMP-Verification-Checksum-Algorithm':
+                  return 'djb2a-32';
+                case 'AMP-Verification-Checksum':
+                  return '12345';
+                default:
+                  throw new Error(`unexpected header: ${key}`);
+              }
+            },
+          };
+          expect(AmpAdNetworkDoubleclickImpl.prototype.maybeValidateAmpCreative(
+              utf8Encode(creative), mockHeaders)).to.eventually.not.be.ok;
         });
       });
     });

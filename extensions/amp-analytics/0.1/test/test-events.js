@@ -26,7 +26,9 @@ import {
   TimerEventTracker,
   VisibilityTracker,
 } from '../events';
+import {Deferred} from '../../../../src/utils/promise';
 import {Signals} from '../../../../src/utils/signals';
+import {macroTask} from '../../../../testing/yield';
 
 
 describes.realWin('Events', {amp: 1}, env => {
@@ -1193,12 +1195,12 @@ describes.realWin('Events', {amp: 1}, env => {
       visibilityManagerMock.verify();
     });
 
-    it('should initalize, add listeners and dispose', () => {
+    it('should initialize, add listeners and dispose', () => {
       expect(tracker.root).to.equal(root);
     });
 
-    it('should add doc listener', () => {
-      const unlisten = function() {};
+    it('should add doc listener', function* () {
+      const unlisten = sandbox.spy();
       iniLoadTrackerMock.expects('getRootSignal').never();
       iniLoadTrackerMock.expects('getElementSignal').never();
       visibilityManagerMock
@@ -1210,19 +1212,21 @@ describes.realWin('Events', {amp: 1}, env => {
               saveCallback)
           .returns(unlisten)
           .once();
-      const res = tracker.add(analyticsElement, 'visible', {}, eventResolver);
-      expect(res).to.equal(unlisten);
+      tracker.add(analyticsElement, 'visible', {}, eventResolver);
+      yield macroTask();
       saveCallback.callback({totalVisibleTime: 10});
-      return eventPromise.then(event => {
+      return eventPromise.then(function *(event) {
         expect(event.target).to.equal(root.getRootElement());
         expect(event.type).to.equal('visible');
         expect(event.vars.totalVisibleTime).to.equal(10);
+        yield macroTask();
+        expect(unlisten).to.be.called;
       });
     });
 
-    it('should add root listener', () => {
+    it('should add root listener', function* () {
       const config = {selector: ':root'};
-      const unlisten = function() {};
+      const unlisten = sandbox.spy();
       iniLoadTrackerMock.expects('getElementSignal').never();
       const readyPromise = Promise.resolve();
       iniLoadTrackerMock
@@ -1238,20 +1242,22 @@ describes.realWin('Events', {amp: 1}, env => {
               saveCallback)
           .returns(unlisten)
           .once();
-      const res = tracker.add(analyticsElement,
+      tracker.add(analyticsElement,
           'visible', config, eventResolver);
-      expect(res).to.equal(unlisten);
+      yield macroTask();
       saveCallback.callback({totalVisibleTime: 10});
-      return eventPromise.then(event => {
+      return eventPromise.then(function* (event) {
         expect(event.target).to.equal(root.getRootElement());
         expect(event.type).to.equal('visible');
         expect(event.vars.totalVisibleTime).to.equal(10);
+        yield macroTask();
+        expect(unlisten).to.be.called;
       });
     });
 
-    it('should add host listener and spec', () => {
+    it('should add host listener and spec', function* () {
       const config = {visibilitySpec: {selector: ':host'}};
-      const unlisten = function() {};
+      const unlisten = sandbox.spy();
       iniLoadTrackerMock.expects('getElementSignal').never();
       const readyPromise = Promise.resolve();
       iniLoadTrackerMock
@@ -1267,18 +1273,20 @@ describes.realWin('Events', {amp: 1}, env => {
               saveCallback)
           .returns(unlisten)
           .once();
-      const res = tracker.add(analyticsElement,
+      tracker.add(analyticsElement,
           'visible', config, eventResolver);
-      expect(res).to.equal(unlisten);
+      yield macroTask();
       saveCallback.callback({totalVisibleTime: 10});
-      return eventPromise.then(event => {
+      return eventPromise.then(function* (event) {
         expect(event.target).to.equal(root.getRootElement());
         expect(event.type).to.equal('visible');
         expect(event.vars.totalVisibleTime).to.equal(10);
+        yield macroTask();
+        expect(unlisten).to.be.called;
       });
     });
 
-    it('should add target listener', () => {
+    it('should add target listener', function* () {
       const config = {visibilitySpec: {selector: '.target'}};
       const unlisten = sandbox.spy();
       iniLoadTrackerMock.expects('getRootSignal').once();
@@ -1302,24 +1310,21 @@ describes.realWin('Events', {amp: 1}, env => {
           'visible', config, eventResolver);
       expect(res).to.be.a('function');
       const unlistenReady = getAmpElementSpy.returnValues[0];
-
-      return unlistenReady.then(() => {
-        saveCallback.callback({totalVisibleTime: 10});
-        return eventPromise.then(event => {
-          expect(event.target).to.equal(target);
-          expect(event.type).to.equal('visible');
-          expect(event.vars.totalVisibleTime).to.equal(10);
-
-          // Test unlisten.
-          expect(unlisten).to.not.be.called;
-          res();
-        }).then(() => {
-          expect(unlisten).to.be.calledOnce;
-        });
+      // #getAmpElement Promise
+      yield unlistenReady;
+      // #assertMeasurable_ Promise
+      yield macroTask();
+      saveCallback.callback({totalVisibleTime: 10});
+      return eventPromise.then(function* (event) {
+        expect(event.target).to.equal(target);
+        expect(event.type).to.equal('visible');
+        expect(event.vars.totalVisibleTime).to.equal(10);
+        yield macroTask();
+        expect(unlisten).to.be.calledOnce;
       });
     });
 
-    it('should expand data params', () => {
+    it('should expand data params', function* () {
       target.setAttribute('data-vars-foo', 'bar');
 
       const config = {selector: '.target'};
@@ -1344,39 +1349,49 @@ describes.realWin('Events', {amp: 1}, env => {
           .once();
       tracker.add(analyticsElement, 'visible', config, eventResolver);
       const unlistenReady = getAmpElementSpy.returnValues[0];
-      return unlistenReady.then(() => {
-        saveCallback.callback({totalVisibleTime: 10});
-        return eventPromise.then(event => {
-          expect(event.vars.totalVisibleTime).to.equal(10);
-          expect(event.vars.foo).to.equal('bar');
-        });
+      // #getAmpElement Promise
+      yield unlistenReady;
+      // #assertMeasurable_ Promise
+      yield macroTask();
+      saveCallback.callback({totalVisibleTime: 10});
+      return eventPromise.then(function* (event) {
+        expect(event.vars.totalVisibleTime).to.equal(10);
+        expect(event.vars.foo).to.equal('bar');
+        yield macroTask();
+        expect(unlisten).to.be.calledOnce;
       });
     });
 
-    it('should pass func to get reportReady with "hidden" trigger', () => {
-      const config = {visibilitySpec: {selector: '.target', waitFor: 'none'}};
-      visibilityManagerMock
-          .expects('listenElement')
-          .withExactArgs(
-              target,
-              config.visibilitySpec,
-              /* readyPromise */ null,
-              /* createReportReadyPromiseFunc */ matchFunc,
-              saveCallback)
-          .returns(null)
-          .once();
-      tracker.add(analyticsElement, 'hidden', config, eventResolver);
-      const unlistenReady = getAmpElementSpy.returnValues[0];
-      // NOTE: createReportReadyPromiseFunc is
-      // fully tested in test-visibility-manager
-      return unlistenReady.then(() => {
-        saveCallback.callback({totalVisibleTime: 10});
-        return eventPromise.then(event => {
-          expect(event.vars.totalVisibleTime).to.equal(10);
-          expect(event.type).to.equal('hidden');
+    it('should pass func to get reportReady with "hidden" trigger',
+        function* () {
+          const config =
+            {visibilitySpec: {selector: '.target', waitFor: 'none'}};
+          visibilityManagerMock
+              .expects('listenElement')
+              .withExactArgs(
+                  target,
+                  config.visibilitySpec,
+                  /* readyPromise */ null,
+                  /* createReportReadyPromiseFunc */ matchFunc,
+                  saveCallback)
+              .returns(null)
+              .once();
+          tracker.add(analyticsElement, 'hidden', config, eventResolver);
+          const unlistenReady = getAmpElementSpy.returnValues[0];
+          // #getAmpElement Promise
+          yield unlistenReady;
+          // #assertMeasurable_ Promise
+          yield macroTask();
+
+          // NOTE: createReportReadyPromiseFunc is
+          // fully tested in test-visibility-manager
+
+          saveCallback.callback({totalVisibleTime: 10});
+          return eventPromise.then(event => {
+            expect(event.vars.totalVisibleTime).to.equal(10);
+            expect(event.type).to.equal('hidden');
+          });
         });
-      });
-    });
 
     describe('should wait on correct readyPromise', () => {
       const selector = '.target';
@@ -1477,39 +1492,72 @@ describes.realWin('Events', {amp: 1}, env => {
         });
       });
 
-      it('with documentExit trigger on unload', () => {
+      it('with documentExit trigger on unload', function* () {
         const config = {visibilitySpec: {reportWhen: 'documentExit'}};
         const tracker = root.getTracker('visible', VisibilityTracker);
-        tracker.add(tracker.root, 'visible', config, handler);
-        expect(handler).to.have.not.been.called;
+        const deferred = new Deferred();
+        const handlerSpy = sandbox.spy();
+        const handler = event => {
+          deferred.resolve(event);
+          handlerSpy();
+        };
 
+        tracker.add(tracker.root, 'visible', config, handler);
+
+        // Ensure unload event is dispatched after visibiltyModel is ready
+        yield macroTask();
+        expect(handlerSpy).to.not.be.called;
         win.dispatchEvent(new Event('unload'));
 
-        return new Promise(resolve => {
-          setTimeout(() => {
-            expect(handler).to.be.calledOnce;
-            const event = handler.args[0][0];
-            expect(event.type).to.equal('visible');
-            resolve();
-          }, 0);
+        return deferred.promise.then(event => {
+          expect(event.type).to.equal('visible');
         });
       });
 
-      it('with documentExit trigger on pagehide', () => {
+      it('with documentExit trigger on pagehide', function* () {
         const config = {visibilitySpec: {reportWhen: 'documentExit'}};
         const tracker = root.getTracker('visible', VisibilityTracker);
-        tracker.add(tracker.root, 'visible', config, handler);
-        expect(handler).to.have.not.been.called;
 
+        const deferred = new Deferred();
+        const handlerSpy = sandbox.spy();
+        const handler = event => {
+          deferred.resolve(event);
+          handlerSpy();
+        };
+        tracker.add(tracker.root, 'visible', config, handler);
+
+        // Ensure pagehide event is dispatched after visibiltyModel is ready
+        yield macroTask();
+        expect(handlerSpy).to.not.be.called;
         win.dispatchEvent(new Event('pagehide'));
-        return new Promise(resolve => {
-          setTimeout(() => {
-            expect(handler).to.be.calledOnce;
-            const event = handler.args[0][0];
-            expect(event.type).to.equal('visible');
-            resolve();
-          }, 0);
+
+        return deferred.promise.then(event => {
+          expect(event.type).to.equal('visible');
         });
+      });
+    });
+
+    describe('Unmeasurable with HostAPI', () => {
+      beforeEach(() => {
+        sandbox.stub(tracker.root, 'isUsingHostAPI').callsFake(() => {
+          return Promise.resolve(true);
+        });
+      });
+
+      it('element level selector is unmeasurable', () => {
+        expectAsyncConsoleError(
+            /Element  .target that is not root is not supported with host API/);
+        const config =
+            {visibilitySpec: {selector: '.target'}};
+        tracker.add(analyticsElement, 'visible', config, eventResolver);
+      });
+
+      it('reportWhen documentExit is unmeasurable', () => {
+        expectAsyncConsoleError(
+            /reportWhen : documentExit is not supported with host API/);
+        const config =
+            {visibilitySpec: {selector: ':root', reportWhen: 'documentExit'}};
+        tracker.add(analyticsElement, 'visible', config, eventResolver);
       });
     });
   });

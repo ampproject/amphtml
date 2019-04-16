@@ -16,7 +16,7 @@
 
 import {CONFIG_TAG, SERVICE_TAG, TAG} from './vars';
 import {dev, user, userAssert} from '../../../src/log';
-import {escapeCssSelectorIdent} from '../../../src/dom';
+import {escapeCssSelectorIdent} from '../../../src/css';
 import {getServiceForDoc} from '../../../src/service';
 import {parseUrlDeprecated} from '../../../src/url';
 
@@ -25,6 +25,7 @@ export const WebPushConfigAttributes = {
   HELPER_FRAME_URL: 'helper-iframe-url',
   PERMISSION_DIALOG_URL: 'permission-dialog-url',
   SERVICE_WORKER_URL: 'service-worker-url',
+  SERVICE_WORKER_SCOPE: 'service-worker-scope',
 };
 
 /** @enum {string} */
@@ -71,12 +72,13 @@ export class WebPushConfig extends AMP.BaseElement {
       'helper-iframe-url': null,
       'permission-dialog-url': null,
       'service-worker-url': null,
+      'service-worker-scope': null,
     };
 
     for (const attribute in WebPushConfigAttributes) {
       const value = WebPushConfigAttributes[attribute];
       userAssert(
-          this.element.getAttribute(value),
+          this.element.getAttribute(value) || value === 'service-worker-scope',
           `The ${value} attribute is required for <${CONFIG_TAG}>`
       );
       config[value] = this.element.getAttribute(value);
@@ -113,6 +115,7 @@ export class WebPushConfig extends AMP.BaseElement {
           'to be installed.'
       );
     }
+
 
     if (
       parseUrlDeprecated(config['service-worker-url']).origin !==

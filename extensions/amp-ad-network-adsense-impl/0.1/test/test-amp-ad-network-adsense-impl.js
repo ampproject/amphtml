@@ -19,10 +19,7 @@
 // always available for them. However, when we test an impl in isolation,
 // AmpAd is not loaded already, so we need to load it separately.
 import '../../../amp-ad/0.1/amp-ad';
-import {
-  ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME,
-  AdSenseAmpAutoAdsHoldoutBranches,
-} from '../../../../ads/google/adsense-amp-auto-ads';
+import {AmpA4A} from '../../../amp-a4a/0.1/amp-a4a';
 import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
 import {
   AmpAdNetworkAdsenseImpl,
@@ -42,6 +39,7 @@ import {
   forceExperimentBranch,
   toggleExperiment,
 } from '../../../../src/experiments';
+import {utf8Decode, utf8Encode} from '../../../../src/utils/bytes';
 
 function createAdsenseImplElement(attributes, doc, opt_tag) {
   const tag = opt_tag || 'amp-ad';
@@ -533,25 +531,6 @@ describes.realWin('amp-ad-network-adsense-impl', {
       return impl.getAdUrl().then(
           url => expect(url).to.match(/eid=[^&]*21062003/));
     });
-    it('includes eid when in amp-auto-ads holdout control', () => {
-      forceExperimentBranch(impl.win,
-          ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME,
-          AdSenseAmpAutoAdsHoldoutBranches.CONTROL);
-      impl.divertExperiments();
-      return impl.getAdUrl().then(url => {
-        expect(url).to.match(new RegExp(
-            `eid=[^&]*${AdSenseAmpAutoAdsHoldoutBranches.CONTROL}`));
-      });
-    });
-    it('includes eid when in amp-auto-ads holdout experiment', () => {
-      forceExperimentBranch(impl.win,
-          ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME,
-          AdSenseAmpAutoAdsHoldoutBranches.EXPERIMENT);
-      return impl.getAdUrl().then(url => {
-        expect(url).to.match(new RegExp(
-            `eid=[^&]*${AdSenseAmpAutoAdsHoldoutBranches.EXPERIMENT}`));
-      });
-    });
     it('returns the right URL', () => {
       element.setAttribute('data-ad-slot', 'some_slot');
       element.setAttribute('data-language', 'lxz');
@@ -851,7 +830,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
       expect(promise).to.exist;
       yield promise;
 
-      expect(adsense.attemptChangeSize).to.be.calledWith(1290, VIEWPORT_WIDTH);
+      expect(adsense.attemptChangeSize).to.be.calledWith(1386, VIEWPORT_WIDTH);
     });
   });
 
@@ -958,21 +937,21 @@ describes.realWin('amp-ad-network-adsense-impl', {
     it('should request 100px height for very small viewports', () => {
       expect(
           AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
-              'rspv', {width: 100, height: 667}))
+              'rspv', {width: 100, height: 667}, doc.createElement('div')))
           .to.be.equal(100);
     });
 
     it('should request 6:5 aspect ratio for normal viewport (iPhone 5)', () => {
       expect(
           AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
-              'rspv', {width: 320, height: 568}))
+              'rspv', {width: 320, height: 568}, doc.createElement('div')))
           .to.be.equal(267);
     });
 
     it('should request 300px height for wide viewports', () => {
       expect(
           AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
-              'rspv', {width: 500, height: 667}))
+              'rspv', {width: 500, height: 667}, doc.createElement('div')))
           .to.be.equal(300);
     });
   });
@@ -981,21 +960,30 @@ describes.realWin('amp-ad-network-adsense-impl', {
     it('get matched content responsive height for iPhone 6', () => {
       expect(
           AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
-              'mcrspv', {width: 375, height: 320}))
-          .to.be.equal(1290);
+              'mcrspv', {width: 375, height: 320}, doc.createElement('div')))
+          .to.be.equal(1386);
     });
 
     it('get matched content responsive height for iPhone 5', () => {
       expect(
           AmpAdNetworkAdsenseImpl.getResponsiveHeightForContext_(
-              'mcrspv', {width: 320, height: 320}))
-          .to.be.equal(1100);
+              'mcrspv', {width: 320, height: 320}, doc.createElement('div')))
+          .to.be.equal(1200);
     });
   });
 
   describe('#delayAdRequestEnabled', () => {
-    it('should return true', () =>
-      expect(impl.delayAdRequestEnabled()).to.be.true);
+    it('should return 3', () => {
+      impl.divertExperiments();
+      expect(impl.delayAdRequestEnabled()).to.equal(3);
+    });
+
+    it('should respect loading strategy', () => {
+      impl.element.setAttribute(
+          'data-loading-strategy', 'prefer-viewability-over-views');
+      impl.divertExperiments();
+      expect(impl.delayAdRequestEnabled()).to.equal(1.25);
+    });
   });
 
   describe('#preconnect', () => {
@@ -1028,6 +1016,67 @@ describes.realWin('amp-ad-network-adsense-impl', {
     it('should return true on a non-canonical page', () => {
       impl.win.location.origin = 'https://www-somesite.cdn.ampproject.org';
       expect(impl.isXhrAllowed()).to.be.true;
+    });
+  });
+
+  describe('#checksumVerification', () => {
+    it('should call super if missing Algorithm header', () => {
+      sandbox.stub(AmpA4A.prototype, 'maybeValidateAmpCreative')
+          .returns(Promise.resolve('foo'));
+      const creative = '<html><body>This is some text</body></html>';
+      const mockHeaders = {
+        get: key => {
+          switch (key) {
+            case 'AMP-Verification-Checksum-Algorithm':
+              return 'unknown';
+            case 'AMP-Verification-Checksum':
+              return btoa('2569076912');
+            default:
+              throw new Error(`unexpected header: ${key}`);
+          }
+        },
+      };
+      expect(AmpAdNetworkAdsenseImpl.prototype.maybeValidateAmpCreative(
+          utf8Encode(creative), mockHeaders)).to.eventually.equal('foo');
+    });
+
+    it('should properly validate checksum', () => {
+      const creative = '<html><body>This is some text</body></html>';
+      const mockHeaders = {
+        get: key => {
+          switch (key) {
+            case 'AMP-Verification-Checksum-Algorithm':
+              return 'djb2a-32';
+            case 'AMP-Verification-Checksum':
+              return btoa('2569076912');
+            default:
+              throw new Error(`unexpected header: ${key}`);
+          }
+        },
+      };
+      return AmpAdNetworkAdsenseImpl.prototype.maybeValidateAmpCreative(
+          utf8Encode(creative), mockHeaders).then(result => {
+        expect(result).to.be.ok;
+        expect(utf8Decode(result)).to.equal(creative);
+      });
+    });
+
+    it('should fail validation if invalid checksum', () => {
+      const creative = '<html><body>This is some text</body></html>';
+      const mockHeaders = {
+        get: key => {
+          switch (key) {
+            case 'AMP-Verification-Checksum-Algorithm':
+              return 'djb2a-32';
+            case 'AMP-Verification-Checksum':
+              return btoa('12345');
+            default:
+              throw new Error(`unexpected header: ${key}`);
+          }
+        },
+      };
+      expect(AmpAdNetworkAdsenseImpl.prototype.maybeValidateAmpCreative(
+          utf8Encode(creative), mockHeaders)).to.eventually.not.be.ok;
     });
   });
 });

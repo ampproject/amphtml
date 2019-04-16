@@ -340,6 +340,32 @@ ReactDatesConstants.ANCHOR_LEFT;
 /** @const {string} */
 ReactDatesConstants.HORIZONTAL_ORIENTATION;
 
+// amp-inputmask externs
+/**
+ * @constructor
+ */
+var Inputmask = class {};
+
+/** @param {!Object} unusedOpts */
+Inputmask.extendAliases = function (unusedOpts) {};
+
+/** @param {!Object} unusedOpts */
+Inputmask.extendDefaults = function (unusedOpts) {};
+
+/** @param {!Element} unusedElement */
+Inputmask.prototype.mask = function (unusedElement) {};
+
+Inputmask.prototype.remove = function () {};
+
+/** @dict */
+window.AMP.dependencies = {};
+
+/**
+ * @param {!Element} unusedElement
+ * @return {!Inputmask}
+ */
+window.AMP.dependencies.inputmaskFactory = function(unusedElement) {};
+
 // Should have been defined in the closure compiler's extern file for
 // IntersectionObserverEntry, but appears to have been omitted.
 IntersectionObserverEntry.prototype.rootBounds;
@@ -348,9 +374,6 @@ IntersectionObserverEntry.prototype.rootBounds;
 window.PerformancePaintTiming;
 window.PerformanceObserver;
 Object.prototype.entryTypes
-
-Element.prototype.signals;
-window.whenSignal;
 
 /** @typedef {number}  */
 var time;
@@ -367,6 +390,37 @@ var UnlistenDef;
  * @typedef {!Element}
  */
 var AmpElement;
+
+/** @return {!Signals} */
+AmpElement.prototype.signals = function() {};
+
+var Signals = class {};
+/**
+  * @param {string} unusedName
+  * @return {number|!Error|null}
+  */
+Signals.prototype.get = function(unusedName) {};
+
+/**
+  * @param {string} unusedName
+  * @return {!Promise<time>}
+  */
+Signals.prototype.whenSignal = function(unusedName) {};
+
+/**
+  * @param {string} unusedName
+  * @param {time=} unusedOpt_time
+  */
+Signals.prototype.signal = function(unusedName, unusedOpt_time) {};
+
+/**
+  * @param {string} unusedName
+  * @param {!Error} unusedError
+  */
+Signals.prototype.rejectSignal = function(unusedName, unusedError) {};
+
+/** @param {string} unusedName */
+Signals.prototype.reset = function(unusedName) {};
 
 // Temp until we figure out forward declarations
 /** @constructor */

@@ -15,13 +15,14 @@
  */
 
 import {CSS} from '../../../build/amp-story-hint-1.0.css';
-import {LocalizedStringId} from './localization';
-import {Services} from '../../../src/services';
 import {
+  EmbeddedComponentState,
   StateProperty,
   UIType,
   getStoreService,
 } from './amp-story-store-service';
+import {LocalizedStringId} from '../../../src/localized-strings';
+import {Services} from '../../../src/services';
 import {createShadowRootWithStyle} from './utils';
 import {dict} from '../../../src/utils/object';
 import {renderAsElement} from './simple-template';
@@ -181,9 +182,10 @@ export class AmpStoryHint {
       this.onBookendStateUpdate_(isOpen);
     });
 
-    this.storeService_.subscribe(
-        StateProperty.EMBEDDED_COMPONENT, tooltipIsOpen => {
-          this.onFocusedStateUpdate_(tooltipIsOpen);
+    this.storeService_.subscribe(StateProperty.INTERACTIVE_COMPONENT_STATE,
+        /** @param {./amp-story-store-service.InteractiveComponentDef} component */ component => {
+          this.hideOnFocusedState_(
+              component.state === EmbeddedComponentState.FOCUSED);
         });
 
     this.vsync_.mutate(() => {
@@ -312,12 +314,12 @@ export class AmpStoryHint {
   }
 
   /**
-   * Hides navigation if tooltip is open.
-   * @param {boolean} isOpen
+   * Hides navigation hint if tooltip is open.
+   * @param {boolean} isActive
    * @private
    */
-  onFocusedStateUpdate_(isOpen) {
-    if (isOpen) {
+  hideOnFocusedState_(isActive) {
+    if (isActive) {
       this.hideAllNavigationHint();
     }
   }

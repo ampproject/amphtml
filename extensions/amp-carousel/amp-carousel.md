@@ -1,3 +1,12 @@
+---
+$category@: layout
+formats:
+  - websites
+  - email
+  - ads
+teaser:
+  text: Displays multiple similar pieces of content along a horizontal axis.
+---
 <!---
 Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,15 +23,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-carousel"></a> `amp-carousel`
+# amp-carousel
 
-[TOC]
+A generic carousel for displaying multiple similar pieces of content along a horizontal axis; meant to be highly flexible and performant.
 
 <table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>A generic carousel for displaying multiple similar pieces of content along a horizontal axis; meant to be highly flexible and performant.</td>
-  </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js">&lt;/script></code></td>
@@ -84,77 +89,74 @@ In the following example, we have a carousel of three images with preview button
 </div>
 
 ## Attributes
-
-##### type
-
-Specifies the display type for the carousel items, which can be:
-
-- **`carousel`** (default): All slides are shown and are scrollable horizontally. This type  supports only the following layouts: `fixed`, `fixed-height`, and `nodisplay`.
-- **`slides`**: Shows a single slide at a time. This type supports the following layouts: `fill`, `fixed`, `fixed-height`, `flex-item`, `nodisplay`, and `responsive`.
-
-##### height (required)
-
-Specifies the height of the carousel, in pixels.
-
-##### controls (optional)
-
-Permanently displays left and right arrows for the user to navigate carousel items on mobile devices.
+<table>
+  <tr>
+    <td width="40%"><strong>type</strong></td>
+    <td>Specifies the display type for the carousel items, which can be:
+<ul>
+  <li>**`carousel`** (default): All slides are shown and are scrollable horizontally. This type supports only the following layouts: `fixed`, `fixed-height`, and `nodisplay`.</li>
+  <li>**`slides`**: Shows a single slide at a time. This type supports the following layouts: `fill`, `fixed`, `fixed-height`, `flex-item`, `nodisplay`, and `responsive`.</li>
+</ul></td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>height (required)</strong></td>
+    <td>Specifies the height of the carousel, in pixels.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>controls (optional)</strong></td>
+    <td>Permanently displays left and right arrows for the user to navigate carousel items on mobile devices.
 By default, navigational arrows disappear after a few seconds on mobile.
-The visibility of arrows can also be controlled via styling, and a media query can be used to only display arrows at certain screen widths. On desktop, arrows are always displayed unless only a single child is present.
-
-##### data-next-button-aria-label (optional)
-
-Sets the aria-label for the `amp-carousel-button-next`. If no value is given, the aria-label defaults to 'Next item in carousel'.
-
-##### data-prev-button-aria-label (optional)
-
-Sets the aria-label for the `amp-carousel-button-prev`. If no value is given, the aria-label defaults to 'Previous item in carousel'.
-
-##### data-button-count-format (optional)
-
-A format string that looks like `(%s of %s)`, used as a suffix to the aria-label for `amp-carousel-button-next`/`amp-carousel-button-prev`. This provides information to users using a screen reader on their progress through the carousel. If no value is given, this defaults to '(%s of %s)'.
-
-#####  autoplay (optional)
-
-Advances the slide to the next slide without user interaction.
-
-If present without a value:
-
-- By default, advances a slide in 5000 millisecond intervals (5 seconds); this can be overridden by the `delay` attribute.
-- Attaches the `loop` attribute to `amp-carousel` if `loop` is not already present.
-- Requires at least 2 slides for autoplay to occur.
-- Applies only to carousels with `type=slides`.
-
-If present with a value:
-
-- Attaches the `loop` attribute to `amp-carousel` if `loop` is not already present.
-- Removes the `loop` attribute after the requisite number of loops are made.
-
-##### delay (optional)
-
-Specifies the duration (in milliseconds) to delay advancing to the next slide when `autoplay` is enabled. The `delay` attribute is only applicable to carousels with `type=slides`.  
-
-##### loop  (optional)
-
-Allows the user to advance past the first item or the final item. There must be at least 3 slides for looping to occur. The `loop` attribute is only applicable to carousels with `type=slides`.
-
-*Example: Displays a slides carousel with controls, looping, and delayed autoplay*
-
+The visibility of arrows can also be controlled via styling, and a media query can be used to only display arrows at certain screen widths. On desktop, arrows are always displayed unless only a single child is present.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-next-button-aria-label (optional)</strong></td>
+    <td>Sets the aria-label for the <code>amp-carousel-button-next</code>. If no value is given, the aria-label defaults to 'Next item in carousel'.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-prev-button-aria-label (optional)</strong></td>
+    <td>Sets the aria-label for the <code>amp-carousel-button-prev</code>. If no value is given, the aria-label defaults to 'Previous item in carousel'.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-button-count-format (optional)</strong></td>
+    <td>A format string that looks like <code>(%s of %s)</code>, used as a suffix to the aria-label for <code>amp-carousel-button-next</code>/<code>amp-carousel-button-prev</code>. This provides information to users using a screen reader on their progress through the carousel. If no value is given, this defaults to '(%s of %s)'.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>autoplay (optional)</strong></td>
+    <td><p>Advances the slide to the next slide without user interaction.<br>
+  If present without a value:</p>
+<ul>
+  <li>By default, advances a slide in 5000 millisecond intervals (5 seconds); this can be overridden by the `delay` attribute.</li>
+  <li>Attaches the `loop` attribute to `amp-carousel` if `loop` is not already present.</li>
+  <li>Requires at least 2 slides for autoplay to occur.</li>
+  <li>Applies only to carousels with `type=slides`.</li>
+</ul>
+<p>If present with a value:</p>
+<ul>
+  <li>Attaches the `loop` attribute to `amp-carousel` if `loop` is not already present.</li>
+  <li>Removes the `loop` attribute after the requisite number of loops are made.</li>
+</ul></td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>delay (optional)</strong></td>
+    <td>Specifies the duration (in milliseconds) to delay advancing to the next slide when <code>autoplay</code> is enabled. The <code>delay</code> attribute is only applicable to carousels with <code>type=slides</code>.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>loop (optional)</strong></td>
+    <td><p>Allows the user to advance past the first item or the final item. There must be at least 3 slides for looping to occur. The <code>loop</code> attribute is only applicable to carousels with <code>type=slides</code>.</p>
+<p><em>Example: Displays a slides carousel with controls, looping, and delayed autoplay</em></p>
 <!--embedded example - displays in ampproject.org -->
 <div>
-<amp-iframe height="446"
-            layout="fixed-height"
-            sandbox="allow-scripts allow-forms allow-same-origin"
-            resizable
-            src="https://ampproject-b5f4c.firebaseapp.com/examples/ampcarousel.controls.embed.html">
-  <div overflow tabindex="0" role="button" aria-label="Show more">Show full code</div>
-  <div placeholder></div>
-</amp-iframe>
-</div>
-
-##### common attributes
-
-This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
+  <amp-iframe height="446" layout="fixed-height" sandbox="allow-scripts allow-forms allow-same-origin" resizable src="https://ampproject-b5f4c.firebaseapp.com/examples/ampcarousel.controls.embed.html">
+    <div overflow tabindex="0" role="button" aria-label="Show more">Show full code</div>
+    <div placeholder></div>
+  </amp-iframe>
+</div></td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>common attributes</strong></td>
+    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
+  </tr>
+</table>
 
 ## Styling
 - You may use the `amp-carousel` element selector to style it freely.

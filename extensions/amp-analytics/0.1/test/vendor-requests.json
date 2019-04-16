@@ -151,7 +151,9 @@
     "awCommonParams": "<ignore for test>",
     "awConversion": "https://www.googleadservices.com/pagead/conversion/!conversionId/?cv=amp3&label=!conversionLabel&random=_random_&url=_source_url_&ref=_document_referrer_&fst=_page_view_id_&num=_counter_&fmt=3&async=1&u_h=_screen_height_&u_w=_screen_width_&u_ah=_available_screen_height_&u_aw=_available_screen_width_&u_cd=_screen_color_depth_&u_tz=_timezone_&tiba=_title_&guid=ON&script=0",
     "awRemarketing": "https://googleads.g.doubleclick.net/pagead/viewthroughconversion/!conversionId/?cv=amp3&label=!conversionLabel&random=_random_&url=_source_url_&ref=_document_referrer_&fst=_page_view_id_&num=_counter_&fmt=3&async=1&u_h=_screen_height_&u_w=_screen_width_&u_ah=_available_screen_height_&u_aw=_available_screen_width_&u_cd=_screen_color_depth_&u_tz=_timezone_&tiba=_title_&guid=ON&script=0",
-    "flBase": "https://ad.doubleclick.net/activity;src=!flSrc;type=!flType;cat=!flCat"
+    "flBase": "https://ad.doubleclick.net/activity;src=!flSrc;type=!flType;cat=!flCat",
+    "flDynamicBase": "https://!flSrc.fls.doubleclick.net/activityi;src=!flSrc;type=!flType;cat=!flCat",
+    "dnsBase": "https://ad.doubleclick.net/ddm/clk/"
   },
   "ibeatanalytics": {
     "host": "https://ibeat.indiatimes.com",
@@ -171,6 +173,11 @@
     "pageview": "https://api.keen.io/3.0/projects/!projectId/events/pageviews?api_key=!writeKey&amp=true&ampdocHostname=_ampdoc_hostname_&ampdocUrl=_ampdoc_url_&ampVersion=_amp_version_&backgroundState=_background_state_&backgroundedAtStart=!backgroundedAtStart&browserLanguage=_browser_language_&canonicalHost=_canonical_host_&canonicalHostname=_canonical_hostname_&canonicalPath=_canonical_path_&canonicalUrl=_canonical_url_&clientId=_client_id_&contentLoadTime=_content_load_time_&documentReferrer=_document_referrer_&domainLookupTime=_domain_lookup_time_&domInteractiveTime=_dom_interactive_time_&externalReferrer=_external_referrer_&incrementalEngagedTime=_incremental_engaged_time_&pageDownloadTime=_page_download_time_&pageLoadTime=_page_load_time_&screenHeight=_screen_height_&screenWidth=_screen_width_&screenColorDepth=_screen_color_depth_&scrollHeight=_scroll_height_&scrollWidth=_scroll_width_&scrollTop=_scroll_top_&scrollLeft=_scroll_left_&serverResponseTime=_server_response_time_&timestamp=_timestamp_&timezone=_timezone_&title=_title_&totalEngagedTime=_total_engaged_time_&totalTime=!totalTime&userAgent=_user_agent_&viewportHeight=_viewport_height_&viewportWidth=_viewport_width_",
     "click": "https://api.keen.io/3.0/projects/!projectId/events/clicks?api_key=!writeKey&amp=true&ampdocHostname=_ampdoc_hostname_&ampdocUrl=_ampdoc_url_&ampVersion=_amp_version_&backgroundState=_background_state_&backgroundedAtStart=!backgroundedAtStart&browserLanguage=_browser_language_&canonicalHost=_canonical_host_&canonicalHostname=_canonical_hostname_&canonicalPath=_canonical_path_&canonicalUrl=_canonical_url_&clientId=_client_id_&contentLoadTime=_content_load_time_&documentReferrer=_document_referrer_&domainLookupTime=_domain_lookup_time_&domInteractiveTime=_dom_interactive_time_&externalReferrer=_external_referrer_&incrementalEngagedTime=_incremental_engaged_time_&pageDownloadTime=_page_download_time_&pageLoadTime=_page_load_time_&screenHeight=_screen_height_&screenWidth=_screen_width_&screenColorDepth=_screen_color_depth_&scrollHeight=_scroll_height_&scrollWidth=_scroll_width_&scrollTop=_scroll_top_&scrollLeft=_scroll_left_&serverResponseTime=_server_response_time_&timestamp=_timestamp_&timezone=_timezone_&title=_title_&totalEngagedTime=_total_engaged_time_&totalTime=!totalTime&userAgent=_user_agent_&viewportHeight=_viewport_height_&viewportWidth=_viewport_width_",
     "custom": "https://api.keen.io/3.0/projects/!projectId/events/!collection?api_key=!writeKey&amp=true&ampdocHostname=_ampdoc_hostname_&ampdocUrl=_ampdoc_url_&ampVersion=_amp_version_&backgroundState=_background_state_&backgroundedAtStart=!backgroundedAtStart&browserLanguage=_browser_language_&canonicalHost=_canonical_host_&canonicalHostname=_canonical_hostname_&canonicalPath=_canonical_path_&canonicalUrl=_canonical_url_&clientId=_client_id_&contentLoadTime=_content_load_time_&documentReferrer=_document_referrer_&domainLookupTime=_domain_lookup_time_&domInteractiveTime=_dom_interactive_time_&externalReferrer=_external_referrer_&incrementalEngagedTime=_incremental_engaged_time_&pageDownloadTime=_page_download_time_&pageLoadTime=_page_load_time_&screenHeight=_screen_height_&screenWidth=_screen_width_&screenColorDepth=_screen_color_depth_&scrollHeight=_scroll_height_&scrollWidth=_scroll_width_&scrollTop=_scroll_top_&scrollLeft=_scroll_left_&serverResponseTime=_server_response_time_&timestamp=_timestamp_&timezone=_timezone_&title=_title_&totalEngagedTime=_total_engaged_time_&totalTime=!totalTime&userAgent=_user_agent_&viewportHeight=_viewport_height_&viewportWidth=_viewport_width_"
+  },
+  "kenshoo": {
+    "host": "https://amp.xg4ken.com",
+    "parameters": "ampcid=_client_id_&chcid=_query_param_&tid=!tid&uid=!userId&domain=_canonical_hostname_",
+    "landingPage": "https://amp.xg4ken.com/amp/v1/match?ampcid=_client_id_&chcid=_query_param_&tid=!tid&uid=!userId&domain=_canonical_hostname_"
   },
   "krux": {
     "beaconHost": "https://beacon.krxd.net",
@@ -254,6 +261,9 @@
   },
   "mpulse": {
     "onvisible": "https://!beacon_url?h.d=!h.d&h.key=!h.key&h.t=!h.t&h.cr=!h.cr&rt.start=navigation&rt.si=_client_id_&rt.ss=_timestamp_&rt.end=_timestamp_&t_resp=_nav_timing_&t_page=_nav_timing_&t_done=_nav_timing_&nt_nav_type=_nav_type_&nt_red_cnt=_nav_redirect_count_&nt_nav_st=_nav_timing_&nt_red_st=_nav_timing_&nt_red_end=_nav_timing_&nt_fet_st=_nav_timing_&nt_dns_st=_nav_timing_&nt_dns_end=_nav_timing_&nt_con_st=_nav_timing_&nt_ssl_st=_nav_timing_&nt_con_end=_nav_timing_&nt_req_st=_nav_timing_&nt_res_st=_nav_timing_&nt_unload_st=_nav_timing_&nt_unload_end=_nav_timing_&nt_domloading=_nav_timing_&nt_res_end=_nav_timing_&nt_domint=_nav_timing_&nt_domcontloaded_st=_nav_timing_&nt_domcontloaded_end=_nav_timing_&nt_domcomp=_nav_timing_&nt_load_st=_nav_timing_&nt_load_end=_nav_timing_&v=1&http.initiator=amp&u=_source_url_&amp.u=_ampdoc_url_&r2=_document_referrer_&scr.xy=_screen_width_x_screen_height_"
+  },
+  "navegg": {
+    "pageview": "https://amp.navdmp.com/amp?aid=_client_id_&url=_canonical_url_&ref=_document_referrer_&tit=_title_&lan=_browser_language_&acc=!account&v=7"
   },
   "newrelic": {
     "pageview": "https://bam.nr-data.net/amp?appId=!appId&licenseKey=!licenseKey&ampUrl=_ampdoc_url_&canonicalUrl=_canonical_url_&timeToDomContentLoadedEventEnd=_nav_timing_&timeToDomInteractive=_nav_timing_&timeToDomComplete=_nav_timing_&timeToDomLoading=_nav_timing_&timeToResponseStart=_nav_timing_&timeToResponseEnd=_nav_timing_&timeToLoadEventStart=_nav_timing_&timeToLoadEventEnd=_nav_timing_&timeToConnectStart=_nav_timing_&timeToConnectEnd=_nav_timing_&timeToFetchStart=_nav_timing_&timeToRequestStart=_nav_timing_&timeToUnloadEventStart=_nav_timing_&timeToUnloadEventEnd=_nav_timing_&timeToDomainLookupStart=_nav_timing_&timeToDomainLookupEnd=_nav_timing_&timeToRedirectStart=_nav_timing_&timeToRedirectEnd=_nav_timing_&timeToSecureConnection=_nav_timing_&timestamp=_timestamp_&ampVersion=_amp_version_&pageLoadTime=_page_load_time_"
@@ -344,6 +354,12 @@
     "base": "?api.api_key=!writeKey&prop._platform=amp&prop._device_id=_client_id_&prop.locale=_browser_language_&prop.path=_canonical_path_&prop.url=_canonical_url_&prop.color_depth=_screen_color_depth_&prop._referrer=_document_referrer_&prop.title=_title_&prop.timezone=_timezone_&prop._time=_timestamp_&prop.resolution=_screen_width_ × _screen_height_",
     "pageview": "https://!apiEndpoint/event/pixel?api.api_key=!writeKey&prop._platform=amp&prop._device_id=_client_id_&prop.locale=_browser_language_&prop.path=_canonical_path_&prop.url=_canonical_url_&prop.color_depth=_screen_color_depth_&prop._referrer=_document_referrer_&prop.title=_title_&prop.timezone=_timezone_&prop._time=_timestamp_&prop.resolution=_screen_width_ × _screen_height_&collection=!pageViewName",
     "custom": "https://!apiEndpoint/event/pixel?api.api_key=!writeKey&prop._platform=amp&prop._device_id=_client_id_&prop.locale=_browser_language_&prop.path=_canonical_path_&prop.url=_canonical_url_&prop.color_depth=_screen_color_depth_&prop._referrer=_document_referrer_&prop.title=_title_&prop.timezone=_timezone_&prop._time=_timestamp_&prop.resolution=_screen_width_ × _screen_height_&collection=!collection"
+  },
+  "reppublika": {
+	  "host": "https://t5.mindtake.com",
+	  "basePrefix": "/tag/cid/",
+	  "baseSuffix": "Service=!service&Category=!category&Url=_source_url_&Device=!device&uid=_random_",
+	  "pageview": "https://t5.mindtake.com/tag/cid/!code/track.gif?Service=!service&Category=!category&Url=_source_url_&Device=!device&uid=_random_"
   },
   "retargetly": {
     "host": "https://api.retargetly.com",

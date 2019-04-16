@@ -24,18 +24,20 @@ import ampToolboxCacheUrl from
 
 import {Deferred, tryResolve} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
-import {dev} from '../../../src/log';
+import {dev, devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {
   getServiceForDoc,
   registerServiceBuilderForDoc,
 } from '../../../src/service';
+import {getSourceOrigin} from '../../../src/url';
 import {listenFor, postMessage} from '../../../src/iframe-helper';
 import {loadPromise} from '../../../src/event-helper';
 import {removeElement} from '../../../src/dom';
 import {setStyle} from '../../../src/style';
 import {urls} from '../../../src/config';
+import {version} from '../../../src/internal-version';
 
 /**
  * @fileoverview
@@ -79,6 +81,9 @@ export class AmpRecaptchaService {
 
     /** @private {number} */
     this.registeredElementCount_ = 0;
+
+    /** @private {?string} */
+    this.recaptchaFrameOrigin_ = null;
 
     /** @private {!Deferred} */
     this.recaptchaApiReady_ = new Deferred();
@@ -153,12 +158,10 @@ export class AmpRecaptchaService {
       });
 
       // Send the message
-      postMessage(
-          dev().assertElement(this.iframe_),
-          'amp-recaptcha-action',
-          message,
-          '*',
-          true);
+      this.postMessageToIframe_(
+          /** @type {string} */ (devAssert(this.recaptchaFrameOrigin_)),
+          message
+      );
     });
     return executePromise.promise;
   }
@@ -217,6 +220,7 @@ export class AmpRecaptchaService {
     const iframe = this.win_.document.createElement('iframe');
 
     return this.getRecaptchaFrameSrc_().then(recaptchaFrameSrc => {
+      this.recaptchaFrameOrigin_ = getSourceOrigin(recaptchaFrameSrc);
       iframe.src = recaptchaFrameSrc;
       iframe.setAttribute('scrolling', 'no');
       iframe.setAttribute('data-amp-3p-sentinel', 'amp-recaptcha');
@@ -251,11 +255,28 @@ export class AmpRecaptchaService {
    */
   getRecaptchaFrameSrc_() {
     if (getMode().localDev || getMode().test) {
-      return ampToolboxCacheUrl.createCurlsSubdomain(this.win_.location.href)
+
+      /**
+       * Get our window location.
+       * In localDev mode, this will be this.win_.location
+       * In test mode, this will be this.win_.testLocation
+       *
+       * tesLocation is needed because test fixtures are
+       * loaded in friendly iframes, thus win.location
+       * would give about:blank.
+       */
+      let winLocation = this.win_.location;
+      if (this.win_.testLocation) {
+        winLocation = this.win_.testLocation;
+      }
+
+      // TODO: win location href curls domain MAY need to be the same
+      return ampToolboxCacheUrl.createCurlsSubdomain(winLocation.href)
           .then(curlsSubdomain => {
-            return 'http://' + curlsSubdomain +
-          '.recaptcha.localhost:8000/dist.3p/' +
-          (getMode().minified ? '$internalRuntimeVersion$/recaptcha'
+            return '//' + curlsSubdomain +
+              '.recaptcha.' + winLocation.host
+              + '/dist.3p/' +
+          (getMode().minified ? `${version()}/recaptcha`
             : 'current/recaptcha.max') +
           '.html';
           });
@@ -278,7 +299,7 @@ export class AmpRecaptchaService {
 
     return curlsSubdomainPromise.then(curlsSubdomain => {
       const recaptchaFrameSrc = 'https://' + curlsSubdomain +
-        `.recaptcha.${urls.thirdPartyFrameHost}/$internalRuntimeVersion$/` +
+        `.recaptcha.${urls.thirdPartyFrameHost}/${version()}/` +
         'recaptcha.html';
       return recaptchaFrameSrc;
     });
@@ -292,29 +313,67 @@ export class AmpRecaptchaService {
    * @private
    */
   listenIframe_(evName, cb) {
+
+    const checkOriginWrappedCallback = (data, source, origin) => {
+      if (this.recaptchaFrameOrigin_ === origin) {
+        cb(data, source, origin);
+      }
+    };
+
     return listenFor(
         dev().assertElement(this.iframe_),
         evName,
-        cb,
+        checkOriginWrappedCallback,
+        true);
+  }
+
+  /**
+   * Function to send a message to our iframe
+   * @param {string} origin
+   * @param {!JsonObject} message
+   * @private
+   */
+  postMessageToIframe_(origin, message) {
+    postMessage(
+        dev().assertElement(this.iframe_),
+        'amp-recaptcha-action',
+        message,
+        origin,
         true);
   }
 
   /**
    * Function to handle token messages from the recaptcha iframe
+   *
+   * NOTE: Use bracket notation to access message properties,
+   * As the externs were a little too generic.
+   *
    * @param {Object} data
    */
   tokenMessageHandler_(data) {
-    this.executeMap_[data.id].resolve(data.token);
-    delete this.executeMap_[data.id];
+
+    const id = data['id'];
+    const token = data['token'];
+
+    this.executeMap_[id].resolve(token);
+    delete this.executeMap_[id];
   }
 
   /**
    * Function to handle error messages from the recaptcha iframe
+   *
+   * NOTE: Use bracket notation to access message properties,
+   * As the externs were a little too generic.
+   *
    * @param {Object} data
    */
   errorMessageHandler_(data) {
-    this.executeMap_[data.id].reject(new Error(data.error));
-    delete this.executeMap_[data.id];
+
+    const id = data['id'];
+    const error = data['error'];
+
+    this.executeMap_[id].reject(new Error(error));
+    delete this.executeMap_[id];
   }
 }
 

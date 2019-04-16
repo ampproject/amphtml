@@ -24,8 +24,10 @@ const minimatch = require('minimatch');
 const path = require('path');
 const {gitDiffNameOnlyMaster} = require('../../git');
 const {green, cyan, red} = colors;
+const {isTravisBuild} = require('../../travis');
 const extensionsCssMapPath = 'EXTENSIONS_CSS_MAP';
 
+const ROOT_DIR = path.resolve(__dirname, '../../../');
 /**
  * Extracts a mapping from CSS files to JS files from a well known file
  * generated during `gulp css`.
@@ -33,7 +35,7 @@ const extensionsCssMapPath = 'EXTENSIONS_CSS_MAP';
  * @return {!Object<string, string>}
  */
 function extractCssJsFileMap() {
-  //TODO(esth): consolidate arg validation logic
+  //TODO(estherkim): consolidate arg validation logic
   if (!fs.existsSync(extensionsCssMapPath)) {
     log(red('ERROR:'), 'Could not find the file',
         cyan(extensionsCssMapPath) + '.');
@@ -119,12 +121,11 @@ function getImports(jsFile) {
     relativeImports: true,
   });
   const files = [];
-  const rootDir = path.dirname(path.dirname(__dirname));
   const jsFileDir = path.dirname(jsFile);
   imports.forEach(function(file) {
     const fullPath = path.resolve(jsFileDir, `${file}.js`);
     if (fs.existsSync(fullPath)) {
-      const relativePath = path.relative(rootDir, fullPath);
+      const relativePath = path.relative(ROOT_DIR, fullPath);
       files.push(relativePath);
     }
   });
@@ -184,18 +185,21 @@ function unitTestsToRun(unitTestPaths) {
   // Retrieves the set of unit tests that should be run
   // for a set of source files.
   function getTestsFor(srcFiles) {
-    const rootDir = path.dirname(path.dirname(__dirname));
     const allUnitTests = deglob.sync(unitTestPaths);
     return allUnitTests.filter(testFile => {
       return shouldRunTest(testFile, srcFiles);
-    }).map(fullPath => path.relative(rootDir, fullPath));
+    }).map(fullPath => path.relative(ROOT_DIR, fullPath));
   }
 
   filesChanged.forEach(file => {
-    if (isUnitTest(file)) {
+    if (!fs.existsSync(file)) {
+      if (!isTravisBuild()) {
+        log(green('INFO:'), 'Skipping', cyan(file), 'because it was deleted');
+      }
+    } else if (isUnitTest(file)) {
       testsToRun.push(file);
     } else if (path.extname(file) == '.js') {
-      srcFiles = srcFiles.concat([file]);
+      srcFiles.push(file);
     } else if (path.extname(file) == '.css') {
       srcFiles = srcFiles.concat(getJsFilesFor(file, cssJsFileMap));
     }

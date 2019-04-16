@@ -10,6 +10,7 @@ This document describes the process you will go through to make a change in AMP.
 
 We want to make it as easy as possible to get in small fixes.  A fix for a small bug should be as easy as creating a PR with the change, adding/fixing a test, and sending it to a reviewer.
 
+- [ ] Sign the [Contributor License Agreement (CLA)](#contributor-license-agreement) as soon as possible if you haven't already done so.  If you are contributing code on behalf of your company and your company is not yet covered by a CLA it can take a few days for the CLA to be verified.
 - [ ] (optional) If you are fixing a bug and there is an existing GitHub issue, assign it to yourself or comment on it to let others know you are working on it.  If there is no GitHub issue consider filing one, but for minor fixes your Pull Request description may be enough.
 - [ ] (optional) [Find a reviewer](#find-a-reviewer) before you start coding to help you answer questions.  If you don't have any questions you can find a reviewer once you have a PR ready.
 - [ ] Follow the parts of the [Implementation](#implementation) section that makes sense for your change.  There are many parts of the process that you probably won't need to follow for a minor fix--e.g. you may not need to make validator changes or put your change behind an experiment for minor fixes.  If in doubt ask your reviewer.
@@ -19,6 +20,7 @@ We want to make it as easy as possible to get in small fixes.  A fix for a small
 Significant changes (e.g. new components or significant changes to behavior) require consultation with and approval from knowledgeable members of the community.
 
 - [ ] *Before you start coding*, [find a reviewer](#find-a-reviewer) who you can discuss your change with and who can help guide you through the process.
+- [ ] Sign the [Contributor License Agreement (CLA)](#contributor-license-agreement) as soon as possible if you haven't already done so.  If you are contributing code on behalf of your company and your company is not yet covered by a CLA it can take a few days for the CLA to be verified.
 - [ ] File an [Intent-to-implement (I2I)](https://github.com/ampproject/amphtml/issues/new?assignees=&labels=INTENT+TO+IMPLEMENT&template=intent-to-implement--i2i-.md&title=I2I:%20%3Cyour%20change/update%3E) GitHub issue and cc your reviewer on it.  The I2I should include:
   -  A description of the change you plan to implement.
   -  If you are integrating a third-party service, provide a link to the third-party's site and product.
@@ -36,10 +38,20 @@ Significant changes (e.g. new components or significant changes to behavior) req
 
 ## Finding a reviewer for small changes
 
-If you're making a minor fix and just want to find someone to review/approve your code, look at the OWNERS.yaml files in the directories where you're modifying code and either:
-- assign your PR to one of them if you are able to
-- cc them by adding the text "/cc @username" in the PR description/comment
+All code must be reviewed and approved as described in the [Code review and approval](#code-review-and-approval) section.
 
+If you're making a minor fix and just want to find someone to review/approve your code, choose:
+
+- an Owner from the OWNERS.yaml file in the directories you change (or their parent directories)
+- and a [Reviewer](https://github.com/orgs/ampproject/teams/reviewers-amphtml)
+
+(It is acceptable for one person to fulfill both roles.)
+
+After you've found your reviewers:
+- add them as reviewers on your PR if you are able to
+- or cc them by adding the text "/cc @username" in the PR description/comment
+
+If the reviewers you find aren't responsive, ping the [#contributing channel](https://amphtml.slack.com/messages/C9HRJ1GPN/) on [Slack](https://bit.ly/amp-slack-signup).  You can also reach out to mrjoro on Slack or cc him on your GitHub issue/PR.
 
 ## Finding a reviewer for significant changes
 
@@ -90,8 +102,10 @@ Once you have found a reviewer, make sure to @-mention them on any issues / PRs 
   - [Push your changes](./getting-started-e2e.md#push-your-changes-to-your-github-fork)
   - [Create a Pull Request (PR)](./getting-started-e2e.md#send-a-pull-request-ie-request-a-code-review).
   - Make sure the presubmit checks shown on your PR on GitHub passes (e.g. no lint and type check errors, tests are passing).
+  - Add reviewers to your PR that will fulfill the requirements of code review and approval documented in the [Code review and approval](#code-review-and-approval) section.  (Your reviewer can help with this.)
   - [Respond to feedback](./getting-started-e2e.md#respond-to-pull-request-comments).
-- After your PR is approved, it will merged by your reviewer or one of the other approvers. To check on your changes and find out when they get into production, read [See your changes in production](./getting-started-quick.md#see-your-changes-in-production).
+- After your PR has all of the necessary approvals, your code may be merged into the repository by any Collaborator/Reviewer.  Your reviewer will typically handle this; reach out to them if your code is not merged soon after it has been approved.
+- To check on your changes and find out when they get into production, read [See your changes in production](./getting-started-quick.md#see-your-changes-in-production).
 - [Clean up](./getting-started-quick.md#delete-your-branch-after-your-changes-are-merged-optional): After your changes are merged, you can delete your working branch.
 
 ## Contributing extended components
@@ -121,3 +135,42 @@ We recommend you handle signing/being covered by a CLA *before* you send a PR to
 * **If you are planning on contributing code on behalf of your company:**
   * Your company will need to agree to a [corporate CLA](https://developers.google.com/open-source/cla/corporate) if it has not already done so.  Although this is a relatively straightforward process, it requires approval from an authorized signer at your company and a manual verification process that may take a couple of days.  To ensure you can get your code reviewed and merged quickly please start this process as soon as possible.  The signer of your corporate CLA will associate a Google Group to the corporate CLA, and any email address added to this Google Group will be considered to be covered by this corporate CLA.
   * To be covered by your company's corporate CLA the owner of the Google Group associated with the corporate CLA (someone at your company) will need to add your address to this Google Group.
+  * If you aren't sure whehther your company has already signed a corporate CLA, if you don't know who at your company owns the Google Group you need to be added to, or you run into any other questions about the corporate CLA, please reach out to @mrjoro (via cc on a PR or on [Slack](https://amphtml.slack.com) ([signup](https://bit.ly/amp-slack-signup))) or the [#contributing](https://amphtml.slack.com/messages/C9HRJ1GPN/details/) channel on Slack.
+
+## Code review and approval
+
+All code in AMP must be reviewed and approved before it is merged.  Reviewers/Collaborators primarily ensure that the code is correct, efficient and consistent with existing AMP code while Owners primarily provide a domain-specific review of the code.
+
+To be merged, all code must be approved by both:
+
+* At least one [Reviewer](https://github.com/orgs/ampproject/teams/reviewers-amphtml) who is not the author.  If the author is a Reviewer, a [Collaborator](https://github.com/orgs/ampproject/teams/reviewers-amphtml) may fulfill this requirement instead.
+* At least one [Owner](https://github.com/ampproject/amphtml/search?o=asc&q=filename%3AOWNERS.yaml&s=indexed) for all areas the PR affects, except those areas in which the code author is an Owner.
+
+It is acceptable for one person to fulfill these requirements, e.g. if an Owner who is also a Reviewer approves the PR it may be merged.
+
+Once the PR has been approved, anyone with commit rights to the repository may merge the PR, including its author.
+
+These guidelines are specific to the amphtml repository.  Other ampproject repos may follow the same guidelines or use different guidelines as documented in their CONTRIBUTING.md files.
+
+### Roles
+
+#### Collaborators
+  * Review, approve and merge PRs in the repository for which they are Collaborators.
+  * Collaborator status is granted to folks who have proven basic familiarity with the respective repository.
+  * A person may become a Collaborator after 2 merged PRs that are non-trivial (not only fixing typos, not only config changes) and a +1 from 1 current Reviewer.  To request becoming a Collaborator file an issue in the repository in which you are requesting to be a Collaborator and cc a [Reviewer](#reviewers) in that repository.
+  * The list of Collaborators is maintained in the [Collaborators (amphtml)](https://github.com/orgs/ampproject/teams/collaborators-amphtml) GitHub team.
+
+#### Reviewers
+  * Review, approve and merge PRs in the repository for which they are Reviewers.
+  * Reviewer status is granted to folks who have demonstrated deep familiarity with the code-style and conventions of the respective repository.
+  * A person may become a Reviewer after 10 merged PRs or 10 high quality reviews of complex PRs and a +1 from 1 current Reviewer.  Qualifying PRs must be non-trivial (not only fixing typos, not only config changes) and should have implemented or documented at least 2 new features.  To request becoming a Reviewer file an issue in the repository in which you are requesting to be a Reviewer and assign/cc a Reviewer in that repository.
+  * The list of Reviewers is maintained in the [Reviewers (amphtml)](https://github.com/orgs/ampproject/teams/reviewers-amphtml) GitHub team.
+
+#### Owners
+  * Review & approve PRs in the area in which they have expertise.
+  * Requirements to be an Owner:
+    * Demonstrated expertise in the area in which they are an Owner.
+    * Any GitHub user (including those who are not Reviewers or Collaborators) may be an Owner.
+    * When creating a new directory (such as when creating a new AMP extension) the author of the pull request should designate themselves as an Owner of that directory.
+    * Owners of an area may approve other Owners at or below their area of expertise following the normal PR process.  To request becoming an Owner create a PR adding yourself to the appropriate OWNERS.yaml file and assign/cc a current Owner for that directory.
+  * The list of Owners for a directory can be found in the [OWNERS.yaml](https://github.com/ampproject/amphtml/search?o=asc&q=filename%3AOWNERS.yaml&s=indexed) file in the directory or a parent directory.

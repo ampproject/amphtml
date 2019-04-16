@@ -145,7 +145,9 @@ export const adConfig = {
     ],
   },
 
-  'adocean': {},
+  'adocean': {
+    consentHandlingOverride: true,
+  },
 
   'adpicker': {
     renderStartImplemented: true,
@@ -172,6 +174,12 @@ export const adConfig = {
     masterFrameAccessibleType: 'google_network',
     fullWidthHeightRatio: 1.2,
     consentHandlingOverride: true,
+  },
+
+  'adsensor': {
+    prefetch: 'https://wfpscripts.webspectator.com/amp/adsensor-amp.js',
+    clientIdScope: 'amp_ecid_adensor',
+    renderStartImplemented: true,
   },
 
   'adsnative': {
@@ -263,8 +271,6 @@ export const adConfig = {
   },
 
   'aja': {
-    renderStartImplemented: true,
-    prefetch: 'https://cdn.as.amanad.adtdp.com/sdk/asot-v2.js',
   },
 
   'appvador': {
@@ -480,7 +486,7 @@ export const adConfig = {
   },
 
   'gumgum': {
-    prefetch: 'https://g2.gumgum.com/javascripts/ad.js',
+    prefetch: 'https://js.gumgum.com/slot.js',
     renderStartImplemented: true,
   },
 
@@ -533,6 +539,8 @@ export const adConfig = {
     preconnect: 'https://as-sec.casalemedia.com',
     renderStartImplemented: true,
   },
+
+  'jubna': {},
 
   'kargo': {},
 
@@ -756,6 +764,8 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  'promoteiq': {},
+
   'pubexchange': {},
 
   'pubguru': {
@@ -788,6 +798,10 @@ export const adConfig = {
   'quoraad': {
     prefetch: 'https://a.quora.com/amp_ad.js',
     preconnect: 'https://ampad.quora.com',
+    renderStartImplemented: true,
+  },
+
+  'rbinfox': {
     renderStartImplemented: true,
   },
 
@@ -828,6 +842,10 @@ export const adConfig = {
 
   'runative': {
     prefetch: 'https://cdn.run-syndicate.com/sdk/v1/n.js',
+    renderStartImplemented: true,
+  },
+
+  'sas': {
     renderStartImplemented: true,
   },
 
@@ -903,6 +921,11 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  'svknative': {
+    renderStartImplemented: true,
+    prefetch: 'https://widget.svk-native.ru/js/embed.js',
+  },
+
   'swoop': {
     prefetch: 'https://www.swoop-amp.com/amp.js',
     preconnect: [
@@ -914,6 +937,11 @@ export const adConfig = {
 
   'taboola': {},
 
+  'tcsemotion': {
+    prefetch: 'https://ads.tcsemotion.com/www/delivery/amphb.js',
+    renderStartImplemented: true,
+  },
+
   'teads': {
     prefetch: 'https://a.teads.tv/media/format/v3/teads-format.min.js',
     preconnect: [
@@ -922,6 +950,10 @@ export const adConfig = {
       'https://r.teads.tv',
     ],
     consentHandlingOverride: true,
+  },
+
+  'torimochi': {
+    renderStartImplemented: true,
   },
 
   'triplelift': {},
@@ -933,6 +965,10 @@ export const adConfig = {
 
   'uas': {
     prefetch: 'https://ads.pubmatic.com/AdServer/js/phoenix.js',
+  },
+
+  'ucfunnel': {
+    renderStartImplemented: true,
   },
 
   'uzou': {

@@ -21,13 +21,13 @@
 import {AmpStory} from '../amp-story';
 import {AmpStoryPage} from '../amp-story-page';
 import {AmpStoryStoreService} from '../amp-story-store-service';
-import {LocalizationService} from '../localization';
-import {PRESETS} from '../animation-presets';
+import {LocalizationService} from '../../../../src/service/localization';
 import {Services} from '../../../../src/services';
 import {
   calculateTargetScalingFactor,
   targetFitsWithinPage,
 } from '../animation-presets-utils';
+import {getPresetDef} from '../animation-presets';
 import {registerServiceBuilder} from '../../../../src/service';
 
 describes.realWin('amp-story-full-bleed-animations', {
@@ -216,7 +216,7 @@ describes.realWin('amp-story-animations-utils', {
     const factor = factorThatWillMakeTargetFitPage * 1.25;
     expect(calculateTargetScalingFactor(dimensions)).to.equal(factor);
 
-    const calculatedKeyframes = PRESETS['pan-up'];
+    const calculatedKeyframes = getPresetDef('pan-up', {});
     calculatedKeyframes.keyframes = calculatedKeyframes.keyframes(dimensions);
 
     const offsetX = -dimensions.targetWidth / 2;

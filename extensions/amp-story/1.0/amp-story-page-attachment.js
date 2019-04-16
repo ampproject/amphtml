@@ -24,6 +24,7 @@ import {CSS} from '../../../build/amp-story-page-attachment-header-1.0.css';
 import {
   HistoryState,
   createShadowRootWithStyle,
+  setHistoryState,
 } from './utils';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
@@ -455,12 +456,24 @@ export class AmpStoryPageAttachment extends AMP.BaseElement {
   }
 
   /**
-   * Does a browser back to close the attachment, to ensure the history state
-   * we added when opening the attachment is popped.
+   * Ensures the history state we added when opening the attachment is popped,
+   * and closes the attachment either directly, or through the onPop callback.
    * @private
    */
   close_() {
-    this.historyService_.goBack();
+    switch (this.state_) {
+      // If the attachment was open, pop the history entry that was added, which
+      // will close the attachment through the onPop callback.
+      case AttachmentState.OPEN:
+      case AttachmentState.DRAGGING_TO_CLOSE:
+        this.historyService_.goBack();
+        break;
+      // If the attachment was not open, no history entry was added, so we can
+      // close the attachment directly.
+      case AttachmentState.DRAGGING_TO_OPEN:
+        this.closeInternal_();
+        break;
+    }
   }
 
   /**
@@ -485,5 +498,7 @@ export class AmpStoryPageAttachment extends AMP.BaseElement {
       setTimeout(
           () => toggle(dev().assertElement(this.containerEl_), false), 250);
     });
+
+    setHistoryState(this.win, HistoryState.ATTACHMENT_PAGE_ID, null);
   }
 }

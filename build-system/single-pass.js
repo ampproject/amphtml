@@ -31,6 +31,8 @@ const relativePath = require('path').relative;
 const tempy = require('tempy');
 const through = require('through2');
 const {extensionBundles, altMainBundles, TYPES} = require('../bundles.config');
+const {highlight} = require('cli-highlight');
+const {isTravisBuild} = require('./travis');
 const {TopologicalSort} = require('topological-sort');
 const TYPES_VALUES = Object.keys(TYPES).map(x => TYPES[x]);
 const wrappers = require('./compile-wrappers');
@@ -419,7 +421,7 @@ function isCommonJsModule(file) {
  * @param {!Object} config
  */
 function transformPathsToTempDir(graph, config) {
-  if (!process.env.TRAVIS) {
+  if (!isTravisBuild()) {
     log('Writing transforms to', colors.cyan(graph.tmp));
   }
   // `sorted` will always have the files that we need.
@@ -592,6 +594,18 @@ function postProcessConcat() {
   });
 }
 
+// Formats a single-pass closure compiler error message into a more readable
+// form by dropping the lengthy java invocation line...
+//     java -jar ... --js_module_root <file>
+// ...and then syntax highlighting the error text.
+function formatSinglePassClosureCompilerError(message) {
+  const singlePassJavaInvocationLine = /java -jar[^]*--js_module_root .*?\n/;
+  message = message.replace(singlePassJavaInvocationLine, '');
+  message = highlight(message, {ignoreIllegals: true});
+  message = message.replace(/WARNING/g, colors.yellow('WARNING'));
+  message = message.replace(/ERROR/g, colors.red('ERROR'));
+  return message;
+}
 
 function compile(flagsArray) {
   fs.writeFileSync('flags-array.txt', JSON.stringify(flagsArray, null, 2));
@@ -603,9 +617,8 @@ function compile(flagsArray) {
         });
       } else {
         reject(
-            new Error('Closure compiler compilation of bundles failed.\n' +
-                stdOut + '\n' +
-                stdErr));
+            new Error(colors.red('Single pass compilation failed:\n') +
+                formatSinglePassClosureCompilerError(stdErr)));
       }
     });
   });

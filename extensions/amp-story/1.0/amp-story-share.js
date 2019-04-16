@@ -13,8 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {LocalizedStringId} from './localization';
+import {LocalizedStringId} from '../../../src/localized-strings';
 import {Services} from '../../../src/services';
+import {
+  StateProperty,
+  getStoreService,
+} from './amp-story-store-service';
 import {Toast} from './toast';
 import {
   copyTextToClipboard,
@@ -23,6 +27,7 @@ import {
 import {dev, devAssert, user} from '../../../src/log';
 import {dict, map} from './../../../src/utils/object';
 import {getRequestService} from './amp-story-request-service';
+import {isExperimentOn} from '../../../src/experiments';
 import {isObject} from '../../../src/types';
 import {listen} from '../../../src/event-helper';
 import {px, setImportantStyles} from '../../../src/style';
@@ -90,6 +95,31 @@ const TEMPLATE = {
   }],
 };
 
+/** @private @const {!./simple-template.ElementDef} */
+const SHARE_PAGE_TEMPLATE = {
+  tag: 'div',
+  attrs: dict({
+    'class': 'i-amphtml-story-page-share',
+  }),
+  children: [
+    {
+      tag: 'input',
+      attrs: dict({
+        'class': 'i-amphtml-story-page-share-input',
+        'type': 'checkbox',
+        'id': 'page-share',
+      }),
+    },
+    {
+      tag: 'label',
+      attrs: dict({
+        'class': 'i-amphtml-story-page-share-label',
+        'for': 'page-share',
+      }),
+      localizedStringId: LocalizedStringId.AMP_STORY_SHARING_PAGE_LABEL,
+    },
+  ],
+};
 
 /** @private @const {!./simple-template.ElementDef} */
 const SHARE_ITEM_TEMPLATE = {
@@ -218,11 +248,14 @@ export class ShareWidget {
     /** @protected {?Element} */
     this.root = null;
 
-    /** @private {?Promise<?./localization.LocalizationService>} */
+    /** @private {?Promise<?../../../src/service/localization.LocalizationService>} */
     this.localizationServicePromise_ = null;
 
     /** @private @const {!./amp-story-request-service.AmpStoryRequestService} */
     this.requestService_ = getRequestService(this.win, storyEl);
+
+    /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
+    this.storeService_ = getStoreService(this.win);
   }
 
   /**
@@ -250,6 +283,7 @@ export class ShareWidget {
     this.loadProviders();
     this.maybeAddLinkShareButton_();
     this.maybeAddSystemShareButton_();
+    this.maybeAddPageShareButton_();
 
     return this.root;
   }
@@ -274,16 +308,37 @@ export class ShareWidget {
 
     this.add_(linkShareButton);
 
-    // TODO(alanorozco): Listen for proper tap event (i.e. fastclick)
     listen(linkShareButton, 'click', e => {
       e.preventDefault();
-      this.copyUrlToClipboard_();
+      this.copyUrlToClipboard_(this.root.querySelector('#page-share').checked);
     });
   }
 
-  /** @private */
-  copyUrlToClipboard_() {
-    const url = Services.documentInfoForDoc(this.getAmpDoc_()).canonicalUrl;
+  /**
+   * On desktop mode, with branching, users should be able to share a story
+   * starting from a specific page.
+   * @private
+  */
+  maybeAddPageShareButton_() {
+    if (isExperimentOn(this.win, 'amp-story-branching')) {
+      const list = devAssert(this.root).firstChild;
+      const sharePageCheck =
+          renderAsElement(this.win.document, SHARE_PAGE_TEMPLATE);
+      this.root.insertBefore(sharePageCheck, list);
+    }
+  }
+
+  /**
+   * @param {boolean=} sharePage
+   * @private
+   */
+  copyUrlToClipboard_(sharePage = false) {
+    const currentPageId = this.storeService_.get(StateProperty.CURRENT_PAGE_ID);
+    const shouldAddFragment =
+      (isExperimentOn(this.win, 'amp-story-branching') && sharePage);
+
+    const url = Services.documentInfoForDoc(this.getAmpDoc_()).canonicalUrl +
+    (shouldAddFragment ? '#page=' + currentPageId : '');
 
     if (!copyTextToClipboard(this.win, url)) {
       this.localizationServicePromise_.then(localizationService => {
@@ -359,7 +414,8 @@ export class ShareWidget {
     providers.forEach(provider => {
       if (isObject(provider)) {
         this.add_(buildProvider(this.win.document,
-            provider['provider'], provider));
+            provider['provider'],
+            /** @type {!JsonObject} */ (provider)));
         return;
       }
 
@@ -370,7 +426,8 @@ export class ShareWidget {
             provider);
         return;
       }
-      this.add_(buildProvider(this.win.document, provider));
+      this.add_(buildProvider(this.win.document,
+          /** @type {string} */ (provider)));
     });
   }
 
@@ -387,7 +444,7 @@ export class ShareWidget {
    * @private
    */
   add_(node) {
-    const list = devAssert(this.root).firstElementChild;
+    const list = devAssert(this.root).lastElementChild;
     const item = renderAsElement(this.win.document, SHARE_ITEM_TEMPLATE);
 
     item.appendChild(node);
@@ -441,8 +498,20 @@ export class ScrollableShareWidget extends ShareWidget {
     this.root.classList.add(SCROLLABLE_CLASSNAME);
 
     Services.viewportForDoc(ampdoc).onResize(
-        // we don't require a lot of smoothness here, so we throttle
         throttle(this.win, () => this.applyButtonPadding_(), 100));
+
+    this.vsync_.measure(() => {
+      // If the element is actually scrollable, don't propagate the touch events
+      // so it is not interpreted as a swipe to the next story.
+      if (this.root./*OK*/offsetWidth < this.root./*OK*/scrollWidth) {
+        this.root.addEventListener(
+            'touchstart', event => event.stopPropagation(), {capture: true});
+        this.root.addEventListener(
+            'touchmove', event => event.stopPropagation(), {capture: true});
+        this.root.addEventListener(
+            'touchend', event => event.stopPropagation(), {capture: true});
+      }
+    });
 
     return this.root;
   }

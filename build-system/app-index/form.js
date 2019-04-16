@@ -16,7 +16,7 @@
 
 /* eslint-disable amphtml-internal/html-template */
 
-const html = require('./html');
+const {html} = require('./html');
 
 
 const Option = ({value, name}) => html`<option value=${value}>${name}</option>`;

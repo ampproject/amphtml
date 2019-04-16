@@ -64,5 +64,11 @@ amp-youtube/0.1/test/validator-amp-youtube.html:54:2 Mutually exclusive attribut
 |      data-live-channelid="UCB8Kb4pxYzsDsHxzBfnid4Q"
 |      data-videoid="dQw4w9WgXcQ">
 |    </amp-youtube>
+|
+|    <!-- Invalid: `dock` without `amp-video-docking` extension -->
+|    <amp-youtube width="480" height="270" data-videoid="dQw4w9WgXcQ" dock>
+>>   ^~~~~~~~~
+amp-youtube/0.1/test/validator-amp-youtube.html:60:2 The attribute 'dock' requires including the 'amp-video-docking' extension JavaScript. [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+|    </amp-youtube>
 |  </body>
 |  </html>

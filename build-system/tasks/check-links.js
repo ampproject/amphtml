@@ -24,8 +24,9 @@ const log = require('fancy-log');
 const markdownLinkCheck = BBPromise.promisify(require('markdown-link-check'));
 const path = require('path');
 const {gitDiffAddedNameOnlyMaster, gitDiffNameOnlyMaster} = require('../git');
+const {isTravisBuild} = require('../travis');
 
-const maybeUpdatePackages = process.env.TRAVIS ? [] : ['update-packages'];
+const maybeUpdatePackages = isTravisBuild() ? [] : ['update-packages'];
 
 /**
  * Parses the list of files in argv, or extracts it from the commit log.
@@ -70,7 +71,7 @@ function checkLinks() {
               deadLinksFound = true;
               deadLinksFoundInFile = true;
               log('[%s] %s', colors.red('✖'), result.link);
-            } else if (!process.env.TRAVIS) {
+            } else if (!isTravisBuild()) {
               log('[%s] %s', colors.green('✔'), result.link);
             }
           });
@@ -143,7 +144,11 @@ function filterWhitelistedLinks(markdown) {
 
   // The heroku nightly build page is not always acccessible by the checker.
   filteredMarkdown = filteredMarkdown.replace(
-      /\(http:\/\/amphtml-nightly.herokuapp.com\/\)/g, '');
+      /\(http:\/\/amphtml-nightly\.herokuapp\.com\/\)/g, '');
+
+  // The Googlebot help page is currently only available to signed-in users.
+  filteredMarkdown = filteredMarkdown.replace(
+      /\(https:\/\/support\.google\.com\/webmasters\/answer\/182072\)/g, '');
 
   // After all whitelisting is done, clean up any remaining empty blocks bounded
   // by backticks. Otherwise, `` will be treated as the start of a code block

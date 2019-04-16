@@ -22,18 +22,14 @@
 
 import '../../amp-a4a/0.1/real-time-config-manager';
 import {
-  AmpA4A,
-  DEFAULT_SAFEFRAME_VERSION,
-  XORIGIN_MODE,
-  assignAdUrlToError,
-} from '../../amp-a4a/0.1/amp-a4a';
-import {
+  ADX_ADY_EXP,
   AmpAnalyticsConfigDef,
   QQID_HEADER,
   SANDBOX_HEADER,
   ValidAdContainerTypes,
   addCsiSignalsToAmpAnalyticsConfig,
   extractAmpAnalyticsConfig,
+  getContainerWidth,
   getCsiAmpAnalyticsConfig,
   getCsiAmpAnalyticsVariables,
   getEnclosingContainerTypes,
@@ -47,6 +43,12 @@ import {
   maybeAppendErrorParameter,
   truncAndTimeUrl,
 } from '../../../ads/google/a4a/utils';
+import {
+  AmpA4A,
+  DEFAULT_SAFEFRAME_VERSION,
+  XORIGIN_MODE,
+  assignAdUrlToError,
+} from '../../amp-a4a/0.1/amp-a4a';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {
   DUMMY_FLUID_SIZE,
@@ -97,6 +99,7 @@ import {parseQueryString} from '../../../src/url';
 import {setStyles} from '../../../src/style';
 import {stringHash32} from '../../../src/string';
 import {tryParseJson} from '../../../src/json';
+import {utf8Decode} from '../../../src/utils/bytes';
 
 /** @type {string} */
 const TAG = 'amp-ad-network-doubleclick-impl';
@@ -116,6 +119,15 @@ const DOUBLECLICK_SRA_EXP_BRANCHES = {
   SRA_CONTROL: '117152666',
   SRA: '117152667',
   SRA_NO_RECOVER: '21062235',
+};
+
+/** @const {string} */
+const FLEXIBLE_AD_SLOTS_EXP = 'flexAdSlots';
+
+/** @const @enum{string} */
+const FLEXIBLE_AD_SLOTS_BRANCHES = {
+  CONTROL: '21063173',
+  EXPERIMENT: '21063174',
 };
 
 /**
@@ -179,11 +191,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     /** @private {?Element} */
     this.ampAnalyticsElement_ = null;
 
-    /** @type {?Object<string,*>}*/
+    /** @type {?JsonObject|Object} */
     this.jsonTargeting = null;
 
-    /** @type {number} */
-    this.adKey = 0;
+    /** @type {string} */
+    this.adKey = '0';
 
     /** @type {!Array<string>} */
     this.experimentIds = [];
@@ -266,6 +278,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
      * @private {boolean}
      */
     this.shouldSandbox_ = false;
+
+    /** @private {boolean} */
+    this.sendFlexibleAdSlotParams_ = false;
   }
 
   /**
@@ -362,10 +377,23 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           branches: Object.keys(DOUBLECLICK_SRA_EXP_BRANCHES).map(
               key => DOUBLECLICK_SRA_EXP_BRANCHES[key]),
         },
+        [FLEXIBLE_AD_SLOTS_EXP]: {
+          isTrafficEligible: () => true,
+          branches: Object.values(FLEXIBLE_AD_SLOTS_BRANCHES),
+        },
+        [[ADX_ADY_EXP.branch]]: {
+          isTrafficEligible: () => true,
+          branches: [[ADX_ADY_EXP.control], [ADX_ADY_EXP.experiment]],
+        },
       });
     const setExps = this.randomlySelectUnsetExperiments_(experimentInfoMap);
     Object.keys(setExps).forEach(expName =>
       setExps[expName] && this.experimentIds.push(setExps[expName]));
+    if (setExps[FLEXIBLE_AD_SLOTS_EXP] &&
+        setExps[FLEXIBLE_AD_SLOTS_EXP] ==
+        FLEXIBLE_AD_SLOTS_BRANCHES.EXPERIMENT) {
+      this.sendFlexibleAdSlotParams_ = true;
+    }
   }
 
   /**
@@ -429,6 +457,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.isFluidRequest_ = !!multiSizeStr &&
           multiSizeStr.indexOf('fluid') != -1;
     }
+    this.maybeAddSinglePassExperiment();
   }
 
   /** @override */
@@ -471,6 +500,17 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         this.win['ampAdGoogleIfiCounter']++;
     const pageLayoutBox = this.isSinglePageStoryAd ?
       this.element.getPageLayoutBox() : null;
+    let psz = null;
+    let msz = null;
+    if (this.sendFlexibleAdSlotParams_) {
+      const parentWidth = getContainerWidth(
+          this.win, this.element.parentElement);
+      let slotWidth = getContainerWidth(
+          this.win, this.element, 1 /* maxDepth */);
+      slotWidth = slotWidth == -1 ? parentWidth : slotWidth;
+      psz = `${parentWidth}x-1`;
+      msz = `${slotWidth}x-1`;
+    }
     return Object.assign({
       'iu': this.element.getAttribute('data-slot'),
       'co': this.jsonTargeting &&
@@ -486,6 +526,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       'frc': Number(this.fromResumeCallback) || null,
       'fluid': this.isFluidRequest_ ? 'height' : null,
       'fsf': this.forceSafeframe ? '1' : null,
+      // Both msz/psz send a height of -1 because height expansion is
+      // disallowed in AMP.
+      'msz': msz,
+      'psz': psz,
       'scp': serializeTargeting(
           (this.jsonTargeting && this.jsonTargeting['targeting']) || null,
           (this.jsonTargeting &&
@@ -741,6 +785,16 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   onNetworkFailure(error, adUrl) {
     dev().info(TAG, 'network error, attempt adding of error parameter', error);
     return {adUrl: maybeAppendErrorParameter(adUrl, 'n')};
+  }
+
+  /** @override */
+  maybeValidateAmpCreative(bytes, headers) {
+    if (headers.get('AMP-Verification-Checksum-Algorithm') !== 'djb2a-32') {
+      return super.maybeValidateAmpCreative(bytes, headers);
+    }
+    const checksum = headers.get('AMP-Verification-Checksum');
+    return Promise.resolve(
+        checksum && stringHash32(utf8Decode(bytes)) == checksum ? bytes : null);
   }
 
   /** @override */
@@ -1393,7 +1447,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 AMP.extension(TAG, '0.1', AMP => {
   AMP.registerElement(TAG, AmpAdNetworkDoubleclickImpl);
 });
-
 
 /** @visibleForTesting */
 export function resetSraStateForTesting() {

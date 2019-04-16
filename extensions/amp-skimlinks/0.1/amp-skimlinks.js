@@ -100,8 +100,9 @@ export class AmpSkimlinks extends AMP.BaseElement {
     this.waypoint_ = new Waypoint(
         /** @type {!../../../src/service/ampdoc-impl.AmpDoc} */
         (this.ampDoc_),
+        this.skimOptions_,
         this.trackingService_,
-        this.referrer_
+        /** @type {string} */ (this.referrer_)
     );
     this.affiliateLinkResolver_ = new AffiliateLinkResolver(
         /** @type {!../../../src/service/xhr-impl.Xhr} */
@@ -203,7 +204,7 @@ export class AmpSkimlinks extends AMP.BaseElement {
     return new Tracking(
         this.element,
         this.skimOptions_,
-        this.referrer_
+        /** @type {string} */ (this.referrer_)
     );
   }
 

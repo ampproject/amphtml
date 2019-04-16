@@ -103,8 +103,12 @@ function isTemplateTagSupported() {
  * @return {!Function} The custom element class.
  */
 export function createCustomElementClass(win, name) {
-  const baseCustomElement = createBaseCustomElementClass(win);
-  /** @extends {HTMLElement} */
+  const baseCustomElement = /** @type {Function} */ (
+    createBaseCustomElementClass(win));
+  /**
+   * @extends {HTMLElement}
+   * @suppress {checkTypes}
+   **/
   class CustomAmpElement extends baseCustomElement {
     /**
      * @see https://github.com/WebReflection/document-register-element#v1-caveat
@@ -136,8 +140,11 @@ function createBaseCustomElementClass(win) {
   if (win.BaseCustomElementClass) {
     return win.BaseCustomElementClass;
   }
-  const htmlElement = win.HTMLElement;
-  /** @abstract @extends {HTMLElement} */
+  const htmlElement = /** @type {Function} */ (win.HTMLElement);
+  /**
+   * @abstract @extends {HTMLElement}
+   * @suppress {checkTypes}
+   **/
   class BaseCustomElement extends htmlElement {
     /**
      * @see https://github.com/WebReflection/document-register-element#v1-caveat
@@ -328,8 +335,9 @@ function createBaseCustomElementClass(win) {
      * @package
      */
     getAmpDoc() {
-      return devAssert(this.ampdoc_,
-          'no ampdoc yet, since element is not attached');
+      devAssert(this.ampdoc_, 'no ampdoc yet, since element is not attached');
+      return /** @typedef {!./service/ampdoc-impl.AmpDoc} */ (
+        this.ampdoc_);
     }
 
     /**
@@ -340,8 +348,10 @@ function createBaseCustomElementClass(win) {
      * @package
      */
     getResources() {
-      return devAssert(this.resources_,
-          'no resources yet, since element is not attached');
+      devAssert(
+          this.resources_, 'no resources yet, since element is not attached');
+      return /** @typedef {!./service/resources-impl.Resources} */ (
+        this.resources_);
     }
 
     /**
@@ -352,8 +362,9 @@ function createBaseCustomElementClass(win) {
      * @package
      */
     getLayers() {
-      return devAssert(this.layers_,
-          'no layers yet, since element is not attached');
+      devAssert(this.layers_, 'no layers yet, since element is not attached');
+      return /** @typedef {!./service/layers-impl.LayoutLayers} */ (
+        this.layers_);
     }
 
     /**
@@ -726,7 +737,7 @@ function createBaseCustomElementClass(win) {
       if (this.isAwaitingSize_()) {
         this.sizeProvided_();
       }
-      this.signals_.signal(CommonSignals.CHANGE_SIZE_END);
+      this.dispatchCustomEvent(AmpEvents.SIZE_CHANGED);
     }
 
     /**
@@ -744,7 +755,8 @@ function createBaseCustomElementClass(win) {
      */
     connectedCallback() {
       if (!isTemplateTagSupported() && this.isInTemplate_ === undefined) {
-        this.isInTemplate_ = !!dom.closestByTag(this, 'template');
+        this.isInTemplate_ =
+          !!dom.closestAncestorElementBySelector(this, 'template');
       }
       if (this.isInTemplate_) {
         return;
@@ -1280,7 +1292,6 @@ function createBaseCustomElementClass(win) {
       this.signals_.reset(CommonSignals.LOAD_START);
       this.signals_.reset(CommonSignals.LOAD_END);
       this.signals_.reset(CommonSignals.INI_LOAD);
-      this.signals_.reset(CommonSignals.CHANGE_SIZE_END);
     }
 
     /**
@@ -1597,11 +1608,12 @@ function createBaseCustomElementClass(win) {
         const doc = this.ownerDocument;
         devAssert(doc);
 
-        const container = htmlFor(doc)`
+        const container = htmlFor(/** @type {!Document} */ (doc))`
             <div class="i-amphtml-loading-container i-amphtml-fill-content
               amp-hidden"></div>`;
 
-        const element = createLoaderElement(doc, this.elementName());
+        const element = createLoaderElement(
+            /** @type {!Document} */ (doc), this.elementName());
         container.appendChild(element);
 
         this.appendChild(container);

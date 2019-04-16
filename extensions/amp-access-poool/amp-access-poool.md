@@ -1,3 +1,10 @@
+---
+$category@: dynamic-content
+formats:
+  - websites
+teaser:
+  text: Displays a Poool paywall. See poool.fr and demo.poool.fr for more details.. amp-access-poool is based on, and requires AMP Access.
+---
 <!---
 Copyright 2017 The AMP HTML Authors.
 

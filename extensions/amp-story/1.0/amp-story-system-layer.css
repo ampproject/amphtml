@@ -138,13 +138,17 @@
 }
 
 .i-amphtml-message-container {
+  display: flex !important;
+  align-items: center !important;
   width: max-content !important;
   transition-property: opacity, transform !important;
   position: absolute !important;
-  top: 12px !important;
+  top: 0 !important;
   right: 48px !important;
+  height: 100% !important;
   color: #fff !important;
-  text-shadow: 0px 0px 6px rgba(0, 0, 0, 0.24) !important;
+  font-size: 16px !important;
+  text-shadow: 0px 0px 6px rgba(0, 0, 0, 0.36) !important;
 }
 
 [dir=rtl] .i-amphtml-message-container {
@@ -207,8 +211,7 @@
 }
 
 .i-amphtml-story-ui-no-buttons .i-amphtml-story-button,
-.i-amphtml-story-ui-no-buttons .i-amphtml-story-system-layer-buttons,
-.i-amphtml-story-ui-no-buttons .i-amphtml-story-share-pill {
+.i-amphtml-story-ui-no-buttons .i-amphtml-story-system-layer-buttons {
   visibility: hidden !important;
 }
 
@@ -244,13 +247,12 @@
 }
 
 .i-amphtml-story-no-sharing .i-amphtml-story-share-control,
-.i-amphtml-story-no-sharing .i-amphtml-story-info-control,
-.i-amphtml-story-no-sharing .i-amphtml-story-share-pill {
+.i-amphtml-story-no-sharing .i-amphtml-story-info-control {
   display: none !important;
 }
 
 .i-amphtml-story-desktop-panels.i-amphtml-story-system-layer {
-  background: linear-gradient(to bottom, rgba(33,33,33,0) 0%, rgba(33,33,33,0.32) 100%)!important;
+  background: transparent !important;
   top: auto !important;
   bottom: 0 !important;
   height: 96px !important;
@@ -276,194 +278,7 @@
 }
 
 .i-amphtml-story-desktop-panels.i-amphtml-story-system-layer .i-amphtml-story-system-layer-buttons {
-  display: flex !important;
-  height: 40px !important;
-  align-items: center !important;
-  justify-content: flex-end !important;
-  margin-top: 0px !important;
-}
-
-.i-amphtml-story-desktop-panels .i-amphtml-story-share-control {
-  display: none !important;
-}
-
-/* Share pill */
-
-div.i-amphtml-story-share-pill-container {
-  position: fixed!important;
-  display: none!important;
+  position: fixed !important;
   top: 0 !important;
-  height: 96px!important;
-  width: 100%!important;
-  z-index: 1!important;
-  background: linear-gradient(to bottom, rgba(33,33,33,0.32) 0%, rgba(33,33,33,0) 100%)!important;
-}
-
-.i-amphtml-story-desktop-panels div.i-amphtml-story-share-pill-container {
-  display: block !important;
-}
-
-.i-amphtml-story-share-pill {
-  display: flex !important;
-  position: absolute!important;
-  top: 0!important;
-  right: 40px!important;
-  bottom: 0!important;
-  margin: auto!important;
-  height: 40px!important;
-  align-items: center!important;
-  pointer-events: auto !important;
-}
-
-[dir=rtl] .i-amphtml-story-share-pill {
-  right: auto !important;
-  left: 40px !important;
-}
-
-/* Share text for share box */
-span.i-amphtml-story-share-pill-label {
-  font-family: 'Roboto', sans-serif!important;
-  position: absolute!important;
-  right: 15px!important;
-  text-align: center!important;
-  width: 60px!important;
-  font-size: 12px!important;
-  font-weight: bold!important;
-  letter-spacing: .5px!important;
-  margin: auto!important;
-  color:#fff!important;
-  box-sizing: initial !important;
-  text-transform: uppercase !important;
-}
-
-[dir=rtl] span.i-amphtml-story-share-pill-label {
-  right: auto !important;
-  left: 15px !important;
-}
-
-/* background for the share box */
-.i-amphtml-story-share-pill:before {
-  position: absolute!important;
-  content: ''!important;
-  width: 58px!important;
-  height: 40px!important;
-  padding: 0 16px!important;
-  background-color: rgba(255, 255, 255, .2)!important;
-  border-radius: 500px!important;
-  box-sizing: initial !important;
-  transition: width 300ms ease-in-out!important;
   right: 0 !important;
-}
-
-[dir=rtl] .i-amphtml-story-share-pill:before {
-  right: auto !important;
-  left: 0 !important;
-}
-
-.i-amphtml-story-share-pill .i-amphtml-story-share-item  {
-  opacity: 0!important;
-  transition: opacity 300ms linear!important;
-}
-
-.i-amphtml-story-share-pill:hover .i-amphtml-story-share-item {
-  opacity: 1!important;
-}
-
-.i-amphtml-story-share-pill .i-amphtml-story-share-item {
-  margin: 0 !important;
-  width: 48px !important;
-  height: 48px !important;
-  padding: 0 !important;
-}
-
-/* Incremental fade in */
-.i-amphtml-story-share-pill:hover
-    .i-amphtml-story-share-item:nth-child(9) {
-  transition-delay: calc(30ms * 1)!important;
-}
-.i-amphtml-story-share-pill:hover
-    .i-amphtml-story-share-item:nth-child(8) {
-  transition-delay: calc(30ms * 2)!important;
-}
-.i-amphtml-story-share-pill:hover
-    .i-amphtml-story-share-item:nth-child(7) {
-  transition-delay: calc(30ms * 3)!important;
-}
-.i-amphtml-story-share-pill:hover
-    .i-amphtml-story-share-item:nth-child(6) {
-  transition-delay: calc(30ms * 4)!important;
-}
-.i-amphtml-story-share-pill:hover
-    .i-amphtml-story-share-item:nth-child(5) {
-  transition-delay: calc(30ms * 5)!important;
-}
-.i-amphtml-story-share-pill:hover
-    .i-amphtml-story-share-item:nth-child(4) {
-  transition-delay: calc(30ms * 6)!important;
-}
-.i-amphtml-story-share-pill:hover
-    .i-amphtml-story-share-item:nth-child(3) {
-  transition-delay: calc(30ms * 7)!important;
-}
-.i-amphtml-story-share-pill:hover
-    .i-amphtml-story-share-item:nth-child(2) {
-  transition-delay: calc(30ms * 8)!important;
-}
-.i-amphtml-story-share-pill:hover
-    .i-amphtml-story-share-item:nth-child(1) {
-  transition-delay: calc(30ms * 9)!important;
-}
-
-.i-amphtml-story-share-pill .i-amphtml-story-share-list {
-  padding: 0!important;
-}
-
-.i-amphtml-story-share-pill:hover:before {
-  width: calc(100% - 32px) !important;
-}
-
-.i-amphtml-story-share-pill .i-amphtml-story-share-icon {
-  display: flex !important;
-  justify-content: center;
-  align-items: center;
-  width: 48px !important;
-  height: 48px !important;
-  padding: 0;
-}
-
-.i-amphtml-story-desktop-panels .i-amphtml-story-share-icon {
-  font-size: 0px!important;
-  background-size: 24px 24px !important;
-  background-position: center center !important;
-  padding: 0 !important;
-}
-
-.i-amphtml-story-desktop-panels .i-amphtml-story-share-icon.amp-social-share-facebook {
-  /* SVG icon has inner padding, so the glyph renders visually smaller than
-   * other icons, so we work around it by setting a higher background size. */
-  background-size: 28px 28px !important;
-  background-position: center center !important;
-}
-
-.i-amphtml-story-desktop-panels .i-amphtml-story-share-pill .i-amphtml-story-share-icon {
-  background-color: transparent !important;
-}
-
-.i-amphtml-story-desktop-panels .i-amphtml-story-share-pill .i-amphtml-story-share-label {
-  display: none !important;
-}
-
-.i-amphtml-story-desktop-panels .i-amphtml-story-share-list {
-  margin-right: 72px !important;
-}
-
-[dir=rtl].i-amphtml-story-desktop-panels .i-amphtml-story-share-list {
-  margin-right: 0 !important;
-  margin-left: 72px !important;
-}
-
-/* system layer changes */
-
-.i-amphtml-story-desktop-panels .i-amphtml-story-share-pill-container {
-  z-index: 100002 !important; /* 1 higher than bookend */
 }

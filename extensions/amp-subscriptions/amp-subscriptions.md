@@ -1,3 +1,10 @@
+---
+$category@: dynamic-content
+formats:
+  - websites
+teaser:
+  text: Implements subscription-style access protocol.
+---
 <!---
 Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,13 +21,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-subscriptions"></a> `amp-subscriptions`
+# amp-subscriptions
+
+Implements subscription-style access protocol.
 
 <table>
-  <tr>
-    <td class="col-fourty"><strong>Description</strong></td>
-    <td>Implements subscription-style access protocol.</td>
-  </tr>
   <tr>
     <td class="col-fourty"><strong>Availability</strong></td>
     <td>Stable</td>
@@ -50,24 +55,24 @@ limitations under the License.
 
 ## Introduction
 
-The `amp-subscriptions` extensions implements the subscription-style access/paywall rules.
+The `amp-subscriptions` extension implements subscription-style access/paywall rules.
 
 ## Relationship to `amp-access`
 
-The `amp-subscriptions` is similar to [`amp-access`](../amp-access/amp-access.md)
+The `amp-subscriptions` extension is similar to [`amp-access`](../amp-access/amp-access.md)
 and in many features builds on top of `amp-access`. However, it's a much more
 specialized version of access/paywall protocol. Some of the key differences are:
 
 1. The `amp-subscriptions` entitlements response is similar to the amp-access
 authorization, but it's striclty defined and standardized.
 2. The `amp-subscriptions` extension allows multiple services to be configured
-for the page to participate in access/paywall decisions. They are executed
+for the page to participate in access/paywall decisions. Services are executed
 concurrently and prioritized based on which service returns the positive response.
 3. AMP viewers are allowed to provide `amp-subscriptions` a signed authorization
 response based on an independent agreement with publishers as a proof of access.
 4. In `amp-subscriptions` content markup is standardized allowing apps and crawlers to easily detect premium content sections.
 
-Because of standardization of markup, multi provider support and improved viewer
+Because of standardization of markup, support for multiple providers, and improved viewer
 support it is recommended that new publisher and paywall provider implementations
 use `amp-subscriptions`.
 
@@ -169,7 +174,7 @@ The `services` property contains an array of service configurations. There must 
 If you'd like to test the document's behavior in the context of a particular viewer, you can add `#viewerUrl=` fragment parameter. For instance, `#viewerUrl=https://www.google.com` would emulate a document's behavior inside a Google viewer.
 
 
-## Selecting a Service
+## Selecting a service
 If no service returns an entitlement that grants access, all services are compared by calculating a score for each and the highest scoring service is selected. Each service has a `"baseScore"` (default 0). A value < 100 in the `baseScore` key in any service configuration represents the initial score for that service.  If no `baseScore` is specified it defaults to `0`.
 
 The score is calculated by taking the `baseScore` for the service and adding dynamically calculated weights from `score[factorName]` configuration multiplied by the value returned by each service for that `factorName`. Services may return a value between [-1..1] for factors they support. If a service is not aware of a factor or does not support it `0` will be returned.
@@ -234,7 +239,7 @@ The vendor service configuration must reference the service ID and can contain a
 See the vendor service's documentation for details.
 
 
-## Authorization endpoint and Entitlements
+## Authorization endpoint and entitlements
 
 Authorization is an endpoint provided by the local service and called by the AMP Runtime. It is a credentialed CORS GET endpoint. This endpoint returns the Entitlements object that can be used by the Content Markup to hide or show different parts of the document. Authorization endpoint is specified using the "authorizationUrl" property in the config.
 
@@ -249,9 +254,13 @@ The Entitlement response returned by the authorization endpoint must conform to 
 ```
 
 The properties in the Entitlement response are:
- - "granted" - boolean stating if the access to the document is granted or not.
- - "grantReason" - the string of the reason for giving the access to the document, recognized reasons are either SUBSCRIBER meaning the user is fully subscribed or METERING meaning user is on metering.
- - "data" - any free form data which can be used for render templating.
+ - `granted` - boolean stating if the access to the document is granted or not.
+
+ - `grantReason` - the string of the reason for giving the access to the document, recognized reasons are either SUBSCRIBER meaning the user is fully subscribed or METERING meaning user is on metering.
+
+ - `data` - free-form data which can be used for template rendering, e.g. messaging related to metering or article count.
+
+In cases where the access is granted by a means other than the Entitlement response, messaging via the data property may not be seen by the user.  Do not use `data` for granting/denying access to content, conditional display of content based on user access, or displaying user or account related information.
 
 Notice, while it's not explicitly visible, all vendor services also implement authorization endpoints of their own and conform to the same response format.
 
@@ -379,49 +388,56 @@ Values in the `data` object of an Entitlements response can be used to build exp
 
 ## Analytics
 
-The `amp-subscriptions` triggers seven types of analytics signals during the different lifecycle of various subscriptions.
-Following are the events and the conditions when the events are triggered.
+The `amp-subscriptions` extension triggers the following analytics signals:
 
-1. `subscriptions-service-activated`:
- - This event is fired when one of the services configured is selected and activated to be used(see [Selecting a Service](#selecting-a-service)).
- - This event is fired with `serviceId` of the selected service.
-2. `subscriptions-access-granted`:
- - This event is fired when one of the configured services is selected and the entitlement from the selected service grants access to the document.
- - This event is fired with `serviceId` of the selected service.
-3. `subscriptions-access-denied`:
- - This event is fired when one of the configured services is selected and the entitlement from the selected service denies access to the document.
- - This event is fired with `serviceId` of the selected service.
-4. `subscriptions-paywall-activated`:
- - After selecting a service, if the entitlement of the service does not grant access to the document then `subscriptions-paywall-activated` is triggered.
- - This event is fired with `serviceId` of the selected service.
-5. `subscriptions-service-registered`:
- - Since a service is free to initialize itself at anytime on the page, `subscriptions-service-registered` event is triggered when `amp-subscriptions` is able to resolve the instance of the service.
- - This event is fired with `serviceId` of the selected service.
-6. `subscriptions-service-re-authorized`:
- - A service can request for re-authorizing itself after any action performed e.g. `Login`. Once the re-authorization is complete and new entitlement is fetched for the service ``subscriptions-service-re-authorized` is triggered.
- - This event is fired with `serviceId` of the selected service.
-7. `subscriptions-action-delegated`:
- - A service can request its action to be delegated to another service, in such scenario `subscriptions-action-delegated` is triggered just before handing over the event to the other service.
- - This event is fired with `serviceId` and `action` of the selected service.
-8. `subscriptions-entitlement-resolved`:
- - Once the service is registered, the entitlements from it are requested. `subscriptions-entitlement-resolved` event is triggered when the entitlement fetch from the service is completed.
- - This event is fired with `serviceId` and `action` of the selected service.
-9. `subscriptions-started`:service
- - This event is triggered when `amp-subscriptions` is initialized.
- - This event does not contain any data.
-10. `subscriptions-action-ActionName-started`:
- - Whenever any action execution starts, the event with `subscriptions-action-ActionName-started` is fired.
- - This event does not contain any data.
-11. `subscriptions-action-ActionName-failed`:
- - If the action execution fails due to any reason, an event with `subscriptions-action-ActionName-failed` is fired.
- - This event does not contain any data.
-12. `subscriptions-action-ActionName-success`:
- - If the event result reports a success, `subscriptions-action-ActionName-success` is triggered.
- - This event does not contain any data.
-13. `subscriptions-action-ActionName-rejected`:
- - If the event result reports a success, `subscriptions-action-ActionName-rejected` is triggered.
- - This event does not contain any data.
-
+1. `subscriptions-started`
+ - Triggered when `amp-subscriptions` is initialized.
+ - Data: none.
+2. `subscriptions-service-registered`
+ - Triggered when `amp-subscriptions` is able to resolve the instance of the service.  A service is free to initialize itself at anytime on the page.
+ - Data: `serviceId` of the selected service.
+3. `subscriptions-service-activated`
+ - Triggered when a configured service is selected and activated for use.  See [Selecting a service](#selecting-a-service).
+ - Data: `serviceId` of the selected service.
+4. `subscriptions-entitlement-resolved`
+ - Triggered when the entitlement fetch for a service is complete.
+ - Data: `serviceId` and `action` of the selected service.
+5. `subscriptions-access-granted`
+ - Triggered when the entitlement from the selected service grants access to the document.
+ - Data: `serviceId` of the selected service.
+6. `subscriptions-paywall-activated`
+ - Triggered when the entitlement from the selected service does not grant access to the document.
+ - Data: `serviceId` of the selected service.
+7. `subscriptions-access-denied`
+ - Triggered when the entitlement from the selected service denies access to the document.
+ - Data: `serviceId` of the selected service.
+8. `subscriptions-service-re-authorized`
+ - Triggered when re-authorization of a service is complete.  A service can request re-authorization after any action is performed e.g., `login`.  A new entitlement is fetched for the service after re-authorization is complete.
+ - Data: `serviceId` of the selected service.
+9. `subscriptions-action-delegated`
+ - Triggered just before a delegated service action is handed off to the other service.  See [Action delegation](#action-delegation).
+ - Data: `serviceId` and the delegated `action` of the selected service.
+10. `subscriptions-action-ActionName-started`
+ - Triggered when the execution of action `ActionName` starts.
+ - Data: none.
+11. `subscriptions-action-ActionName-failed`
+ - Triggered when the execution of action `ActionName` fails due to any reason.
+ - Data: none.
+12. `subscriptions-action-ActionName-success`
+ - Triggered when the execution result of action `ActionName` is reported as a success.
+ - Data: none.
+13. `subscriptions-action-ActionName-rejected`
+ - Triggered when the execution result of action `ActionName` is reported as a failure.
+ - Data: none.
+14. `subscriptions-link-requested`
+ - Triggered when a subscription account linking request is initiated by the selected service.
+ - Data: `serviceId` of the selected service.
+15. `subscriptions-link-complete`
+ - Triggered when subscription account linking has been completed by the selected service.
+ - Data: `serviceId` of the selected service.
+16. `subscriptions-link-canceled`
+ - Triggered when a subscription account linking request initiated by the selected service has been cancelled.
+ - Data: `serviceId` of the selected service.
 
 ## Available vendor services
 

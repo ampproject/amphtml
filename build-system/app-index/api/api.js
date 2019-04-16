@@ -13,35 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/* eslint-disable amphtml-internal/no-deep-destructuring */
+
 'use strict';
 
+const assert = require('assert');
 const Fuse = require('fuse.js');
-const {
-  getListing,
-} = require('../util/listing');
+const path = require('path');
+const {getListing} = require('../util/listing');
 
-async function badRequest(res) {
-  res.status(400).end();
-}
 
-async function searchListing(root, req, res) {
+// Sitting on /build-system/app-index/api, so we go back thrice for the root.
+const root = path.join(__dirname, '../../../');
 
-  if (!req.query || !req.query.path) {
-    badRequest(res);
-    return;
-  }
 
-  const basepath = req.query.path;
-  const fileSet = await getListing(root, basepath);
-
-  if (!fileSet) {
-    badRequest(res);
-    return;
-  }
-
-  if (!req.query.search) {
-    res.status(200).json(fileSet);
-    return;
+function searchListing(fileSet, opt_searchQuery) {
+  if (!opt_searchQuery) {
+    return fileSet;
   }
 
   // Fuzzy find from the file set
@@ -49,30 +38,30 @@ async function searchListing(root, req, res) {
     shouldSort: true,
     threshold: 0.4,
   });
-  const foundFileIndexes = fuse.search(req.query.search);
 
-  const response = [];
-  foundFileIndexes.forEach(fileIndex => {
-    response.push(fileSet[fileIndex]);
-  });
-
-
-
-  res.status(200).json(response);
+  return fuse.search(opt_searchQuery).map(i => fileSet[i]);
 }
 
-// Function to handle API Requests
-// Returns true is handled, false otherwise
-async function handleApiRequest(root, req, res, next) {
 
-  if (req.path.includes('listing')) {
-    await searchListing(root, req, res);
-    return;
+async function handleListingRequest({query: {path, search}}, res) {
+  try {
+    assert(path);
+
+    const fileSet = await getListing(root, path);
+
+    assert(fileSet);
+
+    res.json(await searchListing(fileSet, search));
+  } catch (e) {
+    res.status(400).end('Bad request.');
+    throw e; // to log in console
   }
-
-  next();
 }
 
-module.exports = {
-  handleApiRequest,
-};
+
+function installExpressMiddleware(app) {
+  app.get('/dashboard/api/listing', handleListingRequest);
+}
+
+
+module.exports = {installExpressMiddleware};

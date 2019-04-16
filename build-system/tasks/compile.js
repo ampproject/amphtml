@@ -20,6 +20,7 @@ const closureCompiler = require('gulp-closure-compiler');
 const colors = require('ansi-colors');
 const fs = require('fs-extra');
 const gulp = require('gulp');
+const {isTravisBuild} = require('../travis');
 const {VERSION: internalRuntimeVersion} = require('../internal-version') ;
 
 const rename = require('gulp-rename');
@@ -46,7 +47,7 @@ exports.closureCompile = function(entryModuleFilename, outputDir,
       inProgress++;
       compile(entryModuleFilename, outputDir, outputFilename, options)
           .then(function() {
-            if (process.env.TRAVIS) {
+            if (isTravisBuild()) {
               // Print a progress dot after each task to avoid Travis timeouts.
               process.stdout.write('.');
             }
@@ -118,6 +119,8 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
   const baseExterns = [
     'build-system/amp.extern.js',
     'build-system/dompurify.extern.js',
+    'build-system/event-timing.extern.js',
+    'build-system/layout-jank.extern.js',
     'third_party/closure-compiler/externs/web_animations.js',
     'third_party/moment/moment.extern.js',
     'third_party/react-externs/externs.js',
@@ -239,10 +242,14 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       'extensions/amp-consent/**/*.js',
       // Needed to access AmpGeo type for service locator
       'extensions/amp-geo/**/*.js',
+      // Needed for AmpViewerAssistanceService
+      'extensions/amp-viewer-assistance/**/*.js',
       // Needed for AmpViewerIntegrationVariableService
       'extensions/amp-viewer-integration/**/*.js',
+      // Needed for amp-smartlinks dep on amp-skimlinks
+      'extensions/amp-skimlinks/0.1/**/*.js',
       'src/*.js',
-      'src/!(inabox)*/**/*.js',
+      'src/**/*.js',
       '!third_party/babel/custom-babel-helpers.js',
       // Exclude since it's not part of the runtime/extension binaries.
       '!extensions/amp-access/0.1/amp-login-done.js',
@@ -279,6 +286,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       // Don't include tests.
       '!**_test.js',
       '!**/test-*.js',
+      '!**/test-e2e/*.js',
       '!**/*.extern.js',
     ];
     // Add needed path for extensions.
@@ -380,7 +388,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
         create_source_map: intermediateFilename + '.map',
         source_map_location_mapping:
             '|' + sourceMapBase,
-        warning_level: 'DEFAULT',
+        warning_level: options.verboseLogging ? 'VERBOSE' : 'DEFAULT',
         jscomp_error: [],
         // moduleLoad: Demote "module not found" errors to ignore missing files
         //     in type declarations in the swg.js bundle.
@@ -417,7 +425,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
         .on('error', function(err) {
           const {message} = err;
           console./*OK*/error(colors.red(
-              'Compiler issues for ' + outputFilename + ':\n') +
+              'Compilation failed for ' + outputFilename + ':\n') +
               formatClosureCompilerError(message));
           process.exit(1);
         });

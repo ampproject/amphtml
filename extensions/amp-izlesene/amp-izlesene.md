@@ -1,3 +1,10 @@
+---
+$category@: media
+formats:
+  - websites
+teaser:
+  text: Displays an Izlesene video.
+---
 <!---
 Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,13 +21,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-izlesene"></a> `amp-izlesene`
+# amp-izlesene
+
+Displays an embedded <a href="https://www.izlesene.com/">Izlesene</a> video.
 
 <table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Displays an embedded <a href="https://www.izlesene.com/">Izlesene</a> video.</td>
-  </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-izlesene" src="https://cdn.ampproject.org/v0/amp-izlesene-0.1.js">&lt;/script></code></td>
@@ -45,28 +50,33 @@ With responsive layout the width and height from the example should yield correc
 ```
 
 ## Attributes
+<table>
+  <tr>
+    <td width="40%"><strong>data-videoid (required)</strong></td>
+    <td>The ID of the Izlesene video, which can be found in the Izlesene video page URL. For example, in https://www.izlesene.com/video/yayin-yok/7221390, the video ID is <code>7221390</code>.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-param-showrel (optional)</strong></td>
+    <td>This is an optional attribute that indicates whether to show related content. This functionality is not available for iOS devices.</p>
+<ul>
+  <li>Accepted values: `1` or `0`</li>
+  <li>Default value: `1`</li>
+</ul></td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-param-showreplay (optional)</strong></td>
+    <td>This is an optional attribute that indicates whether to show the replay button at the end of the content.</p>
+<ul>
+  <li>Accepted values: `1` or `0`</li>
+  <li>Default value: `1`</li>
+</ul></td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>common attributes</strong></td>
+    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
+  </tr>
+</table>
 
-##### data-videoid (required)
-
-The ID of the Izlesene video, which can be found in the Izlesene video page URL. For example, in https://www.izlesene.com/video/yayin-yok/7221390, the video ID is `7221390`.
-
-##### data-param-showrel (optional)
-
-This is an optional attribute that indicates whether to show related content. This functionality is not available for iOS devices.
-
-* Accepted values: `1` or `0`
-* Default value: `1`
-
-##### data-param-showreplay (optional)
-
-This is an optional attribute that indicates whether to show the replay button at the end of the content.
-
-* Accepted values: `1` or `0`
-* Default value: `1`
-
-##### common attributes
-
-This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
 ## Validation
 

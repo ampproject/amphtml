@@ -26,8 +26,7 @@ import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {batchFetchJsonFor} from '../../../src/batched-json';
 import {
-  closestByTag,
-  escapeCssSelectorIdent,
+  closestAncestorElementBySelector,
   isRTL,
   iterateCursor,
   scopedQuerySelector,
@@ -39,7 +38,8 @@ import {createDeferred} from './react-utils';
 import {createSingleDatePicker} from './single-date-picker';
 import {dashToCamelCase} from '../../../src/string';
 import {dev, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict, map} from '../../../src/utils/object';
+import {escapeCssSelectorIdent} from '../../../src/css';
 import {once} from '../../../src/utils/function';
 import {requireExternal} from '../../../src/module';
 
@@ -78,10 +78,10 @@ class BindDatesDetails {
     this['dates'] = dates;
 
     /** @const */
-    this['start'] = dates[0];
+    this['start'] = map(dates[0]);
 
     /** @const */
-    this['end'] = dates[dates.length - 1];
+    this['end'] = map(dates[dates.length - 1]);
   }
 }
 
@@ -389,7 +389,7 @@ export class AmpDatePicker extends AMP.BaseElement {
 
     const mode = this.element.getAttribute('mode');
     if (mode) {
-      this.mode_ = mode;
+      this.mode_ = /** @type {!DatePickerMode} */ (mode);
     }
 
     this.weekDayFormat_ = this.element.getAttribute('week-day-format') ||
@@ -832,7 +832,7 @@ export class AmpDatePicker extends AMP.BaseElement {
       return existingField;
     }
 
-    const form = closestByTag(this.element, 'form');
+    const form = closestAncestorElementBySelector(this.element, 'form');
     if (this.mode_ == DatePickerMode.STATIC && form) {
       const hiddenInput = this.document_.createElement('input');
       hiddenInput.type = 'hidden';
@@ -1453,14 +1453,13 @@ export class AmpDatePicker extends AMP.BaseElement {
    */
   iterateDateRange_(startDate, endDate, cb) {
     const normalizedEndDate = endDate || startDate;
-    if (!normalizedEndDate.isAfter(startDate)) {
+    if (!normalizedEndDate.isSameOrAfter(startDate)) {
       return;
     }
 
-    const index = startDate.clone();
-    while (!index.isAfter(normalizedEndDate)) {
-      cb(index.clone());
-      index.add(1, 'days');
+    const days = normalizedEndDate.diff(startDate, 'days') + 1;
+    for (let i = 0; i < days; i++) {
+      cb(startDate.clone().add(i + 1, 'days'));
     }
   }
 

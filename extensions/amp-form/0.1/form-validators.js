@@ -17,7 +17,8 @@ import {FormEvents} from './form-events';
 import {Services} from '../../../src/services';
 import {ValidationBubble} from './validation-bubble';
 import {createCustomEvent} from '../../../src/event-helper';
-import {dev} from '../../../src/log';
+import {dev, devAssert} from '../../../src/log';
+import {iterateCursor} from '../../../src/dom';
 import {toWin} from '../../../src/types';
 
 /** @const @private {string} */
@@ -25,6 +26,13 @@ const VALIDATION_CACHE_PREFIX = '__AMP_VALIDATION_';
 
 /** @const @private {string} */
 const VISIBLE_VALIDATION_CACHE = '__AMP_VISIBLE_VALIDATION';
+
+/**
+ * Validation user message for non-standard pattern mismatch errors.
+ * Note this isn't localized but custom validation can be used instead.
+ * @const @private {string}
+ */
+const CUSTOM_PATTERN_ERROR = 'Please match the requested format.';
 
 
 /** @type {boolean|undefined} */
@@ -114,13 +122,71 @@ export class FormValidator {
   }
 
   /**
+   * Wraps `checkValidity` on input elements to support `pattern` attribute on
+   * <textarea> which is not supported in HTML5.
+   * @param {!Element} input
+   * @return {boolean}
+   * @protected
+   */
+  checkInputValidity(input) {
+    if (input.tagName === 'TEXTAREA' && input.hasAttribute('pattern')) {
+      // FormVerifier also uses setCustomValidity() to signal verification
+      // errors. Make sure we only override pattern errors here.
+      if (input.checkValidity()
+          || input.validationMessage === CUSTOM_PATTERN_ERROR) {
+        const pattern = input.getAttribute('pattern');
+        const re = new RegExp(`^${pattern}$`, 'm');
+        const valid = re.test(input.value);
+        input.setCustomValidity(valid ? '' : CUSTOM_PATTERN_ERROR);
+      }
+    }
+    return input.checkValidity();
+  }
+
+  /**
+   * Wraps `checkValidity` on form elements to support `pattern` attribute on
+   * <textarea> which is not supported in HTML5.
+   * @param {!HTMLFormElement} form
+   * @return {boolean}
+   * @protected
+   */
+  checkFormValidity(form) {
+    this.checkTextAreaValidityInForm_(form);
+    return form.checkValidity();
+  }
+
+  /**
+   * Wraps `reportValidity` on form elements to support `pattern` attribute on
+   * <textarea> which is not supported in HTML5.
+   * @param {!HTMLFormElement} form
+   * @return {boolean}
+   * @protected
+   */
+  reportFormValidity(form) {
+    this.checkTextAreaValidityInForm_(form);
+    return form.reportValidity();
+  }
+
+  /**
+   * @param {!HTMLFormElement} form
+   * @private
+   */
+  checkTextAreaValidityInForm_(form) {
+    iterateCursor(form.elements, element => {
+      if (element.tagName == 'TEXTAREA') {
+        this.checkInputValidity(element);
+      }
+    });
+  }
+
+  /**
    * Fires a valid/invalid event from the form if its validity state
    * has changed since the last invocation of this function.
    * @visibleForTesting
    */
   fireValidityEventIfNecessary() {
     const previousValidity = this.formValidity_;
-    this.formValidity_ = this.form.checkValidity();
+    this.formValidity_ = this.checkFormValidity(this.form);
     if (previousValidity !== this.formValidity_) {
       const win = toWin(this.form.ownerDocument.defaultView);
       const type = this.formValidity_ ? FormEvents.VALID : FormEvents.INVALID;
@@ -136,7 +202,7 @@ export class DefaultValidator extends FormValidator {
 
   /** @override */
   report() {
-    this.form.reportValidity();
+    this.reportFormValidity(this.form);
     this.fireValidityEventIfNecessary();
   }
 }
@@ -160,7 +226,7 @@ export class PolyfillDefaultValidator extends FormValidator {
   report() {
     const inputs = this.inputs();
     for (let i = 0; i < inputs.length; i++) {
-      if (!inputs[i].checkValidity()) {
+      if (!this.checkInputValidity(inputs[i])) {
         inputs[i]./*REVIEW*/focus();
         this.validationBubble_.show(inputs[i], inputs[i].validationMessage);
         break;
@@ -188,7 +254,7 @@ export class PolyfillDefaultValidator extends FormValidator {
       return;
     }
 
-    if (input.checkValidity()) {
+    if (this.checkInputValidity(input)) {
       input.removeAttribute('aria-invalid');
       this.validationBubble_.hide();
     } else {
@@ -241,6 +307,12 @@ export class AbstractCustomValidator extends FormValidator {
   getValidationFor(input, invalidType) {
     if (!input.id) {
       return null;
+    }
+    // <textarea> only supports `pattern` matching. But, it's implemented via
+    // setCustomValidity(), which results in the 'customError' validity state.
+    if (input.tagName === 'TEXTAREA') {
+      devAssert(invalidType === 'customError');
+      invalidType = 'patternMismatch';
     }
     const property = VALIDATION_CACHE_PREFIX + invalidType;
     if (!(property in input)) {
@@ -313,7 +385,7 @@ export class AbstractCustomValidator extends FormValidator {
         !!input.checkValidity && this.shouldValidateOnInteraction(input);
 
     this.hideValidationFor(input);
-    if (shouldValidate && !input.checkValidity()) {
+    if (shouldValidate && !this.checkInputValidity(input)) {
       this.reportInput(input);
     }
   }
@@ -338,7 +410,7 @@ export class ShowFirstOnSubmitValidator extends AbstractCustomValidator {
     this.hideAllValidations();
     const inputs = this.inputs();
     for (let i = 0; i < inputs.length; i++) {
-      if (!inputs[i].checkValidity()) {
+      if (!this.checkInputValidity(inputs[i])) {
         this.reportInput(inputs[i]);
         inputs[i]./*REVIEW*/focus();
         break;
@@ -364,7 +436,7 @@ export class ShowAllOnSubmitValidator extends AbstractCustomValidator {
     let firstInvalidInput = null;
     const inputs = this.inputs();
     for (let i = 0; i < inputs.length; i++) {
-      if (!inputs[i].checkValidity()) {
+      if (!this.checkInputValidity(inputs[i])) {
         firstInvalidInput = firstInvalidInput || inputs[i];
         this.reportInput(inputs[i]);
       }
@@ -470,6 +542,7 @@ export function isCheckValiditySupported(doc) {
 
 /**
  * Returns invalid error type on the input.
+ * @see https://developer.mozilla.org/en-US/docs/Web/API/ValidityState
  * @param {!Element} input
  * @return {?string}
  */

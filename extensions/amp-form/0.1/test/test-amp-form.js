@@ -129,7 +129,7 @@ describes.repeated('', {
     }
 
     function getVerificationForm() {
-      const form = getForm();
+      const form = getForm(/*button1*/ false);
       form.setAttribute('verify-xhr', '');
 
       const noVerifyInput = createElement('input');
@@ -254,7 +254,7 @@ describes.repeated('', {
           sandbox.stub(ampForm.viewer_, 'sendMessageAwaitResponse')
               .returns(
                   Promise.resolve({
-                    data: '<div>much success</div>',
+                    data: {html: '<div>much success</div>'},
                   }));
           const renderedTemplate = createElement('div');
           renderedTemplate.innerText = 'much success';
@@ -264,8 +264,10 @@ describes.repeated('', {
           const fetchAndRenderTemplate = sandbox.stub(
               ampForm.ssrTemplateHelper_, 'fetchAndRenderTemplate');
           fetchAndRenderTemplate
-              .onFirstCall().returns(Promise.resolve({html: renderedTemplate}))
-              .onSecondCall().returns(Promise.resolve({html: template}));
+              .onFirstCall().returns(
+                  Promise.resolve({html: '<div>much success</div>'}))
+              .onSecondCall().returns(
+                  Promise.resolve({html: '<div>mushc success</div>'}));
 
           const handleSubmitEventPromise = ampForm.handleSubmitEvent_(event);
           return whenCalled(fetchAndRenderTemplate)
@@ -275,6 +277,59 @@ describes.repeated('', {
                 expect(ampForm.ssrTemplateHelper_.fetchAndRenderTemplate)
                     .to.have.been.calledWith(
                         form, sinon.match.object, sinon.match.object);
+                return handleSubmitEventPromise;
+              });
+        });
+      });
+
+      it('should set html bypassing mustache rendering', () => {
+        sandbox.spy(xhrUtils, 'setupInput');
+        sandbox.spy(xhrUtils, 'setupAMPCors');
+        sandbox.stub(xhrUtils, 'fromStructuredCloneable');
+        sandbox.stub(xhrUtils, 'verifyAmpCORSHeaders');
+
+        return getSsrAmpFormPromise.then(ampForm => {
+          const form = ampForm.form_;
+          const template = createElement('template');
+          template.setAttribute('type', 'amp-mustache');
+          template.content.appendChild(createTextNode('Some {{template}}'));
+          form.id = 'registration';
+          const event = {
+            stopImmediatePropagation: sandbox.spy(),
+            target: form,
+            preventDefault: sandbox.spy(),
+          };
+          const successTemplateContainer = createElement('div');
+          successTemplateContainer.setAttribute('submit-success', '');
+          successTemplateContainer.appendChild(template);
+
+          form.appendChild(successTemplateContainer);
+
+          form.xhrAction_ = 'https://www.xhr-action.org';
+
+          sandbox.stub(ampForm.viewer_, 'sendMessageAwaitResponse')
+              .returns(
+                  Promise.resolve({
+                    data: '<div>much success</div>',
+                  }));
+          const renderedTemplate = createElement('div');
+          renderedTemplate.innerText = 'much success';
+          sandbox.stub(ampForm.ssrTemplateHelper_.templates_, 'findTemplate')
+              .returns(template);
+
+          const fetchAndRenderTemplate = sandbox.stub(
+              ampForm.ssrTemplateHelper_, 'renderTemplate');
+          fetchAndRenderTemplate
+              .onFirstCall().returns(Promise.resolve({html: renderedTemplate}))
+              .onSecondCall().returns(Promise.resolve({html: template}));
+
+          const renderTemplate = sandbox.spy(ampForm, 'renderTemplate_');
+
+          const handleSubmitEventPromise = ampForm.handleSubmitEvent_(event);
+          return whenCalled(renderTemplate, 2)
+              .then(() => {
+                expect(ampForm.ssrTemplateHelper_.renderTemplate)
+                    .to.have.been.called;
                 return handleSubmitEventPromise;
               });
         });
@@ -1564,14 +1619,28 @@ describes.repeated('', {
 
       expect(actions.installActionHandler).to.be.calledWith(form);
       sandbox.spy(ampForm, 'handleSubmitAction_');
-      ampForm.actionHandler_({method: 'anything'});
+      ampForm.actionHandler_({method: 'anything', satisfiesTrust: () => true});
       expect(ampForm.handleSubmitAction_).to.have.not.been.called;
-      ampForm.actionHandler_({method: 'submit'});
+      ampForm.actionHandler_({method: 'submit', satisfiesTrust: () => true});
 
       return whenCalled(ampForm.xhr_.fetch).then(() => {
         expect(ampForm.handleSubmitAction_).to.have.been.calledOnce;
         document.body.removeChild(form);
       });
+    });
+
+    it('should not invoke low-trust action invocations', () => {
+      const form = getForm();
+      document.body.appendChild(form);
+
+      const ampForm = new AmpForm(form);
+      sandbox.stub(ampForm.xhr_, 'fetch').returns(Promise.resolve());
+
+      sandbox.spy(ampForm, 'handleSubmitAction_');
+      ampForm.actionHandler_({method: 'submit', satisfiesTrust: () => false});
+      expect(ampForm.handleSubmitAction_).to.have.not.been.called;
+
+      document.body.removeChild(form);
     });
 
     it('should handle clear action and restore initial values', () => {
@@ -1591,11 +1660,14 @@ describes.repeated('', {
         ampForm.form_.elements.name.value = 'Jack Sparrow';
 
         sandbox.spy(ampForm, 'handleClearAction_');
-        ampForm.actionHandler_({method: 'anything'});
+        ampForm.actionHandler_({
+          method: 'anything',
+          satisfiesTrust: () => true,
+        });
         expect(ampForm.handleClearAction_).to.have.not.been.called;
 
         expect(ampForm.getFormAsObject_()).to.not.deep.equal(initalFormValues);
-        ampForm.actionHandler_({method: 'clear'});
+        ampForm.actionHandler_({method: 'clear', satisfiesTrust: () => true});
         expect(ampForm.handleClearAction_).to.have.been.called;
 
         expect(ampForm.getFormAsObject_()).to.deep.equal(initalFormValues);
@@ -1671,7 +1743,10 @@ describes.repeated('', {
             .returns(new Promise(unusedResolve => {}));
         sandbox.spy(ampForm, 'handleSubmitAction_');
 
-        const submitPromise = ampForm.actionHandler_({method: 'submit'});
+        const submitPromise = ampForm.actionHandler_({
+          method: 'submit',
+          satisfiesTrust: () => true,
+        });
         expect(ampForm.handleSubmitAction_).to.have.not.been.called;
         return timer.promise(1).then(() => {
           expect(ampForm.handleSubmitAction_).to.have.not.been.called;
@@ -1698,7 +1773,7 @@ describes.repeated('', {
             .returns(Promise.resolve());
         sandbox.spy(ampForm, 'handleSubmitAction_');
 
-        ampForm.actionHandler_({method: 'submit'});
+        ampForm.actionHandler_({method: 'submit', satisfiesTrust: () => true});
         expect(ampForm.handleSubmitAction_).to.have.not.been.called;
         return timer.promise(1).then(() => {
           expect(ampForm.handleSubmitAction_).to.have.not.been.called;
@@ -1845,7 +1920,6 @@ describes.repeated('', {
               .to.have.been.calledWith(clientIdField);
           expect(ampForm.urlReplacement_.expandInputValueSync)
               .to.have.been.calledWith(canonicalUrlField);
-
 
           return whenCalled(ampForm.handleNonXhrGet_).then(() => {
             expect(form.submit).to.not.have.been.called;
@@ -2016,7 +2090,7 @@ describes.repeated('', {
           const submitActionPromise =
             ampForm.handleSubmitAction_(/* invocation */ {});
 
-          expect(form.submit).to.have.not.been.called;
+          expect(form.submit).to.have.been.called;
 
           return submitActionPromise;
         });
@@ -2118,7 +2192,7 @@ describes.repeated('', {
           'formFields[name]': 'John Miller',
           'formFields[email]': 'j@hnmiller.com',
         };
-        expect(form.submit).to.have.not.been.called;
+        expect(form.submit).to.have.been.called;
         expect(ampForm.analyticsEvent_).to.be.calledWith(
             'amp-form-submit',
             expectedFormData
@@ -2232,7 +2306,7 @@ describes.repeated('', {
         const form = ampForm.form_;
         form.id = 'registration';
 
-        // Non XHR GET
+        // Non XHR Get
         ampForm.method_ = 'GET';
         ampForm.xhrAction_ = null;
         const clientIdField = createElement('input');
@@ -2266,7 +2340,6 @@ describes.repeated('', {
             'amp-form-submit',
             expectedFormData
         );
-
         expect(ampForm.urlReplacement_.expandInputValueAsync)
             .to.not.have.been.called;
         expect(ampForm.urlReplacement_.expandInputValueSync)
@@ -2276,10 +2349,48 @@ describes.repeated('', {
         expect(ampForm.urlReplacement_.expandInputValueSync)
             .to.have.been.calledWith(canonicalUrlField);
 
-        expect(form.submit).to.not.have.been.called;
+        expect(form.submit).to.have.been.calledOnce;
         expect(clientIdField.value).to.equal('');
         expect(canonicalUrlField.value).to.equal(
             'https%3A%2F%2Fexample.com%2Famps.html');
+      });
+    });
+
+    it('should attach auth token with crossorigin attribute', () => {
+      sandbox.stub(Services, 'viewerAssistanceForDocOrNull').returns(
+          Promise.resolve({
+            getIdTokenPromise: (() => Promise.resolve('idToken')),
+          }));
+      return getAmpForm(getForm()).then(ampForm => {
+        const form = ampForm.form_;
+        form.id = 'registration';
+
+        const emailInput = createElement('input');
+        emailInput.setAttribute('name', 'email');
+        emailInput.setAttribute('type', 'email');
+        emailInput.setAttribute('value', 'j@hnmiller.com');
+        form.appendChild(emailInput);
+
+        const unnamedInput = createElement('input');
+        unnamedInput.setAttribute('type', 'text');
+        unnamedInput.setAttribute('value', 'unnamed');
+        form.appendChild(unnamedInput);
+
+        ampForm.method_ = 'POST';
+        ampForm.form_.setAttribute(
+            'crossorigin', 'amp-viewer-auth-token-via-post');
+        sandbox.stub(ampForm.xhr_, 'fetch').returns(
+            Promise.resolve({json: (() => Promise.resolve())}));
+
+        return ampForm.handleSubmitAction_(/* invocation */ {}).then(() => {
+          return ampForm.xhrSubmitPromiseForTesting().then(() => {
+            expect(Services.viewerAssistanceForDocOrNull).to.be.called;
+            const fetchCallFormData =
+                ampForm.xhr_.fetch.firstCall.args[1].body.getFormData();
+            expect(fetchCallFormData.get('ampViewerAuthToken'))
+                .to.equal('idToken');
+          });
+        });
       });
     });
 
@@ -2318,7 +2429,7 @@ describes.repeated('', {
 
           return ampForm.submit_(ActionTrust.HIGH, mockEvent).then(() => {
             expect(getValueStub).to.be.called;
-            expect(formElementSubmitSpy).to.be.called;
+            expect(formElementSubmitSpy).to.be.calledOnce;
           });
         });
       });

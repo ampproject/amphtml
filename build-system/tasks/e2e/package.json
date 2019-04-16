@@ -1,0 +1,13 @@
+{
+  "private": true,
+  "name": "gulp-e2e",
+  "version": "0.1.0",
+  "description": "Gulp e2e",
+  "dependencies": {
+    "@babel/register": "7.0.0",
+    "babel-regenerator-runtime": "6.5.0",
+    "chromedriver": "2.45.0",
+    "puppeteer": "1.12.2",
+    "selenium-webdriver": "4.0.0-alpha.1"
+  }
+}

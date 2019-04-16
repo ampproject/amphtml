@@ -17,6 +17,7 @@
 @import './amp-story-access.css';
 @import './amp-story-desktop-panels.css';
 @import './amp-story-page-attachment.css';
+@import './amp-story-templates.css';
 @import './amp-story-user-overridable.css';
 @import './pagination-buttons.css';
 
@@ -49,6 +50,7 @@ amp-consent {
   margin: 0 !important;
   padding: 0 !important;
   text-align: start !important;
+  text-shadow: none !important;
   width: auto !important;
 }
 
@@ -63,9 +65,13 @@ amp-story {
   touch-action: manipulation !important;
 }
 
+html.i-amphtml-story-standalone {
+  font-size: calc(2.5 * var(--i-amphtml-story-vmax, 8px));
+}
+
 html.i-amphtml-story-standalone,
 html.i-amphtml-story-standalone body {
-  font-size: calc(2 * var(--i-amphtml-story-vh, 8px));
+  font-size: calc(2.5 * var(--i-amphtml-story-vh, 8px));
   height: 100% !important;
   margin: 0 !important;
   padding: 0 !important;
@@ -77,28 +83,28 @@ html.i-amphtml-story-standalone body {
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0) !important;
 }
 
-amp-story p,
-amp-story h4 {
+p,
+h4 {
   font-size: 1rem;
 }
 
-amp-story h1 {
+h1 {
   font-size: 2rem;
 }
 
-amp-story h2 {
+h2 {
   font-size: 1.5rem;
 }
 
-amp-story h3 {
+h3 {
   font-size: 1.17rem;
 }
 
-amp-story h5 {
+h5 {
   font-size: 0.83rem;
 }
 
-amp-story h6 {
+h6 {
   font-size: 0.67rem;
 }
 
@@ -178,17 +184,16 @@ amp-story-page[active] {
   z-index: 1 !important;
 }
 
-amp-story amp-sidebar[side][open] {
-  background-color: #ffffff !important;
+.i-amphtml-story-sidebar[open] {
   transform: translate3d(0, 0, 0) !important;
   transition: transform 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
 }
 
-[desktop] amp-sidebar[side][open]{
+[desktop] .i-amphtml-story-sidebar[open] {
   max-width: 320px !important;
 }
 
-amp-story amp-sidebar[side] {
+.i-amphtml-story-sidebar {
   max-width: 280px !important;
   min-width: 280px !important;
   width: 280px !important;
@@ -206,10 +211,18 @@ amp-story amp-sidebar[side] {
  * not be automatically laid out. Max distance is set to 2 (next 2 pages) since
  * we don't want to schedule any further pages. */
 
-amp-story-page:not([active]) {
-  transform: translateY(1000%) !important;
+amp-story-page:not(:first-of-type):not([distance]):not([active]) {
+  transform: translateY(1000vh) !important;
 }
 
+amp-story-page:not([active]) {
+  transform: translateY(1000vh) !important;
+}
+
+/**
+ * Note: If updating the [active] or [distance] attributes names, please also
+ * update them in the amp.css file.
+ */
 amp-story-page[active],
 amp-story-page[distance="0"],
 amp-story-page[distance="1"] {
@@ -260,15 +273,17 @@ amp-story-page[distance="2"] {
   /* Prevent someone from making this a full-screen image */
   background-image: none !important;
   background-color: #000 !important;
-  z-index: 100001 !important;
-  animation: i-amphtml-bookend-overlay-opacity 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) forwards !important;
+  visibility: visible;
+  z-index: 100003 !important;
+  transition: visibility 0.3s, opacity 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
 }
 
 .i-amphtml-story-opacity-mask[hidden] {
   opacity: 0 !important;
   pointer-events: none !important;
   display: block !important;
-  animation: i-amphtml-bookend-overlay-opacity 0.2s cubic-bezier(0.4, 0.0, 1, 1) reverse !important;
+  visibility: hidden;
+  transition: visibility 0.2s, opacity 0.2s cubic-bezier(0.4, 0.0, 1, 1) !important;
 }
 
 .i-amphtml-sidebar-mask {
@@ -320,8 +335,13 @@ amp-story-grid-layer > * {
   pointer-events: auto !important;
 }
 
+/** Ensure clicks inside anchor tags are handled by the tooltip. */
+amp-story-grid-layer a * {
+  pointer-events: none !important;
+}
+
 /** Apply click shield on embedded components on initial load. */
-amp-story-grid-layer amp-twitter::after {
+amp-story-grid-layer .i-amphtml-embedded-component::after {
   content: "" !important;
   position: absolute !important;
   height: 100% !important;
@@ -330,7 +350,7 @@ amp-story-grid-layer amp-twitter::after {
   left: 0 !important;
 }
 
-.i-amphtml-expanded-mode amp-twitter::after {
+.i-amphtml-expanded-mode .i-amphtml-embedded-component::after {
   height: 0px !important;
   width: 0px !important;
 }
@@ -341,11 +361,8 @@ amp-story-grid-layer amp-twitter::after {
   z-index: auto !important;
 }
 
-.i-amphtml-expanded-mode amp-twitter {
+.i-amphtml-expanded-mode .i-amphtml-embedded-component.i-amphtml-expanded-component {
   z-index: 1 !important;
-}
-
-.i-amphtml-animate-expand-in {
   transition: transform 0.225s cubic-bezier(0.4, 0.0, 0.2, 1) !important;
 }
 
@@ -532,7 +549,7 @@ amp-story[standalone] .i-amphtml-story-developer-log {
   font-weight: 400 !important;
   font-size: 12px !important;
   max-width: 640px !important;
-  z-index: 100002 !important; /** Bookend + 1 */
+  z-index: 100004 !important; /** share menu + 1 */
 }
 
 @media (min-width: 640px) {
@@ -744,10 +761,10 @@ amp-story .amp-video-eq,
   position: absolute !important;
   top: 0 !important;
   left: 0 !important;
-  margin: 8px !important;
+  margin: 12px !important;
   height: 24px !important;
   width: 24px !important;
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 36 36" fill="rgba(255, 255, 255, 0.7)"><path d="M28.5 9.62L26.38 7.5 18 15.88 9.62 7.5 7.5 9.62 15.88 18 7.5 26.38l2.12 2.12L18 20.12l8.38 8.38 2.12-2.12L20.12 18z"/><path d="M0 0h36v36H0z" fill="none"/></svg>') !important;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 36 36" fill="rgba(255, 255, 255, 0.8)"><path d="M28.5 9.62L26.38 7.5 18 15.88 9.62 7.5 7.5 9.62 15.88 18 7.5 26.38l2.12 2.12L18 20.12l8.38 8.38 2.12-2.12L20.12 18z"/><path d="M0 0h36v36H0z" fill="none"/></svg>') !important;
   cursor: pointer !important;
   text-align: center !important;
 }
@@ -799,14 +816,14 @@ amp-story .amp-video-eq,
 
 @keyframes open-attachment-icon {
   0% {
-    transform: translateY(5px);
+    transform: translateY(14px);
   }
   to {
-    transform: translateY(-2px);
+    transform: translateY(0);
   }
 }
 
-@keyframes open-attachment-button-explode {
+@keyframes open-attachment-icon-explode {
   0% {
     transform: scale(0);
   }
@@ -816,64 +833,113 @@ amp-story .amp-video-eq,
   }
 }
 
-@keyframes open-attachment-text-color {
+@keyframes open-attachment-icon-color {
   0% {
-    color: #fff;
-    text-shadow: 0px 0px 6px rgba(0, 0, 0, 0.36);
+    background: #fff;
   }
   to {
-    color: rgba(0, 0, 0, 0.87);
+    background: rgba(0, 0, 0, 0.87);
     text-shadow: none;
   }
 }
 
+@keyframes open-attachment-bar-left {
+  0% {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(-30deg);
+  }
+}
+
+@keyframes open-attachment-bar-right {
+  0% {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(30deg);
+  }
+}
+
+/**
+ * Hiding the element and only showing it on the active page so the animation
+ * triggers every time the page becomes active.
+ */
 amp-story-page .i-amphtml-story-page-open-attachment {
+  display: none !important;
+}
+
+amp-story-page[active] .i-amphtml-story-page-open-attachment {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   flex-direction: column !important;
   position: absolute !important;
-  bottom: 12px !important;
+  bottom: 0 !important;
   left: 0 !important;
   width: 100% !important;
+  background: linear-gradient(0, rgba(0, 0, 0, 0.15), transparent) !important;
   pointer-events: none !important;
   z-index: 3 !important;
   animation: open-attachment-fly-in 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) both !important;
 }
 
+amp-story-page .i-amphtml-story-page-open-attachment > * {
+  cursor: pointer !important;
+  pointer-events: auto !important;
+}
+
 amp-story-page .i-amphtml-story-page-open-attachment-icon {
   display: block !important;
-  height: 20px !important;
-  width: 24px !important;
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#FFFFFF"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"/><path d="M0 0h24v24H0z" fill="none"/></svg>') !important;
-  background-repeat: no-repeat !important;
-  background-position: center center !important;
-  cursor: pointer !important;
-  filter: drop-shadow(0px 0px 6px rgba(0, 0, 0, 0.36)) !important;
-  animation: open-attachment-icon 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) 1.5s both !important;
-}
-
-amp-story-page .i-amphtml-story-page-open-attachment-text {
-  position: relative !important;
-  padding: 0 24px !important;
   height: 32px !important;
+  width: 32px !important;
   cursor: pointer !important;
-  font-family: 'Roboto', sans-serif !important;
-  font-size: 15px !important;
-  line-height: 32px !important;
-  pointer-events: auto !important;
-  animation: open-attachment-text-color 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) 1.5s both !important;
+  animation: open-attachment-icon 0.2s cubic-bezier(0.4, 0.0, 0.2, 1) 2s both !important;
 }
 
-amp-story-page .i-amphtml-story-page-open-attachment-text::after {
-  content: "";
+amp-story-page .i-amphtml-story-page-open-attachment-icon::after {
+  content: "" !important;
   position: absolute !important;
   top: 0 !important;
   left: 0 !important;
   height: 100% !important;
   width: 100% !important;
-  background: #fff !important;
-  border-radius: 32px !important;
+  background: #FFF !important;
+  border-radius: 100% !important;
   z-index: -1 !important;
-  animation: open-attachment-button-explode 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) 1.5s both !important;
+  animation: open-attachment-icon-explode 0.25s cubic-bezier(0.4, 0.0, 0.2, 1) 2s both !important;
+}
+
+.i-amphtml-story-page-open-attachment-bar-left,
+.i-amphtml-story-page-open-attachment-bar-right {
+  position: absolute !important;
+  display: block !important;
+  height: 3px !important;
+  width: 12px !important;
+  border-radius: 3px !important;
+  top: 14px !important;
+}
+
+.i-amphtml-story-page-open-attachment-bar-left {
+  left: 6px !important;
+  animation: open-attachment-icon-color 0.25s cubic-bezier(0.4, 0.0, 0.2, 1) 2s both,
+             open-attachment-bar-left 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) both !important;
+}
+
+.i-amphtml-story-page-open-attachment-bar-right {
+  right: 6px !important;
+  animation: open-attachment-icon-color 0.25s cubic-bezier(0.4, 0.0, 0.2, 1) 2s both,
+             open-attachment-bar-right 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) both !important;
+}
+
+amp-story-page .i-amphtml-story-page-open-attachment-text {
+  position: relative !important;
+  padding: 0 24px !important;
+  color: #FFF !important;
+  font-family: 'Roboto', sans-serif !important;
+  font-size: 15px !important;
+  font-weight: bold !important;
+  letter-spacing: 0.3px;
+  line-height: 40px !important;
+  text-shadow: 0px 0px 6px rgba(0, 0, 0, 0.36) !important;
 }

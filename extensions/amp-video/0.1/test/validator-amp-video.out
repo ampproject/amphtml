@@ -34,7 +34,9 @@ FAIL
 |      width="640"
 |      height="360"
 |      layout="responsive"
-|      poster="images/kitten-playing.png">
+|      poster="images/kitten-playing.png"
+|      object-fit="cover"
+|      object-position="left center">
 |      <source src="videos/kitten-playing.webm"
 |        type="video/webm" />
 |      <source src="videos/kitten-playing.mp4"
@@ -47,9 +49,9 @@ FAIL
 |    <!-- Invalid: Incorrect attribute value for autoplay -->
 |    <amp-video autoplay=true layout=fill width=300 height=500
 >>   ^~~~~~~~~
-amp-video/0.1/test/validator-amp-video.html:47:2 The attribute 'autoplay' in tag 'amp-video' is set to the invalid value 'true'. (see https://www.ampproject.org/docs/reference/components/amp-video) [DISALLOWED_HTML]
+amp-video/0.1/test/validator-amp-video.html:49:2 The attribute 'autoplay' in tag 'amp-video' is set to the invalid value 'true'. (see https://www.ampproject.org/docs/reference/components/amp-video) [DISALLOWED_HTML]
 >>   ^~~~~~~~~
-amp-video/0.1/test/validator-amp-video.html:47:2 The attribute 'loop' in tag 'amp-video' is set to the invalid value '1'. (see https://www.ampproject.org/docs/reference/components/amp-video) [DISALLOWED_HTML]
+amp-video/0.1/test/validator-amp-video.html:49:2 The attribute 'loop' in tag 'amp-video' is set to the invalid value '1'. (see https://www.ampproject.org/docs/reference/components/amp-video) [DISALLOWED_HTML]
 |      loop="1" preload="metadata" controls="controls"></amp-video>
 |
 |    <!-- Valid: Correct attribute value for rotate-to-fullscreen -->
@@ -59,12 +61,12 @@ amp-video/0.1/test/validator-amp-video.html:47:2 The attribute 'loop' in tag 'am
 |    <!-- Invalid: `dock` without `amp-video-docking` extension. -->
 |    <amp-video dock layout=fill width=300 height=500 controls></amp-video>
 >>   ^~~~~~~~~
-amp-video/0.1/test/validator-amp-video.html:55:2 The attribute 'dock' requires including the 'amp-video-docking' extension JavaScript. [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+amp-video/0.1/test/validator-amp-video.html:57:2 The attribute 'dock' requires including the 'amp-video-docking' extension JavaScript. [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |
 |    <!-- Invalid: Incorrect attribute value for rotate-to-fullscreen -->
 |    <amp-video rotate-to-fullscreen=true layout=fill width=300 height=500
 >>   ^~~~~~~~~
-amp-video/0.1/test/validator-amp-video.html:58:2 The attribute 'rotate-to-fullscreen' in tag 'amp-video' is set to the invalid value 'true'. (see https://www.ampproject.org/docs/reference/components/amp-video) [DISALLOWED_HTML]
+amp-video/0.1/test/validator-amp-video.html:60:2 The attribute 'rotate-to-fullscreen' in tag 'amp-video' is set to the invalid value 'true'. (see https://www.ampproject.org/docs/reference/components/amp-video) [DISALLOWED_HTML]
 |      loop preload="metadata" controls></amp-video>
 |  </body>
 |  </html>

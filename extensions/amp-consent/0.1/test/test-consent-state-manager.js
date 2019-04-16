@@ -37,12 +37,14 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
   let storageValue;
   let storageGetSpy;
   let storageSetSpy;
+  let storageRemoveSpy;
   beforeEach(() => {
     win = env.win;
     ampdoc = env.ampdoc;
     storageValue = {};
     storageGetSpy = sandbox.spy();
     storageSetSpy = sandbox.spy();
+    storageRemoveSpy = sandbox.spy();
 
     resetServiceForTesting(win, 'storage');
     registerServiceBuilder(win, 'storage', function() {
@@ -54,6 +56,10 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
         setNonBoolean: (name, value) => {
           storageSetSpy(name, value);
           storageValue[name] = value;
+          return Promise.resolve();
+        },
+        remove: name => {
+          storageRemoveSpy(name);
           return Promise.resolve();
         },
       });
@@ -114,6 +120,23 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
         yield p;
         expect(value).to.deep.equal(
             constructConsentInfo(CONSENT_ITEM_STATE.ACCEPTED, 'test-string'));
+      });
+
+      it('update consent string that exceeds max size', function* () {
+        expectAsyncConsoleError(/Cannot store consentString/);
+        manager.registerConsentInstance('test', {});
+        const MAX_LENGTH = 150;
+        let testStr = 'a';
+        for (let i = 0; i < MAX_LENGTH; i++) {
+          testStr += 'a';
+        }
+        manager.updateConsentInstanceState(
+            CONSENT_ITEM_STATE.ACCEPTED, testStr);
+        let value;
+        const p = manager.getConsentInstanceInfo().then(v => value = v);
+        yield p;
+        expect(value).to.deep.equal(
+            constructConsentInfo(CONSENT_ITEM_STATE.ACCEPTED, testStr));
       });
     });
 
@@ -222,6 +245,20 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
           expect(storageSetSpy).to.be.calledOnce;
           expect(storageSetSpy).to.be.calledWith(
               'amp-consent:test', composeStoreValue(consentInfo));
+        });
+
+        it('remove consetninfo when consentStr length exceeds', function* () {
+          expectAsyncConsoleError(/Cannot store consentString/);
+          const MAX_LENGTH = 150;
+          let testStr = 'a';
+          for (let i = 0; i < MAX_LENGTH; i++) {
+            testStr += 'a';
+          }
+          instance.update(
+              CONSENT_ITEM_STATE.ACCEPTED, testStr);
+          yield macroTask();
+          expect(storageSetSpy).to.not.be.called;
+          expect(storageRemoveSpy).to.be.calledOnce;
         });
       });
 

@@ -1,3 +1,10 @@
+---
+$category@: media
+formats:
+  - websites
+teaser:
+  text: Displays a Brid.tv player.
+---
 <!---
 Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,13 +21,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-brid-player"></a> `amp-brid-player`
+# amp-brid-player
+An <code>amp-brid-player</code> displays the Brid Player used in <a href="https://www.brid.tv/">Brid.tv</a> Video Platform.
 
 <table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>An <code>amp-brid-player</code> displays the Brid Player used in <a href="https://www.brid.tv/">Brid.tv</a> Video Platform.
-  </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-brid-player" src="https://cdn.ampproject.org/v0/amp-brid-player-0.1.js">&lt;/script></code></td>
@@ -41,7 +45,7 @@ limitations under the License.
 
 The `width` and `height` attributes determine the aspect ratio of the player embedded in responsive layouts.
 
-Examples:
+Example:
 
 ```html
 <amp-brid-player
@@ -54,40 +58,49 @@ Examples:
 ```
 
 ## Attributes
+<table>
+  <tr>
+    <td width="40%"><strong>autoplay</strong></td>
+    <td>If this attribute is present, and the browser supports autoplay:</p>
+<ul>
+  <li>the video is automatically muted before autoplay starts</li>
+  <li>when the video is scrolled out of view, the video is paused</li>
+  <li>when the video is scrolled into view, the video resumes playback</li>
+  <li>when the user taps the video, the video is unmuted</li>
+  <li>if the user has interacted with the video (e.g., mutes/unmutes, pauses/resumes, etc.), and the video is scrolled in or out of view, the state of the video remains as how the user left it. For example, if the user pauses the video, then scrolls the video out of view and returns to the video, the video is still paused.</li>
+</ul></td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-partner</strong></td>
+    <td>The Brid.tv partner ID.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-player</strong></td>
+    <td>The Brid.tv player ID. Specific to every partner.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-video</strong></td>
+    <td>The Brid.tv video ID.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-playlist</strong></td>
+    <td>The Brid.tv playlist ID or custom string value for dynamic playlists.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-outstream</strong></td>
+    <td>The Brid.tv outstream unit ID.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-dynamic</strong></td>
+    <td>Parameter used to specify type of dynamic playlist, e.g. latest, channel, tag.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>common attributes</strong></td>
+    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
+  </tr>
+</table>
 
-##### autoplay
-
-If this attribute is present, and the browser supports autoplay:
-
-* the video is automatically muted before autoplay starts
-* when the video is scrolled out of view, the video is paused
-* when the video is scrolled into view, the video resumes playback
-* when the user taps the video, the video is unmuted
-* if the user has interacted with the video (e.g., mutes/unmutes, pauses/resumes, etc.), and the video is scrolled in or out of view, the state of the video remains as how the user left it.  For example, if the user pauses the video, then scrolls the video out of view and returns to the video, the video is still paused. 
-
-##### data-partner
-
-The Brid.tv partner id.
-
-##### data-player
-
-The Brid.tv player id. Specific to every partner.
-
-##### data-video
-
-The Brid.tv video ID.
-
-##### data-playlist
-
-The Brid.tv playlist ID. Embed must either have video or playlist or outstream attribute.
-
-##### data-outstream
-
-The Brid.tv outstream unit ID.
-
-##### common attributes
-
-This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
+Embed code must either have video, playlist or outstream attribute.
 
 ## Validation
 

@@ -19,7 +19,6 @@ import {Deferred} from '../../../src/utils/promise';
 import {Observable} from '../../../src/observable';
 import {
   PlayingStates,
-  VideoAnalyticsDetailsDef,
   VideoAnalyticsEvents,
 } from '../../../src/video-interface';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
@@ -1185,7 +1184,6 @@ export class VisibilityTracker extends EventTracker {
     const selector = config['selector'] || visibilitySpec['selector'];
     const waitForSpec = visibilitySpec['waitFor'];
     let reportWhenSpec = visibilitySpec['reportWhen'];
-    const visibilityManager = this.root.getVisibilityManager();
     let createReportReadyPromiseFunc = null;
 
     if (reportWhenSpec) {
@@ -1202,6 +1200,14 @@ export class VisibilityTracker extends EventTracker {
       reportWhenSpec = 'documentHidden';
     }
 
+    const visibilityManagerPromise = this.root.isUsingHostAPI()
+        .then(hasHostAPI => {
+          if (hasHostAPI) {
+            this.assertMeasurableWithHostApi_(selector, reportWhenSpec);
+          }
+          return this.root.getVisibilityManager();
+        });
+
     if (reportWhenSpec == 'documentHidden') {
       createReportReadyPromiseFunc =
           this.createReportReadyPromiseForDocumentHidden_.bind(this);
@@ -1213,39 +1219,59 @@ export class VisibilityTracker extends EventTracker {
           reportWhenSpec);
     }
 
+    let unlistenPromise;
     // Root selectors are delegated to analytics roots.
     if (!selector || selector == ':root' || selector == ':host') {
       // When `selector` is specified, we always use "ini-load" signal as
       // a "ready" signal.
-      return visibilityManager.listenRoot(
-          visibilitySpec,
-          this.getReadyPromise(waitForSpec, selector),
-          createReportReadyPromiseFunc,
-          this.onEvent_.bind(
-              this, eventType, listener, this.root.getRootElement()));
+      unlistenPromise = visibilityManagerPromise.then(visibilityManager => {
+        return visibilityManager.listenRoot(
+            visibilitySpec,
+            this.getReadyPromise(waitForSpec, selector),
+            createReportReadyPromiseFunc,
+            this.onEvent_.bind(
+                this, eventType, listener, this.root.getRootElement()));
+      }, () => {});
+    } else {
+      // An AMP-element. Wait for DOM to be fully parsed to avoid
+      // false missed searches.
+      const selectionMethod = config['selectionMethod'] ||
+          visibilitySpec['selectionMethod'];
+      unlistenPromise = this.root.getAmpElement(
+          (context.parentElement || context),
+          selector,
+          selectionMethod
+      ).then(element => {
+        return visibilityManagerPromise.then(visibilityManager => {
+          return visibilityManager.listenElement(
+              element,
+              visibilitySpec,
+              this.getReadyPromise(waitForSpec, selector, element),
+              createReportReadyPromiseFunc,
+              this.onEvent_.bind(this, eventType, listener, element));
+        }, () => {});
+      });
     }
 
-    // An AMP-element. Wait for DOM to be fully parsed to avoid
-    // false missed searches.
-    const selectionMethod = config['selectionMethod'] ||
-          visibilitySpec['selectionMethod'];
-    const unlistenPromise = this.root.getAmpElement(
-        (context.parentElement || context),
-        selector,
-        selectionMethod
-    ).then(element => {
-      return visibilityManager.listenElement(
-          element,
-          visibilitySpec,
-          this.getReadyPromise(waitForSpec, selector, element),
-          createReportReadyPromiseFunc,
-          this.onEvent_.bind(this, eventType, listener, element));
-    });
     return function() {
       unlistenPromise.then(unlisten => {
         unlisten();
       });
     };
+  }
+
+  /**
+   * Assert that the setting is measurable with host API
+   * @param {string=} selector
+   * @param {string=} reportWhenSpec
+   */
+  assertMeasurableWithHostApi_(selector, reportWhenSpec) {
+    userAssert(!selector || selector == ':root' || selector == ':host',
+        'Element %s that is not root is not supported with host API',
+        selector);
+
+    userAssert(reportWhenSpec !== 'documentExit',
+        'reportWhen : documentExit is not supported with host API');
   }
 
   /**

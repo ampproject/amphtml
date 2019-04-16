@@ -1,3 +1,10 @@
+---
+$category@: dynamic-content
+formats:
+  - websites
+teaser:
+  text: Displays a dismissable notification to the user.
+---
 <!--
 Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,15 +21,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-user-notification"></a> `amp-user-notification`
+# amp-user-notification
 
 [TOC]
 
+Displays a dismissable notification to the user.
+
 <table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Displays a dismissable notification to the user. </td>
-  </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td>
@@ -154,7 +159,7 @@ In this example if the user is located in Mexico (`mx`) the `amp-geo` will retur
 
 This is the opposite of `data-show-if-geo`.  When specified `amp-user-notification` will only trigger if the `amp-geo` country group does not match the supplied list.
 
-Example: 
+Example:
 
 In this example user in Mexico would not trigger the notification, but a user in an unknon country (assigned to the  `whereIsWaldo` group) would trigger the notifcation.
 

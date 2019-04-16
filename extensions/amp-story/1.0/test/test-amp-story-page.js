@@ -18,6 +18,9 @@ import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
 import {AmpStoryPage, PageState} from '../amp-story-page';
 import {AmpStoryStoreService} from '../amp-story-store-service';
 import {MediaType} from '../media-pool';
+import {createElementWithAttributes} from '../../../../src/dom';
+import {installFriendlyIframeEmbed}
+  from '../../../../src/friendly-iframe-embed';
 import {registerServiceBuilder} from '../../../../src/service';
 
 
@@ -52,6 +55,7 @@ describes.realWin('amp-story-page', {amp: true}, env => {
     win.document.body.appendChild(story);
 
     page = new AmpStoryPage(element);
+    page.element.getResources = () => win.services.resources.obj;
   });
 
   afterEach(() => {
@@ -157,6 +161,53 @@ describes.realWin('amp-story-page', {amp: true}, env => {
         });
   });
 
+  it('should perform media operations on fie video when active', done => {
+    const iframe = win.document.createElement('iframe');
+    const fiePromise = installFriendlyIframeEmbed(iframe, gridLayerEl, {
+      url: 'https://amp.dev',
+      html: '<video src="https://example.com/video.mp3"></video>',
+    });
+
+    fiePromise.then(fie => {
+      const fieDoc = fie.win.document;
+      const videoEl = fieDoc.querySelector('video');
+
+      let mediaPoolMock;
+
+      page.buildCallback();
+      page.layoutCallback()
+          .then(() => page.mediaPoolPromise_)
+          .then(mediaPool => {
+            mediaPoolMock = sandbox.mock(mediaPool);
+            mediaPoolMock
+                .expects('register')
+                .withExactArgs(videoEl)
+                .once();
+
+            mediaPoolMock
+                .expects('preload')
+                .withExactArgs(videoEl)
+                .returns(Promise.resolve())
+                .once();
+
+            mediaPoolMock
+                .expects('play')
+                .withExactArgs(videoEl)
+                .once();
+
+            page.setState(PageState.PLAYING);
+
+            // `setState` runs code that creates subtasks (Promise callbacks).
+            // Waits for the next frame to make sure all the subtasks are
+            // already executed when we run the assertions.
+            win.requestAnimationFrame(() => {
+              mediaPoolMock.verify();
+              done();
+            });
+          });
+    });
+  });
+
   it('should stop the advancement when state becomes not active', () => {
     const advancementStopStub = sandbox.stub(page.advancement_, 'stop');
 
@@ -250,6 +301,63 @@ describes.realWin('amp-story-page', {amp: true}, env => {
             mediaPoolMock.verify();
             done();
           });
+        });
+  });
+
+  it('should find pageIds in a goToPage action', () => {
+    const actionButton = createElementWithAttributes(
+        win.document,
+        'button',
+        {'id': 'actionButton',
+          'on': 'tap:story.goToPage(id=pageId)'});
+    element.appendChild(actionButton);
+    page.buildCallback();
+
+    return page.layoutCallback()
+        .then(() => {
+          const actions = page.actions_();
+
+          expect(actions.length).to.be.equal(1);
+          expect(actions[0]).to.be.equal('pageId');
+        });
+  });
+
+  it('should find pageIds in a goToPage action with multiple actions', () => {
+
+    const multipleActionButton = createElementWithAttributes(
+        win.document,
+        'button',
+        {'id': 'actionButton',
+          'on': 'tap:story.goToPage(id=pageId),foo.bar(baz=quux)'});
+    element.appendChild(multipleActionButton);
+    page.buildCallback();
+
+    return page.layoutCallback()
+        .then(() => {
+          const actions = page.actions_();
+
+          expect(actions.length).to.be.equal(1);
+          expect(actions[0]).to.be.equal('pageId');
+        });
+  });
+
+  it('should find pageIds in a goToPage action with multiple events', () => {
+
+    const multipleEventsButton = createElementWithAttributes(
+        win.document,
+        'button',
+        {'id': 'actionButton',
+          'on':
+            'tap:story.goToPage(id=pageId);action:foo.bar(baz=quux'});
+    element.appendChild(multipleEventsButton);
+    page.buildCallback();
+
+    return page.layoutCallback()
+        .then(() => {
+          const actions = page.actions_();
+
+          expect(actions.length).to.be.equal(1);
+          expect(actions[0]).to.be.equal('pageId');
         });
   });
 });

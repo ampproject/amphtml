@@ -39,6 +39,7 @@ import {toWin} from './types';
  *   obj: (?Object),
  *   promise: (?Promise),
  *   resolve: (?function(!Object)),
+ *   reject: (?function((*))),
  *   context: (?Window|?./service/ampdoc-impl.AmpDoc),
  *   ctor: (?function(new:Object, !Window)|
  *          ?function(new:Object, !./service/ampdoc-impl.AmpDoc)),
@@ -166,6 +167,17 @@ export function registerServiceBuilderForDoc(nodeOrDoc,
   }
 }
 
+/**
+ * Reject a service promise.
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @param {string} id
+ * @param {*} error
+ */
+export function rejectServicePromiseForDoc(nodeOrDoc, id, error) {
+  const ampdoc = getAmpdoc(nodeOrDoc);
+  const holder = getAmpdocServiceHolder(ampdoc);
+  rejectServicePromiseInternal(holder, id, error);
+}
 
 /**
  * Returns a service for the given id and window (a per-window singleton). Users
@@ -414,6 +426,7 @@ function registerServiceInternal(holder, context, id, ctor) {
       obj: null,
       promise: null,
       resolve: null,
+      reject: null,
       context: null,
       ctor: null,
     };
@@ -449,20 +462,29 @@ function getServicePromiseInternal(holder, id) {
 
   // TODO(@cramforce): Add a check that if the element is eventually registered
   // that the service is actually provided and this promise resolves.
-  const deferred = new Deferred();
-  const {promise, resolve} = deferred;
-
   const services = getServices(holder);
-  services[id] = {
-    obj: null,
-    promise,
-    resolve,
-    context: null,
-    ctor: null,
-  };
-  return promise;
+  services[id] = emptyServiceHolderWithPromise();
+  return /** @type {!Promise<!Object>} */ (services[id].promise);
 }
 
+/**
+ * @param {!Object} holder
+ * @param {string} id of the service.
+ * @param {*} error
+ */
+function rejectServicePromiseInternal(holder, id, error) {
+  const services = getServices(holder);
+  const s = services[id];
+  if (s) {
+    if (s.reject) {
+      s.reject(error);
+    }
+    return;
+  }
+
+  services[id] = emptyServiceHolderWithPromise();
+  services[id].reject(error);
+}
 
 /**
  * Returns a promise for service `id` if the service has been registered
@@ -588,6 +610,7 @@ function disposeServiceInternal(id, service) {
  * in embed scope.
  * @param {!Window} embedWin
  * @param {function(new:Object, !./service/ampdoc-impl.AmpDoc)} serviceClass
+ * @suppress {missingProperties}
  * @return {boolean}
  */
 export function installServiceInEmbedIfEmbeddable(embedWin, serviceClass) {
@@ -624,4 +647,19 @@ function isServiceRegistered(holder, id) {
   const service = holder.services && holder.services[id];
   // All registered services must have an implementation or a constructor.
   return !!(service && (service.ctor || service.obj));
+}
+
+/** @return {!ServiceHolderDef} */
+function emptyServiceHolderWithPromise() {
+  const deferred = new Deferred();
+  const {promise, resolve, reject} = deferred;
+  promise.catch(() => {}); // avoid uncaught exception when service gets rejected
+  return {
+    obj: null,
+    promise,
+    resolve,
+    reject,
+    context: null,
+    ctor: null,
+  };
 }

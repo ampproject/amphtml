@@ -46,7 +46,7 @@ class AmpAccordion extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {!Array<!Node>} */
+    /** @private {!Array<!Element>} */
     this.headers_ = [];
 
     /** @private {?string} */
@@ -58,7 +58,7 @@ class AmpAccordion extends AMP.BaseElement {
     /** @private {boolean} */
     this.sessionOptOut_ = false;
 
-    /** @private {Element} */
+    /** @private {?Array<!Element>} */
     this.sections_ = null;
 
     /** @private {?../../../src/service/action-impl.ActionService} */
@@ -321,14 +321,20 @@ class AmpAccordion extends AMP.BaseElement {
    * @private
    */
   animateExpand_(section) {
-    let height, duration;
-    // Expand the div portion of the section and not the header
+    let sectionWidth;
+    let headerHeight;
+    let contentHeight;
+    let duration;
     const sectionChild = section.children[1];
 
-    return this.mutateElement(() => {
-      // We set position and opacity to avoid a FOUC while measuring height
+    return this.measureMutateElement(() => {
+      sectionWidth = section./*OK*/offsetWidth;
+    }, () => {
+      // We set position and opacity to avoid a FOUC while measuring height.
+      // We set the width for layouts where the height depends on the width.
       setImportantStyles(sectionChild, {
         'position': 'fixed',
+        'width': `${sectionWidth}px`,
         'opacity': '0',
       });
       if (!section.hasAttribute('expanded')) {
@@ -338,31 +344,44 @@ class AmpAccordion extends AMP.BaseElement {
     }).then(() => {
       return this.measureMutateElement(
           () => {
-            height = sectionChild./*OK*/offsetHeight;
+            headerHeight = section./*OK*/offsetHeight;
+            contentHeight = sectionChild./*OK*/offsetHeight;
             const viewportHeight = this.getViewport().getHeight();
-            duration = this.getTransitionDuration_(Math.abs(height),
+            duration = this.getTransitionDuration_(Math.abs(contentHeight),
                 viewportHeight);
           },
           () => {
+            setStyles(section, {
+              'overflow': 'hidden',
+            });
             setStyles(sectionChild, {
               'position': '',
               'opacity': '',
-              'height': 0,
+              'width': '',
             });
           });
     }).then(() => {
-      return Animation.animate(this.element, setStylesTransition(sectionChild, {
-        'height': px(numeric(0, height)),
+      const animation = new Animation(this.element);
+      animation.setCurve(EXPAND_CURVE_);
+      // We expand the whole section to make sure we do not effect the size of
+      // the content.
+      animation.add(0, setStylesTransition(section, {
+        'height': px(numeric(headerHeight, headerHeight + contentHeight)),
+      }), 1);
+      animation.add(0, setStylesTransition(sectionChild, {
         'opacity': numeric(0,1),
-      }), duration, EXPAND_CURVE_)
-          .thenAlways(() => {
-            this.mutateElement(() => {
-              setStyles(sectionChild, {
-                height: '',
-                opacity: '',
-              });
-            });
+      }), 1);
+      return animation.start(duration).thenAlways(() => {
+        this.mutateElement(() => {
+          setStyles(section, {
+            'overflow': '',
+            'height': '',
           });
+          setStyles(sectionChild, {
+            'opacity': '',
+          });
+        });
+      });
     });
   }
 
@@ -372,25 +391,33 @@ class AmpAccordion extends AMP.BaseElement {
    * @private
    */
   animateCollapse_(section) {
-    let height, duration;
-    // Collapse the div portion of the section and not the header
-    const sectionChild = section.children[1];
-    return this.measureElement(() => {
-      height = section./*OK*/offsetHeight;
+    let sectionHeight;
+    let headerHeight;
+    let duration;
+    const sectionHeader = section.firstElementChild;
+
+    return this.measureMutateElement(() => {
+      sectionHeight = section./*OK*/offsetHeight;
+      headerHeight = sectionHeader./*OK*/offsetHeight;
       const viewportHeight = this.getViewport().getSize().height;
-      duration = this.getTransitionDuration_(Math.abs(height),
+      duration = this.getTransitionDuration_(Math.abs(sectionHeight),
           viewportHeight);
+    }, () => {
+      setStyles(section, {
+        'overflow': 'hidden',
+      });
     }).then(() => {
-      return Animation.animate(sectionChild, setStylesTransition(sectionChild, {
-        'height': px(numeric(height, 0)),
+      return Animation.animate(section, setStylesTransition(section, {
+        'height': px(numeric(sectionHeight, headerHeight)),
       }), duration, COLLAPSE_CURVE_).thenAlways(() => {
         return this.mutateElement(() => {
           if (section.hasAttribute('expanded')) {
             this.triggerEvent_('collapse', section);
             section.removeAttribute('expanded');
           }
-          setStyles(sectionChild, {
-            height: '',
+          setStyles(section, {
+            'height': '',
+            'overflow': '',
           });
         });
       });

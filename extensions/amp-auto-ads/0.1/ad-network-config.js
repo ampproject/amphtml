@@ -15,15 +15,11 @@
  */
 
 import {
-  AdSenseAmpAutoAdsHoldoutBranches,
-  getAdSenseAmpAutoAdsExpBranch,
-} from '../../../ads/google/adsense-amp-auto-ads';
-import {
   AdSenseAmpAutoAdsResponsiveBranches,
   getAdSenseAmpAutoAdsResponsiveExperimentBranch,
 } from '../../../ads/google/adsense-amp-auto-ads-responsive';
 import {Services} from '../../../src/services';
-import {buildUrl} from '../../../ads/google/a4a/url-builder';
+import {buildUrl} from '../../../ads/google/a4a/shared/url-builder';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {parseUrlDeprecated} from '../../../src/url';
@@ -169,12 +165,9 @@ class AdSenseNetworkConfig {
     this.autoAmpAdsElement_ = autoAmpAdsElement;
   }
 
-  /**
-   * @param {!Window} win
-   */
-  isEnabled(win) {
-    const branch = getAdSenseAmpAutoAdsExpBranch(win);
-    return branch != AdSenseAmpAutoAdsHoldoutBranches.CONTROL;
+  /** @override */
+  isEnabled() {
+    return true;
   }
 
   /**
@@ -182,7 +175,7 @@ class AdSenseNetworkConfig {
    */
   isResponsiveEnabled(win) {
     const branch = getAdSenseAmpAutoAdsResponsiveExperimentBranch(win);
-    return branch != AdSenseAmpAutoAdsResponsiveBranches.CONTROL;
+    return branch != AdSenseAmpAutoAdsResponsiveBranches.EXPERIMENT;
   }
 
   /** @override */

@@ -18,12 +18,12 @@ import {Action} from './amp-story-store-service';
 import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-story-consent-0.1.css';
 import {Layout} from '../../../src/layout';
-import {LocalizedStringId} from './localization';
+import {LocalizedStringId} from '../../../src/localized-strings';
 import {Services} from '../../../src/services';
 import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
 import {
   childElementByTag,
-  closestByTag,
+  closestAncestorElementBySelector,
   isJsonScriptTag,
 } from '../../../src/dom';
 import {computedStyle, setImportantStyles} from '../../../src/style';
@@ -197,8 +197,9 @@ export class AmpStoryConsent extends AMP.BaseElement {
   buildCallback() {
     this.assertAndParseConfig_();
 
-    const storyEl = closestByTag(this.element, 'AMP-STORY');
-    const consentEl = closestByTag(this.element, 'AMP-CONSENT');
+    const storyEl = closestAncestorElementBySelector(this.element, 'AMP-STORY');
+    const consentEl = closestAncestorElementBySelector(this.element,
+        'AMP-CONSENT');
     const consentId = consentEl.id;
     this.storeService_.dispatch(Action.SET_CONSENT_ID, consentId);
 

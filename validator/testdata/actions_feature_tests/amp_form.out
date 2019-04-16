@@ -1,0 +1,146 @@
+FAIL
+|  <!--
+|    Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+|
+|    Licensed under the Apache License, Version 2.0 (the "License");
+|    you may not use this file except in compliance with the License.
+|    You may obtain a copy of the License at
+|
+|        http://www.apache.org/licenses/LICENSE-2.0
+|
+|    Unless required by applicable law or agreed to in writing, software
+|    distributed under the License is distributed on an "AS-IS" BASIS,
+|    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+|    See the License for the specific language governing permissions and
+|    limitations under the license.
+|  -->
+|  <!--
+|    Test Description:
+|    This tests form rules that are allowed in amp actions.
+|  -->
+|
+|  <!doctype html>
+|  <html ⚡ actions>
+|  <head>
+|    <meta charset="utf-8">
+|    <link rel="canonical" href="./regular-html-version.html">
+|    <meta name="viewport" content="width=device-width">
+|    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|    <script async custom-element="amp-viewer-assistance" src="https://cdn.ampproject.org/v0/amp-viewer-assistance-0.1.js"></script>
+|    <script async custom-element="amp-form"
+|      src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
+|    <!-- Valid -->
+|    <script id="amp-viewer-assistance" type="application/json">
+|    {
+|      "actionsOnGoogle" : {
+|        "projectId": "0123456789"
+|      }
+|    }
+|    </script>
+|  </head>
+|  <body>
+|    <!-- Valid: Example 1-->
+|    <form method="post" action-xhr="https://example.com/subscribe" custom-validation-reporting="as-you-go" autocomplete>
+|      <fieldset>
+|        <label>
+|          <span>Your name</span>
+|          <input id="name" type="text" name="name" required>
+|          <span visible-when-invalid="valueMissing" validation-for="name"></span>
+|        </label>
+|        <label>
+|          <span>Your email</span>
+|          <input type="email" name="email" required>
+|        </label>
+|        <input type="submit" value="Subscribe">
+|      </fieldset>
+|    </form>
+|
+|    <!-- Valid: Example 2 -->
+|    <form method="post" action-xhr="https://example.com/subscribe" name="test"
+|    crossorigin="amp-viewer-auth-token-via-post" custom-validation-reporting="as-you-go" autocomplete
+|    verify-xhr="https://example.com/verify" enctype="test_enc">
+|      <fieldset>
+|        <label>
+|          <span>Your name</span>
+|          <input id="name" type="text" name="name" required>
+|          <span visible-when-invalid="valueMissing" validation-for="name"></span>
+|        </label>
+|        <label>
+|          <span>Your email</span>
+|          <input type="email" name="email" required>
+|        </label>
+|        <input type="submit" value="Subscribe">
+|      </fieldset>
+|    </form>
+|
+|      <!-- Valid: With cross-origin -->
+|      <form method="post" action-xhr="https://example.com/subscribe" name="test"
+>>     ^~~~~~~~~
+actions_feature_tests/amp_form.html:77:4 The attribute 'cross-origin' in tag 'FORM [method=POST] (ACTIONS)' is deprecated - use 'crossorigin' instead. (see https://github.com/ampproject/amphtml/issues/21399) [DEPRECATION]
+|      cross-origin="amp-viewer-auth-token-via-post" custom-validation-reporting="as-you-go" autocomplete
+|      verify-xhr="https://example.com/verify" enctype="test_enc">
+|        <fieldset>
+|          <label>
+|            <span>Your name</span>
+|            <input id="name" type="text" name="name" required>
+|            <span visible-when-invalid="valueMissing" validation-for="name"></span>
+|          </label>
+|          <label>
+|            <span>Your email</span>
+|            <input type="email" name="email" required>
+|          </label>
+|          <input type="submit" value="Subscribe">
+|        </fieldset>
+|      </form>
+|
+|    <!-- Valid: Target attribute is allowed-->
+|    <form method="post" action-xhr="https://example.com/subscribe" target="_blank"
+|    crossorigin="amp-viewer-auth-token-via-post" custom-validation-reporting="as-you-go">
+|      <fieldset>
+|        <label>
+|          <span>Your name</span>
+|          <input id="name" type="text" name="name" required>
+|          <span visible-when-invalid="valueMissing" validation-for="name"></span>
+|        </label>
+|        <label>
+|          <span>Your email</span>
+|          <input type="email" name="email" required>
+|        </label>
+|        <input type="submit" value="Subscribe">
+|      </fieldset>
+|    </form>
+|
+|    <!-- Invalid: Action xhr must be https -->
+|    <form method="post" action-xhr="http://example.com/subscribe"
+>>   ^~~~~~~~~
+actions_feature_tests/amp_form.html:112:2 Invalid URL protocol 'http:' for attribute 'action-xhr' in tag 'FORM [method=POST] (ACTIONS)'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
+|    crossorigin="amp-viewer-auth-token-via-post" custom-validation-reporting="as-you-go" autocomplete>
+|      <fieldset>
+|        <label>
+|          <span>Your name</span>
+|          <input id="name" type="text" name="name" required>
+|          <span visible-when-invalid="valueMissing" validation-for="name"></span>
+|        </label>
+|        <label>
+|          <span>Your email</span>
+|          <input type="email" name="email" required>
+|        </label>
+|        <input type="submit" value="Subscribe">
+|      </fieldset>
+|    </form>
+|
+|    <!-- Invalid: Missing action-xhr-->
+|    <form method="post">
+>>   ^~~~~~~~~
+actions_feature_tests/amp_form.html:129:2 The mandatory attribute 'action-xhr' is missing in tag 'FORM [method=POST] (ACTIONS)'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
+|      <fieldset>
+|        <label>
+|          <span>Your email</span>
+|          <input type="email" name="email" required>
+|        </label>
+|        <input type="submit" value="Subscribe">
+|      </fieldset>
+|    </form>
+|  </body>
+|  </html>

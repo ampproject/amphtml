@@ -22,6 +22,7 @@ import {moveLayoutRect} from '../../../src/layout-rect';
 import {parseJson} from '../../../src/json';
 import {parseQueryString} from '../../../src/url';
 import {resetStyles, setInitialDisplay, setStyles} from '../../../src/style';
+import {whenDocumentReady} from '../../../src/document-ready';
 
 /**
  * The message name sent by viewers to dismiss highlights.
@@ -67,7 +68,7 @@ const NUM_SENTENCES_LIMIT = 15;
 const NUM_ALL_CHARS_LIMIT = 1500;
 
 /** @typedef {{sentences: !Array<string>, skipRendering: boolean}} */
-let HighlightInfoDef;
+export let HighlightInfoDef;
 
 /**
  * The height of scrolling-down animation to highlighted texts.
@@ -143,7 +144,9 @@ export class HighlightHandler {
     /** @private {?Array<!Element>} */
     this.highlightedNodes_ = null;
 
-    this.initHighlight_(highlightInfo);
+    whenDocumentReady(ampdoc.win.document).then(() => {
+      this.initHighlight_(highlightInfo);
+    });
   }
 
   /**

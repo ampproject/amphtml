@@ -15,10 +15,10 @@
  */
 
 import {BrowserController} from '../../../../../testing/test-helper';
-import {isExperimentOn} from '../../../../../src/experiments';
 import {poll} from '../../../../../testing/iframe';
 
 const TIMEOUT = 15000;
+const LOCAL_TIMEOUT = 5000;
 
 describe('amp-list (integration)', function() {
   this.timeout(TIMEOUT);
@@ -50,14 +50,14 @@ describe('amp-list (integration)', function() {
       expect(container).to.exist;
     });
 
-    it('should render items', function*() {
+    // TODO(choumx): Frequent 10s timeout on Chrome 72.0.3626 (Linux 0.0.0).
+    it.skip('should render items', function*() {
       const list = doc.querySelector('amp-list');
       expect(list).to.exist;
 
       yield browser.waitForElementLayout('amp-list', TIMEOUT);
 
       const children = list.querySelectorAll('div[role=list] > div');
-
       expect(children.length).to.equal(3);
       expect(children[0].textContent.trim()).to.equal('apple : 47 @ 0.33');
       expect(children[1].textContent.trim()).to.equal('pear : 538 @ 0.54');
@@ -84,7 +84,6 @@ describe('amp-list (integration)', function() {
         </template>
       </amp-list>`,
     extensions: ['amp-list', 'amp-mustache'],
-    experiments: ['amp-list-resizable-children'],
   }, env => {
     let browser;
     let doc;
@@ -97,8 +96,6 @@ describe('amp-list (integration)', function() {
     });
 
     it('should change to layout container as action', function*() {
-      expect(isExperimentOn(win, 'amp-list-resizable-children')).to.be.true;
-
       const list = doc.querySelector('amp-list');
 
       yield browser.waitForElementLayout('amp-list', TIMEOUT);
@@ -127,7 +124,6 @@ describe('amp-list (integration)', function() {
       </template>
     </amp-list>`,
     extensions: ['amp-list', 'amp-mustache', 'amp-bind'],
-    experiments: ['amp-list-resizable-children'],
   }, env => {
     let browser;
     let doc;
@@ -139,18 +135,18 @@ describe('amp-list (integration)', function() {
       doc = win.document;
     });
 
-    it('should change to layout container as on bind', function*() {
-      expect(isExperimentOn(win, 'amp-list-resizable-children')).to.be.true;
-
+    it('should change to layout container on bind', function*() {
       const list = doc.querySelector('amp-list');
 
-      yield browser.waitForElementLayout('amp-list', TIMEOUT);
+      yield browser.waitForElementLayout('amp-list', LOCAL_TIMEOUT);
       browser.click('button');
 
       yield poll('changes to layout container', () => {
         const layout = list.getAttribute('layout');
         return layout == 'container';
-      }, /* onError */ undefined, TIMEOUT);
+      }, () => {
+        throw new Error('change to layout container did not complete');
+      }, LOCAL_TIMEOUT);
 
       expect(list.classList.contains('i-amphtml-layout-container')).to.be.true;
     });

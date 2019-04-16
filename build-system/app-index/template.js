@@ -19,60 +19,12 @@
 
 'use strict';
 
-const boilerPlate = require('./boilerplate');
-const documentModes = require('./document-modes');
-const html = require('./html');
+const headerLinks = require('./header-links');
 const ProxyForm = require('./proxy-form');
-const {KeyValueOptions} = require('./form');
+const {AmpDoc, addRequiredExtensionsToHead} = require('./amphtml-helpers');
+const {FileList} = require('./file-list');
+const {html, joinFragments} = require('./html');
 const {SettingsModal, SettingsOpenButton} = require('./settings');
-
-
-const headerLinks = [
-  {
-    'name': 'Developing',
-    'href': 'https://' +
-      'github.com/ampproject/amphtml/blob/master/contributing/DEVELOPING.md',
-  },
-  {
-    'divider': true,
-    'name': 'Contributing',
-    'href': 'https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md',
-  },
-  {
-    'name': 'Github',
-    'href': 'https://github.com/ampproject/amphtml/',
-  },
-  {
-    'name': 'Find File',
-    'href': 'https://github.com/ampproject/amphtml/find/master',
-  },
-  {
-    'name': 'Travis',
-    'href': 'https://travis-ci.org/ampproject/amphtml',
-  },
-  {
-    'name': 'Percy',
-    'href': 'https://percy.io/ampproject/amphtml/',
-  },
-];
-
-
-const requiredExtensions = [
-  {name: 'amp-bind'},
-  {name: 'amp-form'},
-  {name: 'amp-lightbox'},
-  {name: 'amp-selector'},
-  {name: 'amp-mustache', version: '0.2'},
-  {name: 'amp-list'},
-];
-
-
-const ExtensionScript = ({name, version}) =>
-  html`<script
-    async
-    custom-element="${name}"
-    src="https://cdn.ampproject.org/v0/${name}-${version || '0.1'}.js">
-  </script>`;
 
 
 const HeaderLink = ({name, href, divider}) => html`
@@ -90,144 +42,60 @@ const Header = ({isMainPage, links}) => html`
       ${!isMainPage ? HeaderBackToMainLink() : ''}
     </div>
     <ul class="right-nav">
-      ${links.map(({name, href, divider}, i) =>
+      ${joinFragments(links, ({name, href, divider}, i) =>
           HeaderLink({
             divider: divider || i == links.length - 1,
             name,
             href,
-          })).join('')}
+          }))}
       <li>${SettingsOpenButton()}</li>
     </ul>
   </header>`;
 
-const FileListSearch = ({basepath}) =>
-  html`<input type="text"
-    class="file-list-search"
-    placeholder="Fuzzy Search"
-    pattern="[a-zA-Z0-9-]+"
-    on="input-debounced: AMP.setState({
-      fileListState: {
-        src: '/dashboard/api/listing?path=${basepath}&search=' + event.value
-      }
-    })">`;
 
 const HeaderBackToMainLink = () => html`<a href="/">← Back to main</a>`;
 
-const ExamplesDocumentModeSelect = () => html`
-  <label for="examples-mode-select">
-    Document mode:
-    <select id="examples-mode-select"
-        on="change:AMP.setState({
-          documentMode: {
-            selectModePrefix: event.value
-          }
-        })">
-      ${KeyValueOptions(documentModes)}
-    </select>
-  </label>`;
+
+const ProxyFormOptional = ({isMainPage}) => isMainPage ? ProxyForm() : '';
 
 
-const ExamplesSelectModeOptional = ({basepath, selectModePrefix}) =>
-  !/^\/examples/.test(basepath) ? '' : ExamplesDocumentModeSelect({
+function renderTemplate(opt_params) {
+  const {
+    basepath,
+    css,
+    isMainPage,
+    fileSet,
+    serveMode,
     selectModePrefix,
-  });
+  } = {
+    basepath: '/',
+    isMainPage: false,
+    fileSet: [],
+    serveMode: 'default',
+    selectModePrefix: '/',
+    ...(opt_params || {}),
+  };
 
-const FileList = ({basepath}) =>
-  html`<amp-state id="fileListState">
-    <script type="application/json">
-      {"src": "/dashboard/api/listing?path=${basepath}"}
-    </script>
-  </amp-state>
-  <amp-list [src]="fileListState.src"
-    src="/dashboard/api/listing?path=${basepath}"
-    items="."
-    layout="fixed-height"
-    width="auto"
-    height="568px"
-    class="file-list custom-loader">
-
-    <div fallback>Failed to load data.</div>
-
-    <template type="amp-mustache">
-      <div class="file-link-container">
-        <a class="file-link"
-          [href]="(documentMode.selectModePrefix || '') +
-          '${basepath.substring(1)}{{.}}'">
-          {{.}}
-        </a>
-      </div>
-    </template>
-
-    <div overflow
-      role="button"
-      aria-label="Show more"
-      class="list-overflow">
-      Show more
-    </div>
-
-    <div placeholder>Loading...</div>
-  </amp-list>`;
-
-const ProxyFormOptional = ({isMainPage}) => {
-  return isMainPage ? ProxyForm() : '';
-};
-
-const selectModePrefix = '/';
-
-const renderTemplate = ({
-  basepath,
-  css,
-  isMainPage,
-  serveMode}) => html`
-
-  <!doctype html>
-  <html ⚡>
-  <head>
-    <title>AMP Dev Server</title>
-    <meta charset="utf-8">
-    <style amp-custom>
-    ${css}
-    </style>
-    <link rel="canonical" href="${basepath}">
-    <meta name="viewport"
-      content="width=device-width,minimum-scale=1,initial-scale=1">
-    ${boilerPlate}
-    <script async src="https://cdn.ampproject.org/v0.js"></script>
-    ${requiredExtensions.map(({name, version}) =>
-        ExtensionScript({name, version})).join('')}
-  </head>
-  <body>
-    <div class="wrap">
+  const body = joinFragments([
+    html`<div class="wrap">
       ${Header({isMainPage, links: headerLinks})}
       ${ProxyFormOptional({isMainPage})}
-    </div>
-    <div class="file-list-container">
-      <div class="wrap">
-        <div class="file-list-heading">
-          <h3 class="code" id="basepath">
-            ${basepath}
-          </h3>
-          ${FileListSearch({basepath})}
-          <div class="file-list-right-section">
-            <amp-state id="documentMode">
-              <script type="application/json">
-              ${JSON.stringify({selectModePrefix})}
-              </script>
-            </amp-state>
-            ${ExamplesSelectModeOptional({basepath, selectModePrefix})}
-            <a href="/~" class="underlined">List root directory</a>
-          </div>
-        </div>
-        ${FileList({basepath})}
-      </div>
-    </div>
-    <div class="center">
+    </div>`,
+
+    FileList({basepath, selectModePrefix, fileSet}),
+
+    html`<div class="center">
       Built with 💙  by
       <a href="https://ampproject.org" class="underlined">the AMP Project</a>.
-    </div>
-    ${SettingsModal({serveMode})}
-  </body>
-  </html>`;
+    </div>`,
+
+    SettingsModal({serveMode}),
+  ]);
+
+  const docWithoutExtensions = AmpDoc({canonical: basepath, css, body});
+
+  return addRequiredExtensionsToHead(docWithoutExtensions);
+}
 
 
 module.exports = {renderTemplate};

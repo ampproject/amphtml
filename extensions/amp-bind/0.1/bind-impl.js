@@ -21,7 +21,10 @@ import {ChunkPriority, chunk} from '../../../src/chunk';
 import {RAW_OBJECT_ARGS_KEY} from '../../../src/action-constants';
 import {Services} from '../../../src/services';
 import {Signals} from '../../../src/utils/signals';
-import {closestByTag, iterateCursor} from '../../../src/dom';
+import {
+  closestAncestorElementBySelector,
+  iterateCursor,
+} from '../../../src/dom';
 import {debounce} from '../../../src/utils/rate-limit';
 import {deepEquals, getValueForExpr, parseJson} from '../../../src/json';
 import {deepMerge, dict, map} from '../../../src/utils/object';
@@ -33,7 +36,7 @@ import {installServiceInEmbedScope} from '../../../src/service';
 import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
 import {isArray, isFiniteNumber, isObject, toArray} from '../../../src/types';
 import {reportError} from '../../../src/error';
-import {rewriteAttributesForElement} from '../../../src/purifier';
+import {rewriteAttributesForElement} from '../../../src/url-rewrite';
 import {startsWith} from '../../../src/string';
 import {whenDocumentReady} from '../../../src/document-ready';
 
@@ -214,10 +217,10 @@ export class Bind {
    * evaluation unless `opt_skipEval` is false.
    * @param {!JsonObject} state
    * @param {boolean=} opt_skipEval
-   * @param {boolean=} opt_isAmpStateMutation
+   * @param {boolean=} opt_skipAmpState
    * @return {!Promise}
    */
-  setState(state, opt_skipEval, opt_isAmpStateMutation) {
+  setState(state, opt_skipEval, opt_skipAmpState) {
     try {
       deepMerge(this.state_, state, MAX_MERGE_DEPTH);
     } catch (e) {
@@ -232,7 +235,7 @@ export class Bind {
 
     const promise = this.initializePromise_
         .then(() => this.evaluate_())
-        .then(results => this.apply_(results, opt_isAmpStateMutation));
+        .then(results => this.apply_(results, opt_skipAmpState));
 
     if (getMode().test) {
       promise.then(() => {
@@ -267,7 +270,6 @@ export class Bind {
       this.maxNumberOfBindings_ = Math.min(2000,
           Math.max(1000, this.maxNumberOfBindings_ + 500));
 
-      // Signal first mutation (subsequent signals are harmless).
       this.signals_.signal('FIRST_MUTATE');
 
       const scope = dict();
@@ -302,11 +304,12 @@ export class Bind {
     dev().info(TAG, 'setState:', `"${expression}"`);
     this.setStatePromise_ = this.evaluateExpression_(expression, scope)
         .then(result => this.setState(result))
-        .then(() => {
-          this.history_.replace({
-            'data': dict({'amp-bind': this.state_}),
-            'title': this.localWin_.document.title,
-          });
+        .then(() => this.getDataForHistory_())
+        .then(data => {
+          // Don't bother calling History.replace with empty data.
+          if (data) {
+            this.history_.replace(data);
+          }
         });
     return this.setStatePromise_;
   }
@@ -334,12 +337,31 @@ export class Bind {
 
       const onPop = () => this.setState(oldState);
       return this.setState(result)
-          .then(() => {
-            this.history_.push(onPop, {
-              'data': dict({'amp-bind': this.state_}),
-              'title': this.localWin_.document.title,
-            });
+          .then(() => this.getDataForHistory_())
+          .then(data => {
+            this.history_.push(onPop, data);
           });
+    });
+  }
+
+  /**
+   * Returns data that should be saved in browser history on AMP.setState() or
+   * AMP.pushState(). This enables features like restoring browser tabs.
+   * @return {!Promise<?JsonObject>}
+   */
+  getDataForHistory_() {
+    const data = dict({
+      'data': dict({'amp-bind': this.state_}),
+      'title': this.localWin_.document.title,
+    });
+    if (!this.viewer_.isEmbedded()) {
+      // CC doesn't recognize !JsonObject as a subtype of (JsonObject|null).
+      return /** @type {!Promise<?JsonObject>} */ (Promise.resolve(data));
+    }
+    // Only pass state for history updates to trusted viewers, since they
+    // may contain user data e.g. form input.
+    return this.viewer_.isTrustedViewer().then(trusted => {
+      return (trusted) ? data : null;
     });
   }
 
@@ -355,10 +377,25 @@ export class Bind {
    *
    * @param {!Array<!Element>} addedElements
    * @param {!Array<!Element>} removedElements
-   * @param {number} timeout Timeout in milliseconds.
+   * @param {number=} opt_timeout Timeout in milliseconds.
    * @return {!Promise}
    */
-  scanAndApply(addedElements, removedElements, timeout = 2000) {
+  scanAndApply(addedElements, removedElements, opt_timeout) {
+    // TODO(choumx): Dependency on init may be removed if we skip elements
+    // with .i-amphtml-binding during tree walk and extract macro setup.
+    return this.initializePromise_.then(() => {
+      return this.rescan_(addedElements, removedElements, opt_timeout || 2000);
+    });
+  }
+
+  /**
+   * @param {!Array<!Element>} addedElements
+   * @param {!Array<!Element>} removedElements
+   * @param {number} timeout
+   * @return {!Promise}
+   * @private
+   */
+  rescan_(addedElements, removedElements, timeout) {
     dev().info(TAG, 'rescan:', addedElements, removedElements);
     /**
      * Helper function for cleaning up bindings in removed elements.
@@ -390,6 +427,7 @@ export class Bind {
       this.scanElement_(el, Number.POSITIVE_INFINITY, bindings);
     });
     const added = bindings.length;
+    // Early-out if there are no elements to add -- just clean up `removed`.
     if (added === 0) {
       return cleanup(0);
     }
@@ -426,8 +464,6 @@ export class Bind {
    * @private
    */
   initialize_(root) {
-    dev().info(TAG, 'init');
-
     // Disallow URL property bindings in AMP4EMAIL.
     const allowUrlProperties = !this.isAmp4Email_();
     this.validator_ = new BindValidator(allowUrlProperties);
@@ -447,10 +483,31 @@ export class Bind {
       if (getMode().development) {
         return this.evaluate_().then(results => this.verify_(results));
       }
-    }).then(() => {
-      this.viewer_.sendMessage('bindReady', undefined);
-      this.dispatchEventForTesting_(BindEvents.INITIALIZE);
-    });
+    }).then(() => this.checkReadiness_(root));
+  }
+
+  /**
+   * Bind is "ready" when its initialization completes _and_ all <amp-state>
+   * elements' local data is parsed and processed (not remote data).
+   * @param {!Node} root
+   * @private
+   */
+  checkReadiness_(root) {
+    const ampStates = root.querySelectorAll('AMP-STATE');
+    if (ampStates.length > 0) {
+      const whenBuilt = toArray(ampStates).map(el => el.whenBuilt());
+      Promise.all(whenBuilt).then(() => this.onReady_());
+    } else {
+      this.onReady_();
+    }
+  }
+
+  /**
+   * @private
+   */
+  onReady_() {
+    this.viewer_.sendMessage('bindReady', undefined);
+    this.dispatchEventForTesting_(BindEvents.INITIALIZE);
   }
 
   /**
@@ -518,7 +575,7 @@ export class Bind {
    * a premutate message from the viewer.
    * @param {string} key
    */
-  makeStateKeyOverridable(key) {
+  addOverridableKey(key) {
     this.overridableKeys_.push(key);
   }
 
@@ -973,16 +1030,15 @@ export class Bind {
   /**
    * Applies expression results to all elements in the document.
    * @param {Object<string, BindExpressionResultDef>} results
-   * @param {boolean=} opt_isAmpStateMutation
+   * @param {boolean=} opt_skipAmpState
    * @return {!Promise}
    * @private
    */
-  apply_(results, opt_isAmpStateMutation) {
+  apply_(results, opt_skipAmpState) {
     const promises = this.boundElements_.map(boundElement => {
-      // If this "apply" round is triggered by an <amp-state> mutation,
-      // ignore updates to <amp-state> element to prevent update cycles.
-      if (opt_isAmpStateMutation
-          && boundElement.element.tagName == 'AMP-STATE') {
+      // If this evaluation is triggered by an <amp-state> mutation, we must
+      // ignore updates to any <amp-state> element to prevent update cycles.
+      if (opt_skipAmpState && boundElement.element.tagName === 'AMP-STATE') {
         return Promise.resolve();
       }
       return this.applyBoundElement_(results, boundElement);
@@ -1177,7 +1233,7 @@ export class Bind {
     if (!Services.platformFor(this.win_).isSafari()) {
       return;
     }
-    const select = closestByTag(element, 'select');
+    const select = closestAncestorElementBySelector(element, 'select');
     if (!select) {
       return;
     }
@@ -1280,6 +1336,8 @@ export class Bind {
           match = (initialValue === '');
         } else if (expectedValue === false) {
           match = (initialValue === null);
+        } else if (typeof expectedValue === 'number') {
+          match = (Number(initialValue) === expectedValue);
         } else {
           match = (initialValue === expectedValue);
         }

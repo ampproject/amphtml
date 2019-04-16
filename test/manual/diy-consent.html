@@ -113,11 +113,30 @@ var sentinel = 'amp';
 var ampWindow = parent;
 
 // Write passed in stored state and client config
-var clientInfo = JSON.parse(window.name);
-var cmpId = clientInfo['clientConfig']['CMP_id'];
-var consentStr = clientInfo['consentString'];
-var consentState = clientInfo['consentState'];
-// TODO: convert consentState to readable value
+var clientInfo;
+var cmpId;
+var consentStr;
+var consentState;
+if (window && window.name) {
+  try {
+    clientInfo = JSON.parse(window.name);
+    cmpId = clientInfo['clientConfig']['CMP_id'];
+    consentStr = clientInfo['consentString'];
+    consentState = clientInfo['consentState'];
+    // TODO: convert consentState to readable value
+  } catch(e) {
+    console.log('Caught error when parsing window.name,', e)
+  }
+}
+
+// Add event listener for focus for a11y
+window.addEventListener('focus', () => {
+  const headerElement = document.querySelector('h1');
+  console.log('Focused!', headerElement);
+  if (headerElement) {
+    headerElement.focus();
+  }
+});
 
 var text = `Passed in cmpId is '${cmpId}', previously stored consent string is` +
 ` '${consentStr}', consent state is '${consentState}'`;
@@ -138,12 +157,26 @@ if (hashMatch) {
   ampWindow = ancestors[depth];
 }
 
-
+// Send our ready event
 setTimeout(() => {
-  parent.postMessage({
+
+  // Our ready object
+  const readyObject = {
     type: 'consent-ui',
     action: 'ready'
-  }, '*');
+  };
+
+  // Check if we should randomly do some custom stuff
+  const shouldApplyCustom = Math.random() > 0.5;
+  if (shouldApplyCustom) {
+    const initialHeight = 30 + Math.floor(Math.random() * 30);
+    readyObject.initialHeight = `${initialHeight}vh`;
+    readyObject.border = Math.random() < 0.5
+  }
+
+  console.log('diy-consent: Sending Ready Message!', readyObject);
+
+  parent.postMessage(readyObject, '*');
 }, 2000);
 
 function registerClickConsentMessage(querySelector, type, action, info, timeout) {

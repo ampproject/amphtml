@@ -54,11 +54,11 @@ import {Gestures} from '../../../src/gesture';
 import {InfoDialog} from './amp-story-info-dialog';
 import {Keys} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
+import {LocalizationService} from '../../../src/service/localization';
 import {
-  LocalizationService,
   LocalizedStringId,
   createPseudoLocale,
-} from './localization';
+} from '../../../src/localized-strings';
 import {MediaPool, MediaType} from './media-pool';
 import {NavigationState} from './navigation-state';
 import {ORIGIN_WHITELIST} from './origin-whitelist';
@@ -75,7 +75,6 @@ import {
   childElementByTag,
   childElements,
   closest,
-  escapeCssSelectorIdent,
   matches,
   removeElement,
   scopedQuerySelectorAll,
@@ -89,6 +88,7 @@ import {
 import {debounce} from '../../../src/utils/rate-limit';
 import {dev, devAssert, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {escapeCssSelectorIdent} from '../../../src/css';
 import {findIndex} from '../../../src/utils/array';
 import {getDetail} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
@@ -165,8 +165,8 @@ const SHARE_WIDGET_PILL_CONTAINER = {
     {
       tag: 'span',
       attrs: dict({'class': 'i-amphtml-story-share-pill-label'}),
-      localizedStringId:
-          LocalizedStringId.AMP_STORY_SYSTEM_LAYER_SHARE_WIDGET_LABEL,
+      localizedStringId: LocalizedStringId
+          .DEPRECATED_AMP_STORY_SYSTEM_LAYER_SHARE_WIDGET_LABEL,
     },
   ],
 };
@@ -755,14 +755,14 @@ export class AmpStory extends AMP.BaseElement {
 
     const experimentsLinkEl = this.win.document.createElement('button');
     experimentsLinkEl.textContent = this.localizationService_
-        .getLocalizedString(
-            LocalizedStringId.AMP_STORY_EXPERIMENT_ENABLE_BUTTON_LABEL);
+        .getLocalizedString(LocalizedStringId
+            .DEPRECATED_AMP_STORY_EXPERIMENT_ENABLE_BUTTON_LABEL);
     experimentsLinkEl.addEventListener('click', () => {
       toggleExperiment(this.win, 'amp-story', true);
       errorIconEl.classList.remove('i-amphtml-story-experiment-icon-error');
       errorIconEl.classList.add('i-amphtml-story-experiment-icon-done');
       errorMsgEl.textContent = this.localizationService_.getLocalizedString(
-          LocalizedStringId.AMP_STORY_EXPERIMENT_ENABLED_TEXT);
+          LocalizedStringId.DEPRECATED_AMP_STORY_EXPERIMENT_ENABLED_TEXT);
       removeElement(experimentsLinkEl);
     });
 

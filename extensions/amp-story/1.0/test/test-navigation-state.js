@@ -78,7 +78,7 @@ describes.fakeWin('amp-story navigation state', {ampdoc: 'none'}, env => {
 
     hasBookend = false;
 
-    navigationState.updateActivePage(1, 2, 'fake-id', false);
+    navigationState.updateActivePage(1, 2, 'fake-id', 'old-fake-id', false);
 
     expect(observer).to.have.been.calledWith(sandbox.match(e =>
       e.type == StateChangeType.ACTIVE_PAGE
@@ -96,7 +96,7 @@ describes.fakeWin('amp-story navigation state', {ampdoc: 'none'}, env => {
 
     hasBookend = false;
 
-    navigationState.updateActivePage(1, 2, 'fake-id', true);
+    navigationState.updateActivePage(1, 2, 'fake-id', 'old-fake-id', true);
 
     expect(observer).to.have.been.calledWith(sandbox.match(e =>
       e.type == StateChangeType.ACTIVE_PAGE
@@ -114,7 +114,7 @@ describes.fakeWin('amp-story navigation state', {ampdoc: 'none'}, env => {
 
     hasBookend = true;
 
-    navigationState.updateActivePage(1, 2, 'fake-id', true);
+    navigationState.updateActivePage(1, 2, 'fake-id', 'old-fake-id', true);
 
     expect(observer).to.have.been.calledWith(sandbox.match(e =>
       e.type == StateChangeType.ACTIVE_PAGE

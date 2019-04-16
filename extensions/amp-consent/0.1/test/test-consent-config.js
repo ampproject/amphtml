@@ -31,11 +31,8 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
     element = doc.createElement('div');
     toggleExperiment(win, 'amp-consent-v2', true);
     defaultConfig = dict({
-      'consents': {
-        'ABC': {
-          'checkConsentHref': 'https://response1',
-        },
-      },
+      'consentInstanceId': 'ABC',
+      'checkConsentHref': 'https://response1',
     });
   });
 
@@ -51,10 +48,9 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
       appendConfigScriptElement(doc, element, defaultConfig);
       const consentConfig = new ConsentConfig(element);
       expect(consentConfig.getConsentConfig()).to.deep.equal(dict({
-        'storageKey': 'ABC',
+        'consentInstanceId': 'ABC',
         'checkConsentHref': 'https://response1',
       }));
-      expect(consentConfig.getPolicyConfig()).to.deep.equal(dict({}));
     });
 
     it('read cmp config', () => {
@@ -62,22 +58,52 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
       element.setAttribute('type', '_ping_');
       const consentConfig = new ConsentConfig(element);
       expect(consentConfig.getConsentConfig()).to.deep.equal(dict({
-        'storageKey': '_ping_',
+        'consentInstanceId': '_ping_',
         'checkConsentHref': '/get-consent-v1',
         'promptUISrc':
             '/test/manual/diy-consent.html',
       }));
-      expect(consentConfig.getPolicyConfig()).to.deep.equal(dict({}));
+    });
+
+    it('support deprecated config format', () => {
+      appendConfigScriptElement(doc, element, dict({
+        'consents': {
+          'ABC': {
+            'promptIfUnknownForGeoGroup': 'eea',
+            'checkConsentHref': '/href',
+            'clientConfig': {
+              'test': 'error',
+            },
+          },
+        },
+        'clientConfig': {
+          'test': 'ABC',
+        },
+        'uiConfig': {
+          'overlay': true,
+        },
+        'postPromptUI': 'test',
+      }));
+      const consentConfig = new ConsentConfig(element);
+      expect(consentConfig.getConsentConfig()).to.deep.equal(dict({
+        'consentInstanceId': 'ABC',
+        'promptIfUnknownForGeoGroup': 'eea',
+        'checkConsentHref': '/href',
+        'clientConfig': {
+          'test': 'ABC',
+        },
+        'uiConfig': {
+          'overlay': true,
+        },
+        'postPromptUI': 'test',
+      }));
     });
 
     it('merge inline config w/ cmp config', () => {
       appendConfigScriptElement(doc, element, dict({
-        'consents': {
-          '_ping_': {
-            'promptIfUnknownForGeoGroup': 'eea',
-            'checkConsentHref': '/override',
-          },
-        },
+        'consentInstanceId': '_ping_',
+        'promptIfUnknownForGeoGroup': 'eea',
+        'checkConsentHref': '/override',
         'clientConfig': {
           'test': 'ABC',
         },
@@ -94,7 +120,7 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
       element.setAttribute('type', '_ping_');
       const consentConfig = new ConsentConfig(element);
       expect(consentConfig.getConsentConfig()).to.deep.equal(dict({
-        'storageKey': '_ping_',
+        'consentInstanceId': '_ping_',
         'checkConsentHref': '/override',
         'promptUISrc':
             '/test/manual/diy-consent.html',
@@ -106,10 +132,10 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
         'uiConfig': {
           'overlay': true,
         },
-      }));
-      expect(consentConfig.getPolicyConfig()).to.deep.equal(dict({
-        'default': {
-          'waitFor': {},
+        'policy': {
+          'default': {
+            'waitFor': {},
+          },
         },
       }));
     });
@@ -118,7 +144,7 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
       const scriptTypeError = 'amp-consent/consent-config: <script> child ' +
           'must have type="application/json"';
       const consentExistError = 'amp-consent/consent-config: ' +
-          'consents config is required';
+          'consentInstanceId to store consent info is required';
       const multiScriptError =
           'amp-consent/consent-config: Found 2 <script> children. Expected 1';
       const invalidJsonError = 'amp-consent/consent-config: ' +
@@ -156,6 +182,9 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
       });
 
       // Check invalid CMP
+      scriptElement.textContent = JSON.stringify({
+        'clientConfig': 'test',
+      });
       element.setAttribute('type', 'not_exist');
       allowConsoleError(() => {
         expect(() => new ConsentConfig(element).getConsentConfig())
@@ -177,15 +206,16 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
     it('remove not supported policy', () => {
       toggleExperiment(win, 'multi-consent', false);
       appendConfigScriptElement(doc, element, dict({
-        'consents': {
-          'ABC': 'r1',
-        },
+        'consentInstanceId': 'ABC',
         'policy': {
           'ABC': undefined,
         },
       }));
       const consentConfig = new ConsentConfig(element);
-      expect(consentConfig.getPolicyConfig()).to.deep.equal({});
+      expect(consentConfig.getConsentConfig()).to.deep.equal({
+        'consentInstanceId': 'ABC',
+        'policy': {},
+      });
     });
   });
 

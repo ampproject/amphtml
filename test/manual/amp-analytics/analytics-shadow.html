@@ -1,0 +1,71 @@
+
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>AMP Analytics in shadow Root</title>
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/shadow-v0.js"></script>
+</head>
+<body>
+
+  <div id='s1'></div>
+  <div id='s2'></div>
+        <!-- Wait for API to initialize -->
+      <script>
+      (window.AMP = window.AMP || []).push(function(AMP) {
+        // AMP APIs can be used now via "AMP" object.
+        //let shadow = AMP.attachShadowDocAsStream(document.body);
+        const div1 = document.getElementById('s1');
+        const div2 = document.getElementById('s2');
+        const url = './analytics-shadow-root-1.html';
+        const shadowDoc = AMP.attachShadowDocAsStream(div1, url);
+        const url2 = './analytics-shadow-root-2.html';
+        const shadowDoc2 = AMP.attachShadowDocAsStream(div2, url2);
+
+        fetch(url).then(response => {
+          const reader = response.body.getReader();
+          const decoder = new TextDecoder();
+          function readChunk() {
+            return reader.read().then(chunk => {
+              const text = decoder.decode(
+                  chunk.value || new Uint8Array(),
+                  {stream: !chunk.done});
+              if (text) {
+                shadowDoc.writer.write(text);
+              }
+              if (chunk.done) {
+                shadowDoc.writer.close();
+              } else {
+                return readChunk();
+              }
+            });
+          }
+          return readChunk();
+        });
+
+        fetch(url2).then(response => {
+          const reader = response.body.getReader();
+          const decoder = new TextDecoder();
+          function readChunk() {
+            return reader.read().then(chunk => {
+              const text = decoder.decode(
+                  chunk.value || new Uint8Array(),
+                  {stream: !chunk.done});
+              if (text) {
+                shadowDoc2.writer.write(text);
+              }
+              if (chunk.done) {
+                shadowDoc2.writer.close();
+              } else {
+                return readChunk();
+              }
+            });
+          }
+          return readChunk();
+        });
+      });
+</script>
+
+</body>

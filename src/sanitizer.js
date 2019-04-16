@@ -22,15 +22,15 @@ import {
   WHITELISTED_ATTRS_BY_TAGS,
   WHITELISTED_TARGETS,
   isValidAttr,
-  rewriteAttributeValue,
-} from './purifier';
+} from './sanitation';
 import {dict} from './utils/object';
 import {htmlSanitizer} from '../third_party/caja/html-sanitizer';
+import {rewriteAttributeValue} from './url-rewrite';
 import {startsWith} from './string';
 import {user} from './log';
 
 /** @private @const {string} */
-const TAG = 'SANITIZER';
+const TAG = 'sanitizer';
 
 /**
  * Whitelist of supported self-closing tags for Caja. These are used for
@@ -206,8 +206,8 @@ export function sanitizeHtml(html, diffing) {
         const attrName = attribs[i];
         const attrValue = attribs[i + 1];
         if (!isValidAttr(tagName, attrName, attrValue)) {
-          user().error(TAG,
-              `Removed unsafe attribute: ${attrName}="${attrValue}"`);
+          user().error(TAG, `Removing "${attrName}" attribute with invalid `
+              + `value in <${tagName} ${attrName}="${attrValue}">.`);
           continue;
         }
         emit(' ');

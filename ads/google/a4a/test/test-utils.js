@@ -16,8 +16,8 @@
 
 import '../../../../extensions/amp-ad/0.1/amp-ad-ui';
 import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
-import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 import {
+  ADX_ADY_EXP,
   EXPERIMENT_ATTRIBUTE,
   TRUNCATION_PARAM,
   ValidAdContainerTypes,
@@ -26,6 +26,7 @@ import {
   extractAmpAnalyticsConfig,
   extractHost,
   getAmpRuntimeTypeParameter,
+  getContainerWidth,
   getCorrelator,
   getCsiAmpAnalyticsVariables,
   getEnclosingContainerTypes,
@@ -36,11 +37,12 @@ import {
   maybeAppendErrorParameter,
   mergeExperimentIds,
 } from '../utils';
+import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 import {
   MockA4AImpl,
 } from '../../../../extensions/amp-a4a/0.1/test/utils';
 import {Services} from '../../../../src/services';
-import {buildUrl} from '../url-builder';
+import {buildUrl} from '../shared/url-builder';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {createIframePromise} from '../../../../testing/iframe';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
@@ -66,17 +68,15 @@ function setupForAdTesting(fixture) {
 // Because of the way the element is constructed, it doesn't have all of the
 // machinery that AMP expects it to have, so just no-op the irrelevant
 // functions.
-function noopMethods(impl, doc, sandbox) {
+function noopMethods(impl, doc, sandbox, pageLayoutBox = {
+  top: 11, left: 12, right: 0, bottom: 0, width: 0, height: 0,
+}) {
   const noop = () => {};
   impl.element.build = noop;
   impl.element.getPlaceholder = noop;
   impl.element.createPlaceholder = noop;
-  sandbox.stub(impl, 'getAmpDoc').callsFake(() => doc);
-  sandbox.stub(impl, 'getPageLayoutBox').callsFake(() => {
-    return {
-      top: 11, left: 12, right: 0, bottom: 0, width: 0, height: 0,
-    };
-  });
+  sandbox.stub(impl, 'getAmpDoc').returns(doc);
+  sandbox.stub(impl, 'getPageLayoutBox').returns(pageLayoutBox);
 }
 
 describe('Google A4A utils', () => {
@@ -527,6 +527,30 @@ describe('Google A4A utils', () => {
             expect(url).to.match(/[&?]bdt=[1-9][0-9]*[&$]/);
           });
         });
+      });
+    });
+
+    it('should set adx/ady as 1 with experiment enabled', () => {
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
+        const {doc} = fixture;
+        doc.win = fixture.win;
+        const elem = createElementWithAttributes(doc, 'amp-a4a', {});
+        const impl = new MockA4AImpl(elem);
+        noopMethods(impl, doc, sandbox, {
+          top: 0, left: 0, right: 0, bottom: 0, width: 0, height: 0,
+        });
+        return fixture.addElement(elem).then(() =>
+          googleAdUrl(impl, '', Date.now(), [], []).then(url => {
+            expect(url).to.match(/[&?]adx=0[&$]/);
+            expect(url).to.match(/[&?]adx=0[&$]/);
+            elem.setAttribute(
+                'data-experiment-id', `123,${ADX_ADY_EXP.experiment},789`,);
+            return googleAdUrl(impl, '', Date.now(), [], []).then(url => {
+              expect(url).to.match(/[&?]adx=1[&$]/);
+              expect(url).to.match(/[&?]adx=1[&$]/);
+            });
+          }));
       });
     });
   });
@@ -986,5 +1010,132 @@ describes.realWin('#groupAmpAdsByType', {amp: true}, env => {
                 expect(baseElement.element.getAttribute('type'))
                     .to.equal('doubleclick')));
         });
+  });
+});
+
+describes.realWin('#getContainerWidth', {amp: true}, env => {
+  let doc, win;
+  beforeEach(() => {
+    win = env.win;
+    doc = win.document;
+  });
+
+  function createResource(
+    config, layout, tagName = 'amp-ad', parent = doc.body) {
+    config['layout'] = layout;
+    const element = createElementWithAttributes(doc, tagName, config);
+    parent.appendChild(element);
+    return element;
+  }
+
+  it('should return the fixed width for FIXED layout', () => {
+    const element = createResource({width: 300, height: 250}, 'fixed');
+    expect(getContainerWidth(win, element)).to.equal(300);
+  });
+
+  it('should return 0 for FIXED layout and invalid width', () => {
+    allowConsoleError(() => {
+      const element = createResource({width: 'auto', height: 250}, 'fixed');
+      expect(getContainerWidth(win, element)).to.equal(0);
+    });
+  });
+
+  it('should return 0 for NODISPLAY layout', () => {
+    const element = createResource({width: 500}, 'nodisplay');
+    expect(getContainerWidth(win, element)).to.equal(0);
+  });
+
+  it('should return 0 for FLEX_ITEM layout', () => {
+    const element = createResource({width: 500}, 'flex-item');
+    expect(getContainerWidth(win, element)).to.equal(0);
+  });
+
+  it('should return 0 for invalid layout', () => {
+    allowConsoleError(() => {
+      const element = createResource({width: 500}, 'qwerty');
+      expect(getContainerWidth(win, element)).to.equal(0);
+    });
+  });
+
+  it('should return the max-width, if present, for FILL layout', () => {
+    const element = createResource({maxWidth: 300}, 'fill');
+    expect(getContainerWidth(win, element)).to.equal(300);
+  });
+
+  it('should return parent\'s fixed width for FILL layout', () => {
+    const parent = document.createElement('div');
+    parent.setAttribute('width', 300);
+    parent.setAttribute('layout', 'fixed');
+    doc.body.appendChild(parent);
+    const element = createResource({} /* config */, 'fill', 'amp-ad', parent);
+    expect(getContainerWidth(win, element)).to.equal(300);
+  });
+
+  it('should return the max-width, if present, for FIXED_HEIGHT layout',
+      () => {
+        const element = createResource({height: 300}, 'fixed-height');
+        element.style.maxWidth = '250px';
+        expect(getContainerWidth(win, element)).to.equal(250);
+      });
+
+  it('should return parent\'s fixed width for FIXED_HEIGHT layout', () => {
+    const parent = document.createElement('div');
+    parent.setAttribute('width', 300);
+    parent.setAttribute('layout', 'fixed');
+    doc.body.appendChild(parent);
+    const element = createResource(
+        {height: 250}, 'fixed-height', 'amp-ad', parent);
+    expect(getContainerWidth(win, element)).to.equal(300);
+  });
+
+  it('should return the max-width, if present, for FLUID layout', () => {
+    const element = createResource({height: 300}, 'fluid');
+    element.style.maxWidth = '250px';
+    expect(getContainerWidth(win, element)).to.equal(250);
+  });
+
+  it('should return parent\'s fixed width for FLUID layout', () => {
+    const parent = document.createElement('div');
+    parent.setAttribute('width', 300);
+    parent.setAttribute('layout', 'fixed');
+    doc.body.appendChild(parent);
+    const element = createResource(
+        {height: 250}, 'fluid', 'amp-ad', parent);
+    expect(getContainerWidth(win, element)).to.equal(300);
+  });
+
+  it('should return the max-width, if present, for RESPONSIVE layout', () => {
+    const element = createResource({height: 200, width: 200}, 'responsive');
+    element.style.maxWidth = '250px';
+    expect(getContainerWidth(win, element)).to.equal(250);
+  });
+
+  it('should return parent\'s fixed width for RESPONSIVE layout', () => {
+    const parent = document.createElement('div');
+    parent.setAttribute('width', 300);
+    parent.setAttribute('layout', 'fixed');
+    doc.body.appendChild(parent);
+    const element = createResource(
+        {height: 250, width: 250}, 'responsive', 'amp-ad', parent);
+    expect(getContainerWidth(win, element)).to.equal(300);
+  });
+
+  it('should return the viewport width for CONTAINER layout', () => {
+    const element = createResource({} /* config */, 'container');
+    sandbox.stub(Services.viewportForDoc(element), 'getSize')
+        .returns({width: 300});
+    expect(getContainerWidth(win, element)).to.equal(300);
+  });
+
+  it('should return -1 width for non-fixed layouts, maxDepth = 1', () => {
+    ['fill', 'fixed-height', 'fluid', 'responsive'].forEach(layout => {
+      const parent = document.createElement('div');
+      parent.setAttribute('width', 300);
+      parent.setAttribute('layout', 'fixed');
+      doc.body.appendChild(parent);
+      const element = createResource(
+          {height: 250}, layout, 'amp-ad', parent);
+      expect(getContainerWidth(win, element, 1)).to.equal(-1);
+    });
   });
 });

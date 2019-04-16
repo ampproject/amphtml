@@ -1,0 +1,115 @@
+FAIL
+|  <!--
+|    Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+|    Licensed under the Apache License, Version 2.0 (the "License");
+|    you may not use this file except in compliance with the License.
+|    You may obtain a copy of the License at
+|        http://www.apache.org/licenses/LICENSE-2.0
+|    Unless required by applicable law or agreed to in writing, software
+|    distributed under the License is distributed on an "AS-IS" BASIS,
+|    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+|    See the License for the specific language governing permissions and
+|    limitations under the license.
+|  -->
+|  <!--
+|    Test Description: Basic test for amp-payment-google-inline
+|  -->
+|  <!doctype html>
+|  <html ⚡ actions>
+|  <head>
+|    <meta charset="utf-8">
+|    <title>amp-payment-google-inline-async: Basic</title>
+|    <link rel="canonical" href="amps.html">
+|    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+|    <link href="https://fonts.googleapis.com/css?family=Questrial" rel="stylesheet" type="text/css">
+|    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|    <script async custom-element="amp-payment-google-inline-async"
+|        src="https://cdn.ampproject.org/v0/amp-payment-google-inline-async-0.1.js"></script>
+|    <script async custom-element="amp-form"
+|        src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
+|  </head>
+|  <body>
+|    <!-- Valid -->
+|    <form method="post"
+|      action-xhr="https://www.example.com"
+|      target="_top">
+|      <amp-payment-google-inline-async
+|        name="payment-data"
+|        layout="flex-item">
+|        <script type="application/json">
+|          {
+|            "config": "example"
+|          }
+|        </script>
+|      </amp-payment-google-inline-async>
+|    </form>
+|    <!-- Valid: with test-override -->
+|    <form method="post"
+|      action-xhr="https://www.example.com"
+|      target="_top">
+|      <amp-payment-google-inline-async
+|        name="payment-data"
+|        layout="flex-item">
+|        <script type="application/json">
+|          {
+|            "config": "origin"
+|          }
+|        </script>
+|        <script type="application/json" name="test-override">
+|          {
+|            "config": "override"
+|          }
+|        </script>
+|      </amp-payment-google-inline-async>
+|    </form>
+|    <!-- Valid: with is-test-mode -->
+|    <form method="post"
+|      action-xhr="https://www.example.com"
+|      target="_top">
+|      <amp-payment-google-inline-async
+|        name="payment-data"
+|        is-test-mode="true"
+|        layout="flex-item">
+|        <script type="application/json">
+|          {
+|            "config": "example"
+|          }
+|        </script>
+|      </amp-payment-google-inline-async>
+|    </form>
+|    <!-- Invalid: missing name attribute -->
+|    <form method="post"
+|      action-xhr="https://www.example.com"
+|      target="_top">
+|      <amp-payment-google-inline-async
+>>     ^~~~~~~~~
+amp-payment-google-inline-async/0.1/test/validator-actions-amp-payment-google-inline-async.html:84:4 The mandatory attribute 'name' is missing in tag 'amp-payment-google-inline-async'. (see https://www.ampproject.org/docs/reference/components/amp-payment-google-inline-async) [AMP_TAG_PROBLEM]
+|        layout="flex-item">
+|        <script type="application/json">
+|          {
+|            "config": "example"
+|          }
+|        </script>
+|      </amp-payment-google-inline-async>
+|    </form>
+|    <!-- Invalid: missing JSON config -->
+|    <form method="post"
+|      action-xhr="https://www.example.com"
+|      target="_top">
+|      <amp-payment-google-inline-async
+>>     ^~~~~~~~~
+amp-payment-google-inline-async/0.1/test/validator-actions-amp-payment-google-inline-async.html:97:4 Tag 'amp-payment-google-inline-async' must have a minimum of 1 child tags - saw 0 child tags. (see https://www.ampproject.org/docs/reference/components/amp-payment-google-inline-async) [GENERIC]
+|        name="payment-data"
+|        layout="flex-item">
+|      </amp-payment-google-inline-async>
+|    </form>
+|    <!-- Invalid: missing enclosing amp form -->
+|    <amp-payment-google-inline-async
+>>   ^~~~~~~~~
+amp-payment-google-inline-async/0.1/test/validator-actions-amp-payment-google-inline-async.html:103:2 The tag 'amp-payment-google-inline-async' may only appear as a descendant of tag 'form [method=post] (actions)'. (see https://www.ampproject.org/docs/reference/components/amp-payment-google-inline-async) [AMP_TAG_PROBLEM]
+|      name="payment-data"
+|      layout="flex-item">
+|    </amp-payment-google-inline-async>
+|  </body>
+|  </html>

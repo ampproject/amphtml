@@ -52,20 +52,76 @@
       align-content: flex-start;
     }
 
+    amp-list {
+      height: auto;
+    }
+
+    amp-list-load-more[load-more-failed] {
+      height: 100vh;
+      width: 100%;
+      background-color: red;
+    }
+
+    div[placeholder] {
+      height: 100vh;
+      background-color: red;
+    }
+
   </style>
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
   <script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
+  <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
   <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-latest.js"></script>
 </head>
 <body>
 <article>
+
+
+    <amp-state id="data">
+        <script type="application/json">
+          {
+            "items": 8,
+            "left": 5,
+            "latency": 0,
+            "url": "/list/infinite-scroll?items=8&left=5"
+          }
+        </script>
+      </amp-state>
+
+    <article>
+
+      <div>
+        <span>Items per page: </span>
+        <input type="text" id="items" placeholder="Items per page" value="8"
+             on="change:AMP.setState({data: {items: event.value}})">
+      </div>
+
+      <div>
+        <span>Number of additional pages: </span>
+        <input type="text" id="left" placeholder="Pages left" value="2"
+             on="change:AMP.setState({data: {left: event.value}})">
+      </div>
+
+      <div>
+        <span>Load latency: </span>
+        <input type="text" id="latency" placeholder="Latency" value="0"
+             on="change:AMP.setState({data: {latency: event.value}})">
+      </div>
+
+      <button
+              on="tap:AMP.setState({data: {url: '/infinite-scroll?items='
+                    + data.items + '&left=' + data.left + '&latency=' + data.latency}})">
+        Update
+      </button>
+
   <h1>AMP List</h1>
   <p>This is a flexbox amp-list with tiles, something like an infinite image gallery.</p>
 
   <amp-list width="auto" height="200"
     layout="fixed-height"
-    src="/infinite-scroll?items=2&left=20"
+    src="/list/infinite-scroll?items=10&left=50"
+    [src]="data.url"
     load-more="auto"
     load-more-bookmark="next">
     <template type="amp-mustache">
@@ -77,35 +133,15 @@
         </div>
       </div>
     </template>
-    <div load-more-end>
-      LOAD ENDED
-    </div>
     <div fallback>
       FALLBACK
     </div>
-  </amp-list>
+    <div placeholder>
+      PLACEHOLDER
+    </div>
+    <amp-list-load-more load-more-failed>
 
-  <h1>Second List</h1>
-  <amp-list width="auto" height="200"
-    layout="fixed-height"
-    src="/infinite-scroll?items=5&left=3"
-    load-more="auto"
-    load-more-bookmark="next">
-    <template type="amp-mustache">
-      <div class="pin-container">
-        <amp-img src="{{imageUrl}}" width="160" height="160"></amp-img>
-        <div class="title">{{title}}</div>
-        <div class="description">
-          At vero eos et accusamus et iusto odio dignissimos ducimus...
-        </div>
-      </div>
-    </template>
-    <div load-more-end>
-      LOAD ENDED
-    </div>
-    <div fallback>
-      FALLBACK
-    </div>
+    </amp-list-load-more>
   </amp-list>
 </article>
 </body>

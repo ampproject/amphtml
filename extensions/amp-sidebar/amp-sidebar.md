@@ -1,3 +1,11 @@
+---
+$category@: layout
+formats:
+  - websites
+  - email
+teaser:
+  text: Provides a way to display meta content intended for temporary access such as navigation, links, buttons, menus.
+---
 <!---
 Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 
@@ -123,7 +131,7 @@ You can create a `toolbar` element that displays in the `<body>` by specifying t
 - The sidebar may implement toolbars by adding nav elements with the `toolbar` attribute and `toolbar-target` attribute.
 - The nav element must be a child of `<amp-sidebar>` and follow this format: `<nav toolbar="(media-query)" toolbar-target="elementID">`.
     - For instance, this would be a valid use of toolbar: `<nav toolbar="(max-width: 1024px)" toolbar-target="target-element">`.
-- The nav containing the toolbar attribute must only contain a single `<ul>` element, that contains `<li>` elements.
+- The nav containing the toolbar attribute must only contain a single `<ul>` or `<ol>` element, that contains `<li>` elements.
     - The `<li>` elements may contain any valid HTML elements (supported by AMP), or any of the AMP elements that `<amp-sidebar>` supports.
 - Toolbar behavior is only applied while the `toolbar` attribute media-query is valid. Also, an element with the `toolbar-target` attribute id must exist on the page for the toolbar to be applied.
 
@@ -201,13 +209,55 @@ In the following example, we display a `toolbar` if the window width is less tha
 See live demos at [AMP By Example](https://ampbyexample.com/components/amp-sidebar/).
 {% endcall %}
 
+## Sidebar for Stories
+Use of `amp-sidebar` is supported within the `amp-story` [component](https://www.ampproject.org/stories/).
+
+### Behavior
+- The `<amp-sidebar>` must be a direct child of `<amp-story>`.
+- The sidebar defaults to the "end" side, meaning right for left-right languages and left for right-to-left languages.
+- The `<amp-sidebar>` has default background color of white and is overridable in CSS.
+- Maximum width of `<amp-sidebar>` is enforced at `280px` and at `320px` for desktop experiences.
+- A 'hamburger' style button that opens/closes the sidebar will appear on the story UI.
+
+There are certain restrictions on what attributes and features are allowed in order to provide a consistent UI experience across the story platform. The following are allowed attributes and features of an `amp-sidebar` within an `amp-story`.
+
+### Allowed Attributes
+- [layout](#layout)
+- [data-close-button-aria-label](#data)
+- [common attributes](#common)
+
+*Example: Basic Sidebar in a Story*
+
+The following example shows a simple `amp-sidebar` within an `amp-story`.
+
+```html
+...
+<body>
+    <amp-story standalone>
+      <amp-sidebar id="sidebar1" layout="nodisplay">
+        <ul>
+          <li><a href="https://www.ampproject.org"> External Link </a></li>
+          <li>Nav item 2</li>
+          <li>Nav item 3</li>
+        </ul>
+      </amp-sidebar>
+      <amp-story-page id="cover">
+        <amp-story-grid-layer template="fill">
+          <h1>Hello World</h1>
+          <p>This is the cover page of this story.</p>
+        </amp-story-grid-layer>
+      </amp-story-page>
+      ...
+  </body>
+```
+
 ## Attributes
 
 ##### side
 
 Indicates what side of the page the sidebar should open from, either `left` or `right`.  If a `side` is not specified, the `side` value will be inherited from the `body` tag's `dir` attribute (`ltr` => `left` , `rtl` => `right`); if no `dir` exists, the `side` defaults to `left`.
 
-##### layout
+##### layout<a name="layout"></a>
 
 Specifies the display layout of the sidebar, which must be `nodisplay`.
 
@@ -216,7 +266,7 @@ Specifies the display layout of the sidebar, which must be `nodisplay`.
 This attribute is present when the sidebar is open.
 
 
-##### data-close-button-aria-label
+##### data-close-button-aria-label<a name="data"></a>
 
 Optional attribute used to set ARIA label for the close button added for accessibility.
 
@@ -229,7 +279,7 @@ This attribute is present on child `<nav toolbar="(media-query)" toolbar-target=
 
 This attribute is present on child `<nav toolbar="(media-query)" toolbar-target="elementID">`, and accepts an id of an element on the page.  The `toolbar-target` attribute will place the toolbar into the specified id of the element on the page, without the default toolbar styling. See the [Toolbar](#toolbar) section for more information on using toolbars.
 
-##### common attributes
+##### common attributes<a name="common"></a>
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
@@ -245,6 +295,41 @@ The `amp-sidebar` component can be styled with standard CSS.
 Visit [AMP Start](https://ampstart.com/components#navigation) for responsive, pre-styled navigation menus that you can use in your AMP pages.
 {% endcall %}
 
+## Auto scrolling within overflowing areas
+
+`amp-sidebar` can automatically scroll the overflowing container to first element that is decorated with `autoscroll` as an attribute in both sidebar and toolbar cases.
+
+This feature is useful when dealing with long navigation list and wanting the sidebar to scroll to the current navigation items when page loads.
+
+When using `toolbar` feature, `autoscroll` only works if the `<nav toolbar>` element is set to `overflow: auto` or `overflow: scroll`.
+
+```html
+<style amp-custom="">
+
+  nav [toolbar] {
+    overflow: auto;
+  }
+
+</style>
+
+<amp-sidebar id="sidebar1" layout="nodisplay" side="right">
+  <nav toolbar="(max-width: 767px)" toolbar-target="target-element">
+    <ul>
+      <li>Nav item 1</li>
+      <li>Nav item 2</li>
+      <li>Nav item 3</li>
+      <li autoscroll class="currentPage">Nav item 4</li>
+      <li>Nav item 5</li>
+      <li>Nav item 6</li>
+    </ul>
+  </nav>
+</amp-sidebar>
+
+<div id="target-element">
+</div>
+```
+
+Please see [this example file](https://github.com/ampproject/amphtml/blob/master/examples/amp-sidebar-autoscroll.amp.html) for a working example code.
 
 ## UX considerations
 

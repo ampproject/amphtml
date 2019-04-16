@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-story-analytics"></a>AMP Story and Analytics
+# AMP Story and Analytics
 
 ## Story triggers
 

@@ -146,7 +146,7 @@ export class AmpLiveList extends AMP.BaseElement {
     /** @private {boolean} */
     this.isReverseOrder_ = false;
 
-    /** @private @const {!Object<string, string>} */
+    /** @private @const {!Object<string, time>} */
     this.knownItems_ = Object.create(null);
 
     /** @private @const {!Array<!Element>} */
@@ -358,8 +358,7 @@ export class AmpLiveList extends AMP.BaseElement {
           this.itemsSlot_.lastElementChild ?
           this.itemsSlot_.lastElementChild : this.element;
         const pos = this.isReverseOrder_ ? 'bottom' : 'top';
-        return this.viewport_.animateScrollIntoView(
-            elementToScrollTo, 500, 'ease-in', pos);
+        return this.viewport_.animateScrollIntoView(elementToScrollTo, pos);
       });
     }
     return promise;
