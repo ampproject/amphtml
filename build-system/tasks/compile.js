@@ -344,10 +344,6 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
     }
     externs.push('build-system/amp.multipass.extern.js');
 
-    const platformOptions = {
-      platform: ['java'],
-    };
-
     /* eslint "google-camelcase/google-camelcase": 0*/
     const compilerOptions = {
       compilation_level: options.compilationLevel || 'SIMPLE_OPTIMIZATIONS',
@@ -406,6 +402,11 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
     if (compilerOptions.define.length == 0) {
       delete compilerOptions.define;
     }
+
+    // Required in order to override the JAR used by closure compiler
+    const platformOptions = {
+      platform: ['java'],
+    };
 
     // Override to local closure compiler JAR
     closureCompiler.compiler.JAR_PATH =
