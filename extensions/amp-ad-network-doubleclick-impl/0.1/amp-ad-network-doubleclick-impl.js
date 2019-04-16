@@ -457,6 +457,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.isFluidRequest_ = !!multiSizeStr &&
           multiSizeStr.indexOf('fluid') != -1;
     }
+    this.maybeAddSinglePassExperiment();
   }
 
   /** @override */
