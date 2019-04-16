@@ -97,7 +97,7 @@ exports.reportTestStarted = () => {
 };
 
 exports.reportAllExpectedTests = async buildTargets => {
-  `for (const [type, subTypes] of TEST_TYPE_SUBTYPES) {`
+  for (const [type, subTypes] of TEST_TYPE_SUBTYPES) {
     const action = TEST_TYPE_ACTIVATORS.get(type).some(buildTargets.has)
       ? 'queued' : 'skipped';
     for (const subType of subTypes) {
