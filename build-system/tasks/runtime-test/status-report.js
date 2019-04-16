@@ -19,7 +19,6 @@ const argv = require('minimist')(process.argv.slice(2));
 const log = require('fancy-log');
 const requestPromise = require('request-promise');
 const {cyan, green, yellow} = require('ansi-colors');
-const {determineBuildTargets} = require('./build-targets');
 const {gitCommitHash} = require('../../git');
 const {isTravisPullRequestBuild} = require('../../travis');
 
@@ -97,9 +96,7 @@ exports.reportTestStarted = () => {
   return postReport(inferTestType(), 'started');
 };
 
-exports.reportAllExpectedTests = async () => {
-  const buildTargets = determineBuildTargets();
-
+exports.reportAllExpectedTests = async buildTargets => {
   for (const [type, subTypes] of TEST_TYPE_SUBTYPES) {
     const action = TEST_TYPE_ACTIVATORS[type].some(buildTargets.has)
         ? 'queued' : 'skipped';

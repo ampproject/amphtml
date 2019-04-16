@@ -73,7 +73,7 @@ function main() {
       timedExecOrDie('gulp check-types');
     }
 
-    reportAllExpectedTests();
+    reportAllExpectedTests(buildTargets);
   }
 
   stopTimer(FILENAME, FILENAME, startTime);
