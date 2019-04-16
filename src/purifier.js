@@ -23,7 +23,6 @@ import {
   WHITELISTED_TARGETS,
   isValidAttr,
 } from './sanitation';
-import {remove} from './utils/array';
 import {rewriteAttributeValue} from './url-rewrite';
 import {startsWith} from './string';
 import {user} from './log';
