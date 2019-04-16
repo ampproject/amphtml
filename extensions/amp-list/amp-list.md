@@ -277,11 +277,11 @@ We recommend using `binding="no"` or `binding="refresh"` for faster performance.
 
 If `binding` attribute is not provided, default is `always`.
 
-##### [is-layout-container] (experimental, optional)
+##### [is-layout-container] (optional)
 
 This is a bindable attribute that should always be `false` by default. When set to `true` via `amp-bind`, it changes the layout of the `<amp-list>` to `container`. This attribute is useful for handling dynamic resizing for amp-list.
 
-This attribute cannot be true by default for the same reason why `<amp-list>` does not support layout `CONTAINER` &mdash; it can cause content jumping on first load. This attribute is experimentally available under `amp-list-resizable-children`.
+This attribute cannot be true by default for the same reason why `<amp-list>` does not support layout `CONTAINER` &mdash; it can cause content jumping on first load.
 
 Alternatively, one may also use the `changeToLayoutContainer` action.
 
@@ -289,9 +289,9 @@ Alternatively, one may also use the `changeToLayoutContainer` action.
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
-## Load more and infinite scroll (experimental)
+## Load more and infinite scroll
 
-We've introduced the `amp-list-load-more` experiment as an implementation for pagination and infinite scroll in `<amp-list>`. You can enable this feature by turning on the 'amp-list-load-more' experiment on the [experiments page](https://cdn.ampproject.org/experiments.html) and adding the `load-more` attribute to `<amp-list>`. This is a feature currently in origin trial, and final APIs may change.
+We've introduced the `load-more` attributes with options `manual` and `auto` to allow pagination and infinite scroll.
 
 #### Sample Usage
 
@@ -331,7 +331,7 @@ An `<amp-list-load-more>` element with the `load-more-button` attribute, which s
 ##### Example:
 
 ```html
-<amp-list load-more="auto" src="https://www.load.more.example.com/" width="400" height="800">
+<amp-list load-more="manual" src="https://www.load.more.example.com/" width="400" height="800">
   ...
   <amp-list-load-more load-more-button>
     <button>See More</button> /* My custom see more button */
@@ -361,7 +361,7 @@ It can be templated via `amp-mustache`.
 This element is a loader that will be displayed if the user reaches the end of the list and the contents are still loading, or as a result of clicking on the `load-more-button` element (while the new children of the `<amp-list>` are still loading). This element can be customized by providing `<amp-list>` with a child element that has the attribute `load-more-loading`. Example below:
 
 ```html
-<amp-list load-more=auto src="https://www.load.more.example.com/" width="400" height="800">
+<amp-list load-more="auto" src="https://www.load.more.example.com/" width="400" height="800">
   ...
   <amp-list-load-more load-more-loading>
     <svg>...</svg> /* My custom loader */
