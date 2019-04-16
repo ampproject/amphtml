@@ -28,14 +28,18 @@ import {
   calculateExtensionScriptUrl,
 } from '../../../src/service/extension-location';
 import {dev, user} from '../../../src/log';
+import {getElementServiceForDoc} from '../../../src/element-service';
 import {getMode} from '../../../src/mode';
 import {isExperimentOn} from '../../../src/experiments';
 
 /** @const {string} */
 const TAG = 'amp-script';
 
-/** @const {number} */
-const MAX_SCRIPT_SIZE = 150000;
+/**
+ * Max cumulative size of author scripts from all amp-script elements on page.
+ * @const {number}
+ */
+const MAX_TOTAL_SCRIPT_SIZE = 150000;
 
 /**
  * Size-contained elements up to 300px are allowed to mutate freely.
@@ -61,6 +65,9 @@ export class AmpScript extends AMP.BaseElement {
 
     /** @private {?UserActivationTracker} */
     this.userActivation_ = null;
+
+    /** @private {?AmpScriptService} */
+    this.service_ = null;
   }
 
   /** @override */
@@ -72,8 +79,9 @@ export class AmpScript extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     if (!isExperimentOn(this.win, 'amp-script')) {
-      user().error(TAG, 'Experiment "amp-script" is not enabled.');
-      return Promise.reject('Experiment "amp-script" is not enabled.');
+      const message = 'Experiment "amp-script" is not enabled.';
+      user().error(TAG, message);
+      return Promise.reject(message);
     }
 
     this.userActivation_ = new UserActivationTracker(this.element);
@@ -101,13 +109,17 @@ export class AmpScript extends AMP.BaseElement {
       // `workerUrl` is from CDN, so no need for `ampCors`.
       xhr.fetchText(workerUrl, {ampCors: false}).then(r => r.text()),
       xhr.fetchText(authorUrl).then(r => r.text()),
+      getElementServiceForDoc(this.element, 'script'),
     ]);
     upgrade(this.element, fetches.then(results => {
       const workerScript = results[0];
       const authorScript = results[1];
-      if (authorScript.length > MAX_SCRIPT_SIZE) {
-        user().error(TAG, `Max script size exceeded: ${authorScript.length} > `
-            + MAX_SCRIPT_SIZE);
+      this.service_ = results[2];
+
+      if (this.service_.sizeLimitExceeded(authorScript.length)) {
+        user().error(TAG, 'Maximum total script size exceeded ' +
+            `(${MAX_TOTAL_SCRIPT_SIZE}). Disabled:`, this.element);
+        this.element.classList.add('i-amphtml-broken');
         return [];
       }
       return [workerScript, authorScript];
@@ -184,6 +196,26 @@ export class AmpScript extends AMP.BaseElement {
   }
 }
 
+class AmpScriptService {
+  /**
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} unusedAmpdoc
+   */
+  constructor(unusedAmpdoc) {
+    /** @private {number} */
+    this.cumulativeSize_ = 0;
+  }
+
+  /**
+   * @param {number} size
+   * @return {boolean}
+   */
+  sizeLimitExceeded(size) {
+    this.cumulativeSize_ += size;
+    return this.cumulativeSize_ > MAX_TOTAL_SCRIPT_SIZE;
+  }
+}
+
 AMP.extension('amp-script', '0.1', function(AMP) {
+  AMP.registerServiceForDoc('script', AmpScriptService);
   AMP.registerElement('amp-script', AmpScript, CSS);
 });
