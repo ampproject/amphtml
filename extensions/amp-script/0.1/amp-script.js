@@ -15,7 +15,9 @@
  */
 
 import {CSS} from '../../../build/amp-script-0.1.css';
-import {DomPurifyDef, createPurifier} from '../../../src/purifier';
+import {
+  DomPurifyDef, createPurifier, validateAttributeChange,
+} from '../../../src/purifier';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {UserActivationTracker} from './user-activation-tracker';
@@ -26,6 +28,7 @@ import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {isExperimentOn} from '../../../src/experiments';
+import {rewriteAttributeValue} from '../../../src/url-rewrite';
 import {
   upgrade,
 } from '@ampproject/worker-dom/dist/unminified.index.safe.mjs.patched';
@@ -223,23 +226,58 @@ class SanitizerImpl {
   }
 
   /**
-   * @param {string} tag
-   * @param {string} attr
+   * @param {!Node} node
+   * @param {string} attribute
    * @param {string} value
    * @return {boolean}
    */
-  validAttribute(tag, attr, value) {
-    return this.purifier_.isValidAttribute(tag, attr, value);
+  mutateAttribute(node, attribute, value) {
+    // TODO(choumx): Per Gabor, check node against DOMPurify's tag whitelist.
+    // We could also call sanitize() on the node, but that could result in
+    // node removal, whereas we'd want to no-op ideally.
+
+    // TODO(choumx): Call mutatedAttributesCallback() on AMP elements e.g.
+    // so an amp-img can update its child img when [src] is changed.
+
+    const tag = node.nodeName.toLowerCase();
+    const attr = attribute.toLowerCase();
+
+    if (validateAttributeChange(this.purifier_, tag, attr, value)) {
+      if (value == null) {
+        node.removeAttribute(attr);
+      } else {
+        const newValue = rewriteAttributeValue(tag, attr, value);
+        node.setAttribute(attr, newValue);
+      }
+
+      // a[href] requires [target], which defaults to _top.
+      if (tag === 'a') {
+        if (node.hasAttribute('href') && !node.hasAttribute('target')) {
+          node.setAttribute('target', '_top');
+        }
+      }
+      return true;
+    }
+    return false;
   }
 
   /**
-   * @param {string} tag
-   * @param {string} prop
+   * @param {!Node} node
+   * @param {string} property
    * @param {string} value
    * @return {boolean}
    */
-  validProperty(tag, prop, value) {
-    return this.purifier_.isValidAttribute(tag, prop, value);
+  mutateProperty(node, property, value) {
+    const tag = node.nodeName.toLowerCase();
+    const prop = property.toLowerCase();
+
+    // worker-dom's supported properties and corresponding attribute name
+    // differences are minor, e.g. acceptCharset vs. accept-charset.
+    if (validateAttributeChange(this.purifier_, tag, prop, value)) {
+      node[property] = value;
+      return true;
+    }
+    return false;
   }
 }
 
