@@ -66,7 +66,7 @@ function main() {
     if (buildTargets.has('RUNTIME') ||
         buildTargets.has('BUILD_SYSTEM') ||
         buildTargets.has('UNIT_TEST')) {
-      timedExecOrDie('gulp test --nobuild --headless --local-changes');
+      timedExecOrDie('gulp test --unit --nobuild --headless --local-changes');
     }
 
     if (buildTargets.has('RUNTIME') ||
