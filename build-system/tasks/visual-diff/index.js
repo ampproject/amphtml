@@ -474,6 +474,7 @@ async function snapshotWebpages(percy, browser, webpages) {
   }
   log('travis', '\n');
   if (isTravisBuild()) {
+    testErrors.sort((a, b) => a.name.localeCompare(b.name));
     testErrors.forEach(testErrorObject => {
       const {name, error} = testErrorObject;
       log('error', 'Error in test', colors.cyan(name));
