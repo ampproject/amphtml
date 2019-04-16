@@ -388,7 +388,7 @@ async function snapshotWebpages(percy, browser, webpages) {
           })
           .catch(navigationError => {
             if (!isTravisBuild()) {
-              log('error', 'Page navigator of test', colors.yellow(name),
+              log('error', 'Page navigation of test', colors.yellow(name),
                   'has errored with:', navigationError);
               log('error', 'Continuing to verify page regardless...');
             }
