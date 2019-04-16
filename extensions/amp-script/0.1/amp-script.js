@@ -109,7 +109,7 @@ export class AmpScript extends AMP.BaseElement {
       // `workerUrl` is from CDN, so no need for `ampCors`.
       xhr.fetchText(workerUrl, {ampCors: false}).then(r => r.text()),
       xhr.fetchText(authorUrl).then(r => r.text()),
-      getElementServiceForDoc(this.element, 'script'),
+      getElementServiceForDoc(this.element, 'script', TAG),
     ]);
     upgrade(this.element, fetches.then(results => {
       const workerScript = results[0];
