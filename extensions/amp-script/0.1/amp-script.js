@@ -80,8 +80,6 @@ export class AmpScript extends AMP.BaseElement {
 
     this.userActivation_ = new UserActivationTracker(this.element);
 
-    this.userActivation_ = new UserActivationTracker(this.element);
-
     // Create worker and hydrate.
     const authorUrl = this.element.getAttribute('src');
     const workerUrl = this.workerThreadUrl_();
@@ -120,11 +118,6 @@ export class AmpScript extends AMP.BaseElement {
       },
       onReceiveMessage: data => {
         dev().info(TAG, 'From worker:', data);
-      },
-      onMutationPump: this.mutationPump_.bind(this),
-      onLongTask: promise => {
-        this.userActivation_.expandLongTask(promise);
-        // TODO(dvoytenko): consider additional "progress" UI.
       },
       sanitizer: new SanitizerImpl(this.win),
     };
