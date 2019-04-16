@@ -31,14 +31,14 @@ const IS_SAUCELABS = !!(argv.saucelabs || argv.saucelabs_lite);
 const IS_SINGLE_PASS = !!argv.single_pass;
 const IS_UNIT = !!argv.unit;
 
-const TEST_TYPE_SUBTYPES = new Map({
-  integration: ['default', 'saucelabs', 'single-pass'],
-  unit: ['default', 'local-changes', 'saucelabs'],
-});
-const TEST_TYPE_ACTIVATORS = new Map({
-  integration: ['RUNTIME', 'BUILD_SYSTEM', 'INTEGRATION_TEST'],
-  unit: ['RUNTIME', 'BUILD_SYSTEM', 'UNIT_TEST'],
-});
+const TEST_TYPE_SUBTYPES = new Map([
+  ['integration', ['default', 'saucelabs', 'single-pass']],
+  ['unit', ['default', 'local-changes', 'saucelabs']],
+]);
+const TEST_TYPE_ACTIVATORS = new Map([
+  ['integration', ['RUNTIME', 'BUILD_SYSTEM', 'INTEGRATION_TEST']],
+  ['unit', ['RUNTIME', 'BUILD_SYSTEM', 'UNIT_TEST']],
+]);
 
 function inferTestType() {
   let type;
