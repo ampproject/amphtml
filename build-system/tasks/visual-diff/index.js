@@ -242,7 +242,7 @@ function addTestError(testErrors, name, message, error, fatal) {
  * @param {!JsonObject} testError object as created by addTestError.
  */
 function logTestError(testError) {
-  log('error', 'Error in test', colors.yellow(testError.name), '\n  :',
+  log('error', 'Error in test', colors.yellow(testError.name), '\n  ',
       testError.message, '\n  ', testError.error);
 }
 
