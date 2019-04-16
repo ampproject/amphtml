@@ -242,8 +242,8 @@ function addTestError(testErrors, name, message, error, fatal) {
  * @param {!JsonObject} testError object as created by addTestError.
  */
 function logTestError(testError) {
-  log('error', 'Error in test', colors.yellow(name), '\n  :', message, '\n  ',
-        navigationError);
+  log('error', 'Error in test', colors.yellow(testError.name), '\n  :',
+      testError.message, '\n  ', testError.error);
 }
 
 /**
@@ -383,7 +383,6 @@ async function snapshotWebpages(percy, browser, webpages) {
   const pagePromises = {};
   const testErrors = [];
   let testNumber = 0;
-  let fatalFailure = false;
   for (const webpage of webpages) {
     const {viewport, name: pageName} = webpage;
     for (const [testName, testFunction] of Object.entries(webpage.tests_)) {
