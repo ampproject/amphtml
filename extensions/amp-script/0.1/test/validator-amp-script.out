@@ -27,33 +27,23 @@ FAIL
 |    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
 |    <script async custom-element="amp-script" src="https://cdn.ampproject.org/v0/amp-script-0.1.js"></script>
->>   ^~~~~~~~~
-amp-script/0.1/test/validator-amp-script.html:28:2 Custom JavaScript is not allowed. (see https://www.ampproject.org/docs/reference/spec#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |  </head>
 |  <body>
 |    <!-- Valid. -->
 |    <amp-script layout=container src="https://example.com/foo.js"><div class="root"><p>Some text to hydrate.</p></div></amp-script>
->>   ^~~~~~~~~
-amp-script/0.1/test/validator-amp-script.html:32:2 The tag 'amp-script' requires including the 'amp-script' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-script) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |
 |    <!-- Invalid: Relative URL. -->
 |    <amp-script layout=container src="/foo.js"></amp-script>
 >>   ^~~~~~~~~
 amp-script/0.1/test/validator-amp-script.html:35:2 The relative URL '/foo.js' for attribute 'src' in tag 'amp-script' is disallowed. (see https://www.ampproject.org/docs/reference/components/amp-script) [AMP_TAG_PROBLEM]
->>   ^~~~~~~~~
-amp-script/0.1/test/validator-amp-script.html:35:2 The tag 'amp-script' requires including the 'amp-script' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-script) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |
 |    <!-- Invalid: Missing 'src' attribute. -->
 |    <amp-script layout=container></amp-script>
 >>   ^~~~~~~~~
 amp-script/0.1/test/validator-amp-script.html:38:2 The mandatory attribute 'src' is missing in tag 'amp-script'. (see https://www.ampproject.org/docs/reference/components/amp-script) [AMP_TAG_PROBLEM]
->>   ^~~~~~~~~
-amp-script/0.1/test/validator-amp-script.html:38:2 The tag 'amp-script' requires including the 'amp-script' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-script) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |
 |    <!-- Invalid: Non-https 'src' attribute. -->
 |    <amp-script layout=container src="http://not.https.url"></amp-script>
 >>   ^~~~~~~~~
 amp-script/0.1/test/validator-amp-script.html:41:2 Invalid URL protocol 'http:' for attribute 'src' in tag 'amp-script'. (see https://www.ampproject.org/docs/reference/components/amp-script) [AMP_TAG_PROBLEM]
->>   ^~~~~~~~~
-amp-script/0.1/test/validator-amp-script.html:41:2 The tag 'amp-script' requires including the 'amp-script' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-script) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |  </body>
