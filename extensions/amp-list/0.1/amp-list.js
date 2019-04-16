@@ -458,8 +458,12 @@ export class AmpList extends AMP.BaseElement {
     }
 
     return fetch.catch(error => {
+      const event = error
+        ? createCustomEvent(this.win, `${TAG}.error`,
+            dict({'response': error.response}))
+        : null;
       const actions = Services.actionServiceForDoc(this.element);
-      actions.trigger(this.element, 'fetch-error', null, ActionTrust.LOW);
+      actions.trigger(this.element, 'fetch-error', event, ActionTrust.LOW);
 
       if (opt_append) {
         throw error;
