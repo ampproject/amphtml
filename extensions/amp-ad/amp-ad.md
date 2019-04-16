@@ -387,6 +387,9 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Yieldpro](../../ads/yieldpro.md)
 - [Zedo](../../ads/zedo.md)
 - [Zucks](../../ads/zucks.md)
+- [Mgid](../../ads/mgid.md)
+- [Lentainform](../../ads/lentainform.md)
+- [Idealmedia](../../ads/idealmedia.md)
 
 ## Supported embed types
 
