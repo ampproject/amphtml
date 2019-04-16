@@ -81,7 +81,7 @@ const command = {
     timedExecOrDie(cmd + ' --headless --coverage');
   },
   runUnitTestsOnLocalChanges: function() {
-    timedExecOrDie('gulp test --nobuild --headless --local-changes');
+    timedExecOrDie('gulp test --unit --nobuild --headless --local-changes');
   },
   runDevDashboardTests: function() {
     timedExecOrDie('gulp test --dev_dashboard --nobuild');
