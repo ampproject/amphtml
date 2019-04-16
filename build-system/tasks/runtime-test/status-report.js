@@ -34,7 +34,7 @@ const TEST_TYPE_SUBTYPES = new Map([
   ['integration', ['default', 'saucelabs', 'single-pass']],
   ['unit', ['default', 'local-changes', 'saucelabs']],
 ]);
-const TEST_TYPE_ACTIVATORS = new Map([
+const TEST_TYPE_BUILD_TARGETS = new Map([
   ['integration', ['RUNTIME', 'BUILD_SYSTEM', 'INTEGRATION_TEST']],
   ['unit', ['RUNTIME', 'BUILD_SYSTEM', 'UNIT_TEST']],
 ]);
@@ -98,9 +98,8 @@ exports.reportTestStarted = () => {
 
 exports.reportAllExpectedTests = async buildTargets => {
   for (const [type, subTypes] of TEST_TYPE_SUBTYPES) {
-    const testTypeActivators = TEST_TYPE_ACTIVATORS.get(type);
-    log(green('DEBUG:'), type, testTypeActivators, buildTargets);
-    const action = testTypeActivators.some(buildTargets.has)
+    const testTypeBuildTargets = TEST_TYPE_BUILD_TARGETS.get(type);
+    const action = testTypeBuildTargets.some(target => buildTargets.has(target))
       ? 'queued' : 'skipped';
     for (const subType of subTypes) {
       await postReport(`${type}/${subType}`, action);
