@@ -28,7 +28,7 @@ import {
 import {Gestures} from '../../../src/gesture';
 import {Keys} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
-import {boundValue} from '../../../src/utils/math';
+import {boundValue, magnitude, distance} from '../../../src/utils/math';
 import {bezierCurve} from '../../../src/curve';
 import {continueMotion} from '../../../src/motion';
 import {dev, userAssert} from '../../../src/log';
@@ -556,7 +556,7 @@ export class ImageViewer {
    * @private
    */
   onZoomInc_(centerClientX, centerClientY, deltaX, deltaY) {
-    const dist = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+    const dist = magnitude(deltaX, deltaY);
 
     const zoomSign =
       Math.abs(deltaY) > Math.abs(deltaX)
@@ -654,9 +654,7 @@ export class ImageViewer {
    */
   set_(newScale, newPosX, newPosY, animate) {
     const ds = newScale - this.scale_;
-    const dx = newPosX - this.posX_;
-    const dy = newPosY - this.posY_;
-    const dist = Math.sqrt(dx * dx + dy * dy);
+    const dist = distance(this.posX_, this.posY_, newPosX, newPosY);
 
     let dur = 0;
     if (animate) {
