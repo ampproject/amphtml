@@ -392,7 +392,7 @@ async function snapshotWebpages(percy, browser, webpages) {
                   'has errored with:', navigationError);
               log('error', 'Continuing to verify page regardless...');
             }
-            testErrors.push({name, navigationError});
+            testErrors.push({name, error: navigationError});
           })
           .then(async() => {
             // Visibility evaluations can only be performed on the active tab,
@@ -459,7 +459,7 @@ async function snapshotWebpages(percy, browser, webpages) {
               log('error', 'Error in test', colors.cyan(name));
               log('error', 'Exception thrown:', testError);
             }
-            testErrors.push({name, testError});
+            testErrors.push({name, error: testError});
           })
           .then(async() => {
             await page.close();
@@ -475,9 +475,9 @@ async function snapshotWebpages(percy, browser, webpages) {
   log('travis', '\n');
   if (isTravisBuild()) {
     testErrors.forEach(testErrorObject => {
-      const {name, testError} = testErrorObject;
+      const {name, error} = testErrorObject;
       log('error', 'Error in test', colors.cyan(name));
-      log('error', 'Exception thrown:', testError);
+      log('error', 'Exception thrown:', error);
     });
   }
   return testErrors.length == 0;
