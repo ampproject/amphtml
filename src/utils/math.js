@@ -94,3 +94,15 @@ export function mod(a, b) {
 export function clamp(val, min, max) {
   return Math.min(Math.max(val, min), max);
 }
+
+/**
+ * Returns value bound to min and max values +/- extent.
+ * @param {number} val the value to bound.
+ * @param {number} min the lower bound.
+ * @param {number} max the upper bound
+ * @param {number} extent the allowed extent beyond the bounds.
+ * @return {number} the bounded value.
+ */
+export function boundValue(val, min, max, extent) {
+  return clamp(val, min - extent, max + extent);
+}
