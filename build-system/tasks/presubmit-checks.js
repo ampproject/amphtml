@@ -42,6 +42,9 @@ const backwardCompat = 'This method must not be called. It is only retained ' +
 const realiasGetMode = 'Do not re-alias getMode or its return so it can be ' +
     'DCE\'d. Use explicitly like "getMode().localDev" instead.';
 
+const shadowDocUnsafe = 'Do not use this API as this is not available in' +
+    'shadow document mode. Please use a shadow doc friendly API instead.';
+
 // Terms that must not appear in our source files.
 const forbiddenTerms = {
   'DO NOT SUBMIT': '',
@@ -652,6 +655,20 @@ const forbiddenTerms = {
       'src/style-installer.js',
       'src/inabox/amp-inabox.js',
       'src/inabox/amp-inabox-lite.js',
+    ],
+  },
+  'window\.document': {
+    message: shadowDocUnsafe,
+    whitelist: [
+      '3p/integration.js',
+      'build-system/app-video-testbench.js',
+      'build-system/app.js',
+      'build-system/shadow-viewer.js',
+      'ads/contentad',
+      'ads/recomad.js',
+      'ads/contentad.js',
+      'ads/sklik.js',
+      'build-system/tasks/update-packages.js',
     ],
   },
 };
