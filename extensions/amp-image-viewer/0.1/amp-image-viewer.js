@@ -28,7 +28,7 @@ import {
 } from '../../../src/gesture-recognizers';
 import {Gestures} from '../../../src/gesture';
 import {Layout} from '../../../src/layout';
-import {boundValue} from '../../../src/utils/math';
+import {boundValue, magnitude, distance} from '../../../src/utils/math';
 import {bezierCurve} from '../../../src/curve';
 import {closestAncestorElementBySelector, elementByTag} from '../../../src/dom';
 import {continueMotion} from '../../../src/motion';
@@ -718,7 +718,7 @@ export class AmpImageViewer extends AMP.BaseElement {
     if (dir == 0) {
       return;
     }
-    const dist = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+    const dist = magnitude(deltaX, deltaY);
     const newScale = this.startScale_ * (1 + (dir * dist) / 100);
     const deltaCenterX = this.elementBox_.width / 2 - centerClientX;
     const deltaCenterY = this.elementBox_.height / 2 - centerClientY;
@@ -827,9 +827,7 @@ export class AmpImageViewer extends AMP.BaseElement {
    */
   set_(newScale, newPosX, newPosY, animate) {
     const ds = newScale - this.scale_;
-    const dx = newPosX - this.posX_;
-    const dy = newPosY - this.posY_;
-    const dist = Math.sqrt(dx * dx + dy * dy);
+    const dist = distance(this.posX_, this.posY_, newPosX, newPosY);
 
     let dur = 0;
     if (animate) {
