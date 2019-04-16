@@ -203,20 +203,24 @@ const INVALID_INLINE_STYLE_REGEX =
  * @param {string} tagName Lowercase tag name.
  * @param {string} attrName Lowercase attribute name.
  * @param {string} attrValue
+ * @param {boolean} opt_purify Is true, skips some attribute sanitizations
+ *     that are already covered by DOMPurify.
  * @return {boolean}
  */
-export function isValidAttr(tagName, attrName, attrValue) {
-  // "on*" attributes are not allowed.
-  if (startsWith(attrName, 'on') && attrName != 'on') {
-    return false;
-  }
+export function isValidAttr(tagName, attrName, attrValue, opt_purify = false) {
+  if (!opt_purify) {
+    // "on*" attributes are not allowed.
+    if (startsWith(attrName, 'on') && attrName != 'on') {
+      return false;
+    }
 
-  // No attributes with "javascript" or other blacklisted substrings in them.
-  if (attrValue) {
-    const normalized = attrValue.toLowerCase().replace(/[\s,\u0000]+/g, '');
-    for (let i = 0; i < BLACKLISTED_ATTR_VALUES.length; i++) {
-      if (normalized.indexOf(BLACKLISTED_ATTR_VALUES[i]) >= 0) {
-        return false;
+    // No attributes with "javascript" or other blacklisted substrings in them.
+    if (attrValue) {
+      const normalized = attrValue.toLowerCase().replace(/[\s,\u0000]+/g, '');
+      for (let i = 0; i < BLACKLISTED_ATTR_VALUES.length; i++) {
+        if (normalized.indexOf(BLACKLISTED_ATTR_VALUES[i]) >= 0) {
+          return false;
+        }
       }
     }
   }
