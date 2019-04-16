@@ -260,6 +260,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     // This should happen last, as some diversion criteria rely on some of the
     // preceding logic (specifically responsive logic).
     this.divertExperiments();
+    this.maybeAddSinglePassExperiment();
   }
 
   /** @override */
