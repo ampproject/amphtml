@@ -16,7 +16,7 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const closureCompiler = require('gulp-closure-compiler');
+const closureCompiler = require('google-closure-compiler');
 const colors = require('ansi-colors');
 const fs = require('fs-extra');
 const gulp = require('gulp');
@@ -351,77 +351,81 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
     }
     externs.push('build-system/amp.multipass.extern.js');
 
+    const platformOptions = {
+      platform: ['java'],
+    };
+
     /* eslint "google-camelcase/google-camelcase": 0*/
     const compilerOptions = {
-      // Temporary shipping with our own compiler that has a single patch
-      // applied
-      compilerPath: 'build-system/runner/dist/runner.jar',
-      fileName: intermediateFilename,
-      continueWithWarnings: false,
-      tieredCompilation: true, // Magic speed up.
-      compilerFlags: {
-        compilation_level: options.compilationLevel || 'SIMPLE_OPTIMIZATIONS',
-        // Turns on more optimizations.
-        assume_function_wrapper: true,
-        // Transpile from ES6 to ES5.
-        language_in: 'ECMASCRIPT6',
-        language_out: 'ECMASCRIPT5',
-        // We do not use the polyfills provided by closure compiler.
-        // If you need a polyfill. Manually include them in the
-        // respective top level polyfills.js files.
-        rewrite_polyfills: false,
-        externs,
-        js_module_root: [
-          // Do _not_ include 'node_modules/' in js_module_root with 'NODE'
-          // resolution or bad things will happen (#18600).
-          'build/patched-module/',
-          'build/fake-module/',
-          'build/fake-polyfills/',
-        ],
-        entry_point: entryModuleFilenames,
-        module_resolution: 'NODE',
-        process_common_js_modules: true,
-        // This strips all files from the input set that aren't explicitly
-        // required.
-        only_closure_dependencies: true,
-        output_wrapper: wrapper,
-        create_source_map: intermediateFilename + '.map',
-        source_map_location_mapping:
-            '|' + sourceMapBase,
-        warning_level: options.verboseLogging ? 'VERBOSE' : 'DEFAULT',
-        jscomp_error: [],
-        // moduleLoad: Demote "module not found" errors to ignore missing files
-        //     in type declarations in the swg.js bundle.
-        jscomp_warning: ['moduleLoad'],
-        // Turn off warning for "Unknown @define" since we use define to pass
-        // args such as FORTESTING to our runner.
-        jscomp_off: ['unknownDefines'],
-        define,
-        hide_warnings_for: hideWarningsFor,
-      },
+      js_output_file: intermediateFilename,
+      compilation_level: options.compilationLevel || 'SIMPLE_OPTIMIZATIONS',
+      // Turns on more optimizations.
+      assume_function_wrapper: true,
+      // Transpile from ES6 to ES5.
+      language_in: 'ECMASCRIPT6',
+      language_out: 'ECMASCRIPT5',
+      // We do not use the polyfills provided by closure compiler.
+      // If you need a polyfill. Manually include them in the
+      // respective top level polyfills.js files.
+      rewrite_polyfills: false,
+      externs,
+      js_module_root: [
+        // Do _not_ include 'node_modules/' in js_module_root with 'NODE'
+        // resolution or bad things will happen (#18600).
+        'build/patched-module/',
+        'build/fake-module/',
+        'build/fake-polyfills/',
+      ],
+      entry_point: entryModuleFilenames,
+      module_resolution: 'NODE',
+      process_common_js_modules: true,
+      // This strips all files from the input set that aren't explicitly
+      // required.
+      only_closure_dependencies: true,
+      output_wrapper: wrapper,
+      create_source_map: intermediateFilename + '.map',
+      source_map_location_mapping: '|' + sourceMapBase,
+      warning_level: options.verboseLogging ? 'VERBOSE' : 'DEFAULT',
+      jscomp_error: [],
+      // moduleLoad: Demote "module not found" errors to ignore missing files
+      //     in type declarations in the swg.js bundle.
+      jscomp_warning: ['moduleLoad'],
+      // Turn off warning for "Unknown @define" since we use define to pass
+      // args such as FORTESTING to our runner.
+      jscomp_off: ['unknownDefines'],
+      define,
+      hide_warnings_for: hideWarningsFor,
     };
 
     // For now do type check separately
     if (argv.typecheck_only || checkTypes) {
       // Don't modify compilation_level to a lower level since
       // it won't do strict type checking if its whitespace only.
-      compilerOptions.compilerFlags.define.push('TYPECHECK_ONLY=true');
-      compilerOptions.compilerFlags.jscomp_error.push(
+      compilerOptions.define.push('TYPECHECK_ONLY=true');
+      compilerOptions.jscomp_error.push(
           'checkTypes',
           'accessControls',
           'const',
           'constantProperty',
           'globalThis');
-      compilerOptions.compilerFlags.conformance_configs =
+      compilerOptions.conformance_configs =
           'build-system/conformance-config.textproto';
     }
 
-    if (compilerOptions.compilerFlags.define.length == 0) {
-      delete compilerOptions.compilerFlags.define;
+    if (compilerOptions.define.length == 0) {
+      delete compilerOptions.define;
     }
 
-    let stream = gulp.src(srcs)
-        .pipe(closureCompiler(compilerOptions))
+    // Override to local closure compiler JAR
+    closureCompiler.compiler.JAR_PATH =
+        require.resolve('../runner/dist/runner.jar');
+
+    const gulpClosureCompiler = closureCompiler.gulp({
+      extraArguments: ['-XX:-TieredCompilation'],
+    });
+
+    let stream = gulp.src(srcs, {base: '.'})
+        .pipe(gulpClosureCompiler(compilerOptions, platformOptions))
         .on('error', function(err) {
           const {message} = err;
           console./*OK*/error(colors.red(
@@ -429,7 +433,6 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
               formatClosureCompilerError(message));
           process.exit(1);
         });
-    // If we're only doing type checking, no need to output the files.
     if (!argv.typecheck_only && !options.typeCheckOnly) {
       stream = stream
           .pipe(rename(outputFilename))
@@ -443,7 +446,9 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
                 .on('end', resolve);
           });
     } else {
-      stream = stream.on('end', resolve);
+      stream = stream
+          .on('end', resolve)
+          .pipe(gulp.dest(outputDir));
     }
     return stream;
   });
