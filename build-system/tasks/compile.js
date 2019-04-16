@@ -75,7 +75,6 @@ exports.closureCompile = function(entryModuleFilename, outputDir,
 };
 
 function cleanupBuildDir() {
-  fs.mkdirsSync('build/cc');
   rimraf.sync('build/fake-module');
   rimraf.sync('build/patched-module');
   fs.mkdirsSync('build/patched-module/document-register-element/build');
@@ -176,8 +175,6 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
     }
     const checkTypes =
         options.checkTypes || options.typeCheckOnly || argv.typecheck_only;
-    const intermediateFilename = 'build/cc/' +
-        entryModuleFilename.replace(/\//g, '_').replace(/^\./, '');
     // If undefined/null or false then we're ok executing the deletions
     // and mkdir.
     if (!options.preventRemoveAndMakeDir) {
@@ -189,9 +186,6 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
     let wrapper = '(function(){%output%})();';
     if (options.wrapper) {
       wrapper = options.wrapper.replace('<%= contents %>', '%output%');
-    }
-    if (fs.existsSync(intermediateFilename)) {
-      fs.unlinkSync(intermediateFilename);
     }
     let sourceMapBase = 'http://localhost:8000/';
     if (isProdBuild) {
@@ -358,7 +352,6 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
 
     /* eslint "google-camelcase/google-camelcase": 0*/
     const compilerOptions = {
-      js_output_file: intermediateFilename,
       compilation_level: options.compilationLevel || 'SIMPLE_OPTIMIZATIONS',
       // Turns on more optimizations.
       assume_function_wrapper: true,
