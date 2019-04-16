@@ -27,7 +27,7 @@ import {Gestures} from '../../../src/gesture';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {bezierCurve} from '../../../src/curve';
-import {boundValue} from '../../../src/utils/math';
+import {boundValue, magnitude, distance} from '../../../src/utils/math';
 import {continueMotion} from '../../../src/motion';
 import {createCustomEvent, listen} from '../../../src/event-helper';
 import {dev, userAssert} from '../../../src/log';
@@ -852,7 +852,7 @@ export class AmpPanZoom extends AMP.BaseElement {
       return Promise.resolve();
     }
     const {width, height} = this.elementBox_;
-    const dist = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+    const dist = magnitude(deltaX, deltaY);
     const newScale = this.startScale_ * (1 + (dir * dist) / 100);
     const deltaCenterX = width / 2 - this.getOffsetX_(centerClientX);
     const deltaCenterY = height / 2 - this.getOffsetY_(centerClientY);
@@ -933,9 +933,7 @@ export class AmpPanZoom extends AMP.BaseElement {
    */
   set_(newScale, newPosX, newPosY, animate) {
     const ds = newScale - this.scale_;
-    const dx = newPosX - this.posX_;
-    const dy = newPosY - this.posY_;
-    const dist = Math.sqrt(dx * dx + dy * dy);
+    const dist = distance(this.posX_, this.posY_, newPosX, newPosY);
 
     const dur = animate
       ? Math.min(
