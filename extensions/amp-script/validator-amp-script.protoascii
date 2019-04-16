@@ -19,7 +19,6 @@ tags: {
   extension_spec: {
     name: "amp-script"
     version: "0.1"
-    version: "latest"
   }
   attr_lists: "common-extension-attrs"
 }
@@ -29,7 +28,6 @@ tags: {  <amp-script>
   tag_name: "AMP-SCRIPT"
   disallowed_ancestor: "AMP-SCRIPT"
   requires_extension: "amp-script"
-  unique: true # TODO(choumx): Remove when global size limit is implemented.
   attrs: {
     name: "src"
     mandatory: true
