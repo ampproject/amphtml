@@ -27,6 +27,7 @@ const rename = require('gulp-rename');
 const replace = require('gulp-regexp-sourcemaps');
 const rimraf = require('rimraf');
 const shortenLicense = require('../shorten-license');
+const sourcemaps = require('gulp-sourcemaps');
 const {highlight} = require('cli-highlight');
 const {singlePassCompile} = require('../single-pass');
 
@@ -188,7 +189,6 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
     if (options.wrapper) {
       wrapper = options.wrapper.replace('<%= contents %>', '%output%');
     }
-    wrapper += '\n//# sourceMappingURL=' + outputFilename + '.map\n';
     if (fs.existsSync(intermediateFilename)) {
       fs.unlinkSync(intermediateFilename);
     }
@@ -383,7 +383,6 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       // required.
       only_closure_dependencies: true,
       output_wrapper: wrapper,
-      create_source_map: intermediateFilename + '.map',
       source_map_location_mapping: '|' + sourceMapBase,
       warning_level: options.verboseLogging ? 'VERBOSE' : 'DEFAULT',
       jscomp_error: [],
@@ -425,6 +424,9 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
     });
 
     let stream = gulp.src(srcs, {base: '.'})
+        .pipe(sourcemaps.init({loadMaps: true}))
+        .pipe(replace(/\$internalRuntimeVersion\$/g, internalRuntimeVersion, 'runtime-version'))
+        .pipe(shortenLicense())
         .pipe(gulpClosureCompiler(compilerOptions, platformOptions))
         .on('error', function(err) {
           const {message} = err;
@@ -436,19 +438,13 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
     if (!argv.typecheck_only && !options.typeCheckOnly) {
       stream = stream
           .pipe(rename(outputFilename))
-          .pipe(replace(/\$internalRuntimeVersion\$/g, internalRuntimeVersion, 'runtime-version'))
-          .pipe(shortenLicense())
+          .pipe(sourcemaps.write('.'))
           .pipe(gulp.dest(outputDir))
-          .on('end', function() {
-            gulp.src(intermediateFilename + '.map')
-                .pipe(rename(outputFilename + '.map'))
-                .pipe(gulp.dest(outputDir))
-                .on('end', resolve);
-          });
+          .on('end', resolve);
     } else {
       stream = stream
-          .on('end', resolve)
-          .pipe(gulp.dest(outputDir));
+          .pipe(gulp.dest(outputDir))
+          .on('end', resolve);
     }
     return stream;
   });
