@@ -21,11 +21,12 @@ import {
   UrlReplacementPolicy,
   batchFetchJsonFor,
 } from '../../../src/batched-json';
+import {createCustomEvent} from '../../../src/event-helper';
 import {dev, devAssert, userAssert} from '../../../src/log';
+import {dict, map} from '../../../src/utils/object';
 import {getSourceOrigin} from '../../../src/url';
 import {getViewerAuthTokenIfAvailable} from '../../../src/utils/xhr-utils';
 import {isJsonScriptTag} from '../../../src/dom';
-import {map} from '../../../src/utils/object';
 import {toggle} from '../../../src/style';
 import {tryParseJson} from '../../../src/json';
 
@@ -153,10 +154,14 @@ export class AmpState extends AMP.BaseElement {
       : UrlReplacementPolicy.ALL;
 
     return getViewerAuthTokenIfAvailable(element).then(token =>
-      this.fetch_(ampdoc, policy, opt_refresh, token).catch(() => {
+      this.fetch_(ampdoc, policy, opt_refresh, token).catch(error => {
+        const event = error
+          ? createCustomEvent(this.win, 'amp-state.error',
+              dict({'response': error.response}))
+          : null;
         // Trigger "fetch-error" event on fetch failure.
         const actions = Services.actionServiceForDoc(element);
-        actions.trigger(element, 'fetch-error', null, ActionTrust.LOW);
+        actions.trigger(element, 'fetch-error', event, ActionTrust.LOW);
       })
     );
   }
