@@ -243,7 +243,7 @@ function addTestError(testErrors, name, message, error, fatal) {
  */
 function logTestError(testError) {
   log(testError.fatal ? 'error' : 'warning', 'Error in test',
-      colors.yellow(testError.name), '\n  ', testError.message, `\n  `,
+      colors.yellow(testError.name), '\n  ', testError.message, '\n  ',
       testError.error);
 }
 
