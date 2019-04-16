@@ -118,7 +118,7 @@
     "jsdom": "14.0.0",
     "json-stable-stringify": "1.0.1",
     "json5": "2.1.0",
-    "karma": "4.0.1",
+    "karma": "4.1.0",
     "karma-browserify": "6.0.0",
     "karma-chai": "0.1.0",
     "karma-chrome-launcher": "2.2.0",
