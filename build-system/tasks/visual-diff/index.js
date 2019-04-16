@@ -220,6 +220,33 @@ async function newPage(browser, viewport = null) {
 }
 
 /**
+ * Adds a test error and logs it if running locally (not on Travis).
+ *
+ * @param {!Array<!JsonObject>} testErrors array of testError objects.
+ * @param {string} name full name of the test.
+ * @param {string} message extra information about the failure.
+ * @param {Error} error error object with stack trace.
+ * @param {boolean} fatal whether this failure should be considered fatal.
+ */
+function addTestError(testErrors, name, message, error, fatal) {
+  const testError = {name, message, error, fatal};
+  if (!isTravisBuild()) {
+    logTestError(testError);
+  }
+  testErrors.push(testError);
+}
+
+/**
+ * Logs a test error (regardless of where it's running).
+ *
+ * @param {!JsonObject} testError object as created by addTestError.
+ */
+function logTestError(testError) {
+  log('error', 'Error in test', colors.yellow(name), '\n  :', message, '\n  ',
+        navigationError);
+}
+
+/**
  * Runs the visual tests.
  *
  * @param {!Array<string>} assetGlobs an array of glob strings to load assets
@@ -356,6 +383,7 @@ async function snapshotWebpages(percy, browser, webpages) {
   const pagePromises = {};
   const testErrors = [];
   let testNumber = 0;
+  let fatalFailure = false;
   for (const webpage of webpages) {
     const {viewport, name: pageName} = webpage;
     for (const [testName, testFunction] of Object.entries(webpage.tests_)) {
@@ -387,12 +415,12 @@ async function snapshotWebpages(percy, browser, webpages) {
                 'is done, verifying page');
           })
           .catch(navigationError => {
+            addTestError(testErrors, name,
+                'The browser test runner failed to complete the navigation ' +
+                'to the test page', navigationError, /* fatal */ false);
             if (!isTravisBuild()) {
-              log('error', 'Page navigation of test', colors.yellow(name),
-                  'has errored with:', navigationError);
               log('error', 'Continuing to verify page regardless...');
             }
-            testErrors.push({name, error: navigationError});
           })
           .then(async() => {
             // Visibility evaluations can only be performed on the active tab,
@@ -455,11 +483,8 @@ async function snapshotWebpages(percy, browser, webpages) {
           })
           .catch(testError => {
             log('travis', colors.red('○'));
-            if (!isTravisBuild()) {
-              log('error', 'Error in test', colors.cyan(name));
-              log('error', 'Exception thrown:', testError);
-            }
-            testErrors.push({name, error: testError});
+            addTestError(testErrors, name, 'Unknown failure in test page',
+                testError, /* fatal */ true);
           })
           .then(async() => {
             await page.close();
@@ -475,13 +500,9 @@ async function snapshotWebpages(percy, browser, webpages) {
   log('travis', '\n');
   if (isTravisBuild()) {
     testErrors.sort((a, b) => a.name.localeCompare(b.name));
-    testErrors.forEach(testErrorObject => {
-      const {name, error} = testErrorObject;
-      log('error', 'Error in test', colors.cyan(name));
-      log('error', 'Exception thrown:', error);
-    });
+    testErrors.forEach(logTestError);
   }
-  return testErrors.length == 0;
+  return testErrors.some(testError => testError.fatal);
 }
 
 /**
