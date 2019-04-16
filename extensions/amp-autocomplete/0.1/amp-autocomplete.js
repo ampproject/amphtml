@@ -392,7 +392,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     }
 
     // Client-side filtering.
-    input = input.toLowerCase();
+    input = input.toLocaleLowerCase();
     const itemsExpr = this.element.getAttribute('filter-value') || 'value';
     const filteredData = data.filter(item => {
       if (typeof item === 'object') {
@@ -407,9 +407,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
         case FilterType.PREFIX:
           return startsWith(item, input);
         case FilterType.TOKEN_PREFIX:
-          return item.split(' ').some(token => {
-            return startsWith(token, input);
-          });
+          return this.tokenPrefixMatch_(item, input);
         case FilterType.FUZZY:
           throw new Error(`Filter not yet supported: ${this.filter_}`);
         case FilterType.CUSTOM:
@@ -418,8 +416,75 @@ export class AmpAutocomplete extends AMP.BaseElement {
           throw new Error(`Unexpected filter: ${this.filter_}`);
       }
     });
-
+    
     return this.truncateToMaxEntries_(filteredData);
+  }
+
+  /**
+   * Returns true if the given tokenized input is a token-prefix match on the
+   * given item. Assumes toLocaleLowerCase() has been performed on both
+   * parameters.
+   * @param {string} item
+   * @param {!Array<string>} input
+   * @return {boolean}
+   * @private
+   */
+  tokenPrefixMatch_(item, input) {
+    if (input === '') {
+      return true;
+    }
+
+    // Remove '.'
+    item = item.replace(/[\.]+/g, '');
+    input = input.replace(/[\.]+/g, '');
+
+    // Split by special characters or space ' '
+    const itemTokens = item.split(/[`~(){}_|+\-;:\'",\{\}\[\]\\\/ ]+/g);
+    const inputTokens = input.split(/[`~(){}_|+\-;:\'",\{\}\[\]\\\/ ]+/g);
+
+    // Match each input token (except the last one) to an item token
+    const itemTokensMap = this.tokensArrayToMap_(itemTokens);
+    const lastInputToken = inputTokens[inputTokens.length - 1];
+    inputTokens.splice(inputTokens.length - 1, 1);
+
+    let match = true;
+    inputTokens.forEach(token => {
+      if (token === '') {
+        return;
+      }
+      if (!itemTokensMap.has(token)) {
+        return match = false;
+      }
+      const count = itemTokensMap.get(token);
+      if (count > 1) {
+        itemTokensMap.set(token, count - 1);
+      } else {
+        itemTokensMap.delete(token);
+      }
+    });
+
+    // Return that the last input token is a prefix of one of the item tokens
+    const remainingItemTokens = Array.from(itemTokensMap.keys());
+    return match && (lastInputToken === '' ||
+      remainingItemTokens.some(itemToken => {
+        return startsWith(itemToken, lastInputToken);
+      }));
+  }
+
+  /**
+   * Returns the given tokens array as a dictionary of key: token (str) and
+   * value: number of occurrences.
+   * @param {!Array<string>} tokens
+   * @return {!Map<string, number>}
+   * @private
+   */
+  tokensArrayToMap_(tokens) {
+    const tokensMap = new Map();
+    tokens.forEach(token => {
+      const count = tokensMap.has(token) ? tokensMap.get(token) + 1 : 1;
+      tokensMap.set(token, count);
+    });
+    return tokensMap;
   }
 
   /**

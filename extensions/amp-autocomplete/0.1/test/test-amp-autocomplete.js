@@ -229,6 +229,8 @@ describes.realWin('amp-autocomplete unit tests', {
     impl.filter_ = 'token-prefix';
     expect(impl.filterData_(['a', 'b a', 'ab', 'ba', 'c a'], 'a')).to.have
         .ordered.members(['a', 'b a', 'ab', 'c a']);
+    expect(impl.filterData_(['a', 'b a', 'ab', 'ba', 'c a'], 'a c')).to.have
+        .ordered.members(['c a']);
     // None filter
     impl.filter_ = 'none';
     expect(impl.filterData_(['a', 'b a', 'ab', 'ba', 'c a'], 'a')).to.have
@@ -243,6 +245,28 @@ describes.realWin('amp-autocomplete unit tests', {
     impl.filter_ = 'invalid';
     expect(() => impl.filterData_(['a', 'b', 'c'], 'a')).to.throw(
         'Unexpected filter: invalid');
+  });
+
+  it('tokenPrefixMatch_ should exhaustively match on complex cases', () => {
+    const item = 'washington, district of columbia (d.c.)';
+    expect(impl.tokenPrefixMatch_(item, 'washington')).to.be.true;
+    expect(impl.tokenPrefixMatch_(item, 'district of columbia')).to.be.true;
+    expect(impl.tokenPrefixMatch_(item, 'of colum')).to.be.true;
+    expect(impl.tokenPrefixMatch_(item,
+        'district washington columbia of')).to.be.true;
+    expect(impl.tokenPrefixMatch_(item, 'dc')).to.be.true;
+    expect(impl.tokenPrefixMatch_(item, 'washington dc')).to.be.true;
+    expect(impl.tokenPrefixMatch_(item, 'washington, d.c.')).to.be.true;
+    expect(impl.tokenPrefixMatch_(item, 'washington, (dc)')).to.be.true;
+    expect(impl.tokenPrefixMatch_(item, 'w.a.s.h.i.n.g.t.o.n.')).to.be.true;
+    expect(impl.tokenPrefixMatch_(item, 'district-of-columbia')).to.be.true;
+    expect(impl.tokenPrefixMatch_(item, "washington 'dc'")).to.be.true;
+    expect(impl.tokenPrefixMatch_(item,
+        'washin.gton,   (..dc)+++++')).to.be.true;
+    expect(impl.tokenPrefixMatch_(item, 'ashington dc')).to.be.false;
+    expect(impl.tokenPrefixMatch_(item, 'washi distri')).to.be.false;
+    expect(impl.tokenPrefixMatch_(item, 'columbia columbia')).to.be.false;
+    expect(impl.tokenPrefixMatch_(item, 'd c')).to.be.false;
   });
 
   it('truncateToMaxEntries_() should truncate given data', () => {
