@@ -20,6 +20,7 @@ const closureCompiler = require('google-closure-compiler');
 const colors = require('ansi-colors');
 const fs = require('fs-extra');
 const gulp = require('gulp');
+const nop = require('gulp-nop');
 const {isTravisBuild} = require('../travis');
 const {VERSION: internalRuntimeVersion} = require('../internal-version') ;
 
@@ -425,7 +426,9 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
 
     let stream = gulp.src(srcs, {base: '.'})
         .pipe(sourcemaps.init({loadMaps: true}))
-        .pipe(replace(/\$internalRuntimeVersion\$/g, internalRuntimeVersion, 'runtime-version'))
+        .pipe(replace(
+            /\$internalRuntimeVersion\$/g, internalRuntimeVersion,
+            'runtime-version'))
         .pipe(shortenLicense())
         .pipe(gulpClosureCompiler(compilerOptions, platformOptions))
         .on('error', function(err) {
@@ -443,7 +446,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
           .on('end', resolve);
     } else {
       stream = stream
-          .pipe(gulp.dest(outputDir))
+          .pipe(nop())
           .on('end', resolve);
     }
     return stream;
