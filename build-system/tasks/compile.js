@@ -173,8 +173,6 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       entryModuleFilename = entryModuleFilenames;
       entryModuleFilenames = [entryModuleFilename];
     }
-    const checkTypes =
-        options.checkTypes || options.typeCheckOnly || argv.typecheck_only;
     // If undefined/null or false then we're ok executing the deletions
     // and mkdir.
     if (!options.preventRemoveAndMakeDir) {
@@ -391,7 +389,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
     };
 
     // For now do type check separately
-    if (argv.typecheck_only || checkTypes) {
+    if (options.checkTypes || options.typeCheckOnly) {
       // Don't modify compilation_level to a lower level since
       // it won't do strict type checking if its whitespace only.
       compilerOptions.define.push('TYPECHECK_ONLY=true');
@@ -417,31 +415,33 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       extraArguments: ['-XX:-TieredCompilation'],
     });
 
-    let stream = gulp.src(srcs, {base: '.'})
-        .pipe(sourcemaps.init({loadMaps: true}))
-        .pipe(replace(
-            /\$internalRuntimeVersion\$/g, internalRuntimeVersion,
-            'runtime-version'))
-        .pipe(shortenLicense())
-        .pipe(gulpClosureCompiler(compilerOptions, platformOptions))
-        .on('error', function(err) {
-          const {message} = err;
-          console./*OK*/error(colors.red(
-              'Compilation failed for ' + outputFilename + ':\n') +
-              formatClosureCompilerError(message));
-          process.exit(1);
-        });
-    if (!argv.typecheck_only && !options.typeCheckOnly) {
-      stream = stream
+    const handleCompilerError = function(err) {
+      const {message} = err;
+      console./*OK*/error(colors.red(
+          'Compilation failed for ' + outputFilename + ':\n') +
+          formatClosureCompilerError(message));
+      process.exit(1);
+    };
+
+    if (options.typeCheckOnly) {
+      return gulp.src(srcs, {base: '.'})
+          .pipe(gulpClosureCompiler(compilerOptions, platformOptions))
+          .on('error', handleCompilerError)
+          .pipe(nop())
+          .on('end', resolve);
+    } else {
+      return gulp.src(srcs, {base: '.'})
+          .pipe(sourcemaps.init({loadMaps: true}))
+          .pipe(replace(
+              /\$internalRuntimeVersion\$/g, internalRuntimeVersion,
+              'runtime-version'))
+          .pipe(shortenLicense())
+          .pipe(gulpClosureCompiler(compilerOptions, platformOptions))
+          .on('error', handleCompilerError)
           .pipe(rename(outputFilename))
           .pipe(sourcemaps.write('.'))
           .pipe(gulp.dest(outputDir))
           .on('end', resolve);
-    } else {
-      stream = stream
-          .pipe(nop())
-          .on('end', resolve);
     }
-    return stream;
   });
 }
