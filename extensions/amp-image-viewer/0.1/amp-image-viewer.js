@@ -28,6 +28,7 @@ import {
 } from '../../../src/gesture-recognizers';
 import {Gestures} from '../../../src/gesture';
 import {Layout} from '../../../src/layout';
+import {boundValue} from '../../../src/utils/math';
 import {bezierCurve} from '../../../src/curve';
 import {closestAncestorElementBySelector, elementByTag} from '../../../src/dom';
 import {continueMotion} from '../../../src/motion';
@@ -544,19 +545,6 @@ export class AmpImageViewer extends AMP.BaseElement {
   }
 
   /**
-   * Returns value bound to min and max values +/- extent.
-   * @param {number} v
-   * @param {number} min
-   * @param {number} max
-   * @param {number} extent
-   * @return {number}
-   * @private
-   */
-  boundValue_(v, min, max, extent) {
-    return Math.max(min - extent, Math.min(max + extent, v));
-  }
-
-  /**
    * Returns the scale within the allowed range with possible extent.
    * @param {number} s
    * @param {boolean} allowExtent
@@ -564,12 +552,8 @@ export class AmpImageViewer extends AMP.BaseElement {
    * @private
    */
   boundScale_(s, allowExtent) {
-    return this.boundValue_(
-      s,
-      this.minScale_,
-      this.maxScale_,
-      allowExtent ? 0.25 : 0
-    );
+    return boundValue(s, this.minScale_, this.maxScale_,
+        allowExtent ? 0.25 : 0);
   }
 
   /**
@@ -580,12 +564,8 @@ export class AmpImageViewer extends AMP.BaseElement {
    * @private
    */
   boundX_(x, allowExtent) {
-    return this.boundValue_(
-      x,
-      this.minX_,
-      this.maxX_,
-      allowExtent && this.scale_ > 1 ? this.elementBox_.width * 0.25 : 0
-    );
+    return boundValue(x, this.minX_, this.maxX_,
+        allowExtent && this.scale_ > 1 ? this.elementBox_.width * 0.25 : 0);
   }
 
   /**
@@ -596,12 +576,8 @@ export class AmpImageViewer extends AMP.BaseElement {
    * @private
    */
   boundY_(y, allowExtent) {
-    return this.boundValue_(
-      y,
-      this.minY_,
-      this.maxY_,
-      allowExtent ? this.elementBox_.height * 0.25 : 0
-    );
+    return boundValue(y, this.minY_, this.maxY_,
+        allowExtent ? this.elementBox_.height * 0.25 : 0);
   }
 
   /**

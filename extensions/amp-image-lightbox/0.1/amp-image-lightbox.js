@@ -28,6 +28,7 @@ import {
 import {Gestures} from '../../../src/gesture';
 import {Keys} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
+import {boundValue} from '../../../src/utils/math';
 import {bezierCurve} from '../../../src/curve';
 import {continueMotion} from '../../../src/motion';
 import {dev, userAssert} from '../../../src/log';
@@ -407,19 +408,6 @@ export class ImageViewer {
   }
 
   /**
-   * Returns value bound to min and max values +/- extent.
-   * @param {number} v
-   * @param {number} min
-   * @param {number} max
-   * @param {number} extent
-   * @return {number}
-   * @private
-   */
-  boundValue_(v, min, max, extent) {
-    return Math.max(min - extent, Math.min(max + extent, v));
-  }
-
-  /**
    * Returns the scale within the allowed range with possible extent.
    * @param {number} s
    * @param {boolean} allowExtent
@@ -427,12 +415,17 @@ export class ImageViewer {
    * @private
    */
   boundScale_(s, allowExtent) {
+<<<<<<< HEAD
     return this.boundValue_(
       s,
       this.minScale_,
       this.maxScale_,
       allowExtent ? 0.25 : 0
     );
+=======
+    return boundValue(s, this.minScale_, this.maxScale_,
+        allowExtent ? 0.25 : 0);
+>>>>>>> Remove duplicate definitions of boundValue and update refs
   }
 
   /**
@@ -443,12 +436,17 @@ export class ImageViewer {
    * @private
    */
   boundX_(x, allowExtent) {
+<<<<<<< HEAD
     return this.boundValue_(
       x,
       this.minX_,
       this.maxX_,
       allowExtent && this.scale_ > 1 ? this.viewerBox_.width * 0.25 : 0
     );
+=======
+    return boundValue(x, this.minX_, this.maxX_,
+        allowExtent && this.scale_ > 1 ? this.viewerBox_.width * 0.25 : 0);
+>>>>>>> Remove duplicate definitions of boundValue and update refs
   }
 
   /**
@@ -459,12 +457,17 @@ export class ImageViewer {
    * @private
    */
   boundY_(y, allowExtent) {
+<<<<<<< HEAD
     return this.boundValue_(
       y,
       this.minY_,
       this.maxY_,
       allowExtent ? this.viewerBox_.height * 0.25 : 0
     );
+=======
+    return boundValue(y, this.minY_, this.maxY_,
+        allowExtent ? this.viewerBox_.height * 0.25 : 0);
+>>>>>>> Remove duplicate definitions of boundValue and update refs
   }
 
   /**
