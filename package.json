@@ -54,7 +54,7 @@
     "ava": "1.4.1",
     "babel-eslint": "10.0.1",
     "babel-plugin-filter-imports": "3.0.0",
-    "babel-plugin-istanbul": "5.1.1",
+    "babel-plugin-istanbul": "5.1.2",
     "babel-plugin-transform-commonjs-es2015-modules": "4.0.1",
     "babel-plugin-transform-es2015-modules-commonjs": "6.26.2",
     "babelify": "10.0.0",
