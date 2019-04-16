@@ -425,7 +425,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
    * given item. Assumes toLocaleLowerCase() has been performed on both
    * parameters.
    * @param {string} item
-   * @param {!Array<string>} input
+   * @param {string} input
    * @return {boolean}
    * @private
    */
