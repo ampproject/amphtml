@@ -94,6 +94,10 @@ exports.reportTestFinished = (success, failed) => {
   return postReport(inferTestType(), `report/${success}/${failed}`);
 };
 
+exports.reportTestSkipped = () => {
+  return postReport(inferTestType(), 'skipped');
+};
+
 exports.reportTestStarted = () => {
   return postReport(inferTestType(), 'started');
 };
