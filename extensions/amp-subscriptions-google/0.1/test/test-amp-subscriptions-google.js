@@ -83,6 +83,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     };
     methods = {
       reset: sandbox.stub(ConfiguredRuntime.prototype, 'reset'),
+      showContributionOptions: sandbox.stub(ConfiguredRuntime.prototype, 'showContributionOptions'),
       showOffers: sandbox.stub(ConfiguredRuntime.prototype, 'showOffers'),
       showAbbrvOffer: sandbox.stub(
           ConfiguredRuntime.prototype, 'showAbbrvOffer'),
@@ -413,6 +414,12 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
   it('should show offers if subscribe action is delegated', () => {
     const executeStub = platform.runtime_.showOffers;
     platform.executeAction('subscribe');
+    expect(executeStub).to.be.calledWith({list: 'amp', isClosable: true});
+  });
+
+  it('should show contributions if contribute action is delegated', () => {
+    const executeStub = platform.runtime_.showContributionOptions;
+    platform.executeAction('contribute');
     expect(executeStub).to.be.calledWith({list: 'amp', isClosable: true});
   });
 

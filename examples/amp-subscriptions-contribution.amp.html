@@ -161,6 +161,17 @@
       background: #ffc;
     }
 
+    amp-subscriptions-dialog {
+      text-align: center;
+      padding: 5px;
+    }
+
+    #contributeButton {
+      padding: 5px;
+      margin: 10px;
+      text-align: center;
+    }
+
   </style>
 </head>
 <body>
@@ -270,6 +281,8 @@
             Nullam in libero nisi.
           </p>
 
+          
+
           <p>
             Sed pharetra semper fringilla. Nulla fringilla, neque eget
             varius suscipit, mi turpis congue odio, quis dignissim nisi
@@ -329,6 +342,8 @@
             Aliquam erat volutpat.
           </p>
 
+
+
           <p>
             Morbi at velit vitae eros congue congue venenatis non dui.
             Sed lacus sem, feugiat sed elementum sed, maximus sed lacus.
@@ -352,13 +367,22 @@
   <template type="amp-mustache" subscriptions-dialog subscriptions-display="loggedIn">
     Dialog for logged in users
   </template>
-  <template type="amp-mustache" subscriptions-dialog subscriptions-display="NOT loggedIn">
+  <!-- <template type="amp-mustache" subscriptions-dialog subscriptions-display="NOT loggedIn">
     <div>Dialog for non logged in users<div>
     <div subscriptions-display="NOT loggedIn"
       subscriptions-action="subscribe"
       subscriptions-service="subscribe.google.com"
       subscriptions-decorate>Login</div>
     <div subscriptions-display="NOT subscribed">btw u are not subscribed</div>
+  </template> -->
+
+  <template type="amp-mustache" subscriptions-dialog subscriptions-display="NOT loggedIn">
+    <div>Dialog for Contrbutions Request<div>
+    <button id="contributeButton" subscriptions-display="NOT loggedIn"
+      subscriptions-action="contribute"
+      subscriptions-service="subscribe.google.com"
+      subscriptions-decorate>Yes I will Contribute</button>
+    <div subscriptions-display="NOT subscribed">We want your money</div>
   </template>
 </body>
 </html>

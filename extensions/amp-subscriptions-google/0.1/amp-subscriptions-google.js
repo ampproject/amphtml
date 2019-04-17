@@ -18,7 +18,6 @@ import {CSS} from '../../../build/amp-subscriptions-google-0.1.css';
 import {
   ConfiguredRuntime,
   Fetcher,
-  ProductType,
   SubscribeResponse,
 } from '../../../third_party/subscriptions-project/swg';
 import {DocImpl} from '../../amp-subscriptions/0.1/doc-impl';
@@ -33,6 +32,7 @@ import {
 } from '../../amp-subscriptions/0.1/analytics';
 import {SubscriptionsScoreFactor}
   from '../../amp-subscriptions/0.1/score-factors.js';
+import {getData} from '../../../src/event-helper';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {parseUrlDeprecated} from '../../../src/url';
 
@@ -110,7 +110,11 @@ export class GoogleSubscriptionsPlatform {
           this.getServiceId());
     });
     this.runtime_.setOnFlowStarted(e => {
-      if (e.flow == 'subscribe' || e.flow == 'contribute') {
+      if (
+        e.flow == 'subscribe' ||
+        e.flow == 'showContributionOptions' ||
+        e.flow == 'showOffers'
+        ) {
         this.subscriptionAnalytics_.actionEvent(
             this.getServiceId(),
             e.flow,
@@ -128,7 +132,11 @@ export class GoogleSubscriptionsPlatform {
         this.subscriptionAnalytics_.serviceEvent(
             SubscriptionAnalyticsEvents.LINK_CANCELED,
             this.getServiceId());
-      } else if (e.flow == 'subscribe' || e.flow == 'contribute') {
+      } else if (
+        e.flow == 'subscribe' ||
+        e.flow == 'showContributionOptions' ||
+        e.flow == 'showOffers'
+        ) {
         this.subscriptionAnalytics_.actionEvent(
             this.getServiceId(),
             e.flow,
@@ -214,7 +222,7 @@ export class GoogleSubscriptionsPlatform {
    * @param {!string} eventType
    * @private
    */
-  onSubscribeResponse_(response) {
+  onSubscribeResponse_(response, eventType) {
     response.complete().then(() => {
       this.serviceAdapter_.resetPlatforms();
     });
@@ -343,14 +351,12 @@ export class GoogleSubscriptionsPlatform {
     if (action == 'subscribe') {
       this.runtime_.showOffers({
         list: 'amp',
-        productType: ProductType.SUBSCRIPTION,
         isClosable: true});
       return Promise.resolve(true);
     }
     if (action == 'contribute') {
-      this.runtime_.showOffers({
+      this.runtime_.showContributionOptions({
         list: 'amp',
-        productType: ProductType.UI_CONTRIBUTION,
         isClosable: true});
       return Promise.resolve(true);
     }
