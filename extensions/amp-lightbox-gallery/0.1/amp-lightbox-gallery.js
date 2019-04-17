@@ -748,10 +748,10 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     // Need to capture these as they will no longer be available after closing.
     const carousel = devAssert(this.carousel_);
     const {sourceElement} = this.getCurrentElement_();
-    const distance = distance(0, 0, deltaX, deltaY);
-    const releasePercentage = Math.min(distance / SWIPE_TO_CLOSE_DISTANCE, 1);
+    const dist = distance(0, 0, deltaX, deltaY);
+    const releasePercentage = Math.min(dist / SWIPE_TO_CLOSE_DISTANCE, 1);
     const hideControlsPercentage = Math.min(
-      distance / SWIPE_TO_HIDE_CONTROLS_DISTANCE,
+      dist / SWIPE_TO_HIDE_CONTROLS_DISTANCE,
       1
     );
     const scale = lerp(1, SWIPE_TO_CLOSE_MIN_SCALE, releasePercentage);
