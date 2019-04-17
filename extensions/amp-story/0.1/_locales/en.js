@@ -23,7 +23,7 @@ import {
  * Localized string bundle used for English strings.
  * @const {!LocalizedStringBundleDef}
  */
-export default /** @const {!LocalizedStringBundleDef} */ ({
+const strings = {
   [LocalizedStringId.AMP_STORY_BOOKEND_PRIVACY_SETTINGS_TITLE]: {
     string: 'Privacy settings',
     description: 'Title for a section that allows the user to configure ' +
@@ -164,4 +164,6 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
     description: 'Text for a warning screen that informs the user that ' +
         'their browser does not support stories.',
   },
-});
+};
+
+export default strings;

@@ -238,7 +238,7 @@ export class GoogleSubscriptionsPlatform {
 
   /** @override */
   getEntitlements() {
-    return this.runtime_.getEntitlements().then(swgEntitlements => {
+    return this.runtime_.getEntitlements(null).then(swgEntitlements => {
       // Get and store the isReadyToPay signal which is independent of
       // any entitlments existing.
       if (swgEntitlements.isReadyToPay) {
