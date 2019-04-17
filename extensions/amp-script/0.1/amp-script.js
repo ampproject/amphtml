@@ -109,6 +109,7 @@ export class AmpScript extends AMP.BaseElement {
         this.userActivation_.expandLongTask(promise);
         // TODO(dvoytenko): consider additional "progress" UI.
       },
+      sanitizer: new SanitizerImpl(this.win),
       // Callbacks.
       onCreateWorker: data => {
         dev().info(TAG, 'Create worker:', data);
@@ -119,7 +120,6 @@ export class AmpScript extends AMP.BaseElement {
       onReceiveMessage: data => {
         dev().info(TAG, 'From worker:', data);
       },
-      sanitizer: new SanitizerImpl(this.win),
     };
 
     upgrade(this.element, fetchPromise, workerConfig).then(workerDom => {
