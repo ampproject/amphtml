@@ -32,8 +32,8 @@ const IS_UNIT = !!argv.unit;
 
 const TEST_TYPE_SUBTYPES = new Map([
   // TODO(danielrozenberg): add 'saucelabs' to integration tests when supported.
-  ['integration', ['default', 'single-pass']],
-  ['unit', ['default', 'local-changes', 'saucelabs']],
+  ['integration', ['local', 'single-pass']],
+  ['unit', ['local', 'local-changes', 'saucelabs']],
   // TODO(danielrozenberg): add 'e2e' tests.
 ]);
 const TEST_TYPE_BUILD_TARGETS = new Map([
@@ -63,7 +63,7 @@ function inferTestType() {
   } else if (IS_SINGLE_PASS) {
     return `${type}/single-pass`;
   } else {
-    return `${type}/default`;
+    return `${type}/local`;
   }
 }
 
