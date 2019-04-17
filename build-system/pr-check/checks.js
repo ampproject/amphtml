@@ -57,6 +57,7 @@ function main() {
   } else {
     printChangeSummary(FILENAME);
     timedExecOrDie('gulp update-packages');
+    reportAllExpectedTests(buildTargets);
     runCommonChecks();
 
     // Check document links only for PR builds.
@@ -72,8 +73,6 @@ function main() {
       timedExecOrDie('gulp dep-check');
       timedExecOrDie('gulp check-types');
     }
-
-    reportAllExpectedTests(buildTargets);
   }
 
   stopTimer(FILENAME, FILENAME, startTime);
