@@ -68,7 +68,7 @@ Currently, the supported players are:
 - [`amp-delight-player`](https://github.com/ampproject/amphtml/blob/master/extensions/amp-delight-player/amp-delight-player.md)
 - [`amp-ima-video`](https://www.ampproject.org/docs/reference/components/amp-ima-video)
 - [`amp-video`](https://www.ampproject.org/docs/reference/components/amp-video)
-- [`amp-video-iframe`](https://www.ampproject.org/docs/reference/components/amp-youtube)
+- [`amp-video-iframe`](https://www.ampproject.org/docs/reference/components/amp-video-iframe)
 - [`amp-youtube`](https://www.ampproject.org/docs/reference/components/amp-youtube)
 
 ### Triggering conditions
