@@ -177,19 +177,20 @@ describes.sandboxed('utils/math', {}, () => {
       expect(magnitude(-1.5, 2.5)).be.closeTo(2.915, 0.001);
       expect(magnitude(1.5, -2.5)).be.closeTo(2.915, 0.001);
     });
-    
+
     it('should operate on all-negative vectors', () => {
       expect(magnitude(-3, -4)).to.equal(5);
       expect(magnitude(-5, -12)).to.equal(13);
       expect(magnitude(-1.5, -2.5)).be.closeTo(2.915, 0.001);
     });
-    
-    it('should yield the absolute value of one delta if the other is zero', () => {
-      expect(magnitude(3, 0)).to.equal(3);
-      expect(magnitude(0, 4)).to.equal(4);
-      expect(magnitude(-1.5, 0)).to.equal(1.5);
-      expect(magnitude(0, -0.0005)).to.equal(0.0005);
-    });
+
+    it('should yield the absolute value of one delta if the other is zero',
+        () => {
+          expect(magnitude(3, 0)).to.equal(3);
+          expect(magnitude(0, 4)).to.equal(4);
+          expect(magnitude(-1.5, 0)).to.equal(1.5);
+          expect(magnitude(0, -0.0005)).to.equal(0.0005);
+        });
 
     it('should yield zero for the zero-vector', () => {
       expect(magnitude(0, 0)).to.equal(0);
