@@ -43,7 +43,7 @@ import {installStylesForDoc} from '../../../src/style-installer';
 import {isFiniteNumber} from '../../../src/types';
 import {isRTL, removeElement, scopedQuerySelector} from '../../../src/dom';
 import {layoutRectLtwh, moveLayoutRect} from '../../../src/layout-rect';
-import {mapRange, magnitude} from '../../../src/utils/math';
+import {magnitude, mapRange} from '../../../src/utils/math';
 import {once} from '../../../src/utils/function';
 import {
   px,
