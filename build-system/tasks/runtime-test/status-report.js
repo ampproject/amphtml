@@ -75,8 +75,10 @@ function postReport(type, action) {
         .then(body => {
           log(green('INFO:'), 'reported', cyan(`${type}/${action}`),
               'to the test-status GitHub App');
-          log(green('INFO:'), 'response from test-status was',
-              body.length ? 'empty' : cyan(body.substr(0, 100)));
+          if (body.length > 0) {
+            log(green('INFO:'), 'response from test-status was',
+                cyan(body.substr(0, 100)));
+          }
         }).catch(error => {
           log(yellow('WARNING:'), 'failed to report', cyan(`${type}/${action}`),
               'to the test-status GitHub App:\n', error.message.substr(0, 100));
