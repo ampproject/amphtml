@@ -77,7 +77,7 @@ export class AmpFormTextarea {
     this.doc_ = (root.ownerDocument || root);
 
     /** @private @const */
-    this.win_ = devAssert(this.doc_.defaultView);
+    this.win_ = /** @type {!Window} */ (devAssert(this.doc_.defaultView));
 
     /** @private @const */
     this.viewport_ = Services.viewportForDoc(ampdoc);
@@ -217,7 +217,8 @@ function maybeRemoveResizeBehavior(element, startHeight, endHeight) {
  */
 export function maybeResizeTextarea(element) {
   const resources = Services.resourcesForDoc(element);
-  const win = devAssert(element.ownerDocument.defaultView);
+  const win = /** @type {!Window} */ (
+    devAssert(element.ownerDocument.defaultView));
 
   let offset = 0;
   let scrollHeight = 0;
@@ -276,9 +277,9 @@ export function maybeResizeTextarea(element) {
  * @return {!Promise<number>}
  */
 function getShrinkHeight(textarea) {
-  const doc = devAssert(textarea.ownerDocument);
-  const win = devAssert(doc.defaultView);
-  const body = devAssert(doc.body);
+  const doc = /** @type {!Document} */ (devAssert(textarea.ownerDocument));
+  const win = /** @type {!Window} */ (devAssert(doc.defaultView));
+  const body = /** @type {!HTMLBodyElement} */ (devAssert(doc.body));
   const resources = Services.resourcesForDoc(textarea);
 
   const clone = textarea.cloneNode(/*deep*/ false);
