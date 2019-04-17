@@ -177,8 +177,9 @@ export class AmpScript extends AMP.BaseElement {
 
 /**
  * A DOMPurify wrapper that implements the worker-dom.Sanitizer interface.
+ * @visibleForTesting
  */
-class SanitizerImpl {
+export class SanitizerImpl {
   /**
    * @param {!Window} win
    */
@@ -221,7 +222,7 @@ class SanitizerImpl {
   /**
    * @param {!Node} node
    * @param {string} attribute
-   * @param {string} value
+   * @param {string|null} value
    * @return {boolean}
    */
   mutateAttribute(node, attribute, value) {

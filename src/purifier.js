@@ -338,7 +338,7 @@ function bindingTypeForAttr(attrName) {
  * @param {!DomPurifyDef} purifier
  * @param {string} tag Lower-case tag name.
  * @param {string} attr Lower-case attribute name.
- * @param {string} value
+ * @param {string|null} value
  * @return {boolean}
  */
 export function validateAttributeChange(purifier, tag, attr, value) {
@@ -348,14 +348,14 @@ export function validateAttributeChange(purifier, tag, attr, value) {
   if (whitelist) {
     const {attribute, values} = whitelist;
     if (attribute === attr) {
-      if (!values.includes(value)) {
+      if (value == null || !values.includes(value)) {
         return false;
       }
     }
   }
   // a[target] is required and only certain values are allowed.
   if (tag === 'a' && attr === 'target') {
-    if (!WHITELISTED_TARGETS.includes(value)) {
+    if (value == null || !WHITELISTED_TARGETS.includes(value)) {
       return false;
     }
   }
@@ -381,7 +381,7 @@ export function validateAttributeChange(purifier, tag, attr, value) {
     }
   }
   // Perform AMP-specific attribute validation e.g. __amp_source_origin.
-  if (!isValidAttr(tag, attr, value, /* opt_purify */ true)) {
+  if (value && !isValidAttr(tag, attr, value, /* opt_purify */ true)) {
     return false;
   }
   return true;
