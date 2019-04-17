@@ -383,11 +383,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18845',
   },
   {
-    id: 'amp-list-resizable-children',
-    name: 'Experiment for allowing amp-list to resize when its children resize',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18875',
-  },
-  {
     id: 'hidden-mutation-observer',
     name: "Enables FixedLayer's hidden-attribute mutation observer",
     spec: 'https://github.com/ampproject/amphtml/issues/17475',
