@@ -32,7 +32,6 @@ import {
 } from '../../amp-subscriptions/0.1/analytics';
 import {SubscriptionsScoreFactor}
   from '../../amp-subscriptions/0.1/score-factors.js';
-import {getData} from '../../../src/event-helper';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {parseUrlDeprecated} from '../../../src/url';
 
@@ -114,7 +113,7 @@ export class GoogleSubscriptionsPlatform {
         e.flow == 'subscribe' ||
         e.flow == 'showContributionOptions' ||
         e.flow == 'showOffers'
-        ) {
+      ) {
         this.subscriptionAnalytics_.actionEvent(
             this.getServiceId(),
             e.flow,
@@ -136,7 +135,7 @@ export class GoogleSubscriptionsPlatform {
         e.flow == 'subscribe' ||
         e.flow == 'showContributionOptions' ||
         e.flow == 'showOffers'
-        ) {
+      ) {
         this.subscriptionAnalytics_.actionEvent(
             this.getServiceId(),
             e.flow,
@@ -156,7 +155,6 @@ export class GoogleSubscriptionsPlatform {
         this.onSubscribeResponse_(response, 'contribute');
       });
     });
-    
 
     /** @const @private {!JsonObject} */
     this.serviceConfig_ = platformConfig;
@@ -219,7 +217,7 @@ export class GoogleSubscriptionsPlatform {
 
   /**
    * @param {!SubscribeResponse} response
-   * @param {!string} eventType
+   * @param {string} eventType
    * @private
    */
   onSubscribeResponse_(response, eventType) {
@@ -369,7 +367,7 @@ export class GoogleSubscriptionsPlatform {
 
   /** @override */
   decorateUI(element, action, options) {
-    /** 
+    /**
      * contribute doesn't have a standard button as of
      * so we don't do anything here for it.
      */

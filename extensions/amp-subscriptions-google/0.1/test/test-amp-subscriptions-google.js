@@ -83,7 +83,9 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     };
     methods = {
       reset: sandbox.stub(ConfiguredRuntime.prototype, 'reset'),
-      showContributionOptions: sandbox.stub(ConfiguredRuntime.prototype, 'showContributionOptions'),
+      showContributionOptions:
+          sandbox.stub(ConfiguredRuntime.prototype,
+              'showContributionOptions'),
       showOffers: sandbox.stub(ConfiguredRuntime.prototype, 'showOffers'),
       showAbbrvOffer: sandbox.stub(
           ConfiguredRuntime.prototype, 'showAbbrvOffer'),
