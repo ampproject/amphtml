@@ -22,6 +22,7 @@ const gulp = require('gulp');
 const gulpIf = require('gulp-if');
 const nop = require('gulp-nop');
 const rename = require('gulp-rename');
+const replace = require('gulp-regexp-sourcemaps');
 const sourcemaps = require('gulp-sourcemaps');
 const {
   gulpClosureCompile,
@@ -402,9 +403,12 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       }
     });
 
+    const stream = gulp
+      .src(srcs, {base: '.'})
+      .pipe(gulpIf(/third_party/, replace(/\/\*\*/g, '/*#', 'remove-jsdoc')));
+
     if (options.typeCheckOnly) {
-      return gulp
-        .src(srcs, {base: '.'})
+      return stream
         .pipe(gulpClosureCompile(compilerOptionsArray))
         .on('error', err => {
           handleTypeCheckError();
@@ -413,8 +417,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
         .pipe(nop())
         .on('end', resolve);
     } else {
-      return gulp
-        .src(srcs, {base: '.'})
+      return stream
         .pipe(gulpIf(shouldShortenLicense, shortenLicense()))
         .pipe(sourcemaps.init({loadMaps: true}))
         .pipe(gulpClosureCompile(compilerOptionsArray))
