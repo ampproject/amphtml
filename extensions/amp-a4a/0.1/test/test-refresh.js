@@ -26,14 +26,6 @@ import {
 } from '../refresh-intersection-observer-wrapper';
 import {Services} from '../../../../src/services';
 
-function getTestElement() {
-  const div = window.document.createElement('div');
-  div.setAttribute('style', 'width:1px; height:1px;');
-  div.setAttribute('type', 'doubleclick');
-  div.setAttribute(DATA_ATTR_NAME, '35');
-  return div;
-}
-
 describe('refresh', () => {
 
   let mockA4a;
@@ -43,6 +35,16 @@ describe('refresh', () => {
     totalTimeMin: 0,
     continuousTimeMin: 1,
   };
+
+  function getTestElement() {
+    const div = window.document.createElement('div');
+    div.setAttribute('style', 'width:1px; height:1px;');
+    div.setAttribute('type', 'doubleclick');
+    div.setAttribute(DATA_ATTR_NAME, '35');
+    sandbox.replaceGetter(div, 'isConnected', () => true);
+    return div;
+  }
+
 
   beforeEach(() => {
     sandbox = sinon.sandbox;

@@ -105,8 +105,8 @@ export class FixedLayer {
       this.update();
     });
 
-    /** @private {?MutationObserver} */
-    this.mutationObserver_ = null;
+    /** @private {?function()} */
+    this.hiddenObserverUnlistener_ = null;
 
     /** @private {!Array<string>} */
     this.fixedSelectors_ = [];
@@ -231,60 +231,38 @@ export class FixedLayer {
     if (!isExperimentOn(this.ampdoc.win, 'hidden-mutation-observer')) {
       return;
     }
-    const mo = this.initMutationObserver_();
-    mo.observe(this.ampdoc.getRootNode(), {
-      attributes: true,
-      subtree: true,
-    });
+    this.initHiddenObserver_();
   }
 
   /**
-   * Stop observing changes to the hidden attribute. Does not destroy the
-   * mutation observer.
+   * Stop observing changes to the hidden attribute.
    */
   unobserveHiddenMutations_() {
-    this.clearMutationObserver_();
-    const mo = this.mutationObserver_;
-    if (mo) {
-      mo.disconnect();
-    }
-  }
-
-  /**
-   * Clears the mutation observer and its pass queue.
-   */
-  clearMutationObserver_() {
     this.updatePass_.cancel();
-    const mo = this.mutationObserver_;
-    if (mo) {
-      mo.takeRecords();
+    const unlisten = this.hiddenObserverUnlistener_;
+    if (unlisten) {
+      unlisten();
+      this.hiddenObserverUnlistener_ = null;
     }
   }
 
   /**
-   * @return {!MutationObserver}
+   * Start observing changes to the hidden attribute, if we haven't already
+   * started.
    */
-  initMutationObserver_() {
-    if (this.mutationObserver_) {
-      return this.mutationObserver_;
+  initHiddenObserver_() {
+    if (this.hiddenObserverUnlistener_) {
+      return;
     }
 
-    const mo = new this.ampdoc.win.MutationObserver(mutations => {
-      if (this.updatePass_.isPending()) {
-        return;
-      }
-
-      for (let i = 0; i < mutations.length; i++) {
-        const mutation = mutations[i];
-        if (mutation.attributeName === 'hidden') {
-          // Wait one animation frame so that other mutations may arrive.
-          this.updatePass_.schedule(16);
-          return;
-        }
+    const {documentElement} = this.ampdoc.getRootNode();
+    const hiddenObserver = Services.hiddenObserverForDoc(documentElement);
+    this.hiddenObserverUnlistener_ = hiddenObserver.add(() => {
+      if (!this.updatePass_.isPending()) {
+        // Wait one animation frame so that other mutations may arrive.
+        this.updatePass_.schedule(16);
       }
     });
-
-    return this.mutationObserver_ = mo;
   }
 
   /**
@@ -428,8 +406,8 @@ export class FixedLayer {
       return Promise.resolve();
     }
 
-    // Clear out the mutation observer's queue since we're doing the work now.
-    this.clearMutationObserver_();
+    // Clear out the update pass since we're doing the work now.
+    this.updatePass_.cancel();
 
     // Next, the positioning-related properties will be measured. If a
     // potentially fixed/sticky element turns out to be actually fixed/sticky,
