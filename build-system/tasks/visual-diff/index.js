@@ -220,6 +220,34 @@ async function newPage(browser, viewport = null) {
 }
 
 /**
+ * Adds a test error and logs it if running locally (not on Travis).
+ *
+ * @param {!Array<!JsonObject>} testErrors array of testError objects.
+ * @param {string} name full name of the test.
+ * @param {string} message extra information about the failure.
+ * @param {Error} error error object with stack trace.
+ * @param {boolean} fatal whether this failure should be considered fatal.
+ */
+function addTestError(testErrors, name, message, error, fatal) {
+  const testError = {name, message, error, fatal};
+  if (!isTravisBuild()) {
+    logTestError(testError);
+  }
+  testErrors.push(testError);
+}
+
+/**
+ * Logs a test error (regardless of where it's running).
+ *
+ * @param {!JsonObject} testError object as created by addTestError.
+ */
+function logTestError(testError) {
+  log(testError.fatal ? 'error' : 'warning', 'Error in test',
+      colors.yellow(testError.name), '\n  ', testError.message, '\n  ',
+      testError.error);
+}
+
+/**
  * Runs the visual tests.
  *
  * @param {!Array<string>} assetGlobs an array of glob strings to load assets
@@ -375,10 +403,6 @@ async function snapshotWebpages(percy, browser, webpages) {
       const page = await newPage(browser, viewport);
       log('verbose', 'Navigating to page', colors.yellow(webpage.url));
 
-      // Navigate to an empty page first to support different webpages that only
-      // modify the #anchor name.
-      await page.goto('about:blank').then(() => {}, () => {});
-
       // Puppeteer is flaky when it comes to catching navigation requests, so
       // ignore timeouts. If this was a real non-loading page, this will be
       // caught in the resulting Percy build. Also attempt to wait until there
@@ -386,11 +410,19 @@ async function snapshotWebpages(percy, browser, webpages) {
       // doesn't always understand Chrome's network activity, so ignore timeouts
       // again.
       const pagePromise = page.goto(fullUrl, {waitUntil: 'networkidle0'})
-          .then(() => {}, () => {})
-          .then(async() => {
-            log('verbose', 'Navigation to page', colors.yellow(name),
+          .then(() => {
+            log('verbose', 'Page navigation of test', colors.yellow(name),
                 'is done, verifying page');
-
+          })
+          .catch(navigationError => {
+            addTestError(testErrors, name,
+                'The browser test runner failed to complete the navigation ' +
+                'to the test page', navigationError, /* fatal */ false);
+            if (!isTravisBuild()) {
+              log('warning', 'Continuing to verify page regardless...');
+            }
+          })
+          .then(async() => {
             // Visibility evaluations can only be performed on the active tab,
             // even in the headless browser mode.
             await page.bringToFront();
@@ -451,11 +483,8 @@ async function snapshotWebpages(percy, browser, webpages) {
           })
           .catch(testError => {
             log('travis', colors.red('○'));
-            if (!isTravisBuild()) {
-              log('error', 'Error in test', colors.cyan(name));
-              log('error', 'Exception thrown:', testError);
-            }
-            testErrors.push({name, testError});
+            addTestError(testErrors, name, 'Unknown failure in test page',
+                testError, /* fatal */ true);
           })
           .then(async() => {
             await page.close();
@@ -470,13 +499,11 @@ async function snapshotWebpages(percy, browser, webpages) {
   }
   log('travis', '\n');
   if (isTravisBuild()) {
-    testErrors.forEach(testErrorObject => {
-      const {name, testError} = testErrorObject;
-      log('error', 'Error in test', colors.cyan(name));
-      log('error', 'Exception thrown:', testError);
-    });
+    testErrors.sort((a, b) => a.name.localeCompare(b.name));
+    // TODO(danielrozenberg): add Travis log folding.
+    testErrors.forEach(logTestError);
   }
-  return testErrors.length == 0;
+  return testErrors.every(testError => !testError.fatal);
 }
 
 /**
