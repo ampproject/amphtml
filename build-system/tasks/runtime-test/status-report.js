@@ -30,6 +30,17 @@ const IS_SAUCELABS = !!(argv.saucelabs || argv.saucelabs_lite);
 const IS_SINGLE_PASS = !!argv.single_pass;
 const IS_UNIT = !!argv.unit;
 
+const TEST_TYPE_SUBTYPES = new Map([
+  // TODO(danielrozenberg): add 'saucelabs' to integration tests when supported.
+  ['integration', ['local', 'single-pass']],
+  ['unit', ['local', 'local-changes', 'saucelabs']],
+  // TODO(danielrozenberg): add 'e2e' tests.
+]);
+const TEST_TYPE_BUILD_TARGETS = new Map([
+  ['integration', ['RUNTIME', 'BUILD_SYSTEM', 'INTEGRATION_TEST']],
+  ['unit', ['RUNTIME', 'BUILD_SYSTEM', 'UNIT_TEST']],
+]);
+
 function inferTestType() {
   let type;
   if (IS_UNIT) {
@@ -52,12 +63,11 @@ function inferTestType() {
   } else if (IS_SINGLE_PASS) {
     return `${type}/single-pass`;
   } else {
-    return `${type}/default`;
+    return `${type}/local`;
   }
 }
 
-function postReport(action) {
-  const type = inferTestType();
+function postReport(type, action) {
   if (type !== null && isTravisPullRequestBuild()) {
     const commitHash = gitCommitHash();
     const postUrl = `${reportBaseUrl}/${commitHash}/${type}/${action}`;
@@ -65,8 +75,10 @@ function postReport(action) {
         .then(body => {
           log(green('INFO:'), 'reported', cyan(`${type}/${action}`),
               'to the test-status GitHub App');
-          log(green('INFO:'), 'response from test-status was',
-              body.length ? 'empty' : cyan(body.substr(0, 100)));
+          if (body.length > 0) {
+            log(green('INFO:'), 'response from test-status was',
+                cyan(body.substr(0, 100)));
+          }
         }).catch(error => {
           log(yellow('WARNING:'), 'failed to report', cyan(`${type}/${action}`),
               'to the test-status GitHub App:\n', error.message.substr(0, 100));
@@ -77,21 +89,28 @@ function postReport(action) {
 }
 
 exports.reportTestErrored = () => {
-  return postReport('report/errored');
+  return postReport(inferTestType(), 'report/errored');
 };
 
 exports.reportTestFinished = (success, failed) => {
-  return postReport(`report/${success}/${failed}`);
-};
-
-exports.reportTestQueued = () => {
-  return postReport('queued');
-};
-
-exports.reportTestStarted = () => {
-  return postReport('started');
+  return postReport(inferTestType(), `report/${success}/${failed}`);
 };
 
 exports.reportTestSkipped = () => {
-  return postReport('skipped');
+  return postReport(inferTestType(), 'skipped');
+};
+
+exports.reportTestStarted = () => {
+  return postReport(inferTestType(), 'started');
+};
+
+exports.reportAllExpectedTests = async buildTargets => {
+  for (const [type, subTypes] of TEST_TYPE_SUBTYPES) {
+    const testTypeBuildTargets = TEST_TYPE_BUILD_TARGETS.get(type);
+    const action = testTypeBuildTargets.some(target => buildTargets.has(target))
+      ? 'queued' : 'skipped';
+    for (const subType of subTypes) {
+      await postReport(`${type}/${subType}`, action);
+    }
+  }
 };
