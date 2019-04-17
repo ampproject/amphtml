@@ -57,6 +57,9 @@ const commonJsModules = [
   'node_modules/set-dom/',
 ];
 
+// Override to local closure compiler JAR
+ClosureCompiler.JAR_PATH = require.resolve('./runner/dist/runner.jar');
+
 const mainBundle = 'src/amp.js';
 const extensionsInfo = {};
 let extensions = extensionBundles.concat(altMainBundles)
@@ -605,9 +608,6 @@ function formatSinglePassClosureCompilerError(message) {
 }
 
 function compile(flagsArray) {
-  // Override to local closure compiler JAR
-  ClosureCompiler.JAR_PATH = require.resolve('./runner/dist/runner.jar');
-
   fs.writeFileSync('flags-array.txt', JSON.stringify(flagsArray, null, 2));
   return new Promise(function(resolve, reject) {
     new ClosureCompiler(flagsArray).run(function(exitCode, stdOut, stdErr) {
