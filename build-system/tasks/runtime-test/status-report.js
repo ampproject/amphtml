@@ -31,8 +31,10 @@ const IS_SINGLE_PASS = !!argv.single_pass;
 const IS_UNIT = !!argv.unit;
 
 const TEST_TYPE_SUBTYPES = new Map([
-  ['integration', ['default', 'saucelabs', 'single-pass']],
+  // TODO(danielrozenberg): add 'saucelabs' to integration tests when supported.
+  ['integration', ['default', 'single-pass']],
   ['unit', ['default', 'local-changes', 'saucelabs']],
+  // TODO(danielrozenberg): add 'e2e' tests.
 ]);
 const TEST_TYPE_BUILD_TARGETS = new Map([
   ['integration', ['RUNTIME', 'BUILD_SYSTEM', 'INTEGRATION_TEST']],
