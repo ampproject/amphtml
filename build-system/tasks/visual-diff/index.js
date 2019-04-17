@@ -500,6 +500,7 @@ async function snapshotWebpages(percy, browser, webpages) {
   log('travis', '\n');
   if (isTravisBuild()) {
     testErrors.sort((a, b) => a.name.localeCompare(b.name));
+    // TODO(danielrozenberg): add Travis log folding.
     testErrors.forEach(logTestError);
   }
   return testErrors.every(testError => !testError.fatal);
