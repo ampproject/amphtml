@@ -18,6 +18,7 @@ import {CSS} from '../../../build/amp-subscriptions-google-0.1.css';
 import {
   ConfiguredRuntime,
   Fetcher,
+  ProductType,
   SubscribeResponse,
 } from '../../../third_party/subscriptions-project/swg';
 import {DocImpl} from '../../amp-subscriptions/0.1/doc-impl';
@@ -109,10 +110,10 @@ export class GoogleSubscriptionsPlatform {
           this.getServiceId());
     });
     this.runtime_.setOnFlowStarted(e => {
-      if (e.flow == 'subscribe') {
+      if (e.flow == 'subscribe' || e.flow == 'contribute') {
         this.subscriptionAnalytics_.actionEvent(
             this.getServiceId(),
-            'subscribe',
+            e.flow,
             'started');
       }
     });
@@ -127,10 +128,10 @@ export class GoogleSubscriptionsPlatform {
         this.subscriptionAnalytics_.serviceEvent(
             SubscriptionAnalyticsEvents.LINK_CANCELED,
             this.getServiceId());
-      } else if (e.flow == 'subscribe') {
+      } else if (e.flow == 'subscribe' || e.flow == 'contribute') {
         this.subscriptionAnalytics_.actionEvent(
             this.getServiceId(),
-            'subscribe',
+            e.flow,
             'rejected');
       }
     });
@@ -139,9 +140,15 @@ export class GoogleSubscriptionsPlatform {
     });
     this.runtime_.setOnSubscribeResponse(promise => {
       promise.then(response => {
-        this.onSubscribeResponse_(response);
+        this.onSubscribeResponse_(response, 'subscribe');
       });
     });
+    this.runtime_.setOnContributionResponse(promise => {
+      promise.then(response => {
+        this.onSubscribeResponse_(response, 'contribute');
+      });
+    });
+    
 
     /** @const @private {!JsonObject} */
     this.serviceConfig_ = platformConfig;
@@ -183,6 +190,7 @@ export class GoogleSubscriptionsPlatform {
     this.serviceAdapter_.resetPlatforms();
   }
 
+  /* TODO(jpettitt): contribute? */
   /** @private */
   onNativeSubscribeRequest_() {
     this.maybeComplete_(this.serviceAdapter_.delegateActionToLocal(
@@ -203,6 +211,7 @@ export class GoogleSubscriptionsPlatform {
 
   /**
    * @param {!SubscribeResponse} response
+   * @param {!string} eventType
    * @private
    */
   onSubscribeResponse_(response) {
@@ -211,7 +220,7 @@ export class GoogleSubscriptionsPlatform {
     });
     this.subscriptionAnalytics_.actionEvent(
         this.getServiceId(),
-        'subscribe',
+        eventType,
         'success');
   }
 
@@ -332,7 +341,17 @@ export class GoogleSubscriptionsPlatform {
   /** @override */
   executeAction(action) {
     if (action == 'subscribe') {
-      this.runtime_.showOffers({list: 'amp', isClosable: true});
+      this.runtime_.showOffers({
+        list: 'amp',
+        productType: ProductType.SUBSCRIPTION,
+        isClosable: true});
+      return Promise.resolve(true);
+    }
+    if (action == 'contribute') {
+      this.runtime_.showOffers({
+        list: 'amp',
+        productType: ProductType.UI_CONTRIBUTION,
+        isClosable: true});
       return Promise.resolve(true);
     }
     if (action == 'login') {
@@ -344,6 +363,10 @@ export class GoogleSubscriptionsPlatform {
 
   /** @override */
   decorateUI(element, action, options) {
+    /** 
+     * contribute doesn't have a standard button as of
+     * so we don't do anything here for it.
+     */
     if (action === 'subscribe') {
       element.textContent = '';
       this.runtime_.attachButton(element, options, () => {});
