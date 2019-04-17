@@ -28,8 +28,8 @@ import {
 import {Gestures} from '../../../src/gesture';
 import {Keys} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
-import {boundValue, clamp, distance, magnitude} from '../../../src/utils/math';
 import {bezierCurve} from '../../../src/curve';
+import {boundValue, clamp, distance, magnitude} from '../../../src/utils/math';
 import {continueMotion} from '../../../src/motion';
 import {dev, userAssert} from '../../../src/log';
 import {isLoaded} from '../../../src/event-helper';
