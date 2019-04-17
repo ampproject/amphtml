@@ -368,7 +368,7 @@ export class GoogleSubscriptionsPlatform {
   /** @override */
   decorateUI(element, action, options) {
     /**
-     * contribute doesn't have a standard button as of
+     * Note: contribute doesn't have a standard button
      * so we don't do anything here for it.
      */
     if (action === 'subscribe') {
