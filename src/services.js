@@ -253,6 +253,16 @@ export class Services {
   }
 
   /**
+   * Returns service to listen for `hidden` attribute mutations.
+   * @param {!Element|!ShadowRoot} element
+   * @return {!./service/hidden-observer-impl.HiddenObserver}
+   */
+  static hiddenObserverForDoc(element) {
+    return /** @type {!./service/hidden-observer-impl.HiddenObserver} */ (
+      getExistingServiceForDocInEmbedScope(element, 'hidden-observer'));
+  }
+
+  /**
    * Returns service implemented in service/history-impl.
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @return {!./service/history-impl.History}
