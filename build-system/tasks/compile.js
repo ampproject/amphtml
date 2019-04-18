@@ -403,18 +403,14 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       delete compilerOptions.define;
     }
 
-    // Required in order to override the JAR used by closure compiler
-    const platformOptions = {
-      platform: ['java'],
+    const pluginOptions = {
+      platform: ['java'], // Override the JAR used by closure compiler
+      extraArguments: ['-XX:+TieredCompilation'], // Significant speed up!
     };
 
     // Override to local closure compiler JAR
     closureCompiler.compiler.JAR_PATH =
         require.resolve('../runner/dist/runner.jar');
-
-    const gulpClosureCompiler = closureCompiler.gulp({
-      extraArguments: ['-XX:+TieredCompilation'],
-    });
 
     const handleCompilerError = function(err) {
       const {message} = err;
@@ -426,14 +422,14 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
 
     if (options.typeCheckOnly) {
       return gulp.src(srcs, {base: '.'})
-          .pipe(gulpClosureCompiler(compilerOptions, platformOptions))
+          .pipe(closureCompiler.gulp()(compilerOptions, pluginOptions))
           .on('error', handleCompilerError)
           .pipe(nop())
           .on('end', resolve);
     } else {
       return gulp.src(srcs, {base: '.'})
           .pipe(sourcemaps.init({loadMaps: true}))
-          .pipe(gulpClosureCompiler(compilerOptions, platformOptions))
+          .pipe(closureCompiler.gulp()(compilerOptions, pluginOptions))
           .on('error', handleCompilerError)
           .pipe(sourcemaps.write('.'))
           .pipe(replace(
