@@ -91,6 +91,9 @@ const DISABLED_BY_ATTR = [
   // onclick action(e.g. `button`) or where it cannot be determined whether
   // they're actionable or not (e.g. `amp-script`).
   'amp-selector [option]',
+
+  // amp-subscriptions actions
+  '[subscriptions-action]',
 ].join(',');
 
 /**
