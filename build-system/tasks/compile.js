@@ -431,12 +431,12 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
           .pipe(sourcemaps.init({loadMaps: true}))
           .pipe(closureCompiler.gulp()(compilerOptions, pluginOptions))
           .on('error', handleCompilerError)
+          .pipe(rename(outputFilename))
           .pipe(sourcemaps.write('.'))
           .pipe(replace(
               /\$internalRuntimeVersion\$/g, internalRuntimeVersion,
               'runtime-version'))
           .pipe(shortenLicense())
-          .pipe(rename(outputFilename))
           .pipe(gulp.dest(outputDir))
           .on('end', resolve);
     }
