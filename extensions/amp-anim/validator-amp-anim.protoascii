@@ -47,6 +47,8 @@ tags: {  # <amp-anim>
   requires_extension: "amp-anim"
   attrs: { name: "alt" }
   attrs: { name: "attribution" }
+  attrs: { name: "object-fit" }
+  attrs: { name: "object-position" }
   attr_lists: "extended-amp-global"
   attr_lists: "mandatory-src-or-srcset"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-anim"
@@ -67,6 +69,8 @@ tags: {  # <amp-anim>
   requires_extension: "amp-anim"
   attrs: { name: "alt" }
   attrs: { name: "attribution" }
+  attrs: { name: "object-fit" }
+  attrs: { name: "object-position" }
   attr_lists: "extended-amp-global"
   attr_lists: "mandatory-src-amp4email"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-anim"

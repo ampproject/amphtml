@@ -22,7 +22,7 @@ import {
  * Localized string bundle used for ml strings.
  * @const {!LocalizedStringBundleDef}
  */
-export default /** @const {!LocalizedStringBundleDef} */ ({
+const strings = {
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_APPLY_NOW]: {
     string: 'ഇപ്പോൾ പ്രയോഗിക്കുക',
   },
@@ -92,4 +92,6 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_WATCH_EPISODE]: {
     string: 'എപ്പിസോഡ് കാണുക',
   },
-});
+};
+
+export default strings;

@@ -191,11 +191,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     /** @private {?Element} */
     this.ampAnalyticsElement_ = null;
 
-    /** @type {?Object<string,*>}*/
+    /** @type {?JsonObject|Object} */
     this.jsonTargeting = null;
 
-    /** @type {number} */
-    this.adKey = 0;
+    /** @type {string} */
+    this.adKey = '0';
 
     /** @type {!Array<string>} */
     this.experimentIds = [];
@@ -457,6 +457,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.isFluidRequest_ = !!multiSizeStr &&
           multiSizeStr.indexOf('fluid') != -1;
     }
+    this.maybeAddSinglePassExperiment();
   }
 
   /** @override */

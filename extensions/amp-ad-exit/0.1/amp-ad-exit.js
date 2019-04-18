@@ -130,7 +130,7 @@ export class AmpAdExit extends AMP.BaseElement {
   /**
    * @param {!Object<string, string|number|boolean>} args
    * @param {!../../../src/service/action-impl.ActionEventDef} event
-   * @param {!JsonObject} target
+   * @param {!NavigationTargetDef} target
    * @return {function(string): string}
    */
   getUrlVariableRewriter_(args, event, target) {

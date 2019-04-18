@@ -23,7 +23,10 @@ function poll(description, condition, opt_onError) {
   return classicPoll(description, condition, opt_onError, TIMEOUT);
 }
 
-describe.configure().skipSinglePass().run('amp-script', function() {
+// TODO(choumx): If possible / desired, make these tests work on Single-pass,
+// and on Windows (Edge, Firefox, and Chrome).
+describe.configure().skipSinglePass().skipWindows().run('amp-' +
+    'script', function() {
   this.timeout(TIMEOUT);
 
   let browser, doc, element;
