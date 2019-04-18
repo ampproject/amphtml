@@ -366,8 +366,8 @@ export function validateAttributeChange(purifier, tag, attr, value) {
   const pure = purifier.isValidAttribute(tag, attr, value);
   if (!pure) {
     // DOMPurify.isValidAttribute() by default rejects certain attributes that
-    // we should allow: (1) AMP element attributes, (2) tag-specific attributes,
-    // (3) the 'on' attribute. Reject if _not_ one of the above.
+    // we should allow: (1) AMP element attributes, (2) tag-specific attributes.
+    // Reject if _not_ one of the above.
     //
     // TODO(choumx): This opts out of DOMPurify's attribute _value_ sanitization
     // for the above, which assumes that the attributes don't have security
@@ -376,7 +376,7 @@ export function validateAttributeChange(purifier, tag, attr, value) {
     // to preserve value sanitization.
     const attrsByTags = WHITELISTED_ATTRS_BY_TAGS[tag];
     const whitelistedForTag = attrsByTags && attrsByTags.includes(attr);
-    if (!whitelistedForTag && !startsWith(tag, 'amp-') && attr !== 'on') {
+    if (!whitelistedForTag && !startsWith(tag, 'amp-')) {
       return false;
     }
   }
