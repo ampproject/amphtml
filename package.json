@@ -26,7 +26,7 @@
   },
   "dependencies": {
     "@ampproject/animations": "0.1.2",
-    "@ampproject/worker-dom": "0.9.0",
+    "@ampproject/worker-dom": "0.10.0",
     "document-register-element": "1.5.0",
     "dompurify": "1.0.10",
     "moment": "2.24.0",
@@ -162,7 +162,7 @@
     "request-promise": "4.2.4",
     "rimraf": "2.6.3",
     "rocambole": "0.7.0",
-    "sinon": "7.3.1",
+    "sinon": "7.3.2",
     "sinon-chai": "3.3.0",
     "sleep-promise": "8.0.1",
     "tempy": "0.3.0",
