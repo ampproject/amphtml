@@ -413,7 +413,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
         require.resolve('../runner/dist/runner.jar');
 
     const gulpClosureCompiler = closureCompiler.gulp({
-      extraArguments: ['-XX:-TieredCompilation'],
+      extraArguments: ['-XX:+TieredCompilation'],
     });
 
     const handleCompilerError = function(err) {
@@ -433,14 +433,14 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
     } else {
       return gulp.src(srcs, {base: '.'})
           .pipe(sourcemaps.init({loadMaps: true}))
+          .pipe(gulpClosureCompiler(compilerOptions, platformOptions))
+          .on('error', handleCompilerError)
+          .pipe(sourcemaps.write('.'))
           .pipe(replace(
               /\$internalRuntimeVersion\$/g, internalRuntimeVersion,
               'runtime-version'))
           .pipe(shortenLicense())
-          .pipe(gulpClosureCompiler(compilerOptions, platformOptions))
-          .on('error', handleCompilerError)
           .pipe(rename(outputFilename))
-          .pipe(sourcemaps.write('.'))
           .pipe(gulp.dest(outputDir))
           .on('end', resolve);
     }
