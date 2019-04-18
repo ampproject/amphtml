@@ -203,6 +203,10 @@ describes.realWin(TAG, {
         mutate: el => el.setAttribute('data-amp-auto-lightbox-disable', ''),
       },
       {
+        rejects: 'amp-subscriptions asubnodes',
+        mutate: el => el.setAttribute('subscriptions-action', ''),
+      },
+      {
         rejects: 'placeholder subnodes',
         mutate: el => el.setAttribute('placeholder', ''),
       },
