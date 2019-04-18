@@ -23,7 +23,6 @@ import {
   WHITELISTED_TARGETS,
   isValidAttr,
 } from './sanitation';
-import {remove} from './utils/array';
 import {rewriteAttributeValue} from './url-rewrite';
 import {startsWith} from './string';
 import {user} from './log';
@@ -101,8 +100,8 @@ export function purifyConfig() {
     FORCE_BODY: true,
     // Avoid need for serializing to/from string by returning Node directly.
     RETURN_DOM: true,
-    // BLACKLISTED_ATTR_VALUES are enough. Other unknown protocols are safe.
-    // This allows native app deeplinks.
+    // Allows native app deeplinks. DOMPurify's remaining checks are sufficient
+    // to prevent code execution.
     ALLOW_UNKNOWN_PROTOCOLS: true,
   }));
   return /** @type {!DomPurifyConfig} */ (config);
@@ -264,10 +263,10 @@ export function addPurifyHooks(purifier, diffing) {
   };
 
   /**
-   * @param {!Node} node
+   * @param {!Node} unusedNode
    * @this {{removed: !Array}} Contains list of removed elements/attrs so far.
    */
-  const afterSanitizeAttributes = function(node) {
+  const afterSanitizeAttributes = function(unusedNode) {
     // DOMPurify doesn't have a tag-specific attribute whitelist API and
     // `allowedAttributes` has a per-invocation scope, so we need to undo
     // changes after sanitizing attributes.
@@ -275,19 +274,6 @@ export function addPurifyHooks(purifier, diffing) {
       delete allowedAttributes[attr];
     });
     allowedAttributesChanges.length = 0;
-
-    // Restore the `on` attribute which DOMPurify incorrectly flags as an
-    // unknown protocol due to presence of the `:` character.
-    remove(this.removed, r => {
-      if (r.from === node && r.attribute) {
-        const {name, value} = r.attribute;
-        if (name.toLowerCase() === 'on') {
-          node.setAttribute('on', value);
-          return true; // Delete from `removed` array once processed.
-        }
-      }
-      return false;
-    });
   };
 
   purifier.addHook('uponSanitizeElement', uponSanitizeElement);
