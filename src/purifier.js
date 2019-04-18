@@ -31,8 +31,9 @@ import purify from 'dompurify/dist/purify.es';
 /**
  * @typedef {{addHook: !Function, removeAllHooks: !Function, sanitize: !Function}}
  */
-let DomPurifyDef;
+export let DomPurifyDef;
 
+// TODO(choumx): Convert this into a class to avoid import side effects.
 /** @private @const {!DomPurifyDef} */
 const DomPurify = purify(self);
 
@@ -82,6 +83,18 @@ export function purifyHtml(dirty, diffing = false) {
 }
 
 /**
+ * @param {!JsonObject=} opt_config
+ * @return {!DomPurifyDef}
+ */
+export function createPurifier(opt_config) {
+  const domPurify = purify(self);
+  const config = Object.assign(opt_config || {}, purifyConfig());
+  domPurify.setConfig(config);
+  addPurifyHooks(domPurify, /* diffing */ false);
+  return domPurify;
+}
+
+/**
  * Returns DOMPurify config for normal, escaped templates.
  * Do not use for unescaped templates.
  *
@@ -92,7 +105,7 @@ export function purifyHtml(dirty, diffing = false) {
  *
  * @return {!DomPurifyConfig}
  */
-export function purifyConfig() {
+function purifyConfig() {
   const config = Object.assign({}, PURIFY_CONFIG, /** @type {!DomPurifyConfig} */ ({
     ADD_ATTR: WHITELISTED_ATTRS,
     FORBID_TAGS: Object.keys(BLACKLISTED_TAGS),
@@ -112,7 +125,7 @@ export function purifyConfig() {
  * @param {!DomPurifyDef} purifier
  * @param {boolean} diffing
  */
-export function addPurifyHooks(purifier, diffing) {
+function addPurifyHooks(purifier, diffing) {
   // Reference to DOMPurify's `allowedTags` whitelist.
   let allowedTags;
   const allowedTagsChanges = [];
@@ -138,8 +151,7 @@ export function addPurifyHooks(purifier, diffing) {
     const {tagName} = data;
     allowedTags = data.allowedTags;
 
-    // Allow all AMP elements (constrained by AMP Validator since tag
-    // calculation is not possible).
+    // Allow all AMP elements.
     if (startsWith(tagName, 'amp-')) {
       allowedTags[tagName] = true;
       // AMP elements don't support arbitrary mutation, so don't DOM diff them.
@@ -228,17 +240,15 @@ export function addPurifyHooks(purifier, diffing) {
       }
     }
 
-    const classicBinding = attrName[0] == '['
-        && attrName[attrName.length - 1] == ']';
-    const alternativeBinding = startsWith(attrName, BIND_PREFIX);
+    const bindingType = bindingTypeForAttr(attrName);
     // Rewrite classic bindings e.g. [foo]="bar" -> data-amp-bind-foo="bar".
     // This is because DOMPurify eagerly removes attributes and re-adds them
     // after sanitization, which fails because `[]` are not valid attr chars.
-    if (classicBinding) {
+    if (bindingType === BindingType.CLASSIC) {
       const property = attrName.substring(1, attrName.length - 1);
       node.setAttribute(`${BIND_PREFIX}${property}`, attrValue);
     }
-    if (classicBinding || alternativeBinding) {
+    if (bindingType !== BindingType.NONE) {
       // Set a custom attribute to mark this element as containing a binding.
       // This is an optimization that obviates the need for DOM scan later.
       node.setAttribute('i-amphtml-binding', '');
@@ -280,6 +290,87 @@ export function addPurifyHooks(purifier, diffing) {
   purifier.addHook('afterSanitizeElements', afterSanitizeElements);
   purifier.addHook('uponSanitizeAttribute', uponSanitizeAttribute);
   purifier.addHook('afterSanitizeAttributes', afterSanitizeAttributes);
+}
+
+/**
+ * @enum {number}
+ */
+const BindingType = {
+  NONE: 0,
+  CLASSIC: 1,
+  ALTERNATIVE: 2,
+};
+
+/**
+ * @param {string} attrName
+ * @return {BindingType}
+ */
+function bindingTypeForAttr(attrName) {
+  if (attrName[0] == '[' && attrName[attrName.length - 1] == ']') {
+    return BindingType.CLASSIC;
+  }
+  if (startsWith(attrName, BIND_PREFIX)) {
+    return BindingType.ALTERNATIVE;
+  }
+  return BindingType.NONE;
+}
+
+/**
+ * Returns whether an attribute addition/modification/removal is valid.
+ *
+ * This function's behavior should match that of addPurifyHooks(), except
+ * that it operates on attribute changes instead of rendering new HTML.
+ *
+ * @param {!DomPurifyDef} purifier
+ * @param {string} tag Lower-case tag name.
+ * @param {string} attr Lower-case attribute name.
+ * @param {string|null} value
+ * @return {boolean}
+ */
+export function validateAttributeChange(purifier, tag, attr, value) {
+  // Disallow change of attributes that are required for certain tags,
+  // e.g. script[type].
+  const whitelist = WHITELISTED_TAGS_BY_ATTRS[tag];
+  if (whitelist) {
+    const {attribute, values} = whitelist;
+    if (attribute === attr) {
+      if (value == null || !values.includes(value)) {
+        return false;
+      }
+    }
+  }
+  // a[target] is required and only certain values are allowed.
+  if (tag === 'a' && attr === 'target') {
+    if (value == null || !WHITELISTED_TARGETS.includes(value)) {
+      return false;
+    }
+  }
+  // Don't allow binding attributes for now.
+  if (bindingTypeForAttr(attr) !== BindingType.NONE) {
+    return false;
+  }
+  const pure = purifier.isValidAttribute(tag, attr, value);
+  if (!pure) {
+    // DOMPurify.isValidAttribute() by default rejects certain attributes that
+    // we should allow: (1) AMP element attributes, (2) tag-specific attributes.
+    // Reject if _not_ one of the above.
+    //
+    // TODO(choumx): This opts out of DOMPurify's attribute _value_ sanitization
+    // for the above, which assumes that the attributes don't have security
+    // implications beyond URLs etc. that are covered by isValidAttr().
+    // This is OK for now, but we should instead somehow modify ALLOWED_ATTR
+    // to preserve value sanitization.
+    const attrsByTags = WHITELISTED_ATTRS_BY_TAGS[tag];
+    const whitelistedForTag = attrsByTags && attrsByTags.includes(attr);
+    if (!whitelistedForTag && !startsWith(tag, 'amp-')) {
+      return false;
+    }
+  }
+  // Perform AMP-specific attribute validation e.g. __amp_source_origin.
+  if (value && !isValidAttr(tag, attr, value, /* opt_purify */ true)) {
+    return false;
+  }
+  return true;
 }
 
 /**
