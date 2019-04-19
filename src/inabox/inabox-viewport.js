@@ -186,7 +186,7 @@ export class ViewportBindingInabox {
     // registered (since it's registered after the inabox services so it won't
     // be available immediately).
     // TODO(lannka): Investigate why this is the case.
-    if (this.topWindowPositionObserver_) {
+    if (this.unobserveFunction_) {
       return Promise.resolve();
     }
     return Services.resourcesPromiseForDoc(this.win.document.documentElement)
@@ -430,6 +430,7 @@ export class ViewportBindingInabox {
   disconnect() {
     if (this.unobserveFunction_) {
       this.unobserveFunction_();
+      this.unobserveFunction_ = null;
     }
   }
 
