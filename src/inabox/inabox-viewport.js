@@ -191,7 +191,8 @@ export class ViewportBindingInabox {
     }
     return Services.resourcesPromiseForDoc(this.win.document.documentElement)
         .then(() => {
-          this.topWindowPositionObserver_ = new PositionObserver(this.win.top);
+          this.topWindowPositionObserver_ = this.topWindowPositionObserver_ ||
+              new PositionObserver(this.win.top);
           this.unobserveFunction_ = this.topWindowPositionObserver_.observe(
               /** @type {!HTMLIFrameElement} */(this.win.frameElement),
               data => {
