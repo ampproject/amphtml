@@ -35,7 +35,8 @@ import {getConfigManager} from '../amp-addthis';
 import {getDetailsForMeta, getMetaElements} from './../addthis-utils/meta';
 import {getKeywordsString} from './../addthis-utils/classify';
 import {getSessionId} from '../addthis-utils/session';
-import {isString} from '../addthis-utils/string';
+import {getWidgetOverload} from
+  '../addthis-utils/get-widget-id-overloaded-with-json-for-anonymous-mode';
 import {toArray} from '../../../../src/types';
 
 describes.realWin('amp-addthis', {
@@ -512,22 +513,76 @@ describes.realWin('amp-addthis', {
     expect(isWidgetId(null)).to.equal(false);
   });
 
-  it('isString: knows if a thing is a string or not', () => {
-    expect(isString(1)).to.equal(false);
-    expect(isString(String('mayb'))).to.equal(true);
-    expect(isString(String('101x'))).to.equal(true);
-    expect(isString('maybe')).to.equal(true);
-    expect(isString('shin')).to.equal(true);
-    expect(isString('shfs')).to.equal(true);
-    expect(isString({})).to.equal(false);
-    expect(isString([])).to.equal(false);
-    expect(isString(void 0)).to.equal(false);
-    expect(isString(null)).to.equal(false);
+  it('getWidgetOverload: self.element.getAttribute function argument', () => {
+    const result = '{"counts":"none","numPreferredServices":5}';
+    const mock = {
+      'data-attr-counts': 'none',
+      'data-attr-numPreferredServices': 5,
+    };
+    const getAttribute = key => mock[key] ;
+    const self = {element: {getAttribute}};
+    expect(getWidgetOverload(self)).to.equal(result);
+  });
+
+  it('getWidgetOverload: doesn\'t pass unknown params', () => {
+    const mock = {
+      'data-attr-csounts': 'none',
+      'data-attr-nsumPreferredServices': 5,
+    };
+    const getAttribute = key => mock[key] ;
+    const self = {element: {getAttribute}};
+    expect(getWidgetOverload(self)).to.equal('');
+  });
+
+  it('getWidgetOverload: only saves string, boolean, number', () => {
+    const mock = {
+      'data-attr-backgroundColor': undefined,
+      'data-attr-counterColor': null,
+      'data-attr-counts': [],
+      'data-attr-countsFontSize': {},
+      'data-attr-desktopPosition': new Function(),
+    };
+    const getAttribute = key => mock[key] ;
+    const self = {element: {getAttribute}};
+    expect(getWidgetOverload(self)).to.equal('');
+  });
+
+  it('getWidgetOverload: passes all params correctly', () => {
+    const mock = {
+      'data-attr-backgroundColor': 1,
+      'data-attr-counterColor': 1,
+      'data-attr-counts': 1,
+      'data-attr-countsFontSize': 1,
+      'data-attr-desktopPosition': 1,
+      'data-attr-elements': 1,
+      'data-attr-hideDevice': 1,
+      'data-attr-hideEmailSharingConfirmation': 1,
+      'data-attr-hideLabel': 1,
+      'data-attr-iconColor': 1,
+      'data-attr-mobilePosition': 1,
+      'data-attr-numPreferredServices': 1,
+      'data-attr-offset': 1,
+      'data-attr-originalServices': 1,
+      'data-attr-postShareFollowMsg': 1,
+      'data-attr-postShareRecommendedMsg': 1,
+      'data-attr-postShareTitle': 1,
+      'data-attr-responsive': 1,
+      'data-attr-shareCountThreshold': 1,
+      'data-attr-size': 1,
+      'data-attr-style': 1,
+      'data-attr-textColor': 1,
+      'data-attr-thankyou': 1,
+      'data-attr-titleFontSize': 1,
+      'data-attr-__hideOnHomepage': 1,
+    };
+    const getAttribute = key => mock[key] ;
+    const self = {element: {getAttribute}};
+    expect(getWidgetOverload(self).length).to.equal(447);
   });
 
   it('getSessionId: returns a string of 16 characters containing 0-9 a-f',
       () => {
-        expect(isString(getSessionId())).to.equal(true);
+        expect(typeof getSessionId() === 'string').to.equal(true);
         expect(getSessionId().length).to.equal(16);
         expect(/^[0-9a-f]{16}$/.test(getSessionId())).to.equal(true);
 
@@ -538,7 +593,7 @@ describes.realWin('amp-addthis', {
       });
 
   it('createCUID: returns a string of 16 characters containing 0-9 a-f', () => {
-    expect(isString(createCUID())).to.equal(true);
+    expect(typeof createCUID() === 'string').to.equal(true);
 
     const a = createCUID();
     const b = createCUID();
