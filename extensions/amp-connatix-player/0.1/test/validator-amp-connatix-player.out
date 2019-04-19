@@ -1,4 +1,4 @@
-PASS
+FAIL
 |  <!doctype html>
 |  <html ⚡>
 |  <head>
@@ -16,6 +16,12 @@ PASS
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
 |  </head>
 |  <body>
-|    <amp-connatix-player layout="responsive" width="150" height="80"></amp-connatix-player>
+|    <amp-connatix-player 
+>>   ^~~~~~~~~
+amp-connatix-player/0.1/test/validator-amp-connatix-player.html:18:2 The mandatory attribute 'data-player-id' is missing in tag 'amp-connatix-player'. (see https://www.ampproject.org/docs/reference/components/amp-connatix-player) [AMP_TAG_PROBLEM]
+|      layout="responsive"
+|      width="150"
+|      height="80">
+|    </amp-connatix-player>
 |  </body>
 |  </html>

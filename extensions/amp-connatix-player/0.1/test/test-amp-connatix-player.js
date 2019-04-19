@@ -45,7 +45,7 @@ describes.realWin('amp-connatix-player', {
 
   it('renders', async() => {
     const cnx = await getConnatixPlayer({
-      'data-player-id': 'f721b0d8-7a79-42b6-b637-fa4e86138ed9'
+      'data-player-id': 'f721b0d8-7a79-42b6-b637-fa4e86138ed9',
     });
     const iframe = cnx.querySelector('iframe');
     expect(iframe).to.not.be.null;
