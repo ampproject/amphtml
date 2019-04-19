@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {isLayoutSizeDefined} from '../../../src/layout';
 import {addParamsToUrl} from '../../../src/url';
 import {dict} from '../../../src/utils/object';
+import {getData} from '../../../src/event-helper';
+import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeElement} from '../../../src/dom';
 import {userAssert} from '../../../src/log';
-import {getData} from '../../../src/event-helper';
 
 export class AmpConnatixPlayer extends AMP.BaseElement {
 
@@ -45,11 +45,12 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
 
   /**
    * Sends a post message to the iframe where the connatix player
-   * is embedded. Used for giving external commands to the player (play/pause etc)
+   * is embedded. Used for giving external commands to the player
+   * (play/pause etc)
    * @private
    * @param {string} command
    */
-  sendCommand(command) {
+  sendCommand_(command) {
     if (this.iframe_ && this.iframe_.contentWindow) {
       // Send message to the player
       this.iframe_.contentWindow./*OK*/postMessage(command,
@@ -58,11 +59,13 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
   }
 
   /**
-   * Sends a post message to the iframe where the connatix player
-   * is embedded. Used for giving external commands to the player (play/pause etc)
+   * Binds to player events from iframe. In this case
+   * it is used for binding to the close event which
+   * triggers when a user clicks on the close button
+   * on the player
    * @private
    */
-  bindToPlayerCommands() {
+  bindToPlayerCommands_() {
     this.win.addEventListener('message', e => {
       if (!this.iframe_ || e.source !== this.iframe_.contentWindow) {
         // Ignore messages from other iframes.
@@ -70,7 +73,7 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
       }
       // Player wants to close because the user interracted on its close button
       if (getData(e) === 'cnx_close') {
-        this.destroyPlayerFrame();
+        this.destroyPlayerFrame_();
         this.attemptCollapse();
       }
     });
@@ -80,7 +83,7 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
    * Removes the player iframe
    * @private
    */
-  destroyPlayerFrame() {
+  destroyPlayerFrame_() {
     if (this.iframe_) {
       removeElement(this.iframe_);
       this.iframe_ = null;
@@ -93,18 +96,18 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
 
     // Player id is mandatory
     this.playerId_ = userAssert(
-      element.getAttribute('data-player-id'),
-      'The data-player-id attribute is required for <amp-connatix-player> %s',
-      element);
+        element.getAttribute('data-player-id'),
+        'The data-player-id attribute is required for <amp-connatix-player> %s',
+        element);
 
     // Media id is optional
     this.mediaId_ = element.getAttribute('data-media-id') ||
         '';
 
-    this.bindToPlayerCommands();
+    this.bindToPlayerCommands_();
   }
 
-    /**
+  /**
    * @param {boolean=} onLayout
    * @override
    */
@@ -123,8 +126,8 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
     const {element} = this;
     // Url Params for iframe source
     const urlParams = dict({
-      'playerId' : this.playerId_ || undefined,
-      'mediaId' : this.mediaId_ || undefined
+      'playerId': this.playerId_ || undefined,
+      'mediaId': this.mediaId_ || undefined,
     });
     const iframeUrl = this.iframeDomain_ + '/embed/index.html';
     const src = addParamsToUrl(iframeUrl, urlParams);
@@ -147,12 +150,12 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
 
   /** @override */
   pauseCallback() {
-    sendCommand('pause');
+    this.sendCommand_('pause');
   }
 
   /** @override */
   unlayoutCallback() {
-    this.destroyPlayerFrame();
+    this.destroyPlayerFrame_();
     return true;
   }
 }
