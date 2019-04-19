@@ -380,13 +380,15 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
   });
 
   it('should disconnect friendly listener', () => {
+    const unobserveFunction = sandbox.spy();
     sandbox.stub(PositionObserver.prototype, 'observe')
-        .returns(sandbox.spy());
+        .returns(unobserveFunction);
     sandbox./*OK*/stub(iframeHelper, 'canInspectWindow').returns(true);
     return binding.listenForPositionSameDomain().then(() => {
-      expect(binding.unobserveFunction_).to.not.be.called;
+      expect(unobserveFunction).to.not.be.called;
       binding.disconnect();
-      expect(binding.unobserveFunction_).to.be.called;
+      expect(unobserveFunction).to.be.called;
+      expect(binding.unobserveFunction_).to.be.null;
     });
   });
 });
