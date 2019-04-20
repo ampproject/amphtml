@@ -47,6 +47,8 @@ public class AmpCommandLineRunner extends CommandLineRunner {
 
   private boolean single_file_compilation = false;
 
+  private String amp_version = "";
+
   /**
    * List of string suffixes to eliminate from the AST.
    */
@@ -82,7 +84,7 @@ public class AmpCommandLineRunner extends CommandLineRunner {
     CompilerOptions options = super.createOptions();
     options.setCollapsePropertiesLevel(CompilerOptions.PropertyCollapseLevel.ALL);
     AmpPass ampPass = new AmpPass(getCompiler(), is_production_env, suffixTypes,
-        assignmentReplacements, prodAssignmentReplacements);
+        assignmentReplacements, prodAssignmentReplacements, amp_version);
     options.addCustomPass(CustomPassExecutionTime.BEFORE_OPTIMIZATIONS, ampPass);
     options.setDevirtualizePrototypeMethods(true);
     options.setExtractPrototypeMemberDeclarations(true);
@@ -138,6 +140,8 @@ public class AmpCommandLineRunner extends CommandLineRunner {
         runner.pseudo_names = true;
       } else if (arg.contains("SINGLE_FILE_COMPILATION=true")) {
         runner.single_file_compilation = true;
+      } else if (arg.contains("VERSION=")) {
+        runner.amp_version = arg.substring(arg.lastIndexOf("=") + 1);
       }
     }
 
