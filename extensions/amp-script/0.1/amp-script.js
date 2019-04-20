@@ -27,6 +27,9 @@ import {
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
+import {
+  installOriginExperimentsForDoc, originExperimentsForDoc,
+} from '../../../src/service/origin-experiments-impl';
 import {isExperimentOn} from '../../../src/experiments';
 import {rewriteAttributeValue} from '../../../src/url-rewrite';
 import {
@@ -71,13 +74,29 @@ export class AmpScript extends AMP.BaseElement {
         isLayoutSizeDefined(layout);
   }
 
+  /** @return {!Promise<boolean>} */
+  isExperimentOn_() {
+    if (!isExperimentOn(this.win, 'amp-script')) {
+      return Promise.resolve(false);
+    }
+    installOriginExperimentsForDoc(this.getAmpDoc());
+    return originExperimentsForDoc(this.element)
+        .getExperiments()
+        .then(trials => trials && trials.includes(TAG));
+  }
+
+  /** @override */
+  buildCallback() {
+    return this.isExperimentOn_().then(on => {
+      if (!on) {
+        throw user().createError(
+            TAG, 'Experiment "amp-script" is not enabled.');
+      }
+    });
+  }
+
   /** @override */
   layoutCallback() {
-    if (!isExperimentOn(this.win, 'amp-script')) {
-      user().error(TAG, 'Experiment "amp-script" is not enabled.');
-      return Promise.reject('Experiment "amp-script" is not enabled.');
-    }
-
     this.userActivation_ = new UserActivationTracker(this.element);
 
     // Create worker and hydrate.
