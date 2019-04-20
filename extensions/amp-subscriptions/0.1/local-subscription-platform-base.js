@@ -178,7 +178,9 @@ export class LocalSubscriptionBasePlatform {
   }
 
   /** @override */
-  pingback(unusedEntitlement) {}
+  pingback(unusedEntitlement) {
+    return Promise.resolve();
+  }
 
   /** @override */
   isPingbackEnabled() {

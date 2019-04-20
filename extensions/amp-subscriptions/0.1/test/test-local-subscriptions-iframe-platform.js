@@ -15,9 +15,8 @@
  */
 
 import {Dialog} from '../dialog';
-import {GrantReason} from '../entitlement';
 import {
-  LocalSubscriptionIframePlatform
+  LocalSubscriptionIframePlatform,
 } from '../local-subscription-platform-iframe';
 import {
   LocalSubscriptionPlatformFactory,
@@ -37,19 +36,11 @@ describes.fakeWin('LocalSubscriptionsIframePlatform', {amp: true}, env => {
     'subscribe': 'https://lipsum.com/subscribe',
     'login': 'https://lipsum.com/login',
   };
-  const service = 'sample-service';
-  const source = 'sample-source';
-  const json = {
-    service,
-    source,
-    granted: true,
-    grantReason: GrantReason.SUBSCRIBER,
-  };
-  const readerId = 'reader1';
+
   const configIframeUrl = 'https://lipsum.com/iframe?rid=READER_ID';
-  
+
   const serviceConfig = {};
-  let builder, builderMock;
+  let builderMock;
 
   beforeEach(() => {
     ampdoc = env.ampdoc;
@@ -70,20 +61,16 @@ describes.fakeWin('LocalSubscriptionsIframePlatform', {amp: true}, env => {
         'baseScore': 99,
       },
     ];
-    builder = {
-      buildUrl: () => {},
-      collectUrlVars: () => {},
-    };
     builderMock = sandbox.mock(UrlBuilder.prototype);
   });
 
   afterEach(() => {
     sandbox.restore();
-  })
+  });
 
   it('initializeListeners_ should listen to clicks on rootNode', () => {
     localSubscriptionPlatform = LocalSubscriptionPlatformFactory(ampdoc,
-      serviceConfig.services[0], serviceAdapter);
+        serviceConfig.services[0], serviceAdapter);
     const domStub = sandbox.stub(localSubscriptionPlatform.rootNode_,
         'addEventListener');
 
@@ -95,45 +82,46 @@ describes.fakeWin('LocalSubscriptionsIframePlatform', {amp: true}, env => {
 
   it('should return baseScore', () => {
     localSubscriptionPlatform = LocalSubscriptionPlatformFactory(ampdoc,
-      serviceConfig.services[0], serviceAdapter);
+        serviceConfig.services[0], serviceAdapter);
     expect(localSubscriptionPlatform.getBaseScore()).to.be.equal(99);
   });
 
   it('Should not allow prerender', () => {
     localSubscriptionPlatform = LocalSubscriptionPlatformFactory(ampdoc,
-      serviceConfig.services[0], serviceAdapter);
+        serviceConfig.services[0], serviceAdapter);
     expect(localSubscriptionPlatform.isPrerenderSafe()).to.be.false;
   });
 
   describe('config', () => {
     it('only trigger if "iframeUrl" is present', () => {
       expect(
-        LocalSubscriptionPlatformFactory(ampdoc,
-          serviceConfig.services[0], serviceAdapter)
+          LocalSubscriptionPlatformFactory(ampdoc,
+              serviceConfig.services[0], serviceAdapter)
       ).to.be.instanceOf(LocalSubscriptionIframePlatform);
     });
 
-    it('error if "iframeUrl" is present and "AuthorizationUrl" are missing', () => {
-      delete serviceConfig.services[0]['iframeUrl'];
-      allowConsoleError(() => { expect(() => {
-        LocalSubscriptionPlatformFactory(ampdoc,
-          serviceConfig.services[0], serviceAdapter);
-      }).to.throw(/authorization/); });
-    });
+    it('error if "iframeUrl" is present and "AuthorizationUrl" are missing',
+        () => {
+          delete serviceConfig.services[0]['iframeUrl'];
+          allowConsoleError(() => { expect(() => {
+            LocalSubscriptionPlatformFactory(ampdoc,
+                serviceConfig.services[0], serviceAdapter);
+          }).to.throw(/authorization/); });
+        });
 
     it('should require "iframeUrl" to be secure', () => {
       serviceConfig.services[0]['iframeUrl'] = 'http://acme.com/iframe';
       allowConsoleError(() => { expect(() => {
         LocalSubscriptionPlatformFactory(ampdoc,
-          serviceConfig.services[0], serviceAdapter);
+            serviceConfig.services[0], serviceAdapter);
       }).to.throw(/https/); });
     });
 
     it('should disallow non-array vars', () => {
-      serviceConfig.services[0]['iframeVars'] = "foo";
+      serviceConfig.services[0]['iframeVars'] = 'foo';
       allowConsoleError(() => { expect(() => {
         LocalSubscriptionPlatformFactory(ampdoc,
-          serviceConfig.services[0], serviceAdapter);
+            serviceConfig.services[0], serviceAdapter);
       }).to.throw(/array/); });
     });
   });
@@ -143,7 +131,7 @@ describes.fakeWin('LocalSubscriptionsIframePlatform', {amp: true}, env => {
     it('should NOT connect until necessary', () => {
       const connectStub = sandbox.stub(Messenger.prototype, 'connect');
       localSubscriptionPlatform = LocalSubscriptionPlatformFactory(ampdoc,
-        serviceConfig.services[0], serviceAdapter);
+          serviceConfig.services[0], serviceAdapter);
       expect(localSubscriptionPlatform.connectedPromise_).to.be.null;
       expect(localSubscriptionPlatform.iframe_.parentNode).to.be.null;
       expect(connectStub).to.not.be.called;
@@ -152,7 +140,7 @@ describes.fakeWin('LocalSubscriptionsIframePlatform', {amp: true}, env => {
     it('should connect on first and only first authorize', () => {
       const connectStub = sandbox.stub(Messenger.prototype, 'connect');
       localSubscriptionPlatform = LocalSubscriptionPlatformFactory(ampdoc,
-        serviceConfig.services[0], serviceAdapter);
+          serviceConfig.services[0], serviceAdapter);
       localSubscriptionPlatform.getEntitlements();
       expect(localSubscriptionPlatform.connectedPromise_).to.not.be.null;
       expect(localSubscriptionPlatform.iframe_.parentNode).to.not.be.null;
@@ -167,19 +155,20 @@ describes.fakeWin('LocalSubscriptionsIframePlatform', {amp: true}, env => {
             'VAR2': 'B',
           }))
           .once();
-      const expectedConfig =  Object.assign({}, serviceConfig.services[0], {
-          'iframeVars': {
-            'VAR1': 'A',
-            'VAR2': 'B',
-      }});
+      const expectedConfig = Object.assign({}, serviceConfig.services[0], {
+        'iframeVars': {
+          'VAR1': 'A',
+          'VAR2': 'B',
+        }});
       serviceConfig.services[0]['iframeVars'] = ['VAR1', 'VAR2'];
       const localSubscriptionPlatform = LocalSubscriptionPlatformFactory(ampdoc,
-        serviceConfig.services[0], serviceAdapter);
-      const sendStub = sandbox.stub(localSubscriptionPlatform.messenger_, 'sendCommandRsvp')
-        .returns(Promise.resolve({}));
+          serviceConfig.services[0], serviceAdapter);
+      const sendStub = sandbox.stub(
+          localSubscriptionPlatform.messenger_, 'sendCommandRsvp')
+          .returns(Promise.resolve({}));
       const promise = localSubscriptionPlatform.connect();
       localSubscriptionPlatform.handleCommand_('connect');
-      
+
       return promise.then(() => {
         expect(sendStub).to.be.calledOnce;
         expect(sendStub).to.be.calledWithExactly('start', {
@@ -192,16 +181,15 @@ describes.fakeWin('LocalSubscriptionsIframePlatform', {amp: true}, env => {
 
 
   describe('runtime', () => {
-    let adapter;
     let messengerMock;
-    let storage, storageMock;
-    let localSubscriptionPlatform; 
+    let localSubscriptionPlatform;
 
     beforeEach(() => {
       messengerMock = sandbox.mock(Messenger.prototype);
       localSubscriptionPlatform = LocalSubscriptionPlatformFactory(ampdoc,
-        serviceConfig.services[0], serviceAdapter);
-    })
+          serviceConfig.services[0], serviceAdapter);
+    });
+
     afterEach(() => {
       messengerMock.verify();
     });
@@ -249,7 +237,7 @@ describes.fakeWin('LocalSubscriptionsIframePlatform', {amp: true}, env => {
 
       it('should send pingback', () => {
         messengerMock.expects('sendCommandRsvp')
-            .withExactArgs('pingback', { entitlement: {}})
+            .withExactArgs('pingback', {entitlement: {}})
             .returns(Promise.resolve())
             .once();
         return localSubscriptionPlatform.pingback({});
