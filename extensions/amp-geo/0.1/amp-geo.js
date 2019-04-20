@@ -170,8 +170,13 @@ export class AmpGeo extends AMP.BaseElement {
   findCountry_(ampdoc) {
     // Flag to see if we've been pre-rendered with a country
     const preRenderMatch = ampdoc.getBody().className.match(PRE_RENDER_REGEX);
-    // Trim the spaces off the patched country
-    const trimmedCountry = COUNTRY.trim();
+    // Trim the spaces off the patched country.
+    // This is guaranteed to always match
+    // - Correctly patched will have the two-char country code and whitespace.
+    // - Unknown country will not have the country code, but will match all
+    //   whitespace.
+    // - Unpatched will match, but will not have a country code nor whitespace.
+    const trimmedCountryMatch = /^(\w{2})?\s*/.exec(COUNTRY);
 
     // default country is 'unknown' which is also the zero length case
 
@@ -190,11 +195,11 @@ export class AmpGeo extends AMP.BaseElement {
       // to handle that.
       this.mode_ = mode.GEO_PRERENDER;
       this.country_ = preRenderMatch[1];
-    } else if (trimmedCountry.length == 2) {
+    } else if (trimmedCountryMatch[1]) {
       // We have a valid 2 letter ISO country
       this.mode_ = mode.GEO_HOT_PATCH;
-      this.country_ = trimmedCountry;
-    } else if (trimmedCountry.length > 2 && !getMode(this.win).localDev) {
+      this.country_ = trimmedCountryMatch[1];
+    } else if (trimmedCountryMatch[0] === '' && !getMode(this.win).localDev) {
       // We were not patched, if we're not in dev this is an error
       // and we leave the country at the default 'unknown'
       this.error_ = true;
