@@ -155,8 +155,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
         compilationOptions
     ).then(() => {
       return new Promise((resolve, reject) => {
-        const stream = gulp.src(outputDir + '/**/*.js');
-        stream
+        gulp.src(outputDir + '/**/*.js')
             .pipe(shortenLicense())
             .pipe(gulp.dest(outputDir))
             .on('end', resolve)
