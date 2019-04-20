@@ -15,9 +15,11 @@
  */
 
 import {Dialog} from '../dialog';
-import {Entitlement, GrantReason} from '../entitlement';
+import {GrantReason} from '../entitlement';
 import {
-  LocalSubscriptionIframePlatform,
+  LocalSubscriptionIframePlatform
+} from '../local-subscription-platform-iframe';
+import {
   LocalSubscriptionPlatformFactory,
 } from '../local-subscription-platform';
 import {Messenger} from '../../../amp-access/0.1/iframe-api/messenger';
@@ -47,7 +49,7 @@ describes.fakeWin('LocalSubscriptionsIframePlatform', {amp: true}, env => {
   const configIframeUrl = 'https://lipsum.com/iframe?rid=READER_ID';
   
   const serviceConfig = {};
-  let builderMock;
+  let builder, builderMock;
 
   beforeEach(() => {
     ampdoc = env.ampdoc;
@@ -199,7 +201,6 @@ describes.fakeWin('LocalSubscriptionsIframePlatform', {amp: true}, env => {
       messengerMock = sandbox.mock(Messenger.prototype);
       localSubscriptionPlatform = LocalSubscriptionPlatformFactory(ampdoc,
         serviceConfig.services[0], serviceAdapter);
-      
     })
     afterEach(() => {
       messengerMock.verify();
@@ -248,10 +249,10 @@ describes.fakeWin('LocalSubscriptionsIframePlatform', {amp: true}, env => {
 
       it('should send pingback', () => {
         messengerMock.expects('sendCommandRsvp')
-            .withExactArgs('pingback', {})
+            .withExactArgs('pingback', { entitlement: {}})
             .returns(Promise.resolve())
             .once();
-        return localSubscriptionPlatform.pingback();
+        return localSubscriptionPlatform.pingback({});
       });
     });
   });

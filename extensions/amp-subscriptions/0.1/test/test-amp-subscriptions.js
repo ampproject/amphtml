@@ -18,9 +18,13 @@ import * as utilsStory from '../../../../src/utils/story';
 import {Entitlement, GrantReason} from '../entitlement';
 import {
   LocalSubscriptionIframePlatform,
+} from '../local-subscription-platform-iframe';
+import {
   LocalSubscriptionPlatformFactory,
-  LocalSubscriptionRemotePlatform,
 } from '../local-subscription-platform';
+import {
+  LocalSubscriptionRemotePlatform,
+} from '../local-subscription-platform-remote';
 import {
   PageConfig,
   PageConfigResolver,

@@ -94,7 +94,7 @@ export class LocalSubscriptionIframePlatform
 
   /** @override */
   pingback(selectedEntitlement) {
-    this.connect().then(() => {
+    return this.connect().then(() => {
       return this.messenger_.sendCommandRsvp(
           'pingback', {entitlement: selectedEntitlement});
     });
