@@ -15,10 +15,12 @@
  */
 
 import {Actions} from './actions';
+import {Deferred} from '../../../src/utils/promise';
 import {Entitlement} from './entitlement';
 import {
   LocalSubscriptionPlatformRenderer,
 } from './local-subscription-platform-renderer';
+import {Messenger} from '../../amp-access/0.1/iframe-api/messenger';
 import {PageConfig} from '../../../third_party/subscriptions-project/config';
 import {Services} from '../../../src/services';
 import {UrlBuilder} from './url-builder';
@@ -26,14 +28,32 @@ import {assertHttpsUrl} from '../../../src/url';
 import {closestAncestorElementBySelector} from '../../../src/dom';
 import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {isArray} from '../../../src/types';
+import {parseUrlDeprecated} from '../../../src/url';
+import {parseJson} from '../../../src/json';
+import {toggle} from '../../../src/style';
 
+/**
+ * Local subscription platform factory method.
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!JsonObject} platformConfig
+ * @param {!./service-adapter.ServiceAdapter} serviceAdapter
+ * @return {./subscription-platform.SubscriptionPlatform}
+ */
+export function LocalSubscriptionPlatformFactory(ampdoc, platformConfig, serviceAdapter) {
+  /* Return the correxct platform based on the config */
+  if(platformConfig['iframeUrl']) {
+    return new LocalSubscriptionIframePlatform(ampdoc, platformConfig, serviceAdapter);
+  }
+  return new LocalSubscriptionRemotePlatform(ampdoc, platformConfig, serviceAdapter);
+}
 
 /**
  * This implements the methods to interact with various subscription platforms.
  *
  * @implements {./subscription-platform.SubscriptionPlatform}
  */
-export class LocalSubscriptionPlatform {
+export class LocalSubscriptionBasePlatform {
 
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
@@ -56,15 +76,6 @@ export class LocalSubscriptionPlatform {
     /** @const @private {!../../../src/service/xhr-impl.Xhr} */
     this.xhr_ = Services.xhrFor(this.ampdoc_.win);
 
-    /** @private @const {string} */
-    this.authorizationUrl_ = assertHttpsUrl(
-        userAssert(
-            this.serviceConfig_['authorizationUrl'],
-            'Service config does not have authorization Url'
-        ),
-        'Authorization Url'
-    );
-
     /** @private @const {!UrlBuilder} */
     this.urlBuilder_ = new UrlBuilder(
         this.ampdoc_,
@@ -86,11 +97,6 @@ export class LocalSubscriptionPlatform {
     /** @private @const {!LocalSubscriptionPlatformRenderer}*/
     this.renderer_ = new LocalSubscriptionPlatformRenderer(this.ampdoc_,
         serviceAdapter.getDialog(), this.serviceAdapter_);
-
-    /** @private @const {?string} */
-    this.pingbackUrl_ = this.serviceConfig_['pingbackUrl'] || null;
-
-    this.initializeListeners_();
   }
 
   /**
@@ -185,6 +191,51 @@ export class LocalSubscriptionPlatform {
   }
 
   /** @override */
+  getSupportedScoreFactor(unusedFactor) {
+    return 0;
+  }
+
+  /** @override */
+  getBaseScore() {
+    return this.serviceConfig_['baseScore'] || 0;
+  }
+
+  /** @override */
+  decorateUI(unusedNode, unusedAction, unusedOptions) {}
+}
+
+/**
+ * Implments the remotel local subscriptions platform which uses 
+ * authorization and pingback urls
+ *
+ * @implements {./subscription-platform.SubscriptionPlatform}
+ */
+export class LocalSubscriptionRemotePlatform extends LocalSubscriptionBasePlatform {
+
+  /**
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!JsonObject} platformConfig
+   * @param {!./service-adapter.ServiceAdapter} serviceAdapter
+   */
+  constructor(ampdoc, platformConfig, serviceAdapter) {
+    super(ampdoc, platformConfig, serviceAdapter);
+   
+    /** @private @const {string} */
+    this.authorizationUrl_ = assertHttpsUrl(
+        userAssert(
+            this.serviceConfig_['authorizationUrl'],
+            'Service config does not have authorization Url'
+        ),
+        'Authorization Url'
+    );
+
+    /** @private @const {?string} */
+    this.pingbackUrl_ = this.serviceConfig_['pingbackUrl'] || null;
+
+    this.initializeListeners_();
+  }
+
+  /** @override */
   getEntitlements() {
     return this.urlBuilder_.buildUrl(this.authorizationUrl_,
         /* useAuthData */ false)
@@ -223,19 +274,154 @@ export class LocalSubscriptionPlatform {
       });
     });
   }
+}
+
+/**
+ * Implments the iframe local subscriptions platform which provides 
+ * authorization and pingback via an iframe
+ *
+ * @implements {./subscription-platform.SubscriptionPlatform}
+ */
+export class LocalSubscriptionIframePlatform extends LocalSubscriptionBasePlatform {
+
+  /**
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!JsonObject} platformConfig
+   * @param {!./service-adapter.ServiceAdapter} serviceAdapter
+   */
+  constructor(ampdoc, platformConfig, serviceAdapter) {
+    super(ampdoc, platformConfig, serviceAdapter);
+    
+    /** @const @private {string} */
+    this.iframeSrc_ = userAssert(this.serviceConfig_['iframeUrl'],
+        '"iframeUrl" URL must be specified');
+    assertHttpsUrl(this.iframeSrc_, 'iframe Url');
+
+
+    /** @const @private {?Array} */
+    this.iframeVars_ = this.serviceConfig_['iframeVars'] || null;
+    if (this.iframeVars_) {
+      userAssert(isArray(this.iframeVars_),
+          '"iframeVars" must be an array');
+    }
+
+    /** @private @const {!./service-adapter.ServiceAdapter} */
+    this.serviceAdapter_ = serviceAdapter;
+
+    /** @const @private {!../../../src/service/timer-impl.Timer} */
+    this.timer_ = Services.timerFor(this.ampdoc_.win);
+
+    /** @private @const {string} */
+    this.targetOrigin_ = parseUrlDeprecated(this.iframeSrc_).origin;
+
+    /** @private {?function()} */
+    this.connectedResolver_ = null;
+
+    /** @private {?Promise} */
+    this.connectedPromise_ = null;
+
+    /** @private @const {!Element} */
+    this.iframe_ = ampdoc.win.document.createElement('iframe');
+    toggle(this.iframe_, false);
+
+    /** @private @const {!Messenger} */
+    this.messenger_ = new Messenger(
+        this.ampdoc_.win,
+        () => this.iframe_.contentWindow,
+        this.targetOrigin_);
+
+    /** @private {?Promise<!JsonObject>} */
+    this.configPromise_ = null;
+
+    this.initializeListeners_();
+  }
+
+  
 
   /** @override */
-  getSupportedScoreFactor(unusedFactor) {
-    return 0;
+  getEntitlements() {
+    return this.connect().then(() => {
+      return this.messenger_.sendCommandRsvp('authorize', {});
+    });
   }
 
   /** @override */
-  getBaseScore() {
-    return this.serviceConfig_['baseScore'] || 0;
+  isPingbackEnabled() {
+    return true;
   }
 
   /** @override */
-  decorateUI(unusedNode, unusedAction, unusedOptions) {}
+  pingback(selectedEntitlement) {
+    return this.connect().then(() => {
+      return this.messenger_.sendCommandRsvp('pingback', {});
+    });
+  }
+
+  /**
+   * @return {!Promise}
+   * @package Visible for testing only.
+   */
+  connect() {
+    if (!this.connectedPromise_) {
+      const deferred = new Deferred();
+      this.connectedPromise_ = deferred.promise;
+      this.connectedResolver_ = deferred.resolve;
+
+      this.configPromise_ = this.resolveConfig_();
+      // Connect.
+      this.messenger_.connect(this.handleCommand_.bind(this));
+      this.ampdoc_.getBody().appendChild(this.iframe_);
+      this.iframe_.src = this.iframeSrc_;
+    }
+    return this.connectedPromise_;
+  }
+
+  /**
+   * @return {!Promise<!JsonObject>}
+   * @private
+   */
+  resolveConfig_() {
+    return new Promise(resolve => {
+      const configJson = parseJson(JSON.stringify(this.serviceConfig_));
+      if (this.iframeVars_) {
+        const varsString = this.iframeVars_.join('&');
+        this.urlBuilder_.collectUrlVars(
+            varsString,
+            /* useAuthData */ false)
+        .then(vars => {
+          configJson['iframeVars'] = vars;
+          resolve(configJson);
+        });
+      } else {
+        resolve(configJson);
+      }
+    });
+  }
+
+  /**
+   * @param {string} cmd
+   * @param {?Object} unusedPayload
+   * @return {*}
+   * @private
+   */
+  handleCommand_(cmd, unusedPayload) {
+    if (cmd == 'connect') {
+      // First ever message. Indicates that the receiver is listening.
+      this.configPromise_.then(configJson => {
+        this.messenger_.sendCommandRsvp('start', {
+          'protocol': 'amp-subscriptions',
+          'config': configJson,
+        }).then(() => {
+          // Confirmation that connection has been successful.
+          if (this.connectedResolver_) {
+            this.connectedResolver_();
+            this.connectedResolver_ = null;
+          }
+        });
+      });
+      return;
+    }
+  }
 }
 
 /**

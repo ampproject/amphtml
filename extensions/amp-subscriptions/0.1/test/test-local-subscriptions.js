@@ -16,7 +16,7 @@
 
 import {Dialog} from '../dialog';
 import {Entitlement, GrantReason} from '../entitlement';
-import {LocalSubscriptionPlatform} from '../local-subscription-platform';
+import {LocalSubscriptionPlatformFactory} from '../local-subscription-platform';
 import {PageConfig} from '../../../../third_party/subscriptions-project/config';
 import {ServiceAdapter} from '../service-adapter';
 import {SubscriptionAnalytics} from '../analytics';
@@ -67,7 +67,7 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
         .callsFake(() => new Dialog(ampdoc));
     sandbox.stub(serviceAdapter, 'getReaderId')
         .callsFake(() => Promise.resolve('reader1'));
-    localSubscriptionPlatform = new LocalSubscriptionPlatform(ampdoc,
+    localSubscriptionPlatform = LocalSubscriptionPlatformFactory(ampdoc,
         serviceConfig.services[0], serviceAdapter);
   });
 

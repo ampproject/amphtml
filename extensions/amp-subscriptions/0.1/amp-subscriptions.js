@@ -18,7 +18,7 @@ import {CSS} from '../../../build/amp-subscriptions-0.1.css';
 import {Dialog} from './dialog';
 import {DocImpl} from './doc-impl';
 import {Entitlement} from './entitlement';
-import {LocalSubscriptionPlatform} from './local-subscription-platform';
+import {LocalSubscriptionPlatformFactory} from './local-subscription-platform';
 import {
   PageConfig,
   PageConfigResolver,
@@ -140,7 +140,7 @@ export class SubscriptionService {
   initializeLocalPlatforms_(serviceConfig) {
     if ((serviceConfig['serviceId'] || 'local') == 'local') {
       this.platformStore_.resolvePlatform('local',
-          new LocalSubscriptionPlatform(
+          LocalSubscriptionPlatformFactory(
               this.ampdoc_,
               serviceConfig,
               this.serviceAdapter_)
