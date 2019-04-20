@@ -89,8 +89,8 @@ export class AmpScript extends AMP.BaseElement {
   buildCallback() {
     return this.isExperimentOn_().then(on => {
       if (!on) {
-        throw user().createError(
-            TAG, 'Experiment "amp-script" is not enabled.');
+        // Return rejected Promise to buildCallback() to disable component.
+        throw user().createError(TAG, `Experiment "${TAG}" is not enabled.`);
       }
     });
   }
