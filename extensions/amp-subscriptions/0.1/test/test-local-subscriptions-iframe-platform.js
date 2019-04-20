@@ -44,13 +44,10 @@ describes.fakeWin('LocalSubscriptionsIframePlatform', {amp: true}, env => {
     grantReason: GrantReason.SUBSCRIBER,
   };
   const readerId = 'reader1';
-  const entitlement = Entitlement.parseFromJson(json);
   const configIframeUrl = 'https://lipsum.com/iframe?rid=READER_ID';
   
-  const serviceConfig = {
-  };
-  let builder, builderMock;
-  const iframeUrl = configIframeUrl.replace('READER_ID', readerId);
+  const serviceConfig = {};
+  let builderMock;
 
   beforeEach(() => {
     ampdoc = env.ampdoc;

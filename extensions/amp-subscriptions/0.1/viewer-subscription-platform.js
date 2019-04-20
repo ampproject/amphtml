@@ -47,7 +47,7 @@ export class ViewerSubscriptionPlatform {
     /** @private @const {!PageConfig} */
     this.pageConfig_ = serviceAdapter.getPageConfig();
 
-    /** @private @const {!LocalSubscriptionPlatform} */
+    /** @private @const {!./subscription-platform.SubscriptionPlatform} */
     this.platform_ = LocalSubscriptionPlatformFactory(
         ampdoc, platformConfig, serviceAdapter);
 
