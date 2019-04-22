@@ -20,7 +20,12 @@
  {
   /**
   * An array of glob strings to use to load assets to Percy, relative to
-  * the base amphtml/ directory.
+  * the base amphtml/ directory. All assets accessed by the test must be
+  * relative to the server path (i.e., use relative paths such as
+  * <amp-img src="/examples/visual-tests/..."> - never external domains such as
+  * <amp-img src="https://ampbyexample.com/...">)
+  * (see the "allow_external_network_access" field below for experimental
+  * override, however this is deprecated and will be removed in the future.)
   *
   * Note that if you add a new test from a sub-directory that is not matched
   * by any glob string in this list, it will be missing its resources!
@@ -121,6 +126,10 @@
    *   //     },
    *   //   };
    *   "interactive_tests": "examples/visual-tests/foo/foo-test.js",
+   *
+   *   // [optional, DEPRECATED] Set this key to true to allow this test to
+   *   // access external network resources.
+   *   "allow_external_network_access": true,
    *
    *   // [optional] Add this key and set to true to skip this test. You should
    *   // also add an explanation and a link to an example of a previous
@@ -574,6 +583,7 @@
         ".slot-render-ended",
         ".slot-onload",
       ],
+      "allow_external_network_access": true,
     },
     {
       "url": "examples/visual-tests/amp-story/amp-story-tooltip.html",
