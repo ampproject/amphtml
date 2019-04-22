@@ -101,8 +101,7 @@ export class AmpFormTextarea {
       }
 
       const element = dev().assertElement(e.target);
-      if (element.tagName != 'TEXTAREA' ||
-          !element.hasAttribute(AMP_FORM_TEXTAREA_EXPAND_ATTR)) {
+      if (element.tagName != 'TEXTAREA') {
         return;
       }
 
