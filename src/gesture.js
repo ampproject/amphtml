@@ -45,7 +45,7 @@ export class Gesture {
     this.type = type;
     /** @const {DATA} */
     this.data = data;
-    /** @const {time} */
+    /** @const {number} */
     this.time = time;
     /** @const {?Event} */
     this.event = event;

@@ -173,7 +173,7 @@ export class AmpBysideContent extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     const iframe = this.element.ownerDocument.createElement('iframe');
-    this.iframe_ = iframe;
+    this.iframe_ = /** @type {HTMLIFrameElement} */ (iframe);
 
     iframe.name = 'amp_byside_content_iframe' + iframeCount_++;
 
