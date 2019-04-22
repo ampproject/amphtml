@@ -355,6 +355,8 @@ export const VideoEvents = {
   AD_END: 'ad_end',
 };
 
+/** @typedef {string} */
+export let PlayingStateDef;
 
 /**
  * Playing States
@@ -362,7 +364,7 @@ export const VideoEvents = {
  * Internal playing states used to distinguish between video playing on user's
  * command and videos playing automatically
  *
- * @constant {!Object<string, string>}
+ * @constant {!Object<string, PlayingStateDef>}
  */
 export const PlayingStates = {
   /**

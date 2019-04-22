@@ -87,6 +87,25 @@ describes.realWin('AmpState', {
     });
   });
 
+  it('should trigger "fetch-error" if fetch fails', function*() {
+    whenFirstVisiblePromiseResolve();
+    fetchStub.returns(Promise.reject());
+
+    const actions = {trigger: sandbox.spy()};
+    sandbox.stub(Services, 'actionServiceForDoc').returns(actions);
+
+    element.setAttribute('src', 'https://foo.com/bar?baz=1');
+    element.build();
+
+    yield whenFirstVisiblePromise;
+    yield getViewerAuthTokenIfAvailableStub();
+    yield ampState.fetch_();
+
+    expect(ampState.updateState_).to.not.be.called;
+    expect(actions.trigger).to.be.calledWithExactly(
+        ampState, 'fetch-error', /* event */ null, ActionTrust.LOW);
+  });
+
   it('should register action refresh', () => {
     sandbox.spy(ampState, 'registerAction');
     element.setAttribute('src', 'https://foo.com/bar?baz=1');

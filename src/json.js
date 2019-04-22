@@ -121,7 +121,7 @@ export function parseJson(json) {
  * @param {*} json JSON string to parse
  * @param {function(!Error)=} opt_onFailed Optional function that will be called
  *     with the error if parsing fails.
- * @return {?JsonObject|undefined} May be extend to parse arrays.
+ * @return {?JsonObject} May be extend to parse arrays.
  */
 export function tryParseJson(json, opt_onFailed) {
   try {
@@ -130,7 +130,7 @@ export function tryParseJson(json, opt_onFailed) {
     if (opt_onFailed) {
       opt_onFailed(e);
     }
-    return undefined;
+    return null;
   }
 }
 
