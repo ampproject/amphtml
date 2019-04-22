@@ -22,7 +22,7 @@ import {
 import {PageConfig} from '../../../third_party/subscriptions-project/config';
 import {Services} from '../../../src/services';
 import {UrlBuilder} from './url-builder';
-import {assertHttpsUrl} from '../../../src/url';
+import {addParamToUrl, assertHttpsUrl} from '../../../src/url';
 import {closestAncestorElementBySelector} from '../../../src/dom';
 import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
@@ -188,12 +188,19 @@ export class LocalSubscriptionPlatform {
   getEntitlements() {
     return this.urlBuilder_.buildUrl(this.authorizationUrl_,
         /* useAuthData */ false)
-        .then(fetchUrl =>
+        .then(fetchUrl => {
+          const encryptedDocumentKey =
+              this.serviceAdapter_.getEncryptedDocumentKey('local');
+          if (encryptedDocumentKey) {
+            //TODO(chenshay): if crypt, switch to 'post'
+            fetchUrl = addParamToUrl(fetchUrl, 'crypt', encryptedDocumentKey);
+          }
           this.xhr_.fetchJson(fetchUrl, {credentials: 'include'})
               .then(res => res.json())
               .then(resJson => {
                 return Entitlement.parseFromJson(resJson);
-              }));
+              });
+        });
   }
 
   /** @override */
