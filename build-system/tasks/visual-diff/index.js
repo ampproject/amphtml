@@ -204,10 +204,8 @@ async function launchBrowser() {
  * @param {!puppeteer.Browser} browser a Puppeteer controlled browser.
  * @param {JsonObject} viewport optional viewport size object with numeric
  *     fields `width` and `height`.
- * @param {boolean} hermetic whether this test should be able to access external
- *     network resources (`false`) or be hermetic (`true`).
  */
-async function newPage(browser, viewport = null, hermetic = true) {
+async function newPage(browser, viewport = null) {
   const width = viewport ? viewport.width : VIEWPORT_WIDTH;
   const height = viewport ? viewport.height : VIEWPORT_HEIGHT;
 
@@ -218,31 +216,29 @@ async function newPage(browser, viewport = null, hermetic = true) {
   await page.setViewport({width, height});
   page.setDefaultNavigationTimeout(NAVIGATE_TIMEOUT_MS);
   await page.setJavaScriptEnabled(true);
-  if (hermetic) {
-    await page.setRequestInterception(true);
-    page.on('request', interceptedRequest => {
-      const requestUrl = new URL(interceptedRequest.url());
-      const mockedFilepath = path.join(
-          path.dirname(__filename), 'network-mocks', requestUrl.hostname,
-          encodeURIComponent(
-              `${requestUrl.pathname.substr(1)}${requestUrl.search}`)
-              .replace(/%2F/g, '/'));
+  await page.setRequestInterception(true);
+  page.on('request', interceptedRequest => {
+    const requestUrl = new URL(interceptedRequest.url());
+    const mockedFilepath = path.join(
+        path.dirname(__filename), 'network-mocks', requestUrl.hostname,
+        encodeURIComponent(
+            `${requestUrl.pathname.substr(1)}${requestUrl.search}`)
+            .replace(/%2F/g, '/'));
 
-      if (requestUrl.hostname == HOST ||
-          requestUrl.hostname.endsWith(`.${HOST}`)) {
-        return interceptedRequest.continue();
-      } else if (fs.existsSync(mockedFilepath)) {
-        log('verbose', 'Mocked network request for',
-            colors.yellow(requestUrl.href), 'with file',
-            colors.cyan(mockedFilepath));
-        return interceptedRequest.respond(fs.readFileSync(mockedFilepath));
-      } else {
-        log('verbose', 'Blocked external network request for',
-            colors.yellow(requestUrl.href));
-        return interceptedRequest.abort('blockedbyclient');
-      }
-    });
-  }
+    if (requestUrl.hostname == HOST ||
+        requestUrl.hostname.endsWith(`.${HOST}`)) {
+      return interceptedRequest.continue();
+    } else if (fs.existsSync(mockedFilepath)) {
+      log('verbose', 'Mocked network request for',
+          colors.yellow(requestUrl.href), 'with file',
+          colors.cyan(mockedFilepath));
+      return interceptedRequest.respond(fs.readFileSync(mockedFilepath));
+    } else {
+      log('verbose', 'Blocked external network request for',
+          colors.yellow(requestUrl.href));
+      return interceptedRequest.abort('blockedbyclient');
+    }
+  });
   return page;
 }
 
@@ -427,8 +423,7 @@ async function snapshotWebpages(percy, browser, webpages) {
       const name = testName ? `${pageName} (${testName})` : pageName;
       log('verbose', 'Visual diff test', colors.yellow(name));
 
-      const page = await newPage(
-          browser, viewport, !webpage.allow_external_network_access);
+      const page = await newPage(browser, viewport);
       log('verbose', 'Navigating to page', colors.yellow(webpage.url));
 
       // Puppeteer is flaky when it comes to catching navigation requests, so
