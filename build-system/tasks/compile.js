@@ -84,12 +84,11 @@ function cleanupBuildDir() {
 exports.cleanupBuildDir = cleanupBuildDir;
 
 // Formats a closure compiler error message into a more readable form by
-// dropping the lengthy java invocation line...
-//     Command failed: java -jar ... --js_output_file="<file>"
-// ...and then syntax highlighting the error text.
+// dropping the closure compiler plugin's logging prefix and then syntax
+// highlighting the error text.
 function formatClosureCompilerError(message) {
-  const javaInvocationLine = /Command failed:[^]*--js_output_file=\".*?\"\n/;
-  message = message.replace(javaInvocationLine, '');
+  const closurePluginLoggingPrefix = /^.*?gulp-google-closure-compiler.*?: /;
+  message = message.replace(closurePluginLoggingPrefix, '');
   message = highlight(message, {ignoreIllegals: true});
   message = message.replace(/WARNING/g, colors.yellow('WARNING'));
   message = message.replace(/ERROR/g, colors.red('ERROR'));
@@ -402,20 +401,21 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       delete compilerOptions.define;
     }
 
+    let compilerErrors = '';
     const pluginOptions = {
       platform: ['java'], // Override the JAR used by closure compiler
       extraArguments: ['-XX:+TieredCompilation'], // Significant speed up!
+      logger: errors => compilerErrors = errors, // Capture compiler errors
     };
 
     // Override to local closure compiler JAR
     closureCompiler.compiler.JAR_PATH =
         require.resolve('../runner/dist/runner.jar');
 
-    const handleCompilerError = function(err) {
-      const {message} = err;
+    const handleCompilerError = function() {
       console./*OK*/error(colors.red(
           'Compilation failed for ' + outputFilename + ':\n') +
-          formatClosureCompilerError(message));
+          formatClosureCompilerError(compilerErrors));
       process.exit(1);
     };
 
