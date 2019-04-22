@@ -96,7 +96,7 @@ import {
   metaJsonCreativeGrouper,
 } from '../../../ads/google/a4a/line-delimited-response-handler';
 import {parseQueryString} from '../../../src/url';
-import {setStyles} from '../../../src/style';
+import {setImportantStyles, setStyles} from '../../../src/style';
 import {stringHash32} from '../../../src/string';
 import {tryParseJson} from '../../../src/json';
 import {utf8Decode} from '../../../src/utils/bytes';
@@ -1058,6 +1058,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
             this.element.getAttribute('data-amp-slot-index'));
         return Promise.reject('Cannot access body of friendly frame');
       }
+      setImportantStyles(this.element, {position: 'static'});
       return this.attemptChangeHeight(
           this.iframe.contentWindow.document.body./*OK*/clientHeight)
           .then(() => {
@@ -1066,6 +1067,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           })
           .catch(() => {
             this.reattemptToExpandFluidCreative_ = true;
+            setImportantStyles(this.element, {position: 'absolute'});
           });
     }
     return Promise.resolve();
