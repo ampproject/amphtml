@@ -111,6 +111,7 @@ export class GoogleSubscriptionsPlatform {
     this.runtime_.setOnFlowStarted(e => {
       if (
         e.flow == 'subscribe' ||
+        e.flow == 'contribute' ||
         e.flow == 'showContributionOptions' ||
         e.flow == 'showOffers'
       ) {
