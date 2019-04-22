@@ -26,6 +26,12 @@ const log = require('fancy-log');
 const opn = require('opn');
 const path = require('path');
 const webserver = require('gulp-webserver');
+const {
+  reportTestErrored,
+  reportTestFinished,
+  reportTestSkipped,
+  reportTestStarted,
+} = require('./status-report');
 const {app} = require('../../test-server');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../../ctrlcHandler');
 const {getAdTypes, unitTestsToRun} = require('./helpers');
@@ -59,7 +65,13 @@ function getConfig() {
     return Object.assign({}, karmaDefault, {browsers: ['Edge']});
   }
   if (argv.ie) {
-    return Object.assign({}, karmaDefault, {browsers: ['IE']});
+    return Object.assign({}, karmaDefault, {browsers: ['IE'],
+      customLaunchers: {
+        IeNoAddOns: {
+          base: 'IE',
+          flags: ['-extoff'],
+        },
+      }});
   }
   if (argv.chrome_canary && !argv.chrome_flags) {
     return Object.assign({}, karmaDefault, {browsers: ['ChromeCanary']});
@@ -96,11 +108,11 @@ function getConfig() {
     saucelabsBrowsers = argv.saucelabs ?
     // With --saucelabs, integration tests are run on this set of browsers.
       [
-        //'SL_Chrome',
+        'SL_Chrome',
         'SL_Firefox',
         // TODO(amp-infra): Restore this once tests are stable again.
         // 'SL_Safari_11',
-        //'SL_Edge_17',
+        'SL_Edge_17',
         'SL_Safari_12',
         // TODO(amp-infra): Evaluate and add more platforms here.
         //'SL_Chrome_Android_7',
@@ -249,7 +261,7 @@ async function runTests() {
     if (testsToRun.length == 0) {
       log(green('INFO:'),
           'No unit tests were directly affected by local changes.');
-      return Promise.resolve();
+      return reportTestSkipped();
     } else {
       log(green('INFO:'), 'Running the following unit tests:');
       testsToRun.forEach(test => {
@@ -482,6 +494,7 @@ async function runTests() {
       if (!argv.saucelabs && !argv.saucelabs_lite) {
         log(green('Running tests locally...'));
       }
+      reportTestStarted();
     }).on('browsers_ready', function() {
       console./*OK*/log('\n');
       log(green('Done. Running tests...'));
@@ -490,9 +503,11 @@ async function runTests() {
       // Prevent cases where Karma detects zero tests and still passes. #16851.
       if (result.total == 0) {
         log(red('ERROR: Zero tests detected by Karma. Something went wrong.'));
-        if (!argv.watch) {
-          process.exit(1);
-        }
+        reportTestErrored().finally(() => {
+          if (!argv.watch) {
+            process.exit(1);
+          }
+        });
       }
       // Print a summary for each browser as soon as tests complete.
       let message = `${browser.name}: Executed ` +
@@ -506,6 +521,12 @@ async function runTests() {
       message += '\n';
       console./*OK*/log('\n');
       log(message);
+    }).on('run_complete', (browsers, results) => {
+      if (results.error) {
+        reportTestErrored();
+      } else {
+        reportTestFinished(results.success, results.failed);
+      }
     }).start();
     return deferred;
   }

@@ -22,6 +22,7 @@ tags: {  # amp-story
     version: "0.1"
     version: "1.0"
     version: "latest"
+    deprecated_version: "0.1"
   }
   attr_lists: "common-extension-attrs"
 }
@@ -260,6 +261,10 @@ tags: {
   attrs: { name: "animate-in-timing-function" }
   attrs: { name: "grid-area" }
   attrs: {
+    name: "interactive"
+    value: ""
+  }
+  attrs: {
     name: "scale-end"
     value_regex: "[0-9]+([.][0-9]+)?"
   }
@@ -347,6 +352,10 @@ tags: {
   attrs: { name: "animate-in-delay" }
   attrs: { name: "animate-in-duration" }
   attrs: { name: "animate-in-timing-function" }
+  attrs: {
+    name: "interactive"
+    value: ""
+  }
   attrs: {
     name: "scale-end"
     value_regex: "[0-9]+([.][0-9]+)?"

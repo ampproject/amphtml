@@ -14,28 +14,48 @@
  * limitations under the License.
  */
 
+/* NOTE: styles that affect sizing are in amp.css to avoid FOUC */
+amp-autocomplete,
+amp-autocomplete > input {
+  font-family: sans-serif; /* default-ui-font-stack */
+}
+
+amp-autocomplete > input {
+  border-radius: 4px; /* default-ui-border-radius */
+  box-sizing: border-box;
+}
+
 .i-amphtml-autocomplete-results {
   position: absolute;
   top: 100%;
-  width: 100%;
-  margin-top: 4px;
+  width: calc(100% + 16px);
+  margin-top: .5rem; /* default-ui-space-small */
+  margin-left: -.5rem; /* default-ui-space-small */
+  border-radius: 4px; /* default-ui-border-radius */
+
+  background-color: white; /* default-ui-background-color */
+  box-shadow: 0px 2px 4px 0px rgba(0,0,0,.5); /* default-ui-box-shadow */
+  z-index: 10;
 }
 
 .i-amphtml-autocomplete-item {
-  background-color: white;
-  border: 1px solid black;
-  padding: 4px;
   position: relative;
+  padding: .5rem 1rem; /* default-ui-space-small default-ui-space-medium */
+  cursor: pointer;
 }
 
-.i-amphtml-autocomplete-item:last-child {
-  display: none;
+.i-amphtml-autocomplete-item:first-child {
+  border-radius: 4px 4px 0px 0px; /* default-ui-border-radiuss */
+}
+
+.i-amphtml-autocomplete-item:nth-last-child(2) {
+  border-radius: 0px 0px 4px 4px; /* default-ui-border-radius */
 }
 
 .i-amphtml-autocomplete-item:hover {
-  background-color: #d3d3d3;
+  background-color: rgba(0,0,0,.15); /* default-ui-light-gray */
 }
 
 .i-amphtml-autocomplete-item-active {
-  background-color: #d3d3d3;
+  background-color: rgba(0,0,0,.15); /* default-ui-light-gray */
 }

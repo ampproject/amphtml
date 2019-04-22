@@ -1703,6 +1703,7 @@ class TagStack {
     goog.asserts.assert(query !== amp.validator.AncestorMarker.Marker.UNKNOWN);
     // Skip the first element, which is "$ROOT".
     for (let i = 1; i < this.stack_.length; ++i) {
+      if (this.stack_[i].tagSpec === null) {continue;}
       const spec = this.stack_[i].tagSpec.getSpec();
       if (spec.markDescendants === null) {continue;}
       for (const marker of spec.markDescendants.marker) {
@@ -5931,6 +5932,8 @@ amp.validator.ValidationResult.prototype.outputToTerminal = function(
   const {status} = this;
   if (status === amp.validator.ValidationResult.Status.PASS) {
     terminal.info('AMP validation successful.');
+    terminal.info('Review our \'publishing checklist\' to ensure '
+        + 'successful AMP document distribution. See https://bit.ly/2D54tM9');
     if (this.errors.length === 0) {
       return;
     }
@@ -6370,7 +6373,6 @@ amp.validator.categorizeError = function(error) {
       error.code ===
           amp.validator.ValidationError.Code
               .WARNING_EXTENSION_DEPRECATED_VERSION ||
-
       error.code ===
           amp.validator.ValidationError.Code.WARNING_TAG_REQUIRED_BY_MISSING) {
     return amp.validator.ErrorCategory.Code.DEPRECATION;

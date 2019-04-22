@@ -16,18 +16,122 @@
 
 // import to install chromedriver
 require('chromedriver'); // eslint-disable-line no-unused-vars
+
+const puppeteer = require('puppeteer');
 const {AmpDriver, AmpdocEnvironment} = require('./amp-driver');
 const {Builder, Capabilities} = require('selenium-webdriver');
 const {clearLastExpectError, getLastExpectError} = require('./expect');
 const {installRepl, uninstallRepl} = require('./repl');
-const {SeleniumWebDriverController} = require(
-    './selenium-webdriver-controller');
+const {PuppeteerController} = require('./puppeteer-controller');
+const {SeleniumWebDriverController} = require('./selenium-webdriver-controller');
 
 /** Should have something in the name, otherwise nothing is shown. */
 const SUB = ' ';
 const TIMEOUT = 20000;
 
 const DEFAULT_E2E_INITIAL_RECT = {width: 800, height: 600};
+
+/**
+ * @typedef {{
+ *  headless: boolean,
+ *  engine: string,
+ * }}
+ */
+let DescribesConfigDef;
+
+/**
+ * @typedef {{
+ *  headless: boolean,
+ * }}
+ */
+let PuppeteerConfigDef;
+
+/**
+ * @typedef {{
+ *  headless: boolean,
+ * }}
+ */
+let SeleniumConfigDef;
+
+/** @const {?DescribesConfigDef} */
+let describesConfig = null;
+
+/**
+ * Configure all tests. This may only be called once, since it is only read once
+ * and writes after reading will not have any effect.
+ * @param {!DescribesConfigDef} config
+ */
+function configure(config) {
+  if (describesConfig) {
+    throw new Error('describes.config should only be called once');
+  }
+
+  describesConfig = Object.assign({}, config);
+}
+
+/**
+ * Retrieve the describes config if set.
+ * If not set, it sets the config to an empty object and returns it.
+ * After getting the config the first time, the config may not be changed.
+ * @return {!DescribesConfigDef}
+ */
+function getConfig() {
+  if (!describesConfig) {
+    describesConfig = {};
+  }
+
+  return describesConfig;
+}
+
+/**
+ * Configure and launch a Puppeteer instance
+ * @param {!PuppeteerConfigDef=} opt_config
+ */
+async function createPuppeteer(opt_config = {}) {
+  const browser = await puppeteer.launch({
+    headless: opt_config.headless || false,
+    devtools: false,
+    defaultViewport: null,
+    timeout: 0,
+  });
+  return browser;
+}
+
+/**
+ * Configure and launch a Selenium instance
+ * @param {!SeleniumConfigDef=} opt_config
+ */
+async function createSelenium(opt_config = {}) {
+  // TODO(estherkim): implement sessions
+  // TODO(estherkim): ensure tests are in a sandbox
+  // See https://w3c.github.io/webdriver/#sessions
+
+  // TODO(estherkim): create multiple drivers per 'config.browsers'
+  // const config = {
+  //   browsers: this.browsers_,
+  //   session: undefined,
+  // };
+
+  const args = [];
+  args.push('--no-sandbox');
+  args.push('--disable-gpu');
+  if (opt_config.headless) {
+    args.push('--headless');
+  }
+
+  // TODO(estherkim): remove hardcoded chrome driver
+  const capabilities = Capabilities.chrome();
+  const chromeOptions = {
+    // TODO(cvializ,estherkim,sparhami):
+    // figure out why headless causes more flakes
+    'args': args,
+  };
+  capabilities.set('chromeOptions', chromeOptions);
+
+  const builder = new Builder().withCapabilities(capabilities);
+  const driver = await builder.build();
+  return driver;
+}
 
 /**
  * TODO(estherkim): use this to specify browsers/fixtures to opt in/out of
@@ -45,7 +149,6 @@ let TestSpec;
  */
 const endtoend = describeEnv(spec => [
   new AmpPageFixture(spec),
-  // TODO(estherkim): add fixtures for viewer, shadow, cache, etc
 ]);
 
 /**
@@ -138,7 +241,6 @@ function describeEnv(factory) {
         clearTimeout(asyncErrorTimerId);
       });
 
-
       describe(SUB, function() {
         // If there is an async expect error, throw it in the final state.
         asyncErrorTimerId = setTimeout(() => {
@@ -203,9 +305,6 @@ class AmpPageFixture {
   constructor(spec) {
     /** @const */
     this.spec = spec;
-
-    /** @private @const */
-    this.driver_ = null;
   }
 
   /** @override */
@@ -215,33 +314,11 @@ class AmpPageFixture {
 
   /** @override */
   async setup(env) {
-    // TODO(estherkim): implement sessions
-    // TODO(estherkim): ensure tests are in a sandbox
-    // See https://w3c.github.io/webdriver/#sessions
-
-    // TODO(estherkim): create multiple drivers per 'config.browsers'
-    // const config = {
-    //   browsers: this.browsers_,
-    //   session: undefined,
-    // };
-
-    // TODO(estherkim): remove hardcoded chrome driver
-    const capabilities = Capabilities.chrome();
-    const chromeOptions = {
-      // TODO(cvializ,estherkim,sparhami):
-      //   figure out why headless causes more flakes
-      // 'args': ['--headless']
-    };
-    capabilities.set('chromeOptions', chromeOptions);
-
-    const builder = new Builder().withCapabilities(capabilities);
-    const driver = await builder.build();
-    const controller = new SeleniumWebDriverController(driver);
+    const config = getConfig();
+    const controller = await getController(config);
     const ampDriver = new AmpDriver(controller);
-
     env.controller = controller;
     env.ampDriver = ampDriver;
-    this.driver_ = driver;
 
     const {
       testUrl,
@@ -266,11 +343,27 @@ class AmpPageFixture {
     const {controller} = env;
     if (controller) {
       await controller.switchToParent();
+      await controller.dispose();
     }
-    if (this.driver_) {
-      await this.driver_.quit();
-    }
-    this.driver_ = null;
+  }
+}
+
+/**
+ * Get the controller object for the configured engine.
+ * @param {!DescribesConfigDef} describesConfig
+ */
+async function getController({
+  engine = 'selenium',
+  headless = false,
+}) {
+  if (engine == 'puppeteer') {
+    const browser = await createPuppeteer({headless});
+    return new PuppeteerController(browser);
+  }
+
+  if (engine == 'selenium') {
+    const driver = await createSelenium({headless});
+    return new SeleniumWebDriverController(driver);
   }
 }
 
@@ -296,4 +389,5 @@ async function toggleExperiments(ampDriver, testUrl, experiments) {
 module.exports = {
   TestSpec,
   endtoend,
+  configure,
 };

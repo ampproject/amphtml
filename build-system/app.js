@@ -31,6 +31,7 @@ const jsdom = require('jsdom');
 const multer = require('multer');
 const path = require('path');
 const request = require('request');
+const {appTestEndpoints} = require('./app-test');
 const pc = process;
 const runVideoTestBench = require('./app-video-testbench');
 const {
@@ -41,6 +42,8 @@ const {renderShadowViewer} = require('./shadow-viewer');
 const {replaceUrls} = require('./app-utils');
 
 const upload = multer();
+
+const TEST_SERVER_PORT = process.env.SERVE_PORT;
 
 app.use(bodyParser.text());
 app.use('/amp4test', require('./amp4test').app);
@@ -191,6 +194,7 @@ app.use(
 app.get([
   '/examples/*.(min|max).html',
   '/test/manual/*.(min|max).html',
+  '/test/fixtures/e2e/*/*.(min|max).html',
   '/dist/cache-sw.(min|max).html',
 ], (req, res) => {
   const filePath = req.url;
@@ -347,6 +351,21 @@ app.use('/form/search-json/get', (req, res) => {
     additionalFields: req.query.additionalFields,
     results: [{title: 'Result 1'}, {title: 'Result 2'}, {title: 'Result 3'}],
   });
+});
+
+const autocompleteColors = ['red', 'orange', 'yellow', 'green', 'blue',
+  'purple', 'pink', 'black', 'white'];
+
+app.use('/form/autocomplete/query', (req, res) => {
+  const query = req.query.q;
+  if (!query) {
+    res.json({items: autocompleteColors});
+  } else {
+    const lowerCaseQuery = query.toLowerCase();
+    const filtered = autocompleteColors.filter(
+        l => l.toLowerCase().includes(lowerCaseQuery));
+    res.json({items: filtered});
+  }
 });
 
 const autosuggestLanguages = ['ActionScript', 'AppleScript', 'Asp', 'BASIC',
@@ -852,7 +871,10 @@ app.use(['/dist/v0/amp-*.js'], (req, res, next) => {
  */
 app.get('/test/manual/amp-video.amp.html', runVideoTestBench);
 
-app.get(['/examples/*.html', '/test/manual/*.html'], (req, res, next) => {
+app.get([
+  '/examples/*.html',
+  '/test/manual/*.html',
+  '/test/fixtures/e2e/*/*.html'], (req, res, next) => {
   const filePath = req.path;
   const mode = pc.env.SERVE_MODE;
   const inabox = req.query['inabox'];
@@ -861,7 +883,7 @@ app.get(['/examples/*.html', '/test/manual/*.html'], (req, res, next) => {
     if (req.query['amp_js_v']) {
       file = addViewerIntegrationScript(req.query['amp_js_v'], file);
     }
-
+    file = file.replace(/__TEST_SERVER_PORT__/g, TEST_SERVER_PORT);
 
     if (inabox && req.headers.origin && req.query.__amp_source_origin) {
       // Allow CORS requests for A4A.
@@ -909,6 +931,8 @@ app.get(['/examples/*.html', '/test/manual/*.html'], (req, res, next) => {
     next();
   });
 });
+
+appTestEndpoints(app);
 
 function escapeRegExp(string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -993,6 +1017,12 @@ app.use('/bind/ecommerce/sizes', (req, res) => {
     res.json(object);
   }, 1000); // Simulate network delay.
 });
+
+/*
+//TODO(chenshay): Accept '?crypto=bla'
+implement authorizer here.
+this is for local testing.
+*/
 
 // Simulated subscription entitlement
 app.use('/subscription/:id/entitlements', (req, res) => {

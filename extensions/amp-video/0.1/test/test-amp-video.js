@@ -187,7 +187,8 @@ describes.realWin('amp-video', {
     });
   });
 
-  it('should not load a video with http src', () => {
+  // TODO(#21767): re-enable this test.
+  it.skip('should not load a video with http src', () => {
     expectAsyncConsoleError(/start with/);
     return expect(getVideo({
       src: 'http://example.com/video.mp4',
@@ -201,6 +202,7 @@ describes.realWin('amp-video', {
   });
 
   it('should not load a video with http source children', () => {
+    expectAsyncConsoleError(/start with/);
     const sources = [];
     const mediatypes = ['video/ogg', 'video/mp4', 'video/webm'];
     for (let i = 0; i < mediatypes.length; i++) {
@@ -432,6 +434,46 @@ describes.realWin('amp-video', {
       expect(video.controls).to.be.false;
       expect(video.getAttribute('controlsList')).to.equal(
           'nodownload nofullscreen');
+    });
+  });
+
+  it('should propagate the object-fit attribute', () => {
+    return getVideo({
+      src: 'video.mp4',
+      'object-fit': 'cover',
+    }).then(v => {
+      const video = v.querySelector('video');
+      expect(video.style.objectFit).to.equal('cover');
+    });
+  });
+
+  it('should not propagate the object-fit attribute if invalid', () => {
+    return getVideo({
+      src: 'video.mp4',
+      'object-fit': 'foo 80%',
+    }).then(v => {
+      const video = v.querySelector('video');
+      expect(video.style.objectFit).to.be.empty;
+    });
+  });
+
+  it('should propagate the object-position attribute', () => {
+    return getVideo({
+      src: 'video.mp4',
+      'object-position': '20% 80%',
+    }).then(v => {
+      const video = v.querySelector('video');
+      expect(video.style.objectPosition).to.equal('20% 80%');
+    });
+  });
+
+  it('should not propagate the object-position attribute if invalid', () => {
+    return getVideo({
+      src: 'video.mp4',
+      'object-position': 'url("example.com")',
+    }).then(v => {
+      const video = v.querySelector('video');
+      expect(video.style.objectPosition).to.be.empty;
     });
   });
 
