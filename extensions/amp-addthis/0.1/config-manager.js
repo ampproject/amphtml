@@ -165,7 +165,10 @@ export class ConfigManager {
           }
           break;
         case 3:
-          // "wp anonymous mode" COMING SOON!
+          // "wp anonymous mode"
+          if (productCode) {
+            this.activeToolsMonitor_.recordProductCode(productCode);
+          }
           return;
         default:
           return;
