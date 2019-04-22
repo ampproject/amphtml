@@ -43,6 +43,15 @@ export class ServiceAdapter {
   }
 
   /**
+   * Returns the encrypted document key for the specified service.
+   * @param {string} serviceId
+   * @return {?string}
+   */
+  getEncryptedDocumentKey(serviceId) {
+    return this.subscriptionService_.getEncryptedDocumentKey(serviceId);
+  }
+
+  /**
    * Returns the analytics service for subscriptions.
    * @return {!./analytics.SubscriptionAnalytics}
    */

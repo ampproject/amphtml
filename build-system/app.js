@@ -1018,6 +1018,12 @@ app.use('/bind/ecommerce/sizes', (req, res) => {
   }, 1000); // Simulate network delay.
 });
 
+/*
+//TODO(chenshay): Accept '?crypto=bla'
+implement authorizer here.
+this is for local testing.
+*/
+
 // Simulated subscription entitlement
 app.use('/subscription/:id/entitlements', (req, res) => {
   cors.assertCors(req, res, ['GET']);
