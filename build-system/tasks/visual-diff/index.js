@@ -409,6 +409,7 @@ async function snapshotWebpages(percy, browser, webpages) {
   let testNumber = 0;
   for (const webpage of webpages) {
     const {viewport, name: pageName} = webpage;
+    let hasWarnings = false;
     for (const [testName, testFunction] of Object.entries(webpage.tests_)) {
       // Chrome supports redirecting <anything>.localhost to localhost, while
       // respecting domain name boundaries. This allows each test to be
@@ -438,6 +439,7 @@ async function snapshotWebpages(percy, browser, webpages) {
                 'is done, verifying page');
           })
           .catch(navigationError => {
+            hasWarnings = true;
             addTestError(testErrors, name,
                 'The browser test runner failed to complete the navigation ' +
                 'to the test page', navigationError, /* fatal */ false);
@@ -502,7 +504,7 @@ async function snapshotWebpages(percy, browser, webpages) {
 
             // Finally, send the snapshot to percy.
             await percy.snapshot(name, page, snapshotOptions);
-            log('travis', colors.cyan('●'));
+            log('travis', hasWarnings ? colors.yellow('●') : colors.cyan('●'));
           })
           .catch(testError => {
             log('travis', colors.red('○'));
