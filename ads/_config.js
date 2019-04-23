@@ -358,7 +358,7 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
-  'chargeads': {}, // Deprecated, to be removed on 2019-04-06
+  'chargeads': {}, // Deprecated, to be removed on 2019-05-23
 
   'colombia': {
     prefetch: 'https://static.clmbtech.com/ad/commons/js/colombia-amp.js',
