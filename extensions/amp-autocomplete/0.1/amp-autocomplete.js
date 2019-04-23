@@ -21,8 +21,7 @@ import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {UrlReplacementPolicy,
   batchFetchJsonFor} from '../../../src/batched-json';
-import {childElementsByTag,
-  closestAncestorElementBySelector, removeChildren} from '../../../src/dom';
+import {childElementsByTag, removeChildren} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user, userAssert} from '../../../src/log';
 import {getValueForExpr, tryParseJson} from '../../../src/json';
@@ -115,19 +114,13 @@ export class AmpAutocomplete extends AMP.BaseElement {
     this.container_ = null;
 
     /**
-     * The reference to the <form> ancestor that contains <amp-autocomplete>.
-     * @private {?Element}
-     */
-    this.formAncestor_ = null;
-
-    /**
      * The developer specified value of the 'autocomplete' attribute on the
      * <form> ancestor that contains <amp-autocomplete>. Used to reset the
      * attribute on blurring the input field. 'on' by default, according to
      * common browser practices.
-     * @private {string}
+     * @private {?string}
      */
-    this.formAncestorAutocompleteAttr_ = 'on';
+    this.initialAutocompleteAttr_ = null;
 
     /** @const @private {!../../../src/service/template-impl.Templates} */
     this.templates_ = Services.templatesFor(this.win);
@@ -162,11 +155,10 @@ export class AmpAutocomplete extends AMP.BaseElement {
         `${TAG} should contain exactly one <input> child`);
     this.inputElement_ = /** @type {!HTMLInputElement} */ (inputElements[0]);
 
-    this.formAncestor_ = closestAncestorElementBySelector(this.element, 'form');
-    userAssert(this.formAncestor_, `${TAG} should be inside a <form> tag`);
-    if (this.formAncestor_.hasAttribute('autocomplete')) {
-      this.formAncestorAutocompleteAttr_ =
-        this.formAncestor_.getAttribute('autocomplete');
+    userAssert(this.inputElement_.form, `${TAG} should be inside a <form> tag`);
+    if (this.inputElement_.form.hasAttribute('autocomplete')) {
+      this.initialAutocompleteAttr_ =
+      this.inputElement_.form.getAttribute('autocomplete');
     }
 
     if (this.templates_.hasTemplate(
@@ -475,9 +467,14 @@ export class AmpAutocomplete extends AMP.BaseElement {
    */
   toggleResultsHandler_(display) {
     // Set/reset "autocomplete" attribute on the <form> ancestor.
-    const updatedAttribute = display ? 'off' :
-      this.formAncestorAutocompleteAttr_;
-    this.formAncestor_.setAttribute('autocomplete', updatedAttribute);
+    if (display) {
+      this.inputElement_.form.setAttribute('autocomplete', 'off');
+    } else if (this.initialAutocompleteAttr_) {
+      this.inputElement_.form.setAttribute('autocomplete',
+          this.initialAutocompleteAttr_);
+    } else {
+      this.inputElement_.form.removeAttribute('autocomplete');
+    }
 
     // Toggle results.
     return this.mutateElement(() => {
