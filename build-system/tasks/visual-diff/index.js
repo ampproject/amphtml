@@ -47,7 +47,7 @@ let Percy;
 
 // CSS widths: iPhone: 375, Pixel: 411, Desktop: 1400.
 const DEFAULT_SNAPSHOT_OPTIONS = {widths: [375, 411, 1400]};
-const SNAPSHOT_EMPTY_BUILD_OPTIONS = {widths: [375]};
+const SNAPSHOT_SINGLE_BUILD_OPTIONS = {widths: [375]};
 const VIEWPORT_WIDTH = 1400;
 const VIEWPORT_HEIGHT = 100000;
 const HOST = 'localhost';
@@ -384,7 +384,7 @@ async function generateSnapshots(percy, webpages) {
     const page = await newPage(browser);
     await page.goto(
         `http://${HOST}:${PORT}/examples/visual-tests/blank-page/blank.html`);
-    await percy.snapshot('Blank page', page, SNAPSHOT_EMPTY_BUILD_OPTIONS);
+    await percy.snapshot('Blank page', page, SNAPSHOT_SINGLE_BUILD_OPTIONS);
   }
 
   log('verbose', 'Generating snapshots...');
@@ -569,7 +569,7 @@ async function createEmptyBuild() {
   await page.goto(
       `http://${HOST}:${PORT}/examples/visual-tests/blank-page/blank.html`)
       .then(() => {}, () => {});
-  await percy.snapshot('Blank page', page, SNAPSHOT_EMPTY_BUILD_OPTIONS);
+  await percy.snapshot('Blank page', page, SNAPSHOT_SINGLE_BUILD_OPTIONS);
   await percy.finalizeBuild();
 }
 
