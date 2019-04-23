@@ -22,7 +22,6 @@ const fs = require('fs');
 const gulp = require('gulp-help')(require('gulp'));
 const JSON5 = require('json5');
 const path = require('path');
-const promiseRetry = require('promise-retry');
 const request = BBPromise.promisify(require('request'));
 const sleep = require('sleep-promise');
 const tryConnect = require('try-net-connect');
@@ -55,6 +54,7 @@ const HOST = 'localhost';
 const PORT = 8000;
 const WEBSERVER_TIMEOUT_RETRIES = 10;
 const NAVIGATE_TIMEOUT_MS = 3000;
+const NAVIGATE_RETRIES = 3;
 const MAX_PARALLEL_TABS = 10;
 const WAIT_FOR_TABS_MS = 1000;
 const BUILD_STATUS_URL = 'https://amphtml-percy-status-checker.appspot.com/status';
@@ -440,19 +440,25 @@ async function snapshotWebpages(percy, browser, webpages) {
       // build. Also attempt to wait until there are no more network requests.
       // This method is flaky since Puppeteer doesn't always understand Chrome's
       // network activity, so ignore timeouts again.
-      const pagePromise = promiseRetry({retries: 2}, async(retry, number) => {
-        hasWarnings = number > 1;
-        await page.goto(fullUrl, {waitUntil: 'networkidle0'}).catch(retry);
+      const pagePromise = new Promise(async(resolve, reject) => {
+        let lastNavigationError;
+        for (let attempt = 0; attempt < NAVIGATE_RETRIES; attempt++) {
+          try {
+            resolve(page.goto(fullUrl, {waitUntil: 'networkidle0'}));
+          } catch (navigationError) {
+            hasWarnings = true;
+            lastNavigationError = navigationError;
+            addTestError(testErrors, name,
+                'The browser test runner failed on attempt number ' +
+                (attempt + 1) + ' to navigate to the test page',
+                navigationError, /* fatal */ false);
+          }
+        }
+        reject(lastNavigationError);
       })
           .then(() => {
             log('verbose', 'Page navigation of test', colors.yellow(name),
                 'is done, verifying page');
-            if (hasWarnings) {
-              addTestError(testErrors, name,
-                  'The browser test runner had to retry navigation to the ' +
-                  'test page, most likely due to timeouts', /* error */ null,
-                  /* fatal */ false);
-            }
           })
           .catch(navigationError => {
             hasWarnings = true;
