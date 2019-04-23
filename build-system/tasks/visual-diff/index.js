@@ -415,7 +415,6 @@ async function snapshotWebpages(percy, browser, webpages) {
   for (const webpage of webpages) {
     const {viewport, name: pageName} = webpage;
     let hasWarnings = false;
-    let wasRetried = false;
     for (const [testName, testFunction] of Object.entries(webpage.tests_)) {
       // Chrome supports redirecting <anything>.localhost to localhost, while
       // respecting domain name boundaries. This allows each test to be
@@ -442,13 +441,13 @@ async function snapshotWebpages(percy, browser, webpages) {
       // This method is flaky since Puppeteer doesn't always understand Chrome's
       // network activity, so ignore timeouts again.
       const pagePromise = promiseRetry({retries: 2}, async(retry, number) => {
-        wasRetried = number > 1;
+        hasWarnings = number > 1;
         await page.goto(fullUrl, {waitUntil: 'networkidle0'}).catch(retry);
       })
           .then(() => {
             log('verbose', 'Page navigation of test', colors.yellow(name),
                 'is done, verifying page');
-            if (wasRetried) {
+            if (hasWarnings) {
               addTestError(testErrors, name,
                   'The browser test runner had to retry navigation to the ' +
                   'test page, most likely due to timeouts', /* error */ null,
