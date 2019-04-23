@@ -134,6 +134,7 @@ export class GoogleSubscriptionsPlatform {
             this.getServiceId());
       } else if (
         e.flow == 'subscribe' ||
+        e.flow == 'contribute' ||
         e.flow == 'showContributionOptions' ||
         e.flow == 'showOffers'
       ) {
@@ -349,6 +350,17 @@ export class GoogleSubscriptionsPlatform {
 
   /** @override */
   executeAction(action) {
+    /**
+     * The contribute and subscribe flows are not called
+     * directly with a sku to avoid baking sku detail into
+     * a page that may be cached for an extended time.
+     * Instead we use showOffers and showContributionOptions
+     * which get sku info from the server.
+     * 
+     * Note: we do handle events form the contribute and
+     * subscribe flows elsewhere since they are invoked after
+     * offer selection.
+     */
     if (action == 'subscribe') {
       this.runtime_.showOffers({
         list: 'amp',
