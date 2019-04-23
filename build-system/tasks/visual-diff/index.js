@@ -507,7 +507,7 @@ async function snapshotWebpages(percy, browser, webpages) {
             log('travis', hasWarnings ? colors.yellow('●') : colors.cyan('●'));
           })
           .catch(testError => {
-            log('travis', colors.red('○'));
+            log('travis', colors.red('●'));
             addTestError(testErrors, name, 'Unknown failure in test page',
                 testError, /* fatal */ true);
           })
