@@ -416,7 +416,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
           throw new Error(`Unexpected filter: ${this.filter_}`);
       }
     });
-    
+
     return this.truncateToMaxEntries_(filteredData);
   }
 
@@ -434,19 +434,13 @@ export class AmpAutocomplete extends AMP.BaseElement {
       return true;
     }
 
-    // Remove '.'
-    item = item.replace(/[\.]+/g, '');
-    input = input.replace(/[\.]+/g, '');
-
-    // Split by special characters or space ' '
-    const itemTokens = item.split(/[`~(){}_|+\-;:\'",\{\}\[\]\\\/ ]+/g);
-    const inputTokens = input.split(/[`~(){}_|+\-;:\'",\{\}\[\]\\\/ ]+/g);
+    const itemTokens = this.tokenizeString_(item);
+    const inputTokens = this.tokenizeString_(input);
 
     // Match each input token (except the last one) to an item token
-    const itemTokensMap = this.tokensArrayToMap_(itemTokens);
+    const itemTokensMap = this.mapFromTokensArray_(itemTokens);
     const lastInputToken = inputTokens[inputTokens.length - 1];
     inputTokens.splice(inputTokens.length - 1, 1);
-
     let match = true;
     inputTokens.forEach(token => {
       if (token === '') {
@@ -472,13 +466,25 @@ export class AmpAutocomplete extends AMP.BaseElement {
   }
 
   /**
+   * Takes a string, removes '.', and splits by special characters.
+   * Returns the resulting array of tokens.
+   * @param {string} inputStr
+   * @return {!Array<string>}
+   * @private
+   */
+  tokenizeString_(inputStr) {
+    inputStr = inputStr.replace(/[\.]+/g, '');
+    return inputStr.split(/[`~(){}_|+\-;:\'",\{\}\[\]\\\/ ]+/g);
+  }
+
+  /**
    * Returns the given tokens array as a dictionary of key: token (str) and
    * value: number of occurrences.
    * @param {!Array<string>} tokens
    * @return {!Map<string, number>}
    * @private
    */
-  tokensArrayToMap_(tokens) {
+  mapFromTokensArray_(tokens) {
     const tokensMap = new Map();
     tokens.forEach(token => {
       const count = tokensMap.has(token) ? tokensMap.get(token) + 1 : 1;
