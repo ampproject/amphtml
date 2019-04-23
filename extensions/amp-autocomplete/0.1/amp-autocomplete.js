@@ -26,6 +26,7 @@ import {childElementsByTag,
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user, userAssert} from '../../../src/log';
 import {getValueForExpr, tryParseJson} from '../../../src/json';
+import {hasOwn, map, ownProperty} from '../../../src/utils/object';
 import {includes, startsWith} from '../../../src/string';
 import {isEnumValue} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
@@ -424,6 +425,18 @@ export class AmpAutocomplete extends AMP.BaseElement {
    * Returns true if the given input string is a token-prefix match on the
    * given item string. Assumes toLocaleLowerCase() has been performed on both
    * parameters.
+   *
+   * Matches:
+   * washington dc, dc
+   * washington dc, wash
+   * washington dc, dc washington
+   * new york ny, new york
+   *
+   * Non-matches:
+   * washington dc, district of columbia
+   * washington dc, washington d c
+   * washington dc, ashington dc
+   *
    * @param {string} item
    * @param {string} input
    * @return {boolean}
@@ -442,23 +455,25 @@ export class AmpAutocomplete extends AMP.BaseElement {
     const lastInputToken = inputTokens[inputTokens.length - 1];
     inputTokens.splice(inputTokens.length - 1, 1);
     let match = true;
-    inputTokens.forEach(token => {
+    for (let i = 0; i < inputTokens.length; i++) {
+      const token = inputTokens[i];
       if (token === '') {
-        return;
+        continue;
       }
-      if (!itemTokensMap.has(token)) {
-        return match = false;
+      if (!hasOwn(itemTokensMap, token)) {
+        match = false;
+        continue;
       }
-      const count = itemTokensMap.get(token);
+      const count = ownProperty(itemTokensMap, token);
       if (count > 1) {
-        itemTokensMap.set(token, count - 1);
+        itemTokensMap[token] = count - 1;
       } else {
-        itemTokensMap.delete(token);
+        delete itemTokensMap[token];
       }
-    });
+    }
 
     // Return that the last input token is a prefix of one of the item tokens
-    const remainingItemTokens = Array.from(itemTokensMap.keys());
+    const remainingItemTokens = Object.keys(itemTokensMap);
     return match && (lastInputToken === '' ||
       remainingItemTokens.some(itemToken => {
         return startsWith(itemToken, lastInputToken);
@@ -474,21 +489,22 @@ export class AmpAutocomplete extends AMP.BaseElement {
    */
   tokenizeString_(inputStr) {
     inputStr = inputStr.replace(/[\.]+/g, '');
-    return inputStr.split(/[`~(){}_|+\-;:\'",\{\}\[\]\\\/ ]+/g);
+    return inputStr.split(/[`~(){}_|+\-;:\'",\[\]\\\/ ]+/g);
   }
 
   /**
    * Returns the given tokens array as a dictionary of key: token (str) and
    * value: number of occurrences.
    * @param {!Array<string>} tokens
-   * @return {!Map<string, number>}
+   * @return {!Object<string, number>}
    * @private
    */
   mapFromTokensArray_(tokens) {
-    const tokensMap = new Map();
+    const tokensMap = map();
     tokens.forEach(token => {
-      const count = tokensMap.has(token) ? tokensMap.get(token) + 1 : 1;
-      tokensMap.set(token, count);
+      const count = hasOwn(tokensMap, token) ?
+        ownProperty(tokensMap, token) + 1 : 1;
+      tokensMap[token] = count;
     });
     return tokensMap;
   }
