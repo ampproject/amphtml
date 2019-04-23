@@ -60,13 +60,17 @@ const BUILD_STATUS_URL = 'https://amphtml-percy-status-checker.appspot.com/statu
 
 const ROOT_DIR = path.resolve(__dirname, '../../../');
 
-// Script snippets that execute inside the page.
+// JavaScript snippets that execute inside the page.
 const WRAP_IN_IFRAME_SNIPPET = fs.readFileSync(
     path.resolve(__dirname, 'snippets/iframe-wrapper.js'), 'utf8');
 const REMOVE_AMP_SCRIPTS_SNIPPET = fs.readFileSync(
     path.resolve(__dirname, 'snippets/remove-amp-scripts.js'), 'utf8');
 const FREEZE_FORM_VALUE_SNIPPET = fs.readFileSync(
     path.resolve(__dirname, 'snippets/freeze-form-values.js'), 'utf8');
+
+// HTML snippet to create an error page snapshot.
+const SNAPSHOT_ERROR_SNIPPET = fs.readFileSync(
+    path.resolve(__dirname, 'snippets/snapshot-error.html'), 'utf8');
 
 let browser_;
 let webServerProcess_;
@@ -506,10 +510,16 @@ async function snapshotWebpages(percy, browser, webpages) {
             await percy.snapshot(name, page, snapshotOptions);
             log('travis', hasWarnings ? colors.yellow('●') : colors.cyan('●'));
           })
-          .catch(testError => {
+          .catch(async testError => {
             log('travis', colors.red('●'));
             addTestError(testErrors, name, 'Unknown failure in test page',
                 testError, /* fatal */ true);
+
+            await page.setContent(
+                SNAPSHOT_ERROR_SNIPPET
+                    .replace('__TEST_NAME__', name)
+                    .replace('__TEST_ERROR__', testError.message));
+            await percy.snapshot(name, page, SNAPSHOT_SINGLE_BUILD_OPTIONS);
           })
           .then(async() => {
             await page.close();
