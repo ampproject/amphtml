@@ -22,6 +22,7 @@ const fs = require('fs');
 const gulp = require('gulp-help')(require('gulp'));
 const JSON5 = require('json5');
 const path = require('path');
+const promiseRetry = require('promise-retry');
 const request = BBPromise.promisify(require('request'));
 const sleep = require('sleep-promise');
 const tryConnect = require('try-net-connect');
@@ -414,6 +415,7 @@ async function snapshotWebpages(percy, browser, webpages) {
   for (const webpage of webpages) {
     const {viewport, name: pageName} = webpage;
     let hasWarnings = false;
+    let wasRetried = false;
     for (const [testName, testFunction] of Object.entries(webpage.tests_)) {
       // Chrome supports redirecting <anything>.localhost to localhost, while
       // respecting domain name boundaries. This allows each test to be
@@ -432,15 +434,26 @@ async function snapshotWebpages(percy, browser, webpages) {
       log('verbose', 'Navigating to page', colors.yellow(webpage.url));
 
       // Puppeteer is flaky when it comes to catching navigation requests, so
-      // ignore timeouts. If this was a real non-loading page, this will be
-      // caught in the resulting Percy build. Also attempt to wait until there
-      // are no more network requests. This method is flaky since Puppeteer
-      // doesn't always understand Chrome's network activity, so ignore timeouts
-      // again.
-      const pagePromise = page.goto(fullUrl, {waitUntil: 'networkidle0'})
+      // retry the page navigation up to 3 times (the `retries` parameter is the
+      // number of follow-up attempts, so the total is `retries`+1) and
+      // eventually ignore a final timeout. If this was ends up being a real
+      // non-loading page error, this will be caught in the resulting Percy
+      // build. Also attempt to wait until there are no more network requests.
+      // This method is flaky since Puppeteer doesn't always understand Chrome's
+      // network activity, so ignore timeouts again.
+      const pagePromise = promiseRetry({retries: 2}, async(retry, number) => {
+        wasRetried = number > 1;
+        await page.goto(fullUrl, {waitUntil: 'networkidle0'}).catch(retry);
+      })
           .then(() => {
             log('verbose', 'Page navigation of test', colors.yellow(name),
                 'is done, verifying page');
+            if (wasRetried) {
+              addTestError(testErrors, name,
+                  'The browser test runner had to retry navigation to the ' +
+                  'test page, most likely due to timeouts', /* error */ null,
+                  /* fatal */ false);
+            }
           })
           .catch(navigationError => {
             hasWarnings = true;
