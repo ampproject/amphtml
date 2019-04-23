@@ -3,11 +3,17 @@
 <head>
   <meta charset="utf-8">
   <title>Snapshot Error</title>
+  <style>
+    blockquote {
+      font-family: monospace;
+      background-color: lemonchiffon;
+    }
+  </style>
 </head>
 
 <body>
-  <h1>Snapshot Error for test <code>__TEST_NAME__</h1>
+  <h1>Snapshot error in test <code>__TEST_NAME__</code></h1>
   <p>Inspect the Travis logs for the full error message</p>
-  <pre>__TEST_ERROR__</pre>
+  <blockquote>__TEST_ERROR__</blockquote>
 </body>
 </html>
