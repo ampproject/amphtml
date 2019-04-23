@@ -356,7 +356,7 @@ export class GoogleSubscriptionsPlatform {
      * a page that may be cached for an extended time.
      * Instead we use showOffers and showContributionOptions
      * which get sku info from the server.
-     * 
+     *
      * Note: we do handle events form the contribute and
      * subscribe flows elsewhere since they are invoked after
      * offer selection.
