@@ -932,6 +932,9 @@ function build() {
  * and replaces google-closure-compiler's binary with the nailgun runner
  */
 async function startNailgunServer() {
+  if (argv.single_pass) {
+    return;
+  }
   // Replace default binary with nailgun on linux and macos
   const nailgunRunnerPath =
       require.resolve('./build-system/runner/nailgun/nailgun-runner');
@@ -962,9 +965,11 @@ async function startNailgunServer() {
   const getVersionCmd =
       `${nailgunRunner} --nailgun-port ${NAILGUN_PORT} ` +
       'org.ampproject.AmpCommandLineRunner -- --version';
-  log('Starting', cyan('nailgun-server.jar'), 'on port', cyan(NAILGUN_PORT));
-  exec(stopNailgunServerCmd, {stdio: 'ignore'});
-  execScriptAsync(startNailgunServerCmd, {stdio: 'ignore'});
+  if (!isTravisBuild()) {
+    log('Starting', cyan('nailgun-server.jar'), 'on port', cyan(NAILGUN_PORT));
+  }
+  exec(stopNailgunServerCmd, {stdio: 'pipe'});
+  execScriptAsync(startNailgunServerCmd, {stdio: 'pipe'});
 
   // Ensure that the nailgun server is up and running
   const end = Date.now() + NAILGUN_STARTUP_TIMEOUT_MS;
@@ -988,14 +993,20 @@ async function startNailgunServer() {
  * google-closure-compiler
  */
 async function stopNailgunServer() {
+  if (argv.single_pass) {
+    return;
+  }
   if (nailgunRunnerReplacer) {
     nailgunRunnerReplacer.restore();
   }
   if (process.platform == 'darwin' || process.platform == 'linux') {
     const stopNailgunServerCmd =
         `${nailgunRunner} --nailgun-port ${NAILGUN_PORT} ng-stop`;
-    log('Stopping', cyan('nailgun-server.jar'), 'on port', cyan(NAILGUN_PORT));
-    exec(stopNailgunServerCmd, {stdio: 'ignore'});
+    if (!isTravisBuild()) {
+      log('Stopping', cyan('nailgun-server.jar'), 'on port',
+          cyan(NAILGUN_PORT));
+    }
+    exec(stopNailgunServerCmd, {stdio: 'pipe'});
   }
 }
 
@@ -1016,7 +1027,7 @@ function dist() {
   }
   if (argv.single_pass) {
     if (!isTravisBuild()) {
-      log(green('Not building any AMP extensions in'), cyan('single_pass'),
+      log(green('Building all AMP extensions in'), cyan('single_pass'),
           green('mode.'));
     }
   } else {

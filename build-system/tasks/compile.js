@@ -410,7 +410,8 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
 
     // SIGNIFICANTLY speed up compilation on Mac and Linux using nailgun
     // See https://github.com/facebook/nailgun.
-    if (process.platform == 'darwin' || process.platform == 'linux') {
+    if (!argv.single_pass &&
+        (process.platform == 'darwin' || process.platform == 'linux')) {
       const compilerOptionsArray = [
         '--nailgun-port',
         NAILGUN_PORT,
