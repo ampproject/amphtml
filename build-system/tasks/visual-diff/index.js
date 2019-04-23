@@ -518,7 +518,7 @@ async function snapshotWebpages(percy, browser, webpages) {
             await page.setContent(
                 SNAPSHOT_ERROR_SNIPPET
                     .replace('__TEST_NAME__', name)
-                    .replace('__TEST_ERROR__', testError.error));
+                    .replace('__TEST_ERROR__', testError));
             await percy.snapshot(name, page, SNAPSHOT_SINGLE_BUILD_OPTIONS);
           })
           .then(async() => {
