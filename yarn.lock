@@ -12677,6 +12677,13 @@ require-directory@^2.1.1:
   resolved "https://registry.yarnpkg.com/require-directory/-/require-directory-2.1.1.tgz#8c64ad5fd30dab1c976e2344ffe7f792a6a6df42"
   integrity sha1-jGStX9MNqxyXbiNE/+f3kqam30I=
 
+require-hijack@1.2.1:
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/require-hijack/-/require-hijack-1.2.1.tgz#ccdbf8391870b1806722b086e6cc1ab26a44f15f"
+  integrity sha1-zNv4ORhwsYBnIrCG5swasmpE8V8=
+  dependencies:
+    require-middleware "~1.0.0"
+
 require-main-filename@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/require-main-filename/-/require-main-filename-1.0.1.tgz#97f717b69d48784f5f526a6c5aa8ffdda055a4d1"
@@ -12686,6 +12693,11 @@ require-main-filename@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/require-main-filename/-/require-main-filename-2.0.0.tgz#d0b329ecc7cc0f61649f62215be69af54aa8989b"
   integrity sha512-NKN5kMDylKuldxYLSUfrbo5Tuzh4hd+2E8NPPX02mZtn1VuREQToYe/ZdlJy+J3uCpfaiGF05e7B8W0iXbQHmg==
+
+require-middleware@~1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/require-middleware/-/require-middleware-1.0.0.tgz#9071eeaeb5e4a632cd342447754e5a14b1dfa372"
+  integrity sha1-kHHurrXkpjLNNCRHdU5aFLHfo3I=
 
 require-precompiled@^0.1.0:
   version "0.1.0"
