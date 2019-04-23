@@ -369,6 +369,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       // required.
       only_closure_dependencies: true,
       output_wrapper: wrapper,
+      source_map_include_content: !!argv.full_sourcemaps,
       source_map_location_mapping: '|' + sourceMapBase,
       warning_level: options.verboseLogging ? 'VERBOSE' : 'DEFAULT',
       jscomp_error: [],
