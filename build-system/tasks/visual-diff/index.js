@@ -433,13 +433,12 @@ async function snapshotWebpages(percy, browser, webpages) {
       log('verbose', 'Navigating to page', colors.yellow(webpage.url));
 
       // Puppeteer is flaky when it comes to catching navigation requests, so
-      // retry the page navigation up to 3 times (the `retries` parameter is the
-      // number of follow-up attempts, so the total is `retries`+1) and
-      // eventually ignore a final timeout. If this was ends up being a real
-      // non-loading page error, this will be caught in the resulting Percy
-      // build. Also attempt to wait until there are no more network requests.
-      // This method is flaky since Puppeteer doesn't always understand Chrome's
-      // network activity, so ignore timeouts again.
+      // retry the page navigation up to NAVIGATE_RETRIES times and eventually
+      // ignore a final timeout. If this ends up being a real non-loading page
+      // error, this will be caught in the resulting Percy build. Also attempt
+      // to wait until there are no more network requests. This method is flaky
+      // since Puppeteer doesn't always understand Chrome's network activity, so
+      // ignore timeouts again.
       const pagePromise = new Promise(async(resolve, reject) => {
         let lastNavigationError;
         for (let attempt = 0; attempt < NAVIGATE_RETRIES; attempt++) {
