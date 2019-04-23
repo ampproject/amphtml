@@ -21,15 +21,14 @@ const colors = require('ansi-colors');
 const fs = require('fs-extra');
 const gulp = require('gulp');
 const nop = require('gulp-nop');
-const {isTravisBuild} = require('../travis');
-const {VERSION: internalRuntimeVersion} = require('../internal-version') ;
-
 const rename = require('gulp-rename');
 const rimraf = require('rimraf');
 const shortenLicense = require('../shorten-license');
 const sourcemaps = require('gulp-sourcemaps');
 const {highlight} = require('cli-highlight');
+const {isTravisBuild} = require('../travis');
 const {singlePassCompile} = require('../single-pass');
+const {VERSION: internalRuntimeVersion} = require('../internal-version') ;
 
 const isProdBuild = !!argv.type;
 const queue = [];
@@ -343,7 +342,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
     externs.push('build-system/amp.multipass.extern.js');
 
     /* eslint "google-camelcase/google-camelcase": 0*/
-    const compilerOptions = {
+    let compilerOptions = {
       compilation_level: options.compilationLevel || 'SIMPLE_OPTIMIZATIONS',
       // Turns on more optimizations.
       assume_function_wrapper: true,
@@ -403,10 +402,38 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
 
     let compilerErrors = '';
     const pluginOptions = {
-      platform: ['java'], // Override the JAR used by closure compiler
+      platform: ['java'], // Override the binary used by closure compiler
       extraArguments: ['-XX:+TieredCompilation'], // Significant speed up!
       logger: errors => compilerErrors = errors, // Capture compiler errors
     };
+
+    // SIGNIFICANTLY speed up compilation on Mac and Linux using nailgun
+    // See https://github.com/facebook/nailgun.
+    if (process.platform == 'darwin' || process.platform == 'linux') {
+      const compilerOptionsArray = [
+        '--nailgun-port',
+        '2113',
+        'org.ampproject.AmpCommandLineRunner',
+        '--',
+      ];
+      Object.keys(compilerOptions).forEach(function(option) {
+        const value = compilerOptions[option];
+        if (value instanceof Array) {
+          value.forEach(function(item) {
+            compilerOptionsArray.push('--' + option + '=' + item);
+          });
+        } else {
+          if (value != null) {
+            compilerOptionsArray.push('--' + option + '=' + value);
+          } else {
+            compilerOptionsArray.push('--' + option);
+          }
+        }
+      });
+      compilerOptions = compilerOptionsArray;
+      pluginOptions.platform = ['native']; // nailgun-runner isn't a java binary
+      pluginOptions.extraArguments = null; // Already part of nailgun-server
+    }
 
     // Override to local closure compiler JAR
     closureCompiler.compiler.JAR_PATH =
