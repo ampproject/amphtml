@@ -247,6 +247,24 @@ describes.realWin('amp-autocomplete unit tests', {
         'Unexpected filter: invalid');
   });
 
+  it('tokenizeString_ should return an array of tokens', () => {
+    expect(impl.tokenizeString_('')).to.have.ordered.members(['']);
+    expect(impl.tokenizeString_('a b c')).to.have.ordered.members(
+        ['a', 'b', 'c']);
+    expect(impl.tokenizeString_('a-b-c')).to.have.ordered.members(
+        ['a', 'b', 'c']);
+    expect(impl.tokenizeString_('a. ...b).c')).to.have.ordered.members(
+        ['a', 'b', 'c']);
+  });
+
+  it('mapFromTokensArray_ should return a map of token counts', () => {
+    expect(impl.mapFromTokensArray_([])).to.be.empty;
+    expect(impl.mapFromTokensArray_(['a', 'b', 'c'])).to.have.all.keys(
+        'a', 'b', 'c');
+    expect(impl.mapFromTokensArray_(['a', 'b', 'c', 'a', 'a']))
+        .to.have.all.keys('a', 'b', 'c');
+  });
+
   it('tokenPrefixMatch_ should exhaustively match on complex cases', () => {
     const item = 'washington, district of columbia (d.c.)';
     expect(impl.tokenPrefixMatch_(item, 'washington')).to.be.true;
@@ -294,7 +312,7 @@ describes.realWin('amp-autocomplete unit tests', {
 
   it('should call inputHandler_() on input', () => {
     let renderSpy, toggleResultsSpy;
-    return element.layoutCallback().then(() => {
+    return element.layoutCallback().then(() => {'';
       impl.inputElement_.value = 'a';
       renderSpy = sandbox.spy(impl, 'renderResults_');
       toggleResultsSpy = sandbox.spy(impl, 'toggleResults_');
