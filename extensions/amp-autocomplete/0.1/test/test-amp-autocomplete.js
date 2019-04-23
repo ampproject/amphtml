@@ -312,7 +312,7 @@ describes.realWin('amp-autocomplete unit tests', {
 
   it('should call inputHandler_() on input', () => {
     let renderSpy, toggleResultsSpy;
-    return element.layoutCallback().then(() => {'';
+    return element.layoutCallback().then(() => {
       impl.inputElement_.value = 'a';
       renderSpy = sandbox.spy(impl, 'renderResults_');
       toggleResultsSpy = sandbox.spy(impl, 'toggleResults_');
