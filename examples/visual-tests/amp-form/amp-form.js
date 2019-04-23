@@ -49,8 +49,9 @@ module.exports = {
     ]);
   },
 
+  // TODO(danielrozenberg): fix and restore this test
+  /*
   'try to submit to a dead server': async (page, name) => {
-    await page.setRequestInterception(true);
     page.on('request', interceptedRequest => interceptedRequest.abort());
 
     await page.tap('#name');
@@ -63,4 +64,5 @@ module.exports = {
       'div[submit-error] div[id^="rendered-message-amp-form-"]',
     ]);
   }
+  */
 };

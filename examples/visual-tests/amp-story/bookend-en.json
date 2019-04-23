@@ -17,19 +17,19 @@
       "type": "small",
       "title": "Small article card",
       "url": "http://example.com/1.html",
-      "image": "https://picsum.photos/1600/900?image=981"
+      "image": "/examples/visual-tests/picsum.photos/image981_1600x900.jpg"
     },
     {
       "type": "landscape",
       "title": "Landscape article card",
       "url": "http://example.com/2.html",
-      "image": "https://picsum.photos/1600/900?image=981"
+      "image": "/examples/visual-tests/picsum.photos/image981_1600x900.jpg"
     },
     {
       "type": "portrait",
       "title": "Portrait article card",
       "url": "http://example.com/3.html",
-      "image": "https://picsum.photos/1600/900?image=981"
+      "image": "/examples/visual-tests/picsum.photos/image981_1600x900.jpg"
     },
     {
       "type": "cta-link",
