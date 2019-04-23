@@ -85,7 +85,7 @@ const unminified3pTarget = 'dist.3p/current/integration.js';
 
 const maybeUpdatePackages = isTravisBuild() ? [] : ['update-packages'];
 
-// Also used in build-system/tasks/compile.js
+// Also used in compile.js and single-pass.js
 const CHECK_TYPES_NAILGUN_PORT = '2114';
 const DIST_NAILGUN_PORT = '2115';
 
@@ -945,11 +945,7 @@ function dist() {
   }
   return compileCss(/* watch */ undefined, /* opt_compileAll */ true)
       .then(async() => {
-        if (!argv.single_pass) {
-          await startNailgunServer(DIST_NAILGUN_PORT, /* detached */ false);
-        } else {
-          return Promise.resolve();
-        }
+        await startNailgunServer(DIST_NAILGUN_PORT, /* detached */ false);
       })
       .then(() => {
         return Promise.all([
@@ -977,11 +973,7 @@ function dist() {
           console.log('\n');
         }
       }).then(async() => {
-        if (!argv.single_pass) {
-          await stopNailgunServer(DIST_NAILGUN_PORT);
-        } else {
-          return Promise.resolve();
-        }
+        await stopNailgunServer(DIST_NAILGUN_PORT);
       }).then(() => {
         return copyAliasExtensions();
       }).then(() => {
@@ -1076,12 +1068,8 @@ function checkTypes() {
   }).sort();
   return compileCss()
       .then(async() => {
-        if (!argv.single_pass) {
-          await startNailgunServer(
-              CHECK_TYPES_NAILGUN_PORT, /* detached */ false);
-        } else {
-          return Promise.resolve();
-        }
+        await startNailgunServer(
+            CHECK_TYPES_NAILGUN_PORT, /* detached */ false);
       })
       .then(() => {
         return Promise.all([
@@ -1121,11 +1109,7 @@ function checkTypes() {
           console.log('\n');
         }
       }).then(async() => {
-        if (!argv.single_pass) {
-          await stopNailgunServer(CHECK_TYPES_NAILGUN_PORT);
-        } else {
-          return Promise.resolve();
-        }
+        await stopNailgunServer(CHECK_TYPES_NAILGUN_PORT);
       }).then(() => exitCtrlcHandler(handlerProcess));
 }
 

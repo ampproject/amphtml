@@ -35,7 +35,7 @@ const queue = [];
 let inProgress = 0;
 const MAX_PARALLEL_CLOSURE_INVOCATIONS = 4;
 
-// Also used in gulpfile.js
+// Also used in gulpfile.js and single-pass.js
 const CHECK_TYPES_NAILGUN_PORT = '2114';
 const DIST_NAILGUN_PORT = '2115';
 
@@ -407,16 +407,17 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
     }
 
     let compilerErrors = '';
+    const initOptions = {
+      extraArguments: ['-XX:+TieredCompilation'], // Significant speed up!
+    };
     const pluginOptions = {
       platform: ['java'], // Override the binary used by closure compiler
-      extraArguments: ['-XX:+TieredCompilation'], // Significant speed up!
       logger: errors => compilerErrors = errors, // Capture compiler errors
     };
 
     // SIGNIFICANTLY speed up compilation on Mac and Linux using nailgun
     // See https://github.com/facebook/nailgun.
-    if (!argv.single_pass &&
-        (process.platform == 'darwin' || process.platform == 'linux')) {
+    if (process.platform == 'darwin' || process.platform == 'linux') {
       const compilerOptionsArray = [
         '--nailgun-port',
         options.typeCheckOnly ? CHECK_TYPES_NAILGUN_PORT : DIST_NAILGUN_PORT,
@@ -439,7 +440,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       });
       compilerOptions = compilerOptionsArray; // nailgun-runner takes an array
       pluginOptions.platform = ['native']; // nailgun-runner isn't a java binary
-      pluginOptions.extraArguments = null; // Already part of nailgun-server
+      initOptions.extraArguments = null; // Already part of nailgun-server
     }
 
     // Override to local closure compiler JAR
@@ -454,16 +455,17 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       process.exit(1);
     };
 
+    const compiler = closureCompiler.gulp(initOptions);
     if (options.typeCheckOnly) {
       return gulp.src(srcs, {base: '.'})
-          .pipe(closureCompiler.gulp()(compilerOptions, pluginOptions))
+          .pipe(compiler(compilerOptions, pluginOptions))
           .on('error', handleCompilerError)
           .pipe(nop())
           .on('end', resolve);
     } else {
       return gulp.src(srcs, {base: '.'})
           .pipe(sourcemaps.init({loadMaps: true}))
-          .pipe(closureCompiler.gulp()(compilerOptions, pluginOptions))
+          .pipe(compiler(compilerOptions, pluginOptions))
           .on('error', handleCompilerError)
           .pipe(rename(outputFilename))
           .pipe(sourcemaps.write('.'))

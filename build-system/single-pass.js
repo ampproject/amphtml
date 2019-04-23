@@ -17,17 +17,19 @@
 const babel = require('@babel/core');
 const babelify = require('babelify');
 const browserify = require('browserify');
-const ClosureCompiler = require('google-closure-compiler').compiler;
+const closureCompiler = require('google-closure-compiler');
 const colors = require('ansi-colors');
 const conf = require('./build.conf');
 const devnull = require('dev-null');
 const fs = require('fs-extra');
+const gulp = require('gulp');
 const log = require('fancy-log');
 const minimist = require('minimist');
 const move = require('glob-move');
 const path = require('path');
 const Promise = require('bluebird');
 const relativePath = require('path').relative;
+const sourcemaps = require('gulp-sourcemaps');
 const tempy = require('tempy');
 const through = require('through2');
 const {extensionBundles, altMainBundles, TYPES} = require('../bundles.config');
@@ -47,6 +49,13 @@ if (!singlePassDest.endsWith('/')) {
 }
 
 const SPLIT_MARKER = `/** SPLIT${Math.floor(Math.random() * 10000)} */`;
+
+// Also used in gulpfile.js and compile.js
+const DIST_NAILGUN_PORT = '2115';
+
+// Used to store transforms and compile v0.js
+const transformDir = tempy.directory();
+const srcs = [];
 
 // Since we no longer pass the process_common_js_modules flag to closure
 // compiler, we must now tranform these common JS node_modules to ESM before
@@ -92,12 +101,8 @@ exports.getFlags = function(config) {
     compilation_level: 'ADVANCED',
     use_types_for_optimization: true,
     rewrite_polyfills: false,
-    create_source_map: '%outname%.map',
-    parse_inline_source_maps: true,
-    apply_input_source_maps: true,
-    source_map_location_mapping: [
-      '|/',
-    ],
+    source_map_include_content: !!argv.full_sourcemaps,
+    source_map_location_mapping: ['|/'],
     //new_type_inf: true,
     language_in: 'ES6',
     language_out: config.language_out || 'ES5',
@@ -148,11 +153,11 @@ exports.getFlags = function(config) {
 exports.getBundleFlags = function(g) {
   const flagsArray = [];
 
-  // Write all the packages (directories with a package.json) as --js
-  // inputs to the flags. Closure compiler reads the packages to resolve
+  // Add all packages (directories with a package.json) to the srcs array.
+  // Closure compiler reads the packages to resolve
   // non-relative module names.
   Object.keys(g.packages).sort().forEach(function(pkg) {
-    flagsArray.push('--js', pkg);
+    srcs.push(pkg);
   });
 
   // Build up the weird flag structure that closure compiler calls
@@ -171,7 +176,7 @@ exports.getBundleFlags = function(g) {
     // TODO(erwinm): This access will break
     const bundle = g.bundles[originalName];
     bundle.modules.forEach(function(js) {
-      flagsArray.push('--js', `${g.tmp}/${js}`);
+      srcs.push(`${g.tmp}/${js}`);
     });
     let name;
     let info = extensionsInfo[bundle.name];
@@ -269,7 +274,7 @@ exports.getGraph = function(entryModules, config) {
       },
     },
     packages: {},
-    tmp: tempy.directory(),
+    tmp: transformDir,
   };
 
   TYPES_VALUES.forEach(type => {
@@ -594,12 +599,8 @@ function postProcessConcat() {
 }
 
 // Formats a single-pass closure compiler error message into a more readable
-// form by dropping the lengthy java invocation line...
-//     java -jar ... --js_module_root <file>
-// ...and then syntax highlighting the error text.
+// form by syntax highlighting the error text.
 function formatSinglePassClosureCompilerError(message) {
-  const singlePassJavaInvocationLine = /java -jar[^]*--js_module_root .*?\n/;
-  message = message.replace(singlePassJavaInvocationLine, '');
   message = highlight(message, {ignoreIllegals: true});
   message = message.replace(/WARNING/g, colors.yellow('WARNING'));
   message = message.replace(/ERROR/g, colors.red('ERROR'));
@@ -608,20 +609,47 @@ function formatSinglePassClosureCompilerError(message) {
 
 function compile(flagsArray) {
   // Override to local closure compiler JAR
-  ClosureCompiler.JAR_PATH = require.resolve('./runner/dist/runner.jar');
+  closureCompiler.compiler.JAR_PATH =
+      require.resolve('./runner/dist/runner.jar');
+
+  let compilerErrors = '';
+
+  const initOptions = {
+    extraArguments: ['-XX:+TieredCompilation'], // Significant speed up!
+  };
+  const pluginOptions = {
+    platform: ['java'], // Override the binary used by closure compiler
+    logger: errors => compilerErrors = errors, // Capture compiler errors
+  };
+
+  const handleCompilerError = function(err) {
+    console./*OK*/error(colors.red('Single pass compilation failed:\n') +
+        formatSinglePassClosureCompilerError(compilerErrors) + '\n' +
+        err);
+    process.exit(1);
+  };
+
+  if (process.platform == 'darwin' || process.platform == 'linux') {
+    flagsArray = [
+      '--nailgun-port',
+      DIST_NAILGUN_PORT,
+      'org.ampproject.AmpCommandLineRunner',
+      '--',
+    ].concat(flagsArray);
+    pluginOptions.platform = ['native']; // nailgun-runner isn't a java binary
+    initOptions.extraArguments = null; // Already part of nailgun-server
+  }
 
   fs.writeFileSync('flags-array.txt', JSON.stringify(flagsArray, null, 2));
-  return new Promise(function(resolve, reject) {
-    new ClosureCompiler(flagsArray).run(function(exitCode, stdOut, stdErr) {
-      if (exitCode == 0) {
-        resolve({
-          warnings: null,
-        });
-      } else {
-        reject(
-            new Error(colors.red('Single pass compilation failed:\n') +
-                formatSinglePassClosureCompilerError(stdErr)));
-      }
-    });
+
+  return new Promise(function(resolve) {
+    const compiler = closureCompiler.gulp(initOptions);
+    return gulp.src(srcs, {base: transformDir})
+        .pipe(sourcemaps.init({loadMaps: true}))
+        .pipe(compiler(flagsArray, pluginOptions))
+        .on('error', handleCompilerError)
+        .pipe(sourcemaps.write('.'))
+        .pipe(gulp.dest('.'))
+        .on('end', resolve);
   });
 }
