@@ -421,8 +421,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
   }
 
   /**
-   * Returns true if the given tokenized input is a token-prefix match on the
-   * given item. Assumes toLocaleLowerCase() has been performed on both
+   * Returns true if the given input string is a token-prefix match on the
+   * given item string. Assumes toLocaleLowerCase() has been performed on both
    * parameters.
    * @param {string} item
    * @param {string} input
