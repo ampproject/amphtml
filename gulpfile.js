@@ -89,9 +89,9 @@ const maybeUpdatePackages = isTravisBuild() ? [] : ['update-packages'];
 // Used to start and stop the Closure nailgun server
 let nailgunRunnerReplacer;
 const nailgunRunner =
-    require.resolve('./build-system/runner/nailgun/nailgun-runner');
+    require.resolve('./third_party/nailgun/nailgun-runner');
 const nailgunServer =
-    require.resolve('./build-system/runner/nailgun/nailgun-server.jar');
+    require.resolve('./third_party/nailgun/nailgun-server.jar');
 const customRunner = require.resolve('./build-system/runner/dist/runner.jar');
 const NAILGUN_PORT = '2113'; // Also used in build-system/tasks/compile.js
 const NAILGUN_STARTUP_TIMEOUT_MS = 5 * 1000;
@@ -936,16 +936,12 @@ async function startNailgunServer() {
     return;
   }
   // Replace default binary with nailgun on linux and macos
-  const nailgunRunnerPath =
-      require.resolve('./build-system/runner/nailgun/nailgun-runner');
   if (process.platform == 'darwin') {
     nailgunRunnerReplacer = require('require-hijack')
-        .replace('google-closure-compiler-osx')
-        .with(nailgunRunnerPath);
+        .replace('google-closure-compiler-osx').with(nailgunRunner);
   } else if (process.platform == 'linux') {
     nailgunRunnerReplacer = require('require-hijack')
-        .replace('google-closure-compiler-linux')
-        .with(nailgunRunnerPath);
+        .replace('google-closure-compiler-linux').with(nailgunRunner);
   } else {
     log(yellow('WARNING:'), 'Cannot run', cyan('nailgun-server.jar'),
         'on', cyan(process.platform));
