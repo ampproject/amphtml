@@ -521,10 +521,13 @@ async function snapshotWebpages(percy, browser, webpages) {
     await sleep(WAIT_FOR_TABS_MS);
   }
   log('travis', '\n');
-  if (isTravisBuild()) {
+  if (isTravisBuild() && testErrors.length > 0) {
     testErrors.sort((a, b) => a.name.localeCompare(b.name));
-    // TODO(danielrozenberg): add Travis log folding.
+    log('info', colors.yellow('Tests warnings and errors:'),
+        'expand this section');
+    console./*OK*/log('travis_fold:start:lint_results\n');
     testErrors.forEach(logTestError);
+    console./*OK*/log('travis_fold:end:visual_tests');
   }
   return testErrors.every(testError => !testError.fatal);
 }
