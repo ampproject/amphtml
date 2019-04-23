@@ -525,7 +525,7 @@ async function snapshotWebpages(percy, browser, webpages) {
     testErrors.sort((a, b) => a.name.localeCompare(b.name));
     log('info', colors.yellow('Tests warnings and errors:'),
         'expand this section');
-    console./*OK*/log('travis_fold:start:lint_results\n');
+    console./*OK*/log('travis_fold:start:visual_tests\n');
     testErrors.forEach(logTestError);
     console./*OK*/log('travis_fold:end:visual_tests');
   }
