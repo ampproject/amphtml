@@ -1755,6 +1755,7 @@ gulp.task('dist', 'Build production binaries', maybeUpdatePackages, dist, {
     noextensions: '  Builds with no extensions.',
     single_pass_dest: '  The directory closure compiler will write out to ' +
             'with --single_pass mode. The default directory is `dist`',
+    full_sourcemaps: '  Includes source code content in sourcemaps',
   },
 });
 gulp.task('watch', 'Watches for changes in files, re-builds when detected',
