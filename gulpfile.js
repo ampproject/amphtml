@@ -93,8 +93,8 @@ const nailgunRunner =
 const nailgunServer =
     require.resolve('./build-system/runner/nailgun/nailgun-server.jar');
 const customRunner = require.resolve('./build-system/runner/dist/runner.jar');
-const NAILGUN_PORT = '2113';
-const NAILGUN_STARTUP_TIMEOUT_MS = 10 * 1000;
+const NAILGUN_PORT = '2113'; // Also used in build-system/tasks/compile.js
+const NAILGUN_STARTUP_TIMEOUT_MS = 5 * 1000;
 
 /**
  * Tasks that should print the `--nobuild` help text.
@@ -928,10 +928,11 @@ function build() {
 }
 
 /**
- * Starts a nailgun server that provides a fast running closure compiler, and
- * replaces the compiler used by google-closure-compiler with the nailgun runner
+ * Starts a nailgun server (provides a fast-running closure compiler instance),
+ * and replaces google-closure-compiler's binary with the nailgun runner
  */
 async function startNailgunServer() {
+  // Replace default binary with nailgun on linux and macos
   const nailgunRunnerPath =
       require.resolve('./build-system/runner/nailgun/nailgun-runner');
   if (process.platform == 'darwin') {
@@ -945,10 +946,13 @@ async function startNailgunServer() {
   } else {
     log(yellow('WARNING:'), 'Cannot run', cyan('nailgun-server.jar'),
         'on', cyan(process.platform));
-    log(yellow('WARNING:'), 'Closure compiler will be significantly faster on',
+    log(yellow('WARNING:'),
+        'Closure compiler will be significantly slower than on',
         cyan('macos'), 'or', cyan('linux'));
     return;
   }
+
+  // Start up the nailgun server after cleaning up old instances (if any)
   const startNailgunServerCmd =
       'java -XX:+TieredCompilation -server -cp ' +
       `${nailgunServer}:${customRunner} ` +
@@ -958,11 +962,11 @@ async function startNailgunServer() {
   const getVersionCmd =
       `${nailgunRunner} --nailgun-port ${NAILGUN_PORT} ` +
       'org.ampproject.AmpCommandLineRunner -- --version';
-
   log('Starting', cyan('nailgun-server.jar'), 'on port', cyan(NAILGUN_PORT));
   exec(stopNailgunServerCmd, {stdio: 'ignore'});
   execScriptAsync(startNailgunServerCmd, {stdio: 'ignore'});
 
+  // Ensure that the nailgun server is up and running
   const end = Date.now() + NAILGUN_STARTUP_TIMEOUT_MS;
   while (Date.now() < end) {
     try {
@@ -980,7 +984,7 @@ async function startNailgunServer() {
 }
 
 /**
- * Stops the nailgun server if it's running, and restores the compiler used by
+ * Stops the nailgun server if it's running, and restores the binary used by
  * google-closure-compiler
  */
 async function stopNailgunServer() {
@@ -1018,7 +1022,6 @@ function dist() {
   } else {
     parseExtensionFlags();
   }
-
   return compileCss(/* watch */ undefined, /* opt_compileAll */ true)
       .then(async() => {
         await startNailgunServer();

@@ -34,6 +34,7 @@ const isProdBuild = !!argv.type;
 const queue = [];
 let inProgress = 0;
 const MAX_PARALLEL_CLOSURE_INVOCATIONS = 4;
+const NAILGUN_PORT = '2113'; // Also used in gulpfile.js
 
 // Compiles AMP with the closure compiler. This is intended only for
 // production use. During development we intend to continue using
@@ -412,7 +413,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
     if (process.platform == 'darwin' || process.platform == 'linux') {
       const compilerOptionsArray = [
         '--nailgun-port',
-        '2113',
+        NAILGUN_PORT,
         'org.ampproject.AmpCommandLineRunner',
         '--',
       ];
@@ -430,7 +431,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
           }
         }
       });
-      compilerOptions = compilerOptionsArray;
+      compilerOptions = compilerOptionsArray; // nailgun-runner takes an array
       pluginOptions.platform = ['native']; // nailgun-runner isn't a java binary
       pluginOptions.extraArguments = null; // Already part of nailgun-server
     }
@@ -439,10 +440,11 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
     closureCompiler.compiler.JAR_PATH =
         require.resolve('../runner/dist/runner.jar');
 
-    const handleCompilerError = function() {
+    const handleCompilerError = function(err) {
       console./*OK*/error(colors.red(
           'Compilation failed for ' + outputFilename + ':\n') +
-          formatClosureCompilerError(compilerErrors));
+          formatClosureCompilerError(compilerErrors) + '\n' +
+          err);
       process.exit(1);
     };
 
