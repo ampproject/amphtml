@@ -21,7 +21,6 @@
  */
 
 import {AccessController} from './access-controller';
-import {Deferred} from '../../../../src/utils/promise';
 import {Messenger} from './messenger';
 
 
@@ -60,13 +59,13 @@ export class AmpAccessIframeApi {
     /** @private {?string} */
     this.protocol_ = null;
 
-    const deferred = new Deferred();
+    /** @private {?function()} */
+    this.connectedResolver_ = null;
 
     /** @private @const {!Promise} */
-    this.connectedPromise_ = deferred.promise;
-
-    /** @private {?function()} */
-    this.connectedResolver_ = deferred.resolve;
+    this.connectedPromise_ = new Promise(resolve => {
+      this.connectedResolver_ = resolve;
+    });
   }
 
   /**
