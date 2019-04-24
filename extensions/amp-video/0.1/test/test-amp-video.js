@@ -187,9 +187,10 @@ describes.realWin('amp-video', {
     });
   });
 
-  // TODO(#21767): re-enable this test.
-  it.skip('should not load a video with http src', () => {
-    expectAsyncConsoleError(/start with/);
+  it('should not load a video with http src', () => {
+    // Both "preconnectCallback" and "propagateLayoutChildren_" will trigger
+    // this error message.
+    expectAsyncConsoleError(/start with/, 2);
     return expect(getVideo({
       src: 'http://example.com/video.mp4',
       width: 160,
@@ -198,6 +199,12 @@ describes.realWin('amp-video', {
       'autoplay': '',
       'muted': '',
       'loop': '',
+    }).catch(e => {
+      const v = doc.querySelector('amp-video');
+      // preconnectCallback could get called again after this test is done, and
+      // trigger an other "start with https://" error that would crash mocha.
+      sandbox.stub(v.implementation_, 'preconnectCallback');
+      throw e;
     })).to.be.rejectedWith(/start with/);
   });
 
