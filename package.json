@@ -37,7 +37,8 @@
     "react-dates": "15.5.3",
     "set-dom": "7.5.2",
     "web-activities": "1.13.0",
-    "web-animations-js": "2.3.1"
+    "web-animations-js": "2.3.1",
+    "yarn": "^1.15.2"
   },
   "devDependencies": {
     "@babel/core": "7.4.4",
