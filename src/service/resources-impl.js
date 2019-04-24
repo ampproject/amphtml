@@ -558,7 +558,8 @@ export class Resources {
     // Most documents have 10 or less AMP tags. By building 20 we should not
     // change the behavior for the vast majority of docs, and almost always
     // catch everything in the first viewport.
-    return this.buildAttemptsCount_++ < MAX_BUILDS_IN_PRERENDER ||
+    return (this.useDocumentOrderPrerendering_ ||
+        this.buildAttemptsCount_++ < MAX_BUILDS_IN_PRERENDER) ||
         this.viewer_.hasBeenVisible();
   }
 
@@ -627,8 +628,7 @@ export class Resources {
       whenUpgradedToCustomElement(el)
           .then(() => el.whenUpgradeCompleted())
           .then(() => {
-            if (this.viewer_.getVisibilityState() !==
-                VisibilityState.PRERENDER) {
+            if (this.viewer_.hasBeenVisible()) {
               return;
             }
             const r = Resource.forElement(el);
