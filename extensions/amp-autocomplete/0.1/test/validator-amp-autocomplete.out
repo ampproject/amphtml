@@ -200,9 +200,7 @@ FAIL
 |        <input type="text">
 |        <script type="application/json"> {} </script>
 |        <template type="amp-mustache" id="amp-template-default">
-|          <div class="city-item" value="{{value}}">
->>         ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:202:8 The attribute 'value' may not appear in tag 'div'. [DISALLOWED_HTML]
+|          <div class="city-item" data-value="{{value}}">
 |              <div>{{value}}</div>
 |              <div class="custom-population">Population: {{population}}</div>        
 |          </div>
@@ -213,9 +211,7 @@ amp-autocomplete/0.1/test/validator-amp-autocomplete.html:202:8 The attribute 'v
 |      <amp-autocomplete src="https://data.com/articles.json?ref=CANONICAL_URL">
 |        <input type="text">
 |        <template type="amp-mustache" id="amp-template-default">
-|          <div class="city-item" value="{{value}}">
->>         ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:213:8 The attribute 'value' may not appear in tag 'div'. [DISALLOWED_HTML]
+|          <div class="city-item" data-value="{{value}}">
 |              <div>{{value}}</div>
 |              <div class="custom-population">Population: {{population}}</div>        
 |          </div>
@@ -238,7 +234,7 @@ amp-autocomplete/0.1/test/validator-amp-autocomplete.html:213:8 The attribute 'v
 |        <input type="text">
 |        <script type="application/json"> {} </script>
 |        <script type="text/plain" template="amp-mustache">
-|          <div class="city-item" value="{{value}}">
+|          <div class="city-item" data-value="{{value}}">
 |            <div>{{value}}</div>
 |            <div class="custom-population">Population: {{population}}</div>        
 |          </div>
@@ -250,7 +246,7 @@ amp-autocomplete/0.1/test/validator-amp-autocomplete.html:213:8 The attribute 'v
 |        <input type="text">
 |        <script type="application/json"> {} </script>
 |        <script type="text/plain" template="amp-mustache">
-|          <div class="city-item" value="{{value}}">
+|          <div class="city-item" data-value="{{value}}">
 |            <div>{{value}}</div>
 |            <div class="custom-population">Population: {{population}}</div>        
 |          </div>

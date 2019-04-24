@@ -152,12 +152,12 @@ export class AmpAutocomplete extends AMP.BaseElement {
       this.templateElement_ =
         this.templates_.findTemplate(this.element,
             'template, script[template]');
-      // Dummy render to verify existence of "value" attribute.
+      // Dummy render to verify existence of "data-value" attribute.
       this.templates_.renderTemplate(this.templateElement_,
           /** @type {!JsonObject} */({})).then(
           renderedEl => {
-            userAssert(renderedEl.hasAttribute('value'),
-                `${TAG} requires <template> tag to have "value" attribute.`);
+            userAssert(renderedEl.hasAttribute('data-value'),
+                `${TAG} requires the "data-value" attribute on <template>.`);
           });
     }
 
@@ -299,7 +299,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     const element = this.element.ownerDocument.createElement('div');
     element.classList.add('i-amphtml-autocomplete-item');
     element.setAttribute('role', 'listitem');
-    element.setAttribute('value', item);
+    element.setAttribute('data-value', item);
     element.textContent = item;
     return element;
   }
@@ -495,7 +495,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
     if (element === null) {
       return;
     }
-    this.inputElement_.value = this.userInput_ = element.getAttribute('value');
+    this.inputElement_.value = this.userInput_ =
+      element.getAttribute('data-value');
     this.fireSelectEvent_(this.userInput_);
     this.clearAllItems_();
   }
@@ -527,7 +528,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     const index = keyUpWhenNoneActive ? delta : this.activeIndex_ + delta;
     const activeIndex = mod(index, this.container_.children.length);
     const newActiveElement = this.container_.children[activeIndex];
-    this.inputElement_.value = newActiveElement.getAttribute('value');
+    this.inputElement_.value = newActiveElement.getAttribute('data-value');
     return this.mutateElement(() => {
       this.resetActiveElement_();
       newActiveElement.classList.add('i-amphtml-autocomplete-item-active');
