@@ -197,24 +197,27 @@ export class AmpList extends AMP.BaseElement {
       this.maybeResizeListToFitItems_();
     });
 
-    const promises = [];
-
     if (this.loadMoreEnabled_) {
-      const loadMorePromise = this.mutateElement(() => {
-        this.getLoadMoreService_().initializeLoadMore();
-        const overflowElement = this.getOverflowElement();
-        if (overflowElement) {
-          toggle(overflowElement, false);
-        }
-        this.element.warnOnMissingOverflow = false;
-      }).then(() => {
-        this.adjustContainerForLoadMoreButton_();
-      });
-      promises.push(loadMorePromise);
+      this.initializeLoadMoreElements_();
     }
+    return this.fetchList_();
+  }
 
-    promises.push(this.fetchList_());
-    return Promise.all(promises);
+  /**
+   * @return {!Promise}
+   * @private
+   */
+  initializeLoadMoreElements_() {
+    return this.mutateElement(() => {
+      this.getLoadMoreService_().initializeLoadMore();
+      const overflowElement = this.getOverflowElement();
+      if (overflowElement) {
+        toggle(overflowElement, false);
+      }
+      this.element.warnOnMissingOverflow = false;
+    }).then(() => {
+      this.adjustContainerForLoadMoreButton_();
+    });
   }
 
   /**
