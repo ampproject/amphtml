@@ -121,6 +121,12 @@ describes.sandboxed('utils/math', {}, () => {
       expect(clamp(-0.0001, 0, 1)).to.equal(0);
       expect(clamp(-21, -20, 0)).to.equal(-20);
     });
+
+    it('should fail if the minimum is greater than the maximum', () => {
+      expect(() => clamp(1, 1, 0)).to.throw();
+      expect(() => clamp(0.3, 0.5, 0.1)).to.throw();
+      expect(() => clamp(0, 10, -10)).to.throw();
+    });
   });
 
   describe('boundValue', () => {
@@ -161,6 +167,12 @@ describes.sandboxed('utils/math', {}, () => {
       expect(boundValue(-5, 0, 1, 0.3)).to.equal(-0.3);
       expect(boundValue(-0.3001, 0, 1, 0.3)).to.equal(-0.3);
       expect(boundValue(-24, -20, 0, 3)).to.equal(-23);
+    });
+
+    it('should fail if the minimum is greater than the maximum', () => {
+      expect(() => boundValue(1, 1, 0, 1)).to.throw();
+      expect(() => boundValue(0.3, 0.5, 0.1, 1)).to.throw();
+      expect(() => boundValue(0, 10, -10, 1)).to.throw();
     });
   });
 
