@@ -510,7 +510,8 @@ describes.realWin('amp-iframe', {
       });
     });
 
-    it('should allow resize events w/ srcdoc', function* () {
+    // TODO(@aghassemi): unskip flaky test
+    it.skip('should allow resize events w/ srcdoc', function* () {
       const srcdoc = `
         <!doctype html>>
         <html>

@@ -153,7 +153,8 @@ describe('amp-ad-xorigin-iframe-handler', () => {
         });
       });
 
-      it('should resolve on message "no-content" ' +
+      // TODO(@lannka): unskip flaky test
+      it.skip('should resolve on message "no-content" ' +
           'and remove non-master iframe', () => {
         expect(iframe.style.visibility).to.equal('hidden');
         iframe.postMessageToParent({
