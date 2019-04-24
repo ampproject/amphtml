@@ -443,7 +443,7 @@ async function snapshotWebpages(percy, browser, webpages) {
         let lastNavigationError;
         for (let attempt = 0; attempt < NAVIGATE_RETRIES; attempt++) {
           try {
-            return page.goto(fullUrl, {waitUntil: 'networkidle0'});
+            return await page.goto(fullUrl, {waitUntil: 'networkidle0'});
           } catch (navigationError) {
             hasWarnings = true;
             lastNavigationError = navigationError;
