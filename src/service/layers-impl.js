@@ -25,6 +25,7 @@ import {remove} from '../utils/array';
 import {rootNodeFor} from '../dom';
 
 const LAYOUT_PROP = '__AMP_LAYOUT';
+const FRAME_PARENT = '__AMP_FRAME_PARENT';
 
 /**
  * The Size of an element.
@@ -1290,9 +1291,26 @@ function sameDocument(element, other) {
  */
 function frameParent(node) {
   devAssert(node.nodeType === Node.DOCUMENT_NODE);
+  const {defaultView} = node;
+  if (!defaultView) {
+    // Somehow, we're disconnected from the window.
+    return null;
+  }
+  return defaultView[FRAME_PARENT] === undefined
+    ? (defaultView[FRAME_PARENT] = frameParentInternal(defaultView))
+    : defaultView[FRAME_PARENT];
+}
+
+/**
+ * Grabs the frameElement of the window, which may throw if the parent window
+ * is cross origin.
+ *
+ * @param {!Window} win
+ * @return {?Element}
+ */
+function frameParentInternal(win) {
   try {
-    const {defaultView} = node;
-    const frameElement = defaultView && defaultView.frameElement;
+    const frameElement = win && win.frameElement;
     return frameElement && getFriendlyIframeEmbedOptional(frameElement)
       ? frameElement
       : null;
