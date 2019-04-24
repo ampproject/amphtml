@@ -83,7 +83,7 @@ export class AmpCldImg extends AMP.BaseElement {
     /** @private {?string} */
     this.publicId_ = null;
 
-    /** @private {?Img} */
+    /** @private {?Element} */
     this.image_ = null;
 
     /** @private {?string} */
@@ -107,11 +107,11 @@ export class AmpCldImg extends AMP.BaseElement {
 
   /** @override */
   mutatedAttributesCallback(mutations) {
-    if (this.img_) {
+    if (this.image_) {
       const attrs = ATTRIBUTES_TO_PROPAGATE.filter(
           value => mutations[value] !== undefined);
       this.propagateAttributes(
-          attrs, this.img_, true);
+          attrs, this.image_, true);
     }
   }
 
@@ -184,7 +184,7 @@ export class AmpCldImg extends AMP.BaseElement {
   updateSrc_() {
     const src = buildUrl(this.publicId_, this.options_);
     console.log('Generated url:' + src);
-    this.image_.setAttribute('src', src);
+    this.image_.setAttribute('src', src || '');
   }
 
   /**
@@ -194,7 +194,8 @@ export class AmpCldImg extends AMP.BaseElement {
   buildOptions_() {
     /* get all values from config, and override them with this element's
        attributes */
-    Object.assign(this.options_, this.config_);
+    const options = this.options_ || {};
+    Object.assign(options, this.config_);
 
     ATTRIBUTES_FOR_OPTIONS.forEach(attr => {
       const attrValue = this.element.getAttribute(attr);

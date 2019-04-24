@@ -9,10 +9,10 @@
 import {utf8Encode} from './utf8-encode';
 
 /**
- * Compute the crc32 checksum if the given string
+ * Compute the crc32 checksum of the given string
  * @private
  * @param {string} str
- * @return {number|*}
+ * @return {number}
  */
 export function crc32(str) {
   str = utf8Encode(str);

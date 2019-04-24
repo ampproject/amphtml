@@ -28,7 +28,7 @@ const CROP_TO_OBJECT_FIT = {
  * is provided in options.
  * @param {Object} options Configuration and transformation options used to
  * generate the url. if src is provided the rest of the options are ignored.
- * @return {string} The constructed url
+ * @return {?string} The constructed url
  */
 export function buildUrl(publicId, options = {}) {
   let url = options.src;
@@ -39,24 +39,25 @@ export function buildUrl(publicId, options = {}) {
         .replace('h_auto', `h_${options.height}`);
   } else {
     patchFetchFormat(options);
-    let type = optionConsume(options, 'type', null);
-    let resourceType = optionConsume(options, 'resourceType', 'image');
-    let version = optionConsume(options, 'version');
+    let type = /** @type {?string} */(optionConsume(options, 'type', null));
+    let resourceType = /** @type {?string} */(optionConsume(options, 'resourceType', 'image'));
+    let version = /** @type {?string} */(optionConsume(options, 'version', null));
     let transformation = generateTransformationString(options);
-    const format = optionConsume(options, 'format');
-    const cloudName = optionConsume(options, 'cloudName');
-    const privateCdn = optionConsume(options, 'privateCdn');
-    const secureDistribution = optionConsume(options, 'secureDistribution');
-    const secure = optionConsume(options, 'secure', true);
-    const cdnSubdomain = optionConsume(options, 'cdnSubdomain');
-    const secureCdnSubdomain = optionConsume(options, 'secureCdnSubdomain');
-    const cname = optionConsume(options, 'cname');
-    const shorten = optionConsume(options, 'shorten');
-    const urlSuffix = optionConsume(options, 'urlSuffix');
-    const useRootPath = optionConsume(options, 'useRootPath');
+    const format = /** @type {?string} */(optionConsume(options, 'format', null));
+    const cloudName = /** @type {string} */(optionConsume(options, 'cloudName', null));
+    const privateCdn = /** @type {?boolean} */(optionConsume(options, 'privateCdn', null));
+    const secureDistribution = /** @type {?string} */(optionConsume(options, 'secureDistribution', null));
+    const secure = /** @type {?boolean} */(optionConsume(options, 'secure', true));
+    const cdnSubdomain = /** @type {?string} */(optionConsume(options, 'cdnSubdomain', null));
+    const secureCdnSubdomain = /** @type {?boolean} */(optionConsume(options, 'secureCdnSubdomain', null));
+    const cname = /** @type {?string} */(optionConsume(options, 'cname', null));
+    const shorten = /** @type {?boolean} */(optionConsume(options, 'shorten', null));
+    const urlSuffix = /** @type {?string} */(optionConsume(options, 'urlSuffix', null));
+    const useRootPath = /** @type {?boolean} */(optionConsume(options, 'useRootPath', null));
 
     const preloaded = /^(image|raw)\/([a-z0-9_]+)\/v(\d+)\/([^#]+)$/.exec(publicId);
     if (preloaded) {
+      debugger;
       resourceType = preloaded[1];
       type = preloaded[2];
       version = preloaded[3];
@@ -126,12 +127,12 @@ export function deriveObjectFit(cropMode) {
  * Generates the url prefix based on the parameters
  * @param {string} source
  * @param {string} cloudName
- * @param {boolean} privateCdn
- * @param {string} cdnSubdomain
- * @param {boolean} secureCdnSubdomain
- * @param {string} cname
- * @param {boolean} secure
- * @param {boolean} secureDistribution
+ * @param {?boolean} privateCdn
+ * @param {?string} cdnSubdomain
+ * @param {?boolean} secureCdnSubdomain
+ * @param {?string} cname
+ * @param {?boolean} secure
+ * @param {?string} secureDistribution
  * @return {string} The generated prefix
  */
 function unsignedUrlPrefix(source, cloudName, privateCdn, cdnSubdomain,
@@ -151,7 +152,7 @@ function unsignedUrlPrefix(source, cloudName, privateCdn, cdnSubdomain,
       sharedDomain = secureDistribution === SHARED_CDN;
     }
     if ((secureCdnSubdomain == null) && sharedDomain) {
-      secureCdnSubdomain = cdnSubdomain;
+      secureCdnSubdomain = cdnSubdomain != null && cdnSubdomain.length > 0;
     }
 
     if (secureCdnSubdomain) {
@@ -182,7 +183,7 @@ function unsignedUrlPrefix(source, cloudName, privateCdn, cdnSubdomain,
 function patchFetchFormat(options = {}) {
   if (options.type === 'fetch') {
     if (options.fetchFormat == null) {
-      options.fetchFormat = optionConsume(options, 'format');
+      options.fetchFormat = optionConsume(options, 'format', null);
     }
   }
 }
@@ -191,8 +192,8 @@ function patchFetchFormat(options = {}) {
  *
  * @param {Object} options
  * @param {string} optionName
- * @param {any} defaultValue
- * @return {any}
+ * @param {*} defaultValue
+ * @return {*}
  */
 function optionConsume(options, optionName, defaultValue) {
   const result = options[optionName];
@@ -206,12 +207,12 @@ function optionConsume(options, optionName, defaultValue) {
 
 /**
  *
- * @param {string} resourceType
- * @param {string} type
- * @param {string} urlSuffix
- * @param {boolean} useRootPath
- * @param {boolean} shorten
- * @return {[string]}
+ * @param {?string} resourceType
+ * @param {?string} type
+ * @param {?string} urlSuffix
+ * @param {?boolean} useRootPath
+ * @param {?boolean} shorten
+ * @return {Array<string>}
  */
 function finalizeResourceType(resourceType, type, urlSuffix, useRootPath,
   shorten) {
@@ -251,10 +252,10 @@ function finalizeResourceType(resourceType, type, urlSuffix, useRootPath,
 
 /**
  *
- * @param {string} source
- * @param {string} format
- * @param {string} urlSuffix
- * @return {[string]}
+ * @param {?string} source
+ * @param {?string} format
+ * @param {?string} urlSuffix
+ * @return {Array<string>}
  */
 function finalizeSource(source, format, urlSuffix) {
   let sourceToSign;
@@ -282,7 +283,7 @@ function finalizeSource(source, format, urlSuffix) {
 /**
  *
  * @param {string} string
- * @param {string} unsafe
+ * @param {RegExp} unsafe
  * @return {string}
  */
 function smartEscape(string, unsafe = /([^a-zA-Z0-9_.\-\/:]+)/g) {
@@ -301,21 +302,21 @@ function smartEscape(string, unsafe = /([^a-zA-Z0-9_.\-\/:]+)/g) {
  */
 function generateTransformationString(options) {
   const width = optionConsume(options, 'transformationWidth',
-      optionConsume(options,'width'));
+      optionConsume(options,'width', null));
   const height = optionConsume(options, 'transformationHeight',
-      optionConsume(options,'height'));
-  const crop = optionConsume(options, 'crop');
-  const gravity = optionConsume(options, 'gravity');
+      optionConsume(options,'height', null));
+  const crop = optionConsume(options, 'crop', null);
+  const gravity = optionConsume(options, 'gravity', null);
 
-  let background = optionConsume(options, 'background');
+  let background = optionConsume(options, 'background', null);
   background = background && background.replace(/^#/, 'rgb:');
-  const effect = optionConsume(options, 'effect');
-  const border = optionConsume(options, 'border');
-  const aspectRatio = optionConsume(options, 'aspectRatio');
-  const dprValue = optionConsume(options, 'dpr');
-  const rawTransformation = optionConsume(options, 'rawTransformation');
-  const fetchFormat = optionConsume(options, 'fetchFormat');
-  const quality = optionConsume(options, 'quality');
+  const effect = optionConsume(options, 'effect', null);
+  const border = optionConsume(options, 'border', null);
+  const aspectRatio = optionConsume(options, 'aspectRatio', null);
+  const dprValue = optionConsume(options, 'dpr', null);
+  const rawTransformation = optionConsume(options, 'rawTransformation', null);
+  const fetchFormat = optionConsume(options, 'fetchFormat', null);
+  const quality = optionConsume(options, 'quality', null);
 
   const transformation = {
     b: background,
@@ -348,7 +349,8 @@ function generateTransformationString(options) {
  * @return {string} the joined string.
  */
 function filterAndJoin_(transformation) {
-  return Object.keys(transformation)
+  const nonNullTransformation = transformation || {};
+  return Object.keys(nonNullTransformation)
       .filter(key => isPresent(transformation[key]))
       .map(key => key + '_' + transformation[key])
       .sort()
