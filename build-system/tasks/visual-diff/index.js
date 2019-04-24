@@ -439,7 +439,7 @@ async function snapshotWebpages(percy, browser, webpages) {
       // to wait until there are no more network requests. This method is flaky
       // since Puppeteer doesn't always understand Chrome's network activity, so
       // ignore timeouts again.
-      const pagePromise = (async() => {
+      pagePromises[name] = (async() => {
         let lastNavigationError;
         for (const attempt = 0; attempt < NAVIGATE_RETRIES; attempt++) {
           try {
@@ -542,7 +542,6 @@ async function snapshotWebpages(percy, browser, webpages) {
             await page.close();
             delete pagePromises[name];
           });
-      pagePromises[name] = pagePromise;
     }
   }
 
