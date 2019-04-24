@@ -53,7 +53,7 @@ const VIEWPORT_HEIGHT = 100000;
 const HOST = 'localhost';
 const PORT = 8000;
 const WEBSERVER_TIMEOUT_RETRIES = 10;
-const NAVIGATE_TIMEOUT_MS = 3000;
+const NAVIGATE_TIMEOUT_MS = 7000;
 const NAVIGATE_RETRIES = 3;
 const NAVIGATE_RETRY_TIMEOUT_MS = 2000;
 const MAX_PARALLEL_TABS = 10;
@@ -444,7 +444,7 @@ async function snapshotWebpages(percy, browser, webpages) {
         let lastNavigationError;
         for (let attempt = 0; attempt < NAVIGATE_RETRIES; attempt++) {
           try {
-            return await page.goto(fullUrl, {waitUntil: 'networkidle0'});
+            return await page.goto(fullUrl, {waitUntil: 'networkidle2'});
           } catch (navigationError) {
             hasWarnings = true;
             lastNavigationError = navigationError;
