@@ -15,6 +15,7 @@
  */
 
 import {CSS} from '../../../build/amp-subscriptions-0.1.css';
+import {CryptoHandler} from './crypto-handler';
 import {Dialog} from './dialog';
 import {DocImpl} from './doc-impl';
 import {Entitlement} from './entitlement';
@@ -110,6 +111,9 @@ export class SubscriptionService {
 
     /** @private {!Object<string, ?Promise<string>>} */
     this.readerIdPromiseMap_ = {};
+
+    /** @private {!CryptoHandler} */
+    this.cryptoHandler_ = new CryptoHandler(ampdoc);
   }
 
   /**
@@ -227,6 +231,10 @@ export class SubscriptionService {
    */
   resolveEntitlementsToStore_(serviceId, entitlement) {
     this.platformStore_.resolveEntitlement(serviceId, entitlement);
+    if (entitlement.decryptedDocumentKey) {
+      this.cryptoHandler_.tryToDecryptDocument(
+          entitlement.decryptedDocumentKey);
+    }
     this.subscriptionAnalytics_.serviceEvent(
         SubscriptionAnalyticsEvents.ENTITLEMENT_RESOLVED,
         serviceId
@@ -242,7 +250,11 @@ export class SubscriptionService {
     if (getMode().development || getMode().localDev) {
       timeout = SERVICE_TIMEOUT * 2;
     }
-    return this.viewer_.whenFirstVisible().then(() => {
+    // Prerender safe platforms don't have to wait for the
+    // page to become visible, all others wait for whenFirstVisible()
+    const visiblePromise = subscriptionPlatform.isPrerenderSafe() ?
+      Promise.resolve() : this.viewer_.whenFirstVisible();
+    return visiblePromise.then(() => {
       return this.timer_.timeoutPromise(
           timeout,
           subscriptionPlatform.getEntitlements()
@@ -342,7 +354,7 @@ export class SubscriptionService {
         viewerPlatform.getEntitlements().then(entitlement => {
           devAssert(entitlement, 'Entitlement is null');
           // Viewer authorization is redirected to use local platform instead.
-          this.platformStore_.resolveEntitlement('local',
+          this.resolveEntitlementsToStore_('local',
               /** @type {!./entitlement.Entitlement}*/ (entitlement));
         }).catch(reason => {
           this.platformStore_.reportPlatformFailureAndFallback('local');
@@ -372,6 +384,14 @@ export class SubscriptionService {
       this.readerIdPromiseMap_[serviceId] = readerId;
     }
     return readerId;
+  }
+
+  /**
+   * @param {string} serviceId
+   * @return {?string}
+   */
+  getEncryptedDocumentKey(serviceId) {
+    return this.cryptoHandler_.getEncryptedDocumentKey(serviceId);
   }
 
   /**

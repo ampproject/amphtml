@@ -78,7 +78,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     this.requests_ = {};
 
     /**
-     * @private {JsonObject}
+     * @private {!JsonObject}
      */
     this.config_ = dict();
 
@@ -163,9 +163,9 @@ export class AmpAnalytics extends AMP.BaseElement {
       this.linkerManager_ = null;
     }
 
-    for (let i = 0; i < this.requests_.length; i++) {
-      this.requests_[i].dispose();
-      delete this.requests_[i];
+    for (const request in this.requests_) {
+      this.requests_[request].dispose();
+      delete this.requests_[request];
     }
   }
 
@@ -224,7 +224,7 @@ export class AmpAnalytics extends AMP.BaseElement {
               return new AnalyticsConfig(this.element).loadConfig();
             })
             .then(config => {
-              this.config_ = config;
+              this.config_ = /** @type {!JsonObject} */ (config);
               return new CookieWriter(this.win,
                   this.element, this.config_).write();
             })
@@ -409,6 +409,11 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @return {boolean} true if the user has opted out.
    */
   hasOptedOut_() {
+    const elementId = this.config_['optoutElementId'];
+    if (elementId && this.win.document.getElementById(elementId)) {
+      return true;
+    }
+
     if (!this.config_['optout']) {
       return false;
     }

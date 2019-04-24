@@ -47,26 +47,32 @@ let Percy;
 
 // CSS widths: iPhone: 375, Pixel: 411, Desktop: 1400.
 const DEFAULT_SNAPSHOT_OPTIONS = {widths: [375, 411, 1400]};
-const SNAPSHOT_EMPTY_BUILD_OPTIONS = {widths: [375]};
+const SNAPSHOT_SINGLE_BUILD_OPTIONS = {widths: [375]};
 const VIEWPORT_WIDTH = 1400;
 const VIEWPORT_HEIGHT = 100000;
 const HOST = 'localhost';
 const PORT = 8000;
 const WEBSERVER_TIMEOUT_RETRIES = 10;
 const NAVIGATE_TIMEOUT_MS = 3000;
+const NAVIGATE_RETRIES = 3;
+const NAVIGATE_RETRY_TIMEOUT_MS = 2000;
 const MAX_PARALLEL_TABS = 10;
 const WAIT_FOR_TABS_MS = 1000;
 const BUILD_STATUS_URL = 'https://amphtml-percy-status-checker.appspot.com/status';
 
 const ROOT_DIR = path.resolve(__dirname, '../../../');
 
-// Script snippets that execute inside the page.
+// JavaScript snippets that execute inside the page.
 const WRAP_IN_IFRAME_SNIPPET = fs.readFileSync(
     path.resolve(__dirname, 'snippets/iframe-wrapper.js'), 'utf8');
 const REMOVE_AMP_SCRIPTS_SNIPPET = fs.readFileSync(
     path.resolve(__dirname, 'snippets/remove-amp-scripts.js'), 'utf8');
 const FREEZE_FORM_VALUE_SNIPPET = fs.readFileSync(
     path.resolve(__dirname, 'snippets/freeze-form-values.js'), 'utf8');
+
+// HTML snippet to create an error page snapshot.
+const SNAPSHOT_ERROR_SNIPPET = fs.readFileSync(
+    path.resolve(__dirname, 'snippets/snapshot-error.html'), 'utf8');
 
 let browser_;
 let webServerProcess_;
@@ -216,7 +222,58 @@ async function newPage(browser, viewport = null) {
   await page.setViewport({width, height});
   page.setDefaultNavigationTimeout(NAVIGATE_TIMEOUT_MS);
   await page.setJavaScriptEnabled(true);
+  await page.setRequestInterception(true);
+  page.on('request', interceptedRequest => {
+    const requestUrl = new URL(interceptedRequest.url());
+    const mockedFilepath = path.join(
+        path.dirname(__filename), 'network-mocks', requestUrl.hostname,
+        encodeURIComponent(
+            `${requestUrl.pathname.substr(1)}${requestUrl.search}`)
+            .replace(/%2F/g, '/'));
+
+    if (requestUrl.hostname == HOST ||
+        requestUrl.hostname.endsWith(`.${HOST}`)) {
+      return interceptedRequest.continue();
+    } else if (fs.existsSync(mockedFilepath)) {
+      log('verbose', 'Mocked network request for',
+          colors.yellow(requestUrl.href), 'with file',
+          colors.cyan(mockedFilepath));
+      return interceptedRequest.respond(fs.readFileSync(mockedFilepath));
+    } else {
+      log('verbose', 'Blocked external network request for',
+          colors.yellow(requestUrl.href));
+      return interceptedRequest.abort('blockedbyclient');
+    }
+  });
   return page;
+}
+
+/**
+ * Adds a test error and logs it if running locally (not on Travis).
+ *
+ * @param {!Array<!JsonObject>} testErrors array of testError objects.
+ * @param {string} name full name of the test.
+ * @param {string} message extra information about the failure.
+ * @param {Error} error error object with stack trace.
+ * @param {boolean} fatal whether this failure should be considered fatal.
+ */
+function addTestError(testErrors, name, message, error, fatal) {
+  const testError = {name, message, error, fatal};
+  if (!isTravisBuild()) {
+    logTestError(testError);
+  }
+  testErrors.push(testError);
+}
+
+/**
+ * Logs a test error (regardless of where it's running).
+ *
+ * @param {!JsonObject} testError object as created by addTestError.
+ */
+function logTestError(testError) {
+  log(testError.fatal ? 'error' : 'warning', 'Error in test',
+      colors.yellow(testError.name), '\n  ', testError.message, '\n  ',
+      testError.error);
 }
 
 /**
@@ -333,7 +390,7 @@ async function generateSnapshots(percy, webpages) {
     const page = await newPage(browser);
     await page.goto(
         `http://${HOST}:${PORT}/examples/visual-tests/blank-page/blank.html`);
-    await percy.snapshot('Blank page', page, SNAPSHOT_EMPTY_BUILD_OPTIONS);
+    await percy.snapshot('Blank page', page, SNAPSHOT_SINGLE_BUILD_OPTIONS);
   }
 
   log('verbose', 'Generating snapshots...');
@@ -358,6 +415,7 @@ async function snapshotWebpages(percy, browser, webpages) {
   let testNumber = 0;
   for (const webpage of webpages) {
     const {viewport, name: pageName} = webpage;
+    let hasWarnings = false;
     for (const [testName, testFunction] of Object.entries(webpage.tests_)) {
       // Chrome supports redirecting <anything>.localhost to localhost, while
       // respecting domain name boundaries. This allows each test to be
@@ -375,22 +433,47 @@ async function snapshotWebpages(percy, browser, webpages) {
       const page = await newPage(browser, viewport);
       log('verbose', 'Navigating to page', colors.yellow(webpage.url));
 
-      // Navigate to an empty page first to support different webpages that only
-      // modify the #anchor name.
-      await page.goto('about:blank').then(() => {}, () => {});
-
       // Puppeteer is flaky when it comes to catching navigation requests, so
-      // ignore timeouts. If this was a real non-loading page, this will be
-      // caught in the resulting Percy build. Also attempt to wait until there
-      // are no more network requests. This method is flaky since Puppeteer
-      // doesn't always understand Chrome's network activity, so ignore timeouts
-      // again.
-      const pagePromise = page.goto(fullUrl, {waitUntil: 'networkidle0'})
-          .then(() => {}, () => {})
-          .then(async() => {
-            log('verbose', 'Navigation to page', colors.yellow(name),
+      // retry the page navigation up to NAVIGATE_RETRIES times and eventually
+      // ignore a final timeout. If this ends up being a real non-loading page
+      // error, this will be caught in the resulting Percy build. Also attempt
+      // to wait until there are no more network requests. This method is flaky
+      // since Puppeteer doesn't always understand Chrome's network activity, so
+      // ignore timeouts again.
+      pagePromises[name] = (async() => {
+        let lastNavigationError;
+        for (let attempt = 0; attempt < NAVIGATE_RETRIES; attempt++) {
+          try {
+            return await page.goto(fullUrl, {waitUntil: 'networkidle0'});
+          } catch (navigationError) {
+            hasWarnings = true;
+            lastNavigationError = navigationError;
+            addTestError(testErrors, name,
+                'The browser test runner failed on attempt number ' +
+                (attempt + 1) + ' to navigate to the test page',
+                navigationError, /* fatal */ false);
+            // Exponential backoff.
+            if (attempt < NAVIGATE_RETRIES) {
+              await sleep(NAVIGATE_RETRY_TIMEOUT_MS * (Math.pow(2, attempt)));
+            }
+          }
+        }
+        throw lastNavigationError;
+      })()
+          .then(() => {
+            log('verbose', 'Page navigation of test', colors.yellow(name),
                 'is done, verifying page');
-
+          })
+          .catch(navigationError => {
+            hasWarnings = true;
+            addTestError(testErrors, name,
+                'The browser test runner failed to complete the navigation ' +
+                'to the test page', navigationError, /* fatal */ false);
+            if (!isTravisBuild()) {
+              log('warning', 'Continuing to verify page regardless...');
+            }
+          })
+          .then(async() => {
             // Visibility evaluations can only be performed on the active tab,
             // even in the headless browser mode.
             await page.bringToFront();
@@ -447,21 +530,23 @@ async function snapshotWebpages(percy, browser, webpages) {
 
             // Finally, send the snapshot to percy.
             await percy.snapshot(name, page, snapshotOptions);
-            log('travis', colors.cyan('●'));
+            log('travis', hasWarnings ? colors.yellow('●') : colors.cyan('●'));
           })
-          .catch(testError => {
-            log('travis', colors.red('○'));
-            if (!isTravisBuild()) {
-              log('error', 'Error in test', colors.cyan(name));
-              log('error', 'Exception thrown:', testError);
-            }
-            testErrors.push({name, testError});
+          .catch(async testError => {
+            log('travis', colors.red('●'));
+            addTestError(testErrors, name, 'Unknown failure in test page',
+                testError, /* fatal */ true);
+
+            await page.setContent(
+                SNAPSHOT_ERROR_SNIPPET
+                    .replace('__TEST_NAME__', name)
+                    .replace('__TEST_ERROR__', testError));
+            await percy.snapshot(name, page, SNAPSHOT_SINGLE_BUILD_OPTIONS);
           })
-          .then(async() => {
+          .finally(async() => {
             await page.close();
             delete pagePromises[name];
           });
-      pagePromises[name] = pagePromise;
     }
   }
 
@@ -469,14 +554,15 @@ async function snapshotWebpages(percy, browser, webpages) {
     await sleep(WAIT_FOR_TABS_MS);
   }
   log('travis', '\n');
-  if (isTravisBuild()) {
-    testErrors.forEach(testErrorObject => {
-      const {name, testError} = testErrorObject;
-      log('error', 'Error in test', colors.cyan(name));
-      log('error', 'Exception thrown:', testError);
-    });
+  if (isTravisBuild() && testErrors.length > 0) {
+    testErrors.sort((a, b) => a.name.localeCompare(b.name));
+    log('info', colors.yellow('Tests warnings and errors:'),
+        'expand this section');
+    console./*OK*/log('travis_fold:start:visual_tests\n');
+    testErrors.forEach(logTestError);
+    console./*OK*/log('travis_fold:end:visual_tests');
   }
-  return testErrors.length == 0;
+  return testErrors.every(testError => !testError.fatal);
 }
 
 /**
@@ -517,7 +603,7 @@ async function createEmptyBuild() {
   await page.goto(
       `http://${HOST}:${PORT}/examples/visual-tests/blank-page/blank.html`)
       .then(() => {}, () => {});
-  await percy.snapshot('Blank page', page, SNAPSHOT_EMPTY_BUILD_OPTIONS);
+  await percy.snapshot('Blank page', page, SNAPSHOT_SINGLE_BUILD_OPTIONS);
   await percy.finalizeBuild();
 }
 
@@ -589,9 +675,11 @@ async function ensureOrBuildAmpRuntimeInTestMode_() {
 }
 
 function installPercy_() {
-  log('info', 'Running', colors.cyan('yarn'), 'to install Percy...');
-  execOrDie('npx yarn --cwd build-system/tasks/visual-diff',
-      {'stdio': 'ignore'});
+  if (!argv.noyarn) {
+    log('info', 'Running', colors.cyan('yarn'), 'to install Percy...');
+    execOrDie('npx yarn --cwd build-system/tasks/visual-diff',
+        {'stdio': 'ignore'});
+  }
 
   puppeteer = require('puppeteer');
   Percy = require('@percy/puppeteer').Percy;
@@ -634,6 +722,7 @@ gulp.task(
         'percy_disabled':
           '  Disables Percy integration (for testing local changes only)',
         'nobuild': '  Skip build',
+        'noyarn': '  Skip calling yarn to install dependencies',
       },
     }
 );

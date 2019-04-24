@@ -31,8 +31,8 @@ export class AmpRiddleQuiz extends AMP.BaseElement {
     /** @private {?number} */
     this.itemHeight_ = 400; //default
 
-    /** @private {?number} */
-    this.riddleId_ = null;
+    /** @private {string} */
+    this.riddleId_ = '';
 
     /** @private {?Function} */
     this.unlistenMessage_ = null;

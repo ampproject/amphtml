@@ -64,10 +64,7 @@ import {
 import {InfoDialog} from './amp-story-info-dialog';
 import {Keys} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
-import {
-  LocalizationService,
-  createPseudoLocale,
-} from './localization';
+import {LocalizationService} from '../../../src/service/localization';
 import {MediaPool, MediaType} from './media-pool';
 import {NavigationState} from './navigation-state';
 import {PaginationButtons} from './pagination-buttons';
@@ -96,6 +93,7 @@ import {
   setImportantStyles,
   toggle,
 } from '../../../src/style';
+import {createPseudoLocale} from '../../../src/localized-strings';
 import {debounce} from '../../../src/utils/rate-limit';
 import {dev, devAssert, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
@@ -142,17 +140,18 @@ const MIN_SWIPE_FOR_HINT_OVERLAY_PX = 50;
 
 /** @enum {string} */
 const Attributes = {
-  STANDALONE: 'standalone',
+  AD_SHOWING: 'ad-showing',
   ADVANCE_TO: 'i-amphtml-advance-to',
+  AUTO_ADVANCE_AFTER: 'auto-advance-after',
+  AUTO_ADVANCE_TO: 'auto-advance-to',
+  DESKTOP_POSITION: 'i-amphtml-desktop-position',
+  ORIENTATION: 'orientation',
   PUBLIC_ADVANCE_TO: 'advance-to',
   RETURN_TO: 'i-amphtml-return-to',
-  AUTO_ADVANCE_TO: 'auto-advance-to',
-  AD_SHOWING: 'ad-showing',
-  // Attributes that desktop css looks for to decide where pages will be placed
-  DESKTOP_POSITION: 'i-amphtml-desktop-position',
-  VISITED: 'i-amphtml-visited', // stacked offscreen to left
-  AUTO_ADVANCE_AFTER: 'auto-advance-after',
+  STANDALONE: 'standalone',
   SUPPORTS_LANDSCAPE: 'supports-landscape',
+  // Attributes that desktop css looks for to decide where pages will be placed
+  VISITED: 'i-amphtml-visited', // stacked offscreen to left
 };
 
 /**
@@ -212,6 +211,14 @@ const HIDE_ON_BOOKEND_SELECTOR =
  * @const {string}
  */
 const DEFAULT_THEME_COLOR = '#202125';
+
+/**
+ * MutationObserverInit options to listen for changes to the `open` attribute.
+ */
+const SIDEBAR_OBSERVER_OPTIONS = {
+  attributes: true,
+  attributeFilter: ['open'],
+};
 
 /**
  * @implements {./media-pool.MediaPoolRoot}
@@ -289,6 +296,10 @@ export class AmpStory extends AMP.BaseElement {
     this.canRotateToDesktopMedia_ = this.win.matchMedia(
         `(min-width: ${DESKTOP_HEIGHT_THRESHOLD}px) and ` +
         `(min-height: ${DESKTOP_WIDTH_THRESHOLD}px)`);
+
+    /** @private @const */
+    this.landscapeOrientationMedia_ =
+        this.win.matchMedia('(orientation: landscape)');
 
     /** @private {?AmpStoryBackground} */
     this.background_ = null;
@@ -869,7 +880,8 @@ export class AmpStory extends AMP.BaseElement {
     const isActualPage =
       pageId =>
         findIndex(this.pages_, page => page.element.id === pageId) >= 0;
-    const historyPage = getHistoryState(this.win, HistoryState.PAGE_ID);
+    const historyPage =
+    /** @type {string} */ (getHistoryState(this.win, HistoryState.PAGE_ID));
 
     if (isExperimentOn(this.win, 'amp-story-branching')) {
       const maybePageId = parseQueryString(this.win.location.hash)['page'];
@@ -1444,39 +1456,63 @@ export class AmpStory extends AMP.BaseElement {
     const uiState = this.getUIType_();
     this.storeService_.dispatch(Action.TOGGLE_UI, uiState);
 
-    if (uiState !== UIType.MOBILE || this.isLandscapeSupported_()) {
+    const isLandscape = this.isLandscape_();
+    const isLandscapeSupported = this.isLandscapeSupported_();
+
+    this.setOrientationAttribute_(isLandscape, isLandscapeSupported);
+
+    if (uiState !== UIType.MOBILE || isLandscapeSupported) {
       // Hides the UI that prevents users from using the LANDSCAPE orientation.
       this.storeService_.dispatch(Action.TOGGLE_VIEWPORT_WARNING, false);
       return;
     }
 
-    // On mobile, maybe display the landscape overlay warning and pause the
-    // story.
-    this.vsync_.run({
-      measure: state => {
-        const {offsetWidth, offsetHeight} = this.element;
-        state.isLandscape = offsetWidth > offsetHeight;
-      },
-      mutate: state => {
-        const viewportWarningState =
-            this.storeService_.get(StateProperty.VIEWPORT_WARNING_STATE);
+    // Only called when the desktop media query is not matched and the landscape
+    // mode is not enabled.
+    this.maybeTriggerViewportWarning_(isLandscape);
+  }
 
-        if (viewportWarningState === state.isLandscape) {
-          return;
-        }
+  /**
+   * Adds an orientation=landscape|portrait attribute.
+   * If the story doesn't explicitly support landscape via the opt-in attribute,
+   * it is always in a portrait orientation.
+   * @param {boolean} isLandscape Whether the viewport is landscape or portrait
+   * @param {boolean} isLandscapeSupported Whether the story supports landscape
+   * @private
+   */
+  setOrientationAttribute_(isLandscape, isLandscapeSupported) {
+    // TODO(#20832) base this check on the size of the amp-story-page, once it
+    // is stored as a store state.
+    this.mutateElement(() => {
+      this.element.setAttribute(
+          Attributes.ORIENTATION,
+          isLandscapeSupported && isLandscape ? 'landscape' : 'portrait');
+    });
+  }
 
-        if (state.isLandscape) {
-          this.pausedStateToRestore_ =
-              !!this.storeService_.get(StateProperty.PAUSED_STATE);
-          this.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
-          this.storeService_.dispatch(Action.TOGGLE_VIEWPORT_WARNING, true);
-        } else {
-          this.storeService_
-              .dispatch(Action.TOGGLE_PAUSED, this.pausedStateToRestore_);
-          this.storeService_.dispatch(Action.TOGGLE_VIEWPORT_WARNING, false);
-        }
-      },
-    }, {});
+  /**
+   * Maybe triggers the viewport warning overlay.
+   * @param {boolean} isLandscape
+   * @private
+   */
+  maybeTriggerViewportWarning_(isLandscape) {
+    if (isLandscape ===
+        this.storeService_.get(StateProperty.VIEWPORT_WARNING_STATE)) {
+      return;
+    }
+
+    this.mutateElement(() => {
+      if (isLandscape) {
+        this.pausedStateToRestore_ =
+            !!this.storeService_.get(StateProperty.PAUSED_STATE);
+        this.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
+        this.storeService_.dispatch(Action.TOGGLE_VIEWPORT_WARNING, true);
+      } else {
+        this.storeService_
+            .dispatch(Action.TOGGLE_PAUSED, this.pausedStateToRestore_);
+        this.storeService_.dispatch(Action.TOGGLE_VIEWPORT_WARNING, false);
+      }
+    });
   }
 
   /**
@@ -1573,6 +1609,14 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
+   * @return {boolean} True if the screen orientation is landscape.
+   * @private
+   */
+  isLandscape_() {
+    return this.landscapeOrientationMedia_.matches;
+  }
+
+  /**
    * @return {boolean} true if this is a standalone story (i.e. this story is
    *     the only content of the document).
    * @private
@@ -1617,16 +1661,13 @@ export class AmpStory extends AMP.BaseElement {
     const actions = Services.actionServiceForDoc(this.element);
     if (this.win.MutationObserver) {
       if (!this.sidebarObserver_) {
-        this.sidebarObserver_ = new this.win.MutationObserver(mutationsList => {
-          if (mutationsList.some(
-              mutation => mutation.attributeName === 'open')) {
-            this.storeService_.dispatch(Action.TOGGLE_SIDEBAR,
-                this.sidebar_.hasAttribute('open'));
-          }
+        this.sidebarObserver_ = new this.win.MutationObserver(() => {
+          this.storeService_.dispatch(Action.TOGGLE_SIDEBAR,
+              this.sidebar_.hasAttribute('open'));
         });
       }
       if (this.sidebar_ && sidebarState) {
-        this.sidebarObserver_.observe(this.sidebar_, {attributes: true});
+        this.sidebarObserver_.observe(this.sidebar_, SIDEBAR_OBSERVER_OPTIONS);
         this.openOpacityMask_();
         actions.execute(this.sidebar_, 'open', /* args */ null,
             /* source */ null, /* caller */ null, /* event */ null,
@@ -2234,7 +2275,8 @@ export class AmpStory extends AMP.BaseElement {
     const historyNavigationPath =
       getHistoryState(this.win, HistoryState.NAVIGATION_PATH);
     if (historyNavigationPath) {
-      this.storyNavigationPath_ = historyNavigationPath;
+      this.storyNavigationPath_ =
+        /** @type {!Array<string>} */ (historyNavigationPath);
     }
   }
 

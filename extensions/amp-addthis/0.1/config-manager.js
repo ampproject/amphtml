@@ -165,7 +165,10 @@ export class ConfigManager {
           }
           break;
         case 3:
-          // "wp anonymous mode" COMING SOON!
+          // "wp anonymous mode"
+          if (productCode) {
+            this.activeToolsMonitor_.recordProductCode(productCode);
+          }
           return;
         default:
           return;
@@ -280,7 +283,9 @@ ConfigManager.PubIdData; // purely for typedef
  *   widgetId:string,
  *   productCode:string,
  *   shareConfig:(Object<string,string>|undefined),
- *   iframe: Element
+ *   iframe: Element,
+ *   atConfig: JsonObject,
+ *   containerClassName: string
  * }}
  */
 ConfigManager.IframeDatum; // purely for typedef
