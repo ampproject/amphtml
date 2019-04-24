@@ -66,11 +66,6 @@ export class MraidInitializer {
     /** @private {boolean} */
     this.fallback_ = false;
 
-    if (getMode().runtime !== 'inabox') {
-      dev().error(TAG, 'Only supported with Inabox');
-      return;
-    }
-
     const ampMraidScripts = this.ampdoc_.getHeadNode().querySelectorAll(
         'script[host-service="amp-mraid"]');
     if (ampMraidScripts.length > 1) {
@@ -84,6 +79,12 @@ export class MraidInitializer {
     const fallbackOn =
         (element.getAttribute(FALLBACK_ON) || '').split(' ');
     this.fallback_ = fallbackOn.includes(FallbackErrorNames.MISMATCH);
+
+    if (getMode().runtime !== 'inabox') {
+      dev().fine(TAG, 'Only supported with Inabox');
+      this.handleMismatch_();
+      return;
+    }
 
     // It looks like we're initiating a network load for mraid from a relative
     // url, but this will actually be intercepted by the mobile app SDK and
