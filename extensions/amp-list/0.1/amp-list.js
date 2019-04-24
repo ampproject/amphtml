@@ -926,18 +926,24 @@ export class AmpList extends AMP.BaseElement {
           // Necessary since load-more elements are toggled in the above block
           this.attemptToFitLoadMore_(dev().assertElement(this.container_));
         }).catch(() => {
-          this.mutateElement(() =>
-            this.getLoadMoreService_().setLoadMoreFailed())
-              .then(() => {
-                this.attemptToFitLoadMoreElement_(
-                    this.getLoadMoreService_().getLoadMoreFailedElement(),
-                    dev().assertElement(this.container_));
-                const loadMoreFailedClickable = this.getLoadMoreService_()
-                    .getLoadMoreFailedClickable();
-                this.unlistenLoadMore_ = listen(
-                    loadMoreFailedClickable,
-                    'click', () => this.loadMoreCallback_(/*opt_reload*/ true));
-              });
+          this.handleLoadMoreFailed_();
+        });
+  }
+
+  /**
+   * @private
+   */
+  handleLoadMoreFailed_() {
+    this.mutateElement(() => this.getLoadMoreService_().setLoadMoreFailed())
+        .then(() => {
+          this.attemptToFitLoadMoreElement_(
+              this.getLoadMoreService_().getLoadMoreFailedElement(),
+              dev().assertElement(this.container_));
+          const loadMoreFailedClickable = this.getLoadMoreService_()
+              .getLoadMoreFailedClickable();
+          this.unlistenLoadMore_ = listen(
+              loadMoreFailedClickable,
+              'click', () => this.loadMoreCallback_(/*opt_reload*/ true));
         });
   }
 
