@@ -123,7 +123,7 @@ export class AmpCldImg extends AMP.BaseElement {
     if (!this.element.getAttribute('src')) {
       /* Assert required fields since we need to construct the url ourselves: */
       this.publicId_ = userAssert(
-          this.element.getAttribute('data-public-id') ,
+          this.element.getAttribute('data-public-id'),
           'The data-public-id attribute is required for <amp-cld-img> %s',
           this.element);
 
@@ -152,7 +152,7 @@ export class AmpCldImg extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     /* set transformation\s width and height based on actual element
-    dimensions: */
+     dimensions: */
     this.options_['width'] = this.roundValue_(this.element.clientWidth);
     this.options_['height'] = this.roundValue_(this.element.clientHeight);
 
@@ -193,7 +193,7 @@ export class AmpCldImg extends AMP.BaseElement {
    */
   buildOptions_() {
     /* get all values from config, and override them with this element's
-       attributes */
+     attributes */
     const options = this.options_ || {};
     Object.assign(options, this.config_);
 

@@ -40,24 +40,36 @@ export function buildUrl(publicId, options = {}) {
   } else {
     patchFetchFormat(options);
     let type = /** @type {?string} */(optionConsume(options, 'type', null));
-    let resourceType = /** @type {?string} */(optionConsume(options, 'resourceType', 'image'));
-    let version = /** @type {?string} */(optionConsume(options, 'version', null));
+    let resourceType = /** @type {?string} */(optionConsume(options,
+        'resourceType', 'image'));
+    let version = /** @type {?string} */(optionConsume(options, 'version',
+        null));
     let transformation = generateTransformationString(options);
-    const format = /** @type {?string} */(optionConsume(options, 'format', null));
-    const cloudName = /** @type {string} */(optionConsume(options, 'cloudName', null));
-    const privateCdn = /** @type {?boolean} */(optionConsume(options, 'privateCdn', null));
-    const secureDistribution = /** @type {?string} */(optionConsume(options, 'secureDistribution', null));
-    const secure = /** @type {?boolean} */(optionConsume(options, 'secure', true));
-    const cdnSubdomain = /** @type {?string} */(optionConsume(options, 'cdnSubdomain', null));
-    const secureCdnSubdomain = /** @type {?boolean} */(optionConsume(options, 'secureCdnSubdomain', null));
+    const format = /** @type {?string} */(optionConsume(options, 'format',
+        null));
+    const cloudName = /** @type {string} */(optionConsume(options, 'cloudName',
+        null));
+    const privateCdn = /** @type {?boolean} */(optionConsume(options,
+        'privateCdn', null));
+    const secureDistribution = /** @type {?string} */(optionConsume(options,
+        'secureDistribution', null));
+    const secure = /** @type {?boolean} */(optionConsume(options, 'secure',
+        true));
+    const cdnSubdomain = /** @type {?string} */(optionConsume(options,
+        'cdnSubdomain', null));
+    const secureCdnSubdomain = /** @type {?boolean} */(optionConsume(options,
+        'secureCdnSubdomain', null));
     const cname = /** @type {?string} */(optionConsume(options, 'cname', null));
-    const shorten = /** @type {?boolean} */(optionConsume(options, 'shorten', null));
-    const urlSuffix = /** @type {?string} */(optionConsume(options, 'urlSuffix', null));
-    const useRootPath = /** @type {?boolean} */(optionConsume(options, 'useRootPath', null));
+    const shorten = /** @type {?boolean} */(optionConsume(options, 'shorten',
+        null));
+    const urlSuffix = /** @type {?string} */(optionConsume(options, 'urlSuffix',
+        null));
+    const useRootPath = /** @type {?boolean} */(optionConsume(options,
+        'useRootPath', null));
 
-    const preloaded = /^(image|raw)\/([a-z0-9_]+)\/v(\d+)\/([^#]+)$/.exec(publicId);
+    const preloaded = /^(image|raw)\/([a-z0-9_]+)\/v(\d+)\/([^#]+)$/.exec(
+        publicId);
     if (preloaded) {
-      debugger;
       resourceType = preloaded[1];
       type = preloaded[2];
       version = preloaded[3];
@@ -81,7 +93,8 @@ export function buildUrl(publicId, options = {}) {
     publicId = finalizedSource[0];
     const sourceToSign = finalizedSource[1];
 
-    if (sourceToSign.indexOf('/') > 0 && !sourceToSign.match(/^v[0-9]+/) && !sourceToSign.match(/^https?:\//)) {
+    if (sourceToSign.indexOf('/') > 0 && !sourceToSign.match(/^v[0-9]+/) &&
+      !sourceToSign.match(/^https?:\//)) {
       if (version == null) {
         version = 1;
       }
@@ -136,7 +149,8 @@ export function deriveObjectFit(cropMode) {
  * @return {string} The generated prefix
  */
 function unsignedUrlPrefix(source, cloudName, privateCdn, cdnSubdomain,
-  secureCdnSubdomain, cname, secure, secureDistribution) {
+  secureCdnSubdomain, cname, secure,
+  secureDistribution) {
   let prefix;
   if (cloudName.indexOf('/') === 0) {
     return '/res' + cloudName;
@@ -264,7 +278,8 @@ function finalizeSource(source, format, urlSuffix) {
     source = smartEscape(source);
     sourceToSign = source;
   } else {
-    source = encodeURIComponent(decodeURIComponent(source)).replace(/%3A/g, ':').replace(/%2F/g, '/');
+    source = encodeURIComponent(decodeURIComponent(source)).replace(/%3A/g, ':')
+        .replace(/%2F/g, '/');
     sourceToSign = source;
     if (!!urlSuffix) {
       if (urlSuffix.match(/[\.\/]/)) {
@@ -302,9 +317,9 @@ function smartEscape(string, unsafe = /([^a-zA-Z0-9_.\-\/:]+)/g) {
  */
 function generateTransformationString(options) {
   const width = optionConsume(options, 'transformationWidth',
-      optionConsume(options,'width', null));
+      optionConsume(options, 'width', null));
   const height = optionConsume(options, 'transformationHeight',
-      optionConsume(options,'height', null));
+      optionConsume(options, 'height', null));
   const crop = optionConsume(options, 'crop', null);
   const gravity = optionConsume(options, 'gravity', null);
 
