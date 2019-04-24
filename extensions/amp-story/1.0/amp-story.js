@@ -476,21 +476,19 @@ export class AmpStory extends AMP.BaseElement {
   initializeMediaQueries_(mediaQueryEls) {
     const service = getMediaQueryService(this.getAmpDoc());
 
-    const onMediaQueryMatch = (matches, attribute) => {
+    const onMediaQueryMatch = (matches, className) => {
       this.mutateElement(() => {
-        matches ?
-          this.element.setAttribute(attribute, '') :
-          this.element.removeAttribute(attribute);
+        this.element.classList.toggle(className, matches);
       });
     };
 
     mediaQueryEls.forEach(el => {
-      const attribute = el.getAttribute('attribute');
+      const className = el.getAttribute('class-name');
       const media = el.getAttribute('media');
 
-      if (attribute && media) {
+      if (className && media) {
         service.onMediaQueryMatch(
-            media, matches => onMediaQueryMatch(matches, attribute));
+            media, matches => onMediaQueryMatch(matches, className));
       }
     });
   }

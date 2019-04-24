@@ -23,7 +23,7 @@ describes.realWin('amp-story-media-query-service', {amp: true}, env => {
   let styleEl;
   let win;
 
-  function setMatcherSize(height, width) {
+  function setMatcherSize(width, height) {
     styleEl.textContent = `
         .i-amphtml-story-media-query-matcher {
           position: absolute;
@@ -36,7 +36,7 @@ describes.realWin('amp-story-media-query-service', {amp: true}, env => {
   function waitForClassName(element, className) {
     return poll(`className ${className} on ${element.tagName}`, () => {
       return element.classList.contains(className);
-    }, undefined, 300);
+    }, undefined /** opt_onError */, 300 /** opt_timeout */);
   };
 
   beforeEach(() => {
@@ -47,7 +47,7 @@ describes.realWin('amp-story-media-query-service', {amp: true}, env => {
     win.document.body.appendChild(storyEl);
 
     styleEl = win.document.createElement('style');
-    setMatcherSize(100, 200);
+    setMatcherSize(200, 100);
     storyEl.appendChild(styleEl);
 
     return new Promise(resolve => {
@@ -101,7 +101,7 @@ describes.realWin('amp-story-media-query-service', {amp: true}, env => {
           storyEl.classList.toggle('portrait', matches);
         })
         .then(() => {
-          setMatcherSize(300, 100);
+          setMatcherSize(100, 300);
           return waitForClassName(storyEl, 'portrait');
         });
   });
