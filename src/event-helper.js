@@ -131,6 +131,7 @@ export function listenOncePromise(element, eventType, opt_evtListenerOpts,
  */
 export function isLoaded(eleOrWindow) {
   return !!(eleOrWindow.complete || eleOrWindow.readyState == 'complete'
+      || (eleOrWindow instanceof HTMLMediaElement && eleOrWindow.readyState > 0)
       // If the passed in thing is a Window, infer loaded state from
       //
       || (eleOrWindow.document
@@ -154,14 +155,13 @@ export function loadPromise(eleOrWindow) {
   const loadingPromise = new Promise((resolve, reject) => {
     // Listen once since IE 5/6/7 fire the onload event continuously for
     // animated GIFs.
-    const {tagName} = eleOrWindow;
-    if (tagName === 'AUDIO' || tagName === 'VIDEO') {
-      unlistenLoad = listenOnce(eleOrWindow, 'loadstart', resolve);
+    if (eleOrWindow instanceof HTMLMediaElement) {
+      unlistenLoad = listenOnce(eleOrWindow, 'loadedmetadata', resolve);
     } else {
       unlistenLoad = listenOnce(eleOrWindow, 'load', resolve);
     }
     // For elements, unlisten on error (don't for Windows).
-    if (tagName) {
+    if (eleOrWindow.tagName) {
       unlistenError = listenOnce(eleOrWindow, 'error', reject);
     }
   });
