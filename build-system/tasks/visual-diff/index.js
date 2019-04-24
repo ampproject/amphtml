@@ -47,7 +47,7 @@ let Percy;
 
 // CSS widths: iPhone: 375, Pixel: 411, Desktop: 1400.
 const DEFAULT_SNAPSHOT_OPTIONS = {widths: [375, 411, 1400]};
-const SNAPSHOT_EMPTY_BUILD_OPTIONS = {widths: [375]};
+const SNAPSHOT_SINGLE_BUILD_OPTIONS = {widths: [375]};
 const VIEWPORT_WIDTH = 1400;
 const VIEWPORT_HEIGHT = 100000;
 const HOST = 'localhost';
@@ -60,13 +60,17 @@ const BUILD_STATUS_URL = 'https://amphtml-percy-status-checker.appspot.com/statu
 
 const ROOT_DIR = path.resolve(__dirname, '../../../');
 
-// Script snippets that execute inside the page.
+// JavaScript snippets that execute inside the page.
 const WRAP_IN_IFRAME_SNIPPET = fs.readFileSync(
     path.resolve(__dirname, 'snippets/iframe-wrapper.js'), 'utf8');
 const REMOVE_AMP_SCRIPTS_SNIPPET = fs.readFileSync(
     path.resolve(__dirname, 'snippets/remove-amp-scripts.js'), 'utf8');
 const FREEZE_FORM_VALUE_SNIPPET = fs.readFileSync(
     path.resolve(__dirname, 'snippets/freeze-form-values.js'), 'utf8');
+
+// HTML snippet to create an error page snapshot.
+const SNAPSHOT_ERROR_SNIPPET = fs.readFileSync(
+    path.resolve(__dirname, 'snippets/snapshot-error.html'), 'utf8');
 
 let browser_;
 let webServerProcess_;
@@ -384,7 +388,7 @@ async function generateSnapshots(percy, webpages) {
     const page = await newPage(browser);
     await page.goto(
         `http://${HOST}:${PORT}/examples/visual-tests/blank-page/blank.html`);
-    await percy.snapshot('Blank page', page, SNAPSHOT_EMPTY_BUILD_OPTIONS);
+    await percy.snapshot('Blank page', page, SNAPSHOT_SINGLE_BUILD_OPTIONS);
   }
 
   log('verbose', 'Generating snapshots...');
@@ -409,6 +413,7 @@ async function snapshotWebpages(percy, browser, webpages) {
   let testNumber = 0;
   for (const webpage of webpages) {
     const {viewport, name: pageName} = webpage;
+    let hasWarnings = false;
     for (const [testName, testFunction] of Object.entries(webpage.tests_)) {
       // Chrome supports redirecting <anything>.localhost to localhost, while
       // respecting domain name boundaries. This allows each test to be
@@ -438,6 +443,7 @@ async function snapshotWebpages(percy, browser, webpages) {
                 'is done, verifying page');
           })
           .catch(navigationError => {
+            hasWarnings = true;
             addTestError(testErrors, name,
                 'The browser test runner failed to complete the navigation ' +
                 'to the test page', navigationError, /* fatal */ false);
@@ -502,12 +508,18 @@ async function snapshotWebpages(percy, browser, webpages) {
 
             // Finally, send the snapshot to percy.
             await percy.snapshot(name, page, snapshotOptions);
-            log('travis', colors.cyan('●'));
+            log('travis', hasWarnings ? colors.yellow('●') : colors.cyan('●'));
           })
-          .catch(testError => {
-            log('travis', colors.red('○'));
+          .catch(async testError => {
+            log('travis', colors.red('●'));
             addTestError(testErrors, name, 'Unknown failure in test page',
                 testError, /* fatal */ true);
+
+            await page.setContent(
+                SNAPSHOT_ERROR_SNIPPET
+                    .replace('__TEST_NAME__', name)
+                    .replace('__TEST_ERROR__', testError));
+            await percy.snapshot(name, page, SNAPSHOT_SINGLE_BUILD_OPTIONS);
           })
           .then(async() => {
             await page.close();
@@ -521,10 +533,13 @@ async function snapshotWebpages(percy, browser, webpages) {
     await sleep(WAIT_FOR_TABS_MS);
   }
   log('travis', '\n');
-  if (isTravisBuild()) {
+  if (isTravisBuild() && testErrors.length > 0) {
     testErrors.sort((a, b) => a.name.localeCompare(b.name));
-    // TODO(danielrozenberg): add Travis log folding.
+    log('info', colors.yellow('Tests warnings and errors:'),
+        'expand this section');
+    console./*OK*/log('travis_fold:start:visual_tests\n');
     testErrors.forEach(logTestError);
+    console./*OK*/log('travis_fold:end:visual_tests');
   }
   return testErrors.every(testError => !testError.fatal);
 }
@@ -567,7 +582,7 @@ async function createEmptyBuild() {
   await page.goto(
       `http://${HOST}:${PORT}/examples/visual-tests/blank-page/blank.html`)
       .then(() => {}, () => {});
-  await percy.snapshot('Blank page', page, SNAPSHOT_EMPTY_BUILD_OPTIONS);
+  await percy.snapshot('Blank page', page, SNAPSHOT_SINGLE_BUILD_OPTIONS);
   await percy.finalizeBuild();
 }
 
