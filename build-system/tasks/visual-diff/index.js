@@ -441,7 +441,7 @@ async function snapshotWebpages(percy, browser, webpages) {
       // ignore timeouts again.
       pagePromises[name] = (async() => {
         let lastNavigationError;
-        for (const attempt = 0; attempt < NAVIGATE_RETRIES; attempt++) {
+        for (let attempt = 0; attempt < NAVIGATE_RETRIES; attempt++) {
           try {
             return await page.goto(fullUrl, {waitUntil: 'networkidle0'});
           } catch (navigationError) {
