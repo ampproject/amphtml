@@ -31,16 +31,16 @@ describes.realWin('amp-story-media-query-service', {amp: true}, env => {
           width: ${width}px;
           border: none;
         }`;
-  };
+  }
 
   function waitForClassName(element, className) {
     return poll(`className ${className} on ${element.tagName}`, () => {
       return element.classList.contains(className);
     }, undefined /** opt_onError */, 300 /** opt_timeout */);
-  };
+  }
 
   beforeEach(() => {
-    win = env.ampdoc.getWin();
+    win = env.win;
 
     storyEl = win.document.createElement('amp-story');
     storyEl.setAttribute('foo', 'bar');
@@ -52,10 +52,10 @@ describes.realWin('amp-story-media-query-service', {amp: true}, env => {
 
     return new Promise(resolve => {
       requestAnimationFrame(() => {
-        mediaQueryService = new AmpStoryMediaQueryService(env.ampdoc);
+        mediaQueryService = new AmpStoryMediaQueryService(win);
         resolve();
       });
-    })
+    });
   });
 
   afterEach(() => {

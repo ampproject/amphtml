@@ -23,15 +23,15 @@ import {registerServiceBuilder} from '../../../src/service';
  * Util function to retrieve the media query service. Ensures we can retrieve
  * the service synchronously from the amp-story codebase without running into
  * race conditions.
- * @param  {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @param  {!Window} win
  * @return {!AmpStoryMediaQueryService}
  */
-export const getMediaQueryService = ampdoc => {
-  let service = Services.storyMediaQueryService(ampdoc);
+export const getMediaQueryService = win => {
+  let service = Services.storyMediaQueryService(win);
 
   if (!service) {
-    service = new AmpStoryMediaQueryService(ampdoc);
-    registerServiceBuilder(ampdoc, 'story-media-query', () => service);
+    service = new AmpStoryMediaQueryService(win);
+    registerServiceBuilder(win, 'story-media-query', () => service);
   }
 
   return service;
@@ -42,27 +42,27 @@ export const getMediaQueryService = ampdoc => {
  */
 export class AmpStoryMediaQueryService {
   /**
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!Window} win
    */
-  constructor(ampdoc) {
-    /** @private @const {!../../../src/service/ampdoc-impl.AmpDoc} */
-    this.ampdoc_ = ampdoc;
+  constructor(win) {
+    /** @private @const {!Window} */
+    this.win_ = win;
 
-    /** @private {boolean} */
+    /** @private {?Promise} */
     this.initializePromise_ = null;
 
-    /** @private {?HTMLElement} Iframe matcher. */
+    /** @private {?Element} Iframe matcher. */
     this.matcher_ = null;
 
     /** @private @const {!Element} */
     this.storyEl_ = dev().assertElement(
-        this.ampdoc_.getWin().document.querySelector('amp-story'));
+        this.win_.document.querySelector('amp-story'));
   }
 
   /**
    * Registers the media query and triggering the provided callback on match.
    * @param {string} media The media query, ie: '(orientation: portrait)'
-   * @param {!function(boolean)} callback Called when the media query matches.
+   * @param {function(boolean)} callback Called when the media query matches.
    * @return {!Promise<!MediaQueryList>}
    */
   onMediaQueryMatch(media, callback) {
@@ -86,7 +86,7 @@ export class AmpStoryMediaQueryService {
     }
 
     this.initializePromise_ = new Promise(resolve => {
-      this.matcher_ = this.ampdoc_.getWin().document.createElement('iframe');
+      this.matcher_ = this.win_.document.createElement('iframe');
       this.matcher_.classList.add('i-amphtml-story-media-query-matcher');
       this.matcher_.onload = resolve;
       this.storyEl_.appendChild(this.matcher_);

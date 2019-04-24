@@ -474,7 +474,7 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   initializeMediaQueries_(mediaQueryEls) {
-    const service = getMediaQueryService(this.getAmpDoc());
+    const service = getMediaQueryService(this.win);
 
     const onMediaQueryMatch = (matches, className) => {
       this.mutateElement(() => {
