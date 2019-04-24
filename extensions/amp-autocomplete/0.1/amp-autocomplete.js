@@ -146,6 +146,11 @@ export class AmpAutocomplete extends AMP.BaseElement {
     userAssert(inputElements.length === 1,
         `${TAG} should contain exactly one <input> child`);
     this.inputElement_ = /** @type {!HTMLInputElement} */ (inputElements[0]);
+    userAssert(this.inputElement_.hasAttribute('type'),
+        `${TAG} requires the "type" attribute on <input>`);
+    const inputType = this.inputElement_.getAttribute('type');
+    userAssert(inputType === 'text' || inputType === 'search',
+        `${TAG} requires the "type=text|search" attribute on <input>`);
 
     if (this.templates_.hasTemplate(
         this.element, 'template, script[template]')) {

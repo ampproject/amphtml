@@ -262,53 +262,6 @@
     <amp-autocomplete layout="responsive">
         <input type="text">
         <script type="application/json"> {} </script>
-    </amp-autocomplete>  
-
-    <!-- Invalid: no children -->
-    <amp-autocomplete>
-    </amp-autocomplete>  
-    
-    <!-- Invalid: input tag only (no data source) -->
-    <amp-autocomplete>
-      <input type="text">
-    </amp-autocomplete>  
-
-    <!-- Invalid: script tag present with input tag excluded -->
-    <amp-autocomplete>
-      <script type="application/json"> {} </script>
-    </amp-autocomplete>  
-
-    <!-- Invalid: src attr only with input tag excluded -->
-    <amp-autocomplete src="https://data.com/articles.json?ref=CANONICAL_URL">
-    </amp-autocomplete>  
-
-    <!-- Invalid: two input tags -->
-    <amp-autocomplete src="https://data.com/articles.json?ref=CANONICAL_URL">
-        <input type="text">
-        <input type="text">
-    </amp-autocomplete>  
-
-    <!-- Invalid: input tag with type != "text" | "search" -->
-    <amp-autocomplete>
-      <input type="checkbox">
-      <script type="application/json"> {} </script>
-    </amp-autocomplete>  
-
-    <!-- Invalid: input tag with type != "text" | "search" -->
-    <amp-autocomplete src="https://data.com/articles.json?ref=CANONICAL_URL">
-      <input type="button">
-    </amp-autocomplete>  
-
-    <!-- Invalid: input tag with type != "text" | "search" -->
-    <amp-autocomplete>
-      <input type="submit">
-      <script type="application/json"> {} </script>
-    </amp-autocomplete>
-
-    <!-- Invalid: static and remote data both provided -->
-    <amp-autocomplete src="https://data.com/articles.json?ref=CANONICAL_URL">
-      <input type="text">
-      <script type="application/json"> {} </script>
     </amp-autocomplete>
 
     <!-- Invalid: amp-autocomplete with filter=custom and no filter-expr attribute -->
