@@ -90,14 +90,17 @@ export class MraidInitializer {
     // and handled locally.
     //
     // In cases where this won't be intercepted by an SDK we don't want it to
-    // suceed, so we intentionally use an invalid domain and TLD.  This isn't
+    // suceed, so we intentionally use a URL that will 404.  This isn't
     // technically correct, since the MRAID spec says you must use a relative
     // URL reference, but the interception API that platforms provide only lets
     // them see post-resolution URLs.  Platforms just check if the URL ends with
     // "/mraid.js".
+    //
+    // We use cdn.ampproject.org so we can learn how often this happens from
+    // server logs for 404s.
     const mraidJs = document.createElement('script');
     mraidJs.setAttribute('type', 'text/javascript');
-    mraidJs.setAttribute('src', 'https://invalid.invalid/mraid.js');
+    mraidJs.setAttribute('src', 'https://cdn.ampproject.org/mraid.js');
     mraidJs.addEventListener('load', () => {
       this.mraidLoadSuccess_();
     });
