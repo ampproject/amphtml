@@ -198,7 +198,7 @@ export class GoogleSubscriptionsPlatform {
     this.serviceAdapter_.resetPlatforms();
   }
 
-  /* TODO(jpettitt): contribute? */
+  /* TODO(jpettitt): should local suppoort 'contribute' action? */
   /** @private */
   onNativeSubscribeRequest_() {
     this.maybeComplete_(this.serviceAdapter_.delegateActionToLocal(
@@ -382,7 +382,7 @@ export class GoogleSubscriptionsPlatform {
 
   /** @override */
   decorateUI(element, action, options) {
-    /**
+    /*
      * Note: contribute doesn't have a standard button
      * so we don't do anything here for it.
      */
