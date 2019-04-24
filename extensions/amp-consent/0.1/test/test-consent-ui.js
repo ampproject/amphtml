@@ -227,6 +227,8 @@ describes.realWin('consent-ui', {
       expect(parent.classList.contains('amp-hidden')).to.be.false;
 
       const showIframeSpy = sandbox.spy(consentUI, 'showIframe_');
+      const applyInitialStylesSpy =
+          sandbox.spy(consentUI, 'applyInitialStyles_');
 
       consentUI.show();
       expect(parent.classList.contains('amp-active')).to.be.true;
@@ -240,6 +242,8 @@ describes.realWin('consent-ui', {
         expect(
             parent.classList.contains(consentUiClasses.iframeActive)
         ).to.be.true;
+
+        return whenCalled(applyInitialStylesSpy);
       });
     });
 
@@ -319,6 +323,93 @@ describes.realWin('consent-ui', {
       yield macroTask();
       expect(consentUI.maskElement_.hasAttribute('hidden')).to.be.ok;
       expect(consentUI.scrollEnabled_).to.be.true;
+    });
+  });
+
+  describe('ready', () => {
+
+    it('should respond to the ready event', () => {
+      return getReadyIframeCmpConsentUi().then(consentUI => {
+        const handleReadyStub = sandbox.stub(consentUI, 'handleReady_');
+
+        consentUI.ui_ = {
+          contentWindow: 'mock-src',
+        };
+        consentUI.handleIframeMessages_({
+          source: 'mock-src',
+          data: {
+            type: 'consent-ui',
+            action: 'ready',
+          },
+        });
+
+        expect(handleReadyStub).to.be.calledOnce;
+      });
+    });
+
+    it('should handle a valid initial height', () => {
+      return getReadyIframeCmpConsentUi().then(consentUI => {
+
+        expect(consentUI.initialHeight_).to.be.equal('30vh');
+
+        consentUI.ui_ = {
+          contentWindow: 'mock-src',
+        };
+        consentUI.handleIframeMessages_({
+          source: 'mock-src',
+          data: {
+            type: 'consent-ui',
+            action: 'ready',
+            initialHeight: '50vh',
+          },
+        });
+
+        expect(consentUI.initialHeight_).to.be.equal('50vh');
+      });
+    });
+
+    it('should throw an error on an invalid initial height', () => {
+      return getReadyIframeCmpConsentUi().then(consentUI => {
+
+        expect(consentUI.initialHeight_).to.be.equal('30vh');
+
+        return allowConsoleError(() => {
+          consentUI.ui_ = {
+            contentWindow: 'mock-src',
+          };
+          consentUI.handleIframeMessages_({
+            source: 'mock-src',
+            data: {
+              type: 'consent-ui',
+              action: 'ready',
+              initialHeight: '9vh',
+            },
+          });
+
+          expect(consentUI.initialHeight_).to.be.equal('30vh');
+        });
+      });
+    });
+
+    it('should handle a border value', () => {
+      return getReadyIframeCmpConsentUi().then(consentUI => {
+
+        expect(consentUI.enableBorder_).to.be.equal(true);
+
+        consentUI.ui_ = {
+          contentWindow: 'mock-src',
+        };
+        consentUI.handleIframeMessages_({
+          source: 'mock-src',
+          data: {
+            type: 'consent-ui',
+            action: 'ready',
+            border: false,
+          },
+        });
+
+        expect(consentUI.enableBorder_).to.be.equal(false);
+      });
     });
   });
 

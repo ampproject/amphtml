@@ -253,6 +253,16 @@ export class Services {
   }
 
   /**
+   * Returns service to listen for `hidden` attribute mutations.
+   * @param {!Element|!ShadowRoot} element
+   * @return {!./service/hidden-observer-impl.HiddenObserver}
+   */
+  static hiddenObserverForDoc(element) {
+    return /** @type {!./service/hidden-observer-impl.HiddenObserver} */ (
+      getExistingServiceForDocInEmbedScope(element, 'hidden-observer'));
+  }
+
+  /**
    * Returns service implemented in service/history-impl.
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @return {!./service/history-impl.History}
@@ -388,17 +398,17 @@ export class Services {
 
   /**
    * @param {!Window} win
-   * @return {!Promise<?../extensions/amp-story/1.0/localization.LocalizationService>}
+   * @return {!Promise<?./service/localization.LocalizationService>}
    */
   static localizationServiceForOrNull(win) {
     return (
-    /** @type {!Promise<?../extensions/amp-story/1.0/localization.LocalizationService>} */
+    /** @type {!Promise<?./service/localization.LocalizationService>} */
       (getElementServiceIfAvailable(win, 'localization', 'amp-story', true)));
   }
 
   /**
    * @param {!Window} win
-   * @return {!../extensions/amp-story/1.0/localization.LocalizationService}
+   * @return {!./service/localization.LocalizationService}
    */
   static localizationService(win) {
     return getService(win, 'localization');
@@ -445,11 +455,11 @@ export class Services {
   /**
    * TODO(#14357): Remove this when amp-story:0.1 is deprecated.
    * @param {!Window} win
-   * @return {!Promise<?../extensions/amp-story/0.1/localization.LocalizationService>}
+   * @return {!Promise<?./service/localization.LocalizationService>}
    */
   static localizationServiceForOrNullV01(win) {
     return (
-    /** @type {!Promise<?../extensions/amp-story/0.1/localization.LocalizationService>} */
+    /** @type {!Promise<?./service/localization.LocalizationService>} */
       (getElementServiceIfAvailable(win, 'localization-v01', 'amp-story',
           true)));
   }
@@ -457,7 +467,7 @@ export class Services {
   /**
    * TODO(#14357): Remove this when amp-story:0.1 is deprecated.
    * @param {!Window} win
-   * @return {!../extensions/amp-story/0.1/localization.LocalizationService}
+   * @return {!./service/localization.LocalizationService}
    */
   static localizationServiceV01(win) {
     return getService(win, 'localization-v01');

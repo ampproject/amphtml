@@ -18,7 +18,7 @@ import {AmpStory} from '../amp-story';
 import {AmpStoryPage} from '../amp-story-page';
 import {EventType} from '../events';
 import {Keys} from '../../../../src/utils/key-codes';
-import {LocalizationService} from '../localization';
+import {LocalizationService} from '../../../../src/service/localization';
 import {PaginationButtons} from '../pagination-buttons';
 import {registerServiceBuilder} from '../../../../src/service';
 

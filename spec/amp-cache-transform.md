@@ -130,8 +130,8 @@ immediately fail the entire parameterised list.
 There are additional semantic constraints on the spec:
  * Each `sh-integer` must be non-negative.
  * Two integers in a pair `X..Y` must satisfy `X<=Y`.
- * No two ranges in a spec should intersect. (`A..B` and `C..D` intersect if `B
-   >= C && A <= D`.)
+ * No two ranges in a spec should intersect. (`A..B` and `C..D` intersect if
+   `B >= C && A <= D`.)
 
 If the parameter fails to meet these criteria, then the server may choose not to
 satisfy the parameterised identifier. Otherwise, the server can satisfy the

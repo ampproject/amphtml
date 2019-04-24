@@ -280,6 +280,7 @@ export function isSecureUrlDeprecated(url) {
   }
   return (url.protocol == 'https:' ||
       url.hostname == 'localhost' ||
+      url.hostname == '127.0.0.1' ||
       endsWith(url.hostname, '.localhost'));
 }
 

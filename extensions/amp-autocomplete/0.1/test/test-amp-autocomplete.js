@@ -229,6 +229,10 @@ describes.realWin('amp-autocomplete unit tests', {
     impl.filter_ = 'token-prefix';
     expect(impl.filterData_(['a', 'b a', 'ab', 'ba', 'c a'], 'a')).to.have
         .ordered.members(['a', 'b a', 'ab', 'c a']);
+    // None filter
+    impl.filter_ = 'none';
+    expect(impl.filterData_(['a', 'b a', 'ab', 'ba', 'c a'], 'a')).to.have
+        .ordered.members(['a', 'b a', 'ab', 'ba', 'c a']);
     // Remaining filters should error
     impl.filter_ = 'fuzzy';
     expect(() => impl.filterData_(['a', 'b', 'c'], 'a')).to.throw(
@@ -236,12 +240,21 @@ describes.realWin('amp-autocomplete unit tests', {
     impl.filter_ = 'custom';
     expect(() => impl.filterData_(['a', 'b', 'c'], 'a')).to.throw(
         'Filter not yet supported: custom');
-    impl.filter_ = 'none';
-    expect(() => impl.filterData_(['a', 'b', 'c'], 'a')).to.throw(
-        'Filter not yet supported: none');
     impl.filter_ = 'invalid';
     expect(() => impl.filterData_(['a', 'b', 'c'], 'a')).to.throw(
         'Unexpected filter: invalid');
+  });
+
+  it('truncateToMaxEntries_() should truncate given data', () => {
+    expect(impl.truncateToMaxEntries_(['a', 'b', 'c', 'd'])).to.have.ordered
+        .members(['a', 'b', 'c', 'd']);
+    impl.maxEntries_ = 3;
+    expect(impl.truncateToMaxEntries_(['a', 'b', 'c', 'd'])).to.have.ordered
+        .members(['a', 'b', 'c']);
+    expect(impl.truncateToMaxEntries_(['a', 'b', 'c'])).to.have.ordered
+        .members(['a', 'b', 'c']);
+    expect(impl.truncateToMaxEntries_(['a', 'b'])).to.have.ordered
+        .members(['a', 'b']);
   });
 
   it('should show and hide results on toggle', () => {
@@ -355,6 +368,7 @@ describes.realWin('amp-autocomplete unit tests', {
     it('should call selectItem_ and resetActiveElement_ as expected', () => {
       return layoutAndSetSpies().then(() => {
         impl.activeElement_ = impl.createElementFromItem_('abc');
+        sandbox.stub(impl, 'resultsShowing_').returns(true);
         return impl.keyDownHandler_(event);
       }).then(() => {
         expect(impl.inputElement_.value).to.equal('abc');
@@ -394,13 +408,14 @@ describes.realWin('amp-autocomplete unit tests', {
       selectItemSpy = sandbox.spy(impl, 'selectItem_');
       resetSpy = sandbox.spy(impl, 'resetActiveElement_');
       clearAllSpy = sandbox.spy(impl, 'clearAllItems_');
+      sandbox.stub(impl, 'resultsShowing_').returns(true);
       return impl.keyDownHandler_(event);
     }).then(() => {
       expect(impl.inputElement_.value).to.equal('');
       expect(selectItemSpy).not.to.have.been.called;
       expect(clearAllSpy).not.to.have.been.called;
       expect(resetSpy).not.to.have.been.called;
-      expect(eventPreventSpy).not.to.have.been.called;
+      expect(eventPreventSpy).to.have.been.calledOnce;
       impl.activeElement_ = impl.createElementFromItem_('abc');
       return impl.keyDownHandler_(event);
     }).then(() => {
@@ -408,7 +423,7 @@ describes.realWin('amp-autocomplete unit tests', {
       expect(selectItemSpy).to.have.been.calledOnce;
       expect(clearAllSpy).to.have.been.calledOnce;
       expect(resetSpy).to.have.been.calledOnce;
-      expect(eventPreventSpy).to.have.been.calledOnce;
+      expect(eventPreventSpy).to.have.been.calledTwice;
       expect(impl.submitOnEnter_).to.be.false;
       impl.submitOnEnter_ = true;
       impl.activeElement_ = impl.createElementFromItem_('abc');
@@ -418,7 +433,7 @@ describes.realWin('amp-autocomplete unit tests', {
       expect(selectItemSpy).to.have.been.calledTwice;
       expect(clearAllSpy).to.have.been.calledTwice;
       expect(resetSpy).to.have.been.calledTwice;
-      expect(eventPreventSpy).to.have.been.calledOnce;
+      expect(eventPreventSpy).to.have.been.calledTwice;
       expect(impl.submitOnEnter_).to.be.true;
     });
   });
@@ -433,12 +448,13 @@ describes.realWin('amp-autocomplete unit tests', {
       return impl.renderResults_(impl.sourceData_, impl.container_);
     }).then(() => {
       expect(impl.container_.children.length).to.equal(3);
+      expect(resetSpy).to.have.been.calledOnce;
       impl.toggleResults_(true);
       expect(impl.resultsShowing_()).to.be.true;
       return impl.keyDownHandler_(event);
     }).then(() => {
       expect(displayInputSpy).to.have.been.calledOnce;
-      expect(resetSpy).to.have.been.calledOnce;
+      expect(resetSpy).to.have.been.calledTwice;
       expect(toggleResultsSpy).to.have.been.calledWith(false);
       expect(impl.resultsShowing_()).to.be.false;
     });
@@ -484,6 +500,20 @@ describes.realWin('amp-autocomplete unit tests', {
       expect(getItemSpy).to.have.been.calledWith(mockEl);
       expect(selectItemSpy).to.have.been.calledWith(mockEl);
       expect(impl.inputElement_.value).to.equal('abc');
+    });
+  });
+
+  it('should fire select event from selectItem_', () => {
+    const fireEventSpy = sandbox.spy(impl, 'fireSelectEvent_');
+    const triggerSpy = sandbox.spy(impl.action_, 'trigger');
+    const mockEl = doc.createElement('div');
+    return element.layoutCallback().then(() => {
+      impl.toggleResults_(true);
+      mockEl.setAttribute('value', 'test');
+      impl.selectItem_(mockEl);
+      expect(fireEventSpy).to.have.been.calledOnce;
+      expect(fireEventSpy).to.have.been.calledWith('test');
+      expect(triggerSpy).to.have.been.calledOnce;
     });
   });
 
