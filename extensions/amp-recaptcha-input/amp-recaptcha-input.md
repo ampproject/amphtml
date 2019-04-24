@@ -40,7 +40,7 @@ Appends a <a href="https://developers.google.com/recaptcha/docs/v3">reCAPTCHA v3
 </tr>
 <tr>
 <td width="40%"><strong>Examples</strong></td>
-<td><a href="https://amp.dev/documentation/examples/components/amp-recaptcha-input">amp.dev Example</a></td>
+<td><a href="https://amp.dev/documentation/examples/components/amp-recaptcha-input">Example on amp.dev</a></td>
 </tr>
 </table>
 
