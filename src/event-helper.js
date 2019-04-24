@@ -131,7 +131,7 @@ export function listenOncePromise(element, eventType, opt_evtListenerOpts,
  */
 export function isLoaded(eleOrWindow) {
   return !!(eleOrWindow.complete || eleOrWindow.readyState == 'complete'
-      || (eleOrWindow instanceof HTMLMediaElement && eleOrWindow.readyState > 0)
+      || (isHTMLMediaElement(eleOrWindow) && eleOrWindow.readyState > 0)
       // If the passed in thing is a Window, infer loaded state from
       //
       || (eleOrWindow.document
@@ -155,7 +155,7 @@ export function loadPromise(eleOrWindow) {
   const loadingPromise = new Promise((resolve, reject) => {
     // Listen once since IE 5/6/7 fire the onload event continuously for
     // animated GIFs.
-    if (eleOrWindow instanceof HTMLMediaElement) {
+    if (isHTMLMediaElement(eleOrWindow)) {
       unlistenLoad = listenOnce(eleOrWindow, 'loadedmetadata', resolve);
     } else {
       unlistenLoad = listenOnce(eleOrWindow, 'load', resolve);
@@ -192,6 +192,15 @@ function failedToLoad(eleOrWindow) {
     target = target.src;
   }
   throw user().createError(LOAD_FAILURE_PREFIX, target);
+}
+
+/**
+ * Returns true if the parameter is a HTMLMediaElement.
+ * @param {!Element|!Window} eleOrWindow
+ * @return {boolean}
+ */
+function isHTMLMediaElement(eleOrWindow) {
+  return eleOrWindow.tagName === 'AUDIO' || eleOrWindow.tagName === 'VIDEO';
 }
 
 /**
