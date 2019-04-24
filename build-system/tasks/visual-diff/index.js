@@ -55,6 +55,7 @@ const PORT = 8000;
 const WEBSERVER_TIMEOUT_RETRIES = 10;
 const NAVIGATE_TIMEOUT_MS = 3000;
 const NAVIGATE_RETRIES = 3;
+const NAVIGATE_RETRY_TIMEOUT_MS = 2000;
 const MAX_PARALLEL_TABS = 10;
 const WAIT_FOR_TABS_MS = 1000;
 const BUILD_STATUS_URL = 'https://amphtml-percy-status-checker.appspot.com/status';
@@ -451,6 +452,10 @@ async function snapshotWebpages(percy, browser, webpages) {
                 'The browser test runner failed on attempt number ' +
                 (attempt + 1) + ' to navigate to the test page',
                 navigationError, /* fatal */ false);
+            // Exponential backoff.
+            if (attempt < NAVIGATE_RETRIES) {
+              await sleep(NAVIGATE_RETRY_TIMEOUT_MS * (Math.pow(2, attempt)));
+            }
           }
         }
         throw lastNavigationError;
