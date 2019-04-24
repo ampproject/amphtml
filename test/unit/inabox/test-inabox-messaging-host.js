@@ -147,7 +147,18 @@ describes.realWin('inabox-host:messaging', {}, env => {
       })).to.be.false;
     });
 
-    it('should allow messages from frames with no whitelist for now', () => {
+    it('should allow read-only messages from frames with no whitelist', () => {
+      expect(host.processMessage({
+        source: iframe3.contentWindow,
+        origin: 'www.example.com',
+        data: 'amp-' + JSON.stringify({
+          sentinel: '0-125',
+          type: 'send-positions',
+        }),
+      })).to.be.true;
+    });
+
+    it('should ignore write messages from frames with no whitelist', () => {
       expect(host.processMessage({
         source: iframe3.contentWindow,
         origin: 'www.example.com',
@@ -155,7 +166,7 @@ describes.realWin('inabox-host:messaging', {}, env => {
           sentinel: '0-125',
           type: 'full-overlay-frame',
         }),
-      })).to.be.true;
+      })).to.be.false;
     });
   });
 
