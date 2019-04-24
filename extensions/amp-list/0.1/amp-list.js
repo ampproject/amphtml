@@ -123,6 +123,8 @@ export class AmpList extends AMP.BaseElement {
     this.unlistenLoadMore_ = null;
     /**@private {boolean} */
     this.resizeFailed_ = false;
+    /**@private {?UnlistenDef} */
+    this.unlistenAutoLoadMore_ = null;
 
     this.registerAction('refresh', () => {
       if (this.layoutCompleted_) {
@@ -954,7 +956,10 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   setupLoadMoreAuto_() {
-    this.viewport_.onChanged(() => this.maybeLoadMoreItems_());
+    if (!this.unlistenAutoLoadMore_) {
+      this.unlistenAutoLoadMore_ = this.viewport_.onChanged(
+          () => this.maybeLoadMoreItems_());
+    }
   }
 
   /**
