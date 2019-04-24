@@ -329,13 +329,16 @@ class AmpCarousel extends AMP.BaseElement {
    */
   updateUi_() {
     const index = this.carousel_.getCurrentIndex();
+    const loop = this.carousel_.getLoop();
     // TODO(sparhami) for Shadow DOM, we will need to get the assigned nodes
     // instead.
     iterateCursor(this.prevArrowSlot_.children, child => {
-      toggleAttribute(child, 'disabled', index == 0);
+      const disabled = !loop && index == 0;
+      toggleAttribute(child, 'disabled', disabled);
     });
     iterateCursor(this.nextArrowSlot_.children, child => {
-      toggleAttribute(child, 'disabled', index == this.slides_.length - 1);
+      const disabled = !loop && index == this.slides_.length - 1;
+      toggleAttribute(child, 'disabled', disabled);
     });
     toggleAttribute(
         this.element, 'i-amphtml-carousel-hide-buttons', this.hadTouch_);

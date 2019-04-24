@@ -407,6 +407,13 @@ export class Carousel {
   }
 
   /**
+   * @return {boolean} Whether or not looping is enabled.
+   */
+  getLoop() {
+    return this.loop_;
+  }
+
+  /**
    * Moves the carousel to a given index. If the index is out of range, the
    * carousel is not moved.
    * @param {number} index
