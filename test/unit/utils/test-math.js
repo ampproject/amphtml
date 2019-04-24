@@ -123,9 +123,15 @@ describes.sandboxed('utils/math', {}, () => {
     });
 
     it('should fail if the minimum is greater than the maximum', () => {
-      expect(() => clamp(1, 1, 0)).to.throw();
-      expect(() => clamp(0.3, 0.5, 0.1)).to.throw();
-      expect(() => clamp(0, 10, -10)).to.throw();
+      allowConsoleError(() => {
+        expect(() => clamp(1, 1, 0)).to.throw();
+      });
+      allowConsoleError(() => {
+        expect(() => clamp(0.3, 0.5, 0.1)).to.throw();
+      });
+      allowConsoleError(() => {
+        expect(() => clamp(0, 10, -10)).to.throw();
+      });
     });
   });
 
@@ -170,9 +176,15 @@ describes.sandboxed('utils/math', {}, () => {
     });
 
     it('should fail if the minimum is greater than the maximum', () => {
-      expect(() => boundValue(1, 1, 0, 1)).to.throw();
-      expect(() => boundValue(0.3, 0.5, 0.1, 1)).to.throw();
-      expect(() => boundValue(0, 10, -10, 1)).to.throw();
+      allowConsoleError(() => {
+        expect(() => boundValue(1, 1, 0, 1)).to.throw();
+      });
+      allowConsoleError(() => {
+        expect(() => boundValue(0.3, 0.5, 0.1, 1)).to.throw();
+      });
+      allowConsoleError(() => {
+        expect(() => boundValue(0, 10, -10, 1)).to.throw();
+      });
     });
   });
 
