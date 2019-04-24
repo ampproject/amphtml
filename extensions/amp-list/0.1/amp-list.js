@@ -879,6 +879,10 @@ export class AmpList extends AMP.BaseElement {
         setStyles(this.getLoadMoreService_().getLoadMoreButton(), {
           visibility: '',
         });
+        if (this.unlistenLoadMore_) {
+          this.unlistenLoadMore_();
+          this.unlistenLoadMore_ = null;
+        }
         this.unlistenLoadMore_ = listen(
             this.getLoadMoreService_().getLoadMoreButtonClickable(),
             'click', () => this.loadMoreCallback_());
@@ -911,10 +915,6 @@ export class AmpList extends AMP.BaseElement {
     });
     return this.fetchList_(/* opt_append */ true)
         .then(() => {
-          if (this.unlistenLoadMore_) {
-            this.unlistenLoadMore_();
-            this.unlistenLoadMore_ = null;
-          }
           return this.mutateElement(() => {
             if (this.loadMoreSrc_) {
               this.getLoadMoreService_().toggleLoadMoreLoading(false);
@@ -941,6 +941,10 @@ export class AmpList extends AMP.BaseElement {
               dev().assertElement(this.container_));
           const loadMoreFailedClickable = this.getLoadMoreService_()
               .getLoadMoreFailedClickable();
+          if (this.unlistenLoadMore_) {
+            this.unlistenLoadMore_();
+            this.unlistenLoadMore_ = null;
+          }
           this.unlistenLoadMore_ = listen(
               loadMoreFailedClickable,
               'click', () => this.loadMoreCallback_(/*opt_reload*/ true));
