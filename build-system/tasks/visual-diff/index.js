@@ -441,7 +441,7 @@ async function snapshotWebpages(percy, browser, webpages) {
       // ignore timeouts again.
       const pagePromise = (async() => {
         let lastNavigationError;
-        for (let attempt = 0; attempt < NAVIGATE_RETRIES; attempt++) {
+        for (const attempt = 0; attempt < NAVIGATE_RETRIES; attempt++) {
           try {
             return await page.goto(fullUrl, {waitUntil: 'networkidle0'});
           } catch (navigationError) {
@@ -538,7 +538,7 @@ async function snapshotWebpages(percy, browser, webpages) {
                     .replace('__TEST_ERROR__', testError));
             await percy.snapshot(name, page, SNAPSHOT_SINGLE_BUILD_OPTIONS);
           })
-          .then(async() => {
+          .finally(async() => {
             await page.close();
             delete pagePromises[name];
           });
