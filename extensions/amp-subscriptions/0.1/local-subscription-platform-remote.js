@@ -18,7 +18,7 @@ import {Entitlement} from './entitlement';
 import {LocalSubscriptionBasePlatform}
   from './local-subscription-platform-base';
 import {Services} from '../../../src/services';
-import {assertHttpsUrl} from '../../../src/url';
+import {addParamToUrl, assertHttpsUrl} from '../../../src/url';
 import {devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 

@@ -15,14 +15,15 @@
  */
 
 import {Deferred} from '../../../src/utils/promise';
+import {Entitlement} from './entitlement';
 import {LocalSubscriptionBasePlatform}
   from './local-subscription-platform-base';
 import {Messenger} from '../../amp-access/0.1/iframe-api/messenger';
 import {assertHttpsUrl, parseUrlDeprecated} from '../../../src/url';
+import {devAssert, userAssert} from '../../../src/log';
 import {isArray} from '../../../src/types';
 import {parseJson} from '../../../src/json';
 import {toggle} from '../../../src/style';
-import {userAssert} from '../../../src/log';
 
 
 /**
@@ -42,9 +43,12 @@ export class LocalSubscriptionIframePlatform
   constructor(ampdoc, platformConfig, serviceAdapter) {
     super(ampdoc, platformConfig, serviceAdapter);
 
+    devAssert(this.serviceConfig_['type'] == 'iframe',
+        'iframe initialized called without iframe config type');
+
     /** @const @private {string} */
-    this.iframeSrc_ = userAssert(this.serviceConfig_['iframeUrl'],
-        '"iframeUrl" URL must be specified');
+    this.iframeSrc_ = userAssert(this.serviceConfig_['iframeSrc'],
+        '"iframeSrc" URL must be specified');
     assertHttpsUrl(this.iframeSrc_, 'iframe Url');
 
 
@@ -83,7 +87,9 @@ export class LocalSubscriptionIframePlatform
   /** @override */
   getEntitlements() {
     return this.connect().then(() => {
-      return this.messenger_.sendCommandRsvp('authorize', {});
+      return this.messenger_.sendCommandRsvp('authorize', {})
+          .then(res => JSON.stringify(res))
+          .then(resJson => Entitlement.parseFromJson(resJson));
     });
   }
 

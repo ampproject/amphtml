@@ -15,6 +15,7 @@
  */
 
 import {Dialog} from '../dialog';
+import {Entitlement} from '../entitlement';
 import {
   LocalSubscriptionIframePlatform,
 } from '../local-subscription-platform-iframe';
@@ -37,7 +38,7 @@ describes.fakeWin('LocalSubscriptionsIframePlatform', {amp: true}, env => {
     'login': 'https://lipsum.com/login',
   };
 
-  const configIframeUrl = 'https://lipsum.com/iframe?rid=READER_ID';
+  const configiframeSrc = 'https://lipsum.com/iframe?rid=READER_ID';
 
   const serviceConfig = {};
   let builderMock;
@@ -55,8 +56,9 @@ describes.fakeWin('LocalSubscriptionsIframePlatform', {amp: true}, env => {
         .callsFake(() => Promise.resolve('reader1'));
     serviceConfig.services = [
       {
+        'type': 'iframe',
         'serviceId': 'local',
-        'iframeUrl': configIframeUrl,
+        'iframeSrc': configiframeSrc,
         'actions': actionMap,
         'baseScore': 99,
       },
@@ -93,24 +95,25 @@ describes.fakeWin('LocalSubscriptionsIframePlatform', {amp: true}, env => {
   });
 
   describe('config', () => {
-    it('only trigger if "iframeUrl" is present', () => {
+    it('only trigger if "iframeSrc" is present', () => {
       expect(
           LocalSubscriptionPlatformFactory(ampdoc,
               serviceConfig.services[0], serviceAdapter)
       ).to.be.instanceOf(LocalSubscriptionIframePlatform);
     });
 
-    it('error if "iframeUrl" is present and "AuthorizationUrl" are missing',
+    it('error if type is iframe and "iframeSrc" is missing',
         () => {
-          delete serviceConfig.services[0]['iframeUrl'];
+          delete serviceConfig.services[0]['iframeSrc'];
           allowConsoleError(() => { expect(() => {
             LocalSubscriptionPlatformFactory(ampdoc,
                 serviceConfig.services[0], serviceAdapter);
-          }).to.throw(/authorization/); });
+          }).to.throw(/"iframeSrc" URL must be specified​​​/);
+          });
         });
 
-    it('should require "iframeUrl" to be secure', () => {
-      serviceConfig.services[0]['iframeUrl'] = 'http://acme.com/iframe';
+    it('should require "iframeSrc" to be secure', () => {
+      serviceConfig.services[0]['iframeSrc'] = 'http://acme.com/iframe';
       allowConsoleError(() => { expect(() => {
         LocalSubscriptionPlatformFactory(ampdoc,
             serviceConfig.services[0], serviceAdapter);
@@ -198,7 +201,7 @@ describes.fakeWin('LocalSubscriptionsIframePlatform', {amp: true}, env => {
       return localSubscriptionPlatform.connectedPromise_;
     });
 
-    describe('authorize', () => {
+    describe('getEntitlements', () => {
       beforeEach(() => {
         messengerMock.expects('sendCommandRsvp')
             .withExactArgs('start', {
@@ -211,13 +214,15 @@ describes.fakeWin('LocalSubscriptionsIframePlatform', {amp: true}, env => {
         localSubscriptionPlatform.handleCommand_('connect');
       });
 
-      it('should issue authorization', () => {
+      it('should return entitlement', () => {
         messengerMock.expects('sendCommandRsvp')
             .withExactArgs('authorize', {})
-            .returns(Promise.resolve({a: 1}))
+            .returns(Promise.resolve({}))
             .once();
         return localSubscriptionPlatform.getEntitlements().then(result => {
-          expect(result).to.deep.equal({a: 1});
+          expect(result).to.be.instanceof(Entitlement);
+          expect(result.raw).to.equal('"{}"');
+          expect(result.granted).to.equal(false);
         });
       });
     });

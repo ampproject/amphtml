@@ -32,7 +32,7 @@ import {PageConfig} from '../../../third_party/subscriptions-project/config';
 export function LocalSubscriptionPlatformFactory(
   ampdoc, platformConfig, serviceAdapter) {
   /* Return the correxct platform based on the config */
-  if (platformConfig['iframeUrl']) {
+  if (platformConfig['type'] === 'iframe') {
     return new LocalSubscriptionIframePlatform(
         ampdoc, platformConfig, serviceAdapter);
   }

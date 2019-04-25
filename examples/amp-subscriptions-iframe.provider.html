@@ -1,0 +1,59 @@
+<!doctype html>
+<html>
+<head>
+  <script src="../extensions/amp-access/0.1/iframe-api/build/index.js"></script>
+
+  <script>
+    
+    var pageConfig;
+    var pageProtocol;
+    function log() {
+      if (!console || !console.log) {
+        return;
+      }
+      var var_args = Array.prototype.slice.call(arguments, 0);
+      console.log.apply(console, var_args);
+    }
+
+    /** Implementation of AccessController */
+    var Controller = function() {
+    };
+    Controller.prototype.connect = function(origin, protocol, config) {
+      pageConfg = config; 
+      pageProtocol = protocol;
+      log('connect: ', origin, protocol, config);
+    };
+    Controller.prototype.authorize = function() {
+      log('authorize');
+      // This is the JSON expected in the article-access-iframe.amp.html.
+      if (pageProtocol === "amp-access") {
+        return Promise.resolve({
+          views: 3,
+          maxViews: 5
+        });
+      } else if (pageProtocol === "amp-subscriptions") {
+        return Promise.resolve({
+          "source":"local-iframe",
+          "granted":true,
+          "grantedReason":"METERING",
+          "data":{
+            "login":true
+          }
+        });
+      } else {
+        log('unknown protocol');
+        return Promise.resovle({});
+      }
+    };
+    Controller.prototype.pingback = function() {
+      log('pingback');
+    };
+
+    var iframeApi = new AmpAccessIframeApi(new Controller());
+    iframeApi.connect();
+  </script>
+</head>
+<body>
+  Hidden iframe.
+</body>
+</html>

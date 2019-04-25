@@ -75,7 +75,8 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
   const serviceConfigIframe = {
     services: [
       {
-        iframeUrl: 'https://lipsum.com/authorize',
+        type: 'iframe',
+        iframeSrc: 'https://lipsum.com/authorize',
         actions: {
           subscribe: 'https://lipsum.com/subscribe',
           login: 'https://lipsum.com/login',
