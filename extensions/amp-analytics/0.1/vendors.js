@@ -101,7 +101,6 @@ import {REPPUBLIKA_CONFIG} from './vendors/reppublika';
 import {NAVEGG_CONFIG} from './vendors/navegg';
 import {VPONANALYTICS_CONFIG} from './vendors/vponanalytics';
 
-
 /**
  * @const {!JsonObject}
  */
