@@ -61,12 +61,19 @@ export class LocalSubscriptionRemotePlatform
   getEntitlements() {
     return this.urlBuilder_.buildUrl(this.authorizationUrl_,
         /* useAuthData */ false)
-        .then(fetchUrl =>
+        .then(fetchUrl => {
+          const encryptedDocumentKey =
+              this.serviceAdapter_.getEncryptedDocumentKey('local');
+          if (encryptedDocumentKey) {
+            //TODO(chenshay): if crypt, switch to 'post'
+            fetchUrl = addParamToUrl(fetchUrl, 'crypt', encryptedDocumentKey);
+          }
           this.xhr_.fetchJson(fetchUrl, {credentials: 'include'})
               .then(res => res.json())
               .then(resJson => {
                 return Entitlement.parseFromJson(resJson);
-              }));
+              });
+        });
   }
 
   /** @override */
