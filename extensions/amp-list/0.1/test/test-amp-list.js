@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {ActionTrust} from '../../../../src/action-constants';
 import {AmpDocService} from '../../../../src/service/ampdoc-impl';
 import {AmpEvents} from '../../../../src/amp-events';
 import {AmpList} from '../amp-list';
@@ -114,7 +115,6 @@ describes.repeated('amp-list', {
       refresh: false,
       resetOnRefresh: false,
     };
-
     const DEFAULT_ITEMS = [{title: 'Title1'}];
     const DEFAULT_FETCHED_DATA = {
       items: DEFAULT_ITEMS,
@@ -129,7 +129,7 @@ describes.repeated('amp-list', {
     function expectFetchAndRender(fetched, rendered, opts = DEFAULT_LIST_OPTS) {
       // Mock the actual network request.
       listMock.expects('fetch_')
-          .withExactArgs(!!opts.refresh, undefined)
+          .withExactArgs(!!opts.refresh, /* token */ undefined)
           .returns(Promise.resolve(fetched))
           .atLeast(1);
 
@@ -290,7 +290,6 @@ describes.repeated('amp-list', {
         listMock.expects('toggleLoading').withExactArgs(false).once();
         listMock.expects('togglePlaceholder').withExactArgs(false).once();
 
-
         return layout.then(() => {
           expect(list.container_.contains(foo)).to.be.true;
 
@@ -347,6 +346,7 @@ describes.repeated('amp-list', {
       });
 
       it('should fail to load b/c data array is absent', () => {
+        expectAsyncConsoleError(/Response must contain an array/, 1);
         listMock.expects('fetch_').returns(Promise.resolve({})).once();
         listMock.expects('toggleLoading').withExactArgs(false).once();
         return expect(list.layoutCallback()).to.eventually.be
@@ -354,6 +354,7 @@ describes.repeated('amp-list', {
       });
 
       it('should fail to load b/c data single-item object is absent', () => {
+        expectAsyncConsoleError(/Response must contain an array or object/, 1);
         element.setAttribute('single-item', 'true');
         listMock.expects('fetch_').returns(Promise.resolve()).once();
         listMock.expects('toggleLoading').withExactArgs(false).once();
@@ -394,12 +395,27 @@ describes.repeated('amp-list', {
         });
       });
 
-      it('should show placeholder on fetch failure (w/o fallback)', () => {
+      it('should not show placeholder on fetch failure', function*() {
         // Stub fetch_() to fail.
         listMock.expects('fetch_').returns(Promise.reject()).once();
         listMock.expects('toggleLoading').withExactArgs(false).once();
         listMock.expects('togglePlaceholder').never();
-        return list.layoutCallback().catch(() => {});
+
+        return list.layoutCallback();
+      });
+
+      it('should trigger "fetch-error" event on fetch failure', function*() {
+        const actions = {trigger: sandbox.spy()};
+        sandbox.stub(Services, 'actionServiceForDoc').returns(actions);
+
+        // Stub fetch_() to fail.
+        listMock.expects('fetch_').returns(Promise.reject()).once();
+        listMock.expects('toggleLoading').withExactArgs(false).once();
+
+        yield list.layoutCallback();
+
+        expect(actions.trigger).to.be.calledWithExactly(list, 'fetch-error',
+            sinon.match.any, ActionTrust.LOW);
       });
 
       describe('DOM diffing', () => {
@@ -460,11 +476,10 @@ describes.repeated('amp-list', {
         });
 
         it('should error if proxied fetch returns invalid data', () => {
+          expectAsyncConsoleError(/Expected response with format/, 1);
           sandbox.stub(ssrTemplateHelper, 'fetchAndRenderTemplate')
               .returns(Promise.resolve(undefined));
-
           listMock.expects('toggleLoading').withExactArgs(false).once();
-
           return expect(list.layoutCallback()).to.eventually.be
               .rejectedWith(/Expected response with format/);
         });

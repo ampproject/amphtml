@@ -13,14 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import {LocalizedStringBundleDef, LocalizedStringId} from '../localization';
+import {
+  LocalizedStringBundleDef,
+  LocalizedStringId,
+} from '../../../../src/service/localization';
 
 /**
  * Localized string bundle used for sq strings.
  * @const {!LocalizedStringBundleDef}
  */
-export default /** @const {!LocalizedStringBundleDef} */ ({
+const strings = {
   [LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT]: {
     string: 'Tingulli joaktiv',
   },
@@ -29,75 +31,6 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
   },
   [LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_SOUND_TEXT]: {
     string: 'Tingulli aktiv',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_APPLY_NOW]: {
-    string: 'Zbato tani',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_BOOK_NOW]: {
-    string: 'Rezervo',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_BUY_TICKETS]: {
-    string: 'Bli bileta',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_DOWNLOAD]: {
-    string: 'Shkarko',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_EXPLORE]: {
-    string: 'Eksploro',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_GET_NOW]: {
-    string: 'Merre tani',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_INSTALL]: {
-    string: 'Instalo tani',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_LEARN_MORE]: {
-    string: 'Mëso më shumë',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_LISTEN]: {
-    string: 'Dëgjo',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_MORE]: {
-    string: 'Më shumë',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_OPEN_APP]: {
-    string: 'Hap aplikacionin',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_ORDER_NOW]: {
-    string: 'Porosit tani',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_PLAY]: {
-    string: 'Luaj',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_READ]: {
-    string: 'Lexo',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SHOP]: {
-    string: 'Bli',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SHOW]: {
-    string: 'Shfaq',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SHOWTIMES]: {
-    string: 'Orari i shfaqjes',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SIGN_UP]: {
-    string: 'Regjistrohu',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SUBSCRIBE]: {
-    string: 'Abonohu tani',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_USE_APP]: {
-    string: 'Përdor aplikacionin',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_VIEW]: {
-    string: 'Shiko',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_WATCH]: {
-    string: 'Shiko',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_WATCH_EPISODE]: {
-    string: 'Shiko episodin',
   },
   [LocalizedStringId.AMP_STORY_BOOKEND_MORE_TO_READ_LABEL]: {
     string: 'Më shumë për të lexuar',
@@ -195,4 +128,6 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
     string: 'Na vjen keq, por duket se shfletuesi yt nuk e mbështet këtë ' +
         'eksperiencë',
   },
-});
+};
+
+export default strings;

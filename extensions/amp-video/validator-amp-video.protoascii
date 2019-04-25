@@ -69,6 +69,8 @@ attr_lists: {
     name: "noaudio"
     value: ""
   }
+  attrs: { name: "object-fit" }
+  attrs: { name: "object-position" }
   attrs: { name: "placeholder" }
   attrs: {
     name: "preload"

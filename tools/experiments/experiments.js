@@ -116,6 +116,11 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/20595',
   },
   {
+    id: 'amp-lightbox-gallery-base-carousel',
+    name: 'Uses amp-base-carousel in amp-lightbox-gallery',
+    spec: 'https://github.com/ampproject/amphtml/issues/21568',
+  },
+  {
     id: 'amp-google-vrview-image',
     name: 'AMP VR Viewer for images via Google VRView',
     spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
@@ -378,28 +383,10 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18845',
   },
   {
-    id: 'amp-list-resizable-children',
-    name: 'Experiment for allowing amp-list to resize when its children resize',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18875',
-  },
-  {
     id: 'hidden-mutation-observer',
     name: "Enables FixedLayer's hidden-attribute mutation observer",
     spec: 'https://github.com/ampproject/amphtml/issues/17475',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18897',
-  },
-  {
-    id: 'scroll-height-bounce',
-    name: 'Bounces the scrolling when scroll height changes' +
-        ' (fix for #18861 and #8798)',
-    spec: 'https://github.com/ampproject/amphtml/issues/18861',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/19004',
-  },
-  {
-    id: 'scroll-height-minheight',
-    name: 'Forces min-height on body (fix for #18861 and #8798)',
-    spec: 'https://github.com/ampproject/amphtml/issues/18861',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/19004',
   },
   {
     id: 'amp-auto-lightbox',

@@ -23,6 +23,9 @@ tags: {  # amp-smartlinks
     version: "latest"
   }
   attr_lists: "common-extension-attrs"
+  satisfies: "amp-smartlinks"
+  excludes: "amp-link-rewriter"
+  excludes: "amp-skimlinks"
 }
 
 tags: {  # <amp-smartlinks>

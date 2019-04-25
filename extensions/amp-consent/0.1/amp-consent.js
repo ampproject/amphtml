@@ -149,7 +149,8 @@ export class AmpConsent extends AMP.BaseElement {
      */
     const policyConfig = this.consentConfig_['policy'] || dict({});
 
-    this.policyConfig_ = expandPolicyConfig(policyConfig, this.consentId_);
+    this.policyConfig_ = expandPolicyConfig(
+        policyConfig, /** @type {string} */ (this.consentId_));
 
     const children = this.getRealChildren();
     for (let i = 0; i < children.length; i++) {
@@ -516,8 +517,9 @@ export class AmpConsent extends AMP.BaseElement {
    * @return {Promise<boolean>}
    */
   initPromptUI_(isConsentRequired) {
-    this.consentUI_ = new ConsentUI(this, devAssert(this.consentConfig_,
-        'consent config not found'));
+    this.consentUI_ = new ConsentUI(this,
+        /** @type {!JsonObject} */ (
+          devAssert(this.consentConfig_, 'consent config not found')));
 
     // Get current consent state
     return this.consentStateManager_.getConsentInstanceInfo()

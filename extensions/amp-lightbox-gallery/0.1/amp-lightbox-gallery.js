@@ -44,6 +44,7 @@ import {
   getElementServiceForDoc,
 } from '../../../src/element-service';
 import {htmlFor} from '../../../src/static-template';
+import {isExperimentOn} from '../../../src/experiments';
 import {
   prepareImageAnimation,
 } from '@ampproject/animations/dist/animations.mjs';
@@ -192,7 +193,11 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {Document} */
+    /** @private @const {boolean} */
+    this.useBaseCarousel_ =
+        isExperimentOn(this.win, 'amp-lightbox-gallery-base-carousel');
+
+    /** @private {!Document} */
     this.doc_ = this.win.document;
 
     /** @private {boolean} */
@@ -275,6 +280,11 @@ export class AmpLightboxGallery extends AMP.BaseElement {
      * @private {?function()}
      */
     this.preventCarouselScrollUnlistener_ = null;
+
+    /**
+     * @private {boolean}
+     */
+    this.hasVerticalScrollbarWidth_ = false;
   }
 
   /** @override */
@@ -291,7 +301,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       const viewer = Services.viewerForDoc(this.getAmpDoc());
       return viewer.whenFirstVisible();
     }).then(() => {
-      this.container_ = htmlFor(this.doc_)`
+      this.container_ = htmlFor(/** @type {!Document} */ (this.doc_))`
         <div class="i-amphtml-lbg">
           <div class="i-amphtml-lbg-mask"></div>
         </div>`;
@@ -319,7 +329,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @private
    */
   buildControls_() {
-    this.controlsContainer_ = htmlFor(this.doc_)`
+    this.controlsContainer_ = htmlFor(/** @type {!Document} */ (this.doc_))`
       <div class="i-amphtml-lbg-controls"></div>`;
     this.buildDescriptionBox_();
     this.buildTopBar_();
@@ -375,9 +385,9 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       const descText = this.manager_.getDescription(element);
       const metadata = {
         descriptionText: descText,
-        tagName: clonedNode.tagName,
+        tagName: /** @type {string} */ (clonedNode.tagName),
         sourceElement: element,
-        element: clonedNode,
+        element: dev().assertElement(clonedNode),
       };
       let slide = clonedNode;
       if (ELIGIBLE_TAP_TAGS[clonedNode.tagName]) {
@@ -404,8 +414,9 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    */
   findOrBuildCarousel_(lightboxGroupId) {
     devAssert(this.container_);
+    const tag = this.useBaseCarousel_ ? 'amp-base-carousel' : 'amp-carousel';
     const existingCarousel = this.element.querySelector(
-        `amp-carousel[amp-lightbox-group=${
+        `${escapeCssSelectorIdent(tag)}[amp-lightbox-group=${
           escapeCssSelectorIdent(lightboxGroupId)
         }]`);
     if (existingCarousel) {
@@ -436,16 +447,26 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @private
    */
   buildCarousel_(lightboxGroupId) {
+    const extension = this.useBaseCarousel_ ? 'amp-base-carousel' :
+      'amp-carousel';
     return Promise.all([
       Services.extensionsFor(this.win).installExtensionForDoc(
-          this.getAmpDoc(), 'amp-carousel'),
+          this.getAmpDoc(), extension),
       Services.extensionsFor(this.win).installExtensionForDoc(
           this.getAmpDoc(), 'amp-image-viewer'),
     ]).then(() => {
       return this.manager_.getElementsForLightboxGroup(lightboxGroupId);
     }).then(list => {
-      this.carousel_ = htmlFor(this.doc_)`
-        <amp-carousel type="slides" layout="fill" loop="true"></amp-carousel>`;
+      this.carousel_ = this.useBaseCarousel_ ?
+        htmlFor(this.doc_)`
+          <amp-base-carousel type="slides" layout="fill" loop="true">
+            <div slot="prev-arrow"></div>
+            <div slot="next-arrow"></div>
+          </amp-base-carousel>
+        ` :
+        htmlFor(this.doc_)`
+          <amp-carousel type="slides" layout="fill" loop="true"></amp-carousel>
+        `;
       this.carousel_.setAttribute('amp-lightbox-group', lightboxGroupId);
       this.buildCarouselSlides_(list);
       return this.mutateElement(() => {
@@ -693,7 +714,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   buildButton_(label, className, action) {
     devAssert(this.topBar_);
 
-    const button = htmlFor(this.doc_)`
+    const button = htmlFor(/** @type {!Document} */ (this.doc_))`
     <div role="button" class="i-amphtml-lbg-button">
       <span class="i-amphtml-lbg-icon"></span>
     </div>`;
@@ -807,7 +828,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   carrySwipeMomentum_(scale, deltaX, deltaY, velocity) {
     const duration = velocity * SWIPE_TO_CLOSE_DISTANCE_TO_TIME_FACTOR;
 
-    setStyles(devAssert(this.carousel_), {
+    setStyles(devAssert(dev().assertElement(this.carousel_)), {
       transform: `scale(${scale}) translate(${deltaX}px, ${deltaY}px)`,
       transition: `${duration}ms transform ${SWIPE_TO_CLOSE_MOMENTUM_TIMING}`,
     });
@@ -826,15 +847,15 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     const duration = finalDistance * SWIPE_TO_CLOSE_SNAP_BACK_TIME_FACTOR;
 
     return this.mutateElement(() => {
-      setStyles(devAssert(this.carousel_), {
+      setStyles(dev().assertElement(this.carousel_), {
         transform: '',
         transition: `${duration}ms transform ease-out`,
       });
-      setStyles(devAssert(this.mask_), {
+      setStyles(dev().assertElement(this.mask_), {
         opacity: '',
         transition: `${duration}ms opacity ease-out`,
       });
-      setStyles(devAssert(this.controlsContainer_), {
+      setStyles(dev().assertElement(this.controlsContainer_), {
         opacity: '',
         transition: `${duration}ms opacity ease-out`,
       });
@@ -861,11 +882,11 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       transform: carouselTransform,
       transition: '',
     });
-    setStyles(devAssert(this.mask_), {
+    setStyles(dev().assertElement(this.mask_), {
       opacity: maskOpacity,
       transition: '',
     });
-    setStyles(devAssert(this.controlsContainer_), {
+    setStyles(devAssert(dev().assertElement(this.controlsContainer_)), {
       opacity: controlsOpacity,
       transition: '',
     });
@@ -925,7 +946,8 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     // We do not want the user dragging around to make the carousel think that
     // a scroll happened.
     this.preventCarouselScrollUnlistener_ = listen(
-        devAssert(this.carousel_), 'scroll', event => {
+        dev().assertElement(this.carousel_),
+        'scroll', event => {
           event.stopPropagation();
         }, {
           capture: true,
@@ -981,14 +1003,14 @@ export class AmpLightboxGallery extends AMP.BaseElement {
               // TODO(sparhami) These should be called in a `mutateElement`,
               // but we are already in an animationFrame, and waiting for the
               // next one will cause the UI to flicker.
-              this.adjustForSwipePosition_(carousel);
+              this.adjustForSwipePosition_(dev().assertElement(carousel));
               this.endSwipeToDismiss_(sourceElement);
             });
         return;
       }
 
       this.adjustForSwipePosition_(
-          carousel,
+          dev().assertElement(carousel),
           `scale(${scale}) translate(${deltaX}px, ${deltaY}px)`,
           maskOpacity,
           controlsOpacity);
@@ -1066,13 +1088,17 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     const lightboxGroupId = element.getAttribute('lightbox')
       || 'default';
     this.currentLightboxGroupId_ = lightboxGroupId;
+    this.hasVerticalScrollbarWidth_ =
+        this.getViewport().getVerticalScrollbarWidth() > 0;
+
     return this.findOrInitializeLightbox_(lightboxGroupId).then(() => {
+      return this.getViewport().enterLightboxMode();
+    }).then(() => {
       return this.mutateElement(() => {
         toggle(this.element, true);
         setStyle(this.element, 'opacity', 0);
         this.controlsContainer_.classList.remove('i-amphtml-lbg-fade-in');
         this.controlsContainer_.classList.add('i-amphtml-lbg-hidden');
-        this.getViewport().enterLightboxMode();
       });
     }).then(() => {
       this.isActive_ = true;
@@ -1337,7 +1363,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
 
     return this.mutateElement(() => {
       if (fadeIn) {
-        toggle(devAssert(this.carousel_), true);
+        toggle(dev().assertElement(this.carousel_), true);
         toggle(this.element, true);
       }
 
@@ -1358,7 +1384,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
           });
 
           if (!fadeIn) {
-            toggle(devAssert(this.carousel_), false);
+            toggle(dev().assertElement(this.carousel_), false);
             toggle(this.element, false);
           }
         });
@@ -1426,7 +1452,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     // TODO(#13011): change to a tag selector after `<amp-carousel>`
     // type='carousel' starts supporting goToSlide.
     return closestAncestorElementBySelector(
-        sourceElement, 'amp-carousel[type="slides"]');
+        sourceElement, 'amp-carousel[type="slides"], amp-base-carousel');
   }
 
   /**
@@ -1474,7 +1500,17 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     gestures.cleanup();
 
     return this.mutateElement(() => {
-      this.getViewport().leaveLightboxMode();
+      // If we do not have a vertical scrollbar taking width, immediately
+      // leave lightbox mode so that the user can scroll the page. This makes
+      // things feel much more responsive. When we have a vertical scrollbar,
+      // taking width we do not leave lightbox mode here as it will cause jank
+      // at the start of the animation. On browsers with non-overlaying
+      // scrollbars, this is still consistent, as they cannot scroll during
+      // the animation if it has  a width, or if it does not (i.e. there is no
+      // overflow to scroll).
+      if (!this.hasVerticalScrollbarWidth_) {
+        this.getViewport().leaveLightboxMode();
+      }
       // If there's gallery, set gallery to display none
       this.container_.removeAttribute('gallery-view');
 
@@ -1485,6 +1521,10 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       this.clearDescOverflowState_();
     }).then(() => this.exit_())
         .then(() => {
+          // Leave lightbox mode now that it will not affect the animation.
+          if (this.hasVerticalScrollbarWidth_) {
+            this.getViewport().leaveLightboxMode();
+          }
           this.schedulePause(dev().assertElement(this.container_));
           this.pauseLightboxChildren_();
           this.carousel_ = null;
@@ -1581,7 +1621,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       this.updateVideoThumbnails_();
     } else {
       // Build gallery
-      this.gallery_ = htmlFor(this.doc_)`
+      this.gallery_ = htmlFor(/** @type {!Document} */ (this.doc_))`
       <div class="i-amphtml-lbg-gallery"></div>`;
       this.gallery_.setAttribute('amp-lightbox-group',
           this.currentLightboxGroupId_);
@@ -1688,7 +1728,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
 
   /**
    * @param {Event} event
-   * @param {string} id
+   * @param {number} id
    * @private
    */
   handleThumbnailClick_(event, id) {
@@ -1710,7 +1750,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @private
    */
   createThumbnailElement_(thumbnailObj) {
-    const element = htmlFor(this.doc_)`
+    const element = htmlFor(/** @type {!Document} */ (this.doc_))`
     <div class="i-amphtml-lbg-gallery-thumbnail">
       <img class="i-amphtml-lbg-gallery-thumbnail-img"></img>
     </div>`;
@@ -1724,7 +1764,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     element.appendChild(imgElement);
 
     if (VIDEO_TAGS[thumbnailObj.element.tagName]) {
-      const timestampDiv = htmlFor(this.doc_)`
+      const timestampDiv = htmlFor(/** @type {!Document} */ (this.doc_))`
       <div class="i-amphtml-lbg-thumbnail-timestamp-container">
         <span class="i-amphtml-lbg-thumbnail-play-icon"></span>
       <div>`;

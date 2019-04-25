@@ -13,14 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import {LocalizedStringBundleDef, LocalizedStringId} from '../localization';
+import {
+  LocalizedStringBundleDef,
+  LocalizedStringId,
+} from '../../../../src/service/localization';
 
 /**
  * Localized string bundle used for sw strings.
  * @const {!LocalizedStringBundleDef}
  */
-export default /** @const {!LocalizedStringBundleDef} */ ({
+const strings = {
   [LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT]: {
     string: 'Sauti imezimwa',
   },
@@ -29,75 +31,6 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
   },
   [LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_SOUND_TEXT]: {
     string: 'Umewasha sauti',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_APPLY_NOW]: {
-    string: 'Tuma Ombi Sasa',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_BOOK_NOW]: {
-    string: 'Hifadhi nafasi',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_BUY_TICKETS]: {
-    string: 'Nunua Tiketi',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_DOWNLOAD]: {
-    string: 'Pakua',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_EXPLORE]: {
-    string: 'Gundua',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_GET_NOW]: {
-    string: 'Pata Sasa',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_INSTALL]: {
-    string: 'Sakinisha Sasa',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_LEARN_MORE]: {
-    string: 'Pata Maelezo Zaidi',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_LISTEN]: {
-    string: 'Sikiliza',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_MORE]: {
-    string: 'Zaidi',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_OPEN_APP]: {
-    string: 'Fungua Programu',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_ORDER_NOW]: {
-    string: 'Agiza Sasa',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_PLAY]: {
-    string: 'Cheza',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_READ]: {
-    string: 'Soma',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SHOP]: {
-    string: 'Nunua',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SHOW]: {
-    string: 'Onyesha',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SHOWTIMES]: {
-    string: 'Saa za kuonyesha',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SIGN_UP]: {
-    string: 'Jisajili',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SUBSCRIBE]: {
-    string: 'Jisajili Sasa',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_USE_APP]: {
-    string: 'Tumia Programu',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_VIEW]: {
-    string: 'Angalia',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_WATCH]: {
-    string: 'Tazama',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_WATCH_EPISODE]: {
-    string: 'Tazama Kipindi',
   },
   [LocalizedStringId.AMP_STORY_BOOKEND_MORE_TO_READ_LABEL]: {
     string: 'Mapendekezo zaidi ya kusoma',
@@ -193,4 +126,6 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
   [LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT]: {
     string: 'Samahani, inaonekana kivinjari chako hakitumii hali hii',
   },
-});
+};
+
+export default strings;
