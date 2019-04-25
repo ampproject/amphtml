@@ -26,7 +26,6 @@ tags: {  # amp-mraid
   }
   attr_lists: "common-extension-attrs"
   attrs: {
-    name: "fallback-on",
-    value: "mismatch"
+    name: "no-fallback"
   }
 }
