@@ -1126,4 +1126,51 @@ describes.realWin('DOM', {
       });
     });
   });
+
+  describe('toggleAttribute', () => {
+    let el;
+
+    beforeEach(() => {
+      el = document.createElement('div');
+    });
+
+    it('should toggle to remove the attribute with an empty value', () => {
+      el.setAttribute('foo', '');
+      dom.toggleAttribute(el, 'foo');
+      expect(el.getAttribute('foo')).to.be.null;
+    });
+
+    it('should toggle to remove the attribute with a non-empty value', () => {
+      el.setAttribute('foo', 'asdf');
+      dom.toggleAttribute(el, 'foo');
+      expect(el.getAttribute('foo')).to.be.null;
+    });
+
+    it('should toggle to add the attribute', () => {
+      dom.toggleAttribute(el, 'foo');
+      expect(el.getAttribute('foo')).to.equal('');
+    });
+
+    it('should remove the attribute when forced', () => {
+      el.setAttribute('foo', '');
+      dom.toggleAttribute(el, 'foo', false);
+      expect(el.getAttribute('foo')).to.be.null;
+    });
+
+    it('should not add the attribute when forced off', () => {
+      dom.toggleAttribute(el, 'foo', false);
+      expect(el.getAttribute('foo')).to.be.null;
+    });
+
+    it('should add the attribute when forced and it does not exist', () => {
+      dom.toggleAttribute(el, 'foo', true);
+      expect(el.getAttribute('foo')).to.equal('');
+    });
+
+    it('should leave the attribute when forced and it exists', () => {
+      el.setAttribute('foo', 'asdf');
+      dom.toggleAttribute(el, 'foo', true);
+      expect(el.getAttribute('foo')).to.equal('asdf');
+    });
+  });
 });

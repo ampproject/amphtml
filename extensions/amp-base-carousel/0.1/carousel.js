@@ -27,6 +27,7 @@ import {
   updateLengthStyle,
 } from './dimensions.js';
 import {AutoAdvance} from './auto-advance';
+import {CarouselAccessibility} from './carousel-accessibility';
 import {
   backwardWrappingDistance,
   forwardWrappingDistance,
@@ -175,6 +176,15 @@ export class Carousel {
       win,
       scrollContainer,
       advanceable: this,
+    });
+
+    /** @private @const */
+    this.carouselAccessibility_ = new CarouselAccessibility({
+      win,
+      element,
+      scrollContainer,
+      runMutate,
+      stoppable: this.autoAdvance_,
     });
 
     /** @private @const */
@@ -375,10 +385,35 @@ export class Carousel {
   }
 
   /**
+   * Pauses the auto advance temporarily. This can be resumed by calling
+   * resumeAutoAdvance. This should only be used internally for the carousel
+   * implementation and not exposed.
+   */
+  pauseAutoAdvance() {
+    this.autoAdvance_.pause();
+  }
+
+  /**
+   * Resumes auto advance when paused by pauseAutoAdvance. Note that if the
+   * autoadvance has been stopped, this has no effect. This should only be used
+   * internally for the carousel implementation and not exposed.
+   */
+  resumeAutoAdvance() {
+    this.autoAdvance_.resume();
+  }
+
+  /**
    * @return {number} The current index of the carousel.
    */
   getCurrentIndex() {
     return this.currentIndex_;
+  }
+
+  /**
+   * @return {boolean} Whether or not looping is enabled.
+   */
+  getLoop() {
+    return this.loop_;
   }
 
   /**
@@ -487,6 +522,7 @@ export class Carousel {
    */
   updateMixedLength(mixedLength) {
     this.mixedLength_ = mixedLength;
+    this.carouselAccessibility_.updateMixedLength(mixedLength);
     this.updateUi();
   }
 
@@ -497,6 +533,7 @@ export class Carousel {
    */
   updateSlides(slides) {
     this.slides_ = slides;
+    this.carouselAccessibility_.updateSlides(slides);
     this.updateUi();
   }
 
@@ -571,6 +608,7 @@ export class Carousel {
    */
   updateVisibleCount(visibleCount) {
     this.visibleCount_ = Math.max(1, visibleCount);
+    this.carouselAccessibility_.updateVisibleCount(visibleCount);
     this.updateUi();
   }
 
