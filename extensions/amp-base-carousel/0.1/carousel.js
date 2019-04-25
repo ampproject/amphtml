@@ -184,7 +184,7 @@ export class Carousel {
       element,
       scrollContainer,
       runMutate,
-      autoAdvance: this.autoAdvance_,
+      stoppable: this.autoAdvance_,
     });
 
     /** @private @const */

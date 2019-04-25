@@ -15,7 +15,13 @@
  */
 
 import {getDetail} from '../../../src/event-helper';
-import {AutoAdvance} from './auto-advance';
+
+/**
+ * @typedef {{
+ *   stop: function(),
+ * }}
+ */
+let StoppableDef;
 
 /**
  * Accessibility for the carousel. This behaves either as a list or by
@@ -28,7 +34,7 @@ export class CarouselAccessibility {
    *   element: !Element,
    *   scrollContainer: !Element,
    *   runMutate: function(function()),
-   *   autoAdvance: !AutoAdvance,
+   *   stoppable: !StoppableDef,
    * }} config
    */
   constructor({
@@ -36,7 +42,7 @@ export class CarouselAccessibility {
     element,
     scrollContainer,
     runMutate,
-    autoAdvance,
+    stoppable,
   }) {
     /** @private @const */
     this.win_ = win;
@@ -63,7 +69,7 @@ export class CarouselAccessibility {
     this.index_ = 0;
 
     element.addEventListener('focus', () => {
-      autoAdvance.stop();
+      stoppable.stop();
     }, true);
     element.addEventListener('indexchange', event => {
       this.onIndexChanged_(event);
