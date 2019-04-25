@@ -21,20 +21,20 @@ const colors = require('ansi-colors');
 const fs = require('fs-extra');
 const gulp = require('gulp');
 const nop = require('gulp-nop');
-const {isTravisBuild} = require('../travis');
-const {VERSION: internalRuntimeVersion} = require('../internal-version') ;
-
 const rename = require('gulp-rename');
 const rimraf = require('rimraf');
 const shortenLicense = require('../shorten-license');
 const sourcemaps = require('gulp-sourcemaps');
 const {highlight} = require('cli-highlight');
+const {isTravisBuild} = require('../travis');
 const {singlePassCompile} = require('../single-pass');
+const {VERSION: internalRuntimeVersion} = require('../internal-version') ;
 
 const isProdBuild = !!argv.type;
 const queue = [];
 let inProgress = 0;
 const MAX_PARALLEL_CLOSURE_INVOCATIONS = 4;
+const NAILGUN_PORT = '2113'; // Also used in gulpfile.js
 
 // Compiles AMP with the closure compiler. This is intended only for
 // production use. During development we intend to continue using
@@ -84,12 +84,11 @@ function cleanupBuildDir() {
 exports.cleanupBuildDir = cleanupBuildDir;
 
 // Formats a closure compiler error message into a more readable form by
-// dropping the lengthy java invocation line...
-//     Command failed: java -jar ... --js_output_file="<file>"
-// ...and then syntax highlighting the error text.
+// dropping the closure compiler plugin's logging prefix and then syntax
+// highlighting the error text.
 function formatClosureCompilerError(message) {
-  const javaInvocationLine = /Command failed:[^]*--js_output_file=\".*?\"\n/;
-  message = message.replace(javaInvocationLine, '');
+  const closurePluginLoggingPrefix = /^.*?gulp-google-closure-compiler.*?: /;
+  message = message.replace(closurePluginLoggingPrefix, '');
   message = highlight(message, {ignoreIllegals: true});
   message = message.replace(/WARNING/g, colors.yellow('WARNING'));
   message = message.replace(/ERROR/g, colors.red('ERROR'));
@@ -344,7 +343,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
     externs.push('build-system/amp.multipass.extern.js');
 
     /* eslint "google-camelcase/google-camelcase": 0*/
-    const compilerOptions = {
+    let compilerOptions = {
       compilation_level: options.compilationLevel || 'SIMPLE_OPTIMIZATIONS',
       // Turns on more optimizations.
       assume_function_wrapper: true,
@@ -370,6 +369,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       // required.
       only_closure_dependencies: true,
       output_wrapper: wrapper,
+      source_map_include_content: !!argv.full_sourcemaps,
       source_map_location_mapping: '|' + sourceMapBase,
       warning_level: options.verboseLogging ? 'VERBOSE' : 'DEFAULT',
       jscomp_error: [],
@@ -402,20 +402,51 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       delete compilerOptions.define;
     }
 
+    let compilerErrors = '';
     const pluginOptions = {
-      platform: ['java'], // Override the JAR used by closure compiler
+      platform: ['java'], // Override the binary used by closure compiler
       extraArguments: ['-XX:+TieredCompilation'], // Significant speed up!
+      logger: errors => compilerErrors = errors, // Capture compiler errors
     };
+
+    // SIGNIFICANTLY speed up compilation on Mac and Linux using nailgun
+    // See https://github.com/facebook/nailgun.
+    if (!argv.single_pass &&
+        (process.platform == 'darwin' || process.platform == 'linux')) {
+      const compilerOptionsArray = [
+        '--nailgun-port',
+        NAILGUN_PORT,
+        'org.ampproject.AmpCommandLineRunner',
+        '--',
+      ];
+      Object.keys(compilerOptions).forEach(function(option) {
+        const value = compilerOptions[option];
+        if (value instanceof Array) {
+          value.forEach(function(item) {
+            compilerOptionsArray.push('--' + option + '=' + item);
+          });
+        } else {
+          if (value != null) {
+            compilerOptionsArray.push('--' + option + '=' + value);
+          } else {
+            compilerOptionsArray.push('--' + option);
+          }
+        }
+      });
+      compilerOptions = compilerOptionsArray; // nailgun-runner takes an array
+      pluginOptions.platform = ['native']; // nailgun-runner isn't a java binary
+      pluginOptions.extraArguments = null; // Already part of nailgun-server
+    }
 
     // Override to local closure compiler JAR
     closureCompiler.compiler.JAR_PATH =
         require.resolve('../runner/dist/runner.jar');
 
     const handleCompilerError = function(err) {
-      const {message} = err;
       console./*OK*/error(colors.red(
           'Compilation failed for ' + outputFilename + ':\n') +
-          formatClosureCompilerError(message));
+          formatClosureCompilerError(compilerErrors) + '\n' +
+          err);
       process.exit(1);
     };
 
