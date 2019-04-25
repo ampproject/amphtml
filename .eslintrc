@@ -132,7 +132,8 @@
     "prettier/prettier": [2, {
       "bracketSpacing": false,
       "singleQuote": true,
-      "trailingComma": "es5"
+      "trailingComma": "es5",
+      "quoteProps": "preserve"
     }],
     "radix": 2,
     "require-jsdoc": [2, {
