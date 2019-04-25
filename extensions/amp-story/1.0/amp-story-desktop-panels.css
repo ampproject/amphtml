@@ -180,7 +180,8 @@ amp-story[standalone].i-amphtml-story-desktop-panels {
 }
 
 .i-amphtml-story-desktop-panels > amp-story-page,
-.i-amphtml-story-desktop-panels .i-amphtml-story-page-sentinel {
+.i-amphtml-story-desktop-panels .i-amphtml-story-page-sentinel,
+.i-amphtml-story-desktop-panels .i-amphtml-story-media-query-matcher {
   left: 50%!important;
   right: auto !important;
   margin: auto !important;
