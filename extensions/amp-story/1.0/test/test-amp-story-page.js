@@ -392,7 +392,7 @@ describes.realWin('amp-story-page', {amp: true}, env => {
   it('should build the open attachment UI with custom CTA label', () => {
     const attachmentEl =
         win.document.createElement('amp-story-page-attachment');
-    attachmentEl.setAttribute('data-cta-label', 'Custom label');
+    attachmentEl.setAttribute('data-cta-text', 'Custom label');
     element.appendChild(attachmentEl);
 
     page.buildCallback();

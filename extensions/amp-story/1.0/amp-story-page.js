@@ -1144,7 +1144,7 @@ export class AmpStoryPage extends AMP.BaseElement {
           .querySelector('.i-amphtml-story-page-open-attachment-label');
 
 
-      const openAttachmentLabel = attachmentEl.getAttribute('data-cta-label') ||
+      const openAttachmentLabel = attachmentEl.getAttribute('data-cta-text') ||
           Services.localizationService(this.win).getLocalizedString(
               LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL);
 
