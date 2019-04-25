@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.48 */
+/** Version: 0.1.22.49 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -198,7 +198,7 @@ class GlobalDoc {
   /** @override */
   getHead() {
     // `document.head` always has a chance to be parsed, at least partially.
-    return dev().assertElement(this.doc_.head);
+    return /** @type {!Element} */ (this.doc_.head);
   }
 
   /** @override */

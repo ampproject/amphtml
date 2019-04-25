@@ -31,6 +31,7 @@ const minimatch = require('minimatch');
 const minimist = require('minimist');
 const path = require('path');
 const rimraf = require('rimraf');
+const sleep = require('sleep-promise');
 const source = require('vinyl-source-stream');
 const touch = require('touch');
 const watchify = require('watchify');
@@ -40,6 +41,7 @@ const {applyConfig, removeConfig} = require('./build-system/tasks/prepend-global
 const {cleanupBuildDir, closureCompile} = require('./build-system/tasks/compile');
 const {createCtrlcHandler, exitCtrlcHandler} = require('./build-system/ctrlcHandler');
 const {createModuleCompatibleES5Bundle} = require('./build-system/tasks/create-module-compatible-es5-bundle');
+const {exec, execScriptAsync, getStdout} = require('./build-system/exec');
 const {isTravisBuild} = require('./build-system/travis');
 const {jsifyCssAsync} = require('./build-system/tasks/jsify-css');
 const {serve} = require('./build-system/tasks/serve.js');
@@ -65,7 +67,7 @@ let extensionsToBuild = null;
 // All a4a extensions.
 const adVendors = [];
 
-const {green, red, cyan} = colors;
+const {green, red, cyan, yellow} = colors;
 
 // Minified targets to which AMP_CONFIG must be written.
 const minifiedRuntimeTarget = 'dist/v0.js';
@@ -83,6 +85,16 @@ const unminifiedRuntimeEsmTarget = 'dist/amp-esm.js';
 const unminified3pTarget = 'dist.3p/current/integration.js';
 
 const maybeUpdatePackages = isTravisBuild() ? [] : ['update-packages'];
+
+// Used to start and stop the Closure nailgun server
+let nailgunRunnerReplacer;
+const nailgunRunner =
+    require.resolve('./third_party/nailgun/nailgun-runner');
+const nailgunServer =
+    require.resolve('./third_party/nailgun/nailgun-server.jar');
+const customRunner = require.resolve('./build-system/runner/dist/runner.jar');
+const NAILGUN_PORT = '2113'; // Also used in build-system/tasks/compile.js
+const NAILGUN_STARTUP_TIMEOUT_MS = 5 * 1000;
 
 /**
  * Tasks that should print the `--nobuild` help text.
@@ -916,6 +928,85 @@ function build() {
 }
 
 /**
+ * Starts a nailgun server (provides a fast-running closure compiler instance),
+ * and replaces google-closure-compiler's binary with the nailgun runner
+ */
+async function startNailgunServer() {
+  if (argv.single_pass) {
+    return;
+  }
+  // Replace default binary with nailgun on linux and macos
+  if (process.platform == 'darwin') {
+    nailgunRunnerReplacer = require('require-hijack')
+        .replace('google-closure-compiler-osx').with(nailgunRunner);
+  } else if (process.platform == 'linux') {
+    nailgunRunnerReplacer = require('require-hijack')
+        .replace('google-closure-compiler-linux').with(nailgunRunner);
+  } else {
+    log(yellow('WARNING:'), 'Cannot run', cyan('nailgun-server.jar'),
+        'on', cyan(process.platform));
+    log(yellow('WARNING:'),
+        'Closure compiler will be significantly slower than on',
+        cyan('macos'), 'or', cyan('linux'));
+    return;
+  }
+
+  // Start up the nailgun server after cleaning up old instances (if any)
+  const startNailgunServerCmd =
+      'java -XX:+TieredCompilation -server -cp ' +
+      `${nailgunServer}:${customRunner} ` +
+      `com.facebook.nailgun.NGServer ${NAILGUN_PORT}`;
+  const stopNailgunServerCmd =
+      `${nailgunRunner} --nailgun-port ${NAILGUN_PORT} ng-stop`;
+  const getVersionCmd =
+      `${nailgunRunner} --nailgun-port ${NAILGUN_PORT} ` +
+      'org.ampproject.AmpCommandLineRunner -- --version';
+  if (!isTravisBuild()) {
+    log('Starting', cyan('nailgun-server.jar'), 'on port', cyan(NAILGUN_PORT));
+  }
+  exec(stopNailgunServerCmd, {stdio: 'pipe'});
+  execScriptAsync(startNailgunServerCmd, {stdio: 'pipe'});
+
+  // Ensure that the nailgun server is up and running
+  const end = Date.now() + NAILGUN_STARTUP_TIMEOUT_MS;
+  while (Date.now() < end) {
+    try {
+      const version = getStdout(getVersionCmd).trim();
+      if (/Version/.test(version)) {
+        return;
+      }
+    } catch (e) {
+      await sleep(1000);
+    }
+  }
+  log(red('ERROR:'), 'Could not start',
+      cyan(nailgunServer), 'on port', cyan(NAILGUN_PORT) + '...');
+  process.exit(1);
+}
+
+/**
+ * Stops the nailgun server if it's running, and restores the binary used by
+ * google-closure-compiler
+ */
+async function stopNailgunServer() {
+  if (argv.single_pass) {
+    return;
+  }
+  if (nailgunRunnerReplacer) {
+    nailgunRunnerReplacer.restore();
+  }
+  if (process.platform == 'darwin' || process.platform == 'linux') {
+    const stopNailgunServerCmd =
+        `${nailgunRunner} --nailgun-port ${NAILGUN_PORT} ng-stop`;
+    if (!isTravisBuild()) {
+      log('Stopping', cyan('nailgun-server.jar'), 'on port',
+          cyan(NAILGUN_PORT));
+    }
+    exec(stopNailgunServerCmd, {stdio: 'pipe'});
+  }
+}
+
+/**
  * Dist Build
  * @return {!Promise}
  */
@@ -932,13 +1023,16 @@ function dist() {
   }
   if (argv.single_pass) {
     if (!isTravisBuild()) {
-      log(green('Not building any AMP extensions in'), cyan('single_pass'),
+      log(green('Building all AMP extensions in'), cyan('single_pass'),
           green('mode.'));
     }
   } else {
     parseExtensionFlags();
   }
   return compileCss(/* watch */ undefined, /* opt_compileAll */ true)
+      .then(async() => {
+        await startNailgunServer();
+      })
       .then(() => {
         return Promise.all([
           compile(false, true, true),
@@ -964,6 +1058,8 @@ function dist() {
           // New line after all the compilation progress dots on Travis.
           console.log('\n');
         }
+      }).then(async() => {
+        await stopNailgunServer();
       }).then(() => {
         return copyAliasExtensions();
       }).then(() => {
@@ -1056,44 +1152,50 @@ function checkTypes() {
     return './extensions/' + extension.name + '/' +
         extension.version + '/' + extension.name + '.js';
   }).sort();
-  return compileCss().then(() => {
-    return Promise.all([
-      closureCompile(compileSrcs.concat(extensionSrcs), './dist',
-          'check-types.js', {
-            include3pDirectories: true,
-            includePolyfills: true,
-            extraGlobs: ['src/inabox/*.js'],
-            typeCheckOnly: true,
-          }),
-      // Type check 3p/ads code.
-      closureCompile(['./3p/integration.js'], './dist',
-          'integration-check-types.js', {
-            externs: ['ads/ads.extern.js'],
-            include3pDirectories: true,
-            includePolyfills: true,
-            typeCheckOnly: true,
-          }),
-      closureCompile(['./3p/ampcontext-lib.js'], './dist',
-          'ampcontext-check-types.js', {
-            externs: ['ads/ads.extern.js'],
-            include3pDirectories: true,
-            includePolyfills: true,
-            typeCheckOnly: true,
-          }),
-      closureCompile(['./3p/iframe-transport-client-lib.js'], './dist',
-          'iframe-transport-client-check-types.js', {
-            externs: ['ads/ads.extern.js'],
-            include3pDirectories: true,
-            includePolyfills: true,
-            typeCheckOnly: true,
-          }),
-    ]);
-  }).then(() => {
-    if (isTravisBuild()) {
-      // New line after all the compilation progress dots on Travis.
-      console.log('\n');
-    }
-  }).then(() => exitCtrlcHandler(handlerProcess));
+  return compileCss()
+      .then(async() => {
+        await startNailgunServer();
+      })
+      .then(() => {
+        return Promise.all([
+          closureCompile(compileSrcs.concat(extensionSrcs), './dist',
+              'check-types.js', {
+                include3pDirectories: true,
+                includePolyfills: true,
+                extraGlobs: ['src/inabox/*.js'],
+                typeCheckOnly: true,
+              }),
+          // Type check 3p/ads code.
+          closureCompile(['./3p/integration.js'], './dist',
+              'integration-check-types.js', {
+                externs: ['ads/ads.extern.js'],
+                include3pDirectories: true,
+                includePolyfills: true,
+                typeCheckOnly: true,
+              }),
+          closureCompile(['./3p/ampcontext-lib.js'], './dist',
+              'ampcontext-check-types.js', {
+                externs: ['ads/ads.extern.js'],
+                include3pDirectories: true,
+                includePolyfills: true,
+                typeCheckOnly: true,
+              }),
+          closureCompile(['./3p/iframe-transport-client-lib.js'], './dist',
+              'iframe-transport-client-check-types.js', {
+                externs: ['ads/ads.extern.js'],
+                include3pDirectories: true,
+                includePolyfills: true,
+                typeCheckOnly: true,
+              }),
+        ]);
+      }).then(() => {
+        if (isTravisBuild()) {
+          // New line after all the compilation progress dots on Travis.
+          console.log('\n');
+        }
+      }).then(async() => {
+        await stopNailgunServer();
+      }).then(() => exitCtrlcHandler(handlerProcess));
 }
 
 /**
@@ -1598,34 +1700,6 @@ function buildLoginDoneVersion(version, options) {
 }
 
 /**
- * Build "Iframe API".
- *
- * @param {!Object} options
- */
-function buildAccessIframeApi(options) {
-  const version = '0.1';
-  options = options || {};
-  const path = `extensions/amp-access/${version}/iframe-api`;
-  let {watch} = options;
-  if (watch === undefined) {
-    watch = argv.watch || argv.w;
-  }
-  const minify = options.minify || argv.minify;
-  mkdirSync('dist.3p');
-  mkdirSync('dist.3p/current');
-  return compileJs(path + '/', 'amp-iframe-api-export.js',
-      './dist.3p/current', {
-        minifiedName: 'amp-iframe-api-v0.js',
-        checkTypes: options.checkTypes || argv.checkTypes,
-        watch,
-        minify,
-        preventRemoveAndMakeDir: options.preventRemoveAndMakeDir,
-        include3pDirectories: false,
-        includePolyfills: true,
-      });
-}
-
-/**
  * Build ALP JS.
  *
  * @param {!Object} options
@@ -1755,6 +1829,7 @@ gulp.task('dist', 'Build production binaries', maybeUpdatePackages, dist, {
     noextensions: '  Builds with no extensions.',
     single_pass_dest: '  The directory closure compiler will write out to ' +
             'with --single_pass mode. The default directory is `dist`',
+    full_sourcemaps: '  Includes source code content in sourcemaps',
   },
 });
 gulp.task('watch', 'Watches for changes in files, re-builds when detected',
@@ -1770,5 +1845,3 @@ gulp.task('watch', 'Watches for changes in files, re-builds when detected',
     });
 gulp.task('build-experiments', 'Builds experiments.html/js', buildExperiments);
 gulp.task('build-login-done', 'Builds login-done.html/js', buildLoginDone);
-gulp.task('build-access-iframe-api', 'Builds iframe-api.js',
-    buildAccessIframeApi);

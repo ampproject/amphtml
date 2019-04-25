@@ -72,13 +72,13 @@ jobs:
       script:
         - node build-system/pr-check/local-tests.js
     - stage: test
-      name: "Remote (Sauce Labs) Tests"
+      name: "[NON-BLOCKING] Remote (Sauce Labs) Tests"
       script:
         - node build-system/pr-check/remote-tests.js
       after_script:
         - build-system/sauce_connect/stop_sauce_connect.sh
     - stage: test
-      name: "End to End Tests"
+      name: "[NON-BLOCKING] End to End Tests"
       script:
         - node build-system/pr-check/e2e-tests.js
   fast_finish: true
