@@ -212,6 +212,7 @@ describe.configure().skipWindows().run('inabox', function() {
     });
   });
 
+  // TODO(zombifier, #21311): Investigate why Safari on SauceLabs timeout.
   describes.integration('AMPHTML ads rendered on non-AMP page BTF within ' +
       'friendly frame and safe frame', {
     amp: false,
@@ -237,13 +238,13 @@ describe.configure().skipWindows().run('inabox', function() {
       env.win.document.body.removeChild(iframe);
     });
 
-    it('should layout amp-img, amp-pixel, ' +
+    it.configure().skipSafari().run('should layout amp-img, amp-pixel, ' +
         'amp-analytics within friendly frame', () => {
       writeFriendlyFrame(env.win.document, iframe, adContent);
       return testAmpComponentsBTF(env.win);
     });
 
-    it.configure().skipFirefox().run('should layout amp-img, amp-pixel, ' +
+    it.configure().ifChrome().run('should layout amp-img, amp-pixel, ' +
         'amp-analytics within safe frame', () => {
       writeSafeFrame(env.win.document, iframe, adContent);
       return testAmpComponentsBTF(env.win);
@@ -337,7 +338,7 @@ describe.configure().skipWindows().run('inabox with a complex ' +
           return testVisibilityPings(0, 1000);
         });
 
-    it.configure().skipSafari().skipFirefox().run(
+    it.configure().ifChrome().run(
         'should properly render ad in a safe frame with viewability pings',
         () => {
           writeSafeFrame(doc, iframe, adBody);
@@ -349,6 +350,7 @@ describe.configure().skipWindows().run('inabox with a complex ' +
     });
   });
 
+  // TODO(zombifier, #21311): Investigate why Safari on SauceLabs timeout.
   describes.integration('AMP Inabox Rendering BTF', {
     amp: false,
     body: `
@@ -369,13 +371,14 @@ describe.configure().skipWindows().run('inabox with a complex ' +
       }, 2000);
     });
 
-    it('should properly render ad in a friendly iframe with viewability pings',
+    it.configure().skipSafari().run(
+        'should properly render ad in a friendly iframe with viewability pings',
         () => {
           writeFriendlyFrame(doc, iframe, adBody);
           return testVisibilityPings(2000, 3000);
         });
 
-    it.configure().skipFirefox().run(
+    it.configure().ifChrome().run(
         'should properly render ad in a safe frame with viewability pings',
         () => {
           writeSafeFrame(doc, iframe, adBody);
