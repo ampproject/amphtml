@@ -878,3 +878,30 @@ export function domOrderComparator(element1, element2) {
   // if fe2 is following or contained by fe1, then fe1 is before fe2
   return -1;
 }
+
+
+/**
+ * Like `Element.prototype.toggleAttribute`. This either toggles an attribute
+ * on by adding an attribute with an empty value, or toggles it off by removing
+ * the attribute. This does not mutate the element if the new state matches
+ * the existing state.
+ * @param {!Element} element An element to toggle the attribute for.
+ * @param {string} name The name of the attribute.
+ * @param {boolean=} forced Whether the attribute should be forced on/off. If
+ *    not specified, it will be toggled from the current state.
+ * @return {boolean} Whether or not the element now has the attribute.
+ */
+export function toggleAttribute(element, name, forced) {
+  const hasAttribute = element.hasAttribute(name);
+  const enabled = forced !== undefined ? forced : !hasAttribute;
+
+  if (enabled !== hasAttribute) {
+    if (enabled) {
+      element.setAttribute(name, '');
+    } else {
+      element.removeAttribute(name);
+    }
+  }
+
+  return enabled;
+}
