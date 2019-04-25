@@ -17,11 +17,7 @@
 describes.endtoend('amp-autocomplete', {
   testUrl: 'http://localhost:8000/test/manual/amp-autocomplete/amp-autocomplete.amp.html',
   experiments: ['amp-autocomplete'],
-  // By default, the browser opens at 800x600
   initialRect: {width: 800, height: 800},
-
-  // By default, E2E tests run in all three environments
-  // environments: ['single', 'viewer-demo', 'shadow-demo']
 }, env => {
   let controller;
 
@@ -29,72 +25,91 @@ describes.endtoend('amp-autocomplete', {
     controller = env.controller;
   });
 
-  it('<amp-autocomplete> should render correctly', async() => {
+  it('<amp-autocomplete> should render', async() => {
     const autocomplete = await controller.findElement('#autocomplete');
+    await expect(controller.getElementProperty(autocomplete, 'children'))
+        .to.have.length(3);
+
     const input = await controller.findElement('#input');
+    await expect(controller.getElementAttribute(input, 'type'))
+        .to.equal('text');
+
+    const script = await controller.findElement('#script');
+    await expect(controller.getElementAttribute(script, 'type'))
+        .to.equal('application/json');
+
     const renderedResults =
       await controller.findElement('.i-amphtml-autocomplete-results');
-    await expect(autocomplete).not.to.be.null;
-    await expect(input).not.to.be.null;
-    await expect(renderedResults).not.to.be.null;
+    await expect(controller.getElementProperty(renderedResults, 'children'))
+        .to.have.length(3);
+    await expect(controller.getElementAttribute(renderedResults, 'hidden'))
+        .not.to.be.null;
   });
 
   it('<amp-autocomplete> should display results on focus', async() => {
     const renderedResults =
       await controller.findElement('.i-amphtml-autocomplete-results');
+    await expect(controller.getElementProperty(renderedResults, 'children'))
+        .to.have.length(3);
     await expect(controller.getElementAttribute(renderedResults, 'hidden'))
         .not.to.be.null;
     const focusButton = await controller.findElement('#focusButton');
     await controller.click(focusButton);
 
     // Displays all suggested items on focus.
-    const itemElements =
-      await controller.findElements('.i-amphtml-autocomplete-item');
-    await expect(renderedResults).not.to.be.null;
     await expect(controller.getElementAttribute(renderedResults, 'hidden'))
         .to.be.null;
-    await expect(itemElements).to.have.length(3);
   });
 
   it('<amp-autocomplete> should narrow suggestions to input', async() => {
     const renderedResults =
       await controller.findElement('.i-amphtml-autocomplete-results');
     const focusButton = await controller.findElement('#focusButton');
-    const input = await controller.findElement('#input');
-    await expect(input).not.to.be.null;
+    await expect(controller.getElementAttribute(renderedResults, 'hidden'))
+        .not.to.be.null;
     await controller.click(focusButton);
 
     // Displays all suggested items on focus.
-    const itemElements =
-      await controller.findElements('.i-amphtml-autocomplete-item');
-    await expect(itemElements).to.have.length(3);
+    await expect(controller.getElementAttribute(renderedResults, 'hidden'))
+        .to.be.null;
+    await expect(controller.getElementProperty(renderedResults, 'children'))
+        .to.have.length(3);
 
     // New input narrows down suggested items.
+    const input = await controller.findElement('#input');
     await controller.type(input, 'an');
     await expect(controller.getElementAttribute(renderedResults, 'hidden'))
         .to.be.null;
-    const newItemElements =
-      await controller.findElements('.i-amphtml-autocomplete-item');
-    await expect(newItemElements).to.have.length(2);
+    await expect(controller.getElementProperty(renderedResults, 'children'))
+        .to.have.length(2);
   });
 
   it('<amp-autocomplete> should select an item', async() => {
     const renderedResults =
       await controller.findElement('.i-amphtml-autocomplete-results');
     const focusButton = await controller.findElement('#focusButton');
+    await expect(controller.getElementAttribute(renderedResults, 'hidden'))
+        .not.to.be.null;
+    await expect(controller.getElementProperty(renderedResults, 'children'))
+        .to.have.length(3);
 
     // Displays all suggested items on focus.
     await controller.click(focusButton);
-    const itemElements =
-      await controller.findElements('.i-amphtml-autocomplete-item');
     await expect(controller.getElementAttribute(renderedResults, 'hidden'))
         .to.be.null;
-    await expect(itemElements).to.have.length(3);
+    const itemElements =
+      await controller.findElements('.i-amphtml-autocomplete-item');
+    await expect(controller.getElementText(itemElements[0])).to.equal('apple');
     await controller.click(itemElements[0]);
 
     // Displays no items after selecting one.
     await expect(controller.getElementAttribute(renderedResults, 'hidden'))
         .not.to.be.null;
+    await expect(controller.getElementProperty(renderedResults, 'children'))
+        .to.have.length(0);
+    const input = await controller.findElement('#input');
+    await expect(controller.getElementProperty(input, 'value'))
+        .to.equal('apple');
   });
 
 });
