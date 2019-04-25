@@ -352,7 +352,7 @@ class PuppeteerController {
 
   /**
    * @param {!ElementHandle<!PuppeteerHandle>} handle
-   * @return {!Promise<!{x: number, y: number, height: number. width: number}>}
+   * @return {!Promise<!DomRect>}
    * @override
    */
   getElementRect(handle) {
@@ -361,12 +361,25 @@ class PuppeteerController {
       // Extracting the values seems to perform better than returning
       // the raw ClientRect from the element, in terms of flakiness.
       // The raw ClientRect also has hundredths of a pixel. We round to int.
-      const {x, y, width, height} = element./*OK*/getBoundingClientRect();
+      const {
+        x,
+        y,
+        width,
+        height,
+        top,
+        bottom,
+        left,
+        right,
+      } = element./*OK*/getBoundingClientRect();
       return {
         x: Math.round(x),
         y: Math.round(y),
         width: Math.round(width),
         height: Math.round(height),
+        top: Math.round(top),
+        bottom: Math.round(bottom),
+        left: Math.round(left),
+        right: Math.round(right),
       };
     };
     return new ControllerPromise(
