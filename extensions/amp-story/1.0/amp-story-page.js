@@ -144,7 +144,7 @@ const buildOpenAttachmentElement = element =>
           <span class="i-amphtml-story-page-open-attachment-bar-left"></span>
           <span class="i-amphtml-story-page-open-attachment-bar-right"></span>
         </span>
-        <span class="i-amphtml-story-page-open-attachment-text"></span>
+        <span class="i-amphtml-story-page-open-attachment-label"></span>
       </div>`;
 
 /**
@@ -1141,10 +1141,11 @@ export class AmpStoryPage extends AMP.BaseElement {
           .addEventListener('click', () => this.openAttachment());
 
       const textEl = this.openAttachmentEl_
-          .querySelector('.i-amphtml-story-page-open-attachment-text');
+          .querySelector('.i-amphtml-story-page-open-attachment-label');
 
-      const openAttachmentLabel = Services.localizationService(this.win)
-          .getLocalizedString(
+
+      const openAttachmentLabel = attachmentEl.getAttribute('data-cta-label') ||
+          Services.localizationService(this.win).getLocalizedString(
               LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL);
 
       this.mutateElement(() => {
