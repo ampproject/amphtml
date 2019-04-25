@@ -940,14 +940,19 @@ amp-story-page .i-amphtml-story-page-open-attachment-icon::after {
              open-attachment-bar-right 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) both !important;
 }
 
-amp-story-page .i-amphtml-story-page-open-attachment-text {
+amp-story-page .i-amphtml-story-page-open-attachment-label {
   position: relative !important;
   padding: 0 24px !important;
+  height: 40px !important;
+  max-width: calc(100% - 48px) !important;
   color: #FFF !important;
   font-family: 'Roboto', sans-serif !important;
   font-size: 15px !important;
   font-weight: bold !important;
   letter-spacing: 0.3px;
   line-height: 40px !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
   text-shadow: 0px 0px 6px rgba(0, 0, 0, 0.36) !important;
+  white-space: nowrap !important;
 }
