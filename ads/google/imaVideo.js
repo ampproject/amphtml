@@ -17,10 +17,12 @@
 import {CONSENT_POLICY_STATE} from '../../src/consent-state';
 import {ImaPlayerData} from './ima-player-data';
 import {camelCaseToTitleCase, px, setStyle, setStyles} from '../../src/style';
+import {getData} from '../../src/event-helper';
 import {isObject} from '../../src/types';
 import {loadScript} from '../../3p/3p';
 import {throttle} from '../../src/utils/rate-limit';
 import {tryParseJson} from '../../src/json';
+
 
 /**
  * Possible player states.
@@ -1354,8 +1356,12 @@ export function hideControls() {
  * @param {!Event} event
  */
 function onMessage(global, event) {
-  const msg = isObject(event.data) ? event.data : tryParseJson(event.data);
-  if (msg === undefined) {
+  const eventData = getData(event);
+  if (!eventData) {
+    return;
+  }
+  const msg = isObject(eventData) ? eventData : tryParseJson(eventData);
+  if (!msg) {
     return; // We only process valid JSON.
   }
   if (!msg.event || !msg.func) {
