@@ -462,7 +462,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
       }
       if (!hasOwn(itemTokensMap, token)) {
         match = false;
-        continue;
+        break;
       }
       const count = Number(ownProperty(itemTokensMap, token));
       if (count > 1) {
