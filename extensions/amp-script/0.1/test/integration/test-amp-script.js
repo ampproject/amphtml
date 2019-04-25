@@ -24,8 +24,8 @@ function poll(description, condition, opt_onError) {
 }
 
 // TODO(choumx): If possible / desired, make these tests work on Single-pass,
-// and on Windows (Edge, Firefox, and Chrome).
-describe.configure().skipSinglePass().skipWindows().run('amp-' +
+// on Windows (Edge, Firefox, and Chrome), and on Safari.
+describe.configure().skipSafari().skipSinglePass().skipWindows().run('amp-' +
     'script', function() {
   this.timeout(TIMEOUT);
 
