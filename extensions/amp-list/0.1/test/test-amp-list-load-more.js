@@ -90,7 +90,7 @@ describes.realWin('amp-list component', {
       list.buildCallback();
     });
 
-    it('should create load-more elements after initialization', async() => {
+    it('should create load-more elements after init', async() => {
       sandbox.stub(list, 'getPlaceholder').returns(null);
       await list.initializeLoadMoreElements_();
 
@@ -101,7 +101,7 @@ describes.realWin('amp-list component', {
       expect(list.element.querySelector('[load-more-end]')).to.be.null;
     });
 
-    it('should hide load-more-button at layout', async() => {
+    it('should hide load-more-button after init', async() => {
       sandbox.stub(list, 'getPlaceholder').returns(null);
       await list.initializeLoadMoreElements_();
 
@@ -113,7 +113,7 @@ describes.realWin('amp-list component', {
       });
     });
 
-    it('should hide load-more-failed element at layout', async() => {
+    it('should hide load-more-failed element after init', async() => {
       sandbox.stub(list, 'getPlaceholder').returns(null);
       await list.initializeLoadMoreElements_();
 
@@ -122,7 +122,7 @@ describes.realWin('amp-list component', {
       expect(failedStyles.display).to.equal('none');
     });
 
-    it('should hide load-more-loading element at layout', async() => {
+    it('should hide load-more-loading element after init', async() => {
       sandbox.stub(list, 'getPlaceholder').returns(null);
       await list.initializeLoadMoreElements_();
 
