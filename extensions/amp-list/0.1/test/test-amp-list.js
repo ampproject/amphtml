@@ -346,6 +346,7 @@ describes.repeated('amp-list', {
       });
 
       it('should fail to load b/c data array is absent', () => {
+        expectAsyncConsoleError(/Response must contain an array/, 1);
         listMock.expects('fetch_').returns(Promise.resolve({})).once();
         listMock.expects('toggleLoading').withExactArgs(false).once();
         return expect(list.layoutCallback()).to.eventually.be
@@ -353,6 +354,7 @@ describes.repeated('amp-list', {
       });
 
       it('should fail to load b/c data single-item object is absent', () => {
+        expectAsyncConsoleError(/Response must contain an array or object/, 1);
         element.setAttribute('single-item', 'true');
         listMock.expects('fetch_').returns(Promise.resolve()).once();
         listMock.expects('toggleLoading').withExactArgs(false).once();
@@ -474,11 +476,10 @@ describes.repeated('amp-list', {
         });
 
         it('should error if proxied fetch returns invalid data', () => {
+          expectAsyncConsoleError(/Expected response with format/, 1);
           sandbox.stub(ssrTemplateHelper, 'fetchAndRenderTemplate')
               .returns(Promise.resolve(undefined));
-
           listMock.expects('toggleLoading').withExactArgs(false).once();
-
           return expect(list.layoutCallback()).to.eventually.be
               .rejectedWith(/Expected response with format/);
         });

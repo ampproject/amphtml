@@ -90,9 +90,9 @@ describes.realWin('amp-list component', {
       list.buildCallback();
     });
 
-    it('should create load-more elements after layout callback', async() => {
+    it('should create load-more elements after init', async() => {
       sandbox.stub(list, 'getPlaceholder').returns(null);
-      await list.layoutCallback();
+      await list.initializeLoadMoreElements_();
 
       expect(list.element.querySelectorAll('[load-more-button]'))
           .to.have.lengthOf(1);
@@ -101,9 +101,9 @@ describes.realWin('amp-list component', {
       expect(list.element.querySelector('[load-more-end]')).to.be.null;
     });
 
-    it('should hide load-more-button at layout', async() => {
+    it('should hide load-more-button after init', async() => {
       sandbox.stub(list, 'getPlaceholder').returns(null);
-      await list.layoutCallback();
+      await list.initializeLoadMoreElements_();
 
       const button = list.element.querySelector('[load-more-button]');
       const buttonStyles = win.getComputedStyle(button);
@@ -113,18 +113,18 @@ describes.realWin('amp-list component', {
       });
     });
 
-    it('should hide load-more-failed element at layout', async() => {
+    it('should hide load-more-failed element after init', async() => {
       sandbox.stub(list, 'getPlaceholder').returns(null);
-      await list.layoutCallback();
+      await list.initializeLoadMoreElements_();
 
       const failedElement = list.element.querySelector('[load-more-failed]');
       const failedStyles = win.getComputedStyle(failedElement);
       expect(failedStyles.display).to.equal('none');
     });
 
-    it('should hide load-more-loading element at layout', async() => {
+    it('should hide load-more-loading element after init', async() => {
       sandbox.stub(list, 'getPlaceholder').returns(null);
-      await list.layoutCallback();
+      await list.initializeLoadMoreElements_();
 
       const loader = list.element.querySelector('[load-more-loading]');
       const loaderStyles = win.getComputedStyle(loader);
