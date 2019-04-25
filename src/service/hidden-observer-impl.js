@@ -47,7 +47,8 @@ export class HiddenObserver {
     /** @const {!Document|!ShadowRoot} */
     this.root_ = opt_root || ampdoc.getRootNode();
 
-    const doc = opt_root ? opt_root.ownerDocument : this.root_;
+    const doc = opt_root ? opt_root.ownerDocument :
+      (this.root_.ownerDocument || this.root_);
 
     /** @const {!Window} */
     this.win_ = /** @type {!Window} */(devAssert(doc.defaultView));
