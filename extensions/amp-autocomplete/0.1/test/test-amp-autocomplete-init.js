@@ -31,7 +31,7 @@ describes.realWin('amp-autocomplete init', {
     toggleExperiment(win, 'amp-autocomplete', true);
   });
 
-  function getAutocomplete(attributes,
+  function setupAutocomplete(attributes,
     json = '{ "items" : ["apple", "banana", "orange"] }',
     wantInlineData = true) {
     const ampAutocomplete = doc.createElement('amp-autocomplete');
@@ -54,7 +54,20 @@ describes.realWin('amp-autocomplete init', {
           json.items);
     }
 
-    doc.body.appendChild(ampAutocomplete);
+    return ampAutocomplete;
+  }
+
+  function getAutocomplete(attributes, json, wantInlineData,
+    formAutocompleteValue = null) {
+    const form = doc.createElement('form');
+    if (formAutocompleteValue) {
+      form.setAttribute('autocomplete', formAutocompleteValue);
+    }
+
+    const ampAutocomplete =
+      setupAutocomplete(attributes, json, wantInlineData);
+    form.appendChild(ampAutocomplete);
+    doc.body.appendChild(form);
     return ampAutocomplete.build().then(() => ampAutocomplete);
   }
 
@@ -196,5 +209,37 @@ describes.realWin('amp-autocomplete init', {
         expect(impl.sourceData_).to.have.ordered.members(data.items);
       });
     });
+  });
+
+  it('should error without the form ancestor', () => {
+    return allowConsoleError(() => {
+      const autocomplete = setupAutocomplete({'filter': 'substring'});
+      doc.body.appendChild(autocomplete);
+      return expect(autocomplete.build()).to.be.rejectedWith(
+          'amp-autocomplete should be inside a <form> tag');
+    });
+  });
+
+  it('should read the autocomplete attribute on the form as null', () => {
+    return getAutocomplete({'filter': 'substring'}).then(ampAutocomplete => {
+      const impl = ampAutocomplete.implementation_;
+      expect(impl.initialAutocompleteAttr_).to.be.null;
+    });
+  });
+
+  it('should read the autocomplete attribute on the form as on', () => {
+    return getAutocomplete({'filter': 'substring'}, '{}', true, 'on').then(
+        ampAutocomplete => {
+          const impl = ampAutocomplete.implementation_;
+          expect(impl.initialAutocompleteAttr_).to.equal('on');
+        });
+  });
+
+  it('should read the autocomplete attribute on the form as off', () => {
+    return getAutocomplete({'filter': 'substring'}, '{}', true, 'off').then(
+        ampAutocomplete => {
+          const impl = ampAutocomplete.implementation_;
+          expect(impl.initialAutocompleteAttr_).to.equal('off');
+        });
   });
 });
