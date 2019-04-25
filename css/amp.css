@@ -876,8 +876,6 @@ amp-autocomplete > input,
 .i-amphtml-autocomplete-results {
   font-size: 1rem; /* default-ui-font-size */
   line-height: 1.5rem; /* default-ui-space-large */
-  max-height: 40vh;
-  overflow-y: auto;
 }
 
 /**

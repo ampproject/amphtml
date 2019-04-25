@@ -29,9 +29,14 @@ amp-autocomplete > input {
   position: absolute;
   top: 100%;
   width: calc(100% + 16px);
+  min-width: calc(2em + 16px);
+  max-height: 40vh;
   margin-top: .5rem; /* default-ui-space-small */
   margin-left: -.5rem; /* default-ui-space-small */
   border-radius: 4px; /* default-ui-border-radius */
+
+  overflow-y: auto;
+  overflow-x: hidden;
 
   background-color: white; /* default-ui-background-color */
   box-shadow: 0px 2px 4px 0px rgba(0,0,0,.5); /* default-ui-box-shadow */
