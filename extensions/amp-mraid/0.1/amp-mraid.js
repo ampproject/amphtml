@@ -87,17 +87,8 @@ export class MraidInitializer {
 
     // It looks like we're initiating a network load for mraid from a relative
     // url, but this will actually be intercepted by the mobile app SDK and
-    // handled locally.  To be safe, first we inject an invalid base tag which
-    // prevents any real relative loads.  This works because post-transformation
-    // creatives won't have <base>, and so we're injecting the first <base> tag
-    // on the page.
-    const head = this.win.document.getElementsByTagName('head').item(0);
-
-    const base = this.win.document.createElement('base');
-    base.setAttribute('href', '//invalid.invalid');
-    head.appendChild(base);
-
-    const mraidJs = this.win.document.createElement('script');
+    // handled locally.
+    const mraidJs = document.createElement('script');
     mraidJs.setAttribute('type', 'text/javascript');
     mraidJs.setAttribute('src', 'mraid.js');
     mraidJs.addEventListener('load', () => {
@@ -108,6 +99,7 @@ export class MraidInitializer {
         this.handleMismatch_();
       }
     });
+    const head = document.getElementsByTagName('head').item(0);
     head.appendChild(mraidJs);
   }
 
