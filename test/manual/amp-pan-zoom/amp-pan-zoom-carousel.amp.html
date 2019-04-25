@@ -17,17 +17,31 @@
 </head>
 <body>
   <h1>Slides with amp-pan-zoom</h1>
+  <h2>Layout fixed in fill</h2>
   <amp-carousel width=400 height=300 type=slides>
     <amp-pan-zoom layout="fill">
-        <amp-img src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no" layout=fill></amp-img>
+        <amp-img  layout="fixed" height="225" width="400" src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no"></amp-img>
     </amp-pan-zoom>
     <amp-pan-zoom layout="fill">
-      <amp-img src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w400-h300-no" width=400 height=300></amp-img>
+        <amp-img layout="fixed" height="225" width="400"src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no"></amp-img>
     </amp-pan-zoom>
     <amp-pan-zoom layout="fill">
-      <amp-img src="https://lh3.googleusercontent.com/Z4gtm5Bkxyv21Z2PtbTf95Clb9AE4VTR6olbBKYrenM=w400-h300-no" width=400 height=300></amp-img>
+        <amp-img layout="fixed" height="225" width="400" src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no"></amp-img>
     </amp-pan-zoom>
   </amp-carousel>
+
+  <h2>Layout fill in fixed</h2>
+  <amp-carousel width=400 height=300 type=slides>
+      <amp-pan-zoom layout="fixed" height="300" width="400">
+          <amp-img  layout="fill" src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no"></amp-img>
+      </amp-pan-zoom>
+      <amp-pan-zoom layout="fixed" height="300" width="400">
+          <amp-img layout="fill" src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no"></amp-img>
+      </amp-pan-zoom>
+      <amp-pan-zoom layout="fixed" height="300" width="400">
+          <amp-img layout="fill" src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no"></amp-img>
+      </amp-pan-zoom>
+    </amp-carousel>
 
   <h1>Carousel with amp-pan-zoom</h1>
   <amp-carousel width=900 height=300 type=carousel>
@@ -35,10 +49,10 @@
       <amp-img src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no" layout=fill></amp-img>
     </amp-pan-zoom>
     <amp-pan-zoom layout="fixed" height="300" width="400">
-        <amp-img src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w400-h300-no" width=400 height=300></amp-img>
+        <amp-img src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w400-h300-no" layout=fill></amp-img>
     </amp-pan-zoom>
     <amp-pan-zoom layout="fixed" height="300" width="400">
-        <amp-img src="https://lh3.googleusercontent.com/Z4gtm5Bkxyv21Z2PtbTf95Clb9AE4VTR6olbBKYrenM=w400-h300-no" width=400 height=300></amp-img>
+        <amp-img src="https://lh3.googleusercontent.com/Z4gtm5Bkxyv21Z2PtbTf95Clb9AE4VTR6olbBKYrenM=w400-h300-no" layout=fill></amp-img>
     </amp-pan-zoom>
   </amp-carousel>
 </body>
