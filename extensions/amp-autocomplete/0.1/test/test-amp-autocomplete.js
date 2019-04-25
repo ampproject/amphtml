@@ -31,6 +31,7 @@ describes.realWin('amp-autocomplete unit tests', {
     doc = win.document;
     toggleExperiment(win, 'amp-autocomplete', true);
 
+    const form = doc.createElement('form');
     const ampAutocomplete = doc.createElement('amp-autocomplete');
     ampAutocomplete.setAttribute('layout', 'container');
     ampAutocomplete.setAttribute('filter', 'substring');
@@ -44,7 +45,8 @@ describes.realWin('amp-autocomplete unit tests', {
     script.innerHTML = '{ "items" : ["apple", "banana", "orange"] }';
     ampAutocomplete.appendChild(script);
 
-    doc.body.appendChild(ampAutocomplete);
+    form.appendChild(ampAutocomplete);
+    doc.body.appendChild(form);
     return ampAutocomplete.build().then(() => {
       element = ampAutocomplete;
       impl = element.implementation_;
@@ -474,10 +476,13 @@ describes.realWin('amp-autocomplete unit tests', {
       return impl.toggleResultsHandler_(true);
     }).then(() => {
       expect(toggleResultsSpy).to.have.been.calledOnce;
+      expect(impl.inputElement_.form.getAttribute('autocomplete')).to.equal(
+          'off');
       expect(resetSpy).not.to.have.been.called;
       return impl.toggleResultsHandler_(false);
     }).then(() => {
       expect(toggleResultsSpy).to.have.been.calledTwice;
+      expect(impl.inputElement_.form.hasAttribute('autocomplete')).to.be.false;
       expect(resetSpy).to.have.been.calledOnce;
     });
   });
