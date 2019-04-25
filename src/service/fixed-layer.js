@@ -255,8 +255,9 @@ export class FixedLayer {
       return;
     }
 
-    const {documentElement} = this.ampdoc.getRootNode();
-    const hiddenObserver = Services.hiddenObserverForDoc(documentElement);
+    const root = this.ampdoc.getRootNode();
+    const element = root.documentElement || root;
+    const hiddenObserver = Services.hiddenObserverForDoc(element);
     this.hiddenObserverUnlistener_ = hiddenObserver.add(() => {
       if (!this.updatePass_.isPending()) {
         // Wait one animation frame so that other mutations may arrive.
