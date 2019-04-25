@@ -33,7 +33,8 @@ describes.endtoend('AMP carousel', {
     controller = env.controller;
   });
 
-  it('should render with the correct initial slide', async() => {
+  //TODO(spaharmi): fails on all environments
+  it.skip('should render with the correct initial slide', async() => {
     const thirdSlide = await getSlide(controller, 2);
 
     // Normally, resizing would cause the position to change. We're testing

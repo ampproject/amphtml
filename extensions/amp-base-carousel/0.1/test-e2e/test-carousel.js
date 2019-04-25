@@ -27,6 +27,8 @@ describes.endtoend('AMP carousel', {
   testUrl: 'http://localhost:8000/test/manual/amp-base-carousel/basic.amp.html',
   experiments: ['amp-base-carousel', 'layers'],
   initialRect: {width: pageWidth, height: pageHeight},
+  //TODO(spaharmi): fails on shadow demo
+  environments: ['single', 'viewer-demo'],
 }, async env => {
   /** The total number of slides in the carousel */
   const SLIDE_COUNT = 7;

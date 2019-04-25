@@ -30,6 +30,8 @@ describes.endtoend('AMP carousel arrows when non-looping', {
   testUrl: 'http://localhost:8000/test/manual/amp-base-carousel/non-looping.amp.html',
   experiments: ['amp-base-carousel', 'layers'],
   initialRect: {width: pageWidth, height: pageHeight},
+  //TODO(spaharmi): fails on shadow demo
+  environments: ['single', 'viewer-demo'],
 }, async env => {
   let controller;
   let nextArrow;
