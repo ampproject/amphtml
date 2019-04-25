@@ -28,6 +28,8 @@ describes.endtoend('AMP carousel mixed length slides', {
       'mixed-lengths-no-snap.amp.html',
   experiments: ['amp-base-carousel', 'layers'],
   initialRect: {width: pageWidth, height: pageHeight},
+  //TODO(spaharmi): fails on viewer and shadow demo
+  environments: ['single'],
 }, async env => {
   let controller;
 

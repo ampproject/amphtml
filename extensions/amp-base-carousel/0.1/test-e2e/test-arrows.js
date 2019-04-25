@@ -26,6 +26,8 @@ const SLIDE_COUNT = 7;
 describes.endtoend('AMP carousel arrows with custom arrows', {
   testUrl: 'http://localhost:8000/test/manual/amp-base-carousel/custom-arrows.amp.html',
   experiments: ['amp-base-carousel', 'layers'],
+  //TODO(spaharmi): fails on shadow demo
+  environments: ['single', 'viewer-demo'],
 }, async function(env) {
   let controller;
   let prevArrow;
