@@ -213,6 +213,14 @@ const HIDE_ON_BOOKEND_SELECTOR =
 const DEFAULT_THEME_COLOR = '#202125';
 
 /**
+ * MutationObserverInit options to listen for changes to the `open` attribute.
+ */
+const SIDEBAR_OBSERVER_OPTIONS = {
+  attributes: true,
+  attributeFilter: ['open'],
+};
+
+/**
  * @implements {./media-pool.MediaPoolRoot}
  */
 export class AmpStory extends AMP.BaseElement {
@@ -872,7 +880,8 @@ export class AmpStory extends AMP.BaseElement {
     const isActualPage =
       pageId =>
         findIndex(this.pages_, page => page.element.id === pageId) >= 0;
-    const historyPage = getHistoryState(this.win, HistoryState.PAGE_ID);
+    const historyPage =
+    /** @type {string} */ (getHistoryState(this.win, HistoryState.PAGE_ID));
 
     if (isExperimentOn(this.win, 'amp-story-branching')) {
       const maybePageId = parseQueryString(this.win.location.hash)['page'];
@@ -1652,16 +1661,13 @@ export class AmpStory extends AMP.BaseElement {
     const actions = Services.actionServiceForDoc(this.element);
     if (this.win.MutationObserver) {
       if (!this.sidebarObserver_) {
-        this.sidebarObserver_ = new this.win.MutationObserver(mutationsList => {
-          if (mutationsList.some(
-              mutation => mutation.attributeName === 'open')) {
-            this.storeService_.dispatch(Action.TOGGLE_SIDEBAR,
-                this.sidebar_.hasAttribute('open'));
-          }
+        this.sidebarObserver_ = new this.win.MutationObserver(() => {
+          this.storeService_.dispatch(Action.TOGGLE_SIDEBAR,
+              this.sidebar_.hasAttribute('open'));
         });
       }
       if (this.sidebar_ && sidebarState) {
-        this.sidebarObserver_.observe(this.sidebar_, {attributes: true});
+        this.sidebarObserver_.observe(this.sidebar_, SIDEBAR_OBSERVER_OPTIONS);
         this.openOpacityMask_();
         actions.execute(this.sidebar_, 'open', /* args */ null,
             /* source */ null, /* caller */ null, /* event */ null,
@@ -2269,7 +2275,8 @@ export class AmpStory extends AMP.BaseElement {
     const historyNavigationPath =
       getHistoryState(this.win, HistoryState.NAVIGATION_PATH);
     if (historyNavigationPath) {
-      this.storyNavigationPath_ = historyNavigationPath;
+      this.storyNavigationPath_ =
+        /** @type {!Array<string>} */ (historyNavigationPath);
     }
   }
 

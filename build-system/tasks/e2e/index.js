@@ -114,12 +114,14 @@ async function e2e() {
     // specify tests to run
     if (argv.files) {
       glob.sync(argv.files).forEach(file => {
+        delete require.cache[file];
         mocha.addFile(file);
       });
     }
     else {
       config.e2eTestPaths.forEach(path => {
         glob.sync(path).forEach(file => {
+          delete require.cache[file];
           mocha.addFile(file);
         });
       });
