@@ -179,7 +179,6 @@ export class AmpPanZoom extends AMP.BaseElement {
     this.element.classList.add('i-amphtml-pan-zoom');
     this.content_ = children[0];
     this.content_.classList.add('i-amphtml-pan-zoom-child');
-    this.setAsOwner(this.content_);
     this.maxScale_ = this.getNumberAttributeOr_('max-scale', DEFAULT_MAX_SCALE);
     this.initialScale_ = this.getNumberAttributeOr_('initial-scale', 1);
     this.initialX_ = this.getNumberAttributeOr_('initial-x', 0);
