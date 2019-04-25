@@ -101,8 +101,9 @@ export class AmpFormTextarea {
       }
 
       const element = dev().assertElement(e.target);
-      if (element.tagName != 'TEXTAREA' ||
-          !element.hasAttribute(AMP_FORM_TEXTAREA_EXPAND_ATTR)) {
+      // Handle all text area drag as we want to measure mutate and notify
+      // the viewer of possible doc height changes.
+      if (element.tagName != 'TEXTAREA') {
         return;
       }
 

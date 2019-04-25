@@ -36,6 +36,7 @@ const {isTravisBuild} = require('./travis');
 const {TopologicalSort} = require('topological-sort');
 const TYPES_VALUES = Object.keys(TYPES).map(x => TYPES[x]);
 const wrappers = require('./compile-wrappers');
+const {VERSION: internalRuntimeVersion} = require('./internal-version') ;
 
 const argv = minimist(process.argv.slice(2));
 let singlePassDest = typeof argv.single_pass_dest === 'string' ?
@@ -84,6 +85,7 @@ const jsFilesToWrap = [];
 
 exports.getFlags = function(config) {
   config.define.push('SINGLE_FILE_COMPILATION=true');
+  config.define.push(`VERSION=${internalRuntimeVersion}`);
   /* eslint "google-camelcase/google-camelcase": 0 */
   // Reasonable defaults.
   const flags = {

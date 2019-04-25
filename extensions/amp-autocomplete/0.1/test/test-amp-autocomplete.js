@@ -31,6 +31,7 @@ describes.realWin('amp-autocomplete unit tests', {
     doc = win.document;
     toggleExperiment(win, 'amp-autocomplete', true);
 
+    const form = doc.createElement('form');
     const ampAutocomplete = doc.createElement('amp-autocomplete');
     ampAutocomplete.setAttribute('layout', 'container');
     ampAutocomplete.setAttribute('filter', 'substring');
@@ -44,7 +45,8 @@ describes.realWin('amp-autocomplete unit tests', {
     script.innerHTML = '{ "items" : ["apple", "banana", "orange"] }';
     ampAutocomplete.appendChild(script);
 
-    doc.body.appendChild(ampAutocomplete);
+    form.appendChild(ampAutocomplete);
+    doc.body.appendChild(form);
     return ampAutocomplete.build().then(() => {
       element = ampAutocomplete;
       impl = element.implementation_;
@@ -368,6 +370,7 @@ describes.realWin('amp-autocomplete unit tests', {
     it('should call selectItem_ and resetActiveElement_ as expected', () => {
       return layoutAndSetSpies().then(() => {
         impl.activeElement_ = impl.createElementFromItem_('abc');
+        sandbox.stub(impl, 'resultsShowing_').returns(true);
         return impl.keyDownHandler_(event);
       }).then(() => {
         expect(impl.inputElement_.value).to.equal('abc');
@@ -407,13 +410,14 @@ describes.realWin('amp-autocomplete unit tests', {
       selectItemSpy = sandbox.spy(impl, 'selectItem_');
       resetSpy = sandbox.spy(impl, 'resetActiveElement_');
       clearAllSpy = sandbox.spy(impl, 'clearAllItems_');
+      sandbox.stub(impl, 'resultsShowing_').returns(true);
       return impl.keyDownHandler_(event);
     }).then(() => {
       expect(impl.inputElement_.value).to.equal('');
       expect(selectItemSpy).not.to.have.been.called;
       expect(clearAllSpy).not.to.have.been.called;
       expect(resetSpy).not.to.have.been.called;
-      expect(eventPreventSpy).not.to.have.been.called;
+      expect(eventPreventSpy).to.have.been.calledOnce;
       impl.activeElement_ = impl.createElementFromItem_('abc');
       return impl.keyDownHandler_(event);
     }).then(() => {
@@ -421,7 +425,7 @@ describes.realWin('amp-autocomplete unit tests', {
       expect(selectItemSpy).to.have.been.calledOnce;
       expect(clearAllSpy).to.have.been.calledOnce;
       expect(resetSpy).to.have.been.calledOnce;
-      expect(eventPreventSpy).to.have.been.calledOnce;
+      expect(eventPreventSpy).to.have.been.calledTwice;
       expect(impl.submitOnEnter_).to.be.false;
       impl.submitOnEnter_ = true;
       impl.activeElement_ = impl.createElementFromItem_('abc');
@@ -431,7 +435,7 @@ describes.realWin('amp-autocomplete unit tests', {
       expect(selectItemSpy).to.have.been.calledTwice;
       expect(clearAllSpy).to.have.been.calledTwice;
       expect(resetSpy).to.have.been.calledTwice;
-      expect(eventPreventSpy).to.have.been.calledOnce;
+      expect(eventPreventSpy).to.have.been.calledTwice;
       expect(impl.submitOnEnter_).to.be.true;
     });
   });
@@ -446,12 +450,13 @@ describes.realWin('amp-autocomplete unit tests', {
       return impl.renderResults_(impl.sourceData_, impl.container_);
     }).then(() => {
       expect(impl.container_.children.length).to.equal(3);
+      expect(resetSpy).to.have.been.calledOnce;
       impl.toggleResults_(true);
       expect(impl.resultsShowing_()).to.be.true;
       return impl.keyDownHandler_(event);
     }).then(() => {
       expect(displayInputSpy).to.have.been.calledOnce;
-      expect(resetSpy).to.have.been.calledOnce;
+      expect(resetSpy).to.have.been.calledTwice;
       expect(toggleResultsSpy).to.have.been.calledWith(false);
       expect(impl.resultsShowing_()).to.be.false;
     });
@@ -471,10 +476,13 @@ describes.realWin('amp-autocomplete unit tests', {
       return impl.toggleResultsHandler_(true);
     }).then(() => {
       expect(toggleResultsSpy).to.have.been.calledOnce;
+      expect(impl.inputElement_.form.getAttribute('autocomplete')).to.equal(
+          'off');
       expect(resetSpy).not.to.have.been.called;
       return impl.toggleResultsHandler_(false);
     }).then(() => {
       expect(toggleResultsSpy).to.have.been.calledTwice;
+      expect(impl.inputElement_.form.hasAttribute('autocomplete')).to.be.false;
       expect(resetSpy).to.have.been.calledOnce;
     });
   });
