@@ -59,11 +59,11 @@ class AmpCarousel extends AMP.BaseElement {
     /** @private {!Array<!Element>} */
     this.slides_ = [];
 
-    /** @private {!Element} */
+    /** @private {?Element} */
     this.nextArrowSlot_ = null;
 
-    /** @private {!Element} */
-    this.prevArrowSlow_ = null;
+    /** @private {?Element} */
+    this.prevArrowSlot_ = null;
 
     /**
      * Whether or not the user has interacted with the carousel using touch in

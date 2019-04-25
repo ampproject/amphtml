@@ -15,6 +15,7 @@
  */
 
 import {getDetail} from '../../../src/event-helper';
+import {AutoAdvance} from './auto-advance';
 
 /**
  * Accessibility for the carousel. This behaves either as a list or by
@@ -55,6 +56,12 @@ export class CarouselAccessibility {
     /** @private {boolean} */
     this.mixedLength_ = false;
 
+    /** @private {boolean} */
+    this.updating_ = false;
+
+    /** @private {number} */
+    this.index_ = 0;
+
     element.addEventListener('focus', () => {
       autoAdvance.stop();
     }, true);
@@ -68,7 +75,7 @@ export class CarouselAccessibility {
    * mixed lengths, the carousel is treated as a list.
    * @param {boolean} mixedLength
    */
-  updateMixedLength_(mixedLength) {
+  updateMixedLength(mixedLength) {
     this.mixedLength_ = mixedLength;
   }
 
