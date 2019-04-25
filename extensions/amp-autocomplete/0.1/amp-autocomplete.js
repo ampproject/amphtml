@@ -25,6 +25,7 @@ import {childElementsByTag, removeChildren} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user, userAssert} from '../../../src/log';
 import {getValueForExpr, tryParseJson} from '../../../src/json';
+import {hasOwn, map, ownProperty} from '../../../src/utils/object';
 import {includes, startsWith} from '../../../src/string';
 import {isEnumValue} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
@@ -407,7 +408,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     }
 
     // Client-side filtering.
-    input = input.toLowerCase();
+    input = input.toLocaleLowerCase();
     const itemsExpr = this.element.getAttribute('filter-value') || 'value';
     const filteredData = data.filter(item => {
       if (typeof item === 'object') {
@@ -422,9 +423,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
         case FilterType.PREFIX:
           return startsWith(item, input);
         case FilterType.TOKEN_PREFIX:
-          return item.split(' ').some(token => {
-            return startsWith(token, input);
-          });
+          return this.tokenPrefixMatch_(item, input);
         case FilterType.FUZZY:
           throw new Error(`Filter not yet supported: ${this.filter_}`);
         case FilterType.CUSTOM:
@@ -435,6 +434,94 @@ export class AmpAutocomplete extends AMP.BaseElement {
     });
 
     return this.truncateToMaxEntries_(filteredData);
+  }
+
+  /**
+   * Returns true if the given input string is a token-prefix match on the
+   * given item string. Assumes toLocaleLowerCase() has been performed on both
+   * parameters.
+   *
+   * Matches:
+   * washington dc, dc
+   * washington dc, wash
+   * washington dc, dc washington
+   * new york ny, new york
+   *
+   * Non-matches:
+   * washington dc, district of columbia
+   * washington dc, washington d c
+   * washington dc, ashington dc
+   *
+   * @param {string} item
+   * @param {string} input
+   * @return {boolean}
+   * @private
+   */
+  tokenPrefixMatch_(item, input) {
+    if (input === '') {
+      return true;
+    }
+
+    const itemTokens = this.tokenizeString_(item);
+    const inputTokens = this.tokenizeString_(input);
+
+    // Match each input token (except the last one) to an item token
+    const itemTokensMap = this.mapFromTokensArray_(itemTokens);
+    const lastInputToken = inputTokens[inputTokens.length - 1];
+    inputTokens.splice(inputTokens.length - 1, 1);
+    let match = true;
+    for (let i = 0; i < inputTokens.length; i++) {
+      const token = inputTokens[i];
+      if (token === '') {
+        continue;
+      }
+      if (!hasOwn(itemTokensMap, token)) {
+        match = false;
+        break;
+      }
+      const count = Number(ownProperty(itemTokensMap, token));
+      if (count > 1) {
+        itemTokensMap[token] = count - 1;
+      } else {
+        delete itemTokensMap[token];
+      }
+    }
+
+    // Return that the last input token is a prefix of one of the item tokens
+    const remainingItemTokens = Object.keys(itemTokensMap);
+    return match && (lastInputToken === '' ||
+      remainingItemTokens.some(itemToken => {
+        return startsWith(itemToken, lastInputToken);
+      }));
+  }
+
+  /**
+   * Takes a string, removes '.', and splits by special characters.
+   * Returns the resulting array of tokens.
+   * @param {string} inputStr
+   * @return {!Array<string>}
+   * @private
+   */
+  tokenizeString_(inputStr) {
+    inputStr = inputStr.replace(/[\.]+/g, '');
+    return inputStr.split(/[`~(){}_|+\-;:\'",\[\]\\\/ ]+/g);
+  }
+
+  /**
+   * Returns the given tokens array as a dictionary of key: token (str) and
+   * value: number of occurrences.
+   * @param {!Array<string>} tokens
+   * @return {!Object<string, number>}
+   * @private
+   */
+  mapFromTokensArray_(tokens) {
+    const tokensMap = map();
+    tokens.forEach(token => {
+      const count = hasOwn(tokensMap, token) ?
+        ownProperty(tokensMap, token) + 1 : 1;
+      tokensMap[token] = count;
+    });
+    return tokensMap;
   }
 
   /**
