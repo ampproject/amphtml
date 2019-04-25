@@ -34,7 +34,11 @@ const isProdBuild = !!argv.type;
 const queue = [];
 let inProgress = 0;
 const MAX_PARALLEL_CLOSURE_INVOCATIONS = 4;
-const NAILGUN_PORT = '2113'; // Also used in gulpfile.js
+
+// Also used in gulpfile.js
+const CHECK_TYPES_NAILGUN_PORT = '2114';
+const DIST_NAILGUN_PORT = '2115';
+
 
 // Compiles AMP with the closure compiler. This is intended only for
 // production use. During development we intend to continue using
@@ -415,7 +419,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
         (process.platform == 'darwin' || process.platform == 'linux')) {
       const compilerOptionsArray = [
         '--nailgun-port',
-        NAILGUN_PORT,
+        options.typeCheckOnly ? CHECK_TYPES_NAILGUN_PORT : DIST_NAILGUN_PORT,
         'org.ampproject.AmpCommandLineRunner',
         '--',
       ];
