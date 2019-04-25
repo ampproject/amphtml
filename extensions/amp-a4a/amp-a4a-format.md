@@ -250,7 +250,7 @@ AMPHTML ad creative. Extensions or builtin tags not explicitly listed are prohib
 * [amp-img](https://www.ampproject.org/docs/reference/components/amp-img)
 * [amp-layout](https://www.ampproject.org/docs/reference/components/amp-layout)
 * [amp-lightbox](https://www.ampproject.org/docs/reference/components/amp-lightbox)
-* amp-mraid
+* amp-mraid, on an experimental basis
 * [amp-mustache](https://www.ampproject.org/docs/reference/components/amp-mustache)
 * [amp-pixel](https://www.ampproject.org/docs/reference/components/amp-pixel)
 * [amp-position-observer](https://www.ampproject.org/docs/reference/components/amp-position-observer)
