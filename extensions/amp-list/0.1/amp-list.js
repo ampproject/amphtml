@@ -442,8 +442,8 @@ export class AmpList extends AMP.BaseElement {
       const actions = Services.actionServiceForDoc(this.element);
       actions.trigger(this.element, 'fetch-error', event, ActionTrust.LOW);
 
-      if (opt_append && this.loadMoreEnabled_) {
-        this.handleLoadMoreFailed_();
+      if (opt_append) {
+        throw error;
       }
       this.showFallbackOrThrow_(error);
     });
@@ -920,6 +920,8 @@ export class AmpList extends AMP.BaseElement {
         }).then(() => {
           // Necessary since load-more elements are toggled in the above block
           this.attemptToFitLoadMore_(dev().assertElement(this.container_));
+        }).catch(() => {
+          this.handleLoadMoreFailed_();
         });
   }
 
