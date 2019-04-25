@@ -31,6 +31,7 @@ describes.realWin('amp-autocomplete unit tests', {
     doc = win.document;
     toggleExperiment(win, 'amp-autocomplete', true);
 
+    const form = doc.createElement('form');
     const ampAutocomplete = doc.createElement('amp-autocomplete');
     ampAutocomplete.setAttribute('layout', 'container');
     ampAutocomplete.setAttribute('filter', 'substring');
@@ -44,7 +45,8 @@ describes.realWin('amp-autocomplete unit tests', {
     script.innerHTML = '{ "items" : ["apple", "banana", "orange"] }';
     ampAutocomplete.appendChild(script);
 
-    doc.body.appendChild(ampAutocomplete);
+    form.appendChild(ampAutocomplete);
+    doc.body.appendChild(form);
     return ampAutocomplete.build().then(() => {
       element = ampAutocomplete;
       impl = element.implementation_;
@@ -229,6 +231,8 @@ describes.realWin('amp-autocomplete unit tests', {
     impl.filter_ = 'token-prefix';
     expect(impl.filterData_(['a', 'b a', 'ab', 'ba', 'c a'], 'a')).to.have
         .ordered.members(['a', 'b a', 'ab', 'c a']);
+    expect(impl.filterData_(['a', 'b a', 'ab', 'ba', 'c a'], 'a c')).to.have
+        .ordered.members(['c a']);
     // None filter
     impl.filter_ = 'none';
     expect(impl.filterData_(['a', 'b a', 'ab', 'ba', 'c a'], 'a')).to.have
@@ -243,6 +247,46 @@ describes.realWin('amp-autocomplete unit tests', {
     impl.filter_ = 'invalid';
     expect(() => impl.filterData_(['a', 'b', 'c'], 'a')).to.throw(
         'Unexpected filter: invalid');
+  });
+
+  it('tokenizeString_ should return an array of tokens', () => {
+    expect(impl.tokenizeString_('')).to.have.ordered.members(['']);
+    expect(impl.tokenizeString_('a b c')).to.have.ordered.members(
+        ['a', 'b', 'c']);
+    expect(impl.tokenizeString_('a-b-c')).to.have.ordered.members(
+        ['a', 'b', 'c']);
+    expect(impl.tokenizeString_('a. ...b).c')).to.have.ordered.members(
+        ['a', 'b', 'c']);
+  });
+
+  it('mapFromTokensArray_ should return a map of token counts', () => {
+    expect(impl.mapFromTokensArray_([])).to.be.empty;
+    expect(impl.mapFromTokensArray_(['a', 'b', 'c'])).to.have.all.keys(
+        'a', 'b', 'c');
+    expect(impl.mapFromTokensArray_(['a', 'b', 'c', 'a', 'a']))
+        .to.have.all.keys('a', 'b', 'c');
+  });
+
+  it('tokenPrefixMatch_ should exhaustively match on complex cases', () => {
+    const item = 'washington, district of columbia (d.c.)';
+    expect(impl.tokenPrefixMatch_(item, 'washington')).to.be.true;
+    expect(impl.tokenPrefixMatch_(item, 'district of columbia')).to.be.true;
+    expect(impl.tokenPrefixMatch_(item, 'of colum')).to.be.true;
+    expect(impl.tokenPrefixMatch_(item,
+        'district washington columbia of')).to.be.true;
+    expect(impl.tokenPrefixMatch_(item, 'dc')).to.be.true;
+    expect(impl.tokenPrefixMatch_(item, 'washington dc')).to.be.true;
+    expect(impl.tokenPrefixMatch_(item, 'washington, d.c.')).to.be.true;
+    expect(impl.tokenPrefixMatch_(item, 'washington, (dc)')).to.be.true;
+    expect(impl.tokenPrefixMatch_(item, 'w.a.s.h.i.n.g.t.o.n.')).to.be.true;
+    expect(impl.tokenPrefixMatch_(item, 'district-of-columbia')).to.be.true;
+    expect(impl.tokenPrefixMatch_(item, "washington 'dc'")).to.be.true;
+    expect(impl.tokenPrefixMatch_(item,
+        'washin.gton,   (..dc)+++++')).to.be.true;
+    expect(impl.tokenPrefixMatch_(item, 'ashington dc')).to.be.false;
+    expect(impl.tokenPrefixMatch_(item, 'washi distri')).to.be.false;
+    expect(impl.tokenPrefixMatch_(item, 'columbia columbia')).to.be.false;
+    expect(impl.tokenPrefixMatch_(item, 'd c')).to.be.false;
   });
 
   it('truncateToMaxEntries_() should truncate given data', () => {
@@ -474,10 +518,13 @@ describes.realWin('amp-autocomplete unit tests', {
       return impl.toggleResultsHandler_(true);
     }).then(() => {
       expect(toggleResultsSpy).to.have.been.calledOnce;
+      expect(impl.inputElement_.form.getAttribute('autocomplete')).to.equal(
+          'off');
       expect(resetSpy).not.to.have.been.called;
       return impl.toggleResultsHandler_(false);
     }).then(() => {
       expect(toggleResultsSpy).to.have.been.calledTwice;
+      expect(impl.inputElement_.form.hasAttribute('autocomplete')).to.be.false;
       expect(resetSpy).to.have.been.calledOnce;
     });
   });

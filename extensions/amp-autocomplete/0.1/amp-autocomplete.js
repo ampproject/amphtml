@@ -21,11 +21,11 @@ import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {UrlReplacementPolicy,
   batchFetchJsonFor} from '../../../src/batched-json';
-import {childElementsByTag,
-  removeChildren} from '../../../src/dom';
+import {childElementsByTag, removeChildren} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user, userAssert} from '../../../src/log';
 import {getValueForExpr, tryParseJson} from '../../../src/json';
+import {hasOwn, map, ownProperty} from '../../../src/utils/object';
 import {includes, startsWith} from '../../../src/string';
 import {isEnumValue} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
@@ -114,6 +114,15 @@ export class AmpAutocomplete extends AMP.BaseElement {
      */
     this.container_ = null;
 
+    /**
+     * The developer specified value of the 'autocomplete' attribute on the
+     * <form> ancestor that contains <amp-autocomplete>. Used to reset the
+     * attribute on blurring the input field. 'on' by default, according to
+     * common browser practices.
+     * @private {?string}
+     */
+    this.initialAutocompleteAttr_ = null;
+
     /** @const @private {!../../../src/service/template-impl.Templates} */
     this.templates_ = Services.templatesFor(this.win);
 
@@ -146,6 +155,12 @@ export class AmpAutocomplete extends AMP.BaseElement {
     userAssert(inputElements.length === 1,
         `${TAG} should contain exactly one <input> child`);
     this.inputElement_ = /** @type {!HTMLInputElement} */ (inputElements[0]);
+
+    userAssert(this.inputElement_.form, `${TAG} should be inside a <form> tag`);
+    if (this.inputElement_.form.hasAttribute('autocomplete')) {
+      this.initialAutocompleteAttr_ =
+      this.inputElement_.form.getAttribute('autocomplete');
+    }
 
     if (this.templates_.hasTemplate(
         this.element, 'template, script[template]')) {
@@ -393,7 +408,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     }
 
     // Client-side filtering.
-    input = input.toLowerCase();
+    input = input.toLocaleLowerCase();
     const itemsExpr = this.element.getAttribute('filter-value') || 'value';
     const filteredData = data.filter(item => {
       if (typeof item === 'object') {
@@ -408,9 +423,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
         case FilterType.PREFIX:
           return startsWith(item, input);
         case FilterType.TOKEN_PREFIX:
-          return item.split(' ').some(token => {
-            return startsWith(token, input);
-          });
+          return this.tokenPrefixMatch_(item, input);
         case FilterType.FUZZY:
           throw new Error(`Filter not yet supported: ${this.filter_}`);
         case FilterType.CUSTOM:
@@ -421,6 +434,94 @@ export class AmpAutocomplete extends AMP.BaseElement {
     });
 
     return this.truncateToMaxEntries_(filteredData);
+  }
+
+  /**
+   * Returns true if the given input string is a token-prefix match on the
+   * given item string. Assumes toLocaleLowerCase() has been performed on both
+   * parameters.
+   *
+   * Matches:
+   * washington dc, dc
+   * washington dc, wash
+   * washington dc, dc washington
+   * new york ny, new york
+   *
+   * Non-matches:
+   * washington dc, district of columbia
+   * washington dc, washington d c
+   * washington dc, ashington dc
+   *
+   * @param {string} item
+   * @param {string} input
+   * @return {boolean}
+   * @private
+   */
+  tokenPrefixMatch_(item, input) {
+    if (input === '') {
+      return true;
+    }
+
+    const itemTokens = this.tokenizeString_(item);
+    const inputTokens = this.tokenizeString_(input);
+
+    // Match each input token (except the last one) to an item token
+    const itemTokensMap = this.mapFromTokensArray_(itemTokens);
+    const lastInputToken = inputTokens[inputTokens.length - 1];
+    inputTokens.splice(inputTokens.length - 1, 1);
+    let match = true;
+    for (let i = 0; i < inputTokens.length; i++) {
+      const token = inputTokens[i];
+      if (token === '') {
+        continue;
+      }
+      if (!hasOwn(itemTokensMap, token)) {
+        match = false;
+        break;
+      }
+      const count = Number(ownProperty(itemTokensMap, token));
+      if (count > 1) {
+        itemTokensMap[token] = count - 1;
+      } else {
+        delete itemTokensMap[token];
+      }
+    }
+
+    // Return that the last input token is a prefix of one of the item tokens
+    const remainingItemTokens = Object.keys(itemTokensMap);
+    return match && (lastInputToken === '' ||
+      remainingItemTokens.some(itemToken => {
+        return startsWith(itemToken, lastInputToken);
+      }));
+  }
+
+  /**
+   * Takes a string, removes '.', and splits by special characters.
+   * Returns the resulting array of tokens.
+   * @param {string} inputStr
+   * @return {!Array<string>}
+   * @private
+   */
+  tokenizeString_(inputStr) {
+    inputStr = inputStr.replace(/[\.]+/g, '');
+    return inputStr.split(/[`~(){}_|+\-;:\'",\[\]\\\/ ]+/g);
+  }
+
+  /**
+   * Returns the given tokens array as a dictionary of key: token (str) and
+   * value: number of occurrences.
+   * @param {!Array<string>} tokens
+   * @return {!Object<string, number>}
+   * @private
+   */
+  mapFromTokensArray_(tokens) {
+    const tokensMap = map();
+    tokens.forEach(token => {
+      const count = hasOwn(tokensMap, token) ?
+        ownProperty(tokensMap, token) + 1 : 1;
+      tokensMap[token] = count;
+    });
+    return tokensMap;
   }
 
   /**
@@ -446,12 +547,24 @@ export class AmpAutocomplete extends AMP.BaseElement {
   }
 
   /**
-   * Handle showing or hiding results on user focus/blur.
+   * Disables or re-enables the browser autofill on the autocomplete input.
+   * Then handles showing or hiding results on user focus/blur.
    * @param {boolean} display
    * @return {!Promise}
    * @private
    */
   toggleResultsHandler_(display) {
+    // Set/reset "autocomplete" attribute on the <form> ancestor.
+    if (display) {
+      this.inputElement_.form.setAttribute('autocomplete', 'off');
+    } else if (this.initialAutocompleteAttr_) {
+      this.inputElement_.form.setAttribute('autocomplete',
+          this.initialAutocompleteAttr_);
+    } else {
+      this.inputElement_.form.removeAttribute('autocomplete');
+    }
+
+    // Toggle results.
     return this.mutateElement(() => {
       if (!display) {
         this.resetActiveElement_();
