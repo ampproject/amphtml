@@ -16,6 +16,9 @@
 
 describes.endtoend('amp-autocomplete', {
   testUrl: 'http://localhost:8000/test/manual/amp-autocomplete/amp-autocomplete.amp.html',
+  // TODO: Restore 'environments' to default after supporting fourth test in
+  // shadow environment.
+  environments: ['single', 'viewer-demo'],
   experiments: ['amp-autocomplete'],
   initialRect: {width: 800, height: 800},
 }, env => {
