@@ -436,18 +436,18 @@ export class ViewportBindingInabox {
   /** @override */
   getScrollWidth() {
     // Get actual width of document body, regardless of iframe size.
-    return this.getBodyElement()./*OK*/offsetWidth;
+    return this.getScrollingElement()./*OK*/offsetWidth;
   }
 
   /** @override */
   getScrollHeight() {
     // Get actual height of document body, regardless of iframe size.
-    return this.getBodyElement()./*OK*/offsetHeight;
+    return this.getScrollingElement()./*OK*/offsetHeight;
   }
 
   /** @override */
   getContentHeight() {
-    return this.getBodyElement()./*OK*/offsetHeight;
+    return this.getScrollHeight();
   }
 
   /** @override */ updatePaddingTop() {/* no-op */}
