@@ -29,14 +29,15 @@ tags: {  # <amp-autocomplete src>
   tag_name: "AMP-AUTOCOMPLETE"
   spec_name: "amp-autocomplete with src attribute"
   requires_extension: "amp-autocomplete"
+  mandatory_ancestor: "FORM"
   attrs: {
     name: "filter"
+    value_casei: "custom"
+    value_casei: "fuzzy"
+    value_casei: "none"
+    value_casei: "prefix"
     value_casei: "substring"
     value_casei: "token-prefix"
-    value_casei: "prefix"
-    value_casei: "fuzzy"
-    value_casei: "custom"
-    value_casei: "none"
     trigger: {
       if_value_regex: "custom"
       also_requires_attr: "filter-expr"
@@ -46,11 +47,8 @@ tags: {  # <amp-autocomplete src>
     name: "filter-expr"
     requires_extension: "amp-bind"
   }
-  attrs: { name: "min-characters" }
   attrs: { name: "max-entries" }
-  attrs: { name: "suggest-first" }
-  attrs: { name: "submit-on-enter" }
-  attrs: { name: "template" }
+  attrs: { name: "min-characters" }
   attrs: {
     name: "src"
     value_url: {
@@ -58,6 +56,10 @@ tags: {  # <amp-autocomplete src>
       allow_relative: false
     }
   }
+  attrs: { name: "submit-on-enter" }
+  attrs: { name: "suggest-first" }
+  attrs: { name: "template" }
+  # amp-bind
   attrs: {
     name: "[src]"
   }
@@ -66,7 +68,6 @@ tags: {  # <amp-autocomplete src>
   amp_layout: {
     supported_layouts: CONTAINER
   }
-  mandatory_ancestor: "FORM"
 }
 tags: {  # <amp-autocomplete> > <input>
   html_format: AMP
@@ -78,8 +79,8 @@ tags: {  # <amp-autocomplete> > <input>
   attrs: {
     name: "type"
     mandatory: true
-    value_casei: "text"
     value_casei: "search"
+    value_casei: "text"
   }
 }
 tags: {  # amp-autocomplete JSON
