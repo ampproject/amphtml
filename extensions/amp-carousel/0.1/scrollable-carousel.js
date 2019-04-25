@@ -21,6 +21,7 @@ import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
+import {listen} from '../../../src/event-helper';
 import {numeric} from '../../../src/transition';
 
 /** @const {string} */
@@ -340,8 +341,10 @@ export class AmpScrollableCarousel extends BaseCarousel {
   cancelTouchEvents_() {
     // TODO(aghassemi, #4754): Ideally we only stop propagation of horizontal
     // touchmove events.
-    this.element.addEventListener('touchmove', event => {
+    listen(this.element, 'touchmove', event => {
       event.stopPropagation();
+    }, {
+      passive: true,
     });
   }
 }
