@@ -36,6 +36,7 @@ const {isTravisBuild} = require('./travis');
 const {TopologicalSort} = require('topological-sort');
 const TYPES_VALUES = Object.keys(TYPES).map(x => TYPES[x]);
 const wrappers = require('./compile-wrappers');
+const {VERSION: internalRuntimeVersion} = require('./internal-version') ;
 
 const argv = minimist(process.argv.slice(2));
 let singlePassDest = typeof argv.single_pass_dest === 'string' ?
@@ -56,9 +57,6 @@ const commonJsModules = [
   'node_modules/promise-pjs/',
   'node_modules/set-dom/',
 ];
-
-// Override to local closure compiler JAR
-ClosureCompiler.JAR_PATH = require.resolve('./runner/dist/runner.jar');
 
 const mainBundle = 'src/amp.js';
 const extensionsInfo = {};
@@ -87,6 +85,7 @@ const jsFilesToWrap = [];
 
 exports.getFlags = function(config) {
   config.define.push('SINGLE_FILE_COMPILATION=true');
+  config.define.push(`VERSION=${internalRuntimeVersion}`);
   /* eslint "google-camelcase/google-camelcase": 0 */
   // Reasonable defaults.
   const flags = {
@@ -608,6 +607,9 @@ function formatSinglePassClosureCompilerError(message) {
 }
 
 function compile(flagsArray) {
+  // Override to local closure compiler JAR
+  ClosureCompiler.JAR_PATH = require.resolve('./runner/dist/runner.jar');
+
   fs.writeFileSync('flags-array.txt', JSON.stringify(flagsArray, null, 2));
   return new Promise(function(resolve, reject) {
     new ClosureCompiler(flagsArray).run(function(exitCode, stdOut, stdErr) {
