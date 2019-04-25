@@ -11,59 +11,49 @@ This document describes the process you will go through to make a change in AMP.
 We want to make it as easy as possible to get in small fixes.  A fix for a small bug should be as easy as creating a PR with the change, adding/fixing a test, and sending it to a reviewer.
 
 - [ ] Sign the [Contributor License Agreement (CLA)](#contributor-license-agreement) as soon as possible if you haven't already done so.  If you are contributing code on behalf of your company and your company is not yet covered by a CLA it can take a few days for the CLA to be verified.
-- [ ] (optional) If you are fixing a bug and there is an existing GitHub issue, assign it to yourself or comment on it to let others know you are working on it.  If there is no GitHub issue consider filing one, but for minor fixes your Pull Request description may be enough.
-- [ ] (optional) [Find a reviewer](#find-a-reviewer) before you start coding to help you answer questions.  If you don't have any questions you can find a reviewer once you have a PR ready.
-- [ ] Follow the parts of the [Implementation](#implementation) section that makes sense for your change.  There are many parts of the process that you probably won't need to follow for a minor fix--e.g. you may not need to make validator changes or put your change behind an experiment for minor fixes.  If in doubt ask your reviewer.
+- [ ] (optional) If you are fixing a bug and there is an existing GitHub issue, assign it to yourself (if you can) or comment on it to let others know you are working on it.  If there is no GitHub issue consider filing one, but for minor fixes your PR description may be enough.
+- [ ] (optional) [Find a guide](#find-a-guide) before you start coding to help you answer questions.
+- [ ] Follow the parts of the [Implementation](#implementation) section that makes sense for your change.  There are many parts of the process that you probably won't need to follow for a minor fix--e.g. you may not need to make validator changes or put your change behind an experiment for minor fixes.  If in doubt ask your guide or the [#contributing channel](https://amphtml.slack.com/messages/C9HRJ1GPN/) on [Slack](https://bit.ly/amp-slack-signup).
+- [ ] When your code is ready to review, find [people to review and approve your code](#code-review-and-approval).
+  - Your code must be reviewed/approved by an Owner for each area your PR affects and a Reviewer.  (It is acceptable and common for one person to fulfill both roles.)
+    - choose an Owner from the OWNERS.yaml file in the directories you change (or their parent directories)
+    - choose a [Reviewer](https://github.com/orgs/ampproject/teams/reviewers-amphtml)
+  -  Add the Reviewers/Owners as reviewers on your PR if you are able to do so, otherwise cc them by adding the line "/cc @username" in your PR description/comment.
+
+If your run into any issues finding a Reviewer/Owner or have any other questions, ping the [#contributing channel](https://amphtml.slack.com/messages/C9HRJ1GPN/) on [Slack](https://bit.ly/amp-slack-signup).  You can also reach out to mrjoro on Slack or cc him on your GitHub issue/PR.
 
 ### Process for significant changes
 
 Significant changes (e.g. new components or significant changes to behavior) require consultation with and approval from knowledgeable members of the community.
 
-- [ ] *Before you start coding*, [find a reviewer](#find-a-reviewer) who you can discuss your change with and who can help guide you through the process.
+- [ ] *Before you start coding*, [find a guide](#find-a-guide) who you can discuss your change with and who can help guide you through the process.
 - [ ] Sign the [Contributor License Agreement (CLA)](#contributor-license-agreement) as soon as possible if you haven't already done so.  If you are contributing code on behalf of your company and your company is not yet covered by a CLA it can take a few days for the CLA to be verified.
-- [ ] File an [Intent-to-implement (I2I)](https://github.com/ampproject/amphtml/issues/new?assignees=&labels=INTENT+TO+IMPLEMENT&template=intent-to-implement--i2i-.md&title=I2I:%20%3Cyour%20change/update%3E) GitHub issue and cc your reviewer on it.  The I2I should include:
+- [ ] File an [Intent-to-implement (I2I)](https://github.com/ampproject/amphtml/issues/new?assignees=&labels=INTENT+TO+IMPLEMENT&template=intent-to-implement--i2i-.md&title=I2I:%20%3Cyour%20change/update%3E) GitHub issue and cc your guide on it.  The I2I should include:
   -  A description of the change you plan to implement.
   -  If you are integrating a third-party service, provide a link to the third-party's site and product.
   -  Details on any data collection or tracking that your change might require.
   -  A prototype or mockup (for example, an image, a GIF, or a link to a demo).
-- [ ] Determine who needs to approve your I2I.  Changes that have a significant impact on AMP's behavior or significant new features require the approval from the [Approvers Working Group (WG)](https://github.com/ampproject/wg-approvers).  Work with your reviewer to determine whether your change is significant enough that it requires approval from the Approvers Working Group and/or any other [Working Group](https://github.com/ampproject/meta/tree/master/working-groups).
+- [ ] Determine who needs to approve your I2I.  Changes that have a significant impact on AMP's behavior or significant new features require the approval from the [Approvers Working Group (WG)](https://github.com/ampproject/wg-approvers).  Work with your guide to determine whether your change is significant enough that it requires approval from the Approvers Working Group and/or any other [Working Group](https://github.com/ampproject/meta/tree/master/working-groups).
 - [ ] Get pre-approval from the Approvers WG if needed.  For changes that require approval from the Approvers WG, at least 3 members of the Approvers WG should provide pre-approval on the I2I before significant implementation work proceeds.
 - [ ] Finalize the design of your change.
   - Familiarize yourself with our [Design Principles](DESIGN_PRINCIPLES.md).
-  - Your reviewer can help you determine if your change requires a design doc and whether it should be brought to a [design review](./design-reviews.md).
+  - Your guide can help you determine if your change requires a design doc and whether it should be brought to a [design review](./design-reviews.md).
 - [ ] Proceed with the [implementation](#implementation) of your change.
 - [ ] For changes that require approval from the Approvers WG, file an [Intent-to-ship (I2S) issue](https://github.com/ampproject/amphtml/issues/new?assignees=&labels=INTENT+TO+SHIP&template=intent-to-ship--i2s-.md&title=I2S:%20%3Cyour%20change/update%3E).  Indicate which experiment is gating your change and a rollout plan.  Once this issue is approved by 3 members of the Approvers WG the rollout plan described in the I2S may proceed.
 
-## Find a reviewer
+## Find a guide
 
-## Finding a reviewer for small changes
+A guide is a member of the AMP community who is knowledgeable about the area you are modifying and who can guide you from the design phase all the way through launch.
 
-All code must be reviewed and approved as described in the [Code review and approval](#code-review-and-approval) section.
+A guide is required if you are making a substantial change to AMP, but is optional if you are making smaller changes.
 
-If you're making a minor fix and just want to find someone to review/approve your code, choose:
-
-- an Owner from the OWNERS.yaml file in the directories you change (or their parent directories)
-- and a [Reviewer](https://github.com/orgs/ampproject/teams/reviewers-amphtml)
-
-(It is acceptable for one person to fulfill both roles.)
-
-After you've found your reviewers:
-- add them as reviewers on your PR if you are able to
-- or cc them by adding the text "/cc @username" in the PR description/comment
-
-If the reviewers you find aren't responsive, ping the [#contributing channel](https://amphtml.slack.com/messages/C9HRJ1GPN/) on [Slack](https://bit.ly/amp-slack-signup).  You can also reach out to mrjoro on Slack or cc him on your GitHub issue/PR.
-
-## Finding a reviewer for significant changes
-
-A reviewer is needed if you are making a more substantial change to AMP.  A reviewer is a member of the AMP community who is knowledgeable about the area you are modifying and who can guide you from the design phase all the way through launch.
-
-To find a reviewer:
-- The [Working Group](https://github.com/ampproject/meta/blob/master/working-groups/README.md) that is most responsible for the area you are changing may document how to find a reviewer from that Working Group.  If they do not, reach out to the facilitator of the WG (on [Slack](https://bit.ly/amp-slack-signup) or by ccing them on your GitHub issue by adding "/cc @username" in the issue body or comment).
+To find a guide:
+- The [Working Group](https://github.com/ampproject/meta/blob/master/working-groups/README.md) that is most responsible for the area you are changing may document how to find a guide from that Working Group.  If they do not, reach out to the facilitator of the WG (on [Slack](https://bit.ly/amp-slack-signup) or by ccing them on your GitHub issue by adding "/cc @username" in the issue body or comment).
 - If there is no obvious Working Group responsible for the area you are changing but you know what part of the codebase your change will be in, reach out to one of the people in the OWNERS.yaml files for the areas you're changing (on [Slack](https://bit.ly/amp-slack-signup) or by ccing them on your GitHub issue).
-- If you're still not sure who your reviewer should be, ask for a reviewer on [Slack](https://bit.ly/amp-slack-signup) in the [#contributing channel](https://amphtml.slack.com/messages/C9HRJ1GPN/).
-- If you can't find a reviewer after going through these routes or the reviewers you find aren't responsive, reach out to mrjoro on Slack or cc him on your GitHub issue/PR.
+- If you're still not sure who your guide should be, ask for a guide on [Slack](https://bit.ly/amp-slack-signup) in the [#contributing channel](https://amphtml.slack.com/messages/C9HRJ1GPN/).
+- If you can't find a guide after going through these routes or the guides you find aren't responsive, reach out to mrjoro on Slack or cc him on your GitHub issue/PR.
 
-Once you have found a reviewer, make sure to @-mention them on any issues / PRs related to your change (e.g. if mrjoro is your reviewer you can just add "/cc @mrjoro" in the issue/PR body or comment).
+Once you have found a guide, make sure to @-mention them on any issues / PRs related to your change (e.g. if mrjoro is your guide you can just add "/cc @mrjoro" in the issue/PR body or comment).
 
 ## Implementation
 
@@ -102,9 +92,9 @@ Once you have found a reviewer, make sure to @-mention them on any issues / PRs 
   - [Push your changes](./getting-started-e2e.md#push-your-changes-to-your-github-fork)
   - [Create a Pull Request (PR)](./getting-started-e2e.md#send-a-pull-request-ie-request-a-code-review).
   - Make sure the presubmit checks shown on your PR on GitHub passes (e.g. no lint and type check errors, tests are passing).
-  - Add reviewers to your PR that will fulfill the requirements of code review and approval documented in the [Code review and approval](#code-review-and-approval) section.  (Your reviewer can help with this.)
+  - Add reviewers to your PR that will fulfill the requirements of code review and approval documented in the [Code review and approval](#code-review-and-approval) section.  (Your guide can help with this.)
   - [Respond to feedback](./getting-started-e2e.md#respond-to-pull-request-comments).
-- After your PR has all of the necessary approvals, your code may be merged into the repository by any Collaborator/Reviewer.  Your reviewer will typically handle this; reach out to them if your code is not merged soon after it has been approved.
+- After your PR has all of the necessary approvals, your code may be merged into the repository by any Collaborator/Reviewer.  Your guide will typically handle this; reach out to them if your code is not merged soon after it has been approved.
 - To check on your changes and find out when they get into production, read [See your changes in production](./getting-started-quick.md#see-your-changes-in-production).
 - [Clean up](./getting-started-quick.md#delete-your-branch-after-your-changes-are-merged-optional): After your changes are merged, you can delete your working branch.
 
