@@ -21,6 +21,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.javascript.jscomp.CommandLineRunner;
 import com.google.javascript.jscomp.CompilerOptions;
 import com.google.javascript.jscomp.CustomPassExecutionTime;
+import com.google.javascript.jscomp.FlagUsageException;
 import com.google.javascript.jscomp.PropertyRenamingPolicy;
 import com.google.javascript.jscomp.VariableRenamingPolicy;
 import com.google.javascript.rhino.IR;
@@ -46,14 +47,22 @@ public class AmpCommandLineRunner extends CommandLineRunner {
 
   private boolean single_file_compilation = false;
 
+  private String amp_version = "";
+
   /**
    * List of string suffixes to eliminate from the AST.
    */
-  ImmutableMap<String, Set<String>> suffixTypes = ImmutableMap.of(
-      "module$src$log.dev", ImmutableSet.of(
-          "assert", "fine", "assertElement", "assertString",
-          "assertNumber", "assertBoolean", "assertArray"),
-      "module$src$log.user", ImmutableSet.of("fine"));
+  ImmutableSet<String> suffixTypes = ImmutableSet.of(
+      "dev$$module$src$log().assert()",
+      "dev$$module$src$log().fine()",
+      "dev$$module$src$log().assertElement()",
+      "dev$$module$src$log().assertString()",
+      "dev$$module$src$log().assertNumber()",
+      "dev$$module$src$log().assertArray()",
+      "dev$$module$src$log().assertBoolean()",
+      "devAssert$$module$src$log()",
+      "user$$module$src$log().fine()"
+      );
 
 
   ImmutableMap<String, Node> assignmentReplacements = ImmutableMap.of(
@@ -73,9 +82,9 @@ public class AmpCommandLineRunner extends CommandLineRunner {
       return createTypeCheckingOptions();
     }
     CompilerOptions options = super.createOptions();
-    options.setCollapseProperties(true);
+    options.setCollapsePropertiesLevel(CompilerOptions.PropertyCollapseLevel.ALL);
     AmpPass ampPass = new AmpPass(getCompiler(), is_production_env, suffixTypes,
-        assignmentReplacements, prodAssignmentReplacements);
+        assignmentReplacements, prodAssignmentReplacements, amp_version);
     options.addCustomPass(CustomPassExecutionTime.BEFORE_OPTIMIZATIONS, ampPass);
     options.setDevirtualizePrototypeMethods(true);
     options.setExtractPrototypeMemberDeclarations(true);
@@ -131,6 +140,8 @@ public class AmpCommandLineRunner extends CommandLineRunner {
         runner.pseudo_names = true;
       } else if (arg.contains("SINGLE_FILE_COMPILATION=true")) {
         runner.single_file_compilation = true;
+      } else if (arg.contains("VERSION=")) {
+        runner.amp_version = arg.substring(arg.lastIndexOf("=") + 1);
       }
     }
 

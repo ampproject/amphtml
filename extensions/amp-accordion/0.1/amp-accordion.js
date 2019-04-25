@@ -25,6 +25,7 @@ import {closest, tryFocus} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {getStyle, setImportantStyles, setStyles} from '../../../src/style';
 import {
   numeric,
   px,
@@ -32,7 +33,6 @@ import {
 } from '../../../src/transition';
 import {parseJson} from '../../../src/json';
 import {removeFragment} from '../../../src/url';
-import {setImportantStyles, setStyles} from '../../../src/style';
 
 const TAG = 'amp-accordion';
 const MAX_TRANSITION_DURATION = 500; // ms
@@ -46,7 +46,7 @@ class AmpAccordion extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {!Array<!Node>} */
+    /** @private {!Array<!Element>} */
     this.headers_ = [];
 
     /** @private {?string} */
@@ -58,7 +58,7 @@ class AmpAccordion extends AMP.BaseElement {
     /** @private {boolean} */
     this.sessionOptOut_ = false;
 
-    /** @private {Element} */
+    /** @private {?Array<!Element>} */
     this.sections_ = null;
 
     /** @private {?../../../src/service/action-impl.ActionService} */
@@ -325,10 +325,12 @@ class AmpAccordion extends AMP.BaseElement {
     let headerHeight;
     let contentHeight;
     let duration;
+    let originalWidthStyle;
     const sectionChild = section.children[1];
 
     return this.measureMutateElement(() => {
       sectionWidth = section./*OK*/offsetWidth;
+      originalWidthStyle = getStyle(sectionChild, 'width');
     }, () => {
       // We set position and opacity to avoid a FOUC while measuring height.
       // We set the width for layouts where the height depends on the width.
@@ -357,7 +359,7 @@ class AmpAccordion extends AMP.BaseElement {
             setStyles(sectionChild, {
               'position': '',
               'opacity': '',
-              'width': '',
+              'width': originalWidthStyle,
             });
           });
     }).then(() => {

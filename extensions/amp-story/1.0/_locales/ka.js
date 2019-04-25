@@ -22,7 +22,7 @@ import {
  * Localized string bundle used for ka strings.
  * @const {!LocalizedStringBundleDef}
  */
-export default /** @const {!LocalizedStringBundleDef} */ ({
+const strings = {
   [LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT]: {
     string: 'ხმა გამორთულია',
   },
@@ -128,4 +128,6 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
     string: 'ვწუხვართ, როგორც ჩანს, თქვენს ბრაუზერს არ აქვს ამ გამოცდილების ' +
         'მხარდაჭერა',
   },
-});
+};
+
+export default strings;

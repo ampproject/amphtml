@@ -100,7 +100,33 @@ PASS
 |      data-product-code="shfs">
 |    </amp-addthis>
 |
+|    <!-- Inline using Product Code Anonymous Mode -->
+|    <amp-addthis
+|      width="320"
+|      height="92"
+|      data-product-code="shin">
+|    </amp-addthis>
 |
+|    <!-- Floating using Product Code Anonymous Mode -->
+|    <amp-addthis
+|      width="320"
+|      height="92"
+|      data-widget-type="floating"
+|      layout="responsive"
+|      data-product-code="shfs">
+|    </amp-addthis>
+|
+|    <!-- Floating using Product Code Anonymous Mode with overrides-->
+|    <amp-addthis
+|      width="320"
+|      height="92"
+|      data-widget-type="floating"
+|      layout="responsive"
+|      data-product-code="shfs"
+|      data-attr-counts="none"
+|      data-attr-iconColor="yellow"
+|      data-attr-numPreferredServices="6">
+|    </amp-addthis>
 |
 |  </body>
 |  </html>
