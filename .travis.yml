@@ -64,7 +64,7 @@ jobs:
       script:
         - node build-system/pr-check/dist-tests.js
     - stage: test
-      name: "Visual Diff Tests"
+      name: "[NON-BLOCKING] Visual Diff Tests"
       script:
         - node build-system/pr-check/visual-diff-tests.js
     - stage: test
@@ -87,6 +87,8 @@ jobs:
   allow_failures:
     - script:
       - node build-system/pr-check/e2e-tests.js
+    - script:
+      - node build-system/pr-check/visual-diff-tests.js
 cache:
   directories:
     - node_modules
