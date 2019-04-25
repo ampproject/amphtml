@@ -41,12 +41,6 @@
     }
   </script>
 
-  <script keys type="application/json">
-  {
-    "google.com": "ENCRYPT({\"accessRequirements\": [\"norcal.com:premium\"], \"key\":\"aBcDef781-2-4/sjfdi\"})"
-    "local": "ENCRYPT({\"accessRequirements\": [\"whateveryouwant:12\"], \"key\":\"yourkey\"})"
-  }
-  </script>
 
   <link href='https://fonts.googleapis.com/css?family=Georgia|Open+Sans|Roboto' rel='stylesheet' type='text/css'>
   <style amp-custom>
@@ -167,6 +161,17 @@
       background: #ffc;
     }
 
+    amp-subscriptions-dialog {
+      text-align: center;
+      padding: 5px;
+    }
+
+    #contributeButton {
+      padding: 5px;
+      margin: 10px;
+      text-align: center;
+    }
+
   </style>
 </head>
 <body>
@@ -220,7 +225,7 @@
             srcset="img/hero@1x.jpg 1x, img/hero@2x.jpg 2x"
             layout="responsive" width="360" placeholder
             alt="Curabitur convallis, urna quis pulvinar feugiat, purus diam posuere turpis, sit amet tincidunt purus justo et mi."
-            height="116">
+            height="216">
         </amp-img>
       </figure>
 
@@ -256,18 +261,6 @@
           Login or subscribe to read more.
         </section>
 
-        <br/>
-
-        <div>
-          before
-          <script type="application/octet-stream" encrypted>
-            tniRwntes210WEY+s/BK+dkpd39U9UO75lfADFfpXA7ASUpyreAyVI4TwZ0DCsLJpHC4ckp0+zQ93vYDdH+aSvXm8ksjCIjw1I82pQbcV04CK1NJ5ha9gJavE5bVobMNBAIM6PbfRIFUf+8oE8Tmv5SiDHu9CUHheB4MOunXBKqZzlyW3HgtImY56w6vqLKxPjDwhalvEf4rg2Xi+QlFzeE7YCPCPo68T4T1v9R+RCuYY2QDvLs3Re5Hb6tfnvds/7fO8NCdD6zrZUv0NENoZQvyvEcYt3hKQJe7N908JPg=
-          </script>
-          after
-        </div>
-
-        <br/>
-
         <div subscriptions-section="content" class="article-body" itemprop="articleBody">
           <p>
             Lorem ipsum dolor sit amet, consectetur adipiscing elit.
@@ -287,6 +280,8 @@
             Mauris sem est, accumsan sed tincidunt ut, sagittis vel arcu.
             Nullam in libero nisi.
           </p>
+
+          
 
           <p>
             Sed pharetra semper fringilla. Nulla fringilla, neque eget
@@ -347,6 +342,8 @@
             Aliquam erat volutpat.
           </p>
 
+
+
           <p>
             Morbi at velit vitae eros congue congue venenatis non dui.
             Sed lacus sem, feugiat sed elementum sed, maximus sed lacus.
@@ -367,16 +364,13 @@
   </footer>
 
 
-  <template type="amp-mustache" subscriptions-dialog subscriptions-display="loggedIn">
-    Dialog for logged in users
-  </template>
   <template type="amp-mustache" subscriptions-dialog subscriptions-display="NOT loggedIn">
-    <div>Dialog for non logged in users<div>
-    <div subscriptions-display="NOT loggedIn"
-      subscriptions-action="subscribe"
+    <div>Dialog for Contrbutions Request<div>
+    <button id="contributeButton" subscriptions-display="NOT loggedIn"
+      subscriptions-action="contribute"
       subscriptions-service="subscribe.google.com"
-      subscriptions-decorate>Login</div>
-    <div subscriptions-display="NOT subscribed">btw u are not subscribed</div>
+      subscriptions-decorate>Yes I will Contribute</button>
+    <div subscriptions-display="NOT subscribed">We want your money</div>
   </template>
 </body>
 </html>

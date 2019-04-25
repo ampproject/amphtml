@@ -51,6 +51,10 @@ const CANCELLED = 'CANCELLED';
  */
 const BLOCK_BY_CONSENT = 'BLOCK_BY_CONSENT';
 
+/**
+ * @const {string}
+ */
+const ABORTED = 'AbortError';
 
 /**
  * The threshold for errors throttled because nothing can be done about
@@ -278,7 +282,9 @@ export function installErrorReporting(win) {
   win.addEventListener('unhandledrejection', event => {
     if (event.reason &&
       (event.reason.message === CANCELLED ||
-      event.reason.message === BLOCK_BY_CONSENT)) {
+      event.reason.message === BLOCK_BY_CONSENT ||
+      event.reason.message === ABORTED
+      )) {
       event.preventDefault();
       return;
     }
