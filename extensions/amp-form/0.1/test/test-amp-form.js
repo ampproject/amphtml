@@ -129,7 +129,7 @@ describes.repeated('', {
     }
 
     function getVerificationForm() {
-      const form = getForm();
+      const form = getForm(/*button1*/ false);
       form.setAttribute('verify-xhr', '');
 
       const noVerifyInput = createElement('input');
@@ -1619,14 +1619,28 @@ describes.repeated('', {
 
       expect(actions.installActionHandler).to.be.calledWith(form);
       sandbox.spy(ampForm, 'handleSubmitAction_');
-      ampForm.actionHandler_({method: 'anything'});
+      ampForm.actionHandler_({method: 'anything', satisfiesTrust: () => true});
       expect(ampForm.handleSubmitAction_).to.have.not.been.called;
-      ampForm.actionHandler_({method: 'submit'});
+      ampForm.actionHandler_({method: 'submit', satisfiesTrust: () => true});
 
       return whenCalled(ampForm.xhr_.fetch).then(() => {
         expect(ampForm.handleSubmitAction_).to.have.been.calledOnce;
         document.body.removeChild(form);
       });
+    });
+
+    it('should not invoke low-trust action invocations', () => {
+      const form = getForm();
+      document.body.appendChild(form);
+
+      const ampForm = new AmpForm(form);
+      sandbox.stub(ampForm.xhr_, 'fetch').returns(Promise.resolve());
+
+      sandbox.spy(ampForm, 'handleSubmitAction_');
+      ampForm.actionHandler_({method: 'submit', satisfiesTrust: () => false});
+      expect(ampForm.handleSubmitAction_).to.have.not.been.called;
+
+      document.body.removeChild(form);
     });
 
     it('should handle clear action and restore initial values', () => {
@@ -1646,11 +1660,14 @@ describes.repeated('', {
         ampForm.form_.elements.name.value = 'Jack Sparrow';
 
         sandbox.spy(ampForm, 'handleClearAction_');
-        ampForm.actionHandler_({method: 'anything'});
+        ampForm.actionHandler_({
+          method: 'anything',
+          satisfiesTrust: () => true,
+        });
         expect(ampForm.handleClearAction_).to.have.not.been.called;
 
         expect(ampForm.getFormAsObject_()).to.not.deep.equal(initalFormValues);
-        ampForm.actionHandler_({method: 'clear'});
+        ampForm.actionHandler_({method: 'clear', satisfiesTrust: () => true});
         expect(ampForm.handleClearAction_).to.have.been.called;
 
         expect(ampForm.getFormAsObject_()).to.deep.equal(initalFormValues);
@@ -1726,7 +1743,10 @@ describes.repeated('', {
             .returns(new Promise(unusedResolve => {}));
         sandbox.spy(ampForm, 'handleSubmitAction_');
 
-        const submitPromise = ampForm.actionHandler_({method: 'submit'});
+        const submitPromise = ampForm.actionHandler_({
+          method: 'submit',
+          satisfiesTrust: () => true,
+        });
         expect(ampForm.handleSubmitAction_).to.have.not.been.called;
         return timer.promise(1).then(() => {
           expect(ampForm.handleSubmitAction_).to.have.not.been.called;
@@ -1753,7 +1773,7 @@ describes.repeated('', {
             .returns(Promise.resolve());
         sandbox.spy(ampForm, 'handleSubmitAction_');
 
-        ampForm.actionHandler_({method: 'submit'});
+        ampForm.actionHandler_({method: 'submit', satisfiesTrust: () => true});
         expect(ampForm.handleSubmitAction_).to.have.not.been.called;
         return timer.promise(1).then(() => {
           expect(ampForm.handleSubmitAction_).to.have.not.been.called;

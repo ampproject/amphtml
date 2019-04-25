@@ -21,7 +21,17 @@
  * Example:
  * <code>
  * <script async host-service="amp-mraid"
- *         fallback-on="mismatch"></script>
+ *         src="https://cdn.ampproject.org/v0/amp-mraid-0.1.js"></script>
+ * <code>
+ *
+ * By default, if amp-mraid determines its not running in a mobile app it falls
+ * back to standard web APIs for determining visibility and collapse/expand.  If
+ * you are sure you're serving to a mobile app and want to disable this
+ * behavior, you can specify no-fallback:
+ *
+ * <code>
+ * <script async host-service="amp-mraid" no-fallback
+ *         src="https://cdn.ampproject.org/v0/amp-mraid-0.1.js"></script>
  * </code>
  *
  */
@@ -32,18 +42,7 @@ import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 
 const TAG = 'amp-mraid';
-const FALLBACK_ON = 'fallback-on';
-
-/**
- * String representations of the HostServicesErrors that can be used in the
- * 'fallback-on' attribute.
- *
- * @const @enum {string}
- */
-const FallbackErrorNames = {
-  MISMATCH: 'mismatch',
-  UNSUPPORTED: 'unsupported',
-};
+const NO_FALLBACK = 'no-fallback';
 
 /**
  * Loads mraid.js if available, and once it's loaded looks good, configures an
@@ -64,12 +63,7 @@ export class MraidInitializer {
     this.mraid_ = null;
 
     /** @private {boolean} */
-    this.fallback_ = false;
-
-    if (getMode().runtime !== 'inabox') {
-      dev().error(TAG, 'Only supported with Inabox');
-      return;
-    }
+    this.fallback_ = true;
 
     const ampMraidScripts = this.ampdoc_.getHeadNode().querySelectorAll(
         'script[host-service="amp-mraid"]');
@@ -81,9 +75,15 @@ export class MraidInitializer {
       return;
     }
     const element = ampMraidScripts[0];
-    const fallbackOn =
-        (element.getAttribute(FALLBACK_ON) || '').split(' ');
-    this.fallback_ = fallbackOn.includes(FallbackErrorNames.MISMATCH);
+    if (element.getAttribute(NO_FALLBACK) != null) {
+      this.fallback_ = false;
+    }
+
+    if (getMode().runtime !== 'inabox') {
+      dev().fine(TAG, 'Only supported with Inabox');
+      this.handleMismatch_();
+      return;
+    }
 
     // It looks like we're initiating a network load for mraid from a relative
     // url, but this will actually be intercepted by the mobile app SDK and

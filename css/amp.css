@@ -196,18 +196,6 @@ html.i-amphtml-singledoc.i-amphtml-ios-embed-sd > body {
   overflow: hidden !important;
 }
 
-/**
- * TODO(dvoytenko, #19004): if/when "scroll-height-minheight" launched, merge
- * these styles into _both_: `#i-amphtml-wrapper > body` and
- * `html.i-amphtml-ios-embed-sd > body` sections above.
- */
-.i-amphtml-body-minheight > body {
-  /* A slightly overflowing height is necessary to avoid scrolling and
-     rendering bugs on iOS due to
-     https://bugs.webkit.org/show_bug.cgi?id=158342. */
-  min-height: calc(100vh + 1px);
-}
-
 
 .i-amphtml-element {
   display: inline-block;
@@ -863,6 +851,15 @@ amp-story .i-amphtml-loader {
 }
 
 /**
+ * Uses a selector that stops targeting amp-story-page elements once they have a
+ * [distance] or [active] attribute, so amp-story.css doesn't have to rely on
+ * CSS specificity hacks to override these styles after the JavaScript ran.
+ */
+amp-story-page:not(:first-of-type):not([distance]):not([active]) {
+  transform: translateY(1000vh) !important;
+}
+
+/**
  * amp-autocomplete to avoid FOUC.
  */
 amp-autocomplete {
@@ -871,7 +868,14 @@ amp-autocomplete {
 }
 
 amp-autocomplete > input {
-  padding: 4px !important;
+  padding: .5rem; /* default-ui-space-large */
+  border: 1px solid rgba(0,0,0,.33) /* default-ui-med-gray */
+}
+
+amp-autocomplete > input,
+.i-amphtml-autocomplete-results {
+  font-size: 1rem; /* default-ui-font-size */
+  line-height: 1.5rem; /* default-ui-space-large */
 }
 
 /**
@@ -902,8 +906,11 @@ amp-autocomplete > input {
     bottom: 0;
   }
 }
-@media only screen and (min-width: 980px) {
+@media only screen and (min-width: 979px) {
   amp-addthis[data-widget-type="floating"] {
-    display:none;
+    position: fixed !important;
+    width: 70px !important;
+    height: 320px!important;
+    top: 200px;
   }
 }

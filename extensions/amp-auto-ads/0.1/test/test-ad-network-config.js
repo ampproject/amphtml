@@ -71,19 +71,19 @@ describes.realWin('ad-network-config', {
         });
 
     it('should report responsive-enabled when responsive experiment on and ' +
-       'experiment branch picked', () => {
+       'control branch picked', () => {
       forceExperimentBranch(env.win,
           ADSENSE_AMP_AUTO_ADS_RESPONSIVE_EXPERIMENT_NAME,
-          AdSenseAmpAutoAdsResponsiveBranches.EXPERIMENT);
+          AdSenseAmpAutoAdsResponsiveBranches.CONTROL);
       const adNetwork = getAdNetworkConfig('adsense', ampAutoAdsElem);
       expect(adNetwork.isResponsiveEnabled(env.win)).to.equal(true);
     });
 
     it('should report responsive-disabled when responsive experiment on ' +
-       'and control branch picked', () => {
+       'and experiment branch picked', () => {
       forceExperimentBranch(env.win,
           ADSENSE_AMP_AUTO_ADS_RESPONSIVE_EXPERIMENT_NAME,
-          AdSenseAmpAutoAdsResponsiveBranches.CONTROL);
+          AdSenseAmpAutoAdsResponsiveBranches.EXPERIMENT);
       const adNetwork = getAdNetworkConfig('adsense', ampAutoAdsElem);
       expect(adNetwork.isResponsiveEnabled(env.win)).to.equal(false);
     });

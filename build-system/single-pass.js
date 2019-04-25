@@ -31,10 +31,12 @@ const relativePath = require('path').relative;
 const tempy = require('tempy');
 const through = require('through2');
 const {extensionBundles, altMainBundles, TYPES} = require('../bundles.config');
+const {highlight} = require('cli-highlight');
 const {isTravisBuild} = require('./travis');
 const {TopologicalSort} = require('topological-sort');
 const TYPES_VALUES = Object.keys(TYPES).map(x => TYPES[x]);
 const wrappers = require('./compile-wrappers');
+const {VERSION: internalRuntimeVersion} = require('./internal-version') ;
 
 const argv = minimist(process.argv.slice(2));
 let singlePassDest = typeof argv.single_pass_dest === 'string' ?
@@ -55,9 +57,6 @@ const commonJsModules = [
   'node_modules/promise-pjs/',
   'node_modules/set-dom/',
 ];
-
-// Override to local closure compiler JAR
-ClosureCompiler.JAR_PATH = require.resolve('./runner/dist/runner.jar');
 
 const mainBundle = 'src/amp.js';
 const extensionsInfo = {};
@@ -86,6 +85,7 @@ const jsFilesToWrap = [];
 
 exports.getFlags = function(config) {
   config.define.push('SINGLE_FILE_COMPILATION=true');
+  config.define.push(`VERSION=${internalRuntimeVersion}`);
   /* eslint "google-camelcase/google-camelcase": 0 */
   // Reasonable defaults.
   const flags = {
@@ -593,8 +593,23 @@ function postProcessConcat() {
   });
 }
 
+// Formats a single-pass closure compiler error message into a more readable
+// form by dropping the lengthy java invocation line...
+//     java -jar ... --js_module_root <file>
+// ...and then syntax highlighting the error text.
+function formatSinglePassClosureCompilerError(message) {
+  const singlePassJavaInvocationLine = /java -jar[^]*--js_module_root .*?\n/;
+  message = message.replace(singlePassJavaInvocationLine, '');
+  message = highlight(message, {ignoreIllegals: true});
+  message = message.replace(/WARNING/g, colors.yellow('WARNING'));
+  message = message.replace(/ERROR/g, colors.red('ERROR'));
+  return message;
+}
 
 function compile(flagsArray) {
+  // Override to local closure compiler JAR
+  ClosureCompiler.JAR_PATH = require.resolve('./runner/dist/runner.jar');
+
   fs.writeFileSync('flags-array.txt', JSON.stringify(flagsArray, null, 2));
   return new Promise(function(resolve, reject) {
     new ClosureCompiler(flagsArray).run(function(exitCode, stdOut, stdErr) {
@@ -604,9 +619,8 @@ function compile(flagsArray) {
         });
       } else {
         reject(
-            new Error('Closure compiler compilation of bundles failed.\n' +
-                stdOut + '\n' +
-                stdErr));
+            new Error(colors.red('Single pass compilation failed:\n') +
+                formatSinglePassClosureCompilerError(stdErr)));
       }
     });
   });

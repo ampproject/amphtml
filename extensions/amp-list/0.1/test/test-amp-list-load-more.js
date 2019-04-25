@@ -18,7 +18,16 @@ import {AmpDocService} from '../../../../src/service/ampdoc-impl';
 import {AmpList} from '../amp-list';
 import {Services} from '../../../../src/services';
 import {isExperimentOn, toggleExperiment} from '../../../../src/experiments';
+import {
+  measureElementStub,
+  measureMutateElementStub,
+  mutateElementStub,
+} from '../../../../testing/test-helper';
 
+const HAS_MORE_ITEMS_PAYLOAD = {
+  'items': ['1', '2', '3'],
+  'load-more-src': '/list/infinite-scroll?items=2&left=1',
+};
 
 describes.realWin('amp-list component', {
   amp: {
@@ -61,22 +70,10 @@ describes.realWin('amp-list component', {
       sandbox.stub(list, 'getAmpDoc').returns(ampdoc);
       sandbox.stub(list, 'getFallback').returns(null);
 
-      sandbox.stub(list, 'mutateElement').callsFake(mutator => {
-        mutator();
-        return Promise.resolve();
-      });
-
-      sandbox.stub(list, 'measureElement').callsFake(measurer => {
-        measurer();
-        return Promise.resolve();
-      });
-
+      sandbox.stub(list, 'mutateElement').callsFake(mutateElementStub);
+      sandbox.stub(list, 'measureElement').callsFake(measureElementStub);
       sandbox.stub(list, 'measureMutateElement').callsFake(
-          (measurer, mutator) => {
-            measurer();
-            mutator();
-            return Promise.resolve();
-          });
+          measureMutateElementStub);
 
       element.setAttribute('src', '/list/infinite-scroll?items=2&left=1');
       element.setAttribute('load-more', 'manual');
@@ -93,9 +90,9 @@ describes.realWin('amp-list component', {
       list.buildCallback();
     });
 
-    it('should create load-more elements after layout callback', async() => {
+    it('should create load-more elements after init', async() => {
       sandbox.stub(list, 'getPlaceholder').returns(null);
-      await list.layoutCallback();
+      await list.initializeLoadMoreElements_();
 
       expect(list.element.querySelectorAll('[load-more-button]'))
           .to.have.lengthOf(1);
@@ -104,9 +101,9 @@ describes.realWin('amp-list component', {
       expect(list.element.querySelector('[load-more-end]')).to.be.null;
     });
 
-    it('should hide load-more-button at layout', async() => {
+    it('should hide load-more-button after init', async() => {
       sandbox.stub(list, 'getPlaceholder').returns(null);
-      await list.layoutCallback();
+      await list.initializeLoadMoreElements_();
 
       const button = list.element.querySelector('[load-more-button]');
       const buttonStyles = win.getComputedStyle(button);
@@ -116,18 +113,18 @@ describes.realWin('amp-list component', {
       });
     });
 
-    it('should hide load-more-failed element at layout', async() => {
+    it('should hide load-more-failed element after init', async() => {
       sandbox.stub(list, 'getPlaceholder').returns(null);
-      await list.layoutCallback();
+      await list.initializeLoadMoreElements_();
 
       const failedElement = list.element.querySelector('[load-more-failed]');
       const failedStyles = win.getComputedStyle(failedElement);
       expect(failedStyles.display).to.equal('none');
     });
 
-    it('should hide load-more-loading element at layout', async() => {
+    it('should hide load-more-loading element after init', async() => {
       sandbox.stub(list, 'getPlaceholder').returns(null);
-      await list.layoutCallback();
+      await list.initializeLoadMoreElements_();
 
       const loader = list.element.querySelector('[load-more-loading]');
       const loaderStyles = win.getComputedStyle(loader);
@@ -145,5 +142,49 @@ describes.realWin('amp-list component', {
       await list.layoutCallback();
       expect(attemptChangeHeightSpy).to.be.calledOnceWith(50);
     });
+
+  });
+
+  describe('loading states', () => {
+
+    beforeEach(() => {
+      expect(isExperimentOn(win, 'amp-list-load-more')).to.be.true;
+
+      element = doc.createElement('amp-list');
+      list = new AmpList(element);
+
+      sandbox.stub(list, 'getAmpDoc').returns(ampdoc);
+      sandbox.stub(list, 'getFallback').returns(null);
+
+      sandbox.stub(list, 'mutateElement').callsFake(mutateElementStub);
+      sandbox.stub(list, 'measureElement').callsFake(measureElementStub);
+      sandbox.stub(list, 'measureMutateElement').callsFake(
+          measureMutateElementStub);
+
+      element.setAttribute('src', '/list/infinite-scroll?items=2&left=1');
+      element.setAttribute('load-more', 'manual');
+      element.setAttribute('layout', 'fixed');
+      element.setAttribute('width', '50');
+      element.setAttribute('height', '10');
+      element.style.height = '10px';
+      doc.body.appendChild(element);
+
+      sandbox.stub(list, 'getOverflowElement').returns(null);
+      sandbox.stub(list, 'fetch_').returns(
+          Promise.resolve(HAS_MORE_ITEMS_PAYLOAD));
+      list.element.changeSize = () => {};
+      list.buildCallback();
+    });
+
+    it('should not fetch the same url more than once', async() => {
+      const fetchListSpy = sandbox.spy(list, 'fetchList_');
+      sandbox.stub(list, 'scheduleRender_').returns(Promise.resolve());
+      await list.layoutCallback();
+      expect(fetchListSpy).to.be.calledOnce;
+      list.loadMoreCallback_();
+      await list.loadMoreCallback_();
+      expect(fetchListSpy).to.be.calledTwice;
+    });
+
   });
 });

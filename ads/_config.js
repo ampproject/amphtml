@@ -145,7 +145,9 @@ export const adConfig = {
     ],
   },
 
-  'adocean': {},
+  'adocean': {
+    consentHandlingOverride: true,
+  },
 
   'adpicker': {
     renderStartImplemented: true,
@@ -917,6 +919,11 @@ export const adConfig = {
     prefetch: 'https://vod.addevweb.com/sunmedia/amp/ads/sunmedia.js',
     preconnect: 'https://static.addevweb.com',
     renderStartImplemented: true,
+  },
+
+  'svknative': {
+    renderStartImplemented: true,
+    prefetch: 'https://widget.svk-native.ru/js/embed.js',
   },
 
   'swoop': {

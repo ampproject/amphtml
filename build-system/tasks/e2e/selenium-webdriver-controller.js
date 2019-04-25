@@ -226,6 +226,18 @@ class SeleniumWebDriverController {
   }
 
   /**
+   * @return {!Promise<!ElementHandle<!WebElement>>}
+   * @override
+   */
+  async getDocumentElement() {
+    const root = await this.getRoot_();
+    const getter = root => root.ownerDocument.documentElement;
+    const documentElement =
+        await this.driver.executeScript(getter, root);
+    return new ElementHandle(documentElement);
+  }
+
+  /**
    * @param {string} location
    * @return {!Promise}
    * @override
@@ -284,10 +296,10 @@ class SeleniumWebDriverController {
    */
   getElementAttribute(handle, attribute) {
     const webElement = handle.getElement();
-
+    const getter = (element, attribute) => element.getAttribute(attribute);
     return new ControllerPromise(
-        webElement.getAttribute(attribute),
-        this.getWaitFn_(() => webElement.getAttribute(attribute)));
+        this.evaluate(getter, webElement, attribute),
+        this.getWaitFn_(() => this.evaluate(getter, webElement, attribute)));
   }
 
   /**
@@ -555,6 +567,11 @@ class SeleniumWebDriverController {
     }
 
     return this.evaluate(() => document.documentElement);
+  }
+
+  /** @override */
+  dispose() {
+    return this.driver.quit();
   }
 }
 

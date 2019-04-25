@@ -17,6 +17,7 @@
 @import './amp-story-access.css';
 @import './amp-story-desktop-panels.css';
 @import './amp-story-page-attachment.css';
+@import './amp-story-templates.css';
 @import './amp-story-user-overridable.css';
 @import './pagination-buttons.css';
 
@@ -167,6 +168,7 @@ amp-story .amp-video-eq:not(.amp-video-eq-play) {
 }
 
 /** Page level */
+.i-amphtml-story-media-query-matcher,
 amp-story-page {
   bottom: 0 !important;
   height: auto !important;
@@ -177,6 +179,13 @@ amp-story-page {
   opacity: 1 !important;
   transition: none !important;
   z-index: 0 !important;
+}
+
+.i-amphtml-story-media-query-matcher {
+  height: inherit !important;
+  width: inherit !important;
+  border: 0 !important;
+  z-index: -1 !important;
 }
 
 amp-story-page[active] {
@@ -210,10 +219,18 @@ amp-story-page[active] {
  * not be automatically laid out. Max distance is set to 2 (next 2 pages) since
  * we don't want to schedule any further pages. */
 
-amp-story-page:not([active]) {
-  transform: translateY(1000%) !important;
+amp-story-page:not(:first-of-type):not([distance]):not([active]) {
+  transform: translateY(1000vh) !important;
 }
 
+amp-story-page:not([active]) {
+  transform: translateY(1000vh) !important;
+}
+
+/**
+ * Note: If updating the [active] or [distance] attributes names, please also
+ * update them in the amp.css file.
+ */
 amp-story-page[active],
 amp-story-page[distance="0"],
 amp-story-page[distance="1"] {

@@ -17,6 +17,7 @@
 import {
   purifyHtml,
   purifyTagsForTripleMustache,
+  validateAttributeChange,
 } from '../../src/purifier';
 
 /**
@@ -443,6 +444,7 @@ function runSanitizerTests() {
     });
   });
 
+
   describe('purifyTagsForTripleMustache', () => {
     it('should output basic text', () => {
       expect(purifyTagsForTripleMustache('abc')).to.be.equal('abc');
@@ -492,6 +494,40 @@ function runSanitizerTests() {
       expect(purifyTagsForTripleMustache(html)).to.be.equal(html);
     });
 
+    it('should whitelist formatting related elements', () => {
+      const nonWhiteListedTag = '<img>';
+      const whiteListedFormattingTags = '<b>abc</b><div>def</div>'
+          + '<br><code></code><del></del><em></em>'
+          + '<i></i><ins></ins><mark></mark><s></s>'
+          + '<small></small><strong></strong><sub></sub>'
+          + '<sup></sup><time></time><u></u><hr>';
+      const html = `${whiteListedFormattingTags}${nonWhiteListedTag}`;
+      // Expect the purifier to unescape the whitelisted tags and to sanitize
+      // and remove the img tag.
+      expect(purifyTagsForTripleMustache(html))
+          .to.be.equal(whiteListedFormattingTags);
+    });
+
+    it('should whitelist table related elements and anchor tags', () => {
+      const html = '<table class="valid-class">'
+          + '<caption>caption</caption>'
+          + '<thead><tr><th colspan="2">header</th></tr></thead>'
+          + '<tbody><tr><td>'
+          + '<a href="http://www.google.com">google</a>'
+          + '</td></tr></tbody>'
+          + '<tfoot><tr>'
+          + '<td colspan="2"><span>footer</span></td>'
+          + '</tr></tfoot>'
+          + '</table>';
+      expect(purifyTagsForTripleMustache(html)).to.be.equal(html);
+    });
+
+    it('should sanitize tags, removing unsafe attributes', () => {
+      const html = '<a href="javascript:alert(\'XSS\')">test</a>'
+          + '<img src="x" onerror="alert(\'XSS\')" />';
+      expect(purifyTagsForTripleMustache(html)).to.be.equal('<a>test</a>');
+    });
+
     describe('should sanitize `style` attribute', () => {
       it('should allow valid styles',() => {
         expect(purify('<div style="color:blue">Test</div>'))
@@ -521,3 +557,62 @@ function runSanitizerTests() {
     });
   });
 }
+
+describe('validateAttributeChange', () => {
+  let purifier;
+  let vac;
+
+  beforeEach(() => {
+    purifier = {
+      isValidAttribute: () => true,
+    };
+
+    vac = (tag, attr, value) =>
+      validateAttributeChange(purifier, tag, attr, value);
+  });
+
+  it('should validate script[type]', () => {
+    expect(vac('script', 'type', 'application/ld+json')).to.be.true;
+    expect(vac('script', 'type', 'application/json')).to.be.true;
+    expect(vac('script', 'type', '')).to.be.false;
+    expect(vac('script', 'type', null)).to.be.false;
+    expect(vac('script', 'type', 'text/javascript')).to.be.false;
+  });
+
+  it('should validate a[target]', () => {
+    expect(vac('a', 'target', '_top')).to.be.true;
+    expect(vac('a', 'target', '_blank')).to.be.true;
+    expect(vac('a', 'target', '')).to.be.false;
+    expect(vac('a', 'target', null)).to.be.false;
+    expect(vac('a', 'target', '_self')).to.be.false;
+    expect(vac('a', 'target', '_parent')).to.be.false;
+  });
+
+  it('should disallow binding attributes', () => {
+    expect(vac('p', '[text]', 'foo')).to.be.false;
+    expect(vac('p', 'data-amp-bind-text', 'foo')).to.be.false;
+  });
+
+  it('should allow whitelisted-by-tag attributes', () => {
+    purifier.isValidAttribute = () => false;
+
+    expect(vac('a', 'rel', 'amphtml')).to.be.true;
+    expect(vac('div', 'template', 'my-template-id')).to.be.true;
+    expect(vac('textarea', 'autoexpand', '')).to.be.true;
+  });
+
+  it('should allow AMP element attributes', () => {
+    purifier.isValidAttribute = () => false;
+
+    expect(vac('amp-carousel', 'slide', '1')).to.be.true;
+    expect(vac('amp-accordion', 'expanded', '')).to.be.true;
+    expect(vac('amp-img', 'on', 'tap: AMP.print')).to.be.true;
+  });
+
+  it('should perform AMP runtime validations', () => {
+    expect(vac('h1', 'style', 'color: red !important')).to.be.false;
+    expect(vac('amp-img', 'src', '?__amp_source_origin=evil')).to.be.false;
+    expect(vac('select', 'form', 'foo')).to.be.false;
+    expect(vac('input', 'type', 'image')).to.be.false;
+  });
+});

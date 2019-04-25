@@ -20,7 +20,6 @@ branches:
     - release
     - canary
     - /^amp-release-.*$/
-    - /^revert-.*$/
 addons:
   apt:
     packages:
@@ -73,20 +72,27 @@ jobs:
       script:
         - node build-system/pr-check/local-tests.js
     - stage: test
-      name: "Remote (Sauce Labs) Tests"
+      name: "[NON-BLOCKING] Remote (Sauce Labs) Tests"
       script:
         - node build-system/pr-check/remote-tests.js
       after_script:
         - build-system/sauce_connect/stop_sauce_connect.sh
+    - stage: test
+      name: "[NON-BLOCKING] End to End Tests"
+      script:
+        - node build-system/pr-check/e2e-tests.js
   fast_finish: true
 
   # TODO(ampproject/wg-infra): remove when remote tests stabilize
   allow_failures:
     - script:
       - node build-system/pr-check/remote-tests.js
+    - script:
+      - node build-system/pr-check/e2e-tests.js
 cache:
   directories:
     - node_modules
+    - build-system/tasks/e2e/node_modules
     - build-system/tasks/visual-diff/node_modules
     - sauce_connect
     - validator/node_modules

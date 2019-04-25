@@ -380,15 +380,13 @@ export class Performance {
     const didStartInPrerender = !this.viewer_.hasBeenVisible();
     let docVisibleTime = didStartInPrerender ? -1 : this.initTime_;
 
-    // This is only relevant if the viewer is in prerender mode.
+    // This will only be relevant if the viewer is in prerender mode.
     // (hasn't been visible yet, ever at this point)
-    if (didStartInPrerender) {
-      this.viewer_.whenFirstVisible().then(() => {
-        docVisibleTime = this.win.Date.now();
-        // Mark this first visible instance in the browser timeline.
-        this.mark('visible');
-      });
-    }
+    this.viewer_.whenFirstVisible().then(() => {
+      docVisibleTime = this.win.Date.now();
+      // Mark this first visible instance in the browser timeline.
+      this.mark('visible');
+    });
 
     this.whenViewportLayoutComplete_().then(() => {
       if (didStartInPrerender) {
