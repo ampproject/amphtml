@@ -386,14 +386,17 @@ export class Carousel {
 
   /**
    * Pauses the auto advance temporarily. This can be resumed by calling
-   * resumeAutoAdvance.
+   * resumeAutoAdvance. This should only be used internally for the carousel
+   * implementation and not exposed.
    */
   pauseAutoAdvance() {
     this.autoAdvance_.pause();
   }
 
   /**
-   * Resumes auto advance when paused by pauseAutoAdvance.
+   * Resumes auto advance when paused by pauseAutoAdvance. Note that if the
+   * autoadvance has been stopped, this has no effect. This should only be used
+   * internally for the carousel implementation and not exposed.
    */
   resumeAutoAdvance() {
     this.autoAdvance_.resume();

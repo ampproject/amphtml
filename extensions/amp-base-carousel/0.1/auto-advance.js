@@ -89,21 +89,31 @@ export class AutoAdvance {
 
   /**
    * Stops the auto advance. Once stopped, auto advance cannot be started
-   * again.
+   * again. This  sets the `stopped_` flag, which is checked in
+   * `shouldAutoAdvance_`.
    */
   stop() {
     this.stopped_ = true;
   }
 
   /**
-   * Pauses the auto advance. It can be resumed again by calling `resume`.
+   * Pauses the auto advance. It can be resumed again by calling `resume`. This
+   * sets the `paused_` flag, which is checked in `shouldAutoAdvance_`.
+   *
+   * This should only be used internally, rather than by an external developer.
+   * If the functionallity is desired, `stop` shoould be used instead.
    */
   pause() {
     this.paused_ = true;
   }
 
   /**
-   * Resumes the auto advance as long as it is not stopped.
+   * Resumes the auto advance as long as it is not stopped. This clears the
+   * `paused_` flag, which is checked in `shouldAutoAdvance_`.
+   *
+   * This should only be used internally, rather than by an external developer
+   * If the functionallity is desired, a `start` function, undoing
+   * `stop` should be implemented instead.
    */
   resume() {
     this.paused_ = false;
