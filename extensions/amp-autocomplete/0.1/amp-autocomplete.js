@@ -63,7 +63,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
     /**
      * The reference to the <input> tag provided as a child.
-     * @private {?HTMLElement}
+     * @private {?HTMLInputElement}
      */
     this.inputElement_ = null;
 
@@ -145,7 +145,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     const inputElements = childElementsByTag(this.element, 'INPUT');
     userAssert(inputElements.length === 1,
         `${TAG} should contain exactly one <input> child`);
-    this.inputElement_ = inputElements[0];
+    this.inputElement_ = /** @type {!HTMLInputElement} */ (inputElements[0]);
 
     if (this.templates_.hasTemplate(
         this.element, 'template, script[template]')) {
@@ -358,6 +358,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
    */
   renderResults_(filteredData, container) {
     let renderPromise = Promise.resolve();
+    this.resetActiveElement_();
     if (this.templateElement_) {
       renderPromise = this.templates_.renderTemplateArray(this.templateElement_,
           filteredData).then(renderedChildren => {
@@ -371,7 +372,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
       filteredData.forEach(item => {
         userAssert(typeof item === 'string',
             `${TAG} data must provide template for non-string items.`);
-        container.appendChild(this.createElementFromItem_(item));
+        container.appendChild(this.createElementFromItem_(
+            /** @type {string} */ (item)));
       });
     }
     return renderPromise;
@@ -453,7 +455,6 @@ export class AmpAutocomplete extends AMP.BaseElement {
     return this.mutateElement(() => {
       if (!display) {
         this.resetActiveElement_();
-        this.activeIndex_ = -1;
       }
       this.toggleResults_(display);
     });
@@ -524,12 +525,13 @@ export class AmpAutocomplete extends AMP.BaseElement {
     }
     const keyUpWhenNoneActive = this.activeIndex_ === -1 && delta < 0;
     const index = keyUpWhenNoneActive ? delta : this.activeIndex_ + delta;
-    this.activeIndex_ = mod(index, this.container_.children.length);
-    const newActiveElement = this.container_.children[this.activeIndex_];
+    const activeIndex = mod(index, this.container_.children.length);
+    const newActiveElement = this.container_.children[activeIndex];
     this.inputElement_.value = newActiveElement.getAttribute('value');
     return this.mutateElement(() => {
       this.resetActiveElement_();
       newActiveElement.classList.add('i-amphtml-autocomplete-item-active');
+      this.activeIndex_ = activeIndex;
       this.activeElement_ = newActiveElement;
     });
   }
@@ -541,11 +543,10 @@ export class AmpAutocomplete extends AMP.BaseElement {
   displayUserInput_() {
     this.inputElement_.value = this.userInput_;
     this.resetActiveElement_();
-    this.activeIndex_ = -1;
   }
 
   /**
-   * Resets the activeElement_ and removes its 'active' class.
+   * Resets the activeIndex_, activeElement_ and removes its 'active' class.
    * @private
    */
   resetActiveElement_() {
@@ -555,6 +556,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     this.activeElement_.classList.toggle(
         'i-amphtml-autocomplete-item-active', false);
     this.activeElement_ = null;
+    this.activeIndex_ = -1;
   }
 
   /**
@@ -590,10 +592,10 @@ export class AmpAutocomplete extends AMP.BaseElement {
         }
         return this.updateActiveItem_(-1);
       case Keys.ENTER:
+        if (this.resultsShowing_() && !this.submitOnEnter_) {
+          event.preventDefault();
+        }
         if (this.activeElement_) {
-          if (!this.submitOnEnter_) {
-            event.preventDefault();
-          }
           return this.mutateElement(() => {
             this.selectItem_(this.activeElement_);
             this.resetActiveElement_();

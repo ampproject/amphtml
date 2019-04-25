@@ -379,6 +379,46 @@ describe('amp-img', () => {
     impl.unlayoutCallback();
   });
 
+  it('should propagate the object-fit attribute', () => {
+    return getImg({
+      src: '/examples/img/sample.jpg',
+      'object-fit': 'cover',
+    }).then(ampImg => {
+      const img = ampImg.querySelector('img');
+      expect(img.style.objectFit).to.equal('cover');
+    });
+  });
+
+  it('should not propagate the object-fit attribute if invalid', () => {
+    return getImg({
+      src: '/examples/img/sample.jpg',
+      'object-fit': 'foo 80%',
+    }).then(ampImg => {
+      const img = ampImg.querySelector('img');
+      expect(img.style.objectFit).to.be.empty;
+    });
+  });
+
+  it('should propagate the object-position attribute', () => {
+    return getImg({
+      src: '/examples/img/sample.jpg',
+      'object-position': '20% 80%',
+    }).then(ampImg => {
+      const img = ampImg.querySelector('img');
+      expect(img.style.objectPosition).to.equal('20% 80%');
+    });
+  });
+
+  it('should not propagate the object-position attribute if invalid', () => {
+    return getImg({
+      src: '/examples/img/sample.jpg',
+      'object-position': 'url("example.com")',
+    }).then(ampImg => {
+      const img = ampImg.querySelector('img');
+      expect(img.style.objectPosition).to.be.empty;
+    });
+  });
+
   describe('blurred image placeholder', () => {
     beforeEach(() => {
       toggleExperiment(window, 'blurry-placeholder', true, true);
