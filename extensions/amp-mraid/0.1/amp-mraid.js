@@ -40,6 +40,7 @@ import {HostServices} from '../../../src/inabox/host-services';
 import {MraidService} from './mraid-service';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
+import {urls} from '../../../src/config'
 
 const TAG = 'amp-mraid';
 const NO_FALLBACK = 'no-fallback';
@@ -100,7 +101,7 @@ export class MraidInitializer {
     // server logs for 404s.
     const mraidJs = document.createElement('script');
     mraidJs.setAttribute('type', 'text/javascript');
-    mraidJs.setAttribute('src', 'https://cdn.ampproject.org/mraid.js');
+    mraidJs.setAttribute('src', `${urls.cdn}/mraid.js`);
     mraidJs.addEventListener('load', () => {
       this.mraidLoadSuccess_();
     });
