@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {computedStyle, setStyle} from '../src/style';
 import {loadScript, validateData} from '../3p/3p';
 
 /**
@@ -27,54 +26,12 @@ export function aja(global, data) {
 
   const {document} = global;
   const asi = data['asi'];
+
   const d = document.createElement('div');
   d.dataset['ajaAd'] = '';
   d.dataset['ajaAsi'] = asi;
-  setStyle(d, 'margin', '1px');
   document.body.appendChild(d);
 
-  const params = {asis: {}};
-  params.asis[asi] = {
-    callback: res => {
-      if (!res.ad || res.ad.ad_type === 0) {
-        return global.context.noContentAvailable();
-      }
-
-      if (!!res.ad.banner) {
-        const {banner} = res.ad;
-        global.context.requestResize(banner.w, banner.h);
-      } else if (!!res.ad.native) {
-        const timer = setInterval(() => {
-          if (1 <= document.querySelectorAll('.ajaRecommend-item').length) {
-            let {scrollWidth: width, scrollHeight: height} = document.body;
-            if (height === 0) {
-              const ds = computedStyle(global, d);
-              width = parseInt(ds.width, 10);
-              height = parseInt(ds.height, 10);
-              if (height === 0) {
-                const fc = d.firstElementChild;
-                if (!fc) {
-                  return;
-                }
-                const fs = computedStyle(global, fc);
-                width = parseInt(fs.width, 10);
-                height = parseInt(fs.height, 10);
-              }
-            }
-            global.context.requestResize(width, height);
-            clearInterval(timer);
-          }
-        }, 100);
-      } else if (!!res.ad.video) {
-        const {video} = res.ad;
-        global.context.requestResize(video.w, video.h);
-      } else {
-        global.context.noContentAvailable();
-      }
-    },
-  };
-  global.__ASOT__ = params;
-
-  loadScript(global, 'https://cdn.as.amanad.adtdp.com/sdk/asot-v2.js');
+  loadScript(global, 'https://cdn.as.amanad.adtdp.com/sdk/asot-amp.js');
 
 }
