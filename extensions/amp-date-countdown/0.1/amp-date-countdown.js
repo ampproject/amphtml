@@ -108,7 +108,7 @@ export class AmpDateCountdown extends AMP.BaseElement {
     /** @private {!Object|null} */
     this.localeWordList_ = null;
 
-    /** @private {!Object|null} */
+    /** @private {?number} */
     this.countDownTimer_ = null;
   }
 

@@ -414,7 +414,8 @@ export class ShareWidget {
     providers.forEach(provider => {
       if (isObject(provider)) {
         this.add_(buildProvider(this.win.document,
-            provider['provider'], provider));
+            provider['provider'],
+            /** @type {!JsonObject} */ (provider)));
         return;
       }
 
@@ -425,7 +426,8 @@ export class ShareWidget {
             provider);
         return;
       }
-      this.add_(buildProvider(this.win.document, provider));
+      this.add_(buildProvider(this.win.document,
+          /** @type {string} */ (provider)));
     });
   }
 

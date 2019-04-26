@@ -31,6 +31,7 @@ const jsdom = require('jsdom');
 const multer = require('multer');
 const path = require('path');
 const request = require('request');
+const {appTestEndpoints} = require('./app-test');
 const pc = process;
 const runVideoTestBench = require('./app-video-testbench');
 const {
@@ -41,6 +42,8 @@ const {renderShadowViewer} = require('./shadow-viewer');
 const {replaceUrls} = require('./app-utils');
 
 const upload = multer();
+
+const TEST_SERVER_PORT = process.env.SERVE_PORT;
 
 app.use(bodyParser.text());
 app.use('/amp4test', require('./amp4test').app);
@@ -241,6 +244,14 @@ app.use('/api/dont-show', (req, res) => {
   res.json({
     showNotification: false,
   });
+});
+
+app.use('/api/echo/query', (req, res) => {
+  const sourceOrigin = req.query['__amp_source_origin'];
+  if (sourceOrigin) {
+    res.setHeader('AMP-Access-Control-Allow-Source-Origin', sourceOrigin);
+  }
+  res.json(JSON.parse(req.query.data));
 });
 
 app.use('/api/echo/post', (req, res) => {
@@ -880,7 +891,7 @@ app.get([
     if (req.query['amp_js_v']) {
       file = addViewerIntegrationScript(req.query['amp_js_v'], file);
     }
-
+    file = file.replace(/__TEST_SERVER_PORT__/g, TEST_SERVER_PORT);
 
     if (inabox && req.headers.origin && req.query.__amp_source_origin) {
       // Allow CORS requests for A4A.
@@ -938,6 +949,8 @@ app.get([
     next();
   });
 });
+
+appTestEndpoints(app);
 
 function escapeRegExp(string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -1022,6 +1035,12 @@ app.use('/bind/ecommerce/sizes', (req, res) => {
     res.json(object);
   }, 1000); // Simulate network delay.
 });
+
+/*
+//TODO(chenshay): Accept '?crypto=bla'
+implement authorizer here.
+this is for local testing.
+*/
 
 // Simulated subscription entitlement
 app.use('/subscription/:id/entitlements', (req, res) => {

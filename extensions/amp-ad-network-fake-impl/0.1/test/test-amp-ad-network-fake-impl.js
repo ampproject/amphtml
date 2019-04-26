@@ -48,4 +48,30 @@ describes.realWin('amp-ad-network-fake-impl', {
     const fakeImpl = new AmpAdNetworkFakeImpl(fakeImplElem);
     expect(fakeImpl.isValidElement()).to.be.true;
   });
+
+  it('adds the correct metadata for a story ad', () => {
+    const storyAd = `
+    <html ⚡4ads>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,minimum-scale=1">
+      <style amp4ads-boilerplate>body{visibility:hidden}</style>
+      <script async src="https://cdn.ampproject.org/amp4ads-v0.js"></script>
+      <meta name="amp-cta-type" content="INSTALL">
+      <meta name="amp-cta-url" content="https://www.amp.dev">
+    </head>
+    <body>Hello, AMP4ADS world.</body>
+    </html>
+    `;
+    fakeImplElem.setAttribute('id', 'i-amphtml-demo-test');
+    fakeImplElem.setAttribute('amp-story', '');
+    const transformed = new AmpAdNetworkFakeImpl(fakeImplElem)
+        .transformCreative_(storyAd);
+    const root = new DOMParser().parseFromString(transformed, 'text/html')
+        .documentElement;
+    const metadata = root.querySelector('[amp-ad-metadata]').textContent;
+    const parsed = JSON.parse(metadata);
+    expect(parsed.ctaType).to.equal('INSTALL');
+    expect(parsed.ctaUrl).to.equal('https://www.amp.dev');
+  });
 });
