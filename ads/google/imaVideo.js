@@ -1364,10 +1364,10 @@ function onMessage(global, event) {
   if (!msg) {
     return; // We only process valid JSON.
   }
-  if (!msg.event || !msg.func) {
+  if (!msg['event'] || !msg['func']) {
     return;
   }
-  switch (msg.func) {
+  switch (msg['func']) {
     case 'playVideo':
       if (adsActive) {
         adsManager.resume();
@@ -1404,22 +1404,23 @@ function onMessage(global, event) {
       }
       break;
     case 'resize':
-      if (msg.args && msg.args.width && msg.args.height) {
+      const args = msg['args'];
+      if (args && args.width && args.height) {
         setStyles(wrapperDiv, {
-          'width': px(msg.args.width),
-          'height': px(msg.args.height),
+          'width': px(args.width),
+          'height': px(args.height),
         });
         setStyles(bigPlayDiv, {
-          'width': px(msg.args.width),
-          'height': px(msg.args.height),
+          'width': px(args.width),
+          'height': px(args.height),
         });
         if (adsActive && !fullscreen) {
           adsManager.resize(
-              msg.args.width, msg.args.height,
+              args.width, args.height,
               global.google.ima.ViewMode.NORMAL);
         } else {
-          adsManagerWidthOnLoad = msg.args.width;
-          adsManagerHeightOnLoad = msg.args.height;
+          adsManagerWidthOnLoad = args.width;
+          adsManagerHeightOnLoad = args.height;
         }
       }
       break;
