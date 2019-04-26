@@ -66,7 +66,7 @@ described above. Stay tuned for the latest changes.
 
 ## Approvals required before merging a change
 
-Any change in AMP requires the approval of at least one OWNER of the code the change
+Any change in AMP requires the approval of at least one owner of the code the change
 modifies, but this is a subset of the required approvals before a change may be merged.
 See the [code contribution process](./contributing-code.md) for more details.
 
