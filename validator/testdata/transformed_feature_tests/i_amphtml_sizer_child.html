@@ -27,12 +27,26 @@
   <script async src="https://cdn.ampproject.org/v0.js"></script>
   <link rel="canonical" href="./regular-html-version.html">
   <script async custom-element="amp-image-slider" src="https://cdn.ampproject.org/v0/amp-image-slider-0.1.js"></script>
+  <script async custom-element="amp-video-iframe" src="https://cdn.ampproject.org/v0/amp-video-iframe-0.1.js"></script>
 </head>
 <body>
+  <!-- Valid: amp-image-slider > i-amphtml-sizer -->
   <amp-image-slider width="300" height="200" layout="responsive" class="i-amphtml-layout-responsive i-amphtml-layout-size-defined" i-amphtml-layout="responsive">
     <i-amphtml-sizer style="display:block;padding-top:66.6667%;"></i-amphtml-sizer>
     <amp-img src="/img/canoe_900x600_blur.jpg" alt="A blurry image about canoeing" layout="fill" class="i-amphtml-layout-fill i-amphtml-layout-size-defined" i-amphtml-layout="fill"></amp-img>
     <amp-img src="/img/canoe_900x600.jpg" alt="An image about canoeing" layout="fill" class="i-amphtml-layout-fill i-amphtml-layout-size-defined" i-amphtml-layout="fill"></amp-img>
   </amp-image-slider>
+
+  <!-- Valid: amp-video-iframe > i-amphtml-sizer -->
+   <amp-video-iframe id="myVideo" src="/amp-video-iframe-videojs.html" width="720" height="405" layout="responsive" autoplay="" class="i-amphtml-layout-responsive i-amphtml-layout-size-defined" i-amphtml-layout="responsive">
+     <i-amphtml-sizer style="display:block;padding-top:56.2500%;"></i-amphtml-sizer>
+     <amp-img placeholder="" src="/img/amp-video-iframe-sample-placeholder.jpg" layout="fill" class="i-amphtml-layout-fill i-amphtml-layout-size-defined" i-amphtml-layout="fill"></amp-img>
+   </amp-video-iframe>
+
+   <!-- Invalid: amp-video-iframe > div posing as i-amphtml-sizer -->
+   <amp-video-iframe id="myVideo" src="/amp-video-iframe-videojs.html" width="720" height="405" layout="responsive" autoplay="" class="i-amphtml-layout-responsive i-amphtml-layout-size-defined" i-amphtml-layout="responsive">
+     <div style="color:blue;"></div>
+     <amp-img placeholder="" src="/img/amp-video-iframe-sample-placeholder.jpg" layout="fill" class="i-amphtml-layout-fill i-amphtml-layout-size-defined" i-amphtml-layout="fill"></amp-img>
+   </amp-video-iframe>
 </body>
 </html>
