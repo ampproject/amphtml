@@ -16,7 +16,7 @@
 
 
 const pageWidth = 800;
-const pageHeight = 400; // unusually small to force a scrollbar
+const pageHeight = 420; // unusually small to force a scrollbar
 
 describes.endtoend('AMP list load-more=auto', {
   testUrl: 'http://localhost:8000/test/manual/amp-list/load-more-auto.amp.html',
