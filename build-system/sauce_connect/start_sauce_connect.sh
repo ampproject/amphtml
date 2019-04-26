@@ -22,7 +22,7 @@ YELLOW() { echo -e "\033[1;33m$1\033[0m"; }
 GREEN() { echo -e "\033[0;32m$1\033[0m"; }
 RED() { echo -e "\033[0;31m$1\033[0m"; }
 
-SC_VERSION="sc-4.5.1-linux"
+SC_VERSION="sc-4.5.3-linux"
 AUTHENTICATED_STATUS_URL="https://$SAUCE_USERNAME:$SAUCE_ACCESS_KEY@saucelabs.com/rest/v1/info/status"
 STATUS_URL="https://saucelabs.com/rest/v1/info/status"
 DOWNLOAD_URL="https://saucelabs.com/downloads/$SC_VERSION.tar.gz"
