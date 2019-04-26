@@ -464,7 +464,7 @@
                         ] }
                     </script>
                     <template type="amp-mustache" id="amp-template-default">
-                        <div class="city-item" value="{{value}}">
+                        <div class="city-item" data-value="{{value}}">
                             <div>{{value}}</div>
                             <div class="custom-population">Population: {{population}}</div>        
                         </div>
@@ -508,7 +508,7 @@
                         ] }
                     </script>
                     <template type="amp-mustache" id="amp-template-custom">
-                        <div class="city-item" value="{{city}}, {{state}}">
+                        <div class="city-item" data-value="{{city}}, {{state}}">
                             <div>{{city}}, {{state}}</div>
                             <div class="custom-population">Population: {{population}}</div>        
                         </div>
