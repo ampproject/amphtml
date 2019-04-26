@@ -36,7 +36,7 @@ export class LocalSubscriptionBasePlatform {
    * @param {!./service-adapter.ServiceAdapter} serviceAdapter
    */
   constructor(ampdoc, platformConfig, serviceAdapter) {
-    /** @const */
+    /** @protected @const */
     this.ampdoc_ = ampdoc;
 
     /** @private @const */
@@ -45,7 +45,7 @@ export class LocalSubscriptionBasePlatform {
     /** @protected {!JsonObject} */
     this.serviceConfig_ = platformConfig;
 
-    /** @private @const {!./service-adapter.ServiceAdapter} */
+    /** @protected @const {!./service-adapter.ServiceAdapter} */
     this.serviceAdapter_ = serviceAdapter;
 
     /** @protected @const {!UrlBuilder} */
@@ -53,7 +53,7 @@ export class LocalSubscriptionBasePlatform {
         this.ampdoc_,
         this.serviceAdapter_.getReaderId('local'));
 
-    /** @private @const {!./analytics.SubscriptionAnalytics} */
+    /** @protected @const {!./analytics.SubscriptionAnalytics} */
     this.subscriptionAnalytics_ = serviceAdapter.getAnalytics();
 
     userAssert(this.serviceConfig_['actions'],
