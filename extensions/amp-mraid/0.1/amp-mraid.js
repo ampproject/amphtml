@@ -40,7 +40,7 @@ import {HostServices} from '../../../src/inabox/host-services';
 import {MraidService} from './mraid-service';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
-import {urls} from '../../../src/config'
+import {urls} from '../../../src/config';
 
 const TAG = 'amp-mraid';
 const NO_FALLBACK = 'no-fallback';
