@@ -28,6 +28,7 @@ STATUS_URL="https://saucelabs.com/rest/v1/info/status"
 DOWNLOAD_URL="https://saucelabs.com/downloads/$SC_VERSION.tar.gz"
 DOWNLOAD_DIR="sauce_connect"
 TAR_FILE="$DOWNLOAD_DIR/$SC_VERSION.tar.gz"
+TAR_FILE_CHECKSUM="c7ad595a2a42f837fab91de3c3f51b49f2af6b36"
 BINARY_FILE="$SC_VERSION/bin/sc"
 PID_FILE="sauce_connect_pid"
 LOG_FILE="sauce_connect_log"
@@ -64,6 +65,11 @@ if [[ -f $TAR_FILE ]]; then
 else
   echo "$LOG_PREFIX Downloading $(CYAN "$DOWNLOAD_URL")"
   wget -q "$DOWNLOAD_URL" -P "$DOWNLOAD_DIR"
+  echo "$TAR_FILE_CHECKSUM $TAR_FILE" | sha1sum --status --check -
+  if [[ $? -ne 0 ]]; then
+    echo "$LOG_PREFIX $(RED "FATAL:") $(CYAN "$TAR_FILE") does not have the expected SHA1 checksum $(CYAN "$TAR_FILE_CHECKSUM")!"
+    exit $CHECKSUM_EXIT_CODE
+  fi
 fi
 echo "$LOG_PREFIX Unpacking $(CYAN "$TAR_FILE")"
 tar -xzf "$TAR_FILE"
