@@ -56,7 +56,7 @@ export function batchFetchJsonFor(
   const xhr = Services.batchedXhrFor(ampdoc.win);
   return requestForBatchFetch(element, opt_urlReplacement, opt_refresh)
       .then(data => {
-        if (opt_token) {
+        if (opt_token !== undefined) {
           data.fetchOpt['method'] = 'POST';
           data.fetchOpt['headers'] = {
             'Content-Type': 'application/x-www-form-urlencoded',

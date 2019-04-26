@@ -255,9 +255,6 @@ AMPHTML ad creative. Extensions or builtin tags not explicitly listed are prohib
 * [amp-position-observer](https://www.ampproject.org/docs/reference/components/amp-position-observer)
 * [amp-social-share](https://www.ampproject.org/docs/reference/components/amp-social-share)
 * [amp-video](https://www.ampproject.org/docs/reference/components/amp-video)
-* [amp-youtube](https://www.ampproject.org/docs/reference/components/amp-youtube)
-
-
 
 Most of the omissions are either for performance or to make AMPHTML ads
 simpler to analyze.

@@ -17,8 +17,11 @@
 import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
 import {AmpStoryPage, PageState} from '../amp-story-page';
 import {AmpStoryStoreService} from '../amp-story-store-service';
+import {LocalizationService} from '../../../../src/service/localization';
 import {MediaType} from '../media-pool';
 import {createElementWithAttributes} from '../../../../src/dom';
+import {installFriendlyIframeEmbed}
+  from '../../../../src/friendly-iframe-embed';
 import {registerServiceBuilder} from '../../../../src/service';
 
 
@@ -42,6 +45,9 @@ describes.realWin('amp-story-page', {amp: true}, env => {
     const storeService = new AmpStoryStoreService(win);
     registerServiceBuilder(win, 'story-store', () => storeService);
 
+    const localizationService = new LocalizationService(win);
+    registerServiceBuilder(win, 'localization', () => localizationService);
+
     const story = win.document.createElement('amp-story');
     story.getImpl = () => Promise.resolve(mediaPoolRoot);
 
@@ -53,7 +59,7 @@ describes.realWin('amp-story-page', {amp: true}, env => {
     win.document.body.appendChild(story);
 
     page = new AmpStoryPage(element);
-    page.element.getResources = () => win.services.resources.obj;
+    sandbox.stub(page, 'mutateElement').callsFake(fn => fn());
   });
 
   afterEach(() => {
@@ -157,6 +163,53 @@ describes.realWin('amp-story-page', {amp: true}, env => {
             done();
           });
         });
+  });
+
+  it('should perform media operations on fie video when active', done => {
+    const iframe = win.document.createElement('iframe');
+    const fiePromise = installFriendlyIframeEmbed(iframe, gridLayerEl, {
+      url: 'https://amp.dev',
+      html: '<video src="https://example.com/video.mp3"></video>',
+    });
+
+    fiePromise.then(fie => {
+      const fieDoc = fie.win.document;
+      const videoEl = fieDoc.querySelector('video');
+
+      let mediaPoolMock;
+
+      page.buildCallback();
+      page.layoutCallback()
+          .then(() => page.mediaPoolPromise_)
+          .then(mediaPool => {
+            mediaPoolMock = sandbox.mock(mediaPool);
+            mediaPoolMock
+                .expects('register')
+                .withExactArgs(videoEl)
+                .once();
+
+            mediaPoolMock
+                .expects('preload')
+                .withExactArgs(videoEl)
+                .returns(Promise.resolve())
+                .once();
+
+            mediaPoolMock
+                .expects('play')
+                .withExactArgs(videoEl)
+                .once();
+
+            page.setState(PageState.PLAYING);
+
+            // `setState` runs code that creates subtasks (Promise callbacks).
+            // Waits for the next frame to make sure all the subtasks are
+            // already executed when we run the assertions.
+            win.requestAnimationFrame(() => {
+              mediaPoolMock.verify();
+              done();
+            });
+          });
+    });
   });
 
   it('should stop the advancement when state becomes not active', () => {
@@ -274,7 +327,6 @@ describes.realWin('amp-story-page', {amp: true}, env => {
   });
 
   it('should find pageIds in a goToPage action with multiple actions', () => {
-
     const multipleActionButton = createElementWithAttributes(
         win.document,
         'button',
@@ -293,7 +345,6 @@ describes.realWin('amp-story-page', {amp: true}, env => {
   });
 
   it('should find pageIds in a goToPage action with multiple events', () => {
-
     const multipleEventsButton = createElementWithAttributes(
         win.document,
         'button',
@@ -310,5 +361,47 @@ describes.realWin('amp-story-page', {amp: true}, env => {
           expect(actions.length).to.be.equal(1);
           expect(actions[0]).to.be.equal('pageId');
         });
+  });
+
+  it('should not build the open attachment UI if no attachment', () => {
+    page.buildCallback();
+    return page.layoutCallback().then(() => {
+      page.setState(PageState.PLAYING);
+
+      const openAttachmentEl =
+          element.querySelector('.i-amphtml-story-page-open-attachment');
+      expect(openAttachmentEl).to.not.exist;
+    });
+  });
+
+  it('should build the open attachment UI if attachment', () => {
+    const attachmentEl =
+        win.document.createElement('amp-story-page-attachment');
+    element.appendChild(attachmentEl);
+
+    page.buildCallback();
+    return page.layoutCallback().then(() => {
+      page.setState(PageState.PLAYING);
+
+      const openAttachmentEl =
+          element.querySelector('.i-amphtml-story-page-open-attachment');
+      expect(openAttachmentEl).to.exist;
+    });
+  });
+
+  it('should build the open attachment UI with custom CTA label', () => {
+    const attachmentEl =
+        win.document.createElement('amp-story-page-attachment');
+    attachmentEl.setAttribute('data-cta-text', 'Custom label');
+    element.appendChild(attachmentEl);
+
+    page.buildCallback();
+    return page.layoutCallback().then(() => {
+      page.setState(PageState.PLAYING);
+
+      const openAttachmentLabelEl =
+          element.querySelector('.i-amphtml-story-page-open-attachment-label');
+      expect(openAttachmentLabelEl.textContent).to.equal('Custom label');
+    });
   });
 });

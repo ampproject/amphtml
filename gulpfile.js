@@ -43,6 +43,7 @@ const {createModuleCompatibleES5Bundle} = require('./build-system/tasks/create-m
 const {isTravisBuild} = require('./build-system/travis');
 const {jsifyCssAsync} = require('./build-system/tasks/jsify-css');
 const {serve} = require('./build-system/tasks/serve.js');
+const {startNailgunServer, stopNailgunServer} = require('./build-system/tasks/nailgun');
 const {thirdPartyFrames} = require('./build-system/config');
 const {transpileTs} = require('./build-system/typescript');
 const {VERSION: internalRuntimeVersion} = require('./build-system/internal-version') ;
@@ -83,6 +84,10 @@ const unminifiedRuntimeEsmTarget = 'dist/amp-esm.js';
 const unminified3pTarget = 'dist.3p/current/integration.js';
 
 const maybeUpdatePackages = isTravisBuild() ? [] : ['update-packages'];
+
+// Also used in build-system/tasks/compile.js
+const CHECK_TYPES_NAILGUN_PORT = '2114';
+const DIST_NAILGUN_PORT = '2115';
 
 /**
  * Tasks that should print the `--nobuild` help text.
@@ -932,13 +937,20 @@ function dist() {
   }
   if (argv.single_pass) {
     if (!isTravisBuild()) {
-      log(green('Not building any AMP extensions in'), cyan('single_pass'),
+      log(green('Building all AMP extensions in'), cyan('single_pass'),
           green('mode.'));
     }
   } else {
     parseExtensionFlags();
   }
   return compileCss(/* watch */ undefined, /* opt_compileAll */ true)
+      .then(async() => {
+        if (!argv.single_pass) {
+          await startNailgunServer(DIST_NAILGUN_PORT, /* detached */ false);
+        } else {
+          return Promise.resolve();
+        }
+      })
       .then(() => {
         return Promise.all([
           compile(false, true, true),
@@ -963,6 +975,12 @@ function dist() {
         if (isTravisBuild()) {
           // New line after all the compilation progress dots on Travis.
           console.log('\n');
+        }
+      }).then(async() => {
+        if (!argv.single_pass) {
+          await stopNailgunServer(DIST_NAILGUN_PORT);
+        } else {
+          return Promise.resolve();
         }
       }).then(() => {
         return copyAliasExtensions();
@@ -1056,44 +1074,59 @@ function checkTypes() {
     return './extensions/' + extension.name + '/' +
         extension.version + '/' + extension.name + '.js';
   }).sort();
-  return compileCss().then(() => {
-    return Promise.all([
-      closureCompile(compileSrcs.concat(extensionSrcs), './dist',
-          'check-types.js', {
-            include3pDirectories: true,
-            includePolyfills: true,
-            extraGlobs: ['src/inabox/*.js'],
-            typeCheckOnly: true,
-          }),
-      // Type check 3p/ads code.
-      closureCompile(['./3p/integration.js'], './dist',
-          'integration-check-types.js', {
-            externs: ['ads/ads.extern.js'],
-            include3pDirectories: true,
-            includePolyfills: true,
-            typeCheckOnly: true,
-          }),
-      closureCompile(['./3p/ampcontext-lib.js'], './dist',
-          'ampcontext-check-types.js', {
-            externs: ['ads/ads.extern.js'],
-            include3pDirectories: true,
-            includePolyfills: true,
-            typeCheckOnly: true,
-          }),
-      closureCompile(['./3p/iframe-transport-client-lib.js'], './dist',
-          'iframe-transport-client-check-types.js', {
-            externs: ['ads/ads.extern.js'],
-            include3pDirectories: true,
-            includePolyfills: true,
-            typeCheckOnly: true,
-          }),
-    ]);
-  }).then(() => {
-    if (isTravisBuild()) {
-      // New line after all the compilation progress dots on Travis.
-      console.log('\n');
-    }
-  }).then(() => exitCtrlcHandler(handlerProcess));
+  return compileCss()
+      .then(async() => {
+        if (!argv.single_pass) {
+          await startNailgunServer(
+              CHECK_TYPES_NAILGUN_PORT, /* detached */ false);
+        } else {
+          return Promise.resolve();
+        }
+      })
+      .then(() => {
+        return Promise.all([
+          closureCompile(compileSrcs.concat(extensionSrcs), './dist',
+              'check-types.js', {
+                include3pDirectories: true,
+                includePolyfills: true,
+                extraGlobs: ['src/inabox/*.js'],
+                typeCheckOnly: true,
+              }),
+          // Type check 3p/ads code.
+          closureCompile(['./3p/integration.js'], './dist',
+              'integration-check-types.js', {
+                externs: ['ads/ads.extern.js'],
+                include3pDirectories: true,
+                includePolyfills: true,
+                typeCheckOnly: true,
+              }),
+          closureCompile(['./3p/ampcontext-lib.js'], './dist',
+              'ampcontext-check-types.js', {
+                externs: ['ads/ads.extern.js'],
+                include3pDirectories: true,
+                includePolyfills: true,
+                typeCheckOnly: true,
+              }),
+          closureCompile(['./3p/iframe-transport-client-lib.js'], './dist',
+              'iframe-transport-client-check-types.js', {
+                externs: ['ads/ads.extern.js'],
+                include3pDirectories: true,
+                includePolyfills: true,
+                typeCheckOnly: true,
+              }),
+        ]);
+      }).then(() => {
+        if (isTravisBuild()) {
+          // New line after all the compilation progress dots on Travis.
+          console.log('\n');
+        }
+      }).then(async() => {
+        if (!argv.single_pass) {
+          await stopNailgunServer(CHECK_TYPES_NAILGUN_PORT);
+        } else {
+          return Promise.resolve();
+        }
+      }).then(() => exitCtrlcHandler(handlerProcess));
 }
 
 /**
@@ -1598,34 +1631,6 @@ function buildLoginDoneVersion(version, options) {
 }
 
 /**
- * Build "Iframe API".
- *
- * @param {!Object} options
- */
-function buildAccessIframeApi(options) {
-  const version = '0.1';
-  options = options || {};
-  const path = `extensions/amp-access/${version}/iframe-api`;
-  let {watch} = options;
-  if (watch === undefined) {
-    watch = argv.watch || argv.w;
-  }
-  const minify = options.minify || argv.minify;
-  mkdirSync('dist.3p');
-  mkdirSync('dist.3p/current');
-  return compileJs(path + '/', 'amp-iframe-api-export.js',
-      './dist.3p/current', {
-        minifiedName: 'amp-iframe-api-v0.js',
-        checkTypes: options.checkTypes || argv.checkTypes,
-        watch,
-        minify,
-        preventRemoveAndMakeDir: options.preventRemoveAndMakeDir,
-        include3pDirectories: false,
-        includePolyfills: true,
-      });
-}
-
-/**
  * Build ALP JS.
  *
  * @param {!Object} options
@@ -1755,6 +1760,7 @@ gulp.task('dist', 'Build production binaries', maybeUpdatePackages, dist, {
     noextensions: '  Builds with no extensions.',
     single_pass_dest: '  The directory closure compiler will write out to ' +
             'with --single_pass mode. The default directory is `dist`',
+    full_sourcemaps: '  Includes source code content in sourcemaps',
   },
 });
 gulp.task('watch', 'Watches for changes in files, re-builds when detected',
@@ -1770,5 +1776,3 @@ gulp.task('watch', 'Watches for changes in files, re-builds when detected',
     });
 gulp.task('build-experiments', 'Builds experiments.html/js', buildExperiments);
 gulp.task('build-login-done', 'Builds login-done.html/js', buildLoginDone);
-gulp.task('build-access-iframe-api', 'Builds iframe-api.js',
-    buildAccessIframeApi);

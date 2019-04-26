@@ -46,7 +46,7 @@ import {Deferred} from '../../../src/utils/promise';
 import {EventType, dispatch} from './events';
 import {Layout} from '../../../src/layout';
 import {LoadingSpinner} from './loading-spinner';
-import {LocalizedStringId} from './localization';
+import {LocalizedStringId} from '../../../src/localized-strings';
 import {MediaPool} from './media-pool';
 import {Services} from '../../../src/services';
 import {
@@ -89,6 +89,7 @@ const Selectors = {
   ALL_AMP_MEDIA: 'amp-story-grid-layer amp-audio, ' +
       'amp-story-grid-layer amp-video, amp-story-grid-layer amp-img, ' +
       'amp-story-grid-layer amp-anim',
+  ALL_IFRAMED_MEDIA: 'audio, video',
   // TODO(gmajoulet): Refactor the way these selectors are used. They will be
   // passed to scopedQuerySelectorAll which expects only one selector and not
   // multiple separated by commas. `> audio` has to be kept first of the list to
@@ -143,7 +144,7 @@ const buildOpenAttachmentElement = element =>
           <span class="i-amphtml-story-page-open-attachment-bar-left"></span>
           <span class="i-amphtml-story-page-open-attachment-bar-right"></span>
         </span>
-        <span class="i-amphtml-story-page-open-attachment-text"></span>
+        <span class="i-amphtml-story-page-open-attachment-label"></span>
       </div>`;
 
 /**
@@ -254,6 +255,9 @@ export class AmpStoryPage extends AMP.BaseElement {
      * @private @const {boolean}
      */
     this.isBotUserAgent_ = Services.platformFor(this.win).isBot();
+
+    /** @private {?number} Time at which an audio element failed playing. */
+    this.playAudioElementFromTimestamp_ = null;
   }
 
   /**
@@ -374,6 +378,7 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     this.stopListeningToVideoEvents_();
     this.togglePlayMessage_(false);
+    this.playAudioElementFromTimestamp_ = null;
 
     if (this.storeService_.get(StateProperty.UI_STATE) ===
         UIType.DESKTOP_PANELS) {
@@ -585,8 +590,8 @@ export class AmpStoryPage extends AMP.BaseElement {
       return mediaSet;
     }
 
-    iterateCursor(scopedQuerySelectorAll(fie.win.document.body, selector),
-        el => mediaSet.push(el));
+    iterateCursor(scopedQuerySelectorAll(fie.win.document.body,
+        Selectors.ALL_IFRAMED_MEDIA), el => mediaSet.push(el));
     return mediaSet;
   }
 
@@ -642,8 +647,14 @@ export class AmpStoryPage extends AMP.BaseElement {
           // Auto playing the media failed, which could be caused by a data
           // saver, or a battery saving mode. Display a message so we can
           // get a user gesture to bless the media elements, and play them.
-          this.debounceToggleLoadingSpinner_(false);
-          this.togglePlayMessage_(true);
+          if (mediaEl.tagName === 'VIDEO') {
+            this.debounceToggleLoadingSpinner_(false);
+            this.togglePlayMessage_(true);
+          }
+
+          if (mediaEl.tagName === 'AUDIO') {
+            this.playAudioElementFromTimestamp_ = Date.now();
+          }
         });
       }
     });
@@ -690,9 +701,31 @@ export class AmpStoryPage extends AMP.BaseElement {
       if (this.isBotUserAgent_) {
         mediaEl.muted = false;
         mediaEl.removeAttribute('muted');
+        if (mediaEl.tagName === 'AUDIO' && mediaEl.paused) {
+          mediaEl.play();
+        }
       } else {
-        return mediaPool.unmute(
-            /** @type {!./media-pool.DomElementDef} */ (mediaEl));
+        mediaEl = /** @type {!./media-pool.DomElementDef} */ (mediaEl);
+        const promises = [mediaPool.unmute(mediaEl)];
+
+        // Audio element might not be playing if the page navigation did not
+        // happen after a user intent, and the media element was not "blessed".
+        // On unmute, make sure this audio element is playing, at the expected
+        // currentTime.
+        if (mediaEl.tagName === 'AUDIO' && mediaEl.paused) {
+          const currentTime =
+              (Date.now() - this.playAudioElementFromTimestamp_) / 1000;
+          if (mediaEl.hasAttribute('loop') || currentTime < mediaEl.duration) {
+            promises.push(
+                mediaPool.setCurrentTime(
+                    mediaEl, currentTime % mediaEl.duration));
+            promises.push(mediaPool.play(mediaEl));
+          }
+
+          this.playAudioElementFromTimestamp_ = null;
+        }
+
+        return Promise.all(promises);
       }
     });
   }
@@ -1108,10 +1141,11 @@ export class AmpStoryPage extends AMP.BaseElement {
           .addEventListener('click', () => this.openAttachment());
 
       const textEl = this.openAttachmentEl_
-          .querySelector('.i-amphtml-story-page-open-attachment-text');
+          .querySelector('.i-amphtml-story-page-open-attachment-label');
 
-      const openAttachmentLabel = Services.localizationService(this.win)
-          .getLocalizedString(
+
+      const openAttachmentLabel = attachmentEl.getAttribute('data-cta-text') ||
+          Services.localizationService(this.win).getLocalizedString(
               LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL);
 
       this.mutateElement(() => {

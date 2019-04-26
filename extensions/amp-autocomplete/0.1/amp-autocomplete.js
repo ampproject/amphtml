@@ -14,16 +14,18 @@
  * limitations under the License.
  */
 
+import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-autocomplete-0.1.css';
 import {Keys} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {UrlReplacementPolicy,
   batchFetchJsonFor} from '../../../src/batched-json';
-import {childElementsByTag,
-  removeChildren} from '../../../src/dom';
+import {childElementsByTag, removeChildren} from '../../../src/dom';
+import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user, userAssert} from '../../../src/log';
 import {getValueForExpr, tryParseJson} from '../../../src/json';
+import {hasOwn, map, ownProperty} from '../../../src/utils/object';
 import {includes, startsWith} from '../../../src/string';
 import {isEnumValue} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
@@ -61,7 +63,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
     /**
      * The reference to the <input> tag provided as a child.
-     * @private {?HTMLElement}
+     * @private {?HTMLInputElement}
      */
     this.inputElement_ = null;
 
@@ -112,6 +114,15 @@ export class AmpAutocomplete extends AMP.BaseElement {
      */
     this.container_ = null;
 
+    /**
+     * The developer specified value of the 'autocomplete' attribute on the
+     * <form> ancestor that contains <amp-autocomplete>. Used to reset the
+     * attribute on blurring the input field. 'on' by default, according to
+     * common browser practices.
+     * @private {?string}
+     */
+    this.initialAutocompleteAttr_ = null;
+
     /** @const @private {!../../../src/service/template-impl.Templates} */
     this.templates_ = Services.templatesFor(this.win);
 
@@ -120,6 +131,9 @@ export class AmpAutocomplete extends AMP.BaseElement {
      * @private {?Element}
      */
     this.templateElement_ = null;
+
+    /** @private {?../../../src/service/action-impl.ActionService} */
+    this.action_ = null;
   }
 
   /** @override */
@@ -127,6 +141,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     userAssert(isExperimentOn(this.win, 'amp-autocomplete'),
         `Experiment ${EXPERIMENT} is not turned on.`);
 
+    this.action_ = Services.actionServiceForDoc(this.element);
     const jsonScript =
       this.element.querySelector('script[type="application/json"]');
     if (jsonScript) {
@@ -139,19 +154,30 @@ export class AmpAutocomplete extends AMP.BaseElement {
     const inputElements = childElementsByTag(this.element, 'INPUT');
     userAssert(inputElements.length === 1,
         `${TAG} should contain exactly one <input> child`);
-    this.inputElement_ = inputElements[0];
+    this.inputElement_ = /** @type {!HTMLInputElement} */ (inputElements[0]);
+    userAssert(this.inputElement_.hasAttribute('type'),
+        `${TAG} requires the "type" attribute on <input>`);
+    const inputType = this.inputElement_.getAttribute('type');
+    userAssert(inputType === 'text' || inputType === 'search',
+        `${TAG} requires the "type=text|search" attribute on <input>`);
+
+    userAssert(this.inputElement_.form, `${TAG} should be inside a <form> tag`);
+    if (this.inputElement_.form.hasAttribute('autocomplete')) {
+      this.initialAutocompleteAttr_ =
+      this.inputElement_.form.getAttribute('autocomplete');
+    }
 
     if (this.templates_.hasTemplate(
         this.element, 'template, script[template]')) {
       this.templateElement_ =
         this.templates_.findTemplate(this.element,
             'template, script[template]');
-      // Dummy render to verify existence of "value" attribute.
+      // Dummy render to verify existence of "data-value" attribute.
       this.templates_.renderTemplate(this.templateElement_,
           /** @type {!JsonObject} */({})).then(
           renderedEl => {
-            userAssert(renderedEl.hasAttribute('value'),
-                `${TAG} requires <template> tag to have "value" attribute.`);
+            userAssert(renderedEl.hasAttribute('data-value'),
+                `${TAG} requires the "data-value" attribute on <template>.`);
           });
     }
 
@@ -222,7 +248,6 @@ export class AmpAutocomplete extends AMP.BaseElement {
     container.classList.add('i-amphtml-autocomplete-results');
     container.setAttribute('role', 'list');
     toggle(container, false);
-    this.applyFillContent(container, /* replacedContent */ true);
     return container;
   }
 
@@ -294,7 +319,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     const element = this.element.ownerDocument.createElement('div');
     element.classList.add('i-amphtml-autocomplete-item');
     element.setAttribute('role', 'listitem');
-    element.setAttribute('value', item);
+    element.setAttribute('data-value', item);
     element.textContent = item;
     return element;
   }
@@ -353,6 +378,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
    */
   renderResults_(filteredData, container) {
     let renderPromise = Promise.resolve();
+    this.resetActiveElement_();
     if (this.templateElement_) {
       renderPromise = this.templates_.renderTemplateArray(this.templateElement_,
           filteredData).then(renderedChildren => {
@@ -366,7 +392,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
       filteredData.forEach(item => {
         userAssert(typeof item === 'string',
             `${TAG} data must provide template for non-string items.`);
-        container.appendChild(this.createElementFromItem_(item));
+        container.appendChild(this.createElementFromItem_(
+            /** @type {string} */ (item)));
       });
     }
     return renderPromise;
@@ -380,9 +407,15 @@ export class AmpAutocomplete extends AMP.BaseElement {
    * @private
    */
   filterData_(data, input) {
-    input = input.toLowerCase();
+    // Server-side filtering.
+    if (this.filter_ === FilterType.NONE) {
+      return this.truncateToMaxEntries_(data);
+    }
+
+    // Client-side filtering.
+    input = input.toLocaleLowerCase();
     const itemsExpr = this.element.getAttribute('filter-value') || 'value';
-    let filteredData = data.filter(item => {
+    const filteredData = data.filter(item => {
       if (typeof item === 'object') {
         item = getValueForExpr(/** @type {!JsonObject} */(item), itemsExpr);
       }
@@ -395,27 +428,118 @@ export class AmpAutocomplete extends AMP.BaseElement {
         case FilterType.PREFIX:
           return startsWith(item, input);
         case FilterType.TOKEN_PREFIX:
-          return item.split(' ').some(token => {
-            return startsWith(token, input);
-          });
+          return this.tokenPrefixMatch_(item, input);
         case FilterType.FUZZY:
           throw new Error(`Filter not yet supported: ${this.filter_}`);
         case FilterType.CUSTOM:
-          throw new Error(`Filter not yet supported: ${this.filter_}`);
-        case FilterType.NONE:
-          // Query server endpoint.
           throw new Error(`Filter not yet supported: ${this.filter_}`);
         default:
           throw new Error(`Unexpected filter: ${this.filter_}`);
       }
     });
 
-    // Truncate to max-entries.
-    if (this.maxEntries_ && this.maxEntries_ < filteredData.length) {
-      filteredData = filteredData.slice(0, this.maxEntries_);
+    return this.truncateToMaxEntries_(filteredData);
+  }
+
+  /**
+   * Returns true if the given input string is a token-prefix match on the
+   * given item string. Assumes toLocaleLowerCase() has been performed on both
+   * parameters.
+   *
+   * Matches:
+   * washington dc, dc
+   * washington dc, wash
+   * washington dc, dc washington
+   * new york ny, new york
+   *
+   * Non-matches:
+   * washington dc, district of columbia
+   * washington dc, washington d c
+   * washington dc, ashington dc
+   *
+   * @param {string} item
+   * @param {string} input
+   * @return {boolean}
+   * @private
+   */
+  tokenPrefixMatch_(item, input) {
+    if (input === '') {
+      return true;
     }
 
-    return filteredData;
+    const itemTokens = this.tokenizeString_(item);
+    const inputTokens = this.tokenizeString_(input);
+
+    // Match each input token (except the last one) to an item token
+    const itemTokensMap = this.mapFromTokensArray_(itemTokens);
+    const lastInputToken = inputTokens[inputTokens.length - 1];
+    inputTokens.splice(inputTokens.length - 1, 1);
+    let match = true;
+    for (let i = 0; i < inputTokens.length; i++) {
+      const token = inputTokens[i];
+      if (token === '') {
+        continue;
+      }
+      if (!hasOwn(itemTokensMap, token)) {
+        match = false;
+        break;
+      }
+      const count = Number(ownProperty(itemTokensMap, token));
+      if (count > 1) {
+        itemTokensMap[token] = count - 1;
+      } else {
+        delete itemTokensMap[token];
+      }
+    }
+
+    // Return that the last input token is a prefix of one of the item tokens
+    const remainingItemTokens = Object.keys(itemTokensMap);
+    return match && (lastInputToken === '' ||
+      remainingItemTokens.some(itemToken => {
+        return startsWith(itemToken, lastInputToken);
+      }));
+  }
+
+  /**
+   * Takes a string, removes '.', and splits by special characters.
+   * Returns the resulting array of tokens.
+   * @param {string} inputStr
+   * @return {!Array<string>}
+   * @private
+   */
+  tokenizeString_(inputStr) {
+    inputStr = inputStr.replace(/[\.]+/g, '');
+    return inputStr.split(/[`~(){}_|+\-;:\'",\[\]\\\/ ]+/g);
+  }
+
+  /**
+   * Returns the given tokens array as a dictionary of key: token (str) and
+   * value: number of occurrences.
+   * @param {!Array<string>} tokens
+   * @return {!Object<string, number>}
+   * @private
+   */
+  mapFromTokensArray_(tokens) {
+    const tokensMap = map();
+    tokens.forEach(token => {
+      const count = hasOwn(tokensMap, token) ?
+        ownProperty(tokensMap, token) + 1 : 1;
+      tokensMap[token] = count;
+    });
+    return tokensMap;
+  }
+
+  /**
+   * Truncate the given data to a maximum length of the max-entries attribute.
+   * @param {!Array<!JsonObject|string>} data
+   * @return {!Array<!JsonObject|string>}
+   * @private
+   */
+  truncateToMaxEntries_(data) {
+    if (this.maxEntries_ && this.maxEntries_ < data.length) {
+      data = data.slice(0, this.maxEntries_);
+    }
+    return data;
   }
 
   /**
@@ -428,16 +552,27 @@ export class AmpAutocomplete extends AMP.BaseElement {
   }
 
   /**
-   * Handle showing or hiding results on user focus/blur.
+   * Disables or re-enables the browser autofill on the autocomplete input.
+   * Then handles showing or hiding results on user focus/blur.
    * @param {boolean} display
    * @return {!Promise}
    * @private
    */
   toggleResultsHandler_(display) {
+    // Set/reset "autocomplete" attribute on the <form> ancestor.
+    if (display) {
+      this.inputElement_.form.setAttribute('autocomplete', 'off');
+    } else if (this.initialAutocompleteAttr_) {
+      this.inputElement_.form.setAttribute('autocomplete',
+          this.initialAutocompleteAttr_);
+    } else {
+      this.inputElement_.form.removeAttribute('autocomplete');
+    }
+
+    // Toggle results.
     return this.mutateElement(() => {
       if (!display) {
         this.resetActiveElement_();
-        this.activeIndex_ = -1;
       }
       this.toggleResults_(display);
     });
@@ -478,8 +613,22 @@ export class AmpAutocomplete extends AMP.BaseElement {
     if (element === null) {
       return;
     }
-    this.inputElement_.value = this.userInput_ = element.getAttribute('value');
+    this.inputElement_.value = this.userInput_ =
+      element.getAttribute('data-value');
+    this.fireSelectEvent_(this.userInput_);
     this.clearAllItems_();
+  }
+
+  /**
+   * Triggers a 'select' event with the given value as the value emitted.
+   * @param {string} value
+   * @private
+   */
+  fireSelectEvent_(value) {
+    const name = 'select';
+    const selectEvent = createCustomEvent(this.win,
+        `amp-autocomplete.${name}`, value);
+    this.action_.trigger(this.element, name, selectEvent, ActionTrust.HIGH);
   }
 
   /**
@@ -495,12 +644,13 @@ export class AmpAutocomplete extends AMP.BaseElement {
     }
     const keyUpWhenNoneActive = this.activeIndex_ === -1 && delta < 0;
     const index = keyUpWhenNoneActive ? delta : this.activeIndex_ + delta;
-    this.activeIndex_ = mod(index, this.container_.children.length);
-    const newActiveElement = this.container_.children[this.activeIndex_];
-    this.inputElement_.value = newActiveElement.getAttribute('value');
+    const activeIndex = mod(index, this.container_.children.length);
+    const newActiveElement = this.container_.children[activeIndex];
+    this.inputElement_.value = newActiveElement.getAttribute('data-value');
     return this.mutateElement(() => {
       this.resetActiveElement_();
       newActiveElement.classList.add('i-amphtml-autocomplete-item-active');
+      this.activeIndex_ = activeIndex;
       this.activeElement_ = newActiveElement;
     });
   }
@@ -512,11 +662,10 @@ export class AmpAutocomplete extends AMP.BaseElement {
   displayUserInput_() {
     this.inputElement_.value = this.userInput_;
     this.resetActiveElement_();
-    this.activeIndex_ = -1;
   }
 
   /**
-   * Resets the activeElement_ and removes its 'active' class.
+   * Resets the activeIndex_, activeElement_ and removes its 'active' class.
    * @private
    */
   resetActiveElement_() {
@@ -526,6 +675,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     this.activeElement_.classList.toggle(
         'i-amphtml-autocomplete-item-active', false);
     this.activeElement_ = null;
+    this.activeIndex_ = -1;
   }
 
   /**
@@ -561,10 +711,10 @@ export class AmpAutocomplete extends AMP.BaseElement {
         }
         return this.updateActiveItem_(-1);
       case Keys.ENTER:
+        if (this.resultsShowing_() && !this.submitOnEnter_) {
+          event.preventDefault();
+        }
         if (this.activeElement_) {
-          if (!this.submitOnEnter_) {
-            event.preventDefault();
-          }
           return this.mutateElement(() => {
             this.selectItem_(this.activeElement_);
             this.resetActiveElement_();

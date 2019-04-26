@@ -13,14 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {LocalizedStringBundleDef, LocalizedStringId} from '../localization';
+import {
+  LocalizedStringBundleDef,
+  LocalizedStringId,
+} from '../../../../src/localized-strings';
 
 
 /**
  * Localized string bundle used for English strings.
  * @const {!LocalizedStringBundleDef}
  */
-export default /** @const {!LocalizedStringBundleDef} */ ({
+const strings = {
   [LocalizedStringId.AMP_STORY_BOOKEND_PRIVACY_SETTINGS_TITLE]: {
     string: 'Privacy settings',
     description: 'Title for a section that allows the user to configure ' +
@@ -51,11 +54,11 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
     description: 'Label for a link to documentation on how AMP links are ' +
         'handled.',
   },
-  [LocalizedStringId.AMP_STORY_EXPERIMENT_ENABLE_BUTTON_LABEL]: {
+  [LocalizedStringId.DEPRECATED_AMP_STORY_EXPERIMENT_ENABLE_BUTTON_LABEL]: {
     string: 'Enable',
     description: 'Label for a button that enables the amp-story experiment.',
   },
-  [LocalizedStringId.AMP_STORY_EXPERIMENT_ENABLED_TEXT]: {
+  [LocalizedStringId.DEPRECATED_AMP_STORY_EXPERIMENT_ENABLED_TEXT]: {
     string: 'Experiment enabled.  Please reload.',
     description: 'Text that is shown once the amp-story experiment has ' +
         'been successfully enabled.',
@@ -135,7 +138,7 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
     description: 'Button label for the share target that shares a link via ' +
         'Whatsapp.',
   },
-  [LocalizedStringId.AMP_STORY_SYSTEM_LAYER_SHARE_WIDGET_LABEL]: {
+  [LocalizedStringId.DEPRECATED_AMP_STORY_SYSTEM_LAYER_SHARE_WIDGET_LABEL]: {
     string: 'Share',
     description: 'Label for the expandable share widget shown in the ' +
         'desktop UI.',
@@ -161,4 +164,6 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
     description: 'Text for a warning screen that informs the user that ' +
         'their browser does not support stories.',
   },
-});
+};
+
+export default strings;
