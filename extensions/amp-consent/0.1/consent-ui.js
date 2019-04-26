@@ -169,9 +169,9 @@ export class ConsentUI {
 
   /**
    * Display the UI.
-   * @param {string=} opt_promptTrigger
+   * @param {boolean} isActionPromptTrigger
    */
-  show(opt_promptTrigger) {
+  show(isActionPromptTrigger) {
     if (!this.ui_) {
       // No prompt UI specified, nothing to do
       return;
@@ -183,7 +183,7 @@ export class ConsentUI {
     // Add to fixed layer
     this.baseInstance_.getViewport().addToFixedLayer(this.parent_);
     if (this.isCreatedIframe_) {
-      this.loadIframe_(opt_promptTrigger).then(() => {
+      this.loadIframe_(isActionPromptTrigger).then(() => {
         // It is safe to assume that the loadIframe_ promise will resolve
         // before resetIframe_. Because the iframe needs to be shown first
         // being hidden. CMP iframe is responsible to call consent-iframe-ready
@@ -426,10 +426,10 @@ export class ConsentUI {
   /**
    * Apply placeholder
    * Set up event listener to handle UI related messages.
-   * @param {string=} opt_promptTrigger
+   * @param {boolean} isActionPromptTrigger
    * @return {!Promise}
    */
-  loadIframe_(opt_promptTrigger) {
+  loadIframe_(isActionPromptTrigger) {
     this.iframeReady_ = new Deferred();
     const {classList} = this.parent_;
     if (!elementByTag(this.parent_, 'placeholder')) {
@@ -440,9 +440,7 @@ export class ConsentUI {
     toggle(dev().assertElement(this.ui_), false);
 
     const iframePromise = this.getClientInfoPromise_().then(clientInfo => {
-      if (opt_promptTrigger) {
-        clientInfo['promptTrigger'] = opt_promptTrigger;
-      }
+      clientInfo['promptTrigger'] = isActionPromptTrigger ? 'action' : 'load';
       this.ui_.setAttribute('name', JSON.stringify(clientInfo));
       this.win_.addEventListener('message', this.boundHandleIframeMessages_);
       insertAfterOrAtStart(this.parent_, dev().assertElement(this.ui_), null);
