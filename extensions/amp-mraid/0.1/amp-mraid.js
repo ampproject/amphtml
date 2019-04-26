@@ -40,6 +40,7 @@ import {HostServices} from '../../../src/inabox/host-services';
 import {MraidService} from './mraid-service';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
+import {urls} from '../../../src/config';
 
 const TAG = 'amp-mraid';
 const NO_FALLBACK = 'no-fallback';
@@ -85,12 +86,22 @@ export class MraidInitializer {
       return;
     }
 
-    // It looks like we're initiating a network load for mraid from a relative
-    // url, but this will actually be intercepted by the mobile app SDK and
-    // handled locally.
+    // It looks like we're initiating a network load for mraid.js, but if we're
+    // in a mobile app this will actually be intercepted by the mobile app SDK
+    // and handled locally.
+    //
+    // In cases where this won't be intercepted by an SDK we don't want it to
+    // suceed, so we intentionally use a URL that will 404.  This isn't
+    // technically correct, since the MRAID spec says you must use a relative
+    // URL reference, but the interception API that platforms provide only lets
+    // them see post-resolution URLs.  Platforms just check if the URL ends with
+    // "/mraid.js".
+    //
+    // We use cdn.ampproject.org so we can learn how often this happens from
+    // server logs for 404s.
     const mraidJs = document.createElement('script');
     mraidJs.setAttribute('type', 'text/javascript');
-    mraidJs.setAttribute('src', 'mraid.js');
+    mraidJs.setAttribute('src', `${urls.cdn}/mraid.js`);
     mraidJs.addEventListener('load', () => {
       this.mraidLoadSuccess_();
     });
