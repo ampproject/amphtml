@@ -838,6 +838,8 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  'rnetplus': {},
+
   'rubicon': {},
 
   'runative': {

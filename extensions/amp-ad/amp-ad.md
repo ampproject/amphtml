@@ -341,6 +341,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Relap](../../ads/relap.md)
 - [Revcontent](../../ads/revcontent.md)
 - [RevJet](../../ads/revjet.md)
+- [rnetplus](../../ads/rnetplus.md)
 - [Rubicon Project](../../ads/rubicon.md)
 - [RUNative](../../ads/runative.md)
 - [SAS CI 360 Match](../../ads/sas.md)
