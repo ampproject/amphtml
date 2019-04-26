@@ -30,7 +30,7 @@ export function aja(global, data) {
   const d = document.createElement('div');
   d.dataset['ajaAd'] = '';
   d.dataset['ajaAsi'] = asi;
-  document.body.appendChild(d);
+  document.getElementById('c').appendChild(d);
 
   loadScript(global, 'https://cdn.as.amanad.adtdp.com/sdk/asot-amp.js');
 
