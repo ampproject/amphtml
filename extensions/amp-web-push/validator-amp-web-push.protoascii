@@ -57,6 +57,13 @@ tags: {  # <amp-web-push>
       allow_relative: false
     }
   }
+  attrs: {
+    name: "service-worker-scope"
+    value_url: {
+      protocol: "https"
+      allow_relative: true
+    }
+  }
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-web-push"
   amp_layout: {
