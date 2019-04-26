@@ -258,6 +258,7 @@ exports.rules = [
 
       // Subscriptions.
       'extensions/amp-subscriptions/0.1/expr.js->extensions/amp-access/0.1/access-expr.js',
+      'extensions/amp-subscriptions/0.1/local-subscription-platform-iframe.js->extensions/amp-access/0.1/iframe-api/messenger.js',
       'extensions/amp-subscriptions/0.1/viewer-subscription-platform.js->extensions/amp-access/0.1/jwt.js',
       'extensions/amp-subscriptions/0.1/actions.js->extensions/amp-access/0.1/login-dialog.js',
       'extensions/amp-subscriptions-google/0.1/amp-subscriptions-google.js->extensions/amp-subscriptions/0.1/analytics.js',
