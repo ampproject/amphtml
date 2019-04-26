@@ -62,7 +62,7 @@ Technical issues, designs, etc. are discussed using several different channels:
 
 ### Working groups
 
-Most of the day-to-day work in building AMP happens in AMP's [Working Groups (WG)](https://github.com/ampproject/meta/tree/master/working-groups).  Getting involved in a WG is a great way to contribute to AMP.
+Most of the day-to-day work in building AMP happens in AMP's [Working Groups (WGs)](https://github.com/ampproject/meta/tree/master/working-groups).  Getting involved in a WG is a great way to contribute to AMP.
 
 Most working groups post approximately bi-weekly [Status Update GitHub issues](https://github.com/search?q=org%3Aampproject+label%3A%22Type%3A+Status+Update%22&type=Issues).
 
