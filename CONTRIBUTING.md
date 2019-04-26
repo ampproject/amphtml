@@ -60,11 +60,11 @@ Technical issues, designs, etc. are discussed using several different channels:
   - there are many other Slack channels for more specific topics; after you join our Slack click on the "Channels" header to find other channels you want to participate in
 - the [amphtml-discuss Google Group](https://groups.google.com/forum/#!forum/amphtml-discuss)
 
-### Status updates
+### Working groups
 
-Status updates from members of the community are tracked using approximately bi-weekly [Status Update GitHub issues](https://github.com/ampproject/amphtml/issues?q=label%3A%22Type%3A+Status+Update%22).
+Most of the day-to-day work in building AMP happens in AMP's [Working Groups (WG)](https://github.com/ampproject/meta/tree/master/working-groups).  Getting involved in a WG is a great way to contribute to AMP.
 
-We encourage everyone who is actively contributing to AMP to add a comment to the relevant Status Update issue.
+Most working groups post approximately bi-weekly [Status Update GitHub issues](https://github.com/search?q=org%3Aampproject+label%3A%22Type%3A+Status+Update%22&type=Issues).
 
 ### Weekly design reviews
 
