@@ -28,7 +28,7 @@
   <script async custom-element="amp-web-push" src="https://cdn.ampproject.org/v0/amp-web-push-0.1.js"></script>
 </head>
 <body>
-  <!-- Valid: Example of amp-web-push usage -->
+  <!-- Valid: Default amp-web-push usage. -->
   <amp-web-push
     id="amp-web-push"
     layout="nodisplay"
@@ -36,6 +36,27 @@
     permission-dialog-url="https://example.com/permission-dialog.html"
     service-worker-url="https://example.com/service-worker.js">
   </amp-web-push>
+
+  <!-- Valid: Has optional service-worker-scope attribute, referencing the root. -->
+  <amp-web-push
+    id="amp-web-push"
+    layout="nodisplay"
+    helper-iframe-url="https://example.com/helper-iframe.html"
+    permission-dialog-url="https://example.com/permission-dialog.html"
+    service-worker-url="https://example.com/service-worker.js"
+    service-worker-scope="/">
+  </amp-web-push>
+
+  <!-- Valid: Has optional service-worker-scope attribute, referencing a subpath. -->
+  <amp-web-push
+    id="amp-web-push"
+    layout="nodisplay"
+    helper-iframe-url="https://example.com/subpath/helper-iframe.html"
+    permission-dialog-url="https://example.com/subpath/permission-dialog.html"
+    service-worker-url="https://example.com/subpath/service-worker.js"
+    service-worker-scope="/subpath">
+  </amp-web-push>
+
   <amp-web-push-widget visibility="unsubscribed" layout="fixed" width="250" height="80">
     <button on="tap:amp-web-push.subscribe">Subscribe to Notifications</button>
   </amp-web-push-widget>
