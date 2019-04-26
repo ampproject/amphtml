@@ -56,7 +56,7 @@ const WEBSERVER_TIMEOUT_RETRIES = 10;
 const NAVIGATE_TIMEOUT_MS = 7000;
 const NAVIGATE_RETRIES = 3;
 const NAVIGATE_RETRY_TIMEOUT_MS = 2000;
-const MAX_PARALLEL_TABS = 10;
+const MAX_PARALLEL_TABS = 1;
 const WAIT_FOR_TABS_MS = 1000;
 const BUILD_STATUS_URL = 'https://amphtml-percy-status-checker.appspot.com/status';
 
