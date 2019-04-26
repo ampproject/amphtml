@@ -24,12 +24,24 @@ const {
 const {
   ControllerPromise,
   ElementHandle,
+  Keys,
 } = require('./functional-test-controller');
 const {expect} = require('chai');
 
 const {NoSuchElementError} = error;
 
 const ELEMENT_WAIT_TIMEOUT = 5000;
+
+/** @enum {string} */
+const KeysToSeleniumMap = {
+  [Keys.ArrowDown]: Key.ARROW_DOWN,
+  [Keys.ArrowLeft]: Key.ARROW_LEFT,
+  [Keys.ArrowRight]: Key.ARROW_RIGHT,
+  [Keys.ArrowUp]: Key.ARROW_UP,
+  [Keys.Enter]: Key.ENTER,
+  [Keys.Escape]: Key.ESCAPE,
+  [Keys.Tab]: Key.TAB,
+};
 
 /**
  * @param {function(): !Promise<T>} valueFn
@@ -248,7 +260,7 @@ class SeleniumWebDriverController {
 
   /**
    * @param {!ElementHandle<!WebElement>} handle
-   * @param {string} keys
+   * @param {string|Keys} keys
    * @return {!Promise}
    * @override
    */
@@ -258,7 +270,7 @@ class SeleniumWebDriverController {
       await this.driver.switchTo().activeElement();
 
 
-    const key = Key[keys.toUpperCase()];
+    const key = KeysToSeleniumMap[keys];
     if (key) {
       return await targetElement.sendKeys(key);
     }

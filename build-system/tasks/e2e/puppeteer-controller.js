@@ -25,11 +25,23 @@ const {
   ControllerPromise,
   ElementHandle,
   FunctionalTestController, // eslint-disable-line no-unused-vars
+  Keys,
 } = require('./functional-test-controller');
 const {dirname, join} = require('path');
 
-const KeysMapping = {
-  'ENTER': 'Enter',
+/**
+ * For a list of all possible key strings, see
+ * {@link https://github.com/GoogleChrome/puppeteer/blob/master/lib/USKeyboardLayout.js}
+ * @enum {string}
+ */
+const KeysToPuppeteerMap = {
+  [Keys.ArrowDown]: 'ArrowDown',
+  [Keys.ArrowLeft]: 'ArrowLeft',
+  [Keys.ArrowRight]: 'ArrowRight',
+  [Keys.ArrowUp]: 'ArrowUp',
+  [Keys.Enter]: 'Enter',
+  [Keys.Escape]: 'Escape',
+  [Keys.Tab]: 'Tab',
 };
 
 const DEFAULT_WAIT_TIMEOUT = 10000;
@@ -271,7 +283,7 @@ class PuppeteerController {
 
   /**
    * @param {!ElementHandle<!PuppeteerHandle>} handle
-   * @param {string} keys
+   * @param {string|Keys} keys
    * @return {!Promise}
    * @override
    */
@@ -282,7 +294,7 @@ class PuppeteerController {
       await frame.$(':focus');
 
 
-    const key = KeysMapping[keys.toUpperCase()];
+    const key = KeysToPuppeteerMap[keys];
     if (key) {
       await targetElement.press(key);
       return;
