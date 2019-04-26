@@ -66,13 +66,13 @@ described above. Stay tuned for the latest changes.
 
 ## Approvals required before merging a change
 
-Any change in AMP requires the approval of at least one OWNER of the code modified by a PR,
-but this is a subset of the required approvals before a change may be merged.  See the
-[code contribution process](./contributing-code.md) for more details.
+Any change in AMP requires the approval of at least one OWNER of the code the change
+modifies, but this is a subset of the required approvals before a change may be merged.
+See the [code contribution process](./contributing-code.md) for more details.
 
 ## Criteria for being listed as an owner in an `OWNERS.yaml` file
 
- The `OWNERS.yaml` file for each directory will typically list the creator(s) of
- the component or extension it contains, along with those who are most familiar
- with the directory contents.  To be added to an OWNERS.yaml file create a PR and
- go through the normal [code contribution process](./contributing-code.md).
+The `OWNERS.yaml` file for each directory will typically list the creator(s) of
+the component or extension it contains, along with those who are most familiar
+with the directory contents.  To be added to an OWNERS.yaml file create a PR and
+go through the normal [code contribution process](./contributing-code.md).
