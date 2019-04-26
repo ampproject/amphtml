@@ -55,7 +55,7 @@ The request is always made from the client, even if the document was served from
 
 Filtered results will not be displayed until user focuses on the input field or begins typing into it. Leaving the viewport hides the filtered results.
 
-By default, `<amp-autocomplete>` adds a `list` ARIA role to the filtered results element and a `listitem` role to item elements rendered via the template.
+By default, `<amp-autocomplete>` adds a `list` ARIA role to the filtered results element and `listitem` and `data-value` attributes to item elements rendered via the template.
 
 Example:
 ```html
