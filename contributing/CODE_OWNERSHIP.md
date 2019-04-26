@@ -1,7 +1,9 @@
 # Code Ownership and AMP
 
-This document describes the code ownership model for the AMP open source
+This document describes the code ownership (OWNERS) model for the AMP open source
 project, and in particular the [AMP HTML GitHub project](https://github.com/ampproject/amphtml).
+
+For more information on the overall code contribution process that the OWNERS model is a part of, see the [Contributing code and features](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md) documentation.
 
 The goals of enforcing AMP code ownership are as follows:
 
@@ -72,5 +74,5 @@ for more details.
 
  The `OWNERS.yaml` file for each directory will typically list the creator(s) of
  the component or extension it contains, along with those who are most familiar
- with the directory contents. See [owners-and-committers.md](./owners-and-committers.md)
- for more details.
+ with the directory contents.  To be added to an OWNERS.yaml file create a PR and
+ go through the normal [code review process](./contributing-code.md).
