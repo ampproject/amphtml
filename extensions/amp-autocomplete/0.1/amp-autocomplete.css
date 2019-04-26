@@ -28,8 +28,8 @@ amp-autocomplete > input {
 .i-amphtml-autocomplete-results {
   position: absolute;
   top: 100%;
-  width: calc(100% + 16px);
-  min-width: calc(2em + 16px);
+  width: calc(100% + 1rem); /* 100% + input padding-left + 2 * margin-left offset */
+  min-width: calc(2em + 2rem); /* 2 chars. + 2em results padding + 2 * .5em visual offset */
   max-height: 40vh;
   margin-top: .5rem; /* default-ui-space-small */
   margin-left: -.5rem; /* default-ui-space-small */
