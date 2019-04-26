@@ -16,14 +16,15 @@
 
 
 const pageWidth = 800;
-const pageHeight = 420; // unusually small to force a scrollbar
+const pageHeight = 400; // unusually small to force a scrollbar
 
 describes.endtoend('AMP list load-more=auto', {
   testUrl: 'http://localhost:8000/test/manual/amp-list/load-more-auto.amp.html',
   experiments: ['amp-list-load-more'],
   initialRect: {width: pageWidth, height: pageHeight},
   // TODO(cathyxz, cvializ): figure out why 'viewer' only shows 'FALLBACK'
-  environments: ['single', 'shadow-demo'],
+  // TODO(cathyxz): figure out why shadow-demo doesn't work
+  environments: ['single'],
 }, env => {
   let controller;
 
@@ -31,8 +32,7 @@ describes.endtoend('AMP list load-more=auto', {
     controller = env.controller;
   });
 
-  // TODO(cathyxz): fails because listItems returns with length 4
-  it.skip('should render correctly', async() => {
+  it('should render correctly', async() => {
     const listItems = await controller.findElements('.item');
     await expect(listItems).to.have.length(2);
 
@@ -56,8 +56,7 @@ describes.endtoend('AMP list load-more=auto', {
     await controller.takeScreenshot('screenshots/amp-list-load-more.png');
   });
 
-  // TODO(cathyxz): fails because listItems returns with length 4
-  it.skip('should load more items on scroll', async() => {
+  it('should load more items on scroll', async() => {
     let listItems = await controller.findElements('.item');
     await expect(listItems).to.have.length(2);
 
