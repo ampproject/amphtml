@@ -20,7 +20,7 @@ limitations under the License.
 
 Before you start developing in AMP, check out these resources:
 * [CONTRIBUTING.md](../CONTRIBUTING.md) has details on various ways you can contribute to the AMP Project.
-  * If you're developing in AMP, you should read the [Contributing code](../CONTRIBUTING.md#contributing-code) and [Contributing features](../CONTRIBUTING.md#contributing-features) sections.
+  * If you're developing in AMP, you should read the [Contributing code and features](./contributing-code.md) documentation, which includes information on code reviews and approvals.
   * The [Ongoing participation](../CONTRIBUTING.md#ongoing-participation) section has details on various ways of getting in touch with others in the community including email and Slack.
   * **If you are new to open source projects, Git/GitHub, etc.**, check out the [Tips for new open source contributors](../CONTRIBUTING.md#tips-for-new-open-source-contributors) which includes information on getting help and finding your first bug to work on.
 * The [Getting Started Quick Start Guide](getting-started-quick.md) has installation steps and basic instructions for [one-time setup](getting-started-quick.md#one-time-setup), how to [build AMP & run a local server](getting-started-quick.md#build-amp--run-a-local-server) and how to [test AMP](getting-started-quick.md#test-amp).
@@ -86,23 +86,6 @@ In particular, we try to maintain "it might not be perfect but isn't broken"-sup
 - [Building an AMP Extension](building-an-amp-extension.md)
 
 We also recommend scanning the [spec](../spec/). The non-element part should help understand some of the design aspects.
-
-## Code Reviews
-
-Before any code can be merged into the AMP repository, it has to be reviewed and approved by the [owner and a core committer](https://github.com/ampproject/amphtml/blob/master/contributing/owners-and-committers.md). Note: In the near future, the code ownership model at
-[CODE_OWNERSHIP.md](./CODE_OWNERSHIP.md) will be put in place for code reviews.
-
-- If you are contributing a fix or a new feature to AMP, be sure to follow the tips on [preparing your code for review](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md#contributing-code-for-a-feature-coding--implementation-phase) and follow [instructions](https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-e2e.md#send-a-pull-request-ie-request-a-code-review) on how to submit a pull request.
-
-- Pull requests in AMP are triaged similar to Issues and within 2 business days of submitting a PR, someone will be assigned as the reviewer. If you have been working with a core committer or someone else already, @mentioning them in the PR description will be helpful.
-
-- After a reviewer is assigned, expect comments on your code within a few days. Feel free to @mention the reviewer if your PR is high priority or if you don't hear back after 2 business days since opening the PR.
-
-- Turnaround time for a PR to be merged is variable and depends on the size and quality of the code. Most PRs go through multiple cycles of review comments. It can take anywhere between a day for simple fixes to weeks for larger features.
-
-- When you have addressed all the review comments from the reviewer, please be sure to @mention them with a **"All requested changes are done, please take another look"** comment in the PR so they would know PR is ready for the next round.
-
-- If your PR is urgent or not progressing at the pace outlined above, please feel free to ping the [#contributing](https://amphtml.slack.com/messages/contributing) channel on Slack.
 
 ## Builds and releases
 
