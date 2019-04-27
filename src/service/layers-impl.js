@@ -1310,7 +1310,8 @@ function frameParent(node) {
  */
 function frameParentInternal(win) {
   try {
-    const frameElement = win && win.frameElement;
+    const frameElement = win && /** @type {?HTMLIFrameElement} */(
+      win.frameElement);
     return frameElement && getFriendlyIframeEmbedOptional(frameElement)
       ? frameElement
       : null;
