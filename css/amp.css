@@ -26,7 +26,15 @@
 html {
   overflow-x: hidden !important;
 }
-html, body {
+html:not(.i-amphtml-inabox), body {
+  height: auto !important;
+}
+
+/**
+ * TODO(torch2424, #TODO): if/when "inabox-preserve-height-auto" launched, merge
+ * these styles into : `html:not(.i-amphtml-inabox), body` above, and a new.
+ */
+html.i-amphtml-inabox-preserve-height-auto {
   height: auto !important;
 }
 
