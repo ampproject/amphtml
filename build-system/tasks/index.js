@@ -21,7 +21,6 @@ require('./changelog');
 require('./check-links');
 require('./clean');
 require('./compile-expr');
-require('./compile');
 require('./create-golden-css');
 require('./csvify-size');
 require('./dep-check');
