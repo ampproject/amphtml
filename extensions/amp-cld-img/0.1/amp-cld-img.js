@@ -151,7 +151,7 @@ export class AmpCldImg extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    /* set transformation\s width and height based on actual element
+    /* set transformations width and height based on actual element
      dimensions: */
     this.options_['width'] = this.roundValue_(this.element.clientWidth);
     this.options_['height'] = this.roundValue_(this.element.clientHeight);
