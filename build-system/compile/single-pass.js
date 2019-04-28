@@ -143,9 +143,6 @@ exports.getFlags = function(config) {
   return exports.getGraph(config.modules, config).then(function(g) {
     return flagsArray.concat(
         exports.getBundleFlags(g, flagsArray));
-  }).then(flagsArray => {
-    fs.writeFileSync('flags-array.txt', JSON.stringify(flagsArray, null, 2));
-    return flagsArray;
   });
 };
 
