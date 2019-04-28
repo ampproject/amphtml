@@ -56,22 +56,24 @@ describe.configure().skipSafari().skipEdge().run('amp-sidebar', function() {
       win = env.win;
     });
 
-    // TODO (#16157): this tests times out on Chrome Mobile Webview Android
-    it.configure().skipChrome().run('should focus on opener on close', () => {
-      const openerButton = win.document.getElementById('sidebarOpener');
-      const openedPromise = waitForSidebarOpen(win.document);
-      openerButton.click();
-      return openedPromise.then(() => {
-        const closerButton = win.document.getElementById('sidebarCloser');
-        const closedPromise = waitForSidebarClose(win.document);
-        closerButton.click();
-        return closedPromise;
-      }).then(() => {
-        expect(win.document.activeElement).to.equal(openerButton);
-      });
-    });
+    // TODO (#16157, #21999): this tests times out on FF and Chrome
+    it.configure()
+        .skipChrome().skipFirefox()
+        .run('should focus on opener on close', () => {
+          const openerButton = win.document.getElementById('sidebarOpener');
+          const openedPromise = waitForSidebarOpen(win.document);
+          openerButton.click();
+          return openedPromise.then(() => {
+            const closerButton = win.document.getElementById('sidebarCloser');
+            const closedPromise = waitForSidebarClose(win.document);
+            closerButton.click();
+            return closedPromise;
+          }).then(() => {
+            expect(win.document.activeElement).to.equal(openerButton);
+          });
+        });
 
-    it.configure().skipIfPropertiesObfuscated().run(
+    it.configure().skipIfPropertiesObfuscated().skipFirefox().run(
         'should not change scroll position after close', () => {
           const openerButton = win.document.getElementById('sidebarOpener');
           const sidebar = win.document.getElementById('sidebar1');
