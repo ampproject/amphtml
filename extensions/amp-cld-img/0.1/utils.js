@@ -1,5 +1,3 @@
-import {crc32} from './crc32';
-
 const OLD_AKAMAI_SHARED_CDN = 'cloudinary-a.akamaihd.net';
 const AKAMAI_SHARED_CDN = 'res.cloudinary.com';
 const SHARED_CDN = AKAMAI_SHARED_CDN;
@@ -169,19 +167,12 @@ function unsignedUrlPrefix(source, cloudName, privateCdn, cdnSubdomain,
       secureCdnSubdomain = cdnSubdomain != null && cdnSubdomain.length > 0;
     }
 
-    if (secureCdnSubdomain) {
-      secureDistribution = secureDistribution.replace('res.cloudinary.com',
-          'res-' + ((crc32(source) % 5) + 1 + '.cloudinary.com'));
-    }
-
     prefix = 'https://' + secureDistribution;
   } else if (cname) {
-    const subdomain = cdnSubdomain ? 'a' + ((crc32(source) % 5) + 1) + '.' : '';
-    prefix = 'http://' + subdomain + cname;
+    prefix = 'http://' + cname;
   } else {
     const cdnParn = privateCdn ? cloudName + '-' : '';
-    const subdomainPart = cdnSubdomain ? '-' + ((crc32(source) % 5) + 1) : '';
-    const host = [cdnParn, 'res', subdomainPart, '.cloudinary.com'].join('');
+    const host = [cdnParn, 'res.cloudinary.com'].join('');
     prefix = 'http://' + host;
   }
   if (sharedDomain) {

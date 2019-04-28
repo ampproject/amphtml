@@ -263,7 +263,7 @@ describes.realWin('amp-cld-img', {
     };
     const result = buildUrl('test', options);
     expect(options).to.eql({});
-    expect(result).to.eql('http://a2.hello.com/test123/image/upload/test');
+    expect(result).to.eql('http://hello.com/test123/image/upload/test');
   });
   it('should support border', function() {
     const options = {
