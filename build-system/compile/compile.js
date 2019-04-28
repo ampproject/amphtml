@@ -32,7 +32,7 @@ const {VERSION: internalRuntimeVersion} = require('../internal-version') ;
 const isProdBuild = !!argv.type;
 const queue = [];
 let inProgress = 0;
-const MAX_PARALLEL_CLOSURE_INVOCATIONS = 4;
+const MAX_PARALLEL_CLOSURE_INVOCATIONS = argv.single_pass ? 1 : 4;
 
 // Compiles AMP with the closure compiler. This is intended only for
 // production use. During development we intend to continue using
