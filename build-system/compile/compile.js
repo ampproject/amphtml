@@ -24,7 +24,7 @@ const rename = require('gulp-rename');
 const rimraf = require('rimraf');
 const shortenLicense = require('./shorten-license');
 const sourcemaps = require('gulp-sourcemaps');
-const {gulpClosureCompile, handleCompilerError} = require('./closure-compile');
+const {gulpClosureCompile, handleCompilerError, handleTypeCheckError} = require('./closure-compile');
 const {isTravisBuild} = require('../travis');
 const {singlePassCompile} = require('./single-pass');
 const {VERSION: internalRuntimeVersion} = require('../internal-version') ;
@@ -407,14 +407,14 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
     if (options.typeCheckOnly) {
       return gulp.src(srcs, {base: '.'})
           .pipe(gulpClosureCompile(compilerOptionsArray))
-          .on('error', handleCompilerError)
+          .on('error', handleTypeCheckError)
           .pipe(nop())
           .on('end', resolve);
     } else {
       return gulp.src(srcs, {base: '.'})
           .pipe(sourcemaps.init({loadMaps: true}))
           .pipe(gulpClosureCompile(compilerOptionsArray))
-          .on('error', handleCompilerError)
+          .on('error', () => handleCompilerError(outputFilename))
           .pipe(rename(outputFilename))
           .pipe(sourcemaps.write('.'))
           .pipe(shortenLicense())

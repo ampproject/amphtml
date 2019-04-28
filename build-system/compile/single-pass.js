@@ -32,7 +32,7 @@ const sourcemaps = require('gulp-sourcemaps');
 const tempy = require('tempy');
 const through = require('through2');
 const {extensionBundles, altMainBundles, TYPES} = require('../../bundles.config');
-const {gulpClosureCompile, handleCompilerError} = require('./closure-compile');
+const {gulpClosureCompile, handleSinglePassCompilerError} = require('./closure-compile');
 const {isTravisBuild} = require('../travis');
 const {TopologicalSort} = require('topological-sort');
 const TYPES_VALUES = Object.keys(TYPES).map(x => TYPES[x]);
@@ -602,7 +602,7 @@ function compile(flagsArray) {
     return gulp.src(srcs, {base: transformDir})
         .pipe(sourcemaps.init({loadMaps: true}))
         .pipe(gulpClosureCompile(flagsArray))
-        .on('error', handleCompilerError)
+        .on('error', handleSinglePassCompilerError)
         .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest('.'))
         .on('end', resolve);

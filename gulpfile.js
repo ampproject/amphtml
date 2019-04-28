@@ -1070,6 +1070,9 @@ function checkTypes() {
         await startNailgunServer(NAILGUN_PORT, /* detached */ false);
       })
       .then(() => {
+        if (!isTravisBuild()) {
+          log('Checking types...');
+        }
         return Promise.all([
           closureCompile(compileSrcs.concat(extensionSrcs), './dist',
               'check-types.js', {

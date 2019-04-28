@@ -39,17 +39,30 @@ function formatClosureCompilerError(message) {
   return message;
 }
 
+exports.handleCompilerError = function(outputFilename) {
+  handleError(
+      colors.red('Compilation failed for ') +
+      colors.cyan(outputFilename) +
+      colors.red(':'));
+};
+
+exports.handleTypeCheckError = function() {
+  handleError(colors.red('Type checking failed:'));
+};
+
+exports.handleSinglePassCompilerError = function() {
+  handleError(colors.red('Single pass compilation failed:'));
+};
+
 /**
  * Prints an error message when compilation fails
- * @param {string} err
+ * @param {string} message
  */
-exports.handleCompilerError = function(err) {
+function handleError(message) {
   console./*OK*/error(
-      colors.red('Compilation failed:\n') +
-      formatClosureCompilerError(compilerErrors) + '\n' +
-      err);
+      `${message}\n` + formatClosureCompilerError(compilerErrors));
   process.exit(1);
-};
+}
 
 /**
  * @param {Array<string>} compilerOptions
