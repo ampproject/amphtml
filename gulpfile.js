@@ -37,7 +37,7 @@ const watchify = require('watchify');
 const wrappers = require('./build-system/compile-wrappers');
 const {aliasBundles, extensionBundles, verifyExtensionBundles, verifyExtensionAliasBundles} = require('./bundles.config');
 const {applyConfig, removeConfig} = require('./build-system/tasks/prepend-global/index.js');
-const {cleanupBuildDir, closureCompile} = require('./build-system/tasks/compile');
+const {cleanupBuildDir, closureCompile} = require('./build-system/compile/compile');
 const {createCtrlcHandler, exitCtrlcHandler} = require('./build-system/ctrlcHandler');
 const {createModuleCompatibleES5Bundle} = require('./build-system/tasks/create-module-compatible-es5-bundle');
 const {isTravisBuild} = require('./build-system/travis');
@@ -85,9 +85,8 @@ const unminified3pTarget = 'dist.3p/current/integration.js';
 
 const maybeUpdatePackages = isTravisBuild() ? [] : ['update-packages'];
 
-// Also used in compile.js and single-pass.js
-const CHECK_TYPES_NAILGUN_PORT = '2114';
-const DIST_NAILGUN_PORT = '2115';
+// Also used in closure-compile.js
+const NAILGUN_PORT = '2114';
 
 /**
  * Tasks that should print the `--nobuild` help text.
@@ -945,7 +944,7 @@ function dist() {
   }
   return compileCss(/* watch */ undefined, /* opt_compileAll */ true)
       .then(async() => {
-        await startNailgunServer(DIST_NAILGUN_PORT, /* detached */ false);
+        await startNailgunServer(NAILGUN_PORT, /* detached */ false);
       })
       .then(() => {
         return Promise.all([
@@ -973,7 +972,7 @@ function dist() {
           console.log('\n');
         }
       }).then(async() => {
-        await stopNailgunServer(DIST_NAILGUN_PORT);
+        await stopNailgunServer(NAILGUN_PORT);
       }).then(() => {
         return copyAliasExtensions();
       }).then(() => {
@@ -1068,8 +1067,7 @@ function checkTypes() {
   }).sort();
   return compileCss()
       .then(async() => {
-        await startNailgunServer(
-            CHECK_TYPES_NAILGUN_PORT, /* detached */ false);
+        await startNailgunServer(NAILGUN_PORT, /* detached */ false);
       })
       .then(() => {
         return Promise.all([
@@ -1109,7 +1107,7 @@ function checkTypes() {
           console.log('\n');
         }
       }).then(async() => {
-        await stopNailgunServer(CHECK_TYPES_NAILGUN_PORT);
+        await stopNailgunServer(NAILGUN_PORT);
       }).then(() => exitCtrlcHandler(handlerProcess));
 }
 

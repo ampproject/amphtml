@@ -17,9 +17,8 @@
 const babel = require('@babel/core');
 const babelify = require('babelify');
 const browserify = require('browserify');
-const closureCompiler = require('google-closure-compiler');
 const colors = require('ansi-colors');
-const conf = require('./build.conf');
+const conf = require('../build.conf');
 const devnull = require('dev-null');
 const fs = require('fs-extra');
 const gulp = require('gulp');
@@ -32,13 +31,13 @@ const relativePath = require('path').relative;
 const sourcemaps = require('gulp-sourcemaps');
 const tempy = require('tempy');
 const through = require('through2');
-const {extensionBundles, altMainBundles, TYPES} = require('../bundles.config');
-const {highlight} = require('cli-highlight');
-const {isTravisBuild} = require('./travis');
+const {extensionBundles, altMainBundles, TYPES} = require('../../bundles.config');
+const {gulpClosureCompile, handleCompilerError} = require('./closure-compile');
+const {isTravisBuild} = require('../travis');
 const {TopologicalSort} = require('topological-sort');
 const TYPES_VALUES = Object.keys(TYPES).map(x => TYPES[x]);
-const wrappers = require('./compile-wrappers');
-const {VERSION: internalRuntimeVersion} = require('./internal-version') ;
+const wrappers = require('../compile-wrappers');
+const {VERSION: internalRuntimeVersion} = require('../internal-version') ;
 
 const argv = minimist(process.argv.slice(2));
 let singlePassDest = typeof argv.single_pass_dest === 'string' ?
@@ -49,9 +48,6 @@ if (!singlePassDest.endsWith('/')) {
 }
 
 const SPLIT_MARKER = `/** SPLIT${Math.floor(Math.random() * 10000)} */`;
-
-// Also used in gulpfile.js and compile.js
-const DIST_NAILGUN_PORT = '2115';
 
 // Used to store transforms and compile v0.js
 const transformDir = tempy.directory();
@@ -147,6 +143,9 @@ exports.getFlags = function(config) {
   return exports.getGraph(config.modules, config).then(function(g) {
     return flagsArray.concat(
         exports.getBundleFlags(g, flagsArray));
+  }).then(flagsArray => {
+    fs.writeFileSync('flags-array.txt', JSON.stringify(flagsArray, null, 2));
+    return flagsArray;
   });
 };
 
@@ -598,55 +597,11 @@ function postProcessConcat() {
   });
 }
 
-// Formats a single-pass closure compiler error message into a more readable
-// form by syntax highlighting the error text.
-function formatSinglePassClosureCompilerError(message) {
-  message = highlight(message, {ignoreIllegals: true});
-  message = message.replace(/WARNING/g, colors.yellow('WARNING'));
-  message = message.replace(/ERROR/g, colors.red('ERROR'));
-  return message;
-}
-
 function compile(flagsArray) {
-  // Override to local closure compiler JAR
-  closureCompiler.compiler.JAR_PATH =
-      require.resolve('./runner/dist/runner.jar');
-
-  let compilerErrors = '';
-
-  const initOptions = {
-    extraArguments: ['-XX:+TieredCompilation'], // Significant speed up!
-  };
-  const pluginOptions = {
-    platform: ['java'], // Override the binary used by closure compiler
-    logger: errors => compilerErrors = errors, // Capture compiler errors
-  };
-
-  const handleCompilerError = function(err) {
-    console./*OK*/error(colors.red('Single pass compilation failed:\n') +
-        formatSinglePassClosureCompilerError(compilerErrors) + '\n' +
-        err);
-    process.exit(1);
-  };
-
-  if (process.platform == 'darwin' || process.platform == 'linux') {
-    flagsArray = [
-      '--nailgun-port',
-      DIST_NAILGUN_PORT,
-      'org.ampproject.AmpCommandLineRunner',
-      '--',
-    ].concat(flagsArray);
-    pluginOptions.platform = ['native']; // nailgun-runner isn't a java binary
-    initOptions.extraArguments = null; // Already part of nailgun-server
-  }
-
-  fs.writeFileSync('flags-array.txt', JSON.stringify(flagsArray, null, 2));
-
   return new Promise(function(resolve) {
-    const compiler = closureCompiler.gulp(initOptions);
     return gulp.src(srcs, {base: transformDir})
         .pipe(sourcemaps.init({loadMaps: true}))
-        .pipe(compiler(flagsArray, pluginOptions))
+        .pipe(gulpClosureCompile(flagsArray))
         .on('error', handleCompilerError)
         .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest('.'))
