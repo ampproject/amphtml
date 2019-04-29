@@ -21,6 +21,7 @@
  * This is run during the CI stage = test; job = e2e tests.
  */
 
+const colors = require('ansi-colors');
 const {
   downloadBuildOutput,
   downloadDistOutput,
@@ -28,24 +29,41 @@ const {
   startTimer,
   stopTimer,
   timedExecOrDie: timedExecOrDieBase} = require('./utils');
+const {determineBuildTargets} = require('./build-targets');  
 const {isTravisPullRequestBuild} = require('../travis');
 
 const FILENAME = 'e2e-tests.js';
+const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
 const timedExecOrDie =
   (cmd, unusedFileName) => timedExecOrDieBase(cmd, FILENAME);
 
 async function main() {
   const startTime = startTimer(FILENAME, FILENAME);
+  const buildTargets = determineBuildTargets();
 
   if (!isTravisPullRequestBuild()) {
     downloadDistOutput(FILENAME);
+    timedExecOrDie('gulp update-packages');
+    timedExecOrDie('gulp e2e --nobuild --headless');
   } else {
     printChangeSummary(FILENAME);
-    downloadBuildOutput(FILENAME);
-  }
-  timedExecOrDie('gulp update-packages');
-  timedExecOrDie('gulp e2e --nobuild --headless');
+    if (buildTargets.has('RUNTIME') ||
+        buildTargets.has('UNIT_TEST') ||
+        buildTargets.has('INTEGRATION_TEST') ||
+        buildTargets.has('BUILD_SYSTEM') ||
+        buildTargets.has('FLAG_CONFIG') ||
+        buildTargets.has('VISUAL_DIFF')) {
 
+      downloadBuildOutput(FILENAME);
+      timedExecOrDie('gulp update-packages');
+      timedExecOrDie('gulp e2e --nobuild --headless');
+    } else {
+      console.log(`${FILELOGPREFIX} Skipping ` +
+          colors.cyan('End to End Tests ') +
+          'because this commit does not affect the runtime, build system, ' +
+          'test files, or visual diff files');
+    }
+  }
   stopTimer(FILENAME, FILENAME, startTime);
 }
 
