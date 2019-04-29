@@ -31,20 +31,19 @@ const minimatch = require('minimatch');
 const minimist = require('minimist');
 const path = require('path');
 const rimraf = require('rimraf');
-const sleep = require('sleep-promise');
 const source = require('vinyl-source-stream');
 const touch = require('touch');
 const watchify = require('watchify');
 const wrappers = require('./build-system/compile-wrappers');
 const {aliasBundles, extensionBundles, verifyExtensionBundles, verifyExtensionAliasBundles} = require('./bundles.config');
 const {applyConfig, removeConfig} = require('./build-system/tasks/prepend-global/index.js');
-const {cleanupBuildDir, closureCompile} = require('./build-system/tasks/compile');
+const {cleanupBuildDir, closureCompile} = require('./build-system/compile/compile');
 const {createCtrlcHandler, exitCtrlcHandler} = require('./build-system/ctrlcHandler');
 const {createModuleCompatibleES5Bundle} = require('./build-system/tasks/create-module-compatible-es5-bundle');
-const {exec, execScriptAsync, getStdout} = require('./build-system/exec');
 const {isTravisBuild} = require('./build-system/travis');
 const {jsifyCssAsync} = require('./build-system/tasks/jsify-css');
 const {serve} = require('./build-system/tasks/serve.js');
+const {startNailgunServer, stopNailgunServer} = require('./build-system/tasks/nailgun');
 const {thirdPartyFrames} = require('./build-system/config');
 const {transpileTs} = require('./build-system/typescript');
 const {VERSION: internalRuntimeVersion} = require('./build-system/internal-version') ;
@@ -67,7 +66,7 @@ let extensionsToBuild = null;
 // All a4a extensions.
 const adVendors = [];
 
-const {green, red, cyan, yellow} = colors;
+const {green, red, cyan} = colors;
 
 // Minified targets to which AMP_CONFIG must be written.
 const minifiedRuntimeTarget = 'dist/v0.js';
@@ -86,15 +85,8 @@ const unminified3pTarget = 'dist.3p/current/integration.js';
 
 const maybeUpdatePackages = isTravisBuild() ? [] : ['update-packages'];
 
-// Used to start and stop the Closure nailgun server
-let nailgunRunnerReplacer;
-const nailgunRunner =
-    require.resolve('./third_party/nailgun/nailgun-runner');
-const nailgunServer =
-    require.resolve('./third_party/nailgun/nailgun-server.jar');
-const customRunner = require.resolve('./build-system/runner/dist/runner.jar');
-const NAILGUN_PORT = '2113'; // Also used in build-system/tasks/compile.js
-const NAILGUN_STARTUP_TIMEOUT_MS = 5 * 1000;
+// Also used in closure-compile.js
+const NAILGUN_PORT = '2114';
 
 /**
  * Tasks that should print the `--nobuild` help text.
@@ -928,85 +920,6 @@ function build() {
 }
 
 /**
- * Starts a nailgun server (provides a fast-running closure compiler instance),
- * and replaces google-closure-compiler's binary with the nailgun runner
- */
-async function startNailgunServer() {
-  if (argv.single_pass) {
-    return;
-  }
-  // Replace default binary with nailgun on linux and macos
-  if (process.platform == 'darwin') {
-    nailgunRunnerReplacer = require('require-hijack')
-        .replace('google-closure-compiler-osx').with(nailgunRunner);
-  } else if (process.platform == 'linux') {
-    nailgunRunnerReplacer = require('require-hijack')
-        .replace('google-closure-compiler-linux').with(nailgunRunner);
-  } else {
-    log(yellow('WARNING:'), 'Cannot run', cyan('nailgun-server.jar'),
-        'on', cyan(process.platform));
-    log(yellow('WARNING:'),
-        'Closure compiler will be significantly slower than on',
-        cyan('macos'), 'or', cyan('linux'));
-    return;
-  }
-
-  // Start up the nailgun server after cleaning up old instances (if any)
-  const startNailgunServerCmd =
-      'java -XX:+TieredCompilation -server -cp ' +
-      `${nailgunServer}:${customRunner} ` +
-      `com.facebook.nailgun.NGServer ${NAILGUN_PORT}`;
-  const stopNailgunServerCmd =
-      `${nailgunRunner} --nailgun-port ${NAILGUN_PORT} ng-stop`;
-  const getVersionCmd =
-      `${nailgunRunner} --nailgun-port ${NAILGUN_PORT} ` +
-      'org.ampproject.AmpCommandLineRunner -- --version';
-  if (!isTravisBuild()) {
-    log('Starting', cyan('nailgun-server.jar'), 'on port', cyan(NAILGUN_PORT));
-  }
-  exec(stopNailgunServerCmd, {stdio: 'pipe'});
-  execScriptAsync(startNailgunServerCmd, {stdio: 'pipe'});
-
-  // Ensure that the nailgun server is up and running
-  const end = Date.now() + NAILGUN_STARTUP_TIMEOUT_MS;
-  while (Date.now() < end) {
-    try {
-      const version = getStdout(getVersionCmd).trim();
-      if (/Version/.test(version)) {
-        return;
-      }
-    } catch (e) {
-      await sleep(1000);
-    }
-  }
-  log(red('ERROR:'), 'Could not start',
-      cyan(nailgunServer), 'on port', cyan(NAILGUN_PORT) + '...');
-  process.exit(1);
-}
-
-/**
- * Stops the nailgun server if it's running, and restores the binary used by
- * google-closure-compiler
- */
-async function stopNailgunServer() {
-  if (argv.single_pass) {
-    return;
-  }
-  if (nailgunRunnerReplacer) {
-    nailgunRunnerReplacer.restore();
-  }
-  if (process.platform == 'darwin' || process.platform == 'linux') {
-    const stopNailgunServerCmd =
-        `${nailgunRunner} --nailgun-port ${NAILGUN_PORT} ng-stop`;
-    if (!isTravisBuild()) {
-      log('Stopping', cyan('nailgun-server.jar'), 'on port',
-          cyan(NAILGUN_PORT));
-    }
-    exec(stopNailgunServerCmd, {stdio: 'pipe'});
-  }
-}
-
-/**
  * Dist Build
  * @return {!Promise}
  */
@@ -1031,7 +944,7 @@ function dist() {
   }
   return compileCss(/* watch */ undefined, /* opt_compileAll */ true)
       .then(async() => {
-        await startNailgunServer();
+        await startNailgunServer(NAILGUN_PORT, /* detached */ false);
       })
       .then(() => {
         return Promise.all([
@@ -1059,7 +972,7 @@ function dist() {
           console.log('\n');
         }
       }).then(async() => {
-        await stopNailgunServer();
+        await stopNailgunServer(NAILGUN_PORT);
       }).then(() => {
         return copyAliasExtensions();
       }).then(() => {
@@ -1154,9 +1067,12 @@ function checkTypes() {
   }).sort();
   return compileCss()
       .then(async() => {
-        await startNailgunServer();
+        await startNailgunServer(NAILGUN_PORT, /* detached */ false);
       })
       .then(() => {
+        if (!isTravisBuild()) {
+          log('Checking types...');
+        }
         return Promise.all([
           closureCompile(compileSrcs.concat(extensionSrcs), './dist',
               'check-types.js', {
@@ -1194,7 +1110,7 @@ function checkTypes() {
           console.log('\n');
         }
       }).then(async() => {
-        await stopNailgunServer();
+        await stopNailgunServer(NAILGUN_PORT);
       }).then(() => exitCtrlcHandler(handlerProcess));
 }
 
