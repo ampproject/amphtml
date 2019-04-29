@@ -22,12 +22,14 @@ const conf = require('../build.conf');
 const devnull = require('dev-null');
 const fs = require('fs-extra');
 const gulp = require('gulp');
+const gulpIf = require('gulp-if');
 const log = require('fancy-log');
 const minimist = require('minimist');
-const move = require('glob-move');
 const path = require('path');
 const Promise = require('bluebird');
 const relativePath = require('path').relative;
+const rename = require('gulp-rename');
+const shortenLicense = require('./shorten-license');
 const sourcemaps = require('gulp-sourcemaps');
 const tempy = require('tempy');
 const through = require('through2');
@@ -514,18 +516,7 @@ exports.singlePassCompile = function(entryModule, options) {
     define: options.define,
     externs: options.externs,
     hideWarningsFor: options.hideWarningsFor,
-  }).then(compile).then(function() {
-    // Move things into place as AMP expects them.
-    fs.ensureDirSync(`${singlePassDest}/v0`);
-    return Promise.all([
-      // Move all files that need to live in /v0/. ex. _base files
-      // all extensions.
-      move(`${singlePassDest}/amp*`, `${singlePassDest}/v0`).then(() => {
-        return move('dist/v0/amp4ads*', 'dist');
-      }),
-      move(`${singlePassDest}/_base*`, `${singlePassDest}/v0`),
-    ]);
-  }).then(wrapMainBinaries).then(postProcessConcat).catch(e => {
+  }).then(compile).then(wrapMainBinaries).then(postProcessConcat).catch(e => {
     // NOTE: passing the message here to colors.red breaks the output.
     console./*OK*/error(e.message);
     process.exit(1);
@@ -595,12 +586,15 @@ function postProcessConcat() {
 }
 
 function compile(flagsArray) {
+  // TODO(@cramforce): Run the post processing step
   return new Promise(function(resolve) {
     return gulp.src(srcs, {base: transformDir})
         .pipe(sourcemaps.init({loadMaps: true}))
         .pipe(gulpClosureCompile(flagsArray))
         .on('error', handleSinglePassCompilerError)
         .pipe(sourcemaps.write('.'))
+        .pipe(shortenLicense())
+        .pipe(gulpIf(/(\/amp-|\/_base)/, rename(path => path.dirname += '/v0')))
         .pipe(gulp.dest('.'))
         .on('end', resolve);
   });
