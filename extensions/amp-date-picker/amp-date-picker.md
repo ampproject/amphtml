@@ -610,6 +610,12 @@ For a single date picker:
 </tr>
 </table>
 
+```html
+<amp-date-picker type="single" on="select: AMP.setState({date: event.date, templateSelected: event.id})" ...>
+  <!-- ... -->
+</amp-date-picker>
+```
+
 For a date range picker:
 
 <table>
@@ -630,6 +636,12 @@ For a date range picker:
 <td>A shortcut for the last date in the date range (<code>event.dates[event.dates.length - 1]</code>).
 </tr>
 </table>
+
+```html
+<amp-date-picker type="range" on="select: AMP.setState({dates: event.dates, firstTemplate: event.start.id})" ...>
+  <!-- ... -->
+</amp-date-picker>
+```
 
 ## Actions
 
