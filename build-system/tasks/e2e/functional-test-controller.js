@@ -336,7 +336,7 @@ class FunctionalTestController {
    * {@link https://www.w3.org/TR/webdriver1/#get-element-rect}
    *
    * @param {!ElementHandle} unusedHandle
-   * @return {!ControllerPromise<!DomRect>}
+   * @return {!ControllerPromise<!DOMRectDef>}
    */
   async getElementRect(unusedHandle) {}
 
