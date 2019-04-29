@@ -116,7 +116,7 @@ For the `<img>` tag in `HTML`, the `sizes` attribute is used in conjunction with
 Per our [layouts documentation](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout?format=websites#what-if-the-layout-attribute-isn%E2%80%99t-specified?), the `sizes` attribute is sometimes used to infer layout `responsive` if a layout isn't explicitly specified.
 
 {% call callout('Read on', type='read') %}
-See [Responsive images with srcset, sizes & heights](https://www.ampproject.org/docs/design/responsive/art_direction) for usage of `sizes` and `srcset`.
+See [Responsive images with srcset, sizes & heights](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/art_direction) for usage of `sizes` and `srcset`.
 {% endcall %}
 
 **alt**
