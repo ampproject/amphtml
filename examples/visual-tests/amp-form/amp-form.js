@@ -24,7 +24,8 @@ module.exports = {
     await page.tap('#submit');
     await verifySelectorsVisible(page, name, [
       '#form.user-invalid',
-      'span[visible-when-invalid="valueMissing"].visible',
+      'span[visible-when-invalid="valueMissing"][validation-for="name"].visible',
+      'span[visible-when-invalid="valueMissing"][validation-for="email"].visible',
     ]);
   },
 
@@ -34,7 +35,11 @@ module.exports = {
     await page.keyboard.press('Tab');
     await page.keyboard.type('not.an.email.address');
     await page.tap('#submit');
-    await verifySelectorsVisible(page, name, ['#form.user-invalid']);
+    await verifySelectorsVisible(page, name, [
+      '#form.user-invalid',
+      'span[visible-when-invalid="patternMismatch"][validation-for="name"].visible',
+      'span[visible-when-invalid="typeMismatch"][validation-for="email"].visible',
+    ]);
   },
 
   'try to submit with valid input': async (page, name) => {
