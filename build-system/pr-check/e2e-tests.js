@@ -29,7 +29,7 @@ const {
   startTimer,
   stopTimer,
   timedExecOrDie: timedExecOrDieBase} = require('./utils');
-const {determineBuildTargets} = require('./build-targets');  
+const {determineBuildTargets} = require('./build-targets');
 const {isTravisPullRequestBuild} = require('../travis');
 
 const FILENAME = 'e2e-tests.js';
