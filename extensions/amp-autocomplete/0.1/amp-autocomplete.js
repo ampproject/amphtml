@@ -667,11 +667,23 @@ export class AmpAutocomplete extends AMP.BaseElement {
     if (delta === 0 || !this.resultsShowing_()) {
       return Promise.resolve();
     }
+    // Active element logic
     const keyUpWhenNoneActive = this.activeIndex_ === -1 && delta < 0;
     const index = keyUpWhenNoneActive ? delta : this.activeIndex_ + delta;
     const activeIndex = mod(index, this.container_.children.length);
     const newActiveElement = this.container_.children[activeIndex];
     this.inputElement_.value = newActiveElement.getAttribute('data-value');
+
+    // Element visibility logic
+    const itemTop = newActiveElement.offsetTop;
+    const itemHeight = newActiveElement.offsetHeight;
+    const resultTop = this.container_.scrollTop;
+    if (resultTop > itemTop || 
+      resultTop + this.container_.offsetHeight < itemTop + itemHeight) {
+        this.container_.scrollTop = delta > 0 ? 
+          itemTop + itemHeight - this.container_.offsetHeight : itemTop;
+    }
+
     return this.mutateElement(() => {
       this.resetActiveElement_();
       newActiveElement.classList.add('i-amphtml-autocomplete-item-active');

@@ -46,6 +46,7 @@ amp-autocomplete > input {
 .i-amphtml-autocomplete-results-up {
   top: auto;
   bottom: 100%;
+  margin-bottom: .5rem; /* default-ui-space-small */
 }
 
 .i-amphtml-autocomplete-item {
