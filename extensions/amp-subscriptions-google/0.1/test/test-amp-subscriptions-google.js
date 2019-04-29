@@ -83,6 +83,9 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     };
     methods = {
       reset: sandbox.stub(ConfiguredRuntime.prototype, 'reset'),
+      showContributionOptions:
+          sandbox.stub(ConfiguredRuntime.prototype,
+              'showContributionOptions'),
       showOffers: sandbox.stub(ConfiguredRuntime.prototype, 'showOffers'),
       showAbbrvOffer: sandbox.stub(
           ConfiguredRuntime.prototype, 'showAbbrvOffer'),
@@ -258,6 +261,11 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     expect(methods.linkAccount).to.not.be.called;
   });
 
+  it('should not allow prerender for non-google viewer', () => {
+    platform.isGoogleViewer_ = false;
+    expect(platform.isPrerenderSafe()).to.be.false;
+  });
+
   it('should reauthorize on complete linking', () => {
     analyticsMock.expects('actionEvent')
         .withExactArgs(PLATFORM_ID, 'link', 'success')
@@ -295,13 +303,16 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
         .withExactArgs(PLATFORM_ID, 'subscribe', 'success')
         .once();
     const promise = Promise.resolve();
-    const response = new SubscribeResponse(null, null, null, null,
+    const response = new SubscribeResponse(null, null, null, null, null,
         () => promise);
-    serviceAdapterMock.expects('resetPlatforms')
-        .once();
+    const resetPlatformsPromise = new Promise(resolve => {
+      sandbox.stub(serviceAdapter, 'resetPlatforms').callsFake(() => {
+        resolve();
+      });
+    });
     callback(callbacks.subscribeResponse)(Promise.resolve(response));
     expect(methods.reset).to.not.be.called;
-    return promise;
+    return resetPlatformsPromise;
   });
 
   it('should delegate native subscribe request', () => {
@@ -386,6 +397,12 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     });
   });
 
+  it('should allow prerender if in a google viewer', () => {
+    viewer.params_['viewerUrl'] = 'https://www.google.com/other';
+    platform = new GoogleSubscriptionsPlatform(ampdoc, {}, serviceAdapter);
+    expect(platform.isPrerenderSafe()).to.be.true;
+  });
+
   it('should attach button given to decorateUI', () => {
     const elem = env.win.document.createElement('div');
     const decorateStub = sandbox.stub(platform.runtime_.buttonApi_,
@@ -399,6 +416,12 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
   it('should show offers if subscribe action is delegated', () => {
     const executeStub = platform.runtime_.showOffers;
     platform.executeAction('subscribe');
+    expect(executeStub).to.be.calledWith({list: 'amp', isClosable: true});
+  });
+
+  it('should show contributions if contribute action is delegated', () => {
+    const executeStub = platform.runtime_.showContributionOptions;
+    platform.executeAction('contribute');
     expect(executeStub).to.be.calledWith({list: 'amp', isClosable: true});
   });
 

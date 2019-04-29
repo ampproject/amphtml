@@ -138,13 +138,17 @@
 }
 
 .i-amphtml-message-container {
+  display: flex !important;
+  align-items: center !important;
   width: max-content !important;
   transition-property: opacity, transform !important;
   position: absolute !important;
-  top: 12px !important;
+  top: 0 !important;
   right: 48px !important;
+  height: 100% !important;
   color: #fff !important;
-  text-shadow: 0px 0px 6px rgba(0, 0, 0, 0.24) !important;
+  font-size: 16px !important;
+  text-shadow: 0px 0px 6px rgba(0, 0, 0, 0.36) !important;
 }
 
 [dir=rtl] .i-amphtml-message-container {
@@ -248,7 +252,7 @@
 }
 
 .i-amphtml-story-desktop-panels.i-amphtml-story-system-layer {
-  background: linear-gradient(to bottom, rgba(33,33,33,0) 0%, rgba(33,33,33,0.32) 100%)!important;
+  background: transparent !important;
   top: auto !important;
   bottom: 0 !important;
   height: 96px !important;

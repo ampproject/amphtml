@@ -80,6 +80,7 @@ describes.realWin('Linker Manager', {amp: true}, env => {
     });
     windowInterface.getHostname.returns('amp-source-com.cdn.ampproject.org');
     installVariableService(win);
+    installLinkerReaderService(win);
   });
 
   it('registers anchor mutator if given valid linkers config', () => {

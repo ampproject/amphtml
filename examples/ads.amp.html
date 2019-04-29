@@ -215,6 +215,7 @@
         <option>speakol</option>
         <option>spotx</option>
         <option>sunmedia</option>
+        <option>svknative</option>
         <option>swoop</option>
         <option>taboola</option>
         <option>tcsemotion</option>
@@ -478,6 +479,34 @@
           >
   </amp-ad>
 
+  <h2>AdOcean master-slave</h2>
+  <amp-ad width="300" height="250"
+          type="adocean"
+          data-ao-emitter="myao.adocean.pl"
+          data-ao-master="FDyQKk0qN2a9SxwCMal6Eove..r_lvBE3pPfr_Ier9..f7"
+          data-ao-id="adoceanmyaonhqnqukjtt"
+          data-ao-mode="buffered"
+          data-ao-preview="y6g3tTbLJv6vLRZ.AfyeiXkCPM0gL3CNAik2rwTzhKD.N7"
+          data-ao-keys="key1,key2,key3"
+          data-ao-vars='{"a":"b","c":"d"}'
+          data-ao-clusters='{"clusterA":[-1,2,-3,63], "clusterB":[1,-63]}'
+          >
+  </amp-ad>
+
+  <amp-ad width="300" height="250"
+          type="adocean"
+          data-ao-emitter="myao.adocean.pl"
+          data-ao-master="FDyQKk0qN2a9SxwCMal6Eove..r_lvBE3pPfr_Ier9..f7"
+          data-ao-id="adoceanmyaokiheeseoko"
+          data-ao-mode="buffered"
+          data-ao-preview="y6g3tTbLJv6vLRZ.AfyeiXkCPM0gL3CNAik2rwTzhKD.N7"
+          data-ao-keys="key1,key2,key3"
+          data-ao-vars='{"a":"b","c":"d"}'
+          data-ao-clusters='{"clusterA":[-1,2,-3,63], "clusterB":[1,-63]}'
+          >
+  </amp-ad>
+
+
   <h2>AdPicker</h2>
   <amp-ad width="300" height="250"
       type="adpicker"
@@ -644,16 +673,11 @@
   </amp-ad>
 
   <h2>AJA</h2>
-  <amp-embed width="100" height="100"
+  <amp-ad width="300" height="250"
       type="aja"
       layout="responsive"
-      data-widgetIds="SB_14,SB_13"
-      data-htmlURL="http%3A%2F%2Fedition.cnn.com%2F2015%2F11%2F08%2Fmiddleeast%2Frussian-plane-crash-egypt-sinai%2Findex.html"
-      data-referrer="http%3A%2F%2Fedition.cnn.com"
-      data-ampURL="http%3A%2F%2Famp.cnn.com%2Fpage.html"
-      data-styleFile="http://localhost/style.css"
-      data-testMode="true">
-  </amp-embed>
+      data-ssp-code="zR52u3bkg">
+  </amp-ad>
 
   <h2>AMoAd banner</h2>
   <amp-ad width="300" height="250"
@@ -747,9 +771,18 @@
   </amp-ad>
 
   <h2>CA ProFit-X</h2>
+  <!-- Ad placement with data-tagid is deprecated.
+    It will become invalid after all CA ProFit-X's
+    inventories are replaced by data-mediaid -->
   <amp-ad width="320" height="50"
       type="caprofitx"
       data-tagid="17359">
+  </amp-ad>
+
+  <amp-ad width="320" height="50"
+      type="caprofitx"
+      data-mediaid="3752"
+      data-tag-places="17359">
   </amp-ad>
 
   <h2>Cedato</h2>
@@ -1479,7 +1512,7 @@
       data-params='{"slot": 1160, "targets": { "category": ["6222", "16158", "274", "17912"]}, "count": 1}'
       data-sfcallback="if (!Array.isArray(response)) { response = [response]; }; for (i = 0; i < response.length; i++) { const prod = response[i]; let outerCtr = document.createElement('div'); let img = document.createElement('img'); img.src = prod['product']['imageLarge']; img.style = 'height:250px; width:250px'; outerCtr.appendChild(img); document.body.appendChild(outerCtr); }">
   </amp-ad>
-  
+
   <h2>PubExchange</h2>
   <amp-embed width="640" height="320"
       heights="(max-width:480px) 400%, (max-width:650px) 100%, 75%"
@@ -1756,6 +1789,13 @@
       data-crst="1">
   </amp-ad>
 
+  <h2>SVK Native widget</h2>
+  <amp-embed width="100" height="100"
+      type="svknative"
+      layout="responsive"
+      data-widgetid="2">
+  </amp-embed>
+
   <h2>Swoop</h2>
   <amp-ad width=250 height=35
       type="swoop"
@@ -1837,7 +1877,7 @@
       type="ucfunnel"
       data-site-id="test-ad-83444226E44368D1E32E49EEBE6D29">
   </amp-ad>
-  
+
   <h2>UZOU</h2>
   <amp-ad width="120" height="1630"
       type="uzou"

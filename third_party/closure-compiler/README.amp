@@ -7,7 +7,13 @@ Temporary check in of a compiled closure compiler while we wait for
 a patch to land.
 
 Local Modifications:
-- Add compiler-and-tests.jar (built from all-classes-jar ant build) to use
-for testing.
+- Apply ./Allow-relative-path-reference-types.patch to closure-compiler to the
+  "closure-compiler-parent-v20190301" tag
+  (Needed until https://github.com/google/closure-compiler/issues/3041 is fixed)
+- Add custom built compiler.jar (after the above revert) to use for building.
+- Apply ./POM-file-changes.patch to closure-compiler and move all files from
+  test/ to src/
+- Add custom built compiler-and-tests.jar (after the above changes) to use
+  for testing.
 - Add Messages.properties and ParserConfig.properties for testing.
-- Copied intersection_observer.js extern missing from default externs.
+- Copy web_animations.js extern missing from default externs.

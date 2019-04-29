@@ -111,6 +111,16 @@ const EXPERIMENTS = [
     cleanupIssue: '',
   },
   {
+    id: 'amp-base-carousel',
+    name: 'AMP extension for a basic, flexible, carousel',
+    spec: 'https://github.com/ampproject/amphtml/issues/20595',
+  },
+  {
+    id: 'amp-lightbox-gallery-base-carousel',
+    name: 'Uses amp-base-carousel in amp-lightbox-gallery',
+    spec: 'https://github.com/ampproject/amphtml/issues/21568',
+  },
+  {
     id: 'amp-google-vrview-image',
     name: 'AMP VR Viewer for images via Google VRView',
     spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
@@ -254,6 +264,13 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/15960',
   },
   {
+    id: 'amp-story-desktop-background',
+    name: 'Removes blurred background images from the amp-story component\'s ' +
+        'three-panel desktop UI.',
+    spec: 'https://github.com/ampproject/amphtml/issues/21287',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/21288',
+  },
+  {
     id: 'amp-next-page',
     name: 'Document level next page recommendations and infinite scroll',
     spec: 'https://github.com/ampproject/amphtml/issues/12945',
@@ -366,28 +383,10 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18845',
   },
   {
-    id: 'amp-list-resizable-children',
-    name: 'Experiment for allowing amp-list to resize when its children resize',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18875',
-  },
-  {
     id: 'hidden-mutation-observer',
     name: "Enables FixedLayer's hidden-attribute mutation observer",
     spec: 'https://github.com/ampproject/amphtml/issues/17475',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18897',
-  },
-  {
-    id: 'scroll-height-bounce',
-    name: 'Bounces the scrolling when scroll height changes' +
-        ' (fix for #18861 and #8798)',
-    spec: 'https://github.com/ampproject/amphtml/issues/18861',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/19004',
-  },
-  {
-    id: 'scroll-height-minheight',
-    name: 'Forces min-height on body (fix for #18861 and #8798)',
-    spec: 'https://github.com/ampproject/amphtml/issues/18861',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/19004',
   },
   {
     id: 'amp-auto-lightbox',
@@ -408,11 +407,24 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/20965',
   },
   {
+    id: 'amp-img-auto-sizes',
+    name: 'Automatically generates sizes for amp-img if not given',
+    spec: 'https://github.com/ampproject/amphtml/issues/19513',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/20517',
+  },
+  {
     id: 'amp-autocomplete',
     name: 'AMP Autocomplete provides a set of suggestions to' +
         ' complete a user query in an input field.',
     spec: 'https://github.com/ampproject/amphtml/issues/9785',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/21021',
+  },
+  {
+    id: 'inabox-viewport-friendly',
+    name: 'Inabox viewport measures the host window directly if ' +
+        'within friendly iframe',
+    spec: 'https://github.com/ampproject/amphtml/issues/19869',
+    cleanupIssue: 'TODO',
   },
 ];
 

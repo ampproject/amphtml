@@ -18,7 +18,9 @@ import {BrowserController, RequestBank} from '../../testing/test-helper';
 import {Deferred} from '../../src/utils/promise';
 import {poll} from '../../testing/iframe';
 
-describe.configure().skipSinglePass().run('amp-recaptcha-input', function() {
+// TODO(torch2424, #20541): These tests fail on firefox and Edge.
+describe.configure().skipFirefox().skipEdge().run('amp-recaptcha-' +
+    'input', function() {
 
   describes.integration('with form and amp-mustache', {
   /* eslint-disable max-len */
@@ -107,7 +109,7 @@ describe.configure().skipSinglePass().run('amp-recaptcha-input', function() {
       }
     `,
     /* eslint-enable max-len */
-    extensions: ['amp-recaptcha-input', 'amp-form', 'amp-mustache'],
+    extensions: ['amp-recaptcha-input', 'amp-form', 'amp-mustache:0.2'],
     experiments: ['amp-recaptcha-input'],
   }, env => {
     let doc;

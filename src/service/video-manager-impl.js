@@ -318,7 +318,7 @@ export class VideoManager {
    * with it or playing through autoplay
    *
    * @param {!../video-interface.VideoInterface} video
-   * @return {!../video-interface.VideoInterface} PlayingStates
+   * @return {!../video-interface.PlayingStateDef}
    */
   getPlayingState(video) {
     return this.getEntryForVideo_(video).getPlayingState();
@@ -862,7 +862,7 @@ class VideoEntry {
   /**
    * Returns whether the video is paused or playing after the user interacted
    * with it or playing through autoplay
-   * @return {!../video-interface.VideoInterface} PlayingStates
+   * @return {!../video-interface.PlayingStateDef}
    */
   getPlayingState() {
     if (!this.isPlaying_) {
@@ -1115,9 +1115,6 @@ export class AutoFullscreenManager {
     const {element} = video;
     const viewport = this.getViewport_();
 
-    const duration = 300;
-    const curve = 'ease-in';
-
     return this.onceOrientationChanges_().then(() => {
       const {boundingClientRect} = element.getIntersectionChangeEntry();
       const {top, bottom} = boundingClientRect;
@@ -1128,7 +1125,7 @@ export class AutoFullscreenManager {
       }
       const pos = optPos ? dev().assertString(optPos) :
         bottom > vh ? 'bottom' : 'top';
-      return viewport.animateScrollIntoView(element, duration, curve, pos);
+      return viewport.animateScrollIntoView(element, pos);
     });
   }
 
@@ -1203,7 +1200,7 @@ export class AutoFullscreenManager {
 
   /**
    * @param {!../video-interface.VideoOrBaseElementDef} video
-   * @return {!../video-interface.VideoInterface} PlayingStates
+   * @return {!../video-interface.PlayingStateDef}
    * @private
    */
   getPlayingState_(video) {

@@ -129,6 +129,15 @@ if (window && window.name) {
   }
 }
 
+// Add event listener for focus for a11y
+window.addEventListener('focus', () => {
+  const headerElement = document.querySelector('h1');
+  console.log('Focused!', headerElement);
+  if (headerElement) {
+    headerElement.focus();
+  }
+});
+
 var text = `Passed in cmpId is '${cmpId}', previously stored consent string is` +
 ` '${consentStr}', consent state is '${consentState}'`;
 
@@ -148,12 +157,26 @@ if (hashMatch) {
   ampWindow = ancestors[depth];
 }
 
-
+// Send our ready event
 setTimeout(() => {
-  parent.postMessage({
+
+  // Our ready object
+  const readyObject = {
     type: 'consent-ui',
     action: 'ready'
-  }, '*');
+  };
+
+  // Check if we should randomly do some custom stuff
+  const shouldApplyCustom = Math.random() > 0.5;
+  if (shouldApplyCustom) {
+    const initialHeight = 30 + Math.floor(Math.random() * 30);
+    readyObject.initialHeight = `${initialHeight}vh`;
+    readyObject.border = Math.random() < 0.5
+  }
+
+  console.log('diy-consent: Sending Ready Message!', readyObject);
+
+  parent.postMessage(readyObject, '*');
 }, 2000);
 
 function registerClickConsentMessage(querySelector, type, action, info, timeout) {

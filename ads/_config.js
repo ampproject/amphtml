@@ -145,7 +145,9 @@ export const adConfig = {
     ],
   },
 
-  'adocean': {},
+  'adocean': {
+    consentHandlingOverride: true,
+  },
 
   'adpicker': {
     renderStartImplemented: true,
@@ -269,8 +271,6 @@ export const adConfig = {
   },
 
   'aja': {
-    renderStartImplemented: true,
-    prefetch: 'https://cdn.as.amanad.adtdp.com/sdk/asot-v2.js',
   },
 
   'appvador': {
@@ -486,7 +486,7 @@ export const adConfig = {
   },
 
   'gumgum': {
-    prefetch: 'https://g2.gumgum.com/javascripts/ad.js',
+    prefetch: 'https://js.gumgum.com/slot.js',
     renderStartImplemented: true,
   },
 
@@ -919,6 +919,11 @@ export const adConfig = {
     prefetch: 'https://vod.addevweb.com/sunmedia/amp/ads/sunmedia.js',
     preconnect: 'https://static.addevweb.com',
     renderStartImplemented: true,
+  },
+
+  'svknative': {
+    renderStartImplemented: true,
+    prefetch: 'https://widget.svk-native.ru/js/embed.js',
   },
 
   'swoop': {

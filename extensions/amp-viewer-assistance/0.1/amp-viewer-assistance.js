@@ -28,6 +28,13 @@ const TAG = 'amp-viewer-assistance';
 /** @const {string} */
 const GSI_TOKEN_PROVIDER = 'actions-on-google-gsi';
 
+/** @const {!Array<string>} */
+const ACTION_STATUS_WHITELIST = [
+  'ACTIVE_ACTION_STATUS',
+  'FAILED_ACTION_STATUS',
+  'COMPLETED_ACTION_STATUS',
+];
+
 export class AmpViewerAssistance {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
@@ -70,14 +77,22 @@ export class AmpViewerAssistance {
    */
   actionHandler_(invocation) {
     const {method, args} = invocation;
-    if (method == 'updateActionState' && !!args) {
-      this.viewer_./*OK*/sendMessageAwaitResponse(method, args).catch(error => {
-        user().error(TAG, error.toString());
-      });
+    if (method == 'updateActionState') {
+      // "updateActionState" requires a low-trust event.
+      if (invocation.satisfiesTrust(ActionTrust.LOW)) {
+        this.validateAndTransformUpdateArgs_(args).then(args => {
+          return this.viewer_./*OK*/sendMessageAwaitResponse(
+              method, args);
+        }).catch(err => {
+          user().error(TAG, err.toString());
+        });
+      }
     } else if (method == 'signIn') {
-      this.requestSignIn_();
+      // "signIn" requires a high-trust event.
+      if (invocation.satisfiesTrust(ActionTrust.HIGH)) {
+        this.requestSignIn_();
+      }
     }
-
     return null;
   }
 
@@ -101,8 +116,7 @@ export class AmpViewerAssistance {
         return this;
       }
       this.action_.installActionHandler(
-          this.assistanceElement_, this.actionHandler_.bind(this),
-          ActionTrust.HIGH);
+          this.assistanceElement_, this.actionHandler_.bind(this));
 
       this.getIdTokenPromise();
 
@@ -149,6 +163,55 @@ export class AmpViewerAssistance {
   }
 
   /**
+   * Checks the arguments of 'updateActionState' to have either a valid
+   * 'update' or 'error' parameter.
+   * @private
+   * @param {?JsonObject} args
+   * @return {!Promise<!JsonObject>}
+   */
+  validateAndTransformUpdateArgs_(args) {
+    if (!args) {
+      return Promise.reject('"updateActionState" was called with no' +
+          ' arguments!"');
+    }
+
+    const update = args['update'];
+    const error = args['error'];
+    if (error && update) {
+      return Promise.reject('"updateActionState" must have only one of' +
+        ' the parameters "error" and "update".');
+    } else if (error) {
+      // Must transform 'error' Response object
+      if (error && typeof error.text === 'function') {
+        return error.text().then(errorMessage => {
+          return dict({
+            'update': {
+              'actionStatus': 'FAILED_ACTION_STATUS',
+              'result': {
+                'code': error.status,
+                'message': errorMessage,
+              },
+            },
+          });
+        });
+      } else {
+        return Promise.reject('"updateActionState" action "error" parameter' +
+        ' must contain a valid "response" object.');
+      }
+    } else if (update) {
+      const actionStatus = update && update['actionStatus'];
+      if (!actionStatus || !ACTION_STATUS_WHITELIST.includes(actionStatus)) {
+        return Promise.reject('"updateActionState" action "update" parameter' +
+        ' must contain a valid "actionStatus" field.');
+      }
+      return Promise.resolve(args);
+    } else {
+      return Promise.reject('"updateActionState" action must have an' +
+      ' "update" or "error" parameter.');
+    }
+  }
+
+  /**
    * Toggles the CSS classes related to the status of the identity token.
    * @private
    * @param {boolean} available
@@ -178,7 +241,6 @@ export class AmpViewerAssistance {
     this.vsync_.mutate(() => {
       this.getRootElement_().classList.toggle(className, on);
     });
-
   }
 }
 

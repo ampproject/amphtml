@@ -91,6 +91,9 @@ const DISABLED_BY_ATTR = [
   // onclick action(e.g. `button`) or where it cannot be determined whether
   // they're actionable or not (e.g. `amp-script`).
   'amp-selector [option]',
+
+  // amp-subscriptions actions
+  '[subscriptions-action]',
 ].join(',');
 
 /**
@@ -253,7 +256,7 @@ export function meetsSizingCriteria(
 /**
  * Marks a lightbox candidate as visited as not to rescan on DOM update.
  * @param {!Element} candidate
- * @return {!Promise<!Element>}
+ * @return {!Promise}
  */
 function markAsVisited(candidate) {
   return Mutation.mutate(candidate, () => {
@@ -273,10 +276,11 @@ function candidateSelector(tagName) {
 
 /**
  * @param {!Element} element
- * @return {!Promise<!Element>}
+ * @return {!Promise}
  */
 function whenLoaded(element) {
-  return element.signals().whenSignal(CommonSignals.LOAD_END);
+  return whenUpgradedToCustomElement(element).then(element =>
+    element.signals().whenSignal(CommonSignals.LOAD_END));
 }
 
 

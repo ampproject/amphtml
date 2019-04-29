@@ -16,11 +16,11 @@
 
 import {AmpImg, installImg} from '../../builtins/amp-img';
 import {BaseElement} from '../../src/base-element';
-import {LayoutPriority} from '../../src/layout';
+import {Layout, LayoutPriority} from '../../src/layout';
 import {Services} from '../../src/services';
 import {createCustomEvent} from '../../src/event-helper';
 import {createIframePromise} from '../../testing/iframe';
-import {toggleExperiment} from '../../src/experiments';
+import {isExperimentOn, toggleExperiment} from '../../src/experiments';
 
 describe('amp-img', () => {
   let sandbox;
@@ -367,6 +367,9 @@ describe('amp-img', () => {
 
     el.getPlaceholder = sandbox.stub();
     const impl = new AmpImg(el);
+    impl.getAmpDoc = function() {
+      return window.AMP.ampdoc;
+    };
     impl.buildCallback();
     impl.layoutCallback();
     const img = el.querySelector('img');
@@ -374,6 +377,46 @@ describe('amp-img', () => {
     expect(img.getAttribute('aria-labelledby')).to.equal('id2');
     expect(img.getAttribute('aria-describedby')).to.equal('id3');
     impl.unlayoutCallback();
+  });
+
+  it('should propagate the object-fit attribute', () => {
+    return getImg({
+      src: '/examples/img/sample.jpg',
+      'object-fit': 'cover',
+    }).then(ampImg => {
+      const img = ampImg.querySelector('img');
+      expect(img.style.objectFit).to.equal('cover');
+    });
+  });
+
+  it('should not propagate the object-fit attribute if invalid', () => {
+    return getImg({
+      src: '/examples/img/sample.jpg',
+      'object-fit': 'foo 80%',
+    }).then(ampImg => {
+      const img = ampImg.querySelector('img');
+      expect(img.style.objectFit).to.be.empty;
+    });
+  });
+
+  it('should propagate the object-position attribute', () => {
+    return getImg({
+      src: '/examples/img/sample.jpg',
+      'object-position': '20% 80%',
+    }).then(ampImg => {
+      const img = ampImg.querySelector('img');
+      expect(img.style.objectPosition).to.equal('20% 80%');
+    });
+  });
+
+  it('should not propagate the object-position attribute if invalid', () => {
+    return getImg({
+      src: '/examples/img/sample.jpg',
+      'object-position': 'url("example.com")',
+    }).then(ampImg => {
+      const img = ampImg.querySelector('img');
+      expect(img.style.objectPosition).to.be.empty;
+    });
   });
 
   describe('blurred image placeholder', () => {
@@ -446,5 +489,174 @@ describe('amp-img', () => {
       img = el.firstChild;
       expect(impl.togglePlaceholder).to.have.been.calledWith(false);
     });
+  });
+
+  describe('auto-generate sizes', () => {
+
+    function getStubbedImg(attributes, layoutWidth) {
+      const el = document.createElement('amp-img');
+      for (const key in attributes) {
+        el.setAttribute(key, attributes[key]);
+      }
+      el.getResources = () => Services.resourcesForDoc(document);
+      el.getPlaceholder = sandbox.stub();
+      const impl = new AmpImg(el);
+      impl.createdCallback();
+      sandbox.stub(impl, 'getLayoutWidth').returns(layoutWidth);
+      sandbox.stub(impl, 'getLayout').returns(attributes['layout']);
+      el.toggleFallback = function() {};
+      el.togglePlaceholder = function() {};
+
+      impl.mutateElement = fn => fn();
+      impl.getViewport = function() {
+        return {
+          getWidth: () => windowWidth,
+        };
+      };
+      return impl;
+    }
+
+    beforeEach(() => {
+      toggleExperiment(window, 'amp-img-auto-sizes', true, true);
+    });
+
+    it('should not generate sizes for amp-imgs that already have sizes', () => {
+      let impl;
+      expect(isExperimentOn(window, 'amp-img-auto-sizes')).to.be.true;
+      return getImg({
+        src: '/examples/img/sample.jpg',
+        srcset: SRCSET_STRING,
+        sizes: '50vw',
+        width: 300,
+        height: 200,
+      }).then(ampImg => {
+        impl = ampImg.implementation_;
+        impl.buildCallback();
+        return impl.layoutCallback();
+      }).then(() => {
+        const img = impl.img_;
+        expect(img.getAttribute('sizes')).to.equal('50vw');
+      });
+    });
+
+    it('should not generate sizes for amp-imgs without srcset', () => {
+      let impl;
+      expect(isExperimentOn(window, 'amp-img-auto-sizes')).to.be.true;
+      return getImg({
+        src: '/examples/img/sample.jpg',
+        width: 300,
+        height: 200,
+      }).then(ampImg => {
+        impl = ampImg.implementation_;
+        impl.buildCallback();
+        return impl.layoutCallback();
+      }).then(() => {
+        const img = impl.img_;
+        expect(img.getAttribute('sizes')).to.be.null;
+      });
+    });
+
+    it('should not generate sizes for amp-imgs with x descriptors', () => {
+      let impl;
+      expect(isExperimentOn(window, 'amp-img-auto-sizes')).to.be.true;
+      return getImg({
+        srcset: '/examples/img/hero@1x.jpg, /examples/img/hero@2x.jpg 2x',
+        width: 300,
+        height: 200,
+      }).then(ampImg => {
+        impl = ampImg.implementation_;
+        impl.buildCallback();
+        return impl.layoutCallback();
+      }).then(() => {
+        const img = impl.img_;
+        expect(img.getAttribute('sizes')).to.be.null;
+      });
+    });
+
+    it('should generate correct sizes for layout fixed', () => {
+      expect(isExperimentOn(window, 'amp-img-auto-sizes')).to.be.true;
+      const impl = getStubbedImg({
+        layout: Layout.FIXED,
+        src: 'test.jpg',
+        srcset: 'large.jpg 2000w, small.jpg 1000w',
+        width: 300,
+        height: 200,
+      }, 300);
+      impl.buildCallback();
+      impl.initialize_();
+      const img = impl.img_;
+      expect(impl.getViewport().getWidth()).to.equal(320);
+      expect(img.getAttribute('sizes')).to
+          .equal('(max-width: 320px) 300px, 300px');
+    });
+
+    it('should generate correct sizes for layout responsive', () => {
+      expect(isExperimentOn(window, 'amp-img-auto-sizes')).to.be.true;
+      const impl = getStubbedImg({
+        layout: Layout.RESPONSIVE,
+        src: 'test.jpg',
+        srcset: 'large.jpg 2000w, small.jpg 1000w',
+        width: 300,
+        height: 200,
+      }, 160);
+      impl.buildCallback();
+      impl.initialize_();
+      const img = impl.img_;
+      expect(impl.getViewport().getWidth()).to.equal(320);
+      expect(img.getAttribute('sizes')).to
+          .equal('(max-width: 320px) 160px, 100vw');
+    });
+
+    it('should generate correct sizes for layout fixed-height', () => {
+      expect(isExperimentOn(window, 'amp-img-auto-sizes')).to.be.true;
+      const impl = getStubbedImg({
+        layout: Layout.FIXED_HEIGHT,
+        src: 'test.jpg',
+        srcset: 'large.jpg 2000w, small.jpg 1000w',
+        width: 300,
+        height: 200,
+      }, 160);
+      impl.buildCallback();
+      impl.initialize_();
+      const img = impl.img_;
+      expect(impl.getViewport().getWidth()).to.equal(320);
+      expect(img.getAttribute('sizes')).to
+          .equal('(max-width: 320px) 160px, 100vw');
+    });
+
+    it('should generate correct sizes for layout fill', () => {
+      expect(isExperimentOn(window, 'amp-img-auto-sizes')).to.be.true;
+      const impl = getStubbedImg({
+        layout: Layout.FILL,
+        src: 'test.jpg',
+        srcset: 'large.jpg 2000w, small.jpg 1000w',
+        width: 300,
+        height: 200,
+      }, 160);
+      impl.buildCallback();
+      impl.initialize_();
+      const img = impl.img_;
+      expect(impl.getViewport().getWidth()).to.equal(320);
+      expect(img.getAttribute('sizes')).to
+          .equal('(max-width: 320px) 160px, 100vw');
+    });
+
+    it('should generate correct sizes for layout flex-item', () => {
+      expect(isExperimentOn(window, 'amp-img-auto-sizes')).to.be.true;
+      const impl = getStubbedImg({
+        layout: Layout.FLEX_ITEM,
+        src: 'test.jpg',
+        srcset: 'large.jpg 2000w, small.jpg 1000w',
+        width: 300,
+        height: 200,
+      }, 160);
+      impl.buildCallback();
+      impl.initialize_();
+      const img = impl.img_;
+      expect(impl.getViewport().getWidth()).to.equal(320);
+      expect(img.getAttribute('sizes')).to
+          .equal('(max-width: 320px) 160px, 100vw');
+    });
+
   });
 });

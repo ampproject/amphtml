@@ -13,14 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {LocalizedStringBundleDef, LocalizedStringId} from '../localization';
+import {
+  LocalizedStringBundleDef,
+  LocalizedStringId,
+} from '../../../../src/localized-strings';
 
 
 /**
  * Localized string bundle used for English strings.
  * @const {!LocalizedStringBundleDef}
  */
-export default /** @const {!LocalizedStringBundleDef} */ ({
+const strings = {
   [LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT]: {
     string: 'Sound off',
     description: 'Text that informs users that the sound is off after they ' +
@@ -94,6 +97,12 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
     string: 'Tap Back',
     description: 'Label indicating that users can navigate to the previous ' +
         'page, in the amp-story hint UI.',
+  },
+  [LocalizedStringId.AMP_STORY_SHARING_PAGE_LABEL]: {
+    string: 'Share starting from this page',
+    description: 'Checkbox label when the branching experiment is turned on ' +
+        ' and the story is in landscape mode; checking the checkbox lets the ' +
+        'user share the story from the current page.',
   },
   [LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT]: {
     string: 'Could not copy link to clipboard :(',
@@ -197,4 +206,6 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
     description: 'Text for a warning screen that informs the user that ' +
         'their browser does not support stories.',
   },
-});
+};
+
+export default strings;

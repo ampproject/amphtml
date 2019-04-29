@@ -57,9 +57,6 @@ export class ViewportBindingIosEmbedWrapper_ {
     this.wrapper_ = wrapper;
     wrapper.id = 'i-amphtml-wrapper';
     wrapper.className = topClasses;
-    if (isExperimentOn(win, 'scroll-height-minheight')) {
-      wrapper.classList.add('i-amphtml-body-minheight');
-    }
 
     /** @private @const {!Observable} */
     this.scrollObservable_ = new Observable();
@@ -239,11 +236,14 @@ export class ViewportBindingIosEmbedWrapper_ {
   /** @override */
   getContentHeight() {
     // Don't use scrollHeight, since it returns `MAX(viewport_height,
-    // document_height)`, even though we only want the latter. Also, it doesn't
-    // account for margins
+    // document_height)` (we only want the latter), and it doesn't account
+    // for margins.
     const scrollingElement = this.win.document.body;
     const rect = scrollingElement./*OK*/getBoundingClientRect();
     const style = computedStyle(this.win, scrollingElement);
+    // Note: unlike viewport-binding-natural.js, there's no need to calculate
+    // the "top gap" since the wrapped body _does_ account for child margins.
+    // However, the parent's paddingTop still needs to be added.
     return rect.height
         + this.paddingTop_
         + parseInt(style.marginTop, 10)
@@ -252,18 +252,6 @@ export class ViewportBindingIosEmbedWrapper_ {
 
   /** @override */
   contentHeightChanged() {
-    if (isExperimentOn(this.win, 'scroll-height-bounce')) {
-      // Refresh the overscroll (`-webkit-overflow-scrolling: touch`) to avoid
-      // iOS rendering bugs. See #8798 for details.
-      const doc = this.win.document;
-      const {documentElement} = doc;
-      this.vsync_.mutate(() => {
-        documentElement.classList.remove('i-amphtml-ios-overscroll');
-        this.vsync_.mutate(() => {
-          documentElement.classList.add('i-amphtml-ios-overscroll');
-        });
-      });
-    }
   }
 
   /** @override */

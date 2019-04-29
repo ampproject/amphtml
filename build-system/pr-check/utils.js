@@ -34,6 +34,10 @@ const DIST_OUTPUT_FILE =
     isTravisBuild() ? `amp_dist_${travisBuildNumber()}.zip` : '';
 const OUTPUT_DIRS = 'build/ dist/ dist.3p/ EXTENSIONS_CSS_MAP';
 const OUTPUT_STORAGE_LOCATION = 'gs://amp-travis-builds';
+const OUTPUT_STORAGE_KEY_FILE = 'sa-travis-key.json';
+const OUTPUT_STORAGE_PROJECT_ID = 'amp-travis-build-storage';
+const OUTPUT_STORAGE_SERVICE_ACCOUNT =
+    'sa-travis@amp-travis-build-storage.iam.gserviceaccount.com';
 
 /**
  * Prints a summary of files changed by, and commits included in the PR.
@@ -124,12 +128,13 @@ function stopTimer(functionName, fileName, startTime) {
 /**
  * Executes the provided command and times it. Errors, if any, are printed.
  * @param {string} cmd
+ * @param {string} fileName
  * @return {<Object>} Process info.
  */
-function timedExec(cmd) {
-  const startTime = startTimer(cmd);
+function timedExec(cmd, fileName = 'utils.js') {
+  const startTime = startTimer(cmd, fileName);
   const p = exec(cmd);
-  stopTimer(cmd, startTime);
+  stopTimer(cmd, fileName, startTime);
   return p;
 }
 
@@ -151,7 +156,7 @@ function timedExecOrDie(cmd, fileName = 'utils.js') {
  * @param {string} outputFileName
  * @private
  */
-function downloadOutput_(functionName, outputFileName) {
+async function downloadOutput_(functionName, outputFileName) {
   const fileLogPrefix = colors.bold(colors.yellow(`${functionName}:`));
   const buildOutputDownloadUrl =
     `${OUTPUT_STORAGE_LOCATION}/${outputFileName}`;
@@ -160,6 +165,7 @@ function downloadOutput_(functionName, outputFileName) {
       `${fileLogPrefix} Downloading build output from ` +
       colors.cyan(buildOutputDownloadUrl) + '...');
   exec('echo travis_fold:start:download_results && echo');
+  authenticateWithStorageLocation_();
   execOrDie(`gsutil cp ${buildOutputDownloadUrl} ${outputFileName}`);
   exec('echo travis_fold:end:download_results');
 
@@ -171,7 +177,7 @@ function downloadOutput_(functionName, outputFileName) {
 
   console.log(fileLogPrefix, 'Verifying extracted files...');
   exec('echo travis_fold:start:verify_unzip_results && echo');
-  execOrDie(`ls -la ${OUTPUT_DIRS}`);
+  execOrDie(`ls -laR ${OUTPUT_DIRS}`);
   exec('echo travis_fold:end:verify_unzip_results');
 }
 
@@ -181,7 +187,7 @@ function downloadOutput_(functionName, outputFileName) {
  * @param {string} outputFileName
  * @private
  */
-function uploadOutput_(functionName, outputFileName) {
+async function uploadOutput_(functionName, outputFileName) {
   const fileLogPrefix = colors.bold(colors.yellow(`${functionName}:`));
 
   console.log(
@@ -196,9 +202,19 @@ function uploadOutput_(functionName, outputFileName) {
       `${fileLogPrefix} Uploading ` + colors.cyan(outputFileName) + ' to ' +
       colors.cyan(OUTPUT_STORAGE_LOCATION) + '...');
   exec('echo travis_fold:start:upload_results && echo');
-  execOrDie(`gsutil -m cp -r ${outputFileName} ` +
-      `${OUTPUT_STORAGE_LOCATION}`);
+  authenticateWithStorageLocation_();
+  execOrDie(`gsutil -m cp -r ${outputFileName} ${OUTPUT_STORAGE_LOCATION}`);
   exec('echo travis_fold:end:upload_results');
+}
+
+function authenticateWithStorageLocation_() {
+  decryptTravisKey_();
+  execOrDie('gcloud auth activate-service-account ' +
+  `--key-file ${OUTPUT_STORAGE_KEY_FILE}`);
+  execOrDie(`gcloud config set account ${OUTPUT_STORAGE_SERVICE_ACCOUNT}`);
+  execOrDie('gcloud config set pass_credentials_to_gsutil true');
+  execOrDie(`gcloud config set project ${OUTPUT_STORAGE_PROJECT_ID}`);
+  execOrDie('gcloud config list');
 }
 
 /**
@@ -231,6 +247,17 @@ function uploadBuildOutput(functionName) {
  */
 function uploadDistOutput(functionName) {
   uploadOutput_(functionName, DIST_OUTPUT_FILE);
+}
+
+/**
+ * Decrypts key used by storage service account
+ */
+function decryptTravisKey_() {
+  // -md sha256 is required due to encryption differences between
+  // openssl 1.1.1a, which was used to encrypt the key, and
+  // openssl 1.0.2g, which is used by Travis to decrypt.
+  execOrDie(`openssl aes-256-cbc -md sha256 -k ${process.env.GCP_TOKEN} -in ` +
+      `build-system/sa-travis-key.json.enc -out ${OUTPUT_STORAGE_KEY_FILE} -d`);
 }
 
 module.exports = {

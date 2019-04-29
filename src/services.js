@@ -253,6 +253,16 @@ export class Services {
   }
 
   /**
+   * Returns service to listen for `hidden` attribute mutations.
+   * @param {!Element|!ShadowRoot} element
+   * @return {!./service/hidden-observer-impl.HiddenObserver}
+   */
+  static hiddenObserverForDoc(element) {
+    return /** @type {!./service/hidden-observer-impl.HiddenObserver} */ (
+      getExistingServiceForDocInEmbedScope(element, 'hidden-observer'));
+  }
+
+  /**
    * Returns service implemented in service/history-impl.
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @return {!./service/history-impl.History}
@@ -327,6 +337,15 @@ export class Services {
   }
 
   /**
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @return {!Promise<!./service/resources-impl.Resources>}
+   */
+  static resourcesPromiseForDoc(elementOrAmpDoc) {
+    return /** @type {!Promise<!./service/resources-impl.Resources>} */ (
+      getServicePromiseForDoc(elementOrAmpDoc, 'resources'));
+  }
+
+  /**
    * @param {!Window} win
    * @return {?Promise<?{incomingFragment: string, outgoingFragment: string}>}
    */
@@ -370,6 +389,15 @@ export class Services {
 
   /**
    * @param {!Window} win
+   * @return {?../extensions/amp-story/1.0/amp-story-media-query-service.AmpStoryMediaQueryService}
+   */
+  static storyMediaQueryService(win) {
+    return (/** @type {?../extensions/amp-story/1.0/amp-story-media-query-service.AmpStoryMediaQueryService} */
+      (getExistingServiceOrNull(win, 'story-media-query')));
+  }
+
+  /**
+   * @param {!Window} win
    * @return {?../extensions/amp-story/1.0/amp-story-request-service.AmpStoryRequestService}
    */
   static storyRequestService(win) {
@@ -379,17 +407,17 @@ export class Services {
 
   /**
    * @param {!Window} win
-   * @return {!Promise<?../extensions/amp-story/1.0/localization.LocalizationService>}
+   * @return {!Promise<?./service/localization.LocalizationService>}
    */
   static localizationServiceForOrNull(win) {
     return (
-    /** @type {!Promise<?../extensions/amp-story/1.0/localization.LocalizationService>} */
+    /** @type {!Promise<?./service/localization.LocalizationService>} */
       (getElementServiceIfAvailable(win, 'localization', 'amp-story', true)));
   }
 
   /**
    * @param {!Window} win
-   * @return {!../extensions/amp-story/1.0/localization.LocalizationService}
+   * @return {!./service/localization.LocalizationService}
    */
   static localizationService(win) {
     return getService(win, 'localization');
@@ -436,11 +464,11 @@ export class Services {
   /**
    * TODO(#14357): Remove this when amp-story:0.1 is deprecated.
    * @param {!Window} win
-   * @return {!Promise<?../extensions/amp-story/0.1/localization.LocalizationService>}
+   * @return {!Promise<?./service/localization.LocalizationService>}
    */
   static localizationServiceForOrNullV01(win) {
     return (
-    /** @type {!Promise<?../extensions/amp-story/0.1/localization.LocalizationService>} */
+    /** @type {!Promise<?./service/localization.LocalizationService>} */
       (getElementServiceIfAvailable(win, 'localization-v01', 'amp-story',
           true)));
   }
@@ -448,7 +476,7 @@ export class Services {
   /**
    * TODO(#14357): Remove this when amp-story:0.1 is deprecated.
    * @param {!Window} win
-   * @return {!../extensions/amp-story/0.1/localization.LocalizationService}
+   * @return {!./service/localization.LocalizationService}
    */
   static localizationServiceV01(win) {
     return getService(win, 'localization-v01');
@@ -576,6 +604,17 @@ export class Services {
   static videoManagerForDoc(elementOrAmpDoc) {
     return (/** @type {!./service/video-manager-impl.VideoManager} */ (
       getServiceForDoc(elementOrAmpDoc, 'video-manager')));
+  }
+
+  /**
+   * @param {!Element|!ShadowRoot} element
+   * @return {!Promise<?../extensions/amp-viewer-assistance/0.1/amp-viewer-assistance.AmpViewerAssistance>}
+   */
+  static viewerAssistanceForDocOrNull(element) {
+    return (
+    /** @type {!Promise<?../extensions/amp-viewer-assistance/0.1/amp-viewer-assistance.AmpViewerAssistance>} */
+      (getElementServiceIfAvailableForDoc(element, 'amp-viewer-assistance',
+          'amp-viewer-assistance')));
   }
 
   /**

@@ -294,10 +294,10 @@ class ScrollElement {
     placeholder.classList.add('amp-access-scroll-placeholder');
     const img = document.createElement('img');
     img.setAttribute('src',
-        'https://static.scroll.com/assets/icn-scroll-logo.svg');
+        'https://static.scroll.com/assets/icn-scroll-logo32-9f4ceef399905139bbd26b87bfe94542.svg');
     img.setAttribute('layout', 'fixed');
-    img.setAttribute('width', 26);
-    img.setAttribute('height', 26);
+    img.setAttribute('width', 32);
+    img.setAttribute('height', 32);
     placeholder.appendChild(img);
     this.ampdoc_.getBody().appendChild(placeholder);
 

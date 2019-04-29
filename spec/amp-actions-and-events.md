@@ -205,6 +205,20 @@ event.index</pre></td>
   </tr>
 </table>
 
+### amp-list
+<table>
+  <tr>
+    <th width="25%">Event</th>
+    <th width="35%">Description</th>
+    <th width="40%">Data</th>
+  </tr>
+  <tr>
+    <td><code>fetch-error</code>(low-trust)</td>
+    <td>Fired when fetching data fails.</td>
+    <td>None</td>
+  </tr>
+</table>
+
 ### amp-selector
 <table>
   <tr>
@@ -238,6 +252,20 @@ event.selectedOptions</pre></td>
   <tr>
     <td><code>sidebarClose</code></td>
     <td>Fired when sidebar is fully closed after transition has ended.</td>
+    <td>None</td>
+  </tr>
+</table>
+
+### amp-state
+<table>
+  <tr>
+    <th width="25%">Event</th>
+    <th width="35%">Description</th>
+    <th width="40%">Data</th>
+  </tr>
+  <tr>
+    <td><code>fetch-error</code>(low-trust)</td>
+    <td>Fired when fetching data fails.</td>
     <td>None</td>
   </tr>
 </table>
@@ -328,12 +356,13 @@ event.response</pre></td>
   </tr>
   <tr>
     <td><code>scrollTo(duration=INTEGER, position=STRING)</code></td>
-    <td>Scrolls an element into view with a smooth animation. If defined,
-    <code>duration</code> specifies the length of the animation in milliseconds
-    (default is 500ms). <code>position</code> is optional and takes one of
-    <code>top</code>, <code>center</code> or <code>bottom</code> defining where
-    in the viewport the element will be at the end of the scroll (default is
-    <code>top</code>).</td>
+    <td>Scrolls an element into view with a smooth animation.<br>
+    <code>duration</code> is optional. Specifies the length of the animation in milliseconds. If unspecified, an amount relative to scroll difference
+    under or equal to 500 milliseconds is used.<br>
+    <code>position</code> is optional. One of <code>top</code>, <code>center</code>
+    or <code>bottom</code> (default <code>top</code>).
+    Specifies the position of the element relative to the viewport after
+    scrolling.</td>
   </tr>
   <tr>
     <td><code>focus</code></td>

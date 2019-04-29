@@ -1,0 +1,89 @@
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>amp-experiment</title>
+  <link rel="canonical" href="amps.html" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async custom-element="amp-experiment" src="https://cdn.ampproject.org/v0/amp-experiment-1.0.js"></script>
+  <script async custom-element="amp-user-notification" src="https://cdn.ampproject.org/v0/amp-user-notification-0.1.js"></script>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <style amp-custom>
+  </style>
+</head>
+<body>
+  <h1>Title TBD</h1>
+
+  <ul>
+    <li><a href="#amp-x-background-color-test=yellow" target="_blank">#amp-x-background-color-test=yellow</a></li>
+    <li><a href="#amp-x-background-color-test=green" target="_blank">#amp-x-background-color-test=green</a></li>
+  </ul>
+
+  <amp-experiment>
+    <script type="application/json">
+      {
+        "background-color-test": {
+          "consentNotificationId": "amp-user-notification",
+          "variants": {
+            "yellow": {
+              "weight": 50,
+              "mutations": [
+                {
+                  "type": "attributes",
+                  "target": "h1",
+                  "attributeName": "style",
+                  "value": "background-color: #FFFF00"
+                }
+              ]
+            },
+            "red": {
+              "weight": 50,
+              "mutations": [
+                {
+                  "type": "attributes",
+                  "target": "h1",
+                  "attributeName": "style",
+                  "value": "background-color: #FF0000"
+                }
+              ]
+            }
+          }
+        },
+        "text-content-test": {
+          "sticky": false,
+          "variants": {
+            "firstVariant": {
+              "weight": 50,
+              "mutations": [
+                {
+                  "type": "characterData",
+                  "target": "h1",
+                  "value": "First characterData Variant"
+                }
+              ]
+            },
+            "secondVariant": {
+              "weight": 50,
+              "mutations": [
+                {
+                  "type": "characterData",
+                  "target": "h1",
+                  "value": "Second characterData Variant"
+                }
+              ]
+            }
+          }
+        }
+      }
+    </script>
+  </amp-experiment>
+  <amp-pixel src="https://donot.worry/?background-color-test=VARIANT(background-color-test)&text-content-test=VARIANT(text-content-test)&variants=VARIANTS"></amp-pixel>
+  <amp-user-notification
+      layout=nodisplay
+      id="amp-user-notification">
+    Dismiss this notification to see a background-color on the title on your next visit.
+    <button on="tap:amp-user-notification.dismiss" role="button">I accept</button>
+  </amp-user-notification>
+</body>
+</html>

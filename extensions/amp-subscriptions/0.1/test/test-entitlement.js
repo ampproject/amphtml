@@ -31,6 +31,7 @@ describes.realWin('EntitlementClass', {}, () => {
       token: 'token',
     },
   };
+
   it('should give json representation of the object', () => {
     const raw = 'raw';
     const entitlement = new Entitlement({source, raw, service, granted,
@@ -42,6 +43,15 @@ describes.realWin('EntitlementClass', {}, () => {
       grantReason,
       data: dataObject,
     });
+  });
+
+  it('should not return the decrypted key in the json', () => {
+    const raw = 'raw';
+    const decryptedDocumentKey = 'decryptedDocumentKey';
+    const entitlement = new Entitlement({source, raw, service, granted,
+      grantReason, dataObject, decryptedDocumentKey});
+    expect(entitlement.json().decryptedDocumentKey).to.be.undefined;
+    expect(entitlement.decryptedDocumentKey).to.equal(decryptedDocumentKey);
   });
 
   it('should be able to parse itself from json', () => {

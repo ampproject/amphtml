@@ -23,6 +23,11 @@ import {
   getResponsiveAttributeValue,
 } from './responsive-attributes';
 import {Services} from '../../../src/services';
+import {
+  closestAncestorElementBySelector,
+  iterateCursor,
+  toggleAttribute,
+} from '../../../src/dom';
 import {createCustomEvent, getDetail} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
@@ -30,6 +35,7 @@ import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {toArray} from '../../../src/types';
+
 
 /**
  * @param {!Element} el The Element to check.
@@ -52,6 +58,12 @@ class AmpCarousel extends AMP.BaseElement {
 
     /** @private {!Array<!Element>} */
     this.slides_ = [];
+
+    /** @private {?Element} */
+    this.nextArrowSlot_ = null;
+
+    /** @private {?Element} */
+    this.prevArrowSlot_ = null;
 
     /**
      * Whether or not the user has interacted with the carousel using touch in
@@ -88,9 +100,6 @@ class AmpCarousel extends AMP.BaseElement {
       },
       'mixed-length': newValue => {
         this.carousel_.updateMixedLength(newValue == 'true');
-      },
-      'side-slide-count': newValue => {
-        this.carousel_.updateSideSlideCount(Number(newValue) || 0);
       },
       'slide': newValue => {
         this.carousel_.goToSlide(Number(newValue));
@@ -153,13 +162,13 @@ class AmpCarousel extends AMP.BaseElement {
       slide.classList.add('i-amphtml-carousel-slotted');
       scrollContainer.appendChild(slide);
     });
-    const prevArrowSlot = this.element.querySelector(
+    this.prevArrowSlot_ = this.element.querySelector(
         '.i-amphtml-carousel-arrow-prev-slot');
-    const nextArrowSlot = this.element.querySelector(
+    this.nextArrowSlot_ = this.element.querySelector(
         '.i-amphtml-carousel-arrow-next-slot');
     // Slot the arrows, with defaults
-    prevArrowSlot.appendChild(prevArrow || this.createPrevArrow_());
-    nextArrowSlot.appendChild(nextArrow || this.createNextArrow_());
+    this.prevArrowSlot_.appendChild(prevArrow || this.createPrevArrow_());
+    this.nextArrowSlot_.appendChild(nextArrow || this.createNextArrow_());
 
     // Handle the initial set of attributes
     toArray(this.element.attributes).forEach(attr => {
@@ -171,10 +180,10 @@ class AmpCarousel extends AMP.BaseElement {
     this.element.addEventListener('indexchange', event => {
       this.onIndexChanged_(event);
     });
-    prevArrowSlot.addEventListener('click', () => {
+    this.prevArrowSlot_.addEventListener('click', () => {
       this.carousel_.prev(ActionSource.GENERIC_HIGH_TRUST);
     });
-    nextArrowSlot.addEventListener('click', () => {
+    this.nextArrowSlot_.addEventListener('click', () => {
       this.carousel_.next(ActionSource.GENERIC_HIGH_TRUST);
     });
 
@@ -191,8 +200,26 @@ class AmpCarousel extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    // TODO(sparhami) #19259 Tracks a more generic way to do this. Remove once
+    // we have something better.
+    const isScaled = closestAncestorElementBySelector(
+        this.element, '[i-amphtml-scale-animation]');
+    if (isScaled) {
+      return Promise.resolve();
+    }
+
     this.carousel_.updateUi();
     return Promise.resolve();
+  }
+
+  /** @override */
+  pauseCallback() {
+    this.carousel_.pauseAutoAdvance();
+  }
+
+  /** @override */
+  resumeCallback() {
+    this.carousel_.resumeAutoAdvance();
   }
 
   /** @override */
@@ -213,16 +240,30 @@ class AmpCarousel extends AMP.BaseElement {
   }
 
   /**
+   * Goes to the next slide. This should be called from a user interaction.
+   */
+  interactionNext() {
+    this.carousel_.next(ActionSource.GENERIC_HIGH_TRUST);
+  }
+
+  /**
+   * Goes to the previous slide. This should be called from a user interaction.
+   */
+  interactionPrev() {
+    this.carousel_.prev(ActionSource.GENERIC_HIGH_TRUST);
+  }
+
+  /**
    * @return {!Element}
    * @private
    */
   renderContainerDom_() {
     const html = htmlFor(this.element);
     return html`
-      <div>
+      <div class="i-amphtml-carousel-content">
         <div class="i-amphtml-carousel-scroll"></div>
-        <div class="i-amphtml-carousel-arrow-next-slot"></div>
         <div class="i-amphtml-carousel-arrow-prev-slot"></div>
+        <div class="i-amphtml-carousel-arrow-next-slot"></div>
       </div>
     `;
   }
@@ -288,11 +329,19 @@ class AmpCarousel extends AMP.BaseElement {
    */
   updateUi_() {
     const index = this.carousel_.getCurrentIndex();
-    this.element.setAttribute('i-amphtml-carousel-at-start', index == 0);
-    this.element.setAttribute(
-        'i-amphtml-carousel-at-end', index == this.slides_.length - 1);
-    this.element.setAttribute(
-        'i-amphtml-carousel-hide-buttons', this.hadTouch_);
+    const loop = this.carousel_.getLoop();
+    // TODO(sparhami) for Shadow DOM, we will need to get the assigned nodes
+    // instead.
+    iterateCursor(this.prevArrowSlot_.children, child => {
+      const disabled = !loop && index == 0;
+      toggleAttribute(child, 'disabled', disabled);
+    });
+    iterateCursor(this.nextArrowSlot_.children, child => {
+      const disabled = !loop && index == this.slides_.length - 1;
+      toggleAttribute(child, 'disabled', disabled);
+    });
+    toggleAttribute(
+        this.element, 'i-amphtml-carousel-hide-buttons', this.hadTouch_);
   }
 
   /**
@@ -346,7 +395,8 @@ class AmpCarousel extends AMP.BaseElement {
 }
 
 AMP.extension('amp-base-carousel', '0.1', AMP => {
-  if (!isExperimentOn(AMP.win, 'amp-base-carousel')) {
+  if (!isExperimentOn(AMP.win, 'amp-base-carousel') &&
+      !isExperimentOn(AMP.win, 'amp-lightbox-gallery-base-carousel')) {
     return;
   }
 

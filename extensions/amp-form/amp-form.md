@@ -428,6 +428,10 @@ For more examples, see [examples/forms.amp.html](../../examples/forms.amp.html).
 
 For validation messages, if your element contains no text content inside, AMP will fill it out with the browser's default validation message. In the example above, when the `name5` input is empty and validation is kicked off (i.e., user tried to submit the form) AMP will fill `<span visible-when-invalid="valueMissing" validation-for="name5"></span>` with the browser's validation message and show that `span` to the user.
 
+{% call callout('Important', type='caution') %}
+You must provide your own validation UI for each kind of invalid state that the input could have. If these are not present, users will not see any `custom-validation-reporting` for the missing error state. The validity states can be found in the [official W3C HTML validation reporting documentation](https://www.w3.org/TR/html50/forms.html#validitystate).
+{% endcall %}
+
 ### Reporting strategies
 
 Specify one of the following reporting options for the `custom-validation-reporting` attribute:
@@ -570,7 +574,7 @@ The `:user-invalid` and `:user-valid` pseudo classes are part of the [future CSS
 
 One of the main differences between `:invalid` and `:user-invalid` is when are they applied to the element. The `:user-invalid` class is applied after a significant interaction from the user with the field (e.g., the user types in a field, or blurs from the field).
 
-The `amp-form` extension provides [classes](#classes-and-css-hooks) to polyfill these pseudo-classes. The `amp-form` extension also propagates these to ancestors `fieldset`elements and `form`.
+The `amp-form` extension provides [classes](#classes-and-css-hooks) to polyfill these pseudo-classes. The `amp-form` extension also propagates these to the ancestor `form`. However, `fieldset` elements are only ever set to have class 'user-valid' to be consistent with browser behaviour.
 
 #### `<textarea>` validation
 

@@ -9,6 +9,7 @@
     <meta name="viewport"
           content="width=device-width,minimum-scale=1,initial-scale=1">
     <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <link rel="canonical" href="index.html">
     <style amp-custom>
       amp-story-page {
         background: black;
@@ -34,29 +35,58 @@
         text-align: center;
         color: white;
       }
+
+      amp-twitter.interactive-embed {
+        background-color: blue;
+        width: 100px;
+        height: 200px;
+      }
+
+      amp-twitter.non-interactive-embed {
+        background-color: red;
+        width: 50px;
+        height: 200px;
+      }
     </style>
   </head>
 
   <body>
     <amp-story standalone publisher="AMP Team" title="Visual Diff Test"
-        publisher-logo-src="https://www.ampproject.org/static/img/icons/120.png"
-        poster-portrait-src="https://picsum.photos/900/1600?image=981"
-        poster-landscape-src="https://picsum.photos/1600/900?image=981"
-        poster-square-src="https://picsum.photos/1600/1600?image=981">
+        publisher-logo-src="/examples/visual-tests/photos/120.png"
+        poster-portrait-src="/examples/visual-tests/picsum.photos/image981_900x1600.jpg"
+        poster-landscape-src="/examples/visual-tests/picsum.photos/image981_1600x900.jpg"
+        poster-square-src="/examples/visual-tests/picsum.photos/image981_1600x1600.jpg">
 
       <amp-story-page id="cover">
         <amp-story-grid-layer template="vertical">
           <h1 class="hello-world">Hello world!</h1>
-          <p>Page one of two</p>
+          <p>Page one of four</p>
         </amp-story-grid-layer>
       </amp-story-page>
 
       <amp-story-page id="page-2">
         <amp-story-grid-layer template="vertical">
           <h1 class="hello-world">Hello world!</h1>
-          <p>Page two of two</p>
-          <a href="google.com" role="link"  class="title-small center">Click me!</a>
+          <p>Page two of four</p>
+          <a href="google.com" role="link" data-tooltip-text="Hola" class="title-small center">Click me!</a>
+          <amp-twitter class="interactive-embed" interactive></amp-twitter>
+          <p>Text under embed</p>
         </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="page-3">
+        <amp-story-grid-layer template="vertical">
+          <h1 class="hello-world">Page with non-interactive embed</h1>
+          <p>Page three of four</p>
+          <amp-twitter class="non-interactive-embed"></amp-twitter>
+          <p>Text under embed</p>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="page-4">
+        <amp-story-grid-layer template="vertical">
+          <h1 class="hello-world">Empty page</h1>
+          <p>Page four of four</p>
       </amp-story-page>
 
     </amp-story>

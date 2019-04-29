@@ -93,7 +93,7 @@ amp-story[standalone].i-amphtml-story-desktop-panels {
   transform: scale(0.9) translateX(calc(250% + 192px)) translateY(0%) !important;
   opacity: 0.05 !important;
   transform-origin: left !important;
-  border-radius: 16px !important;
+  border-radius: 0 !important;
 }
 
 [dir=rtl] .i-amphtml-story-desktop-panels amp-story-page.i-amphtml-element {
@@ -180,7 +180,8 @@ amp-story[standalone].i-amphtml-story-desktop-panels {
 }
 
 .i-amphtml-story-desktop-panels > amp-story-page,
-.i-amphtml-story-desktop-panels .i-amphtml-story-page-sentinel {
+.i-amphtml-story-desktop-panels .i-amphtml-story-page-sentinel,
+.i-amphtml-story-desktop-panels .i-amphtml-story-media-query-matcher {
   left: 50%!important;
   right: auto !important;
   margin: auto !important;
@@ -191,5 +192,5 @@ amp-story[standalone].i-amphtml-story-desktop-panels {
 }
 
 .i-amphtml-story-desktop-panels > amp-story-page {
-  box-shadow: 0 0 15px rgba(0, 0, 0, .4)!important;
+  box-shadow: 0 50px 200px rgba(0, 0, 0, 0.7) !important
 }
