@@ -76,8 +76,8 @@ export class AmpScript extends AMP.BaseElement {
 
   /** @return {!Promise<boolean>} */
   isExperimentOn_() {
-    if (!isExperimentOn(this.win, 'amp-script')) {
-      return Promise.resolve(false);
+    if (isExperimentOn(this.win, 'amp-script')) {
+      return Promise.resolve(true);
     }
     installOriginExperimentsForDoc(this.getAmpDoc());
     return originExperimentsForDoc(this.element)
