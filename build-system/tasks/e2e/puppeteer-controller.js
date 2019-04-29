@@ -23,6 +23,7 @@ const {
 } = require('puppeteer');
 const {
   ControllerPromise,
+  DOMRectDef,
   ElementHandle,
   FunctionalTestController, // eslint-disable-line no-unused-vars
 } = require('./functional-test-controller');
@@ -352,7 +353,7 @@ class PuppeteerController {
 
   /**
    * @param {!ElementHandle<!PuppeteerHandle>} handle
-   * @return {!Promise<!DomRect>}
+   * @return {!Promise<!DOMRectDef>}
    * @override
    */
   getElementRect(handle) {

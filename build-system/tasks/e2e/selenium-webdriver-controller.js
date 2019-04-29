@@ -23,6 +23,7 @@ const {
 } = require('selenium-webdriver');
 const {
   ControllerPromise,
+  DOMRectDef,
   ElementHandle,
 } = require('./functional-test-controller');
 const {expect} = require('chai');
@@ -320,7 +321,7 @@ class SeleniumWebDriverController {
 
   /**
    * @param {!ElementHandle<!WebElement>} handle
-   * @return {!Promise<!DomRect>}
+   * @return {!Promise<!DOMRectDef>}
    * @override
    */
   getElementRect(handle) {
@@ -330,8 +331,6 @@ class SeleniumWebDriverController {
       // the raw ClientRect from the element, in terms of flakiness.
       // The raw ClientRect also has hundredths of a pixel. We round to int.
       const {
-        x,
-        y,
         width,
         height,
         top,
@@ -340,8 +339,8 @@ class SeleniumWebDriverController {
         right,
       } = element./*OK*/getBoundingClientRect();
       return {
-        x: Math.round(x),
-        y: Math.round(y),
+        x: Math.round(left),
+        y: Math.round(top),
         width: Math.round(width),
         height: Math.round(height),
         top: Math.round(top),

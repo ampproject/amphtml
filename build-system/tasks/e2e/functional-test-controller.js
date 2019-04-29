@@ -439,6 +439,20 @@ class FunctionalTestController {
 */
 let WindowRectDef;
 
+/**
+ * @typedef {{
+ *   x: number,
+ *   y: number,
+ *   top: number,
+ *   bottom: number,
+ *   left: number,
+ *   right: number,
+ *   width: number,
+ *   height: number
+ * }}
+*/
+let DOMRectDef;
+
 /** @enum {string} */
 // export let ScrollBehavior = {
 //   AUTO: 'auto',
@@ -459,5 +473,6 @@ module.exports = {
   ControllerPromise,
   FunctionalTestController,
   WindowRectDef,
+  DOMRectDef,
   ScrollToOptionsDef,
 };
