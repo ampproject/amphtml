@@ -6615,7 +6615,7 @@ gulp-help@1.6.1:
     chalk "^1.0.0"
     object-assign "^3.0.0"
 
-gulp-if@^2.0.0:
+gulp-if@2.0.2, gulp-if@^2.0.0:
   version "2.0.2"
   resolved "https://registry.yarnpkg.com/gulp-if/-/gulp-if-2.0.2.tgz#a497b7e7573005041caa2bc8b7dda3c80444d629"
   integrity sha1-pJe351cwBQQcqivIt92jyARE1ik=
