@@ -106,11 +106,12 @@ describe('3p environment', () => {
     let clock;
     let progress;
 
-    function installTimer(win) {
+    beforeEach(() => {
       progress = '';
-      clock = lolex.install({target: win});
-      return clock;
-    }
+      // testWin is created before each test and destroyed when the iframe it
+      // comes from gets detached, causing bugs if we call clock.uninstall().
+      clock = lolex.install({target: testWin});
+    });
 
     function add(p) {
       return function(a, b) {
@@ -124,16 +125,7 @@ describe('3p environment', () => {
       };
     }
 
-    afterEach(() => {
-      if (clock) {
-        clock.tick(10000);
-        clock.uninstall();
-      }
-    });
-
-
     it('throttle setTimeout', () => {
-      installTimer(testWin);
       manageWin(testWin);
       testWin.setTimeout(add('a'), 50);
       testWin.setTimeout(add('b'), 60);
@@ -161,7 +153,6 @@ describe('3p environment', () => {
     });
 
     it('throttle setInterval', () => {
-      installTimer(testWin);
       manageWin(testWin);
       const ia = testWin.setInterval(add('a'), 1);
       testWin.setInterval(add('b'), 10);
@@ -190,7 +181,6 @@ describe('3p environment', () => {
     });
 
     it('should support multi arg forms', () => {
-      installTimer(testWin);
       manageWin(testWin);
       testWin.setTimeout(add('a'), 50, '!', '?');
       testWin.setTimeout(add('b'), 60, 'B');
@@ -200,7 +190,6 @@ describe('3p environment', () => {
     });
 
     it('should cancel uninstrumented timeouts', () => {
-      installTimer(testWin);
       const timeout = testWin.setTimeout(() => {
         throw new Error('should not happen: timeout');
       }, 0);
