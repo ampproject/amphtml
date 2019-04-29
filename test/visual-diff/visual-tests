@@ -682,6 +682,11 @@
         "amp-user-notification.amp-active",
       ],
       "interactive_tests": "examples/visual-tests/amp-user-notification/amp-user-notification.js"
+    },
+    {
+      "url": "examples/visual-tests/amp-autocomplete/amp-autocomplete.amp.html",
+      "name": "amp-autocomplete",
+      "interactive_tests": "examples/visual-tests/amp-autocomplete/amp-autocomplete.js",
     }
   ]
 }
