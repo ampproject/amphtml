@@ -17,15 +17,14 @@
 import {Services} from '../services';
 import {computedStyle} from '../style';
 import {dev, devAssert} from '../log';
-import {getFriendlyIframeEmbedOptional, isInFie} from '../friendly-iframe-embed';
 import {getMode} from '../mode';
+import {isInFie} from '../friendly-iframe-embed';
 import {listen} from '../event-helper';
 import {registerServiceBuilderForDoc} from '../service';
 import {remove} from '../utils/array';
 import {rootNodeFor} from '../dom';
 
 const LAYOUT_PROP = '__AMP_LAYOUT';
-const FRAME_PARENT = '__AMP_FRAME_PARENT';
 
 /**
  * The Size of an element.
@@ -1286,32 +1285,15 @@ function sameDocument(element, other) {
 /**
  * Attempts to cross the FIE boundary to the parent node.
  *
- * @param {!Node} node
+ * @param {!Node} doc
  * @return {?Element}
  */
-function frameParent(node) {
-  devAssert(node.nodeType === Node.DOCUMENT_NODE);
-  const {defaultView} = node;
-  if (!defaultView) {
-    // Somehow, we're disconnected from the window.
-    return null;
-  }
-  return defaultView[FRAME_PARENT] === undefined
-    ? (defaultView[FRAME_PARENT] = frameParentInternal(defaultView))
-    : defaultView[FRAME_PARENT];
-}
-
-/**
- * Grabs the frameElement of the window, which may throw if the parent window
- * is cross origin.
- *
- * @param {!Window} win
- * @return {?Element}
- */
-function frameParentInternal(win) {
+function frameParent(doc) {
+  devAssert(doc.nodeType === Node.DOCUMENT_NODE);
   try {
-    return win && isInFie(win.document.documentElement)
-      ? win.frameElement
+    const {defaultView} = doc;
+    return defaultView && isInFie(doc.documentElement)
+      ? defaultView.frameElement
       : null;
   } catch (e) { }
   return null;
