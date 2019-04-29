@@ -35,6 +35,7 @@ const DIST_OUTPUT_FILE =
 const OUTPUT_DIRS = 'build/ dist/ dist.3p/ EXTENSIONS_CSS_MAP';
 const OUTPUT_STORAGE_LOCATION = 'gs://amp-travis-builds';
 const OUTPUT_STORAGE_KEY_FILE = 'sa-travis-key.json';
+const OUTPUT_STORAGE_PROJECT_ID = 'amp-travis-build-storage';
 const OUTPUT_STORAGE_SERVICE_ACCOUNT =
     'sa-travis@amp-travis-build-storage.iam.gserviceaccount.com';
 
@@ -212,6 +213,7 @@ function authenticateWithStorageLocation_() {
   `--key-file ${OUTPUT_STORAGE_KEY_FILE}`);
   execOrDie(`gcloud config set account ${OUTPUT_STORAGE_SERVICE_ACCOUNT}`);
   execOrDie('gcloud config set pass_credentials_to_gsutil true');
+  execOrDie(`gcloud config set project ${OUTPUT_STORAGE_PROJECT_ID}`);
   execOrDie('gcloud config list');
 }
 
