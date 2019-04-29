@@ -10,6 +10,9 @@
       body {
         padding: 15px;
       }
+      .country-info {
+        font: 8pt 'Courier New', Courier, monospace;
+      }
   </style>
   <script>
       (self.AMP=self.AMP||[]).push((AMP) => {
@@ -35,6 +38,33 @@
       </script>
     </amp-autocomplete>
     <input type="submit" value="Submit">
+  </form>
+
+  <h2>Rich content, remote data</h2>
+  <form
+    id="form2"
+    method="get"
+    action="/form/search-html/get"
+    action-xhr="/form/search-json/get"
+    target="_blank">
+    <amp-autocomplete id="autocomplete2" src="./amp-autocomplete-data.json" max-entries="5"
+      filter="prefix" filter-value="countryName" min-characters="0">
+      <input type="search" id="input2">
+      <template type="amp-mustache">
+        <div value="{{countryName}}">
+          <h3>{{countryName}} ({{countryCode}})</h3>
+          <div class="country-info">
+            The population is <b>{{population}}</b>, and the capital is <b>{{capital}}</b>. The local currency is <b>{{currencyCode}}</b>.
+          </div>
+        </div>
+      </template>
+    </amp-autocomplete>
+    <input type="submit" value="Submit">
+    <div submit-success>
+      <template type="amp-mustache">
+        Success!
+      </template>
+    </div>
   </form>
 </body>
 </html>
