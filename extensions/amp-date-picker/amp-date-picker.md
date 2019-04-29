@@ -99,7 +99,7 @@ By specifying `mode="static"`, the `amp-date-picker` renders a static calendar v
 
 For a static date picker, you must specify a size-defined layout, which can be one of: `fixed`, `fixed-height`, `responsive`, `fill` or `flex-item`.
 
-When the `static` amp-date-picker is rendered in a `<form>`, if there are no [inputs specified with `*input-selector`](#input-selector), the amp-date-picker creates hidden input elements (e.g., `<input type="hidden" ...`). The amp-date-picker names the elements as `date` or `start-date` and `end-date`; if those names are already used in the form, the amp-date-picker attempts to name the input fields with the `id` of the `<amp-date-picker>`.
+When the `static` amp-date-picker is rendered in a `<form>`, if there are no [inputs specified with `*input-selector`](#input-selector), the amp-date-picker creates hidden input elements (e.g., `<input type="hidden" …`). The amp-date-picker names the elements as `date` or `start-date` and `end-date`; if those names are already used in the form, the amp-date-picker attempts to name the input fields with the `id` of the `<amp-date-picker>`.
 
 *Example: static date picker in a form field*
 
@@ -611,8 +611,8 @@ For a single date picker:
 </table>
 
 ```html
-<amp-date-picker type="single" on="select: AMP.setState({date: event.date, templateSelected: event.id})" ...>
-  <!-- ... -->
+<amp-date-picker type="single" on="select: AMP.setState({date: event.date, templateSelected: event.id})" …>
+  <!-- … -->
 </amp-date-picker>
 ```
 
@@ -638,8 +638,8 @@ For a date range picker:
 </table>
 
 ```html
-<amp-date-picker type="range" on="select: AMP.setState({dates: event.dates, firstTemplate: event.start.id})" ...>
-  <!-- ... -->
+<amp-date-picker type="range" on="select: AMP.setState({dates: event.dates, firstTemplate: event.start.id})" …>
+  <!-- … -->
 </amp-date-picker>
 ```
 
