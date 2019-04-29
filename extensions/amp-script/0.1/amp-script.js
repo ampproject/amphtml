@@ -185,7 +185,7 @@ export class SanitizerImpl {
    */
   constructor(win) {
     /** @private {!DomPurifyDef} */
-    this.purifier_ = createPurifier(dict({'IN_PLACE': true}));
+    this.purifier_ = createPurifier(win.document, dict({'IN_PLACE': true}));
 
     /** @const @private {!Element} */
     this.wrapper_ = win.document.createElement('div');
@@ -236,7 +236,7 @@ export class SanitizerImpl {
     const tag = node.nodeName.toLowerCase();
     const attr = attribute.toLowerCase();
 
-    if (validateAttributeChange(this.purifier_, tag, attr, value)) {
+    if (validateAttributeChange(this.purifier_, node, attr, value)) {
       if (value == null) {
         node.removeAttribute(attr);
       } else {
@@ -262,12 +262,11 @@ export class SanitizerImpl {
    * @return {boolean}
    */
   mutateProperty(node, property, value) {
-    const tag = node.nodeName.toLowerCase();
     const prop = property.toLowerCase();
 
     // worker-dom's supported properties and corresponding attribute name
     // differences are minor, e.g. acceptCharset vs. accept-charset.
-    if (validateAttributeChange(this.purifier_, tag, prop, value)) {
+    if (validateAttributeChange(this.purifier_, node, prop, value)) {
       node[property] = value;
       return true;
     }

@@ -611,8 +611,9 @@ describe('validateAttributeChange', () => {
       isValidAttribute: () => true,
     };
 
-    vac = (tag, attr, value) =>
-      validateAttributeChange(purifier, tag, attr, value);
+    vac = (type, attr, value) =>
+      validateAttributeChange(
+          purifier, document.createElement(type), attr, value);
   });
 
   it('should validate script[type]', () => {

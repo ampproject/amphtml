@@ -85,14 +85,15 @@ export function purifyHtml(dirty, doc, diffing = false) {
 }
 
 /**
+ * @param {!Document} doc
  * @param {!JsonObject=} opt_config
  * @return {!DomPurifyDef}
  */
-export function createPurifier(opt_config) {
+export function createPurifier(doc, opt_config) {
   const domPurify = purify(self);
   const config = Object.assign(opt_config || {}, purifyConfig());
   domPurify.setConfig(config);
-  addPurifyHooks(domPurify, /* diffing */ false);
+  addPurifyHooks(domPurify, /* diffing */ false, doc);
   return domPurify;
 }
 
@@ -128,7 +129,7 @@ function purifyConfig() {
  * @param {boolean} diffing
  * @param {!Document} doc
  */
-function addPurifyHooks(purifier, diffing) {
+function addPurifyHooks(purifier, diffing, doc) {
   // Reference to DOMPurify's `allowedTags` whitelist.
   let allowedTags;
   const allowedTagsChanges = [];
@@ -277,10 +278,10 @@ function addPurifyHooks(purifier, diffing) {
   };
 
   /**
-   * @param {!Node} unusedNode
+   * @param {!Node} node
    * @this {{removed: !Array}} Contains list of removed elements/attrs so far.
    */
-  const afterSanitizeAttributes = function(unusedNode) {
+  const afterSanitizeAttributes = function(node) {
     // DOMPurify doesn't have a tag-specific attribute whitelist API and
     // `allowedAttributes` has a per-invocation scope, so we need to undo
     // changes after sanitizing attributes.
@@ -340,12 +341,13 @@ function bindingTypeForAttr(attrName) {
  * that it operates on attribute changes instead of rendering new HTML.
  *
  * @param {!DomPurifyDef} purifier
- * @param {string} tag Lower-case tag name.
+ * @param {!Element} element
  * @param {string} attr Lower-case attribute name.
  * @param {string|null} value
  * @return {boolean}
  */
-export function validateAttributeChange(purifier, tag, attr, value) {
+export function validateAttributeChange(purifier, element, attr, value) {
+  const tag = element.nodeName.toLowerCase();
   // Disallow change of attributes that are required for certain tags,
   // e.g. script[type].
   const whitelist = WHITELISTED_TAGS_BY_ATTRS[tag];
@@ -384,8 +386,9 @@ export function validateAttributeChange(purifier, tag, attr, value) {
       return false;
     }
   }
+  const doc = element.ownerDocument ? element.ownerDocument : element;
   // Perform AMP-specific attribute validation e.g. __amp_source_origin.
-  if (value && !isValidAttr(tag, attr, value, /* opt_purify */ true)) {
+  if (value && !isValidAttr(tag, attr, value, doc, /* opt_purify */ true)) {
     return false;
   }
   return true;
