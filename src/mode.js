@@ -15,6 +15,7 @@
  */
 
 import {parseQueryString_} from './url-parse-query-string';
+import {version} from './internal-version';
 
 /**
  * @typedef {{
@@ -33,9 +34,6 @@ import {parseQueryString_} from './url-parse-query-string';
  * }}
  */
 export let ModeDef;
-
-/** @type {string} */
-const version = '$internalRuntimeVersion$';
 
 /**
  * `rtvVersion` is the prefixed version we serve off of the cdn.
@@ -113,7 +111,7 @@ function getMode_(win) {
     test: runningTests,
     testIe: runningTestsOnIe,
     log: hashQuery['log'],
-    version,
+    version: version(),
     rtvVersion,
     singlePassType,
   };
@@ -131,19 +129,19 @@ function getRtvVersion(win, isLocalDev) {
   // If it's local dev then we won't actually have a full version so
   // just use the version.
   if (isLocalDev) {
-    return version;
+    return version();
   }
 
   if (win.AMP_CONFIG && win.AMP_CONFIG.v) {
     return win.AMP_CONFIG.v;
   }
 
-  // Currently `$internalRuntimeVersion$` and thus `mode.version` contain only
+  // Currently `internalRuntimeVersion` and thus `mode.version` contain only
   // major version. The full version however must also carry the minor version.
   // We will default to production default `01` minor version for now.
-  // TODO(erwinmombay): decide whether $internalRuntimeVersion$ should contain
+  // TODO(erwinmombay): decide whether internalRuntimeVersion should contain
   // minor version.
-  return `01${version}`;
+  return `01${version()}`;
 }
 
 

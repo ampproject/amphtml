@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+/** @fileoverview @suppress {suspiciousCode} */
+
 import {getMode} from './mode';
 import {install as installArrayIncludes} from './polyfills/array-includes';
 import {install as installCustomElements} from './polyfills/custom-elements';
@@ -44,7 +46,8 @@ installArrayIncludes(self);
 installGetBoundingClientRect(self);
 // isExperimentOn() must be called after Object.assign polyfill is installed.
 // TODO(jridgewell): Ship custom-elements-v1. For now, we use this hack so it
-// is DCE'd from production builds.
+// is DCE'd from production builds. Note: When the hack is removed, remove the
+// @suppress {suspiciousCode} annotation at the top of this file.
 if ((false && isExperimentOn(self, 'custom-elements-v1')) ||
     (getMode().test && !getMode().testIe)) {
   installCustomElements(self);

@@ -23,7 +23,8 @@ describes.endtoend('AMP list load-more=auto', {
   experiments: ['amp-list-load-more'],
   initialRect: {width: pageWidth, height: pageHeight},
   // TODO(cathyxz, cvializ): figure out why 'viewer' only shows 'FALLBACK'
-  environments: ['single', 'shadow-demo'],
+  // TODO(cathyxz): figure out why shadow-demo doesn't work
+  environments: ['single'],
 }, env => {
   let controller;
 

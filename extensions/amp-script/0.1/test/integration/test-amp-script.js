@@ -23,7 +23,10 @@ function poll(description, condition, opt_onError) {
   return classicPoll(description, condition, opt_onError, TIMEOUT);
 }
 
-describe.configure().skipSinglePass().run('amp-script', function() {
+// TODO(choumx): If possible / desired, make these tests work on Single-pass,
+// on Windows (Edge, Firefox, and Chrome), and on Safari.
+describe.configure().skipSafari().skipSinglePass().skipWindows().run('amp-' +
+    'script', function() {
   this.timeout(TIMEOUT);
 
   let browser, doc, element;
@@ -32,8 +35,8 @@ describe.configure().skipSinglePass().run('amp-script', function() {
     /* eslint-disable max-len */
     body: `
       <amp-script layout=container src="/examples/amp-script/hello-world.js">
-        <button id="hello">Insert</button>
-        <button id="long">Long</button>
+        <button id="hello">Insert Hello World!</button>
+        <button id="long">Long task</button>
       </amp-script>
     `,
     /* eslint-enable max-len */
@@ -56,6 +59,7 @@ describe.configure().skipSinglePass().run('amp-script', function() {
 
       sandbox.stub(impl.userActivation_, 'isActive').callsFake(() => true);
       browser.click('button#hello');
+
       yield poll('mutations applied', () => {
         const h1 = doc.querySelector('h1');
         return h1 && h1.textContent == 'Hello World!';
@@ -96,6 +100,66 @@ describe.configure().skipSinglePass().run('amp-script', function() {
       yield poll('long task started', () => {
         return stub.callCount > 0;
       });
+    });
+  });
+
+  describes.integration('sanitizer', {
+    /* eslint-disable max-len */
+    body: `
+      <amp-script layout=container src="/examples/amp-script/hello-world.js">
+        <p>Number of mutations: <span id="mutationCount">0</span></p>
+        <button id="script">Insert script</button>
+        <button id="img">Insert img</button>
+      </amp-script>
+    `,
+    /* eslint-enable max-len */
+    extensions: ['amp-script'],
+    experiments: ['amp-script'],
+  }, env => {
+    beforeEach(() => {
+      browser = new BrowserController(env.win);
+      doc = env.win.document;
+      element = doc.querySelector('amp-script');
+    });
+
+    it('should sanitize <script> injection', function*() {
+      yield poll('<amp-script> to be hydrated',
+          () => element.classList.contains('i-amphtml-hydrated'));
+      const impl = yield element.getImpl();
+
+      // Give event listeners in hydration a moment to attach.
+      yield browser.wait(100);
+
+      sandbox.stub(impl.userActivation_, 'isActive').callsFake(() => true);
+      browser.click('button#script');
+
+      yield poll('mutations applied', () => {
+        const mc = doc.querySelector('#mutationCount');
+        return mc && mc.textContent == '1';
+      });
+
+      const scripts = element.querySelectorAll('script');
+      expect(scripts.length).to.equal(0);
+    });
+
+    it('should sanitize <img> injection', function*() {
+      yield poll('<amp-script> to be hydrated',
+          () => element.classList.contains('i-amphtml-hydrated'));
+      const impl = yield element.getImpl();
+
+      // Give event listeners in hydration a moment to attach.
+      yield browser.wait(100);
+
+      sandbox.stub(impl.userActivation_, 'isActive').callsFake(() => true);
+      browser.click('button#img');
+
+      yield poll('mutations applied', () => {
+        const mc = doc.querySelector('#mutationCount');
+        return mc && mc.textContent == '1';
+      });
+
+      const scripts = element.querySelectorAll('img');
+      expect(scripts.length).to.equal(0);
     });
   });
 

@@ -29,11 +29,17 @@ import mustache from '../../../third_party/mustache/mustache';
 const TAG = 'amp-mustache';
 
 /**
+ * @typedef {BaseTemplate$$module$src$service$template_impl}
+ */
+AMP.BaseTemplate;
+
+/**
  * Implements an AMP template for Mustache.js.
  * See {@link https://github.com/janl/mustache.js/}.
  *
  * @private Visible for testing.
- * @extends {BaseTemplate$$module$src$service$template_impl}
+ * @extends {AMP.BaseTemplate}
+ * @suppress {checkTypes}
  */
 export class AmpMustache extends AMP.BaseTemplate {
   /**
@@ -130,9 +136,10 @@ export class AmpMustache extends AMP.BaseTemplate {
    * @private
    */
   serializeHtml_(html) {
-    const root = this.win.document.createElement('div');
+    const doc = this.win.document;
+    const root = doc.createElement('div');
     const diffing = isExperimentOn(self, 'amp-list-diffing');
-    const sanitized = sanitizeHtml(html, diffing);
+    const sanitized = sanitizeHtml(html, doc, diffing);
     root./*OK*/innerHTML = sanitized;
     return this.unwrap(root);
   }

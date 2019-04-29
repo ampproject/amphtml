@@ -25,11 +25,17 @@ import mustache from '../../../third_party/mustache/mustache';
 const TAG = 'amp-mustache';
 
 /**
+ * @typedef {BaseTemplate$$module$src$service$template_impl}
+ */
+AMP.BaseTemplate;
+
+/**
  * Implements an AMP template for Mustache.js.
  * See {@link https://github.com/janl/mustache.js/}.
  *
  * @private Visible for testing.
- * @extends {BaseTemplate$$module$src$service$template_impl}
+ * @extends {AMP.BaseTemplate}
+ * @suppress {checkTypes}
  */
 export class AmpMustache extends AMP.BaseTemplate {
   /**
@@ -126,7 +132,7 @@ export class AmpMustache extends AMP.BaseTemplate {
    */
   purifyAndSetHtml_(html) {
     const diffing = isExperimentOn(self, 'amp-list-diffing');
-    const body = purifyHtml(html, diffing);
+    const body = purifyHtml(html, this.win.document, diffing);
     // TODO(choumx): Remove innerHTML usage once DOMPurify bug is fixed.
     // https://github.com/cure53/DOMPurify/pull/295
     const root = this.win.document.createElement('div');

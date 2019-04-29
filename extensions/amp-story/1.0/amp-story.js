@@ -64,10 +64,7 @@ import {
 import {InfoDialog} from './amp-story-info-dialog';
 import {Keys} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
-import {
-  LocalizationService,
-  createPseudoLocale,
-} from './localization';
+import {LocalizationService} from '../../../src/service/localization';
 import {MediaPool, MediaType} from './media-pool';
 import {NavigationState} from './navigation-state';
 import {PaginationButtons} from './pagination-buttons';
@@ -96,6 +93,7 @@ import {
   setImportantStyles,
   toggle,
 } from '../../../src/style';
+import {createPseudoLocale} from '../../../src/localized-strings';
 import {debounce} from '../../../src/utils/rate-limit';
 import {dev, devAssert, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
@@ -103,6 +101,7 @@ import {escapeCssSelectorIdent} from '../../../src/css';
 import {findIndex} from '../../../src/utils/array';
 import {getConsentPolicyState} from '../../../src/consent';
 import {getDetail} from '../../../src/event-helper';
+import {getMediaQueryService} from './amp-story-media-query-service';
 import {getMode} from '../../../src/mode';
 import {isExperimentOn} from '../../../src/experiments';
 import {parseQueryString} from '../../../src/url';
@@ -213,6 +212,14 @@ const HIDE_ON_BOOKEND_SELECTOR =
  * @const {string}
  */
 const DEFAULT_THEME_COLOR = '#202125';
+
+/**
+ * MutationObserverInit options to listen for changes to the `open` attribute.
+ */
+const SIDEBAR_OBSERVER_OPTIONS = {
+  attributes: true,
+  attributeFilter: ['open'],
+};
 
 /**
  * @implements {./media-pool.MediaPoolRoot}
@@ -447,12 +454,43 @@ export class AmpStory extends AMP.BaseElement {
 
   /** @private */
   initializeStyles_() {
-    const styleEl = document.querySelector('style[amp-custom]');
-    if (!styleEl) {
-      return;
+    const mediaQueryEls =
+        this.element.querySelectorAll('media-query');
+
+    if (mediaQueryEls.length) {
+      this.initializeMediaQueries_(mediaQueryEls);
     }
 
-    this.rewriteStyles_(styleEl);
+    const styleEl = document.querySelector('style[amp-custom]');
+
+    if (styleEl) {
+      this.rewriteStyles_(styleEl);
+    }
+  }
+
+  /**
+   * Registers the media queries
+   * @param {!NodeList<!Element>} mediaQueryEls
+   * @private
+   */
+  initializeMediaQueries_(mediaQueryEls) {
+    const service = getMediaQueryService(this.win);
+
+    const onMediaQueryMatch = (matches, className) => {
+      this.mutateElement(() => {
+        this.element.classList.toggle(className, matches);
+      });
+    };
+
+    mediaQueryEls.forEach(el => {
+      const className = el.getAttribute('class-name');
+      const media = el.getAttribute('media');
+
+      if (className && media) {
+        service.onMediaQueryMatch(
+            media, matches => onMediaQueryMatch(matches, className));
+      }
+    });
   }
 
   /**
@@ -874,7 +912,8 @@ export class AmpStory extends AMP.BaseElement {
     const isActualPage =
       pageId =>
         findIndex(this.pages_, page => page.element.id === pageId) >= 0;
-    const historyPage = getHistoryState(this.win, HistoryState.PAGE_ID);
+    const historyPage =
+    /** @type {string} */ (getHistoryState(this.win, HistoryState.PAGE_ID));
 
     if (isExperimentOn(this.win, 'amp-story-branching')) {
       const maybePageId = parseQueryString(this.win.location.hash)['page'];
@@ -1654,16 +1693,13 @@ export class AmpStory extends AMP.BaseElement {
     const actions = Services.actionServiceForDoc(this.element);
     if (this.win.MutationObserver) {
       if (!this.sidebarObserver_) {
-        this.sidebarObserver_ = new this.win.MutationObserver(mutationsList => {
-          if (mutationsList.some(
-              mutation => mutation.attributeName === 'open')) {
-            this.storeService_.dispatch(Action.TOGGLE_SIDEBAR,
-                this.sidebar_.hasAttribute('open'));
-          }
+        this.sidebarObserver_ = new this.win.MutationObserver(() => {
+          this.storeService_.dispatch(Action.TOGGLE_SIDEBAR,
+              this.sidebar_.hasAttribute('open'));
         });
       }
       if (this.sidebar_ && sidebarState) {
-        this.sidebarObserver_.observe(this.sidebar_, {attributes: true});
+        this.sidebarObserver_.observe(this.sidebar_, SIDEBAR_OBSERVER_OPTIONS);
         this.openOpacityMask_();
         actions.execute(this.sidebar_, 'open', /* args */ null,
             /* source */ null, /* caller */ null, /* event */ null,
@@ -2271,7 +2307,8 @@ export class AmpStory extends AMP.BaseElement {
     const historyNavigationPath =
       getHistoryState(this.win, HistoryState.NAVIGATION_PATH);
     if (historyNavigationPath) {
-      this.storyNavigationPath_ = historyNavigationPath;
+      this.storyNavigationPath_ =
+        /** @type {!Array<string>} */ (historyNavigationPath);
     }
   }
 

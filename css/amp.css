@@ -196,18 +196,6 @@ html.i-amphtml-singledoc.i-amphtml-ios-embed-sd > body {
   overflow: hidden !important;
 }
 
-/**
- * TODO(dvoytenko, #19004): if/when "scroll-height-minheight" launched, merge
- * these styles into _both_: `#i-amphtml-wrapper > body` and
- * `html.i-amphtml-ios-embed-sd > body` sections above.
- */
-.i-amphtml-body-minheight > body {
-  /* A slightly overflowing height is necessary to avoid scrolling and
-     rendering bugs on iOS due to
-     https://bugs.webkit.org/show_bug.cgi?id=158342. */
-  min-height: calc(100vh + 1px);
-}
-
 
 .i-amphtml-element {
   display: inline-block;
@@ -880,7 +868,14 @@ amp-autocomplete {
 }
 
 amp-autocomplete > input {
-  padding: 4px !important;
+  padding: .5rem; /* default-ui-space-large */
+  border: 1px solid rgba(0,0,0,.33) /* default-ui-med-gray */
+}
+
+amp-autocomplete > input,
+.i-amphtml-autocomplete-results {
+  font-size: 1rem; /* default-ui-font-size */
+  line-height: 1.5rem; /* default-ui-space-large */
 }
 
 /**

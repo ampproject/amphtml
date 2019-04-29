@@ -29,6 +29,7 @@ const webserver = require('gulp-webserver');
 const {
   reportTestErrored,
   reportTestFinished,
+  reportTestSkipped,
   reportTestStarted,
 } = require('./status-report');
 const {app} = require('../../test-server');
@@ -107,11 +108,11 @@ function getConfig() {
     saucelabsBrowsers = argv.saucelabs ?
     // With --saucelabs, integration tests are run on this set of browsers.
       [
-        //'SL_Chrome',
+        'SL_Chrome',
         'SL_Firefox',
         // TODO(amp-infra): Restore this once tests are stable again.
         // 'SL_Safari_11',
-        //'SL_Edge_17',
+        'SL_Edge_17',
         'SL_Safari_12',
         // TODO(amp-infra): Evaluate and add more platforms here.
         //'SL_Chrome_Android_7',
@@ -264,7 +265,7 @@ async function runTests() {
     if (testsToRun.length == 0) {
       log(green('INFO:'),
           'No unit tests were directly affected by local changes.');
-      return Promise.resolve();
+      return reportTestSkipped();
     } else {
       log(green('INFO:'), 'Running the following unit tests:');
       testsToRun.forEach(test => {

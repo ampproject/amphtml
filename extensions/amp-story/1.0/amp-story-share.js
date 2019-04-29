@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {LocalizedStringId} from './localization';
+import {LocalizedStringId} from '../../../src/localized-strings';
 import {Services} from '../../../src/services';
 import {
   StateProperty,
@@ -248,7 +248,7 @@ export class ShareWidget {
     /** @protected {?Element} */
     this.root = null;
 
-    /** @private {?Promise<?./localization.LocalizationService>} */
+    /** @private {?Promise<?../../../src/service/localization.LocalizationService>} */
     this.localizationServicePromise_ = null;
 
     /** @private @const {!./amp-story-request-service.AmpStoryRequestService} */
@@ -310,7 +310,11 @@ export class ShareWidget {
 
     listen(linkShareButton, 'click', e => {
       e.preventDefault();
-      this.copyUrlToClipboard_(this.root.querySelector('#page-share').checked);
+      let shareFromCurrentPage = false;
+      if (isExperimentOn(this.win, 'amp-story-branching')) {
+        shareFromCurrentPage = this.root.querySelector('#page-share').checked;
+      }
+      this.copyUrlToClipboard_(shareFromCurrentPage);
     });
   }
 
@@ -329,13 +333,13 @@ export class ShareWidget {
   }
 
   /**
-   * @param {boolean=} sharePage
+   * @param {boolean} shareFromCurrentPage
    * @private
    */
-  copyUrlToClipboard_(sharePage = false) {
+  copyUrlToClipboard_(shareFromCurrentPage) {
     const currentPageId = this.storeService_.get(StateProperty.CURRENT_PAGE_ID);
     const shouldAddFragment =
-      (isExperimentOn(this.win, 'amp-story-branching') && sharePage);
+      (isExperimentOn(this.win, 'amp-story-branching') && shareFromCurrentPage);
 
     const url = Services.documentInfoForDoc(this.getAmpDoc_()).canonicalUrl +
     (shouldAddFragment ? '#page=' + currentPageId : '');
@@ -414,7 +418,8 @@ export class ShareWidget {
     providers.forEach(provider => {
       if (isObject(provider)) {
         this.add_(buildProvider(this.win.document,
-            provider['provider'], provider));
+            provider['provider'],
+            /** @type {!JsonObject} */ (provider)));
         return;
       }
 
@@ -425,7 +430,8 @@ export class ShareWidget {
             provider);
         return;
       }
-      this.add_(buildProvider(this.win.document, provider));
+      this.add_(buildProvider(this.win.document,
+          /** @type {string} */ (provider)));
     });
   }
 

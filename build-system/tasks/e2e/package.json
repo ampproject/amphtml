@@ -6,8 +6,8 @@
   "dependencies": {
     "@babel/register": "7.0.0",
     "babel-regenerator-runtime": "6.5.0",
-    "chromedriver": "2.45.0",
-    "puppeteer": "1.12.2",
+    "chromedriver": "74.0.0",
+    "puppeteer": "1.14.0",
     "selenium-webdriver": "4.0.0-alpha.1"
   }
 }

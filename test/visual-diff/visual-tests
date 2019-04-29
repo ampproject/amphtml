@@ -20,7 +20,10 @@
  {
   /**
   * An array of glob strings to use to load assets to Percy, relative to
-  * the base amphtml/ directory.
+  * the base amphtml/ directory. All assets accessed by the test must be
+  * relative to the server path (i.e., use relative paths such as
+  * <amp-img src="/examples/visual-tests/..."> - never external domains such as
+  * <amp-img src="https://ampbyexample.com/...">)
   *
   * Note that if you add a new test from a sub-directory that is not matched
   * by any glob string in this list, it will be missing its resources!
@@ -568,6 +571,8 @@
       ]
     },
     {
+      // TODO(zombifier): disabled in #21935 because this test is not hermetic.
+      "flaky": true,
       "url": "examples/visual-tests/amp-inabox/amp-inabox-gpt.html",
       "name": "AMP Inabox GPT Ad",
       "loading_complete_selectors": [
@@ -585,6 +590,8 @@
       "interactive_tests": "examples/visual-tests/amp-story/amp-story-tooltip.js"
     },
     {
+      // TODO(#21665): Re-enable test.
+      "flaky": true,
       "url": "examples/visual-tests/amp-story/amp-story-tooltip.html",
       "name": "amp-story: tooltip desktop",
       "viewport": {"width": 1440, "height": 900},
@@ -631,6 +638,17 @@
       "interactive_tests": "examples/visual-tests/amp-story/amp-story-page-attachment-desktop.js"
     },
     {
+      // TODO(#21749): Re-enable test.
+      "flaky": true,
+      "url": "examples/visual-tests/amp-story/amp-story-landscape-templates.html",
+      "name": "amp-story: landscape templates",
+      "viewport": {"width": 1440, "height": 900},
+      "loading_complete_selectors": [
+        ".i-amphtml-story-loaded",
+      ],
+      "interactive_tests": "examples/visual-tests/amp-story/amp-story-landscape-templates.js"
+    },
+    {
       "flaky": true,
       // See https://percy.io/ampproject/amphtml/builds/1434487/view/95137509/375?browser=firefox&mode=diff
       "url": "examples/visual-tests/amp-date-picker/amp-date-picker.amp.html",
@@ -664,6 +682,11 @@
         "amp-user-notification.amp-active",
       ],
       "interactive_tests": "examples/visual-tests/amp-user-notification/amp-user-notification.js"
+    },
+    {
+      "url": "examples/visual-tests/amp-autocomplete/amp-autocomplete.amp.html",
+      "name": "amp-autocomplete",
+      "interactive_tests": "examples/visual-tests/amp-autocomplete/amp-autocomplete.js",
     }
   ]
 }
