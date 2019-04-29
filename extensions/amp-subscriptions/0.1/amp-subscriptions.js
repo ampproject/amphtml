@@ -19,7 +19,7 @@ import {CryptoHandler} from './crypto-handler';
 import {Dialog} from './dialog';
 import {DocImpl} from './doc-impl';
 import {Entitlement} from './entitlement';
-import {LocalSubscriptionPlatformFactory} from './local-subscription-platform';
+import {localSubscriptionPlatformFactory} from './local-subscription-platform';
 import {
   PageConfig,
   PageConfigResolver,
@@ -144,7 +144,7 @@ export class SubscriptionService {
   initializeLocalPlatforms_(serviceConfig) {
     if ((serviceConfig['serviceId'] || 'local') == 'local') {
       this.platformStore_.resolvePlatform('local',
-          LocalSubscriptionPlatformFactory(
+          localSubscriptionPlatformFactory(
               this.ampdoc_,
               serviceConfig,
               this.serviceAdapter_)

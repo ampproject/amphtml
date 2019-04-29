@@ -20,7 +20,7 @@ import {
   LocalSubscriptionIframePlatform,
 } from '../local-subscription-platform-iframe';
 import {
-  LocalSubscriptionPlatformFactory,
+  localSubscriptionPlatformFactory,
 } from '../local-subscription-platform';
 import {
   LocalSubscriptionRemotePlatform,
@@ -557,7 +557,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
       firstVisibleStub = sandbox.stub(subscriptionService.viewer_,
           'whenFirstVisible').callsFake(() => Promise.resolve());
       subscriptionService.pageConfig_ = pageConfig;
-      platform = LocalSubscriptionPlatformFactory(ampdoc,
+      platform = localSubscriptionPlatformFactory(ampdoc,
           serviceConfig.services[0],
           serviceAdapter);
       subscriptionService.platformStore_ = new PlatformStore(['local']);

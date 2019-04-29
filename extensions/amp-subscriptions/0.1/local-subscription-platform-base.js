@@ -172,15 +172,17 @@ export class LocalSubscriptionBasePlatform {
     return this.serviceConfig_['baseScore'] || 0;
   }
 
-  /** @override */
-  getEntitlements() {
-    return Promise.resolve({});
-  }
+  /**
+   * @abstract @override 
+   * @return {!Promise<?./entitlement.Entitlement>}
+  */
+  getEntitlements() {}
 
-  /** @override */
-  pingback(unusedEntitlement) {
-    return Promise.resolve();
-  }
+  /** 
+   * @abstract @override 
+   * @return {!Promise|undefined}
+   */
+  pingback(unusedEntitlement) {}
 
   /** @override */
   isPingbackEnabled() {

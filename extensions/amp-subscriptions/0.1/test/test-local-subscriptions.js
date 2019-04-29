@@ -16,7 +16,7 @@
 
 import {Dialog} from '../dialog';
 import {Entitlement, GrantReason} from '../entitlement';
-import {LocalSubscriptionPlatformFactory} from '../local-subscription-platform';
+import {localSubscriptionPlatformFactory} from '../local-subscription-platform';
 import {PageConfig} from '../../../../third_party/subscriptions-project/config';
 import {ServiceAdapter} from '../service-adapter';
 import {SubscriptionAnalytics} from '../analytics';
@@ -71,7 +71,7 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
     getEncryptedDocumentKeyStub = sandbox.stub(
         serviceAdapter, 'getEncryptedDocumentKey')
         .callsFake(() => {return null;});
-    localSubscriptionPlatform = LocalSubscriptionPlatformFactory(ampdoc,
+    localSubscriptionPlatform = localSubscriptionPlatformFactory(ampdoc,
         serviceConfig.services[0], serviceAdapter);
   });
 
@@ -117,6 +117,8 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
   });
 
   it('should call getEncryptedDocumentKey with local', () => {
+    const fetchStub = sandbox.stub(localSubscriptionPlatform.xhr_, 'fetchJson')
+        .callsFake(() => Promise.resolve({json: () => Promise.resolve(json)}));
     return localSubscriptionPlatform.getEntitlements().then(() => {
       expect(getEncryptedDocumentKeyStub).to.be.calledWith('local');
     });

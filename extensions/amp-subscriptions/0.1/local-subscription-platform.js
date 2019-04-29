@@ -29,7 +29,7 @@ import {PageConfig} from '../../../third_party/subscriptions-project/config';
  * @param {!./service-adapter.ServiceAdapter} serviceAdapter
  * @return {!./subscription-platform.SubscriptionPlatform}
  */
-export function LocalSubscriptionPlatformFactory(
+export function localSubscriptionPlatformFactory(
   ampdoc, platformConfig, serviceAdapter) {
   /* Return the correxct platform based on the config */
   if (platformConfig['type'] === 'iframe') {

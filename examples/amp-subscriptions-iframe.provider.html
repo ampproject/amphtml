@@ -25,20 +25,22 @@
     };
     Controller.prototype.authorize = function() {
       log('authorize');
-      // This is the JSON expected in the article-access-iframe.amp.html.
-      if (pageProtocol === "amp-access") {
+      if (pageProtocol === "amp-subscriptions") {
+        // handle amp-subscriptions auth request
         return Promise.resolve({
-          views: 3,
-          maxViews: 5
-        });
-      } else if (pageProtocol === "amp-subscriptions") {
-        return Promise.resolve({
-          "source":"local-iframe",
           "granted":true,
-          "grantedReason":"METERING",
+          "grantedReason":"SUBSCRIBER",
           "data":{
             "login":true
           }
+        });
+      } else if (pageProtocol === "amp-access") {
+        // the same iframe could also handle amp-access protocol
+        // allowing common iframecode for CMS systems that support
+        // both extensions.
+        return Promise.resolve({
+          views: 3,
+          maxViews: 5
         });
       } else {
         log('unknown protocol');
@@ -46,6 +48,8 @@
       }
     };
     Controller.prototype.pingback = function() {
+      // Platform specific action, typically update paywall counter
+      // and maybe log somthing to a server.
       log('pingback');
     };
 

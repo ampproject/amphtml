@@ -68,7 +68,7 @@ export class LocalSubscriptionRemotePlatform
             //TODO(chenshay): if crypt, switch to 'post'
             fetchUrl = addParamToUrl(fetchUrl, 'crypt', encryptedDocumentKey);
           }
-          this.xhr_.fetchJson(fetchUrl, {credentials: 'include'})
+          return this.xhr_.fetchJson(fetchUrl, {credentials: 'include'})
               .then(res => res.json())
               .then(resJson => {
                 return Entitlement.parseFromJson(resJson);

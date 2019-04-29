@@ -68,6 +68,7 @@ export class LocalSubscriptionIframePlatform
     /** @private {?Promise} */
     this.connectedPromise_ = null;
 
+    // TODO(jpettitt) maybe allow the iframe to render UI?
     /** @private @const {!Element} */
     this.iframe_ = ampdoc.win.document.createElement('iframe');
     toggle(this.iframe_, false);
@@ -88,7 +89,10 @@ export class LocalSubscriptionIframePlatform
   getEntitlements() {
     return this.connect().then(() => {
       return this.messenger_.sendCommandRsvp('authorize', {})
-          .then(res => JSON.stringify(res))
+          .then(res => {
+            res.source = 'local-iframe';
+            return JSON.stringify(res)
+          })
           .then(resJson => Entitlement.parseFromJson(resJson));
     });
   }
@@ -132,6 +136,14 @@ export class LocalSubscriptionIframePlatform
   resolveConfig_() {
     return new Promise(resolve => {
       const configJson = parseJson(JSON.stringify(this.serviceConfig_));
+      const pageConfig = this.serviceAdapter_.getPageConfig();
+      // Pass id's to the iframe for context.
+      configJson['pageConfig'] = {
+        publicationId: pageConfig.getPublicationId(),
+        productId: pageConfig.getProductId(),
+        encryptedDocumentKey: 
+            this.serviceAdapter_.getEncryptedDocumentKey('local') || null,
+      };
       if (this.iframeVars_) {
         const varsString = this.iframeVars_.join('&');
         this.urlBuilder_.collectUrlVars(

@@ -17,7 +17,7 @@
 
 import {Entitlement, GrantReason} from './entitlement';
 import {JwtHelper} from '../../amp-access/0.1/jwt';
-import {LocalSubscriptionPlatformFactory} from './local-subscription-platform';
+import {localSubscriptionPlatformFactory} from './local-subscription-platform';
 import {PageConfig} from '../../../third_party/subscriptions-project/config';
 import {Services} from '../../../src/services';
 import {devAssert, user, userAssert} from '../../../src/log';
@@ -48,7 +48,7 @@ export class ViewerSubscriptionPlatform {
     this.pageConfig_ = serviceAdapter.getPageConfig();
 
     /** @private @const {!./subscription-platform.SubscriptionPlatform} */
-    this.platform_ = LocalSubscriptionPlatformFactory(
+    this.platform_ = localSubscriptionPlatformFactory(
         ampdoc, platformConfig, serviceAdapter);
 
     /** @const @private {!../../../src/service/viewer-impl.Viewer} */
