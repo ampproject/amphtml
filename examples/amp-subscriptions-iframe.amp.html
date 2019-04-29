@@ -251,7 +251,7 @@
         </div>
 
 
-        <div subscriptions-action="login" subscriptions-display="NOT loggedIn">Login</div>
+        <div subscriptions-action="login" subscriptions-display="NOT data.loggedIn">Login</div>
 
         <section subscriptions-section="content-not-granted">
           Login or subscribe to read more.
@@ -357,16 +357,16 @@
   </footer>
 
 
-  <template type="amp-mustache" subscriptions-dialog subscriptions-display="loggedIn">
-    Dialog for logged in users
+  <template type="amp-mustache" subscriptions-dialog subscriptions-display="data.loggedIn">
+    Dialog for Subscribers
   </template>
-  <template type="amp-mustache" subscriptions-dialog subscriptions-display="NOT loggedIn">
+  <template type="amp-mustache" subscriptions-dialog subscriptions-display="NOT data.loggedIn">
     <div>Dialog for non logged in users<div>
-    <div subscriptions-display="NOT loggedIn"
+    <div subscriptions-display="NOT data.loggedIn"
       subscriptions-action="subscribe"
       subscriptions-service="subscribe.google.com"
       subscriptions-decorate>Login</div>
-    <div subscriptions-display="NOT subscribed">btw u are not subscribed</div>
+    <div subscriptions-display="NOT data.subscribed">btw u are not subscribed</div>
   </template>
 </body>
 </html>

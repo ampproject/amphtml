@@ -31,9 +31,10 @@
         // defined for local autorization endpoints.
         return Promise.resolve({
           "granted":true,
-          "grantedReason":"SUBSCRIBER",
+          "grantReason":"SUBSCRIBER",
           "data":{
-            "login":true
+            "loggedIn":true,
+            "subscribed": true
           }
         });
       } else if (pageProtocol === "amp-access") {
