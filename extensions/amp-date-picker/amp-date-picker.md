@@ -586,6 +586,50 @@ an interaction with the calendar view, i.e. when the overlay would open.
 The date picker triggers the  `deactivate` event when the user ends
 their interaction with the calendar view, i.e. when the overlay would close.
 
+##### select
+
+The date picker triggers the `select` event when the user selects a date or
+date range. When selecting a date range, the event is emitted when the end
+date and start date are both selected.
+The `select` event contains the following properties.
+
+For a single date picker:
+
+<table>
+<tr>
+<th width="30%">Property</th>
+<th>Description</th>
+</tr>
+<tr>
+<td><code>date</code></td>
+<td>The date that was selected.</td>
+</tr>
+<tr>
+<td><code>id</code></td>
+<td>The <code>id</code> attribute of the first <a href="#templates">date template</a> that applies to this date.</td>
+</tr>
+</table>
+
+For a date range picker:
+
+<table>
+<tr>
+<th width="30%">Property</th>
+<th>Description</th>
+</tr>
+<tr>
+<td><code>dates</code></td>
+<td>An array of the dates that were selected. Each object in the array contains the <code>date</code> and <code>id</code> properties from the single date picker <code>change</code> event object.</td>
+</tr>
+<tr>
+<td><code>start</code></td>
+<td>A shortcut for the first date in the date range (<code>event.dates[0]</code>).
+</tr>
+<tr>
+<td><code>end</code></td>
+<td>A shortcut for the last date in the date range (<code>event.dates[event.dates.length - 1]</code>).
+</tr>
+</table>
 
 ## Actions
 
