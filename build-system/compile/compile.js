@@ -133,20 +133,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
     }
 
     console/*OK*/.assert(typeof entryModuleFilenames == 'string');
-    const entryModule = entryModuleFilenames;
-    // TODO(@cramforce): Run the post processing step
-    return singlePassCompile(
-        entryModule,
-        compilationOptions
-    ).then(() => {
-      return new Promise((resolve, reject) => {
-        gulp.src(outputDir + '/**/*.js')
-            .pipe(shortenLicense())
-            .pipe(gulp.dest(outputDir))
-            .on('end', resolve)
-            .on('error', reject);
-      });
-    });
+    return singlePassCompile(entryModuleFilenames, compilationOptions);
   }
 
   return new Promise(function(resolve) {

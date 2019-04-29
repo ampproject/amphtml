@@ -28,6 +28,7 @@ const move = require('glob-move');
 const path = require('path');
 const Promise = require('bluebird');
 const relativePath = require('path').relative;
+const shortenLicense = require('./shorten-license');
 const sourcemaps = require('gulp-sourcemaps');
 const tempy = require('tempy');
 const through = require('through2');
@@ -595,12 +596,14 @@ function postProcessConcat() {
 }
 
 function compile(flagsArray) {
+  // TODO(@cramforce): Run the post processing step
   return new Promise(function(resolve) {
     return gulp.src(srcs, {base: transformDir})
         .pipe(sourcemaps.init({loadMaps: true}))
         .pipe(gulpClosureCompile(flagsArray))
         .on('error', handleSinglePassCompilerError)
         .pipe(sourcemaps.write('.'))
+        .pipe(shortenLicense())
         .pipe(gulp.dest('.'))
         .on('end', resolve);
   });
