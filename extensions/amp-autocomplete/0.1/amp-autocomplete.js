@@ -696,12 +696,20 @@ export class AmpAutocomplete extends AMP.BaseElement {
     switch (event.key) {
       case Keys.DOWN_ARROW:
         event.preventDefault();
-        // Disrupt loop around to display user input.
-        if (this.activeIndex_ === this.container_.children.length - 1) {
-          this.displayUserInput_();
-          return Promise.resolve();
+        if (this.resultsShowing_()) {
+          // Disrupt loop around to display user input.
+          if (this.activeIndex_ === this.container_.children.length - 1) {
+            this.displayUserInput_();
+            return Promise.resolve();
+          }
+          return this.updateActiveItem_(1);
         }
-        return this.updateActiveItem_(1);
+        else {
+          return this.mutateElement(() => {
+            this.filterDataAndRenderResults_(this.sourceData_, this.userInput_);
+            this.toggleResults_(true);
+          });
+        }
       case Keys.UP_ARROW:
         event.preventDefault();
         // Disrupt loop around to display user input.
