@@ -92,7 +92,6 @@
     "formidable": "1.2.1",
     "fs-extra": "7.0.1",
     "fuse.js": "3.4.4",
-    "glob-move": "1.0.1",
     "globs-to-files": "1.0.0",
     "google-closure-compiler": "20190215.0.2",
     "gulp": "3.9.1",

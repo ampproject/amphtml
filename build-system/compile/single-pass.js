@@ -25,7 +25,6 @@ const gulp = require('gulp');
 const gulpIf = require('gulp-if');
 const log = require('fancy-log');
 const minimist = require('minimist');
-const move = require('glob-move');
 const path = require('path');
 const Promise = require('bluebird');
 const relativePath = require('path').relative;
