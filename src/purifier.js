@@ -341,13 +341,13 @@ function bindingTypeForAttr(attrName) {
  * that it operates on attribute changes instead of rendering new HTML.
  *
  * @param {!DomPurifyDef} purifier
- * @param {!Element} element
+ * @param {!Node} node
  * @param {string} attr Lower-case attribute name.
  * @param {string|null} value
  * @return {boolean}
  */
-export function validateAttributeChange(purifier, element, attr, value) {
-  const tag = element.nodeName.toLowerCase();
+export function validateAttributeChange(purifier, node, attr, value) {
+  const tag = node.nodeName.toLowerCase();
   // Disallow change of attributes that are required for certain tags,
   // e.g. script[type].
   const whitelist = WHITELISTED_TAGS_BY_ATTRS[tag];
@@ -386,7 +386,8 @@ export function validateAttributeChange(purifier, element, attr, value) {
       return false;
     }
   }
-  const doc = element.ownerDocument ? element.ownerDocument : element;
+  const doc = node.ownerDocument
+    ? node.ownerDocument : /** @type {!Document} */ (node);
   // Perform AMP-specific attribute validation e.g. __amp_source_origin.
   if (value && !isValidAttr(tag, attr, value, doc, /* opt_purify */ true)) {
     return false;
