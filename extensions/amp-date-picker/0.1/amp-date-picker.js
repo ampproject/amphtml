@@ -1473,7 +1473,8 @@ export class AmpDatePicker extends AMP.BaseElement {
       return;
     }
 
-    if (startDate.isSame(endDate)) {
+    const isSameDay = this.ReactDates_['isSameDay'];
+    if (isSameDay(startDate, endDate)) {
       return cb(startDate);
     }
 

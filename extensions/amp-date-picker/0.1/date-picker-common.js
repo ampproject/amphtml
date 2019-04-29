@@ -103,8 +103,10 @@ export function withDatePickerCommon(WrappedComponent) {
   });
 
   /**
-   *
-   * @param {!DatesList} list
+   * Detect if a date is a blocked date. This is aware of the
+   * `allow-blocked-end-date` attribute to allow the user to select the first
+   * blocked date after their selected start date.
+   * @param {!./dates-list.DatesList} list
    * @param {?moment} startDate
    * @param {?moment} endDate
    * @param {boolean} allowBlockedEndDate
