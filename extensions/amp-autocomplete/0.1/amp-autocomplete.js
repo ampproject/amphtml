@@ -134,6 +134,9 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
     /** @private {?../../../src/service/action-impl.ActionService} */
     this.action_ = null;
+
+    /** @private {?../../../src/service/viewport/viewport-impl.Viewport} */
+    this.viewport_ = null;
   }
 
   /** @override */
@@ -142,6 +145,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
         `Experiment ${EXPERIMENT} is not turned on.`);
 
     this.action_ = Services.actionServiceForDoc(this.element);
+    this.viewport_ = Services.viewportForDoc(this.element);
+
     const jsonScript =
       this.element.querySelector('script[type="application/json"]');
     if (jsonScript) {
@@ -245,7 +250,11 @@ export class AmpAutocomplete extends AMP.BaseElement {
    */
   createContainer_() {
     const container = this.element.ownerDocument.createElement('div');
+    const viewHeight = this.viewport_.getHeight() || 0;
     container.classList.add('i-amphtml-autocomplete-results');
+    if (this.inputElement_.getBoundingClientRect().top > (viewHeight / 2)) {
+      container.classList.add('i-amphtml-autocomplete-results-up');
+    }
     container.setAttribute('role', 'list');
     toggle(container, false);
     return container;
@@ -573,9 +582,25 @@ export class AmpAutocomplete extends AMP.BaseElement {
     return this.mutateElement(() => {
       if (!display) {
         this.resetActiveElement_();
+      } else {
+        this.setResultDisplayDirection_();
       }
       this.toggleResults_(display);
     });
+  }
+
+  /**
+   * Display results upwards or downwards based on location in the viewport.
+   * @private
+   */
+  setResultDisplayDirection_() {
+    const viewHeight = this.viewport_.getHeight() || 0;
+    if (this.inputElement_.getBoundingClientRect().top > (viewHeight / 2)) {
+      this.container_.classList.add('i-amphtml-autocomplete-results-up');
+    } else {
+      this.container_.classList.toggle(
+          'i-amphtml-autocomplete-results-up', false);
+    }
   }
 
   /**
