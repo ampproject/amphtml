@@ -20,18 +20,28 @@ import {
   validateAttributeChange,
 } from '../../src/purifier';
 
-/**
- * Helper that serializes output of purifyHtml() to string.
- * @param {string} html
- * @param {boolean=} diffing
- * @return {string}
- */
-function purify(html, diffing = false) {
-  const body = purifyHtml(html, diffing);
-  return body.innerHTML;
-}
+
+let purify;
+let html;
 
 describe('DOMPurify-based', () => {
+
+  beforeEach(() => {
+    html = document.createElement('html');
+    const documentEl = {documentElement: html};
+    /**
+     * Helper that serializes output of purifyHtml() to string.
+     * @param {string} html
+     * @param {Document=} doc
+     * @param {boolean=} diffing
+     * @return {string}
+     */
+    purify = (html, diffing = false) => {
+      const body = purifyHtml(html, documentEl, diffing);
+      return body.innerHTML;
+    };
+  });
+
   runSanitizerTests();
 
   describe('<script>', () => {
@@ -433,7 +443,7 @@ function runSanitizerTests() {
       expect(purify('<amp-img [x]="y"></amp-img>', true)).to.match(
           /<amp-img i-amphtml-key="(\d+)" data-amp-bind-x="y" i-amphtml-binding=""><\/amp-img>/);
       // Other elements should NOT have i-amphtml-key-set.
-      expect(purify('<p></p>')).to.equal('<p></p>');
+      expect(purify('<p></p>', true)).to.equal('<p></p>');
     });
 
     it('should resolve URLs', () => {
@@ -444,6 +454,40 @@ function runSanitizerTests() {
     });
   });
 
+  describe('purify based on AMP format type', () => {
+    it('should blacklist input[type="image"] and input[type="button"] in AMP',
+        () => {
+          // Given the AMP format type.
+          html.setAttribute('amp', '');
+          allowConsoleError(() => {
+            expect(purify('<input type="image">')).to.equal('<input>');
+            expect(purify('<input type="button">')).to.equal('<input>');
+          });
+        });
+
+    it('should allow input[type="file"] and input[type="password"]', () => {
+      // Given that the AMP format does not blacklist input types file and
+      // password.
+      html.setAttribute('amp', '');
+      allowConsoleError(() => {
+        expect(purify('<input type="file">')).to.equal('<input type="file">');
+        expect(purify('<input type="password">'))
+            .to.equal('<input type="password">');
+      });
+    });
+
+    it('should sanitize certain tag attributes for AMP4Email', () => {
+      html.setAttribute('amp4email', '');
+      allowConsoleError(() => {
+        expect(purify('<input type="password">')).to.equal('<input>');
+        expect(purify('<input type="file">')).to.equal('<input>');
+        expect(purify('<form name="form-name"></form>'))
+            .to.equal('<form></form>');
+        expect(purify('<amp-anim controls></amp-anim>'))
+            .to.equal('<amp-anim></amp-anim>');
+      });
+    });
+  });
 
   describe('purifyTagsForTripleMustache', () => {
     it('should output basic text', () => {
@@ -567,8 +611,9 @@ describe('validateAttributeChange', () => {
       isValidAttribute: () => true,
     };
 
-    vac = (tag, attr, value) =>
-      validateAttributeChange(purifier, tag, attr, value);
+    vac = (type, attr, value) =>
+      validateAttributeChange(
+          purifier, document.createElement(type), attr, value);
   });
 
   it('should validate script[type]', () => {
