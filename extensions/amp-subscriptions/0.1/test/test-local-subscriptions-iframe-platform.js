@@ -230,12 +230,16 @@ describes.fakeWin('LocalSubscriptionsIframePlatform', {amp: true}, env => {
       it('should return entitlement', () => {
         messengerMock.expects('sendCommandRsvp')
             .withExactArgs('authorize', {})
-            .returns(Promise.resolve({}))
+            .returns(Promise.resolve({
+              granted: true,
+              grantReason: 'SUBSCRIBER',
+            }))
             .once();
         return localSubscriptionPlatform.getEntitlements().then(result => {
           expect(result).to.be.instanceof(Entitlement);
-          expect(result.raw).to.equal('"{\\"source\\":\\"local-iframe\\"}"');
-          expect(result.granted).to.equal(false);
+          expect(result.granted).to.be.true;
+          expect(result.grantReason).to.equal('SUBSCRIBER');
+          expect(result.source).to.equal('local-iframe');
         });
       });
     });
