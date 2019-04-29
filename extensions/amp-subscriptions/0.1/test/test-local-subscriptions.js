@@ -96,11 +96,12 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
   it('should fetch the entitlements on getEntitlements', () => {
     const fetchStub = sandbox.stub(localSubscriptionPlatform.xhr_, 'fetchJson')
         .callsFake(() => Promise.resolve({json: () => Promise.resolve(json)}));
-    return localSubscriptionPlatform.getEntitlements().then(() => {
+    return localSubscriptionPlatform.getEntitlements().then(ent => {
       expect(fetchStub).to.be.calledOnce;
       expect(fetchStub.getCall(0).args[0]).to.be.equals(authUrl);
       expect(fetchStub.getCall(0).args[1].credentials)
           .to.be.equals('include');
+      expect(ent).to.be.instanceof(Entitlement);
     });
   });
 
@@ -117,6 +118,8 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
   });
 
   it('should call getEncryptedDocumentKey with local', () => {
+    sandbox.stub(localSubscriptionPlatform.xhr_, 'fetchJson')
+        .callsFake(() => Promise.resolve({json: () => Promise.resolve(json)}));
     return localSubscriptionPlatform.getEntitlements().then(() => {
       expect(getEncryptedDocumentKeyStub).to.be.calledWith('local');
     });

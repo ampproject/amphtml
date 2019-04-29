@@ -26,10 +26,9 @@ tags: {  # amp-image-slider
 }
 tags: {  # <amp-image-slider>
   html_format: AMP
+  disabled_by: "transformed"
   tag_name: "AMP-IMAGE-SLIDER"
   requires_extension: "amp-image-slider"
-  attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-image-slider"
   attrs: {
     name: "disable-hint-reappear"
   }
@@ -43,16 +42,52 @@ tags: {  # <amp-image-slider>
     # number between 0 and 1 (inclusive)
     value_regex: "0(\\.[0-9]+)?|1(\\.0+)?"
   }
+  attr_lists: "extended-amp-global"
+  child_tags: {
+    child_tag_name_oneof: "AMP-IMG"
+    child_tag_name_oneof: "DIV"
+    mandatory_min_num_child_tags: 2
+  }
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-image-slider"
   amp_layout: {
     supported_layouts: FIXED
     supported_layouts: INTRINSIC
     supported_layouts: NODISPLAY
     supported_layouts: RESPONSIVE
   }
+}
+tags: {  # <amp-image-slider>
+  html_format: AMP
+  enabled_by: "transformed"
+  tag_name: "AMP-IMAGE-SLIDER"
+  spec_name: "amp-image-slider (transformed)"
+  requires_extension: "amp-image-slider"
+  attrs: {
+    name: "disable-hint-reappear"
+  }
+  attrs: {
+    name: "initial-slider-position"
+    # number between 0 and 1 (inclusive)
+    value_regex: "0(\\.[0-9]+)?|1(\\.0+)?"
+  }
+  attrs: {
+    name: "step-size"
+    # number between 0 and 1 (inclusive)
+    value_regex: "0(\\.[0-9]+)?|1(\\.0+)?"
+  }
+  attr_lists: "extended-amp-global"
   child_tags: {
     child_tag_name_oneof: "AMP-IMG"
     child_tag_name_oneof: "DIV"
+    child_tag_name_oneof: "I-AMPHTML-SIZER"
     mandatory_min_num_child_tags: 2
+  }
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-image-slider"
+  amp_layout: {
+    supported_layouts: FIXED
+    supported_layouts: INTRINSIC
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
   }
 }
 tags: {
