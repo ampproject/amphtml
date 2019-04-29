@@ -91,7 +91,7 @@ export class LocalSubscriptionIframePlatform
       return this.messenger_.sendCommandRsvp('authorize', {})
           .then(res => {
             res.source = 'local-iframe';
-            return JSON.stringify(res);
+            return res;
           })
           .then(resJson => Entitlement.parseFromJson(resJson));
     });
