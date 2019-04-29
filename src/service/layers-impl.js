@@ -17,7 +17,7 @@
 import {Services} from '../services';
 import {computedStyle} from '../style';
 import {dev, devAssert} from '../log';
-import {getFriendlyIframeEmbedOptional} from '../friendly-iframe-embed';
+import {getFriendlyIframeEmbedOptional, isInFie} from '../friendly-iframe-embed';
 import {getMode} from '../mode';
 import {listen} from '../event-helper';
 import {registerServiceBuilderForDoc} from '../service';
@@ -1310,10 +1310,8 @@ function frameParent(node) {
  */
 function frameParentInternal(win) {
   try {
-    const frameElement = win && /** @type {?HTMLIFrameElement} */(
-      win.frameElement);
-    return frameElement && getFriendlyIframeEmbedOptional(frameElement)
-      ? frameElement
+    return win && isInFie(win.document.documentElement)
+      ? win.frameElement
       : null;
   } catch (e) { }
   return null;
