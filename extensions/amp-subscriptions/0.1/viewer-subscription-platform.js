@@ -17,12 +17,12 @@
 
 import {Entitlement, GrantReason} from './entitlement';
 import {JwtHelper} from '../../amp-access/0.1/jwt';
-import {localSubscriptionPlatformFactory} from './local-subscription-platform';
 import {PageConfig} from '../../../third_party/subscriptions-project/config';
 import {Services} from '../../../src/services';
 import {devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getSourceOrigin, getWinOrigin} from '../../../src/url';
+import {localSubscriptionPlatformFactory} from './local-subscription-platform';
 
 
 /**

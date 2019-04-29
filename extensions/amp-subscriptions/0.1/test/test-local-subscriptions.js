@@ -16,10 +16,10 @@
 
 import {Dialog} from '../dialog';
 import {Entitlement, GrantReason} from '../entitlement';
-import {localSubscriptionPlatformFactory} from '../local-subscription-platform';
 import {PageConfig} from '../../../../third_party/subscriptions-project/config';
 import {ServiceAdapter} from '../service-adapter';
 import {SubscriptionAnalytics} from '../analytics';
+import {localSubscriptionPlatformFactory} from '../local-subscription-platform';
 
 describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
   let ampdoc;

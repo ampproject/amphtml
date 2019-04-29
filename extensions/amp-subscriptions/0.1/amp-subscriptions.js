@@ -19,7 +19,6 @@ import {CryptoHandler} from './crypto-handler';
 import {Dialog} from './dialog';
 import {DocImpl} from './doc-impl';
 import {Entitlement} from './entitlement';
-import {localSubscriptionPlatformFactory} from './local-subscription-platform';
 import {
   PageConfig,
   PageConfigResolver,
@@ -39,6 +38,7 @@ import {getValueForExpr, tryParseJson} from '../../../src/json';
 import {getWinOrigin} from '../../../src/url';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {isStoryDocument} from '../../../src/utils/story';
+import {localSubscriptionPlatformFactory} from './local-subscription-platform';
 
 /** @const */
 const TAG = 'amp-subscriptions';

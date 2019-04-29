@@ -91,7 +91,7 @@ export class LocalSubscriptionIframePlatform
       return this.messenger_.sendCommandRsvp('authorize', {})
           .then(res => {
             res.source = 'local-iframe';
-            return JSON.stringify(res)
+            return JSON.stringify(res);
           })
           .then(resJson => Entitlement.parseFromJson(resJson));
     });
@@ -141,7 +141,7 @@ export class LocalSubscriptionIframePlatform
       configJson['pageConfig'] = {
         publicationId: pageConfig.getPublicationId(),
         productId: pageConfig.getProductId(),
-        encryptedDocumentKey: 
+        encryptedDocumentKey:
             this.serviceAdapter_.getEncryptedDocumentKey('local') || null,
       };
       if (this.iframeVars_) {

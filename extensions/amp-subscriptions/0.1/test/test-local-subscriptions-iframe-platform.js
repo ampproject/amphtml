@@ -19,14 +19,14 @@ import {Entitlement} from '../entitlement';
 import {
   LocalSubscriptionIframePlatform,
 } from '../local-subscription-platform-iframe';
-import {
-  localSubscriptionPlatformFactory,
-} from '../local-subscription-platform';
 import {Messenger} from '../../../amp-access/0.1/iframe-api/messenger';
 import {PageConfig} from '../../../../third_party/subscriptions-project/config';
 import {ServiceAdapter} from '../service-adapter';
 import {SubscriptionAnalytics} from '../analytics';
 import {UrlBuilder} from '../url-builder';
+import {
+  localSubscriptionPlatformFactory,
+} from '../local-subscription-platform';
 
 describes.fakeWin('LocalSubscriptionsIframePlatform', {amp: true}, env => {
   let ampdoc;
@@ -41,7 +41,7 @@ describes.fakeWin('LocalSubscriptionsIframePlatform', {amp: true}, env => {
   const configiframeSrc = 'https://lipsum.com/iframe?rid=READER_ID';
 
   const serviceConfig = {};
-  let builderMock;
+  let builderMock, expectedConfig;
 
   beforeEach(() => {
     ampdoc = env.ampdoc;
@@ -65,6 +65,25 @@ describes.fakeWin('LocalSubscriptionsIframePlatform', {amp: true}, env => {
         'baseScore': 99,
       },
     ];
+    expectedConfig = {
+      config: {
+        actions: {
+          login: 'https://lipsum.com/login',
+          subscribe: 'https://lipsum.com/subscribe',
+        },
+        baseScore: 99,
+        iframeSrc: 'https://lipsum.com/iframe?rid=READER_ID',
+        pageConfig: {
+          encryptedDocumentKey: null,
+          productId: 'example.org:basic',
+          publicationId: 'example.org',
+        },
+        serviceId: 'local',
+        type: 'iframe',
+      },
+      protocol: 'amp-subscriptions',
+    };
+
     builderMock = sandbox.mock(UrlBuilder.prototype);
   });
 
@@ -160,22 +179,8 @@ describes.fakeWin('LocalSubscriptionsIframePlatform', {amp: true}, env => {
             'VAR2': 'B',
           }))
           .once();
-      const expectedConfig = {
-          actions: {
-            login: "https://lipsum.com/login",
-            subscribe: "https://lipsum.com/subscribe"
-          },
-          baseScore: 99,
-          iframeSrc: "https://lipsum.com/iframe?rid=READER_ID",
-          iframeVars: { VAR1: "A", VAR2: "B" },
-          pageConfig: {
-            encryptedDocumentKey: null,
-            productId: "example.org:basic",
-            publicationId: "example.org"
-          },
-          serviceId: "local",
-          type: "iframe",
-      };
+      const expectedConfigWithVars = Object.assign({}, expectedConfig);
+      expectedConfigWithVars.config.iframeVars = {VAR1: 'A', VAR2: 'B'};
       serviceConfig.services[0]['iframeVars'] = ['VAR1', 'VAR2'];
       const localSubscriptionPlatform = localSubscriptionPlatformFactory(ampdoc,
           serviceConfig.services[0], serviceAdapter);
@@ -187,10 +192,8 @@ describes.fakeWin('LocalSubscriptionsIframePlatform', {amp: true}, env => {
 
       return promise.then(() => {
         expect(sendStub).to.be.calledOnce;
-        expect(sendStub).to.be.calledWithExactly('start', {
-          'protocol': 'amp-subscriptions',
-          'config': expectedConfig,
-        });
+        expect(sendStub).to.be
+            .calledWithExactly('start', expectedConfigWithVars);
       });
     });
   });
@@ -217,24 +220,7 @@ describes.fakeWin('LocalSubscriptionsIframePlatform', {amp: true}, env => {
     describe('getEntitlements', () => {
       beforeEach(() => {
         messengerMock.expects('sendCommandRsvp')
-            .withExactArgs('start', {
-              config: {
-                actions: {
-                  login: "https://lipsum.com/login",
-                  subscribe: "https://lipsum.com/subscribe"
-                },
-                baseScore: 99,
-                iframeSrc: "https://lipsum.com/iframe?rid=READER_ID",
-                pageConfig: {
-                  encryptedDocumentKey: null,
-                  productId: "example.org:basic",
-                  publicationId: "example.org"
-                },
-                serviceId: "local",
-                type: "iframe"
-              },
-              protocol: "amp-subscriptions"
-            })
+            .withExactArgs('start', expectedConfig)
             .returns(Promise.resolve())
             .once();
         localSubscriptionPlatform.connect();
@@ -257,24 +243,7 @@ describes.fakeWin('LocalSubscriptionsIframePlatform', {amp: true}, env => {
     describe('pingback', () => {
       beforeEach(() => {
         messengerMock.expects('sendCommandRsvp')
-            .withExactArgs('start', {
-              'protocol': 'amp-subscriptions',
-              'config': {
-                actions: {
-                  login: "https://lipsum.com/login",
-                  subscribe: "https://lipsum.com/subscribe"
-                },
-                baseScore: 99,
-                iframeSrc: "https://lipsum.com/iframe?rid=READER_ID",
-                pageConfig: {
-                  encryptedDocumentKey: null,
-                  productId: "example.org:basic",
-                  publicationId: "example.org"
-                },
-                serviceId: "local",
-                type: "iframe"
-              },
-            })
+            .withExactArgs('start', expectedConfig)
             .returns(Promise.resolve())
             .once();
         localSubscriptionPlatform.connect();

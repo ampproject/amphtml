@@ -20,9 +20,6 @@ import {
   LocalSubscriptionIframePlatform,
 } from '../local-subscription-platform-iframe';
 import {
-  localSubscriptionPlatformFactory,
-} from '../local-subscription-platform';
-import {
   LocalSubscriptionRemotePlatform,
 } from '../local-subscription-platform-remote';
 import {
@@ -36,6 +33,9 @@ import {SubscriptionAnalyticsEvents} from '../analytics';
 import {SubscriptionPlatform} from '../subscription-platform';
 import {SubscriptionService} from '../amp-subscriptions';
 import {ViewerSubscriptionPlatform} from '../viewer-subscription-platform';
+import {
+  localSubscriptionPlatformFactory,
+} from '../local-subscription-platform';
 import {setTimeout} from 'timers';
 
 
