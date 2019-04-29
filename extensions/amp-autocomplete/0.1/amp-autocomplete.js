@@ -581,6 +581,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
     // Toggle results.
     return this.mutateElement(() => {
       if (!display) {
+        this.userInput_ = this.inputElement_.value;
+        this.filterDataAndRenderResults_(this.sourceData_, this.userInput_);
         this.resetActiveElement_();
       } else {
         this.setResultDisplayDirection_();
@@ -675,13 +677,13 @@ export class AmpAutocomplete extends AMP.BaseElement {
     this.inputElement_.value = newActiveElement.getAttribute('data-value');
 
     // Element visibility logic
-    const itemTop = newActiveElement.offsetTop;
-    const itemHeight = newActiveElement.offsetHeight;
+    const {offsetTop: itemTop, offsetHeight: itemHeight} = newActiveElement;
+
     const resultTop = this.container_.scrollTop;
-    if (resultTop > itemTop || 
+    if (resultTop > itemTop ||
       resultTop + this.container_.offsetHeight < itemTop + itemHeight) {
-        this.container_.scrollTop = delta > 0 ? 
-          itemTop + itemHeight - this.container_.offsetHeight : itemTop;
+      this.container_.scrollTop = delta > 0 ?
+        itemTop + itemHeight - this.container_.offsetHeight : itemTop;
     }
 
     return this.mutateElement(() => {
