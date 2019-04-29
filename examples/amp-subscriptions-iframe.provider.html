@@ -26,7 +26,9 @@
     Controller.prototype.authorize = function() {
       log('authorize');
       if (pageProtocol === "amp-subscriptions") {
-        // handle amp-subscriptions auth request
+        // Handle amp-subscriptions auth request.
+        // This is a typed response and must use the format
+        // defined for local autorization endpoints.
         return Promise.resolve({
           "granted":true,
           "grantedReason":"SUBSCRIBER",
