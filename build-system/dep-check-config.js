@@ -374,12 +374,15 @@ exports.rules = [
       // Accessing extension-location.calculateExtensionScriptUrl().
       'extensions/amp-script/0.1/amp-script.js->' +
             'src/service/extension-location.js',
+      // Origin experiments.
       'extensions/amp-list/0.1/amp-list.js->' +
-            'src/service/origin-experiments-impl.js',
+          'src/service/origin-experiments-impl.js',
       'extensions/amp-recaptcha-input/0.1/amp-recaptcha-input.js->' +
-        'src/service/origin-experiments-impl.js',
+          'src/service/origin-experiments-impl.js',
       'extensions/amp-experiment/1.0/amp-experiment.js->' +
-        'src/service/origin-experiments-impl.js',
+          'src/service/origin-experiments-impl.js',
+      'extensions/amp-script/0.1/amp-script.js->' +
+          'src/service/origin-experiments-impl.js',
       // For action macros.
       'extensions/amp-action-macro/0.1/amp-action-macro.js->' +
             'src/service/action-impl.js',
