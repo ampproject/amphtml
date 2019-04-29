@@ -17,8 +17,8 @@
 import {Services} from '../services';
 import {computedStyle} from '../style';
 import {dev, devAssert} from '../log';
-import {getFriendlyIframeEmbedOptional} from '../friendly-iframe-embed';
 import {getMode} from '../mode';
+import {isInFie} from '../friendly-iframe-embed';
 import {listen} from '../event-helper';
 import {registerServiceBuilderForDoc} from '../service';
 import {remove} from '../utils/array';
@@ -1285,16 +1285,15 @@ function sameDocument(element, other) {
 /**
  * Attempts to cross the FIE boundary to the parent node.
  *
- * @param {!Node} node
+ * @param {!Node} doc
  * @return {?Element}
  */
-function frameParent(node) {
-  devAssert(node.nodeType === Node.DOCUMENT_NODE);
+function frameParent(doc) {
+  devAssert(doc.nodeType === Node.DOCUMENT_NODE);
   try {
-    const {defaultView} = node;
-    const frameElement = defaultView && defaultView.frameElement;
-    return frameElement && getFriendlyIframeEmbedOptional(frameElement)
-      ? frameElement
+    const {defaultView} = doc;
+    return defaultView && isInFie(doc.documentElement)
+      ? defaultView.frameElement
       : null;
   } catch (e) { }
   return null;
