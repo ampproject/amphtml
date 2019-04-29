@@ -54,10 +54,10 @@
   },
   "chartbeat": {
     "host": "https://ping.chartbeat.net",
-    "basePrefix": "/ping?h=!domain&p=_canonical_path_&u=_client_id_&d=_canonical_host_&g=!uid&g0=!sections&g1=!authors&g2=!zone&g3=!sponsorName&g4=!contentType&c=120&x=_scroll_top_&y=_scroll_height_&j=!decayTime&R=1&W=0&I=0&E=_total_engaged_time_&r=_document_referrer_&t=_page_view_id__client_id_&b=_page_load_time_&i=_title_&T=_timestamp_&tz=_timezone_&C=2",
+    "basePrefix": "/ping?h=!domain&p=_canonical_path_&u=_client_id_&d=_canonical_host_&g=!uid&g0=!sections&g1=!authors&g2=!zone&g3=!sponsorName&g4=!contentType&c=120&x=_scroll_top_&y=_scroll_height_&o=_scroll_width_&w=_viewport_height_&j=!decayTime&R=1&W=0&I=0&E=_total_engaged_time_&r=_document_referrer_&t=_page_view_id__client_id_&b=_page_load_time_&i=_title_&T=_timestamp_&tz=_timezone_&C=2",
     "baseSuffix": "&_",
-    "interval": "https://ping.chartbeat.net/ping?h=!domain&p=_canonical_path_&u=_client_id_&d=_canonical_host_&g=!uid&g0=!sections&g1=!authors&g2=!zone&g3=!sponsorName&g4=!contentType&c=120&x=_scroll_top_&y=_scroll_height_&j=!decayTime&R=1&W=0&I=0&E=_total_engaged_time_&r=_document_referrer_&t=_page_view_id__client_id_&b=_page_load_time_&i=_title_&T=_timestamp_&tz=_timezone_&C=2&_",
-    "anchorClick": "https://ping.chartbeat.net/ping?h=!domain&p=_canonical_path_&u=_client_id_&d=_canonical_host_&g=!uid&g0=!sections&g1=!authors&g2=!zone&g3=!sponsorName&g4=!contentType&c=120&x=_scroll_top_&y=_scroll_height_&j=!decayTime&R=1&W=0&I=0&E=_total_engaged_time_&r=_document_referrer_&t=_page_view_id__client_id_&b=_page_load_time_&i=_title_&T=_timestamp_&tz=_timezone_&C=2&_"
+    "interval": "https://ping.chartbeat.net/ping?h=!domain&p=_canonical_path_&u=_client_id_&d=_canonical_host_&g=!uid&g0=!sections&g1=!authors&g2=!zone&g3=!sponsorName&g4=!contentType&c=120&x=_scroll_top_&y=_scroll_height_&o=_scroll_width_&w=_viewport_height_&j=!decayTime&R=1&W=0&I=0&E=_total_engaged_time_&r=_document_referrer_&t=_page_view_id__client_id_&b=_page_load_time_&i=_title_&T=_timestamp_&tz=_timezone_&C=2&_",
+    "anchorClick": "https://ping.chartbeat.net/ping?h=!domain&p=_canonical_path_&u=_client_id_&d=_canonical_host_&g=!uid&g0=!sections&g1=!authors&g2=!zone&g3=!sponsorName&g4=!contentType&c=120&x=_scroll_top_&y=_scroll_height_&o=_scroll_width_&w=_viewport_height_&j=!decayTime&R=1&W=0&I=0&E=_total_engaged_time_&r=_document_referrer_&t=_page_view_id__client_id_&b=_page_load_time_&i=_title_&T=_timestamp_&tz=_timezone_&C=2&_"
   },
   "clicky": {
     "base": "https://in.getclicky.com/in.php?site_id=!site_id",
