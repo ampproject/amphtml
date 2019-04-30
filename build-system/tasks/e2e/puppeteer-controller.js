@@ -25,7 +25,7 @@ const {
   ControllerPromise,
   ElementHandle,
   FunctionalTestController, // eslint-disable-line no-unused-vars
-  Keys,
+  Key,
 } = require('./functional-test-controller');
 const {dirname, join} = require('path');
 
@@ -34,14 +34,14 @@ const {dirname, join} = require('path');
  * {@link https://github.com/GoogleChrome/puppeteer/blob/master/lib/USKeyboardLayout.js}
  * @enum {string}
  */
-const KeysToPuppeteerMap = {
-  [Keys.ArrowDown]: 'ArrowDown',
-  [Keys.ArrowLeft]: 'ArrowLeft',
-  [Keys.ArrowRight]: 'ArrowRight',
-  [Keys.ArrowUp]: 'ArrowUp',
-  [Keys.Enter]: 'Enter',
-  [Keys.Escape]: 'Escape',
-  [Keys.Tab]: 'Tab',
+const KeyToPuppeteerMap = {
+  [Key.ArrowDown]: 'ArrowDown',
+  [Key.ArrowLeft]: 'ArrowLeft',
+  [Key.ArrowRight]: 'ArrowRight',
+  [Key.ArrowUp]: 'ArrowUp',
+  [Key.Enter]: 'Enter',
+  [Key.Escape]: 'Escape',
+  [Key.Tab]: 'Tab',
 };
 
 const DEFAULT_WAIT_TIMEOUT = 10000;
@@ -283,7 +283,7 @@ class PuppeteerController {
 
   /**
    * @param {!ElementHandle<!PuppeteerHandle>} handle
-   * @param {string|Keys} keys
+   * @param {string|Key} keys
    * @return {!Promise}
    * @override
    */
@@ -294,7 +294,7 @@ class PuppeteerController {
       await frame.$(':focus');
 
 
-    const key = KeysToPuppeteerMap[keys];
+    const key = KeyToPuppeteerMap[keys];
     if (key) {
       await targetElement.press(key);
       return;

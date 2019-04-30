@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Keys} from
+import {Key} from
   '../../../../build-system/tasks/e2e/functional-test-controller';
 
 describes.endtoend('amp-date-picker', {
@@ -49,7 +49,7 @@ describes.endtoend('amp-date-picker', {
 
       // This command selects the date one day after the start since the
       // initial focused cell is the date after the start date.
-      await controller.type(null, Keys.Enter);
+      await controller.type(null, Key.Enter);
 
       const endCell = await controller.findElement(
           '.CalendarDay__selected_end');
@@ -69,9 +69,9 @@ describes.endtoend('amp-date-picker', {
 
       // This sequence of commands selects the date one week after the start
       // date since the initial focused cell is the date after the start date.
-      await controller.type(null, Keys.ArrowLeft);
-      await controller.type(null, Keys.ArrowDown);
-      await controller.type(null, Keys.Enter);
+      await controller.type(null, Key.ArrowLeft);
+      await controller.type(null, Key.ArrowDown);
+      await controller.type(null, Key.Enter);
 
       await expect(controller.getElementAttribute(nextWeekCell, 'class'))
           .to.contain('CalendarDay__selected_end');
@@ -94,9 +94,9 @@ describes.endtoend('amp-date-picker', {
 
       // This sequence of commands selects a date one week after the start date
       // since the initial focused cell is the date after the start date.
-      await controller.type(null, Keys.ArrowLeft);
-      await controller.type(null, Keys.ArrowDown);
-      await controller.type(null, Keys.Enter);
+      await controller.type(null, Key.ArrowLeft);
+      await controller.type(null, Key.ArrowDown);
+      await controller.type(null, Key.Enter);
 
       await expect(controller.getElementAttribute(nextWeekCell, 'class'))
           .to.not.contain('CalendarDay__selected_end');

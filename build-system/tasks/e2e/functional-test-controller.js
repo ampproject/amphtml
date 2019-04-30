@@ -45,11 +45,11 @@ class ElementHandle {
 }
 
 /**
- * Keys to send to the FunctionalTestController#type method to trigger
+ * Key to send to the FunctionalTestController#type method to trigger
  * actions instead of text.
  * @enum {string}
  */
-export const Keys = {
+const Key = {
   'ArrowDown': 'ArrowDown',
   'ArrowLeft': 'ArrowLeft',
   'ArrowRight': 'ArrowRight',
@@ -410,7 +410,7 @@ class FunctionalTestController {
    * {@link https://www.w3.org/TR/webdriver1/#element-send-keys}
    *
    * @param {?ElementHandle} unusedHandle
-   * @param {string|Keys} unusedKeys
+   * @param {string|Key} unusedKeys
    * @return {!Promise}
    */
   async type(unusedHandle, unusedKeys) {}
@@ -482,7 +482,7 @@ module.exports = {
   ElementHandle,
   ControllerPromise,
   FunctionalTestController,
-  Keys,
+  Key,
   WindowRectDef,
   DOMRectDef,
   ScrollToOptionsDef,

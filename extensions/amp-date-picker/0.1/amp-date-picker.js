@@ -1257,28 +1257,12 @@ export class AmpDatePicker extends AMP.BaseElement {
    * @param {!JsonObject} param
    */
   onDatesChange(param) {
-    const isSameDay = this.ReactDates_['isSameDay'];
     const startDate = param['startDate'];
     const endDate = param['endDate'];
     const isFinalSelection = (!this.props_['keepOpenOnDateSelect'] &&
         this.state_['focusedInput'] != this.ReactDatesConstants_['END_DATE']);
 
-    let blockedCount = 0;
-    if (startDate && !this.allowBlockedRanges_) {
-      this.iterateDateRange_(startDate, endDate, index => {
-        if (this.blocked_.contains(index)) {
-          blockedCount++;
-        }
-      });
-    }
-
-    if (blockedCount == 1 && this.allowBlockedEndDate_) {
-      // From the above branch, we know allowBlockedEndDate is true
-      if (endDate &&
-          !isSameDay(endDate, this.blocked_.firstDateAfter(startDate))) {
-        return;
-      }
-    } else if (blockedCount > 0) {
+    if (this.isBlockedRange_(startDate, endDate)) {
       return;
     }
 
@@ -1300,6 +1284,40 @@ export class AmpDatePicker extends AMP.BaseElement {
       this.transitionTo_(DatePickerState.OVERLAY_CLOSED);
       this.triggerEvent_(DatePickerEvent.DEACTIVATE);
     }
+  }
+
+  /**
+   * Detect if a blocked date is between the start and end date, inclusively,
+   * accounting for the `allow-blocked-end-date` attribute.
+   * @param {?moment} startDate
+   * @param {?moment} endDate
+   */
+  isBlockedRange_(startDate, endDate) {
+    if (!startDate || !endDate) {
+      return false;
+    }
+
+    const isSameDay = this.ReactDates_['isSameDay'];
+    let blockedCount = 0;
+    if (startDate && !this.allowBlockedRanges_) {
+      this.iterateDateRange_(startDate, endDate, index => {
+        if (this.blocked_.contains(index)) {
+          blockedCount++;
+        }
+      });
+    }
+
+    if (blockedCount == 1 && this.allowBlockedEndDate_) {
+      // From the above branch, we know allowBlockedEndDate is true
+      if (endDate &&
+          !isSameDay(endDate, this.blocked_.firstDateAfter(startDate))) {
+        return true;
+      }
+    } else if (blockedCount > 0) {
+      return true;
+    }
+
+    return false;
   }
 
   /**

@@ -18,13 +18,13 @@ const fs = require('fs');
 const {
   By,
   Condition,
-  Key,
+  Key: SeleniumKey,
   error,
 } = require('selenium-webdriver');
 const {
   ControllerPromise,
   ElementHandle,
-  Keys,
+  Key,
 } = require('./functional-test-controller');
 const {expect} = require('chai');
 
@@ -33,14 +33,14 @@ const {NoSuchElementError} = error;
 const ELEMENT_WAIT_TIMEOUT = 5000;
 
 /** @enum {string} */
-const KeysToSeleniumMap = {
-  [Keys.ArrowDown]: Key.ARROW_DOWN,
-  [Keys.ArrowLeft]: Key.ARROW_LEFT,
-  [Keys.ArrowRight]: Key.ARROW_RIGHT,
-  [Keys.ArrowUp]: Key.ARROW_UP,
-  [Keys.Enter]: Key.ENTER,
-  [Keys.Escape]: Key.ESCAPE,
-  [Keys.Tab]: Key.TAB,
+const KeyToSeleniumMap = {
+  [Key.ArrowDown]: SeleniumKey.ARROW_DOWN,
+  [Key.ArrowLeft]: SeleniumKey.ARROW_LEFT,
+  [Key.ArrowRight]: SeleniumKey.ARROW_RIGHT,
+  [Key.ArrowUp]: SeleniumKey.ARROW_UP,
+  [Key.Enter]: SeleniumKey.ENTER,
+  [Key.Escape]: SeleniumKey.ESCAPE,
+  [Key.Tab]: SeleniumKey.TAB,
 };
 
 /**
@@ -260,7 +260,7 @@ class SeleniumWebDriverController {
 
   /**
    * @param {!ElementHandle<!WebElement>} handle
-   * @param {string|Keys} keys
+   * @param {string|Key} keys
    * @return {!Promise}
    * @override
    */
@@ -270,7 +270,7 @@ class SeleniumWebDriverController {
       await this.driver.switchTo().activeElement();
 
 
-    const key = KeysToSeleniumMap[keys];
+    const key = KeyToSeleniumMap[keys];
     if (key) {
       return await targetElement.sendKeys(key);
     }

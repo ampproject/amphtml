@@ -117,9 +117,9 @@ export function withDatePickerCommon(WrappedComponent) {
 
     if (startDate && !endDate && allowBlockedEndDate) {
       return isBlocked && !isSameDay(day, list.firstDateAfter(startDate));
-    } else {
-      return isBlocked;
     }
+
+    return isBlocked;
   }
 
   /**
