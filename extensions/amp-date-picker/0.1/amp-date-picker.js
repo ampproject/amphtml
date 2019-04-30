@@ -1291,6 +1291,7 @@ export class AmpDatePicker extends AMP.BaseElement {
    * accounting for the `allow-blocked-end-date` attribute.
    * @param {?moment} startDate
    * @param {?moment} endDate
+   * @return {boolean} True if the range should not be selected.
    */
   isBlockedRange_(startDate, endDate) {
     if (!startDate || !endDate) {
@@ -1299,7 +1300,7 @@ export class AmpDatePicker extends AMP.BaseElement {
 
     const isSameDay = this.ReactDates_['isSameDay'];
     let blockedCount = 0;
-    if (startDate && !this.allowBlockedRanges_) {
+    if (!this.allowBlockedRanges_) {
       this.iterateDateRange_(startDate, endDate, index => {
         if (this.blocked_.contains(index)) {
           blockedCount++;
@@ -1307,13 +1308,17 @@ export class AmpDatePicker extends AMP.BaseElement {
       });
     }
 
-    if (blockedCount == 1 && this.allowBlockedEndDate_) {
-      // From the above branch, we know allowBlockedEndDate is true
-      if (endDate &&
-          !isSameDay(endDate, this.blocked_.firstDateAfter(startDate))) {
-        return true;
-      }
-    } else if (blockedCount > 0) {
+    // If allow-blocked-end-date is enabled, we do not consider the range
+    // blocked when the end date is the only blocked date.
+    if (blockedCount == 1 &&
+        this.allowBlockedEndDate_ &&
+        isSameDay(endDate, this.blocked_.firstDateAfter(startDate))) {
+      return false;
+    }
+
+    // If there are any blocked dates in the range, it cannot
+    // be selected.
+    if (blockedCount > 0) {
       return true;
     }
 
