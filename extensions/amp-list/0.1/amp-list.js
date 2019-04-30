@@ -566,13 +566,8 @@ export class AmpList extends AMP.BaseElement {
     };
     const isSSR = this.ssrTemplateHelper_.isSupported();
     let renderPromise = this.ssrTemplateHelper_.renderTemplate(
-        this.element, /** @type {!Array|!JsonObject} */ (current.data))
-        // For SSR, the result will be the container node that contains the
-        // list items. Just pass in the list items when updating the bindings
-        // and rendering else the sanitizer will strip out the class attribute
-        // from the container.
-        .then(result => this.updateBindings_(
-            isSSR ? toArray(result.childNodes) : result, current.append))
+        this.element, current.data)
+        .then(result => this.updateBindings_(result, current.append))
         .then(elements => this.render_(elements, current.append));
     if (!isSSR) {
       const payload = /** @type {!JsonObject} */ (current.payload);
@@ -624,12 +619,14 @@ export class AmpList extends AMP.BaseElement {
    * Scans for, evaluates and applies any bindings in the given elements.
    * Ensures that rendered content is up-to-date with the latest bindable state.
    * Can be skipped by setting binding="no" or binding="refresh" attribute.
-   * @param {!Array<!Element>} elements
+   * @param {!Array<!Element>|!Element} elementOrElements
    * @param {boolean} append
    * @return {!Promise<!Array<!Element>>}
    * @private
    */
-  updateBindings_(elements, append) {
+  updateBindings_(elementOrElements, append) {
+    const elements = /** @type {!Array<!Element>} */
+      (isArray(elementOrElements) ? elementOrElements : [elementOrElements]);
     const binding = this.element.getAttribute('binding');
     // "no": Always skip binding update.
     if (binding === 'no') {
