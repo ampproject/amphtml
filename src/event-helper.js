@@ -15,6 +15,7 @@
  */
 
 import {internalListenImplementation} from './event-helper-listen';
+import {lastChildElement} from './dom';
 import {user} from './log';
 
 /** @const {string}  */
@@ -173,7 +174,8 @@ export function loadPromise(eleOrWindow) {
     // document order. If the last source errors, then the media element
     // loading errored.
     if (isMediaElement && !eleOrWindow.hasAttribute('src')) {
-      errorTarget = eleOrWindow.querySelector('source:last-of-type');
+      errorTarget =
+          lastChildElement(eleOrWindow, child => child.tagName === 'SOURCE');
       if (!errorTarget) {
         return reject(new Error('Media has no source.'));
       }
