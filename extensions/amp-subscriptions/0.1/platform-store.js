@@ -156,11 +156,11 @@ export class PlatformStore {
 
   /**
    * Returns the local platform
-   * @return {!./local-subscription-platform.LocalSubscriptionPlatform}
+   * @return {!./subscription-platform.SubscriptionPlatform}
    */
   getLocalPlatform() {
     const localPlatform =
-        /** @type{!./local-subscription-platform.LocalSubscriptionPlatform} */
+        /** @type{!./subscription-platform.SubscriptionPlatform} */
         (this.getPlatform('local'));
     return localPlatform;
   }

@@ -16,7 +16,12 @@
 
 import * as utilsStory from '../../../../src/utils/story';
 import {Entitlement, GrantReason} from '../entitlement';
-import {LocalSubscriptionPlatform} from '../local-subscription-platform';
+import {
+  LocalSubscriptionIframePlatform,
+} from '../local-subscription-platform-iframe';
+import {
+  LocalSubscriptionRemotePlatform,
+} from '../local-subscription-platform-remote';
 import {
   PageConfig,
   PageConfigResolver,
@@ -28,6 +33,9 @@ import {SubscriptionAnalyticsEvents} from '../analytics';
 import {SubscriptionPlatform} from '../subscription-platform';
 import {SubscriptionService} from '../amp-subscriptions';
 import {ViewerSubscriptionPlatform} from '../viewer-subscription-platform';
+import {
+  localSubscriptionPlatformFactory,
+} from '../local-subscription-platform';
 import {setTimeout} from 'timers';
 
 
@@ -48,6 +56,27 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
     services: [
       {
         authorizationUrl: 'https://lipsum.com/authorize',
+        actions: {
+          subscribe: 'https://lipsum.com/subscribe',
+          login: 'https://lipsum.com/login',
+        },
+      },
+      {
+        serviceId: 'google.subscription',
+      },
+    ],
+    fallbackEntitlement: {
+      source: 'local',
+      grantReason: GrantReason.SUBSCRIBER,
+      granted: true,
+    },
+  };
+
+  const serviceConfigIframe = {
+    services: [
+      {
+        type: 'iframe',
+        iframeSrc: 'https://lipsum.com/authorize',
         actions: {
           subscribe: 'https://lipsum.com/subscribe',
           login: 'https://lipsum.com/login',
@@ -302,7 +331,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
   });
 
   describe('initializeLocalPlatforms_', () => {
-    it('should put `LocalSubscriptionPlatform` for every service config'
+    it('should put `LocalSubscriptionRemotePlatform` for every service config'
         + ' with authorization Url', () => {
       const service = serviceConfig.services[0];
       subscriptionService.serviceAdapter_ =
@@ -313,7 +342,20 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
       expect(subscriptionService.platformStore_.subscriptionPlatforms_['local'])
           .to.be.not.null;
       expect(subscriptionService.platformStore_.subscriptionPlatforms_['local'])
-          .to.be.instanceOf(LocalSubscriptionPlatform);
+          .to.be.instanceOf(LocalSubscriptionRemotePlatform);
+    });
+    it('should put `LocalSubscriptionRemotePlatform` for every service config'
+        + ' with iframe Url', () => {
+      const service = serviceConfigIframe.services[0];
+      subscriptionService.serviceAdapter_ =
+        new ServiceAdapter(subscriptionService);
+      subscriptionService.pageConfig_ = pageConfig;
+      subscriptionService.platformStore_ = new PlatformStore(['local']);
+      subscriptionService.initializeLocalPlatforms_(service);
+      expect(subscriptionService.platformStore_.subscriptionPlatforms_['local'])
+          .to.be.not.null;
+      expect(subscriptionService.platformStore_.subscriptionPlatforms_['local'])
+          .to.be.instanceOf(LocalSubscriptionIframePlatform);
     });
   });
 
@@ -515,7 +557,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
       firstVisibleStub = sandbox.stub(subscriptionService.viewer_,
           'whenFirstVisible').callsFake(() => Promise.resolve());
       subscriptionService.pageConfig_ = pageConfig;
-      platform = new LocalSubscriptionPlatform(ampdoc,
+      platform = localSubscriptionPlatformFactory(ampdoc,
           serviceConfig.services[0],
           serviceAdapter);
       subscriptionService.platformStore_ = new PlatformStore(['local']);
@@ -604,13 +646,13 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
           'fetchEntitlements_');
     });
 
-    it('should put LocalSubscriptionPlatform in platformstore, '
+    it('should put LocalSubscriptionRemotePlatform in platformstore, '
         + 'if viewer does not have auth capability', () => {
       subscriptionService.doesViewerProvideAuth_ = false;
       subscriptionService.start();
       return subscriptionService.initialize_().then(() => {
         expect(subscriptionService.platformStore_.getLocalPlatform()).to.be
-            .instanceOf(LocalSubscriptionPlatform);
+            .instanceOf(LocalSubscriptionRemotePlatform);
       });
     });
 
