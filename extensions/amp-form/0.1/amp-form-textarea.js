@@ -21,6 +21,7 @@ import {dev, devAssert, user} from '../../../src/log';
 import {iterateCursor, removeElement} from '../../../src/dom';
 import {listen, listenOncePromise} from '../../../src/event-helper';
 import {throttle} from '../../../src/utils/rate-limit';
+import {toArray} from '../../../src/types';
 
 const AMP_FORM_TEXTAREA_EXPAND_ATTR = 'autoexpand';
 
@@ -139,9 +140,8 @@ export class AmpFormTextarea {
  * @return {!Promise}
  */
 export function handleInitialOverflowElements(textareas) {
-  const promises = [];
-  iterateCursor(textareas, element => {
-    const result = getHasOverflow(element).then(hasOverflow => {
+  return Promise.all(toArray(textareas).map(element => {
+    return getHasOverflow(element).then(hasOverflow => {
       if (hasOverflow) {
         user().warn('AMP-FORM',
             '"textarea[autoexpand]" with initially scrolling content ' +
@@ -150,10 +150,7 @@ export function handleInitialOverflowElements(textareas) {
         element.removeAttribute(AMP_FORM_TEXTAREA_EXPAND_ATTR);
       }
     });
-    promises.push(result);
-  });
-
-  return Promise.all(promises);
+  }));
 }
 
 /**
