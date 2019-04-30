@@ -72,13 +72,11 @@ self.addEventListener('message', function(event) {
   switch (method) {
     case 'bind.init':
       if (evaluator) {
-        dev().error(TAG, 'Evaluator already exists for scope:', scope);
-        returnValue = false;
-      } else {
-        const allowUrlProperties = args[0];
-        evaluators_[scope] = new BindEvaluator(allowUrlProperties);
-        returnValue = true;
+        dev().warn(TAG, 'Overwriting existing evaluator for scope:', scope);
       }
+      const allowUrlProperties = args[0];
+      evaluators_[scope] = new BindEvaluator(allowUrlProperties);
+      returnValue = true;
       break;
     case 'bind.addBindings':
       returnValue = evaluator.addBindings.apply(evaluator, args);
