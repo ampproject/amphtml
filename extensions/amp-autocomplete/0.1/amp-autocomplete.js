@@ -688,44 +688,24 @@ export class AmpAutocomplete extends AMP.BaseElement {
     this.inputElement_.value = newActiveElement.getAttribute('data-value');
 
     // Element visibility logic
-    let overflowEl;
+    let shouldScroll, newTop;
 
     return this.measureMutateElement(() => {
-      overflowEl = this.measureContainerScroll_(newActiveElement, delta > 0);
+      const {offsetTop: itemTop, offsetHeight: itemHeight} = newActiveElement;
+      const {scrollTop: resultTop, offsetHeight: resultHeight} =
+        this.container_;
+      shouldScroll = (resultTop > itemTop ||
+        resultTop + resultHeight < itemTop + itemHeight);
+      newTop = delta > 0 ? itemTop + itemHeight - resultHeight : itemTop;
     }, () => {
-      if (overflowEl.shouldScroll) {
-        this.container_./*OK*/scrollTop = overflowEl.newTop;
+      if (shouldScroll) {
+        this.container_./*OK*/scrollTop = newTop;
       }
       this.resetActiveElement_();
       newActiveElement.classList.add('i-amphtml-autocomplete-item-active');
       this.activeIndex_ = activeIndex;
       this.activeElement_ = newActiveElement;
     });
-  }
-
-  /**
-   * Given an element and boolean direction, returns an object of the format:
-   * { shouldScroll: boolean, newTop: number }
-   *
-   * This method assumes that the element it is passed is a child
-   * of the results container, otherwise known as a suggested item.
-   * It then calculates whether the item element is visible within
-   * the scope of the container element, and if not, what the container
-   * should be scrolled to (either upwards or downwards),in order for the
-   * element to be seen. Should be called in a measureMutate context.
-   *
-   * @param {!Element} element
-   * @param {boolean} goingDown
-   * @return {!Object}
-   * @private
-   */
-  measureContainerScroll_(element, goingDown) {
-    const {offsetTop: itemTop, offsetHeight: itemHeight} = element;
-    const {scrollTop: resultTop, offsetHeight: resultHeight} = this.container_;
-    const shouldScroll = (resultTop > itemTop ||
-      resultTop + resultHeight < itemTop + itemHeight);
-    const newTop = goingDown ? itemTop + itemHeight - resultHeight : itemTop;
-    return {shouldScroll, newTop};
   }
 
   /**
