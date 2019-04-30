@@ -195,6 +195,7 @@ class AdSenseNetworkConfig {
     return dict({
       'type': 'adsense',
       'data-ad-client': this.autoAmpAdsElement_.getAttribute('data-ad-client'),
+      'data-ad-host': this.autoAmpAdsElement_.getAttribute('data-ad-host'),
     });
   }
 
