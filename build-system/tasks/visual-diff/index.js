@@ -507,10 +507,6 @@ async function snapshotWebpages(percy, browser, webpages) {
             }
           })
           .then(async() => {
-            // Visibility evaluations can only be performed on the active tab,
-            // even in the headless browser mode.
-            await page.bringToFront();
-
             // Perform visibility checks: wait for all AMP built-in loader dots
             // to disappear (i.e., all visible components are finished being
             // layed out and external resources such as images are loaded and
