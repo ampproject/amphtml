@@ -164,9 +164,9 @@ export class ViewportBindingInabox {
   connect() {
     if (isExperimentOn(this.win, 'inabox-viewport-friendly') &&
         canInspectWindow(this.win.top)) {
-      this.listenForPositionSameDomain();
+      return this.listenForPositionSameDomain_();
     } else {
-      this.listenForPosition_();
+      return this.listenForPosition_();
     }
   }
 
@@ -178,20 +178,22 @@ export class ViewportBindingInabox {
           dev().fine(TAG, 'Position changed: ', data);
           this.updateLayoutRects_(data['viewportRect'], data['targetRect']);
         });
+    return Promise.resolve();
   }
 
-  /** @visibleForTesting */
-  listenForPositionSameDomain() {
+  /** @private */
+  listenForPositionSameDomain_() {
     // Set up listener but only after the resources service is properly
     // registered (since it's registered after the inabox services so it won't
     // be available immediately).
     // TODO(lannka): Investigate why this is the case.
-    if (this.topWindowPositionObserver_) {
+    if (this.unobserveFunction_) {
       return Promise.resolve();
     }
     return Services.resourcesPromiseForDoc(this.win.document.documentElement)
         .then(() => {
-          this.topWindowPositionObserver_ = new PositionObserver(this.win.top);
+          this.topWindowPositionObserver_ = this.topWindowPositionObserver_ ||
+              new PositionObserver(this.win.top);
           this.unobserveFunction_ = this.topWindowPositionObserver_.observe(
               /** @type {!HTMLIFrameElement} */(this.win.frameElement),
               data => {
@@ -327,7 +329,7 @@ export class ViewportBindingInabox {
     if (isExperimentOn(this.win, 'inabox-viewport-friendly') &&
         canInspectWindow(this.win.top)) {
       // Set up the listener if we haven't already.
-      return this.listenForPositionSameDomain().then(() =>
+      return this.listenForPositionSameDomain_().then(() =>
         this.topWindowPositionObserver_.getTargetRect(
             /** @type {!HTMLIFrameElement} */(this.win.frameElement)));
     }
@@ -430,6 +432,7 @@ export class ViewportBindingInabox {
   disconnect() {
     if (this.unobserveFunction_) {
       this.unobserveFunction_();
+      this.unobserveFunction_ = null;
     }
   }
 
