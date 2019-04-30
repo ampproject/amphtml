@@ -116,7 +116,7 @@ export class AmpScript extends AMP.BaseElement {
       // `workerUrl` is from CDN, so no need for `ampCors`.
       xhr.fetchText(workerUrl, {ampCors: false}).then(r => r.text()),
       xhr.fetchText(authorUrl).then(r => r.text()),
-      getElementServiceForDoc(this.element, 'script'),
+      getElementServiceForDoc(this.element, TAG),
     ]).then(results => {
       const workerScript = results[0];
       const authorScript = results[1];
@@ -326,7 +326,7 @@ export class SanitizerImpl {
   }
 }
 
-AMP.extension('amp-script', '0.1', function(AMP) {
-  AMP.registerServiceForDoc('script', AmpScriptService);
-  AMP.registerElement('amp-script', AmpScript, CSS);
+AMP.extension(TAG, '0.1', function(AMP) {
+  AMP.registerServiceForDoc(TAG, AmpScriptService);
+  AMP.registerElement(TAG, AmpScript, CSS);
 });
