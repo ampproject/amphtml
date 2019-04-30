@@ -224,10 +224,10 @@ export class LoadMoreService {
     // If it's loading, then it's no longer failed or ended
     if (state) {
       this.getLoadMoreFailedElement().classList.toggle('amp-visible', false);
-      const loadMoreEndElement = this.getLoadMoreEndElement();
-      if (loadMoreEndElement) {
-        loadMoreEndElement.classList.toggle('amp-visible', false);
-      }
+    }
+    const loadMoreEndElement = this.getLoadMoreEndElement();
+    if (loadMoreEndElement) {
+      loadMoreEndElement.classList.toggle('amp-visible', false);
     }
     this.getLoadMoreButton().classList.toggle('amp-visible', !state);
     this.getLoadMoreLoadingElement().classList.toggle('amp-visible', state);
