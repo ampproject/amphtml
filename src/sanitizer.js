@@ -131,11 +131,12 @@ export function sanitizeHtml(html, doc, diffing) {
         // Ask Caja to validate the element as well.
         // Use the resulting properties.
         const savedAttribs = attribs.slice(0);
-        const scrubbed = tagPolicy(tagName, attribs);
+        const scrubbed = /** @type {!JsonObject} */ (
+          tagPolicy(tagName, attribs));
         if (!scrubbed) {
           ignore++;
         } else {
-          attribs = scrubbed.attribs;
+          attribs = scrubbed['attribs'];
           // Restore some of the attributes that AMP is directly responsible
           // for, such as "on".
           for (let i = 0; i < attribs.length; i += 2) {
