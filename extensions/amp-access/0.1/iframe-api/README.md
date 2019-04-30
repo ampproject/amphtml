@@ -16,13 +16,14 @@ limitations under the License.
 
 # amp-access-iframe-api
 
-The access iframe is an implementation of access protocol.
+The access iframe is an implementation of access protocol that
+supports both amp-access and amp-subscriptions.
 
 The npm package is available: https://www.npmjs.com/package/amp-access-iframe-api.
 
 The `AmpAccessIframeApi` is the entry point for access iframe implementation. As its main parameter it requires an instance of `AccessController`, which simply implements all methods of access protocol such as `authorize` and `pingback`.
 
-The document's access configuration would use the "iframe" type. For instance:
+The document's access configuration would use the "iframe" type. For instance when used withe `amp-access`:
 
 ```
 <script id="amp-access" type="application/json">
@@ -38,6 +39,33 @@ The document's access configuration would use the "iframe" type. For instance:
     ],
     "defaultResponse": {...}
   }
+</script>
+```
+
+and with `amp-subscriptions`:
+
+```
+<script type="application/json" id="amp-subscriptions">
+{
+  "services": [
+    {
+      "type": "iframe",
+      "iframeSrc": "https://example.org/access-controller-iframe",
+      "iframeVars": [
+        "READER_ID",
+        "CANONICAL_URL",
+        "AMPDOC_URL",
+        "SOURCE_URL",
+        "DOCUMENT_REFERRER"
+      ],
+      "actions":{
+        "login": "https://...",
+        "subscribe": "https://..."
+      }
+    },
+    ...
+  ]
+}
 </script>
 ```
 
@@ -75,6 +103,7 @@ The `config` argument in the `connect` method will contain the original document
 
 ```
 {
+  "pageProtocol": "amp-iframe",
   "type": "iframe",
   "iframeSrc": "https://example.org/access-controller-iframe",
   "iframeVars": {
@@ -87,12 +116,33 @@ The `config` argument in the `connect` method will contain the original document
 }
 ```
 
+When used with `amp-subscriptions` the `pageProtocol` is set
+to `amp-subscriptions` and a `pageConfig` object is included.
+
+```
+{
+  "pageProtocol": "amp-iframe",
+  "type": "iframe",
+  "pageConfig": {
+    "productId": "...",
+    "publicationId": "..."
+  },
+  // Remainder as per `amp-access`
+}
+```
+
+The `publicationId` and `productId` are extracted from the
+parent document strucuted data.  
+
 
 ## Authorize method
 
 The `authorize` method checks whether the user should be able to access this document. It's expected to be an open-ended JSON structure that can be used for access expressions.
 
 Strong timeout and one-behind semantics are observed for authorization call. If the `authorize()` method does not return within a 3s timeout, the previously returned authorization response is used. If no previous response is available or it's too old, the `defaultResponse` value from the configuration is used. However, even in case of timeout, the iframe authorization will continue until fully complete and will be made available for the next authorization attempt.
+
+In the case of `amp-subscriptions` the autorization response must
+conform to the `local` service autorization struture.
 
 
 ## Pingback method
