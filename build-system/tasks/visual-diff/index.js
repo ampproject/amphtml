@@ -53,10 +53,8 @@ const VIEWPORT_HEIGHT = 100000;
 const HOST = 'localhost';
 const PORT = 8000;
 const WEBSERVER_TIMEOUT_RETRIES = 10;
-const NAVIGATE_TIMEOUT_MS = 7000;
-const NAVIGATE_RETRIES = 3;
-const NAVIGATE_RETRY_TIMEOUT_MS = 2000;
-const MAX_PARALLEL_TABS = 1;
+const NAVIGATE_TIMEOUT_MS = 30000;
+const MAX_PARALLEL_TABS = 5;
 const WAIT_FOR_TABS_MS = 1000;
 const BUILD_STATUS_URL = 'https://amphtml-percy-status-checker.appspot.com/status';
 
@@ -438,7 +436,7 @@ async function snapshotWebpages(percy, browser, webpages) {
     availablePages.push(await newPage(browser));
   }
 
-  const pagePromises = {};
+  const pagePromises = [];
   const testErrors = [];
   let testNumber = 0;
   for (const webpage of webpages) {
@@ -473,25 +471,28 @@ async function snapshotWebpages(percy, browser, webpages) {
       // to wait until there are no more network requests. This method is flaky
       // since Puppeteer doesn't always understand Chrome's network activity, so
       // ignore timeouts again.
-      pagePromises[name] = (async() => {
-        let lastNavigationError;
-        for (let attempt = 0; attempt < NAVIGATE_RETRIES; attempt++) {
-          try {
-            return await page.goto(fullUrl, {waitUntil: 'networkidle2'});
-          } catch (navigationError) {
-            hasWarnings = true;
-            lastNavigationError = navigationError;
-            addTestError(testErrors, name,
-                'The browser test runner failed on attempt number ' +
-                (attempt + 1) + ' to navigate to the test page',
-                navigationError, /* fatal */ false);
-            // Exponential backoff.
-            if (attempt < NAVIGATE_RETRIES) {
-              await sleep(NAVIGATE_RETRY_TIMEOUT_MS * (Math.pow(2, attempt)));
-            }
-          }
-        }
-        throw lastNavigationError;
+      const pagePromise = (async() => {
+        const responseWatcher = new Promise((resolve, reject) => {
+          const responseTimeout = setTimeout(() => {
+            reject(new puppeteer.TimeoutError(
+                `Response was not received in test ${testName} for page ` +
+                `${webpage.url} after ${NAVIGATE_TIMEOUT_MS}ms`));
+          }, NAVIGATE_TIMEOUT_MS);
+
+          page.once('response', async response => {
+            log('verbose', 'Response for url', colors.yellow(response.url()),
+                'with status', colors.cyan(response.status()),
+                colors.cyan(response.statusText()));
+            clearTimeout(responseTimeout);
+            resolve();
+          });
+        });
+
+        log('verbose', 'Navigating to page', colors.yellow(webpage.url));
+        await Promise.all([
+          responseWatcher,
+          page.goto(fullUrl, {waitUntil: 'networkidle2'}),
+        ]);
       })()
           .then(() => {
             log('verbose', 'Page navigation of test', colors.yellow(name),
@@ -584,12 +585,11 @@ async function snapshotWebpages(percy, browser, webpages) {
             page.removeListener('console', consoleLogger);
             availablePages.push(page);
           });
+      pagePromises.push(pagePromise);
     }
   }
 
-  while (Object.keys(pagePromises).length > 0) {
-    await sleep(WAIT_FOR_TABS_MS);
-  }
+  await Promise.all(pagePromises);
   log('travis', '\n');
   if (isTravisBuild() && testErrors.length > 0) {
     testErrors.sort((a, b) => a.name.localeCompare(b.name));
@@ -598,8 +598,9 @@ async function snapshotWebpages(percy, browser, webpages) {
     console./*OK*/log('travis_fold:start:visual_tests\n');
     testErrors.forEach(logTestError);
     console./*OK*/log('travis_fold:end:visual_tests');
+    return false;
   }
-  return testErrors.every(testError => !testError.fatal);
+  return true;
 }
 
 /**
