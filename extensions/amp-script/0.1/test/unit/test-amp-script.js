@@ -50,5 +50,12 @@ describe('SanitizerImpl', () => {
       s.mutateAttribute(a, 'href', '/foo.html');
       expect(a.getAttribute('target')).to.equal('_top');
     });
+
+    it('should not allow changes to invalid tags', () => {
+      const base = win.document.createElement('base');
+      // 'href' attribute is allowed but 'base' tag isn't.
+      s.mutateAttribute(base, 'href', '/foo.html');
+      expect(base.getAttribute('href')).to.equal(null);
+    });
   });
 });
