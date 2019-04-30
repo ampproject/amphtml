@@ -25,17 +25,18 @@ const request = BBPromise.promisify(require('request'));
 const sleep = require('sleep-promise');
 const tryConnect = require('try-net-connect');
 const {
-  gitBranchName,
-  gitCommitterEmail,
-  gitTravisMasterBaseline,
-  shortSha,
-} = require('../../git');
-const {
+  escapeHtml,
   log,
   waitForLoaderDots,
   verifySelectorsInvisible,
   verifySelectorsVisible,
 } = require('./helpers');
+const {
+  gitBranchName,
+  gitCommitterEmail,
+  gitTravisMasterBaseline,
+  shortSha,
+} = require('../../git');
 const {execOrDie, execScriptAsync} = require('../../exec');
 const {isTravisBuild} = require('../../travis');
 const {PercyAssetsLoader} = require('./percy-assets-loader');
@@ -536,10 +537,17 @@ async function snapshotWebpages(percy, browser, webpages) {
             addTestError(testErrors, name, 'Unknown failure in test page',
                 testError, /* fatal */ true);
 
+            let htmlSnapshot;
+            try {
+              htmlSnapshot = await page.content();
+            } catch (e) {
+              htmlSnapshot = e.message;
+            }
             await page.setContent(
                 SNAPSHOT_ERROR_SNIPPET
                     .replace('__TEST_NAME__', name)
-                    .replace('__TEST_ERROR__', testError));
+                    .replace('__TEST_ERROR__', testError)
+                    .replace('__HTML_SNAPSHOT__', escapeHtml(htmlSnapshot)));
             await percy.snapshot(name, page, SNAPSHOT_SINGLE_BUILD_OPTIONS);
           })
           .finally(async() => {

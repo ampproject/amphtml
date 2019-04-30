@@ -25,6 +25,25 @@ const CSS_SELECTOR_RETRY_ATTEMPTS = 50;
 const CSS_SELECTOR_TIMEOUT_MS =
     CSS_SELECTOR_RETRY_MS * CSS_SELECTOR_RETRY_ATTEMPTS;
 
+const HTML_ESCAPE_CHARS = {
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  '"': '&quot;',
+  "'": '&#x27;',
+  '`': '&#x60;',
+};
+const HTML_ESCAPE_REGEX = /(&|<|>|"|'|`)/g;
+
+/**
+ * Escapes a string of HTML elements to HTML entities.
+ *
+ * @param {string} html HTML as string to escape.
+ */
+function escapeHtml(html) {
+  return html.replace(HTML_ESCAPE_REGEX, c => HTML_ESCAPE_CHARS[c]);
+}
+
 /**
  * Logs a message to the console.
  *
@@ -207,6 +226,7 @@ async function waitForSelectorExistence(page, selector) {
 }
 
 module.exports = {
+  escapeHtml,
   log,
   waitForLoaderDots,
   verifySelectorsInvisible,
