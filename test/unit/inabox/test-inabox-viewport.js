@@ -379,16 +379,19 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
     });
   });
 
-  it('should disconnect friendly listener', () => {
+  it('should disconnect friendly listener and reconnect again properly', () => {
     const unobserveFunction = sandbox.spy();
-    sandbox.stub(PositionObserver.prototype, 'observe')
-        .returns(unobserveFunction);
+    const observeFunction = sandbox.stub(PositionObserver.prototype, 'observe');
+    observeFunction.returns(unobserveFunction);
     sandbox./*OK*/stub(iframeHelper, 'canInspectWindow').returns(true);
     return binding.listenForPositionSameDomain().then(() => {
+      expect(observeFunction).to.be.calledOnce;
       expect(unobserveFunction).to.not.be.called;
       binding.disconnect();
       expect(unobserveFunction).to.be.called;
-      expect(binding.unobserveFunction_).to.be.null;
+      return binding.listenForPositionSameDomain();
+    }).then(() => {
+      expect(observeFunction).to.be.calledTwice;
     });
   });
 });
