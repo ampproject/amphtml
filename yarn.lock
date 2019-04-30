@@ -1551,24 +1551,24 @@
     universal-user-agent "^2.0.1"
     url-template "^2.0.8"
 
-"@octokit/request@3.0.0":
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/@octokit/request/-/request-3.0.0.tgz#304a279036b2dc89e7fba7cb30c9e6a9b1f4d2df"
-  integrity sha512-DZqmbm66tq+a9FtcKrn0sjrUpi0UaZ9QPUCxxyk/4CJ2rseTMpAWRf6gCwOSUCzZcx/4XVIsDk+kz5BVdaeenA==
+"@octokit/request@3.0.1":
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/@octokit/request/-/request-3.0.1.tgz#21e888c6dce80566ec69477360bab79f2f14861f"
+  integrity sha512-aH61OVkMKMofGW/go2x4mJ44X4U/JF8xsiFFictwkZYtz0psE8OPKpsP2TZBZaJoCg2wmeTyEgqGfY+veg0hGQ==
   dependencies:
     "@octokit/endpoint" "^4.0.0"
     deprecation "^1.0.1"
-    is-plain-object "^2.0.4"
+    is-plain-object "^3.0.0"
     node-fetch "^2.3.0"
     once "^1.4.0"
     universal-user-agent "^2.0.1"
 
-"@octokit/rest@16.25.0":
-  version "16.25.0"
-  resolved "https://registry.yarnpkg.com/@octokit/rest/-/rest-16.25.0.tgz#1111dc2b2058bc77442fd7fbd295dab3991b62bf"
-  integrity sha512-QKIzP0gNYjyIGmY3Gpm3beof0WFwxFR+HhRZ+Wi0fYYhkEUvkJiXqKF56Pf5glzzfhEwOrggfluEld5F/ZxsKw==
+"@octokit/rest@16.25.1":
+  version "16.25.1"
+  resolved "https://registry.yarnpkg.com/@octokit/rest/-/rest-16.25.1.tgz#60a3171018dbc4feb23d1bf9805a06aad106d53e"
+  integrity sha512-a1Byzjj07OMQNUQDP5Ng/rChaI7aq6TNMY1ZFf8+zCVEEtYzCgcmrFG9BDerFbLPPKGQ5TAeRRFyLujUUN1HIg==
   dependencies:
-    "@octokit/request" "3.0.0"
+    "@octokit/request" "3.0.1"
     atob-lite "^2.0.0"
     before-after-hook "^1.4.0"
     btoa-lite "^1.0.0"
@@ -8134,6 +8134,13 @@ is-plain-object@^2.0.1, is-plain-object@^2.0.3, is-plain-object@^2.0.4:
   dependencies:
     isobject "^3.0.1"
 
+is-plain-object@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/is-plain-object/-/is-plain-object-3.0.0.tgz#47bfc5da1b5d50d64110806c199359482e75a928"
+  integrity sha512-tZIpofR+P05k8Aocp7UI/2UTa9lTJSebCXpFFoR9aibpokDj/uXBsJ8luUu0tTVYKkMU6URDUuOfJZ7koewXvg==
+  dependencies:
+    isobject "^4.0.0"
+
 is-posix-bracket@^0.1.0:
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/is-posix-bracket/-/is-posix-bracket-0.1.1.tgz#3334dc79774368e92f016e6fbc0a88f5cd6e6bc4"
@@ -8306,6 +8313,11 @@ isobject@^3.0.0, isobject@^3.0.1:
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/isobject/-/isobject-3.0.1.tgz#4e431e92b11a9731636aa1f9c8d1ccbcfdab78df"
   integrity sha1-TkMekrEalzFjaqH5yNHMvP2reN8=
+
+isobject@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/isobject/-/isobject-4.0.0.tgz#3f1c9155e73b192022a80819bacd0343711697b0"
+  integrity sha512-S/2fF5wH8SJA/kmwr6HYhK/RI/OkhD84k8ntalo0iJjZikgq1XFvR5M8NPT1x5F7fBwCG3qHfnzeP/Vh/ZxCUA==
 
 isomorphic-fetch@^2.1.1:
   version "2.2.1"
