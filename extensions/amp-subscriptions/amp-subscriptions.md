@@ -404,7 +404,7 @@ The element on which `subscriptions-dialog` dialog is specified can also be a `<
 ```
 <template type="amp-mustache" subscriptions-dialog subscriptions-display="EXPR">
   <div>
-    You have {{history | egrep autocap.left}} articles left this month.
+    You have {{metering.left}} articles left this month.
   </div>
 </template>
 ```

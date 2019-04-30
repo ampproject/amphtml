@@ -23,7 +23,7 @@ The npm package is available: https://www.npmjs.com/package/amp-access-iframe-ap
 
 The `AmpAccessIframeApi` is the entry point for access iframe implementation. As its main parameter it requires an instance of `AccessController`, which simply implements all methods of access protocol such as `authorize` and `pingback`.
 
-The document's access configuration would use the "iframe" type. For instance when used withe `amp-access`:
+The document's access configuration would use the "iframe" type. For example when used with `amp-access`:
 
 ```
 <script id="amp-access" type="application/json">
@@ -141,10 +141,12 @@ The `authorize` method checks whether the user should be able to access this doc
 
 Strong timeout and one-behind semantics are observed for authorization call. If the `authorize()` method does not return within a 3s timeout, the previously returned authorization response is used. If no previous response is available or it's too old, the `defaultResponse` value from the configuration is used. However, even in case of timeout, the iframe authorization will continue until fully complete and will be made available for the next authorization attempt.
 
-In the case of `amp-subscriptions` the autorization response must
-conform to the `local` service autorization struture.
+In the case of `amp-subscriptions` the authorization response must
+conform to the `local` service authorization struture.
 
 
 ## Pingback method
 
 The `pingback` method is optional. If specified, it can implement impression event. The main purpose of this method is metering implementation.
+
+In `amp-subscriptions` the `Entitlement` object, if one is preset, is passed to the pingback.
