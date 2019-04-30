@@ -16,7 +16,7 @@
 
 import {CSS} from '../../../build/amp-script-0.1.css';
 import {
-  DomPurifyDef, createPurifier, validateAttributeChange,
+  DomPurifyDef, createPurifier, getAllowedTags, validateAttributeChange,
 } from '../../../src/purifier';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Services} from '../../../src/services';
@@ -206,6 +206,9 @@ export class SanitizerImpl {
     /** @private {!DomPurifyDef} */
     this.purifier_ = createPurifier(win.document, dict({'IN_PLACE': true}));
 
+    /** @private {!Object<string, boolean>} */
+    this.allowedTags_ = getAllowedTags();
+
     /** @const @private {!Element} */
     this.wrapper_ = win.document.createElement('div');
   }
@@ -245,16 +248,16 @@ export class SanitizerImpl {
    * @return {boolean}
    */
   mutateAttribute(node, attribute, value) {
-    // TODO(choumx): Per Gabor, check node against DOMPurify's tag whitelist.
-    // We could also call sanitize() on the node, but that could result in
-    // node removal, whereas we'd want to no-op ideally.
-
     // TODO(choumx): Call mutatedAttributesCallback() on AMP elements e.g.
     // so an amp-img can update its child img when [src] is changed.
 
     const tag = node.nodeName.toLowerCase();
+    // DOMPurify's attribute validation is tag-agnostic, so we need to check
+    // that the tag itself is valid. E.g. a[href] is ok, but base[href] is not.
+    if (!this.allowedTags_[tag]) {
+      return false;
+    }
     const attr = attribute.toLowerCase();
-
     if (validateAttributeChange(this.purifier_, node, attr, value)) {
       if (value == null) {
         node.removeAttribute(attr);
