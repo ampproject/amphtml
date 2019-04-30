@@ -269,10 +269,11 @@ async function resetPage(page, viewport = null) {
  * @param {string} name full name of the test.
  * @param {string} message extra information about the failure.
  * @param {Error} error error object with stack trace.
- * @param {boolean} fatal whether this failure should be considered fatal.
+ * @param {!Array<puppeteer.ConsoleMessage>} consoleMessages array of console
+ *     messages printed so far.
  */
-function addTestError(testErrors, name, message, error, fatal) {
-  const testError = {name, message, error, fatal};
+function addTestError(testErrors, name, message, error, consoleMessages) {
+  const testError = {name, message, error, consoleMessages};
   if (!isTravisBuild()) {
     logTestError(testError);
   }
@@ -285,9 +286,15 @@ function addTestError(testErrors, name, message, error, fatal) {
  * @param {!JsonObject} testError object as created by addTestError.
  */
 function logTestError(testError) {
-  log(testError.fatal ? 'error' : 'warning', 'Error in test',
-      colors.yellow(testError.name), '\n  ', testError.message, '\n  ',
-      testError.error);
+  log('error', 'Error in test', colors.yellow(testError.name), '\n  ',
+      testError.message, '\n  ', testError.error);
+  if (testError.consoleMessages.length > 0) {
+    log('error', colors.cyan(testError.consoleMessages.length),
+        'Console messages in the browser so far:');
+    for (const message of testError.consoleMessages) {
+      log('error', colors.cyan(`[console.${message.type()}]`), message.text());
+    }
+  }
 }
 
 /**
@@ -450,6 +457,12 @@ async function snapshotWebpages(percy, browser, webpages) {
       const page = availablePages.shift();
       await resetPage(page, viewport);
 
+      const consoleMessages = [];
+      const consoleLogger = consoleMessage => {
+        consoleMessages.push(consoleMessage);
+      };
+      page.on('console', consoleLogger);
+
       const name = testName ? `${pageName} (${testName})` : pageName;
       log('verbose', 'Starting test', colors.yellow(name));
 
@@ -488,7 +501,7 @@ async function snapshotWebpages(percy, browser, webpages) {
             hasWarnings = true;
             addTestError(testErrors, name,
                 'The browser test runner failed to complete the navigation ' +
-                'to the test page', navigationError, /* fatal */ false);
+                'to the test page', navigationError, consoleMessages);
             if (!isTravisBuild()) {
               log('warning', 'Continuing to verify page regardless...');
             }
@@ -555,7 +568,7 @@ async function snapshotWebpages(percy, browser, webpages) {
           .catch(async testError => {
             log('travis', colors.red('●'));
             addTestError(testErrors, name, 'Unknown failure in test page',
-                testError, /* fatal */ true);
+                testError, consoleMessages);
 
             let htmlSnapshot;
             try {
@@ -572,7 +585,7 @@ async function snapshotWebpages(percy, browser, webpages) {
           })
           .finally(async() => {
             log('verbose', 'Finished test', colors.yellow(name));
-            delete pagePromises[name];
+            page.removeListener('console', consoleLogger);
             availablePages.push(page);
           });
     }
