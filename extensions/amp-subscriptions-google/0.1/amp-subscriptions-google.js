@@ -247,7 +247,7 @@ export class GoogleSubscriptionsPlatform {
   /** @override */
   getEntitlements() {
     const encryptedDocumentKey =
-        this.serviceAdapter_.getEncryptedDocumentKey('google');
+        this.serviceAdapter_.getEncryptedDocumentKey('google.com');
     return this.runtime_.getEntitlements(
         encryptedDocumentKey).then(swgEntitlements => {
       // Get and store the isReadyToPay signal which is independent of

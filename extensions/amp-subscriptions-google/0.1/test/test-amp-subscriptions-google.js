@@ -541,7 +541,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
       });
     });
 
-    it('should call getEncryptedDocumentKey with google', () => {
+    it('should call getEncryptedDocumentKey with google.com', () => {
       sandbox.stub(xhr, 'fetchJson').callsFake(() => {
         return Promise.resolve({
           json: () => {
@@ -550,7 +550,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
         });
       });
       return platform.getEntitlements().then(() => {
-        expect(getEncryptedDocumentKeyStub).to.be.calledWith('google');
+        expect(getEncryptedDocumentKeyStub).to.be.calledWith('google.com');
       });
     });
 
