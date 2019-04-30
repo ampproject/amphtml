@@ -1181,6 +1181,7 @@ describe('ValidatorRulesMakeSense', () => {
         'amp-img': 0,
         'amp-layout': 0,
         'amp-lightbox': 0,
+        'amp-mraid': 0,
         'amp-mustache': 0,
         'amp-pixel': 0,
         'amp-position-observer': 0,
