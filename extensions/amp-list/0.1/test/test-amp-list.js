@@ -497,16 +497,14 @@ describes.repeated('amp-list', {
           const listItem = document.createElement('div');
           listItem.setAttribute('role', 'item');
           listContainer.appendChild(listItem);
-          const childNodes =
-              Array.prototype.slice.apply(listContainer.childNodes);
           sandbox.stub(ssrTemplateHelper, 'fetchAndRenderTemplate')
               .returns(Promise.resolve({html}));
           ssrTemplateHelper.renderTemplate
               .returns(Promise.resolve(listContainer));
           listMock.expects('updateBindings_')
-              .returns(Promise.resolve(childNodes)).once();
-          listMock.expects('render_').withExactArgs(childNodes, false)
-              .returns(listContainer);
+              .returns(Promise.resolve(listContainer)).once();
+          listMock.expects('render_').withExactArgs(listContainer, false)
+              .returns(Promise.resolve());
 
           ssrTemplateHelper.renderTemplate
               .withArgs(element, html)
