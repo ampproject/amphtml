@@ -33,11 +33,11 @@
     <p>form has no autocomplete attr</p>
     <form method="post" action-xhr="/form/echo-json/post" target="_blank">
       <label for="frmEmailA">Personal Email</label>
-      <input type="email" name="email" id="frmEmailA" placeholder="name@example.com" required autocomplete="email"><br>
+      <input type="text" name="email" id="frmEmailA" placeholder="name@example.com" required autocomplete="email"><br>
 
       <label for="frmEmailB">Autocomplete Email</label>
       <amp-autocomplete filter="substring" min-characters="0">
-        <input type="email" name="email" id="frmEmailB" placeholder="name@example.com" required autocomplete="email">
+        <input type="text" name="email" id="frmEmailB" placeholder="name@example.com" required autocomplete="email">  
         <script type="application/json">
           { "items" : ["Email 1", "Email 2", "Email 3"]}
         </script>
@@ -48,11 +48,11 @@
     <p>form has autocomplete="on"</p>
     <form method="post" action-xhr="/form/echo-json/post" target="_blank" autocomplete="on">
       <label for="frmEmailC">Personal Email</label>
-      <input type="email" name="email" id="frmEmailC" placeholder="name@example.com" required autocomplete="email"><br>
+      <input type="text" name="email" id="frmEmailC" placeholder="name@example.com" required autocomplete="email"><br>
 
       <label for="frmEmailD">Autocomplete Email</label>
       <amp-autocomplete filter="substring" min-characters="0">
-        <input type="email" name="email" id="frmEmailD" placeholder="name@example.com" required autocomplete="email">
+        <input type="text" name="email" id="frmEmailD" placeholder="name@example.com" required autocomplete="email">  
         <script type="application/json">
           { "items" : ["Email 1", "Email 2", "Email 3"]}
         </script>
@@ -63,11 +63,11 @@
     <p>form and input have autocomplete="off"</p>
     <form method="post" action-xhr="/form/echo-json/post" target="_blank" autocomplete="off">
       <label for="frmEmailE">Personal Email</label>
-      <input type="email" name="email" id="frmEmailE" placeholder="name@example.com" required autocomplete="off"><br>
+      <input type="text" name="email" id="frmEmailE" placeholder="name@example.com" required autocomplete="off"><br>
 
       <label for="frmEmailF">Autocomplete Email</label>
       <amp-autocomplete filter="substring" min-characters="0">
-        <input type="email" name="email" id="frmEmailF" placeholder="name@example.com" required autocomplete="email">
+        <input type="text" name="email" id="frmEmailF" placeholder="name@example.com" required autocomplete="email">  
         <script type="application/json">
           { "items" : ["Email 1", "Email 2", "Email 3"]}
         </script>
