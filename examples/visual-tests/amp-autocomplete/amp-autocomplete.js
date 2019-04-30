@@ -15,13 +15,12 @@
  */
 'use strict';
 
-module.exports = {
-  'open attachment UI element': async (page, name) => {
-    await page.waitFor(1600);
-  },
+const {verifySelectorsVisible} = require('../../../build-system/tasks/visual-diff/helpers');
 
-  'open attachment': async (page, name) => {
-    await page.tap('.i-amphtml-story-page-open-attachment-label');
-    await page.waitFor(410);
+module.exports = {
+
+  'tap input1 to focus and display results': async (page, name) => {
+    await page.tap('input#input1');
+    await verifySelectorsVisible(page, name, ['amp-autocomplete#autocomplete1 > .i-amphtml-autocomplete-results']);
   },
- };
+};
