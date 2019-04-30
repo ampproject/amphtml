@@ -327,9 +327,16 @@ class AmpVideo extends AMP.BaseElement {
     }
 
     // loadPromise for media elements listens to `loadedmetadata`.
-    return this.loadPromise(this.video_).then(() => {
+    const promise = this.loadPromise(this.video_).then(() => {
       this.element.dispatchCustomEvent(VideoEvents.LOAD);
     });
+
+    // Resolve layoutCallback right away if the video won't preload.
+    if (this.element.getAttribute('preload') === 'none') {
+      return;
+    }
+
+    return promise;
   }
 
   /**

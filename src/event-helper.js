@@ -153,17 +153,32 @@ export function loadPromise(eleOrWindow) {
     return Promise.resolve(eleOrWindow);
   }
   const loadingPromise = new Promise((resolve, reject) => {
+    const isMediaElement = isHTMLMediaElement(eleOrWindow);
     // Listen once since IE 5/6/7 fire the onload event continuously for
     // animated GIFs.
-    if (isHTMLMediaElement(eleOrWindow)) {
-      unlistenLoad = listenOnce(eleOrWindow, 'loadedmetadata', resolve);
+    if (isMediaElement) {
+      // The following event can be triggered by the media or one of its
+      // sources. Using capture is required as the media events do not bubble.
+      unlistenLoad =
+          listenOnce(eleOrWindow, 'loadedmetadata', resolve, {capture: true});
     } else {
       unlistenLoad = listenOnce(eleOrWindow, 'load', resolve);
     }
-    // For elements, unlisten on error (don't for Windows).
-    if (eleOrWindow.tagName) {
-      unlistenError = listenOnce(eleOrWindow, 'error', reject);
+    // Don't unlisten on error for Windows.
+    if (!eleOrWindow.tagName) {
+      return;
     }
+    let errorTarget = eleOrWindow;
+    // If the media element has no `src`, it will try to load the sources in
+    // document order. If the last source errors, then the media element
+    // loading errored.
+    if (isMediaElement && !eleOrWindow.hasAttribute('src')) {
+      errorTarget = eleOrWindow.querySelector('source:last-of-type');
+      if (!errorTarget) {
+        return reject('Media has no source.');
+      }
+    }
+    unlistenError = listenOnce(errorTarget, 'error', reject);
   });
 
   return loadingPromise.then(() => {
