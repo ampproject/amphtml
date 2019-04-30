@@ -78,11 +78,11 @@ Note that this is the default behavior when the `destinationDomains` array is no
 
 It is common that a publisher will want to match a few different subdomains or TLDs. To make this set up easier linker supports wildcard domain matching. To enable this functionality you can use the `*` character to match any arbtrary string.
 
-For example: you may have a site `example.com` that links to both `a.example.com` and `b.example.com`. You could include both of these domains inside your `destinationDomains` config, but the wildcard feature allows you to add
+For example: you may have a site `example.com` that links to `a.example.com`, `b.example.com`, and `a.b.example.com`. You could include all of these domains inside your `destinationDomains` config, but the wildcard feature allows you to add:
 ```json
 "destinationDomains": ["*.example.com"]
 ```
-Using this configuration links to both `a.example.com` and `b.example.com` will be decorated. Similarily, you may want to decorate links to `example.co`, `example.co.uk`, and `example.fr`. This can be accomplished using the config below.
+Using this configuration links to `a.example.com`, `b.example.com` and `a.b.example.com` will all be decorated. Similarily, you may want to decorate links to `example.co`, `example.co.uk`, and `example.fr`. This can be accomplished using the config below.
 ```json
 "destinationDomains": ["example.*"]
 ```
