@@ -5581,7 +5581,7 @@ eslint-plugin-jsdoc@4.8.3:
     jsdoctypeparser "3.1.0"
     lodash "^4.17.11"
 
-eslint-plugin-notice@^0.7.8:
+eslint-plugin-notice@0.7.8:
   version "0.7.8"
   resolved "https://registry.yarnpkg.com/eslint-plugin-notice/-/eslint-plugin-notice-0.7.8.tgz#c6887927061fcf1c638c0559476045a521703006"
   integrity sha512-a18VwxiBp4TmXRVpx7T5D4ilHnMS1Gq/5OMUriCcJGHD72Cbji7qVk19DGOW9vBHnJJKeg0yU95a7/o8JQoMCw==
