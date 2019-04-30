@@ -76,7 +76,7 @@ Note that this is the default behavior when the `destinationDomains` array is no
 
 ##### Wildcard Domain Matching
 
-It is common that a publisher will want to match a few different subdomains or TLDs. To make this set up easier linker supports wildcard domain matching. To enable this functionality you can use the `*` character to match any arbtrary string.
+It is common that a publisher will want to match a few different subdomains or TLDs. To make this set up easier linker supports wildcard domain matching. To enable this functionality you can use the `*` character to match any arbitrary string.
 
 For example: you may have a site `example.com` that links to `a.example.com`, `b.example.com`, and `a.b.example.com`. You could include all of these domains inside your `destinationDomains` config, but the wildcard feature allows you to add:
 ```json
