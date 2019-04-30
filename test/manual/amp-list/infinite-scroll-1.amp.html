@@ -110,7 +110,7 @@
       </div>
 
       <button
-              on="tap:AMP.setState({data: {url: '/infinite-scroll?items='
+              on="tap:AMP.setState({data: {url: '/list/infinite-scroll?items='
                     + data.items + '&left=' + data.left + '&latency=' + data.latency}})">
         Update
       </button>
@@ -122,7 +122,7 @@
     layout="fixed-height"
     src="/list/infinite-scroll?items=10&left=50"
     [src]="data.url"
-    load-more="auto"
+    load-more="manual"
     load-more-bookmark="next">
     <template type="amp-mustache">
       <div class="pin-container">
@@ -140,7 +140,9 @@
       PLACEHOLDER
     </div>
     <amp-list-load-more load-more-failed>
-
+    </amp-list-load-more>
+    <amp-list-load-more load-more-end>
+      END
     </amp-list-load-more>
   </amp-list>
 </article>
