@@ -17,20 +17,31 @@
 import {
   purifyHtml,
   purifyTagsForTripleMustache,
+  validateAttributeChange,
 } from '../../src/purifier';
 
-/**
- * Helper that serializes output of purifyHtml() to string.
- * @param {string} html
- * @param {boolean=} diffing
- * @return {string}
- */
-function purify(html, diffing = false) {
-  const body = purifyHtml(html, diffing);
-  return body.innerHTML;
-}
+
+let purify;
+let html;
 
 describe('DOMPurify-based', () => {
+
+  beforeEach(() => {
+    html = document.createElement('html');
+    const documentEl = {documentElement: html};
+    /**
+     * Helper that serializes output of purifyHtml() to string.
+     * @param {string} html
+     * @param {Document=} doc
+     * @param {boolean=} diffing
+     * @return {string}
+     */
+    purify = (html, diffing = false) => {
+      const body = purifyHtml(html, documentEl, diffing);
+      return body.innerHTML;
+    };
+  });
+
   runSanitizerTests();
 
   describe('<script>', () => {
@@ -432,7 +443,7 @@ function runSanitizerTests() {
       expect(purify('<amp-img [x]="y"></amp-img>', true)).to.match(
           /<amp-img i-amphtml-key="(\d+)" data-amp-bind-x="y" i-amphtml-binding=""><\/amp-img>/);
       // Other elements should NOT have i-amphtml-key-set.
-      expect(purify('<p></p>')).to.equal('<p></p>');
+      expect(purify('<p></p>', true)).to.equal('<p></p>');
     });
 
     it('should resolve URLs', () => {
@@ -443,6 +454,40 @@ function runSanitizerTests() {
     });
   });
 
+  describe('purify based on AMP format type', () => {
+    it('should blacklist input[type="image"] and input[type="button"] in AMP',
+        () => {
+          // Given the AMP format type.
+          html.setAttribute('amp', '');
+          allowConsoleError(() => {
+            expect(purify('<input type="image">')).to.equal('<input>');
+            expect(purify('<input type="button">')).to.equal('<input>');
+          });
+        });
+
+    it('should allow input[type="file"] and input[type="password"]', () => {
+      // Given that the AMP format does not blacklist input types file and
+      // password.
+      html.setAttribute('amp', '');
+      allowConsoleError(() => {
+        expect(purify('<input type="file">')).to.equal('<input type="file">');
+        expect(purify('<input type="password">'))
+            .to.equal('<input type="password">');
+      });
+    });
+
+    it('should sanitize certain tag attributes for AMP4Email', () => {
+      html.setAttribute('amp4email', '');
+      allowConsoleError(() => {
+        expect(purify('<input type="password">')).to.equal('<input>');
+        expect(purify('<input type="file">')).to.equal('<input>');
+        expect(purify('<form name="form-name"></form>'))
+            .to.equal('<form></form>');
+        expect(purify('<amp-anim controls></amp-anim>'))
+            .to.equal('<amp-anim></amp-anim>');
+      });
+    });
+  });
 
   describe('purifyTagsForTripleMustache', () => {
     it('should output basic text', () => {
@@ -556,3 +601,63 @@ function runSanitizerTests() {
     });
   });
 }
+
+describe('validateAttributeChange', () => {
+  let purifier;
+  let vac;
+
+  beforeEach(() => {
+    purifier = {
+      isValidAttribute: () => true,
+    };
+
+    vac = (type, attr, value) =>
+      validateAttributeChange(
+          purifier, document.createElement(type), attr, value);
+  });
+
+  it('should validate script[type]', () => {
+    expect(vac('script', 'type', 'application/ld+json')).to.be.true;
+    expect(vac('script', 'type', 'application/json')).to.be.true;
+    expect(vac('script', 'type', '')).to.be.false;
+    expect(vac('script', 'type', null)).to.be.false;
+    expect(vac('script', 'type', 'text/javascript')).to.be.false;
+  });
+
+  it('should validate a[target]', () => {
+    expect(vac('a', 'target', '_top')).to.be.true;
+    expect(vac('a', 'target', '_blank')).to.be.true;
+    expect(vac('a', 'target', '')).to.be.false;
+    expect(vac('a', 'target', null)).to.be.false;
+    expect(vac('a', 'target', '_self')).to.be.false;
+    expect(vac('a', 'target', '_parent')).to.be.false;
+  });
+
+  it('should disallow binding attributes', () => {
+    expect(vac('p', '[text]', 'foo')).to.be.false;
+    expect(vac('p', 'data-amp-bind-text', 'foo')).to.be.false;
+  });
+
+  it('should allow whitelisted-by-tag attributes', () => {
+    purifier.isValidAttribute = () => false;
+
+    expect(vac('a', 'rel', 'amphtml')).to.be.true;
+    expect(vac('div', 'template', 'my-template-id')).to.be.true;
+    expect(vac('textarea', 'autoexpand', '')).to.be.true;
+  });
+
+  it('should allow AMP element attributes', () => {
+    purifier.isValidAttribute = () => false;
+
+    expect(vac('amp-carousel', 'slide', '1')).to.be.true;
+    expect(vac('amp-accordion', 'expanded', '')).to.be.true;
+    expect(vac('amp-img', 'on', 'tap: AMP.print')).to.be.true;
+  });
+
+  it('should perform AMP runtime validations', () => {
+    expect(vac('h1', 'style', 'color: red !important')).to.be.false;
+    expect(vac('amp-img', 'src', '?__amp_source_origin=evil')).to.be.false;
+    expect(vac('select', 'form', 'foo')).to.be.false;
+    expect(vac('input', 'type', 'image')).to.be.false;
+  });
+});

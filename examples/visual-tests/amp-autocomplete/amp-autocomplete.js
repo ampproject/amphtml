@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,16 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
-/**
- * @param {*} candidate
- * @return {boolean}
- */
-export function isString(candidate) {
-  return Object.prototype.toString.call(candidate) === '[object String]';
-}
+const {verifySelectorsVisible} = require('../../../build-system/tasks/visual-diff/helpers');
 
+module.exports = {
 
-
-
-
+  'tap input1 to focus and display results': async (page, name) => {
+    await page.tap('input#input1');
+    await verifySelectorsVisible(page, name, ['amp-autocomplete#autocomplete1 > .i-amphtml-autocomplete-results']);
+  },
+};

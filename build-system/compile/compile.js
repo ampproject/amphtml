@@ -16,24 +16,23 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const closureCompiler = require('gulp-closure-compiler');
 const colors = require('ansi-colors');
 const fs = require('fs-extra');
 const gulp = require('gulp');
-const {isTravisBuild} = require('../travis');
-const {VERSION: internalRuntimeVersion} = require('../internal-version') ;
-
+const nop = require('gulp-nop');
 const rename = require('gulp-rename');
-const replace = require('gulp-regexp-sourcemaps');
 const rimraf = require('rimraf');
-const shortenLicense = require('../shorten-license');
-const {highlight} = require('cli-highlight');
-const {singlePassCompile} = require('../single-pass');
+const shortenLicense = require('./shorten-license');
+const sourcemaps = require('gulp-sourcemaps');
+const {gulpClosureCompile, handleCompilerError, handleTypeCheckError} = require('./closure-compile');
+const {isTravisBuild} = require('../travis');
+const {singlePassCompile} = require('./single-pass');
+const {VERSION: internalRuntimeVersion} = require('../internal-version') ;
 
 const isProdBuild = !!argv.type;
 const queue = [];
 let inProgress = 0;
-const MAX_PARALLEL_CLOSURE_INVOCATIONS = 4;
+const MAX_PARALLEL_CLOSURE_INVOCATIONS = argv.single_pass ? 1 : 4;
 
 // Compiles AMP with the closure compiler. This is intended only for
 // production use. During development we intend to continue using
@@ -73,7 +72,6 @@ exports.closureCompile = function(entryModuleFilename, outputDir,
 };
 
 function cleanupBuildDir() {
-  fs.mkdirsSync('build/cc');
   rimraf.sync('build/fake-module');
   rimraf.sync('build/patched-module');
   fs.mkdirsSync('build/patched-module/document-register-element/build');
@@ -82,19 +80,6 @@ function cleanupBuildDir() {
   fs.mkdirsSync('build/fake-polyfills/src/polyfills');
 }
 exports.cleanupBuildDir = cleanupBuildDir;
-
-// Formats a closure compiler error message into a more readable form by
-// dropping the lengthy java invocation line...
-//     Command failed: java -jar ... --js_output_file="<file>"
-// ...and then syntax highlighting the error text.
-function formatClosureCompilerError(message) {
-  const javaInvocationLine = /Command failed:[^]*--js_output_file=\".*?\"\n/;
-  message = message.replace(javaInvocationLine, '');
-  message = highlight(message, {ignoreIllegals: true});
-  message = message.replace(/WARNING/g, colors.yellow('WARNING'));
-  message = message.replace(/ERROR/g, colors.red('ERROR'));
-  return message;
-}
 
 function compile(entryModuleFilenames, outputDir, outputFilename, options) {
   const hideWarningsFor = [
@@ -125,7 +110,9 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
     'third_party/moment/moment.extern.js',
     'third_party/react-externs/externs.js',
   ];
-  const define = [];
+  const define = [
+    `VERSION=${internalRuntimeVersion}`,
+  ];
   if (argv.pseudo_names) {
     define.push('PSEUDO_NAMES=true');
   }
@@ -146,22 +133,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
     }
 
     console/*OK*/.assert(typeof entryModuleFilenames == 'string');
-    const entryModule = entryModuleFilenames;
-    // TODO(@cramforce): Run the post processing step
-    return singlePassCompile(
-        entryModule,
-        compilationOptions
-    ).then(() => {
-      return new Promise((resolve, reject) => {
-        const stream = gulp.src(outputDir + '/**/*.js');
-        stream.on('end', resolve);
-        stream.on('error', reject);
-        stream.pipe(
-            replace(/\$internalRuntimeVersion\$/g, internalRuntimeVersion, 'runtime-version'))
-            .pipe(shortenLicense())
-            .pipe(gulp.dest(outputDir));
-      });
-    });
+    return singlePassCompile(entryModuleFilenames, compilationOptions);
   }
 
   return new Promise(function(resolve) {
@@ -172,10 +144,6 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       entryModuleFilename = entryModuleFilenames;
       entryModuleFilenames = [entryModuleFilename];
     }
-    const checkTypes =
-        options.checkTypes || options.typeCheckOnly || argv.typecheck_only;
-    const intermediateFilename = 'build/cc/' +
-        entryModuleFilename.replace(/\//g, '_').replace(/^\./, '');
     // If undefined/null or false then we're ok executing the deletions
     // and mkdir.
     if (!options.preventRemoveAndMakeDir) {
@@ -187,10 +155,6 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
     let wrapper = '(function(){%output%})();';
     if (options.wrapper) {
       wrapper = options.wrapper.replace('<%= contents %>', '%output%');
-    }
-    wrapper += '\n//# sourceMappingURL=' + outputFilename + '.map\n';
-    if (fs.existsSync(intermediateFilename)) {
-      fs.unlinkSync(intermediateFilename);
     }
     let sourceMapBase = 'http://localhost:8000/';
     if (isProdBuild) {
@@ -353,98 +317,96 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
 
     /* eslint "google-camelcase/google-camelcase": 0*/
     const compilerOptions = {
-      // Temporary shipping with our own compiler that has a single patch
-      // applied
-      compilerPath: 'build-system/runner/dist/runner.jar',
-      fileName: intermediateFilename,
-      continueWithWarnings: false,
-      tieredCompilation: true, // Magic speed up.
-      compilerFlags: {
-        compilation_level: options.compilationLevel || 'SIMPLE_OPTIMIZATIONS',
-        // Turns on more optimizations.
-        assume_function_wrapper: true,
-        // Transpile from ES6 to ES5.
-        language_in: 'ECMASCRIPT6',
-        language_out: 'ECMASCRIPT5',
-        // We do not use the polyfills provided by closure compiler.
-        // If you need a polyfill. Manually include them in the
-        // respective top level polyfills.js files.
-        rewrite_polyfills: false,
-        externs,
-        js_module_root: [
-          // Do _not_ include 'node_modules/' in js_module_root with 'NODE'
-          // resolution or bad things will happen (#18600).
-          'build/patched-module/',
-          'build/fake-module/',
-          'build/fake-polyfills/',
-        ],
-        entry_point: entryModuleFilenames,
-        module_resolution: 'NODE',
-        process_common_js_modules: true,
-        // This strips all files from the input set that aren't explicitly
-        // required.
-        only_closure_dependencies: true,
-        output_wrapper: wrapper,
-        create_source_map: intermediateFilename + '.map',
-        source_map_location_mapping:
-            '|' + sourceMapBase,
-        warning_level: options.verboseLogging ? 'VERBOSE' : 'DEFAULT',
-        jscomp_error: [],
-        // moduleLoad: Demote "module not found" errors to ignore missing files
-        //     in type declarations in the swg.js bundle.
-        jscomp_warning: ['moduleLoad'],
-        // Turn off warning for "Unknown @define" since we use define to pass
-        // args such as FORTESTING to our runner.
-        jscomp_off: ['unknownDefines'],
-        define,
-        hide_warnings_for: hideWarningsFor,
-      },
+      compilation_level: options.compilationLevel || 'SIMPLE_OPTIMIZATIONS',
+      // Turns on more optimizations.
+      assume_function_wrapper: true,
+      // Transpile from ES6 to ES5.
+      language_in: 'ECMASCRIPT6',
+      language_out: 'ECMASCRIPT5',
+      // We do not use the polyfills provided by closure compiler.
+      // If you need a polyfill. Manually include them in the
+      // respective top level polyfills.js files.
+      rewrite_polyfills: false,
+      externs,
+      js_module_root: [
+        // Do _not_ include 'node_modules/' in js_module_root with 'NODE'
+        // resolution or bad things will happen (#18600).
+        'build/patched-module/',
+        'build/fake-module/',
+        'build/fake-polyfills/',
+      ],
+      entry_point: entryModuleFilenames,
+      module_resolution: 'NODE',
+      process_common_js_modules: true,
+      // This strips all files from the input set that aren't explicitly
+      // required.
+      only_closure_dependencies: true,
+      output_wrapper: wrapper,
+      source_map_include_content: !!argv.full_sourcemaps,
+      source_map_location_mapping: '|' + sourceMapBase,
+      warning_level: options.verboseLogging ? 'VERBOSE' : 'DEFAULT',
+      jscomp_error: [],
+      // moduleLoad: Demote "module not found" errors to ignore missing files
+      //     in type declarations in the swg.js bundle.
+      jscomp_warning: ['moduleLoad'],
+      // Turn off warning for "Unknown @define" since we use define to pass
+      // args such as FORTESTING to our runner.
+      jscomp_off: ['unknownDefines'],
+      define,
+      hide_warnings_for: hideWarningsFor,
     };
 
     // For now do type check separately
-    if (argv.typecheck_only || checkTypes) {
+    if (options.checkTypes || options.typeCheckOnly) {
       // Don't modify compilation_level to a lower level since
       // it won't do strict type checking if its whitespace only.
-      compilerOptions.compilerFlags.define.push('TYPECHECK_ONLY=true');
-      compilerOptions.compilerFlags.jscomp_error.push(
+      compilerOptions.define.push('TYPECHECK_ONLY=true');
+      compilerOptions.jscomp_error.push(
           'checkTypes',
           'accessControls',
           'const',
           'constantProperty',
           'globalThis');
-      compilerOptions.compilerFlags.conformance_configs =
+      compilerOptions.conformance_configs =
           'build-system/conformance-config.textproto';
     }
 
-    if (compilerOptions.compilerFlags.define.length == 0) {
-      delete compilerOptions.compilerFlags.define;
+    if (compilerOptions.define.length == 0) {
+      delete compilerOptions.define;
     }
 
-    let stream = gulp.src(srcs)
-        .pipe(closureCompiler(compilerOptions))
-        .on('error', function(err) {
-          const {message} = err;
-          console./*OK*/error(colors.red(
-              'Compilation failed for ' + outputFilename + ':\n') +
-              formatClosureCompilerError(message));
-          process.exit(1);
+    const compilerOptionsArray = [];
+    Object.keys(compilerOptions).forEach(function(option) {
+      const value = compilerOptions[option];
+      if (value instanceof Array) {
+        value.forEach(function(item) {
+          compilerOptionsArray.push('--' + option + '=' + item);
         });
-    // If we're only doing type checking, no need to output the files.
-    if (!argv.typecheck_only && !options.typeCheckOnly) {
-      stream = stream
+      } else {
+        if (value != null) {
+          compilerOptionsArray.push('--' + option + '=' + value);
+        } else {
+          compilerOptionsArray.push('--' + option);
+        }
+      }
+    });
+
+    if (options.typeCheckOnly) {
+      return gulp.src(srcs, {base: '.'})
+          .pipe(gulpClosureCompile(compilerOptionsArray))
+          .on('error', handleTypeCheckError)
+          .pipe(nop())
+          .on('end', resolve);
+    } else {
+      return gulp.src(srcs, {base: '.'})
+          .pipe(sourcemaps.init({loadMaps: true}))
+          .pipe(gulpClosureCompile(compilerOptionsArray))
+          .on('error', () => handleCompilerError(outputFilename))
           .pipe(rename(outputFilename))
-          .pipe(replace(/\$internalRuntimeVersion\$/g, internalRuntimeVersion, 'runtime-version'))
+          .pipe(sourcemaps.write('.'))
           .pipe(shortenLicense())
           .pipe(gulp.dest(outputDir))
-          .on('end', function() {
-            gulp.src(intermediateFilename + '.map')
-                .pipe(rename(outputFilename + '.map'))
-                .pipe(gulp.dest(outputDir))
-                .on('end', resolve);
-          });
-    } else {
-      stream = stream.on('end', resolve);
+          .on('end', resolve);
     }
-    return stream;
   });
 }

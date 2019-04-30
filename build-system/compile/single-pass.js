@@ -17,25 +17,29 @@
 const babel = require('@babel/core');
 const babelify = require('babelify');
 const browserify = require('browserify');
-const ClosureCompiler = require('google-closure-compiler').compiler;
 const colors = require('ansi-colors');
-const conf = require('./build.conf');
+const conf = require('../build.conf');
 const devnull = require('dev-null');
 const fs = require('fs-extra');
+const gulp = require('gulp');
+const gulpIf = require('gulp-if');
 const log = require('fancy-log');
 const minimist = require('minimist');
-const move = require('glob-move');
 const path = require('path');
 const Promise = require('bluebird');
 const relativePath = require('path').relative;
+const rename = require('gulp-rename');
+const shortenLicense = require('./shorten-license');
+const sourcemaps = require('gulp-sourcemaps');
 const tempy = require('tempy');
 const through = require('through2');
-const {extensionBundles, altMainBundles, TYPES} = require('../bundles.config');
-const {highlight} = require('cli-highlight');
-const {isTravisBuild} = require('./travis');
+const {extensionBundles, altMainBundles, TYPES} = require('../../bundles.config');
+const {gulpClosureCompile, handleSinglePassCompilerError} = require('./closure-compile');
+const {isTravisBuild} = require('../travis');
 const {TopologicalSort} = require('topological-sort');
 const TYPES_VALUES = Object.keys(TYPES).map(x => TYPES[x]);
-const wrappers = require('./compile-wrappers');
+const wrappers = require('../compile-wrappers');
+const {VERSION: internalRuntimeVersion} = require('../internal-version') ;
 
 const argv = minimist(process.argv.slice(2));
 let singlePassDest = typeof argv.single_pass_dest === 'string' ?
@@ -47,6 +51,10 @@ if (!singlePassDest.endsWith('/')) {
 
 const SPLIT_MARKER = `/** SPLIT${Math.floor(Math.random() * 10000)} */`;
 
+// Used to store transforms and compile v0.js
+const transformDir = tempy.directory();
+const srcs = [];
+
 // Since we no longer pass the process_common_js_modules flag to closure
 // compiler, we must now tranform these common JS node_modules to ESM before
 // passing them to closure.
@@ -56,9 +64,6 @@ const commonJsModules = [
   'node_modules/promise-pjs/',
   'node_modules/set-dom/',
 ];
-
-// Override to local closure compiler JAR
-ClosureCompiler.JAR_PATH = require.resolve('./runner/dist/runner.jar');
 
 const mainBundle = 'src/amp.js';
 const extensionsInfo = {};
@@ -87,18 +92,15 @@ const jsFilesToWrap = [];
 
 exports.getFlags = function(config) {
   config.define.push('SINGLE_FILE_COMPILATION=true');
+  config.define.push(`VERSION=${internalRuntimeVersion}`);
   /* eslint "google-camelcase/google-camelcase": 0 */
   // Reasonable defaults.
   const flags = {
     compilation_level: 'ADVANCED',
     use_types_for_optimization: true,
     rewrite_polyfills: false,
-    create_source_map: '%outname%.map',
-    parse_inline_source_maps: true,
-    apply_input_source_maps: true,
-    source_map_location_mapping: [
-      '|/',
-    ],
+    source_map_include_content: !!argv.full_sourcemaps,
+    source_map_location_mapping: ['|/'],
     //new_type_inf: true,
     language_in: 'ES6',
     language_out: config.language_out || 'ES5',
@@ -149,11 +151,11 @@ exports.getFlags = function(config) {
 exports.getBundleFlags = function(g) {
   const flagsArray = [];
 
-  // Write all the packages (directories with a package.json) as --js
-  // inputs to the flags. Closure compiler reads the packages to resolve
+  // Add all packages (directories with a package.json) to the srcs array.
+  // Closure compiler reads the packages to resolve
   // non-relative module names.
   Object.keys(g.packages).sort().forEach(function(pkg) {
-    flagsArray.push('--js', pkg);
+    srcs.push(pkg);
   });
 
   // Build up the weird flag structure that closure compiler calls
@@ -172,7 +174,7 @@ exports.getBundleFlags = function(g) {
     // TODO(erwinm): This access will break
     const bundle = g.bundles[originalName];
     bundle.modules.forEach(function(js) {
-      flagsArray.push('--js', `${g.tmp}/${js}`);
+      srcs.push(`${g.tmp}/${js}`);
     });
     let name;
     let info = extensionsInfo[bundle.name];
@@ -270,7 +272,7 @@ exports.getGraph = function(entryModules, config) {
       },
     },
     packages: {},
-    tmp: tempy.directory(),
+    tmp: transformDir,
   };
 
   TYPES_VALUES.forEach(type => {
@@ -514,18 +516,7 @@ exports.singlePassCompile = function(entryModule, options) {
     define: options.define,
     externs: options.externs,
     hideWarningsFor: options.hideWarningsFor,
-  }).then(compile).then(function() {
-    // Move things into place as AMP expects them.
-    fs.ensureDirSync(`${singlePassDest}/v0`);
-    return Promise.all([
-      // Move all files that need to live in /v0/. ex. _base files
-      // all extensions.
-      move(`${singlePassDest}/amp*`, `${singlePassDest}/v0`).then(() => {
-        return move('dist/v0/amp4ads*', 'dist');
-      }),
-      move(`${singlePassDest}/_base*`, `${singlePassDest}/v0`),
-    ]);
-  }).then(wrapMainBinaries).then(postProcessConcat).catch(e => {
+  }).then(compile).then(wrapMainBinaries).then(postProcessConcat).catch(e => {
     // NOTE: passing the message here to colors.red breaks the output.
     console./*OK*/error(e.message);
     process.exit(1);
@@ -594,32 +585,17 @@ function postProcessConcat() {
   });
 }
 
-// Formats a single-pass closure compiler error message into a more readable
-// form by dropping the lengthy java invocation line...
-//     java -jar ... --js_module_root <file>
-// ...and then syntax highlighting the error text.
-function formatSinglePassClosureCompilerError(message) {
-  const singlePassJavaInvocationLine = /java -jar[^]*--js_module_root .*?\n/;
-  message = message.replace(singlePassJavaInvocationLine, '');
-  message = highlight(message, {ignoreIllegals: true});
-  message = message.replace(/WARNING/g, colors.yellow('WARNING'));
-  message = message.replace(/ERROR/g, colors.red('ERROR'));
-  return message;
-}
-
 function compile(flagsArray) {
-  fs.writeFileSync('flags-array.txt', JSON.stringify(flagsArray, null, 2));
-  return new Promise(function(resolve, reject) {
-    new ClosureCompiler(flagsArray).run(function(exitCode, stdOut, stdErr) {
-      if (exitCode == 0) {
-        resolve({
-          warnings: null,
-        });
-      } else {
-        reject(
-            new Error(colors.red('Single pass compilation failed:\n') +
-                formatSinglePassClosureCompilerError(stdErr)));
-      }
-    });
+  // TODO(@cramforce): Run the post processing step
+  return new Promise(function(resolve) {
+    return gulp.src(srcs, {base: transformDir})
+        .pipe(sourcemaps.init({loadMaps: true}))
+        .pipe(gulpClosureCompile(flagsArray))
+        .on('error', handleSinglePassCompilerError)
+        .pipe(sourcemaps.write('.'))
+        .pipe(shortenLicense())
+        .pipe(gulpIf(/(\/amp-|\/_base)/, rename(path => path.dirname += '/v0')))
+        .pipe(gulp.dest('.'))
+        .on('end', resolve);
   });
 }
