@@ -212,15 +212,10 @@ async function launchBrowser() {
  *     fields `width` and `height`.
  */
 async function newPage(browser, viewport = null) {
-  const width = viewport ? viewport.width : VIEWPORT_WIDTH;
-  const height = viewport ? viewport.height : VIEWPORT_HEIGHT;
-
-  log('verbose', 'Creating new page with viewport size of',
-      colors.yellow(`${width}×${height}`));
+  log('verbose', 'Creating new tab');
 
   const page = await browser.newPage();
-  await page.setViewport({width, height});
-  page.setDefaultNavigationTimeout(NAVIGATE_TIMEOUT_MS);
+  page.setDefaultNavigationTimeout(0);
   await page.setJavaScriptEnabled(true);
   await page.setRequestInterception(true);
   page.on('request', interceptedRequest => {
@@ -245,7 +240,26 @@ async function newPage(browser, viewport = null) {
       return interceptedRequest.abort('blockedbyclient');
     }
   });
+  await resetPage(page, viewport);
   return page;
+}
+
+/**
+ * Resets the size of a tab and loads about:blank.
+ *
+ * @param {!puppeteer.Page} page a Puppeteer control browser tab/page.
+ * @param {JsonObject} viewport optional viewport size object with numeric
+ *     fields `width` and `height`.
+ */
+async function resetPage(page, viewport = null) {
+  const width = viewport ? viewport.width : VIEWPORT_WIDTH;
+  const height = viewport ? viewport.height : VIEWPORT_HEIGHT;
+
+  log('verbose', 'Resetting tab to', colors.yellow('about:blank'), 'with size',
+      colors.yellow(`${width}×${height}`));
+
+  await page.goto('about:blank');
+  await page.setViewport({width, height});
 }
 
 /**
@@ -410,6 +424,13 @@ async function generateSnapshots(percy, webpages) {
  *     the tests passed on Percy).
  */
 async function snapshotWebpages(percy, browser, webpages) {
+  const availablePages = [];
+
+  log('verbose', 'Preallocating', colors.cyan(MAX_PARALLEL_TABS), 'tabs...');
+  for (let i = 0; i < MAX_PARALLEL_TABS; i++) {
+    availablePages.push(await newPage(browser));
+  }
+
   const pagePromises = {};
   const testErrors = [];
   let testNumber = 0;
@@ -423,15 +444,14 @@ async function snapshotWebpages(percy, browser, webpages) {
       // localStorage. Since Puppeteer only ever executes on Chrome, this is
       // fine.
       const fullUrl = `http://${testNumber++}.${HOST}:${PORT}/${webpage.url}`;
-      while (Object.keys(pagePromises).length >= MAX_PARALLEL_TABS) {
+      while (availablePages.length == 0) {
         await sleep(WAIT_FOR_TABS_MS);
       }
+      const page = availablePages.shift();
+      await resetPage(page, viewport);
 
       const name = testName ? `${pageName} (${testName})` : pageName;
-      log('verbose', 'Visual diff test', colors.yellow(name));
-
-      const page = await newPage(browser, viewport);
-      log('verbose', 'Navigating to page', colors.yellow(webpage.url));
+      log('verbose', 'Starting test', colors.yellow(name));
 
       // Puppeteer is flaky when it comes to catching navigation requests, so
       // retry the page navigation up to NAVIGATE_RETRIES times and eventually
@@ -551,8 +571,9 @@ async function snapshotWebpages(percy, browser, webpages) {
             await percy.snapshot(name, page, SNAPSHOT_SINGLE_BUILD_OPTIONS);
           })
           .finally(async() => {
-            await page.close();
+            log('verbose', 'Finished test', colors.yellow(name));
             delete pagePromises[name];
+            availablePages.push(page);
           });
     }
   }
