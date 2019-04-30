@@ -77,16 +77,26 @@ export class ViewerSubscriptionPlatform {
   /** @override */
   getEntitlements() {
     devAssert(this.currentProductId_, 'Current product is not set');
-
+    /** @type {Object} */
+    let messageData = dict({
+      'publicationId': this.publicationId_,
+      'productId': this.currentProductId_,
+      'origin': this.origin_,
+    });
+    const encryptedDocumentKey =
+        this.serviceAdapter_.getEncryptedDocumentKey('google');
+    if (encryptedDocumentKey) {
+      messageData = dict({
+        'publicationId': this.publicationId_,
+        'productId': this.currentProductId_,
+        'origin': this.origin_,
+        'encryptedDocumentKey': encryptedDocumentKey,
+      });
+    }
     const entitlementPromise = this.viewer_.sendMessageAwaitResponse(
-        'auth',
-        dict({
-          'publicationId': this.publicationId_,
-          'productId': this.currentProductId_,
-          'origin': this.origin_,
-        })
-    ).then(entitlementData => {
+        'auth', messageData).then(entitlementData => {
       const authData = (entitlementData || {})['authorization'];
+      //something here for decryptedDocumentKey
       if (!authData) {
         return Entitlement.empty('local');
       }
@@ -157,7 +167,7 @@ export class ViewerSubscriptionPlatform {
           dataObject: entitlements,
         });
       }
-
+      entitlement.decryptedDocumentKey = entitlements.decryptedDocumentKey;
       entitlement.service = 'local';
       resolve(entitlement);
     });
