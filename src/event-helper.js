@@ -175,7 +175,7 @@ export function loadPromise(eleOrWindow) {
     if (isMediaElement && !eleOrWindow.hasAttribute('src')) {
       errorTarget = eleOrWindow.querySelector('source:last-of-type');
       if (!errorTarget) {
-        return reject('Media has no source.');
+        return reject(new Error('Media has no source.'));
       }
     }
     unlistenError = listenOnce(errorTarget, 'error', reject);
