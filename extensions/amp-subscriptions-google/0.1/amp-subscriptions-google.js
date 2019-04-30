@@ -246,7 +246,10 @@ export class GoogleSubscriptionsPlatform {
 
   /** @override */
   getEntitlements() {
-    return this.runtime_.getEntitlements(null).then(swgEntitlements => {
+    const encryptedDocumentKey =
+        this.serviceAdapter_.getEncryptedDocumentKey('google.com');
+    return this.runtime_.getEntitlements(
+        encryptedDocumentKey).then(swgEntitlements => {
       // Get and store the isReadyToPay signal which is independent of
       // any entitlments existing.
       if (swgEntitlements.isReadyToPay) {
@@ -266,8 +269,7 @@ export class GoogleSubscriptionsPlatform {
         granted: true, //swgEntitlements.getEntitlementForThis makes sure this is true.
         grantReason: GrantReason.SUBSCRIBER, // there is no other case of subscription for SWG as of now.
         dataObject: swgEntitlement.json(),
-        // TODO(chenshay): Do this and test it after swg-js library is upgraded.
-        // decryptedDocumentKey: swgEntitlements.decryptedDocumentKey,
+        decryptedDocumentKey: swgEntitlements.decryptedDocumentKey,
       });
     });
   }
