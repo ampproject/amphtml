@@ -284,7 +284,25 @@ app.use('/form/redirect-to/post', (req, res) => {
 app.use('/form/echo-json/post', (req, res) => {
   cors.assertCors(req, res, ['POST']);
   const form = new formidable.IncomingForm();
-  form.parse(req, (err, fields) => {
+  const fields = Object.create(null);
+  form.on('field', function(name, value) {
+    console.log(name, value);
+    // fields[name] = value;
+    if (name in fields) {
+      const realName = name; // .slice(0, name.length - 2);
+      if (realName in fields) {
+        if (!Array.isArray(fields[realName])) {
+          fields[realName] = [fields[realName]];
+        }
+      } else {
+        fields[realName] = [];
+      }
+      fields[realName].push(value);
+    } else {
+      fields[name] = value;
+    }
+  });
+  form.parse(req, unusedErr => {
     res.setHeader('Content-Type', 'application/json; charset=utf-8');
     if (fields['email'] == 'already@subscribed.com') {
       res.statusCode = 500;

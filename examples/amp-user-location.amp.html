@@ -1,0 +1,228 @@
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>amp-user-location example</title>
+  <link rel="canonical" href="amps.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <style amp-custom>
+    amp-user-location {
+      color: red;
+    }
+  </style>
+  <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+  <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+  <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
+  <script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
+  <script async custom-element="amp-user-location" src="https://cdn.ampproject.org/v0/amp-user-location-0.1.js"></script>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+</head>
+<body>
+<h1>amp-user-location</h1>
+
+<h2>Basic usage</h2>
+<p>
+  This example populates variable substitution for analytics
+  and triggers the AMP actions and events.
+</p>
+<amp-user-location id="location" layout="nodisplay"
+    on="approve: approved.show; deny: denied.show; error: errored.show"
+></amp-user-location>
+<p hidden id="approved">Approved!</p>
+<p hidden id="denied">Denied!</p>
+<p hidden id="errored">Errored!</p>
+<button on="tap: location.request()">Get my location</button>
+
+
+<h2>Form and variable substitution usage</h2>
+<p>
+  This example populates variable substitution for analytics
+  and triggers the AMP actions and events.
+</p>
+<amp-user-location on="
+  approve: location-form.submit;
+  deny: denied2.show;
+  error: errored2.show" id="location2" layout="nodisplay">
+</amp-user-location>
+<p hidden id="denied2">Denied!</p>
+<p hidden id="errored2">Errored!</p>
+<fieldset>
+  <legend>Location form</legend>
+  <button on="tap: location2.request()">Use my location</button>
+  <form id="location-form" method="POST" action-xhr="https://localhost:8000/form/echo-json/post">
+    <input type="hidden" name="latlon" data-amp-replace="AMP_USER_LOCATION" value="AMP_USER_LOCATION">
+    <input type="hidden" name="lat" data-amp-replace="AMP_USER_LOCATION" value="AMP_USER_LOCATION(LAT)">
+    <input type="hidden" name="lon" data-amp-replace="AMP_USER_LOCATION" value="AMP_USER_LOCATION(LON)">
+    <div submit-success>
+      <template type="amp-mustache">
+        <p>latlon: <b>{{latlon}}</b></p>
+        <p>lat: <b>{{lat}}</b></p>
+        <p>lon: <b>{{lon}}</b></p>
+      </template>
+    </div>
+  </form>
+</fieldset>
+
+
+<h2>Bind usage</h2>
+<p>
+  This example populates variable substitution for analytics
+  and triggers the AMP actions and events.
+</p>
+<amp-state id="example3"><script type="application/json">{}</script></amp-state>
+<amp-user-location id="location3" layout="nodisplay"
+    on="
+    approve: AMP.setState({example3: {lat: event.lat, lon: event.lon}});
+    deny: denied3.show;
+    error: errored3.show"
+></amp-user-location>
+<p hidden [hidden]="!example3.lat && !example3.lon">
+  Approved! <span [text]="example3.lat && example3.lon ? example3.lat + ' ' + example3.lon:''"></span>
+</p>
+<p hidden id="denied3">Denied!</p>
+<p hidden id="errored3">Errored!</p>
+<button on="tap: location3.request()">Get my location</button>
+
+
+<h2>Analytics usage</h2>
+<p>
+  This example consumes analytics variables exposed by the component
+</p>
+<amp-user-location id="location4" layout="nodisplay"
+    on="approve: approved4.show;
+    deny: denied4.show;
+    error: error4.show"
+></amp-user-location>
+<button on="tap: location4.request()">Get my location</button>
+<p hidden id="approved4">Approved!</p>
+<p hidden id="denied4">Denied!</p>
+<p hidden id="errored4">Errored!</p>
+
+<amp-analytics id="analytics1">
+  <script type="application/json">
+  {
+    "transport": {"beacon": true, "xhrpost": false},
+    "requests": {
+      "endpoint": "/analytics",
+      "base": "${endpoint}/${type}?path=${canonicalPath}",
+      "event": "${base}&lat=${ampUserLocation(LAT)}&lon=${ampUserLocation(LON)}&latlon=${ampUserLocation()}"
+    },
+    "triggers": {
+      "pageview": {
+        "on": "visible",
+        "request": "event",
+        "vars": {
+          "type": "pageLoad"
+        }
+      },
+      "visibility": {
+        "on": "visible",
+        "request": "event",
+        "selector": "#location4",
+        "visibilitySpec": {
+          "visiblePercentageMin": 20,
+          "visiblePercentageMax": 80,
+          "totalTimeMin": 5000,
+          "continuousTimeMin": 2000,
+          "waitFor": "ini-load"
+        },
+        "vars": {
+          "type": "visible"
+        }
+      },
+      "clickPings": {
+        "on": "click",
+        "selector": "${selector}",
+        "request": "event",
+        "vars": {
+          "type": "click",
+          "selector": "body"
+        }
+      },
+      "timer": {
+        "on": "timer",
+        "timerSpec": {
+          "interval": 5,
+          "maxTimerLength": 20
+        },
+        "request": "event",
+        "vars": {
+          "type": "timer"
+        }
+      }
+    }
+  }
+  </script>
+</amp-analytics>
+
+<h2>amp-list usage without amp-bind</h2>
+<p>
+  This example populates variable substitution for analytics
+  and triggers the AMP actions and events.
+</p>
+<amp-user-location on="
+  approve: list-form.submit;
+  deny: denied5.show, requesting5.hide;
+  error: errored5.show, requesting5.hide;" id="location5" layout="nodisplay">
+</amp-user-location>
+<p hidden id="denied5">Denied!</p>
+<p hidden id="errored5">Errored!</p>
+<p hidden id="requesting5">Please wait</p>
+<fieldset>
+  <legend>List form</legend>
+  <button on="tap: requesting5.show, location5.request();">Use my location</button>
+  <form
+      id="list-form" method="POST" action-xhr="https://localhost:8000/form/echo-json/post"
+      on="submit-success: requesting5.hide, AMP.setState({listData: event.response})">
+    <input type="hidden" name="latlon" data-amp-replace="AMP_USER_LOCATION" value="AMP_USER_LOCATION">
+    <input type="hidden" name="lat" data-amp-replace="AMP_USER_LOCATION" value="AMP_USER_LOCATION(LAT)">
+    <input type="hidden" name="lon" data-amp-replace="AMP_USER_LOCATION" value="AMP_USER_LOCATION(LON)">
+    <input hidden type="checkbox" checked name="businesses" value="McCarlos">
+    <input hidden type="checkbox" checked name="businesses" value="JCarlos">
+    <input hidden type="checkbox" checked name="businesses" value="Carlos O'Vializ's">
+  </form>
+</fieldset>
+<amp-list [src]="listData" layout="responsive" width="16" height="9" single-item>
+  <template type="amp-mustache">
+  <p>Businesses near <b>{{lat}} {{lon}}</b></p>
+  <ul>
+    {{#businesses}}<li>{{.}}</li>{{/businesses}}
+  </ul>
+  </template>
+</amp-list>
+
+
+<h2>amp-list usage with amp-bind</h2>
+<p>
+  This example populates variable substitution for analytics
+  and triggers the AMP actions and events.
+</p>
+<amp-user-location on="
+  approve: AMP.setState({listLat: event.lat, listLon: event.lon}), requesting6.hide;
+  deny: denied6.show, requesting6.hide;
+  error: errored6.show, requesting6.hide;" id="location6" layout="nodisplay">
+</amp-user-location>
+<p hidden id="denied6">Denied!</p>
+<p hidden id="errored6">Errored!</p>
+<button on="tap: requesting6.show, location6.request();">Get my local deals</button>
+<p hidden id="requesting6">Please wait</p>
+<amp-list
+    src="https://localhost:8000/user-location/general-deals"
+    [src]="'https://localhost:8000/user-location/localized-deals/TODO?lat=' + listLat + '&lon=' + listLon"
+    layout="responsive" width="16" height="9" single-item
+>
+  <template type="amp-mustache">
+  <p>Businesses near <b>{{lat}} {{lon}}</b></p>
+  <ul>
+    {{#businesses}}<li>{{.}}</li>{{/businesses}}
+  </ul>
+  </template>
+</amp-list>
+
+<h2>amp-pixel</h2>
+<amp-pixel width="1" height="1" src="//localhost:8000/pixel?location=$AMP_USER_LOCATION"></amp-pixel>
+
+</body>
+</html>

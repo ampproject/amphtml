@@ -396,6 +396,22 @@ export class GlobalVariableSource extends VariableSource {
       })
     );
 
+    // Returns user location data if available
+    this.setAsync('AMP_USER_LOCATION', /** @type {AsyncResolverDef} */(type => {
+      // Type may be "","lat","lon", and undefined
+      return this.getUserLocation_(userLocation => {
+        if (type === 'LAT') {
+          return userLocation.lat;
+        }
+        if (type === 'LON') {
+          return userLocation.lon;
+        }
+        userAssert(type === '' || typeof type === 'undefined',
+            'The value passed to AMP_USER_LOCATION() is not valid: ' + type);
+        return `${userLocation.lon},${userLocation.lat}`;
+      }, 'AMP_USER_LOCATION');
+    }));
+
     // Returns incoming share tracking fragment.
     this.setAsync(
       'SHARE_TRACKING_INCOMING',
@@ -804,6 +820,28 @@ export class GlobalVariableSource extends VariableSource {
       userAssert(geo, 'To use variable %s, amp-geo should be configured', expr);
       return getter(geo);
     });
+  }
+
+  /**
+   * Resolves the value via the user location service.
+   * @param {function(Object<string, string>)} getter
+   * @param {string} expr
+   * @return {!Promise<Object<string,(string|Array<string>)>>}
+   * @template T
+   * @private
+   */
+  getUserLocation_(getter, expr) {
+    const element = this.ampdoc.getHeadNode();
+    return Services.userLocationForDocOrNull(element)
+        .then(userLocationService => {
+          return userLocationService.getLocation();
+        }).then(location => {
+          userAssert(location,
+              'To use variable %s, amp-user-location should be configured ' +
+              'and requested by the user',
+              expr);
+          return getter(location);
+        });
   }
 
   /**

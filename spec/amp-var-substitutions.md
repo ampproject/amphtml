@@ -255,6 +255,7 @@ The tables below list the available URL variables grouped by type of usage. Furt
 | [Client ID](#client-id) | `CLIENT_ID` | `${clientId}` |
 | [Extra URL Parameters](#extra-url-parameters) | N/A | `${extraUrlParams}` |
 | [Geolocation](#geolocation) | `AMP_GEO` | `${ampGeo}` |
+| [User Location](#user-location) | `AMP_USER_LOCATION` | `${ampUserLocation}` |
 | [Page View ID](#page-view-id) | `PAGE_VIEW_ID` | `${pageViewId}` |
 | [Query Parameter](#query-parameter) | `QUERY_PARAM` | `${queryParam}` |
 | [Random](#random) | `RANDOM` | `${random}` |
@@ -649,6 +650,19 @@ Provides the approximate, country level, location of the user provided by the [`
 * **amp-analytics variable**: `${ampGeo}`
   * Example value: `ca`
 
+#### User Location
+
+Provides the latitude and longitude coordinates exposed by [`amp-user-location`](../extensions/amp-user-location/amp-user-location.md#variable-substitution) extension. Note that this data is unavailable until the user has approved location access.
+
+* **platform variable**: AMP_USER_LOCATION
+  *  Example: <br>
+  ```html
+   <amp-pixel src="https://foo.com/pixel?location=AMP_USER_LOCATION"></amp-pixel>
+  ```
+* **amp-analytics variable**: `${ampUserLocation}`
+  * Example value: `40.712776,-74.005974`
+
+
 #### Horizontal Scroll Boundary
 
 Provides the horizontal scroll boundary that triggered a scroll event. This variable is only available in a `trigger` of type `scroll`. The value of the boundary may be rounded based on the precision supported by the extension. For example, a boundary with value `1` and precision of `5` will result in value of var to be 0.
@@ -687,7 +701,7 @@ requested attribute names and the object values are the elements' values for tho
 
 #### Initial Scroll Depth
 
-Provides the scroll depth at the time the element was loaded, relative to the target. The value returned will be top/inside/bottom, indicating whether the target was scrolled inside the viewport, was offscreen above the top of the viewport, or was offscreen below the bottom of the viewport. 
+Provides the scroll depth at the time the element was loaded, relative to the target. The value returned will be top/inside/bottom, indicating whether the target was scrolled inside the viewport, was offscreen above the top of the viewport, or was offscreen below the bottom of the viewport.
 
 * **platform variable**: N/A
 * **amp-analytics variable**: `${initialScrollDepth}`
