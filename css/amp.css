@@ -26,15 +26,18 @@
 html {
   overflow-x: hidden !important;
 }
-html:not(.i-amphtml-inabox), body {
+html,
+html body {
   height: auto !important;
 }
 
 /**
- * TODO(torch2424, #TODO): if/when "inabox-preserve-height-auto" launched, merge
- * these styles into : `html:not(.i-amphtml-inabox), body` above, and a new.
+ * TODO(torch2424, #22059): if/when "inabox-preserve-height-auto" launched, merge
+ * these styles into : `html:not([amp4ads]), html:not([amp4ads]) body` above, and a new.
+ * :not([amp4ads])
  */
-html.i-amphtml-inabox-preserve-height-auto {
+html.i-amphtml-inabox-preserve-height-auto,
+html.i-amphtml-inabox-preserve-height-auto body {
   height: auto !important;
 }
 

@@ -17,16 +17,19 @@
 
         body {
           font-family: Arial, arial, sans-serif;
-          border: 1px solid red;
-        }
+          background-color: #fff;
+          font-family: 'Roboto', sans-serif;
+          font-size: 12px;
+          position: relative;
 
-        body,
-        table,
-        div,
-        ul,
-        li {
-            margin: 0;
-            padding: 0
+          /*
+           * Styles to test for #22059
+           * Since border to 2px instead of one
+           * 300px -> 296px
+           */
+          border: 2px solid red;
+          width: 296px;
+          height: 296px;
         }
 
         #adunit {
@@ -34,9 +37,34 @@
             position: absolute;
             top: 0;
             left: 0;
+
+            /*
+             * Less than 300 to make room for the border.
+             * Examples from #22059
+             */
             width: 300px;
             height: 300px;
         }
+
+        /*
+         * Styles to test for #22059
+         * Since border to 2px instead of one
+         * 300px -> 296px
+         */
+        .image {
+          width: 296px;
+          height: 296px;
+        }
+
+        body,
+        table,
+        div,
+        ul,
+        li {
+          margin: 0;
+          padding: 0
+        }
+
 
         .attribution {
             z-index: 999;
@@ -48,13 +76,6 @@
 
         #adunit #ads .image .image-link {
             background-color: transparent;
-            position: relative;
-        }
-
-        body {
-            background-color: #fff;
-            font-family: 'Roboto', sans-serif;
-            font-size: 12px;
             position: relative;
         }
 
