@@ -19,17 +19,6 @@ const escape = require('regexp.escape');
 const pumpify = require('pumpify');
 const replace = require('gulp-regexp-sourcemaps');
 
-// Keep the number of lines in the original and replacement the same. Because
-// sourcemaps suck.
-function emptyLines(original, replacement) {
-  const lines = original.split('\n').length;
-  const current = replacement.split('\n').length;
-  for (let l = current; l < lines; l++) {
-    replacement += '\n';
-  }
-  return replacement;
-}
-
 /* eslint-disable */
 const MIT_FULL = [
 'Permission is hereby granted, free of charge, to any person obtaining a copy',
@@ -74,8 +63,8 @@ const BSD_SHORT = [
 /* eslint-enable */
 
 const LICENSES = [
-  [MIT_FULL, emptyLines(MIT_FULL, MIT_SHORT)],
-  [POLYMER_BSD_FULL, emptyLines(POLYMER_BSD_FULL, BSD_SHORT)],
+  [MIT_FULL, MIT_SHORT],
+  [POLYMER_BSD_FULL, BSD_SHORT],
 ];
 
 /*

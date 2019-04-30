@@ -19,6 +19,7 @@ const argv = require('minimist')(process.argv.slice(2));
 const colors = require('ansi-colors');
 const fs = require('fs-extra');
 const gulp = require('gulp');
+const gulpIf = require('gulp-if');
 const nop = require('gulp-nop');
 const rename = require('gulp-rename');
 const rimraf = require('rimraf');
@@ -399,6 +400,9 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
           .on('end', resolve);
     } else {
       return gulp.src(srcs, {base: '.'})
+          .pipe(gulpIf(
+              /(ShadowCSS\.js|document-register-element\.patched\.js)/,
+              shortenLicense()))
           .pipe(sourcemaps.init({loadMaps: true}))
           .pipe(gulpClosureCompile(compilerOptionsArray))
           .on('error', () => handleCompilerError(outputFilename))
