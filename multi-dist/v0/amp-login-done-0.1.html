@@ -1,0 +1,515 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">
+  <meta name="robots" content="noindex">
+  <title>AMP Login Complete</title>
+  <script async src="https://cdn.ampproject.org/v0/amp-login-done-0.1.js"></script>
+  <style>
+    body {
+      margin: 0;
+    }
+
+    header {
+      margin-bottom: 32px;
+      padding: 16px;
+      display: -webkit-box;
+      display: -webkit-flex;
+      display: -ms-flexbox;
+      display: flex;
+      -webkit-box-orient: horizontal;
+      -webkit-box-direction: normal;
+      -webkit-flex-direction: row;
+      -ms-flex-direction: row;
+      flex-direction: row;
+      -webkit-flex-wrap: nowrap;
+      -ms-flex-wrap: nowrap;
+      flex-wrap: nowrap;
+      -webkit-box-align: center;
+      -webkit-align-items: center;
+      -ms-flex-align: center;
+      align-items: center;
+    }
+
+    .logo,
+    .logo svg {
+      height: 40px;
+      width: 40px;
+    }
+
+    .logo path {
+      fill: #bdbdbd;
+    }
+
+    .logo-text {
+      color: #bdbdbd;
+      font-family: Roboto, verdana, arial, sans-serif;
+      font-size: 14px;
+      letter-spacing: 2px;
+      margin-left: 16px;
+      text-decoration: none;
+      text-transform: uppercase;
+    }
+
+    section {
+      font-family: Roboto, verdana, arial, sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      margin: 16px;
+    }
+
+    .subsection {
+      margin: 8px 0;
+    }
+
+    [lang] {
+      display: none;
+    }
+
+    .error-section {
+      display: none;
+    }
+
+    .amp-error .progress-section {
+      display: none;
+    }
+
+    .amp-error[data-error="postback"] .postback-failed-section {
+      display: block;
+    }
+
+    .amp-error[data-error="close"] .close-failed-section {
+      display: block;
+    }
+
+    #closeButton {
+      color: #4285f4;
+      display: block;
+      font-weight: 300;
+      padding: 8px 0;
+      text-decoration: none;
+      text-transform: uppercase;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 105 105">
+        <g>
+          <path d="M48.24645,63.9289875 L29.9397,63.9289875 C29.1627,63.9289875 28.65345,63.1152375 28.9947,62.4169875 L59.211075,0.4249875 C57.00345,0.1441125 54.753825,-0.0002625 52.470075,-0.0002625 C23.789325,0.0181125 0.211575,23.4304875 0.001575,52.1112375 C-0.17955,77.2456125 17.300325,98.3269875 40.77045,103.684612 L48.24645,63.9289875 Z"/>
+          <path d="M65.00865,1.504125 L57.419775,41.853 L75.726525,41.853 C76.503525,41.853 77.012775,42.66675 76.671525,43.365 L46.78065,104.69025 C48.66015,104.892375 50.568525,105 52.500525,105 C81.496275,105 105.000525,81.49575 105.000525,52.5 C105.000525,27.817125 87.964275,7.11375 65.00865,1.504125" />
+        </g>
+      </svg>
+    </div>
+    <div class="logo-text">
+      <div>Accelerated</div>
+      <div>Mobile Pages</div>
+    </div>
+  </header>
+
+  <section class="progress-section">
+    <div lang="en">Opening page...</div>
+    <div lang="af">Maak tans bladsy oop …</div>
+    <div lang="am">ገጽ በመክፈት ላይ...</div>
+    <div lang="ar">جارٍ فتح الصفحة...</div>
+    <div lang="be">Старонка адкрываецца...</div>
+    <div lang="bg">Страницата се отваря...</div>
+    <div lang="bn">পৃষ্ঠা খোলা হচ্ছে…</div>
+    <div lang="bs">Stranica se otvara...</div>
+    <div lang="ca">S&#039;està obrint la pàgina…</div>
+    <div lang="crs">Pe ouver paz...</div>
+    <div lang="cs">Otevírání stránky...</div>
+    <div lang="da">Åbner siden...</div>
+    <div lang="de">Seite wird geöffnet...</div>
+    <div lang="el">Άνοιγμα σελίδας...</div>
+    <div lang="en-GB">Opening page...</div>
+    <div lang="es">Abriendo la página...</div>
+    <div lang="es-419">Abriendo página…</div>
+    <div lang="et">Lehe avamine …</div>
+    <div lang="eu">Orria irekitzen…</div>
+    <div lang="fa">در حال باز کردن صفحه...</div>
+    <div lang="fi">Avataan sivua…</div>
+    <div lang="fil">Binubuksan ang page...</div>
+    <div lang="fr">Ouverture de la page...</div>
+    <div lang="gl">Abrindo páxina...</div>
+    <div lang="hi">पृष्ठ खोला जा रहा है...</div>
+    <div lang="hr">Otvaranje stranice...</div>
+    <div lang="hu">Oldal megnyitása...</div>
+    <div lang="id">Membuka laman...</div>
+    <div lang="is">Opnar síðu...</div>
+    <div lang="it">Apertura pagina...</div>
+    <div lang="iw">פותח את הדף...</div>
+    <div lang="ja">ページを開いています...</div>
+    <div lang="ka">მიმდინარეობს გვერდის გახსნა...</div>
+    <div lang="km">កំពុងបើកទំព័រ...</div>
+    <div lang="kn">ಪುಟ ತೆರೆಯಲಾಗುತ್ತಿದೆ...</div>
+    <div lang="ko">페이지 여는 중...</div>
+    <div lang="lo">ກຳລັງເປີດໜ້າ...</div>
+    <div lang="lt">Atidaromas puslapis...</div>
+    <div lang="lv">Notiek lapas atvēršana...</div>
+    <div lang="mg">Manokatra pejy…</div>
+    <div lang="mk">Се отвора страницата...</div>
+    <div lang="ml">പേജ് തുറക്കുന്നു...</div>
+    <div lang="mn">Хуудсыг нээж байна...</div>
+    <div lang="mr">पृष्ठ उघडत आहे...</div>
+    <div lang="ms">Membuka halaman…</div>
+    <div lang="my">စာမျက်နှာကို ဖွင့်နေသည်...</div>
+    <div lang="ne">पृष्ठ खोल्दै...</div>
+    <div lang="nl">De pagina wordt geopend...</div>
+    <div lang="no">Åpner siden ...</div>
+    <div lang="pa">ਪੰਨਾ ਖੋਲ੍ਹਿਆ ਜਾ ਰਿਹਾ ਹੈ...</div>
+    <div lang="pl">Otwieram stronę...</div>
+    <div lang="pt">A abrir a página…</div>
+    <div lang="pt-BR">Abrindo página…</div>
+    <div lang="rm">Avrel pagina...</div>
+    <div lang="ro">Se deschide pagina...</div>
+    <div lang="ru">Страница открывается...</div>
+    <div lang="si">පිටුව විවෘත කරමින්...</div>
+    <div lang="sk">Otvára sa stránka...</div>
+    <div lang="sl">Odpiranje strani ...</div>
+    <div lang="so">Bogga furitaanka ...</div>
+    <div lang="sq">Faqja po hapet...</div>
+    <div lang="sr">Отварање странице...</div>
+    <div lang="st">E bula leqephe...</div>
+    <div lang="sv">Öppnar sida ...</div>
+    <div lang="sw">Inafungua ukurasa...</div>
+    <div lang="ta">பக்கத்தைத் திறக்கிறது...</div>
+    <div lang="te">పేజీని తెరుస్తోంది...</div>
+    <div lang="th">กำลังเปิดหน้าเว็บ...</div>
+    <div lang="tn">E bula tsebe...</div>
+    <div lang="tr">Sayfa açılıyor...</div>
+    <div lang="uk">Відкривається сторінка…</div>
+    <div lang="ur">صفحہ کھل رہا ہے…</div>
+    <div lang="vi">Đang mở trang...</div>
+    <div lang="zh-CN">正在打开网页…</div>
+    <div lang="zh-TW">正在開啟網頁...</div>
+    <div lang="zu">Ivula ikhasi...</div>
+  </section>
+
+  <section class="error-section postback-failed-section">
+    <div class="subsection postback-failed-message">
+      <div lang="en">Couldn&#039;t open page</div>
+      <div lang="af">Kon nie bladsy oopmaak nie</div>
+      <div lang="am">ገጽ መከፈት አልተቻለም</div>
+      <div lang="ar">تعذَّر فتح الصفحة</div>
+      <div lang="be">Не атрымалася адкрыць старонку</div>
+      <div lang="bg">Страницата не можа да се отвори</div>
+      <div lang="bn">পৃষ্ঠা খোলা যায়নি</div>
+      <div lang="bs">Nije moguće otvoriti stranicu</div>
+      <div lang="ca">No s&#039;ha pogut obrir la pàgina</div>
+      <div lang="crs">Pa&#039;n kapab ouver paz</div>
+      <div lang="cs">Stránku nelze otevřít</div>
+      <div lang="da">Siden kunne ikke åbnes</div>
+      <div lang="de">Seite konnte nicht geöffnet werden</div>
+      <div lang="el">Δεν ήταν δυνατό το άνοιγμα της σελίδας</div>
+      <div lang="en-GB">Couldn&#039;t open page</div>
+      <div lang="es">No se ha podido abrir la página</div>
+      <div lang="es-419">No se pudo abrir la página</div>
+      <div lang="et">Lehte ei saanud avada</div>
+      <div lang="eu">Ezin da ireki orria</div>
+      <div lang="fa">صفحه باز نشد</div>
+      <div lang="fi">Sivun avaaminen epäonnistui.</div>
+      <div lang="fil">Hindi mabuksan ang page</div>
+      <div lang="fr">La page n&#039;a pas pu être ouverte.</div>
+      <div lang="gl">Non se puido abrir a páxina</div>
+      <div lang="hi">पृष्ठ खोला नहीं जा सका</div>
+      <div lang="hr">Stranica se ne može otvoriti</div>
+      <div lang="hu">Nem sikerült megnyitni az oldalt</div>
+      <div lang="id">Tidak dapat membuka laman</div>
+      <div lang="is">Ekki tókst að opna síðuna</div>
+      <div lang="it">Impossibile aprire la pagina</div>
+      <div lang="iw">לא ניתן היה לפתוח את הדף</div>
+      <div lang="ja">ページを開けませんでした</div>
+      <div lang="ka">გვერდის გახსნა ვერ მოხერხდა</div>
+      <div lang="km">មិនអាចបើកទំព័របានទេ</div>
+      <div lang="kn">ಪುಟ ತೆರೆಯಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ</div>
+      <div lang="ko">페이지를 열 수 없습니다.</div>
+      <div lang="lo">ບໍ່ສາມາດເປີດໜ້າໄດ້</div>
+      <div lang="lt">Nepavyko atidaryti puslapio</div>
+      <div lang="lv">Nevarēja atvērt lapu</div>
+      <div lang="mg">Tsy afa-nanokatra pejy</div>
+      <div lang="mk">Не можеше да се отвори страницата</div>
+      <div lang="ml">പേജ് തുറക്കാനായില്ല</div>
+      <div lang="mn">Хуудсыг нээж чадсангүй</div>
+      <div lang="mr">पृष्ठ उघडणे शक्य झाले नाही</div>
+      <div lang="ms">Tidak dapat membuka halaman</div>
+      <div lang="my">စာမျက်နှာကို ဖွင့်၍မရခဲ့ပါ</div>
+      <div lang="ne">पृष्ठ खोल्न सकिएन</div>
+      <div lang="nl">Kan de pagina niet openen</div>
+      <div lang="no">Kunne ikke åpne siden</div>
+      <div lang="pa">ਪੰਨਾ ਖੋਲ੍ਹਿਆ ਨਹੀਂ ਜਾ ਸਕਿਆ</div>
+      <div lang="pl">Nie udało się otworzyć strony</div>
+      <div lang="pt">Não foi possível abrir a página</div>
+      <div lang="pt-BR">Não foi possível abrir a página.</div>
+      <div lang="rm">Na poss betg avrir pagina</div>
+      <div lang="ro">Pagina nu s-a putut deschide</div>
+      <div lang="ru">Не удалось открыть страницу</div>
+      <div lang="si">පිටුව විවෘත කළ නොහැකි විය</div>
+      <div lang="sk">Stránku nie je možné otvoriť</div>
+      <div lang="sl">Strani ni bilo mogoče odpreti</div>
+      <div lang="so">Wuu furi kari waayay bogga</div>
+      <div lang="sq">Faqja nuk mund të hapej</div>
+      <div lang="sr">Отварање странице није успело</div>
+      <div lang="st">E hlolehile ho bula leqephe</div>
+      <div lang="sv">Det gick inte att öppna sidan</div>
+      <div lang="sw">Haikuweza kufungua ukurasa</div>
+      <div lang="ta">பக்கத்தைத் திறக்க முடியவில்லை</div>
+      <div lang="te">పేజీని తెరవడం సాధ్యపడలేదు</div>
+      <div lang="th">ไม่สามารถเปิดหน้าเว็บได้</div>
+      <div lang="tn">Ga e a kgona go bula tsebe</div>
+      <div lang="tr">Sayfa açılamadı</div>
+      <div lang="uk">Не вдалося відкрити сторінку</div>
+      <div lang="ur">صفحہ نہیں کھل سکا</div>
+      <div lang="vi">Không thể mở trang</div>
+      <div lang="zh-CN">无法打开网页</div>
+      <div lang="zh-TW">無法開啟網頁</div>
+      <div lang="zu">Ayikwazanga ukuvula ikhasi</div>
+    </div>
+
+    <div class="subsection button-section">
+      <a id="closeButton">
+        <div lang="en">Continue</div>
+        <div lang="af">Gaan voort</div>
+        <div lang="am">ቀጥል</div>
+        <div lang="ar">متابعة</div>
+        <div lang="be">Працягнуць</div>
+        <div lang="bg">Напред</div>
+        <div lang="bn">চালিয়ে যান</div>
+        <div lang="bs">Nastavi</div>
+        <div lang="ca">Continua</div>
+        <div lang="crs">Kontinyen</div>
+        <div lang="cs">Pokračovat</div>
+        <div lang="da">Fortsæt</div>
+        <div lang="de">Weiter</div>
+        <div lang="el">Συνέχεια</div>
+        <div lang="en-GB">Continue</div>
+        <div lang="es">Continuar</div>
+        <div lang="es-419">Continuar</div>
+        <div lang="et">Jätkake</div>
+        <div lang="eu">Jarraitu</div>
+        <div lang="fa">ادامه</div>
+        <div lang="fi">Jatka</div>
+        <div lang="fil">Magpatuloy</div>
+        <div lang="fr">Continuer</div>
+        <div lang="gl">Continuar</div>
+        <div lang="hi">जारी रखें</div>
+        <div lang="hr">Nastavi</div>
+        <div lang="hu">Tovább</div>
+        <div lang="id">Lanjutkan</div>
+        <div lang="is">Halda áfram</div>
+        <div lang="it">Continua</div>
+        <div lang="iw">המשך</div>
+        <div lang="ja">続行</div>
+        <div lang="ka">გაგრძელება</div>
+        <div lang="km">បន្ត</div>
+        <div lang="kn">ಮುಂದುವರೆಸು</div>
+        <div lang="ko">계속</div>
+        <div lang="lo">ສືບຕໍ່</div>
+        <div lang="lt">Tęsti</div>
+        <div lang="lv">Turpināt</div>
+        <div lang="mg">Hanohy</div>
+        <div lang="mk">Продолжи</div>
+        <div lang="ml">തുടരുക</div>
+        <div lang="mn">Үргэлжлүүлэх</div>
+        <div lang="mr">सुरु ठेवा</div>
+        <div lang="ms">Teruskan</div>
+        <div lang="my">ရှေ့ဆက်ပါ</div>
+        <div lang="ne">जारी राख्नुहोस्</div>
+        <div lang="nl">Doorgaan</div>
+        <div lang="no">Fortsett</div>
+        <div lang="pa">ਜਾਰੀ ਰੱਖੋ</div>
+        <div lang="pl">Dalej</div>
+        <div lang="pt">Continuar</div>
+        <div lang="pt-BR">Continuar.</div>
+        <div lang="rm">Cuntinuar</div>
+        <div lang="ro">Continuați</div>
+        <div lang="ru">Продолжить</div>
+        <div lang="si">කරගෙන යන්න</div>
+        <div lang="sk">Pokračovať</div>
+        <div lang="sl">Naprej</div>
+        <div lang="so">Sii wad</div>
+        <div lang="sq">Vazhdo</div>
+        <div lang="sr">Настави</div>
+        <div lang="st">Tsoela-pele</div>
+        <div lang="sv">Fortsätt</div>
+        <div lang="sw">Endelea</div>
+        <div lang="ta">தொடரவும்</div>
+        <div lang="te">కొనసాగించు</div>
+        <div lang="th">ต่อไป</div>
+        <div lang="tn">Tswelela</div>
+        <div lang="tr">Devam Et</div>
+        <div lang="uk">Продовжити</div>
+        <div lang="ur">جاری رکھیں</div>
+        <div lang="vi">Tiếp tục</div>
+        <div lang="zh-CN">继续</div>
+        <div lang="zh-TW">繼續</div>
+        <div lang="zu">Qhubeka</div>
+      </a>
+    </div>
+  </section>
+
+  <section class="error-section close-failed-section">
+    <div class="subsection close-failed-message">
+      <div lang="en">An error occurred</div>
+      <div lang="af">&#039;n Fout het voorgekom</div>
+      <div lang="am">ስህተት ተከስቷል</div>
+      <div lang="ar">حدث خطأ</div>
+      <div lang="be">Адбылася памылка</div>
+      <div lang="bg">Възникна грешка</div>
+      <div lang="bn">একটি ত্রুটি ঘটেছে</div>
+      <div lang="bs">Došlo je do greške</div>
+      <div lang="ca">S&#039;ha produït un error</div>
+      <div lang="crs">En lerer n&#039;arive</div>
+      <div lang="cs">Došlo k chybě</div>
+      <div lang="da">Der opstod en fejl</div>
+      <div lang="de">Ein Fehler ist aufgetreten</div>
+      <div lang="el">Παρουσιάστηκε σφάλμα</div>
+      <div lang="en-GB">An error occurred</div>
+      <div lang="es">Se ha producido un error</div>
+      <div lang="es-419">Se produjo un error.</div>
+      <div lang="et">Ilmnes viga</div>
+      <div lang="eu">Errore bat gertatu da</div>
+      <div lang="fa">خطایی روی داد</div>
+      <div lang="fi">Tapahtui virhe</div>
+      <div lang="fil">Nagkaroon ng error</div>
+      <div lang="fr">Une erreur s&#039;est produite.</div>
+      <div lang="gl">Produciuse un erro</div>
+      <div lang="hi">कोई त्रुटि आई</div>
+      <div lang="hr">Došlo je do pogreške</div>
+      <div lang="hu">Hiba történt</div>
+      <div lang="id">Terjadi kesalahan</div>
+      <div lang="is">Villa kom upp</div>
+      <div lang="it">Si è verificato un errore</div>
+      <div lang="iw">אירעה שגיאה</div>
+      <div lang="ja">エラーが発生しました</div>
+      <div lang="ka">წარმოიშვა შეცდომა</div>
+      <div lang="km">កំហុសបានកើតឡើង</div>
+      <div lang="kn">ದೋಷವೊಂದು ಕಾಣಿಸಿಕೊಂಡಿದೆ</div>
+      <div lang="ko">오류가 발생했습니다.</div>
+      <div lang="lo">ມີຄວາມຜິດພາດເກີດຂຶ້ນ</div>
+      <div lang="lt">Įvyko klaida</div>
+      <div lang="lv">Radās kļūda</div>
+      <div lang="mg">Nisy tsy fetezana</div>
+      <div lang="mk">Се појави грешка</div>
+      <div lang="ml">ഒരു പിശക് സംഭവിച്ചു</div>
+      <div lang="mn">Алдаа гарлаа</div>
+      <div lang="mr">एक त्रुटी आली आहे</div>
+      <div lang="ms">Berlaku ralat</div>
+      <div lang="my">ချွတ်ယွင်းမှုတစ်ခု ဖြစ်ပေါ်ခဲ့သည်</div>
+      <div lang="ne">एउटा त्रुटि भयो।</div>
+      <div lang="nl">Er is een fout opgetreden</div>
+      <div lang="no">Det oppsto en feil</div>
+      <div lang="pa">ਇੱਕ ਗੜਬੜ ਹੋ ਗਈ</div>
+      <div lang="pl">Wystąpił błąd</div>
+      <div lang="pt">Ocorreu um erro</div>
+      <div lang="pt-BR">Ocorreu um erro.</div>
+      <div lang="rm">Igl ha dà in errur</div>
+      <div lang="ro">A apărut o eroare</div>
+      <div lang="ru">Произошла ошибка</div>
+      <div lang="si">දෝෂයක් සිදු විය</div>
+      <div lang="sk">Vyskytla sa chyba</div>
+      <div lang="sl">Prišlo je do napake</div>
+      <div lang="so">Qalad ayaa dhacay</div>
+      <div lang="sq">Ndodhi një gabim</div>
+      <div lang="sr">Дошло је до грешке</div>
+      <div lang="st">Ho hlahile bothata</div>
+      <div lang="sv">Ett fel uppstod</div>
+      <div lang="sw">Hitilafu fulani imetokea</div>
+      <div lang="ta">பிழை ஏற்பட்டது</div>
+      <div lang="te">లోపం సంభవించింది</div>
+      <div lang="th">เกิดข้อผิดพลาด</div>
+      <div lang="tn">Go diragetse phoso</div>
+      <div lang="tr">Bir hata oluştu</div>
+      <div lang="uk">Сталася помилка</div>
+      <div lang="ur">ایک خرابی پیش آگئی</div>
+      <div lang="vi">Đã xảy ra lỗi</div>
+      <div lang="zh-CN">发生了错误</div>
+      <div lang="zh-TW">發生錯誤</div>
+      <div lang="zu">Kuvele iphutha</div>
+    </div>
+
+    <div class="subsection">
+      <div lang="en">Please close this page</div>
+      <div lang="af">Maak hierdie bladsy asseblief toe</div>
+      <div lang="am">እባክዎ ይህንን ገጽ ይዝጉት</div>
+      <div lang="ar">يُرجى إغلاق هذه الصفحة</div>
+      <div lang="be">Калі ласка, закрыйце гэту старонку</div>
+      <div lang="bg">Моля, затворете тази страница</div>
+      <div lang="bn">অনুগ্রহ করে পৃষ্ঠাটি বন্ধ করুন</div>
+      <div lang="bs">Zatvorite ovu stranicu</div>
+      <div lang="ca">Tanqueu aquesta pàgina</div>
+      <div lang="crs">Silvouple ferm sa paz</div>
+      <div lang="cs">Zavřete stránku</div>
+      <div lang="da">Luk denne side</div>
+      <div lang="de">Bitte schließe die Seite</div>
+      <div lang="el">Κλείστε αυτήν τη σελίδα</div>
+      <div lang="en-GB">Please close this page</div>
+      <div lang="es">Cierra esta página</div>
+      <div lang="es-419">Cierra esta página</div>
+      <div lang="et">Sulgege see leht</div>
+      <div lang="eu">Itxi orri hau</div>
+      <div lang="fa">لطفاً این صفحه را ببندید</div>
+      <div lang="fi">Sulje tämä sivu</div>
+      <div lang="fil">Pakisara ang page na ito</div>
+      <div lang="fr">Veuillez fermer cette page.</div>
+      <div lang="gl">Pecha esta páxina</div>
+      <div lang="hi">कृपया यह पृष्ठ बंद करें</div>
+      <div lang="hr">Zatvorite stranicu</div>
+      <div lang="hu">Zárja be az oldalt</div>
+      <div lang="id">Tutup laman ini</div>
+      <div lang="is">Lokaðu þessari síðu</div>
+      <div lang="it">Chiudi questa pagina</div>
+      <div lang="iw">עליך לסגור את הדף</div>
+      <div lang="ja">このページを閉じてください</div>
+      <div lang="ka">გთხოვთ, დახუროთ ეს გვერდი</div>
+      <div lang="km">សូមបិទទំព័រនេះ</div>
+      <div lang="kn">ದಯವಿಟ್ಟು ಈ ಪುಟ ಮುಚ್ಚಿ</div>
+      <div lang="ko">이 페이지를 닫아주세요.</div>
+      <div lang="lo">ກະລຸນາປິດໜ້ານີ້</div>
+      <div lang="lt">Uždarykite šį puslapį</div>
+      <div lang="lv">Lūdzu, aizveriet šo lapu</div>
+      <div lang="mg">Hidio ity pejy ity azafady</div>
+      <div lang="mk">Затворете ја страницата</div>
+      <div lang="ml">ഈ പേജ് അടയ്‌ക്കുക</div>
+      <div lang="mn">Энэ хуудсыг хаана уу</div>
+      <div lang="mr">कृपया हे पृष्ठ बंद करा</div>
+      <div lang="ms">Sila tutup halaman ini</div>
+      <div lang="my">ဤစာမျက်နှာကို ပိတ်ပါ</div>
+      <div lang="ne">कृपया यो पृष्ठ बन्द गर्नुहोस्</div>
+      <div lang="nl">Sluit deze pagina</div>
+      <div lang="no">Lukk denne siden</div>
+      <div lang="pa">ਕਿਰਪਾ ਕਰਕੇ ਇਸ ਪੰਨੇ ਨੂੰ ਬੰਦ ਕਰੋ</div>
+      <div lang="pl">Zamknij tę stronę</div>
+      <div lang="pt">Feche esta página</div>
+      <div lang="pt-BR">Feche esta página.</div>
+      <div lang="rm">Per plaschair serrar questa pagina</div>
+      <div lang="ro">Închideți pagina</div>
+      <div lang="ru">Закройте страницу</div>
+      <div lang="si">මෙම පිටුව වසන්න</div>
+      <div lang="sk">Zatvorte túto stránku</div>
+      <div lang="sl">Zaprite to stran</div>
+      <div lang="so">Fadlan xidh boggan</div>
+      <div lang="sq">Mbylle këtë faqe</div>
+      <div lang="sr">Затворите ову страницу</div>
+      <div lang="st">Hle kwala leqephe lena</div>
+      <div lang="sv">Stäng den här sidan</div>
+      <div lang="sw">Tafadhali funga ukurasa huu</div>
+      <div lang="ta">இந்தப் பக்கத்தை மூடவும்</div>
+      <div lang="te">దయచేసి ఈ పేజీని మూసివేయండి</div>
+      <div lang="th">โปรดปิดหน้าเว็บนี้</div>
+      <div lang="tn">Tsweetswee tswala tsebe eno</div>
+      <div lang="tr">Lütfen bu sayfayı kapatın</div>
+      <div lang="uk">Закрийте цю сторінку</div>
+      <div lang="ur">براہ کرم اس صفحہ کو بند کر دیں</div>
+      <div lang="vi">Hãy đóng trang này</div>
+      <div lang="zh-CN">请关闭此网页</div>
+      <div lang="zh-TW">請關閉這個網頁</div>
+      <div lang="zu">Sicela uvale leli khasi</div>
+    </div>
+  </section>
+
+</body>
+</html>
