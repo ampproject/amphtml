@@ -205,6 +205,9 @@ export class AmpScript extends AMP.BaseElement {
   }
 }
 
+/**
+ * Service for sharing data across <amp-script> elements.
+ */
 class AmpScriptService {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} unusedAmpdoc
