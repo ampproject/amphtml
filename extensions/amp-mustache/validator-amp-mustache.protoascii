@@ -24,7 +24,7 @@ tags: {  # amp-mustache
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-mustache"
-    is_custom_template: true
+    extension_type: CUSTOM_TEMPLATE
     version: "0.1"
     version: "0.2"
     version: "latest"
@@ -42,7 +42,7 @@ tags: {  # amp-mustache
   spec_name: "SCRIPT[custom-element=amp-mustache] (AMP4ADS/AMP4EMAIL)"
   extension_spec: {
     name: "amp-mustache"
-    is_custom_template: true
+    extension_type: CUSTOM_TEMPLATE
     version: "0.1"
     version: "0.2"
     version: "latest"
