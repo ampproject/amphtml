@@ -6,6 +6,7 @@
     "eslint-plugin-amphtml-internal",
     "eslint-plugin-google-camelcase",
     "jsdoc",
+    "notice",
     "sort-imports-es6-autofix",
     "sort-requires"
   ],
@@ -135,6 +136,15 @@
     "no-undef": 2,
     "no-var": 2,
     "no-warning-comments": [2, { "terms": ["do not submit"], "location": "anywhere" }],
+    "notice/notice": [2,
+      {
+        "mustMatch": "Copyright 20\\d{2} The AMP HTML Authors\\.",
+        "templateFile": "build-system/artifacts/eslint-notice-license-template.txt",
+        "messages": {
+          "whenFailedToMatch": "Mising or incorrect license header. Run `gulp lint --fix` to add automatically."
+        }
+      }
+    ],
     "object-curly-spacing": [2, "never", {
       "objectsInObjects": false,
       "arraysInObjects": false
