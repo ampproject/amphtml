@@ -3,7 +3,7 @@ $category@: media
 formats:
   - websites
 teaser:
-  text: Displays an iframe containing a video player.
+  text: Embeds an iframe containing a video player.
 ---
 <!--
 Copyright 2019 The AMP HTML Authors. All Rights Reserved.
@@ -25,7 +25,7 @@ limitations under the License.
 
 [TOC]
 
-Displays an iframe containing a video player.
+Displays an [iframe](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe) containing a video player.
 
 <table>
   <tr>
@@ -33,11 +33,22 @@ Displays an iframe containing a video player.
     <td><code>&lt;script async custom-element="amp-video-iframe" src="https://cdn.ampproject.org/v0/amp-video-iframe-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
     <td>fill, fixed, fixed-height, flex-item, intrinsic, nodisplay, responsive</td>
   </tr>
 </table>
 
+## When should I use this?
+
+This component is useful if you've built your own Javascript-based
+video player and would like to embed it in an AMP document, or if your player is provided by a third party not
+supported by the AMP component library.
+
+1. If you'd like to **include a video directly on the AMP document**, you should use [`amp-video`](https://amp.dev/documentation/components/amp-video).
+
+2. If you're using a **common 3rd party** like Youtube, Vimeo or [others supported in AMP](/spec/amp-video-interface.md), you should use their supported component (e.g. [`amp-youtube`](https://amp.dev/documentation/components/amp-youtube), [`amp-vimeo`](https://amp.dev/documentation/components/amp-vimeo)).
+
+3. If you've built a **custom player** or are using one provided by an **unsupported 3rd party**, you sould use `amp-video-iframe`.
 
 ## Behavior
 
@@ -45,19 +56,19 @@ Displays an iframe containing a video player.
 
 - By default, an `amp-video-iframe` is sandboxed (see [details](#sandbox)).
 
-- `amp-video-iframe` implements all [Video Features](../../spec/amp-video-interface.md), like autoplay, minimize-to-corner and rotate-to-fullscreen.
+- `amp-video-iframe` implements all [Video Features](/spec/amp-video-interface.md), like autoplay, minimize-to-corner and rotate-to-fullscreen.
 
 - `amp-video-iframe` must only request resources via HTTPS.
 
 - `amp-video-iframe` is not scrollable.
 
+In short, `amp-video-iframe` plugs AMP video features into an embedded document that hosts a video player.
 
 ## Usage of amp-video-iframe for advertising
 
 `amp-video-iframe` **must not** be used for the primary purpose of displaying advertising. It is OK to use `amp-video-iframe` for the purpose of displaying videos, where part of the videos are advertising. This AMP policy may be enforced by not rendering the respective iframes.
 
-Advertising use cases should use [`amp-ad`](https://www.ampproject.org/docs/reference/components/amp-ad) instead.
-
+Advertising use cases should use [`amp-ad`](https://amp.dev/documentation/components/amp-ad) instead.
 
 The reasons for this policy are that:
 
@@ -87,12 +98,12 @@ to be played, <a href="https://github.com/ampproject/amphtml/blob/master/spec/am
   </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>
-    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
+    <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
   <tr>
     <td width="40%"><strong>dock</strong></td>
     <td><strong>Requires <code>amp-video-docking</code> extension.</strong> If this attribute is present and the video is playing manually, the video will be "minimized" and fixed to a corner or an element when the user scrolls out of the video component's visual area.
-    For more details, see <a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-video-docking/amp-video-docking.md">documentation on the docking extension itself.</a></td>
+    For more details, see <a href="https://amp.dev/documentation/components/amp-video-docking">documentation on the docking extension itself.</a></td>
   </tr>
   <tr>
     <td width="40%"><strong>implements-media-session</strong></td>
@@ -108,10 +119,22 @@ to be played, <a href="https://github.com/ampproject/amphtml/blob/master/spec/am
   </tr>
 </table>
 
-## Integration
+## Usage
 
-In order for the video integration to work, the document living inside your
-frame must include a small library:
+Include an `amp-video-iframe` on your AMP document:
+
+```html
+<amp-video-iframe layout="responsive"
+    width="16"
+    height="16"
+    src="/my-video-player.html"
+    poster="/my-video-poster.jpg">
+</amp-video-iframe>
+```
+
+## Integration inside the frame
+
+In order for the video integration to work, the embedded document (e.g. `my-video-player.html`) must include a small library:
 
 ```html
 <script async src="https://cdn.ampproject.org/video-iframe-integration-v0.js"></script>
@@ -123,9 +146,14 @@ frame must include a small library:
 
 function onAmpIntegrationReady(ampIntegration) {
   // `ampIntegration` is an object containing the tools required to integrate.
+  // This callback specifies how the AMP document and the iframed video document
+  // talk to each other.
 }
 </script>
 ```
+
+Note that this library is separate from the extension code (`amp-video-iframe-0.1.js`), because
+it lives on the non-AMP document that is iframed.
 
 ### Simple integrations
 
