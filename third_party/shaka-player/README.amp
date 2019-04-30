@@ -1,0 +1,10 @@
+URL: https://github.com/google/shaka-player
+License: Apache License
+License File: https://github.com/google/shaka-player/blob/master/LICENSE
+
+Description:
+Copy of compiled Shaka Player from release v2.4.7:
+https://ajax.googleapis.com/ajax/libs/shaka-player/2.4.7/shaka-player.compiled.js
+
+Local Modifications:
+None

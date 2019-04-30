@@ -1170,6 +1170,9 @@ const EXTENSION_BUNDLE_MAP = {
   'amp-inputmask.js': [
     'third_party/inputmask/bundle.js',
   ],
+  'amp-shaka.js': [
+    'third_party/shaka-player/shaka-player.compiled.js',
+  ]
 };
 
 /**

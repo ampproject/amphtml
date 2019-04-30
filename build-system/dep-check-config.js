@@ -103,7 +103,8 @@ exports.rules = [
       'extensions/amp-subscriptions-google/**/*.js->' +
           'third_party/subscriptions-project/swg.js',
       'extensions/amp-recaptcha-input/**/*.js->' +
-      'third_party/amp-toolbox-cache-url/dist/amp-toolbox-cache-url.esm.js',
+      'third_party/amp-toolbox-cache-url/dist/amp-toolbox-cache-url.esm.js' +
+      'extensions/amp-shaka/**->third_party/shaka-player/shaka-player.compiled.js',
     ],
   },
   // Rules for 3p
