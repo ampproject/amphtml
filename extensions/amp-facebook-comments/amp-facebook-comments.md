@@ -66,7 +66,7 @@ You can use the `amp-facebook-comments` component to embed the [Facebook comment
   </tr>
   <tr>
     <td width="40%"><strong>data-numposts (optional)</strong></td>
-    <td>The number of comments to show. For details, see the <a href="https://developers.facebook.com/docs/plugins/comments">Facebook comments documentation</a>.</td>
+    <td>The number of comments to show. Currently Facebook SDK limits this to max 100. For details, see the <a href="https://developers.facebook.com/docs/plugins/comments">Facebook comments documentation</a>.</td>
   </tr>
   <tr>
     <td width="40%"><strong>data-order-by (optional)</strong></td>
