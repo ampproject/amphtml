@@ -596,13 +596,20 @@ export class AmpAutocomplete extends AMP.BaseElement {
    * @private
    */
   setResultDisplayDirection_() {
+    const renderAbove = this.shouldRenderAbove_();
+    this.container_.classList.toggle(
+        'i-amphtml-autocomplete-results-up', renderAbove);
+  }
+
+  /**
+   * Returns true if the input is in the bottom half of the viewport.
+   * @return {boolean}
+   * @private
+   */
+  shouldRenderAbove_() {
     const viewHeight = this.viewport_.getHeight() || 0;
-    if (this.inputElement_.getBoundingClientRect().top > (viewHeight / 2)) {
-      this.container_.classList.add('i-amphtml-autocomplete-results-up');
-    } else {
-      this.container_.classList.toggle(
-          'i-amphtml-autocomplete-results-up', false);
-    }
+    return this.inputElement_.getBoundingClientRect().top
+      > (viewHeight / 2);
   }
 
   /**
@@ -677,21 +684,44 @@ export class AmpAutocomplete extends AMP.BaseElement {
     this.inputElement_.value = newActiveElement.getAttribute('data-value');
 
     // Element visibility logic
-    const {offsetTop: itemTop, offsetHeight: itemHeight} = newActiveElement;
+    let overflowEl;
 
-    const resultTop = this.container_.scrollTop;
-    if (resultTop > itemTop ||
-      resultTop + this.container_.offsetHeight < itemTop + itemHeight) {
-      this.container_.scrollTop = delta > 0 ?
-        itemTop + itemHeight - this.container_.offsetHeight : itemTop;
-    }
-
-    return this.mutateElement(() => {
+    return this.measureMutateElement(() => {
+      overflowEl = this.measureContainerScroll_(newActiveElement, delta > 0);
+    }, () => {
+      if (overflowEl.shouldScroll) {
+        this.container_.scrollTop = overflowEl.newTop;
+      }
       this.resetActiveElement_();
       newActiveElement.classList.add('i-amphtml-autocomplete-item-active');
       this.activeIndex_ = activeIndex;
       this.activeElement_ = newActiveElement;
     });
+  }
+
+  /**
+   * Given an element and boolean direction, returns an object of the format:
+   * { shouldScroll: boolean, newTop: number }
+   *
+   * This method assumes that the element it is passed is a child
+   * of the results container, otherwise known as a suggested item.
+   * It then calculates whether the item element is visible within
+   * the scope of the container element, and if not, what the container
+   * should be scrolled to (either upwards or downwards),in order for the
+   * element to be seen. Should be called in a measureMutate context.
+   *
+   * @param {!Element} element
+   * @param {boolean} goingDown
+   * @return {!Object}
+   * @private
+   */
+  measureContainerScroll_(element, goingDown) {
+    const {offsetTop: itemTop, offsetHeight: itemHeight} = element;
+    const resultHeight = this.container_.offsetHeight;
+    const shouldScroll = (this.container_.scrollTop > itemTop ||
+      this.container_.scrollTop + resultHeight < itemTop + itemHeight);
+    const newTop = goingDown ? itemTop + itemHeight - resultHeight : itemTop;
+    return {shouldScroll, newTop};
   }
 
   /**
@@ -743,12 +773,10 @@ export class AmpAutocomplete extends AMP.BaseElement {
           }
           return this.updateActiveItem_(1);
         }
-        else {
-          return this.mutateElement(() => {
-            this.filterDataAndRenderResults_(this.sourceData_, this.userInput_);
-            this.toggleResults_(true);
-          });
-        }
+        return this.mutateElement(() => {
+          this.filterDataAndRenderResults_(this.sourceData_, this.userInput_);
+          this.toggleResults_(true);
+        });
       case Keys.UP_ARROW:
         event.preventDefault();
         // Disrupt loop around to display user input.
