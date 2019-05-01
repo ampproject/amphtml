@@ -32,7 +32,7 @@ module.exports = function(babel) {
               ]));
           path.replaceWith(IIFE);
         }
-      }
-    }
+      },
+    },
   };
-}
+};
