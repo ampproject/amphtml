@@ -19,17 +19,6 @@ const escape = require('regexp.escape');
 const pumpify = require('pumpify');
 const replace = require('gulp-regexp-sourcemaps');
 
-// Keep the number of lines in the original and replacement the same. Because
-// sourcemaps suck.
-function emptyLines(original, replacement) {
-  const lines = original.split('\n').length;
-  const current = replacement.split('\n').length;
-  for (let l = current; l < lines; l++) {
-    replacement += '\n';
-  }
-  return replacement;
-}
-
 /* eslint-disable */
 const MIT_FULL = [
 'Permission is hereby granted, free of charge, to any person obtaining a copy',
@@ -74,15 +63,21 @@ const BSD_SHORT = [
 /* eslint-enable */
 
 const LICENSES = [
-  [MIT_FULL, emptyLines(MIT_FULL, MIT_SHORT)],
-  [POLYMER_BSD_FULL, emptyLines(POLYMER_BSD_FULL, BSD_SHORT)],
+  [MIT_FULL, MIT_SHORT],
+  [POLYMER_BSD_FULL, BSD_SHORT],
 ];
 
-/*
+const PATHS = [
+  'third_party/webcomponentsjs/ShadowCSS.js',
+  'node_modules/document-register-element/build/' +
+      'document-register-element.patched.js',
+];
+
+/**
  * We can replace full-text of standard licenses with a pre-approved shorten
  * version.
  */
-module.exports = function() {
+exports.shortenLicense = function() {
   const streams = LICENSES.map(tuple => {
     const regex = new RegExp(escape(tuple[0]), 'g');
     return replace(regex, tuple[1], 'shorten-license');
@@ -91,3 +86,10 @@ module.exports = function() {
   return pumpify.obj(streams);
 };
 
+/**
+ * Returns true if a source file has a license that needs to be shortened.
+ * @param {Vinyl} file
+ */
+exports.shouldShortenLicense = function(file) {
+  return PATHS.some(path => file.path.endsWith(path));
+};
