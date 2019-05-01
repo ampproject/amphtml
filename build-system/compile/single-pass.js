@@ -103,9 +103,11 @@ exports.getFlags = function(config) {
     source_map_location_mapping: ['|/'],
     //new_type_inf: true,
     language_in: 'ES6',
-    // This is important for exports across js modules. Because of the async
-    // loading nature of amp scripts we export everything through the `_`
-    // namespace to be referenced across `chunks`.
+    // By default closure puts all of the public exports on the global, but
+    // because of the wrapper modules (to mitigate async loading of scripts)
+    // that we add to the js binaries this prevents other js binaries from
+    // accessing the symbol, we remedy this by attaching all public exports
+    // to `_` and everything imported across modules is is accessed through `_`.
     rename_prefix_namespace: '_',
     language_out: config.language_out || 'ES5',
     module_output_path_prefix: config.writeTo || 'out/',
