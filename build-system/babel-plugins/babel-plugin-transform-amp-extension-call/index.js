@@ -25,13 +25,19 @@ module.exports = function(babel) {
         if (t.isIdentifier(callee.object, {name: 'AMP'}) &&
             t.isIdentifier(callee.property, {name: 'extension'})) {
           const func = node.arguments[node.arguments.length - 1];
-          if (!t.isFunctionExpression(func)) {
+          if (!(t.isFunctionExpression(func) ||
+              t.isArrowFunctionExpression(func))) {
             return;
           }
 
+          const newParams = [t.identifier('AMP')];
+          const newFunc = t.isFunctionExpression(func) ?
+              t.functionExpression(null, newParams, func.body) :
+              t.arrowFunctionExpression(newParams, func.body);
+
           const IIFE = t.expressionStatement(
             t.callExpression(
-              t.functionExpression(null, [t.identifier('AMP')], func.body),
+              newFunc,
               [
                 t.memberExpression(t.identifier('self'), t.identifier('AMP'))
               ]
