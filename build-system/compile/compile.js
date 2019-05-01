@@ -23,10 +23,10 @@ const gulpIf = require('gulp-if');
 const nop = require('gulp-nop');
 const rename = require('gulp-rename');
 const rimraf = require('rimraf');
-const shortenLicense = require('./shorten-license');
 const sourcemaps = require('gulp-sourcemaps');
 const {gulpClosureCompile, handleCompilerError, handleTypeCheckError} = require('./closure-compile');
 const {isTravisBuild} = require('../travis');
+const {shortenLicense, shouldShortenLicense} = require('./shorten-license');
 const {singlePassCompile} = require('./single-pass');
 const {VERSION: internalRuntimeVersion} = require('../internal-version') ;
 
@@ -400,15 +400,12 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
           .on('end', resolve);
     } else {
       return gulp.src(srcs, {base: '.'})
-          .pipe(gulpIf(
-              /(ShadowCSS\.js|document-register-element\.patched\.js)/,
-              shortenLicense()))
+          .pipe(gulpIf(shouldShortenLicense, shortenLicense()))
           .pipe(sourcemaps.init({loadMaps: true}))
           .pipe(gulpClosureCompile(compilerOptionsArray))
           .on('error', () => handleCompilerError(outputFilename))
           .pipe(rename(outputFilename))
           .pipe(sourcemaps.write('.'))
-          .pipe(shortenLicense())
           .pipe(gulp.dest(outputDir))
           .on('end', resolve);
     }
