@@ -15,11 +15,11 @@
  */
 
 import {
+  getAllowedTags,
   purifyHtml,
   purifyTagsForTripleMustache,
   validateAttributeChange,
 } from '../../src/purifier';
-
 
 let purify;
 let html;
@@ -659,5 +659,29 @@ describe('validateAttributeChange', () => {
     expect(vac('amp-img', 'src', '?__amp_source_origin=evil')).to.be.false;
     expect(vac('select', 'form', 'foo')).to.be.false;
     expect(vac('input', 'type', 'image')).to.be.false;
+  });
+});
+
+describe('getAllowedTags', () => {
+  let allowedTags;
+
+  beforeEach(() => {
+    allowedTags = getAllowedTags();
+  });
+
+  it('should contain html tags', () => {
+    expect(allowedTags).to.have.property('a', true);
+    expect(allowedTags).to.have.property('p', true);
+  });
+
+  it('should contain svg tags', () => {
+    expect(allowedTags).to.have.property('svg', true);
+    expect(allowedTags).to.have.property('feblend', true);
+  });
+
+  it('should not contain blacklisted tags', () => {
+    // Tags allowed in DOMPurify but disallowed in AMP.
+    expect(allowedTags).to.not.have.property('audio');
+    expect(allowedTags).to.not.have.property('img');
   });
 });

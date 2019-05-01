@@ -336,7 +336,8 @@ describes.realWin('amp-autocomplete unit tests', {
       eventPreventSpy = sandbox.spy(event, 'preventDefault');
     });
 
-    it('should updateActiveItem_ on Down arrow', () => {
+    it('should updateActiveItem_ when results showing on Down arrow', () => {
+      sandbox.stub(impl, 'resultsShowing_').onFirstCall().returns(true);
       return element.layoutCallback().then(() => {
         impl.activeIndex_ = 0;
         return impl.keyDownHandler_(event);
@@ -348,11 +349,27 @@ describes.realWin('amp-autocomplete unit tests', {
     });
 
     it('should displayUserInput_ when looping on Down arrow', () => {
+      sandbox.stub(impl, 'resultsShowing_').returns(true);
       return element.layoutCallback().then(() => {
         return impl.keyDownHandler_(event);
       }).then(() => {
         expect(eventPreventSpy).to.have.been.calledOnce;
         expect(displayInputSpy).to.have.been.calledOnce;
+        expect(updateActiveSpy).not.to.have.been.called;
+      });
+    });
+
+    it('should display results if not already on Down arrow', () => {
+      let filterAndRenderSpy, toggleResultsSpy;
+      return element.layoutCallback().then(() => {
+        filterAndRenderSpy = sandbox.spy(impl, 'filterDataAndRenderResults_');
+        toggleResultsSpy = sandbox.spy(impl, 'toggleResults_');
+        return impl.keyDownHandler_(event);
+      }).then(() => {
+        expect(eventPreventSpy).to.have.been.calledOnce;
+        expect(filterAndRenderSpy).to.have.been.calledOnce;
+        expect(toggleResultsSpy).to.have.been.calledWith(true);
+        expect(displayInputSpy).not.to.have.been.called;
         expect(updateActiveSpy).not.to.have.been.called;
       });
     });

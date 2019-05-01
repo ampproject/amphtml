@@ -16,10 +16,10 @@
 
 import {Dialog} from '../dialog';
 import {Entitlement, GrantReason} from '../entitlement';
-import {LocalSubscriptionPlatform} from '../local-subscription-platform';
 import {PageConfig} from '../../../../third_party/subscriptions-project/config';
 import {ServiceAdapter} from '../service-adapter';
 import {SubscriptionAnalytics} from '../analytics';
+import {localSubscriptionPlatformFactory} from '../local-subscription-platform';
 
 describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
   let ampdoc;
@@ -71,7 +71,7 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
     getEncryptedDocumentKeyStub = sandbox.stub(
         serviceAdapter, 'getEncryptedDocumentKey')
         .callsFake(() => {return null;});
-    localSubscriptionPlatform = new LocalSubscriptionPlatform(ampdoc,
+    localSubscriptionPlatform = localSubscriptionPlatformFactory(ampdoc,
         serviceConfig.services[0], serviceAdapter);
   });
 

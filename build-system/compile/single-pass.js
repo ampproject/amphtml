@@ -29,13 +29,13 @@ const path = require('path');
 const Promise = require('bluebird');
 const relativePath = require('path').relative;
 const rename = require('gulp-rename');
-const shortenLicense = require('./shorten-license');
 const sourcemaps = require('gulp-sourcemaps');
 const tempy = require('tempy');
 const through = require('through2');
 const {extensionBundles, altMainBundles, TYPES} = require('../../bundles.config');
 const {gulpClosureCompile, handleSinglePassCompilerError} = require('./closure-compile');
 const {isTravisBuild} = require('../travis');
+const {shortenLicense, shouldShortenLicense} = require('./shorten-license');
 const {TopologicalSort} = require('topological-sort');
 const TYPES_VALUES = Object.keys(TYPES).map(x => TYPES[x]);
 const wrappers = require('../compile-wrappers');
@@ -589,11 +589,11 @@ function compile(flagsArray) {
   // TODO(@cramforce): Run the post processing step
   return new Promise(function(resolve) {
     return gulp.src(srcs, {base: transformDir})
+        .pipe(gulpIf(shouldShortenLicense, shortenLicense()))
         .pipe(sourcemaps.init({loadMaps: true}))
         .pipe(gulpClosureCompile(flagsArray))
         .on('error', handleSinglePassCompilerError)
         .pipe(sourcemaps.write('.'))
-        .pipe(shortenLicense())
         .pipe(gulpIf(/(\/amp-|\/_base)/, rename(path => path.dirname += '/v0')))
         .pipe(gulp.dest('.'))
         .on('end', resolve);

@@ -134,6 +134,9 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
     /** @private {?../../../src/service/action-impl.ActionService} */
     this.action_ = null;
+
+    /** @private {?../../../src/service/viewport/viewport-impl.Viewport} */
+    this.viewport_ = null;
   }
 
   /** @override */
@@ -142,6 +145,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
         `Experiment ${EXPERIMENT} is not turned on.`);
 
     this.action_ = Services.actionServiceForDoc(this.element);
+    this.viewport_ = Services.viewportForDoc(this.element);
+
     const jsonScript =
       this.element.querySelector('script[type="application/json"]');
     if (jsonScript) {
@@ -240,12 +245,16 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
   /**
    * Creates and returns <div> that contains the template-rendered children.
+   * Should be called in a measureMutate context.
    * @return {!Element}
    * @private
    */
   createContainer_() {
     const container = this.element.ownerDocument.createElement('div');
     container.classList.add('i-amphtml-autocomplete-results');
+    if (this.shouldRenderAbove_()) {
+      container.classList.add('i-amphtml-autocomplete-results-up');
+    }
     container.setAttribute('role', 'list');
     toggle(container, false);
     return container;
@@ -570,12 +579,41 @@ export class AmpAutocomplete extends AMP.BaseElement {
     }
 
     // Toggle results.
-    return this.mutateElement(() => {
+    let renderAbove = false;
+    return this.measureMutateElement(() => {
+      renderAbove = this.shouldRenderAbove_();
+    }, () => {
       if (!display) {
+        this.userInput_ = this.inputElement_.value;
+        this.filterDataAndRenderResults_(this.sourceData_, this.userInput_);
         this.resetActiveElement_();
+        this.setResultDisplayDirection_(renderAbove);
       }
       this.toggleResults_(display);
     });
+  }
+
+  /**
+   * Display results upwards or downwards based on location in the viewport.
+   * Should be called in a measureMutate context.
+   * @param {boolean} renderAbove
+   * @private
+   */
+  setResultDisplayDirection_(renderAbove) {
+    this.container_.classList.toggle(
+        'i-amphtml-autocomplete-results-up', renderAbove);
+  }
+
+  /**
+   * Returns true if the input is in the bottom half of the viewport.
+   * Should be called in a measureMutate context.
+   * @return {boolean}
+   * @private
+   */
+  shouldRenderAbove_() {
+    const viewHeight = this.viewport_.getHeight() || 0;
+    return this.inputElement_./*OK*/getBoundingClientRect().top
+      > (viewHeight / 2);
   }
 
   /**
@@ -642,12 +680,27 @@ export class AmpAutocomplete extends AMP.BaseElement {
     if (delta === 0 || !this.resultsShowing_()) {
       return Promise.resolve();
     }
+    // Active element logic
     const keyUpWhenNoneActive = this.activeIndex_ === -1 && delta < 0;
     const index = keyUpWhenNoneActive ? delta : this.activeIndex_ + delta;
     const activeIndex = mod(index, this.container_.children.length);
     const newActiveElement = this.container_.children[activeIndex];
     this.inputElement_.value = newActiveElement.getAttribute('data-value');
-    return this.mutateElement(() => {
+
+    // Element visibility logic
+    let shouldScroll, newTop;
+
+    return this.measureMutateElement(() => {
+      const {offsetTop: itemTop, offsetHeight: itemHeight} = newActiveElement;
+      const {scrollTop: resultTop, offsetHeight: resultHeight} =
+        this.container_;
+      shouldScroll = (resultTop > itemTop ||
+        resultTop + resultHeight < itemTop + itemHeight);
+      newTop = delta > 0 ? itemTop + itemHeight - resultHeight : itemTop;
+    }, () => {
+      if (shouldScroll) {
+        this.container_./*OK*/scrollTop = newTop;
+      }
       this.resetActiveElement_();
       newActiveElement.classList.add('i-amphtml-autocomplete-item-active');
       this.activeIndex_ = activeIndex;
@@ -666,6 +719,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
   /**
    * Resets the activeIndex_, activeElement_ and removes its 'active' class.
+   * Should be called in a measureMutate context.
    * @private
    */
   resetActiveElement_() {
@@ -696,12 +750,18 @@ export class AmpAutocomplete extends AMP.BaseElement {
     switch (event.key) {
       case Keys.DOWN_ARROW:
         event.preventDefault();
-        // Disrupt loop around to display user input.
-        if (this.activeIndex_ === this.container_.children.length - 1) {
-          this.displayUserInput_();
-          return Promise.resolve();
+        if (this.resultsShowing_()) {
+          // Disrupt loop around to display user input.
+          if (this.activeIndex_ === this.container_.children.length - 1) {
+            this.displayUserInput_();
+            return Promise.resolve();
+          }
+          return this.updateActiveItem_(1);
         }
-        return this.updateActiveItem_(1);
+        return this.mutateElement(() => {
+          this.filterDataAndRenderResults_(this.sourceData_, this.userInput_);
+          this.toggleResults_(true);
+        });
       case Keys.UP_ARROW:
         event.preventDefault();
         // Disrupt loop around to display user input.
