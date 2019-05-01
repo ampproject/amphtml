@@ -27,8 +27,6 @@ import {
 } from './layout-rect';
 import {isConnectedNode} from './dom';
 
-const nativeClientRect = Element.prototype.getBoundingClientRect;
-
 /**
  * Polyfill for Node.getBoundingClientRect API.
  * @this {!Element}
@@ -36,6 +34,7 @@ const nativeClientRect = Element.prototype.getBoundingClientRect;
  */
 function getBoundingClientRect() {
   if (isConnectedNode(this)) {
+    const nativeClientRect = Element.prototype.getBoundingClientRect;
     return nativeClientRect.call(this);
   }
 
@@ -48,6 +47,10 @@ function getBoundingClientRect() {
  * @return {boolean}
  */
 function shouldInstall(win) {
+  if (!win.document) {
+    return false;
+  }
+
   try {
     const div = win.document.createElement('div');
     const rect = div./*OK*/getBoundingClientRect();

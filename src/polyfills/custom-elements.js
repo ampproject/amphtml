@@ -834,7 +834,7 @@ function subClass(Object, superClass, subClass) {
  * @param {!Function=} opt_ctor
  */
 export function install(win, opt_ctor) {
-  if (isPatched(win)) {
+  if (isPatched(win) || !win.document) {
     return;
   }
 
