@@ -2,10 +2,11 @@
   "root": true,
   "parser": "babel-eslint",
   "plugins": [
+    "amphtml-internal",
     "chai-expect",
-    "eslint-plugin-amphtml-internal",
-    "eslint-plugin-google-camelcase",
+    "google-camelcase",
     "jsdoc",
+    "notice",
     "sort-imports-es6-autofix",
     "sort-requires"
   ],
@@ -135,6 +136,15 @@
     "no-undef": 2,
     "no-var": 2,
     "no-warning-comments": [2, { "terms": ["do not submit"], "location": "anywhere" }],
+    "notice/notice": [2,
+      {
+        "mustMatch": "Copyright 20\\d{2} The AMP HTML Authors\\.",
+        "templateFile": "LICENSE-TEMPLATE.txt",
+        "messages": {
+          "whenFailedToMatch": "Missing or incorrect license header"
+        }
+      }
+    ],
     "object-curly-spacing": [2, "never", {
       "objectsInObjects": false,
       "arraysInObjects": false
