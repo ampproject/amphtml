@@ -129,6 +129,11 @@ export class AmpAudio extends AMP.BaseElement {
       artwork: [{src: artwork}],
     };
 
+    // Resolve layoutCallback right away if the audio won't preload.
+    if (this.element.getAttribute('preload') === 'none') {
+      return this.audio_;
+    }
+
     return this.loadPromise(this.audio_);
   }
 
