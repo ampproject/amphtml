@@ -145,33 +145,22 @@ export class LiveListManager {
     // TODO(erwinm): add update time here when possible.
     return fetchDocument(this.ampdoc.win, url, {
       requireAmpResponseSourceOrigin: false,
-    }).then(doc => {
-      this.getLiveLists_(doc);
-      this.getDynamicLiveLists_(doc);
-    });
+    }).then(this.updateLiveLists_.bind(this));
   }
 
   /**
-    * Queries for dynamically added `amp-live-lists`.
-    * @param {!Document} doc
-    */
-  getDynamicLiveLists_(doc) {
-    const dynamicListsIds = Object.keys(this.liveLists_).filter(id =>
-      this.liveLists_[id].element.hasAttribute('custom-container')
-    );
-    dynamicListsIds.forEach(this.updateCustomContainer_.bind(this, doc));
-  }
-
-  /**
-   * Queries the document for all `amp-live-list` tags.
+   * Gets all live lists and updates them with their corresponding counterparts.
+   * Saves latest update time.
    *
    * @param {!Document} doc
+   * @private
    */
-  getLiveLists_(doc) {
+  updateLiveLists_(doc) {
     this.installExtensionsForDoc_(doc);
-    const lists = Array.prototype.slice.call(
-        doc.getElementsByTagName('amp-live-list'));
-    const updateTimes = lists.map(this.updateLiveList_.bind(this));
+    const allLiveLists =
+      this.getLiveLists_(doc).concat(this.getDynamicLiveLists_(doc));
+    const updateTimes = allLiveLists.map(this.updateLiveList_.bind(this));
+
     const latestUpdateTime = Math.max.apply(Math, [0].concat(updateTimes));
     if (latestUpdateTime > 0) {
       this.latestUpdateTime_ = latestUpdateTime;
@@ -184,16 +173,46 @@ export class LiveListManager {
   }
 
   /**
+   * Queries the document for all `amp-live-list` tags.
+   *
+   * @param {!Document} doc
+   * @return {!Array<!Element>}
+   * @private
+   */
+  getLiveLists_(doc) {
+    return Array.prototype.slice.call(
+        doc.getElementsByTagName('amp-live-list'));
+  }
+
+  /**
+   * Queries for dynamically added `amp-live-list`s and returns elements that
+   * built them.
+   *
+   * @param {!Document} doc
+   * @return {!Array<!Element>}
+   * @private
+   */
+  getDynamicLiveLists_(doc) {
+    const dynamicListsIds = Object.keys(this.liveLists_).filter(id =>
+      this.liveLists_[id].isDynamic());
+    return dynamicListsIds.map(id =>
+      doc.getElementById(this.liveLists_[id].element.getAttribute('built-by')));
+  }
+
+  /**
    * Updates the appropriate `amp-live-list` with its updates from the server.
    *
    * @param {!Element} liveList
    * @return {number}
    */
   updateLiveList_(liveList) {
-    const id = liveList.getAttribute('id');
+    const id = liveList.hasAttribute('dynamic-live-list') ?
+      liveList.getAttribute('dynamic-live-list') :
+      liveList.getAttribute('id');
     userAssert(id, 'amp-live-list must have an id.');
     userAssert(id in this.liveLists_,
         'amp-live-list#%s found but did not exist on original page load.', id);
+
     const inClientDomLiveList = this.liveLists_[id];
     inClientDomLiveList.toggle(!liveList.hasAttribute('disabled'));
 
@@ -201,25 +220,6 @@ export class LiveListManager {
       return inClientDomLiveList.update(liveList);
     }
     return 0;
-  }
-
-  /**
-   * Updates the appropriate `custom-container` with its updates from the server.
-   *
-   * @param {!Document} doc
-   * @param {string} inClientDomLiveListId
-   */
-  updateCustomContainer_(doc, inClientDomLiveListId) {
-    userAssert(inClientDomLiveListId in this.liveLists_,
-        'custom-container#%s found but did not exist on original page load.',
-        inClientDomLiveListId);
-
-    const inClientDomLiveList = this.liveLists_[inClientDomLiveListId];
-    const containerId = inClientDomLiveList.element
-        .getAttribute('custom-container');
-    const serverContainer = doc.getElementById(containerId);
-
-    return inClientDomLiveList.update(serverContainer);
   }
 
   /**
