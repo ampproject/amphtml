@@ -145,7 +145,7 @@
     "mocha": "6.1.4",
     "morgan": "1.9.1",
     "multer": "1.4.1",
-    "nodemon": "1.18.11",
+    "nodemon": "1.19.0",
     "opn": "5.5.0",
     "path": "0.12.7",
     "plugin-error": "1.0.1",
