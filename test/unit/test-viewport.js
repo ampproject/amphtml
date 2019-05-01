@@ -211,26 +211,26 @@ describes.fakeWin('Viewport', {}, env => {
     describe('experiments', () => {
 
       afterEach(() => {
-        toggleExperiment(windowApi, 'inabox-preserve-height-auto', false);
-      });
-
-      it('should NOT set ' +
-        '.i-amphtml-inabox-preserve-height-auto ' +
-        'without and experiment', () => {
-        ampdoc.win.parent = {};
-        new Viewport(ampdoc, binding, viewer);
-        expect(root).to.not.have.class(
-            'i-amphtml-inabox-preserve-height-auto'
-        );
+        toggleExperiment(windowApi, 'inabox-remove-height-auto', false);
       });
 
       it('should set ' +
         '.i-amphtml-inabox-preserve-height-auto ' +
-        'with the experiment', () => {
-        toggleExperiment(windowApi, 'inabox-preserve-height-auto', true);
+        'without an experiment', () => {
         ampdoc.win.parent = {};
         new Viewport(ampdoc, binding, viewer);
         expect(root).to.have.class(
+            'i-amphtml-inabox-preserve-height-auto'
+        );
+      });
+
+      it('should NOT set ' +
+        '.i-amphtml-inabox-preserve-height-auto ' +
+        'with the experiment', () => {
+        toggleExperiment(windowApi, 'inabox-remove-height-auto', true);
+        ampdoc.win.parent = {};
+        new Viewport(ampdoc, binding, viewer);
+        expect(root).to.not.have.class(
             'i-amphtml-inabox-preserve-height-auto'
         );
       });

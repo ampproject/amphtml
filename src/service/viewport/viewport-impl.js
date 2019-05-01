@@ -211,7 +211,9 @@ export class Viewport {
     }
 
     // Doc Level CSS Experiments
-    if (isExperimentOn(this.ampdoc.win, 'inabox-preserve-height-auto')) {
+    if (!isExperimentOn(this.ampdoc.win, 'inabox-remove-height-auto')) {
+      // This is a double negative, to allow going from 0 -> 100
+      // When deploying the experiment
       globalDocElement.classList.add('i-amphtml-inabox-preserve-height-auto');
     }
 
