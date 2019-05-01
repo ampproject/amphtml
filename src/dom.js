@@ -866,11 +866,11 @@ export function domOrderComparator(element1, element2) {
   }
 
   const pos = element1.compareDocumentPosition(element2);
-  const preceedingOrContains =
+  const precedingOrContains =
     Node.DOCUMENT_POSITION_PRECEDING | Node.DOCUMENT_POSITION_CONTAINS;
 
-  // if fe2 is preceeding or contains fe1 then, fe1 is after fe2
-  if (pos & preceedingOrContains) {
+  // if fe2 is preceding or contains fe1 then, fe1 is after fe2
+  if (pos & precedingOrContains) {
     return 1;
   }
 
