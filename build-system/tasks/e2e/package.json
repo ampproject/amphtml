@@ -7,7 +7,7 @@
     "@babel/register": "7.4.4",
     "babel-regenerator-runtime": "6.5.0",
     "chromedriver": "74.0.0",
-    "puppeteer": "1.14.0",
+    "puppeteer": "1.15.0",
     "selenium-webdriver": "4.0.0-alpha.1"
   }
 }
