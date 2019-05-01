@@ -490,6 +490,22 @@ class SeleniumWebDriverController {
   }
 
   /**
+   * @param {!ElementHandle<!WebElement>} handle
+   * @param {!ScrollToOptionsDef=} opt_scrollToOptions
+   * @return {!Promise}
+   * @override
+   */
+  async scrollTo(handle, opt_scrollToOptions) {
+    const webElement = handle.getElement();
+    const scrollTo = (element, opt_scrollToOptions) => {
+      element./*OK*/scrollTo(opt_scrollToOptions);
+    };
+
+    return await this.driver.executeScript(
+      scrollTo, webElement, opt_scrollToOptions);
+  }
+
+  /**
    * @param {string} path
    * @return {!Promise<string>} An encoded string representing the image data
    * @override
