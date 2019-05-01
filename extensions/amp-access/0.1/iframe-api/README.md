@@ -99,7 +99,7 @@ The `connect` method should perform two main tasks:
 1. Ensure that the parent document is the right document by checking the origin.
 2. Initialize the iframe.
 
-The `protocol` argument in the connect method wil lbe one of
+The `protocol` argument in the connect method will be one of
 `amp-access` or `amp-subscriptions`.
 
 The `config` argument in the `connect` method will contain the original document config with `iframeVars` replace with the map of resolved AMP variables. See [Access URL Variables](../../amp-access.md#access-url-variables) for more details. For instance, for the example above the `config` value could look like this:
