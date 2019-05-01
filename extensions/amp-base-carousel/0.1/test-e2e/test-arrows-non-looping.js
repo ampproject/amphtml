@@ -20,7 +20,7 @@ import {
 } from './helpers';
 
 /** The total number of slides in the carousel */
-const SLIDE_COUNT = 7;
+const SLIDE_COUNT = 4;
 const pageWidth = 600;
 const pageHeight = 600;
 
@@ -58,7 +58,9 @@ describes.endtoend('AMP carousel arrows when non-looping', {
   });
 
   it('should hide the next arrow when going to the end', async() => {
-    // click to the end instead of using controller.scrollBy()
+    // TODO(estherkim): fix controller.scrollBy(); click to the end for now
+    // const el = await getScrollingElement(controller);
+    // await controller.scrollBy(el, {left: SLIDE_COUNT * pageWidth});
     let clicks = 0;
     while (clicks < SLIDE_COUNT) {
       await controller.click(nextArrow);
