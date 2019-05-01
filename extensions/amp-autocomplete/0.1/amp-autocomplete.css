@@ -63,10 +63,10 @@ amp-autocomplete > input {
   border-radius: 0px 0px 4px 4px; /* default-ui-border-radius */
 }
 
-.i-amphtml-autocomplete-item:hover {
+.i-amphtml-autocomplete-item:hover:not([disabled]) {
   background-color: rgba(0,0,0,.15); /* default-ui-light-gray */
 }
 
-.i-amphtml-autocomplete-item-active {
+.i-amphtml-autocomplete-item-active:not([disabled]) {
   background-color: rgba(0,0,0,.15); /* default-ui-light-gray */
 }

@@ -12,11 +12,13 @@
   <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
   <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
   <style amp-custom>
+    body {
+        padding: 15px;
+    }
     .custom-population {
         padding-top: 4px;
         font: 8pt 'Courier New', Courier, monospace;
     }
-
     input[name=favoriteState] {
       width: 2em;
     }
@@ -569,6 +571,44 @@
                 <div>Here are the results for the search: {{term}}</div>
             </template>
         </div>
+    </form>
+
+    <h2>'Disable' attribute</h2>
+    <form method="post" action-xhr="/form/echo-json/post" target="_blank">
+      <amp-autocomplete filter="substring" min-characters="0" [src]="manualFilterData" >
+        <input type="text" on="input-debounced:AMP.setState({ manualFilterData: event.value.length == 0 ? 
+          initialInventory : { 'items' : [ 'apple', 'orange', 'banana' ]} })">
+          <amp-state id="initialInventory">
+              <script type="application/json">
+                { "items" : [ { "value" : "Recommended Fruit", 
+                                "sectionHeader": "true" },
+                              { "value" : "apple",
+                                "trending" : "true" },
+                              { "value" : "orange",
+                                "trending" : "true" },
+                              { "value" : "banana",
+                                "trending" : "true" } ] }
+              </script>
+          </amp-state>
+        <template type="amp-mustache">
+            {{#sectionHeader}}
+              <div disabled>
+                <b>{{value}}</b>
+              </div>
+            {{/sectionHeader}}
+            {{#trending}}
+              <div data-value="{{value}}">
+                ✨ {{value}} 
+              </div>
+            {{/trending}}
+            {{^value}}
+              <div data-value="{{.}}">
+                {{.}}
+              </div>
+            {{/value}}
+        </template> 
+      </amp-autocomplete>
+      <input name="submit-button" type="submit" value="Submit">
     </form>
 </body>
 </html>

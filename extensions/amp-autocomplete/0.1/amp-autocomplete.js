@@ -181,8 +181,9 @@ export class AmpAutocomplete extends AMP.BaseElement {
       this.templates_.renderTemplate(this.templateElement_,
           /** @type {!JsonObject} */({})).then(
           renderedEl => {
-            userAssert(renderedEl.hasAttribute('data-value'),
-                `${TAG} requires the "data-value" attribute on <template>.`);
+            userAssert(renderedEl.hasAttribute('data-value') ||
+              renderedEl.hasAttribute('disabled'),
+            `${TAG} requires a "data-value" or "disabled" attribute.`);
           });
     }
 
@@ -648,7 +649,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
    * @private
    */
   selectItem_(element) {
-    if (element === null) {
+    if (element === null || element.hasAttribute('disabled')) {
       return;
     }
     this.inputElement_.value = this.userInput_ =
@@ -685,6 +686,16 @@ export class AmpAutocomplete extends AMP.BaseElement {
     const index = keyUpWhenNoneActive ? delta : this.activeIndex_ + delta;
     const activeIndex = mod(index, this.container_.children.length);
     const newActiveElement = this.container_.children[activeIndex];
+
+    // Mark the next element as active if the current is 'disabled'
+    if (newActiveElement.hasAttribute('disabled')) {
+      if (this.container_.children.length === 1) {
+        return;
+      }
+      const newDelta = delta < 0 ? delta - 1 : delta + 1;
+      return this.updateActiveItem_(newDelta);
+    }
+
     this.inputElement_.value = newActiveElement.getAttribute('data-value');
 
     // Element visibility logic
