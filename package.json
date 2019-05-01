@@ -44,7 +44,7 @@
     "@babel/helper-plugin-test-runner": "7.1.0",
     "@babel/plugin-proposal-class-properties": "7.4.4",
     "@babel/preset-env": "7.4.4",
-    "@octokit/rest": "16.25.0",
+    "@octokit/rest": "16.25.1",
     "acorn-globals": "4.3.1",
     "amphtml-validator": "1.0.23",
     "ansi-colors": "3.2.4",
