@@ -45,7 +45,7 @@
     "@babel/plugin-proposal-class-properties": "7.4.4",
     "@babel/preset-env": "7.4.4",
     "@octokit/rest": "16.25.1",
-    "acorn-globals": "4.3.1",
+    "acorn-globals": "4.3.2",
     "amphtml-validator": "1.0.23",
     "ansi-colors": "3.2.4",
     "ast-replace": "1.1.3",
