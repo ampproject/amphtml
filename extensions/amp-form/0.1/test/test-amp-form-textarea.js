@@ -18,6 +18,7 @@ import * as eventHelper from '../../../../src/event-helper';
 import {
   AmpFormTextarea,
   getHasOverflow,
+  handleInitialOverflowElements,
   maybeResizeTextarea,
 } from '../amp-form-textarea';
 import {CSS} from '../../../../build/amp-form-0.1.css';
@@ -37,9 +38,18 @@ describes.realWin('amp-form textarea[autoexpand]', {
     sandbox = env.sandbox;
   });
 
-  describe('AmpFormTextarea', () => {
+  describe('handleInitialOverflowElements', () => {
     it('should remove autoexpand on elements with initial overflow', () => {
+      const textarea = doc.createElement('textarea');
+      textarea.setAttribute('autoexpand', '');
+      textarea.setAttribute('rows', '1');
+      textarea.setAttribute('cols', '80');
+      textarea.innerHTML = 'big text'.repeat(30);
+      doc.body.appendChild(textarea);
 
+      return handleInitialOverflowElements([textarea]).then(() => {
+        expect(textarea).to.not.have.attribute('autoexpand');
+      });
     });
   });
 
