@@ -16,13 +16,11 @@
 
 import {
   getNextArrow,
-  getNextArrowSlot,
-  getPrevArrowSlot,
-  getScrollingElement,
+  getPrevArrow,
 } from './helpers';
 
 /** The total number of slides in the carousel */
-const SLIDE_COUNT = 7;
+const SLIDE_COUNT = 4;
 const pageWidth = 600;
 const pageHeight = 600;
 
@@ -34,9 +32,8 @@ describes.endtoend('AMP carousel arrows when non-looping', {
   environments: ['single', 'viewer-demo'],
 }, async env => {
   let controller;
+  let prevArrow;
   let nextArrow;
-  let prevArrowSlot;
-  let nextArrowSlot;
 
   function css(handle, name) {
     return controller.getElementCssValue(handle, name);
@@ -45,27 +42,32 @@ describes.endtoend('AMP carousel arrows when non-looping', {
   beforeEach(async() => {
     controller = env.controller;
 
-    prevArrowSlot = await getPrevArrowSlot(controller);
-    nextArrowSlot = await getNextArrowSlot(controller);
+    prevArrow = await getPrevArrow(controller);
     nextArrow = await getNextArrow(controller);
   });
 
   it('should have the arrows in the correct initial state', async() => {
-    await expect(css(prevArrowSlot, 'opacity')).to.equal('0');
-    await expect(css(nextArrowSlot, 'opacity')).to.equal('1');
+    await expect(css(prevArrow, 'opacity')).to.equal('0');
+    await expect(css(nextArrow, 'opacity')).to.equal('1');
   });
 
   it('should show the prev arrow when going to the first slide', async() => {
     await controller.click(nextArrow);
-    await expect(css(prevArrowSlot, 'opacity')).to.equal('1');
-    await expect(css(nextArrowSlot, 'opacity')).to.equal('1');
+    await expect(css(prevArrow, 'opacity')).to.equal('1');
+    await expect(css(nextArrow, 'opacity')).to.equal('1');
   });
 
   it('should hide the next arrow when going to the end', async() => {
-    const el = await getScrollingElement(controller);
-    await controller.scrollBy(el, {left: SLIDE_COUNT * pageWidth});
+    // TODO(estherkim): fix controller.scrollBy(); click to the end for now
+    // const el = await getScrollingElement(controller);
+    // await controller.scrollBy(el, {left: SLIDE_COUNT * pageWidth});
+    let clicks = 0;
+    while (clicks < SLIDE_COUNT) {
+      await controller.click(nextArrow);
+      clicks++;
+    }
 
-    await expect(css(prevArrowSlot, 'opacity')).to.equal('1');
-    await expect(css(nextArrowSlot, 'opacity')).to.equal('0');
+    await expect(css(prevArrow, 'opacity')).to.equal('1');
+    await expect(css(nextArrow, 'opacity')).to.equal('0');
   });
 });
