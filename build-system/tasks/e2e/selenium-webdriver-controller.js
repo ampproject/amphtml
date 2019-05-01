@@ -502,7 +502,7 @@ class SeleniumWebDriverController {
     };
 
     return await this.driver.executeScript(
-      scrollTo, webElement, opt_scrollToOptions);
+        scrollTo, webElement, opt_scrollToOptions);
   }
 
   /**
