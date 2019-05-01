@@ -95,7 +95,7 @@
     "fuse.js": "3.4.4",
     "globs-to-files": "1.0.0",
     "google-closure-compiler": "20190215.0.2",
-    "gulp": "3.9.1",
+    "gulp": "4.0.1",
     "gulp-ava": "1.0.0",
     "gulp-eslint": "5.0.0",
     "gulp-eslint-if-fixed": "1.0.0",
