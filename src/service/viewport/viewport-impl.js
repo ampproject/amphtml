@@ -210,6 +210,11 @@ export class Viewport {
       globalDocElement.classList.add('i-amphtml-webview');
     }
 
+    // Doc Level CSS Experiments
+    if (isExperimentOn(this.ampdoc.win, 'inabox-preserve-height-auto')) {
+      globalDocElement.classList.add('i-amphtml-inabox-preserve-height-auto');
+    }
+
     // To avoid browser restore scroll position when traverse history
     if (isIframed(win) && ('scrollRestoration' in win.history)) {
       win.history.scrollRestoration = 'manual';

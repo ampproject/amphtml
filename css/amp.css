@@ -26,8 +26,8 @@
 html {
   overflow-x: hidden !important;
 }
-html,
-html body {
+html:not([amp4ads]),
+html:not([amp4ads]) body {
   height: auto !important;
 }
 
