@@ -99,11 +99,13 @@ The `connect` method should perform two main tasks:
 1. Ensure that the parent document is the right document by checking the origin.
 2. Initialize the iframe.
 
+The `protocol` argument in the connect method wil lbe one of
+`amp-access` or `amp-subscriptions`.
+
 The `config` argument in the `connect` method will contain the original document config with `iframeVars` replace with the map of resolved AMP variables. See [Access URL Variables](../../amp-access.md#access-url-variables) for more details. For instance, for the example above the `config` value could look like this:
 
 ```
 {
-  "pageProtocol": "amp-iframe",
   "type": "iframe",
   "iframeSrc": "https://example.org/access-controller-iframe",
   "iframeVars": {
@@ -121,7 +123,6 @@ to `amp-subscriptions` and a `pageConfig` object is included.
 
 ```
 {
-  "pageProtocol": "amp-iframe",
   "type": "iframe",
   "pageConfig": {
     "productId": "...",
@@ -132,7 +133,7 @@ to `amp-subscriptions` and a `pageConfig` object is included.
 ```
 
 The `publicationId` and `productId` are extracted from the
-parent document strucuted data.  
+parent document [structured data](../../../amp-subscriptions/amp-subscriptions.md#json-ld-markup).  
 
 
 ## Authorize method
@@ -142,7 +143,7 @@ The `authorize` method checks whether the user should be able to access this doc
 Strong timeout and one-behind semantics are observed for authorization call. If the `authorize()` method does not return within a 3s timeout, the previously returned authorization response is used. If no previous response is available or it's too old, the `defaultResponse` value from the configuration is used. However, even in case of timeout, the iframe authorization will continue until fully complete and will be made available for the next authorization attempt.
 
 In the case of `amp-subscriptions` the authorization response must
-conform to the `local` service authorization struture.
+conform to the `local` service [authorization response struture](../../../amp-subscriptions/amp-subscriptions.md#authorization-endpoint-and-entitlements).
 
 
 ## Pingback method
