@@ -2,9 +2,9 @@
   "root": true,
   "parser": "babel-eslint",
   "plugins": [
+    "amphtml-internal",
     "chai-expect",
-    "eslint-plugin-amphtml-internal",
-    "eslint-plugin-google-camelcase",
+    "google-camelcase",
     "jsdoc",
     "notice",
     "sort-imports-es6-autofix",
@@ -139,9 +139,9 @@
     "notice/notice": [2,
       {
         "mustMatch": "Copyright 20\\d{2} The AMP HTML Authors\\.",
-        "templateFile": "build-system/artifacts/eslint-notice-license-template.txt",
+        "templateFile": "LICENSE-TEMPLATE.txt",
         "messages": {
-          "whenFailedToMatch": "Mising or incorrect license header. Run `gulp lint --fix` to add automatically."
+          "whenFailedToMatch": "Missing or incorrect license header"
         }
       }
     ],
