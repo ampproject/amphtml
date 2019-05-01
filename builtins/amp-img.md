@@ -111,13 +111,19 @@ Same as `srcset` attribute on the `img` tag. For browsers that do not support `s
 
 **sizes (optional)**
 
-For the `<img>` tag in `HTML`, the `sizes` attribute is used in conjunction with the `srcset` attribute and specifies the intended display size of the image as corresponding to a media condition. It will influence the intrinsic display size of the underlying `<img>`. If provided, the `sizes` attribute given to `<amp-img>` is propagated to the underlying `<img>` tag. However, `sizes` in AMP has the additional effect of setting inline `width` on the `<amp-img>` in AMP according to the matched media query. If the `srcset` attribute is provided, `<amp-img>` will autogenerate a `sizes` attribute for the underlying `<img>` when none is specified.
+This attribute is optional for `<amp-img>`. If the `srcset` attribute is provided, `<amp-img>` will autogenerate a `sizes` attribute for the underlying `<img>` when none is specified. If the `srcset` attribute is not provided, `sizes` does nothing. If you do wish to set the `sizes` attribute on `<amp-img>`, it will be propagated to the underlying `<img>` tag with the following side-effects:
 
-Per our [layouts documentation](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout?format=websites#what-if-the-layout-attribute-isn%E2%80%99t-specified?), the `sizes` attribute is sometimes used to infer layout `responsive` if a layout isn't explicitly specified.
+1. `sizes` in AMP has the additional effect of setting inline `width` on the `<amp-img>` in AMP according to the matched media query.
+2. Per our [layouts documentation](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout?format=websites#what-if-the-layout-attribute-isn%E2%80%99t-specified?), the `sizes` attribute is sometimes used to infer layout `responsive` if a layout isn't explicitly specified.
+
 
 {% call callout('Read on', type='read') %}
-See [Responsive images with srcset, sizes & heights](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/art_direction) for usage of `sizes` and `srcset`.
+For the `<img>` tag in `HTML`, the `sizes` attribute is used in conjunction with the `srcset` attribute and specifies the intended display size of the image as corresponding to a media condition. It will influence the intrinsic display size of the underlying `<img>` based on [browser behavior](https://gist.github.com/cathyxz/f17d12c07d60bcef52591e64e5e684fb).
 {% endcall %}
+
+
+See [Responsive images with srcset, sizes & heights](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/art_direction) for usage of `sizes` and `srcset`.
+
 
 **alt**
 
