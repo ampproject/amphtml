@@ -102,7 +102,7 @@ The `connect` method should perform two main tasks:
 The `protocol` argument in the connect method will be one of
 `amp-access` or `amp-subscriptions`.
 
-The `config` argument in the `connect` method will contain the original document config with `iframeVars` replace with the map of resolved AMP variables. See [Access URL Variables](../../amp-access.md#access-url-variables) for more details. For instance, for the example above the `config` value could look like this:
+The `config` argument in the `connect` method will contain the original document config with `iframeVars` replace with the map of resolved AMP variables. See [Access URL Variables](../../amp-access.md#access-url-variables) for more details. For instance, for the example, using `amp-access`, above the `config` value could look like this:
 
 ```
 {
@@ -118,8 +118,10 @@ The `config` argument in the `connect` method will contain the original document
 }
 ```
 
-When used with `amp-subscriptions` the `pageProtocol` is set
+When used with `amp-subscriptions` the `protocol` is set
 to `amp-subscriptions` and a `pageConfig` object is included.
+
+Example:
 
 ```
 {
