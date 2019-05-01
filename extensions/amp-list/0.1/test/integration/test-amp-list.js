@@ -80,7 +80,7 @@ describe('amp-list (integration)', function() {
     extensions: ['amp-list', 'amp-mustache:0.2'],
   }, basicTests);
 
-  describes.integration('basic (mustache-0.1)', {
+  describes.integration('basic (mustache-0.1) script template', {
     body: scriptTemplateBody,
     extensions: ['amp-list', 'amp-mustache:0.1'],
   }, basicTests);
