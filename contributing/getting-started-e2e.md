@@ -99,7 +99,7 @@ If you are new to Git it may seem surprising that there are three different repo
 
 Note that each of these repositories has a complete copy of the entire amphtml codebase.  If your local repository is on your computer and you lose your internet connection you'll still be able to make changes to any file in your local repository.  Part of the workflow for Git that we'll go through is how you keep these three repositories in sync.
 
-One thing that might put your mind at ease:  if you aren't in a [role](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#roles) that lets you make changes to the amphtml repository directly any changes you may will only affect you. So go ahead and try out different Git commands without worrying you're going to break things for other people!
+One thing that might put your mind at ease:  if you aren't in a [role](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#roles) that lets you make changes to the amphtml repository directly any changes you make will only affect you. So go ahead and try out different Git commands without worrying you're going to break things for other people!
 
 ## Creating your GitHub fork and your local repository
 To create your fork on GitHub and your local copy of that fork:
