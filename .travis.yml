@@ -64,7 +64,7 @@ jobs:
       script:
         - node build-system/pr-check/dist-tests.js
     - stage: test
-      name: "Visual Diff Tests"
+      name: "[NON-BLOCKING] Visual Diff Tests"
       script:
         - node build-system/pr-check/visual-diff-tests.js
     - stage: test
@@ -78,17 +78,17 @@ jobs:
       after_script:
         - build-system/sauce_connect/stop_sauce_connect.sh
     - stage: test
-      name: "End to End Tests"
+      name: "[NON-BLOCKING] End to End Tests"
       script:
         - node build-system/pr-check/e2e-tests.js
   fast_finish: true
 
-  # TODO(ampproject/wg-infra): remove when remote tests stabilize
+  # TODO(ampproject/wg-infra): remove when these tests stabilize
   allow_failures:
     - script:
-      - node build-system/pr-check/remote-tests.js
-    - script:
       - node build-system/pr-check/e2e-tests.js
+    - script:
+      - node build-system/pr-check/visual-diff-tests.js
 cache:
   directories:
     - node_modules
