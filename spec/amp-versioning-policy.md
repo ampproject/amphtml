@@ -49,11 +49,9 @@ The following are **not** considered breaking changes:
 
 In rare cases, the AMP project may decide that an existing feature or API must be removed. Such breaking changes must follow the AMP deprecations process prior to removal. Deprecations must be publicly discussed and provide significant user benefit that justifies additional work for page developers.
 
-Process:
-- Create [INTENT TO IMPLEMENT](https://github.com/ampproject/amphtml/labels/INTENT%20TO%20IMPLEMENT) issue.
-- Allow for at least 2 weeks of open discussion.
-- Wait for 3 approvals from core committers.
-- [Announce](#announcements) change on the mailing list.
+The process for deprecations follows the [process for significant changes](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#process-for-significant-changes) (including the use of Intent-to-implement and Intent-to-ship issues and need for approval from 3 members of the [Approvers Working Group](https://github.com/ampproject/wg-approvers)).  In addition:
+- After the I2I is created, at least 2 weeks of open discussion should be allowed before proceeding with implementation.
+- [Announce](#announcements) the change on the mailing list and on [Slack](https://amphtml.slack.com).
 - Start warning for pages that might break via the developer console.
 - Give developers 6 weeks to apply changes.
 - Apply new behavior to old content in a way that minimizes breakage.
@@ -69,6 +67,6 @@ The binaries of old versions must not be removed except in the case of security 
 
 ## Announcements
 
-Changes that may break existing pages (including those where the number of broken pages is assumed to be very small) should be announced via the [amphtml-announce@googlegroups.com](https://groups.google.com/forum/#!forum/amphtml-announce) mailing list. Sometimes such changes are not anticipated upfront in which case announcements should still be sent to let websites know.
+Changes that may break existing pages (including those where the number of broken pages is assumed to be very small) should be announced via the [amphtml-announce@googlegroups.com](https://groups.google.com/forum/#!forum/amphtml-announce) mailing list and on [Slack](https://amphtml.slack.com).
 
-Security fixes may in some cases only be announced after the change was rolled out.
+Fixes that address security or privacy concerns may in some cases only be announced after the change was rolled out.
