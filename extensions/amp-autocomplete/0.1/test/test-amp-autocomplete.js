@@ -642,4 +642,30 @@ describes.realWin('amp-autocomplete unit tests', {
           'i-amphtml-autocomplete-item-active');
     });
   });
+
+  it('should not select disabled items', () => {
+    const disabledItem = doc.createElement('div');
+    disabledItem.setAttribute('disabled', '');
+    expect(impl.selectItem_(disabledItem)).to.be.undefined;
+  });
+
+  it('should not return disabled items from getEnabledItems_()', () => {
+    impl.templateElement_ = doc.createElement('template');
+    const sourceData = ['apple', 'mango', 'pear'];
+    const renderedChildren = sourceData.map(item => {
+      const renderedChild = doc.createElement('div');
+      renderedChild.setAttribute('data-value', item);
+      return renderedChild;
+    });
+    renderedChildren[2].setAttribute('disabled', '');
+    sandbox.stub(impl.templates_, 'renderTemplateArray').returns(
+        Promise.resolve(renderedChildren));
+
+    return impl.renderResults_(sourceData, impl.container_).then(() => {
+      expect(impl.container_.children.length).to.equal(3);
+      expect(impl.getEnabledItems_().length).to.equal(2);
+      expect(impl.container_.children[2].hasAttribute(
+        'aria-disabled')).to.be.true;
+    });
+  });
 });
