@@ -40,18 +40,15 @@ const {
   parseExtensionFlags,
 } = require('./extension-helpers');
 const {cleanupBuildDir} = require('../compile/compile');
+const {closureNailgunPort, startNailgunServer, stopNailgunServer} = require('./nailgun');
 const {compileCss, cssEntryPoints} = require('./css');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
 const {createModuleCompatibleES5Bundle} = require('./create-module-compatible-es5-bundle');
 const {isTravisBuild} = require('../travis');
-const {startNailgunServer, stopNailgunServer} = require('./nailgun');
 
 const {green, cyan} = colors;
 const argv = require('minimist')(process.argv.slice(2));
 const maybeUpdatePackages = isTravisBuild() ? [] : ['update-packages'];
-
-// Also used in closure-compile.js
-const NAILGUN_PORT = '2114';
 
 // Minified targets to which AMP_CONFIG must be written.
 const minifiedRuntimeTarget = 'dist/v0.js';
@@ -86,7 +83,7 @@ function dist() {
   }
   return compileCss(/* watch */ undefined, /* opt_compileAll */ true)
       .then(async() => {
-        await startNailgunServer(NAILGUN_PORT, /* detached */ false);
+        await startNailgunServer(closureNailgunPort, /* detached */ false);
       })
       .then(() => {
         return Promise.all([
@@ -114,7 +111,7 @@ function dist() {
           console.log('\n');
         }
       }).then(async() => {
-        await stopNailgunServer(NAILGUN_PORT);
+        await stopNailgunServer(closureNailgunPort);
       }).then(() => {
         return copyAliasExtensions();
       }).then(() => {
