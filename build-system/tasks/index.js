@@ -17,14 +17,18 @@
 
 require('./ava');
 require('./bundle-size');
+require('./build');
 require('./changelog');
 require('./check-links');
+require('./check-types');
 require('./clean');
 require('./compile-expr');
 require('./create-golden-css');
+require('./css');
 require('./csvify-size');
 require('./dep-check');
 require('./dev-dashboard-tests');
+require('./dist');
 require('./e2e');
 require('./extension-generator');
 require('./firebase');
