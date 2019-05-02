@@ -371,7 +371,7 @@ describe('BindExpression', () => {
       // Functions should not conflict with scope variables.
       expect(evaluate('abs(-2) + abs', {abs: 2})).to.equal(4);
       expect(evaluate('sqrt(4) + sqrt', {sqrt: 2})).to.equal(4);
-      expect(evaluate('log(20.2) + log', {log: 0.9943173955928408})).to.equal(4);
+      expect(evaluate('log(20) + log', {log: 1})).to.equal(3.995732273553991);
 
       // Don't support non-whitelisted functions.
       expect(() => {
