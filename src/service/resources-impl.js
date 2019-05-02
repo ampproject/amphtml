@@ -1224,11 +1224,14 @@ export class Resources {
       this.ampdoc.signals().signal(READY_SCAN_SIGNAL_);
     }
 
-    if (this.maybeChangeHeight_) {
+    const isViewerReqDocHeight = this.viewer_.isRequestDocHeight();
+    if (this.maybeChangeHeight_ || isViewerReqDocHeight) {
       this.maybeChangeHeight_ = false;
       this.vsync_.measure(() => {
         const measuredContentHeight = this.viewport_.getContentHeight();
-        if (measuredContentHeight != this.contentHeight_) {
+        if (measuredContentHeight != this.contentHeight_
+            || isViewerReqDocHeight) {
+          this.viewer_.clearRequestDocHeight();
           this.viewer_.sendMessage('documentHeight',
               dict({'height': measuredContentHeight}), /* cancelUnsent */true);
           this.contentHeight_ = measuredContentHeight;

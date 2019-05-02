@@ -124,6 +124,9 @@ export class Viewer {
     /** @private {boolean} */
     this.overtakeHistory_ = false;
 
+    /** @private {boolean} */
+    this.requestDocHeight_ = false;
+
     /** @private {!VisibilityState} */
     this.visibilityState_ = VisibilityState.VISIBLE;
 
@@ -558,9 +561,30 @@ export class Viewer {
     return this.visibilityState_;
   }
 
+  /**
+   * Sets the document height request to false.
+   */
+  clearRequestDocHeight() {
+    this.requestDocHeight_ = false;
+  }
+
+  /**
+   * If true, in resource pass, a document height msg is sent to the
+   * viewer.
+   * @return {boolean}
+   */
+  isRequestDocHeight() {
+    return this.requestDocHeight_;
+  }
+
   /** @private */
   recheckVisibilityState_() {
     this.setVisibilityState_(this.viewerVisibilityState_);
+  }
+
+  /** @private */
+  requestDocumentHeight_() {
+    this.requestDocHeight_ = true;
   }
 
   /**
@@ -883,6 +907,10 @@ export class Viewer {
           /** @type {!JsonObject|undefined} */ (data));
       return Promise.resolve();
     }
+    if (eventType == 'documentHeight') {
+      this.requestDocumentHeight_();
+      return Promise.resolve();
+    }
     const observable = this.messageObservables_[eventType];
     if (observable) {
       observable.fire(data);
@@ -1130,7 +1158,6 @@ function getChannelError(opt_reason) {
 export function setViewerVisibilityState(viewer, state) {
   viewer.setVisibilityState_(state);
 }
-
 
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc

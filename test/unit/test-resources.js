@@ -1727,6 +1727,29 @@ describes.realWin('Resources contentHeight', {
     expect(viewportContentHeightChangedStub).to.be.calledOnce;
   });
 
+  describe('Viewer request doc height', () => {
+    beforeEach(() => {
+      sandbox.stub(resources.viewer_, 'isRequestDocHeight').returns(true);
+    });
+
+    it('should send contentHeight to viewer if requested by viewer', () => {
+      resources.doPass();
+      expect(resources.maybeChangeHeight_).to.equal(false);
+      expect(viewerSendMessageStub).to.be.calledOnce;
+      expect(viewerSendMessageStub.lastCall.args[0]).to.equal('documentHeight');
+    });
+
+    it('should send contentHeight to viewer if requested and regardless of no '
+        + 'content height changes', () => {
+      const contentHeight = resources.viewport_.getContentHeight();
+      resources.maybeChangeHeight_ = true;
+      resources.doPass();
+      expect(resources.maybeChangeHeight_).to.equal(false);
+      expect(resources.contentHeight_).to.equal(contentHeight);
+      expect(viewerSendMessageStub).to.be.calledOnce;
+      expect(viewerSendMessageStub.lastCall.args[0]).to.equal('documentHeight');
+    });
+  });
 });
 
 describe('Resources changeSize', () => {

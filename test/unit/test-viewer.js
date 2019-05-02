@@ -667,6 +667,25 @@ describe('Viewer', () => {
     });
   });
 
+  describe('Document height request', () => {
+    beforeEach(() => {
+      windowApi.parent = {};
+      viewer = new Viewer(ampdoc);
+    });
+
+    it('should set viewer doc height request', () => {
+      viewer.receiveMessage('documentHeight', {});
+      expect(viewer.isRequestDocHeight()).to.be.true;
+    });
+
+    it('should clear viewer height request', () => {
+      viewer.receiveMessage('documentHeight', {});
+      expect(viewer.isRequestDocHeight()).to.be.true;
+      viewer.clearRequestDocHeight();
+      expect(viewer.isRequestDocHeight()).to.be.false;
+    });
+  });
+
   describe('Messaging embedded', () => {
     beforeEach(() => {
       windowApi.parent = {};
