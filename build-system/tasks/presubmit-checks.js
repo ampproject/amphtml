@@ -116,11 +116,13 @@ const forbiddenTerms = {
       'build-system/pr-check/validator-tests.js',
       'build-system/pr-check/visual-diff-tests.js',
       'build-system/pr-check/yarn-checks.js',
+      'build-system/tasks/check-types.js',
+      'build-system/tasks/dist.js',
+      'build-system/tasks/helpers.js',
       'validator/nodejs/index.js', // NodeJs only.
       'validator/engine/parse-css.js',
       'validator/engine/validator-in-browser.js',
       'validator/engine/validator.js',
-      'gulpfile.js',
     ],
     checkInTestFolder: true,
   },
@@ -586,6 +588,9 @@ const forbiddenTerms = {
       'build-system/tasks/prepend-global/index.js',
       'build-system/tasks/prepend-global/test.js',
       'build-system/tasks/visual-diff/index.js',
+      'build-system/tasks/build.js',
+      'build-system/tasks/dist.js',
+      'build-system/tasks/helpers.js',
       'dist.3p/current/integration.js',
       'src/config.js',
       'src/experiments.js',
@@ -593,7 +598,6 @@ const forbiddenTerms = {
       'src/web-worker/web-worker.js', // Web worker custom error reporter.
       'tools/experiments/experiments.js',
       'build-system/amp4test.js',
-      'gulpfile.js',
     ],
   },
   'data:image/svg(?!\\+xml;charset=utf-8,)[^,]*,': {
@@ -901,7 +905,7 @@ const forbiddenTermsSrcInclusive = {
       'build-system/shadow-viewer.js',
       'build-system/tasks/check-links.js',
       'build-system/tasks/extension-generator/index.js',
-      'gulpfile.js',
+      'build-system/tasks/helpers.js',
     ],
   },
   '\\<\\<\\<\\<\\<\\<': {
