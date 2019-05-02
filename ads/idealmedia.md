@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# Lentainform
+# Idealmedia
 
 ## Example
 
@@ -22,7 +22,7 @@ limitations under the License.
 
 ```html
   <amp-embed width="100" height="283"
-       type="lentainform"
+       type="idealmedia"
        data-publisher="amp-demo"
        data-widget="12345"
        data-container="demo-container">

@@ -1127,7 +1127,7 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
-  'lentainform': {
+  'idealmedia': {
     renderStartImplemented: true,
   },
 
