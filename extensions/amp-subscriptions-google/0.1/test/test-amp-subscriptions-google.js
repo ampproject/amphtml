@@ -43,6 +43,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
   let platform;
   let serviceAdapter;
   let serviceAdapterMock;
+  let getEncryptedDocumentKeyStub;
   let analyticsMock;
   let viewer;
   let xhr;
@@ -50,6 +51,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
   let methods;
   let ackStub;
   let element;
+  let entitlementResponse;
 
   beforeEach(() => {
     ampdoc = env.ampdoc;
@@ -66,6 +68,14 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     const analytics = new SubscriptionAnalytics(ampdoc.getRootNode());
     sandbox.stub(serviceAdapter, 'getAnalytics').callsFake(() => analytics);
     analyticsMock = sandbox.mock(analytics);
+    getEncryptedDocumentKeyStub = sandbox.stub(
+        serviceAdapter, 'getEncryptedDocumentKey')
+        .callsFake(() => {return null;});
+    entitlementResponse = {
+      source: 'google',
+      products: ['example.org:basic'],
+      subscriptionToken: 'tok1',
+    };
     callbacks = {
       loginRequest:
           sandbox.stub(ConfiguredRuntime.prototype, 'setOnLoginRequest'),
@@ -83,6 +93,9 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     };
     methods = {
       reset: sandbox.stub(ConfiguredRuntime.prototype, 'reset'),
+      showContributionOptions:
+          sandbox.stub(ConfiguredRuntime.prototype,
+              'showContributionOptions'),
       showOffers: sandbox.stub(ConfiguredRuntime.prototype, 'showOffers'),
       showAbbrvOffer: sandbox.stub(
           ConfiguredRuntime.prototype, 'showAbbrvOffer'),
@@ -121,13 +134,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
       expect(init).to.deep.equal({credentials: 'include'});
       return Promise.resolve({
         json: () => {
-          return Promise.resolve({
-            entitlements: {
-              source: 'google',
-              products: ['example.org:basic'],
-              subscriptionToken: 'tok1',
-            },
-          });
+          return Promise.resolve({entitlements: entitlementResponse});
         },
       });
     });
@@ -160,13 +167,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     sandbox.stub(xhr, 'fetchJson').callsFake(() => {
       return Promise.resolve({
         json: () => {
-          return Promise.resolve({
-            entitlements: {
-              source: 'google',
-              products: ['example.org:basic'],
-              subscriptionToken: 'tok1',
-            },
-          });
+          return Promise.resolve({entitlements: entitlementResponse});
         },
       });
     });
@@ -416,6 +417,12 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     expect(executeStub).to.be.calledWith({list: 'amp', isClosable: true});
   });
 
+  it('should show contributions if contribute action is delegated', () => {
+    const executeStub = platform.runtime_.showContributionOptions;
+    platform.executeAction('contribute');
+    expect(executeStub).to.be.calledWith({list: 'amp', isClosable: true});
+  });
+
   it('should link accounts if login action is delegated', () => {
     const executeStub = platform.runtime_.linkAccount;
     platform.executeAction('login');
@@ -424,17 +431,10 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
 
   describe('getEntitlements', () => {
     it('should convert granted entitlements to internal shape', () => {
-      const entitlementResponse = {
-        source: 'google',
-        products: ['example.org:basic'],
-        subscriptionToken: 'tok1',
-      };
       sandbox.stub(xhr, 'fetchJson').callsFake(() => {
         return Promise.resolve({
           json: () => {
-            return Promise.resolve({
-              entitlements: entitlementResponse,
-            });
+            return Promise.resolve({entitlements: entitlementResponse});
           },
         });
       });
@@ -468,7 +468,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
 
   describe('isReadyToPay', () => {
     // #TODO(jpettitt) remove fake entitlements when swj.js
-    // isRadyToPay is available
+    // isReadyToPay is available
     /**
      * return a fake entitlements object
      * @param {boolean} isReadyToPay
@@ -483,17 +483,10 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     }
 
     it('should treat missing isReadyToPay as false', () => {
-      const entitlementResponse = {
-        source: 'google',
-        products: ['example.org:basic'],
-        subscriptionToken: 'tok1',
-      };
       sandbox.stub(xhr, 'fetchJson').callsFake(() => {
         return Promise.resolve({
           json: () => {
-            return Promise.resolve({
-              entitlements: entitlementResponse,
-            });
+            return Promise.resolve({entitlements: entitlementResponse});
           },
         });
       });
@@ -505,11 +498,6 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     });
 
     it('should handle isReadyToPay true', () => {
-      const entitlementResponse = {
-        source: 'google',
-        products: ['example.org:basic'],
-        subscriptionToken: 'tok1',
-      };
       sandbox.stub(xhr, 'fetchJson').callsFake(() => {
         return Promise.resolve({
           json: () => {
@@ -532,11 +520,6 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     });
 
     it('should handle isReadyToPay false', () => {
-      const entitlementResponse = {
-        source: 'google',
-        products: ['example.org:basic'],
-        subscriptionToken: 'tok1',
-      };
       sandbox.stub(xhr, 'fetchJson').callsFake(() => {
         return Promise.resolve({
           json: () => {
@@ -555,6 +538,48 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
         expect(platform
             .getSupportedScoreFactor(SubscriptionsScoreFactor.IS_READY_TO_PAY))
             .to.equal(0);
+      });
+    });
+
+    it('should call getEncryptedDocumentKey with google.com', () => {
+      sandbox.stub(xhr, 'fetchJson').callsFake(() => {
+        return Promise.resolve({
+          json: () => {
+            return Promise.resolve({entitlements: {}});
+          },
+        });
+      });
+      return platform.getEntitlements().then(() => {
+        expect(getEncryptedDocumentKeyStub).to.be.calledWith('google.com');
+      });
+    });
+
+    it('should not add encryptedDocumentKey parameter to url', () => {
+      const fetchStub = sandbox.stub(xhr, 'fetchJson').callsFake(() => {
+        return Promise.resolve({
+          json: () => {
+            return Promise.resolve({entitlements: {}});
+          },
+        });
+      });
+      return platform.getEntitlements().then(() => {
+        return expect(fetchStub).to.be.calledWith('https://news.google.com/swg/_/api/v1/publication/example.org/entitlements');
+      });
+    });
+
+    it('should add encryptedDocumentKey parameter to url', () => {
+      const fetchStub = sandbox.stub(xhr, 'fetchJson').callsFake(() => {
+        return Promise.resolve({
+          json: () => {
+            return Promise.resolve({entitlements: {}});
+          },
+        });
+      });
+
+      getEncryptedDocumentKeyStub.callsFake(() => {
+        return 'encryptedDocumentKey';});
+      return platform.getEntitlements().then(() => {
+        return expect(fetchStub).to.be.calledWith('https://news.google.com/swg/_/api/v1/publication/example.org/entitlements?crypt=encryptedDocumentKey');
       });
     });
   });

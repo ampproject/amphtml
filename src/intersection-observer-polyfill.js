@@ -239,9 +239,9 @@ export class IntersectionObserverPolyfill {
 
     /**
      * Mutation observer to fire off on visibility changes
-     * @private {?MutationObserver}
+     * @private {?function()}
      */
-    this.mutationObserver_ = null;
+    this.hiddenObserverUnlistener_ = null;
 
     /** @private {Pass} */
     this.mutationPass_ = null;
@@ -293,19 +293,15 @@ export class IntersectionObserverPolyfill {
     // TODO (@torch2424): Allow this to observe elements,
     // from multiple documents.
     const ampdoc = Services.ampdoc(element);
-    if (ampdoc.win.MutationObserver && !this.mutationObserver_) {
+    if (ampdoc.win.MutationObserver && !this.hiddenObserverUnlistener_) {
       this.mutationPass_ = new Pass(
           ampdoc.win,
           this.handleMutationObserverPass_.bind(this, element)
       );
-      this.mutationObserver_ = new ampdoc.win.MutationObserver(
+      const hiddenObserver = Services.hiddenObserverForDoc(element);
+      this.hiddenObserverUnlistener_ = hiddenObserver.add(
           this.handleMutationObserverNotification_.bind(this)
       );
-      this.mutationObserver_.observe(ampdoc.win.document, {
-        attributes: true,
-        attributeFilter: ['hidden'],
-        subtree: true,
-      });
     }
 
     // push new observed element
@@ -445,10 +441,10 @@ export class IntersectionObserverPolyfill {
    * @private
    */
   disconnectMutationObserver_() {
-    if (this.mutationObserver_) {
-      this.mutationObserver_.disconnect();
+    if (this.hiddenObserverUnlistener_) {
+      this.hiddenObserverUnlistener_();
     }
-    this.mutationObserver_ = null;
+    this.hiddenObserverUnlistener_ = null;
     if (this.mutationPass_) {
       this.mutationPass_.cancel();
     }

@@ -22,8 +22,6 @@
  * Notice! As much as possible, keep this module dependency-free.
  */
 
-import {Deferred} from '../../../../src/utils/promise';
-
 const SENTINEL = '__AMP__';
 
 
@@ -152,10 +150,10 @@ export class Messenger {
    */
   sendCommandRsvp(cmd, opt_payload) {
     const rsvpId = String(++this.requestId_);
-    const deferred = new Deferred();
-    const {promise, resolve: resolver} = deferred;
-
-
+    let resolver = null;
+    const promise = new Promise(resolve => {
+      resolver = resolve;
+    });
     this.waiting_[rsvpId] = {
       promise,
       resolver,
