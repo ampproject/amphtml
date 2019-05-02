@@ -70,6 +70,18 @@ if (ampImg) {
   });
 }
 
+const ampPixel = document.getElementById('amp-pixel');
+if (ampPixel) {
+  ampPixel.addEventListener('click', () => {
+    incrementMutationCount();
+
+    const el = document.createElement('amp-pixel');
+    el.setAttribute('layout', 'nodisplay');
+    el.setAttribute('src', 'https://foo.com/tracker/foo?id=CLIENT_ID(bar)');
+    document.body.appendChild(el);
+  });
+}
+
 // <script> should be sanitized.
 const script = document.getElementById('script');
 if (script) {

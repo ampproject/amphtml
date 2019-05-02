@@ -15,6 +15,7 @@
  */
 
 import {CSS} from '../../../build/amp-script-0.1.css';
+import {CommonSignals} from '../../../src/common-signals';
 import {
   DomPurifyDef, createPurifier, getAllowedTags, validateAttributeChange,
 } from '../../../src/purifier';
@@ -32,6 +33,7 @@ import {
 } from '../../../src/service/origin-experiments-impl';
 import {isExperimentOn} from '../../../src/experiments';
 import {rewriteAttributeValue} from '../../../src/url-rewrite';
+import {startsWith} from '../../../src/string';
 import {
   upgrade,
 } from '@ampproject/worker-dom/dist/unminified.index.safe.mjs.patched';
@@ -66,6 +68,11 @@ export class AmpScript extends AMP.BaseElement {
 
     /** @private {?UserActivationTracker} */
     this.userActivation_ = null;
+
+    /** @private {?ShadowRoot|?Element} */
+    this.shadow_ = null;
+
+    this.iframe_ = null;
   }
 
   /** @override */
@@ -74,12 +81,15 @@ export class AmpScript extends AMP.BaseElement {
         isLayoutSizeDefined(layout);
   }
 
-  /** @return {!Promise<boolean>} */
-  isExperimentOn_() {
+  /**
+   * @param {*} ampdoc
+   * @return {!Promise<boolean>}
+   */
+  isExperimentOn_(ampdoc) {
     if (isExperimentOn(this.win, 'amp-script')) {
       return Promise.resolve(true);
     }
-    installOriginExperimentsForDoc(this.getAmpDoc());
+    installOriginExperimentsForDoc(ampdoc);
     return originExperimentsForDoc(this.element)
         .getExperiments()
         .then(trials => trials && trials.includes(TAG));
@@ -87,12 +97,78 @@ export class AmpScript extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    return this.isExperimentOn_().then(on => {
+    const ampdoc = this.getAmpDoc();
+    return this.isExperimentOn_(ampdoc).then(on => {
       if (!on) {
         // Return rejected Promise to buildCallback() to disable component.
         throw user().createError(TAG, `Experiment "${TAG}" is not enabled.`);
       }
+      const shadowed = isExperimentOn(this.win, 'amp-script-in-shadow');
+      if (shadowed) {
+        return this.createShadow_(ampdoc).then(shadow => {
+          this.shadow_ = shadow;
+        });
+      }
     });
+  }
+
+  /**
+   * @param {*} ampdoc
+   * @return {!Promise}
+   * @private
+   */
+  createShadow_(ampdoc) {
+    const head = ampdoc.getHeadNode();
+    const styles = head.querySelectorAll(
+        'style[amp-runtime], style[amp-custom]');
+
+    if (false) { //'attachShadow' in this.element) {
+      const shadow = this.element.attachShadow({mode: 'open'});
+      // Copy runtime & custom styles to shadow root.
+      // TODO(choumx): Include extension CSS (and avoid race condition).
+      styles.forEach(style => {
+        shadow.appendChild(style.cloneNode(/* deep */ true));
+      });
+      // Move hydratable light DOM to shadow DOM.
+      while (this.element.firstChild) {
+        shadow.appendChild(this.element.firstChild);
+      }
+      return Promise.resolve(shadow);
+    } else {
+      // TODO: Use friendly-iframe-embed.js.
+      const iframeReady = new Promise(resolve => {
+        this.iframe_ = this.win.document.createElement('iframe');
+        let styleHtml = '<style>body { margin: 0; }</style>';
+        styles.forEach(style => {
+          styleHtml += style.outerHTML;
+        });
+        // Copy this element's children into the iframe. They'll be rendered
+        // directly on top of existing children to avoid visual jank.
+        this.iframe_.srcdoc = `
+          <head>${styleHtml}</head>
+          <body>${this.element.innerHTML}</body>`;
+        this.iframe_.onload = () => {
+          // Size the iframe to match the element's initial height.
+          if (this.getLayout() === Layout.CONTAINER) {
+            // TODO: What if layout box is not ready yet?
+            this.iframe_.height = this.element.getLayoutBox().height;
+          }
+          resolve(this.iframe_.contentWindow.document.body);
+        };
+        this.element.appendChild(this.iframe_);
+      });
+      // When the iframe is ready AND this element is laid out, remove the
+      // original children.
+      Promise.all([
+        iframeReady,
+        this.signals().whenSignal(CommonSignals.LOAD_START),
+      ]).then(() => {
+        while (this.element.firstChild !== this.iframe_) {
+          this.element.removeChild(this.element.firstChild);
+        }
+      });
+      return iframeReady;
+    }
   }
 
   /** @override */
@@ -141,7 +217,8 @@ export class AmpScript extends AMP.BaseElement {
       },
     };
 
-    upgrade(this.element, fetchPromise, workerConfig).then(workerDom => {
+    const root = this.shadow_ || this.element;
+    upgrade(root, fetchPromise, workerConfig).then(workerDom => {
       this.workerDom_ = workerDom;
     });
     return Promise.resolve();
@@ -180,8 +257,15 @@ export class AmpScript extends AMP.BaseElement {
           && this.getLayoutBox().height <= MAX_FREE_MUTATION_HEIGHT)
     );
 
-    if (allowMutation) {
-      this.vsync_.mutate(flush);
+    if (true) {
+      this.vsync_.mutate(() => {
+        flush();
+
+        if (this.iframe_ && this.getLayout() === Layout.CONTAINER) {
+          const {body} = this.iframe_.contentWindow.document;
+          this.iframe_.height = body.getBoundingClientRect().height;
+        }
+      });
       return;
     }
 

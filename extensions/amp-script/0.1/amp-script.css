@@ -21,3 +21,15 @@ amp-script {
 amp-script.i-amphtml-hydrated {
   opacity: 1;
 }
+
+amp-script > iframe {
+  border: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+}
+
+amp-script:not[layout=container] > iframe {
+  height: 100%;
+}
