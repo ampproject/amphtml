@@ -3,7 +3,7 @@ name: Intent-to-ship (I2S)
 about: Proposes launching a significant change/update to AMP that has already been
   implemented. https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md
 title: 'I2S: <your change/update>'
-labels: INTENT TO SHIP
+labels: ''
 assignees: ''
 
 ---
