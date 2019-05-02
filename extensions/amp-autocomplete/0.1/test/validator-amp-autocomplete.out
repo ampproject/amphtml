@@ -218,6 +218,24 @@ FAIL
 |        </template>
 |      </amp-autocomplete> 
 |
+|      <!-- Valid: amp-component with remote data and rich content template -->
+|      <amp-autocomplete src="https://data.com/articles.json?ref=CANONICAL_URL">
+|        <input type="text">
+|        <template type="amp-mustache" id="amp-template-default">
+|          {{#disabled}}
+|            <div disabled>
+|              <b>{{value}}</b>
+|            </div>
+|          {{/disabled}}
+|          {{^disabled}}
+|          <div class="city-item" data-value="{{value}}">
+|              <div>{{value}}</div>
+|              <div class="custom-population">Population: {{population}}</div>        
+|          </div>
+|          {{/disabled}}
+|        </template>
+|      </amp-autocomplete> 
+|
 |      <!-- Valid: amp-component with static data and template attr -->
 |      <amp-autocomplete template="my-template-id">
 |        <input type="text">
@@ -256,7 +274,7 @@ FAIL
 |      <!-- Invalid: width is mistyped -->
 |      <amp-autocomplete widht=100>
 >>     ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:256:4 The attribute 'widht' may not appear in tag 'amp-autocomplete with src attribute'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [DISALLOWED_HTML]
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:274:4 The attribute 'widht' may not appear in tag 'amp-autocomplete with src attribute'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [DISALLOWED_HTML]
 |          <input type="text">
 |          <script type="application/json"> {} </script>
 |      </amp-autocomplete>  
@@ -264,7 +282,7 @@ amp-autocomplete/0.1/test/validator-amp-autocomplete.html:256:4 The attribute 'w
 |      <!-- Invalid: responsive layout is not supported -->
 |      <amp-autocomplete layout="responsive">
 >>     ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:262:4 The specified layout 'RESPONSIVE' is not supported by tag 'amp-autocomplete with src attribute'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_LAYOUT_PROBLEM]
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:280:4 The specified layout 'RESPONSIVE' is not supported by tag 'amp-autocomplete with src attribute'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_LAYOUT_PROBLEM]
 |          <input type="text">
 |          <script type="application/json"> {} </script>
 |      </amp-autocomplete>
@@ -272,7 +290,7 @@ amp-autocomplete/0.1/test/validator-amp-autocomplete.html:262:4 The specified la
 |      <!-- Invalid: amp-autocomplete with filter=custom and no filter-expr attribute -->
 |      <amp-autocomplete filter="custom">
 >>     ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:268:4 The attribute 'filter-expr' in tag 'amp-autocomplete with src attribute' is missing or incorrect, but required by attribute 'filter'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [DISALLOWED_HTML]
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:286:4 The attribute 'filter-expr' in tag 'amp-autocomplete with src attribute' is missing or incorrect, but required by attribute 'filter'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [DISALLOWED_HTML]
 |        <input type="text">
 |        <script type="application/json"> {} </script>
 |      </amp-autocomplete>
@@ -280,14 +298,14 @@ amp-autocomplete/0.1/test/validator-amp-autocomplete.html:268:4 The attribute 'f
 |      <!-- Invalid: amp-autocomplete with filter=custom and no filter-expr attribute -->
 |      <amp-autocomplete filter="custom" src="https://data.com/articles.json?ref=CANONICAL_URL">
 >>     ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:274:4 The attribute 'filter-expr' in tag 'amp-autocomplete with src attribute' is missing or incorrect, but required by attribute 'filter'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [DISALLOWED_HTML]
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:292:4 The attribute 'filter-expr' in tag 'amp-autocomplete with src attribute' is missing or incorrect, but required by attribute 'filter'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [DISALLOWED_HTML]
 |        <input type="text">
 |      </amp-autocomplete>
 |
 |      <!-- Invalid: amp-autocomplete with unexpected filter -->
 |      <amp-autocomplete filter="random">
 >>     ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:279:4 The attribute 'filter' in tag 'amp-autocomplete with src attribute' is set to the invalid value 'random'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [DISALLOWED_HTML]
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:297:4 The attribute 'filter' in tag 'amp-autocomplete with src attribute' is set to the invalid value 'random'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [DISALLOWED_HTML]
 |        <input type="text">
 |        <script type="application/json"> {} </script>
 |      </amp-autocomplete>
@@ -295,7 +313,7 @@ amp-autocomplete/0.1/test/validator-amp-autocomplete.html:279:4 The attribute 'f
 |      <!-- Invalid: amp-autocomplete with unexpected filter and src attr -->
 |      <amp-autocomplete filter="random" src="https://data.com/articles.json?ref=CANONICAL_URL">
 >>     ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:285:4 The attribute 'filter' in tag 'amp-autocomplete with src attribute' is set to the invalid value 'random'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [DISALLOWED_HTML]
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:303:4 The attribute 'filter' in tag 'amp-autocomplete with src attribute' is set to the invalid value 'random'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [DISALLOWED_HTML]
 |        <input type="text">
 |      </amp-autocomplete>
 |    </form>
@@ -303,7 +321,7 @@ amp-autocomplete/0.1/test/validator-amp-autocomplete.html:285:4 The attribute 'f
 |    <!-- Invalid: amp-autocomplete with static data without FORM ancestor -->
 |    <amp-autocomplete>
 >>   ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:291:2 The tag 'amp-autocomplete with src attribute' may only appear as a descendant of tag 'form'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_TAG_PROBLEM]
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:309:2 The tag 'amp-autocomplete with src attribute' may only appear as a descendant of tag 'form'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_TAG_PROBLEM]
 |      <input type="text">
 |      <script type="application/json"> {} </script>
 |    </amp-autocomplete>
@@ -311,7 +329,7 @@ amp-autocomplete/0.1/test/validator-amp-autocomplete.html:291:2 The tag 'amp-aut
 |    <!-- Invalid: amp-autocomplete with remote data without FORM ancestor -->
 |    <amp-autocomplete src="https://data.com/articles.json?ref=CANONICAL_URL">
 >>   ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:297:2 The tag 'amp-autocomplete with src attribute' may only appear as a descendant of tag 'form'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_TAG_PROBLEM]
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:315:2 The tag 'amp-autocomplete with src attribute' may only appear as a descendant of tag 'form'. (see https://www.ampproject.org/docs/reference/components/amp-autocomplete) [AMP_TAG_PROBLEM]
 |      <input type="text">
 |    </amp-autocomplete>
 |
