@@ -266,7 +266,7 @@ import {zen} from '../ads/zen';
 import {zergnet} from '../ads/zergnet';
 import {zucks} from '../ads/zucks';
 import {speakol} from '../ads/speakol';
-
+import {mgid} from '../ads/mgid';
 
 /**
  * Whether the embed type may be used with amp-embed tag.
@@ -513,6 +513,7 @@ register('zen', zen);
 register('zergnet', zergnet);
 register('zucks', zucks);
 register('speakol', speakol);
+register('mgid', mgid);
 
 // For backward compat, we always allow these types without the iframe
 // opting in.
