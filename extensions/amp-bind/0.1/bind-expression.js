@@ -160,6 +160,8 @@ function generateFunctionWhitelist() {
     'abs': Math.abs,
     'ceil': Math.ceil,
     'floor': Math.floor,
+    'sqrt': Math.sqrt,
+    'log': Math.log,
     'max': Math.max,
     'min': Math.min,
     'random': Math.random,
