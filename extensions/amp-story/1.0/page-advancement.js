@@ -522,18 +522,39 @@ class ManualAdvancement extends AdvancementConfig {
   }
 
   /**
-   * Checks if click was inside of an edge of the screen.
+   * Checks if click was inside of one of the horizontal edges of the screen.
    * @param {!Event} event
    * @param {!ClientRect} pageRect
    * @return {boolean}
    * @private
    */
-  isInScreenEdge_(event, pageRect) {
+  isInScreenSideEdge_(event, pageRect) {
     const edgeOfScreen = pageRect.width * SCREEN_EDGE_PERCENT;
 
     return (
       event.clientX <= edgeOfScreen ||
       event.clientX >= pageRect.width - edgeOfScreen
+    );
+  }
+
+  /**
+   * Checks if click should be handled by the embedded component logic rather
+   * than by navigation.
+   * @param {!Event} event
+   * @param {!ClientRect} pageRect
+   * @return {boolean}
+   * @private
+   */
+  isHandledByEmbeddedComponent_(event, pageRect) {
+    const target = dev().assertElement(event.target);
+    const inExpandedMode =
+      this.storeService_.get(StateProperty.INTERACTIVE_COMPONENT_STATE)
+        .state === EmbeddedComponentState.EXPANDED;
+
+    return (
+      inExpandedMode ||
+      (matches(target, INTERACTIVE_EMBEDDED_COMPONENTS_SELECTORS) &&
+        this.canShowTooltip_(event, pageRect))
     );
   }
 
@@ -547,12 +568,7 @@ class ManualAdvancement extends AdvancementConfig {
     const target = dev().assertElement(event.target);
     const pageRect = this.element_./*OK*/ getBoundingClientRect();
 
-    if (
-      this.canShowTooltip_(event, pageRect) &&
-      matches(target, INTERACTIVE_EMBEDDED_COMPONENTS_SELECTORS)
-    ) {
-      // Clicked element triggers a tooltip, so we dispatch the corresponding
-      // event and skip navigation.
+    if (this.isHandledByEmbeddedComponent_(event, pageRect)) {
       event.preventDefault();
       const embedComponent = /** @type {InteractiveComponentDef} */ (this.storeService_.get(
         StateProperty.INTERACTIVE_COMPONENT_STATE
