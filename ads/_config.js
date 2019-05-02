@@ -1127,4 +1127,8 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  'lentainform': {
+    renderStartImplemented: true,
+  },
+
 };
