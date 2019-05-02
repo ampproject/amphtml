@@ -457,9 +457,9 @@ amproject/amphtml / master … <username>/amphtml / <branch name>
 
 Below this are text boxes where you can provide a title and description for your pull request.  Please follow the guidelines in the template for providing a good title and description.  Make sure to refer to any GitHub issues that you are fixing (by typing "Issue #" and selecting it from the autocomplete) so that people can see which issue you are fixing and people watching the issue will see that there's a PR for it.
 
-You will need to find a [Reviewer and Owner](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#code-review-and-approval) to review your code and approve it.  When you find someone to revie your code, cc them on the Pull Request (by adding a line "/cc @username", e.g. "/cc @mrjoro").
+You will need to find a [Reviewer and Owner](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#code-review-and-approval) to review your code and approve it.  When you find someone to review your code, cc them on the Pull Request (by adding a line "/cc @username", e.g. "/cc @mrjoro").
 
-When you're new to contributing to AMP it can be tricky to figure out who should review your code.  If you aren't sure who to ask to review your code, the steps for [finding a guide](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#find-a-guide) can also work for finding a reviewer for your change.
+When you're new to contributing to AMP it can be tricky to figure out who should review your code.  In general if you're been working with someone in the community on your change, they can likely review your code or know who can review it.  If you aren't sure who to ask to review your code, the steps for [finding a guide](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#find-a-guide) can also work for finding a reviewer for your change.
 
 When you're done click "Create pull request."  This will bring you to your Pull Request page where you can track progress, add comments, etc.
 
