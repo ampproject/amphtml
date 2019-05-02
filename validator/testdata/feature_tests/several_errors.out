@@ -23,12 +23,12 @@ FAIL
 |  <head>
 |    <meta charset='pick-a-key'>
 >>   ^~~~~~~~~
-feature_tests/several_errors.html:23:2 The attribute 'charset' in tag 'meta charset=utf-8' is set to the invalid value 'pick-a-key'. (see https://www.ampproject.org/docs/reference/spec#required-markup) [DISALLOWED_HTML]
+feature_tests/several_errors.html:23:2 The attribute 'charset' in tag 'meta charset=utf-8' is set to the invalid value 'pick-a-key'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup) [DISALLOWED_HTML]
 |    <link rel='canonical' href='./regular-html-version.html'>
 |    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
 |    <script type='javascript'>
 >>   ^~~~~~~~~
-feature_tests/several_errors.html:26:2 Custom JavaScript is not allowed. (see https://www.ampproject.org/docs/reference/spec#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
+feature_tests/several_errors.html:26:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |    // Let's go crazy. Uhm, no, hahaha.
 |    </script>
 |  </head>
@@ -55,8 +55,8 @@ feature_tests/several_errors.html:40:2 The attribute 'height' in tag 'amp-ad' is
 |  </body>
 |  </html>
 >>       ^~~~~~~~~
-feature_tests/several_errors.html:43:6 The mandatory tag 'meta name=viewport' is missing or incorrect. (see https://www.ampproject.org/docs/reference/spec#required-markup) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+feature_tests/several_errors.html:43:6 The mandatory tag 'meta name=viewport' is missing or incorrect. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 >>       ^~~~~~~~~
-feature_tests/several_errors.html:43:6 The mandatory tag 'amphtml engine v0.js script' is missing or incorrect. (see https://www.ampproject.org/docs/reference/spec#required-markup) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+feature_tests/several_errors.html:43:6 The mandatory tag 'amphtml engine v0.js script' is missing or incorrect. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 >>       ^~~~~~~~~
 feature_tests/several_errors.html:43:6 The tag 'amp-ad extension .js script' is missing or incorrect, but required by 'amp-ad'. This will soon be an error. (see https://amp.dev/documentation/components/amp-ad) [DEPRECATION]

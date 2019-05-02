@@ -26,7 +26,7 @@ FAIL
 |    <meta name="viewport" content="width=device-width">
 |    <script async nonce src="https://cdn.ampproject.org/v0.js"></script>
 >>   ^~~~~~~~~
-transformed_feature_tests/nonce_attribute_error.html:26:2 The attribute 'nonce' may not appear in tag 'amphtml engine v0.js script'. (see https://www.ampproject.org/docs/reference/spec#required-markup) [DISALLOWED_HTML]
+transformed_feature_tests/nonce_attribute_error.html:26:2 The attribute 'nonce' may not appear in tag 'amphtml engine v0.js script'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup) [DISALLOWED_HTML]
 |    <script async custom-element="amp-bind" nonce src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
 >>   ^~~~~~~~~
 transformed_feature_tests/nonce_attribute_error.html:27:2 The attribute 'nonce' may not appear in tag 'amp-bind extension .js script'. (see https://amp.dev/documentation/components/amp-bind) [DISALLOWED_HTML]

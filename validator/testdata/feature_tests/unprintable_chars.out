@@ -1,9 +1,9 @@
 FAIL
 |  ﻿﻿﻿<!--
 >> ^~~~~~~~~
-feature_tests/unprintable_chars.html:1:0 The mandatory attribute '⚡' is missing in tag 'html'. (see https://www.ampproject.org/docs/reference/spec#required-markup) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+feature_tests/unprintable_chars.html:1:0 The mandatory attribute '⚡' is missing in tag 'html'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 >> ^~~~~~~~~
-feature_tests/unprintable_chars.html:1:0 The parent tag of tag 'html' is '$root', but it can only be '!doctype'. (see https://www.ampproject.org/docs/reference/spec#required-markup) [DISALLOWED_HTML]
+feature_tests/unprintable_chars.html:1:0 The parent tag of tag 'html' is '$root', but it can only be '!doctype'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup) [DISALLOWED_HTML]
 >> ^~~~~~~~~
 feature_tests/unprintable_chars.html:1:0 Tag or text which is only allowed inside the body section found outside of the body section. [DISALLOWED_HTML]
 >> ^~~~~~~~~
@@ -40,28 +40,28 @@ feature_tests/unprintable_chars.html:1:0 The tag 'BODY' appears more than once i
 |  <head>
 |    <meta charset="utf-8">
 >>   ^~~~~~~~~
-feature_tests/unprintable_chars.html:32:2 The parent tag of tag 'meta charset=utf-8' is 'body', but it can only be 'head'. (see https://www.ampproject.org/docs/reference/spec#required-markup) [DISALLOWED_HTML]
+feature_tests/unprintable_chars.html:32:2 The parent tag of tag 'meta charset=utf-8' is 'body', but it can only be 'head'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup) [DISALLOWED_HTML]
 |    <link rel="canonical" href="./regular-html-version.html">
 >>   ^~~~~~~~~
-feature_tests/unprintable_chars.html:33:2 The parent tag of tag 'link rel=canonical' is 'body', but it can only be 'head'. (see https://www.ampproject.org/docs/reference/spec#required-markup) [DISALLOWED_HTML]
+feature_tests/unprintable_chars.html:33:2 The parent tag of tag 'link rel=canonical' is 'body', but it can only be 'head'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup) [DISALLOWED_HTML]
 |    <meta name="viewport" content="width=device-width,minimum-scale=1">
 >>   ^~~~~~~~~
-feature_tests/unprintable_chars.html:34:2 The parent tag of tag 'meta name=viewport' is 'body', but it can only be 'head'. (see https://www.ampproject.org/docs/reference/spec#required-markup) [DISALLOWED_HTML]
+feature_tests/unprintable_chars.html:34:2 The parent tag of tag 'meta name=viewport' is 'body', but it can only be 'head'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup) [DISALLOWED_HTML]
 |    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
 >>   ^~~~~~~~~
-feature_tests/unprintable_chars.html:35:2 The parent tag of tag 'style amp-custom' is 'body', but it can only be 'head'. (see https://www.ampproject.org/docs/reference/spec#stylesheets) [DISALLOWED_HTML]
+feature_tests/unprintable_chars.html:35:2 The parent tag of tag 'style amp-custom' is 'body', but it can only be 'head'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#stylesheets) [DISALLOWED_HTML]
 >>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  ^~~~~~~~~
 feature_tests/unprintable_chars.html:35:641 The tag 'noscript > style[amp-boilerplate]' may only appear as a descendant of tag 'head'. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md) [DISALLOWED_HTML]
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
 >>   ^~~~~~~~~
-feature_tests/unprintable_chars.html:36:2 The parent tag of tag 'amphtml engine v0.js script' is 'body', but it can only be 'head'. (see https://www.ampproject.org/docs/reference/spec#required-markup) [CUSTOM_JAVASCRIPT_DISALLOWED]
+feature_tests/unprintable_chars.html:36:2 The parent tag of tag 'amphtml engine v0.js script' is 'body', but it can only be 'head'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |  </head>
 |  <body data-foo>
 |  Hello, world.
 |  </body>
 |  </html>
 >>       ^~~~~~~~~
-feature_tests/unprintable_chars.html:41:6 The mandatory tag 'html doctype' is missing or incorrect. (see https://www.ampproject.org/docs/reference/spec#required-markup) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+feature_tests/unprintable_chars.html:41:6 The mandatory tag 'html doctype' is missing or incorrect. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 >>       ^~~~~~~~~
 feature_tests/unprintable_chars.html:41:6 The mandatory tag 'head > style[amp-boilerplate]' is missing or incorrect. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 >>       ^~~~~~~~~

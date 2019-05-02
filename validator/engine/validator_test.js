@@ -407,7 +407,7 @@ describe('ValidatorCssLength', () => {
        'feature_tests/css_length.html:28:2 The author stylesheet ' +
        'specified in tag \'style amp-custom\' is too long - document ' +
        'contains 50001 bytes whereas the limit is 50000 bytes. ' +
-       '(see https://www.ampproject.org/docs/reference/spec' +
+       '(see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml' +
        '#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
     test.run();
   });
@@ -428,7 +428,7 @@ describe('ValidatorCssLength', () => {
        'feature_tests/css_length.html:28:2 The author stylesheet ' +
        'specified in tag \'style amp-custom\' is too long - document ' +
        'contains 50002 bytes whereas the limit is 50000 bytes. ' +
-       '(see https://www.ampproject.org/docs/reference/spec' +
+       '(see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml' +
        '#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
     test.run();
   });
@@ -461,7 +461,7 @@ describe('ValidatorCssLength', () => {
        'feature_tests/css_length.html:36:6 The author stylesheet ' +
        'specified in tag \'style amp-custom\' and the combined inline ' +
        'styles is too large - document contains 50001 bytes whereas the ' +
-       'limit is 50000 bytes. (see https://www.ampproject.org/docs/guides' +
+       'limit is 50000 bytes. (see https://amp.dev/documentation/guides-and-tutorials/' +
        '/author-develop/responsive/style_pages) ' +
        '[AUTHOR_STYLESHEET_PROBLEM]';
     test.run();
@@ -482,7 +482,7 @@ describe('ValidatorCssLength', () => {
        'feature_tests/css_length.html:5036:6 The author stylesheet ' +
        'specified in tag \'style amp-custom\' and the combined inline ' +
        'styles is too large - document contains 50014 bytes whereas the ' +
-       'limit is 50000 bytes. (see https://www.ampproject.org/docs/guides' +
+       'limit is 50000 bytes. (see https://amp.dev/documentation/guides-and-tutorials/' +
        '/author-develop/responsive/style_pages) ' +
        '[AUTHOR_STYLESHEET_PROBLEM]';
     test.run();
@@ -524,7 +524,7 @@ describe('ValidatorCssLengthWithUrls', () => {
         'feature_tests/css_length.html:28:2 The author stylesheet ' +
         'specified in tag \'style amp-custom\' is too long - document ' +
         'contains 50010 bytes whereas the limit is 50000 bytes. (see ' +
-        'https://www.ampproject.org/docs/reference/spec#maximum-size) ' +
+        'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#maximum-size) ' +
         '[AUTHOR_STYLESHEET_PROBLEM]';
     test.run();
   });
@@ -550,7 +550,7 @@ describe('ValidatorCssLengthWithUrls', () => {
         'feature_tests/css_length.html:28:2 The author stylesheet ' +
         'specified in tag \'style amp-custom\' is too long - document ' +
         'contains 50010 bytes whereas the limit is 50000 bytes. (see ' +
-        'https://www.ampproject.org/docs/reference/spec#maximum-size) ' +
+        'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#maximum-size) ' +
         '[AUTHOR_STYLESHEET_PROBLEM]';
     test.run();
   });
@@ -576,7 +576,7 @@ describe('ValidatorCssLengthWithUrls', () => {
         'feature_tests/css_length.html:28:2 The author stylesheet ' +
         'specified in tag \'style amp-custom\' is too long - document ' +
         'contains 50010 bytes whereas the limit is 50000 bytes. (see ' +
-        'https://www.ampproject.org/docs/reference/spec#maximum-size) ' +
+        'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#maximum-size) ' +
         '[AUTHOR_STYLESHEET_PROBLEM]';
     test.run();
   });
@@ -664,7 +664,7 @@ describe('ValidatorTransformedAmpCssLengthWithUrls', () => {
         'stylesheet specified in tag \'style amp-custom (transformed)\' ' +
         'is too long - document contains 50010 bytes whereas the limit ' +
         'is 50000 bytes. (see ' +
-        'https://www.ampproject.org/docs/reference/spec#maximum-size) ' +
+        'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#maximum-size) ' +
         '[AUTHOR_STYLESHEET_PROBLEM]';
     test.run();
   });

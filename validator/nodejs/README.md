@@ -9,7 +9,7 @@ https://github.com/ampproject/amphtml/tree/master/validator/nodejs.
 ## Command Line Tool
 
 The `amphtml-validator` command line tool is documented here:
-https://www.ampproject.org/docs/guides/validate.html#command-line-tool
+https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validate_amp#command-line-tool
 
 ## Node.js API
 
@@ -41,8 +41,8 @@ Now try running it:
 ```
 $ node demo.js
 FAIL
-line 1, col 0: The mandatory attribute '⚡' is missing in tag 'html ⚡ for top-level html'. (see https://www.ampproject.org/docs/reference/spec.html#required-markup)
-line 1, col 0: The parent tag of tag 'html ⚡ for top-level html' is '$root', but it can only be '!doctype'. (see https://www.ampproject.org/docs/reference/spec.html#required-markup)
+line 1, col 0: The mandatory attribute '⚡' is missing in tag 'html ⚡ for top-level html'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml.html#required-markup)
+line 1, col 0: The parent tag of tag 'html ⚡ for top-level html' is '$root', but it can only be '!doctype'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml.html#required-markup)
 ...
 ```
 As expected, this emits errors because the provided string in the example, `<html>Hello, world.</html>` is not a valid AMP HTML document.

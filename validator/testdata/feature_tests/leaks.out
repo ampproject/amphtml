@@ -24,13 +24,13 @@ FAIL
 |  -->
 |  <!doctype html SYSTEM "https://leaking.via/doctype">
 >> ^~~~~~~~~
-feature_tests/leaks.html:24:0 The attribute '"https://leaking.via/doctype"' may not appear in tag 'html doctype'. (see https://www.ampproject.org/docs/reference/spec#required-markup) [DISALLOWED_HTML]
+feature_tests/leaks.html:24:0 The attribute '"https://leaking.via/doctype"' may not appear in tag 'html doctype'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup) [DISALLOWED_HTML]
 >> ^~~~~~~~~
-feature_tests/leaks.html:24:0 The attribute 'system' may not appear in tag 'html doctype'. (see https://www.ampproject.org/docs/reference/spec#required-markup) [DISALLOWED_HTML]
+feature_tests/leaks.html:24:0 The attribute 'system' may not appear in tag 'html doctype'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup) [DISALLOWED_HTML]
 |
 |  <html ⚡ manifest="https://leaking.via/html-manifest">
 >> ^~~~~~~~~
-feature_tests/leaks.html:26:0 The attribute 'manifest' may not appear in tag 'html'. (see https://www.ampproject.org/docs/reference/spec#required-markup) [DISALLOWED_HTML]
+feature_tests/leaks.html:26:0 The attribute 'manifest' may not appear in tag 'html'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup) [DISALLOWED_HTML]
 |
 |
 |  <!-- AMP boilerplate which should not produce errors -->
@@ -80,16 +80,16 @@ feature_tests/leaks.html:57:0 The attribute 'http-equiv' may not appear in tag '
 |  -->
 |  <link rel="stylesheet" href="https://leaking.via/link-stylesheet" />
 >> ^~~~~~~~~
-feature_tests/leaks.html:62:0 The attribute 'href' in tag 'link rel=stylesheet for fonts' is set to the invalid value 'https://leaking.via/link-stylesheet'. (see https://www.ampproject.org/docs/reference/spec#custom-fonts) [AUTHOR_STYLESHEET_PROBLEM]
+feature_tests/leaks.html:62:0 The attribute 'href' in tag 'link rel=stylesheet for fonts' is set to the invalid value 'https://leaking.via/link-stylesheet'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#custom-fonts) [AUTHOR_STYLESHEET_PROBLEM]
 |  <link rel="alternate stylesheet" href="https://leaking.via/link-alternate-stylesheet" />
 >> ^~~~~~~~~
-feature_tests/leaks.html:63:0 The attribute 'rel' in tag 'link rel=' is set to the invalid value 'alternate stylesheet'. (see https://www.ampproject.org/docs/reference/spec#html-tags) [DISALLOWED_HTML]
+feature_tests/leaks.html:63:0 The attribute 'rel' in tag 'link rel=' is set to the invalid value 'alternate stylesheet'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags) [DISALLOWED_HTML]
 |  <link rel="import" href="https://leaking.via/link-import" />
 >> ^~~~~~~~~
-feature_tests/leaks.html:64:0 The attribute 'rel' in tag 'link rel=' is set to the invalid value 'import'. (see https://www.ampproject.org/docs/reference/spec#html-tags) [DISALLOWED_HTML]
+feature_tests/leaks.html:64:0 The attribute 'rel' in tag 'link rel=' is set to the invalid value 'import'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags) [DISALLOWED_HTML]
 |  <link rel="subresource" href="https://leaking.via/link-subresource">
 >> ^~~~~~~~~
-feature_tests/leaks.html:65:0 The attribute 'rel' in tag 'link rel=' is set to the invalid value 'subresource'. (see https://www.ampproject.org/docs/reference/spec#html-tags) [DISALLOWED_HTML]
+feature_tests/leaks.html:65:0 The attribute 'rel' in tag 'link rel=' is set to the invalid value 'subresource'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags) [DISALLOWED_HTML]
 |
 |  <!--
 |  %MSIE Imports
@@ -134,10 +134,10 @@ feature_tests/leaks.html:90:0 The tag 'img' may only appear as a descendant of t
 |
 |  <image src="https://leaking.via/image-src"></image>
 >> ^~~~~~~~~
-feature_tests/leaks.html:92:0 The tag 'image' may only appear as a descendant of tag 'svg'. (see https://www.ampproject.org/docs/reference/spec#svg) [DISALLOWED_HTML]
+feature_tests/leaks.html:92:0 The tag 'image' may only appear as a descendant of tag 'svg'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg) [DISALLOWED_HTML]
 |  <image href="https://leaking.via/image-href"></image>
 >> ^~~~~~~~~
-feature_tests/leaks.html:93:0 The tag 'image' may only appear as a descendant of tag 'svg'. (see https://www.ampproject.org/docs/reference/spec#svg) [DISALLOWED_HTML]
+feature_tests/leaks.html:93:0 The tag 'image' may only appear as a descendant of tag 'svg'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg) [DISALLOWED_HTML]
 |
 |  <picture>
 >> ^~~~~~~~~
@@ -258,16 +258,16 @@ feature_tests/leaks.html:145:4 The tag 'param' is disallowed. [DISALLOWED_HTML]
 |  -->
 |  <script src="https://leaking.via/script-src"></script>
 >> ^~~~~~~~~
-feature_tests/leaks.html:152:0 Custom JavaScript is not allowed. (see https://www.ampproject.org/docs/reference/spec#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
+feature_tests/leaks.html:152:0 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |  <svg><script href="https://leaking.via/svg-script-href"></script></svg>
 >>      ^~~~~~~~~
-feature_tests/leaks.html:153:5 Custom JavaScript is not allowed. (see https://www.ampproject.org/docs/reference/spec#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
+feature_tests/leaks.html:153:5 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |  <svg><script xlink:href="https://leaking.via/svg-script-xlink-href"></script></svg>
 >>      ^~~~~~~~~
-feature_tests/leaks.html:154:5 Custom JavaScript is not allowed. (see https://www.ampproject.org/docs/reference/spec#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
+feature_tests/leaks.html:154:5 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |  <script>
 >> ^~~~~~~~~
-feature_tests/leaks.html:155:0 Custom JavaScript is not allowed. (see https://www.ampproject.org/docs/reference/spec#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
+feature_tests/leaks.html:155:0 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |  //# sourceMappingURL=https://leaking.via/javascript-source-map
 |  </script>
 |
@@ -364,7 +364,7 @@ feature_tests/leaks.html:205:0 The attribute 'datasrc' may not appear in tag 'di
 |  -->
 |  <line xmlns="urn:schemas-microsoft-com:vml">
 >> ^~~~~~~~~
-feature_tests/leaks.html:210:0 The tag 'line' may only appear as a descendant of tag 'svg'. (see https://www.ampproject.org/docs/reference/spec#svg) [DISALLOWED_HTML]
+feature_tests/leaks.html:210:0 The tag 'line' may only appear as a descendant of tag 'svg'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg) [DISALLOWED_HTML]
 |      <fill style="behavior:url(#default#vml)" src="https://leaking.via/vml-line-fill-src" />
 >>     ^~~~~~~~~
 feature_tests/leaks.html:211:4 The tag 'fill' is disallowed. [DISALLOWED_HTML]

@@ -25,7 +25,7 @@ FAIL
 |    <meta charset="utf-8">
 |    <link rel="canonical" href="javascript://llamas">
 >>   ^~~~~~~~~
-feature_tests/urls.html:25:2 Invalid URL protocol 'javascript:' for attribute 'href' in tag 'link rel=canonical'. (see https://www.ampproject.org/docs/reference/spec#required-markup) [DISALLOWED_HTML]
+feature_tests/urls.html:25:2 Invalid URL protocol 'javascript:' for attribute 'href' in tag 'link rel=canonical'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup) [DISALLOWED_HTML]
 |    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">
 |    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
 |    <script src="https://cdn.ampproject.org/v0.js" async></script>
@@ -39,23 +39,23 @@ feature_tests/urls.html:25:2 Invalid URL protocol 'javascript:' for attribute 'h
 |    <a href="https://⚡">Valid URL</a>
 |    <a href="https://">Valid URL</a>
 >>   ^~~~~~~~~
-feature_tests/urls.html:37:2 Malformed URL 'https://' for attribute 'href' in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+feature_tests/urls.html:37:2 Malformed URL 'https://' for attribute 'href' in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#links) [DISALLOWED_HTML]
 |    <a href="HtTpS://Google.com/">Valid URL</a>
 |    <a href="javascript:alert('boo')">Invalid protocol</a>
 >>   ^~~~~~~~~
-feature_tests/urls.html:39:2 Invalid URL protocol 'javascript:' for attribute 'href' in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+feature_tests/urls.html:39:2 Invalid URL protocol 'javascript:' for attribute 'href' in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#links) [DISALLOWED_HTML]
 |    <a href="JavaScript:alert('boo')">Invalid protocol</a>
 >>   ^~~~~~~~~
-feature_tests/urls.html:40:2 Invalid URL protocol 'javascript:' for attribute 'href' in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+feature_tests/urls.html:40:2 Invalid URL protocol 'javascript:' for attribute 'href' in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#links) [DISALLOWED_HTML]
 |    <a href="javascript&colon;alert(1)">Invalid protocol</a>
 >>   ^~~~~~~~~
-feature_tests/urls.html:41:2 Invalid URL protocol 'javascript:' for attribute 'href' in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+feature_tests/urls.html:41:2 Invalid URL protocol 'javascript:' for attribute 'href' in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#links) [DISALLOWED_HTML]
 |    <a href="vbscript:bar">Invalid protocol</a>
 >>   ^~~~~~~~~
-feature_tests/urls.html:42:2 Invalid URL protocol 'vbscript:' for attribute 'href' in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+feature_tests/urls.html:42:2 Invalid URL protocol 'vbscript:' for attribute 'href' in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#links) [DISALLOWED_HTML]
 |    <a href="data:baz">Invalid protocol</a>
 >>   ^~~~~~~~~
-feature_tests/urls.html:43:2 Invalid URL protocol 'data:' for attribute 'href' in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+feature_tests/urls.html:43:2 Invalid URL protocol 'data:' for attribute 'href' in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#links) [DISALLOWED_HTML]
 |    <a href="ftp://google.com/">Valid protocol</a>
 |    <!-- invalid (javascript is not an allowed protocol: singluar src element) -->
 |    <amp-img srcset="javascript:alert(1)" layout="fill"></amp-img>
@@ -143,7 +143,7 @@ feature_tests/urls.html:83:2 Invalid URL protocol 'http:' for attribute 'src' in
 feature_tests/urls.html:84:2 Invalid URL protocol 'http:' for attribute 'src' in tag 'amp-video'. (see https://amp.dev/documentation/components/amp-video) [AMP_TAG_PROBLEM]
 |    <a href=" j a v a s c r i p t :alert(1)">Invalid protocol</a>
 >>   ^~~~~~~~~
-feature_tests/urls.html:85:2 Invalid URL protocol 'j a v a s c r i p t :' for attribute 'href' in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+feature_tests/urls.html:85:2 Invalid URL protocol 'j a v a s c r i p t :' for attribute 'href' in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#links) [DISALLOWED_HTML]
 |
 |    <!-- Valid ipv6 addresses -->
 |    <a href="https://[2001:0db8::85a3]/">Valid</a>
@@ -156,36 +156,36 @@ feature_tests/urls.html:85:2 Invalid URL protocol 'j a v a s c r i p t :' for at
 |    <!-- Invalid ipv6 addresses -->
 |    <a href="https://[2001:0db8:85a3]/">Invalid</a>
 >>   ^~~~~~~~~
-feature_tests/urls.html:96:2 Malformed URL 'https://[2001:0db8:85a3]/' for attribute 'href' in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+feature_tests/urls.html:96:2 Malformed URL 'https://[2001:0db8:85a3]/' for attribute 'href' in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#links) [DISALLOWED_HTML]
 |    <a href="https://[20012:0db8::85a3]/">Invalid</a>
 >>   ^~~~~~~~~
-feature_tests/urls.html:97:2 Malformed URL 'https://[20012:0db8::85a3]/' for attribute 'href' in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+feature_tests/urls.html:97:2 Malformed URL 'https://[20012:0db8::85a3]/' for attribute 'href' in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#links) [DISALLOWED_HTML]
 |    <a href="https://[200g:0db8:85a3]/">Invalid</a>
 >>   ^~~~~~~~~
-feature_tests/urls.html:98:2 Malformed URL 'https://[200g:0db8:85a3]/' for attribute 'href' in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+feature_tests/urls.html:98:2 Malformed URL 'https://[200g:0db8:85a3]/' for attribute 'href' in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#links) [DISALLOWED_HTML]
 |    <a href="https://[:::1]/">Invalid</a>
 >>   ^~~~~~~~~
-feature_tests/urls.html:99:2 Malformed URL 'https://[:::1]/' for attribute 'href' in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+feature_tests/urls.html:99:2 Malformed URL 'https://[:::1]/' for attribute 'href' in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#links) [DISALLOWED_HTML]
 |    <a href="https://[0:0:0:0:0:0:1]/">Invalid</a>
 >>   ^~~~~~~~~
-feature_tests/urls.html:100:2 Malformed URL 'https://[0:0:0:0:0:0:1]/' for attribute 'href' in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+feature_tests/urls.html:100:2 Malformed URL 'https://[0:0:0:0:0:0:1]/' for attribute 'href' in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#links) [DISALLOWED_HTML]
 |    <a href="https://[0:0:0:0:0:0:0:0:1]/">Invalid</a>
 >>   ^~~~~~~~~
-feature_tests/urls.html:101:2 Malformed URL 'https://[0:0:0:0:0:0:0:0:1]/' for attribute 'href' in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+feature_tests/urls.html:101:2 Malformed URL 'https://[0:0:0:0:0:0:0:0:1]/' for attribute 'href' in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#links) [DISALLOWED_HTML]
 |    <a href="https://[0:0:0:0:0:0:0:8.8.8.8]/">Invalid</a>
 >>   ^~~~~~~~~
-feature_tests/urls.html:102:2 Malformed URL 'https://[0:0:0:0:0:0:0:8.8.8.8]/' for attribute 'href' in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+feature_tests/urls.html:102:2 Malformed URL 'https://[0:0:0:0:0:0:0:8.8.8.8]/' for attribute 'href' in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#links) [DISALLOWED_HTML]
 |    <a href="https://[0:0:0:0:0:8.8.8.8]/">Invalid</a>
 >>   ^~~~~~~~~
-feature_tests/urls.html:103:2 Malformed URL 'https://[0:0:0:0:0:8.8.8.8]/' for attribute 'href' in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+feature_tests/urls.html:103:2 Malformed URL 'https://[0:0:0:0:0:8.8.8.8]/' for attribute 'href' in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#links) [DISALLOWED_HTML]
 |    <a href="https://[0:0:0:0:0:8.8.8.8:1]/">Invalid</a>
 >>   ^~~~~~~~~
-feature_tests/urls.html:104:2 Malformed URL 'https://[0:0:0:0:0:8.8.8.8:1]/' for attribute 'href' in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+feature_tests/urls.html:104:2 Malformed URL 'https://[0:0:0:0:0:8.8.8.8:1]/' for attribute 'href' in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#links) [DISALLOWED_HTML]
 |
 |    <!-- __amp_source_origin is not an allowed value for URLs. -->
 |    <a href="__amp_source_origin">uhm, no</a>
 >>   ^~~~~~~~~
-feature_tests/urls.html:107:2 The attribute 'href' in tag 'a' is set to the invalid value '__amp_source_origin'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+feature_tests/urls.html:107:2 The attribute 'href' in tag 'a' is set to the invalid value '__amp_source_origin'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#links) [DISALLOWED_HTML]
 |    <amp-ad src="__amp_source_origin" width="42" height="42" type=""></amp-ad>
 >>   ^~~~~~~~~
 feature_tests/urls.html:108:2 The attribute 'src' in tag 'amp-ad' is set to the invalid value '__amp_source_origin'. (see https://amp.dev/documentation/components/amp-ad) [DISALLOWED_HTML]

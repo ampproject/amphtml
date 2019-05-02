@@ -27,7 +27,7 @@ FAIL
 |    <meta name="viewport" content="width=device-width,minimum-scale=1">
 |    <style>invalid body</style>
 >>   ^~~~~~~~~
-feature_tests/regexps.html:27:2 The mandatory attribute 'amp-custom' is missing in tag 'style amp-custom'. (see https://www.ampproject.org/docs/reference/spec#stylesheets) [DISALLOWED_HTML]
+feature_tests/regexps.html:27:2 The mandatory attribute 'amp-custom' is missing in tag 'style amp-custom'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#stylesheets) [DISALLOWED_HTML]
 |    <noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
 |
@@ -54,7 +54,7 @@ feature_tests/regexps.html:38:2 The tag 'amp-hulu extension .js script' contains
 |          href="https://cdn.materialdesignicons.com/2.0.46/css/materialdesignicons.min.css">
 |    <link rel="stylesheet" type="text/css"
 >>   ^~~~~~~~~
-feature_tests/regexps.html:46:2 The attribute 'href' in tag 'link rel=stylesheet for fonts' is set to the invalid value 'https://cdn.materialdesignicons.com/2.0.46/css/.../materialdesignicons.min.css'. (see https://www.ampproject.org/docs/reference/spec#custom-fonts) [AUTHOR_STYLESHEET_PROBLEM]
+feature_tests/regexps.html:46:2 The attribute 'href' in tag 'link rel=stylesheet for fonts' is set to the invalid value 'https://cdn.materialdesignicons.com/2.0.46/css/.../materialdesignicons.min.css'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#custom-fonts) [AUTHOR_STYLESHEET_PROBLEM]
 |          href="https://cdn.materialdesignicons.com/2.0.46/css/.../materialdesignicons.min.css">
 |
 |    <!--
@@ -67,7 +67,7 @@ feature_tests/regexps.html:46:2 The attribute 'href' in tag 'link rel=stylesheet
 |          href="https://cloud.typography.com/6256354/724768/css/fonts.css">
 |    <link rel="stylesheet" type="text/css"
 >>   ^~~~~~~~~
-feature_tests/regexps.html:57:2 The attribute 'href' in tag 'link rel=stylesheet for fonts' is set to the invalid value 'http://xss.com/https://fonts.googleapis.com/css?foobar'. (see https://www.ampproject.org/docs/reference/spec#custom-fonts) [AUTHOR_STYLESHEET_PROBLEM]
+feature_tests/regexps.html:57:2 The attribute 'href' in tag 'link rel=stylesheet for fonts' is set to the invalid value 'http://xss.com/https://fonts.googleapis.com/css?foobar'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#custom-fonts) [AUTHOR_STYLESHEET_PROBLEM]
 |          href="http://xss.com/https://fonts.googleapis.com/css?foobar">
 |
 |    <!--
@@ -79,7 +79,7 @@ feature_tests/regexps.html:57:2 The attribute 'href' in tag 'link rel=stylesheet
 |          href="https://use.typekit.net/oeg4hgb.css">
 |    <link rel="stylesheet" type="text/css"
 >>   ^~~~~~~~~
-feature_tests/regexps.html:67:2 The attribute 'href' in tag 'link rel=stylesheet for fonts' is set to the invalid value 'https://use.typekit.net/css/oeg4hgb.css'. (see https://www.ampproject.org/docs/reference/spec#custom-fonts) [AUTHOR_STYLESHEET_PROBLEM]
+feature_tests/regexps.html:67:2 The attribute 'href' in tag 'link rel=stylesheet for fonts' is set to the invalid value 'https://use.typekit.net/css/oeg4hgb.css'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#custom-fonts) [AUTHOR_STYLESHEET_PROBLEM]
 |          href="https://use.typekit.net/css/oeg4hgb.css">
 |
 |    <!--
@@ -90,7 +90,7 @@ feature_tests/regexps.html:67:2 The attribute 'href' in tag 'link rel=stylesheet
 |          href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
 |    <link rel="stylesheet" type="text/css"
 >>   ^~~~~~~~~
-feature_tests/regexps.html:76:2 The attribute 'href' in tag 'link rel=stylesheet for fonts' is set to the invalid value 'https://maxcdn.bootstrapcdn.com/font-awesome/../bootstrap/3.3.7/css/bootstrap.min.class'. (see https://www.ampproject.org/docs/reference/spec#custom-fonts) [AUTHOR_STYLESHEET_PROBLEM]
+feature_tests/regexps.html:76:2 The attribute 'href' in tag 'link rel=stylesheet for fonts' is set to the invalid value 'https://maxcdn.bootstrapcdn.com/font-awesome/../bootstrap/3.3.7/css/bootstrap.min.class'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#custom-fonts) [AUTHOR_STYLESHEET_PROBLEM]
 |          href="https://maxcdn.bootstrapcdn.com/font-awesome/../bootstrap/3.3.7/css/bootstrap.min.class">
 |    <!--
 |      New Font Awesome url format the first four are valid the last two are not.
@@ -102,10 +102,10 @@ feature_tests/regexps.html:76:2 The attribute 'href' in tag 'link rel=stylesheet
 |    <!-- invalid -->
 |    <link href="https://use.fontawesome.com/releases/v5.0.8/css/other.css" rel="stylesheet">
 >>   ^~~~~~~~~
-feature_tests/regexps.html:86:2 The attribute 'href' in tag 'link rel=stylesheet for fonts' is set to the invalid value 'https://use.fontawesome.com/releases/v5.0.8/css/other.css'. (see https://www.ampproject.org/docs/reference/spec#custom-fonts) [AUTHOR_STYLESHEET_PROBLEM]
+feature_tests/regexps.html:86:2 The attribute 'href' in tag 'link rel=stylesheet for fonts' is set to the invalid value 'https://use.fontawesome.com/releases/v5.0.8/css/other.css'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#custom-fonts) [AUTHOR_STYLESHEET_PROBLEM]
 |    <link href="https://use.fontawesome.com/releases/v5.0.8/../css/solid.css" rel="stylesheet">
 >>   ^~~~~~~~~
-feature_tests/regexps.html:87:2 The attribute 'href' in tag 'link rel=stylesheet for fonts' is set to the invalid value 'https://use.fontawesome.com/releases/v5.0.8/../css/solid.css'. (see https://www.ampproject.org/docs/reference/spec#custom-fonts) [AUTHOR_STYLESHEET_PROBLEM]
+feature_tests/regexps.html:87:2 The attribute 'href' in tag 'link rel=stylesheet for fonts' is set to the invalid value 'https://use.fontawesome.com/releases/v5.0.8/../css/solid.css'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#custom-fonts) [AUTHOR_STYLESHEET_PROBLEM]
 |    <!--
 |      Old Font Awesome url format. Valid.
 |    -->
@@ -120,13 +120,13 @@ feature_tests/regexps.html:87:2 The attribute 'href' in tag 'link rel=stylesheet
 |    <link rel="accessibility alternate archives">
 |    <link rel="import">
 >>   ^~~~~~~~~
-feature_tests/regexps.html:100:2 The attribute 'rel' in tag 'link rel=' is set to the invalid value 'import'. (see https://www.ampproject.org/docs/reference/spec#html-tags) [DISALLOWED_HTML]
+feature_tests/regexps.html:100:2 The attribute 'rel' in tag 'link rel=' is set to the invalid value 'import'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags) [DISALLOWED_HTML]
 |    <link rel="accessibility subresource">
 >>   ^~~~~~~~~
-feature_tests/regexps.html:101:2 The attribute 'rel' in tag 'link rel=' is set to the invalid value 'accessibility subresource'. (see https://www.ampproject.org/docs/reference/spec#html-tags) [DISALLOWED_HTML]
+feature_tests/regexps.html:101:2 The attribute 'rel' in tag 'link rel=' is set to the invalid value 'accessibility subresource'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags) [DISALLOWED_HTML]
 |    <link rel="manifest accessibility">
 >>   ^~~~~~~~~
-feature_tests/regexps.html:102:2 The attribute 'rel' in tag 'link rel=' is set to the invalid value 'manifest accessibility'. (see https://www.ampproject.org/docs/reference/spec#html-tags) [DISALLOWED_HTML]
+feature_tests/regexps.html:102:2 The attribute 'rel' in tag 'link rel=' is set to the invalid value 'manifest accessibility'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags) [DISALLOWED_HTML]
 |
 |    <!--
 |    name blacklisted_value_regex: "(^|\\s)(viewport|content-disposition|revisit-after)($|\\s)"
@@ -147,7 +147,7 @@ feature_tests/regexps.html:111:2 The attribute 'name' in tag 'meta name= and con
 |    -->
 |    <style amp-custom>
 >>   ^~~~~~~~~
-feature_tests/regexps.html:117:2 The tag 'style amp-custom' appears more than once in the document. (see https://www.ampproject.org/docs/reference/spec#stylesheets) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+feature_tests/regexps.html:117:2 The tag 'style amp-custom' appears more than once in the document. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#stylesheets) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |      .comic-amp-font-loaded .comic-amp {
 |        font-family: 'Comic AMP', serif, sans-serif;
 |      }

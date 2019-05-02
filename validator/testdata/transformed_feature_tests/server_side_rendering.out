@@ -61,9 +61,9 @@ transformed_feature_tests/server_side_rendering.html:50:2 The attribute 'class' 
 |    <amp-img class="i-amphtml-layout-responsive i-amphtml-layout-size-defined" height=2911 i-amphtml-layout=responsive layout=responsive src=https://example-com.cdn.ampproject.org/i/s/example.com/lemur-narrow.jpg srcset="https://example-com.cdn.ampproject.org/i/s/example.com/lemur-wide.jpg 640w, https://example-com.cdn.ampproject.org/i/s/example.com/lemur-narrow.jpg 320w" width=1698>
 |      <i-amphtml-sizer style=display:none;padding-bottom:171.4370%;></i-amphtml-sizer>
 >>     ^~~~~~~~~
-transformed_feature_tests/server_side_rendering.html:53:4 CSS syntax error in tag 'i-amphtml-sizer' - the property 'display' is set to the disallowed value 'none'. (see https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages) [GENERIC]
+transformed_feature_tests/server_side_rendering.html:53:4 CSS syntax error in tag 'i-amphtml-sizer' - the property 'display' is set to the disallowed value 'none'. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages) [GENERIC]
 >>     ^~~~~~~~~
-transformed_feature_tests/server_side_rendering.html:53:4 The property 'padding-bottom' in attribute 'style' in tag 'i-amphtml-sizer' is disallowed. (see https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages) [GENERIC]
+transformed_feature_tests/server_side_rendering.html:53:4 The property 'padding-bottom' in attribute 'style' in tag 'i-amphtml-sizer' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages) [GENERIC]
 |    </amp-img>
 |
 |  </body>

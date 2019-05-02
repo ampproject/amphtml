@@ -20,7 +20,7 @@ A validator for the
 [AMP HTML format](https://github.com/ampproject/amphtml/blob/master/README.md).
 
 If you just want to validate a page, please see
-[our documentation over at ampproject.org](https://www.ampproject.org/docs/guides/validate.html).
+[our documentation over at ampproject.org](https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validate_amp).
 
 ## Chrome Extension
 Please see [chromeextension/README.md](https://github.com/ampproject/amphtml/blob/master/validator/chromeextension/README.md).
@@ -86,7 +86,7 @@ Dependencies:
 Then, run `python build.py`. This creates `dist/validator_minified.js`, which is
 equivalent to the validator deployed at cdn.ampproject.org. You may now
 use the `--validator_js` command line flag to
-[amphtml-validator](https://www.ampproject.org/docs/guides/validate.html#command-line-tool) to use this validator.
+[amphtml-validator](https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validate_amp#command-line-tool) to use this validator.
 
 For use for testing with extensions, you can simply run `python build.py`
 to run all of the validator tests in the amphtml repo.
@@ -97,8 +97,8 @@ run `python build.py --update_tests`.
 $ amphtml-validator --validator_js dist/validator_minified.js testdata/feature_tests/several_errors.html
 testdata/feature_tests/several_errors.html:23:2 The attribute 'charset' may not appear in tag 'meta name= and content='.
 testdata/feature_tests/several_errors.html:26:2 The tag 'script' is disallowed except in specific forms.
-testdata/feature_tests/several_errors.html:32:2 The mandatory attribute 'height' is missing in tag 'amp-img'. (see https://www.ampproject.org/docs/reference/amp-img.html)
-testdata/feature_tests/several_errors.html:34:2 The attribute 'width' in tag 'amp-ad' is set to the invalid value '100%'. (see https://www.ampproject.org/docs/reference/amp-ad.html)
+testdata/feature_tests/several_errors.html:32:2 The mandatory attribute 'height' is missing in tag 'amp-img'. (see https://amp.dev/documentation/components/amp-img)
+testdata/feature_tests/several_errors.html:34:2 The attribute 'width' in tag 'amp-ad' is set to the invalid value '100%'. (see https://amp.dev/documentation/components/amp-ad)
 ...
 ```
 
