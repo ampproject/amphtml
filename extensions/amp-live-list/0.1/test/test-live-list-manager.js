@@ -99,6 +99,10 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
     getUpdateTime() {
       return this.updateTime_;
     }
+
+    isDynamic() {
+      return false;
+    }
   }
 
   function getLiveList(attrs = {}, opt_id) {
@@ -248,7 +252,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
       expect(liveList.isEnabled()).to.be.true;
       expect(liveList2.isEnabled()).to.be.true;
 
-      manager.getLiveLists_(fromServer1);
+      manager.updateLiveLists_(fromServer1);
 
       // Still polls since at least one live list can still receive updates.
       expect(liveList.isEnabled()).to.be.true;
@@ -261,7 +265,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
       fromServer2List1.setAttribute('disabled', '');
       fromServer2.appendChild(fromServer2List1);
 
-      manager.getLiveLists_(fromServer2);
+      manager.updateLiveLists_(fromServer2);
 
       expect(liveList.isEnabled()).to.be.false;
       expect(liveList2.isEnabled()).to.be.false;
@@ -295,7 +299,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
     expect(updateSpy1).to.have.not.been.called;
     expect(updateSpy2).to.have.not.been.called;
 
-    manager.getLiveLists_(fromServer1);
+    manager.updateLiveLists_(fromServer1);
 
     expect(updateSpy1).to.be.calledOnce;
     expect(updateSpy2).to.have.not.been.called;
@@ -313,7 +317,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
     expect(updateSpy1).to.be.calledOnce;
     expect(updateSpy2).to.have.not.been.called;
 
-    manager.getLiveLists_(fromServer2);
+    manager.updateLiveLists_(fromServer2);
 
     expect(updateSpy1).to.have.callCount(2);
     expect(updateSpy2).to.be.calledOnce;
@@ -559,7 +563,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
     list1.buildCallback();
     list2.buildCallback();
     expect(manager.latestUpdateTime_).to.equal(0);
-    manager.getLiveLists_(doc);
+    manager.updateLiveLists_(doc);
     expect(manager.latestUpdateTime_).to.equal(2000);
   });
 
