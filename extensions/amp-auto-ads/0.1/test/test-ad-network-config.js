@@ -109,6 +109,7 @@ describes.realWin('ad-network-config', {
       expect(adNetwork.getAttributes()).to.deep.equal({
         'type': 'adsense',
         'data-ad-client': 'ca-pub-1234',
+        'data-ad-host': null,
       });
     });
 
