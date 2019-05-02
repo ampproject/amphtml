@@ -253,6 +253,16 @@ export class Services {
   }
 
   /**
+   * Returns service to listen for `hidden` attribute mutations.
+   * @param {!Element|!ShadowRoot} element
+   * @return {!./service/hidden-observer-impl.HiddenObserver}
+   */
+  static hiddenObserverForDoc(element) {
+    return /** @type {!./service/hidden-observer-impl.HiddenObserver} */ (
+      getExistingServiceForDocInEmbedScope(element, 'hidden-observer'));
+  }
+
+  /**
    * Returns service implemented in service/history-impl.
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @return {!./service/history-impl.History}
@@ -375,6 +385,15 @@ export class Services {
   static storyStoreService(win) {
     return (/** @type {?../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
       (getExistingServiceOrNull(win, 'story-store')));
+  }
+
+  /**
+   * @param {!Window} win
+   * @return {?../extensions/amp-story/1.0/amp-story-media-query-service.AmpStoryMediaQueryService}
+   */
+  static storyMediaQueryService(win) {
+    return (/** @type {?../extensions/amp-story/1.0/amp-story-media-query-service.AmpStoryMediaQueryService} */
+      (getExistingServiceOrNull(win, 'story-media-query')));
   }
 
   /**

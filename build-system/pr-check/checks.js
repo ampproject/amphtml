@@ -29,6 +29,7 @@ const {
   timedExecOrDie: timedExecOrDieBase} = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
 const {isTravisPullRequestBuild} = require('../travis');
+const {reportAllExpectedTests} = require('../tasks/runtime-test/status-report');
 
 const FILENAME = 'checks.js';
 const timedExecOrDie =
@@ -56,6 +57,7 @@ function main() {
   } else {
     printChangeSummary(FILENAME);
     timedExecOrDie('gulp update-packages');
+    reportAllExpectedTests(buildTargets);
     runCommonChecks();
 
     // Check document links only for PR builds.

@@ -8,8 +8,8 @@
   <!-- See https://github.com/ampproject/amp-publisher-sample -->
   <script id="amp-access" type="application/json">
     {
-      "authorization": "https://ampbyexample.com/components/amp-access/authorization?rid=READER_ID&url=CANONICAL_URL&ref=DOCUMENT_REFERRER&_=RANDOM",
-      "pingback": "https://ampbyexample.com/components/amp-access/authorization?rid=READER_ID&url=CANONICAL_URL&ref=DOCUMENT_REFERRER&_=RANDOM",
+      "authorization": "/api/echo/query?data={\"email\":\"\",\"loggedIn\":false,\"name\":\"\",\"powerUser\":false}",
+      "pingback": "/api/echo/query?data={\"email\":\"\",\"loggedIn\":false,\"name\":\"\",\"powerUser\":false}",
       "login": "https://ampbyexample.com/components/amp-access/login?rid=READER_ID&url=CANONICAL_URL",
       "authorizationFallbackResponse": {"error": true}
     }

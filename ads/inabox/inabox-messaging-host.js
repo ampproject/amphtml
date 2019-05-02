@@ -29,6 +29,9 @@ import {getData} from '../../src/event-helper';
 /** @const */
 const TAG = 'InaboxMessagingHost';
 
+/** @const */
+const READ_ONLY_MESSAGES = [MessageType.SEND_POSITIONS];
+
 /** Simple helper for named callbacks. */
 class NamedObservable {
 
@@ -130,9 +133,10 @@ export class InaboxMessagingHost {
     }
 
     const allowedTypes = adFrame.iframe.dataset['ampAllowed'];
-    // having no whitelist is legacy behavior so assume all types are allowed
-    if (allowedTypes &&
-        allowedTypes.split(/\s*,\s*/).indexOf(request['type']) === -1) {
+    const allowedTypesList = allowedTypes ?
+      allowedTypes.split(/\s*,\s*/) :
+      READ_ONLY_MESSAGES;
+    if (allowedTypesList.indexOf(request['type']) === -1) {
       dev().info(TAG, 'Ignored non-whitelisted message type:', message);
       return false;
     }

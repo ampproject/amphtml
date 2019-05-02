@@ -512,16 +512,18 @@ describes.realWin('amp-iframe', {
 
     it('should allow resize events w/ srcdoc', function* () {
       const srcdoc = `
-        <!doctype html>>
+        <!doctype html>
         <html>
          <body>
           <script>
+            setTimeout(() => {
               window.parent.postMessage({
                 sentinel: 'amp',
                 type: 'embed-size',
                 height: 200,
                 width: 300,
               }, '*');
+            }, 100);
           </script>
          </body>
         </html>
