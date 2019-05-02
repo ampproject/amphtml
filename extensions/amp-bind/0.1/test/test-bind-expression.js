@@ -362,6 +362,7 @@ describe('BindExpression', () => {
       expect(evaluate('min(0, 1)')).to.equal(0);
       expect(evaluate('round(0.6)')).to.equal(1);
       expect(evaluate('sqrt(4)')).to.equal(2);
+      expect(evaluate('log(20.2)')).to.equal(3.005682604407159);
       const r = evaluate('random()');
       expect(r).to.be.at.least(0);
       expect(r).to.be.at.below(1);
@@ -370,6 +371,7 @@ describe('BindExpression', () => {
       // Functions should not conflict with scope variables.
       expect(evaluate('abs(-2) + abs', {abs: 2})).to.equal(4);
       expect(evaluate('sqrt(4) + sqrt', {sqrt: 2})).to.equal(4);
+      expect(evaluate('log(20.2) + log', {log: 0.9943173955928408})).to.equal(4);
 
       // Don't support non-whitelisted functions.
       expect(() => {
@@ -386,6 +388,10 @@ describe('BindExpression', () => {
 
       expect(() => {
         evaluate('Math.sqrt(4)', {Math});
+      }).to.throw(unsupportedFunctionError);
+
+      expect(() => {
+        evaluate('Math.log(20.2)', {Math});
       }).to.throw(unsupportedFunctionError);
     });
 
