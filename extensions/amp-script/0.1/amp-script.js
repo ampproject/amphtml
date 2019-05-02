@@ -229,7 +229,7 @@ export class SanitizerImpl {
     this.purifier_.sanitize(parent);
     const clean = parent.firstChild;
     if (!clean) {
-      dev().info(TAG, 'Sanitized node:', node);
+      user().warn(TAG, 'Sanitized node:', node);
       return false;
     }
     // Detach `node` if we used a wrapper div.
@@ -254,26 +254,26 @@ export class SanitizerImpl {
     const tag = node.nodeName.toLowerCase();
     // DOMPurify's attribute validation is tag-agnostic, so we need to check
     // that the tag itself is valid. E.g. a[href] is ok, but base[href] is not.
-    if (!this.allowedTags_[tag]) {
-      return false;
-    }
-    const attr = attribute.toLowerCase();
-    if (validateAttributeChange(this.purifier_, node, attr, value)) {
-      if (value == null) {
-        node.removeAttribute(attr);
-      } else {
-        const newValue = rewriteAttributeValue(tag, attr, value);
-        node.setAttribute(attr, newValue);
-      }
-
-      // a[href] requires [target], which defaults to _top.
-      if (tag === 'a') {
-        if (node.hasAttribute('href') && !node.hasAttribute('target')) {
-          node.setAttribute('target', '_top');
+    if (this.allowedTags_[tag] || startsWith(tag, 'amp-')) {
+      const attr = attribute.toLowerCase();
+      if (validateAttributeChange(this.purifier_, node, attr, value)) {
+        if (value == null) {
+          node.removeAttribute(attr);
+        } else {
+          const newValue = rewriteAttributeValue(tag, attr, value);
+          node.setAttribute(attr, newValue);
         }
+
+        // a[href] requires [target], which defaults to _top.
+        if (tag === 'a') {
+          if (node.hasAttribute('href') && !node.hasAttribute('target')) {
+            node.setAttribute('target', '_top');
+          }
+        }
+        return true;
       }
-      return true;
     }
+    user().warn(TAG, 'Sanitized [%s]="%s":', attribute, value, node);
     return false;
   }
 
