@@ -1,6 +1,6 @@
 # Contributing to AMP HTML
 
-The AMP HTML project strongly encourages your participation and [contributions](https://www.ampproject.org/contribute/)!
+The AMP HTML project strongly encourages your participation and [contributions](https://amp.dev/documentation/guides-and-tutorials/contribute/)!
 
 We hope you'll become an ongoing participant in our open source community but we also welcome one-off contributions for the issues you're particularly passionate about.
 

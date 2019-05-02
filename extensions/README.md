@@ -15,7 +15,7 @@ include the following script in the `<head>`:
 
 ## Current list of components
 
-See the [Components](https://www.ampproject.org/docs/reference/components) list.
+See the [Components](https://amp.dev/documentation/components/) list.
 
 
 ## AMP HTML Extended Templates

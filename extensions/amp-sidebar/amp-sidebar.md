@@ -281,7 +281,7 @@ This attribute is present on child `<nav toolbar="(media-query)" toolbar-target=
 
 ##### common attributes<a name="common"></a>
 
-This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
+This element includes [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes) extended to AMP components.
 
 ## Styling
 

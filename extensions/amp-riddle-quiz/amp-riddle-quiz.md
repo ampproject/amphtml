@@ -58,7 +58,7 @@ This component embeds <a href="https://www.riddle.com/">Riddle</a> content (e.g.
   </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>
-    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP component.</td>
+    <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP component.</td>
   </tr>
 </table>
 

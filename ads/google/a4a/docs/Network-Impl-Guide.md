@@ -110,7 +110,7 @@ is allowed by including the following headers in the response:
   <dd>With the value matching the value of the <code>"__amp_source_origin"</code>
     request parameter, which is <a href="https://github.com/ampproject/amphtml/blob/master/src/service/xhr-impl.js#L103">added</a>
     by the AMP Runtime and matches the origin of the request had the page not
-    been served from <a href="https://www.ampproject.org/docs/get_started/about-amp.html">Google AMP Cache</a>
+    been served from <a href="https://amp.dev/about/how-amp-works">Google AMP Cache</a>
     (the originating source of the page).  Ad network can use this to prevent
     access by particular publisher domains where lack of response header will
     cause the response to be <a href="https://github.com/ampproject/amphtml/blob/master/src/service/xhr-impl.js#L137">dropped</a>
@@ -161,7 +161,7 @@ To create an ad network implementation, you must perform the following:
   discretion of the ad network, but must be approved by AMP project members just
   as any other contributions.
 
-#### Create the implementation script 
+#### Create the implementation script
 
 *For reference, see [Figure 1 Parts B and D](#detailed-design).*
 
@@ -227,7 +227,7 @@ and [AdSense](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a
 Create the `test-amp-ad-network-<TYPE>-impl.js` file, and write thorough testing
 for your AMP ad network implementation.
 
-## Checklist for ad network implementation 
+## Checklist for ad network implementation
 
 - [ ] All Server-AMP communication done with SSL
 - [ ] AMP ads sent to validation server

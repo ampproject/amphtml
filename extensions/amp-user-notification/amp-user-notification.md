@@ -317,7 +317,7 @@ amp-user-notification.amp-active {
 ```
 
 ## Actions
-The `amp-user-notification` exposes the following actions that you can use [AMP on-syntax to trigger](https://www.ampproject.org/docs/interaction_dynamic/amp-actions-and-events):
+The `amp-user-notification` exposes the following actions that you can use [AMP on-syntax to trigger](https://amp.dev/documentation/guides-and-tutorials/learn/amp-actions-and-events):
 
 <table>
   <tr>

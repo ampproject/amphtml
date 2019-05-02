@@ -566,7 +566,7 @@ If present, keeps the date picker open after the user clears the date or dates. 
 
 ##### common attributes
 
-This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
+This element includes [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes) extended to AMP components.
 
 
 ## Events
@@ -574,7 +574,7 @@ This element includes [common attributes](https://www.ampproject.org/docs/refere
 These events may trigger actions on other AMP components using the `on` attribute.
 e.g. `on="activate: my-lightbox.open"`
 
-Read more about [AMP Actions and Events](https://www.ampproject.org/docs/interaction_dynamic/amp-actions-and-events).
+Read more about [AMP Actions and Events](https://amp.dev/documentation/guides-and-tutorials/learn/amp-actions-and-events).
 
 ##### activate
 
@@ -648,7 +648,7 @@ For a date range picker:
 These actions may be triggered by other components using the `on` attribute.
 e.g. `on="tap: date-picker.setDate(date=state.value)"`
 
-Read more about [AMP Actions and Events](https://www.ampproject.org/docs/interaction_dynamic/amp-actions-and-events).
+Read more about [AMP Actions and Events](https://amp.dev/documentation/guides-and-tutorials/learn/amp-actions-and-events).
 
 ##### clear
 

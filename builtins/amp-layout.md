@@ -19,7 +19,7 @@ limitations under the License.
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>A generic, multi-purpose container element that brings AMP's powerful <a href="https://www.ampproject.org/docs/guides/responsive/control_layout#the-layout-attribute">layouts </a> to any element.</td>
+    <td>A generic, multi-purpose container element that brings AMP's powerful <a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout?#the-layout-attribute">layouts </a> to any element.</td>
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
@@ -29,7 +29,7 @@ limitations under the License.
 
 ## Overview
 
-The `amp-layout` component allows you to apply aspect-ratio based responsive layouts to any element. The `amp-layout` component works similarly to the [layout](https://www.ampproject.org/docs/guides/responsive/control_layout#the-layout-attribute) attribute on existing AMP components, but supports any HTML markup as children. Other supported layouts all work with `amp-layout` (e.g., fixed-height, fixed, etc.).
+The `amp-layout` component allows you to apply aspect-ratio based responsive layouts to any element. The `amp-layout` component works similarly to the [layout](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout?#the-layout-attribute) attribute on existing AMP components, but supports any HTML markup as children. Other supported layouts all work with `amp-layout` (e.g., fixed-height, fixed, etc.).
 
 **Example**
 
@@ -45,7 +45,7 @@ This example uses `amp-layout` to create a responsive container around a circle 
 ```
 ## Attributes
 
-This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
+This element includes [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes) extended to AMP components.
 
 ## Validation
 

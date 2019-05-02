@@ -287,7 +287,7 @@ Alternatively, one may also use the `changeToLayoutContainer` action.
 
 ##### common attributes
 
-This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
+This element includes [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes) extended to AMP components.
 
 ## Load more and infinite scroll
 

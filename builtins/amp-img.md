@@ -69,7 +69,7 @@ In the following example, we display an image that responds to the size of the v
 </div>
 
 {% call callout('Read on', type='read') %}
-Learn about responsive AMP pages in the [Create Responsive AMP Pages](https://www.ampproject.org/docs/guides/responsive/responsive_design.html) guide.
+Learn about responsive AMP pages in the [Create Responsive AMP Pages](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/responsive_design) guide.
 {% endcall %}
 
 If the resource requested by the `amp-img` component fails to load, the space will be blank unless a [`fallback`](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md#fallback) child is provided. A fallback is only executed on the initial layout and subsequent src changes after the fact (through resize + srcset for example) will not have a fallback for performance implications.
@@ -95,8 +95,8 @@ Additional image features like captions can be implemented with standard HTML (f
 {% call callout('Read on', type='read') %}
 Learn more about using `amp-img` from these resources:
 
-- [Placeholders & fallbacks](https://www.ampproject.org/docs/design/responsive/placeholders)
-- [Include Images & Video](https://www.ampproject.org/docs/media/amp_replacements)
+- [Placeholders & fallbacks](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/placeholders)
+- [Include Images & Video](https://amp.dev/documentation/guides-and-tutorials/develop/media_iframes_3p/)
 {% endcall %}
 
 ## Attributes
@@ -141,7 +141,7 @@ An explicit size of the image, which is used by the AMP runtime to determine the
 
 **common attributes**
 
-This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
+This element includes [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes) extended to AMP components.
 
 
 ## Styling
@@ -176,7 +176,7 @@ If you want your image to display at a fixed size:
 2. Specify the `width` and `height`.
 
 {% call callout('Read on', type='read') %}
-Learn about the [inferred layout](https://www.ampproject.org/docs/design/responsive/control_layout#what-if-the-layout-attribute-isn%E2%80%99t-specified?) if you don't specify the `layout` attribute.
+Learn about the [inferred layout](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout#what-if-the-layout-attribute-isn%E2%80%99t-specified?) if you don't specify the `layout` attribute.
 {% endcall %}
 
 
@@ -201,9 +201,9 @@ For example, instead of specifying `width="900"` and `height="675"`, you can jus
 
 The [`srcset`](#attributes) attribute should be used to provide different resolutions of the same image, that all have the same aspect ratio. The browser will automatically choose the most appropriate file from `srcset` based on the screen resolution and width of the user's device.
 
-In contrast, the [`media`](https://www.ampproject.org/docs/reference/common_attributes#media) attribute shows or hides AMP components, and should be used when designing responsive layouts. The appropriate way to display images with differing aspect ratios is to use multiple `<amp-img>` components, each with a `media` attribute that matches the screen widths in which to show each instance.
+In contrast, the [`media`](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes#media) attribute shows or hides AMP components, and should be used when designing responsive layouts. The appropriate way to display images with differing aspect ratios is to use multiple `<amp-img>` components, each with a `media` attribute that matches the screen widths in which to show each instance.
 
-See the guide on [creating responsive AMP pages](https://www.ampproject.org/docs/design/responsive/responsive_design#displaying-responsive-images) for more details.
+See the guide on [creating responsive AMP pages](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/responsive_design#displaying-responsive-images) for more details.
 
 #### Maintaining the aspect ratio for images with unknown dimensions
 

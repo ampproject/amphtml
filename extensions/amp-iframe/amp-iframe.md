@@ -115,7 +115,7 @@ See the <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/ifram
   </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>
-    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
+    <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
 </table>
 
@@ -236,7 +236,7 @@ Iframes are identified as tracking/analytics iframes if they appear to serve no 
 
 ## Guideline: Use existing AMP components over amp-iframe
 
-The `amp-iframe` component should be considered a fallback if the required user experience is not possible by other means in AMP, that is, there's not already an existing [AMP component](https://www.ampproject.org/docs/reference/components) for the use case. This is because there are many benefits to using an AMP component tailored for a specific use-case such as:
+The `amp-iframe` component should be considered a fallback if the required user experience is not possible by other means in AMP, that is, there's not already an existing [AMP component](https://amp.dev/documentation/components/) for the use case. This is because there are many benefits to using an AMP component tailored for a specific use-case such as:
 
 - Better resource management and performance
 - Custom components can provide built-in placeholder images in some cases. This means getting, say, the right video thumbnail before a video loads, and reduces the coding effort to add a placeholder manually.

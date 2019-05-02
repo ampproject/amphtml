@@ -115,7 +115,7 @@ it is ready.</td>
   </tr>
   <tr>
     <td width="40%"><strong>title</strong></td>
-    <td>(string) part of the [common attributes](https://www.ampproject.org/docs/reference/common_attributes), doubles as the audio's name displayed in the MediaSession notification. If not provided, the MediaSessionAPI Helper will use either the `aria-label` attribute or fall back to the page's title.</td>
+    <td>(string) part of the [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes), doubles as the audio's name displayed in the MediaSession notification. If not provided, the MediaSessionAPI Helper will use either the `aria-label` attribute or fall back to the page's title.</td>
   </tr>
 </table>
 

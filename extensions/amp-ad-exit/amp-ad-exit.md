@@ -29,7 +29,7 @@ limitations under the License.
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>Provides configurable behavior for ad exits for <a href="https://www.ampproject.org/docs/ads/amphtml_ads">AMPHTML ads</a>.</td>
+    <td>Provides configurable behavior for ad exits for <a href="https://amp.dev/documentation/guides-and-tutorials/learn/intro-to-amphtml-ads">AMPHTML ads</a>.</td>
   </tr>
   <tr>
     <td><strong>Required Script</strong></td>
@@ -407,5 +407,5 @@ See the `AmpAdExitConfig` typedef in [config.js](https://github.com/ampproject/a
 </table>
 
 ## Validation
-The `amp-ad-exit` element is only available for [AMPHTML ads)](https://www.ampproject.org/docs/ads/amphtml_ads).
+The `amp-ad-exit` element is only available for [AMPHTML ads)](https://amp.dev/documentation/guides-and-tutorials/learn/intro-to-amphtml-ads).
 See [amp-ad-exit rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-exit/validator-amp-ad-exit.protoascii) for the AMP validator specification.

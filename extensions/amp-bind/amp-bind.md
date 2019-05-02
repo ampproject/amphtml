@@ -395,7 +395,7 @@ When the **state** changes, expressions are re-evaluated and the bound elements'
     <td>Should be a boolean expression.</td>
   </tr>
   <tr>
-    <td>Size of <a href="https://www.ampproject.org/docs/reference/components">AMP elements</a></td>
+    <td>Size of <a href="https://amp.dev/documentation/components/">AMP elements</a></td>
     <td><code>[width]</code><br><code>[height]</code></td>
     <td>Changes the width and/or height of the AMP element.</td>
   </tr>

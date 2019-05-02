@@ -80,7 +80,7 @@ Used to uniquely identify the action. This is referenced in an action invocation
 
 ##### execute
 
-The action to invoke. Any valid amp action is allowed here. See [actions and events in AMP](https://www.ampproject.org/docs/interaction_dynamic/amp-actions-and-events).
+The action to invoke. Any valid amp action is allowed here. See [actions and events in AMP](https://amp.dev/documentation/guides-and-tutorials/learn/amp-actions-and-events).
 
 e.g.
 
