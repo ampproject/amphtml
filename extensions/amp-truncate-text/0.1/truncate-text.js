@@ -178,8 +178,12 @@ function getAllNodes(root, filter, nodes = []) {
 
   nodes.push(root);
 
-  for (let child = root.firstChild; child; child = child.nextSibling) {
-    getAllNodes(child, filter, nodes);
+  const childNodes = root.localName == 'slot' ?
+      root.assignedNodes() :
+      root.childNodes;
+
+  for (let i = 0; i < childNodes.length; i++) {
+    getAllNodes(childNodes[i], filter, nodes);
   }
 
   return nodes;
