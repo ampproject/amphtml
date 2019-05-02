@@ -42,6 +42,13 @@ const NEXT_SCREEN_AREA_RATIO = 0.75;
 /** @private @const {number} */
 const PREVIOUS_SCREEN_AREA_RATIO = 0.25;
 
+/**
+ * Percentage of the screen considered edge.
+ * @const {number}
+ * @private
+ */
+const SCREEN_EDGE_PERCENT = 0.15;
+
 const INTERACTIVE_EMBEDDED_COMPONENTS_SELECTORS = Object.values(
   interactiveElementsSelectors()
 ).join(',');
@@ -478,12 +485,22 @@ class ManualAdvancement extends AdvancementConfig {
    * For an element to trigger a tooltip it has to be descendant of
    * amp-story-page but not of amp-story-cta-layer or amp-story-page-attachment.
    * @param {!Event} event
+   * @param {!ClientRect} pageRect
    * @return {boolean}
    * @private
    */
-  canShowTooltip_(event) {
+  canShowTooltip_(event, pageRect) {
     let valid = true;
     let tagName;
+
+    if (
+      this.isInScreenEdge_(event, pageRect) &&
+      this.storeService_.get(StateProperty.INTERACTIVE_COMPONENT_STATE)
+        .state !== EmbeddedComponentState.EXPANDED
+    ) {
+      event.preventDefault();
+      return false;
+    }
 
     return !!closest(
       dev().assertElement(event.target),
@@ -505,6 +522,22 @@ class ManualAdvancement extends AdvancementConfig {
   }
 
   /**
+   * Checks if click was inside of an edge of the screen.
+   * @param {!Event} event
+   * @param {!ClientRect} pageRect
+   * @return {boolean}
+   * @private
+   */
+  isInScreenEdge_(event, pageRect) {
+    const edgeOfScreen = pageRect.width * SCREEN_EDGE_PERCENT;
+
+    return (
+      event.clientX <= edgeOfScreen ||
+      event.clientX >= pageRect.width - edgeOfScreen
+    );
+  }
+
+  /**
    * Performs a system navigation if it is determined that the specified event
    * was a click intended for navigation.
    * @param {!Event} event 'click' event
@@ -512,9 +545,10 @@ class ManualAdvancement extends AdvancementConfig {
    */
   maybePerformNavigation_(event) {
     const target = dev().assertElement(event.target);
+    const pageRect = this.element_./*OK*/ getBoundingClientRect();
 
     if (
-      this.canShowTooltip_(event) &&
+      this.canShowTooltip_(event, pageRect) &&
       matches(target, INTERACTIVE_EMBEDDED_COMPONENTS_SELECTORS)
     ) {
       // Clicked element triggers a tooltip, so we dispatch the corresponding
@@ -549,8 +583,6 @@ class ManualAdvancement extends AdvancementConfig {
       Action.SET_ADVANCEMENT_MODE,
       AdvancementMode.MANUAL_ADVANCE
     );
-
-    const pageRect = this.element_./*OK*/ getBoundingClientRect();
 
     // Using `left` as a fallback since Safari returns a ClientRect in some
     // cases.

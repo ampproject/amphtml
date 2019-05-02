@@ -533,6 +533,10 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     this.mutateElement(() => {
       componentEls.forEach(el => {
+        userAssert(
+          el.getAttribute('layout') === 'fixed',
+          'Embedded ' + 'components inside amp-story must use layout="fixed".'
+        );
         el.classList.add('i-amphtml-embedded-component');
       });
     });
