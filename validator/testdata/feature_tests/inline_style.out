@@ -33,10 +33,10 @@ FAIL
 |    <!-- Invalid: !important is not allowed -->
 |    <amp-img layout=fill src=lemur.png style="display:block !important; width:100px;"></amp-img>
 >>   ^~~~~~~~~
-feature_tests/inline_style.html:33:2 The attribute 'style' in tag 'amp-img' is set to the invalid value 'display:block !important; width:100px;'. (see https://www.ampproject.org/docs/reference/components/amp-img) [DISALLOWED_HTML]
+feature_tests/inline_style.html:33:2 The attribute 'style' in tag 'amp-img' is set to the invalid value 'display:block !important; width:100px;'. (see https://amp.dev/documentation/components/amp-img) [DISALLOWED_HTML]
 |    <amp-img layout=fill src=lemur.png style="display:block ! important; width:100px;"></amp-img>
 >>   ^~~~~~~~~
-feature_tests/inline_style.html:34:2 The attribute 'style' in tag 'amp-img' is set to the invalid value 'display:block ! important; width:100px;'. (see https://www.ampproject.org/docs/reference/components/amp-img) [DISALLOWED_HTML]
+feature_tests/inline_style.html:34:2 The attribute 'style' in tag 'amp-img' is set to the invalid value 'display:block ! important; width:100px;'. (see https://amp.dev/documentation/components/amp-img) [DISALLOWED_HTML]
 |    <!-- Invalid: position:fixed is not allowed -->
 |    <amp-img layout=fill src=lemur.png style="display: block; position: fixed; width: 100px;"></amp-img>
 >>   ^~~~~~~~~
@@ -48,6 +48,6 @@ feature_tests/inline_style.html:38:2 The property 'lemur' in attribute 'style' i
 |    <!-- Invalid: attribute [style] is not allowed -->
 |    <amp-img layout=fill src=lemur.png style="display:block;" [style]="display:block;"></amp-img>
 >>   ^~~~~~~~~
-feature_tests/inline_style.html:40:2 The attribute '[style]' may not appear in tag 'amp-img'. (see https://www.ampproject.org/docs/reference/components/amp-img) [DISALLOWED_HTML]
+feature_tests/inline_style.html:40:2 The attribute '[style]' may not appear in tag 'amp-img'. (see https://amp.dev/documentation/components/amp-img) [DISALLOWED_HTML]
 |  </body>
 |  </html>

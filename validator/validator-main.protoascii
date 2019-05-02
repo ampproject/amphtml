@@ -528,7 +528,7 @@ tags: {
     value_casei: "amp-3p-iframe-src"
     dispatch_key: NAME_VALUE_DISPATCH
   }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-ad"
+  spec_url: "https://amp.dev/documentation/components/amp-ad"
 }
 # AMP metadata, name=amp-consent-blocking
 tags: {
@@ -2212,7 +2212,7 @@ tags: {
   tag_name: "IMG"
   mandatory_ancestor: "NOSCRIPT"
   mandatory_ancestor_suggested_alternative: "AMP-IMG"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-img"
+  spec_url: "https://amp.dev/documentation/components/amp-img"
   attrs: { name: "alt" }
   attrs: { name: "attribution" }
   attrs: { name: "border" }  # Not valid html5 but commonly used and supported.
@@ -2252,7 +2252,7 @@ tags: {
   tag_name: "IFRAME"
   mandatory_ancestor: "NOSCRIPT"
   mandatory_ancestor_suggested_alternative: "AMP-IFRAME"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-iframe"
+  spec_url: "https://amp.dev/documentation/components/amp-iframe"
   attrs: {
     name: "frameborder"
     value: "0"
@@ -2306,7 +2306,7 @@ tags: {
   attrs: {
     name: "muted"
     deprecation: "autoplay"
-    deprecation_url: "https://www.ampproject.org/docs/reference/components/amp-video"
+    deprecation_url: "https://amp.dev/documentation/components/amp-video"
   }
   attrs: { name: "playsinline" }
   attrs: { name: "poster" }
@@ -2321,7 +2321,7 @@ tags: {
     blacklisted_value_regex: "__amp_source_origin"
   }
   attrs: { name: "width" }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-video"
+  spec_url: "https://amp.dev/documentation/components/amp-video"
 }
 # 4.7.7 The audio element
 # Only allowed in noscript tags. Otherwise use amp-audio.
@@ -2344,7 +2344,7 @@ tags: {
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-audio"
+  spec_url: "https://amp.dev/documentation/components/amp-audio"
 }
 # 4.7.7 The picture element
 # Only allowed in noscript tags which support img tags.
@@ -2352,7 +2352,7 @@ tags: {
   html_format: AMP
   tag_name: "PICTURE"
   mandatory_parent: "NOSCRIPT"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-img"
+  spec_url: "https://amp.dev/documentation/components/amp-img"
 }
 # 4.7.8 The source element
 tags: {
@@ -2373,7 +2373,7 @@ tags: {
     blacklisted_value_regex: "__amp_source_origin"
   }
   attrs: { name: "type" }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-img"
+  spec_url: "https://amp.dev/documentation/components/amp-img"
 }
 tags: {
   html_format: AMP
@@ -2395,7 +2395,7 @@ tags: {
   # <amp-bind>
   attrs: { name: "[src]" }
   attrs: { name: "[type]" }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-video"
+  spec_url: "https://amp.dev/documentation/components/amp-video"
 }
 tags: {
   html_format: AMP
@@ -2417,7 +2417,7 @@ tags: {
   # <amp-bind>
   attrs: { name: "[src]" }
   attrs: { name: "[type]" }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-audio"
+  spec_url: "https://amp.dev/documentation/components/amp-audio"
 }
 tags: {
   html_format: AMP
@@ -2440,7 +2440,7 @@ tags: {
     name: "type"
     mandatory: true
   }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-audio"
+  spec_url: "https://amp.dev/documentation/components/amp-audio"
 }
 tags: {
   html_format: AMP
@@ -2463,7 +2463,7 @@ tags: {
     name: "type"
     mandatory: true
   }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-video"
+  spec_url: "https://amp.dev/documentation/components/amp-video"
 }
 tags: {
   html_format: AMP
@@ -2653,7 +2653,7 @@ tags: {
   attrs: { name: "[src]" }
   attrs: { name: "[srclang]" }
   attr_lists: "track-attrs-subtitles"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-ima-video"
+  spec_url: "https://amp.dev/documentation/components/amp-ima-video"
 }
 
 
@@ -4362,7 +4362,7 @@ tags: {
   html_format: ACTIONS
   tag_name: "LABEL"
   attrs: { name: "for" }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-form"
+  spec_url: "https://amp.dev/documentation/components/amp-form"
 }
 # 4.10.5 The input element.
 # The input tag is also defined by extensions/amp-inputmask/validator-amp-inputmask.protoascii
@@ -4389,7 +4389,7 @@ tags: {
   # Note that this amp-bind attribute is not available for the AMP4Email format
   # thus we add this manually for the formats that should.
   attrs: { name: "[type]" }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-form"
+  spec_url: "https://amp.dev/documentation/components/amp-form"
 }
 tags: {
   html_format: AMP
@@ -4408,7 +4408,7 @@ tags: {
   attr_lists: "input-common-attr"
   attr_lists: "name-attr"
   mandatory_ancestor: "FORM [method=POST]"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-form"
+  spec_url: "https://amp.dev/documentation/components/amp-form"
 }
 tags: {
   html_format: AMP
@@ -4423,7 +4423,7 @@ tags: {
   attr_lists: "input-common-attr"
   attr_lists: "name-attr"
   mandatory_ancestor: "FORM [method=POST]"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-form"
+  spec_url: "https://amp.dev/documentation/components/amp-form"
 }
 # amp-bind usage of [type] is not allowed in AMP4EMAIL
 tags: {
@@ -4441,7 +4441,7 @@ tags: {
   }
   attr_lists: "input-common-attr"
   attr_lists: "name-attr"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-form"
+  spec_url: "https://amp.dev/documentation/components/amp-form"
 }
 # 4.10.6 The button element
 tags: {
@@ -4518,7 +4518,7 @@ tags: {
   attrs: { name: "[required]" }
   attrs: { name: "[size]" }
   attr_lists: "name-attr"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-form"
+  spec_url: "https://amp.dev/documentation/components/amp-form"
 }
 # 4.10.8 The datalist element
 tags: {
@@ -4527,7 +4527,7 @@ tags: {
   html_format: AMP4EMAIL
   html_format: ACTIONS
   tag_name: "DATALIST"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-form"
+  spec_url: "https://amp.dev/documentation/components/amp-form"
 }
 # 4.10.9 The optgroup element
 tags: {
@@ -4542,7 +4542,7 @@ tags: {
   # <amp-bind>
   attrs: { name: "[disabled]" }
   attrs: { name: "[label]" }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-form"
+  spec_url: "https://amp.dev/documentation/components/amp-form"
 }
 # 4.10.10 The option element
 tags: {
@@ -4560,7 +4560,7 @@ tags: {
   attrs: { name: "[label]" }
   attrs: { name: "[selected]" }
   attrs: { name: "[value]" }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-form"
+  spec_url: "https://amp.dev/documentation/components/amp-form"
 }
 # 4.10.11 The textarea element
 tags: {
@@ -4611,7 +4611,7 @@ tags: {
   attrs: { name: "[spellcheck]" }
   attrs: { name: "[wrap]" }
   attr_lists: "name-attr"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-form"
+  spec_url: "https://amp.dev/documentation/components/amp-form"
 }
 # 4.10.13 The output element
 tags: {
@@ -5076,7 +5076,7 @@ tags: {  # <amp-img>
   attr_lists: "extended-amp-global"
   attr_lists: "lightboxable-elements"
   attr_lists: "mandatory-src-or-srcset"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-img"
+  spec_url: "https://amp.dev/documentation/components/amp-img"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED
@@ -5102,7 +5102,7 @@ tags: {  # <amp-img>
   # <amp-bind>
   attrs: { name: "[alt]" }
   attrs: { name: "[attribution]" }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-img"
+  spec_url: "https://amp.dev/documentation/components/amp-img"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED
@@ -5119,7 +5119,7 @@ tags: {  # <amp-layout>
   html_format: ACTIONS
   tag_name: "AMP-LAYOUT"
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-layout"
+  spec_url: "https://amp.dev/documentation/components/amp-layout"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED
@@ -5152,7 +5152,7 @@ tags: {  # <amp-pixel>
     blacklisted_value_regex: "__amp_source_origin"
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-pixel"
+  spec_url: "https://amp.dev/documentation/components/amp-pixel"
   amp_layout {
     defines_default_height: true
     defines_default_width: true
@@ -6426,7 +6426,7 @@ attr_lists: {
   attrs: { name: "fallback" value: "" }
   attrs: { name: "overflow" }
   # amp-access specific attributes, see
-  # https://www.ampproject.org/docs/reference/components/amp-access
+  # https://amp.dev/documentation/components/amp-access
   # TODO(gregable): These should only be allowed on any tag inside BODY or HEAD.
   attrs: { name: "amp-access" }
   attrs: { name: "amp-access-behavior" }
@@ -6464,7 +6464,7 @@ attr_lists: {
     }
   }
   # amp-fx-collection specific attributes, see
-  # https://www.ampproject.org/docs/reference/components/amp-fx-collection
+  # https://amp.dev/documentation/components/amp-fx-collection
   attrs: {
     name: "amp-fx"
     value_regex_casei: "(fade-in|"
@@ -6489,7 +6489,7 @@ attr_lists: {
     requires_extension: "amp-fx-collection"
   }
   # amp-subscriptions specific attributes, see
-  # https://www.ampproject.org/docs/reference/components/amp-subscriptions
+  # https://amp.dev/documentation/components/amp-subscriptions
   attrs: {
     name: "subscriptions-action"
     requires_extension: "amp-subscriptions"

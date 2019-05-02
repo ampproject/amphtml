@@ -45,7 +45,7 @@ Uses fixed size by the given `width` and `height`.
 </amp-sticky-ad>
 ```
 
-Refer to the [amp-sticky-ad](https://www.ampproject.org/docs/reference/components/amp-sticky-ad) documentation to see how to implement this ad.
+Refer to the [amp-sticky-ad](https://amp.dev/documentation/components/amp-sticky-ad) documentation to see how to implement this ad.
 
 
 ## Configuration

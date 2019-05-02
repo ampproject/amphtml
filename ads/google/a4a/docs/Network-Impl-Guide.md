@@ -127,7 +127,7 @@ is allowed by including the following headers in the response:
 
 ### Creating an AMPHTML ad extension implementation
 
-The [`<amp-ad>`](https://www.ampproject.org/docs/reference/components/amp-ad)
+The [`<amp-ad>`](https://amp.dev/documentation/components/amp-ad)
 element differentiates between different ad network implementations via the
 `type` attribute. For example, the following amp-ad tag utilizes the Google Ad Manager
 ad network:

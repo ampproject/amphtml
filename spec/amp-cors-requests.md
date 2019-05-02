@@ -89,7 +89,7 @@ cross-origin requests, you need to handle CORS, otherwise, the request fails.
 Most AMP components that use CORS requests either automatically set the
 [credentials mode](https://fetch.spec.whatwg.org/#concept-request-credentials-mode)
 or allow the author to optionally enable it. For example, the
-[`amp-list`](https://www.ampproject.org/docs/reference/components/amp-list)
+[`amp-list`](https://amp.dev/documentation/components/amp-list)
 component fetches dynamic content from a CORS JSON endpoint, and allows the
 author to set the credential mode through the `credentials` attribute.
 

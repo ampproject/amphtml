@@ -46,7 +46,7 @@ other AMP components.
 
 ## Overview
 
-The `amp-orientation-observer` component monitors the orientation of a device, and dispatches low-trust level events (`alpha`, `beta`, `gamma`) that report changes in the device's orientation along the `alpha`, `beta` and `gamma` axises in terms of `angle` and `percent`. These can be used to trigger actions (*Only Low Trust Actions*) on other components (e.g., [amp-animation](https://www.ampproject.org/docs/reference/components/amp-animation)).
+The `amp-orientation-observer` component monitors the orientation of a device, and dispatches low-trust level events (`alpha`, `beta`, `gamma`) that report changes in the device's orientation along the `alpha`, `beta` and `gamma` axises in terms of `angle` and `percent`. These can be used to trigger actions (*Only Low Trust Actions*) on other components (e.g., [amp-animation](https://amp.dev/documentation/components/amp-animation)).
 
 {% call callout('Note', type='note') %}
 The `amp-orientation-observer` component is only useful when used with other components and does not do anything on its own.
@@ -67,7 +67,7 @@ These are the low-trust level events that the `amp-orientation-observer` compone
 
 ## What can I do with amp-orientation-observer?
 
-Currently, [amp-animation](https://www.ampproject.org/docs/reference/components/amp-animation) and several video players in AMP are the only components that allow low-trust events to trigger their actions (e.g., starting an animation, seeking to a position within the animation, pausing a video, etc.).
+Currently, [amp-animation](https://amp.dev/documentation/components/amp-animation) and several video players in AMP are the only components that allow low-trust events to trigger their actions (e.g., starting an animation, seeking to a position within the animation, pausing a video, etc.).
 
 ### Scroll-bound animations
 

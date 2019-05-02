@@ -39,9 +39,9 @@ transformed_feature_tests/transformed_but_not_identified_transformed.html:24:2 T
 |  <body>
 |    <amp-img class="i-amphtml-layout-responsive i-amphtml-layout-size-defined" height=2911 i-amphtml-layout=responsive layout=responsive src=https://example-com.cdn.ampproject.org/i/s/example.com/lemur-narrow.jpg srcset="https://example-com.cdn.ampproject.org/i/s/example.com/lemur-wide.jpg 640w, https://example-com.cdn.ampproject.org/i/s/example.com/lemur-narrow.jpg 320w" width=1698>
 >>   ^~~~~~~~~
-transformed_feature_tests/transformed_but_not_identified_transformed.html:31:2 The attribute 'class' in tag 'amp-img' is set to the invalid value 'i-amphtml-layout-responsive i-amphtml-layout-size-defined'. (see https://www.ampproject.org/docs/reference/components/amp-img) [DISALLOWED_HTML]
+transformed_feature_tests/transformed_but_not_identified_transformed.html:31:2 The attribute 'class' in tag 'amp-img' is set to the invalid value 'i-amphtml-layout-responsive i-amphtml-layout-size-defined'. (see https://amp.dev/documentation/components/amp-img) [DISALLOWED_HTML]
 >>   ^~~~~~~~~
-transformed_feature_tests/transformed_but_not_identified_transformed.html:31:2 The attribute 'i-amphtml-layout' may not appear in tag 'amp-img'. (see https://www.ampproject.org/docs/reference/components/amp-img) [DISALLOWED_HTML]
+transformed_feature_tests/transformed_but_not_identified_transformed.html:31:2 The attribute 'i-amphtml-layout' may not appear in tag 'amp-img'. (see https://amp.dev/documentation/components/amp-img) [DISALLOWED_HTML]
 |      <i-amphtml-sizer style=display:block;padding-top:171.4370%;></i-amphtml-sizer>
 >>     ^~~~~~~~~
 transformed_feature_tests/transformed_but_not_identified_transformed.html:32:4 The tag 'i-amphtml-sizer' is disallowed. [DISALLOWED_HTML]

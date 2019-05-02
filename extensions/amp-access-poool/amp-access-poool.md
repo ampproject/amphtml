@@ -27,7 +27,7 @@ limitations under the License.
   <tr>
     <td class="col-fourty"><strong>Description</strong></td>
     <td>Displays a Poool paywall<br />.
-    See <a href="http://poool.fr">poool.fr</a> and <a href="http://demo.poool.fr">demo.poool.fr</a> for more details.. <code>amp-access-poool</code> is based on, and requires <a href="https://www.ampproject.org/docs/reference/components/amp-access">AMP Access</a>.</td>
+    See <a href="http://poool.fr">poool.fr</a> and <a href="http://demo.poool.fr">demo.poool.fr</a> for more details.. <code>amp-access-poool</code> is based on, and requires <a href="https://amp.dev/documentation/components/amp-access">AMP Access</a>.</td>
   </tr>
   <tr>
     <td class="col-fourty"><strong>Required Scripts</strong></td>

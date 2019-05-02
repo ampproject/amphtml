@@ -17,7 +17,7 @@
 # Specific URL to reference for violations having to do with mustache
 # templates. These are specific to any particular tag, so must live at
 # the top level of this rules file.
-template_spec_url: "https://www.ampproject.org/docs/reference/components/dynamic/amp-mustache"
+template_spec_url: "https://amp.dev/documentation/components/dynamic/amp-mustache"
 
 tags: {  # amp-mustache
   html_format: AMP

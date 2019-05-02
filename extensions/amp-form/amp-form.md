@@ -112,7 +112,7 @@ See the [Custom Validation](#custom-validations) section for more details.
 
 * Other form-related elements, including: `<textarea>`, `<select>`, `<option>`, `<fieldset>`, `<label>`, `<input type=text>`, `<input type=submit>`, and so on.
 * `<input type=password>` and `<input type=file>` inside of `<form method=POST action-xhr>`.
-* [`amp-selector`](https://www.ampproject.org/docs/reference/components/amp-selector)
+* [`amp-selector`](https://amp.dev/documentation/components/amp-selector)
 
 **Not Allowed**:
 
@@ -183,7 +183,7 @@ See the [full example here](../../examples/forms.amp.html).
 
 ### Analytics triggers
 
-The `amp-form` extension triggers the following events that you can track in your [amp-analytics](https://www.ampproject.org/docs/reference/components/amp-analytics) config:
+The `amp-form` extension triggers the following events that you can track in your [amp-analytics](https://amp.dev/documentation/components/amp-analytics) config:
 
 | Event                     | Fired when                        |
 |---------------------------|-----------------------------------|
@@ -244,7 +244,7 @@ When the `amp-form-submit`, `amp-form-submit-success`, or `amp-form-submit-error
 
 ## Success/error response rendering
 
-You can render success or error responses in your form by using [extended templates](https://www.ampproject.org/docs/fundamentals/spec#extended-templates), such as [amp-mustache](https://www.ampproject.org/docs/reference/components/amp-mustache), or success responses through data binding with [amp-bind](https://www.ampproject.org/docs/reference/components/amp-bind) and the following response attributes:
+You can render success or error responses in your form by using [extended templates](https://www.ampproject.org/docs/fundamentals/spec#extended-templates), such as [amp-mustache](https://amp.dev/documentation/components/amp-mustache), or success responses through data binding with [amp-bind](https://amp.dev/documentation/components/amp-bind) and the following response attributes:
 
 | Response attribute | Description |
 |-----------|---------------------|
@@ -341,11 +341,11 @@ See the [full example here](../../examples/forms.amp.html).
 
 ### To render a successful response with data binding
 
-* Use the [on attribute](https://www.ampproject.org/docs/interaction_dynamic/amp-actions-and-events) to bind the form *submit-success* attribute to [`AMP.setState()`](https://www.ampproject.org/docs/reference/components/amp-bind#updating-state-with-amp.setstate()).
+* Use the [on attribute](https://www.ampproject.org/docs/interaction_dynamic/amp-actions-and-events) to bind the form *submit-success* attribute to [`AMP.setState()`](https://amp.dev/documentation/components/amp-bind#updating-state-with-amp.setstate()).
 * Use the `event` property to capture the response data.
 * Add the state attribute to the desired element to bind the form response.
 
-The following example demonstrates a form `submit-success` response with [`amp-bind`](https://www.ampproject.org/docs/reference/components/amp-bind):
+The following example demonstrates a form `submit-success` response with [`amp-bind`](https://amp.dev/documentation/components/amp-bind):
 ```html
   <p [text]="'Thanks, ' + subscribe +'! You have successfully subscribed.'">Subscribe to our newsletter</p>
   <form method="post"

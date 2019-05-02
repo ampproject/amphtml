@@ -470,7 +470,7 @@ following, with errors specific to your test cases.
 
 ```
 FAIL
-amp-iframe/0.1/test/validator-amp-iframe.html:41:2 The attribute 'src' in tag 'amp-iframe' is missing or incorrect, but required by attribute '[src]'. (see https://www.ampproject.org/docs/reference/components/amp-iframe) [DISALLOWED_HTML]
+amp-iframe/0.1/test/validator-amp-iframe.html:41:2 The attribute 'src' in tag 'amp-iframe' is missing or incorrect, but required by attribute '[src]'. (see https://amp.dev/documentation/components/amp-iframe) [DISALLOWED_HTML]
 ```
 
 To test your changes, from the `amphtml/validator/` path, run `python build.py`.

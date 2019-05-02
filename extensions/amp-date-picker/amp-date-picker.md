@@ -331,14 +331,14 @@ an initial end date dynamically.
 The earliest date that the user may select. This must be formatted as an ISO 8601 date.
 If no `min` attribute is present, the current date will be the minimum date.
 
-The `min` attribute may be updated after a user gesture with [`amp-bind`](https://www.ampproject.org/docs/reference/components/amp-bind).
+The `min` attribute may be updated after a user gesture with [`amp-bind`](https://amp.dev/documentation/components/amp-bind).
 
 ##### max
 
 The latest date that the user may select. This must be formatted as an ISO 8601 date.
 If no `max` attribute is present, the date picker will have no maximum date.
 
-The `max` attribute may be updated after a user gesture with [`amp-bind`](https://www.ampproject.org/docs/reference/components/amp-bind).
+The `max` attribute may be updated after a user gesture with [`amp-bind`](https://amp.dev/documentation/components/amp-bind).
 
 #####  month-format
 
@@ -460,7 +460,7 @@ The following table lists the properties that you can specify in the JSON data:
 </tbody>
 </table>
 
-The `src` attribute may be updated after a user gesture with [`amp-bind`](https://www.ampproject.org/docs/reference/components/amp-bind).
+The `src` attribute may be updated after a user gesture with [`amp-bind`](https://amp.dev/documentation/components/amp-bind).
 
 ###### template definition objects
 

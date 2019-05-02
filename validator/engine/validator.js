@@ -381,7 +381,7 @@ function getTagSpecUrl(tagSpec) {
   if (tagSpec.specUrl !== null) {return tagSpec.specUrl;}
 
   const extensionSpecUrlPrefix =
-      'https://www.ampproject.org/docs/reference/components/';
+      'https://amp.dev/documentation/components/';
   if (tagSpec.extensionSpec !== null && tagSpec.extensionSpec.name !== null)
   {return extensionSpecUrlPrefix + tagSpec.extensionSpec.name;}
   if (tagSpec.requiresExtension.length > 0) {

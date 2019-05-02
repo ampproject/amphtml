@@ -65,5 +65,5 @@ To take this approach, review the documentation for publishers' integration with
  * [comScore](https://github.com/ampproject/amphtml/pull/1608)
  * [Parsely](https://github.com/ampproject/amphtml/pull/1595)
 * [amp-analytics sample](https://github.com/ampproject/amp-publisher-sample#amp-analytics-sample)
-* [amp-analytics](https://www.ampproject.org/docs/reference/components/amp-analytics) reference documentation
+* [amp-analytics](https://amp.dev/documentation/components/amp-analytics) reference documentation
 * [amp-analytics variables](analytics-vars.md) reference documentation

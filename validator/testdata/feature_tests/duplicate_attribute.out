@@ -45,7 +45,7 @@ feature_tests/duplicate_attribute.html:31:2 Custom JavaScript is not allowed. (s
 >>    ^~~~~~~~~
 feature_tests/duplicate_attribute.html:37:3 The tag 'amp-img' contains the attribute 'width' repeated multiple times. [DISALLOWED_HTML]
 >>    ^~~~~~~~~
-feature_tests/duplicate_attribute.html:37:3 The attribute 'width' in tag 'amp-img' is set to the invalid value '100%'. (see https://www.ampproject.org/docs/reference/components/amp-img) [AMP_LAYOUT_PROBLEM]
+feature_tests/duplicate_attribute.html:37:3 The attribute 'width' in tag 'amp-img' is set to the invalid value '100%'. (see https://amp.dev/documentation/components/amp-img) [AMP_LAYOUT_PROBLEM]
 |     <amp-img src="a.png" width=600 width='100%' height=800></amp-img>
 >>    ^~~~~~~~~
 feature_tests/duplicate_attribute.html:38:3 The tag 'amp-img' contains the attribute 'width' repeated multiple times. [DISALLOWED_HTML]
