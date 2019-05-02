@@ -30,14 +30,11 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
     /** @private {string} */
     this.playerId_ = '';
 
-
     /** @private {string} */
     this.mediaId_ = '';
 
-
     /** @private {string} */
     this.iframeDomain_ = 'https://cds.connatix.com';
-
 
     /** @private {?HTMLIFrameElement} */
     this.iframe_ = null;
