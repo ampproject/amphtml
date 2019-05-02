@@ -75,6 +75,20 @@ function setTruncated(element) {
 }
 
 /**
+ * @param {!Node} node The node to operate on. 
+ * @param {function(!Node)} cb  A callback to call for each child.
+ */
+function forEachChild(node, cb) {
+  const childNodes = node.localName == 'slot' ?
+      node.assignedNodes() :
+      node.childNodes;
+
+  for (let i = 0; i < childNodes.length; i++) {
+    cb(childNodes[i]);
+  }
+}
+
+/**
  * Clears the effects of truncation for a given subtree, unhiding Elements that
  * were hidden and restoring text content for Text Nodes.
  * @param {!Node} node The node to restore.
@@ -90,9 +104,7 @@ function removeTruncation(node) {
     node.removeAttribute(ELEMENT_OVERFLOW_ATTRIBUTE);
   }
 
-  for (let child = node.firstChild; child; child = child.nextSibling) {
-    removeTruncation(child);
-  }
+  forEachChild(node, child => removeTruncation(child));
 }
 
 /**
@@ -177,15 +189,7 @@ function getAllNodes(root, filter, nodes = []) {
   }
 
   nodes.push(root);
-
-  const childNodes = root.localName == 'slot' ?
-      root.assignedNodes() :
-      root.childNodes;
-
-  for (let i = 0; i < childNodes.length; i++) {
-    getAllNodes(childNodes[i], filter, nodes);
-  }
-
+  forEachChild(root, child => getAllNodes(child, filter, nodes));
   return nodes;
 }
 
