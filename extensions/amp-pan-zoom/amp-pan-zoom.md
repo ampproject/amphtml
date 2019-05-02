@@ -30,14 +30,14 @@ Provides zooming and panning for arbitrary content.
 <table>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
-    <td><div><a href="https://www.ampproject.org/docs/reference/experimental.html">Experimental</a></td>
+    <td><div><a href="https://amp.dev/documentation/guides-and-tutorials/learn/experimental.html">Experimental</a></td>
   </tr>
   <tr>
     <td><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-pan-zoom" src="https://cdn.ampproject.org/v0/amp-pan-zoom-0.1.js">&lt;/script></code></td>
   </tr>
     <tr>
-    <td><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html#the-layout-attribute">Supported Layouts</a></strong></td>
+    <td><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout#the-layout-attribute">Supported Layouts</a></strong></td>
     <td>fill, fixed, fixed-height, responsive</td>
   </tr>
 </table>

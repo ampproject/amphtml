@@ -32,7 +32,7 @@ limitations under the License.
     <td>A runtime-managed replacement for the HTML <code>img</code> tag.</td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
     <td>fill, fixed, fixed-height, flex-item, intrinsic, nodisplay, responsive</td>
   </tr>
   <tr>
@@ -51,7 +51,7 @@ The runtime may choose to delay or prioritize resource loading based on the view
 explicit size (as in `width` / `height`) in advance, so that the aspect ratio can be known without fetching the image. Actual layout behavior is determined by the `layout` attribute.
 
 {% call callout('Read on', type='read') %}
-Learn more about layouts in the [AMP HTML Layout System](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md) spec and [Supported Layouts](https://www.ampproject.org/docs/guides/responsive/control_layout.html#the-layout-attribute).
+Learn more about layouts in the [AMP HTML Layout System](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md) spec and [Supported Layouts](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout#the-layout-attribute).
 {% endcall %}
 
 #### Example: Displaying a responsive image

@@ -32,7 +32,7 @@ Allows rendering of custom UI components running on third-party JavaScript.
 <table>
   <tr>
     <td><strong>Availability</strong></td>
-    <td><a href="https://www.ampproject.org/docs/reference/experimental.html">Experimental</a></td>
+    <td><a href="https://amp.dev/documentation/guides-and-tutorials/learn/experimental.html">Experimental</a></td>
   </tr>
   <tr>
     <td class="col-fourty"><strong>Required Script</strong></td>
@@ -49,7 +49,7 @@ Allows rendering of custom UI components running on third-party JavaScript.
 The `amp-script` component allows you to render widgets and other UI using custom third-party JavaScript, e.g. a React component.
 
 {% call callout('Important', type='caution') %}
-`amp-script` is in active development and under [experimental availability](https://www.ampproject.org/docs/reference/experimental.html). It's subject to breaking API changes and should not yet be used in production.
+`amp-script` is in active development and under [experimental availability](https://amp.dev/documentation/guides-and-tutorials/learn/experimental.html). It's subject to breaking API changes and should not yet be used in production.
 {% endcall %}
 
 ### A simple example

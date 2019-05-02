@@ -34,7 +34,7 @@ limitations under the License.
     <td><code>&lt;script async custom-element="amp-lightbox" src="https://cdn.ampproject.org/v0/amp-lightbox-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
     <td>nodisplay</td>
   </tr>
   <tr>
@@ -127,7 +127,7 @@ The `amp-lightbox` exposes the following actions you can use [AMP on-syntax to t
 ## <a id="a4a"></a> Using `amp-lightbox` in AMPHTML ads
 
 {% call callout('Note', type='note') %}
-The `amp-lightbox` component for use in AMPHTML ads is [experimental](https://www.ampproject.org/docs/reference/experimental) and under active development. To use `amp-lightbox` in AMPHTML ads, [enable the `amp-lightbox-a4a-proto` experiment](http://cdn.ampproject.org/experiments.html).
+The `amp-lightbox` component for use in AMPHTML ads is [experimental](https://amp.dev/documentation/guides-and-tutorials/learn/experimental) and under active development. To use `amp-lightbox` in AMPHTML ads, [enable the `amp-lightbox-a4a-proto` experiment](http://cdn.ampproject.org/experiments.html).
 {% endcall %}
 
 There are some differences between using `amp-lightbox` in normal AMP documents vs. [ads written in AMPHTML](../amp-a4a/amp-a4a-format.md):
