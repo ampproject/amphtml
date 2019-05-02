@@ -665,7 +665,7 @@ describes.realWin('amp-autocomplete unit tests', {
       expect(impl.container_.children.length).to.equal(3);
       expect(impl.getEnabledItems_().length).to.equal(2);
       expect(impl.container_.children[2].hasAttribute(
-        'aria-disabled')).to.be.true;
+          'aria-disabled')).to.be.true;
     });
   });
 });
