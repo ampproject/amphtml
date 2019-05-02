@@ -577,25 +577,29 @@
     <form method="post" action-xhr="/form/echo-json/post" target="_blank">
       <amp-autocomplete filter="substring" min-characters="0" [src]="manualFilterData" >
         <input type="text" on="input-debounced:AMP.setState({ manualFilterData: event.value.length == 0 ? 
-          initialInventory : { 'items' : [ 'apple', 'orange', 'banana' ]} })">
+          initialInventory : { 'items' : [ 'apple', 'orange', 'banana', 'avocado' ]} })">
           <amp-state id="initialInventory">
               <script type="application/json">
-                { "items" : [ { "value" : "Recommended Fruit", 
-                                "sectionHeader": "true" },
+                { "items" : [ { "value" : "Doctor Approved", 
+                                "disabled" : "true" },
                               { "value" : "apple",
                                 "trending" : "true" },
                               { "value" : "orange",
+                                "trending" : "true" },
+                              { "value" : "Trending Fruit", 
+                                "disabled" : "true" },
+                              { "value" : "avocado",
                                 "trending" : "true" },
                               { "value" : "banana",
                                 "trending" : "true" } ] }
               </script>
           </amp-state>
         <template type="amp-mustache">
-            {{#sectionHeader}}
+            {{#disabled}}
               <div disabled>
                 <b>{{value}}</b>
               </div>
-            {{/sectionHeader}}
+            {{/disabled}}
             {{#trending}}
               <div data-value="{{value}}">
                 ✨ {{value}} 
