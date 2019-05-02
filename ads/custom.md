@@ -16,7 +16,7 @@ limitations under the License.
 
 # Custom (experimental)
 
-Custom does not represent a specific network. Rather, it provides a way for 
+Custom does not represent a specific network. Rather, it provides a way for
 a site to display simple ads on a self-service basis. You must provide
 your own ad server to deliver the ads in json format as shown below.
 
@@ -116,7 +116,7 @@ The template can be specified outside the `amp-ad` tag for sharing. You can refe
 
 This must be starting with `https://`, and it must be the address of an ad
 server returning json in the format defined below. This endpoint must be available
-cross-origin. (See [CORS in AMP](https://www.ampproject.org/docs/fundamentals/amp-cors-requests).)
+cross-origin. (See [CORS in AMP](https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests).)
 
 ### data-slot (optional)
 
@@ -129,7 +129,7 @@ specified and the other does not.
 
 ## Ad server
 
-The ad server will be called once for each value of `data-url` on the page: for the vast 
+The ad server will be called once for each value of `data-url` on the page: for the vast
 majority of applications, all your ads will be from a single server so it will be
 called only once.
 
@@ -140,7 +140,7 @@ The ad server should return a json object containing a record for each slot in t
 slot id in `data-slot`. The record format is defined by your template. For the examples above,
 the record contains three fields:
 
-* src - string to go into the source parameter of the image to be displayed. This can be a 
+* src - string to go into the source parameter of the image to be displayed. This can be a
 web reference (in which case it must be `https:` or a `data:` URI including the base64-encoded image.
 * href - URL to which the user is to be directed when he clicks on the ad
 * info - A string with additional info about the ad that was served, mmaybe for use with analytics
@@ -186,13 +186,13 @@ Here is an example of how to make it work with Google Analytics events. Note tha
 that displays the page (as in `eventAction`) or in variables passed back by the ad server (as in `eventCategory` and `eventLabel`).
 
 ```html
-<amp-ad type="custom" layout="responsive" width="300" height="250" 
+<amp-ad type="custom" layout="responsive" width="300" height="250"
     data-url="https://mysite/my-ad-server">
     <template type="amp-mustache" id="my-amp-template-id">
         <a href="{{href}}" data-vars-event-label="{{evehtLabel}}" data-vars-event-category="{{category}}">
             <amp-img layout='responsive' width="300" height="250" src="{{artwork}}"></amp-img>
         </a>
-    </template>  
+    </template>
 </amp-ad>
 <amp-analytics type='googleanalytics'>
 <script type='application/json'>

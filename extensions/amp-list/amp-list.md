@@ -48,7 +48,7 @@ using a supplied template.
 The `<amp-list>` component fetches dynamic content from a CORS JSON endpoint. The response from the endpoint contains data, which is rendered in the specified template.
 
 {% call callout('Important', type='caution') %}
-Your endpoint must implement the requirements specified in the [CORS Requests in AMP](https://www.ampproject.org/docs/fundamentals/amp-cors-requests) spec.
+Your endpoint must implement the requirements specified in the [CORS Requests in AMP](https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests) spec.
 {% endcall %}
 
 You can specify a template in one of two ways:
@@ -205,7 +205,7 @@ The URL of the remote endpoint that returns the JSON that will be rendered
 within this `<amp-list>`. This must be a CORS HTTP service. The URL's protocol must be HTTPS.
 
 {% call callout('Important', type='caution') %}
-Your endpoint must implement the requirements specified in the [CORS Requests in AMP](https://www.ampproject.org/docs/fundamentals/amp-cors-requests) spec.
+Your endpoint must implement the requirements specified in the [CORS Requests in AMP](https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests) spec.
 {% endcall %}
 
 The `src` attribute may be omitted if the `[src]` attribute exists.
@@ -219,7 +219,7 @@ Defines a `credentials` option as specified by the [Fetch API](https://fetch.spe
 * Supported values: `omit`, `include`
 * Default: `omit`
 
-To send credentials, pass the value of `include`. If this value is set, the response must follow the [AMP CORS security guidelines](https://www.ampproject.org/docs/fundamentals/amp-cors-requests#cors-security-in-amp).
+To send credentials, pass the value of `include`. If this value is set, the response must follow the [AMP CORS security guidelines](https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests#cors-security-in-amp).
 
 Here's an example that specifies including credentials to display personalized content in a list:
 

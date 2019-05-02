@@ -71,7 +71,7 @@ Each unique CORS endpoint is called only once per page.
   <li>`formattedPhoneNumber` (optional): Specifies the phone number to display. If not specified, the value in `phoneNumber` is used.</li>
 </ul>
 <p>{% call callout('Important', type='caution') %}
-  Your XHR endpoint must implement the requirements specified in the <a href="https://www.ampproject.org/docs/fundamentals/amp-cors-requests">CORS Requests in AMP</a> spec.
+  Your XHR endpoint must implement the requirements specified in the <a href="https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests">CORS Requests in AMP</a> spec.
   {% endcall %}</p></td>
   </tr>
 </table>
