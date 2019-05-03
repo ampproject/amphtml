@@ -521,6 +521,20 @@ describes.realWin('amp-autocomplete unit tests', {
     });
   });
 
+  it('should call keyDownHandler_() on Tab', () => {
+    const event = {key: Keys.TAB};
+    impl.inputElement_.value = 'expected';
+    impl.activeElement_ = doc.createElement('div');
+    expect(impl.userInput_).not.to.equal(impl.inputElement_.value);
+    const fireEventSpy = sandbox.spy(impl, 'fireSelectEvent_');
+    return element.layoutCallback().then(() => {
+      return impl.keyDownHandler_(event);
+    }).then(() => {
+      expect(impl.userInput_).to.equal(impl.inputElement_.value);
+      expect(fireEventSpy).to.have.been.calledWith(impl.userInput_);
+    });
+  });
+
   it('should call keyDownHandler_() and fallthrough on any other key', () => {
     const event = {key: Keys.LEFT_ARROW};
     return element.layoutCallback().then(() => {

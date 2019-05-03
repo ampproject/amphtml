@@ -29,6 +29,22 @@
 </head>
 <body>
     <h1>Autocomplete</h1>
+    <h2>Select Event</h2>
+    <p>min-characters = 0</p>
+    <form method="post" action-xhr="/form/echo-json/post" target="_blank">
+      <amp-autocomplete filter="substring" min-characters="0" src="autocomplete-cities.example.json"
+        on="select:AMP.setState({inputSelect: event.value})">
+          <input type="text" name="input2" required>
+      </amp-autocomplete>
+      <input name="submit-button" type="submit" value="Submit">
+    <div submit-success>
+        <template type="amp-mustache">
+            Success! {{input2}}
+        </template>
+    </div>
+    </form>
+    <p [text]="'Hello ' + inputSelect">Hello World</p>
+
     <h2>Disable browser autofill</h2>
     <p>form has no autocomplete attr</p>
     <form method="post" action-xhr="/form/echo-json/post" target="_blank">
