@@ -85,18 +85,13 @@
 <!-- Call to action-macro. -->
 <button on="tap:scrollable-carousel-macro.execute()">Go to slide 1</button>
 
-<!-- Different calls referencing the action macro, with different arguments. -->
-<button on="tap:scrollable-carousel-macro-args.execute(x=1)">Go to slide 1</button>
-<button on="tap:scrollable-carousel-macro-args.execute(x=2)">Go to slide 2</button>
+
+
+<a role="button" style="float:left;border:none;display:inline-block;font-size:14px;font-weight:normal;font-family:&quot;Google Sans&quot;,Roboto,sans-serif;line-height:36px;min-height:36px;padding:0 8px;text-align:center;text-decoration:none;letter-spacing:0.25px;background-color:transparent;color:#1a73e8" href="https://google.com" target="_blank">Open</a>
+<br/>
+<a role="button" on="tap:scrollable-carousel-macro.execute()" style="float:left;border:none;display:inline-block;font-size:14px;font-weight:normal;font-family:&quot;Google Sans&quot;,Roboto,sans-serif;line-height:36px;min-height:36px;padding:0 8px;text-align:center;text-decoration:none;letter-spacing:0.25px;background-color:transparent;color:#1a73e8" href="https://google.com" target="_blank">Action</a>
+
 <br />
-<!-- Invokes the multi action action macro -->
-<button on="tap:scrollable-carousel-macro-multi.execute(x=1,y=2)">Go to slide 1 then slide 2</button>
-
-<!-- Call to an action-macro that calls an action macro. -->
-<button on="tap:scrollable-carousel-macro-refers-an-action-macro.execute()">Go to slide 2</button>
-
-<!-- Invalid call action macro call. Action macro referenced -->
-<button on="tap:scrollable-carousel-macro-refers-an-action-macro-defined-after-it.execute()">Invalid call</button>
-
+<a role="button" on="tap:non-existent-target.execute()" style="float:left;border:none;display:inline-block;font-size:14px;font-weight:normal;font-family:&quot;Google Sans&quot;,Roboto,sans-serif;line-height:36px;min-height:36px;padding:0 8px;text-align:center;text-decoration:none;letter-spacing:0.25px;background-color:transparent;color:#1a73e8" href="https://google.com" target="_blank">Action node non existent</a>
 </body>
 </html>
