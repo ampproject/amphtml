@@ -56,6 +56,9 @@ const SUPPORTED_CSS_GRID_ATTRIBUTES_SELECTOR =
         .map(key => `[${key}]`)
         .join(',');
 
+const ESTHERS_ATTRIBUTE_SELECTOR =
+  '[esthers-attribute]';
+
 /**
  * The attribute name for grid layer templates.
  * @private @const {string}
@@ -98,6 +101,7 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
     this.applyTemplateClassName_();
     this.setOwnCssGridStyles_();
     this.setDescendentCssGridStyles_();
+    this.setDescendentCssTextStyles_();
   }
 
   /** @override */
@@ -131,6 +135,22 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
 
     Array.prototype.forEach.call(elementsToUpgradeStyles, element => {
       this.setCssGridStyles_(element);
+    });
+  }
+
+  /**
+   * Hi this is Esther
+   * @private
+   */
+  setDescendentCssTextStyles_() {
+    const elementsToUpgradeStyles = scopedQuerySelectorAll(this.element,
+        ESTHERS_ATTRIBUTE_SELECTOR);
+
+    Array.prototype.forEach.call(elementsToUpgradeStyles, element => {
+      const color = element.getAttribute('esthers-attribute');
+      const text = element.innerHTML;
+      const newHtml = `<span style="background-color:${color}">${text}</span>`;
+      element.innerHTML = newHtml;
     });
   }
 

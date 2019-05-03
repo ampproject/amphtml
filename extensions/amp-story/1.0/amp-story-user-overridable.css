@@ -51,3 +51,7 @@ amp-story-grid-layer * {
 amp-story-grid-layer {
   padding: 68px 32px 32px; /* 44 + 24 */
 }
+
+amp-story-grid-layer [esthers-attribute] > span {
+  padding: 2px 4px;
+}
