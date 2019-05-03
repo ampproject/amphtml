@@ -22,6 +22,12 @@
     input[name=favoriteState] {
       width: 2em;
     }
+    .out-of-stock {
+      text-align: right;
+      text-transform: uppercase;
+      font: 8pt 'Arial', sans-serif;
+      right: 0;
+    }
   </style>
   <script>
       (self.AMP=self.AMP||[]).push((AMP) => {
@@ -573,43 +579,32 @@
         </div>
     </form>
 
-    <h2>'Disable' attribute</h2>
+    <h2>'Disabled' attribute</h2>
     <form method="post" action-xhr="/form/echo-json/post" target="_blank">
       <amp-autocomplete filter="substring" min-characters="0" [src]="manualFilterData" >
-        <input type="text" on="input-debounced:AMP.setState({ manualFilterData: event.value.length == 0 ? 
-          initialInventory : { 'items' : [ 'apple', 'orange', 'banana', 'avocado' ]} })">
+        <input type="text">
           <amp-state id="initialInventory">
               <script type="application/json">
-                { "items" : [ { "value" : "Doctor Approved", 
+                { "items" : [ { "value" : "apple",
                                 "disabled" : "true" },
-                              { "value" : "apple",
-                                "trending" : "true" },
-                              { "value" : "orange",
-                                "trending" : "true" },
-                              { "value" : "Trending Fruit", 
-                                "disabled" : "true" },
+                              { "value" : "orange" },
                               { "value" : "avocado",
-                                "trending" : "true" },
-                              { "value" : "banana",
-                                "trending" : "true" } ] }
+                                "disabled" : "true" },
+                              { "value" : "banana" } ] }
               </script>
           </amp-state>
         <template type="amp-mustache">
             {{#disabled}}
               <div disabled>
-                <b>{{value}}</b>
+                {{value}}
+                <span class="out-of-stock">out of stock</span>
               </div>
             {{/disabled}}
-            {{#trending}}
+            {{^disabled}}
               <div data-value="{{value}}">
-                ✨ {{value}} 
+                {{value}}
               </div>
-            {{/trending}}
-            {{^value}}
-              <div data-value="{{.}}">
-                {{.}}
-              </div>
-            {{/value}}
+            {{/disabled}}
         </template> 
       </amp-autocomplete>
       <input name="submit-button" type="submit" value="Submit">

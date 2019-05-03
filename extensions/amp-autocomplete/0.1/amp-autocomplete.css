@@ -70,3 +70,7 @@ amp-autocomplete > input {
 .i-amphtml-autocomplete-item-active:not([disabled]) {
   background-color: rgba(0,0,0,.15); /* default-ui-light-gray */
 }
+
+.i-amphtml-autocomplete-item[disabled] {
+  color: silver;
+}
