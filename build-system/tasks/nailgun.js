@@ -31,8 +31,10 @@ const nailgunServer =
     require.resolve('../../third_party/nailgun/nailgun-server.jar');
 const customRunner = require.resolve('../runner/dist/runner.jar');
 const DEFAULT_NAILGUN_PORT = '2113';
+const CLOSURE_NAILGUN_PORT = '2114';
 const NAILGUN_STARTUP_TIMEOUT_MS = 5 * 1000;
 
+exports.closureNailgunPort = CLOSURE_NAILGUN_PORT;
 
 /**
  * Replaces the default compiler binary with nailgun on linux and macos
