@@ -17,7 +17,7 @@
 
 
 const fs = require('fs');
-const gulp = require('gulp-help')(require('gulp'));
+const gulp = require('gulp');
 const PluginError = require('plugin-error');
 const postcss = require('postcss');
 const table = require('text-table');
@@ -109,17 +109,17 @@ function createTable(filesData) {
  * @param {string} glob
  * @return {!Stream}
  */
-function getZindex(glob) {
+function getZindexStream(glob) {
   return gulp.src(glob).pipe(through.obj(onFileThrough));
 }
 
 /**
  * @param {function()} cb
  */
-function getZindexForAmp(cb) {
+function getZindex(cb) {
   const filesData = Object.create(null);
   // Don't return the stream here since we do a `writeFileSync`
-  getZindex('{css,src,extensions}/**/*.css')
+  getZindexStream('{css,src,extensions}/**/*.css')
       .on('data', chunk => {
         filesData[chunk.name] = chunk.selectors;
       })
@@ -132,8 +132,11 @@ function getZindexForAmp(cb) {
       });
 }
 
-gulp.task('get-zindex', 'Runs through all css files of project to gather ' +
-    'z-index values', getZindexForAmp);
+module.exports = {
+  createTable,
+  getZindex,
+  getZindexStream,
+};
 
-exports.getZindex = getZindex;
-exports.createTable = createTable;
+getZindex.description =
+    'Runs through all css files of project to gather z-index values';

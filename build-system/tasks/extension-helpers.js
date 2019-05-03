@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-const $$ = require('gulp-load-plugins')();
 const colors = require('ansi-colors');
 const fs = require('fs-extra');
 const log = require('fancy-log');
 const minimatch = require('minimatch');
+const watch = require('gulp-watch');
 const wrappers = require('../compile-wrappers');
 const {aliasBundles, extensionBundles, verifyExtensionBundles, verifyExtensionAliasBundles} = require('../../bundles.config');
 const {compileJs, endBuildStep, mkdirSync} = require('./helpers');
@@ -347,7 +347,7 @@ function buildExtension(
     // Do not set watchers again when we get called by the watcher.
     const copy = Object.create(options);
     copy.watch = false;
-    $$.watch(path + '/*', function() {
+    watch(path + '/*', function() {
       buildExtension(name, version, latestVersion, hasCss, copy);
     });
   }
@@ -443,9 +443,11 @@ function buildExtensionJs(path, name, version, latestVersion, options) {
   });
 }
 
-exports.buildExtensions = buildExtensions;
-exports.extensions = extensions;
-exports.extensionAliasFilePath = extensionAliasFilePath;
-exports.getExtensionsToBuild = getExtensionsToBuild;
-exports.maybeInitializeExtensions = maybeInitializeExtensions;
-exports.parseExtensionFlags = parseExtensionFlags;
+module.exports = {
+  buildExtensions,
+  extensions,
+  extensionAliasFilePath,
+  getExtensionsToBuild,
+  maybeInitializeExtensions,
+  parseExtensionFlags,
+};

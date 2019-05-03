@@ -17,10 +17,10 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const colors = require('ansi-colors');
-const gulp = require('gulp-help')(require('gulp'));
 const log = require('fancy-log');
 const nodemon = require('nodemon');
 const path = require('path');
+const {createCtrlcHandler} = require('../ctrlcHandler');
 
 const host = argv.host || 'localhost';
 const port = argv.port || process.env.PORT || 8000;
@@ -33,6 +33,8 @@ const noCachingExtensions = argv.noCachingExtensions != undefined;
  * Starts a simple http server at the repository root
  */
 function serve() {
+  createCtrlcHandler('serve');
+
   // Get the serve mode
   if (argv.compiled) {
     process.env.SERVE_MODE = 'compiled';
@@ -81,29 +83,23 @@ function serve() {
   });
 }
 
-process.on('SIGINT', function() {
-  process.exit();
-});
-
-gulp.task(
-    'serve',
-    'Serves content in root dir over ' + getHost() + '/',
-    serve,
-    {
-      options: {
-        'host': '  Hostname or IP address to bind to (default: localhost)',
-        'port': '  Specifies alternative port (default: 8000)',
-        'https': '  Use HTTPS server (default: false)',
-        'quiet': '  Do not log HTTP requests (default: false)',
-        'cache': '  Make local resources cacheable by the browser ' +
-            '(default: false)',
-        'inspect': '  Run nodemon in `inspect` mode',
-      },
-    }
-);
-
 function getHost() {
   return (useHttps ? 'https' : 'http') + '://' + host + ':' + port;
 }
 
-exports.serve = serve;
+module.exports = {
+  serve,
+};
+
+/* eslint "google-camelcase/google-camelcase": 0 */
+
+serve.description = 'Serves content in root dir over ' + getHost() + '/';
+serve.flags = {
+  'host': '  Hostname or IP address to bind to (default: localhost)',
+  'port': '  Specifies alternative port (default: 8000)',
+  'https': '  Use HTTPS server (default: false)',
+  'quiet': '  Do not log HTTP requests (default: false)',
+  'cache': '  Make local resources cacheable by the browser ' +
+      '(default: false)',
+  'inspect': '  Run nodemon in `inspect` mode',
+};

@@ -22,21 +22,18 @@ const browserify = require('browserify');
 const colors = require('ansi-colors');
 const depCheckConfig = require('../dep-check-config');
 const fs = BBPromise.promisifyAll(require('fs-extra'));
-const gulp = require('gulp-help')(require('gulp'));
+const gulp = require('gulp');
 const log = require('fancy-log');
 const minimatch = require('minimatch');
 const path = require('path');
 const source = require('vinyl-source-stream');
 const through = require('through2');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
-const {isTravisBuild} = require('../travis');
-
+const {css} = require('./css');
 
 const root = process.cwd();
 const absPathRegExp = new RegExp(`^${root}/`);
 const red = msg => log(colors.red(msg));
-
-const maybeUpdatePackages = isTravisBuild() ? [] : ['update-packages'];
 
 /**
  * @typedef {{
@@ -283,7 +280,8 @@ function runRules(modules) {
   return errorsFound;
 }
 
-function depCheck() {
+async function depCheck() {
+  await css();
   const handlerProcess = createCtrlcHandler('dep-check');
   return getSrcs().then(entryPoints => {
     // This check is for extension folders that actually dont have
@@ -323,8 +321,8 @@ function flatten(arr) {
   return [].concat.apply([], arr);
 }
 
-gulp.task(
-    'dep-check',
-    'Runs a dependency check on each module',
-    maybeUpdatePackages.concat(['css']),
-    depCheck);
+module.exports = {
+  depCheck,
+};
+
+depCheck.description = 'Runs a dependency check on each module';

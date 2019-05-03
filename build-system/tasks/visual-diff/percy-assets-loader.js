@@ -81,4 +81,6 @@ class PercyAssetsLoader {
   }
 }
 
-exports.PercyAssetsLoader = PercyAssetsLoader;
+module.exports = {
+  PercyAssetsLoader,
+};

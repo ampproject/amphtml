@@ -16,7 +16,7 @@
 'use strict';
 
 const colors = require('ansi-colors');
-const gulp = require('gulp-help')(require('gulp'));
+const gulp = require('gulp');
 const log = require('fancy-log');
 const path = require('path');
 const srcGlobs = require('../config').presubmitGlobs;
@@ -1138,7 +1138,7 @@ function isMissingTerms(file) {
  * Check a file for all the required terms and
  * any forbidden terms and log any errors found.
  */
-function checkForbiddenAndRequiredTerms() {
+function presubmit() {
   let forbiddenFound = false;
   let missingRequirements = false;
   return gulp.src(srcGlobs)
@@ -1158,10 +1158,14 @@ function checkForbiddenAndRequiredTerms() {
             'to the file)'));
         }
         if (forbiddenFound || missingRequirements) {
-          process.exit(1);
+          process.exitCode = 1;
         }
       });
 }
 
-gulp.task('presubmit', 'Run validation against files to check for forbidden ' +
-  'and required terms', checkForbiddenAndRequiredTerms);
+module.exports = {
+  presubmit,
+};
+
+presubmit.description =
+    'Run validation against files to check for forbidden and required terms';

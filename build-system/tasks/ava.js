@@ -15,20 +15,24 @@
  */
 'use strict';
 
-const ava = require('gulp-ava');
-const gulp = require('gulp-help')(require('gulp'));
+const gulp = require('gulp');
+const gulpAva = require('gulp-ava');
 const {isTravisBuild} = require('../travis');
 
 /**
  * Runs ava tests.
  */
-function runAvaTests() {
+function ava() {
   return gulp.src([
-    'csvify-size/test.js',
-    'get-zindex/test.js',
-    'prepend-global/test.js',
+    require.resolve('./csvify-size/test.js'),
+    require.resolve('./get-zindex/test.js'),
+    require.resolve('./prepend-global/test.js'),
   ])
-      .pipe(ava({silent: isTravisBuild()}));
+      .pipe(gulpAva({silent: isTravisBuild()}));
 }
 
-gulp.task('ava', 'Runs ava tests for gulp tasks', runAvaTests);
+module.exports = {
+  ava,
+};
+
+ava.description = 'Runs ava tests for gulp tasks';

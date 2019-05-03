@@ -16,7 +16,6 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const gulp = require('gulp-help')(require('gulp'));
 const {execOrDie} = require('../exec');
 
 let validatorArgs = '';
@@ -38,6 +37,10 @@ function validatorWebui() {
   execOrDie('cd validator/webui && python build.py' + validatorArgs);
 }
 
-gulp.task('validator', 'Builds and tests the AMP validator.', validator);
-gulp.task('validator-webui', 'Builds and tests the AMP validator web UI.',
-    validatorWebui);
+module.exports = {
+  validator,
+  validatorWebui,
+};
+
+validator.description = 'Builds and tests the AMP validator.';
+validatorWebui.description = 'Builds and tests the AMP validator web UI.';

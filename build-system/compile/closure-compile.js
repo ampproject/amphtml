@@ -59,7 +59,6 @@ exports.handleSinglePassCompilerError = function() {
 function handleError(message) {
   console./*OK*/error(
       `${message}\n` + formatClosureCompilerError(compilerErrors));
-  process.exit(1);
 }
 
 /**

@@ -182,7 +182,7 @@ function main() {
 
   // Run the local version of all tests.
   process.env['LOCAL_PR_CHECK'] = true;
-  printChangeSummary();
+  printChangeSummary(FILENAME);
   console.log(FILELOGPREFIX, 'Running all pr-check commands locally.');
   runAllCommandsLocally();
   stopTimer(FILENAME, FILENAME, startTime);

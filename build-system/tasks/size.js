@@ -221,7 +221,7 @@ function sizer() {
  * the content size before and after gzip and cleanup any temporary file
  * output from the process.
  */
-function sizeTask() {
+function size() {
   gulp.src([
     'dist/**/*.js',
     '!dist/**/*-latest.js',
@@ -234,4 +234,8 @@ function sizeTask() {
       .on('end', del.bind(null, [tempFolderName]));
 }
 
-gulp.task('size', 'Runs a report on artifact size', sizeTask);
+module.exports = {
+  size,
+};
+
+size.description = 'Runs a report on artifact size';

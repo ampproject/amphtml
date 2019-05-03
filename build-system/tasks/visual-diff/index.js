@@ -19,7 +19,6 @@ const argv = require('minimist')(process.argv.slice(2));
 const BBPromise = require('bluebird');
 const colors = require('ansi-colors');
 const fs = require('fs');
-const gulp = require('gulp-help')(require('gulp'));
 const JSON5 = require('json5');
 const path = require('path');
 const request = BBPromise.promisify(require('request'));
@@ -704,25 +703,23 @@ async function cleanup_() {
   }
 }
 
-gulp.task(
-    'visual-diff',
-    'Runs the AMP visual diff tests.',
-    visualDiff,
-    {
-      options: {
-        'master': '  Includes a blank snapshot (baseline for skipped builds)',
-        'empty': '  Creates a dummy Percy build with only a blank snapshot',
-        'chrome_debug': '  Prints debug info from Chrome',
-        'webserver_debug': '  Prints debug info from the local gulp webserver',
-        'debug': '  Prints all the above debug info',
-        'grep': '  Runs tests that match the pattern',
-        'percy_project': '  Override the PERCY_PROJECT environment variable',
-        'percy_token': '  Override the PERCY_TOKEN environment variable',
-        'percy_branch': '  Override the PERCY_BRANCH environment variable',
-        'percy_disabled':
-          '  Disables Percy integration (for testing local changes only)',
-        'nobuild': '  Skip build',
-        'noyarn': '  Skip calling yarn to install dependencies',
-      },
-    }
-);
+module.exports = {
+  visualDiff,
+};
+
+visualDiff.description = 'Runs the AMP visual diff tests.';
+visualDiff.flags = {
+  'master': '  Includes a blank snapshot (baseline for skipped builds)',
+  'empty': '  Creates a dummy Percy build with only a blank snapshot',
+  'chrome_debug': '  Prints debug info from Chrome',
+  'webserver_debug': '  Prints debug info from the local gulp webserver',
+  'debug': '  Prints all the above debug info',
+  'grep': '  Runs tests that match the pattern',
+  'percy_project': '  Override the PERCY_PROJECT environment variable',
+  'percy_token': '  Override the PERCY_TOKEN environment variable',
+  'percy_branch': '  Override the PERCY_BRANCH environment variable',
+  'percy_disabled':
+    '  Disables Percy integration (for testing local changes only)',
+  'nobuild': '  Skip build',
+  'noyarn': '  Skip calling yarn to install dependencies',
+};
