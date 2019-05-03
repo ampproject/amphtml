@@ -26,14 +26,14 @@ if (argv.update_tests) {
 /**
  * Simple wrapper around the python based validator build.
  */
-function validator() {
+async function validator() {
   execOrDie('cd validator && python build.py' + validatorArgs);
 }
 
 /**
  * Simple wrapper around the python based validator webui build.
  */
-function validatorWebui() {
+async function validatorWebui() {
   execOrDie('cd validator/webui && python build.py' + validatorArgs);
 }
 
