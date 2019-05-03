@@ -171,6 +171,15 @@ export class AmpForm {
     /** @const @private {string} */
     this.target_ = this.form_.getAttribute('target');
 
+    this.customHeaders_ = this.form_.getAttribute('headers');
+    if(this.customHeaders_) {
+      try {
+        this.customHeaders_ = JSON.parse(this.customHeaders_.replace(/'/g, '"'));
+      } catch (e) {
+          return false;
+      }
+    }
+
     /** @private {?string} */
     this.xhrAction_ = this.getXhrUrl_('action-xhr');
 
@@ -284,7 +293,7 @@ export class AmpForm {
         'body': body,
         'method': method,
         'credentials': 'include',
-        'headers': dict({'Accept': 'application/json'}),
+        'headers': Object.assign(dict({'Accept': 'application/json'}), this.customHeaders_),
       }),
     };
 
