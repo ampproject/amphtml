@@ -51,14 +51,6 @@ const {maybeUpdatePackages} = require('./update-packages');
 const {green, cyan} = colors;
 const argv = require('minimist')(process.argv.slice(2));
 
-// Minified targets to which AMP_CONFIG must be written.
-const minifiedRuntimeTarget = 'dist/v0.js';
-const minifiedShadowRuntimeTarget = 'dist/shadow-v0.js';
-const minifiedAdsTarget = 'dist/amp4ads-v0.js';
-// TODO(#18934, erwinm): temporary fix.
-//const minifiedRuntimeEsmTarget = 'dist/v0-esm.js';
-const minified3pTarget = 'dist.3p/current-min/f.js';
-
 /**
  * Dist Build
  * @return {!Promise}
@@ -119,19 +111,16 @@ async function dist() {
       }).then(() => {
         if (argv.fortesting) {
           return Promise.all([
-            enableLocalTesting(minifiedRuntimeTarget),
-            enableLocalTesting(minifiedAdsTarget),
-            enableLocalTesting(minifiedShadowRuntimeTarget),
-          ]).then(() => {
-            if (!argv.single_pass) {
-              // TODO(#18934, erwinm): temporary fix.
-              //return enableLocalTesting(minifiedRuntimeEsmTarget)
-              return enableLocalTesting(minifiedShadowRuntimeTarget)
-                  .then(() => {
-                    return enableLocalTesting(minifiedAdsTarget);
-                  });
-            }
-          });
+            enableLocalTesting('dist/v0.js'),
+            enableLocalTesting('dist/amp4ads-v0.js'),
+            enableLocalTesting('dist/shadow-v0.js'),
+          ]);
+          // TODO(#18934, erwinm): Re-enable when the ESM build is fixed.
+          // .then(() => {
+          //   if (!argv.single_pass) {
+          //     return enableLocalTesting('dist/v0-esm.js')
+          //   }
+          // });
         }
       }).then(() => {
         if (argv.esm) {
@@ -145,7 +134,7 @@ async function dist() {
         }
       }).then(() => {
         if (argv.fortesting) {
-          return enableLocalTesting(minified3pTarget);
+          return enableLocalTesting('dist.3p/current-min/f.js');
         }
       }).then(() => exitCtrlcHandler(handlerProcess));
 }

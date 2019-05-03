@@ -535,12 +535,12 @@ async function runTests() {
   }
 }
 
-function test() {
+async function test() {
   if (!argv.nobuild) {
     if (argv.unit || argv.a4a || argv['local-changes']) {
-      css();
+      await css();
     } else {
-      build();
+      await build();
     }
   }
   // TODO(alanorozco): Come up with a more elegant check?

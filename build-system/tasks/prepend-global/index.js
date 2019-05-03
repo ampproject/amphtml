@@ -200,9 +200,6 @@ function removeConfig(target) {
       .then(file => {
         let contents = file.toString();
         if (numConfigs(contents) == 0) {
-          if (!isTravisBuild()) {
-            log('No configs found in', cyan(target));
-          }
           return Promise.resolve();
         }
         sanityCheck(contents);
