@@ -17,7 +17,6 @@
 
 const config = require('../config');
 const deglob = require('globs-to-files');
-const gulp = require('gulp-help')(require('gulp'));
 const Mocha = require('mocha');
 const {isTravisBuild} = require('../travis');
 
@@ -25,7 +24,7 @@ const {isTravisBuild} = require('../travis');
 /**
  * Run all the dev dashboard tests
  */
-function runDevDashboardTests() {
+async function devDashboardTests() {
   const mocha = new Mocha({reporter: isTravisBuild() ? 'dot' : 'spec'});
 
   // Add our files
@@ -48,6 +47,8 @@ function runDevDashboardTests() {
   return deferred;
 }
 
+module.exports = {
+  devDashboardTests,
+};
 
-gulp.task('dev-dashboard-tests', 'Runs all the dev dashboard tests',
-    runDevDashboardTests);
+devDashboardTests.description = 'Runs all the dev dashboard tests';

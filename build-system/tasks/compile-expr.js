@@ -16,7 +16,6 @@
 'use strict';
 
 const fs = require('fs-extra');
-const gulp = require('gulp');
 const jison = require('jison');
 
 /**
@@ -57,7 +56,7 @@ function compileExpr(path, jisonFilename, imports, parserName, jsFilename) {
   fs.writeFileSync(path + jsFilename, out);
 }
 
-function compileAccessExpr() {
+async function compileAccessExpr() {
   const path = 'extensions/amp-access/0.1/';
   const jisonFilename = 'access-expr-impl.jison';
   const imports = '';
@@ -66,7 +65,7 @@ function compileAccessExpr() {
   compileExpr(path, jisonFilename, imports, parserName, jsFilename);
 }
 
-function compileBindExpr() {
+async function compileBindExpr() {
   const path = 'extensions/amp-bind/0.1/';
   const jisonFilename = 'bind-expr-impl.jison';
   const imports = 'import {AstNode, AstNodeType} from \'./bind-expr-defines\';';
@@ -75,7 +74,7 @@ function compileBindExpr() {
   compileExpr(path, jisonFilename, imports, parserName, jsFilename);
 }
 
-function compileCssExpr() {
+async function compileCssExpr() {
   const path = 'extensions/amp-animation/0.1/parsers/';
   const jisonFilename = 'css-expr-impl.jison';
   const imports = 'import * as ast from \'./css-expr-ast\';';
@@ -84,6 +83,12 @@ function compileCssExpr() {
   compileExpr(path, jisonFilename, imports, parserName, jsFilename);
 }
 
-gulp.task('compile-access-expr', compileAccessExpr);
-gulp.task('compile-bind-expr', compileBindExpr);
-gulp.task('compile-css-expr', compileCssExpr);
+module.exports = {
+  compileAccessExpr,
+  compileBindExpr,
+  compileCssExpr,
+};
+
+compileAccessExpr.description = 'Use jison to create a parser for amp-access';
+compileBindExpr.description = 'Use jison to create a parser for amp-bind';
+compileCssExpr.description = 'Use jison to create a parser for amp-animation';

@@ -61,7 +61,7 @@ const cssNanoDefaultOptions = {
  * @return {!Promise<string>} that resolves with the css content after
  *    processing
  */
-const transformCss = exports.transformCss = function(filename, opt_cssnano) {
+function transformCss(filename, opt_cssnano) {
   opt_cssnano = opt_cssnano || Object.create(null);
   // See http://cssnano.co/optimisations/ for full list.
   // We try and turn off any optimization that is marked unsafe.
@@ -74,7 +74,7 @@ const transformCss = exports.transformCss = function(filename, opt_cssnano) {
   return postcss(transformers).process(css.toString(), {
     'from': filename,
   });
-};
+}
 
 /**
  * 'Jsify' a CSS file - Adds vendor specific css prefixes to the css file,
@@ -85,7 +85,7 @@ const transformCss = exports.transformCss = function(filename, opt_cssnano) {
  * @return {!Promise<string>} that resolves with the css content after
  *    processing
  */
-exports.jsifyCssAsync = function(filename) {
+function jsifyCssAsync(filename) {
   return transformCss(filename).then(function(result) {
     result.warnings().forEach(function(warn) {
       log(colors.red(warn.toString()));
@@ -93,4 +93,9 @@ exports.jsifyCssAsync = function(filename) {
     const {css} = result;
     return css + '\n/*# sourceURL=/' + filename + '*/';
   });
+}
+
+module.exports = {
+  jsifyCssAsync,
+  transformCss,
 };

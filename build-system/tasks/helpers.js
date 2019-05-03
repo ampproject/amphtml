@@ -14,18 +14,22 @@
  * limitations under the License.
  */
 
-const $$ = require('gulp-load-plugins')();
 const babelify = require('babelify');
 const browserify = require('browserify');
 const buffer = require('vinyl-buffer');
 const colors = require('ansi-colors');
+const file = require('gulp-file');
 const fs = require('fs-extra');
-const gulp = $$.help(require('gulp'));
+const gulp = require('gulp');
+const gulpWatch = require('gulp-watch');
 const lazypipe = require('lazypipe');
 const log = require('fancy-log');
 const path = require('path');
+const regexpSourcemaps = require('gulp-regexp-sourcemaps');
+const rename = require('gulp-rename');
 const rimraf = require('rimraf');
 const source = require('vinyl-source-stream');
+const sourcemaps = require('gulp-sourcemaps');
 const touch = require('touch');
 const watchify = require('watchify');
 const wrappers = require('../compile-wrappers');
@@ -87,7 +91,7 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
           watch,
           minify: shouldMinify,
           preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
-          externs: ['ads/ads.extern.js'],
+          externs: ['./ads/ads.extern.js'],
           include3pDirectories: true,
           includePolyfills: true,
         }),
@@ -98,7 +102,7 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
           watch,
           minify: shouldMinify,
           preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
-          externs: ['ads/ads.extern.js'],
+          externs: ['./ads/ads.extern.js'],
           include3pDirectories: true,
           includePolyfills: false,
         }),
@@ -109,7 +113,7 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
           watch,
           minify: shouldMinify,
           preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
-          externs: ['ads/ads.extern.js'],
+          externs: ['./ads/ads.extern.js'],
           include3pDirectories: true,
           includePolyfills: false,
         }),
@@ -249,7 +253,7 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
 
     if (watch) {
       thirdPartyFrames.forEach(frameObject => {
-        $$.watch(frameObject.max, function() {
+        gulpWatch(frameObject.max, function() {
           thirdPartyBootstrap(
               frameObject.max, frameObject.min, shouldMinify);
         });
@@ -362,12 +366,12 @@ function compileJs(srcDir, srcFilename, destDir, options) {
   const lazybuild = lazypipe()
       .pipe(source, srcFilename)
       .pipe(buffer)
-      .pipe($$.sourcemaps.init.bind($$.sourcemaps), {loadMaps: true})
-      .pipe($$.regexpSourcemaps, /\$internalRuntimeVersion\$/g, internalRuntimeVersion, 'runtime-version')
-      .pipe($$.regexpSourcemaps, /([^]+)/, devWrapper, 'wrapper');
+      .pipe(sourcemaps.init.bind(sourcemaps), {loadMaps: true})
+      .pipe(regexpSourcemaps, /\$internalRuntimeVersion\$/g, internalRuntimeVersion, 'runtime-version')
+      .pipe(regexpSourcemaps, /([^]+)/, devWrapper, 'wrapper');
 
   const lazywrite = lazypipe()
-      .pipe($$.sourcemaps.write.bind($$.sourcemaps), './')
+      .pipe(sourcemaps.write.bind(sourcemaps), './')
       .pipe(gulp.dest.bind(gulp), destDir);
 
   const destFilename = options.toName || srcFilename;
@@ -393,7 +397,7 @@ function compileJs(srcDir, srcFilename, destDir, options) {
               }
             })
             .pipe(lazybuild())
-            .pipe($$.rename(destFilename))
+            .pipe(rename(destFilename))
             .pipe(lazywrite())
             .on('end', function() {
               appendToCompiledFile(srcFilename,
@@ -581,7 +585,7 @@ function thirdPartyBootstrap(input, outputName, shouldMinify) {
   // Convert default relative URL to absolute min URL.
   const html = fs.readFileSync(input, 'utf8')
       .replace(/\.\/integration\.js/g, integrationJs);
-  return toPromise($$.file(outputName, html, {src: true})
+  return toPromise(file(outputName, html, {src: true})
       .pipe(gulp.dest('dist.3p/' + internalRuntimeVersion))
       .on('end', function() {
         const aliasToLatestBuild = 'dist.3p/current-min';
@@ -603,7 +607,7 @@ function thirdPartyBootstrap(input, outputName, shouldMinify) {
  *
  * @param {!Object} options
  */
-function buildExperiments(options) {
+async function buildExperiments(options) {
   options = options || {};
   const path = 'tools/experiments';
   const htmlPath = path + '/experiments.html';
@@ -620,7 +624,7 @@ function buildExperiments(options) {
     // Do not set watchers again when we get called by the watcher.
     const copy = Object.create(options);
     copy.watch = false;
-    $$.watch(path + '/*', function() {
+    gulpWatch(path + '/*', function() {
       buildExperiments(copy);
     });
   }
@@ -630,7 +634,7 @@ function buildExperiments(options) {
   const minHtml = html.replace('/dist.tools/experiments/experiments.js',
       `https://${hostname}/v0/experiments.js`);
   gulp.src(htmlPath)
-      .pipe($$.file('experiments.cdn.html', minHtml))
+      .pipe(file('experiments.cdn.html', minHtml))
       .pipe(gulp.dest('dist.tools/experiments/'));
 
   // Build JS.
@@ -638,7 +642,7 @@ function buildExperiments(options) {
   const builtName = 'experiments.max.js';
   const minifiedName = 'experiments.js';
   return toPromise(gulp.src(path + '/*.js')
-      .pipe($$.file(builtName, js))
+      .pipe(file(builtName, js))
       .pipe(gulp.dest('build/experiments/')))
       .then(function() {
         return compileJs(
@@ -731,16 +735,18 @@ function toPromise(readable) {
   });
 }
 
-exports.buildAlp = buildAlp;
-exports.buildExaminer = buildExaminer;
-exports.buildExperiments = buildExperiments;
-exports.buildWebWorker = buildWebWorker;
-exports.compile = compile;
-exports.compileJs = compileJs;
-exports.enableLocalTesting = enableLocalTesting;
-exports.endBuildStep = endBuildStep;
-exports.hostname = hostname;
-exports.mkdirSync = mkdirSync;
-exports.printConfigHelp = printConfigHelp;
-exports.printNobuildHelp = printNobuildHelp;
-exports.toPromise = toPromise;
+module.exports = {
+  buildAlp,
+  buildExaminer,
+  buildExperiments,
+  buildWebWorker,
+  compile,
+  compileJs,
+  enableLocalTesting,
+  endBuildStep,
+  hostname,
+  mkdirSync,
+  printConfigHelp,
+  printNobuildHelp,
+  toPromise,
+};

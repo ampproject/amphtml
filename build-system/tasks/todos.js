@@ -17,7 +17,7 @@
 
 const BBPromise = require('bluebird');
 const colors = require('ansi-colors');
-const gulp = require('gulp-help')(require('gulp'));
+const gulp = require('gulp');
 const log = require('fancy-log');
 const request = BBPromise.promisify(require('request'));
 const srcGlobs = require('../config').presubmitGlobs;
@@ -120,7 +120,7 @@ function githubRequest(path, opt_method, opt_data) {
 /**
  * todos:find-closed task.
  */
-function findClosedTodosTask() {
+function todosFindClosed() {
   let foundCount = 0;
   return gulp.src(srcGlobs)
       .pipe(through2.obj(function(file, enc, cb) {
@@ -137,5 +137,8 @@ function findClosedTodosTask() {
       });
 }
 
+module.exports = {
+  todosFindClosed,
+};
 
-gulp.task('todos:find-closed', 'Find closed TODOs', findClosedTodosTask);
+todosFindClosed.description = 'Find closed TODOs';

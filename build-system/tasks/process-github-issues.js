@@ -19,7 +19,6 @@ const assert = require('assert');
 const BBPromise = require('bluebird');
 const colors = require('ansi-colors');
 const extend = require('util')._extend;
-const gulp = require('gulp-help')(require('gulp'));
 const log = require('fancy-log');
 const request = BBPromise.promisify(require('request'));
 
@@ -71,7 +70,7 @@ const QUARTERLY_DAYS = 89;
 const NUM_BATCHES = 14;
 
 // We start processing the issues by checking token first
-function processIssues() {
+function processGithubIssues() {
   if (!GITHUB_ACCESS_TOKEN) {
     log(colors.red('You have not set the ' +
         'GITHUB_ACCESS_TOKEN env var.'));
@@ -403,14 +402,12 @@ function createGithubRequest(path, opt_method, opt_data, typeRequest) {
   return request(options);
 }
 
-gulp.task(
-    'process-github-issues',
-    'Automatically updates the labels '
-    + 'and milestones of all open issues at github.com/ampproject/amphtml.',
-    processIssues,
-    {
-      options: {
-        dryrun: '  Generate process but don\'t push it out',
-      },
-    }
-);
+module.exports = {
+  processGithubIssues,
+};
+
+processGithubIssues.description = 'Automatically updates the labels ' +
+    'and milestones of all open issues at github.com/ampproject/amphtml.';
+processGithubIssues.flags = {
+  dryrun: '  Generate process but don\'t push it out',
+};

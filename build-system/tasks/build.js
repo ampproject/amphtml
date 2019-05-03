@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-const $$ = require('gulp-load-plugins')();
-const gulp = $$.help(require('gulp'));
+const gulp = require('gulp');
 const {
   buildAlp,
   buildExaminer,
@@ -28,25 +27,27 @@ const {
 const {buildExtensions} = require('./extension-helpers');
 const {compileCss} = require('./css');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
-const {isTravisBuild} = require('../travis');
+const {maybeUpdatePackages} = require('./update-packages');
 const {parseExtensionFlags} = require('./extension-helpers');
+const {serve} = require('./serve');
 
-const maybeUpdatePackages = isTravisBuild() ? [] : ['update-packages'];
 
 /**
  * Enables watching for file changes in css, extensions.
  * @return {!Promise}
  */
-function watch() {
-  const handlerProcess = createCtrlcHandler('watch');
-  return performBuild(true).then(() => exitCtrlcHandler(handlerProcess));
+async function watch() {
+  maybeUpdatePackages();
+  createCtrlcHandler('watch');
+  return performBuild(true);
 }
 
 /**
  * Main build
  * @return {!Promise}
  */
-function build() {
+async function build() {
+  maybeUpdatePackages();
   const handlerProcess = createCtrlcHandler('build');
   return performBuild().then(() => exitCtrlcHandler(handlerProcess));
 }
@@ -56,7 +57,7 @@ function build() {
  * @param {boolean} watch
  * @return {!Promise}
  */
-function performBuild(watch) {
+async function performBuild(watch) {
   process.env.NODE_ENV = 'development';
   printNobuildHelp();
   printConfigHelp(watch ? 'gulp watch' : 'gulp build');
@@ -81,24 +82,42 @@ function polyfillsForTests() {
   return compileJs('./src/', 'polyfills.js', './build/');
 }
 
+/**
+ * The default task run when `gulp` is executed
+ */
+const defaultTask = gulp.series(watch, serve);
+
+module.exports = {
+  build,
+  defaultTask,
+  watch,
+};
+
 /* eslint "google-camelcase/google-camelcase": 0 */
 
-gulp.task('build', 'Builds the AMP library', maybeUpdatePackages, build, {
-  options: {
-    config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
-    extensions: '  Builds only the listed extensions.',
-    extensions_from: '  Builds only the extensions from the listed AMP(s).',
-    noextensions: '  Builds with no extensions.',
-  },
-});
-gulp.task('watch', 'Watches for changes in files, re-builds when detected',
-    maybeUpdatePackages, watch, {
-      options: {
-        with_inabox: '  Also watch and build the amp-inabox.js binary.',
-        with_shadow: '  Also watch and build the amp-shadow.js binary.',
-        extensions: '  Watches and builds only the listed extensions.',
-        extensions_from: '  Watches and builds only the extensions from the ' +
-            'listed AMP(s).',
-        noextensions: '  Watches and builds with no extensions.',
-      },
-    });
+build.description = 'Builds the AMP library';
+build.flags = {
+  config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
+  extensions: '  Builds only the listed extensions.',
+  extensions_from: '  Builds only the extensions from the listed AMP(s).',
+  noextensions: '  Builds with no extensions.',
+};
+
+watch.description = 'Watches for changes in files, re-builds when detected';
+watch.flags = {
+  with_inabox: '  Also watch and build the amp-inabox.js binary.',
+  with_shadow: '  Also watch and build the amp-shadow.js binary.',
+  extensions: '  Watches and builds only the listed extensions.',
+  extensions_from: '  Watches and builds only the extensions from the ' +
+      'listed AMP(s).',
+  noextensions: '  Watches and builds with no extensions.',
+};
+
+defaultTask.description = 'Runs "watch" and then "serve"';
+defaultTask.flags = {
+  extensions: '  Watches and builds only the listed extensions.',
+  extensions_from: '  Watches and builds only the extensions from the ' +
+      'listed AMP(s).',
+  noextensions: '  Watches and builds with no extensions.',
+};
+

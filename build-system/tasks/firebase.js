@@ -16,9 +16,11 @@
 const argv = require('minimist')(process.argv.slice(2));
 const colors = require('ansi-colors');
 const fs = require('fs-extra');
-const gulp = require('gulp-help')(require('gulp'));
 const log = require('fancy-log');
 const path = require('path');
+const {build} = require('./build');
+const {dist} = require('./dist');
+
 
 async function walk(dest) {
   const filelist = [];
@@ -53,7 +55,14 @@ async function modifyThirdPartyUrl() {
   await fs.writeFile(filePath, result, 'utf8');
 }
 
-async function generateFirebaseFolder() {
+async function firebase() {
+  if (!argv.nobuild) {
+    if (argv.min) {
+      dist();
+    } else {
+      build();
+    }
+  }
   await fs.mkdirp('firebase');
   if (argv.file) {
     log(colors.green(`Processing file: ${argv.file}.`));
@@ -90,21 +99,13 @@ async function replaceUrls(filePath) {
   await fs.writeFile(filePath, result, 'utf8');
 }
 
-const tasks = [];
+module.exports = {
+  firebase,
+};
 
-if (!argv.nobuild) {
-  tasks.push(argv.min ? 'dist' : 'build');
-}
-
-gulp.task(
-    'firebase',
-    'Generates firebase folder for deployment',
-    tasks,
-    generateFirebaseFolder,
-    {
-      options: {
-        'file': 'File to deploy to firebase as index.html',
-        'min': 'Source from minified files',
-        'nobuild': 'Skips the gulp build|dist step.',
-      },
-    });
+firebase.description = 'Generates firebase folder for deployment';
+firebase.flags = {
+  'file': 'File to deploy to firebase as index.html',
+  'min': 'Source from minified files',
+  'nobuild': 'Skips the gulp build|dist step.',
+};

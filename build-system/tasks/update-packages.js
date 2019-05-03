@@ -17,10 +17,11 @@
 
 const colors = require('ansi-colors');
 const fs = require('fs-extra');
-const gulp = require('gulp-help')(require('gulp'));
 const log = require('fancy-log');
 const {exec, execOrDie, getStderr} = require('../exec');
 const {isTravisBuild} = require('../travis');
+
+const argv = require('minimist')(process.argv.slice(2));
 
 const yarnExecutable = 'npx yarn';
 
@@ -195,11 +196,22 @@ function runYarnCheck() {
 }
 
 /**
+ * Used as a pre-requisite by several gulp tasks.
+ */
+function maybeUpdatePackages() {
+  if (!isTravisBuild()) {
+    updatePackages();
+  }
+}
+
+/**
  * Installs custom lint rules, updates node_modules (for local dev), and patches
  * web-animations-js and document-register-element if necessary.
  */
-function updatePackages() {
-  installCustomEslintRules();
+async function updatePackages() {
+  if (isTravisBuild() || argv._.includes('lint')) {
+    installCustomEslintRules();
+  }
   if (!isTravisBuild()) {
     runYarnCheck();
   }
@@ -209,8 +221,10 @@ function updatePackages() {
   transformEs6Packages();
 }
 
-gulp.task(
-    'update-packages',
-    'Runs yarn if node_modules is out of date, and patches web-animations-js',
-    updatePackages
-);
+module.exports = {
+  maybeUpdatePackages,
+  updatePackages,
+};
+
+updatePackages.description =
+    'Runs yarn if node_modules is out of date, and applies custom patches';

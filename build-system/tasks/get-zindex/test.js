@@ -33,7 +33,7 @@ const result = {
 test.cb('collects selectors', t => {
   const data = Object.create(null);
   const testFiles = `${__dirname}/*.css`;
-  m.getZindex(testFiles)
+  m.getZindexStream(testFiles)
       .on('data', chunk => {
         data[chunk.name] = chunk.selectors;
       })

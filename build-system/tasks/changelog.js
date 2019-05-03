@@ -30,7 +30,6 @@ const colors = require('ansi-colors');
 const config = require('../config');
 const extend = require('util')._extend;
 const git = require('gulp-git');
-const gulp = require('gulp-help')(require('gulp'));
 const log = require('fancy-log');
 const request = BBPromise.promisify(require('request'));
 
@@ -99,7 +98,7 @@ let LogMetadataDef;
  */
 let PrMetadataDef;
 
-function changelog() {
+async function changelog() {
   if (!GITHUB_ACCESS_TOKEN) {
     log(colors.red('Warning! You have not set the ' +
         'GITHUB_ACCESS_TOKEN env var. Aborting "changelog" task.'));
@@ -541,7 +540,7 @@ function buildPrMetadata(pr) {
   };
 }
 
-function changelogUpdate() {
+async function changelogUpdate() {
   if (!GITHUB_ACCESS_TOKEN) {
     log(colors.red('Warning! You have not set the ' +
         'GITHUB_ACCESS_TOKEN env var. Aborting "changelog" task.'));
@@ -610,19 +609,21 @@ function update() {
   });
 }
 
-gulp.task('changelog', 'Create github release draft', changelog, {
-  options: {
-    dryrun: '  Generate changelog but dont push it out',
-    type: '  Pass in "canary" to generate a canary changelog',
-    tag: '  The git tag and github release label',
-  },
-});
+module.exports = {
+  changelog,
+  changelogUpdate,
+};
 
-const updateMessage = 'Update github release. Ex. prepend ' +
+changelog.description = 'Create github release draft';
+changelog.flags = {
+  dryrun: '  Generate changelog but dont push it out',
+  type: '  Pass in "canary" to generate a canary changelog',
+  tag: '  The git tag and github release label',
+};
+
+changelogUpdate.description = 'Update github release. Ex. prepend ' +
     'canary percentage changes to release';
-gulp.task('changelog:update', updateMessage, changelogUpdate, {
-  options: {
-    dryrun: '  Generate changelog but dont push it out',
-    tag: '  The git tag and github release label',
-  },
-});
+changelogUpdate.flags = {
+  dryrun: '  Generate changelog but dont push it out',
+  tag: '  The git tag and github release label',
+};
