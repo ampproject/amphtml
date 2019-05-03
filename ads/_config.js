@@ -628,6 +628,10 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  'mgid': {
+    renderStartImplemented: true,
+  },
+
   'microad': {
     prefetch: 'https://j.microad.net/js/camp.js',
     preconnect: [
@@ -1124,10 +1128,6 @@ export const adConfig = {
 
   'baidu': {
     prefetch: 'https://dup.baidustatic.com/js/dm.js',
-    renderStartImplemented: true,
-  },
-
-  'mgid': {
     renderStartImplemented: true,
   },
 

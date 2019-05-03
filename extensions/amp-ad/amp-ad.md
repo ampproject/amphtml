@@ -305,6 +305,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Mediavine](../../ads/mediavine.md)
 - [Medyanet](../../ads/medyanet.md)
 - [Meg](../../ads/meg.md)
+- [Mgid](../../ads/mgid.md)
 - [MicroAd](../../ads/microad.md)
 - [MixiMedia](../../ads/miximedia.md)
 - [Mixpo](../../ads/mixpo.md)
@@ -387,7 +388,6 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Yieldpro](../../ads/yieldpro.md)
 - [Zedo](../../ads/zedo.md)
 - [Zucks](../../ads/zucks.md)
-- [Mgid](../../ads/mgid.md)
 
 ## Supported embed types
 

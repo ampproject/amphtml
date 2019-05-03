@@ -176,6 +176,7 @@ import {medianet} from '../ads/medianet';
 import {mediavine} from '../ads/mediavine';
 import {medyanet} from '../ads/medyanet';
 import {meg} from '../ads/meg';
+import {mgid} from '../ads/mgid';
 import {microad} from '../ads/microad';
 import {miximedia} from '../ads/miximedia';
 import {mixpo} from '../ads/mixpo';
@@ -266,7 +267,6 @@ import {zen} from '../ads/zen';
 import {zergnet} from '../ads/zergnet';
 import {zucks} from '../ads/zucks';
 import {speakol} from '../ads/speakol';
-import {mgid} from '../ads/mgid';
 
 /**
  * Whether the embed type may be used with amp-embed tag.
@@ -419,6 +419,7 @@ register('medianet', medianet);
 register('mediavine', mediavine);
 register('medyanet', medyanet);
 register('meg', meg);
+register('mgid', mgid);
 register('microad', microad);
 register('miximedia', miximedia);
 register('mixpo', mixpo);
@@ -513,7 +514,6 @@ register('zen', zen);
 register('zergnet', zergnet);
 register('zucks', zucks);
 register('speakol', speakol);
-register('mgid', mgid);
 
 // For backward compat, we always allow these types without the iframe
 // opting in.
