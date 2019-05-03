@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-const $$ = require('gulp-load-plugins')();
 const colors = require('ansi-colors');
+const file = require('gulp-file');
 const fs = require('fs-extra');
-const gulp = $$.help(require('gulp'));
+const gulp = require('gulp');
+const gulpWatch = require('gulp-watch');
 const log = require('fancy-log');
 const {
   buildAlp,
@@ -45,10 +46,10 @@ const {compileCss, cssEntryPoints} = require('./css');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
 const {createModuleCompatibleES5Bundle} = require('./create-module-compatible-es5-bundle');
 const {isTravisBuild} = require('../travis');
+const {updatePackages} = require('./update-packages');
 
 const {green, cyan} = colors;
 const argv = require('minimist')(process.argv.slice(2));
-const maybeUpdatePackages = isTravisBuild() ? [] : ['update-packages'];
 
 // Minified targets to which AMP_CONFIG must be written.
 const minifiedRuntimeTarget = 'dist/v0.js';
@@ -62,7 +63,10 @@ const minified3pTarget = 'dist.3p/current-min/f.js';
  * Dist Build
  * @return {!Promise}
  */
-function dist() {
+async function dist() {
+  if (!isTravisBuild()) {
+    updatePackages();
+  }
   const handlerProcess = createCtrlcHandler('dist');
   process.env.NODE_ENV = 'production';
   cleanupBuildDir();
@@ -159,7 +163,7 @@ function copyCss() {
     fs.copySync(`build/css/${outCss}`, `dist/${outCss}`);
   });
 
-  return toPromise(gulp.src('build/css/amp-*.css')
+  return toPromise(gulp.src('build/css/amp-*.css', {base: 'build/css/'})
       .pipe(gulp.dest('dist/v0')))
       .then(() => {
         endBuildStep('Copied', 'build/css/*.css to dist/*.css', startTime);
@@ -240,8 +244,8 @@ function buildWebPushPublisherFile(version, fileName, watch, options) {
   const js = fs.readFileSync(basePath + fileName + '.js', 'utf8');
   const builtName = fileName + '.js';
   const minifiedName = fileName + '.js';
-  return toPromise(gulp.src(basePath + '/*.js')
-      .pipe($$.file(builtName, js))
+  return toPromise(gulp.src(basePath + '/*.js', {base: '.'})
+      .pipe(file(builtName, js))
       .pipe(gulp.dest(tempBuildDir)))
       .then(function() {
         return compileJs('./' + tempBuildDir, builtName, './' + distDir, {
@@ -277,7 +281,7 @@ function buildWebPushPublisherFile(version, fileName, watch, options) {
  *
  * @param {!Object} options
  */
-function buildLoginDone(options) {
+async function buildLoginDone(options) {
   return buildLoginDoneVersion('0.1', options);
 }
 
@@ -287,7 +291,7 @@ function buildLoginDone(options) {
  * @param {string} version
  * @param {!Object} options
  */
-function buildLoginDoneVersion(version, options) {
+async function buildLoginDoneVersion(version, options) {
   options = options || {};
   const path = `extensions/amp-access/${version}/`;
   const buildDir = `build/all/amp-access-${version}/`;
@@ -305,7 +309,7 @@ function buildLoginDoneVersion(version, options) {
     // Do not set watchers again when we get called by the watcher.
     const copy = Object.create(options);
     copy.watch = false;
-    $$.watch(path + '/*', function() {
+    gulpWatch(path + '/*', function() {
       buildLoginDoneVersion(version, copy);
     });
   }
@@ -335,8 +339,8 @@ function buildLoginDoneVersion(version, options) {
   const builtName = 'amp-login-done-' + version + '.max.js';
   const minifiedName = 'amp-login-done-' + version + '.js';
   const latestName = 'amp-login-done-latest.js';
-  return toPromise(gulp.src(path + '/*.js')
-      .pipe($$.file(builtName, js))
+  return toPromise(gulp.src(path + '/*.js', {base: path})
+      .pipe(file(builtName, js))
       .pipe(gulp.dest(buildDir)))
       .then(function() {
         return compileJs('./' + buildDir, builtName, './dist/v0/', {
@@ -354,22 +358,27 @@ function buildLoginDoneVersion(version, options) {
       });
 }
 
+module.exports = {
+  buildExperiments,
+  buildLoginDone,
+  dist,
+};
+
 /* eslint "google-camelcase/google-camelcase": 0 */
 
-gulp.task('dist', 'Build production binaries', maybeUpdatePackages, dist, {
-  options: {
-    pseudo_names: '  Compiles with readable names. ' +
-            'Great for profiling and debugging production code.',
-    fortesting: '  Compiles production binaries for local testing',
-    config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
-    single_pass: 'Compile AMP\'s primary JS bundles in a single invocation',
-    extensions: '  Builds only the listed extensions.',
-    extensions_from: '  Builds only the extensions from the listed AMP(s).',
-    noextensions: '  Builds with no extensions.',
-    single_pass_dest: '  The directory closure compiler will write out to ' +
-            'with --single_pass mode. The default directory is `dist`',
-    full_sourcemaps: '  Includes source code content in sourcemaps',
-  },
-});
-gulp.task('build-experiments', 'Builds experiments.html/js', buildExperiments);
-gulp.task('build-login-done', 'Builds login-done.html/js', buildLoginDone);
+buildExperiments.description = 'Builds experiments.html/js';
+buildLoginDone.description = 'Builds login-done.html/js';
+dist.description = 'Build production binaries';
+dist.flags = {
+  pseudo_names: '  Compiles with readable names. ' +
+          'Great for profiling and debugging production code.',
+  fortesting: '  Compiles production binaries for local testing',
+  config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
+  single_pass: 'Compile AMP\'s primary JS bundles in a single invocation',
+  extensions: '  Builds only the listed extensions.',
+  extensions_from: '  Builds only the extensions from the listed AMP(s).',
+  noextensions: '  Builds with no extensions.',
+  single_pass_dest: '  The directory closure compiler will write out to ' +
+          'with --single_pass mode. The default directory is `dist`',
+  full_sourcemaps: '  Includes source code content in sourcemaps',
+};

@@ -21,13 +21,15 @@ const colors = require('ansi-colors');
 const config = require('../config');
 const eslint = require('gulp-eslint');
 const eslintIfFixed = require('gulp-eslint-if-fixed');
-const gulp = require('gulp-help')(require('gulp'));
+const fs = require('fs-extra');
+const gulp = require('gulp');
 const lazypipe = require('lazypipe');
 const log = require('fancy-log');
 const path = require('path');
 const watch = require('gulp-watch');
 const {gitDiffNameOnlyMaster} = require('../git');
 const {isTravisBuild, isTravisPullRequestBuild} = require('../travis');
+const {updatePackages} = require('./update-packages');
 
 const isWatching = (argv.watch || argv.w) || false;
 const options = {
@@ -36,7 +38,6 @@ const options = {
 };
 let collapseLintResults = isTravisBuild();
 
-const maybeUpdatePackages = isTravisBuild() ? [] : ['update-packages'];
 const rootDir = path.dirname(path.dirname(__dirname));
 
 /**
@@ -145,7 +146,7 @@ function runLinter(filePath, stream, options) {
  */
 function jsFilesChanged() {
   return gitDiffNameOnlyMaster().filter(function(file) {
-    return path.extname(file) == '.js';
+    return fs.existsSync(file) && path.extname(file) == '.js';
   });
 }
 
@@ -187,6 +188,9 @@ function setFilesToLint(files) {
  * @return {!Stream} Readable stream
  */
 function lint() {
+  if (!isTravisBuild()) {
+    updatePackages();
+  }
   if (argv.fix) {
     options.fix = true;
   }
@@ -208,18 +212,15 @@ function lint() {
   return runLinter(basePath, stream, options);
 }
 
+module.exports = {
+  lint,
+};
 
-gulp.task(
-    'lint',
-    'Validates against Google Closure Linter',
-    maybeUpdatePackages,
-    lint,
-    {
-      options: {
-        'watch': '  Watches for changes in files, validates against the linter',
-        'fix': '  Fixes simple lint errors (spacing etc)',
-        'local-changes':
-            '  Lints just the changes commited to the local branch',
-        'quiet': '  Suppress warnings from outputting',
-      },
-    });
+lint.description = 'Validates against Google Closure Linter';
+lint.flags = {
+  'watch': '  Watches for changes in files, validates against the linter',
+  'fix': '  Fixes simple lint errors (spacing etc)',
+  'local-changes':
+      '  Lints just the changes commited to the local branch',
+  'quiet': '  Suppress warnings from outputting',
+};

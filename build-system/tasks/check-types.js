@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-const $$ = require('gulp-load-plugins')();
-const gulp = $$.help(require('gulp'));
 const log = require('fancy-log');
 const {cleanupBuildDir, closureCompile} = require('../compile/compile');
 const {closureNailgunPort, startNailgunServer, stopNailgunServer} = require('./nailgun');
@@ -23,14 +21,16 @@ const {compileCss} = require('./css');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
 const {extensions, maybeInitializeExtensions} = require('./extension-helpers');
 const {isTravisBuild} = require('../travis');
-
-const maybeUpdatePackages = isTravisBuild() ? [] : ['update-packages'];
+const {updatePackages} = require('./update-packages');
 
 /**
  * Dedicated type check path.
  * @return {!Promise}
  */
-function checkTypes() {
+async function checkTypes() {
+  if (!isTravisBuild()) {
+    updatePackages();
+  }
   const handlerProcess = createCtrlcHandler('check-types');
   process.env.NODE_ENV = 'production';
   cleanupBuildDir();
@@ -108,4 +108,8 @@ function checkTypes() {
       }).then(() => exitCtrlcHandler(handlerProcess));
 }
 
-gulp.task('check-types', 'Check JS types', maybeUpdatePackages, checkTypes);
+module.exports = {
+  checkTypes,
+};
+
+checkTypes.description = 'Check source code for JS type errors';

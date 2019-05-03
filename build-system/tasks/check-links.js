@@ -19,14 +19,12 @@ const argv = require('minimist')(process.argv.slice(2));
 const BBPromise = require('bluebird');
 const colors = require('ansi-colors');
 const fs = require('fs-extra');
-const gulp = require('gulp-help')(require('gulp'));
 const log = require('fancy-log');
 const markdownLinkCheck = BBPromise.promisify(require('markdown-link-check'));
 const path = require('path');
 const {gitDiffAddedNameOnlyMaster, gitDiffNameOnlyMaster} = require('../git');
 const {isTravisBuild} = require('../travis');
-
-const maybeUpdatePackages = isTravisBuild() ? [] : ['update-packages'];
+const {updatePackages} = require('./update-packages');
 
 /**
  * Parses the list of files in argv, or extracts it from the commit log.
@@ -47,7 +45,10 @@ function getMarkdownFiles() {
  *
  * @return {Promise} Used to wait until all async link checkers finish.
  */
-function checkLinks() {
+async function checkLinks() {
+  if (!isTravisBuild()) {
+    updatePackages();
+  }
   const markdownFiles = getMarkdownFiles();
   const linkCheckers = markdownFiles.map(function(markdownFile) {
     return runLinkChecker(markdownFile);
@@ -178,14 +179,11 @@ function runLinkChecker(markdownFile) {
   return markdownLinkCheck(filteredMarkdown, opts);
 }
 
-gulp.task(
-    'check-links',
-    'Detects dead links in markdown files',
-    maybeUpdatePackages,
-    checkLinks,
-    {
-      options: {
-        'files': '  CSV list of files in which to check links',
-      },
-    }
-);
+module.exports = {
+  checkLinks,
+};
+
+checkLinks.description = 'Detects dead links in markdown files';
+checkLinks.flags = {
+  'files': '  CSV list of files in which to check links',
+};

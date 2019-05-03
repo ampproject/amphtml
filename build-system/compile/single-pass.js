@@ -515,18 +515,21 @@ function isAltMainBundle(name) {
   });
 }
 
-exports.singlePassCompile = function(entryModule, options) {
+exports.singlePassCompile = async function(entryModule, options) {
   return exports.getFlags({
     modules: [entryModule].concat(extensions),
     writeTo: singlePassDest,
     define: options.define,
     externs: options.externs,
     hideWarningsFor: options.hideWarningsFor,
-  }).then(compile).then(wrapMainBinaries).then(postProcessConcat).catch(e => {
-    // NOTE: passing the message here to colors.red breaks the output.
-    console./*OK*/error(e.message);
-    process.exit(1);
-  });
+  })
+      .then(compile)
+      .then(wrapMainBinaries)
+      .then(postProcessConcat)
+      .catch(err => {
+        err.showStack = false; // Useless node_modules stack
+        return Promise.reject(err);
+      });
 };
 
 /**
@@ -538,7 +541,7 @@ exports.singlePassCompile = function(entryModule, options) {
  * magic-string might be part of the solution here so explore that (pre or post
  * process)
  */
-function wrapMainBinaries() {
+async function wrapMainBinaries() {
   const pair = wrappers.mainBinary.split('<%= contents %>');
   const prefix = pair[0];
   const suffix = pair[1];
@@ -558,7 +561,7 @@ function wrapMainBinaries() {
  * TODO(erwinm, #18811): This operation is needed but straight out breaks
  * source maps.
  */
-function postProcessConcat() {
+async function postProcessConcat() {
   const extensions = extensionBundles.filter(
       x => Array.isArray(x.postPrepend));
   extensions.forEach(extension => {
@@ -591,14 +594,17 @@ function postProcessConcat() {
   });
 }
 
-function compile(flagsArray) {
+async function compile(flagsArray) {
   // TODO(@cramforce): Run the post processing step
-  return new Promise(function(resolve) {
+  return new Promise(function(resolve, reject) {
     return gulp.src(srcs, {base: transformDir})
         .pipe(gulpIf(shouldShortenLicense, shortenLicense()))
         .pipe(sourcemaps.init({loadMaps: true}))
         .pipe(gulpClosureCompile(flagsArray))
-        .on('error', handleSinglePassCompilerError)
+        .on('error', err => {
+          handleSinglePassCompilerError();
+          reject(err);
+        })
         .pipe(sourcemaps.write('.'))
         .pipe(gulpIf(/(\/amp-|\/_base)/, rename(path => path.dirname += '/v0')))
         .pipe(gulp.dest('.'))
