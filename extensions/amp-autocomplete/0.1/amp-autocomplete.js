@@ -665,7 +665,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
   fireSelectEvent_(value) {
     const name = 'select';
     const selectEvent = createCustomEvent(this.win,
-        `amp-autocomplete.${name}`, value);
+        `amp-autocomplete.${name}`, /** @type {!JsonObject} */({value}));
     this.action_.trigger(this.element, name, selectEvent, ActionTrust.HIGH);
   }
 
@@ -787,6 +787,12 @@ export class AmpAutocomplete extends AMP.BaseElement {
           this.displayUserInput_();
           this.toggleResults_(false);
         });
+      case Keys.TAB:
+        if (this.activeElement_) {
+          this.userInput_ = this.inputElement_.value;
+          this.fireSelectEvent_(this.userInput_);
+        }
+        return Promise.resolve();
       default:
         return Promise.resolve();
     }
