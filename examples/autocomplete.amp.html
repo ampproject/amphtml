@@ -240,20 +240,34 @@
         target="_blank">
         <fieldset>
             <label>
-                <span>Your name</span>
-                <amp-autocomplete filter="substring" min-characters="0" max-entries="2">
-                    <input type="text" name="name" required>
+                <span>Your favorite color (in Arabic)</span>
+                <amp-autocomplete filter="substring" min-characters="0">
+                    <input type="text" required>
                     <script type="application/json">
-                        { "items" : ["hello a", "hello b", "hello c"] }
+                        { "items" : [ 
+                          "أبيض", "أسود", "أحمر", "أصفر",
+                          "أخضر", "أزرق", "بني", "برتقالى"]
+                        }
+                    </script>
+                </amp-autocomplete>
+            </label><br>
+            <label>
+                <span>Your favorite color (in English)</span>
+                <amp-autocomplete filter="prefix" min-characters="0">
+                    <input type="text" required>
+                    <script type="application/json">
+                        { "items" : ["white", "black", "red", "yellow",
+                        "green", "blue", "brown", "orange"] }
                     </script>
                 </amp-autocomplete>
             </label>
             <label>
-                <span>Your email</span>
-                <amp-autocomplete filter="prefix" min-characters="3">
-                    <input type="text" name="email" required>
+                <span>Your favorite color (in Arabic and English)</span>
+                <amp-autocomplete filter="prefix" min-characters="0">
+                    <input type="text" required>
                     <script type="application/json">
-                        { "items" : ["apple", "pineapple", "coconut", "pine apple"] }
+                        { "items" : ["أبيض", "white", "أسود", "black", "أحمر", "red", "أصفر", "yellow", "أخضر", 
+                        "green", "أزرق", "blue", "بني", "brown", "برتقالى", "orange"] }
                     </script>
                 </amp-autocomplete>
             </label>

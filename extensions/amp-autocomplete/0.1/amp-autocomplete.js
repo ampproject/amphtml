@@ -165,6 +165,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     const inputType = this.inputElement_.getAttribute('type');
     userAssert(inputType === 'text' || inputType === 'search',
         `${TAG} requires the "type=text|search" attribute on <input>`);
+    this.inputElement_.setAttribute('dir', 'auto');
 
     userAssert(this.inputElement_.form, `${TAG} should be inside a <form> tag`);
     if (this.inputElement_.form.hasAttribute('autocomplete')) {
@@ -329,6 +330,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     element.classList.add('i-amphtml-autocomplete-item');
     element.setAttribute('role', 'listitem');
     element.setAttribute('data-value', item);
+    element.setAttribute('dir', 'auto');
     element.textContent = item;
     return element;
   }
@@ -394,6 +396,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
         renderedChildren.map(child => {
           child.classList.add('i-amphtml-autocomplete-item');
           child.setAttribute('role', 'listitem');
+          child.setAttribute('dir', 'auto');
           container.appendChild(child);
         });
       });
