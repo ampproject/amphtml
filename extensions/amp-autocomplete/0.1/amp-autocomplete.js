@@ -789,8 +789,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
         });
       case Keys.TAB:
         if (this.activeElement_) {
-          this.fireSelectEvent_(this.userInput_ =
-            this.inputElement_.value);
+          this.userInput_ = this.inputElement_.value;
+          this.fireSelectEvent_(this.userInput_);
         }
         return Promise.resolve();
       default:
