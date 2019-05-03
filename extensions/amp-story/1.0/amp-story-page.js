@@ -49,17 +49,20 @@ import {LoadingSpinner} from './loading-spinner';
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {MediaPool} from './media-pool';
 import {Services} from '../../../src/services';
+import {VideoEvents, delegateAutoplay} from '../../../src/video-interface';
 import {
+  childElement,
   closestAncestorElementBySelector,
+  isAmpElement,
   iterateCursor,
   matches,
   scopedQuerySelectorAll,
 } from '../../../src/dom';
 import {debounce} from '../../../src/utils/rate-limit';
-import {delegateAutoplay} from '../../../src/video-interface';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getAmpdoc} from '../../../src/service';
+import {getData, listen} from '../../../src/event-helper';
 import {
   getFriendlyIframeEmbedOptional,
 } from '../../../src/friendly-iframe-embed';
@@ -67,7 +70,6 @@ import {getLogEntries} from './logging';
 import {getMode} from '../../../src/mode';
 import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
-import {listen} from '../../../src/event-helper';
 import {toggle} from '../../../src/style';
 import {upgradeBackgroundAudio} from './audio';
 
@@ -89,6 +91,7 @@ const Selectors = {
   ALL_AMP_MEDIA: 'amp-story-grid-layer amp-audio, ' +
       'amp-story-grid-layer amp-video, amp-story-grid-layer amp-img, ' +
       'amp-story-grid-layer amp-anim',
+  ALL_AMP_VIDEO: 'amp-story-grid-layer amp-video',
   ALL_IFRAMED_MEDIA: 'audio, video',
   // TODO(gmajoulet): Refactor the way these selectors are used. They will be
   // passed to scopedQuerySelectorAll which expects only one selector and not
@@ -211,6 +214,9 @@ export class AmpStoryPage extends AMP.BaseElement {
     /** @private {?Element} */
     this.openAttachmentEl_ = null;
 
+    /** @private @const {!../../../src/service/resources-impl.Resources} */
+    this.resources_ = Services.resourcesForDoc(getAmpdoc(this.win.document));
+
     /** @private @const {!Promise} */
     this.mediaLayoutPromise_ = this.waitForMediaLayout_();
 
@@ -244,9 +250,6 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     /** @private @const {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(this.win);
-
-    /** @private @const {!../../../src/service/resources-impl.Resources} */
-    this.resources_ = Services.resourcesForDoc(getAmpdoc(this.win.document));
 
     /**
      * Whether the user agent matches a bot.  This is used to prevent resource
@@ -573,11 +576,14 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /**
    * Gets media on page by given selector. Finds elements through friendly
-   * iframe (if one exists).
+   * iframe (if one exists). By default, it filters the media elements and only
+   * returns those that are visible, ie: not hidden by publisher's CSS.
    * @param {string} selector
+   * @param {boolean=} includeHiddenMedia
    * @return {!Array<?Element>}
+   * @private
    */
-  getMediaBySelector_(selector) {
+  getMediaBySelector_(selector, includeHiddenMedia = false) {
     const iframe = this.element.querySelector('iframe');
     const fie = iframe &&
         getFriendlyIframeEmbedOptional(/** @type {!HTMLIFrameElement} */ (iframe));
@@ -586,13 +592,32 @@ export class AmpStoryPage extends AMP.BaseElement {
     iterateCursor(scopedQuerySelectorAll(this.element, selector),
         el => mediaSet.push(el));
 
-    if (!fie) {
-      return mediaSet;
+    if (fie) {
+      iterateCursor(scopedQuerySelectorAll(fie.win.document.body,
+          Selectors.ALL_IFRAMED_MEDIA), el => mediaSet.push(el));
     }
 
-    iterateCursor(scopedQuerySelectorAll(fie.win.document.body,
-        Selectors.ALL_IFRAMED_MEDIA), el => mediaSet.push(el));
-    return mediaSet;
+    return includeHiddenMedia ?
+      mediaSet : mediaSet.filter(mediaEl => this.isMediaDisplayed_(mediaEl));
+  }
+
+  /**
+   * Returns a boolean indicating whether the media element is visible, or
+   * hidden by any publisher CSS rule.
+   * @param {!Element} mediaEl
+   * @return {boolean}
+   * @private
+   */
+  isMediaDisplayed_(mediaEl) {
+    const ampEl = isAmpElement(mediaEl) ? mediaEl : mediaEl.parentElement;
+
+    // Considers amp-audio elements with a layout=nodisplay attribute as
+    // displayed, since we want them to play when the page is active.
+    if (ampEl.getAttribute('layout') === Layout.NODISPLAY) {
+      return true;
+    }
+
+    return this.resources_.getResourceForElement(ampEl).isDisplayed();
   }
 
   /**
@@ -601,6 +626,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @param {!function(!./media-pool.MediaPool, !Element)} callbackFn The
    *     callback to be applied to each media element.
    * @return {!Promise} Promise that resolves after the callbacks are called.
+   * @private
    */
   whenAllMediaElements_(callbackFn) {
     const mediaSet = this.getAllMedia_();
@@ -622,14 +648,29 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   pauseAllMedia_(rewindToBeginning = false) {
     return this.whenAllMediaElements_((mediaPool, mediaEl) => {
-      if (this.isBotUserAgent_) {
-        mediaEl.pause();
-      } else {
-        return mediaPool.pause(
-            /** @type {!./media-pool.DomElementDef} */ (mediaEl),
-            rewindToBeginning);
-      }
+      return this.pauseMedia_(
+          mediaPool, mediaEl, /** @type {boolean} */ (rewindToBeginning));
     });
+  }
+
+  /**
+   * Pauses the given media.
+   * @param {!./media-pool.MediaPool} mediaPool
+   * @param {!Element} mediaEl
+   * @param {boolean} rewindToBeginning Whether to rewind the currentTime
+   *     of media items to the beginning.
+   * @return {!Promise} Promise that resolves after the media is paused.
+   * @private
+   */
+  pauseMedia_(mediaPool, mediaEl, rewindToBeginning) {
+    if (this.isBotUserAgent_) {
+      mediaEl.pause();
+      return Promise.resolve();
+    } else {
+      return mediaPool.pause(
+          /** @type {!./media-pool.DomElementDef} */ (mediaEl),
+          rewindToBeginning);
+    }
   }
 
   /**
@@ -639,25 +680,41 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   playAllMedia_() {
     return this.whenAllMediaElements_((mediaPool, mediaEl) => {
-      if (this.isBotUserAgent_) {
-        mediaEl.play();
-      } else {
-        return mediaPool.play(
-            /** @type {!./media-pool.DomElementDef} */ (mediaEl)).catch(() => {
-          // Auto playing the media failed, which could be caused by a data
-          // saver, or a battery saving mode. Display a message so we can
-          // get a user gesture to bless the media elements, and play them.
-          if (mediaEl.tagName === 'VIDEO') {
-            this.debounceToggleLoadingSpinner_(false);
-            this.togglePlayMessage_(true);
-          }
-
-          if (mediaEl.tagName === 'AUDIO') {
-            this.playAudioElementFromTimestamp_ = Date.now();
-          }
-        });
-      }
+      return this.playMedia_(mediaPool, mediaEl);
     });
+  }
+
+  /**
+   * Plays the given media.
+   * @param {!./media-pool.MediaPool} mediaPool
+   * @param {!Element} mediaEl
+   * @return {!Promise} Promise that resolves after the media is played.
+   * @private
+   */
+  playMedia_(mediaPool, mediaEl) {
+    if (this.isBotUserAgent_) {
+      mediaEl.play();
+      return Promise.resolve();
+    } else {
+      return mediaPool.play(
+          /** @type {!./media-pool.DomElementDef} */ (mediaEl)).catch(unusedError => {
+        if (!this.isMediaDisplayed_(mediaEl)) {
+          return;
+        }
+
+        // Auto playing the media failed, which could be caused by a data
+        // saver, or a battery saving mode. Display a message so we can
+        // get a user gesture to bless the media elements, and play them.
+        if (mediaEl.tagName === 'VIDEO') {
+          this.debounceToggleLoadingSpinner_(false);
+          this.togglePlayMessage_(true);
+        }
+
+        if (mediaEl.tagName === 'AUDIO') {
+          this.playAudioElementFromTimestamp_ = Date.now();
+        }
+      });
+    }
   }
 
   /**
@@ -669,6 +726,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     return this.whenAllMediaElements_((mediaPool, mediaEl) => {
       if (this.isBotUserAgent_) {
         // No-op.
+        return Promise.resolve();
       } else {
         return mediaPool.preload(
             /** @type {!./media-pool.DomElementDef} */ (mediaEl));
@@ -682,14 +740,26 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   muteAllMedia() {
     return this.whenAllMediaElements_((mediaPool, mediaEl) => {
-      if (this.isBotUserAgent_) {
-        mediaEl.muted = true;
-        mediaEl.setAttribute('muted', '');
-      } else {
-        return mediaPool.mute(
-            /** @type {!./media-pool.DomElementDef} */ (mediaEl));
-      }
+      this.muteMedia_(mediaPool, mediaEl);
     });
+  }
+
+  /**
+   * Mutes the given media.
+   * @param {!./media-pool.MediaPool} mediaPool
+   * @param {!Element} mediaEl
+   * @return {!Promise} Promise that resolves after the media is muted.
+   * @private
+   */
+  muteMedia_(mediaPool, mediaEl) {
+    if (this.isBotUserAgent_) {
+      mediaEl.muted = true;
+      mediaEl.setAttribute('muted', '');
+      return Promise.resolve();
+    } else {
+      return mediaPool.mute(
+          /** @type {!./media-pool.DomElementDef} */ (mediaEl));
+    }
   }
 
   /**
@@ -698,36 +768,48 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   unmuteAllMedia() {
     return this.whenAllMediaElements_((mediaPool, mediaEl) => {
-      if (this.isBotUserAgent_) {
-        mediaEl.muted = false;
-        mediaEl.removeAttribute('muted');
-        if (mediaEl.tagName === 'AUDIO' && mediaEl.paused) {
-          mediaEl.play();
-        }
-      } else {
-        mediaEl = /** @type {!./media-pool.DomElementDef} */ (mediaEl);
-        const promises = [mediaPool.unmute(mediaEl)];
-
-        // Audio element might not be playing if the page navigation did not
-        // happen after a user intent, and the media element was not "blessed".
-        // On unmute, make sure this audio element is playing, at the expected
-        // currentTime.
-        if (mediaEl.tagName === 'AUDIO' && mediaEl.paused) {
-          const currentTime =
-              (Date.now() - this.playAudioElementFromTimestamp_) / 1000;
-          if (mediaEl.hasAttribute('loop') || currentTime < mediaEl.duration) {
-            promises.push(
-                mediaPool.setCurrentTime(
-                    mediaEl, currentTime % mediaEl.duration));
-            promises.push(mediaPool.play(mediaEl));
-          }
-
-          this.playAudioElementFromTimestamp_ = null;
-        }
-
-        return Promise.all(promises);
-      }
+      this.unmuteMedia_(mediaPool, mediaEl);
     });
+  }
+
+  /**
+   * Unmutes the given media.
+   * @param {!./media-pool.MediaPool} mediaPool
+   * @param {!Element} mediaEl
+   * @return {!Promise} Promise that resolves after the media is unmuted.
+   * @private
+   */
+  unmuteMedia_(mediaPool, mediaEl) {
+    if (this.isBotUserAgent_) {
+      mediaEl.muted = false;
+      mediaEl.removeAttribute('muted');
+      if (mediaEl.tagName === 'AUDIO' && mediaEl.paused) {
+        mediaEl.play();
+      }
+      return Promise.resolve();
+    } else {
+      mediaEl = /** @type {!./media-pool.DomElementDef} */ (mediaEl);
+      const promises = [mediaPool.unmute(mediaEl)];
+
+      // Audio element might not be playing if the page navigation did not
+      // happen after a user intent, and the media element was not "blessed".
+      // On unmute, make sure this audio element is playing, at the expected
+      // currentTime.
+      if (mediaEl.tagName === 'AUDIO' && mediaEl.paused) {
+        const currentTime =
+            (Date.now() - this.playAudioElementFromTimestamp_) / 1000;
+        if (mediaEl.hasAttribute('loop') || currentTime < mediaEl.duration) {
+          promises.push(
+              mediaPool.setCurrentTime(
+                  mediaEl, currentTime % mediaEl.duration));
+          promises.push(mediaPool.play(mediaEl));
+        }
+
+        this.playAudioElementFromTimestamp_ = null;
+      }
+
+      return Promise.all(promises);
+    }
   }
 
   /**
@@ -737,13 +819,25 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   registerAllMedia_() {
     return this.whenAllMediaElements_((mediaPool, mediaEl) => {
-      if (this.isBotUserAgent_) {
-        // No-op.
-      } else {
-        return mediaPool.register(
-            /** @type {!./media-pool.DomElementDef} */ (mediaEl));
-      }
+      this.registerMedia_(mediaPool, mediaEl);
     });
+  }
+
+  /**
+   * Registers the given media.
+   * @param {!./media-pool.MediaPool} mediaPool
+   * @param {!Element} mediaEl
+   * @return {!Promise} Promise that resolves after the media is registered.
+   * @private
+   */
+  registerMedia_(mediaPool, mediaEl) {
+    if (this.isBotUserAgent_) {
+      // No-op.
+      return Promise.resolve();
+    } else {
+      return mediaPool.register(
+          /** @type {!./media-pool.DomElementDef} */ (mediaEl));
+    }
   }
 
   /**
@@ -755,6 +849,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     return this.whenAllMediaElements_((mediaPool, mediaEl) => {
       if (this.isBotUserAgent_) {
         mediaEl.currentTime = 0;
+        return Promise.resolve();
       } else {
         return mediaPool.rewindToBeginning(
             /** @type {!./media-pool.DomElementDef} */ (mediaEl));
@@ -1028,18 +1123,24 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   startListeningToVideoEvents_() {
-    const videos = this.getAllVideos_();
+    const videoEls = this.getAllVideos_();
 
-    if (videos.length === 0) {
-      return;
+    if (videoEls.length) {
+      this.debounceToggleLoadingSpinner_(true);
     }
 
-    this.debounceToggleLoadingSpinner_(true);
-    Array.prototype.forEach.call(videos, videoEl => {
+    Array.prototype.forEach.call(videoEls, videoEl => {
       this.unlisteners_.push(listen(
           videoEl, 'playing', () => this.debounceToggleLoadingSpinner_(false)));
       this.unlisteners_.push(listen(
           videoEl, 'waiting', () => this.debounceToggleLoadingSpinner_(true)));
+    });
+
+    const ampVideoEls = this.getMediaBySelector_(
+        Selectors.ALL_AMP_VIDEO, true /* includeHiddenMedia */);
+    Array.prototype.forEach.call(ampVideoEls, ampVideoEl => {
+      this.unlisteners_.push(listen(ampVideoEl, VideoEvents.VISIBILITY,
+          event => this.onVideoVisibilityUpdate_(event)));
     });
   }
 
@@ -1050,6 +1151,33 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.debounceToggleLoadingSpinner_(false);
     this.unlisteners_.forEach(unlisten => unlisten());
     this.unlisteners_ = [];
+  }
+
+  /**
+   * On video visibility update, either play or pause the video.
+   * @param {!Event} event
+   * @private
+   */
+  onVideoVisibilityUpdate_(event) {
+    const ampVideoEl = dev().assertElement(event.target);
+    const videoEl = dev().assertElement(
+        childElement(ampVideoEl, el => el.tagName === 'VIDEO'));
+    const visible = getData(event)['visible'];
+
+    this.mediaPoolPromise_.then(mediaPool => {
+      if (visible) {
+        this.registerMedia_(mediaPool, videoEl)
+            .then(() => {
+              this.playMedia_(mediaPool, videoEl);
+              if (!this.storeService_.get(StateProperty.MUTED_STATE)) {
+                this.unmuteAllMedia();
+              }
+            });
+      } else {
+        this.pauseMedia_(mediaPool, videoEl, true /** rewindToBeginning */);
+        this.muteMedia_(mediaPool, videoEl);
+      }
+    });
   }
 
   /**
