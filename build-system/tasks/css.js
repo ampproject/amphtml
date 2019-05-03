@@ -26,18 +26,15 @@ const {
   toPromise,
 } = require('./helpers');
 const {buildExtensions, extensions} = require('./extension-helpers');
-const {isTravisBuild} = require('../travis');
 const {jsifyCssAsync} = require('./jsify-css');
-const {updatePackages} = require('./update-packages');
+const {maybeUpdatePackages} = require('./update-packages');
 
 /**
  * Entry point for 'gulp css'
  * @return {!Promise}
  */
 async function css() {
-  if (!isTravisBuild()) {
-    updatePackages();
-  }
+  maybeUpdatePackages();
   printNobuildHelp();
   return compileCss();
 }

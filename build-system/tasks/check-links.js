@@ -24,7 +24,7 @@ const markdownLinkCheck = BBPromise.promisify(require('markdown-link-check'));
 const path = require('path');
 const {gitDiffAddedNameOnlyMaster, gitDiffNameOnlyMaster} = require('../git');
 const {isTravisBuild} = require('../travis');
-const {updatePackages} = require('./update-packages');
+const {maybeUpdatePackages} = require('./update-packages');
 
 /**
  * Parses the list of files in argv, or extracts it from the commit log.
@@ -46,9 +46,7 @@ function getMarkdownFiles() {
  * @return {Promise} Used to wait until all async link checkers finish.
  */
 async function checkLinks() {
-  if (!isTravisBuild()) {
-    updatePackages();
-  }
+  maybeUpdatePackages();
   const markdownFiles = getMarkdownFiles();
   const linkCheckers = markdownFiles.map(function(markdownFile) {
     return runLinkChecker(markdownFile);

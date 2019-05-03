@@ -21,16 +21,14 @@ const {compileCss} = require('./css');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
 const {extensions, maybeInitializeExtensions} = require('./extension-helpers');
 const {isTravisBuild} = require('../travis');
-const {updatePackages} = require('./update-packages');
+const {maybeUpdatePackages} = require('./update-packages');
 
 /**
  * Dedicated type check path.
  * @return {!Promise}
  */
 async function checkTypes() {
-  if (!isTravisBuild()) {
-    updatePackages();
-  }
+  maybeUpdatePackages();
   const handlerProcess = createCtrlcHandler('check-types');
   process.env.NODE_ENV = 'production';
   cleanupBuildDir();

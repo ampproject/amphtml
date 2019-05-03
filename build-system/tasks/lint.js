@@ -29,7 +29,7 @@ const path = require('path');
 const watch = require('gulp-watch');
 const {gitDiffNameOnlyMaster} = require('../git');
 const {isTravisBuild, isTravisPullRequestBuild} = require('../travis');
-const {updatePackages} = require('./update-packages');
+const {maybeUpdatePackages} = require('./update-packages');
 
 const isWatching = (argv.watch || argv.w) || false;
 const options = {
@@ -188,9 +188,7 @@ function setFilesToLint(files) {
  * @return {!Stream} Readable stream
  */
 function lint() {
-  if (!isTravisBuild()) {
-    updatePackages();
-  }
+  maybeUpdatePackages();
   if (argv.fix) {
     options.fix = true;
   }

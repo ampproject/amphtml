@@ -196,6 +196,15 @@ function runYarnCheck() {
 }
 
 /**
+ * Used as a pre-requisite by several gulp tasks.
+ */
+function maybeUpdatePackages() {
+  if (!isTravisBuild()) {
+    updatePackages();
+  }
+}
+
+/**
  * Installs custom lint rules, updates node_modules (for local dev), and patches
  * web-animations-js and document-register-element if necessary.
  */
@@ -213,6 +222,7 @@ async function updatePackages() {
 }
 
 module.exports = {
+  maybeUpdatePackages,
   updatePackages,
 };
 

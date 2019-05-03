@@ -27,10 +27,9 @@ const {
 const {buildExtensions} = require('./extension-helpers');
 const {compileCss} = require('./css');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
-const {isTravisBuild} = require('../travis');
+const {maybeUpdatePackages} = require('./update-packages');
 const {parseExtensionFlags} = require('./extension-helpers');
 const {serve} = require('./serve');
-const {updatePackages} = require('./update-packages');
 
 
 /**
@@ -38,9 +37,7 @@ const {updatePackages} = require('./update-packages');
  * @return {!Promise}
  */
 async function watch() {
-  if (!isTravisBuild()) {
-    updatePackages();
-  }
+  maybeUpdatePackages();
   createCtrlcHandler('watch');
   return performBuild(true);
 }
@@ -50,9 +47,7 @@ async function watch() {
  * @return {!Promise}
  */
 async function build() {
-  if (!isTravisBuild()) {
-    updatePackages();
-  }
+  maybeUpdatePackages();
   const handlerProcess = createCtrlcHandler('build');
   return performBuild().then(() => exitCtrlcHandler(handlerProcess));
 }

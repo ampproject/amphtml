@@ -46,7 +46,7 @@ const {compileCss, cssEntryPoints} = require('./css');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
 const {createModuleCompatibleES5Bundle} = require('./create-module-compatible-es5-bundle');
 const {isTravisBuild} = require('../travis');
-const {updatePackages} = require('./update-packages');
+const {maybeUpdatePackages} = require('./update-packages');
 
 const {green, cyan} = colors;
 const argv = require('minimist')(process.argv.slice(2));
@@ -64,9 +64,7 @@ const minified3pTarget = 'dist.3p/current-min/f.js';
  * @return {!Promise}
  */
 async function dist() {
-  if (!isTravisBuild()) {
-    updatePackages();
-  }
+  maybeUpdatePackages();
   const handlerProcess = createCtrlcHandler('dist');
   process.env.NODE_ENV = 'production';
   cleanupBuildDir();
