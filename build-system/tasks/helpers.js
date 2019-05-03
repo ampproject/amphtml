@@ -343,16 +343,7 @@ function compileJs(srcDir, srcFilename, destDir, options) {
         });
   }
 
-  const startTime = Date.now();
-  let bundler = browserify(entryPoint, {debug: true})
-      .transform(babelify)
-      .once('transform', () => {
-        let name = srcFilename;
-        if (options.name && options.version) {
-          name = `${options.name}-${options.version}.js`;
-        }
-        endBuildStep('Transformed', name, startTime);
-      });
+  let bundler = browserify(entryPoint, {debug: true}).transform(babelify);
   if (options.watch) {
     bundler = watchify(bundler);
   }
