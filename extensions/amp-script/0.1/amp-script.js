@@ -80,8 +80,8 @@ export class AmpScript extends AMP.BaseElement {
     /** @private {?UserActivationTracker} */
     this.userActivation_ = null;
 
-    /** @private {?ShadowRoot|?Element} */
-    this.shadow_ = null;
+    /** @private {!ShadowRoot|!Element} */
+    this.baseElement_ = this.element;
 
     /** @private {?HTMLIFrameElement} */
     this.iframe_ = null;
@@ -116,18 +116,24 @@ export class AmpScript extends AMP.BaseElement {
       }
       const shadowed = isExperimentOn(this.win, 'amp-script-in-shadow');
       if (shadowed) {
-        return this.createShadow_().then(shadow => {
-          this.shadow_ = shadow;
+        return this.createShadowBase_().then(shadow => {
+          this.baseElement_ = shadow;
         });
       }
     });
   }
 
   /**
+   * Creates a new base element that encapsulates the WorkerDOM subtree
+   * in shadow DOM (or friendly iframe on older browsers).
+   *
+   * This establishes a boundary that AMP processes (e.g. DOM queries
+   * by extensions or event listeners that inspect `Event.target`) won't cross
+   * by default without special handling.
    * @return {!Promise<!ShadowRoot|!Element>}
    * @private
    */
-  createShadow_() {
+  createShadowBase_() {
     const head = this.getAmpDoc().getHeadNode();
 
     const shadowSupport = getShadowDomSupportedVersion();
@@ -151,6 +157,7 @@ export class AmpScript extends AMP.BaseElement {
         html,
         url: this.win.location.origin,
       };
+      // TODO(choumx): installUrlReplacementsForEmbed().
       return installFriendlyIframeEmbed(this.iframe_, this.element, spec)
           // The iframe body is worker-dom's base element.
           .then(() => this.iframe_.contentWindow.document.body);
@@ -218,11 +225,10 @@ export class AmpScript extends AMP.BaseElement {
       },
     };
 
-    const baseElement = this.shadow_ || this.element;
-    upgrade(baseElement, fetchPromise, workerConfig).then(workerDom => {
+    upgrade(this.baseElement_, fetchPromise, workerConfig).then(workerDom => {
       this.workerDom_ = workerDom;
     });
-    this.userActivation_ = new UserActivationTracker(baseElement);
+    this.userActivation_ = new UserActivationTracker(this.baseElement_);
 
     return Promise.resolve();
   }
