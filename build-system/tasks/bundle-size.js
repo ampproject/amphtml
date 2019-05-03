@@ -18,7 +18,6 @@
 const argv = require('minimist')(process.argv.slice(2));
 const BBPromise = require('bluebird');
 const colors = require('ansi-colors');
-const gulp = require('gulp-help')(require('gulp'));
 const log = require('fancy-log');
 const Octokit = require('@octokit/rest');
 const path = require('path');
@@ -179,7 +178,7 @@ async function reportBundleSize() {
   }
 }
 
-async function performBundleSizeCheck() {
+async function bundleSize() {
   if (argv.on_skipped_build) {
     return await skipBundleSize();
   } else if (argv.on_push_build) {
@@ -192,18 +191,17 @@ async function performBundleSizeCheck() {
   }
 }
 
+module.exports = {
+  bundleSize,
+};
 
-gulp.task(
-    'bundle-size',
-    'Checks if the minified AMP binary has exceeded its size cap',
-    performBundleSizeCheck,
-    {
-      options: {
-        'on_push_build': '  Store bundle size in AMP build artifacts repo '
-            + '(also implies --on_pr_build)',
-        'on_pr_build': '  Report the bundle size of this pull request to '
-            + 'GitHub',
-        'on_skipped_build': '  Set the status of this pull request\'s bundle '
-            + 'size check in GitHub to `skipped`',
-      },
-    });
+bundleSize.description =
+    'Checks if the minified AMP binary has exceeded its size cap';
+bundleSize.flags = {
+  'on_push_build': '  Store bundle size in AMP build artifacts repo '
+      + '(also implies --on_pr_build)',
+  'on_pr_build': '  Report the bundle size of this pull request to '
+      + 'GitHub',
+  'on_skipped_build': '  Set the status of this pull request\'s bundle '
+      + 'size check in GitHub to `skipped`',
+};
