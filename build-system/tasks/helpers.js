@@ -515,7 +515,7 @@ function printNobuildHelp() {
  * Called at the end of "gulp build" and "gulp dist --fortesting".
  * @param {string} targetFile File to which the config is to be written.
  */
-function enableLocalTesting(targetFile) {
+async function enableLocalTesting(targetFile) {
   const config = (argv.config === 'canary') ? 'canary' : 'prod';
   const baseConfigFile =
       'build-system/global-configs/' + config + '-config.json';
