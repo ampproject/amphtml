@@ -555,6 +555,10 @@ export const adConfig = {
 
   'kuadio': {},
 
+  'lentainform': {
+    renderStartImplemented: true,
+  },
+
   'ligatus': {
     prefetch: 'https://ssl.ligatus.com/render/ligrend.js',
     renderStartImplemented: true,
@@ -1124,10 +1128,6 @@ export const adConfig = {
 
   'baidu': {
     prefetch: 'https://dup.baidustatic.com/js/dm.js',
-    renderStartImplemented: true,
-  },
-
-  'lentainform': {
     renderStartImplemented: true,
   },
 

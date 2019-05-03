@@ -295,6 +295,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Kiosked](../../ads/kiosked.md)
 - [Kixer](../../ads/kixer.md)
 - [Kuadio](../../ads/kuadio.md)
+- [Lentainform](../../ads/lentainform.md)
 - [Ligatus](../../ads/ligatus.md)
 - [LockerDome](../../ads/lockerdome.md)
 - [LOKA](../../ads/loka.md)
@@ -387,7 +388,6 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Yieldpro](../../ads/yieldpro.md)
 - [Zedo](../../ads/zedo.md)
 - [Zucks](../../ads/zucks.md)
-- [Lentainform](../../ads/lentainform.md)
 
 ## Supported embed types
 
