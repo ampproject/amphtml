@@ -524,6 +524,7 @@ describes.realWin('amp-autocomplete unit tests', {
   it('should call keyDownHandler_() on Tab', () => {
     const event = {key: Keys.TAB};
     impl.inputElement_.value = 'expected';
+    impl.activeElement_ = doc.createElement('div');
     expect(impl.userInput_).not.to.equal(impl.inputElement_.value);
     const fireEventSpy = sandbox.spy(impl, 'fireSelectEvent_');
     return element.layoutCallback().then(() => {
