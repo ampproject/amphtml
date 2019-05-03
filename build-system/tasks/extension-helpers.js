@@ -21,7 +21,7 @@ const minimatch = require('minimatch');
 const watch = require('gulp-watch');
 const wrappers = require('../compile-wrappers');
 const {aliasBundles, extensionBundles, verifyExtensionBundles, verifyExtensionAliasBundles} = require('../../bundles.config');
-const {compileJs, endBuildStep, mkdirSync} = require('./helpers');
+const {compileJs, mkdirSync} = require('./helpers');
 const {isTravisBuild} = require('../travis');
 const {jsifyCssAsync} = require('./jsify-css');
 
@@ -355,10 +355,7 @@ function buildExtension(
   if (hasCss) {
     mkdirSync('build');
     mkdirSync('build/css');
-    const startTime = Date.now();
-    promise = buildExtensionCss(path, name, version, options).then(() => {
-      endBuildStep('Recompiled CSS in', `${name}/${version}`, startTime);
-    });
+    promise = buildExtensionCss(path, name, version, options);
     if (options.compileOnlyCss) {
       return promise;
     }

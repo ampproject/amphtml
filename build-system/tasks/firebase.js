@@ -58,9 +58,9 @@ async function modifyThirdPartyUrl() {
 async function firebase() {
   if (!argv.nobuild) {
     if (argv.min) {
-      dist();
+      await dist();
     } else {
-      build();
+      await build();
     }
   }
   await fs.mkdirp('firebase');
