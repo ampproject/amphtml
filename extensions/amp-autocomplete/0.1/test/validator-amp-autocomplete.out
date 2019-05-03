@@ -223,7 +223,7 @@ FAIL
 |        <input type="text">
 |        <template type="amp-mustache" id="amp-template-default">
 |          {{#disabled}}
-|            <div disabled>
+|            <div data-disabled>
 |              <b>{{value}}</b>
 |            </div>
 |          {{/disabled}}

@@ -106,14 +106,3 @@ tags: {  # amp-autocomplete JSON
     }
   }
 }
-tags: {  # amp-autocomplete disabled
-  html_format: AMP
-  tag_name: "DIV"
-  spec_name: "amp-autocomplete disabled"
-  requires_extension: "amp-autocomplete"
-  mandatory_ancestor: "AMP-AUTOCOMPLETE"
-  attrs: {
-    name: "disabled"
-    value: ""
-  }
-}

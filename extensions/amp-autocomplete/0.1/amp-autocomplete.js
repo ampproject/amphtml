@@ -182,8 +182,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
           /** @type {!JsonObject} */({})).then(
           renderedEl => {
             userAssert(renderedEl.hasAttribute('data-value') ||
-              renderedEl.hasAttribute('disabled'),
-            `${TAG} requires a "data-value" or "disabled" attribute.`);
+              renderedEl.hasAttribute('data-disabled'),
+            `${TAG} requires a "data-value" or "data-disabled" attribute.`);
           });
     }
 
@@ -393,7 +393,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
       renderPromise = this.templates_.renderTemplateArray(this.templateElement_,
           filteredData).then(renderedChildren => {
         renderedChildren.map(child => {
-          if (child.hasAttribute('disabled')) {
+          if (child.hasAttribute('data-disabled')) {
             child.setAttribute('aria-disabled', 'true');
           }
           child.classList.add('i-amphtml-autocomplete-item');
@@ -652,7 +652,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
    * @private
    */
   selectItem_(element) {
-    if (element === null || element.hasAttribute('disabled')) {
+    if (element === null || element.hasAttribute('data-disabled')) {
       return;
     }
     this.inputElement_.value = this.userInput_ =
@@ -688,6 +688,9 @@ export class AmpAutocomplete extends AMP.BaseElement {
     const keyUpWhenNoneActive = this.activeIndex_ === -1 && delta < 0;
     const index = keyUpWhenNoneActive ? delta : this.activeIndex_ + delta;
     const enabledElements = this.getEnabledItems_();
+    if (enabledElements.length === 0) {
+      return Promise.resolve();
+    }
     const activeIndex = mod(index, enabledElements.length);
     const newActiveElement = enabledElements[activeIndex];
     this.inputElement_.value = newActiveElement.getAttribute('data-value');
@@ -714,13 +717,13 @@ export class AmpAutocomplete extends AMP.BaseElement {
   }
 
   /** Returns all item elements in the results container that do not have the
-   * 'disabled' attribute.
+   * 'data-disabled' attribute.
    * @return {!NodeList}
    * @private
    */
   getEnabledItems_() {
     return this.container_.querySelectorAll(
-        '.i-amphtml-autocomplete-item:not([disabled])');
+        '.i-amphtml-autocomplete-item:not([data-disabled])');
   }
 
   /**

@@ -645,7 +645,7 @@ describes.realWin('amp-autocomplete unit tests', {
 
   it('should not select disabled items', () => {
     const disabledItem = doc.createElement('div');
-    disabledItem.setAttribute('disabled', '');
+    disabledItem.setAttribute('data-disabled', '');
     expect(impl.selectItem_(disabledItem)).to.be.undefined;
   });
 
@@ -657,7 +657,7 @@ describes.realWin('amp-autocomplete unit tests', {
       renderedChild.setAttribute('data-value', item);
       return renderedChild;
     });
-    renderedChildren[2].setAttribute('disabled', '');
+    renderedChildren[2].setAttribute('data-disabled', '');
     sandbox.stub(impl.templates_, 'renderTemplateArray').returns(
         Promise.resolve(renderedChildren));
 
