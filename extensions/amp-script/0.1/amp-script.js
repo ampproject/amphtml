@@ -28,11 +28,13 @@ import {
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
+import {installFriendlyIframeEmbed} from '../../../src/friendly-iframe-embed';
 import {
   installOriginExperimentsForDoc, originExperimentsForDoc,
 } from '../../../src/service/origin-experiments-impl';
 import {isExperimentOn} from '../../../src/experiments';
 import {rewriteAttributeValue} from '../../../src/url-rewrite';
+import {setStyle, setStyles} from '../../../src/style';
 import {startsWith} from '../../../src/string';
 import {
   upgrade,
@@ -119,13 +121,13 @@ export class AmpScript extends AMP.BaseElement {
    */
   createShadow_(ampdoc) {
     const head = ampdoc.getHeadNode();
-    const styles = head.querySelectorAll(
-        'style[amp-runtime], style[amp-custom]');
 
     if (false) { //'attachShadow' in this.element) {
       const shadow = this.element.attachShadow({mode: 'open'});
       // Copy runtime & custom styles to shadow root.
       // TODO(choumx): Include extension CSS (and avoid race condition).
+      const styles = head.querySelectorAll(
+          'style[amp-runtime], style[amp-custom]');
       styles.forEach(style => {
         shadow.appendChild(style.cloneNode(/* deep */ true));
       });
@@ -135,39 +137,24 @@ export class AmpScript extends AMP.BaseElement {
       }
       return Promise.resolve(shadow);
     } else {
-      // TODO: Use friendly-iframe-embed.js.
-      const iframeReady = new Promise(resolve => {
-        this.iframe_ = this.win.document.createElement('iframe');
-        let styleHtml = '<style>body { margin: 0; }</style>';
-        styles.forEach(style => {
-          styleHtml += style.outerHTML;
-        });
-        // Copy this element's children into the iframe. They'll be rendered
-        // directly on top of existing children to avoid visual jank.
-        this.iframe_.srcdoc = `
-          <head>${styleHtml}</head>
-          <body>${this.element.innerHTML}</body>`;
-        this.iframe_.onload = () => {
-          // Size the iframe to match the element's initial height.
-          if (this.getLayout() === Layout.CONTAINER) {
-            // TODO: What if layout box is not ready yet?
-            this.iframe_.height = this.element.getLayoutBox().height;
-          }
-          resolve(this.iframe_.contentWindow.document.body);
-        };
-        this.element.appendChild(this.iframe_);
+      this.iframe_ = this.win.document.createElement('iframe');
+      let styleHtml = '';
+      const styles = head.querySelectorAll('style[amp-custom]');
+      styles.forEach(style => {
+        styleHtml += style.outerHTML;
       });
-      // When the iframe is ready AND this element is laid out, remove the
-      // original children.
-      Promise.all([
-        iframeReady,
-        this.signals().whenSignal(CommonSignals.LOAD_START),
-      ]).then(() => {
-        while (this.element.firstChild !== this.iframe_) {
-          this.element.removeChild(this.element.firstChild);
-        }
-      });
-      return iframeReady;
+      // Copy this element's children into the iframe. They'll be rendered
+      // directly on top of existing children to avoid visual jank.
+      const html = `
+        <head>${styleHtml}</head>
+        <body>${this.element.innerHTML}</body>`;
+      const spec = {html};
+      return installFriendlyIframeEmbed(this.iframe_, this.element, spec)
+          // .then(fie => fie.signals().whenSignal(CommonSignals.INI_LOAD))
+          .then(() => {
+            // The iframe body is worker-dom's base element.
+            return this.iframe_.contentWindow.document.body;
+          });
     }
   }
 
@@ -217,8 +204,8 @@ export class AmpScript extends AMP.BaseElement {
       },
     };
 
-    const root = this.shadow_ || this.element;
-    upgrade(root, fetchPromise, workerConfig).then(workerDom => {
+    const base = this.shadow_ || this.element;
+    upgrade(base, fetchPromise, workerConfig).then(workerDom => {
       this.workerDom_ = workerDom;
     });
     return Promise.resolve();
@@ -255,15 +242,21 @@ export class AmpScript extends AMP.BaseElement {
       // If the element is size-contained and small enough.
       || (isLayoutSizeDefined(this.getLayout())
           && this.getLayoutBox().height <= MAX_FREE_MUTATION_HEIGHT)
+      // HACK(choumx): Support iframe-focus in user activation.
+      || this.iframe_
     );
 
-    if (true) {
+    if (allowMutation) {
       this.vsync_.mutate(() => {
         flush();
 
         if (this.iframe_ && this.getLayout() === Layout.CONTAINER) {
           const {body} = this.iframe_.contentWindow.document;
-          this.iframe_.height = body.getBoundingClientRect().height;
+          // Match iframe height and remove original children.
+          setStyle(this.iframe_, 'height', body.scrollHeight + 'px');
+          while (this.element.firstChild !== this.iframe_) {
+            this.element.removeChild(this.element.firstChild);
+          }
         }
       });
       return;

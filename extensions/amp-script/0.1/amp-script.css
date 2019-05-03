@@ -28,8 +28,5 @@ amp-script > iframe {
   top: 0;
   left: 0;
   width: 100%;
-}
-
-amp-script:not[layout=container] > iframe {
   height: 100%;
 }
