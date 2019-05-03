@@ -64,13 +64,6 @@ const EXTENSION_BUNDLE_MAP = {
 const hostname = argv.hostname || 'cdn.ampproject.org';
 const hostname3p = argv.hostname3p || '3p.ampproject.net';
 
-// Unminified targets to which AMP_CONFIG must be written.
-const unminifiedRuntimeTarget = 'dist/amp.js';
-const unminifiedShadowRuntimeTarget = 'dist/amp-shadow.js';
-const unminifiedAdsTarget = 'dist/amp-inabox.js';
-const unminifiedRuntimeEsmTarget = 'dist/amp-esm.js';
-const unminified3pTarget = 'dist.3p/current/integration.js';
-
 /**
  * Compile and optionally minify the stylesheets and the scripts
  * and drop them in the dist folder
@@ -421,17 +414,17 @@ function compileJs(srcDir, srcFilename, destDir, options) {
         .then(() => {
           if (process.env.NODE_ENV === 'development') {
             if (destFilename === 'amp.js') {
-              return enableLocalTesting(unminifiedRuntimeTarget);
+              return enableLocalTesting('dist/amp.js');
             } else if (destFilename === 'amp-esm.js') {
-              return enableLocalTesting(unminifiedRuntimeEsmTarget);
+              return enableLocalTesting('dist/amp-esm.js');
             } else if (destFilename === 'amp4ads-v0.js') {
-              return enableLocalTesting(unminifiedAdsTarget);
+              return enableLocalTesting('dist/amp4ads-v0.js');
             } else if (destFilename === 'integration.js') {
-              return enableLocalTesting(unminified3pTarget);
+              return enableLocalTesting('dist.3p/current/integration.js');
             } else if (destFilename === 'amp-shadow.js') {
-              return enableLocalTesting(unminifiedShadowRuntimeTarget);
+              return enableLocalTesting('dist/amp-shadow.js');
             } else if (destFilename === 'amp-inabox.js') {
-              return enableLocalTesting(unminifiedAdsTarget);
+              return enableLocalTesting('dist/amp-inabox.js');
             } else {
               return Promise.resolve();
             }
