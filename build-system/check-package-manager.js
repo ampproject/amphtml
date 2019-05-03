@@ -182,13 +182,14 @@ function checkGlobalGulp() {
         cyan('"yarn global add gulp-cli"') + yellow('.'));
   } else if (!firstInstall) {
     const gulpVersions = getStdout(gulpExecutable + ' --version').trim();
-    const gulpVersion = gulpVersions.match(/Local version (.*?)$/);
+    const gulpVersion = gulpVersions.match(/Local version[:]? (.*?)$/);
     if (gulpVersion && gulpVersion.length == 2) {
       console.log(green('Detected'), cyan('gulp'), green('version'),
           cyan(gulpVersion[1]) + green('.'));
     } else {
-      console.log(yellow('WARNING: Something went wrong. ' +
-          'Could not determine the local version of gulp.'));
+      console.log(yellow('WARNING: ' +
+          'Could not determine the local version of gulp. ' +
+          '(This is normal during install / upgrade.)'));
     }
   }
 }
