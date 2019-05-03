@@ -665,7 +665,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
   fireSelectEvent_(value) {
     const name = 'select';
     const selectEvent = createCustomEvent(this.win,
-        `amp-autocomplete.${name}`, /** @type {!JsonObject} */{value});
+        `amp-autocomplete.${name}`, /** @type {!JsonObject} */({value}));
     this.action_.trigger(this.element, name, selectEvent, ActionTrust.HIGH);
   }
 
