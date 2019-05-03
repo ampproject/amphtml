@@ -441,7 +441,7 @@ function createBaseCustomElementClass(win) {
         let error = 'Layout not supported: ' + this.layout_;
         if (!this.getAttribute('layout')) {
           error += '. The element did not specify a layout attribute. ' +
-              'Check https://www.ampproject.org/docs/guides/' +
+              'Check https://amp.dev/documentation/guides-and-tutorials/' +
               'responsive/control_layout and the respective element ' +
               'documentation for details.';
         }

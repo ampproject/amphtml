@@ -60,7 +60,7 @@ The following is a typical example using an `amp-image-lightbox`:
     width="200" height="100"></amp-img>
 ```
 
-When the user clicks the image, the `<amp-img>` activates the `<amp-image-lightbox>` via the [`on`](https://www.ampproject.org/docs/reference/spec#on) action, which references the ID of the `<amp-image-lightbox>` element (i.e., `lightbox1`). The `<amp-image-lightbox>` then displays the image in the center of the full-viewport lightbox. Note that the `amp-image-lightbox` element itself must be empty and must be set to `layout=nodisplay`.
+When the user clicks the image, the `<amp-img>` activates the `<amp-image-lightbox>` via the [`on`](https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#on) action, which references the ID of the `<amp-image-lightbox>` element (i.e., `lightbox1`). The `<amp-image-lightbox>` then displays the image in the center of the full-viewport lightbox. Note that the `amp-image-lightbox` element itself must be empty and must be set to `layout=nodisplay`.
 
 Among other things the `amp-image-lightbox` allows the following user manipulations: zooming, panning, showing/hiding of the description.
 Pressing the escape key on a keyboard closes the lightbox.
@@ -153,7 +153,7 @@ section.
 
 ## Actions
 
-The `amp-image-lightbox` exposes the following actions you can use [AMP on-syntax to trigger](https://www.ampproject.org/docs/reference/amp-actions-and-events):
+The `amp-image-lightbox` exposes the following actions you can use [AMP on-syntax to trigger](https://amp.dev/documentation/guides-and-tutorials/learn/amp-actions-and-events):
 
 <table>
   <tr>

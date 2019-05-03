@@ -13,7 +13,7 @@ effectively only for those that come from Google Search results.
 Documents also need to contain either of the following:
 
 - an [OpenGraph](http://ogp.me/) `<meta property="og:type" content="article">` tag
-- or a `@type` field declared in [JSON+LD schema](https://www.ampproject.org/docs/fundamentals/discovery#use-schema.org-for-most-search-engines)
+- or a `@type` field declared in [JSON+LD schema](https://amp.dev/documentation/guides-and-tutorials/optimize-and-measure/discovery#use-schema.org-for-most-search-engines)
   that's any of the following:
   - `Article`
   - `NewsArticle`

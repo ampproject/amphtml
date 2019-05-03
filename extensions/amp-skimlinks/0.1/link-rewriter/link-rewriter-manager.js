@@ -58,7 +58,7 @@ export class LinkRewriterManager {
     /**
      * Use getRootNode() to support "shadow AMP" mode where the rootNode is not
      * necessarily the page document.
-     * See https://www.ampproject.org/docs/integration/pwa-amp/amp-in-pwa
+     * See https://amp.dev/documentation/guides-and-tutorials/integrate/amp-in-pwa
      * @private {!Document|!ShadowRoot}
      */
     this.rootNode_ = ampdoc.getRootNode();

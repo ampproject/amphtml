@@ -86,7 +86,7 @@ function renderTemplate(opt_params) {
 
     html`<div class="center">
       Built with 💙  by
-      <a href="https://ampproject.org" class="underlined">the AMP Project</a>.
+      <a href="https://amp.dev" class="underlined">the AMP Project</a>.
     </div>`,
 
     SettingsModal({serveMode}),

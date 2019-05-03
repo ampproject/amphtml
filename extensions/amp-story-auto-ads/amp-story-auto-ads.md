@@ -37,10 +37,10 @@ Dynamically inserts ads into a Story.
 </table>
 
 # Getting Started
-For information on how to include ads in your AMP Stories, [refer to our guide](https://www.ampproject.org/docs/ads/advertise_amp_stories).
+For information on how to include ads in your AMP Stories, [refer to our guide](https://amp.dev/documentation/guides-and-tutorials/develop/advertise_amp_stories).
 
 # Best practices for creating an AMP Story ad
-If you are interested in creating an ad for the AMP Story platform, [refer to our best practices guide](https://www.ampproject.org/docs/ads/story_ads_best_practices).
+If you are interested in creating an ad for the AMP Story platform, [refer to our best practices guide](https://amp.dev/documentation/guides-and-tutorials/develop/story_ads_best_practices).
 
 ## Behavior
 `amp-story-auto-ads` extension dynamically inserts ads (implemented as `amp-ad`)

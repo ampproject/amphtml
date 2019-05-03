@@ -87,7 +87,7 @@ e.g.
 ```html
  <amp-action-macro
     id="navigate-action"
-    action="AMP.navigateTo('http://www.ampproject.org')"></amp-action-macro>
+    action="AMP.navigateTo('http://www.amp.dev')"></amp-action-macro>
 
  <amp-action-macro
     id="refresh-amp-list"

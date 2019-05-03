@@ -169,7 +169,7 @@ An element with `amp-fx="float-in-top"` or `...bottom` must have the following C
 - **if it's `bottom`**, `bottom: 0`
 
 If any of these is not set, the effect will not be applied and a warning will be
-thrown in [development mode.](https://www.ampproject.org/docs/fundamentals/validate#browser-developer-console)
+thrown in [development mode.](https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validate_amp#browser-developer-console)
 
 ### fly-in-bottom, fly-in-left, fly-in-right, fly-in-top
 

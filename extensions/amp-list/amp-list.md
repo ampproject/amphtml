@@ -62,7 +62,7 @@ For more details on templates, see [AMP HTML Templates](../../spec/amp-html-temp
 
 In the following example, we retrieve JSON data that contains URLs and titles, and render the content in a nested [amp-mustache template](https://amp.dev/documentation/components/amp-mustache).
 
-<!--embedded example - displays in ampproject.org -->
+<!--embedded example - displays in amp.dev -->
 <div>
 <amp-iframe height="259"
             layout="fixed-height"
@@ -84,8 +84,8 @@ Here is the JSON file that we used:
      "url": "https://www.youtube.com/channel/UCXPBsjgKKG2HqsKBhWA4uQw"
    },
    {
-     "title": "AMPproject.org",
-     "url": "https://www.ampproject.org/"
+     "title": "AMP.dev",
+     "url": "https://amp.dev/"
    },
    {
      "title": "AMP By Example",
@@ -130,7 +130,7 @@ Optionally, the `<amp-list>` element can contain an element with an `overflow` a
 
 In the following example, we display a list of images and titles. Because the `<amp-list>` content requires more space than available, the AMP Runtime displays the overflow element.
 
-<!--embedded example - displays in ampproject.org -->
+<!--embedded example - displays in amp.dev-->
 <div>
 <amp-iframe height="213"
             layout="fixed-height"
@@ -160,7 +160,7 @@ Optionally, `<amp-list>` supports a placeholder and/or fallback.
 - A *placeholder* is a child element with the `placeholder` attribute. This element is shown until the `<amp-list>` loads successfully. If a fallback is also provided, the placeholder is hidden when the `<amp-list>` fails to load.
 - A *fallback* is a child element with the `fallback` attribute. This element is shown if the `<amp-list>` fails to load.
 
-Learn more in [Placeholders & Fallbacks](https://www.ampproject.org/docs/guides/responsive/placeholders). Note that a child element cannot be both a placeholder and a fallback.
+Learn more in [Placeholders & Fallbacks](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/placeholders). Note that a child element cannot be both a placeholder and a fallback.
 
 ```html
 <amp-list src="https://foo.com/list.json">

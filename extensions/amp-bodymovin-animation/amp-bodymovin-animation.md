@@ -86,7 +86,7 @@ Example:
 
 ## Actions
 
-Please see [AMP Action Documentation](https://www.ampproject.org/docs/reference/amp-actions-and-events#amp-bodymovin-animation) for the actions available on `amp-bodymovin-animation` component.
+Please see [AMP Action Documentation](https://amp.dev/documentation/guides-and-tutorials/learn/amp-actions-and-events#amp-bodymovin-animation) for the actions available on `amp-bodymovin-animation` component.
 
 ## Validation
 

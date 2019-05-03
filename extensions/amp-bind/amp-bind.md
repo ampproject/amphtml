@@ -50,7 +50,7 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong>Tutorials</strong></td>
-    <td><a href="https://www.ampproject.org/docs/tutorials/interactivity">Create interactive AMP pages</a></td>
+    <td><a href="https://amp.dev/documentation/guides-and-tutorials/develop/interactivity/">Create interactive AMP pages</a></td>
   </tr>
 </table>
 

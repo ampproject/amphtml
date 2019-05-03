@@ -210,7 +210,7 @@ See live demos at [AMP By Example](https://ampbyexample.com/components/amp-sideb
 {% endcall %}
 
 ## Sidebar for Stories
-Use of `amp-sidebar` is supported within the `amp-story` [component](https://www.ampproject.org/stories/).
+Use of `amp-sidebar` is supported within the `amp-story` [component](https://amp.dev/about/stories).
 
 ### Behavior
 - The `<amp-sidebar>` must be a direct child of `<amp-story>`.
@@ -236,7 +236,7 @@ The following example shows a simple `amp-sidebar` within an `amp-story`.
     <amp-story standalone>
       <amp-sidebar id="sidebar1" layout="nodisplay">
         <ul>
-          <li><a href="https://www.ampproject.org"> External Link </a></li>
+          <li><a href="https://amp.dev/"> External Link </a></li>
           <li>Nav item 2</li>
           <li>Nav item 3</li>
         </ul>

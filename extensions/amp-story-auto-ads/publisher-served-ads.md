@@ -17,7 +17,7 @@ limitations under the License.
 # Publisher served ads
 This is an option for publishers who would like to place single page ads amidst
 AMP story content they produce. This is a complex solution. If you are looking
-for the more common implementation please see our [getting started guide](https://www.ampproject.org/docs/ads/advertise_amp_stories)
+for the more common implementation please see our [getting started guide](https://amp.dev/documentation/guides-and-tutorials/develop/advertise_amp_stories)
 
 This is implemented using a mechanism in the [Custom ad](../../ads/custom.md) extension.
 The ads are rendered with inlined templates in the story document

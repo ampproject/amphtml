@@ -452,7 +452,7 @@ Note that you must configure either the [`promptIfUnknownForGeoGroup`](#promptif
 
 ##### How can I stop showing all of my content to users from the EEA?
 
-You could consider hiding all your content for EEA users by implementing [`<amp-geo>`](https://amp.dev/documentation/components/amp-geo). See [this blog post](https://www.ampproject.org/latest/blog/dynamic-geo-personalization/) for more details.
+You could consider hiding all your content for EEA users by implementing [`<amp-geo>`](https://amp.dev/documentation/components/amp-geo). See [this blog post](https://blog.amp.dev/2018/05/03/dynamic-geo-personalization/) for more details.
 
 ##### How can I target consent for only EEA users?
 
@@ -516,8 +516,8 @@ Join in on the discussion where we are discussing [upcoming potential features](
 
 ## Related resources
 
-*   Blog post: [New functionality to help manage user choice in AMP pages](https://www.ampproject.org/latest/blog/new-functionality-to-help-manage-user-choice-in-amp-pages/)
-*   Blog post: [Dynamic geo-personalization](https://www.ampproject.org/latest/blog/dynamic-geo-personalization/)
+*   Blog post: [New functionality to help manage user choice in AMP pages](https://blog.amp.dev/)
+*   Blog post: [Dynamic geo-personalization](https://blog.amp.dev/2018/05/03/dynamic-geo-personalization/)
 *   [`<amp-geo>` documentation](https://amp.dev/documentation/components/amp-geo)
 *   [DoubleClick/ AdSense documentation ](https://support.google.com/dfp_premium/answer/7678538#amp-pages)
 *   [New feature discussion for amp-consent](https://github.com/ampproject/amphtml/issues/13716#issuecomment-382474345)

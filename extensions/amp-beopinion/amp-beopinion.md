@@ -74,7 +74,7 @@ BeOpinion does not currently provide an API that yields fixed aspect ratio for e
 
 An element marked with a `placeholder` attribute displays while the content for the content is loading or initializing.  Placeholders are hidden once the AMP component's content displays. An element marked with a `fallback` attribute displays if `amp-beopinion` isn't supported by the browser or if the content doesn't exist or has been deleted.
 
-Visit the [Placeholders & fallbacks](https://www.ampproject.org/docs/guides/responsive/placeholders) guide to learn more about how placeholders and fallbacks interact for the `amp-beopinion` component.
+Visit the [Placeholders & fallbacks](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/placeholders) guide to learn more about how placeholders and fallbacks interact for the `amp-beopinion` component.
 
 ## Attributes
 <table>

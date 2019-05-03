@@ -95,7 +95,7 @@ amp-live-list/0.1/test/validator-amp-live-list.html:70:2 The reference point 'AM
 amp-live-list/0.1/test/validator-amp-live-list.html:82:4 The tag 'img' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-img'? (see https://amp.dev/documentation/components/amp-img) [DISALLOWED_HTML_WITH_AMP_EQUIVALENT]
 |      <script items>
 >>     ^~~~~~~~~
-amp-live-list/0.1/test/validator-amp-live-list.html:83:4 Custom JavaScript is not allowed. (see https://www.ampproject.org/docs/reference/spec#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
+amp-live-list/0.1/test/validator-amp-live-list.html:83:4 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |        document.writeln('1, 2, 3');
 |      </script>
 |    </amp-live-list>

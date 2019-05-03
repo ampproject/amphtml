@@ -138,5 +138,5 @@ We tested with [WebComponents.js polyfill](https://github.com/webcomponents/webc
 
 See [pwa.js](../examples/pwa/pwa.js) for examples of uses of boths APIs.
 
-See [Combine AMP with PWA](https://www.ampproject.org/docs/guides/pwa-amp) and [Embed & use AMP as a data source](https://www.ampproject.org/docs/guides/pwa-amp/amp-in-pwa) guides.
+See [Combine AMP with PWA](https://amp.dev/documentation/guides-and-tutorials/learn/combine-amp-pwa) and [Embed & use AMP as a data source](https://amp.dev/documentation/guides-and-tutorials/learn/combine-amp-pwa/amp-in-pwa) guides.
 

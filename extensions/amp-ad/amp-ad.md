@@ -58,10 +58,10 @@ custom element called `<amp-ad>`. No ad network-provided JavaScript is allowed t
 different origin (via iframe sandbox) as the AMP document and executes the ad
 network’s JS inside that iframe sandbox.
 
-The `<amp-ad>` requires width and height values to be specified according to the [rule](https://www.ampproject.org/docs/design/amp-html-layout#(tl;dr)-summary-of-layout-requirements-&-behaviors) of its layout type. It requires a `type` argument that select what ad network is displayed. All `data-*` attributes on the tag are automatically passed as arguments to the code that eventually renders the ad. What `data-` attributes are required for a given type of network depends and must be documented with the ad network.
+The `<amp-ad>` requires width and height values to be specified according to the [rule](https://amp.dev/documentation/guides-and-tutorials/learn/amp-html-layout/#(tl;dr)-summary-of-layout-requirements-&-behaviors) of its layout type. It requires a `type` argument that select what ad network is displayed. All `data-*` attributes on the tag are automatically passed as arguments to the code that eventually renders the ad. What `data-` attributes are required for a given type of network depends and must be documented with the ad network.
 
 #### Example: Displaying a few ads
-<!--embedded example - displays in ampproject.org -->
+<!--embedded example - displays in amp.dev -->
 <div>
 <amp-iframe height="522"
             layout="fixed-height"
@@ -116,7 +116,7 @@ The `<amp-ad>` requires width and height values to be specified according to the
 
 ## Placeholder
 
-Optionally, `amp-ad` supports a child element with the `placeholder` attribute. If supported by the ad network, this element is shown until the ad is available for viewing. Learn more in [Placeholders & Fallbacks](https://www.ampproject.org/docs/guides/responsive/placeholders).
+Optionally, `amp-ad` supports a child element with the `placeholder` attribute. If supported by the ad network, this element is shown until the ad is available for viewing. Learn more in [Placeholders & Fallbacks](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/placeholders).
 
 ```html
 <amp-ad width=300 height=250
@@ -180,7 +180,7 @@ Enforcing origins can be done with the 3rd argument to `draw3p` and must additio
 
 This is completely optional: It is sometimes desired to enhance the ad request before making the ad request to the ad server.
 
-If your ad network supports [fast fetch](https://www.ampproject.org/docs/ads/adnetwork_integration#creating-an-amp-ad-implementation), then please use [Real Time Config](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/rtc-documentation.md) (RTC). (e.g. DoubleClick and AdSense integrations both support fast fetch and RTC)
+If your ad network supports [fast fetch](https://amp.dev/documentation/guides-and-tutorials/contribute/adnetwork_integration#creating-an-amp-ad-implementation), then please use [Real Time Config](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/rtc-documentation.md) (RTC). (e.g. DoubleClick and AdSense integrations both support fast fetch and RTC)
 
 If your ad network uses delayed fetch, you can pass a callback to the `draw3p` function call in the [remote.html](../../3p/remote.html) file. The callback receives the incoming configuration as first argument and then receives another callback as second argument (Called `done` in the example below). This callback must be called with the updated config in order for ad rendering to proceed.
 

@@ -74,7 +74,7 @@ export let AmpStoryLogEntryDef;
 
 
 /** @private @const {string} */
-const AMPPROJECT_DOCS = 'https://www.ampproject.org/docs';
+const AMPPROJECT_DOCS = 'https://amp.dev/documentation/guides-and-tutorials/';
 
 
 /**

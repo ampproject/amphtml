@@ -38,7 +38,7 @@ const TAG = 'amp-access-server-jwt';
 const AUTHORIZATION_TIMEOUT = 3000;
 
 /** @const {string} */
-const AMP_AUD = 'ampproject.org';
+const AMP_AUD = 'amp.dev';
 
 
 /**

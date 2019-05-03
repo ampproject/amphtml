@@ -136,7 +136,7 @@ The following values can be set in the `laterpay` config object:
   <tr>
     <td><code>sandbox</code></td>
     <td>boolean</td>
-    <td>Only needed if you are using the sandbox mode to test out your server configuration. You also need to use AMP's <a href="https://www.ampproject.org/docs/reference/spec#amp-runtime">development mode</a>.</td>
+    <td>Only needed if you are using the sandbox mode to test out your server configuration. You also need to use AMP's <a href="https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#amp-runtime">development mode</a>.</td>
   </tr>
 </table>
 

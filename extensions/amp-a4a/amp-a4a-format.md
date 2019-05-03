@@ -25,13 +25,13 @@ performant ads in AMP pages.  To ensure that AMPHTML ad documents ("AMP
 creatives") can be rendered quickly and smoothly in the browser and do
 not degrade user experience, AMP creatives must obey a set of validation
 rules.  Similar in spirit to the
-[AMP format rules](https://www.ampproject.org/docs/fundamentals/spec.html), AMPHTML ads have
+[AMP format rules](https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml), AMPHTML ads have
 access to a limited set of allowed tags, capabilities, and extensions.
 
 ## AMPHTML ad format rules
 
 Unless otherwise specified below, the creative must obey all rules given by the
-[AMP format rules](https://www.ampproject.org/docs/fundamentals/spec.html),
+[AMP format rules](https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml),
 included here by reference.  For example, the AMPHTML ad [Boilerplate](#boilerplate) deviates from the AMP standard boilerplate.
 
 In addition, creatives must obey the following rules:

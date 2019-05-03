@@ -20,7 +20,7 @@ A validator for the
 [AMP HTML format](https://github.com/ampproject/amphtml/blob/master/README.md).
 
 If you just want to validate a page, please see
-[our documentation over at ampproject.org](https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validate_amp).
+[our documentation over at amp.dev](https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validate_amp).
 
 ## Chrome Extension
 Please see [chromeextension/README.md](https://github.com/ampproject/amphtml/blob/master/validator/chromeextension/README.md).

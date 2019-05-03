@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "manifest_version": 2,
   "description": "Run prod AMP pages with the local AMP runtime.",
-  "homepage_url": "https://www.ampproject.org",
+  "homepage_url": "https://amp.dev/",
   "background": {
     "scripts": [
       "background.js"

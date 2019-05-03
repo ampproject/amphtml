@@ -57,7 +57,7 @@ The carousel consists of an arbitrary number of items, as well as optional navig
 
 The carousel advances between items if the user swipes, uses arrow keys, or clicks an optional navigation arrow.
 
-<!--embedded example - displays in ampproject.org -->
+<!--embedded example - displays in amp.dev -->
 <div>
   <amp-iframe height="313"
               layout="fixed-height"
@@ -76,7 +76,7 @@ Setting a method for the `on` attribute on an element to `tap:carousel-id.goToSl
 
 In the following example, we have a carousel of three images with preview buttons below the carousel. When a user clicks one of the buttons, the corresponding carousel item displays.
 
-<!--embedded example - displays in ampproject.org -->
+<!--embedded example - displays in amp.dev -->
 <div>
 <amp-iframe height="878"
             layout="fixed-height"
@@ -144,7 +144,7 @@ The visibility of arrows can also be controlled via styling, and a media query c
     <td width="40%"><strong>loop (optional)</strong></td>
     <td><p>Allows the user to advance past the first item or the final item. There must be at least 3 slides for looping to occur. The <code>loop</code> attribute is only applicable to carousels with <code>type=slides</code>.</p>
 <p><em>Example: Displays a slides carousel with controls, looping, and delayed autoplay</em></p>
-<!--embedded example - displays in ampproject.org -->
+<!--embedded example - displays in amp.dev -->
 <div>
   <amp-iframe height="446" layout="fixed-height" sandbox="allow-scripts allow-forms allow-same-origin" resizable src="https://ampproject-b5f4c.firebaseapp.com/examples/ampcarousel.controls.embed.html">
     <div overflow tabindex="0" role="button" aria-label="Show more">Show full code</div>

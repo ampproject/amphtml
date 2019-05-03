@@ -518,7 +518,7 @@ You can see whether your change made it into a given build on the [amphtml Relea
 
 You can set your browser to use the Dev Channel build by enabling `dev-channel` on the [AMP Experiments](https://cdn.ampproject.org/experiments.html) page.  This will let you see how your changes will affect any AMP page before your changes are rolled out to all AMP pages.  Note that this only affects the browser in which you enable the experiment.
 
-You can verify the AMP version your browser is using for a given page by looking at your browser's developer console.  After loading an AMP page (e.g. [https://ampproject.org](https://ampproject.org)) the console will have a message like `Powered by AMP ⚡ HTML – Version <build number>`).  The `<build number>` will match one of the build numbers on the [amphtml Releases page](https://github.com/ampproject/amphtml/releases).
+You can verify the AMP version your browser is using for a given page by looking at your browser's developer console.  After loading an AMP page (e.g. [https://amp.dev](https://amp.dev)) the console will have a message like `Powered by AMP ⚡ HTML – Version <build number>`).  The `<build number>` will match one of the build numbers on the [amphtml Releases page](https://github.com/ampproject/amphtml/releases).
 
 The [Release Schedule](release-schedule.md) doc has more details on the release process.
 

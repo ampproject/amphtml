@@ -68,7 +68,7 @@ Twitter does not currently provide an API that yields fixed aspect ratio for emb
 
 An element marked with a `placeholder` attribute displays while the content for the Tweet or Moment is loading or initializing.  Placeholders are hidden once the AMP component's content displays. An element marked with a `fallback` attribute displays if `amp-twitter` isn't supported by the browser or if the Tweet or Moment doesn't exist or has been deleted.
 
-Visit the [Placeholders & fallbacks](https://www.ampproject.org/docs/guides/responsive/placeholders) guide to learn more about how placeholders and fallbacks interact for the `amp-twitter` component.
+Visit the [Placeholders & fallbacks](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/placeholders) guide to learn more about how placeholders and fallbacks interact for the `amp-twitter` component.
 
 *Example: Specifying a placeholder*
 <!--embedded example - displays in ampproject.org -->

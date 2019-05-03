@@ -168,7 +168,7 @@ Allows the `amp-date-countdown` component to calculate the time difference based
 
 ## Events
 
-The `amp-date-countdown` component exposes the following event that you can use [AMP on-syntax to trigger](https://www.ampproject.org/docs/reference/amp-actions-and-events):
+The `amp-date-countdown` component exposes the following event that you can use [AMP on-syntax to trigger](https://amp.dev/documentation/guides-and-tutorials/learn/amp-actions-and-events):
 
 Event | Description
 -- | --

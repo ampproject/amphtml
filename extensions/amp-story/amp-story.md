@@ -45,7 +45,7 @@ limitations under the License.
     <td width="40%"><strong>Examples</strong></td>
     <td><ul>
       <li>See AMP By Example's <a href="https://ampbyexample.com/stories/introduction/amp_story_hello_world/">Hello World</a> sample.</li>
-      <li>Learn from the <a href="https://www.ampproject.org/docs/tutorials/visual_story">Create a visual AMP story</a> tutorial.</li>
+      <li>Learn from the <a href="https://amp.dev/documentation/guides-and-tutorials/start/visual_story/">Create a visual AMP story</a> tutorial.</li>
     </ul></td>
   </tr>
 </table>
@@ -264,7 +264,7 @@ The content in the body creates a story with two pages.  Each page has a full bl
 
 ### Required markup for amp-story
 
-The AMP story HTML format follows the [same markup requirements as a valid AMP HTML document](https://www.ampproject.org/docs/reference/spec#required-markup), along with the following additional requirements:
+The AMP story HTML format follows the [same markup requirements as a valid AMP HTML document](https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup), along with the following additional requirements:
 
 
 | RULE | DESCRIPTION |
@@ -779,7 +779,7 @@ The `<amp-story-cta-layer>` component allows the usage of `<a>` and `<button>` e
     <div class="content" grid-area="lower-third">Paragraph 3</div>
   </amp-story-grid-layer>
   <amp-story-cta-layer>
-    <a href="https://www.ampproject.org" class="button">Outlink here!</a>
+    <a href="https://amp.dev/" class="button">Outlink here!</a>
   </amp-story-cta-layer>
 </amp-story-page>
 ```
@@ -1432,6 +1432,6 @@ Additionally, for right-to-left languages, you may include the `dir="rtl"` attri
 
 ## Related resources
 
-* [Tutorial: Create a visual AMP story](https://www.ampproject.org/docs/tutorials/visual_story)
+* [Tutorial: Create a visual AMP story](https://amp.dev/documentation/guides-and-tutorials/start/visual_story/)
 * [Samples on AMP By Example](https://ampbyexample.com/stories/#stories/introduction)
-* [Best practices for creating an AMP story](https://www.ampproject.org/docs/guides/amp_story_best_practices)
+* [Best practices for creating an AMP story](https://amp.dev/documentation/guides-and-tutorials/develop/amp_story_best_practices)

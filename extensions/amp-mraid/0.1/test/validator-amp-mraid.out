@@ -26,7 +26,7 @@ FAIL
 |    <!-- Invalid: amp-mraid not allowed in AMP; only allowed in AMP ADS -->
 |    <script async host-service="amp-mraid" src="https://cdn.ampproject.org/v0/amp-mraid-0.1.js"></script>
 >>   ^~~~~~~~~
-amp-mraid/0.1/test/validator-amp-mraid.html:26:2 Custom JavaScript is not allowed. (see https://www.ampproject.org/docs/reference/spec#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
+amp-mraid/0.1/test/validator-amp-mraid.html:26:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
 |  </head>
 |  <body>

@@ -15,7 +15,7 @@
  */
 
 /**
- * In practice this would be *.ampproject.org and the publishers
+ * In practice this would be *.amp.dev and the publishers
  * origin. Please see AMP CORS docs for more details:
  *    https://goo.gl/F6uCAY
  * @type {RegExp}

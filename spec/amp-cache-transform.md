@@ -44,7 +44,7 @@ of those transforms. This allows the AMP cache to:
 
   1. Make continuous improvements to the AMP transforms and the transformed AMP
      validation code.
-  2. Try to satisfy [AMP's design principles](https://www.ampproject.org/about/amp-design-principles/),
+  2. Try to satisfy [AMP's design principles](https://amp.dev/about/how-amp-works),
      especially as deficiencies in the transforms are found, by guaranteeing
      that its cache of SXGs don't contain those deficiencies.
   3. Keep its validation code of bounded complexity, by not needing to validate

@@ -107,7 +107,7 @@ required and valid for use with <a href="#a4a">AMPHTML Ads</a>.</td>
 You can style the `amp-lightbox` with standard CSS.
 
 ## Actions
-The `amp-lightbox` exposes the following actions you can use [AMP on-syntax to trigger](https://www.ampproject.org/docs/reference/amp-actions-and-events):
+The `amp-lightbox` exposes the following actions you can use [AMP on-syntax to trigger](https://amp.dev/documentation/guides-and-tutorials/learn/amp-actions-and-events):
 
 <table>
   <tr>
