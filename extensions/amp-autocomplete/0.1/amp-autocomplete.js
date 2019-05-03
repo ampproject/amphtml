@@ -396,7 +396,6 @@ export class AmpAutocomplete extends AMP.BaseElement {
         renderedChildren.map(child => {
           child.classList.add('i-amphtml-autocomplete-item');
           child.setAttribute('role', 'listitem');
-          child.setAttribute('dir', 'auto');
           container.appendChild(child);
         });
       });
