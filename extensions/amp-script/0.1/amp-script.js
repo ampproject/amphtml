@@ -37,7 +37,7 @@ import {
 } from '../../../src/service/origin-experiments-impl';
 import {isExperimentOn} from '../../../src/experiments';
 import {rewriteAttributeValue} from '../../../src/url-rewrite';
-import {setStyle} from '../../../src/style';
+import {setImportantStyles} from '../../../src/style';
 import {startsWith} from '../../../src/string';
 import {
   upgrade,
@@ -135,6 +135,7 @@ export class AmpScript extends AMP.BaseElement {
       dev().info(TAG, 'Iframe mode!');
       this.iframe_ = /** @type {!HTMLIFrameElement} */ (
         this.win.document.createElement('iframe'));
+      this.iframe_.classList.add('i-amphtml-shadow');
       // Copy custom styles into friendly iframe.
       let styleHtml = '';
       const styles = head.querySelectorAll('style[amp-custom]');
@@ -272,7 +273,7 @@ export class AmpScript extends AMP.BaseElement {
             height = body.scrollHeight;
           }, () => {
             // Match iframe height and remove original children.
-            setStyle(this.iframe_, 'height', height + 'px');
+            setImportantStyles(this.iframe_, {'height': height + 'px'});
             while (this.element.firstChild !== this.iframe_) {
               this.element.removeChild(this.element.firstChild);
             }
