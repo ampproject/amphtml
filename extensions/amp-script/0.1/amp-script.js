@@ -15,7 +15,6 @@
  */
 
 import {CSS} from '../../../build/amp-script-0.1.css';
-import {CommonSignals} from '../../../src/common-signals';
 import {
   DomPurifyDef, createPurifier, getAllowedTags, validateAttributeChange,
 } from '../../../src/purifier';
@@ -34,7 +33,7 @@ import {
 } from '../../../src/service/origin-experiments-impl';
 import {isExperimentOn} from '../../../src/experiments';
 import {rewriteAttributeValue} from '../../../src/url-rewrite';
-import {setStyle, setStyles} from '../../../src/style';
+import {setStyle} from '../../../src/style';
 import {startsWith} from '../../../src/string';
 import {
   upgrade,
@@ -74,6 +73,7 @@ export class AmpScript extends AMP.BaseElement {
     /** @private {?ShadowRoot|?Element} */
     this.shadow_ = null;
 
+    /** @private {?HTMLIFrameElement} */
     this.iframe_ = null;
   }
 
@@ -84,14 +84,14 @@ export class AmpScript extends AMP.BaseElement {
   }
 
   /**
-   * @param {*} ampdoc
    * @return {!Promise<boolean>}
+   * @private
    */
-  isExperimentOn_(ampdoc) {
+  isExperimentOn_() {
     if (isExperimentOn(this.win, 'amp-script')) {
       return Promise.resolve(true);
     }
-    installOriginExperimentsForDoc(ampdoc);
+    installOriginExperimentsForDoc(this.getAmpDoc());
     return originExperimentsForDoc(this.element)
         .getExperiments()
         .then(trials => trials && trials.includes(TAG));
@@ -99,15 +99,14 @@ export class AmpScript extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    const ampdoc = this.getAmpDoc();
-    return this.isExperimentOn_(ampdoc).then(on => {
+    return this.isExperimentOn_().then(on => {
       if (!on) {
         // Return rejected Promise to buildCallback() to disable component.
         throw user().createError(TAG, `Experiment "${TAG}" is not enabled.`);
       }
       const shadowed = isExperimentOn(this.win, 'amp-script-in-shadow');
       if (shadowed) {
-        return this.createShadow_(ampdoc).then(shadow => {
+        return this.createShadow_().then(shadow => {
           this.shadow_ = shadow;
         });
       }
@@ -115,14 +114,13 @@ export class AmpScript extends AMP.BaseElement {
   }
 
   /**
-   * @param {*} ampdoc
-   * @return {!Promise}
+   * @return {!Promise<!ShadowRoot|!Element>}
    * @private
    */
-  createShadow_(ampdoc) {
-    const head = ampdoc.getHeadNode();
+  createShadow_() {
+    const head = this.getAmpDoc().getHeadNode();
 
-    if (false) { //'attachShadow' in this.element) {
+    if ('attachShadow' in this.element) {
       const shadow = this.element.attachShadow({mode: 'open'});
       // Copy runtime & custom styles to shadow root.
       // TODO(choumx): Include extension CSS (and avoid race condition).
@@ -150,11 +148,8 @@ export class AmpScript extends AMP.BaseElement {
         <body>${this.element.innerHTML}</body>`;
       const spec = {html};
       return installFriendlyIframeEmbed(this.iframe_, this.element, spec)
-          // .then(fie => fie.signals().whenSignal(CommonSignals.INI_LOAD))
-          .then(() => {
-            // The iframe body is worker-dom's base element.
-            return this.iframe_.contentWindow.document.body;
-          });
+          // The iframe body is worker-dom's base element.
+          .then(() => this.iframe_.contentWindow.document.body);
     }
   }
 
