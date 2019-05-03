@@ -868,7 +868,6 @@ amp-autocomplete {
 }
 
 amp-autocomplete > input {
-  text-align: start !important;
   padding: .5rem; /* default-ui-space-large */
   border: 1px solid rgba(0,0,0,.33) /* default-ui-med-gray */
 }
