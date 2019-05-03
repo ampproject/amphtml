@@ -20,6 +20,10 @@ import {
 } from '../../../src/purifier';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Services} from '../../../src/services';
+import {
+  ShadowDomVersion,
+  getShadowDomSupportedVersion,
+} from '../../../src/web-components';
 import {UserActivationTracker} from './user-activation-tracker';
 import {
   calculateExtensionScriptUrl,
@@ -50,8 +54,14 @@ const MAX_SCRIPT_SIZE = 150000;
  */
 const MAX_FREE_MUTATION_HEIGHT = 300;
 
-const PHASE_HYDRATING = 1;
-const PHASE_MUTATING = 2;
+/**
+ * Must match worker-dom/src/transfer/Phase.ts.
+ * @enum {number}
+ */
+const Phase = {
+  HYDRATING: 1,
+  MUTATING: 2,
+};
 
 export class AmpScript extends AMP.BaseElement {
 
@@ -120,8 +130,34 @@ export class AmpScript extends AMP.BaseElement {
   createShadow_() {
     const head = this.getAmpDoc().getHeadNode();
 
-    if ('attachShadow' in this.element) {
-      const shadow = this.element.attachShadow({mode: 'open'});
+    const shadowSupport = getShadowDomSupportedVersion();
+    if (shadowSupport === ShadowDomVersion.NONE) {
+      dev().info(TAG, 'Iframe mode!');
+      this.iframe_ = /** @type {!HTMLIFrameElement} */ (
+        this.win.document.createElement('iframe'));
+      // Copy custom styles into friendly iframe.
+      let styleHtml = '';
+      const styles = head.querySelectorAll('style[amp-custom]');
+      styles.forEach(style => {
+        styleHtml += style.outerHTML;
+      });
+      // Copy this element's children into the iframe. They'll be overlaid
+      // on top of existing children to avoid jank, and the real children
+      // will be removed on the first mutation. See mutationPump_().
+      const html = `<head>${styleHtml}</head>`
+          + `<body>${this.element.innerHTML}</body>`;
+      const spec = {
+        html,
+        url: this.win.location.origin,
+      };
+      return installFriendlyIframeEmbed(this.iframe_, this.element, spec)
+          // The iframe body is worker-dom's base element.
+          .then(() => this.iframe_.contentWindow.document.body);
+    } else {
+      dev().info(TAG, 'Shadow mode!');
+      const shadow = (shadowSupport === ShadowDomVersion.V0)
+        ? this.element.createShadowRoot()
+        : this.element.attachShadow({mode: 'open'});
       // Copy runtime & custom styles to shadow root.
       // TODO(choumx): Include extension CSS (and avoid race condition).
       const styles = head.querySelectorAll(
@@ -134,29 +170,11 @@ export class AmpScript extends AMP.BaseElement {
         shadow.appendChild(this.element.firstChild);
       }
       return Promise.resolve(shadow);
-    } else {
-      this.iframe_ = this.win.document.createElement('iframe');
-      let styleHtml = '';
-      const styles = head.querySelectorAll('style[amp-custom]');
-      styles.forEach(style => {
-        styleHtml += style.outerHTML;
-      });
-      // Copy this element's children into the iframe. They'll be rendered
-      // directly on top of existing children to avoid visual jank.
-      const html = `
-        <head>${styleHtml}</head>
-        <body>${this.element.innerHTML}</body>`;
-      const spec = {html};
-      return installFriendlyIframeEmbed(this.iframe_, this.element, spec)
-          // The iframe body is worker-dom's base element.
-          .then(() => this.iframe_.contentWindow.document.body);
     }
   }
 
   /** @override */
   layoutCallback() {
-    this.userActivation_ = new UserActivationTracker(this.element);
-
     // Create worker and hydrate.
     const authorUrl = this.element.getAttribute('src');
     const workerUrl = this.workerThreadUrl_();
@@ -199,10 +217,12 @@ export class AmpScript extends AMP.BaseElement {
       },
     };
 
-    const base = this.shadow_ || this.element;
-    upgrade(base, fetchPromise, workerConfig).then(workerDom => {
+    const baseElement = this.shadow_ || this.element;
+    upgrade(baseElement, fetchPromise, workerConfig).then(workerDom => {
       this.workerDom_ = workerDom;
     });
+    this.userActivation_ = new UserActivationTracker(baseElement);
+
     return Promise.resolve();
   }
 
@@ -220,49 +240,55 @@ export class AmpScript extends AMP.BaseElement {
   }
 
   /**
-   * @param {function()} flush
+   * @param {function()} flushMutations
    * @param {number} phase
    * @private
    */
-  mutationPump_(flush, phase) {
-    if (phase == PHASE_HYDRATING) {
+  mutationPump_(flushMutations, phase) {
+    if (phase == Phase.HYDRATING) {
       this.vsync_.mutate(
           () => this.element.classList.add('i-amphtml-hydrated'));
     }
     const allowMutation = (
       // Hydration is always allowed.
-      phase != PHASE_MUTATING
+      phase != Phase.MUTATING
       // Mutation depends on the gesture state and long tasks.
       || this.userActivation_.isActive()
       // If the element is size-contained and small enough.
       || (isLayoutSizeDefined(this.getLayout())
           && this.getLayoutBox().height <= MAX_FREE_MUTATION_HEIGHT)
-      // HACK(choumx): Support iframe-focus in user activation.
-      || this.iframe_
     );
 
     if (allowMutation) {
       this.vsync_.mutate(() => {
-        flush();
+        flushMutations();
 
+        // "Container" layout should be sized to fit children. Iframes
+        // don't behave this way, so we do it manually instead.
         if (this.iframe_ && this.getLayout() === Layout.CONTAINER) {
-          const {body} = this.iframe_.contentWindow.document;
-          // Match iframe height and remove original children.
-          setStyle(this.iframe_, 'height', body.scrollHeight + 'px');
-          while (this.element.firstChild !== this.iframe_) {
-            this.element.removeChild(this.element.firstChild);
-          }
+          let height;
+          this.measureMutateElement(() => {
+            const {body} = this.iframe_.contentWindow.document;
+            height = body.scrollHeight;
+          }, () => {
+            // Match iframe height and remove original children.
+            setStyle(this.iframe_, 'height', height + 'px');
+            while (this.element.firstChild !== this.iframe_) {
+              this.element.removeChild(this.element.firstChild);
+            }
+          });
         }
       });
-      return;
-    }
+    } else {
+      // Otherwise, terminate the worker.
+      this.workerDom_.terminate();
 
-    // Otherwise, terminate the worker.
-    this.workerDom_.terminate();
-    // TODO(dvoytenko): a better UI to indicate the broken state.
-    this.element.classList.remove('i-amphtml-hydrated');
-    this.element.classList.add('i-amphtml-broken');
-    user().error(TAG, '"amp-script" is terminated due to unallowed mutation.');
+      // TODO(dvoytenko): a better UI to indicate the broken state.
+      this.element.classList.remove('i-amphtml-hydrated');
+      this.element.classList.add('i-amphtml-broken');
+
+      user().error(TAG, 'Terminated due to illegal mutation:', this.element);
+    }
   }
 }
 

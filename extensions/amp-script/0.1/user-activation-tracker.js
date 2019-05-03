@@ -27,15 +27,18 @@ const ACTIVATION_EVENTS = ['click', 'input', 'dblclick', 'keypress', 'submit'];
 export class UserActivationTracker {
 
   /**
-   * @param {!Element} root
+   * @param {!Element|!ShadowRoot} root
    */
   constructor(root) {
     /** @private @const */
     this.root_ = root;
+
     /** @private @const */
     this.boundActivated_ = this.activated_.bind(this);
+
     /** @private {number} */
     this.lastActivationTime_ = 0;
+
     /** @private {boolean} */
     this.inLongTask_ = false;
 
