@@ -457,7 +457,7 @@ amproject/amphtml / master … <username>/amphtml / <branch name>
 
 Below this are text boxes where you can provide a title and description for your pull request.  Please follow the guidelines in the template for providing a good title and description.
 
-In your PR description or comments refer to any GitHub issues that your PR is addressing.  This will let people reviewing your PR know what issue your change is addressing and let anyone watching the issue know that there's a PR for it.  You can do this by including the text `issue #<your issue number>` in the description/comment.  If your PR completely fixes the issue, make this `fixes issue #<your issue number>` instead, which will also cause the issue to be closed once your PR is merged.
+In your PR description or comments refer to any GitHub issues that your PR is addressing.  This will let people reviewing your PR know what issue your change is addressing and let anyone watching the issue know that there's a PR for it.  You can do this by including the text `issue #<your issue number>` in the description/comment.  If your PR completely fixes the issue, make this `fixes #<your issue number>` instead, which will also cause the issue to be closed once your PR is merged.
 
 You will need to find a [Reviewer and Owner](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#code-review-and-approval) to review your code and approve it.  When you find someone to review your code, cc them on the Pull Request (by adding a line "/cc @username", e.g. "/cc @mrjoro").
 
