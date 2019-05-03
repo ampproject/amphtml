@@ -689,6 +689,7 @@
       "name": "amp-autocomplete",
       "interactive_tests": "examples/visual-tests/amp-autocomplete/amp-autocomplete.js",
     },
+    {
       "url": "examples/visual-tests/amp-ad/amp-ad.html",
       "name": "AMP ad",
       "enable_percy_javascript": true
