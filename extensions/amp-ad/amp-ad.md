@@ -282,9 +282,10 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [GMOSSP](../../ads/gmossp.md)
 - [GumGum](../../ads/gumgum.md)
 - [Holder](../../ads/holder.md)
+- [iBillboard](../../ads/ibillboard.md)
+- [Idealmedia](../../ads/idealmedia.md)
 - [I-Mobile](../../ads/imobile.md)
 - [Imonomy](../../ads/imonomy.md)
-- [iBillboard](../../ads/ibillboard.md)
 - [Imedia](../../ads/imedia.md)
 - [Improve Digital](../../ads/improvedigital.md)
 - [Index Exchange](../../ads/ix.md)
@@ -387,7 +388,6 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Yieldpro](../../ads/yieldpro.md)
 - [Zedo](../../ads/zedo.md)
 - [Zucks](../../ads/zucks.md)
-- [Idealmedia](../../ads/idealmedia.md)
 
 ## Supported embed types
 

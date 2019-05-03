@@ -498,6 +498,10 @@ export const adConfig = {
 
   'ibillboard': {},
 
+  'idealmedia': {
+    renderStartImplemented: true,
+  },
+
   'imedia': {
     prefetch: 'https://i.imedia.cz/js/im3.js',
     renderStartImplemented: true,
@@ -1124,10 +1128,6 @@ export const adConfig = {
 
   'baidu': {
     prefetch: 'https://dup.baidustatic.com/js/dm.js',
-    renderStartImplemented: true,
-  },
-
-  'idealmedia': {
     renderStartImplemented: true,
   },
 

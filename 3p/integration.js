@@ -153,6 +153,7 @@ import {gmossp} from '../ads/gmossp';
 import {gumgum} from '../ads/gumgum';
 import {holder} from '../ads/holder';
 import {ibillboard} from '../ads/ibillboard';
+import {idealmedia} from '../ads/idealmedia';
 import {imaVideo} from '../ads/google/imaVideo';
 import {imedia} from '../ads/imedia';
 import {imobile} from '../ads/imobile';
@@ -266,7 +267,6 @@ import {zen} from '../ads/zen';
 import {zergnet} from '../ads/zergnet';
 import {zucks} from '../ads/zucks';
 import {speakol} from '../ads/speakol';
-import {idealmedia} from '../ads/idealmedia';
 
 /**
  * Whether the embed type may be used with amp-embed tag.
@@ -393,6 +393,7 @@ register('gmossp', gmossp);
 register('gumgum', gumgum);
 register('holder', holder);
 register('ibillboard', ibillboard);
+register('idealmedia', idealmedia);
 register('ima-video', imaVideo);
 register('imedia', imedia);
 register('imobile', imobile);
@@ -513,7 +514,6 @@ register('zen', zen);
 register('zergnet', zergnet);
 register('zucks', zucks);
 register('speakol', speakol);
-register('idealmedia', idealmedia);
 
 // For backward compat, we always allow these types without the iframe
 // opting in.
