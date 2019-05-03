@@ -581,30 +581,28 @@
 
     <h2>'Disabled' attribute</h2>
     <form method="post" action-xhr="/form/echo-json/post" target="_blank">
-      <amp-autocomplete filter="substring" min-characters="0" [src]="manualFilterData" >
+      <amp-autocomplete filter="substring" min-characters="0">
         <input type="text">
-          <amp-state id="initialInventory">
-              <script type="application/json">
-                { "items" : [ { "value" : "apple",
-                                "disabled" : "true" },
-                              { "value" : "orange" },
-                              { "value" : "avocado",
-                                "disabled" : "true" },
-                              { "value" : "banana" } ] }
-              </script>
-          </amp-state>
+          <script type="application/json">
+            { "items" : [ { "value" : "apple",
+                            "disabled" : "true" },
+                          { "value" : "orange" },
+                          { "value" : "avocado",
+                            "disabled" : "true" },
+                          { "value" : "banana" } ] }
+          </script>
         <template type="amp-mustache">
-            {{#disabled}}
-              <div disabled>
-                {{value}}
-                <span class="out-of-stock">out of stock</span>
-              </div>
-            {{/disabled}}
-            {{^disabled}}
-              <div data-value="{{value}}">
-                {{value}}
-              </div>
-            {{/disabled}}
+          {{#disabled}}
+            <div disabled>
+              {{value}}
+              <span class="out-of-stock">out of stock</span>
+            </div>
+          {{/disabled}}
+          {{^disabled}}
+            <div data-value="{{value}}">
+              {{value}}
+            </div>
+          {{/disabled}}
         </template> 
       </amp-autocomplete>
       <input name="submit-button" type="submit" value="Submit">

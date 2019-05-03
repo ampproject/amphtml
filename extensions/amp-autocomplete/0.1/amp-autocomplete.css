@@ -72,5 +72,5 @@ amp-autocomplete > input {
 }
 
 .i-amphtml-autocomplete-item[disabled] {
-  color: silver;
+  color: rgba(0,0,0,.33);
 }
