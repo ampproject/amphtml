@@ -116,8 +116,8 @@ async function reportAllExpectedTests(buildTargets) {
 }
 
 module.exports = {
-  reportTestErrored,
   reportAllExpectedTests,
+  reportTestErrored,
   reportTestFinished,
   reportTestSkipped,
   reportTestStarted,

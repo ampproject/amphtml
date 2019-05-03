@@ -78,8 +78,7 @@ function cleanupBuildDir() {
 }
 exports.cleanupBuildDir = cleanupBuildDir;
 
-async function compile(
-  entryModuleFilenames, outputDir, outputFilename, options) {
+function compile(entryModuleFilenames, outputDir, outputFilename, options) {
   const hideWarningsFor = [
     'third_party/caja/',
     'third_party/closure-library/sha384-generated.js',

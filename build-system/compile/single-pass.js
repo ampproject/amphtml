@@ -541,7 +541,7 @@ exports.singlePassCompile = async function(entryModule, options) {
  * magic-string might be part of the solution here so explore that (pre or post
  * process)
  */
-async function wrapMainBinaries() {
+function wrapMainBinaries() {
   const pair = wrappers.mainBinary.split('<%= contents %>');
   const prefix = pair[0];
   const suffix = pair[1];
@@ -561,7 +561,7 @@ async function wrapMainBinaries() {
  * TODO(erwinm, #18811): This operation is needed but straight out breaks
  * source maps.
  */
-async function postProcessConcat() {
+function postProcessConcat() {
   const extensions = extensionBundles.filter(
       x => Array.isArray(x.postPrepend));
   extensions.forEach(extension => {
@@ -594,7 +594,7 @@ async function postProcessConcat() {
   });
 }
 
-async function compile(flagsArray) {
+function compile(flagsArray) {
   // TODO(@cramforce): Run the post processing step
   return new Promise(function(resolve, reject) {
     return gulp.src(srcs, {base: transformDir})
