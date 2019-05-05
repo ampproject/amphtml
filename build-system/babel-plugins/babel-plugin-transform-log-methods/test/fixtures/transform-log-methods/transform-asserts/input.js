@@ -14,5 +14,6 @@
  * limitations under the License.
  */
 user().assert(1 + 1);
-let result = user().assert(user(), 'hello', 'world');
-let result2 = user().assert();
+const result = user().assert(user(), 'hello', 'world');
+dev().createError('This is an error with no arguments.');
+const result2 = user().assert();

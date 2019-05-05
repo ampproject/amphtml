@@ -14,5 +14,6 @@
  * limitations under the License.
  */
 user().assert(1 + 1);
-let result = user().assert(user(), user().getLogUrl('hello', 'world'));
-let result2 = user().assert();
+const result = user().assert(user(), user().getLogUrl('0', ['world']));
+dev().createError(dev().getLogUrl('1'));
+const result2 = user().assert();

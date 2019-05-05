@@ -14,96 +14,116 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Indirects log messages through expansion calls with
+ * base36-encoded message ids that redirect to to a URL or look up a message
+ * table to interpolate and display the logged message.
+ *
+ * The motivation of this transform is to reduce binary size. The average length
+ * of an error message is ~43 whereas the common minified transformed output
+ * in the form of `x().l('z2')` is just 11. Since the first part of the output
+ * repeats, it also compresses well.
+ *
+ * Additionally outputs a JSON file containing [message, id] pairs keyed by
+ * message string. This table is "backwards" for deduping, to key by id its rows
+ * should be reversed independently.
+ *
+ * Converts:
+ *
+ *    dev().assert(foo != bar, 'foo should not be bar')
+ *
+ * into:
+ *
+ *    dev().assert(foo != bar, dev().getLogUrl('0'))
+ *
+ * When the message contains arguments, those get passed to the expansion
+ * method. The following gets converted:
+ *
+ *    dev().assert(..., `${foo} should not be ${bar}`)
+ *
+ * into:
+ *
+ *    dev().assert(..., dev().getLogUrl('0', foo, bar))
+ *
+ */
+
 const fs = require('fs');
 
 const logMessagesPath = `${__dirname}/../../log-messages.json`;
-
-function convertFromBase10ToBase16(str) {
-  const num = parseInt(str, 10);
-  return num.toString(16);
-}
+const messageExpansionMethod = 'getLogUrl';
 
 /**
+ * Positions of the first message argument in the logging methods.
  * @type {!Array<LogMethodMetadataDef>}
  */
-const transformableMethods = [
-  {name: 'assert', variadic: true, startPos: 1},
-  {name: 'assertString', variadic: false, startPos: 1},
-  {name: 'assertNumber', variadic: false, startPos: 1},
-  {name: 'assertBoolean', variadic: false, startPos: 1},
-  {name: 'assertEnumValue', variadic: false, startPos: 2},
-  {name: 'assertElement', variadic: false, startPos: 1},
-  {name: 'fine', variadic: true, startPos: 1},
-  {name: 'info', variadic: true, startPos: 1},
-  {name: 'warn', variadic: true, startPos: 1},
-  {name: 'createExpectedError', variadic: true, startPos: 0},
-  {name: 'error', variadic: true, startPos: 1},
-  {name: 'expectedError', variadic: true, startPos: 1},
-  {name: 'createError', variadic: true, startPos: 0},
-];
+const methodsMessageArgPos = {
+  assert: 1,
+  assertBoolean: 1,
+  assertElement: 1,
+  assertEnumValue: 2,
+  assertNumber: 1,
+  assertString: 1,
+  createError: 0,
+  createExpectedError: 0,
+  error: 1,
+  expectedError: 1,
+  fine: 1,
+  info: 1,
+  warn: 1,
+};
 
-function isTransformableMethod(t, node, methods) {
-  if (!node || !t.isIdentifier(node)) {
-    return false;
-  }
-  return methods.some(names => {
-    const {name} = names;
-    return t.isIdentifier(node, {name});
-  });
-}
-
-/**
- * @param {string} name
- * @return {!LogMethodMetadataDef}
- */
-function getMetadata(name) {
-  return transformableMethods.find(cur => cur.name === name);
-}
-
-/**
- * @param {!Node} node
- * @return {boolean}
- */
-function isBinaryConcat(node) {
-  return node.type === 'BinaryExpression' && node.operator === '+';
-}
-
-/**
- * @param {!Node} node
- * @return {boolean}
- */
-function isLiteralString(node) {
-  return node.type === "StringLiteral";
-}
+const isTransformableMethod = (t, node, methods) =>
+  t.isIdentifier(node) && node.name in methods;
 
 /**
  * Retrieves the error map from the json file.
+ * @return {!Object<string, string>}
  */
-function getErrorMap() {
-  return JSON.parse(fs.readFileSync(logMessagesPath));
-}
+const getMessageToIdMap = () => JSON.parse(fs.readFileSync(logMessagesPath));
 
 /**
  * Retrieves the error map from the json file.
+ * @param {!Object<string, string>} obj
  */
 function writeErrorMap(obj) {
-  const json = JSON.stringify(obj, null, 2);
+  const json = JSON.stringify(obj, /* replacer */ null, /* spaces */ 2);
   fs.writeFileSync(logMessagesPath, json);
 }
 
-function getHexId(message) {
-  const errorMap = getErrorMap();
+/**
+ * Converts a numeric message id to a base-36 encoded string.
+ * @param {number} id
+ * @return {string}
+ */
+const createShortMessageId = id => id.toString(36);
+
+/**
+ * Gets a message id from the message map, or adds a new entry for a new
+ * message.
+ * @param {string} message
+ * @return {string}
+ */
+function getOrCreateShortMessageId(message) {
+  const errorMap = getMessageToIdMap();
   if (errorMap[message]) {
     return errorMap[message];
   }
-  const hexId = convertFromBase10ToBase16(Object.keys(errorMap).length + 1);
-  errorMap[message] = hexId;
+  const shortMessageId = createShortMessageId(Object.keys(errorMap).length + 1);
+  errorMap[message] = shortMessageId;
   writeErrorMap(errorMap);
-  return hexId;
+  return shortMessageId;
 }
 
-module.exports = function(babel) {
-  const {types: t} = babel;
+/**
+ * Determines whether a callee is either dev() or user() singleton.
+ * @param {*} t babel.types
+ * @param {Node} callee
+ * @return {boolean}
+ */
+const isLogSingletonCall = (t, callee) =>
+  ['dev', 'user'].some(name => t.isIdentifier(callee, {name}));
+
+module.exports = function({types: t}) {
   return {
     visitor: {
       CallExpression(path) {
@@ -117,24 +137,19 @@ module.exports = function(babel) {
           return;
         }
 
-        // this is dev() or user() call expression
         const logCallee = callee.object.callee;
         const {property} = callee;
-        const isTransformableDevCall =
-          t.isIdentifier(logCallee, {name: 'dev'}) &&
-          isTransformableMethod(t, property, transformableMethods);
-        const isTransformableUserCall =
-          t.isIdentifier(logCallee, {name: 'user'}) &&
-          isTransformableMethod(t, property, transformableMethods);
 
-        if (!(isTransformableDevCall || isTransformableUserCall)) {
+        // This is dev() or user() call expression with a known method.
+        if (
+          !isLogSingletonCall(t, logCallee) ||
+          !isTransformableMethod(t, property, methodsMessageArgPos)
+        ) {
           return;
         }
 
-        const metadata = getMetadata(property.name);
-
-        // This is the message argument that we want to extract and replace.
-        const messageArg = path.node.arguments[metadata.startPos];
+        const messageArgPos = methodsMessageArgPos[property.name];
+        const messageArg = node.arguments[messageArgPos];
 
         // If there is actually no message argument then bail out on the whole
         // transformation.
@@ -142,57 +157,71 @@ module.exports = function(babel) {
           return;
         }
 
-        // Other arguments are template expressions in template literals.
-        const otherArgs = [];
+        const templateLiteralArgs = [];
 
         // Construct a String Literal from the argument. This is because
         // There could be other Nodes like Template Literals, Binary
         // Expressions, Method calls etc.
-        const message = buildMessage(messageArg, otherArgs);
+        const message = buildMessage(t, messageArg, templateLiteralArgs);
 
-        let hexId = getHexId(message);
+        const shortMessageId = getOrCreateShortMessageId(message);
 
-        const newArgs = path.node.arguments.slice(0, metadata.startPos);
-        const interpolateArgs = path.node.arguments
-            .slice(metadata.startPos + 1);
-        const newCall = t.memberExpression(
-            t.callExpression(t.identifier(logCallee.name), []),
-            t.identifier('getLogUrl')
+        const argsHead = node.arguments.slice(
+            0,
+            Math.max(0, messageArgPos - 1)
         );
 
-        const getLogUrlArgs = [
-          t.stringLiteral(hexId),
-          t.arrayExpression([...interpolateArgs, ...otherArgs]),
-        ];
-        newArgs[metadata.startPos] = t.callExpression(newCall, getLogUrlArgs);
+        const argsTail = node.arguments.slice(messageArgPos + 1);
 
-        path.node.arguments.length = 0;
-        path.node.arguments.push.apply(path.node.arguments, newArgs);
+        // Member expression as callee of message expansion method,
+        // eg. `dev().getLogUrl`.
+        const messageExpansionCallee = t.memberExpression(
+            t.callExpression(t.identifier(logCallee.name), []),
+            t.identifier(messageExpansionMethod)
+        );
+
+        const messageExpansionArgs = [
+          t.stringLiteral(shortMessageId),
+          t.arrayExpression([...argsTail, ...templateLiteralArgs]),
+        ];
+
+        console.log(
+            t.callExpression(messageExpansionCallee, messageExpansionArgs)
+        );
+
+        node.arguments = [
+          ...argsHead,
+          // Full expansion call as eg. `dev().getLogUrl(shortId, ...args)`
+          t.callExpression(messageExpansionCallee, messageExpansionArgs),
+        ];
       },
     },
   };
 };
 
 /**
+ * @param {*} t babel.types
  * @param {!Node} node
  * @param {!Array<!Node>} otherNodes
  */
-function buildMessage(node, otherNodes) {
-  if (isLiteralString(node)) {
+function buildMessage(t, node, otherNodes) {
+  if (t.isStringLiteral(node)) {
     return node.value;
   }
 
-  if (isBinaryConcat(node)) {
-    return buildMessage(node.left, otherNodes) +
-        buildMessage(node.right, otherNodes);
+  if (t.isBinaryExpression(node, {operator: '+'})) {
+    return (
+      buildMessage(t, node.left, otherNodes) +
+      buildMessage(t, node.right, otherNodes)
+    );
   }
 
-  if (node.type === 'TemplateLiteral') {
+  if (t.isTemplateLiteral(node)) {
     let quasied = '';
     let i = 0;
     for (; i < node.quasis.length - 1; i++) {
       quasied += node.quasis[i].value.cooked;
-      quasied += buildMessage(node.expressions[i], otherNodes);
+      quasied += buildMessage(t, node.expressions[i], otherNodes);
     }
     quasied += node.quasis[i].value.cooked;
     return quasied;
