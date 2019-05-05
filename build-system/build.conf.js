@@ -14,56 +14,48 @@
  * limitations under the License.
  */
 
+const localPlugin = name => require.resolve(`./babel-plugins/${name}`);
+
 const defaultPlugins = [
-  require.resolve(
-      './babel-plugins/babel-plugin-transform-amp-asserts'),
-  require.resolve(
-      './babel-plugins/babel-plugin-transform-html-template'),
-  require.resolve(
-      './babel-plugins/babel-plugin-transform-parenthesize-expression'),
-  require.resolve(
-      './babel-plugins/babel-plugin-is_minified-constant-transformer'),
-  require.resolve(
-      './babel-plugins/babel-plugin-transform-log-methods'),
+  localPlugin('babel-plugin-transform-amp-asserts'),
+  localPlugin('babel-plugin-transform-html-template'),
+  // TODO(alanorozco): Enable once message serving infra is up.
+  localPlugin('babel-plugin-transform-log-methods'),
+  localPlugin('babel-plugin-transform-parenthesize-expression'),
+  localPlugin('babel-plugin-is_minified-constant-transformer'),
 ];
 
-module.exports = {
-  plugins: ({
-    isEsmBuild,
-    isCommonJsModule,
-    isForTesting,
-  }) => {
-    let pluginsToApply = defaultPlugins;
-    if (isEsmBuild) {
-      pluginsToApply = pluginsToApply.concat([
-        [require.resolve('babel-plugin-filter-imports'), {
+function plugins({
+  isEsmBuild,
+  isCommonJsModule,
+  isForTesting,
+}) {
+  const pluginsToApply = [...defaultPlugins];
+  if (isEsmBuild) {
+    pluginsToApply.push(
+        ['babel-plugin-filter-imports', {
           'imports': {
-            './polyfills/fetch': ['installFetch'],
-            './polyfills/domtokenlist-toggle': ['installDOMTokenListToggle'],
             './polyfills/document-contains': ['installDocContains'],
+            './polyfills/domtokenlist-toggle': ['installDOMTokenListToggle'],
+            './polyfills/fetch': ['installFetch'],
             './polyfills/math-sign': ['installMathSign'],
             './polyfills/object-assign': ['installObjectAssign'],
             './polyfills/object-values': ['installObjectValues'],
             './polyfills/promise': ['installPromise'],
           },
-        }],
-      ]);
-    }
-    if (isCommonJsModule) {
-      pluginsToApply = pluginsToApply.concat([
-        [require.resolve('babel-plugin-transform-commonjs-es2015-modules')],
-      ]);
-    }
-    if (!isForTesting) {
-      pluginsToApply = pluginsToApply.concat([
-        require.resolve(
-            './babel-plugins/babel-plugin-is_dev-constant-transformer'
-        ),
-        require.resolve(
-            './babel-plugins/babel-plugin-amp-mode-transformer'
-        ),
-      ]);
-    }
-    return pluginsToApply;
-  },
-};
+        }]
+    );
+  }
+  if (isCommonJsModule) {
+    pluginsToApply.push('babel-plugin-transform-commonjs-es2015-modules');
+  }
+  if (!isForTesting) {
+    pluginsToApply.push(
+        localPlugin('babel-plugin-amp-mode-transformer'),
+        localPlugin('babel-plugin-is_dev-constant-transformer')
+    );
+  }
+  return pluginsToApply;
+}
+
+module.exports = {plugins};
