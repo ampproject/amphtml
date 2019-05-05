@@ -16,8 +16,6 @@
 
 const fs = require('fs');
 
-console.log(__dirname);
-
 const logMessagesPath = `${__dirname}/../../log-messages.json`;
 
 function convertFromBase10ToBase16(str) {
@@ -95,22 +93,14 @@ function writeErrorMap(obj) {
 
 function getHexId(message) {
   const errorMap = getErrorMap();
-  console.log('errormap', errorMap);
-  console.log('message', message);
-  console.log('in it?', message in errorMap);
-  console.log('typeof', typeof errorMap[message]);
-  console.log('woop', errorMap[message]);
   if (errorMap[message]) {
-    hexId = errorMap[message];
-  } else {
-    hexId = convertFromBase10ToBase16(Object.keys(errorMap).length + 1);
-    errorMap[message] = hexId;
-    console.log('i am in AAAA', errorMap);
-    writeErrorMap(errorMap);
+    return errorMap[message];
   }
+  const hexId = convertFromBase10ToBase16(Object.keys(errorMap).length + 1);
+  errorMap[message] = hexId;
+  writeErrorMap(errorMap);
   return hexId;
 }
-
 
 module.exports = function(babel) {
   const {types: t} = babel;
@@ -158,7 +148,6 @@ module.exports = function(babel) {
         // Construct a String Literal from the argument. This is because
         // There could be other Nodes like Template Literals, Binary
         // Expressions, Method calls etc.
-        console.log('message?', messageArg, ':', otherArgs);
         const message = buildMessage(messageArg, otherArgs);
 
         let hexId = getHexId(message);
