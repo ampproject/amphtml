@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-const $$ = require('gulp-load-plugins')();
 const colors = require('ansi-colors');
 const fs = require('fs-extra');
 const log = require('fancy-log');
 const minimatch = require('minimatch');
+const watch = require('gulp-watch');
 const wrappers = require('../compile-wrappers');
 const {aliasBundles, extensionBundles, verifyExtensionBundles, verifyExtensionAliasBundles} = require('../../bundles.config');
-const {compileJs, endBuildStep, mkdirSync} = require('./helpers');
+const {compileJs, mkdirSync} = require('./helpers');
 const {isTravisBuild} = require('../travis');
 const {jsifyCssAsync} = require('./jsify-css');
 
@@ -347,7 +347,7 @@ function buildExtension(
     // Do not set watchers again when we get called by the watcher.
     const copy = Object.create(options);
     copy.watch = false;
-    $$.watch(path + '/*', function() {
+    watch(path + '/*', function() {
       buildExtension(name, version, latestVersion, hasCss, copy);
     });
   }
@@ -355,10 +355,7 @@ function buildExtension(
   if (hasCss) {
     mkdirSync('build');
     mkdirSync('build/css');
-    const startTime = Date.now();
-    promise = buildExtensionCss(path, name, version, options).then(() => {
-      endBuildStep('Recompiled CSS in', `${name}/${version}`, startTime);
-    });
+    promise = buildExtensionCss(path, name, version, options);
     if (options.compileOnlyCss) {
       return promise;
     }
@@ -443,9 +440,11 @@ function buildExtensionJs(path, name, version, latestVersion, options) {
   });
 }
 
-exports.buildExtensions = buildExtensions;
-exports.extensions = extensions;
-exports.extensionAliasFilePath = extensionAliasFilePath;
-exports.getExtensionsToBuild = getExtensionsToBuild;
-exports.maybeInitializeExtensions = maybeInitializeExtensions;
-exports.parseExtensionFlags = parseExtensionFlags;
+module.exports = {
+  buildExtensions,
+  extensions,
+  extensionAliasFilePath,
+  getExtensionsToBuild,
+  maybeInitializeExtensions,
+  parseExtensionFlags,
+};

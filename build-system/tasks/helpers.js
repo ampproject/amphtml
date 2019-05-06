@@ -14,18 +14,22 @@
  * limitations under the License.
  */
 
-const $$ = require('gulp-load-plugins')();
 const babelify = require('babelify');
 const browserify = require('browserify');
 const buffer = require('vinyl-buffer');
 const colors = require('ansi-colors');
+const file = require('gulp-file');
 const fs = require('fs-extra');
-const gulp = $$.help(require('gulp'));
+const gulp = require('gulp');
+const gulpWatch = require('gulp-watch');
 const lazypipe = require('lazypipe');
 const log = require('fancy-log');
 const path = require('path');
+const regexpSourcemaps = require('gulp-regexp-sourcemaps');
+const rename = require('gulp-rename');
 const rimraf = require('rimraf');
 const source = require('vinyl-source-stream');
+const sourcemaps = require('gulp-sourcemaps');
 const touch = require('touch');
 const watchify = require('watchify');
 const wrappers = require('../compile-wrappers');
@@ -60,13 +64,6 @@ const EXTENSION_BUNDLE_MAP = {
 const hostname = argv.hostname || 'cdn.ampproject.org';
 const hostname3p = argv.hostname3p || '3p.ampproject.net';
 
-// Unminified targets to which AMP_CONFIG must be written.
-const unminifiedRuntimeTarget = 'dist/amp.js';
-const unminifiedShadowRuntimeTarget = 'dist/amp-shadow.js';
-const unminifiedAdsTarget = 'dist/amp-inabox.js';
-const unminifiedRuntimeEsmTarget = 'dist/amp-esm.js';
-const unminified3pTarget = 'dist.3p/current/integration.js';
-
 /**
  * Compile and optionally minify the stylesheets and the scripts
  * and drop them in the dist folder
@@ -87,7 +84,7 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
           watch,
           minify: shouldMinify,
           preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
-          externs: ['ads/ads.extern.js'],
+          externs: ['./ads/ads.extern.js'],
           include3pDirectories: true,
           includePolyfills: true,
         }),
@@ -98,7 +95,7 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
           watch,
           minify: shouldMinify,
           preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
-          externs: ['ads/ads.extern.js'],
+          externs: ['./ads/ads.extern.js'],
           include3pDirectories: true,
           includePolyfills: false,
         }),
@@ -109,7 +106,7 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
           watch,
           minify: shouldMinify,
           preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
-          externs: ['ads/ads.extern.js'],
+          externs: ['./ads/ads.extern.js'],
           include3pDirectories: true,
           includePolyfills: false,
         }),
@@ -249,7 +246,7 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
 
     if (watch) {
       thirdPartyFrames.forEach(frameObject => {
-        $$.watch(frameObject.max, function() {
+        gulpWatch(frameObject.max, function() {
           thirdPartyBootstrap(
               frameObject.max, frameObject.min, shouldMinify);
         });
@@ -339,16 +336,7 @@ function compileJs(srcDir, srcFilename, destDir, options) {
         });
   }
 
-  const startTime = Date.now();
-  let bundler = browserify(entryPoint, {debug: true})
-      .transform(babelify)
-      .once('transform', () => {
-        let name = srcFilename;
-        if (options.name && options.version) {
-          name = `${options.name}-${options.version}.js`;
-        }
-        endBuildStep('Transformed', name, startTime);
-      });
+  let bundler = browserify(entryPoint, {debug: true}).transform(babelify);
   if (options.watch) {
     bundler = watchify(bundler);
   }
@@ -362,12 +350,12 @@ function compileJs(srcDir, srcFilename, destDir, options) {
   const lazybuild = lazypipe()
       .pipe(source, srcFilename)
       .pipe(buffer)
-      .pipe($$.sourcemaps.init.bind($$.sourcemaps), {loadMaps: true})
-      .pipe($$.regexpSourcemaps, /\$internalRuntimeVersion\$/g, internalRuntimeVersion, 'runtime-version')
-      .pipe($$.regexpSourcemaps, /([^]+)/, devWrapper, 'wrapper');
+      .pipe(sourcemaps.init.bind(sourcemaps), {loadMaps: true})
+      .pipe(regexpSourcemaps, /\$internalRuntimeVersion\$/g, internalRuntimeVersion, 'runtime-version')
+      .pipe(regexpSourcemaps, /([^]+)/, devWrapper, 'wrapper');
 
   const lazywrite = lazypipe()
-      .pipe($$.sourcemaps.write.bind($$.sourcemaps), './')
+      .pipe(sourcemaps.write.bind(sourcemaps), './')
       .pipe(gulp.dest.bind(gulp), destDir);
 
   const destFilename = options.toName || srcFilename;
@@ -393,7 +381,7 @@ function compileJs(srcDir, srcFilename, destDir, options) {
               }
             })
             .pipe(lazybuild())
-            .pipe($$.rename(destFilename))
+            .pipe(rename(destFilename))
             .pipe(lazywrite())
             .on('end', function() {
               appendToCompiledFile(srcFilename,
@@ -426,17 +414,17 @@ function compileJs(srcDir, srcFilename, destDir, options) {
         .then(() => {
           if (process.env.NODE_ENV === 'development') {
             if (destFilename === 'amp.js') {
-              return enableLocalTesting(unminifiedRuntimeTarget);
+              return enableLocalTesting('dist/amp.js');
             } else if (destFilename === 'amp-esm.js') {
-              return enableLocalTesting(unminifiedRuntimeEsmTarget);
+              return enableLocalTesting('dist/amp-esm.js');
             } else if (destFilename === 'amp4ads-v0.js') {
-              return enableLocalTesting(unminifiedAdsTarget);
+              return enableLocalTesting('dist/amp4ads-v0.js');
             } else if (destFilename === 'integration.js') {
-              return enableLocalTesting(unminified3pTarget);
+              return enableLocalTesting('dist.3p/current/integration.js');
             } else if (destFilename === 'amp-shadow.js') {
-              return enableLocalTesting(unminifiedShadowRuntimeTarget);
+              return enableLocalTesting('dist/amp-shadow.js');
             } else if (destFilename === 'amp-inabox.js') {
-              return enableLocalTesting(unminifiedAdsTarget);
+              return enableLocalTesting('dist/amp-inabox.js');
             } else {
               return Promise.resolve();
             }
@@ -527,7 +515,7 @@ function printNobuildHelp() {
  * Called at the end of "gulp build" and "gulp dist --fortesting".
  * @param {string} targetFile File to which the config is to be written.
  */
-function enableLocalTesting(targetFile) {
+async function enableLocalTesting(targetFile) {
   const config = (argv.config === 'canary') ? 'canary' : 'prod';
   const baseConfigFile =
       'build-system/global-configs/' + config + '-config.json';
@@ -581,7 +569,7 @@ function thirdPartyBootstrap(input, outputName, shouldMinify) {
   // Convert default relative URL to absolute min URL.
   const html = fs.readFileSync(input, 'utf8')
       .replace(/\.\/integration\.js/g, integrationJs);
-  return toPromise($$.file(outputName, html, {src: true})
+  return toPromise(file(outputName, html, {src: true})
       .pipe(gulp.dest('dist.3p/' + internalRuntimeVersion))
       .on('end', function() {
         const aliasToLatestBuild = 'dist.3p/current-min';
@@ -603,7 +591,7 @@ function thirdPartyBootstrap(input, outputName, shouldMinify) {
  *
  * @param {!Object} options
  */
-function buildExperiments(options) {
+async function buildExperiments(options) {
   options = options || {};
   const path = 'tools/experiments';
   const htmlPath = path + '/experiments.html';
@@ -620,7 +608,7 @@ function buildExperiments(options) {
     // Do not set watchers again when we get called by the watcher.
     const copy = Object.create(options);
     copy.watch = false;
-    $$.watch(path + '/*', function() {
+    gulpWatch(path + '/*', function() {
       buildExperiments(copy);
     });
   }
@@ -630,7 +618,7 @@ function buildExperiments(options) {
   const minHtml = html.replace('/dist.tools/experiments/experiments.js',
       `https://${hostname}/v0/experiments.js`);
   gulp.src(htmlPath)
-      .pipe($$.file('experiments.cdn.html', minHtml))
+      .pipe(file('experiments.cdn.html', minHtml))
       .pipe(gulp.dest('dist.tools/experiments/'));
 
   // Build JS.
@@ -638,7 +626,7 @@ function buildExperiments(options) {
   const builtName = 'experiments.max.js';
   const minifiedName = 'experiments.js';
   return toPromise(gulp.src(path + '/*.js')
-      .pipe($$.file(builtName, js))
+      .pipe(file(builtName, js))
       .pipe(gulp.dest('build/experiments/')))
       .then(function() {
         return compileJs(
@@ -731,16 +719,18 @@ function toPromise(readable) {
   });
 }
 
-exports.buildAlp = buildAlp;
-exports.buildExaminer = buildExaminer;
-exports.buildExperiments = buildExperiments;
-exports.buildWebWorker = buildWebWorker;
-exports.compile = compile;
-exports.compileJs = compileJs;
-exports.enableLocalTesting = enableLocalTesting;
-exports.endBuildStep = endBuildStep;
-exports.hostname = hostname;
-exports.mkdirSync = mkdirSync;
-exports.printConfigHelp = printConfigHelp;
-exports.printNobuildHelp = printNobuildHelp;
-exports.toPromise = toPromise;
+module.exports = {
+  buildAlp,
+  buildExaminer,
+  buildExperiments,
+  buildWebWorker,
+  compile,
+  compileJs,
+  enableLocalTesting,
+  endBuildStep,
+  hostname,
+  mkdirSync,
+  printConfigHelp,
+  printNobuildHelp,
+  toPromise,
+};

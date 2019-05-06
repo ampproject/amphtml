@@ -18,7 +18,6 @@
 const argv = require('minimist')(process.argv.slice(2));
 const colors = require('ansi-colors');
 const fs = require('fs-extra');
-const gulp = require('gulp-help')(require('gulp'));
 const log = require('fancy-log');
 
 const year = new Date().getFullYear();
@@ -273,7 +272,7 @@ function getExamplesFile(name) {
 `;
 }
 
-function makeExtension() {
+async function makeExtension() {
   if (!argv.name) {
     log(colors.red(
         'Error! Please pass in the "--name" flag with a value'));
@@ -304,8 +303,11 @@ function makeExtension() {
       examplesFile);
 }
 
-gulp.task('make-extension', 'Create an extension skeleton', makeExtension, {
-  options: {
-    name: '  The name of the extension. Preferable prefixed with `amp-*`',
-  },
-});
+module.exports = {
+  makeExtension,
+};
+
+makeExtension.description = 'Create an extension skeleton';
+makeExtension.flags = {
+  name: '  The name of the extension. Preferable prefixed with `amp-*`',
+};

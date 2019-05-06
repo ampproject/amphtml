@@ -99,7 +99,7 @@ If you are new to Git it may seem surprising that there are three different repo
 
 Note that each of these repositories has a complete copy of the entire amphtml codebase.  If your local repository is on your computer and you lose your internet connection you'll still be able to make changes to any file in your local repository.  Part of the workflow for Git that we'll go through is how you keep these three repositories in sync.
 
-One thing that might put your mind at ease:  if you aren't currently a [core committer](../GOVERNANCE.md) to the amphtml project, you can't actually make changes to the amphtml repository directly. So go ahead and try out different Git commands without worrying you're going to break things for other people!
+One thing that might put your mind at ease:  if you aren't in a [role](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#roles) that lets you make changes to the amphtml repository directly any changes you make will only affect you. So go ahead and try out different Git commands without worrying you're going to break things for other people!
 
 ## Creating your GitHub fork and your local repository
 To create your fork on GitHub and your local copy of that fork:
@@ -444,7 +444,7 @@ Note that you *can* edit files in your branch directly on GitHub using the web U
 
 # Send a Pull Request (i.e. request a code review)
 
-In order for your changes to become part of the amphtml repository, you will need to get your code reviewed by one of the [core committers](../GOVERNANCE.md) via a Pull Request (PR).  In fact you won't actually merge your code into the amphtml repository directly; once a core committer approves it he or she will handle the merge for you.
+In order for your changes to become part of the amphtml repository, you will need to get your [code reviewed](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#code-review-and-approval) via a Pull Request (PR).  In fact you won't actually merge your code into the amphtml repository directly; after your code has been reviewed [someone with the permission to modify the amphtml repository](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#roles) will handle the merge for you.
 
 Once your code is ready for a review, go to [https://github.com/ampproject/amphtml](https://github.com/ampproject/amphtml) and click on the "Compare & pull request" button on the "recently pushed branches" banner.  If that banner isn't visible, go to your GitHub fork at
 `https://github.com/<username>/amphtml`, use the Branch dropdown to select the branch that contains the changes you want reviewed and press the "New pull request" button.
@@ -455,9 +455,13 @@ On the "Open a pull request" page, you will see dropdowns at the top indicating 
 amproject/amphtml / master … <username>/amphtml / <branch name>
 ```
 
-Below this are text boxes where you can provide a title and description for your pull request.  Please follow the guidelines in the template for providing a good title and description.  Make sure to refer to any Issues that you are fixing (by typing "Issue #" and selecting it from the autocomplete) so that people can see which issue you are fixing and people watching the issue will see that there's a PR for it.
+Below this are text boxes where you can provide a title and description for your pull request.  Please follow the guidelines in the template for providing a good title and description.
 
-The reviewer should be one of the [core committers](../GOVERNANCE.md) and ideally someone who is familiar with the change you are making (e.g. someone you've been communicating with through an associated GitHub issue).
+In your PR description or comments refer to any GitHub issues that your PR is addressing.  This will let people reviewing your PR know what issue your change is addressing and let anyone watching the issue know that there's a PR for it.  You can do this by including the text `issue #<your issue number>` in the description/comment.  If your PR completely fixes the issue, make this `fixes #<your issue number>` instead, which will also cause the issue to be closed once your PR is merged.
+
+You will need to find a [Reviewer and Owner](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#code-review-and-approval) to review your code and approve it.  When you find someone to review your code, cc them on the Pull Request (by adding a line "/cc @username", e.g. "/cc @mrjoro").
+
+When you're new to contributing to AMP it can be tricky to figure out who should review your code.  In general if you've been working with someone in the community on your change, they can likely review your code or know who can review it.  The [people who previously changed the files you're changing](https://help.github.com/en/articles/tracking-changes-in-a-file) are also good candidates for reviewing your change.  If you aren't sure who to ask to review your code, the steps for [finding a guide](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#find-a-guide) can also work for finding a reviewer for your change.
 
 When you're done click "Create pull request."  This will bring you to your Pull Request page where you can track progress, add comments, etc.
 

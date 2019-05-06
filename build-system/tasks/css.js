@@ -15,9 +15,10 @@
  */
 
 
-const $$ = require('gulp-load-plugins')();
+const file = require('gulp-file');
 const fs = require('fs-extra');
-const gulp = $$.help(require('gulp'));
+const gulp = require('gulp');
+const gulpWatch = require('gulp-watch');
 const {
   endBuildStep,
   mkdirSync,
@@ -25,16 +26,15 @@ const {
   toPromise,
 } = require('./helpers');
 const {buildExtensions, extensions} = require('./extension-helpers');
-const {isTravisBuild} = require('../travis');
 const {jsifyCssAsync} = require('./jsify-css');
-
-const maybeUpdatePackages = isTravisBuild() ? [] : ['update-packages'];
+const {maybeUpdatePackages} = require('./update-packages');
 
 /**
  * Entry point for 'gulp css'
  * @return {!Promise}
  */
-function css() {
+async function css() {
+  maybeUpdatePackages();
   printNobuildHelp();
   return compileCss();
 }
@@ -60,7 +60,7 @@ const cssEntryPoints = [
  */
 function compileCss(watch, opt_compileAll) {
   if (watch) {
-    $$.watch('css/**/*.css', function() {
+    gulpWatch('css/**/*.css', function() {
       compileCss();
     });
   }
@@ -76,7 +76,7 @@ function compileCss(watch, opt_compileAll) {
    */
   function writeCss(css, originalCssFilename, jsFilename, cssFilename) {
     return toPromise(gulp.src(`css/${originalCssFilename}`)
-        .pipe($$.file(jsFilename, 'export const cssText = ' +
+        .pipe(file(jsFilename, 'export const cssText = ' +
           JSON.stringify(css)))
         .pipe(gulp.dest('build'))
         .on('end', function() {
@@ -92,14 +92,11 @@ function compileCss(watch, opt_compileAll) {
    * @param {string} outCss
    */
   function writeCssEntryPoint(path, outJs, outCss) {
-    const startTime = Date.now();
-
     return jsifyCssAsync(`css/${path}`)
-        .then(css => writeCss(css, path, outJs, outCss))
-        .then(() => {
-          endBuildStep('Recompiled CSS in', path, startTime);
-        });
+        .then(css => writeCss(css, path, outJs, outCss));
   }
+
+  const startTime = Date.now();
 
   // Used by `gulp test --local-changes` to map CSS files to JS files.
   fs.writeFileSync('EXTENSIONS_CSS_MAP', JSON.stringify(extensions));
@@ -116,10 +113,15 @@ function compileCss(watch, opt_compileAll) {
     bundleOnlyIfListedInFiles: false,
     compileOnlyCss: true,
     compileAll: opt_compileAll,
-  }));
+  })).then(() => {
+    endBuildStep('Recompiled all CSS files into', 'build/', startTime);
+  });
 }
 
-exports.compileCss = compileCss;
-exports.cssEntryPoints = cssEntryPoints;
+module.exports = {
+  css,
+  compileCss,
+  cssEntryPoints,
+};
 
-gulp.task('css', 'Recompile css to build directory', maybeUpdatePackages, css);
+css.description = 'Recompile css to build directory';
