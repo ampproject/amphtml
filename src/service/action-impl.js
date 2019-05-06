@@ -294,12 +294,12 @@ export class ActionService {
           const isTapEventRole =
               (role && hasOwn(TAPPABLE_ARIA_ROLES, role.toLowerCase()));
           if (!event.defaultPrevented && isTapEventRole) {
-            const actionInvoked =
+            const hasAction =
                 this.trigger(element, name, event, ActionTrust.HIGH);
-            // Only if an action was invoked do we prevent the default.
+            // Only if the element has an action do we prevent the default.
             // In the absence of an action, e.g. on="[event].method", we do not
             // want to stop default behavior.
-            if (actionInvoked) {
+            if (hasAction) {
               event.preventDefault();
             }
           }
@@ -378,7 +378,7 @@ export class ActionService {
    * @param {?ActionEventDef} event
    * @param {!ActionTrust} trust
    * @param {?JsonObject=} opt_args
-   * @return {boolean} true if an action was invoked.
+   * @return {boolean} true if the target has an action.
    */
   trigger(target, eventType, event, trust, opt_args) {
     return this.action_(target, eventType, event, trust, opt_args);
@@ -508,7 +508,7 @@ export class ActionService {
    * @param {?ActionEventDef} event
    * @param {!ActionTrust} trust
    * @param {?JsonObject=} opt_args
-   * @return {boolean} True if an invocation attempt was made.
+   * @return {boolean} True if the element has an action.
    * @private
    */
   action_(source, actionEventType, event, trust, opt_args) {
@@ -524,24 +524,17 @@ export class ActionService {
     // to complete. `currentPromise` is the i'th promise in the chain.
     /** @type {?Promise} */
     let currentPromise = null;
-    let actionInvoked = false;
     action.actionInfos.forEach(({target, args, method, str}) => {
       const dereferencedArgs = dereferenceArgsVariables(args, event, opt_args);
       const invokeAction = () => {
         const node = this.getActionNode_(target);
         if (!node) {
           this.error_(`Target "${target}" not found for action [${str}].`);
-          actionInvoked = false;
-          return;
+          return false;
         }
         const invocation = new ActionInvocation(node, method,
             dereferencedArgs, source, action.node, event, trust,
             actionEventType, node.tagName || target, sequenceId);
-        // Whether an action was invoked. An action could be absent in a
-        // whitelist or not invoked because of a nonexistent method. This
-        // is only used to determine if an invocation attempt was made and not
-        // whether it was successful or not.
-        actionInvoked = true;
         return this.invoke_(invocation);
       };
       // Wait for the previous action, if any.
@@ -550,7 +543,7 @@ export class ActionService {
         : invokeAction();
     });
 
-    return actionInvoked;
+    return action.actionInfos.lenght >= 1;
   }
 
   /**
