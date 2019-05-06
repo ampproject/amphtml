@@ -4,7 +4,7 @@
 
 [AMP HTML](https://amp.dev) is a way to build web pages that render with reliable and fast performance. It is our attempt at fixing what many perceive as painfully slow page load times – especially when reading content on the mobile web.  AMP HTML is built on existing web technologies; an AMP page will load (quickly) in any modern browser.
 
-You can learn more at [amp.dev](https://amp.dev/) including [how AMP works](https://amp.dev/about/how-amp-works) and the importance of [validation in AMP](https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validate_amp).  You can also walk through [creating an AMP page](https://amp.dev/documentation/guides-and-tutorials/start/create/) and read through the [reference docs](https://amp.dev/documentation/components/).
+You can learn more at [amp.dev](https://amp.dev) including [how AMP works](https://amp.dev/about/how-amp-works) and the importance of [validation in AMP](https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validate_amp).  You can also walk through [creating an AMP page](https://amp.dev/documentation/guides-and-tutorials/start/create/basic_markup) and read through the [reference docs](https://amp.dev/documentation/components/).
 
 ## We'd love your help making AMP better!
 
