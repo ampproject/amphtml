@@ -67,21 +67,6 @@ const TAG = 'video-manager';
 const SECONDS_PLAYED_MIN_DELAY = 1000;
 
 /**
- * Decorates/wraps a video common action handler to inform user interaction.
- *
- * @param {!../video-interface.VideoOrBaseElementDef} video
- * @param {function()} handler
- * @return {function(!./action-impl.ActionInvocation)}
- */
-function decorateCommonActionHandler(video, handler) {
-  return invocation => {
-    userInteractedWith(video);
-    maybeAddUnsafeAllowAutoplay(video, invocation);
-    handler();
-  };
-}
-
-/**
  * TEMPORARY workaround for for M72-M75 user-activation breakage.
  * If this function is still here in June 2019, please ping `@aghassemi` and
  * `@alanorozco`.
@@ -255,9 +240,15 @@ export class VideoManager {
     };
 
     Object.keys(handlers).forEach(action => {
+      const handler = handlers[action];
+      const decoratedHandler = invocation => {
+        userInteractedWith(video);
+        maybeAddUnsafeAllowAutoplay(video, invocation);
+        handler();
+      };
       video.registerAction(
           action,
-          decorateCommonActionHandler(video, handlers[action]),
+          decoratedHandler,
           // Only require ActionTrust.LOW for video actions to defer to platform
           // specific handling (e.g. user gesture requirement for unmuted
           // playback).
