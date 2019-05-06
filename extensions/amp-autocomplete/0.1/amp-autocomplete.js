@@ -182,8 +182,10 @@ export class AmpAutocomplete extends AMP.BaseElement {
           /** @type {!JsonObject} */({})).then(
           renderedEl => {
             userAssert(renderedEl.hasAttribute('data-value') ||
+              renderedEl.hasAttribute('data-category') ||
               renderedEl.hasAttribute('data-disabled'),
-            `${TAG} requires a "data-value" or "data-disabled" attribute.`);
+            `${TAG} requires the "data-value", "data-category", or 
+            "data-disabled" attribute.`);
           });
     }
 
@@ -393,12 +395,25 @@ export class AmpAutocomplete extends AMP.BaseElement {
       renderPromise = this.templates_.renderTemplateArray(this.templateElement_,
           filteredData).then(renderedChildren => {
         renderedChildren.map(child => {
-          if (child.hasAttribute('data-disabled')) {
-            child.setAttribute('aria-disabled', 'true');
+          if (child.hasAttribute('data-category')) {
+            child.classList.add('i-amphtml-autocomplete-category');
+            child.setAttribute('role', 'group');
+            const itemChildren = child.querySelectorAll('[data-value]');
+            itemChildren.forEach(item => {
+              item.classList.add('i-amphtml-autocomplete-item');
+              item.setAttribute('role', 'listitem');
+            });
+          } else {
+            child.classList.add('i-amphtml-autocomplete-item');
+            child.setAttribute('role', 'listitem');
           }
-          child.classList.add('i-amphtml-autocomplete-item');
-          child.setAttribute('role', 'listitem');
           container.appendChild(child);
+
+          // Append 'aria-disabled' on all 'data-disabled' elements.
+          const disabledEls = container.querySelectorAll('[data-value]');
+          disabledEls.forEach(el => {
+            el.setAttribute('aria-disabled', 'true');
+          });
         });
       });
     } else {
@@ -429,29 +444,53 @@ export class AmpAutocomplete extends AMP.BaseElement {
     input = input.toLocaleLowerCase();
     const itemsExpr = this.element.getAttribute('filter-value') || 'value';
     const filteredData = data.filter(item => {
-      if (typeof item === 'object') {
-        item = getValueForExpr(/** @type {!JsonObject} */(item), itemsExpr);
-      }
-      userAssert(typeof item === 'string',
-          `${TAG} data property "${itemsExpr}" must map to string type.`);
-      item = item.toLocaleLowerCase();
-      switch (this.filter_) {
-        case FilterType.SUBSTRING:
-          return includes(item, input);
-        case FilterType.PREFIX:
-          return startsWith(item, input);
-        case FilterType.TOKEN_PREFIX:
-          return this.tokenPrefixMatch_(item, input);
-        case FilterType.FUZZY:
-          throw new Error(`Filter not yet supported: ${this.filter_}`);
-        case FilterType.CUSTOM:
-          throw new Error(`Filter not yet supported: ${this.filter_}`);
-        default:
-          throw new Error(`Unexpected filter: ${this.filter_}`);
-      }
+      return this.filterMatch_(item, input, itemsExpr);
     });
 
     return this.truncateToMaxEntries_(filteredData);
+  }
+
+  /**
+   * Client-side filtering method.
+   *
+   * Returns true if the given item is a match on the given input according
+   * to the "filter" attribute on this amp-autocomplete instance.
+   *
+   * @param {!Object|string} item
+   * @param {string} input
+   * @param {string} itemsExpr
+   * @return {boolean}
+   * @private
+   */
+  filterMatch_(item, input, itemsExpr) {
+    if (typeof item === 'object') {
+      const category = getValueForExpr(/**@type {!JsonObject} */(item), 'category');
+      if (category) {
+        const opts = getValueForExpr(/**@type {!JsonObject} */(item), 'items');
+        const filteredOpts = opts.filter(item => {
+          return this.filterMatch_(item, input, itemsExpr);
+        });
+        return filteredOpts.length;
+      }
+      item = getValueForExpr(/** @type {!JsonObject} */(item), itemsExpr);
+    }
+    userAssert(typeof item === 'string',
+        `${TAG} data property "${itemsExpr}" must map to string type.`);
+    item = item.toLocaleLowerCase();
+    switch (this.filter_) {
+      case FilterType.SUBSTRING:
+        return includes(item, input);
+      case FilterType.PREFIX:
+        return startsWith(item, input);
+      case FilterType.TOKEN_PREFIX:
+        return this.tokenPrefixMatch_(item, input);
+      case FilterType.FUZZY:
+        throw new Error(`Filter not yet supported: ${this.filter_}`);
+      case FilterType.CUSTOM:
+        throw new Error(`Filter not yet supported: ${this.filter_}`);
+      default:
+        throw new Error(`Unexpected filter: ${this.filter_}`);
+    }
   }
 
   /**
@@ -699,7 +738,9 @@ export class AmpAutocomplete extends AMP.BaseElement {
     let shouldScroll, newTop;
 
     return this.measureMutateElement(() => {
-      const {offsetTop: itemTop, offsetHeight: itemHeight} = newActiveElement;
+      const itemTop = activeIndex === 0 ? 
+        0 : this.distanceToContainerTop_(newActiveElement);
+      const {offsetHeight: itemHeight} = newActiveElement;
       const {scrollTop: resultTop, offsetHeight: resultHeight} =
         this.container_;
       shouldScroll = (resultTop > itemTop ||
@@ -714,6 +755,23 @@ export class AmpAutocomplete extends AMP.BaseElement {
       this.activeIndex_ = activeIndex;
       this.activeElement_ = newActiveElement;
     });
+  }
+
+  /** 
+   * Calculates the total offset distance from the given element to the 
+   * container_. This assumes the given parameter is a descendent of the 
+   * results container. 
+   * 
+   * @param {!Element} element 
+   * @return {number}
+   * @private
+   */
+  distanceToContainerTop_(element) {
+    const {offsetTop: top, parentElement: parent} = element;
+    if (parent === this.container_) {
+      return top;
+    }
+    return top + this.distanceToContainerTop_(parent);
   }
 
   /** Returns all item elements in the results container that do not have the

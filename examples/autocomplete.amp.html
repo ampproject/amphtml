@@ -623,5 +623,37 @@
       </amp-autocomplete>
       <input name="submit-button" type="submit" value="Submit">
     </form>
+
+    <h2>Categories</h2>
+    <form method="post"
+        action-xhr="/form/echo-json/post"
+        target="_blank">
+      <amp-autocomplete filter="substring" min-characters="0">
+        <input type="text" name="name" required>
+        <script type="application/json">
+          { "items" : [
+            {
+              "category" : "Fruit",
+              "items" : [ "apple", "banana", "orange" ]
+            }, {
+              "category" : "Vegetables",
+              "items" : [ "cucumber", "lettuce", "broccoli" ]
+            }, {
+              "category" : "Bread",
+              "items" : [ "bagel", "baguette", "brioche" ]
+            }
+          ] }
+        </script>
+        <template type="amp-mustache" id="amp-template-custom">
+          <div data-category="{{category}}">
+            <strong>Trending {{category}}</strong>
+            {{#items}}
+            <div data-value="{{.}}">{{.}}</div>
+            {{/items}}
+          </div>
+        </template>
+      </amp-autocomplete>
+      <input name="submit-button" type="submit" value="Submit">
+    </form>
 </body>
 </html>
