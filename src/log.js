@@ -14,9 +14,13 @@
  * limitations under the License.
  */
 
+import {dict} from './utils/object';
 import {getMode} from './mode';
 import {getModeObject} from './mode-object';
 import {isEnumValue} from './types';
+import {version} from './internal-version';
+
+const noop = () => {};
 
 /**
  * Triple zero width space.
@@ -89,8 +93,14 @@ export function overrideLogLevel(level) {
   levelOverride_ = level;
 }
 
-function externalMessagesUrl(suffix) {
-  return `https://log.amp.dev/${suffix}`;
+/**
+ * @param {string} path
+ * @param {string} query
+ * @return {string}
+ */
+function externalMessagesUrl(path, query) {
+  const v = encodeURIComponent(version());
+  return `https://log.amp.dev/${path}?v=${v}&${query}`;
 }
 
 /**
@@ -115,7 +125,7 @@ export class Log {
    * @param {function(!./mode.ModeDef):!LogLevel} levelFunc
    * @param {string=} opt_suffix
    */
-  constructor(win, levelFunc, opt_suffix) {
+  constructor(win, levelFunc, opt_suffix = '') {
     /**
      * In tests we use the main test window instead of the iframe where
      * the tests runs because only the former is relayed to the console.
@@ -130,7 +140,24 @@ export class Log {
     this.level_ = this.defaultLevel_();
 
     /** @private @const {string} */
-    this.suffix_ = opt_suffix || '';
+    this.suffix_ = opt_suffix;
+
+    /** @private {!JsonObject} */
+    this.messages_ = dict();
+
+    if (getMode(win).development) {
+      win.fetch(externalMessagesUrl('.json', ''), noop)
+          .then(opt_response => {
+            if (opt_response) {
+              return opt_response.json();
+            }
+          }, noop)
+          .then(opt_messages => {
+            if (opt_messages) {
+              this.messages_ = /** @type {!JsonObject} */ opt_messages;
+            }
+          });
+    }
   }
 
   /**
@@ -486,10 +513,21 @@ export class Log {
    * @return {string}
    */
   getLogUrl(id, var_args) {
-    return [].slice.call(arguments, 1).reduce(
-        (head, arg) => `${head}&s[]=${encodeURIComponent(toString(arg))}`,
-        `More info at https://log.amp.dev/?id=${encodeURIComponent(id)}`
+    const args = [].slice.call(arguments, 1);
+    // Messages are fetched asynchronously, so the first few logs might
+    // be indirected to a URL even if in development mode. Message table is
+    // ~small so this should be a short gap. Otherwise all relevant methods
+    // would need to be async, which would increase binary size and complexity.
+    if (id in this.messages_) {
+      const template = this.messages_[id];
+      const {message} = createErrorVargs.apply(null, [template].concat(args));
+      return message;
+    }
+    const url = args.reduce(
+        (prefix, arg) => `${prefix}&s[]=${encodeURIComponent(toString(arg))}`,
+        externalMessagesUrl('', `id=${encodeURIComponent(id)}`)
     );
+    return `More info at ${url}`;
   }
 }
 
