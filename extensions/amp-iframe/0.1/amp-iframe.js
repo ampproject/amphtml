@@ -156,7 +156,7 @@ export class AmpIframe extends AMP.BaseElement {
         'amphtml/blob/master/spec/amp-iframe-origin-policy.md for details.',
         element);
     userAssert(!(endsWith(hostname, `.${urls.thirdPartyFrameHost}`) ||
-        endsWith(hostname, '.amp.dev')),
+        endsWith(hostname, '.ampproject.org')),
     'amp-iframe does not allow embedding of frames from ' +
         'ampproject.*: %s', src);
     return src;
