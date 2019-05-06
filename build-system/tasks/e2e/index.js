@@ -25,7 +25,6 @@ const Mocha = require('mocha');
 const tryConnect = require('try-net-connect');
 const {cyan} = require('ansi-colors');
 const {execOrDie, execScriptAsync} = require('../../exec');
-const {exitCtrlcHandler} = require('../../ctrlcHandler');
 const {watch} = require('gulp');
 
 const HOST = 'localhost';
@@ -65,9 +64,8 @@ function launchWebServer_() {
 
 function cleanUp_() {
   if (webServerProcess_ && !webServerProcess_.killed) {
-    webServerProcess_.kill('SIGINT');
+    webServerProcess_.kill('SIGKILL');
   }
-  exitCtrlcHandler(webServerProcess_.pid);
 }
 
 function createMocha_() {
