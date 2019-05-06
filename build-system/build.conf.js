@@ -24,7 +24,11 @@ const defaultPlugins = [
   localPlugin('babel-plugin-is_minified-constant-transformer'),
 ];
 
-function plugins({isEsmBuild, isCommonJsModule, isForTesting}) {
+function plugins({
+  isEsmBuild,
+  isCommonJsModule,
+  isForTesting,
+}) {
   const pluginsToApply = [...defaultPlugins];
   if (isEsmBuild) {
     pluginsToApply.push([
