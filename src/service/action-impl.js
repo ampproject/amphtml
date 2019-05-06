@@ -530,7 +530,7 @@ export class ActionService {
         const node = this.getActionNode_(target);
         if (!node) {
           this.error_(`Target "${target}" not found for action [${str}].`);
-          return false;
+          return;
         }
         const invocation = new ActionInvocation(node, method,
             dereferencedArgs, source, action.node, event, trust,
