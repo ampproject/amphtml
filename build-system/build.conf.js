@@ -23,6 +23,8 @@ const defaultPlugins = [
       './babel-plugins/babel-plugin-transform-parenthesize-expression'),
   require.resolve(
       './babel-plugins/babel-plugin-is_minified-constant-transformer'),
+  require.resolve(
+      './babel-plugins/babel-plugin-transform-amp-extension-call'),
 ];
 
 module.exports = {
