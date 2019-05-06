@@ -28,7 +28,7 @@ A generic carousel for displaying multiple similar pieces of content along a hor
 <table>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
-    <td><div><a href="https://amp.dev/documentation/guides-and-tutorials/learn/experimental.html">Experimental</a>; You must turn on the `amp-base-carousel` experiment to use this component.</div></td>
+    <td><div><a href="https://amp.dev/documentation/guides-and-tutorials/learn/experimental">Experimental</a>; You must turn on the `amp-base-carousel` experiment to use this component.</div></td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
@@ -121,7 +121,7 @@ The media queries are evaluated from left to right, with the first matching medi
   <tr>
     <td width="40%"><strong><code>snap-by</code></strong></td>
     <td>A number, defaults to <code>1</code>. This determines the granularity of snapping and is useful when using
-    <code>visible-count</code>. This 
+    <code>visible-count</code>. This
   </tr>
 </table>
 

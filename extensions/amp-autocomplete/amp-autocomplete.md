@@ -1,7 +1,7 @@
 ---
 $category: misc
 formats: websites
-teaser: 
+teaser:
   text: Suggests completed results corresponding to the user input as they type into the input field.
 ---
 <!--
@@ -31,7 +31,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
-     <td><a href="https://amp.dev/documentation/guides-and-tutorials/learn/experimental.html">Experimental</a></td>
+     <td><a href="https://amp.dev/documentation/guides-and-tutorials/learn/experimental">Experimental</a></td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
@@ -99,7 +99,7 @@ Example:
   <tr>
     <td width="40%"><strong>max-entries [optional]</strong></td>
     <td>
-      The max specified number of items to suggest at once based on a user input, displays all if unspecified 
+      The max specified number of items to suggest at once based on a user input, displays all if unspecified
     </td>
   </tr>
   <tr>

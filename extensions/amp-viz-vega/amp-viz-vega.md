@@ -28,7 +28,7 @@ Displays visualizations created using <a href="https://vega.github.io/vega/">Veg
 <table>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
-    <td><a href="https://amp.dev/documentation/guides-and-tutorials/learn/experimental.html">Experimental</a></td>
+    <td><a href="https://amp.dev/documentation/guides-and-tutorials/learn/experimental">Experimental</a></td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>

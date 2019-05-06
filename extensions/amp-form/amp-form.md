@@ -133,7 +133,7 @@ The `amp-form` element exposes the following actions:
 | `clear` | Empties the values from each input in the form. This can allow users to quickly fill out forms a second time. |
 
 {% call callout('Read on', type='read') %}
-Learn more about [Actions and Events in AMP](https://amp.dev/documentation/guides-and-tutorials/learn/amp-actions-and-events.html).
+Learn more about [Actions and Events in AMP](https://amp.dev/documentation/guides-and-tutorials/learn/amp-actions-and-events).
 {% endcall %}
 
 ## Events

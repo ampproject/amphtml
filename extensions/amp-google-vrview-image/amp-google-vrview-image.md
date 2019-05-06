@@ -29,7 +29,7 @@ VR image
 <table>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
-    <td><div><a href="https://amp.dev/documentation/guides-and-tutorials/learn/experimental.html">Experimental</a>; no validations yet.</div><div>Work in progress.</div></td>
+    <td><div><a href="https://amp.dev/documentation/guides-and-tutorials/learn/experimental">Experimental</a>; no validations yet.</div><div>Work in progress.</div></td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
