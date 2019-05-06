@@ -24,26 +24,23 @@ const defaultPlugins = [
   localPlugin('babel-plugin-is_minified-constant-transformer'),
 ];
 
-function plugins({
-  isEsmBuild,
-  isCommonJsModule,
-  isForTesting,
-}) {
+function plugins({isEsmBuild, isCommonJsModule, isForTesting}) {
   const pluginsToApply = [...defaultPlugins];
   if (isEsmBuild) {
-    pluginsToApply.push(
-        ['babel-plugin-filter-imports', {
-          'imports': {
-            './polyfills/document-contains': ['installDocContains'],
-            './polyfills/domtokenlist-toggle': ['installDOMTokenListToggle'],
-            './polyfills/fetch': ['installFetch'],
-            './polyfills/math-sign': ['installMathSign'],
-            './polyfills/object-assign': ['installObjectAssign'],
-            './polyfills/object-values': ['installObjectValues'],
-            './polyfills/promise': ['installPromise'],
-          },
-        }]
-    );
+    pluginsToApply.push([
+      'babel-plugin-filter-imports',
+      {
+        imports: {
+          './polyfills/document-contains': ['installDocContains'],
+          './polyfills/domtokenlist-toggle': ['installDOMTokenListToggle'],
+          './polyfills/fetch': ['installFetch'],
+          './polyfills/math-sign': ['installMathSign'],
+          './polyfills/object-assign': ['installObjectAssign'],
+          './polyfills/object-values': ['installObjectValues'],
+          './polyfills/promise': ['installPromise'],
+        },
+      },
+    ]);
   }
   if (isCommonJsModule) {
     pluginsToApply.push('babel-plugin-transform-commonjs-es2015-modules');
