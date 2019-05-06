@@ -78,7 +78,8 @@ describe('amp-skimlinks', function() {
       return browser.waitForElementBuild('amp-skimlinks');
     });
 
-    it('Should send the page impression tracking request', () => {
+    // TODO(@slocka) Disabled due to #22154, re-enable
+    it.skip('Should send the page impression tracking request', () => {
       return RequestBank.withdraw('pageTrackingUrl').then(req => {
         const regex = /^\/track\.php\?data=([^&]*)&?.*$/;
         const match = regex.exec(req.url);
@@ -93,7 +94,8 @@ describe('amp-skimlinks', function() {
       });
     });
 
-    it('Should send the links impression tracking request', () => {
+    // TODO(@slocka) Disabled due to #22154, re-enable
+    it.skip('Should send the links impression tracking request', () => {
       return RequestBank.withdraw('linksTrackingUrl').then(req => {
         const regex = /^\/link\?data=([^&]*)&?.*$/;
         const match = regex.exec(req.url);
@@ -114,10 +116,8 @@ describe('amp-skimlinks', function() {
     });
 
     // TODO(alanorozco): Unskip on firefox
-    const itSkipFirefox = (desc, cb) =>
-      it.configure().skipFirefox().run(desc, cb);
-
-    itSkipFirefox('should send NA-tracking on non-merchant link click ', () => {
+    // TODO(@slocka) Disabled due to #22154, re-enable
+    it.skip('should send NA-tracking on non-merchant link click ', () => {
       // Give 500ms for amp-skimlinks to set up.
       return browser.wait(500).then(() => {
         clickLinkAndNavigate('#non-merchant-link');
@@ -136,7 +136,8 @@ describe('amp-skimlinks', function() {
       });
     });
 
-    it('Should send merchant links to waypoint on click', () => {
+    // TODO(@slocka) Disabled due to #22154, re-enable
+    it.skip('Should send merchant links to waypoint on click', () => {
       // Give 500ms for amp-skimlinks to set up.
       return browser.wait(500).then(() => {
         clickLinkAndNavigate('#merchant-link');
