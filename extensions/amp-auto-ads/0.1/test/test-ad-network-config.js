@@ -118,8 +118,8 @@ describes.realWin('ad-network-config', {
       const adNetwork = getAdNetworkConfig('adsense', ampAutoAdsElem);
       expect(adNetwork.getAttributes()).to.deep.equal({
         'type': 'adsense',
-        'data-ad-client': 'ca-pub-1234',
-        'data-ad-host': 'ca-pub-5678',
+        'data-ad-client': AD_CLIENT,
+        'data-ad-host': AD_HOST,
       });
       ampAutoAdsElem.removeAttribute('data-ad-host');
     });
