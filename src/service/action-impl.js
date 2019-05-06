@@ -543,7 +543,7 @@ export class ActionService {
         : invokeAction();
     });
 
-    return action.actionInfos.lenght >= 1;
+    return action.actionInfos.length >= 1;
   }
 
   /**
