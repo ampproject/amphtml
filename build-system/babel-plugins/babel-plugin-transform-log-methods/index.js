@@ -16,7 +16,7 @@
 
 /**
  * @fileoverview Indirects log messages through expansion calls with
- * base36-encoded message ids. These redirect to to a URL or look up a message
+ * base36-encoded message ids. These redirect to a URL or look up a message
  * table to interpolate and display the logged string.
  *
  *    dev().assert(foo != bar, 'foo should not be bar')
@@ -149,15 +149,6 @@ function getOrCreateShortMessageId(messagesPath, message) {
 }
 
 /**
- * Determines whether a callee is to any of the dev() or user() singletons.
- * @param {*} t babel.types
- * @param {Node} callee
- * @return {boolean}
- */
-const isSingletonCallee = (t, callee) =>
-  singletonFunctions.some(name => t.isIdentifier(callee, {name}));
-
-/**
  * @param {*} t babel.types
  * @param {!Node} node
  * @param {!Array<!Node>} interpolationArgs
@@ -210,7 +201,7 @@ module.exports = function({types: t}) {
         }
 
         const singletonCallee = callee.object.callee;
-        if (!isSingletonCallee(t, singletonCallee)) {
+        if (!singletonFunctions.some(name => t.isIdentifier(callee, {name}))) {
           return;
         }
 
@@ -229,8 +220,8 @@ module.exports = function({types: t}) {
         // Construct a printf template from the argument set. There could be
         // non-string types among string literals in variadic calls, so the
         // template includes them as interpolated arguments.
-        const templateLiteralArgs = [];
-        const message = buildMessage(t, messageArg, templateLiteralArgs);
+        const templateArgs = [];
+        const message = buildMessage(t, messageArg, templateArgs);
 
         // Bounce when indirection increases minified size (±1 byte). Also
         // catches the the case where the top-level message is variable (ie.
@@ -253,8 +244,8 @@ module.exports = function({types: t}) {
         // all previous method arguments (ie. the head) should stay in place.
         // The body is nested into the expansion method call, after the template
         // id.
-        const argsHead = node.arguments.slice(0, Math.max(0, messageArgPos));
-        const argsBody = node.arguments.slice(messageArgPos + 1);
+        const headArgs = node.arguments.slice(0, Math.max(0, messageArgPos));
+        const bodyArgs = node.arguments.slice(messageArgPos + 1);
 
         // Callee to expansion method, eg. `dev().expandLogMessage`.
         const messageExpansionCallee = t.memberExpression(
@@ -267,11 +258,11 @@ module.exports = function({types: t}) {
         // that prevents such usage.
         const expansionCall = t.callExpression(messageExpansionCallee, [
           t.stringLiteral(shortMessageId),
-          ...argsBody,
-          ...templateLiteralArgs,
+          ...bodyArgs,
+          ...templateArgs,
         ]);
 
-        node.arguments = [...argsHead, expansionCall];
+        node.arguments = [...headArgs, expansionCall];
       },
     },
   };
