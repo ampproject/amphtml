@@ -22,18 +22,20 @@ const conf = require('../build.conf');
 const devnull = require('dev-null');
 const fs = require('fs-extra');
 const gulp = require('gulp');
+const gulpIf = require('gulp-if');
 const log = require('fancy-log');
 const minimist = require('minimist');
-const move = require('glob-move');
 const path = require('path');
 const Promise = require('bluebird');
 const relativePath = require('path').relative;
+const rename = require('gulp-rename');
 const sourcemaps = require('gulp-sourcemaps');
 const tempy = require('tempy');
 const through = require('through2');
 const {extensionBundles, altMainBundles, TYPES} = require('../../bundles.config');
 const {gulpClosureCompile, handleSinglePassCompilerError} = require('./closure-compile');
 const {isTravisBuild} = require('../travis');
+const {shortenLicense, shouldShortenLicense} = require('./shorten-license');
 const {TopologicalSort} = require('topological-sort');
 const TYPES_VALUES = Object.keys(TYPES).map(x => TYPES[x]);
 const wrappers = require('../compile-wrappers');
@@ -101,6 +103,12 @@ exports.getFlags = function(config) {
     source_map_location_mapping: ['|/'],
     //new_type_inf: true,
     language_in: 'ES6',
+    // By default closure puts all of the public exports on the global, but
+    // because of the wrapper modules (to mitigate async loading of scripts)
+    // that we add to the js binaries this prevents other js binaries from
+    // accessing the symbol, we remedy this by attaching all public exports
+    // to `_` and everything imported across modules is is accessed through `_`.
+    rename_prefix_namespace: '_',
     language_out: config.language_out || 'ES5',
     module_output_path_prefix: config.writeTo || 'out/',
     module_resolution: 'NODE',
@@ -507,29 +515,21 @@ function isAltMainBundle(name) {
   });
 }
 
-exports.singlePassCompile = function(entryModule, options) {
+exports.singlePassCompile = async function(entryModule, options) {
   return exports.getFlags({
     modules: [entryModule].concat(extensions),
     writeTo: singlePassDest,
     define: options.define,
     externs: options.externs,
     hideWarningsFor: options.hideWarningsFor,
-  }).then(compile).then(function() {
-    // Move things into place as AMP expects them.
-    fs.ensureDirSync(`${singlePassDest}/v0`);
-    return Promise.all([
-      // Move all files that need to live in /v0/. ex. _base files
-      // all extensions.
-      move(`${singlePassDest}/amp*`, `${singlePassDest}/v0`).then(() => {
-        return move('dist/v0/amp4ads*', 'dist');
-      }),
-      move(`${singlePassDest}/_base*`, `${singlePassDest}/v0`),
-    ]);
-  }).then(wrapMainBinaries).then(postProcessConcat).catch(e => {
-    // NOTE: passing the message here to colors.red breaks the output.
-    console./*OK*/error(e.message);
-    process.exit(1);
-  });
+  })
+      .then(compile)
+      .then(wrapMainBinaries)
+      .then(postProcessConcat)
+      .catch(err => {
+        err.showStack = false; // Useless node_modules stack
+        return Promise.reject(err);
+      });
 };
 
 /**
@@ -595,12 +595,18 @@ function postProcessConcat() {
 }
 
 function compile(flagsArray) {
-  return new Promise(function(resolve) {
+  // TODO(@cramforce): Run the post processing step
+  return new Promise(function(resolve, reject) {
     return gulp.src(srcs, {base: transformDir})
+        .pipe(gulpIf(shouldShortenLicense, shortenLicense()))
         .pipe(sourcemaps.init({loadMaps: true}))
         .pipe(gulpClosureCompile(flagsArray))
-        .on('error', handleSinglePassCompilerError)
+        .on('error', err => {
+          handleSinglePassCompilerError();
+          reject(err);
+        })
         .pipe(sourcemaps.write('.'))
+        .pipe(gulpIf(/(\/amp-|\/_base)/, rename(path => path.dirname += '/v0')))
         .pipe(gulp.dest('.'))
         .on('end', resolve);
   });

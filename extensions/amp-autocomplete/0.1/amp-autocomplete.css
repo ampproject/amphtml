@@ -43,6 +43,12 @@ amp-autocomplete > input {
   z-index: 10;
 }
 
+.i-amphtml-autocomplete-results-up {
+  top: auto;
+  bottom: 100%;
+  margin-bottom: .5rem; /* default-ui-space-small */
+}
+
 .i-amphtml-autocomplete-item {
   position: relative;
   padding: .5rem 1rem; /* default-ui-space-small default-ui-space-medium */
@@ -57,10 +63,14 @@ amp-autocomplete > input {
   border-radius: 0px 0px 4px 4px; /* default-ui-border-radius */
 }
 
-.i-amphtml-autocomplete-item:hover {
+.i-amphtml-autocomplete-item:hover:not([data-disabled]) {
   background-color: rgba(0,0,0,.15); /* default-ui-light-gray */
 }
 
-.i-amphtml-autocomplete-item-active {
+.i-amphtml-autocomplete-item-active:not([data-disabled]) {
   background-color: rgba(0,0,0,.15); /* default-ui-light-gray */
+}
+
+.i-amphtml-autocomplete-item[data-disabled] {
+  color: rgba(0,0,0,.33);
 }

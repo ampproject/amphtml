@@ -16,14 +16,13 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const gulp = require('gulp-help')(require('gulp'));
 const {execOrDie} = require('../exec');
 
 
 /**
  * Simple wrapper around pr-check.js.
  */
-function prCheck() {
+async function prCheck() {
   let cmd = 'node build-system/pr-check.js';
   if (argv.files) {
     cmd = cmd + ' --files ' + argv.files;
@@ -34,14 +33,12 @@ function prCheck() {
   execOrDie(cmd);
 }
 
-gulp.task(
-    'pr-check',
-    'Locally runs the PR checks that are run by Travis CI.',
-    prCheck,
-    {
-      options: {
-        'files': '  Restricts unit / integration tests to just these files',
-        'nobuild': '  Skips building the runtime via `gulp build`.',
-      },
-    }
-);
+module.exports = {
+  prCheck,
+};
+
+prCheck.description = 'Locally runs the PR checks that are run by Travis CI.';
+prCheck.flags = {
+  'files': '  Restricts unit / integration tests to just these files',
+  'nobuild': '  Skips building the runtime via `gulp build`.',
+};

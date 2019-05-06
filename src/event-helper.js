@@ -15,6 +15,7 @@
  */
 
 import {internalListenImplementation} from './event-helper-listen';
+import {lastChildElement} from './dom';
 import {user} from './log';
 
 /** @const {string}  */
@@ -131,6 +132,7 @@ export function listenOncePromise(element, eventType, opt_evtListenerOpts,
  */
 export function isLoaded(eleOrWindow) {
   return !!(eleOrWindow.complete || eleOrWindow.readyState == 'complete'
+      || (isHTMLMediaElement(eleOrWindow) && eleOrWindow.readyState > 0)
       // If the passed in thing is a Window, infer loaded state from
       //
       || (eleOrWindow.document
@@ -152,18 +154,33 @@ export function loadPromise(eleOrWindow) {
     return Promise.resolve(eleOrWindow);
   }
   const loadingPromise = new Promise((resolve, reject) => {
+    const isMediaElement = isHTMLMediaElement(eleOrWindow);
     // Listen once since IE 5/6/7 fire the onload event continuously for
     // animated GIFs.
-    const {tagName} = eleOrWindow;
-    if (tagName === 'AUDIO' || tagName === 'VIDEO') {
-      unlistenLoad = listenOnce(eleOrWindow, 'loadstart', resolve);
+    if (isMediaElement) {
+      // The following event can be triggered by the media or one of its
+      // sources. Using capture is required as the media events do not bubble.
+      unlistenLoad =
+          listenOnce(eleOrWindow, 'loadedmetadata', resolve, {capture: true});
     } else {
       unlistenLoad = listenOnce(eleOrWindow, 'load', resolve);
     }
-    // For elements, unlisten on error (don't for Windows).
-    if (tagName) {
-      unlistenError = listenOnce(eleOrWindow, 'error', reject);
+    // Don't unlisten on error for Windows.
+    if (!eleOrWindow.tagName) {
+      return;
     }
+    let errorTarget = eleOrWindow;
+    // If the media element has no `src`, it will try to load the sources in
+    // document order. If the last source errors, then the media element
+    // loading errored.
+    if (isMediaElement && !eleOrWindow.hasAttribute('src')) {
+      errorTarget =
+          lastChildElement(eleOrWindow, child => child.tagName === 'SOURCE');
+      if (!errorTarget) {
+        return reject(new Error('Media has no source.'));
+      }
+    }
+    unlistenError = listenOnce(errorTarget, 'error', reject);
   });
 
   return loadingPromise.then(() => {
@@ -192,6 +209,15 @@ function failedToLoad(eleOrWindow) {
     target = target.src;
   }
   throw user().createError(LOAD_FAILURE_PREFIX, target);
+}
+
+/**
+ * Returns true if the parameter is a HTMLMediaElement.
+ * @param {!Element|!Window} eleOrWindow
+ * @return {boolean}
+ */
+function isHTMLMediaElement(eleOrWindow) {
+  return eleOrWindow.tagName === 'AUDIO' || eleOrWindow.tagName === 'VIDEO';
 }
 
 /**
