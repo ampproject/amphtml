@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {validateData, writeScript} from '../3p/3p';
+import {loadScript, validateData} from '../3p/3p';
 
 const pubmineOptional = ['section', 'pt', 'ht'],
     pubmineRequired = ['siteid'],
@@ -32,7 +32,7 @@ function initMasterFrame(data) {
   };
   global['__ATA'] = global['__ATA'] || {};
   global['__ATA']['cmd'] = global['__ATA']['cmd'] || [];
-  writeScript(global, pubmineURL);
+  loadScript(global, pubmineURL);
 }
 
 /**
