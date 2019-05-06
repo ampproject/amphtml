@@ -14,6 +14,28 @@
  * limitations under the License.
  */
 
+const deglob = require('globs-to-files');
+const fs = require('fs');
 const runner = require('@babel/helper-plugin-test-runner').default;
 
+function cleanup(testOptionsJsonFile) {
+  const {plugins = []} = JSON.parse(fs.readFileSync(testOptionsJsonFile));
+  console.log(plugins);
+  plugins.forEach(plugin => {
+    console.log(plugin);
+    if (!Array.isArray(plugin)) {
+      return;
+    }
+    const [name, {messagesPath} = {}] = plugin;
+    if (!name.endsWith('babel-plugin-transform-log-methods')) {
+      return;
+    }
+    if (messagesPath) {
+      fs.unlinkSync(messagesPath);
+    }
+  });
+}
+
 runner(__dirname);
+
+deglob.sync([`${__dirname}/*/options.json`]).forEach(cleanup);

@@ -13,7 +13,5 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-user().assert(1 + 1);
-const result = user().assert(user(), 'hello', 'world');
-dev().createError('This is an error with no arguments.');
-const result2 = user().assert();
+user().assert(false, `I'm a ${template} literal with one argument.`);
+user().assert(false, `I have ${foo}, ${bar} and ${baz}.`);

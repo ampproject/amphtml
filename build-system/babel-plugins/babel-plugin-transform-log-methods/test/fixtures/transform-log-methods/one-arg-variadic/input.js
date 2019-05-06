@@ -13,7 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-user().assert(1 + 1);
-const result = user().assert(user(), user().getLogUrl('0', ['world']));
-dev().createError(dev().getLogUrl('1'));
-const result2 = user().assert();
+// One argument in variadic method, should be indirected unless the message
+// argument itself is variable or the string is small enough that indirection
+// would increase file size.
+user().assert(false, variableMessage);
+user().assert(false, 'Hello');
+user().assert(user(), 'hello my friend,', name);
+const result3 = user().assert(user(), 'hello my friend,', name);
+user().assertElement(element, 'Should be element', element);
+dev().assertEnumValue(foo, bar, 'String should be indexed as 2');
