@@ -92,14 +92,11 @@ function compileCss(watch, opt_compileAll) {
    * @param {string} outCss
    */
   function writeCssEntryPoint(path, outJs, outCss) {
-    const startTime = Date.now();
-
     return jsifyCssAsync(`css/${path}`)
-        .then(css => writeCss(css, path, outJs, outCss))
-        .then(() => {
-          endBuildStep('Recompiled CSS in', path, startTime);
-        });
+        .then(css => writeCss(css, path, outJs, outCss));
   }
+
+  const startTime = Date.now();
 
   // Used by `gulp test --local-changes` to map CSS files to JS files.
   fs.writeFileSync('EXTENSIONS_CSS_MAP', JSON.stringify(extensions));
@@ -116,7 +113,9 @@ function compileCss(watch, opt_compileAll) {
     bundleOnlyIfListedInFiles: false,
     compileOnlyCss: true,
     compileAll: opt_compileAll,
-  }));
+  })).then(() => {
+    endBuildStep('Recompiled all CSS files into', 'build/', startTime);
+  });
 }
 
 module.exports = {
