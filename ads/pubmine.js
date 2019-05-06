@@ -25,8 +25,8 @@ const pubmineOptional = ['section', 'pt', 'ht'],
  */
 function initMasterFrame(data) {
   global['__ATA_PP'] = {
-    pt: data['pt'] ? data['pt'] : 1,
-    ht: data['ht'] ? data['ht'] : 1,
+    pt: data['pt'] || 1,
+    ht: data['ht'] || 1,
     tn: 'amp',
     amp: true,
   };
@@ -51,7 +51,7 @@ function createSlot(slotId) {
 export function pubmine(global, data) {
   validateData(data, pubmineRequired, pubmineOptional);
 
-  const sectionId = data['siteid'] + (data['section'] ? data['section'] : '1');
+  const sectionId = data['siteid'] + (data['section'] || '1');
 
   const slotConfig = {
     sectionId,
