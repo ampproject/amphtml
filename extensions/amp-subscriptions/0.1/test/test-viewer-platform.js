@@ -62,6 +62,8 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
         .callsFake(() => new Dialog(ampdoc));
     sandbox.stub(serviceAdapter, 'getReaderId')
         .callsFake(() => Promise.resolve('reader1'));
+    sandbox.stub(serviceAdapter, 'getEncryptedDocumentKey')
+        .callsFake(() => Promise.resolve(null));
     resetPlatformsStub = sandbox.stub(serviceAdapter, 'resetPlatforms');
     sandbox.stub(Services.viewerForDoc(ampdoc),'onMessage')
         .callsFake((message, cb) => { messageCallback = cb; });
