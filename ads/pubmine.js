@@ -44,6 +44,7 @@ function createSlot(slotId) {
   adSlot.setAttribute('id', slotId);
   containerEl.appendChild(adSlot);
 }
+
 /**
  * @param {!Window} global
  * @param {!Object} data
