@@ -17,7 +17,7 @@
 import {BASE_CID_MAX_AGE_MILLIS} from '../../../src/service/cid-impl';
 import {Services} from '../../../src/services';
 import {getMode} from '../../../src/mode';
-import {getNameArgs, variableServiceFor} from './variables';
+import {getNameArgs, variableServiceForDoc} from './variables';
 import {hasOwn} from '../../../src/utils/object';
 import {isInFie} from '../../../src/friendly-iframe-embed';
 import {isObject} from '../../../src/types';
@@ -65,7 +65,7 @@ export class CookieWriter {
     this.config_ = config;
 
     /** @const @private {!JsonObject} */
-    this.bindings_ = variableServiceFor(this.win_).getMacros();
+    this.bindings_ = variableServiceForDoc(element).getMacros();
   }
 
   /**

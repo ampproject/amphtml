@@ -36,7 +36,7 @@ const {app} = require('../../test-server');
 const {build} = require('../build');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../../ctrlcHandler');
 const {css} = require('../css');
-const {getAdTypes, unitTestsToRun} = require('./helpers');
+const {getAdTypes, refreshKarmaWdCache, unitTestsToRun} = require('./helpers');
 const {getStdout} = require('../../exec');
 const {isTravisBuild} = require('../../travis');
 
@@ -349,6 +349,9 @@ async function runTests() {
   // Listen for Ctrl + C to cancel testing
   const handlerProcess = createCtrlcHandler('test');
 
+  // Avoid Karma startup errors
+  refreshKarmaWdCache();
+
   // Run Sauce Labs tests in batches to avoid timeouts when connecting to the
   // Sauce Labs environment.
   let processExitCode;
@@ -532,12 +535,12 @@ async function runTests() {
   }
 }
 
-function test() {
+async function test() {
   if (!argv.nobuild) {
     if (argv.unit || argv.a4a || argv['local-changes']) {
-      css();
+      await css();
     } else {
-      build();
+      await build();
     }
   }
   // TODO(alanorozco): Come up with a more elegant check?

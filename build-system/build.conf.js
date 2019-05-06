@@ -17,6 +17,7 @@ const localPlugin = name => require.resolve(`./babel-plugins/${name}`);
 
 const defaultPlugins = [
   localPlugin('babel-plugin-transform-amp-asserts'),
+  localPlugin('babel-plugin-transform-amp-extension-call'),
   localPlugin('babel-plugin-transform-html-template'),
   [
     localPlugin('babel-plugin-transform-log-methods'), {
