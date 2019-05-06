@@ -18,8 +18,12 @@ const localPlugin = name => require.resolve(`./babel-plugins/${name}`);
 const defaultPlugins = [
   localPlugin('babel-plugin-transform-amp-asserts'),
   localPlugin('babel-plugin-transform-html-template'),
-  // TODO(alanorozco): Enable once message serving infra is up.
-  localPlugin('babel-plugin-transform-log-methods'),
+  [
+    localPlugin('babel-plugin-transform-log-methods'), {
+      // TODO(alanorozco): Enable and remove option once serving infra is up.
+      replaceCallArguments: false,
+    },
+  ],
   localPlugin('babel-plugin-transform-parenthesize-expression'),
   localPlugin('babel-plugin-is_minified-constant-transformer'),
 ];

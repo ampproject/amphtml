@@ -21,9 +21,9 @@
  *
  *    dev().assert(foo != bar, 'foo should not be bar')
  *    // transforms into 👇
- *    dev().assert(foo != bar, dev().getLogUrl('1z'))
+ *    dev().assert(foo != bar, dev().expandLogMessage('1z'))
  *
- * Where `getLogUrl` is in charge of looking up and expanding the message
+ * Where `expandLogMessage` is in charge of looking up and expanding the message
  * string, or returning a URL where the interpolated message is displayed.
  *
  * Additionally outputs a JSON file containing [template, id] pairs keyed by
@@ -34,13 +34,13 @@
  *
  *    dev().assert(false, '%s should not be %s.', foo, bar)
  *    // transforms into 👇
- *    dev().assert(false, dev().getLogUrl('e2', foo, bar))
+ *    dev().assert(false, dev().expandLogMessage('e2', foo, bar))
  *
  * It also nests arguments of template literals:
  *
  *    dev().assert(false, `Hello, my dear ${name}`);
  *    // transforms into 👇
- *    dev().assert(false, dev().getLogUrl('0a', name));
+ *    dev().assert(false, dev().expandLogMessage('0a', name));
  *
  * The motivation of this transform is to reduce binary size. The average length
  * of a log message is ~43 whereas the common minified transformed output (as
@@ -60,7 +60,7 @@ const fs = require('fs');
 const defaultMessagesPath = 'dist/log-messages.json';
 
 /** Method on `Log` that this transform outputs to "expand" log messages. */
-const messageExpansionMethod = 'getLogUrl';
+const messageExpansionMethod = 'expandLogMessage';
 
 /** Functions exposed as singleton getters for `Log`. */
 const singletonFunctions = ['dev', 'user'];
@@ -190,80 +190,7 @@ function buildMessage(t, node, interpolationArgs) {
   return '%s';
 }
 
-/**
- * Visits a CallExpression and replaces its arguments when the message string
- * can be indirected.
- * @param {*} babel
- * @param {*} path
- * @this {*} babel.plugin
- *  - `messagesPath` as resolved from options and default.
- */
-function CallExpression({types: t}, path) {
-  const {node} = path;
-  const {callee} = node;
-
-  // Looks like a method().call().
-  if (!t.isMemberExpression(callee) || !t.isCallExpression(callee.object)) {
-    return;
-  }
-
-  const singletonCallee = callee.object.callee;
-  if (!isSingletonCallee(t, singletonCallee)) {
-    return;
-  }
-
-  const {property} = callee;
-  if (!isTransformableMethod(t, property, methodsMessageArgPos)) {
-    return;
-  }
-
-  const messageArgPos = methodsMessageArgPos[property.name];
-  const messageArg = node.arguments[messageArgPos];
-
-  if (!messageArg) {
-    return;
-  }
-
-  // Construct a printf template from the argument set. There could be
-  // non-string types among string literals in variadic calls, so the template
-  // includes them as interpolated arguments.
-  const templateLiteralArgs = [];
-  const message = buildMessage(t, messageArg, templateLiteralArgs);
-
-  // Bounce when indirection increases minified size (±1 byte). Also catches the
-  // the case where the top-level message is variable (ie. when its template is
-  // exactly '%s'), in which indirection would be pointless.
-  if (message.length <= roughMinifiedExpansionLength) {
-    return;
-  }
-
-  const shortMessageId = getOrCreateShortMessageId(this.messagesPath, message);
-
-  // We care only about message arguments beyond the first (ie. the body): all
-  // previous method arguments (ie. the head) should stay in place. The body is
-  // nested into the expansion method call, after the template id.
-  const argsHead = node.arguments.slice(0, Math.max(0, messageArgPos));
-  const argsBody = node.arguments.slice(messageArgPos + 1);
-
-  // Callee to expansion method, eg. `dev().getLogUrl`.
-  const messageExpansionCallee = t.memberExpression(
-      t.callExpression(t.identifier(singletonCallee.name), []),
-      t.identifier(messageExpansionMethod)
-  );
-
-  // Interpolation order breaks badly when template literals are combined with
-  // variadic calls. This transform implicitly depends on a lint rule that
-  // prevents such usage.
-  const expansionCall = t.callExpression(messageExpansionCallee, [
-    t.stringLiteral(shortMessageId),
-    ...argsBody,
-    ...templateLiteralArgs,
-  ]);
-
-  node.arguments = [...argsHead, expansionCall];
-}
-
-module.exports = function(babel) {
+module.exports = function({types: t}) {
   return {
     pre() {
       // Configurable to isolate test output.
@@ -271,8 +198,80 @@ module.exports = function(babel) {
       this.messagesPath = relativeToRoot(messagesPath);
     },
     visitor: {
-      CallExpression(...args) {
-        CallExpression.call(this, babel, ...args);
+      CallExpression({node}, {opts}) {
+        const {callee} = node;
+
+        // Looks like a method().call().
+        if (
+          !t.isMemberExpression(callee) ||
+          !t.isCallExpression(callee.object)
+        ) {
+          return;
+        }
+
+        const singletonCallee = callee.object.callee;
+        if (!isSingletonCallee(t, singletonCallee)) {
+          return;
+        }
+
+        const {property} = callee;
+        if (!isTransformableMethod(t, property, methodsMessageArgPos)) {
+          return;
+        }
+
+        const messageArgPos = methodsMessageArgPos[property.name];
+        const messageArg = node.arguments[messageArgPos];
+
+        if (!messageArg) {
+          return;
+        }
+
+        // Construct a printf template from the argument set. There could be
+        // non-string types among string literals in variadic calls, so the
+        // template includes them as interpolated arguments.
+        const templateLiteralArgs = [];
+        const message = buildMessage(t, messageArg, templateLiteralArgs);
+
+        // Bounce when indirection increases minified size (±1 byte). Also
+        // catches the the case where the top-level message is variable (ie.
+        // when its template is exactly '%s'), in which indirection would be
+        // pointless.
+        if (message.length <= roughMinifiedExpansionLength) {
+          return;
+        }
+
+        const shortMessageId =
+            getOrCreateShortMessageId(this.messagesPath, message);
+
+        // Temporary option to not replace call arguments, but still output the
+        // table to keep other code and infra independent from rollout.
+        if (opts.replaceCallArguments === false) {
+          return;
+        }
+
+        // We care only about message arguments beyond the first (ie. the body):
+        // all previous method arguments (ie. the head) should stay in place.
+        // The body is nested into the expansion method call, after the template
+        // id.
+        const argsHead = node.arguments.slice(0, Math.max(0, messageArgPos));
+        const argsBody = node.arguments.slice(messageArgPos + 1);
+
+        // Callee to expansion method, eg. `dev().expandLogMessage`.
+        const messageExpansionCallee = t.memberExpression(
+            t.callExpression(t.identifier(singletonCallee.name), []),
+            t.identifier(messageExpansionMethod)
+        );
+
+        // Interpolation order breaks badly when template literals are mixed
+        // with variadic calls. This transform implicitly depends on a lint rule
+        // that prevents such usage.
+        const expansionCall = t.callExpression(messageExpansionCallee, [
+          t.stringLiteral(shortMessageId),
+          ...argsBody,
+          ...templateLiteralArgs,
+        ]);
+
+        node.arguments = [...argsHead, expansionCall];
       },
     },
   };

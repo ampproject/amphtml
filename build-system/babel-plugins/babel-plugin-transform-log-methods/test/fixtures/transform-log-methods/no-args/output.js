@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 // No arguments, should be indirected.
-dev().createError(dev().getLogUrl("0"));
+dev().createError(dev().expandLogMessage("0"));

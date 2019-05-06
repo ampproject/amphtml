@@ -502,7 +502,8 @@ export class Log {
   }
 
   /**
-   * Redirects a pair of (errorId, ...args) to a URL where a
+   * Either redirects a pair of (errorId, ...args) to a URL where the full
+   * message is displayed, or displays it from a fetched table.
    *
    * This method is used by the output of the `transform-log-methods` babel
    * plugin. It should not be used directly. Use the (*error|assert*|info|warn)
@@ -512,7 +513,7 @@ export class Log {
    * @param {...*} var_args
    * @return {string}
    */
-  getLogUrl(id, var_args) {
+  expandLogMessage(id, var_args) {
     const args = [].slice.call(arguments, 1);
     // Messages are fetched asynchronously, so the first few logs might
     // be indirected to a URL even if in development mode. Message table is

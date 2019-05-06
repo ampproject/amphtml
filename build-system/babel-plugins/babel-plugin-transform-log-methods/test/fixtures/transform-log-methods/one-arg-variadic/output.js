@@ -18,7 +18,7 @@
 // would increase file size.
 user().assert(false, variableMessage);
 user().assert(false, 'Hello');
-user().assert(user(), user().getLogUrl("0", name));
-const result3 = user().assert(user(), user().getLogUrl("0", name));
-user().assertElement(element, user().getLogUrl("1", element));
-dev().assertEnumValue(foo, bar, dev().getLogUrl("2"));
+user().assert(user(), user().expandLogMessage("0", name));
+const result3 = user().assert(user(), user().expandLogMessage("0", name));
+user().assertElement(element, user().expandLogMessage("1", element));
+dev().assertEnumValue(foo, bar, dev().expandLogMessage("2"));
