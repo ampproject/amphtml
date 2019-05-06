@@ -945,6 +945,18 @@ const forbiddenTermsSrcInclusive = {
     ],
   },
   '\\.matches\\(': 'Please use matches() helper in src/dom.js',
+  '\\.getLogUrl\\(': {
+    message:
+      'This method is used by the output of the `transform-log-methods` ' +
+      'babel plugin. It should not be used directly. Use the ' +
+      '(*error|assert*|info|warn) methods instead.',
+    whitelist: [
+      'build-system/babel-plugins/babel-plugin-transform-log-methods/' +
+        'test/input.js',
+      'build-system/babel-plugins/babel-plugin-transform-log-methods/' +
+        'test/output.js',
+    ],
+  },
 };
 
 // Terms that must appear in a source file.
