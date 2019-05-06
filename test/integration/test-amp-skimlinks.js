@@ -136,7 +136,8 @@ describe('amp-skimlinks', function() {
       });
     });
 
-    it('Should send merchant links to waypoint on click', () => {
+    // TODO(@slocka) Disabled due to #22154, re-enable
+    it.skip('Should send merchant links to waypoint on click', () => {
       // Give 500ms for amp-skimlinks to set up.
       return browser.wait(500).then(() => {
         clickLinkAndNavigate('#merchant-link');
