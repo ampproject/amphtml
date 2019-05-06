@@ -98,7 +98,7 @@ export class SsrTemplateHelper {
 
   /**
    * @param {!Element} element
-   * @param {!Array|!JsonObject} data
+   * @param {(?JsonObject|string|undefined|!Array)} data
    * @return {!Promise}
    */
   renderTemplate(element, data) {

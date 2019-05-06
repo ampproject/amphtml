@@ -59,9 +59,17 @@ describes.realWin('amp-audio', {
   function attachAndRun(attributes, opt_childNodesAttrs) {
     naturalDimensions_['AMP-AUDIO'] = {width: '300px', height: '30px'};
     const ampAudio = getAmpAudio(attributes, opt_childNodesAttrs);
-    return ampAudio.build().then(() => {
-      return ampAudio.layoutCallback();
-    }).then(() => ampAudio);
+    return ampAudio.build()
+        .then(() => ampAudio.layoutCallback())
+        .then(() => ampAudio)
+        .catch(error => {
+          // Ignore failed to load errors since sources are fake.
+          if (error.toString().indexOf('Failed to load') > -1) {
+            return ampAudio;
+          } else {
+            throw error;
+          }
+        });
   }
 
   function attachToAmpStoryAndRun(attributes) {
@@ -74,19 +82,27 @@ describes.realWin('amp-audio', {
     ampStory.appendChild(ampAudio);
     doc.body.appendChild(ampStory);
 
-    return ampAudio.build().then(() => {
-      return ampAudio.layoutCallback();
-    }).then(() => ampAudio);
+    return ampAudio.build()
+        .then(() => ampAudio.layoutCallback())
+        .then(() => ampAudio)
+        .catch(error => {
+          // Ignore failed to load errors since sources are fake.
+          if (error.toString().indexOf('Failed to load') > -1) {
+            return ampAudio;
+          } else {
+            throw error;
+          }
+        });
   }
 
   it('should load audio through attribute', () => {
     return attachAndRun({
-      src: 'https://origin.com/audio.mp3',
+      src: 'audio.mp3',
     }).then(a => {
       const audio = a.querySelector('audio');
       expect(audio.tagName).to.equal('AUDIO');
       expect(audio.getAttribute('src'))
-          .to.equal('https://origin.com/audio.mp3');
+          .to.equal('audio.mp3');
       expect(audio.hasAttribute('controls')).to.be.true;
       expect(a.style.width).to.be.equal('300px');
       expect(a.style.height).to.be.equal('30px');
@@ -95,7 +111,7 @@ describes.realWin('amp-audio', {
 
   it('should not preload audio', () => {
     return attachAndRun({
-      src: 'https://origin.com/audio.mp3',
+      src: 'audio.mp3',
       preload: 'none',
     }).then(a => {
       const audio = a.querySelector('audio');
@@ -105,7 +121,7 @@ describes.realWin('amp-audio', {
 
   it('should only preload audio metadata', () => {
     return attachAndRun({
-      src: 'https://origin.com/audio.mp3',
+      src: 'audio.mp3',
       preload: 'metadata',
     }).then(a => {
       const audio = a.querySelector('audio');
@@ -116,7 +132,7 @@ describes.realWin('amp-audio', {
   it('should attach `<audio>` element and execute relevant actions for ' +
   'layout="nodisplay"', () => {
     return attachAndRun({
-      src: 'https://origin.com/audio.mp3',
+      src: 'audio.mp3',
       preload: 'none',
       layout: 'nodisplay',
     }).then(ampAudio => {
@@ -141,9 +157,9 @@ describes.realWin('amp-audio', {
       muted: '',
       loop: '',
     }, [
-      {tag: 'source', src: 'https://origin.com/audio.mp3',
+      {tag: 'source', src: 'audio.mp3',
         type: 'audio/mpeg'},
-      {tag: 'source', src: 'https://origin.com/audio.ogg', type: 'audio/ogg'},
+      {tag: 'source', src: 'audio.ogg', type: 'audio/ogg'},
       {tag: 'text', text: 'Unsupported.'},
     ]).then(a => {
       const audio = a.querySelector('audio');
@@ -160,10 +176,10 @@ describes.realWin('amp-audio', {
       expect(audio.hasAttribute('src')).to.be.false;
       expect(audio.childNodes[0].tagName).to.equal('SOURCE');
       expect(audio.childNodes[0].getAttribute('src'))
-          .to.equal('https://origin.com/audio.mp3');
+          .to.equal('audio.mp3');
       expect(audio.childNodes[1].tagName).to.equal('SOURCE');
       expect(audio.childNodes[1].getAttribute('src'))
-          .to.equal('https://origin.com/audio.ogg');
+          .to.equal('audio.ogg');
       expect(audio.childNodes[2].nodeType).to.equal(Node.TEXT_NODE);
       expect(audio.childNodes[2].textContent).to.equal('Unsupported.');
     });
@@ -171,7 +187,7 @@ describes.realWin('amp-audio', {
 
   it('should set its dimensions to the browser natural', () => {
     return attachAndRun({
-      src: 'https://origin.com/audio.mp3',
+      src: 'audio.mp3',
     }).then(a => {
       const audio = a.querySelector('audio');
       expect(a.style.width).to.be.equal('300px');
@@ -189,7 +205,7 @@ describes.realWin('amp-audio', {
   it('should set its natural dimension only if not specified', () => {
     return attachAndRun({
       'width': '500',
-      src: 'https://origin.com/audio.mp3',
+      src: 'audio.mp3',
     }).then(a => {
       expect(a.style.width).to.be.equal('500px');
       expect(a.style.height).to.be.equal('30px');
@@ -216,7 +232,7 @@ describes.realWin('amp-audio', {
 
   it('should propagate ARIA attributes', () => {
     return attachAndRun({
-      src: 'https://origin.com/audio.mp3',
+      src: 'audio.mp3',
       'aria-label': 'Hello',
       'aria-labelledby': 'id2',
       'aria-describedby': 'id3',
@@ -231,7 +247,7 @@ describes.realWin('amp-audio', {
   it('should play/pause when `play`/`pause` actions are called', () => {
     return attachAndRun({
       'width': '500',
-      src: 'https://origin.com/audio.mp3',
+      src: 'audio.mp3',
     }).then(ampAudio => {
       const impl = ampAudio.implementation_;
       impl.executeAction({method: 'play', satisfiesTrust: () => true});
@@ -246,7 +262,7 @@ describes.realWin('amp-audio', {
     'of `amp-story`', () => {
     return attachToAmpStoryAndRun({
       'width': '500',
-      src: 'https://origin.com/audio.mp3',
+      src: 'audio.mp3',
     }).then(ampAudio => {
       const impl = ampAudio.implementation_;
       impl.executeAction({method: 'play', satisfiesTrust: () => true});
