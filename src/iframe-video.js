@@ -139,15 +139,24 @@ export function mutedOrUnmutedEvent(isMuted) {
 
 
 /**
- * TEMPORARY workaround for M72-M74 user-activation breakage.
- * If this method is still here in May 2019, please ping @aghassemi
- * Only used by trusted video players: IMA and YouTube.
+ * TEMPORARY workaround for M72-M75 user-activation breakage.
+ * If this function is still here in June 2019, please ping `@aghassemi` and
+ * `@alanorozco`.
+ *
+ * - Used directly ONLY by trusted video players: amp-ima-video and amp-youtube.
+ * - Used indirectly ONLY through the `VideoManager` on execution of a
+ *   high-trust common action on an iframe player component.
+ *
  * See https://github.com/ampproject/amphtml/issues/21242 for details.
  * TODO(aghassemi, #21247)
+ *
  * @param {Element} iframe
  */
 export function addUnsafeAllowAutoplay(iframe) {
-  let val = iframe.getAttribute('allow') || '';
-  val += 'autoplay;';
-  iframe.setAttribute('allow', val);
+  const allow = iframe.getAttribute('allow') || '';
+  if (allow.indexOf('autoplay') >= 0) {
+    return;
+  }
+  const delimited = allow.replace(/([^;])$/, '$1;');
+  iframe.setAttribute('allow', `${delimited}autoplay;`);
 }

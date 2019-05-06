@@ -34,6 +34,7 @@ import {
 import {Services} from '../services';
 import {VideoSessionManager} from './video-session-manager';
 import {VideoUtils, getInternalVideoElementFor} from '../utils/video';
+import {addUnsafeAllowAutoplay} from '../iframe-video';
 import {clamp} from '../utils/math';
 import {
   createCustomEvent,
@@ -65,6 +66,47 @@ const TAG = 'video-manager';
  */
 const SECONDS_PLAYED_MIN_DELAY = 1000;
 
+/**
+ * Decorates/wraps a video common action handler to inform user interaction.
+ *
+ * @param {!../video-interface.VideoOrBaseElementDef} video
+ * @param {function()} handler
+ * @return {function(!./action-impl.ActionInvocation)}
+ */
+function decorateCommonActionHandler(video, handler) {
+  return invocation => {
+    userInteractedWith(video);
+    maybeAddUnsafeAllowAutoplay(video, invocation);
+    handler();
+  };
+}
+
+/**
+ * TEMPORARY workaround for for M72-M75 user-activation breakage.
+ * If this function is still here in June 2019, please ping `@aghassemi` and
+ * `@alanorozco`.
+ *
+ * This sets `allow=autoplay` on iframe players IFF triggered from a high-trust
+ * invocation. Otherwise Chrome throws a `DOMContentException` and refuses any
+ * playback activities on the iframe.
+ *
+ * See https://github.com/ampproject/amphtml/issues/22122 for details.
+ * TODO(alanorozco, #22158)
+ *
+ * @param {!../video-interface.VideoOrBaseElementDef} video
+ * @param {!./action-impl.ActionInvocation} invocation
+ */
+function maybeAddUnsafeAllowAutoplay({element}, invocation) {
+  // Common actions require only low-trust.
+  if (!invocation.satisfiesTrust(ActionTrust.HIGH)) {
+    return;
+  }
+  const internal = getInternalVideoElementFor(element);
+  if (internal.tagName.toLowerCase() != 'iframe') {
+    return;
+  }
+  addUnsafeAllowAutoplay(internal);
+}
 
 /**
  * VideoManager keeps track of all AMP video players that implement
@@ -204,26 +246,24 @@ export class VideoManager {
    * @private
    */
   registerCommonActions_(video) {
-    // Only require ActionTrust.LOW for video actions to defer to platform
-    // specific handling (e.g. user gesture requirement for unmuted playback).
-    const trust = ActionTrust.LOW;
+    const handlers = {
+      play: () => video.play(/* isAutoplay */ false),
+      pause: () => video.pause(),
+      mute: () => video.mute(),
+      unmute: () => video.unmute(),
+      fullscreen: () => video.fullscreenEnter(),
+    };
 
-    registerAction('play', () => video.play(/* isAutoplay */ false));
-    registerAction('pause', () => video.pause());
-    registerAction('mute', () => video.mute());
-    registerAction('unmute', () => video.unmute());
-    registerAction('fullscreen', () => video.fullscreenEnter());
-
-    /**
-     * @param {string} action
-     * @param {function()} fn
-     */
-    function registerAction(action, fn) {
-      video.registerAction(action, () => {
-        userInteractedWith(video);
-        fn();
-      }, trust);
-    }
+    Object.keys(handlers).forEach(action => {
+      video.registerAction(
+          action,
+          decorateCommonActionHandler(handlers[action]),
+          // Only require ActionTrust.LOW for video actions to defer to platform
+          // specific handling (e.g. user gesture requirement for unmuted
+          // playback).
+          ActionTrust.LOW
+      );
+    });
   }
 
   /**

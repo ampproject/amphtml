@@ -945,6 +945,18 @@ const forbiddenTermsSrcInclusive = {
     ],
   },
   '\\.matches\\(': 'Please use matches() helper in src/dom.js',
+  'addUnsafeAllowAutoplay\\(': {
+    // TODO(alanorozco, #21247): Remove as this refers to a temporary
+    // workaround.
+    message: 'addUnsafeAllowAutoplay() should only be used by sanctioned' +
+      'extensions or by the VideoManager service. See #21242 for details',
+    whitelist: [
+      'extensions/amp-ima-video/0.1/amp-ima-video.js',
+      'extensions/amp-youtube/0.1/amp-youtube.js',
+      'src/iframe-video.js',
+      'src/service/video-manager-impl.js',
+    ],
+  },
 };
 
 // Terms that must appear in a source file.
