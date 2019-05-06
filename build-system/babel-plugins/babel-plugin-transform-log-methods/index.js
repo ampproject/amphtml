@@ -19,42 +19,43 @@
  * base36-encoded message ids that redirect to to a URL or look up a message
  * table to interpolate and display the logged message.
  *
- * The motivation of this transform is to reduce binary size. The average length
- * of an error message is ~43 whereas the common minified transformed output
- * in the form of `x().l('z2')` is just 11. Since the first part of the output
- * repeats, it also compresses well.
+ *    dev().assert(foo != bar, 'foo should not be bar')
+ *    // transforms into:
+ *    dev().assert(foo != bar, dev().getLogUrl('1z'))
  *
  * Additionally outputs a JSON file containing [message, id] pairs keyed by
  * message string. This table is "backwards" for deduping, to key by id its rows
  * should be reversed independently.
  *
- * Converts:
- *
- *    dev().assert(foo != bar, 'foo should not be bar')
- *
- * into:
- *
- *    dev().assert(foo != bar, dev().getLogUrl('0'))
- *
  * When the message contains arguments, those get passed to the expansion
- * method. The following gets converted:
+ * method. The following gets converted.
  *
- *    dev().assert(..., `${foo} should not be ${bar}`)
+ *    dev().assert(false, `${foo} should not be ${bar}`)
+ *    // transforms into:
+ *    dev().assert(false, dev().getLogUrl('e2', foo, bar))
  *
- * into:
+ * It also nests arguments of variadic methods:
  *
- *    dev().assert(..., dev().getLogUrl('0', foo, bar))
+ *    dev().assert(false, 'Hello, respected', name);
+ *    // transforms into:
+ *    dev().assert(false, dev().getLogUrl('0a', name));
  *
+ * The motivation of this transform is to reduce binary size. The average length
+ * of an error message is ~43 whereas the common minified transformed output
+ * in the form of `x().l('z2')` is just 11. Since the first part of the output
+ * repeats, it also compresses well.
  */
 
 const fs = require('fs');
 
-const logMessagesPath = `${__dirname}/../../log-messages.json`;
+const relativeToRoot = path => `${__dirname}/../../../${path}`;
+
+const defaultMessagesPath = 'dist/log-messages.json';
 const messageExpansionMethod = 'getLogUrl';
 
 /**
  * Positions of the first message argument in the logging methods.
- * @type {!Array<LogMethodMetadataDef>}
+ * @type {!Object<string, number>}
  */
 const methodsMessageArgPos = {
   assert: 1,
@@ -72,22 +73,31 @@ const methodsMessageArgPos = {
   warn: 1,
 };
 
+/**
+ * Determines whether a callee node is to a known transformable log method.
+ * @param {*} t babel.types
+ * @param {Node} node
+ * @param {!Object<string, *>} methods
+ * @return {boolean}
+ */
 const isTransformableMethod = (t, node, methods) =>
   t.isIdentifier(node) && node.name in methods;
 
 /**
  * Retrieves the error map from the json file.
+ * @param {string} messagesPath
  * @return {!Object<string, string>}
  */
-const getMessageToIdMap = () => JSON.parse(fs.readFileSync(logMessagesPath));
+const getMessages = messagesPath => JSON.parse(fs.readFileSync(messagesPath));
 
 /**
- * Retrieves the error map from the json file.
+ * Writes the error map from the json file.
+ * @param {string} messagesPath
  * @param {!Object<string, string>} obj
  */
-function writeErrorMap(obj) {
+function writeMessages(messagesPath, obj) {
   const json = JSON.stringify(obj, /* replacer */ null, /* spaces */ 2);
-  fs.writeFileSync(logMessagesPath, json);
+  fs.writeFileSync(messagesPath, json);
 }
 
 /**
@@ -100,17 +110,18 @@ const createShortMessageId = id => id.toString(36);
 /**
  * Gets a message id from the message map, or adds a new entry for a new
  * message.
+ * @param {file} messagesPath
  * @param {string} message
  * @return {string}
  */
-function getOrCreateShortMessageId(message) {
-  const errorMap = getMessageToIdMap();
+function getOrCreateShortMessageId(messagesPath, message) {
+  const errorMap = getMessages(messagesPath);
   if (errorMap[message]) {
     return errorMap[message];
   }
-  const shortMessageId = createShortMessageId(Object.keys(errorMap).length + 1);
+  const shortMessageId = createShortMessageId(Object.keys(errorMap).length);
   errorMap[message] = shortMessageId;
-  writeErrorMap(errorMap);
+  writeMessages(messagesPath, errorMap);
   return shortMessageId;
 }
 
@@ -125,6 +136,18 @@ const isLogSingletonCall = (t, callee) =>
 
 module.exports = function({types: t}) {
   return {
+    pre() {
+      // Configurable to isolate test output.
+      const {messagesPath = defaultMessagesPath} = this.opts;
+      this.messagesPath = relativeToRoot(messagesPath);
+
+      // Check for file existance or create empty.
+      try {
+        getMessages(this.messagesPath);
+      } catch {
+        writeMessages(this.messagesPath, {});
+      }
+    },
     visitor: {
       CallExpression(path) {
         const {node} = path;
@@ -157,21 +180,29 @@ module.exports = function({types: t}) {
           return;
         }
 
-        const templateLiteralArgs = [];
-
         // Construct a String Literal from the argument. This is because
         // There could be other Nodes like Template Literals, Binary
         // Expressions, Method calls etc.
+        const templateLiteralArgs = [];
         const message = buildMessage(t, messageArg, templateLiteralArgs);
 
-        const shortMessageId = getOrCreateShortMessageId(message);
+        // Bounce when indirection increases minified size.
+        // This also catches the case where the message itself is variable
+        // (eg if the resulting message string is '%s').
+        if (message.length < 'a().b()'.length) {
+          return;
+        }
 
-        const argsHead = node.arguments.slice(
-            0,
-            Math.max(0, messageArgPos - 1)
+        const shortMessageId = getOrCreateShortMessageId(
+            this.messagesPath,
+            message
         );
 
-        const argsTail = node.arguments.slice(messageArgPos + 1);
+        // We care about arguments beyond the first message argument (the body)
+        // but all previous (the head) should be kept in place.
+        // The tail is passed to the indirection function.
+        const argsHead = node.arguments.slice(0, Math.max(0, messageArgPos));
+        const argsBody = node.arguments.slice(messageArgPos + 1);
 
         // Member expression as callee of message expansion method,
         // eg. `dev().getLogUrl`.
@@ -180,14 +211,16 @@ module.exports = function({types: t}) {
             t.identifier(messageExpansionMethod)
         );
 
+        // Compose arguments for message expansion call, where the first
+        // argument is the id for the message added to the table.
+        // Argument order breaks badly when combining template literals and
+        // variadic methods with printf syntax. This transform depends on lint
+        // rules that prevent such usage.
         const messageExpansionArgs = [
           t.stringLiteral(shortMessageId),
-          t.arrayExpression([...argsTail, ...templateLiteralArgs]),
+          ...argsBody,
+          ...templateLiteralArgs,
         ];
-
-        console.log(
-            t.callExpression(messageExpansionCallee, messageExpansionArgs)
-        );
 
         node.arguments = [
           ...argsHead,
