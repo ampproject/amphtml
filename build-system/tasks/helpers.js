@@ -338,7 +338,7 @@ function handleBundleError(err, failOnError, srcFilename, startTime) {
 }
 
 /**
- * Performas the final steps after Browserify bundles a JS file
+ * Performs the final steps after Browserify bundles a JS file
  * @param {string} srcFilename
  * @param {string} destDir
  * @param {string} destFilename
