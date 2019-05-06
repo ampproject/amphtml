@@ -217,6 +217,7 @@ describes.realWin('amp-analytics', {
       const whenFirstVisibleStub = sandbox.stub(
           viewer,
           'whenFirstVisible').callsFake(() => new Promise(function() {}));
+      doc.body.appendChild(el);
       const analytics = new AmpAnalytics(el);
       el.getAmpDoc = () => ampdoc;
       analytics.buildCallback();
