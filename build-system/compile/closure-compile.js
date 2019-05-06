@@ -17,10 +17,8 @@
 
 const closureCompiler = require('google-closure-compiler');
 const colors = require('ansi-colors');
+const {closureNailgunPort} = require('../tasks/nailgun');
 const {highlight} = require('cli-highlight');
-
-// Also used in gulpfile.js
-const NAILGUN_PORT = '2114';
 
 let compilerErrors = '';
 
@@ -61,7 +59,6 @@ exports.handleSinglePassCompilerError = function() {
 function handleError(message) {
   console./*OK*/error(
       `${message}\n` + formatClosureCompilerError(compilerErrors));
-  process.exit(1);
 }
 
 /**
@@ -82,7 +79,7 @@ exports.gulpClosureCompile = function(compilerOptions) {
   if (process.platform == 'darwin' || process.platform == 'linux') {
     compilerOptions = [
       '--nailgun-port',
-      NAILGUN_PORT,
+      closureNailgunPort,
       'org.ampproject.AmpCommandLineRunner',
       '--',
     ].concat(compilerOptions);

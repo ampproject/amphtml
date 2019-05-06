@@ -90,9 +90,7 @@ public class AmpCommandLineRunner extends CommandLineRunner {
     options.setExtractPrototypeMemberDeclarations(true);
     options.setSmartNameRemoval(true);
     options.optimizeCalls = true;
-    if (single_file_compilation) {
-      options.renamePrefixNamespace = "_";
-    } else {
+    if (!single_file_compilation) {
       // Have to turn this off because we cannot know whether sub classes
       // might override a method. In the future this might be doable
       // with using a more complete extern file instead.

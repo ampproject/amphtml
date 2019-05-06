@@ -30,7 +30,7 @@ describes.endtoend('Non-looping AMP carousel', {
   initialRect: {width: pageWidth, height: pageHeight},
 }, async env => {
   /** The total number of slides in the carousel */
-  const SLIDE_COUNT = 7;
+  const SLIDE_COUNT = 4;
   let controller;
 
   function prop(el, name) {

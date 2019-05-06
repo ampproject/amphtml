@@ -26,7 +26,6 @@ const assert = require('assert');
 const BBPromise = require('bluebird');
 const colors = require('ansi-colors');
 const extend = require('util')._extend;
-const gulp = require('gulp-help')(require('gulp'));
 const log = require('fancy-log');
 const request = BBPromise.promisify(require('request'));
 
@@ -117,7 +116,7 @@ function calculateReviewer() {
 /**
  * Main function for auto triaging
  */
-function processPRs() {
+function process3pGithubPr() {
   if (!GITHUB_ACCESS_TOKEN) {
     log(colors.red('You have not set the ' +
         'GITHUB_ACCESS_TOKEN env var.'));
@@ -319,13 +318,7 @@ function assignIssue(issue, assignees) {
   return request(options);
 }
 
-gulp.task(
-    'process-3p-github-pr',
-    'Automatically triage 3P integration PRs',
-    processPRs,
-    {
-      options: {
-        dryrun: '  Generate process but don\'t push it out',
-      },
-    }
-);
+process3pGithubPr.description = 'Automatically triage 3P integration PRs';
+process3pGithubPr.flags = {
+  dryrun: '  Generate process but don\'t push it out',
+};
