@@ -312,10 +312,6 @@ function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
         if (options.latestName) {
           name = `${name} → ${options.latestName}`;
         }
-        // Remove intemediary, transpiled JS files after compilation.
-        if (options.typeScript) {
-          rimraf.sync(path.join(srcDir, '**/*.js'));
-        }
         endBuildStep('Minified', name, startTime);
       });
 }
@@ -419,10 +415,6 @@ function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
                 options.latestName.split('.js')[0] + '.max.js';
             name = `${name} → ${latestMaxName}`;
           }
-          // Remove intemediary, transpiled JS files after compilation.
-          if (options.typeScript) {
-            rimraf.sync(path.join(srcDir, '**/*.js'));
-          }
           endBuildStep('Compiled', name, startTime);
         })
         .then(() => maybeEnableLocalTesting(destFilename));
@@ -478,10 +470,26 @@ function maybeEnableLocalTesting(destFilename) {
 }
 
 /**
- * Bundles (max) or compiles (min) a given JavaScript file entry point.
+ * Transpiles from TypeScript into intermediary files before compilation and
+ * deletes them afterwards.
  *
- * If `options.typeScript` is true, transpiles from TypeScript into
- * intermediary files before compilation and deletes them afterwards.
+ * @param {string} srcDir Path to the src directory
+ * @param {string} srcFilename Name of the JS source file
+ * @param {string} destDir Destination folder for output script
+ * @param {?Object} options
+ * @return {!Promise}
+ */
+function compileTs(srcDir, srcFilename, destDir, options) {
+  options = options || {};
+  const startTime = Date.now();
+  transpileTs(srcDir, srcFilename);
+  endBuildStep('Transpiled', srcFilename, startTime);
+  compileJs(srcDir, srcFilename, destDir, options);
+  rimraf.sync(path.join(srcDir, '**/*.js'));
+}
+
+/**
+ * Bundles (max) or compiles (min) a given JavaScript file entry point.
  *
  * @param {string} srcDir Path to the src directory
  * @param {string} srcFilename Name of the JS source file
@@ -491,12 +499,6 @@ function maybeEnableLocalTesting(destFilename) {
  */
 function compileJs(srcDir, srcFilename, destDir, options) {
   options = options || {};
-  // Transpile TS to Closure-annotated JS before actual bundling or compile.
-  if (options.typeScript) {
-    const startTime = Date.now();
-    transpileTs(srcDir, srcFilename);
-    endBuildStep('Transpiled', srcFilename, startTime);
-  }
   if (options.minify) {
     return compileMinifiedJs(srcDir, srcFilename, destDir, options);
   } else {
@@ -774,6 +776,7 @@ module.exports = {
   buildWebWorker,
   compile,
   compileJs,
+  compileTs,
   enableLocalTesting,
   endBuildStep,
   hostname,
