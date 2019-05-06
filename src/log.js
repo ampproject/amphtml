@@ -89,6 +89,10 @@ export function overrideLogLevel(level) {
   levelOverride_ = level;
 }
 
+function externalMessagesUrl(suffix) {
+  return `https://log.amp.dev/${suffix}`;
+}
+
 /**
  * Logging class. Use of sentinel string instead of a boolean to check user/dev
  * errors because errors could be rethrown by some native code as a new error,
@@ -471,11 +475,21 @@ export class Log {
   }
 
   /**
+   * Redirects a pair of (errorId, ...args) to a URL where a
+   *
+   * This method is used by the output of the `transform-log-methods` babel
+   * plugin. It should not be used directly. Use the (*error|assert*|info|warn)
+   * methods instead.
+   *
    * @param {string} id
    * @param {...*} var_args
+   * @return {string}
    */
   getLogUrl(id, var_args) {
-    return '';
+    return [].slice.call(arguments, 1).reduce(
+        (head, arg) => `${head}&s[]=${encodeURIComponent(toString(arg))}`,
+        `More info at https://log.amp.dev/?id=${encodeURIComponent(id)}`
+    );
   }
 }
 
