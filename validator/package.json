@@ -1,7 +1,7 @@
 {
   "name": "amp-validator",
   "version": "0.1.0",
-  "description": "Validator for AMP HTML (www.amp.dev)",
+  "description": "Validator for AMP HTML (amp.dev)",
   "engines": {
     "node": "^10.0.0"
   },

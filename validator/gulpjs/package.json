@@ -1,7 +1,7 @@
 {
   "name": "gulp-amphtml-validator",
   "version": "1.0.2",
-  "description": "Gulp plugin for the official AMP HTML validator (www.amp.dev)",
+  "description": "Gulp plugin for the official AMP HTML validator (amp.dev)",
   "keywords": [
     "gulpplugin",
     "AMP",
