@@ -16,45 +16,57 @@
 
 /**
  * @fileoverview Indirects log messages through expansion calls with
- * base36-encoded message ids that redirect to to a URL or look up a message
- * table to interpolate and display the logged message.
+ * base36-encoded message ids. These redirect to to a URL or look up a message
+ * table to interpolate and display the logged string.
  *
  *    dev().assert(foo != bar, 'foo should not be bar')
- *    // transforms into:
+ *    // transforms into 👇
  *    dev().assert(foo != bar, dev().getLogUrl('1z'))
  *
- * Additionally outputs a JSON file containing [message, id] pairs keyed by
- * message string. This table is "backwards" for deduping, to key by id its rows
- * should be reversed independently.
+ * Where `getLogUrl` is in charge of looking up and expanding the message
+ * string, or returning a URL where the interpolated message is displayed.
  *
- * When the message contains arguments, those get passed to the expansion
- * method. The following gets converted.
+ * Additionally outputs a JSON file containing [template, id] pairs keyed by
+ * message template. This table is "backwards" for deduping, to key by id its
+ * rows should be reversed separately.
  *
- *    dev().assert(false, `${foo} should not be ${bar}`)
- *    // transforms into:
+ * When the template has arguments they are nested into the expansion method:
+ *
+ *    dev().assert(false, '%s should not be %s.', foo, bar)
+ *    // transforms into 👇
  *    dev().assert(false, dev().getLogUrl('e2', foo, bar))
  *
- * It also nests arguments of variadic methods:
+ * It also nests arguments of template literals:
  *
- *    dev().assert(false, 'Hello, respected', name);
- *    // transforms into:
+ *    dev().assert(false, `Hello, my dear ${name}`);
+ *    // transforms into 👇
  *    dev().assert(false, dev().getLogUrl('0a', name));
  *
  * The motivation of this transform is to reduce binary size. The average length
- * of an error message is ~43 whereas the common minified transformed output
- * in the form of `x().l('z2')` is just 11. Since the first part of the output
- * repeats, it also compresses well.
+ * of a log message is ~43 whereas the common minified transformed output (as
+ * `x().l('a0')`) is just 11. Since the prefix of the output could repeat
+ * throughout a binary, it also compresses well.
+ *
+ * Resulting binary savings are ~1.5% depending on their logging density.
  */
-
 const fs = require('fs');
 
-const relativeToRoot = path => `${__dirname}/../../../${path}`;
-
+/**
+ * Path to messages file for this version relative to the repo root.
+ * This is a default since tests can configure this table's output path, but for
+ * all building purposes this should be considered the canonical messages
+ * filepath for the built version.
+ */
 const defaultMessagesPath = 'dist/log-messages.json';
+
+/** Method on `Log` that this transform outputs to "expand" log messages. */
 const messageExpansionMethod = 'getLogUrl';
 
+/** Functions exposed as singleton getters for `Log`. */
+const singletonFunctions = ['dev', 'user'];
+
 /**
- * Positions of the first message argument in the logging methods.
+ * Position of the first message argument for each known logging method.
  * @type {!Object<string, number>}
  */
 const methodsMessageArgPos = {
@@ -73,8 +85,17 @@ const methodsMessageArgPos = {
   warn: 1,
 };
 
+const roughMinifiedExpansionLength = 'a().b("xx")'.length;
+
 /**
- * Determines whether a callee node is to a known transformable log method.
+ * Determines a filepath relative to the repo root.
+ * @param {string} path
+ * @return {string}
+ */
+const relativeToRoot = path => `${__dirname}/../../../${path}`;
+
+/**
+ * Determines whether a callee is a known transformable log method.
  * @param {*} t babel.types
  * @param {Node} node
  * @param {!Object<string, *>} methods
@@ -84,14 +105,22 @@ const isTransformableMethod = (t, node, methods) =>
   t.isIdentifier(node) && node.name in methods;
 
 /**
- * Retrieves the error map from the json file.
+ * Reads the messages table from the JSON file.
  * @param {string} messagesPath
  * @return {!Object<string, string>}
  */
-const getMessages = messagesPath => JSON.parse(fs.readFileSync(messagesPath));
+function getMessages(messagesPath) {
+  try {
+    return JSON.parse(fs.readFileSync(messagesPath));
+  } catch {
+    // When non-existent or empty just return an empty object. Transformations
+    // that read will write as well.
+    return {};
+  }
+}
 
 /**
- * Writes the error map from the json file.
+ * Writes the messages table to the JSON file.
  * @param {string} messagesPath
  * @param {!Object<string, string>} obj
  */
@@ -101,149 +130,48 @@ function writeMessages(messagesPath, obj) {
 }
 
 /**
- * Converts a numeric message id to a base-36 encoded string.
- * @param {number} id
- * @return {string}
- */
-const createShortMessageId = id => id.toString(36);
-
-/**
- * Gets a message id from the message map, or adds a new entry for a new
- * message.
+ * Gets a message id from the table, or adds a new entry for a message if
+ * non-existent and returnssssssssss its new id.
  * @param {file} messagesPath
  * @param {string} message
- * @return {string}
+ * @return {string} Short message id.
  */
 function getOrCreateShortMessageId(messagesPath, message) {
-  const errorMap = getMessages(messagesPath);
-  if (errorMap[message]) {
-    return errorMap[message];
+  const messages = getMessages(messagesPath);
+  if (messages[message]) {
+    return messages[message];
   }
-  const shortMessageId = createShortMessageId(Object.keys(errorMap).length);
-  errorMap[message] = shortMessageId;
-  writeMessages(messagesPath, errorMap);
+  // Base-36 radix for best utilization of ascii space.
+  const shortMessageId = Object.keys(messages).length.toString(36);
+  messages[message] = shortMessageId;
+  writeMessages(messagesPath, messages);
   return shortMessageId;
 }
 
 /**
- * Determines whether a callee is either dev() or user() singleton.
+ * Determines whether a callee is to any of the dev() or user() singletons.
  * @param {*} t babel.types
  * @param {Node} callee
  * @return {boolean}
  */
-const isLogSingletonCall = (t, callee) =>
-  ['dev', 'user'].some(name => t.isIdentifier(callee, {name}));
-
-module.exports = function({types: t}) {
-  return {
-    pre() {
-      // Configurable to isolate test output.
-      const {messagesPath = defaultMessagesPath} = this.opts;
-      this.messagesPath = relativeToRoot(messagesPath);
-
-      // Check for file existance or create empty.
-      try {
-        getMessages(this.messagesPath);
-      } catch {
-        writeMessages(this.messagesPath, {});
-      }
-    },
-    visitor: {
-      CallExpression(path) {
-        const {node} = path;
-        const {callee} = node;
-
-        // Test to see if it looks like a method().call()
-        if (!t.isMemberExpression(callee) || !t.isCallExpression(callee.object)) {
-          return;
-        }
-
-        const logCallee = callee.object.callee;
-        const {property} = callee;
-
-        // This is dev() or user() call expression with a known method.
-        if (
-          !isLogSingletonCall(t, logCallee) ||
-          !isTransformableMethod(t, property, methodsMessageArgPos)
-        ) {
-          return;
-        }
-
-        const messageArgPos = methodsMessageArgPos[property.name];
-        const messageArg = node.arguments[messageArgPos];
-
-        // If there is actually no message argument then bail out on the whole
-        // transformation.
-        if (!messageArg) {
-          return;
-        }
-
-        // Construct a String Literal from the argument. This is because
-        // There could be other Nodes like Template Literals, Binary
-        // Expressions, Method calls etc.
-        const templateLiteralArgs = [];
-        const message = buildMessage(t, messageArg, templateLiteralArgs);
-
-        // Bounce when indirection increases minified size.
-        // This also catches the case where the message itself is variable
-        // (eg if the resulting message string is '%s').
-        if (message.length < 'a().b()'.length) {
-          return;
-        }
-
-        const shortMessageId = getOrCreateShortMessageId(
-            this.messagesPath,
-            message
-        );
-
-        // We care about arguments beyond the first message argument (the body)
-        // but all previous (the head) should be kept in place.
-        // The tail is passed to the indirection function.
-        const argsHead = node.arguments.slice(0, Math.max(0, messageArgPos));
-        const argsBody = node.arguments.slice(messageArgPos + 1);
-
-        // Member expression as callee of message expansion method,
-        // eg. `dev().getLogUrl`.
-        const messageExpansionCallee = t.memberExpression(
-            t.callExpression(t.identifier(logCallee.name), []),
-            t.identifier(messageExpansionMethod)
-        );
-
-        // Compose arguments for message expansion call, where the first
-        // argument is the id for the message added to the table.
-        // Argument order breaks badly when combining template literals and
-        // variadic methods with printf syntax. This transform depends on lint
-        // rules that prevent such usage.
-        const messageExpansionArgs = [
-          t.stringLiteral(shortMessageId),
-          ...argsBody,
-          ...templateLiteralArgs,
-        ];
-
-        node.arguments = [
-          ...argsHead,
-          // Full expansion call as eg. `dev().getLogUrl(shortId, ...args)`
-          t.callExpression(messageExpansionCallee, messageExpansionArgs),
-        ];
-      },
-    },
-  };
-};
+const isSingletonCallee = (t, callee) =>
+  singletonFunctions.some(name => t.isIdentifier(callee, {name}));
 
 /**
  * @param {*} t babel.types
  * @param {!Node} node
- * @param {!Array<!Node>} otherNodes
+ * @param {!Array<!Node>} interpolationArgs
+ * @return {string} Template for the message.
  */
-function buildMessage(t, node, otherNodes) {
+function buildMessage(t, node, interpolationArgs) {
   if (t.isStringLiteral(node)) {
     return node.value;
   }
 
   if (t.isBinaryExpression(node, {operator: '+'})) {
     return (
-      buildMessage(t, node.left, otherNodes) +
-      buildMessage(t, node.right, otherNodes)
+      buildMessage(t, node.left, interpolationArgs) +
+      buildMessage(t, node.right, interpolationArgs)
     );
   }
 
@@ -252,12 +180,100 @@ function buildMessage(t, node, otherNodes) {
     let i = 0;
     for (; i < node.quasis.length - 1; i++) {
       quasied += node.quasis[i].value.cooked;
-      quasied += buildMessage(t, node.expressions[i], otherNodes);
+      quasied += buildMessage(t, node.expressions[i], interpolationArgs);
     }
     quasied += node.quasis[i].value.cooked;
     return quasied;
   }
 
-  otherNodes.push(node);
+  interpolationArgs.push(node);
   return '%s';
 }
+
+/**
+ * Visits a CallExpression and replaces its arguments when the message string
+ * can be indirected.
+ * @param {*} babel
+ * @param {*} path
+ * @this {*} babel.plugin
+ *  - `messagesPath` as resolved from options and default.
+ */
+function CallExpression({types: t}, path) {
+  const {node} = path;
+  const {callee} = node;
+
+  // Looks like a method().call().
+  if (!t.isMemberExpression(callee) || !t.isCallExpression(callee.object)) {
+    return;
+  }
+
+  const singletonCallee = callee.object.callee;
+  if (!isSingletonCallee(t, singletonCallee)) {
+    return;
+  }
+
+  const {property} = callee;
+  if (!isTransformableMethod(t, property, methodsMessageArgPos)) {
+    return;
+  }
+
+  const messageArgPos = methodsMessageArgPos[property.name];
+  const messageArg = node.arguments[messageArgPos];
+
+  if (!messageArg) {
+    return;
+  }
+
+  // Construct a printf template from the argument set. There could be
+  // non-string types among string literals in variadic calls, so the template
+  // includes them as interpolated arguments.
+  const templateLiteralArgs = [];
+  const message = buildMessage(t, messageArg, templateLiteralArgs);
+
+  // Bounce when indirection increases minified size (±1 byte). Also catches the
+  // the case where the top-level message is variable (ie. when its template is
+  // exactly '%s'), in which indirection would be pointless.
+  if (message.length <= roughMinifiedExpansionLength) {
+    return;
+  }
+
+  const shortMessageId = getOrCreateShortMessageId(this.messagesPath, message);
+
+  // We care only about message arguments beyond the first (ie. the body): all
+  // previous method arguments (ie. the head) should stay in place. The body is
+  // nested into the expansion method call, after the template id.
+  const argsHead = node.arguments.slice(0, Math.max(0, messageArgPos));
+  const argsBody = node.arguments.slice(messageArgPos + 1);
+
+  // Callee to expansion method, eg. `dev().getLogUrl`.
+  const messageExpansionCallee = t.memberExpression(
+      t.callExpression(t.identifier(singletonCallee.name), []),
+      t.identifier(messageExpansionMethod)
+  );
+
+  // Interpolation order breaks badly when template literals are combined with
+  // variadic calls. This transform implicitly depends on a lint rule that
+  // prevents such usage.
+  const expansionCall = t.callExpression(messageExpansionCallee, [
+    t.stringLiteral(shortMessageId),
+    ...argsBody,
+    ...templateLiteralArgs,
+  ]);
+
+  node.arguments = [...argsHead, expansionCall];
+}
+
+module.exports = function(babel) {
+  return {
+    pre() {
+      // Configurable to isolate test output.
+      const {messagesPath = defaultMessagesPath} = this.opts;
+      this.messagesPath = relativeToRoot(messagesPath);
+    },
+    visitor: {
+      CallExpression(...args) {
+        CallExpression.call(this, babel, ...args);
+      },
+    },
+  };
+};
