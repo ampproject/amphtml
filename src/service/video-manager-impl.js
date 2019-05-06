@@ -257,7 +257,7 @@ export class VideoManager {
     Object.keys(handlers).forEach(action => {
       video.registerAction(
           action,
-          decorateCommonActionHandler(handlers[action]),
+          decorateCommonActionHandler(video, handlers[action]),
           // Only require ActionTrust.LOW for video actions to defer to platform
           // specific handling (e.g. user gesture requirement for unmuted
           // playback).
