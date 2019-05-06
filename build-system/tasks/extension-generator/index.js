@@ -61,7 +61,7 @@ tags: {  # <${name}>
   tag_name: "${name.toUpperCase()}"
   requires_extension: "${name}"
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/${name}"
+  spec_url: "https://amp.dev/documentation/components/${name}"
   amp_layout: {
     supported_layouts: RESPONSIVE
   }
