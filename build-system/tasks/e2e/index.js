@@ -126,17 +126,17 @@ async function e2e() {
       });
     }
 
-    mocha.run(failures => {
+    mocha.run(async failures => {
       // end web server
       cleanUp_();
 
       // end task
       if (failures) {
         process.exitCode = 1;
-        rejecter();
+        await rejecter();
       }
       process.exit();
-      resolver();
+      await resolver();
     });
   }
   else {
