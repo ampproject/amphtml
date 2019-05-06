@@ -655,5 +655,60 @@
       </amp-autocomplete>
       <input name="submit-button" type="submit" value="Submit">
     </form>
+
+    <p>nested</p>
+    <form method="post"
+        action-xhr="/form/echo-json/post"
+        target="_blank">
+      <amp-autocomplete filter="substring" min-characters="0">
+        <input type="text" name="name" required>
+        <script type="application/json">
+          { "items" : [
+            {
+              "category" : "Fruit",
+              "items" : [ "apple", "banana", "orange" ]
+            }, {
+              "category" : "Vegetables",
+              "items" : [ "cucumber", "lettuce", "broccoli" ]
+            }, {
+              "category" : "Bread",
+              "items" : [ "bagel", "baguette", "brioche" ]
+            }, { 
+              "category" : "Meats",
+              "items" : [ {
+                "category" : "Meats",
+                "subCategory" : "Red meat",
+                "items" : [ "pork", "beef" ],
+                "subItems" : [ "pork", "beef" ]
+              }, {
+                "category" : "Meats",
+                "subCategory" : "White meat",
+                "items" : [ "chicken", "turkey" ],
+                "subItems" : [ "chicken", "turkey" ]
+              } ] 
+            }
+          ] }
+        </script>
+        <template type="amp-mustache" id="amp-template-custom">
+          <div data-category="{{category}}">
+            <strong>Trending {{category}}</strong>
+            {{#items}}
+              {{#subCategory}}
+                <div data-category="{{subCategory}}">
+                  <em>{{subCategory}}</em>
+                  {{#subItems}}
+                    <div data-value="{{.}}">{{.}}</div>
+                  {{/subItems}}
+                </div>
+              {{/subCategory}}
+              {{^subCategory}}
+              <div data-value="{{.}}">{{.}}</div>
+              {{/subCategory}}
+            {{/items}}
+          </div>
+        </template>
+      </amp-autocomplete>
+      <input name="submit-button" type="submit" value="Submit">
+    </form>
 </body>
 </html>
