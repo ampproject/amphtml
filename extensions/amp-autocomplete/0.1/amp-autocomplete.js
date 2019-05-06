@@ -181,8 +181,9 @@ export class AmpAutocomplete extends AMP.BaseElement {
       this.templates_.renderTemplate(this.templateElement_,
           /** @type {!JsonObject} */({})).then(
           renderedEl => {
-            userAssert(renderedEl.hasAttribute('data-value'),
-                `${TAG} requires the "data-value" attribute on <template>.`);
+            userAssert(renderedEl.hasAttribute('data-value') ||
+              renderedEl.hasAttribute('data-disabled'),
+            `${TAG} requires a "data-value" or "data-disabled" attribute.`);
           });
     }
 
@@ -392,6 +393,9 @@ export class AmpAutocomplete extends AMP.BaseElement {
       renderPromise = this.templates_.renderTemplateArray(this.templateElement_,
           filteredData).then(renderedChildren => {
         renderedChildren.map(child => {
+          if (child.hasAttribute('data-disabled')) {
+            child.setAttribute('aria-disabled', 'true');
+          }
           child.classList.add('i-amphtml-autocomplete-item');
           child.setAttribute('role', 'listitem');
           container.appendChild(child);
@@ -648,7 +652,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
    * @private
    */
   selectItem_(element) {
-    if (element === null) {
+    if (element === null || element.hasAttribute('data-disabled')) {
       return;
     }
     this.inputElement_.value = this.userInput_ =
@@ -683,8 +687,12 @@ export class AmpAutocomplete extends AMP.BaseElement {
     // Active element logic
     const keyUpWhenNoneActive = this.activeIndex_ === -1 && delta < 0;
     const index = keyUpWhenNoneActive ? delta : this.activeIndex_ + delta;
-    const activeIndex = mod(index, this.container_.children.length);
-    const newActiveElement = this.container_.children[activeIndex];
+    const enabledElements = this.getEnabledItems_();
+    if (enabledElements.length === 0) {
+      return Promise.resolve();
+    }
+    const activeIndex = mod(index, enabledElements.length);
+    const newActiveElement = enabledElements[activeIndex];
     this.inputElement_.value = newActiveElement.getAttribute('data-value');
 
     // Element visibility logic
@@ -706,6 +714,16 @@ export class AmpAutocomplete extends AMP.BaseElement {
       this.activeIndex_ = activeIndex;
       this.activeElement_ = newActiveElement;
     });
+  }
+
+  /** Returns all item elements in the results container that do not have the
+   * 'data-disabled' attribute.
+   * @return {!NodeList}
+   * @private
+   */
+  getEnabledItems_() {
+    return this.container_.querySelectorAll(
+        '.i-amphtml-autocomplete-item:not([data-disabled])');
   }
 
   /**
@@ -752,7 +770,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
         event.preventDefault();
         if (this.resultsShowing_()) {
           // Disrupt loop around to display user input.
-          if (this.activeIndex_ === this.container_.children.length - 1) {
+          if (this.activeIndex_ === this.getEnabledItems_().length - 1) {
             this.displayUserInput_();
             return Promise.resolve();
           }

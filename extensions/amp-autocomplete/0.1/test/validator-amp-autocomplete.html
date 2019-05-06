@@ -217,6 +217,24 @@
       </template>
     </amp-autocomplete> 
 
+    <!-- Valid: amp-component with remote data and rich content template -->
+    <amp-autocomplete src="https://data.com/articles.json?ref=CANONICAL_URL">
+      <input type="text">
+      <template type="amp-mustache" id="amp-template-default">
+        {{#disabled}}
+          <div data-disabled>
+            <b>{{value}}</b>
+          </div>
+        {{/disabled}}
+        {{^disabled}}
+        <div class="city-item" data-value="{{value}}">
+            <div>{{value}}</div>
+            <div class="custom-population">Population: {{population}}</div>        
+        </div>
+        {{/disabled}}
+      </template>
+    </amp-autocomplete> 
+
     <!-- Valid: amp-component with static data and template attr -->
     <amp-autocomplete template="my-template-id">
       <input type="text">
