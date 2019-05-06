@@ -57,7 +57,7 @@ amp-autocomplete > input {
 
 .i-amphtml-autocomplete-category {
   position: relative;
-  padding: 0 1rem; /* default-ui-space-small default-ui-space-medium */
+  padding: 0 1rem; /* default-ui-space-medium */
   cursor: pointer;
 }
 

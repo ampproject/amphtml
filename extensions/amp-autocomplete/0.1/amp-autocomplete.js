@@ -24,7 +24,7 @@ import {UrlReplacementPolicy,
 import {childElementsByTag, removeChildren} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user, userAssert} from '../../../src/log';
-import {getValueForExpr, tryParseJson} from '../../../src/json';
+import {getValueForExpr, parseJson, tryParseJson} from '../../../src/json';
 import {hasOwn, map, ownProperty} from '../../../src/utils/object';
 import {includes, startsWith} from '../../../src/string';
 import {isEnumValue} from '../../../src/types';
@@ -428,6 +428,25 @@ export class AmpAutocomplete extends AMP.BaseElement {
   }
 
   /**
+   * Copies an object containing JSON data and returns it.
+   * Returns null if input object contains invalid JSON (e.g. undefined or
+   * circular references).
+   * @param {?JsonObject|undefined} o
+   * @return {?JsonObject}
+   */
+  copyJsonObject_(o) {
+    if (o === undefined) {
+      return null;
+    }
+    try {
+      return parseJson(JSON.stringify(o));
+    } catch (e) {
+      dev().error(TAG, 'Failed to copy JSON (' + o + ') with error: ' + e);
+    }
+    return null;
+  }
+
+  /**
    * Apply the filter to the given data based on the given input.
    * @param {!Array<!JsonObject|string>} data
    * @param {string} input
@@ -443,8 +462,19 @@ export class AmpAutocomplete extends AMP.BaseElement {
     // Client-side filtering.
     input = input.toLocaleLowerCase();
     const itemsExpr = this.element.getAttribute('filter-value') || 'value';
-    const filteredData = data.filter(item => {
+    const filteredData = this.copyJsonObject_(data.filter(item => {
       return this.filterMatch_(item, input, itemsExpr);
+    }));
+    filteredData.map(item => {
+      const category = getValueForExpr(/**@type {!JsonObject} */(item), 'category');
+      if (category) {
+        const opts = getValueForExpr(/**@type {!JsonObject} */(item), 'items');
+        const filteredOpts = opts.filter(item => {
+          return this.filterMatch_(item, input, itemsExpr);
+        });
+        item['items'] = filteredOpts;
+      }
+      return item;
     });
 
     return this.truncateToMaxEntries_(filteredData);
@@ -738,7 +768,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     let shouldScroll, newTop;
 
     return this.measureMutateElement(() => {
-      const itemTop = activeIndex === 0 ? 
+      const itemTop = activeIndex === 0 ?
         0 : this.distanceToContainerTop_(newActiveElement);
       const {offsetHeight: itemHeight} = newActiveElement;
       const {scrollTop: resultTop, offsetHeight: resultHeight} =
@@ -757,12 +787,12 @@ export class AmpAutocomplete extends AMP.BaseElement {
     });
   }
 
-  /** 
-   * Calculates the total offset distance from the given element to the 
-   * container_. This assumes the given parameter is a descendent of the 
-   * results container. 
-   * 
-   * @param {!Element} element 
+  /**
+   * Calculates the total offset distance from the given element to the
+   * container_. This assumes the given parameter is a descendent of the
+   * results container.
+   *
+   * @param {!Element} element
    * @return {number}
    * @private
    */
