@@ -403,9 +403,10 @@ export function validateAttributeChange(purifier, node, attr, value) {
     // implications beyond URLs etc. that are covered by isValidAttr().
     // This is OK for now, but we should instead somehow modify ALLOWED_ATTR
     // to preserve value sanitization.
+    const whitelisted = WHITELISTED_ATTRS.includes(attr);
     const attrsByTags = WHITELISTED_ATTRS_BY_TAGS[tag];
     const whitelistedForTag = attrsByTags && attrsByTags.includes(attr);
-    if (!whitelistedForTag && !startsWith(tag, 'amp-')) {
+    if (!whitelisted && !whitelistedForTag && !startsWith(tag, 'amp-')) {
       return false;
     }
   }

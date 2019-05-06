@@ -208,12 +208,21 @@ export class SanitizerImpl {
 
     /** @private {!Object<string, boolean>} */
     this.allowedTags_ = getAllowedTags();
+    // For now, only allow built-in AMP components.
+    this.allowedTags_['amp-img'] = true;
+    this.allowedTags_['amp-layout'] = true;
+    this.allowedTags_['amp-pixel'] = true;
 
     /** @const @private {!Element} */
     this.wrapper_ = win.document.createElement('div');
   }
 
   /**
+   * TODO(choumx): This is currently called by worker-dom on node creation,
+   * so all invocations are on super-simple nodes like <p></p>.
+   * Either it should be moved to node insertion to justify the more expensive
+   * sanitize() call, or this method should be a simple string lookup.
+   *
    * @param {!Node} node
    * @return {boolean}
    */
@@ -229,7 +238,7 @@ export class SanitizerImpl {
     this.purifier_.sanitize(parent);
     const clean = parent.firstChild;
     if (!clean) {
-      dev().info(TAG, 'Sanitized node:', node);
+      user().warn(TAG, 'Sanitized node:', node);
       return false;
     }
     // Detach `node` if we used a wrapper div.
@@ -254,26 +263,27 @@ export class SanitizerImpl {
     const tag = node.nodeName.toLowerCase();
     // DOMPurify's attribute validation is tag-agnostic, so we need to check
     // that the tag itself is valid. E.g. a[href] is ok, but base[href] is not.
-    if (!this.allowedTags_[tag]) {
-      return false;
-    }
-    const attr = attribute.toLowerCase();
-    if (validateAttributeChange(this.purifier_, node, attr, value)) {
-      if (value == null) {
-        node.removeAttribute(attr);
-      } else {
-        const newValue = rewriteAttributeValue(tag, attr, value);
-        node.setAttribute(attr, newValue);
-      }
-
-      // a[href] requires [target], which defaults to _top.
-      if (tag === 'a') {
-        if (node.hasAttribute('href') && !node.hasAttribute('target')) {
-          node.setAttribute('target', '_top');
+    // TODO(choumx): This is actually more strict than sanitize().
+    if (this.allowedTags_[tag]) {
+      const attr = attribute.toLowerCase();
+      if (validateAttributeChange(this.purifier_, node, attr, value)) {
+        if (value == null) {
+          node.removeAttribute(attr);
+        } else {
+          const newValue = rewriteAttributeValue(tag, attr, value);
+          node.setAttribute(attr, newValue);
         }
+
+        // a[href] requires [target], which defaults to _top.
+        if (tag === 'a') {
+          if (node.hasAttribute('href') && !node.hasAttribute('target')) {
+            node.setAttribute('target', '_top');
+          }
+        }
+        return true;
       }
-      return true;
     }
+    user().warn(TAG, 'Sanitized [%s]="%s":', attribute, value, node);
     return false;
   }
 
