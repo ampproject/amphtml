@@ -638,6 +638,13 @@ describe('validateAttributeChange', () => {
     expect(vac('p', 'data-amp-bind-text', 'foo')).to.be.false;
   });
 
+  it('should allow whitelisted attributes', () => {
+    purifier.isValidAttribute = () => false;
+
+    expect(vac('p', 'heights', '(min-width:500px) 200px, 80%')).to.be.true;
+    expect(vac('button', 'on', 'tap:AMP.print')).to.be.true;
+  });
+
   it('should allow whitelisted-by-tag attributes', () => {
     purifier.isValidAttribute = () => false;
 
