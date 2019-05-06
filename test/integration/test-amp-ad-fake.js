@@ -32,7 +32,7 @@ describe('A4A', function() {
       `,
     extensions: ['amp-ad'],
   }, () => {
-    // TODO: Unskip flaky test
+    // TODO(#21545): Unskip flaky test
     it.configure().skipFirefox().run(
         'should layout amp-img, amp-pixel, amp-analytics', () => {
       // See amp4test.js for creative content
