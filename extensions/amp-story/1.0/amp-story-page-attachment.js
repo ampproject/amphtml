@@ -73,6 +73,7 @@ const getHeaderEl = element => {
       <span
           class="i-amphtml-story-page-attachment-close-button" role="button">
       </span>
+      <span class="i-amphtml-story-page-attachment-title"></span>
     </div>`;
 };
 
@@ -131,9 +132,15 @@ export class AmpStoryPageAttachment extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     const templateEl = getTemplateEl(this.element);
-
     const headerShadowRootEl = this.win.document.createElement('div');
     this.headerEl_ = getHeaderEl(this.element);
+
+    if (this.element.hasAttribute('data-title')) {
+      this.headerEl_
+          .querySelector('.i-amphtml-story-page-attachment-title')
+          .textContent = this.element.getAttribute('data-title');
+    }
+
     createShadowRootWithStyle(headerShadowRootEl, this.headerEl_, CSS);
     templateEl.insertBefore(headerShadowRootEl, templateEl.firstChild);
 
