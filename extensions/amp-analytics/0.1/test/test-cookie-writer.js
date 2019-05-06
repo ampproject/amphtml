@@ -18,7 +18,10 @@ import * as cookie from '../../../../src/cookies';
 import {CookieWriter} from '../cookie-writer';
 import {dict} from '../../../../src/utils/object';
 import {installLinkerReaderService} from '../linker-reader';
-import {installVariableService, variableServiceFor} from '../variables';
+import {
+  installVariableServiceForDoc,
+  variableServiceForDoc,
+} from '../variables';
 
 
 
@@ -46,7 +49,7 @@ describes.realWin('amp-analytics.cookie-writer', {
         });
     element = doc.createElement('div');
     doc.body.appendChild(element);
-    installVariableService(win);
+    installVariableServiceForDoc(doc);
     installLinkerReaderService(win);
   });
 
@@ -105,7 +108,7 @@ describes.realWin('amp-analytics.cookie-writer', {
         location: 'https://www-example-com.cdn.ampproject.org',
       };
       installLinkerReaderService(mockWin);
-      installVariableService(mockWin);
+      installVariableServiceForDoc(doc);
       const cookieWriter = new CookieWriter(mockWin, element, config);
       expandAndWriteSpy = sandbox.spy(cookieWriter, 'expandAndWrite_');
       return cookieWriter.write().then(() => {
@@ -265,7 +268,7 @@ describes.realWin('amp-analytics.cookie-writer', {
         },
       });
       const cookieWriter = new CookieWriter(win, element, config);
-      const variableService = variableServiceFor(win);
+      const variableService = variableServiceForDoc(doc);
       sandbox.stub(variableService.linkerReader_,
           'get').callsFake((name, id) => {
         return `${name}-${id}`;
