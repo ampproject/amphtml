@@ -21,6 +21,7 @@ const log = require('fancy-log');
 const path = require('path');
 const ts = require('typescript');
 const tsickle = require('tsickle');
+const {endBuildStep} = require('./tasks/helpers');
 
 /**
  * Given a file path `foo/bar.js`, transpiles the TypeScript entry point of
@@ -30,6 +31,7 @@ const tsickle = require('tsickle');
  * @param {string} srcFilename
  */
 exports.transpileTs = function(srcDir, srcFilename) {
+  const startTime = Date.now();
   const tsEntry = path.join(srcDir, srcFilename).replace(/\.js$/, '.ts');
   const tsConfig = ts.convertCompilerOptionsFromJson({
     'module': 'ES6',
@@ -71,4 +73,5 @@ exports.transpileTs = function(srcDir, srcFilename) {
   if (diagnostics.length) {
     log(colors.red('TSickle:'), tsickle.formatDiagnostics(diagnostics));
   }
+  endBuildStep('Transpiled', srcFilename, startTime);
 };

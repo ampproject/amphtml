@@ -479,12 +479,10 @@ function maybeEnableLocalTesting(destFilename) {
  * @param {?Object} options
  * @return {!Promise}
  */
-function compileTs(srcDir, srcFilename, destDir, options) {
+async function compileTs(srcDir, srcFilename, destDir, options) {
   options = options || {};
-  const startTime = Date.now();
-  transpileTs(srcDir, srcFilename);
-  endBuildStep('Transpiled', srcFilename, startTime);
-  compileJs(srcDir, srcFilename, destDir, options);
+  await transpileTs(srcDir, srcFilename);
+  await compileJs(srcDir, srcFilename, destDir, options);
   rimraf.sync(path.join(srcDir, '**/*.js'));
 }
 
