@@ -135,7 +135,6 @@ async function e2e() {
         process.exitCode = 1;
         await rejecter();
       }
-      process.exit();
       await resolver();
     });
   }
