@@ -88,23 +88,23 @@ function postReport(type, action) {
   return Promise.resolve();
 }
 
-exports.reportTestErrored = () => {
+function reportTestErrored() {
   return postReport(inferTestType(), 'report/errored');
-};
+}
 
-exports.reportTestFinished = (success, failed) => {
+function reportTestFinished(success, failed) {
   return postReport(inferTestType(), `report/${success}/${failed}`);
-};
+}
 
-exports.reportTestSkipped = () => {
+function reportTestSkipped() {
   return postReport(inferTestType(), 'skipped');
-};
+}
 
-exports.reportTestStarted = () => {
+function reportTestStarted() {
   return postReport(inferTestType(), 'started');
-};
+}
 
-exports.reportAllExpectedTests = async buildTargets => {
+async function reportAllExpectedTests(buildTargets) {
   for (const [type, subTypes] of TEST_TYPE_SUBTYPES) {
     const testTypeBuildTargets = TEST_TYPE_BUILD_TARGETS.get(type);
     const action = testTypeBuildTargets.some(target => buildTargets.has(target))
@@ -113,4 +113,12 @@ exports.reportAllExpectedTests = async buildTargets => {
       await postReport(`${type}/${subType}`, action);
     }
   }
+}
+
+module.exports = {
+  reportAllExpectedTests,
+  reportTestErrored,
+  reportTestFinished,
+  reportTestSkipped,
+  reportTestStarted,
 };

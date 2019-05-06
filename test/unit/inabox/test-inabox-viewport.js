@@ -122,7 +122,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
           'position',
           (req, res, cb) => { positionCallback = cb; },
           /* opt_sync */ true);
-      return binding.listenForPosition_().then(() => {
+      return binding.connect().then(() => {
         testPositionCallback();
       });
     });
@@ -141,10 +141,9 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
         topWindowObservable.fire();
       };
 
-      return binding.listenForPositionSameDomain().then(() => {
+      return binding.connect().then(() => {
         testPositionCallback();
       });
-
     });
 
     function testPositionCallback() {
@@ -386,14 +385,20 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
     });
   });
 
-  it('should disconnect friendly listener', () => {
-    sandbox.stub(PositionObserver.prototype, 'observe')
-        .returns(sandbox.spy());
+  it('should disconnect friendly listener and reconnect again properly', () => {
+    const unobserveFunction = sandbox.spy();
+    const observeFunction = sandbox.stub(PositionObserver.prototype, 'observe');
+    observeFunction.returns(unobserveFunction);
+    toggleExperiment(win, 'inabox-viewport-friendly', true);
     sandbox./*OK*/stub(iframeHelper, 'canInspectWindow').returns(true);
-    return binding.listenForPositionSameDomain().then(() => {
-      expect(binding.unobserveFunction_).to.not.be.called;
+    return binding.connect().then(() => {
+      expect(observeFunction).to.be.calledOnce;
+      expect(unobserveFunction).to.not.be.called;
       binding.disconnect();
-      expect(binding.unobserveFunction_).to.be.called;
+      expect(unobserveFunction).to.be.called;
+      return binding.connect();
+    }).then(() => {
+      expect(observeFunction).to.be.calledTwice;
     });
   });
 });

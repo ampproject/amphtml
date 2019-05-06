@@ -74,6 +74,20 @@ URL | Matches | Notes
 
 Note that this is the default behavior when the `destinationDomains` array is not specified. You may always add additional domains to match in this array.
 
+##### Wildcard Domain Matching
+
+It is common that a publisher will want to match a few different subdomains or TLDs. To make this set up easier linker supports wildcard domain matching. To enable this functionality you can use the `*` character to match any arbitrary string.
+
+For example: you may have a site `example.com` that links to `a.example.com`, `b.example.com`, and `a.b.example.com`. You could include all of these domains inside your `destinationDomains` config, but the wildcard feature allows you to add:
+```json
+"destinationDomains": ["*.example.com"]
+```
+Using this configuration links to `a.example.com`, `b.example.com` and `a.b.example.com` will all be decorated. Similarily, you may want to decorate links to `example.co`, `example.co.uk`, and `example.fr`. This can be accomplished using the config below.
+```json
+"destinationDomains": ["example.*"]
+```
+It is important to note that wildcard matching will respect the `.` and not decorate links where the `.` is not present. In the example above a link to `examplefoo.com` would not be decorated, while `example.foo.com` would be decorated.
+
 #### Default configuration
 Some items in the configuration objects have default values. However, you may override these values at the `amp-analytics` element level to suit your use case. The values will be merged and the more specific configuration will take precedence over their parents. Keep in mind these defaults are set only for the `linkers` object in which they are defined. If you have multiple `amp-analytics` elements on your page you will need to set the configuration for each top level linkers object you wish to enable.
 
