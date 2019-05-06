@@ -672,7 +672,7 @@
     },
     {
       "flaky": true,
-      // TODO(cvializ): see https://percy.io/ampproject/amphtml/builds/1828636
+      // TODO(#22162, cvializ): see https://percy.io/ampproject/amphtml/builds/1828636
       "url": "examples/visual-tests/amp-accordion/amp-accordion.html",
       "name": "amp-accordion: page loads",
       "loading_complete_delay_ms": 1000,
