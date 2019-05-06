@@ -486,7 +486,8 @@ function endBuildStep(stepName, targetName, startTime) {
  */
 function printConfigHelp(command) {
   if (!isTravisBuild()) {
-    log(green('Building the runtime for local testing with the'),
+    log(green('Building version'), cyan(internalRuntimeVersion),
+        green('of the runtime for local testing with the'),
         cyan((argv.config === 'canary') ? 'canary' : 'prod'),
         green('AMP config.'));
     log(green('⤷ Use'), cyan('--config={canary|prod}'), green('with your'),

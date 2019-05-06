@@ -165,15 +165,6 @@ exports.gitCommitFormattedTime = function() {
 };
 
 /**
- * Returns machine parsable list of uncommitted changed files, or an empty
- * string if no files were changed.
- * @return {string}
- */
-exports.gitStatusPorcelain = function() {
-  return getStdout('git status --porcelain').trim();
-};
-
-/**
  * Returns the merge base of the current branch off of master when running on
  * a local workspace.
  * @return {string}
