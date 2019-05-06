@@ -87,10 +87,9 @@ async function e2e() {
   installPackages_();
 
   // set up promise to return to gulp.task()
-  let resolver, rejecter;
-  const deferred = new Promise((resolverIn, rejecterIn) => {
+  let resolver;
+  const deferred = new Promise(resolverIn => {
     resolver = resolverIn;
-    rejecter = rejecterIn;
   });
 
   require('@babel/register');
