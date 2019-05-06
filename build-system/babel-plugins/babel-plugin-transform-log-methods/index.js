@@ -154,9 +154,7 @@ module.exports = function({types: t}) {
         const {callee} = node;
 
         // Test to see if it looks like a method().call()
-        const isMemberAndCallExpression =
-          t.isMemberExpression(callee) && t.isCallExpression(callee.object);
-        if (!isMemberAndCallExpression) {
+        if (!t.isMemberExpression(callee) || !t.isCallExpression(callee.object)) {
           return;
         }
 
