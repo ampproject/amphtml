@@ -133,10 +133,7 @@ async function e2e() {
       cleanUp_();
 
       // end task
-      if (failures) {
-        process.exitCode = 1;
-        await rejecter();
-      }
+      process.exitCode = failures ? 1 : 0;
       await resolver();
     });
   }
