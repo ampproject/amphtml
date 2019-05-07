@@ -581,7 +581,7 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
       beforeEach(() => {
         jwt = {
           'exp': Math.floor((Date.now() + 10000) / 1000),
-          'aud': 'amp.dev',
+          'aud': 'ampproject.org',
         };
       });
 
@@ -611,13 +611,13 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
       });
 
       it('should succeed with array aud', () => {
-        jwt['aud'] = ['amp.dev'];
+        jwt['aud'] = ['ampproject.org'];
         adapter.validateJwt_(jwt);
 
-        jwt['aud'] = ['other.org', 'amp.dev'];
+        jwt['aud'] = ['other.org', 'ampproject.org'];
         adapter.validateJwt_(jwt);
 
-        jwt['aud'] = ['amp.dev', 'other.org'];
+        jwt['aud'] = ['ampproject.org', 'other.org'];
         adapter.validateJwt_(jwt);
       });
 
@@ -632,14 +632,14 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
         jwt['aud'] = 'other.org';
         allowConsoleError(() => { expect(() => {
           adapter.validateJwt_(jwt);
-        }).to.throw(/"aud" must be "amp.dev"/); });
+        }).to.throw(/"aud" must be "ampproject.org"/); });
       });
 
       it('should fail w/non-AMP aud array', () => {
         jwt['aud'] = ['another.org', 'other.org'];
         allowConsoleError(() => { expect(() => {
           adapter.validateJwt_(jwt);
-        }).to.throw(/"aud" must be "amp.dev"/); });
+        }).to.throw(/"aud" must be "ampproject.org"/); });
       });
     });
 
