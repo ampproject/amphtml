@@ -33,6 +33,7 @@ import {
   matches,
   scopedQuerySelectorAll,
 } from '../../../src/dom';
+import {dict} from '../../../src/utils/object';
 
 /**
  * A mapping of attribute names we support for grid layers to the CSS Grid
@@ -163,9 +164,12 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
 
     Array.prototype.forEach.call(elementsToUpgradeStyles, element => {
       const color = element.getAttribute(TEXT_BACKGROUND_COLOR_ATTRIBUTE_NAME);
-      const spanEl =
-          createElementWithAttributes(this.element.ownerDocument, 'span',
-              {'style': `background-color:${color}`});
+      const attributes = dict({
+        'style': `background-color:${color}`,
+      });
+      const spanEl = createElementWithAttributes(
+          /** @type {!Document} */ (this.element.ownerDocument),
+          'span', attributes);
       spanEl.textContent = element.textContent;
       element.textContent = null;
       element.appendChild(spanEl);
