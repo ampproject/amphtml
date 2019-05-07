@@ -350,6 +350,7 @@ amp-story-grid-layer a * {
 
 amp-story-grid-layer [text-background-color] > span {
   padding: 2px 4px;
+  box-decoration-break: clone;
 }
 
 /** Apply click shield on embedded components on initial load. */
