@@ -50,6 +50,7 @@
  * Resulting binary savings are ~1.5% depending on their logging density.
  */
 const fs = require('fs');
+const path = require('path');
 const {
   singletonFunctions,
   transformableMethods,
@@ -97,6 +98,10 @@ function getMessages(messagesPath) {
  */
 function writeMessages(messagesPath, obj) {
   const json = JSON.stringify(obj, /* replacer */ null, /* spaces */ 2);
+  const messagesPathDir = path.dirname(messagesPath);
+  if (!fs.existsSync(messagesPathDir)) {
+    fs.mkdirSync(messagesPathDir);
+  }
   fs.writeFileSync(messagesPath, json);
 }
 
