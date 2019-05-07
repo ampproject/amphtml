@@ -21,7 +21,8 @@ import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {UrlReplacementPolicy,
   batchFetchJsonFor} from '../../../src/batched-json';
-import {childElementsByTag, removeChildren} from '../../../src/dom';
+import {childElementsByTag, removeChildren}
+  from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user, userAssert} from '../../../src/log';
 import {getValueForExpr, parseJson, tryParseJson} from '../../../src/json';
@@ -394,26 +395,29 @@ export class AmpAutocomplete extends AMP.BaseElement {
     if (this.templateElement_) {
       renderPromise = this.templates_.renderTemplateArray(this.templateElement_,
           filteredData).then(renderedChildren => {
-        renderedChildren.map(child => {
-          if (child.hasAttribute('data-category')) {
-            child.classList.add('i-amphtml-autocomplete-category');
-            child.setAttribute('role', 'group');
-            const itemChildren = child.querySelectorAll('[data-value]');
-            itemChildren.forEach(item => {
-              item.classList.add('i-amphtml-autocomplete-item');
-              item.setAttribute('role', 'listitem');
-            });
-          } else {
-            child.classList.add('i-amphtml-autocomplete-item');
-            child.setAttribute('role', 'listitem');
-          }
+        renderedChildren.forEach(child => {
           container.appendChild(child);
+        });
 
-          // Append 'aria-disabled' on all 'data-disabled' elements.
-          const disabledEls = container.querySelectorAll('[data-value]');
-          disabledEls.forEach(el => {
-            el.setAttribute('aria-disabled', 'true');
-          });
+        // Append 'item' attributes and classes on all such elements.
+        const itemEls = container.querySelectorAll('[data-value]');
+        itemEls.forEach(el => {
+          el.classList.add('i-amphtml-autocomplete-item');
+          el.setAttribute('role', 'listitem');
+        });
+
+        // Append 'category' attributes and classes on all such elements.
+        const catEls = container.querySelectorAll('[data-category]');
+        catEls.forEach(el => {
+          el.setAttribute('role', 'group');
+        });
+
+        // Append 'aria-disabled' on all 'data-disabled' elements.
+        const disabledEls = container.querySelectorAll('[data-disabled]');
+        disabledEls.forEach(el => {
+          el.classList.add('i-amphtml-autocomplete-item');
+          el.setAttribute('role', 'listitem');
+          el.setAttribute('aria-disabled', 'true');
         });
       });
     } else {
@@ -786,7 +790,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
     return this.measureMutateElement(() => {
       const categoryEl = newActiveElement.closest(
-          '.i-amphtml-autocomplete-results > .i-amphtml-autocomplete-category');
+          '.i-amphtml-autocomplete-results > [data-category]');
       const addedOffset = categoryEl ? categoryEl.offsetTop : 0;
       const itemTop = activeIndex === 0 ? 0 :
         newActiveElement.offsetTop + addedOffset;
