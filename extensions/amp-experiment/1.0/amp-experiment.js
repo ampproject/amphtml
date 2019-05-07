@@ -31,6 +31,9 @@ import {parseMutation} from './mutation-parser';
 
 const TAG = 'amp-experiment';
 
+/** @const {number} */
+const MAX_JSON_SIZE = 3000;
+
 export class AmpExperiment extends AMP.BaseElement {
 
   /** @override */
@@ -110,10 +113,20 @@ export class AmpExperiment extends AMP.BaseElement {
             && children[0].getAttribute('type').toUpperCase()
                 == 'APPLICATION/JSON',
         '<amp-experiment> should contain exactly one ' +
-        '<script type="application/json"> child.');
+      '<script type="application/json"> child.');
+
+    const experimentJson = children[0].textContent;
+
+    // Enforce the size limitation on the JSON
+    if (experimentJson.length > MAX_JSON_SIZE) {
+      const jsonError = `Max JSON size exceeded: ${experimentJson.length} > `
+        + MAX_JSON_SIZE;
+      user().error(TAG, jsonError);
+      throw new Error(jsonError);
+    }
 
     return /** @type {!JsonObject} */ (
-      devAssert(parseJson(children[0].textContent)));
+      devAssert(parseJson(experimentJson)));
   }
 
   /**

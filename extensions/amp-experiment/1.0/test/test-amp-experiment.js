@@ -147,6 +147,22 @@ describes.realWin('amp-experiment', {
     });
   });
 
+  it('should throw if JSON size exceeds the max size', () => {
+    let longString = '';
+    for (let i = 0; i < 3000; i++) {
+      longString += i;
+    }
+    addConfigElement(
+        'script',
+        'application/json',
+        `{"longString": "${longString}"}`
+    );
+    expectAsyncConsoleError(/Max JSON size/);
+    return expect(experiment.buildCallback()).to.eventually
+        .be.rejectedWith(/Max JSON size/);
+  });
+
+
   it('should apply the mutations from the variant', () => {
     addConfigElement('script');
     const stub = sandbox.stub(variant, 'allocateVariant');
