@@ -18,11 +18,11 @@ FAIL
 |  <!doctype html>
 |  <html ⚡ allow-xhr-interception allow-viewer-render-template report-errors-to-viewer>
 >> ^~~~~~~~~
-feature_tests/root_element_attributes.html:18:0 The attribute 'allow-viewer-render-template' may not appear in tag 'html'. (see https://www.ampproject.org/docs/reference/spec#required-markup) [DISALLOWED_HTML]
+feature_tests/root_element_attributes.html:18:0 The attribute 'allow-viewer-render-template' may not appear in tag 'html'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup) [DISALLOWED_HTML]
 >> ^~~~~~~~~
-feature_tests/root_element_attributes.html:18:0 The attribute 'allow-xhr-interception' may not appear in tag 'html'. (see https://www.ampproject.org/docs/reference/spec#required-markup) [DISALLOWED_HTML]
+feature_tests/root_element_attributes.html:18:0 The attribute 'allow-xhr-interception' may not appear in tag 'html'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup) [DISALLOWED_HTML]
 >> ^~~~~~~~~
-feature_tests/root_element_attributes.html:18:0 The attribute 'report-errors-to-viewer' may not appear in tag 'html'. (see https://www.ampproject.org/docs/reference/spec#required-markup) [DISALLOWED_HTML]
+feature_tests/root_element_attributes.html:18:0 The attribute 'report-errors-to-viewer' may not appear in tag 'html'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup) [DISALLOWED_HTML]
 |  <head>
 |    <meta charset="utf-8">
 |    <link rel="canonical" href="./regular-html-version.html">
