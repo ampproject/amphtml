@@ -15,6 +15,8 @@
  */
 
 import {dict} from '../../../src/utils/object';
+import {startsWith} from '../../../src/string';
+import {user} from '../../../src/log';
 
 /**
  * Installs an alias used by amp-inputmask that fixes a problem where
@@ -53,14 +55,11 @@ export function getAliasDefinition() {
        */
       'onBeforeMask': function(value, opts) {
         const prefixes = opts['prefixes'];
-        const trimZeros = opts['trimZeros'];
+        const trimZeros = opts['trimZeros'] || 0;
 
-        let processedValue = value;
-        if (trimZeros) {
-          const re = new RegExp(`^0{1,${trimZeros}}`);
-          processedValue = processedValue.replace(re, '');
-        }
-        processedValue = processedValue.replace(/[\s]/g, '');
+        const processedValue = value
+            .replace(new RegExp(`^0{0,${trimZeros}}`), '')
+            .replace(/[\s]/g, '');
 
         return removePrefix(processedValue, prefixes);
       },
@@ -87,9 +86,14 @@ export function getPrefixSubsets(mask) {
   const prefixes = {};
   for (let i = 0; i < masks.length; i++) {
     const prefix = getMaskPrefix(masks[i]);
+    if (prefix.length == 0) {
+      continue;
+    }
     // The array of subprefixes grows with the factorial of prefix.length
     // so we cap it at 5! = 120
-    if (prefix.length == 0 || prefix.length > 5) {
+    if (prefix.length > 5) {
+      user().warn('amp-inputmask does not support prefix trimming ' +
+          'for masks that start with more than 5 non-mask characters.');
       continue;
     }
 
@@ -133,7 +137,7 @@ export function getMaskPrefix(mask) {
  */
 export function removePrefix(value, prefixes) {
   const longestPrefix = prefixes
-      .filter(prefix => value.indexOf(prefix) == 0)
+      .filter(prefix => startsWith(value, prefix))
       .sort((a, b) => b.length - a.length)[0];
 
   if (longestPrefix) {

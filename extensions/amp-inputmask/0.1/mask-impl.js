@@ -90,17 +90,15 @@ export class Mask {
       } else {
         config['alias'] = namedFormat;
       }
-      this.controller_ = this.Inputmask_(config);
-      return;
+    } else {
+      // If not a named mask, it is a custom mask
+      config['alias'] = 'custom';
+
+      const inputmaskMask = convertAmpMaskToInputmask(trimmedMask);
+      config['customMask'] = inputmaskMask;
+      const trimZeros = element.getAttribute('mask-trim-zeros');
+      config['trimZeros'] = trimZeros ? Number(trimZeros) : 2;
     }
-
-    // If not a named mask, it is a custom mask
-    config['alias'] = 'custom';
-
-    const inputmaskMask = convertAmpMaskToInputmask(trimmedMask);
-    config['customMask'] = inputmaskMask;
-    const trimZeros = element.getAttribute('mask-trim-zeros');
-    config['trimZeros'] = trimZeros ? Number(trimZeros) : 2;
 
     this.controller_ = this.Inputmask_(config);
   }
