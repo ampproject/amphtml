@@ -628,9 +628,7 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
-  'mgid': {
-    renderStartImplemented: true,
-  },
+  'mgid': {},
 
   'microad': {
     prefetch: 'https://j.microad.net/js/camp.js',
