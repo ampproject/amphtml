@@ -22,32 +22,32 @@ FAIL
 |    <!-- Invalid: amp-embedly-key missing value -->
 |    <amp-embedly-key layout="nodisplay"></amp-embedly-key>
 >>   ^~~~~~~~~
-amp-embedly-card/0.1/test/validator-amp-embedly-card.html:22:2 The mandatory attribute 'value' is missing in tag 'amp-embedly-key'. (see https://www.ampproject.org/docs/reference/components/amp-embedly-card) [AMP_TAG_PROBLEM]
+amp-embedly-card/0.1/test/validator-amp-embedly-card.html:22:2 The mandatory attribute 'value' is missing in tag 'amp-embedly-key'. (see https://amp.dev/documentation/components/amp-embedly-card) [AMP_TAG_PROBLEM]
 |
 |    <!-- Invalid: amp-embedly-key invalid layout - responsive -->
 |    <amp-embedly-key layout="responsive"></amp-embedly-key>
 >>   ^~~~~~~~~
-amp-embedly-card/0.1/test/validator-amp-embedly-card.html:25:2 The specified layout 'RESPONSIVE' is not supported by tag 'amp-embedly-key'. (see https://www.ampproject.org/docs/reference/components/amp-embedly-card) [AMP_LAYOUT_PROBLEM]
+amp-embedly-card/0.1/test/validator-amp-embedly-card.html:25:2 The specified layout 'RESPONSIVE' is not supported by tag 'amp-embedly-key'. (see https://amp.dev/documentation/components/amp-embedly-card) [AMP_LAYOUT_PROBLEM]
 |
 |    <!-- Invalid: amp-embedly-key invalid layout - fill -->
 |    <amp-embedly-key layout="fill"></amp-embedly-key>
 >>   ^~~~~~~~~
-amp-embedly-card/0.1/test/validator-amp-embedly-card.html:28:2 The specified layout 'FILL' is not supported by tag 'amp-embedly-key'. (see https://www.ampproject.org/docs/reference/components/amp-embedly-card) [AMP_LAYOUT_PROBLEM]
+amp-embedly-card/0.1/test/validator-amp-embedly-card.html:28:2 The specified layout 'FILL' is not supported by tag 'amp-embedly-key'. (see https://amp.dev/documentation/components/amp-embedly-card) [AMP_LAYOUT_PROBLEM]
 |
 |    <!-- Invalid: amp-embedly-key invalid layout - fixed -->
 |    <amp-embedly-key layout="fixed"></amp-embedly-key>
 >>   ^~~~~~~~~
-amp-embedly-card/0.1/test/validator-amp-embedly-card.html:31:2 The specified layout 'FIXED' is not supported by tag 'amp-embedly-key'. (see https://www.ampproject.org/docs/reference/components/amp-embedly-card) [AMP_LAYOUT_PROBLEM]
+amp-embedly-card/0.1/test/validator-amp-embedly-card.html:31:2 The specified layout 'FIXED' is not supported by tag 'amp-embedly-key'. (see https://amp.dev/documentation/components/amp-embedly-card) [AMP_LAYOUT_PROBLEM]
 |
 |    <!-- Invalid: amp-embedly-key invalid layout - fixed-height -->
 |    <amp-embedly-key layout="fixed-height"></amp-embedly-key>
 >>   ^~~~~~~~~
-amp-embedly-card/0.1/test/validator-amp-embedly-card.html:34:2 The specified layout 'FIXED_HEIGHT' is not supported by tag 'amp-embedly-key'. (see https://www.ampproject.org/docs/reference/components/amp-embedly-card) [AMP_LAYOUT_PROBLEM]
+amp-embedly-card/0.1/test/validator-amp-embedly-card.html:34:2 The specified layout 'FIXED_HEIGHT' is not supported by tag 'amp-embedly-key'. (see https://amp.dev/documentation/components/amp-embedly-card) [AMP_LAYOUT_PROBLEM]
 |
 |    <!-- Invalid: amp-embedly-key invalid layout - flex-item -->
 |    <amp-embedly-key layout="flex-item"></amp-embedly-key>
 >>   ^~~~~~~~~
-amp-embedly-card/0.1/test/validator-amp-embedly-card.html:37:2 The specified layout 'FLEX_ITEM' is not supported by tag 'amp-embedly-key'. (see https://www.ampproject.org/docs/reference/components/amp-embedly-card) [AMP_LAYOUT_PROBLEM]
+amp-embedly-card/0.1/test/validator-amp-embedly-card.html:37:2 The specified layout 'FLEX_ITEM' is not supported by tag 'amp-embedly-key'. (see https://amp.dev/documentation/components/amp-embedly-card) [AMP_LAYOUT_PROBLEM]
 |
 |    <!-- Invalid: amp-embedly-card missing width -->
 |    <amp-embedly-card

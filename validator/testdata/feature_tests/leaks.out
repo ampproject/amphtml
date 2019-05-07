@@ -173,11 +173,11 @@ feature_tests/leaks.html:109:0 The tag 'isindex' is disallowed. [DISALLOWED_HTML
 feature_tests/leaks.html:110:0 The tag 'isindex' is disallowed. [DISALLOWED_HTML]
 |  <form id="test2"></form><isindex type="submit" formaction="https://leaking.via/isindex-formaction" form="test2"></isindex>
 >> ^~~~~~~~~
-feature_tests/leaks.html:111:0 The mandatory attribute 'action' is missing in tag 'FORM [method=GET]'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
+feature_tests/leaks.html:111:0 The mandatory attribute 'action' is missing in tag 'FORM [method=GET]'. (see https://amp.dev/documentation/components/amp-form) [DISALLOWED_HTML]
 >> ^~~~~~~~~
-feature_tests/leaks.html:111:0 The mandatory attribute 'target' is missing in tag 'FORM [method=GET]'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
+feature_tests/leaks.html:111:0 The mandatory attribute 'target' is missing in tag 'FORM [method=GET]'. (see https://amp.dev/documentation/components/amp-form) [DISALLOWED_HTML]
 >> ^~~~~~~~~
-feature_tests/leaks.html:111:0 The tag 'FORM [method=GET]' requires including the 'amp-form' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-form) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+feature_tests/leaks.html:111:0 The tag 'FORM [method=GET]' requires including the 'amp-form' extension JavaScript. (see https://amp.dev/documentation/components/amp-form) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 >>                         ^~~~~~~~~
 feature_tests/leaks.html:111:24 The tag 'isindex' is disallowed. [DISALLOWED_HTML]
 |

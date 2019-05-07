@@ -26,7 +26,7 @@ FAIL
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
 |    <script async custom-element="amp-anim" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
 >>   ^~~~~~~~~
-amp4email_feature_tests/amp_img.html:26:2 The attribute 'src' in tag 'amp-anim extension .js script (AMP4EMAIL)' is set to the invalid value 'https://cdn.ampproject.org/v0/amp-form-0.1.js'. (see https://www.ampproject.org/docs/reference/components/amp-anim) [DISALLOWED_HTML]
+amp4email_feature_tests/amp_img.html:26:2 The attribute 'src' in tag 'amp-anim extension .js script (AMP4EMAIL)' is set to the invalid value 'https://cdn.ampproject.org/v0/amp-form-0.1.js'. (see https://amp.dev/documentation/components/amp-anim) [DISALLOWED_HTML]
 |    <script async custom-template="amp-mustache"
 |        src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
 |  </head>

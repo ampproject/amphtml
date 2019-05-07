@@ -29,7 +29,7 @@ PASS
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
 |    <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-0.1.js"></script>
 >>   ^~~~~~~~~
-amp-story/0.1/test/validator-amp-story-deprecated.html:29:2 The extension 'amp-story' is referenced at version '0.1' which is a deprecated version. Please use a more recent version of this extension. This may become an error in the future. (see https://www.ampproject.org/docs/reference/components/amp-story) [DEPRECATION]
+amp-story/0.1/test/validator-amp-story-deprecated.html:29:2 The extension 'amp-story' is referenced at version '0.1' which is a deprecated version. Please use a more recent version of this extension. This may become an error in the future. (see https://amp.dev/documentation/components/amp-story) [DEPRECATION]
 |  </head>
 |  <body>
 |    <amp-story standalone bookend-config-src="./bookend-config-src.json" background-audio="path/to/my.mp3">

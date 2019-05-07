@@ -80,16 +80,16 @@ FAIL
 |    <!-- Invalid: only https protocol is supported. -->
 |    <form method="GET" action-xhr="http://someserver.com/endpoint">
 >>   ^~~~~~~~~
-amp4email_feature_tests/amp_form.html:80:2 Invalid URL protocol 'http:' for attribute 'action-xhr' in tag 'FORM [method=GET] (AMP4EMAIL)'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
+amp4email_feature_tests/amp_form.html:80:2 Invalid URL protocol 'http:' for attribute 'action-xhr' in tag 'FORM [method=GET] (AMP4EMAIL)'. (see https://amp.dev/documentation/components/amp-form) [DISALLOWED_HTML]
 |      <input name="googlesearch">
 |      <input type="submit" value="OK">
 |    </form>
 |    <!-- Invalid: the action and target attributes are disallowed. -->
 |    <form method="GET"
 >>   ^~~~~~~~~
-amp4email_feature_tests/amp_form.html:85:2 The attribute 'action' may not appear in tag 'FORM [method=GET] (AMP4EMAIL)'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
+amp4email_feature_tests/amp_form.html:85:2 The attribute 'action' may not appear in tag 'FORM [method=GET] (AMP4EMAIL)'. (see https://amp.dev/documentation/components/amp-form) [DISALLOWED_HTML]
 >>   ^~~~~~~~~
-amp4email_feature_tests/amp_form.html:85:2 The attribute 'target' may not appear in tag 'FORM [method=GET] (AMP4EMAIL)'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
+amp4email_feature_tests/amp_form.html:85:2 The attribute 'target' may not appear in tag 'FORM [method=GET] (AMP4EMAIL)'. (see https://amp.dev/documentation/components/amp-form) [DISALLOWED_HTML]
 |      action="/components/amp-form/submit-form"
 |      target="_top">
 |      <div>
@@ -118,13 +118,13 @@ amp4email_feature_tests/amp_form.html:101:4 The attribute 'type' in tag 'INPUT (
 |    <!-- Invalid: invalid attribute xhr-verify -->
 |    <form method="post" action-xhr="https://example.com/subscribe"
 >>   ^~~~~~~~~
-amp4email_feature_tests/amp_form.html:104:2 The attribute 'xhr-verify' may not appear in tag 'FORM [method=POST] (AMP4EMAIL)'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
+amp4email_feature_tests/amp_form.html:104:2 The attribute 'xhr-verify' may not appear in tag 'FORM [method=POST] (AMP4EMAIL)'. (see https://amp.dev/documentation/components/amp-form) [DISALLOWED_HTML]
 |      xhr-verify="https://example.com/subscribe">
 |    </form>
 |    <!-- Invalid: invalid attribute xhr-verify -->
 |    <form method="get" action-xhr="https://example.com/subscribe"
 >>   ^~~~~~~~~
-amp4email_feature_tests/amp_form.html:108:2 The attribute 'xhr-verify' may not appear in tag 'FORM [method=GET] (AMP4EMAIL)'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
+amp4email_feature_tests/amp_form.html:108:2 The attribute 'xhr-verify' may not appear in tag 'FORM [method=GET] (AMP4EMAIL)'. (see https://amp.dev/documentation/components/amp-form) [DISALLOWED_HTML]
 |      xhr-verify="https://example.com/subscribe">
 |    </form>
 |    <!-- Invalid: amp-bind usage for type in input -->
@@ -139,7 +139,7 @@ amp4email_feature_tests/amp_form.html:113:4 The attribute '[type]' may not appea
 |      <div submitting>
 |        <template type="amp-mustache">
 >>       ^~~~~~~~~
-amp4email_feature_tests/amp_form.html:119:6 The tag 'TEMPLATE (AMP4EMAIL)' may not appear as a descendant of tag 'form div [submitting]'. (see https://www.ampproject.org/docs/reference/components/amp-mustache) [GENERIC]
+amp4email_feature_tests/amp_form.html:119:6 The tag 'TEMPLATE (AMP4EMAIL)' may not appear as a descendant of tag 'form div [submitting]'. (see https://amp.dev/documentation/components/amp-mustache) [GENERIC]
 |          Submitting... {{a}}
 |        </template>
 |      </div>
@@ -160,7 +160,7 @@ amp4email_feature_tests/amp_form.html:127:4 The attribute 'template' may not app
 |          {{a}}
 |          <template type="amp-mustache">
 >>         ^~~~~~~~~
-amp4email_feature_tests/amp_form.html:136:8 The tag 'TEMPLATE (AMP4EMAIL)' may not appear as a descendant of tag 'template (amp4email)'. (see https://www.ampproject.org/docs/reference/components/amp-mustache) [GENERIC]
+amp4email_feature_tests/amp_form.html:136:8 The tag 'TEMPLATE (AMP4EMAIL)' may not appear as a descendant of tag 'template (amp4email)'. (see https://amp.dev/documentation/components/amp-mustache) [GENERIC]
 |            {{b}}
 |          </template>
 |        </template>
@@ -170,7 +170,7 @@ amp4email_feature_tests/amp_form.html:136:8 The tag 'TEMPLATE (AMP4EMAIL)' may n
 |    <template type="amp-mustache">
 |      <form method="GET"
 >>     ^~~~~~~~~
-amp4email_feature_tests/amp_form.html:144:4 The attribute 'action-xhr' in tag 'FORM [method=GET] (AMP4EMAIL)' is set to the invalid value '{{foo}}'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
+amp4email_feature_tests/amp_form.html:144:4 The attribute 'action-xhr' in tag 'FORM [method=GET] (AMP4EMAIL)' is set to the invalid value '{{foo}}'. (see https://amp.dev/documentation/components/amp-form) [DISALLOWED_HTML]
 |        action-xhr="{{foo}}">
 |        <div>
 |          <input name="googlesearch">
@@ -181,7 +181,7 @@ amp4email_feature_tests/amp_form.html:144:4 The attribute 'action-xhr' in tag 'F
 |    <template type="amp-mustache">
 |      <form method="GET"
 >>     ^~~~~~~~~
-amp4email_feature_tests/amp_form.html:153:4 The attribute 'action-xhr' in tag 'FORM [method=GET] (AMP4EMAIL)' is set to the invalid value '{{foo}}{{bar}}'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
+amp4email_feature_tests/amp_form.html:153:4 The attribute 'action-xhr' in tag 'FORM [method=GET] (AMP4EMAIL)' is set to the invalid value '{{foo}}{{bar}}'. (see https://amp.dev/documentation/components/amp-form) [DISALLOWED_HTML]
 |        action-xhr="{{foo}}{{bar}}">
 |        <div>
 |          <input name="googlesearch">
@@ -192,7 +192,7 @@ amp4email_feature_tests/amp_form.html:153:4 The attribute 'action-xhr' in tag 'F
 |    <template type="amp-mustache">
 |      <form method="GET"
 >>     ^~~~~~~~~
-amp4email_feature_tests/amp_form.html:162:4 The attribute 'action-xhr' in tag 'FORM [method=GET] (AMP4EMAIL)' is set to the invalid value 'foo{{bar'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
+amp4email_feature_tests/amp_form.html:162:4 The attribute 'action-xhr' in tag 'FORM [method=GET] (AMP4EMAIL)' is set to the invalid value 'foo{{bar'. (see https://amp.dev/documentation/components/amp-form) [DISALLOWED_HTML]
 |        action-xhr="foo{{bar">
 |        <div>
 |          <input name="googlesearch">
@@ -203,7 +203,7 @@ amp4email_feature_tests/amp_form.html:162:4 The attribute 'action-xhr' in tag 'F
 |    <template type="amp-mustache">
 |      <form method="GET"
 >>     ^~~~~~~~~
-amp4email_feature_tests/amp_form.html:171:4 The attribute 'action-xhr' in tag 'FORM [method=GET] (AMP4EMAIL)' is set to the invalid value 'foo}}bar'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
+amp4email_feature_tests/amp_form.html:171:4 The attribute 'action-xhr' in tag 'FORM [method=GET] (AMP4EMAIL)' is set to the invalid value 'foo}}bar'. (see https://amp.dev/documentation/components/amp-form) [DISALLOWED_HTML]
 |        action-xhr="foo}}bar">
 |        <div>
 |          <input name="googlesearch">
@@ -214,7 +214,7 @@ amp4email_feature_tests/amp_form.html:171:4 The attribute 'action-xhr' in tag 'F
 |    <template type="amp-mustache">
 |      <form method="GET"
 >>     ^~~~~~~~~
-amp4email_feature_tests/amp_form.html:180:4 The attribute 'action-xhr' in tag 'FORM [method=GET] (AMP4EMAIL)' is set to the invalid value '{{'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
+amp4email_feature_tests/amp_form.html:180:4 The attribute 'action-xhr' in tag 'FORM [method=GET] (AMP4EMAIL)' is set to the invalid value '{{'. (see https://amp.dev/documentation/components/amp-form) [DISALLOWED_HTML]
 |        action-xhr="{{">
 |        <div>
 |          <input name="googlesearch">
@@ -225,7 +225,7 @@ amp4email_feature_tests/amp_form.html:180:4 The attribute 'action-xhr' in tag 'F
 |    <template type="amp-mustache">
 |      <form method="GET"
 >>     ^~~~~~~~~
-amp4email_feature_tests/amp_form.html:189:4 The attribute 'action-xhr' in tag 'FORM [method=GET] (AMP4EMAIL)' is set to the invalid value '}}'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
+amp4email_feature_tests/amp_form.html:189:4 The attribute 'action-xhr' in tag 'FORM [method=GET] (AMP4EMAIL)' is set to the invalid value '}}'. (see https://amp.dev/documentation/components/amp-form) [DISALLOWED_HTML]
 |        action-xhr="}}">
 |        <div>
 |          <input name="googlesearch">
@@ -236,12 +236,12 @@ amp4email_feature_tests/amp_form.html:189:4 The attribute 'action-xhr' in tag 'F
 |    <!-- Invalid POST form with name. -->
 |    <form method="post" name="post-form" action-xhr="https://example.com/subscribe">
 >>   ^~~~~~~~~
-amp4email_feature_tests/amp_form.html:198:2 The attribute 'name' may not appear in tag 'FORM [method=POST] (AMP4EMAIL)'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
+amp4email_feature_tests/amp_form.html:198:2 The attribute 'name' may not appear in tag 'FORM [method=POST] (AMP4EMAIL)'. (see https://amp.dev/documentation/components/amp-form) [DISALLOWED_HTML]
 |    </form>
 |    <!-- Invalid GET form with name. -->
 |    <form method="GET" name="get-form" action-xhr="https://someserver.com/endpoint">
 >>   ^~~~~~~~~
-amp4email_feature_tests/amp_form.html:201:2 The attribute 'name' may not appear in tag 'FORM [method=GET] (AMP4EMAIL)'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
+amp4email_feature_tests/amp_form.html:201:2 The attribute 'name' may not appear in tag 'FORM [method=GET] (AMP4EMAIL)'. (see https://amp.dev/documentation/components/amp-form) [DISALLOWED_HTML]
 |    </form>
 |  </body>
 |  </html>

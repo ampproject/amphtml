@@ -38,13 +38,13 @@ feature_tests/regexps.html:27:2 The mandatory attribute 'amp-custom' is missing 
 |    <script async custom-element="amp-vine" src="https://cdn.ampproject.org/v0/amp-vine-latest.js"> </script>
 |    <script async custom-element="amp-vine" src="https://cdn.ampproject.org/v0/amp-vine-0.1.js?foobar"></script>
 >>   ^~~~~~~~~
-feature_tests/regexps.html:36:2 The attribute 'src' in tag 'amp-vine extension .js script' is set to the invalid value 'https://cdn.ampproject.org/v0/amp-vine-0.1.js?foobar'. (see https://www.ampproject.org/docs/reference/components/amp-vine) [CUSTOM_JAVASCRIPT_DISALLOWED]
+feature_tests/regexps.html:36:2 The attribute 'src' in tag 'amp-vine extension .js script' is set to the invalid value 'https://cdn.ampproject.org/v0/amp-vine-0.1.js?foobar'. (see https://amp.dev/documentation/components/amp-vine) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |    <script async custom-element="amp-vine" src="http://xss.com/https://cdn.ampproject.org/v0/amp-vine-0.1.js?foobar"></script>
 >>   ^~~~~~~~~
-feature_tests/regexps.html:37:2 The attribute 'src' in tag 'amp-vine extension .js script' is set to the invalid value 'http://xss.com/https://cdn.ampproject.org/v0/amp-vine-0.1.js?foobar'. (see https://www.ampproject.org/docs/reference/components/amp-vine) [CUSTOM_JAVASCRIPT_DISALLOWED]
+feature_tests/regexps.html:37:2 The attribute 'src' in tag 'amp-vine extension .js script' is set to the invalid value 'http://xss.com/https://cdn.ampproject.org/v0/amp-vine-0.1.js?foobar'. (see https://amp.dev/documentation/components/amp-vine) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |    <script async custom-element="amp-hulu" src="https://cdn.ampproject.org/v0/amp-hulu-latest.js"> Only whitespace is allowed here. </script>
 >>   ^~~~~~~~~
-feature_tests/regexps.html:38:2 The tag 'amp-hulu extension .js script' contains text, which is disallowed. (see https://www.ampproject.org/docs/reference/components/amp-hulu) [DISALLOWED_HTML]
+feature_tests/regexps.html:38:2 The tag 'amp-hulu extension .js script' contains text, which is disallowed. (see https://amp.dev/documentation/components/amp-hulu) [DISALLOWED_HTML]
 |
 |    <!--
 |    href value_regex: "https://cdn\\.materialdesignicons\\.com/([0-9]+\\.?)+/css/materialdesignicons\\.min\\.css"

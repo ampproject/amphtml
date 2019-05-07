@@ -1,7 +1,7 @@
 FAIL
 |  ﻿﻿﻿<!--
 >> ^~~~~~~~~
-feature_tests/unprintable_chars.html:1:0 The mandatory attribute '⚡' is missing in tag 'html'. (see https://www.ampproject.org/docs/reference/spec#required-markup) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+feature_tests/unprintable_chars.html:1:0 The mandatory attribute '⚡' is missing in tag 'html'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 >> ^~~~~~~~~
 feature_tests/unprintable_chars.html:1:0 The parent tag of tag 'html' is '$root', but it can only be '!doctype'. (see https://www.ampproject.org/docs/reference/spec#required-markup) [DISALLOWED_HTML]
 >> ^~~~~~~~~

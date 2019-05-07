@@ -31,7 +31,7 @@ FAIL
 |
 |  <template type="amp-mustache">
 >> ^~~~~~~~~
-amp-mustache/0.2/test/validator-amp-mustache.html:31:0 The tag 'template' requires including the 'amp-mustache' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-mustache) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+amp-mustache/0.2/test/validator-amp-mustache.html:31:0 The tag 'template' requires including the 'amp-mustache' extension JavaScript. (see https://amp.dev/documentation/components/amp-mustache) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |    <{{not-actually-parsed-as-an-html-tag-so-allowed}}>
 |    <p title="{{allowed}}">{{allowed}}</p>
 |    <p {{notallowed}}></p>
@@ -224,13 +224,13 @@ amp-mustache/0.2/test/validator-amp-mustache.html:75:2 The attribute 'title' in 
 |
 |  <template type="amp-mustache">
 >> ^~~~~~~~~
-amp-mustache/0.2/test/validator-amp-mustache.html:98:0 The tag 'template' requires including the 'amp-mustache' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-mustache) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+amp-mustache/0.2/test/validator-amp-mustache.html:98:0 The tag 'template' requires including the 'amp-mustache' extension JavaScript. (see https://amp.dev/documentation/components/amp-mustache) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |    <div>
 |      <template type="amp-mustache">
 >>     ^~~~~~~~~
-amp-mustache/0.2/test/validator-amp-mustache.html:100:4 The tag 'template' may not appear as a descendant of tag 'template'. (see https://www.ampproject.org/docs/reference/components/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
+amp-mustache/0.2/test/validator-amp-mustache.html:100:4 The tag 'template' may not appear as a descendant of tag 'template'. (see https://amp.dev/documentation/components/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
 >>     ^~~~~~~~~
-amp-mustache/0.2/test/validator-amp-mustache.html:100:4 The tag 'template' requires including the 'amp-mustache' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-mustache) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+amp-mustache/0.2/test/validator-amp-mustache.html:100:4 The tag 'template' requires including the 'amp-mustache' extension JavaScript. (see https://amp.dev/documentation/components/amp-mustache) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |        Nested Template tags are not allowed.
 |      </template>
 |    </div>
@@ -238,13 +238,13 @@ amp-mustache/0.2/test/validator-amp-mustache.html:100:4 The tag 'template' requi
 |
 |  <template type="amp-mustache">
 >> ^~~~~~~~~
-amp-mustache/0.2/test/validator-amp-mustache.html:106:0 The tag 'template' requires including the 'amp-mustache' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-mustache) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+amp-mustache/0.2/test/validator-amp-mustache.html:106:0 The tag 'template' requires including the 'amp-mustache' extension JavaScript. (see https://amp.dev/documentation/components/amp-mustache) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |    <div>
 |      <script type="text/plain" template="amp-mustache">
 >>     ^~~~~~~~~
-amp-mustache/0.2/test/validator-amp-mustache.html:108:4 The tag 'SCRIPT type=text/plain' may not appear as a descendant of tag 'template'. (see https://www.ampproject.org/docs/reference/components/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
+amp-mustache/0.2/test/validator-amp-mustache.html:108:4 The tag 'SCRIPT type=text/plain' may not appear as a descendant of tag 'template'. (see https://amp.dev/documentation/components/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
 >>     ^~~~~~~~~
-amp-mustache/0.2/test/validator-amp-mustache.html:108:4 The tag 'SCRIPT type=text/plain' requires including the 'amp-mustache' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-mustache) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+amp-mustache/0.2/test/validator-amp-mustache.html:108:4 The tag 'SCRIPT type=text/plain' requires including the 'amp-mustache' extension JavaScript. (see https://amp.dev/documentation/components/amp-mustache) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |        Nested Template script tags are not allowed.
 |      </script>
 |    </div>
@@ -258,7 +258,7 @@ amp-mustache/0.2/test/validator-amp-mustache.html:115:0 The attribute 'autoplay'
 amp-mustache/0.2/test/validator-amp-mustache.html:115:0 The tag 'amp-audio' requires including the 'amp-audio' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-audio) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |  <template type="amp-mustache">
 >> ^~~~~~~~~
-amp-mustache/0.2/test/validator-amp-mustache.html:116:0 The tag 'template' requires including the 'amp-mustache' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-mustache) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+amp-mustache/0.2/test/validator-amp-mustache.html:116:0 The tag 'template' requires including the 'amp-mustache' extension JavaScript. (see https://amp.dev/documentation/components/amp-mustache) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |  <amp-audio src="https://example.com/audio" layout="fixed" autoplay="{{valid}}">
 >> ^~~~~~~~~
 amp-mustache/0.2/test/validator-amp-mustache.html:117:0 The tag 'amp-audio' requires including the 'amp-audio' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-audio) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
@@ -269,7 +269,7 @@ amp-mustache/0.2/test/validator-amp-mustache.html:117:0 The tag 'amp-audio' requ
 |  <!-- See https://github.com/ampproject/amphtml/issues/2670 -->
 |  <template type="amp-mustache">
 >> ^~~~~~~~~
-amp-mustache/0.2/test/validator-amp-mustache.html:123:0 The tag 'template' requires including the 'amp-mustache' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-mustache) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+amp-mustache/0.2/test/validator-amp-mustache.html:123:0 The tag 'template' requires including the 'amp-mustache' extension JavaScript. (see https://amp.dev/documentation/components/amp-mustache) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |  <amp-img src="{{image.url}}" width={{image.width}} height={{image.height}}></amp-img>
 |  </template>
 |
@@ -280,7 +280,7 @@ amp-mustache/0.2/test/validator-amp-mustache.html:123:0 The tag 'template' requi
 |  -->
 |  <script type="text/plain" template="amp-mustache">
 >> ^~~~~~~~~
-amp-mustache/0.2/test/validator-amp-mustache.html:132:0 The tag 'SCRIPT type=text/plain' requires including the 'amp-mustache' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-mustache) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+amp-mustache/0.2/test/validator-amp-mustache.html:132:0 The tag 'SCRIPT type=text/plain' requires including the 'amp-mustache' extension JavaScript. (see https://amp.dev/documentation/components/amp-mustache) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |    <{{not-actually-parsed-as-an-html-tag-so-allowed}}>
 |    <p title="{{allowed}}">{{allowed}}</p>
 |    <p {{notallowed}}></p>
@@ -355,7 +355,7 @@ amp-mustache/0.2/test/validator-amp-mustache.html:200:0 The attribute 'autoplay'
 amp-mustache/0.2/test/validator-amp-mustache.html:200:0 The tag 'amp-audio' requires including the 'amp-audio' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-audio) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |  <script type="text/plain" template="amp-mustache">
 >> ^~~~~~~~~
-amp-mustache/0.2/test/validator-amp-mustache.html:201:0 The tag 'SCRIPT type=text/plain' requires including the 'amp-mustache' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-mustache) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+amp-mustache/0.2/test/validator-amp-mustache.html:201:0 The tag 'SCRIPT type=text/plain' requires including the 'amp-mustache' extension JavaScript. (see https://amp.dev/documentation/components/amp-mustache) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |  <amp-audio src="https://example.com/audio" layout="fixed" autoplay="{{valid}}">
 |  </script>
 |
@@ -364,7 +364,7 @@ amp-mustache/0.2/test/validator-amp-mustache.html:201:0 The tag 'SCRIPT type=tex
 |  <!-- See https://github.com/ampproject/amphtml/issues/2670 -->
 |  <script type="text/plain" template="amp-mustache">
 >> ^~~~~~~~~
-amp-mustache/0.2/test/validator-amp-mustache.html:208:0 The tag 'SCRIPT type=text/plain' requires including the 'amp-mustache' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-mustache) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+amp-mustache/0.2/test/validator-amp-mustache.html:208:0 The tag 'SCRIPT type=text/plain' requires including the 'amp-mustache' extension JavaScript. (see https://amp.dev/documentation/components/amp-mustache) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |  <amp-img src="{{image.url}}" width={{image.width}} height={{image.height}}></amp-img>
 |  </script>
 |
