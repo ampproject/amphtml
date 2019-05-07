@@ -233,7 +233,7 @@ feature_tests/forms.html:193:6 The tag 'template' may not appear as a descendant
 |    <form method="post" action-xhr="https://example.com/subscribe" target="_blank">
 |      <input mask="L0L_0L0" type="tel">
 >>     ^~~~~~~~~
-feature_tests/forms.html:203:4 The tag 'input [mask] (custom mask)' requires including the 'amp-inputmask' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-inputmask) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+feature_tests/forms.html:203:4 The tag 'input [mask] (custom mask)' requires including the 'amp-inputmask' extension JavaScript. (see https://amp.dev/documentation/components/amp-inputmask) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |    </form>
 |    <!-- Valid: textarea within form -->
 |    <form method="post" action-xhr="https://example.com/subscribe" target="_blank">

@@ -46,7 +46,7 @@ transformed_feature_tests/nonce_attribute_error.html:31:2 The attribute 'nonce' 
 |    <amp-state id=nonce>
 |      <script nonce type=application/json>{}</script>
 >>     ^~~~~~~~~
-transformed_feature_tests/nonce_attribute_error.html:36:4 The attribute 'nonce' may not appear in tag 'amp-bind extension .json script'. (see https://www.ampproject.org/docs/reference/components/amp-bind) [DISALLOWED_HTML]
+transformed_feature_tests/nonce_attribute_error.html:36:4 The attribute 'nonce' may not appear in tag 'amp-bind extension .json script'. (see https://amp.dev/documentation/components/amp-bind) [DISALLOWED_HTML]
 |    </amp-state>
 |  </body>
 |  </html>

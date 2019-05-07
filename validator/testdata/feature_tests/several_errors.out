@@ -40,17 +40,17 @@ feature_tests/several_errors.html:32:2 The mandatory attribute 'height' is missi
 |    <!-- We don't allow percent as a size unit either. -->
 |    <amp-ad width=100% height=300>
 >>   ^~~~~~~~~
-feature_tests/several_errors.html:34:2 The attribute 'width' in tag 'amp-ad' is set to the invalid value '100%'. (see https://www.ampproject.org/docs/reference/components/amp-ad) [AMP_LAYOUT_PROBLEM]
+feature_tests/several_errors.html:34:2 The attribute 'width' in tag 'amp-ad' is set to the invalid value '100%'. (see https://amp.dev/documentation/components/amp-ad) [AMP_LAYOUT_PROBLEM]
 |      <!-- <script>document.write(…)</script> -->
 |    </amp-ad>
 |    <amp-ad width="42" height="42" made_up_attribute="oh hi"></amp-ad>
 >>   ^~~~~~~~~
-feature_tests/several_errors.html:37:2 The attribute 'made_up_attribute' may not appear in tag 'amp-ad'. (see https://www.ampproject.org/docs/reference/components/amp-ad) [DISALLOWED_HTML]
+feature_tests/several_errors.html:37:2 The attribute 'made_up_attribute' may not appear in tag 'amp-ad'. (see https://amp.dev/documentation/components/amp-ad) [DISALLOWED_HTML]
 |    <!-- When rendering errors for attribute values, we collapse whitespace -
 |         even whitespace that is originally encoded.-->
 |    <amp-ad width="42" height="foo&#13;&#10;bar  baz">
 >>   ^~~~~~~~~
-feature_tests/several_errors.html:40:2 The attribute 'height' in tag 'amp-ad' is set to the invalid value 'foo bar baz'. (see https://www.ampproject.org/docs/reference/components/amp-ad) [AMP_LAYOUT_PROBLEM]
+feature_tests/several_errors.html:40:2 The attribute 'height' in tag 'amp-ad' is set to the invalid value 'foo bar baz'. (see https://amp.dev/documentation/components/amp-ad) [AMP_LAYOUT_PROBLEM]
 |    </amp-ad>
 |  </body>
 |  </html>
@@ -59,4 +59,4 @@ feature_tests/several_errors.html:43:6 The mandatory tag 'meta name=viewport' is
 >>       ^~~~~~~~~
 feature_tests/several_errors.html:43:6 The mandatory tag 'amphtml engine v0.js script' is missing or incorrect. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 >>       ^~~~~~~~~
-feature_tests/several_errors.html:43:6 The tag 'amp-ad extension .js script' is missing or incorrect, but required by 'amp-ad'. This will soon be an error. (see https://www.ampproject.org/docs/reference/components/amp-ad) [DEPRECATION]
+feature_tests/several_errors.html:43:6 The tag 'amp-ad extension .js script' is missing or incorrect, but required by 'amp-ad'. This will soon be an error. (see https://amp.dev/documentation/components/amp-ad) [DEPRECATION]

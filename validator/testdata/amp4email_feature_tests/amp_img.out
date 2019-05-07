@@ -55,9 +55,9 @@ amp4email_feature_tests/amp_img.html:38:2 Invalid URL protocol 'http:' for attri
 |    <!-- href of anchor is not bindable. -->
 |    <amp-anim [src]="evil">disallowed</amp-anim>
 >>   ^~~~~~~~~
-amp4email_feature_tests/amp_img.html:41:2 Incomplete layout attributes specified for tag 'AMP-ANIM (AMP4EMAIL)'. For example, provide attributes 'width' and 'height'. (see https://www.ampproject.org/docs/reference/components/amp-anim) [AMP_LAYOUT_PROBLEM]
+amp4email_feature_tests/amp_img.html:41:2 Incomplete layout attributes specified for tag 'AMP-ANIM (AMP4EMAIL)'. For example, provide attributes 'width' and 'height'. (see https://amp.dev/documentation/components/amp-anim) [AMP_LAYOUT_PROBLEM]
 >>   ^~~~~~~~~
-amp4email_feature_tests/amp_img.html:41:2 The attribute '[src]' may not appear in tag 'AMP-ANIM (AMP4EMAIL)'. (see https://www.ampproject.org/docs/reference/components/amp-anim) [DISALLOWED_HTML]
+amp4email_feature_tests/amp_img.html:41:2 The attribute '[src]' may not appear in tag 'AMP-ANIM (AMP4EMAIL)'. (see https://amp.dev/documentation/components/amp-anim) [DISALLOWED_HTML]
 |
 |
 |    <!-- This is allowed. -->
@@ -69,7 +69,7 @@ amp4email_feature_tests/amp_img.html:41:2 The attribute '[src]' may not appear i
 |    <template type="amp-mustache">
 |      <amp-anim width="1" height="1" src="{{foo}}{{bar}}">disallowed</amp-anim>
 >>     ^~~~~~~~~
-amp4email_feature_tests/amp_img.html:51:4 The attribute 'src' in tag 'AMP-ANIM (AMP4EMAIL)' is set to the invalid value '{{foo}}{{bar}}'. (see https://www.ampproject.org/docs/reference/components/amp-anim) [DISALLOWED_HTML]
+amp4email_feature_tests/amp_img.html:51:4 The attribute 'src' in tag 'AMP-ANIM (AMP4EMAIL)' is set to the invalid value '{{foo}}{{bar}}'. (see https://amp.dev/documentation/components/amp-anim) [DISALLOWED_HTML]
 |    </template>
 |
 |  </body>

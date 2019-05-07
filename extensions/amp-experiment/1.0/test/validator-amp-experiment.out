@@ -67,7 +67,7 @@ FAIL
 |
 |  <amp-experiment>
 >> ^~~~~~~~~
-amp-experiment/1.0/test/validator-amp-experiment.html:67:0 The tag 'amp-experiment' appears more than once in the document. (see https://www.ampproject.org/docs/reference/components/amp-experiment) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+amp-experiment/1.0/test/validator-amp-experiment.html:67:0 The tag 'amp-experiment' appears more than once in the document. (see https://amp.dev/documentation/components/amp-experiment) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |      <script type="invalidtype"></script>
 >>     ^~~~~~~~~
 amp-experiment/1.0/test/validator-amp-experiment.html:68:4 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
