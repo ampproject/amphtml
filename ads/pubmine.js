@@ -59,7 +59,6 @@ export function pubmine(global, data) {
     height: data.height == 250 ? 250 : data.height - 15,
     width: data.width,
     window: global,
-    renderStart: global.context.renderStart,
   };
 
   const slotId = `atatags-${sectionId}`;
