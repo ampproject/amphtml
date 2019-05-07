@@ -49,28 +49,20 @@ amp-autocomplete > input {
   margin-bottom: .5rem; /* default-ui-space-small */
 }
 
+.i-amphtml-autocomplete-item, .i-amphtml-autocomplete-category {
+  position: relative;
+  cursor: pointer;
+}
+
 .i-amphtml-autocomplete-item {
-  position: relative;
   padding: .5rem 1rem; /* default-ui-space-small default-ui-space-medium */
-  cursor: pointer;
 }
 
-.i-amphtml-autocomplete-category {
-  position: relative;
-  padding: 0 1rem; /* default-ui-space-medium */
-  cursor: pointer;
-}
-
-.i-amphtml-autocomplete-category:first-child {
-  border-radius: 4px 4px 0px 0px; /* default-ui-border-radiuss */
-  padding-top: .5rem; /* default-ui-space-small */
-}
-
-.i-amphtml-autocomplete-item:first-child {
+.i-amphtml-autocomplete-results > :first-child {
   border-radius: 4px 4px 0px 0px; /* default-ui-border-radiuss */
 }
 
-.i-amphtml-autocomplete-item:nth-last-child(2) {
+.i-amphtml-autocomplete-results > :last-child {
   border-radius: 0px 0px 4px 4px; /* default-ui-border-radius */
 }
 
