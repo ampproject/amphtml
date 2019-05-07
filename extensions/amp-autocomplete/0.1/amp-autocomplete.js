@@ -474,32 +474,6 @@ export class AmpAutocomplete extends AMP.BaseElement {
   }
 
   /**
-   * Given an item, returns it as is if it does not contain subitems. 
-   * Otherwise, only includes those subitems which match the given input.
-   * 
-   * @param {!JsonObject|string} item
-   * @param {string} input
-   * @param {string} itemsExpr
-   * @return {boolean}
-   */
-  filterCategories_(item, input, itemsExpr) {
-    const category = getValueForExpr(/**@type {!JsonObject} */(item), 'category');
-    if (category) {
-      const opts = getValueForExpr(/**@type {!JsonObject} */(item), 'items');
-      const filteredOpts = [];
-      opts.filter(opt => {
-        return this.isFilterMatch_(opt, input, itemsExpr);
-      }).forEach(opt => {
-        opt = this.filterCategory_(opt, input, itemsExpr);
-        filteredOpts.push(opt);
-      });
-      item = this.copyJsonObject_(/**@type {!JsonObject} */(item));
-      item['items'] = filteredOpts;
-    }
-    return item;
-  }
-
-  /**
    * Client-side filtering method.
    *
    * Returns true if the given item is a match on the given input according
@@ -513,19 +487,18 @@ export class AmpAutocomplete extends AMP.BaseElement {
    */
   isFilterMatch_(item, input, itemsExpr) {
     if (typeof item === 'object') {
-      const category = getValueForExpr(/**@type {!JsonObject} */(item), 'category');
-      if (category) {
-        const opts = getValueForExpr(/**@type {!JsonObject} */(item), 'items');
-        const filteredOpts = opts.filter(item => {
+      if (item['category']) {
+        const filteredOpts = item['items'].filter(item => {
           return this.isFilterMatch_(item, input, itemsExpr);
         });
         return filteredOpts.length;
       }
-      item = /**@type {string} */(getValueForExpr(/**@type {!JsonObject} */(item), itemsExpr));
+      item = /**@type {string} */(
+        getValueForExpr(/**@type {!JsonObject} */(item), itemsExpr));
     }
     userAssert(typeof item === 'string',
         `${TAG} data property "${itemsExpr}" must map to string type.`);
-    item = /**@type {string} */(item).toLocaleLowerCase();
+    item = item.toLocaleLowerCase();
     switch (this.filter_) {
       case FilterType.SUBSTRING:
         return includes(item, input);
@@ -540,6 +513,31 @@ export class AmpAutocomplete extends AMP.BaseElement {
       default:
         throw new Error(`Unexpected filter: ${this.filter_}`);
     }
+  }
+
+  /**
+   * Given an item, returns it as is if it does not contain subitems.
+   * Otherwise, only includes those subitems which match the given input.
+   *
+   * @param {!JsonObject|string} item
+   * @param {string} input
+   * @param {string} itemsExpr
+   * @return {!JsonObject|string}
+   */
+  filterCategories_(item, input, itemsExpr) {
+    if (item['category']) {
+      const opts = [];
+      item['items'].filter(opt => {
+        return this.isFilterMatch_(opt, input, itemsExpr);
+      }).forEach(opt => {
+        opt = this.filterCategories_(opt, input, itemsExpr);
+        opts.push(opt);
+      });
+      item = /**@type {!JsonObject} */(
+        this.copyJsonObject_(/**@type {!JsonObject} */(item)));
+      item['items'] = opts;
+    }
+    return item;
   }
 
   /**
