@@ -93,73 +93,83 @@ describes.realWin(
 
       expectAsyncConsoleError(/Experiment/);
       addConfigElement('script');
-      doc.body.appendChild(el);
-      return experiment
-        .buildCallback()
-        .should.eventually.be.rejectedWith(/Experiment/);
+      experiment.buildCallback();
+    }).to.not.throw();
+  });
+
+  it('should throw if it has no child element', () => {
+    expectAsyncConsoleError(/should contain exactly one/);
+    return expect(experiment.buildCallback()).to.eventually
+        .be.rejectedWith(/should contain exactly one/);
+  });
+
+  it('should throw if it has multiple child elements', () => {
+    addConfigElement('script');
+    addConfigElement('script');
+    expectAsyncConsoleError(/should contain exactly one/);
+    return expect(experiment.buildCallback()).to.eventually
+        .be.rejectedWith(/should contain exactly one/);
+  });
+
+  it('should throw if the child element is not a <script> element', () => {
+    addConfigElement('a');
+    expectAsyncConsoleError(/script/);
+    return expect(experiment.buildCallback()).to.eventually
+        .be.rejectedWith(/script/);
+  });
+
+  it('should throw if the child script element is not json typed', () => {
+    addConfigElement('script', 'wrongtype');
+    expectAsyncConsoleError(/application\/json/);
+    return expect(experiment.buildCallback()).to.eventually
+        .be.rejectedWith(/application\/json/);
     });
 
-    it('should not throw on valid config', () => {
-      expect(() => {
-        addConfigElement('script');
-        experiment.buildCallback();
-      }).to.not.throw();
+  it('should throw if the child script element has non-JSON content', () => {
+    addConfigElement('script', 'application/json', '{not json}');
+    expectAsyncConsoleError();
+    return experiment.buildCallback().then(() => {
+      throw new Error('must have failed');
+    }, () => {
+      return Services.variantsForDocOrNull(ampdoc.getHeadNode())
+          .then(service => service.getVariants())
+          .then(variants => {
+            expect(variants).to.deep.equal({});
+          });
     });
 
-    it('should throw if it has no child element', () => {
-      expectAsyncConsoleError(/should contain exactly one/);
-      return expect(experiment.buildCallback()).to.eventually.be.rejectedWith(
-        /should contain exactly one/
-      );
-    });
+  it('should throw if the chosen experiment / variant config has too many mutations', () => {
 
-    it('should throw if it has multiple child elements', () => {
-      addConfigElement('script');
-      addConfigElement('script');
-      expectAsyncConsoleError(/should contain exactly one/);
-      return expect(experiment.buildCallback()).to.eventually.be.rejectedWith(
-        /should contain exactly one/
-      );
-    });
-
-    it('should throw if the child element is not a <script> element', () => {
-      addConfigElement('a');
-      expectAsyncConsoleError(/script/);
-      return expect(experiment.buildCallback()).to.eventually.be.rejectedWith(
-        /script/
-      );
-    });
-
-    it('should throw if the child script element is not json typed', () => {
-      addConfigElement('script', 'wrongtype');
-      expectAsyncConsoleError(/application\/json/);
-      return expect(experiment.buildCallback()).to.eventually.be.rejectedWith(
-        /application\/json/
-      );
-    });
-
-    it('should throw if the child script element has non-JSON content', () => {
-      addConfigElement('script', 'application/json', '{not json}');
-      expectAsyncConsoleError();
-      return experiment.buildCallback().then(
-        () => {
-          throw new Error('must have failed');
+    const tooManyMutationsConfig = {
+      'experiment-1': {
+        variants: {
+          'variant-a': {
+            weight: 50,
+            mutations: (new Array(200)).fill({}),
+          },
+          'variant-b': {
+            weight: 50,
+            mutations: (new Array(200)).fill({}),
+          },
         },
-        () => {
-          return Services.variantsForDocOrNull(ampdoc.getHeadNode())
-            .then(service => service.getVariants())
-            .then(variants => {
-              expect(variants).to.deep.equal({});
-            });
-        }
-      );
-    });
+      }
+    }
 
-    it('should apply the mutations from the variant', () => {
-      addConfigElement('script');
-      const stub = sandbox.stub(variant, 'allocateVariant');
-      stub
-        .withArgs(ampdoc, 'experiment-1', config['experiment-1'])
+    addConfigElement(
+      'script',
+      'application/json',
+      JSON.stringify(tooManyMutationsConfig)
+    );
+
+    expectAsyncConsoleError(/Max number of mutations/);
+    return expect(experiment.buildCallback()).to.eventually
+      .be.rejectedWith(/Max number of mutations/);
+  });
+
+  it('should apply the mutations from the variant', () => {
+    addConfigElement('script');
+    const stub = sandbox.stub(variant, 'allocateVariant');
+    stub.withArgs(ampdoc, 'experiment-1', config['experiment-1'])
         .returns(Promise.resolve('variant-a'));
       stub
         .withArgs(ampdoc, 'experiment-2', config['experiment-2'])
