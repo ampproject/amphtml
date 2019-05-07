@@ -1030,7 +1030,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
             case 'AMP-Verification-Checksum-Algorithm':
               return 'unknown';
             case 'AMP-Verification-Checksum':
-              return btoa('2569076912');
+              return '2569076912';
             default:
               throw new Error(`unexpected header: ${key}`);
           }
@@ -1048,7 +1048,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
             case 'AMP-Verification-Checksum-Algorithm':
               return 'djb2a-32';
             case 'AMP-Verification-Checksum':
-              return btoa('2569076912');
+              return '2569076912';
             default:
               throw new Error(`unexpected header: ${key}`);
           }
@@ -1069,7 +1069,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
             case 'AMP-Verification-Checksum-Algorithm':
               return 'djb2a-32';
             case 'AMP-Verification-Checksum':
-              return btoa('12345');
+              return '12345';
             default:
               throw new Error(`unexpected header: ${key}`);
           }
