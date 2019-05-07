@@ -83,7 +83,7 @@ export class AmpAutoAds extends AMP.BaseElement {
           attributes,
           sizing,
           adTracker,
-          adNetwork.isResponsiveEnabled(this.win)).run();
+          adNetwork.isResponsiveEnabled()).run();
       new AnchorAdStrategy(ampdoc, attributes, configObj).run();
     });
   }
