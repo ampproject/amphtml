@@ -97,6 +97,17 @@ export class AmpAutocomplete extends AMP.BaseElement {
     this.submitOnEnter_ = false;
 
     /**
+     * If the "suggest-first" attribute is present on <autocomplete> 
+     * and the filter type is "prefix".
+     */
+    this.suggestFirst_ = false;
+
+    /**
+     * Whether or not an item is currently suggested by suggestFirst_.
+     */
+    this.typeaheadActive_ = false;
+
+    /**
      * The index of the active suggested item.
      * @private {number}
      */
@@ -197,6 +208,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
     this.maxEntries_ = this.element.hasAttribute('max-entries') ?
       parseInt(this.element.getAttribute('max-entries'), 10) : null;
     this.submitOnEnter_ = this.element.hasAttribute('submit-on-enter');
+    this.suggestFirst_ = this.element.hasAttribute('suggest-first') 
+      && this.filter_ === FilterType.PREFIX;
 
     this.container_ = this.createContainer_();
     this.element.appendChild(this.container_);
@@ -344,6 +357,11 @@ export class AmpAutocomplete extends AMP.BaseElement {
     return this.mutateElement(() => {
       this.filterDataAndRenderResults_(this.sourceData_, this.userInput_);
       this.toggleResults_(true);
+      if (this.suggestFirst_) {
+        this.updateActiveItem_(1);
+        this.inputElement_.setSelectionRange(this.userInput_.length, 
+          this.inputElement_.value.length);
+      }
     });
   }
 
