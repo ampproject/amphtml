@@ -38,7 +38,6 @@ import {
 import {isExperimentOn} from '../../../src/experiments';
 import {rewriteAttributeValue} from '../../../src/url-rewrite';
 import {setImportantStyles} from '../../../src/style';
-import {startsWith} from '../../../src/string';
 import {
   upgrade,
 } from '@ampproject/worker-dom/dist/unminified.index.safe.mjs.patched';
@@ -146,13 +145,13 @@ export class AmpScript extends AMP.BaseElement {
       let styleHtml = '';
       const styles = head.querySelectorAll('style[amp-custom]');
       styles.forEach(style => {
-        styleHtml += style.outerHTML;
+        styleHtml += style./*OK*/outerHTML;
       });
       // Copy this element's children into the iframe. They'll be overlaid
       // on top of existing children to avoid jank, and the real children
       // will be removed on the first mutation. See mutationPump_().
       const html = `<head>${styleHtml}</head>`
-          + `<body>${this.element.innerHTML}</body>`;
+          + `<body>${this.element./*OK*/innerHTML}</body>`;
       const spec = {
         html,
         url: this.win.location.origin,
@@ -276,7 +275,7 @@ export class AmpScript extends AMP.BaseElement {
           let height;
           this.measureMutateElement(() => {
             const {body} = this.iframe_.contentWindow.document;
-            height = body.scrollHeight;
+            height = body./*OK*/scrollHeight;
           }, () => {
             // Match iframe height and remove original children.
             setImportantStyles(this.iframe_, {'height': height + 'px'});
