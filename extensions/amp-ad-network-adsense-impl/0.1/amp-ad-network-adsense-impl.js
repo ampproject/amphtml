@@ -60,9 +60,6 @@ import {
 } from '../../../src/style';
 import {dev, devAssert, user} from '../../../src/log';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
-import {
-  getAdSenseAmpAutoAdsResponsiveExperimentBranch,
-} from '../../../ads/google/adsense-amp-auto-ads-responsive';
 import {getAmpAdRenderOutsideViewport} from '../../amp-ad/0.1/concurrent-load';
 import {getDefaultBootstrapBaseUrl} from '../../../src/3p-frame';
 import {
@@ -378,11 +375,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     };
 
     const experimentIds = [];
-    const ampAutoAdsResponsiveBranch =
-      getAdSenseAmpAutoAdsResponsiveExperimentBranch(this.win);
-    if (ampAutoAdsResponsiveBranch) {
-      experimentIds.push(ampAutoAdsResponsiveBranch);
-    }
     const identityPromise = Services.timerFor(this.win)
         .timeoutPromise(1000, this.identityTokenPromise_)
         .catch(unusedErr => {
@@ -415,8 +407,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     }
     const checksum = headers.get('AMP-Verification-Checksum');
     return Promise.resolve(
-        checksum && stringHash32(utf8Decode(bytes)) == atob(checksum)
-          ? bytes : null);
+        checksum && stringHash32(utf8Decode(bytes)) == checksum ? bytes : null);
   }
 
   /** @override */
