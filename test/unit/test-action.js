@@ -1193,6 +1193,7 @@ describes.fakeWin('Core events', {amp: true}, env => {
         try {
           originalTrigger.apply(action, action.trigger.getCall(0).args);
           resolve();
+          return true;
         } catch (e) {
           reject(e);
         }
@@ -1212,6 +1213,7 @@ describes.fakeWin('Core events', {amp: true}, env => {
 
   it('should trigger tap event on key press if focused element has ' +
      'role=button', () => {
+    action.trigger.returns(false);
     expect(window.document.addEventListener).to.have.been.calledWith(
         'keydown');
     const handler = window.document.addEventListener.getCall(1).args[1];
@@ -1222,12 +1224,30 @@ describes.fakeWin('Core events', {amp: true}, env => {
       key: Keys.ENTER,
       preventDefault: sandbox.stub()};
     handler(event);
+    expect(event.preventDefault).to.not.have.been.called;
+    expect(action.trigger).to.have.been.calledWith(element, 'tap', event);
+  });
+
+  it('should trigger tap event and prevent default on key press if focused ' +
+     'element has role=button and has an action invoked', () => {
+    expect(window.document.addEventListener).to.have.been.calledWith(
+        'keydown');
+    const handler = window.document.addEventListener.getCall(1).args[1];
+    const element = document.createElement('div');
+    element.setAttribute('role', 'button');
+    const event = {
+      target: element,
+      key: Keys.ENTER,
+      preventDefault: sandbox.stub()};
+    handler(event);
+    // Expect prevent default to have been called.
     expect(event.preventDefault).to.have.been.called;
     expect(action.trigger).to.have.been.calledWith(element, 'tap', event);
   });
 
   it('should trigger tap event on key press if focused element has ' +
      'role=option', () => {
+    action.trigger.returns(false);
     expect(window.document.addEventListener).to.have.been.calledWith(
         'keydown');
     const handler = window.document.addEventListener.getCall(1).args[1];
@@ -1238,7 +1258,7 @@ describes.fakeWin('Core events', {amp: true}, env => {
       key: Keys.ENTER,
       preventDefault: sandbox.stub()};
     handler(event);
-    expect(event.preventDefault).to.have.been.called;
+    expect(event.preventDefault).to.not.have.been.called;
     expect(action.trigger).to.have.been.calledWith(element, 'tap', event);
   });
 

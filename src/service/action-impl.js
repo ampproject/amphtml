@@ -287,15 +287,21 @@ export class ActionService {
         }
       });
       this.root_.addEventListener('keydown', event => {
-        const element = dev().assertElement(event.target);
-        const {key} = event;
+        const {key, target} = event;
+        const element = dev().assertElement(target);
         if (key == Keys.ENTER || key == Keys.SPACE) {
           const role = element.getAttribute('role');
           const isTapEventRole =
               (role && hasOwn(TAPPABLE_ARIA_ROLES, role.toLowerCase()));
           if (!event.defaultPrevented && isTapEventRole) {
-            event.preventDefault();
-            this.trigger(element, name, event, ActionTrust.HIGH);
+            const hasAction =
+                this.trigger(element, name, event, ActionTrust.HIGH);
+            // Only if the element has an action do we prevent the default.
+            // In the absence of an action, e.g. on="[event].method", we do not
+            // want to stop default behavior.
+            if (hasAction) {
+              event.preventDefault();
+            }
           }
         }
       });
@@ -372,9 +378,10 @@ export class ActionService {
    * @param {?ActionEventDef} event
    * @param {!ActionTrust} trust
    * @param {?JsonObject=} opt_args
+   * @return {boolean} true if the target has an action.
    */
   trigger(target, eventType, event, trust, opt_args) {
-    this.action_(target, eventType, event, trust, opt_args);
+    return this.action_(target, eventType, event, trust, opt_args);
   }
 
   /**
@@ -501,19 +508,21 @@ export class ActionService {
    * @param {?ActionEventDef} event
    * @param {!ActionTrust} trust
    * @param {?JsonObject=} opt_args
+   * @return {boolean} True if the element has an action.
    * @private
    */
   action_(source, actionEventType, event, trust, opt_args) {
     const action =
         this.findAction_(source, actionEventType);
     if (!action) {
-      return;
+      return false;
     }
     // Use a pseudo-UUID to uniquely identify this sequence of actions.
     // A sequence is all actions triggered by a single event.
     const sequenceId = Math.random();
     // Invoke actions serially, where each action waits for its predecessor
     // to complete. `currentPromise` is the i'th promise in the chain.
+    /** @type {?Promise} */
     let currentPromise = null;
     action.actionInfos.forEach(({target, args, method, str}) => {
       const dereferencedArgs = dereferenceArgsVariables(args, event, opt_args);
@@ -533,6 +542,8 @@ export class ActionService {
         ? currentPromise.then(invokeAction)
         : invokeAction();
     });
+
+    return action.actionInfos.length >= 1;
   }
 
   /**
