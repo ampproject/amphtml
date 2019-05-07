@@ -1,11 +1,11 @@
 FAIL
 |  <!--
 |    Copyright 2019 The AMP HTML Authors. All Rights Reserved.
-|   
+|
 |    Licensed under the Apache License, Version 2.0 (the "License");
 |    you may not use this file except in compliance with the License.
 |    You may obtain a copy of the License at
-|   
+|
 |        http://www.apache.org/licenses/LICENSE-2.0
 |
 |    Unless required by applicable law or agreed to in writing, software
@@ -34,33 +34,33 @@ FAIL
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
 |  </head>
 |  <body>
-|    <form method="post" action-xhr="https://example.com/subscribe"> 
+|    <form method="post" action-xhr="https://example.com/subscribe">
 |      <!-- Valid: input and script tags as direct child to FORM -->
 |      <amp-autocomplete>
 |        <input type="text">
 |        <script type="application/json"> {} </script>
-|      </amp-autocomplete>  
+|      </amp-autocomplete>
 |
 |      <!-- Valid: input and src attr as direct child to FORM -->
 |      <amp-autocomplete src="https://data.com/articles.json?ref=CANONICAL_URL">
 |        <input type="text">
-|      </amp-autocomplete>  
+|      </amp-autocomplete>
 |
 |      <!-- Valid: input and [src] attr as direct child to FORM -->
 |      <amp-autocomplete [src]="foo.bar">
 |        <input type="text">
-|      </amp-autocomplete>  
+|      </amp-autocomplete>
 |
 |      <!-- Valid: input tag with type "search" and script tag -->
 |      <amp-autocomplete>
 |        <input type="search">
 |        <script type="application/json"> {} </script>
-|      </amp-autocomplete>  
+|      </amp-autocomplete>
 |
 |      <!-- Valid: input tag with type "search" and src attr -->
 |      <amp-autocomplete src="https://data.com/articles.json?ref=CANONICAL_URL">
 |        <input type="search">
-|      </amp-autocomplete>  
+|      </amp-autocomplete>
 |
 |      <!-- Valid: deeply nested with FORM still as ancestor -->
 |      <div>
@@ -69,7 +69,7 @@ FAIL
 |            <amp-autocomplete>
 |              <input type="search">
 |              <script type="application/json"> {} </script>
-|            </amp-autocomplete>  
+|            </amp-autocomplete>
 |          </div>
 |        </div>
 |      </div>
@@ -80,7 +80,7 @@ FAIL
 |          <div>
 |            <amp-autocomplete src="https://data.com/articles.json?ref=CANONICAL_URL">
 |              <input type="search">
-|            </amp-autocomplete>  
+|            </amp-autocomplete>
 |          </div>
 |        </div>
 |      </div>
@@ -106,7 +106,7 @@ FAIL
 |      <amp-autocomplete filter="token-prefix" src="https://data.com/articles.json?ref=CANONICAL_URL">
 |          <input type="text">
 |      </amp-autocomplete>
-|    
+|
 |      <!-- Valid: amp-component with static data and filter=substring attribute -->
 |      <amp-autocomplete filter="substring">
 |          <input type="text">
@@ -134,7 +134,7 @@ FAIL
 |          <input type="text">
 |          <script type="application/json"> {} </script>
 |      </amp-autocomplete>
-|      
+|
 |      <!-- Valid: amp-component with remote data and filter=none attribute -->
 |      <amp-autocomplete filter="none" src="https://data.com/articles.json?ref=CANONICAL_URL">
 |        <input type="text">
@@ -177,7 +177,7 @@ FAIL
 |      <amp-autocomplete suggest-first>
 |          <input type="text">
 |          <script type="application/json"> {} </script>
-|      </amp-autocomplete>  
+|      </amp-autocomplete>
 |
 |      <!-- Valid: amp-component with remote data and suggest-first attribute -->
 |      <amp-autocomplete suggest-first src="https://data.com/articles.json?ref=CANONICAL_URL">
@@ -188,12 +188,12 @@ FAIL
 |      <amp-autocomplete submit-on-enter>
 |          <input type="text">
 |          <script type="application/json"> {} </script>
-|      </amp-autocomplete> 
+|      </amp-autocomplete>
 |
 |      <!-- Valid: amp-component with remote data and submit-on-enter attribute -->
 |      <amp-autocomplete submit-on-enter src="https://data.com/articles.json?ref=CANONICAL_URL">
 |        <input type="text">
-|      </amp-autocomplete> 
+|      </amp-autocomplete>
 |
 |      <!-- Valid: amp-component with static data and rich content template -->
 |      <amp-autocomplete>
@@ -202,10 +202,10 @@ FAIL
 |        <template type="amp-mustache" id="amp-template-default">
 |          <div class="city-item" data-value="{{value}}">
 |              <div>{{value}}</div>
-|              <div class="custom-population">Population: {{population}}</div>        
+|              <div class="custom-population">Population: {{population}}</div>
 |          </div>
 |        </template>
-|      </amp-autocomplete> 
+|      </amp-autocomplete>
 |
 |      <!-- Valid: amp-component with remote data and rich content template -->
 |      <amp-autocomplete src="https://data.com/articles.json?ref=CANONICAL_URL">
@@ -213,21 +213,39 @@ FAIL
 |        <template type="amp-mustache" id="amp-template-default">
 |          <div class="city-item" data-value="{{value}}">
 |              <div>{{value}}</div>
-|              <div class="custom-population">Population: {{population}}</div>        
+|              <div class="custom-population">Population: {{population}}</div>
 |          </div>
 |        </template>
-|      </amp-autocomplete> 
+|      </amp-autocomplete>
+|
+|      <!-- Valid: amp-component with remote data and rich content template -->
+|      <amp-autocomplete src="https://data.com/articles.json?ref=CANONICAL_URL">
+|        <input type="text">
+|        <template type="amp-mustache" id="amp-template-default">
+|          {{#disabled}}
+|            <div data-disabled>
+|              <b>{{value}}</b>
+|            </div>
+|          {{/disabled}}
+|          {{^disabled}}
+|          <div class="city-item" data-value="{{value}}">
+|              <div>{{value}}</div>
+|              <div class="custom-population">Population: {{population}}</div>
+|          </div>
+|          {{/disabled}}
+|        </template>
+|      </amp-autocomplete>
 |
 |      <!-- Valid: amp-component with static data and template attr -->
 |      <amp-autocomplete template="my-template-id">
 |        <input type="text">
 |        <script type="application/json"> {} </script>
-|      </amp-autocomplete> 
-|      
+|      </amp-autocomplete>
+|
 |      <!-- Valid: amp-component with remote data and template attr -->
 |      <amp-autocomplete src="https://data.com/articles.json?ref=CANONICAL_URL" template="my-template-id">
 |        <input type="text">
-|      </amp-autocomplete> 
+|      </amp-autocomplete>
 |
 |      <!-- Valid: amp-component with static data and template script child -->
 |      <amp-autocomplete>
@@ -236,11 +254,11 @@ FAIL
 |        <script type="text/plain" template="amp-mustache">
 |          <div class="city-item" data-value="{{value}}">
 |            <div>{{value}}</div>
-|            <div class="custom-population">Population: {{population}}</div>        
+|            <div class="custom-population">Population: {{population}}</div>
 |          </div>
 |        </script>
-|      </amp-autocomplete> 
-|      
+|      </amp-autocomplete>
+|
 |      <!-- Valid: amp-component with remote data and template attr -->
 |      <amp-autocomplete src="https://data.com/articles.json?ref=CANONICAL_URL">
 |        <input type="text">
@@ -248,10 +266,10 @@ FAIL
 |        <script type="text/plain" template="amp-mustache">
 |          <div class="city-item" data-value="{{value}}">
 |            <div>{{value}}</div>
-|            <div class="custom-population">Population: {{population}}</div>        
+|            <div class="custom-population">Population: {{population}}</div>
 |          </div>
 |        </script>
-|      </amp-autocomplete> 
+|      </amp-autocomplete>
 |
 |      <!-- Invalid: width is mistyped -->
 |      <amp-autocomplete widht=100>
@@ -259,7 +277,7 @@ FAIL
 amp-autocomplete/0.1/test/validator-amp-autocomplete.html:256:4 The attribute 'widht' may not appear in tag 'amp-autocomplete with src attribute'. (see https://amp.dev/documentation/components/amp-autocomplete) [DISALLOWED_HTML]
 |          <input type="text">
 |          <script type="application/json"> {} </script>
-|      </amp-autocomplete>  
+|      </amp-autocomplete>
 |
 |      <!-- Invalid: responsive layout is not supported -->
 |      <amp-autocomplete layout="responsive">
