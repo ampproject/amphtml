@@ -142,22 +142,8 @@ export class Log {
     /** @private @const {string} */
     this.suffix_ = opt_suffix;
 
-    /** @private {!JsonObject} */
-    this.messages_ = dict();
-
-    if (getMode(win).development) {
-      win.fetch(externalMessagesUrl('.json', ''), noop)
-          .then(opt_response => {
-            if (opt_response) {
-              return opt_response.json();
-            }
-          }, noop)
-          .then(opt_messages => {
-            if (opt_messages) {
-              this.messages_ = /** @type {!JsonObject} */ opt_messages;
-            }
-          });
-    }
+    /** @private {?JsonObject} */
+    this.messages_ = null;
   }
 
   /**
@@ -514,12 +500,25 @@ export class Log {
    * @return {string}
    */
   expandLogMessage(id, var_args) {
+    // Best effort fetch of message template table.
+    // Since this is async, the first few logs might be indirected to a URL even
+    // if in development mode. Message table is ~small so this should be a short
+    // gap.
+    if (getMode(this.win).development && !this.messages_) {
+      this.win.fetch(externalMessagesUrl('.json', ''), noop)
+          .then(opt_response => {
+            if (opt_response) {
+              return opt_response.json();
+            }
+          }, noop)
+          .then(opt_messages => {
+            if (opt_messages) {
+              this.messages_ = /** @type {!JsonObject} */ opt_messages;
+            }
+          });
+    }
     const args = [].slice.call(arguments, 1);
-    // Messages are fetched asynchronously, so the first few logs might
-    // be indirected to a URL even if in development mode. Message table is
-    // ~small so this should be a short gap. Otherwise all relevant methods
-    // would need to be async, which would increase binary size and complexity.
-    if (id in this.messages_) {
+    if (this.messages_ && id in this.messages_) {
       const template = this.messages_[id];
       const {message} = createErrorVargs.apply(null, [template].concat(args));
       return message;
