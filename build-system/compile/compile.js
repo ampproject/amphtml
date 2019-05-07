@@ -16,16 +16,16 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const colors = require('ansi-colors');
 const fs = require('fs-extra');
 const gulp = require('gulp');
+const gulpIf = require('gulp-if');
 const nop = require('gulp-nop');
 const rename = require('gulp-rename');
 const rimraf = require('rimraf');
-const shortenLicense = require('./shorten-license');
 const sourcemaps = require('gulp-sourcemaps');
 const {gulpClosureCompile, handleCompilerError, handleTypeCheckError} = require('./closure-compile');
 const {isTravisBuild} = require('../travis');
+const {shortenLicense, shouldShortenLicense} = require('./shorten-license');
 const {singlePassCompile} = require('./single-pass');
 const {VERSION: internalRuntimeVersion} = require('../internal-version') ;
 
@@ -37,11 +37,11 @@ const MAX_PARALLEL_CLOSURE_INVOCATIONS = argv.single_pass ? 1 : 4;
 // Compiles AMP with the closure compiler. This is intended only for
 // production use. During development we intend to continue using
 // babel, as it has much faster incremental compilation.
-exports.closureCompile = function(entryModuleFilename, outputDir,
+exports.closureCompile = async function(entryModuleFilename, outputDir,
   outputFilename, options) {
   // Rate limit closure compilation to MAX_PARALLEL_CLOSURE_INVOCATIONS
   // concurrent processes.
-  return new Promise(function(resolve) {
+  return new Promise(function(resolve, reject) {
     function start() {
       inProgress++;
       compile(entryModuleFilename, outputDir, outputFilename, options)
@@ -53,10 +53,7 @@ exports.closureCompile = function(entryModuleFilename, outputDir,
             inProgress--;
             next();
             resolve();
-          }, function(e) {
-            console./*OK*/error(colors.red('Compilation error:'), e.message);
-            process.exit(1);
-          });
+          }, reason => reject(reason));
     }
     function next() {
       if (!queue.length) {
@@ -136,7 +133,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
     return singlePassCompile(entryModuleFilenames, compilationOptions);
   }
 
-  return new Promise(function(resolve) {
+  return new Promise(function(resolve, reject) {
     let entryModuleFilename;
     if (entryModuleFilenames instanceof Array) {
       entryModuleFilename = entryModuleFilenames[0];
@@ -245,13 +242,6 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       // Not sure what these files are, but they seem to duplicate code
       // one level below and confuse the compiler.
       '!node_modules/core-js/modules/library/**.js',
-      // Don't include rollup configs
-      '!**/rollup.config.js',
-      // Don't include tests.
-      '!**_test.js',
-      '!**/test-*.js',
-      '!**/test-e2e/*.js',
-      '!**/*.extern.js',
     ];
     // Add needed path for extensions.
     // Instead of globbing all extensions, this will only add the actual
@@ -301,6 +291,17 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       srcs.push('!src/polyfills.js', '!build/fake-polyfills/**/*.js',);
       unneededFiles.push('build/fake-module/src/polyfills.js');
     }
+    // Negative globstars must come at the end.
+    srcs.push(
+        // Don't include rollup configs
+        '!**/rollup.config.js',
+        // Don't include tests.
+        '!**_test.js',
+        '!**/test-*.js',
+        '!**/test-e2e/*.js',
+        // Don't include externs.
+        '!**/*.extern.js',
+    );
     unneededFiles.forEach(function(fake) {
       if (!fs.existsSync(fake)) {
         fs.writeFileSync(fake,
@@ -394,17 +395,23 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
     if (options.typeCheckOnly) {
       return gulp.src(srcs, {base: '.'})
           .pipe(gulpClosureCompile(compilerOptionsArray))
-          .on('error', handleTypeCheckError)
+          .on('error', err => {
+            handleTypeCheckError();
+            reject(err);
+          })
           .pipe(nop())
           .on('end', resolve);
     } else {
       return gulp.src(srcs, {base: '.'})
+          .pipe(gulpIf(shouldShortenLicense, shortenLicense()))
           .pipe(sourcemaps.init({loadMaps: true}))
           .pipe(gulpClosureCompile(compilerOptionsArray))
-          .on('error', () => handleCompilerError(outputFilename))
+          .on('error', err => {
+            handleCompilerError(outputFilename);
+            reject(err);
+          })
           .pipe(rename(outputFilename))
           .pipe(sourcemaps.write('.'))
-          .pipe(shortenLicense())
           .pipe(gulp.dest(outputDir))
           .on('end', resolve);
     }

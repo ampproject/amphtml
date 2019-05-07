@@ -55,7 +55,7 @@ const WHITELISTED_TAGS_BY_ATTRS = {
   },
 };
 
-const PURIFY_CONFIG = /** @type {!DomPurifyConfig} */ ({
+const PURIFY_PROFILES = /** @type {!DomPurifyConfig} */ ({
   USE_PROFILES: {
     html: true,
     svg: true,
@@ -70,14 +70,15 @@ const PURIFY_CONFIG = /** @type {!DomPurifyConfig} */ ({
 let KEY_COUNTER = 0;
 
 /**
- * Returns a <body> element containing the sanitized, serialized `dirty`.
+ * Returns a <body> element containing the sanitized `dirty` markup.
+ * Uses the standard DOMPurify config.
  * @param {string} dirty
  * @param {!Document} doc
  * @param {boolean=} diffing
  * @return {!Node}
  */
 export function purifyHtml(dirty, doc, diffing = false) {
-  const config = purifyConfig();
+  const config = standardPurifyConfig();
   addPurifyHooks(DomPurify, diffing, doc);
   const body = DomPurify.sanitize(dirty, config);
   DomPurify.removeAllHooks();
@@ -85,20 +86,21 @@ export function purifyHtml(dirty, doc, diffing = false) {
 }
 
 /**
+ * Creates a new DOMPurify instance with a custom DOMPurify configuration.
  * @param {!Document} doc
  * @param {!JsonObject=} opt_config
  * @return {!DomPurifyDef}
  */
 export function createPurifier(doc, opt_config) {
   const domPurify = purify(self);
-  const config = Object.assign(opt_config || {}, purifyConfig());
+  const config = Object.assign(opt_config || {}, standardPurifyConfig());
   domPurify.setConfig(config);
   addPurifyHooks(domPurify, /* diffing */ false, doc);
   return domPurify;
 }
 
 /**
- * Returns DOMPurify config for normal, escaped templates.
+ * Returns standard DOMPurify config for escaped templates.
  * Do not use for unescaped templates.
  *
  * NOTE: See that we use DomPurifyConfig found in
@@ -108,8 +110,8 @@ export function createPurifier(doc, opt_config) {
  *
  * @return {!DomPurifyConfig}
  */
-function purifyConfig() {
-  const config = Object.assign({}, PURIFY_CONFIG, /** @type {!DomPurifyConfig} */ ({
+function standardPurifyConfig() {
+  const config = Object.assign({}, PURIFY_PROFILES, /** @type {!DomPurifyConfig} */ ({
     ADD_ATTR: WHITELISTED_ATTRS,
     FORBID_TAGS: Object.keys(BLACKLISTED_TAGS),
     // Avoid reparenting of some elements to document head e.g. <script>.
@@ -121,6 +123,27 @@ function purifyConfig() {
     ALLOW_UNKNOWN_PROTOCOLS: true,
   }));
   return /** @type {!DomPurifyConfig} */ (config);
+}
+
+/**
+ * Gets a copy of the map of allowed tag names (standard DOMPurify config).
+ * @return {!Object<string, boolean>}
+ */
+export function getAllowedTags() {
+  const allowedTags = {};
+  // Use this hook to extract purifier's allowed tags.
+  DomPurify.addHook('uponSanitizeElement', function(node, data) {
+    Object.assign(allowedTags, data.allowedTags);
+  });
+  // Sanitize dummy markup so that the hook is invoked.
+  DomPurify.sanitize('<p></p>');
+  // Remove any blacklisted tags.
+  Object.keys(BLACKLISTED_TAGS).forEach(blacklistedTag => {
+    delete allowedTags[blacklistedTag];
+  });
+  // Pops the last hook added.
+  DomPurify.removeHook('uponSanitizeElement');
+  return allowedTags;
 }
 
 /**
@@ -380,9 +403,10 @@ export function validateAttributeChange(purifier, node, attr, value) {
     // implications beyond URLs etc. that are covered by isValidAttr().
     // This is OK for now, but we should instead somehow modify ALLOWED_ATTR
     // to preserve value sanitization.
+    const whitelisted = WHITELISTED_ATTRS.includes(attr);
     const attrsByTags = WHITELISTED_ATTRS_BY_TAGS[tag];
     const whitelistedForTag = attrsByTags && attrsByTags.includes(attr);
-    if (!whitelistedForTag && !startsWith(tag, 'amp-')) {
+    if (!whitelisted && !whitelistedForTag && !startsWith(tag, 'amp-')) {
       return false;
     }
   }
@@ -406,7 +430,6 @@ export function validateAttributeChange(purifier, node, attr, value) {
 export function purifyTagsForTripleMustache(html, doc = self.document) {
   // Reference to DOMPurify's `allowedTags` whitelist.
   let allowedTags;
-
   DomPurify.addHook('uponSanitizeElement', (node, data) => {
     const {tagName} = data;
     allowedTags = data.allowedTags;
