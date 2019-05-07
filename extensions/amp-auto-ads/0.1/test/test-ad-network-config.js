@@ -41,6 +41,7 @@ describes.realWin('ad-network-config', {
   describe('AdSense', () => {
 
     const AD_CLIENT = 'ca-pub-1234';
+    const AD_HOST = 'ca-pub-5678';
 
     beforeEach(() => {
       ampAutoAdsElem.setAttribute('data-ad-client', AD_CLIENT);
@@ -82,6 +83,17 @@ describes.realWin('ad-network-config', {
         'type': 'adsense',
         'data-ad-client': 'ca-pub-1234',
       });
+    });
+
+    it('should add data-ad-host to attributes if set on ampAutoAdsElem', () => {
+      ampAutoAdsElem.setAttribute('data-ad-host', AD_HOST);
+      const adNetwork = getAdNetworkConfig('adsense', ampAutoAdsElem);
+      expect(adNetwork.getAttributes()).to.deep.equal({
+        'type': 'adsense',
+        'data-ad-client': AD_CLIENT,
+        'data-ad-host': AD_HOST,
+      });
+      ampAutoAdsElem.removeAttribute('data-ad-host');
     });
 
     it('should get the default ad constraints', () => {
