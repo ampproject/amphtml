@@ -555,9 +555,7 @@ export const adConfig = {
 
   'kuadio': {},
 
-  'lentainform': {
-    renderStartImplemented: true,
-  },
+  'lentainform': {},
 
   'ligatus': {
     prefetch: 'https://ssl.ligatus.com/render/ligrend.js',
