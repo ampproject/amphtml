@@ -15,6 +15,7 @@
  */
 
 const {
+  definitionFile,
   singletonFunctions,
   transformableMethods,
 } = require('../../log-module-metadata.js');
@@ -52,25 +53,16 @@ function hasTemplateLiteral(node) {
   return false;
 }
 
-/**
- * @param {string} name
- * @return {!LogMethodMetadataDef}
- */
-function getMetadata(name) {
-  return transformableMethods.find(cur => cur.name === name);
-}
-
 const selector = Object.keys(transformableMethods)
   .map(method => `CallExpression[callee.property.name=${method.name}]`)
   .join(',');
-
 
 module.exports = {
   create(context) {
     return {
       [selector]: function(node) {
         // Don't evaluate or transform log.js
-        if (context.getFilename().endsWith('src/log.js')) {
+        if (context.getFilename().endsWith(definitionFile)) {
           return;
         }
         // Make sure that callee is a CallExpression as well.
@@ -110,8 +102,8 @@ module.exports = {
 
         let errMsg = [
           'Mixing Template Strings and %s interpolation for log methods is',
-          `not supported on ${methodInvokedName}. Please either use template `,
-          'literals or use the log strformat(%s) style interpolation ',
+          `not supported on ${methodInvokedName}. Please either use template`,
+          'literals or use the log strformat(%s) style interpolation',
           'exclusively',
         ].join(' ');
 

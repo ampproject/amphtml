@@ -76,16 +76,6 @@ const roughMinifiedExpansionLength = 'a().b("xx")'.length;
 const relativeToRoot = path => `${__dirname}/../../../${path}`;
 
 /**
- * Determines whether a callee is a known transformable log method.
- * @param {*} t babel.types
- * @param {Node} node
- * @param {!Object<string, *>} methods
- * @return {boolean}
- */
-const isTransformableMethod = (t, node, methods) =>
-  t.isIdentifier(node) && node.name in methods;
-
-/**
  * Reads the messages table from the JSON file.
  * @param {string} messagesPath
  * @return {!Object<string, string>}
@@ -112,7 +102,7 @@ function writeMessages(messagesPath, obj) {
 
 /**
  * Gets a message id from the table, or adds a new entry for a message if
- * non-existent and returnsssssssssssssssssss its new id.
+ * non-existent and returns its new id.
  * @param {file} messagesPath
  * @param {string} message
  * @return {string} Short message id.
@@ -130,6 +120,7 @@ function getOrCreateShortMessageId(messagesPath, message) {
 }
 
 /**
+ * Builds a message template using printf syntax from a starting node.
  * @param {*} t babel.types
  * @param {!Node} node
  * @param {!Array<!Node>} interpolationArgs
@@ -191,7 +182,10 @@ module.exports = function({types: t}) {
         }
 
         const {property} = callee;
-        if (!isTransformableMethod(t, property, transformableMethods)) {
+        if (
+          !t.isIdentifier(property) ||
+          !(property.name in transformableMethods)
+        ) {
           return;
         }
 

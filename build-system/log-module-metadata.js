@@ -19,6 +19,8 @@
 /** @typedef {{variadic: boolean, messageArgPos: number}} */
 let LogMethodMetadataDef;
 
+const definitionFile = 'src/log.js';
+
 /** Functions exposed as singleton getters for `Log`. */
 const singletonFunctions = ['dev', 'user'];
 
@@ -42,4 +44,4 @@ const transformableMethods = {
   createError: {variadic: true, messageArgPos: 0},
 };
 
-module.exports = {singletonFunctions, transformableMethods};
+module.exports = {definitionFile, singletonFunctions, transformableMethods};
