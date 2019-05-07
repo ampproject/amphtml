@@ -271,6 +271,13 @@ export const adConfig = {
   },
 
   'aja': {
+    prefetch: [
+      'https://cdn.as.amanad.adtdp.com/sdk/asot-amp.js',
+      'https://cdn.as.amanad.adtdp.com/sdk/asot-v2.js',
+    ],
+    preconnect: [
+      'https://ad.as.amanad.adtdp.com',
+    ],
   },
 
   'appvador': {
