@@ -88,8 +88,19 @@ describes.realWin(
       experiment.element.appendChild(child);
     }
 
-    it('Rejects because experiment is not enabled', () => {
-      toggleExperiment(win, 'amp-experiment-1.0', false);
+  function stubAllocateVariant(sandbox, config) {
+    const stub = sandbox.stub(variant, 'allocateVariant');
+    stub.withArgs(ampdoc, 'experiment-1', config['experiment-1'])
+        .returns(Promise.resolve('variant-a'));
+    stub.withArgs(ampdoc, 'experiment-2', config['experiment-2'])
+        .returns(Promise.resolve('variant-d'));
+    stub.withArgs(ampdoc, 'experiment-3', config['experiment-3'])
+        .returns(Promise.resolve(null));
+    return stub;
+  }
+
+  it('Rejects because experiment is not enabled', () => {
+    toggleExperiment(win, 'amp-experiment-1.0', false);
 
       expectAsyncConsoleError(/Experiment/);
       addConfigElement('script');
@@ -123,7 +134,7 @@ describes.realWin(
     expectAsyncConsoleError(/application\/json/);
     return expect(experiment.buildCallback()).to.eventually
         .be.rejectedWith(/application\/json/);
-    });
+  });
 
   it('should throw if the child script element has non-JSON content', () => {
     addConfigElement('script', 'application/json', '{not json}');
@@ -138,7 +149,8 @@ describes.realWin(
           });
     });
 
-  it('should throw if the chosen experiment / variant config has too many mutations', () => {
+  it('should throw if the chosen experiment / ' +
+    'variant config has too many mutations', () => {
 
     const tooManyMutationsConfig = {
       'experiment-1': {
@@ -152,14 +164,15 @@ describes.realWin(
             mutations: (new Array(200)).fill({}),
           },
         },
-      }
-    }
+      },
+    };
 
     addConfigElement(
-      'script',
-      'application/json',
-      JSON.stringify(tooManyMutationsConfig)
+        'script',
+        'application/json',
+        JSON.stringify(tooManyMutationsConfig)
     );
+    stubAllocateVariant(sandbox, tooManyMutationsConfig);
 
     expectAsyncConsoleError(/Max number of mutations/);
     return experiment.buildCallback().then(() => {
@@ -171,15 +184,7 @@ describes.realWin(
 
   it('should match the variant to the experiment', () => {
     addConfigElement('script');
-    const stub = sandbox.stub(variant, 'allocateVariant');
-    stub.withArgs(ampdoc, 'experiment-1', config['experiment-1'])
-        .returns(Promise.resolve('variant-a'));
-      stub
-        .withArgs(ampdoc, 'experiment-2', config['experiment-2'])
-        .returns(Promise.resolve('variant-d'));
-      stub
-        .withArgs(ampdoc, 'experiment-3', config['experiment-3'])
-        .returns(Promise.resolve(null));
+    stubAllocateVariant(sandbox, config);
 
     const applyStub = sandbox.stub(experiment, 'applyMutations_');
     sandbox.stub(experiment, 'validateExperimentToVariant_');

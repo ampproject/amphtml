@@ -62,23 +62,27 @@ export class AmpExperiment extends AMP.BaseElement {
         const experimentToVariant = Object.create(null);
         const variants = Object.keys(config).map(experimentName => {
           return allocateVariant(
-              this.getAmpDoc(), experimentName, config[experimentName])
-              .then(variantName => {
-                experimentToVariant[experimentName] = variantName;
-              });
+              this.getAmpDoc(), experimentName, config[experimentName]
+          ).then(variantName => {
+            experimentToVariant[experimentName] = variantName;
+          });
         });
 
         /** @private @const {!Promise<!Object<string, ?string>>} */
         const experimentVariants = Promise.all(variants)
-          .then(() => {
-            this.validateExperimentToVariant_(config, experimentToVariant);
-            const applyExperimentsPromise = this.applyExperimentVariants_(config, experimentToVariant);
-            variantsService.init(applyExperimentsPromise);
-          }).catch(e => {
-            // Ensure downstream consumers don't wait for the promise forever.
-            variantsService.init(Promise.resolve({}));
-            throw e;
-          });
+            .then(() => {
+              this.validateExperimentToVariant_(config, experimentToVariant);
+              const applyExperimentsPromise = this.applyExperimentVariants_(
+                  config,
+                  experimentToVariant
+              );
+              variantsService.init(applyExperimentsPromise);
+              return applyExperimentsPromise;
+            }).catch(e => {
+              // Ensure downstream consumers don't wait for the promise forever.
+              variantsService.init(Promise.resolve({}));
+              throw e;
+            });
         return experimentVariants;
       } catch (e) {
         // Ensure downstream consumers don't wait for the promise forever.
@@ -140,11 +144,13 @@ export class AmpExperiment extends AMP.BaseElement {
       const experimentKey = experimentToVariantKeys[i];
       const variantKey = experimentToVariant[experimentKey];
       const variant = config[experimentKey]['variants'][variantKey];
-      totalMutations += variant.mutations.length;
+      if (variant.mutations) {
+        totalMutations += variant.mutations.length;
+      }
     }
 
     if (totalMutations > MAX_MUTATIONS) {
-      const numMutationsError = `Max number of mutations for the total ` +
+      const numMutationsError = 'Max number of mutations for the total ' +
         `applied experiments exceeded: ${totalMutations} > ` + MAX_MUTATIONS;
       user().error(TAG, numMutationsError);
       throw new Error(numMutationsError);
