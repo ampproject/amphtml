@@ -23,11 +23,11 @@ FAIL
 |  -->
 |  <!doctype html 🐶 data-dog id="dog" lang="en">
 >> ^~~~~~~~~
-feature_tests/dog_doc_type.html:23:0 The attribute 'data-dog' may not appear in tag 'html doctype'. (see https://www.ampproject.org/docs/reference/spec#required-markup) [DISALLOWED_HTML]
+feature_tests/dog_doc_type.html:23:0 The attribute 'data-dog' may not appear in tag 'html doctype'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup) [DISALLOWED_HTML]
 >> ^~~~~~~~~
-feature_tests/dog_doc_type.html:23:0 The attribute 'id' may not appear in tag 'html doctype'. (see https://www.ampproject.org/docs/reference/spec#required-markup) [DISALLOWED_HTML]
+feature_tests/dog_doc_type.html:23:0 The attribute 'id' may not appear in tag 'html doctype'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup) [DISALLOWED_HTML]
 >> ^~~~~~~~~
-feature_tests/dog_doc_type.html:23:0 The attribute '🐶' may not appear in tag 'html doctype'. (see https://www.ampproject.org/docs/reference/spec#required-markup) [DISALLOWED_HTML]
+feature_tests/dog_doc_type.html:23:0 The attribute '🐶' may not appear in tag 'html doctype'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup) [DISALLOWED_HTML]
 |  <html>
 >> ^~~~~~~~~
 feature_tests/dog_doc_type.html:24:0 The mandatory attribute '⚡' is missing in tag 'html'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]

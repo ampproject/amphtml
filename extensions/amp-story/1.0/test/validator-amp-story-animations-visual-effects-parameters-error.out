@@ -60,11 +60,11 @@ amp-story/1.0/test/validator-amp-story-animations-visual-effects-parameters-erro
 amp-story/1.0/test/validator-amp-story-animations-visual-effects-parameters-error.html:49:8 The attribute 'scale-start' may not appear in tag 'div'. [DISALLOWED_HTML]
 |              <amp-img id="ken-burns-img1"
 >>             ^~~~~~~~~
-amp-story/1.0/test/validator-amp-story-animations-visual-effects-parameters-error.html:50:12 The attribute 'animate-in' may not appear in tag 'amp-img'. (see https://www.ampproject.org/docs/reference/components/amp-img) [DISALLOWED_HTML]
+amp-story/1.0/test/validator-amp-story-animations-visual-effects-parameters-error.html:50:12 The attribute 'animate-in' may not appear in tag 'amp-img'. (see https://amp.dev/documentation/components/amp-img) [DISALLOWED_HTML]
 >>             ^~~~~~~~~
-amp-story/1.0/test/validator-amp-story-animations-visual-effects-parameters-error.html:50:12 The attribute 'animate-in-duration' may not appear in tag 'amp-img'. (see https://www.ampproject.org/docs/reference/components/amp-img) [DISALLOWED_HTML]
+amp-story/1.0/test/validator-amp-story-animations-visual-effects-parameters-error.html:50:12 The attribute 'animate-in-duration' may not appear in tag 'amp-img'. (see https://amp.dev/documentation/components/amp-img) [DISALLOWED_HTML]
 >>             ^~~~~~~~~
-amp-story/1.0/test/validator-amp-story-animations-visual-effects-parameters-error.html:50:12 The attribute 'translate-x' may not appear in tag 'amp-img'. (see https://www.ampproject.org/docs/reference/components/amp-img) [DISALLOWED_HTML]
+amp-story/1.0/test/validator-amp-story-animations-visual-effects-parameters-error.html:50:12 The attribute 'translate-x' may not appear in tag 'amp-img'. (see https://amp.dev/documentation/components/amp-img) [DISALLOWED_HTML]
 |                 src="https://picsum.photos/1024/768?image=1077"
 |                 animate-in="pan-left"
 |                 translate-x="-100"
@@ -98,11 +98,11 @@ amp-story/1.0/test/validator-amp-story-animations-visual-effects-parameters-erro
 |              animate-in-after="ken-burns-img1">
 |              <amp-img id="ken-burns-img2"
 >>             ^~~~~~~~~
-amp-story/1.0/test/validator-amp-story-animations-visual-effects-parameters-error.html:68:12 The attribute 'animate-in-after' may not appear in tag 'amp-img'. (see https://www.ampproject.org/docs/reference/components/amp-img) [DISALLOWED_HTML]
+amp-story/1.0/test/validator-amp-story-animations-visual-effects-parameters-error.html:68:12 The attribute 'animate-in-after' may not appear in tag 'amp-img'. (see https://amp.dev/documentation/components/amp-img) [DISALLOWED_HTML]
 >>             ^~~~~~~~~
-amp-story/1.0/test/validator-amp-story-animations-visual-effects-parameters-error.html:68:12 The attribute 'animate-in-duration' may not appear in tag 'amp-img'. (see https://www.ampproject.org/docs/reference/components/amp-img) [DISALLOWED_HTML]
+amp-story/1.0/test/validator-amp-story-animations-visual-effects-parameters-error.html:68:12 The attribute 'animate-in-duration' may not appear in tag 'amp-img'. (see https://amp.dev/documentation/components/amp-img) [DISALLOWED_HTML]
 >>             ^~~~~~~~~
-amp-story/1.0/test/validator-amp-story-animations-visual-effects-parameters-error.html:68:12 The attribute 'translate-y' may not appear in tag 'amp-img'. (see https://www.ampproject.org/docs/reference/components/amp-img) [DISALLOWED_HTML]
+amp-story/1.0/test/validator-amp-story-animations-visual-effects-parameters-error.html:68:12 The attribute 'translate-y' may not appear in tag 'amp-img'. (see https://amp.dev/documentation/components/amp-img) [DISALLOWED_HTML]
 |                src="https://picsum.photos/1024/768?image=1026"
 |                layout="fixed"
 |                width="1024"

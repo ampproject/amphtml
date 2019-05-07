@@ -66,7 +66,7 @@ FAIL
 |      <!-- Invalid: mask-output attr without mask attr -->
 |      <input mask-output="raw" type="text">
 >>     ^~~~~~~~~
-amp-inputmask/0.1/test/validator-amp-inputmask.html:66:4 The attribute 'mask-output' may not appear in tag 'input'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
+amp-inputmask/0.1/test/validator-amp-inputmask.html:66:4 The attribute 'mask-output' may not appear in tag 'input'. (see https://amp.dev/documentation/components/amp-form) [DISALLOWED_HTML]
 |      <!-- Invalid: mask attr with type=date -->
 |      <input mask="L0L_0L0" type="date">
 >>     ^~~~~~~~~

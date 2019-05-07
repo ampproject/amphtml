@@ -101,19 +101,19 @@ amp4email_feature_tests/amp_form.html:85:2 The attribute 'target' may not appear
 |    <form method="post" action-xhr="https://example.com/subscribe">
 |      <input type="button" name="button">
 >>     ^~~~~~~~~
-amp4email_feature_tests/amp_form.html:95:4 The attribute 'type' in tag 'INPUT (AMP4EMAIL)' is set to the invalid value 'button'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
+amp4email_feature_tests/amp_form.html:95:4 The attribute 'type' in tag 'INPUT (AMP4EMAIL)' is set to the invalid value 'button'. (see https://amp.dev/documentation/components/amp-form) [DISALLOWED_HTML]
 |      <input type="image" name="image">
 >>     ^~~~~~~~~
-amp4email_feature_tests/amp_form.html:96:4 The attribute 'type' in tag 'INPUT (AMP4EMAIL)' is set to the invalid value 'image'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
+amp4email_feature_tests/amp_form.html:96:4 The attribute 'type' in tag 'INPUT (AMP4EMAIL)' is set to the invalid value 'image'. (see https://amp.dev/documentation/components/amp-form) [DISALLOWED_HTML]
 |    </form>
 |    <!-- Invalid: input can not be type="password" -->
 |    <form method="post" action-xhr="https://example.com/subscribe">
 |      <input type="password" name="password">
 >>     ^~~~~~~~~
-amp4email_feature_tests/amp_form.html:100:4 The attribute 'type' in tag 'INPUT (AMP4EMAIL)' is set to the invalid value 'password'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
+amp4email_feature_tests/amp_form.html:100:4 The attribute 'type' in tag 'INPUT (AMP4EMAIL)' is set to the invalid value 'password'. (see https://amp.dev/documentation/components/amp-form) [DISALLOWED_HTML]
 |      <input type="file" name="file">
 >>     ^~~~~~~~~
-amp4email_feature_tests/amp_form.html:101:4 The attribute 'type' in tag 'INPUT (AMP4EMAIL)' is set to the invalid value 'file'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
+amp4email_feature_tests/amp_form.html:101:4 The attribute 'type' in tag 'INPUT (AMP4EMAIL)' is set to the invalid value 'file'. (see https://amp.dev/documentation/components/amp-form) [DISALLOWED_HTML]
 |    </form>
 |    <!-- Invalid: invalid attribute xhr-verify -->
 |    <form method="post" action-xhr="https://example.com/subscribe"
@@ -131,7 +131,7 @@ amp4email_feature_tests/amp_form.html:108:2 The attribute 'xhr-verify' may not a
 |    <form method="get" action-xhr="https://example.com/subscribe">
 |      <input [type]="state.type" name="name">
 >>     ^~~~~~~~~
-amp4email_feature_tests/amp_form.html:113:4 The attribute '[type]' may not appear in tag 'INPUT (AMP4EMAIL)'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
+amp4email_feature_tests/amp_form.html:113:4 The attribute '[type]' may not appear in tag 'INPUT (AMP4EMAIL)'. (see https://amp.dev/documentation/components/amp-form) [DISALLOWED_HTML]
 |    </form>
 |    <!-- Invalid: invalid usage of submitting attribute with nested template -->
 |    <form method="post" action-xhr="https://example.com/subscribe">

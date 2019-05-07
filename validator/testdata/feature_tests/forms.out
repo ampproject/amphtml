@@ -139,10 +139,10 @@ feature_tests/forms.html:124:2 The attribute 'target' in tag 'FORM [method=POST]
 |    <form method="post" action-xhr="https://example.com/subscribe" target="_blank">
 |      <input type="button" name="button">
 >>     ^~~~~~~~~
-feature_tests/forms.html:135:4 The attribute 'type' in tag 'input' is set to the invalid value 'button'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
+feature_tests/forms.html:135:4 The attribute 'type' in tag 'input' is set to the invalid value 'button'. (see https://amp.dev/documentation/components/amp-form) [DISALLOWED_HTML]
 |      <input type="image" name="image">
 >>     ^~~~~~~~~
-feature_tests/forms.html:136:4 The attribute 'type' in tag 'input' is set to the invalid value 'image'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
+feature_tests/forms.html:136:4 The attribute 'type' in tag 'input' is set to the invalid value 'image'. (see https://amp.dev/documentation/components/amp-form) [DISALLOWED_HTML]
 |    </form>
 |    <!-- Valid: input can be type="password" or type="file" in a post xhr form. -->
 |    <form method="post" action-xhr="https://example.com/subscribe" target="_blank">
@@ -153,7 +153,7 @@ feature_tests/forms.html:136:4 The attribute 'type' in tag 'input' is set to the
 |    <form method="get" action="https://example.com/subscribe" action-xhr="https://example.com/subscribe" target="_blank">
 |      <input type="password" name="password">
 >>     ^~~~~~~~~
-feature_tests/forms.html:145:4 The tag 'INPUT [type=password]' may only appear as a descendant of tag 'form [method=post]'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
+feature_tests/forms.html:145:4 The tag 'INPUT [type=password]' may only appear as a descendant of tag 'form [method=post]'. (see https://amp.dev/documentation/components/amp-form) [DISALLOWED_HTML]
 |    </form>
 |    <!-- Invalid: if validation-for is set on an element, then -->
 |    <!-- visible-when-invalid must also be set and vice versa. -->

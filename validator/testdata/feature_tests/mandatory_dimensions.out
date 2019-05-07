@@ -146,43 +146,43 @@ feature_tests/mandatory_dimensions.html:105:4 The tag 'amp-lightbox' requires in
 |      <!-- Container layout isn't supported by amp-img. -->
 |      <amp-img src="img" layout="container">
 >>     ^~~~~~~~~
-feature_tests/mandatory_dimensions.html:110:4 The specified layout 'CONTAINER' is not supported by tag 'amp-img'. (see https://www.ampproject.org/docs/reference/components/amp-img) [AMP_LAYOUT_PROBLEM]
+feature_tests/mandatory_dimensions.html:110:4 The specified layout 'CONTAINER' is not supported by tag 'amp-img'. (see https://amp.dev/documentation/components/amp-img) [AMP_LAYOUT_PROBLEM]
 |      <amp-img src="img" layout="container" width="42" height="42">
 >>     ^~~~~~~~~
-feature_tests/mandatory_dimensions.html:111:4 The specified layout 'CONTAINER' is not supported by tag 'amp-img'. (see https://www.ampproject.org/docs/reference/components/amp-img) [AMP_LAYOUT_PROBLEM]
+feature_tests/mandatory_dimensions.html:111:4 The specified layout 'CONTAINER' is not supported by tag 'amp-img'. (see https://amp.dev/documentation/components/amp-img) [AMP_LAYOUT_PROBLEM]
 |      <amp-img src="img">
 >>     ^~~~~~~~~
-feature_tests/mandatory_dimensions.html:112:4 Incomplete layout attributes specified for tag 'amp-img'. For example, provide attributes 'width' and 'height'. (see https://www.ampproject.org/docs/reference/components/amp-img) [AMP_LAYOUT_PROBLEM]
+feature_tests/mandatory_dimensions.html:112:4 Incomplete layout attributes specified for tag 'amp-img'. For example, provide attributes 'width' and 'height'. (see https://amp.dev/documentation/components/amp-img) [AMP_LAYOUT_PROBLEM]
 |
 |      <!-- Layout of responsive/fixed without width/height -->
 |      <amp-img src="img" layout="responsive">
 >>     ^~~~~~~~~
-feature_tests/mandatory_dimensions.html:115:4 The mandatory attribute 'height' is missing in tag 'amp-img'. (see https://www.ampproject.org/docs/reference/components/amp-img) [AMP_LAYOUT_PROBLEM]
+feature_tests/mandatory_dimensions.html:115:4 The mandatory attribute 'height' is missing in tag 'amp-img'. (see https://amp.dev/documentation/components/amp-img) [AMP_LAYOUT_PROBLEM]
 |      <amp-img src="img" layout="fixed">
 >>     ^~~~~~~~~
-feature_tests/mandatory_dimensions.html:116:4 The mandatory attribute 'height' is missing in tag 'amp-img'. (see https://www.ampproject.org/docs/reference/components/amp-img) [AMP_LAYOUT_PROBLEM]
+feature_tests/mandatory_dimensions.html:116:4 The mandatory attribute 'height' is missing in tag 'amp-img'. (see https://amp.dev/documentation/components/amp-img) [AMP_LAYOUT_PROBLEM]
 |      <amp-img src="img" layout="responsive" width="42">
 >>     ^~~~~~~~~
-feature_tests/mandatory_dimensions.html:117:4 The mandatory attribute 'height' is missing in tag 'amp-img'. (see https://www.ampproject.org/docs/reference/components/amp-img) [AMP_LAYOUT_PROBLEM]
+feature_tests/mandatory_dimensions.html:117:4 The mandatory attribute 'height' is missing in tag 'amp-img'. (see https://amp.dev/documentation/components/amp-img) [AMP_LAYOUT_PROBLEM]
 |      <amp-img src="img" layout="fixed" height="42">
 >>     ^~~~~~~~~
-feature_tests/mandatory_dimensions.html:118:4 The mandatory attribute 'width' is missing in tag 'amp-img'. (see https://www.ampproject.org/docs/reference/components/amp-img) [AMP_LAYOUT_PROBLEM]
+feature_tests/mandatory_dimensions.html:118:4 The mandatory attribute 'width' is missing in tag 'amp-img'. (see https://amp.dev/documentation/components/amp-img) [AMP_LAYOUT_PROBLEM]
 |      <amp-img src="img" layout="fixed" height="auto">
 >>     ^~~~~~~~~
-feature_tests/mandatory_dimensions.html:119:4 The attribute 'height' in tag 'amp-img' is set to the invalid value 'auto'. (see https://www.ampproject.org/docs/reference/components/amp-img) [AMP_LAYOUT_PROBLEM]
+feature_tests/mandatory_dimensions.html:119:4 The attribute 'height' in tag 'amp-img' is set to the invalid value 'auto'. (see https://amp.dev/documentation/components/amp-img) [AMP_LAYOUT_PROBLEM]
 |      <amp-img src="img" layout="fixed" width="auto" height="42">
 >>     ^~~~~~~~~
-feature_tests/mandatory_dimensions.html:120:4 The attribute 'width' in tag 'amp-img' is set to the invalid value 'auto'. (see https://www.ampproject.org/docs/reference/components/amp-img) [AMP_LAYOUT_PROBLEM]
+feature_tests/mandatory_dimensions.html:120:4 The attribute 'width' in tag 'amp-img' is set to the invalid value 'auto'. (see https://amp.dev/documentation/components/amp-img) [AMP_LAYOUT_PROBLEM]
 |
 |      <!-- Inconsistent units -->
 |      <amp-img src="img" layout="responsive" width="42px" height="42rem">
 >>     ^~~~~~~~~
-feature_tests/mandatory_dimensions.html:123:4 Inconsistent units for width and height in tag 'amp-img' - width is specified in 'px' whereas height is specified in 'rem'. (see https://www.ampproject.org/docs/reference/components/amp-img) [AMP_LAYOUT_PROBLEM]
+feature_tests/mandatory_dimensions.html:123:4 Inconsistent units for width and height in tag 'amp-img' - width is specified in 'px' whereas height is specified in 'rem'. (see https://amp.dev/documentation/components/amp-img) [AMP_LAYOUT_PROBLEM]
 |
 |      <!-- src or srcset or both are all valid -->
 |      <amp-img width="42" height="42"></amp-img>
 >>     ^~~~~~~~~
-feature_tests/mandatory_dimensions.html:126:4 The mandatory attribute 'src' is missing in tag 'amp-img'. (see https://www.ampproject.org/docs/reference/components/amp-img) [AMP_TAG_PROBLEM]
+feature_tests/mandatory_dimensions.html:126:4 The mandatory attribute 'src' is missing in tag 'amp-img'. (see https://amp.dev/documentation/components/amp-img) [AMP_TAG_PROBLEM]
 |      <amp-anim width="42" height="42"></amp-anim>
 >>     ^~~~~~~~~
 feature_tests/mandatory_dimensions.html:127:4 The mandatory attribute 'src' is missing in tag 'amp-anim'. (see https://www.ampproject.org/docs/reference/components/amp-anim) [AMP_TAG_PROBLEM]
@@ -207,7 +207,7 @@ feature_tests/mandatory_dimensions.html:134:4 The tag 'amp-iframe' is missing a 
 feature_tests/mandatory_dimensions.html:134:4 The tag 'amp-iframe' requires including the 'amp-iframe' extension JavaScript. (see https://amp.dev/documentation/components/amp-iframe) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |      <amp-pixel></amp-pixel>
 >>     ^~~~~~~~~
-feature_tests/mandatory_dimensions.html:135:4 The mandatory attribute 'src' is missing in tag 'amp-pixel'. (see https://www.ampproject.org/docs/reference/components/amp-pixel) [AMP_TAG_PROBLEM]
+feature_tests/mandatory_dimensions.html:135:4 The mandatory attribute 'src' is missing in tag 'amp-pixel'. (see https://amp.dev/documentation/components/amp-pixel) [AMP_TAG_PROBLEM]
 |
 |      <!-- disallow a src or srcset -->
 |      <amp-fit-text height="42" src="fit-text"></amp-fit-text>
@@ -244,7 +244,7 @@ feature_tests/mandatory_dimensions.html:143:4 The tag 'amp-lightbox' requires in
 |      <!-- Not-whitelisted attributes -->
 |      <amp-img height="42" src="img" foo="bar"></amp-img>
 >>     ^~~~~~~~~
-feature_tests/mandatory_dimensions.html:146:4 The attribute 'foo' may not appear in tag 'amp-img'. (see https://www.ampproject.org/docs/reference/components/amp-img) [DISALLOWED_HTML]
+feature_tests/mandatory_dimensions.html:146:4 The attribute 'foo' may not appear in tag 'amp-img'. (see https://amp.dev/documentation/components/amp-img) [DISALLOWED_HTML]
 |    <!-- /Invalid Examples -->
 |
 |  </body>
