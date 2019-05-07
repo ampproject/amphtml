@@ -41,7 +41,7 @@ FAIL
 |    <!-- invalid: layout=fixed - requires width/height -->
 |    <amp-img layout="fixed"  src="itshappening.gif"></amp-img>
 >>   ^~~~~~~~~
-feature_tests/amp_layouts.html:41:2 The mandatory attribute 'height' is missing in tag 'amp-img'. (see https://www.ampproject.org/docs/reference/components/amp-img) [AMP_LAYOUT_PROBLEM]
+feature_tests/amp_layouts.html:41:2 The mandatory attribute 'height' is missing in tag 'amp-img'. (see https://amp.dev/documentation/components/amp-img) [AMP_LAYOUT_PROBLEM]
 |
 |    <!-- valid: layout=fixed-height -->
 |    <amp-img layout="fixed-height" height="200"  src="itshappening.gif"></amp-img>
@@ -53,7 +53,7 @@ feature_tests/amp_layouts.html:41:2 The mandatory attribute 'height' is missing 
 |    <!-- invalid: layout=fixed-height, prohibit width!=auto -->
 |    <amp-img layout="fixed-height" height="200" width="300"
 >>   ^~~~~~~~~
-feature_tests/amp_layouts.html:51:2 Invalid value '300' for attribute 'width' in tag 'amp-img' - for layout 'FIXED_HEIGHT', set the attribute 'width' to value 'auto'. (see https://www.ampproject.org/docs/reference/components/amp-img) [AMP_LAYOUT_PROBLEM]
+feature_tests/amp_layouts.html:51:2 Invalid value '300' for attribute 'width' in tag 'amp-img' - for layout 'FIXED_HEIGHT', set the attribute 'width' to value 'auto'. (see https://amp.dev/documentation/components/amp-img) [AMP_LAYOUT_PROBLEM]
 |             src="itshappening.gif"></amp-img>
 |
 |    <!-- valid: layout=fixed-height - default with height -->
@@ -65,7 +65,7 @@ feature_tests/amp_layouts.html:51:2 Invalid value '300' for attribute 'width' in
 |    <!-- invalid: layout=fixed-height - requires height -->
 |    <amp-img layout="fixed-height" src="itshappening.gif"></amp-img>
 >>   ^~~~~~~~~
-feature_tests/amp_layouts.html:61:2 The mandatory attribute 'height' is missing in tag 'amp-img'. (see https://www.ampproject.org/docs/reference/components/amp-img) [AMP_LAYOUT_PROBLEM]
+feature_tests/amp_layouts.html:61:2 The mandatory attribute 'height' is missing in tag 'amp-img'. (see https://amp.dev/documentation/components/amp-img) [AMP_LAYOUT_PROBLEM]
 |
 |    <!-- valid: layout=responsive -->
 |    <amp-img layout="responsive" width="100" height="200"
@@ -82,7 +82,7 @@ feature_tests/amp_layouts.html:61:2 The mandatory attribute 'height' is missing 
 |         for flex-item -->
 |    <amp-img layout="fill" width="50" height="auto"></amp-img>
 >>   ^~~~~~~~~
-feature_tests/amp_layouts.html:76:2 The attribute 'height' in tag 'amp-img' is set to the invalid value 'auto'. (see https://www.ampproject.org/docs/reference/components/amp-img) [AMP_LAYOUT_PROBLEM]
+feature_tests/amp_layouts.html:76:2 The attribute 'height' in tag 'amp-img' is set to the invalid value 'auto'. (see https://amp.dev/documentation/components/amp-img) [AMP_LAYOUT_PROBLEM]
 |
 |    <!-- valid: layout=flex-item -->
 |    <amp-img layout="flex-item" src="itshappening.gif"></amp-img>
@@ -104,12 +104,12 @@ feature_tests/amp_layouts.html:76:2 The attribute 'height' in tag 'amp-img' is s
 |      -->
 |    <amp-img layout="container" src="itshappening.gif"></amp-img>
 >>   ^~~~~~~~~
-feature_tests/amp_layouts.html:96:2 The specified layout 'CONTAINER' is not supported by tag 'amp-img'. (see https://www.ampproject.org/docs/reference/components/amp-img) [AMP_LAYOUT_PROBLEM]
+feature_tests/amp_layouts.html:96:2 The specified layout 'CONTAINER' is not supported by tag 'amp-img'. (see https://amp.dev/documentation/components/amp-img) [AMP_LAYOUT_PROBLEM]
 |
 |    <!-- invalid: layout=unknown -->
 |    <amp-img layout="unknown" src="itshappening.gif"></amp-img>
 >>   ^~~~~~~~~
-feature_tests/amp_layouts.html:99:2 The attribute 'layout' in tag 'amp-img' is set to the invalid value 'unknown'. (see https://www.ampproject.org/docs/reference/components/amp-img) [AMP_LAYOUT_PROBLEM]
+feature_tests/amp_layouts.html:99:2 The attribute 'layout' in tag 'amp-img' is set to the invalid value 'unknown'. (see https://amp.dev/documentation/components/amp-img) [AMP_LAYOUT_PROBLEM]
 |
 |    <!-- valid: should configure natural dimensions; default layout -->
 |    <amp-pixel src="https://www.example.com/make-my-visit-count"></amp-pixel>
@@ -141,19 +141,19 @@ feature_tests/amp_layouts.html:99:2 The attribute 'layout' in tag 'amp-img' is s
 |         support fixed-height layout. -->
 |    <amp-pixel src="https://www.example.com/make-my-visit-count"
 >>   ^~~~~~~~~
-feature_tests/amp_layouts.html:129:2 The implied layout 'FIXED_HEIGHT' is not supported by tag 'amp-pixel'. (see https://www.ampproject.org/docs/reference/components/amp-pixel) [AMP_LAYOUT_PROBLEM]
+feature_tests/amp_layouts.html:129:2 The implied layout 'FIXED_HEIGHT' is not supported by tag 'amp-pixel'. (see https://amp.dev/documentation/components/amp-pixel) [AMP_LAYOUT_PROBLEM]
 |               width="auto" height="1px"></amp-pixel>
 |
 |    <!-- invalid: width=X. -->
 |    <amp-pixel src="https://www.example.com/make-my-visit-count"
 >>   ^~~~~~~~~
-feature_tests/amp_layouts.html:133:2 The attribute 'width' in tag 'amp-pixel' is set to the invalid value 'X'. (see https://www.ampproject.org/docs/reference/components/amp-pixel) [AMP_LAYOUT_PROBLEM]
+feature_tests/amp_layouts.html:133:2 The attribute 'width' in tag 'amp-pixel' is set to the invalid value 'X'. (see https://amp.dev/documentation/components/amp-pixel) [AMP_LAYOUT_PROBLEM]
 |               width="X" height="1px"></amp-pixel>
 |
 |    <!-- invalid: height=X. -->
 |    <amp-pixel src="https://www.example.com/make-my-visit-count"
 >>   ^~~~~~~~~
-feature_tests/amp_layouts.html:137:2 The attribute 'height' in tag 'amp-pixel' is set to the invalid value 'X'. (see https://www.ampproject.org/docs/reference/components/amp-pixel) [AMP_LAYOUT_PROBLEM]
+feature_tests/amp_layouts.html:137:2 The attribute 'height' in tag 'amp-pixel' is set to the invalid value 'X'. (see https://amp.dev/documentation/components/amp-pixel) [AMP_LAYOUT_PROBLEM]
 |               height="X" width="1px"></amp-pixel>
 |
 |    <!-- valid responsive layout with heights -->
@@ -167,33 +167,33 @@ feature_tests/amp_layouts.html:137:2 The attribute 'height' in tag 'amp-pixel' i
 |    <!-- invalid: can't have heights with specified layout fixed -->
 |    <amp-img src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w400-h300-no-n" width=400 height=300 layout="fixed"
 >>   ^~~~~~~~~
-feature_tests/amp_layouts.html:149:2 The attribute 'heights' in tag 'amp-img' is disallowed by specified layout 'FIXED'. (see https://www.ampproject.org/docs/reference/components/amp-img) [AMP_LAYOUT_PROBLEM]
+feature_tests/amp_layouts.html:149:2 The attribute 'heights' in tag 'amp-img' is disallowed by specified layout 'FIXED'. (see https://amp.dev/documentation/components/amp-img) [AMP_LAYOUT_PROBLEM]
 |             heights="(min-width:760px)  33%, (min-width:500px) 75%, 125%" ></amp-img>
 |
 |    <!-- invalid: can't have heights with implied layout fixed_height -->
 |    <amp-img src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w400-h300-no-n" height=300
 >>   ^~~~~~~~~
-feature_tests/amp_layouts.html:153:2 The attribute 'heights' in tag 'amp-img' is disallowed by implied layout 'FIXED_HEIGHT'. (see https://www.ampproject.org/docs/reference/components/amp-img) [AMP_LAYOUT_PROBLEM]
+feature_tests/amp_layouts.html:153:2 The attribute 'heights' in tag 'amp-img' is disallowed by implied layout 'FIXED_HEIGHT'. (see https://amp.dev/documentation/components/amp-img) [AMP_LAYOUT_PROBLEM]
 |             heights="(min-width:760px)  33%, (min-width:500px) 75%, 125%" ></amp-img>
 |    <!-- valid: intrinsic has height and width set with same units -->
 |    <amp-img src="img.png" height="30px" width="300px" layout="intrinsic"></amp-img>
 |    <!-- invalid: intrinsic has height and width set with different units -->
 |    <amp-img src="img.png" height="30px" width="300em" layout="intrinsic"></amp-img>
 >>   ^~~~~~~~~
-feature_tests/amp_layouts.html:158:2 Inconsistent units for width and height in tag 'amp-img' - width is specified in 'em' whereas height is specified in 'px'. (see https://www.ampproject.org/docs/reference/components/amp-img) [AMP_LAYOUT_PROBLEM]
+feature_tests/amp_layouts.html:158:2 Inconsistent units for width and height in tag 'amp-img' - width is specified in 'em' whereas height is specified in 'px'. (see https://amp.dev/documentation/components/amp-img) [AMP_LAYOUT_PROBLEM]
 |    <!-- invalid: intrinsic height and width can not be auto -->
 |    <amp-img src="img.png" height="auto" width="300px" layout="intrinsic"></amp-img>
 >>   ^~~~~~~~~
-feature_tests/amp_layouts.html:160:2 The attribute 'height' in tag 'amp-img' is set to the invalid value 'auto'. (see https://www.ampproject.org/docs/reference/components/amp-img) [AMP_LAYOUT_PROBLEM]
+feature_tests/amp_layouts.html:160:2 The attribute 'height' in tag 'amp-img' is set to the invalid value 'auto'. (see https://amp.dev/documentation/components/amp-img) [AMP_LAYOUT_PROBLEM]
 |    <amp-img src="img.png" height="30px" width="auto" layout="intrinsic"></amp-img>
 >>   ^~~~~~~~~
-feature_tests/amp_layouts.html:161:2 The attribute 'width' in tag 'amp-img' is set to the invalid value 'auto'. (see https://www.ampproject.org/docs/reference/components/amp-img) [AMP_LAYOUT_PROBLEM]
+feature_tests/amp_layouts.html:161:2 The attribute 'width' in tag 'amp-img' is set to the invalid value 'auto'. (see https://amp.dev/documentation/components/amp-img) [AMP_LAYOUT_PROBLEM]
 |    <!-- invalid: intrinsic height and width must be set -->
 |    <amp-img src="img.png" height="30px" layout="intrinsic"></amp-img>
 >>   ^~~~~~~~~
-feature_tests/amp_layouts.html:163:2 The mandatory attribute 'width' is missing in tag 'amp-img'. (see https://www.ampproject.org/docs/reference/components/amp-img) [AMP_LAYOUT_PROBLEM]
+feature_tests/amp_layouts.html:163:2 The mandatory attribute 'width' is missing in tag 'amp-img'. (see https://amp.dev/documentation/components/amp-img) [AMP_LAYOUT_PROBLEM]
 |    <amp-img src="img.png" width="300px" layout="intrinsic"></amp-img>
 >>   ^~~~~~~~~
-feature_tests/amp_layouts.html:164:2 The mandatory attribute 'height' is missing in tag 'amp-img'. (see https://www.ampproject.org/docs/reference/components/amp-img) [AMP_LAYOUT_PROBLEM]
+feature_tests/amp_layouts.html:164:2 The mandatory attribute 'height' is missing in tag 'amp-img'. (see https://amp.dev/documentation/components/amp-img) [AMP_LAYOUT_PROBLEM]
 |  </body>
 |  </html>

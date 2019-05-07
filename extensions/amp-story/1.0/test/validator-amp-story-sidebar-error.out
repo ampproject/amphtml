@@ -47,7 +47,7 @@ FAIL
 |        poster-portrait-src="https://example.com/my-story/poster/3x4.jpg">
 |        <amp-sidebar id="sidebar1" layout="nodisplay" side="right">
 >>       ^~~~~~~~~
-amp-story/1.0/test/validator-amp-story-sidebar-error.html:47:6 The attribute 'side' may not appear in tag 'amp-story >> amp-sidebar'. (see https://www.ampproject.org/docs/reference/components/amp-sidebar) [DISALLOWED_HTML]
+amp-story/1.0/test/validator-amp-story-sidebar-error.html:47:6 The attribute 'side' may not appear in tag 'amp-story >> amp-sidebar'. (see https://amp.dev/documentation/components/amp-sidebar) [DISALLOWED_HTML]
 |          <ul>
 |            <li>Nav item 1</li>
 |            <li><a href="#idTwo" on="tap:idTwo.scrollTo">Nav item 2</a></li>

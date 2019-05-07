@@ -51,36 +51,36 @@ FAIL
 |      <audio>
 |        <source>
 >>       ^~~~~~~~~
-feature_tests/noscript.html:51:6 The mandatory attribute 'src' is missing in tag 'audio > source'. (see https://www.ampproject.org/docs/reference/components/amp-audio) [DISALLOWED_HTML]
+feature_tests/noscript.html:51:6 The mandatory attribute 'src' is missing in tag 'audio > source'. (see https://amp.dev/documentation/components/amp-audio) [DISALLOWED_HTML]
 >>       ^~~~~~~~~
-feature_tests/noscript.html:51:6 The mandatory attribute 'type' is missing in tag 'audio > source'. (see https://www.ampproject.org/docs/reference/components/amp-audio) [DISALLOWED_HTML]
+feature_tests/noscript.html:51:6 The mandatory attribute 'type' is missing in tag 'audio > source'. (see https://amp.dev/documentation/components/amp-audio) [DISALLOWED_HTML]
 |      </audio>
 |    </noscript>
 |    <!-- Invalid: img must have src; alt, height and width are optional -->
 |    <noscript>
 |      <img alt="Iconic Lemurs">
 >>     ^~~~~~~~~
-feature_tests/noscript.html:56:4 The mandatory attribute 'src' is missing in tag 'img'. (see https://www.ampproject.org/docs/reference/components/amp-img) [DISALLOWED_HTML]
+feature_tests/noscript.html:56:4 The mandatory attribute 'src' is missing in tag 'img'. (see https://amp.dev/documentation/components/amp-img) [DISALLOWED_HTML]
 |    </noscript>
 |    <!-- Invalid: audio must be in a noscript tag -->
 |    <audio controls>
 >>   ^~~~~~~~~
-feature_tests/noscript.html:59:2 The tag 'audio' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-audio'? (see https://www.ampproject.org/docs/reference/components/amp-audio) [DISALLOWED_HTML_WITH_AMP_EQUIVALENT]
+feature_tests/noscript.html:59:2 The tag 'audio' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-audio'? (see https://amp.dev/documentation/components/amp-audio) [DISALLOWED_HTML_WITH_AMP_EQUIVALENT]
 |      <source src="https://example.com/howl-of-the-lemur.mp3" type="audio/mpeg">
 |    </audio>
 |    <!-- Invalid: img must be in a noscript tag -->
 |    <img alt="Iconic Lemurs" height="200" src="https://example.com/lemurs.png" width="80">
 >>   ^~~~~~~~~
-feature_tests/noscript.html:63:2 The tag 'img' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-img'? (see https://www.ampproject.org/docs/reference/components/amp-img) [DISALLOWED_HTML_WITH_AMP_EQUIVALENT]
+feature_tests/noscript.html:63:2 The tag 'img' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-img'? (see https://amp.dev/documentation/components/amp-img) [DISALLOWED_HTML_WITH_AMP_EQUIVALENT]
 |    <!-- Invalid: video must be in a noscript tag -->
 |    <video controls height="480" width="640">
 >>   ^~~~~~~~~
-feature_tests/noscript.html:65:2 The tag 'video' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-video'? (see https://www.ampproject.org/docs/reference/components/amp-video) [DISALLOWED_HTML_WITH_AMP_EQUIVALENT]
+feature_tests/noscript.html:65:2 The tag 'video' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-video'? (see https://amp.dev/documentation/components/amp-video) [DISALLOWED_HTML_WITH_AMP_EQUIVALENT]
 |      <source src="https://example.com/island-of-lemurs.mp4" type="video/mp4">
 |    </video>
 |    <!-- Invalid: nested noscript tags don't correctly parse. -->
 |    <noscript> <noscript> </noscript> </noscript>
 >>              ^~~~~~~~~
-feature_tests/noscript.html:69:13 The parent tag of tag 'noscript enclosure for boilerplate' is 'noscript', but it can only be 'head'. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md) [DISALLOWED_HTML]
+feature_tests/noscript.html:69:13 The parent tag of tag 'noscript enclosure for boilerplate' is 'noscript', but it can only be 'head'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amp-boilerplate?format=websites) [DISALLOWED_HTML]
 |  </body>
 |  </html>

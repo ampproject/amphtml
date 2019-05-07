@@ -39,6 +39,6 @@ FAIL
 |    <!-- Invalid: illegal layout. -->
 |    <amp-image-lightbox id="lightbox1" width=1 height=1></amp-image-lightbox>
 >>   ^~~~~~~~~
-amp-image-lightbox/0.1/test/validator-amp-image-lightbox.html:39:2 The implied layout 'FIXED' is not supported by tag 'amp-image-lightbox'. (see https://www.ampproject.org/docs/reference/components/amp-image-lightbox) [AMP_LAYOUT_PROBLEM]
+amp-image-lightbox/0.1/test/validator-amp-image-lightbox.html:39:2 The implied layout 'FIXED' is not supported by tag 'amp-image-lightbox'. (see https://amp.dev/documentation/components/amp-image-lightbox) [AMP_LAYOUT_PROBLEM]
 |  </body>
 |  </html>

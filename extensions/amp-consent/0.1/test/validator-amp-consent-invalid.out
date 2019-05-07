@@ -42,7 +42,7 @@ FAIL
 |  <!-- Invalid: multiple amp-consent -->
 |  <amp-consent id='ABC' layout='nodisplay'>
 >> ^~~~~~~~~
-amp-consent/0.1/test/validator-amp-consent-invalid.html:42:0 The tag 'amp-consent' appears more than once in the document. (see https://www.ampproject.org/docs/reference/components/amp-consent) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+amp-consent/0.1/test/validator-amp-consent-invalid.html:42:0 The tag 'amp-consent' appears more than once in the document. (see https://amp.dev/documentation/components/amp-consent) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |    <div id='ui1'>UI1
 |      <button>Accept</button>
 |    </div>
@@ -53,4 +53,4 @@ amp-consent/0.1/test/validator-amp-consent-invalid.html:42:0 The tag 'amp-consen
 |  </body>
 |  </html>
 >>       ^~~~~~~~~
-amp-consent/0.1/test/validator-amp-consent-invalid.html:51:6 The tag 'amp-consent extension .json script' is missing or incorrect, but required by 'amp-consent'. (see https://www.ampproject.org/docs/reference/components/amp-consent) [AMP_TAG_PROBLEM]
+amp-consent/0.1/test/validator-amp-consent-invalid.html:51:6 The tag 'amp-consent extension .json script' is missing or incorrect, but required by 'amp-consent'. (see https://amp.dev/documentation/components/amp-consent) [AMP_TAG_PROBLEM]

@@ -48,7 +48,7 @@ tags: {  # <amp-image-slider>
     child_tag_name_oneof: "DIV"
     mandatory_min_num_child_tags: 2
   }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-image-slider"
+  spec_url: "https://amp.dev/documentation/components/amp-image-slider"
   amp_layout: {
     supported_layouts: FIXED
     supported_layouts: INTRINSIC
@@ -82,7 +82,7 @@ tags: {  # <amp-image-slider>
     child_tag_name_oneof: "I-AMPHTML-SIZER"
     mandatory_min_num_child_tags: 2
   }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-image-slider"
+  spec_url: "https://amp.dev/documentation/components/amp-image-slider"
   amp_layout: {
     supported_layouts: FIXED
     supported_layouts: INTRINSIC
@@ -99,7 +99,7 @@ tags: {
     name: "first"
     mandatory: true
   }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-image-slider"
+  spec_url: "https://amp.dev/documentation/components/amp-image-slider"
 }
 tags: {
   html_format: AMP
@@ -110,5 +110,5 @@ tags: {
     name: "second"
     mandatory: true
   }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-image-slider"
+  spec_url: "https://amp.dev/documentation/components/amp-image-slider"
 }

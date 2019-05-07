@@ -49,9 +49,9 @@ FAIL
 |    <!-- Invalid: Incorrect attribute value for autoplay -->
 |    <amp-video autoplay=true layout=fill width=300 height=500
 >>   ^~~~~~~~~
-amp-video/0.1/test/validator-amp-video.html:49:2 The attribute 'autoplay' in tag 'amp-video' is set to the invalid value 'true'. (see https://www.ampproject.org/docs/reference/components/amp-video) [DISALLOWED_HTML]
+amp-video/0.1/test/validator-amp-video.html:49:2 The attribute 'autoplay' in tag 'amp-video' is set to the invalid value 'true'. (see https://amp.dev/documentation/components/amp-video) [DISALLOWED_HTML]
 >>   ^~~~~~~~~
-amp-video/0.1/test/validator-amp-video.html:49:2 The attribute 'loop' in tag 'amp-video' is set to the invalid value '1'. (see https://www.ampproject.org/docs/reference/components/amp-video) [DISALLOWED_HTML]
+amp-video/0.1/test/validator-amp-video.html:49:2 The attribute 'loop' in tag 'amp-video' is set to the invalid value '1'. (see https://amp.dev/documentation/components/amp-video) [DISALLOWED_HTML]
 |      loop="1" preload="metadata" controls="controls"></amp-video>
 |
 |    <!-- Valid: Correct attribute value for rotate-to-fullscreen -->
@@ -66,7 +66,7 @@ amp-video/0.1/test/validator-amp-video.html:57:2 The attribute 'dock' requires i
 |    <!-- Invalid: Incorrect attribute value for rotate-to-fullscreen -->
 |    <amp-video rotate-to-fullscreen=true layout=fill width=300 height=500
 >>   ^~~~~~~~~
-amp-video/0.1/test/validator-amp-video.html:60:2 The attribute 'rotate-to-fullscreen' in tag 'amp-video' is set to the invalid value 'true'. (see https://www.ampproject.org/docs/reference/components/amp-video) [DISALLOWED_HTML]
+amp-video/0.1/test/validator-amp-video.html:60:2 The attribute 'rotate-to-fullscreen' in tag 'amp-video' is set to the invalid value 'true'. (see https://amp.dev/documentation/components/amp-video) [DISALLOWED_HTML]
 |      loop preload="metadata" controls></amp-video>
 |  </body>
 |  </html>

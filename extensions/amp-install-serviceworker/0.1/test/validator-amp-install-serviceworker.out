@@ -45,7 +45,7 @@ FAIL
 |    <!-- Invalid: The data-iframe-src attribute is not https or relative. -->
 |    <amp-install-serviceworker
 >>   ^~~~~~~~~
-amp-install-serviceworker/0.1/test/validator-amp-install-serviceworker.html:45:2 Invalid URL protocol 'http:' for attribute 'data-iframe-src' in tag 'amp-install-serviceworker'. (see https://www.ampproject.org/docs/reference/components/amp-install-serviceworker) [AMP_TAG_PROBLEM]
+amp-install-serviceworker/0.1/test/validator-amp-install-serviceworker.html:45:2 Invalid URL protocol 'http:' for attribute 'data-iframe-src' in tag 'amp-install-serviceworker'. (see https://amp.dev/documentation/components/amp-install-serviceworker) [AMP_TAG_PROBLEM]
 |      src="https://www.your-domain.com/serviceworker.js"
 |      data-iframe-src="http://www.your-domain.com/install-serviceworker.html"
 |      layout="nodisplay">
@@ -54,7 +54,7 @@ amp-install-serviceworker/0.1/test/validator-amp-install-serviceworker.html:45:2
 |    <!-- Invalid: Missing src attribute. -->
 |    <amp-install-serviceworker
 >>   ^~~~~~~~~
-amp-install-serviceworker/0.1/test/validator-amp-install-serviceworker.html:52:2 The mandatory attribute 'src' is missing in tag 'amp-install-serviceworker'. (see https://www.ampproject.org/docs/reference/components/amp-install-serviceworker) [AMP_TAG_PROBLEM]
+amp-install-serviceworker/0.1/test/validator-amp-install-serviceworker.html:52:2 The mandatory attribute 'src' is missing in tag 'amp-install-serviceworker'. (see https://amp.dev/documentation/components/amp-install-serviceworker) [AMP_TAG_PROBLEM]
 |      data-iframe-src="https://www.your-domain.com/install-serviceworker.html"
 |      layout="nodisplay">
 |    </amp-install-serviceworker>
@@ -62,7 +62,7 @@ amp-install-serviceworker/0.1/test/validator-amp-install-serviceworker.html:52:2
 |    <!-- Invalid: The src attribute is not https or relative. -->
 |    <amp-install-serviceworker
 >>   ^~~~~~~~~
-amp-install-serviceworker/0.1/test/validator-amp-install-serviceworker.html:58:2 Invalid URL protocol 'http:' for attribute 'src' in tag 'amp-install-serviceworker'. (see https://www.ampproject.org/docs/reference/components/amp-install-serviceworker) [AMP_TAG_PROBLEM]
+amp-install-serviceworker/0.1/test/validator-amp-install-serviceworker.html:58:2 Invalid URL protocol 'http:' for attribute 'src' in tag 'amp-install-serviceworker'. (see https://amp.dev/documentation/components/amp-install-serviceworker) [AMP_TAG_PROBLEM]
 |      src="http://www.your-domain.com/serviceworker.js"
 |      data-iframe-src="https://www.your-domain.com/install-serviceworker.html"
 |      layout="nodisplay">
@@ -71,7 +71,7 @@ amp-install-serviceworker/0.1/test/validator-amp-install-serviceworker.html:58:2
 |    <!-- Invalid: illegal layout. -->
 |    <amp-install-serviceworker
 >>   ^~~~~~~~~
-amp-install-serviceworker/0.1/test/validator-amp-install-serviceworker.html:65:2 The specified layout 'RESPONSIVE' is not supported by tag 'amp-install-serviceworker'. (see https://www.ampproject.org/docs/reference/components/amp-install-serviceworker) [AMP_LAYOUT_PROBLEM]
+amp-install-serviceworker/0.1/test/validator-amp-install-serviceworker.html:65:2 The specified layout 'RESPONSIVE' is not supported by tag 'amp-install-serviceworker'. (see https://amp.dev/documentation/components/amp-install-serviceworker) [AMP_LAYOUT_PROBLEM]
 |      src="https://www.your-domain.com/serviceworker.js"
 |      data-iframe-src="https://www.your-domain.com/install-serviceworker.html"
 |      layout="responsive">

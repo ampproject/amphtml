@@ -40,7 +40,7 @@ FAIL
 |    <!-- Invalid: missing data-eid attribute. -->
 |    <amp-hulu
 >>   ^~~~~~~~~
-amp-hulu/0.1/test/validator-amp-hulu.html:40:2 The mandatory attribute 'data-eid' is missing in tag 'amp-hulu'. (see https://www.ampproject.org/docs/reference/components/amp-hulu) [AMP_TAG_PROBLEM]
+amp-hulu/0.1/test/validator-amp-hulu.html:40:2 The mandatory attribute 'data-eid' is missing in tag 'amp-hulu'. (see https://amp.dev/documentation/components/amp-hulu) [AMP_TAG_PROBLEM]
 |      layout="responsive"
 |      width="312"
 |      height="213">
@@ -49,7 +49,7 @@ amp-hulu/0.1/test/validator-amp-hulu.html:40:2 The mandatory attribute 'data-eid
 |    <!-- Invalid: illegal layout. -->
 |    <amp-hulu
 >>   ^~~~~~~~~
-amp-hulu/0.1/test/validator-amp-hulu.html:47:2 The specified layout 'INTRINSIC' is not supported by tag 'amp-hulu'. (see https://www.ampproject.org/docs/reference/components/amp-hulu) [AMP_LAYOUT_PROBLEM]
+amp-hulu/0.1/test/validator-amp-hulu.html:47:2 The specified layout 'INTRINSIC' is not supported by tag 'amp-hulu'. (see https://amp.dev/documentation/components/amp-hulu) [AMP_LAYOUT_PROBLEM]
 |      layout="intrinsic"
 |      width="412"
 |      height="213"

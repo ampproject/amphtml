@@ -33,21 +33,21 @@ FAIL
 |    <!-- Invalid: !important is not allowed -->
 |    <amp-img layout=fill src=lemur.png style="display:block !important; width:100px;"></amp-img>
 >>   ^~~~~~~~~
-feature_tests/inline_style.html:33:2 The attribute 'style' in tag 'amp-img' is set to the invalid value 'display:block !important; width:100px;'. (see https://www.ampproject.org/docs/reference/components/amp-img) [DISALLOWED_HTML]
+feature_tests/inline_style.html:33:2 The attribute 'style' in tag 'amp-img' is set to the invalid value 'display:block !important; width:100px;'. (see https://amp.dev/documentation/components/amp-img) [DISALLOWED_HTML]
 |    <amp-img layout=fill src=lemur.png style="display:block ! important; width:100px;"></amp-img>
 >>   ^~~~~~~~~
-feature_tests/inline_style.html:34:2 The attribute 'style' in tag 'amp-img' is set to the invalid value 'display:block ! important; width:100px;'. (see https://www.ampproject.org/docs/reference/components/amp-img) [DISALLOWED_HTML]
+feature_tests/inline_style.html:34:2 The attribute 'style' in tag 'amp-img' is set to the invalid value 'display:block ! important; width:100px;'. (see https://amp.dev/documentation/components/amp-img) [DISALLOWED_HTML]
 |    <!-- Invalid: position:fixed is not allowed -->
 |    <amp-img layout=fill src=lemur.png style="display: block; position: fixed; width: 100px;"></amp-img>
 >>   ^~~~~~~~~
-feature_tests/inline_style.html:36:2 CSS syntax error in tag 'amp-img' - the property 'position' is set to the disallowed value 'fixed'. (see https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages) [GENERIC]
+feature_tests/inline_style.html:36:2 CSS syntax error in tag 'amp-img' - the property 'position' is set to the disallowed value 'fixed'. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages) [GENERIC]
 |    <!-- Invalid: made up declaration is not allowed -->
 |    <amp-img layout=fill src=lemur.png style="lemur: lemur;"></amp-img>
 >>   ^~~~~~~~~
-feature_tests/inline_style.html:38:2 The property 'lemur' in attribute 'style' in tag 'amp-img' is disallowed. (see https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages) [GENERIC]
+feature_tests/inline_style.html:38:2 The property 'lemur' in attribute 'style' in tag 'amp-img' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages) [GENERIC]
 |    <!-- Invalid: attribute [style] is not allowed -->
 |    <amp-img layout=fill src=lemur.png style="display:block;" [style]="display:block;"></amp-img>
 >>   ^~~~~~~~~
-feature_tests/inline_style.html:40:2 The attribute '[style]' may not appear in tag 'amp-img'. (see https://www.ampproject.org/docs/reference/components/amp-img) [DISALLOWED_HTML]
+feature_tests/inline_style.html:40:2 The attribute '[style]' may not appear in tag 'amp-img'. (see https://amp.dev/documentation/components/amp-img) [DISALLOWED_HTML]
 |  </body>
 |  </html>
