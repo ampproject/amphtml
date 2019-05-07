@@ -149,7 +149,8 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
   }
 
   /**
-   * Creates inner span element with
+   * Styles text with a background color based on the value of
+   * the text-background-color attribute
    * @private
    */
   setDescendentCssTextStyles_() {
