@@ -55,6 +55,7 @@ describe('Logging', () => {
       console: {
         log: logSpy,
       },
+      location: {hash: ''},
       setTimeout: timeoutSpy,
       reportError: error => error,
     };
@@ -779,7 +780,7 @@ describe('Logging', () => {
   });
 
   describe('expandLogMessage', () => {
-    const prefixRe = 'https://log.amp.dev/?v=[0-9]+&';
+    const prefixRe = 'https:\\/\\/log\\.amp\\.dev\\/\\?v=[^&]+&';
     let log;
 
     beforeEach(() => {
@@ -789,22 +790,20 @@ describe('Logging', () => {
     it('returns url without args', () => {
       const id = 'foo';
       const queryRe = `id=${id}`;
-      const expectedRe = new RegExp(`^${prefixRe}${queryRe}$`);
-      expect(
-          log.expandLogMessage(id).match(expectedRe),
-          `https://.../?${queryRe}`
-      ).to.be.true;
+      const expectedRe = new RegExp(`${prefixRe}${queryRe}$`);
+      const result = log.expandLogMessage(id);
+      expect(expectedRe.test(result), `${expectedRe}.test('${result}')`)
+          .to.be.true;
     });
 
     it('returns url with one arg', () => {
       const id = 'foo';
       const arg1 = 'bar';
-      const queryRe = `id=${id}&s\[\]=${arg1}`;
-      const expectedRe = new RegExp(`^${prefixRe}${queryRe}$`);
-      expect(
-          log.expandLogMessage(id, arg1).match(expectedRe),
-          `https://.../?${queryRe}`
-      ).to.be.true;
+      const queryRe = `id=${id}&s\\[\\]=${arg1}`;
+      const expectedRe = new RegExp(`${prefixRe}${queryRe}$`);
+      const result = log.expandLogMessage(id, arg1);
+      expect(expectedRe.test(result), `${expectedRe}.test('${result}')`)
+          .to.be.true;
     });
 
     it('returns url with many args', () => {
@@ -812,12 +811,12 @@ describe('Logging', () => {
       const arg1 = 'bar';
       const arg2 = 'baz';
       const arg3 = 'taquitos';
-      const queryRe = `id=${id}&s\[\]=${arg1}&s\[\]=${arg2}&s\[\]=${arg3}`;
-      const expectedRe = new RegExp(`^${prefixRe}${queryRe}$`);
-      expect(
-          log.expandLogMessage(id, arg1, arg2, arg3).match(expectedRe),
-          `https://.../?${queryRe}`
-      ).to.be.true;
+      const queryRe =
+        `id=${id}&s\\[\\]=${arg1}&s\\[\\]=${arg2}&s\\[\\]=${arg3}`;
+      const expectedRe = new RegExp(`${prefixRe}${queryRe}$`);
+      const result = log.expandLogMessage(id, arg1, arg2, arg3);
+      expect(expectedRe.test(result), `${expectedRe}.test('${result}')`)
+          .to.be.true;
     });
   });
 });
