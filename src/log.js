@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {dict} from './utils/object';
 import {getMode} from './mode';
 import {getModeObject} from './mode-object';
 import {isEnumValue} from './types';
