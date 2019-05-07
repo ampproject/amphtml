@@ -28,7 +28,11 @@
 
 import {AmpStoryBaseLayer} from './amp-story-base-layer';
 import {assertDoesNotContainDisplay, setStyles} from '../../../src/style';
-import {matches, scopedQuerySelectorAll} from '../../../src/dom';
+import {
+  createElementWithAttributes,
+  matches,
+  scopedQuerySelectorAll,
+} from '../../../src/dom';
 
 /**
  * A mapping of attribute names we support for grid layers to the CSS Grid
@@ -159,9 +163,12 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
 
     Array.prototype.forEach.call(elementsToUpgradeStyles, element => {
       const color = element.getAttribute(TEXT_BACKGROUND_COLOR_ATTRIBUTE_NAME);
-      const text = element.innerHTML;
-      const span = `<span style="background-color:${color}">${text}</span>`;
-      element.innerHTML = span;
+      const spanEl =
+          createElementWithAttributes(this.element.ownerDocument, 'span',
+              {'style': `background-color:${color}`});
+      spanEl.textContent = element.textContent;
+      element.textContent = null;
+      element.appendChild(spanEl);
     });
   }
 
