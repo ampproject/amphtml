@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+@import './lightbox-caption.css';
+
 amp-lightbox-gallery .amp-carousel-button {
   display: none;
 }
@@ -157,60 +159,8 @@ amp-lightbox-gallery amp-carousel {
   animation: fadeIn ease-in 0.4s 1 forwards;
 }
 
-.i-amphtml-lbg-controls.i-amphtml-lbg-fade-out
- {
+.i-amphtml-lbg-controls.i-amphtml-lbg-fade-out {
   animation: fadeOut linear 0.4s 1 forwards;
-}
-
-.i-amphtml-lbg-desc-box {
-  position: absolute !important;
-  left: 0 !important;
-  right: 0 !important;
-  bottom: 0 !important;
-  color: #ffffff;
-}
-
-.i-amphtml-lbg-desc-box.i-amphtml-lbg-standard {
-  background: linear-gradient(rgba(0,0,0,0), rgba(0,0,0,0.5));
-  max-height: 6rem !important;
-  transition: max-height ease-out 0.3s !important;
-  overflow: hidden !important;
-}
-
-.i-amphtml-lbg-desc-box.i-amphtml-lbg-overflow {
-  overflow-y: auto !important;
-  -webkit-overflow-scrolling: touch !important;
-  max-height: 100% !important;
-  transition: max-height ease-out 0.7s !important;
-}
-
-.i-amphtml-lbg-desc-mask {
-  width: 100% !important;
-  position: fixed !important;
-  bottom: 0 !important;
-}
-
-.i-amphtml-lbg-desc-text {
-  padding: 20px !important;
-  position: relative !important;
-  z-index: 1 !important;
-}
-
-.i-amphtml-lbg-desc-box.i-amphtml-lbg-overflow .i-amphtml-lbg-desc-text {
-  padding-top: 40px !important;
-}
-
-.i-amphtml-lbg-desc-box.i-amphtml-lbg-standard .i-amphtml-lbg-desc-mask {
-  z-index: 1 !important;
-  height: 1rem !important;
-  background: linear-gradient(transparent, rgba(0,0,0,0.9));
-  transition: background-color ease-out 0.5s !important;
-}
-.i-amphtml-lbg-desc-box.i-amphtml-lbg-overflow .i-amphtml-lbg-desc-mask {
-  background-color: rgba(0,0,0,0.4) !important;
-  top: 0 !important;
-  z-index: 0 !important;
-  transition: background-color ease-in 0.4s !important;
 }
 
 .i-amphtml-lbg[gallery-view] .i-amphtml-lbg-gallery {
@@ -278,7 +228,8 @@ amp-lightbox-gallery amp-carousel {
   }
 }
 
-.i-amphtml-lbg[gallery-view] .i-amphtml-lbg-button-gallery {
+.i-amphtml-lbg[gallery-view] .i-amphtml-lbg-button-gallery,
+.i-amphtml-lbg[gallery-view] .i-amphtml-lbg-caption {
   display: none;
 }
 
@@ -310,11 +261,4 @@ amp-lightbox-gallery .i-amphtml-slide-item > * {
     opacity: 0;
     visibility: hidden;
    }
-}
-
-@keyframes slideUp {
-  from { max-height: 6rem; }
-  to {
-    max-height: 100%;
-  }
 }
