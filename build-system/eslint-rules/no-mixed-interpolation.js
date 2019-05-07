@@ -18,7 +18,7 @@ const {
   definitionFile,
   singletonFunctions,
   transformableMethods,
-} = require('../../log-module-metadata.js');
+} = require('../log-module-metadata.js');
 
 /**
  * @param {!Node} node
