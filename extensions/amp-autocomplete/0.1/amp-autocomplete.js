@@ -462,22 +462,41 @@ export class AmpAutocomplete extends AMP.BaseElement {
     // Client-side filtering.
     input = input.toLocaleLowerCase();
     const itemsExpr = this.element.getAttribute('filter-value') || 'value';
-    const filteredData = this.copyJsonObject_(data.filter(item => {
-      return this.filterMatch_(item, input, itemsExpr);
-    }));
-    filteredData.map(item => {
-      const category = getValueForExpr(/**@type {!JsonObject} */(item), 'category');
-      if (category) {
-        const opts = getValueForExpr(/**@type {!JsonObject} */(item), 'items');
-        const filteredOpts = opts.filter(item => {
-          return this.filterMatch_(item, input, itemsExpr);
-        });
-        item['items'] = filteredOpts;
-      }
-      return item;
+    const filteredData = [];
+    data.filter(item => {
+      return this.isFilterMatch_(item, input, itemsExpr);
+    }).forEach(item => {
+      item = this.filterCategories_(item, input, itemsExpr);
+      filteredData.push(item);
     });
 
     return this.truncateToMaxEntries_(filteredData);
+  }
+
+  /**
+   * Given an item, returns it as is if it does not contain subitems. 
+   * Otherwise, only includes those subitems which match the given input.
+   * 
+   * @param {!JsonObject|string} item
+   * @param {string} input
+   * @param {string} itemsExpr
+   * @return {boolean}
+   */
+  filterCategories_(item, input, itemsExpr) {
+    const category = getValueForExpr(/**@type {!JsonObject} */(item), 'category');
+    if (category) {
+      const opts = getValueForExpr(/**@type {!JsonObject} */(item), 'items');
+      const filteredOpts = [];
+      opts.filter(opt => {
+        return this.isFilterMatch_(opt, input, itemsExpr);
+      }).forEach(opt => {
+        opt = this.filterCategory_(opt, input, itemsExpr);
+        filteredOpts.push(opt);
+      });
+      item = this.copyJsonObject_(/**@type {!JsonObject} */(item));
+      item['items'] = filteredOpts;
+    }
+    return item;
   }
 
   /**
@@ -486,27 +505,27 @@ export class AmpAutocomplete extends AMP.BaseElement {
    * Returns true if the given item is a match on the given input according
    * to the "filter" attribute on this amp-autocomplete instance.
    *
-   * @param {!Object|string} item
+   * @param {!JsonObject|string} item
    * @param {string} input
    * @param {string} itemsExpr
    * @return {boolean}
    * @private
    */
-  filterMatch_(item, input, itemsExpr) {
+  isFilterMatch_(item, input, itemsExpr) {
     if (typeof item === 'object') {
       const category = getValueForExpr(/**@type {!JsonObject} */(item), 'category');
       if (category) {
         const opts = getValueForExpr(/**@type {!JsonObject} */(item), 'items');
         const filteredOpts = opts.filter(item => {
-          return this.filterMatch_(item, input, itemsExpr);
+          return this.isFilterMatch_(item, input, itemsExpr);
         });
         return filteredOpts.length;
       }
-      item = getValueForExpr(/** @type {!JsonObject} */(item), itemsExpr);
+      item = /**@type {string} */(getValueForExpr(/**@type {!JsonObject} */(item), itemsExpr));
     }
     userAssert(typeof item === 'string',
         `${TAG} data property "${itemsExpr}" must map to string type.`);
-    item = item.toLocaleLowerCase();
+    item = /**@type {string} */(item).toLocaleLowerCase();
     switch (this.filter_) {
       case FilterType.SUBSTRING:
         return includes(item, input);
@@ -792,13 +811,13 @@ export class AmpAutocomplete extends AMP.BaseElement {
    * container_. This assumes the given parameter is a descendent of the
    * results container.
    *
-   * @param {!Element} element
+   * @param {Element} element
    * @return {number}
    * @private
    */
   distanceToContainerTop_(element) {
     const {offsetTop: top, parentElement: parent} = element;
-    if (parent === this.container_) {
+    if (!parent || parent === this.container_) {
       return top;
     }
     return top + this.distanceToContainerTop_(parent);

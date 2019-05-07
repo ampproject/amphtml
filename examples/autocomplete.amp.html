@@ -657,7 +657,7 @@
         </script>
         <template type="amp-mustache" id="amp-template-custom">
           <div data-category="{{category}}">
-            <strong>Trending {{category}}</strong>
+            <div class="header">Trending {{category}}</div>
             {{#items}}
             <div data-value="{{.}}">{{.}}</div>
             {{/items}}
@@ -689,13 +689,11 @@
               "items" : [ {
                 "category" : "Meats",
                 "subcategory" : "Red meat",
-                "items" : [ "pork", "beef" ],
-                "subItems" : [ "pork", "beef" ]
+                "items" : [ "pork", "beef" ]
               }, {
                 "category" : "Meats",
                 "subcategory" : "White meat",
-                "items" : [ "chicken", "turkey" ],
-                "subItems" : [ "chicken", "turkey" ]
+                "items" : [ "chicken", "turkey" ]
               } ] 
             }
           ] }
@@ -707,9 +705,9 @@
               {{#subcategory}}
                 <div data-category="{{subcategory}}">
                   <div class="subheader">{{subcategory}}</div>
-                  {{#subItems}}
+                  {{#items}}
                     <div data-value="{{.}}" class="subvalue">{{.}}</div>
-                  {{/subItems}}
+                  {{/items}}
                 </div>
               {{/subcategory}}
               {{^subcategory}}
