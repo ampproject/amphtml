@@ -50,6 +50,10 @@
  * Resulting binary savings are ~1.5% depending on their logging density.
  */
 const fs = require('fs');
+const {
+  singletonFunctions,
+  transformableMethods,
+} = require('../../log-module-metadata.js');
 
 /**
  * Path to messages file for this version relative to the repo root.
@@ -61,29 +65,6 @@ const defaultMessagesPath = 'dist/log-messages.json';
 
 /** Method on `Log` that this transform outputs to "expand" log messages. */
 const messageExpansionMethod = 'expandLogMessage';
-
-/** Functions exposed as singleton getters for `Log`. */
-const singletonFunctions = ['dev', 'user'];
-
-/**
- * Position of the first message argument for each known logging method.
- * @type {!Object<string, number>}
- */
-const methodsMessageArgPos = {
-  assert: 1,
-  assertBoolean: 1,
-  assertElement: 1,
-  assertEnumValue: 2,
-  assertNumber: 1,
-  assertString: 1,
-  createError: 0,
-  createExpectedError: 0,
-  error: 1,
-  expectedError: 1,
-  fine: 1,
-  info: 1,
-  warn: 1,
-};
 
 const roughMinifiedExpansionLength = 'a().b("xx")'.length;
 
@@ -131,7 +112,7 @@ function writeMessages(messagesPath, obj) {
 
 /**
  * Gets a message id from the table, or adds a new entry for a message if
- * non-existent and returnssssssssss its new id.
+ * non-existent and returnsssssssssssssssssss its new id.
  * @param {file} messagesPath
  * @param {string} message
  * @return {string} Short message id.
@@ -201,16 +182,20 @@ module.exports = function({types: t}) {
         }
 
         const singletonCallee = callee.object.callee;
-        if (!singletonFunctions.some(name => t.isIdentifier(callee, {name}))) {
+        if (
+          !singletonFunctions.some(name =>
+            t.isIdentifier(singletonCallee, {name})
+          )
+        ) {
           return;
         }
 
         const {property} = callee;
-        if (!isTransformableMethod(t, property, methodsMessageArgPos)) {
+        if (!isTransformableMethod(t, property, transformableMethods)) {
           return;
         }
 
-        const messageArgPos = methodsMessageArgPos[property.name];
+        const {messageArgPos} = transformableMethods[property.name];
         const messageArg = node.arguments[messageArgPos];
 
         if (!messageArg) {
@@ -231,8 +216,10 @@ module.exports = function({types: t}) {
           return;
         }
 
-        const shortMessageId =
-            getOrCreateShortMessageId(this.messagesPath, message);
+        const shortMessageId = getOrCreateShortMessageId(
+            this.messagesPath,
+            message
+        );
 
         // Temporary option to not replace call arguments, but still output the
         // table to keep other code and infra independent from rollout.
@@ -254,8 +241,8 @@ module.exports = function({types: t}) {
         );
 
         // Interpolation order breaks badly when template literals are mixed
-        // with variadic calls. This transform implicitly depends on a lint rule
-        // that prevents such usage.
+        // with variadic calls. This transform implicitly depends on the
+        // `no-mixed-interpolation` lint rule to prevent such usage.
         const expansionCall = t.callExpression(messageExpansionCallee, [
           t.stringLiteral(shortMessageId),
           ...bodyArgs,

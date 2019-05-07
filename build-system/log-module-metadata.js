@@ -14,23 +14,32 @@
  * limitations under the License.
  */
 
+/** @fileoverview Definitions of logging methods for transforms and linting. */
+
+/** @typedef {{variadic: boolean, messageArgPos: number}} */
+let LogMethodMetadataDef;
+
+/** Functions exposed as singleton getters for `Log`. */
+const singletonFunctions = ['dev', 'user'];
+
 /**
+ * Known transformable logging methods.
  * @type {!Array<LogMethodMetadataDef>}
  */
-exports.transformableMethods = [
-  {name: 'assert', variadic: true, startPos: 1},
-  {name: 'assertString', variadic: false, startPos: 1},
-  {name: 'assertNumber', variadic: false, startPos: 1},
-  {name: 'assertBoolean', variadic: false, startPos: 1},
-  {name: 'assertEnumValue', variadic: false, startPos: 2},
-  {name: 'assertElement', variadic: false, startPos: 1},
-  {name: 'fine', variadic: true, startPos: 1},
-  {name: 'info', variadic: true, startPos: 1},
-  {name: 'warn', variadic: true, startPos: 1},
-  // Disable any of the error methods linting for now since these methods
-  // do a lot more work than just normal message logging.
-  //{name: 'error', variadic: true, startPos: 1},
-  //{name: 'createExpectedError', variadic: true, startPos: 0},
-  //{name: 'expectedError', variadic: true, startPos: 1},
-  //{name: 'createError', variadic: true, startPos: 0},
-];
+const transformableMethods = {
+  assert: {variadic: true, messageArgPos: 1},
+  assertString: {variadic: false, messageArgPos: 1},
+  assertNumber: {variadic: false, messageArgPos: 1},
+  assertBoolean: {variadic: false, messageArgPos: 1},
+  assertEnumValue: {variadic: false, messageArgPos: 2},
+  assertElement: {variadic: false, messageArgPos: 1},
+  fine: {variadic: true, messageArgPos: 1},
+  info: {variadic: true, messageArgPos: 1},
+  warn: {variadic: true, messageArgPos: 1},
+  error: {variadic: true, messageArgPos: 1},
+  createExpectedError: {variadic: true, messageArgPos: 0},
+  expectedError: {variadic: true, messageArgPos: 1},
+  createError: {variadic: true, messageArgPos: 0},
+};
+
+module.exports = {singletonFunctions, transformableMethods};

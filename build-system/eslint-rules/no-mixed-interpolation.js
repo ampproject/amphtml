@@ -14,17 +14,10 @@
  * limitations under the License.
  */
 
-const transformableMethods =
-    require('../log-module-metadata').transformableMethods;
-
-/**
- * @typedef {{
- *   name: string.
- *   variadle: boolean,
- *   startPos: number
- * }}
- */
-let LogMethodMetadataDef;
+const {
+  singletonFunctions,
+  transformableMethods,
+} = require('../../log-module-metadata.js');
 
 /**
  * @param {!Node} node
@@ -67,9 +60,9 @@ function getMetadata(name) {
   return transformableMethods.find(cur => cur.name === name);
 }
 
-const selector = transformableMethods.map(method => {
-  return `CallExpression[callee.property.name=${method.name}]`;
-}).join(',');
+const selector = Object.keys(transformableMethods)
+  .map(method => `CallExpression[callee.property.name=${method.name}]`)
+  .join(',');
 
 
 module.exports = {
@@ -90,13 +83,13 @@ module.exports = {
         }
 
         // Make sure that the CallExpression is one of dev() or user().
-        if(!['dev', 'user'].includes(calleeObject.callee.name)) {
+        if(!singletonFunctions.includes(calleeObject.callee.name)) {
           return;
         }
 
         const methodInvokedName = callee.property.name;
         // Find the position of the argument we care about.
-        const metadata = getMetadata(methodInvokedName);
+        const metadata = transformableMethods[methodInvokedName];
 
         // If there's no metadata, this is most likely a test file running
         // private methods on log.
@@ -104,26 +97,25 @@ module.exports = {
           return;
         }
 
-        const argToEval = node.arguments[metadata.startPos];
+        const {variadic, messageArgPos} = metadata;
+        // If method is not variadic we don't need to check.
+        if (!variadic) {
+         return;
+        }
 
+        const argToEval = node.arguments[messageArgPos];
         if (!argToEval) {
           return;
         }
 
         let errMsg = [
           'Mixing Template Strings and %s interpolation for log methods is',
-          `not supported on ${metadata.name}. Please either use template `,
+          `not supported on ${methodInvokedName}. Please either use template `,
           'literals or use the log strformat(%s) style interpolation ',
           'exclusively',
         ].join(' ');
 
-        // If method is not variadic we don't need to check.
-        if (!metadata.variadic) {
-         return;
-        }
-
-        const hasVariadicInterpolation = node.arguments[metadata.startPos + 1];
-
+        const hasVariadicInterpolation = node.arguments.length >= messageArgPos;
         if (hasVariadicInterpolation && hasTemplateLiteral(argToEval)) {
           context.report({
             node: argToEval,

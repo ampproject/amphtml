@@ -777,5 +777,47 @@ describe('Logging', () => {
       expect(user()).to.not.equal(user(element1));
     });
   });
-});
 
+  describe('expandLogMessage', () => {
+    const prefixRe = 'https://log.amp.dev/?v=[0-9]+&';
+    let log;
+
+    beforeEach(() => {
+      log = new Log(win, RETURNS_FINE);
+    });
+
+    it('returns url without args', () => {
+      const id = 'foo';
+      const queryRe = `id=${id}`;
+      const expectedRe = new RegExp(`^${prefixRe}${queryRe}$`);
+      expect(
+          log.expandLogMessage(id).match(expectedRe),
+          `https://.../?${queryRe}`
+      ).to.be.true;
+    });
+
+    it('returns url with one arg', () => {
+      const id = 'foo';
+      const arg1 = 'bar';
+      const queryRe = `id=${id}&s\[\]=${arg1}`;
+      const expectedRe = new RegExp(`^${prefixRe}${queryRe}$`);
+      expect(
+          log.expandLogMessage(id, arg1).match(expectedRe),
+          `https://.../?${queryRe}`
+      ).to.be.true;
+    });
+
+    it('returns url with many args', () => {
+      const id = 'foo';
+      const arg1 = 'bar';
+      const arg2 = 'baz';
+      const arg3 = 'taquitos';
+      const queryRe = `id=${id}&s\[\]=${arg1}&s\[\]=${arg2}&s\[\]=${arg3}`;
+      const expectedRe = new RegExp(`^${prefixRe}${queryRe}$`);
+      expect(
+          log.expandLogMessage(id, arg1, arg2, arg3).match(expectedRe),
+          `https://.../?${queryRe}`
+      ).to.be.true;
+    });
+  });
+});
