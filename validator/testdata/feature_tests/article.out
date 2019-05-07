@@ -500,4 +500,4 @@ feature_tests/article.html:287:2 The tag 'content' is disallowed. [DISALLOWED_HT
 |  </body>
 |  </html>
 >>       ^~~~~~~~~
-feature_tests/article.html:498:6 The tag 'amp-video extension .js script' is missing or incorrect, but required by 'amp-video'. This will soon be an error. (see https://www.ampproject.org/docs/reference/components/amp-video) [DEPRECATION]
+feature_tests/article.html:498:6 The tag 'amp-video extension .js script' is missing or incorrect, but required by 'amp-video'. This will soon be an error. (see https://amp.dev/documentation/components/amp-video) [DEPRECATION]

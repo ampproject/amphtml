@@ -41,7 +41,7 @@ FAIL
 |      <!-- invalid, needs data-id -->
 |      <amp-3q-player
 >>     ^~~~~~~~~
-amp-3q-player/0.1/test/validator-amp-3q-player.html:41:4 The mandatory attribute 'data-id' is missing in tag 'amp-3q-player'. (see https://www.ampproject.org/docs/reference/components/amp-3q-player) [AMP_TAG_PROBLEM]
+amp-3q-player/0.1/test/validator-amp-3q-player.html:41:4 The mandatory attribute 'data-id' is missing in tag 'amp-3q-player'. (see https://amp.dev/documentation/components/amp-3q-player) [AMP_TAG_PROBLEM]
 |        height=360
 |        width=640
 |        layout="responsive">

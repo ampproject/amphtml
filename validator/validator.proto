@@ -399,12 +399,12 @@ message ExtensionSpec {
   // Most extensions are custom-elements. For custom-template extensions, this
   // value needs to be set true. E.g: amp-mustache.
   enum ExtensionType {
+    UNKNOWN = 0;
     CUSTOM_ELEMENT = 1;
     CUSTOM_TEMPLATE = 2;
     HOST_SERVICE = 3;
   }
   optional ExtensionType extension_type = 8 [default = CUSTOM_ELEMENT];
-
 
   // For older tags, we did not originally require that the tag only be included
   // once, so those tags are grandfathered in for multiple inclusion in the file

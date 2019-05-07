@@ -24,9 +24,9 @@ FAIL
 |    <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
 |    <style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>
 >>   ^~~~~~~~~
-feature_tests/old-boilerplate.html:24:2 The mandatory attribute 'amp-custom' is missing in tag 'style amp-custom'. (see https://www.ampproject.org/docs/reference/spec#stylesheets) [DISALLOWED_HTML]
+feature_tests/old-boilerplate.html:24:2 The mandatory attribute 'amp-custom' is missing in tag 'style amp-custom'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#stylesheets) [DISALLOWED_HTML]
 >>                                             ^~~~~~~~~
-feature_tests/old-boilerplate.html:24:44 The parent tag of tag 'style amp-custom' is 'noscript', but it can only be 'head'. (see https://www.ampproject.org/docs/reference/spec#stylesheets) [DISALLOWED_HTML]
+feature_tests/old-boilerplate.html:24:44 The parent tag of tag 'style amp-custom' is 'noscript', but it can only be 'head'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#stylesheets) [DISALLOWED_HTML]
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
 |  </head>
 |  <body>
@@ -39,6 +39,6 @@ feature_tests/old-boilerplate.html:24:44 The parent tag of tag 'style amp-custom
 |  </body>
 |  </html>
 >>       ^~~~~~~~~
-feature_tests/old-boilerplate.html:35:6 The mandatory tag 'head > style[amp-boilerplate]' is missing or incorrect. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+feature_tests/old-boilerplate.html:35:6 The mandatory tag 'head > style[amp-boilerplate]' is missing or incorrect. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amp-boilerplate?format=websites) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 >>       ^~~~~~~~~
-feature_tests/old-boilerplate.html:35:6 The mandatory tag 'noscript > style[amp-boilerplate]' is missing or incorrect. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+feature_tests/old-boilerplate.html:35:6 The mandatory tag 'noscript > style[amp-boilerplate]' is missing or incorrect. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amp-boilerplate?format=websites) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]

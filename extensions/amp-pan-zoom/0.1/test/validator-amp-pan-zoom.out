@@ -65,13 +65,13 @@ FAIL
 |      <!-- Invalid configuration example -->
 |      <amp-pan-zoom layout="responsive"
 >>     ^~~~~~~~~
-amp-pan-zoom/0.1/test/validator-amp-pan-zoom.html:65:4 The attribute 'initial-scale' in tag 'amp-pan-zoom' is set to the invalid value ''. (see https://www.ampproject.org/docs/reference/components/amp-pan-zoom) [DISALLOWED_HTML]
+amp-pan-zoom/0.1/test/validator-amp-pan-zoom.html:65:4 The attribute 'initial-scale' in tag 'amp-pan-zoom' is set to the invalid value ''. (see https://amp.dev/documentation/components/amp-pan-zoom) [DISALLOWED_HTML]
 >>     ^~~~~~~~~
-amp-pan-zoom/0.1/test/validator-amp-pan-zoom.html:65:4 The attribute 'initial-x' in tag 'amp-pan-zoom' is set to the invalid value 'abc'. (see https://www.ampproject.org/docs/reference/components/amp-pan-zoom) [DISALLOWED_HTML]
+amp-pan-zoom/0.1/test/validator-amp-pan-zoom.html:65:4 The attribute 'initial-x' in tag 'amp-pan-zoom' is set to the invalid value 'abc'. (see https://amp.dev/documentation/components/amp-pan-zoom) [DISALLOWED_HTML]
 >>     ^~~~~~~~~
-amp-pan-zoom/0.1/test/validator-amp-pan-zoom.html:65:4 The attribute 'initial-y' in tag 'amp-pan-zoom' is set to the invalid value ''. (see https://www.ampproject.org/docs/reference/components/amp-pan-zoom) [DISALLOWED_HTML]
+amp-pan-zoom/0.1/test/validator-amp-pan-zoom.html:65:4 The attribute 'initial-y' in tag 'amp-pan-zoom' is set to the invalid value ''. (see https://amp.dev/documentation/components/amp-pan-zoom) [DISALLOWED_HTML]
 >>     ^~~~~~~~~
-amp-pan-zoom/0.1/test/validator-amp-pan-zoom.html:65:4 The attribute 'max-scale' in tag 'amp-pan-zoom' is set to the invalid value '3ex3'. (see https://www.ampproject.org/docs/reference/components/amp-pan-zoom) [DISALLOWED_HTML]
+amp-pan-zoom/0.1/test/validator-amp-pan-zoom.html:65:4 The attribute 'max-scale' in tag 'amp-pan-zoom' is set to the invalid value '3ex3'. (see https://amp.dev/documentation/components/amp-pan-zoom) [DISALLOWED_HTML]
 |        width="1"
 |        height="1"
 |        initial-x="abc"

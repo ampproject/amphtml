@@ -24,7 +24,7 @@ tags: {  # amp-yotpo
     version: "latest"
   }
   attr_lists: "common-extension-attrs"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-yotpo"
+  spec_url: "https://amp.dev/documentation/components/amp-yotpo"
 }
 tags: {  # <amp-yotpo>
   html_format: AMP
@@ -32,7 +32,7 @@ tags: {  # <amp-yotpo>
   tag_name: "AMP-YOTPO"
   requires_extension: "amp-yotpo"
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-yotpo"
+  spec_url: "https://amp.dev/documentation/components/amp-yotpo"
   attrs: {
     name: "data-app-key"
     mandatory: true

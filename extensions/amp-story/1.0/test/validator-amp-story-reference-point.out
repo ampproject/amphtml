@@ -37,9 +37,9 @@ FAIL
 >>         ^~~~~~~~~
 amp-story/1.0/test/validator-amp-story-reference-point.html:35:8 The tag 'img', a child tag of 'amp-story-grid-layer', does not satisfy one of the acceptable reference points: AMP-STORY-GRID-LAYER default, AMP-STORY-GRID-LAYER animate-in. [AMP_TAG_PROBLEM]
 >>         ^~~~~~~~~
-amp-story/1.0/test/validator-amp-story-reference-point.html:35:8 The tag 'img' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-img'? (see https://www.ampproject.org/docs/reference/components/amp-img) [DISALLOWED_HTML_WITH_AMP_EQUIVALENT]
+amp-story/1.0/test/validator-amp-story-reference-point.html:35:8 The tag 'img' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-img'? (see https://amp.dev/documentation/components/amp-img) [DISALLOWED_HTML_WITH_AMP_EQUIVALENT]
 >>         ^~~~~~~~~
-amp-story/1.0/test/validator-amp-story-reference-point.html:35:8 The tag 'img' may not appear as a descendant of tag 'amp-story-grid-layer'. (see https://www.ampproject.org/docs/reference/components/amp-img) [AMP_TAG_PROBLEM]
+amp-story/1.0/test/validator-amp-story-reference-point.html:35:8 The tag 'img' may not appear as a descendant of tag 'amp-story-grid-layer'. (see https://amp.dev/documentation/components/amp-img) [AMP_TAG_PROBLEM]
 |        </amp-story-grid-layer>
 |      </amp-story-page>
 |      <amp-story-bookend src="./related.json" layout="nodisplay"></amp-story-bookend>

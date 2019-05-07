@@ -21,7 +21,7 @@ FAIL
 |  <!doctype html>
 |  <html ⚡4email actions>
 >> ^~~~~~~~~
-amp4email_feature_tests/amp_actions.html:21:0 The attribute 'actions' may not appear in tag 'html'. (see https://www.ampproject.org/docs/reference/spec#required-markup) [DISALLOWED_HTML]
+amp4email_feature_tests/amp_actions.html:21:0 The attribute 'actions' may not appear in tag 'html'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup) [DISALLOWED_HTML]
 |  <head>
 |    <meta charset="utf-8">
 |    <style amp4email-boilerplate>body{visibility:hidden}</style>

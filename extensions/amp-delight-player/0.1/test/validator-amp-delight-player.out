@@ -38,7 +38,7 @@ FAIL
 |      <!-- Invalid example of missing content ID. -->
 |      <amp-delight-player
 >>     ^~~~~~~~~
-amp-delight-player/0.1/test/validator-amp-delight-player.html:38:4 The mandatory attribute 'data-content-id' is missing in tag 'amp-delight-player'. (see https://www.ampproject.org/docs/reference/components/amp-delight-player) [AMP_TAG_PROBLEM]
+amp-delight-player/0.1/test/validator-amp-delight-player.html:38:4 The mandatory attribute 'data-content-id' is missing in tag 'amp-delight-player'. (see https://amp.dev/documentation/components/amp-delight-player) [AMP_TAG_PROBLEM]
 |          layout="responsive" width="16" height="9">
 |      </amp-delight-player>
 |

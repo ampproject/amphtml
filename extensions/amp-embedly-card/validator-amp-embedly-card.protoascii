@@ -38,7 +38,7 @@ tags: {  # <amp-embedly-card>
     }
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-embedly-card"
+  spec_url: "https://amp.dev/documentation/components/amp-embedly-card"
   amp_layout: {
     supported_layouts: RESPONSIVE
   }

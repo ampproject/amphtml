@@ -132,119 +132,119 @@ FAIL
 |    <!-- Invalid: single amp-date-picker with start-input-selector -->
 |    <amp-date-picker type="single" mode="static" start-input-selector="#x3" layout="fixed-height" height="360">
 >>   ^~~~~~~~~
-amp-date-picker/0.1/test/validator-amp-date-picker.html:132:2 The specified layout 'FIXED_HEIGHT' is not supported by tag 'amp-date-picker[type=single][mode=overlay]'. (see https://www.ampproject.org/docs/reference/components/amp-date-picker) [AMP_LAYOUT_PROBLEM]
+amp-date-picker/0.1/test/validator-amp-date-picker.html:132:2 The specified layout 'FIXED_HEIGHT' is not supported by tag 'amp-date-picker[type=single][mode=overlay]'. (see https://amp.dev/documentation/components/amp-date-picker) [AMP_LAYOUT_PROBLEM]
 >>   ^~~~~~~~~
-amp-date-picker/0.1/test/validator-amp-date-picker.html:132:2 The attribute 'mode' in tag 'amp-date-picker[type=single][mode=overlay]' is set to the invalid value 'static'. (see https://www.ampproject.org/docs/reference/components/amp-date-picker) [DISALLOWED_HTML]
+amp-date-picker/0.1/test/validator-amp-date-picker.html:132:2 The attribute 'mode' in tag 'amp-date-picker[type=single][mode=overlay]' is set to the invalid value 'static'. (see https://amp.dev/documentation/components/amp-date-picker) [DISALLOWED_HTML]
 >>   ^~~~~~~~~
-amp-date-picker/0.1/test/validator-amp-date-picker.html:132:2 The attribute 'start-input-selector' may not appear in tag 'amp-date-picker[type=single][mode=overlay]'. (see https://www.ampproject.org/docs/reference/components/amp-date-picker) [DISALLOWED_HTML]
+amp-date-picker/0.1/test/validator-amp-date-picker.html:132:2 The attribute 'start-input-selector' may not appear in tag 'amp-date-picker[type=single][mode=overlay]'. (see https://amp.dev/documentation/components/amp-date-picker) [DISALLOWED_HTML]
 |    </amp-date-picker>
 |    <!-- Invalid: range amp-date-picker with input-selector -->
 |    <amp-date-picker type="range" input-selector="#a4" layout="fixed-height" height="360">
 >>   ^~~~~~~~~
-amp-date-picker/0.1/test/validator-amp-date-picker.html:135:2 The specified layout 'FIXED_HEIGHT' is not supported by tag 'amp-date-picker[type=single][mode=overlay]'. (see https://www.ampproject.org/docs/reference/components/amp-date-picker) [AMP_LAYOUT_PROBLEM]
+amp-date-picker/0.1/test/validator-amp-date-picker.html:135:2 The specified layout 'FIXED_HEIGHT' is not supported by tag 'amp-date-picker[type=single][mode=overlay]'. (see https://amp.dev/documentation/components/amp-date-picker) [AMP_LAYOUT_PROBLEM]
 >>   ^~~~~~~~~
-amp-date-picker/0.1/test/validator-amp-date-picker.html:135:2 The attribute 'type' in tag 'amp-date-picker[type=single][mode=overlay]' is set to the invalid value 'range'. (see https://www.ampproject.org/docs/reference/components/amp-date-picker) [DISALLOWED_HTML]
+amp-date-picker/0.1/test/validator-amp-date-picker.html:135:2 The attribute 'type' in tag 'amp-date-picker[type=single][mode=overlay]' is set to the invalid value 'range'. (see https://amp.dev/documentation/components/amp-date-picker) [DISALLOWED_HTML]
 |      </amp-date-picker>
 |    <!-- Invalid: amp-date-picker with implicit mode="static" without layout -->
 |    <amp-date-picker></amp-date-picker>
 >>   ^~~~~~~~~
-amp-date-picker/0.1/test/validator-amp-date-picker.html:138:2 Incomplete layout attributes specified for tag 'amp-date-picker[type=single][mode=static]'. For example, provide attributes 'width' and 'height'. (see https://www.ampproject.org/docs/reference/components/amp-date-picker) [AMP_LAYOUT_PROBLEM]
+amp-date-picker/0.1/test/validator-amp-date-picker.html:138:2 Incomplete layout attributes specified for tag 'amp-date-picker[type=single][mode=static]'. For example, provide attributes 'width' and 'height'. (see https://amp.dev/documentation/components/amp-date-picker) [AMP_LAYOUT_PROBLEM]
 |    <!-- Invalid: amp-date-picker with explicit mode="static" without layout -->
 |    <amp-date-picker mode="static">
 >>   ^~~~~~~~~
-amp-date-picker/0.1/test/validator-amp-date-picker.html:140:2 Incomplete layout attributes specified for tag 'amp-date-picker[type=single][mode=static]'. For example, provide attributes 'width' and 'height'. (see https://www.ampproject.org/docs/reference/components/amp-date-picker) [AMP_LAYOUT_PROBLEM]
+amp-date-picker/0.1/test/validator-amp-date-picker.html:140:2 Incomplete layout attributes specified for tag 'amp-date-picker[type=single][mode=static]'. For example, provide attributes 'width' and 'height'. (see https://amp.dev/documentation/components/amp-date-picker) [AMP_LAYOUT_PROBLEM]
 |    </amp-date-picker>
 |    <!-- Invalid: overlay amp-date-picker with fullscreen attribute -->
 |    <amp-date-picker mode="overlay" fullscreen>
 >>   ^~~~~~~~~
-amp-date-picker/0.1/test/validator-amp-date-picker.html:143:2 Incomplete layout attributes specified for tag 'amp-date-picker[type=single][mode=static]'. For example, provide attributes 'width' and 'height'. (see https://www.ampproject.org/docs/reference/components/amp-date-picker) [AMP_LAYOUT_PROBLEM]
+amp-date-picker/0.1/test/validator-amp-date-picker.html:143:2 Incomplete layout attributes specified for tag 'amp-date-picker[type=single][mode=static]'. For example, provide attributes 'width' and 'height'. (see https://amp.dev/documentation/components/amp-date-picker) [AMP_LAYOUT_PROBLEM]
 >>   ^~~~~~~~~
-amp-date-picker/0.1/test/validator-amp-date-picker.html:143:2 The attribute 'mode' in tag 'amp-date-picker[type=single][mode=static]' is set to the invalid value 'overlay'. (see https://www.ampproject.org/docs/reference/components/amp-date-picker) [DISALLOWED_HTML]
+amp-date-picker/0.1/test/validator-amp-date-picker.html:143:2 The attribute 'mode' in tag 'amp-date-picker[type=single][mode=static]' is set to the invalid value 'overlay'. (see https://amp.dev/documentation/components/amp-date-picker) [DISALLOWED_HTML]
 |      <input type="text" name="date4">
 |    </amp-date-picker>
 |    <!-- Invalid: width is mistyped. -->
 |    <amp-date-picker height="360" wdith="360">
 >>   ^~~~~~~~~
-amp-date-picker/0.1/test/validator-amp-date-picker.html:147:2 The implied layout 'FIXED_HEIGHT' is not supported by tag 'amp-date-picker[type=single][mode=overlay]'. (see https://www.ampproject.org/docs/reference/components/amp-date-picker) [AMP_LAYOUT_PROBLEM]
+amp-date-picker/0.1/test/validator-amp-date-picker.html:147:2 The implied layout 'FIXED_HEIGHT' is not supported by tag 'amp-date-picker[type=single][mode=overlay]'. (see https://amp.dev/documentation/components/amp-date-picker) [AMP_LAYOUT_PROBLEM]
 >>   ^~~~~~~~~
-amp-date-picker/0.1/test/validator-amp-date-picker.html:147:2 The attribute 'wdith' may not appear in tag 'amp-date-picker[type=single][mode=overlay]'. (see https://www.ampproject.org/docs/reference/components/amp-date-picker) [DISALLOWED_HTML]
+amp-date-picker/0.1/test/validator-amp-date-picker.html:147:2 The attribute 'wdith' may not appear in tag 'amp-date-picker[type=single][mode=overlay]'. (see https://amp.dev/documentation/components/amp-date-picker) [DISALLOWED_HTML]
 |    </amp-date-picker>
 |    <!-- Invalid: amp-date-picker with bad day-size-->
 |    <amp-date-picker type="range" layout="fixed-height" height="360"
 >>   ^~~~~~~~~
-amp-date-picker/0.1/test/validator-amp-date-picker.html:150:2 The specified layout 'FIXED_HEIGHT' is not supported by tag 'amp-date-picker[type=range][mode=overlay]'. (see https://www.ampproject.org/docs/reference/components/amp-date-picker) [AMP_LAYOUT_PROBLEM]
+amp-date-picker/0.1/test/validator-amp-date-picker.html:150:2 The specified layout 'FIXED_HEIGHT' is not supported by tag 'amp-date-picker[type=range][mode=overlay]'. (see https://amp.dev/documentation/components/amp-date-picker) [AMP_LAYOUT_PROBLEM]
 >>   ^~~~~~~~~
-amp-date-picker/0.1/test/validator-amp-date-picker.html:150:2 The attribute 'day-size' in tag 'amp-date-picker[type=range][mode=overlay]' is set to the invalid value 'five'. (see https://www.ampproject.org/docs/reference/components/amp-date-picker) [DISALLOWED_HTML]
+amp-date-picker/0.1/test/validator-amp-date-picker.html:150:2 The attribute 'day-size' in tag 'amp-date-picker[type=range][mode=overlay]' is set to the invalid value 'five'. (see https://amp.dev/documentation/components/amp-date-picker) [DISALLOWED_HTML]
 |        day-size="five">
 |    </amp-date-picker>
 |    <!-- Invalid: amp-date-picker with bad number-of-months -->
 |    <amp-date-picker type="range" layout="fixed-height" height="360"
 >>   ^~~~~~~~~
-amp-date-picker/0.1/test/validator-amp-date-picker.html:154:2 The specified layout 'FIXED_HEIGHT' is not supported by tag 'amp-date-picker[type=range][mode=overlay]'. (see https://www.ampproject.org/docs/reference/components/amp-date-picker) [AMP_LAYOUT_PROBLEM]
+amp-date-picker/0.1/test/validator-amp-date-picker.html:154:2 The specified layout 'FIXED_HEIGHT' is not supported by tag 'amp-date-picker[type=range][mode=overlay]'. (see https://amp.dev/documentation/components/amp-date-picker) [AMP_LAYOUT_PROBLEM]
 >>   ^~~~~~~~~
-amp-date-picker/0.1/test/validator-amp-date-picker.html:154:2 The attribute 'number-of-months' in tag 'amp-date-picker[type=range][mode=overlay]' is set to the invalid value 'twele'. (see https://www.ampproject.org/docs/reference/components/amp-date-picker) [DISALLOWED_HTML]
+amp-date-picker/0.1/test/validator-amp-date-picker.html:154:2 The attribute 'number-of-months' in tag 'amp-date-picker[type=range][mode=overlay]' is set to the invalid value 'twele'. (see https://amp.dev/documentation/components/amp-date-picker) [DISALLOWED_HTML]
 |        number-of-months="twele">
 |    </amp-date-picker>
 |    <!-- Invalid: amp-date-picker with bad first-day-of-week -->
 |    <amp-date-picker type="range" layout="fixed-height" height="360"
 >>   ^~~~~~~~~
-amp-date-picker/0.1/test/validator-amp-date-picker.html:158:2 The specified layout 'FIXED_HEIGHT' is not supported by tag 'amp-date-picker[type=range][mode=overlay]'. (see https://www.ampproject.org/docs/reference/components/amp-date-picker) [AMP_LAYOUT_PROBLEM]
+amp-date-picker/0.1/test/validator-amp-date-picker.html:158:2 The specified layout 'FIXED_HEIGHT' is not supported by tag 'amp-date-picker[type=range][mode=overlay]'. (see https://amp.dev/documentation/components/amp-date-picker) [AMP_LAYOUT_PROBLEM]
 >>   ^~~~~~~~~
-amp-date-picker/0.1/test/validator-amp-date-picker.html:158:2 The attribute 'first-day-of-week' in tag 'amp-date-picker[type=range][mode=overlay]' is set to the invalid value '7'. (see https://www.ampproject.org/docs/reference/components/amp-date-picker) [DISALLOWED_HTML]
+amp-date-picker/0.1/test/validator-amp-date-picker.html:158:2 The attribute 'first-day-of-week' in tag 'amp-date-picker[type=range][mode=overlay]' is set to the invalid value '7'. (see https://amp.dev/documentation/components/amp-date-picker) [DISALLOWED_HTML]
 |        first-day-of-week="7">
 |    </amp-date-picker>
 |    <!-- Invalid: amp-date-picker templates outside amp-date-picker -->
 |    <template info-template type="amp-mustache"></template>
 >>   ^~~~~~~~~
-amp-date-picker/0.1/test/validator-amp-date-picker.html:162:2 The parent tag of tag 'amp-date-picker > template [info-template]' is 'body', but it can only be 'amp-date-picker'. (see https://www.ampproject.org/docs/reference/components/amp-mustache) [AMP_TAG_PROBLEM]
+amp-date-picker/0.1/test/validator-amp-date-picker.html:162:2 The parent tag of tag 'amp-date-picker > template [info-template]' is 'body', but it can only be 'amp-date-picker'. (see https://amp.dev/documentation/components/amp-mustache) [AMP_TAG_PROBLEM]
 |    <template date-template dates="2018-01-01" type="amp-mustache"></template>
 >>   ^~~~~~~~~
-amp-date-picker/0.1/test/validator-amp-date-picker.html:163:2 The parent tag of tag 'amp-date-picker > template [date-template]' is 'body', but it can only be 'amp-date-picker'. (see https://www.ampproject.org/docs/reference/components/amp-mustache) [AMP_TAG_PROBLEM]
+amp-date-picker/0.1/test/validator-amp-date-picker.html:163:2 The parent tag of tag 'amp-date-picker > template [date-template]' is 'body', but it can only be 'amp-date-picker'. (see https://amp.dev/documentation/components/amp-mustache) [AMP_TAG_PROBLEM]
 |    <!-- Invalid: amp-date-picker with bad maximum nights -->
 |    <amp-date-picker type="range" layout="fixed-height" height="360" maximum-nights="zero">
 >>   ^~~~~~~~~
-amp-date-picker/0.1/test/validator-amp-date-picker.html:165:2 The specified layout 'FIXED_HEIGHT' is not supported by tag 'amp-date-picker[type=range][mode=overlay]'. (see https://www.ampproject.org/docs/reference/components/amp-date-picker) [AMP_LAYOUT_PROBLEM]
+amp-date-picker/0.1/test/validator-amp-date-picker.html:165:2 The specified layout 'FIXED_HEIGHT' is not supported by tag 'amp-date-picker[type=range][mode=overlay]'. (see https://amp.dev/documentation/components/amp-date-picker) [AMP_LAYOUT_PROBLEM]
 >>   ^~~~~~~~~
-amp-date-picker/0.1/test/validator-amp-date-picker.html:165:2 The attribute 'maximum-nights' in tag 'amp-date-picker[type=range][mode=overlay]' is set to the invalid value 'zero'. (see https://www.ampproject.org/docs/reference/components/amp-date-picker) [DISALLOWED_HTML]
+amp-date-picker/0.1/test/validator-amp-date-picker.html:165:2 The attribute 'maximum-nights' in tag 'amp-date-picker[type=range][mode=overlay]' is set to the invalid value 'zero'. (see https://amp.dev/documentation/components/amp-date-picker) [DISALLOWED_HTML]
 |    </amp-date-picker>
 |    <!-- Invalid: amp-date-picker with bad minimum nights -->
 |    <amp-date-picker type="range" layout="fixed-height" height="360" minimum-nights="zero">
 >>   ^~~~~~~~~
-amp-date-picker/0.1/test/validator-amp-date-picker.html:168:2 The specified layout 'FIXED_HEIGHT' is not supported by tag 'amp-date-picker[type=range][mode=overlay]'. (see https://www.ampproject.org/docs/reference/components/amp-date-picker) [AMP_LAYOUT_PROBLEM]
+amp-date-picker/0.1/test/validator-amp-date-picker.html:168:2 The specified layout 'FIXED_HEIGHT' is not supported by tag 'amp-date-picker[type=range][mode=overlay]'. (see https://amp.dev/documentation/components/amp-date-picker) [AMP_LAYOUT_PROBLEM]
 >>   ^~~~~~~~~
-amp-date-picker/0.1/test/validator-amp-date-picker.html:168:2 The attribute 'minimum-nights' in tag 'amp-date-picker[type=range][mode=overlay]' is set to the invalid value 'zero'. (see https://www.ampproject.org/docs/reference/components/amp-date-picker) [DISALLOWED_HTML]
+amp-date-picker/0.1/test/validator-amp-date-picker.html:168:2 The attribute 'minimum-nights' in tag 'amp-date-picker[type=range][mode=overlay]' is set to the invalid value 'zero'. (see https://amp.dev/documentation/components/amp-date-picker) [DISALLOWED_HTML]
 |    </amp-date-picker>
 |    <!-- Invalid: single amp-date-picker with maximum nights -->
 |    <amp-date-picker layout="fixed-height" height="360" maximum-nights="0">
 >>   ^~~~~~~~~
-amp-date-picker/0.1/test/validator-amp-date-picker.html:171:2 The specified layout 'FIXED_HEIGHT' is not supported by tag 'amp-date-picker[type=range][mode=overlay]'. (see https://www.ampproject.org/docs/reference/components/amp-date-picker) [AMP_LAYOUT_PROBLEM]
+amp-date-picker/0.1/test/validator-amp-date-picker.html:171:2 The specified layout 'FIXED_HEIGHT' is not supported by tag 'amp-date-picker[type=range][mode=overlay]'. (see https://amp.dev/documentation/components/amp-date-picker) [AMP_LAYOUT_PROBLEM]
 |    </amp-date-picker>
 |    <!-- Invalid: single amp-date-picker with minimum nights -->
 |    <amp-date-picker layout="fixed-height" height="360" minimum-nights="0">
 >>   ^~~~~~~~~
-amp-date-picker/0.1/test/validator-amp-date-picker.html:174:2 The specified layout 'FIXED_HEIGHT' is not supported by tag 'amp-date-picker[type=range][mode=overlay]'. (see https://www.ampproject.org/docs/reference/components/amp-date-picker) [AMP_LAYOUT_PROBLEM]
+amp-date-picker/0.1/test/validator-amp-date-picker.html:174:2 The specified layout 'FIXED_HEIGHT' is not supported by tag 'amp-date-picker[type=range][mode=overlay]'. (see https://amp.dev/documentation/components/amp-date-picker) [AMP_LAYOUT_PROBLEM]
 |    </amp-date-picker>
 |    <!-- Invalid: single amp-date-picker with start-date attribute -->
 |    <amp-date-picker layout="fixed-height" height="360" start-date="2018-01-01">
 >>   ^~~~~~~~~
-amp-date-picker/0.1/test/validator-amp-date-picker.html:177:2 The specified layout 'FIXED_HEIGHT' is not supported by tag 'amp-date-picker[type=range][mode=overlay]'. (see https://www.ampproject.org/docs/reference/components/amp-date-picker) [AMP_LAYOUT_PROBLEM]
+amp-date-picker/0.1/test/validator-amp-date-picker.html:177:2 The specified layout 'FIXED_HEIGHT' is not supported by tag 'amp-date-picker[type=range][mode=overlay]'. (see https://amp.dev/documentation/components/amp-date-picker) [AMP_LAYOUT_PROBLEM]
 |    </amp-date-picker>
 |    <!-- Invalid: range amp-date-picker with date attribute -->
 |    <amp-date-picker type="range" layout="fixed-height" height="360" date="2018-01-01">
 >>   ^~~~~~~~~
-amp-date-picker/0.1/test/validator-amp-date-picker.html:180:2 The specified layout 'FIXED_HEIGHT' is not supported by tag 'amp-date-picker[type=single][mode=overlay]'. (see https://www.ampproject.org/docs/reference/components/amp-date-picker) [AMP_LAYOUT_PROBLEM]
+amp-date-picker/0.1/test/validator-amp-date-picker.html:180:2 The specified layout 'FIXED_HEIGHT' is not supported by tag 'amp-date-picker[type=single][mode=overlay]'. (see https://amp.dev/documentation/components/amp-date-picker) [AMP_LAYOUT_PROBLEM]
 >>   ^~~~~~~~~
-amp-date-picker/0.1/test/validator-amp-date-picker.html:180:2 The attribute 'type' in tag 'amp-date-picker[type=single][mode=overlay]' is set to the invalid value 'range'. (see https://www.ampproject.org/docs/reference/components/amp-date-picker) [DISALLOWED_HTML]
+amp-date-picker/0.1/test/validator-amp-date-picker.html:180:2 The attribute 'type' in tag 'amp-date-picker[type=single][mode=overlay]' is set to the invalid value 'range'. (see https://amp.dev/documentation/components/amp-date-picker) [DISALLOWED_HTML]
 |    </amp-date-picker>
 |    <!-- Invalid: static amp-date-picker with touch-keyboard-editable -->
 |    <amp-date-picker layout="fixed-height" height="360" touch-keyboard-editable>
 >>   ^~~~~~~~~
-amp-date-picker/0.1/test/validator-amp-date-picker.html:183:2 The specified layout 'FIXED_HEIGHT' is not supported by tag 'amp-date-picker[type=single][mode=overlay]'. (see https://www.ampproject.org/docs/reference/components/amp-date-picker) [AMP_LAYOUT_PROBLEM]
+amp-date-picker/0.1/test/validator-amp-date-picker.html:183:2 The specified layout 'FIXED_HEIGHT' is not supported by tag 'amp-date-picker[type=single][mode=overlay]'. (see https://amp.dev/documentation/components/amp-date-picker) [AMP_LAYOUT_PROBLEM]
 |    </amp-date-picker>
 |    <!-- Invalid: amp-date-picker with http src -->
 |    <amp-date-picker layout="fixed-height" height="360"
 >>   ^~~~~~~~~
-amp-date-picker/0.1/test/validator-amp-date-picker.html:186:2 Invalid URL protocol 'http:' for attribute 'src' in tag 'amp-date-picker[type=single][mode=static]'. (see https://www.ampproject.org/docs/reference/components/amp-date-picker) [AMP_TAG_PROBLEM]
+amp-date-picker/0.1/test/validator-amp-date-picker.html:186:2 Invalid URL protocol 'http:' for attribute 'src' in tag 'amp-date-picker[type=single][mode=static]'. (see https://amp.dev/documentation/components/amp-date-picker) [AMP_TAG_PROBLEM]
 |        src="http://data.com/dates.json?ref=CANONICAL_URL">
 |    </amp-date-picker>
 |  </body>

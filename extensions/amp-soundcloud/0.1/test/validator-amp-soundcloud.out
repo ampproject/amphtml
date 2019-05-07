@@ -39,17 +39,17 @@ FAIL
 |    <!-- invalid: visual mode must be 'true' or 'false'-->
 |    <amp-soundcloud height=166 data-trackid="243169232" data-visual
 >>   ^~~~~~~~~
-amp-soundcloud/0.1/test/validator-amp-soundcloud.html:39:2 The attribute 'data-visual' in tag 'amp-soundcloud' is set to the invalid value ''. (see https://www.ampproject.org/docs/reference/components/amp-soundcloud) [DISALLOWED_HTML]
+amp-soundcloud/0.1/test/validator-amp-soundcloud.html:39:2 The attribute 'data-visual' in tag 'amp-soundcloud' is set to the invalid value ''. (see https://amp.dev/documentation/components/amp-soundcloud) [DISALLOWED_HTML]
 |                    layout="fixed-height"></amp-soundcloud>
 |    <!-- invalid: bad trackid-->
 |    <amp-soundcloud height=166 data-trackid="mahler_number_6.ogg" data-visual="false"
 >>   ^~~~~~~~~
-amp-soundcloud/0.1/test/validator-amp-soundcloud.html:42:2 The attribute 'data-trackid' in tag 'amp-soundcloud' is set to the invalid value 'mahler_number_6.ogg'. (see https://www.ampproject.org/docs/reference/components/amp-soundcloud) [DISALLOWED_HTML]
+amp-soundcloud/0.1/test/validator-amp-soundcloud.html:42:2 The attribute 'data-trackid' in tag 'amp-soundcloud' is set to the invalid value 'mahler_number_6.ogg'. (see https://amp.dev/documentation/components/amp-soundcloud) [DISALLOWED_HTML]
 |                    layout="fixed-height"></amp-soundcloud>
 |    <!-- invalid: bad layout -->
 |    <amp-soundcloud height=166 width=42 data-trackid="243169232" data-visual="true"
 >>   ^~~~~~~~~
-amp-soundcloud/0.1/test/validator-amp-soundcloud.html:45:2 The specified layout 'RESPONSIVE' is not supported by tag 'amp-soundcloud'. (see https://www.ampproject.org/docs/reference/components/amp-soundcloud) [AMP_LAYOUT_PROBLEM]
+amp-soundcloud/0.1/test/validator-amp-soundcloud.html:45:2 The specified layout 'RESPONSIVE' is not supported by tag 'amp-soundcloud'. (see https://amp.dev/documentation/components/amp-soundcloud) [AMP_LAYOUT_PROBLEM]
 |                    layout="responsive"></amp-soundcloud>
 |    <!-- valid: classic mode with three letter color -->
 |    <amp-soundcloud height=166 data-trackid="243169232" data-color="fff"

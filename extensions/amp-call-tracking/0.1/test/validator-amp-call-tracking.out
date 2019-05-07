@@ -37,13 +37,13 @@ FAIL
 |    <!-- Invalid: no <A> tag -->
 |    <amp-call-tracking config="https://example.com/calltracking.json">
 >>   ^~~~~~~~~
-amp-call-tracking/0.1/test/validator-amp-call-tracking.html:37:2 Tag 'amp-call-tracking' must have 1 child tags - saw 0 child tags. (see https://www.ampproject.org/docs/reference/components/amp-call-tracking) [AMP_TAG_PROBLEM]
+amp-call-tracking/0.1/test/validator-amp-call-tracking.html:37:2 Tag 'amp-call-tracking' must have 1 child tags - saw 0 child tags. (see https://amp.dev/documentation/components/amp-call-tracking) [AMP_TAG_PROBLEM]
 |    </amp-call-tracking>
 |
 |    <!-- Invalid: more than one <A> tag -->
 |    <amp-call-tracking config="https://example.com/calltracking.json">
 >>   ^~~~~~~~~
-amp-call-tracking/0.1/test/validator-amp-call-tracking.html:41:2 Tag 'amp-call-tracking' must have 1 child tags - saw 2 child tags. (see https://www.ampproject.org/docs/reference/components/amp-call-tracking) [AMP_TAG_PROBLEM]
+amp-call-tracking/0.1/test/validator-amp-call-tracking.html:41:2 Tag 'amp-call-tracking' must have 1 child tags - saw 2 child tags. (see https://amp.dev/documentation/components/amp-call-tracking) [AMP_TAG_PROBLEM]
 |      <a href="tel:12345678">+1 (23) 45-678</a>
 |      <a href="tel:98765432">(987) 654-321</a>
 |    </amp-call-tracking>
@@ -51,7 +51,7 @@ amp-call-tracking/0.1/test/validator-amp-call-tracking.html:41:2 Tag 'amp-call-t
 |    <!-- Invalid: no "config" attribute -->
 |    <amp-call-tracking>
 >>   ^~~~~~~~~
-amp-call-tracking/0.1/test/validator-amp-call-tracking.html:47:2 The mandatory attribute 'config' is missing in tag 'amp-call-tracking'. (see https://www.ampproject.org/docs/reference/components/amp-call-tracking) [AMP_TAG_PROBLEM]
+amp-call-tracking/0.1/test/validator-amp-call-tracking.html:47:2 The mandatory attribute 'config' is missing in tag 'amp-call-tracking'. (see https://amp.dev/documentation/components/amp-call-tracking) [AMP_TAG_PROBLEM]
 |      <a href="tel:12345678">+1 (23) 45-678</a>
 |    </amp-call-tracking>
 |
@@ -59,7 +59,7 @@ amp-call-tracking/0.1/test/validator-amp-call-tracking.html:47:2 The mandatory a
 |    <amp-call-tracking config="https://example.com/calltracking.json">
 |      <div></div>
 >>     ^~~~~~~~~
-amp-call-tracking/0.1/test/validator-amp-call-tracking.html:53:4 Tag 'div' is disallowed as child of tag 'amp-call-tracking'. Child tag must be one of ['a']. (see https://www.ampproject.org/docs/reference/components/amp-call-tracking) [AMP_TAG_PROBLEM]
+amp-call-tracking/0.1/test/validator-amp-call-tracking.html:53:4 Tag 'div' is disallowed as child of tag 'amp-call-tracking'. Child tag must be one of ['a']. (see https://amp.dev/documentation/components/amp-call-tracking) [AMP_TAG_PROBLEM]
 |    </amp-call-tracking>
 |  </body>
 |  </html>

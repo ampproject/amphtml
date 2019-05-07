@@ -38,7 +38,7 @@ FAIL
 |         missing value results in an error. -->
 |    <amp-reach-player
 >>   ^~~~~~~~~
-amp-reach-player/0.1/test/validator-amp-reach-player.html:38:2 The mandatory attribute 'data-embed-id' is missing in tag 'amp-reach-player'. (see https://www.ampproject.org/docs/reference/components/amp-reach-player) [AMP_TAG_PROBLEM]
+amp-reach-player/0.1/test/validator-amp-reach-player.html:38:2 The mandatory attribute 'data-embed-id' is missing in tag 'amp-reach-player'. (see https://amp.dev/documentation/components/amp-reach-player) [AMP_TAG_PROBLEM]
 |        layout="responsive" width="480" height="270">
 |    </amp-reach-player>
 |  </body>

@@ -73,7 +73,7 @@ tags: {  # <amp-dailymotion>
     requires_extension: "amp-video-docking"
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-dailymotion"
+  spec_url: "https://amp.dev/documentation/components/amp-dailymotion"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

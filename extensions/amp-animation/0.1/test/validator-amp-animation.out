@@ -55,7 +55,7 @@ FAIL
 |    <!-- Invalid: trigger value is not visibility -->
 |    <amp-animation layout="nodisplay" trigger="display">
 >>   ^~~~~~~~~
-amp-animation/0.1/test/validator-amp-animation.html:55:2 The attribute 'trigger' in tag 'amp-animation' is set to the invalid value 'display'. (see https://www.ampproject.org/docs/reference/components/amp-animation) [DISALLOWED_HTML]
+amp-animation/0.1/test/validator-amp-animation.html:55:2 The attribute 'trigger' in tag 'amp-animation' is set to the invalid value 'display'. (see https://amp.dev/documentation/components/amp-animation) [DISALLOWED_HTML]
 |      <script type="application/json">
 |      {
 |        "target": "target1",
@@ -68,7 +68,7 @@ amp-animation/0.1/test/validator-amp-animation.html:55:2 The attribute 'trigger'
 |    <!-- Invalid: no child json tag -->
 |    <amp-animation layout="nodisplay">
 >>   ^~~~~~~~~
-amp-animation/0.1/test/validator-amp-animation.html:66:2 Tag 'amp-animation' must have 1 child tags - saw 0 child tags. (see https://www.ampproject.org/docs/reference/components/amp-animation) [AMP_TAG_PROBLEM]
+amp-animation/0.1/test/validator-amp-animation.html:66:2 Tag 'amp-animation' must have 1 child tags - saw 0 child tags. (see https://amp.dev/documentation/components/amp-animation) [AMP_TAG_PROBLEM]
 |    </amp-animation>
 |  </body>
 |  </html>

@@ -70,7 +70,7 @@ FAIL
 |    <!-- Example of non nodisplay layout type -->
 |    <amp-user-notification
 >>   ^~~~~~~~~
-amp-user-notification/0.1/test/validator-amp-user-notification.html:70:2 The specified layout 'CONTAINER' is not supported by tag 'amp-user-notification'. (see https://www.ampproject.org/docs/reference/components/amp-user-notification) [AMP_LAYOUT_PROBLEM]
+amp-user-notification/0.1/test/validator-amp-user-notification.html:70:2 The specified layout 'CONTAINER' is not supported by tag 'amp-user-notification'. (see https://amp.dev/documentation/components/amp-user-notification) [AMP_LAYOUT_PROBLEM]
 |        layout=container
 |        id="amp-user-notification1"
 |        data-show-if-href="https://example.com/api/show?timestamp=TIMESTAMP"

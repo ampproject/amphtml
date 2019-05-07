@@ -35,7 +35,7 @@ FAIL
 |    <!-- Invalid: layout must be nodisplay. -->
 |    <amp-lightbox width="512" height="360"></amp-lightbox>
 >>   ^~~~~~~~~
-amp-lightbox/0.1/test/validator-amp-lightbox.html:35:2 The implied layout 'FIXED' is not supported by tag 'amp-lightbox'. (see https://www.ampproject.org/docs/reference/components/amp-lightbox) [AMP_LAYOUT_PROBLEM]
+amp-lightbox/0.1/test/validator-amp-lightbox.html:35:2 The implied layout 'FIXED' is not supported by tag 'amp-lightbox'. (see https://amp.dev/documentation/components/amp-lightbox) [AMP_LAYOUT_PROBLEM]
 |
 |    <!-- Valid -->
 |    <amp-lightbox id="lb-2" layout="nodisplay" animate-in="fade-in">
@@ -52,7 +52,7 @@ amp-lightbox/0.1/test/validator-amp-lightbox.html:35:2 The implied layout 'FIXED
 |    <!-- Invalid: invalid `animate-in` value -->
 |    <amp-lightbox id="lb-5" layout="nodisplay" animate-in="xmas-lights">
 >>   ^~~~~~~~~
-amp-lightbox/0.1/test/validator-amp-lightbox.html:50:2 The attribute 'animate-in' in tag 'amp-lightbox' is set to the invalid value 'xmas-lights'. (see https://www.ampproject.org/docs/reference/components/amp-lightbox) [DISALLOWED_HTML]
+amp-lightbox/0.1/test/validator-amp-lightbox.html:50:2 The attribute 'animate-in' in tag 'amp-lightbox' is set to the invalid value 'xmas-lights'. (see https://amp.dev/documentation/components/amp-lightbox) [DISALLOWED_HTML]
 |    </amp-lightbox>
 |  </body>
 |  </html>
