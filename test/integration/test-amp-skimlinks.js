@@ -116,7 +116,7 @@ describe.skip('amp-skimlinks', function() {
 
     // TODO(alanorozco): Unskip on firefox
     const itSkipFirefox = (desc, cb) =>
-        it.configure().skipFirefox().run(desc, cb);
+      it.configure().skipFirefox().run(desc, cb);
 
     // TODO(alanorozco): Unskip on firefox
     itSkipFirefox('should send NA-tracking on non-merchant link click ', () => {
