@@ -785,8 +785,11 @@ export class AmpAutocomplete extends AMP.BaseElement {
     let shouldScroll, newTop;
 
     return this.measureMutateElement(() => {
-      const itemTop = activeIndex === 0 ?
-        0 : this.distanceToContainerTop_(newActiveElement);
+      const categoryEl = newActiveElement.closest(
+          '.i-amphtml-autocomplete-results > .i-amphtml-autocomplete-category');
+      const addedOffset = categoryEl ? categoryEl.offsetTop : 0;
+      const itemTop = activeIndex === 0 ? 0 :
+        newActiveElement.offsetTop + addedOffset;
       const {offsetHeight: itemHeight} = newActiveElement;
       const {scrollTop: resultTop, offsetHeight: resultHeight} =
         this.container_;
@@ -802,23 +805,6 @@ export class AmpAutocomplete extends AMP.BaseElement {
       this.activeIndex_ = activeIndex;
       this.activeElement_ = newActiveElement;
     });
-  }
-
-  /**
-   * Calculates the total offset distance from the given element to the
-   * container_. This assumes the given parameter is a descendent of the
-   * results container.
-   *
-   * @param {Element} element
-   * @return {number}
-   * @private
-   */
-  distanceToContainerTop_(element) {
-    const {offsetTop: top, parentElement: parent} = element;
-    if (!parent || parent === this.container_) {
-      return top;
-    }
-    return top + this.distanceToContainerTop_(parent);
   }
 
   /** Returns all item elements in the results container that do not have the

@@ -39,6 +39,11 @@
     .subvalue {
       padding: .5rem 2rem; 
     }
+    .label {
+      padding: .5rem 1rem .5rem;
+      font: 8pt 'Arial', sans-serif;
+      text-transform: uppercase;
+    }
   </style>
   <script>
       (self.AMP=self.AMP||[]).push((AMP) => {
@@ -680,7 +685,23 @@
               "items" : [ "apple", "banana", "orange" ]
             }, {
               "category" : "Vegetables",
-              "items" : [ "cucumber", "lettuce", "broccoli" ]
+              "items" : [ {
+                "category" : "Vegetables",
+                "subcategory" : "Greens",
+                "items" : [ "lettuce", "arugula" ]
+              }, {
+                "category" : "Vegetables",
+                "subcategory" : "Roots",
+                "items" : [ {
+                  "category" : "Vegetables",
+                  "label" : "Healthy",
+                  "items" : [ "potato", "yam" ]
+                }, {
+                  "category" : "Vegetables",
+                  "label" : "Unhealthy",
+                  "items" : [ "potato chips", "french fries" ]
+                } ]
+              } ] 
             }, {
               "category" : "Bread",
               "items" : [ "bagel", "baguette", "brioche" ]
@@ -706,7 +727,17 @@
                 <div data-category="{{subcategory}}">
                   <div class="subheader">{{subcategory}}</div>
                   {{#items}}
+                    {{#label}}
+                    <div data-category="{{label}}">
+                      <div class="label">{{label}}</div>
+                      {{#items}}
+                      <div data-value="{{.}}" class="subvalue">{{.}}</div>
+                      {{/items}}
+                    </div>
+                    {{/label}}
+                    {{^label}}
                     <div data-value="{{.}}" class="subvalue">{{.}}</div>
+                    {{/label}}
                   {{/items}}
                 </div>
               {{/subcategory}}
