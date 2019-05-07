@@ -60,7 +60,7 @@ tags: {  # amp-geo (json)
       error_message: "html comments"
     }
   }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-geo"
+  spec_url: "https://amp.dev/documentation/components/amp-geo"
 }
 
 

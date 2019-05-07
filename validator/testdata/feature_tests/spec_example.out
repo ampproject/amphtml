@@ -59,4 +59,4 @@ PASS
 |    </body>
 |  </html>
 >>       ^~~~~~~~~
-feature_tests/spec_example.html:59:6 The tag 'amp-ad extension .js script' is missing or incorrect, but required by 'amp-ad'. This will soon be an error. (see https://www.ampproject.org/docs/reference/components/amp-ad) [DEPRECATION]
+feature_tests/spec_example.html:59:6 The tag 'amp-ad extension .js script' is missing or incorrect, but required by 'amp-ad'. This will soon be an error. (see https://amp.dev/documentation/components/amp-ad) [DEPRECATION]

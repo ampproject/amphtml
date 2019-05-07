@@ -50,7 +50,7 @@ FAIL
 |    <!-- Invalid: Incorrect attribute value for autoplay -->
 |    <amp-video-iframe
 >>   ^~~~~~~~~
-amp-video-iframe/0.1/test/validator-amp-video-iframe.html:50:2 The attribute 'autoplay' in tag 'AMP-VIDEO-IFRAME[poster]' is set to the invalid value 'true'. (see https://www.ampproject.org/docs/reference/components/amp-video-iframe) [DISALLOWED_HTML]
+amp-video-iframe/0.1/test/validator-amp-video-iframe.html:50:2 The attribute 'autoplay' in tag 'AMP-VIDEO-IFRAME[poster]' is set to the invalid value 'true'. (see https://amp.dev/documentation/components/amp-video-iframe) [DISALLOWED_HTML]
 |        autoplay=true
 |        layout=fill
 |        width=300
@@ -82,7 +82,7 @@ amp-video-iframe/0.1/test/validator-amp-video-iframe.html:50:2 The attribute 'au
 |    <!-- Invalid: Incorrect attribute value for rotate-to-fullscreen -->
 |    <amp-video-iframe
 >>   ^~~~~~~~~
-amp-video-iframe/0.1/test/validator-amp-video-iframe.html:80:2 The attribute 'rotate-to-fullscreen' in tag 'AMP-VIDEO-IFRAME[poster]' is set to the invalid value 'true'. (see https://www.ampproject.org/docs/reference/components/amp-video-iframe) [DISALLOWED_HTML]
+amp-video-iframe/0.1/test/validator-amp-video-iframe.html:80:2 The attribute 'rotate-to-fullscreen' in tag 'AMP-VIDEO-IFRAME[poster]' is set to the invalid value 'true'. (see https://amp.dev/documentation/components/amp-video-iframe) [DISALLOWED_HTML]
 |        rotate-to-fullscreen=true
 |        layout=fill
 |        width=300

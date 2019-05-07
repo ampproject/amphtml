@@ -34,7 +34,7 @@ tags: {  # <amp-story-auto-ads>
   requires_extension: "amp-story-auto-ads"
   mandatory_parent: "AMP-STORY"
   unique: true
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/amp-story-auto-ads.md"
+  spec_url: "https://amp.dev/documentation/components/amp-story-auto-ads"
 }
 tags: {  # amp-story-auto-ads (json config)
   html_format: AMP
@@ -58,7 +58,7 @@ tags: {  # amp-story-auto-ads (json config)
       error_message: "html comments"
     }
   }
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/amp-story-auto-ads.md"
+  spec_url: "https://amp.dev/documentation/components/amp-story-auto-ads"
 }
 # HTML5, 4.11.3 The template element
 tags: {

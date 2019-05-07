@@ -37,5 +37,5 @@ tags: {  # <amp-action-macro>
     mandatory: true
   }
   attr_lists: "mandatory-id-attr"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-action-macro"
+  spec_url: "https://amp.dev/documentation/components/amp-action-macro"
 }

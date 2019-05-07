@@ -29,6 +29,6 @@ FAIL
 |  <!-- Example of invalid amp-link-rewriter missing a script tag -->
 |  <amp-link-rewriter layout="nodisplay"></amp-link-rewriter>
 >> ^~~~~~~~~
-amp-link-rewriter/0.1/test/validator-amp-link-rewriter-no-script.html:29:0 Tag 'amp-link-rewriter' must have 1 child tags - saw 0 child tags. (see https://www.ampproject.org/docs/reference/components/amp-link-rewriter) [AMP_TAG_PROBLEM]
+amp-link-rewriter/0.1/test/validator-amp-link-rewriter-no-script.html:29:0 Tag 'amp-link-rewriter' must have 1 child tags - saw 0 child tags. (see https://amp.dev/documentation/components/amp-link-rewriter) [AMP_TAG_PROBLEM]
 |  </body>
 |  </html>
