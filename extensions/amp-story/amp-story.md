@@ -598,6 +598,7 @@ An `amp-story-grid-layer` can contain any of the following elements:
         <li><code>&lt;amp-img></code></li>
         <li><code>&lt;amp-video></code></li>
         <li><code>&lt;source></code></li>
+        <li><code>&lt;svg></code></li>
         <li><code>&lt;track></code></li>
       </ul>
     </td>
