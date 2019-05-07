@@ -56,8 +56,18 @@ const SUPPORTED_CSS_GRID_ATTRIBUTES_SELECTOR =
         .map(key => `[${key}]`)
         .join(',');
 
-const ESTHERS_ATTRIBUTE_SELECTOR =
-  '[esthers-attribute]';
+/**
+ * The attribute name for text background color
+ * @private @const {string}
+ */
+const TEXT_BACKGROUND_COLOR_ATTRIBUTE_NAME = 'text-background-color';
+
+/**
+ * The selector for text background color
+ * @private @const {string}
+ */
+const TEXT_BACKGROUND_COLOR_SELECTOR =
+    `[${TEXT_BACKGROUND_COLOR_ATTRIBUTE_NAME}]`;
 
 /**
  * The attribute name for grid layer templates.
@@ -139,18 +149,18 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
   }
 
   /**
-   * Hi this is Esther
+   * Creates inner span element with
    * @private
    */
   setDescendentCssTextStyles_() {
     const elementsToUpgradeStyles = scopedQuerySelectorAll(this.element,
-        ESTHERS_ATTRIBUTE_SELECTOR);
+        TEXT_BACKGROUND_COLOR_SELECTOR);
 
     Array.prototype.forEach.call(elementsToUpgradeStyles, element => {
-      const color = element.getAttribute('esthers-attribute');
+      const color = element.getAttribute(TEXT_BACKGROUND_COLOR_ATTRIBUTE_NAME);
       const text = element.innerHTML;
-      const newHtml = `<span style="background-color:${color}">${text}</span>`;
-      element.innerHTML = newHtml;
+      const span = `<span style="background-color:${color}">${text}</span>`;
+      element.innerHTML = span;
     });
   }
 

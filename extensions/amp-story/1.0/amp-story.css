@@ -348,6 +348,10 @@ amp-story-grid-layer a * {
   pointer-events: none !important;
 }
 
+amp-story-grid-layer [text-background-color] > span {
+  padding: 2px 4px;
+}
+
 /** Apply click shield on embedded components on initial load. */
 amp-story-grid-layer .i-amphtml-embedded-component::after {
   content: "" !important;
