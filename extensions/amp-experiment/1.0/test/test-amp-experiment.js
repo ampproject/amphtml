@@ -162,11 +162,14 @@ describes.realWin(
     );
 
     expectAsyncConsoleError(/Max number of mutations/);
-    return expect(experiment.buildCallback()).to.eventually
-      .be.rejectedWith(/Max number of mutations/);
+    return experiment.buildCallback().then(() => {
+      throw new Error('must have failed');
+    }, e => {
+      expect(e).to.match(/Max number of mutations/);
+    });
   });
 
-  it('should apply the mutations from the variant', () => {
+  it('should match the variant to the experiment', () => {
     addConfigElement('script');
     const stub = sandbox.stub(variant, 'allocateVariant');
     stub.withArgs(ampdoc, 'experiment-1', config['experiment-1'])
@@ -178,7 +181,8 @@ describes.realWin(
         .withArgs(ampdoc, 'experiment-3', config['experiment-3'])
         .returns(Promise.resolve(null));
 
-      const applyStub = sandbox.stub(experiment, 'applyMutations_');
+    const applyStub = sandbox.stub(experiment, 'applyMutations_');
+    sandbox.stub(experiment, 'validateExperimentToVariant_');
 
       experiment.buildCallback();
       return Services.variantsForDocOrNull(ampdoc.getHeadNode())

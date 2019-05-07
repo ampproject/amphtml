@@ -72,11 +72,13 @@ export class AmpExperiment extends AMP.BaseElement {
         const experimentVariants = Promise.all(variants)
           .then(() => {
             this.validateExperimentToVariant_(config, experimentToVariant);
-
             const applyExperimentsPromise = this.applyExperimentVariants_(config, experimentToVariant);
             variantsService.init(applyExperimentsPromise);
+          }).catch(e => {
+            // Ensure downstream consumers don't wait for the promise forever.
+            variantsService.init(Promise.resolve({}));
+            throw e;
           });
-
         return experimentVariants;
       } catch (e) {
         // Ensure downstream consumers don't wait for the promise forever.
