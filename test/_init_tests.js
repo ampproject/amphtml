@@ -128,7 +128,7 @@ class TestConfig {
     /**
      * By default, IE is skipped. Individual tests may opt in.
      */
-    this.skip(this.runOnIe);
+    //this.skip(this.runOnIe);
   }
 
   skipChrome() {
