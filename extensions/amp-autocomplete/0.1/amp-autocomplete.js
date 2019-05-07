@@ -791,9 +791,9 @@ export class AmpAutocomplete extends AMP.BaseElement {
     return this.measureMutateElement(() => {
       const categoryEl = newActiveElement.closest(
           '.i-amphtml-autocomplete-results > [data-category]');
-      const addedOffset = categoryEl ? categoryEl.offsetTop : 0;
+      const addedOffset = categoryEl ? categoryEl./*OK*/offsetTop : 0;
       const itemTop = activeIndex === 0 ? 0 :
-        newActiveElement.offsetTop + addedOffset;
+        newActiveElement./*OK*/offsetTop + addedOffset;
       const {offsetHeight: itemHeight} = newActiveElement;
       const {scrollTop: resultTop, offsetHeight: resultHeight} =
         this.container_;
