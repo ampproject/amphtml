@@ -789,8 +789,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
     let shouldScroll, newTop;
 
     return this.measureMutateElement(() => {
-      const itemTop = activeIndex === 0 ? 
-        0 : this.distanceToContainerTop_(newActiveElement);
+      const itemTop = activeIndex === 0 ?
+        0 : this.distanceToContainerTop_(newActiveElement, true);
       const {offsetHeight: itemHeight} = newActiveElement;
       const {scrollTop: resultTop, offsetHeight: resultHeight} =
         this.container_;
@@ -808,21 +808,32 @@ export class AmpAutocomplete extends AMP.BaseElement {
     });
   }
 
-  /** 
-   * Calculates the total offset distance from the given element to the 
-   * container_. This assumes the given parameter is a descendent of the 
-   * results container. 
+  /**
+   * Calculates the total scroll distance from the given element to the
+   * container_ as a summation of the offsetTop values of the given element 
+   * and its most ancestral element that is an immediate child of the 
+   * container_. 
    * 
-   * @param {Element} element 
+   * The boolean "first" describes if the given element is the 
+   * desired child to calculate the distance from or an intermediary element 
+   * in the recursion. This assumes the given parameter is a descendent of the
+   * results container.
+   *
+   * @param {Element} element
+   * @param {boolean} first
    * @return {number}
    * @private
    */
-  distanceToContainerTop_(element) {
+  distanceToContainerTop_(element, first) {
     const {offsetTop: top, parentElement: parent} = element;
     if (!parent || parent === this.container_) {
       return top;
     }
-    return top + this.distanceToContainerTop_(parent);
+    if (first) {
+      return top + this.distanceToContainerTop_(parent, false);
+    } 
+    return this.distanceToContainerTop_(parent, false);
+  }
 
   /** Returns all item elements in the results container that do not have the
    * 'data-disabled' attribute.
