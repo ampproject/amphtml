@@ -447,6 +447,8 @@ function createElementRules_() {
       'selectionstart': null,
       'spellcheck': null,
       'wrap': null,
+      // Non-standard property.
+      'defaultText': null,
     },
   };
   return rules;

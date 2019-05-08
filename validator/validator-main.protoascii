@@ -4597,6 +4597,7 @@ tags: {
   attrs: { name: "[autocomplete]" }
   attrs: { name: "[autofocus]" }
   attrs: { name: "[cols]" }
+  attrs: { name: "[defaultText]" }
   attrs: { name: "[disabled]" }
   attrs: { name: "[maxlength]" }
   attrs: { name: "[minlength]" }
