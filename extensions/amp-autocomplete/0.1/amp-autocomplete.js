@@ -105,7 +105,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     /**
      * Whether or not the "Backspace" key has recently been fired.
      * Only used when "suggest-first" is present on amp-autocomplete.
-     * 
+     *
      * This is used in conjunction between the "keydown" and "input" events
      * on the input element. The reason the inputHandler_() does not alone
      * read the "inputType" on the "input" to make the same discernment is

@@ -349,15 +349,15 @@ describes.realWin('amp-autocomplete unit tests', {
   });
 
   describe('keyDownHandler_() on Backspace', () => {
-    const event = { key: Keys.Backspace };
+    const event = {key: Keys.Backspace};
 
     it('should set flag to true when suggest-first is present', () => {
       return element.layoutCallback().then(() => {
         impl.suggestFirst_ = true;
-        expect(impl.detectBackspace_ = false);
+        expect(impl.detectBackspace_).to.be.false;
         return impl.keyDownHandler_(event);
       }).then(() => {
-        expect(impl.detectBackspace_ = true);
+        expect(impl.detectBackspace_).to.be.true;
       });
     });
 
@@ -367,7 +367,7 @@ describes.realWin('amp-autocomplete unit tests', {
         expect(impl.detectBackspace_).to.be.false;
         return impl.keyDownHandler_(event);
       }).then(() => {
-        expect(impl.detectBackspace_ = false);
+        expect(impl.detectBackspace_).to.be.false;
       });
     });
   });
