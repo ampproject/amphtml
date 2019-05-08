@@ -233,9 +233,8 @@ async function runTests() {
     c.reporters = ['mocha'];
   }
 
-  const transpileNodeModules = !!argv.ie;
   c.browserify = {
-    transform: [['babelify', {global: transpileNodeModules}]],
+    transform: [['babelify', {global: true}]],
     configure: function(bundle) {
       bundle.on('prebundle', function() {
         log(green('Transforming tests with'),
