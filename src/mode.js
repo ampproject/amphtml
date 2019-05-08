@@ -110,7 +110,7 @@ function getMode_(win) {
     lite: searchQuery['amp_lite'] != undefined,
     test: runningTests,
     // TODO(estherkim) see what happens when testing on IE11 w/out old polyfill
-    testIe: false, //runningTestsOnIe
+    testIe: runningTestsOnIe && false,
     log: hashQuery['log'],
     version: version(),
     rtvVersion,
