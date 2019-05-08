@@ -29,6 +29,7 @@ const {endBuildStep} = require('./tasks/helpers');
  *
  * @param {string} srcDir
  * @param {string} srcFilename
+ * @return {!Promise}
  */
 exports.transpileTs = function(srcDir, srcFilename) {
   const startTime = Date.now();
@@ -63,15 +64,17 @@ exports.transpileTs = function(srcDir, srcFilename) {
     shouldSkipTsickleProcessing: () => false,
     transformTypesToClosure: true,
   };
-  const emitResult = tsickle.emitWithTsickle(program, transformerHost,
-      compilerHost, tsOptions, undefined, (filePath, contents) => {
+  return tsickle.emitWithTsickle(
+      program, transformerHost, compilerHost, tsOptions, undefined,
+      (filePath, contents) => {
         fs.writeFileSync(filePath, contents, {encoding: 'utf-8'});
+      })
+      .then(emitResult => {
+        const diagnostics =
+            ts.getPreEmitDiagnostics(program).concat(emitResult.diagnostics);
+        if (diagnostics.length) {
+          log(colors.red('TSickle:'), tsickle.formatDiagnostics(diagnostics));
+        }
+        endBuildStep('Transpiled', srcFilename, startTime);
       });
-
-  const diagnostics =
-      ts.getPreEmitDiagnostics(program).concat(emitResult.diagnostics);
-  if (diagnostics.length) {
-    log(colors.red('TSickle:'), tsickle.formatDiagnostics(diagnostics));
-  }
-  endBuildStep('Transpiled', srcFilename, startTime);
 };
