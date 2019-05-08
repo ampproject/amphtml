@@ -77,7 +77,7 @@ export class ViewerSubscriptionPlatform {
   /** @override */
   getEntitlements() {
     devAssert(this.currentProductId_, 'Current product is not set');
-    /** @type {Object} */
+    /** @type {JsonObject} */
     const messageData = dict({
       'publicationId': this.publicationId_,
       'productId': this.currentProductId_,
