@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,22 +15,44 @@
  */
 
 import {CSS} from '../../../build/amp-cld-img-0.1.css';
-import {buildUrl, deriveObjectFit, getAsBoolean} from './utils';
+import {buildUrl, deriveObjectFit} from './utils';
 import {dashToCamelCase} from '../../../src/string';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {tryParseJson} from '../../../src/json';
 import {user, userAssert} from '../../../src/log';
 
+/**
+ * Default value for the crop attribute - affects the way Cloudinary crops the
+ * image before delivery. 'fill' is similar to CSS cover class.
+ * @type {string}
+ */
 const DEFAULT_CROP = 'fill';
+
+/**
+ * Default for dimensions rounding of the element's for the transformations.
+ * For instance, an element sized 280 by 370 will generate a request for
+ * 300 by 400 when using this default value.
+ * @type {number}
+ */
 const DEFAULT_STEP_SIZE = 100;
+
+/**
+ * Default maximum width/height of the fetched image. Element dimensions larger
+ * than this value will be trimmed to this value.
+ * @type {number}
+ */
 const DEFAULT_MAX_SIZE = 2000;
 
 /**
  * Attributes to propagate to internal image when changed externally.
  * @type {!Array<string>}
  */
-const ATTRIBUTES_TO_PROPAGATE = ['alt', 'title', 'referrerpolicy', 'aria-label',
-  'aria-describedby', 'aria-labelledby'];
+const ATTRIBUTES_TO_PROPAGATE = ['alt',
+  'title',
+  'referrerpolicy',
+  'aria-label',
+  'aria-describedby',
+  'aria-labelledby'];
 
 /**
  * Boolean attributes to merge into options object used to generate the url
@@ -183,7 +205,6 @@ export class AmpCldImg extends AMP.BaseElement {
    */
   updateSrc_() {
     const src = buildUrl(this.publicId_, this.options_);
-    console.log('Generated url:' + src);
     this.image_.setAttribute('src', src || '');
   }
 
@@ -207,7 +228,7 @@ export class AmpCldImg extends AMP.BaseElement {
     BOOLEAN_ATTRIBUTES.forEach(attr => {
       const attrValue = this.element.getAttribute(attr);
       if (attrValue !== undefined) {
-        this.options_[dashToCamelCase(attr)] = getAsBoolean(attrValue);
+        this.options_[dashToCamelCase(attr)] = attrValue === 'true';
       }
     });
 

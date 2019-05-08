@@ -1,6 +1,28 @@
+/**
+ * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 const OLD_AKAMAI_SHARED_CDN = 'cloudinary-a.akamaihd.net';
 const AKAMAI_SHARED_CDN = 'res.cloudinary.com';
 const SHARED_CDN = AKAMAI_SHARED_CDN;
+/**
+ * Represents all the default illegal values to escape when using smartEscape.
+ * Anything but (letters, numbers,-,:,/,_)
+ * @type {RegExp}
+ */
+const DEFAULT_URL_ESCAPE_PATTERN = /([^a-zA-Z0-9_.\-\/:]+)/g;
 
 const CROP_TO_OBJECT_FIT = {
   'scale': 'fill',
@@ -28,101 +50,92 @@ const CROP_TO_OBJECT_FIT = {
  * generate the url. if src is provided the rest of the options are ignored.
  * @return {?string} The constructed url
  */
-export function buildUrl(publicId, options = {}) {
-  let url = options.src;
+export function buildUrl(publicId, options) {
   /* if src provided explicitly it will be used: */
-  if (url) {
+  if (options.src) {
     /* replace auto width/height if requested: */
-    url = url.replace('w_auto', `w_${options.width}`)
+    return options.src.replace('w_auto', `w_${options.width}`)
         .replace('h_auto', `h_${options.height}`);
-  } else {
-    patchFetchFormat(options);
-    let type = /** @type {?string} */(optionConsume(options, 'type', null));
-    let resourceType = /** @type {?string} */(optionConsume(options,
-        'resourceType', 'image'));
-    let version = /** @type {?string} */(optionConsume(options, 'version',
-        null));
-    let transformation = generateTransformationString(options);
-    const format = /** @type {?string} */(optionConsume(options, 'format',
-        null));
-    const cloudName = /** @type {string} */(optionConsume(options, 'cloudName',
-        null));
-    const privateCdn = /** @type {?boolean} */(optionConsume(options,
-        'privateCdn', null));
-    const secureDistribution = /** @type {?string} */(optionConsume(options,
-        'secureDistribution', null));
-    const secure = /** @type {?boolean} */(optionConsume(options, 'secure',
-        true));
-    const cdnSubdomain = /** @type {?string} */(optionConsume(options,
-        'cdnSubdomain', null));
-    const secureCdnSubdomain = /** @type {?boolean} */(optionConsume(options,
-        'secureCdnSubdomain', null));
-    const cname = /** @type {?string} */(optionConsume(options, 'cname', null));
-    const shorten = /** @type {?boolean} */(optionConsume(options, 'shorten',
-        null));
-    const urlSuffix = /** @type {?string} */(optionConsume(options, 'urlSuffix',
-        null));
-    const useRootPath = /** @type {?boolean} */(optionConsume(options,
-        'useRootPath', null));
+  }
+  const optionsCopy = Object.assign({}, options);
 
-    const preloaded = /^(image|raw)\/([a-z0-9_]+)\/v(\d+)\/([^#]+)$/.exec(
-        publicId);
-    if (preloaded) {
-      resourceType = preloaded[1];
-      type = preloaded[2];
-      version = preloaded[3];
-      publicId = preloaded[4];
-    }
-    const originalSource = publicId;
-    if (publicId == null) {
-      return originalSource;
-    }
+  patchFetchFormat(optionsCopy);
 
-    if (type === null && publicId.match(/^https?:\//i)) {
-      return originalSource;
-    }
-    const finalizedResourceType = finalizeResourceType(resourceType, type,
-        urlSuffix, useRootPath, shorten);
+  let type = /** @type {?string} */(optionConsume(optionsCopy, 'type', null));
+  let resourceType = /** @type {?string} */(optionConsume(optionsCopy,
+      'resourceType', 'image'));
+  let version = /** @type {?string} */(optionConsume(optionsCopy, 'version'));
+  let transformation = generateTransformationString(optionsCopy);
+  const format = /** @type {?string} */(optionConsume(optionsCopy, 'format'));
+  const cloudName = /** @type {string} */(optionConsume(optionsCopy, 'cloudName'));
+  const privateCdn = /** @type {?boolean} */(optionConsume(optionsCopy,
+      'privateCdn'));
+  const secureDistribution = /** @type {?string} */(optionConsume(optionsCopy,
+      'secureDistribution', null));
+  const secure = /** @type {?boolean} */(optionConsume(optionsCopy, 'secure',
+      true));
+  const cdnSubdomain = /** @type {?string} */(optionConsume(optionsCopy,
+      'cdnSubdomain'));
+  const secureCdnSubdomain = /** @type {?boolean} */(optionConsume(optionsCopy,
+      'secureCdnSubdomain', null));
+  const cname = /** @type {?string} */(optionConsume(optionsCopy, 'cname'));
+  const shorten = /** @type {?boolean} */(optionConsume(optionsCopy, 'shorten'));
+  const urlSuffix = /** @type {?string} */(optionConsume(optionsCopy, 'urlSuffix'));
+  const useRootPath = /** @type {?boolean} */(optionConsume(optionsCopy,'useRootPath'));
 
-    resourceType = finalizedResourceType[0];
-    type = finalizedResourceType[1];
-
-    const finalizedSource = finalizeSource(publicId, format, urlSuffix);
-    publicId = finalizedSource[0];
-    const sourceToSign = finalizedSource[1];
-
-    if (sourceToSign.indexOf('/') > 0 && !sourceToSign.match(/^v[0-9]+/) &&
-      !sourceToSign.match(/^https?:\//)) {
-      if (version == null) {
-        version = 1;
-      }
-    }
-    if (version != null) {
-      version = `v${version}`;
-    }
-    transformation = transformation.replace(/([^:])\/\//g, '$1/');
-
-    const prefix = unsignedUrlPrefix(publicId, cloudName, privateCdn,
-        cdnSubdomain, secureCdnSubdomain, cname, secure, secureDistribution);
-
-    url = [prefix, resourceType, type, transformation,
-      version, publicId].filter(function(part) {
-      return (part != null) && part !== '';
-    }).join('/');
+  /**
+   * Checks if the publicId represents a pre-loaded url in the form of
+   * "resource_type/type/version/publicId", e.g.
+   * "image/private/v123456/sample.png"
+   */
+  const preloaded = /^(image|raw)\/([a-z0-9_]+)\/v(\d+)\/([^#]+)$/.exec(
+      publicId);
+  if (preloaded) {
+    resourceType = preloaded[1];
+    type = preloaded[2];
+    version = preloaded[3];
+    publicId = preloaded[4];
   }
 
-  return url;
-}
+  /**
+   * If the publicId represents a pre-loaded url, the actual publicId should be
+   * in there - in case it's not, there's nothing we can do.
+   */
+  if (publicId == null) {
+    return null;
+  }
 
-/**
- * Converts the string to boolean
- * @param {string} value to convert to boolean
- */
-export function getAsBoolean(value) {
-  return value === '1' ||
-    value === 'TRUE' ||
-    value === 'true' ||
-    value === 'True';
+  const originalSource = publicId;
+
+  if (type === null && publicId.match(/^https?:\//i)) {
+    return originalSource;
+  }
+  const finalizedResourceType = finalizeResourceType(resourceType, type,
+      urlSuffix, useRootPath, shorten);
+
+  resourceType = finalizedResourceType.resourceType;
+  type = finalizedResourceType.type;
+
+  const finalizedSource = finalizeSource(publicId, format, urlSuffix);
+  publicId = finalizedSource.source;
+  const {sourceToSign} = finalizedSource;
+
+  if (sourceToSign.indexOf('/') > 0 && !sourceToSign.match(/^v[0-9]+/) &&
+      !sourceToSign.match(/^https?:\//)) {
+    if (version == null) {
+      version = 1;
+    }
+  }
+  if (version != null) {
+    version = `v${version}`;
+  }
+  transformation = transformation.replace(/([^:])\/\//g, '$1/');
+
+  const prefix = unsignedUrlPrefix(cloudName, privateCdn,
+      cdnSubdomain, secureCdnSubdomain, cname, secure, secureDistribution);
+
+  return [prefix, resourceType, type, transformation,
+    version, publicId].filter(part => part).join('/');
 }
 
 /**
@@ -136,7 +149,6 @@ export function deriveObjectFit(cropMode) {
 
 /**
  * Generates the url prefix based on the parameters
- * @param {string} source
  * @param {string} cloudName
  * @param {?boolean} privateCdn
  * @param {?string} cdnSubdomain
@@ -146,7 +158,7 @@ export function deriveObjectFit(cropMode) {
  * @param {?string} secureDistribution
  * @return {string} The generated prefix
  */
-function unsignedUrlPrefix(source, cloudName, privateCdn, cdnSubdomain,
+function unsignedUrlPrefix(cloudName, privateCdn, cdnSubdomain,
   secureCdnSubdomain, cname, secure,
   secureDistribution) {
   let prefix;
@@ -185,11 +197,9 @@ function unsignedUrlPrefix(source, cloudName, privateCdn, cdnSubdomain,
  *
  * @param {Object} options
  */
-function patchFetchFormat(options = {}) {
-  if (options.type === 'fetch') {
-    if (options.fetchFormat == null) {
-      options.fetchFormat = optionConsume(options, 'format', null);
-    }
+function patchFetchFormat(options) {
+  if (options.type === 'fetch' && options.fetchFormat == null) {
+    options.fetchFormat = optionConsume(options, 'format');
   }
 }
 
@@ -197,7 +207,7 @@ function patchFetchFormat(options = {}) {
  *
  * @param {Object} options
  * @param {string} optionName
- * @param {*} defaultValue
+ * @param {*=} defaultValue
  * @return {*}
  */
 function optionConsume(options, optionName, defaultValue) {
@@ -205,9 +215,9 @@ function optionConsume(options, optionName, defaultValue) {
   delete options[optionName];
   if (result != null) {
     return result;
-  } else {
-    return defaultValue;
   }
+
+  return defaultValue;
 }
 
 /**
@@ -217,7 +227,7 @@ function optionConsume(options, optionName, defaultValue) {
  * @param {?string} urlSuffix
  * @param {?boolean} useRootPath
  * @param {?boolean} shorten
- * @return {Array<string>}
+ * @return {{type: ?string, resourceType: ?string}}
  */
 function finalizeResourceType(resourceType, type, urlSuffix, useRootPath,
   shorten) {
@@ -252,54 +262,69 @@ function finalizeResourceType(resourceType, type, urlSuffix, useRootPath,
     resourceType = 'iu';
     type = null;
   }
-  return [resourceType, type];
+  return {resourceType, type};
 }
 
 /**
  *
- * @param {?string} source
- * @param {?string} format
- * @param {?string} urlSuffix
- * @return {Array<string>}
+ * @param {string} source The id of the resource, usually a cloudinary publicId
+ * but for certain url types (e.g. fetch) this can be a full resource url
+ * @param {?string} format The file format to use for delivery
+ * @param {?string} urlSuffix Used to give more meaningful name to resources, as
+ * the id itself can be a random string. Used primarily for SEO.
+ * @return {{
+ *   source: string,
+ *   sourceToSign: string
+ * }}
  */
 function finalizeSource(source, format, urlSuffix) {
   let sourceToSign;
+
+  /**
+   * combine all double slashes into a single slash, unless it's the double
+   * slash right after the url scheme. This is only relevant if the source
+   * is a url.
+   * Example: https://res.cloudinary.com/image/upload//sample
+   * turns to https://res.cloudinary.com/image/upload/sample
+   */
   source = source.replace(/([^:])\/\//g, '$1/');
+
   if (source.match(/^https?:\//i)) {
-    source = smartEscape(source);
-    sourceToSign = source;
-  } else {
-    source = encodeURIComponent(decodeURIComponent(source)).replace(/%3A/g, ':')
-        .replace(/%2F/g, '/');
-    sourceToSign = source;
-    if (!!urlSuffix) {
-      if (urlSuffix.match(/[\.\/]/)) {
-        throw new Error('urlSuffix should not include . or /');
-      }
-      source = source + '/' + urlSuffix;
-    }
-    if (format != null) {
-      source = source + '.' + format;
-      sourceToSign = sourceToSign + '.' + format;
-    }
+    // if the source is a url, return it, escaped, without further processing.
+    const escaped = smartEscape(source);
+    return {source: escaped, sourceToSign: source};
   }
-  return [source, sourceToSign];
+
+  source = encodeURIComponent(decodeURIComponent(source)).replace(/%3A/g, ':')
+      .replace(/%2F/g, '/');
+  sourceToSign = source;
+  if (urlSuffix) {
+    if (urlSuffix.match(/[\.\/]/)) {
+      throw new Error('urlSuffix should not include . or /');
+    }
+    source = source + '/' + urlSuffix;
+  }
+  if (format != null) {
+    source = source + '.' + format;
+    sourceToSign = sourceToSign + '.' + format;
+  }
+  return {source, sourceToSign};
 }
 
 /**
- *
- * @param {string} string
- * @param {RegExp} unsafe
+ * URL-escape the given string.
+ * @param {string} string The string to escape
+ * @param {RegExp=} unsafe A regex pattern representing the values to escape.
+ * if no regex is sent, standard url escaping is used.
  * @return {string}
  */
-function smartEscape(string, unsafe = /([^a-zA-Z0-9_.\-\/:]+)/g) {
+function smartEscape(string, unsafe = DEFAULT_URL_ESCAPE_PATTERN) {
   return string.replace(unsafe, function(match) {
     return match.split('').map(function(c) {
       return '%' + c.charCodeAt(0).toString(16).toUpperCase();
     }).join('');
   });
 }
-
 
 /**
  * Generate a transformation string based on the options
@@ -308,37 +333,37 @@ function smartEscape(string, unsafe = /([^a-zA-Z0-9_.\-\/:]+)/g) {
  */
 function generateTransformationString(options) {
   const width = optionConsume(options, 'transformationWidth',
-      optionConsume(options, 'width', null));
+      optionConsume(options, 'width'));
   const height = optionConsume(options, 'transformationHeight',
-      optionConsume(options, 'height', null));
-  const crop = optionConsume(options, 'crop', null);
-  const gravity = optionConsume(options, 'gravity', null);
+      optionConsume(options, 'height'));
+  const crop = optionConsume(options, 'crop');
+  const gravity = optionConsume(options, 'gravity');
 
-  let background = optionConsume(options, 'background', null);
+  let background = optionConsume(options, 'background');
   background = background && background.replace(/^#/, 'rgb:');
-  const effect = optionConsume(options, 'effect', null);
-  const border = optionConsume(options, 'border', null);
-  const aspectRatio = optionConsume(options, 'aspectRatio', null);
-  const dprValue = optionConsume(options, 'dpr', null);
-  const rawTransformation = optionConsume(options, 'rawTransformation', null);
-  const fetchFormat = optionConsume(options, 'fetchFormat', null);
-  const quality = optionConsume(options, 'quality', null);
+  const effect = optionConsume(options, 'effect');
+  const border = optionConsume(options, 'border');
+  const aspectRatio = optionConsume(options, 'aspectRatio');
+  const dprValue = optionConsume(options, 'dpr');
+  const rawTransformation = optionConsume(options, 'rawTransformation');
+  const fetchFormat = optionConsume(options, 'fetchFormat');
+  const quality = optionConsume(options, 'quality');
 
   const transformation = {
-    b: background,
-    bo: border,
-    e: effect,
-    f: fetchFormat,
-    q: quality,
+    'b': background,
+    'bo': border,
+    'e': effect,
+    'f': fetchFormat,
+    'q': quality,
   };
 
   const responsive = {
-    dpr: dprValue,
-    ar: aspectRatio,
-    c: crop,
-    g: gravity,
-    h: height,
-    w: width,
+    'dpr': dprValue,
+    'ar': aspectRatio,
+    'c': crop,
+    'g': gravity,
+    'h': height,
+    'w': width,
   };
 
   return [rawTransformation,
@@ -351,12 +376,11 @@ function generateTransformationString(options) {
 /**
  * Returns a string of all the defined values (comma separated)
  * @private
- * @param {Object} transformation
+ * @param {!Object} transformation
  * @return {string} the joined string.
  */
 function filterAndJoin_(transformation) {
-  const nonNullTransformation = transformation || {};
-  return Object.keys(nonNullTransformation)
+  return Object.keys(transformation)
       .filter(key => isPresent(transformation[key]))
       .map(key => key + '_' + transformation[key])
       .sort()
@@ -371,6 +395,6 @@ function filterAndJoin_(transformation) {
  * @return {boolean} True if the value is defined and not empty.
  */
 function isPresent(value) {
-  return value != null && (String(value)).length > 0;
+  return value != null && value !== '';
 }
 
