@@ -38,7 +38,7 @@ FAIL
 |              <path d="m64.3 22.023h-4.16l-6.975 17.797h3.674s.74-.33 1.18-1.4l.805-2.57h6.808l.805 2.57c.44 1.07 1.18 1.4 1.18 1.4h3.674zm-4.524 11.033 2.45-7.26 2.45 7.26zm36.608-11.033v17.797h-3.664v-11.684l-4.524 8.805s-.552 1.158-1.82 1.026h-.1c-1.27.143-1.82-1.026-1.82-1.026l-4.524-8.805v11.684h-3.674v-17.797h3.586c.827.01.938.684.938.684l5.55 10.978 5.55-10.978s.1-.673.938-.684zm19.196 2.837c-1.655-3.2-8.75-2.836-8.75-2.836h-3.94v17.796h4.05l.143-5.958c6.73.188 7.756-1.876 7.756-1.876 2.946-2.902.74-7.128.74-7.128zm-5.78 5.88h-2.8v-5.517c0-.364 3.178-.022 3.487.077.706.22 1.346.662 1.556 1.4.52 1.82-.188 3.773-2.25 4.038z"/>
 |              <circle cx="24.578" cy="30" r="20.952" foo-attribute="bar"/>
 >>             ^~~~~~~~~
-amp-story/1.0/test/validator-amp-story-svg-error.html:38:12 The attribute 'foo-attribute' may not appear in tag 'circle'. (see https://www.ampproject.org/docs/reference/spec#svg) [DISALLOWED_HTML]
+amp-story/1.0/test/validator-amp-story-svg-error.html:38:12 The attribute 'foo-attribute' may not appear in tag 'circle'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg) [DISALLOWED_HTML]
 |            </g>
 |            <path d="m26.144 26.834h5.075s1.07 0 .52 1.214l-8.75 14.564h-1.622l1.545-9.522-5.153-.033s-.916-.364-.22-1.545l8.606-14.233h1.688z" fill="#fff"/>
 |          </svg>
@@ -46,7 +46,7 @@ amp-story/1.0/test/validator-amp-story-svg-error.html:38:12 The attribute 'foo-a
 |        <amp-story-page-attachment layout="nodisplay">
 |          <circle cx="50" cy="50" r="40" stroke="black" stroke-width="3" fill="red" />
 >>         ^~~~~~~~~
-amp-story/1.0/test/validator-amp-story-svg-error.html:44:8 The tag 'circle' may only appear as a descendant of tag 'svg'. (see https://www.ampproject.org/docs/reference/spec#svg) [DISALLOWED_HTML]
+amp-story/1.0/test/validator-amp-story-svg-error.html:44:8 The tag 'circle' may only appear as a descendant of tag 'svg'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg) [DISALLOWED_HTML]
 |          <svg height="100" width="100">
 |          </svg>
 |        </amp-story-page-attachment>
