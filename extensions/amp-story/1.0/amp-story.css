@@ -381,11 +381,6 @@ amp-story-grid-layer .i-amphtml-embedded-component::after {
 }
 
 .i-amphtml-story-grid-template-fill > * {
-  /**
-   * Publishers need to be able to override the display of an amp-img or
-   * amp-video from their custom CSS, to toggle assets based on media queries.
-   */
-  display: block;
   bottom: 0 !important;
   height: auto !important;
   left: 0 !important;

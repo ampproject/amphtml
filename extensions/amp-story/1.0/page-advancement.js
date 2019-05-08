@@ -716,7 +716,7 @@ class MediaBasedAdvancement extends AdvancementConfig {
     this.elements_ = elements;
 
     /** @private {?Element} */
-    this.element_ = this.getFirstDisplayedElement_();
+    this.element_ = this.getFirstPlayableElement_();
 
     /** @private {?Element} */
     this.mediaElement_ = null;
@@ -742,11 +742,12 @@ class MediaBasedAdvancement extends AdvancementConfig {
   }
 
   /**
-   * Returns the first displayed element, or null.
+   * Returns the first playable element, or null. An element is considered
+   * playable if it's either visible, or a hidden AMP-AUDIO.
    * @return {?Element}
    * @private
    */
-  getFirstDisplayedElement_() {
+  getFirstPlayableElement_() {
     if (this.elements_.length === 1) {
       return this.elements_[0];
     }
@@ -754,8 +755,9 @@ class MediaBasedAdvancement extends AdvancementConfig {
     for (let i = 0; i < this.elements_.length; i++) {
       const element = this.elements_[i];
       const resource = this.resources_.getResourceForElement(element);
-      if (element.getAttribute('layout') === Layout.NODISPLAY ||
-          resource.isDisplayed()) {
+      if (resource.isDisplayed() ||
+          (element.tagName === 'AMP-AUDIO' &&
+              element.getLayout() === Layout.NODISPLAY)) {
         return element;
       }
     }
@@ -769,14 +771,16 @@ class MediaBasedAdvancement extends AdvancementConfig {
    * @private
    */
   onVideoVisibilityChange_() {
-    const element = this.getFirstDisplayedElement_();
+    const element = this.getFirstPlayableElement_();
     if (element === this.element_) {
       return;
     }
     this.element_ = element;
     this.mediaElement_ = null;
     this.video_ = null;
-    // Only call `start()` again if the page-advancement is running.
+    // If the page-advancement is running, reset the event listeners so the
+    // progress bar reflects the advancement of the new video. If not running,
+    // the next call to `start()` will set the listeners on the new element.
     if (this.isRunning()) {
       this.stop();
       this.start();

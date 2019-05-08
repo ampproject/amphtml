@@ -613,7 +613,8 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     // Considers amp-audio elements with a layout=nodisplay attribute as
     // displayed, since we want them to play when the page is active.
-    if (ampEl.getAttribute('layout') === Layout.NODISPLAY) {
+    if (ampEl.tagName === 'AMP-AUDIO' &&
+        ampEl.getLayout() === Layout.NODISPLAY) {
       return true;
     }
 
