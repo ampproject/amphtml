@@ -16,6 +16,7 @@
 
 import {LiveListManager, liveListManagerForDoc} from '../live-list-manager';
 import {Services} from '../../../../src/services';
+import { AMP_LIST_CUSTOM_SLOT_ID } from '../amp-live-list';
 
 const XHR_BUFFER_SIZE = 2;
 
@@ -100,8 +101,8 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
       return this.updateTime_;
     }
 
-    isDynamic() {
-      return false;
+    hasCustomSlot() {
+      return !!this[AMP_LIST_CUSTOM_SLOT_ID];
     }
   }
 
@@ -158,6 +159,36 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
     ready();
     return manager.whenDocReady_().then(() => {
       expect(manager.interval_).to.equal(5000);
+    });
+  });
+
+  it('should use custom containers for live-lists dynamically appended ' +
+  'in the client', () => {
+    const customSlot = document.createElement('div');
+    customSlot.setAttribute('id', 'custom-slot');
+    customSlot.setAttribute('dynamic-live-list', 'custom-list');
+
+    const fromServer = doc.createElement('div');
+    fromServer.appendChild(customSlot);
+    fromServer.getElementById = () => {};
+
+    sandbox.stub(fromServer, 'getElementById').returns(customSlot);
+
+    ready();
+    const clientLiveList = getLiveList({
+      'data-poll-interval': '9000',
+      'sort': 'ascending',
+      'disable-scrolling': '',
+      'disable-pagination': '',
+      'auto-insert': '',
+    }, 'custom-list');
+    clientLiveList[AMP_LIST_CUSTOM_SLOT_ID] = customSlot.id;
+    clientLiveList.buildCallback();
+
+
+    return manager.whenDocReady_().then(() => {
+      manager.updateLiveLists_(fromServer);
+      expect(Object.keys(manager.liveLists_)).to.have.length(1);
     });
   });
 

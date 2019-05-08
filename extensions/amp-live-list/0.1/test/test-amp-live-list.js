@@ -139,6 +139,21 @@ describes.realWin('amp-live-list', {
     expect(stub).to.be.calledOnce;
   });
 
+  it('only counts number of valid children', () => {
+    const child = document.createElement('div');
+    child.setAttribute('id', 'child-id');
+    child.setAttribute('data-sort-time', Date.now());
+    elem.querySelector('[items]').appendChild(child);
+
+    const invalidChild = document.createElement('div');
+    elem.querySelector('[items]').appendChild(invalidChild);
+
+    buildElement(elem, dftAttrs);
+    const spy = sandbox.spy(liveList, 'countAndCacheValidItems_');
+    liveList.buildCallback();
+    expect(spy).to.have.returned(1);
+  });
+
   it('validates correctly', () => {
     const child = document.createElement('div');
     elem.querySelector('[items]').appendChild(child);

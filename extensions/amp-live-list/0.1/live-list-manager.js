@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {AMP_LIST_CUSTOM_SLOT_ID} from './amp-live-list';
 import {Poller} from './poller';
 import {Services} from '../../../src/services';
 import {addParamToUrl} from '../../../src/url';
@@ -158,7 +159,7 @@ export class LiveListManager {
   updateLiveLists_(doc) {
     this.installExtensionsForDoc_(doc);
     const allLiveLists =
-      this.getLiveLists_(doc).concat(this.getDynamicLiveLists_(doc));
+      this.getLiveLists_(doc).concat(this.getCustomSlots_(doc));
     const updateTimes = allLiveLists.map(this.updateLiveList_.bind(this));
 
     const latestUpdateTime = Math.max.apply(Math, [0].concat(updateTimes));
@@ -185,18 +186,20 @@ export class LiveListManager {
   }
 
   /**
-   * Queries for dynamically added `amp-live-list`s and returns elements that
-   * built them.
+   * Queries for custom slots that will be used to host the live elements. This
+   * overrides looking for live elements inside the default <amp-live-list>
+   * element.
    *
    * @param {!Document} doc
    * @return {!Array<!Element>}
    * @private
    */
-  getDynamicLiveLists_(doc) {
-    const dynamicListsIds = Object.keys(this.liveLists_).filter(id =>
-      this.liveLists_[id].isDynamic());
-    return dynamicListsIds.map(id =>
-      doc.getElementById(this.liveLists_[id].element.getAttribute('built-by')));
+  getCustomSlots_(doc) {
+    const liveListsWithCustomSlots = Object.keys(this.liveLists_).filter(id =>
+      this.liveLists_[id].hasCustomSlot());
+
+    return liveListsWithCustomSlots.map(id =>
+      doc.getElementById(this.liveLists_[id].element[AMP_LIST_CUSTOM_SLOT_ID]));
   }
 
   /**
@@ -206,6 +209,8 @@ export class LiveListManager {
    * @return {number}
    */
   updateLiveList_(liveList) {
+    // amp-live-list elements can be appended dynamically by another
+    // component using the [dynamic-live-list] attribute.
     const id = liveList.hasAttribute('dynamic-live-list') ?
       liveList.getAttribute('dynamic-live-list') :
       liveList.getAttribute('id');
