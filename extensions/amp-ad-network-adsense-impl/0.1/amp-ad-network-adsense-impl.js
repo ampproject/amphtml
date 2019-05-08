@@ -337,7 +337,9 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     const pfx = enclosingContainers.includes(
         ValidAdContainerTypes['AMP-FX-FLYING-CARPET']) ||
         enclosingContainers.includes(ValidAdContainerTypes['AMP-STICKY-AD']);
-    const parameters = {
+    // Indicates that element is anchor ad for amp auto ads
+    const fa = this.element.getAttribute('data-fa');
+    const parameters = Object.assign({
       'client': adClientId,
       'format': format,
       'w': this.size_.width,
@@ -372,7 +374,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       // Package code (also known as URL group) that was used to
       // create ad.
       'pwprc': this.element.getAttribute('data-package'),
-    };
+    }, fa && {fa});
 
     const experimentIds = [];
     const identityPromise = Services.timerFor(this.win)

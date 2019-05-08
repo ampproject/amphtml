@@ -88,13 +88,14 @@ export class AnchorAdStrategy {
    * @private
    */
   placeStickyAd_() {
+    const type = this.baseAttributes_['type'];
     const viewportWidth =
         Services.viewportForDoc(this.ampdoc).getWidth();
     const attributes = /** @type {!JsonObject} */ (
       Object.assign(dict(), this.baseAttributes_, dict({
         'width': String(viewportWidth),
         'height': '100',
-      })));
+      }), (type === 'adsense' && {'data-fa': '1'}) || null));
     const doc = this.ampdoc.win.document;
     const ampAd = createElementWithAttributes(
         doc, 'amp-ad', attributes);
