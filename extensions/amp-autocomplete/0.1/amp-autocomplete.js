@@ -97,15 +97,21 @@ export class AmpAutocomplete extends AMP.BaseElement {
     this.submitOnEnter_ = false;
 
     /**
-     * If the "suggest-first" attribute is present on <autocomplete> 
+     * If the "suggest-first" attribute is present on <autocomplete>
      * and the filter type is "prefix".
      */
     this.suggestFirst_ = false;
 
     /**
-     * Whether or not an item is currently suggested by suggestFirst_.
+     * Whether or not the "Backspace" key has recently been fired.
+     * Only used when "suggest-first" is present on amp-autocomplete.
+     * 
+     * This is used in conjunction between the "keydown" and "input" events
+     * on the input element. The reason the inputHandler_() does not alone
+     * read the "inputType" on the "input" to make the same discernment is
+     * because that event property is not compatible in all browsers.
      */
-    this.typeaheadActive_ = false;
+    this.detectBackspace_ = false;
 
     /**
      * The index of the active suggested item.
@@ -208,7 +214,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     this.maxEntries_ = this.element.hasAttribute('max-entries') ?
       parseInt(this.element.getAttribute('max-entries'), 10) : null;
     this.submitOnEnter_ = this.element.hasAttribute('submit-on-enter');
-    this.suggestFirst_ = this.element.hasAttribute('suggest-first') 
+    this.suggestFirst_ = this.element.hasAttribute('suggest-first')
       && this.filter_ === FilterType.PREFIX;
 
     this.container_ = this.createContainer_();
@@ -353,14 +359,21 @@ export class AmpAutocomplete extends AMP.BaseElement {
   * @private
   */
   inputHandler_() {
+    // If the input is the first entry in the field.
+    const firstEntry = this.userInput_.length === 0 &&
+    this.inputElement_.value.length === 1;
     this.userInput_ = this.inputElement_.value;
     return this.mutateElement(() => {
       this.filterDataAndRenderResults_(this.sourceData_, this.userInput_);
       this.toggleResults_(true);
       if (this.suggestFirst_) {
-        this.updateActiveItem_(1);
-        this.inputElement_.setSelectionRange(this.userInput_.length, 
-          this.inputElement_.value.length);
+        if (!this.detectBackspace_ || firstEntry) {
+          this.updateActiveItem_(1);
+          this.inputElement_.setSelectionRange(this.userInput_.length,
+              this.inputElement_.value.length);
+        }
+        // Reset flag.
+        this.detectBackspace_ = false;
       }
     });
   }
@@ -784,6 +797,11 @@ export class AmpAutocomplete extends AMP.BaseElement {
    */
   keyDownHandler_(event) {
     switch (event.key) {
+      case Keys.BACKSPACE:
+        if (this.suggestFirst_) {
+          this.detectBackspace_ = true;
+        }
+        return Promise.resolve();
       case Keys.DOWN_ARROW:
         event.preventDefault();
         if (this.resultsShowing_()) {
@@ -809,6 +827,10 @@ export class AmpAutocomplete extends AMP.BaseElement {
       case Keys.ENTER:
         if (this.resultsShowing_() && !this.submitOnEnter_) {
           event.preventDefault();
+        }
+        if (this.suggestFirst_) {
+          const inputLength = this.inputElement_.value.length;
+          this.inputElement_.setSelectionRange(inputLength, inputLength);
         }
         if (this.activeElement_) {
           return this.mutateElement(() => {
