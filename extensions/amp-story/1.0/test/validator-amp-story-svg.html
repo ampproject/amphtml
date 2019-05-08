@@ -1,0 +1,63 @@
+<!--
+  Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS-IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the license.
+-->
+<!--
+  Test Description:
+  Tests for SVG support.
+-->
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>SVG support in STAMP</title>
+  <link rel="canonical" href="http://nonblocking.io/" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+</head>
+<body>
+  <amp-story standalone title="My Story" publisher="Me" publisher-logo-src="http://me.com/logo.png" poster-portrait-src="http://me.com/portrait.jpg" poster-square-src="http://me.com/square.jpg" poster-landscape-src="http://me.com/landscape.jpg">
+    <amp-story-page id="0">
+      <amp-story-grid-layer template="horizontal">
+        <svg xmlns="http://www.w3.org/2000/svg" height="60" width="120">
+          <g fill="#0479c2">
+            <path d="m64.3 22.023h-4.16l-6.975 17.797h3.674s.74-.33 1.18-1.4l.805-2.57h6.808l.805 2.57c.44 1.07 1.18 1.4 1.18 1.4h3.674zm-4.524 11.033 2.45-7.26 2.45 7.26zm36.608-11.033v17.797h-3.664v-11.684l-4.524 8.805s-.552 1.158-1.82 1.026h-.1c-1.27.143-1.82-1.026-1.82-1.026l-4.524-8.805v11.684h-3.674v-17.797h3.586c.827.01.938.684.938.684l5.55 10.978 5.55-10.978s.1-.673.938-.684zm19.196 2.837c-1.655-3.2-8.75-2.836-8.75-2.836h-3.94v17.796h4.05l.143-5.958c6.73.188 7.756-1.876 7.756-1.876 2.946-2.902.74-7.128.74-7.128zm-5.78 5.88h-2.8v-5.517c0-.364 3.178-.022 3.487.077.706.22 1.346.662 1.556 1.4.52 1.82-.188 3.773-2.25 4.038z"/>
+            <circle cx="24.578" cy="30" r="20.952"/>
+          </g>
+          <path d="m26.144 26.834h5.075s1.07 0 .52 1.214l-8.75 14.564h-1.622l1.545-9.522-5.153-.033s-.916-.364-.22-1.545l8.606-14.233h1.688z" fill="#fff"/>
+        </svg>
+      </amp-story-grid-layer>
+      <amp-story-page-attachment layout="nodisplay">
+        <svg height="100" width="100">
+          <circle cx="50" cy="50" r="40" stroke="black" stroke-width="3" fill="red" />
+        </svg>
+      </amp-story-page-attachment>
+    </amp-story-page>
+    <amp-story-page id="1">
+      <amp-story-grid-layer template="horizontal">
+        <svg height="100" width="100">
+          <circle cx="50" cy="50" r="40" stroke="black" stroke-width="3" fill="red" />
+        </svg>
+      </amp-story-grid-layer>
+      <amp-story-cta-layer>
+        <svg height="100" width="100">
+          <circle cx="50" cy="50" r="40" stroke="black" stroke-width="3" fill="red" />
+        </svg>
+      </amp-story-page-attachment>
+    </amp-story-page>
+  </amp-story>
+</body>
+</html>
