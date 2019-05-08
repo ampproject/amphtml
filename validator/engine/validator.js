@@ -4128,7 +4128,8 @@ function validateAttributeInExtension(tagSpec, context, attr, result) {
   // field attribute value. The dispatch key matching is case-insensitive for
   // faster lookups, so it still possible for the attribute value to not match
   // if it contains upper-case letters.
-  if (getExtensionNameAttribute(extensionSpec) === attr.name) {
+  if (extensionSpec !== null &&
+      getExtensionNameAttribute(extensionSpec) === attr.name) {
     if (extensionSpec.name !== attr.value) {
       goog.asserts.assert(extensionSpec.name === attr.value.toLowerCase());
       return false;
