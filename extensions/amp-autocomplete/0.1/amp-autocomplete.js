@@ -810,12 +810,12 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
   /**
    * Calculates the total scroll distance from the given element to the
-   * container_ as a summation of the offsetTop values of the given element 
-   * and its most ancestral element that is an immediate child of the 
-   * container_. 
-   * 
-   * The boolean "first" describes if the given element is the 
-   * desired child to calculate the distance from or an intermediary element 
+   * container_ as a summation of the offsetTop values of the given element
+   * and its most ancestral element that is an immediate child of the
+   * container_.
+   *
+   * The boolean "first" describes if the given element is the
+   * desired child to calculate the distance from or an intermediary element
    * in the recursion. This assumes the given parameter is a descendent of the
    * results container.
    *
@@ -831,7 +831,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     }
     if (first) {
       return top + this.distanceToContainerTop_(parent, false);
-    } 
+    }
     return this.distanceToContainerTop_(parent, false);
   }
 
