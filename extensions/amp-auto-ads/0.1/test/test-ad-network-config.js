@@ -14,15 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  ADSENSE_AMP_AUTO_ADS_RESPONSIVE_EXPERIMENT_NAME,
-  AdSenseAmpAutoAdsResponsiveBranches,
-} from '../../../../ads/google/adsense-amp-auto-ads-responsive';
 import {Services} from '../../../../src/services';
-import {
-  forceExperimentBranch,
-  toggleExperiment,
-} from '../../../../src/experiments';
 import {getAdNetworkConfig} from '../ad-network-config';
 
 describes.realWin('ad-network-config', {
@@ -63,31 +55,11 @@ describes.realWin('ad-network-config', {
           'url=https%3A%2F%2Ffoo.bar%2Fbaz');
     });
 
-    it('should report responsive-enabled when responsive experiment not on',
+    it('should report responsive-enabled',
         () => {
-          toggleExperiment(
-              env.win, ADSENSE_AMP_AUTO_ADS_RESPONSIVE_EXPERIMENT_NAME, false);
           const adNetwork = getAdNetworkConfig('adsense', ampAutoAdsElem);
-          expect(adNetwork.isResponsiveEnabled(env.win)).to.equal(true);
+          expect(adNetwork.isResponsiveEnabled()).to.equal(true);
         });
-
-    it('should report responsive-enabled when responsive experiment on and ' +
-       'control branch picked', () => {
-      forceExperimentBranch(env.win,
-          ADSENSE_AMP_AUTO_ADS_RESPONSIVE_EXPERIMENT_NAME,
-          AdSenseAmpAutoAdsResponsiveBranches.CONTROL);
-      const adNetwork = getAdNetworkConfig('adsense', ampAutoAdsElem);
-      expect(adNetwork.isResponsiveEnabled(env.win)).to.equal(true);
-    });
-
-    it('should report responsive-disabled when responsive experiment on ' +
-       'and experiment branch picked', () => {
-      forceExperimentBranch(env.win,
-          ADSENSE_AMP_AUTO_ADS_RESPONSIVE_EXPERIMENT_NAME,
-          AdSenseAmpAutoAdsResponsiveBranches.EXPERIMENT);
-      const adNetwork = getAdNetworkConfig('adsense', ampAutoAdsElem);
-      expect(adNetwork.isResponsiveEnabled(env.win)).to.equal(false);
-    });
 
     // TODO(bradfrizzell, #12476): Make this test work with sinon 4.0.
     it.skip('should truncate the URL if it\'s too long', () => {
@@ -217,7 +189,7 @@ describes.realWin('ad-network-config', {
 
     it('should not be responsive-enabled', () => {
       const adNetwork = getAdNetworkConfig('doubleclick', ampAutoAdsElem);
-      expect(adNetwork.isResponsiveEnabled(env.win)).to.be.false;
+      expect(adNetwork.isResponsiveEnabled()).to.be.false;
     });
   });
 

@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-import {
-  AdSenseAmpAutoAdsResponsiveBranches,
-  getAdSenseAmpAutoAdsResponsiveExperimentBranch,
-} from '../../../ads/google/adsense-amp-auto-ads-responsive';
 import {Services} from '../../../src/services';
 import {buildUrl} from '../../../ads/google/a4a/shared/url-builder';
 import {dict} from '../../../src/utils/object';
@@ -45,10 +41,9 @@ class AdNetworkConfigDef {
 
   /**
    * Indicates whether amp-auto-ads should be displayed at full-width.
-   * @param {!Window} unusedWin
    * @return {boolean} true if amp-auto-ads full-width responsive is enabled.
    */
-  isResponsiveEnabled(unusedWin) {}
+  isResponsiveEnabled() {}
 
   /**
    * @return {string}
@@ -171,11 +166,10 @@ class AdSenseNetworkConfig {
   }
 
   /**
-   * @param {!Window} win
+   * True if responsive is enabled for auto-ads
    */
-  isResponsiveEnabled(win) {
-    const branch = getAdSenseAmpAutoAdsResponsiveExperimentBranch(win);
-    return branch != AdSenseAmpAutoAdsResponsiveBranches.EXPERIMENT;
+  isResponsiveEnabled() {
+    return true;
   }
 
   /** @override */
@@ -239,9 +233,9 @@ class DoubleclickNetworkConfig {
   }
 
   /**
-   * @param {!Window} unusedWin
+   * True if responsive is enabled for auto-ads
    */
-  isResponsiveEnabled(unusedWin) {
+  isResponsiveEnabled() {
     return false;
   }
 
