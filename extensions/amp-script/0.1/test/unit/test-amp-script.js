@@ -55,7 +55,27 @@ describe('SanitizerImpl', () => {
       const base = win.document.createElement('base');
       // 'href' attribute is allowed but 'base' tag isn't.
       s.mutateAttribute(base, 'href', '/foo.html');
-      expect(base.getAttribute('href')).to.equal(null);
+      expect(base.getAttribute('href')).to.be.null;
+    });
+
+    it('should allow changes to built-in AMP tags', () => {
+      const img = win.document.createElement('amp-img');
+      s.mutateAttribute(img, 'src', 'foo.jpg');
+      expect(img.getAttribute('src')).to.include('foo.jpg');
+
+      const layout = win.document.createElement('amp-layout');
+      s.mutateAttribute(layout, 'width', '10');
+      expect(layout.getAttribute('width')).to.equal('10');
+
+      const pixel = win.document.createElement('amp-pixel');
+      s.mutateAttribute(pixel, 'src', '/foo/track');
+      expect(pixel.getAttribute('src')).to.include('/foo/track');
+    });
+
+    it('should not allow changes to other AMP tags', () => {
+      const analytics = win.document.createElement('amp-analytics');
+      s.mutateAttribute(analytics, 'data-credentials', 'include');
+      expect(analytics.getAttribute('data-credentials')).to.be.null;
     });
   });
 });

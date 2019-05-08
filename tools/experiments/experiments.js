@@ -426,6 +426,14 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/19869',
     cleanupIssue: 'TODO',
   },
+  {
+    id: 'inabox-remove-height-auto',
+    name: 'Experiment to allow slowly removing the height: auto!' +
+    ' for inabox amp4ads. By adding the ' +
+    '.i-amphtml-inabox-preserve-height-auto class on <html>',
+    spec: 'https://github.com/ampproject/amphtml/issues/22059',
+    cleanupIssue: 'TODO',
+  },
 ];
 
 if (getMode().localDev) {

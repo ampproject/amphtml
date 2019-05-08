@@ -58,7 +58,7 @@ FAIL
 |         leaving it out results in an error. -->
 |    <amp-powr-player
 >>   ^~~~~~~~~
-amp-powr-player/0.1/test/validator-amp-powr-player.html:58:2 The mandatory attribute 'data-account' is missing in tag 'amp-powr-player'. (see https://www.ampproject.org/docs/reference/components/amp-powr-player) [AMP_TAG_PROBLEM]
+amp-powr-player/0.1/test/validator-amp-powr-player.html:58:2 The mandatory attribute 'data-account' is missing in tag 'amp-powr-player'. (see https://amp.dev/documentation/components/amp-powr-player) [AMP_TAG_PROBLEM]
 |        data-player="1"
 |        data-video="ZNImchutXk"
 |        layout="responsive" width="480" height="270">
@@ -68,7 +68,7 @@ amp-powr-player/0.1/test/validator-amp-powr-player.html:58:2 The mandatory attri
 |         leaving it out results in an error. -->
 |    <amp-powr-player
 >>   ^~~~~~~~~
-amp-powr-player/0.1/test/validator-amp-powr-player.html:66:2 The mandatory attribute 'data-player' is missing in tag 'amp-powr-player'. (see https://www.ampproject.org/docs/reference/components/amp-powr-player) [AMP_TAG_PROBLEM]
+amp-powr-player/0.1/test/validator-amp-powr-player.html:66:2 The mandatory attribute 'data-player' is missing in tag 'amp-powr-player'. (see https://amp.dev/documentation/components/amp-powr-player) [AMP_TAG_PROBLEM]
 |        data-account="945"
 |        data-video="ZNImchutXk"
 |        layout="responsive" width="480" height="270">
@@ -78,7 +78,7 @@ amp-powr-player/0.1/test/validator-amp-powr-player.html:66:2 The mandatory attri
 |         leaving it out results in an error. -->
 |    <amp-powr-player
 >>   ^~~~~~~~~
-amp-powr-player/0.1/test/validator-amp-powr-player.html:74:2 The tag 'amp-powr-player' is missing a mandatory attribute - pick one of ['data-video', 'data-terms']. (see https://www.ampproject.org/docs/reference/components/amp-powr-player) [AMP_TAG_PROBLEM]
+amp-powr-player/0.1/test/validator-amp-powr-player.html:74:2 The tag 'amp-powr-player' is missing a mandatory attribute - pick one of ['data-video', 'data-terms']. (see https://amp.dev/documentation/components/amp-powr-player) [AMP_TAG_PROBLEM]
 |        data-account="945"
 |        data-player="1"
 |        layout="responsive" width="480" height="270">
