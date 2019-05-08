@@ -41,7 +41,7 @@ tags: {  # <amp-google-document-embed>
   attrs: { name: "[src]" }
   attrs: { name: "[title]" }
   attr_lists: "extended-amp-global"
-  spec_url: "https://amp.dev/documentation/components/amp-google-document-embed"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-google-document-embed"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

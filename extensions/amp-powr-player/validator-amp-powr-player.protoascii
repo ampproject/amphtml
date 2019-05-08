@@ -50,7 +50,7 @@ tags: {  # <amp-powr-player>
     value_regex: "[0-9a-zA-Z-]+"
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://amp.dev/documentation/components/amp-powr-player"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-powr-player"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

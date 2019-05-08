@@ -53,7 +53,7 @@ tags: {  # amp-analytics (json)
       error_message: "html comments"
     }
   }
-  spec_url: "https://amp.dev/documentation/components/amp-analytics"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-analytics"
 }
 tags: {  # <amp-analytics>
   html_format: AMP
@@ -71,6 +71,6 @@ tags: {  # <amp-analytics>
     blacklisted_value_regex: "__amp_source_origin"
   }
   attrs: { name: "type" }
-  spec_url: "https://amp.dev/documentation/components/amp-analytics"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-analytics"
 }
 

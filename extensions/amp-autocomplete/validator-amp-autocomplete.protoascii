@@ -64,7 +64,7 @@ tags: {  # <amp-autocomplete src>
     name: "[src]"
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://amp.dev/documentation/components/amp-autocomplete"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-autocomplete"
   amp_layout: {
     supported_layouts: CONTAINER
   }

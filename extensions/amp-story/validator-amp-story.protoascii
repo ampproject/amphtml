@@ -50,7 +50,7 @@ tags: {  # <amp-story>
       protocol: "https"
     }
     deprecation: "AMP-STORY-BOOKEND"
-    deprecation_url: "https://amp.dev/documentation/components/amp-story#migrating-from-0.1-to-1.0"
+    deprecation_url: "https://www.ampproject.org/docs/reference/components/amp-story#migrating-from-0.1-to-1.0"
   }
   attrs: {
     name: "poster-landscape-src"
@@ -118,7 +118,7 @@ tags: {  # <amp-story> without metadata (deprecated)
   tag_name: "AMP-STORY"
   spec_name: "AMP-STORY (beta)"
   deprecation: "AMP-STORY"
-  deprecation_url: "https://amp.dev/documentation/components/amp-story#migrating-from-0.1-to-1.0"
+  deprecation_url: "https://www.ampproject.org/docs/reference/components/amp-story#migrating-from-0.1-to-1.0"
   requires_extension: "amp-story"
   mandatory_parent: "BODY"
   requires: "amp-story-page"
@@ -307,7 +307,7 @@ tags: {
   reference_points: {
     tag_spec_name: "AMP-STORY-GRID-LAYER animate-in"
   }
-  spec_url: "https://amp.dev/documentation/components/amp-story"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-story"
 }
 tags: {
   html_format: AMP
@@ -375,7 +375,7 @@ tags: {
   reference_points: {
     tag_spec_name: "AMP-STORY-GRID-LAYER animate-in"
   }
-  spec_url: "https://amp.dev/documentation/components/amp-story"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-story"
 }
 tags: {  # <amp-story-access>
   html_format: AMP
@@ -528,7 +528,7 @@ tags: {
   reference_points: {
     tag_spec_name: "AMP-STORY-CTA-LAYER animate-in"
   }
-  spec_url: "https://amp.dev/documentation/components/amp-story"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-story"
 }
 descendant_tag_list: {
   name: "amp-story-cta-layer-allowed-descendants"

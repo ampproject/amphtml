@@ -31,69 +31,69 @@ FAIL
 |  <!-- Template -->
 |  <template type="amp-mustache">
 >> ^~~~~~~~~
-amp-mustache/0.1/test/validator-amp-mustache.html:31:0 The tag 'template' requires including the 'amp-mustache' extension JavaScript. (see https://amp.dev/documentation/components/amp-mustache) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+amp-mustache/0.1/test/validator-amp-mustache.html:31:0 The tag 'template' requires including the 'amp-mustache' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-mustache) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |    <{{not-actually-parsed-as-an-html-tag-so-allowed}}>
 |    <p title="{{allowed}}">{{allowed}}</p>
 |    <p {{notallowed}}></p>
 >>   ^~~~~~~~~
-amp-mustache/0.1/test/validator-amp-mustache.html:34:2 Mustache template syntax in attribute name '{{notallowed}}' in tag 'p'. (see https://amp.dev/documentation/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
+amp-mustache/0.1/test/validator-amp-mustache.html:34:2 Mustache template syntax in attribute name '{{notallowed}}' in tag 'p'. (see https://www.ampproject.org/docs/reference/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
 |    <p {{notallowed}}=0></p>
 >>   ^~~~~~~~~
-amp-mustache/0.1/test/validator-amp-mustache.html:35:2 Mustache template syntax in attribute name '{{notallowed}}' in tag 'p'. (see https://amp.dev/documentation/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
+amp-mustache/0.1/test/validator-amp-mustache.html:35:2 Mustache template syntax in attribute name '{{notallowed}}' in tag 'p'. (see https://www.ampproject.org/docs/reference/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
 |    <p [{{notallowed}}]=0></p>
 >>   ^~~~~~~~~
-amp-mustache/0.1/test/validator-amp-mustache.html:36:2 Mustache template syntax in attribute name '[{{notallowed}}]' in tag 'p'. (see https://amp.dev/documentation/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
+amp-mustache/0.1/test/validator-amp-mustache.html:36:2 Mustache template syntax in attribute name '[{{notallowed}}]' in tag 'p'. (see https://www.ampproject.org/docs/reference/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
 |    <p data-{notallowed}=0></p>
 >>   ^~~~~~~~~
 amp-mustache/0.1/test/validator-amp-mustache.html:37:2 The attribute 'data-{notallowed}' may not appear in tag 'p'. [DISALLOWED_HTML]
 |    <p data-{{notallowed}}=0></p>
 >>   ^~~~~~~~~
-amp-mustache/0.1/test/validator-amp-mustache.html:38:2 Mustache template syntax in attribute name 'data-{{notallowed}}' in tag 'p'. (see https://amp.dev/documentation/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
+amp-mustache/0.1/test/validator-amp-mustache.html:38:2 Mustache template syntax in attribute name 'data-{{notallowed}}' in tag 'p'. (see https://www.ampproject.org/docs/reference/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
 |    <p data-[{{notallowed}}]=0></p>
 >>   ^~~~~~~~~
-amp-mustache/0.1/test/validator-amp-mustache.html:39:2 Mustache template syntax in attribute name 'data-[{{notallowed}}]' in tag 'p'. (see https://amp.dev/documentation/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
+amp-mustache/0.1/test/validator-amp-mustache.html:39:2 Mustache template syntax in attribute name 'data-[{{notallowed}}]' in tag 'p'. (see https://www.ampproject.org/docs/reference/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
 |    <p data-{{{notallowed}}}=0></p>
 >>   ^~~~~~~~~
-amp-mustache/0.1/test/validator-amp-mustache.html:40:2 Mustache template syntax in attribute name 'data-{{{notallowed}}}' in tag 'p'. (see https://amp.dev/documentation/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
+amp-mustache/0.1/test/validator-amp-mustache.html:40:2 Mustache template syntax in attribute name 'data-{{{notallowed}}}' in tag 'p'. (see https://www.ampproject.org/docs/reference/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
 |    <p data-{{&notallowed}}=0></p>
 >>   ^~~~~~~~~
-amp-mustache/0.1/test/validator-amp-mustache.html:41:2 Mustache template syntax in attribute name 'data-{{&notallowed}}' in tag 'p'. (see https://amp.dev/documentation/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
+amp-mustache/0.1/test/validator-amp-mustache.html:41:2 Mustache template syntax in attribute name 'data-{{&notallowed}}' in tag 'p'. (see https://www.ampproject.org/docs/reference/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
 |    <p data-{{#notallowed}}=0></p>
 >>   ^~~~~~~~~
-amp-mustache/0.1/test/validator-amp-mustache.html:42:2 Mustache template syntax in attribute name 'data-{{#notallowed}}' in tag 'p'. (see https://amp.dev/documentation/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
+amp-mustache/0.1/test/validator-amp-mustache.html:42:2 Mustache template syntax in attribute name 'data-{{#notallowed}}' in tag 'p'. (see https://www.ampproject.org/docs/reference/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
 |    <p data-{{/notallowed}}=0></p>
 >>   ^~~~~~~~~
-amp-mustache/0.1/test/validator-amp-mustache.html:43:2 Mustache template syntax in attribute name 'data-{{/notallowed}}' in tag 'p'. (see https://amp.dev/documentation/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
+amp-mustache/0.1/test/validator-amp-mustache.html:43:2 Mustache template syntax in attribute name 'data-{{/notallowed}}' in tag 'p'. (see https://www.ampproject.org/docs/reference/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
 |    <p data-{{^notallowed}}=0></p>
 >>   ^~~~~~~~~
-amp-mustache/0.1/test/validator-amp-mustache.html:44:2 Mustache template syntax in attribute name 'data-{{^notallowed}}' in tag 'p'. (see https://amp.dev/documentation/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
+amp-mustache/0.1/test/validator-amp-mustache.html:44:2 Mustache template syntax in attribute name 'data-{{^notallowed}}' in tag 'p'. (see https://www.ampproject.org/docs/reference/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
 |    <p data-{{>notallowed}}=0></p>
 >>   ^~~~~~~~~
-amp-mustache/0.1/test/validator-amp-mustache.html:45:2 Mustache template syntax in attribute name 'data-{{' in tag 'p'. (see https://amp.dev/documentation/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
+amp-mustache/0.1/test/validator-amp-mustache.html:45:2 Mustache template syntax in attribute name 'data-{{' in tag 'p'. (see https://www.ampproject.org/docs/reference/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
 |    <p {{#notallowed}}class=foo{{/notallowed}}>
 >>   ^~~~~~~~~
-amp-mustache/0.1/test/validator-amp-mustache.html:46:2 Mustache template syntax in attribute name '{{#notallowed}}class' in tag 'p'. (see https://amp.dev/documentation/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
+amp-mustache/0.1/test/validator-amp-mustache.html:46:2 Mustache template syntax in attribute name '{{#notallowed}}class' in tag 'p'. (see https://www.ampproject.org/docs/reference/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
 |    <p {{#notallowed}}class{{/notallowed}}>
 >>   ^~~~~~~~~
-amp-mustache/0.1/test/validator-amp-mustache.html:47:2 Mustache template syntax in attribute name '{{#notallowed}}class{{/notallowed}}' in tag 'p'. (see https://amp.dev/documentation/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
+amp-mustache/0.1/test/validator-amp-mustache.html:47:2 Mustache template syntax in attribute name '{{#notallowed}}class{{/notallowed}}' in tag 'p'. (see https://www.ampproject.org/docs/reference/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
 |    <p title="{{{notallowed}}}"></p>
 >>   ^~~~~~~~~
-amp-mustache/0.1/test/validator-amp-mustache.html:48:2 The attribute 'title' in tag 'p' is set to '{{{notallowed}}}', which contains unescaped Mustache template syntax. (see https://amp.dev/documentation/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
+amp-mustache/0.1/test/validator-amp-mustache.html:48:2 The attribute 'title' in tag 'p' is set to '{{{notallowed}}}', which contains unescaped Mustache template syntax. (see https://www.ampproject.org/docs/reference/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
 |    <p title="{{&notallowed}}"></p>
 >>   ^~~~~~~~~
-amp-mustache/0.1/test/validator-amp-mustache.html:49:2 The attribute 'title' in tag 'p' is set to '{{&notallowed}}', which contains unescaped Mustache template syntax. (see https://amp.dev/documentation/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
+amp-mustache/0.1/test/validator-amp-mustache.html:49:2 The attribute 'title' in tag 'p' is set to '{{&notallowed}}', which contains unescaped Mustache template syntax. (see https://www.ampproject.org/docs/reference/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
 |    <p title="{{>notallowed}}"></p>
 >>   ^~~~~~~~~
-amp-mustache/0.1/test/validator-amp-mustache.html:50:2 The attribute 'title' in tag 'p' is set to '{{>notallowed}}', which contains a Mustache template partial. (see https://amp.dev/documentation/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
+amp-mustache/0.1/test/validator-amp-mustache.html:50:2 The attribute 'title' in tag 'p' is set to '{{>notallowed}}', which contains a Mustache template partial. (see https://www.ampproject.org/docs/reference/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
 |    <p data-title="{{{notallowed}}}"></p>
 >>   ^~~~~~~~~
-amp-mustache/0.1/test/validator-amp-mustache.html:51:2 The attribute 'data-title' in tag 'p' is set to '{{{notallowed}}}', which contains unescaped Mustache template syntax. (see https://amp.dev/documentation/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
+amp-mustache/0.1/test/validator-amp-mustache.html:51:2 The attribute 'data-title' in tag 'p' is set to '{{{notallowed}}}', which contains unescaped Mustache template syntax. (see https://www.ampproject.org/docs/reference/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
 |    <p data-title="{{&notallowed}}"></p>
 >>   ^~~~~~~~~
-amp-mustache/0.1/test/validator-amp-mustache.html:52:2 The attribute 'data-title' in tag 'p' is set to '{{&notallowed}}', which contains unescaped Mustache template syntax. (see https://amp.dev/documentation/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
+amp-mustache/0.1/test/validator-amp-mustache.html:52:2 The attribute 'data-title' in tag 'p' is set to '{{&notallowed}}', which contains unescaped Mustache template syntax. (see https://www.ampproject.org/docs/reference/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
 |    <p data-title="{{>notallowed}}"></p>
 >>   ^~~~~~~~~
-amp-mustache/0.1/test/validator-amp-mustache.html:53:2 The attribute 'data-title' in tag 'p' is set to '{{>notallowed}}', which contains a Mustache template partial. (see https://amp.dev/documentation/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
+amp-mustache/0.1/test/validator-amp-mustache.html:53:2 The attribute 'data-title' in tag 'p' is set to '{{>notallowed}}', which contains a Mustache template partial. (see https://www.ampproject.org/docs/reference/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
 |
 |    <!-- now with some whitespace inside the mustache tags -->
 |    <{{ not-actually-parsed-as-an-html-tag-so-allowed }}>
@@ -102,26 +102,26 @@ amp-mustache/0.1/test/validator-amp-mustache.html:53:2 The attribute 'data-title
 >>   ^~~~~~~~~
 amp-mustache/0.1/test/validator-amp-mustache.html:58:2 The attribute 'notallowed' may not appear in tag 'p'. [DISALLOWED_HTML]
 >>   ^~~~~~~~~
-amp-mustache/0.1/test/validator-amp-mustache.html:58:2 Mustache template syntax in attribute name '{{' in tag 'p'. (see https://amp.dev/documentation/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
+amp-mustache/0.1/test/validator-amp-mustache.html:58:2 Mustache template syntax in attribute name '{{' in tag 'p'. (see https://www.ampproject.org/docs/reference/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
 >>   ^~~~~~~~~
 amp-mustache/0.1/test/validator-amp-mustache.html:58:2 The attribute '}}' may not appear in tag 'p'. [DISALLOWED_HTML]
 |    <p {{ notallowed }}=0></p>
 >>   ^~~~~~~~~
 amp-mustache/0.1/test/validator-amp-mustache.html:59:2 The attribute 'notallowed' may not appear in tag 'p'. [DISALLOWED_HTML]
 >>   ^~~~~~~~~
-amp-mustache/0.1/test/validator-amp-mustache.html:59:2 Mustache template syntax in attribute name '{{' in tag 'p'. (see https://amp.dev/documentation/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
+amp-mustache/0.1/test/validator-amp-mustache.html:59:2 Mustache template syntax in attribute name '{{' in tag 'p'. (see https://www.ampproject.org/docs/reference/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
 >>   ^~~~~~~~~
 amp-mustache/0.1/test/validator-amp-mustache.html:59:2 The attribute '}}' may not appear in tag 'p'. [DISALLOWED_HTML]
 |    <p data-{{ notallowed }}=0></p>
 >>   ^~~~~~~~~
-amp-mustache/0.1/test/validator-amp-mustache.html:60:2 Mustache template syntax in attribute name 'data-{{' in tag 'p'. (see https://amp.dev/documentation/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
+amp-mustache/0.1/test/validator-amp-mustache.html:60:2 Mustache template syntax in attribute name 'data-{{' in tag 'p'. (see https://www.ampproject.org/docs/reference/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
 >>   ^~~~~~~~~
 amp-mustache/0.1/test/validator-amp-mustache.html:60:2 The attribute 'notallowed' may not appear in tag 'p'. [DISALLOWED_HTML]
 >>   ^~~~~~~~~
 amp-mustache/0.1/test/validator-amp-mustache.html:60:2 The attribute '}}' may not appear in tag 'p'. [DISALLOWED_HTML]
 |    <p data-{{{ notallowed }}}=0></p>
 >>   ^~~~~~~~~
-amp-mustache/0.1/test/validator-amp-mustache.html:61:2 Mustache template syntax in attribute name 'data-{{{' in tag 'p'. (see https://amp.dev/documentation/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
+amp-mustache/0.1/test/validator-amp-mustache.html:61:2 Mustache template syntax in attribute name 'data-{{{' in tag 'p'. (see https://www.ampproject.org/docs/reference/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
 >>   ^~~~~~~~~
 amp-mustache/0.1/test/validator-amp-mustache.html:61:2 The attribute 'notallowed' may not appear in tag 'p'. [DISALLOWED_HTML]
 >>   ^~~~~~~~~
@@ -130,40 +130,40 @@ amp-mustache/0.1/test/validator-amp-mustache.html:61:2 The attribute '}}}' may n
 >>   ^~~~~~~~~
 amp-mustache/0.1/test/validator-amp-mustache.html:62:2 The attribute '&notallowed' may not appear in tag 'p'. [DISALLOWED_HTML]
 >>   ^~~~~~~~~
-amp-mustache/0.1/test/validator-amp-mustache.html:62:2 Mustache template syntax in attribute name 'data-{{' in tag 'p'. (see https://amp.dev/documentation/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
+amp-mustache/0.1/test/validator-amp-mustache.html:62:2 Mustache template syntax in attribute name 'data-{{' in tag 'p'. (see https://www.ampproject.org/docs/reference/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
 >>   ^~~~~~~~~
 amp-mustache/0.1/test/validator-amp-mustache.html:62:2 The attribute '}}' may not appear in tag 'p'. [DISALLOWED_HTML]
 |    <p data-{{ #notallowed }}=0></p>
 >>   ^~~~~~~~~
 amp-mustache/0.1/test/validator-amp-mustache.html:63:2 The attribute '#notallowed' may not appear in tag 'p'. [DISALLOWED_HTML]
 >>   ^~~~~~~~~
-amp-mustache/0.1/test/validator-amp-mustache.html:63:2 Mustache template syntax in attribute name 'data-{{' in tag 'p'. (see https://amp.dev/documentation/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
+amp-mustache/0.1/test/validator-amp-mustache.html:63:2 Mustache template syntax in attribute name 'data-{{' in tag 'p'. (see https://www.ampproject.org/docs/reference/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
 >>   ^~~~~~~~~
 amp-mustache/0.1/test/validator-amp-mustache.html:63:2 The attribute '}}' may not appear in tag 'p'. [DISALLOWED_HTML]
 |    <p data-{{ /notallowed }}=0></p>
 >>   ^~~~~~~~~
 amp-mustache/0.1/test/validator-amp-mustache.html:64:2 The attribute '/notallowed' may not appear in tag 'p'. [DISALLOWED_HTML]
 >>   ^~~~~~~~~
-amp-mustache/0.1/test/validator-amp-mustache.html:64:2 Mustache template syntax in attribute name 'data-{{' in tag 'p'. (see https://amp.dev/documentation/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
+amp-mustache/0.1/test/validator-amp-mustache.html:64:2 Mustache template syntax in attribute name 'data-{{' in tag 'p'. (see https://www.ampproject.org/docs/reference/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
 >>   ^~~~~~~~~
 amp-mustache/0.1/test/validator-amp-mustache.html:64:2 The attribute '}}' may not appear in tag 'p'. [DISALLOWED_HTML]
 |    <p data-{{ ^notallowed }}=0></p>
 >>   ^~~~~~~~~
 amp-mustache/0.1/test/validator-amp-mustache.html:65:2 The attribute '^notallowed' may not appear in tag 'p'. [DISALLOWED_HTML]
 >>   ^~~~~~~~~
-amp-mustache/0.1/test/validator-amp-mustache.html:65:2 Mustache template syntax in attribute name 'data-{{' in tag 'p'. (see https://amp.dev/documentation/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
+amp-mustache/0.1/test/validator-amp-mustache.html:65:2 Mustache template syntax in attribute name 'data-{{' in tag 'p'. (see https://www.ampproject.org/docs/reference/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
 >>   ^~~~~~~~~
 amp-mustache/0.1/test/validator-amp-mustache.html:65:2 The attribute '}}' may not appear in tag 'p'. [DISALLOWED_HTML]
 |    <p data-{{ >notallowed }}=0></p>
 >>   ^~~~~~~~~
-amp-mustache/0.1/test/validator-amp-mustache.html:66:2 Mustache template syntax in attribute name 'data-{{' in tag 'p'. (see https://amp.dev/documentation/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
+amp-mustache/0.1/test/validator-amp-mustache.html:66:2 Mustache template syntax in attribute name 'data-{{' in tag 'p'. (see https://www.ampproject.org/docs/reference/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
 |    <p {{ #notallowed }}class=foo{{ /notallowed }}>
 >>   ^~~~~~~~~
 amp-mustache/0.1/test/validator-amp-mustache.html:67:2 The attribute '#notallowed' may not appear in tag 'p'. [DISALLOWED_HTML]
 >>   ^~~~~~~~~
 amp-mustache/0.1/test/validator-amp-mustache.html:67:2 The attribute '/notallowed' may not appear in tag 'p'. [DISALLOWED_HTML]
 >>   ^~~~~~~~~
-amp-mustache/0.1/test/validator-amp-mustache.html:67:2 Mustache template syntax in attribute name '{{' in tag 'p'. (see https://amp.dev/documentation/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
+amp-mustache/0.1/test/validator-amp-mustache.html:67:2 Mustache template syntax in attribute name '{{' in tag 'p'. (see https://www.ampproject.org/docs/reference/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
 >>   ^~~~~~~~~
 amp-mustache/0.1/test/validator-amp-mustache.html:67:2 The attribute '}}' may not appear in tag 'p'. [DISALLOWED_HTML]
 >>   ^~~~~~~~~
@@ -174,32 +174,32 @@ amp-mustache/0.1/test/validator-amp-mustache.html:68:2 The attribute '#notallowe
 >>   ^~~~~~~~~
 amp-mustache/0.1/test/validator-amp-mustache.html:68:2 The attribute '/notallowed' may not appear in tag 'p'. [DISALLOWED_HTML]
 >>   ^~~~~~~~~
-amp-mustache/0.1/test/validator-amp-mustache.html:68:2 Mustache template syntax in attribute name '{{' in tag 'p'. (see https://amp.dev/documentation/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
+amp-mustache/0.1/test/validator-amp-mustache.html:68:2 Mustache template syntax in attribute name '{{' in tag 'p'. (see https://www.ampproject.org/docs/reference/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
 >>   ^~~~~~~~~
 amp-mustache/0.1/test/validator-amp-mustache.html:68:2 The attribute '}}' may not appear in tag 'p'. [DISALLOWED_HTML]
 >>   ^~~~~~~~~
-amp-mustache/0.1/test/validator-amp-mustache.html:68:2 Mustache template syntax in attribute name '}}class{{' in tag 'p'. (see https://amp.dev/documentation/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
+amp-mustache/0.1/test/validator-amp-mustache.html:68:2 Mustache template syntax in attribute name '}}class{{' in tag 'p'. (see https://www.ampproject.org/docs/reference/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
 |    <p title="{{{ notallowed }}}"></p>
 >>   ^~~~~~~~~
-amp-mustache/0.1/test/validator-amp-mustache.html:69:2 The attribute 'title' in tag 'p' is set to '{{{ notallowed }}}', which contains unescaped Mustache template syntax. (see https://amp.dev/documentation/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
+amp-mustache/0.1/test/validator-amp-mustache.html:69:2 The attribute 'title' in tag 'p' is set to '{{{ notallowed }}}', which contains unescaped Mustache template syntax. (see https://www.ampproject.org/docs/reference/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
 |    <p title="{{ &notallowed }}"></p>
 >>   ^~~~~~~~~
-amp-mustache/0.1/test/validator-amp-mustache.html:70:2 The attribute 'title' in tag 'p' is set to '{{ &notallowed }}', which contains unescaped Mustache template syntax. (see https://amp.dev/documentation/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
+amp-mustache/0.1/test/validator-amp-mustache.html:70:2 The attribute 'title' in tag 'p' is set to '{{ &notallowed }}', which contains unescaped Mustache template syntax. (see https://www.ampproject.org/docs/reference/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
 |    <p title="{{ >notallowed }}"></p>
 >>   ^~~~~~~~~
-amp-mustache/0.1/test/validator-amp-mustache.html:71:2 The attribute 'title' in tag 'p' is set to '{{ >notallowed }}', which contains a Mustache template partial. (see https://amp.dev/documentation/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
+amp-mustache/0.1/test/validator-amp-mustache.html:71:2 The attribute 'title' in tag 'p' is set to '{{ >notallowed }}', which contains a Mustache template partial. (see https://www.ampproject.org/docs/reference/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
 |    <p title="{{& notallowed }}"></p>
 >>   ^~~~~~~~~
-amp-mustache/0.1/test/validator-amp-mustache.html:72:2 The attribute 'title' in tag 'p' is set to '{{& notallowed }}', which contains unescaped Mustache template syntax. (see https://amp.dev/documentation/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
+amp-mustache/0.1/test/validator-amp-mustache.html:72:2 The attribute 'title' in tag 'p' is set to '{{& notallowed }}', which contains unescaped Mustache template syntax. (see https://www.ampproject.org/docs/reference/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
 |    <p title="{{> notallowed }}"></p>
 >>   ^~~~~~~~~
-amp-mustache/0.1/test/validator-amp-mustache.html:73:2 The attribute 'title' in tag 'p' is set to '{{> notallowed }}', which contains a Mustache template partial. (see https://amp.dev/documentation/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
+amp-mustache/0.1/test/validator-amp-mustache.html:73:2 The attribute 'title' in tag 'p' is set to '{{> notallowed }}', which contains a Mustache template partial. (see https://www.ampproject.org/docs/reference/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
 |    <p title="{{ & notallowed }}"></p>
 >>   ^~~~~~~~~
-amp-mustache/0.1/test/validator-amp-mustache.html:74:2 The attribute 'title' in tag 'p' is set to '{{ & notallowed }}', which contains unescaped Mustache template syntax. (see https://amp.dev/documentation/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
+amp-mustache/0.1/test/validator-amp-mustache.html:74:2 The attribute 'title' in tag 'p' is set to '{{ & notallowed }}', which contains unescaped Mustache template syntax. (see https://www.ampproject.org/docs/reference/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
 |    <p title="{{ > notallowed }}"></p>
 >>   ^~~~~~~~~
-amp-mustache/0.1/test/validator-amp-mustache.html:75:2 The attribute 'title' in tag 'p' is set to '{{ > notallowed }}', which contains a Mustache template partial. (see https://amp.dev/documentation/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
+amp-mustache/0.1/test/validator-amp-mustache.html:75:2 The attribute 'title' in tag 'p' is set to '{{ > notallowed }}', which contains a Mustache template partial. (see https://www.ampproject.org/docs/reference/components/dynamic/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
 |
 |    <!-- Note, this is allowed by the validator, but it is critical that it
 |         be sanitized by the runtime. If the runtime allowed this, then after
@@ -224,13 +224,13 @@ amp-mustache/0.1/test/validator-amp-mustache.html:75:2 The attribute 'title' in 
 |
 |  <template type="amp-mustache">
 >> ^~~~~~~~~
-amp-mustache/0.1/test/validator-amp-mustache.html:98:0 The tag 'template' requires including the 'amp-mustache' extension JavaScript. (see https://amp.dev/documentation/components/amp-mustache) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+amp-mustache/0.1/test/validator-amp-mustache.html:98:0 The tag 'template' requires including the 'amp-mustache' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-mustache) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |    <div>
 |      <template type="amp-mustache">
 >>     ^~~~~~~~~
-amp-mustache/0.1/test/validator-amp-mustache.html:100:4 The tag 'template' may not appear as a descendant of tag 'template'. (see https://amp.dev/documentation/components/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
+amp-mustache/0.1/test/validator-amp-mustache.html:100:4 The tag 'template' may not appear as a descendant of tag 'template'. (see https://www.ampproject.org/docs/reference/components/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
 >>     ^~~~~~~~~
-amp-mustache/0.1/test/validator-amp-mustache.html:100:4 The tag 'template' requires including the 'amp-mustache' extension JavaScript. (see https://amp.dev/documentation/components/amp-mustache) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+amp-mustache/0.1/test/validator-amp-mustache.html:100:4 The tag 'template' requires including the 'amp-mustache' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-mustache) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |        Nested Template tags are not allowed.
 |      </template>
 |    </div>
@@ -238,13 +238,13 @@ amp-mustache/0.1/test/validator-amp-mustache.html:100:4 The tag 'template' requi
 |
 |  <template type="amp-mustache">
 >> ^~~~~~~~~
-amp-mustache/0.1/test/validator-amp-mustache.html:106:0 The tag 'template' requires including the 'amp-mustache' extension JavaScript. (see https://amp.dev/documentation/components/amp-mustache) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+amp-mustache/0.1/test/validator-amp-mustache.html:106:0 The tag 'template' requires including the 'amp-mustache' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-mustache) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |    <div>
 |      <script type="text/plain" template="amp-mustache">
 >>     ^~~~~~~~~
-amp-mustache/0.1/test/validator-amp-mustache.html:108:4 The tag 'SCRIPT type=text/plain' may not appear as a descendant of tag 'template'. (see https://amp.dev/documentation/components/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
+amp-mustache/0.1/test/validator-amp-mustache.html:108:4 The tag 'SCRIPT type=text/plain' may not appear as a descendant of tag 'template'. (see https://www.ampproject.org/docs/reference/components/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
 >>     ^~~~~~~~~
-amp-mustache/0.1/test/validator-amp-mustache.html:108:4 The tag 'SCRIPT type=text/plain' requires including the 'amp-mustache' extension JavaScript. (see https://amp.dev/documentation/components/amp-mustache) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+amp-mustache/0.1/test/validator-amp-mustache.html:108:4 The tag 'SCRIPT type=text/plain' requires including the 'amp-mustache' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-mustache) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |        Nested Template script tags are not allowed.
 |      </script>
 |    </div>
@@ -253,15 +253,15 @@ amp-mustache/0.1/test/validator-amp-mustache.html:108:4 The tag 'SCRIPT type=tex
 |  <!-- Inside a template, attribute value restrictions are relaxed. -->
 |  <amp-audio src="https://example.com/audio" layout="fixed" autoplay="{{invalid}}">
 >> ^~~~~~~~~
-amp-mustache/0.1/test/validator-amp-mustache.html:115:0 The attribute 'autoplay' in tag 'amp-audio' is set to the invalid value '{{invalid}}'. (see https://amp.dev/documentation/components/amp-audio) [DISALLOWED_HTML]
+amp-mustache/0.1/test/validator-amp-mustache.html:115:0 The attribute 'autoplay' in tag 'amp-audio' is set to the invalid value '{{invalid}}'. (see https://www.ampproject.org/docs/reference/components/amp-audio) [DISALLOWED_HTML]
 >> ^~~~~~~~~
-amp-mustache/0.1/test/validator-amp-mustache.html:115:0 The tag 'amp-audio' requires including the 'amp-audio' extension JavaScript. (see https://amp.dev/documentation/components/amp-audio) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+amp-mustache/0.1/test/validator-amp-mustache.html:115:0 The tag 'amp-audio' requires including the 'amp-audio' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-audio) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |  <template type="amp-mustache">
 >> ^~~~~~~~~
-amp-mustache/0.1/test/validator-amp-mustache.html:116:0 The tag 'template' requires including the 'amp-mustache' extension JavaScript. (see https://amp.dev/documentation/components/amp-mustache) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+amp-mustache/0.1/test/validator-amp-mustache.html:116:0 The tag 'template' requires including the 'amp-mustache' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-mustache) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |  <amp-audio src="https://example.com/audio" layout="fixed" autoplay="{{valid}}">
 >> ^~~~~~~~~
-amp-mustache/0.1/test/validator-amp-mustache.html:117:0 The tag 'amp-audio' requires including the 'amp-audio' extension JavaScript. (see https://amp.dev/documentation/components/amp-audio) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+amp-mustache/0.1/test/validator-amp-mustache.html:117:0 The tag 'amp-audio' requires including the 'amp-audio' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-audio) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |  </template>
 |
 |  <!-- Since layout calculations follow a different code path, test that layouts
@@ -269,7 +269,7 @@ amp-mustache/0.1/test/validator-amp-mustache.html:117:0 The tag 'amp-audio' requ
 |  <!-- See https://github.com/ampproject/amphtml/issues/2670 -->
 |  <template type="amp-mustache">
 >> ^~~~~~~~~
-amp-mustache/0.1/test/validator-amp-mustache.html:123:0 The tag 'template' requires including the 'amp-mustache' extension JavaScript. (see https://amp.dev/documentation/components/amp-mustache) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+amp-mustache/0.1/test/validator-amp-mustache.html:123:0 The tag 'template' requires including the 'amp-mustache' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-mustache) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |  <amp-img src="{{image.url}}" width={{image.width}} height={{image.height}}></amp-img>
 |  </template>
 |
@@ -280,7 +280,7 @@ amp-mustache/0.1/test/validator-amp-mustache.html:123:0 The tag 'template' requi
 |  -->
 |  <script type="text/plain" template="amp-mustache">
 >> ^~~~~~~~~
-amp-mustache/0.1/test/validator-amp-mustache.html:132:0 The tag 'SCRIPT type=text/plain' requires including the 'amp-mustache' extension JavaScript. (see https://amp.dev/documentation/components/amp-mustache) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+amp-mustache/0.1/test/validator-amp-mustache.html:132:0 The tag 'SCRIPT type=text/plain' requires including the 'amp-mustache' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-mustache) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |    <{{not-actually-parsed-as-an-html-tag-so-allowed}}>
 |    <p title="{{allowed}}">{{allowed}}</p>
 |    <p {{notallowed}}></p>
@@ -350,12 +350,12 @@ amp-mustache/0.1/test/validator-amp-mustache.html:132:0 The tag 'SCRIPT type=tex
 |  <!-- Inside a script template, attribute value restrictions are relaxed. -->
 |  <amp-audio src="https://example.com/audio" layout="fixed" autoplay="{{invalid}}">
 >> ^~~~~~~~~
-amp-mustache/0.1/test/validator-amp-mustache.html:200:0 The attribute 'autoplay' in tag 'amp-audio' is set to the invalid value '{{invalid}}'. (see https://amp.dev/documentation/components/amp-audio) [DISALLOWED_HTML]
+amp-mustache/0.1/test/validator-amp-mustache.html:200:0 The attribute 'autoplay' in tag 'amp-audio' is set to the invalid value '{{invalid}}'. (see https://www.ampproject.org/docs/reference/components/amp-audio) [DISALLOWED_HTML]
 >> ^~~~~~~~~
-amp-mustache/0.1/test/validator-amp-mustache.html:200:0 The tag 'amp-audio' requires including the 'amp-audio' extension JavaScript. (see https://amp.dev/documentation/components/amp-audio) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+amp-mustache/0.1/test/validator-amp-mustache.html:200:0 The tag 'amp-audio' requires including the 'amp-audio' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-audio) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |  <script type="text/plain" template="amp-mustache">
 >> ^~~~~~~~~
-amp-mustache/0.1/test/validator-amp-mustache.html:201:0 The tag 'SCRIPT type=text/plain' requires including the 'amp-mustache' extension JavaScript. (see https://amp.dev/documentation/components/amp-mustache) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+amp-mustache/0.1/test/validator-amp-mustache.html:201:0 The tag 'SCRIPT type=text/plain' requires including the 'amp-mustache' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-mustache) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |  <amp-audio src="https://example.com/audio" layout="fixed" autoplay="{{valid}}">
 |  </script>
 |
@@ -364,7 +364,7 @@ amp-mustache/0.1/test/validator-amp-mustache.html:201:0 The tag 'SCRIPT type=tex
 |  <!-- See https://github.com/ampproject/amphtml/issues/2670 -->
 |  <script type="text/plain" template="amp-mustache">
 >> ^~~~~~~~~
-amp-mustache/0.1/test/validator-amp-mustache.html:208:0 The tag 'SCRIPT type=text/plain' requires including the 'amp-mustache' extension JavaScript. (see https://amp.dev/documentation/components/amp-mustache) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+amp-mustache/0.1/test/validator-amp-mustache.html:208:0 The tag 'SCRIPT type=text/plain' requires including the 'amp-mustache' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-mustache) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |  <amp-img src="{{image.url}}" width={{image.width}} height={{image.height}}></amp-img>
 |  </script>
 |

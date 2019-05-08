@@ -51,7 +51,7 @@ tags: {  # <amp-anim>
   attrs: { name: "object-position" }
   attr_lists: "extended-amp-global"
   attr_lists: "mandatory-src-or-srcset"
-  spec_url: "https://amp.dev/documentation/components/amp-anim"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-anim"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED
@@ -73,7 +73,7 @@ tags: {  # <amp-anim>
   attrs: { name: "object-position" }
   attr_lists: "extended-amp-global"
   attr_lists: "mandatory-src-amp4email"
-  spec_url: "https://amp.dev/documentation/components/amp-anim"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-anim"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

@@ -22,7 +22,7 @@ FAIL
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
 |    <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-0.1.js"></script>
 >>   ^~~~~~~~~
-amp-story/0.1/test/validator-amp-story-cta-layer-error.html:22:2 The extension 'amp-story' is referenced at version '0.1' which is a deprecated version. Please use a more recent version of this extension. This may become an error in the future. (see https://amp.dev/documentation/components/amp-story) [DEPRECATION]
+amp-story/0.1/test/validator-amp-story-cta-layer-error.html:22:2 The extension 'amp-story' is referenced at version '0.1' which is a deprecated version. Please use a more recent version of this extension. This may become an error in the future. (see https://www.ampproject.org/docs/reference/components/amp-story) [DEPRECATION]
 |    <title>My Story</title>
 |    <meta name="description" content="Get started with amp-story">
 |    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
@@ -67,7 +67,7 @@ amp-story/0.1/test/validator-amp-story-cta-layer-error.html:54:6 Tag 'amp-story-
 >>     ^~~~~~~~~
 amp-story/0.1/test/validator-amp-story-cta-layer-error.html:61:4 The tag 'amp-story-cta-layer' may only appear as a descendant of tag 'amp-story-page'. [AMP_TAG_PROBLEM]
 >>     ^~~~~~~~~
-amp-story/0.1/test/validator-amp-story-cta-layer-error.html:61:4 Tag 'amp-story-cta-layer' is disallowed as child of tag 'amp-story'. Child tag must be one of ['amp-analytics', 'amp-consent', 'amp-geo', 'amp-pixel', 'amp-sidebar', 'amp-story-access', 'amp-story-auto-ads', 'amp-story-bookend', 'amp-story-page']. (see https://amp.dev/documentation/components/amp-story) [AMP_TAG_PROBLEM]
+amp-story/0.1/test/validator-amp-story-cta-layer-error.html:61:4 Tag 'amp-story-cta-layer' is disallowed as child of tag 'amp-story'. Child tag must be one of ['amp-analytics', 'amp-consent', 'amp-geo', 'amp-pixel', 'amp-sidebar', 'amp-story-access', 'amp-story-auto-ads', 'amp-story-bookend', 'amp-story-page']. (see https://www.ampproject.org/docs/reference/components/amp-story) [AMP_TAG_PROBLEM]
 |        <a href="http://www.google.com" class="button"> Illegal CTA layer outside of amp-story-page! </a>
 |      </amp-story-cta-layer>
 |    </amp-story>

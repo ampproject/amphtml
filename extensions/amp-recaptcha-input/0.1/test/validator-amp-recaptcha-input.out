@@ -55,7 +55,7 @@ FAIL
 |    <div>
 |      <amp-recaptcha-input layout="nodisplay" name="recaptcha_example" data-sitekey="6LebBGoUAAAAAHbj1oeZMBU_rze_CutlbyzpH8VE" data-action="recaptcha_example">
 >>     ^~~~~~~~~
-amp-recaptcha-input/0.1/test/validator-amp-recaptcha-input.html:55:4 The tag 'amp-recaptcha-input' may only appear as a descendant of tag 'form'. (see https://amp.dev/documentation/components/amp-form) [AMP_TAG_PROBLEM]
+amp-recaptcha-input/0.1/test/validator-amp-recaptcha-input.html:55:4 The tag 'amp-recaptcha-input' may only appear as a descendant of tag 'form'. (see https://www.ampproject.org/docs/reference/components/amp-form) [AMP_TAG_PROBLEM]
 |      </amp-recaptcha-input>
 |    </div>
 |
@@ -71,7 +71,7 @@ amp-recaptcha-input/0.1/test/validator-amp-recaptcha-input.html:55:4 The tag 'am
 |        <input name="submit-button" type="submit" value="Search">
 |        <amp-recaptcha-input layout="nodisplay" data-sitekey="6LebBGoUAAAAAHbj1oeZMBU_rze_CutlbyzpH8VE" data-action="recaptcha_example">
 >>       ^~~~~~~~~
-amp-recaptcha-input/0.1/test/validator-amp-recaptcha-input.html:69:6 The mandatory attribute 'name' is missing in tag 'amp-recaptcha-input'. (see https://amp.dev/documentation/components/amp-form) [AMP_TAG_PROBLEM]
+amp-recaptcha-input/0.1/test/validator-amp-recaptcha-input.html:69:6 The mandatory attribute 'name' is missing in tag 'amp-recaptcha-input'. (see https://www.ampproject.org/docs/reference/components/amp-form) [AMP_TAG_PROBLEM]
 |        </amp-recaptcha-input>
 |      </fieldset>
 |
@@ -93,7 +93,7 @@ amp-recaptcha-input/0.1/test/validator-amp-recaptcha-input.html:69:6 The mandato
 |        <input name="submit-button" type="submit" value="Search">
 |        <amp-recaptcha-input layout="nodisplay" name="recaptcha_example" data-action="recaptcha_example">
 >>       ^~~~~~~~~
-amp-recaptcha-input/0.1/test/validator-amp-recaptcha-input.html:89:6 The mandatory attribute 'data-sitekey' is missing in tag 'amp-recaptcha-input'. (see https://amp.dev/documentation/components/amp-form) [AMP_TAG_PROBLEM]
+amp-recaptcha-input/0.1/test/validator-amp-recaptcha-input.html:89:6 The mandatory attribute 'data-sitekey' is missing in tag 'amp-recaptcha-input'. (see https://www.ampproject.org/docs/reference/components/amp-form) [AMP_TAG_PROBLEM]
 |        </amp-recaptcha-input>
 |      </fieldset>
 |
@@ -115,7 +115,7 @@ amp-recaptcha-input/0.1/test/validator-amp-recaptcha-input.html:89:6 The mandato
 |        <input name="submit-button" type="submit" value="Search">
 |        <amp-recaptcha-input layout="nodisplay" name="recaptcha_example" data-sitekey="6LebBGoUAAAAAHbj1oeZMBU_rze_CutlbyzpH8VE">
 >>       ^~~~~~~~~
-amp-recaptcha-input/0.1/test/validator-amp-recaptcha-input.html:109:6 The mandatory attribute 'data-action' is missing in tag 'amp-recaptcha-input'. (see https://amp.dev/documentation/components/amp-form) [AMP_TAG_PROBLEM]
+amp-recaptcha-input/0.1/test/validator-amp-recaptcha-input.html:109:6 The mandatory attribute 'data-action' is missing in tag 'amp-recaptcha-input'. (see https://www.ampproject.org/docs/reference/components/amp-form) [AMP_TAG_PROBLEM]
 |        </amp-recaptcha-input>
 |      </fieldset>
 |
@@ -137,7 +137,7 @@ amp-recaptcha-input/0.1/test/validator-amp-recaptcha-input.html:109:6 The mandat
 |        <input name="submit-button" type="submit" value="Search">
 |        <amp-recaptcha-input name="recaptcha_example" data-sitekey="6LebBGoUAAAAAHbj1oeZMBU_rze_CutlbyzpH8VE" data-action="recaptcha_example">
 >>       ^~~~~~~~~
-amp-recaptcha-input/0.1/test/validator-amp-recaptcha-input.html:129:6 The implied layout 'CONTAINER' is not supported by tag 'amp-recaptcha-input'. (see https://amp.dev/documentation/components/amp-form) [AMP_LAYOUT_PROBLEM]
+amp-recaptcha-input/0.1/test/validator-amp-recaptcha-input.html:129:6 The implied layout 'CONTAINER' is not supported by tag 'amp-recaptcha-input'. (see https://www.ampproject.org/docs/reference/components/amp-form) [AMP_LAYOUT_PROBLEM]
 |        </amp-recaptcha-input>
 |      </fieldset>
 |
@@ -159,7 +159,7 @@ amp-recaptcha-input/0.1/test/validator-amp-recaptcha-input.html:129:6 The implie
 |        <input name="submit-button" type="submit" value="Search">
 |        <amp-recaptcha-input layout="responsive" name="recaptcha_example" data-sitekey="6LebBGoUAAAAAHbj1oeZMBU_rze_CutlbyzpH8VE" data-action="recaptcha_example">
 >>       ^~~~~~~~~
-amp-recaptcha-input/0.1/test/validator-amp-recaptcha-input.html:149:6 The specified layout 'RESPONSIVE' is not supported by tag 'amp-recaptcha-input'. (see https://amp.dev/documentation/components/amp-form) [AMP_LAYOUT_PROBLEM]
+amp-recaptcha-input/0.1/test/validator-amp-recaptcha-input.html:149:6 The specified layout 'RESPONSIVE' is not supported by tag 'amp-recaptcha-input'. (see https://www.ampproject.org/docs/reference/components/amp-form) [AMP_LAYOUT_PROBLEM]
 |        </amp-recaptcha-input>
 |      </fieldset>
 |

@@ -29,7 +29,7 @@ PASS
 |    <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
 |    <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-latest.js"></script>
 >>   ^~~~~~~~~
-amp-mustache/0.2/test/validator-amp-mustache-version.html:29:2 The tag 'amp-mustache extension .js script' appears more than once in the document. This will soon be an error. (see https://amp.dev/documentation/components/amp-mustache) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+amp-mustache/0.2/test/validator-amp-mustache-version.html:29:2 The tag 'amp-mustache extension .js script' appears more than once in the document. This will soon be an error. (see https://www.ampproject.org/docs/reference/components/amp-mustache) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |  </head>
 |  <body>
 |  </body>

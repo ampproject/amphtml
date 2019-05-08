@@ -53,7 +53,7 @@ FAIL
 |    <!-- Invalid: missing src attribute. -->
 |    <amp-reddit
 >>   ^~~~~~~~~
-amp-reddit/0.1/test/validator-amp-reddit.html:53:2 The mandatory attribute 'data-src' is missing in tag 'amp-reddit'. (see https://amp.dev/documentation/components/amp-reddit) [AMP_TAG_PROBLEM]
+amp-reddit/0.1/test/validator-amp-reddit.html:53:2 The mandatory attribute 'data-src' is missing in tag 'amp-reddit'. (see https://www.ampproject.org/docs/reference/components/amp-reddit) [AMP_TAG_PROBLEM]
 |      layout="responsive"
 |      width="300"
 |      height="400"

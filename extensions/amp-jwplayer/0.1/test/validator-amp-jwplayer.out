@@ -46,16 +46,16 @@ FAIL
 |    <!-- Invalid example missing a player id. -->
 |    <amp-jwplayer
 >>   ^~~~~~~~~
-amp-jwplayer/0.1/test/validator-amp-jwplayer.html:46:2 The tag 'amp-jwplayer' is missing a mandatory attribute - pick one of ['data-media-id', 'data-playlist-id']. (see https://amp.dev/documentation/components/amp-jwplayer) [AMP_TAG_PROBLEM]
+amp-jwplayer/0.1/test/validator-amp-jwplayer.html:46:2 The tag 'amp-jwplayer' is missing a mandatory attribute - pick one of ['data-media-id', 'data-playlist-id']. (see https://www.ampproject.org/docs/reference/components/amp-jwplayer) [AMP_TAG_PROBLEM]
 >>   ^~~~~~~~~
-amp-jwplayer/0.1/test/validator-amp-jwplayer.html:46:2 The mandatory attribute 'data-player-id' is missing in tag 'amp-jwplayer'. (see https://amp.dev/documentation/components/amp-jwplayer) [AMP_TAG_PROBLEM]
+amp-jwplayer/0.1/test/validator-amp-jwplayer.html:46:2 The mandatory attribute 'data-player-id' is missing in tag 'amp-jwplayer'. (see https://www.ampproject.org/docs/reference/components/amp-jwplayer) [AMP_TAG_PROBLEM]
 |        data-playerlist-id="482jsTAr"
 |        width="160" height="90">
 |    </amp-jwplayer>
 |    <!-- Invalid example missing playlist id or media-id. -->
 |    <amp-jwplayer
 >>   ^~~~~~~~~
-amp-jwplayer/0.1/test/validator-amp-jwplayer.html:51:2 The tag 'amp-jwplayer' is missing a mandatory attribute - pick one of ['data-media-id', 'data-playlist-id']. (see https://amp.dev/documentation/components/amp-jwplayer) [AMP_TAG_PROBLEM]
+amp-jwplayer/0.1/test/validator-amp-jwplayer.html:51:2 The tag 'amp-jwplayer' is missing a mandatory attribute - pick one of ['data-media-id', 'data-playlist-id']. (see https://www.ampproject.org/docs/reference/components/amp-jwplayer) [AMP_TAG_PROBLEM]
 |        data-player-id="BjcwyK37"
 |        width="160" height="90">
 |    </amp-jwplayer>

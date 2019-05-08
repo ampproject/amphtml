@@ -33,7 +33,7 @@ tags: {  # <amp-hulu>
     mandatory: true
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://amp.dev/documentation/components/amp-hulu"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-hulu"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

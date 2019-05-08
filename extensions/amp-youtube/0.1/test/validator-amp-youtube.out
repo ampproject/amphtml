@@ -45,22 +45,22 @@ FAIL
 |    <!-- Invalid: data-videoid and data-live-channelid both missing. -->
 |    <amp-youtube width="480" height="270"></amp-youtube>
 >>   ^~~~~~~~~
-amp-youtube/0.1/test/validator-amp-youtube.html:45:2 The tag 'amp-youtube' is missing a mandatory attribute - pick one of ['data-live-channelid', 'data-videoid']. (see https://amp.dev/documentation/components/amp-youtube) [AMP_TAG_PROBLEM]
+amp-youtube/0.1/test/validator-amp-youtube.html:45:2 The tag 'amp-youtube' is missing a mandatory attribute - pick one of ['data-live-channelid', 'data-videoid']. (see https://www.ampproject.org/docs/reference/components/amp-youtube) [AMP_TAG_PROBLEM]
 |    <!-- Invalid: dimensions are missing. -->
 |    <amp-youtube data-videoid="dQw4w9WgXcQ">
 >>   ^~~~~~~~~
-amp-youtube/0.1/test/validator-amp-youtube.html:47:2 Incomplete layout attributes specified for tag 'amp-youtube'. For example, provide attributes 'width' and 'height'. (see https://amp.dev/documentation/components/amp-youtube) [AMP_LAYOUT_PROBLEM]
+amp-youtube/0.1/test/validator-amp-youtube.html:47:2 Incomplete layout attributes specified for tag 'amp-youtube'. For example, provide attributes 'width' and 'height'. (see https://www.ampproject.org/docs/reference/components/amp-youtube) [AMP_LAYOUT_PROBLEM]
 |    </amp-youtube>
 |    <!-- Invalid: the attr value must be a video id -->
 |    <amp-youtube width="480" height="270"
 >>   ^~~~~~~~~
-amp-youtube/0.1/test/validator-amp-youtube.html:50:2 The attribute 'data-videoid' in tag 'amp-youtube' is set to the invalid value 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'. (see https://amp.dev/documentation/components/amp-youtube) [DISALLOWED_HTML]
+amp-youtube/0.1/test/validator-amp-youtube.html:50:2 The attribute 'data-videoid' in tag 'amp-youtube' is set to the invalid value 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'. (see https://www.ampproject.org/docs/reference/components/amp-youtube) [DISALLOWED_HTML]
 |                 data-videoid="https://www.youtube.com/watch?v=dQw4w9WgXcQ">
 |    </amp-youtube>
 |    <!-- Invalid: cannot have both data-videoid and data-live-channelid -->
 |    <amp-youtube width="480" height="270"
 >>   ^~~~~~~~~
-amp-youtube/0.1/test/validator-amp-youtube.html:54:2 Mutually exclusive attributes encountered in tag 'amp-youtube' - pick one of ['data-live-channelid', 'data-videoid']. (see https://amp.dev/documentation/components/amp-youtube) [AMP_TAG_PROBLEM]
+amp-youtube/0.1/test/validator-amp-youtube.html:54:2 Mutually exclusive attributes encountered in tag 'amp-youtube' - pick one of ['data-live-channelid', 'data-videoid']. (see https://www.ampproject.org/docs/reference/components/amp-youtube) [AMP_TAG_PROBLEM]
 |      data-live-channelid="UCB8Kb4pxYzsDsHxzBfnid4Q"
 |      data-videoid="dQw4w9WgXcQ">
 |    </amp-youtube>

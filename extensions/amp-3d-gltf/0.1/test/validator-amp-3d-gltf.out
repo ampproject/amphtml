@@ -48,6 +48,6 @@ FAIL
 |    <!-- invalid: no src -->
 |    <amp-3d-gltf layout="responsive" width="150" height="80"></amp-3d-gltf>
 >>   ^~~~~~~~~
-amp-3d-gltf/0.1/test/validator-amp-3d-gltf.html:48:2 The mandatory attribute 'src' is missing in tag 'amp-3d-gltf'. (see https://amp.dev/documentation/components/amp-3d-gltf) [AMP_TAG_PROBLEM]
+amp-3d-gltf/0.1/test/validator-amp-3d-gltf.html:48:2 The mandatory attribute 'src' is missing in tag 'amp-3d-gltf'. (see https://www.ampproject.org/docs/reference/components/amp-3d-gltf) [AMP_TAG_PROBLEM]
 |  </body>
 |  </html>

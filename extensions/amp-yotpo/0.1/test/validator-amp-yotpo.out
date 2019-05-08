@@ -41,7 +41,7 @@ FAIL
 |    <!-- Invalid: Missing data-app-key attribute. -->
 |    <amp-yotpo
 >>   ^~~~~~~~~
-amp-yotpo/0.1/test/validator-amp-yotpo.html:41:2 The mandatory attribute 'data-app-key' is missing in tag 'amp-yotpo'. (see https://amp.dev/documentation/components/amp-yotpo) [AMP_TAG_PROBLEM]
+amp-yotpo/0.1/test/validator-amp-yotpo.html:41:2 The mandatory attribute 'data-app-key' is missing in tag 'amp-yotpo'. (see https://www.ampproject.org/docs/reference/components/amp-yotpo) [AMP_TAG_PROBLEM]
 |      layout="responsive"
 |      height="100"
 |      width="550"
@@ -51,7 +51,7 @@ amp-yotpo/0.1/test/validator-amp-yotpo.html:41:2 The mandatory attribute 'data-a
 |    <!-- Invalid: Missing data-widget-type attribute. -->
 |    <amp-yotpo
 >>   ^~~~~~~~~
-amp-yotpo/0.1/test/validator-amp-yotpo.html:49:2 The mandatory attribute 'data-widget-type' is missing in tag 'amp-yotpo'. (see https://amp.dev/documentation/components/amp-yotpo) [AMP_TAG_PROBLEM]
+amp-yotpo/0.1/test/validator-amp-yotpo.html:49:2 The mandatory attribute 'data-widget-type' is missing in tag 'amp-yotpo'. (see https://www.ampproject.org/docs/reference/components/amp-yotpo) [AMP_TAG_PROBLEM]
 |      layout="responsive"
 |      height="100"
 |      width="550"
@@ -61,7 +61,7 @@ amp-yotpo/0.1/test/validator-amp-yotpo.html:49:2 The mandatory attribute 'data-w
 |    <!-- Invalid: illegal layout. -->
 |    <amp-yotpo
 >>   ^~~~~~~~~
-amp-yotpo/0.1/test/validator-amp-yotpo.html:57:2 The specified layout 'CONTAINER' is not supported by tag 'amp-yotpo'. (see https://amp.dev/documentation/components/amp-yotpo) [AMP_LAYOUT_PROBLEM]
+amp-yotpo/0.1/test/validator-amp-yotpo.html:57:2 The specified layout 'CONTAINER' is not supported by tag 'amp-yotpo'. (see https://www.ampproject.org/docs/reference/components/amp-yotpo) [AMP_LAYOUT_PROBLEM]
 |      layout="container"
 |      height="100"
 |      width="550">

@@ -49,7 +49,7 @@ FAIL
 |         leaving it out results in an error. -->
 |    <amp-o2-player
 >>   ^~~~~~~~~
-amp-o2-player/0.1/test/validator-amp-o2-player.html:49:2 The mandatory attribute 'data-bcid' is missing in tag 'amp-o2-player'. (see https://amp.dev/documentation/components/amp-o2-player) [AMP_TAG_PROBLEM]
+amp-o2-player/0.1/test/validator-amp-o2-player.html:49:2 The mandatory attribute 'data-bcid' is missing in tag 'amp-o2-player'. (see https://www.ampproject.org/docs/reference/components/amp-o2-player) [AMP_TAG_PROBLEM]
 |        data-pid="573d9bf1e4b02a3388f42c36"
 |        layout="responsive" width="480" height="270">
 |    </amp-o2-player>
@@ -58,7 +58,7 @@ amp-o2-player/0.1/test/validator-amp-o2-player.html:49:2 The mandatory attribute
 |           leaving it out results in an error. -->
 |    <amp-o2-player
 >>   ^~~~~~~~~
-amp-o2-player/0.1/test/validator-amp-o2-player.html:56:2 The mandatory attribute 'data-pid' is missing in tag 'amp-o2-player'. (see https://amp.dev/documentation/components/amp-o2-player) [AMP_TAG_PROBLEM]
+amp-o2-player/0.1/test/validator-amp-o2-player.html:56:2 The mandatory attribute 'data-pid' is missing in tag 'amp-o2-player'. (see https://www.ampproject.org/docs/reference/components/amp-o2-player) [AMP_TAG_PROBLEM]
 |        data-bcid="50d595ec0364e95588c77bd2"
 |        layout="responsive" width="480" height="270">
 |    </amp-o2-player>

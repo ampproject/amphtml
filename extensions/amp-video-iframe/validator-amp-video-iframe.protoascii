@@ -77,7 +77,7 @@ tags: {  # <amp-video-iframe> with poster
   attr_lists: "extended-amp-global"
   attr_lists: "amp-video-iframe-common"
   attr_lists: "lightboxable-elements"
-  spec_url: "https://amp.dev/documentation/components/amp-video-iframe"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-video-iframe"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED
@@ -98,7 +98,7 @@ tags: {  # <amp-video-iframe> with [placeholder]
   attr_lists: "extended-amp-global"
   attr_lists: "amp-video-iframe-common"
   attr_lists: "lightboxable-elements"
-  spec_url: "https://amp.dev/documentation/components/amp-video-iframe"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-video-iframe"
   reference_points: {
     tag_spec_name: "AMP-VIDEO-IFRAME > [placeholder]"
     mandatory: true
@@ -124,7 +124,7 @@ tags: {  # <amp-video-iframe> with [placeholder] (transformed)
   attr_lists: "extended-amp-global"
   attr_lists: "amp-video-iframe-common"
   attr_lists: "lightboxable-elements"
-  spec_url: "https://amp.dev/documentation/components/amp-video-iframe"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-video-iframe"
   reference_points: {
     tag_spec_name: "AMP-VIDEO-IFRAME > [placeholder]"
     mandatory: true
@@ -152,7 +152,7 @@ tags: {
     name: "placeholder"
     mandatory: true
   }
-  spec_url: "https://amp.dev/documentation/components/amp-video-iframe"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-video-iframe"
 }
 
 tags: {
@@ -171,5 +171,5 @@ tags: {
     }
     css_declaration: { name: "padding-top" }
   }
-  spec_url: "https://amp.dev/documentation/components/amp-video-iframe"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-video-iframe"
 }

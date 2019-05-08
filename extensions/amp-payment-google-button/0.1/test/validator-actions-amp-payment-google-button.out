@@ -92,6 +92,6 @@ FAIL
 |    <!-- Invalid: missing mandatory child script tag -->
 |    <amp-payment-google-button></amp-payment-google-button>
 >>   ^~~~~~~~~
-amp-payment-google-button/0.1/test/validator-actions-amp-payment-google-button.html:92:2 Tag 'amp-payment-google-button' must have a minimum of 1 child tags - saw 0 child tags. (see https://amp.dev/documentation/components/amp-payment-google-button) [GENERIC]
+amp-payment-google-button/0.1/test/validator-actions-amp-payment-google-button.html:92:2 Tag 'amp-payment-google-button' must have a minimum of 1 child tags - saw 0 child tags. (see https://www.ampproject.org/docs/reference/components/amp-payment-google-button) [GENERIC]
 |  </body>
 |  </html>

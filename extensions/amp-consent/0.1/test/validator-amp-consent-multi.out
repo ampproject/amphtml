@@ -48,4 +48,4 @@ FAIL
 |  </body>
 |  </html>
 >>       ^~~~~~~~~
-amp-consent/0.1/test/validator-amp-consent-multi.html:48:6 The tag 'amp-consent' is present, but is excluded by the presence of 'amp-consent [type]'. (see https://amp.dev/documentation/components/amp-consent) [AMP_TAG_PROBLEM]
+amp-consent/0.1/test/validator-amp-consent-multi.html:48:6 The tag 'amp-consent' is present, but is excluded by the presence of 'amp-consent [type]'. (see https://www.ampproject.org/docs/reference/components/amp-consent) [AMP_TAG_PROBLEM]

@@ -43,7 +43,7 @@ FAIL
 |      <!-- invalid, layout cannot be mutated with amp-bind -->
 |      <amp-timeago layout="fixed" width="160" height="20" datetime="2018-04-11T00:37:33.809Z" locale="en" cutoff="8640000" [datetime]="myState.datetime" [title]="myState.title" [layout]="myState.layout">Saturday 11 April 2018 00.37</amp-timeago>
 >>     ^~~~~~~~~
-amp-timeago/0.1/test/validator-amp-timeago-mutation-error.html:43:4 The attribute '[layout]' may not appear in tag 'amp-timeago'. (see https://amp.dev/documentation/components/amp-timeago) [DISALLOWED_HTML]
+amp-timeago/0.1/test/validator-amp-timeago-mutation-error.html:43:4 The attribute '[layout]' may not appear in tag 'amp-timeago'. (see https://www.ampproject.org/docs/reference/components/amp-timeago) [DISALLOWED_HTML]
 |
 |    </body>
 |  </html>

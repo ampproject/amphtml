@@ -37,4 +37,4 @@ FAIL
 |  </body>
 |  </html>
 >>       ^~~~~~~~~
-amp-story/1.0/test/validator-empty-story.html:37:6 The tag 'amp-story-page' is missing or incorrect, but required by 'amp-story'. (see https://amp.dev/documentation/components/amp-story) [AMP_TAG_PROBLEM]
+amp-story/1.0/test/validator-empty-story.html:37:6 The tag 'amp-story-page' is missing or incorrect, but required by 'amp-story'. (see https://www.ampproject.org/docs/reference/components/amp-story) [AMP_TAG_PROBLEM]
