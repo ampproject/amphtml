@@ -48,7 +48,7 @@ tags: {  # <amp-timeago>
   attrs: { name: "[datetime]" }
   attrs: { name: "[title]" }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-timeago"
+  spec_url: "https://amp.dev/documentation/components/amp-timeago"
   amp_layout: {
     supported_layouts: FIXED
     supported_layouts: FIXED_HEIGHT

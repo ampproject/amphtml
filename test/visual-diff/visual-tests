@@ -601,6 +601,8 @@
       "interactive_tests": "examples/visual-tests/amp-story/amp-story-tooltip-desktop.js"
     },
     {
+      // TODO(#22070): Re-enable test.
+      "flaky": true,
       "url": "examples/visual-tests/amp-story/amp-story-pagination-buttons.html",
       "name": "amp-story: pagination-buttons desktop",
       "viewport": {"width": 1440, "height": 900},
@@ -669,6 +671,8 @@
       "interactive_tests": "examples/visual-tests/amp-form/amp-form.js",
     },
     {
+      "flaky": true,
+      // TODO(#22162, cvializ): see https://percy.io/ampproject/amphtml/builds/1828636
       "url": "examples/visual-tests/amp-accordion/amp-accordion.html",
       "name": "amp-accordion: page loads",
       "loading_complete_delay_ms": 1000,

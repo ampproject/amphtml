@@ -84,15 +84,13 @@ public class AmpCommandLineRunner extends CommandLineRunner {
     CompilerOptions options = super.createOptions();
     options.setCollapsePropertiesLevel(CompilerOptions.PropertyCollapseLevel.ALL);
     AmpPass ampPass = new AmpPass(getCompiler(), is_production_env, suffixTypes,
-        assignmentReplacements, prodAssignmentReplacements, amp_version);
+        assignmentReplacements, prodAssignmentReplacements, amp_version, single_file_compilation);
     options.addCustomPass(CustomPassExecutionTime.BEFORE_OPTIMIZATIONS, ampPass);
     options.setDevirtualizePrototypeMethods(true);
     options.setExtractPrototypeMemberDeclarations(true);
     options.setSmartNameRemoval(true);
     options.optimizeCalls = true;
-    if (single_file_compilation) {
-      options.renamePrefixNamespace = "_";
-    } else {
+    if (!single_file_compilation) {
       // Have to turn this off because we cannot know whether sub classes
       // might override a method. In the future this might be doable
       // with using a more complete extern file instead.

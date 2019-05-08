@@ -33,15 +33,15 @@ const {
   reportTestStarted,
 } = require('./status-report');
 const {app} = require('../../test-server');
+const {build} = require('../build');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../../ctrlcHandler');
-const {getAdTypes, unitTestsToRun} = require('./helpers');
+const {css} = require('../css');
+const {getAdTypes, refreshKarmaWdCache, unitTestsToRun} = require('./helpers');
 const {getStdout} = require('../../exec');
 const {isTravisBuild} = require('../../travis');
 
-const {green, yellow, cyan, red} = colors;
 
-const preTestTasks = argv.nobuild ? [] : (
-  (argv.unit || argv.a4a || argv['local-changes']) ? ['css'] : ['build']);
+const {green, yellow, cyan, red} = colors;
 
 const batchSize = 4; // Number of Sauce Lab browsers
 
@@ -354,6 +354,9 @@ async function runTests() {
   // Listen for Ctrl + C to cancel testing
   const handlerProcess = createCtrlcHandler('test');
 
+  // Avoid Karma startup errors
+  refreshKarmaWdCache();
+
   // Run Sauce Labs tests in batches to avoid timeouts when connecting to the
   // Sauce Labs environment.
   let processExitCode;
@@ -537,10 +540,14 @@ async function runTests() {
   }
 }
 
-/**
- * Run tests after applying the prod / canary AMP config to the runtime.
- */
-gulp.task('test', 'Runs tests', preTestTasks, function() {
+async function test() {
+  if (!argv.nobuild) {
+    if (argv.unit || argv.a4a || argv['local-changes']) {
+      await css();
+    } else {
+      await build();
+    }
+  }
   // TODO(alanorozco): Come up with a more elegant check?
   global.AMP_TESTING = true;
 
@@ -548,32 +555,39 @@ gulp.task('test', 'Runs tests', preTestTasks, function() {
     printArgvMessages();
   }
   return runTests();
-}, {
-  options: {
-    'verbose': '  With logging enabled',
-    'testnames': '  Lists the name of each test being run',
-    'watch': '  Watches for changes in files, runs corresponding test(s)',
-    'saucelabs': '  Runs integration tests on saucelabs (requires setup)',
-    'saucelabs_lite': '  Runs tests on a subset of saucelabs browsers ' +
-        '(requires setup)',
-    'safari': '  Runs tests on Safari',
-    'firefox': '  Runs tests on Firefox',
-    'edge': '  Runs tests on Edge',
-    'ie': '  Runs tests on IE',
-    'chrome_canary': 'Runs tests on Chrome Canary',
-    'chrome_flags':
-      'Uses the given flags to launch Chrome',
-    'unit': '  Run only unit tests.',
-    'integration': '  Run only integration tests.',
-    'compiled': '  Changes integration tests to use production JS ' +
-        'binaries for execution',
-    'grep': '  Runs tests that match the pattern',
-    'files': '  Runs tests for specific files',
-    'nohelp': '  Silence help messages that are printed prior to test run',
-    'a4a': '  Runs all A4A tests',
-    'coverage': '  Run tests in code coverage mode',
-    'headless': '  Run tests in a headless Chrome window',
-    'local-changes': '  Run unit tests directly affected by the files ' +
-        'changed in the local branch',
-  },
-});
+}
+
+module.exports = {
+  test,
+};
+
+/* eslint "google-camelcase/google-camelcase": 0 */
+
+test.description = 'Runs tests';
+test.flags = {
+  'verbose': '  With logging enabled',
+  'testnames': '  Lists the name of each test being run',
+  'watch': '  Watches for changes in files, runs corresponding test(s)',
+  'saucelabs': '  Runs integration tests on saucelabs (requires setup)',
+  'saucelabs_lite': '  Runs tests on a subset of saucelabs browsers ' +
+      '(requires setup)',
+  'safari': '  Runs tests on Safari',
+  'firefox': '  Runs tests on Firefox',
+  'edge': '  Runs tests on Edge',
+  'ie': '  Runs tests on IE',
+  'chrome_canary': 'Runs tests on Chrome Canary',
+  'chrome_flags':
+    'Uses the given flags to launch Chrome',
+  'unit': '  Run only unit tests.',
+  'integration': '  Run only integration tests.',
+  'compiled': '  Changes integration tests to use production JS ' +
+      'binaries for execution',
+  'grep': '  Runs tests that match the pattern',
+  'files': '  Runs tests for specific files',
+  'nohelp': '  Silence help messages that are printed prior to test run',
+  'a4a': '  Runs all A4A tests',
+  'coverage': '  Run tests in code coverage mode',
+  'headless': '  Run tests in a headless Chrome window',
+  'local-changes': '  Run unit tests directly affected by the files ' +
+      'changed in the local branch',
+};

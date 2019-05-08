@@ -79,7 +79,7 @@ FAIL
 |    <!-- Invalid: Endpoint given with a protocol that doesn't fit the whitelist -->
 |    <amp-social-share type="vote-this-up"
 >>   ^~~~~~~~~
-amp-social-share/0.1/test/validator-amp-social-share.html:79:2 Invalid URL protocol 'votethisup:' for attribute 'data-share-endpoint' in tag 'amp-social-share'. (see https://www.ampproject.org/docs/reference/components/amp-social-share) [AMP_TAG_PROBLEM]
+amp-social-share/0.1/test/validator-amp-social-share.html:79:2 Invalid URL protocol 'votethisup:' for attribute 'data-share-endpoint' in tag 'amp-social-share'. (see https://amp.dev/documentation/components/amp-social-share) [AMP_TAG_PROBLEM]
 |                      layout="container"
 |                      data-share-endpoint="votethisup://vote"
 |                      data-param-text="Check this out: TITLE - CANONICAL_URL">
@@ -89,7 +89,7 @@ amp-social-share/0.1/test/validator-amp-social-share.html:79:2 Invalid URL proto
 |    <!-- Invalid: Endpoint given with a protocol that doesn't fit the whitelist -->
 |    <amp-social-share type="uhm-no-hahaha"
 >>   ^~~~~~~~~
-amp-social-share/0.1/test/validator-amp-social-share.html:87:2 Invalid URL protocol 'j a v a s c r i p t :' for attribute 'data-share-endpoint' in tag 'amp-social-share'. (see https://www.ampproject.org/docs/reference/components/amp-social-share) [AMP_TAG_PROBLEM]
+amp-social-share/0.1/test/validator-amp-social-share.html:87:2 Invalid URL protocol 'j a v a s c r i p t :' for attribute 'data-share-endpoint' in tag 'amp-social-share'. (see https://amp.dev/documentation/components/amp-social-share) [AMP_TAG_PROBLEM]
 |                      layout="container"
 |                      data-share-endpoint="j a v a s c r i p t : alert('oh hi')"
 |                      data-param-text="Check this out: TITLE - CANONICAL_URL">
