@@ -299,7 +299,8 @@ async function runTests() {
     mochaTimeout: c.client.mocha.timeout,
     propertiesObfuscated: !!argv.single_pass,
     testServerPort: c.client.testServerPort,
-    testOnIe: !!argv.ie,
+    testOnIe: !!argv.ie ||
+        (!!argv.saucelabs && saucelabsBrowsers.includes('SL_IE_11')),
   };
 
   if (argv.compiled) {
@@ -396,7 +397,9 @@ async function runTests() {
   async function runTestInBatches() {
     const browsers = {stable: [], beta: []};
     for (const browserId of saucelabsBrowsers) {
-      browsers[browserId.toLowerCase().endsWith('_beta') ? 'beta' : 'stable']
+      browsers[
+          (browserId.toLowerCase().endsWith('_beta') || browserId == 'SL_IE_11')
+            ? 'beta' : 'stable']
           .push(browserId);
     }
     if (browsers.stable.length) {
