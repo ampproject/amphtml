@@ -109,8 +109,7 @@ function getMode_(win) {
     // would prefer to use less bandwidth.
     lite: searchQuery['amp_lite'] != undefined,
     test: runningTests,
-    // TODO(estherkim) see what happens when testing on IE11 w/out old polyfill
-    testIe: runningTestsOnIe && false,
+    testIe: runningTestsOnIe,
     log: hashQuery['log'],
     version: version(),
     rtvVersion,
