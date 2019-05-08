@@ -113,7 +113,7 @@ describes.realWin('ad-network-config', {
       });
     });
 
-    it('should add data-ad-host to attributes if set on ampAutoAdsElem', () => {
+    it('should add data-ad-host to attributes if set on amp auto ads element', () => {
       ampAutoAdsElem.setAttribute('data-ad-host', AD_HOST);
       const adNetwork = getAdNetworkConfig('adsense', ampAutoAdsElem);
       expect(adNetwork.getAttributes()).to.deep.equal({
