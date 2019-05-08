@@ -92,8 +92,9 @@ export function getPrefixSubsets(mask) {
     // The array of subprefixes grows with the factorial of prefix.length
     // so we cap it at 5! = 120
     if (prefix.length > 5) {
-      user().warn('amp-inputmask does not support prefix trimming ' +
-          'for masks that start with more than 5 non-mask characters.');
+      user().warn('AMP-INPUTMASK',
+          'amp-inputmask does not support prefix trimming for masks ' +
+          'that start with more than 5 non-mask characters.');
       continue;
     }
 
