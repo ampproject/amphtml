@@ -193,7 +193,7 @@ class AdSenseNetworkConfig {
   /** @override */
   getAttributes() {
     const dataAdHost = this.autoAmpAdsElement_.getAttribute('data-ad-host');
-    return Object.assign(dict(),  dict({
+    return Object.assign(dict(), dict({
       'type': 'adsense',
       'data-ad-client': this.autoAmpAdsElement_.getAttribute('data-ad-client'),
     }), dataAdHost && {'data-ad-host': dataAdHost});
