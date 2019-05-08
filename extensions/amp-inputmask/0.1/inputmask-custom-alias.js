@@ -15,6 +15,8 @@
  */
 
 import {dict} from '../../../src/utils/object';
+import {startsWith} from '../../../src/string';
+import {user} from '../../../src/log';
 
 /**
  * Installs an alias used by amp-inputmask that fixes a problem where
@@ -24,7 +26,16 @@ import {dict} from '../../../src/utils/object';
  * @param {!Object} Inputmask
  */
 export function factory(Inputmask) {
-  Inputmask.extendAliases(dict({
+  Inputmask.extendAliases(getAliasDefinition());
+}
+
+/**
+ * Gets the alias definition for the custom mask.
+ * @return {!Object}
+ * @private visible for testing
+ */
+export function getAliasDefinition() {
+  return dict({
     'custom': {
       'prefixes': [],
       /**
@@ -43,81 +54,96 @@ export function factory(Inputmask) {
        * @return {string}
        */
       'onBeforeMask': function(value, opts) {
-        const processedValue = value.replace(/^0{1,2}/, '').replace(/[\s]/g, '');
         const prefixes = opts['prefixes'];
+        const trimZeros = opts['trimZeros'] || 0;
+
+        const processedValue = value
+            .replace(new RegExp(`^0{0,${trimZeros}}`), '')
+            .replace(/[\s]/g, '');
 
         return removePrefix(processedValue, prefixes);
       },
     },
-  }));
+  });
+}
 
-  /**
-   * A prefix is defined as non-mask characters at the beginning of a mask
-   * definition.
-   */
-  const prefixRe = /^([^\*\[\]a\?9\\]+)[\*\[\]a\?9\\]/i;
+/**
+ * A prefix is defined as non-mask characters at the beginning of a mask
+ * definition.
+ */
+export const prefixRe = /^([^\*\[\]a\?9\\]+)[\*\[\]a\?9\\]/i;
 
-  /**
-   * Gets a map of substrings of the mask prefixes.
-   * e.g. +1(000)000-0000" -> ["+1(", "+1", "+", "1(", ...]
-   * @param {!Array<string>|string} mask
-   * @return {!Array<string>}
-   */
-  function getPrefixSubsets(mask) {
-    const masks = (typeof mask == 'string' ? [mask] : mask);
+/**
+ * Gets a map of substrings of the mask prefixes.
+ * e.g. +1(000)000-0000" -> ["+1(", "+1", "+", "1(", ...]
+ * @param {!Array<string>|string} mask
+ * @return {!Array<string>}
+ * @private visible for testing
+ */
+export function getPrefixSubsets(mask) {
+  const masks = (typeof mask == 'string' ? [mask] : mask);
 
-    const prefixes = {};
-    for (let i = 0; i < masks.length; i++) {
-      const prefix = getMaskPrefix(masks[i]);
-      if (prefix.length == 0) {
-        continue;
-      }
-
-      const stack = [prefix];
-      while (stack.length) {
-        const prefix = stack.pop();
-        prefixes[prefix] = true;
-
-        if (prefix.length > 1) {
-          stack.push(prefix.slice(1));
-          stack.push(prefix.slice(0, -1));
-        }
-      }
+  const prefixes = {};
+  for (let i = 0; i < masks.length; i++) {
+    const prefix = getMaskPrefix(masks[i]);
+    if (prefix.length == 0) {
+      continue;
+    }
+    // The array of subprefixes grows with the factorial of prefix.length
+    // so we cap it at 5! = 120
+    if (prefix.length > 5) {
+      user().warn('AMP-INPUTMASK',
+          'amp-inputmask does not support prefix trimming for masks ' +
+          'that start with more than 5 non-mask characters.');
+      continue;
     }
 
-    return Object.keys(prefixes);
-  }
+    const stack = [prefix];
+    while (stack.length) {
+      const prefix = stack.pop();
+      prefixes[prefix] = true;
 
-  /**
-   * Gets any literal non-variable mask characters from the
-   * beginning of the mask string
-   * e.g. "+1(000)000-0000" -> "+1("
-   * @param {string} mask
-   * @return {string}
-   */
-  function getMaskPrefix(mask) {
-    const processedMask = mask.replace(/[\s]/g, '');
-    const match = prefixRe.exec(processedMask);
-    const prefix = (match && match[1]) || '';
-
-    return prefix;
-  }
-
-  /**
-   * Remove a mask prefix from the input value
-   * @param {string} value
-   * @param {!Array<string>} prefixes
-   * @return {string}
-   */
-  function removePrefix(value, prefixes) {
-    const longestPrefix = prefixes
-        .filter(prefix => value.indexOf(prefix) == 0)
-        .sort((a, b) => b.length - a.length)[0];
-
-    if (longestPrefix) {
-      return value.slice(longestPrefix.length);
-    } else {
-      return value;
+      if (prefix.length > 1) {
+        stack.push(prefix.slice(1));
+        stack.push(prefix.slice(0, -1));
+      }
     }
+  }
+
+  return Object.keys(prefixes);
+}
+
+/**
+ * Gets any literal non-variable mask characters from the
+ * beginning of the mask string
+ * e.g. "+1(000)000-0000" -> "+1("
+ * @param {string} mask
+ * @return {string}
+ * @private visible for testing
+ */
+export function getMaskPrefix(mask) {
+  const processedMask = mask.replace(/[\s]/g, '');
+  const match = prefixRe.exec(processedMask);
+  const prefix = (match && match[1]) || '';
+
+  return prefix;
+}
+
+/**
+ * Remove a mask prefix from the input value
+ * @param {string} value
+ * @param {!Array<string>} prefixes
+ * @return {string}
+ * @private visible for testing
+ */
+export function removePrefix(value, prefixes) {
+  const longestPrefix = prefixes
+      .filter(prefix => startsWith(value, prefix))
+      .sort((a, b) => b.length - a.length)[0];
+
+  if (longestPrefix) {
+    return value.slice(longestPrefix.length);
+  } else {
+    return value;
   }
 }
