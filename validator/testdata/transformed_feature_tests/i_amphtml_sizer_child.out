@@ -48,7 +48,7 @@ FAIL
 |     <amp-video-iframe id="myVideo" src="/amp-video-iframe-videojs.html" width="720" height="405" layout="responsive" autoplay="" class="i-amphtml-layout-responsive i-amphtml-layout-size-defined" i-amphtml-layout="responsive">
 |       <div style="color:blue;"></div>
 >>      ^~~~~~~~~
-transformed_feature_tests/i_amphtml_sizer_child.html:48:5 The tag 'div', a child tag of 'AMP-VIDEO-IFRAME with [placeholder] (transformed)', does not satisfy one of the acceptable reference points: AMP-VIDEO-IFRAME > [placeholder], AMP-VIDEO-IFRAME > I-AMPHTML-SIZER [style]. (see https://amp.dev/documentation/components/amp-video-iframe) [AMP_TAG_PROBLEM]
+transformed_feature_tests/i_amphtml_sizer_child.html:48:5 The tag 'div', a child tag of 'AMP-VIDEO-IFRAME with [placeholder] (transformed)', does not satisfy one of the acceptable reference points: AMP-VIDEO-IFRAME > [placeholder], AMP-VIDEO-IFRAME > I-AMPHTML-SIZER [style]. (see https://www.ampproject.org/docs/reference/components/amp-video-iframe) [AMP_TAG_PROBLEM]
 |       <amp-img placeholder="" src="/img/amp-video-iframe-sample-placeholder.jpg" layout="fill" class="i-amphtml-layout-fill i-amphtml-layout-size-defined" i-amphtml-layout="fill"></amp-img>
 |     </amp-video-iframe>
 |  </body>

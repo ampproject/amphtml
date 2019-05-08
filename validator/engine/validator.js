@@ -381,7 +381,7 @@ function getTagSpecUrl(tagSpec) {
   if (tagSpec.specUrl !== null) {return tagSpec.specUrl;}
 
   const extensionSpecUrlPrefix =
-      'https://amp.dev/documentation/components/';
+      'https://www.ampproject.org/docs/reference/components/';
   if (tagSpec.extensionSpec !== null && tagSpec.extensionSpec.name !== null)
   {return extensionSpecUrlPrefix + tagSpec.extensionSpec.name;}
   if (tagSpec.requiresExtension.length > 0) {
@@ -5176,7 +5176,7 @@ class ParsedValidatorRules {
                   amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
                   context.getLineCol(),
                   /*params=*/[attr.name, 'html', attr.value],
-                  'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup',
+                  'https://www.ampproject.org/docs/reference/spec#required-markup',
                   validationResult);
             }
           }
@@ -5184,7 +5184,7 @@ class ParsedValidatorRules {
           context.addError(
               amp.validator.ValidationError.Code.DISALLOWED_ATTR,
               context.getLineCol(), /*params=*/[attr.name, 'html'],
-              'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup',
+              'https://www.ampproject.org/docs/reference/spec#required-markup',
               validationResult);
         }
       }
@@ -5195,7 +5195,7 @@ class ParsedValidatorRules {
       context.addError(
           amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING,
           context.getLineCol(), /*params=*/[formatIdentifiers[0], 'html'],
-          'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup',
+          'https://www.ampproject.org/docs/reference/spec#required-markup',
           validationResult);
     }
   }
