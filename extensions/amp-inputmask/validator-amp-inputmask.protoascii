@@ -45,6 +45,10 @@ tags: {
         "|date-yyyy-mm-dd"
         ")"
   }
+  attrs: {
+    name: "mask-trim-zeros"
+    value_regex: "\\d+"
+  }
   attr_lists: "amp-inputmask-common-attr"
   attr_lists: "input-common-attr"
   attr_lists: "name-attr"
