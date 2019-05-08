@@ -108,6 +108,7 @@ function getConfig() {
     saucelabsBrowsers = argv.saucelabs ?
     // With --saucelabs, integration tests are run on this set of browsers.
       [
+        'SL_IE_11',
         'SL_Chrome',
         'SL_Firefox',
         // TODO(amp-infra): Restore this once tests are stable again.
@@ -118,7 +119,6 @@ function getConfig() {
         //'SL_Chrome_Android_7',
         //'SL_iOS_11',
         //'SL_iOS_12',
-        //'SL_IE_11',
         'SL_Chrome_Beta',
         'SL_Firefox_Beta',
       ] : [
