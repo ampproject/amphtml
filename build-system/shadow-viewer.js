@@ -16,7 +16,7 @@
 /* eslint-disable amphtml-internal/html-template */
 /* eslint-disable indent */
 
-const html = require('./app-index/html');
+const {html} = require('./app-index/html');
 
 const SCRIPT = `
 /**
