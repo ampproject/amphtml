@@ -793,8 +793,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
       const {scrollTop: resultTop, offsetHeight: resultHeight} =
         this.container_;
       const relativeItemTop = activeIndex === 0 ?
-        -resultTop : newActiveElement.getBoundingClientRect().top -
-        this.container_.getBoundingClientRect().top;
+        -resultTop : newActiveElement./*OK*/getBoundingClientRect().top -
+        this.container_./*OK*/getBoundingClientRect().top;
       shouldScroll = (relativeItemTop < 0 ||
         relativeItemTop + itemHeight > resultHeight);
       newTop = delta > 0 ?
