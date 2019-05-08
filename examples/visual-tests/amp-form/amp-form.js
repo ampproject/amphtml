@@ -46,7 +46,7 @@ module.exports = {
     await page.tap('#name');
     await page.keyboard.type('Jane Miller');
     await page.tap('#email');
-    await page.keyboard.type('jane.miller@amp.dev');
+    await page.keyboard.type('jane.miller@ampproject.org');
     await page.tap('#submit');
     await verifySelectorsVisible(page, name, [
       '#form.user-valid',
@@ -62,7 +62,7 @@ module.exports = {
     await page.tap('#name');
     await page.keyboard.type('Jane Miller');
     await page.tap('#email');
-    await page.keyboard.type('jane.miller@amp.dev');
+    await page.keyboard.type('jane.miller@ampproject.org');
     await page.tap('#submit');
     await verifySelectorsVisible(page, name, [
       '#form.user-valid',
