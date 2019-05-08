@@ -102,16 +102,6 @@ async function createPuppeteer(opt_config = {}) {
  * @param {!SeleniumConfigDef=} opt_config
  */
 async function createSelenium(opt_config = {}) {
-  // TODO(estherkim): implement sessions
-  // TODO(estherkim): ensure tests are in a sandbox
-  // See https://w3c.github.io/webdriver/#sessions
-
-  // TODO(estherkim): create multiple drivers per 'config.browsers'
-  // const config = {
-  //   browsers: this.browsers_,
-  //   session: undefined,
-  // };
-
   const args = [];
   args.push('--no-sandbox');
   args.push('--disable-gpu');
@@ -119,7 +109,6 @@ async function createSelenium(opt_config = {}) {
     args.push('--headless');
   }
 
-  // TODO(estherkim): remove hardcoded chrome driver
   const capabilities = Capabilities.chrome();
   const chromeOptions = {
     // TODO(cvializ,estherkim,sparhami):
@@ -134,7 +123,6 @@ async function createSelenium(opt_config = {}) {
 }
 
 /**
- * TODO(estherkim): use this to specify browsers/fixtures to opt in/out of
  * @typedef {{
  *  browsers: (!Array<string>|undefined),
  *  environments: (!Array<!AmpdocEnvironment>|undefined),
@@ -145,11 +133,9 @@ async function createSelenium(opt_config = {}) {
 let TestSpec;
 
 /**
- * An end2end test using selenium web driver on a regular amp page
+ * An end2end test using Selenium Web Driver or Puppeteer
  */
-const endtoend = describeEnv(spec => [
-  new AmpPageFixture(spec),
-]);
+const endtoend = describeEnv(spec => new EndToEndFixture(spec));
 
 /**
  * Maps an environment enum value to a `describes.repeated` variant object.
@@ -209,7 +195,6 @@ class ItConfig {
   }
 }
 
-
 /**
  * Returns a wrapped version of Mocha's describe(), it() and only() methods
  * that also sets up the provided fixtures and returns the corresponding
@@ -217,6 +202,7 @@ class ItConfig {
  * @param {function(!Object):!Array<?Fixture>} factory
  */
 function describeEnv(factory) {
+
   /**
    * @param {string} name
    * @param {!Object} spec
@@ -224,13 +210,7 @@ function describeEnv(factory) {
    * @param {function(string, function())} describeFunc
    */
   const templateFunc = function(name, spec, fn, describeFunc) {
-    const fixtures = [];
-    factory(spec).forEach(fixture => {
-      if (fixture && fixture.isOn()) {
-        fixtures.push(fixture);
-      }
-    });
-
+    const fixture = factory(spec);
     const environments = spec.environments || defaultEnvironments;
     const variants = Object.create(null);
     environments.forEach(environment => {
@@ -255,30 +235,17 @@ function describeEnv(factory) {
       let asyncErrorTimerId;
       this.timeout(TIMEOUT);
       beforeEach(async() => {
-        // Set up all fixtures.
-        for (const fixture of fixtures) {
-          await fixture.setup(env);
-        }
+        await fixture.setup(env);
         installRepl(global, env);
       });
 
-      afterEach(function() {
+      afterEach(async function() {
         clearLastExpectError();
         clearTimeout(asyncErrorTimerId);
-        // Tear down all fixtures.
-        fixtures.slice(0).reverse().forEach(fixture => {
-          // TODO(cvializ): handle errors better
-          // if (this.currentTest.state == 'failed') {
-          //   fixture.handleError();
-          // }
-          fixture.teardown(env);
-        });
-
-        // Delete all other keys.
+        await fixture.teardown(env);
         for (const key in env) {
           delete env[key];
         }
-
         uninstallRepl();
       });
 
@@ -324,27 +291,7 @@ function describeEnv(factory) {
   return mainFunc;
 }
 
-
-/** @interface */
-class FixtureInterface {
-
-  /** @return {boolean} */
-  isOn() {}
-
-  /**
-   * @param {!Object} unusedEnv
-   * @return {!Promise|undefined}
-   */
-  setup(unusedEnv) {}
-
-  /**
-   * @param {!Object} unusedEnv
-   */
-  teardown(unusedEnv) {}
-}
-
-/** @implements {FixtureInterface} */
-class AmpPageFixture {
+class EndToEndFixture {
 
   /** @param {!TestSpec} spec */
   constructor(spec) {
@@ -372,7 +319,6 @@ class AmpPageFixture {
     } = this.spec;
     const {
       environment,
-      // TODO(estherkim): browser
     } = env;
 
     await toggleExperiments(ampDriver, testUrl, experiments);
