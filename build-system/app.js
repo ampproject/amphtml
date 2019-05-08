@@ -286,8 +286,6 @@ app.use('/form/echo-json/post', (req, res) => {
   const form = new formidable.IncomingForm();
   const fields = Object.create(null);
   form.on('field', function(name, value) {
-    console.log(name, value);
-    // fields[name] = value;
     if (name in fields) {
       const realName = name; // .slice(0, name.length - 2);
       if (realName in fields) {
@@ -989,6 +987,8 @@ app.get(
           file = addViewerIntegrationScript(req.query['amp_js_v'], file);
         }
         file = file.replace(/__TEST_SERVER_PORT__/g, TEST_SERVER_PORT);
+        file = file.replace(/__VIALIZ_MAP_KEY__/g,
+            fs.readFileSync(`${pc.cwd()}/credentials/vializ_map_key`));
 
         if (inabox && req.headers.origin && req.query.__amp_source_origin) {
           // Allow CORS requests for A4A.

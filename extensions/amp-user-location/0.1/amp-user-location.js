@@ -18,24 +18,15 @@ import {ActionTrust} from '../../../src/action-constants';
 import {Layout} from '../../../src/layout';
 import {PositionError} from './position-error';
 import {Services} from '../../../src/services';
-import {
-  UserLocationConfigDef,
-  UserLocationDef,
-  UserLocationService,
-} from './user-location-service';
+import {UserLocationService} from './user-location-service';
 import {createCustomEvent} from '../../../src/event-helper';
-import {getMode} from '../../../src/mode';
-import {isCanary, isExperimentOn} from '../../../src/experiments';
+import {isExperimentOn} from '../../../src/experiments';
 import {isJsonScriptTag} from '../../../src/dom';
 import {tryParseJson} from '../../../src/json';
 import {userAssert} from '../../../src/log';
 
 const TAG = 'amp-user-location';
 const SERVICE_TAG = 'user-location';
-
-
-const LOCATION_SEPARATOR = ',';
-
 
 /** @enum {string} */
 export const AmpUserLocationEvent = {
@@ -54,7 +45,7 @@ export class AmpUserLocation extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {?UserLocationConfigDef} */
+    /** @private {?./user-location-service.UserLocationConfigDef} */
     this.config_ = null;
 
     /** @private {?../../../src/service/action-impl.ActionService} */
@@ -84,7 +75,7 @@ export class AmpUserLocation extends AMP.BaseElement {
 
   /**
    * Parse a JSON script tag for configuration, if present.
-   * @return {?UserLocationConfigDef}
+   * @return {?./user-location-service.UserLocationConfigDef}
    */
   parse_() {
     const {children} = this.element;
@@ -97,7 +88,7 @@ export class AmpUserLocation extends AMP.BaseElement {
       this.user().error(TAG,
           'amp-user-location config should be in a <script> tag ' +
           'with type="application/json".');
-      return;
+      return null;
     }
 
     const json = tryParseJson(firstChild.textContent, e => {
@@ -123,36 +114,22 @@ export class AmpUserLocation extends AMP.BaseElement {
    * @private
    */
   userLocationInteraction_() {
-    let override = null;
-    const {localDev, userLocationOverride} = getMode(this.win);
-    if (userLocationOverride && (isCanary(this.win) || localDev) &&
-      /^[\w-,]+$/.test(userLocationOverride)) {
-      // Debug override case, only works in canary or localdev and matches
-      // numeric and limited symbolic characters only to prevent xss vector.
-      // The regex is not trying to ensure correctness.
-      const split = userLocationOverride.split(LOCATION_SEPARATOR);
-      const lat = Number(split[0]);
-      const lon = Number(split[1]);
-      override = {lat, lon};
-    }
-
     const servicePromise = Services.userLocationForDocOrNull(this.element);
 
     return servicePromise.then(userLocationService => {
       const config = this.config_ || {};
-      return userLocationService.requestLocation(config, override);
+      return userLocationService.requestLocation(config);
     }).then(location => {
       this.triggerEvent_(AmpUserLocationEvent.APPROVE, location);
     }).catch(error => {
-      const {code} = error;
-      if (code == PositionError.PERMISSION_DENIED) {
+      if (error == PositionError.PERMISSION_DENIED) {
         this.triggerEvent_(AmpUserLocationEvent.DENY);
         return;
       }
 
-      if (code == PositionError.PLATFORM_UNSUPPORTED ||
-          code == PositionError.POSITION_UNAVAILABLE ||
-          code == PositionError.TIMEOUT) {
+      if (error == PositionError.PLATFORM_UNSUPPORTED ||
+          error == PositionError.POSITION_UNAVAILABLE ||
+          error == PositionError.TIMEOUT) {
         this.triggerEvent_(AmpUserLocationEvent.ERROR);
       }
     });
@@ -162,11 +139,12 @@ export class AmpUserLocation extends AMP.BaseElement {
    * Trigger the given AMP action. Triggered when the overlay opens or when
    * the static date picker should receive focus from the attached input.
    * @param {string} name
-   * @param {UserLocationDef=} opt_data
+   * @param {?./user-location-service.UserLocationDef=} opt_data
    * @private
    */
   triggerEvent_(name, opt_data = null) {
-    const event = createCustomEvent(this.win, `${TAG}.${name}`, opt_data);
+    const event = createCustomEvent(
+        this.win, `${TAG}.${name}`, /** @type {JsonObject}*/ (opt_data));
     this.action_.trigger(this.element, name, event, ActionTrust.HIGH);
   }
 }

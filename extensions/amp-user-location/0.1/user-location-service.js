@@ -19,24 +19,42 @@ import {Observable} from '../../../src/observable';
 import {PositionError} from './position-error';
 import {Services} from '../../../src/services';
 import {devAssert} from '../../../src/log';
+import {getMode} from '../../../src/mode';
+import {includes} from '../../../src/string';
+import {isCanary} from '../../../src/experiments';
 
 /**
  * @typedef {{
  *   lat: number,
- *   lon: number
+ *   lon: number,
+ *   source: UserLocationSource,
  * }}
  */
 export let UserLocationDef;
 
 /**
  * @typedef {{
- *   fallback: UserLocationDef=,
- *   maxAge: number=,
- *   precision: string=,
- *   timeout: number=
+ *   fallback: UserLocationDef,
+ *   maxAge: number,
+ *   precision: string,
+ *   timeout: number,
  * }}
  */
 export let UserLocationConfigDef;
+
+/** @enum {string} */
+const PermissionStatus = {
+  GRANTED: 'granted',
+  DENIED: 'denied',
+  PROMPT: 'prompt',
+};
+
+/** @enum {string} */
+const UserLocationSource = {
+  FALLBACK: 'fallback',
+  GEOLOCATION: 'geolocation',
+  DEBUG: 'debug',
+};
 
 /**
  * The reported position will be at most this many milliseconds old.
@@ -57,9 +75,11 @@ const DEFAULT_TIMEOUT = 30000;
  */
 const DEFAULT_PRECISION = 'low';
 
+const LOCATION_SEPARATOR = ',';
+
 export class UserLocationService {
   /**
-   * @param {!AmpDoc} ampdoc
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
     /** @private */
@@ -98,7 +118,7 @@ export class UserLocationService {
   createRequestedObservable_() {
     const observable = new Observable();
     observable.add(
-        (position, error) => this.handleLocationAvailable_(position, error));
+        ({position, error}) => this.handleLocationAvailable_(position, error));
     return observable;
   }
 
@@ -183,20 +203,48 @@ export class UserLocationService {
    */
   purge() {
     this.cachedLocation_ = null;
-    this.firstRequestedDeferred_ = this.createRequestedObservable_();
+    this.requestedObservable_ = this.createRequestedObservable_();
+  }
+
+  /**
+   * Debug override case, only works in canary or localdev and matches
+   * numeric and limited symbolic characters only to prevent xss vector.
+   * The regex is not trying to ensure correctness.
+   * @return {?UserLocationDef|string}
+   * @private
+   */
+  getOverride_() {
+    let override = null;
+
+    const {localDev, userLocationOverride} = getMode(this.win_);
+    if (!userLocationOverride ||
+        !(isCanary(this.win_) || localDev) ||
+        !/^[\w-,]+$/.test(userLocationOverride)) {
+      return null;
+    }
+
+    if (includes(userLocationOverride, LOCATION_SEPARATOR)) {
+      const split = userLocationOverride.split(LOCATION_SEPARATOR);
+      const lat = Number(split[0]);
+      const lon = Number(split[1]);
+      override = {lat, lon, source: UserLocationSource.DEBUG};
+    }
+
+    return override;
   }
 
   /**
    * Called to retrieve the user location after the user has requested it.
    * This will wait for the location to become available if necessary.
+   * @param {boolean=} opt_poll
    * @return {!Promise<?UserLocationDef>}
    */
-  getLocation() {
+  getLocation(opt_poll) {
     if (!this.geolocationSupported_) {
       return Promise.reject(PositionError.PLATFORM_UNSUPPORTED);
     }
 
-    if (this.firstRequestedDeferred_) {
+    if (opt_poll && this.firstRequestedDeferred_) {
       return this.firstRequestedDeferred_.promise;
     }
 
@@ -217,21 +265,20 @@ export class UserLocationService {
    * Variable substitution is notified through the `getLocation` method.
    *
    * @param {!UserLocationConfigDef} config
-   * @param {(!UserLocationDef|string)=} opt_override
    * @return {!Promise<!UserLocationDef>}
    */
-  requestLocation(config, opt_override) {
+  requestLocation(config) {
     const observable = this.requestedObservable_;
     const locationDeferred = new Deferred();
     const {promise} = locationDeferred;
 
     const resolve = location => {
-      observable.fire(location);
+      observable.fire({location});
       locationDeferred.resolve(location);
     };
 
     const reject = error => {
-      observable.fire(null, error);
+      observable.fire({location: null, error});
       locationDeferred.reject(error);
     };
 
@@ -240,7 +287,8 @@ export class UserLocationService {
       return promise;
     }
 
-    if (opt_override === 'error') {
+    const override = this.getOverride_();
+    if (override === 'error') {
       reject(PositionError.POSITION_UNAVAILABLE);
       return promise;
     }
@@ -249,15 +297,15 @@ export class UserLocationService {
       this.initialize_();
     }
 
-    if (opt_override) {
-      resolve(opt_override);
+    if (override) {
+      resolve(override);
       return promise;
     }
 
     const {navigator} = this.win_;
     navigator.geolocation.getCurrentPosition(position => {
       const {latitude: lat, longitude: lon} = position.coords;
-      resolve({lat, lon});
+      resolve({lat, lon, source: UserLocationSource.GEOLOCATION});
     }, error => {
       const {code} = error;
       if (code == error.POSITION_UNAVAILABLE) {
@@ -276,7 +324,7 @@ export class UserLocationService {
         return;
       }
 
-      reject();
+      reject(null);
     }, {
       timeout: config.timeout || DEFAULT_TIMEOUT,
       maximumAge: config.maximumAge || DEFAULT_MAXIMUM_AGE,

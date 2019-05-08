@@ -29,7 +29,7 @@ tags: {  # <amp-user-location>
   tag_name: "AMP-USER-LOCATION"
   requires_extension: "amp-user-location"
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-user-location"
+  spec_url: "https://amp.dev/documentation/components/amp-user-location"
   amp_layout: {
     supported_layouts: NODISPLAY
   }

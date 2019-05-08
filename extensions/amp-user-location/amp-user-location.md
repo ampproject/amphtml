@@ -82,7 +82,7 @@ for the current domain, if the user has not already.
 </tr>
 <tr>
 <td><code>approve</code></td>
-<td>This event is fired when the user triggers the `request` action and then approves the browser prompt to access their location, or the user has previously approved the prompt.</td>
+<td>This event is fired when the user triggers the `request` action and then approves the browser prompt to access their location, or the user has previously approved the prompt. The `event` object contains `lat` `lon` and `source` properties.</td><!-- TODO(cvializ): add description of the properties -->
 </tr>
 <tr>
 <td><code>deny</code></td>
@@ -100,6 +100,7 @@ The user's location is also available via AMP variable substitution:
 `AMP_USER_LOCATION` or `${ampUserLocation}` returns the latitude and longitude separated by a comma.
 `AMP_USER_LOCATION(LAT)` or `${ampUserLocation(LAT)}` returns the latitude.
 `AMP_USER_LOCATION(LON)` or `${ampUserLocation(LON)}` returns the longitude.
+`AMP_USER_LOCATION(SOURCE)` or `${ampUserLocation(SOURCE)}` returns the source.
 
 
 ## Validation

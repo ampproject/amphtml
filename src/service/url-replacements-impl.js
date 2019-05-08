@@ -396,7 +396,7 @@ export class GlobalVariableSource extends VariableSource {
       })
     );
 
-    // Returns user location data if available
+    // Attempt to returns user location data if available, otherwise null.
     this.setAsync('AMP_USER_LOCATION', /** @type {AsyncResolverDef} */(type => {
       // Type may be "","lat","lon", and undefined
       return this.getUserLocation_(userLocation => {
@@ -410,6 +410,24 @@ export class GlobalVariableSource extends VariableSource {
             'The value passed to AMP_USER_LOCATION() is not valid: ' + type);
         return `${userLocation.lon},${userLocation.lat}`;
       }, 'AMP_USER_LOCATION');
+    }));
+
+    // Returns user location data only if available,
+    // and waits for the user to approve.
+    this.setAsync('AMP_USER_LOCATION_POLL', /** @type {AsyncResolverDef} */(type => {
+      // Type may be "","lat","lon", and undefined
+      return this.getUserLocation_(userLocation => {
+        if (type === 'LAT') {
+          return userLocation.lat;
+        }
+        if (type === 'LON') {
+          return userLocation.lon;
+        }
+        userAssert(type === '' || typeof type === 'undefined',
+            'The value passed to AMP_USER_LOCATION_POLL()' +
+            ' is not valid: ' + type);
+        return `${userLocation.lon},${userLocation.lat}`;
+      }, 'AMP_USER_LOCATION_POLL', /*opt_poll*/true);
     }));
 
     // Returns incoming share tracking fragment.
@@ -826,16 +844,16 @@ export class GlobalVariableSource extends VariableSource {
    * Resolves the value via the user location service.
    * @param {function(Object<string, string>)} getter
    * @param {string} expr
+   * @param {boolean=} opt_poll
    * @return {!Promise<Object<string,(string|Array<string>)>>}
    * @template T
    * @private
    */
-  getUserLocation_(getter, expr) {
+  getUserLocation_(getter, expr, opt_poll) {
     const element = this.ampdoc.getHeadNode();
     return Services.userLocationForDocOrNull(element)
-        .then(userLocationService => {
-          return userLocationService.getLocation();
-        }).then(location => {
+        .then(userLocationService => userLocationService.getLocation(opt_poll))
+        .then(location => {
           userAssert(location,
               'To use variable %s, amp-user-location should be configured ' +
               'and requested by the user',
