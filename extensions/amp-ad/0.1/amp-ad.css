@@ -75,4 +75,5 @@ amp-ad[data-a4a-upgrade-type="amp-ad-network-doubleclick-impl"][height="fluid"] 
 
 amp-ad[data-a4a-upgrade-type="amp-ad-network-doubleclick-impl"][height="fluid"] {
   width: 100% !important;
+  position: static !important;
 }

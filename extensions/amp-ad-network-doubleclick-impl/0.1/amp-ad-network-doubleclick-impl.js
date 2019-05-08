@@ -1064,9 +1064,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
             this.fireFluidDelayedImpression();
             this.reattemptToExpandFluidCreative_ = false;
           })
-      .catch(() => {
-        this.reattemptToExpandFluidCreative_ = true;
-      });
+          .catch(() => {
+            this.reattemptToExpandFluidCreative_ = true;
+          });
     }
     return Promise.resolve();
   }

@@ -248,6 +248,35 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
     });
   });
 
+  it('should fire impression for AMP fluid creative', () => {
+    impl.iframe = impl.win.document.createElement('iframe');
+    impl.win.document.body.appendChild(impl.iframe);
+    sandbox.stub(impl, 'attemptChangeHeight').returns(mockPromise);
+    const delayedImpressionSpy = sandbox.spy(impl, 'fireDelayedImpressions');
+    impl.buildCallback();
+    impl.isFluidRequest_ = true;
+    impl.isVerifiedAmpCreative_ = true;
+    impl.fluidImpressionUrl_ = 'http://www.foo.co.uk';
+    impl.onCreativeRender(null, mockPromise);
+    expect(delayedImpressionSpy.withArgs('http://www.foo.co.uk'))
+        .to.be.calledOnce;
+  });
+
+  it('should set expansion re-attempt flag after initial failure', () => {
+    impl.iframe = impl.win.document.createElement('iframe');
+    impl.win.document.body.appendChild(impl.iframe);
+    const attemptChangeHeightStub = sandbox.stub(impl, 'attemptChangeHeight');
+    attemptChangeHeightStub.returns(Promise.reject());
+    sandbox.stub(impl, 'attemptToRenderCreative').returns(Promise.resolve());
+    impl.buildCallback();
+    impl.isFluidRequest_ = true;
+    impl.isVerifiedAmpCreative_ = true;
+    return impl.expandFluidCreative_().then(() => {
+      expect(attemptChangeHeightStub).to.be.calledOnce;
+      expect(impl.reattemptToExpandFluidCreative_).to.be.true;
+    });
+  });
+
   it('should re-attempt expansion after initial failure', () => {
     impl.iframe = impl.win.document.createElement('iframe');
     impl.win.document.body.appendChild(impl.iframe);
