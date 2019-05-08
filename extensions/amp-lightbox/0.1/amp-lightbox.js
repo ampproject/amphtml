@@ -141,9 +141,6 @@ class AmpLightbox extends AMP.BaseElement {
     /** @private {?number} */
     this.scrollTimerId_ = null;
 
-    /** @private {?number} */
-    this.scrollHeight_ = null;
-
     /** @private @const {string} */
     this.animationPreset_ =
         (element.getAttribute('animate-in') || DEFAULT_ANIMATION).toLowerCase();
