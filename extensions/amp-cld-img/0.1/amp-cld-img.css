@@ -15,7 +15,7 @@
  */
 
 /* setup object-fit classes */
-amp-cld-img.amp-object-fit-fill img {
+amp-cld-img.amp-object-fit-fill > img {
   object-fit: fill;
 }
 
