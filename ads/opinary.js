@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
-import { loadScript, validateData } from "../3p/3p";
+import {loadScript, validateData} from "../3p/3p";
 
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function opinary(global, data) {
-  validateData(data, ["client"]);
+  validateData(data, ['client']);
 
   const div = global.document.createElement("div");
-  div.setAttribute("id", "opinary-automation-placeholder");
-  global.document.getElementById("c").appendChild(div);
+  div.setAttribute('id', 'opinary-automation-placeholder');
+  global.document.getElementById('c').appendChild(div);
 
-  if (!document.querySelector('link[rel="canonical"]')) {
-    const link = document.createElement("link");
-    link.rel = "canonical";
+  if (!document.querySelector(`link[rel='canonical']`)) {
+    const link = document.createElement('link');
+    link.rel = 'canonical';
     link.href = global.context.canonicalUrl;
     global.document.head.appendChild(link);
   }
