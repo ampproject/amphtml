@@ -51,7 +51,7 @@ limitations under the License.
 </table>
 
 {% call callout('Important', type='caution') %}
-This component is experimental and under active development. For any issues, please [file a GitHub issue](https://github.com/ampproject/amphtml/issues/new).
+This component is under active development. For any issues, please [file a GitHub issue](https://github.com/ampproject/amphtml/issues/new).
 {% endcall %}
 
 [TOC]
@@ -598,6 +598,7 @@ An `amp-story-grid-layer` can contain any of the following elements:
         <li><code>&lt;amp-img></code></li>
         <li><code>&lt;amp-video></code></li>
         <li><code>&lt;source></code></li>
+        <li><code>&lt;svg></code></li>
         <li><code>&lt;track></code></li>
       </ul>
     </td>

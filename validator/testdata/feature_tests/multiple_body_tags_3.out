@@ -39,7 +39,7 @@ feature_tests/multiple_body_tags_3.html:32:53 The tag 'BODY' appears more than o
 >>   ^~~~~~~~~
 feature_tests/multiple_body_tags_3.html:33:2 The parent tag of tag 'style amp-custom' is 'body', but it can only be 'head'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#stylesheets) [DISALLOWED_HTML]
 >>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  ^~~~~~~~~
-feature_tests/multiple_body_tags_3.html:33:641 The tag 'noscript > style[amp-boilerplate]' may only appear as a descendant of tag 'head'. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md) [DISALLOWED_HTML]
+feature_tests/multiple_body_tags_3.html:33:641 The tag 'noscript > style[amp-boilerplate]' may only appear as a descendant of tag 'head'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amp-boilerplate?format=websites) [DISALLOWED_HTML]
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
 >>   ^~~~~~~~~
 feature_tests/multiple_body_tags_3.html:34:2 The parent tag of tag 'amphtml engine v0.js script' is 'body', but it can only be 'head'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup) [CUSTOM_JAVASCRIPT_DISALLOWED]
@@ -51,6 +51,6 @@ feature_tests/multiple_body_tags_3.html:34:2 The parent tag of tag 'amphtml engi
 |  </body>
 |  </html>
 >>       ^~~~~~~~~
-feature_tests/multiple_body_tags_3.html:41:6 The mandatory tag 'head > style[amp-boilerplate]' is missing or incorrect. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+feature_tests/multiple_body_tags_3.html:41:6 The mandatory tag 'head > style[amp-boilerplate]' is missing or incorrect. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amp-boilerplate?format=websites) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 >>       ^~~~~~~~~
-feature_tests/multiple_body_tags_3.html:41:6 The mandatory tag 'noscript enclosure for boilerplate' is missing or incorrect. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+feature_tests/multiple_body_tags_3.html:41:6 The mandatory tag 'noscript enclosure for boilerplate' is missing or incorrect. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amp-boilerplate?format=websites) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]

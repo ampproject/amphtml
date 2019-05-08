@@ -36,4 +36,4 @@ feature_tests/new_and_old_boilerplate_mixed.html:28:12 The parent tag of tag 'st
 |  </body>
 |  </html>
 >>       ^~~~~~~~~
-feature_tests/new_and_old_boilerplate_mixed.html:34:6 The mandatory tag 'noscript > style[amp-boilerplate]' is missing or incorrect. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+feature_tests/new_and_old_boilerplate_mixed.html:34:6 The mandatory tag 'noscript > style[amp-boilerplate]' is missing or incorrect. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amp-boilerplate?format=websites) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]

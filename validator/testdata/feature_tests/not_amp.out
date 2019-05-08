@@ -34,10 +34,10 @@ feature_tests/not_amp.html:28:6 The mandatory tag 'link rel=canonical' is missin
 >>       ^~~~~~~~~
 feature_tests/not_amp.html:28:6 The mandatory tag 'meta name=viewport' is missing or incorrect. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 >>       ^~~~~~~~~
-feature_tests/not_amp.html:28:6 The mandatory tag 'head > style[amp-boilerplate]' is missing or incorrect. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+feature_tests/not_amp.html:28:6 The mandatory tag 'head > style[amp-boilerplate]' is missing or incorrect. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amp-boilerplate?format=websites) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 >>       ^~~~~~~~~
-feature_tests/not_amp.html:28:6 The mandatory tag 'noscript > style[amp-boilerplate]' is missing or incorrect. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+feature_tests/not_amp.html:28:6 The mandatory tag 'noscript > style[amp-boilerplate]' is missing or incorrect. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amp-boilerplate?format=websites) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 >>       ^~~~~~~~~
 feature_tests/not_amp.html:28:6 The mandatory tag 'amphtml engine v0.js script' is missing or incorrect. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 >>       ^~~~~~~~~
-feature_tests/not_amp.html:28:6 The mandatory tag 'noscript enclosure for boilerplate' is missing or incorrect. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+feature_tests/not_amp.html:28:6 The mandatory tag 'noscript enclosure for boilerplate' is missing or incorrect. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amp-boilerplate?format=websites) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
