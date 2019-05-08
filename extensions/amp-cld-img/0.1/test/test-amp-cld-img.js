@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ describes.realWin('amp-cld-img', {
     doc.head.appendChild(script);
   });
 
-  function getCldImg(extraAttrs) {
+  async function getCldImg(extraAttrs) {
     const cld = doc.createElement('amp-cld-img');
     cld.setAttribute('data-public-id', 'sample');
     cld.setAttribute('layout', 'fixed');
@@ -49,53 +49,58 @@ describes.realWin('amp-cld-img', {
     }
 
     doc.body.appendChild(cld);
-    return cld.build().then(() => cld.layoutCallback()).then(() => cld);
+
+    await cld.build();
+    await cld.layoutCallback();
+    return cld;
   }
 
-  it('should use attributes to generate url', () => {
-    return getCldImg().then(cld => {
-      expect(cld.childNodes[0].getAttribute('src'))
-          .to.eql('https://res.cloudinary.com/demo/image/upload/c_fill,h_100,w_100/sample');
-    });
+  it('should use attributes to generate url', async() => {
+    const cld = await getCldImg();
+    expect(cld.querySelector('img').getAttribute('src'))
+        .to.eql(
+            'https://res.cloudinary.com/demo/image/upload/c_fill,h_100,w_100/sample');
   });
-  it('should use tag attributes over global config', () => {
-    return getCldImg({'cloud-name': 'test123', 'crop': 'mfit'}).then(cld => {
-      expect(cld.childNodes[0].getAttribute('src'))
-          .to.eql('https://res.cloudinary.com/test123/image/upload/c_mfit,h_100,w_100/sample');
-    });
+  it('should use tag attributes over global config', async() => {
+    const cld = await getCldImg({'cloud-name': 'test123', 'crop': 'mfit'});
+    expect(cld.querySelector('img').getAttribute('src'))
+        .to.eql(
+            'https://res.cloudinary.com/test123/image/upload/c_mfit,h_100,w_100/sample');
   });
-  it('should use step size to generate transformation', () => {
-    return getCldImg({'step-size': '150'}).then(cld => {
-      expect(cld.childNodes[0].getAttribute('src'))
-          .to.eql('https://res.cloudinary.com/demo/image/upload/c_fill,h_150,w_150/sample');
-    });
+  it('should use step size to generate transformation', async() => {
+    const cld = await getCldImg({'step-size': '150'});
+    expect(cld.querySelector('img').getAttribute('src'))
+        .to.eql(
+            'https://res.cloudinary.com/demo/image/upload/c_fill,h_150,w_150/sample');
   });
-  it('should use max size to generate transformation', () => {
-    return getCldImg({'max-size': '60'}).then(cld => {
-      expect(cld.childNodes[0].getAttribute('src'))
-          .to.eql('https://res.cloudinary.com/demo/image/upload/c_fill,h_60,w_60/sample');
-    });
+  it('should use max size to generate transformation', async() => {
+    const cld = await getCldImg({'max-size': '60'});
+    expect(cld.querySelector('img').getAttribute('src'))
+        .to.eql(
+            'https://res.cloudinary.com/demo/image/upload/c_fill,h_60,w_60/sample');
   });
-  it('should use attributes to generate transformation', () => {
-    return getCldImg({'effect': 'blur:50'}).then(cld => {
-      expect(cld.childNodes[0].getAttribute('src'))
-          .to.eql('https://res.cloudinary.com/demo/image/upload/e_blur:50/c_fill,h_100,w_100/sample');
-    });
+  it('should use attributes to generate transformation', async() => {
+    const cld = await getCldImg({'effect': 'blur:50', 'private-cdn': 'true'});
+    expect(cld.querySelector('img').getAttribute('src'))
+        .to.eql(
+            'https://demo-res.cloudinary.com/image/upload/e_blur:50/c_fill,h_100,w_100/sample');
   });
-  it('should use rawTransformation attribute', () => {
-    return getCldImg({'effect': 'blur:50',
-      'raw-transformation': 'l_sample,g_north'}).then(cld => {
-      expect(cld.childNodes[0].getAttribute('src'))
-          .to.eql('https://res.cloudinary.com/demo/image/upload/l_sample,g_north/e_blur:50/c_fill,h_100,w_100/sample');
+  it('should use rawTransformation attribute', async() => {
+    const cld = await getCldImg({
+      'effect': 'blur:50',
+      'raw-transformation': 'l_sample,g_north',
     });
+    expect(cld.querySelector('img').getAttribute('src'))
+        .to.eql(
+            'https://res.cloudinary.com/demo/image/upload/l_sample,g_north/e_blur:50/c_fill,h_100,w_100/sample');
   });
   it('should allow overriding cloudName in options', function() {
     const options = {
       cloudName: 'test321',
     };
     const result = buildUrl('test', options);
-    expect(options).to.eql({});
-    expect(result).to.eql('https://res.cloudinary.com/test321/image/upload/test');
+    expect(result).to
+        .eql('https://res.cloudinary.com/test321/image/upload/test');
   });
   it('should use format from options', function() {
     const options = {
@@ -103,7 +108,6 @@ describes.realWin('amp-cld-img', {
       format: 'jpg',
     };
     const result = buildUrl('test', options);
-    expect(options).to.eql({});
     expect(result).to.eql(
         'https://res.cloudinary.com/test123/image/upload/test.jpg');
   });
@@ -113,7 +117,6 @@ describes.realWin('amp-cld-img', {
       rawTransformation: 'e_blur:20',
     };
     let result = buildUrl('test', options);
-    expect(options).to.eql({});
     expect(result).to.eql(
         'https://res.cloudinary.com/test123/image/upload/e_blur:20/test');
     options = {
@@ -122,7 +125,6 @@ describes.realWin('amp-cld-img', {
       effect: 'sepia',
     };
     result = buildUrl('test', options);
-    expect(options).to.eql({});
     expect(result).to.eql(
         'https://res.cloudinary.com/test123/image/upload/e_blur:20/e_sepia/test');
   });
@@ -133,8 +135,8 @@ describes.realWin('amp-cld-img', {
       privateCdn: true,
     };
     const result = buildUrl('test', options);
-    expect(options).to.eql({});
-    expect(result).to.eql('https://test123-res.cloudinary.com/image/upload/test');
+    expect(result).to
+        .eql('https://test123-res.cloudinary.com/image/upload/test');
   });
   it('should not add cloudName if secure privateCdn and secure non akamai ' +
     'secureDistribution', function() {
@@ -144,7 +146,6 @@ describes.realWin('amp-cld-img', {
       secureDistribution: 'something.cloudfront.net',
     };
     const result = buildUrl('test', options);
-    expect(options).to.eql({});
     expect(result).to.eql('https://something.cloudfront.net/image/upload/test');
   });
   it('should not add cloudName if privateCdn and not secure', function() {
@@ -153,8 +154,8 @@ describes.realWin('amp-cld-img', {
       privateCdn: true,
     };
     const result = buildUrl('test', options);
-    expect(options).to.eql({});
-    expect(result).to.eql('https://test123-res.cloudinary.com/image/upload/test');
+    expect(result).to
+        .eql('https://test123-res.cloudinary.com/image/upload/test');
   });
   it('should use type from options', function() {
     const options = {
@@ -162,8 +163,8 @@ describes.realWin('amp-cld-img', {
       type: 'facebook',
     };
     const result = buildUrl('test', options);
-    expect(options).to.eql({});
-    expect(result).to.eql('https://res.cloudinary.com/test123/image/facebook/test');
+    expect(result).to
+        .eql('https://res.cloudinary.com/test123/image/facebook/test');
   });
   it('should use resourceType from options', function() {
     const options = {
@@ -171,7 +172,6 @@ describes.realWin('amp-cld-img', {
       resourceType: 'raw',
     };
     const result = buildUrl('test', options);
-    expect(options).to.eql({});
     expect(result).to.eql('https://res.cloudinary.com/test123/raw/upload/test');
   });
   it('should ignore http links only if type is not given ', function() {
@@ -180,15 +180,14 @@ describes.realWin('amp-cld-img', {
       type: null,
     };
     let result = buildUrl('http://example.com/', options);
-    expect(options).to.eql({});
     expect(result).to.eql('http://example.com/');
     options = {
       cloudName: 'test123',
       type: 'fetch',
     };
     result = buildUrl('http://example.com/', options);
-    expect(options).to.eql({});
-    expect(result).to.eql('https://res.cloudinary.com/test123/image/fetch/http://example.com/');
+    expect(result).to.eql(
+        'https://res.cloudinary.com/test123/image/fetch/http://example.com/');
   });
   it('should escape fetch urls', function() {
     const options = {
@@ -196,17 +195,18 @@ describes.realWin('amp-cld-img', {
       type: 'fetch',
     };
     const result = buildUrl('http://blah.com/hello?a=b', options);
-    expect(options).to.eql({});
-    expect(result).to.eql('https://res.cloudinary.com/test123/image/fetch/http://blah.com/hello%3Fa%3Db');
+    expect(result).to.eql(
+        'https://res.cloudinary.com/test123/image/fetch/http://blah.com/hello%3Fa%3Db');
   });
   it('should escape http urls', function() {
     const options = {
       cloudName: 'test123',
       type: 'youtube',
     };
-    const result = buildUrl('http://www.youtube.com/watch?v=d9NF2edxy-M', options);
-    expect(options).to.eql({});
-    expect(result).to.eql('https://res.cloudinary.com/test123/image/youtube/http://www.youtube.com/watch%3Fv%3Dd9NF2edxy-M');
+    const result = buildUrl('http://www.youtube.com/watch?v=d9NF2edxy-M',
+        options);
+    expect(result).to.eql(
+        'https://res.cloudinary.com/test123/image/youtube/http://www.youtube.com/watch%3Fv%3Dd9NF2edxy-M');
   });
   it('should support background', function() {
     let options = {
@@ -214,15 +214,15 @@ describes.realWin('amp-cld-img', {
       background: 'red',
     };
     let result = buildUrl('test', options);
-    expect(options).to.eql({});
-    expect(result).to.eql('https://res.cloudinary.com/test123/image/upload/b_red/test');
+    expect(result).to
+        .eql('https://res.cloudinary.com/test123/image/upload/b_red/test');
     options = {
       cloudName: 'test123',
       background: '#112233',
     };
     result = buildUrl('test', options);
-    expect(options).to.eql({});
-    expect(result).to.eql('https://res.cloudinary.com/test123/image/upload/b_rgb:112233/test');
+    expect(result).to
+        .eql('https://res.cloudinary.com/test123/image/upload/b_rgb:112233/test');
   });
   it('should support format for fetch urls', function() {
     const options = {
@@ -231,8 +231,8 @@ describes.realWin('amp-cld-img', {
       type: 'fetch',
     };
     const result = buildUrl('http://cloudinary.com/images/logo.png', options);
-    expect(options).to.eql({});
-    expect(result).to.eql('https://res.cloudinary.com/test123/image/fetch/f_jpg/http://cloudinary.com/images/logo.png');
+    expect(result).to.eql(
+        'https://res.cloudinary.com/test123/image/fetch/f_jpg/http://cloudinary.com/images/logo.png');
   });
   it('should support effect', function() {
     const options = {
@@ -240,8 +240,8 @@ describes.realWin('amp-cld-img', {
       effect: 'sepia',
     };
     const result = buildUrl('test', options);
-    expect(options).to.eql({});
-    expect(result).to.eql('https://res.cloudinary.com/test123/image/upload/e_sepia/test');
+    expect(result).to
+        .eql('https://res.cloudinary.com/test123/image/upload/e_sepia/test');
   });
   it('should support external cname', function() {
     const options = {
@@ -250,7 +250,6 @@ describes.realWin('amp-cld-img', {
       secure: false,
     };
     const result = buildUrl('test', options);
-    expect(options).to.eql({});
     expect(result).to.eql('http://hello.com/test123/image/upload/test');
   });
 
@@ -262,7 +261,6 @@ describes.realWin('amp-cld-img', {
       cdnSubdomain: true,
     };
     const result = buildUrl('test', options);
-    expect(options).to.eql({});
     expect(result).to.eql('http://hello.com/test123/image/upload/test');
   });
   it('should support border', function() {
@@ -271,21 +269,26 @@ describes.realWin('amp-cld-img', {
       border: '1px_solid_blue',
     };
     const result = buildUrl('test', options);
-    expect(options).to.eql({});
-    expect(result).to.eql('https://res.cloudinary.com/test123/image/upload/bo_1px_solid_blue/test');
+    expect(result).to.eql(
+        'https://res.cloudinary.com/test123/image/upload/bo_1px_solid_blue/test');
   });
-  it('should add version if publicId contains /', function() {
-    let result = buildUrl('folder/test', {cloudName: 'test123'});
-    expect(result).to.eql('https://res.cloudinary.com/test123/image/upload/v1/folder/test');
-    result = buildUrl('folder/test', {
+  it('should add version 1 if publicId contains /', function() {
+    const result = buildUrl('folder/test', {cloudName: 'test123'});
+    expect(result).to
+        .eql('https://res.cloudinary.com/test123/image/upload/v1/folder/test');
+  });
+  it('should not add version 1 if version explicitly specified', function() {
+    const result = buildUrl('folder/test', {
       version: 123,
       cloudName: 'test123',
     });
-    expect(result).to.eql('https://res.cloudinary.com/test123/image/upload/v123/folder/test');
+    expect(result).to
+        .eql('https://res.cloudinary.com/test123/image/upload/v123/folder/test');
   });
   it('should not add version if publicId contains version already', function() {
     const result = buildUrl('v1234/test', {cloudName: 'test123'});
-    expect(result).to.eql('https://res.cloudinary.com/test123/image/upload/v1234/test');
+    expect(result).to
+        .eql('https://res.cloudinary.com/test123/image/upload/v1234/test');
   });
   it('should allow to shorted image/upload urls', function() {
     const result = buildUrl('test', {
@@ -294,6 +297,23 @@ describes.realWin('amp-cld-img', {
     });
     expect(result).to.eql('https://res.cloudinary.com/test123/iu/test');
   });
+
+  const publicIdEscapeTests = {
+    'a b': 'a%20b',
+    'a+b': 'a%2Bb',
+    'a%20b': 'a%20b',
+    'a-b': 'a-b',
+    'a??b': 'a%3F%3Fb',
+  };
+
+  for (const publicId in publicIdEscapeTests) {
+    it(`should escape public id: ${publicId}`, () => {
+      const target = publicIdEscapeTests[publicId];
+      const result = buildUrl(publicId, {cloudName: 'test123'});
+      expect(result)
+          .to.eql('https://res.cloudinary.com/test123/image/upload/' + target);
+    });
+  }
   it('should escape publicIds', function() {
     const tests = {
       'a b': 'a%20b',
@@ -306,19 +326,21 @@ describes.realWin('amp-cld-img', {
     for (const source in tests) {
       const target = tests[source];
       const result = buildUrl(source, {cloudName: 'test123'});
-      results.push(expect(result).to.eql('https://res.cloudinary.com/test123/image/upload/' + target));
+      results.push(expect(result).to
+          .eql('https://res.cloudinary.com/test123/image/upload/' + target));
     }
   });
   it('should support preloaded identifier format', function() {
     let result = buildUrl('raw/private/v123456/document.docx',
         {cloudName: 'test123'});
-    expect(result).to.eql('https://res.cloudinary.com/test123/raw/private/v123456/document.docx');
+    expect(result).to.eql(
+        'https://res.cloudinary.com/test123/raw/private/v123456/document.docx');
     result = buildUrl('image/private/v123456/img.jpg', {
       cloudName: 'test123',
       crop: 'scale',
       width: '1.0',
     });
-    expect(result).to.eql('https://res.cloudinary.com/test123/image/private/c_scale,w_1.0/v123456/img.jpg');
+    expect(result).to.eql(
+        'https://res.cloudinary.com/test123/image/private/c_scale,w_1.0/v123456/img.jpg');
   });
 });
-
