@@ -16,7 +16,7 @@
 
 import {CSS} from '../../../build/amp-script-0.1.css';
 import {
-  DomPurifyDef, createPurifier, validateAttributeChange,
+  DomPurifyDef, createPurifier, getAllowedTags, validateAttributeChange,
 } from '../../../src/purifier';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Services} from '../../../src/services';
@@ -27,6 +27,9 @@ import {
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
+import {
+  installOriginExperimentsForDoc, originExperimentsForDoc,
+} from '../../../src/service/origin-experiments-impl';
 import {isExperimentOn} from '../../../src/experiments';
 import {rewriteAttributeValue} from '../../../src/url-rewrite';
 import {
@@ -71,13 +74,29 @@ export class AmpScript extends AMP.BaseElement {
         isLayoutSizeDefined(layout);
   }
 
+  /** @return {!Promise<boolean>} */
+  isExperimentOn_() {
+    if (isExperimentOn(this.win, 'amp-script')) {
+      return Promise.resolve(true);
+    }
+    installOriginExperimentsForDoc(this.getAmpDoc());
+    return originExperimentsForDoc(this.element)
+        .getExperiments()
+        .then(trials => trials && trials.includes(TAG));
+  }
+
+  /** @override */
+  buildCallback() {
+    return this.isExperimentOn_().then(on => {
+      if (!on) {
+        // Return rejected Promise to buildCallback() to disable component.
+        throw user().createError(TAG, `Experiment "${TAG}" is not enabled.`);
+      }
+    });
+  }
+
   /** @override */
   layoutCallback() {
-    if (!isExperimentOn(this.win, 'amp-script')) {
-      user().error(TAG, 'Experiment "amp-script" is not enabled.');
-      return Promise.reject('Experiment "amp-script" is not enabled.');
-    }
-
     this.userActivation_ = new UserActivationTracker(this.element);
 
     // Create worker and hydrate.
@@ -185,13 +204,25 @@ export class SanitizerImpl {
    */
   constructor(win) {
     /** @private {!DomPurifyDef} */
-    this.purifier_ = createPurifier(dict({'IN_PLACE': true}));
+    this.purifier_ = createPurifier(win.document, dict({'IN_PLACE': true}));
+
+    /** @private {!Object<string, boolean>} */
+    this.allowedTags_ = getAllowedTags();
+    // For now, only allow built-in AMP components.
+    this.allowedTags_['amp-img'] = true;
+    this.allowedTags_['amp-layout'] = true;
+    this.allowedTags_['amp-pixel'] = true;
 
     /** @const @private {!Element} */
     this.wrapper_ = win.document.createElement('div');
   }
 
   /**
+   * TODO(choumx): This is currently called by worker-dom on node creation,
+   * so all invocations are on super-simple nodes like <p></p>.
+   * Either it should be moved to node insertion to justify the more expensive
+   * sanitize() call, or this method should be a simple string lookup.
+   *
    * @param {!Node} node
    * @return {boolean}
    */
@@ -207,7 +238,7 @@ export class SanitizerImpl {
     this.purifier_.sanitize(parent);
     const clean = parent.firstChild;
     if (!clean) {
-      dev().info(TAG, 'Sanitized node:', node);
+      user().warn(TAG, 'Sanitized node:', node);
       return false;
     }
     // Detach `node` if we used a wrapper div.
@@ -226,32 +257,33 @@ export class SanitizerImpl {
    * @return {boolean}
    */
   mutateAttribute(node, attribute, value) {
-    // TODO(choumx): Per Gabor, check node against DOMPurify's tag whitelist.
-    // We could also call sanitize() on the node, but that could result in
-    // node removal, whereas we'd want to no-op ideally.
-
     // TODO(choumx): Call mutatedAttributesCallback() on AMP elements e.g.
     // so an amp-img can update its child img when [src] is changed.
 
     const tag = node.nodeName.toLowerCase();
-    const attr = attribute.toLowerCase();
-
-    if (validateAttributeChange(this.purifier_, tag, attr, value)) {
-      if (value == null) {
-        node.removeAttribute(attr);
-      } else {
-        const newValue = rewriteAttributeValue(tag, attr, value);
-        node.setAttribute(attr, newValue);
-      }
-
-      // a[href] requires [target], which defaults to _top.
-      if (tag === 'a') {
-        if (node.hasAttribute('href') && !node.hasAttribute('target')) {
-          node.setAttribute('target', '_top');
+    // DOMPurify's attribute validation is tag-agnostic, so we need to check
+    // that the tag itself is valid. E.g. a[href] is ok, but base[href] is not.
+    // TODO(choumx): This is actually more strict than sanitize().
+    if (this.allowedTags_[tag]) {
+      const attr = attribute.toLowerCase();
+      if (validateAttributeChange(this.purifier_, node, attr, value)) {
+        if (value == null) {
+          node.removeAttribute(attr);
+        } else {
+          const newValue = rewriteAttributeValue(tag, attr, value);
+          node.setAttribute(attr, newValue);
         }
+
+        // a[href] requires [target], which defaults to _top.
+        if (tag === 'a') {
+          if (node.hasAttribute('href') && !node.hasAttribute('target')) {
+            node.setAttribute('target', '_top');
+          }
+        }
+        return true;
       }
-      return true;
     }
+    user().warn(TAG, 'Sanitized [%s]="%s":', attribute, value, node);
     return false;
   }
 
@@ -262,12 +294,11 @@ export class SanitizerImpl {
    * @return {boolean}
    */
   mutateProperty(node, property, value) {
-    const tag = node.nodeName.toLowerCase();
     const prop = property.toLowerCase();
 
     // worker-dom's supported properties and corresponding attribute name
     // differences are minor, e.g. acceptCharset vs. accept-charset.
-    if (validateAttributeChange(this.purifier_, tag, prop, value)) {
+    if (validateAttributeChange(this.purifier_, node, prop, value)) {
       node[property] = value;
       return true;
     }

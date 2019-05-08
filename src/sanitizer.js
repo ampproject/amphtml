@@ -78,10 +78,11 @@ let KEY_COUNTER = 0;
  * cases, such as <SCRIPT>, <STYLE>, <IFRAME>.
  *
  * @param {string} html
+ * @param {!Document} doc
  * @param {boolean=} diffing
  * @return {string}
  */
-export function sanitizeHtml(html, diffing) {
+export function sanitizeHtml(html, doc, diffing) {
   const tagPolicy = htmlSanitizer.makeTagPolicy(parsed =>
     parsed.getScheme() === 'https' ? parsed : null);
   const output = [];
@@ -130,11 +131,12 @@ export function sanitizeHtml(html, diffing) {
         // Ask Caja to validate the element as well.
         // Use the resulting properties.
         const savedAttribs = attribs.slice(0);
-        const scrubbed = tagPolicy(tagName, attribs);
+        const scrubbed = /** @type {!JsonObject} */ (
+          tagPolicy(tagName, attribs));
         if (!scrubbed) {
           ignore++;
         } else {
-          attribs = scrubbed.attribs;
+          attribs = scrubbed['attribs'];
           // Restore some of the attributes that AMP is directly responsible
           // for, such as "on".
           for (let i = 0; i < attribs.length; i += 2) {
@@ -205,7 +207,7 @@ export function sanitizeHtml(html, diffing) {
       for (let i = 0; i < attribs.length; i += 2) {
         const attrName = attribs[i];
         const attrValue = attribs[i + 1];
-        if (!isValidAttr(tagName, attrName, attrValue)) {
+        if (!isValidAttr(tagName, attrName, attrValue, doc, false)) {
           user().error(TAG, `Removing "${attrName}" attribute with invalid `
               + `value in <${tagName} ${attrName}="${attrValue}">.`);
           continue;
