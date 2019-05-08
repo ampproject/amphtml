@@ -27,7 +27,7 @@ export function opinary(global, data) {
   div.setAttribute('id', 'opinary-automation-placeholder');
   global.document.getElementById('c').appendChild(div);
 
-  if (!document.querySelector(`link[rel='canonical']`)) {
+  if (!document.querySelector('link[rel=\'canonical\']')) {
     const link = document.createElement('link');
     link.rel = 'canonical';
     link.href = global.context.canonicalUrl;
