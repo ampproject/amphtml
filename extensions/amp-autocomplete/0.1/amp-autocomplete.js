@@ -789,14 +789,17 @@ export class AmpAutocomplete extends AMP.BaseElement {
     let shouldScroll, newTop;
 
     return this.measureMutateElement(() => {
-      const itemTop = activeIndex === 0 ?
-        0 : this.distanceToContainerTop_(newActiveElement, true);
       const {offsetHeight: itemHeight} = newActiveElement;
       const {scrollTop: resultTop, offsetHeight: resultHeight} =
         this.container_;
-      shouldScroll = (resultTop > itemTop ||
-        resultTop + resultHeight < itemTop + itemHeight);
-      newTop = delta > 0 ? itemTop + itemHeight - resultHeight : itemTop;
+      const relativeItemTop = activeIndex === 0 ?
+        -resultTop : newActiveElement.getBoundingClientRect().top -
+        this.container_.getBoundingClientRect().top;
+      shouldScroll = (relativeItemTop < 0 ||
+        relativeItemTop + itemHeight > resultHeight);
+      newTop = delta > 0 ?
+        resultTop + relativeItemTop + itemHeight - resultHeight
+        : resultTop + relativeItemTop;
     }, () => {
       if (shouldScroll) {
         this.container_./*OK*/scrollTop = newTop;
@@ -806,33 +809,6 @@ export class AmpAutocomplete extends AMP.BaseElement {
       this.activeIndex_ = activeIndex;
       this.activeElement_ = newActiveElement;
     });
-  }
-
-  /**
-   * Calculates the total scroll distance from the given element to the
-   * container_ as a summation of the offsetTop values of the given element
-   * and its most ancestral element that is an immediate child of the
-   * container_.
-   *
-   * The boolean "first" describes if the given element is the
-   * desired child to calculate the distance from or an intermediary element
-   * in the recursion. This assumes the given parameter is a descendent of the
-   * results container.
-   *
-   * @param {Element} element
-   * @param {boolean} first
-   * @return {number}
-   * @private
-   */
-  distanceToContainerTop_(element, first) {
-    const {offsetTop: top, parentElement: parent} = element;
-    if (!parent || parent === this.container_) {
-      return top;
-    }
-    if (first) {
-      return top + this.distanceToContainerTop_(parent, false);
-    }
-    return this.distanceToContainerTop_(parent, false);
   }
 
   /** Returns all item elements in the results container that do not have the
