@@ -1175,6 +1175,8 @@ export class Bind {
       default:
         // For input elements, update both the attribute (initial value) and
         // property (current value) for bindings e.g. [value].
+        // TODO(choumx): Investigate if splitting into [value] and
+        // [defaultValue] is possible without version bump.
         const updateProperty = (tag === 'INPUT' && property in element);
         const oldValue = element.getAttribute(property);
 
