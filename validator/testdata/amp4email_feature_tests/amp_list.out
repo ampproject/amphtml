@@ -28,7 +28,7 @@ FAIL
 |    <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
 |    <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
 >>   ^~~~~~~~~
-amp4email_feature_tests/amp_list.html:28:2 The extension 'amp-mustache' is referenced at version '0.1' which is a deprecated version. Please use a more recent version of this extension. This may become an error in the future. (see https://amp.dev/documentation/components/amp-mustache) [DEPRECATION]
+amp4email_feature_tests/amp_list.html:28:2 The extension 'amp-mustache' is referenced at version '0.1' which is a deprecated version. Please use a more recent version of this extension. This may become an error in the future. (see https://www.ampproject.org/docs/reference/components/amp-mustache) [DEPRECATION]
 |  </head>
 |  <body>
 |  <!--
@@ -54,11 +54,11 @@ amp4email_feature_tests/amp_list.html:28:2 The extension 'amp-mustache' is refer
 |      <div>
 |        <amp-list width="auto" height="100" layout="fixed-height"
 >>       ^~~~~~~~~
-amp4email_feature_tests/amp_list.html:52:6 The tag 'AMP-LIST (AMP4EMAIL)' may not appear as a descendant of tag 'amp-list'. (see https://amp.dev/documentation/components/amp-list) [AMP_TAG_PROBLEM]
+amp4email_feature_tests/amp_list.html:52:6 The tag 'AMP-LIST (AMP4EMAIL)' may not appear as a descendant of tag 'amp-list'. (see https://www.ampproject.org/docs/reference/components/amp-list) [AMP_TAG_PROBLEM]
 |          src="https://someserver.json">
 |          <template type="amp-mustache" id="1234">
 >>         ^~~~~~~~~
-amp4email_feature_tests/amp_list.html:54:8 The tag 'TEMPLATE (AMP4EMAIL)' may not appear as a descendant of tag 'template (amp4email)'. (see https://amp.dev/documentation/components/amp-mustache) [GENERIC]
+amp4email_feature_tests/amp_list.html:54:8 The tag 'TEMPLATE (AMP4EMAIL)' may not appear as a descendant of tag 'template (amp4email)'. (see https://www.ampproject.org/docs/reference/components/amp-mustache) [GENERIC]
 |            <div>
 |              <a href="https://somelink.com">{{blah}}</a>
 |            </div>
@@ -74,7 +74,7 @@ amp4email_feature_tests/amp_list.html:54:8 The tag 'TEMPLATE (AMP4EMAIL)' may no
 |      <div>
 |        <amp-state src="https://someserver.json">
 >>       ^~~~~~~~~
-amp4email_feature_tests/amp_list.html:68:6 The tag 'amp-state (AMP4EMAIL)' may not appear as a descendant of tag 'amp-list'. (see https://amp.dev/documentation/components/amp-bind) [AMP_TAG_PROBLEM]
+amp4email_feature_tests/amp_list.html:68:6 The tag 'amp-state (AMP4EMAIL)' may not appear as a descendant of tag 'amp-list'. (see https://www.ampproject.org/docs/reference/components/amp-bind) [AMP_TAG_PROBLEM]
 |          <script type="application/json">{}</script>
 |        </amp-state>
 |      </div>
@@ -90,7 +90,7 @@ amp4email_feature_tests/amp_list.html:68:6 The tag 'amp-state (AMP4EMAIL)' may n
 |      <div>
 |        <amp-list width="auto" height="100" layout="fixed-height"
 >>       ^~~~~~~~~
-amp4email_feature_tests/amp_list.html:82:6 The tag 'AMP-LIST (AMP4EMAIL)' may not appear as a descendant of tag 'amp-list'. (see https://amp.dev/documentation/components/amp-list) [AMP_TAG_PROBLEM]
+amp4email_feature_tests/amp_list.html:82:6 The tag 'AMP-LIST (AMP4EMAIL)' may not appear as a descendant of tag 'amp-list'. (see https://www.ampproject.org/docs/reference/components/amp-list) [AMP_TAG_PROBLEM]
 |          src="https://someserver.json" template="1234">
 |        </amp-list>
 |      </div>
@@ -103,7 +103,7 @@ amp4email_feature_tests/amp_list.html:82:6 The tag 'AMP-LIST (AMP4EMAIL)' may no
 |      <div>
 |        <amp-state id="123"
 >>       ^~~~~~~~~
-amp4email_feature_tests/amp_list.html:93:6 The tag 'amp-state (AMP4EMAIL)' may not appear as a descendant of tag 'amp-list'. (see https://amp.dev/documentation/components/amp-bind) [AMP_TAG_PROBLEM]
+amp4email_feature_tests/amp_list.html:93:6 The tag 'amp-state (AMP4EMAIL)' may not appear as a descendant of tag 'amp-list'. (see https://www.ampproject.org/docs/reference/components/amp-bind) [AMP_TAG_PROBLEM]
 |          src="https://someserver.json" template="1234">
 |          <script type="application/json">{}</script>
 |        </amp-state>
@@ -115,7 +115,7 @@ amp4email_feature_tests/amp_list.html:93:6 The tag 'amp-state (AMP4EMAIL)' may n
 |    <div>
 |      <amp-list width="auto" height="100" layout="fixed-height"
 >>     ^~~~~~~~~
-amp4email_feature_tests/amp_list.html:103:4 The tag 'AMP-LIST (AMP4EMAIL)' may not appear as a descendant of tag 'template'. (see https://amp.dev/documentation/components/amp-list) [AMP_HTML_TEMPLATE_PROBLEM]
+amp4email_feature_tests/amp_list.html:103:4 The tag 'AMP-LIST (AMP4EMAIL)' may not appear as a descendant of tag 'template'. (see https://www.ampproject.org/docs/reference/components/amp-list) [AMP_HTML_TEMPLATE_PROBLEM]
 |        src="https://someserver.json" template="1234">
 |      </amp-list>
 |    </div>
@@ -125,7 +125,7 @@ amp4email_feature_tests/amp_list.html:103:4 The tag 'AMP-LIST (AMP4EMAIL)' may n
 |    <div>
 |      <amp-state id="123"
 >>     ^~~~~~~~~
-amp4email_feature_tests/amp_list.html:111:4 The tag 'amp-state (AMP4EMAIL)' may not appear as a descendant of tag 'template'. (see https://amp.dev/documentation/components/amp-bind) [AMP_HTML_TEMPLATE_PROBLEM]
+amp4email_feature_tests/amp_list.html:111:4 The tag 'amp-state (AMP4EMAIL)' may not appear as a descendant of tag 'template'. (see https://www.ampproject.org/docs/reference/components/amp-bind) [AMP_HTML_TEMPLATE_PROBLEM]
 |        src="https://someserver.json" template="1234">
 |        <script type="application/json">{}</script>
 |      </amp-state>
@@ -137,7 +137,7 @@ amp4email_feature_tests/amp_list.html:111:4 The tag 'amp-state (AMP4EMAIL)' may 
 |  -->
 |  <amp-list width="auto" height="100" layout="fixed-height"
 >> ^~~~~~~~~
-amp4email_feature_tests/amp_list.html:121:0 Missing URL for attribute 'src' in tag 'AMP-LIST (AMP4EMAIL)'. (see https://amp.dev/documentation/components/amp-list) [DISALLOWED_HTML]
+amp4email_feature_tests/amp_list.html:121:0 Missing URL for attribute 'src' in tag 'AMP-LIST (AMP4EMAIL)'. (see https://www.ampproject.org/docs/reference/components/amp-list) [DISALLOWED_HTML]
 |    src="">
 |    <template type="amp-mustache">
 |      <div>
@@ -147,7 +147,7 @@ amp4email_feature_tests/amp_list.html:121:0 Missing URL for attribute 'src' in t
 |
 |  <amp-state src="">
 >> ^~~~~~~~~
-amp4email_feature_tests/amp_list.html:129:0 Missing URL for attribute 'src' in tag 'amp-state (AMP4EMAIL)'. (see https://amp.dev/documentation/components/amp-bind) [AMP_TAG_PROBLEM]
+amp4email_feature_tests/amp_list.html:129:0 Missing URL for attribute 'src' in tag 'amp-state (AMP4EMAIL)'. (see https://www.ampproject.org/docs/reference/components/amp-bind) [AMP_TAG_PROBLEM]
 |    <template type="amp-mustache">
 |      <div>
 |      </div>
@@ -159,7 +159,7 @@ amp4email_feature_tests/amp_list.html:129:0 Missing URL for attribute 'src' in t
 |  -->
 |  <amp-list width="auto" height="100" layout="fixed-height"
 >> ^~~~~~~~~
-amp4email_feature_tests/amp_list.html:139:0 Invalid URL protocol 'http:' for attribute 'src' in tag 'AMP-LIST (AMP4EMAIL)'. (see https://amp.dev/documentation/components/amp-list) [DISALLOWED_HTML]
+amp4email_feature_tests/amp_list.html:139:0 Invalid URL protocol 'http:' for attribute 'src' in tag 'AMP-LIST (AMP4EMAIL)'. (see https://www.ampproject.org/docs/reference/components/amp-list) [DISALLOWED_HTML]
 |    src="http://somelink.com">
 |    <template type="amp-mustache">
 |      <div>
@@ -169,7 +169,7 @@ amp4email_feature_tests/amp_list.html:139:0 Invalid URL protocol 'http:' for att
 |
 |  <amp-state id="123"
 >> ^~~~~~~~~
-amp4email_feature_tests/amp_list.html:147:0 Invalid URL protocol 'http:' for attribute 'src' in tag 'amp-state (AMP4EMAIL)'. (see https://amp.dev/documentation/components/amp-bind) [AMP_TAG_PROBLEM]
+amp4email_feature_tests/amp_list.html:147:0 Invalid URL protocol 'http:' for attribute 'src' in tag 'amp-state (AMP4EMAIL)'. (see https://www.ampproject.org/docs/reference/components/amp-bind) [AMP_TAG_PROBLEM]
 |    src="http://somelink.com">
 |    <template type="amp-mustache">
 |      <div>
@@ -183,7 +183,7 @@ amp4email_feature_tests/amp_list.html:147:0 Invalid URL protocol 'http:' for att
 |  -->
 |  <amp-list width="auto" height="100" layout="fixed-height"
 >> ^~~~~~~~~
-amp4email_feature_tests/amp_list.html:159:0 The attribute '[src]' may not appear in tag 'AMP-LIST (AMP4EMAIL)'. (see https://amp.dev/documentation/components/amp-list) [DISALLOWED_HTML]
+amp4email_feature_tests/amp_list.html:159:0 The attribute '[src]' may not appear in tag 'AMP-LIST (AMP4EMAIL)'. (see https://www.ampproject.org/docs/reference/components/amp-list) [DISALLOWED_HTML]
 |    [src]="evil">
 |    <template type="amp-mustache">
 |      <div>
@@ -193,7 +193,7 @@ amp4email_feature_tests/amp_list.html:159:0 The attribute '[src]' may not appear
 |
 |  <amp-state id="123" [src]="evil">
 >> ^~~~~~~~~
-amp4email_feature_tests/amp_list.html:167:0 The attribute '[src]' may not appear in tag 'amp-state (AMP4EMAIL)'. (see https://amp.dev/documentation/components/amp-bind) [DISALLOWED_HTML]
+amp4email_feature_tests/amp_list.html:167:0 The attribute '[src]' may not appear in tag 'amp-state (AMP4EMAIL)'. (see https://www.ampproject.org/docs/reference/components/amp-bind) [DISALLOWED_HTML]
 |    <script type="application/json">{}</script>
 |  </amp-state>
 |
@@ -202,7 +202,7 @@ amp4email_feature_tests/amp_list.html:167:0 The attribute '[src]' may not appear
 |  -->
 |  <amp-list width="auto" height="100" layout="fixed-height"
 >> ^~~~~~~~~
-amp4email_feature_tests/amp_list.html:174:0 The relative URL 'foo{{bar' for attribute 'src' in tag 'AMP-LIST (AMP4EMAIL)' is disallowed. (see https://amp.dev/documentation/components/amp-list) [DISALLOWED_HTML]
+amp4email_feature_tests/amp_list.html:174:0 The relative URL 'foo{{bar' for attribute 'src' in tag 'AMP-LIST (AMP4EMAIL)' is disallowed. (see https://www.ampproject.org/docs/reference/components/amp-list) [DISALLOWED_HTML]
 |    src="foo{{bar">
 |    <template type="amp-mustache">
 |      <div>
@@ -212,7 +212,7 @@ amp4email_feature_tests/amp_list.html:174:0 The relative URL 'foo{{bar' for attr
 |
 |  <amp-list width="auto" height="100" layout="fixed-height"
 >> ^~~~~~~~~
-amp4email_feature_tests/amp_list.html:182:0 The relative URL 'foo}}bar' for attribute 'src' in tag 'AMP-LIST (AMP4EMAIL)' is disallowed. (see https://amp.dev/documentation/components/amp-list) [DISALLOWED_HTML]
+amp4email_feature_tests/amp_list.html:182:0 The relative URL 'foo}}bar' for attribute 'src' in tag 'AMP-LIST (AMP4EMAIL)' is disallowed. (see https://www.ampproject.org/docs/reference/components/amp-list) [DISALLOWED_HTML]
 |    src="foo}}bar">
 |    <template type="amp-mustache">
 |      <div>
