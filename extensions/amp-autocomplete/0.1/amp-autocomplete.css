@@ -49,13 +49,13 @@ amp-autocomplete > input {
   margin-bottom: .5rem; /* default-ui-space-small */
 }
 
-.i-amphtml-autocomplete-item {
-  padding: .5rem 1rem; /* default-ui-space-small default-ui-space-medium */
-}
-
-.i-amphtml-autocomplete-results > * {
+.i-amphtml-autocomplete-item, .i-amphtml-autocomplete-category {
   position: relative;
   cursor: pointer;
+}
+
+.i-amphtml-autocomplete-item {
+  padding: .5rem 1rem; /* default-ui-space-small default-ui-space-medium */
 }
 
 .i-amphtml-autocomplete-results > :first-child {
