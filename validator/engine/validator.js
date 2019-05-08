@@ -380,7 +380,8 @@ function getTagSpecUrl(tagSpec) {
 
   if (tagSpec.specUrl !== null) {return tagSpec.specUrl;}
 
-  const extensionSpecUrlPrefix = 'https://amp.dev/documentation/components/';
+  const extensionSpecUrlPrefix =
+      'https://www.ampproject.org/docs/reference/components/';
   if (tagSpec.extensionSpec !== null && tagSpec.extensionSpec.name !== null)
   {return extensionSpecUrlPrefix + tagSpec.extensionSpec.name;}
   if (tagSpec.requiresExtension.length > 0) {
@@ -4128,8 +4129,7 @@ function validateAttributeInExtension(tagSpec, context, attr, result) {
   // field attribute value. The dispatch key matching is case-insensitive for
   // faster lookups, so it still possible for the attribute value to not match
   // if it contains upper-case letters.
-  if (extensionSpec !== null &&
-      getExtensionNameAttribute(extensionSpec) === attr.name) {
+  if (getExtensionNameAttribute(extensionSpec) === attr.name) {
     if (extensionSpec.name !== attr.value) {
       goog.asserts.assert(extensionSpec.name === attr.value.toLowerCase());
       return false;
@@ -5176,7 +5176,7 @@ class ParsedValidatorRules {
                   amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
                   context.getLineCol(),
                   /*params=*/[attr.name, 'html', attr.value],
-                  'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup',
+                  'https://www.ampproject.org/docs/reference/spec#required-markup',
                   validationResult);
             }
           }
@@ -5184,7 +5184,7 @@ class ParsedValidatorRules {
           context.addError(
               amp.validator.ValidationError.Code.DISALLOWED_ATTR,
               context.getLineCol(), /*params=*/[attr.name, 'html'],
-              'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup',
+              'https://www.ampproject.org/docs/reference/spec#required-markup',
               validationResult);
         }
       }
@@ -5195,7 +5195,7 @@ class ParsedValidatorRules {
       context.addError(
           amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING,
           context.getLineCol(), /*params=*/[formatIdentifiers[0], 'html'],
-          'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup',
+          'https://www.ampproject.org/docs/reference/spec#required-markup',
           validationResult);
     }
   }

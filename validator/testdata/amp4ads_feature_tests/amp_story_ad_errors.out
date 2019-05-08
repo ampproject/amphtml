@@ -26,7 +26,7 @@ FAIL
 |      <meta name="viewport" content="width=device-width,minimum-scale=1">
 |
 |      <!-- Should fail as an invalid meta tag. -->
-|      <meta name="amp-cta" content="https://amp.dev/">
+|      <meta name="amp-cta" content="https://www.ampproject.org">
 >>     ^~~~~~~~~
 amp4ads_feature_tests/amp_story_ad_errors.html:28:4 The attribute 'name' in tag 'meta name= and content=' is set to the invalid value 'amp-cta'. [DISALLOWED_HTML]
 |

@@ -95,7 +95,7 @@ feature_tests/svg.html:82:6 The tag 'stop' contains the attribute 'offset' repea
 |    <!-- Invalid: xml:base present -->
 |    <svg xml:base="javascript:alert('hello world')">
 >>   ^~~~~~~~~
-feature_tests/svg.html:87:2 The attribute 'xml:base' may not appear in tag 'svg'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg) [DISALLOWED_HTML]
+feature_tests/svg.html:87:2 The attribute 'xml:base' may not appear in tag 'svg'. (see https://www.ampproject.org/docs/reference/spec#svg) [DISALLOWED_HTML]
 |      <a href="#"><circle r="10"></a>
 |    </svg>
 |
@@ -108,13 +108,13 @@ feature_tests/svg.html:87:2 The attribute 'xml:base' may not appear in tag 'svg'
 |    <svg>
 |      <g style="display: block; position: sticky;"/>
 >>     ^~~~~~~~~
-feature_tests/svg.html:98:4 CSS syntax error in tag 'g' - the property 'position' is set to the disallowed value 'sticky'. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages) [GENERIC]
+feature_tests/svg.html:98:4 CSS syntax error in tag 'g' - the property 'position' is set to the disallowed value 'sticky'. (see https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages) [GENERIC]
 |      <g style="DISPLAY:BLOCK;POSITION:STICKY;"/>
 >>     ^~~~~~~~~
-feature_tests/svg.html:99:4 CSS syntax error in tag 'g' - the property 'POSITION' is set to the disallowed value 'STICKY'. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages) [GENERIC]
+feature_tests/svg.html:99:4 CSS syntax error in tag 'g' - the property 'POSITION' is set to the disallowed value 'STICKY'. (see https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages) [GENERIC]
 |      <g style="foo:bar;"/>
 >>     ^~~~~~~~~
-feature_tests/svg.html:100:4 The property 'foo' in attribute 'style' in tag 'g' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages) [GENERIC]
+feature_tests/svg.html:100:4 The property 'foo' in attribute 'style' in tag 'g' is disallowed. (see https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages) [GENERIC]
 |      <g style="@media only screen and (max-width: 600px)"/>
 >>     ^~~~~~~~~
 feature_tests/svg.html:101:4 CSS syntax error in tag 'g' - saw invalid at rule '@media'. [AUTHOR_STYLESHEET_PROBLEM]
@@ -125,7 +125,7 @@ feature_tests/svg.html:101:4 CSS syntax error in tag 'g' - saw invalid at rule '
 |    <svg>
 |      <style/>
 >>     ^~~~~~~~~
-feature_tests/svg.html:107:4 The parent tag of tag 'style amp-custom' is 'svg', but it can only be 'head'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#stylesheets) [DISALLOWED_HTML]
+feature_tests/svg.html:107:4 The parent tag of tag 'style amp-custom' is 'svg', but it can only be 'head'. (see https://www.ampproject.org/docs/reference/spec#stylesheets) [DISALLOWED_HTML]
 |    </svg>
 |  </body>
 |  </html>
