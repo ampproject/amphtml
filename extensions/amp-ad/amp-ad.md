@@ -323,6 +323,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [OnNetwork](../../ads/onnetwork.md)
 - [Open AdStream (OAS)](../../ads/openadstream.md)
 - [OpenX](../../ads/openx.md)
+- [opinary](../../ads/opinary.md)
 - [Pixels](../../ads/pixels.md)
 - [plista](../../ads/plista.md)
 - [polymorphicAds](../../ads/polymorphicads.md)

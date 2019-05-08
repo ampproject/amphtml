@@ -735,6 +735,10 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  'opinary': {
+    renderStartImplemented: true,
+  },
+
   'outbrain': {
     renderStartImplemented: true,
     prefetch: 'https://widgets.outbrain.com/widgetAMP/outbrainAMP.min.js',
