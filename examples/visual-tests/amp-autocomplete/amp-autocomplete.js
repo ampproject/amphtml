@@ -23,4 +23,9 @@ module.exports = {
     await page.tap('input#input1');
     await verifySelectorsVisible(page, name, ['amp-autocomplete#autocomplete1 > .i-amphtml-autocomplete-results']);
   },
+
+  'tap input-rtl to focus and display results': async (page, name) => {
+    await page.tap('input#input-rtl');
+    await verifySelectorsVisible(page, name, ['amp-autocomplete#autocomplete-rtl > .i-amphtml-autocomplete-results']);
+  },
 };
