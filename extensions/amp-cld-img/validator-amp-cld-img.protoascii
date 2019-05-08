@@ -45,9 +45,13 @@ tags: {  # <amp-cld-img>
   }
   attrs: {
     name: "private-cdn"
+    value: "true"
+    value: "false"
   }
   attrs: {
     name: "secure-cdn-subdomain"
+     value: "true"
+     value: "false"
   }
   attrs: {
     name: "max-size"
