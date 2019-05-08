@@ -110,6 +110,7 @@ export function buildUrl(publicId, options) {
   if (type === null && publicId.match(/^https?:\//i)) {
     return originalSource;
   }
+
   const finalizedResourceType = finalizeResourceType(resourceType, type,
       urlSuffix, useRootPath, shorten);
 
@@ -120,15 +121,7 @@ export function buildUrl(publicId, options) {
   publicId = finalizedSource.source;
   const {sourceToSign} = finalizedSource;
 
-  if (sourceToSign.indexOf('/') > 0 && !sourceToSign.match(/^v[0-9]+/) &&
-      !sourceToSign.match(/^https?:\//)) {
-    if (version == null) {
-      version = 1;
-    }
-  }
-  if (version != null) {
-    version = `v${version}`;
-  }
+  version = inferVersions(sourceToSign, version);
   transformation = transformation.replace(/([^:])\/\//g, '$1/');
 
   const prefix = unsignedUrlPrefix(cloudName, privateCdn,
@@ -139,7 +132,27 @@ export function buildUrl(publicId, options) {
 }
 
 /**
- * Beset-effort guess the object fit style based on the cloudinary crop mode
+ * Infers the correct version for the given set of arguments.
+ * @param {string} source The source used for the url.
+ * @param {?string} version The version from the config, if present.
+ * @return {?string} The version to use in the url
+ */
+function inferVersions(source, version) {
+  if (source.indexOf('/') > 0 && !source.match(/^v[0-9]+/) &&
+    !source.match(/^https?:\//)) {
+    if (version == null) {
+      version = '1';
+    }
+  }
+  if (version != null) {
+    version = `v${version}`;
+  }
+
+  return version;
+}
+
+/**
+ * Best-effort guess the object fit style based on the cloudinary crop mode
  * @param {string} cropMode The crop used in the transformation
  * @return {string} The derived object-fit value
  */
