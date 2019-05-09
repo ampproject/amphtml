@@ -20,8 +20,8 @@ import {
   VariableService,
   encodeVars,
   getNameArgsForTesting,
-  installVariableServiceForDoc,
-  variableServiceForDoc,
+  installVariableService,
+  variableServiceFor,
 } from '../variables';
 import {Services} from '../../../../src/services';
 import {
@@ -29,12 +29,13 @@ import {
   linkerReaderServiceFor,
 } from '../linker-reader';
 
-describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
+describe('amp-analytics.VariableService', function() {
   let variables;
 
   beforeEach(() => {
-    installLinkerReaderService(env.win);
-    variables = new VariableService(env.ampdoc);
+    const fakeWin = {};
+    installLinkerReaderService(fakeWin);
+    variables = new VariableService(fakeWin);
   });
 
   describe('encodeVars', () => {
@@ -166,7 +167,6 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
   });
 
   describes.fakeWin('macros', {amp: true}, env => {
-    let doc;
     let win;
     let urlReplacementService;
     let sandbox;
@@ -174,10 +174,9 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
     beforeEach(() => {
       sandbox = env.sandbox;
       win = env.win;
-      doc = win.document;
       installLinkerReaderService(win);
-      installVariableServiceForDoc(doc);
-      variables = variableServiceForDoc(doc);
+      installVariableService(win);
+      variables = variableServiceFor(win);
       const {documentElement} = win.document;
       urlReplacementService = Services.urlReplacementsForDoc(documentElement);
     });
