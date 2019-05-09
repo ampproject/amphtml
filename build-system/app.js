@@ -920,12 +920,12 @@ app.get([
 
     // Extract amp-consent for the given 'type' specified in URL query.
     if (req.path.indexOf(
-      '/examples/cmp-vendors.amp.html') == 0 && req.query.type) {
+        '/examples/cmp-vendors.amp.html') == 0 && req.query.type) {
       const consent = file.match(
-        elementExtractor('amp-consent', req.query.type));
+          elementExtractor('amp-consent', req.query.type));
       file = file.replace(
-        /<div id="container">[\s\S]+<\/div>/m,
-        '<div id="container">' + consent.join('') + '</div>');
+          /<div id="container">[\s\S]+<\/div>/m,
+          '<div id="container">' + consent.join('') + '</div>');
     }
 
     if (stream > 0) {

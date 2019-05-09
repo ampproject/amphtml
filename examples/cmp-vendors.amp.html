@@ -6,31 +6,82 @@
     <link rel="canonical" href="analytics.amp.html" >
     <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
     <style amp-custom>
-.box {
-  background: #ccc;
-  border: 1px solid #aaa;
-  padding: 10px;
-  margin: 10px;
-}
+    .box {
+      background: #ccc;
+      border: 1px solid #aaa;
+      padding: 10px;
+      margin: 10px;
+    }
+
     #container {
       position: absolute;
       top: 10000px;
       height: 10px;
     }
+
     .filterBar {
       background: #eee;
       padding: 3px;
       font-size: 1.2em;
     }
+
+    .filterBar form {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+    }
+
+    .filterBar form * {
+      margin-left: 10px;
+      margin-right 10px;
+    }
+
+    .filterBar .clearLocalStorage {
+      margin-left: auto;
+    }
+
     select {
       border: 1px solid #999;
     }
+
     input[type=submit] {
       font-size: 14px;
       border: 1px solid #999;
       border-radius: 3px;
       margin-left: 10px;
     }
+
+    amp-consent {
+      min-height: 30px;
+      font-family: 'Roboto';
+      font-weight: 500;
+      line-height: 30px;
+      padding: 8px;
+      background: #46b6ac;
+    }
+
+    amp-consent button {
+      border: none;
+      border-radius: 2px;
+
+      color: #fafafa;
+      height: 26px;
+      min-width: 32px;
+      padding: 0 16px;
+      margin: 0 16px;
+      text-transform: uppercase;
+      letter-spacing: 0;
+      cursor: pointer;
+      vertical-align: middle;
+      line-height: 26px;
+      text-align: center;
+      background: #3f51b5;
+    }
+
+    #ui1 {
+      height: 100vh;
+    }
+
     </style>
     <script async custom-element="amp-geo" src="https://cdn.ampproject.org/v0/amp-geo-0.1.js"></script>
     <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
@@ -50,10 +101,12 @@
           <option>_ping_</option>
         </select>
         <input type="submit" value="Go">
+        <button type="button" class="clearLocalStorage" onclick="localStorage.clear(); alert('localStorage Cleared!')">Clear localStorage</button>
       </form>
     </div>
 
     <h1 id="top">AMP Consent CMP</h1>
+    <h3>Please open your devtools an enable the consent v2 experiment: `AMP.toggleExperiment('amp-consent-v2', true)`</h3>
     <h3>Image that is blocked by both consent</h3>
     <amp-img data-block-on-consent src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w300-h200-no-n" width=300 height=200></amp-img>
 
@@ -71,11 +124,11 @@
         <script type="application/json">
           {
             "consents": {},
-              "postPromptUI": "postPromptUI",
-              "clientConfig": {
-                "CMP_id": "test_id",
-                "other_info": "test_info"
-              }
+            "postPromptUI": "postPromptUI",
+            "clientConfig": {
+              "CMP_id": "test_id",
+              "other_info": "test_info"
+            }
           }
         </script>
         <div id="ui1">
