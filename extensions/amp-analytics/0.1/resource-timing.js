@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ExpansionOptions, variableServiceForDoc} from './variables';
+import {ExpansionOptions, variableServiceFor} from './variables';
 import {findIndex} from '../../../src/utils/array';
 import {isObject} from '../../../src/types';
 import {parseUrlDeprecated} from '../../../src/url';
@@ -233,14 +233,14 @@ function filterEntries(entries, resourceDefs) {
  * single string.
  * @param {!Array<!PerformanceResourceTiming>} entries
  * @param {!JsonObject} resourceTimingSpec
- * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!Window} win
  * @return {!Promise<string>}
  */
-function serialize(entries, resourceTimingSpec, ampdoc) {
+function serialize(entries, resourceTimingSpec, win) {
   const resources = resourceTimingSpec['resources'];
   const encoding = resourceTimingSpec['encoding'];
 
-  const variableService = variableServiceForDoc(ampdoc);
+  const variableService = variableServiceFor(win);
   const format = (val, relativeTo = 0) =>
     Math.round(val - relativeTo).toString(encoding['base'] || 10);
 
@@ -255,12 +255,11 @@ function serialize(entries, resourceTimingSpec, ampdoc) {
 
 /**
  * Serializes resource timing entries according to the resource timing spec.
- * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!Window} win
  * @param {!JsonObject} resourceTimingSpec
  * @return {!Promise<string>}
  */
-function serializeResourceTiming(ampdoc, resourceTimingSpec) {
-  const {win} = ampdoc;
+function serializeResourceTiming(win, resourceTimingSpec) {
   // Check that the performance timing API exists before and that the spec is
   // valid before proceeding. If not, we simply return an empty string.
   if (resourceTimingSpec['done'] || !win.performance || !win.performance.now ||
@@ -288,19 +287,19 @@ function serializeResourceTiming(ampdoc, resourceTimingSpec) {
     return Promise.resolve('');
   }
   // Yield the thread in case iterating over all resources takes a long time.
-  return yieldThread(() => serialize(entries, resourceTimingSpec, ampdoc));
+  return yieldThread(() => serialize(entries, resourceTimingSpec, win));
 }
 
 /**
- * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!Window} win resource timing spec.
  * @param {!JsonObject|undefined} spec resource timing spec.
  * @param {number} startTime start timestamp.
  * @return {!Promise<string>}
  */
-export function getResourceTiming(ampdoc, spec, startTime) {
+export function getResourceTiming(win, spec, startTime) {
   // Only allow collecting timing within 1s
   if (spec && (Date.now() < (startTime + 60 * 1000))) {
-    return serializeResourceTiming(ampdoc, spec);
+    return serializeResourceTiming(win, spec);
   } else {
     return Promise.resolve('');
   }

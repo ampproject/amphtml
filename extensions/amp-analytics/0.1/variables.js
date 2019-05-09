@@ -19,10 +19,7 @@ import {base64UrlEncodeFromString} from '../../../src/utils/base64';
 import {devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getConsentPolicyState} from '../../../src/consent';
-import {
-  getServiceForDoc,
-  registerServiceBuilderForDoc,
-} from '../../../src/service';
+import {getService, registerServiceBuilder} from '../../../src/service';
 import {isArray, isFiniteNumber} from '../../../src/types';
 import {linkerReaderServiceFor} from './linker-reader';
 import {tryResolve} from '../../../src/utils/promise';
@@ -145,18 +142,18 @@ function replaceMacro(string, matchPattern, opt_newSubStr) {
  */
 export class VariableService {
   /**
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!Window} window
    */
-  constructor(ampdoc) {
+  constructor(window) {
 
-    /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
-    this.ampdoc_ = ampdoc;
+    /** @private {!Window} */
+    this.win_ = window;
 
     /** @private {!JsonObject} */
     this.macros_ = dict({});
 
     /** @const @private {!./linker-reader.LinkerReader} */
-    this.linkerReader_ = linkerReaderServiceFor(this.ampdoc_.win);
+    this.linkerReader_ = linkerReaderServiceFor(this.win_);
 
     this.register_('$DEFAULT', defaultMacro);
     this.register_('$SUBSTR', substrMacro);
@@ -251,7 +248,7 @@ export class VariableService {
    * @return {!Promise<string>}
    */
   hashMacro_(value) {
-    return Services.cryptoFor(this.ampdoc_.win).sha384Base64(value);
+    return Services.cryptoFor(this.win_).sha384Base64(value);
   }
 }
 
@@ -291,19 +288,18 @@ export function getNameArgs(key) {
 }
 
 /**
- * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!Window} win
  */
-export function installVariableServiceForDoc(ampdoc) {
-  registerServiceBuilderForDoc(ampdoc, 'amp-analytics-variables',
-      VariableService);
+export function installVariableService(win) {
+  registerServiceBuilder(win, 'amp-analytics-variables', VariableService);
 }
 
 /**
- * @param {!Element|!ShadowRoot|!../../../src/service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+ * @param {!Window} win
  * @return {!VariableService}
  */
-export function variableServiceForDoc(elementOrAmpDoc) {
-  return getServiceForDoc(elementOrAmpDoc, 'amp-analytics-variables');
+export function variableServiceFor(win) {
+  return getService(win, 'amp-analytics-variables');
 }
 
 /**
