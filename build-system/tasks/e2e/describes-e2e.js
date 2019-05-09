@@ -17,6 +17,7 @@
 // import to install chromedriver
 require('chromedriver'); // eslint-disable-line no-unused-vars
 
+const log = require('fancy-log');
 const puppeteer = require('puppeteer');
 const {AmpDriver, AmpdocEnvironment} = require('./amp-driver');
 const {Builder, Capabilities} = require('selenium-webdriver');
@@ -234,9 +235,10 @@ function describeEnv(factory) {
       const env = Object.create(variant);
       let asyncErrorTimerId;
       this.timeout(TIMEOUT);
-      beforeEach(async function() {
+      beforeEach(async function(done) {
         setTimeout(() => {
-          throw new Error('Timed out in root level before each');
+          log('Timed out in root level before each');
+          done();
         }, TIMEOUT);
 
         await fixture.setup(env);
