@@ -44,6 +44,7 @@ import {
   userAssert,
 } from '../src/log';
 import {installEmbedStateListener, manageWin} from './environment';
+import {internalRuntimeVersion} from '../src/internal-version';
 import {parseJson} from '../src/json';
 import {
   register,
@@ -52,10 +53,7 @@ import {
 } from './3p';
 import {startsWith} from '../src/string.js';
 import {urls} from '../src/config';
-import {version} from '../src/internal-version';
 
-// Disable auto-sorting of imports from here on.
-/* eslint-disable sort-imports-es6-autofix/sort-imports-es6 */
 
 // 3P - please keep in alphabetic order
 import {beopinion} from './beopinion';
@@ -228,6 +226,7 @@ import {smi2} from '../ads/smi2';
 import {sogouad} from '../ads/sogouad';
 import {sortable} from '../ads/sortable';
 import {sovrn} from '../ads/sovrn';
+import {speakol} from '../ads/speakol';
 import {spotx} from '../ads/spotx';
 import {sunmedia} from '../ads/sunmedia';
 import {svknative} from '../ads/svknative';
@@ -265,7 +264,7 @@ import {zedo} from '../ads/zedo';
 import {zen} from '../ads/zen';
 import {zergnet} from '../ads/zergnet';
 import {zucks} from '../ads/zucks';
-import {speakol} from '../ads/speakol';
+
 
 
 /**
@@ -769,7 +768,7 @@ export function isTagNameAllowed(type, tagName) {
  */
 function lightweightErrorReport(e, isCanary) {
   new Image().src = urls.errorReporting +
-      '?3p=1&v=' + encodeURIComponent(version()) +
+      '?3p=1&v=' + encodeURIComponent(internalRuntimeVersion()) +
       '&m=' + encodeURIComponent(e.message) +
       '&ca=' + (isCanary ? 1 : 0) +
       '&r=' + encodeURIComponent(document.referrer) +
