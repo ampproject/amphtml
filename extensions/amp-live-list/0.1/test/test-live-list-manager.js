@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import {AMP_LIST_CUSTOM_SLOT_ID} from '../amp-live-list';
 import {LiveListManager, liveListManagerForDoc} from '../live-list-manager';
 import {Services} from '../../../../src/services';
-import { AMP_LIST_CUSTOM_SLOT_ID } from '../amp-live-list';
 
 const XHR_BUFFER_SIZE = 2;
 
@@ -102,7 +102,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
     }
 
     hasCustomSlot() {
-      return !!this[AMP_LIST_CUSTOM_SLOT_ID];
+      return !!this.element[AMP_LIST_CUSTOM_SLOT_ID];
     }
   }
 
@@ -171,8 +171,9 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
     const fromServer = doc.createElement('div');
     fromServer.appendChild(customSlot);
     fromServer.getElementById = () => {};
-
-    sandbox.stub(fromServer, 'getElementById').returns(customSlot);
+    sandbox.stub(fromServer, 'getElementById').callsFake(id => {
+      return fromServer.querySelector(`#${id}`);
+    });
 
     ready();
     const clientLiveList = getLiveList({
@@ -182,13 +183,11 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
       'disable-pagination': '',
       'auto-insert': '',
     }, 'custom-list');
-    clientLiveList[AMP_LIST_CUSTOM_SLOT_ID] = customSlot.id;
+    clientLiveList.element[AMP_LIST_CUSTOM_SLOT_ID] = customSlot.id;
     clientLiveList.buildCallback();
 
-
     return manager.whenDocReady_().then(() => {
-      manager.updateLiveLists_(fromServer);
-      expect(Object.keys(manager.liveLists_)).to.have.length(1);
+      expect(manager.getCustomSlots_(fromServer)).to.have.length(1);
     });
   });
 

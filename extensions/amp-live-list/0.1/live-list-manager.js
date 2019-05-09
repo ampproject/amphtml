@@ -198,8 +198,10 @@ export class LiveListManager {
     const liveListsWithCustomSlots = Object.keys(this.liveLists_).filter(id =>
       this.liveLists_[id].hasCustomSlot());
 
-    return liveListsWithCustomSlots.map(id =>
-      doc.getElementById(this.liveLists_[id].element[AMP_LIST_CUSTOM_SLOT_ID]));
+    return liveListsWithCustomSlots.map(id => {
+      const customSlotId = this.liveLists_[id].element[AMP_LIST_CUSTOM_SLOT_ID];
+      return doc.getElementById(customSlotId);
+    });
   }
 
   /**
