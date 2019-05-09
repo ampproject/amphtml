@@ -17,7 +17,6 @@
 // import to install chromedriver
 require('chromedriver'); // eslint-disable-line no-unused-vars
 
-const log = require('fancy-log');
 const puppeteer = require('puppeteer');
 const {AmpDriver, AmpdocEnvironment} = require('./amp-driver');
 const {Builder, Capabilities} = require('selenium-webdriver');
@@ -29,7 +28,7 @@ const {SeleniumWebDriverController} = require('./selenium-webdriver-controller')
 
 /** Should have something in the name, otherwise nothing is shown. */
 const SUB = ' ';
-const TIMEOUT = 20000;
+const TEST_TIMEOUT = 20000;
 const SETUP_TIMEOUT = 30000;
 const DEFAULT_E2E_INITIAL_RECT = {width: 800, height: 600};
 
@@ -204,7 +203,6 @@ class ItConfig {
  * @param {function(!Object):!Array<?Fixture>} factory
  */
 function describeEnv(factory) {
-
   /**
    * @param {string} name
    * @param {!Object} spec
@@ -235,21 +233,15 @@ function describeEnv(factory) {
     function doTemplate(name, variant) {
       const env = Object.create(variant);
       let asyncErrorTimerId;
-      this.timeout(TIMEOUT);
-      let rootBeforeEachTimeout;
+      this.timeout(TEST_TIMEOUT);
       beforeEach(async function() {
         this.timeout(SETUP_TIMEOUT);
-        rootBeforeEachTimeout = setTimeout(() => {
-          log('Timed out in root level before each');
-        }, SETUP_TIMEOUT);
         await fixture.setup(env);
 
         // don't install for CI
         if (!isTravisBuild()) {
           installRepl(global, env);
         }
-
-        clearTimeout(rootBeforeEachTimeout);
       });
 
       afterEach(async function() {
@@ -316,15 +308,11 @@ class EndToEndFixture {
   }
 
   async setup(env) {
-    const firstTimeout = setTimeout(() => {
-      log('first setup timeout');
-    }, TIMEOUT / 4);
     const config = getConfig();
     const controller = await getController(config);
     const ampDriver = new AmpDriver(controller);
     env.controller = controller;
     env.ampDriver = ampDriver;
-    clearTimeout(firstTimeout);
 
     const {
       testUrl,
@@ -335,14 +323,12 @@ class EndToEndFixture {
       environment,
     } = env;
 
-    const secondTimeout = setTimeout(() => {
-      log('second setup timeout');
-    }, TIMEOUT / 4);
     await toggleExperiments(ampDriver, testUrl, experiments);
+
     const {width, height} = initialRect;
     await controller.setWindowRect({width, height});
+
     await ampDriver.navigateToEnvironment(environment, testUrl);
-    clearTimeout(secondTimeout);
   }
 
   async teardown(env) {
