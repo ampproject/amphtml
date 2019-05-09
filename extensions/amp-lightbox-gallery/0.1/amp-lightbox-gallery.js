@@ -967,7 +967,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   open(element, expandDescription = false) {
     return this.openLightboxGallery_(
         dev().assertElement(element),
-        expandDescription,
+        expandDescription
     ).then(() => {
       return this.history_.push(this.close_.bind(this));
     }).then(historyId => {
