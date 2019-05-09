@@ -369,8 +369,6 @@ export class AmpAutocomplete extends AMP.BaseElement {
       if (this.suggestFirst_) {
         if (!this.detectBackspace_ || firstEntry) {
           this.updateActiveItem_(1);
-          this.inputElement_.setSelectionRange(this.userInput_.length,
-              this.inputElement_.value.length);
         }
         // Reset flag.
         this.detectBackspace_ = false;
@@ -725,6 +723,12 @@ export class AmpAutocomplete extends AMP.BaseElement {
     const activeIndex = mod(index, enabledElements.length);
     const newActiveElement = enabledElements[activeIndex];
     this.inputElement_.value = newActiveElement.getAttribute('data-value');
+
+    // Highlight if suggest-first is present.
+    if (this.suggestFirst_) {
+      this.inputElement_.setSelectionRange(this.userInput_.length,
+          this.inputElement_.value.length);
+    }
 
     // Element visibility logic
     let shouldScroll, newTop;
