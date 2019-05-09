@@ -15,10 +15,8 @@
  */
 
 import {BrowserController} from '../../../../../testing/test-helper';
-import {poll} from '../../../../../testing/iframe';
 
 const TIMEOUT = 15000;
-const LOCAL_TIMEOUT = 5000;
 
 describe('amp-list (integration)', function() {
   this.timeout(TIMEOUT);
@@ -29,6 +27,13 @@ describe('amp-list (integration)', function() {
         {{name}} : {{quantity}} @ {{unitPrice}}
       </template>
     '</amp-list>`;
+
+  const scriptTemplateBody =
+  `<amp-list width=300 height=100 src="http://localhost:9876/list/fruit-data/get?cors=0">
+    <script type="text/plain" template="amp-mustache">
+      {{name}} : {{quantity}} @ {{unitPrice}}
+    </script>
+  '</amp-list>`;
 
   const basicTests = env => {
 
@@ -75,80 +80,13 @@ describe('amp-list (integration)', function() {
     extensions: ['amp-list', 'amp-mustache:0.2'],
   }, basicTests);
 
-  describes.integration('"changeToLayoutContainer" action', {
-    body: `
-      <button on="tap:list.changeToLayoutContainer()">+</button>
-      <amp-list id=list width=300 height=100 src="http://localhost:9876/list/fruit-data/get?cors=0">
-        <template type="amp-mustache">
-          {{name}} : {{quantity}} @ {{unitPrice}}
-        </template>
-      </amp-list>`,
-    extensions: ['amp-list', 'amp-mustache'],
-  }, env => {
-    let browser;
-    let doc;
-    let win;
+  describes.integration('basic (mustache-0.1) script template', {
+    body: scriptTemplateBody,
+    extensions: ['amp-list', 'amp-mustache:0.1'],
+  }, basicTests);
 
-    beforeEach(() => {
-      win = env.win;
-      browser = new BrowserController(win);
-      doc = win.document;
-    });
-
-    it('should change to layout container as action', function*() {
-      const list = doc.querySelector('amp-list');
-
-      yield browser.waitForElementLayout('amp-list', TIMEOUT);
-      browser.click('button');
-
-      yield poll('changes to layout container', () => {
-        const layout = list.getAttribute('layout');
-        return layout === 'container';
-      }, /* onError */ undefined, TIMEOUT);
-
-      expect(list.classList.contains('i-amphtml-layout-container')).to.be.true;
-    });
-  });
-
-  describes.integration('[is-layout-container]', {
-    body: `
-    <amp-state id="state">
-      <script type="application/json">
-        false
-      </script>
-    </amp-state>
-    <button on="tap:AMP.setState({state: true})">+</button>
-    <amp-list width=300 height=100 [is-layout-container]="state" src="http://localhost:9876/list/fruit-data/get?cors=0">
-      <template type="amp-mustache">
-        {{name}} : {{quantity}} @ {{unitPrice}}
-      </template>
-    </amp-list>`,
-    extensions: ['amp-list', 'amp-mustache', 'amp-bind'],
-  }, env => {
-    let browser;
-    let doc;
-    let win;
-
-    beforeEach(() => {
-      win = env.win;
-      browser = new BrowserController(win);
-      doc = win.document;
-    });
-
-    it('should change to layout container on bind', function*() {
-      const list = doc.querySelector('amp-list');
-
-      yield browser.waitForElementLayout('amp-list', LOCAL_TIMEOUT);
-      browser.click('button');
-
-      yield poll('changes to layout container', () => {
-        const layout = list.getAttribute('layout');
-        return layout == 'container';
-      }, () => {
-        throw new Error('change to layout container did not complete');
-      }, LOCAL_TIMEOUT);
-
-      expect(list.classList.contains('i-amphtml-layout-container')).to.be.true;
-    });
-  });
+  describes.integration('basic (mustache-0.2) script template', {
+    body: scriptTemplateBody,
+    extensions: ['amp-list', 'amp-mustache:0.2'],
+  }, basicTests);
 });

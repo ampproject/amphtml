@@ -16,34 +16,32 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const closureCompiler = require('google-closure-compiler');
-const colors = require('ansi-colors');
 const fs = require('fs-extra');
 const gulp = require('gulp');
+const gulpIf = require('gulp-if');
 const nop = require('gulp-nop');
 const rename = require('gulp-rename');
 const rimraf = require('rimraf');
-const shortenLicense = require('../shorten-license');
 const sourcemaps = require('gulp-sourcemaps');
-const {highlight} = require('cli-highlight');
+const {gulpClosureCompile, handleCompilerError, handleTypeCheckError} = require('./closure-compile');
 const {isTravisBuild} = require('../travis');
-const {singlePassCompile} = require('../single-pass');
+const {shortenLicense, shouldShortenLicense} = require('./shorten-license');
+const {singlePassCompile} = require('./single-pass');
 const {VERSION: internalRuntimeVersion} = require('../internal-version') ;
 
 const isProdBuild = !!argv.type;
 const queue = [];
 let inProgress = 0;
-const MAX_PARALLEL_CLOSURE_INVOCATIONS = 4;
-const NAILGUN_PORT = '2113'; // Also used in gulpfile.js
+const MAX_PARALLEL_CLOSURE_INVOCATIONS = argv.single_pass ? 1 : 4;
 
 // Compiles AMP with the closure compiler. This is intended only for
 // production use. During development we intend to continue using
 // babel, as it has much faster incremental compilation.
-exports.closureCompile = function(entryModuleFilename, outputDir,
+exports.closureCompile = async function(entryModuleFilename, outputDir,
   outputFilename, options) {
   // Rate limit closure compilation to MAX_PARALLEL_CLOSURE_INVOCATIONS
   // concurrent processes.
-  return new Promise(function(resolve) {
+  return new Promise(function(resolve, reject) {
     function start() {
       inProgress++;
       compile(entryModuleFilename, outputDir, outputFilename, options)
@@ -55,10 +53,7 @@ exports.closureCompile = function(entryModuleFilename, outputDir,
             inProgress--;
             next();
             resolve();
-          }, function(e) {
-            console./*OK*/error(colors.red('Compilation error:'), e.message);
-            process.exit(1);
-          });
+          }, reason => reject(reason));
     }
     function next() {
       if (!queue.length) {
@@ -82,18 +77,6 @@ function cleanupBuildDir() {
   fs.mkdirsSync('build/fake-polyfills/src/polyfills');
 }
 exports.cleanupBuildDir = cleanupBuildDir;
-
-// Formats a closure compiler error message into a more readable form by
-// dropping the closure compiler plugin's logging prefix and then syntax
-// highlighting the error text.
-function formatClosureCompilerError(message) {
-  const closurePluginLoggingPrefix = /^.*?gulp-google-closure-compiler.*?: /;
-  message = message.replace(closurePluginLoggingPrefix, '');
-  message = highlight(message, {ignoreIllegals: true});
-  message = message.replace(/WARNING/g, colors.yellow('WARNING'));
-  message = message.replace(/ERROR/g, colors.red('ERROR'));
-  return message;
-}
 
 function compile(entryModuleFilenames, outputDir, outputFilename, options) {
   const hideWarningsFor = [
@@ -147,23 +130,10 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
     }
 
     console/*OK*/.assert(typeof entryModuleFilenames == 'string');
-    const entryModule = entryModuleFilenames;
-    // TODO(@cramforce): Run the post processing step
-    return singlePassCompile(
-        entryModule,
-        compilationOptions
-    ).then(() => {
-      return new Promise((resolve, reject) => {
-        gulp.src(outputDir + '/**/*.js')
-            .pipe(shortenLicense())
-            .pipe(gulp.dest(outputDir))
-            .on('end', resolve)
-            .on('error', reject);
-      });
-    });
+    return singlePassCompile(entryModuleFilenames, compilationOptions);
   }
 
-  return new Promise(function(resolve) {
+  return new Promise(function(resolve, reject) {
     let entryModuleFilename;
     if (entryModuleFilenames instanceof Array) {
       entryModuleFilename = entryModuleFilenames[0];
@@ -272,13 +242,6 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       // Not sure what these files are, but they seem to duplicate code
       // one level below and confuse the compiler.
       '!node_modules/core-js/modules/library/**.js',
-      // Don't include rollup configs
-      '!**/rollup.config.js',
-      // Don't include tests.
-      '!**_test.js',
-      '!**/test-*.js',
-      '!**/test-e2e/*.js',
-      '!**/*.extern.js',
     ];
     // Add needed path for extensions.
     // Instead of globbing all extensions, this will only add the actual
@@ -328,6 +291,17 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       srcs.push('!src/polyfills.js', '!build/fake-polyfills/**/*.js',);
       unneededFiles.push('build/fake-module/src/polyfills.js');
     }
+    // Negative globstars must come at the end.
+    srcs.push(
+        // Don't include rollup configs
+        '!**/rollup.config.js',
+        // Don't include tests.
+        '!**_test.js',
+        '!**/test-*.js',
+        '!**/test-e2e/*.js',
+        // Don't include externs.
+        '!**/*.extern.js',
+    );
     unneededFiles.forEach(function(fake) {
       if (!fs.existsSync(fake)) {
         fs.writeFileSync(fake,
@@ -343,7 +317,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
     externs.push('build-system/amp.multipass.extern.js');
 
     /* eslint "google-camelcase/google-camelcase": 0*/
-    let compilerOptions = {
+    const compilerOptions = {
       compilation_level: options.compilationLevel || 'SIMPLE_OPTIMIZATIONS',
       // Turns on more optimizations.
       assume_function_wrapper: true,
@@ -402,68 +376,42 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       delete compilerOptions.define;
     }
 
-    let compilerErrors = '';
-    const pluginOptions = {
-      platform: ['java'], // Override the binary used by closure compiler
-      extraArguments: ['-XX:+TieredCompilation'], // Significant speed up!
-      logger: errors => compilerErrors = errors, // Capture compiler errors
-    };
-
-    // SIGNIFICANTLY speed up compilation on Mac and Linux using nailgun
-    // See https://github.com/facebook/nailgun.
-    if (!argv.single_pass &&
-        (process.platform == 'darwin' || process.platform == 'linux')) {
-      const compilerOptionsArray = [
-        '--nailgun-port',
-        NAILGUN_PORT,
-        'org.ampproject.AmpCommandLineRunner',
-        '--',
-      ];
-      Object.keys(compilerOptions).forEach(function(option) {
-        const value = compilerOptions[option];
-        if (value instanceof Array) {
-          value.forEach(function(item) {
-            compilerOptionsArray.push('--' + option + '=' + item);
-          });
+    const compilerOptionsArray = [];
+    Object.keys(compilerOptions).forEach(function(option) {
+      const value = compilerOptions[option];
+      if (value instanceof Array) {
+        value.forEach(function(item) {
+          compilerOptionsArray.push('--' + option + '=' + item);
+        });
+      } else {
+        if (value != null) {
+          compilerOptionsArray.push('--' + option + '=' + value);
         } else {
-          if (value != null) {
-            compilerOptionsArray.push('--' + option + '=' + value);
-          } else {
-            compilerOptionsArray.push('--' + option);
-          }
+          compilerOptionsArray.push('--' + option);
         }
-      });
-      compilerOptions = compilerOptionsArray; // nailgun-runner takes an array
-      pluginOptions.platform = ['native']; // nailgun-runner isn't a java binary
-      pluginOptions.extraArguments = null; // Already part of nailgun-server
-    }
-
-    // Override to local closure compiler JAR
-    closureCompiler.compiler.JAR_PATH =
-        require.resolve('../runner/dist/runner.jar');
-
-    const handleCompilerError = function(err) {
-      console./*OK*/error(colors.red(
-          'Compilation failed for ' + outputFilename + ':\n') +
-          formatClosureCompilerError(compilerErrors) + '\n' +
-          err);
-      process.exit(1);
-    };
+      }
+    });
 
     if (options.typeCheckOnly) {
       return gulp.src(srcs, {base: '.'})
-          .pipe(closureCompiler.gulp()(compilerOptions, pluginOptions))
-          .on('error', handleCompilerError)
+          .pipe(gulpClosureCompile(compilerOptionsArray))
+          .on('error', err => {
+            handleTypeCheckError();
+            reject(err);
+          })
           .pipe(nop())
           .on('end', resolve);
     } else {
       return gulp.src(srcs, {base: '.'})
+          .pipe(gulpIf(shouldShortenLicense, shortenLicense()))
           .pipe(sourcemaps.init({loadMaps: true}))
-          .pipe(closureCompiler.gulp()(compilerOptions, pluginOptions))
-          .on('error', handleCompilerError)
+          .pipe(gulpClosureCompile(compilerOptionsArray))
+          .on('error', err => {
+            handleCompilerError(outputFilename);
+            reject(err);
+          })
           .pipe(rename(outputFilename))
           .pipe(sourcemaps.write('.'))
-          .pipe(shortenLicense())
           .pipe(gulp.dest(outputDir))
           .on('end', resolve);
     }

@@ -1,7 +1,9 @@
 # Code Ownership and AMP
 
-This document describes the code ownership model for the AMP open source
+This document describes the code ownership (OWNERS) model for the AMP open source
 project, and in particular the [AMP HTML GitHub project](https://github.com/ampproject/amphtml).
+
+For more information on the overall code contribution process that the OWNERS model is a part of, see the [Contributing code and features](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md) documentation.
 
 The goals of enforcing AMP code ownership are as follows:
 
@@ -64,13 +66,13 @@ described above. Stay tuned for the latest changes.
 
 ## Approvals required before merging a change
 
-In order to merge a PR, an approval will be required from at least one of the
-owners of each file modified by the PR. See [contributing-code.md](./contributing-code.md)
-for more details.
+Any change in AMP requires the approval of at least one owner of the code the change
+modifies, but this is a subset of the required approvals before a change may be merged.
+See the [code contribution process](./contributing-code.md) for more details.
 
 ## Criteria for being listed as an owner in an `OWNERS.yaml` file
 
- The `OWNERS.yaml` file for each directory will typically list the creator(s) of
- the component or extension it contains, along with those who are most familiar
- with the directory contents. See [owners-and-committers.md](./owners-and-committers.md)
- for more details.
+The `OWNERS.yaml` file for each directory will typically list the creator(s) of
+the component or extension it contains, along with those who are most familiar
+with the directory contents.  To be added to an OWNERS.yaml file create a PR and
+go through the normal [code contribution process](./contributing-code.md).

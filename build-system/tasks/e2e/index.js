@@ -20,7 +20,6 @@ const argv = require('minimist')(process.argv.slice(2));
 const ciReporter = require('../mocha-ci-reporter');
 const config = require('../../config');
 const glob = require('glob');
-const gulp = require('gulp-help')(require('gulp'));
 const log = require('fancy-log');
 const Mocha = require('mocha');
 const tryConnect = require('try-net-connect');
@@ -158,11 +157,14 @@ async function e2e() {
   return deferred;
 }
 
-gulp.task('e2e', 'Runs e2e tests', e2e, {
-  options: {
-    'nobuild': '  Skips building the runtime via `gulp build`',
-    'files': '  Run tests found in a specific path (ex: **/test-e2e/*.js)',
-    'testnames': '  Lists the name of each test being run',
-    'watch': '  Watches for changes in files, runs corresponding test(s)',
-  },
-});
+module.exports = {
+  e2e,
+};
+
+e2e.description = 'Runs e2e tests';
+e2e.flags = {
+  'nobuild': '  Skips building the runtime via `gulp build`',
+  'files': '  Run tests found in a specific path (ex: **/test-e2e/*.js)',
+  'testnames': '  Lists the name of each test being run',
+  'watch': '  Watches for changes in files, runs corresponding test(s)',
+};

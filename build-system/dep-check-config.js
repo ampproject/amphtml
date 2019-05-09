@@ -173,6 +173,8 @@ exports.rules = [
       'ads/alp/handler.js->src/config.js',
       // Some ads need to depend on json.js
       'ads/**->src/json.js',
+      // IMA, similar to other non-Ad 3Ps above, needs access to event-helper
+      'ads/google/imaVideo.js->src/event-helper.js',
     ],
   },
   {
@@ -258,6 +260,7 @@ exports.rules = [
 
       // Subscriptions.
       'extensions/amp-subscriptions/0.1/expr.js->extensions/amp-access/0.1/access-expr.js',
+      'extensions/amp-subscriptions/0.1/local-subscription-platform-iframe.js->extensions/amp-access/0.1/iframe-api/messenger.js',
       'extensions/amp-subscriptions/0.1/viewer-subscription-platform.js->extensions/amp-access/0.1/jwt.js',
       'extensions/amp-subscriptions/0.1/actions.js->extensions/amp-access/0.1/login-dialog.js',
       'extensions/amp-subscriptions-google/0.1/amp-subscriptions-google.js->extensions/amp-subscriptions/0.1/analytics.js',
@@ -374,12 +377,15 @@ exports.rules = [
       // Accessing extension-location.calculateExtensionScriptUrl().
       'extensions/amp-script/0.1/amp-script.js->' +
             'src/service/extension-location.js',
+      // Origin experiments.
       'extensions/amp-list/0.1/amp-list.js->' +
-            'src/service/origin-experiments-impl.js',
+          'src/service/origin-experiments-impl.js',
       'extensions/amp-recaptcha-input/0.1/amp-recaptcha-input.js->' +
-        'src/service/origin-experiments-impl.js',
+          'src/service/origin-experiments-impl.js',
       'extensions/amp-experiment/1.0/amp-experiment.js->' +
-        'src/service/origin-experiments-impl.js',
+          'src/service/origin-experiments-impl.js',
+      'extensions/amp-script/0.1/amp-script.js->' +
+          'src/service/origin-experiments-impl.js',
       // For action macros.
       'extensions/amp-action-macro/0.1/amp-action-macro.js->' +
             'src/service/action-impl.js',

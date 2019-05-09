@@ -170,6 +170,47 @@ const defaultEnvironments = [
 ];
 
 /**
+ * Helper class to skip E2E tests in a specific AMP environment.
+ * Must be instantiated using it.configure().
+ *
+ * Example usage:
+ * it.configure().skipViewerDemo().skipShadowDemo().run('Should ...', ...);
+*/
+class ItConfig {
+  constructor(it, env) {
+    this.it = it;
+    this.env = env;
+    this.skip = false;
+  }
+
+  skipShadowDemo() {
+    this.skip = this.skip ? this.skip : this.env.environment == 'shadow-demo';
+    return this;
+  }
+
+  skipSingle() {
+    this.skip = this.skip ? this.skip : this.env.environment == 'single';
+    return this;
+  }
+
+  skipViewerDemo() {
+    this.skip = this.skip ? this.skip : this.env.environment == 'viewer-demo';
+    return this;
+  }
+
+  run(name, fn) {
+    if (this.skip) {
+      return this.it.skip(name, fn);
+    }
+
+    this.it(name, function() {
+      return fn.apply(this, arguments);
+    });
+  }
+}
+
+
+/**
  * Returns a wrapped version of Mocha's describe(), it() and only() methods
  * that also sets up the provided fixtures and returns the corresponding
  * environment objects of each fixture to the test method.
@@ -199,6 +240,10 @@ function describeEnv(factory) {
 
     return describeFunc(name, function() {
       for (const name in variants) {
+        it.configure = function() {
+          return new ItConfig(it, variants[name]);
+        };
+
         describe(name ? ` ${name} ` : SUB, function() {
           doTemplate.call(this, name, variants[name]);
         });

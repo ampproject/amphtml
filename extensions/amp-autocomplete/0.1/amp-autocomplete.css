@@ -28,14 +28,25 @@ amp-autocomplete > input {
 .i-amphtml-autocomplete-results {
   position: absolute;
   top: 100%;
-  width: calc(100% + 16px);
+  width: calc(100% + 1rem); /* 100% + input padding-left + 2 * margin-left offset */
+  min-width: calc(2em + 2rem); /* 2 chars. + 2em results padding + 2 * .5em visual offset */
+  max-height: 40vh;
   margin-top: .5rem; /* default-ui-space-small */
   margin-left: -.5rem; /* default-ui-space-small */
   border-radius: 4px; /* default-ui-border-radius */
 
+  overflow-y: auto;
+  overflow-x: hidden;
+
   background-color: white; /* default-ui-background-color */
   box-shadow: 0px 2px 4px 0px rgba(0,0,0,.5); /* default-ui-box-shadow */
   z-index: 10;
+}
+
+.i-amphtml-autocomplete-results-up {
+  top: auto;
+  bottom: 100%;
+  margin-bottom: .5rem; /* default-ui-space-small */
 }
 
 .i-amphtml-autocomplete-item {
@@ -52,10 +63,14 @@ amp-autocomplete > input {
   border-radius: 0px 0px 4px 4px; /* default-ui-border-radius */
 }
 
-.i-amphtml-autocomplete-item:hover {
+.i-amphtml-autocomplete-item:hover:not([data-disabled]) {
   background-color: rgba(0,0,0,.15); /* default-ui-light-gray */
 }
 
-.i-amphtml-autocomplete-item-active {
+.i-amphtml-autocomplete-item-active:not([data-disabled]) {
   background-color: rgba(0,0,0,.15); /* default-ui-light-gray */
+}
+
+.i-amphtml-autocomplete-item[data-disabled] {
+  color: rgba(0,0,0,.33);
 }

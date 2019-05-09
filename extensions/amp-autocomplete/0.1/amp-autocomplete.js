@@ -134,6 +134,9 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
     /** @private {?../../../src/service/action-impl.ActionService} */
     this.action_ = null;
+
+    /** @private {?../../../src/service/viewport/viewport-impl.Viewport} */
+    this.viewport_ = null;
   }
 
   /** @override */
@@ -142,6 +145,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
         `Experiment ${EXPERIMENT} is not turned on.`);
 
     this.action_ = Services.actionServiceForDoc(this.element);
+    this.viewport_ = Services.viewportForDoc(this.element);
+
     const jsonScript =
       this.element.querySelector('script[type="application/json"]');
     if (jsonScript) {
@@ -155,6 +160,12 @@ export class AmpAutocomplete extends AMP.BaseElement {
     userAssert(inputElements.length === 1,
         `${TAG} should contain exactly one <input> child`);
     this.inputElement_ = /** @type {!HTMLInputElement} */ (inputElements[0]);
+    userAssert(this.inputElement_.hasAttribute('type'),
+        `${TAG} requires the "type" attribute on <input>`);
+    const inputType = this.inputElement_.getAttribute('type');
+    userAssert(inputType === 'text' || inputType === 'search',
+        `${TAG} requires the "type=text|search" attribute on <input>`);
+    this.inputElement_.setAttribute('dir', 'auto');
 
     userAssert(this.inputElement_.form, `${TAG} should be inside a <form> tag`);
     if (this.inputElement_.form.hasAttribute('autocomplete')) {
@@ -167,12 +178,13 @@ export class AmpAutocomplete extends AMP.BaseElement {
       this.templateElement_ =
         this.templates_.findTemplate(this.element,
             'template, script[template]');
-      // Dummy render to verify existence of "value" attribute.
+      // Dummy render to verify existence of "data-value" attribute.
       this.templates_.renderTemplate(this.templateElement_,
           /** @type {!JsonObject} */({})).then(
           renderedEl => {
-            userAssert(renderedEl.hasAttribute('value'),
-                `${TAG} requires <template> tag to have "value" attribute.`);
+            userAssert(renderedEl.hasAttribute('data-value') ||
+              renderedEl.hasAttribute('data-disabled'),
+            `${TAG} requires a "data-value" or "data-disabled" attribute.`);
           });
     }
 
@@ -235,12 +247,16 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
   /**
    * Creates and returns <div> that contains the template-rendered children.
+   * Should be called in a measureMutate context.
    * @return {!Element}
    * @private
    */
   createContainer_() {
     const container = this.element.ownerDocument.createElement('div');
     container.classList.add('i-amphtml-autocomplete-results');
+    if (this.shouldRenderAbove_()) {
+      container.classList.add('i-amphtml-autocomplete-results-up');
+    }
     container.setAttribute('role', 'list');
     toggle(container, false);
     return container;
@@ -314,7 +330,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
     const element = this.element.ownerDocument.createElement('div');
     element.classList.add('i-amphtml-autocomplete-item');
     element.setAttribute('role', 'listitem');
-    element.setAttribute('value', item);
+    element.setAttribute('data-value', item);
+    element.setAttribute('dir', 'auto');
     element.textContent = item;
     return element;
   }
@@ -378,6 +395,9 @@ export class AmpAutocomplete extends AMP.BaseElement {
       renderPromise = this.templates_.renderTemplateArray(this.templateElement_,
           filteredData).then(renderedChildren => {
         renderedChildren.map(child => {
+          if (child.hasAttribute('data-disabled')) {
+            child.setAttribute('aria-disabled', 'true');
+          }
           child.classList.add('i-amphtml-autocomplete-item');
           child.setAttribute('role', 'listitem');
           container.appendChild(child);
@@ -565,12 +585,41 @@ export class AmpAutocomplete extends AMP.BaseElement {
     }
 
     // Toggle results.
-    return this.mutateElement(() => {
+    let renderAbove = false;
+    return this.measureMutateElement(() => {
+      renderAbove = this.shouldRenderAbove_();
+    }, () => {
       if (!display) {
+        this.userInput_ = this.inputElement_.value;
+        this.filterDataAndRenderResults_(this.sourceData_, this.userInput_);
         this.resetActiveElement_();
+        this.setResultDisplayDirection_(renderAbove);
       }
       this.toggleResults_(display);
     });
+  }
+
+  /**
+   * Display results upwards or downwards based on location in the viewport.
+   * Should be called in a measureMutate context.
+   * @param {boolean} renderAbove
+   * @private
+   */
+  setResultDisplayDirection_(renderAbove) {
+    this.container_.classList.toggle(
+        'i-amphtml-autocomplete-results-up', renderAbove);
+  }
+
+  /**
+   * Returns true if the input is in the bottom half of the viewport.
+   * Should be called in a measureMutate context.
+   * @return {boolean}
+   * @private
+   */
+  shouldRenderAbove_() {
+    const viewHeight = this.viewport_.getHeight() || 0;
+    return this.inputElement_./*OK*/getBoundingClientRect().top
+      > (viewHeight / 2);
   }
 
   /**
@@ -605,10 +654,11 @@ export class AmpAutocomplete extends AMP.BaseElement {
    * @private
    */
   selectItem_(element) {
-    if (element === null) {
+    if (element === null || element.hasAttribute('data-disabled')) {
       return;
     }
-    this.inputElement_.value = this.userInput_ = element.getAttribute('value');
+    this.inputElement_.value = this.userInput_ =
+      element.getAttribute('data-value');
     this.fireSelectEvent_(this.userInput_);
     this.clearAllItems_();
   }
@@ -621,7 +671,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
   fireSelectEvent_(value) {
     const name = 'select';
     const selectEvent = createCustomEvent(this.win,
-        `amp-autocomplete.${name}`, value);
+        `amp-autocomplete.${name}`, /** @type {!JsonObject} */({value}));
     this.action_.trigger(this.element, name, selectEvent, ActionTrust.HIGH);
   }
 
@@ -636,17 +686,46 @@ export class AmpAutocomplete extends AMP.BaseElement {
     if (delta === 0 || !this.resultsShowing_()) {
       return Promise.resolve();
     }
+    // Active element logic
     const keyUpWhenNoneActive = this.activeIndex_ === -1 && delta < 0;
     const index = keyUpWhenNoneActive ? delta : this.activeIndex_ + delta;
-    const activeIndex = mod(index, this.container_.children.length);
-    const newActiveElement = this.container_.children[activeIndex];
-    this.inputElement_.value = newActiveElement.getAttribute('value');
-    return this.mutateElement(() => {
+    const enabledElements = this.getEnabledItems_();
+    if (enabledElements.length === 0) {
+      return Promise.resolve();
+    }
+    const activeIndex = mod(index, enabledElements.length);
+    const newActiveElement = enabledElements[activeIndex];
+    this.inputElement_.value = newActiveElement.getAttribute('data-value');
+
+    // Element visibility logic
+    let shouldScroll, newTop;
+
+    return this.measureMutateElement(() => {
+      const {offsetTop: itemTop, offsetHeight: itemHeight} = newActiveElement;
+      const {scrollTop: resultTop, offsetHeight: resultHeight} =
+        this.container_;
+      shouldScroll = (resultTop > itemTop ||
+        resultTop + resultHeight < itemTop + itemHeight);
+      newTop = delta > 0 ? itemTop + itemHeight - resultHeight : itemTop;
+    }, () => {
+      if (shouldScroll) {
+        this.container_./*OK*/scrollTop = newTop;
+      }
       this.resetActiveElement_();
       newActiveElement.classList.add('i-amphtml-autocomplete-item-active');
       this.activeIndex_ = activeIndex;
       this.activeElement_ = newActiveElement;
     });
+  }
+
+  /** Returns all item elements in the results container that do not have the
+   * 'data-disabled' attribute.
+   * @return {!NodeList}
+   * @private
+   */
+  getEnabledItems_() {
+    return this.container_.querySelectorAll(
+        '.i-amphtml-autocomplete-item:not([data-disabled])');
   }
 
   /**
@@ -660,6 +739,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
   /**
    * Resets the activeIndex_, activeElement_ and removes its 'active' class.
+   * Should be called in a measureMutate context.
    * @private
    */
   resetActiveElement_() {
@@ -690,12 +770,18 @@ export class AmpAutocomplete extends AMP.BaseElement {
     switch (event.key) {
       case Keys.DOWN_ARROW:
         event.preventDefault();
-        // Disrupt loop around to display user input.
-        if (this.activeIndex_ === this.container_.children.length - 1) {
-          this.displayUserInput_();
-          return Promise.resolve();
+        if (this.resultsShowing_()) {
+          // Disrupt loop around to display user input.
+          if (this.activeIndex_ === this.getEnabledItems_().length - 1) {
+            this.displayUserInput_();
+            return Promise.resolve();
+          }
+          return this.updateActiveItem_(1);
         }
-        return this.updateActiveItem_(1);
+        return this.mutateElement(() => {
+          this.filterDataAndRenderResults_(this.sourceData_, this.userInput_);
+          this.toggleResults_(true);
+        });
       case Keys.UP_ARROW:
         event.preventDefault();
         // Disrupt loop around to display user input.
@@ -721,6 +807,12 @@ export class AmpAutocomplete extends AMP.BaseElement {
           this.displayUserInput_();
           this.toggleResults_(false);
         });
+      case Keys.TAB:
+        if (this.activeElement_) {
+          this.userInput_ = this.inputElement_.value;
+          this.fireSelectEvent_(this.userInput_);
+        }
+        return Promise.resolve();
       default:
         return Promise.resolve();
     }
