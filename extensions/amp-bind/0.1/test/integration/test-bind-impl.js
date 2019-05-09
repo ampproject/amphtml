@@ -526,9 +526,11 @@ describe.configure().ifChrome().run('Bind', function() {
           env, container, '[defaultText]="\'abc\'"', 'textarea');
       expect(element.textContent).to.equal('');
       expect(element.value).to.equal('');
+      // Setting `textContent` will also update `value` before interaction.
+      element.value = '123';
       return onBindReadyAndSetState(env, bind, {}).then(() => {
         expect(element.textContent).to.equal('abc');
-        expect(element.value).to.equal('');
+        expect(element.value).to.equal('123');
       });
     });
 

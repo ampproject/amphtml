@@ -1132,7 +1132,7 @@ export class Bind {
     const tag = element.tagName;
 
     switch (property) {
-      case 'defaultText':
+      case 'defaulttext':
         element.textContent = String(newValue);
         break;
 
