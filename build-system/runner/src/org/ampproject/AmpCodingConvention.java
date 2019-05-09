@@ -35,16 +35,9 @@ import java.util.Collection;
  */
 public final class AmpCodingConvention extends CodingConventions.Proxy {
 
-  private boolean singleFileCompilation = false;
-
   /** By default, decorate the ClosureCodingConvention. */
   public AmpCodingConvention() {
     this(new ClosureCodingConvention());
-  }
-
-  public AmpCodingConvention(boolean singleFileCompilation) {
-    this(new ClosureCodingConvention());
-    this.singleFileCompilation = singleFileCompilation;
   }
 
   /** Decorates a wrapped CodingConvention. */
@@ -80,9 +73,6 @@ public final class AmpCodingConvention extends CodingConventions.Proxy {
    * delivery), this could go away there.
    */
   @Override public boolean isExported(String name, boolean local) {
-    if (singleFileCompilation) {
-      return false;
-    }
     // This stops compiler from inlining functions (local or not) that end with
     // NoInline in their name. Mostly used for externing try-catch to avoid v8
     // de-optimization (https://goo.gl/gvzlDp)
