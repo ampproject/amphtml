@@ -43,9 +43,9 @@ import {
   makeBodyVisibleRecovery,
 } from '../style-installer';
 import {installViewerServiceForDoc} from '../service/viewer-impl';
+import {internalRuntimeVersion} from '../internal-version';
 import {registerIniLoadListener} from './utils';
 import {stubElementsForDoc} from '../service/custom-element-registry';
-import {internalRuntimeVersion} from '../internal-version';
 
 import {installActionServiceForDoc} from '../service/action-impl';
 import {installCidService} from '../service/cid-impl';
