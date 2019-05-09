@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {dev} from '../../../src/log';
 import {htmlFor} from '../../../src/static-template';
 
 /**
@@ -35,19 +36,18 @@ export class LightboxCaption {
    * @return {!LightboxCaption} A LightboxCaption instance.
    */
   static build(doc, measureMutateElement) {
-    const element = htmlFor(doc)`
+    const el = htmlFor(doc)`
       <div class="i-amphtml-lbg-caption">
         <div class="i-amphtml-lbg-caption-scroll">
           <div class="i-amphtml-lbg-caption-text"></div>
         </div>
         <div class="i-amphtml-lbg-caption-mask"></div>
       </div>`;
-
     return new LightboxCaption(
-        element,
-        element.querySelector('.i-amphtml-lbg-caption-scroll'),
-        element.querySelector('.i-amphtml-lbg-caption-text'),
-        element.querySelector('.i-amphtml-lbg-caption-mask'),
+        el,
+        dev().assertElement(el.querySelector('.i-amphtml-lbg-caption-scroll')),
+        dev().assertElement(el.querySelector('.i-amphtml-lbg-caption-text')),
+        dev().assertElement(el.querySelector('.i-amphtml-lbg-caption-mask')),
         measureMutateElement);
   }
 
@@ -106,7 +106,8 @@ export class LightboxCaption {
    * @return {!OverflowState} state
    */
   getOverflowState() {
-    return this.scrollContainer_.getAttribute('i-amphtml-lbg-caption-state');
+    return /** @type {OverflowState} */ (
+      this.scrollContainer_.getAttribute('i-amphtml-lbg-caption-state'));
   }
 
   /**
