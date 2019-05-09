@@ -26,7 +26,7 @@ const defaultPlugins = [
   require.resolve(
       './babel-plugins/babel-plugin-transform-amp-extension-call'),
   require.resolve(
-      './babel-plugins/babel-plugin-transform-version'),
+      './babel-plugins/babel-plugin-transform-version-call'),
 ];
 
 module.exports = {

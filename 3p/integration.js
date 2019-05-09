@@ -54,8 +54,6 @@ import {
 import {startsWith} from '../src/string.js';
 import {urls} from '../src/config';
 
-// Disable auto-sorting of imports from here on.
-/* eslint-disable sort-imports-es6-autofix/sort-imports-es6 */
 
 // 3P - please keep in alphabetic order
 import {beopinion} from './beopinion';
@@ -266,6 +264,7 @@ import {zedo} from '../ads/zedo';
 import {zen} from '../ads/zen';
 import {zergnet} from '../ads/zergnet';
 import {zucks} from '../ads/zucks';
+
 
 
 /**
