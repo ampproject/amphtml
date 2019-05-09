@@ -16,6 +16,27 @@
 
 @import './lightbox-caption.css';
 
+[i-amphtml-lbg-fade] {
+  animation-fill-mode: forwards;
+  /* Keep in sync with FADE_DURATION */
+  animation-duration: 400ms;
+}
+
+[i-amphtml-lbg-fade="in"] {
+  animation-name: fadeIn;
+}
+
+[i-amphtml-lbg-fade="out"] {
+  animation-name: fadeOut;
+}
+
+amp-lightbox-gallery[i-amphtml-lbg-fade] {
+  position: relative;
+  /* The highest z-index supported by most browsers - 5. See: css/Z_INDEX.md */
+  z-index: 2147483642;
+  animation-timing-function: cubic-bezier(0.8, 0, 0.2, 1);
+}
+
 amp-lightbox-gallery .amp-carousel-button {
   display: none;
 }
@@ -150,17 +171,17 @@ amp-lightbox-gallery amp-carousel {
   }
 }
 
-.i-amphtml-lbg-controls.i-amphtml-lbg-hidden {
+.i-amphtml-lbg-controls:not([i-amphtml-lbg-fade]) {
   opacity: 0;
   visibility: hidden;
 }
 
-.i-amphtml-lbg-controls.i-amphtml-lbg-fade-in {
-  animation: fadeIn ease-in 0.4s 1 forwards;
+.i-amphtml-lbg-controls[i-amphtml-lbg-fade="in"] {
+  animation-timing-function: ease-in;
 }
 
-.i-amphtml-lbg-controls.i-amphtml-lbg-fade-out {
-  animation: fadeOut linear 0.4s 1 forwards;
+.i-amphtml-lbg-controls[i-amphtml-lbg-fade="out"] {
+  animation-timing-function: linear;
 }
 
 .i-amphtml-lbg[gallery-view] .i-amphtml-lbg-gallery {

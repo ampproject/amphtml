@@ -30,7 +30,6 @@ import {
 } from './lightbox-caption';
 import {Services} from '../../../src/services';
 import {SwipeDef, SwipeYRecognizer} from '../../../src/gesture-recognizers';
-import {bezierCurve} from '../../../src/curve';
 import {
   childElementByTag,
   closest,
@@ -123,8 +122,9 @@ const SWIPE_TO_CLOSE_MOMENTUM_TIMING = 'cubic-bezier(0.15, .55, .3, 0.95)';
 
 // Use S Curves for entry and exit animations
 const TRANSITION_CURVE = {x1: 0.8, y1: 0, x2: 0.2, y2: 1};
-const FADE_CURVE = bezierCurve(0.8, 0, 0.2, 1);
 
+// Keep in sync with [i-amphtml-lbg-fade]'s animation duration
+const FADE_DURATION = 400; // ms;
 const MAX_TRANSITION_DURATION = 700; // ms
 const MIN_TRANSITION_DURATION = 500; // ms
 const MAX_DISTANCE_APPROXIMATION = 250; // px
@@ -310,8 +310,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       this.element.appendChild(this.container_);
       this.manager_.maybeInit();
       this.registerDefaultAction(
-          invocation => this.handleOpenAction_(invocation),
-          'open');
+          invocation => this.openAction_(invocation), 'open');
     });
   }
 
@@ -687,9 +686,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @private
    */
   showControls_() {
-    this.controlsContainer_.classList.remove('i-amphtml-lbg-fade-out');
-    this.controlsContainer_.classList.remove('i-amphtml-lbg-hidden');
-    this.controlsContainer_.classList.add('i-amphtml-lbg-fade-in');
+    this.controlsContainer_.setAttribute('i-amphtml-lbg-fade', 'in');
     this.controlsMode_ = LightboxControlsModes.CONTROLS_DISPLAYED;
   }
 
@@ -698,8 +695,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @private
    */
   hideControls_() {
-    this.controlsContainer_.classList.remove('i-amphtml-lbg-fade-in');
-    this.controlsContainer_.classList.add('i-amphtml-lbg-fade-out');
+    this.controlsContainer_.setAttribute('i-amphtml-lbg-fade', 'out');
     this.controlsMode_ = LightboxControlsModes.CONTROLS_HIDDEN;
   }
 
@@ -991,7 +987,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @param {!../../../src/service/action-impl.ActionInvocation} invocation
    * @private
    */
-  handleOpenAction_(invocation) {
+  openAction_(invocation) {
     const args = invocation.args || {};
     const id = args['id'];
     const expandDescription = args['expandDescription'];
@@ -1023,8 +1019,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       return this.mutateElement(() => {
         toggle(this.element, true);
         setStyle(this.element, 'opacity', 0);
-        this.controlsContainer_.classList.remove('i-amphtml-lbg-fade-in');
-        this.controlsContainer_.classList.add('i-amphtml-lbg-hidden');
+        this.controlsContainer_.removeAttribute('i-amphtml-lbg-fade');
       });
     }).then(() => {
       this.isActive_ = true;
@@ -1043,9 +1038,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
 
       return this.carousel_.signals().whenSignal(CommonSignals.LOAD_END);
     })
-        .then(() => {
-          return this.openLightboxForElement_(element, expandDescription);
-        })
+        .then(() => this.openLightboxForElement_(element, expandDescription))
         .then(() => {
           setStyle(this.element, 'opacity', '');
           this.showControls_();
@@ -1289,37 +1282,17 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @private
    */
   fade_(fadeIn) {
-    const duration = MIN_TRANSITION_DURATION * MOTION_DURATION_RATIO;
-
     return this.mutateElement(() => {
       if (fadeIn) {
         toggle(dev().assertElement(this.carousel_), true);
         toggle(this.element, true);
       }
 
-
-      setStyles(this.element, {
-        // These are needed to stack correctly given that we give the element
-        // opacity. This istThe highest z-index supported by most browsers - 5.
-        // See: css/Z_INDEX.md
-        position: 'relative',
-        zIndex: '2147483642',
-        animationName: fadeIn ? 'fadeIn' : 'fadeOut',
-        animationFillMode: 'forwards',
-        animationTimingFunction: FADE_CURVE,
-        animationDuration: `${duration}ms`,
-      });
+      this.element.setAttribute('i-amphtml-lbg-fade', fadeIn ? 'in' : 'out');
     })
-        .then(() => delayAfterDeferringToEventLoop(this.win, duration))
+        .then(() => delayAfterDeferringToEventLoop(this.win, FADE_DURATION))
         .then(() => {
-          setStyles(this.element, {
-            position: '',
-            zIndex: '',
-            animationName: '',
-            animationFillMode: '',
-            animationTimingFunction: '',
-            animationDuration: '',
-          });
+          this.element.removeAttribute('i-amphtml-lbg-fade');
 
           if (!fadeIn) {
             toggle(dev().assertElement(this.carousel_), false);
