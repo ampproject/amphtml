@@ -108,6 +108,7 @@ function getConfig() {
     saucelabsBrowsers = argv.saucelabs ?
     // With --saucelabs, integration tests are run on this set of browsers.
       [
+        'SL_IE_11',
         'SL_Chrome',
         'SL_Firefox',
         // TODO(amp-infra): Restore this once tests are stable again.
@@ -118,7 +119,6 @@ function getConfig() {
         //'SL_Chrome_Android_7',
         //'SL_iOS_11',
         //'SL_iOS_12',
-        //'SL_IE_11',
         'SL_Chrome_Beta',
         'SL_Firefox_Beta',
       ] : [
@@ -233,19 +233,22 @@ async function runTests() {
     c.reporters = ['mocha'];
   }
 
-  c.browserify.configure = function(bundle) {
-    bundle.on('prebundle', function() {
-      log(green('Transforming tests with'), cyan('browserify') + green('...'));
-    });
-    bundle.on('transform', function(tr) {
-      if (tr instanceof babelify) {
-        tr.once('babelify', function() {
-          process.stdout.write('.');
-        });
-      }
-    });
+  c.browserify = {
+    transform: [['babelify', {global: true}]],
+    configure: function(bundle) {
+      bundle.on('prebundle', function() {
+        log(green('Transforming tests with'),
+            cyan('browserify') + green('...'));
+      });
+      bundle.on('transform', function(tr) {
+        if (tr instanceof babelify) {
+          tr.once('babelify', function() {
+            process.stdout.write('.');
+          });
+        }
+      });
+    },
   };
-
   // Exclude chai-as-promised from runs on the full set of sauce labs browsers.
   // See test/chai-as-promised/chai-as-promised.js for why this is necessary.
   c.files = argv.saucelabs ? [] : config.chaiAsPromised;
@@ -296,6 +299,8 @@ async function runTests() {
     mochaTimeout: c.client.mocha.timeout,
     propertiesObfuscated: !!argv.single_pass,
     testServerPort: c.client.testServerPort,
+    testOnIe: !!argv.ie ||
+        (!!argv.saucelabs && saucelabsBrowsers.includes('SL_IE_11')),
   };
 
   if (argv.compiled) {
@@ -392,7 +397,9 @@ async function runTests() {
   async function runTestInBatches() {
     const browsers = {stable: [], beta: []};
     for (const browserId of saucelabsBrowsers) {
-      browsers[browserId.toLowerCase().endsWith('_beta') ? 'beta' : 'stable']
+      browsers[
+          (browserId.toLowerCase().endsWith('_beta') || browserId == 'SL_IE_11')
+            ? 'beta' : 'stable']
           .push(browserId);
     }
     if (browsers.stable.length) {
