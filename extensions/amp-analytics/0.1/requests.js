@@ -18,7 +18,7 @@ import {BatchSegmentDef, defaultSerializer} from './transport-serializer';
 import {
   ExpansionOptions,
   getConsentStateStr,
-  variableServiceForDoc,
+  variableServiceFor,
 } from './variables';
 import {SANDBOX_AVAILABLE_VARS} from './sandbox-vars-whitelist';
 import {Services} from '../../../src/services';
@@ -61,7 +61,7 @@ export class RequestHandler {
     this.batchIntervalPointer_ = null;
 
     /** @private {!./variables.VariableService} */
-    this.variableService_ = variableServiceForDoc(element);
+    this.variableService_ = variableServiceFor(this.win);
 
     /** @private {!../../../src/service/url-replacements-impl.UrlReplacements} */
     this.urlReplacementService_ = Services.urlReplacementsForDoc(element);
@@ -124,7 +124,7 @@ export class RequestHandler {
     this.lastTrigger_ = trigger;
     const bindings = this.variableService_.getMacros();
     bindings['RESOURCE_TIMING'] = getResourceTiming(
-        this.ampdoc_, trigger['resourceTimingSpec'], this.startTime_);
+        this.win, trigger['resourceTimingSpec'], this.startTime_);
     // TODO: (@zhouyx) Move to variable service once that becomes
     // a doc level services
     bindings['CONSENT_STATE'] = getConsentStateStr(this.element_);
@@ -313,7 +313,7 @@ export class RequestHandler {
 export function expandPostMessage(
   ampdoc, msg, configParams, trigger, expansionOption, element)
 {
-  const variableService = variableServiceForDoc(ampdoc);
+  const variableService = variableServiceFor(ampdoc.win);
   const urlReplacementService = Services.urlReplacementsForDoc(element);
 
   const bindings = variableService.getMacros();
