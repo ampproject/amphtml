@@ -14,18 +14,6 @@
  * limitations under the License.
  */
 
-const {VERSION} = require('../../internal-version') ;
+const runner = require('@babel/helper-plugin-test-runner').default;
 
-module.exports = function(babel) {
-  const {types: t} = babel;
-  return {
-    name: 'transform-version',
-    visitor: {
-      CallExpression(path) {
-        if (path.node.callee.name === 'internalRuntimeVersion') {
-          path.replaceWith(t.stringLiteral(VERSION));
-        }
-      },
-    },
-  };
-};
+runner(__dirname);
