@@ -42,11 +42,11 @@ import {
   makeBodyVisibleRecovery,
 } from '../style-installer';
 import {installViewerServiceForDoc} from '../service/viewer-impl';
+import {internalRuntimeVersion} from '../internal-version';
 import {maybeTrackImpression} from '../impression';
 import {maybeValidate} from '../validator-integration';
 import {startupChunk} from '../chunk';
 import {stubElementsForDoc} from '../service/custom-element-registry';
-import {version} from '../internal-version';
 
 getMode(self).runtime = 'inabox';
 getMode(self).a4aId = getA4AId(self);
@@ -129,7 +129,8 @@ startupChunk(self.document, function initial() {
 // (At least by sophisticated users).
 if (self.console) {
   (console.info || console.log).call(console,
-      `Powered by AMP ⚡ HTML – Version ${version()}`,
+      `Powered by AMP ⚡ HTML – Version ${internalRuntimeVersion()}`,
       self.location.href);
 }
-self.document.documentElement.setAttribute('amp-version', version());
+self.document.documentElement.setAttribute('amp-version',
+    internalRuntimeVersion());
