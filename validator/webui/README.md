@@ -27,7 +27,7 @@ $ go build serve-standalone.go
 $ ./serve-standalone
 ```
 
-Then visit your own instance at http://127.0.0.1:8765/.
+Then visit your own instance at `http://127.0.0.1:8765/`.
 
 If you'd like to run exactly the code that is running at
 [validator.amp.dev](https://validator.amp.dev/), that's an
