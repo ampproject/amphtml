@@ -723,9 +723,12 @@ export class AmpForm {
   handleSsrTemplateFailure_(error) {
     this.setState_(FormState.SUBMIT_ERROR);
     user().error(TAG, 'Form submission failed: %s', error);
+    const errorJsonObject = dict({
+      'error': error.message,
+    });
     return tryResolve(() => {
       this.renderTemplate_(error || {}).then(() => {
-        this.triggerAction_(FormEvents.SUBMIT_ERROR, error);
+        this.triggerAction_(FormEvents.SUBMIT_ERROR, errorJsonObject);
       });
     });
   }
