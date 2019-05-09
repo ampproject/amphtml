@@ -374,7 +374,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       // Package code (also known as URL group) that was used to
       // create ad.
       'pwprc': this.element.getAttribute('data-package'),
-    }, fa && {'fa': fa});
+    }, fa ? {'fa': fa} : null);
 
     const experimentIds = [];
     const identityPromise = Services.timerFor(this.win)
