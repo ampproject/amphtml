@@ -510,7 +510,7 @@ describe.configure().ifChrome().run('Bind', function() {
       });
     });
 
-    it('should only set value for <textarea> elements', () => {
+    it('should set value for [text] in <textarea>', () => {
       const element = createElement(
           env, container, '[text]="\'abc\'"', 'textarea');
       expect(element.textContent).to.equal('');
@@ -518,6 +518,19 @@ describe.configure().ifChrome().run('Bind', function() {
       return onBindReadyAndSetState(env, bind, {}).then(() => {
         expect(element.textContent).to.equal('');
         expect(element.value).to.equal('abc');
+      });
+    });
+
+    it('should set textContent for [defaultText] in <textarea>', () => {
+      const element = createElement(
+          env, container, '[defaultText]="\'abc\'"', 'textarea');
+      expect(element.textContent).to.equal('');
+      expect(element.value).to.equal('');
+      // Setting `textContent` will also update `value` before interaction.
+      element.value = '123';
+      return onBindReadyAndSetState(env, bind, {}).then(() => {
+        expect(element.textContent).to.equal('abc');
+        expect(element.value).to.equal('123');
       });
     });
 
