@@ -235,17 +235,17 @@ function describeEnv(factory) {
       const env = Object.create(variant);
       let asyncErrorTimerId;
       this.timeout(TIMEOUT);
-      beforeEach(async function(done) {
-        setTimeout(() => {
+      let rootBeforeEachTimeout;
+      beforeEach(async function() {
+        rootBeforeEachTimeout = setTimeout(() => {
           log('Timed out in root level before each');
-          done();
         }, TIMEOUT);
-
         await fixture.setup(env);
         installRepl(global, env);
       });
 
       afterEach(async function() {
+        clearTimeout(rootBeforeEachTimeout);
         clearLastExpectError();
         clearTimeout(asyncErrorTimerId);
         await fixture.teardown(env);
