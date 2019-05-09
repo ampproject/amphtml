@@ -168,18 +168,17 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/pull/19495',
   },
   {
+    id: 'ios-fixed-no-transfer',
+    name: 'Remove fixed transfer from iOS 12.2 and up',
+    spec: 'https://github.com/ampproject/amphtml/issues/22220',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22220',
+  },
+  {
     id: 'ios-embed-sd',
     name: 'A new iOS embedded viewport model that wraps the body into' +
       ' shadow root',
     spec: 'https://medium.com/@dvoytenko/amp-ios-scrolling-redo-2-the' +
       '-shadow-wrapper-approach-experimental-3362ed3c2fa2',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16640',
-  },
-  {
-    id: 'ios-embed-sd-notransfer',
-    name: 'Disables transfer mode for the new iOS embedded viewport model',
-    spec: 'https://medium.com/@dvoytenko/amp-ios-scrolling-redo-2-the' +
-        '-shadow-wrapper-approach-experimental-3362ed3c2fa2',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16640',
   },
   {

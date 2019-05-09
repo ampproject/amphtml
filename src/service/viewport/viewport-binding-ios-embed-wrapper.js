@@ -145,7 +145,13 @@ export class ViewportBindingIosEmbedWrapper_ {
 
   /** @override */
   requiresFixedLayerTransfer() {
-    return true;
+    if (!isExperimentOn(this.win, 'ios-fixed-no-transfer')) {
+      return true;
+    }
+    // The jumping fixed elements have been fixed in iOS 12.2.
+    const iosVersion = parseFloat(Services.platformFor(this.win)
+        .getIosVersionString());
+    return iosVersion < 12.2;
   }
 
   /** @override */
