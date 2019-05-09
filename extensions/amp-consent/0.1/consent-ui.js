@@ -407,9 +407,10 @@ export class ConsentUI {
 
   /**
    * Get the client information that needs to be passed to cmp iframe
+   * @param {boolean} isActionPromptTrigger
    * @return {!Promise<JsonObject>}
    */
-  getClientInfoPromise_() {
+  getClientInfoPromise_(isActionPromptTrigger) {
     const consentStatePromise =
         getServicePromiseForDoc(this.ampdoc_, CONSENT_STATE_MANAGER);
     return consentStatePromise.then(consentStateManager => {
@@ -418,6 +419,7 @@ export class ConsentUI {
           'clientConfig': this.clientConfig_,
           'consentState': getConsentStateValue(consentInfo['consentState']),
           'consentString': consentInfo['consentString'],
+          'promptTrigger': isActionPromptTrigger ? 'action' : 'load',
         });
       });
     });
@@ -439,12 +441,22 @@ export class ConsentUI {
     classList.add(consentUiClasses.loading);
     toggle(dev().assertElement(this.ui_), false);
 
-    const iframePromise = this.getClientInfoPromise_().then(clientInfo => {
-      clientInfo['promptTrigger'] = isActionPromptTrigger ? 'action' : 'load';
-      this.ui_.setAttribute('name', JSON.stringify(clientInfo));
-      this.win_.addEventListener('message', this.boundHandleIframeMessages_);
-      insertAfterOrAtStart(this.parent_, dev().assertElement(this.ui_), null);
-    });
+    const iframePromise = this.getClientInfoPromise_(isActionPromptTrigger)
+        .then(clientInfo => {
+          this.ui_.setAttribute(
+              'name',
+              JSON.stringify(clientInfo)
+          );
+          this.win_.addEventListener(
+              'message',
+              this.boundHandleIframeMessages_
+          );
+          insertAfterOrAtStart(
+              this.parent_,
+              dev().assertElement(this.ui_),
+              null
+          );
+        });
 
     return Promise.all([
       iframePromise,
