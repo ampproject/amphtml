@@ -253,7 +253,7 @@ function describeEnv(factory) {
         }
 
         if (!isTravisBuild()) {
-          uninstallRepl(global, env);
+          uninstallRepl();
         }
       });
 
