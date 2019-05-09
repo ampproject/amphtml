@@ -105,12 +105,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6217',
   },
   {
-    id: 'amp-auto-ads-adsense-responsive',
-    name: 'AMP Auto Ads AdSense Responsive',
-    spec: '',
-    cleanupIssue: '',
-  },
-  {
     id: 'amp-base-carousel',
     name: 'AMP extension for a basic, flexible, carousel',
     spec: 'https://github.com/ampproject/amphtml/issues/20595',
