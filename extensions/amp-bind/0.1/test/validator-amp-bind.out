@@ -33,6 +33,7 @@ PASS
 |  <body>
 |    <!-- VALID BINDINGS -->
 |    <p [text]="foo.bar" [class]="foo.bar">p</p>
+|    <textarea [defaultText]="foo.bar" [text]="foo.bar">textarea</textarea>
 |    <a [href]="foo.bar">a</a>
 |    <amp-img src="http://pictures.com/image.jpg" alt="pic" width=10 height=10
 |        [src]="foo.bar" [alt]="foo.bar" [width]="foo.bar" [height]="foo.bar">
