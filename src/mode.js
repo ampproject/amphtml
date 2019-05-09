@@ -15,7 +15,7 @@
  */
 
 import {parseQueryString_} from './url-parse-query-string';
-import {version} from './internal-version';
+import {internalRuntimeVersion} from './internal-version';
 
 /**
  * @typedef {{
@@ -109,7 +109,7 @@ function getMode_(win) {
     lite: searchQuery['amp_lite'] != undefined,
     test: runningTests,
     log: hashQuery['log'],
-    version: version(),
+    version: internalRuntimeVersion(),
     rtvVersion,
     singlePassType,
   };
@@ -127,7 +127,7 @@ function getRtvVersion(win, isLocalDev) {
   // If it's local dev then we won't actually have a full version so
   // just use the version.
   if (isLocalDev) {
-    return version();
+    return internalRuntimeVersion();
   }
 
   if (win.AMP_CONFIG && win.AMP_CONFIG.v) {
@@ -139,7 +139,7 @@ function getRtvVersion(win, isLocalDev) {
   // We will default to production default `01` minor version for now.
   // TODO(erwinmombay): decide whether internalRuntimeVersion should contain
   // minor version.
-  return `01${version()}`;
+  return `01${internalRuntimeVersion()}`;
 }
 
 

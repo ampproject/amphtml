@@ -22,7 +22,7 @@ import {hasOwn} from '../../../src/utils/object';
 import {isLongTaskApiSupported} from '../../../src/service/jank-meter';
 import {toggle} from '../../../src/style';
 import {urls} from '../../../src/config';
-import {version} from '../../../src/internal-version';
+import {internalRuntimeVersion} from '../../../src/internal-version';
 
 /** @private @const {string} */
 const TAG_ = 'amp-analytics/iframe-transport';
@@ -52,7 +52,7 @@ export function getIframeTransportScriptUrl(ampWin, opt_forceProdUrl) {
     return `${loc.protocol}//${loc.host}/dist/iframe-transport-client-lib.js`;
   }
   return urls.thirdParty +
-      `/${version()}/iframe-transport-client-v0.js`;
+      `/${internalRuntimeVersion()}/iframe-transport-client-v0.js`;
 }
 
 /**

@@ -22,7 +22,7 @@ module.exports = function(babel) {
     name: 'transform-version',
     visitor: {
     CallExpression(path) {
-      if (path.node.callee.name === 'version') {
+      if (path.node.callee.name === 'internalRuntimeVersion') {
           path.replaceWith(t.stringLiteral(VERSION));
         }
       }

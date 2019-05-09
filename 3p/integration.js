@@ -52,7 +52,7 @@ import {
 } from './3p';
 import {startsWith} from '../src/string.js';
 import {urls} from '../src/config';
-import {version} from '../src/internal-version';
+import {internalRuntimeVersion} from '../src/internal-version';
 
 // Disable auto-sorting of imports from here on.
 /* eslint-disable sort-imports-es6-autofix/sort-imports-es6 */
@@ -769,7 +769,7 @@ export function isTagNameAllowed(type, tagName) {
  */
 function lightweightErrorReport(e, isCanary) {
   new Image().src = urls.errorReporting +
-      '?3p=1&v=' + encodeURIComponent(version()) +
+      '?3p=1&v=' + encodeURIComponent(internalRuntimeVersion()) +
       '&m=' + encodeURIComponent(e.message) +
       '&ca=' + (isCanary ? 1 : 0) +
       '&r=' + encodeURIComponent(document.referrer) +

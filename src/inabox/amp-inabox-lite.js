@@ -116,10 +116,11 @@ installStylesForDoc(ampdoc, fullCss, () => {
 // (At least by sophisticated users).
 if (self.console) {
   (console.info || console.log).call(console,
-      `Powered by AMP ⚡ HTML – Version ${version()}`,
+      `Powered by AMP ⚡ HTML – Version ${internalRuntimeVersion()}`,
       self.location.href);
 }
-self.document.documentElement.setAttribute('amp-version', version());
+self.document.documentElement.setAttribute('amp-version',
+    internalRuntimeVersion());
 
 /**
  * Install ampdoc-level services.

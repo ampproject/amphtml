@@ -24,7 +24,7 @@ import {setStyle} from './style';
 import {startsWith} from './string';
 import {tryParseJson} from './json';
 import {urls} from './config';
-import {version} from './internal-version';
+import {internalRuntimeVersion} from './internal-version';
 
 /** @type {!Object<string,number>} Number of 3p frames on the for that type. */
 let count = {};
@@ -193,7 +193,7 @@ export function preloadBootstrap(win, preconnect, opt_disallowCustom) {
   // fetched by it.
   const scriptUrl = getMode().localDev
     ? getAdsLocalhost(win) + '/dist.3p/current/integration.js'
-    : `${urls.thirdParty}/${version()}/f.js`;
+    : `${urls.thirdParty}/${internalRuntimeVersion()}/f.js`;
   preconnect.preload(scriptUrl, 'script');
 }
 
@@ -242,7 +242,7 @@ export function getDefaultBootstrapBaseUrl(parentWindow, opt_srcFileBasename) {
   parentWindow.defaultBootstrapSubDomain =
       parentWindow.defaultBootstrapSubDomain || getSubDomain(parentWindow);
   return 'https://' + parentWindow.defaultBootstrapSubDomain +
-      `.${urls.thirdPartyFrameHost}/${version()}/` +
+      `.${urls.thirdPartyFrameHost}/${internalRuntimeVersion()}/` +
       `${srcFileBasename}.html`;
 }
 
@@ -255,7 +255,7 @@ export function getDefaultBootstrapBaseUrl(parentWindow, opt_srcFileBasename) {
 export function getDevelopmentBootstrapBaseUrl(parentWindow, srcFileBasename) {
   return overrideBootstrapBaseUrl || getAdsLocalhost(parentWindow)
     + '/dist.3p/'
-    + (getMode().minified ? `${version()}/${srcFileBasename}`
+    + (getMode().minified ? `${internalRuntimeVersion()}/${srcFileBasename}`
       : `current/${srcFileBasename}.max`)
     + '.html';
 }
@@ -330,7 +330,7 @@ function getCustomBootstrapBaseUrl(parentWindow, opt_strictForUnitTest) {
       '%s (%s) in element %s. See https://github.com/ampproject/amphtml' +
       '/blob/master/spec/amp-iframe-origin-policy.md for details.', url,
   parsed.origin, meta);
-  return `${url}?${version()}`;
+  return `${url}?${internalRuntimeVersion()}`;
 }
 
 /**

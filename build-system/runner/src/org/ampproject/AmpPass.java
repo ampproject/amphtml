@@ -93,7 +93,7 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
         maybeReplaceRValueInVar(n, prodAssignmentReplacements);
       }
       maybeReplaceRValueInVar(n, assignmentReplacements);
-      maybeReplaceCallWithVersion(n, parent);
+      //maybeReplaceCallWithVersion(n, parent);
     }
   }
 

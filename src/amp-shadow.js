@@ -41,7 +41,7 @@ import {installDocService} from './service/ampdoc-impl';
 import {installPerformanceService} from './service/performance-impl';
 import {isExperimentOn} from './experiments';
 import {stubElementsForDoc} from './service/custom-element-registry';
-import {version} from './internal-version';
+import {internalRuntimeVersion} from './internal-version';
 
 // This feature doesn't make sense in shadow mode as it only applies to
 // background rendered iframes;
@@ -93,6 +93,7 @@ if (isExperimentOn(self, 'ampdoc-shell')) {
 // (At least by sophisticated users).
 if (self.console) {
   (console.info || console.log).call(console,
-      `Powered by AMP ⚡ HTML shadows – Version ${version()}`);
+      `Powered by AMP ⚡ HTML shadows – Version ${internalRuntimeVersion()}`);
 }
-self.document.documentElement.setAttribute('amp-version', version());
+self.document.documentElement.setAttribute('amp-version',
+    internalRuntimeVersion());

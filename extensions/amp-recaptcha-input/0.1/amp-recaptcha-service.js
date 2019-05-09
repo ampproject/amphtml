@@ -37,7 +37,7 @@ import {loadPromise} from '../../../src/event-helper';
 import {removeElement} from '../../../src/dom';
 import {setStyle} from '../../../src/style';
 import {urls} from '../../../src/config';
-import {version} from '../../../src/internal-version';
+import {internalRuntimeVersion} from '../../../src/internal-version';
 
 /**
  * @fileoverview
@@ -276,7 +276,7 @@ export class AmpRecaptchaService {
             return '//' + curlsSubdomain +
               '.recaptcha.' + winLocation.host
               + '/dist.3p/' +
-          (getMode().minified ? `${version()}/recaptcha`
+          (getMode().minified ? `${internalRuntimeVersion()}/recaptcha`
             : 'current/recaptcha.max') +
           '.html';
           });
@@ -299,7 +299,7 @@ export class AmpRecaptchaService {
 
     return curlsSubdomainPromise.then(curlsSubdomain => {
       const recaptchaFrameSrc = 'https://' + curlsSubdomain +
-        `.recaptcha.${urls.thirdPartyFrameHost}/${version()}/` +
+        `.recaptcha.${urls.thirdPartyFrameHost}/${internalRuntimeVersion()}/` +
         'recaptcha.html';
       return recaptchaFrameSrc;
     });
