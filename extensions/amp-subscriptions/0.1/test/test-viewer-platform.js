@@ -35,6 +35,7 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
     service: 'local', products: [currentProductId], subscriptionToken: 'token'};
   const fakeAuthToken = {
     'authorization': 'faketoken',
+    'decryptedDocumentKey': 'decryptedDocumentKey',
   };
   const authUrl = 'https://subscribe.google.com/subscription/2/entitlements';
   const pingbackUrl = 'https://lipsum.com/login/pingback';
@@ -62,6 +63,8 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
         .callsFake(() => new Dialog(ampdoc));
     sandbox.stub(serviceAdapter, 'getReaderId')
         .callsFake(() => Promise.resolve('reader1'));
+    sandbox.stub(serviceAdapter, 'getEncryptedDocumentKey')
+        .callsFake(() => Promise.resolve(null));
     resetPlatformsStub = sandbox.stub(serviceAdapter, 'resetPlatforms');
     sandbox.stub(Services.viewerForDoc(ampdoc),'onMessage')
         .callsFake((message, cb) => { messageCallback = cb; });
@@ -75,13 +78,17 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
   });
 
   describe('getEntitlements', () => {
-    it('should call verify with the entitlement given from the'
-      + ' viewer', () => {
-      // const verifyStub = sandbox.stub(viewerPlatform, 'verifyAuthToken_')
-      //     .callsFake(() => Promise.resolve(entitlement));
-      // return viewerPlatform.getEntitlements().then(() => {
-      //   expect(verifyStub).to.be.calledWith('faketoken');
-      // });
+    it('should call verify() with authorization and decryptedDocKey', () => {
+      const entitlement = {};
+      const verifyAuthTokenStub =
+        sandbox.stub(viewerPlatform, 'verifyAuthToken_').callsFake(
+            () => Promise.resolve(entitlement));
+      return viewerPlatform.getEntitlements().then(() => {
+        expect(verifyAuthTokenStub).to.be.calledWith(
+            fakeAuthToken['authorization'],
+            fakeAuthToken['decryptedDocumentKey'],
+        );
+      });
     });
 
     it('should send auth rejection message for rejected verification', () => {
@@ -156,6 +163,22 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
             // sendMessageAwaitResponse.
             expect(resolvedEntitlement.raw).to
                 .equal('faketoken');
+            expect(resolvedEntitlement.decryptedDocumentKey).to.be.undefined;
+          });
+    });
+
+    it('should resolve promise with entitlement and decryptedDocKey', () => {
+      sandbox.stub(viewerPlatform.jwtHelper_, 'decode')
+          .callsFake(() => {return {
+            'aud': getWinOrigin(win),
+            'exp': Math.floor(Date.now() / 1000) + 5 * 60,
+            'entitlements': [entitlementData],
+          };});
+      return viewerPlatform.verifyAuthToken_(
+          'faketoken', 'decryptedDocumentKey').then(
+          resolvedEntitlement => {
+            expect(resolvedEntitlement.decryptedDocumentKey).to
+                .equal('decryptedDocumentKey');
           });
     });
 
