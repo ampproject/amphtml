@@ -242,8 +242,10 @@ module.exports = {
   client: {
     mocha: {
       reporter: 'html',
-      // Longer timeout on Travis; fail quickly at local.
+      // Longer timeout on Travis; fail quickly during local runs.
       timeout: isTravisBuild() ? 10000 : 2000,
+      // Run tests up to 3 times before failing them on Travis.
+      retries: isTravisBuild() ? 2 : 0,
     },
     captureConsole: false,
     verboseLogging: false,
