@@ -831,13 +831,14 @@ export class AmpAutocomplete extends AMP.BaseElement {
           const inputLength = this.inputElement_.value.length;
           this.inputElement_.setSelectionRange(inputLength, inputLength);
         }
-        if (this.activeElement_) {
-          return this.mutateElement(() => {
+        return this.mutateElement(() => {
+          if (this.activeElement_) {
             this.selectItem_(this.activeElement_);
             this.resetActiveElement_();
-          });
-        }
-        return Promise.resolve();
+          } else {
+            this.toggleResults_(false);
+          }
+        });
       case Keys.ESCAPE:
         // Select user's partial input and hide results.
         return this.mutateElement(() => {
