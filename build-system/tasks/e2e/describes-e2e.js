@@ -30,7 +30,7 @@ const {SeleniumWebDriverController} = require('./selenium-webdriver-controller')
 /** Should have something in the name, otherwise nothing is shown. */
 const SUB = ' ';
 const TIMEOUT = 20000;
-
+const SETUP_TIMEOUT = 30000;
 const DEFAULT_E2E_INITIAL_RECT = {width: 800, height: 600};
 
 /**
@@ -238,9 +238,10 @@ function describeEnv(factory) {
       this.timeout(TIMEOUT);
       let rootBeforeEachTimeout;
       beforeEach(async function() {
+        this.timeout(SETUP_TIMEOUT);
         rootBeforeEachTimeout = setTimeout(() => {
           log('Timed out in root level before each');
-        }, TIMEOUT);
+        }, SETUP_TIMEOUT);
         await fixture.setup(env);
 
         // don't install for CI
