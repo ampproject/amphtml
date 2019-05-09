@@ -23,6 +23,7 @@ const {AmpDriver, AmpdocEnvironment} = require('./amp-driver');
 const {Builder, Capabilities} = require('selenium-webdriver');
 const {clearLastExpectError, getLastExpectError} = require('./expect');
 const {installRepl, uninstallRepl} = require('./repl');
+const {isTravisBuild} = require('../../travis');
 const {PuppeteerController} = require('./puppeteer-controller');
 const {SeleniumWebDriverController} = require('./selenium-webdriver-controller');
 
@@ -241,18 +242,26 @@ function describeEnv(factory) {
           log('Timed out in root level before each');
         }, TIMEOUT);
         await fixture.setup(env);
-        installRepl(global, env);
+
+        // don't install for CI
+        if (!isTravisBuild()) {
+          installRepl(global, env);
+        }
+
+        clearTimeout(rootBeforeEachTimeout);
       });
 
       afterEach(async function() {
-        clearTimeout(rootBeforeEachTimeout);
         clearLastExpectError();
         clearTimeout(asyncErrorTimerId);
         await fixture.teardown(env);
         for (const key in env) {
           delete env[key];
         }
-        uninstallRepl();
+
+        if (!isTravisBuild()) {
+          uninstallRepl(global, env);
+        }
       });
 
       after(function() {
@@ -305,18 +314,16 @@ class EndToEndFixture {
     this.spec = spec;
   }
 
-  /** @override */
-  isOn() {
-    return true;
-  }
-
-  /** @override */
   async setup(env) {
+    const firstTimeout = setTimeout(() => {
+      log('first setup timeout');
+    }, TIMEOUT / 4);
     const config = getConfig();
     const controller = await getController(config);
     const ampDriver = new AmpDriver(controller);
     env.controller = controller;
     env.ampDriver = ampDriver;
+    clearTimeout(firstTimeout);
 
     const {
       testUrl,
@@ -327,15 +334,16 @@ class EndToEndFixture {
       environment,
     } = env;
 
+    const secondTimeout = setTimeout(() => {
+      log('second setup timeout');
+    }, TIMEOUT / 4);
     await toggleExperiments(ampDriver, testUrl, experiments);
-
     const {width, height} = initialRect;
     await controller.setWindowRect({width, height});
-
     await ampDriver.navigateToEnvironment(environment, testUrl);
+    clearTimeout(secondTimeout);
   }
 
-  /** @override */
   async teardown(env) {
     const {controller} = env;
     if (controller) {
