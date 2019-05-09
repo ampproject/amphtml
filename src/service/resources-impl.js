@@ -1542,6 +1542,25 @@ export class Resources {
   discoverWork_() {
     // TODO(dvoytenko): vsync separation may be needed for different phases
 
+    const viewportRect = this.viewport_.getRect();
+    // Load viewport = viewport + 3x up/down when document is visible or
+    // depending on prerenderSize in pre-render mode.
+    let loadRect;
+    if (this.visible_) {
+      loadRect = expandLayoutRect(viewportRect, 0.25, 2);
+    } else if (this.prerenderSize_ > 0) {
+      loadRect = expandLayoutRect(viewportRect, 0, this.prerenderSize_ - 1);
+    } else {
+      loadRect = null;
+    }
+
+    const visibleRect = this.visible_
+      // When the doc is visible, consider the viewport to be 25% larger,
+      // to minimize effect from small scrolling and notify things that
+      // they are in viewport just before they are actually visible.
+      ? expandLayoutRect(viewportRect, 0.25, 0.25)
+      : viewportRect;
+
     const now = Date.now();
 
     // Ensure all resources layout phase complete; when relayoutAll is requested
@@ -1556,7 +1575,17 @@ export class Resources {
     let remeasureCount = 0;
     for (let i = 0; i < this.resources_.length; i++) {
       const r = this.resources_[i];
+      if (!r.hasBeenMeasured()) {
+        r.measure();
+      }
       if (r.getState() == ResourceState.NOT_BUILT && !r.isBuilding()) {
+        const shouldForceBuild =
+            this.viewer_.getVisibilityState() === VisibilityState.PRERENDER &&
+            r.isDisplayed() && r.overlaps(loadRect);
+        if (shouldForceBuild) {
+          r.forceBuild = true;
+          console.log('Force prerender', r.debugid);
+        }
         this.buildOrScheduleBuildForResource_(r, /* checkForDupes */ true);
       }
       if (relayoutAll ||
@@ -1608,25 +1637,6 @@ export class Resources {
         });
       });
     }
-
-    const viewportRect = this.viewport_.getRect();
-    // Load viewport = viewport + 3x up/down when document is visible or
-    // depending on prerenderSize in pre-render mode.
-    let loadRect;
-    if (this.visible_) {
-      loadRect = expandLayoutRect(viewportRect, 0.25, 2);
-    } else if (this.prerenderSize_ > 0) {
-      loadRect = expandLayoutRect(viewportRect, 0, this.prerenderSize_ - 1);
-    } else {
-      loadRect = null;
-    }
-
-    const visibleRect = this.visible_
-      // When the doc is visible, consider the viewport to be 25% larger,
-      // to minimize effect from small scrolling and notify things that
-      // they are in viewport just before they are actually visible.
-      ? expandLayoutRect(viewportRect, 0.25, 0.25)
-      : viewportRect;
 
     // Phase 3: Trigger "viewport enter/exit" events.
     for (let i = 0; i < this.resources_.length; i++) {

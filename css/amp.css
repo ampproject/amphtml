@@ -840,6 +840,7 @@ amp-list[load-more] [load-more-end]
  * amp-story
  */
 amp-story[standalone], amp-story-page {
+  min-height: 1px;
   display: block !important;
   height: 100% !important;
   margin: 0 !important;

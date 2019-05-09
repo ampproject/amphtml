@@ -220,6 +220,9 @@ export class Resource {
     /** @private @const {boolean} */
     this.useLayersPrioritization_ = isExperimentOn(this.hostWin,
         'layers-prioritization');
+
+    /** @public {boolean} */
+    this.forceBuild = false;
   }
 
   /**
@@ -325,7 +328,7 @@ export class Resource {
   build() {
     if (this.isBuilding_ ||
         !this.element.isUpgraded() ||
-        !this.resources_.grantBuildPermission()) {
+        (!this.forceBuild && !this.resources_.grantBuildPermission())) {
       return null;
     }
     this.isBuilding_ = true;
