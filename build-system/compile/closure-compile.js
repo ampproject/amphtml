@@ -74,22 +74,30 @@ exports.gulpClosureCompile = function(compilerOptions) {
     logger: errors => compilerErrors = errors, // Capture compiler errors
   };
 
-  // SIGNIFICANTLY speed up compilation on Mac OS and Linux using nailgun
-  // See https://github.com/facebook/nailgun.
-  if (process.platform == 'darwin' || process.platform == 'linux') {
-    compilerOptions = [
-      '--nailgun-port',
-      closureNailgunPort,
-      'org.ampproject.AmpCommandLineRunner',
-      '--',
-    ].concat(compilerOptions);
-    pluginOptions.platform = ['native']; // nailgun-runner isn't a java binary
-    initOptions.extraArguments = null; // Already part of nailgun-server
+  if (compilerOptions.includes('SINGLE_FILE_COMPILATION=true')) {
+    // For single-pass compilation, use the default compiler.jar
+    // TODO(rsimha): Use the native compiler instead of compiler.jar once a fix
+    // is checked in for https://github.com/google/closure-compiler/issues/3041
+    closureCompiler.compiler.JAR_PATH =
+          require.resolve('../../third_party/closure-compiler/compiler.jar');
+  } else {
+    // On Mac OS and Linux, speed up compilation using nailgun.
+    // See https://github.com/facebook/nailgun.
+    if (process.platform == 'darwin' || process.platform == 'linux') {
+      compilerOptions = [
+        '--nailgun-port',
+        closureNailgunPort,
+        'org.ampproject.AmpCommandLineRunner',
+        '--',
+      ].concat(compilerOptions);
+      pluginOptions.platform = ['native']; // nailgun-runner isn't a java binary
+      initOptions.extraArguments = null; // Already part of nailgun-server
+    } else {
+      // For other platforms, use AMP's custom runner.jar
+      closureCompiler.compiler.JAR_PATH =
+            require.resolve('../runner/dist/runner.jar');
+    }
   }
-
-  // Override to local closure compiler JAR
-  closureCompiler.compiler.JAR_PATH =
-        require.resolve('../runner/dist/runner.jar');
 
   return closureCompiler.gulp(initOptions)(compilerOptions, pluginOptions);
 };
