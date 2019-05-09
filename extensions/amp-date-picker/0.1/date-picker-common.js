@@ -26,7 +26,7 @@ import {requireExternal} from '../../../src/module';
  */
 export function withDatePickerCommon(WrappedComponent) {
   const reactDates = requireExternal('react-dates');
-
+  const isSameDay = reactDates['isSameDay'];
   const isInclusivelyAfterDay = reactDates['isInclusivelyAfterDay'];
   const isInclusivelyBeforeDay = reactDates['isInclusivelyBeforeDay'];
   const React = requireExternal('react');
@@ -94,12 +94,33 @@ export function withDatePickerCommon(WrappedComponent) {
   }
 
   const defaultProps = dict({
+    'allowBlockedEndDate': false,
     'blocked': null,
     'highlighted': null,
     'initialVisibleMonth': '',
     'max': '',
     'min': '',
   });
+
+  /**
+   * Detect if a date is a blocked date. This is aware of the
+   * `allow-blocked-end-date` attribute to allow the user to select the first
+   * blocked date after their selected start date.
+   * @param {!./dates-list.DatesList} list
+   * @param {?moment} startDate
+   * @param {?moment} endDate
+   * @param {boolean} allowBlockedEndDate
+   * @param {!moment} day
+   */
+  function isDayBlocked(list, startDate, endDate, allowBlockedEndDate, day) {
+    const isBlocked = datesListContains(list, day);
+
+    if (startDate && !endDate && allowBlockedEndDate) {
+      return isBlocked && !isSameDay(day, list.firstDateAfter(startDate));
+    }
+
+    return isBlocked;
+  }
 
   /**
    * @struct
@@ -115,12 +136,16 @@ export function withDatePickerCommon(WrappedComponent) {
       /** @type {!JsonObject} */
       this.props;
 
+      const allowBlockedEndDate = props['allowBlockedEndDate'];
       const blocked = props['blocked'];
+      const endDate = props['endDate'];
       const highlighted = props['highlighted'];
-      const min = props['min'];
       const max = props['max'];
+      const min = props['min'];
+      const startDate = props['startDate'];
 
-      this.isDayBlocked = datesListContains.bind(null, blocked);
+      this.isDayBlocked = isDayBlocked.bind(null,
+          blocked, startDate, endDate, allowBlockedEndDate);
       this.isDayHighlighted = datesListContains.bind(null, highlighted);
       this.isOutsideRange = isOutsideRange.bind(null, min, max);
     }
@@ -134,16 +159,24 @@ export function withDatePickerCommon(WrappedComponent) {
 
     /** @override */
     componentWillReceiveProps(nextProps) {
+      const allowBlockedEndDate = nextProps['allowBlockedEndDate'];
+      const blocked = nextProps['blocked'];
+      const endDate = nextProps['endDate'];
+      const highlighted = nextProps['highlighted'];
       const max = nextProps['max'];
       const min = nextProps['min'];
-      const blocked = nextProps['blocked'];
-      const highlighted = nextProps['highlighted'];
+      const startDate = nextProps['startDate'];
+
       if (min != this.props['min'] || max != this.props['max']) {
         this.isOutsideRange = isOutsideRange.bind(null, min, max);
       }
 
-      if (blocked != this.props['blocked']) {
-        this.isDayBlocked = datesListContains.bind(null, blocked);
+      if (blocked != this.props['blocked'] ||
+        allowBlockedEndDate != this.props['allowBlockedEndDate'] ||
+        startDate != this.props['startDate'] ||
+        endDate != this.props['endDate']) {
+        this.isDayBlocked = isDayBlocked.bind(null,
+            blocked, startDate, endDate, allowBlockedEndDate);
       }
 
       if (highlighted != this.props['highlighted']) {

@@ -45,6 +45,21 @@ class ElementHandle {
 }
 
 /**
+ * Key to send to the FunctionalTestController#type method to trigger
+ * actions instead of text.
+ * @enum {string}
+ */
+const Key = {
+  'ArrowDown': 'ArrowDown',
+  'ArrowLeft': 'ArrowLeft',
+  'ArrowRight': 'ArrowRight',
+  'ArrowUp': 'ArrowUp',
+  'Enter': 'Enter',
+  'Escape': 'Escape',
+  'Tab': 'Tab',
+};
+
+/**
  * Allow expectations to await the expected value. Duck-type a real Promise.
  * This class, and its waitForValue member function, are necessary because
  * to behave like a Promise and to wait for the correct value from the
@@ -395,7 +410,7 @@ class FunctionalTestController {
    * {@link https://www.w3.org/TR/webdriver1/#element-send-keys}
    *
    * @param {?ElementHandle} unusedHandle
-   * @param {string} unusedKeys
+   * @param {string|Key} unusedKeys
    * @return {!Promise}
    */
   async type(unusedHandle, unusedKeys) {}
@@ -467,6 +482,7 @@ module.exports = {
   ElementHandle,
   ControllerPromise,
   FunctionalTestController,
+  Key,
   WindowRectDef,
   DOMRectDef,
   ScrollToOptionsDef,
