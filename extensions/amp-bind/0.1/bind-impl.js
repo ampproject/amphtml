@@ -221,13 +221,13 @@ export class Bind {
    * @return {!Promise}
    */
   setState(state, opt_skipEval, opt_skipAmpState) {
+    dev().info(TAG, 'setState:', state);
+
     try {
       deepMerge(this.state_, state, MAX_MERGE_DEPTH);
     } catch (e) {
       user().error(TAG, 'Failed to merge result from AMP.setState().', e);
     }
-
-    dev().info(TAG, 'state:', this.state_);
 
     if (opt_skipEval) {
       return Promise.resolve();
@@ -301,7 +301,7 @@ export class Bind {
    * @return {!Promise}
    */
   setStateWithExpression(expression, scope) {
-    dev().info(TAG, 'setState:', `"${expression}"`);
+    dev().info(TAG, 'setState:', expression);
     this.setStatePromise_ = this.evaluateExpression_(expression, scope)
         .then(result => this.setState(result))
         .then(() => this.getDataForHistory_())
@@ -475,8 +475,7 @@ export class Bind {
         this.addMacros_(),
         this.addBindingsForNodes_([root]),
       ]);
-    }).then(results => {
-      dev().info(TAG, '⤷', 'Δ:', results);
+    }).then(() => {
       // Listen for DOM updates (e.g. template render) to rescan for bindings.
       root.addEventListener(AmpEvents.DOM_UPDATE, e => this.onDomUpdate_(e));
       // In dev mode, check default values against initial expression results.
@@ -495,8 +494,10 @@ export class Bind {
   checkReadiness_(root) {
     const ampStates = root.querySelectorAll('AMP-STATE');
     if (ampStates.length > 0) {
-      const whenBuilt = toArray(ampStates).map(el => el.whenBuilt());
-      Promise.all(whenBuilt).then(() => this.onReady_());
+      // Instead of waiting for runtime to schedule builds, force all current
+      // <amp-state> elements to be built.
+      const whenBuilt = toArray(ampStates).map(el => el.build());
+      return Promise.all(whenBuilt).then(() => this.onReady_());
     } else {
       this.onReady_();
     }
@@ -900,7 +901,6 @@ export class Bind {
         // Throw to reject promise.
         throw this.reportWorkerError_(error, `${TAG}: Expression eval failed.`);
       } else {
-        dev().info(TAG, '⤷', result);
         return result;
       }
     });
@@ -927,7 +927,7 @@ export class Bind {
           this.reportError_(userError, elements[0]);
         }
       });
-      dev().info(TAG, 'bindings:', results);
+      dev().info(TAG, 'evaluation:', results);
       return results;
     });
   }
@@ -1043,9 +1043,7 @@ export class Bind {
       }
       return this.applyBoundElement_(results, boundElement);
     });
-    return Promise.all(promises).then(() => {
-      dev().info(TAG, 'updated:', promises.length, 'elements');
-    });
+    return Promise.all(promises);
   }
 
   /**
@@ -1063,9 +1061,7 @@ export class Bind {
         }
       });
     });
-    return Promise.all(promises).then(() => {
-      dev().info(TAG, 'updated:', promises.length, 'elements');
-    });
+    return Promise.all(promises);
   }
 
   /**

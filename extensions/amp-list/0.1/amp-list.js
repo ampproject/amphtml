@@ -271,7 +271,7 @@ export class AmpList extends AMP.BaseElement {
 
   /** @override */
   mutatedAttributesCallback(mutations) {
-    dev().info(TAG, 'mutate:', mutations);
+    dev().info(TAG, 'mutate:', this.element, mutations);
     let promise;
     const src = mutations['src'];
     const state = /** @type {!JsonObject} */ (mutations)['state'];
@@ -522,14 +522,9 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   scheduleRender_(data, append, opt_payload) {
-    dev().info(TAG, 'schedule:', data);
+    dev().info(TAG, 'schedule:', this.element, data);
     const deferred = new Deferred();
     const {promise, resolve: resolver, reject: rejecter} = deferred;
-
-    // If there's nothing currently being rendered, schedule a render pass.
-    if (!this.renderItems_) {
-      this.renderPass_.schedule();
-    }
 
     this.renderItems_ = /** @type {?RenderItems} */ (
       {data, append, resolver, rejecter, payload: opt_payload});
@@ -539,6 +534,9 @@ export class AmpList extends AMP.BaseElement {
         /** @type {(?JsonObject|Array<JsonObject>)} */ (opt_payload || {});
     }
 
+    if (!this.renderPass_.isPending()) {
+      this.renderPass_.schedule();
+    }
     return promise;
   }
 
@@ -550,7 +548,7 @@ export class AmpList extends AMP.BaseElement {
   doRenderPass_() {
     const current = this.renderItems_;
     devAssert(current && current.data, 'Nothing to render.');
-    dev().info(TAG, 'pass:', current);
+    dev().info(TAG, 'pass:', this.element, current);
     const scheduleNextPass = () => {
       // If there's a new `renderItems_`, schedule it for render.
       if (this.renderItems_ !== current) {
@@ -669,7 +667,7 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   render_(elements, opt_append = false) {
-    dev().info(TAG, 'render:', elements);
+    dev().info(TAG, 'render:', this.element, elements);
     const container = dev().assertElement(this.container_);
 
     return this.mutateElement(() => {
