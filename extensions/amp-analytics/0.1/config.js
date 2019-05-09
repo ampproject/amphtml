@@ -22,7 +22,7 @@ import {dev, user, userAssert} from '../../../src/log';
 import {getChildJsonConfig} from '../../../src/json';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject, toWin} from '../../../src/types';
-import {variableServiceForDoc} from './variables';
+import {variableServiceFor} from './variables';
 
 const TAG = 'amp-analytics/config';
 
@@ -355,12 +355,12 @@ export class AnalyticsConfig {
     const keys = [];
     const expansionPromises = [];
 
-    const urlReplacements = Services.urlReplacementsForDoc(element);
-    const bindings = variableServiceForDoc(element).getMacros();
-
     Object.keys(obj).forEach(key => {
       keys.push(key);
-      const expanded = urlReplacements.expandStringAsync(obj[key], bindings);
+      const expanded = Services.urlReplacementsForDoc(element)
+          .expandStringAsync(obj[key],
+              variableServiceFor(/** @type {!Window} */
+                  (this.win_)).getMacros());
       expansionPromises.push(expanded);
     });
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ExpansionOptions, variableServiceForDoc} from './variables';
+import {ExpansionOptions, variableServiceFor} from './variables';
 import {Priority} from '../../../src/service/navigation';
 import {Services} from '../../../src/services';
 import {WindowInterface} from '../../../src/window-interface';
@@ -71,7 +71,7 @@ export class LinkerManager {
     this.formSubmitUnlistener_ = null;
 
     /** @const @private {!./variables.VariableService} */
-    this.variableService_ = variableServiceForDoc(this.ampdoc_);
+    this.variableService_ = variableServiceFor(this.ampdoc_.win);
   }
 
 
