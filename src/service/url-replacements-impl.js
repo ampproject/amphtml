@@ -44,8 +44,8 @@ import {
   installServiceInEmbedScope,
   registerServiceBuilderForDoc,
 } from '../service';
-import {tryResolve} from '../utils/promise';
 import {internalRuntimeVersion} from '../internal-version';
+import {tryResolve} from '../utils/promise';
 
 /** @private @const {string} */
 const TAG = 'UrlReplacements';

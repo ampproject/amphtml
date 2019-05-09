@@ -21,11 +21,11 @@ module.exports = function(babel) {
   return {
     name: 'transform-version',
     visitor: {
-    CallExpression(path) {
-      if (path.node.callee.name === 'internalRuntimeVersion') {
+      CallExpression(path) {
+        if (path.node.callee.name === 'internalRuntimeVersion') {
           path.replaceWith(t.stringLiteral(VERSION));
         }
-      }
+      },
     },
   };
 };

@@ -19,12 +19,12 @@ import {dev, devAssert, user, userAssert} from './log';
 import {dict} from './utils/object';
 import {getContextMetadata} from '../src/iframe-attributes';
 import {getMode} from './mode';
+import {internalRuntimeVersion} from './internal-version';
 import {isExperimentOn} from './experiments';
 import {setStyle} from './style';
 import {startsWith} from './string';
 import {tryParseJson} from './json';
 import {urls} from './config';
-import {internalRuntimeVersion} from './internal-version';
 
 /** @type {!Object<string,number>} Number of 3p frames on the for that type. */
 let count = {};

@@ -41,11 +41,11 @@ import {
   makeBodyVisible,
   makeBodyVisibleRecovery,
 } from './style-installer';
+import {internalRuntimeVersion} from './internal-version';
 import {maybeTrackImpression} from './impression';
 import {maybeValidate} from './validator-integration';
 import {startupChunk} from './chunk';
 import {stubElementsForDoc} from './service/custom-element-registry';
-import {internalRuntimeVersion} from './internal-version';
 
 /**
  * self.IS_AMP_ALT (is AMP alternative binary) is undefined by default in the

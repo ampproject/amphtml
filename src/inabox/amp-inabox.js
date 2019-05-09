@@ -42,11 +42,11 @@ import {
   makeBodyVisibleRecovery,
 } from '../style-installer';
 import {installViewerServiceForDoc} from '../service/viewer-impl';
+import {internalRuntimeVersion} from '../internal-version';
 import {maybeTrackImpression} from '../impression';
 import {maybeValidate} from '../validator-integration';
 import {startupChunk} from '../chunk';
 import {stubElementsForDoc} from '../service/custom-element-registry';
-import {internalRuntimeVersion} from '../internal-version';
 
 getMode(self).runtime = 'inabox';
 getMode(self).a4aId = getA4AId(self);

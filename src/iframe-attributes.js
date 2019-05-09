@@ -19,8 +19,8 @@ import {dict} from './utils/object.js';
 import {experimentToggles, isCanary} from './experiments';
 import {getLengthNumeral} from './layout';
 import {getModeObject} from './mode-object';
-import {urls} from './config';
 import {internalRuntimeVersion} from './internal-version';
+import {urls} from './config';
 
 /**
  * Produces the attributes for the ad template.

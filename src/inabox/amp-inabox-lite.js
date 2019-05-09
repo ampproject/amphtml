@@ -45,7 +45,7 @@ import {
 import {installViewerServiceForDoc} from '../service/viewer-impl';
 import {registerIniLoadListener} from './utils';
 import {stubElementsForDoc} from '../service/custom-element-registry';
-import {version} from '../internal-version';
+import {internalRuntimeVersion} from '../internal-version';
 
 import {installActionServiceForDoc} from '../service/action-impl';
 import {installCidService} from '../service/cid-impl';

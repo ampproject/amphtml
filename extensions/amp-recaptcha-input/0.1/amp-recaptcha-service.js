@@ -32,12 +32,12 @@ import {
   registerServiceBuilderForDoc,
 } from '../../../src/service';
 import {getSourceOrigin} from '../../../src/url';
+import {internalRuntimeVersion} from '../../../src/internal-version';
 import {listenFor, postMessage} from '../../../src/iframe-helper';
 import {loadPromise} from '../../../src/event-helper';
 import {removeElement} from '../../../src/dom';
 import {setStyle} from '../../../src/style';
 import {urls} from '../../../src/config';
-import {internalRuntimeVersion} from '../../../src/internal-version';
 
 /**
  * @fileoverview

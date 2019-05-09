@@ -77,6 +77,7 @@ import {installViewerServiceForDoc, setViewerVisibilityState} from
 import {installViewportServiceForDoc} from './service/viewport/viewport-impl';
 import {installVsyncService} from './service/vsync-impl';
 import {installXhrService} from './service/xhr-impl';
+import {internalRuntimeVersion} from './internal-version';
 import {
   isExperimentOn,
   toggleExperiment,
@@ -86,7 +87,6 @@ import {reportErrorForWin} from './error';
 import {setStyle} from './style';
 import {startupChunk} from './chunk';
 import {stubElementsForDoc} from './service/custom-element-registry';
-import {internalRuntimeVersion} from './internal-version';
 
 initLogConstructor();
 setReportError(reportErrorForWin.bind(null, self));

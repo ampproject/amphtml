@@ -31,8 +31,8 @@ import {getConsentPolicyState} from '../../../src/consent';
 import {getMode} from '../../../src/mode';
 import {getOrCreateAdCid} from '../../../src/ad-cid';
 import {getTimingDataSync} from '../../../src/service/variable-source';
-import {parseJson} from '../../../src/json';
 import {internalRuntimeVersion} from '../../../src/internal-version';
+import {parseJson} from '../../../src/json';
 import {whenUpgradedToCustomElement} from '../../../src/dom';
 
 /** @type {string}  */

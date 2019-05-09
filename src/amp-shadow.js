@@ -39,9 +39,9 @@ import {deactivateChunking} from './chunk';
 import {doNotTrackImpression} from './impression';
 import {installDocService} from './service/ampdoc-impl';
 import {installPerformanceService} from './service/performance-impl';
+import {internalRuntimeVersion} from './internal-version';
 import {isExperimentOn} from './experiments';
 import {stubElementsForDoc} from './service/custom-element-registry';
-import {internalRuntimeVersion} from './internal-version';
 
 // This feature doesn't make sense in shadow mode as it only applies to
 // background rendered iframes;

@@ -19,10 +19,10 @@ import {createElementWithAttributes} from '../../../src/dom';
 import {devAssert, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {hasOwn} from '../../../src/utils/object';
+import {internalRuntimeVersion} from '../../../src/internal-version';
 import {isLongTaskApiSupported} from '../../../src/service/jank-meter';
 import {toggle} from '../../../src/style';
 import {urls} from '../../../src/config';
-import {internalRuntimeVersion} from '../../../src/internal-version';
 
 /** @private @const {string} */
 const TAG_ = 'amp-analytics/iframe-transport';
