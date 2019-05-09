@@ -193,6 +193,20 @@
     </div>
     </form>
 
+    <p>suggest-first and submit-on-enter</p>
+    <form method="post" action-xhr="/form/echo-json/post" target="_blank">
+      <amp-autocomplete filter="prefix"
+        src="autocomplete-cities.example.json" suggest-first submit-on-enter>
+          <input type="text" name="input6b" required>
+      </amp-autocomplete>
+      <input name="submit-button" type="submit" value="Submit">
+    <div submit-success>
+        <template type="amp-mustache">
+            Success! {{input6b}}
+        </template>
+    </div>
+    </form>
+
     <h2>Filters</h2>
     <p>substring</p>
     <form method="post" action-xhr="/form/echo-json/post" target="_blank">

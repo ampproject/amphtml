@@ -348,30 +348,6 @@ describes.realWin('amp-autocomplete unit tests', {
     });
   });
 
-  describe('keyDownHandler_() on Backspace', () => {
-    const event = {key: Keys.Backspace};
-
-    it('should set flag to true when suggest-first is present', () => {
-      return element.layoutCallback().then(() => {
-        impl.suggestFirst_ = true;
-        expect(impl.detectBackspace_).to.be.false;
-        return impl.keyDownHandler_(event);
-      }).then(() => {
-        expect(impl.detectBackspace_).to.be.true;
-      });
-    });
-
-    it('should not set flag when suggest-first is absent', () => {
-      return element.layoutCallback().then(() => {
-        expect(impl.suggestFirst_).to.be.false;
-        expect(impl.detectBackspace_).to.be.false;
-        return impl.keyDownHandler_(event);
-      }).then(() => {
-        expect(impl.detectBackspace_).to.be.false;
-      });
-    });
-  });
-
   describe('keyDownHandler_() on arrow keys', () => {
     const event = {key: Keys.DOWN_ARROW, preventDefault: () => {}};
     let displayInputSpy, updateActiveSpy, eventPreventSpy;
@@ -578,6 +554,30 @@ describes.realWin('amp-autocomplete unit tests', {
     }).then(() => {
       expect(impl.userInput_).to.equal(impl.inputElement_.value);
       expect(fireEventSpy).to.have.been.calledWith(impl.userInput_);
+    });
+  });
+
+  describe('keyDownHandler_() on Backspace', () => {
+    const event = {key: Keys.BACKSPACE};
+
+    it('should set flag to true when suggest-first is present', () => {
+      return element.layoutCallback().then(() => {
+        impl.suggestFirst_ = true;
+        expect(impl.detectBackspace_).to.be.false;
+        return impl.keyDownHandler_(event);
+      }).then(() => {
+        expect(impl.detectBackspace_).to.be.true;
+      });
+    });
+
+    it('should not set flag when suggest-first is absent', () => {
+      return element.layoutCallback().then(() => {
+        expect(impl.suggestFirst_).to.be.false;
+        expect(impl.detectBackspace_).to.be.false;
+        return impl.keyDownHandler_(event);
+      }).then(() => {
+        expect(impl.detectBackspace_).to.be.false;
+      });
     });
   });
 

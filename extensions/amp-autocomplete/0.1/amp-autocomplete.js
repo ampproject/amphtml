@@ -797,11 +797,6 @@ export class AmpAutocomplete extends AMP.BaseElement {
    */
   keyDownHandler_(event) {
     switch (event.key) {
-      case Keys.BACKSPACE:
-        if (this.suggestFirst_) {
-          this.detectBackspace_ = true;
-        }
-        return Promise.resolve();
       case Keys.DOWN_ARROW:
         event.preventDefault();
         if (this.resultsShowing_()) {
@@ -849,6 +844,11 @@ export class AmpAutocomplete extends AMP.BaseElement {
         if (this.activeElement_) {
           this.userInput_ = this.inputElement_.value;
           this.fireSelectEvent_(this.userInput_);
+        }
+        return Promise.resolve();
+      case Keys.BACKSPACE:
+        if (this.suggestFirst_) {
+          this.detectBackspace_ = true;
         }
         return Promise.resolve();
       default:
