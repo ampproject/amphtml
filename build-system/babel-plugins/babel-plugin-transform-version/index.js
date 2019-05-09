@@ -13,3 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+const {VERSION} = require('../../internal-version') ;
+
+module.exports = function(babel) {
+  const {types: t} = babel;
+  return {
+    name: 'transform-version',
+    visitor: {
+    CallExpression(path) {
+      if (path.node.callee.name === 'version') {
+          path.replaceWith(t.stringLiteral(VERSION));
+        }
+      }
+    },
+  };
+};

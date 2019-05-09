@@ -25,6 +25,8 @@ const defaultPlugins = [
       './babel-plugins/babel-plugin-is_minified-constant-transformer'),
   require.resolve(
       './babel-plugins/babel-plugin-transform-amp-extension-call'),
+  require.resolve(
+      './babel-plugins/babel-plugin-transform-version'),
 ];
 
 module.exports = {
