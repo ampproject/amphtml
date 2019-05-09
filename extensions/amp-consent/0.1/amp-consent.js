@@ -54,7 +54,6 @@ export const ACTION_TYPE = {
   DISMISS: 'dismiss',
 };
 
-
 export class AmpConsent extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -139,7 +138,6 @@ export class AmpConsent extends AMP.BaseElement {
      *   'postPromptUI': ...
      * }
      */
-
     const policyConfig = this.consentConfig_['policy'] || dict({});
 
     this.policyConfig_ = expandPolicyConfig(
@@ -210,7 +208,7 @@ export class AmpConsent extends AMP.BaseElement {
     });
 
     this.registerAction('prompt', () => {
-      this.scheduleDisplay_();
+      this.scheduleDisplay_(true);
     });
 
     this.enableExternalInteractions_();
@@ -268,8 +266,9 @@ export class AmpConsent extends AMP.BaseElement {
 
   /**
    * Returns a promise that attempt to show prompt UI
+   * @param {boolean} isActionPromptTrigger
    */
-  scheduleDisplay_() {
+  scheduleDisplay_(isActionPromptTrigger) {
     if (!this.notificationUiManager_) {
       dev().error(TAG, 'notification ui manager not found');
     }
@@ -289,22 +288,25 @@ export class AmpConsent extends AMP.BaseElement {
     }
 
     this.consentUIPending_ = true;
-    this.notificationUiManager_.registerUI(this.show_.bind(this));
+    this.notificationUiManager_.registerUI(
+        this.show_.bind(this, isActionPromptTrigger)
+    );
   }
 
   /**
    * Show prompt UI
    * Do not invoke the function except in scheduleDisplay_
+   * @param {boolean} isActionPromptTrigger
    * @return {!Promise}
    */
-  show_() {
+  show_(isActionPromptTrigger) {
     if (this.isPromptUIOn_) {
       dev().error(TAG,
           'Attempt to show an already displayed prompt UI');
     }
 
     this.vsync_.mutate(() => {
-      this.consentUI_.show();
+      this.consentUI_.show(isActionPromptTrigger);
       this.isPromptUIOn_ = true;
     });
 
@@ -519,7 +521,7 @@ export class AmpConsent extends AMP.BaseElement {
             return false;
           }
           // Prompt
-          this.scheduleDisplay_();
+          this.scheduleDisplay_(false);
           return true;
           // TODO(@zhouyx):
           // Race condition on consent state change between schedule to
@@ -537,7 +539,7 @@ export class AmpConsent extends AMP.BaseElement {
 
     this.notificationUiManager_.onQueueEmpty(() => {
       this.vsync_.mutate(() => {
-        this.postPromptUI_.show();
+        this.postPromptUI_.show(false);
         // Will need to scheduleLayout for postPromptUI
         // upon request for using AMP component.
       });
