@@ -414,6 +414,12 @@ document that sets a minimum height for the date picker.
 }
 ```
 
+##### allow-blocked-end-date
+
+If present, this attribute allows the user to choose an end date on the first
+blocked date after their chosen start date.
+By default, this attribute is not present.
+
 ##### allow-blocked-ranges
 
 If present, this attribute allows the user to select a range containing blocked date(s).

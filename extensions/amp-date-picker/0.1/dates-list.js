@@ -49,7 +49,8 @@ export class DatesList {
     /** @private @const */
     this.dates_ = dates
         .filter(d => this.getDateType_(d) == DateType.DATE)
-        .map(d => this.moment_(d));
+        .map(d => this.moment_(d))
+        .sort((a, b) => a.toDate() - b.toDate());
   }
 
   /**
@@ -61,6 +62,29 @@ export class DatesList {
   contains(date) {
     const m = this.moment_(date);
     return this.matchesDate_(m) || this.matchesRrule_(m);
+  }
+
+  /**
+   * Gets the first date in the date list after the given date.
+   * @param {!moment|string} date
+   * @return {!moment}
+   */
+  firstDateAfter(date) {
+    const m = this.moment_(date);
+
+    const firstDatesAfter = [];
+    for (let i = 0; i < this.dates_.length; i++) {
+      if (this.dates_[i].toDate() >= date) {
+        firstDatesAfter.push(this.dates_[i]);
+        break;
+      }
+    }
+    const rruleDates = this.rrulestrs_
+        .map(rrule => rrule.after(m.toDate()))
+        .filter(Boolean);
+    firstDatesAfter.concat(rruleDates);
+
+    return firstDatesAfter.sort((a, b) => a.toDate() - b.toDate())[0];
   }
 
   /**
