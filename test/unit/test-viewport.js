@@ -1495,8 +1495,8 @@ describe('createViewport', () => {
     });
 
     it('should bind to "iOS embed SD" when the experiment is on', () => {
-      sandbox.stub(Services.platformFor(win), 'getMajorVersion')
-          .callsFake(() => 11);
+      sandbox.stub(Services.platformFor(win), 'getIosVersionString')
+          .callsFake(() => '12.2');
       toggleExperiment(win, 'ios-embed-sd', true);
       win.parent = {};
       sandbox.stub(viewer, 'isEmbedded').callsFake(() => true);
@@ -1507,8 +1507,8 @@ describe('createViewport', () => {
     });
 
     it('should bind to "iOS embed SD" in future Safari', () => {
-      sandbox.stub(Services.platformFor(win), 'getMajorVersion')
-          .callsFake(() => 12);
+      sandbox.stub(Services.platformFor(win), 'getIosVersionString')
+          .callsFake(() => '12.2');
       toggleExperiment(win, 'ios-embed-sd', true);
       win.parent = {};
       sandbox.stub(viewer, 'isEmbedded').callsFake(() => true);
@@ -1518,10 +1518,10 @@ describe('createViewport', () => {
           .be.instanceof(ViewportBindingIosEmbedShadowRoot_);
     });
 
-    it('should NOT bind to "iOS embed SD" in Safari 10', () => {
-      // This is due to some scrolling and SD bugs.
+    it('should NOT bind to "iOS embed SD" in Safari before 12.2', () => {
+      // This is due to some scrolling, position:fixed and SD bugs.
       sandbox.stub(Services.platformFor(win), 'getMajorVersion')
-          .callsFake(() => 10);
+          .callsFake(() => '12.1');
       toggleExperiment(win, 'ios-embed-sd', true);
       win.parent = {};
       sandbox.stub(viewer, 'isEmbedded').callsFake(() => true);
@@ -1536,6 +1536,8 @@ describe('createViewport', () => {
       Object.defineProperty(win.Element.prototype, 'attachShadow', {
         value: null,
       });
+      sandbox.stub(Services.platformFor(win), 'getMajorVersion')
+          .callsFake(() => '12.2');
       toggleExperiment(win, 'ios-embed-sd', true);
       win.parent = {};
       sandbox.stub(viewer, 'isEmbedded').callsFake(() => true);
