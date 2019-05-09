@@ -23,6 +23,8 @@ module.exports = function(babel) {
     visitor: {
       CallExpression(path) {
         if (path.node.callee.name === 'internalRuntimeVersion') {
+          // Detect if we're in a test run and if we are replace the value
+          // with a static string.
           if (process.env.JEST_WORKER_ID !== undefined) {
             path.replaceWith(t.stringLiteral('transform-version-call'));
             return;
