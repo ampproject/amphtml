@@ -285,57 +285,91 @@ function appendToCompiledFile(srcFilename, destFilePath) {
 }
 
 /**
- * Bundles (max) or compiles (min) a given JavaScript file entry point.
- *
- * If `options.typeScript` is true, transpiles from TypeScript into
- * intermediary files before compilation and deletes them afterwards.
- *
- * @param {string} srcDir Path to the src directory
- * @param {string} srcFilename Name of the JS source file
- * @param {string} destDir Destination folder for output script
+ * Minifies a given JavaScript file entry point.
+ * @param {string} srcDir
+ * @param {string} srcFilename
+ * @param {string} destDir
  * @param {?Object} options
  * @return {!Promise}
  */
-function compileJs(srcDir, srcFilename, destDir, options) {
-  options = options || {};
-
+function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
+  const startTime = Date.now();
   const entryPoint = path.join(srcDir, srcFilename);
+  return closureCompile(entryPoint, destDir, options.minifiedName, options)
+      .then(function() {
+        const destPath = path.join(destDir, options.minifiedName);
+        appendToCompiledFile(srcFilename, destPath);
+        fs.writeFileSync(
+            path.join(destDir, 'version.txt'), internalRuntimeVersion);
+        if (options.latestName) {
+          fs.copySync(
+              destPath,
+              path.join(destDir, options.latestName));
+        }
+      })
+      .then(() => {
+        let name = options.minifiedName;
+        if (options.latestName) {
+          name = `${name} → ${options.latestName}`;
+        }
+        endBuildStep('Minified', name, startTime);
+      });
+}
 
-  // Transpile TS to Closure-annotated JS before actual bundling or compile.
-  if (options.typeScript) {
-    const startTime = Date.now();
-    transpileTs(srcDir, srcFilename);
-    endBuildStep('Transpiled', srcFilename, startTime);
+/**
+ * Handles a browserify bundling error
+ * @param {Error} err
+ * @param {boolean} failOnError
+ * @param {string} srcFilename
+ * @param {string} startTime
+ */
+function handleBundleError(err, failOnError, srcFilename, startTime) {
+  let message = err;
+  if (err.stack) {
+    // Drop the node_modules call stack, which begins with '    at'.
+    message = err.stack.replace(/    at[^]*/, '').trim();
   }
-
-  if (options.minify) {
-    const startTime = Date.now();
-    return closureCompile(entryPoint, destDir, options.minifiedName, options)
-        .then(function() {
-          const destPath = path.join(destDir, options.minifiedName);
-          appendToCompiledFile(srcFilename, destPath);
-          fs.writeFileSync(
-              path.join(destDir, 'version.txt'), internalRuntimeVersion);
-          if (options.latestName) {
-            fs.copySync(
-                destPath,
-                path.join(destDir, options.latestName));
-          }
-        })
-        .then(() => {
-          let name = options.minifiedName;
-          if (options.latestName) {
-            name = `${name} → ${options.latestName}`;
-          }
-          endBuildStep('Minified', name, startTime);
-
-          // Remove intemediary, transpiled JS files after compilation.
-          if (options.typeScript) {
-            rimraf.sync(path.join(srcDir, '**/*.js'));
-          }
-        });
+  console.error(red(message));
+  if (failOnError) {
+    process.exit(1);
+  } else {
+    endBuildStep('Error while compiling', srcFilename, startTime);
   }
+}
 
+/**
+ * Performs the final steps after Browserify bundles a JS file
+ * @param {string} srcFilename
+ * @param {string} destDir
+ * @param {string} destFilename
+ * @param {?Object} options
+ */
+function finishBundle(srcFilename, destDir, destFilename, options) {
+  appendToCompiledFile(srcFilename,
+      path.join(destDir, destFilename));
+
+  if (options.latestName) {
+    // "amp-foo-latest.js" -> "amp-foo-latest.max.js"
+    const latestMaxName =
+        options.latestName.split('.js')[0] + '.max.js';
+    // Copy amp-foo-0.1.js to amp-foo-latest.max.js.
+    fs.copySync(
+        path.join(destDir, options.toName),
+        path.join(destDir, latestMaxName));
+  }
+}
+
+/**
+ * Transforms a given JavaScript file entry point with browserify, and watches
+ * it for changes (if required).
+ * @param {string} srcDir
+ * @param {string} srcFilename
+ * @param {string} destDir
+ * @param {?Object} options
+ * @return {!Promise}
+ */
+function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
+  const entryPoint = path.join(srcDir, srcFilename);
   let bundler = browserify(entryPoint, {debug: true}).transform(babelify);
   if (options.watch) {
     bundler = watchify(bundler);
@@ -367,36 +401,13 @@ function compileJs(srcDir, srcFilename, destDir, options) {
     const startTime = Date.now();
     return toPromise(
         bundler.bundle()
-            .on('error', function(err) {
-              let message = err;
-              if (err.stack) {
-                // Drop the node_modules call stack, which begins with '    at'.
-                message = err.stack.replace(/    at[^]*/, '').trim();
-              }
-              console.error(red(message));
-              if (failOnError) {
-                process.exit(1);
-              } else {
-                endBuildStep('Error while compiling', srcFilename, startTime);
-              }
-            })
+            .on('error', err => handleBundleError(
+                err, failOnError, srcFilename, startTime))
             .pipe(lazybuild())
             .pipe(rename(destFilename))
             .pipe(lazywrite())
-            .on('end', function() {
-              appendToCompiledFile(srcFilename,
-                  path.join(destDir, destFilename));
-
-              if (options.latestName) {
-                // "amp-foo-latest.js" -> "amp-foo-latest.max.js"
-                const latestMaxName =
-                    options.latestName.split('.js')[0] + '.max.js';
-                // Copy amp-foo-0.1.js to amp-foo-latest.max.js.
-                fs.copySync(
-                    path.join(destDir, options.toName),
-                    path.join(destDir, latestMaxName));
-              }
-            }))
+            .on('end', () => finishBundle(
+                srcFilename, destDir, destFilename, options)))
         .then(() => {
           let name = destFilename;
           if (options.latestName) {
@@ -405,33 +416,8 @@ function compileJs(srcDir, srcFilename, destDir, options) {
             name = `${name} → ${latestMaxName}`;
           }
           endBuildStep('Compiled', name, startTime);
-
-          // Remove intemediary, transpiled JS files after compilation.
-          if (options.typeScript) {
-            rimraf.sync(path.join(srcDir, '**/*.js'));
-          }
         })
-        .then(() => {
-          if (process.env.NODE_ENV === 'development') {
-            if (destFilename === 'amp.js') {
-              return enableLocalTesting('dist/amp.js');
-            } else if (destFilename === 'amp-esm.js') {
-              return enableLocalTesting('dist/amp-esm.js');
-            } else if (destFilename === 'amp4ads-v0.js') {
-              return enableLocalTesting('dist/amp4ads-v0.js');
-            } else if (destFilename === 'integration.js') {
-              return enableLocalTesting('dist.3p/current/integration.js');
-            } else if (destFilename === 'amp-shadow.js') {
-              return enableLocalTesting('dist/amp-shadow.js');
-            } else if (destFilename === 'amp-inabox.js') {
-              return enableLocalTesting('dist/amp-inabox.js');
-            } else {
-              return Promise.resolve();
-            }
-          } else {
-            return Promise.resolve();
-          }
-        });
+        .then(() => maybeEnableLocalTesting(destFilename));
   }
 
   if (options.watch) {
@@ -454,6 +440,67 @@ function compileJs(srcDir, srcFilename, destDir, options) {
     // This is the default options.watch === true case, and also covers the
     // `gulp build` / `gulp dist` cases where options.watch is undefined.
     return rebundle(/* failOnError */ true);
+  }
+}
+
+/**
+ * Enables local testing mode for various target files
+ * @param {string} destFilename
+ */
+function maybeEnableLocalTesting(destFilename) {
+  if (process.env.NODE_ENV === 'development') {
+    if (destFilename === 'amp.js') {
+      return enableLocalTesting('dist/amp.js');
+    } else if (destFilename === 'amp-esm.js') {
+      return enableLocalTesting('dist/amp-esm.js');
+    } else if (destFilename === 'amp4ads-v0.js') {
+      return enableLocalTesting('dist/amp4ads-v0.js');
+    } else if (destFilename === 'integration.js') {
+      return enableLocalTesting('dist.3p/current/integration.js');
+    } else if (destFilename === 'amp-shadow.js') {
+      return enableLocalTesting('dist/amp-shadow.js');
+    } else if (destFilename === 'amp-inabox.js') {
+      return enableLocalTesting('dist/amp-inabox.js');
+    } else {
+      return Promise.resolve();
+    }
+  } else {
+    return Promise.resolve();
+  }
+}
+
+/**
+ * Transpiles from TypeScript into intermediary files before compilation and
+ * deletes them afterwards.
+ *
+ * @param {string} srcDir Path to the src directory
+ * @param {string} srcFilename Name of the JS source file
+ * @param {string} destDir Destination folder for output script
+ * @param {?Object} options
+ * @return {!Promise}
+ */
+async function compileTs(srcDir, srcFilename, destDir, options) {
+  options = options || {};
+  await transpileTs(srcDir, srcFilename);
+  await compileJs(srcDir, srcFilename, destDir, options);
+  rimraf.sync(path.join(srcDir, '**/*.js'));
+}
+
+/**
+ * Bundles (max) or compiles (min) a given JavaScript file entry point.
+ *
+ * @param {string} srcDir Path to the src directory
+ * @param {string} srcFilename Name of the JS source file
+ * @param {string} destDir Destination folder for output script
+ * @param {?Object} options
+ * @return {!Promise}
+ */
+function compileJs(srcDir, srcFilename, destDir, options) {
+  options = options || {};
+  if (options.minify) {
+    return compileMinifiedJs(srcDir, srcFilename, destDir, options);
+  } else {
+    return compileUnminifiedJs(srcDir, srcFilename, destDir, options);
   }
 }
 
@@ -727,6 +774,7 @@ module.exports = {
   buildWebWorker,
   compile,
   compileJs,
+  compileTs,
   enableLocalTesting,
   endBuildStep,
   hostname,
