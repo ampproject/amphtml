@@ -90,7 +90,6 @@ const unitTestOnSaucePaths = [
 
 const integrationTestPaths = [
   'test/integration/**/*.js',
-  'test/unit/test-error.js',
   'extensions/**/test/integration/**/*.js',
 ];
 
