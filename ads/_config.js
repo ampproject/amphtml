@@ -505,6 +505,10 @@ export const adConfig = {
 
   'ibillboard': {},
 
+  'idealmedia': {
+    renderStartImplemented: false,
+  },
+
   'imedia': {
     prefetch: 'https://i.imedia.cz/js/im3.js',
     renderStartImplemented: true,
