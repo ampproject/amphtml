@@ -109,7 +109,7 @@ describes.endtoend('amp-autocomplete', {
     await expect(controller.getElementAttribute(renderedResults, 'hidden'))
         .not.to.be.null;
     await expect(controller.getElementProperty(renderedResults, 'children'))
-        .to.have.length(0);
+        .to.have.length(1);
     const input = await controller.findElement('#input');
     await expect(controller.getElementProperty(input, 'value'))
         .to.equal('apple');
