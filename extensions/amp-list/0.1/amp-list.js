@@ -300,7 +300,7 @@ export class AmpList extends AMP.BaseElement {
     const renderLocalData = data => {
       // Remove the 'src' now that local data is used to render the list.
       this.element.setAttribute('src', '');
-      const array = isArray(data) ? data : [data];
+      const array = /** @type {!Array} */ (isArray(data) ? data : [data]);
       // Defer to render in layoutCallback() before first layout.
       if (this.layoutCompleted_) {
         this.resetIfNecessary_(/* isFetch */ false);
@@ -312,7 +312,7 @@ export class AmpList extends AMP.BaseElement {
     };
 
     const src = mutations['src'];
-    const state = mutations['state'];
+    const state = /** @type {!JsonObject} */ (mutations)['state'];
     if (src !== undefined) {
       if (typeof src === 'string') {
         // Defer to fetch in layoutCallback() before first layout.
