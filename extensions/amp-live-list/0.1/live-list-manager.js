@@ -32,6 +32,13 @@ const SERVICE_ID = 'liveListManager';
 const TRANSFORMED_PREFIX = 'google;v=';
 
 /**
+ * Property used for storing id of custom slot. This custom slot can be used to
+ * replace the default "items" and "update" slot.
+ * @const {string}
+ */
+export const AMP_LIVE_LIST_CUSTOM_SLOT_ID = 'AMP_LIVE_LIST_CUSTOM_SLOT_ID';
+
+/**
  * Manages registered AmpLiveList components.
  * Primarily handles network requests and updates the components
  * if necessary.
@@ -145,19 +152,22 @@ export class LiveListManager {
     // TODO(erwinm): add update time here when possible.
     return fetchDocument(this.ampdoc.win, url, {
       requireAmpResponseSourceOrigin: false,
-    }).then(this.getLiveLists_.bind(this));
+    }).then(this.updateLiveLists_.bind(this));
   }
 
   /**
-   * Queries the document for all `amp-live-list` tags.
+   * Gets all live lists and updates them with their corresponding counterparts.
+   * Saves latest update time.
    *
    * @param {!Document} doc
+   * @private
    */
-  getLiveLists_(doc) {
+  updateLiveLists_(doc) {
     this.installExtensionsForDoc_(doc);
-    const lists = Array.prototype.slice.call(
-        doc.getElementsByTagName('amp-live-list'));
-    const updateTimes = lists.map(this.updateLiveList_.bind(this));
+    const allLiveLists =
+      this.getLiveLists_(doc).concat(this.getCustomSlots_(doc));
+    const updateTimes = allLiveLists.map(this.updateLiveList_.bind(this));
+
     const latestUpdateTime = Math.max.apply(Math, [0].concat(updateTimes));
     if (latestUpdateTime > 0) {
       this.latestUpdateTime_ = latestUpdateTime;
@@ -170,16 +180,53 @@ export class LiveListManager {
   }
 
   /**
+   * Queries the document for all `amp-live-list` tags.
+   *
+   * @param {!Document} doc
+   * @return {!Array<!Element>}
+   * @private
+   */
+  getLiveLists_(doc) {
+    return Array.prototype.slice.call(
+        doc.getElementsByTagName('amp-live-list'));
+  }
+
+  /**
+   * Queries for custom slots that will be used to host the live elements. This
+   * overrides looking for live elements inside the default <amp-live-list>
+   * element.
+   *
+   * @param {!Document} doc
+   * @return {!Array<!Element>}
+   * @private
+   */
+  getCustomSlots_(doc) {
+    const liveListsWithCustomSlots = Object.keys(this.liveLists_).filter(id =>
+      this.liveLists_[id].hasCustomSlot());
+
+    return liveListsWithCustomSlots.map(id => {
+      const customSlotId =
+        this.liveLists_[id].element[AMP_LIVE_LIST_CUSTOM_SLOT_ID];
+      return doc.getElementById(customSlotId);
+    });
+  }
+
+  /**
    * Updates the appropriate `amp-live-list` with its updates from the server.
    *
    * @param {!Element} liveList
    * @return {number}
    */
   updateLiveList_(liveList) {
-    const id = liveList.getAttribute('id');
+    // amp-live-list elements can be appended dynamically by another
+    // component using the [dynamic-live-list] attribute.
+    const id = liveList.hasAttribute('dynamic-live-list') ?
+      liveList.getAttribute('dynamic-live-list') :
+      liveList.getAttribute('id');
     userAssert(id, 'amp-live-list must have an id.');
     userAssert(id in this.liveLists_,
         'amp-live-list#%s found but did not exist on original page load.', id);
+
     const inClientDomLiveList = this.liveLists_[id];
     inClientDomLiveList.toggle(!liveList.hasAttribute('disabled'));
 
