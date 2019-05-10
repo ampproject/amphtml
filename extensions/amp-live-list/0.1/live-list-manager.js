@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {AMP_LIST_CUSTOM_SLOT_ID} from './amp-live-list';
 import {Poller} from './poller';
 import {Services} from '../../../src/services';
 import {addParamToUrl} from '../../../src/url';
@@ -31,6 +30,13 @@ import {userAssert} from '../../../src/log';
 const SERVICE_ID = 'liveListManager';
 
 const TRANSFORMED_PREFIX = 'google;v=';
+
+/**
+ * Property used for storing id of custom slot. This custom slot can be used to
+ * replace the default "items" and "update" slot.
+ * @const {string}
+ */
+export const AMP_LIVE_LIST_CUSTOM_SLOT_ID = 'AMP_LIVE_LIST_CUSTOM_SLOT_ID';
 
 /**
  * Manages registered AmpLiveList components.
@@ -199,7 +205,8 @@ export class LiveListManager {
       this.liveLists_[id].hasCustomSlot());
 
     return liveListsWithCustomSlots.map(id => {
-      const customSlotId = this.liveLists_[id].element[AMP_LIST_CUSTOM_SLOT_ID];
+      const customSlotId =
+        this.liveLists_[id].element[AMP_LIVE_LIST_CUSTOM_SLOT_ID];
       return doc.getElementById(customSlotId);
     });
   }

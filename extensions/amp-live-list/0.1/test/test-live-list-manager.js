@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
-import {AMP_LIST_CUSTOM_SLOT_ID} from '../amp-live-list';
-import {LiveListManager, liveListManagerForDoc} from '../live-list-manager';
+import {
+  AMP_LIVE_LIST_CUSTOM_SLOT_ID,
+  LiveListManager,
+  liveListManagerForDoc,
+} from '../live-list-manager';
 import {Services} from '../../../../src/services';
 
 const XHR_BUFFER_SIZE = 2;
@@ -102,7 +105,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
     }
 
     hasCustomSlot() {
-      return !!this.element[AMP_LIST_CUSTOM_SLOT_ID];
+      return !!this.element[AMP_LIVE_LIST_CUSTOM_SLOT_ID];
     }
   }
 
@@ -183,7 +186,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
       'disable-pagination': '',
       'auto-insert': '',
     }, 'custom-list');
-    clientLiveList.element[AMP_LIST_CUSTOM_SLOT_ID] = customSlot.id;
+    clientLiveList.element[AMP_LIVE_LIST_CUSTOM_SLOT_ID] = customSlot.id;
     clientLiveList.buildCallback();
 
     return manager.whenDocReady_().then(() => {

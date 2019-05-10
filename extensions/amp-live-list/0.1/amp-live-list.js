@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
+import {
+  AMP_LIVE_LIST_CUSTOM_SLOT_ID,
+  LiveListManager,
+  liveListManagerForDoc,
+} from './live-list-manager';
 import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-live-list-0.1.css';
 import {Layout} from '../../../src/layout';
-import {LiveListManager, liveListManagerForDoc} from './live-list-manager';
 import {childElementByAttr} from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';
 import {user, userAssert} from '../../../src/log';
@@ -39,13 +43,6 @@ const classes = {
  * }}
  */
 let MutateItemsDef;
-
-/**
- * Property used for storing id of custom slot. This custom slot can be used to
- * replace the default "items" and "update" slot.
- * @const {string}
- */
-export const AMP_LIST_CUSTOM_SLOT_ID = 'AMP_LIST_CUSTOM_SLOT_ID';
 
 /**
  * Defines underlying API for LiveList components.
@@ -204,7 +201,7 @@ export class AmpLiveList extends AMP.BaseElement {
 
     this.manager_ = liveListManagerForDoc(this.getAmpDoc());
 
-    this.customSlotId_ = this.element[AMP_LIST_CUSTOM_SLOT_ID];
+    this.customSlotId_ = this.element[AMP_LIVE_LIST_CUSTOM_SLOT_ID];
 
     this.updateSlot_ = userAssert(
         this.getUpdateSlot_(this.element),
