@@ -38,9 +38,9 @@ amp-story/1.0/test/validator-amp-story-embedded-component-error.html:33:8 The ta
 >>         ^~~~~~~~~
 amp-story/1.0/test/validator-amp-story-embedded-component-error.html:34:8 The tag 'a', a child tag of 'amp-story-grid-layer', does not satisfy one of the acceptable reference points: AMP-STORY-GRID-LAYER default, AMP-STORY-GRID-LAYER animate-in. [AMP_TAG_PROBLEM]
 >>         ^~~~~~~~~
-amp-story/1.0/test/validator-amp-story-embedded-component-error.html:34:8 Invalid URL protocol 'javascript:' for attribute 'href' in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+amp-story/1.0/test/validator-amp-story-embedded-component-error.html:34:8 Invalid URL protocol 'javascript:' for attribute 'href' in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#links) [DISALLOWED_HTML]
 >>         ^~~~~~~~~
-amp-story/1.0/test/validator-amp-story-embedded-component-error.html:34:8 The attribute 'target' in tag 'a' is set to the invalid value ''. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+amp-story/1.0/test/validator-amp-story-embedded-component-error.html:34:8 The attribute 'target' in tag 'a' is set to the invalid value ''. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#links) [DISALLOWED_HTML]
 |        </amp-story-grid-layer>
 |        <amp-story-grid-layer template="vertical">
 |            <a href="google.com" role="link" data-tooltip-icon="/my-icon" data-tooltip-text="click me" target="_top">TOOLTIP</a>

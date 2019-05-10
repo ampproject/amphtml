@@ -43,9 +43,9 @@ import {
   makeBodyVisibleRecovery,
 } from '../style-installer';
 import {installViewerServiceForDoc} from '../service/viewer-impl';
+import {internalRuntimeVersion} from '../internal-version';
 import {registerIniLoadListener} from './utils';
 import {stubElementsForDoc} from '../service/custom-element-registry';
-import {version} from '../internal-version';
 
 import {installActionServiceForDoc} from '../service/action-impl';
 import {installCidService} from '../service/cid-impl';
@@ -116,10 +116,11 @@ installStylesForDoc(ampdoc, fullCss, () => {
 // (At least by sophisticated users).
 if (self.console) {
   (console.info || console.log).call(console,
-      `Powered by AMP ⚡ HTML – Version ${version()}`,
+      `Powered by AMP ⚡ HTML – Version ${internalRuntimeVersion()}`,
       self.location.href);
 }
-self.document.documentElement.setAttribute('amp-version', version());
+self.document.documentElement.setAttribute('amp-version',
+    internalRuntimeVersion());
 
 /**
  * Install ampdoc-level services.

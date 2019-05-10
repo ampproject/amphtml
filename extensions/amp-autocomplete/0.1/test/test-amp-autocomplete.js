@@ -521,6 +521,20 @@ describes.realWin('amp-autocomplete unit tests', {
     });
   });
 
+  it('should call keyDownHandler_() on Tab', () => {
+    const event = {key: Keys.TAB};
+    impl.inputElement_.value = 'expected';
+    impl.activeElement_ = doc.createElement('div');
+    expect(impl.userInput_).not.to.equal(impl.inputElement_.value);
+    const fireEventSpy = sandbox.spy(impl, 'fireSelectEvent_');
+    return element.layoutCallback().then(() => {
+      return impl.keyDownHandler_(event);
+    }).then(() => {
+      expect(impl.userInput_).to.equal(impl.inputElement_.value);
+      expect(fireEventSpy).to.have.been.calledWith(impl.userInput_);
+    });
+  });
+
   it('should call keyDownHandler_() and fallthrough on any other key', () => {
     const event = {key: Keys.LEFT_ARROW};
     return element.layoutCallback().then(() => {
@@ -640,6 +654,32 @@ describes.realWin('amp-autocomplete unit tests', {
           'i-amphtml-autocomplete-item-active');
       expect(impl.container_.children[2]).not.to.have.class(
           'i-amphtml-autocomplete-item-active');
+    });
+  });
+
+  it('should not select disabled items', () => {
+    const disabledItem = doc.createElement('div');
+    disabledItem.setAttribute('data-disabled', '');
+    expect(impl.selectItem_(disabledItem)).to.be.undefined;
+  });
+
+  it('should not return disabled items from getEnabledItems_()', () => {
+    impl.templateElement_ = doc.createElement('template');
+    const sourceData = ['apple', 'mango', 'pear'];
+    const renderedChildren = sourceData.map(item => {
+      const renderedChild = doc.createElement('div');
+      renderedChild.setAttribute('data-value', item);
+      return renderedChild;
+    });
+    renderedChildren[2].setAttribute('data-disabled', '');
+    sandbox.stub(impl.templates_, 'renderTemplateArray').returns(
+        Promise.resolve(renderedChildren));
+
+    return impl.renderResults_(sourceData, impl.container_).then(() => {
+      expect(impl.container_.children.length).to.equal(3);
+      expect(impl.getEnabledItems_().length).to.equal(2);
+      expect(impl.container_.children[2].hasAttribute(
+          'aria-disabled')).to.be.true;
     });
   });
 });

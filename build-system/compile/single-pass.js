@@ -103,6 +103,12 @@ exports.getFlags = function(config) {
     source_map_location_mapping: ['|/'],
     //new_type_inf: true,
     language_in: 'ES6',
+    // By default closure puts all of the public exports on the global, but
+    // because of the wrapper modules (to mitigate async loading of scripts)
+    // that we add to the js binaries this prevents other js binaries from
+    // accessing the symbol, we remedy this by attaching all public exports
+    // to `_` and everything imported across modules is is accessed through `_`.
+    rename_prefix_namespace: '_',
     language_out: config.language_out || 'ES5',
     module_output_path_prefix: config.writeTo || 'out/',
     module_resolution: 'NODE',
@@ -509,18 +515,21 @@ function isAltMainBundle(name) {
   });
 }
 
-exports.singlePassCompile = function(entryModule, options) {
+exports.singlePassCompile = async function(entryModule, options) {
   return exports.getFlags({
     modules: [entryModule].concat(extensions),
     writeTo: singlePassDest,
     define: options.define,
     externs: options.externs,
     hideWarningsFor: options.hideWarningsFor,
-  }).then(compile).then(wrapMainBinaries).then(postProcessConcat).catch(e => {
-    // NOTE: passing the message here to colors.red breaks the output.
-    console./*OK*/error(e.message);
-    process.exit(1);
-  });
+  })
+      .then(compile)
+      .then(wrapMainBinaries)
+      .then(postProcessConcat)
+      .catch(err => {
+        err.showStack = false; // Useless node_modules stack
+        return Promise.reject(err);
+      });
 };
 
 /**
@@ -587,12 +596,15 @@ function postProcessConcat() {
 
 function compile(flagsArray) {
   // TODO(@cramforce): Run the post processing step
-  return new Promise(function(resolve) {
+  return new Promise(function(resolve, reject) {
     return gulp.src(srcs, {base: transformDir})
         .pipe(gulpIf(shouldShortenLicense, shortenLicense()))
         .pipe(sourcemaps.init({loadMaps: true}))
         .pipe(gulpClosureCompile(flagsArray))
-        .on('error', handleSinglePassCompilerError)
+        .on('error', err => {
+          handleSinglePassCompilerError();
+          reject(err);
+        })
         .pipe(sourcemaps.write('.'))
         .pipe(gulpIf(/(\/amp-|\/_base)/, rename(path => path.dirname += '/v0')))
         .pipe(gulp.dest('.'))

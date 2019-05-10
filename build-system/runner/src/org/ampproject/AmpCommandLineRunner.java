@@ -45,8 +45,6 @@ public class AmpCommandLineRunner extends CommandLineRunner {
 
   private boolean is_production_env = true;
 
-  private boolean single_file_compilation = false;
-
   private String amp_version = "";
 
   /**
@@ -90,22 +88,18 @@ public class AmpCommandLineRunner extends CommandLineRunner {
     options.setExtractPrototypeMemberDeclarations(true);
     options.setSmartNameRemoval(true);
     options.optimizeCalls = true;
-    if (single_file_compilation) {
-      options.renamePrefixNamespace = "_";
-    } else {
-      // Have to turn this off because we cannot know whether sub classes
-      // might override a method. In the future this might be doable
-      // with using a more complete extern file instead.
-      options.setRemoveUnusedPrototypeProperties(false);
-      options.setInlineProperties(false);
-      options.setComputeFunctionSideEffects(false);
-      // Since we are not computing function side effects, at least let the
-      // compiler remove calls to functions with `@nosideeffects`.
-      options.setMarkNoSideEffectCalls(true);
-      // Property renaming. Relies on AmpCodingConvention to be safe.
-      options.setRenamingPolicy(VariableRenamingPolicy.ALL,
-          PropertyRenamingPolicy.ALL_UNQUOTED);
-    }
+    // Have to turn this off because we cannot know whether sub classes
+    // might override a method. In the future this might be doable
+    // with using a more complete extern file instead.
+    options.setRemoveUnusedPrototypeProperties(false);
+    options.setInlineProperties(false);
+    options.setComputeFunctionSideEffects(false);
+    // Since we are not computing function side effects, at least let the
+    // compiler remove calls to functions with `@nosideeffects`.
+    options.setMarkNoSideEffectCalls(true);
+    // Property renaming. Relies on AmpCodingConvention to be safe.
+    options.setRenamingPolicy(VariableRenamingPolicy.ALL,
+        PropertyRenamingPolicy.ALL_UNQUOTED);
     options.setDisambiguatePrivateProperties(true);
     options.setGeneratePseudoNames(pseudo_names);
     return options;
@@ -114,7 +108,7 @@ public class AmpCommandLineRunner extends CommandLineRunner {
   @Override protected void setRunOptions(CompilerOptions options)
       throws IOException, FlagUsageException {
     super.setRunOptions(options);
-    options.setCodingConvention(new AmpCodingConvention(single_file_compilation));
+    options.setCodingConvention(new AmpCodingConvention());
   }
 
   /**
@@ -138,8 +132,6 @@ public class AmpCommandLineRunner extends CommandLineRunner {
         runner.is_production_env = false;
       } else if (arg.contains("PSEUDO_NAMES=true")) {
         runner.pseudo_names = true;
-      } else if (arg.contains("SINGLE_FILE_COMPILATION=true")) {
-        runner.single_file_compilation = true;
       } else if (arg.contains("VERSION=")) {
         runner.amp_version = arg.substring(arg.lastIndexOf("=") + 1);
       }

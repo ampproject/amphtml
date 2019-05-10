@@ -16,7 +16,6 @@
 'use strict';
 
 const colors = require('ansi-colors');
-const gulp = require('gulp-help')(require('gulp'));
 const log = require('fancy-log');
 const sleep = require('sleep-promise');
 const {exec, execScriptAsync, getStdout} = require('../exec');
@@ -31,8 +30,8 @@ const nailgunServer =
     require.resolve('../../third_party/nailgun/nailgun-server.jar');
 const customRunner = require.resolve('../runner/dist/runner.jar');
 const DEFAULT_NAILGUN_PORT = '2113';
+const CLOSURE_NAILGUN_PORT = '2114';
 const NAILGUN_STARTUP_TIMEOUT_MS = 5 * 1000;
-
 
 /**
  * Replaces the default compiler binary with nailgun on linux and macos
@@ -60,7 +59,7 @@ function maybeReplaceDefaultCompiler() {
  * @param {string} port
  * @param {boolean} detached
  */
-exports.startNailgunServer = async function(port, detached) {
+async function startNailgunServer(port, detached) {
   nailgunRunnerReplacer = maybeReplaceDefaultCompiler();
   if (!nailgunRunnerReplacer) {
     return;
@@ -103,14 +102,14 @@ exports.startNailgunServer = async function(port, detached) {
   log(red('ERROR:'), 'Could not start',
       cyan('nailgun-server.jar'), 'on port', cyan(port) + '...');
   process.exit(1);
-};
+}
 
 /**
  * Stops the nailgun server if it's running, and restores the binary used by
  * google-closure-compiler
  * @param {string} port
  */
-exports.stopNailgunServer = async function(port) {
+async function stopNailgunServer(port) {
   if (nailgunRunnerReplacer) {
     nailgunRunnerReplacer.restore();
   }
@@ -127,22 +126,27 @@ exports.stopNailgunServer = async function(port) {
           cyan('nailgun-server.jar'), 'on port', cyan(port));
     }
   }
-};
+}
 
 async function nailgunStart() {
   log(green('Usage:'));
   log('⤷ To start a server:', cyan('gulp nailgun-start'));
   log('⤷ To compile code:', cyan('build-system/tasks/nailgun-compile <args>'));
   log('⤷ To stop the server:', cyan('gulp nailgun-stop'));
-  await exports.startNailgunServer(DEFAULT_NAILGUN_PORT, /* detached */ true);
+  await startNailgunServer(DEFAULT_NAILGUN_PORT, /* detached */ true);
 }
 
 async function nailgunStop() {
-  await exports.stopNailgunServer(DEFAULT_NAILGUN_PORT);
+  await stopNailgunServer(DEFAULT_NAILGUN_PORT);
 }
 
-gulp.task('nailgun-start', 'Starts up a nailgun server for closure compiler',
-    nailgunStart);
+module.exports = {
+  closureNailgunPort: CLOSURE_NAILGUN_PORT,
+  nailgunStart,
+  nailgunStop,
+  startNailgunServer,
+  stopNailgunServer,
+};
 
-gulp.task('nailgun-stop', 'Stops an already running nailgun server',
-    nailgunStop);
+nailgunStart.description = 'Starts up a nailgun server for closure compiler';
+nailgunStop.description = 'Stops an already running nailgun server';

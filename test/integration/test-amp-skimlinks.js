@@ -41,7 +41,8 @@ function clickLinkAndNavigate_(doc, selector) {
   }
 }
 
-describe('amp-skimlinks', function() {
+// TODO(@slocka) Disabled due to #22154, re-enable
+describe.skip('amp-skimlinks', function() {
   const setupBasic = {
     extensions: ['amp-skimlinks'],
     body: `
@@ -117,6 +118,7 @@ describe('amp-skimlinks', function() {
     const itSkipFirefox = (desc, cb) =>
       it.configure().skipFirefox().run(desc, cb);
 
+    // TODO(alanorozco): Unskip on firefox
     itSkipFirefox('should send NA-tracking on non-merchant link click ', () => {
       // Give 500ms for amp-skimlinks to set up.
       return browser.wait(500).then(() => {
