@@ -23,21 +23,31 @@ import {getMode} from '../../../src/mode';
 import {includes} from '../../../src/string';
 import {isCanary} from '../../../src/experiments';
 
-/**
- * @typedef {{
- *   lat: number,
- *   lon: number,
- *   source: UserLocationSource,
- * }}
- */
-export let UserLocationDef;
+/** @dict @extends {JsonObject} */
+export class UserLocation {
+  /**
+   * @param {UserLocationSource} source
+   * @param {number=} lat
+   * @param {number=} lon
+   */
+  constructor(source, lat = undefined, lon = undefined) {
+    /** @const */
+    this['lat'] = lat;
+
+    /** @const */
+    this['lon'] = lon;
+
+    /** @const */
+    this['source'] = source;
+  }
+}
 
 /**
  * @typedef {{
- *   fallback: UserLocationDef,
+ *   fallback: UserLocation,
  *   maxAge: number,
  *   precision: string,
- *   timeout: number,
+ *   timeout: number
  * }}
  */
 export let UserLocationConfigDef;
@@ -50,10 +60,12 @@ const PermissionStatus = {
 };
 
 /** @enum {string} */
-const UserLocationSource = {
+export const UserLocationSource = {
+  DEBUG: 'debug',
   FALLBACK: 'fallback',
   GEOLOCATION: 'geolocation',
-  DEBUG: 'debug',
+  UNAVAILABLE: 'unavailable',
+  UNSUPPORTED: 'unsupported',
 };
 
 /**
@@ -85,8 +97,8 @@ export class UserLocationService {
     /** @private */
     this.initialized_ = false;
 
-    /** @private {?UserLocationDef} */
-    this.cachedLocation_ = null;
+    /** @private {!UserLocation} */
+    this.cachedLocation_ = new UserLocation(UserLocationSource.UNAVAILABLE);
 
     /** @private */
     this.requestedObservable_ = this.createRequestedObservable_();
@@ -112,27 +124,24 @@ export class UserLocationService {
   }
 
   /**
-   * @return {!Observable}
+   * @return {!Observable<!UserLocation>}
    * @private
    */
   createRequestedObservable_() {
     const observable = new Observable();
     observable.add(
-        ({position, error}) => this.handleLocationAvailable_(position, error));
+        position => this.handleLocationAvailable_(position));
     return observable;
   }
 
   /**
    *
-   * @param {?UserLocationDef} position
-   * @param {PositionError=} error
+   * @param {!UserLocation} position
    * @private
    */
-  handleLocationAvailable_(position, error) {
-    if (position) {
-      this.cachedLocation_ = position;
-    }
-    this.handleFirstRequested_(position, error);
+  handleLocationAvailable_(position) {
+    this.cachedLocation_ = position;
+    this.handleFirstRequested_(position);
   }
 
   /**
@@ -146,18 +155,11 @@ export class UserLocationService {
    * If the user purges their location permission from blocked to prompt
    * etc
    *
-   * @param {?UserLocationDef} position
-   * @param {PositionError=} error
+   * @param {!UserLocation} position
    * @private
    */
-  handleFirstRequested_(position, error) {
+  handleFirstRequested_(position) {
     if (!this.firstRequestedDeferred_) {
-      return;
-    }
-
-    if (error) {
-      // TODO(cvializ): should we not expose the error code?
-      this.firstRequestedDeferred_.reject(error);
       return;
     }
 
@@ -202,7 +204,7 @@ export class UserLocationService {
    * Remove variables from global AMP state.
    */
   purge() {
-    this.cachedLocation_ = null;
+    this.cachedLocation_ = new UserLocation(UserLocationSource.UNAVAILABLE);
     this.requestedObservable_ = this.createRequestedObservable_();
   }
 
@@ -210,12 +212,10 @@ export class UserLocationService {
    * Debug override case, only works in canary or localdev and matches
    * numeric and limited symbolic characters only to prevent xss vector.
    * The regex is not trying to ensure correctness.
-   * @return {?UserLocationDef|string}
+   * @return {?UserLocation|string}
    * @private
    */
   getOverride_() {
-    let override = null;
-
     const {localDev, userLocationOverride} = getMode(this.win_);
     if (!userLocationOverride ||
         !(isCanary(this.win_) || localDev) ||
@@ -227,21 +227,22 @@ export class UserLocationService {
       const split = userLocationOverride.split(LOCATION_SEPARATOR);
       const lat = Number(split[0]);
       const lon = Number(split[1]);
-      override = {lat, lon, source: UserLocationSource.DEBUG};
+      return new UserLocation(UserLocationSource.DEBUG, lat, lon);
     }
 
-    return override;
+    return userLocationOverride;
   }
 
   /**
    * Called to retrieve the user location after the user has requested it.
    * This will wait for the location to become available if necessary.
    * @param {boolean=} opt_poll
-   * @return {!Promise<?UserLocationDef>}
+   * @return {!Promise<!UserLocation>}
    */
   getLocation(opt_poll) {
     if (!this.geolocationSupported_) {
-      return Promise.reject(PositionError.PLATFORM_UNSUPPORTED);
+      return Promise.resolve(
+          new UserLocation(UserLocationSource.UNSUPPORTED));
     }
 
     if (opt_poll && this.firstRequestedDeferred_) {
@@ -250,7 +251,7 @@ export class UserLocationService {
 
     // NOTE: This may be reached with a `null` cachedLocation if the user
     // removes geolocation permission after allowing it.
-    return Promise.resolve(this.cachedLocation_);
+    return Promise.resolve(this.cachedLocation_); // TODO(cvializ): add fallback here, when present
   }
 
   /**
@@ -264,21 +265,30 @@ export class UserLocationService {
    *
    * Variable substitution is notified through the `getLocation` method.
    *
-   * @param {!UserLocationConfigDef} config
-   * @return {!Promise<!UserLocationDef>}
+   * @param {UserLocationConfigDef} config
+   * @return {!Promise<!UserLocation>}
    */
   requestLocation(config) {
     const observable = this.requestedObservable_;
     const locationDeferred = new Deferred();
     const {promise} = locationDeferred;
 
-    const resolve = location => {
-      observable.fire({location});
-      locationDeferred.resolve(location);
+    const resolve = position => {
+      observable.fire(position);
+      locationDeferred.resolve(position);
     };
 
     const reject = error => {
-      observable.fire({location: null, error});
+      let position;
+      if (error == PositionError.PLATFORM_UNSUPPORTED) {
+        position = new UserLocation(UserLocationSource.UNSUPPORTED);
+      }
+      if (error == PositionError.POSITION_UNAVAILABLE ||
+          error == PositionError.PERMISSION_DENIED ||
+          error == PositionError.TIMEOUT) {
+        position = new UserLocation(UserLocationSource.UNAVAILABLE);
+      }
+      observable.fire(position);
       locationDeferred.reject(error);
     };
 
@@ -305,7 +315,7 @@ export class UserLocationService {
     const {navigator} = this.win_;
     navigator.geolocation.getCurrentPosition(position => {
       const {latitude: lat, longitude: lon} = position.coords;
-      resolve({lat, lon, source: UserLocationSource.GEOLOCATION});
+      resolve(new UserLocation(UserLocationSource.GEOLOCATION, lat, lon));
     }, error => {
       const {code} = error;
       if (code == error.POSITION_UNAVAILABLE) {

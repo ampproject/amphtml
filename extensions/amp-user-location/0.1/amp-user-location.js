@@ -117,7 +117,8 @@ export class AmpUserLocation extends AMP.BaseElement {
     const servicePromise = Services.userLocationForDocOrNull(this.element);
 
     return servicePromise.then(userLocationService => {
-      const config = this.config_ || {};
+      const config = this.config_ ||
+      /** @type {./user-location-service.UserLocationConfigDef} */ ({});
       return userLocationService.requestLocation(config);
     }).then(location => {
       this.triggerEvent_(AmpUserLocationEvent.APPROVE, location);
@@ -139,12 +140,12 @@ export class AmpUserLocation extends AMP.BaseElement {
    * Trigger the given AMP action. Triggered when the overlay opens or when
    * the static date picker should receive focus from the attached input.
    * @param {string} name
-   * @param {?./user-location-service.UserLocationDef=} opt_data
+   * @param {!./user-location-service.UserLocation=} data
    * @private
    */
-  triggerEvent_(name, opt_data = null) {
+  triggerEvent_(name, data = undefined) {
     const event = createCustomEvent(
-        this.win, `${TAG}.${name}`, /** @type {JsonObject}*/ (opt_data));
+        this.win, `${TAG}.${name}`, data);
     this.action_.trigger(this.element, name, event, ActionTrust.HIGH);
   }
 }

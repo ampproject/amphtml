@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as mode from '../../../../src/mode';
 import {AmpUserLocationEvent} from '../amp-user-location';
 import {PositionError} from '../position-error';
 import {Services} from '../../../../src/services';
@@ -28,7 +27,6 @@ describes.realWin('amp-user-location', {
 
   let win;
   let doc;
-  let getModeStub;
 
   beforeEach(() => {
     win = env.win;
@@ -133,7 +131,7 @@ describes.realWin('amp-user-location', {
   it('should trigger the "deny" event if user denies geolocation', () => {
     class UserLocationFake {}
     UserLocationFake.prototype.requestLocation =
-        sandbox.stub().rejects({code: PositionError.PERMISSION_DENIED});
+        sandbox.stub().rejects(PositionError.PERMISSION_DENIED);
     sandbox.stub(Services, 'userLocationForDocOrNull')
         .resolves(new UserLocationFake());
 
@@ -149,7 +147,7 @@ describes.realWin('amp-user-location', {
   it('should trigger the "error" event if geolocation timeouts', () => {
     class UserLocationFake {}
     UserLocationFake.prototype.requestLocation =
-        sandbox.stub().rejects({code: PositionError.TIMEOUT});
+        sandbox.stub().rejects(PositionError.TIMEOUT);
     sandbox.stub(Services, 'userLocationForDocOrNull')
         .resolves(new UserLocationFake());
 
@@ -165,7 +163,7 @@ describes.realWin('amp-user-location', {
   it('should trigger the "error" event if geolocation is unavailable', () => {
     class UserLocationFake {}
     UserLocationFake.prototype.requestLocation =
-        sandbox.stub().rejects({code: PositionError.POSITION_UNAVAILABLE});
+        sandbox.stub().rejects(PositionError.POSITION_UNAVAILABLE);
     sandbox.stub(Services, 'userLocationForDocOrNull')
         .resolves(new UserLocationFake());
 
@@ -182,7 +180,7 @@ describes.realWin('amp-user-location', {
       'does not support geolocation', () => {
     class UserLocationFake {}
     UserLocationFake.prototype.requestLocation =
-        sandbox.stub().rejects({code: PositionError.PLATFORM_UNSUPPORTED});
+        sandbox.stub().rejects(PositionError.PLATFORM_UNSUPPORTED);
     sandbox.stub(Services, 'userLocationForDocOrNull')
         .resolves(new UserLocationFake());
 
@@ -198,12 +196,9 @@ describes.realWin('amp-user-location', {
   it('should "approve" with override if override is present', () => {
     class UserLocationFake {}
     UserLocationFake.prototype.requestLocation =
-        sandbox.stub().callsFake((unusedConfig, override) => override);
+        sandbox.stub().callsFake(() => ({lat: 10, lon: -10}));
     sandbox.stub(Services, 'userLocationForDocOrNull')
         .resolves(new UserLocationFake());
-
-    getModeStub = sandbox.stub(mode, 'getMode');
-    getModeStub.returns({userLocationOverride: '10,-10', localDev: true});
 
     let triggerSpy;
     return newUserLocation().then(element => element.getImpl()).then(impl => {
