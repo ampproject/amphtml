@@ -33,13 +33,6 @@ async function checkTypes() {
   process.env.NODE_ENV = 'production';
   cleanupBuildDir();
   maybeInitializeExtensions();
-  // Disabled to improve type check performance, since this provides
-  // little incremental value.
-  /*buildExperiments({
-    minify: true,
-    checkTypes: true,
-    preventRemoveAndMakeDir: true,
-  });*/
   const compileSrcs = [
     './src/amp.js',
     './src/amp-shadow.js',
