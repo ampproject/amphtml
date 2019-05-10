@@ -81,22 +81,17 @@ async function dist() {
       })
       .then(() => {
         return Promise.all([
-          compile(false, true, true),
+          compile(false, true),
           // NOTE: When adding a line here,
           // consider whether you need to include polyfills
           // and whether you need to init logging (initLogConstructor).
-          buildAlp({minify: true, watch: false, preventRemoveAndMakeDir: true}),
-          buildExaminer({
-            minify: true, watch: false, preventRemoveAndMakeDir: true}),
-          buildWebWorker({
-            minify: true, watch: false, preventRemoveAndMakeDir: true}),
-          buildExtensions({minify: true, preventRemoveAndMakeDir: true}),
-          buildExperiments({
-            minify: true, watch: false, preventRemoveAndMakeDir: true}),
-          buildLoginDone({
-            minify: true, watch: false, preventRemoveAndMakeDir: true}),
-          buildWebPushPublisherFiles({
-            minify: true, watch: false, preventRemoveAndMakeDir: true}),
+          buildAlp({minify: true, watch: false}),
+          buildExaminer({minify: true, watch: false}),
+          buildWebWorker({minify: true, watch: false}),
+          buildExtensions({minify: true}),
+          buildExperiments({minify: true, watch: false}),
+          buildLoginDone({minify: true, watch: false}),
+          buildWebPushPublisherFiles({minify: true, watch: false}),
           copyCss(),
         ]);
       }).then(() => {
@@ -240,7 +235,6 @@ function buildWebPushPublisherFile(version, fileName, watch, options) {
           includePolyfills: true,
           minify: options.minify || argv.minify,
           minifiedName,
-          preventRemoveAndMakeDir: options.preventRemoveAndMakeDir,
           extraGlobs: [
             tempBuildDir + '*.js',
           ],
@@ -335,7 +329,6 @@ async function buildLoginDoneVersion(version, options) {
           includePolyfills: true,
           minify: options.minify || argv.minify,
           minifiedName,
-          preventRemoveAndMakeDir: options.preventRemoveAndMakeDir,
           latestName,
           extraGlobs: [
             buildDir + 'amp-login-done-0.1.max.js',

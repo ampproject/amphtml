@@ -141,11 +141,6 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       entryModuleFilename = entryModuleFilenames;
       entryModuleFilenames = [entryModuleFilename];
     }
-    // If undefined/null or false then we're ok executing the deletions
-    // and mkdir.
-    if (!options.preventRemoveAndMakeDir) {
-      cleanupBuildDir();
-    }
     const unneededFiles = [
       'build/fake-module/third_party/babel/custom-babel-helpers.js',
     ];

@@ -70,17 +70,15 @@ const hostname3p = argv.hostname3p || '3p.ampproject.net';
  *
  * @param {boolean} watch
  * @param {boolean} shouldMinify
- * @param {boolean=} opt_preventRemoveAndMakeDir
  * @return {!Promise}
  */
-function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir) {
+function compile(watch, shouldMinify) {
   const promises = [
     compileJs('./3p/', 'integration.js',
         './dist.3p/' + (shouldMinify ? internalRuntimeVersion : 'current'), {
           minifiedName: 'f.js',
           watch,
           minify: shouldMinify,
-          preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
           externs: ['./ads/ads.extern.js'],
           include3pDirectories: true,
           includePolyfills: true,
@@ -90,7 +88,6 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir) {
           minifiedName: 'ampcontext-v0.js',
           watch,
           minify: shouldMinify,
-          preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
           externs: ['./ads/ads.extern.js'],
           include3pDirectories: true,
           includePolyfills: false,
@@ -100,7 +97,6 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir) {
           minifiedName: 'iframe-transport-client-v0.js',
           watch,
           minify: shouldMinify,
-          preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
           externs: ['./ads/ads.extern.js'],
           include3pDirectories: true,
           includePolyfills: false,
@@ -110,7 +106,6 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir) {
           minifiedName: 'recaptcha.js',
           watch,
           minify: shouldMinify,
-          preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
           externs: [],
           include3pDirectories: true,
           includePolyfills: true,
@@ -120,7 +115,6 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir) {
       minifiedName: 'v0.js',
       includePolyfills: true,
       watch,
-      preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
       minify: shouldMinify,
       wrapper: wrappers.mainBinary,
       singlePassCompilation: argv.single_pass,
@@ -134,7 +128,6 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir) {
           watch,
           extraGlobs: ['extensions/amp-viewer-integration/**/*.js'],
           compilationLevel: 'WHITESPACE_ONLY',
-          preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
           minify: false,
         }),
   ];
@@ -151,7 +144,6 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir) {
           includePolyfills: true,
           includeOnlyESMLevelPolyfills: true,
           watch,
-          preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
           minify: shouldMinify,
           wrapper: wrappers.mainBinary,
         }));
@@ -163,7 +155,6 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir) {
           minifiedName: 'shadow-v0.js',
           includePolyfills: true,
           watch,
-          preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
           minify: shouldMinify,
         })
     );
@@ -175,7 +166,6 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir) {
           minifiedName: 'video-iframe-integration-v0.js',
           includePolyfills: false,
           watch,
-          preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
           minify: shouldMinify,
         }));
   }
@@ -190,7 +180,6 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir) {
             includePolyfills: true,
             extraGlobs: ['src/inabox/*.js', '3p/iframe-messaging-client.js'],
             watch,
-            preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
             minify: shouldMinify,
           }));
     }
@@ -202,7 +191,6 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir) {
           minifiedName: 'amp4ads-host-v0.js',
           includePolyfills: false,
           watch,
-          preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
           minify: shouldMinify,
         })
     );
@@ -217,7 +205,6 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir) {
           includePolyfills: true,
           extraGlobs: ['src/inabox/*.js', '3p/iframe-messaging-client.js'],
           watch,
-          preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
           minify: shouldMinify,
         }));
   }
@@ -667,7 +654,6 @@ async function buildExperiments(options) {
               minify: options.minify || argv.minify,
               includePolyfills: true,
               minifiedName,
-              preventRemoveAndMakeDir: options.preventRemoveAndMakeDir,
             });
       });
 }
@@ -685,7 +671,6 @@ function buildAlp(options) {
     minify: options.minify || argv.minify,
     includePolyfills: true,
     minifiedName: 'alp.js',
-    preventRemoveAndMakeDir: options.preventRemoveAndMakeDir,
   });
 }
 
@@ -702,7 +687,6 @@ function buildExaminer(options) {
     minify: options.minify || argv.minify,
     includePolyfills: true,
     minifiedName: 'examiner.js',
-    preventRemoveAndMakeDir: options.preventRemoveAndMakeDir,
   });
 }
 
@@ -719,7 +703,6 @@ function buildWebWorker(options) {
     includePolyfills: true,
     watch: opts.watch,
     minify: opts.minify || argv.minify,
-    preventRemoveAndMakeDir: opts.preventRemoveAndMakeDir,
   });
 }
 

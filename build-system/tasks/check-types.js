@@ -35,10 +35,7 @@ async function checkTypes() {
   maybeInitializeExtensions();
   // Disabled to improve type check performance, since this provides
   // little incremental value.
-  /*buildExperiments({
-    minify: true,
-    preventRemoveAndMakeDir: true,
-  });*/
+  // buildExperiments({minify: true});
   const compileSrcs = [
     './src/amp.js',
     './src/amp-shadow.js',
