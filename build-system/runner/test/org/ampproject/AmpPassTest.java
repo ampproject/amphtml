@@ -35,7 +35,7 @@ public class AmpPassTest extends CompilerTestCase {
 
   @Override protected CompilerPass getProcessor(Compiler compiler) {
     return new AmpPass(compiler, /* isProd */ true, suffixTypes, assignmentReplacements,
-        prodAssignmentReplacements, "123");
+        prodAssignmentReplacements, "123", false);
   }
 
   @Override protected int getNumRepetitions() {
@@ -371,9 +371,9 @@ public class AmpPassTest extends CompilerTestCase {
   @Test public void testAmpVersionReplacement() throws Exception {
     test(
         LINE_JOINER.join(
-            "var a = `test${version$$module$src$internal_version()}ing`;",
-            "var b = 'test' + version$$module$src$internal_version() + 'ing';",
-            "var c = version$$module$src$internal_version();"),
+            "var a = `test${internalRuntimeVersion$$module$src$internal_version()}ing`;",
+            "var b = 'test' + internalRuntimeVersion$$module$src$internal_version() + 'ing';",
+            "var c = internalRuntimeVersion$$module$src$internal_version();"),
         LINE_JOINER.join(
             "var a = `test${'123'}ing`;",
             "var b = 'test' + '123' + 'ing';",

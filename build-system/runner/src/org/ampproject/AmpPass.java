@@ -197,7 +197,7 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
     }
 
     String name = buildQualifiedName(n);
-    if (!name.equals("version$$module$src$internal_version()")) {
+    if (!name.equals("internalRuntimeVersion$$module$src$internal_version()")) {
       return;
     }
 
