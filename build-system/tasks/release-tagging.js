@@ -20,7 +20,6 @@ const BBPromise = require('bluebird');
 const colors = require('ansi-colors');
 const fs = require('fs-extra');
 const git = require('gulp-git');
-const gulp = require('gulp-help')(require('gulp'));
 const log = require('fancy-log');
 const request = BBPromise.promisify(require('request'));
 
@@ -213,10 +212,12 @@ function releaseTag() {
   return promise;
 }
 
+module.exports = {
+  releaseTag,
+};
 
-gulp.task('release:tag', 'Tag the releases in pull requests', releaseTag, {
-  options: {
-    dryrun: '  Generate update log but dont push it out',
-    type: '  Either of "canary", "prod" or "all". Default is "all".',
-  },
-});
+releaseTag.description = 'Tag the releases in pull requests';
+releaseTag.flags = {
+  dryrun: '  Generate update log but dont push it out',
+  type: '  Either of "canary", "prod" or "all". Default is "all".',
+};

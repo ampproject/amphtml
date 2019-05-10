@@ -65,7 +65,7 @@ FAIL
 |    <!-- Invalid example missing a player id. -->
 |    <amp-brid-player
 >>   ^~~~~~~~~
-amp-brid-player/0.1/test/validator-amp-brid-player.html:65:2 The mandatory attribute 'data-player' is missing in tag 'amp-brid-player'. (see https://www.ampproject.org/docs/reference/components/amp-brid-player) [AMP_TAG_PROBLEM]
+amp-brid-player/0.1/test/validator-amp-brid-player.html:65:2 The mandatory attribute 'data-player' is missing in tag 'amp-brid-player'. (see https://amp.dev/documentation/components/amp-brid-player) [AMP_TAG_PROBLEM]
 |        data-partner="264"
 |        data-video="13663"
 |        layout="responsive"
@@ -74,7 +74,7 @@ amp-brid-player/0.1/test/validator-amp-brid-player.html:65:2 The mandatory attri
 |    <!-- Invalid example missing video, playlist and outstream. -->
 |    <amp-brid-player
 >>   ^~~~~~~~~
-amp-brid-player/0.1/test/validator-amp-brid-player.html:72:2 The tag 'amp-brid-player' is missing a mandatory attribute - pick one of ['data-outstream', 'data-playlist', 'data-video']. (see https://www.ampproject.org/docs/reference/components/amp-brid-player) [AMP_TAG_PROBLEM]
+amp-brid-player/0.1/test/validator-amp-brid-player.html:72:2 The tag 'amp-brid-player' is missing a mandatory attribute - pick one of ['data-outstream', 'data-playlist', 'data-video']. (see https://amp.dev/documentation/components/amp-brid-player) [AMP_TAG_PROBLEM]
 |        data-partner="264"
 |        data-player="4144"
 |        layout="responsive"

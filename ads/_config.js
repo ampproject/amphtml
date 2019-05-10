@@ -271,6 +271,13 @@ export const adConfig = {
   },
 
   'aja': {
+    prefetch: [
+      'https://cdn.as.amanad.adtdp.com/sdk/asot-amp.js',
+      'https://cdn.as.amanad.adtdp.com/sdk/asot-v2.js',
+    ],
+    preconnect: [
+      'https://ad.as.amanad.adtdp.com',
+    ],
   },
 
   'appvador': {
@@ -559,6 +566,10 @@ export const adConfig = {
 
   'kuadio': {},
 
+  'lentainform': {
+    renderStartImplemented: false,
+  },
+
   'ligatus': {
     prefetch: 'https://ssl.ligatus.com/render/ligrend.js',
     renderStartImplemented: true,
@@ -630,6 +641,10 @@ export const adConfig = {
 
   'meg': {
     renderStartImplemented: true,
+  },
+
+  'mgid': {
+    renderStartImplemented: false,
   },
 
   'microad': {

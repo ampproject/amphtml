@@ -21,7 +21,6 @@ const childProcess = require('child_process');
 const exec = BBPromise.promisify(childProcess.exec);
 const colors = require('ansi-colors');
 const fs = BBPromise.promisifyAll(require('fs'));
-const gulp = require('gulp-help')(require('gulp'));
 const log = require('fancy-log');
 
 
@@ -243,7 +242,7 @@ function serializeCheckout(logs) {
   return promise.then(mergeTables.bind(null, dateTimes));
 }
 
-function csvify() {
+async function csvifySize() {
   const shaAndDate = '%H %ai';
   return getLog(shaAndDate)
       .then(logs => {
@@ -256,7 +255,10 @@ function csvify() {
       });
 }
 
-gulp.task('csvify-size', 'create a CSV file out of the size.txt file', csvify);
+module.exports = {
+  csvifySize,
+  parseSizeFile,
+  mergeTables,
+};
 
-exports.parseSizeFile = parseSizeFile;
-exports.mergeTables = mergeTables;
+csvifySize.description = 'Creates a CSV file out of the size.txt file';
