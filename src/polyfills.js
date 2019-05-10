@@ -52,7 +52,9 @@ if (self.document) {
   // TODO(jridgewell): Ship custom-elements-v1. For now, we use this hack so it
   // is DCE'd from production builds. Note: When the hack is removed, remove the
   // @suppress {suspiciousCode} annotation at the top of this file.
-  if ((false && isExperimentOn(self, 'custom-elements-v1')) || getMode().test) {
+  // TODO(jridgewell, estherkim): Find out why CE isn't being polyfilled for IE.
+  if ((false && isExperimentOn(self, 'custom-elements-v1')) ||
+      (getMode().test && !getMode().testIe)) {
     installCustomElements(self);
   } else {
     installRegisterElement(self, 'auto');

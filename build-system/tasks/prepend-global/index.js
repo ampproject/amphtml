@@ -21,7 +21,6 @@ const childProcess = require('child_process');
 const exec = BBPromise.promisify(childProcess.exec);
 const colors = require('ansi-colors');
 const fs = BBPromise.promisifyAll(require('fs'));
-const gulp = require('gulp-help')(require('gulp'));
 const log = require('fancy-log');
 const {isTravisBuild} = require('../../travis');
 
@@ -201,9 +200,6 @@ function removeConfig(target) {
       .then(file => {
         let contents = file.toString();
         if (numConfigs(contents) == 0) {
-          if (!isTravisBuild()) {
-            log('No configs found in', cyan(target));
-          }
           return Promise.resolve();
         }
         sanityCheck(contents);
@@ -218,7 +214,7 @@ function removeConfig(target) {
       });
 }
 
-function main() {
+async function prependGlobal() {
   const TESTING_HOST = process.env.AMP_TESTING_HOST;
   const target = argv.target || TESTING_HOST;
 
@@ -254,29 +250,31 @@ function main() {
   });
 }
 
-gulp.task('prepend-global', 'Prepends a json config to a target file', main, {
-  options: {
-    'target': '  The file to prepend the json config to.',
-    'canary': '  Prepend the default canary config. ' +
-        'Takes in an optional value for a custom canary config source.',
-    'prod': '  Prepend the default prod config. ' +
-        'Takes in an optional value for a custom prod config source.',
-    'local_dev': '  Enables runtime to be used for local development.',
-    'branch': '  Switch to a git branch to get config source from. ' +
-        'Uses master by default.',
-    'local_branch': '  Don\'t switch branches and use the config from the ' +
-        'local branch.',
-    'fortesting': '  Force the config to return true for getMode().test',
-    'remove': '  Removes previously prepended json config from the target ' +
-        'file (if present).',
-  },
-});
+module.exports = {
+  applyConfig,
+  checkoutBranchConfigs,
+  numConfigs,
+  prependConfig,
+  prependGlobal,
+  removeConfig,
+  sanityCheck,
+  valueOrDefault,
+  writeTarget,
+};
 
-exports.checkoutBranchConfigs = checkoutBranchConfigs;
-exports.prependConfig = prependConfig;
-exports.writeTarget = writeTarget;
-exports.valueOrDefault = valueOrDefault;
-exports.sanityCheck = sanityCheck;
-exports.numConfigs = numConfigs;
-exports.removeConfig = removeConfig;
-exports.applyConfig = applyConfig;
+prependGlobal.description = 'Prepends a json config to a target file';
+prependGlobal.flags = {
+  'target': '  The file to prepend the json config to.',
+  'canary': '  Prepend the default canary config. ' +
+      'Takes in an optional value for a custom canary config source.',
+  'prod': '  Prepend the default prod config. ' +
+      'Takes in an optional value for a custom prod config source.',
+  'local_dev': '  Enables runtime to be used for local development.',
+  'branch': '  Switch to a git branch to get config source from. ' +
+      'Uses master by default.',
+  'local_branch': '  Don\'t switch branches and use the config from the ' +
+      'local branch.',
+  'fortesting': '  Force the config to return true for getMode().test',
+  'remove': '  Removes previously prepended json config from the target ' +
+      'file (if present).',
+};

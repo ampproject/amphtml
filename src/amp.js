@@ -41,11 +41,11 @@ import {
   makeBodyVisible,
   makeBodyVisibleRecovery,
 } from './style-installer';
+import {internalRuntimeVersion} from './internal-version';
 import {maybeTrackImpression} from './impression';
 import {maybeValidate} from './validator-integration';
 import {startupChunk} from './chunk';
 import {stubElementsForDoc} from './service/custom-element-registry';
-import {version} from './internal-version';
 
 /**
  * self.IS_AMP_ALT (is AMP alternative binary) is undefined by default in the
@@ -140,8 +140,9 @@ if (shouldMainBootstrapRun) {
   // (At least by sophisticated users).
   if (self.console) {
     (console.info || console.log).call(console,
-        `Powered by AMP ⚡ HTML – Version ${version()}`,
+        `Powered by AMP ⚡ HTML – Version ${internalRuntimeVersion()}`,
         self.location.href);
   }
-  self.document.documentElement.setAttribute('amp-version', version());
+  self.document.documentElement.setAttribute('amp-version',
+      internalRuntimeVersion());
 }

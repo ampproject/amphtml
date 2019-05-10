@@ -210,6 +210,13 @@ export class Viewport {
       globalDocElement.classList.add('i-amphtml-webview');
     }
 
+    // Doc Level CSS Experiments
+    if (!isExperimentOn(this.ampdoc.win, 'inabox-remove-height-auto')) {
+      // This is a double negative, to allow going from 0 -> 100
+      // When deploying the experiment
+      globalDocElement.classList.add('i-amphtml-inabox-preserve-height-auto');
+    }
+
     // To avoid browser restore scroll position when traverse history
     if (isIframed(win) && ('scrollRestoration' in win.history)) {
       win.history.scrollRestoration = 'manual';
@@ -1281,8 +1288,8 @@ function createViewport(ampdoc) {
       getViewportType(win, viewer) == ViewportType.NATURAL_IOS_EMBED) {
     if (isExperimentOn(win, 'ios-embed-sd') &&
         win.Element.prototype.attachShadow &&
-        // Even though iOS 10 supports Shadow DOM, the support is buggy.
-        Services.platformFor(win).getMajorVersion() >= 11) {
+        // We need the native Shadow DOM support and jumping-fixed-element fix.
+        parseFloat(Services.platformFor(win).getIosVersionString()) >= 12.2) {
       binding = new ViewportBindingIosEmbedShadowRoot_(win);
     } else {
       binding = new ViewportBindingIosEmbedWrapper_(win);

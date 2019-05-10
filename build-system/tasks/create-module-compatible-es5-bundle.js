@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-const $$ = require('gulp-load-plugins')();
-const gulp = $$.help(require('gulp'));
+const gulp = require('gulp');
+const regexpSourcemaps = require('gulp-regexp-sourcemaps');
+const sourcemaps = require('gulp-sourcemaps');
 
 /* Copy source to source-nomodule.js and
  * make it compatible with `<script type=module`.
@@ -28,10 +29,14 @@ const gulp = $$.help(require('gulp'));
  *
  * Changes `global?global:VARNAME}(this)` to `global?global:VARNAME}(self)`
  */
-exports.createModuleCompatibleES5Bundle = function(src) {
+function createModuleCompatibleES5Bundle(src) {
   return gulp.src('dist/' + src)
-      .pipe($$.sourcemaps.init({loadMaps: true}))
-      .pipe($$.regexpSourcemaps(/(window.global\?window.global:\w*)this/, '$1self', 'module-global'))
-      .pipe($$.sourcemaps.write('./'))
+      .pipe(sourcemaps.init({loadMaps: true}))
+      .pipe(regexpSourcemaps(/(window.global\?window.global:\w*)this/, '$1self', 'module-global'))
+      .pipe(sourcemaps.write('./'))
       .pipe(gulp.dest('dist'));
+}
+
+module.exports = {
+  createModuleCompatibleES5Bundle,
 };
