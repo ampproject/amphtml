@@ -174,6 +174,7 @@ import {medianet} from '../ads/medianet';
 import {mediavine} from '../ads/mediavine';
 import {medyanet} from '../ads/medyanet';
 import {meg} from '../ads/meg';
+import {mgid} from '../ads/mgid';
 import {microad} from '../ads/microad';
 import {miximedia} from '../ads/miximedia';
 import {mixpo} from '../ads/mixpo';
@@ -264,7 +265,6 @@ import {zedo} from '../ads/zedo';
 import {zen} from '../ads/zen';
 import {zergnet} from '../ads/zergnet';
 import {zucks} from '../ads/zucks';
-
 
 
 /**
@@ -418,6 +418,7 @@ register('medianet', medianet);
 register('mediavine', mediavine);
 register('medyanet', medyanet);
 register('meg', meg);
+register('mgid', mgid);
 register('microad', microad);
 register('miximedia', miximedia);
 register('mixpo', mixpo);
