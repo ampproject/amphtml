@@ -19,7 +19,7 @@ const {
   buildAlp,
   buildExaminer,
   buildWebWorker,
-  compile,
+  compileAllUnminifiedTargets,
   compileJs,
   printConfigHelp,
   printNobuildHelp,
@@ -69,7 +69,7 @@ async function performBuild(watch) {
       buildExaminer({watch}),
       buildWebWorker({watch}),
       buildExtensions({bundleOnlyIfListedInFiles: !watch, watch}),
-      compile(watch),
+      compileAllUnminifiedTargets(watch),
     ]);
   });
 }
