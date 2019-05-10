@@ -358,7 +358,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
     };
 
     // For now do type check separately
-    if (options.checkTypes || options.typeCheckOnly) {
+    if (options.typeCheckOnly) {
       // Don't modify compilation_level to a lower level since
       // it won't do strict type checking if its whitespace only.
       compilerOptions.define.push('TYPECHECK_ONLY=true');

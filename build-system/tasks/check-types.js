@@ -37,7 +37,6 @@ async function checkTypes() {
   // little incremental value.
   /*buildExperiments({
     minify: true,
-    checkTypes: true,
     preventRemoveAndMakeDir: true,
   });*/
   const compileSrcs = [
