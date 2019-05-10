@@ -213,7 +213,8 @@ export class AmpList extends AMP.BaseElement {
       this.initializeLoadMoreElements_();
     }
 
-    if (this.element.hasAttribute('src')) {
+    // Don't fetch if `src` is empty string.
+    if (!!this.element.getAttribute('src')) {
       return this.fetchList_();
     } else if (this.pendingLocalData_) {
       return this.scheduleRender_(this.pendingLocalData_);
