@@ -23,11 +23,13 @@
 
 import './web-worker-polyfills';
 import {BindEvaluator} from '../../extensions/amp-bind/0.1/bind-evaluator';
-import {dev, initLogConstructor} from '../log';
+import {dev, initLogConstructor, setReportError} from '../log';
 import {exponentialBackoff} from '../exponential-backoff';
+import {reportError} from '../error';
 import {urls} from '../config';
 
 initLogConstructor();
+setReportError(reportError);
 
 /** @const {string} */
 const TAG = 'web-worker';

@@ -581,7 +581,7 @@ export function getErrorReportData(message, filename, line, col, error,
     data['l'] = line || '';
     data['c'] = col || '';
   }
-  data['r'] = self.document.referrer;
+  data['r'] = self.document ? self.document.referrer : '';
   data['ae'] = accumulatedErrorMessages.join(',');
   data['fr'] = self.location.originalHash || self.location.hash;
 
@@ -598,6 +598,9 @@ export function getErrorReportData(message, filename, line, col, error,
  * @visibleForTesting
  */
 export function detectNonAmpJs(win) {
+  if (!win.document) {
+    return false;
+  }
   const scripts = win.document.querySelectorAll('script[src]');
   for (let i = 0; i < scripts.length; i++) {
     if (!isProxyOrigin(scripts[i].src.toLowerCase())) {
