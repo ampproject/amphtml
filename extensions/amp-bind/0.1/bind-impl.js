@@ -274,7 +274,9 @@ export class Bind {
 
       const scope = dict();
       if (event && getDetail(/** @type {!Event} */ (event))) {
-        scope['event'] = getDetail(/** @type {!Event} */ (event));
+        const detail = getDetail(/** @type {!Event} */ (event));
+        this.sanitizeDetailForWorker_(detail);
+        scope['event'] = detail;
       }
       switch (method) {
         case 'setState':
@@ -291,6 +293,27 @@ export class Bind {
           + '"AMP.setState(foo=\'bar\')".');
     }
     return Promise.resolve();
+  }
+
+  /**
+   * Removes Error or Function objects from the JSON object used to evaluate an
+   * expression as the web worker does this work and such objects aren't
+   * supported in postMessage.
+   * https://developer.mozilla.org/docs/Web/API/Web_Workers_API/Structured_clone_algorithm
+   * @param {?JsonObject|string|undefined} detail
+   * @private
+   */
+  sanitizeDetailForWorker_(detail) {
+    if (typeof detail == 'object') {
+      for (const key in detail) {
+        const value = detail[key];
+        if (value instanceof Error || typeof value == 'function') {
+	  user().warn('Unsupported object type (Error, Function) in '
+              + 'postMessage context: %s', value);
+          detail[key] = null;
+        }
+      }
+    }
   }
 
   /**
