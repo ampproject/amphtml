@@ -491,8 +491,12 @@ class IntegrationFixture {
       const docUrl = addParamsToUrl(url, {body, css, experiments, extensions})
             + `#${this.hash}`;
       // If shadow mode, wrap doc in shadow viewer.
-      const src = ampDocType === 'shadow' ?
-        addParamsToUrl('/amp4test/compose-shadow', {docUrl}) : docUrl;
+      let src = '';
+      if (ampDocType === 'shadow') {
+        src = addParamsToUrl('/amp4test/compose-shadow', {docUrl});
+      } else {
+        src = docUrl;
+      }
 
       env.iframe = createElementWithAttributes(document, 'iframe', {src});
       env.iframe.onload = function() {
