@@ -21,10 +21,13 @@ const minimist = require('minimist');
 const argv = minimist(
     process.argv.slice(2), {boolean: ['strictBabelTransform']});
 const multer = require('multer');
-
+const path = require('path');
+const {renderShadowViewer} = require('./shadow-viewer');
 const upload = multer();
 
 /* eslint-disable max-len */
+
+const KARMA_SERVER_PORT = 9876;
 
 /**
  * Logs the given messages to the console when --verbose is specified.
@@ -92,6 +95,16 @@ ${req.query.body}
 </body>
 </html>
   `);
+});
+
+app.use('/compose-shadow', function(req, res) {
+  const {docUrl} = req.query;
+  res.send(renderShadowViewer({
+    // Remove leading '/'.
+    src: docUrl.slice(1),
+    port: KARMA_SERVER_PORT,
+    baseHref: path.dirname(req.url),
+  }));
 });
 
 /**
