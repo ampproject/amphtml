@@ -214,6 +214,14 @@ export class AmpAutocomplete extends AMP.BaseElement {
     this.maxEntries_ = this.element.hasAttribute('max-entries') ?
       parseInt(this.element.getAttribute('max-entries'), 10) : null;
     this.submitOnEnter_ = this.element.hasAttribute('submit-on-enter');
+    if (this.element.hasAttribute('suggest-first')) {
+      if (this.filter_ === FilterType.PREFIX) {
+        this.suggestFirst_ = true;
+      } else {
+        user().error(TAG, '"suggest-first" requires "filter" to be prefix.' +
+        ' Unexpected "filter" type: ' + this.filter_);
+      }
+    }
     this.suggestFirst_ = this.element.hasAttribute('suggest-first')
       && this.filter_ === FilterType.PREFIX;
 
