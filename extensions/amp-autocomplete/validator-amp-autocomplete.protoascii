@@ -24,10 +24,10 @@ tags: {  # amp-autocomplete
   }
   attr_lists: "common-extension-attrs"
 }
-tags: {  # <amp-autocomplete src>
+tags: {  # <amp-autocomplete>
   html_format: AMP
   tag_name: "AMP-AUTOCOMPLETE"
-  spec_name: "amp-autocomplete with src attribute"
+  spec_name: "amp-autocomplete"
   requires_extension: "amp-autocomplete"
   mandatory_ancestor: "FORM"
   attrs: {
@@ -57,7 +57,12 @@ tags: {  # <amp-autocomplete src>
     }
   }
   attrs: { name: "submit-on-enter" }
-  attrs: { name: "suggest-first" }
+  attrs: { 
+    name: "suggest-first" 
+    trigger: {
+      also_requires_attr: "filter"
+    }
+  }
   attrs: { name: "template" }
   # amp-bind
   attrs: {
