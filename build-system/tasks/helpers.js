@@ -65,6 +65,21 @@ const hostname = argv.hostname || 'cdn.ampproject.org';
 const hostname3p = argv.hostname3p || '3p.ampproject.net';
 
 /**
+ * Compile all runtime targets in minified mode and drop them in dist/.
+ */
+function compileAllMinifiedTargets() {
+  return compile(/* watch */ false, /* shouldMinify */ true);
+}
+
+/**
+ * Compile all runtime targets in unminified mode and drop them in dist/.
+ * @param {boolean} watch
+ */
+function compileAllUnminifiedTargets(watch) {
+  return compile(/* watch */ watch);
+}
+
+/**
  * Compile and optionally minify the stylesheets and the scripts
  * and drop them in the dist folder
  *
@@ -110,16 +125,6 @@ function compile(watch, shouldMinify) {
           include3pDirectories: true,
           includePolyfills: true,
         }),
-    compileJs('./src/', 'amp.js', './dist', {
-      toName: 'amp.js',
-      minifiedName: 'v0.js',
-      includePolyfills: true,
-      watch,
-      minify: shouldMinify,
-      wrapper: wrappers.mainBinary,
-      singlePassCompilation: argv.single_pass,
-      esmPassCompilation: argv.esm,
-    }),
     compileJs('./extensions/amp-viewer-integration/0.1/examples/',
         'amp-viewer-host.js', './dist/v0/examples', {
           toName: 'amp-viewer-host.max.js',
@@ -131,23 +136,6 @@ function compile(watch, shouldMinify) {
           minify: false,
         }),
   ];
-
-  // TODO(#18934, erwinm): temporarily commented out to unblock master builds.
-  // theres a race condition between the read to amp.js here, and on the
-  // main v0.js compile above.
-  /**
-  if (!argv.single_pass) {
-    promises.push(
-        compileJs('./src/', 'amp.js', './dist', {
-          toName: 'amp-esm.js',
-          minifiedName: 'v0-esm.js',
-          includePolyfills: true,
-          includeOnlyESMLevelPolyfills: true,
-          watch,
-          minify: shouldMinify,
-          wrapper: wrappers.mainBinary,
-        }));
-  }*/
 
   if (!argv.single_pass && (!watch || argv.with_shadow)) {
     promises.push(
@@ -225,7 +213,34 @@ function compile(watch, shouldMinify) {
     });
   }
 
-  return Promise.all(promises);
+  return Promise.all(promises)
+      .then(() => {
+        return compileJs('./src/', 'amp.js', './dist', {
+          toName: 'amp.js',
+          minifiedName: 'v0.js',
+          includePolyfills: true,
+          watch,
+          minify: shouldMinify,
+          wrapper: wrappers.mainBinary,
+          singlePassCompilation: argv.single_pass,
+          esmPassCompilation: argv.esm,
+        });
+      })
+      .then(() => {
+        if (!argv.single_pass) {
+          return compileJs('./src/', 'amp.js', './dist', {
+            toName: 'amp-esm.js',
+            minifiedName: 'v0-esm.js',
+            includePolyfills: true,
+            includeOnlyESMLevelPolyfills: true,
+            watch,
+            minify: shouldMinify,
+            wrapper: wrappers.mainBinary,
+          });
+        } else {
+          return Promise.resolve();
+        }
+      });
 }
 
 /**
@@ -738,7 +753,8 @@ module.exports = {
   buildExaminer,
   buildExperiments,
   buildWebWorker,
-  compile,
+  compileAllMinifiedTargets,
+  compileAllUnminifiedTargets,
   compileJs,
   compileTs,
   enableLocalTesting,

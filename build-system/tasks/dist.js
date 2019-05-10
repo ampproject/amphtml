@@ -25,7 +25,7 @@ const {
   buildExaminer,
   buildExperiments,
   buildWebWorker,
-  compile,
+  compileAllMinifiedTargets,
   compileJs,
   enableLocalTesting,
   endBuildStep,
@@ -81,7 +81,7 @@ async function dist() {
       })
       .then(() => {
         return Promise.all([
-          compile(false, true),
+          compileAllMinifiedTargets(),
           // NOTE: When adding a line here,
           // consider whether you need to include polyfills
           // and whether you need to init logging (initLogConstructor).
@@ -109,13 +109,10 @@ async function dist() {
             enableLocalTesting('dist/v0.js'),
             enableLocalTesting('dist/amp4ads-v0.js'),
             enableLocalTesting('dist/shadow-v0.js'),
+            enableLocalTesting('dist.3p/current-min/f.js'),
+            argv.single_pass ?
+              Promise.resolve() : enableLocalTesting('dist/v0-esm.js'),
           ]);
-          // TODO(#18934, erwinm): Re-enable when the ESM build is fixed.
-          // .then(() => {
-          //   if (!argv.single_pass) {
-          //     return enableLocalTesting('dist/v0-esm.js')
-          //   }
-          // });
         }
       }).then(() => {
         if (argv.esm) {
@@ -126,10 +123,6 @@ async function dist() {
           ]);
         } else {
           return Promise.resolve();
-        }
-      }).then(() => {
-        if (argv.fortesting) {
-          return enableLocalTesting('dist.3p/current-min/f.js');
         }
       }).then(() => exitCtrlcHandler(handlerProcess));
 }
