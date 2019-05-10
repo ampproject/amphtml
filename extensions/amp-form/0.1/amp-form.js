@@ -724,7 +724,7 @@ export class AmpForm {
     this.setState_(FormState.SUBMIT_ERROR);
     user().error(TAG, 'Form submission failed: %s', error);
     const errorJsonObject = dict({
-      'error': error.message,
+      'error': error['message'],
     });
     return tryResolve(() => {
       this.renderTemplate_(error || {}).then(() => {
