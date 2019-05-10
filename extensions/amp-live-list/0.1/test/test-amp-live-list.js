@@ -133,31 +133,31 @@ describes.realWin('amp-live-list', {
     const child = document.createElement('div');
     elem.querySelector('[items]').appendChild(child);
     buildElement(elem, dftAttrs);
-    const stub = sandbox.stub(liveList, 'validateLiveListItems_');
+    const stub = sandbox.stub(liveList, 'countAndCacheValidItems_');
     expect(stub).to.have.not.been.called;
     liveList.buildCallback();
     expect(stub).to.be.calledOnce;
+  });
+
+  it('only counts number of valid children', () => {
+    const child = document.createElement('div');
+    child.setAttribute('id', 'child-id');
+    child.setAttribute('data-sort-time', Date.now());
+    elem.querySelector('[items]').appendChild(child);
+
+    const invalidChild = document.createElement('div');
+    elem.querySelector('[items]').appendChild(invalidChild);
+
+    buildElement(elem, dftAttrs);
+    const spy = sandbox.spy(liveList, 'countAndCacheValidItems_');
+    liveList.buildCallback();
+    expect(spy).to.have.returned(1);
   });
 
   it('validates correctly', () => {
     const child = document.createElement('div');
     elem.querySelector('[items]').appendChild(child);
     buildElement(elem, dftAttrs);
-    allowConsoleError(() => { expect(() => {
-      liveList.validateLiveListItems_(elem.querySelector('[items]'));
-    }).to.throw(/children must have id and data-sort-time/); });
-
-    allowConsoleError(() => { expect(() => {
-      child.setAttribute('id', 'child-id');
-      liveList.buildCallback();
-    }).to.throw(/children must have id and data-sort-time/); });
-
-    child.removeAttribute('id');
-
-    allowConsoleError(() => { expect(() => {
-      child.setAttribute('data-sort-time', Date.now());
-      liveList.buildCallback();
-    }).to.throw(/children must have id and data-sort-time/); });
 
     expect(() => {
       child.setAttribute('id', 'child-id');
@@ -378,11 +378,9 @@ describes.realWin('amp-live-list', {
       updateLiveListItems.setAttribute('items', '');
       update.appendChild(updateLiveListItems);
       updateLiveListItems.appendChild(document.createElement('div'));
-      const stub = sandbox.stub(liveList, 'validateLiveListItems_');
+      const stub = sandbox.stub(liveList, 'countAndCacheValidItems_');
       expect(stub).to.have.not.been.called;
-      allowConsoleError(() => { expect(() => {
-        liveList.update(update);
-      }).to.throw(); });
+      liveList.update(update);
       expect(stub).to.be.calledOnce;
     });
 
