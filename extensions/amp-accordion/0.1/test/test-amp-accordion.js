@@ -16,6 +16,7 @@
 
 import '../amp-accordion';
 import {Keys} from '../../../../src/utils/key-codes';
+import {computedStyle} from '../../../../src/style';
 import {poll} from '../../../../testing/iframe';
 import {tryFocus} from '../../../../src/dom';
 
@@ -34,20 +35,18 @@ describes.realWin('amp-accordion', {
     counter += 1;
   });
 
-  function getAmpAccordion(opt_shouldSetId) {
+  function getAmpAccordionWithContents(contents, opt_shouldSetId) {
     win.sessionStorage.clear();
     const ampAccordion = doc.createElement('amp-accordion');
     if (opt_shouldSetId) {
       ampAccordion.setAttribute('id', `acc${counter}`);
     }
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < contents.length; i++) {
       const section = doc.createElement('section');
       if (opt_shouldSetId) {
         section.setAttribute('id', `acc${counter}sec${i}`);
       }
-      section.innerHTML = '<h2 tabindex="0">Section ' + i +
-          '<span>nested stuff<span></h2><div id=\'test' + i +
-          '\'>Loreum ipsum</div>';
+      section.innerHTML = contents[i];
       ampAccordion.appendChild(section);
       if (i == 1) {
         section.setAttribute('expanded', '');
@@ -60,6 +59,16 @@ describes.realWin('amp-accordion', {
       });
       return ampAccordion.layoutCallback();
     }).then(() => ampAccordion);
+  }
+
+
+  function getAmpAccordion(opt_shouldSetId) {
+    const contents = [0, 1, 2].map((i => {
+      return '<h2 tabindex="0">Section ' + i +
+          '<span>nested stuff<span></h2><div id=\'test' + i +
+          '\'>Loreum ipsum</div>';
+    }));
+    return getAmpAccordionWithContents(contents, opt_shouldSetId);
   }
 
   it('should expand when toggle action is triggered on a collapsed section',
@@ -233,6 +242,54 @@ describes.realWin('amp-accordion', {
     }).then(() => {
       return poll('wait for second section to expand',
           () => impl.sections_[2].hasAttribute('expanded'));
+    });
+  });
+
+  it('should size responsive children correctly when animating', async() => {
+    const contents = [`
+      <h2>Section header</h2>
+      <amp-layout layout="responsive" width="3" height="2"></amp-layout>
+    `];
+    const ampAccordion = await getAmpAccordionWithContents(contents, true);
+    const impl = ampAccordion.implementation_;
+    const firstSection = impl.sections_[0];
+    const content = firstSection.querySelector('amp-layout');
+
+    ampAccordion.setAttribute('animate', '');
+    ampAccordion.style.width = '300px';
+    impl.toggle_(firstSection, true);
+    await poll('wait for first section to finish animating', () => {
+      return firstSection.hasAttribute('expanded') &&
+          computedStyle(win, content).opacity == '1';
+    });
+
+    expect(content.getBoundingClientRect()).to.include({
+      width: 300,
+      height: 200,
+    });
+  });
+
+  it('should size fixed size children correctly when animating', async() => {
+    const contents = [`
+      <h2>Section header</h2>
+      <amp-layout layout="fixed" width="300" height="200"></amp-layout>
+    `];
+    const ampAccordion = await getAmpAccordionWithContents(contents, true);
+    const impl = ampAccordion.implementation_;
+    const firstSection = impl.sections_[0];
+    const content = firstSection.querySelector('amp-layout');
+
+    ampAccordion.setAttribute('animate', '');
+    ampAccordion.style.width = '400px';
+    impl.toggle_(firstSection, true);
+    await poll('wait for first section to finish animating', () => {
+      return firstSection.hasAttribute('expanded') &&
+          computedStyle(win, content).opacity == '1';
+    });
+
+    expect(content.getBoundingClientRect()).to.include({
+      width: 300,
+      height: 200,
     });
   });
 

@@ -30,7 +30,7 @@ FAIL
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
 |    <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-0.1.js"></script>
 >>   ^~~~~~~~~
-amp-story/0.1/test/validator-empty-story.html:30:2 The extension 'amp-story' is referenced at version '0.1' which is a deprecated version. Please use a more recent version of this extension. This may become an error in the future. (see https://www.ampproject.org/docs/reference/components/amp-story) [DEPRECATION]
+amp-story/0.1/test/validator-empty-story.html:30:2 The extension 'amp-story' is referenced at version '0.1' which is a deprecated version. Please use a more recent version of this extension. This may become an error in the future. (see https://amp.dev/documentation/components/amp-story) [DEPRECATION]
 |  </head>
 |  <body>
 |    <amp-story standalone title="My Story" publisher="Me" publisher-logo-src="http://me.com/logo.png" poster-portrait-src="http://me.com/poster.jpg">
@@ -39,4 +39,4 @@ amp-story/0.1/test/validator-empty-story.html:30:2 The extension 'amp-story' is 
 |  </body>
 |  </html>
 >>       ^~~~~~~~~
-amp-story/0.1/test/validator-empty-story.html:37:6 The tag 'amp-story-page' is missing or incorrect, but required by 'amp-story'. (see https://www.ampproject.org/docs/reference/components/amp-story) [AMP_TAG_PROBLEM]
+amp-story/0.1/test/validator-empty-story.html:37:6 The tag 'amp-story-page' is missing or incorrect, but required by 'amp-story'. (see https://amp.dev/documentation/components/amp-story) [AMP_TAG_PROBLEM]

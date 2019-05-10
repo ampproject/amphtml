@@ -109,10 +109,15 @@ export class GoogleSubscriptionsPlatform {
           this.getServiceId());
     });
     this.runtime_.setOnFlowStarted(e => {
-      if (e.flow == 'subscribe') {
+      if (
+        e.flow == 'subscribe' ||
+        e.flow == 'contribute' ||
+        e.flow == 'showContributionOptions' ||
+        e.flow == 'showOffers'
+      ) {
         this.subscriptionAnalytics_.actionEvent(
             this.getServiceId(),
-            'subscribe',
+            e.flow,
             'started');
       }
     });
@@ -127,10 +132,15 @@ export class GoogleSubscriptionsPlatform {
         this.subscriptionAnalytics_.serviceEvent(
             SubscriptionAnalyticsEvents.LINK_CANCELED,
             this.getServiceId());
-      } else if (e.flow == 'subscribe') {
+      } else if (
+        e.flow == 'subscribe' ||
+        e.flow == 'contribute' ||
+        e.flow == 'showContributionOptions' ||
+        e.flow == 'showOffers'
+      ) {
         this.subscriptionAnalytics_.actionEvent(
             this.getServiceId(),
-            'subscribe',
+            e.flow,
             'rejected');
       }
     });
@@ -139,7 +149,12 @@ export class GoogleSubscriptionsPlatform {
     });
     this.runtime_.setOnSubscribeResponse(promise => {
       promise.then(response => {
-        this.onSubscribeResponse_(response);
+        this.onSubscribeResponse_(response, 'subscribe');
+      });
+    });
+    this.runtime_.setOnContributionResponse(promise => {
+      promise.then(response => {
+        this.onSubscribeResponse_(response, 'contribute');
       });
     });
 
@@ -183,6 +198,7 @@ export class GoogleSubscriptionsPlatform {
     this.serviceAdapter_.resetPlatforms();
   }
 
+  /* TODO(jpettitt): should local suppoort 'contribute' action? */
   /** @private */
   onNativeSubscribeRequest_() {
     this.maybeComplete_(this.serviceAdapter_.delegateActionToLocal(
@@ -203,15 +219,16 @@ export class GoogleSubscriptionsPlatform {
 
   /**
    * @param {!SubscribeResponse} response
+   * @param {string} eventType
    * @private
    */
-  onSubscribeResponse_(response) {
+  onSubscribeResponse_(response, eventType) {
     response.complete().then(() => {
       this.serviceAdapter_.resetPlatforms();
     });
     this.subscriptionAnalytics_.actionEvent(
         this.getServiceId(),
-        'subscribe',
+        eventType,
         'success');
   }
 
@@ -229,7 +246,10 @@ export class GoogleSubscriptionsPlatform {
 
   /** @override */
   getEntitlements() {
-    return this.runtime_.getEntitlements(null).then(swgEntitlements => {
+    const encryptedDocumentKey =
+        this.serviceAdapter_.getEncryptedDocumentKey('google.com');
+    return this.runtime_.getEntitlements(
+        encryptedDocumentKey).then(swgEntitlements => {
       // Get and store the isReadyToPay signal which is independent of
       // any entitlments existing.
       if (swgEntitlements.isReadyToPay) {
@@ -249,6 +269,7 @@ export class GoogleSubscriptionsPlatform {
         granted: true, //swgEntitlements.getEntitlementForThis makes sure this is true.
         grantReason: GrantReason.SUBSCRIBER, // there is no other case of subscription for SWG as of now.
         dataObject: swgEntitlement.json(),
+        decryptedDocumentKey: swgEntitlements.decryptedDocumentKey,
       });
     });
   }
@@ -331,8 +352,27 @@ export class GoogleSubscriptionsPlatform {
 
   /** @override */
   executeAction(action) {
+    /**
+     * The contribute and subscribe flows are not called
+     * directly with a sku to avoid baking sku detail into
+     * a page that may be cached for an extended time.
+     * Instead we use showOffers and showContributionOptions
+     * which get sku info from the server.
+     *
+     * Note: we do handle events form the contribute and
+     * subscribe flows elsewhere since they are invoked after
+     * offer selection.
+     */
     if (action == 'subscribe') {
-      this.runtime_.showOffers({list: 'amp', isClosable: true});
+      this.runtime_.showOffers({
+        list: 'amp',
+        isClosable: true});
+      return Promise.resolve(true);
+    }
+    if (action == 'contribute') {
+      this.runtime_.showContributionOptions({
+        list: 'amp',
+        isClosable: true});
       return Promise.resolve(true);
     }
     if (action == 'login') {
@@ -344,6 +384,10 @@ export class GoogleSubscriptionsPlatform {
 
   /** @override */
   decorateUI(element, action, options) {
+    /*
+     * Note: contribute doesn't have a standard button
+     * so we don't do anything here for it.
+     */
     if (action === 'subscribe') {
       element.textContent = '';
       this.runtime_.attachButton(element, options, () => {});

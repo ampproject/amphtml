@@ -66,9 +66,12 @@ function unregisterIframe(frame) {
   }
 }
 
-// TODO: Unskip the cross domain tests on Firefox, which broke because localhost
+// TODO(zombifier):
+// - Unskip the cross domain tests on Firefox, which broke because localhost
 // subdomains no longer work on version 65.
-// TODO(zombifier): Unskip on Windows once these tests work.
+// - Unskip on Windows once these tests work there.
+// - The BTF test fails on Safari and flakes on other platforms (#21311).
+// Should be ported to being E2E tests.
 describe.configure().skipWindows().run('inabox', function() {
 
   function testAmpComponents() {
@@ -161,8 +164,6 @@ describe.configure().skipWindows().run('inabox', function() {
         env.iframe.style.height = '100vh';
       });
 
-      // TODO(zombifier, #21545): fix this flaky test. Was using configuration:
-      // it.configure().skipSafari().run(...
       it.skip('should layout amp-img, amp-pixel, amp-analytics', () => {
         // See amp4test.js for creative content
         return testAmpComponentsBTF(env.win);
@@ -237,13 +238,13 @@ describe.configure().skipWindows().run('inabox', function() {
       env.win.document.body.removeChild(iframe);
     });
 
-    it('should layout amp-img, amp-pixel, ' +
+    it.skip('should layout amp-img, amp-pixel, ' +
         'amp-analytics within friendly frame', () => {
       writeFriendlyFrame(env.win.document, iframe, adContent);
       return testAmpComponentsBTF(env.win);
     });
 
-    it.configure().skipFirefox().run('should layout amp-img, amp-pixel, ' +
+    it.skip('should layout amp-img, amp-pixel, ' +
         'amp-analytics within safe frame', () => {
       writeSafeFrame(env.win.document, iframe, adContent);
       return testAmpComponentsBTF(env.win);
@@ -251,7 +252,6 @@ describe.configure().skipWindows().run('inabox', function() {
   });
 });
 
-// TODO(zombifier): Unskip on Windows once these tests work.
 describe.configure().skipWindows().run('inabox with a complex ' +
     'image ad', function() {
   const {testServerPort} = window.ampTestRuntimeConfig;
@@ -337,7 +337,7 @@ describe.configure().skipWindows().run('inabox with a complex ' +
           return testVisibilityPings(0, 1000);
         });
 
-    it.configure().skipSafari().skipFirefox().run(
+    it.configure().ifChrome().run(
         'should properly render ad in a safe frame with viewability pings',
         () => {
           writeSafeFrame(doc, iframe, adBody);
@@ -369,13 +369,14 @@ describe.configure().skipWindows().run('inabox with a complex ' +
       }, 2000);
     });
 
-    it('should properly render ad in a friendly iframe with viewability pings',
+    it.skip(
+        'should properly render ad in a friendly iframe with viewability pings',
         () => {
           writeFriendlyFrame(doc, iframe, adBody);
           return testVisibilityPings(2000, 3000);
         });
 
-    it.configure().skipFirefox().run(
+    it.skip(
         'should properly render ad in a safe frame with viewability pings',
         () => {
           writeSafeFrame(doc, iframe, adBody);

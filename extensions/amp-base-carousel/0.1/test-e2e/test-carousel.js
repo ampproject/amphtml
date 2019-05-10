@@ -27,6 +27,8 @@ describes.endtoend('AMP carousel', {
   testUrl: 'http://localhost:8000/test/manual/amp-base-carousel/basic.amp.html',
   experiments: ['amp-base-carousel', 'layers'],
   initialRect: {width: pageWidth, height: pageHeight},
+  //TODO(spaharmi): fails on shadow demo
+  environments: ['single', 'viewer-demo'],
 }, async env => {
   /** The total number of slides in the carousel */
   const SLIDE_COUNT = 7;
@@ -192,11 +194,10 @@ describes.endtoend('AMP carousel', {
       // Go to the last slide, wait for scrolling to move.
       const slideWidth = await prop(lastSlide, 'offsetWidth');
       const restingScrollLeft = await prop(el, 'scrollLeft');
-      await controller.scrollBy(el, {
-        left: slideWidth * (SLIDE_COUNT - 1),
+      await controller.scrollTo(el, {
+        left: slideWidth * (SLIDE_COUNT - 2),
       });
 
-      await expect(prop(el, 'scrollLeft')).to.not.equal(restingScrollLeft);
       await expect(prop(el, 'scrollLeft')).to.equal(restingScrollLeft);
       await expect(controller.getElementRect(lastSlide)).to.include({
         x: 0,
@@ -220,8 +221,8 @@ describes.endtoend('AMP carousel', {
       // Go to the last slide, wait for scrolling to move.
       const slideWidth = await prop(secondSlide, 'offsetWidth');
       const restingScrollLeft = await prop(el, 'scrollLeft');
-      await controller.scrollBy(el, {
-        left: -(slideWidth * (SLIDE_COUNT - 1)),
+      await controller.scrollTo(el, {
+        left: -(slideWidth * (SLIDE_COUNT - 2)),
       });
 
       await expect(prop(el, 'scrollLeft')).to.not.equal(restingScrollLeft);

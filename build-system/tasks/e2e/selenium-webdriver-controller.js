@@ -18,18 +18,30 @@ const fs = require('fs');
 const {
   By,
   Condition,
-  Key,
+  Key: SeleniumKey,
   error,
 } = require('selenium-webdriver');
 const {
   ControllerPromise,
   ElementHandle,
+  Key,
 } = require('./functional-test-controller');
 const {expect} = require('chai');
 
 const {NoSuchElementError} = error;
 
 const ELEMENT_WAIT_TIMEOUT = 5000;
+
+/** @enum {string} */
+const KeyToSeleniumMap = {
+  [Key.ArrowDown]: SeleniumKey.ARROW_DOWN,
+  [Key.ArrowLeft]: SeleniumKey.ARROW_LEFT,
+  [Key.ArrowRight]: SeleniumKey.ARROW_RIGHT,
+  [Key.ArrowUp]: SeleniumKey.ARROW_UP,
+  [Key.Enter]: SeleniumKey.ENTER,
+  [Key.Escape]: SeleniumKey.ESCAPE,
+  [Key.Tab]: SeleniumKey.TAB,
+};
 
 /**
  * @param {function(): !Promise<T>} valueFn
@@ -248,7 +260,7 @@ class SeleniumWebDriverController {
 
   /**
    * @param {!ElementHandle<!WebElement>} handle
-   * @param {string} keys
+   * @param {string|Key} keys
    * @return {!Promise}
    * @override
    */
@@ -258,7 +270,7 @@ class SeleniumWebDriverController {
       await this.driver.switchTo().activeElement();
 
 
-    const key = Key[keys.toUpperCase()];
+    const key = KeyToSeleniumMap[keys];
     if (key) {
       return await targetElement.sendKeys(key);
     }
@@ -487,6 +499,22 @@ class SeleniumWebDriverController {
 
     return await this.driver.executeScript(
         scrollBy, webElement, opt_scrollToOptions);
+  }
+
+  /**
+   * @param {!ElementHandle<!WebElement>} handle
+   * @param {!ScrollToOptionsDef=} opt_scrollToOptions
+   * @return {!Promise}
+   * @override
+   */
+  async scrollTo(handle, opt_scrollToOptions) {
+    const webElement = handle.getElement();
+    const scrollTo = (element, opt_scrollToOptions) => {
+      element./*OK*/scrollTo(opt_scrollToOptions);
+    };
+
+    return await this.driver.executeScript(
+        scrollTo, webElement, opt_scrollToOptions);
   }
 
   /**

@@ -30,12 +30,12 @@ FAIL
 |
 |    <style></style>
 >>   ^~~~~~~~~
-feature_tests/style_tag.html:30:2 The mandatory attribute 'amp-custom' is missing in tag 'style amp-custom'. (see https://www.ampproject.org/docs/reference/spec#stylesheets) [DISALLOWED_HTML]
+feature_tests/style_tag.html:30:2 The mandatory attribute 'amp-custom' is missing in tag 'style amp-custom'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#stylesheets) [DISALLOWED_HTML]
 |
 |  </head>
 |  <body>
 |    <style></style>
 >>   ^~~~~~~~~
-feature_tests/style_tag.html:34:2 The parent tag of tag 'style amp-custom' is 'body', but it can only be 'head'. (see https://www.ampproject.org/docs/reference/spec#stylesheets) [DISALLOWED_HTML]
+feature_tests/style_tag.html:34:2 The parent tag of tag 'style amp-custom' is 'body', but it can only be 'head'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#stylesheets) [DISALLOWED_HTML]
 |  </body>
 |  </html>

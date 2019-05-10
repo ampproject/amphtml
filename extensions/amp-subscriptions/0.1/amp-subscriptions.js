@@ -15,10 +15,10 @@
  */
 
 import {CSS} from '../../../build/amp-subscriptions-0.1.css';
+import {CryptoHandler} from './crypto-handler';
 import {Dialog} from './dialog';
 import {DocImpl} from './doc-impl';
 import {Entitlement} from './entitlement';
-import {LocalSubscriptionPlatform} from './local-subscription-platform';
 import {
   PageConfig,
   PageConfigResolver,
@@ -38,6 +38,7 @@ import {getValueForExpr, tryParseJson} from '../../../src/json';
 import {getWinOrigin} from '../../../src/url';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {isStoryDocument} from '../../../src/utils/story';
+import {localSubscriptionPlatformFactory} from './local-subscription-platform';
 
 /** @const */
 const TAG = 'amp-subscriptions';
@@ -110,6 +111,9 @@ export class SubscriptionService {
 
     /** @private {!Object<string, ?Promise<string>>} */
     this.readerIdPromiseMap_ = {};
+
+    /** @private {!CryptoHandler} */
+    this.cryptoHandler_ = new CryptoHandler(ampdoc);
   }
 
   /**
@@ -140,7 +144,7 @@ export class SubscriptionService {
   initializeLocalPlatforms_(serviceConfig) {
     if ((serviceConfig['serviceId'] || 'local') == 'local') {
       this.platformStore_.resolvePlatform('local',
-          new LocalSubscriptionPlatform(
+          localSubscriptionPlatformFactory(
               this.ampdoc_,
               serviceConfig,
               this.serviceAdapter_)
@@ -227,6 +231,10 @@ export class SubscriptionService {
    */
   resolveEntitlementsToStore_(serviceId, entitlement) {
     this.platformStore_.resolveEntitlement(serviceId, entitlement);
+    if (entitlement.decryptedDocumentKey) {
+      this.cryptoHandler_.tryToDecryptDocument(
+          entitlement.decryptedDocumentKey);
+    }
     this.subscriptionAnalytics_.serviceEvent(
         SubscriptionAnalyticsEvents.ENTITLEMENT_RESOLVED,
         serviceId
@@ -346,7 +354,7 @@ export class SubscriptionService {
         viewerPlatform.getEntitlements().then(entitlement => {
           devAssert(entitlement, 'Entitlement is null');
           // Viewer authorization is redirected to use local platform instead.
-          this.platformStore_.resolveEntitlement('local',
+          this.resolveEntitlementsToStore_('local',
               /** @type {!./entitlement.Entitlement}*/ (entitlement));
         }).catch(reason => {
           this.platformStore_.reportPlatformFailureAndFallback('local');
@@ -376,6 +384,14 @@ export class SubscriptionService {
       this.readerIdPromiseMap_[serviceId] = readerId;
     }
     return readerId;
+  }
+
+  /**
+   * @param {string} serviceId
+   * @return {?string}
+   */
+  getEncryptedDocumentKey(serviceId) {
+    return this.cryptoHandler_.getEncryptedDocumentKey(serviceId);
   }
 
   /**
