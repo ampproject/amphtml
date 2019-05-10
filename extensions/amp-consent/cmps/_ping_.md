@@ -32,18 +32,6 @@ A fake cmp type that is only used for local development.
       }
   }
   </script>
-  <div id="ui1">
-    Please Accept to load image.
-    <button on="tap:ABC.accept" role="button">Accept</button>
-    <button on="tap:ABC.reject" role="button">Reject</button>
-    <button on="tap:ABC.dismiss" role="button">Dismiss</button>
-  </div>
-  <div id="ui2">
-    Please Accept to load image.
-    <button on="tap:ABC.accept" role="button">Accept</button>
-    <button on="tap:ABC.reject" role="button">Reject</button>
-    <button on="tap:ABC.dismiss" role="button">Dismiss</button>
-  </div>
   <div id="postPromptUI">
     Post Prompt UI
     <button on="tap:ABC.prompt(consent=_ping_)" role="button">Manage</button>
