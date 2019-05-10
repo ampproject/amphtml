@@ -47,6 +47,7 @@ function getBoundingClientRect() {
  * @return {boolean}
  */
 function shouldInstall(win) {
+  // Don't install in no-DOM environments e.g. worker.
   if (!win.document) {
     return false;
   }
