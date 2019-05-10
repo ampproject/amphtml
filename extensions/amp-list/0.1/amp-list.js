@@ -87,6 +87,12 @@ export class AmpList extends AMP.BaseElement {
     this.renderPass_ = new Pass(this.win, () => this.doRenderPass_());
 
     /**
+     * Local data queued for render (from `src` mutation before layoutCallbacK).
+     * @private {?Array}
+     */
+    this.pendingLocalData_ = null;
+
+    /**
      * Latest fetched items to render and the promise resolver and rejecter
      * to be invoked on render success or fail, respectively.
      * @private {?RenderItems}
@@ -113,14 +119,19 @@ export class AmpList extends AMP.BaseElement {
 
     /** @private {?../../../extensions/amp-bind/0.1/bind-impl.Bind} */
     this.bind_ = null;
+
     /** @private {boolean} */
     this.loadMoreEnabled_ = false;
+
     /** @private {?./service/load-more-service.LoadMoreService} */
     this.loadMoreService_ = null;
+
     /** @private {?string} */
     this.loadMoreSrc_ = null;
+
     /**@private {boolean} */
     this.resizeFailed_ = false;
+
     /**@private {?UnlistenDef} */
     this.unlistenAutoLoadMore_ = null;
 
@@ -187,6 +198,7 @@ export class AmpList extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     this.layoutCompleted_ = true;
+
     // If a placeholder exists and it's taller than amp-list, attempt a resize.
     const placeholder = this.getPlaceholder();
     if (placeholder) {
@@ -200,7 +212,13 @@ export class AmpList extends AMP.BaseElement {
     if (this.loadMoreEnabled_) {
       this.initializeLoadMoreElements_();
     }
-    return this.fetchList_();
+
+    if (this.element.hasAttribute('src')) {
+      return this.fetchList_();
+    } else if (this.pendingLocalData_) {
+      return this.scheduleRender_(this.pendingLocalData_);
+    }
+    return Promise.resolve();
   }
 
   /**
@@ -273,9 +291,25 @@ export class AmpList extends AMP.BaseElement {
   mutatedAttributesCallback(mutations) {
     dev().info(TAG, 'mutate:', this.element, mutations);
     let promise;
+
+    /**
+     * @param {!Array|!Object} data
+     * @return {!Promise}
+     */
+    const renderLocalData = data => {
+      this.resetIfNecessary_(/* isFetch */ false);
+      const array = isArray(data) ? data : [data];
+      // Defer to render in layoutCallback() before first layout.
+      if (this.layoutCompleted_) {
+        return this.scheduleRender_(array);
+      } else {
+        this.pendingLocalData_ = array;
+      }
+      return Promise.resolve();
+    };
+
     const src = mutations['src'];
-    const state = /** @type {!JsonObject} */ (mutations)['state'];
-    const isLayoutContainer = mutations['is-layout-container'];
+    const state = mutations['state'];
     if (src !== undefined) {
       if (typeof src === 'string') {
         // Defer to fetch in layoutCallback() before first layout.
@@ -286,21 +320,20 @@ export class AmpList extends AMP.BaseElement {
       } else if (typeof src === 'object') {
         // Remove the 'src' now that local data is used to render the list.
         this.element.setAttribute('src', '');
-        this.resetIfNecessary_(/* isFetch */ false);
-        const data = isArray(src) ? src : [src];
-        promise = this.scheduleRender_(data, /*append*/ false);
+        promise = renderLocalData(src);
       } else {
         this.user().error(TAG, 'Unexpected "src" type: ' + src);
       }
     } else if (state !== undefined) {
       user().error(TAG, '[state] is deprecated, please use [src] instead.');
-      this.resetIfNecessary_(/* isFetch */ false);
-      const data = isArray(state) ? state : [state];
-      promise = this.scheduleRender_(data, /*append*/ false);
+      promise = renderLocalData(state);
     }
+
+    const isLayoutContainer = mutations['is-layout-container'];
     if (isLayoutContainer) {
       this.changeToLayoutContainer_();
     }
+
     // Only return the promise for easier testing.
     if (getMode().test) {
       return promise;
@@ -428,9 +461,9 @@ export class AmpList extends AMP.BaseElement {
           items = this.truncateToMaxLen_(items);
         }
         if (this.loadMoreEnabled_) {
-          this.updateLoadMoreSrc_(/**@type {!JsonObject} */(data));
+          this.updateLoadMoreSrc_(/** @type {!JsonObject} */ (data));
         }
-        return this.scheduleRender_(items, !!opt_append, data);
+        return this.scheduleRender_(items, opt_append, /* opt_payload */ data);
       });
     }
 
@@ -510,33 +543,37 @@ export class AmpList extends AMP.BaseElement {
       return response;
     }, error => {
       throw user().createError('Error proxying amp-list templates', error);
-    }).then(data => this.scheduleRender_(data, /*append*/ false));
+    }).then(data => this.scheduleRender_(data, /* append */ false));
   }
 
   /**
    * Schedules a fetch result to be rendered in the near future.
    * @param {!Array|!JsonObject|undefined} data
-   * @param {boolean} append
+   * @param {boolean=} opt_append
    * @param {JsonObject|Array<JsonObject>=} opt_payload
    * @return {!Promise}
    * @private
    */
-  scheduleRender_(data, append, opt_payload) {
+  scheduleRender_(data, opt_append, opt_payload) {
+    devAssert(this.layoutCompleted_);
     dev().info(TAG, 'schedule:', this.element, data);
+
     const deferred = new Deferred();
     const {promise, resolve: resolver, reject: rejecter} = deferred;
 
-    this.renderItems_ = /** @type {?RenderItems} */ (
-      {data, append, resolver, rejecter, payload: opt_payload});
+    // If there's nothing currently being rendered, schedule a render pass.
+    if (!this.renderItems_) {
+      this.renderPass_.schedule();
+    }
 
-    if (this.renderedItems_ && append) {
+    this.renderItems_ = /** @type {?RenderItems} */ (
+      {data, resolver, rejecter, append: opt_append, payload: opt_payload});
+
+    if (this.renderedItems_ && opt_append) {
       this.renderItems_.payload =
         /** @type {(?JsonObject|Array<JsonObject>)} */ (opt_payload || {});
     }
 
-    if (!this.renderPass_.isPending()) {
-      this.renderPass_.schedule();
-    }
     return promise;
   }
 
@@ -547,6 +584,7 @@ export class AmpList extends AMP.BaseElement {
    */
   doRenderPass_() {
     const current = this.renderItems_;
+
     devAssert(current && current.data, 'Nothing to render.');
     dev().info(TAG, 'pass:', this.element, current);
     const scheduleNextPass = () => {
