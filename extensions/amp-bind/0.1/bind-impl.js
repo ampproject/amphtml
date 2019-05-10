@@ -482,33 +482,19 @@ export class Bind {
       if (getMode().development) {
         return this.evaluate_().then(results => this.verify_(results));
       }
-    }).then(() => this.checkReadiness_(root));
-  }
-
-  /**
-   * Bind is "ready" when its initialization completes _and_ all <amp-state>
-   * elements' local data is parsed and processed (not remote data).
-   * @param {!Node} root
-   * @private
-   */
-  checkReadiness_(root) {
-    const ampStates = root.querySelectorAll('AMP-STATE');
-    if (ampStates.length > 0) {
-      // Instead of waiting for runtime to schedule builds, force all current
-      // <amp-state> elements to be built.
+    }).then(() => {
+      const ampStates = root.querySelectorAll('AMP-STATE');
+      // Force all query-able <amp-state> elements to be built.
+      // A bit weird but amp-state is just metadata, so there's no point
+      // to wait for runtime to schedule builds before sending "bindReady".
       const whenBuilt = toArray(ampStates).map(el => el.build());
-      return Promise.all(whenBuilt).then(() => this.onReady_());
-    } else {
-      this.onReady_();
-    }
-  }
-
-  /**
-   * @private
-   */
-  onReady_() {
-    this.viewer_.sendMessage('bindReady', undefined);
-    this.dispatchEventForTesting_(BindEvents.INITIALIZE);
+      return Promise.all(whenBuilt);
+    }).then(() => {
+      // Bind is "ready" when its initialization completes _and_ all <amp-state>
+      // elements' local data is parsed and processed (not remote data).
+      this.viewer_.sendMessage('bindReady', undefined);
+      this.dispatchEventForTesting_(BindEvents.INITIALIZE);
+    });
   }
 
   /**
