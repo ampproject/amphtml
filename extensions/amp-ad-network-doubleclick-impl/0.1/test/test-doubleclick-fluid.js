@@ -227,9 +227,9 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
   it('should fire delayed impression ping', () => {
     createScaffoldingForFluidRendering(impl, sandbox);
     const connectMessagingChannelSpy =
-          sandbox.spy(impl.safeframeApi_,
+          sandbox./*OK*/spy(impl.safeframeApi_,
               'connectMessagingChannel');
-    const onFluidResizeSpy = sandbox.spy(impl.safeframeApi_,
+    const onFluidResizeSpy = sandbox./*OK*/spy(impl.safeframeApi_,
         'onFluidResize_');
     return impl.adPromise_.then(() => {
       return impl.layoutCallback().then(() => {

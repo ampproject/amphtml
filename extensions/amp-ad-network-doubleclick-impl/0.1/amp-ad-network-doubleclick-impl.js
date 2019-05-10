@@ -96,7 +96,7 @@ import {
   metaJsonCreativeGrouper,
 } from '../../../ads/google/a4a/line-delimited-response-handler';
 import {parseQueryString} from '../../../src/url';
-import {setStyles} from '../../../src/style';
+import {setImportantStyles, setStyles} from '../../../src/style';
 import {stringHash32} from '../../../src/string';
 import {tryParseJson} from '../../../src/json';
 import {utf8Decode} from '../../../src/utils/bytes';
@@ -1065,10 +1065,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
               this.fireFluidDelayedImpression();
               this.reattemptToExpandFluidCreative_ = false;
             })
-        .catch(() => {
-          this.reattemptToExpandFluidCreative_ = true;
-          this.setCssPosition_('absolute');
-        });
+            .catch(() => {
+              this.reattemptToExpandFluidCreative_ = true;
+              this.setCssPosition_('absolute');
+            });
       });
     }
     return Promise.resolve();
@@ -1076,7 +1076,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /**
    * Sets the CSS 'position' property of this.element.
-   * @param {string} The CSS position value.
+   * @param {string} position The CSS position value.
    * @return {!Promise} A promise that resolves when mutation is complete.
    * @private
    */
