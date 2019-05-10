@@ -298,10 +298,12 @@ export class AmpList extends AMP.BaseElement {
      * @return {!Promise}
      */
     const renderLocalData = data => {
-      this.resetIfNecessary_(/* isFetch */ false);
+      // Remove the 'src' now that local data is used to render the list.
+      this.element.setAttribute('src', '');
       const array = isArray(data) ? data : [data];
       // Defer to render in layoutCallback() before first layout.
       if (this.layoutCompleted_) {
+        this.resetIfNecessary_(/* isFetch */ false);
         return this.scheduleRender_(array);
       } else {
         this.pendingLocalData_ = array;
@@ -319,8 +321,6 @@ export class AmpList extends AMP.BaseElement {
           promise = this.fetchList_();
         }
       } else if (typeof src === 'object') {
-        // Remove the 'src' now that local data is used to render the list.
-        this.element.setAttribute('src', '');
         promise = renderLocalData(src);
       } else {
         this.user().error(TAG, 'Unexpected "src" type: ' + src);
