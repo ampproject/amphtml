@@ -31,6 +31,7 @@ import {isEnumValue} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {mod} from '../../../src/utils/math';
 import {toggle} from '../../../src/style';
+import Fuse from 'fuse.js/dist/fuse.js';
 
 const EXPERIMENT = 'amp-autocomplete';
 const TAG = 'amp-autocomplete';
@@ -430,28 +431,36 @@ export class AmpAutocomplete extends AMP.BaseElement {
     // Client-side filtering.
     input = input.toLocaleLowerCase();
     const itemsExpr = this.element.getAttribute('filter-value') || 'value';
-    const filteredData = data.filter(item => {
-      if (typeof item === 'object') {
-        item = getValueForExpr(/** @type {!JsonObject} */(item), itemsExpr);
-      }
-      userAssert(typeof item === 'string',
-          `${TAG} data property "${itemsExpr}" must map to string type.`);
-      item = item.toLocaleLowerCase();
-      switch (this.filter_) {
-        case FilterType.SUBSTRING:
-          return includes(item, input);
-        case FilterType.PREFIX:
-          return startsWith(item, input);
-        case FilterType.TOKEN_PREFIX:
-          return this.tokenPrefixMatch_(item, input);
-        case FilterType.FUZZY:
-          throw new Error(`Filter not yet supported: ${this.filter_}`);
-        case FilterType.CUSTOM:
-          throw new Error(`Filter not yet supported: ${this.filter_}`);
-        default:
-          throw new Error(`Unexpected filter: ${this.filter_}`);
-      }
-    });
+    let filteredData;
+    if (this.filter_ === FilterType.FUZZY) {
+      // Fuzzy find from the data
+      const fuse = new Fuse(data, {
+        threshold: .4,
+        keys: [itemsExpr],
+      });
+      filteredData = fuse.search(input).map(i => data[i]);
+    } else {
+      filteredData = data.filter(item => {
+        if (typeof item === 'object') {
+          item = getValueForExpr(/** @type {!JsonObject} */(item), itemsExpr);
+        }
+        userAssert(typeof item === 'string',
+            `${TAG} data property "${itemsExpr}" must map to string type.`);
+        item = item.toLocaleLowerCase();
+        switch (this.filter_) {
+          case FilterType.SUBSTRING:
+            return includes(item, input);
+          case FilterType.PREFIX:
+            return startsWith(item, input);
+          case FilterType.TOKEN_PREFIX:
+            return this.tokenPrefixMatch_(item, input);
+          case FilterType.CUSTOM:
+            throw new Error(`Filter not yet supported: ${this.filter_}`);
+          default:
+            throw new Error(`Unexpected filter: ${this.filter_}`);
+        }
+      });
+    }
 
     return this.truncateToMaxEntries_(filteredData);
   }
