@@ -1102,20 +1102,6 @@ describes.fakeWin('Viewport', {}, env => {
 
     beforeEach(() => {
       windowApi.scrollTo = originalScrollTo;
-      // QQQQ
-      // setScrollTopStub
-      /*
-    viewport = new Viewport(ampdoc, binding, viewer);
-    viewport.fixedLayer_ = {
-      enterLightbox: () => {},
-      leaveLightbox: () => {},
-      update: () => {
-        return {then: callback => callback()};
-      },
-      updatePaddingTop: () => {},
-    };
-    viewport.getSize();
-      */
     });
 
     it('should not override scrollTo if not requested', () => {
