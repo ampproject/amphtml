@@ -227,9 +227,9 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
   it('should fire delayed impression ping', () => {
     createScaffoldingForFluidRendering(impl, sandbox);
     const connectMessagingChannelSpy =
-          sandbox./*OK*/spy(impl.safeframeApi_,
+          sandbox.spy(impl.safeframeApi_,
               'connectMessagingChannel');
-    const onFluidResizeSpy = sandbox./*OK*/spy(impl.safeframeApi_,
+    const onFluidResizeSpy = sandbox.spy(impl.safeframeApi_,
         'onFluidResize_');
     return impl.adPromise_.then(() => {
       return impl.layoutCallback().then(() => {
@@ -251,6 +251,7 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
   it('should fire impression for AMP fluid creative', () => {
     impl.iframe = impl.win.document.createElement('iframe');
     impl.win.document.body.appendChild(impl.iframe);
+    sandbox.stub(impl, 'setCssPosition_').returns(mockPromise);
     sandbox.stub(impl, 'attemptChangeHeight').returns(mockPromise);
     const delayedImpressionSpy = sandbox.spy(impl, 'fireDelayedImpressions');
     impl.buildCallback();
@@ -267,6 +268,7 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
     impl.win.document.body.appendChild(impl.iframe);
     const attemptChangeHeightStub = sandbox.stub(impl, 'attemptChangeHeight');
     attemptChangeHeightStub.returns(Promise.reject());
+    sandbox.stub(impl, 'setCssPosition_').returns(Promise.resolve());
     sandbox.stub(impl, 'attemptToRenderCreative').returns(Promise.resolve());
     impl.buildCallback();
     impl.isFluidRequest_ = true;
@@ -283,6 +285,7 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
     const attemptChangeHeightStub = sandbox.stub(impl, 'attemptChangeHeight');
     attemptChangeHeightStub.returns(Promise.resolve());
     sandbox.stub(impl, 'attemptToRenderCreative').returns(Promise.resolve());
+    sandbox.stub(impl, 'setCssPosition_').returns(mockPromise);
     impl.buildCallback();
     impl.isFluidRequest_ = true;
     impl.isVerifiedAmpCreative_ = true;
@@ -292,5 +295,43 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
     expect(attemptChangeHeightStub).to.not.be.called;
     impl.viewportCallback(false);
     expect(attemptChangeHeightStub).to.be.calledOnce;
+  });
+
+  it('should set position: static when measuring height on AMP fluid', () => {
+    impl.iframe = impl.win.document.createElement('iframe');
+    impl.win.document.body.appendChild(impl.iframe);
+    const attemptChangeHeightStub = sandbox.stub(impl, 'attemptChangeHeight');
+    const measureMutateElementStub = sandbox.stub(impl, 'measureMutateElement');
+    attemptChangeHeightStub.returns(Promise.resolve());
+    measureMutateElementStub.returns(Promise.resolve());
+    sandbox.stub(impl, 'attemptToRenderCreative').returns(Promise.resolve());
+    impl.buildCallback();
+    impl.isFluidRequest_ = true;
+    impl.isVerifiedAmpCreative_ = true;
+    const setCssPositionSpy = sandbox.spy(impl, 'setCssPosition_');
+    return impl.expandFluidCreative_().then(() => {
+      expect(attemptChangeHeightStub).to.be.calledOnce;
+      expect(setCssPositionSpy.withArgs('static')).to.be.calledOnce;
+      expect(setCssPositionSpy.withArgs('absolute')).to.not.be.called;
+    });
+  });
+
+  it('should set position: absoltute back when resizing fails', () => {
+    impl.iframe = impl.win.document.createElement('iframe');
+    impl.win.document.body.appendChild(impl.iframe);
+    const attemptChangeHeightStub = sandbox.stub(impl, 'attemptChangeHeight');
+    const measureMutateElementStub = sandbox.stub(impl, 'measureMutateElement');
+    attemptChangeHeightStub.returns(Promise.reject());
+    measureMutateElementStub.returns(Promise.resolve());
+    sandbox.stub(impl, 'attemptToRenderCreative').returns(Promise.resolve());
+    impl.buildCallback();
+    impl.isFluidRequest_ = true;
+    impl.isVerifiedAmpCreative_ = true;
+    const setCssPositionSpy = sandbox.spy(impl, 'setCssPosition_');
+    return impl.expandFluidCreative_().then(() => {
+      expect(attemptChangeHeightStub).to.be.calledOnce;
+      expect(setCssPositionSpy.withArgs('static')).to.be.calledOnce;
+      expect(setCssPositionSpy.withArgs('absolute')).to.be.calledOnce;
+    });
   });
 });
