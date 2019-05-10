@@ -850,9 +850,6 @@ export function isEnabled(element) {
   return !(element.disabled || matches(element, ':disabled'));
 }
 
-const PRECEDING_OR_CONTAINS =
-    Node.DOCUMENT_POSITION_PRECEDING | Node.DOCUMENT_POSITION_CONTAINS;
-
 /**
  * A sorting comparator that sorts elements in DOM tree order.
  * A first sibling is sorted to be before its nextSibling.
@@ -869,9 +866,11 @@ export function domOrderComparator(element1, element2) {
   }
 
   const pos = element1.compareDocumentPosition(element2);
+  const precedingOrContains =
+    Node.DOCUMENT_POSITION_PRECEDING | Node.DOCUMENT_POSITION_CONTAINS;
 
-  // if fe2 is preceeding or contains fe1 then, fe1 is after fe2
-  if (pos & PRECEDING_OR_CONTAINS) {
+  // if fe2 is preceding or contains fe1 then, fe1 is after fe2
+  if (pos & precedingOrContains) {
     return 1;
   }
 
