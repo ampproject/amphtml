@@ -27,7 +27,7 @@ FAIL
 |    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
 |    <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-0.1.js"></script>
 >>   ^~~~~~~~~
-amp-story/0.1/test/validator-amp-story-animations-error.html:27:2 The extension 'amp-story' is referenced at version '0.1' which is a deprecated version. Please use a more recent version of this extension. This may become an error in the future. (see https://www.ampproject.org/docs/reference/components/amp-story) [DEPRECATION]
+amp-story/0.1/test/validator-amp-story-animations-error.html:27:2 The extension 'amp-story' is referenced at version '0.1' which is a deprecated version. Please use a more recent version of this extension. This may become an error in the future. (see https://amp.dev/documentation/components/amp-story) [DEPRECATION]
 |    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
 |    <style amp-custom>
@@ -49,7 +49,7 @@ amp-story/0.1/test/validator-amp-story-animations-error.html:27:2 The extension 
 |  <body>
 |    <amp-story standalone>
 >>   ^~~~~~~~~
-amp-story/0.1/test/validator-amp-story-animations-error.html:47:2 The tag 'AMP-STORY (beta)' is deprecated - use 'AMP-STORY' instead. (see https://www.ampproject.org/docs/reference/components/amp-story#migrating-from-0.1-to-1.0) [DEPRECATION]
+amp-story/0.1/test/validator-amp-story-animations-error.html:47:2 The tag 'AMP-STORY (beta)' is deprecated - use 'AMP-STORY' instead. (see https://amp.dev/documentation/components/amp-story#migrating-from-0.1-to-1.0) [DEPRECATION]
 |      <amp-story-page id="combining-animations">
 |          <amp-story-grid-layer template="thirds">
 |            <h1>invalid animation value + empty animation value</h1>
