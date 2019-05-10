@@ -1097,7 +1097,7 @@ describes.fakeWin('Viewport', {}, env => {
     });
   });
 
-  describe.only('overrideGlobalScrollTo', () => {
+  describe('overrideGlobalScrollTo', () => {
     const originalScrollTo = function() {};
 
     beforeEach(() => {
