@@ -1096,6 +1096,53 @@ describes.fakeWin('Viewport', {}, env => {
       expect(rect.top).to.equal(111 + 10);
     });
   });
+
+  describe.only('overrideGlobalScrollTo', () => {
+    const originalScrollTo = function() {};
+
+    beforeEach(() => {
+      windowApi.scrollTo = originalScrollTo;
+      // QQQQ
+      // setScrollTopStub
+      /*
+    viewport = new Viewport(ampdoc, binding, viewer);
+    viewport.fixedLayer_ = {
+      enterLightbox: () => {},
+      leaveLightbox: () => {},
+      update: () => {
+        return {then: callback => callback()};
+      },
+      updatePaddingTop: () => {},
+    };
+    viewport.getSize();
+      */
+    });
+
+    it('should not override scrollTo if not requested', () => {
+      new Viewport(ampdoc, binding, viewer);
+      expect(windowApi.scrollTo).to.equal(originalScrollTo);
+    });
+
+    it('should override scrollTo when requested', () => {
+      sandbox.stub(binding, 'overrideGlobalScrollTo').callsFake(() => true);
+      viewport = new Viewport(ampdoc, binding, viewer);
+      const setScrollTopStub = sandbox.stub(viewport, 'setScrollTop');
+      expect(windowApi.scrollTo).to.not.equal(originalScrollTo);
+      windowApi.scrollTo(0, 11);
+      expect(setScrollTopStub).to.be.calledOnce.calledWith(11);
+    });
+
+    it('should tolerate scrollTo override failures', () => {
+      Object.defineProperty(windowApi, 'scrollTo', {
+        value: originalScrollTo,
+        writable: false,
+        configurable: false,
+      });
+      sandbox.stub(binding, 'overrideGlobalScrollTo').callsFake(() => true);
+      new Viewport(ampdoc, binding, viewer);
+      expect(windowApi.scrollTo).to.equal(originalScrollTo);
+    });
+  });
 });
 
 
