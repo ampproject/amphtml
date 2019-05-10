@@ -48,7 +48,10 @@ import {
   incrementLoadingAds,
   is3pThrottled,
 } from '../../amp-ad/0.1/concurrent-load';
-import {getConsentPolicyState} from '../../../src/consent';
+import {
+  getConsentPolicyState,
+  getConsentPolicyInfo
+} from '../../../src/consent';
 import {getContextMetadata} from '../../../src/iframe-attributes';
 import {getMode} from '../../../src/mode';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
@@ -622,23 +625,50 @@ export class AmpA4A extends AMP.BaseElement {
           }
         })
         // Possibly block on amp-consent.
-        /** @return {!Promise<?CONSENT_POLICY_STATE>} */
+        /** @return {!Promise<array>} */
         .then(() => {
           checkStillCurrent();
           const consentPolicyId = super.getConsentPolicy();
-          return consentPolicyId ?
-            getConsentPolicyState(this.element, consentPolicyId)
-                .catch(err => {
-                  user().error(TAG, 'Error determining consent state', err);
-                  return CONSENT_POLICY_STATE.UNKNOWN;
-                }) : Promise.resolve(null);
+
+          // TODO torch2424
+          getConsentPolicyInfo(this.element, consentPolicyId);
+
+          if (consentPolicyId) {
+
+            const consentStatePromise = getConsentPolicyState(
+              this.element,
+              consentPolicyId
+            ).catch(err => {
+                user().error(TAG, 'Error determining consent state', err);
+                return CONSENT_POLICY_STATE.UNKNOWN;
+            });
+
+            const consentStringPromise = getConsentPolicyInfo(
+              this.element,
+              consentPolicyId
+            ).catch(err => {
+              user().error(TAG, 'Error determining consent sttring', err);
+              return null;
+            });
+
+            return Promise.all([
+              consentStatePromise,
+              consentStringPromise
+            ]);
+          }
+
+          return Promise.resolve([null, null]);
         })
         // This block returns the ad URL, if one is available.
         /** @return {!Promise<?string>} */
-        .then(consentState => {
+        .then(consentResponse => {
           checkStillCurrent();
+          console.log(consentResponse);
           return /** @type {!Promise<?string>} */(this.getAdUrl(
-              consentState, this.tryExecuteRealTimeConfig_(consentState)));
+            consentState, this.tryExecuteRealTimeConfig_(
+              consentResponse[0],
+              consentResponse[1]
+          )));
         })
         // This block returns the (possibly empty) response to the XHR request.
         /** @return {!Promise<?Response>} */
@@ -1701,14 +1731,15 @@ export class AmpA4A extends AMP.BaseElement {
    * If it is not supported by the network, but the publisher has included
    * the rtc-config attribute on the amp-ad element, warn.
    * @param {?CONSENT_POLICY_STATE} consentState
+   * @param {?string} consentString
    * @return {Promise<!Array<!rtcResponseDef>>|undefined}
    */
-  tryExecuteRealTimeConfig_(consentState) {
+  tryExecuteRealTimeConfig_(consentState, consentString) {
     if (!!AMP.RealTimeConfigManager) {
       try {
         return new AMP.RealTimeConfigManager(this)
             .maybeExecuteRealTimeConfig(
-                this.getCustomRealTimeConfigMacros_(), consentState);
+                this.getCustomRealTimeConfigMacros_(), consentState, consentString);
       } catch (err) {
         user().error(TAG, 'Could not perform Real Time Config.', err);
       }
