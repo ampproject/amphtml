@@ -16,6 +16,7 @@
 
 // import to install chromedriver
 require('chromedriver'); // eslint-disable-line no-unused-vars
+require('geckodriver'); // eslint-disable-line no-unused-vars
 
 const puppeteer = require('puppeteer');
 const {
@@ -103,15 +104,35 @@ async function createPuppeteer(opt_config = {}) {
 /**
  * Configure and launch a Selenium instance
  * @param {!SeleniumConfigDef=} opt_config
+ * @return {!SeleniumDriver}
  */
-async function createSelenium(opt_config = {}) {
+async function createSelenium(browser, opt_config = {}) {
+  // TODO(estherkim): implement sessions
+  // TODO(estherkim): ensure tests are in a sandbox
+  // See https://w3c.github.io/webdriver/#sessions
+  switch (browser) {
+    case 'firefox':
+      return createFirefoxDriver(opt_config);
+    default:
+      return createChromeDriver(opt_config);
+  }
+}
+
+/**
+ * Configure a chrome driver.
+ *
+ * @param {!SeleniumConfigDef} config
+ * @return {!SeleniumDriver}
+ */
+async function createChromeDriver(config) {
   const args = [];
   args.push('--no-sandbox');
   args.push('--disable-gpu');
-  if (opt_config.headless) {
+  if (config.headless) {
     args.push('--headless');
   }
 
+  // TODO(estherkim): remove hardcoded chrome driver
   const capabilities = Capabilities.chrome();
   const chromeOptions = {
     // TODO(cvializ,estherkim,sparhami):
@@ -119,8 +140,26 @@ async function createSelenium(opt_config = {}) {
     'args': args,
   };
   capabilities.set('chromeOptions', chromeOptions);
-
   const builder = new Builder().withCapabilities(capabilities);
+  const driver = await builder.build();
+  return driver;
+}
+
+/**
+ * Configure a firefox driver.
+ *
+ * @param {!SeleniumConfigDef} config
+ * @return {!SeleniumDriver}
+ */
+async function createFirefoxDriver(config) {
+  const capabilities = Capabilities.firefox();
+  const options = new firefox.Options();
+
+  if (config.headless) {
+    options.addArguments('-headless');
+  }
+  const builder = new Builder().withCapabilities(capabilities)
+      .forBrowser('firefox').setFirefoxOptions(options);
   const driver = await builder.build();
   return driver;
 }
@@ -227,23 +266,27 @@ function describeEnv(factory) {
     });
 
     return describeFunc(name, function() {
-      for (const name in variants) {
-        it.configure = function() {
-          return new ItConfig(it, variants[name]);
-        };
+      spec.browser(browser => {
+        describe(browser, function() {
+          for (const name in variants) {
+            it.configure = function() {
+              return new ItConfig(it, variants[name]);
+            };
 
-        describe(name ? ` ${name} ` : SUB, function() {
-          doTemplate.call(this, name, variants[name]);
+            describe(name ? ` ${name} ` : SUB, function() {
+              doTemplate.call(this, name, browser, variants[name]);
+            });
+          }
         });
-      }
+      });
     });
 
-    function doTemplate(name, variant) {
+    function doTemplate(name, browser, variant) {
       const env = Object.create(variant);
       this.timeout(TEST_TIMEOUT);
       beforeEach(async function() {
         this.timeout(SETUP_TIMEOUT);
-        await fixture.setup(env);
+        await fixture.setup(browser, env);
 
         // don't install for CI
         if (!isTravisBuild()) {
@@ -307,7 +350,7 @@ class EndToEndFixture {
     this.spec = spec;
   }
 
-  async setup(env) {
+  async setup(browser, env) {
     const config = getConfig();
     const controller = await getController(config);
     const ampDriver = new AmpDriver(controller);
