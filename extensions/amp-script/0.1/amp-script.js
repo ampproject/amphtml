@@ -289,8 +289,9 @@ export class AmpScript extends AMP.BaseElement {
             height = body./*OK*/scrollHeight;
           }, () => {
             // Match iframe height and remove original children.
-            setImportantStyles(this.iframe_, {'height': height + 'px'});
-            while (this.element.firstChild !== this.iframe_) {
+            const iframe = /** @type {!HTMLIFrameElement} */ (this.iframe_);
+            setImportantStyles(iframe, {'height': height + 'px'});
+            while (this.element.firstChild !== iframe) {
               this.element.removeChild(this.element.firstChild);
             }
           });
