@@ -562,6 +562,10 @@ export const adConfig = {
 
   'kuadio': {},
 
+  'lentainform': {
+    renderStartImplemented: false,
+  },
+
   'ligatus': {
     prefetch: 'https://ssl.ligatus.com/render/ligrend.js',
     renderStartImplemented: true,

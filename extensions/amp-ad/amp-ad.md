@@ -296,6 +296,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Kiosked](../../ads/kiosked.md)
 - [Kixer](../../ads/kixer.md)
 - [Kuadio](../../ads/kuadio.md)
+- [Lentainform](../../ads/lentainform.md)
 - [Ligatus](../../ads/ligatus.md)
 - [LockerDome](../../ads/lockerdome.md)
 - [LOKA](../../ads/loka.md)

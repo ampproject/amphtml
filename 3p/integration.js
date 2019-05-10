@@ -164,6 +164,7 @@ import {kargo} from '../ads/kargo';
 import {kiosked} from '../ads/kiosked';
 import {kixer} from '../ads/kixer';
 import {kuadio} from '../ads/kuadio';
+import {lentainform} from '../ads/lentainform';
 import {ligatus} from '../ads/ligatus';
 import {lockerdome} from '../ads/lockerdome';
 import {loka} from '../ads/loka';
@@ -265,7 +266,6 @@ import {zedo} from '../ads/zedo';
 import {zen} from '../ads/zen';
 import {zergnet} from '../ads/zergnet';
 import {zucks} from '../ads/zucks';
-
 
 /**
  * Whether the embed type may be used with amp-embed tag.
@@ -406,6 +406,7 @@ register('kargo', kargo);
 register('kiosked', kiosked);
 register('kixer', kixer);
 register('kuadio', kuadio);
+register('lentainform', lentainform);
 register('ligatus', ligatus);
 register('lockerdome', lockerdome);
 register('loka', loka);
