@@ -19,7 +19,7 @@ import * as lolex from 'lolex';
 import {CookieWriter} from '../cookie-writer';
 import {dict} from '../../../../src/utils/object';
 import {installLinkerReaderService} from '../linker-reader';
-import {installVariableService, variableServiceFor} from '../variables';
+import {installVariableService} from '../variables';
 import {stubService} from '../../../../testing/test-helper';
 
 
