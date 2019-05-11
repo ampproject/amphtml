@@ -33,6 +33,7 @@ const sourcemaps = require('gulp-sourcemaps');
 const touch = require('touch');
 const watchify = require('watchify');
 const wrappers = require('../compile-wrappers');
+const {altMainBundles} = require('../../bundles.config');
 const {applyConfig, removeConfig} = require('./prepend-global/index.js');
 const {closureCompile} = require('../compile/compile');
 const {isTravisBuild} = require('../travis');
@@ -190,7 +191,6 @@ function compile(watch, shouldMinify) {
           }));
     }
     promises.push(
-
         // inabox-host
         compileJs('./ads/inabox/', 'inabox-host.js', './dist', {
           toName: 'amp-inabox-host.js',
@@ -322,8 +322,15 @@ function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
       .then(() => {
         if (argv.fortesting && MINIFIED_TARGETS.includes(minifiedName)) {
           return enableLocalTesting(`${destDir}/${minifiedName}`);
-        } else {
-          return Promise.resolve();
+        }
+      })
+      .then(() => {
+        if (options.singlePassCompilation) {
+          const promises = [];
+          altMainBundles.forEach(bundle => {
+            promises.push(enableLocalTesting(`dist/${bundle.name}.js`));
+          });
+          return Promise.all(promises);
         }
       });
 }
@@ -432,8 +439,6 @@ function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
         .then(() => {
           if (UNMINIFIED_TARGETS.includes(destFilename)) {
             return enableLocalTesting(`${destDir}/${destFilename}`);
-          } else {
-            return Promise.resolve();
           }
         });
   }
