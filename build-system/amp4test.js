@@ -104,6 +104,7 @@ app.use('/compose-shadow', function(req, res) {
     src: docUrl.slice(1),
     port: KARMA_SERVER_PORT,
     baseHref: path.dirname(req.url),
+    useLocalJs: true,
   }));
 });
 
