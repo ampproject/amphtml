@@ -663,11 +663,14 @@ export class AmpA4A extends AMP.BaseElement {
         /** @return {!Promise<?string>} */
         .then(consentResponse => {
           checkStillCurrent();
-          console.log(consentResponse);
+
+          const consentState = consentResponse[0];
+          const consentString = consentResponse[1];
+
           return /** @type {!Promise<?string>} */(this.getAdUrl(
             consentState, this.tryExecuteRealTimeConfig_(
-              consentResponse[0],
-              consentResponse[1]
+              consentState,
+              consentString
           )));
         })
         // This block returns the (possibly empty) response to the XHR request.
