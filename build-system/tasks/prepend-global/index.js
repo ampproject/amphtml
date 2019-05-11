@@ -22,6 +22,7 @@ const exec = BBPromise.promisify(childProcess.exec);
 const colors = require('ansi-colors');
 const fs = BBPromise.promisifyAll(require('fs'));
 const log = require('fancy-log');
+const path = require('path');
 const {isTravisBuild} = require('../../travis');
 
 const {red, cyan} = colors;
@@ -155,7 +156,10 @@ function applyConfig(
       })
       .then(() => {
         if (!isTravisBuild()) {
-          log('Wrote', cyan(config), 'AMP config to', cyan(target));
+          const details = '(' + cyan(config) +
+              (opt_localDev ? ', ' + cyan('localDev') : '') +
+              (opt_fortesting ? ', ' + cyan('test') : '') + ')';
+          log('Applied AMP config', details, 'to', cyan(path.basename(target)));
         }
       });
 }
@@ -168,9 +172,6 @@ function applyConfig(
  */
 function enableLocalDev(config, target, configJson) {
   let LOCAL_DEV_AMP_CONFIG = {localDev: true};
-  if (!isTravisBuild()) {
-    log('Enabled local development mode in', cyan(target));
-  }
   const TESTING_HOST = process.env.AMP_TESTING_HOST;
   if (typeof TESTING_HOST == 'string') {
     const TESTING_HOST_FULL_URL = TESTING_HOST.match(/^https?:\/\//) ?

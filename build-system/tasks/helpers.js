@@ -61,6 +61,24 @@ const EXTENSION_BUNDLE_MAP = {
   ],
 };
 
+const UNMINIFIED_TARGETS = [
+  'amp.js',
+  'amp-esm.js',
+  'amp-shadow.js',
+  'amp-inabox.js',
+  'alp.max.js',
+  'integration.js',
+];
+
+const MINIFIED_TARGETS = [
+  'v0.js',
+  'v0-esm.js',
+  'shadow-v0.js',
+  'amp4ads-v0.js',
+  'alp.js',
+  'f.js',
+];
+
 const hostname = argv.hostname || 'cdn.ampproject.org';
 const hostname3p = argv.hostname3p || '3p.ampproject.net';
 
@@ -281,9 +299,10 @@ function appendToCompiledFile(srcFilename, destFilePath) {
 function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
   const startTime = Date.now();
   const entryPoint = path.join(srcDir, srcFilename);
-  return closureCompile(entryPoint, destDir, options.minifiedName, options)
+  const {minifiedName} = options;
+  return closureCompile(entryPoint, destDir, minifiedName, options)
       .then(function() {
-        const destPath = path.join(destDir, options.minifiedName);
+        const destPath = path.join(destDir, minifiedName);
         appendToCompiledFile(srcFilename, destPath);
         fs.writeFileSync(
             path.join(destDir, 'version.txt'), internalRuntimeVersion);
@@ -294,11 +313,18 @@ function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
         }
       })
       .then(() => {
-        let name = options.minifiedName;
+        let name = minifiedName;
         if (options.latestName) {
           name = `${name} → ${options.latestName}`;
         }
         endBuildStep('Minified', name, startTime);
+      })
+      .then(() => {
+        if (argv.fortesting && MINIFIED_TARGETS.includes(minifiedName)) {
+          return enableLocalTesting(`${destDir}/${minifiedName}`);
+        } else {
+          return Promise.resolve();
+        }
       });
 }
 
@@ -403,7 +429,13 @@ function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
           }
           endBuildStep('Compiled', name, startTime);
         })
-        .then(() => maybeEnableLocalTesting(destFilename));
+        .then(() => {
+          if (UNMINIFIED_TARGETS.includes(destFilename)) {
+            return enableLocalTesting(`${destDir}/${destFilename}`);
+          } else {
+            return Promise.resolve();
+          }
+        });
   }
 
   if (options.watch) {
@@ -426,32 +458,6 @@ function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
     // This is the default options.watch === true case, and also covers the
     // `gulp build` / `gulp dist` cases where options.watch is undefined.
     return rebundle(/* failOnError */ true);
-  }
-}
-
-/**
- * Enables local testing mode for various target files
- * @param {string} destFilename
- */
-function maybeEnableLocalTesting(destFilename) {
-  if (process.env.NODE_ENV === 'development') {
-    if (destFilename === 'amp.js') {
-      return enableLocalTesting('dist/amp.js');
-    } else if (destFilename === 'amp-esm.js') {
-      return enableLocalTesting('dist/amp-esm.js');
-    } else if (destFilename === 'amp4ads-v0.js') {
-      return enableLocalTesting('dist/amp4ads-v0.js');
-    } else if (destFilename === 'integration.js') {
-      return enableLocalTesting('dist.3p/current/integration.js');
-    } else if (destFilename === 'amp-shadow.js') {
-      return enableLocalTesting('dist/amp-shadow.js');
-    } else if (destFilename === 'amp-inabox.js') {
-      return enableLocalTesting('dist/amp-inabox.js');
-    } else {
-      return Promise.resolve();
-    }
-  } else {
-    return Promise.resolve();
   }
 }
 
