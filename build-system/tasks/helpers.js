@@ -317,6 +317,12 @@ function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
         if (options.latestName) {
           name = `${name} → ${options.latestName}`;
         }
+        if (options.singlePassCompilation) {
+          altMainBundles.forEach(bundle => {
+            name = `${name}, ${bundle.name}.js`;
+          });
+          name = `${name}, and all extensions`;
+        }
         endBuildStep('Minified', name, startTime);
       })
       .then(() => {
