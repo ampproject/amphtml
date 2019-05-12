@@ -15,6 +15,7 @@
  */
 
 import {CSS} from '../../../build/amp-cld-img-0.1.css';
+import {Services} from '../../../src/services';
 import {buildUrl, deriveObjectFit} from './utils';
 import {dashToCamelCase} from '../../../src/string';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -173,14 +174,14 @@ export class AmpCldImg extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    /* set transformations width and height based on actual element
-     dimensions: */
-    this.options_['width'] = this.roundValue_(this.element.clientWidth);
-    this.options_['height'] = this.roundValue_(this.element.clientHeight);
-
-    this.updateSrc_();
-
-    return this.loadPromise(this.image_);
+    return this.loadPromise(this.image_).then(() => {
+      return Services.viewportForDoc(this.element)
+          .getClientRectAsync(this.element).then(rect => {
+            this.options_['width'] = this.roundValue_(rect.width);
+            this.options_['height'] = this.roundValue_(rect.height);
+            this.updateSrc_();
+          });
+    });
   }
 
   /**
