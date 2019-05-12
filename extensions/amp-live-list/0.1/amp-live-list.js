@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
+import {
+  AMP_LIVE_LIST_CUSTOM_SLOT_ID,
+  LiveListManager,
+  liveListManagerForDoc,
+} from './live-list-manager';
 import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-live-list-0.1.css';
 import {Layout} from '../../../src/layout';
-import {LiveListManager, liveListManagerForDoc} from './live-list-manager';
 import {childElementByAttr} from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';
 import {user, userAssert} from '../../../src/log';
@@ -76,6 +80,14 @@ export class LiveListInterface {
    * @return {boolean}
    */
   isEnabled() {}
+
+  /**
+   * Identifies if the amp-live-list is using another slot that contains the
+   * live elements.
+   *
+   * @return {boolean}
+   */
+  hasCustomSlot() {}
 
   /**
    * Retrieves the highest update time from the live list.
@@ -161,6 +173,9 @@ export class AmpLiveList extends AMP.BaseElement {
     /** @private {?Element} */
     this.pendingPagination_ = null;
 
+    /** @private {string} */
+    this.customSlotId_ = '';
+
     /**
      * This is the count of items we treat as "active" (exclusing tombstone'd
      * items). We increment it on insert operations done,
@@ -186,6 +201,8 @@ export class AmpLiveList extends AMP.BaseElement {
 
     this.manager_ = liveListManagerForDoc(this.getAmpDoc());
 
+    this.customSlotId_ = this.element[AMP_LIVE_LIST_CUSTOM_SLOT_ID];
+
     this.updateSlot_ = userAssert(
         this.getUpdateSlot_(this.element),
         'amp-live-list must have an "update" slot.');
@@ -204,11 +221,12 @@ export class AmpLiveList extends AMP.BaseElement {
         LiveListManager.getMinDataPollInterval());
 
     const maxItems = this.element.getAttribute('data-max-items-per-page');
-    userAssert(Number(maxItems) > 0,
-        'amp-live-list # %s must have data-max-items-per-page attribute with'
-        + ' numeric value. Found %s.',
-        this.liveListId_,
-        maxItems
+    userAssert(Number(maxItems) > 0 ||
+      this.element.hasAttribute('disable-pagination'),
+    'amp-live-list # %s must have data-max-items-per-page attribute with'
+    + ' numeric value. Found %s.',
+    this.liveListId_,
+    maxItems
     );
 
     const actualCount = ([].slice.call(this.itemsSlot_.children)
@@ -229,14 +247,18 @@ export class AmpLiveList extends AMP.BaseElement {
       item.classList.add(classes.ITEM);
     });
 
-    this.curNumOfLiveItems_ = this.validateLiveListItems_(
-        this.itemsSlot_, true);
+    this.curNumOfLiveItems_ = this.countAndCacheValidItems_(this.itemsSlot_,
+        true /** opt_cacheIds */);
 
     this.registerDefaultAction(this.updateAction_.bind(this), 'update');
-
     if (!this.element.hasAttribute('aria-live')) {
       this.element.setAttribute('aria-live', 'polite');
     }
+  }
+
+  /** @override */
+  hasCustomSlot() {
+    return !!this.customSlotId_;
   }
 
   /** @override */
@@ -256,10 +278,11 @@ export class AmpLiveList extends AMP.BaseElement {
   /** @override */
   update(updatedElement) {
     const container = this.getItemsSlot_(updatedElement);
+
     if (!container) {
       return this.updateTime_;
     }
-    this.validateLiveListItems_(container);
+    this.countAndCacheValidItems_(container);
     const mutateItems = this.getUpdates_(container);
 
     this.preparePendingItemsInsert_(mutateItems.insert);
@@ -269,8 +292,11 @@ export class AmpLiveList extends AMP.BaseElement {
     this.pendingPagination_ = this.getPaginationSlot_(updatedElement);
 
     // We prefer user interaction if we have pending items to insert at the
-    // top of the component.
+    // top of the component. Unless the 'auto-insert' attribute is used.
     if (this.pendingItemsInsert_.length > 0) {
+      if (this.element.hasAttribute('auto-insert')) {
+        this.updateAction_();
+      }
       this.mutateElement(() => {
         this.toggleUpdateButton_(true);
         this.viewport_.updateFixedLayer();
@@ -308,7 +334,6 @@ export class AmpLiveList extends AMP.BaseElement {
         this.eachChildElement_(itemsSlot, child => {
           child.classList.remove(classes.NEW_ITEM);
         });
-
         this.curNumOfLiveItems_ += this.insert_(
             itemsSlot, this.pendingItemsInsert_);
         this.pendingItemsInsert_.length = 0;
@@ -352,7 +377,7 @@ export class AmpLiveList extends AMP.BaseElement {
       });
     }
 
-    if (hasInsertItems) {
+    if (hasInsertItems && !this.element.hasAttribute('disable-scrolling')) {
       promise = promise.then(() => {
         const elementToScrollTo = this.isReverseOrder_ &&
           this.itemsSlot_.lastElementChild ?
@@ -389,25 +414,30 @@ export class AmpLiveList extends AMP.BaseElement {
     let count = 0;
 
     orphans.forEach(orphan => {
-      if (this.itemsSlot_.childElementCount == 0) {
+      if (this.itemsSlot_.childElementCount === 0) {
         this.itemsSlot_.appendChild(orphan);
       } else {
         const orphanSortTime = this.getSortTime_(orphan);
+        // An item might not have sort time when a custom slot is used (with
+        // customSlotId_) instead of the default "items" slot. As the custom
+        // container may contain a mixture of live elements and static ones.
+        if (!this.isValidTime_(orphanSortTime)) {
+          return;
+        }
 
         if (this.isReverseOrder_) {
           for (let child = this.itemsSlot_.lastElementChild; child;
             child = child.previousElementSibling) {
             const childSortTime = this.getSortTime_(child);
+            if (!this.isValidTime_(childSortTime)) {
+              continue;
+            }
+
             if (orphanSortTime >= childSortTime) {
-              if (child.nextElementSibling) {
-                this.itemsSlot_.insertBefore(orphan, child.nextElementSibling);
-                count++;
-                break;
-              } else {
-                this.itemsSlot_.appendChild(orphan);
-                count++;
-                break;
-              }
+              this.itemsSlot_.insertBefore(orphan,
+                  child.nextElementSibling);
+              count++;
+              break;
             // If we've exhausted the list it should be appended as the first
             // item.
             } else if (!child.previousElementSibling) {
@@ -424,6 +454,9 @@ export class AmpLiveList extends AMP.BaseElement {
           for (let child = this.itemsSlot_.firstElementChild; child;
             child = child.nextElementSibling) {
             const childSortTime = this.getSortTime_(child);
+            if (!this.isValidTime_(childSortTime)) {
+              continue;
+            }
             if (orphanSortTime >= childSortTime) {
               this.itemsSlot_.insertBefore(orphan, child);
               count++;
@@ -664,6 +697,13 @@ export class AmpLiveList extends AMP.BaseElement {
     for (let child = updatedElement.firstElementChild; child;
       child = child.nextElementSibling) {
       const id = child.getAttribute('id');
+      const sortTime = this.getSortTime_(child);
+      // An item might not have sort time when a custom slot is used
+      // (with customSlotId_) instead of the default "items" slot. As it
+      // may contain a mixture of live elements and static ones.
+      if (!id || !this.isValidTime_(sortTime)) {
+        continue;
+      }
 
       if (this.isChildNew_(child)) {
         const orphan = this.win.document.importNode(child, true);
@@ -759,16 +799,6 @@ export class AmpLiveList extends AMP.BaseElement {
   }
 
   /**
-   * Remove id of child from cache.
-   *
-   * @param {string} id
-   * @private
-   */
-  removeChildId_(id) {
-    delete this.knownItems_[id];
-  }
-
-  /**
    * Checks if child has necessary attributes to be a valid child.
    *
    * @param {!Element} child
@@ -777,12 +807,12 @@ export class AmpLiveList extends AMP.BaseElement {
    */
   isValidChild_(child) {
     return !!child.hasAttribute('id') &&
-        Number(child.getAttribute('data-sort-time')) > 0;
+      this.isValidTime_(this.getSortTime_(child));
   }
 
   /**
-   * Runs through all the children of the current live-list and validates
-   * them. Has optional opt_cacheIds flag which caches the ids while we iterate
+   * Runs through all the children of the current live-list and counts valid
+   * ones. Has optional opt_cacheIds flag which caches the ids while we iterate
    * through the children.
    *
    * @param {!Element} element
@@ -790,22 +820,18 @@ export class AmpLiveList extends AMP.BaseElement {
    * @return {number}
    * @private
    */
-  validateLiveListItems_(element, opt_cacheIds) {
+  countAndCacheValidItems_(element, opt_cacheIds) {
     let numItems = 0;
-    let foundInvalid = false;
+
     this.eachChildElement_(element, child => {
-      if (!this.isValidChild_(child)) {
-        foundInvalid = true;
-      } else if (opt_cacheIds) {
-        this.cacheChild_(child);
+      if (this.isValidChild_(child)) {
+        numItems++;
+        if (opt_cacheIds) {
+          this.cacheChild_(child);
+        }
       }
-      numItems++;
     });
-    userAssert(!foundInvalid,
-        'All amp-live-list-items under amp-live-list#%s children must '
-        + 'have id and data-sort-time attributes. data-sort-time must be a '
-        + 'Number greater than 0.',
-        this.liveListId_);
+
     return numItems;
   }
 
@@ -825,10 +851,25 @@ export class AmpLiveList extends AMP.BaseElement {
   }
 
   /**
+   * Gets custom slot by id.
+   *
+   * @param {!Element} element
+   */
+  getCustomSlot_(element) {
+    if (element.id === this.customSlotId_) {
+      return element;
+    }
+    return this.win.document.getElementById(this.customSlotId_);
+  }
+
+  /**
    * @param {!Element} parent
    * @private
    */
   getUpdateSlot_(parent) {
+    if (this.customSlotId_) {
+      return this.getCustomSlot_(parent);
+    }
     return childElementByAttr(parent, 'update');
   }
 
@@ -838,6 +879,9 @@ export class AmpLiveList extends AMP.BaseElement {
    * @private
    */
   getItemsSlot_(parent) {
+    if (this.customSlotId_) {
+      return this.getCustomSlot_(parent);
+    }
     return childElementByAttr(parent, 'items');
   }
 
@@ -872,6 +916,17 @@ export class AmpLiveList extends AMP.BaseElement {
   }
 
   /**
+   * Checks if time is a valid value.
+   *
+   * @param {time} time
+   * @return {boolean}
+   * @private
+   */
+  isValidTime_(time) {
+    return time > 0;
+  }
+
+  /**
    * @param {!Element} elem
    * @return {time}
    * @private
@@ -895,10 +950,6 @@ export class AmpLiveList extends AMP.BaseElement {
     // we can't for data-update-time since we always have to evaluate if it
     // changed or not if it exists.
     const time = Number(elem.getAttribute(attr));
-    userAssert(time > 0,
-        '%s attribute must exist and value must be a number greater than 0.'
-        + ' Found %s on %s instead.',
-        attr, time, elem.getAttribute('id'));
     return time;
   }
 

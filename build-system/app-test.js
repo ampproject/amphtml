@@ -34,6 +34,28 @@ function appTestEndpoints(app) {
       ],
     });
   });
+
+  app.use('/date-picker/config.json', (req, res) => {
+    function getISO8601Date(date) {
+      const year = date.toLocaleString('en-US', {year: 'numeric'});
+      const month = date.toLocaleString('en-US', {month: '2-digit'});
+      const day = date.toLocaleString('en-US', {day: '2-digit'});
+      return `${year}-${month}-${day}`;
+    }
+
+    const date = new Date();
+    const nextWeek = new Date(new Date(date).setDate(date.getDate() + 7));
+    const twoWeeks = new Date(new Date(date).setDate(date.getDate() + 14));
+
+    const blocked = [
+      getISO8601Date(nextWeek),
+      getISO8601Date(twoWeeks),
+    ];
+
+    res.json({
+      blocked,
+    });
+  });
 }
 
 module.exports = {

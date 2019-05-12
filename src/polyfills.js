@@ -35,23 +35,30 @@ import {installCustomElements as installRegisterElement} from
   'document-register-element/build/document-register-element.patched';
 import {isExperimentOn} from './experiments';
 
-installDOMTokenListToggle(self);
 installFetch(self);
 installMathSign(self);
 installObjectAssign(self);
 installObjectValues(self);
 installPromise(self);
-installDocContains(self);
 installArrayIncludes(self);
-installGetBoundingClientRect(self);
-// isExperimentOn() must be called after Object.assign polyfill is installed.
-// TODO(jridgewell): Ship custom-elements-v1. For now, we use this hack so it
-// is DCE'd from production builds. Note: When the hack is removed, remove the
-// @suppress {suspiciousCode} annotation at the top of this file.
-if ((false && isExperimentOn(self, 'custom-elements-v1')) || getMode().test) {
-  installCustomElements(self);
-} else {
-  installRegisterElement(self, 'auto');
+
+// Polyfills that depend on DOM availability
+if (self.document) {
+  installDOMTokenListToggle(self);
+  installDocContains(self);
+  installGetBoundingClientRect(self);
+
+  // isExperimentOn() must be called after Object.assign polyfill is installed.
+  // TODO(jridgewell): Ship custom-elements-v1. For now, we use this hack so it
+  // is DCE'd from production builds. Note: When the hack is removed, remove the
+  // @suppress {suspiciousCode} annotation at the top of this file.
+  // TODO(jridgewell, estherkim): Find out why CE isn't being polyfilled for IE.
+  if ((false && isExperimentOn(self, 'custom-elements-v1')) ||
+      (getMode().test && !getMode().testIe)) {
+    installCustomElements(self);
+  } else {
+    installRegisterElement(self, 'auto');
+  }
 }
 
 // TODO(#18268, erwinm): For whatever reason imports to modules that have no
