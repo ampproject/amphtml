@@ -314,33 +314,4 @@ describes.realWin('amp-cld-img', {
           .to.eql('https://res.cloudinary.com/test123/image/upload/' + target);
     });
   }
-  it('should escape publicIds', function() {
-    const tests = {
-      'a b': 'a%20b',
-      'a+b': 'a%2Bb',
-      'a%20b': 'a%20b',
-      'a-b': 'a-b',
-      'a??b': 'a%3F%3Fb',
-    };
-    const results = [];
-    for (const source in tests) {
-      const target = tests[source];
-      const result = buildUrl(source, {cloudName: 'test123'});
-      results.push(expect(result).to
-          .eql('https://res.cloudinary.com/test123/image/upload/' + target));
-    }
-  });
-  it('should support preloaded identifier format', function() {
-    let result = buildUrl('raw/private/v123456/document.docx',
-        {cloudName: 'test123'});
-    expect(result).to.eql(
-        'https://res.cloudinary.com/test123/raw/private/v123456/document.docx');
-    result = buildUrl('image/private/v123456/img.jpg', {
-      cloudName: 'test123',
-      crop: 'scale',
-      width: '1.0',
-    });
-    expect(result).to.eql(
-        'https://res.cloudinary.com/test123/image/private/c_scale,w_1.0/v123456/img.jpg');
-  });
 });
