@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+import {startsWith} from '../../../src/string';
+import {tryDecodeUriComponent} from '../../../src/url';
+
 const OLD_AKAMAI_SHARED_CDN = 'cloudinary-a.akamaihd.net';
 const AKAMAI_SHARED_CDN = 'res.cloudinary.com';
 const SHARED_CDN = AKAMAI_SHARED_CDN;
@@ -57,6 +60,15 @@ export function buildUrl(publicId, options) {
     return options.src.replace('w_auto', `w_${options.width}`)
         .replace('h_auto', `h_${options.height}`);
   }
+
+  /**
+   * If the publicId represents a pre-loaded url, the actual publicId should be
+   * in there - in case it's not, there's nothing we can do.
+   */
+  if (publicId == null) {
+    return null;
+  }
+
   const optionsCopy = Object.assign({}, options);
 
   patchFetchFormat(optionsCopy);
@@ -83,28 +95,6 @@ export function buildUrl(publicId, options) {
   const urlSuffix = /** @type {?string} */(optionConsume(optionsCopy, 'urlSuffix'));
   const useRootPath = /** @type {?boolean} */(optionConsume(optionsCopy,'useRootPath'));
 
-  /**
-   * Checks if the publicId represents a pre-loaded url in the form of
-   * "resource_type/type/version/publicId", e.g.
-   * "image/private/v123456/sample.png"
-   */
-  const preloaded = /^(image|raw)\/([a-z0-9_]+)\/v(\d+)\/([^#]+)$/.exec(
-      publicId);
-  if (preloaded) {
-    resourceType = preloaded[1];
-    type = preloaded[2];
-    version = preloaded[3];
-    publicId = preloaded[4];
-  }
-
-  /**
-   * If the publicId represents a pre-loaded url, the actual publicId should be
-   * in there - in case it's not, there's nothing we can do.
-   */
-  if (publicId == null) {
-    return null;
-  }
-
   const originalSource = publicId;
 
   if (type === null && publicId.match(/^https?:\//i)) {
@@ -118,6 +108,9 @@ export function buildUrl(publicId, options) {
   type = finalizedResourceType.type;
 
   const finalizedSource = finalizeSource(publicId, format, urlSuffix);
+  if (finalizedSource == null) {
+    return null;
+  }
   publicId = finalizedSource.source;
   const {sourceToSign} = finalizedSource;
 
@@ -175,7 +168,7 @@ function unsignedUrlPrefix(cloudName, privateCdn, cdnSubdomain,
   secureCdnSubdomain, cname, secure,
   secureDistribution) {
   let prefix;
-  if (cloudName.indexOf('/') === 0) {
+  if (startsWith(cloudName, '/')) {
     return '/res' + cloudName;
   }
   let sharedDomain = !privateCdn;
@@ -285,7 +278,7 @@ function finalizeResourceType(resourceType, type, urlSuffix, useRootPath,
  * @param {?string} format The file format to use for delivery
  * @param {?string} urlSuffix Used to give more meaningful name to resources, as
  * the id itself can be a random string. Used primarily for SEO.
- * @return {{
+ * @return {?{
  *   source: string,
  *   sourceToSign: string
  * }}
@@ -308,7 +301,12 @@ function finalizeSource(source, format, urlSuffix) {
     return {source: escaped, sourceToSign: source};
   }
 
-  source = encodeURIComponent(decodeURIComponent(source)).replace(/%3A/g, ':')
+  const decodedSource = tryDecodeUriComponent(source);
+  if (!isPresent(decodedSource)) {
+    return null;
+  }
+
+  source = encodeURIComponent(decodedSource).replace(/%3A/g, ':')
       .replace(/%2F/g, '/');
   sourceToSign = source;
   if (urlSuffix) {
