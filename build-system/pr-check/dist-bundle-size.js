@@ -24,8 +24,8 @@
 
 const colors = require('ansi-colors');
 const {
+  areValidBuildTargets,
   determineBuildTargets,
-  validateBuildTargets,
 } = require('./build-targets');
 const {
   printChangeSummary,
@@ -45,9 +45,13 @@ const timedExecOrDie =
 
 function main() {
   const startTime = startTimer(FILENAME, FILENAME);
-  runYarnChecks(FILENAME);
   const buildTargets = determineBuildTargets();
-  validateBuildTargets(buildTargets, FILENAME);
+  if (!runYarnChecks(FILENAME) ||
+      !areValidBuildTargets(buildTargets, FILENAME)) {
+    stopTimer(FILENAME, FILENAME, startTime);
+    process.exitCode = 1;
+    return;
+  }
 
   if (!isTravisPullRequestBuild()) {
     timedExecOrDie('gulp update-packages');
@@ -60,8 +64,7 @@ function main() {
         buildTargets.has('UNIT_TEST') ||
         buildTargets.has('INTEGRATION_TEST') ||
         buildTargets.has('BUILD_SYSTEM') ||
-        buildTargets.has('FLAG_CONFIG') ||
-        buildTargets.has('VISUAL_DIFF')) {
+        buildTargets.has('FLAG_CONFIG')) {
       timedExecOrDie('gulp update-packages');
       timedExecOrDie('gulp dist --fortesting');
       timedExecOrDie('gulp bundle-size --on_pr_build');

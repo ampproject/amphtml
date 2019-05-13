@@ -23,15 +23,16 @@
 
 const colors = require('ansi-colors');
 const {
+  areValidBuildTargets,
   determineBuildTargets,
-  validateBuildTargets,
 } = require('./build-targets');
 const {
   printChangeSummary,
   startTimer,
   stopTimer,
   timedExecOrDie: timedExecOrDieBase,
-  uploadBuildOutput} = require('./utils');
+  uploadBuildOutput,
+} = require('./utils');
 const {isTravisPullRequestBuild} = require('../travis');
 const {runYarnChecks} = require('./yarn-checks');
 
@@ -43,9 +44,13 @@ const timedExecOrDie =
 
 function main() {
   const startTime = startTimer(FILENAME, FILENAME);
-  runYarnChecks(FILENAME);
   const buildTargets = determineBuildTargets();
-  validateBuildTargets(buildTargets, FILENAME);
+  if (!runYarnChecks(FILENAME) ||
+      !areValidBuildTargets(buildTargets, FILENAME)) {
+    stopTimer(FILENAME, FILENAME, startTime);
+    process.exitCode = 1;
+    return;
+  }
 
   if (!isTravisPullRequestBuild()) {
     timedExecOrDie('gulp update-packages');
