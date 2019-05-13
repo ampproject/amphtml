@@ -66,6 +66,10 @@ function cleanUp_() {
   if (webServerProcess_ && !webServerProcess_.killed) {
     webServerProcess_.kill('SIGKILL');
   }
+
+  // TODO(estherkim): DEBUGGING only... see if this fixes Travis VM hang
+  execOrDie('for pid in `ps -e | grep chromedriver | awk \'{print $1}\'`;' +
+      'do kill $pid; done');
 }
 
 function createMocha_() {
