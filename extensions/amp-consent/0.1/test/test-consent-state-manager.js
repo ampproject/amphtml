@@ -276,8 +276,6 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
           expect(storageSetSpy).to.not.be.called;
           expect(storageRemoveSpy).to.be.calledOnce;
         });
-
-        it('');
       });
 
       describe('should override stored value correctly', () => {
@@ -397,7 +395,6 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
 
       it('send update request on consentString change', function* () {
         yield instance.update(CONSENT_ITEM_STATE.ACCEPTED, 'old');
-        yield macroTask();
         yield macroTask();
         expect(requestSpy).to.be.calledOnce;
         expect(requestBody.consentState).to.be.true;

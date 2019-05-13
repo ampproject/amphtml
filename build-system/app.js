@@ -720,13 +720,15 @@ app.post('/get-consent-v1/', (req, res) => {
   res.json(body);
 });
 
-app.get('/get-consent-v1-set/:forcePromptOnNext', (req, res) => {
-  const value = req.params['forcePromptOnNext'];
+app.get('/get-consent-v1-set/', (req, res) => {
+  cors.assertCors(req, res, ['GET']);
+  const value = req.query['forcePromptOnNext'];
   if (value == 'false' || value == '0') {
     forcePromptOnNext = false;
   } else {
     forcePromptOnNext = true;
   }
+  res.json({});
   res.end();
 });
 

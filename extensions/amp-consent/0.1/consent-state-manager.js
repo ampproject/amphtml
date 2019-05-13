@@ -20,11 +20,11 @@ import {
   calculateLegacyStateValue,
   composeStoreValue,
   constructConsentInfo,
+  getConsentStateValue,
   getStoredConsentInfo,
   hasDirtyBit,
   isConsentInfoStoredValueSame,
   recalculateConsentStateValue,
-  getConsentStateValue,
 } from './consent-info';
 import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
