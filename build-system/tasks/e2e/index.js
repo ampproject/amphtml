@@ -19,6 +19,7 @@
 const argv = require('minimist')(process.argv.slice(2));
 const ciReporter = require('../mocha-ci-reporter');
 const config = require('../../config');
+const find = require('find-process');
 const glob = require('glob');
 const log = require('fancy-log');
 const Mocha = require('mocha');
@@ -62,14 +63,18 @@ function launchWebServer_() {
   return deferred;
 }
 
-function cleanUp_() {
+async function cleanUp_() {
   if (webServerProcess_ && !webServerProcess_.killed) {
     webServerProcess_.kill('SIGKILL');
   }
 
   // TODO(estherkim): DEBUGGING only... see if this fixes Travis VM hang
-  execOrDie('for pid in `ps -e | grep chromedriver | awk \'{print $1}\'`;' +
-      'do kill $pid; done');
+  const nodeProcesses = await find('name', 'node', true);
+  nodeProcesses.forEach(p => {
+    if (p.cmd.includes('server.js')) {
+      execOrDie(`kill ${p.pid}`);
+    }
+  });
 }
 
 function createMocha_() {
@@ -131,7 +136,7 @@ async function e2e() {
 
     mocha.run(async failures => {
       // end web server
-      cleanUp_();
+      await cleanUp_();
 
       // end task
       process.exitCode = failures ? 1 : 0;
