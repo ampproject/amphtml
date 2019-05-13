@@ -28,13 +28,18 @@ import {
 import {isConnectedNode} from './dom';
 
 /**
+ * Stores the native getBoundingClientRect before we patch it, so that the
+ * patch may call the native implementation.
+ */
+let nativeClientRect;
+
+/**
  * Polyfill for Node.getBoundingClientRect API.
  * @this {!Element}
  * @return {!ClientRect|!LayoutRectDef}
  */
 function getBoundingClientRect() {
   if (isConnectedNode(this)) {
-    const nativeClientRect = Element.prototype.getBoundingClientRect;
     return nativeClientRect.call(this);
   }
 
@@ -69,6 +74,7 @@ function shouldInstall(win) {
  */
 export function install(win) {
   if (shouldInstall(win)) {
+    nativeClientRect = Element.prototype.getBoundingClientRect;
     win.Object.defineProperty(win.Element.prototype, 'getBoundingClientRect', {
       value: getBoundingClientRect,
     });
