@@ -418,8 +418,7 @@ export function assertSuccess(response) {
  * @return {!Promise<undefined>}
  */
 export function getViewerAuthTokenIfAvailable(element) {
-  const crossOriginAttr = element.getAttribute('cross-origin') ||
-      element.getAttribute('crossorigin');
+  const crossOriginAttr = element.getAttribute('crossorigin');
   if (crossOriginAttr
       && crossOriginAttr.trim() === 'amp-viewer-auth-token-via-post') {
     return Services.viewerAssistanceForDocOrNull(element)
