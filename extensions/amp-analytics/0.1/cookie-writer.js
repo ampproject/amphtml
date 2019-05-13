@@ -190,7 +190,9 @@ export class CookieWriter {
           // provide a way to overwrite or erase existing cookie
           if (value) {
             const expireDate = Date.now() + BASE_CID_MAX_AGE_MILLIS;
-            setCookie(this.win_, cookieName, value, expireDate);
+            setCookie(this.win_, cookieName, value, expireDate, {
+              highestAvailableDomain: true,
+            });
           }
         }).catch(e => {
       user().error(TAG, 'Error expanding cookie string', e);
