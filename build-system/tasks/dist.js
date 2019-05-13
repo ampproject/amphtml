@@ -27,7 +27,6 @@ const {
   buildWebWorker,
   compileAllMinifiedTargets,
   compileJs,
-  enableLocalTesting,
   endBuildStep,
   hostname,
   mkdirSync,
@@ -103,17 +102,6 @@ async function dist() {
         await stopNailgunServer(closureNailgunPort);
       }).then(() => {
         return copyAliasExtensions();
-      }).then(() => {
-        if (argv.fortesting) {
-          return Promise.all([
-            enableLocalTesting('dist/v0.js'),
-            enableLocalTesting('dist/amp4ads-v0.js'),
-            enableLocalTesting('dist/shadow-v0.js'),
-            enableLocalTesting('dist.3p/current-min/f.js'),
-            argv.single_pass ?
-              Promise.resolve() : enableLocalTesting('dist/v0-esm.js'),
-          ]);
-        }
       }).then(() => {
         if (argv.esm) {
           return Promise.all([
