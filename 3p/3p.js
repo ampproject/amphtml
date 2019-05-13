@@ -120,7 +120,7 @@ export function loadScript(win, url, opt_cb, opt_errorCb) {
 export function nextTick(win, fn) {
   const P = win.Promise;
   if (P) {
-    P.resolve().then/*OK*/(fn);
+    P.resolve()./*OK*/then(fn);
   } else {
     win.setTimeout(fn, 0);
   }

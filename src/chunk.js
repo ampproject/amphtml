@@ -442,7 +442,7 @@ class Chunks {
       return;
     }
     // The message doesn't actually matter.
-    this.win_.postMessage/*OK*/('amp-macro-task', '*');
+    this.win_./*OK*/postMessage('amp-macro-task', '*');
   }
 }
 

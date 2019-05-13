@@ -126,7 +126,7 @@ export class IframeMessagingClient {
    *  @param {JsonObject=} opt_payload The payload of message to send.
    */
   sendMessage(type, opt_payload) {
-    this.hostWindow_.postMessage/*OK*/(
+    this.hostWindow_./*OK*/postMessage(
         serializeMessage(
             type, dev().assertString(this.sentinel_),
             opt_payload, this.rtvVersion_),

@@ -124,7 +124,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       const safeframeMock = createElementWithAttributes(doc, 'iframe', {});
       ampAd.appendChild(safeframeMock);
       doubleclickImpl.iframe = safeframeMock;
-      const connectMessagingChannelSpy = sandbox.spy(
+      const connectMessagingChannelSpy = sandbox./*OK*/spy(
           safeframeHost, 'connectMessagingChannel');
       const postMessageStub = sandbox./*OK*/stub(
           safeframeMock.contentWindow, 'postMessage');
@@ -605,11 +605,11 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       });
       ampAd.appendChild(safeframeMock);
       doubleclickImpl.iframe = safeframeMock;
-      resizeSafeframeSpy = sandbox.spy(
+      resizeSafeframeSpy = sandbox./*OK*/spy(
           safeframeHost, 'resizeSafeframe');
-      sendResizeResponseSpy = sandbox.spy(
+      sendResizeResponseSpy = sandbox./*OK*/spy(
           safeframeHost, 'sendResizeResponse');
-      resizeAmpAdAndSafeframeSpy = sandbox.spy(
+      resizeAmpAdAndSafeframeSpy = sandbox./*OK*/spy(
           safeframeHost, 'resizeAmpAdAndSafeframe');
       safeframeHost.initialHeight_ = ampAdHeight;
       safeframeHost.initialWidth_ = ampAdWidth;

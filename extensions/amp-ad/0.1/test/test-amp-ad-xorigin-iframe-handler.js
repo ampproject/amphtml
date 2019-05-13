@@ -91,7 +91,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
           });
         });
         noContentSpy =
-            sandbox.spy/*OK*/(iframeHandler, 'freeXOriginIframe');
+            sandbox./*OK*/spy(iframeHandler, 'freeXOriginIframe');
 
         initPromise = iframeHandler.init(iframe);
       });
@@ -222,7 +222,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
         const err = new Error();
         err.message = 'error test';
         const userErrorReportSpy =
-                sandbox.spy/*OK*/(iframeHandler, 'userErrorForAnalytics_');
+                sandbox./*OK*/spy(iframeHandler, 'userErrorForAnalytics_');
         iframe.postMessageToParent({
           type: 'user-error-in-iframe',
           sentinel: 'amp3ptest' + testIndex,
@@ -282,7 +282,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
     });
 
     it('should be able to use embed-state API', () => {
-      sandbox.stub/*OK*/(iframeHandler.viewer_, 'isVisible').callsFake(
+      sandbox./*OK*/stub(iframeHandler.viewer_, 'isVisible').callsFake(
           () => true);
       iframe.postMessageToParent({
         type: 'send-embed-state',
@@ -376,12 +376,12 @@ describe('amp-ad-xorigin-iframe-handler', () => {
       iframe.setAttribute('data-amp-3p-sentinel', 'amp3ptest' + testIndex);
       iframe.name = 'test_nomaster';
       iframeHandler.init(iframe);
-      sandbox.stub/*OK*/(
+      sandbox./*OK*/stub(
           iframeHandler.viewport_,
           'getClientRectAsync').callsFake(() => {
         return Promise.resolve(layoutRectLtwh(1, 1, 1, 1));
       });
-      sandbox.stub/*OK*/(iframeHandler.viewport_, 'getRect').callsFake(() => {
+      sandbox./*OK*/stub(iframeHandler.viewport_, 'getRect').callsFake(() => {
         return layoutRectLtwh(1, 1, 1, 1);
       });
       iframe.postMessageToParent({

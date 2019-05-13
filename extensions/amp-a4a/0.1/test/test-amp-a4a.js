@@ -432,7 +432,7 @@ describe('amp-a4a', () => {
       a4a.onLayoutMeasure();
 
       // Never resolve
-      sandbox.stub/*OK*/(FriendlyIframeEmbed.prototype,'whenIniLoaded')
+      sandbox./*OK*/stub(FriendlyIframeEmbed.prototype,'whenIniLoaded')
           .callsFake(() => {return new Promise(() => {});});
       const creativeString = buildCreativeString();
       const metaData = a4a.getAmpAdMetadata(creativeString);
@@ -500,7 +500,7 @@ describe('amp-a4a', () => {
           sandbox.spy(analytics, 'triggerAnalyticsEvent');
       a4a.buildCallback();
       a4a.onLayoutMeasure();
-      sandbox.stub/*OK*/(FriendlyIframeEmbed.prototype, 'whenIniLoaded')
+      sandbox./*OK*/stub(FriendlyIframeEmbed.prototype, 'whenIniLoaded')
           .callsFake(() => Promise.resolve());
       return a4a.layoutCallback().then(() => {
         verifyA4aAnalyticsTriggersWereFired(a4a, triggerAnalyticsEventSpy);

@@ -406,7 +406,7 @@ export function childNodes(parent, callback) {
  */
 export function childElementByAttr(parent, attr) {
   assertIsName(attr);
-  return scopedQuerySelector/*OK*/(parent, `> [${attr}]`);
+  return /*OK*/scopedQuerySelector(parent, `> [${attr}]`);
 }
 
 
@@ -432,7 +432,7 @@ export function lastChildElementByAttr(parent, attr) {
  */
 export function childElementsByAttr(parent, attr) {
   assertIsName(attr);
-  return scopedQuerySelectorAll/*OK*/(parent, `> [${attr}]`);
+  return /*OK*/scopedQuerySelectorAll(parent, `> [${attr}]`);
 }
 
 
@@ -444,7 +444,7 @@ export function childElementsByAttr(parent, attr) {
  */
 export function childElementByTag(parent, tagName) {
   assertIsName(tagName);
-  return scopedQuerySelector/*OK*/(parent, `> ${tagName}`);
+  return /*OK*/scopedQuerySelector(parent, `> ${tagName}`);
 }
 
 
@@ -456,7 +456,7 @@ export function childElementByTag(parent, tagName) {
  */
 export function childElementsByTag(parent, tagName) {
   assertIsName(tagName);
-  return scopedQuerySelectorAll/*OK*/(parent, `> ${tagName}`);
+  return /*OK*/scopedQuerySelectorAll(parent, `> ${tagName}`);
 }
 
 /**
