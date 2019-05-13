@@ -19,7 +19,6 @@
 const argv = require('minimist')(process.argv.slice(2));
 const ciReporter = require('../mocha-ci-reporter');
 const config = require('../../config');
-const find = require('find-process');
 const glob = require('glob');
 const log = require('fancy-log');
 const Mocha = require('mocha');
@@ -45,7 +44,12 @@ function buildRuntime_() {
 
 function launchWebServer_() {
   webServerProcess_ = execScriptAsync(
-      `gulp serve --host ${HOST} --port ${PORT}`);
+      `gulp serve --host ${HOST} --port ${PORT} ${process.env.WEBSERVER_QUIET}`,
+      {
+        stdio: argv.webserver_debug ?
+          ['ignore', process.stdout, process.stderr] :
+          'ignore',
+      });
 
   let resolver;
   const deferred = new Promise(resolverIn => {
@@ -67,14 +71,6 @@ async function cleanUp_() {
   if (webServerProcess_ && !webServerProcess_.killed) {
     webServerProcess_.kill('SIGKILL');
   }
-
-  // TODO(estherkim): DEBUGGING only... see if this fixes Travis VM hang
-  const nodeProcesses = await find('name', 'node', true);
-  nodeProcesses.forEach(p => {
-    if (p.cmd.includes('server.js')) {
-      execOrDie(`kill ${p.pid}`);
-    }
-  });
 }
 
 function createMocha_() {
