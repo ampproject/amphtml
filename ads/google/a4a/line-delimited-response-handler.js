@@ -50,7 +50,7 @@ export function lineDelimitedStreamer(win, response, lineCallback) {
   }
 
   const decoder = new TextDecoder('utf-8');
-  const reader = /** @type !ReadableStreamDefaultReader */ (
+  const reader = /** @type {!ReadableStreamDefaultReader} */ (
     response.body.getReader());
   reader.read().then(function chunk(result) {
     if (result.value) {

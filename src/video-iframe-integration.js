@@ -89,7 +89,7 @@ const validEvents = [
  */
 export function getVideoJs(win, opt_initializer) {
   return userAssert(
-      opt_initializer || /** @type (function()) */ (win.videojs),
+      opt_initializer || /** @type {function()} */ (win.videojs),
       'Video.JS not imported or initializer undefined.');
 }
 

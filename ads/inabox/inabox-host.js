@@ -69,7 +69,7 @@ export class InaboxHost {
       win.AMP[INABOX_UNREGISTER_IFRAME] = host.unregisterIframe.bind(host);
     }
     const queuedMsgs = win[PENDING_MESSAGES];
-    const processMessageFn = /** @type function(Event)*/(evt => {
+    const processMessageFn = /** @type {function(Event)} */(evt => {
       try {
         host.processMessage(evt);
       } catch (err) {

@@ -275,7 +275,7 @@ class AmpAddThis extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     const iframe = createElementWithAttributes(
-        /** @type !Document */ (this.element.ownerDocument),
+        /** @type {!Document} */ (this.element.ownerDocument),
         'iframe',
         dict({
           'frameborder': 0,

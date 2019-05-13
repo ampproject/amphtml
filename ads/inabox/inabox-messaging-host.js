@@ -169,7 +169,7 @@ export class InaboxMessagingHost {
     this.iframeMap_[request.sentinel].observeUnregisterFn =
         this.iframeMap_[request.sentinel].observeUnregisterFn ||
         this.positionObserver_.observe(iframe, data =>
-          this.sendPosition_(request, source, origin, /** @type ?JsonObject */(data)));
+          this.sendPosition_(request, source, origin, /** @type {?JsonObject} */(data)));
     return true;
   }
 

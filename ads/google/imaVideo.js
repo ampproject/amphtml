@@ -625,7 +625,7 @@ function onImaLoadSuccess(global, data) {
 function onImaLoadFail() {
   // Something blocked ima3.js from loading - ignore all IMA stuff and just play
   // content.
-  addHoverEventToElement(/** @type !Element */(videoPlayer), showControlsThrottled);
+  addHoverEventToElement(/** @type {!Element} */(videoPlayer), showControlsThrottled);
   imaLoadAllowed = false;
   postMessage({event: VideoEvents.LOAD});
 }
@@ -832,7 +832,7 @@ export function onAdsLoaderError() {
   // failing to load an ad is just as good as loading one as far as starting
   // playback is concerned because our content will be ready to play.
   postMessage({event: VideoEvents.LOAD});
-  addHoverEventToElement(/** @type !Element */(videoPlayer), showControlsThrottled);
+  addHoverEventToElement(/** @type {!Element} */(videoPlayer), showControlsThrottled);
   if (playbackStarted) {
     playVideo();
   }
@@ -849,7 +849,7 @@ export function onAdError() {
   if (adsManager) {
     adsManager.destroy();
   }
-  addHoverEventToElement(/** @type !Element */(videoPlayer), showControlsThrottled);
+  addHoverEventToElement(/** @type {!Element} */(videoPlayer), showControlsThrottled);
   playVideo();
 }
 
@@ -896,7 +896,7 @@ export function onContentPauseRequested(global) {
   }
   adsActive = true;
   postMessage({event: VideoEvents.AD_START});
-  removeHoverEventFromElement(/** @type !Element */(videoPlayer), showControlsThrottled);
+  removeHoverEventFromElement(/** @type {!Element} */(videoPlayer), showControlsThrottled);
   setStyle(adContainerDiv, 'display', 'block');
   videoPlayer.removeEventListener('ended', onContentEnded);
   showAdControls();
@@ -910,7 +910,7 @@ export function onContentPauseRequested(global) {
  */
 export function onContentResumeRequested() {
   adsActive = false;
-  addHoverEventToElement(/** @type !Element */(videoPlayer), showControlsThrottled);
+  addHoverEventToElement(/** @type {!Element} */(videoPlayer), showControlsThrottled);
   postMessage({event: VideoEvents.AD_END});
   resetControlsAfterAd();
   if (!contentComplete) {

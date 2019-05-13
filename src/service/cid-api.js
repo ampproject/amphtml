@@ -206,6 +206,6 @@ export class GoogleCidApi {
    * @return {boolean}
    */
   isStatusToken_(token) {
-    return /** @type boolean */ (token && token[0] === '$');
+    return /** @type {boolean} */ (token && token[0] === '$');
   }
 }
