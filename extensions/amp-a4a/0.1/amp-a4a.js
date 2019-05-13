@@ -49,8 +49,8 @@ import {
   is3pThrottled,
 } from '../../amp-ad/0.1/concurrent-load';
 import {
+  getConsentPolicyInfo,
   getConsentPolicyState,
-  getConsentPolicyInfo
 } from '../../../src/consent';
 import {getContextMetadata} from '../../../src/iframe-attributes';
 import {getMode} from '../../../src/mode';
@@ -633,16 +633,16 @@ export class AmpA4A extends AMP.BaseElement {
           if (consentPolicyId) {
 
             const consentStatePromise = getConsentPolicyState(
-              this.element,
-              consentPolicyId
+                this.element,
+                consentPolicyId
             ).catch(err => {
-                user().error(TAG, 'Error determining consent state', err);
-                return CONSENT_POLICY_STATE.UNKNOWN;
+              user().error(TAG, 'Error determining consent state', err);
+              return CONSENT_POLICY_STATE.UNKNOWN;
             });
 
             const consentStringPromise = getConsentPolicyInfo(
-              this.element,
-              consentPolicyId
+                this.element,
+                consentPolicyId
             ).catch(err => {
               user().error(TAG, 'Error determining consent string', err);
               return null;
@@ -650,7 +650,7 @@ export class AmpA4A extends AMP.BaseElement {
 
             return Promise.all([
               consentStatePromise,
-              consentStringPromise
+              consentStringPromise,
             ]);
           }
 
@@ -665,10 +665,10 @@ export class AmpA4A extends AMP.BaseElement {
           const consentString = consentResponse[1];
 
           return /** @type {!Promise<?string>} */(this.getAdUrl(
-            consentState, this.tryExecuteRealTimeConfig_(
-              consentState,
-              consentString
-          )));
+              consentState, this.tryExecuteRealTimeConfig_(
+                  consentState,
+                  consentString
+              )));
         })
         // This block returns the (possibly empty) response to the XHR request.
         /** @return {!Promise<?Response>} */
