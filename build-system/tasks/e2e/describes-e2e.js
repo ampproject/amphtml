@@ -18,6 +18,7 @@
 require('chromedriver'); // eslint-disable-line no-unused-vars
 require('geckodriver'); // eslint-disable-line no-unused-vars
 
+const firefox = require('selenium-webdriver/firefox');
 const puppeteer = require('puppeteer');
 const {
   SeleniumWebDriverController,
