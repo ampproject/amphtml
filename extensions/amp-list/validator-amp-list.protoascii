@@ -204,12 +204,6 @@ tags: {  # <amp-list>
   }
   attrs: { name: "credentials" }
   attrs: {
-    name: "cross-origin"
-    value: "amp-viewer-auth-token-via-post"
-    deprecation: "crossorigin"
-    deprecation_url: "https://github.com/ampproject/amphtml/issues/21399"
-  }
-  attrs: {
     name: "crossorigin"
     value: "amp-viewer-auth-token-via-post"
   }
