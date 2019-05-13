@@ -26,9 +26,24 @@
 html {
   overflow-x: hidden !important;
 }
+
+html.i-amphtml-fie {
+  height: 100% !important;
+  width: 100% !important;
+}
+
 html:not([amp4ads]),
 html:not([amp4ads]) body {
   height: auto !important;
+}
+
+/**
+ * Margin:0 is currently needed for iOS viewer embeds.
+ * See:
+ * https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md
+ */
+html:not([amp4ads]) body {
+  margin: 0 !important;
 }
 
 /**
@@ -41,18 +56,8 @@ html.i-amphtml-inabox-preserve-height-auto body {
   height: auto !important;
 }
 
-html.i-amphtml-fie {
-  height: 100% !important;
-  width: 100% !important;
-}
-
-/**
- * Margin:0 is currently needed for iOS viewer embeds.
- * See:
- * https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md
- */
-body {
-  margin: 0 !important;
+html.i-amphtml-inabox-preserve-height-auto body {
+  margin: 0;
 }
 
 /** These properties can be overriden by user stylesheets. */
