@@ -16,40 +16,56 @@
 
 const localPlugin = name => require.resolve(`./babel-plugins/${name}`);
 
-const defaultPlugins = [
+const transformLogMethods = [
+  localPlugin('babel-plugin-transform-log-methods'),
+  {
+    // TODO(alanorozco): Remove option once serving infra is up.
+    replaceCallArguments: false,
+  },
+];
+
+/** Required for any compilation mode since babel will mangle typecasts. */
+const parenthesizeExpression = localPlugin(
+    'babel-plugin-transform-parenthesize-expression'
+);
+
+const singlepassPlugins = [
+  parenthesizeExpression,
+  transformLogMethods,
   localPlugin('babel-plugin-transform-amp-asserts'),
   localPlugin('babel-plugin-transform-amp-extension-call'),
   localPlugin('babel-plugin-transform-html-template'),
-  [
-    localPlugin('babel-plugin-transform-log-methods'), {
-      // TODO(alanorozco): Enable and remove option once serving infra is up.
-      replaceCallArguments: false,
-    },
-  ],
   localPlugin('babel-plugin-transform-parenthesize-expression'),
   localPlugin('babel-plugin-is_minified-constant-transformer'),
 ];
 
+const multipassPlugins = [parenthesizeExpression, transformLogMethods];
+
+/** Polyfills to be removed from ESM build. */
+const esmFilteredPolyfills = {
+  './polyfills/document-contains': ['installDocContains'],
+  './polyfills/domtokenlist-toggle': ['installDOMTokenListToggle'],
+  './polyfills/fetch': ['installFetch'],
+  './polyfills/math-sign': ['installMathSign'],
+  './polyfills/object-assign': ['installObjectAssign'],
+  './polyfills/object-values': ['installObjectValues'],
+  './polyfills/promise': ['installPromise'],
+};
+
 function plugins({
+  isSinglepass,
   isEsmBuild,
   isCommonJsModule,
   isForTesting,
-}) {
-  const pluginsToApply = [...defaultPlugins];
+} = {}) {
+  if (!isSinglepass) {
+    return multipassPlugins;
+  }
+  const pluginsToApply = [...singlepassPlugins];
   if (isEsmBuild) {
     pluginsToApply.push([
       'babel-plugin-filter-imports',
-      {
-        imports: {
-          './polyfills/document-contains': ['installDocContains'],
-          './polyfills/domtokenlist-toggle': ['installDOMTokenListToggle'],
-          './polyfills/fetch': ['installFetch'],
-          './polyfills/math-sign': ['installMathSign'],
-          './polyfills/object-assign': ['installObjectAssign'],
-          './polyfills/object-values': ['installObjectValues'],
-          './polyfills/promise': ['installPromise'],
-        },
-      },
+      {imports: esmFilteredPolyfills},
     ]);
   }
   if (isCommonJsModule) {

@@ -24,6 +24,9 @@ const definitionFile = 'src/log.js';
 /** Functions exposed as singleton getters for `Log`. */
 const singletonFunctions = ['dev', 'user'];
 
+/** Path to messages table output from transform. */
+const messagesPath = 'dist/log-messages.json';
+
 /**
  * Known transformable logging methods.
  * @type {!Array<LogMethodMetadataDef>}
@@ -44,4 +47,9 @@ const transformableMethods = {
   createError: {variadic: true, messageArgPos: 0},
 };
 
-module.exports = {definitionFile, singletonFunctions, transformableMethods};
+module.exports = {
+  definitionFile,
+  messagesPath,
+  singletonFunctions,
+  transformableMethods,
+};

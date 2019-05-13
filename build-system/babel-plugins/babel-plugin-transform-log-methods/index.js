@@ -47,11 +47,13 @@
  * `x().l('a0')`) is just 11. Since the prefix of the output could repeat
  * throughout a binary, it also compresses well.
  *
- * Resulting binary savings are ~1.5% depending on their logging density.
+ * Resulting compressed, minified binaries reduce size by ~1.5% depending on
+ * their logging density.
  */
 const fs = require('fs');
 const path = require('path');
 const {
+  messagesPath,
   singletonFunctions,
   transformableMethods,
 } = require('../../log-module-metadata.js');
@@ -62,11 +64,21 @@ const {
  * all building purposes this should be considered the canonical messages
  * filepath for the built version.
  */
-const defaultMessagesPath = 'dist/log-messages.json';
+const defaultMessagesPath = messagesPath;
 
 /** Method on `Log` that this transform outputs to "expand" log messages. */
 const messageExpansionMethod = 'expandLogMessage';
 
+/**
+ * "Pre-minified" expansion method name to prevent large public method in
+ * multipass build.
+ */
+const messageExpansionMethodShortName = 'l';
+
+/**
+ * Approximate length of a compressed message expansion call to determine
+ * whether an instance of message indirection actually reduces binary size.
+ */
 const roughMinifiedExpansionLength = 'a().b("xx")'.length;
 
 /**
@@ -108,7 +120,7 @@ function writeMessages(messagesPath, obj) {
 /**
  * Gets a message id from the table, or adds a new entry for a message if
  * non-existent and returns its new id.
- * @param {file} messagesPath
+ * @param {string} messagesPath
  * @param {string} message
  * @return {string} Short message id.
  */
@@ -126,7 +138,7 @@ function getOrCreateShortMessageId(messagesPath, message) {
 
 /**
  * Builds a message template using printf syntax from a starting node.
- * @param {*} t babel.types
+ * @param {@babel/types} t
  * @param {!Node} node
  * @param {!Array<!Node>} interpolationArgs
  * @return {string} Template for the message.
@@ -160,13 +172,51 @@ function buildMessage(t, node, interpolationArgs) {
 
 module.exports = function({types: t}) {
   return {
+    /** Resolves plugin config. */
     pre() {
-      // Configurable to isolate test output.
-      const {messagesPath = defaultMessagesPath} = this.opts;
+      const {
+        // Configurable to isolate test output.
+        messagesPath = defaultMessagesPath,
+
+        // Temporary option to not replace call arguments, but still output the
+        // table to keep build code and infra independent from rollout.
+        replaceCallArguments = true,
+      } = this.opts;
+
       this.messagesPath = relativeToRoot(messagesPath);
+      this.replaceCallArguments = replaceCallArguments;
     },
     visitor: {
-      CallExpression({node}, {opts}) {
+      /**
+       * Visits definition for expansion method.
+       * @param {*} path babel.path
+       */
+      ClassMethod(path) {
+        const {node} = path;
+
+        if (!t.isIdentifier(node.key, {name: messageExpansionMethod})) {
+          return;
+        }
+
+        if (!this.replaceCallArguments) {
+          // If we're not replacing arguments, runtime method is dead code.
+          // Since it's public, Closure doesn't know that it can be safely
+          // DCE'd, so we remove before Closure pass.
+          path.remove();
+          return;
+        }
+
+        // Shorten method to "pre-minify" since it's public and does not get
+        // minified on multipass.
+        // TODO(alanorozco): This will not be required once we only do 1pass.
+        node.key.name = messageExpansionMethodShortName;
+      },
+
+      /**
+       * Visits call expressions for known log assertion/error methods.
+       * @param {*} path babel.path
+       */
+      CallExpression({node}) {
         const {callee} = node;
 
         // Looks like a method().call().
@@ -220,9 +270,7 @@ module.exports = function({types: t}) {
             message
         );
 
-        // Temporary option to not replace call arguments, but still output the
-        // table to keep other code and infra independent from rollout.
-        if (opts.replaceCallArguments === false) {
+        if (!this.replaceCallArguments) {
           return;
         }
 
@@ -236,7 +284,11 @@ module.exports = function({types: t}) {
         // Callee to expansion method, eg. `dev().expandLogMessage`.
         const messageExpansionCallee = t.memberExpression(
             t.callExpression(t.identifier(singletonCallee.name), []),
-            t.identifier(messageExpansionMethod)
+
+            // Use short method name as "pre-minified" since it's public and
+            // does not get minified on multipass.
+            // TODO(alanorozco): This will not be required once we only do 1pass
+            t.identifier(messageExpansionMethodShortName)
         );
 
         // Interpolation order breaks badly when template literals are mixed

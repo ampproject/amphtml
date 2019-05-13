@@ -97,6 +97,7 @@
     "google-closure-compiler": "20190215.0.2",
     "gulp": "4.0.1",
     "gulp-ava": "1.0.0",
+    "gulp-babel": "8.0.0",
     "gulp-eslint": "5.0.0",
     "gulp-eslint-if-fixed": "1.0.0",
     "gulp-file": "0.4.0",

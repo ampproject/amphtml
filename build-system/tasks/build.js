@@ -23,6 +23,7 @@ const {
   compileJs,
   printConfigHelp,
   printNobuildHelp,
+  reverseLogMessagesKeyValues,
 } = require('./helpers');
 const {buildExtensions} = require('./extension-helpers');
 const {compileCss} = require('./css');
@@ -34,28 +35,26 @@ const {serve} = require('./serve');
 
 /**
  * Enables watching for file changes in css, extensions.
- * @return {!Promise}
  */
 async function watch() {
   maybeUpdatePackages();
   createCtrlcHandler('watch');
-  return performBuild(true);
+  await performBuild(true);
 }
 
 /**
  * Main build
- * @return {!Promise}
  */
 async function build() {
   maybeUpdatePackages();
   const handlerProcess = createCtrlcHandler('build');
-  return performBuild().then(() => exitCtrlcHandler(handlerProcess));
+  await performBuild();
+  exitCtrlcHandler(handlerProcess);
 }
 
 /**
  * Performs the build steps for gulp build and gulp watch
  * @param {boolean} watch
- * @return {!Promise}
  */
 async function performBuild(watch) {
   process.env.NODE_ENV = 'development';
@@ -71,6 +70,9 @@ async function performBuild(watch) {
       buildExtensions({bundleOnlyIfListedInFiles: !watch, watch}),
       compile(watch),
     ]);
+  }).then(() => {
+    // Steps for all binaries write to the same file.
+    return reverseLogMessagesKeyValues();
   });
 }
 

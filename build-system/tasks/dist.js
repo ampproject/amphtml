@@ -31,6 +31,7 @@ const {
   endBuildStep,
   hostname,
   mkdirSync,
+  reverseLogMessagesKeyValues,
   printConfigHelp,
   toPromise,
 } = require('./helpers');

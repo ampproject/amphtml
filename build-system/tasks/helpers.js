@@ -36,12 +36,17 @@ const wrappers = require('../compile-wrappers');
 const {applyConfig, removeConfig} = require('./prepend-global/index.js');
 const {closureCompile} = require('../compile/compile');
 const {isTravisBuild} = require('../travis');
+const {messagesPath} = require('../log-module-metadata');
+const {promisify} = require('util');
 const {thirdPartyFrames} = require('../config');
 const {transpileTs} = require('../typescript');
 const {VERSION: internalRuntimeVersion} = require('../internal-version') ;
 
 const {green, red, cyan} = colors;
 const argv = require('minimist')(process.argv.slice(2));
+
+const readFileAsync = promisify(fs.readFileSync);
+const writeFileAsync = promisify(fs.writeFileSync);
 
 /**
  * Tasks that should print the `--nobuild` help text.
@@ -720,6 +725,25 @@ function toPromise(readable) {
   });
 }
 
+/**
+ * Reverses the log messages table as output by transform.
+ * It's keyed by message template during transformation for deduping, so it
+ * needs to be reversed separately.
+ */
+async function reverseLogMessagesKeyValues() {
+  let byKey;
+  console.log('wat');
+  byKey = JSON.parse(await readFileAsync(messagesPath));
+  const byValue = {};
+  for (const key of Object.keys(byKey)) {
+    const id = byKey[key];
+    byValue[id] = key;
+  }
+  console.log(byValue);
+  const json = JSON.stringify(byValue, /* replacer */ null, /* spaces */ 2);
+  await writeFileAsync(messagesPath, json);
+}
+
 module.exports = {
   buildAlp,
   buildExaminer,
@@ -733,5 +757,6 @@ module.exports = {
   mkdirSync,
   printConfigHelp,
   printNobuildHelp,
+  reverseLogMessagesKeyValues,
   toPromise,
 };
