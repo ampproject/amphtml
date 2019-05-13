@@ -188,17 +188,20 @@ export class AmpAutocomplete extends AMP.BaseElement {
           });
     }
 
+    // Read configuration attributes
     this.filter_ = userAssert(this.element.getAttribute('filter'),
         `${TAG} requires "filter" attribute.`);
     userAssert(isEnumValue(FilterType, this.filter_),
         `Unexpected filter: ${this.filter_}`);
-
     this.minChars_ = this.element.hasAttribute('min-characters') ?
       parseInt(this.element.getAttribute('min-characters'), 10) : 1;
     this.maxEntries_ = this.element.hasAttribute('max-entries') ?
       parseInt(this.element.getAttribute('max-entries'), 10) : null;
     this.submitOnEnter_ = this.element.hasAttribute('submit-on-enter');
 
+    // Set accessibility attributes
+    this.element.setAttribute('role', 'combobox');
+    this.element.setAttribute('aria-haspopup', 'listbox');
     this.container_ = this.createContainer_();
     this.element.appendChild(this.container_);
   }
@@ -257,7 +260,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     if (this.shouldRenderAbove_()) {
       container.classList.add('i-amphtml-autocomplete-results-up');
     }
-    container.setAttribute('role', 'list');
+    container.setAttribute('role', 'listbox');
     toggle(container, false);
     return container;
   }
@@ -329,7 +332,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
   createElementFromItem_(item) {
     const element = this.element.ownerDocument.createElement('div');
     element.classList.add('i-amphtml-autocomplete-item');
-    element.setAttribute('role', 'listitem');
+    element.setAttribute('role', 'option');
     element.setAttribute('data-value', item);
     element.setAttribute('dir', 'auto');
     element.textContent = item;
@@ -563,6 +566,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
    * @private
    */
   toggleResults_(opt_display) {
+    this.element.setAttribute('aria-expanded', opt_display);
     toggle(dev().assertElement(this.container_), opt_display);
   }
 
@@ -593,8 +597,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
         this.userInput_ = this.inputElement_.value;
         this.filterDataAndRenderResults_(this.sourceData_, this.userInput_);
         this.resetActiveElement_();
-        this.setResultDisplayDirection_(renderAbove);
       }
+      this.setResultDisplayDirection_(renderAbove);
       this.toggleResults_(display);
     });
   }
@@ -713,6 +717,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
       }
       this.resetActiveElement_();
       newActiveElement.classList.add('i-amphtml-autocomplete-item-active');
+      newActiveElement.setAttribute('aria-selected', 'true');
       this.activeIndex_ = activeIndex;
       this.activeElement_ = newActiveElement;
     });
@@ -748,6 +753,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     }
     this.activeElement_.classList.toggle(
         'i-amphtml-autocomplete-item-active', false);
+    this.activeElement_.removeAttribute('aria-selected');
     this.activeElement_ = null;
     this.activeIndex_ = -1;
   }
