@@ -28,6 +28,7 @@ export class LiveStoryManager {
    */
   constructor(ampStory) {
     this.ampStory_ = ampStory;
+    this.storyEl_ = ampStory.element;
   }
 
   /**
@@ -41,23 +42,20 @@ export class LiveStoryManager {
         'amp-live-list', dict({
           'id': liveListId,
           'data-poll-interval':
-            this.ampStory_.element.getAttribute('data-poll-interval') || 15000,
+            this.storyEl_.getAttribute('data-poll-interval') || 15000,
           'sort': 'ascending',
           'disable-scrolling': '',
           'disable-pagination': '',
           'auto-insert': '',
         }));
-    liveListEl[AMP_LIVE_LIST_CUSTOM_SLOT_ID] =
-      userAssert(this.ampStory_.element.id,
-          'Story must contain id to build an amp-live-list');
+    liveListEl[AMP_LIVE_LIST_CUSTOM_SLOT_ID] = userAssert(this.storyEl_.id,
+        'Story must contain id to build an amp-live-list');
 
-    this.ampStory_.element.insertBefore(liveListEl,
-        this.ampStory_.element.firstElementChild);
+    this.storyEl_.insertBefore(liveListEl, this.storyEl_.firstElementChild);
 
-    this.ampStory_.element.addEventListener(AmpEvents.DOM_UPDATE,
-        ({target}) => {
-          this.updateStory_(target);
-        });
+    this.storyEl_.addEventListener(AmpEvents.DOM_UPDATE, ({target}) => {
+      this.updateStory_(target);
+    });
   }
 
   /**
@@ -72,11 +70,11 @@ export class LiveStoryManager {
         .filter(page => page.classList.contains('amp-live-list-item-new'));
 
     const currentPages =
-      this.ampStory_.element.querySelectorAll('amp-story-page:not([ad])');
+      this.storyEl_.querySelectorAll('amp-story-page:not([ad])');
     let lastPage = currentPages[currentPages.length - 1];
 
     newPages.forEach(newPage => {
-      this.ampStory_.element.insertBefore(newPage, lastPage.nextElementSibling);
+      this.storyEl_.insertBefore(newPage, lastPage.nextElementSibling);
 
       newPage.getImpl().then(page => {
         this.ampStory_.addPage(page);
