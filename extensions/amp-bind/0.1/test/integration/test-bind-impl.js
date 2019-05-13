@@ -303,25 +303,13 @@ describe.configure().ifChrome().run('Bind', function() {
 
     it('should not send "bindReady" until all <amp-state> are built', () => {
       const element = createElement(env, container, '', 'amp-state', true);
-      let build;
-      const buildPromise = new Promise(resolve => {
-        build = resolve;
-      });
-      // This promise lets us check that viewer.sendMessage isn't called
-      // when element.build() is called.
-      let resolveWhenBuildCalled;
-      const whenBuildCalled = new Promise(resolve => {
-        resolveWhenBuildCalled = resolve;
-      });
-      element.build = () => {
-        resolveWhenBuildCalled();
-        return buildPromise;
-      };
-      return whenBuildCalled.then(() => {
+      const parseAndUpdate = sandbox.spy();
+      element.getImpl = () => {
         expect(viewer.sendMessage).to.not.be.called;
-        build();
-        return buildPromise;
-      }).then(() => {
+        return Promise.resolve({parseAndUpdate});
+      };
+      return onBindReady(env, bind).then(() => {
+        expect(parseAndUpdate).to.be.calledOnce;
         expect(viewer.sendMessage).to.be.calledOnce;
         expect(viewer.sendMessage).to.be.calledWith('bindReady');
       });
@@ -773,7 +761,7 @@ describe.configure().ifChrome().run('Bind', function() {
 
     it('should ignore <amp-state> updates if specified in setState()', () => {
       const element = createElement(env, container, '[src]="foo"', 'amp-state');
-      element.build = () => Promise.resolve();
+      element.getImpl = () => Promise.resolve({parseAndUpdate: sandbox.spy()});
       expect(element.getAttribute('src')).to.be.null;
 
       const promise = onBindReadyAndSetState(env, bind,
