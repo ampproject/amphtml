@@ -431,6 +431,9 @@ async function runTests() {
   // Avoid Karma startup errors
   refreshKarmaWdCache();
 
+  // Notify the test-status bot that the tests are running.
+  reportTestStarted();
+
   // Run Sauce Labs tests in batches to avoid timeouts when connecting to the
   // Sauce Labs environment.
   let processExitCode;
@@ -602,7 +605,6 @@ async function runTests() {
         if (!argv.saucelabs && !argv.saucelabs_lite) {
           log(green('Running tests locally...'));
         }
-        reportTestStarted();
       })
       .on('browsers_ready', function() {
         console./*OK*/ log('\n');
