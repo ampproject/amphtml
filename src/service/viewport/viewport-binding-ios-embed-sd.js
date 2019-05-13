@@ -298,6 +298,11 @@ export class ViewportBindingIosEmbedShadowRoot_ {
   }
 
   /** @override */
+  overrideGlobalScrollTo() {
+    return true;
+  }
+
+  /** @override */
   supportsPositionFixed() {
     return true;
   }

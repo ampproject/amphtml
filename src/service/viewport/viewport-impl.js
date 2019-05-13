@@ -221,6 +221,17 @@ export class Viewport {
     if (isIframed(win) && ('scrollRestoration' in win.history)) {
       win.history.scrollRestoration = 'manual';
     }
+
+    // Override global scrollTo if requested.
+    if (this.binding_.overrideGlobalScrollTo()) {
+      try {
+        Object.defineProperty(win, 'scrollTo', {
+          value: (x, y) => this.setScrollTop(y),
+        });
+      } catch (e) {
+        // Ignore errors.
+      }
+    }
   }
 
   /** @override */

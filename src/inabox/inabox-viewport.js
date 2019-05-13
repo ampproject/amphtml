@@ -463,6 +463,7 @@ export class ViewportBindingInabox {
   /** @override */ contentHeightChanged() {}
   /** @override */ getBorderTop() {return 0;}
   /** @override */ requiresFixedLayerTransfer() {return false;}
+  /** @override */ overrideGlobalScrollTo() {return false;}
 }
 
 /**
