@@ -305,8 +305,8 @@ export class Bind {
     for (const key in scope) {
       const value = scope[key];
       if (value instanceof Error || typeof value == 'function') {
-        user().warn(TAG, Removing unsupported object type (Error, Function) in '
-            + 'postMessage context: %s', value);
+        user().warn(TAG, 'Removing unsupported object type (Error, Function) '
+            + 'in postMessage context: %s', value);
         delete scope[key];
       }
     }
