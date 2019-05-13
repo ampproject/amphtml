@@ -134,7 +134,6 @@ async function createChromeDriver(config) {
     args.push('--headless');
   }
 
-  // TODO(estherkim): remove hardcoded chrome driver
   const capabilities = Capabilities.chrome();
   const chromeOptions = {
     // TODO(cvializ,estherkim,sparhami):
@@ -252,7 +251,6 @@ class ItConfig {
  * @param {function(!Object):!Array<?Fixture>} factory
  */
 function describeEnv(factory) {
-
   /**
    * @param {string} name
    * @param {!Object} spec
