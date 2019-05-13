@@ -1081,15 +1081,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * @private
    */
   setCssPosition_(position) {
-    return this.measureMutateElement(
-        /** MEASURER */ () => {
-          this.getResource().measure();
-        },
-        /** MUTATOR */ () => {
-          setImportantStyles(this.element, {position});
-        },
-        this.element
-    );
+    return this.mutateElement(() => {
+      setImportantStyles(this.element, {position});
+    }, this.element);
   }
 
   /**

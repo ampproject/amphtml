@@ -301,9 +301,9 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
     impl.iframe = impl.win.document.createElement('iframe');
     impl.win.document.body.appendChild(impl.iframe);
     const attemptChangeHeightStub = sandbox.stub(impl, 'attemptChangeHeight');
-    const measureMutateElementStub = sandbox.stub(impl, 'measureMutateElement');
+    const mutateElementStub = sandbox.stub(impl, 'mutateElement');
     attemptChangeHeightStub.returns(Promise.resolve());
-    measureMutateElementStub.returns(Promise.resolve());
+    mutateElementStub.returns(Promise.resolve());
     sandbox.stub(impl, 'attemptToRenderCreative').returns(Promise.resolve());
     impl.buildCallback();
     impl.isFluidRequest_ = true;
@@ -320,9 +320,9 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
     impl.iframe = impl.win.document.createElement('iframe');
     impl.win.document.body.appendChild(impl.iframe);
     const attemptChangeHeightStub = sandbox.stub(impl, 'attemptChangeHeight');
-    const measureMutateElementStub = sandbox.stub(impl, 'measureMutateElement');
+    const mutateElementStub = sandbox.stub(impl, 'mutateElement');
     attemptChangeHeightStub.returns(Promise.reject());
-    measureMutateElementStub.returns(Promise.resolve());
+    mutateElementStub.returns(Promise.resolve());
     sandbox.stub(impl, 'attemptToRenderCreative').returns(Promise.resolve());
     impl.buildCallback();
     impl.isFluidRequest_ = true;
