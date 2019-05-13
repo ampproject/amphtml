@@ -252,12 +252,12 @@ class ItConfig {
  */
 function describeEnv(factory) {
   /**
-   * @param {string} name
+   * @param {string} suiteName
    * @param {!Object} spec
    * @param {function(!Object)} fn
    * @param {function(string, function())} describeFunc
    */
-  const templateFunc = function(name, spec, fn, describeFunc) {
+  const templateFunc = function(suiteName, spec, fn, describeFunc) {
     const fixture = factory(spec);
     const environments = spec.environments || defaultEnvironments;
     const variants = Object.create(null);
@@ -271,28 +271,36 @@ function describeEnv(factory) {
       spec.browsers = ['chrome'];
     }
 
-    return describeFunc(name, function() {
+    function createBrowserDescribe() {
       spec.browsers.forEach(browserName => {
         describe(browserName, function() {
-          for (const name in variants) {
-            it.configure = function() {
-              return new ItConfig(it, variants[name]);
-            };
-
-            describe(name ? ` ${name} ` : SUB, function() {
-              doTemplate.call(this, name, variants[name], browserName);
-            });
-          }
+          createVariantDescribe(browserName);
         });
       });
+    }
+
+    function createVariantDescribe(browserName) {
+      for (const name in variants) {
+        it.configure = function() {
+          return new ItConfig(it, variants[name]);
+        };
+
+        describe(name ? ` ${name} ` : SUB, function() {
+          doTemplate.call(this, name, variants[name], browserName);
+        });
+      }
+    }
+
+    return describeFunc(suiteName, function() {
+      createBrowserDescribe();
     });
 
-    function doTemplate(name, variant, browser) {
+    function doTemplate(name, variant, browserName) {
       const env = Object.create(variant);
       this.timeout(TEST_TIMEOUT);
       beforeEach(async function() {
         this.timeout(SETUP_TIMEOUT);
-        await fixture.setup(env, browser);
+        await fixture.setup(env, browserName);
 
         // don't install for CI
         if (!isTravisBuild()) {
