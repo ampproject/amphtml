@@ -274,9 +274,7 @@ export class Bind {
 
       const scope = dict();
       if (event && getDetail(/** @type {!Event} */ (event))) {
-        const detail = getDetail(/** @type {!Event} */ (event));
-        this.sanitizeDetailForWorker_(detail);
-        scope['event'] = detail;
+        scope['event'] = getDetail(/** @type {!Event} */ (event));
       }
       switch (method) {
         case 'setState':
@@ -300,18 +298,16 @@ export class Bind {
    * expression as the web worker does this work and such objects aren't
    * supported in postMessage.
    * https://developer.mozilla.org/docs/Web/API/Web_Workers_API/Structured_clone_algorithm
-   * @param {?JsonObject|string|undefined} detail
+   * @param {!JsonObject} scope
    * @private
    */
-  sanitizeDetailForWorker_(detail) {
-    if (typeof detail == 'object') {
-      for (const key in detail) {
-        const value = detail[key];
-        if (value instanceof Error || typeof value == 'function') {
-	  user().warn('Unsupported object type (Error, Function) in '
-              + 'postMessage context: %s', value);
-          detail[key] = null;
-        }
+  sanitizeScope_(scope) {
+    for (const key in scope) {
+      const value = scope[key];
+      if (value instanceof Error || typeof value == 'function') {
+        user().warn('Removing unsupported object type (Error, Function) in '
+            + 'postMessage context: %s', value);
+        delete scope[key];
       }
     }
   }
@@ -914,6 +910,7 @@ export class Bind {
    */
   evaluateExpression_(expression, scope) {
     return this.initializePromise_.then(() => {
+      this.sanitizeScope_(scope);
       // Allow expression to reference current state in addition to event state.
       Object.assign(scope, this.state_);
       return this.ww_('bind.evaluateExpression', [expression, scope]);

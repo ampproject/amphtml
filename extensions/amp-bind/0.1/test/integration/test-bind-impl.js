@@ -664,6 +664,24 @@ describe.configure().ifChrome().run('Bind', function() {
       expect(bind.setStateWithExpression).to.be.calledTwice;
     });
 
+    it('should sanitize scope for expression evaluation', () => {
+      const sanitizeScope = sandbox.spy(bind, 'sanitizeScope_');
+      const element = createElement(env, container, '[text]="onePlusOne"');
+      expect(element.textContent).to.equal('');
+      const error = new Error('This error object should be sanitized');
+      const func = new Function();
+      // Given the unsupport Error and function objects are in the scope.
+      const scope = {one: 1, error, func};
+      const promise = onBindReadyAndSetStateWithExpression(
+          env, bind, '{"onePlusOne": one + one}', scope);
+      return promise.then(() => {
+        // Expect unsupported objects to be sanitized.
+        expect(sanitizeScope).to.be.calledOnce;
+        expect(scope).to.deep.equal({one: 1});
+        expect(element.textContent).to.equal('2');
+      });
+    });
+
     it('should support parsing exprs in setStateWithExpression()', () => {
       const element = createElement(env, container, '[text]="onePlusOne"');
       expect(element.textContent).to.equal('');
