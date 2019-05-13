@@ -798,7 +798,6 @@ export const adConfig = {
   'pubmine': {
     prefetch: [
       'https://s.pubmine.com/head.js',
-      'https://s.pubmine.com/showad.js',
     ],
     preconnect: 'https://delivery.g.switchadhub.com',
     renderStartImplemented: true,
