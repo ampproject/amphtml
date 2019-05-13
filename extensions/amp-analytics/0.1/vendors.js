@@ -264,7 +264,7 @@ ANALYTICS_CONFIG['adobeanalytics_nativeConfig']
 ANALYTICS_CONFIG['oewa']['triggers']['pageview']['iframe' +
 /* TEMPORARY EXCEPTION */ 'Ping'] = true;
 
-mergeIframeTransportConfig(ANALYTICS_CONFIG, IFRAME_TRANSPORTS);
+mergeIframeTransportConfig(ANALYTICS_CONFIG, isCanary(self) ? IFRAME_TRANSPORTS_CANARY : IFRAME_TRANSPORTS);
 
 /**
  * Merges iframe transport config.
