@@ -179,10 +179,7 @@ let TestSpec;
 /**
  * An end2end test using Selenium Web Driver or Puppeteer
  */
-const endtoend = describeEnv(spec => {
-  console.log('endtoend');
-  return new EndToEndFixture(spec);
-});
+const endtoend = describeEnv(spec => new EndToEndFixture(spec));
 
 /**
  * Maps an environment enum value to a `describes.repeated` variant object.
@@ -255,7 +252,6 @@ class ItConfig {
  * @param {function(!Object):!Array<?Fixture>} factory
  */
 function describeEnv(factory) {
-  console.log('describeEnv');
 
   /**
    * @param {string} name
@@ -264,7 +260,6 @@ function describeEnv(factory) {
    * @param {function(string, function())} describeFunc
    */
   const templateFunc = function(name, spec, fn, describeFunc) {
-    console.log('templateFunc');
     const fixture = factory(spec);
     const environments = spec.environments || defaultEnvironments;
     const variants = Object.create(null);
@@ -337,7 +332,6 @@ function describeEnv(factory) {
    * @param {function(!Object)} fn
    */
   const mainFunc = function(name, spec, fn) {
-    console.log('here');
     return templateFunc(name, spec, fn, describe);
   };
 
@@ -351,11 +345,9 @@ function describeEnv(factory) {
   };
 
   mainFunc.skip = function(name, variants, fn) {
-    console.log('here');
     return templateFunc(name, variants, fn, describe.skip);
   };
 
-    console.log('huwat');
   return mainFunc;
 }
 
