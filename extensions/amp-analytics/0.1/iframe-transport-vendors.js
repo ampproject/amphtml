@@ -30,7 +30,8 @@ export const IFRAME_TRANSPORTS = /** @type {!JsonObject} */ ({
 });
 
 /**
- * URLs for iframe transports to run in Canary.
+ * URLs for iframe transports to run in Canary Vendors who have IAB 
+ * viewability certification.
  *
  * @const {!JsonObject}
  */
