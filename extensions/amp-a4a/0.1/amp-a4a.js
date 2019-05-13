@@ -630,9 +630,6 @@ export class AmpA4A extends AMP.BaseElement {
           checkStillCurrent();
           const consentPolicyId = super.getConsentPolicy();
 
-          // TODO torch2424
-          getConsentPolicyInfo(this.element, consentPolicyId);
-
           if (consentPolicyId) {
 
             const consentStatePromise = getConsentPolicyState(
@@ -647,7 +644,7 @@ export class AmpA4A extends AMP.BaseElement {
               this.element,
               consentPolicyId
             ).catch(err => {
-              user().error(TAG, 'Error determining consent sttring', err);
+              user().error(TAG, 'Error determining consent string', err);
               return null;
             });
 
