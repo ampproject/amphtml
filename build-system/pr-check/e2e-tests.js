@@ -23,7 +23,6 @@
 
 const colors = require('ansi-colors');
 const {
-  downloadBuildOutput,
   downloadDistOutput,
   printChangeSummary,
   startTimer,
@@ -36,6 +35,7 @@ const FILENAME = 'e2e-tests.js';
 const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
 const timedExecOrDie =
   (cmd, unusedFileName) => timedExecOrDieBase(cmd, FILENAME);
+
 
 async function main() {
   const startTime = startTimer(FILENAME, FILENAME);
@@ -53,8 +53,7 @@ async function main() {
         buildTargets.has('BUILD_SYSTEM') ||
         buildTargets.has('FLAG_CONFIG') ||
         buildTargets.has('VISUAL_DIFF')) {
-
-      downloadBuildOutput(FILENAME);
+      downloadDistOutput(FILENAME);
       timedExecOrDie('gulp update-packages');
       timedExecOrDie('gulp e2e --nobuild --headless');
     } else {

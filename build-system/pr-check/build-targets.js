@@ -188,7 +188,7 @@ function isFlagConfig(filePath) {
  * @param {string} fileName
  * @return {boolean}
  */
-function areValidBuildTargets(buildTargets, fileName) {
+function validateBuildTargets(buildTargets, fileName) {
   const files = gitDiffNameOnlyMaster();
   if (buildTargets.has('FLAG_CONFIG') && buildTargets.has('RUNTIME')) {
     console.log(fileName, colors.red('ERROR:'),
@@ -202,9 +202,8 @@ function areValidBuildTargets(buildTargets, fileName) {
     console.log(fileLogPrefix, colors.red('ERROR:'),
         'Please move these files to a separate PR:',
         colors.cyan(nonFlagConfigFiles.join(', ')));
-    return false;
+    process.exit(1);
   }
-  return true;
 }
 
 /**
@@ -259,6 +258,6 @@ function determineBuildTargets() {
 }
 
 module.exports = {
-  areValidBuildTargets,
+  validateBuildTargets,
   determineBuildTargets,
 };

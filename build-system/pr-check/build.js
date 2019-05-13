@@ -23,11 +23,9 @@
 
 const colors = require('ansi-colors');
 const {
-  areValidBuildTargets,
-  determineBuildTargets} = require('./build-targets');
-const {
-  isYarnLockFileInSync,
-  isYarnLockFileProperlyUpdated} = require('./yarn-checks');
+  determineBuildTargets,
+  validateBuildTargets,
+} = require('./build-targets');
 const {
   printChangeSummary,
   startTimer,
@@ -35,26 +33,19 @@ const {
   timedExecOrDie: timedExecOrDieBase,
   uploadBuildOutput} = require('./utils');
 const {isTravisPullRequestBuild} = require('../travis');
+const {runYarnChecks} = require('./yarn-checks');
+
 const FILENAME = 'build.js';
 const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
 const timedExecOrDie =
   (cmd, unusedFileName) => timedExecOrDieBase(cmd, FILENAME);
 
+
 function main() {
   const startTime = startTimer(FILENAME, FILENAME);
-  // Make sure package.json and yarn.lock are in sync and up-to-date.
-  if (!isYarnLockFileInSync(FILENAME) ||
-      !isYarnLockFileProperlyUpdated(FILENAME)) {
-    process.exitCode = 1;
-    return;
-  }
-
+  runYarnChecks(FILENAME);
   const buildTargets = determineBuildTargets();
-  if (!areValidBuildTargets(buildTargets, FILENAME)) {
-    stopTimer(FILENAME, FILENAME, startTime);
-    process.exitCode = 1;
-    return;
-  }
+  validateBuildTargets(buildTargets, FILENAME);
 
   if (!isTravisPullRequestBuild()) {
     timedExecOrDie('gulp update-packages');
