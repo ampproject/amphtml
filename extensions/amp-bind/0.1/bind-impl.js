@@ -484,11 +484,12 @@ export class Bind {
       }
     }).then(() => {
       const ampStates = root.querySelectorAll('AMP-STATE');
-      // Force all query-able <amp-state> elements to be built.
-      // A bit weird but amp-state is just metadata, so there's no point
-      // to wait for runtime to schedule builds before sending "bindReady".
-      const whenBuilt = toArray(ampStates).map(el => el.build());
-      return Promise.all(whenBuilt);
+      // Force all query-able <amp-state> elements to parse local data instead
+      // of waiting for runtime to build them all.
+      const whenParsed = toArray(ampStates)
+          .map(el => el.getImplementation())
+          .map(impl => impl.parseAndUpdate());
+      return Promise.all(whenParsed);
     }).then(() => {
       // Bind is "ready" when its initialization completes _and_ all <amp-state>
       // elements' local data is parsed and processed (not remote data).
