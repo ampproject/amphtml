@@ -44,15 +44,27 @@ function main() {
     timedExecOrDie('gulp validator-webui');
   } else {
     printChangeSummary(FILENAME);
-    if (buildTargets.has('VALIDATOR')) {
+    let ranTests = false;
+
+    if (buildTargets.has('RUNTIME') ||
+        buildTargets.has('BUILD_SYSTEM') ||
+        buildTargets.has('VALIDATOR')) {
       timedExecOrDie('gulp validator');
-    } else if (buildTargets.has('VALIDATOR_WEBUI')) {
+      ranTests = true;
+    }
+
+    if (buildTargets.has('RUNTIME') ||
+        buildTargets.has('BUILD_SYSTEM') ||
+        buildTargets.has('VALIDATOR_WEBUI')) {
       timedExecOrDie('gulp validator-webui');
-    } else {
+      ranTests = true;
+    }
+
+    if (!ranTests) {
       console.log(
           `${FILELOGPREFIX} Skipping ` + colors.cyan('Validator Tests ') +
-          'because this commit does not affect ' +
-          'the validator or validator web UI.');
+          'because this commit does not affect the runtime, build system, ' +
+          'validator, or validator web UI.');
     }
   }
 
