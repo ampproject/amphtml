@@ -325,7 +325,7 @@ export class FriendlyIframeEmbed {
     this.iframe = iframe;
 
     /** @const {!Window} */
-    this.win = /** @type{!Window} */(iframe.contentWindow);
+    this.win = /** @type {!Window} */(iframe.contentWindow);
 
     /** @const {!FriendlyIframeSpec} */
     this.spec = spec;

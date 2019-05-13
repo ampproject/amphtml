@@ -34,7 +34,7 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
      * Preserved so that we may keep track of the "good" children. When an
      * element collapses, we remove it from the list.
      *
-     * @type{!Array<!Element>}
+     * @type {!Array<!Element>}
      * @private
      */
     this.children_ = [];

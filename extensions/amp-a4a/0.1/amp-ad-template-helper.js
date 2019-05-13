@@ -66,7 +66,7 @@ export class AmpAdTemplateHelper {
       this.cache_.put(proxyUrl, templatePromise);
     }
     devAssert(templatePromise);
-    return /** @type{!Promise<string>} */ (templatePromise);
+    return /** @type {!Promise<string>} */ (templatePromise);
   }
 
   /**

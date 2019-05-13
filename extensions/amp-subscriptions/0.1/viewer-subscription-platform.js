@@ -104,7 +104,7 @@ export class ViewerSubscriptionPlatform {
       this.sendAuthTokenErrorToViewer_(reason.message);
       throw reason;
     });
-    return /** @type{!Promise<Entitlement>} */ (entitlementPromise);
+    return /** @type {!Promise<Entitlement>} */ (entitlementPromise);
   }
 
   /**

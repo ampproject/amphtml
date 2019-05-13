@@ -832,7 +832,7 @@ export function getIdentityToken(win, ampDoc, consentPolicyId) {
           .then(consentState =>
             consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
             consentState == CONSENT_POLICY_STATE.UNKNOWN ?
-            /** @type{!IdentityToken} */({}) :
+            /** @type {!IdentityToken} */({}) :
               executeIdentityTokenFetch(win, ampDoc));
   return /** @type {!Promise<!IdentityToken>} */(win['goog_identity_prom']);
 }

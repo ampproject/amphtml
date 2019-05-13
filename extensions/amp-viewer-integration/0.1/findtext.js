@@ -407,7 +407,7 @@ export class TextScanner {
     while (this.textIdx_ < text.length) {
       const idx = this.textIdx_;
       this.textIdx_++;
-      return {node: /**@type{!Text}*/(this.node_), offset: idx};
+      return {node: /**@type {!Text}*/(this.node_), offset: idx};
     }
     return null;
   }
