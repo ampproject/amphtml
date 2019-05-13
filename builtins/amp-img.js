@@ -240,7 +240,7 @@ export class AmpImg extends BaseElement {
     return true;
   }
 
-  /** @override **/
+  /** @override */
   firstLayoutCompleted() {
     const placeholder = this.getPlaceholder();
     if (placeholder &&

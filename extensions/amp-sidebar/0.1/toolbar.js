@@ -46,7 +46,7 @@ export class Toolbar {
     /** @private {Element|undefined} */
     this.toolbarTarget_ = undefined;
 
-    /** @private {boolean} **/
+    /** @private {boolean} */
     this.toolbarShown_ = false;
 
     // Default to toolbar target being hidden

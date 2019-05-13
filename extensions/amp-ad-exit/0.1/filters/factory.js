@@ -29,7 +29,7 @@ export function createFilter(name, spec, adExitInstance) {
     case FilterType.CLICK_DELAY:
       return new ClickDelayFilter(
           name,
-          /** @type {!../config.ClickDelayConfig} **/(spec),
+          /** @type {!../config.ClickDelayConfig} */(spec),
           adExitInstance.win);
     case FilterType.CLICK_LOCATION:
       return new ClickLocationFilter(name, spec, adExitInstance);

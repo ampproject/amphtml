@@ -62,7 +62,7 @@ export class AmpAdCustom extends AMP.BaseElement {
     return LayoutPriority.CONTENT;
   }
 
-  /** @override **/
+  /** @override */
   isLayoutSupported(layout) {
     /** @TODO Add proper support for more layouts, and figure out which ones
      *  we're permitting */

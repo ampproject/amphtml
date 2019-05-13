@@ -1063,7 +1063,7 @@ export class AmpA4A extends AMP.BaseElement {
     return true;
   }
 
-  /** @override **/
+  /** @override */
   attemptChangeSize(newHeight, newWidth) {
     // Store original size of slot in order to allow re-expansion on
     // unlayoutCallback so that it is reverted to original size in case

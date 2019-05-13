@@ -57,10 +57,10 @@ const TAG = 'RECAPTCHA';
 /** @const {string} */
 const RECAPTCHA_API_URL = 'https://www.google.com/recaptcha/api.js?render=';
 
-/** {?IframeMessaginClient} **/
+/** {?IframeMessaginClient} */
 let iframeMessagingClient = null;
 
-/** {?string} **/
+/** {?string} */
 let sitekey = null;
 
 /**

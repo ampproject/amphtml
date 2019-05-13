@@ -44,7 +44,7 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {?string} **/
+    /** @private {?string} */
     this.sitekey_ = null;
 
     /** @private {?string} */

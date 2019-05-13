@@ -85,7 +85,7 @@ const allowedJsonBodyTypes_ = [isArray, isObject];
 export function toStructuredCloneable(input, init) {
   const newInit = Object.assign({}, init);
   if (isFormDataWrapper(init.body)) {
-    const wrapper = /** @type {!FormDataWrapperInterface} **/ (init.body);
+    const wrapper = /** @type {!FormDataWrapperInterface} */ (init.body);
     newInit.headers['Content-Type'] = 'multipart/form-data;charset=utf-8';
     newInit.body = fromIterator(wrapper.entries());
   }
