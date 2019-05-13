@@ -735,9 +735,7 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
-  'opinary': {
-    renderStartImplemented: false,
-  },
+  'opinary': {},
 
   'outbrain': {
     renderStartImplemented: true,
