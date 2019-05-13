@@ -315,13 +315,13 @@ function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
       .then(() => {
         let name = minifiedName;
         if (options.latestName) {
-          name = `${name} → ${options.latestName}`;
+          name += ` → ${options.latestName}`;
         }
         if (options.singlePassCompilation) {
           altMainBundles.forEach(bundle => {
-            name = `${name}, ${bundle.name}.js`;
+            name += `, ${bundle.name}.js`;
           });
-          name = `${name}, and all extensions`;
+          name += ', and all extensions';
         }
         endBuildStep('Minified', name, startTime);
       })
@@ -331,7 +331,7 @@ function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
         }
       })
       .then(() => {
-        if (options.singlePassCompilation) {
+        if (argv.fortesting && options.singlePassCompilation) {
           const promises = [];
           altMainBundles.forEach(bundle => {
             promises.push(enableLocalTesting(`dist/${bundle.name}.js`));
