@@ -184,7 +184,7 @@ describes.realWin('amp-consent', {
       yield macroTask();
       expect(requestBody).to.deep.equal({
         'consentInstanceId': 'ABC',
-        'consentState': 'unknown',
+        'consentStateValue': 'unknown',
         'consentString': undefined,
         'isDirty': false,
       });

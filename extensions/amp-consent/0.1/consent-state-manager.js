@@ -24,6 +24,7 @@ import {
   hasDirtyBit,
   isConsentInfoStoredValueSame,
   recalculateConsentStateValue,
+  getConsentStateValue,
 } from './consent-info';
 import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
@@ -399,7 +400,7 @@ export class ConsentInstance {
       // No need to send update request if the stored consent info is dirty
       return;
     }
-    const consentState =
+    const legacyConsentState =
         calculateLegacyStateValue(consentInfo['consentState']);
     const cidPromise = Services.cidForDoc(this.ampdoc_).then(cid => {
       return cid.get({scope: CID_SCOPE, createCookieIfNotPresent: true},
@@ -411,7 +412,11 @@ export class ConsentInstance {
         'consentInstanceId': this.id_,
         'ampUserId': userId,
       });
-      request['consentState'] = consentState;
+      if (legacyConsentState != null) {
+        request['consentState'] = legacyConsentState;
+      }
+      request['consentStateValue'] =
+          getConsentStateValue(consentInfo['consentState']);
       if (consentInfo['consentString']) {
         request['consentString'] = consentInfo['consentString'];
       }

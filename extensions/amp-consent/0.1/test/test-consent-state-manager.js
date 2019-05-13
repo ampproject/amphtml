@@ -384,12 +384,14 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
         expect(requestSpy).to.be.calledWith('//updateHref');
         expect(requestBody.consentInstanceId).to.equal('test');
         expect(requestBody.consentState).to.equal(true);
+        expect(requestBody.consentStateValue).to.equal('accepted');
         expect(requestBody.consentString).to.be.undefined;
         yield instance.update(CONSENT_ITEM_STATE.REJECTED);
         yield macroTask();
         expect(requestSpy).to.be.calledTwice;
         expect(requestSpy).to.be.calledWith('//updateHref');
         expect(requestBody.consentState).to.equal(false);
+        expect(requestBody.consentStateValue).to.equal('rejected');
         expect(requestBody.consentString).to.be.undefined;
       });
 
@@ -399,11 +401,13 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
         yield macroTask();
         expect(requestSpy).to.be.calledOnce;
         expect(requestBody.consentState).to.be.true;
+        expect(requestBody.consentStateValue).to.equal('accepted');
         expect(requestBody.consentString).to.equal('old');
         yield instance.update(CONSENT_ITEM_STATE.ACCEPTED, 'new');
         yield macroTask();
         expect(requestSpy).to.be.calledTwice;
         expect(requestBody.consentState).to.be.true;
+        expect(requestBody.consentStateValue).to.equal('accepted');
         expect(requestBody.consentString).to.equal('new');
       });
 
@@ -436,6 +440,7 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
         yield macroTask();
         expect(requestSpy).to.be.calledOnce;
         expect(requestBody.consentState).to.equal(false);
+        expect(requestBody.consentStateValue).to.equal('rejected');
       });
 
       it('send update request on local stroage removal', function* () {
@@ -447,7 +452,7 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
         yield macroTask();
         yield macroTask();
         expect(requestSpy).to.be.calledOnce;
-        expect(requestBody.consentState).to.equal(null);
+        expect(requestBody.consentStateValue).to.equal('unknown');
       });
 
       it('do not send update request with dirtyBit', function* () {

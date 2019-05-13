@@ -490,7 +490,7 @@ export class AmpConsent extends AMP.BaseElement {
         // Note: Expect the request to look different in following versions.
         const request = /** @type {!JsonObject} */ ({
           'consentInstanceId': this.consentId_,
-          'consentState': getConsentStateValue(storedInfo['consentState']),
+          'consentStateValue': getConsentStateValue(storedInfo['consentState']),
           'consentString': storedInfo['consentString'],
           'isDirty': !!storedInfo['isDirty'],
         });

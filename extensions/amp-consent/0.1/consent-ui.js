@@ -418,7 +418,10 @@ export class ConsentUI {
           consentInfo => {
             return dict({
               'clientConfig': this.clientConfig_,
+              // consentState to be deprecated
               'consentState': getConsentStateValue(consentInfo['consentState']),
+              'consentStateValue':
+                  getConsentStateValue(consentInfo['consentState']),
               'consentString': consentInfo['consentString'],
               'promptTrigger': isActionPromptTrigger ? 'action' : 'load',
               'isDirty': !!consentInfo['isDirty'],
