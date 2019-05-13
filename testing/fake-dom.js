@@ -119,6 +119,7 @@ export class FakeWindow {
 
     /** @private {!Array<string>} */
     this.cookie_ = [];
+    this.document.lastSetCookieRaw; // used to verify cookie settings like expiration time etc
     Object.defineProperty(this.document, 'cookie', {
       get: () => {
         const cookie = [];
@@ -128,6 +129,7 @@ export class FakeWindow {
         return cookie.join(';');
       },
       set: value => {
+        this.document.lastSetCookieRaw = value;
         const cookie = value.match(/^([^=]*)=([^;]*)/);
         const expiresMatch = value.match(/expires=([^;]*)(;|$)/);
         const expires = expiresMatch ? Date.parse(expiresMatch[1]) : Infinity;
