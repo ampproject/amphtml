@@ -38,6 +38,8 @@ const SCRIPT = `
 
         if (!window.AMP_SHADOW) {
           window.AMP_SHADOW = true;
+          this._installScript(
+            'https://cdn.ampproject.org/shadow-v0.js');
         }
 
         this._amp = null;
@@ -70,16 +72,6 @@ const SCRIPT = `
 
       attributeChangedCallback(name, old, value) {
         if (old !== value) this.src = value;
-      }
-
-      connectedCallback() {
-        let scriptPath = ''
-        if (this.getAttribute('use-local-js')) {
-          scriptPath = '/dist/amp-shadow.js';
-        } else {
-          scriptPath = 'https://cdn.ampproject.org/shadow-v0.js';
-        }
-        this._installScript(scriptPath);
       }
 
       _setVisibilityState(state) {
@@ -153,12 +145,7 @@ const SCRIPT = `
 `;
 
 
-const renderShadowViewer = ({
-  src,
-  baseHref,
-  port = 8000,
-  useLocalJs = false,
-}) =>
+const renderShadowViewer = ({src, baseHref, port = 8000}) =>
   html`<!doctype html>
   <html>
     <head>
@@ -169,10 +156,7 @@ const renderShadowViewer = ({
       </script>
     </head>
     <body style="padding: 0; margin: 0">
-      <amp-viewer
-        use-local-js="${useLocalJs}"
-        src="http://localhost:${port}/${src}"
-      ></amp-viewer>
+      <amp-viewer src="http://localhost:${port}/${src}"></amp-viewer>
     </body>
   </html>`;
 
