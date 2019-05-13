@@ -38,63 +38,63 @@ FAIL
 |    <!-- invalid: data-site-id must be numeric -->
 |    <amp-springboard-player data-site-id="a261" data-mode="video"
 >>   ^~~~~~~~~
-amp-springboard-player/0.1/test/validator-amp-springboard-player.html:38:2 The attribute 'data-site-id' in tag 'amp-springboard-player' is set to the invalid value 'a261'. (see https://www.ampproject.org/docs/reference/components/amp-springboard-player) [DISALLOWED_HTML]
+amp-springboard-player/0.1/test/validator-amp-springboard-player.html:38:2 The attribute 'data-site-id' in tag 'amp-springboard-player' is set to the invalid value 'a261'. (see https://amp.dev/documentation/components/amp-springboard-player) [DISALLOWED_HTML]
 |        data-content-id="1578473" data-player-id="test401"
 |        data-domain="test.com" data-items="10"
 |        layout="fixed"width="480" height="270"></amp-springboard-player>
 |    <!-- invalid: data-player-id must be alphanumeric -->
 |    <amp-springboard-player data-site-id="261" data-mode="playlist"
 >>   ^~~~~~~~~
-amp-springboard-player/0.1/test/validator-amp-springboard-player.html:43:2 The attribute 'data-player-id' in tag 'amp-springboard-player' is set to the invalid value 'test 401'. (see https://www.ampproject.org/docs/reference/components/amp-springboard-player) [DISALLOWED_HTML]
+amp-springboard-player/0.1/test/validator-amp-springboard-player.html:43:2 The attribute 'data-player-id' in tag 'amp-springboard-player' is set to the invalid value 'test 401'. (see https://amp.dev/documentation/components/amp-springboard-player) [DISALLOWED_HTML]
 |        data-content-id="1578473" data-player-id="test 401"
 |        data-domain="test.com" data-items="10"
 |        layout="fixed" width="480" height="270"></amp-springboard-player>
 |    <!-- invalid: data-content-id required -->
 |    <amp-springboard-player data-site-id="261" data-mode="video"
 >>   ^~~~~~~~~
-amp-springboard-player/0.1/test/validator-amp-springboard-player.html:48:2 The mandatory attribute 'data-content-id' is missing in tag 'amp-springboard-player'. (see https://www.ampproject.org/docs/reference/components/amp-springboard-player) [AMP_TAG_PROBLEM]
+amp-springboard-player/0.1/test/validator-amp-springboard-player.html:48:2 The mandatory attribute 'data-content-id' is missing in tag 'amp-springboard-player'. (see https://amp.dev/documentation/components/amp-springboard-player) [AMP_TAG_PROBLEM]
 |        data-player-id="test401"
 |        data-domain="test.com" data-items="10"
 |        layout="fixed" width="480" height="270"></amp-springboard-player>
 |    <!-- invalid: data-domain required -->
 |    <amp-springboard-player data-site-id="261" data-mode="video"
 >>   ^~~~~~~~~
-amp-springboard-player/0.1/test/validator-amp-springboard-player.html:53:2 The mandatory attribute 'data-domain' is missing in tag 'amp-springboard-player'. (see https://www.ampproject.org/docs/reference/components/amp-springboard-player) [AMP_TAG_PROBLEM]
+amp-springboard-player/0.1/test/validator-amp-springboard-player.html:53:2 The mandatory attribute 'data-domain' is missing in tag 'amp-springboard-player'. (see https://amp.dev/documentation/components/amp-springboard-player) [AMP_TAG_PROBLEM]
 |        data-content-id="1578473" data-player-id="test401"
 |        data-items="10"
 |        layout="fixed" width="480" height="270"></amp-springboard-player>
 |    <!-- invalid: data-items required -->
 |    <amp-springboard-player data-site-id="261" data-mode="video"
 >>   ^~~~~~~~~
-amp-springboard-player/0.1/test/validator-amp-springboard-player.html:58:2 The mandatory attribute 'data-items' is missing in tag 'amp-springboard-player'. (see https://www.ampproject.org/docs/reference/components/amp-springboard-player) [AMP_TAG_PROBLEM]
+amp-springboard-player/0.1/test/validator-amp-springboard-player.html:58:2 The mandatory attribute 'data-items' is missing in tag 'amp-springboard-player'. (see https://amp.dev/documentation/components/amp-springboard-player) [AMP_TAG_PROBLEM]
 |        data-content-id="1578473" data-player-id="test401"
 |        data-domain="test.com"
 |        layout="fixed" width="480" height="270"></amp-springboard-player>
 |    <!-- invalid: data-mode required -->
 |    <amp-springboard-player data-site-id="261"
 >>   ^~~~~~~~~
-amp-springboard-player/0.1/test/validator-amp-springboard-player.html:63:2 The mandatory attribute 'data-mode' is missing in tag 'amp-springboard-player'. (see https://www.ampproject.org/docs/reference/components/amp-springboard-player) [AMP_TAG_PROBLEM]
+amp-springboard-player/0.1/test/validator-amp-springboard-player.html:63:2 The mandatory attribute 'data-mode' is missing in tag 'amp-springboard-player'. (see https://amp.dev/documentation/components/amp-springboard-player) [AMP_TAG_PROBLEM]
 |        data-content-id="1578473" data-player-id="test401"
 |        data-domain="test.com" data-items="10"
 |        layout="fixed" width="480" height="270"></amp-springboard-player>
 |    <!-- invalid: data-player-id required -->
 |    <amp-springboard-player data-site-id="261" data-mode="video"
 >>   ^~~~~~~~~
-amp-springboard-player/0.1/test/validator-amp-springboard-player.html:68:2 The mandatory attribute 'data-player-id' is missing in tag 'amp-springboard-player'. (see https://www.ampproject.org/docs/reference/components/amp-springboard-player) [AMP_TAG_PROBLEM]
+amp-springboard-player/0.1/test/validator-amp-springboard-player.html:68:2 The mandatory attribute 'data-player-id' is missing in tag 'amp-springboard-player'. (see https://amp.dev/documentation/components/amp-springboard-player) [AMP_TAG_PROBLEM]
 |        data-content-id="1578473"
 |        data-domain="test.com" data-items="10"
 |        layout="fixed" width="480" height="270"></amp-springboard-player>
 |    <!-- invalid: data-site-id required -->
 |    <amp-springboard-player data-mode="video"
 >>   ^~~~~~~~~
-amp-springboard-player/0.1/test/validator-amp-springboard-player.html:73:2 The mandatory attribute 'data-site-id' is missing in tag 'amp-springboard-player'. (see https://www.ampproject.org/docs/reference/components/amp-springboard-player) [AMP_TAG_PROBLEM]
+amp-springboard-player/0.1/test/validator-amp-springboard-player.html:73:2 The mandatory attribute 'data-site-id' is missing in tag 'amp-springboard-player'. (see https://amp.dev/documentation/components/amp-springboard-player) [AMP_TAG_PROBLEM]
 |        data-content-id="1578473" data-player-id="test401"
 |        data-domain="test.com" data-items="10"
 |        layout="fixed" width="480" height="270"></amp-springboard-player>
 |    <!-- invalid: bad layout -->
 |    <amp-springboard-player data-site-id="261" data-mode="playlist"
 >>   ^~~~~~~~~
-amp-springboard-player/0.1/test/validator-amp-springboard-player.html:78:2 The specified layout 'FIXED_HEIGHT' is not supported by tag 'amp-springboard-player'. (see https://www.ampproject.org/docs/reference/components/amp-springboard-player) [AMP_LAYOUT_PROBLEM]
+amp-springboard-player/0.1/test/validator-amp-springboard-player.html:78:2 The specified layout 'FIXED_HEIGHT' is not supported by tag 'amp-springboard-player'. (see https://amp.dev/documentation/components/amp-springboard-player) [AMP_LAYOUT_PROBLEM]
 |        data-player-id="test401"
 |        layout="fixed-height" width="480" height="270"></amp-springboard-player>
 |  </body>

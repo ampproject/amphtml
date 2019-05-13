@@ -12,13 +12,21 @@
   <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
   <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
   <style amp-custom>
+    body {
+        padding: 15px;
+    }
     .custom-population {
         padding-top: 4px;
         font: 8pt 'Courier New', Courier, monospace;
     }
-
     input[name=favoriteState] {
       width: 2em;
+    }
+    .out-of-stock {
+      text-align: right;
+      text-transform: uppercase;
+      font: 8pt 'Arial', sans-serif;
+      right: 0;
     }
   </style>
   <script>
@@ -256,20 +264,34 @@
         target="_blank">
         <fieldset>
             <label>
-                <span>Your name</span>
-                <amp-autocomplete filter="substring" min-characters="0" max-entries="2">
-                    <input type="text" name="name" required>
+                <span>Your favorite color (in Arabic)</span>
+                <amp-autocomplete filter="substring" min-characters="0">
+                    <input type="text" required>
                     <script type="application/json">
-                        { "items" : ["hello a", "hello b", "hello c"] }
+                        { "items" : [ 
+                          "أبيض", "أسود", "أحمر", "أصفر",
+                          "أخضر", "أزرق", "بني", "برتقالى"]
+                        }
+                    </script>
+                </amp-autocomplete>
+            </label><br>
+            <label>
+                <span>Your favorite color (in English)</span>
+                <amp-autocomplete filter="prefix" min-characters="0">
+                    <input type="text" required>
+                    <script type="application/json">
+                        { "items" : ["white", "black", "red", "yellow",
+                        "green", "blue", "brown", "orange"] }
                     </script>
                 </amp-autocomplete>
             </label>
             <label>
-                <span>Your email</span>
-                <amp-autocomplete filter="prefix" min-characters="3">
-                    <input type="text" name="email" required>
+                <span>Your favorite color (in Arabic and English)</span>
+                <amp-autocomplete filter="prefix" min-characters="0">
+                    <input type="text" required>
                     <script type="application/json">
-                        { "items" : ["apple", "pineapple", "coconut", "pine apple"] }
+                        { "items" : ["أبيض", "white", "أسود", "black", "أحمر", "red", "أصفر", "yellow", "أخضر", 
+                        "green", "أزرق", "blue", "بني", "brown", "برتقالى", "orange"] }
                     </script>
                 </amp-autocomplete>
             </label>
@@ -585,6 +607,35 @@
                 <div>Here are the results for the search: {{term}}</div>
             </template>
         </div>
+    </form>
+
+    <h2>'Disabled' attribute</h2>
+    <form method="post" action-xhr="/form/echo-json/post" target="_blank">
+      <amp-autocomplete filter="substring" min-characters="0">
+        <input type="text">
+          <script type="application/json">
+            { "items" : [ { "value" : "apple",
+                            "disabled" : "true" },
+                          { "value" : "orange" },
+                          { "value" : "avocado",
+                            "disabled" : "true" },
+                          { "value" : "banana" } ] }
+          </script>
+        <template type="amp-mustache">
+          {{#disabled}}
+            <div data-disabled>
+              {{value}}
+              <span class="out-of-stock">out of stock</span>
+            </div>
+          {{/disabled}}
+          {{^disabled}}
+            <div data-value="{{value}}">
+              {{value}}
+            </div>
+          {{/disabled}}
+        </template> 
+      </amp-autocomplete>
+      <input name="submit-button" type="submit" value="Submit">
     </form>
 </body>
 </html>
