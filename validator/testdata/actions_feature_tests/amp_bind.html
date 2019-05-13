@@ -53,9 +53,6 @@
   <!-- Valid: Using [src] is valid-->
   <amp-state id="test" [src]="{{example_url}}" crossorigin="amp-viewer-auth-token-via-post"></amp-state>
 
-  <!-- Valid: Using cross-origin is valid-->
-  <amp-state id="test" [src]="{{example_url}}" cross-origin="amp-viewer-auth-token-via-post"></amp-state>
-
   <!-- Valid: Credentials valid with [src] -->
   <amp-state id="test" [src]="{{example_url}}" data-amp-replace="CLIENT_ID CLIENT_ID(cid)"
   crossorigin="amp-viewer-auth-token-via-post" credentials="123" overridable></amp-state>
