@@ -98,6 +98,11 @@ export class ViewportBindingNatural_ {
   }
 
   /** @override */
+  overrideGlobalScrollTo() {
+    return false;
+  }
+
+  /** @override */
   supportsPositionFixed() {
     return true;
   }

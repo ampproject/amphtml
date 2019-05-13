@@ -91,6 +91,10 @@ describes.realWin('ViewportBindingNatural', {ampCss: true}, env => {
     expect(binding.requiresFixedLayerTransfer()).to.be.false;
   });
 
+  it('should NOT require override of the global scrollTo', () => {
+    expect(binding.overrideGlobalScrollTo()).to.be.false;
+  });
+
   it('should connect events: subscribe to scroll and resize events', () => {
     expect(win.eventListeners.count('resize')).to.equal(1);
     expect(win.eventListeners.count('scroll')).to.equal(1);
@@ -250,6 +254,10 @@ describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
   it('should NOT setup body min-height w/o experiment', () => {
     const style = win.getComputedStyle(win.document.body);
     expect(style.minHeight).to.equal('0px');
+  });
+
+  it('should require override of the global scrollTo', () => {
+    expect(binding.overrideGlobalScrollTo()).to.be.true;
   });
 
   // TODO(#22220): Remove when "ios-fixed-no-transfer" experiment is cleaned up.
@@ -551,6 +559,10 @@ describes.realWin('ViewportBindingIosEmbedShadowRoot_', {ampCss: true}, env => {
 
     it('should NOT require fixed layer transferring', () => {
       expect(binding.requiresFixedLayerTransfer()).to.be.false;
+    });
+
+    it('should require override of the global scrollTo', () => {
+      expect(binding.overrideGlobalScrollTo()).to.be.true;
     });
 
     it('should start w/o overscroll and set it on doc ready', () => {
