@@ -155,6 +155,11 @@ export class ViewportBindingIosEmbedWrapper_ {
   }
 
   /** @override */
+  overrideGlobalScrollTo() {
+    return true;
+  }
+
+  /** @override */
   supportsPositionFixed() {
     return true;
   }

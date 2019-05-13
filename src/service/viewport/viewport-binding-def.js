@@ -52,6 +52,13 @@ export class ViewportBindingDef {
   requiresFixedLayerTransfer() {}
 
   /**
+   * Whether the binding requires the global window's `scrollTo` to be
+   * indirected via methods of this binding.
+   * @return {boolean}
+   */
+  overrideGlobalScrollTo() {}
+
+  /**
    * Whether the binding supports fix-positioned elements.
    * @return {boolean}
    */
