@@ -64,6 +64,7 @@ import {
 import {InfoDialog} from './amp-story-info-dialog';
 import {Keys} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
+import {LiveStoryManager} from './live-story-manager';
 import {LocalizationService} from '../../../src/service/localization';
 import {MediaPool, MediaType} from './media-pool';
 import {NavigationState} from './navigation-state';
@@ -357,6 +358,9 @@ export class AmpStory extends AMP.BaseElement {
     /** @private {?Element} */
     this.maskElement_ = null;
 
+    /** @private {?LiveStoryManager} */
+    this.liveStoryManager_ = null;
+
     /** @private @const {!LocalizationService} */
     this.localizationService_ = new LocalizationService(this.win);
     this.localizationService_
@@ -441,6 +445,14 @@ export class AmpStory extends AMP.BaseElement {
           this.switchTo_(args['id'], NavigationDirection.NEXT);
         }
       });
+    }
+
+    if (this.element.hasAttribute('dynamic-live-list')) {
+      this.liveStoryManager_ = new LiveStoryManager(this);
+      this.liveStoryManager_.build(
+          this.element.getAttribute('dynamic-live-list'));
+      this.storeService_.dispatch(Action.ADD_TO_ACTIONS_WHITELIST,
+          [{tagOrTarget: 'AMP-LIVE-LIST', method: 'update'}]);
     }
   }
 
@@ -2549,6 +2561,8 @@ export class AmpStory extends AMP.BaseElement {
     if (page.isAd()) {
       this.adPages_.push(page);
     }
+
+    this.storeService_.dispatch(Action.SET_PAGES_COUNT, this.getPageCount());
   }
 
   /**
@@ -2591,9 +2605,11 @@ export class AmpStory extends AMP.BaseElement {
 
     const nextPageEl = nextPage.element;
     const nextPageId = nextPageEl.id;
-    pageToBeInsertedEl.setAttribute(advanceAttr, nextPageId);
-    pageToBeInsertedEl.setAttribute(Attributes.AUTO_ADVANCE_TO, nextPageId);
-    nextPageEl.setAttribute(Attributes.RETURN_TO, pageToBeInsertedId);
+    if (nextPageId !== pageToBeInsertedId) {
+      pageToBeInsertedEl.setAttribute(advanceAttr, nextPageId);
+      pageToBeInsertedEl.setAttribute(Attributes.AUTO_ADVANCE_TO, nextPageId);
+      nextPageEl.setAttribute(Attributes.RETURN_TO, pageToBeInsertedId);
+    }
 
     return true;
   }
