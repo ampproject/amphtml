@@ -479,14 +479,14 @@ async function runTests() {
 
     let totalStableSuccess = 0;
     let totalStableFailed = 0;
-    const partialTestRunComplete = async (browsers, results) => {
+    const partialTestRunComplete = async(browsers, results) => {
       if (results.error) {
         await reportTestErrored();
       } else {
         totalStableSuccess += results.success;
         totalStableFailed += results.failed;
       }
-    }
+    };
 
     if (browsers.stable.length) {
       const allBatchesExitCodes = await runTestInBatchesWithBrowsers(
@@ -541,7 +541,7 @@ async function runTests() {
    * @return {number} processExitCode
    */
   async function runTestInBatchesWithBrowsers(
-      batchName, browsers, runComplete) {
+    batchName, browsers, runComplete) {
     let batch = 1;
     let startIndex = 0;
     let endIndex = batchSize;
