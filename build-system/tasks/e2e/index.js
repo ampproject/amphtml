@@ -131,6 +131,7 @@ async function e2e() {
 
       // end task
       process.exitCode = failures ? 1 : 0;
+      execOrDie('ps -e'); // log processes
       await resolver();
     });
   }
