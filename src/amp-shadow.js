@@ -57,36 +57,14 @@ installRuntimeServices(self);
 // has to be unblocked.
 doNotTrackImpression();
 
-if (isExperimentOn(self, 'ampdoc-shell')) {
-  //Shadow mode with an Ampdoc for the shell
-  installPerformanceService(self);
-  const ampdocService = Services.ampdocServiceFor(self);
-  const ampdocShell = ampdocService.installShellShadowDoc();
-  installStylesForDoc(ampdocShell, cssText, () => {
-    installAmpdocServices(ampdocShell);
+// PWA shell manages its own visibility and shadow ampdocs their own.
+bodyAlwaysVisible(self);
 
-    // Builtins.
-    installBuiltins(self);
+// Builtins.
+installBuiltins(self);
 
-    // Final configuration and stubbing.
-    adoptShadowMode(self);
-
-    // Pre-stub already known elements.
-    stubElementsForDoc(ampdocShell);
-
-    makeBodyVisible(self.document);
-    Services.resourcesForDoc(ampdocShell).ampInitComplete();
-  }, /* opt_isRuntimeCss */ true, /* opt_ext */ 'amp-runtime');
-} else {
-  // PWA shell manages its own visibility and shadow ampdocs their own.
-  bodyAlwaysVisible(self);
-
-  // Builtins.
-  installBuiltins(self);
-
-  // Final configuration and stubbing.
-  adoptShadowMode(self);
-}
+// Final configuration and stubbing.
+adoptShadowMode(self);
 
 // Output a message to the console and add an attribute to the <html>
 // tag to give some information that can be used in error reports.

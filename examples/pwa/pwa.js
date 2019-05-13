@@ -363,7 +363,7 @@ class AmpViewer {
  * @return {boolean}
  */
 function isShellUrl(url) {
-  return (url == '/pwa' || url == '/pwa/' || url == '/pwa/ampdoc-shell');
+  return (url == '/pwa' || url == '/pwa/');
 }
 
 
