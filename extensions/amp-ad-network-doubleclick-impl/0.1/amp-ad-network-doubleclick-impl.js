@@ -96,7 +96,7 @@ import {
   metaJsonCreativeGrouper,
 } from '../../../ads/google/a4a/line-delimited-response-handler';
 import {parseQueryString} from '../../../src/url';
-import {setStyles} from '../../../src/style';
+import {setImportantStyles, setStyles} from '../../../src/style';
 import {stringHash32} from '../../../src/string';
 import {tryParseJson} from '../../../src/json';
 import {utf8Decode} from '../../../src/utils/bytes';
@@ -1058,17 +1058,32 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
             this.element.getAttribute('data-amp-slot-index'));
         return Promise.reject('Cannot access body of friendly frame');
       }
-      return this.attemptChangeHeight(
-          this.iframe.contentWindow.document.body./*OK*/clientHeight)
-          .then(() => {
-            this.fireFluidDelayedImpression();
-            this.reattemptToExpandFluidCreative_ = false;
-          })
-          .catch(() => {
-            this.reattemptToExpandFluidCreative_ = true;
-          });
+      return this.setCssPosition_('static').then(() => {
+        return this.attemptChangeHeight(
+            this.iframe.contentWindow.document.body./*OK*/clientHeight)
+            .then(() => {
+              this.fireFluidDelayedImpression();
+              this.reattemptToExpandFluidCreative_ = false;
+            })
+            .catch(() => {
+              this.reattemptToExpandFluidCreative_ = true;
+              this.setCssPosition_('absolute');
+            });
+      });
     }
     return Promise.resolve();
+  }
+
+  /**
+   * Sets the CSS 'position' property of this.element.
+   * @param {string} position The CSS position value.
+   * @return {!Promise} A promise that resolves when mutation is complete.
+   * @private
+   */
+  setCssPosition_(position) {
+    return this.mutateElement(() => {
+      setImportantStyles(this.element, {position});
+    }, this.element);
   }
 
   /**
