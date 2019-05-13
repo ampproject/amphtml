@@ -75,7 +75,16 @@ function isYarnLockFileProperlyUpdated(fileName = 'yarn-checks.js') {
   return true;
 }
 
+/**
+ * Runs both yarn checks, and returns false if either one fails.
+ * @param {string} filename
+ * @return {boolean}
+ */
+function runYarnChecks(filename) {
+  return isYarnLockFileInSync(filename) &&
+      isYarnLockFileProperlyUpdated(filename);
+}
+
 module.exports = {
-  isYarnLockFileInSync,
-  isYarnLockFileProperlyUpdated,
+  runYarnChecks,
 };
