@@ -198,12 +198,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8237',
   },
   {
-    id: 'version-locking',
-    name: 'Force all extensions to have the same release ' +
-        'as the main JS binary',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8236',
-  },
-  {
     id: 'web-worker',
     name: 'Web worker for background processing',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/7156',

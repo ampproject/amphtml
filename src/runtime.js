@@ -908,8 +908,7 @@ export class MultidocManager {
  * If they are different, returns false, and initiates a load
  * of the respective extension via a versioned URL.
  *
- * This is currently guarded by the 'version-locking' experiment.
- * With this active, all scripts in a given page are guaranteed
+ * All scripts in a given page are guaranteed
  * to have the same AMP release version.
  *
  * @param {!Window} win
@@ -917,9 +916,6 @@ export class MultidocManager {
  * @return {boolean}
  */
 function maybeLoadCorrectVersion(win, fnOrStruct) {
-  if (!isExperimentOn(win, 'version-locking')) {
-    return false;
-  }
   if (typeof fnOrStruct == 'function') {
     return false;
   }
