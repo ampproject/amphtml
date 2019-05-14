@@ -16,8 +16,8 @@
 
 import {getMode} from './mode';
 import {getModeObject} from './mode-object';
+import {internalRuntimeVersion} from './internal-version';
 import {isEnumValue} from './types';
-import {version} from './internal-version';
 
 const noop = () => {};
 
@@ -98,8 +98,8 @@ export function overrideLogLevel(level) {
  * @return {string}
  */
 function externalMessagesUrl(path, query) {
-  const v = encodeURIComponent(version());
-  return `https://log.amp.dev/${path}?v=${v}&${query}`;
+  const version = encodeURIComponent(internalRuntimeVersion());
+  return `https://log.amp.dev/${path}?v=${version}&${query}`;
 }
 
 /**
