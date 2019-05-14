@@ -443,7 +443,6 @@ function transformPathsToTempDir(graph, config) {
     } else {
       const {code} = babel.transformFileSync(f, {
         plugins: conf.plugins({
-          isSinglepass: true,
           isEsmBuild: config.define.indexOf('ESM_BUILD=true') !== -1,
           isCommonJsModule: isCommonJsModule(f),
           isForTesting: config.define.indexOf('FORTESTING=true') !== -1,

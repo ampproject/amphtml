@@ -17,13 +17,13 @@
 const localPlugin = name =>
   require.resolve(`./babel-plugins/babel-plugin-${name}`);
 
-/** Apply to singlepass and multipass. */
 const defaultPlugins = [
   // TODO(alanorozco): Remove `replaceCallArguments` once serving infra is up.
   [localPlugin('transform-log-methods'), {replaceCallArguments: false}],
   localPlugin('transform-parenthesize-expression'),
 ];
 
+// TODO(alanorozco): Merge on `defaultPlugins` once multipass is gone.
 const singlepassPlugins = [
   ...defaultPlugins,
   localPlugin('is_minified-constant-transformer'),
@@ -44,30 +44,29 @@ const esmRemovedImports = {
 };
 
 /**
- * Resolves babel plugins to be applied before compiling on singlepass through
- * Closure.
- * @param {!Object<string, boolean|undefined>} buildConfig
+ * Resolves babel plugin set to apply before compiling on singlepass.
+ * @param {!Object<string, boolean>} buildFlags
  * @return {!Array<string|!Array<string|!Object>>}
  */
 function plugins({
-  isEsmBuild,
   isCommonJsModule,
+  isEsmBuild,
   isForTesting,
 }) {
-  const pluginsToApply = [...singlepassPlugins];
+  const applied = [...singlepassPlugins];
   if (isEsmBuild) {
-    pluginsToApply.push(['filter-imports', {imports: esmRemovedImports}]);
+    applied.push(['filter-imports', {imports: esmRemovedImports}]);
   }
   if (isCommonJsModule) {
-    pluginsToApply.push('transform-commonjs-es2015-modules');
+    applied.push('transform-commonjs-es2015-modules');
   }
   if (!isForTesting) {
-    pluginsToApply.push(
+    applied.push(
         localPlugin('amp-mode-transformer'),
         localPlugin('is_dev-constant-transformer')
     );
   }
-  return pluginsToApply;
+  return applied;
 }
 
-module.exports = {defaultPlugins, plugins};
+module.exports = {multipassPlugins: [...defaultPlugins], plugins};
