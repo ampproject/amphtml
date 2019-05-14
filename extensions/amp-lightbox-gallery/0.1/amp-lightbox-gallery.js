@@ -29,8 +29,8 @@ import {
   OverflowState,
 } from './lightbox-caption';
 import {Services} from '../../../src/services';
+import {SwipeDef, SwipeYRecognizer} from '../../../src/gesture-recognizers';
 import {SwipeToDismiss} from './swipe-to-dismiss';
-import {SwipeYRecognizer} from '../../../src/gesture-recognizers';
 import {
   childElementByTag,
   closest,
@@ -657,8 +657,8 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       this.swipeToDismiss_.startSwipe({
         swipeElement: dev().assertElement(this.carousel_),
         hiddenElement: parentCarousel || sourceElement,
-        mask: this.mask_,
-        overlay: this.controlsContainer_,
+        mask: dev().assertElement(this.mask_),
+        overlay: dev().assertElement(this.controlsContainer_),
       });
       return;
     }
@@ -1298,7 +1298,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
           if (!ts || isNaN(ts)) {
             return;
           }
-          const timestamp = this.secondsToTimestampString_(ts);
+          const timestamp = secondsToTimestampString(ts);
           const thumbnailContainer = dev().assertElement(
               this.gallery_.childNodes[thumbnail.index]);
           const timestampDiv = childElementByTag(thumbnailContainer, 'div');

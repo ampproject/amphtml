@@ -122,6 +122,12 @@ export class SwipeToDismiss {
     this.swipeElement_ = null;
 
     /**
+     * The element to hide while doing the swipe.
+     * @private {?Element}
+     */
+    this.hiddenElement_ = null;
+
+    /**
      * A background mask element behind the swipe element.
      * @private {?Element}
      */
