@@ -15,9 +15,9 @@
  */
 
 import {IFRAME_TRANSPORTS} from './iframe-transport-vendors';
-import {isCanary} from '../../../src/experiments';
 import {getMode} from '../../../src/mode';
 import {hasOwn} from '../../../src/utils/object';
+import {isCanary} from '../../../src/experiments';
 
 // Disable auto-sorting of imports from here on.
 /* eslint-disable sort-imports-es6-autofix/sort-imports-es6 */
