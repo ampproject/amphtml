@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-import {CONSENT_ITEM_STATE, hasStoredValue} from './consent-info';
+import {
+  CONSENT_ITEM_STATE,
+  getConsentStateValue,
+  hasStoredValue,
+} from './consent-info';
 import {CSS} from '../../../build/amp-consent-0.1.css';
 import {ConsentConfig, expandPolicyConfig} from './consent-config';
 import {ConsentPolicyManager} from './consent-policy-manager';
@@ -379,6 +383,7 @@ export class AmpConsent extends AMP.BaseElement {
    */
   init_() {
     this.passSharedData_();
+    this.maybeSetDirtyBit_();
 
     this.getConsentRequiredPromise_().then(isConsentRequired => {
       return this.initPromptUI_(isConsentRequired);
@@ -443,6 +448,18 @@ export class AmpConsent extends AMP.BaseElement {
   }
 
   /**
+   * Set dirtyBit of the local consent value based on server response
+   */
+  maybeSetDirtyBit_() {
+    const responsePromise = this.getConsentRemote_();
+    responsePromise.then(response => {
+      if (response && !!response['forcePromptOnNext']) {
+        this.consentStateManager_.setDirtyBit();
+      }
+    });
+  }
+
+  /**
    * Returns a promise that if user is in the given geoGroup
    * @param {string} geoGroup
    * @return {Promise<boolean>}
@@ -467,30 +484,37 @@ export class AmpConsent extends AMP.BaseElement {
     if (!this.consentConfig_['checkConsentHref']) {
       this.remoteConfigPromise_ = Promise.resolve(null);
     } else {
-      // Note: Expect the request to look different in following versions.
-      const request = /** @type {!JsonObject} */ ({
-        'consentInstanceId': this.consentId_,
-      });
-      if (this.consentConfig_['clientConfig']) {
-        request['clientConfig'] = this.consentConfig_['clientConfig'];
-      }
-      const init = {
-        credentials: 'include',
-        method: 'POST',
-        body: request,
-        requireAmpResponseSourceOrigin: false,
-      };
-      const href =
+      const storeConsentPromise =
+          this.consentStateManager_.getLastConsentInstanceInfo();
+      this.remoteConfigPromise_ = storeConsentPromise.then(storedInfo => {
+        // Note: Expect the request to look different in following versions.
+        const request = /** @type {!JsonObject} */ ({
+          'consentInstanceId': this.consentId_,
+          'consentStateValue': getConsentStateValue(storedInfo['consentState']),
+          'consentString': storedInfo['consentString'],
+          'isDirty': !!storedInfo['isDirty'],
+        });
+        if (this.consentConfig_['clientConfig']) {
+          request['clientConfig'] = this.consentConfig_['clientConfig'];
+        }
+        const init = {
+          credentials: 'include',
+          method: 'POST',
+          body: request,
+          requireAmpResponseSourceOrigin: false,
+        };
+        const href =
           this.consentConfig_['checkConsentHref'];
-      assertHttpsUrl(href, this.element);
-      const ampdoc = this.getAmpDoc();
-      const sourceBase = getSourceUrl(ampdoc.getUrl());
-      const resolvedHref = resolveRelativeUrl(href, sourceBase);
-      const viewer = Services.viewerForDoc(ampdoc);
-      this.remoteConfigPromise_ = viewer.whenFirstVisible().then(() => {
-        return Services.xhrFor(this.win)
-            .fetchJson(resolvedHref, init)
-            .then(res => res.json());
+        assertHttpsUrl(href, this.element);
+        const ampdoc = this.getAmpDoc();
+        const sourceBase = getSourceUrl(ampdoc.getUrl());
+        const resolvedHref = resolveRelativeUrl(href, sourceBase);
+        const viewer = Services.viewerForDoc(ampdoc);
+        return viewer.whenFirstVisible().then(() => {
+          return Services.xhrFor(this.win)
+              .fetchJson(resolvedHref, init)
+              .then(res => res.json());
+        });
       });
     }
     return this.remoteConfigPromise_;
