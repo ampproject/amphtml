@@ -18,7 +18,7 @@ import {CSS} from '../../../build/amp-truncate-text-0.1.css';
 import {
   CSS as ShadowCSS,
 } from '../../../build/amp-truncate-text-shadow-0.1.css';
-import {devAssert} from '../../../src/log';
+import {dev} from '../../../src/log';
 import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
 import {iterateCursor} from '../../../src/dom';
@@ -221,8 +221,8 @@ export class AmpTruncateText extends AMP.BaseElement {
         .then(() => {
           this.truncateRequested_ = false;
 
-          const container =
-              devAssert(this.useShadow_ ? this.element : this.content_);
+          const container = dev().assertElement(
+              this.useShadow_ ? this.element : this.content_);
           const overflowElement = this.useShadow_ ?
             this.element.querySelector('[slot="expand"]') :
             this.element.querySelector('.i-amphtml-truncate-expand-slot');
