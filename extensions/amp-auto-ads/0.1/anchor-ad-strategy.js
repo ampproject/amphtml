@@ -63,8 +63,7 @@ export class AnchorAdStrategy {
    * @private
    */
   hasExistingStickyAd_() {
-    return this.ampdoc.getRootNode()
-        .getElementsByTagName('AMP-STICKY-AD').length > 0;
+    return !!this.ampdoc.getRootNode().querySelector('AMP-STICKY-AD');
   }
 
   /**
