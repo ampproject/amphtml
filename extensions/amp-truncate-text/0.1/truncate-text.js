@@ -75,13 +75,13 @@ function setTruncated(element) {
 }
 
 /**
- * @param {!Node} node The node to operate on. 
+ * @param {!Node} node The node to operate on.
  * @param {function(!Node)} cb  A callback to call for each child.
  */
 function forEachChild(node, cb) {
   const childNodes = node.localName == 'slot' ?
-      node.assignedNodes() :
-      node.childNodes;
+    node.assignedNodes() :
+    node.childNodes;
 
   for (let i = 0; i < childNodes.length; i++) {
     cb(childNodes[i]);
