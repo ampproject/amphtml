@@ -237,7 +237,8 @@ export class NextPageService {
   appendNextArticle_() {
     if (this.nextArticle_ < this.config_.pages.length) {
       const next = this.config_.pages[this.nextArticle_];
-      const documentRef = createDocumentRef(next.ampUrl);
+      const {ampUrl} = next;
+      const documentRef = createDocumentRef(ampUrl);
       this.documentRefs_.push(documentRef);
 
       const container = this.win_.document.createElement('div');
@@ -269,7 +270,6 @@ export class NextPageService {
       }
 
       this.nextArticle_++;
-      const {ampUrl} = next;
       const fetchPromise = this.xhr_.fetch(ampUrl, {ampCors: false}).then(r => {
         // Update AMP URL in case we were redirected.
         documentRef.ampUrl = r.url;
