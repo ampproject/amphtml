@@ -67,14 +67,12 @@ import {installStylesForDoc} from '../../../src/style-installer';
 import {toArray, toWin} from '../../../src/types';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
-
-/** @type {string} */
+/** @const {string} */
 const TAG = 'amp-form';
-
 
 /**
  * A list of external dependencies that can be included in forms.
- * @type {!Array<string>}
+ * @const {!Array<string>}
  */
 const EXTERNAL_DEPS = [
   'amp-selector',
@@ -356,8 +354,7 @@ export class AmpForm {
 
     this.form_.addEventListener(
         'submit',
-        /** @type {function(!Event): (boolean|undefined)|null}*/
-        (this.handleSubmitEvent_.bind(this)),
+        this.handleSubmitEvent_.bind(this),
         true
     );
 
@@ -379,11 +376,9 @@ export class AmpForm {
           if (this.state_ === FormState.VERIFYING) {
             if (errors.length) {
               this.setState_(FormState.VERIFY_ERROR);
-              this.renderTemplate_(
-                  /** @type {!JsonObject} */ ({verifyErrors: errors}))
-                  .then(() => {
-                    this.triggerAction_(FormEvents.VERIFY_ERROR, errors);
-                  });
+              this.renderTemplate_(dict({'verifyErrors': errors})).then(() => {
+                this.triggerAction_(FormEvents.VERIFY_ERROR, errors);
+              });
             } else {
               this.setState_(FormState.INITIAL);
             }
@@ -573,7 +568,13 @@ export class AmpForm {
         SUBMIT_TIMEOUT
     ).then(
         () => this.handlePresubmitSuccess_(trust),
-        error => this.handlePresubmitError_(/**@type {!Error}*/(error))
+        error => {
+          const detail = dict();
+          if (error && error.message) {
+            detail['error'] = error.message;
+          }
+          return this.handleSubmitFailure_(error, detail);
+        }
     );
   }
 
@@ -598,27 +599,10 @@ export class AmpForm {
     } else if (this.method_ == 'POST') {
       this.handleNonXhrPost_();
     } else if (this.method_ == 'GET') {
-      this.handleNonXhrGet_(/*shouldSubmitFormElement*/true);
+      this.handleNonXhrGet_(/* shouldSubmitFormElement */true);
     }
-
     return Promise.resolve();
   }
-
-  /**
-   * Handle errors for presubmit tasks
-   * @param {!Error} error
-   */
-  handlePresubmitError_(error) {
-    this.setState_(FormState.SUBMIT_ERROR);
-    dev().error(TAG, 'Form submission failed: %s', error);
-    const errorJsonObject = dict({
-      'error': error.message,
-    });
-    this.renderTemplate_(errorJsonObject).then(() => {
-      this.triggerAction_(FormEvents.SUBMIT_ERROR, errorJsonObject);
-    });
-  }
-
 
   /**
    * Send the verify request and control the VERIFYING state.
@@ -647,17 +631,14 @@ export class AmpForm {
       p = this.handleSsrTemplate_(trust);
     } else {
       this.submittingWithTrust_(trust);
-      p = this.doActionXhr_()
-          .then(response => this.handleXhrSubmitSuccess_(
-              /* {!../../../src/utils/xhr-utils.FetchResponse} */ response),
-          error => {
-            return this.handleXhrSubmitFailure_(/** @type {!Error} */(error));
-          });
+      p = this.doActionXhr_().then(
+          response => this.handleXhrSubmitSuccess_(response),
+          error => this.handleXhrSubmitFailure_(error)
+      );
     }
     if (getMode().test) {
       this.xhrSubmitPromise_ = p;
     }
-
     return p;
   }
 
@@ -688,9 +669,14 @@ export class AmpForm {
               request,
               this.templatesForSsr_());
         }).then(
-            resp => this.handleSsrTemplateSuccess_(resp, request),
-            error => this.handleSsrTemplateFailure_(
-                /** @type {!Error} */ (error)));
+            response => this.handleSsrTemplateSuccess_(response, request),
+            error => {
+              const detail = dict();
+              if (error && error.message) {
+                detail['error'] = error.message;
+              }
+              return this.handleSubmitFailure_(error, detail);
+            });
   }
 
   /**
@@ -701,15 +687,14 @@ export class AmpForm {
    * @private
    */
   templatesForSsr_() {
-    const successContainer =
-        this.form_.querySelector('div[submit-success]');
-    const errorContainer = this.form_.querySelector('div[submit-error]');
     let successTemplate;
-    let errorTemplate;
+    const successContainer = this.form_.querySelector('[submit-success]');
     if (successContainer) {
-      successTemplate =
-          this.templates_.maybeFindTemplate(successContainer);
+      successTemplate = this.templates_.maybeFindTemplate(successContainer);
     }
+
+    let errorTemplate;
+    const errorContainer = this.form_.querySelector('[submit-error]');
     if (errorContainer) {
       errorTemplate = this.templates_.maybeFindTemplate(errorContainer);
     }
@@ -717,20 +702,17 @@ export class AmpForm {
   }
 
   /**
-   * Handles viewer render template failure.
-   * @param {!Error} error
+   * Transition the form to the submit success state.
+   * @param {!JsonObject} response
+   * @param {!FetchRequestDef} request
+   * @return {!Promise}
+   * @private
    */
-  handleSsrTemplateFailure_(error) {
-    this.setState_(FormState.SUBMIT_ERROR);
-    user().error(TAG, 'Form submission failed: %s', error);
-    const errorJsonObject = dict({
-      'error': error.message,
-    });
-    return tryResolve(() => {
-      this.renderTemplate_(errorJsonObject || {}).then(() => {
-        this.triggerAction_(FormEvents.SUBMIT_ERROR, errorJsonObject);
-      });
-    });
+  handleSsrTemplateSuccess_(response, request) {
+    // Construct the fetch response to reuse the methods in-place for
+    // amp CORs validation.
+    this.ssrTemplateHelper_.verifySsrResponse(this.win_, response, request);
+    return this.handleSubmitSuccess_(tryResolve(() => response));
   }
 
   /**
@@ -836,29 +818,35 @@ export class AmpForm {
   }
 
   /**
-   * Transition the form to the submit success state.
-   * @param {!JsonObject} response
-   * @param {!FetchRequestDef} request
+   * @param {!Response} response
    * @return {!Promise}
-   * @private visible for testing
+   * @private
    */
-  handleSsrTemplateSuccess_(response, request) {
-    // Construct the fetch response to reuse the methods in-place for
-    // amp CORs validation.
-    this.ssrTemplateHelper_.verifySsrResponse(this.win_, response, request);
-    return this.handleSubmitSuccess_(tryResolve(() => response));
+  handleXhrSubmitSuccess_(response) {
+    const json = /** @type {!Promise<!JsonObject>} */ (response.json());
+    return this.handleSubmitSuccess_(json).then(() => {
+      this.triggerFormSubmitInAnalytics_('amp-form-submit-success');
+      this.maybeHandleRedirect_(response);
+    });
   }
 
   /**
-   * Transition the form to the submit success state.
-   * @param {!Response} response
+   * @param {*} e
    * @return {!Promise}
-   * @private visible for testing
+   * @private
    */
-  handleXhrSubmitSuccess_(response) {
-    return this.handleSubmitSuccess_(/** @type {!Promise<!JsonObject>}*/(response.json())).then(() => {
-      this.triggerFormSubmitInAnalytics_('amp-form-submit-success');
-      this.maybeHandleRedirect_(response);
+  handleXhrSubmitFailure_(e) {
+    let promise;
+    if (e && e.response) {
+      const error = /** @type {!Error} */ (e);
+      promise = error.response.json().catch(() => null);
+    } else {
+      promise = Promise.resolve(null);
+    }
+    return promise.then(responseJson => {
+      this.triggerFormSubmitInAnalytics_('amp-form-submit-error');
+      this.maybeHandleRedirect_(e.response);
+      this.handleSubmitFailure_(e, responseJson);
     });
   }
 
@@ -881,26 +869,18 @@ export class AmpForm {
 
   /**
    * Transition the form the the submit error state.
-   * @param {!Error} error
+   * @param {*} error
+   * @param {!JsonObject} json
    * @return {!Promise}
    * @private
    */
-  handleXhrSubmitFailure_(error) {
-    let promise;
-    if (error && error.response) {
-      promise = error.response.json().catch(() => null);
-    } else {
-      promise = Promise.resolve(null);
-    }
-    return promise.then(responseJson => {
-
-      this.triggerFormSubmitInAnalytics_('amp-form-submit-error');
-      this.setState_(FormState.SUBMIT_ERROR);
-      this.renderTemplate_(responseJson || {}).then(() => {
-        this.triggerAction_(FormEvents.SUBMIT_ERROR, responseJson);
+  handleSubmitFailure_(error, json) {
+    user().error(TAG, 'Form submission failed: %s', error);
+    this.setState_(FormState.SUBMIT_ERROR);
+    return tryResolve(() => {
+      this.renderTemplate_(json).then(() => {
+        this.triggerAction_(FormEvents.SUBMIT_ERROR, json);
       });
-      this.maybeHandleRedirect_(error.response);
-      user().error(TAG, 'Form submission failed: %s', error);
     });
   }
 
@@ -973,7 +953,7 @@ export class AmpForm {
   /**
    * Handles response redirect throught the AMP-Redirect-To response header.
    * Not applicable if viewer can render templates.
-   * @param {!Response} response
+   * @param {?Response} response
    * @private
    */
   maybeHandleRedirect_(response) {
@@ -1002,13 +982,12 @@ export class AmpForm {
   /**
    * Triggers either a submit-success or submit-error action with response data.
    * @param {!FormEvents} name
-   * @param {!JsonObject|!Array<{message: string, name: string}>|null} detail
+   * @param {?JsonObject|!Array<{message: string, name: string}>} detail
    * @private
    */
   triggerAction_(name, detail) {
-    const event =
-        createCustomEvent(this.win_, `${TAG}.${name}`,
-            dict({'response': detail}));
+    const event = createCustomEvent(this.win_, `${TAG}.${name}`,
+        dict({'response': detail}));
     this.actions_.trigger(this.form_, name, event, ActionTrust.HIGH);
   }
 
