@@ -490,12 +490,11 @@ class IntegrationFixture {
     return new Promise((resolve, reject) => {
       const docUrl = addParamsToUrl(url, {body, css, experiments, extensions})
             + `#${this.hash}`;
+
+      let src = docUrl;
       // If shadow mode, wrap doc in shadow viewer.
-      let src = '';
-      if (ampDocType === 'shadow') {
+      if (ampDocType == 'shadow') {
         src = addParamsToUrl('/amp4test/compose-shadow', {docUrl});
-      } else {
-        src = docUrl;
       }
 
       env.iframe = createElementWithAttributes(document, 'iframe', {src});

@@ -1263,14 +1263,11 @@ app.use('/shadow/', (req, res) => {
     baseHref,
   });
 
-  let response = '';
-  if (req.query.useLocal) {
-    response = replaceUrls(pc.env.SERVE_MODE, viewerHtml);
-  } else {
-    response = viewerHtml;
+  if (!req.query.useLocal) {
+    res.end(viewerHtml);
+    return;
   }
-
-  res.end(response);
+  res.end(replaceUrls(pc.env.SERVE_MODE, viewerHtml));
 });
 
 /**

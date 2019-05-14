@@ -102,8 +102,7 @@ ${req.query.body}
 app.use('/compose-shadow', function(req, res) {
   const {docUrl} = req.query;
   const viewerHtml = renderShadowViewer({
-    // Remove leading '/'.
-    src: docUrl.slice(1),
+    src: docUrl.replace(/^\//, ''),
     port: KARMA_SERVER_PORT,
     baseHref: path.dirname(req.url),
   });
