@@ -1,0 +1,6 @@
+{
+  "plugins": [["../../../../../babel-plugin-transform-log-methods", {
+    "messagesPath": "dist/.log-messages.remove-dead-method.temp",
+    "replaceCallArguments": false
+  }]]
+}

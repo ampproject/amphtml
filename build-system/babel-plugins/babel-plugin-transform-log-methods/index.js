@@ -202,6 +202,19 @@ module.exports = function({types: t}) {
           // If we're not replacing arguments, runtime method is dead code.
           // Since it's public, Closure doesn't know that it can be safely
           // DCE'd, so we remove before Closure pass.
+
+          // Remove JSDoc. The `trailingComments` reference when a previous
+          // node exists would keep the JSDoc even when removing the visited
+          // path.
+          const {node: prevNode} = path.getPrevSibling();
+          if (prevNode && prevNode.trailingComments) {
+            prevNode.trailingComments.length = 0;
+          }
+          if (node.leadingComments) {
+            node.leadingComments.length = 0;
+          }
+
+          // Remove actual path.
           path.remove();
           return;
         }

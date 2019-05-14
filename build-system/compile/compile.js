@@ -38,11 +38,11 @@ const MAX_PARALLEL_CLOSURE_INVOCATIONS = argv.single_pass ? 1 : 4;
 
 /**
  * Predicate for gulp streams that aren't inside third_party.
- * Excludes them from transforms that are only safe for our own code.
+ * Excludes third_party from transforms that are only safe for our own code.
  * @param {Vinyl} file
  * @return {boolean}
  */
-const not3p = file => file.path.indexOf('third_party') < 0;
+const firstPartyFile = file => file.path.indexOf('third_party') < 0;
 
 // Compiles AMP with the closure compiler. This is intended only for
 // production use. During development we intend to continue using
@@ -415,7 +415,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       return gulp.src(srcs, {base: '.'})
           .pipe(gulpIf(shouldShortenLicense, shortenLicense()))
           .pipe(sourcemaps.init({loadMaps: true}))
-          .pipe(gulpIf(not3p, babel({plugins: conf.plugins()})))
+          .pipe(gulpIf(firstPartyFile, babel({plugins: conf.plugins()})))
           .pipe(gulpClosureCompile(compilerOptionsArray))
           .on('error', err => {
             handleCompilerError(outputFilename);
