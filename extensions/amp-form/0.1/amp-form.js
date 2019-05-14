@@ -690,7 +690,7 @@ export class AmpForm {
         }).then(
             resp => this.handleSsrTemplateSuccess_(resp, request),
             error => this.handleSsrTemplateFailure_(
-                /** @type {!JsonObject} */ (error)));
+                /** @type {!Error} */ (error)));
   }
 
   /**
@@ -718,14 +718,17 @@ export class AmpForm {
 
   /**
    * Handles viewer render template failure.
-   * @param {!JsonObject} error
+   * @param {!Error} error
    */
   handleSsrTemplateFailure_(error) {
     this.setState_(FormState.SUBMIT_ERROR);
     user().error(TAG, 'Form submission failed: %s', error);
+    const errorJsonObject = dict({
+      'error': error.message,
+    });
     return tryResolve(() => {
-      this.renderTemplate_(error || {}).then(() => {
-        this.triggerAction_(FormEvents.SUBMIT_ERROR, error);
+      this.renderTemplate_(errorJsonObject || {}).then(() => {
+        this.triggerAction_(FormEvents.SUBMIT_ERROR, errorJsonObject);
       });
     });
   }
