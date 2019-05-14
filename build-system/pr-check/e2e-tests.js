@@ -65,7 +65,6 @@ async function main() {
     }
   }
   stopTimer(FILENAME, FILENAME, startTime);
-  timedExecOrDie('ps -e'); // log processes
 }
 
 main();
