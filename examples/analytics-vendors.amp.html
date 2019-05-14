@@ -70,6 +70,7 @@
       <option>infonline</option>
       <option>iplabel</option>
       <option>keen</option>
+      <option>kenshoo</option>
       <option>krux</option>
       <option>linkpulse</option>
       <option>lotame</option>
@@ -107,6 +108,7 @@
       <option>treasuredata</option>
       <option>umenganalytics</option>
       <option>upscore</option>
+      <option>vponanalytics</option>
       <option>webtrekk</option>
       <option>webtrekk_v2</option>
     </select>
@@ -688,6 +690,19 @@ For complete documentation and additional examples please see: https://marketing
 </amp-analytics>
 <!-- End Keen Analytics tracking -->
 
+<!-- Kenshoo example -->
+<amp-analytics type="kenshoo" id="kenshoo">
+  <script type="application/json">
+    {
+      "vars": {
+        "tid": "KT-XXXXX-XXX",
+        "userId": "<USER_ID>"
+      }
+    }
+  </script>
+</amp-analytics>
+<!-- End Kenshoo example -->
+
 <!-- Krux tracking. Ensure you replace KMnP7vhh with your configuration ID. -->
 <amp-analytics type="krux" id="krux" config="https://cdn.krxd.net/controltag/amp/KMnP7vhh.json">
 <script type="application/json">
@@ -1144,7 +1159,7 @@ For complete documentation and additional examples please see: https://marketing
     }
 }
 </script>
-</amp-analytics>	
+</amp-analytics>
 <!-- End Reppublika example -->
 
 <!-- Retargetly example -->
@@ -1540,6 +1555,49 @@ For complete documentation and additional examples please see: https://marketing
   </script>
 </amp-analytics>
 <!-- End Umeng Analytics example -->
+<!-- Vpon Analytics example -->
+<amp-analytics type="vponanalytics" id="vponanalytics">
+  <script type="application/json">
+    {
+      "vars": {
+        "licence_key": "xxxxxxxxxxxxxxx",
+        "category": "web"
+      },
+      "triggers": {
+        "custom_event": {
+         "on": "click",
+         "selector": ".vp_search",
+         "request": "event",
+         "vars": {
+           "ev_name": "search",
+           "payload": "{\"keyword\":\"裙子\"}"
+         }
+        },
+        "element_Interact": {
+         "on": "click",
+         "selector": ".vp_track_0",
+         "request": "elementInteract",
+         "vars": {
+           "action": "click",
+           "label": "ev_0_search-flight"
+         }
+        },
+        "scroll": {
+          "on": "scroll",
+          "selector": "body",
+          "request": "scroll",
+          "vars": {
+            "action": "scroll_${verticalScrollBoundary}"
+          },
+          "scrollSpec": {
+            "verticalBoundaries": [5,30,50,70,95]
+          }
+        }
+      }
+    }
+  </script>
+</amp-analytics>
+<!-- Vpon Analytics example -->
 </div>
 
 <div class="logo"></div>

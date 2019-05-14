@@ -44,6 +44,7 @@ import {
   installServiceInEmbedScope,
   registerServiceBuilderForDoc,
 } from '../service';
+import {internalRuntimeVersion} from '../internal-version';
 import {tryResolve} from '../utils/promise';
 
 /** @private @const {string} */
@@ -520,7 +521,7 @@ export class GlobalVariableSource extends VariableSource {
     });
 
     // returns the AMP version number
-    this.set('AMP_VERSION', () => '$internalRuntimeVersion$');
+    this.set('AMP_VERSION', () => internalRuntimeVersion());
 
     this.set('BACKGROUND_STATE', () => {
       return Services.viewerForDoc(this.ampdoc).isVisible() ? '0' : '1';

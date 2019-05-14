@@ -21,6 +21,7 @@ import {dev, devAssert, user} from '../../../src/log';
 import {iterateCursor, removeElement} from '../../../src/dom';
 import {listen, listenOncePromise} from '../../../src/event-helper';
 import {throttle} from '../../../src/utils/rate-limit';
+import {toArray} from '../../../src/types';
 
 const AMP_FORM_TEXTAREA_EXPAND_ATTR = 'autoexpand';
 
@@ -77,7 +78,7 @@ export class AmpFormTextarea {
     this.doc_ = (root.ownerDocument || root);
 
     /** @private @const */
-    this.win_ = devAssert(this.doc_.defaultView);
+    this.win_ = /** @type {!Window} */ (devAssert(this.doc_.defaultView));
 
     /** @private @const */
     this.viewport_ = Services.viewportForDoc(ampdoc);
@@ -101,8 +102,9 @@ export class AmpFormTextarea {
       }
 
       const element = dev().assertElement(e.target);
-      if (element.tagName != 'TEXTAREA' ||
-          !element.hasAttribute(AMP_FORM_TEXTAREA_EXPAND_ATTR)) {
+      // Handle all text area drag as we want to measure mutate and notify
+      // the viewer of possible doc height changes.
+      if (element.tagName != 'TEXTAREA') {
         return;
       }
 
@@ -120,19 +122,7 @@ export class AmpFormTextarea {
     }, MIN_EVENT_INTERVAL_MS);
     this.unlisteners_.push(this.viewport_.onResize(throttledResize));
 
-    // For now, warn if textareas with initial overflow are present, and
-    // prevent them from becoming autoexpand textareas.
-    iterateCursor(cachedTextareaElements, element => {
-      getHasOverflow(element).then(hasOverflow => {
-        if (hasOverflow) {
-          user().warn('AMP-FORM',
-              '"textarea[autoexpand]" with initially scrolling content ' +
-              'will not autoexpand.\n' +
-              'See https://github.com/ampproject/amphtml/issues/20839');
-          element.removeAttribute(AMP_FORM_TEXTAREA_EXPAND_ATTR);
-        }
-      });
-    });
+    handleInitialOverflowElements(cachedTextareaElements);
   }
 
   /**
@@ -141,6 +131,26 @@ export class AmpFormTextarea {
   dispose() {
     this.unlisteners_.forEach(unlistener => unlistener());
   }
+}
+
+/**
+ * For now, warn if textareas with initial overflow are present, and
+ * prevent them from becoming autoexpand textareas.
+ * @param {!IArrayLike<!Element>} textareas
+ * @return {!Promise}
+ */
+export function handleInitialOverflowElements(textareas) {
+  return Promise.all(toArray(textareas).map(element => {
+    return getHasOverflow(element).then(hasOverflow => {
+      if (hasOverflow) {
+        user().warn('AMP-FORM',
+            '"textarea[autoexpand]" with initially scrolling content ' +
+            'will not autoexpand.\n' +
+            'See https://github.com/ampproject/amphtml/issues/20839');
+        element.removeAttribute(AMP_FORM_TEXTAREA_EXPAND_ATTR);
+      }
+    });
+  }));
 }
 
 /**
@@ -217,7 +227,8 @@ function maybeRemoveResizeBehavior(element, startHeight, endHeight) {
  */
 export function maybeResizeTextarea(element) {
   const resources = Services.resourcesForDoc(element);
-  const win = devAssert(element.ownerDocument.defaultView);
+  const win = /** @type {!Window} */ (
+    devAssert(element.ownerDocument.defaultView));
 
   let offset = 0;
   let scrollHeight = 0;
@@ -276,21 +287,22 @@ export function maybeResizeTextarea(element) {
  * @return {!Promise<number>}
  */
 function getShrinkHeight(textarea) {
-  const doc = devAssert(textarea.ownerDocument);
-  const win = devAssert(doc.defaultView);
-  const body = devAssert(doc.body);
+  const doc = /** @type {!Document} */ (devAssert(textarea.ownerDocument));
+  const win = /** @type {!Window} */ (devAssert(doc.defaultView));
+  const body = /** @type {!HTMLBodyElement} */ (devAssert(doc.body));
   const resources = Services.resourcesForDoc(textarea);
 
   const clone = textarea.cloneNode(/*deep*/ false);
   clone.classList.add(AMP_FORM_TEXTAREA_CLONE_CSS);
 
-  let height = 0;
+  let cloneWidth = 0;
+  let resultingHeight = 0;
   let shouldKeepTop = false;
 
   return resources.measureMutateElement(body, () => {
     const computed = computedStyle(win, textarea);
     const maxHeight = parseInt(computed.getPropertyValue('max-height'), 10); // TODO(cvializ): what if it's a percent?
-
+    cloneWidth = parseInt(computed.getPropertyValue('width'), 10);
     // maxHeight is NaN if the max-height property is 'none'.
     shouldKeepTop =
         (isNaN(maxHeight) || textarea./*OK*/scrollHeight < maxHeight);
@@ -299,13 +311,18 @@ function getShrinkHeight(textarea) {
     if (shouldKeepTop) {
       textarea./*OK*/scrollTop = 0;
     }
+
+    // Keep the clone's width consistent if the textarea was sized relative
+    // to its parent element.
+    setStyle(clone, 'width', px(cloneWidth));
+
     // Append the clone to the DOM so its scrollHeight can be read
     doc.body.appendChild(clone);
   }).then(() => {
     return resources.measureMutateElement(body, () => {
-      height = clone./*OK*/scrollHeight;
+      resultingHeight = clone./*OK*/scrollHeight;
     }, () => {
       removeElement(clone);
     });
-  }).then(() => height);
+  }).then(() => resultingHeight);
 }

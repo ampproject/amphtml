@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-import {LiveListManager, liveListManagerForDoc} from '../live-list-manager';
+import {
+  AMP_LIVE_LIST_CUSTOM_SLOT_ID,
+  LiveListManager,
+  liveListManagerForDoc,
+} from '../live-list-manager';
 import {Services} from '../../../../src/services';
 
 const XHR_BUFFER_SIZE = 2;
@@ -99,6 +103,10 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
     getUpdateTime() {
       return this.updateTime_;
     }
+
+    hasCustomSlot() {
+      return !!this.element[AMP_LIVE_LIST_CUSTOM_SLOT_ID];
+    }
   }
 
   function getLiveList(attrs = {}, opt_id) {
@@ -154,6 +162,35 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
     ready();
     return manager.whenDocReady_().then(() => {
       expect(manager.interval_).to.equal(5000);
+    });
+  });
+
+  it('should use custom containers for live-lists dynamically appended ' +
+  'in the client', () => {
+    const customSlot = document.createElement('div');
+    customSlot.setAttribute('id', 'custom-slot');
+    customSlot.setAttribute('dynamic-live-list', 'custom-list');
+
+    const fromServer = doc.createElement('div');
+    fromServer.appendChild(customSlot);
+    fromServer.getElementById = () => {};
+    sandbox.stub(fromServer, 'getElementById').callsFake(id => {
+      return fromServer.querySelector(`#${id}`);
+    });
+
+    ready();
+    const clientLiveList = getLiveList({
+      'data-poll-interval': '9000',
+      'sort': 'ascending',
+      'disable-scrolling': '',
+      'disable-pagination': '',
+      'auto-insert': '',
+    }, 'custom-list');
+    clientLiveList.element[AMP_LIVE_LIST_CUSTOM_SLOT_ID] = customSlot.id;
+    clientLiveList.buildCallback();
+
+    return manager.whenDocReady_().then(() => {
+      expect(manager.getCustomSlots_(fromServer)).to.have.length(1);
     });
   });
 
@@ -248,7 +285,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
       expect(liveList.isEnabled()).to.be.true;
       expect(liveList2.isEnabled()).to.be.true;
 
-      manager.getLiveLists_(fromServer1);
+      manager.updateLiveLists_(fromServer1);
 
       // Still polls since at least one live list can still receive updates.
       expect(liveList.isEnabled()).to.be.true;
@@ -261,7 +298,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
       fromServer2List1.setAttribute('disabled', '');
       fromServer2.appendChild(fromServer2List1);
 
-      manager.getLiveLists_(fromServer2);
+      manager.updateLiveLists_(fromServer2);
 
       expect(liveList.isEnabled()).to.be.false;
       expect(liveList2.isEnabled()).to.be.false;
@@ -295,7 +332,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
     expect(updateSpy1).to.have.not.been.called;
     expect(updateSpy2).to.have.not.been.called;
 
-    manager.getLiveLists_(fromServer1);
+    manager.updateLiveLists_(fromServer1);
 
     expect(updateSpy1).to.be.calledOnce;
     expect(updateSpy2).to.have.not.been.called;
@@ -313,7 +350,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
     expect(updateSpy1).to.be.calledOnce;
     expect(updateSpy2).to.have.not.been.called;
 
-    manager.getLiveLists_(fromServer2);
+    manager.updateLiveLists_(fromServer2);
 
     expect(updateSpy1).to.have.callCount(2);
     expect(updateSpy2).to.be.calledOnce;
@@ -496,6 +533,56 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
     });
   });
 
+  it('should fetch with url from the cache if on publisher origin ' +
+      'and is transformed', () => {
+    sandbox.stub(Math, 'random').callsFake(() => 1);
+    sandbox.stub(viewer, 'isVisible').returns(true);
+    manager.url_ = 'https://www.example.com/foo/bar?hello=world#dev=1';
+    manager.isTransformed_ = true;
+    ready();
+    const fetchSpy = sandbox.spy(manager, 'work_');
+    liveList.buildCallback();
+    return manager.whenDocReady_().then(() => {
+      const interval = liveList.getInterval();
+      const tick = interval - jitterOffset;
+      expect(manager.poller_.isRunning()).to.be.true;
+      expect(fetchSpy).to.have.not.been.called;
+      clock.tick(tick);
+      expect(fetchSpy).to.be.calledOnce;
+      return xhrs[0].then(xhr => {
+        expect(xhr.url).to.match(/^https:\/\/cdn\.ampproject\.org\/c\/www\.example\.com\/foo\/bar\?hello=world/);
+        expect(xhr.url).to.match(/#dev=1/);
+        expect(xhr.url).to.match(/amp_latest_update_time/);
+      });
+    });
+  });
+
+  it('should not fetch with url from the cache if on cache origin ' +
+      'and is not transformed', () => {
+    sandbox.stub(Math, 'random').callsFake(() => 1);
+    sandbox.stub(viewer, 'isVisible').returns(true);
+    manager.url_ = 'www.example.com/foo/bar?hello=world#dev=1';
+    manager.isTransformed_ = false;
+    manager.location_ = 'https://cdn.ampproject.org' +
+        '/c/s/www.example.com/foo/bar?hello=world#dev=1';
+    ready();
+    const fetchSpy = sandbox.spy(manager, 'work_');
+    liveList.buildCallback();
+    return manager.whenDocReady_().then(() => {
+      const interval = liveList.getInterval();
+      const tick = interval - jitterOffset;
+      expect(manager.poller_.isRunning()).to.be.true;
+      expect(fetchSpy).to.have.not.been.called;
+      clock.tick(tick);
+      expect(fetchSpy).to.be.calledOnce;
+      return xhrs[0].then(xhr => {
+        expect(xhr.url).to.match(/^www\.example\.com\/foo\/bar\?hello=world/);
+        expect(xhr.url).to.match(/#dev=1/);
+        expect(xhr.url).to.match(/amp_latest_update_time/);
+      });
+    });
+  });
+
   it('should find highest "update time" from amp-live-list elements', () => {
     const doc = [];
     const list1 = getLiveList(undefined, 'id1');
@@ -509,7 +596,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
     list1.buildCallback();
     list2.buildCallback();
     expect(manager.latestUpdateTime_).to.equal(0);
-    manager.getLiveLists_(doc);
+    manager.updateLiveLists_(doc);
     expect(manager.latestUpdateTime_).to.equal(2000);
   });
 

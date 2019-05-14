@@ -77,6 +77,16 @@ describes.realWin('amp-pan-zoom', {
     env.iframe.width = 400;
   });
 
+  it('should schedule layout of own children', () => {
+    let scheduleLayoutSpy;
+    return getPanZoom().then(() => {
+      scheduleLayoutSpy = sandbox.spy(impl, 'scheduleLayout');
+      el.layoutCallback();
+    }).then(() => {
+      expect(scheduleLayoutSpy).to.be.calledOnceWith(svg);
+    });
+  });
+
   it('should size contents correctly', () => {
     return getPanZoom().then(() => el.layoutCallback()).then(() => {
       expect(svg.clientWidth).to.equal(300);

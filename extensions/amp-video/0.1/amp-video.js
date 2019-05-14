@@ -40,6 +40,7 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {listen} from '../../../src/event-helper';
 import {mutedOrUnmutedEvent} from '../../../src/iframe-video';
 import {
+  propagateObjectFitStyles,
   setImportantStyles,
   setInitialDisplay,
   setStyles,
@@ -206,6 +207,7 @@ class AmpVideo extends AMP.BaseElement {
         /* opt_removeMissingAttrs */ true);
     this.installEventHandlers_();
     this.applyFillContent(this.video_, true);
+    propagateObjectFitStyles(this.element, this.video_);
 
     this.createPosterForAndroidBug_();
     element.appendChild(this.video_);
@@ -324,10 +326,17 @@ class AmpVideo extends AMP.BaseElement {
       this.propagateLayoutChildren_();
     }
 
-    // loadPromise for media elements listens to `loadstart`
-    return this.loadPromise(this.video_).then(() => {
+    // loadPromise for media elements listens to `loadedmetadata`.
+    const promise = this.loadPromise(this.video_).then(() => {
       this.element.dispatchCustomEvent(VideoEvents.LOAD);
     });
+
+    // Resolve layoutCallback right away if the video won't preload.
+    if (this.element.getAttribute('preload') === 'none') {
+      return;
+    }
+
+    return promise;
   }
 
   /**

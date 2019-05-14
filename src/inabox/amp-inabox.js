@@ -42,6 +42,7 @@ import {
   makeBodyVisibleRecovery,
 } from '../style-installer';
 import {installViewerServiceForDoc} from '../service/viewer-impl';
+import {internalRuntimeVersion} from '../internal-version';
 import {maybeTrackImpression} from '../impression';
 import {maybeValidate} from '../validator-integration';
 import {startupChunk} from '../chunk';
@@ -128,8 +129,8 @@ startupChunk(self.document, function initial() {
 // (At least by sophisticated users).
 if (self.console) {
   (console.info || console.log).call(console,
-      'Powered by AMP ⚡ HTML – Version $internalRuntimeVersion$',
+      `Powered by AMP ⚡ HTML – Version ${internalRuntimeVersion()}`,
       self.location.href);
 }
 self.document.documentElement.setAttribute('amp-version',
-    '$internalRuntimeVersion$');
+    internalRuntimeVersion());

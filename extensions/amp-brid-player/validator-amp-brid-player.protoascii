@@ -32,6 +32,10 @@ tags: {  # <amp-brid-player>
   requires_extension: "amp-brid-player"
   attrs: { name: "autoplay" }
   attrs: {
+    name: "data-dynamic"
+    value_regex: "[a-z]+"
+  }
+  attrs: {
     name: "data-outstream"
     mandatory_oneof: "['data-outstream', 'data-playlist', 'data-video']"
     value_regex: "[0-9]+"
@@ -49,7 +53,7 @@ tags: {  # <amp-brid-player>
   attrs: {
     name: "data-playlist"
     mandatory_oneof: "['data-outstream', 'data-playlist', 'data-video']"
-    value_regex: "[0-9]+"
+    value_regex: ".+"
   }
   attrs: {
     name: "data-video"
@@ -57,7 +61,7 @@ tags: {  # <amp-brid-player>
     value_regex: "[0-9]+"
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-brid-player"
+  spec_url: "https://amp.dev/documentation/components/amp-brid-player"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

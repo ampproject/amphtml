@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const pageWidth = 400;
+const pageWidth = 600;
 const pageHeight = 600;
 
 describes.endtoend('AMP list load-more=manual', {
@@ -22,7 +22,7 @@ describes.endtoend('AMP list load-more=manual', {
       'load-more-manual.amp.html',
   experiments: ['amp-list-load-more'],
   initialRect: {width: pageWidth, height: pageHeight},
-  // TODO(cathyxz, cvializ): figure out why 'viewer' only shows 'FALLBACK'
+  // TODO(cathyxz, cvializ): figure out why 'viewer-demo' only shows 'FALLBACK'
   environments: ['single'],
 }, async env => {
   let controller;
@@ -69,28 +69,12 @@ describes.endtoend('AMP list load-more=manual', {
     await expect(fourthItem).to.be.ok;
     listItems = await controller.findElements('.item');
     await expect(listItems).to.have.length(4);
-
-    // TODO(cathyxz): Figure out why the button is not visible after
-    // clicking load more the first time.
-    await controller.click(seeMore);
-
-    const sixthItem = await controller.findElement('div.item:nth-child(6)');
-    await expect(sixthItem).to.be.ok;
-    listItems = await controller.findElements('.item');
-    await expect(listItems).to.have.length(6);
   });
-
 
   it('should show load-more-end when done', async() => {
     const seeMore = await controller.findElement('[load-more-button]');
     await controller.click(seeMore);
     await controller.findElement('div.item:nth-child(4)');
-
-    // TODO(cathyxz): Figure out why the button is not visible after
-    // clicking load more the first time.
-    await controller.click(seeMore);
-
-    await controller.findElement('div.item:nth-child(6)');
 
     const loadMoreEnd = await controller.findElement('[load-more-end]');
     await expect(controller.getElementCssValue(loadMoreEnd, 'display'))

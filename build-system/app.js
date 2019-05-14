@@ -31,6 +31,7 @@ const jsdom = require('jsdom');
 const multer = require('multer');
 const path = require('path');
 const request = require('request');
+const {appTestEndpoints} = require('./app-test');
 const pc = process;
 const runVideoTestBench = require('./app-video-testbench');
 const {
@@ -41,6 +42,8 @@ const {renderShadowViewer} = require('./shadow-viewer');
 const {replaceUrls} = require('./app-utils');
 
 const upload = multer();
+
+const TEST_SERVER_PORT = process.env.SERVE_PORT;
 
 app.use(bodyParser.text());
 app.use('/amp4test', require('./amp4test').app);
@@ -191,6 +194,7 @@ app.use(
 app.get([
   '/examples/*.(min|max).html',
   '/test/manual/*.(min|max).html',
+  '/test/fixtures/e2e/*/*.(min|max).html',
   '/dist/cache-sw.(min|max).html',
 ], (req, res) => {
   const filePath = req.url;
@@ -240,6 +244,14 @@ app.use('/api/dont-show', (req, res) => {
   res.json({
     showNotification: false,
   });
+});
+
+app.use('/api/echo/query', (req, res) => {
+  const sourceOrigin = req.query['__amp_source_origin'];
+  if (sourceOrigin) {
+    res.setHeader('AMP-Access-Control-Allow-Source-Origin', sourceOrigin);
+  }
+  res.json(JSON.parse(req.query.data));
 });
 
 app.use('/api/echo/post', (req, res) => {
@@ -347,6 +359,21 @@ app.use('/form/search-json/get', (req, res) => {
     additionalFields: req.query.additionalFields,
     results: [{title: 'Result 1'}, {title: 'Result 2'}, {title: 'Result 3'}],
   });
+});
+
+const autocompleteColors = ['red', 'orange', 'yellow', 'green', 'blue',
+  'purple', 'pink', 'black', 'white'];
+
+app.use('/form/autocomplete/query', (req, res) => {
+  const query = req.query.q;
+  if (!query) {
+    res.json({items: autocompleteColors});
+  } else {
+    const lowerCaseQuery = query.toLowerCase();
+    const filtered = autocompleteColors.filter(
+        l => l.toLowerCase().includes(lowerCaseQuery));
+    res.json({items: filtered});
+  }
 });
 
 const autosuggestLanguages = ['ActionScript', 'AppleScript', 'Asp', 'BASIC',
@@ -679,16 +706,30 @@ app.use('/impression-proxy/', (req, res) => {
   // Or fake response with status 204 if viewer replaceUrl is provided
 });
 
+let forcePromptOnNext = false;
 app.post('/get-consent-v1/', (req, res) => {
   cors.assertCors(req, res, ['POST']);
   const body = {
     'promptIfUnknown': true,
+    'forcePromptOnNext': forcePromptOnNext,
     'sharedData': {
       'tfua': true,
       'coppa': true,
     },
   };
   res.json(body);
+});
+
+app.get('/get-consent-v1-set/', (req, res) => {
+  cors.assertCors(req, res, ['GET']);
+  const value = req.query['forcePromptOnNext'];
+  if (value == 'false' || value == '0') {
+    forcePromptOnNext = false;
+  } else {
+    forcePromptOnNext = true;
+  }
+  res.json({});
+  res.end();
 });
 
 app.post('/get-consent-no-prompt/', (req, res) => {
@@ -823,13 +864,14 @@ app.use('/examples/analytics.config.json', (req, res, next) => {
   next();
 });
 
-app.use(['/examples/*', '/extensions/*'], (req, res, next) => {
-  const sourceOrigin = req.query['__amp_source_origin'];
-  if (sourceOrigin) {
-    res.setHeader('AMP-Access-Control-Allow-Source-Origin', sourceOrigin);
-  }
-  next();
-});
+app.use(['/examples/*', '/extensions/*', '/test/manual/*'],
+    (req, res, next) => {
+      const sourceOrigin = req.query['__amp_source_origin'];
+      if (sourceOrigin) {
+        res.setHeader('AMP-Access-Control-Allow-Source-Origin', sourceOrigin);
+      }
+      next();
+    });
 
 /**
  * Append ?sleep=5 to any included JS file in examples to emulate delay in
@@ -851,7 +893,10 @@ app.use(['/dist/v0/amp-*.js'], (req, res, next) => {
  */
 app.get('/test/manual/amp-video.amp.html', runVideoTestBench);
 
-app.get(['/examples/*.html', '/test/manual/*.html'], (req, res, next) => {
+app.get([
+  '/examples/*.html',
+  '/test/manual/*.html',
+  '/test/fixtures/e2e/*/*.html'], (req, res, next) => {
   const filePath = req.path;
   const mode = pc.env.SERVE_MODE;
   const inabox = req.query['inabox'];
@@ -860,7 +905,7 @@ app.get(['/examples/*.html', '/test/manual/*.html'], (req, res, next) => {
     if (req.query['amp_js_v']) {
       file = addViewerIntegrationScript(req.query['amp_js_v'], file);
     }
-
+    file = file.replace(/__TEST_SERVER_PORT__/g, TEST_SERVER_PORT);
 
     if (inabox && req.headers.origin && req.query.__amp_source_origin) {
       // Allow CORS requests for A4A.
@@ -887,6 +932,16 @@ app.get(['/examples/*.html', '/test/manual/*.html'], (req, res, next) => {
           '<div id="container">' + analytics.join('') + '</div>');
     }
 
+    // Extract amp-consent for the given 'type' specified in URL query.
+    if (req.path.indexOf(
+        '/examples/cmp-vendors.amp.html') == 0 && req.query.type) {
+      const consent = file.match(
+          elementExtractor('amp-consent', req.query.type));
+      file = file.replace(
+          /<div id="container">[\s\S]+<\/div>/m,
+          '<div id="container">' + consent.join('') + '</div>');
+    }
+
     if (stream > 0) {
       res.writeHead(200, {'Content-Type': 'text/html'});
       let pos = 0;
@@ -908,6 +963,8 @@ app.get(['/examples/*.html', '/test/manual/*.html'], (req, res, next) => {
     next();
   });
 });
+
+appTestEndpoints(app);
 
 function escapeRegExp(string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -992,6 +1049,12 @@ app.use('/bind/ecommerce/sizes', (req, res) => {
     res.json(object);
   }, 1000); // Simulate network delay.
 });
+
+/*
+//TODO(chenshay): Accept '?crypto=bla'
+implement authorizer here.
+this is for local testing.
+*/
 
 // Simulated subscription entitlement
 app.use('/subscription/:id/entitlements', (req, res) => {
@@ -1198,7 +1261,8 @@ app.get('/dist/ww(.max)?.js', (req, res) => {
 });
 
 /**
- * Shadow viewer
+ * Shadow viewer. Fetches shadow runtime from cdn by default.
+ * Setting the param useLocal=1 will load the runtime from the local build.
  */
 app.use('/shadow/', (req, res) => {
   const {url} = req;
@@ -1208,10 +1272,16 @@ app.use('/shadow/', (req, res) => {
     'https://cdn.ampproject.org/' :
     `${path.dirname(url)}/`;
 
-  res.end(renderShadowViewer({
+  const viewerHtml = renderShadowViewer({
     src: req.url.replace(/^\//, ''),
     baseHref,
-  }));
+  });
+
+  if (!req.query.useLocal) {
+    res.end(viewerHtml);
+    return;
+  }
+  res.end(replaceUrls(pc.env.SERVE_MODE, viewerHtml));
 });
 
 /**

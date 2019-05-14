@@ -60,6 +60,7 @@ import {installDocumentInfoServiceForDoc} from './service/document-info-impl';
 import {installDocumentStateService} from './service/document-state';
 import {installGlobalNavigationHandlerForDoc} from './service/navigation';
 import {installGlobalSubmitListenerForDoc} from './document-submit';
+import {installHiddenObserverForDoc} from './service/hidden-observer-impl';
 import {installHistoryServiceForDoc} from './service/history-impl';
 import {installInputService} from './input';
 import {installPlatformService} from './service/platform-impl';
@@ -76,6 +77,7 @@ import {installViewerServiceForDoc, setViewerVisibilityState} from
 import {installViewportServiceForDoc} from './service/viewport/viewport-impl';
 import {installVsyncService} from './service/vsync-impl';
 import {installXhrService} from './service/xhr-impl';
+import {internalRuntimeVersion} from './internal-version';
 import {
   isExperimentOn,
   toggleExperiment,
@@ -121,6 +123,7 @@ export function installAmpdocServices(ampdoc, opt_initParams) {
   installDocumentInfoServiceForDoc(ampdoc);
   installViewerServiceForDoc(ampdoc, opt_initParams);
   installViewportServiceForDoc(ampdoc);
+  installHiddenObserverForDoc(ampdoc);
   installHistoryServiceForDoc(ampdoc);
   installResourcesServiceForDoc(ampdoc);
   installUrlReplacementsServiceForDoc(ampdoc);
@@ -329,8 +332,9 @@ function adoptShared(global, callback) {
   // If the closure passed to maybePumpEarlyFrame didn't execute
   // immediately we need to keep pushing onto preregisteredExtensions
   if (!global.AMP.push) {
-    global.AMP.push = preregisteredExtensions.push.bind(
-        preregisteredExtensions);
+    global.AMP.push =
+      /** @type {function((ExtensionPayload|function(!Object, !Object): ?))} */ (
+        preregisteredExtensions.push.bind(preregisteredExtensions));
   }
 
   // For iOS we need to set `cursor:pointer` to ensure that click events are
@@ -919,11 +923,11 @@ function maybeLoadCorrectVersion(win, fnOrStruct) {
   if (typeof fnOrStruct == 'function') {
     return false;
   }
-  const version = fnOrStruct.v;
+  const {v} = fnOrStruct;
   // This is non-obvious, but we only care about the release version,
   // not about the full rtv version, because these only differ
   // in the config that is fully determined by the primary binary.
-  if ('$internalRuntimeVersion$' == version) {
+  if (internalRuntimeVersion() == v) {
     return false;
   }
   // The :not is an extra prevention of recursion because it will be

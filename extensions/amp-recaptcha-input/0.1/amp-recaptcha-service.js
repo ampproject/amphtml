@@ -32,6 +32,7 @@ import {
   registerServiceBuilderForDoc,
 } from '../../../src/service';
 import {getSourceOrigin} from '../../../src/url';
+import {internalRuntimeVersion} from '../../../src/internal-version';
 import {listenFor, postMessage} from '../../../src/iframe-helper';
 import {loadPromise} from '../../../src/event-helper';
 import {removeElement} from '../../../src/dom';
@@ -158,7 +159,7 @@ export class AmpRecaptchaService {
 
       // Send the message
       this.postMessageToIframe_(
-          devAssert(this.recaptchaFrameOrigin_),
+          /** @type {string} */ (devAssert(this.recaptchaFrameOrigin_)),
           message
       );
     });
@@ -275,7 +276,7 @@ export class AmpRecaptchaService {
             return '//' + curlsSubdomain +
               '.recaptcha.' + winLocation.host
               + '/dist.3p/' +
-          (getMode().minified ? '$internalRuntimeVersion$/recaptcha'
+          (getMode().minified ? `${internalRuntimeVersion()}/recaptcha`
             : 'current/recaptcha.max') +
           '.html';
           });
@@ -298,7 +299,7 @@ export class AmpRecaptchaService {
 
     return curlsSubdomainPromise.then(curlsSubdomain => {
       const recaptchaFrameSrc = 'https://' + curlsSubdomain +
-        `.recaptcha.${urls.thirdPartyFrameHost}/$internalRuntimeVersion$/` +
+        `.recaptcha.${urls.thirdPartyFrameHost}/${internalRuntimeVersion()}/` +
         'recaptcha.html';
       return recaptchaFrameSrc;
     });
@@ -343,20 +344,36 @@ export class AmpRecaptchaService {
 
   /**
    * Function to handle token messages from the recaptcha iframe
+   *
+   * NOTE: Use bracket notation to access message properties,
+   * As the externs were a little too generic.
+   *
    * @param {Object} data
    */
   tokenMessageHandler_(data) {
-    this.executeMap_[data.id].resolve(data.token);
-    delete this.executeMap_[data.id];
+
+    const id = data['id'];
+    const token = data['token'];
+
+    this.executeMap_[id].resolve(token);
+    delete this.executeMap_[id];
   }
 
   /**
    * Function to handle error messages from the recaptcha iframe
+   *
+   * NOTE: Use bracket notation to access message properties,
+   * As the externs were a little too generic.
+   *
    * @param {Object} data
    */
   errorMessageHandler_(data) {
-    this.executeMap_[data.id].reject(new Error(data.error));
-    delete this.executeMap_[data.id];
+
+    const id = data['id'];
+    const error = data['error'];
+
+    this.executeMap_[id].reject(new Error(error));
+    delete this.executeMap_[id];
   }
 }
 

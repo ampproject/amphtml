@@ -10,8 +10,6 @@ notifications:
       - amp-build-cop@grotations.appspotmail.com
     on_success: change
     on_failure: change
-  webhooks:
-    - http://savage.nonblocking.io:8080/savage/travis
 before_install:
   # Override Xenial's default Java version (github.com/travis-ci/travis-ci/issues/10290)
   - export PATH=$(echo "$PATH" | sed -e 's/:\/usr\/local\/lib\/jvm\/openjdk11\/bin//')
@@ -22,7 +20,6 @@ branches:
     - release
     - canary
     - /^amp-release-.*$/
-    - /^revert-.*$/
 addons:
   apt:
     packages:
@@ -58,14 +55,13 @@ jobs:
       script:
         - node build-system/pr-check/validator-tests.js
     - stage: build
-      name: "Dist"
-      if: type != pull_request
+      name: "Dist, Bundle Size"
       script:
-        - node build-system/pr-check/dist.js
+        - node build-system/pr-check/dist-bundle-size.js
     - stage: test
-      name: "Dist, Bundle Size, Single Pass Tests"
+      name: "Single Pass Tests"
       script:
-        - node build-system/pr-check/dist-tests.js
+        - node build-system/pr-check/single-pass-tests.js
     - stage: test
       name: "Visual Diff Tests"
       script:
@@ -80,15 +76,20 @@ jobs:
         - node build-system/pr-check/remote-tests.js
       after_script:
         - build-system/sauce_connect/stop_sauce_connect.sh
+    - stage: test
+      name: "[NON-BLOCKING] End to End Tests"
+      script:
+        - node build-system/pr-check/e2e-tests.js
   fast_finish: true
 
-  # TODO(ampproject/wg-infra): remove when remote tests stabilize
+  # TODO(ampproject/wg-infra): remove when these tests stabilize
   allow_failures:
     - script:
-      - node build-system/pr-check/remote-tests.js
+      - node build-system/pr-check/e2e-tests.js
 cache:
   directories:
     - node_modules
+    - build-system/tasks/e2e/node_modules
     - build-system/tasks/visual-diff/node_modules
     - sauce_connect
     - validator/node_modules

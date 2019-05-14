@@ -17,12 +17,12 @@
 
 import {Entitlement, GrantReason} from './entitlement';
 import {JwtHelper} from '../../amp-access/0.1/jwt';
-import {LocalSubscriptionPlatform} from './local-subscription-platform';
 import {PageConfig} from '../../../third_party/subscriptions-project/config';
 import {Services} from '../../../src/services';
 import {devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getSourceOrigin, getWinOrigin} from '../../../src/url';
+import {localSubscriptionPlatformFactory} from './local-subscription-platform';
 
 
 /**
@@ -41,15 +41,20 @@ export class ViewerSubscriptionPlatform {
     /** @private @const */
     this.ampdoc_ = ampdoc;
 
+    /** @private @const */
+    this.serviceAdapter_ = serviceAdapter;
+
     /** @private @const {!PageConfig} */
     this.pageConfig_ = serviceAdapter.getPageConfig();
 
-    /** @private @const {!LocalSubscriptionPlatform} */
-    this.platform_ = new LocalSubscriptionPlatform(
+    /** @private @const {!./subscription-platform.SubscriptionPlatform} */
+    this.platform_ = localSubscriptionPlatformFactory(
         ampdoc, platformConfig, serviceAdapter);
 
     /** @const @private {!../../../src/service/viewer-impl.Viewer} */
     this.viewer_ = Services.viewerForDoc(this.ampdoc_);
+    this.viewer_.onMessage('subscriptionchange',
+        this.subscriptionChange_.bind(this));
 
     /** @private @const {!JwtHelper} */
     this.jwtHelper_ = new JwtHelper(ampdoc.win);
@@ -65,22 +70,36 @@ export class ViewerSubscriptionPlatform {
   }
 
   /** @override */
+  isPrerenderSafe() {
+    return true;
+  }
+
+  /** @override */
   getEntitlements() {
     devAssert(this.currentProductId_, 'Current product is not set');
-
+    /** @type {JsonObject} */
+    const messageData = dict({
+      'publicationId': this.publicationId_,
+      'productId': this.currentProductId_,
+      'origin': this.origin_,
+    });
+    // TODO(chenshay): Viewer Matching: We don't know which viewer it actually
+    // is. Need to check the viewerUrl to know, or more specificlly iterate via
+    // configured platforms and check whether any of these support the viewer.
+    const encryptedDocumentKey =
+        this.serviceAdapter_.getEncryptedDocumentKey('google.com');
+    if (encryptedDocumentKey) {
+      messageData['encryptedDocumentKey'] = encryptedDocumentKey;
+    }
     const entitlementPromise = this.viewer_.sendMessageAwaitResponse(
-        'auth',
-        dict({
-          'publicationId': this.publicationId_,
-          'productId': this.currentProductId_,
-          'origin': this.origin_,
-        })
-    ).then(entitlementData => {
+        'auth', messageData).then(entitlementData => {
       const authData = (entitlementData || {})['authorization'];
+      const decryptedDocumentKey =
+          (entitlementData || {})['decryptedDocumentKey'];
       if (!authData) {
         return Entitlement.empty('local');
       }
-      return this.verifyAuthToken_(authData);
+      return this.verifyAuthToken_(authData, decryptedDocumentKey);
     }).catch(reason => {
       this.sendAuthTokenErrorToViewer_(reason.message);
       throw reason;
@@ -91,10 +110,11 @@ export class ViewerSubscriptionPlatform {
   /**
    * Logs error and sends message to viewer
    * @param {string} token
+   * @param {?string} decryptedDocumentKey
    * @return {!Promise<!Entitlement>}
    * @private
    */
-  verifyAuthToken_(token) {
+  verifyAuthToken_(token, decryptedDocumentKey) {
     return new Promise(resolve => {
       const origin = getWinOrigin(this.ampdoc_.win);
       const sourceOrigin = getSourceOrigin(this.ampdoc_.win.location);
@@ -124,6 +144,7 @@ export class ViewerSubscriptionPlatform {
               grantReason: entitlementObject.subscriptionToken ?
                 GrantReason.SUBSCRIBER : '',
               dataObject: entitlementObject,
+              decryptedDocumentKey,
             });
             break;
           }
@@ -136,6 +157,7 @@ export class ViewerSubscriptionPlatform {
           granted: true,
           grantReason: GrantReason.METERING,
           dataObject: decodedData['metering'],
+          decryptedDocumentKey,
         });
       } else if (entitlements) { // Not null
         entitlement = new Entitlement({
@@ -145,9 +167,9 @@ export class ViewerSubscriptionPlatform {
           grantReason: entitlements.subscriptionToken ?
             GrantReason.SUBSCRIBER : '',
           dataObject: entitlements,
+          decryptedDocumentKey,
         });
       }
-
       entitlement.service = 'local';
       resolve(entitlement);
     });
@@ -206,6 +228,15 @@ export class ViewerSubscriptionPlatform {
   /** @override */
   decorateUI(element, action, options) {
     return this.platform_.decorateUI(element, action, options);
+  }
+
+  /**
+   * Handles a reset message from the viewer which indicates
+   * subscription state changed.  Eventually that will trigger
+   * a new getEntitlements() message exchange.
+   */
+  subscriptionChange_() {
+    this.serviceAdapter_.resetPlatforms();
   }
 }
 

@@ -689,6 +689,38 @@ describes.sandboxed('DOM', {}, env => {
         expect(document.body).to.exist;
       });
     });
+
+    it('should wait for body even if doc is complete', () => {
+      return new Promise((resolve, reject) => {
+        const doc = {
+          readyState: 'complete',
+          body: null,
+          documentElement: {
+            ownerDocument: {
+              defaultView: {
+                setInterval() {
+                  return window.setInterval.apply(window, arguments);
+                },
+                clearInterval() {
+                  return window.clearInterval.apply(window, arguments);
+                },
+              },
+            },
+          },
+        };
+        setTimeout(() => {
+          doc.body = {};
+        }, 50);
+        dom.waitForBody(doc, () => {
+          try {
+            expect(doc.body).to.exist;
+            resolve();
+          } catch (e) {
+            reject(new Error("body doesn't exist"));
+          }
+        });
+      });
+    });
   });
 
   describe('getDataParamsFromAttributes', () => {
@@ -1092,6 +1124,53 @@ describes.realWin('DOM', {
       return dom.whenUpgradedToCustomElement(element).then(element => {
         expect(element.whenBuilt).to.exist;
       });
+    });
+  });
+
+  describe('toggleAttribute', () => {
+    let el;
+
+    beforeEach(() => {
+      el = document.createElement('div');
+    });
+
+    it('should toggle to remove the attribute with an empty value', () => {
+      el.setAttribute('foo', '');
+      dom.toggleAttribute(el, 'foo');
+      expect(el.getAttribute('foo')).to.be.null;
+    });
+
+    it('should toggle to remove the attribute with a non-empty value', () => {
+      el.setAttribute('foo', 'asdf');
+      dom.toggleAttribute(el, 'foo');
+      expect(el.getAttribute('foo')).to.be.null;
+    });
+
+    it('should toggle to add the attribute', () => {
+      dom.toggleAttribute(el, 'foo');
+      expect(el.getAttribute('foo')).to.equal('');
+    });
+
+    it('should remove the attribute when forced', () => {
+      el.setAttribute('foo', '');
+      dom.toggleAttribute(el, 'foo', false);
+      expect(el.getAttribute('foo')).to.be.null;
+    });
+
+    it('should not add the attribute when forced off', () => {
+      dom.toggleAttribute(el, 'foo', false);
+      expect(el.getAttribute('foo')).to.be.null;
+    });
+
+    it('should add the attribute when forced and it does not exist', () => {
+      dom.toggleAttribute(el, 'foo', true);
+      expect(el.getAttribute('foo')).to.equal('');
+    });
+
+    it('should leave the attribute when forced and it exists', () => {
+      el.setAttribute('foo', 'asdf');
+      dom.toggleAttribute(el, 'foo', true);
+      expect(el.getAttribute('foo')).to.equal('asdf');
     });
   });
 });

@@ -25,7 +25,7 @@ import {
  */
 export function purch(global, data) {
   validateData(data, [],
-      ['pid', 'divid']);
+      ['pid', 'divid', 'config']);
   global.data = data;
 
   const adsrc = 'https://ramp.purch.com/serve/creative_amp.js';

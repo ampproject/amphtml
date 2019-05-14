@@ -250,14 +250,12 @@ AMPHTML ad creative. Extensions or builtin tags not explicitly listed are prohib
 * [amp-img](https://www.ampproject.org/docs/reference/components/amp-img)
 * [amp-layout](https://www.ampproject.org/docs/reference/components/amp-layout)
 * [amp-lightbox](https://www.ampproject.org/docs/reference/components/amp-lightbox)
+* amp-mraid, on an experimental basis.  If you're considering using this, please open an issue at [wg-ads](https://github.com/ampproject/wg-ads/issues/new).
 * [amp-mustache](https://www.ampproject.org/docs/reference/components/amp-mustache)
 * [amp-pixel](https://www.ampproject.org/docs/reference/components/amp-pixel)
 * [amp-position-observer](https://www.ampproject.org/docs/reference/components/amp-position-observer)
 * [amp-social-share](https://www.ampproject.org/docs/reference/components/amp-social-share)
 * [amp-video](https://www.ampproject.org/docs/reference/components/amp-video)
-* [amp-youtube](https://www.ampproject.org/docs/reference/components/amp-youtube)
-
-
 
 Most of the omissions are either for performance or to make AMPHTML ads
 simpler to analyze.

@@ -57,9 +57,6 @@ export class ViewportBindingIosEmbedWrapper_ {
     this.wrapper_ = wrapper;
     wrapper.id = 'i-amphtml-wrapper';
     wrapper.className = topClasses;
-    if (isExperimentOn(win, 'scroll-height-minheight')) {
-      wrapper.classList.add('i-amphtml-body-minheight');
-    }
 
     /** @private @const {!Observable} */
     this.scrollObservable_ = new Observable();
@@ -148,6 +145,17 @@ export class ViewportBindingIosEmbedWrapper_ {
 
   /** @override */
   requiresFixedLayerTransfer() {
+    if (!isExperimentOn(this.win, 'ios-fixed-no-transfer')) {
+      return true;
+    }
+    // The jumping fixed elements have been fixed in iOS 12.2.
+    const iosVersion = parseFloat(Services.platformFor(this.win)
+        .getIosVersionString());
+    return iosVersion < 12.2;
+  }
+
+  /** @override */
+  overrideGlobalScrollTo() {
     return true;
   }
 
@@ -255,18 +263,6 @@ export class ViewportBindingIosEmbedWrapper_ {
 
   /** @override */
   contentHeightChanged() {
-    if (isExperimentOn(this.win, 'scroll-height-bounce')) {
-      // Refresh the overscroll (`-webkit-overflow-scrolling: touch`) to avoid
-      // iOS rendering bugs. See #8798 for details.
-      const doc = this.win.document;
-      const {documentElement} = doc;
-      this.vsync_.mutate(() => {
-        documentElement.classList.remove('i-amphtml-ios-overscroll');
-        this.vsync_.mutate(() => {
-          documentElement.classList.add('i-amphtml-ios-overscroll');
-        });
-      });
-    }
   }
 
   /** @override */

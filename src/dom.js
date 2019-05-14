@@ -22,7 +22,7 @@ import {
 } from './css';
 import {dev, devAssert} from './log';
 import {dict} from './utils/object';
-import {onDocumentReady, whenDocumentReady} from './document-ready';
+import {onDocumentReady} from './document-ready';
 import {startsWith} from './string';
 import {toWin} from './types';
 
@@ -106,9 +106,7 @@ export function waitForHead(doc, callback) {
  * @return {!Promise}
  */
 export function waitForHeadPromise(doc) {
-  return new Promise(resolve => {
-    waitForHead(doc, resolve);
-  });
+  return new Promise(resolve => waitForHead(doc, resolve));
 }
 
 /**
@@ -119,7 +117,7 @@ export function waitForHeadPromise(doc) {
  * @param {function()} callback
  */
 export function waitForBody(doc, callback) {
-  return onDocumentReady(doc, callback);
+  onDocumentReady(doc, () => waitForHead(doc, callback));
 }
 
 
@@ -129,7 +127,7 @@ export function waitForBody(doc, callback) {
  * @return {!Promise}
  */
 export function waitForBodyPromise(doc) {
-  return whenDocumentReady(doc);
+  return new Promise(resolve => waitForBody(doc, resolve));
 }
 
 
@@ -852,9 +850,6 @@ export function isEnabled(element) {
   return !(element.disabled || matches(element, ':disabled'));
 }
 
-const PRECEDING_OR_CONTAINS =
-    Node.DOCUMENT_POSITION_PRECEDING | Node.DOCUMENT_POSITION_CONTAINS;
-
 /**
  * A sorting comparator that sorts elements in DOM tree order.
  * A first sibling is sorted to be before its nextSibling.
@@ -871,12 +866,41 @@ export function domOrderComparator(element1, element2) {
   }
 
   const pos = element1.compareDocumentPosition(element2);
+  const precedingOrContains =
+    Node.DOCUMENT_POSITION_PRECEDING | Node.DOCUMENT_POSITION_CONTAINS;
 
-  // if fe2 is preceeding or contains fe1 then, fe1 is after fe2
-  if (pos & PRECEDING_OR_CONTAINS) {
+  // if fe2 is preceding or contains fe1 then, fe1 is after fe2
+  if (pos & precedingOrContains) {
     return 1;
   }
 
   // if fe2 is following or contained by fe1, then fe1 is before fe2
   return -1;
+}
+
+
+/**
+ * Like `Element.prototype.toggleAttribute`. This either toggles an attribute
+ * on by adding an attribute with an empty value, or toggles it off by removing
+ * the attribute. This does not mutate the element if the new state matches
+ * the existing state.
+ * @param {!Element} element An element to toggle the attribute for.
+ * @param {string} name The name of the attribute.
+ * @param {boolean=} forced Whether the attribute should be forced on/off. If
+ *    not specified, it will be toggled from the current state.
+ * @return {boolean} Whether or not the element now has the attribute.
+ */
+export function toggleAttribute(element, name, forced) {
+  const hasAttribute = element.hasAttribute(name);
+  const enabled = forced !== undefined ? forced : !hasAttribute;
+
+  if (enabled !== hasAttribute) {
+    if (enabled) {
+      element.setAttribute(name, '');
+    } else {
+      element.removeAttribute(name);
+    }
+  }
+
+  return enabled;
 }

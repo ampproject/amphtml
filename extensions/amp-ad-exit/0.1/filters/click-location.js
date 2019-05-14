@@ -51,16 +51,25 @@ export class ClickLocationFilter extends Filter {
     this.adExitElement_ = adExitElement;
 
     /**
-     * The structure that represents the rect that will not be filtered .
-     *
      * @typedef {{
      *   top: number,
      *   right: number,
      *   bottom: number,
      *   left: number
      * }}
+    */
+    let AllowedRectDef;
+
+    /**
+     * The structure that represents the rect that will not be filtered .
+     * @type {AllowedRectDef}
      */
-    this.allowedRect_ = {};
+    this.allowedRect_ = {
+      top: 0,
+      right: 0,
+      bottom: 0,
+      left: 0,
+    };
   }
 
   /** @override */

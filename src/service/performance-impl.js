@@ -15,6 +15,7 @@
  */
 
 import {Services} from '../services';
+import {dev} from '../log';
 import {dict, map} from '../utils/object';
 import {getMode} from '../mode';
 import {getService, registerServiceBuilder} from '../service';
@@ -281,7 +282,15 @@ export class Performance {
       list.getEntries().forEach(processEntry);
       this.flush();
     });
-    observer.observe({entryTypes: entryTypesToObserve});
+
+    // Wrap observer.observe() in a try statement for testing, because
+    // Webkit throws an error if the entry types to observe are not natively
+    // supported.
+    try {
+      observer.observe({entryTypes: entryTypesToObserve});
+    } catch (err) {
+      dev()/*OK*/.warn(err);
+    }
   }
 
   /**
@@ -371,15 +380,13 @@ export class Performance {
     const didStartInPrerender = !this.viewer_.hasBeenVisible();
     let docVisibleTime = didStartInPrerender ? -1 : this.initTime_;
 
-    // This is only relevant if the viewer is in prerender mode.
+    // This will only be relevant if the viewer is in prerender mode.
     // (hasn't been visible yet, ever at this point)
-    if (didStartInPrerender) {
-      this.viewer_.whenFirstVisible().then(() => {
-        docVisibleTime = this.win.Date.now();
-        // Mark this first visible instance in the browser timeline.
-        this.mark('visible');
-      });
-    }
+    this.viewer_.whenFirstVisible().then(() => {
+      docVisibleTime = this.win.Date.now();
+      // Mark this first visible instance in the browser timeline.
+      this.mark('visible');
+    });
 
     this.whenViewportLayoutComplete_().then(() => {
       if (didStartInPrerender) {

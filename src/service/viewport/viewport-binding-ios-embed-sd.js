@@ -109,9 +109,6 @@ export class ViewportBindingIosEmbedShadowRoot_ {
     const doc = this.win.document;
     const {documentElement} = doc;
     documentElement.classList.add('i-amphtml-ios-embed-sd');
-    if (isExperimentOn(win, 'scroll-height-minheight')) {
-      documentElement.classList.add('i-amphtml-body-minheight');
-    }
 
     const scroller = htmlFor(doc)`
       <div id="i-amphtml-scroller">
@@ -297,7 +294,12 @@ export class ViewportBindingIosEmbedShadowRoot_ {
 
   /** @override */
   requiresFixedLayerTransfer() {
-    return !isExperimentOn(this.win, 'ios-embed-sd-notransfer');
+    return false;
+  }
+
+  /** @override */
+  overrideGlobalScrollTo() {
+    return true;
   }
 
   /** @override */
@@ -413,20 +415,6 @@ export class ViewportBindingIosEmbedShadowRoot_ {
 
   /** @override */
   contentHeightChanged() {
-    if (isExperimentOn(this.win, 'scroll-height-bounce')) {
-      // Refresh the overscroll (`-webkit-overflow-scrolling: touch`) to avoid
-      // iOS rendering bugs. See #8798 for details.
-      this.vsync_.mutate(() => {
-        setImportantStyles(this.scroller_, {
-          '-webkit-overflow-scrolling': 'auto',
-        });
-        this.vsync_.mutate(() => {
-          setImportantStyles(this.scroller_, {
-            '-webkit-overflow-scrolling': 'touch',
-          });
-        });
-      });
-    }
   }
 
   /** @override */

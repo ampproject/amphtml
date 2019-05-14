@@ -91,6 +91,10 @@ describes.realWin('ViewportBindingNatural', {ampCss: true}, env => {
     expect(binding.requiresFixedLayerTransfer()).to.be.false;
   });
 
+  it('should NOT require override of the global scrollTo', () => {
+    expect(binding.overrideGlobalScrollTo()).to.be.false;
+  });
+
   it('should connect events: subscribe to scroll and resize events', () => {
     expect(win.eventListeners.count('resize')).to.equal(1);
     expect(win.eventListeners.count('scroll')).to.equal(1);
@@ -233,7 +237,6 @@ describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
     env.iframe.style.height = '100px';
     win = env.win;
     win.document.documentElement.className = 'top i-amphtml-singledoc';
-    toggleExperiment(win, 'scroll-height-minheight', false);
     child = win.document.createElement('div');
     child.style.width = '200px';
     child.style.height = '300px';
@@ -242,6 +245,7 @@ describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
     installDocService(win, /* isSingleDoc */ true);
     installDocumentStateService(win);
     installVsyncService(win);
+    installPlatformService(win);
     vsync = Services.vsyncFor(win);
     binding = new ViewportBindingIosEmbedWrapper_(win);
     binding.connect();
@@ -252,19 +256,42 @@ describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
     expect(style.minHeight).to.equal('0px');
   });
 
-  it('should setup body min-height wwith experiment', () => {
-    toggleExperiment(win, 'scroll-height-minheight', true);
-    try {
-      binding = new ViewportBindingIosEmbedWrapper_(win);
-    } catch (e) {
-      // Ignore a double-init errors.
-    }
-    const style = win.getComputedStyle(win.document.body);
-    expect(style.minHeight).to.equal((win.innerHeight + 1) + 'px');
+  it('should require override of the global scrollTo', () => {
+    expect(binding.overrideGlobalScrollTo()).to.be.true;
   });
 
-  it('should NOT require fixed layer transferring', () => {
+  // TODO(#22220): Remove when "ios-fixed-no-transfer" experiment is cleaned up.
+  it('should require fixed layer transferring', () => {
     expect(binding.requiresFixedLayerTransfer()).to.be.true;
+  });
+
+  // TODO(#22220): Remove when "ios-fixed-no-transfer" experiment is cleaned up.
+  it('should require fixed layer transferring for later iOS w/o experiment',
+      () => {
+        sandbox.stub(Services.platformFor(win), 'getIosVersionString')
+            .callsFake(() => '12.2');
+        expect(binding.requiresFixedLayerTransfer()).to.be.true;
+      });
+
+  it('should configure fixed layer transferring based on iOS version', () => {
+    toggleExperiment(win, 'ios-fixed-no-transfer');
+    let version;
+    sandbox.stub(Services.platformFor(win), 'getIosVersionString')
+        .callsFake(() => version);
+
+    // 12.1 is still out.
+    version = '12.1';
+    expect(binding.requiresFixedLayerTransfer()).to.be.true;
+
+    // 12.2 and up are fixed.
+    version = '12.2';
+    expect(binding.requiresFixedLayerTransfer()).to.be.false;
+
+    version = '12.3';
+    expect(binding.requiresFixedLayerTransfer()).to.be.false;
+
+    version = '13.0';
+    expect(binding.requiresFixedLayerTransfer()).to.be.false;
   });
 
   it('should start w/o overscroll and set it on doc ready', () => {
@@ -477,24 +504,7 @@ describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
     expect(wrapperCss.overflowY).to.equal('auto');
   });
 
-  it('should refresh overscroll when content height changes', () => {
-    toggleExperiment(win, 'scroll-height-bounce', true);
-    const root = win.document.documentElement;
-    return vsync.mutatePromise().then(() => {
-      expect(root).to.have.class('i-amphtml-ios-overscroll');
-      binding.contentHeightChanged();
-      return vsync.mutatePromise();
-    }).then(() => {
-      expect(root).to.not.have.class('i-amphtml-ios-overscroll');
-      return vsync.mutatePromise();
-    }).then(() => {
-      expect(root).to.have.class('i-amphtml-ios-overscroll');
-    });
-  });
-
   it('should NOT refresh overscroll w/o experiment', () => {
-    // TODO(#19004): cleanup once "scroll-height-bounce" is launched.
-    toggleExperiment(win, 'scroll-height-bounce', false);
     binding.contentHeightChanged();
     const root = win.document.documentElement;
     return vsync.mutatePromise().then(() => {
@@ -518,7 +528,6 @@ describes.realWin('ViewportBindingIosEmbedShadowRoot_', {ampCss: true}, env => {
       iframe.style.width = '100px';
       iframe.style.height = '100px';
       win = env.win;
-      toggleExperiment(win, 'scroll-height-minheight', false);
       win.document.documentElement.className = 'top i-amphtml-singledoc';
       child = win.document.createElement('div');
       child.style.width = '200px';
@@ -548,24 +557,12 @@ describes.realWin('ViewportBindingIosEmbedShadowRoot_', {ampCss: true}, env => {
       expect(style.minHeight).to.equal('0px');
     });
 
-    it('should setup body min-height wwith experiment', () => {
-      toggleExperiment(win, 'scroll-height-minheight', true);
-      try {
-        new ViewportBindingIosEmbedShadowRoot_(win);
-      } catch (e) {
-        // Ignore a double-init errors.
-      }
-      const style = win.getComputedStyle(win.document.body);
-      expect(style.minHeight).to.equal((win.innerHeight + 1) + 'px');
-    });
-
     it('should NOT require fixed layer transferring', () => {
-      expect(binding.requiresFixedLayerTransfer()).to.be.true;
+      expect(binding.requiresFixedLayerTransfer()).to.be.false;
     });
 
-    it('should require fixed layer transferring with experiment', () => {
-      toggleExperiment(win, 'ios-embed-sd-notransfer', true);
-      expect(binding.requiresFixedLayerTransfer()).to.be.false;
+    it('should require override of the global scrollTo', () => {
+      expect(binding.overrideGlobalScrollTo()).to.be.true;
     });
 
     it('should start w/o overscroll and set it on doc ready', () => {
@@ -825,28 +822,7 @@ describes.realWin('ViewportBindingIosEmbedShadowRoot_', {ampCss: true}, env => {
       expect(scrollerCss.overflowY).to.equal('auto');
     });
 
-    it('should refresh overscroll when content height changes', () => {
-      toggleExperiment(win, 'scroll-height-bounce', true);
-      const scroller = binding.scroller_;
-      const setStyleStub = sandbox.stub(scroller.style, 'setProperty');
-      return vsync.mutatePromise().then(() => {
-        binding.contentHeightChanged();
-        return vsync.mutatePromise();
-      }).then(() => {
-        const {args} = setStyleStub.lastCall;
-        expect(args[0]).to.equal('-webkit-overflow-scrolling');
-        expect(args[1]).to.equal('auto');
-        return vsync.mutatePromise();
-      }).then(() => {
-        const {args} = setStyleStub.lastCall;
-        expect(args[0]).to.equal('-webkit-overflow-scrolling');
-        expect(args[1]).to.equal('touch');
-      });
-    });
-
     it('should NOT refresh overscroll w/o experiment', () => {
-      // TODO(#19004): cleanup once "scroll-height-bounce" is launched.
-      toggleExperiment(win, 'scroll-height-bounce', false);
       const scroller = binding.scroller_;
       const setStyleStub = sandbox.stub(scroller.style, 'setProperty');
       binding.contentHeightChanged();

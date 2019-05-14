@@ -19,6 +19,7 @@ import {dict} from './utils/object.js';
 import {experimentToggles, isCanary} from './experiments';
 import {getLengthNumeral} from './layout';
 import {getModeObject} from './mode-object';
+import {internalRuntimeVersion} from './internal-version';
 import {urls} from './config';
 
 /**
@@ -65,9 +66,9 @@ export function getContextMetadata(
   // Please also add new introduced variable
   // name to the extern list.
   attributes['_context'] = dict({
-    'ampcontextVersion': '$internalRuntimeVersion$',
-    'ampcontextFilepath': urls.thirdParty + '/$internalRuntimeVersion$' +
-        '/ampcontext-v0.js',
+    'ampcontextVersion': internalRuntimeVersion(),
+    'ampcontextFilepath':
+        `${urls.thirdParty}/${internalRuntimeVersion()}/ampcontext-v0.js`,
     'sourceUrl': docInfo.sourceUrl,
     'referrer': referrer,
     'canonicalUrl': docInfo.canonicalUrl,

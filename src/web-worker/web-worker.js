@@ -23,11 +23,13 @@
 
 import './web-worker-polyfills';
 import {BindEvaluator} from '../../extensions/amp-bind/0.1/bind-evaluator';
-import {dev, initLogConstructor} from '../log';
+import {dev, initLogConstructor, setReportError} from '../log';
 import {exponentialBackoff} from '../exponential-backoff';
+import {reportError} from '../error';
 import {urls} from '../config';
 
 initLogConstructor();
+setReportError(reportError);
 
 /** @const {string} */
 const TAG = 'web-worker';
@@ -72,13 +74,11 @@ self.addEventListener('message', function(event) {
   switch (method) {
     case 'bind.init':
       if (evaluator) {
-        dev().error(TAG, 'Evaluator already exists for scope:', scope);
-        returnValue = false;
-      } else {
-        const allowUrlProperties = args[0];
-        evaluators_[scope] = new BindEvaluator(allowUrlProperties);
-        returnValue = true;
+        dev().warn(TAG, 'Overwriting existing evaluator for scope:', scope);
       }
+      const allowUrlProperties = args[0];
+      evaluators_[scope] = new BindEvaluator(allowUrlProperties);
+      returnValue = true;
       break;
     case 'bind.addBindings':
       returnValue = evaluator.addBindings.apply(evaluator, args);

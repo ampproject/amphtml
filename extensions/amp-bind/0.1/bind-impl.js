@@ -377,10 +377,25 @@ export class Bind {
    *
    * @param {!Array<!Element>} addedElements
    * @param {!Array<!Element>} removedElements
-   * @param {number} timeout Timeout in milliseconds.
+   * @param {number=} opt_timeout Timeout in milliseconds.
    * @return {!Promise}
    */
-  scanAndApply(addedElements, removedElements, timeout = 2000) {
+  scanAndApply(addedElements, removedElements, opt_timeout) {
+    // TODO(choumx): Dependency on init may be removed if we skip elements
+    // with .i-amphtml-binding during tree walk and extract macro setup.
+    return this.initializePromise_.then(() => {
+      return this.rescan_(addedElements, removedElements, opt_timeout || 2000);
+    });
+  }
+
+  /**
+   * @param {!Array<!Element>} addedElements
+   * @param {!Array<!Element>} removedElements
+   * @param {number} timeout
+   * @return {!Promise}
+   * @private
+   */
+  rescan_(addedElements, removedElements, timeout) {
     dev().info(TAG, 'rescan:', addedElements, removedElements);
     /**
      * Helper function for cleaning up bindings in removed elements.
@@ -1117,23 +1132,22 @@ export class Bind {
     const tag = element.tagName;
 
     switch (property) {
-      case 'text':
-        let updateTextContent = true;
-        const stringValue = String(newValue);
+      case 'defaulttext':
+        element.textContent = String(newValue);
+        break;
 
-        // textContent on <textarea> only works before interaction.
-        if (tag === 'TEXTAREA') {
-          element.value = stringValue;
-          // Don't also update textContent to avoid disrupting focus.
-          updateTextContent = false;
-        }
+      case 'text':
+        const stringValue = String(newValue);
         // If <title> element in the <head>, also update the document title.
         if (tag === 'TITLE'
             && element.parentNode === this.localWin_.document.head) {
           this.localWin_.document.title = stringValue;
         }
-        // Default behavior.
-        if (updateTextContent) {
+        // For <textarea>, [text] sets `value` (current value), while
+        // [defaultText] sets `textContent` (initial value).
+        if (tag === 'TEXTAREA') {
+          element.value = stringValue;
+        } else {
           element.textContent = stringValue;
         }
         break;
@@ -1159,10 +1173,10 @@ export class Bind {
         break;
 
       default:
-        // Some input elements treat some of their attributes as initial values.
-        // Once the user interacts with these elements, the JS properties
-        // underlying these attributes must be updated for the change to be
-        // visible to the user.
+        // For input elements, update both the attribute (initial value) and
+        // property (current value) for bindings e.g. [value].
+        // TODO(choumx): Investigate if splitting into [value] and
+        // [defaultValue] is possible without version bump.
         const updateProperty = (tag === 'INPUT' && property in element);
         const oldValue = element.getAttribute(property);
 

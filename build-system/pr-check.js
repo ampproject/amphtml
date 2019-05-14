@@ -81,7 +81,7 @@ const command = {
     timedExecOrDie(cmd + ' --headless --coverage');
   },
   runUnitTestsOnLocalChanges: function() {
-    timedExecOrDie('gulp test --nobuild --headless --local-changes');
+    timedExecOrDie('gulp test --unit --nobuild --headless --local-changes');
   },
   runDevDashboardTests: function() {
     timedExecOrDie('gulp test --dev_dashboard --nobuild');
@@ -182,7 +182,7 @@ function main() {
 
   // Run the local version of all tests.
   process.env['LOCAL_PR_CHECK'] = true;
-  printChangeSummary();
+  printChangeSummary(FILENAME);
   console.log(FILELOGPREFIX, 'Running all pr-check commands locally.');
   runAllCommandsLocally();
   stopTimer(FILENAME, FILENAME, startTime);

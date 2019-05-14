@@ -168,7 +168,7 @@ export class AdTracker {
  * @return {!Array<!Element>}
  */
 export function getExistingAds(ampdoc) {
-  return [].slice.call(ampdoc.getRootNode().getElementsByTagName('AMP-AD'))
+  return [].slice.call(ampdoc.getRootNode().querySelectorAll('AMP-AD'))
       .filter(ad => {
         // Filters out AMP-STICKY-AD.
         if (ad.parentElement && ad.parentElement.tagName == 'AMP-STICKY-AD') {

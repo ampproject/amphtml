@@ -20,8 +20,8 @@ import {dev} from '../src/log';
 import {guaranteeSrcForSrcsetUnsupportedBrowsers} from '../src/utils/img';
 import {isExperimentOn} from '../src/experiments';
 import {listen} from '../src/event-helper';
+import {propagateObjectFitStyles, setImportantStyles} from '../src/style';
 import {registerElement} from '../src/service/custom-element-registry';
-import {setImportantStyles} from '../src/style';
 
 /**
  * Attributes to propagate to internal image when changed externally.
@@ -51,9 +51,6 @@ export class AmpImg extends BaseElement {
     /** @private {?UnlistenDef} */
     this.unlistenError_ = null;
 
-    /** @private {boolean} */
-    this.autoGenerateSizes_ = isExperimentOn(this.win, 'amp-img-auto-sizes');
-
     /**
      * The current width used by the automatically generated sizes attribute
      * @private {number}
@@ -74,9 +71,7 @@ export class AmpImg extends BaseElement {
 
   /** @override */
   onMeasureChanged() {
-    if (this.autoGenerateSizes_) {
-      this.maybeGenerateSizes_();
-    }
+    this.maybeGenerateSizes_();
   }
 
   /** @override */
@@ -148,10 +143,9 @@ export class AmpImg extends BaseElement {
 
     this.propagateAttributes(ATTRIBUTES_TO_PROPAGATE, this.img_);
     guaranteeSrcForSrcsetUnsupportedBrowsers(this.img_);
-    if (this.autoGenerateSizes_) {
-      this.maybeGenerateSizes_();
-    }
+    this.maybeGenerateSizes_();
     this.applyFillContent(this.img_, true);
+    propagateObjectFitStyles(this.element, this.img_);
 
     this.element.appendChild(this.img_);
   }

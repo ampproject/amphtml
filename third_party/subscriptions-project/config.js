@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.45 */
+/** Version: 0.1.22.50 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -332,6 +332,25 @@ class PageConfig {
  * limitations under the License.
  */
 
+ /**
+  * Debug logger, only log message if #swg.log=1
+  * @param {...*} var_args [decription]
+  */
+function debugLog(var_args) {
+  if (/swg.debug=1/.test(self.location.hash)) {
+    const logArgs = Array.prototype.slice.call(arguments, 0);
+    logArgs.unshift('[Subscriptions]');
+    log.apply(log, logArgs);
+  }
+}
+
+/**
+ * @param  {...*} var_args [description]
+ */
+function log(var_args) {
+  console.log.apply(console, arguments);
+}
+
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -584,6 +603,7 @@ class PageConfigResolver {
           new Error('No config could be discovered in the page')));
       this.configResolver_ = null;
     }
+    debugLog(config);
     return config;
   }
 }

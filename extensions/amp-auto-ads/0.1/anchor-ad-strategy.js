@@ -53,7 +53,7 @@ export class AnchorAdStrategy {
       return Promise.resolve(false);
     }
     Services.extensionsFor(this.ampdoc.win)./*OK*/installExtensionForDoc(
-        this.ampdoc, STICKY_AD_TAG);
+        this.ampdoc, STICKY_AD_TAG, '1.0');
     this.placeStickyAd_();
     return Promise.resolve(true);
   }
@@ -63,8 +63,7 @@ export class AnchorAdStrategy {
    * @private
    */
   hasExistingStickyAd_() {
-    return this.ampdoc.getRootNode()
-        .getElementsByTagName('AMP-STICKY-AD').length > 0;
+    return !!this.ampdoc.getRootNode().querySelector('AMP-STICKY-AD');
   }
 
   /**

@@ -282,6 +282,12 @@ exports.extensionBundles = [
     type: TYPES.MISC,
   },
   {
+    name: 'amp-connatix-player',
+    version: '0.1',
+    latestVersion: '0.1',
+    type: TYPES.MEDIA,
+  },
+  {
     name: 'amp-crypto-polyfill',
     version: '0.1',
     latestVersion: '0.1',
@@ -325,7 +331,7 @@ exports.extensionBundles = [
   },
   {
     name: 'amp-experiment',
-    version: '0.1',
+    version: ['0.1', '1.0'],
     latestVersion: '0.1',
     type: TYPES.MISC,
   },
@@ -680,7 +686,12 @@ exports.extensionBundles = [
     name: 'amp-story-auto-ads',
     version: '0.1',
     latestVersion: '0.1',
-    options: {hasCss: true},
+    options: {
+      hasCss: true,
+      cssBinaries: [
+        'amp-story-auto-ads-attribution',
+      ],
+    },
     type: TYPES.MISC,
   },
   {
@@ -907,6 +918,12 @@ exports.extensionBundles = [
     version: '0.1',
     latestVersion: '0.1',
     type: TYPES.AD,
+  },
+  {
+    name: 'amp-link-rewriter',
+    version: '0.1',
+    latestVersion: '0.1',
+    type: TYPES.MISC,
   },
 ];
 

@@ -26,11 +26,8 @@ import {
   ADSENSE_RSPV_WHITELISTED_HEIGHT,
   getMatchedContentResponsiveHeightAndUpdatePubParams,
 } from '../../../ads/google/utils';
-import {AdsenseSharedState} from './adsense-shared-state';
-import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
-import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
-import {Navigation} from '../../../src/service/navigation';
 import {
+  ADX_ADY_EXP,
   QQID_HEADER,
   SANDBOX_HEADER,
   ValidAdContainerTypes,
@@ -46,6 +43,10 @@ import {
   isReportingEnabled,
   maybeAppendErrorParameter,
 } from '../../../ads/google/a4a/utils';
+import {AdsenseSharedState} from './adsense-shared-state';
+import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
+import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
+import {Navigation} from '../../../src/service/navigation';
 import {Services} from '../../../src/services';
 import {
   addExperimentIdToElement,
@@ -59,9 +60,6 @@ import {
 } from '../../../src/style';
 import {dev, devAssert, user} from '../../../src/log';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
-import {
-  getAdSenseAmpAutoAdsResponsiveExperimentBranch,
-} from '../../../ads/google/adsense-amp-auto-ads-responsive';
 import {getAmpAdRenderOutsideViewport} from '../../amp-ad/0.1/concurrent-load';
 import {getDefaultBootstrapBaseUrl} from '../../../src/3p-frame';
 import {
@@ -259,6 +257,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     // This should happen last, as some diversion criteria rely on some of the
     // preceding logic (specifically responsive logic).
     this.divertExperiments();
+    this.maybeAddSinglePassExperiment();
   }
 
   /** @override */
@@ -281,6 +280,10 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
             Number(this.element.getAttribute('width')) > 0 &&
             Number(this.element.getAttribute('height')) > 0,
           branches: ['21062003', '21062004'],
+        },
+        [[ADX_ADY_EXP.branch]]: {
+          isTrafficEligible: () => true,
+          branches: [[ADX_ADY_EXP.control], [ADX_ADY_EXP.experiment]],
         },
       });
     const setExps = randomlySelectUnsetExperiments(this.win, experimentInfoMap);
@@ -372,11 +375,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     };
 
     const experimentIds = [];
-    const ampAutoAdsResponsiveBranch =
-      getAdSenseAmpAutoAdsResponsiveExperimentBranch(this.win);
-    if (ampAutoAdsResponsiveBranch) {
-      experimentIds.push(ampAutoAdsResponsiveBranch);
-    }
     const identityPromise = Services.timerFor(this.win)
         .timeoutPromise(1000, this.identityTokenPromise_)
         .catch(unusedErr => {
@@ -409,8 +407,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     }
     const checksum = headers.get('AMP-Verification-Checksum');
     return Promise.resolve(
-        checksum && stringHash32(utf8Decode(bytes)) == atob(checksum)
-          ? bytes : null);
+        checksum && stringHash32(utf8Decode(bytes)) == checksum ? bytes : null);
   }
 
   /** @override */

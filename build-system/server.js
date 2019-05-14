@@ -43,7 +43,8 @@ const header = require('connect-header');
 // Exit if the port is in use.
 process.on('uncaughtException', function(err) {
   if (err.errno === 'EADDRINUSE') {
-    log(colors.red('Port', port, 'in use, shutting down server'));
+    log(colors.red('ERROR:'), 'Port', colors.cyan(port),
+        'in use, shutting down server');
   } else {
     log(colors.red(err));
   }

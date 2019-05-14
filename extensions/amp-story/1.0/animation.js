@@ -46,6 +46,8 @@ const ANIMATE_IN_DELAY_ATTRIBUTE_NAME = 'animate-in-delay';
 /** const {string} */
 const ANIMATE_IN_AFTER_ATTRIBUTE_NAME = 'animate-in-after';
 /** const {string} */
+const ANIMATE_IN_TIMING_FUNCTION_ATTRIBUTE_NAME = 'animate-in-timing-function';
+/** const {string} */
 const ANIMATABLE_ELEMENTS_SELECTOR = `[${ANIMATE_IN_ATTRIBUTE_NAME}]`;
 /** const {string} */
 const SCALE_START_ATTRIBUTE_NAME = 'scale-start';
@@ -55,6 +57,8 @@ const SCALE_END_ATTRIBUTE_NAME = 'scale-end';
 const TRANSLATE_X_ATTRIBUTE_NAME = 'translate-x';
 /** const {string} */
 const TRANSLATE_Y_ATTRIBUTE_NAME = 'translate-y';
+/** const {string} */
+const DEFAULT_EASING = 'cubic-bezier(0.4, 0.0, 0.2, 1)';
 
 /**
  * @param {!Element} element
@@ -116,6 +120,10 @@ class AnimationRunner {
 
     /** @private @const */
     this.duration_ = animationDef.duration || this.presetDef_.duration || 0;
+
+    /** @private @const */
+    this.easing_ = animationDef.easing || this.presetDef_.easing ||
+        DEFAULT_EASING;
 
     /**
      * @private @const {!Promise<
@@ -191,7 +199,7 @@ class AnimationRunner {
       keyframes,
       target: this.target_,
       duration: `${this.duration_}ms`,
-      easing: this.presetDef_.easing,
+      easing: this.easing_,
       fill: 'forwards',
     }));
   }
@@ -547,6 +555,11 @@ export class AnimationManager {
           el.getAttribute(ANIMATE_IN_AFTER_ATTRIBUTE_NAME);
     }
 
+    if (el.hasAttribute(ANIMATE_IN_TIMING_FUNCTION_ATTRIBUTE_NAME)) {
+      animationDef.easing =
+          el.getAttribute(ANIMATE_IN_TIMING_FUNCTION_ATTRIBUTE_NAME);
+    }
+
     return animationDef;
   }
 
@@ -610,12 +623,12 @@ export class AnimationManager {
       el);
     }
 
-    return userAssert(
+    return /** @type {StoryAnimationPresetDef} */ (userAssert(
         getPresetDef(name, options),
         'Invalid %s preset "%s" for element %s',
         ANIMATE_IN_ATTRIBUTE_NAME,
         name,
-        el);
+        el));
   }
 }
 

@@ -56,13 +56,14 @@ import {
   isCheckValiditySupported,
 } from './form-validators';
 import {getMode} from '../../../src/mode';
-import {installFormProxy} from './form-proxy';
-import {installStylesForDoc} from '../../../src/style-installer';
 import {
+  getViewerAuthTokenIfAvailable,
   setupAMPCors,
   setupInit,
   setupInput,
 } from '../../../src/utils/xhr-utils';
+import {installFormProxy} from './form-proxy';
+import {installStylesForDoc} from '../../../src/style-installer';
 import {toArray, toWin} from '../../../src/types';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
@@ -205,7 +206,7 @@ export class AmpForm {
         this.form_, () => this.handleXhrVerify_());
 
     this.actions_.installActionHandler(
-        this.form_, this.actionHandler_.bind(this), ActionTrust.HIGH);
+        this.form_, this.actionHandler_.bind(this));
     this.installEventHandlers_();
     this.installInputMasking_();
 
@@ -244,7 +245,7 @@ export class AmpForm {
    * @param {string} method
    * @param {!Object<string, string>=} opt_extraFields
    * @param {!Array<string>=} opt_fieldBlacklist
-   * @return {!FetchRequestDef}
+   * @return {!Promise<!FetchRequestDef>}
    */
   requestForFormFetch(url, method, opt_extraFields, opt_fieldBlacklist) {
     let xhrUrl, body;
@@ -275,7 +276,9 @@ export class AmpForm {
         body.append(key, opt_extraFields[key]);
       }
     }
-    return {
+
+    /** @type {!FetchRequestDef}*/
+    const request = {
       xhrUrl,
       fetchOpt: dict({
         'body': body,
@@ -284,6 +287,15 @@ export class AmpForm {
         'headers': dict({'Accept': 'application/json'}),
       }),
     };
+
+    return getViewerAuthTokenIfAvailable(this.form_).then(token => {
+      if (token) {
+        userAssert(request.fetchOpt['method'] == 'POST',
+            'Cannot attach auth token with GET request.');
+        body.append('ampViewerAuthToken', token);
+      }
+      return request;
+    });
   }
 
   /**
@@ -301,6 +313,9 @@ export class AmpForm {
    * @private
    */
   actionHandler_(invocation) {
+    if (!invocation.satisfiesTrust(ActionTrust.HIGH)) {
+      return null;
+    }
     if (invocation.method == 'submit') {
       return this.whenDependenciesReady_().then(() => {
         return this.handleSubmitAction_(invocation);
@@ -600,7 +615,7 @@ export class AmpForm {
       'error': error.message,
     });
     this.renderTemplate_(errorJsonObject).then(() => {
-      this.triggerAction_(FormEvents.SUBMIT_ERROR, error);
+      this.triggerAction_(FormEvents.SUBMIT_ERROR, errorJsonObject);
     });
   }
 
@@ -657,12 +672,12 @@ export class AmpForm {
     // Render template for the form submitting state.
     const values = this.getFormAsObject_();
     return this.renderTemplate_(values)
-        .then(() => {
-          this.actions_.trigger(
-              this.form_, FormEvents.SUBMIT, /* event */ null, trust);
-        }).then(() => {
-          request = this.requestForFormFetch(
-              dev().assertString(this.xhrAction_), this.method_);
+        .then(() => this.actions_.trigger(
+            this.form_, FormEvents.SUBMIT, /* event */ null, trust))
+        .then(() => this.requestForFormFetch(
+            dev().assertString(this.xhrAction_), this.method_))
+        .then(formRequest => {
+          request = formRequest;
           request.fetchOpt = setupInit(request.fetchOpt);
           request.fetchOpt = setupAMPCors(
               this.win_, request.xhrUrl, request.fetchOpt);
@@ -675,7 +690,7 @@ export class AmpForm {
         }).then(
             resp => this.handleSsrTemplateSuccess_(resp, request),
             error => this.handleSsrTemplateFailure_(
-                /** @type {!JsonObject} */ (error)));
+                /** @type {!Error} */ (error)));
   }
 
   /**
@@ -703,14 +718,17 @@ export class AmpForm {
 
   /**
    * Handles viewer render template failure.
-   * @param {!JsonObject} error
+   * @param {!Error} error
    */
   handleSsrTemplateFailure_(error) {
     this.setState_(FormState.SUBMIT_ERROR);
     user().error(TAG, 'Form submission failed: %s', error);
+    const errorJsonObject = dict({
+      'error': error.message,
+    });
     return tryResolve(() => {
-      this.renderTemplate_(error || {}).then(() => {
-        this.triggerAction_(FormEvents.SUBMIT_ERROR, error);
+      this.renderTemplate_(errorJsonObject || {}).then(() => {
+        this.triggerAction_(FormEvents.SUBMIT_ERROR, errorJsonObject);
       });
     });
   }
@@ -812,9 +830,9 @@ export class AmpForm {
    */
   doXhr_(url, method, opt_extraFields, opt_fieldBlacklist) {
     this.assertSsrTemplate_(false, 'XHRs should be proxied.');
-    const request = this.requestForFormFetch(
-        url, method, opt_extraFields, opt_fieldBlacklist);
-    return this.xhr_.fetch(request.xhrUrl, request.fetchOpt);
+    return this.requestForFormFetch(
+        url, method, opt_extraFields, opt_fieldBlacklist)
+        .then(request => this.xhr_.fetch(request.xhrUrl, request.fetchOpt));
   }
 
   /**
@@ -984,7 +1002,7 @@ export class AmpForm {
   /**
    * Triggers either a submit-success or submit-error action with response data.
    * @param {!FormEvents} name
-   * @param {?Object} detail
+   * @param {!JsonObject|!Array<{message: string, name: string}>|null} detail
    * @private
    */
   triggerAction_(name, detail) {
@@ -1056,7 +1074,8 @@ export class AmpForm {
             .then(rendered => {
               rendered.id = messageId;
               rendered.setAttribute('i-amphtml-rendered', '');
-              return this.resources_.mutateElement(devAssert(container),
+              return this.resources_.mutateElement(
+                  dev().assertElement(container),
                   () => {
                     container.appendChild(rendered);
                     const renderedEvent = createCustomEvent(

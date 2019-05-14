@@ -409,3 +409,28 @@ export function assertSuccess(response) {
     throw err;
   });
 }
+
+/**
+ * Returns a promise resolving to a string identity token if the element
+ * contains the 'crossorigin' attribute and the amp-viewer-assistance extension
+ * is present. Resolves to undefined otherwise.
+ * @param {!Element} element
+ * @return {!Promise<undefined>}
+ */
+export function getViewerAuthTokenIfAvailable(element) {
+  const crossOriginAttr = element.getAttribute('crossorigin');
+  if (crossOriginAttr
+      && crossOriginAttr.trim() === 'amp-viewer-auth-token-via-post') {
+    return Services.viewerAssistanceForDocOrNull(element)
+        .then(va => {
+          userAssert(va, 'crossorigin="amp-viewer-auth-token-post" '
+              + 'requires amp-viewer-assistance extension.');
+          return va.getIdTokenPromise();
+        })
+        // If crossorigin attr is present, resolve with token or empty string.
+        .then(token => token || '')
+        .catch(() => '');
+  }
+  // If crossorigin attribute is missing, always resolve with undefined.
+  return Promise.resolve(undefined);
+}

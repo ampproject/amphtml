@@ -45,8 +45,6 @@ function main() {
     timedExecOrDie('gulp update-packages');
     timedExecOrDie('gulp test --integration --nobuild --headless --coverage');
     timedExecOrDie('gulp test --unit --nobuild --headless --coverage');
-    //TODO(estherkim): turn on when stabilized :)
-    //timedExecOrDie('gulp e2e --nobuild');
   } else {
     printChangeSummary(FILENAME);
 
@@ -66,7 +64,7 @@ function main() {
     if (buildTargets.has('RUNTIME') ||
         buildTargets.has('BUILD_SYSTEM') ||
         buildTargets.has('UNIT_TEST')) {
-      timedExecOrDie('gulp test --nobuild --headless --local-changes');
+      timedExecOrDie('gulp test --unit --nobuild --headless --local-changes');
     }
 
     if (buildTargets.has('RUNTIME') ||
@@ -79,8 +77,6 @@ function main() {
         buildTargets.has('BUILD_SYSTEM') ||
         buildTargets.has('UNIT_TEST')) {
       timedExecOrDie('gulp test --unit --nobuild --headless --coverage');
-      //TODO(estherkim): turn on when stabilized :)
-      //timedExecOrDie('gulp e2e --nobuild');
     }
   }
 

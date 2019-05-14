@@ -38,7 +38,7 @@ import {createDeferred} from './react-utils';
 import {createSingleDatePicker} from './single-date-picker';
 import {dashToCamelCase} from '../../../src/string';
 import {dev, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict, map} from '../../../src/utils/object';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {once} from '../../../src/utils/function';
 import {requireExternal} from '../../../src/module';
@@ -78,10 +78,10 @@ class BindDatesDetails {
     this['dates'] = dates;
 
     /** @const */
-    this['start'] = dates[0];
+    this['start'] = map(dates[0]);
 
     /** @const */
-    this['end'] = dates[dates.length - 1];
+    this['end'] = map(dates[dates.length - 1]);
   }
 }
 
@@ -209,6 +209,10 @@ export class AmpDatePicker extends AMP.BaseElement {
      */
     this.reactRender_ = requireExternal('react-dom').render;
 
+    /** @private @const */
+    this.ReactDates_ = /** @type {!JsonObject} */ (
+      requireExternal('react-dates'));
+
     /**
      * @private
      * @const
@@ -273,6 +277,9 @@ export class AmpDatePicker extends AMP.BaseElement {
 
     /** @private */
     this.allowBlockedRanges_ = false;
+
+    /** @private */
+    this.allowBlockedEndDate_ = false;
 
     /** @private */
     this.fullscreen_ = false;
@@ -389,7 +396,7 @@ export class AmpDatePicker extends AMP.BaseElement {
 
     const mode = this.element.getAttribute('mode');
     if (mode) {
-      this.mode_ = mode;
+      this.mode_ = /** @type {!DatePickerMode} */ (mode);
     }
 
     this.weekDayFormat_ = this.element.getAttribute('week-day-format') ||
@@ -397,6 +404,9 @@ export class AmpDatePicker extends AMP.BaseElement {
 
     this.allowBlockedRanges_ =
         this.element.hasAttribute('allow-blocked-ranges');
+
+    this.allowBlockedEndDate_ =
+        this.element.hasAttribute('allow-blocked-end-date');
 
     this.fullscreen_ = this.element.hasAttribute('fullscreen');
     if (this.fullscreen_) {
@@ -1252,17 +1262,7 @@ export class AmpDatePicker extends AMP.BaseElement {
     const isFinalSelection = (!this.props_['keepOpenOnDateSelect'] &&
         this.state_['focusedInput'] != this.ReactDatesConstants_['END_DATE']);
 
-    let containsBlocked = false;
-
-    if (startDate && !this.allowBlockedRanges_) {
-      this.iterateDateRange_(startDate, endDate, index => {
-        if (this.blocked_.contains(index)) {
-          containsBlocked = true;
-        }
-      });
-    }
-
-    if (containsBlocked) {
+    if (this.isBlockedRange_(startDate, endDate)) {
       return;
     }
 
@@ -1284,6 +1284,45 @@ export class AmpDatePicker extends AMP.BaseElement {
       this.transitionTo_(DatePickerState.OVERLAY_CLOSED);
       this.triggerEvent_(DatePickerEvent.DEACTIVATE);
     }
+  }
+
+  /**
+   * Detect if a blocked date is between the start and end date, inclusively,
+   * accounting for the `allow-blocked-end-date` attribute.
+   * @param {?moment} startDate
+   * @param {?moment} endDate
+   * @return {boolean} True if the range should not be selected.
+   */
+  isBlockedRange_(startDate, endDate) {
+    if (!startDate || !endDate) {
+      return false;
+    }
+
+    const isSameDay = this.ReactDates_['isSameDay'];
+    let blockedCount = 0;
+    if (!this.allowBlockedRanges_) {
+      this.iterateDateRange_(startDate, endDate, index => {
+        if (this.blocked_.contains(index)) {
+          blockedCount++;
+        }
+      });
+    }
+
+    // If allow-blocked-end-date is enabled, we do not consider the range
+    // blocked when the end date is the only blocked date.
+    if (blockedCount == 1 &&
+        this.allowBlockedEndDate_ &&
+        isSameDay(endDate, this.blocked_.firstDateAfter(startDate))) {
+      return false;
+    }
+
+    // If there are any blocked dates in the range, it cannot
+    // be selected.
+    if (blockedCount > 0) {
+      return true;
+    }
+
+    return false;
   }
 
   /**
@@ -1453,14 +1492,18 @@ export class AmpDatePicker extends AMP.BaseElement {
    */
   iterateDateRange_(startDate, endDate, cb) {
     const normalizedEndDate = endDate || startDate;
-    if (!normalizedEndDate.isAfter(startDate)) {
+    if (!normalizedEndDate.isSameOrAfter(startDate)) {
       return;
     }
 
-    const index = startDate.clone();
-    while (!index.isAfter(normalizedEndDate)) {
-      cb(index.clone());
-      index.add(1, 'days');
+    const isSameDay = this.ReactDates_['isSameDay'];
+    if (isSameDay(startDate, endDate)) {
+      return cb(startDate);
+    }
+
+    const days = normalizedEndDate.diff(startDate, 'days');
+    for (let i = 0; i < days; i++) {
+      cb(startDate.clone().add(i + 1, 'days'));
     }
   }
 
@@ -1737,6 +1780,7 @@ export class AmpDatePicker extends AMP.BaseElement {
         // in the month.
         this.reactRender_(
             this.react_.createElement(Picker, Object.assign({}, dict({
+              'allowBlockedEndDate': this.allowBlockedEndDate_,
               'min': props['min'],
               'max': props['max'],
               'date': props['date'],

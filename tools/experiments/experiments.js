@@ -105,15 +105,14 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6217',
   },
   {
-    id: 'amp-auto-ads-adsense-responsive',
-    name: 'AMP Auto Ads AdSense Responsive',
-    spec: '',
-    cleanupIssue: '',
-  },
-  {
     id: 'amp-base-carousel',
     name: 'AMP extension for a basic, flexible, carousel',
     spec: 'https://github.com/ampproject/amphtml/issues/20595',
+  },
+  {
+    id: 'amp-lightbox-gallery-base-carousel',
+    name: 'Uses amp-base-carousel in amp-lightbox-gallery',
+    spec: 'https://github.com/ampproject/amphtml/issues/21568',
   },
   {
     id: 'amp-google-vrview-image',
@@ -169,18 +168,17 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/pull/19495',
   },
   {
+    id: 'ios-fixed-no-transfer',
+    name: 'Remove fixed transfer from iOS 12.2 and up',
+    spec: 'https://github.com/ampproject/amphtml/issues/22220',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22220',
+  },
+  {
     id: 'ios-embed-sd',
     name: 'A new iOS embedded viewport model that wraps the body into' +
       ' shadow root',
     spec: 'https://medium.com/@dvoytenko/amp-ios-scrolling-redo-2-the' +
       '-shadow-wrapper-approach-experimental-3362ed3c2fa2',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16640',
-  },
-  {
-    id: 'ios-embed-sd-notransfer',
-    name: 'Disables transfer mode for the new iOS embedded viewport model',
-    spec: 'https://medium.com/@dvoytenko/amp-ios-scrolling-redo-2-the' +
-        '-shadow-wrapper-approach-experimental-3362ed3c2fa2',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16640',
   },
   {
@@ -378,28 +376,10 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18845',
   },
   {
-    id: 'amp-list-resizable-children',
-    name: 'Experiment for allowing amp-list to resize when its children resize',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18875',
-  },
-  {
     id: 'hidden-mutation-observer',
     name: "Enables FixedLayer's hidden-attribute mutation observer",
     spec: 'https://github.com/ampproject/amphtml/issues/17475',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18897',
-  },
-  {
-    id: 'scroll-height-bounce',
-    name: 'Bounces the scrolling when scroll height changes' +
-        ' (fix for #18861 and #8798)',
-    spec: 'https://github.com/ampproject/amphtml/issues/18861',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/19004',
-  },
-  {
-    id: 'scroll-height-minheight',
-    name: 'Forces min-height on body (fix for #18861 and #8798)',
-    spec: 'https://github.com/ampproject/amphtml/issues/18861',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/19004',
   },
   {
     id: 'amp-auto-lightbox',
@@ -437,6 +417,14 @@ const EXPERIMENTS = [
     name: 'Inabox viewport measures the host window directly if ' +
         'within friendly iframe',
     spec: 'https://github.com/ampproject/amphtml/issues/19869',
+    cleanupIssue: 'TODO',
+  },
+  {
+    id: 'inabox-remove-height-auto',
+    name: 'Experiment to allow slowly removing the height: auto!' +
+    ' for inabox amp4ads. By adding the ' +
+    '.i-amphtml-inabox-preserve-height-auto class on <html>',
+    spec: 'https://github.com/ampproject/amphtml/issues/22059',
     cleanupIssue: 'TODO',
   },
 ];

@@ -35,55 +35,49 @@ describes.endtoend('AMP carousel grouping', {
     return controller.getElementRect(el);
   }
 
-  beforeEach(async() => {
+  beforeEach(function() {
     controller = env.controller;
+    this.timeout(3 * 1000);
   });
 
-  describe('snapping', () => {
-    it('should snap on next group when past the midpoint', async() => {
-      const el = await getScrollingElement(controller);
-      const slides = await getSlides(controller);
+  it('should snap on next group when past the midpoint', async() => {
+    const el = await getScrollingElement(controller);
+    const slides = await getSlides(controller);
 
-      await controller.scrollBy(el, {left: slideWidth + 1});
-      await expect(rect(slides[2])).to.include({x: 0});
-    });
-
-    // TODO(sparhami) It seems like scrolling by even 1 pixel using scrollBy
-    // causes snap now. Need touch event support to actually simulate the  user
-    // scrolling.
-    it.skip('should snap on current group when before the midpoint',
-        async() => {
-          const el = await getScrollingElement(controller);
-          const slides = await getSlides(controller);
-
-          await controller.scrollBy(el, {left: slideWidth - 1});
-          await expect(rect(slides[0])).to.include({x: 0});
-        });
+    await controller.scrollTo(el, {left: slideWidth + 1});
+    await expect(rect(slides[2])).to.include({x: 0});
   });
 
-  describe('advancing', () => {
-    it('should move forwards by the advance-count', async() => {
-      const slides = await getSlides(controller);
-      const btn = await controller.findElement('[on="tap:carousel-1.next()"]');
+  it('should snap on current group when before the midpoint', async() => {
+    const el = await getScrollingElement(controller);
+    const slides = await getSlides(controller);
 
-      await controller.click(btn);
-      await expect(rect(slides[2])).to.include({x: 0});
-      await controller.click(btn);
-      await expect(rect(slides[4])).to.include({x: 0});
-      await controller.click(btn);
-      await expect(rect(slides[0])).to.include({x: 0});
-    });
+    await controller.scrollTo(el, {left: slideWidth - 1});
+    await expect(rect(slides[0])).to.include({x: 0});
+  });
 
-    it('should move backwards by the advance-count', async() => {
-      const slides = await getSlides(controller);
-      const btn = await controller.findElement('[on="tap:carousel-1.prev()"]');
+  it.skip('should move forwards by the advance-count', async() => {
+    const slides = await getSlides(controller);
+    const btn = await controller.findElement('[on="tap:carousel-1.next()"]');
 
-      await controller.click(btn);
-      await expect(rect(slides[4])).to.include({x: 0});
-      await controller.click(btn);
-      await expect(rect(slides[2])).to.include({x: 0});
-      await controller.click(btn);
-      await expect(rect(slides[0])).to.include({x: 0});
-    });
+    await controller.click(btn);
+    await expect(rect(slides[2])).to.include({x: 0});
+    await controller.click(btn);
+    await expect(rect(slides[4])).to.include({x: 0});
+    await controller.click(btn);
+    await expect(rect(slides[0])).to.include({x: 0});
+  });
+
+  it.skip('should move backwards by the advance-count', async() => {
+    const slides = await getSlides(controller);
+    const btn = await controller.findElement('[on="tap:carousel-1.prev()"]');
+
+    await controller.click(btn);
+    await expect(rect(slides[4])).to.include({x: 0});
+    await controller.click(btn);
+    await expect(rect(slides[2])).to.include({x: 0});
+    await controller.click(btn);
+    await expect(rect(slides[0])).to.include({x: 0});
   });
 });
+
