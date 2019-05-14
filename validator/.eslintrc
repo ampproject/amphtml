@@ -23,8 +23,11 @@
     "amphtml-internal/no-module-exports": 0,
     "amphtml-internal/no-for-of-statement": 0,
     "amphtml-internal/no-has-own-property-method": 0,
-    "chai-expect/missing-assertion": 1,
+    "chai-expect/missing-assertion": 0,
     "google-camelcase/google-camelcase": 0,
+    "jasmine/expect-matcher": 0,
+    "jasmine/no-spec-dupes": 0,
+    "jasmine/prefer-jasmine-matcher": 0,
     "jsdoc/check-param-names": 0,
     "jsdoc/check-tag-names": 0,
     "jsdoc/check-types": 0,
@@ -32,24 +35,24 @@
     "jsdoc/require-param-name": 0,
     "jsdoc/require-param-type": 0,
     "jsdoc/require-returns-type": 0,
-    "max-len": [1, 80, 4, {
+    "max-len": [0, 80, 4, {
       "ignoreTrailingComments": true,
       "ignoreRegExpLiterals": true,
       "ignorePattern": "^import.*';|}\\ from.*;|.*require\\(.*;$|@typedef|@param|@return|@private|@const|@type|@implements",
       "ignoreUrls": true
     }],
-    "no-cond-assign": 1,
-    "no-div-regex": 1,
+    "no-cond-assign": 0,
+    "no-div-regex": 0,
     "no-multi-spaces": 0,
-    "no-throw-literal": 1,
-    "no-undef": 1,
-    "no-unused-vars": [1, {
+    "no-throw-literal": 0,
+    "no-undef": 0,
+    "no-unused-vars": [0, {
       "argsIgnorePattern": "^var_|opt_|unused",
       "varsIgnorePattern": "AmpElement|Def|Interface$"
     }],
-    "no-useless-concat": 1,
-    "no-var": 1,
-    "prefer-const": 1,
+    "no-useless-concat": 0,
+    "no-var": 0,
+    "prefer-const": 0,
     "require-jsdoc": 0
   }
 }
