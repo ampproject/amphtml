@@ -625,7 +625,7 @@ export class AmpA4A extends AMP.BaseElement {
           }
         })
         // Possibly block on amp-consent.
-        /** @return {!Promise<array>} */
+        /** @return {!Promise<Array<Promise>>} */
         .then(() => {
           checkStillCurrent();
           const consentPolicyId = super.getConsentPolicy();
@@ -1739,7 +1739,10 @@ export class AmpA4A extends AMP.BaseElement {
       try {
         return new AMP.RealTimeConfigManager(this)
             .maybeExecuteRealTimeConfig(
-                this.getCustomRealTimeConfigMacros_(), consentState, consentString);
+              this.getCustomRealTimeConfigMacros_(),
+              consentState,
+              consentString
+            );
       } catch (err) {
         user().error(TAG, 'Could not perform Real Time Config.', err);
       }
