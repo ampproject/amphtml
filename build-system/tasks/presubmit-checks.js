@@ -16,7 +16,7 @@
 'use strict';
 
 const colors = require('ansi-colors');
-const gulp = require('gulp-help')(require('gulp'));
+const gulp = require('gulp');
 const log = require('fancy-log');
 const path = require('path');
 const srcGlobs = require('../config').presubmitGlobs;
@@ -107,20 +107,22 @@ const forbiddenTerms = {
       'build-system/pr-check/build.js',
       'build-system/pr-check/build-targets.js',
       'build-system/pr-check/checks.js',
-      'build-system/pr-check/dist.js',
-      'build-system/pr-check/dist-tests.js',
+      'build-system/pr-check/dist-bundle-size.js',
       'build-system/pr-check/e2e-tests.js',
       'build-system/pr-check/local-tests.js',
       'build-system/pr-check/remote-tests.js',
+      'build-system/pr-check/single-pass-tests.js',
       'build-system/pr-check/utils.js',
       'build-system/pr-check/validator-tests.js',
       'build-system/pr-check/visual-diff-tests.js',
       'build-system/pr-check/yarn-checks.js',
+      'build-system/tasks/check-types.js',
+      'build-system/tasks/dist.js',
+      'build-system/tasks/helpers.js',
       'validator/nodejs/index.js', // NodeJs only.
       'validator/engine/parse-css.js',
       'validator/engine/validator-in-browser.js',
       'validator/engine/validator.js',
-      'gulpfile.js',
     ],
     checkInTestFolder: true,
   },
@@ -586,6 +588,9 @@ const forbiddenTerms = {
       'build-system/tasks/prepend-global/index.js',
       'build-system/tasks/prepend-global/test.js',
       'build-system/tasks/visual-diff/index.js',
+      'build-system/tasks/build.js',
+      'build-system/tasks/dist.js',
+      'build-system/tasks/helpers.js',
       'dist.3p/current/integration.js',
       'src/config.js',
       'src/experiments.js',
@@ -593,7 +598,6 @@ const forbiddenTerms = {
       'src/web-worker/web-worker.js', // Web worker custom error reporter.
       'tools/experiments/experiments.js',
       'build-system/amp4test.js',
-      'gulpfile.js',
     ],
   },
   'data:image/svg(?!\\+xml;charset=utf-8,)[^,]*,': {
@@ -901,7 +905,7 @@ const forbiddenTermsSrcInclusive = {
       'build-system/shadow-viewer.js',
       'build-system/tasks/check-links.js',
       'build-system/tasks/extension-generator/index.js',
-      'gulpfile.js',
+      'build-system/tasks/helpers.js',
     ],
   },
   '\\<\\<\\<\\<\\<\\<': {
@@ -1134,7 +1138,7 @@ function isMissingTerms(file) {
  * Check a file for all the required terms and
  * any forbidden terms and log any errors found.
  */
-function checkForbiddenAndRequiredTerms() {
+function presubmit() {
   let forbiddenFound = false;
   let missingRequirements = false;
   return gulp.src(srcGlobs)
@@ -1154,10 +1158,14 @@ function checkForbiddenAndRequiredTerms() {
             'to the file)'));
         }
         if (forbiddenFound || missingRequirements) {
-          process.exit(1);
+          process.exitCode = 1;
         }
       });
 }
 
-gulp.task('presubmit', 'Run validation against files to check for forbidden ' +
-  'and required terms', checkForbiddenAndRequiredTerms);
+module.exports = {
+  presubmit,
+};
+
+presubmit.description =
+    'Run validation against files to check for forbidden and required terms';

@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-import {CONSENT_ITEM_STATE, hasStoredValue} from './consent-info';
+import {
+  CONSENT_ITEM_STATE,
+  getConsentStateValue,
+  hasStoredValue,
+} from './consent-info';
 import {CSS} from '../../../build/amp-consent-0.1.css';
 import {ConsentConfig, expandPolicyConfig} from './consent-config';
 import {ConsentPolicyManager} from './consent-policy-manager';
@@ -53,7 +57,6 @@ export const ACTION_TYPE = {
   REJECT: 'reject',
   DISMISS: 'dismiss',
 };
-
 
 export class AmpConsent extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -139,7 +142,6 @@ export class AmpConsent extends AMP.BaseElement {
      *   'postPromptUI': ...
      * }
      */
-
     const policyConfig = this.consentConfig_['policy'] || dict({});
 
     this.policyConfig_ = expandPolicyConfig(
@@ -210,7 +212,7 @@ export class AmpConsent extends AMP.BaseElement {
     });
 
     this.registerAction('prompt', () => {
-      this.scheduleDisplay_();
+      this.scheduleDisplay_(true);
     });
 
     this.enableExternalInteractions_();
@@ -268,8 +270,9 @@ export class AmpConsent extends AMP.BaseElement {
 
   /**
    * Returns a promise that attempt to show prompt UI
+   * @param {boolean} isActionPromptTrigger
    */
-  scheduleDisplay_() {
+  scheduleDisplay_(isActionPromptTrigger) {
     if (!this.notificationUiManager_) {
       dev().error(TAG, 'notification ui manager not found');
     }
@@ -289,22 +292,25 @@ export class AmpConsent extends AMP.BaseElement {
     }
 
     this.consentUIPending_ = true;
-    this.notificationUiManager_.registerUI(this.show_.bind(this));
+    this.notificationUiManager_.registerUI(
+        this.show_.bind(this, isActionPromptTrigger)
+    );
   }
 
   /**
    * Show prompt UI
    * Do not invoke the function except in scheduleDisplay_
+   * @param {boolean} isActionPromptTrigger
    * @return {!Promise}
    */
-  show_() {
+  show_(isActionPromptTrigger) {
     if (this.isPromptUIOn_) {
       dev().error(TAG,
           'Attempt to show an already displayed prompt UI');
     }
 
     this.vsync_.mutate(() => {
-      this.consentUI_.show();
+      this.consentUI_.show(isActionPromptTrigger);
       this.isPromptUIOn_ = true;
     });
 
@@ -377,6 +383,7 @@ export class AmpConsent extends AMP.BaseElement {
    */
   init_() {
     this.passSharedData_();
+    this.maybeSetDirtyBit_();
 
     this.getConsentRequiredPromise_().then(isConsentRequired => {
       return this.initPromptUI_(isConsentRequired);
@@ -441,6 +448,18 @@ export class AmpConsent extends AMP.BaseElement {
   }
 
   /**
+   * Set dirtyBit of the local consent value based on server response
+   */
+  maybeSetDirtyBit_() {
+    const responsePromise = this.getConsentRemote_();
+    responsePromise.then(response => {
+      if (response && !!response['forcePromptOnNext']) {
+        this.consentStateManager_.setDirtyBit();
+      }
+    });
+  }
+
+  /**
    * Returns a promise that if user is in the given geoGroup
    * @param {string} geoGroup
    * @return {Promise<boolean>}
@@ -465,30 +484,37 @@ export class AmpConsent extends AMP.BaseElement {
     if (!this.consentConfig_['checkConsentHref']) {
       this.remoteConfigPromise_ = Promise.resolve(null);
     } else {
-      // Note: Expect the request to look different in following versions.
-      const request = /** @type {!JsonObject} */ ({
-        'consentInstanceId': this.consentId_,
-      });
-      if (this.consentConfig_['clientConfig']) {
-        request['clientConfig'] = this.consentConfig_['clientConfig'];
-      }
-      const init = {
-        credentials: 'include',
-        method: 'POST',
-        body: request,
-        requireAmpResponseSourceOrigin: false,
-      };
-      const href =
+      const storeConsentPromise =
+          this.consentStateManager_.getLastConsentInstanceInfo();
+      this.remoteConfigPromise_ = storeConsentPromise.then(storedInfo => {
+        // Note: Expect the request to look different in following versions.
+        const request = /** @type {!JsonObject} */ ({
+          'consentInstanceId': this.consentId_,
+          'consentStateValue': getConsentStateValue(storedInfo['consentState']),
+          'consentString': storedInfo['consentString'],
+          'isDirty': !!storedInfo['isDirty'],
+        });
+        if (this.consentConfig_['clientConfig']) {
+          request['clientConfig'] = this.consentConfig_['clientConfig'];
+        }
+        const init = {
+          credentials: 'include',
+          method: 'POST',
+          body: request,
+          requireAmpResponseSourceOrigin: false,
+        };
+        const href =
           this.consentConfig_['checkConsentHref'];
-      assertHttpsUrl(href, this.element);
-      const ampdoc = this.getAmpDoc();
-      const sourceBase = getSourceUrl(ampdoc.getUrl());
-      const resolvedHref = resolveRelativeUrl(href, sourceBase);
-      const viewer = Services.viewerForDoc(ampdoc);
-      this.remoteConfigPromise_ = viewer.whenFirstVisible().then(() => {
-        return Services.xhrFor(this.win)
-            .fetchJson(resolvedHref, init)
-            .then(res => res.json());
+        assertHttpsUrl(href, this.element);
+        const ampdoc = this.getAmpDoc();
+        const sourceBase = getSourceUrl(ampdoc.getUrl());
+        const resolvedHref = resolveRelativeUrl(href, sourceBase);
+        const viewer = Services.viewerForDoc(ampdoc);
+        return viewer.whenFirstVisible().then(() => {
+          return Services.xhrFor(this.win)
+              .fetchJson(resolvedHref, init)
+              .then(res => res.json());
+        });
       });
     }
     return this.remoteConfigPromise_;
@@ -519,7 +545,7 @@ export class AmpConsent extends AMP.BaseElement {
             return false;
           }
           // Prompt
-          this.scheduleDisplay_();
+          this.scheduleDisplay_(false);
           return true;
           // TODO(@zhouyx):
           // Race condition on consent state change between schedule to
@@ -537,7 +563,7 @@ export class AmpConsent extends AMP.BaseElement {
 
     this.notificationUiManager_.onQueueEmpty(() => {
       this.vsync_.mutate(() => {
-        this.postPromptUI_.show();
+        this.postPromptUI_.show(false);
         // Will need to scheduleLayout for postPromptUI
         // upon request for using AMP component.
       });

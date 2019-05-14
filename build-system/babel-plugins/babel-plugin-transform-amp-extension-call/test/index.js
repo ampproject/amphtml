@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,6 @@
  * limitations under the License.
  */
 
-import {validateSrcPrefix, writeScript} from '../3p/3p';
+const runner = require('@babel/helper-plugin-test-runner').default;
 
-/**
- * @param {!Window} global
- * @param {!Object} data
- */
-export function chargeads(global, data) {
-  const {src} = data;
-  validateSrcPrefix(['https://www.chargeplatform.com/', 'https://tags.chargeplatform.com/'], src);
-  writeScript(global, src);
-}
+runner(__dirname);

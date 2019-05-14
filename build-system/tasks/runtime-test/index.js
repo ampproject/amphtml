@@ -33,15 +33,15 @@ const {
   reportTestStarted,
 } = require('./status-report');
 const {app} = require('../../test-server');
+const {build} = require('../build');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../../ctrlcHandler');
-const {getAdTypes, unitTestsToRun} = require('./helpers');
+const {css} = require('../css');
+const {getAdTypes, refreshKarmaWdCache, unitTestsToRun} = require('./helpers');
 const {getStdout} = require('../../exec');
 const {isTravisBuild} = require('../../travis');
 
-const {green, yellow, cyan, red} = colors;
 
-const preTestTasks = argv.nobuild ? [] : (
-  (argv.unit || argv.a4a || argv['local-changes']) ? ['css'] : ['build']);
+const {green, yellow, cyan, red} = colors;
 
 const batchSize = 4; // Number of Sauce Lab browsers
 
@@ -110,15 +110,13 @@ function getConfig() {
       [
         'SL_Chrome',
         'SL_Firefox',
-        // TODO(amp-infra): Restore this once tests are stable again.
-        // 'SL_Safari_11',
         'SL_Edge_17',
         'SL_Safari_12',
+        'SL_IE_11',
         // TODO(amp-infra): Evaluate and add more platforms here.
         //'SL_Chrome_Android_7',
         //'SL_iOS_11',
         //'SL_iOS_12',
-        //'SL_IE_11',
         'SL_Chrome_Beta',
         'SL_Firefox_Beta',
       ] : [
@@ -233,19 +231,22 @@ async function runTests() {
     c.reporters = ['mocha'];
   }
 
-  c.browserify.configure = function(bundle) {
-    bundle.on('prebundle', function() {
-      log(green('Transforming tests with'), cyan('browserify') + green('...'));
-    });
-    bundle.on('transform', function(tr) {
-      if (tr instanceof babelify) {
-        tr.once('babelify', function() {
-          process.stdout.write('.');
-        });
-      }
-    });
+  c.browserify = {
+    transform: [['babelify', {global: true}]],
+    configure: function(bundle) {
+      bundle.on('prebundle', function() {
+        log(green('Transforming tests with'),
+            cyan('browserify') + green('...'));
+      });
+      bundle.on('transform', function(tr) {
+        if (tr instanceof babelify) {
+          tr.once('babelify', function() {
+            process.stdout.write('.');
+          });
+        }
+      });
+    },
   };
-
   // Exclude chai-as-promised from runs on the full set of sauce labs browsers.
   // See test/chai-as-promised/chai-as-promised.js for why this is necessary.
   c.files = argv.saucelabs ? [] : config.chaiAsPromised;
@@ -296,6 +297,8 @@ async function runTests() {
     mochaTimeout: c.client.mocha.timeout,
     propertiesObfuscated: !!argv.single_pass,
     testServerPort: c.client.testServerPort,
+    testOnIe: !!argv.ie ||
+        (!!argv.saucelabs && saucelabsBrowsers.includes('SL_IE_11')),
   };
 
   if (argv.compiled) {
@@ -349,6 +352,9 @@ async function runTests() {
   // Listen for Ctrl + C to cancel testing
   const handlerProcess = createCtrlcHandler('test');
 
+  // Avoid Karma startup errors
+  refreshKarmaWdCache();
+
   // Run Sauce Labs tests in batches to avoid timeouts when connecting to the
   // Sauce Labs environment.
   let processExitCode;
@@ -389,7 +395,9 @@ async function runTests() {
   async function runTestInBatches() {
     const browsers = {stable: [], beta: []};
     for (const browserId of saucelabsBrowsers) {
-      browsers[browserId.toLowerCase().endsWith('_beta') ? 'beta' : 'stable']
+      browsers[
+          browserId.toLowerCase().endsWith('_beta')
+            ? 'beta' : 'stable']
           .push(browserId);
     }
     if (browsers.stable.length) {
@@ -532,10 +540,14 @@ async function runTests() {
   }
 }
 
-/**
- * Run tests after applying the prod / canary AMP config to the runtime.
- */
-gulp.task('test', 'Runs tests', preTestTasks, function() {
+async function test() {
+  if (!argv.nobuild) {
+    if (argv.unit || argv.a4a || argv['local-changes']) {
+      await css();
+    } else {
+      await build();
+    }
+  }
   // TODO(alanorozco): Come up with a more elegant check?
   global.AMP_TESTING = true;
 
@@ -543,32 +555,39 @@ gulp.task('test', 'Runs tests', preTestTasks, function() {
     printArgvMessages();
   }
   return runTests();
-}, {
-  options: {
-    'verbose': '  With logging enabled',
-    'testnames': '  Lists the name of each test being run',
-    'watch': '  Watches for changes in files, runs corresponding test(s)',
-    'saucelabs': '  Runs integration tests on saucelabs (requires setup)',
-    'saucelabs_lite': '  Runs tests on a subset of saucelabs browsers ' +
-        '(requires setup)',
-    'safari': '  Runs tests on Safari',
-    'firefox': '  Runs tests on Firefox',
-    'edge': '  Runs tests on Edge',
-    'ie': '  Runs tests on IE',
-    'chrome_canary': 'Runs tests on Chrome Canary',
-    'chrome_flags':
-      'Uses the given flags to launch Chrome',
-    'unit': '  Run only unit tests.',
-    'integration': '  Run only integration tests.',
-    'compiled': '  Changes integration tests to use production JS ' +
-        'binaries for execution',
-    'grep': '  Runs tests that match the pattern',
-    'files': '  Runs tests for specific files',
-    'nohelp': '  Silence help messages that are printed prior to test run',
-    'a4a': '  Runs all A4A tests',
-    'coverage': '  Run tests in code coverage mode',
-    'headless': '  Run tests in a headless Chrome window',
-    'local-changes': '  Run unit tests directly affected by the files ' +
-        'changed in the local branch',
-  },
-});
+}
+
+module.exports = {
+  test,
+};
+
+/* eslint "google-camelcase/google-camelcase": 0 */
+
+test.description = 'Runs tests';
+test.flags = {
+  'verbose': '  With logging enabled',
+  'testnames': '  Lists the name of each test being run',
+  'watch': '  Watches for changes in files, runs corresponding test(s)',
+  'saucelabs': '  Runs integration tests on saucelabs (requires setup)',
+  'saucelabs_lite': '  Runs tests on a subset of saucelabs browsers ' +
+      '(requires setup)',
+  'safari': '  Runs tests on Safari',
+  'firefox': '  Runs tests on Firefox',
+  'edge': '  Runs tests on Edge',
+  'ie': '  Runs tests on IE',
+  'chrome_canary': 'Runs tests on Chrome Canary',
+  'chrome_flags':
+    'Uses the given flags to launch Chrome',
+  'unit': '  Run only unit tests.',
+  'integration': '  Run only integration tests.',
+  'compiled': '  Changes integration tests to use production JS ' +
+      'binaries for execution',
+  'grep': '  Runs tests that match the pattern',
+  'files': '  Runs tests for specific files',
+  'nohelp': '  Silence help messages that are printed prior to test run',
+  'a4a': '  Runs all A4A tests',
+  'coverage': '  Run tests in code coverage mode',
+  'headless': '  Run tests in a headless Chrome window',
+  'local-changes': '  Run unit tests directly affected by the files ' +
+      'changed in the local branch',
+};

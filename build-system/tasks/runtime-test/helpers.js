@@ -22,6 +22,7 @@ const fs = require('fs');
 const log = require('fancy-log');
 const minimatch = require('minimatch');
 const path = require('path');
+const {exec} = require('../../exec');
 const {gitDiffNameOnlyMaster} = require('../../git');
 const {green, cyan, red} = colors;
 const {isTravisBuild} = require('../../travis');
@@ -217,4 +218,16 @@ function unitTestsToRun(unitTestPaths) {
   return testsToRun;
 }
 
-module.exports = {getAdTypes, unitTestsToRun};
+/**
+ * Mitigates https://github.com/karma-runner/karma-sauce-launcher/issues/117
+ * by refreshing the wd cache so that Karma can launch without an error.
+ */
+function refreshKarmaWdCache() {
+  exec('node ./node_modules/wd/scripts/build-browser-scripts.js');
+}
+
+module.exports = {
+  getAdTypes,
+  refreshKarmaWdCache,
+  unitTestsToRun,
+};

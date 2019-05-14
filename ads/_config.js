@@ -271,6 +271,13 @@ export const adConfig = {
   },
 
   'aja': {
+    prefetch: [
+      'https://cdn.as.amanad.adtdp.com/sdk/asot-amp.js',
+      'https://cdn.as.amanad.adtdp.com/sdk/asot-v2.js',
+    ],
+    preconnect: [
+      'https://ad.as.amanad.adtdp.com',
+    ],
   },
 
   'appvador': {
@@ -358,7 +365,7 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
-  'chargeads': {},
+  'chargeads': {}, // Deprecated, to be removed on 2019-05-23
 
   'colombia': {
     prefetch: 'https://static.clmbtech.com/ad/commons/js/colombia-amp.js',
@@ -498,6 +505,10 @@ export const adConfig = {
 
   'ibillboard': {},
 
+  'idealmedia': {
+    renderStartImplemented: false,
+  },
+
   'imedia': {
     prefetch: 'https://i.imedia.cz/js/im3.js',
     renderStartImplemented: true,
@@ -554,6 +565,10 @@ export const adConfig = {
   },
 
   'kuadio': {},
+
+  'lentainform': {
+    renderStartImplemented: false,
+  },
 
   'ligatus': {
     prefetch: 'https://ssl.ligatus.com/render/ligrend.js',
@@ -626,6 +641,10 @@ export const adConfig = {
 
   'meg': {
     renderStartImplemented: true,
+  },
+
+  'mgid': {
+    renderStartImplemented: false,
   },
 
   'microad': {
@@ -707,6 +726,8 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  'nws': {},
+
   'onead': {
     prefetch: 'https://ad-specs.guoshipartners.com/static/js/onead-amp.min.js',
     renderStartImplemented: true,
@@ -779,7 +800,6 @@ export const adConfig = {
   'pubmine': {
     prefetch: [
       'https://s.pubmine.com/head.js',
-      'https://s.pubmine.com/showad.js',
     ],
     preconnect: 'https://delivery.g.switchadhub.com',
     renderStartImplemented: true,

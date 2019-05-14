@@ -169,8 +169,9 @@ export class ConsentUI {
 
   /**
    * Display the UI.
+   * @param {boolean} isActionPromptTrigger
    */
-  show() {
+  show(isActionPromptTrigger) {
     if (!this.ui_) {
       // No prompt UI specified, nothing to do
       return;
@@ -182,7 +183,7 @@ export class ConsentUI {
     // Add to fixed layer
     this.baseInstance_.getViewport().addToFixedLayer(this.parent_);
     if (this.isCreatedIframe_) {
-      this.loadIframe_().then(() => {
+      this.loadIframe_(isActionPromptTrigger).then(() => {
         // It is safe to assume that the loadIframe_ promise will resolve
         // before resetIframe_. Because the iframe needs to be shown first
         // being hidden. CMP iframe is responsible to call consent-iframe-ready
@@ -406,28 +407,36 @@ export class ConsentUI {
 
   /**
    * Get the client information that needs to be passed to cmp iframe
+   * @param {boolean} isActionPromptTrigger
    * @return {!Promise<JsonObject>}
    */
-  getClientInfoPromise_() {
+  getClientInfoPromise_(isActionPromptTrigger) {
     const consentStatePromise =
         getServicePromiseForDoc(this.ampdoc_, CONSENT_STATE_MANAGER);
     return consentStatePromise.then(consentStateManager => {
-      return consentStateManager.getConsentInstanceInfo().then(consentInfo => {
-        return dict({
-          'clientConfig': this.clientConfig_,
-          'consentState': getConsentStateValue(consentInfo['consentState']),
-          'consentString': consentInfo['consentString'],
-        });
-      });
+      return consentStateManager.getLastConsentInstanceInfo().then(
+          consentInfo => {
+            return dict({
+              'clientConfig': this.clientConfig_,
+              // consentState to be deprecated
+              'consentState': getConsentStateValue(consentInfo['consentState']),
+              'consentStateValue':
+                  getConsentStateValue(consentInfo['consentState']),
+              'consentString': consentInfo['consentString'],
+              'promptTrigger': isActionPromptTrigger ? 'action' : 'load',
+              'isDirty': !!consentInfo['isDirty'],
+            });
+          });
     });
   }
 
   /**
    * Apply placeholder
    * Set up event listener to handle UI related messages.
+   * @param {boolean} isActionPromptTrigger
    * @return {!Promise}
    */
-  loadIframe_() {
+  loadIframe_(isActionPromptTrigger) {
     this.iframeReady_ = new Deferred();
     const {classList} = this.parent_;
     if (!elementByTag(this.parent_, 'placeholder')) {
@@ -437,11 +446,22 @@ export class ConsentUI {
     classList.add(consentUiClasses.loading);
     toggle(dev().assertElement(this.ui_), false);
 
-    const iframePromise = this.getClientInfoPromise_().then(clientInfo => {
-      this.ui_.setAttribute('name', JSON.stringify(clientInfo));
-      this.win_.addEventListener('message', this.boundHandleIframeMessages_);
-      insertAfterOrAtStart(this.parent_, dev().assertElement(this.ui_), null);
-    });
+    const iframePromise = this.getClientInfoPromise_(isActionPromptTrigger)
+        .then(clientInfo => {
+          this.ui_.setAttribute(
+              'name',
+              JSON.stringify(clientInfo)
+          );
+          this.win_.addEventListener(
+              'message',
+              this.boundHandleIframeMessages_
+          );
+          insertAfterOrAtStart(
+              this.parent_,
+              dev().assertElement(this.ui_),
+              null
+          );
+        });
 
     return Promise.all([
       iframePromise,
