@@ -482,7 +482,7 @@ async function runTests() {
 
     let totalStableSuccess = 0;
     let totalStableFailed = 0;
-    const partialTestRunComplete = async(browsers, results) => {
+    const partialTestRunCompleteFn = async(browsers, results) => {
       if (results.error) {
         // TODO(danielrozenberg): the last batch fails with an error because of
         // IE 11 failed tests. Uncomment this once there issues are resolved.
@@ -497,7 +497,7 @@ async function runTests() {
       const allBatchesExitCodes = await runTestInBatchesWithBrowsers(
         'stable',
         browsers.stable,
-        partialTestRunComplete
+        partialTestRunCompleteFn
       );
       await reportTestFinished(totalStableSuccess, totalStableFailed);
       if (allBatchesExitCodes) {
@@ -516,7 +516,7 @@ async function runTests() {
       const allBatchesExitCodes = await runTestInBatchesWithBrowsers(
         'beta',
         browsers.beta,
-        /* runComplete */ () => {});
+        /* runCompleteFn */ () => {});
       if (allBatchesExitCodes) {
         log(
           yellow('Some tests have failed on'),
@@ -540,13 +540,13 @@ async function runTests() {
    * @param {string} batchName a human readable name for the batch.
    * @param {!Array{string}} browsers list of SauceLabs browsers as
    *     customLaunchers IDs.
-   * @param {!Function} runComplete a function to execute on the `run_complete`
-   *     event. It should take two arguments, (browser, results), and return
-   *     nothing.
+   * @param {!Function} runCompleteFn a function to execute on the
+   *     `run_complete` event. It should take two arguments, (browser, results),
+   *     and return nothing.
    * @return {number} processExitCode
    */
   async function runTestInBatchesWithBrowsers(
-    batchName, browsers, runComplete) {
+    batchName, browsers, runCompleteFn) {
     let batch = 1;
     let startIndex = 0;
     let endIndex = batchSize;
@@ -568,7 +568,7 @@ async function runTests() {
         cyan(configBatch.browsers.length),
         green('Sauce Labs browser(s)...')
       );
-      batchExitCodes.push(await createKarmaServer(configBatch, runComplete));
+      batchExitCodes.push(await createKarmaServer(configBatch, runCompleteFn));
       startIndex = batch * batchSize;
       batch++;
       endIndex = Math.min(batch * batchSize, browsers.length);
@@ -580,12 +580,12 @@ async function runTests() {
   /**
    * Creates and starts karma server
    * @param {!Object} configBatch
-   * @param {!Function} runComplete a function to execute on the `run_complete`
-   *     event. It should take two arguments, (browser, results), and return
-   *     nothing.
+   * @param {!Function} runCompleteFn a function to execute on the
+   *     `run_complete` event. It should take two arguments, (browser, results),
+   *     and return nothing.
    * @return {!Promise<number>}
    */
-  function createKarmaServer(configBatch, runComplete) {
+  function createKarmaServer(configBatch, runCompleteFn) {
     let resolver;
     const deferred = new Promise(resolverIn => {
       resolver = resolverIn;
@@ -638,7 +638,7 @@ async function runTests() {
         console./*OK*/ log('\n');
         log(message);
       })
-      .on('run_complete', runComplete)
+      .on('run_complete', runCompleteFn)
       .start();
     return deferred;
   }
