@@ -14,9 +14,13 @@
  * limitations under the License.
  */
 
-import {IFRAME_TRANSPORTS} from './iframe-transport-vendors';
+import {
+  IFRAME_TRANSPORTS,
+  IFRAME_TRANSPORTS_CANARY,
+} from './iframe-transport-vendors';
 import {getMode} from '../../../src/mode';
 import {hasOwn} from '../../../src/utils/object';
+import {isCanary} from '../../../src/experiments';
 
 // Disable auto-sorting of imports from here on.
 /* eslint-disable sort-imports-es6-autofix/sort-imports-es6 */
@@ -264,7 +268,9 @@ ANALYTICS_CONFIG['adobeanalytics_nativeConfig']
 ANALYTICS_CONFIG['oewa']['triggers']['pageview']['iframe' +
 /* TEMPORARY EXCEPTION */ 'Ping'] = true;
 
-mergeIframeTransportConfig(ANALYTICS_CONFIG, IFRAME_TRANSPORTS);
+mergeIframeTransportConfig(
+    ANALYTICS_CONFIG,
+    isCanary(self) ? IFRAME_TRANSPORTS_CANARY : IFRAME_TRANSPORTS);
 
 /**
  * Merges iframe transport config.
