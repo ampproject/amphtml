@@ -18,7 +18,6 @@
 const argv = require('minimist')(process.argv.slice(2));
 const colors = require('ansi-colors');
 const fs = require('fs-extra');
-const gulp = require('gulp-help')(require('gulp'));
 const log = require('fancy-log');
 
 const year = new Date().getFullYear();
@@ -62,7 +61,7 @@ tags: {  # <${name}>
   tag_name: "${name.toUpperCase()}"
   requires_extension: "${name}"
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/${name}"
+  spec_url: "https://amp.dev/documentation/components/${name}"
   amp_layout: {
     supported_layouts: RESPONSIVE
   }
@@ -125,7 +124,7 @@ limitations under the License.
     <td><code>&lt;script async custom-element="${name}" src="https://cdn.ampproject.org/v0/${name}-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
     <td>FILL THIS IN</td>
   </tr>
   <tr>
@@ -273,7 +272,7 @@ function getExamplesFile(name) {
 `;
 }
 
-function makeExtension() {
+async function makeExtension() {
   if (!argv.name) {
     log(colors.red(
         'Error! Please pass in the "--name" flag with a value'));
@@ -304,8 +303,11 @@ function makeExtension() {
       examplesFile);
 }
 
-gulp.task('make-extension', 'Create an extension skeleton', makeExtension, {
-  options: {
-    name: '  The name of the extension. Preferable prefixed with `amp-*`',
-  },
-});
+module.exports = {
+  makeExtension,
+};
+
+makeExtension.description = 'Create an extension skeleton';
+makeExtension.flags = {
+  name: '  The name of the extension. Preferable prefixed with `amp-*`',
+};
