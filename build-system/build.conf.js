@@ -23,7 +23,6 @@ const defaultPlugins = [
   localPlugin('transform-parenthesize-expression'),
 ];
 
-// TODO(alanorozco): Merge on `defaultPlugins` once multipass is gone.
 const singlepassPlugins = [
   ...defaultPlugins,
   localPlugin('is_minified-constant-transformer'),
