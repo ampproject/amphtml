@@ -107,12 +107,13 @@ git checkout -b <branch name> master
 
 ## Create commits to contain your changes
 
-1.  Edit files in your favorite editor
-2. If your code requires a new dependency, run `yarn add --dev --exact [packagename]`, which automatically updates `package.json` and `yarn.lock`
-3. If you manually edited `package.json`, run `yarn` to install the dependency and generate an updated `yarn.lock` file
-4. Add each file you change: `git add <file>`
-5. Create a commit: `git commit -m "<your commit message>"`
-6. To avoid having to run `git add` on each file, you can use `git commit -a -m "<your commit message>"` instead.
+1. Edit files in your favorite editor
+2. Make sure your changes satisfy AMP's [code quality and style rules](getting-started-e2e.md#code-quality-and-style)
+3. If your code requires a new dependency, run `yarn add --dev --exact [packagename]`, which automatically updates `package.json` and `yarn.lock`
+4. If you manually edited `package.json`, run `yarn` to install the dependency and generate an updated `yarn.lock` file
+5. Add each file you change: `git add <file>`
+6. Create a commit: `git commit -m "<your commit message>"`
+7. To avoid having to run `git add` on each file, you can use `git commit -a -m "<your commit message>"` instead.
 
 ## Pull the latest changes
 

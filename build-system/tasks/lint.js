@@ -139,6 +139,15 @@ function runLinter(filePath, stream, options) {
               'Since this is a destructive operation (that edits your files',
               'in-place), make sure you commit before running the command.'
             );
+            log(
+              colors.yellow('NOTE 3:'),
+              'If you see any',
+              colors.cyan('prettier/prettier'),
+              'errors, read',
+              colors.cyan(
+                'https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-e2e.md#code-quality-and-style'
+              )
+            );
           }
         }
         if (options.fix && Object.keys(fixedFiles).length > 0) {
