@@ -477,19 +477,27 @@ class IntegrationFixture {
       undefined : this.spec.experiments.join(',');
     const extensions = this.spec.extensions == undefined ?
       undefined : this.spec.extensions.join(',');
+    const ampDocType = this.spec.ampdoc || 'single';
 
     let url = this.spec.amp === false
       ? '/amp4test/compose-html'
       : '/amp4test/compose-doc';
+
     if (this.spec.params) {
       url = addParamsToUrl(url, this.spec.params);
     }
 
     return new Promise((resolve, reject) => {
-      env.iframe = createElementWithAttributes(document, 'iframe', {
-        src: addParamsToUrl(url, {body, css, experiments, extensions})
-            + `#${this.hash}`,
-      });
+      const docUrl = addParamsToUrl(url, {body, css, experiments, extensions})
+            + `#${this.hash}`;
+
+      let src = docUrl;
+      // If shadow mode, wrap doc in shadow viewer.
+      if (ampDocType == 'shadow') {
+        src = addParamsToUrl('/amp4test/compose-shadow', {docUrl});
+      }
+
+      env.iframe = createElementWithAttributes(document, 'iframe', {src});
       env.iframe.onload = function() {
         env.win = env.iframe.contentWindow;
         resolve();
