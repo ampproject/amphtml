@@ -47,14 +47,23 @@ The following are **not** considered breaking changes:
 
 ## Deprecations
 
-In rare cases, the AMP project may decide that an existing feature or API must be removed. Such breaking changes must follow the AMP deprecations process prior to removal. Deprecations must be publicly discussed and provide significant user benefit that justifies additional work for page developers.
+In rare cases, the AMP project may decide that an existing feature or API must be removed. Such breaking changes must follow the AMP deprecation process prior to removal.
 
-The process for deprecations follows the [process for significant changes](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#process-for-significant-changes) (including the use of Intent-to-implement and Intent-to-ship issues and need for approval from 3 members of the [Approvers Working Group](https://github.com/ampproject/wg-approvers)).  In addition:
-- After the I2I is created, at least 2 weeks of open discussion should be allowed before proceeding with implementation.
-- [Announce](#announcements) the change on the mailing list and on [Slack](https://amphtml.slack.com).
-- Start warning for pages that might break via the developer console.
-- Give developers 6 weeks to apply changes.
+Deprecations must be publicly discussed and provide significant user benefit that justifies additional work for page developers.
+
+The process for deprecations is similar to the [process for significant changes](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#process-for-significant-changes), but has some unique requirements:
+- [File](https://github.com/ampproject/amphtml/issues/new/choose) an [Intent-to-Deprecate (I2D](https://github.com/ampproject/amphtml/labels/INTENT%20TO%20DEPRECATE) issue describing the feature that is being deprecated, the motivation for deprecating it, and the plan for deprecating/removing the feature.
+  - If you intend to remove the feature immediately after the warning period described below you may make your Intent-to-Deprecate issue an Intent-to-Deprecate-and-Remove issue (by modifying the title and adding the [INTENT TO REMOVE label](https://github.com/ampproject/amphtml/labels/INTENT%20TO%20REMOVE) to it).
+  - Otherwise if you do not have a concrete timeline for removal you may file a separate [Intent-to-Remove issue](https://github.com/ampproject/amphtml/labels/INTENT%20TO%20REMOVE) to track removal of the feature.
+- Allow at least 2 weeks of open discussion after the I2D is created before proceeding with the deprecation of the feature.
+- The deprecation and removal requires approval from at least 3 members of the [Approvers Working Group](https://github.com/ampproject/wg-approvers).
 - Apply new behavior to old content in a way that minimizes breakage.
+- [Announce](#announcements) the deprecation on the mailing list and on [Slack](https://amphtml.slack.com)
+- Start warning for pages that might break via the developer console.
+- Give developers at least 6 weeks after your deprecation warning is in production to apply changes before removing the feature.
+- If you did not include removal in your I2D, file a separate Intent-to-Remove (I2R) when you are ready to remove the deprecated feature.
+
+
 
 ### Version deprecations
 
