@@ -44,12 +44,8 @@ function buildRuntime_() {
 
 function launchWebServer_() {
   webServerProcess_ = execScriptAsync(
-      `gulp serve --host ${HOST} --port ${PORT} ${process.env.WEBSERVER_QUIET}`,
-      {
-        stdio: argv.webserver_debug ?
-          ['ignore', process.stdout, process.stderr] :
-          'ignore',
-      });
+      `gulp serve --host ${HOST} --port ${PORT}`,
+      {stdio: 'ignore'});
 
   let resolver;
   const deferred = new Promise(resolverIn => {
@@ -136,7 +132,6 @@ async function e2e() {
 
       // end task
       process.exitCode = failures ? 1 : 0;
-      execOrDie('ps -e'); // log processes
       await resolver();
     });
   }
