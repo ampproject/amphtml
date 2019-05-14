@@ -44,7 +44,8 @@ function buildRuntime_() {
 
 function launchWebServer_() {
   webServerProcess_ = execScriptAsync(
-      `gulp serve --host ${HOST} --port ${PORT}`);
+      `gulp serve --host ${HOST} --port ${PORT}`,
+      {stdio: 'ignore'});
 
   let resolver;
   const deferred = new Promise(resolverIn => {
@@ -62,9 +63,9 @@ function launchWebServer_() {
   return deferred;
 }
 
-function cleanUp_() {
+async function cleanUp_() {
   if (webServerProcess_ && !webServerProcess_.killed) {
-    webServerProcess_.kill('SIGINT');
+    webServerProcess_.kill('SIGKILL');
   }
 }
 
@@ -85,10 +86,9 @@ async function e2e() {
   installPackages_();
 
   // set up promise to return to gulp.task()
-  let resolver, rejecter;
-  const deferred = new Promise((resolverIn, rejecterIn) => {
+  let resolver;
+  const deferred = new Promise(resolverIn => {
     resolver = resolverIn;
-    rejecter = rejecterIn;
   });
 
   require('@babel/register');
@@ -126,17 +126,13 @@ async function e2e() {
       });
     }
 
-    mocha.run(failures => {
+    mocha.run(async failures => {
       // end web server
-      cleanUp_();
+      await cleanUp_();
 
       // end task
-      if (failures) {
-        process.exitCode = 1;
-        rejecter();
-      }
-      process.exit();
-      resolver();
+      process.exitCode = failures ? 1 : 0;
+      await resolver();
     });
   }
   else {
