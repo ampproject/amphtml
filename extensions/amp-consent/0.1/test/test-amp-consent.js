@@ -184,11 +184,15 @@ describes.realWin('amp-consent', {
       yield macroTask();
       expect(requestBody).to.deep.equal({
         'consentInstanceId': 'ABC',
+        'consentStateValue': 'unknown',
+        'consentString': undefined,
+        'isDirty': false,
       });
     });
 
     it('read promptIfUnknown from server response', function* () {
       ampConsent.buildCallback();
+      yield macroTask();
       return ampConsent.getConsentRequiredPromise_().then(isRequired => {
         expect(isRequired).to.be.true;
       });

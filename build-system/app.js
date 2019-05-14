@@ -706,16 +706,30 @@ app.use('/impression-proxy/', (req, res) => {
   // Or fake response with status 204 if viewer replaceUrl is provided
 });
 
+let forcePromptOnNext = false;
 app.post('/get-consent-v1/', (req, res) => {
   cors.assertCors(req, res, ['POST']);
   const body = {
     'promptIfUnknown': true,
+    'forcePromptOnNext': forcePromptOnNext,
     'sharedData': {
       'tfua': true,
       'coppa': true,
     },
   };
   res.json(body);
+});
+
+app.get('/get-consent-v1-set/', (req, res) => {
+  cors.assertCors(req, res, ['GET']);
+  const value = req.query['forcePromptOnNext'];
+  if (value == 'false' || value == '0') {
+    forcePromptOnNext = false;
+  } else {
+    forcePromptOnNext = true;
+  }
+  res.json({});
+  res.end();
 });
 
 app.post('/get-consent-no-prompt/', (req, res) => {
