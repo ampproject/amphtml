@@ -1261,7 +1261,8 @@ app.get('/dist/ww(.max)?.js', (req, res) => {
 });
 
 /**
- * Shadow viewer
+ * Shadow viewer. Fetches shadow runtime from cdn by default.
+ * Setting the param useLocal=1 will load the runtime from the local build.
  */
 app.use('/shadow/', (req, res) => {
   const {url} = req;
@@ -1271,10 +1272,16 @@ app.use('/shadow/', (req, res) => {
     'https://cdn.ampproject.org/' :
     `${path.dirname(url)}/`;
 
-  res.end(renderShadowViewer({
+  const viewerHtml = renderShadowViewer({
     src: req.url.replace(/^\//, ''),
     baseHref,
-  }));
+  });
+
+  if (!req.query.useLocal) {
+    res.end(viewerHtml);
+    return;
+  }
+  res.end(replaceUrls(pc.env.SERVE_MODE, viewerHtml));
 });
 
 /**
