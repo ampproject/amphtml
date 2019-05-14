@@ -16,30 +16,29 @@
 
 const localPlugin = name => require.resolve(`./babel-plugins/${name}`);
 
-const transformLogMethods = [
-  localPlugin('babel-plugin-transform-log-methods'),
-  {
-    // TODO(alanorozco): Remove option once serving infra is up.
-    replaceCallArguments: false,
-  },
+/** Applied to singlepass and multipass. */
+const defaultPlugins = [
+  [
+    localPlugin('babel-plugin-transform-log-methods'),
+    {
+      // TODO(alanorozco): Remove option once serving infra is up.
+      replaceCallArguments: false,
+    },
+  ],
+  localPlugin('babel-plugin-transform-parenthesize-expression'),
 ];
 
-/** Required for any compilation mode since babel will mangle typecasts. */
-const parenthesizeExpression = localPlugin(
-    'babel-plugin-transform-parenthesize-expression'
-);
-
 const singlepassPlugins = [
-  parenthesizeExpression,
-  transformLogMethods,
+  ...defaultPlugins,
   localPlugin('babel-plugin-transform-amp-asserts'),
   localPlugin('babel-plugin-transform-amp-extension-call'),
   localPlugin('babel-plugin-transform-html-template'),
   localPlugin('babel-plugin-transform-parenthesize-expression'),
+  localPlugin('babel-plugin-transform-version-call'),
   localPlugin('babel-plugin-is_minified-constant-transformer'),
 ];
 
-const multipassPlugins = [parenthesizeExpression, transformLogMethods];
+const multipassPlugins = [...defaultPlugins];
 
 /** Polyfills to be removed from ESM build. */
 const esmFilteredPolyfills = {

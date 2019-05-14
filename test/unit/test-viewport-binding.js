@@ -91,6 +91,10 @@ describes.realWin('ViewportBindingNatural', {ampCss: true}, env => {
     expect(binding.requiresFixedLayerTransfer()).to.be.false;
   });
 
+  it('should NOT require override of the global scrollTo', () => {
+    expect(binding.overrideGlobalScrollTo()).to.be.false;
+  });
+
   it('should connect events: subscribe to scroll and resize events', () => {
     expect(win.eventListeners.count('resize')).to.equal(1);
     expect(win.eventListeners.count('scroll')).to.equal(1);
@@ -241,6 +245,7 @@ describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
     installDocService(win, /* isSingleDoc */ true);
     installDocumentStateService(win);
     installVsyncService(win);
+    installPlatformService(win);
     vsync = Services.vsyncFor(win);
     binding = new ViewportBindingIosEmbedWrapper_(win);
     binding.connect();
@@ -251,8 +256,42 @@ describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
     expect(style.minHeight).to.equal('0px');
   });
 
-  it('should NOT require fixed layer transferring', () => {
+  it('should require override of the global scrollTo', () => {
+    expect(binding.overrideGlobalScrollTo()).to.be.true;
+  });
+
+  // TODO(#22220): Remove when "ios-fixed-no-transfer" experiment is cleaned up.
+  it('should require fixed layer transferring', () => {
     expect(binding.requiresFixedLayerTransfer()).to.be.true;
+  });
+
+  // TODO(#22220): Remove when "ios-fixed-no-transfer" experiment is cleaned up.
+  it('should require fixed layer transferring for later iOS w/o experiment',
+      () => {
+        sandbox.stub(Services.platformFor(win), 'getIosVersionString')
+            .callsFake(() => '12.2');
+        expect(binding.requiresFixedLayerTransfer()).to.be.true;
+      });
+
+  it('should configure fixed layer transferring based on iOS version', () => {
+    toggleExperiment(win, 'ios-fixed-no-transfer');
+    let version;
+    sandbox.stub(Services.platformFor(win), 'getIosVersionString')
+        .callsFake(() => version);
+
+    // 12.1 is still out.
+    version = '12.1';
+    expect(binding.requiresFixedLayerTransfer()).to.be.true;
+
+    // 12.2 and up are fixed.
+    version = '12.2';
+    expect(binding.requiresFixedLayerTransfer()).to.be.false;
+
+    version = '12.3';
+    expect(binding.requiresFixedLayerTransfer()).to.be.false;
+
+    version = '13.0';
+    expect(binding.requiresFixedLayerTransfer()).to.be.false;
   });
 
   it('should start w/o overscroll and set it on doc ready', () => {
@@ -519,12 +558,11 @@ describes.realWin('ViewportBindingIosEmbedShadowRoot_', {ampCss: true}, env => {
     });
 
     it('should NOT require fixed layer transferring', () => {
-      expect(binding.requiresFixedLayerTransfer()).to.be.true;
+      expect(binding.requiresFixedLayerTransfer()).to.be.false;
     });
 
-    it('should require fixed layer transferring with experiment', () => {
-      toggleExperiment(win, 'ios-embed-sd-notransfer', true);
-      expect(binding.requiresFixedLayerTransfer()).to.be.false;
+    it('should require override of the global scrollTo', () => {
+      expect(binding.overrideGlobalScrollTo()).to.be.true;
     });
 
     it('should start w/o overscroll and set it on doc ready', () => {

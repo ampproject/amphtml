@@ -25,9 +25,8 @@ const {
   buildExaminer,
   buildExperiments,
   buildWebWorker,
-  compile,
+  compileAllMinifiedTargets,
   compileJs,
-  enableLocalTesting,
   endBuildStep,
   hostname,
   mkdirSync,
@@ -82,22 +81,17 @@ async function dist() {
       })
       .then(() => {
         return Promise.all([
-          compile(false, true, true),
+          compileAllMinifiedTargets(),
           // NOTE: When adding a line here,
           // consider whether you need to include polyfills
           // and whether you need to init logging (initLogConstructor).
-          buildAlp({minify: true, watch: false, preventRemoveAndMakeDir: true}),
-          buildExaminer({
-            minify: true, watch: false, preventRemoveAndMakeDir: true}),
-          buildWebWorker({
-            minify: true, watch: false, preventRemoveAndMakeDir: true}),
-          buildExtensions({minify: true, preventRemoveAndMakeDir: true}),
-          buildExperiments({
-            minify: true, watch: false, preventRemoveAndMakeDir: true}),
-          buildLoginDone({
-            minify: true, watch: false, preventRemoveAndMakeDir: true}),
-          buildWebPushPublisherFiles({
-            minify: true, watch: false, preventRemoveAndMakeDir: true}),
+          buildAlp({minify: true, watch: false}),
+          buildExaminer({minify: true, watch: false}),
+          buildWebWorker({minify: true, watch: false}),
+          buildExtensions({minify: true, watch: false}),
+          buildExperiments({minify: true, watch: false}),
+          buildLoginDone({minify: true, watch: false}),
+          buildWebPushPublisherFiles({minify: true, watch: false}),
           copyCss(),
         ]);
       }).then(() => {
@@ -110,20 +104,6 @@ async function dist() {
       }).then(() => {
         return copyAliasExtensions();
       }).then(() => {
-        if (argv.fortesting) {
-          return Promise.all([
-            enableLocalTesting('dist/v0.js'),
-            enableLocalTesting('dist/amp4ads-v0.js'),
-            enableLocalTesting('dist/shadow-v0.js'),
-          ]);
-          // TODO(#18934, erwinm): Re-enable when the ESM build is fixed.
-          // .then(() => {
-          //   if (!argv.single_pass) {
-          //     return enableLocalTesting('dist/v0-esm.js')
-          //   }
-          // });
-        }
-      }).then(() => {
         if (argv.esm) {
           return Promise.all([
             createModuleCompatibleES5Bundle('v0.js'),
@@ -132,10 +112,6 @@ async function dist() {
           ]);
         } else {
           return Promise.resolve();
-        }
-      }).then(() => {
-        if (argv.fortesting) {
-          return enableLocalTesting('dist.3p/current-min/f.js');
         }
       }).then(() => exitCtrlcHandler(handlerProcess));
 }
@@ -241,7 +217,6 @@ function buildWebPushPublisherFile(version, fileName, watch, options) {
           includePolyfills: true,
           minify: options.minify || argv.minify,
           minifiedName,
-          preventRemoveAndMakeDir: options.preventRemoveAndMakeDir,
           extraGlobs: [
             tempBuildDir + '*.js',
           ],
@@ -336,7 +311,6 @@ async function buildLoginDoneVersion(version, options) {
           includePolyfills: true,
           minify: options.minify || argv.minify,
           minifiedName,
-          preventRemoveAndMakeDir: options.preventRemoveAndMakeDir,
           latestName,
           extraGlobs: [
             buildDir + 'amp-login-done-0.1.max.js',

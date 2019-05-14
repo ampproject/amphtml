@@ -151,11 +151,6 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       entryModuleFilename = entryModuleFilenames;
       entryModuleFilenames = [entryModuleFilename];
     }
-    // If undefined/null or false then we're ok executing the deletions
-    // and mkdir.
-    if (!options.preventRemoveAndMakeDir) {
-      cleanupBuildDir();
-    }
     const unneededFiles = [
       'build/fake-module/third_party/babel/custom-babel-helpers.js',
     ];
@@ -368,7 +363,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
     };
 
     // For now do type check separately
-    if (options.checkTypes || options.typeCheckOnly) {
+    if (options.typeCheckOnly) {
       // Don't modify compilation_level to a lower level since
       // it won't do strict type checking if its whitespace only.
       compilerOptions.define.push('TYPECHECK_ONLY=true');

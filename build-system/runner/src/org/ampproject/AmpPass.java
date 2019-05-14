@@ -50,21 +50,18 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
   private final ImmutableMap<String, Node> prodAssignmentReplacements;
   final boolean isProd;
   private final String amp_version;
-  final boolean isSinglePass;
 
   public AmpPass(AbstractCompiler compiler, boolean isProd,
         ImmutableSet<String> stripTypeSuffixes,
         ImmutableMap<String, Node> assignmentReplacements,
         ImmutableMap<String, Node> prodAssignmentReplacements,
-        String amp_version,
-        boolean isSinglePass) {
+        String amp_version) {
     this.compiler = compiler;
     this.stripTypeSuffixes = stripTypeSuffixes;
     this.isProd = isProd;
     this.assignmentReplacements = assignmentReplacements;
     this.prodAssignmentReplacements = prodAssignmentReplacements;
     this.amp_version = amp_version;
-    this.isSinglePass = isSinglePass;
   }
 
   @Override public void process(Node externs, Node root) {
@@ -78,7 +75,7 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
   @Override public void visit(NodeTraversal t, Node n, Node parent) {
     if (isCallRemovable(n)) {
       maybeEliminateCallExceptFirstParam(n, parent);
-    } else if (!this.isSinglePass && isAmpExtensionCall(n)) {
+    } else if (isAmpExtensionCall(n)) {
       inlineAmpExtensionCall(n, parent);
     // Remove any `getMode().localDev` and `getMode().test` calls and replace it with `false`.
     } else if (isProd && isFunctionInvokeAndPropAccess(n, "$mode.getMode",
@@ -197,7 +194,7 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
     }
 
     String name = buildQualifiedName(n);
-    if (!name.equals("version$$module$src$internal_version()")) {
+    if (!name.equals("internalRuntimeVersion$$module$src$internal_version()")) {
       return;
     }
 
