@@ -249,6 +249,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [AppVador](../../ads/appvador.md)
 - [Atomx](../../ads/atomx.md)
 - [Baidu](../../ads/baidu.md)
+- [BeaverAds](../../ads/beaverads.md)
 - [BeOpinion](../amp-beopinion/amp-beopinion.md)
 - [Bidtellect](../../ads/bidtellect.md)
 - [brainy](../../ads/brainy.md)
