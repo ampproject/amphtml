@@ -512,7 +512,7 @@ export class Log {
           }, noop)
           .then(opt_messages => {
             if (opt_messages) {
-              this.messages_ = /** @type {!JsonObject} */ opt_messages;
+              this.messages_ = /** @type {!JsonObject} */ (opt_messages);
             }
           });
     }
