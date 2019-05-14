@@ -483,14 +483,19 @@ async function runTests() {
     let totalStableSuccess = 0;
     let totalStableFailed = 0;
     const partialTestRunCompleteFn = async(browsers, results) => {
-      if (results.error) {
-        // TODO(danielrozenberg): the last batch fails with an error because of
-        // IE 11 failed tests. Uncomment this once there issues are resolved.
-        // await reportTestErrored();
-      } else {
-        totalStableSuccess += results.success;
-        totalStableFailed += results.failed;
-      }
+      // TODO(danielrozenberg): some of the batches fail with an error because
+      // IE 11 tests are running, but there are zero of them, so Karma considers
+      // this a failure. When tests begin opting-in to IE 11 we should wrap this
+      // with an `if (results.error)` clause and report an error instead of
+      // passes/failures.
+      //
+      // For now, the results might not be the most accurate. i.e., if one
+      // browser really errors out but all the rest have only passing tests,
+      // this will report a successful test run with only the passed tests.
+      //
+      // This is okay for now because the Travis check will fail on the error.
+      totalStableSuccess += results.success;
+      totalStableFailed += results.failed;
     };
 
     if (browsers.stable.length) {
