@@ -37,8 +37,8 @@ let inProgress = 0;
 const MAX_PARALLEL_CLOSURE_INVOCATIONS = argv.single_pass ? 1 : 4;
 
 /**
- * `gulpIf` Predicate for gulp streams that aren't inside third_party.
- * Excludes third_party from transforms that are only safe for our own code.
+ * `gulpIf` predicate for gulp streams that aren't inside third_party, to
+ * pass them through transforms that are only safe for our own code.
  * @param {Vinyl} file
  * @return {boolean}
  */
