@@ -14,7 +14,7 @@
 # limitations under the license.
 
 tags: {  # amp-ad-custom
-  html_format: AMP  # Ads are not allowed inside ads
+  html_format: AMP  # AMP only as ads are not allowed inside AMP Ads
   tag_name: "SCRIPT"
   spec_name: "amp-ad-custom extension .js script"
   extension_spec: {
@@ -25,7 +25,7 @@ tags: {  # amp-ad-custom
   attr_lists: "common-extension-attrs"
 }
 tags: {  # <amp-ad-custom>
-  html_format: AMP  # Ads are not allowed inside ads
+  html_format: AMP  # AMP only as ads are not allowed inside AMP Ads
   tag_name: "AMP-AD-CUSTOM"
   requires_extension: "amp-ad-custom"
   # If modifying disallowed_ancestors, then please also edit
