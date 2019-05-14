@@ -17,7 +17,6 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const babel = require('gulp-babel');
-const conf = require('../build.conf');
 const fs = require('fs-extra');
 const gulp = require('gulp');
 const gulpIf = require('gulp-if');
@@ -25,6 +24,7 @@ const nop = require('gulp-nop');
 const rename = require('gulp-rename');
 const rimraf = require('rimraf');
 const sourcemaps = require('gulp-sourcemaps');
+const {defaultPlugins: plugins} = require('../build.conf');
 const {gulpClosureCompile, handleCompilerError, handleTypeCheckError} = require('./closure-compile');
 const {isTravisBuild} = require('../travis');
 const {shortenLicense, shouldShortenLicense} = require('./shorten-license');
@@ -400,13 +400,10 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
           .on('end', resolve);
     }
 
-    // Exclude files in `third_party` from babel transforms.
-    const isFirstPartyFile = ({path}) => path.indexOf('third_party') < 0;
-
     return gulp.src(srcs, {base: '.'})
         .pipe(gulpIf(shouldShortenLicense, shortenLicense()))
         .pipe(sourcemaps.init({loadMaps: true}))
-        .pipe(gulpIf(isFirstPartyFile, babel({plugins: conf.plugins()})))
+        .pipe(gulpIf(({path}) => !/third_party/.test(path), babel({plugins})))
         .pipe(gulpClosureCompile(compilerOptionsArray))
         .on('error', err => {
           handleCompilerError(outputFilename);

@@ -14,34 +14,26 @@
  * limitations under the License.
  */
 
-const localPlugin = name => require.resolve(`./babel-plugins/${name}`);
+const localPlugin = name =>
+  require.resolve(`./babel-plugins/babel-plugin-${name}`);
 
-/** Applied to singlepass and multipass. */
+/** Apply to singlepass and multipass. */
 const defaultPlugins = [
-  [
-    localPlugin('babel-plugin-transform-log-methods'),
-    {
-      // TODO(alanorozco): Remove option once serving infra is up.
-      replaceCallArguments: false,
-    },
-  ],
-  localPlugin('babel-plugin-transform-parenthesize-expression'),
+  // TODO(alanorozco): Remove `replaceCallArguments` once serving infra is up.
+  [localPlugin('transform-log-methods'), {replaceCallArguments: false}],
+  localPlugin('transform-parenthesize-expression'),
 ];
 
 const singlepassPlugins = [
   ...defaultPlugins,
-  localPlugin('babel-plugin-transform-amp-asserts'),
-  localPlugin('babel-plugin-transform-amp-extension-call'),
-  localPlugin('babel-plugin-transform-html-template'),
-  localPlugin('babel-plugin-transform-parenthesize-expression'),
-  localPlugin('babel-plugin-transform-version-call'),
-  localPlugin('babel-plugin-is_minified-constant-transformer'),
+  localPlugin('is_minified-constant-transformer'),
+  localPlugin('transform-amp-asserts'),
+  localPlugin('transform-amp-extension-call'),
+  localPlugin('transform-html-template'),
+  localPlugin('transform-version-call'),
 ];
 
-const multipassPlugins = [...defaultPlugins];
-
-/** Polyfills to be removed from ESM build. */
-const esmFilteredPolyfills = {
+const esmRemovedImports = {
   './polyfills/document-contains': ['installDocContains'],
   './polyfills/domtokenlist-toggle': ['installDOMTokenListToggle'],
   './polyfills/fetch': ['installFetch'],
@@ -52,46 +44,30 @@ const esmFilteredPolyfills = {
 };
 
 /**
- * @typedef {{
- *   isSinglepass: (boolean|undefined),
- *   isEsmBuild: (boolean|undefined),
- *   isCommonJsModule: (boolean|undefined),
- *   isForTesting: (boolean|undefined),
- * }}
- */
-let BuildConfigDef;
-
-/**
- * Resolves babel plugins to be applied before compiling through Closure.
- * @param {BuildConfigDef} buildConfig
- * @return {!Array<(string|!Array<string|!Object>)>}
+ * Resolves babel plugins to be applied before compiling on singlepass through
+ * Closure.
+ * @param {!Object<string, boolean|undefined>} buildConfig
+ * @return {!Array<string|!Array<string|!Object>>}
  */
 function plugins({
-  isSinglepass,
   isEsmBuild,
   isCommonJsModule,
   isForTesting,
-} = {}) {
-  if (!isSinglepass) {
-    return multipassPlugins;
-  }
+}) {
   const pluginsToApply = [...singlepassPlugins];
   if (isEsmBuild) {
-    pluginsToApply.push([
-      'babel-plugin-filter-imports',
-      {imports: esmFilteredPolyfills},
-    ]);
+    pluginsToApply.push(['filter-imports', {imports: esmRemovedImports}]);
   }
   if (isCommonJsModule) {
-    pluginsToApply.push('babel-plugin-transform-commonjs-es2015-modules');
+    pluginsToApply.push('transform-commonjs-es2015-modules');
   }
   if (!isForTesting) {
     pluginsToApply.push(
-        localPlugin('babel-plugin-amp-mode-transformer'),
-        localPlugin('babel-plugin-is_dev-constant-transformer')
+        localPlugin('amp-mode-transformer'),
+        localPlugin('is_dev-constant-transformer')
     );
   }
   return pluginsToApply;
 }
 
-module.exports = {plugins};
+module.exports = {defaultPlugins, plugins};
