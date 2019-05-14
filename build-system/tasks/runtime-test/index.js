@@ -480,22 +480,16 @@ async function runTests() {
       ].push(browserId);
     }
 
+    let errored = false;
     let totalStableSuccess = 0;
     let totalStableFailed = 0;
     const partialTestRunCompleteFn = async(browsers, results) => {
-      // TODO(danielrozenberg): some of the batches fail with an error because
-      // IE 11 tests are running, but there are zero of them, so Karma considers
-      // this a failure. When tests begin opting-in to IE 11 we should wrap this
-      // with an `if (results.error)` clause and report an error instead of
-      // passes/failures.
-      //
-      // For now, the results might not be the most accurate. i.e., if one
-      // browser really errors out but all the rest have only passing tests,
-      // this will report a successful test run with only the passed tests.
-      //
-      // This is okay for now because the Travis check will fail on the error.
-      totalStableSuccess += results.success;
-      totalStableFailed += results.failed;
+      if (results.error) {
+        errored = true;
+      } else {
+        totalStableSuccess += results.success;
+        totalStableFailed += results.failed;
+      }
     };
 
     if (browsers.stable.length) {
@@ -504,8 +498,12 @@ async function runTests() {
         browsers.stable,
         partialTestRunCompleteFn
       );
-      await reportTestFinished(totalStableSuccess, totalStableFailed);
-      if (allBatchesExitCodes) {
+      if (errored) {
+        await reportTestErrored();
+      } else {
+        await reportTestFinished(totalStableSuccess, totalStableFailed);
+      }
+      if (allBatchesExitCodes || errored) {
         log(
           yellow('Some tests have failed on'),
           cyan('stable'),
@@ -513,7 +511,7 @@ async function runTests() {
           cyan('beta'),
           yellow('browsers.')
         );
-        return allBatchesExitCodes;
+        return allBatchesExitCodes || Number(errored);
       }
     }
 
