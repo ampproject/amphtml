@@ -557,7 +557,7 @@ export class ShadowDomWriterStreamer {
 
     // Merge body children.
     if (this.targetBody_) {
-      const inputBody = /** @type {!Element} */(devAssert(this.parser_.body));
+      const inputBody = dev().assertElement(this.parser_.body);
       const targetBody = devAssert(this.targetBody_);
       let transferCount = 0;
       removeNoScriptElements(inputBody);

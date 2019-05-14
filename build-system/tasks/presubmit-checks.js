@@ -566,6 +566,7 @@ const forbiddenTerms = {
       'src/log.js', // Has actual implementation of assertElement.
       'dist.3p/current/integration.js', // Includes the previous.
       'src/polyfills/custom-elements.js',
+      'ads/google/imaVideo.js', // Required until #22277 is fixed.
     ],
   },
   'startupChunk\\(': {
