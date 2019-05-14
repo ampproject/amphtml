@@ -70,7 +70,7 @@ const defaultMessagesPath = messagesPath;
 const messageExpansionMethod = 'expandLogMessage';
 
 /**
- * "Pre-minified" expansion method name to prevent large public method in
+ * Mangled expansion method name to prevent large public method name in
  * multipass build.
  */
 const messageExpansionMethodShortName = 'l';
@@ -219,8 +219,8 @@ module.exports = function({types: t}) {
           return;
         }
 
-        // Shorten method to "pre-minify" since it's public and does not get
-        // minified on multipass.
+        // Premangle method name since it's public so it wouldn't be mangled by
+        // Closure on multipass.
         // TODO(alanorozco): This will not be required once we only do 1pass.
         node.key.name = messageExpansionMethodShortName;
       },
