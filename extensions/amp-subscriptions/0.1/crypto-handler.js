@@ -33,7 +33,7 @@ export class CryptoHandler {
     this.decryptionPromise_ = null;
 
     const parsedEncryptedKeys =
-        this.ampdoc_.getRootNode().querySelector('script[keys]');
+        this.ampdoc_.getRootNode().querySelector('script[cryptokeys]');
     /** @type {?JsonObject} */
     this.encryptedKeys_ = (parsedEncryptedKeys &&
       tryParseJson(parsedEncryptedKeys.textContent)) || null;
