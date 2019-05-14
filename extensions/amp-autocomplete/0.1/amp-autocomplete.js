@@ -331,15 +331,14 @@ export class AmpAutocomplete extends AMP.BaseElement {
     const element = this.element.ownerDocument.createElement('div');
     element.classList.add('i-amphtml-autocomplete-item');
     element.setAttribute('role', 'listitem');
+    element.setAttribute('data-value', item);
+    element.setAttribute('dir', 'auto');
     if (!substring || substring.length > item.length) {
       element.textContent = item;
     } else {
       const regex = new RegExp(substring, 'gi');
       element.innerHTML = item.replace(regex, '<strong>$&</strong>');
     }
-    element.setAttribute('data-value', item);
-    element.setAttribute('dir', 'auto');
-    element.textContent = item;
     return element;
   }
 
@@ -407,6 +406,16 @@ export class AmpAutocomplete extends AMP.BaseElement {
           }
           child.classList.add('i-amphtml-autocomplete-item');
           child.setAttribute('role', 'listitem');
+          const valueToReplace = child.getAttribute('data-value');
+          if (this.userInput_ && valueToReplace &&
+            this.userInput_.length <= valueToReplace.length) {
+            const regex = new RegExp(this.userInput_, 'gi');
+            const displayValue =
+              valueToReplace.replace(regex, '<strong>$&</strong>');
+            child.innerHTML =
+              child.innerHTML.replace(valueToReplace, displayValue);
+          }
+
           container.appendChild(child);
         });
       });
@@ -415,7 +424,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
         userAssert(typeof item === 'string',
             `${TAG} data must provide template for non-string items.`);
         container.appendChild(this.createElementFromItem_(
-            /** @type {string} */ (item)));
+            /** @type {string} */ (item), this.userInput_));
       });
     }
     return renderPromise;
