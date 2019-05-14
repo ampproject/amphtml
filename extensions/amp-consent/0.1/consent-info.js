@@ -15,8 +15,8 @@
  */
 
 import {dev} from '../../../src/log';
+import {hasOwn, map} from '../../../src/utils/object';
 import {isEnumValue, isObject} from '../../../src/types';
-import {map} from '../../../src/utils/object';
 
 
 /**
@@ -78,6 +78,21 @@ export function getStoredConsentInfo(value) {
   return constructConsentInfo(consentState,
       value[STORAGE_KEY.STRING],
       (value[STORAGE_KEY.IS_DIRTY] && value[STORAGE_KEY.IS_DIRTY] === 1));
+}
+
+/**
+ * Helper function to detect if stored consent has dirtyBit set
+ * @param {?ConsentInfoDef} consentInfo
+ * @return {boolean}
+ */
+export function hasDirtyBit(consentInfo) {
+  if (!consentInfo) {
+    return false;
+  }
+  if (hasOwn(consentInfo, 'isDirty') && consentInfo['isDirty'] == true) {
+    return true;
+  }
+  return false;
 }
 
 /**
@@ -160,9 +175,10 @@ export function calculateLegacyStateValue(consentState) {
  * Return true if they can be converted to the same stored value.
  * @param {?ConsentInfoDef} infoA
  * @param {?ConsentInfoDef} infoB
+ * @param {boolean=} opt_isDirty
  * @return {boolean}
  */
-export function isConsentInfoStoredValueSame(infoA, infoB) {
+export function isConsentInfoStoredValueSame(infoA, infoB, opt_isDirty) {
   if (!infoA && !infoB) {
     return true;
   }
@@ -171,7 +187,12 @@ export function isConsentInfoStoredValueSame(infoA, infoB) {
         calculateLegacyStateValue(infoB['consentState']);
     const stringEqual =
         ((infoA['consentString'] || '') === (infoB['consentString'] || ''));
-    const isDirtyEqual = !!infoA['isDirty'] === !!infoB['isDirty'];
+    let isDirtyEqual;
+    if (opt_isDirty) {
+      isDirtyEqual = !!infoA['isDirty'] === !!opt_isDirty;
+    } else {
+      isDirtyEqual = !!infoA['isDirty'] === !!infoB['isDirty'];
+    }
     return stateEqual && stringEqual && isDirtyEqual;
   }
   return false;

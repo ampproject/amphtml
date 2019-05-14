@@ -82,7 +82,7 @@ describes.realWin('consent-ui', {
     resetServiceForTesting(win, 'consentStateManager');
     registerServiceBuilder(win, 'consentStateManager', function() {
       return Promise.resolve({
-        getConsentInstanceInfo: () => {return Promise.resolve(
+        getLastConsentInstanceInfo: () => {return Promise.resolve(
             constructConsentInfo(CONSENT_ITEM_STATE.ACCEPTED, 'test'));},
       });
     });
@@ -263,8 +263,10 @@ describes.realWin('consent-ui', {
           'test': 'ABC',
         },
         'consentState': 'accepted',
+        'consentStateValue': 'accepted',
         'consentString': 'test',
         'promptTrigger': 'load',
+        'isDirty': false,
       }));
     });
 
@@ -284,8 +286,10 @@ describes.realWin('consent-ui', {
           'test': 'ABC',
         },
         'consentState': 'accepted',
+        'consentStateValue': 'accepted',
         'consentString': 'test',
         'promptTrigger': 'action',
+        'isDirty': false,
       }));
     });
 
