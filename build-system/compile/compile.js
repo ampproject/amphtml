@@ -36,14 +36,6 @@ const queue = [];
 let inProgress = 0;
 const MAX_PARALLEL_CLOSURE_INVOCATIONS = argv.single_pass ? 1 : 4;
 
-/**
- * `gulpIf` predicate for gulp streams that aren't inside third_party, to
- * pass them through transforms that are only safe for our own code.
- * @param {Vinyl} file
- * @return {boolean}
- */
-const firstPartyFile = ({path}) => path.indexOf('third_party') < 0;
-
 // Compiles AMP with the closure compiler. This is intended only for
 // production use. During development we intend to continue using
 // babel, as it has much faster incremental compilation.
@@ -408,10 +400,14 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
           .on('end', resolve);
     }
 
+    // `gulpIf` predicate for vinyl streams that aren't inside third_party, to
+    // pass them through babel transforms that are only safe for our own code.
+    const isFirstPartyFile = ({path}) => path.indexOf('third_party') < 0;
+
     return gulp.src(srcs, {base: '.'})
         .pipe(gulpIf(shouldShortenLicense, shortenLicense()))
         .pipe(sourcemaps.init({loadMaps: true}))
-        .pipe(gulpIf(firstPartyFile, babel({plugins: conf.plugins()})))
+        .pipe(gulpIf(isFirstPartyFile, babel({plugins: conf.plugins()})))
         .pipe(gulpClosureCompile(compilerOptionsArray))
         .on('error', err => {
           handleCompilerError(outputFilename);
