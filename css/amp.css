@@ -57,7 +57,7 @@ html.i-amphtml-inabox-preserve-height-auto body {
 }
 
 html.i-amphtml-inabox-preserve-height-auto body {
-  margin: 0;
+  margin: 0 !important;
 }
 
 /** These properties can be overriden by user stylesheets. */
