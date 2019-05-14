@@ -70,6 +70,7 @@ import {getLogEntries} from './logging';
 import {getMode} from '../../../src/mode';
 import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
+import {isMediaDisplayed} from './utils';
 import {toggle} from '../../../src/style';
 import {upgradeBackgroundAudio} from './audio';
 
@@ -609,16 +610,10 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   isMediaDisplayed_(mediaEl) {
-    const ampEl = isAmpElement(mediaEl) ? mediaEl : mediaEl.parentElement;
-
-    // Considers amp-audio elements with a layout=nodisplay attribute as
-    // displayed, since we want them to play when the page is active.
-    if (ampEl.tagName === 'AMP-AUDIO' &&
-        ampEl.getLayout() === Layout.NODISPLAY) {
-      return true;
-    }
-
-    return this.resources_.getResourceForElement(ampEl).isDisplayed();
+    const ampEl = dev().assertElement(
+        isAmpElement(mediaEl) ? mediaEl : mediaEl.parentElement);
+    const resource = this.resources_.getResourceForElement(ampEl);
+    return isMediaDisplayed(ampEl, resource);
   }
 
   /**

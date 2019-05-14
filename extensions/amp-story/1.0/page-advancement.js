@@ -21,7 +21,6 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {AdvancementMode} from './story-analytics';
-import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {TAPPABLE_ARIA_ROLES} from '../../../src/service/action-impl';
 import {VideoEvents} from '../../../src/video-interface';
@@ -29,7 +28,7 @@ import {closest, matches} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {getAmpdoc} from '../../../src/service';
-import {hasTapAction, timeStrToMillis} from './utils';
+import {hasTapAction, isMediaDisplayed, timeStrToMillis} from './utils';
 import {
   interactiveElementsSelectors,
 } from './amp-story-embedded-component';
@@ -755,9 +754,7 @@ class MediaBasedAdvancement extends AdvancementConfig {
     for (let i = 0; i < this.elements_.length; i++) {
       const element = this.elements_[i];
       const resource = this.resources_.getResourceForElement(element);
-      if (resource.isDisplayed() ||
-          (element.tagName === 'AMP-AUDIO' &&
-              element.getLayout() === Layout.NODISPLAY)) {
+      if (isMediaDisplayed(element, resource)) {
         return element;
       }
     }
