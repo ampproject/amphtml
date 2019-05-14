@@ -24,7 +24,7 @@ limitations under the License.
 
 
 
-AMP is a technology known for developing super fast web pages on mobile clients. AMP is a set of HTML tags backed by JavaScript that easily enables functionality with an added focus on performance and security. There are [AMP components](https://amp.dev/documentation/components.html) for everything from carousels, to responsive form elements, to retrieving fresh content from remote endpoints.
+AMP is a technology known for developing super fast web pages on mobile clients. AMP is a set of HTML tags backed by JavaScript that easily enables functionality with an added focus on performance and security. There are [AMP components](https://amp.dev/documentation/components/) for everything from carousels, to responsive form elements, to retrieving fresh content from remote endpoints.
 
 The AMP for Email format provides a subset of AMP components that you can use in email messages. Recipients of AMP emails can view and interact with the AMP components directly in the email.
 
@@ -60,7 +60,7 @@ An AMP email message MUST
 
 ## AMP Components
 
-The following is the list of [AMP components](https://amp.dev/documentation/components.html?format=email) that are currently supported in AMP email messages. The components are grouped into the following categories:
+The following is the list of [AMP components](https://amp.dev/documentation/components/?format=email) that are currently supported in AMP email messages. The components are grouped into the following categories:
 
 * [Dynamic Content](#dynamic-content)
 * [Layout](#layout)
@@ -70,31 +70,31 @@ The following is the list of [AMP components](https://amp.dev/documentation/comp
 
 | Element | Description |
 | ------- | ----------- |
-| [`<amp-form>`](https://amp.dev/documentation/components/reference/amp-form.html) | Form element. The action-xhr attribute must be used in place of the regular action attribute. Can be used in conjunction with `<template type="amp-mustache">` to render a response. |
-| [`<amp-selector>`](https://amp.dev/documentation/components/reference/amp-selector.html) | A multi-select widget for use within a form. |
-| [`<amp-bind>` and `<amp-state>`](https://amp.dev/documentation/components/reference/amp-bind.html) | Simple scripting language in AMP that allows the manipulation of a state machine for interactions between elements. Can also be used to add behavior on certain events.<br><br>`<amp-state>` is used to remotely fetch the initial state machine values.<br><br>**Note:** It is prohibited to bind to `[href]` or `[src]`. It is also prohibited to use the `AMP.print`, `AMP.navigateTo` and `AMP.goBack` actions. |
-| [`<amp-list>`](https://amp.dev/documentation/components/reference/amp-list.html) | Remotely fetches JSON data that will be rendered by an [`<amp-mustache>`](https://amp.dev/documentation/components/reference/amp-mustache.html).<br><br>**Note:** Binding to the `[src]` attribute is not allowed. Including user credentials with `credentials="include"` is also prohibited. |
-| [`<template type="amp-mustache">`](https://amp.dev/documentation/components/reference/amp-mustache.html) | A Mustache template markup to render the results of an `amp-list` call. |
+| [`<amp-form>`](https://amp.dev/documentation/components/amp-form) | Form element. The action-xhr attribute must be used in place of the regular action attribute. Can be used in conjunction with `<template type="amp-mustache">` to render a response. |
+| [`<amp-selector>`](https://amp.dev/documentation/components/amp-selector) | A multi-select widget for use within a form. |
+| [`<amp-bind>` and `<amp-state>`](https://amp.dev/documentation/components/amp-bind) | Simple scripting language in AMP that allows the manipulation of a state machine for interactions between elements. Can also be used to add behavior on certain events.<br><br>`<amp-state>` is used to remotely fetch the initial state machine values.<br><br>**Note:** It is prohibited to bind to `[href]` or `[src]`. It is also prohibited to use the `AMP.print`, `AMP.navigateTo` and `AMP.goBack` actions. |
+| [`<amp-list>`](https://amp.dev/documentation/components/amp-list) | Remotely fetches JSON data that will be rendered by an [`<amp-mustache>`](https://amp.dev/documentation/components/amp-mustache).<br><br>**Note:** Binding to the `[src]` attribute is not allowed. Including user credentials with `credentials="include"` is also prohibited. |
+| [`<template type="amp-mustache">`](https://amp.dev/documentation/components/amp-mustache) | A Mustache template markup to render the results of an `amp-list` call. |
 
 ### Layout
 
 | Element | Description |
 | ------- | ----------- |
-| [layout attributes](https://amp.dev/documentation/guides-and-tutorials/learn/amp-html-layout/index.html#layout-attributes)| Layout behavior is determined by the layout attribute. |
-| [`<amp-accordion>`](https://amp.dev/documentation/components/reference/amp-accordion.html)| A UI element that facilitates showing/hiding different sections. |
-| [`<amp-carousel>`](https://amp.dev/documentation/components/reference/amp-carousel.html) | A carousel UI component. |
-| [`<amp-sidebar>`](https://amp.dev/documentation/components/reference/amp-sidebar.html) | A sidebar for navigational purposes. |
-| [`<amp-image-lightbox>`](https://amp.dev/documentation/components/reference/amp-image-lightbox.html) | A lightbox for containing images. |
-| [`<amp-lightbox>`](https://amp.dev/documentation/components/reference/amp-lightbox.html) | A lightbox for containing content. |
-| [`<amp-fit-text>`](https://amp.dev/documentation/components/reference/amp-fit-text.html) | A helper component for fitting text within a certain area. |
-| [`<amp-timeago>`](https://amp.dev/documentation/components/reference/amp-timeago.html) | Provides a convenient way of rendering timestamps. |
+| [layout attributes](https://amp.dev/documentation/guides-and-tutorials/learn/amp-html-layout/#layout-attributes)| Layout behavior is determined by the layout attribute. |
+| [`<amp-accordion>`](https://amp.dev/documentation/components/amp-accordion)| A UI element that facilitates showing/hiding different sections. |
+| [`<amp-carousel>`](https://amp.dev/documentation/components/amp-carousel) | A carousel UI component. |
+| [`<amp-sidebar>`](https://amp.dev/documentation/components/amp-sidebar) | A sidebar for navigational purposes. |
+| [`<amp-image-lightbox>`](https://amp.dev/documentation/components/amp-image-lightbox) | A lightbox for containing images. |
+| [`<amp-lightbox>`](https://amp.dev/documentation/components/amp-lightbox) | A lightbox for containing content. |
+| [`<amp-fit-text>`](https://amp.dev/documentation/components/amp-fit-text) | A helper component for fitting text within a certain area. |
+| [`<amp-timeago>`](https://amp.dev/documentation/components/amp-timeago) | Provides a convenient way of rendering timestamps. |
 
 ### Media
 
 | Element | Description |
 | ------- | ----------- |
-| [`<amp-img>`](https://amp.dev/documentation/components/reference/amp-img.html) | An AMP component that replaces `<img>`.<br><br>**Note:** Binding to `[src]` is not allowed. |
-| [`<amp-anim>`](https://amp.dev/documentation/components/reference/amp-anim.html) | Embeds GIF files.<br><br>**Note:** Binding to `[src]` is not allowed. |
+| [`<amp-img>`](https://amp.dev/documentation/components/amp-img) | An AMP component that replaces `<img>`.<br><br>**Note:** Binding to `[src]` is not allowed. |
+| [`<amp-anim>`](https://amp.dev/documentation/components/amp-anim) | Embeds GIF files.<br><br>**Note:** Binding to `[src]` is not allowed. |
 
 ## CSS requirements
 
@@ -123,7 +123,7 @@ All CSS in any AMP document must be included in a `<style amp-custom>` tag withi
 Note: The entire `<style>` tag cannot exceed 50,000 bytes. The validator will check for this.
 
 ### CSS Restrictions
-The AMP4EMAIL validator spec does not contain CSS restrictions beyond the [standard AMP CSS restrictions](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages.html). However, email clients may have their own CSS restrictions.
+The AMP4EMAIL validator spec does not contain CSS restrictions beyond the [standard AMP CSS restrictions](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages). However, email clients may have their own CSS restrictions.
 
 For example, in Gmail, the allowed list of CSS properties and values can be found at [Gmail Supported CSS Properties & Media Queries](https://developers.google.com/gmail/design/reference/supported_css).
 
@@ -138,7 +138,7 @@ For example, in Gmail, the allowed list of CSS properties and values can be foun
 
 To ensure your email messages meet the strict criteria for the AMP for Email format, you can use AMP's existing validation tools.
 
-See [Validate AMP Email](https://amp.dev/documentation/guides-and-tutorials/develop/validate_emails.html) for more information.
+See [Validate AMP Email](https://amp.dev/documentation/guides-and-tutorials/develop/validate_emails) for more information.
 
 ## Privacy and Security
 
@@ -149,9 +149,9 @@ AMPHTML allows tracking email opens with pixel tracking techniques, same as regu
 ### AMP-specific analytics
 The following AMP-specific analytic techniques are not supported:
 
-*   [AMP `CLIENT_ID`](https://amp.dev/documentation/guides-and-tutorials/optimize-measure/configure-analytics/analytics_basics.html#user-identification)
-*   [`amp-analytics`](https://amp.dev/documentation/components/reference/amp-analytics.html)
-*   [`amp-pixel`](https://amp.dev/documentation/components/reference/amp-pixel.html)
+*   [AMP `CLIENT_ID`](https://amp.dev/documentation/guides-and-tutorials/optimize-measure/configure-analytics/analytics_basics#user-identification)
+*   [`amp-analytics`](https://amp.dev/documentation/components/amp-analytics)
+*   [`amp-pixel`](https://amp.dev/documentation/components/amp-pixel)
 *   [AMP Variable Substitution](https://amp.dev/documentation/guides-and-tutorials/optimize-measure/configure-analytics/analytics_basics.html#variable-substitution)
 
 ### Replying/forwarding semantics
@@ -161,16 +161,16 @@ The email client strips out the `text/x-amp-html` part of the MIME tree when a u
 
 ### The amp-carousel
 
-Requests for images in the [`<amp-carousel>`](https://amp.dev/documentation/components/reference/amp-carousel.html) can indicate to the sender that the user is interacting with the message.
+Requests for images in the [`<amp-carousel>`](https://amp.dev/documentation/components/amp-carousel) can indicate to the sender that the user is interacting with the message.
 
 
 ## Examples
 
-This section provides some [AMP for Email code examples](https://amp.dev/documentation/examples.html?format=email).
+This section provides some [AMP for Email code examples](https://amp.dev/documentation/examples/?format=email).
 
 ### Basic usage of `<amp-list>`
 
-The following is a fictional email that includes an updated list of featured products retrieved from an endpoint. This example shows the basic usage of [`<amp-list>`](https://amp.dev/documentation/components/reference/amp-list.html).
+The following is a fictional email that includes an updated list of featured products retrieved from an endpoint. This example shows the basic usage of [`<amp-list>`](https://amp.dev/documentation/components/amp-list).
 
 ```html
 <!doctype html>
@@ -206,7 +206,7 @@ The following is a fictional email that includes an updated list of featured pro
 
 ### Basic usage of `<amp-bind>`
 
-The following is a fictional email that shows interactivity features by using [`<amp-bind>`](https://amp.dev/documentation/components/reference/amp-bind.html).
+The following is a fictional email that shows interactivity features by using [`<amp-bind>`](https://amp.dev/documentation/components/amp-bind).
 
 ```html
 <!doctype html>
