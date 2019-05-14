@@ -28,7 +28,7 @@ const log = require('fancy-log');
 const path = require('path');
 const watch = require('gulp-watch');
 const {gitDiffNameOnlyMaster} = require('../git');
-const {isTravisBuild, isTravisPullRequestBuild} = require('../travis');
+const {isTravisBuild} = require('../travis');
 const {maybeUpdatePackages} = require('./update-packages');
 
 const isWatching = (argv.watch || argv.w) || false;
@@ -36,7 +36,6 @@ const options = {
   fix: false,
   quiet: argv.quiet || false,
 };
-let collapseLintResults = isTravisBuild();
 
 const rootDir = path.dirname(path.dirname(__dirname));
 
@@ -79,11 +78,6 @@ function runLinter(filePath, stream, options) {
   if (!isTravisBuild()) {
     log(colors.green('Starting linter...'));
   }
-  if (collapseLintResults) {
-    // TODO(#15255, #14761): Remove log folding after warnings are fixed.
-    log(colors.bold(colors.yellow('Lint results: ')) + 'Expand this section');
-    console./* OK*/log('travis_fold:start:lint_results\n');
-  }
   const fixedFiles = {};
   return stream.pipe(eslint(options))
       .pipe(eslint.formatEach('stylish', function(msg) {
@@ -103,10 +97,6 @@ function runLinter(filePath, stream, options) {
         }
       }))
       .pipe(eslint.results(function(results) {
-        // TODO(#15255, #14761): Remove log folding after warnings are fixed.
-        if (collapseLintResults) {
-          console./* OK*/log('travis_fold:end:lint_results');
-        }
         if (results.errorCount == 0 && results.warningCount == 0) {
           if (!isTravisBuild()) {
             logOnSameLine(colors.green('SUCCESS: ') +
@@ -157,9 +147,6 @@ function jsFilesChanged() {
  * @return {boolean}
  */
 function eslintRulesChanged() {
-  if (!isTravisPullRequestBuild()) {
-    return false;
-  }
   return gitDiffNameOnlyMaster().filter(function(file) {
     return path.basename(file).includes('.eslintrc') ||
         path.dirname(file) === 'build-system/eslint-rules';
@@ -180,7 +167,6 @@ function setFilesToLint(files) {
       log(colors.cyan(file));
     });
   }
-  collapseLintResults = false;
 }
 
 /**
@@ -195,9 +181,7 @@ function lint() {
   if (argv.files) {
     setFilesToLint(argv.files.split(','));
   } else if (!eslintRulesChanged() &&
-      (isTravisPullRequestBuild() ||
-       process.env.LOCAL_PR_CHECK ||
-       argv['local-changes'])) {
+      (process.env.LOCAL_PR_CHECK || argv['local-changes'])) {
     const jsFiles = jsFilesChanged();
     if (jsFiles.length == 0) {
       log(colors.green('INFO: ') + 'No JS files in this PR');
