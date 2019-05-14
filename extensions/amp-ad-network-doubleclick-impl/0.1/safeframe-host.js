@@ -160,8 +160,8 @@ export class SafeframeHostApi {
 
     /** @private {{width:number, height:number}} */
     this.initialCreativeSize_ =
-      /** @private {{width:number, height:number}} */
-      (Object.assign({}, creativeSize));
+      /** @type {{width:number, height:number}} */ (
+      Object.assign({}, creativeSize));
 
     /** @private {?Promise} */
     this.delay_ = null;

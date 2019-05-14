@@ -490,8 +490,8 @@ class ManualAdvancement extends AdvancementConfig {
       // Clicked element triggers a tooltip, so we dispatch the corresponding
       // event and skip navigation.
       event.preventDefault();
-      const embedComponent = /** @type {InteractiveComponentDef} */
-        (this.storeService_.get(StateProperty.INTERACTIVE_COMPONENT_STATE));
+      const embedComponent = /** @type {InteractiveComponentDef} */ (
+        this.storeService_.get(StateProperty.INTERACTIVE_COMPONENT_STATE));
       this.storeService_.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT, {
         element: target,
         state: embedComponent.state || EmbeddedComponentState.FOCUSED,

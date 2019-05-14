@@ -474,8 +474,8 @@ export class HistoryBindingNatural_ {
     history.replaceState = this.historyReplaceState_.bind(this);
 
     this.popstateHandler_ = e => {
-      const state = /** @type {!JsonObject} */(
-        /** @type {!PopStateEvent} */(e).state);
+      const event = /** @type {!PopStateEvent} */(e);
+      const state = /** @type {!JsonObject} */(event.state);
       dev().fine(TAG_, 'popstate event: ' + this.win.history.length + ', ' +
         JSON.stringify(state));
       this.onHistoryEvent_();

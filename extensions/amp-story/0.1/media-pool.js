@@ -225,9 +225,9 @@ export class MediaPool {
       // this optimization automatically. However, it skips it due to a
       // comparison with the itervar below, so we have to roll it by hand.
       for (let i = count; i > 0; i--) {
-        const mediaEl = /** @type {!HTMLMediaElement} */
-            // Use seed element at end of set to prevent wasting it.
-            (i == 1 ? mediaElSeed : mediaElSeed.cloneNode(/* deep */ true));
+        // Use seed element at end of set to prevent wasting it.
+        const mediaEl = /** @type {!HTMLMediaElement} */ (
+            i == 1 ? mediaElSeed : mediaElSeed.cloneNode(/* deep */ true));
         const sources = this.getDefaultSource_(type);
         mediaEl.setAttribute('pool-element', elId++);
         this.enqueueMediaElementTask_(mediaEl,

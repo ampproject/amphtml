@@ -108,8 +108,8 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
     const checkStillCurrent = this.verifyStillCurrent();
     return tryResolve(() => utf8Decode(bytes)).then(body => {
       checkStillCurrent();
-      this.ampCreativeJson_ = /** @type {!../../amp-a4a/0.1/amp-ad-type-defs.AmpTemplateCreativeDef} */
-        (tryParseJson(body) || {});
+      this.ampCreativeJson_ = /** @type {!../../amp-a4a/0.1/amp-ad-type-defs.AmpTemplateCreativeDef} */ (
+        tryParseJson(body) || {});
       // TODO(keithwrightbos): macro value validation?  E.g. http invalid?
       return ampAdTemplateHelper
           .fetch(this.ampCreativeJson_.templateUrl)

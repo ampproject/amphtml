@@ -146,7 +146,7 @@ export class IframeTransport {
     frame.sentinel = sentinel;
     toggle(frame, false);
     frame.src = this.frameUrl_;
-    const frameData = /** @const {FrameData} */ ({
+    const frameData = /** @type {FrameData} */ ({
       frame,
       usageCount: 1,
       queue: new IframeTransportMessageQueue(this.ampWin_,

@@ -113,8 +113,8 @@ export class ConsentConfig {
 
     const cmpConfig = this.getCMPConfig_();
 
-    const config = /** @type {!JsonObject} */
-        (deepMerge(cmpConfig || {}, inlineConfig || {}, 1));
+    const config = /** @type {!JsonObject} */ (
+        deepMerge(cmpConfig || {}, inlineConfig || {}, 1));
 
     userAssert(config['consentInstanceId'],
         '%s: consentInstanceId to store consent info is required', TAG);

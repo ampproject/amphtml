@@ -720,8 +720,8 @@ export class AmpStory extends AMP.BaseElement {
     // Shows "tap to navigate" hint when swiping.
     gestures.onGesture(swipeRecognizer, gesture => {
       const {deltaX, deltaY} = gesture.data;
-      const embedComponent = /** @type {InteractiveComponentDef} */
-        (this.storeService_.get(StateProperty.INTERACTIVE_COMPONENT_STATE));
+      const embedComponent = /** @type {InteractiveComponentDef} */ (
+        this.storeService_.get(StateProperty.INTERACTIVE_COMPONENT_STATE));
       // TODO(enriqe): Move to a separate file if this keeps growing.
       if (this.storeService_.get(StateProperty.BOOKEND_STATE) ||
           embedComponent.state !== EmbeddedComponentState.HIDDEN ||
@@ -2020,8 +2020,8 @@ export class AmpStory extends AMP.BaseElement {
           this.mediaPool_.register(backgroundAudioEl);
           return this.mediaPool_.preload(backgroundAudioEl);
         }).then(() => {
-          this.backgroundAudioEl_ = /** @type {!HTMLMediaElement} */
-              (childElement(this.element, el => {
+          this.backgroundAudioEl_ = /** @type {!HTMLMediaElement} */ (
+              childElement(this.element, el => {
                 return el.tagName.toLowerCase() === 'audio';
               }));
         });

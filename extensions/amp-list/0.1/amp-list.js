@@ -629,8 +629,8 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   updateBindings_(elementOrElements, append) {
-    const elements = /** @type {!Array<!Element>} */
-      (isArray(elementOrElements) ? elementOrElements : [elementOrElements]);
+    const elements = /** @type {!Array<!Element>} */ (
+      isArray(elementOrElements) ? elementOrElements : [elementOrElements]);
     const binding = this.element.getAttribute('binding');
     // "no": Always skip binding update.
     if (binding === 'no') {

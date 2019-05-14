@@ -1335,8 +1335,8 @@ export class AmpStory extends AMP.BaseElement {
           this.mediaPool_.register(backgroundAudioEl);
           return this.mediaPool_.preload(backgroundAudioEl);
         }).then(() => {
-          this.backgroundAudioEl_ = /** @type {!HTMLMediaElement} */
-              (childElement(this.element, el => {
+          this.backgroundAudioEl_ = /** @type {!HTMLMediaElement} */ (
+              childElement(this.element, el => {
                 return el.tagName.toLowerCase() === 'audio';
               }));
         });

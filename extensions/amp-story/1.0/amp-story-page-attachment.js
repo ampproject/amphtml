@@ -452,8 +452,8 @@ export class AmpStoryPageAttachment extends AMP.BaseElement {
       toggle(dev().assertElement(this.containerEl_), true);
     });
 
-    const currentHistoryState = /** @type {!Object} */
-        (getState(this.win.history));
+    const currentHistoryState = /** @type {!Object} */ (
+        getState(this.win.history));
     const historyState = Object.assign({}, currentHistoryState, {
       [HistoryState.ATTACHMENT_PAGE_ID]:
           this.storeService_.get(StateProperty.CURRENT_PAGE_ID),
