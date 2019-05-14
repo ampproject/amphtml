@@ -97,6 +97,7 @@ export class CryptoHandler {
   decryptDocumentContent_(
     // eslint-disable-next-line no-unused-vars
     encryptedContent,
+    // eslint-disable-next-line no-unused-vars
     documentKey
   ) {
     // Don't really return this. Placeholder for the real thing.

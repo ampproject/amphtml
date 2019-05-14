@@ -296,8 +296,9 @@ describe
     // with visibility pings being placeholders that's substituted with calls to
     // the request bank.
     const adBody = maybeSwitchToCompiledJs(
+      // eslint-disable-next-line no-undef
       __html__['test/fixtures/amp-cupcake-ad.html']
-    ) // eslint-disable-line no-undef
+    )
       .replace(/__TEST_SERVER_PORT__/g, testServerPort)
       .replace(/__VIEW_URL__/g, RequestBank.getUrl('view')) // get all instances
       .replace('__VISIBLE_URL__', RequestBank.getUrl('visible'))

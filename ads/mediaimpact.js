@@ -41,8 +41,9 @@ export function mediaimpact(global, data) {
   window.addEventListener(
     'load',
     function() {
+      // eslint-disable-next-line no-undef
       asmi.sas.call(
-        data.site + '/(' + data.page + ')', // eslint-disable-line no-undef
+        data.site + '/(' + data.page + ')',
         data.format,
         data.target + ';googleAMP=1;',
         '',
@@ -52,8 +53,8 @@ export function mediaimpact(global, data) {
     },
     false
   );
+  // eslint-disable-next-line no-unused-vars, no-undef
   asmiSetup = {
-    // eslint-disable-line no-unused-vars, no-undef
     view: 'm',
     async: true,
   };
