@@ -28,3 +28,8 @@ export const IFRAME_TRANSPORTS = /** @type {!JsonObject} */ ({
   'bg': 'https://tpc.googlesyndication.com/b4a/b4a-runner.html',
   'moat': 'https://z.moatads.com/ampanalytics093284/iframe.html',
 });
+
+export const IFRAME_TRANSPORTS_CANARY = /** @type {!JsonObject} */ ({
+  'bg': 'https://tpc.googlesyndication.com/b4a/experimental/b4a-runner.html',
+  'moat': 'https://z.moatads.com/ampanalytics093284/iframe.html',
+});
