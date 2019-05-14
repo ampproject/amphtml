@@ -400,8 +400,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
           .on('end', resolve);
     }
 
-    // `gulpIf` predicate for vinyl streams that aren't inside third_party, to
-    // pass them through babel transforms that are only safe for our own code.
+    // Exclude files in `third_party` from babel transforms.
     const isFirstPartyFile = ({path}) => path.indexOf('third_party') < 0;
 
     return gulp.src(srcs, {base: '.'})
