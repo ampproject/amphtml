@@ -12,7 +12,7 @@ Replace/remove all of the text in brackets, including this text.
 
 See https://github.com/ampproject/amphtml/blob/master/spec/amp-versioning-policy.md for details on AMP's deprecation policy, instructions on filling out this I2R template and how to get help if you have questions.
 
-You will file your Intent-to-Deprecate (I2D) for the feature that is being removed is approved.
+This I2R should be created after your Intent-to-Deprecate (I2D) for the feature was approved.
 -->
 
 ## Summary
