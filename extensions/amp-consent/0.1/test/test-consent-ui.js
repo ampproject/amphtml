@@ -82,7 +82,7 @@ describes.realWin('consent-ui', {
     resetServiceForTesting(win, 'consentStateManager');
     registerServiceBuilder(win, 'consentStateManager', function() {
       return Promise.resolve({
-        getConsentInstanceInfo: () => {return Promise.resolve(
+        getLastConsentInstanceInfo: () => {return Promise.resolve(
             constructConsentInfo(CONSENT_ITEM_STATE.ACCEPTED, 'test'));},
       });
     });
@@ -99,7 +99,7 @@ describes.realWin('consent-ui', {
     const consentUI =
       new ConsentUI(mockInstance, config);
     const showIframeSpy = sandbox.spy(consentUI, 'showIframe_');
-    consentUI.show();
+    consentUI.show(false);
     consentUI.iframeReady_.resolve();
     return whenCalled(showIframeSpy).then(() => Promise.resolve(consentUI));
   };
@@ -140,7 +140,7 @@ describes.realWin('consent-ui', {
           new ConsentUI(mockInstance, config);
       expect(parent.classList.contains('amp-active')).to.be.false;
       expect(parent.classList.contains('amp-hidden')).to.be.false;
-      consentUI.show();
+      consentUI.show(false);
       expect(parent.classList.contains('amp-active')).to.be.true;
       expect(parent).to.not.have.display('none');
       consentUI.hide();
@@ -155,7 +155,7 @@ describes.realWin('consent-ui', {
       consentUI =
           new ConsentUI(mockInstance, config);
       expect(elementByTag(parent, 'iframe')).to.be.null;
-      consentUI.show();
+      consentUI.show(false);
       yield macroTask();
       expect(elementByTag(parent, 'iframe')).to.not.be.null;
       consentUI.hide();
@@ -171,12 +171,12 @@ describes.realWin('consent-ui', {
         new ConsentUI(mockInstance, config);
 
       expect(consentUI.scrollEnabled_).to.be.true;
-      consentUI.show();
+      consentUI.show(false);
       expect(consentUI.scrollEnabled_).to.be.true;
       consentUI.hide();
       expect(consentUI.scrollEnabled_).to.be.true;
 
-      consentUI.show();
+      consentUI.show(false);
       expect(consentUI.scrollEnabled_).to.be.true;
       consentUI.disableScroll_();
       expect(consentUI.scrollEnabled_).to.be.false;
@@ -202,7 +202,7 @@ describes.realWin('consent-ui', {
       expect(placeholder).to.be.ok;
       expect(placeholder.hidden).to.be.true;
 
-      consentUI.show();
+      consentUI.show(false);
 
       // Pop onto the back of the event queue,
       // so we expect() once our mutate element in show() resolves
@@ -230,7 +230,7 @@ describes.realWin('consent-ui', {
       const applyInitialStylesSpy =
           sandbox.spy(consentUI, 'applyInitialStyles_');
 
-      consentUI.show();
+      consentUI.show(false);
       expect(parent.classList.contains('amp-active')).to.be.true;
       expect(parent.classList.contains(consentUiClasses.loading)).to.be.true;
       expect(parent).to.not.have.display('none');
@@ -255,7 +255,7 @@ describes.realWin('consent-ui', {
         },
       });
       consentUI = new ConsentUI(mockInstance, config);
-      consentUI.show();
+      consentUI.show(false);
       yield macroTask();
 
       expect(consentUI.ui_.getAttribute('name')).to.deep.equal(JSON.stringify({
@@ -263,9 +263,36 @@ describes.realWin('consent-ui', {
           'test': 'ABC',
         },
         'consentState': 'accepted',
+        'consentStateValue': 'accepted',
         'consentString': 'test',
+        'promptTrigger': 'load',
+        'isDirty': false,
       }));
     });
+
+    it('should pass the promptTrigger reason to the iframe', function* () {
+      const config = dict({
+        'promptUISrc': 'https//promptUISrc',
+        'clientConfig': {
+          'test': 'ABC',
+        },
+      });
+      consentUI = new ConsentUI(mockInstance, config);
+      consentUI.show(true);
+      yield macroTask();
+
+      expect(consentUI.ui_.getAttribute('name')).to.deep.equal(JSON.stringify({
+        'clientConfig': {
+          'test': 'ABC',
+        },
+        'consentState': 'accepted',
+        'consentStateValue': 'accepted',
+        'consentString': 'test',
+        'promptTrigger': 'action',
+        'isDirty': false,
+      }));
+    });
+
   });
 
   describe('overlay', () => {
@@ -283,7 +310,7 @@ describes.realWin('consent-ui', {
       };
       expect(consentUI.maskElement_).to.be.null;
       expect(consentUI.scrollEnabled_).to.be.true;
-      consentUI.show();
+      consentUI.show(false);
       yield macroTask();
       expect(consentUI.maskElement_).to.be.null;
       expect(consentUI.scrollEnabled_).to.be.true;
@@ -307,7 +334,7 @@ describes.realWin('consent-ui', {
 
       expect(consentUI.maskElement_).to.be.null;
       expect(consentUI.scrollEnabled_).to.be.true;
-      consentUI.show();
+      consentUI.show(false);
       yield macroTask();
       expect(consentUI.maskElement_).to.not.be.null;
       expect(consentUI.scrollEnabled_).to.be.false;
@@ -315,7 +342,7 @@ describes.realWin('consent-ui', {
       yield macroTask();
       expect(consentUI.maskElement_.hasAttribute('hidden')).to.be.ok;
       expect(consentUI.scrollEnabled_).to.be.true;
-      consentUI.show();
+      consentUI.show(false);
       yield macroTask();
       expect(consentUI.maskElement_.hasAttribute('hidden')).to.not.be.ok;
       expect(consentUI.scrollEnabled_).to.be.false;

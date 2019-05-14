@@ -20,7 +20,9 @@ import {
   calculateLegacyStateValue,
   composeStoreValue,
   constructConsentInfo,
+  getConsentStateValue,
   getStoredConsentInfo,
+  hasDirtyBit,
   isConsentInfoStoredValueSame,
   recalculateConsentStateValue,
 } from './consent-info';
@@ -101,13 +103,28 @@ export class ConsentStateManager {
   }
 
   /**
+   * Get last consent instance stored.
+   * @return {Promise<!ConsentInfoDef>}
+   */
+  getLastConsentInstanceInfo() {
+    devAssert(this.instance_,
+        '%s: cannot find the instance', TAG);
+    return this.instance_.get();
+  }
+
+  /**
    * Get local consent instance state
    * @return {Promise<!ConsentInfoDef>}
    */
   getConsentInstanceInfo() {
     devAssert(this.instance_,
         '%s: cannot find the instance', TAG);
-    return this.instance_.get();
+    return this.instance_.get().then(info => {
+      if (hasDirtyBit(info)) {
+        return constructConsentInfo(CONSENT_ITEM_STATE.UNKNOWN);
+      }
+      return info;
+    });
   }
 
   /**
@@ -140,6 +157,14 @@ export class ConsentStateManager {
     devAssert(this.instance_,
         '%s: cannot find the instance', TAG);
     this.instance_.sharedDataPromise = sharedDataPromise;
+  }
+
+  /**
+   * Sets the dirty bit so current consent info won't be used for
+   * decision making on next visit
+   */
+  setDirtyBit() {
+    this.instance_.setDirtyBit();
   }
 
   /**
@@ -200,6 +225,9 @@ export class ConsentInstance {
     /** @private {?ConsentInfoDef}*/
     this.localConsentInfo_ = null;
 
+    /** @private {?ConsentInfoDef} */
+    this.savedConsentInfo_ = null;
+
     /** @private {string} */
     this.storageKey_ = 'amp-consent:' + id;
 
@@ -208,14 +236,36 @@ export class ConsentInstance {
     if (this.onUpdateHref_) {
       assertHttpsUrl(this.onUpdateHref_, 'AMP-CONSENT');
     }
+
+    /** @private {boolean|undefined} */
+    this.hasDirtyBitNext_ = undefined;
+  }
+
+  /**
+   * Set dirtyBit to current consent info. Refresh stored consent value with
+   * dirtyBit
+   */
+  setDirtyBit() {
+    // Note: this.hasDirtyBitNext_ is only set to true when 'forcePromptNext'
+    // is set to true and we need to set dirtyBit for next visit.
+    this.hasDirtyBitNext_ = true;
+    return this.get().then(info => {
+      if (hasDirtyBit(info)) {
+        // Current stored value has dirtyBit and is no longer valid.
+        // No need to update with dirtyBit
+        return;
+      }
+      this.update(info['consentState'], info['consentString'], true);
+    });
   }
 
   /**
    * Update the local consent state list
    * @param {!CONSENT_ITEM_STATE} state
    * @param {string=} consentString
+   * @param {boolean=} opt_systemUpdate
    */
-  update(state, consentString) {
+  update(state, consentString, opt_systemUpdate) {
     const localState =
         this.localConsentInfo_ && this.localConsentInfo_['consentState'];
     const localConsentStr =
@@ -230,11 +280,23 @@ export class ConsentInstance {
       return;
     }
 
-    const newConsentInfo = constructConsentInfo(calculatedState, consentString);
-    const oldConsentInfo = this.localConsentInfo_;
-    this.localConsentInfo_ = newConsentInfo;
+    // Any user update makes the current state valid, thus remove dirtyBit
+    // from localConsentInfo_
+    const oldValue = this.localConsentInfo_;
+    if (opt_systemUpdate && hasDirtyBit(oldValue)) {
+      this.localConsentInfo_ = constructConsentInfo(
+          calculatedState, consentString, true);
+    } else {
+      // Any user update makes the current state valid, thus remove dirtyBit
+      // from localConsentInfo_
+      this.localConsentInfo_ = constructConsentInfo(
+          calculatedState, consentString);
+    }
 
-    if (isConsentInfoStoredValueSame(newConsentInfo, oldConsentInfo)) {
+    const newConsentInfo = constructConsentInfo(
+        calculatedState, consentString, this.hasDirtyBitNext_);
+
+    if (isConsentInfoStoredValueSame(newConsentInfo, this.savedConsentInfo_)) {
       // Only update/save to localstorage if it's not dismiss
       // And the value is different from what is stored.
       return;
@@ -251,7 +313,7 @@ export class ConsentInstance {
   updateStoredValue_(consentInfo) {
     this.storagePromise_.then(storage => {
       if (!isConsentInfoStoredValueSame(
-          consentInfo, this.localConsentInfo_)) {
+          consentInfo, this.localConsentInfo_, this.hasDirtyBitNext_)) {
         // If state has changed. do not store outdated value.
         return;
       }
@@ -278,6 +340,7 @@ export class ConsentInstance {
         // Nothing to store to localStorage
         return;
       }
+      this.savedConsentInfo_ = consentInfo;
       storage.setNonBoolean(this.storageKey_, value);
       this.sendUpdateHrefRequest_(consentInfo);
     });
@@ -293,7 +356,9 @@ export class ConsentInstance {
       return Promise.resolve(this.localConsentInfo_);
     }
 
-    return this.storagePromise_.then(storage => {
+    let storage;
+    return this.storagePromise_.then(s => {
+      storage = s;
       return storage.get(this.storageKey_);
     }).then(storedValue => {
       if (this.localConsentInfo_) {
@@ -302,6 +367,18 @@ export class ConsentInstance {
       }
 
       const consentInfo = getStoredConsentInfo(storedValue);
+      this.savedConsentInfo_ = consentInfo;
+
+      if (hasDirtyBit(consentInfo)) {
+        // clear stored value.
+        this.sendUpdateHrefRequest_(
+            constructConsentInfo(CONSENT_ITEM_STATE.UNKNOWN));
+        storage.remove(this.storageKey_);
+        this.savedConsentInfo_ = null;
+      }
+      // Note: this.localConsentInfo dirtyBit can only be set to false
+      // if the stored value has dirtyBit.
+      // Any local update reset the value to true.
       this.localConsentInfo_ = consentInfo;
       return this.localConsentInfo_;
     }).catch(e => {
@@ -319,7 +396,11 @@ export class ConsentInstance {
     if (!this.onUpdateHref_) {
       return;
     }
-    const consentState =
+    if (hasDirtyBit(consentInfo)) {
+      // No need to send update request if the stored consent info is dirty
+      return;
+    }
+    const legacyConsentState =
         calculateLegacyStateValue(consentInfo['consentState']);
     const cidPromise = Services.cidForDoc(this.ampdoc_).then(cid => {
       return cid.get({scope: CID_SCOPE, createCookieIfNotPresent: true},
@@ -331,9 +412,11 @@ export class ConsentInstance {
         'consentInstanceId': this.id_,
         'ampUserId': userId,
       });
-      if (consentState != null) {
-        request['consentState'] = consentState;
+      if (legacyConsentState != null) {
+        request['consentState'] = legacyConsentState;
       }
+      request['consentStateValue'] =
+          getConsentStateValue(consentInfo['consentState']);
       if (consentInfo['consentString']) {
         request['consentString'] = consentInfo['consentString'];
       }

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.49 */
+/** Version: 0.1.22.50 */
 /**
  * @license
  * Copyright 2017 The Web Activities Authors. All Rights Reserved.
@@ -3597,6 +3597,27 @@ function base64UrlDecodeToBytes(str) {
  * limitations under the License.
  */
 
+/* @const */
+const toString_ = Object.prototype.toString;
+
+/**
+ * Returns the ECMA [[Class]] of a value
+ * @param {*} value
+ * @return {string}
+ */
+function toString$1(value) {
+  return toString_.call(value);
+}
+
+/**
+ * Determines if value is actually an Object.
+ * @param {*} value
+ * @return {boolean}
+ */
+function isObject(value) {
+  return toString$1(value) === '[object Object]';
+}
+
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -4707,7 +4728,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.49',
+    '_client': 'SwG 0.1.22.50',
   });
 }
 
@@ -7088,11 +7109,6 @@ const ExperimentFlags = {
    * Enables the contributions feature.
    */
   CONTRIBUTIONS: 'contributions',
-
-  /**
-   * Enables the Propensity feature
-   */
-  PROPENSITY: 'propensity',
 };
 
 /**
@@ -12776,7 +12792,7 @@ class PropensityServer {
   /**
    * @param {string} referrer
    * @param {string} type
-   * @return {*}
+   * @return {?Promise<../api/propensity-api.PropensityScore>}
    */
   getPropensity(referrer, type) {
     const clientId = this.getClientId_();
@@ -12842,7 +12858,13 @@ class Propensity {
       throw new Error('Entitlements must be provided for users with'
           + ' active or expired subscriptions');
     }
-    const entitlements = jsonEntitlements && JSON.stringify(jsonEntitlements);
+    if (jsonEntitlements && !isObject(jsonEntitlements)) {
+      throw new Error('Entitlements should be in JSON format');
+    }
+    let entitlements = null;
+    if (jsonEntitlements) {
+      entitlements = JSON.stringify(jsonEntitlements);
+    }
     this.propensityServer_.sendSubscriptionState(state, entitlements);
   }
 
@@ -12859,14 +12881,20 @@ class Propensity {
   }
 
   /** @override */
-  sendEvent(userEvent, jsonParams) {
-    if (!Object.values(Event).includes(userEvent)) {
+  sendEvent(userEvent) {
+    if (!Object.values(Event).includes(userEvent.name)) {
       throw new Error('Invalid user event provided');
     }
-    // TODO(sohanirao): drop the params for some events?
-    // TODO(sohanirao) : verify parameters for some events
-    const paramString = jsonParams && JSON.stringify(jsonParams);
-    this.propensityServer_.sendEvent(userEvent, paramString);
+    if (userEvent.data && !isObject(userEvent.data)) {
+      throw new Error('Event param should be a JSON');
+    }
+    // TODO(sohanirao, mborof): Idenfity the new interface with event
+    // manager and update the lines below to adhere to that interface
+    let paramString = null;
+    if (userEvent.data) {
+      paramString = JSON.stringify(userEvent.data);
+    }
+    this.propensityServer_.sendEvent(userEvent.name, paramString);
   }
 }
 
@@ -13271,9 +13299,6 @@ class ConfiguredRuntime {
 
   /** @override */
   getPropensityModule() {
-    if (!isExperimentOn(this.win_, ExperimentFlags.PROPENSITY)) {
-      throw new Error('Not yet launched!');
-    }
     return Promise.resolve(this.propensityModule_);
   }
 }
