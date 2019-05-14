@@ -33,7 +33,7 @@ export class CryptoHandler {
     this.decryptionPromise_ = null;
 
     const parsedEncryptedKeys =
-        this.ampdoc_.getRootNode().querySelector('script[keys]');
+        this.ampdoc_.getRootNode().querySelector('script[cryptokeys]');
     /** @type {?JsonObject} */
     this.encryptedKeys_ = (parsedEncryptedKeys &&
       tryParseJson(parsedEncryptedKeys.textContent)) || null;
@@ -108,8 +108,7 @@ console.log('documentKey', documentKey);
     ).then(function(buffer) {
       return new TextDecoder().decode(new Uint8Array(buffer));
     });
-    // const placeholder = '<h2><i> abc </i></h2>';
-    return Promise.resolve(decryptedContent);
+    return Promise.resolve('<h2><i>' + decryptedContent + '</i></h2>');
   }
 
   /**
