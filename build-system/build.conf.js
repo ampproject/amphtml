@@ -51,6 +51,21 @@ const esmFilteredPolyfills = {
   './polyfills/promise': ['installPromise'],
 };
 
+/**
+ * @typedef {{
+ *   isSinglepass: (boolean|undefined),
+ *   isEsmBuild: (boolean|undefined),
+ *   isCommonJsModule: (boolean|undefined),
+ *   isForTesting: (boolean|undefined),
+ * }}
+ */
+let BuildConfigDef;
+
+/**
+ * Resolves babel plugins to be applied before compiling through Closure.
+ * @param {BuildConfigDef} buildConfig
+ * @return {!Array<(string|!Array<string|!Object>)>}
+ */
 function plugins({
   isSinglepass,
   isEsmBuild,

@@ -37,12 +37,12 @@ let inProgress = 0;
 const MAX_PARALLEL_CLOSURE_INVOCATIONS = argv.single_pass ? 1 : 4;
 
 /**
- * Predicate for gulp streams that aren't inside third_party.
+ * `gulpIf` Predicate for gulp streams that aren't inside third_party.
  * Excludes third_party from transforms that are only safe for our own code.
  * @param {Vinyl} file
  * @return {boolean}
  */
-const firstPartyFile = file => file.path.indexOf('third_party') < 0;
+const firstPartyFile = ({path}) => path.indexOf('third_party') < 0;
 
 // Compiles AMP with the closure compiler. This is intended only for
 // production use. During development we intend to continue using
