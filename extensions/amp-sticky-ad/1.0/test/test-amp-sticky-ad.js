@@ -185,26 +185,6 @@ describes.realWin('amp-sticky-ad 1.0 version', {
       });
     });
 
-    it('should wait for built and load-end signals', () => {
-      impl.vsync_.mutate = function(callback) {
-        callback();
-      };
-      const layoutAdSpy = sandbox.spy(impl, 'layoutAd_');
-      impl.scheduleLayoutForAd_();
-      expect(layoutAdSpy).to.not.been.called;
-      impl.ad_.signals().signal('built');
-      return adUpgradedToCustomElementPromise.then(() => {
-        return impl.ad_.signals().whenSignal('built').then(() => {
-          expect(layoutAdSpy).to.be.called;
-          expect(ampStickyAd).to.not.have.attribute('visible');
-          impl.ad_.signals().signal('load-end');
-          return poll('visible attribute must be set', () => {
-            return ampStickyAd.hasAttribute('visible');
-          });
-        });
-      });
-    });
-
     it('should wait for built and render-start signals', () => {
       impl.vsync_.mutate = function(callback) {
         callback();
