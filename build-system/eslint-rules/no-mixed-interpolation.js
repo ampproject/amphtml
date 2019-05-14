@@ -54,7 +54,7 @@ function hasTemplateLiteral(node) {
 }
 
 const selector = Object.keys(transformableMethods)
-  .map(method => `CallExpression[callee.property.name=${method.name}]`)
+  .map(name => `CallExpression[callee.property.name=${name}]`)
   .join(',');
 
 module.exports = {
