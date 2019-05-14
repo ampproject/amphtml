@@ -92,11 +92,37 @@ export class CryptoHandler {
    * @return {Promise<string>}
    */
   decryptDocumentContent_(
-    // eslint-disable-next-line no-unused-vars
     encryptedContent, documentKey) {
-    // Don't really return this. Placeholder for the real thing.
-    // const placeholder = encryptedContent.trim() + documentKey;
-    const placeholder = '<h2><i> abc </i></h2>';
-    return Promise.resolve(placeholder);
+
+console.log('encryptedContent', encryptedContent);
+console.log('documentKey', documentKey);
+
+    const decryptedContent = crypto.subtle.decrypt(
+        {
+          name: 'AES-CTR',
+          counter: new Uint8Array(16), // iv: all zeros.
+          length: 128, // block size (16): 1-128
+        },
+        this.base64ToBytes(documentKey),
+        encryptedContent.trim(),
+    ).then(function(buffer) {
+      return new TextDecoder().decode(new Uint8Array(buffer));
+    });
+    // const placeholder = '<h2><i> abc </i></h2>';
+    return Promise.resolve(decryptedContent);
+  }
+
+  /**
+   * @param {string} s
+   * @return {ArrayBuffer}
+   */
+  base64ToBytes(s) {
+    s = s.trim();
+    const bytesString = atob(s);
+    const bytes = new Uint8Array(bytesString.length);
+    for (let i = 0; i < bytesString.length; i++) {
+      bytes[i] = bytesString.charCodeAt(i);
+    }
+    return bytes;
   }
 }
