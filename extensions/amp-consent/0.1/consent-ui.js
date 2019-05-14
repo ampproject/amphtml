@@ -414,14 +414,19 @@ export class ConsentUI {
     const consentStatePromise =
         getServicePromiseForDoc(this.ampdoc_, CONSENT_STATE_MANAGER);
     return consentStatePromise.then(consentStateManager => {
-      return consentStateManager.getConsentInstanceInfo().then(consentInfo => {
-        return dict({
-          'clientConfig': this.clientConfig_,
-          'consentState': getConsentStateValue(consentInfo['consentState']),
-          'consentString': consentInfo['consentString'],
-          'promptTrigger': isActionPromptTrigger ? 'action' : 'load',
-        });
-      });
+      return consentStateManager.getLastConsentInstanceInfo().then(
+          consentInfo => {
+            return dict({
+              'clientConfig': this.clientConfig_,
+              // consentState to be deprecated
+              'consentState': getConsentStateValue(consentInfo['consentState']),
+              'consentStateValue':
+                  getConsentStateValue(consentInfo['consentState']),
+              'consentString': consentInfo['consentString'],
+              'promptTrigger': isActionPromptTrigger ? 'action' : 'load',
+              'isDirty': !!consentInfo['isDirty'],
+            });
+          });
     });
   }
 
