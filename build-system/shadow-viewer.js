@@ -145,18 +145,20 @@ const SCRIPT = `
 `;
 
 
-const renderShadowViewer = ({src, baseHref}) => html`<!doctype html>
-<html>
-  <head>
-    <base href="${baseHref}">
-    <script>
-      ${SCRIPT}
-    </script>
-  </head>
-  <body style="padding: 0; margin: 0">
-    <amp-viewer src="http://localhost:8000/${src}"></amp-viewer>
-  </body>
-</html>`;
+const renderShadowViewer = ({src, baseHref, port = 8000}) =>
+  html`<!doctype html>
+  <html>
+    <head>
+      <base href="${baseHref}">
+      <title>Shadow Viewer</title>
+      <script>
+        ${SCRIPT}
+      </script>
+    </head>
+    <body style="padding: 0; margin: 0">
+      <amp-viewer src="http://localhost:${port}/${src}"></amp-viewer>
+    </body>
+  </html>`;
 
 
 module.exports = {renderShadowViewer};
