@@ -126,6 +126,9 @@ describes.realWin('amp-story-page', {amp: true}, env => {
   });
 
   it('should perform media operations when state becomes active', done => {
+    sandbox.stub(page.resources_, 'getResourceForElement')
+        .returns({isDisplayed: () => true});
+
     const videoEl = win.document.createElement('video');
     videoEl.setAttribute('src', 'https://example.com/video.mp3');
     gridLayerEl.appendChild(videoEl);
@@ -177,6 +180,9 @@ describes.realWin('amp-story-page', {amp: true}, env => {
       const videoEl = fieDoc.querySelector('video');
 
       let mediaPoolMock;
+
+      sandbox.stub(page.resources_, 'getResourceForElement')
+          .returns({isDisplayed: () => true});
 
       page.buildCallback();
       page.layoutCallback()
@@ -240,6 +246,9 @@ describes.realWin('amp-story-page', {amp: true}, env => {
   });
 
   it('should pause/rewind media when state becomes not active', done => {
+    sandbox.stub(page.resources_, 'getResourceForElement')
+        .returns({isDisplayed: () => true});
+
     const videoEl = win.document.createElement('video');
     videoEl.setAttribute('src', 'https://example.com/video.mp3');
     gridLayerEl.appendChild(videoEl);
@@ -280,6 +289,8 @@ describes.realWin('amp-story-page', {amp: true}, env => {
   });
 
   it('should pause media when state becomes paused', done => {
+    sandbox.stub(page.resources_, 'getResourceForElement')
+        .returns({isDisplayed: () => true});
     const videoEl = win.document.createElement('video');
     videoEl.setAttribute('src', 'https://example.com/video.mp3');
     gridLayerEl.appendChild(videoEl);
