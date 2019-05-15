@@ -194,7 +194,7 @@ export class Transport {
         parseUrlDeprecated(this.win_.location.href).origin,
         'Origin of iframe request must not be equal to the document origin.' +
         ' See https://github.com/ampproject/' +
-        ' amphtml/blob/master/spec/amp-iframe-origin-policy.md for details.');
+        'amphtml/blob/master/spec/amp-iframe-origin-policy.md for details.');
 
     /** @const {!Element} */
     const iframe = this.win_.document.createElement('iframe');
