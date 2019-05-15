@@ -527,25 +527,6 @@ export class AmpDocShadow extends AmpDoc {
   }
 }
 
-
-/**
- * AmpDocShadow for the shell
- * @package @visibleForTesting
- */
-export class AmpDocShell extends AmpDocShadow {
-  // TODO(choumx): win.document is not a ShadowRoot, which is required by the
-  // super constructor.
-  // eslint-disable-next-line require-jsdoc
-  constructor(win) {
-    super(win, win.location.href, win.document);
-  }
-
-  /** @override */
-  getHeadNode() {
-    return dev().assertElement(this.win.document.head);
-  }
-}
-
 /**
  * Install the ampdoc service and immediately configure it for either a
  * single-doc or a shadow-doc mode. The mode cannot be changed after the
