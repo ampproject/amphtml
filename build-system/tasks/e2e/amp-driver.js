@@ -40,8 +40,10 @@ const EnvironmentBehaviorMap = {
     },
 
     url(url) {
+      const defaultCaps = ['a2a','focus-rect','foo','keyboard','swipe'];
       // TODO(estherkim): somehow allow non-8000 port and domain
-      return `http://localhost:8000/examples/viewer.html#href=${url}`;
+      return `http://localhost:8000/examples/viewer.html#href=${url}` +
+          `&caps=${defaultCaps.join(',')}`;
     },
   },
 
