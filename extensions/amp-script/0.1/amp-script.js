@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {AmpDocShadow} from '../../../src/service/ampdoc-impl';
 import {AmpScriptVariableSource} from './amp-script-variable-source';
 import {CSS} from '../../../build/amp-script-0.1.css';
 import {
@@ -25,11 +26,6 @@ import {
   ShadowDomVersion,
   getShadowDomSupportedVersion,
 } from '../../../src/web-components';
-import {
-  UrlReplacements,
-  installUrlReplacementsForEmbed,
-  installUrlReplacementsServiceForDoc,
-} from '../../../src/service/url-replacements-impl';
 import {UserActivationTracker} from './user-activation-tracker';
 import {
   calculateExtensionScriptUrl,
@@ -42,6 +38,10 @@ import {installFriendlyIframeEmbed} from '../../../src/friendly-iframe-embed';
 import {
   installOriginExperimentsForDoc, originExperimentsForDoc,
 } from '../../../src/service/origin-experiments-impl';
+import {
+  installUrlReplacementsForEmbed,
+  installUrlReplacementsServiceForDoc,
+} from '../../../src/service/url-replacements-impl';
 import {isExperimentOn} from '../../../src/experiments';
 import {rewriteAttributeValue} from '../../../src/url-rewrite';
 import {setImportantStyles} from '../../../src/style';
@@ -199,9 +199,11 @@ export class AmpScript extends AMP.BaseElement {
         shadow.appendChild(this.element.firstChild);
       }
       // Install services that must be scoped uniquely for amp-script.
-      // We leverage shadow AMP APIs for this.
       const ampdocService = Services.ampdocServiceFor(this.win);
-      this.shadowDoc_ = ampdocService.installShadowDoc(shadow);
+      const scriptDoc = new AmpDocScript(this.win, shadow, ampdoc);
+      this.shadowDoc_ = ampdocService.installDocInShadowRoot(scriptDoc, shadow);
+      // Currently, url-replacements is the only service that will retrieve a
+      // locally-scoped service instance in single-doc mode.
       installUrlReplacementsServiceForDoc(this.shadowDoc_, varSource);
       // Resolve with shadow root for worker-dom's base element.
       return Promise.resolve(shadow);
@@ -350,6 +352,34 @@ class AmpScriptService {
   sizeLimitExceeded(size) {
     this.cumulativeSize_ += size;
     return this.cumulativeSize_ > MAX_TOTAL_SCRIPT_SIZE;
+  }
+}
+
+/**
+ * TODO(choumx)
+ */
+export class AmpDocScript extends AmpDocShadow {
+  /**
+   * @param {*} win
+   * @param {*} shadowRoot
+   * @param {*} parent
+   */
+  constructor(win, shadowRoot, parent) {
+    super(win, shadowRoot);
+
+    this.parent_ = parent;
+  }
+
+  /** @override */
+  isSingleDoc() {
+    // AmpDocScript is just a DOM subtree encapsulated in shadow DOM, so its
+    // "single-doc" state is the same as its parent AmpDoc.
+    return this.parent_.isSingleDoc();
+  }
+
+  /** @override */
+  getUrl() {
+    return this.parent_.getUrl();
   }
 }
 

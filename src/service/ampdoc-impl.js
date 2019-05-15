@@ -197,14 +197,25 @@ export class AmpDocService {
   /**
    * Creates and installs the ampdoc for the shadow root.
    * @param {!ShadowRoot} shadowRoot
-   * @param {string} opt_url
+   * @param {string} url
    * @return {!AmpDocShadow}
    * @restricted
    */
-  installShadowDoc(shadowRoot, opt_url) {
+  installShadowDoc(shadowRoot, url) {
+    const ampdoc = new AmpDocShadow(this.win, shadowRoot, url);
+    this.installDocInShadowRoot(ampdoc, shadowRoot);
+    return ampdoc;
+  }
+
+  /**
+   * TODO(choumx)
+   * @param {!AmpDoc} ampdoc
+   * @param {!ShadowRoot} shadowRoot
+   * @return {!AmpDoc}
+   */
+  installDocInShadowRoot(ampdoc, shadowRoot) {
     devAssert(!shadowRoot[AMPDOC_PROP],
         'The shadow root already contains ampdoc');
-    const ampdoc = new AmpDocShadow(this.win, shadowRoot, opt_url);
     shadowRoot[AMPDOC_PROP] = ampdoc;
     return ampdoc;
   }
@@ -276,9 +287,7 @@ export class AmpDoc {
     return this.win;
   }
 
-  /**
-   * @return {!Object}
-   */
+  /** @return {!Object} */
   getServiceHolder() {
     return /** @type {?} */ (devAssert(null, 'not implemented'));
   }
@@ -524,9 +533,7 @@ export class AmpDocShadow extends AmpDoc {
 
   /** @override */
   isSingleDoc() {
-    // If this "shadow doc" doesn't have its own URL, it's just a DOM subtree
-    // encapsulated in shadow DOM.
-    return this.url_ === undefined;
+    return false;
   }
 
   /** @override */
@@ -541,7 +548,7 @@ export class AmpDocShadow extends AmpDoc {
 
   /** @override */
   getUrl() {
-    return this.url_ || this.win.location.href;
+    return this.url_;
   }
 
   /** @override */
