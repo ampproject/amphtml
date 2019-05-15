@@ -327,7 +327,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
    * @return {!Element}
    * @private
    */
-  createElementFromItem_(item, substring) {
+  createElementFromItem_(item, substring = '') {
     const element = this.element.ownerDocument.createElement('div');
     element.classList.add('i-amphtml-autocomplete-item');
     element.setAttribute('role', 'listitem');
