@@ -29,6 +29,8 @@ const {isTravisBuild} = require('../../travis');
 const extensionsCssMapPath = 'EXTENSIONS_CSS_MAP';
 
 const ROOT_DIR = path.resolve(__dirname, '../../../');
+const LARGE_REFACTOR_THRESHOLD = 50;
+
 /**
  * Extracts a mapping from CSS files to JS files from a well known file
  * generated during `gulp css`.
@@ -226,8 +228,19 @@ function refreshKarmaWdCache() {
   exec('node ./node_modules/wd/scripts/build-browser-scripts.js');
 }
 
+/**
+ * Returns true if the PR is a large refactor.
+ * (Used to skip testing local changes.)
+ * @return {boolean}
+ */
+function isLargeRefactor() {
+  const filesChanged = gitDiffNameOnlyMaster();
+  return filesChanged.length >= LARGE_REFACTOR_THRESHOLD;
+}
+
 module.exports = {
   getAdTypes,
+  isLargeRefactor,
   refreshKarmaWdCache,
   unitTestsToRun,
 };

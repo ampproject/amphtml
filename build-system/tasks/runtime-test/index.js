@@ -27,6 +27,12 @@ const opn = require('opn');
 const path = require('path');
 const webserver = require('gulp-webserver');
 const {
+  getAdTypes,
+  isLargeRefactor,
+  refreshKarmaWdCache,
+  unitTestsToRun,
+} = require('./helpers');
+const {
   reportTestErrored,
   reportTestFinished,
   reportTestSkipped,
@@ -36,7 +42,6 @@ const {app} = require('../../test-server');
 const {build} = require('../build');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../../ctrlcHandler');
 const {css} = require('../css');
-const {getAdTypes, refreshKarmaWdCache, unitTestsToRun} = require('./helpers');
 const {getStdout} = require('../../exec');
 const {isTravisBuild} = require('../../travis');
 
@@ -258,6 +263,11 @@ async function runTests() {
       c.reporters = ['mocha'];
     }
   } else if (argv['local-changes']) {
+    if (isLargeRefactor()) {
+      log(green('INFO:'),
+          'Skipping tests on local changes because this is a large refactor.');
+      return reportTestSkipped();
+    }
     const testsToRun = unitTestsToRun(config.unitTestPaths);
     if (testsToRun.length == 0) {
       log(green('INFO:'),
