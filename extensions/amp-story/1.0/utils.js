@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {closestAncestorElementBySelector} from '../../../src/dom';
 import {createShadowRoot} from '../../../src/shadow-embed';
@@ -260,4 +261,19 @@ export function getHistoryState(win, stateName) {
     return getState(history)[stateName];
   }
   return null;
+}
+
+/**
+ * Returns a boolean indicating whether the media element is visible or has to
+ * play, or hidden by any publisher CSS rule.
+ * @param {!Element} ampMediaEl amp-video or amp-audio
+ * @param {!../../../src/service/resource.Resource} resource
+ * @return {boolean}
+ */
+export function isMediaDisplayed(ampMediaEl, resource) {
+  // Considers amp-audio elements with a layout=nodisplay attribute as
+  // displayed, since they are expected to play when the page is active.
+  return resource.isDisplayed() ||
+      (ampMediaEl.tagName === 'AMP-AUDIO' &&
+          ampMediaEl.getLayout() === Layout.NODISPLAY);
 }

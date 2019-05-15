@@ -23,10 +23,6 @@ amp-story[standalone].i-amphtml-story-desktop-panels {
  width: 100vw!important;
 }
 
-.i-amphtml-story-desktop-panels .i-amphtml-story-logo {
- display: block!important;
-}
-
 .i-amphtml-story-background-container {
  opacity: .8!important;
  position: absolute!important;
