@@ -1530,7 +1530,8 @@ describe('Resources discoverWork', () => {
     const buildResourceSpy = sandbox.spy(resources, 'buildResourceUnsafe_');
     sandbox.stub(resources, 'schedule_');
     resources.documentReady_ = true;
-    resource1.element.isBuilt = () => false;
+    resource1.element.isBuilt = sandbox.stub()
+        .onFirstCall().returns(true).onSecondCall().returns(false);
     resource2.element.idleRenderOutsideViewport = () => false;
     resource1.state_ = ResourceState.NOT_BUILT;
     resource1.build = sandbox.spy();
@@ -1540,7 +1541,8 @@ describe('Resources discoverWork', () => {
     expect(resource1.build).to.be.calledOnce;
     expect(buildResourceSpy).calledWithExactly(
       resource1,
-      /* schedulePass */ true
+      /* schedulePass */ true,
+      /* buildGranted */ false
     );
   });
 
@@ -1549,7 +1551,8 @@ describe('Resources discoverWork', () => {
     sandbox.stub(resources, 'schedule_');
     resources.documentReady_ = false;
     resource1.element.nextSibling = {};
-    resource1.element.isBuilt = () => false;
+    resource1.element.isBuilt = sandbox.stub()
+        .onFirstCall().returns(false).onSecondCall().returns(true);
     resource2.element.idleRenderOutsideViewport = () => false;
     resource1.state_ = ResourceState.NOT_BUILT;
     resource1.build = sandbox.spy();
@@ -1595,6 +1598,28 @@ describe('Resources discoverWork', () => {
     resources.discoverWork_();
 
     expect(schedulePassStub).to.be.calledOnce;
+  });
+
+  it('should force build resources durig discoverWork layout phase', () => {
+    const buildResourceSpy = sandbox.spy(resources, 'buildResourceUnsafe_');
+    sandbox.stub(resources, 'schedule_');
+    resources.documentReady_ = true;
+    // Emulates a resource not building, maybe because grantBuildPermission()
+    // returned false.
+    resource1.element.isBuilt = sandbox.stub().returns(false);
+    resource2.element.idleRenderOutsideViewport = () => false;
+    resource1.state_ = ResourceState.NOT_BUILT;
+    resource1.build = sandbox.spy();
+
+    resources.discoverWork_();
+
+    expect(resource1.build).to.be.calledTwice;
+    // discoverWork_ phase 1 build.
+    expect(buildResourceSpy).calledWithExactly(
+        resource1, /* schedulePass */ true, /* buildGranted */ false);
+    // discoverWork_ phase 4 layout grants build.
+    expect(buildResourceSpy).calledWithExactly(
+        resource1, /* schedulePass */ true, /* buildGranted */ true);
   });
 
   describe('getResourcesInRect', () => {

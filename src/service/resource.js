@@ -322,13 +322,14 @@ export class Resource {
   /**
    * Requests the resource's element to be built. See {@link AmpElement.build}
    * for details.
+   * @param {boolean=} buildGranted
    * @return {?Promise}
    */
-  build() {
+  build(buildGranted = false) {
     if (
       this.isBuilding_ ||
       !this.element.isUpgraded() ||
-      !this.resources_.grantBuildPermission()
+      (!buildGranted && !this.resources_.grantBuildPermission())
     ) {
       return null;
     }

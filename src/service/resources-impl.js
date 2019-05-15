@@ -568,12 +568,14 @@ export class Resources {
    * @param {!Resource} resource
    * @param {boolean=} checkForDupes
    * @param {boolean=} scheduleWhenBuilt
+   * @param {boolean=} buildGranted
    * @private
    */
   buildOrScheduleBuildForResource_(
     resource,
     checkForDupes = false,
-    scheduleWhenBuilt = true
+    scheduleWhenBuilt = true,
+    buildGranted = false
   ) {
     const buildingEnabled = this.isRuntimeOn_ || this.isBuildOn_;
 
@@ -587,7 +589,7 @@ export class Resources {
     if (buildingEnabled && shouldBuildResource) {
       if (this.documentReady_) {
         // Build resource immediately, the document has already been parsed.
-        this.buildResourceUnsafe_(resource, scheduleWhenBuilt);
+        this.buildResourceUnsafe_(resource, scheduleWhenBuilt, buildGranted);
       } else if (!resource.isBuilt() && !resource.isBuilding()) {
         if (!checkForDupes || !this.pendingBuildResources_.includes(resource)) {
           // Otherwise add to pending resources and try to build any ready ones.
@@ -642,11 +644,12 @@ export class Resources {
   /**
    * @param {!Resource} resource
    * @param {boolean} schedulePass
+   * @param {boolean=} buildGranted
    * @return {?Promise}
    * @private
    */
-  buildResourceUnsafe_(resource, schedulePass) {
-    const promise = resource.build();
+  buildResourceUnsafe_(resource, schedulePass, buildGranted = false) {
+    const promise = resource.build(buildGranted);
     if (!promise || !schedulePass) {
       return promise;
     }
@@ -1772,6 +1775,13 @@ export class Resources {
     if (loadRect) {
       for (let i = 0; i < this.resources_.length; i++) {
         const r = this.resources_[i];
+        // TODO(dvoytenko): This extra build has to be merged with the
+        // scheduleLayoutOrPreload_ method below.
+        if (!r.isBuilt() && !r.hasOwner() && r.isDisplayed() &&
+            r.overlaps(loadRect)) {
+          this.buildOrScheduleBuildForResource_(r, /* checkForDupes */ true,
+              /* scheduleWhenBuilt */ undefined, /* buildGranted */ true);
+        }
         if (r.getState() != ResourceState.READY_FOR_LAYOUT || r.hasOwner()) {
           continue;
         }
