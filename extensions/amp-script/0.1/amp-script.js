@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {AmpScriptVariableSource} from './amp-script-variable-source';
 import {CSS} from '../../../build/amp-script-0.1.css';
 import {
   DomPurifyDef, createPurifier, getAllowedTags, validateAttributeChange,
@@ -24,6 +25,11 @@ import {
   ShadowDomVersion,
   getShadowDomSupportedVersion,
 } from '../../../src/web-components';
+import {
+  UrlReplacements,
+  installUrlReplacementsForEmbed,
+  installUrlReplacementsServiceForDoc,
+} from '../../../src/service/url-replacements-impl';
 import {UserActivationTracker} from './user-activation-tracker';
 import {
   calculateExtensionScriptUrl,
@@ -140,7 +146,11 @@ export class AmpScript extends AMP.BaseElement {
    * @private
    */
   createShadowBase_() {
-    const head = this.getAmpDoc().getHeadNode();
+    const ampdoc = this.getAmpDoc();
+    const head = ampdoc.getHeadNode();
+
+    const urlVarWhitelist = []; // TODO(choumx)
+    const varSource = new AmpScriptVariableSource(ampdoc, urlVarWhitelist);
 
     const shadowSupport = getShadowDomSupportedVersion();
     if (shadowSupport === ShadowDomVersion.NONE) {
@@ -163,10 +173,15 @@ export class AmpScript extends AMP.BaseElement {
         html,
         url: this.win.location.origin,
       };
-      // TODO(choumx): installUrlReplacementsForEmbed().
-      return installFriendlyIframeEmbed(this.iframe_, this.element, spec)
-          // The iframe body is worker-dom's base element.
-          .then(() => this.iframe_.contentWindow.document.body);
+      return installFriendlyIframeEmbed(
+          this.iframe_, this.element, spec, embedWin => {
+            // URL replacements with AmpScriptVariableSource.
+            installUrlReplacementsForEmbed(ampdoc, embedWin, varSource);
+          })
+          .then(() => {
+            // Resolve with the iframe body for worker-dom's base element.
+            return this.iframe_.contentWindow.document.body;
+          });
     } else {
       dev().info(TAG, 'Shadow mode!');
       const shadow = (shadowSupport === ShadowDomVersion.V0)
@@ -183,6 +198,12 @@ export class AmpScript extends AMP.BaseElement {
       while (this.element.firstChild) {
         shadow.appendChild(this.element.firstChild);
       }
+      // Install services that must be scoped uniquely for amp-script.
+      // We leverage shadow AMP APIs for this.
+      const ampdocService = Services.ampdocServiceFor(this.win);
+      this.shadowDoc_ = ampdocService.installShadowDoc(shadow);
+      installUrlReplacementsServiceForDoc(this.shadowDoc_, varSource);
+      // Resolve with shadow root for worker-dom's base element.
       return Promise.resolve(shadow);
     }
   }

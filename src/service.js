@@ -84,30 +84,25 @@ export class EmbeddableService {
  *
  * @param {!Element|!ShadowRoot} element
  * @param {string} id
- * @param {boolean=} opt_fallbackToTopWin
+ * @param {boolean=} opt_closest If true, returns the service attached to the
+ *     closest AmpDoc instead of the global AmpDoc. Not applicable for FIE.
  * @return {?Object}
  */
-export function getExistingServiceForDocInEmbedScope(
-  element, id, opt_fallbackToTopWin)
-{
+export function getExistingServiceForDocInEmbedScope(element, id, opt_closest) {
   const document = element.ownerDocument;
   const win = toWin(document.defaultView);
   // First, try to resolve via local embed window (if applicable).
   const isEmbed = win != getTopWindow(win);
   if (isEmbed) {
     if (isServiceRegistered(win, id)) {
-      const embedService = getServiceInternal(win, id);
-      if (embedService) {
-        return embedService;
-      }
+      return getServiceInternal(win, id);
     }
-    // Don't continue if fallback is not allowed.
-    if (!opt_fallbackToTopWin) {
-      return null;
-    }
+    // Fallback from FIE to parent is intentionally unsupported for safety.
+    return null;
+  } else {
+    // Resolve via the element's ampdoc.
+    return getServiceForDocOrNullInternal(element, id, opt_closest);
   }
-  // Resolve via the element's ampdoc. This falls back to the top-level service.
-  return getServiceForDocOrNullInternal(element, id);
 }
 
 
@@ -257,9 +252,10 @@ export function getServiceForDoc(elementOrAmpDoc, id) {
  * If service `id` is not registered, returns null.
  * @param {!Element|!ShadowRoot} element
  * @param {string} id
+ * @param {boolean=} opt_closest
  */
-function getServiceForDocOrNullInternal(element, id) {
-  const ampdoc = getAmpdoc(element);
+function getServiceForDocOrNullInternal(element, id, opt_closest) {
+  const ampdoc = getAmpdoc(element, opt_closest);
   const holder = getAmpdocServiceHolder(ampdoc);
   if (isServiceRegistered(holder, id)) {
     return getServiceInternal(holder, id);
@@ -348,13 +344,16 @@ export function getParentWindowFrameElement(node, topWin) {
 
 /**
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @param {boolean=} opt_closest If true, returns the AmpDoc closest to
+ *     `nodeOrDoc` (e.g. instead of the global AmpDoc for single-docs).
  * @return {!./service/ampdoc-impl.AmpDoc}
  */
-export function getAmpdoc(nodeOrDoc) {
+export function getAmpdoc(nodeOrDoc, opt_closest) {
   if (nodeOrDoc.nodeType) {
     const win = toWin(/** @type {!Document} */ (
       nodeOrDoc.ownerDocument || nodeOrDoc).defaultView);
-    return getAmpdocService(win).getAmpDoc(/** @type {!Node} */ (nodeOrDoc));
+    const node = /** @type {!Node} */ (nodeOrDoc);
+    return getAmpdocService(win).getAmpDoc(node, {closestAmpDoc: opt_closest});
   }
   return /** @type {!./service/ampdoc-impl.AmpDoc} */ (nodeOrDoc);
 }
@@ -366,7 +365,7 @@ export function getAmpdoc(nodeOrDoc) {
  */
 function getAmpdocServiceHolder(nodeOrDoc) {
   const ampdoc = getAmpdoc(nodeOrDoc);
-  return ampdoc.isSingleDoc() ? ampdoc.win : ampdoc;
+  return ampdoc.getServiceHolder();
 }
 
 

@@ -109,7 +109,7 @@ describe('AmpDocService', () => {
           return;
         }
 
-        service.installShadowDoc('https://a.org/', shadowRoot);
+        service.installShadowDoc(shadowRoot, 'https://a.org/');
         const ampDoc = service.getAmpDoc(content);
         expect(ampDoc).to.equal(service.singleDoc_);
       });
@@ -119,7 +119,7 @@ describe('AmpDocService', () => {
           return;
         }
 
-        const newAmpDoc = service.installShadowDoc('https://a.org/', shadowRoot);
+        const newAmpDoc = service.installShadowDoc(shadowRoot, 'https://a.org/');
         const ampDoc = service.getAmpDoc(content, {closestAmpDoc: true});
         expect(ampDoc).to.equal(newAmpDoc);
       });
@@ -131,7 +131,7 @@ describe('AmpDocService', () => {
 
         toggleExperiment(window, 'ampdoc-closest', true);
         service = new AmpDocService(window, /* isSingleDoc */ true);
-        const newAmpDoc = service.installShadowDoc('https://a.org/', shadowRoot);
+        const newAmpDoc = service.installShadowDoc(shadowRoot, 'https://a.org/');
         const ampDoc = service.getAmpDoc(content);
         expect(ampDoc).to.equal(newAmpDoc);
       });
@@ -203,7 +203,7 @@ describe('AmpDocService', () => {
         service.getAmpDoc(content);
       }).to.throw(/No ampdoc found/);
 
-      const newAmpDoc = service.installShadowDoc('https://a.org/', shadowRoot);
+      const newAmpDoc = service.installShadowDoc(shadowRoot, 'https://a.org/');
       const ampDoc = service.getAmpDoc(content);
       expect(ampDoc).to.equal(newAmpDoc);
       expect(ampDoc).to.exist;
@@ -234,9 +234,9 @@ describe('AmpDocService', () => {
       if (!shadowRoot) {
         return;
       }
-      service.installShadowDoc('https://a.org/', shadowRoot);
+      service.installShadowDoc(shadowRoot, 'https://a.org/');
       allowConsoleError(() => { expect(() => {
-        service.installShadowDoc('https://a.org/', shadowRoot);
+        service.installShadowDoc(shadowRoot, 'https://a.org/');
       }).to.throw(/The shadow root already contains ampdoc/); });
     });
 
@@ -246,7 +246,7 @@ describe('AmpDocService', () => {
         return;
       }
 
-      const newAmpDoc = service.installShadowDoc('https://a.org/', shadowRoot);
+      const newAmpDoc = service.installShadowDoc(shadowRoot, 'https://a.org/');
       const ampDoc = service.getAmpDoc(content);
       expect(ampDoc).to.equal(newAmpDoc);
 

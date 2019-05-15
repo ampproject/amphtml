@@ -536,8 +536,9 @@ export class Services {
    * @return {!./service/url-replacements-impl.UrlReplacements}
    */
   static urlReplacementsForDoc(element) {
+    const closest = true;
     return /** @type {!./service/url-replacements-impl.UrlReplacements} */ (
-      getExistingServiceForDocInEmbedScope(element, 'url-replace'));
+      getExistingServiceForDocInEmbedScope(element, 'url-replace', closest));
   }
 
   /**

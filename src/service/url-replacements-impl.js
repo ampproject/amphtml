@@ -1109,13 +1109,15 @@ export function extractClientIdFromGaCookie(gaCookie) {
 
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ * @param {!VariableSource=} opt_varSource
  */
-export function installUrlReplacementsServiceForDoc(ampdoc) {
+export function installUrlReplacementsServiceForDoc(ampdoc, opt_varSource) {
   registerServiceBuilderForDoc(
       ampdoc,
       'url-replace',
       function(doc) {
-        return new UrlReplacements(doc, new GlobalVariableSource(doc));
+        const varSource = opt_varSource || new GlobalVariableSource(doc);
+        return new UrlReplacements(doc, varSource);
       });
 }
 
