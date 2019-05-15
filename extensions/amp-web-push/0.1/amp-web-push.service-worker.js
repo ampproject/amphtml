@@ -32,7 +32,7 @@ const WorkerMessengerCommand = {
   /*
     Used to request the current subscription state.
    */
-  AMP_SUBSCRIPION_STATE: 'amp-web-push-subscription-state',
+  AMP_SUBSCRIPTION_STATE: 'amp-web-push-subscription-state',
   /*
     Used to request the service worker to subscribe the user to push.
     Notification permissions are already granted at this point.
@@ -70,7 +70,7 @@ self.addEventListener('message', event => {
   const {command} = event.data;
 
   switch (command) {
-    case WorkerMessengerCommand.AMP_SUBSCRIPION_STATE:
+    case WorkerMessengerCommand.AMP_SUBSCRIPTION_STATE:
       onMessageReceivedSubscriptionState();
       break;
     case WorkerMessengerCommand.AMP_SUBSCRIBE:
@@ -99,11 +99,11 @@ function onMessageReceivedSubscriptionState() {
         }
       }).then(permissionStateOrNull => {
         if (permissionStateOrNull == null) {
-          broadcastReply(WorkerMessengerCommand.AMP_SUBSCRIPION_STATE, false);
+          broadcastReply(WorkerMessengerCommand.AMP_SUBSCRIPTION_STATE, false);
         } else {
           const isSubscribed = !!retrievedPushSubscription &&
             permissionStateOrNull === 'granted';
-          broadcastReply(WorkerMessengerCommand.AMP_SUBSCRIPION_STATE,
+          broadcastReply(WorkerMessengerCommand.AMP_SUBSCRIPTION_STATE,
               isSubscribed);
         }
       });
