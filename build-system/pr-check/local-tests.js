@@ -29,7 +29,6 @@ const {
   stopTimer,
   timedExecOrDie: timedExecOrDieBase} = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
-const {gitDiffNameOnlyMaster} = require('../git');
 const {isTravisPullRequestBuild} = require('../travis');
 
 const FILENAME = 'local-tests.js';
@@ -37,12 +36,6 @@ const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
 const timedExecOrDie =
   (cmd, unusedFileName) => timedExecOrDieBase(cmd, FILENAME);
 
-const LARGE_REFACTOR_THRESHOLD = 50;
-
-function isLargeRefactor() {
-  const filesChanged = gitDiffNameOnlyMaster();
-  return filesChanged.length >= LARGE_REFACTOR_THRESHOLD;
-}
 
 function main() {
   const startTime = startTimer(FILENAME, FILENAME);
@@ -69,10 +62,9 @@ function main() {
     }
     downloadBuildOutput(FILENAME);
     timedExecOrDie('gulp update-packages');
-    if (!isLargeRefactor() &&
-        (buildTargets.has('RUNTIME') ||
-         buildTargets.has('BUILD_SYSTEM') ||
-         buildTargets.has('UNIT_TEST'))) {
+    if (buildTargets.has('RUNTIME') ||
+        buildTargets.has('BUILD_SYSTEM') ||
+        buildTargets.has('UNIT_TEST')) {
       timedExecOrDie('gulp test --unit --nobuild --headless --local-changes');
     }
 
