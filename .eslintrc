@@ -129,7 +129,11 @@
     ],
     "object-shorthand": [2, "properties", { "avoidQuotes": true }],
     "prefer-const": 2,
-    "prettier/prettier": [2, { "singleQuote": true }],
+    "prettier/prettier": [2, {
+      "bracketSpacing": false,
+      "singleQuote": true,
+      "trailingComma": "es5"
+    }],
     "radix": 2,
     "require-jsdoc": [2, {
       "require": {
