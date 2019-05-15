@@ -30,6 +30,7 @@ const source = require('vinyl-source-stream');
 const through = require('through2');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
 const {css} = require('./css');
+const {isTravisBuild} = require('../travis');
 
 const root = process.cwd();
 const absPathRegExp = new RegExp(`^${root}/`);
@@ -281,8 +282,11 @@ function runRules(modules) {
 }
 
 async function depCheck() {
-  await css();
   const handlerProcess = createCtrlcHandler('dep-check');
+  await css();
+  if (!isTravisBuild()) {
+    log('Checking dependencies...');
+  }
   return getSrcs().then(entryPoints => {
     // This check is for extension folders that actually dont have
     // an extension entry point module yet.
