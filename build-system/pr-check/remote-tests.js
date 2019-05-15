@@ -23,7 +23,6 @@
 
 const colors = require('ansi-colors');
 const {
-  downloadBuildOutput,
   downloadDistOutput,
   printChangeSummary,
   startTimer,
@@ -38,6 +37,7 @@ const FILENAME = 'remote-tests.js';
 const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
 const timedExecOrDie =
   (cmd, unusedFileName) => timedExecOrDieBase(cmd, FILENAME);
+
 
 async function main() {
   const startTime = startTimer(FILENAME, FILENAME);
@@ -66,7 +66,7 @@ async function main() {
       stopTimer(FILENAME, FILENAME, startTime);
       return;
     }
-    downloadBuildOutput(FILENAME);
+    downloadDistOutput(FILENAME);
     timedExecOrDie('gulp update-packages');
     await startSauceConnect(FILENAME);
 
@@ -79,7 +79,8 @@ async function main() {
     if (buildTargets.has('RUNTIME') ||
         buildTargets.has('BUILD_SYSTEM') ||
         buildTargets.has('INTEGRATION_TEST')) {
-      timedExecOrDie('gulp test --integration --nobuild --saucelabs');
+      timedExecOrDie(
+          'gulp test --integration --nobuild --compiled --saucelabs');
     }
     stopSauceConnect(FILENAME);
   }

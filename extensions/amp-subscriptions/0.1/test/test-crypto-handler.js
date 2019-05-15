@@ -59,7 +59,7 @@ env => {
 
     // Putting encrypted keys script into the doc head.
     const keyScript = win.document.createElement('script');
-    keyScript.setAttribute('keys', '');
+    keyScript.setAttribute('cryptokeys', '');
     keyScript.setAttribute('type', 'application/json');
     keyScript.textContent = JSON.stringify(encryptedKeys);
     win.document.head.appendChild(keyScript);

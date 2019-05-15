@@ -15,14 +15,12 @@
  */
 
 import * as cookie from '../../../../src/cookies';
+import * as lolex from 'lolex';
 import {CookieWriter} from '../cookie-writer';
 import {dict} from '../../../../src/utils/object';
 import {installLinkerReaderService} from '../linker-reader';
-import {
-  installVariableServiceForDoc,
-  variableServiceForDoc,
-} from '../variables';
-
+import {installVariableService} from '../variables';
+import {stubService} from '../../../../testing/test-helper';
 
 
 const TAG = '[amp-analytics/cookie-writer]';
@@ -49,7 +47,7 @@ describes.realWin('amp-analytics.cookie-writer', {
         });
     element = doc.createElement('div');
     doc.body.appendChild(element);
-    installVariableServiceForDoc(doc);
+    installVariableService(win);
     installLinkerReaderService(win);
   });
 
@@ -108,7 +106,7 @@ describes.realWin('amp-analytics.cookie-writer', {
         location: 'https://www-example-com.cdn.ampproject.org',
       };
       installLinkerReaderService(mockWin);
-      installVariableServiceForDoc(doc);
+      installVariableService(mockWin);
       const cookieWriter = new CookieWriter(mockWin, element, config);
       expandAndWriteSpy = sandbox.spy(cookieWriter, 'expandAndWrite_');
       return cookieWriter.write().then(() => {
@@ -239,106 +237,93 @@ describes.realWin('amp-analytics.cookie-writer', {
       });
     });
   });
+});
 
-  describe('Cookie value', () => {
-    it('Write cookie', () => {
-      const config = dict({
-        'cookies': {
-          'testId': {
-            'value': 'QUERY_PARAM(abc)',
-          },
-        },
-      });
-      const cookieWriter = new CookieWriter(win, element, config);
-      sandbox.stub(cookieWriter.urlReplacementService_,
-          'expandStringAsync').callsFake(string => {
-        return Promise.resolve(string);});
-      return cookieWriter.write().then(() => {
-        expect(setCookieSpy).to.be.calledOnce;
-        expect(setCookieSpy).to.be.calledWith('testId', 'QUERY_PARAM(abc)');
-      });
+describes.fakeWin('amp-analytics.cookie-writer value', {amp: true}, env => {
+  let win;
+  let clock;
+  beforeEach(() => {
+    win = env.win;
+    clock = lolex.install({
+      target: window,
+      now: new Date('2018-01-01T08:00:00Z'),
     });
+    installVariableService(win);
+    installLinkerReaderService(win);
+  });
 
-    it('Write LINKER_PARAM value to cookie', () => {
-      const config = dict({
-        'cookies': {
-          'testId': {
-            'value': 'LINKER_PARAM(testlinker, testid)',
-          },
+  afterEach(() => {
+    clock.uninstall();
+  });
+
+  it('should read value from QUERY_PARAM and LINKER_PARAM', () => {
+    stubService(env.sandbox, win, 'amp-analytics-linker-reader', 'get')
+        .callsFake((name, id) => {
+          return `${name}-${id}`;
+        });
+    win.location = 'https://example.com/?a=123&b=567';
+    const cookieWriter = new CookieWriter(win, win.document.body, dict({
+      'cookies': {
+        'aCookie': {
+          'value': 'QUERY_PARAM(a)',
         },
-      });
-      const cookieWriter = new CookieWriter(win, element, config);
-      const variableService = variableServiceForDoc(doc);
-      sandbox.stub(variableService.linkerReader_,
-          'get').callsFake((name, id) => {
-        return `${name}-${id}`;
-      });
-      return cookieWriter.write().then(() => {
-        expect(setCookieSpy).to.be.calledOnce;
-        expect(setCookieSpy).to.be.calledWith('testId', 'testlinker-testid');
-      });
+        'bCookie': {
+          'value': 'LINKER_PARAM(b,c)',
+        },
+      },
+    }));
+    return cookieWriter.write().then(() => {
+      const cookies = win.document.cookie.split(';');
+      expect(cookies).to.include('aCookie=123');
+      expect(cookies).to.include('bCookie=b-c');
     });
+  });
 
-    it('Write multiple cookie', () => {
-      const config = dict({
-        'cookies': {
-          'testId': {
-            'value': 'QUERY_PARAM(abc)',
-          },
-          'testId2': {
-            'value': 'QUERY_PARAM(def)',
-          },
+  it('should write cookie under eTLD+1 domain with right exp.', () => {
+    win.location = 'https://www.example.com/?a=123&b=567';
+    const cookieWriter = new CookieWriter(win, win.document.body, dict({
+      'cookies': {
+        'aCookie': {
+          'value': 'QUERY_PARAM(a)',
         },
-      });
-      const cookieWriter = new CookieWriter(win, element, config);
-      sandbox.stub(cookieWriter.urlReplacementService_,
-          'expandStringAsync').callsFake(string => {
-        return Promise.resolve(string);});
-      return cookieWriter.write().then(() => {
-        expect(setCookieSpy).to.be.calledTwice;
-        expect(setCookieSpy).to.be.calledWith('testId', 'QUERY_PARAM(abc)');
-        expect(setCookieSpy).to.be.calledWith('testId2', 'QUERY_PARAM(def)');
-      });
+      },
+    }));
+    return cookieWriter.write().then(() => {
+      expect(win.document.lastSetCookieRaw).to.equal(
+          'aCookie=123; path=/; domain=example.com; ' +
+          'expires=Tue, 01 Jan 2019 08:00:00 GMT');
     });
+  });
 
 
-
-    it('Do not write when string is empty', () => {
-      const config = dict({
-        'cookies': {
-          'testId': {
-            'value': 'QUERY_PARAM(noexist)',
-          },
+  it('should not write empty cookie', () => {
+    win.location = 'https://www.example.com/?a=123&b=567';
+    const cookieWriter = new CookieWriter(win, win.document.body, dict({
+      'cookies': {
+        'cCookie': {
+          'value': 'QUERY_PARAM(c)',
         },
-      });
-      const cookieWriter = new CookieWriter(win, element, config);
-      sandbox.stub(cookieWriter.urlReplacementService_,
-          'expandStringAsync').callsFake(() => {
-        return Promise.resolve('');});
-      return cookieWriter.write().then(() => {
-        // Both cookie value resolve to empty string
-        expect(setCookieSpy).to.not.be.called;
-      });
+      },
+    }));
+    return cookieWriter.write().then(() => {
+      expect(win.document.cookie).to.equal('');
+      expect(win.document.lastSetCookieRaw).to.be.undefined;
     });
+  });
 
-    it('Handle expandString error', () => {
-      const config = dict({
-        'cookies': {
-          'testId': {
-            'value': 'QUERY_PARAM',
-          },
+  it('should not write cookie if macro is mal-formatted', () => {
+    win.location = 'https://www.example.com/?a=123&b=567';
+    const cookieWriter = new CookieWriter(win, win.document.body, dict({
+      'cookies': {
+        'aCookie': {
+          'value': 'LINKER_PARAM(b)',
         },
-      });
-      const cookieWriter = new CookieWriter(win, element, config);
-      expectAsyncConsoleError(TAG + ' Error expanding cookie string ' +
-          'Error: The first argument to QUERY_PARAM, ' +
-          'the query string param is required​​​');
-      expectAsyncConsoleError('The first argument to QUERY_PARAM, ' +
-          'the query string param is required');
-      return cookieWriter.write().then(() => {
-        // Both cookie value resolve to empty string
-        expect(setCookieSpy).to.not.be.called;
-      });
+      },
+    }));
+    expectAsyncConsoleError(/LINKER_PARAM requires two params, name and id/);
+    return cookieWriter.write().then(() => {
+      expect(win.document.cookie).to.equal('');
+      expect(win.document.lastSetCookieRaw).to.be.undefined;
     });
   });
 });

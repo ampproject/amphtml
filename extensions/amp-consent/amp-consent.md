@@ -521,3 +521,7 @@ Join in on the discussion where we are discussing [upcoming potential features](
 *   [`<amp-geo>` documentation](https://amp.dev/documentation/components/amp-geo)
 *   [DoubleClick/ AdSense documentation ](https://support.google.com/dfp_premium/answer/7678538#amp-pages)
 *   [New feature discussion for amp-consent](https://github.com/ampproject/amphtml/issues/13716#issuecomment-382474345)
+
+## Supported Consent Management Platforms
+
+- Your Integrated platform here!

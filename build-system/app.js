@@ -706,16 +706,30 @@ app.use('/impression-proxy/', (req, res) => {
   // Or fake response with status 204 if viewer replaceUrl is provided
 });
 
+let forcePromptOnNext = false;
 app.post('/get-consent-v1/', (req, res) => {
   cors.assertCors(req, res, ['POST']);
   const body = {
     'promptIfUnknown': true,
+    'forcePromptOnNext': forcePromptOnNext,
     'sharedData': {
       'tfua': true,
       'coppa': true,
     },
   };
   res.json(body);
+});
+
+app.get('/get-consent-v1-set/', (req, res) => {
+  cors.assertCors(req, res, ['GET']);
+  const value = req.query['forcePromptOnNext'];
+  if (value == 'false' || value == '0') {
+    forcePromptOnNext = false;
+  } else {
+    forcePromptOnNext = true;
+  }
+  res.json({});
+  res.end();
 });
 
 app.post('/get-consent-no-prompt/', (req, res) => {
@@ -916,6 +930,16 @@ app.get([
       file = file.replace(
           /<div id="container">[\s\S]+<\/div>/m,
           '<div id="container">' + analytics.join('') + '</div>');
+    }
+
+    // Extract amp-consent for the given 'type' specified in URL query.
+    if (req.path.indexOf(
+        '/examples/cmp-vendors.amp.html') == 0 && req.query.type) {
+      const consent = file.match(
+          elementExtractor('amp-consent', req.query.type));
+      file = file.replace(
+          /<div id="container">[\s\S]+<\/div>/m,
+          '<div id="container">' + consent.join('') + '</div>');
     }
 
     if (stream > 0) {
@@ -1237,7 +1261,8 @@ app.get('/dist/ww(.max)?.js', (req, res) => {
 });
 
 /**
- * Shadow viewer
+ * Shadow viewer. Fetches shadow runtime from cdn by default.
+ * Setting the param useLocal=1 will load the runtime from the local build.
  */
 app.use('/shadow/', (req, res) => {
   const {url} = req;
@@ -1247,10 +1272,16 @@ app.use('/shadow/', (req, res) => {
     'https://cdn.ampproject.org/' :
     `${path.dirname(url)}/`;
 
-  res.end(renderShadowViewer({
+  const viewerHtml = renderShadowViewer({
     src: req.url.replace(/^\//, ''),
     baseHref,
-  }));
+  });
+
+  if (!req.query.useLocal) {
+    res.end(viewerHtml);
+    return;
+  }
+  res.end(replaceUrls(pc.env.SERVE_MODE, viewerHtml));
 });
 
 /**

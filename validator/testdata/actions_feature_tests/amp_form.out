@@ -74,26 +74,6 @@ FAIL
 |      </fieldset>
 |    </form>
 |
-|      <!-- Valid: With cross-origin -->
-|      <form method="post" action-xhr="https://example.com/subscribe" name="test"
->>     ^~~~~~~~~
-actions_feature_tests/amp_form.html:77:4 The attribute 'cross-origin' in tag 'FORM [method=POST] (ACTIONS)' is deprecated - use 'crossorigin' instead. (see https://github.com/ampproject/amphtml/issues/21399) [DEPRECATION]
-|      cross-origin="amp-viewer-auth-token-via-post" custom-validation-reporting="as-you-go" autocomplete
-|      verify-xhr="https://example.com/verify" enctype="test_enc">
-|        <fieldset>
-|          <label>
-|            <span>Your name</span>
-|            <input id="name" type="text" name="name" required>
-|            <span visible-when-invalid="valueMissing" validation-for="name"></span>
-|          </label>
-|          <label>
-|            <span>Your email</span>
-|            <input type="email" name="email" required>
-|          </label>
-|          <input type="submit" value="Subscribe">
-|        </fieldset>
-|      </form>
-|
 |    <!-- Valid: Target attribute is allowed-->
 |    <form method="post" action-xhr="https://example.com/subscribe" target="_blank"
 |    crossorigin="amp-viewer-auth-token-via-post" custom-validation-reporting="as-you-go">
@@ -114,7 +94,7 @@ actions_feature_tests/amp_form.html:77:4 The attribute 'cross-origin' in tag 'FO
 |    <!-- Invalid: Action xhr must be https -->
 |    <form method="post" action-xhr="http://example.com/subscribe"
 >>   ^~~~~~~~~
-actions_feature_tests/amp_form.html:112:2 Invalid URL protocol 'http:' for attribute 'action-xhr' in tag 'FORM [method=POST] (ACTIONS)'. (see https://amp.dev/documentation/components/amp-form) [DISALLOWED_HTML]
+actions_feature_tests/amp_form.html:94:2 Invalid URL protocol 'http:' for attribute 'action-xhr' in tag 'FORM [method=POST] (ACTIONS)'. (see https://amp.dev/documentation/components/amp-form) [DISALLOWED_HTML]
 |    crossorigin="amp-viewer-auth-token-via-post" custom-validation-reporting="as-you-go" autocomplete>
 |      <fieldset>
 |        <label>
@@ -133,7 +113,7 @@ actions_feature_tests/amp_form.html:112:2 Invalid URL protocol 'http:' for attri
 |    <!-- Invalid: Missing action-xhr-->
 |    <form method="post">
 >>   ^~~~~~~~~
-actions_feature_tests/amp_form.html:129:2 The mandatory attribute 'action-xhr' is missing in tag 'FORM [method=POST] (ACTIONS)'. (see https://amp.dev/documentation/components/amp-form) [DISALLOWED_HTML]
+actions_feature_tests/amp_form.html:111:2 The mandatory attribute 'action-xhr' is missing in tag 'FORM [method=POST] (ACTIONS)'. (see https://amp.dev/documentation/components/amp-form) [DISALLOWED_HTML]
 |      <fieldset>
 |        <label>
 |          <span>Your email</span>
