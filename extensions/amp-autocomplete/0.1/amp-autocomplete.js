@@ -402,7 +402,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
             child.setAttribute('aria-disabled', 'true');
           }
           child.classList.add('i-amphtml-autocomplete-item');
-          child.setAttribute('role', 'listitem');
+          child.setAttribute('role', 'option');
           container.appendChild(child);
         });
       });
