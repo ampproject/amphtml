@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-// import to install chromedriver
+// import to install chromedriver and gecko driver
 require('chromedriver'); // eslint-disable-line no-unused-vars
 require('geckodriver'); // eslint-disable-line no-unused-vars
 
@@ -110,60 +110,54 @@ async function createPuppeteer(opt_config = {}) {
  */
 async function createSelenium(browserName, opt_config = {}) {
   // TODO(estherkim): implement sessions
-  // TODO(estherkim): ensure tests are in a sandbox
   // See https://w3c.github.io/webdriver/#sessions
   switch (browserName) {
     case 'firefox':
-      return createFirefoxDriver(opt_config);
+      return createDriver(browserName, getFirefoxArgs(opt_config));
     case 'chrome':
     default:
-      return createChromeDriver(opt_config);
+      return createDriver(browserName, getChromeArgs(opt_config));
   }
 }
 
-/**
- * Configure a chrome driver.
- *
- * @param {!SeleniumConfigDef} config
- * @return {!SeleniumDriver}
- */
-async function createChromeDriver(config) {
-  const args = [];
-  args.push('--no-sandbox');
-  args.push('--disable-gpu');
-  if (config.headless) {
-    args.push('--headless');
-  }
-
-  const capabilities = Capabilities.chrome();
-  const chromeOptions = {
-    // TODO(cvializ,estherkim,sparhami):
-    // figure out why headless causes more flakes
-    'args': args,
-  };
-  capabilities.set('chromeOptions', chromeOptions);
+async function createDriver(browserName, args) {
+  const capabilities = Capabilities[browserName]();
+  capabilities.set(`${browserName}Options`, {'args': args});
   const builder = new Builder().withCapabilities(capabilities);
   const driver = await builder.build();
   return driver;
 }
 
 /**
- * Configure a firefox driver.
+ * Configure chrome args.
  *
  * @param {!SeleniumConfigDef} config
- * @return {!SeleniumDriver}
+ * @return {!Array<string>}
  */
-async function createFirefoxDriver(config) {
-  const capabilities = Capabilities.firefox();
-  const options = new firefox.Options();
+function getChromeArgs(config) {
+  const args = ['--no-sandbox', '--disable-gpu'];
+
+  // TODO(cvializ,estherkim,sparhami):
+  // figure out why headless causes more flakes
+  if (config.headless) {
+    args.push('--headless');
+  }
+  return args;
+}
+
+/**
+ * Configure firefox args.
+ *
+ * @param {!SeleniumConfigDef} config
+ * @return {!Array<string>}
+ */
+function getFirefoxArgs(config) {
+  const args = [];
 
   if (config.headless) {
-    options.addArguments('-headless');
+    args.push('-headless');
   }
-  const builder = new Builder().withCapabilities(capabilities)
-      .forBrowser('firefox').setFirefoxOptions(options);
-  const driver = await builder.build();
-  return driver;
+  return args;
 }
 
 /**
@@ -269,7 +263,7 @@ function describeEnv(factory) {
 
     // Use chrome as default if no browser is specified
     if (!Array.isArray(spec.browsers)) {
-      spec.browsers = ['chrome'];
+      spec.browsers = ['chrome', 'firefox'];
     }
 
     function createBrowserDescribe() {
