@@ -69,7 +69,8 @@ function main() {
       timedExecOrDie('gulp dev-dashboard-tests');
     }
 
-    if (buildTargets.has('RUNTIME')) {
+    if (buildTargets.has('RUNTIME') ||
+        buildTargets.has('BUILD_SYSTEM')) {
       timedExecOrDie('gulp dep-check');
       timedExecOrDie('gulp check-types');
     }

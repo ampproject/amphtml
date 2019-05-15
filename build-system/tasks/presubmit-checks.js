@@ -100,7 +100,6 @@ const forbiddenTerms = {
     message: 'If you run against this, use console/*OK*/.[log|error] to ' +
       'whitelist a legit case.',
     whitelist: [
-      'build-system/pr-check.js',
       'build-system/app.js',
       'build-system/amp4test.js',
       'build-system/check-package-manager.js',
