@@ -279,10 +279,13 @@ export class NextPageService {
             + 'current document');
         return r.text();
       }, e => {
-        user().error(TAG, 'failed to fetch %s', ampUrl, e);
+        user().error(TAG, 'Failed to fetch: %s', ampUrl, e);
       });
       // Once next page's HTML at `ampUrl` is fetched, inject it into a new doc.
       fetchPromise.then(html => {
+        if (!html) {
+          return;
+        }
         const doc = this.win_.document.implementation.createHTMLDocument('');
         doc.open();
         doc.write(html);
@@ -312,7 +315,7 @@ export class NextPageService {
           });
         });
       }).catch(e => {
-        dev().error(TAG, 'failed to attach shadow document for %s', ampUrl, e);
+        dev().error(TAG, 'Failed to attach shadow document: %s', ampUrl, e);
       }).then(() => {
         // The new page may be short and the next may already need fetching.
         this.scrollHandler_();
