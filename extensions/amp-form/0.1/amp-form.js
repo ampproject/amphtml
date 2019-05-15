@@ -831,6 +831,23 @@ export class AmpForm {
   }
 
   /**
+   * Transition the form to the submit success state.
+   * @param {!Promise<!JsonObject>} jsonPromise
+   * @return {!Promise}
+   * @private visible for testing
+   */
+  handleSubmitSuccess_(jsonPromise) {
+    return jsonPromise.then(json => {
+      this.setState_(FormState.SUBMIT_SUCCESS);
+      this.renderTemplate_(json || {}).then(() => {
+        this.triggerAction_(FormEvents.SUBMIT_SUCCESS, json);
+      });
+    }, error => {
+      user().error(TAG, 'Failed to parse response JSON: %s', error);
+    });
+  }
+
+  /**
    * @param {*} e
    * @return {!Promise}
    * @private
@@ -851,23 +868,6 @@ export class AmpForm {
   }
 
   /**
-   * Transition the form to the submit success state.
-   * @param {!Promise<!JsonObject>} jsonPromise
-   * @return {!Promise}
-   * @private visible for testing
-   */
-  handleSubmitSuccess_(jsonPromise) {
-    return jsonPromise.then(json => {
-      this.setState_(FormState.SUBMIT_SUCCESS);
-      this.renderTemplate_(json || {}).then(() => {
-        this.triggerAction_(FormEvents.SUBMIT_SUCCESS, json);
-      });
-    }, error => {
-      user().error(TAG, 'Failed to parse response JSON: %s', error);
-    });
-  }
-
-  /**
    * Transition the form the the submit error state.
    * @param {*} error
    * @param {!JsonObject} json
@@ -875,8 +875,8 @@ export class AmpForm {
    * @private
    */
   handleSubmitFailure_(error, json) {
-    user().error(TAG, 'Form submission failed: %s', error);
     this.setState_(FormState.SUBMIT_ERROR);
+    user().error(TAG, 'Form submission failed: %s', error);
     return tryResolve(() => {
       this.renderTemplate_(json).then(() => {
         this.triggerAction_(FormEvents.SUBMIT_ERROR, json);
