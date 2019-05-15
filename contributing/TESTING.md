@@ -103,7 +103,6 @@ Command                                                                 | Descri
 `gulp dep-check`                                                        | Runs a dependency check on each module. Run automatically upon push.
 `gulp presubmit`                                                        | Run validation against files to check for forbidden and required terms. Run automatically upon push.
 `gulp validator`                                                        | Builds and tests the AMP validator. Run automatically upon push.
-`node build-system/pr-check.js`                                         | Runs all tests that will be run upon pushing a CL.
 `gulp ava`                                                              | Run node tests for tasks and offline/node code using [ava](https://github.com/avajs/ava).
 `gulp todos:find-closed`                                                | Find `TODO`s in code for issues that have been closed.
 `gulp visual-diff`                                                      | Runs all visual diff tests on a headless instance of local Chrome. Requires `PERCY_PROJECT` and `PERCY_TOKEN` to be set as environment variables or passed to the task with `--percy_project` and `--percy_token`.
