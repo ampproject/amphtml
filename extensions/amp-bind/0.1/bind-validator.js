@@ -265,6 +265,9 @@ function createElementRules_() {
         },
       },
     },
+    'AMP-FORM': {
+      'headers': null,
+    },
     'AMP-GOOGLE-DOCUMENT-EMBED': {
       'src': null,
       'title': null,

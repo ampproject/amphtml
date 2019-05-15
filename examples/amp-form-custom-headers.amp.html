@@ -15,7 +15,7 @@
   </style>
 </head>
 <body>
-    <!-- Read state/token from a request -->
+    <!-- The accessToken will be returned from another request and will bind to form headers -->
     <amp-state id="appState">
         <script type="application/json">
             {
@@ -23,10 +23,12 @@
             }
         </script>
     </amp-state>
-              
+force 
+<a on="tap:AMP.setState({ appState: { accessToken: 'test' } })">set accessToken</a>     
     <!-- set x-access-token value with amp-bind/amp-state     -->
     <form method="POST"
-            headers="{'x-access-token' : 'passAccessTokenHere', 'x-my-custom-header' : 'I Love AMP' }"
+            [headers]="{'x-access-token' : appState.accessToken, 'x-my-custom-header' : 'I Love AMP' }"
+            headers=""
             action-xhr="/form/echo-json/post">
             <fieldset>
                 <label>
