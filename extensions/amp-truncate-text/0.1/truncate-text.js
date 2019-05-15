@@ -275,9 +275,9 @@ function maybeEllipsizeNode(node, container, containerRect) {
   // occur. As long as we have underflow, we will keep looking at a higher
   // index. Note:
   //
-  // - We use BinarySearchPreference.HIGH to find the index that is
+  // - We use BinarySearchPreference.NEXT to find the index that is
   //   overflowing when the return value is negative. When everything overflows
-  //   overflows, BinarySearchPreference.LOW returns `-0`, so we would need to
+  //   overflows, BinarySearchPreference.PREV returns `-0`, so we would need to
   //   special case that.
   // - We use BinarySearchStop.RIGHT to find the last index that is not
   //   overflowing when the return value is positive.
@@ -291,7 +291,7 @@ function maybeEllipsizeNode(node, container, containerRect) {
     }
 
     return underflowAtPosition(container, node, text, offset);
-  }, BinarySearchStop.RIGHT, BinarySearchPreference.HIGH);
+  }, BinarySearchStop.RIGHT, BinarySearchPreference.NEXT);
 
   // When positive, seachIndex is the last underflowing index, so add one to
   // get the overflowing index.
