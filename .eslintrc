@@ -135,8 +135,7 @@
     ],
     "object-shorthand": [2, "properties", { "avoidQuotes": true }],
     "prefer-const": 2,
-    "prettier/prettier": 2,
-    "quotes": [2, "single", "avoid-escape"],
+    "prettier/prettier": [2, { "singleQuote": true }],
     "radix": 2,
     "require-jsdoc": [2, {
       "require": {
