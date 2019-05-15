@@ -27,11 +27,13 @@ import {VideoEvents} from '../../../src/video-interface';
 import {closest, matches} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/css';
-import {hasTapAction, timeStrToMillis} from './utils';
+import {getAmpdoc} from '../../../src/service';
+import {hasTapAction, isMediaDisplayed, timeStrToMillis} from './utils';
 import {
   interactiveElementsSelectors,
 } from './amp-story-embedded-component';
-import {listenOnce} from '../../../src/event-helper';
+import {listen, listenOnce} from '../../../src/event-helper';
+import {toArray} from '../../../src/types';
 
 /** @private @const {number} */
 const HOLD_TOUCH_THRESHOLD_MS = 500;
@@ -698,19 +700,28 @@ class TimeBasedAdvancement extends AdvancementConfig {
 class MediaBasedAdvancement extends AdvancementConfig {
   /**
    * @param {!Window} win
-   * @param {!Element} element
+   * @param {!Array<!Element>} elements
    */
-  constructor(win, element) {
+  constructor(win, elements) {
     super();
 
     /** @private @const {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(win);
 
-    /** @private @const {!Element} */
-    this.element_ = element;
+    /** @private @const {!../../../src/service/resources-impl.Resources} */
+    this.resources_ = Services.resourcesForDoc(getAmpdoc(win.document));
+
+    /** @private @const {!Array<!Element>} */
+    this.elements_ = elements;
+
+    /** @private {?Element} */
+    this.element_ = this.getFirstPlayableElement_();
 
     /** @private {?Element} */
     this.mediaElement_ = null;
+
+    /** @private {!Array<!UnlistenDef>} */
+    this.unlistenFns_ = [];
 
     /** @private {?UnlistenDef} */
     this.unlistenEndedFn_ = null;
@@ -721,10 +732,55 @@ class MediaBasedAdvancement extends AdvancementConfig {
     /** @private {?../../../src/video-interface.VideoInterface} */
     this.video_ = null;
 
-    if (element.ownerDocument.defaultView) {
-      /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
-      this.storeService_ =
-        getStoreService(element.ownerDocument.defaultView);
+    /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
+    this.storeService_ = getStoreService(win);
+
+    this.elements_.forEach(el => {
+      listen(el, VideoEvents.VISIBILITY, () => this.onVideoVisibilityChange_());
+    });
+  }
+
+  /**
+   * Returns the first playable element, or null. An element is considered
+   * playable if it's either visible, or a hidden AMP-AUDIO.
+   * @return {?Element}
+   * @private
+   */
+  getFirstPlayableElement_() {
+    if (this.elements_.length === 1) {
+      return this.elements_[0];
+    }
+
+    for (let i = 0; i < this.elements_.length; i++) {
+      const element = this.elements_[i];
+      const resource = this.resources_.getResourceForElement(element);
+      if (isMediaDisplayed(element, resource)) {
+        return element;
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * On video visibility change, resets the media based advancement to rely on
+   * the newly visible video, if needed.
+   * @private
+   */
+  onVideoVisibilityChange_() {
+    const element = this.getFirstPlayableElement_();
+    if (element === this.element_) {
+      return;
+    }
+    this.element_ = element;
+    this.mediaElement_ = null;
+    this.video_ = null;
+    // If the page-advancement is running, reset the event listeners so the
+    // progress bar reflects the advancement of the new video. If not running,
+    // the next call to `start()` will set the listeners on the new element.
+    if (this.isRunning()) {
+      this.stop();
+      this.start();
     }
   }
 
@@ -763,6 +819,13 @@ class MediaBasedAdvancement extends AdvancementConfig {
   start() {
     super.start();
 
+    // If no element is visible yet, keep isRunning true by stepping out after
+    // `super.start()`. When an element becomes visible, it will call `start()`
+    // again if isRunning is still true.
+    if (!this.element_) {
+      return;
+    }
+
     // Prevents race condition when checking for video interface classname.
     (this.element_.whenBuilt ? this.element_.whenBuilt() : Promise.resolve())
         .then(() => this.startWhenBuilt_());
@@ -796,10 +859,10 @@ class MediaBasedAdvancement extends AdvancementConfig {
   startHtmlMediaElement_() {
     const mediaElement = dev().assertElement(this.mediaElement_,
         'Media element was unspecified.');
-    this.unlistenEndedFn_ =
-        listenOnce(mediaElement, 'ended', () => this.onAdvance());
-    this.unlistenTimeupdateFn_ =
-        listenOnce(mediaElement, 'timeupdate', () => this.onProgressUpdate());
+    this.unlistenFns_.push(
+        listenOnce(mediaElement, 'ended', () => this.onAdvance()));
+    this.unlistenFns_.push(
+        listenOnce(mediaElement, 'timeupdate', () => this.onProgressUpdate()));
   }
 
   /** @private */
@@ -808,9 +871,9 @@ class MediaBasedAdvancement extends AdvancementConfig {
       this.video_ = video;
     });
 
-    this.unlistenEndedFn_ =
+    this.unlistenFns_.push(
         listenOnce(this.element_, VideoEvents.ENDED, () => this.onAdvance(),
-            {capture: true});
+            {capture: true}));
 
     this.onProgressUpdate();
 
@@ -823,14 +886,7 @@ class MediaBasedAdvancement extends AdvancementConfig {
   /** @override */
   stop() {
     super.stop();
-
-    if (this.unlistenEndedFn_) {
-      this.unlistenEndedFn_();
-    }
-
-    if (this.unlistenTimeupdateFn_) {
-      this.unlistenTimeupdateFn_();
-    }
+    this.unlistenFns_.forEach(fn => fn());
   }
 
   /** @override */
@@ -863,15 +919,14 @@ class MediaBasedAdvancement extends AdvancementConfig {
    */
   static fromAutoAdvanceString(autoAdvanceStr, win, rootEl) {
     try {
-      const element = rootEl.querySelector(`#${
-        escapeCssSelectorIdent(autoAdvanceStr)
-      }`);
-
-      if (!element) {
+      const elements = rootEl.querySelectorAll(
+          `[data-id=${escapeCssSelectorIdent(autoAdvanceStr)}],
+          #${escapeCssSelectorIdent(autoAdvanceStr)}`);
+      if (!elements.length) {
         return null;
       }
 
-      return new MediaBasedAdvancement(win, element);
+      return new MediaBasedAdvancement(win, toArray(elements));
     } catch (e) {
       return null;
     }
