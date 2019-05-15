@@ -190,7 +190,7 @@ class AdSenseNetworkConfig {
     return Object.assign(dict(), dict({
       'type': 'adsense',
       'data-ad-client': this.autoAmpAdsElement_.getAttribute('data-ad-client'),
-    }), dataAdHost && {'data-ad-host': dataAdHost});
+    }), dataAdHost ? {'data-ad-host': dataAdHost} : null);
   }
 
   /** @override */
