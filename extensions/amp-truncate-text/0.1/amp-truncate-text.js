@@ -125,7 +125,7 @@ export class AmpTruncateText extends AMP.BaseElement {
     // SSR?
     const sizer = this.element.querySelector('i-amphtml-sizer');
     if (sizer) {
-      sizer.setAttribute('slot', 'sizer');
+      sizer.setAttribute('slot', 'i-amphtml-sizer');
     }
 
     // TODO(sparhami) Is there a shared place to add logic for creating
@@ -142,7 +142,7 @@ export class AmpTruncateText extends AMP.BaseElement {
           <slot class="expand-slot" name="expand"></slot>
           <slot class="collapse-slot" name="collapse"></slot>
         </div>
-        <slot name="sizer"></slot>
+        <slot name="i-amphtml-sizer"></slot>
       </div>
     `;
 

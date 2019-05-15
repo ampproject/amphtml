@@ -34,7 +34,7 @@ tags: {  # <amp-truncate-text>
     value: "right"
     value: "default"
   }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-truncate-text"
+  spec_url: "https://amp.dev/documentation/components/amp-truncate-text"
   amp_layout: {
     supported_layouts: CONTAINER
     supported_layouts: FILL
