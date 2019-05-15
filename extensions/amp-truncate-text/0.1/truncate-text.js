@@ -79,8 +79,26 @@ function setTruncated(element) {
  * @param {function(!Node)} cb  A callback to call for each child.
  */
 function forEachChild(node, cb) {
+  // Check for slots in the light DOM, which may have content projected into
+  // them. For example:
+  //
+  // <amp-slide>
+  //   # ShadowDOM
+  //   <amp-truncate-text>
+  //     <slot name="caption"></slot>
+  //     <button slot="expand">More</button>
+  //   </amp-truncate-text>
+  // </amp-slide>
+  //
+  // <amp-slide>
+  //   <div slot="caption">...</div>
+  // </amp-slide>
+  //
+  // We want to get the contents of the "caption" slot and iterate over them.
+  // We use flatten so that we get the slot default contents, if nothing is
+  // slotted.
   const childNodes = node.localName == 'slot' ?
-    node.assignedNodes() :
+    node.assignedNodes({flatten: true}) :
     node.childNodes;
 
   for (let i = 0; i < childNodes.length; i++) {
@@ -137,7 +155,7 @@ function getOverflowY(element) {
  * contents in any way so that event listeners and any expando properties are
  * maintained.
  *
- * Unlike CSS text truncateing, this actually removes text from the DOM. Text
+ * Unlike CSS text truncating, this actually removes text from the DOM. Text
  * nodes are cleared and not removed so that almost all DOM diffing libraries
  * continue to work. One implication of actually removing text is that it is
  * unavailable to screen readers. This is unfortunate as users would need to

@@ -84,6 +84,7 @@ describes.realWin('amp-truncate-text', {
       doc.body.appendChild(element);
       await element.build();
       await element.layoutCallback();
+      await afterMutationAndClamp();
 
       return element;
     }
