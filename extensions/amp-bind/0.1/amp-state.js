@@ -115,7 +115,9 @@ export class AmpState extends AMP.BaseElement {
   parseAndUpdate() {
     if (this.localData_ === undefined) {
       this.localData_ = this.parse_();
-      return this.updateState_(this.localData_, /* isInit */ true);
+      if (this.localData_) {
+        return this.updateState_(this.localData_, /* isInit */ true);
+      }
     }
     return Promise.resolve();
   }
@@ -127,7 +129,7 @@ export class AmpState extends AMP.BaseElement {
    */
   parse_() {
     const {children} = this.element;
-    if (children.length > 0) {
+    if (children.length == 0) {
       return null;
     }
     const TAG = this.getName_();
