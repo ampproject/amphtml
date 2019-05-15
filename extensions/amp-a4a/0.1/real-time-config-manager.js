@@ -103,6 +103,9 @@ export class RealTimeConfigManager {
 
     /** @private {?CONSENT_POLICY_STATE} */
     this.consentState_ = null;
+
+    /** @private {?string} */
+    this.consentString_ = null;
   }
 
   /**
@@ -162,14 +165,16 @@ export class RealTimeConfigManager {
    * @param {!Object<string, !../../../src/service/variable-source.AsyncResolverDef>} customMacros The ad-network specified macro
    *   substitutions available to use.
    * @param {?CONSENT_POLICY_STATE} consentState
+   * @param {?string} consentString
    * @return {Promise<!Array<!rtcResponseDef>>|undefined}
    * @visibleForTesting
    */
-  maybeExecuteRealTimeConfig(customMacros, consentState) {
+  maybeExecuteRealTimeConfig(customMacros, consentState, consentString) {
     if (!this.validateRtcConfig_(this.a4aElement_.element)) {
       return;
     }
     this.consentState_ = consentState;
+    this.consentString_ = consentString;
     this.modifyRtcConfigForConsentStateSettings();
     customMacros = this.assignMacros(customMacros);
     this.rtcStartTime_ = Date.now();
@@ -255,6 +260,7 @@ export class RealTimeConfigManager {
   assignMacros(macros) {
     macros['TIMEOUT'] = () => this.rtcConfig_.timeoutMillis;
     macros['CONSENT_STATE'] = () => this.consentState_;
+    macros['CONSENT_STRING'] = () => this.consentString_;
     return macros;
   }
 
