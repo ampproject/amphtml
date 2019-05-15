@@ -23,8 +23,7 @@
             }
         </script>
     </amp-state>
-force 
-<a on="tap:AMP.setState({ appState: { accessToken: 'test' } })">set accessToken</a>     
+force <a on="tap:AMP.setState({ appState: { accessToken: 'test' } })">set accessToken</a>     
     <!-- set x-access-token value with amp-bind/amp-state     -->
     <form method="POST"
             [headers]="{'x-access-token' : appState.accessToken, 'x-my-custom-header' : 'I Love AMP' }"
