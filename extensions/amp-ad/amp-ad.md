@@ -245,6 +245,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Affiliate-B](../../ads/affiliateb.md)
 - [AJA](../../ads/aja.md)
 - [AMoAd](../../ads/amoad.md)
+- [Aniview](../../ads/aniview.md)
 - [AppNexus](../../ads/appnexus.md)
 - [AppVador](../../ads/appvador.md)
 - [Atomx](../../ads/atomx.md)
