@@ -122,7 +122,7 @@ import {caajainfeed} from '../ads/caajainfeed';
 import {capirs} from '../ads/capirs';
 import {caprofitx} from '../ads/caprofitx';
 import {cedato} from '../ads/cedato';
-import {chargeads} from '../ads/chargeads';
+import {chargeads, nws} from '../ads/nws';
 import {colombia} from '../ads/colombia';
 import {connatix} from '../ads/connatix';
 import {contentad} from '../ads/contentad';
@@ -151,6 +151,7 @@ import {gmossp} from '../ads/gmossp';
 import {gumgum} from '../ads/gumgum';
 import {holder} from '../ads/holder';
 import {ibillboard} from '../ads/ibillboard';
+import {idealmedia} from '../ads/idealmedia';
 import {imaVideo} from '../ads/google/imaVideo';
 import {imedia} from '../ads/imedia';
 import {imobile} from '../ads/imobile';
@@ -164,6 +165,7 @@ import {kargo} from '../ads/kargo';
 import {kiosked} from '../ads/kiosked';
 import {kixer} from '../ads/kixer';
 import {kuadio} from '../ads/kuadio';
+import {lentainform} from '../ads/lentainform';
 import {ligatus} from '../ads/ligatus';
 import {lockerdome} from '../ads/lockerdome';
 import {loka} from '../ads/loka';
@@ -174,6 +176,7 @@ import {medianet} from '../ads/medianet';
 import {mediavine} from '../ads/mediavine';
 import {medyanet} from '../ads/medyanet';
 import {meg} from '../ads/meg';
+import {mgid} from '../ads/mgid';
 import {microad} from '../ads/microad';
 import {miximedia} from '../ads/miximedia';
 import {mixpo} from '../ads/mixpo';
@@ -191,6 +194,7 @@ import {onead} from '../ads/onead';
 import {onnetwork} from '../ads/onnetwork';
 import {openadstream} from '../ads/openadstream';
 import {openx} from '../ads/openx';
+import {opinary} from '../ads/opinary';
 import {outbrain} from '../ads/outbrain';
 import {pixels} from '../ads/pixels';
 import {plista} from '../ads/plista';
@@ -265,8 +269,6 @@ import {zen} from '../ads/zen';
 import {zergnet} from '../ads/zergnet';
 import {zucks} from '../ads/zucks';
 
-
-
 /**
  * Whether the embed type may be used with amp-embed tag.
  * @const {!Object<string, boolean>}
@@ -283,6 +285,7 @@ const AMP_EMBED_ALLOWED = {
   'mantis-recommend': true,
   miximedia: true,
   mywidget: true,
+  opinary: true,
   outbrain: true,
   plista: true,
   postquare: true,
@@ -392,6 +395,7 @@ register('gmossp', gmossp);
 register('gumgum', gumgum);
 register('holder', holder);
 register('ibillboard', ibillboard);
+register('idealmedia', idealmedia);
 register('ima-video', imaVideo);
 register('imedia', imedia);
 register('imobile', imobile);
@@ -406,6 +410,7 @@ register('kargo', kargo);
 register('kiosked', kiosked);
 register('kixer', kixer);
 register('kuadio', kuadio);
+register('lentainform', lentainform);
 register('ligatus', ligatus);
 register('lockerdome', lockerdome);
 register('loka', loka);
@@ -418,6 +423,7 @@ register('medianet', medianet);
 register('mediavine', mediavine);
 register('medyanet', medyanet);
 register('meg', meg);
+register('mgid', mgid);
 register('microad', microad);
 register('miximedia', miximedia);
 register('mixpo', mixpo);
@@ -431,10 +437,12 @@ register('nend', nend);
 register('netletix', netletix);
 register('noddus', noddus);
 register('nokta', nokta);
+register('nws', nws);
 register('onead', onead);
 register('onnetwork', onnetwork);
 register('openadstream', openadstream);
 register('openx', openx);
+register('opinary', opinary);
 register('outbrain', outbrain);
 register('pixels', pixels);
 register('plista', plista);
