@@ -71,7 +71,6 @@ import {triggerAnalyticsEvent} from '../../../src/analytics';
 /** @type {string} */
 const TAG = 'amp-form';
 
-
 /**
  * A list of external dependencies that can be included in forms.
  * @type {!Array<string>}
