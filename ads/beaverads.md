@@ -21,7 +21,7 @@
   ```html
  <amp-ad width="300" height="250"
      type="beaverads"
-     data-block-id="1000286">
+     data-block-id="1001038">
  </amp-ad>
 
   ```
