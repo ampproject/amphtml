@@ -308,8 +308,7 @@ class PreconnectService {
     // (read CDNs) to respond more efficiently.
     const cacheBust = now - (now % ACTIVE_CONNECTION_TIMEOUT_MS);
     const url = origin +
-        '/amp_preconnect_polyfill_404_or_other_error_expected.' +
-        '_Do_not_worry_about_it?' + cacheBust;
+        '/robots.txt?_AMP_safari_preconnect_polyfill_cachebust=' + cacheBust;
     const xhr = new XMLHttpRequest();
     xhr.open('HEAD', url, true);
     // We only support credentialed preconnect for now.
