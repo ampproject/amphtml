@@ -716,4 +716,49 @@ describe('amp-analytics', function() {
       });
     });
   });
+
+  // TODO: Find source of test failure on edge.
+  describe.configure().skipEdge().run('amp-analytics:shadow mode', function() {
+    describes.integration('basic pageview', {
+      // TODO(ccordry): Figure out how to write cookie in shadow case, so that
+      // we can verify CLIENT_ID() is reading the right value.
+      body: `
+        <!-- put amp-analytics > 3 viewports away from viewport -->
+        <div style="height: 400vh"></div>
+        <amp-analytics>
+          <script type="application/json">
+          {
+            "requests": {
+              "endpoint": "${RequestBank.getUrl()}"
+            },
+            "triggers": {
+              "pageview": {
+                "on": "visible",
+                "request": "endpoint",
+                "extraUrlParams": {
+                  "a": 2
+                }
+              }
+            },
+            "extraUrlParams": {
+              "a": 1,
+              "b": "\${title}",
+              "cid": "\${clientId(_cid)}"
+            }
+          }
+          </script>
+        </amp-analytics>`,
+      extensions: ['amp-analytics'],
+      ampdoc: 'shadow',
+    }, () => {
+
+      it('should send request', () => {
+        return RequestBank.withdraw().then(req => {
+          expect(req.url).to.match(/\/?a=2&b=Shadow%20Viewer&cid=amp-.*/);
+          expect(req.headers.referer,
+              'should keep referrer if no referrerpolicy specified').to.be.ok;
+        });
+      });
+    });
+  });
 });

@@ -123,6 +123,7 @@ import {caajainfeed} from '../ads/caajainfeed';
 import {capirs} from '../ads/capirs';
 import {caprofitx} from '../ads/caprofitx';
 import {cedato} from '../ads/cedato';
+import {chargeads, nws} from '../ads/nws';
 import {colombia} from '../ads/colombia';
 import {connatix} from '../ads/connatix';
 import {contentad} from '../ads/contentad';
@@ -190,11 +191,11 @@ import {nend} from '../ads/nend';
 import {netletix} from '../ads/netletix';
 import {noddus} from '../ads/noddus';
 import {nokta} from '../ads/nokta';
-import {chargeads, nws} from '../ads/nws';
 import {onead} from '../ads/onead';
 import {onnetwork} from '../ads/onnetwork';
 import {openadstream} from '../ads/openadstream';
 import {openx} from '../ads/openx';
+import {opinary} from '../ads/opinary';
 import {outbrain} from '../ads/outbrain';
 import {pixels} from '../ads/pixels';
 import {plista} from '../ads/plista';
@@ -285,6 +286,7 @@ const AMP_EMBED_ALLOWED = {
   'mantis-recommend': true,
   miximedia: true,
   mywidget: true,
+  opinary: true,
   outbrain: true,
   plista: true,
   postquare: true,
@@ -442,6 +444,7 @@ register('onead', onead);
 register('onnetwork', onnetwork);
 register('openadstream', openadstream);
 register('openx', openx);
+register('opinary', opinary);
 register('outbrain', outbrain);
 register('pixels', pixels);
 register('plista', plista);
