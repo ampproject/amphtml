@@ -237,8 +237,7 @@ export class NextPageService {
   appendNextArticle_() {
     if (this.nextArticle_ < this.config_.pages.length) {
       const next = this.config_.pages[this.nextArticle_];
-      const {ampUrl} = next;
-      const documentRef = createDocumentRef(ampUrl);
+      const documentRef = createDocumentRef(next.ampUrl);
       this.documentRefs_.push(documentRef);
 
       const container = this.win_.document.createElement('div');
@@ -270,56 +269,53 @@ export class NextPageService {
       }
 
       this.nextArticle_++;
-      const fetchPromise = this.xhr_.fetch(ampUrl, {ampCors: false}).then(r => {
-        // Update AMP URL in case we were redirected.
-        documentRef.ampUrl = r.url;
-        const url = this.urlService_.parse(r.url);
-        userAssert(url.origin === this.origin_,
-            'ampUrl resolved to a different origin from the origin of the '
-            + 'current document');
-        return r.text();
-      }, e => {
-        user().error(TAG, 'Failed to fetch: %s', ampUrl, e);
-      });
-      // Once next page's HTML at `ampUrl` is fetched, inject it into a new doc.
-      fetchPromise.then(html => {
-        if (!html) {
-          return;
-        }
-        const doc = this.win_.document.implementation.createHTMLDocument('');
-        doc.open();
-        doc.write(html);
-        doc.close();
-
-        return new Promise((resolve, reject) => {
-          if (documentRef.cancelled) {
-            // User has reached the end of the document already, don't render.
-            resolve();
-            return;
-          }
-          if (documentRef.recUnit.isObserving) {
-            this.positionObserver_.unobserve(articleLinks);
-            documentRef.recUnit.isObserving = true;
-          }
-          this.resources_.mutateElement(container, () => {
-            try {
-              const amp = this.attachShadowDoc_(shadowRoot, doc);
-              documentRef.amp = amp;
-
-              toggle(dev().assertElement(documentRef.recUnit.el), false);
-              this.documentQueued_ = false;
+      this.xhr_.fetch(next.ampUrl, {ampCors: false})
+          .then(response => {
+            // Update AMP URL in case we were redirected.
+            documentRef.ampUrl = response.url;
+            const url = this.urlService_.parse(response.url);
+            userAssert(url.origin === this.origin_,
+                'ampUrl resolved to a different origin from the origin of the '
+                + 'current document');
+            return response.text();
+          })
+          .then(html => {
+            const doc =
+                this.win_.document.implementation.createHTMLDocument('');
+            doc.open();
+            doc.write(html);
+            doc.close();
+            return doc;
+          })
+          .then(doc => new Promise((resolve, reject) => {
+            if (documentRef.cancelled) {
+              // User has reached the end of the document already, don't render.
               resolve();
-            } catch (e) {
-              reject(e);
+              return;
             }
-          });
-        });
-      }).catch(e => {
-        dev().error(TAG, 'Failed to attach shadow document: %s', ampUrl, e);
-      }).then(() => {
-        // The new page may be short and the next may already need fetching.
-        this.scrollHandler_();
-      });
+
+            if (documentRef.recUnit.isObserving) {
+              this.positionObserver_.unobserve(articleLinks);
+              documentRef.recUnit.isObserving = true;
+            }
+            this.resources_.mutateElement(container, () => {
+              try {
+                const amp = this.attachShadowDoc_(shadowRoot, doc);
+                documentRef.amp = amp;
+
+                toggle(dev().assertElement(documentRef.recUnit.el), false);
+                this.documentQueued_ = false;
+                resolve();
+              } catch (e) {
+                reject(e);
+              }
+            });
+          }),
+          e => user().error(TAG, 'failed to fetch %s', next.ampUrl, e))
+          .catch(e => dev().error(TAG,
+              'failed to attach shadow document for %s', next.ampUrl, e))
+          // The new page may be short and the next may already need fetching.
+          .then(() => this.scrollHandler_());
     }
   }
 
