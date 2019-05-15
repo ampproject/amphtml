@@ -2532,12 +2532,12 @@ describes.repeated('', {
 
           const getValueError = new Error('amp-async-input-error');
           getValueStub.returns(Promise.reject(getValueError));
-          const handlePresubmitErrorStub =
-            sandbox.stub(ampForm, 'handlePresubmitError_');
 
+          const stub = sandbox.stub(ampForm, 'handleSubmitFailure_');
           return ampForm.submit_(ActionTrust.HIGH).then(() => {
-            expect(handlePresubmitErrorStub).to.be.called;
-            expect(handlePresubmitErrorStub).to.be.calledWith(getValueError);
+            expect(stub).to.be.called;
+            expect(stub).to.be.calledWith(getValueError,
+                {'error': 'amp-async-input-error'});
           });
         });
       });
