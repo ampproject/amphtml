@@ -19,6 +19,7 @@ const colors = require('ansi-colors');
 const requestPromise = require('request-promise');
 const {
   gitBranchName,
+  gitCommitHash,
   gitDiffCommitLog,
   gitDiffStatMaster,
   gitMergeBaseMaster,
@@ -45,15 +46,19 @@ const OUTPUT_STORAGE_SERVICE_ACCOUNT =
  */
 function printChangeSummary(fileName) {
   const fileLogPrefix = colors.bold(colors.yellow(`${fileName}:`));
+  let commitSha;
 
   if (isTravisBuild()) {
     console.log(
         `${fileLogPrefix} ${colors.cyan('origin/master')} is currently at ` +
         `commit ${colors.cyan(shortSha(gitTravisMasterBaseline()))}`);
-    console.log(
-        `${fileLogPrefix} Testing the following changes at commit ` +
-        `${colors.cyan(shortSha(travisPullRequestSha()))}`);
+    commitSha = travisPullRequestSha();
+  } else {
+    commitSha = gitCommitHash();
   }
+  console.log(
+      `${fileLogPrefix} Testing the following changes at commit ` +
+      `${colors.cyan(shortSha(commitSha))}`);
 
   const filesChanged = gitDiffStatMaster();
   console.log(filesChanged);
