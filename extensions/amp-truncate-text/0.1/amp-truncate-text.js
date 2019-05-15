@@ -75,8 +75,8 @@ export class AmpTruncateText extends AMP.BaseElement {
       this.build_();
     }
 
-    if ('MutationObserver' in window) {
-      this.mutationObserver_ = new MutationObserver(() => {
+    if (this.win.MutationObserver) {
+      this.mutationObserver_ = new this.win.MutationObserver(() => {
         this.truncate_();
       });
     }
