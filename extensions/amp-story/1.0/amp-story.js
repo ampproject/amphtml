@@ -38,6 +38,7 @@ import {
 import {ActionTrust} from '../../../src/action-constants';
 import {AdvancementConfig, TapNavigationDirection} from './page-advancement';
 import {AdvancementMode, getAnalyticsService} from './story-analytics';
+import {AmpEvents} from '../../../src/amp-events';
 import {AmpStoryAccess} from './amp-story-access';
 import {AmpStoryBackground} from './background';
 import {AmpStoryBookend} from './bookend/amp-story-bookend';
@@ -445,14 +446,6 @@ export class AmpStory extends AMP.BaseElement {
           this.switchTo_(args['id'], NavigationDirection.NEXT);
         }
       });
-    }
-
-    if (this.element.hasAttribute('dynamic-live-list')) {
-      this.liveStoryManager_ = new LiveStoryManager(this);
-      this.liveStoryManager_.build(
-          this.element.getAttribute('dynamic-live-list'));
-      this.storeService_.dispatch(Action.ADD_TO_ACTIONS_WHITELIST,
-          [{tagOrTarget: 'AMP-LIVE-LIST', method: 'update'}]);
     }
   }
 
@@ -972,10 +965,32 @@ export class AmpStory extends AMP.BaseElement {
     // Do not block the layout callback on the completion of these promises, as
     // that prevents descendents from being laid out (and therefore loaded).
     storyLayoutPromise
-      .then(() => this.whenPagesLoaded_(PAGE_LOAD_TIMEOUT_MS))
-      .then(() => this.markStoryAsLoaded_());
+        .then(() => this.whenPagesLoaded_(PAGE_LOAD_TIMEOUT_MS))
+        .then(() => {
+          this.markStoryAsLoaded_();
+          this.initializeLiveStory_();
+        });
 
     return storyLayoutPromise;
+  }
+
+  /**
+   * Initialize LiveStoryManager if this is a live story.
+   * @private
+   */
+  initializeLiveStory_() {
+    if (this.element.hasAttribute('dynamic-live-list')) {
+      this.liveStoryManager_ = new LiveStoryManager(this);
+      this.liveStoryManager_.build();
+
+      this.storeService_.dispatch(Action.ADD_TO_ACTIONS_WHITELIST,
+          [{tagOrTarget: 'AMP-LIVE-LIST', method: 'update'}]);
+
+      this.element.addEventListener(AmpEvents.DOM_UPDATE, ({target}) => {
+        this.liveStoryManager_.update(target,
+            this.element.querySelectorAll('amp-story-page:not([ad])'));
+      });
+    }
   }
 
   /**
@@ -2605,6 +2620,8 @@ export class AmpStory extends AMP.BaseElement {
 
     const nextPageEl = nextPage.element;
     const nextPageId = nextPageEl.id;
+    // For a live story, nextPage is the same as pageToBeInserted. But not for
+    // ads since it's inserted between two pages.
     if (nextPageId !== pageToBeInsertedId) {
       pageToBeInsertedEl.setAttribute(advanceAttr, nextPageId);
       pageToBeInsertedEl.setAttribute(Attributes.AUTO_ADVANCE_TO, nextPageId);

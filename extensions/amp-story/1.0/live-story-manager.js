@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 
-import {
-  AMP_LIVE_LIST_CUSTOM_SLOT_ID,
-} from '../../amp-live-list/0.1/live-list-manager';
-import {AmpEvents} from '../../../src/amp-events';
-import {createElementWithAttributes} from '../../../src/dom';
+import {addAttributesToElement} from '../../../src/dom';
 import {dict} from '../../../src/utils/object';
+import {htmlFor} from '../../../src/static-template';
 import {userAssert} from '../../../src/log';
+
+/**
+ * Property used for storing id of custom slot. This custom slot can be used to
+ * replace the default "items" and "update" slot.
+ * @const {string}
+ */
+const AMP_LIVE_LIST_CUSTOM_SLOT_ID = 'AMP_LIVE_LIST_CUSTOM_SLOT_ID';
 
 export class LiveStoryManager {
   /**
@@ -34,13 +38,14 @@ export class LiveStoryManager {
   /**
    * Initializes an amp-live-list component with the story-specific
    * configuration and appends it to the DOM.
-   *
-   * @param {string} liveListId
    */
-  build(liveListId) {
-    const liveListEl = createElementWithAttributes(this.ampStory_.win.document,
-        'amp-live-list', dict({
-          'id': liveListId,
+  build() {
+    const listId = userAssert(this.storyEl_.getAttribute('dynamic-live-list'),
+        'Story must contain dynamic-live-list to build an amp-live-list');
+    const liveListEl = htmlFor(this.storyEl_)`<amp-live-list></amp-live-list>`;
+    addAttributesToElement(liveListEl,
+        dict({
+          'id': listId,
           'data-poll-interval':
             this.storyEl_.getAttribute('data-poll-interval') || 15000,
           'sort': 'ascending',
@@ -52,36 +57,30 @@ export class LiveStoryManager {
         'Story must contain id to build an amp-live-list');
 
     this.storyEl_.insertBefore(liveListEl, this.storyEl_.firstElementChild);
-
-    this.storyEl_.addEventListener(AmpEvents.DOM_UPDATE, ({target}) => {
-      this.updateStory_(target);
-    });
   }
 
   /**
    * Updates the client amp-story with the changes from the server document.
    *
    * @param {!Element} updatedStoryEl
-   * @private
+   * @param {!NodeList<!Element>} currentPages
    */
-  updateStory_(updatedStoryEl) {
-    const newPages =
-    ([].slice.call(updatedStoryEl.querySelectorAll('amp-story-page')))
-        .filter(page => page.classList.contains('amp-live-list-item-new'));
+  update(updatedStoryEl, currentPages) {
+    const newPageEls = updatedStoryEl.querySelectorAll(
+        'amp-story-page.amp-live-list-item-new');
 
-    const currentPages =
-      this.storyEl_.querySelectorAll('amp-story-page:not([ad])');
-    let lastPage = currentPages[currentPages.length - 1];
+    let lastPageEl = currentPages[currentPages.length - 1];
 
-    newPages.forEach(newPage => {
-      this.storyEl_.insertBefore(newPage, lastPage.nextElementSibling);
+    const pageImplPromises = Array.prototype.map.call(newPageEls,
+        pageEl => pageEl.getImpl());
 
-      newPage.getImpl().then(page => {
+    Promise.all(pageImplPromises).then(pages => {
+      pages.forEach(page => {
+        this.storyEl_.insertBefore(page.element, lastPageEl.nextElementSibling);
         this.ampStory_.addPage(page);
-        this.ampStory_.insertPage(lastPage.id, newPage.id);
+        this.ampStory_.insertPage(lastPageEl.id, page.element.id);
+        lastPageEl = page.element;
       });
-
-      lastPage = newPage;
     });
   }
 }
