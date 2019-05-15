@@ -2021,7 +2021,8 @@ describe('amp-a4a', () => {
     });
 
     describe('consent integration', () => {
-      let fixture, a4aElement, a4a;
+
+      let fixture, a4aElement, a4a, consentString;
       beforeEach(() => createIframePromise().then(f => {
         fixture = f;
         setupForAdTesting(fixture);
@@ -2030,6 +2031,7 @@ describe('amp-a4a', () => {
             {name: 'ad'});
         a4aElement = createA4aElement(fixture.doc);
         a4a = new MockA4AImpl(a4aElement);
+        consentString = 'test-consent-string';
         toggleExperiment(a4a.win, 'amp-consent', true);
         return fixture;
       }));
@@ -2042,8 +2044,18 @@ describe('amp-a4a', () => {
         sandbox.stub(Services, 'consentPolicyServiceForDocOrNull')
             .returns(Promise.resolve({
               whenPolicyResolved: () => policyPromise,
+              getConsentStringInfo: () => consentString,
             }));
-        const getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
+
+        const getAdUrlSpy = sandbox.spy(
+            a4a,
+            'getAdUrl'
+        );
+        const tryExecuteRealTimeConfigSpy = sandbox.spy(
+            a4a,
+            'tryExecuteRealTimeConfig_'
+        );
+
         a4a.buildCallback();
         a4a.onLayoutMeasure();
         // allow ad promise to start execution, unfortunately timer is only way.
@@ -2051,8 +2063,13 @@ describe('amp-a4a', () => {
           expect(getAdUrlSpy).to.not.be.called;
           inResolver(CONSENT_POLICY_STATE.SUFFICIENT);
           return a4a.layoutCallback().then(() => {
-            expect(getAdUrlSpy.withArgs(CONSENT_POLICY_STATE.SUFFICIENT))
-                .calledOnce;
+            expect(getAdUrlSpy.withArgs(
+                CONSENT_POLICY_STATE.SUFFICIENT
+            )).calledOnce;
+            expect(tryExecuteRealTimeConfigSpy.withArgs(
+                CONSENT_POLICY_STATE.SUFFICIENT,
+                consentString
+            )).calledOnce;
           });
         });
       });
@@ -2075,13 +2092,28 @@ describe('amp-a4a', () => {
             .returns(Promise.resolve({
               whenPolicyResolved: () =>
                 Promise.resolve(CONSENT_POLICY_STATE.SUFFICIENT),
+              getConsentStringInfo: () => consentString,
             }));
-        const getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
+
+        const getAdUrlSpy = sandbox.spy(
+            a4a,
+            'getAdUrl'
+        );
+        const tryExecuteRealTimeConfigSpy = sandbox.spy(
+            a4a,
+            'tryExecuteRealTimeConfig_'
+        );
+
         a4a.buildCallback();
         a4a.onLayoutMeasure();
         return a4a.layoutCallback().then(() => {
-          expect(getAdUrlSpy.withArgs(CONSENT_POLICY_STATE.SUFFICIENT))
-              .calledOnce;
+          expect(getAdUrlSpy.withArgs(
+              CONSENT_POLICY_STATE.SUFFICIENT
+          )).calledOnce;
+          expect(tryExecuteRealTimeConfigSpy.withArgs(
+              CONSENT_POLICY_STATE.SUFFICIENT,
+              consentString
+          )).calledOnce;
         });
       });
 
@@ -2092,13 +2124,30 @@ describe('amp-a4a', () => {
         sandbox.stub(Services, 'consentPolicyServiceForDocOrNull')
             .returns(Promise.resolve({
               whenPolicyResolved: () => {throw new Error('consent err!');},
+              getConsentStringInfo: () => {throw new Error('consent err!');},
             }));
-        const getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
+
+        const getAdUrlSpy = sandbox.spy(
+            a4a,
+            'getAdUrl'
+        );
+        const tryExecuteRealTimeConfigSpy = sandbox.spy(
+            a4a,
+            'tryExecuteRealTimeConfig_'
+        );
+
         a4a.buildCallback();
         a4a.onLayoutMeasure();
         return a4a.layoutCallback().then(() => {
-          expect(getAdUrlSpy.withArgs(CONSENT_POLICY_STATE.UNKNOWN))
-              .calledOnce;
+
+          expect(getAdUrlSpy.withArgs(
+              CONSENT_POLICY_STATE.UNKNOWN
+          )).calledOnce;
+          expect(tryExecuteRealTimeConfigSpy.withArgs(
+              CONSENT_POLICY_STATE.UNKNOWN,
+              null
+          )).calledOnce;
+
         });
       });
     });
