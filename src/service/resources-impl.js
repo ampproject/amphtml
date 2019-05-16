@@ -170,6 +170,12 @@ export class Resources {
     this.queue_ = new TaskQueue();
 
     /** @private @const {boolean} */
+    this.useForcePrerender_ = isExperimentOn(
+      this.win,
+      'amp-force-prerender-visible-elements'
+    );
+
+    /** @private @const {boolean} */
     this.useLayers_ = isExperimentOn(this.win, 'layers');
 
     /** @private @const {boolean} */
@@ -568,14 +574,14 @@ export class Resources {
    * @param {!Resource} resource
    * @param {boolean=} checkForDupes
    * @param {boolean=} scheduleWhenBuilt
-   * @param {boolean=} buildGranted
+   * @param {boolean=} force
    * @private
    */
   buildOrScheduleBuildForResource_(
     resource,
     checkForDupes = false,
     scheduleWhenBuilt = true,
-    buildGranted = false
+    force = false
   ) {
     const buildingEnabled = this.isRuntimeOn_ || this.isBuildOn_;
 
@@ -589,7 +595,7 @@ export class Resources {
     if (buildingEnabled && shouldBuildResource) {
       if (this.documentReady_) {
         // Build resource immediately, the document has already been parsed.
-        this.buildResourceUnsafe_(resource, scheduleWhenBuilt, buildGranted);
+        this.buildResourceUnsafe_(resource, scheduleWhenBuilt, force);
       } else if (!resource.isBuilt() && !resource.isBuilding()) {
         if (!checkForDupes || !this.pendingBuildResources_.includes(resource)) {
           // Otherwise add to pending resources and try to build any ready ones.
@@ -644,12 +650,12 @@ export class Resources {
   /**
    * @param {!Resource} resource
    * @param {boolean} schedulePass
-   * @param {boolean=} buildGranted
+   * @param {boolean=} force
    * @return {?Promise}
    * @private
    */
-  buildResourceUnsafe_(resource, schedulePass, buildGranted = false) {
-    const promise = resource.build(buildGranted);
+  buildResourceUnsafe_(resource, schedulePass, force = false) {
+    const promise = resource.build(force);
     if (!promise || !schedulePass) {
       return promise;
     }
@@ -1777,10 +1783,21 @@ export class Resources {
         const r = this.resources_[i];
         // TODO(dvoytenko): This extra build has to be merged with the
         // scheduleLayoutOrPreload_ method below.
-        if (!r.isBuilt() && !r.hasOwner() && r.hasBeenMeasured() &&
-            r.isDisplayed() && r.overlaps(loadRect)) {
-          this.buildOrScheduleBuildForResource_(r, /* checkForDupes */ true,
-              /* scheduleWhenBuilt */ undefined, /* buildGranted */ true);
+        // Force build for all resources visible, measured, and in the viewport.
+        if (
+          this.useForcePrerender_ &&
+          !r.isBuilt() &&
+          !r.hasOwner() &&
+          r.hasBeenMeasured() &&
+          r.isDisplayed() &&
+          r.overlaps(loadRect)
+        ) {
+          this.buildOrScheduleBuildForResource_(
+            r,
+            /* checkForDupes */ true,
+            /* scheduleWhenBuilt */ undefined,
+            /* force */ true
+          );
         }
         if (r.getState() != ResourceState.READY_FOR_LAYOUT || r.hasOwner()) {
           continue;
