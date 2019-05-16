@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 import {ViewerCidApi} from '../../src/service/viewer-cid-api';
 import {dict} from '../../src/utils/object';
 import {mockServiceForDoc} from '../../testing/test-helper';
@@ -59,22 +58,26 @@ describes.realWin('viewerCidApi', {amp: true}, env => {
 
   describe('getScopedCid', () => {
     function verifyClientIdApiInUse(used) {
-      viewerMock.sendMessageAwaitResponse
-          .returns(Promise.resolve('client-id-from-viewer'));
-      return api.getScopedCid(used ? 'api-key' : undefined,
-          'AMP_ECID_GOOGLE').then(cid => {
-        expect(cid).to.equal('client-id-from-viewer');
-        const payload = dict({
-          'scope': 'AMP_ECID_GOOGLE',
-          'clientIdApi': used,
-          'canonicalOrigin': 'http://localhost:9876',
+      viewerMock.sendMessageAwaitResponse.returns(
+        Promise.resolve('client-id-from-viewer')
+      );
+      return api
+        .getScopedCid(used ? 'api-key' : undefined, 'AMP_ECID_GOOGLE')
+        .then(cid => {
+          expect(cid).to.equal('client-id-from-viewer');
+          const payload = dict({
+            'scope': 'AMP_ECID_GOOGLE',
+            'clientIdApi': used,
+            'canonicalOrigin': 'http://localhost:9876',
+          });
+          if (used) {
+            payload['apiKey'] = 'api-key';
+          }
+          expect(viewerMock.sendMessageAwaitResponse).to.be.calledWith(
+            'cid',
+            payload
+          );
         });
-        if (used) {
-          payload['apiKey'] = 'api-key';
-        }
-        expect(viewerMock.sendMessageAwaitResponse)
-            .to.be.calledWith('cid', payload);
-      });
     }
 
     it('should use client ID API from api if everything great', () => {
@@ -86,26 +89,34 @@ describes.realWin('viewerCidApi', {amp: true}, env => {
     });
 
     it('should not use client ID API if scope not whitelisted', () => {
-      viewerMock.sendMessageAwaitResponse.withArgs('cid', dict({
-        'scope': 'NON_WHITELISTED_SCOPE',
-        'clientIdApi': false,
-        'canonicalOrigin': 'http://localhost:9876',
-      })).returns(Promise.resolve('client-id-from-viewer'));
-      return expect(api.getScopedCid(undefined, 'NON_WHITELISTED_SCOPE'))
-          .to.eventually.equal('client-id-from-viewer');
+      viewerMock.sendMessageAwaitResponse
+        .withArgs(
+          'cid',
+          dict({
+            'scope': 'NON_WHITELISTED_SCOPE',
+            'clientIdApi': false,
+            'canonicalOrigin': 'http://localhost:9876',
+          })
+        )
+        .returns(Promise.resolve('client-id-from-viewer'));
+      return expect(
+        api.getScopedCid(undefined, 'NON_WHITELISTED_SCOPE')
+      ).to.eventually.equal('client-id-from-viewer');
     });
 
     it('should return undefined if Viewer returns undefined', () => {
       viewerMock.sendMessageAwaitResponse.returns(Promise.resolve());
-      return expect(api.getScopedCid('api-key', 'AMP_ECID_GOOGLE'))
-          .to.eventually.be.undefined;
+      return expect(api.getScopedCid('api-key', 'AMP_ECID_GOOGLE')).to
+        .eventually.be.undefined;
     });
 
     it('should reject if Viewer rejects', () => {
-      viewerMock.sendMessageAwaitResponse
-          .returns(Promise.reject('Client API error'));
-      return expect(api.getScopedCid('api-key', 'AMP_ECID_GOOGLE'))
-          .to.eventually.be.rejectedWith(/Client API error/);
+      viewerMock.sendMessageAwaitResponse.returns(
+        Promise.reject('Client API error')
+      );
+      return expect(
+        api.getScopedCid('api-key', 'AMP_ECID_GOOGLE')
+      ).to.eventually.be.rejectedWith(/Client API error/);
     });
   });
 });

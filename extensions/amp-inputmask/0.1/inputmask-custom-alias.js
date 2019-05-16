@@ -58,8 +58,8 @@ export function getAliasDefinition() {
         const trimZeros = opts['trimZeros'] || 0;
 
         const processedValue = value
-            .replace(new RegExp(`^0{0,${trimZeros}}`), '')
-            .replace(/[\s]/g, '');
+          .replace(new RegExp(`^0{0,${trimZeros}}`), '')
+          .replace(/[\s]/g, '');
 
         return removePrefix(processedValue, prefixes);
       },
@@ -81,7 +81,7 @@ export const prefixRe = /^([^\*\[\]a\?9\\]+)[\*\[\]a\?9\\]/i;
  * @private visible for testing
  */
 export function getPrefixSubsets(mask) {
-  const masks = (typeof mask == 'string' ? [mask] : mask);
+  const masks = typeof mask == 'string' ? [mask] : mask;
 
   const prefixes = {};
   for (let i = 0; i < masks.length; i++) {
@@ -92,9 +92,11 @@ export function getPrefixSubsets(mask) {
     // The array of subprefixes grows with the factorial of prefix.length
     // so we cap it at 5! = 120
     if (prefix.length > 5) {
-      user().warn('AMP-INPUTMASK',
-          'amp-inputmask does not support prefix trimming for masks ' +
-          'that start with more than 5 non-mask characters.');
+      user().warn(
+        'AMP-INPUTMASK',
+        'amp-inputmask does not support prefix trimming for masks ' +
+          'that start with more than 5 non-mask characters.'
+      );
       continue;
     }
 
@@ -138,8 +140,8 @@ export function getMaskPrefix(mask) {
  */
 export function removePrefix(value, prefixes) {
   const longestPrefix = prefixes
-      .filter(prefix => startsWith(value, prefix))
-      .sort((a, b) => b.length - a.length)[0];
+    .filter(prefix => startsWith(value, prefix))
+    .sort((a, b) => b.length - a.length)[0];
 
   if (longestPrefix) {
     return value.slice(longestPrefix.length);

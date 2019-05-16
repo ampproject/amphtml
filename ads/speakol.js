@@ -24,16 +24,21 @@ import {loadScript, validateData} from '../3p/3p';
  */
 
 export function speakol(global, data) {
-    validateData(data, ['widgetid']);
+  validateData(data, ['widgetid']);
 
-    global._speakol = global._speakol || {
-        widgetId: data['widgetid'],
-    };
+  global._speakol = global._speakol || {
+    widgetId: data['widgetid'],
+  };
 
-    const d = global.document.createElement('div');
-    d.classList.add('speakol-widget');
-    d.id = 'spk-wi-' + data['widgetid'];
-    global.document.getElementById('c').appendChild(d);
+  const d = global.document.createElement('div');
+  d.classList.add('speakol-widget');
+  d.id = 'spk-wi-' + data['widgetid'];
+  global.document.getElementById('c').appendChild(d);
 
-    loadScript(global, `https://crawler.speakol.com/sdk/speakol-widget.js?wid=wi-${data['widgetid']}&eid=spk-wi-${data['widgetid']}`);
+  loadScript(
+    global,
+    `https://crawler.speakol.com/sdk/speakol-widget.js?wid=wi-${
+      data['widgetid']
+    }&eid=spk-wi-${data['widgetid']}`
+  );
 }
