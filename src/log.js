@@ -95,9 +95,9 @@ export function overrideLogLevel(level) {
  * @return {string}
  */
 const externalMessagesUrl = (path = '') =>
-  `https://log.amp.dev/${path}?v=${
-    encodeURIComponent(internalRuntimeVersion())
-  }&`;
+  `https://log.amp.dev/${path}?v=${encodeURIComponent(
+    internalRuntimeVersion()
+  )}&`;
 
 /**
  * Logging class. Use of sentinel string instead of a boolean to check user/dev
@@ -143,13 +143,14 @@ export class Log {
 
     this.fetchExternalMessagesOnce_ = once(() => {
       // TODO(alanorozco): These should come from the CDN, not amp.dev.
-      win.fetch(externalMessagesUrl('.json'))
-          .then(response => response.json(), noop)
-          .then(opt_messages => {
-            if (opt_messages) {
-              this.messages_ = /** @type {!JsonObject} */ (opt_messages);
-            }
-          });
+      win
+        .fetch(externalMessagesUrl('.json'))
+        .then(response => response.json(), noop)
+        .then(opt_messages => {
+          if (opt_messages) {
+            this.messages_ = /** @type {!JsonObject} */ (opt_messages);
+          }
+        });
     });
   }
 
@@ -351,8 +352,8 @@ export class Log {
     let firstElement;
     if (isArray(opt_message)) {
       return this.assert(
-          shouldBeTrueish,
-          this.expandLogMessage.apply(this, opt_message)
+        shouldBeTrueish,
+        this.expandLogMessage.apply(this, opt_message)
       );
     }
     if (!shouldBeTrueish) {
@@ -556,8 +557,8 @@ export class Log {
       return message;
     }
     const url = args.reduce(
-        (prefix, arg) => `${prefix}&s[]=${encodeURIComponent(toString(arg))}`,
-        `${externalMessagesUrl()}id=${encodeURIComponent(id)}`
+      (prefix, arg) => `${prefix}&s[]=${encodeURIComponent(toString(arg))}`,
+      `${externalMessagesUrl()}id=${encodeURIComponent(id)}`
     );
     return `More info at ${url}`;
   }
