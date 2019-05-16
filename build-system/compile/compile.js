@@ -412,20 +412,20 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
         })
         .pipe(nop())
         .on('end', resolve);
+    } else {
+      return gulp
+        .src(srcs, {base: '.'})
+        .pipe(gulpIf(shouldShortenLicense, shortenLicense()))
+        .pipe(sourcemaps.init({loadMaps: true}))
+        .pipe(gulpClosureCompile(compilerOptionsArray))
+        .on('error', err => {
+          handleCompilerError(outputFilename);
+          reject(err);
+        })
+        .pipe(rename(outputFilename))
+        .pipe(sourcemaps.write('.'))
+        .pipe(gulp.dest(outputDir))
+        .on('end', resolve);
     }
-
-    return gulp
-      .src(srcs, {base: '.'})
-      .pipe(gulpIf(shouldShortenLicense, shortenLicense()))
-      .pipe(sourcemaps.init({loadMaps: true}))
-      .pipe(gulpClosureCompile(compilerOptionsArray))
-      .on('error', err => {
-        handleCompilerError(outputFilename);
-        reject(err);
-      })
-      .pipe(rename(outputFilename))
-      .pipe(sourcemaps.write('.'))
-      .pipe(gulp.dest(outputDir))
-      .on('end', resolve);
   });
 }
