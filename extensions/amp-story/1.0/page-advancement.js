@@ -43,11 +43,11 @@ const NEXT_SCREEN_AREA_RATIO = 0.75;
 const PREVIOUS_SCREEN_AREA_RATIO = 0.25;
 
 /**
- * Percentage of the screen considered edge.
+ * Protected edges of the screen in pixels.
  * @const {number}
  * @private
  */
-const SCREEN_EDGE_PERCENT = 0.15;
+const PROTECTED_SCREEN_EDGE_PX = 48;
 
 const INTERACTIVE_EMBEDDED_COMPONENTS_SELECTORS = Object.values(
   interactiveElementsSelectors()
@@ -493,12 +493,7 @@ class ManualAdvancement extends AdvancementConfig {
     let valid = true;
     let tagName;
 
-    if (
-      this.isInScreenEdge_(event, pageRect) &&
-      this.storeService_.get(StateProperty.INTERACTIVE_COMPONENT_STATE)
-        .state !== EmbeddedComponentState.EXPANDED
-    ) {
-      event.preventDefault();
+    if (this.isInScreenSideEdge_(event, pageRect)) {
       return false;
     }
 
@@ -529,11 +524,9 @@ class ManualAdvancement extends AdvancementConfig {
    * @private
    */
   isInScreenSideEdge_(event, pageRect) {
-    const edgeOfScreen = pageRect.width * SCREEN_EDGE_PERCENT;
-
     return (
-      event.clientX <= edgeOfScreen ||
-      event.clientX >= pageRect.width - edgeOfScreen
+      event.clientX <= PROTECTED_SCREEN_EDGE_PX ||
+      event.clientX >= pageRect.width - PROTECTED_SCREEN_EDGE_PX
     );
   }
 
@@ -566,7 +559,7 @@ class ManualAdvancement extends AdvancementConfig {
    */
   maybePerformNavigation_(event) {
     const target = dev().assertElement(event.target);
-    const pageRect = this.element_./*OK*/ getBoundingClientRect();
+    const pageRect = this.element_.getLayoutBox();
 
     if (this.isHandledByEmbeddedComponent_(event, pageRect)) {
       event.preventDefault();
