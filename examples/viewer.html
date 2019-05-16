@@ -199,7 +199,7 @@
     var allViewers = [];
     var currentContainerId = null;
 
-    function Viewer(containerId, id, url, visible) {
+    function Viewer(containerId, id, url, visible, opt_caps) {
       this.id = id;
       this.url = url;
       this.alreadyLoaded_ = false;
@@ -210,7 +210,7 @@
       this.csi_ = 1;
       this.startResolve_ = null;
       this.startPromise_ = null;
-
+      this.caps_ = opt_caps || 'a2a,focus-rect,foo,keyboard,swipe,viewerRenderTemplate';
       this.isIos_ = /iPhone|iPad|iPod/i.test(window.navigator.userAgent);
 
       this.viewer = document.querySelector('viewer');
@@ -255,7 +255,7 @@
         prerenderSize: this.prerenderSize_,
         origin: parseUrlDeprecated(window.location.href).origin,
         csi: this.csi_,
-        cap: 'a2a,focus-rect,foo,keyboard,swipe,viewerRenderTemplate',
+        cap: this.caps_,
       };
       log('Params:' + JSON.stringify(params));
 
@@ -628,6 +628,7 @@
       const hash = window.location.hash;
       const hashParams = parseQueryString(hash);
       const href = hashParams['href'];
+      const caps = hashParams['caps'];
 
       new Viewer(
           'container1',
@@ -683,7 +684,8 @@
             'container-dynamic',
             'dynamic',
             addQueryParam(href, 'amp_js_v', '0.1'),
-            true).start();
+            true,
+            caps).start();
         document.getElementById('show-containerdynamic-anchor').hidden = false;
         addShowContainer('dynamic');
         showContainer('dynamic');
