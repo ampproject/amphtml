@@ -849,7 +849,7 @@ export class GlobalVariableSource extends VariableSource {
     return Services.userLocationForDocOrNull(element).then(
       userLocationService => {
         userAssert(
-          location,
+          userLocationService,
           'To use variable %s, amp-user-location should be configured',
           expr
         );

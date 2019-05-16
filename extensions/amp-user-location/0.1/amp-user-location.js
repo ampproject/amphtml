@@ -129,8 +129,8 @@ export class AmpUserLocation extends AMP.BaseElement {
           /** @type {./user-location-service.UserLocationConfigDef} */ ({});
         return userLocationService.requestLocation(config);
       })
-      .then(location => {
-        this.triggerEvent_(AmpUserLocationEvent.APPROVE, location);
+      .then(position => {
+        this.triggerEvent_(AmpUserLocationEvent.APPROVE, position);
       })
       .catch(error => {
         if (error == PositionError.PERMISSION_DENIED) {
