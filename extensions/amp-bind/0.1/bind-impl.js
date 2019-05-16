@@ -24,6 +24,7 @@ import {Signals} from '../../../src/utils/signals';
 import {
   closestAncestorElementBySelector,
   iterateCursor,
+  whenUpgradedToCustomElement,
 } from '../../../src/dom';
 import {debounce} from '../../../src/utils/rate-limit';
 import {deepEquals, getValueForExpr, parseJson} from '../../../src/json';
@@ -508,8 +509,11 @@ export class Bind {
       // Force all query-able <amp-state> elements to parse local data instead
       // of waiting for runtime to build them all.
       const whenBuilt = false;
+
       const whenParsed = toArray(ampStates).map(el => {
-        return el.getImpl(whenBuilt).then(impl => impl.parseAndUpdate());
+        return whenUpgradedToCustomElement(el)
+            .then(() => el.getImpl(whenBuilt))
+            .then(impl => impl.parseAndUpdate());
       });
       return Promise.all(whenParsed);
     }).then(() => {
