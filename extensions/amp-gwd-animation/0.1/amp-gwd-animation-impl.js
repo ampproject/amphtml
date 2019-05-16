@@ -18,12 +18,9 @@ import {dev, user} from '../../../src/log';
 import {dict, hasOwn} from '../../../src/utils/object';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {installServiceInEmbedScope} from '../../../src/service';
-import {
-  scopedQuerySelector,
-  waitForChild,
-} from '../../../src/dom';
-import {whenDocumentReady} from '../../../src/document-ready';
+import {scopedQuerySelector, waitForChild} from '../../../src/dom';
 import {toArray} from '../../../src/types';
+import {whenDocumentReady} from '../../../src/document-ready';
 
 /**
  * CSS class used to deactivate animations.
