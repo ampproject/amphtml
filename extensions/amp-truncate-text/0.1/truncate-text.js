@@ -144,7 +144,7 @@ function truncate(node, originalText, modifiedText) {
  * @return {number} The vertical overflow, if any, in pixels.
  */
 function getOverflowY(element) {
-  return element.scrollHeight - element.offsetHeight;
+  return element./*OK*/scrollHeight - element./*OK*/offsetHeight;
 }
 
 /**
@@ -187,7 +187,7 @@ export function truncateText({
 
   // Measure here, since we just measured and the container rect should not
   // depend on truncateing.
-  const containerRect = container.getBoundingClientRect();
+  const containerRect = container./*OK*/getBoundingClientRect();
   // Set the container as truncateed, so we show the overflow element and we can
   // truncate taking the size into account.
   setTruncated(container);
@@ -274,7 +274,7 @@ function maybeEllipsizeNode(node, container, containerRect) {
   // window.
   const range = document.createRange();
   range.selectNode(node);
-  const rect = range.getBoundingClientRect();
+  const rect = range./*OK*/getBoundingClientRect();
   const text = node.data;
 
   // If the rect has no size, there is nothing we need to do.

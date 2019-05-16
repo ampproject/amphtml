@@ -45,7 +45,7 @@
 }
 
 :host(:not([i-amphtml-truncate-overflow])) .expand-slot {
-  display: none !important;
+  display: none;
 }
 
 ::slotted([i-amphtml-truncate-child-overflow]) {

@@ -58,8 +58,10 @@ export class AmpTruncateText extends AMP.BaseElement {
     /** @private {boolean} */
     this.useShadow_ = false;
 
-    /** @private {?MutationObserver} */
-    this.mutationObserver_ = null;
+    /** @private {!MutationObserver} */
+    this.mutationObserver_ = new this.win.MutationObserver(() => {
+      this.truncate_();
+    });
   }
 
   /** @override */
@@ -76,12 +78,6 @@ export class AmpTruncateText extends AMP.BaseElement {
       this.buildShadow_();
     } else {
       this.build_();
-    }
-
-    if (this.win.MutationObserver) {
-      this.mutationObserver_ = new this.win.MutationObserver(() => {
-        this.truncate_();
-      });
     }
 
     this.expandSlot_.addEventListener('click', () => this.expand_());
@@ -146,6 +142,16 @@ export class AmpTruncateText extends AMP.BaseElement {
   }
 
   /** @override */
+  firstAttachedCallback() {
+    this.mutationObserver_.observe(this.element, {
+      attributes: true,
+      characterData: true,
+      childList: true,
+      subtree: true,
+    });
+  }
+
+  /** @override */
   isRelayoutNeeded() {
     return true;
   }
@@ -153,31 +159,6 @@ export class AmpTruncateText extends AMP.BaseElement {
   /** @override */
   isLayoutSupported() {
     return true;
-  }
-
-  /**
-   * Stops listening for mutations, if we have a `MutationObserver`.
-   * @private
-   */
-  unlistenForMutations_() {
-    if (this.mutationObserver_) {
-      this.mutationObserver_.disconnect();
-    }
-  }
-
-  /**
-   * Starts listening for mutations, if we have a `MutationObserver`.
-   * @private
-   */
-  listenForMutations_() {
-    if (this.mutationObserver_) {
-      this.mutationObserver_.observe(this.element, {
-        attributes: true,
-        characterData: true,
-        childList: true,
-        subtree: true,
-      });
-    }
   }
 
   /**
@@ -191,15 +172,13 @@ export class AmpTruncateText extends AMP.BaseElement {
       this.element.querySelector('[slot="expand"]') :
       this.element.querySelector('.i-amphtml-truncate-expand-slot');
 
-    // Make sure mutations from truncateing do not trigger truncateing.
-    this.unlistenForMutations_();
     truncateText({
       container,
       overflowElement,
     });
-    // Listen to all changes, since they may change layout and require
-    // retruncateing.
-    this.listenForMutations_();
+    // Take the records to clear them out. This prevents mutations from
+    // the truncation from invoking the observer's callback.
+    this.mutationObserver_.takeRecords();
   }
 
   /**
