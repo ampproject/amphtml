@@ -84,7 +84,7 @@
     "eslint-plugin-jasmine": "2.10.1",
     "eslint-plugin-jsdoc": "4.8.3",
     "eslint-plugin-notice": "0.7.8",
-    "eslint-plugin-prettier": "3.0.1",
+    "eslint-plugin-prettier": "3.1.0",
     "eslint-plugin-sort-imports-es6-autofix": "0.4.0",
     "eslint-plugin-sort-requires": "2.1.0",
     "event-stream": "4.0.1",
