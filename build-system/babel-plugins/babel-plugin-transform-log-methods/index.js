@@ -23,8 +23,9 @@
  *    // transforms into 👇
  *    dev().assert(foo != bar, ['1z'])
  *
- * Where `expandLogMessage` is in charge of looking up and expanding the message
- * string, or returning a URL where the interpolated message is displayed.
+ * `assert is overloaded so array syntax causes lookup of the message template
+ * and expansion of the message, or displaying a URL where the interpolated
+ * message is displayed.
  *
  * Additionally outputs a JSON file containing [template, id] pairs keyed by
  * message template. This table is "backwards" for deduping, to key by id its
@@ -44,11 +45,10 @@
  *
  * The motivation of this transform is to reduce binary size. The average length
  * of a log message is ~43 whereas the common minified transformed output (as
- * `x().l('a0')`) is just 11. Since the prefix of the output could repeat
- * throughout a binary, it also compresses well.
+ * `['xx']`) is just 6.
  *
- * Resulting compressed, minified binaries reduce size by ~3% depending on their
- * logging density.
+ * Resulting compressed, minified binaries reduce size by ~2.8% depending on
+ * their logging density.
  */
 const base62 = require('base62/lib/ascii');
 const fs = require('fs');
@@ -116,15 +116,15 @@ function writeMessages(messagesPath, obj) {
  * non-existent and returns its new id.
  * @param {Object<string, string>} messages
  * @param {string} message
- * @param {function():number} nextMessageId
+ * @param {function():number} getMessageId
  * @return {string} Short message id.
  */
-function getOrCreateShortMessageId(messages, message, nextMessageId) {
+function getOrCreateShortMessageId(messages, message, getMessageId) {
   if (messages[message]) {
     return messages[message];
   }
   // Base-62 radix for best utilization of ascii space.
-  const shortMessageId = base62.encode(nextMessageId());
+  const shortMessageId = base62.encode(getMessageId());
   messages[message] = shortMessageId;
   return shortMessageId;
 }
@@ -206,16 +206,15 @@ module.exports = function({types: t}) {
       } = this.opts;
 
       this.messagesPath = relativeToRoot(messagesPath);
-      this.messages = {};
-      this.messagesLength = 0;
-      this.nextMessageId = () => this.messagesLength++;
       this.replaceCallArguments = replaceCallArguments;
     },
     visitor: {
+      /** Message table I/O. */
       Program: {
         enter() {
           this.messages = getMessages(this.messagesPath);
-          this.messagesLength = Object.keys(this.messages).length;
+          this.nextMessageId = Object.keys(this.messages).length;
+          this.getMessageId = () => this.nextMessageId++;
         },
         exit() {
           writeMessages(this.messagesPath, this.messages);
@@ -259,7 +258,7 @@ module.exports = function({types: t}) {
         const shortMessageId = getOrCreateShortMessageId(
           this.messages,
           message,
-          this.nextMessageId
+          this.getMessageId
         );
 
         if (!this.replaceCallArguments) {
