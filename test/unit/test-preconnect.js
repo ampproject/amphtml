@@ -16,11 +16,12 @@
 
 import * as lolex from 'lolex';
 import {createIframePromise} from '../../testing/iframe';
-import {preconnectForElement, setPreconnectFeaturesForTesting} from
-  '../../src/preconnect';
+import {
+  preconnectForElement,
+  setPreconnectFeaturesForTesting,
+} from '../../src/preconnect';
 
 describe('preconnect', () => {
-
   let sandbox;
   let iframeClock;
   let clock;
@@ -88,22 +89,30 @@ describe('preconnect', () => {
       preconnect.url('https://a.preconnect.com/foo/bar');
       preconnect.url('https://a.preconnect.com/other');
       preconnect.url(javascriptUrlPrefix + ':alert()');
-      expect(iframe.doc.querySelectorAll('link[rel=dns-prefetch]'))
-          .to.have.length(0);
+      expect(
+        iframe.doc.querySelectorAll('link[rel=dns-prefetch]')
+      ).to.have.length(0);
       return visible.then(() => {
-        expect(iframe.doc.querySelectorAll('link[rel=dns-prefetch]'))
-            .to.have.length(1);
-        expect(iframe.doc.querySelector('link[rel=dns-prefetch]').href)
-            .to.equal('https://a.preconnect.com/');
-        expect(iframe.doc.querySelectorAll('link[rel=preconnect]'))
-            .to.have.length(1);
-        expect(iframe.doc.querySelector('link[rel=preconnect]').href)
-            .to.equal('https://a.preconnect.com/');
         expect(
-            iframe.doc.querySelector('link[rel=preconnect]')
-                .getAttribute('referrerpolicy')).to.equal('origin');
-        expect(iframe.doc.querySelectorAll('link[rel=preload]'))
-            .to.have.length(0);
+          iframe.doc.querySelectorAll('link[rel=dns-prefetch]')
+        ).to.have.length(1);
+        expect(
+          iframe.doc.querySelector('link[rel=dns-prefetch]').href
+        ).to.equal('https://a.preconnect.com/');
+        expect(
+          iframe.doc.querySelectorAll('link[rel=preconnect]')
+        ).to.have.length(1);
+        expect(iframe.doc.querySelector('link[rel=preconnect]').href).to.equal(
+          'https://a.preconnect.com/'
+        );
+        expect(
+          iframe.doc
+            .querySelector('link[rel=preconnect]')
+            .getAttribute('referrerpolicy')
+        ).to.equal('origin');
+        expect(iframe.doc.querySelectorAll('link[rel=preload]')).to.have.length(
+          0
+        );
         expect(open).to.have.not.been.called;
       });
     });
@@ -117,20 +126,27 @@ describe('preconnect', () => {
       preconnect.url('https://a.preconnect.com/foo/bar');
       preconnect.url('https://a.preconnect.com/other');
       preconnect.url(javascriptUrlPrefix + ':alert()');
-      expect(iframe.doc.querySelectorAll('link[rel=preconnect]'))
-          .to.have.length(0);
+      expect(
+        iframe.doc.querySelectorAll('link[rel=preconnect]')
+      ).to.have.length(0);
       return visible.then(() => {
-        expect(iframe.doc.querySelectorAll('link[rel=dns-prefetch]'))
-            .to.have.length(0);
-        expect(iframe.doc.querySelectorAll('link[rel=preconnect]'))
-            .to.have.length(1);
-        expect(iframe.doc.querySelector('link[rel=preconnect]').href)
-            .to.equal('https://a.preconnect.com/');
         expect(
-            iframe.doc.querySelector('link[rel=preconnect]')
-                .getAttribute('referrerpolicy')).to.equal('origin');
-        expect(iframe.doc.querySelectorAll('link[rel=preload]'))
-            .to.have.length(0);
+          iframe.doc.querySelectorAll('link[rel=dns-prefetch]')
+        ).to.have.length(0);
+        expect(
+          iframe.doc.querySelectorAll('link[rel=preconnect]')
+        ).to.have.length(1);
+        expect(iframe.doc.querySelector('link[rel=preconnect]').href).to.equal(
+          'https://a.preconnect.com/'
+        );
+        expect(
+          iframe.doc
+            .querySelector('link[rel=preconnect]')
+            .getAttribute('referrerpolicy')
+        ).to.equal('origin');
+        expect(iframe.doc.querySelectorAll('link[rel=preload]')).to.have.length(
+          0
+        );
         expect(open).to.have.not.been.called;
       });
     });
@@ -145,25 +161,32 @@ describe('preconnect', () => {
       preconnect.url('https://s.preconnect.com/foo/bar');
       preconnect.url('https://s.preconnect.com/other');
       preconnect.url(javascriptUrlPrefix + ':alert()');
-      expect(iframe.doc.querySelectorAll('link[rel=dns-prefetch]'))
-          .to.have.length(0);
+      expect(
+        iframe.doc.querySelectorAll('link[rel=dns-prefetch]')
+      ).to.have.length(0);
       return visible.then(() => {
-        expect(iframe.doc.querySelectorAll('link[rel=dns-prefetch]'))
-            .to.have.length(1);
-        expect(iframe.doc.querySelector('link[rel=dns-prefetch]').href)
-            .to.equal('https://s.preconnect.com/');
-        expect(iframe.doc.querySelectorAll('link[rel=preconnect]'))
-            .to.have.length(1);
-        expect(iframe.doc.querySelector('link[rel=preconnect]').href)
-            .to.equal('https://s.preconnect.com/');
-        expect(iframe.doc.querySelectorAll('link[rel=preload]'))
-            .to.have.length(0);
+        expect(
+          iframe.doc.querySelectorAll('link[rel=dns-prefetch]')
+        ).to.have.length(1);
+        expect(
+          iframe.doc.querySelector('link[rel=dns-prefetch]').href
+        ).to.equal('https://s.preconnect.com/');
+        expect(
+          iframe.doc.querySelectorAll('link[rel=preconnect]')
+        ).to.have.length(1);
+        expect(iframe.doc.querySelector('link[rel=preconnect]').href).to.equal(
+          'https://s.preconnect.com/'
+        );
+        expect(iframe.doc.querySelectorAll('link[rel=preload]')).to.have.length(
+          0
+        );
         expect(open).to.be.calledOnce;
         expect(send).to.be.calledOnce;
         expect(open.args[0][1]).to.equal(
-            'https://s.preconnect.com/robots.txt?_AMP_safari_' +
+          'https://s.preconnect.com/robots.txt?_AMP_safari_' +
             'preconnect_polyfill_cachebust=' +
-            '1485531180000');
+            '1485531180000'
+        );
       });
     });
   });
@@ -172,20 +195,26 @@ describe('preconnect', () => {
     return getPreconnectIframe().then(iframe => {
       preconnect.url('https://c.preconnect.com/foo/bar');
       return visible.then(() => {
-        expect(iframe.doc.querySelectorAll('link[rel=dns-prefetch]'))
-            .to.have.length(1);
-        expect(iframe.doc.querySelectorAll('link[rel=preconnect]'))
-            .to.have.length(1);
+        expect(
+          iframe.doc.querySelectorAll('link[rel=dns-prefetch]')
+        ).to.have.length(1);
+        expect(
+          iframe.doc.querySelectorAll('link[rel=preconnect]')
+        ).to.have.length(1);
         iframeClock.tick(9000);
-        expect(iframe.doc.querySelectorAll('link[rel=dns-prefetch]'))
-            .to.have.length(1);
-        expect(iframe.doc.querySelectorAll('link[rel=preconnect]'))
-            .to.have.length(1);
+        expect(
+          iframe.doc.querySelectorAll('link[rel=dns-prefetch]')
+        ).to.have.length(1);
+        expect(
+          iframe.doc.querySelectorAll('link[rel=preconnect]')
+        ).to.have.length(1);
         iframeClock.tick(1000);
-        expect(iframe.doc.querySelectorAll('link[rel=dns-prefetch]'))
-            .to.have.length(0);
-        expect(iframe.doc.querySelectorAll('link[rel=preconnect]'))
-            .to.have.length(0);
+        expect(
+          iframe.doc.querySelectorAll('link[rel=dns-prefetch]')
+        ).to.have.length(0);
+        expect(
+          iframe.doc.querySelectorAll('link[rel=preconnect]')
+        ).to.have.length(0);
       });
     });
   });
@@ -196,14 +225,18 @@ describe('preconnect', () => {
       // Different origin
       preconnect.url('https://e.preconnect.com/other');
       return visible.then(() => {
-        expect(iframe.doc.querySelectorAll('link[rel=dns-prefetch]'))
-            .to.have.length(2);
-        expect(iframe.doc.querySelectorAll('link[rel=dns-prefetch]')[0].href)
-            .to.equal('https://d.preconnect.com/');
-        expect(iframe.doc.querySelectorAll('link[rel=dns-prefetch]')[1].href)
-            .to.equal('https://e.preconnect.com/');
-        expect(iframe.doc.querySelectorAll('link[rel=preconnect]'))
-            .to.have.length(2);
+        expect(
+          iframe.doc.querySelectorAll('link[rel=dns-prefetch]')
+        ).to.have.length(2);
+        expect(
+          iframe.doc.querySelectorAll('link[rel=dns-prefetch]')[0].href
+        ).to.equal('https://d.preconnect.com/');
+        expect(
+          iframe.doc.querySelectorAll('link[rel=dns-prefetch]')[1].href
+        ).to.equal('https://e.preconnect.com/');
+        expect(
+          iframe.doc.querySelectorAll('link[rel=preconnect]')
+        ).to.have.length(2);
       });
     });
   });
@@ -212,22 +245,26 @@ describe('preconnect', () => {
     return getPreconnectIframe().then(iframe => {
       preconnect.url('https://x.preconnect.com/foo/bar');
       return visible.then(() => {
-        expect(iframe.doc.querySelectorAll('link[rel=preconnect]'))
-            .to.have.length(1);
+        expect(
+          iframe.doc.querySelectorAll('link[rel=preconnect]')
+        ).to.have.length(1);
         iframeClock.tick(9000);
         preconnect.url('https://x.preconnect.com/foo/bar');
         return visible.then(() => {
-          expect(iframe.doc.querySelectorAll('link[rel=preconnect]'))
-              .to.have.length(1);
+          expect(
+            iframe.doc.querySelectorAll('link[rel=preconnect]')
+          ).to.have.length(1);
           iframeClock.tick(1000);
-          expect(iframe.doc.querySelectorAll('link[rel=preconnect]'))
-              .to.have.length(0);
+          expect(
+            iframe.doc.querySelectorAll('link[rel=preconnect]')
+          ).to.have.length(0);
           // After timeout preconnect creates a new tag.
           clock.tick(10000);
           preconnect.url('https://x.preconnect.com/foo/bar');
           return visible.then(() => {
-            expect(iframe.doc.querySelectorAll('link[rel=preconnect]'))
-                .to.have.length(1);
+            expect(
+              iframe.doc.querySelectorAll('link[rel=preconnect]')
+            ).to.have.length(1);
           });
         });
       });
@@ -236,24 +273,30 @@ describe('preconnect', () => {
 
   it('should timeout preconnects longer with active connect', () => {
     return getPreconnectIframe().then(iframe => {
-      preconnect.url('https://y.preconnect.com/foo/bar',
-          /* opt_alsoConnecting */ true);
+      preconnect.url(
+        'https://y.preconnect.com/foo/bar',
+        /* opt_alsoConnecting */ true
+      );
       return visible.then(() => {
-        expect(iframe.doc.querySelectorAll('link[rel=preconnect]'))
-            .to.have.length(1);
+        expect(
+          iframe.doc.querySelectorAll('link[rel=preconnect]')
+        ).to.have.length(1);
         iframeClock.tick(10000);
-        expect(iframe.doc.querySelectorAll('link[rel=preconnect]'))
-            .to.have.length(0);
+        expect(
+          iframe.doc.querySelectorAll('link[rel=preconnect]')
+        ).to.have.length(0);
         clock.tick(10000);
         return visible.then(() => {
           preconnect.url('https://y.preconnect.com/foo/bar');
-          expect(iframe.doc.querySelectorAll('link[rel=preconnect]'))
-              .to.have.length(0);
+          expect(
+            iframe.doc.querySelectorAll('link[rel=preconnect]')
+          ).to.have.length(0);
           clock.tick(180 * 1000);
           return visible.then(() => {
             preconnect.url('https://y.preconnect.com/foo/bar');
-            expect(iframe.doc.querySelectorAll('link[rel=preconnect]'))
-                .to.have.length(1);
+            expect(
+              iframe.doc.querySelectorAll('link[rel=preconnect]')
+            ).to.have.length(1);
           });
         });
       });
@@ -261,32 +304,33 @@ describe('preconnect', () => {
   });
 
   // TODO(cramforce, #11827): Make this test work on Safari.
-  it.configure().skipSafari().run('should add links if feature ' +
-      'if detected', () => {
-    // Don't stub preload support allow the test to run through the browser
-    // default regardless of support or not.
-    return getPreconnectIframe(/* detectFeatures */ true).then(iframe => {
-      preconnect.preload('https://a.prefetch.com/foo/bar', 'script');
-      preconnect.preload('https://a.prefetch.com/foo/bar');
-      preconnect.preload('https://a.prefetch.com/other', 'style');
-      preconnect.preload(javascriptUrlPrefix + ':alert()');
-      const fetches = iframe.doc.querySelectorAll(
-          'link[rel=preload]');
-      expect(fetches).to.have.length(0);
-      return visible.then(() => {
-        expect(iframe.doc.querySelectorAll('link[rel=preconnect]'))
-            .to.have.length(1);
-        expect(iframe.doc.querySelector('link[rel=preconnect]').href)
-            .to.equal('https://a.prefetch.com/');
-        const fetches = iframe.doc.querySelectorAll(
-            'link[rel=preload]');
-        expect(fetches).to.have.length(2);
-        expect(fetches[0].href).to.equal('https://a.prefetch.com/foo/bar');
-        expect(fetches[1].href).to.equal('https://a.prefetch.com/other');
-        expect(fetches[0].getAttribute('referrerpolicy')).to.equal('origin');
+  it.configure()
+    .skipSafari()
+    .run('should add links if feature if detected', () => {
+      // Don't stub preload support allow the test to run through the browser
+      // default regardless of support or not.
+      return getPreconnectIframe(/* detectFeatures */ true).then(iframe => {
+        preconnect.preload('https://a.prefetch.com/foo/bar', 'script');
+        preconnect.preload('https://a.prefetch.com/foo/bar');
+        preconnect.preload('https://a.prefetch.com/other', 'style');
+        preconnect.preload(javascriptUrlPrefix + ':alert()');
+        const fetches = iframe.doc.querySelectorAll('link[rel=preload]');
+        expect(fetches).to.have.length(0);
+        return visible.then(() => {
+          expect(
+            iframe.doc.querySelectorAll('link[rel=preconnect]')
+          ).to.have.length(1);
+          expect(
+            iframe.doc.querySelector('link[rel=preconnect]').href
+          ).to.equal('https://a.prefetch.com/');
+          const fetches = iframe.doc.querySelectorAll('link[rel=preload]');
+          expect(fetches).to.have.length(2);
+          expect(fetches[0].href).to.equal('https://a.prefetch.com/foo/bar');
+          expect(fetches[1].href).to.equal('https://a.prefetch.com/other');
+          expect(fetches[0].getAttribute('referrerpolicy')).to.equal('origin');
+        });
       });
     });
-  });
 
   it('should preload', () => {
     preloadSupported = true;
@@ -297,17 +341,20 @@ describe('preconnect', () => {
       preconnect.preload(javascriptUrlPrefix + ':alert()');
       return visible.then(() => {
         // Also preconnects.
-        expect(iframe.doc.querySelectorAll('link[rel=dns-prefetch]'))
-            .to.have.length(1);
-        expect(iframe.doc.querySelector('link[rel=dns-prefetch]').href)
-            .to.equal('https://a.prefetch.com/');
-        expect(iframe.doc.querySelectorAll('link[rel=preconnect]'))
-            .to.have.length(1);
-        expect(iframe.doc.querySelector('link[rel=preconnect]').href)
-            .to.equal('https://a.prefetch.com/');
+        expect(
+          iframe.doc.querySelectorAll('link[rel=dns-prefetch]')
+        ).to.have.length(1);
+        expect(
+          iframe.doc.querySelector('link[rel=dns-prefetch]').href
+        ).to.equal('https://a.prefetch.com/');
+        expect(
+          iframe.doc.querySelectorAll('link[rel=preconnect]')
+        ).to.have.length(1);
+        expect(iframe.doc.querySelector('link[rel=preconnect]').href).to.equal(
+          'https://a.prefetch.com/'
+        );
         // Actual preload
-        const preloads = iframe.doc.querySelectorAll(
-            'link[rel=preload]');
+        const preloads = iframe.doc.querySelectorAll('link[rel=preload]');
         expect(preloads).to.have.length(2);
         expect(preloads[0].href).to.equal('https://a.prefetch.com/foo/bar');
         expect(preloads[1].href).to.equal('https://a.prefetch.com/other');

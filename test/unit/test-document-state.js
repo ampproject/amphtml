@@ -17,9 +17,7 @@
 import * as dom from '../../src/dom';
 import {DocumentState} from '../../src/service/document-state';
 
-
 describe('DocumentState', () => {
-
   let sandbox;
   let eventListeners;
   let testDoc;

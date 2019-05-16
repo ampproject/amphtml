@@ -22,14 +22,17 @@ module.exports = function(babel) {
       CallExpression(path) {
         const {node} = path;
         const {callee} = node;
-        if (t.isIdentifier(callee.object, {name: 'AMP'}) &&
-            t.isIdentifier(callee.property, {name: 'extension'})) {
+        if (
+          t.isIdentifier(callee.object, {name: 'AMP'}) &&
+          t.isIdentifier(callee.property, {name: 'extension'})
+        ) {
           const func = node.arguments[node.arguments.length - 1];
 
           const IIFE = t.expressionStatement(
-              t.callExpression(func, [
-                t.memberExpression(t.identifier('self'), t.identifier('AMP')),
-              ]));
+            t.callExpression(func, [
+              t.memberExpression(t.identifier('self'), t.identifier('AMP')),
+            ])
+          );
           path.replaceWith(IIFE);
         }
       },
