@@ -21,7 +21,6 @@ import {
 } from '../amp-story-store-service';
 import {EmbedMode, EmbedModeParam} from '../embed-mode';
 
-
 describes.fakeWin('amp-story-store-service', {}, env => {
   let storeService;
 

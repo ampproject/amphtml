@@ -29,15 +29,15 @@ const {
   stopTimer,
   startSauceConnect,
   stopSauceConnect,
-  timedExecOrDie: timedExecOrDieBase} = require('./utils');
+  timedExecOrDie: timedExecOrDieBase,
+} = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
 const {isTravisPullRequestBuild} = require('../travis');
 
 const FILENAME = 'remote-tests.js';
 const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
-const timedExecOrDie =
-  (cmd, unusedFileName) => timedExecOrDieBase(cmd, FILENAME);
-
+const timedExecOrDie = (cmd, unusedFileName) =>
+  timedExecOrDieBase(cmd, FILENAME);
 
 async function main() {
   const startTime = startTimer(FILENAME, FILENAME);
@@ -54,15 +54,20 @@ async function main() {
     stopSauceConnect(FILENAME);
   } else {
     printChangeSummary(FILENAME);
-    if (!(buildTargets.has('RUNTIME') ||
-          buildTargets.has('BUILD_SYSTEM') ||
-          buildTargets.has('UNIT_TEST') ||
-          buildTargets.has('INTEGRATION_TEST'))) {
+    if (
+      !(
+        buildTargets.has('RUNTIME') ||
+        buildTargets.has('BUILD_SYSTEM') ||
+        buildTargets.has('UNIT_TEST') ||
+        buildTargets.has('INTEGRATION_TEST')
+      )
+    ) {
       console.log(
-          `${FILELOGPREFIX} Skipping ` +
+        `${FILELOGPREFIX} Skipping ` +
           colors.cyan('Remote (Sauce Labs) Tests ') +
           'because this commit does not affect the runtime, ' +
-          'build system, or integration test files.');
+          'build system, or integration test files.'
+      );
       stopTimer(FILENAME, FILENAME, startTime);
       return;
     }
@@ -70,17 +75,22 @@ async function main() {
     timedExecOrDie('gulp update-packages');
     await startSauceConnect(FILENAME);
 
-    if (buildTargets.has('RUNTIME') ||
-        buildTargets.has('BUILD_SYSTEM') ||
-        buildTargets.has('UNIT_TEST')) {
+    if (
+      buildTargets.has('RUNTIME') ||
+      buildTargets.has('BUILD_SYSTEM') ||
+      buildTargets.has('UNIT_TEST')
+    ) {
       timedExecOrDie('gulp test --unit --nobuild --saucelabs_lite');
     }
 
-    if (buildTargets.has('RUNTIME') ||
-        buildTargets.has('BUILD_SYSTEM') ||
-        buildTargets.has('INTEGRATION_TEST')) {
+    if (
+      buildTargets.has('RUNTIME') ||
+      buildTargets.has('BUILD_SYSTEM') ||
+      buildTargets.has('INTEGRATION_TEST')
+    ) {
       timedExecOrDie(
-          'gulp test --integration --nobuild --compiled --saucelabs');
+        'gulp test --integration --nobuild --compiled --saucelabs'
+      );
     }
     stopSauceConnect(FILENAME);
   }

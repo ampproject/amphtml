@@ -117,8 +117,9 @@ const strings = {
     string: 'Aumente a largura da janela para ver esta experiência',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
-    string: 'Você precisa ativar o experimento amp-story para ver este ' +
-        'conteúdo.',
+    string:
+      'Você precisa ativar o experimento amp-story para ver este ' +
+      'conteúdo.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
     string: 'Melhor visualização da página no modo retrato',

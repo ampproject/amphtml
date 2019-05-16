@@ -19,14 +19,24 @@ import {getSourceUrl, parseUrlDeprecated} from '../src/url';
 import {hasOwn} from '../src/utils/object';
 
 const mandatoryParams = ['tagtype', 'cid'],
-    optionalParams = [
-      'timeout', 'crid', 'misc',
-      'slot', 'targeting', 'categoryExclusions',
-      'tagForChildDirectedTreatment', 'cookieOptions',
-      'overrideWidth', 'overrideHeight', 'loadingStrategy',
-      'consentNotificationId', 'useSameDomainRenderingUntilDeprecated',
-      'experimentId', 'multiSize', 'multiSizeValidation',
-    ];
+  optionalParams = [
+    'timeout',
+    'crid',
+    'misc',
+    'slot',
+    'targeting',
+    'categoryExclusions',
+    'tagForChildDirectedTreatment',
+    'cookieOptions',
+    'overrideWidth',
+    'overrideHeight',
+    'loadingStrategy',
+    'consentNotificationId',
+    'useSameDomainRenderingUntilDeprecated',
+    'experimentId',
+    'multiSize',
+    'multiSizeValidation',
+  ];
 // useSameDomainRenderingUntilDeprecated is included to ensure publisher
 // amp-tags don't break before 29th March
 
@@ -37,11 +47,12 @@ const mandatoryParams = ['tagtype', 'cid'],
 export function medianet(global, data) {
   validateData(data, mandatoryParams, optionalParams);
 
-  const publisherUrl = global.context.canonicalUrl ||
-      getSourceUrl(global.context.location.href),
-      referrerUrl = global.context.referrer;
+  const publisherUrl =
+      global.context.canonicalUrl || getSourceUrl(global.context.location.href),
+    referrerUrl = global.context.referrer;
 
-  if (data.tagtype === 'headerbidder') { //parameter tagtype is used to identify the product the publisher is using. Going ahead we plan to support more product types.
+  if (data.tagtype === 'headerbidder') {
+    //parameter tagtype is used to identify the product the publisher is using. Going ahead we plan to support more product types.
     loadHBTag(global, data, publisherUrl, referrerUrl);
   } else if (data.tagtype === 'cm' && data.crid) {
     loadCMTag(global, data, publisherUrl, referrerUrl);
@@ -143,7 +154,6 @@ function loadCMTag(global, data, publisherUrl, referrerUrl) {
  * @param {?string} referrerUrl
  */
 function loadHBTag(global, data, publisherUrl, referrerUrl) {
-
   /**
    * Loads MNETAd.
    */
@@ -162,8 +172,10 @@ function loadHBTag(global, data, publisherUrl, referrerUrl) {
 
     data.targeting = data.targeting || {};
 
-    if (global.advBidxc &&
-      typeof global.advBidxc.setAmpTargeting === 'function') {
+    if (
+      global.advBidxc &&
+      typeof global.advBidxc.setAmpTargeting === 'function'
+    ) {
       global.advBidxc.setAmpTargeting(global, data);
     }
     global.advBidxc.loadAmpAd(global, data);
@@ -174,8 +186,10 @@ function loadHBTag(global, data, publisherUrl, referrerUrl) {
    */
   function mnetHBHandle() {
     global.advBidxc = global.context.master.advBidxc;
-    if (global.advBidxc &&
-      typeof global.advBidxc.registerAmpSlot === 'function') {
+    if (
+      global.advBidxc &&
+      typeof global.advBidxc.registerAmpSlot === 'function'
+    ) {
       global.advBidxc.registerAmpSlot({
         cb: loadMNETAd,
         data,
@@ -184,22 +198,34 @@ function loadHBTag(global, data, publisherUrl, referrerUrl) {
     }
   }
 
-  computeInMasterFrame(global, 'medianet-hb-load', done => {
-    /*eslint "google-camelcase/google-camelcase": 0*/
-    global.advBidxc_requrl = publisherUrl;
-    global.advBidxc_refurl = referrerUrl;
-    global.advBidxc = {
-      registerAmpSlot: () => {},
-      setAmpTargeting: () => {},
-      renderAmpAd: () => {},
-      loadAmpAd: () => {
-        global.context.noContentAvailable();
-      },
-    };
-    global.advBidxc.amp = getCallbacksObject();
-    const publisherDomain = parseUrlDeprecated(publisherUrl).hostname;
-    writeScript(global, 'https://contextual.media.net/bidexchange.js?https=1&amp=1&cid=' + encodeURIComponent(data.cid) + '&dn=' + encodeURIComponent(publisherDomain), () => {
-      done(null);
-    });
-  }, mnetHBHandle);
+  computeInMasterFrame(
+    global,
+    'medianet-hb-load',
+    done => {
+      /*eslint "google-camelcase/google-camelcase": 0*/
+      global.advBidxc_requrl = publisherUrl;
+      global.advBidxc_refurl = referrerUrl;
+      global.advBidxc = {
+        registerAmpSlot: () => {},
+        setAmpTargeting: () => {},
+        renderAmpAd: () => {},
+        loadAmpAd: () => {
+          global.context.noContentAvailable();
+        },
+      };
+      global.advBidxc.amp = getCallbacksObject();
+      const publisherDomain = parseUrlDeprecated(publisherUrl).hostname;
+      writeScript(
+        global,
+        'https://contextual.media.net/bidexchange.js?https=1&amp=1&cid=' +
+          encodeURIComponent(data.cid) +
+          '&dn=' +
+          encodeURIComponent(publisherDomain),
+        () => {
+          done(null);
+        }
+      );
+    },
+    mnetHBHandle
+  );
 }

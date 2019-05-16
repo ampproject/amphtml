@@ -57,10 +57,10 @@ const strings = {
     string: 'AMP ප්‍රතිඵල ගැන තවත්',
   },
   [LocalizedStringId.AMP_STORY_HINT_UI_NEXT_LABEL]: {
-    string: '\'මීළඟ\' තට්ටු කරන්න',
+    string: "'මීළඟ' තට්ටු කරන්න",
   },
   [LocalizedStringId.AMP_STORY_HINT_UI_PREVIOUS_LABEL]: {
-    string: '\'ආපසු\' තට්ටු කරන්න',
+    string: "'ආපසු' තට්ටු කරන්න",
   },
   [LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL]: {
     string: 'ඉහළට ස්වයිප් කරන්න',

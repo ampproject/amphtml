@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 /**
  * Compares if two arrays contains exactly same elements of same number
  * of same order. Note that it does NOT handle NaN case as expected.

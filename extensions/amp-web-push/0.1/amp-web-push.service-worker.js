@@ -87,26 +87,30 @@ self.addEventListener('message', event => {
  */
 function onMessageReceivedSubscriptionState() {
   let retrievedPushSubscription = null;
-  self.registration.pushManager.getSubscription()
-      .then(pushSubscription => {
-        retrievedPushSubscription = pushSubscription;
-        if (!pushSubscription) {
-          return null;
-        } else {
-          return self.registration.pushManager.permissionState(
-              pushSubscription.options
-          );
-        }
-      }).then(permissionStateOrNull => {
-        if (permissionStateOrNull == null) {
-          broadcastReply(WorkerMessengerCommand.AMP_SUBSCRIPTION_STATE, false);
-        } else {
-          const isSubscribed = !!retrievedPushSubscription &&
-            permissionStateOrNull === 'granted';
-          broadcastReply(WorkerMessengerCommand.AMP_SUBSCRIPTION_STATE,
-              isSubscribed);
-        }
-      });
+  self.registration.pushManager
+    .getSubscription()
+    .then(pushSubscription => {
+      retrievedPushSubscription = pushSubscription;
+      if (!pushSubscription) {
+        return null;
+      } else {
+        return self.registration.pushManager.permissionState(
+          pushSubscription.options
+        );
+      }
+    })
+    .then(permissionStateOrNull => {
+      if (permissionStateOrNull == null) {
+        broadcastReply(WorkerMessengerCommand.AMP_SUBSCRIPTION_STATE, false);
+      } else {
+        const isSubscribed =
+          !!retrievedPushSubscription && permissionStateOrNull === 'granted';
+        broadcastReply(
+          WorkerMessengerCommand.AMP_SUBSCRIPTION_STATE,
+          isSubscribed
+        );
+      }
+    });
 }
 
 /**
@@ -127,15 +131,16 @@ function onMessageReceivedSubscribe() {
         https://github.com/web-push-libs/web-push, convert the VAPID key to a
         UInt8 array and supply it to applicationServerKey
    */
-  self.registration.pushManager.subscribe({
-    userVisibleOnly: true,
-    applicationServerKey: 'fake-demo-key',
-  }).then(() => {
-    // IMPLEMENT: Forward the push subscription to your server here
-    broadcastReply(WorkerMessengerCommand.AMP_SUBSCRIBE, null);
-  });
+  self.registration.pushManager
+    .subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: 'fake-demo-key',
+    })
+    .then(() => {
+      // IMPLEMENT: Forward the push subscription to your server here
+      broadcastReply(WorkerMessengerCommand.AMP_SUBSCRIBE, null);
+    });
 }
-
 
 /**
   Unsubscribes the subscriber from push.
@@ -143,12 +148,13 @@ function onMessageReceivedSubscribe() {
   The broadcast value is null (not used in the AMP page).
  */
 function onMessageReceivedUnsubscribe() {
-  self.registration.pushManager.getSubscription()
-      .then(subscription => subscription.unsubscribe())
-      .then(() => {
-        // OPTIONALLY IMPLEMENT: Forward the unsubscription to your server here
-        broadcastReply(WorkerMessengerCommand.AMP_UNSUBSCRIBE, null);
-      });
+  self.registration.pushManager
+    .getSubscription()
+    .then(subscription => subscription.unsubscribe())
+    .then(() => {
+      // OPTIONALLY IMPLEMENT: Forward the unsubscription to your server here
+      broadcastReply(WorkerMessengerCommand.AMP_UNSUBSCRIBE, null);
+    });
 }
 
 /**
@@ -157,14 +163,13 @@ function onMessageReceivedUnsubscribe() {
  * @param {!JsonObject} payload
  */
 function broadcastReply(command, payload) {
-  self.clients.matchAll()
-      .then(clients => {
-        for (let i = 0; i < clients.length; i++) {
-          const client = clients[i];
-          client./*OK*/postMessage({
-            command,
-            payload,
-          });
-        }
+  self.clients.matchAll().then(clients => {
+    for (let i = 0; i < clients.length; i++) {
+      const client = clients[i];
+      client./*OK*/ postMessage({
+        command,
+        payload,
       });
+    }
+  });
 }

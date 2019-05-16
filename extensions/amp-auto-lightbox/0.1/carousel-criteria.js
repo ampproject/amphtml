@@ -62,7 +62,6 @@ export class CarouselCriteria {
 }
 
 class SlideCriteria {
-
   /**
    * @param {!Element} element
    * @return {!Promise<boolean>}
@@ -77,8 +76,10 @@ class SlideCriteria {
       return resolveFalse();
     }
 
-    const slideMeetsSizingPromise =
-        SlideCriteria.meetsSizingCriteria(img, element);
+    const slideMeetsSizingPromise = SlideCriteria.meetsSizingCriteria(
+      img,
+      element
+    );
 
     return slideMeetsSizingPromise.then(slideMeetsSizingCriteria => {
       if (!slideMeetsSizingCriteria) {
@@ -96,23 +97,23 @@ class SlideCriteria {
   static meetsSizingCriteria(img, slide) {
     devAssert(img.tagName == 'AMP-IMG');
 
-    return img.getImpl().then(impl => new Promise(resolve => {
-      impl.measureElement(() => {
-        const {
-          width: imgWidth,
-          height: imgHeight,
-        } = img.getLayoutBox();
+    return img.getImpl().then(
+      impl =>
+        new Promise(resolve => {
+          impl.measureElement(() => {
+            const {width: imgWidth, height: imgHeight} = img.getLayoutBox();
 
-        const {
-          width: slideWidth,
-          height: slideHeight,
-        } = slide./*OK*/getBoundingClientRect();
+            const {
+              width: slideWidth,
+              height: slideHeight,
+            } = slide./*OK*/ getBoundingClientRect();
 
-        const imgArea = imgWidth * imgHeight;
-        const slideArea = slideWidth * slideHeight;
+            const imgArea = imgWidth * imgHeight;
+            const slideArea = slideWidth * slideHeight;
 
-        resolve((imgArea / slideArea) >= MIN_IMG_SLIDE_AREA_RATIO);
-      });
-    }));
+            resolve(imgArea / slideArea >= MIN_IMG_SLIDE_AREA_RATIO);
+          });
+        })
+    );
   }
 }

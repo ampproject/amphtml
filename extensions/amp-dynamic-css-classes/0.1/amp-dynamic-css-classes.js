@@ -82,7 +82,6 @@ function normalizedReferrers(ampdoc) {
   return referrers_(referrer);
 }
 
-
 /**
  * Adds CSS classes onto the HTML element.
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
@@ -92,11 +91,9 @@ function addDynamicCssClasses(ampdoc, classes) {
   if (ampdoc.isBodyAvailable()) {
     addCssClassesToBody(ampdoc.getBody(), classes);
   } else {
-    ampdoc.whenBodyAvailable().then(
-        body => addCssClassesToBody(body, classes));
+    ampdoc.whenBodyAvailable().then(body => addCssClassesToBody(body, classes));
   }
 }
-
 
 /**
  * @param {!Element} body
@@ -108,7 +105,6 @@ function addCssClassesToBody(body, classes) {
     classList.add(classes[i]);
   }
 }
-
 
 /**
  * Adds dynamic css classes based on the referrer, with a separate class for
@@ -126,7 +122,6 @@ function addReferrerClasses(ampdoc) {
   });
 }
 
-
 /**
  * Adds a dynamic css class `amp-viewer` if this document is inside a viewer.
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
@@ -139,7 +134,6 @@ function addViewerClass(ampdoc) {
     });
   }
 }
-
 
 /**
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
@@ -171,7 +165,5 @@ class AmpDynamicCssClasses {
 
 // Register doc-service factory.
 AMP.extension('amp-dynamic-css-classes', '0.1', AMP => {
-  AMP.registerServiceForDoc(
-      'amp-dynamic-css-classes',
-      AmpDynamicCssClasses);
+  AMP.registerServiceForDoc('amp-dynamic-css-classes', AmpDynamicCssClasses);
 });

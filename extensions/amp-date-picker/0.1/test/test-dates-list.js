@@ -25,7 +25,7 @@ describes.sandboxed('DatesList', {}, () => {
     const containedDate = '09/04/1998';
     const notContainedDate = '09/03/1998';
     const containedRrule =
-        'FREQ=WEEKLY;DTSTART=20180101T000000Z;WKST=SU;BYDAY=TU,SA';
+      'FREQ=WEEKLY;DTSTART=20180101T000000Z;WKST=SU;BYDAY=TU,SA';
     const matchesRrule = '01/02/2018';
     const datesList = new DatesList([containedDate, containedRrule]);
 

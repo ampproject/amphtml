@@ -58,9 +58,7 @@ import {MOBIFY_CONFIG} from './vendors/mobify';
 import {MPARTICLE_CONFIG} from './vendors/mparticle';
 import {NEWRELIC_CONFIG} from './vendors/newrelic';
 import {NIELSEN_CONFIG} from './vendors/nielsen';
-import {
-  NIELSEN_MARKETING_CLOUD_CONFIG,
-} from './vendors/nielsen-marketing-cloud';
+import {NIELSEN_MARKETING_CLOUD_CONFIG} from './vendors/nielsen-marketing-cloud';
 import {OEWADIRECT_CONFIG} from './vendors/oewadirect';
 import {OEWA_CONFIG} from './vendors/oewa';
 import {PARSELY_CONFIG} from './vendors/parsely';
@@ -72,9 +70,7 @@ import {PRESSBOARD_CONFIG} from './vendors/pressboard';
 import {QUANTCAST_CONFIG} from './vendors/quantcast';
 import {RETARGETLY_CONFIG} from './vendors/retargetly';
 import {ADOBEANALYTICS_CONFIG} from './vendors/adobeanalytics';
-import {
-  ADOBEANALYTICS_NATIVECONFIG_CONFIG,
-} from './vendors/adobeanalytics_nativeConfig';
+import {ADOBEANALYTICS_NATIVECONFIG_CONFIG} from './vendors/adobeanalytics_nativeConfig';
 import {INFONLINE_CONFIG} from './vendors/infonline';
 import {SIMPLEREACH_CONFIG} from './vendors/simplereach';
 import {SEGMENT_CONFIG} from './vendors/segment';
@@ -91,9 +87,7 @@ import {LINKPULSE_CONFIG} from './vendors/linkpulse';
 import {RAKAM_CONFIG} from './vendors/rakam';
 import {IBEATANALYTICS_CONFIG} from './vendors/ibeatanalytics';
 import {TOPMAILRU_CONFIG} from './vendors/topmailru';
-import {
-  ORACLEINFINITYANALYTICS_CONFIG,
-} from './vendors/oracleInfinityAnalytics';
+import {ORACLEINFINITYANALYTICS_CONFIG} from './vendors/oracleInfinityAnalytics';
 import {MOAT_CONFIG} from './vendors/moat';
 import {BG_CONFIG} from './vendors/bg';
 import {UPSCORE_CONFIG} from './vendors/upscore';
@@ -105,7 +99,6 @@ import {VPONANALYTICS_CONFIG} from './vendors/vponanalytics';
  * @const {!JsonObject}
  */
 export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
-
   // Default parent configuration applied to all amp-analytics tags.
   'default': {
     'transport': {'beacon': true, 'xhrpost': true, 'image': true},
@@ -254,15 +247,13 @@ if (getMode().test || getMode().localDev) {
   ANALYTICS_CONFIG['_fake_'] = _FAKE_;
 }
 
-ANALYTICS_CONFIG['infonline']['triggers']['pageview']['iframe' +
-/* TEMPORARY EXCEPTION */ 'Ping'] = true;
+ANALYTICS_CONFIG['infonline']['triggers']['pageview']['iframePing'] = true;
 
-ANALYTICS_CONFIG['adobeanalytics_nativeConfig']
-    ['triggers']['pageLoad']['iframe' +
-    /* TEMPORARY EXCEPTION */ 'Ping'] = true;
+ANALYTICS_CONFIG['adobeanalytics_nativeConfig']['triggers']['pageLoad'][
+  'iframePing'
+] = true;
 
-ANALYTICS_CONFIG['oewa']['triggers']['pageview']['iframe' +
-/* TEMPORARY EXCEPTION */ 'Ping'] = true;
+ANALYTICS_CONFIG['oewa']['triggers']['pageview']['iframePing'] = true;
 
 mergeIframeTransportConfig(ANALYTICS_CONFIG, IFRAME_TRANSPORTS);
 
@@ -276,8 +267,11 @@ function mergeIframeTransportConfig(config, iframeTransportConfig) {
   for (const vendor in iframeTransportConfig) {
     if (hasOwn(iframeTransportConfig, vendor)) {
       const url = iframeTransportConfig[vendor];
-      config[vendor]['transport'] =
-          Object.assign({}, config[vendor]['transport'], {'iframe': url});
+      config[vendor]['transport'] = Object.assign(
+        {},
+        config[vendor]['transport'],
+        {'iframe': url}
+      );
     }
   }
 }

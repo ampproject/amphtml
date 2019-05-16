@@ -16,8 +16,10 @@
 
 export const ALEXAMETRICS_CONFIG = /** @type {!JsonObject} */ ({
   'requests': {
-    'base': 'https://${ampAtrkHost}/atrk.gif?account=${atrk_acct}&domain=${domain}',
-    'pageview': '${base}&jsv=amp-${ampVersion}' +
+    'base':
+      'https://${ampAtrkHost}/atrk.gif?account=${atrk_acct}&domain=${domain}',
+    'pageview':
+      '${base}&jsv=amp-${ampVersion}' +
       '&frame_height=${viewportHeight}&frame_width=${viewportWidth}' +
       '&title=${title}&time=${timestamp}&time_zone_offset=${timezone}' +
       '&screen_params=${screenWidth}x${screenHeight}x${screenColorDepth}' +

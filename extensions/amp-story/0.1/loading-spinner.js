@@ -17,10 +17,8 @@ import {dev} from '../../../src/log';
 import {dict} from './../../../src/utils/object';
 import {renderAsElement} from './simple-template';
 
-
 /** @const {string} */
 const SPINNER_ACTIVE_ATTRIBUTE = 'active';
-
 
 /** @private @const {!./simple-template.ElementDef} */
 const SPINNER = {

@@ -111,22 +111,25 @@ const strings = {
     string: 'Zgjero lartësinë e dritares për të shikuar këtë eksperiencë',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT]: {
-    string: 'Zgjero lartësinë dhe gjerësinë e dritares sate për të shikuar ' +
-        'këtë eksperiencë',
+    string:
+      'Zgjero lartësinë dhe gjerësinë e dritares sate për të shikuar ' +
+      'këtë eksperiencë',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_WIDTH_SIZE_TEXT]: {
     string: 'Zgjero gjeresinë e dritares për të shikuar këtë eksperiencë',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
-    string: 'Duhet të aktivizosh eksperimentin e historisë së AMP për të ' +
-        'shikuar këtë përmbajtje.',
+    string:
+      'Duhet të aktivizosh eksperimentin e historisë së AMP për të ' +
+      'shikuar këtë përmbajtje.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
     string: 'Faqja shikohet më mirë në modalitetin e portretit',
   },
   [LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT]: {
-    string: 'Na vjen keq, por duket se shfletuesi yt nuk e mbështet këtë ' +
-        'eksperiencë',
+    string:
+      'Na vjen keq, por duket se shfletuesi yt nuk e mbështet këtë ' +
+      'eksperiencë',
   },
 };
 

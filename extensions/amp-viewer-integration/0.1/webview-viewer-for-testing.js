@@ -91,8 +91,8 @@ export class WebviewViewerForTesting {
     const params = {
       history: 1,
       viewportType: this.viewportType_,
-      width: this.containerEl./*OK*/offsetWidth,
-      height: this.containerEl./*OK*/offsetHeight,
+      width: this.containerEl./*OK*/ offsetWidth,
+      height: this.containerEl./*OK*/ offsetHeight,
       visibilityState: this.visibilityState_,
       prerenderSize: 1,
       origin: parseUrlDeprecated(window.location.href).origin,
@@ -110,8 +110,10 @@ export class WebviewViewerForTesting {
     const url = parsedUrl.href;
     this.iframe.setAttribute('src', url);
 
-    this.pollingIntervalIds_[this.intervalCtr] =
-        setInterval(this.pollAMPDoc_.bind(this, this.intervalCtr) , 1000);
+    this.pollingIntervalIds_[this.intervalCtr] = setInterval(
+      this.pollAMPDoc_.bind(this, this.intervalCtr),
+      1000
+    );
     this.intervalCtr++;
 
     this.containerEl.appendChild(this.iframe);
@@ -128,8 +130,11 @@ export class WebviewViewerForTesting {
         app: APP,
         name: 'handshake-poll',
       };
-      this.iframe.contentWindow./*OK*/postMessage(
-          JSON.stringify(message), '*', [channel.port2]);
+      this.iframe.contentWindow./*OK*/ postMessage(
+        JSON.stringify(message),
+        '*',
+        [channel.port2]
+      );
       channel.port1.onmessage = function(e) {
         if (this.isChannelOpen_(e)) {
           window.clearInterval(this.pollingIntervalIds_[intervalCtr]);
@@ -147,8 +152,7 @@ export class WebviewViewerForTesting {
    */
   isChannelOpen_(e) {
     const data = JSON.parse(e.data);
-    return e.type == 'message' && data.app == APP &&
-      data.name == 'channelOpen';
+    return e.type == 'message' && data.app == APP && data.name == 'channelOpen';
   }
 
   /**
@@ -164,7 +168,7 @@ export class WebviewViewerForTesting {
       type: MessageType.RESPONSE,
     };
     this.log('############## viewer posting1 Message', message);
-    channel.port1./*OK*/postMessage(JSON.stringify(message));
+    channel.port1./*OK*/ postMessage(JSON.stringify(message));
 
     class WindowPortEmulator {
       /**
@@ -193,26 +197,32 @@ export class WebviewViewerForTesting {
        */
       postMessage(data) {
         this.log_('############## viewer posting2 Message', data);
-        channel.port1./*OK*/postMessage(JSON.stringify(data));
+        channel.port1./*OK*/ postMessage(JSON.stringify(data));
       }
       /**
        * Fake docs for testing
        */
       start() {}
     }
-    this.messaging_ = new Messaging(this.win,
-        new WindowPortEmulator(this.messageHandlers_, this.id, this.log));
+    this.messaging_ = new Messaging(
+      this.win,
+      new WindowPortEmulator(this.messageHandlers_, this.id, this.log)
+    );
 
     this.messaging_.setDefaultHandler((type, payload, awaitResponse) => {
-      console/*OK*/.log(
-          'viewer receiving message: ', type, payload, awaitResponse);
+      console /*OK*/
+        .log('viewer receiving message: ', type, payload, awaitResponse);
       return Promise.resolve();
     });
 
-    this.sendRequest_('visibilitychange', {
-      state: this.visibilityState_,
-      prerenderSize: this.prerenderSize,
-    }, true);
+    this.sendRequest_(
+      'visibilitychange',
+      {
+        state: this.visibilityState_,
+        prerenderSize: this.prerenderSize,
+      },
+      true
+    );
 
     this.handshakeResponseResolve_();
   }
@@ -286,6 +296,7 @@ export class WebviewViewerForTesting {
    */
   log() {
     const var_args = Array.prototype.slice.call(arguments, 0);
-    console/*OK*/.log.apply(console, var_args);
+    console /*OK*/.log
+      .apply(console, var_args);
   }
 }

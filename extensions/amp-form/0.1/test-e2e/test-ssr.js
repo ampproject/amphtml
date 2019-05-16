@@ -14,58 +14,72 @@
  * limitations under the License.
  */
 
-describes.endtoend('amp-form', {
-  testUrl: 'http://localhost:8000/test/fixtures/e2e/amp-form/amp-form.html',
-  environments: ['single'],
-}, async env => {
-  let controller;
+describes.endtoend(
+  'amp-form',
+  {
+    testUrl: 'http://localhost:8000/test/fixtures/e2e/amp-form/amp-form.html',
+    environments: ['single'],
+  },
+  async env => {
+    let controller;
 
-  beforeEach(async() => {
-    controller = env.controller;
-  });
+    beforeEach(async () => {
+      controller = env.controller;
+    });
 
-  it('should render form response', async() => {
-    const searchInput =
-        await controller.findElement('#xhr-get input[name=term]');
-    await controller.type(searchInput, 'search term');
-    const submitForm =
-        await controller.findElement('#xhr-get input[type=submit]');
-    await controller.click(submitForm);
+    it('should render form response', async () => {
+      const searchInput = await controller.findElement(
+        '#xhr-get input[name=term]'
+      );
+      await controller.type(searchInput, 'search term');
+      const submitForm = await controller.findElement(
+        '#xhr-get input[type=submit]'
+      );
+      await controller.click(submitForm);
 
-    const renderedTemplate = await controller.findElement(
-        'div[i-amphtml-rendered]');
-    await expect(controller.getElementText(renderedTemplate)).to.equal(
-        'Here are the results for the search:\nResult 1\nResult 2\nResult 3');
+      const renderedTemplate = await controller.findElement(
+        'div[i-amphtml-rendered]'
+      );
+      await expect(controller.getElementText(renderedTemplate)).to.equal(
+        'Here are the results for the search:\nResult 1\nResult 2\nResult 3'
+      );
 
-    await controller.takeScreenshot('screenshots/amp-form-ssr.png');
-  });
+      await controller.takeScreenshot('screenshots/amp-form-ssr.png');
+    });
+  }
+);
 
-});
+describes.endtoend(
+  'amp-form SSR templates',
+  {
+    testUrl: 'http://localhost:8000/test/fixtures/e2e/amp-form/amp-form.html',
+    environments: ['viewer-demo'],
+  },
+  async env => {
+    let controller;
 
-describes.endtoend('amp-form SSR templates', {
-  testUrl: 'http://localhost:8000/test/fixtures/e2e/amp-form/amp-form.html',
-  environments: ['viewer-demo'],
-}, async env => {
-  let controller;
+    beforeEach(async () => {
+      controller = env.controller;
+    });
 
-  beforeEach(async() => {
-    controller = env.controller;
-  });
+    it('should render form response', async () => {
+      const searchInput = await controller.findElement(
+        '#xhr-get input[name=term]'
+      );
+      await controller.type(searchInput, 'search term');
+      const submitForm = await controller.findElement(
+        '#xhr-get input[type=submit]'
+      );
+      await controller.click(submitForm);
 
-  it('should render form response', async() => {
-    const searchInput =
-        await controller.findElement('#xhr-get input[name=term]');
-    await controller.type(searchInput, 'search term');
-    const submitForm =
-        await controller.findElement('#xhr-get input[type=submit]');
-    await controller.click(submitForm);
+      const renderedTemplate = await controller.findElement(
+        'div[i-amphtml-rendered]'
+      );
+      await expect(controller.getElementText(renderedTemplate)).to.equal(
+        'SSR response'
+      );
 
-    const renderedTemplate = await controller.findElement(
-        'div[i-amphtml-rendered]');
-    await expect(controller.getElementText(renderedTemplate)).to.equal(
-        'SSR response');
-
-    await controller.takeScreenshot('screenshots/amp-form.png');
-  });
-
-});
+      await controller.takeScreenshot('screenshots/amp-form.png');
+    });
+  }
+);

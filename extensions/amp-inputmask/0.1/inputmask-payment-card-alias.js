@@ -24,38 +24,40 @@ import {dict} from '../../../src/utils/object';
 export function factory(Inputmask) {
   // TODO(cvializ): Improve card chunking support
   // https://baymard.com/checkout-usability/credit-card-patterns
-  Inputmask.extendAliases(dict({
-    'payment-card': {
-      'postValidation': buffer => /[\s\d]+/.test(buffer.join('')),
-      /** @param {!JsonObject} opts */
-      'mask': function(opts) {
-        opts['definitions'] = dict({
-          'x': {
-            'validator': function(chrs, buffer) {
-              const val = buffer.buffer.join('') + chrs;
-              const valExp2 = new RegExp('\\d\\d');
-              const regextest = valExp2.test(val);
-              return regextest && val != '34' && val != '37';
+  Inputmask.extendAliases(
+    dict({
+      'payment-card': {
+        'postValidation': buffer => /[\s\d]+/.test(buffer.join('')),
+        /** @param {!JsonObject} opts */
+        'mask': function(opts) {
+          opts['definitions'] = dict({
+            'x': {
+              'validator': function(chrs, buffer) {
+                const val = buffer.buffer.join('') + chrs;
+                const valExp2 = new RegExp('\\d\\d');
+                const regextest = valExp2.test(val);
+                return regextest && val != '34' && val != '37';
+              },
+              'cardinality': 2,
             },
-            'cardinality': 2,
-          },
-          'y': {
-            'validator': function(chrs, buffer) {
-              const val = buffer.buffer.join('') + chrs;
-              const valExp2 = /3(4|7)/;
-              const regextest = valExp2.test(val);
-              return regextest;
+            'y': {
+              'validator': function(chrs, buffer) {
+                const val = buffer.buffer.join('') + chrs;
+                const valExp2 = /3(4|7)/;
+                const regextest = valExp2.test(val);
+                return regextest;
+              },
+              'cardinality': 2,
             },
-            'cardinality': 2,
-          },
-        });
-        return [
-          'y99 999999 99999',
-          'x99 9999 9999 9999',
-          '9999 999999 99999',
-          '9999 9999 9999 9999',
-        ];
+          });
+          return [
+            'y99 999999 99999',
+            'x99 9999 9999 9999',
+            '9999 999999 99999',
+            '9999 9999 9999 9999',
+          ];
+        },
       },
-    },
-  }));
+    })
+  );
 }

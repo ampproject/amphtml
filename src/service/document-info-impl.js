@@ -52,14 +52,12 @@ const filteredLinkRels = ['prefetch', 'preload', 'preconnect', 'dns-prefetch'];
  */
 export let DocumentInfoDef;
 
-
 /**
  * @param {!Node|!./ampdoc-impl.AmpDoc} nodeOrDoc
  */
 export function installDocumentInfoServiceForDoc(nodeOrDoc) {
   return registerServiceBuilderForDoc(nodeOrDoc, 'documentInfo', DocInfo);
 }
-
 
 export class DocInfo {
   /**
@@ -81,8 +79,7 @@ export class DocInfo {
     const url = ampdoc.getUrl();
     const sourceUrl = getSourceUrl(url);
     const rootNode = ampdoc.getRootNode();
-    let canonicalUrl = rootNode && rootNode.AMP
-        && rootNode.AMP.canonicalUrl;
+    let canonicalUrl = rootNode && rootNode.AMP && rootNode.AMP.canonicalUrl;
     if (!canonicalUrl) {
       const canonicalTag = rootNode.querySelector('link[rel=canonical]');
       canonicalUrl = canonicalTag
@@ -94,7 +91,7 @@ export class DocInfo {
     const metaTags = getMetaTags(ampdoc.win.document);
     const replaceParams = getReplaceParams(ampdoc);
 
-    return this.info_ = {
+    return (this.info_ = {
       /** @return {string} */
       get sourceUrl() {
         return getSourceUrl(ampdoc.getUrl());
@@ -104,10 +101,9 @@ export class DocInfo {
       linkRels,
       metaTags,
       replaceParams,
-    };
+    });
   }
 }
-
 
 /**
  * Returns a relatively low entropy random string.
@@ -200,8 +196,10 @@ function getMetaTags(doc) {
  */
 function getReplaceParams(ampdoc) {
   // The "amp_r" parameter is only supported for ads.
-  if (!ampdoc.isSingleDoc() ||
-      getProxyServingType(ampdoc.win.location.href) != 'a') {
+  if (
+    !ampdoc.isSingleDoc() ||
+    getProxyServingType(ampdoc.win.location.href) != 'a'
+  ) {
     return null;
   }
   const url = parseUrlDeprecated(ampdoc.win.location.href);

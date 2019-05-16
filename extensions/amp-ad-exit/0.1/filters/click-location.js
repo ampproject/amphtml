@@ -57,7 +57,7 @@ export class ClickLocationFilter extends Filter {
      *   bottom: number,
      *   left: number
      * }}
-    */
+     */
     let AllowedRectDef;
 
     /**
@@ -74,10 +74,12 @@ export class ClickLocationFilter extends Filter {
 
   /** @override */
   filter(event) {
-    if (event.clientX >= this.allowedRect_.left &&
-        event.clientX <= this.allowedRect_.right &&
-        event.clientY >= this.allowedRect_.top &&
-        event.clientY <= this.allowedRect_.bottom) {
+    if (
+      event.clientX >= this.allowedRect_.left &&
+      event.clientX <= this.allowedRect_.right &&
+      event.clientY >= this.allowedRect_.top &&
+      event.clientY <= this.allowedRect_.bottom
+    ) {
       return true;
     }
     return false;
@@ -91,11 +93,12 @@ export class ClickLocationFilter extends Filter {
     this.adExitElement_.getVsync().measure(() => {
       const {win} = this.adExitElement_;
       if (this.relativeTo_) {
-        const relativeElement = win.document.querySelector(
-            this.relativeTo_);
-        userAssert(relativeElement,
-            `relativeTo element ${this.relativeTo_} not found.`);
-        const rect = relativeElement./*OK*/getBoundingClientRect();
+        const relativeElement = win.document.querySelector(this.relativeTo_);
+        userAssert(
+          relativeElement,
+          `relativeTo element ${this.relativeTo_} not found.`
+        );
+        const rect = relativeElement./*OK*/ getBoundingClientRect();
         this.allowedRect_.left = rect.left;
         this.allowedRect_.top = rect.top;
         this.allowedRect_.bottom = rect.bottom;
@@ -103,8 +106,8 @@ export class ClickLocationFilter extends Filter {
       } else {
         this.allowedRect_.left = 0;
         this.allowedRect_.top = 0;
-        this.allowedRect_.bottom = win./*OK*/innerHeight;
-        this.allowedRect_.right = win./*OK*/innerWidth;
+        this.allowedRect_.bottom = win./*OK*/ innerHeight;
+        this.allowedRect_.right = win./*OK*/ innerWidth;
       }
       this.allowedRect_.left += this.leftBorder_;
       this.allowedRect_.top += this.topBorder_;
@@ -119,11 +122,13 @@ export class ClickLocationFilter extends Filter {
  * @return {boolean} Whether the config defines a ClickLocation filter.
  */
 function isValidClickLocationSpec(spec) {
-  return spec.type == FilterType.CLICK_LOCATION &&
-      (typeof spec.left === 'undefined' || typeof spec.left === 'number') &&
-      (typeof spec.right === 'undefined' || typeof spec.right === 'number') &&
-      (typeof spec.top === 'undefined' || typeof spec.top === 'number') &&
-      (typeof spec.bottom === 'undefined' || typeof spec.bottom === 'number') &&
-      (typeof spec.relativeTo === 'undefined' ||
-       typeof spec.relativeTo === 'string') ;
+  return (
+    spec.type == FilterType.CLICK_LOCATION &&
+    (typeof spec.left === 'undefined' || typeof spec.left === 'number') &&
+    (typeof spec.right === 'undefined' || typeof spec.right === 'number') &&
+    (typeof spec.top === 'undefined' || typeof spec.top === 'number') &&
+    (typeof spec.bottom === 'undefined' || typeof spec.bottom === 'number') &&
+    (typeof spec.relativeTo === 'undefined' ||
+      typeof spec.relativeTo === 'string')
+  );
 }

@@ -28,8 +28,7 @@ export function _ping_(global, data) {
   // for testing only. see #10628
   global.networkIntegrationDataParamForTesting = data;
 
-  validateData(data, ['url'],
-      ['valid', 'adHeight', 'adWidth', 'enableIo']);
+  validateData(data, ['url'], ['valid', 'adHeight', 'adWidth', 'enableIo']);
   userAssert(!data['error'], 'Fake user error!');
   global.document.getElementById('c').textContent = data.ping;
   global.ping = Object.create(null);
@@ -43,8 +42,7 @@ export function _ping_(global, data) {
   });
 
   if (data.ad_container) {
-    devAssert(
-        global.context.container == data.ad_container, 'wrong container');
+    devAssert(global.context.container == data.ad_container, 'wrong container');
   }
   if (data.valid == 'false') {
     // Immediately send no-content for visual diff test
@@ -75,8 +73,11 @@ export function _ping_(global, data) {
     if (data.enableIo) {
       global.context.observeIntersection(function(changes) {
         changes.forEach(function(c) {
-          dev().info('AMP-AD', 'Intersection: (WxH)' +
-              `${c.intersectionRect.width}x${c.intersectionRect.height}`);
+          dev().info(
+            'AMP-AD',
+            'Intersection: (WxH)' +
+              `${c.intersectionRect.width}x${c.intersectionRect.height}`
+          );
         });
         // store changes to global.lastIO for testing purpose
         global.ping.lastIO = changes[changes.length - 1];

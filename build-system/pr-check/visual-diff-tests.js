@@ -28,14 +28,15 @@ const {
   printChangeSummary,
   startTimer,
   stopTimer,
-  timedExecOrDie: timedExecOrDieBase} = require('./utils');
+  timedExecOrDie: timedExecOrDieBase,
+} = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
 const {isTravisPullRequestBuild} = require('../travis');
 
 const FILENAME = 'visual-diff-tests.js';
 const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
-const timedExecOrDie =
-  (cmd, unusedFileName) => timedExecOrDieBase(cmd, FILENAME);
+const timedExecOrDie = (cmd, unusedFileName) =>
+  timedExecOrDieBase(cmd, FILENAME);
 
 function main() {
   const startTime = startTimer(FILENAME, FILENAME);
@@ -49,22 +50,25 @@ function main() {
   } else {
     printChangeSummary(FILENAME);
     process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
-    if (buildTargets.has('RUNTIME') ||
-        buildTargets.has('BUILD_SYSTEM') ||
-        buildTargets.has('INTEGRATION_TEST') ||
-        buildTargets.has('VISUAL_DIFF') ||
-        buildTargets.has('FLAG_CONFIG')) {
-
+    if (
+      buildTargets.has('RUNTIME') ||
+      buildTargets.has('BUILD_SYSTEM') ||
+      buildTargets.has('INTEGRATION_TEST') ||
+      buildTargets.has('VISUAL_DIFF') ||
+      buildTargets.has('FLAG_CONFIG')
+    ) {
       downloadBuildOutput(FILENAME);
       timedExecOrDie('gulp update-packages');
       timedExecOrDie('gulp visual-diff --nobuild');
     } else {
       timedExecOrDie('gulp visual-diff --nobuild --empty');
       console.log(
-          `${FILELOGPREFIX} Skipping ` + colors.cyan('Visual Diff Tests ') +
+        `${FILELOGPREFIX} Skipping ` +
+          colors.cyan('Visual Diff Tests ') +
           'because this commit does not affect the ' +
           'runtime, build system, integration test files, ' +
-          'visual diff test files, or flag config files.');
+          'visual diff test files, or flag config files.'
+      );
     }
   }
 

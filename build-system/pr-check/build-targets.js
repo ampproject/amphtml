@@ -43,7 +43,8 @@ function isValidatorWebuiFile(filePath) {
  * @return {boolean}
  */
 function isBuildSystemFile(filePath) {
-  return (filePath.startsWith('build-system') &&
+  return (
+    (filePath.startsWith('build-system') &&
       // Exclude textproto from build-system since we want it to trigger
       // tests and type check.
       path.extname(filePath) != '.textproto' &&
@@ -55,9 +56,10 @@ function isBuildSystemFile(filePath) {
       !isDevDashboardFile(filePath) &&
       // Exclude visual diff files from build-system since we want it to trigger
       // visual diff tests.
-      !isVisualDiffFile(filePath))
-      // OWNERS.yaml files should trigger build system to run tests
-      || isOwnersFile(filePath);
+      !isVisualDiffFile(filePath)) ||
+    // OWNERS.yaml files should trigger build system to run tests
+    isOwnersFile(filePath)
+  );
 }
 
 /**
@@ -67,13 +69,13 @@ function isBuildSystemFile(filePath) {
  * @return {boolean}
  */
 function isBuildSystemAndRuntimeFile(filePath) {
-  return isBuildSystemFile(filePath) &&
-      // These build system files are involved in the compilation/bundling and
-      // are likely to affect the runtime as well.
-      (
-        filePath.startsWith('build-system/babel-plugins') ||
-        filePath.startsWith('build-system/runner')
-      );
+  return (
+    isBuildSystemFile(filePath) &&
+    // These build system files are involved in the compilation/bundling and
+    // are likely to affect the runtime as well.
+    (filePath.startsWith('build-system/babel-plugins') ||
+      filePath.startsWith('build-system/runner'))
+  );
 }
 
 /**
@@ -101,9 +103,12 @@ function isValidatorFile(filePath) {
 
   // Validator files take the form of validator-.*\.(html|out|protoascii)
   const name = path.basename(filePath);
-  return name.startsWith('validator-') &&
-      (name.endsWith('.out') || name.endsWith('.html') ||
-        name.endsWith('.protoascii'));
+  return (
+    name.startsWith('validator-') &&
+    (name.endsWith('.out') ||
+      name.endsWith('.html') ||
+      name.endsWith('.protoascii'))
+  );
 }
 
 /**
@@ -131,9 +136,11 @@ function isDocFile(filePath) {
  */
 function isVisualDiffFile(filePath) {
   const filename = path.basename(filePath);
-  return (filename == 'visual-diff.js' ||
-          filename == 'visual-tests' ||
-          filePath.startsWith('examples/visual-tests/'));
+  return (
+    filename == 'visual-diff.js' ||
+    filename == 'visual-tests' ||
+    filePath.startsWith('examples/visual-tests/')
+  );
 }
 
 /**
@@ -155,8 +162,10 @@ function isUnitTest(filePath) {
  * @return {boolean}
  */
 function isDevDashboardFile(filePath) {
-  return (filePath === 'build-system/app.js' ||
-  filePath.startsWith('build-system/app-index/'));
+  return (
+    filePath === 'build-system/app.js' ||
+    filePath.startsWith('build-system/app-index/')
+  );
 }
 
 /**
@@ -178,7 +187,7 @@ function isIntegrationTest(filePath) {
  */
 function isFlagConfig(filePath) {
   const filename = path.basename(filePath);
-  return (filename == 'prod-config.json' || filename == 'canary-config.json');
+  return filename == 'prod-config.json' || filename == 'canary-config.json';
 }
 
 /**
@@ -191,17 +200,23 @@ function isFlagConfig(filePath) {
 function areValidBuildTargets(buildTargets, fileName) {
   const files = gitDiffNameOnlyMaster();
   if (buildTargets.has('FLAG_CONFIG') && buildTargets.has('RUNTIME')) {
-    console.log(fileName, colors.red('ERROR:'),
-        'Looks like your PR contains',
-        colors.cyan('{prod|canary}-config.json'),
-        'in addition to some other files.  Config and code are not kept in',
-        'sync, and config needs to be backwards compatible with code for at',
-        'least two weeks.  See #8188');
+    console.log(
+      fileName,
+      colors.red('ERROR:'),
+      'Looks like your PR contains',
+      colors.cyan('{prod|canary}-config.json'),
+      'in addition to some other files.  Config and code are not kept in',
+      'sync, and config needs to be backwards compatible with code for at',
+      'least two weeks.  See #8188'
+    );
     const nonFlagConfigFiles = files.filter(file => !isFlagConfig(file));
     const fileLogPrefix = colors.bold(colors.yellow(`${fileName}:`));
-    console.log(fileLogPrefix, colors.red('ERROR:'),
-        'Please move these files to a separate PR:',
-        colors.cyan(nonFlagConfigFiles.join(', ')));
+    console.log(
+      fileLogPrefix,
+      colors.red('ERROR:'),
+      'Please move these files to a separate PR:',
+      colors.cyan(nonFlagConfigFiles.join(', '))
+    );
     return false;
   }
   return true;
@@ -226,7 +241,8 @@ function determineBuildTargets() {
       'INTEGRATION_TEST',
       'DOCS',
       'FLAG_CONFIG',
-      'VISUAL_DIFF']);
+      'VISUAL_DIFF',
+    ]);
   }
   const targetSet = new Set();
   for (const p of filePaths) {

@@ -22,17 +22,19 @@ export const BURT_CONFIG = /** @type {!JsonObject} */ ({
   },
   'requests': {
     'host': '//${trackingKey}.c.richmetrics.com/',
-    'base': '${host}imglog?' +
+    'base':
+      '${host}imglog?' +
       'e=${trackingKey}&' +
       'pi=${trackingKey}' +
-        '|${pageViewId}' +
-        '|${canonicalPath}' +
-        '|${clientId(burt-amp-user-id)}&' +
+      '|${pageViewId}' +
+      '|${canonicalPath}' +
+      '|${clientId(burt-amp-user-id)}&' +
       'ui=${clientId(burt-amp-user-id)}&' +
       'v=amp&' +
       'ts=${timestamp}&' +
       'sn=${requestCount}&',
-    'pageview': '${base}' +
+    'pageview':
+      '${base}' +
       'type=page&' +
       'ca=${category}&' +
       'sc=${subCategory}&' +
@@ -44,8 +46,7 @@ export const BURT_CONFIG = /** @type {!JsonObject} */ ({
       'sd=${screenWidth}x${screenHeight}&' +
       'wd=${availableScreenWidth}x${availableScreenHeight}&' +
       'ws=${scrollLeft}x${scrollTop}',
-    'pageping': '${base}' +
-      'type=pageping',
+    'pageping': '${base}type=pageping',
   },
   'triggers': {
     'pageview': {

@@ -28,7 +28,7 @@ export function webediads(global, data) {
       'site': data.site,
       'page': data.page,
       'position': data.position,
-      'query': (data.query) ? data.query : '',
+      'query': data.query ? data.query : '',
     });
   });
 }

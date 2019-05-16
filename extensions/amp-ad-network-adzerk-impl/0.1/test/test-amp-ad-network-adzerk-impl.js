@@ -53,16 +53,20 @@ describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, env => {
       const r = '{"p":[{"n":1234,"t":[5],"s":677496}]}';
       element.setAttribute('data-r', r);
       expect(impl.getAdUrl()).to.equal(
-          `https://engine.adzerk.net/amp?r=${encodeURIComponent(r)}`);
+        `https://engine.adzerk.net/amp?r=${encodeURIComponent(r)}`
+      );
     });
 
     it('should be valid #2', () => {
-      element.setAttribute('data-r',
-          '{"p":[{"t":[5],"s":333999,"a":5603000}]}');
+      element.setAttribute(
+        'data-r',
+        '{"p":[{"t":[5],"s":333999,"a":5603000}]}'
+      );
       expect(impl.getAdUrl()).to.equal(
-          'https://engine.adzerk.net' +
+        'https://engine.adzerk.net' +
           '/amp?r=%7B%22p%22%3A%5B%7B%22t%22%3A%5B5%5D%2C%22s%22%3A333999' +
-          '%2C%22a%22%3A5603000%7D%5D%7D');
+          '%2C%22a%22%3A5603000%7D%5D%7D'
+      );
     });
 
     it('should be invalid', () => {
@@ -99,19 +103,24 @@ describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, env => {
             <p>{{foo}}</p>
             </template>
           </body></html>`;
-      fetchTextMock.withArgs(
+      fetchTextMock
+        .withArgs(
           'https://www-adzerk-com.cdn.ampproject.org/ad/s/www.adzerk.com/456',
           {
             mode: 'cors',
             method: 'GET',
             ampCors: false,
             credentials: 'omit',
-          }).returns(Promise.resolve(
-          {
+          }
+        )
+        .returns(
+          Promise.resolve({
             headers: {},
             text: () => template,
-          }));
-      return impl.maybeValidateAmpCreative(
+          })
+        );
+      return impl
+        .maybeValidateAmpCreative(
           utf8Encode(JSON.stringify(adResponseBody)).buffer,
           {
             get: name => {
@@ -119,22 +128,25 @@ describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, env => {
               return 'amp-mustache';
             },
           },
-          () => {})
-          .then(buffer => Promise.resolve(utf8Decode(buffer)))
-          .then(creative => {
-            expect(creative).to.not.contain(
-                '<script async src="https://cdn.ampproject.org/v0.js">' +
-                '</script>');
-            expect(creative).to.not.contain(
-                '<script async custom-template="amp-mustache" src=' +
-                '"https://cdn.ampproject.org/v0/amp-mustache-latest.js">' +
-                '</script>');
-            expect(impl.getAmpAdMetadata()).to.jsonEqual({
-              minifiedCreative: creative,
-              customElementExtensions: ['amp-mustache'],
-              extensions: [],
-            });
+          () => {}
+        )
+        .then(buffer => Promise.resolve(utf8Decode(buffer)))
+        .then(creative => {
+          expect(creative).to.not.contain(
+            '<script async src="https://cdn.ampproject.org/v0.js">' +
+              '</script>'
+          );
+          expect(creative).to.not.contain(
+            '<script async custom-template="amp-mustache" src=' +
+              '"https://cdn.ampproject.org/v0/amp-mustache-latest.js">' +
+              '</script>'
+          );
+          expect(impl.getAmpAdMetadata()).to.jsonEqual({
+            minifiedCreative: creative,
+            customElementExtensions: ['amp-mustache'],
+            extensions: [],
           });
+        });
     });
   });
 
@@ -152,18 +164,22 @@ describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, env => {
             <p>{{foo}}</p>
             </template>
           </body></html>`;
-      fetchTextMock.withArgs(
+      fetchTextMock
+        .withArgs(
           'https://www-adzerk-com.cdn.ampproject.org/ad/s/www.adzerk.com/456',
           {
             mode: 'cors',
             method: 'GET',
             ampCors: false,
             credentials: 'omit',
-          }).returns(Promise.resolve(
-          {
+          }
+        )
+        .returns(
+          Promise.resolve({
             headers: {},
             text: () => template,
-          }));
+          })
+        );
     });
 
     it('should auto add amp-analytics if required', () => {
@@ -171,7 +187,8 @@ describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, env => {
         templateUrl: 'https://www.adzerk.com/456',
         analytics: {'type': 'googleanalytics'},
       };
-      return impl.maybeValidateAmpCreative(
+      return impl
+        .maybeValidateAmpCreative(
           utf8Encode(JSON.stringify(adResponseBody)).buffer,
           {
             get: name => {
@@ -179,21 +196,22 @@ describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, env => {
               return 'amp-mustache';
             },
           },
-          () => {})
-          .then(buffer => utf8Decode(buffer))
-          .then(creative => {
-            expect(impl.getAmpAdMetadata()).to.jsonEqual({
-              minifiedCreative: creative,
-              customElementExtensions: ['amp-analytics', 'amp-mustache'],
-              extensions: [],
-            });
-            // Won't insert duplicate
-            expect(impl.getAmpAdMetadata()).to.jsonEqual({
-              minifiedCreative: creative,
-              customElementExtensions: ['amp-analytics', 'amp-mustache'],
-              extensions: [],
-            });
+          () => {}
+        )
+        .then(buffer => utf8Decode(buffer))
+        .then(creative => {
+          expect(impl.getAmpAdMetadata()).to.jsonEqual({
+            minifiedCreative: creative,
+            customElementExtensions: ['amp-analytics', 'amp-mustache'],
+            extensions: [],
           });
+          // Won't insert duplicate
+          expect(impl.getAmpAdMetadata()).to.jsonEqual({
+            minifiedCreative: creative,
+            customElementExtensions: ['amp-analytics', 'amp-mustache'],
+            extensions: [],
+          });
+        });
     });
 
     it('should not add amp-analytics if not', () => {
@@ -201,7 +219,8 @@ describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, env => {
         templateUrl: 'https://www.adzerk.com/456',
         analytics: undefined,
       };
-      return impl.maybeValidateAmpCreative(
+      return impl
+        .maybeValidateAmpCreative(
           utf8Encode(JSON.stringify(adResponseBody)).buffer,
           {
             get: name => {
@@ -209,15 +228,16 @@ describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, env => {
               return 'amp-mustache';
             },
           },
-          () => {})
-          .then(buffer => utf8Decode(buffer))
-          .then(creative => {
-            expect(impl.getAmpAdMetadata()).to.jsonEqual({
-              minifiedCreative: creative,
-              customElementExtensions: ['amp-mustache'],
-              extensions: [],
-            });
+          () => {}
+        )
+        .then(buffer => utf8Decode(buffer))
+        .then(creative => {
+          expect(impl.getAmpAdMetadata()).to.jsonEqual({
+            minifiedCreative: creative,
+            customElementExtensions: ['amp-mustache'],
+            extensions: [],
           });
+        });
     });
   });
 });

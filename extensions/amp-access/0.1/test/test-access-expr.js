@@ -16,9 +16,7 @@
 
 import {evaluateAccessExpr} from '../access-expr';
 
-
 describe('evaluateAccessExpr', () => {
-
   it('should NOT allow double equal', () => {
     expect(() => {
       evaluateAccessExpr('access == true', {});
@@ -107,25 +105,25 @@ describe('evaluateAccessExpr', () => {
 
   it('should evaluate simple string expressions', () => {
     expect(evaluateAccessExpr('str = "A"', {str: 'A'})).to.be.true;
-    expect(evaluateAccessExpr('str = \'A\'', {str: 'A'})).to.be.true;
+    expect(evaluateAccessExpr("str = 'A'", {str: 'A'})).to.be.true;
     expect(evaluateAccessExpr('str != "A"', {str: 'A'})).to.be.false;
   });
 
   it('should evaluate string expressions with wrong type', () => {
     expect(evaluateAccessExpr('str = "A"', {})).to.be.false;
-    expect(evaluateAccessExpr('str = \'A\'', {})).to.be.false;
+    expect(evaluateAccessExpr("str = 'A'", {})).to.be.false;
     expect(evaluateAccessExpr('str != "A"', {})).to.be.true;
 
     expect(evaluateAccessExpr('str = "A"', {str: 1})).to.be.false;
-    expect(evaluateAccessExpr('str = \'A\'', {str: 1})).to.be.false;
+    expect(evaluateAccessExpr("str = 'A'", {str: 1})).to.be.false;
     expect(evaluateAccessExpr('str != "A"', {str: 1})).to.be.true;
 
     expect(evaluateAccessExpr('str = ""', {str: false})).to.be.false;
-    expect(evaluateAccessExpr('str = \'\'', {str: false})).to.be.false;
+    expect(evaluateAccessExpr("str = ''", {str: false})).to.be.false;
     expect(evaluateAccessExpr('str != ""', {str: false})).to.be.true;
 
     expect(evaluateAccessExpr('str = "A"', {str: true})).to.be.false;
-    expect(evaluateAccessExpr('str = \'A\'', {str: true})).to.be.false;
+    expect(evaluateAccessExpr("str = 'A'", {str: true})).to.be.false;
     expect(evaluateAccessExpr('str != "A"', {str: true})).to.be.true;
   });
 
@@ -173,10 +171,10 @@ describe('evaluateAccessExpr', () => {
   it('should evaluate NOT expressions', () => {
     expect(evaluateAccessExpr('NOT (access = true)', {})).to.be.true;
 
-    expect(evaluateAccessExpr('NOT (access = true)', {access: true}))
-        .to.be.false;
-    expect(evaluateAccessExpr('NOT (access = true)', {access: false}))
-        .to.be.true;
+    expect(evaluateAccessExpr('NOT (access = true)', {access: true})).to.be
+      .false;
+    expect(evaluateAccessExpr('NOT (access = true)', {access: false})).to.be
+      .true;
 
     expect(evaluateAccessExpr('NOT (access = 1)', {access: 1})).to.be.false;
     expect(evaluateAccessExpr('NOT (access = 1)', {access: 0})).to.be.true;
@@ -194,8 +192,8 @@ describe('evaluateAccessExpr', () => {
     expect(evaluateAccessExpr('a = 1 OR b = 2', {a: 1, b: 2})).to.be.true;
     expect(evaluateAccessExpr('a = 1 OR b != 2', {a: 1, b: 2})).to.be.true;
 
-    expect(evaluateAccessExpr('NOT (a = 1 OR b != 2)', {a: 1, b: 2}))
-        .to.be.false;
+    expect(evaluateAccessExpr('NOT (a = 1 OR b != 2)', {a: 1, b: 2})).to.be
+      .false;
 
     expect(evaluateAccessExpr('a AND b = 2', {a: 1, b: 2})).to.be.true;
     expect(evaluateAccessExpr('a AND b', {a: 1, b: 2})).to.be.true;

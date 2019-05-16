@@ -44,8 +44,9 @@ function buildRuntime_() {
 
 function launchWebServer_() {
   webServerProcess_ = execScriptAsync(
-      `gulp serve --host ${HOST} --port ${PORT}`,
-      {stdio: 'ignore'});
+    `gulp serve --host ${HOST} --port ${PORT}`,
+    {stdio: 'ignore'}
+  );
 
   let resolver;
   const deferred = new Promise(resolverIn => {
@@ -116,8 +117,7 @@ async function e2e() {
         delete require.cache[file];
         mocha.addFile(file);
       });
-    }
-    else {
+    } else {
       config.e2eTestPaths.forEach(path => {
         glob.sync(path).forEach(file => {
           delete require.cache[file];
@@ -134,8 +134,7 @@ async function e2e() {
       process.exitCode = failures ? 1 : 0;
       await resolver();
     });
-  }
-  else {
+  } else {
     const filesToWatch = argv.files ? [argv.files] : [config.e2eTestPaths];
     const watcher = watch(filesToWatch);
     log('Watching', cyan(filesToWatch), 'for changes...');

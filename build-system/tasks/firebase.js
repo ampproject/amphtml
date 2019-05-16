@@ -21,7 +21,6 @@ const path = require('path');
 const {build} = require('./build');
 const {dist} = require('./dist');
 
-
 async function walk(dest) {
   const filelist = [];
   const files = await fs.readdir(dest);
@@ -29,9 +28,9 @@ async function walk(dest) {
   for (let i = 0; i < files.length; i++) {
     const file = `${dest}/${files[i]}`;
 
-    fs.statSync(file).isDirectory() ?
-      Array.prototype.push.apply(filelist, await walk(file)) :
-      filelist.push(file);
+    fs.statSync(file).isDirectory()
+      ? Array.prototype.push.apply(filelist, await walk(file))
+      : filelist.push(file);
   }
 
   return filelist;
@@ -41,8 +40,9 @@ async function copyAndReplaceUrls(src, dest) {
   await fs.copy(src, dest, {overwrite: true});
   // Recursively gets all the files within the directory and its children.
   const files = await walk(dest);
-  const promises = files.filter(fileName => path.extname(fileName) == '.html')
-      .map(file => replaceUrls(file));
+  const promises = files
+    .filter(fileName => path.extname(fileName) == '.html')
+    .map(file => replaceUrls(file));
   await Promise.all(promises);
 }
 
@@ -50,8 +50,9 @@ async function modifyThirdPartyUrl() {
   const filePath = 'firebase/dist/amp.js';
   const data = await fs.readFile('firebase/dist/amp.js', 'utf8');
   const result = data.replace(
-      'self.AMP_CONFIG={',
-      'self.AMP_CONFIG={"thirdPartyUrl":location.origin,');
+    'self.AMP_CONFIG={',
+    'self.AMP_CONFIG={"thirdPartyUrl":location.origin,'
+  );
   await fs.writeFile(filePath, result, 'utf8');
 }
 
@@ -67,8 +68,9 @@ async function firebase() {
   if (argv.file) {
     log(colors.green(`Processing file: ${argv.file}.`));
     log(colors.green('Writing file to firebase.index.html.'));
-    await fs.copyFile(/*src*/ argv.file, 'firebase/index.html',
-        {overwrite: true});
+    await fs.copyFile(/*src*/ argv.file, 'firebase/index.html', {
+      overwrite: true,
+    });
     await replaceUrls('firebase/index.html');
   } else {
     await Promise.all([
@@ -83,18 +85,28 @@ async function firebase() {
   ]);
   await Promise.all([
     modifyThirdPartyUrl(),
-    fs.copyFile('firebase/dist/ww.max.js', 'firebase/dist/ww.js',
-        {overwrite: true}),
+    fs.copyFile('firebase/dist/ww.max.js', 'firebase/dist/ww.js', {
+      overwrite: true,
+    }),
   ]);
 }
 
 async function replaceUrls(filePath) {
   const data = await fs.readFile(filePath, 'utf8');
-  let result = data.replace(/https:\/\/cdn\.ampproject\.org\/v0\.js/g, '/dist/amp.js');
+  let result = data.replace(
+    /https:\/\/cdn\.ampproject\.org\/v0\.js/g,
+    '/dist/amp.js'
+  );
   if (argv.min) {
-    result = result.replace(/https:\/\/cdn\.ampproject\.org\/v0\/(.+?).js/g, '/dist/v0/$1.js');
+    result = result.replace(
+      /https:\/\/cdn\.ampproject\.org\/v0\/(.+?).js/g,
+      '/dist/v0/$1.js'
+    );
   } else {
-    result = result.replace(/https:\/\/cdn\.ampproject\.org\/v0\/(.+?).js/g, '/dist/v0/$1.max.js');
+    result = result.replace(
+      /https:\/\/cdn\.ampproject\.org\/v0\/(.+?).js/g,
+      '/dist/v0/$1.max.js'
+    );
   }
   await fs.writeFile(filePath, result, 'utf8');
 }

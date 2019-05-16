@@ -99,7 +99,6 @@ serve.flags = {
   'port': '  Specifies alternative port (default: 8000)',
   'https': '  Use HTTPS server (default: false)',
   'quiet': '  Do not log HTTP requests (default: false)',
-  'cache': '  Make local resources cacheable by the browser ' +
-      '(default: false)',
+  'cache': '  Make local resources cacheable by the browser (default: false)',
   'inspect': '  Run nodemon in `inspect` mode',
 };

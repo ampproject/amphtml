@@ -47,8 +47,9 @@ export const DUMMY_FLUID_SIZE = '320x50';
  * Required size to be sent with fluid requests in array format.
  * @const {!Array<number>}
  */
-const DUMMY_FLUID_SIZE_ARR =
-    DUMMY_FLUID_SIZE.split('x').map(dim => Number(dim));
+const DUMMY_FLUID_SIZE_ARR = DUMMY_FLUID_SIZE.split('x').map(dim =>
+  Number(dim)
+);
 
 /**
  * Given the amp-ad data attribute containing the multi-size dimensions, and a
@@ -71,13 +72,12 @@ export function getMultiSizeDimensions(
   primaryWidth,
   primaryHeight,
   multiSizeValidation,
-  isFluidPrimary = false) {
-
+  isFluidPrimary = false
+) {
   const dimensions = [];
   const arrayOfSizeStrs = multiSizeDataStr.split(',');
 
   for (let i = 0; i < arrayOfSizeStrs.length; i++) {
-
     const sizeStr = arrayOfSizeStrs[i];
     if (sizeStr.toLowerCase() == 'fluid') {
       if (!isFluidPrimary) {
@@ -99,22 +99,43 @@ export function getMultiSizeDimensions(
     const height = Number(size[1]);
 
     // Make sure that both dimensions given are positive numbers.
-    if (!validateDimensions(width, height,
+    if (
+      !validateDimensions(
+        width,
+        height,
         w => isNaN(w) || w <= 0,
         h => isNaN(h) || h <= 0,
-        badParams => badParams.map(badParam =>
-          `Invalid ${badParam.dim} of ${badParam.val} ` +
-            'given for secondary size.').join(' '))) {
+        badParams =>
+          badParams
+            .map(
+              badParam =>
+                `Invalid ${badParam.dim} of ${badParam.val} ` +
+                'given for secondary size.'
+            )
+            .join(' ')
+      )
+    ) {
       continue;
     }
 
     // Check that secondary size is not larger than primary size.
-    if (!isFluidPrimary && !validateDimensions(width, height,
+    if (
+      !isFluidPrimary &&
+      !validateDimensions(
+        width,
+        height,
         w => w > primaryWidth,
         h => h > primaryHeight,
-        badParams => badParams.map(badParam =>
-          `Secondary ${badParam.dim} ${badParam.val} ` +
-            `can't be larger than the primary ${badParam.dim}.`).join(' '))) {
+        badParams =>
+          badParams
+            .map(
+              badParam =>
+                `Secondary ${badParam.dim} ${badParam.val} ` +
+                `can't be larger than the primary ${badParam.dim}.`
+            )
+            .join(' ')
+      )
+    ) {
       continue;
     }
 
@@ -126,13 +147,22 @@ export function getMultiSizeDimensions(
       const minRatio = 2 / 3;
       const minWidth = minRatio * primaryWidth;
       const minHeight = minRatio * primaryHeight;
-      if (!validateDimensions(width, height,
+      if (
+        !validateDimensions(
+          width,
+          height,
           w => w < minWidth,
           h => h < minHeight,
-          badParams => badParams.map(badParam =>
-            `Secondary ${badParam.dim} ${badParam.val} is ` +
-              `smaller than 2/3rds of the primary ${badParam.dim}.`)
-              .join(' '))) {
+          badParams =>
+            badParams
+              .map(
+                badParam =>
+                  `Secondary ${badParam.dim} ${badParam.val} is ` +
+                  `smaller than 2/3rds of the primary ${badParam.dim}.`
+              )
+              .join(' ')
+        )
+      ) {
         continue;
       }
     }
@@ -162,8 +192,13 @@ export function getMultiSizeDimensions(
  * A function that will produce an informative error message.
  * @return {boolean}
  */
-function validateDimensions(width, height, widthCond, heightCond, errorBuilder)
-{
+function validateDimensions(
+  width,
+  height,
+  widthCond,
+  heightCond,
+  errorBuilder
+) {
   const badParams = [];
   if (widthCond(width)) {
     badParams.push({dim: 'width', val: width});
@@ -188,23 +223,29 @@ function validateDimensions(width, height, widthCond, heightCond, errorBuilder)
  * @return {number} height to use for the matched content slot.
  */
 export function getMatchedContentResponsiveHeightAndUpdatePubParams(
-  availableWidth, element) {
+  availableWidth,
+  element
+) {
   const pubControlParams = {
     numberOfRows: element.getAttribute(ExternalCorePubVars.ROWS_NUM),
     numberOfColumns: element.getAttribute(ExternalCorePubVars.COLUMNS_NUM),
     layoutType: element.getAttribute(ExternalCorePubVars.UI_TYPE),
   };
   let config;
-  if (pubControlParams.numberOfRows ||
-      pubControlParams.numberOfColumns ||
-      pubControlParams.layoutType) {
+  if (
+    pubControlParams.numberOfRows ||
+    pubControlParams.numberOfColumns ||
+    pubControlParams.layoutType
+  ) {
     // Publisher provided at least 1 param  which means we are in
     // "pub controlled matched content" mode.
     config = getPubControlConfig(availableWidth, pubControlParams);
   } else {
     // Publisher didn't provide any matched content params so use auto mode.
     config = getAutoConfig(
-        availableWidth, availableWidth <= MIN_PUB_CONTROL_WIDTH_OF_DESKTOP);
+      availableWidth,
+      availableWidth <= MIN_PUB_CONTROL_WIDTH_OF_DESKTOP
+    );
   }
   if (config.validationError) {
     user().error('AMP-AD', config.validationError);

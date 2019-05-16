@@ -17,7 +17,6 @@
 import * as lr from '../../src/layout-rect';
 
 describe('LayoutRect', () => {
-
   it('layoutRectLtwh', () => {
     const rect = lr.layoutRectLtwh(1, 2, 3, 4);
     expect(rect.left).to.equal(1);
@@ -60,8 +59,12 @@ describe('LayoutRect', () => {
   });
 
   it('layoutRectFromDomRect', () => {
-    const rect = lr.layoutRectFromDomRect({top: 11, left: 12, width: 111,
-      height: 222});
+    const rect = lr.layoutRectFromDomRect({
+      top: 11,
+      left: 12,
+      width: 111,
+      height: 222,
+    });
     expect(rect.top).to.equal(11);
     expect(rect.left).to.equal(12);
     expect(rect.width).to.equal(111);

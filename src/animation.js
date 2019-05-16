@@ -31,7 +31,6 @@ const NOOP_CALLBACK = function() {};
  * achieve the desired effect.
  */
 export class Animation {
-
   /**
    * Creates and starts animation with a single segment. Returns AnimationPlayer
    * object that can be used to monitor or control animation.
@@ -45,9 +44,9 @@ export class Animation {
    */
   static animate(contextNode, transition, duration, opt_curve) {
     return new Animation(contextNode)
-        .setCurve(opt_curve)
-        .add(0, transition, 1)
-        .start(duration);
+      .setCurve(opt_curve)
+      .add(0, transition, 1)
+      .start(duration);
   }
 
   /**
@@ -116,12 +115,16 @@ export class Animation {
    * @return {!AnimationPlayer}
    */
   start(duration) {
-    const player = new AnimationPlayer(this.vsync_, this.contextNode_,
-        this.segments_, this.curve_, duration);
+    const player = new AnimationPlayer(
+      this.vsync_,
+      this.contextNode_,
+      this.segments_,
+      this.curve_,
+      duration
+    );
     return player;
   }
 }
-
 
 /**
  * AnimationPlayer allows tracking and monitoring of the running animation.
@@ -133,7 +136,6 @@ export class Animation {
  * implements {IThenable}
  */
 class AnimationPlayer {
-
   /**
    * @param {!./service/vsync-impl.Vsync} vsync
    * @param {!Node} contextNode
@@ -142,7 +144,6 @@ class AnimationPlayer {
    * @param {./time.timeDef} duration
    */
   constructor(vsync, contextNode, segments, defaultCurve, duration) {
-
     /** @private @const {!./service/vsync-impl.Vsync} */
     this.vsync_ = vsync;
 
@@ -257,7 +258,7 @@ class AnimationPlayer {
       // Sort in the completion order.
       if (this.segments_.length > 1) {
         this.segments_.sort((s1, s2) => {
-          return (s1.delay + s1.duration) - (s2.delay + s2.duration);
+          return s1.delay + s1.duration - (s2.delay + s2.duration);
         });
       }
       try {
@@ -293,8 +294,10 @@ class AnimationPlayer {
       return;
     }
     const currentTime = Date.now();
-    const normLinearTime = Math.min((currentTime - this.startTime_) /
-        this.duration_, 1);
+    const normLinearTime = Math.min(
+      (currentTime - this.startTime_) / this.duration_,
+      1
+    );
 
     // Start segments due to be started
     for (let i = 0; i < this.segments_.length; i++) {
@@ -334,8 +337,10 @@ class AnimationPlayer {
     let normLinearTime;
     let normTime;
     if (segment.duration > 0) {
-      normLinearTime = Math.min((totalLinearTime - segment.delay) /
-          segment.duration, 1);
+      normLinearTime = Math.min(
+        (totalLinearTime - segment.delay) / segment.duration,
+        1
+      );
       normTime = normLinearTime;
       if (segment.curve && normTime != 1) {
         try {
@@ -363,7 +368,6 @@ class AnimationPlayer {
   }
 }
 
-
 /**
  * @typedef {{
  *   delay: ./time.normtimeDef,
@@ -373,7 +377,6 @@ class AnimationPlayer {
  * }}
  */
 let SegmentDef;
-
 
 /**
  * @typedef {{

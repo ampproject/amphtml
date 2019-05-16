@@ -139,7 +139,7 @@ export function stringHash32(str) {
   const {length} = str;
   let hash = 5381;
   for (let i = 0; i < length; i++) {
-    hash = hash * 33 ^ str.charCodeAt(i);
+    hash = (hash * 33) ^ str.charCodeAt(i);
   }
   // Convert from 32-bit signed to unsigned.
   return String(hash >>> 0);

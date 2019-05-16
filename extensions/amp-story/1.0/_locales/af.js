@@ -111,22 +111,25 @@ const strings = {
     string: 'Maak jou venster se hoogte groter om hierdie ervaring te bekyk',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT]: {
-    string: 'Maak sowel die hoogte as breedte van jou venster groter om ' +
-        'hierdie ervaring te bekyk',
+    string:
+      'Maak sowel die hoogte as breedte van jou venster groter om ' +
+      'hierdie ervaring te bekyk',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_WIDTH_SIZE_TEXT]: {
     string: 'Maak jou venster se breedte groter om hierdie ervaring te bekyk',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
-    string: 'Jy moet die AMP-storie-eksperiment aktiveer om hierdie inhoud ' +
-        'te bekyk.',
+    string:
+      'Jy moet die AMP-storie-eksperiment aktiveer om hierdie inhoud ' +
+      'te bekyk.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
     string: 'Die bladsy kan die beste in portretmodus bekyk word',
   },
   [LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT]: {
-    string: 'Ons is jammer, maar dit lyk of jou blaaier nie hierdie ervaring ' +
-        'steun nie',
+    string:
+      'Ons is jammer, maar dit lyk of jou blaaier nie hierdie ervaring ' +
+      'steun nie',
   },
 };
 

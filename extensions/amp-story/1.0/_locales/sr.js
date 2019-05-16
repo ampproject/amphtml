@@ -111,15 +111,17 @@ const strings = {
     string: 'Повећајте висину прозора да бисте прегледали овај доживљај',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT]: {
-    string: 'Повећајте висину и ширину прозора да бисте прегледали овај ' +
-        'доживљај',
+    string:
+      'Повећајте висину и ширину прозора да бисте прегледали овај ' +
+      'доживљај',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_WIDTH_SIZE_TEXT]: {
     string: 'Повећајте ширину прозора да бисте прегледали овај доживљај',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
-    string: 'Морате да омогућите експеримент AMP вести да бисте прегледали ' +
-        'овај садржај.',
+    string:
+      'Морате да омогућите експеримент AMP вести да бисте прегледали ' +
+      'овај садржај.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
     string: 'Страница се најбоље прегледа у усправном режиму',

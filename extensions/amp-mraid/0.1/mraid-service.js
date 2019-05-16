@@ -83,25 +83,26 @@ export class MraidService {
     //    subset of LayoutRectDef, though, with x/y position and width/height,
     //    and we can pass it through to the callback directly.
     this.mraid_.addEventListener(
-        'exposureChange',
-        (exposedPercentage,
-          visibleRectangle,
-          unusedOcclusionRectangles) => {
+      'exposureChange',
+      (exposedPercentage, visibleRectangle, unusedOcclusionRectangles) => {
+        // AMP handles intersectionRatio from 0.0 to 1.0
+        callback({
+          // Need to convert x/y to the AMP runtime used left/top
+          visibleRect: layoutRectLtwh(
+            visibleRectangle && visibleRectangle.x ? visibleRectangle.x : 0,
+            visibleRectangle && visibleRectangle.y ? visibleRectangle.y : 0,
+            visibleRectangle && visibleRectangle.width
+              ? visibleRectangle.width
+              : 0,
+            visibleRectangle && visibleRectangle.height
+              ? visibleRectangle.height
+              : 0
+          ),
           // AMP handles intersectionRatio from 0.0 to 1.0
-          callback({
-            // Need to convert x/y to the AMP runtime used left/top
-            visibleRect: layoutRectLtwh(
-                visibleRectangle && visibleRectangle.x ? visibleRectangle.x : 0,
-                visibleRectangle && visibleRectangle.y ? visibleRectangle.y : 0,
-                visibleRectangle && visibleRectangle.width ?
-                  visibleRectangle.width : 0,
-                visibleRectangle && visibleRectangle.height ?
-                  visibleRectangle.height : 0
-            ),
-            // AMP handles intersectionRatio from 0.0 to 1.0
-            visibleRatio: exposedPercentage / 100,
-          });
+          visibleRatio: exposedPercentage / 100,
         });
+      }
+    );
     // TODO: Return unlistener
   }
 
@@ -113,9 +114,11 @@ export class MraidService {
    *     indicating if the request was fulfilled
    */
   enterFullscreenOverlay(unusedTargetElement) {
-    if (this.expanded_) {return Promise.resolve(false);}
+    if (this.expanded_) {
+      return Promise.resolve(false);
+    }
 
-    this.mraid_./*OK*/expand();
+    this.mraid_./*OK*/ expand();
     this.expanded_ = true;
     return Promise.resolve(true);
   }
@@ -128,7 +131,9 @@ export class MraidService {
    *     indicating if the request was fulfilled
    */
   exitFullscreenOverlay(unusedTargetElement) {
-    if (!this.expanded_) {return Promise.resolve(false);}
+    if (!this.expanded_) {
+      return Promise.resolve(false);
+    }
 
     this.mraid_.close();
     this.expanded_ = false;

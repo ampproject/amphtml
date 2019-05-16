@@ -83,23 +83,32 @@ function validateResourceTimingSpec(spec) {
     user().warn('ANALYTICS', 'resourceTimingSpec missing "resources" field');
     return false;
   }
-  if (!spec['encoding'] || !spec['encoding']['entry'] ||
-      !spec['encoding']['delim']) {
+  if (
+    !spec['encoding'] ||
+    !spec['encoding']['entry'] ||
+    !spec['encoding']['delim']
+  ) {
     user().warn(
-        'ANALYTICS',
-        'resourceTimingSpec is missing or has incomplete encoding options');
+      'ANALYTICS',
+      'resourceTimingSpec is missing or has incomplete encoding options'
+    );
     return false;
   }
   if (spec['encoding']['base'] < 2 || spec['encoding']['base'] > 36) {
     user().warn(
-        'ANALYTICS',
-        'resource timing variables only supports bases between 2 and 36');
+      'ANALYTICS',
+      'resource timing variables only supports bases between 2 and 36'
+    );
     return false;
   }
-  if (spec['responseAfter'] != null &&
-      typeof spec['responseAfter'] != 'number') {
+  if (
+    spec['responseAfter'] != null &&
+    typeof spec['responseAfter'] != 'number'
+  ) {
     user().warn(
-        'ANALYTICS', 'resourceTimingSpec["responseAfter"] must be a number');
+      'ANALYTICS',
+      'resourceTimingSpec["responseAfter"] must be a number'
+    );
     return false;
   }
   return true;
@@ -111,8 +120,9 @@ function validateResourceTimingSpec(spec) {
  * @return {!Array<!PerformanceResourceTiming>}
  */
 function getResourceTimingEntries(win) {
-  return /** @type {!Array<!PerformanceResourceTiming>} */ (
-    win.performance.getEntriesByType('resource'));
+  return /** @type {!Array<!PerformanceResourceTiming>} */ (win.performance.getEntriesByType(
+    'resource'
+  ));
 }
 
 /**
@@ -160,9 +170,10 @@ function nameForEntry(entry, resourcesByHost) {
       continue;
     }
     const index = findIndex(
-        resources,
-        res => res.pathPattern.test(url.pathname) &&
-            res.queryPattern.test(url.search));
+      resources,
+      res =>
+        res.pathPattern.test(url.pathname) && res.queryPattern.test(url.search)
+    );
     if (index != -1) {
       return resources[index].name;
     }
@@ -244,12 +255,11 @@ function serialize(entries, resourceTimingSpec, win) {
   const format = (val, relativeTo = 0) =>
     Math.round(val - relativeTo).toString(encoding['base'] || 10);
 
-  const promises =
-      filterEntries(entries, resources)
-          .map(({entry, name}) => entryToExpansionOptions(entry, name, format))
-          .map(
-              expansion =>
-                variableService.expandTemplate(encoding['entry'], expansion));
+  const promises = filterEntries(entries, resources)
+    .map(({entry, name}) => entryToExpansionOptions(entry, name, format))
+    .map(expansion =>
+      variableService.expandTemplate(encoding['entry'], expansion)
+    );
   return Promise.all(promises).then(vars => vars.join(encoding['delim']));
 }
 
@@ -262,9 +272,13 @@ function serialize(entries, resourceTimingSpec, win) {
 function serializeResourceTiming(win, resourceTimingSpec) {
   // Check that the performance timing API exists before and that the spec is
   // valid before proceeding. If not, we simply return an empty string.
-  if (resourceTimingSpec['done'] || !win.performance || !win.performance.now ||
-      !win.performance.getEntriesByType ||
-      !validateResourceTimingSpec(resourceTimingSpec)) {
+  if (
+    resourceTimingSpec['done'] ||
+    !win.performance ||
+    !win.performance.now ||
+    !win.performance.getEntriesByType ||
+    !validateResourceTimingSpec(resourceTimingSpec)
+  ) {
     resourceTimingSpec['done'] = true;
     return Promise.resolve('');
   }
@@ -278,8 +292,10 @@ function serializeResourceTiming(win, resourceTimingSpec) {
   const responseAfter = resourceTimingSpec['responseAfter'] || 0;
   // Update responseAfter for next time to avoid reporting the same resource
   // multiple times.
-  resourceTimingSpec['responseAfter'] =
-      Math.max(responseAfter, win.performance.now());
+  resourceTimingSpec['responseAfter'] = Math.max(
+    responseAfter,
+    win.performance.now()
+  );
 
   // Filter resources that are too early.
   entries = entries.filter(e => e.startTime + e.duration >= responseAfter);
@@ -298,7 +314,7 @@ function serializeResourceTiming(win, resourceTimingSpec) {
  */
 export function getResourceTiming(win, spec, startTime) {
   // Only allow collecting timing within 1s
-  if (spec && (Date.now() < (startTime + 60 * 1000))) {
+  if (spec && Date.now() < startTime + 60 * 1000) {
     return serializeResourceTiming(win, spec);
   } else {
     return Promise.resolve('');

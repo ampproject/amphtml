@@ -69,13 +69,25 @@ function installIncludeWrapper(chai, utils) {
 
   const overwrite = overwriteAlwaysUseSuper(utils);
   Assertion.overwriteChainableMethod(
-      'include', overwrite, inheritChainingBehavior);
+    'include',
+    overwrite,
+    inheritChainingBehavior
+  );
   Assertion.overwriteChainableMethod(
-      'includes', overwrite, inheritChainingBehavior);
+    'includes',
+    overwrite,
+    inheritChainingBehavior
+  );
   Assertion.overwriteChainableMethod(
-      'contain', overwrite, inheritChainingBehavior);
+    'contain',
+    overwrite,
+    inheritChainingBehavior
+  );
   Assertion.overwriteChainableMethod(
-      'contains', overwrite, inheritChainingBehavior);
+    'contains',
+    overwrite,
+    inheritChainingBehavior
+  );
 }
 
 function installMatchWrapper(chai, utils) {
@@ -91,9 +103,15 @@ function installLengthWrapper(chai, utils) {
 
   const overwrite = overwriteAlwaysUseSuper(utils);
   Assertion.overwriteChainableMethod(
-      'length', overwrite, inheritChainingBehavior);
+    'length',
+    overwrite,
+    inheritChainingBehavior
+  );
   Assertion.overwriteChainableMethod(
-      'lengthOf', overwrite, inheritChainingBehavior);
+    'lengthOf',
+    overwrite,
+    inheritChainingBehavior
+  );
 }
 
 function installAboveWrapper(chai, utils) {
@@ -145,7 +163,6 @@ function installIsNullWrapper(chai, utils) {
   Assertion.overwriteProperty('isNull', overwrite);
   Assertion.overwriteProperty('null', overwrite);
 }
-
 
 function overwriteAlwaysUseSuper(utils) {
   const {flag} = utils;

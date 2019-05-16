@@ -117,8 +117,9 @@ const strings = {
     string: 'Щоб переглядати цей вміст, збільште ширину вікна',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
-    string: 'Щоб переглядати цей вміст, потрібно ввімкнути експеримент з ' +
-        'AMP-історіями.',
+    string:
+      'Щоб переглядати цей вміст, потрібно ввімкнути експеримент з ' +
+      'AMP-історіями.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
     string: 'Цю сторінку найкраще переглядати в книжковій орієнтації',

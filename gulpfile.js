@@ -17,16 +17,30 @@
 /* global require */
 
 const gulp = require('gulp-help')(require('gulp'));
+const {
+  buildExperiments,
+  buildLoginDone,
+  dist,
+} = require('./build-system/tasks/dist');
+const {
+  compileAccessExpr,
+  compileBindExpr,
+  compileCssExpr,
+} = require('./build-system/tasks/compile-expr');
+const {
+  process3pGithubPr,
+} = require('./build-system/tasks/process-3p-github-pr');
+const {
+  processGithubIssues,
+} = require('./build-system/tasks/process-github-issues');
 const {ava} = require('./build-system/tasks/ava');
 const {build, defaultTask, watch} = require('./build-system/tasks/build');
-const {buildExperiments, buildLoginDone, dist} = require('./build-system/tasks/dist');
 const {bundleSize} = require('./build-system/tasks/bundle-size');
 const {cachesJson, jsonSyntax} = require('./build-system/tasks/json-check');
 const {changelog, changelogUpdate} = require('./build-system/tasks/changelog');
 const {checkLinks} = require('./build-system/tasks/check-links');
 const {checkTypes} = require('./build-system/tasks/check-types');
 const {clean} = require('./build-system/tasks/clean');
-const {compileAccessExpr, compileBindExpr, compileCssExpr} = require('./build-system/tasks/compile-expr');
 const {createGoldenCss} = require('./build-system/tasks/create-golden-css');
 const {css} = require('./build-system/tasks/css');
 const {csvifySize} = require('./build-system/tasks/csvify-size');
@@ -41,8 +55,6 @@ const {nailgunStart, nailgunStop} = require('./build-system/tasks/nailgun');
 const {prCheck} = require('./build-system/tasks/pr-check');
 const {prependGlobal} = require('./build-system/tasks/prepend-global');
 const {presubmit} = require('./build-system/tasks/presubmit-checks');
-const {process3pGithubPr} = require('./build-system/tasks/process-3p-github-pr');
-const {processGithubIssues} = require('./build-system/tasks/process-github-issues');
 const {releaseTag} = require('./build-system/tasks/release-tagging');
 const {serve} = require('./build-system/tasks/serve.js');
 const {size} = require('./build-system/tasks/size');
@@ -51,7 +63,6 @@ const {todosFindClosed} = require('./build-system/tasks/todos');
 const {updatePackages} = require('./build-system/tasks/update-packages');
 const {validator, validatorWebui} = require('./build-system/tasks/validator');
 const {visualDiff} = require('./build-system/tasks/visual-diff');
-
 
 // Keep this list alphabetized.
 gulp.task('ava', ava);

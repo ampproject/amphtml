@@ -67,10 +67,10 @@ export function isShadowDomSupported() {
  */
 export function isShadowCssSupported() {
   if (shadowCssSupported === undefined) {
-    shadowCssSupported = isShadowDomSupported() && (
-      isNative(Element.prototype.attachShadow) ||
-      isNative(Element.prototype.createShadowRoot)
-    );
+    shadowCssSupported =
+      isShadowDomSupported() &&
+      (isNative(Element.prototype.attachShadow) ||
+        isNative(Element.prototype.createShadowRoot));
   }
   return shadowCssSupported;
 }
@@ -93,8 +93,9 @@ function isNative(func) {
  */
 export function getShadowDomSupportedVersion(opt_elementClass) {
   if (shadowDomSupportedVersion === undefined) {
-    shadowDomSupportedVersion =
-        getShadowDomVersion(opt_elementClass || Element);
+    shadowDomSupportedVersion = getShadowDomVersion(
+      opt_elementClass || Element
+    );
   }
   return shadowDomSupportedVersion;
 }

@@ -196,7 +196,6 @@ describes.realWin('getFormAsObject', {}, env => {
     expect(getFormAsObject(form)).to.deep.equal({'foo': ['bar']});
   });
 
-
   it('returns multiple selected entries in multi-select', () => {
     const select = env.win.document.createElement('select');
     select.name = 'foo';
@@ -230,9 +229,11 @@ describes.realWin('getFormAsObject', {}, env => {
     input2.value = 'quux';
     form.appendChild(input2);
 
-    Object.defineProperty(form, 'ownerDocument', {get() {
-      return {activeElement: input};
-    }});
+    Object.defineProperty(form, 'ownerDocument', {
+      get() {
+        return {activeElement: input};
+      },
+    });
     expect(getFormAsObject(form)).to.deep.equal({'foo': ['bar']});
   });
 
@@ -251,9 +252,11 @@ describes.realWin('getFormAsObject', {}, env => {
 
     expect(getFormAsObject(form)).to.deep.equal({'foo': ['bar']});
 
-    Object.defineProperty(form, 'ownerDocument', {get() {
-      return {activeElement: input2};
-    }});
+    Object.defineProperty(form, 'ownerDocument', {
+      get() {
+        return {activeElement: input2};
+      },
+    });
     expect(getFormAsObject(form)).to.deep.equal({'baz': ['quux']});
   });
 
@@ -268,9 +271,11 @@ describes.realWin('getFormAsObject', {}, env => {
     input2.value = 'quux';
     form.appendChild(input2);
 
-    Object.defineProperty(form, 'ownerDocument', {get() {
-      return {activeElement: env.win.document.body};
-    }});
+    Object.defineProperty(form, 'ownerDocument', {
+      get() {
+        return {activeElement: env.win.document.body};
+      },
+    });
     expect(getFormAsObject(form)).to.deep.equal({'foo': ['bar']});
   });
 
@@ -287,9 +292,11 @@ describes.realWin('getFormAsObject', {}, env => {
 
     expect(getFormAsObject(form)).to.deep.equal({'foo': ['bar']});
 
-    Object.defineProperty(form, 'ownerDocument', {get() {
-      return {activeElement: input2};
-    }});
+    Object.defineProperty(form, 'ownerDocument', {
+      get() {
+        return {activeElement: input2};
+      },
+    });
     expect(getFormAsObject(form)).to.deep.equal({'baz': ['quux']});
   });
 
@@ -328,13 +335,17 @@ describes.realWin('getFormAsObject', {}, env => {
 
     const formDataObject = getFormAsObject(form);
 
-    expect(formDataObject).to.be.an('object')
-        .that.has.all.keys('foo', 'foo1', 'foo2');
-    expect(formDataObject).to.have.property('foo')
-        .that.has.deep.members(['bar', 'baz']);
-    expect(formDataObject).to.have.property('foo1')
-        .that.has.deep.members(['bar']);
-    expect(formDataObject).to.have.property('foo2')
-        .that.has.deep.members(['bar']);
+    expect(formDataObject)
+      .to.be.an('object')
+      .that.has.all.keys('foo', 'foo1', 'foo2');
+    expect(formDataObject)
+      .to.have.property('foo')
+      .that.has.deep.members(['bar', 'baz']);
+    expect(formDataObject)
+      .to.have.property('foo1')
+      .that.has.deep.members(['bar']);
+    expect(formDataObject)
+      .to.have.property('foo2')
+      .that.has.deep.members(['bar']);
   });
 });

@@ -16,9 +16,7 @@
 
 import {install} from '../../src/polyfills/document-contains';
 
-
 describe('HTMLDocument.contains', () => {
-
   let sandbox;
   let fakeWinWithContains;
   let fakeWinWithoutContains;
@@ -41,8 +39,7 @@ describe('HTMLDocument.contains', () => {
     nativeContains = fakeWinWithContains.HTMLDocument.prototype.contains;
 
     fakeWinWithoutContains = {
-      HTMLDocument: class {
-      },
+      HTMLDocument: class {},
       Object: window.Object,
     };
     install(fakeWinWithoutContains);
@@ -67,8 +64,9 @@ describe('HTMLDocument.contains', () => {
 
   it('should NOT override an existing method', () => {
     install(fakeWinWithContains);
-    expect(fakeWinWithContains.HTMLDocument.prototype.contains)
-        .to.equal(nativeContains);
+    expect(fakeWinWithContains.HTMLDocument.prototype.contains).to.equal(
+      nativeContains
+    );
   });
 
   it('should override a existing method', () => {
@@ -90,8 +88,8 @@ describe('HTMLDocument.contains', () => {
 
   it('should be inclusionary for documentElement', () => {
     expect(document.contains(document.documentElement)).to.be.true;
-    expect(polyfillContains.call(document, document.documentElement))
-        .to.be.true;
+    expect(polyfillContains.call(document, document.documentElement)).to.be
+      .true;
   });
 
   it('should be inclusionary for document itself', () => {

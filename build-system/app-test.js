@@ -47,10 +47,7 @@ function appTestEndpoints(app) {
     const nextWeek = new Date(new Date(date).setDate(date.getDate() + 7));
     const twoWeeks = new Date(new Date(date).setDate(date.getDate() + 14));
 
-    const blocked = [
-      getISO8601Date(nextWeek),
-      getISO8601Date(twoWeeks),
-    ];
+    const blocked = [getISO8601Date(nextWeek), getISO8601Date(twoWeeks)];
 
     res.json({
       blocked,

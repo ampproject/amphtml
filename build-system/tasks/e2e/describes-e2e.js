@@ -18,13 +18,15 @@
 require('chromedriver'); // eslint-disable-line no-unused-vars
 
 const puppeteer = require('puppeteer');
+const {
+  SeleniumWebDriverController,
+} = require('./selenium-webdriver-controller');
 const {AmpDriver, AmpdocEnvironment} = require('./amp-driver');
 const {Builder, Capabilities} = require('selenium-webdriver');
 const {clearLastExpectError, getLastExpectError} = require('./expect');
 const {installRepl, uninstallRepl} = require('./repl');
 const {isTravisBuild} = require('../../travis');
 const {PuppeteerController} = require('./puppeteer-controller');
-const {SeleniumWebDriverController} = require('./selenium-webdriver-controller');
 
 /** Should have something in the name, otherwise nothing is shown. */
 const SUB = ' ';
@@ -142,12 +144,18 @@ const endtoend = describeEnv(spec => new EndToEndFixture(spec));
  * Maps an environment enum value to a `describes.repeated` variant object.
  */
 const EnvironmentVariantMap = {
-  [AmpdocEnvironment.SINGLE]:
-      {name: 'Standalone environment', value: {environment: 'single'}},
-  [AmpdocEnvironment.VIEWER_DEMO]:
-      {name: 'Viewer environment', value: {environment: 'viewer-demo'}},
-  [AmpdocEnvironment.SHADOW_DEMO]:
-      {name: 'Shadow environment', value: {environment: 'shadow-demo'}},
+  [AmpdocEnvironment.SINGLE]: {
+    name: 'Standalone environment',
+    value: {environment: 'single'},
+  },
+  [AmpdocEnvironment.VIEWER_DEMO]: {
+    name: 'Viewer environment',
+    value: {environment: 'viewer-demo'},
+  },
+  [AmpdocEnvironment.SHADOW_DEMO]: {
+    name: 'Shadow environment',
+    value: {environment: 'shadow-demo'},
+  },
 };
 
 const defaultEnvironments = [
@@ -162,7 +170,7 @@ const defaultEnvironments = [
  *
  * Example usage:
  * it.configure().skipViewerDemo().skipShadowDemo().run('Should ...', ...);
-*/
+ */
 class ItConfig {
   constructor(it, env) {
     this.it = it;
@@ -289,7 +297,7 @@ function describeEnv(factory) {
    * @param {function(!Object)} fn
    */
   mainFunc.only = function(name, spec, fn) {
-    return templateFunc(name, spec, fn, describe./*OK*/only);
+    return templateFunc(name, spec, fn, describe./*OK*/ only);
   };
 
   mainFunc.skip = function(name, variants, fn) {
@@ -300,7 +308,6 @@ function describeEnv(factory) {
 }
 
 class EndToEndFixture {
-
   /** @param {!TestSpec} spec */
   constructor(spec) {
     /** @const */
@@ -319,9 +326,7 @@ class EndToEndFixture {
       experiments = [],
       initialRect = DEFAULT_E2E_INITIAL_RECT,
     } = this.spec;
-    const {
-      environment,
-    } = env;
+    const {environment} = env;
 
     await toggleExperiments(ampDriver, testUrl, experiments);
 
@@ -344,10 +349,7 @@ class EndToEndFixture {
  * Get the controller object for the configured engine.
  * @param {!DescribesConfigDef} describesConfig
  */
-async function getController({
-  engine = 'selenium',
-  headless = false,
-}) {
+async function getController({engine = 'selenium', headless = false}) {
   if (engine == 'puppeteer') {
     const browser = await createPuppeteer({headless});
     return new PuppeteerController(browser);
