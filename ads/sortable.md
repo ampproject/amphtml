@@ -54,6 +54,4 @@ No explicit configuration is needed for a given sortable amp-ad, though each sit
 ### Optional parameters
 
 * `data-reponsive`: When set to true indicates that the ad slot has multiple potential sizes.
-
-
-
+ 
