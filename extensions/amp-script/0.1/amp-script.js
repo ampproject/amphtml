@@ -16,31 +16,35 @@
 
 import {CSS} from '../../../build/amp-script-0.1.css';
 import {
-  DomPurifyDef, createPurifier, getAllowedTags, validateAttributeChange,
+  DomPurifyDef,
+  createPurifier,
+  getAllowedTags,
+  validateAttributeChange,
 } from '../../../src/purifier';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {UserActivationTracker} from './user-activation-tracker';
-import {
-  calculateExtensionScriptUrl,
-} from '../../../src/service/extension-location';
+import {calculateExtensionScriptUrl} from '../../../src/service/extension-location';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {getElementServiceForDoc} from '../../../src/element-service';
 import {getMode} from '../../../src/mode';
 import {
-  installOriginExperimentsForDoc, originExperimentsForDoc,
+  installOriginExperimentsForDoc,
+  originExperimentsForDoc,
 } from '../../../src/service/origin-experiments-impl';
 import {isExperimentOn} from '../../../src/experiments';
 import {rewriteAttributeValue} from '../../../src/url-rewrite';
-import {
-  upgrade,
-} from '@ampproject/worker-dom/dist/unminified.index.safe.mjs.patched';
+import {upgrade} from '@ampproject/worker-dom/dist/unminified.index.safe.mjs.patched';
 
 /** @const {string} */
 const TAG = 'amp-script';
 
-/** @const {number} */
-const MAX_SCRIPT_SIZE = 150000;
+/**
+ * Max cumulative size of author scripts from all amp-script elements on page.
+ * @const {number}
+ */
+const MAX_TOTAL_SCRIPT_SIZE = 150000;
 
 /**
  * Size-contained elements up to 300px are allowed to mutate freely.
@@ -51,7 +55,6 @@ const PHASE_HYDRATING = 1;
 const PHASE_MUTATING = 2;
 
 export class AmpScript extends AMP.BaseElement {
-
   /**
    * @param {!Element} element
    */
@@ -66,12 +69,14 @@ export class AmpScript extends AMP.BaseElement {
 
     /** @private {?UserActivationTracker} */
     this.userActivation_ = null;
+
+    /** @private {?AmpScriptService} */
+    this.service_ = null;
   }
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.CONTAINER ||
-        isLayoutSizeDefined(layout);
+    return layout == Layout.CONTAINER || isLayoutSizeDefined(layout);
   }
 
   /** @return {!Promise<boolean>} */
@@ -81,8 +86,8 @@ export class AmpScript extends AMP.BaseElement {
     }
     installOriginExperimentsForDoc(this.getAmpDoc());
     return originExperimentsForDoc(this.element)
-        .getExperiments()
-        .then(trials => trials && trials.includes(TAG));
+      .getExperiments()
+      .then(trials => trials && trials.includes(TAG));
   }
 
   /** @override */
@@ -109,12 +114,20 @@ export class AmpScript extends AMP.BaseElement {
       // `workerUrl` is from CDN, so no need for `ampCors`.
       xhr.fetchText(workerUrl, {ampCors: false}).then(r => r.text()),
       xhr.fetchText(authorUrl).then(r => r.text()),
+      getElementServiceForDoc(this.element, TAG, TAG),
     ]).then(results => {
       const workerScript = results[0];
       const authorScript = results[1];
-      if (authorScript.length > MAX_SCRIPT_SIZE) {
-        user().error(TAG, `Max script size exceeded: ${authorScript.length} > `
-            + MAX_SCRIPT_SIZE);
+      this.service_ = results[2];
+
+      if (this.service_.sizeLimitExceeded(authorScript.length)) {
+        user().error(
+          TAG,
+          'Maximum total script size exceeded ' +
+            `(${MAX_TOTAL_SCRIPT_SIZE}). Disabled:`,
+          this.element
+        );
+        this.element.classList.add('i-amphtml-broken');
         return [];
       }
       return [workerScript, authorScript];
@@ -153,11 +166,17 @@ export class AmpScript extends AMP.BaseElement {
    */
   workerThreadUrl_() {
     // Use `testLocation` for testing with iframes. @see testing/iframe.js.
-    const location = (getMode().test && this.win.testLocation)
-      ? this.win.testLocation : this.win.location;
+    const location =
+      getMode().test && this.win.testLocation
+        ? this.win.testLocation
+        : this.win.location;
     const useLocal = getMode().localDev || getMode().test;
     return calculateExtensionScriptUrl(
-        location, 'amp-script-worker', '0.1', useLocal);
+      location,
+      'amp-script-worker',
+      '0.1',
+      useLocal
+    );
   }
 
   /**
@@ -167,18 +186,18 @@ export class AmpScript extends AMP.BaseElement {
    */
   mutationPump_(flush, phase) {
     if (phase == PHASE_HYDRATING) {
-      this.vsync_.mutate(
-          () => this.element.classList.add('i-amphtml-hydrated'));
+      this.vsync_.mutate(() =>
+        this.element.classList.add('i-amphtml-hydrated')
+      );
     }
-    const allowMutation = (
+    const allowMutation =
       // Hydration is always allowed.
-      phase != PHASE_MUTATING
+      phase != PHASE_MUTATING ||
       // Mutation depends on the gesture state and long tasks.
-      || this.userActivation_.isActive()
+      this.userActivation_.isActive() ||
       // If the element is size-contained and small enough.
-      || (isLayoutSizeDefined(this.getLayout())
-          && this.getLayoutBox().height <= MAX_FREE_MUTATION_HEIGHT)
-    );
+      (isLayoutSizeDefined(this.getLayout()) &&
+        this.getLayoutBox().height <= MAX_FREE_MUTATION_HEIGHT);
 
     if (allowMutation) {
       this.vsync_.mutate(flush);
@@ -191,6 +210,28 @@ export class AmpScript extends AMP.BaseElement {
     this.element.classList.remove('i-amphtml-hydrated');
     this.element.classList.add('i-amphtml-broken');
     user().error(TAG, '"amp-script" is terminated due to unallowed mutation.');
+  }
+}
+
+/**
+ * Service for sharing data across <amp-script> elements.
+ */
+class AmpScriptService {
+  /**
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} unusedAmpdoc
+   */
+  constructor(unusedAmpdoc) {
+    /** @private {number} */
+    this.cumulativeSize_ = 0;
+  }
+
+  /**
+   * @param {number} size
+   * @return {boolean}
+   */
+  sizeLimitExceeded(size) {
+    this.cumulativeSize_ += size;
+    return this.cumulativeSize_ > MAX_TOTAL_SCRIPT_SIZE;
   }
 }
 
@@ -306,6 +347,7 @@ export class SanitizerImpl {
   }
 }
 
-AMP.extension('amp-script', '0.1', function(AMP) {
-  AMP.registerElement('amp-script', AmpScript, CSS);
+AMP.extension(TAG, '0.1', function(AMP) {
+  AMP.registerServiceForDoc(TAG, AmpScriptService);
+  AMP.registerElement(TAG, AmpScript, CSS);
 });

@@ -32,9 +32,7 @@ import {
   reportError,
   resetAccumulatedErrorMessagesForTesting,
 } from '../src/error';
-import {
-  resetEvtListenerOptsSupportForTesting,
-} from '../src/event-helper-listen';
+import {resetEvtListenerOptsSupportForTesting} from '../src/event-helper-listen';
 import {resetExperimentTogglesForTesting} from '../src/experiments';
 import {setDefaultBootstrapBaseUrlForTesting} from '../src/3p-frame';
 import {setReportError} from '../src/log';
@@ -46,7 +44,7 @@ let consoleErrorSandbox;
 let testName;
 let expectedAsyncErrors;
 let rethrowAsyncSandbox;
-const originalConsoleError = console/*OK*/.error;
+const originalConsoleError = console /*OK*/.error;
 
 // Used to clean up global state between tests.
 let initialGlobalState;
@@ -74,7 +72,6 @@ global.AMP.extension = function(name, version, installer) {
   describes.bufferExtension(`${name}:${version}`, installer);
 };
 
-
 // Make amp section in karma config readable by tests.
 window.ampTestRuntimeConfig = parent.karma ? parent.karma.config.amp : {};
 
@@ -86,9 +83,8 @@ window.ampTestRuntimeConfig = parent.karma ? parent.karma.config.amp : {};
  * Example usages:
  * describe.configure().skipFirefox().skipSafari().run('Bla bla ...', ... );
  * it.configure().skipEdge().run('Should ...', ...);
-*/
+ */
 class TestConfig {
-
   constructor(runner) {
     this.runner = runner;
     /**
@@ -287,19 +283,22 @@ function printWarning(...messages) {
   }
 
   const errorMessage = message.split('\n', 1)[0]; // First line.
-  const helpMessage = '    The test "' + testName + '"' +
-      ' resulted in a call to console.error. (See above line.)\n' +
-      '    ⤷ If the error is not expected, fix the code that generated ' +
-          'the error.\n' +
-      '    ⤷ If the error is expected (and synchronous), use the following ' +
-          'pattern to wrap the test code that generated the error:\n' +
-      '        \'allowConsoleError(() => { <code that generated the ' +
-          'error> });\'\n' +
-      '    ⤷ If the error is expected (and asynchronous), use the ' +
-          'following pattern at the top of the test:\n' +
-      '        \'expectAsyncConsoleError(<string or regex>[, <number of' +
-      ' times the error message repeats>]);';
-  originalConsoleError(errorMessage + '\'\n' + helpMessage);
+  const helpMessage =
+    '    The test "' +
+    testName +
+    '"' +
+    ' resulted in a call to console.error. (See above line.)\n' +
+    '    ⤷ If the error is not expected, fix the code that generated ' +
+    'the error.\n' +
+    '    ⤷ If the error is expected (and synchronous), use the following ' +
+    'pattern to wrap the test code that generated the error:\n' +
+    "        'allowConsoleError(() => { <code that generated the " +
+    "error> });'\n" +
+    '    ⤷ If the error is expected (and asynchronous), use the ' +
+    'following pattern at the top of the test:\n' +
+    "        'expectAsyncConsoleError(<string or regex>[, <number of" +
+    ' times the error message repeats>]);';
+  originalConsoleError(errorMessage + "'\n" + helpMessage);
 }
 
 /**
@@ -308,12 +307,15 @@ function printWarning(...messages) {
 function warnForConsoleError() {
   expectedAsyncErrors = [];
   consoleErrorSandbox = sinon.createSandbox();
-  const consoleErrorStub =
-      consoleErrorSandbox.stub(console, 'error').callsFake(printWarning);
+  const consoleErrorStub = consoleErrorSandbox
+    .stub(console, 'error')
+    .callsFake(printWarning);
 
   self.expectAsyncConsoleError = function(message, repeat = 1) {
     expectedAsyncErrors.push.apply(
-        expectedAsyncErrors, Array(repeat).fill(message));
+      expectedAsyncErrors,
+      Array(repeat).fill(message)
+    );
   };
   self.allowConsoleError = function(func) {
     consoleErrorStub.reset();
@@ -323,8 +325,10 @@ function warnForConsoleError() {
       expect(consoleErrorStub).to.have.been.called;
     } catch (e) {
       const helpMessage =
-          'The test "' + testName + '" contains an "allowConsoleError" block ' +
-          'that didn\'t result in a call to console.error.';
+        'The test "' +
+        testName +
+        '" contains an "allowConsoleError" block ' +
+        "that didn't result in a call to console.error.";
       originalConsoleError(helpMessage);
     } finally {
       consoleErrorStub.callsFake(printWarning);
@@ -340,9 +344,13 @@ function restoreConsoleError() {
   consoleErrorSandbox.restore();
   if (expectedAsyncErrors.length > 0) {
     const helpMessage =
-        'The test "' + testName + '" called "expectAsyncConsoleError", ' +
-        'but there were no call(s) to console.error with these message(s): ' +
-        '"' + expectedAsyncErrors.join('", "') + '"';
+      'The test "' +
+      testName +
+      '" called "expectAsyncConsoleError", ' +
+      'but there were no call(s) to console.error with these message(s): ' +
+      '"' +
+      expectedAsyncErrors.join('", "') +
+      '"';
     that.test.error(new Error(helpMessage));
   }
   expectedAsyncErrors = [];
@@ -440,7 +448,7 @@ afterEach(function() {
       removeElement(element);
     } catch (e) {
       // This sometimes fails for unknown reasons.
-      console./*OK*/log(e);
+      console./*OK*/ log(e);
     }
   }
   window.localStorage.clear();
@@ -465,8 +473,10 @@ afterEach(function() {
     }
   }
   if (!/native/.test(window.setTimeout)) {
-    throw new Error('You likely forgot to restore sinon timers ' +
-        '(installed via sandbox.useFakeTimers).');
+    throw new Error(
+      'You likely forgot to restore sinon timers ' +
+        '(installed via sandbox.useFakeTimers).'
+    );
   }
   setDefaultBootstrapBaseUrlForTesting(null);
   resetAccumulatedErrorMessagesForTesting();
@@ -478,11 +488,11 @@ chai.Assertion.addMethod('attribute', function(attr) {
   const obj = this._obj;
   const tagName = obj.tagName.toLowerCase();
   this.assert(
-      obj.hasAttribute(attr),
-      'expected element \'' + tagName + '\' to have attribute #{exp}',
-      'expected element \'' + tagName + '\' to not have attribute #{act}',
-      attr,
-      attr
+    obj.hasAttribute(attr),
+    "expected element '" + tagName + "' to have attribute #{exp}",
+    "expected element '" + tagName + "' to not have attribute #{act}",
+    attr,
+    attr
   );
 });
 
@@ -490,11 +500,11 @@ chai.Assertion.addMethod('class', function(className) {
   const obj = this._obj;
   const tagName = obj.tagName.toLowerCase();
   this.assert(
-      obj.classList.contains(className),
-      'expected element \'' + tagName + '\' to have class #{exp}',
-      'expected element \'' + tagName + '\' to not have class #{act}',
-      className,
-      className
+    obj.classList.contains(className),
+    "expected element '" + tagName + "' to have class #{exp}",
+    "expected element '" + tagName + "' to not have class #{act}",
+    className,
+    className
   );
 });
 
@@ -506,14 +516,17 @@ chai.Assertion.addProperty('visible', function() {
   const isOpaque = parseInt(opacity, 10) > 0;
   const tagName = obj.tagName.toLowerCase();
   this.assert(
-      visibility === 'visible' && isOpaque,
-      'expected element \'' +
-      tagName + '\' to be #{exp}, got #{act}. with classes: ' + obj.className,
-      'expected element \'' +
-      tagName + '\' not to be #{exp}, got #{act}. with classes: ' +
+    visibility === 'visible' && isOpaque,
+    "expected element '" +
+      tagName +
+      "' to be #{exp}, got #{act}. with classes: " +
       obj.className,
-      'visible and opaque',
-      `visibility = ${visibility} and opacity = ${opacity}`
+    "expected element '" +
+      tagName +
+      "' not to be #{exp}, got #{act}. with classes: " +
+      obj.className,
+    'visible and opaque',
+    `visibility = ${visibility} and opacity = ${opacity}`
   );
 });
 
@@ -524,13 +537,17 @@ chai.Assertion.addProperty('hidden', function() {
   const opacity = computedStyle.getPropertyValue('opacity');
   const tagName = obj.tagName.toLowerCase();
   this.assert(
-      visibility === 'hidden' || parseInt(opacity, 10) == 0,
-      'expected element \'' +
-        tagName + '\' to be #{exp}, got #{act}. with classes: ' + obj.className,
-      'expected element \'' +
-        tagName + '\' not to be #{act}. with classes: ' + obj.className,
-      'hidden',
-      visibility
+    visibility === 'hidden' || parseInt(opacity, 10) == 0,
+    "expected element '" +
+      tagName +
+      "' to be #{exp}, got #{act}. with classes: " +
+      obj.className,
+    "expected element '" +
+      tagName +
+      "' not to be #{act}. with classes: " +
+      obj.className,
+    'hidden',
+    visibility
   );
 });
 
@@ -539,11 +556,11 @@ chai.Assertion.addMethod('display', function(display) {
   const value = window.getComputedStyle(obj).getPropertyValue('display');
   const tagName = obj.tagName.toLowerCase();
   this.assert(
-      value === display,
-      'expected element \'' + tagName + '\' to be display #{exp}, got #{act}.',
-      'expected element \'' + tagName + '\' not to be display #{act}.',
-      display,
-      value
+    value === display,
+    "expected element '" + tagName + "' to be display #{exp}, got #{act}.",
+    "expected element '" + tagName + "' not to be display #{act}.",
+    display,
+    value
   );
 });
 
@@ -552,10 +569,10 @@ chai.Assertion.addMethod('jsonEqual', function(compare) {
   const a = stringify(compare);
   const b = stringify(obj);
   this.assert(
-      a == b,
-      'expected JSON to be equal.\nExp: #{exp}\nAct: #{act}',
-      'expected JSON to not be equal.\nExp: #{exp}\nAct: #{act}',
-      a,
-      b
+    a == b,
+    'expected JSON to be equal.\nExp: #{exp}\nAct: #{act}',
+    'expected JSON to not be equal.\nExp: #{exp}\nAct: #{act}',
+    a,
+    b
   );
 });

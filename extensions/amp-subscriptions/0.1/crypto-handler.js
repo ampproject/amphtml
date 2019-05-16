@@ -14,13 +14,10 @@
  * limitations under the License.
  */
 
-
 import {iterateCursor} from '../../../src/dom';
 import {tryParseJson} from '../../../src/json';
 
-
 export class CryptoHandler {
-
   /**
    * Creates an instance of CryptoHandler.
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
@@ -32,11 +29,13 @@ export class CryptoHandler {
     /** @private {?Promise} */
     this.decryptionPromise_ = null;
 
-    const parsedEncryptedKeys =
-        this.ampdoc_.getRootNode().querySelector('script[keys]');
+    const parsedEncryptedKeys = this.ampdoc_
+      .getRootNode()
+      .querySelector('script[cryptokeys]');
     /** @type {?JsonObject} */
-    this.encryptedKeys_ = (parsedEncryptedKeys &&
-      tryParseJson(parsedEncryptedKeys.textContent)) || null;
+    this.encryptedKeys_ =
+      (parsedEncryptedKeys && tryParseJson(parsedEncryptedKeys.textContent)) ||
+      null;
   }
 
   /**
@@ -70,15 +69,19 @@ export class CryptoHandler {
       return this.decryptionPromise_;
     }
     this.decryptionPromise_ = this.ampdoc_.whenReady().then(() => {
-      const encryptedSections =
-          this.ampdoc_.getRootNode().querySelectorAll('script[encrypted]');
+      const encryptedSections = this.ampdoc_
+        .getRootNode()
+        .querySelectorAll('script[encrypted]');
       const promises = [];
       iterateCursor(encryptedSections, encryptedSection => {
         promises.push(
-            this.decryptDocumentContent_(encryptedSection.textContent,
-                decryptedDocumentKey).then(decryptedContent => {
-              encryptedSection./*OK*/outerHTML = decryptedContent;
-            }));
+          this.decryptDocumentContent_(
+            encryptedSection.textContent,
+            decryptedDocumentKey
+          ).then(decryptedContent => {
+            encryptedSection./*OK*/ outerHTML = decryptedContent;
+          })
+        );
       });
       return Promise.all(promises);
     });
@@ -93,7 +96,10 @@ export class CryptoHandler {
    */
   decryptDocumentContent_(
     // eslint-disable-next-line no-unused-vars
-    encryptedContent, documentKey) {
+    encryptedContent,
+    // eslint-disable-next-line no-unused-vars
+    documentKey
+  ) {
     // Don't really return this. Placeholder for the real thing.
     // const placeholder = encryptedContent.trim() + documentKey;
     const placeholder = '<h2><i> abc </i></h2>';

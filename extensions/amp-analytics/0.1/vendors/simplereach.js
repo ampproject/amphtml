@@ -24,7 +24,8 @@ export const SIMPLEREACH_CONFIG = /** @type {!JsonObject} */ ({
   },
   'requests': {
     'host': 'https://edge.simplereach.com',
-    'baseParams': 'amp=true' +
+    'baseParams':
+      'amp=true' +
       '&pid=${pid}' +
       '&title=${title}' +
       '&url=${canonicalUrl}' +
@@ -39,9 +40,7 @@ export const SIMPLEREACH_CONFIG = /** @type {!JsonObject} */ ({
       '&article_id=${article_id}' +
       '&ignore_metadata=${ignore_metadata}',
     'visible': '${host}/n?${baseParams}',
-    'timer': '${host}/t?${baseParams}' +
-      '&t=5000' +
-      '&e=5000',
+    'timer': '${host}/t?${baseParams}&t=5000&e=5000',
   },
   'triggers': {
     'visible': {

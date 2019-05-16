@@ -18,16 +18,13 @@ import {Services} from '../../src/services';
 import {Viewer} from '../../src/service/viewer-impl';
 import {dev} from '../../src/log';
 import {installDocService} from '../../src/service/ampdoc-impl';
-import {installDocumentInfoServiceForDoc} from
-  '../../src/service/document-info-impl';
+import {installDocumentInfoServiceForDoc} from '../../src/service/document-info-impl';
 import {installDocumentStateService} from '../../src/service/document-state';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 import {parseUrlDeprecated, removeFragment} from '../../src/url';
 
-
 describe('Viewer', () => {
-
   let sandbox;
   let windowMock;
   let viewer;
@@ -82,16 +79,19 @@ describe('Viewer', () => {
       body: {style: {}},
       documentElement: {style: {}},
       title: 'Awesome doc',
-      querySelector() { return parseUrlDeprecated('http://www.example.com/'); },
+      querySelector() {
+        return parseUrlDeprecated('http://www.example.com/');
+      },
     };
     windowApi.navigator = window.navigator;
     windowApi.history = {
       replaceState: () => {},
     };
-    sandbox.stub(windowApi.history, 'replaceState').callsFake(
-        (state, title, url) => {
-          windowApi.location.href = url;
-        });
+    sandbox
+      .stub(windowApi.history, 'replaceState')
+      .callsFake((state, title, url) => {
+        windowApi.location.href = url;
+      });
     installDocService(windowApi, /* isSingleDoc */ true);
     installDocumentStateService(windowApi);
     ampdoc = Services.ampdocServiceFor(windowApi).getAmpDoc();
@@ -169,8 +169,11 @@ describe('Viewer', () => {
     const viewer = new Viewer(ampdoc);
     expect(viewer.isCctEmbedded()).to.be.true;
     yield viewer.whenFirstVisible();
-    expect(windowApi.history.replaceState).to.be.calledWith({}, '',
-        '#ampshare=http%3A%2F%2Fwww.example.com%2F');
+    expect(windowApi.history.replaceState).to.be.calledWith(
+      {},
+      '',
+      '#ampshare=http%3A%2F%2Fwww.example.com%2F'
+    );
   });
 
   it('should merge fragments within custom tab', function*() {
@@ -182,8 +185,11 @@ describe('Viewer', () => {
     expect(viewer.getParam('test')).to.equal('1');
     expect(viewer.isCctEmbedded()).to.be.true;
     yield viewer.whenFirstVisible();
-    expect(windowApi.history.replaceState).to.be.calledWith({}, '',
-        '#test=1&ampshare=http%3A%2F%2Fwww.example.com%2F');
+    expect(windowApi.history.replaceState).to.be.calledWith(
+      {},
+      '',
+      '#test=1&ampshare=http%3A%2F%2Fwww.example.com%2F'
+    );
   });
 
   it('should not duplicate ampshare when merging', function*() {
@@ -195,26 +201,31 @@ describe('Viewer', () => {
     expect(viewer.getParam('test')).to.equal('1');
     expect(viewer.isCctEmbedded()).to.be.true;
     yield viewer.whenFirstVisible();
-    expect(windowApi.history.replaceState).to.be.calledWith({}, '',
-        '#test=1&ampshare=http%3A%2F%2Fwww.example.com%2F');
+    expect(windowApi.history.replaceState).to.be.calledWith(
+      {},
+      '',
+      '#test=1&ampshare=http%3A%2F%2Fwww.example.com%2F'
+    );
   });
 
   it('should remove multiple ampshares when merging', function*() {
     windowApi.parent = windowApi;
     windowApi.location.href =
-        'http://www.example.com/#test=1&ampshare=a&ampshare=b&ampshare=c';
-    windowApi.location.hash =
-        '#test=1&ampshare=a&ampshare=b&ampshare=c';
+      'http://www.example.com/#test=1&ampshare=a&ampshare=b&ampshare=c';
+    windowApi.location.hash = '#test=1&ampshare=a&ampshare=b&ampshare=c';
     windowApi.location.search = '?amp_gsa=1&amp_js_v=a0';
     const viewer = new Viewer(ampdoc);
     expect(viewer.getParam('test')).to.equal('1');
     expect(viewer.isCctEmbedded()).to.be.true;
     yield viewer.whenFirstVisible();
-    expect(windowApi.history.replaceState).to.be.calledWith({}, '',
-        '#test=1&ampshare=http%3A%2F%2Fwww.example.com%2F');
+    expect(windowApi.history.replaceState).to.be.calledWith(
+      {},
+      '',
+      '#test=1&ampshare=http%3A%2F%2Fwww.example.com%2F'
+    );
   });
 
-  it('should remove extra ampshare even when it\'s first', function*() {
+  it("should remove extra ampshare even when it's first", function*() {
     windowApi.parent = windowApi;
     windowApi.location.href = 'http://www.example.com/#ampshare=old&test=1';
     windowApi.location.hash = '#ampshare=old&test=1';
@@ -223,24 +234,29 @@ describe('Viewer', () => {
     expect(viewer.getParam('test')).to.equal('1');
     expect(viewer.isCctEmbedded()).to.be.true;
     yield viewer.whenFirstVisible();
-    expect(windowApi.history.replaceState).to.be.calledWith({}, '',
-        '#ampshare=http%3A%2F%2Fwww.example.com%2F&test=1');
+    expect(windowApi.history.replaceState).to.be.calledWith(
+      {},
+      '',
+      '#ampshare=http%3A%2F%2Fwww.example.com%2F&test=1'
+    );
   });
 
-  it('should remove extra ampshare even when it\'s sandwiched', function*() {
+  it("should remove extra ampshare even when it's sandwiched", function*() {
     windowApi.parent = windowApi;
     windowApi.location.href =
-        'http://www.example.com/#note=ok&ampshare=old&test=1';
-    windowApi.location.hash =
-        '#note=ok&ampshare=old&test=1';
+      'http://www.example.com/#note=ok&ampshare=old&test=1';
+    windowApi.location.hash = '#note=ok&ampshare=old&test=1';
     windowApi.location.search = '?amp_gsa=1&amp_js_v=a0';
     const viewer = new Viewer(ampdoc);
     expect(viewer.getParam('test')).to.equal('1');
     expect(viewer.getParam('note')).to.equal('ok');
     expect(viewer.isCctEmbedded()).to.be.true;
     yield viewer.whenFirstVisible();
-    expect(windowApi.history.replaceState).to.be.calledWith({}, '',
-        '#note=ok&ampshare=http%3A%2F%2Fwww.example.com%2F&test=1');
+    expect(windowApi.history.replaceState).to.be.calledWith(
+      {},
+      '',
+      '#note=ok&ampshare=http%3A%2F%2Fwww.example.com%2F&test=1'
+    );
   });
 
   it('should clear fragment when click param is present', () => {
@@ -260,12 +276,18 @@ describe('Viewer', () => {
     windowApi.location.hash = '#click=abc';
     windowApi.location.search = '?amp_gsa=1&amp_js_v=a0';
     const viewer = new Viewer(ampdoc);
-    expect(windowApi.history.replaceState).to.be.calledWith({}, '',
-        'http://www.example.com');
+    expect(windowApi.history.replaceState).to.be.calledWith(
+      {},
+      '',
+      'http://www.example.com'
+    );
     expect(viewer.getParam('click')).to.equal('abc');
     yield viewer.whenFirstVisible();
-    expect(windowApi.history.replaceState).to.be.calledWith({}, '',
-        '#ampshare=http%3A%2F%2Fwww.example.com%2F');
+    expect(windowApi.history.replaceState).to.be.calledWith(
+      {},
+      '',
+      '#ampshare=http%3A%2F%2Fwww.example.com%2F'
+    );
   });
 
   it('should configure visibilityState visible by default', () => {
@@ -276,7 +298,7 @@ describe('Viewer', () => {
     expect(viewer.getLastVisibleTime()).to.equal(0);
   });
 
-  it('should return promise that resolve on visible', function* () {
+  it('should return promise that resolve on visible', function*() {
     const viewer = new Viewer(ampdoc);
     expect(viewer.isVisible()).to.be.true;
     let promise = viewer.whenNextVisible();
@@ -368,12 +390,17 @@ describe('Viewer', () => {
       const viewer = new Viewer(ampdoc);
       viewer.replaceUrl(viewer.getParam('replaceUrl'));
       expect(windowApi.history.replaceState).to.be.calledOnce;
-      expect(windowApi.history.replaceState).to.be.calledWith({}, '',
-          'http://www.example.com/two?a=1' + fragment);
-      expect(ampdoc.getUrl())
-          .to.equal('http://www.example.com/two?a=1' + fragment);
-      expect(windowApi.location.originalHref)
-          .to.equal('http://www.example.com/one' + fragment);
+      expect(windowApi.history.replaceState).to.be.calledWith(
+        {},
+        '',
+        'http://www.example.com/two?a=1' + fragment
+      );
+      expect(ampdoc.getUrl()).to.equal(
+        'http://www.example.com/two?a=1' + fragment
+      );
+      expect(windowApi.location.originalHref).to.equal(
+        'http://www.example.com/one' + fragment
+      );
     });
 
     it('should ignore replacement fragment', () => {
@@ -382,10 +409,14 @@ describe('Viewer', () => {
       const viewer = new Viewer(ampdoc);
       viewer.replaceUrl(viewer.getParam('replaceUrl'));
       expect(windowApi.history.replaceState).to.be.calledOnce;
-      expect(windowApi.history.replaceState).to.be.calledWith({}, '',
-          'http://www.example.com/two' + fragment);
-      expect(windowApi.location.originalHref)
-          .to.equal('http://www.example.com/one' + fragment);
+      expect(windowApi.history.replaceState).to.be.calledWith(
+        {},
+        '',
+        'http://www.example.com/two' + fragment
+      );
+      expect(windowApi.location.originalHref).to.equal(
+        'http://www.example.com/one' + fragment
+      );
     });
 
     it('should replace relative URL for the same non-proxy origin', () => {
@@ -394,10 +425,14 @@ describe('Viewer', () => {
       const viewer = new Viewer(ampdoc);
       viewer.replaceUrl(viewer.getParam('replaceUrl'));
       expect(windowApi.history.replaceState).to.be.calledOnce;
-      expect(windowApi.history.replaceState).to.be.calledWith({}, '',
-          window.location.origin + '/two' + fragment);
-      expect(windowApi.location.originalHref)
-          .to.equal(removeFragment(window.location.href) + fragment);
+      expect(windowApi.history.replaceState).to.be.calledWith(
+        {},
+        '',
+        window.location.origin + '/two' + fragment
+      );
+      expect(windowApi.location.originalHref).to.equal(
+        removeFragment(window.location.href) + fragment
+      );
     });
 
     it('should fail to replace URL for a wrong non-proxy origin', () => {
@@ -425,21 +460,24 @@ describe('Viewer', () => {
 
     it('should replace URL for the same source origin on proxy', () => {
       const fragment =
-          '#replaceUrl=https://cdn.ampproject.org/c/www.example.com/two&b=1';
+        '#replaceUrl=https://cdn.ampproject.org/c/www.example.com/two&b=1';
       setUrl('https://cdn.ampproject.org/c/www.example.com/one' + fragment);
       const viewer = new Viewer(ampdoc);
       viewer.replaceUrl(viewer.getParam('replaceUrl'));
       expect(windowApi.history.replaceState).to.be.calledOnce;
-      expect(windowApi.history.replaceState).to.be.calledWith({}, '',
-          'https://cdn.ampproject.org/c/www.example.com/two' + fragment);
-      expect(windowApi.location.originalHref)
-          .to.equal('https://cdn.ampproject.org/c/www.example.com/one' +
-              fragment);
+      expect(windowApi.history.replaceState).to.be.calledWith(
+        {},
+        '',
+        'https://cdn.ampproject.org/c/www.example.com/two' + fragment
+      );
+      expect(windowApi.location.originalHref).to.equal(
+        'https://cdn.ampproject.org/c/www.example.com/one' + fragment
+      );
     });
 
     it('should fail replace URL for wrong source origin on proxy', () => {
       const fragment =
-          '#replaceUrl=https://cdn.ampproject.org/c/other.example.com/two&b=1';
+        '#replaceUrl=https://cdn.ampproject.org/c/other.example.com/two&b=1';
       setUrl('https://cdn.ampproject.org/c/www.example.com/one' + fragment);
       const viewer = new Viewer(ampdoc);
       viewer.replaceUrl(viewer.getParam('replaceUrl'));
@@ -511,11 +549,13 @@ describe('Viewer', () => {
       viewer.receiveMessage('visibilitychange', {
         state: 'paused',
       });
-      allowConsoleError(() => { expect(() => {
-        viewer.receiveMessage('visibilitychange', {
-          state: 'what is this',
-        });
-      }).to.throw('Unknown VisibilityState value'); });
+      allowConsoleError(() => {
+        expect(() => {
+          viewer.receiveMessage('visibilitychange', {
+            state: 'what is this',
+          });
+        }).to.throw('Unknown VisibilityState value');
+      });
       expect(viewer.getVisibilityState()).to.equal('paused');
       expect(viewer.isVisible()).to.equal(false);
     });
@@ -561,15 +601,18 @@ describe('Viewer', () => {
       expect(viewer.isVisible()).to.equal(false);
     });
 
-    it('should be paused when the browser document is visible but viewer is' +
-       'paused', () => {
-      changeVisibility('visible');
-      viewer.receiveMessage('visibilitychange', {
-        state: 'paused',
-      });
-      expect(viewer.getVisibilityState()).to.equal('paused');
-      expect(viewer.isVisible()).to.equal(false);
-    });
+    it(
+      'should be paused when the browser document is visible but viewer is' +
+        'paused',
+      () => {
+        changeVisibility('visible');
+        viewer.receiveMessage('visibilitychange', {
+          state: 'paused',
+        });
+        expect(viewer.getVisibilityState()).to.equal('paused');
+        expect(viewer.isVisible()).to.equal(false);
+      }
+    );
 
     it('should be visible when the browser document is visible', () => {
       changeVisibility('visible');
@@ -642,18 +685,19 @@ describe('Viewer', () => {
   });
 
   describe('Messaging not embedded', () => {
-
     it('should not expect messaging', () => {
       expect(viewer.messagingReadyPromise_).to.be.null;
     });
 
     it('should fail sendMessageAwaitResponse', () => {
-      return viewer.sendMessageAwaitResponse('event', {})
-          .then(() => {
-            throw new Error('should not succeed');
-          }, error => {
-            expect(error.message).to.match(/No messaging channel/);
-          });
+      return viewer.sendMessageAwaitResponse('event', {}).then(
+        () => {
+          throw new Error('should not succeed');
+        },
+        error => {
+          expect(error.message).to.match(/No messaging channel/);
+        }
+      );
     });
 
     it('should do nothing in sendMessage but not fail', () => {
@@ -708,46 +752,51 @@ describe('Viewer', () => {
 
     it('sendMessageAwaitResponse should wait for messaging channel', () => {
       let mResolved = false;
-      const m = viewer.sendMessageAwaitResponse('event', {})
-          .then(() => {
-            mResolved = true;
-          });
-      return Promise.resolve().then(() => {
-        // Not resolved yet.
-        expect(mResolved).to.be.false;
-
-        // Set message deliverer.
-        viewer.setMessageDeliverer(() => {
-          return Promise.resolve();
-        }, 'https://www.example.com');
-        expect(mResolved).to.be.false;
-
-        return m;
-      }).then(() => {
-        // All resolved now.
-        expect(mResolved).to.be.true;
+      const m = viewer.sendMessageAwaitResponse('event', {}).then(() => {
+        mResolved = true;
       });
+      return Promise.resolve()
+        .then(() => {
+          // Not resolved yet.
+          expect(mResolved).to.be.false;
+
+          // Set message deliverer.
+          viewer.setMessageDeliverer(() => {
+            return Promise.resolve();
+          }, 'https://www.example.com');
+          expect(mResolved).to.be.false;
+
+          return m;
+        })
+        .then(() => {
+          // All resolved now.
+          expect(mResolved).to.be.true;
+        });
     });
 
     it('should timeout messaging channel', () => {
       let mResolved = false;
-      const m = viewer.sendMessageAwaitResponse('event', {})
-          .then(() => {
-            mResolved = true;
-          });
-      return Promise.resolve().then(() => {
-        // Not resolved yet.
-        expect(mResolved).to.be.false;
-
-        // Timeout.
-        clock.tick(20001);
-        return m;
-      }).then(() => {
-        throw new Error('must never be here');
-      }, () => {
-        // Not resolved ever.
-        expect(mResolved).to.be.false;
+      const m = viewer.sendMessageAwaitResponse('event', {}).then(() => {
+        mResolved = true;
       });
+      return Promise.resolve()
+        .then(() => {
+          // Not resolved yet.
+          expect(mResolved).to.be.false;
+
+          // Timeout.
+          clock.tick(20001);
+          return m;
+        })
+        .then(
+          () => {
+            throw new Error('must never be here');
+          },
+          () => {
+            // Not resolved ever.
+            expect(mResolved).to.be.false;
+          }
+        );
     });
 
     describe('sendMessage', () => {
@@ -766,8 +815,8 @@ describe('Viewer', () => {
 
     describe('sendMessage with cancelUnsent', () => {
       it('should queue non-dupe events', () => {
-        viewer.sendMessage('event-a', {value: 1}, /* cancelUnsent*/true);
-        viewer.sendMessage('event-b', {value: 2}, /* cancelUnsent*/true);
+        viewer.sendMessage('event-a', {value: 1}, /* cancelUnsent*/ true);
+        viewer.sendMessage('event-b', {value: 2}, /* cancelUnsent*/ true);
         expect(viewer.messageQueue_.length).to.equal(2);
         expect(viewer.messageQueue_[0].eventType).to.equal('event-a');
         expect(viewer.messageQueue_[0].data.value).to.equal(1);
@@ -776,16 +825,16 @@ describe('Viewer', () => {
       });
 
       it('should queue dupe events', () => {
-        viewer.sendMessage('event', {value: 1}, /* cancelUnsent*/true);
-        viewer.sendMessage('event', {value: 2}, /* cancelUnsent*/true);
+        viewer.sendMessage('event', {value: 1}, /* cancelUnsent*/ true);
+        viewer.sendMessage('event', {value: 2}, /* cancelUnsent*/ true);
         expect(viewer.messageQueue_.length).to.equal(1);
         expect(viewer.messageQueue_[0].eventType).to.equal('event');
         expect(viewer.messageQueue_[0].data.value).to.equal(2);
       });
 
       it('should dequeue events when deliverer is set', () => {
-        viewer.sendMessage('event-a', {value: 1}, /* cancelUnsent*/true);
-        viewer.sendMessage('event-b', {value: 2}, /* cancelUnsent*/true);
+        viewer.sendMessage('event-a', {value: 1}, /* cancelUnsent*/ true);
+        viewer.sendMessage('event-b', {value: 2}, /* cancelUnsent*/ true);
         expect(viewer.messageQueue_.length).to.equal(2);
 
         const delivered = [];
@@ -801,8 +850,11 @@ describe('Viewer', () => {
       });
 
       it('should return undefined', () => {
-        const response = viewer.sendMessage('event', {value: 1},
-            /* cancelUnsent */true);
+        const response = viewer.sendMessage(
+          'event',
+          {value: 1},
+          /* cancelUnsent */ true
+        );
         expect(response).to.be.undefined;
       });
     });
@@ -824,44 +876,69 @@ describe('Viewer', () => {
 
     describe('sendMessageAwaitResponse with cancelUnsent', () => {
       it('should send queued messages', () => {
-        viewer.sendMessageAwaitResponse('event-a', {value: 1},
-            /* cancelUnsent */true);
-        viewer.sendMessageAwaitResponse('event-b', {value: 2},
-            /* cancelUnsent */true);
-        viewer.sendMessageAwaitResponse('event-a', {value: 3},
-            /* cancelUnsent */true);
+        viewer.sendMessageAwaitResponse(
+          'event-a',
+          {value: 1},
+          /* cancelUnsent */ true
+        );
+        viewer.sendMessageAwaitResponse(
+          'event-b',
+          {value: 2},
+          /* cancelUnsent */ true
+        );
+        viewer.sendMessageAwaitResponse(
+          'event-a',
+          {value: 3},
+          /* cancelUnsent */ true
+        );
 
         const delivererSpy = sandbox.stub();
         delivererSpy.returns(Promise.resolve());
 
         viewer.setMessageDeliverer(delivererSpy, 'https://www.example.com');
         sinon.assert.callOrder(
-            delivererSpy.withArgs('event-b', {value: 2}, true),
-            delivererSpy.withArgs('event-a', {value: 3}, true));
+          delivererSpy.withArgs('event-b', {value: 2}, true),
+          delivererSpy.withArgs('event-a', {value: 3}, true)
+        );
         expect(delivererSpy).to.not.be.calledWith('event-a', {value: 1}, true);
 
-        viewer.sendMessageAwaitResponse('event-a', {value: 4},
-            /* cancelUnsent */true);
+        viewer.sendMessageAwaitResponse(
+          'event-a',
+          {value: 4},
+          /* cancelUnsent */ true
+        );
         expect(delivererSpy).to.be.calledWith('event-a', {value: 4}, true);
       });
 
       it('should return promise that resolves on response', () => {
-        const response1 = viewer.sendMessageAwaitResponse('event-a', {value: 1},
-            /* cancelUnsent */true);
-        const response2 = viewer.sendMessageAwaitResponse('event-a', {value: 2},
-            /* cancelUnsent */true);
+        const response1 = viewer.sendMessageAwaitResponse(
+          'event-a',
+          {value: 1},
+          /* cancelUnsent */ true
+        );
+        const response2 = viewer.sendMessageAwaitResponse(
+          'event-a',
+          {value: 2},
+          /* cancelUnsent */ true
+        );
 
         const delivererSpy = sandbox.stub();
-        delivererSpy.withArgs('event-a', {value: 2}, true)
-            .returns(Promise.resolve('result-2'));
-        delivererSpy.withArgs('event-a', {value: 3}, true)
-            .returns(Promise.resolve('result-3'));
+        delivererSpy
+          .withArgs('event-a', {value: 2}, true)
+          .returns(Promise.resolve('result-2'));
+        delivererSpy
+          .withArgs('event-a', {value: 3}, true)
+          .returns(Promise.resolve('result-3'));
         viewer.setMessageDeliverer(delivererSpy, 'https://www.example.com');
 
-        const response3 = viewer.sendMessageAwaitResponse('event-a', {value: 3},
-            /* cancelUnsent */true);
-        return expect(Promise.all([response1, response2, response3]))
-            .to.eventually.deep.equal(['result-2', 'result-2', 'result-3']);
+        const response3 = viewer.sendMessageAwaitResponse(
+          'event-a',
+          {value: 3},
+          /* cancelUnsent */ true
+        );
+        return expect(
+          Promise.all([response1, response2, response3])
+        ).to.eventually.deep.equal(['result-2', 'result-2', 'result-3']);
       });
     });
   });
@@ -961,16 +1038,14 @@ describe('Viewer', () => {
       expect(new Viewer(ampdoc).isCctEmbedded()).to.be.false;
     });
 
-    it('should NOT be CCT embedded if iframed regardless of "amp_gsa=1"',
-        () => {
-          windowApi.parent = {};
-          windowApi.location.search = '?amp_gsa=0&amp_js_v=a0';
-          expect(new Viewer(ampdoc).isCctEmbedded()).to.be.false;
-        });
+    it('should NOT be CCT embedded if iframed regardless of "amp_gsa=1"', () => {
+      windowApi.parent = {};
+      windowApi.location.search = '?amp_gsa=0&amp_js_v=a0';
+      expect(new Viewer(ampdoc).isCctEmbedded()).to.be.false;
+    });
   });
 
   describe('isTrustedViewer', () => {
-
     it('should consider non-trusted when not iframed', () => {
       windowApi.parent = windowApi;
       windowApi.location.ancestorOrigins = ['https://google.com'];
@@ -1139,7 +1214,6 @@ describe('Viewer', () => {
           expect(res).to.be.false;
         });
       });
-
     });
 
     describe('when in a fake webview (a bad actor iframe)', () => {
@@ -1245,29 +1319,86 @@ describe('Viewer', () => {
       testHasRoughlySameOrigin('https://google.com', 'https://google.com');
       testHasRoughlySameOrigin('https://www.google.com', 'https://google.com');
       testHasRoughlySameOrigin('https://www.google.net', 'https://google.net');
-      testHasRoughlySameOrigin('https://www.google.co.uk', 'https://google.co.uk');
-      testHasRoughlySameOrigin('https://www.google.co.uk:80', 'https://google.co.uk:80');
-      testHasRoughlySameOrigin('https://www.www.google.com', 'https://google.com');
-      testHasRoughlySameOrigin('https://www.www.www.google.com', 'https://google.com');
-      testHasRoughlySameOrigin('http://www.www.www.google.com:1337', 'http://google.com:1337');
+      testHasRoughlySameOrigin(
+        'https://www.google.co.uk',
+        'https://google.co.uk'
+      );
+      testHasRoughlySameOrigin(
+        'https://www.google.co.uk:80',
+        'https://google.co.uk:80'
+      );
+      testHasRoughlySameOrigin(
+        'https://www.www.google.com',
+        'https://google.com'
+      );
+      testHasRoughlySameOrigin(
+        'https://www.www.www.google.com',
+        'https://google.com'
+      );
+      testHasRoughlySameOrigin(
+        'http://www.www.www.google.com:1337',
+        'http://google.com:1337'
+      );
       testHasRoughlySameOrigin('https://amp.google.com', 'https://google.com');
-      testHasRoughlySameOrigin('https://www.amp.google.com', 'https://google.com');
-      testHasRoughlySameOrigin('https://amp.www.google.com', 'https://google.com');
-      testHasRoughlySameOrigin('https://mobile.google.com', 'https://google.com');
+      testHasRoughlySameOrigin(
+        'https://www.amp.google.com',
+        'https://google.com'
+      );
+      testHasRoughlySameOrigin(
+        'https://amp.www.google.com',
+        'https://google.com'
+      );
+      testHasRoughlySameOrigin(
+        'https://mobile.google.com',
+        'https://google.com'
+      );
       testHasRoughlySameOrigin('https://m.google.com', 'https://google.com');
-      testHasRoughlySameOrigin('https://amp.m.google.com', 'https://google.com');
-      testHasRoughlySameOrigin('https://amp.mobile.google.com', 'https://google.com');
-      testHasRoughlySameOrigin('https://amp.mobile.google.co.uk', 'https://google.co.uk');
-      testHasRoughlySameOrigin('https://www1.www2.www3.google.com', 'https://google.com');
-      testHasRoughlySameOrigin('https://www.xyz.google.com', 'https://xyz.google.com');
-      testHasRoughlySameOrigin('https://xyz.www.xyz.google.com', 'https://xyz.www.xyz.google.com');
+      testHasRoughlySameOrigin(
+        'https://amp.m.google.com',
+        'https://google.com'
+      );
+      testHasRoughlySameOrigin(
+        'https://amp.mobile.google.com',
+        'https://google.com'
+      );
+      testHasRoughlySameOrigin(
+        'https://amp.mobile.google.co.uk',
+        'https://google.co.uk'
+      );
+      testHasRoughlySameOrigin(
+        'https://www1.www2.www3.google.com',
+        'https://google.com'
+      );
+      testHasRoughlySameOrigin(
+        'https://www.xyz.google.com',
+        'https://xyz.google.com'
+      );
+      testHasRoughlySameOrigin(
+        'https://xyz.www.xyz.google.com',
+        'https://xyz.www.xyz.google.com'
+      );
       testHasRoughlyDifferentOrigin('http://google.com', 'https://google.com');
       testHasRoughlyDifferentOrigin('https://google.com', 'https://google.net');
-      testHasRoughlyDifferentOrigin('https://www.google.com', 'http://google.com');
-      testHasRoughlyDifferentOrigin('https://google.com:80', 'https://google.com:81');
-      testHasRoughlyDifferentOrigin('https://xyz.google.com', 'https://google.com');
-      testHasRoughlyDifferentOrigin('https://xyz.google.com', 'http://xyz.google.com');
-      testHasRoughlyDifferentOrigin('https://xyz.google.com:80', 'https://xyz.google.com:81');
+      testHasRoughlyDifferentOrigin(
+        'https://www.google.com',
+        'http://google.com'
+      );
+      testHasRoughlyDifferentOrigin(
+        'https://google.com:80',
+        'https://google.com:81'
+      );
+      testHasRoughlyDifferentOrigin(
+        'https://xyz.google.com',
+        'https://google.com'
+      );
+      testHasRoughlyDifferentOrigin(
+        'https://xyz.google.com',
+        'http://xyz.google.com'
+      );
+      testHasRoughlyDifferentOrigin(
+        'https://xyz.google.com:80',
+        'https://xyz.google.com:81'
+      );
     });
 
     /**
@@ -1309,16 +1440,15 @@ describe('Viewer', () => {
       test('http://google.com', false);
     });
 
-    describe('should NOT trust wrong or non-whitelisted domain variations',
-        () => {
-          test('https://google.net', false);
-          test('https://google.other.com', false);
-          test('https://www.google.other.com', false);
-          test('https://withgoogle.com', false);
-          test('https://acme.com', false);
-          test('https://google', false);
-          test('https://www.google', false);
-        });
+    describe('should NOT trust wrong or non-whitelisted domain variations', () => {
+      test('https://google.net', false);
+      test('https://google.other.com', false);
+      test('https://www.google.other.com', false);
+      test('https://withgoogle.com', false);
+      test('https://acme.com', false);
+      test('https://google', false);
+      test('https://www.google', false);
+    });
   });
 
   describe('referrer', () => {
@@ -1327,8 +1457,9 @@ describe('Viewer', () => {
       windowApi.location.hash = '#';
       windowApi.document.referrer = 'https://acme.org/docref';
       const viewer = new Viewer(ampdoc);
-      expect(viewer.getUnconfirmedReferrerUrl())
-          .to.equal('https://acme.org/docref');
+      expect(viewer.getUnconfirmedReferrerUrl()).to.equal(
+        'https://acme.org/docref'
+      );
       return viewer.getReferrerUrl().then(referrerUrl => {
         expect(referrerUrl).to.equal('https://acme.org/docref');
         expect(errorStub).to.have.not.been.called;
@@ -1337,12 +1468,13 @@ describe('Viewer', () => {
 
     it('should NOT allow override if not iframed', () => {
       windowApi.parent = windowApi;
-      windowApi.location.hash = '#referrer=' +
-          encodeURIComponent('https://acme.org/viewer');
+      windowApi.location.hash =
+        '#referrer=' + encodeURIComponent('https://acme.org/viewer');
       windowApi.document.referrer = 'https://acme.org/docref';
       const viewer = new Viewer(ampdoc);
-      expect(viewer.getUnconfirmedReferrerUrl())
-          .to.equal('https://acme.org/docref');
+      expect(viewer.getUnconfirmedReferrerUrl()).to.equal(
+        'https://acme.org/docref'
+      );
       return viewer.getReferrerUrl().then(referrerUrl => {
         expect(referrerUrl).to.equal('https://acme.org/docref');
         expect(errorStub).to.have.not.been.called;
@@ -1351,13 +1483,15 @@ describe('Viewer', () => {
 
     it('should NOT allow override if not trusted', () => {
       windowApi.parent = {};
-      windowApi.location.hash = '#origin=g.com&referrer=' +
-          encodeURIComponent('https://acme.org/viewer');
+      windowApi.location.hash =
+        '#origin=g.com&referrer=' +
+        encodeURIComponent('https://acme.org/viewer');
       windowApi.document.referrer = 'https://acme.org/docref';
       windowApi.location.ancestorOrigins = ['https://untrusted.com'];
       const viewer = new Viewer(ampdoc);
-      expect(viewer.getUnconfirmedReferrerUrl())
-          .to.equal('https://acme.org/docref');
+      expect(viewer.getUnconfirmedReferrerUrl()).to.equal(
+        'https://acme.org/docref'
+      );
       return viewer.getReferrerUrl().then(referrerUrl => {
         expect(referrerUrl).to.equal('https://acme.org/docref');
         expect(errorStub).to.have.not.been.called;
@@ -1366,13 +1500,15 @@ describe('Viewer', () => {
 
     it('should NOT allow override if ancestor is empty', () => {
       windowApi.parent = {};
-      windowApi.location.hash = '#origin=g.com&referrer=' +
-          encodeURIComponent('https://acme.org/viewer');
+      windowApi.location.hash =
+        '#origin=g.com&referrer=' +
+        encodeURIComponent('https://acme.org/viewer');
       windowApi.document.referrer = 'https://acme.org/docref';
       windowApi.location.ancestorOrigins = [];
       const viewer = new Viewer(ampdoc);
-      expect(viewer.getUnconfirmedReferrerUrl())
-          .to.equal('https://acme.org/docref');
+      expect(viewer.getUnconfirmedReferrerUrl()).to.equal(
+        'https://acme.org/docref'
+      );
       return viewer.getReferrerUrl().then(referrerUrl => {
         expect(referrerUrl).to.equal('https://acme.org/docref');
         expect(errorStub).to.have.not.been.called;
@@ -1381,55 +1517,67 @@ describe('Viewer', () => {
 
     it('should allow partial override if async not trusted', () => {
       windowApi.parent = {};
-      windowApi.location.hash = '#origin=g.com&referrer=' +
-          encodeURIComponent('https://acme.org/viewer');
+      windowApi.location.hash =
+        '#origin=g.com&referrer=' +
+        encodeURIComponent('https://acme.org/viewer');
       windowApi.document.referrer = 'https://acme.org/docref';
       const viewer = new Viewer(ampdoc);
       // Unconfirmed referrer is overriden, but not confirmed yet.
-      expect(viewer.getUnconfirmedReferrerUrl())
-          .to.equal('https://acme.org/viewer');
+      expect(viewer.getUnconfirmedReferrerUrl()).to.equal(
+        'https://acme.org/viewer'
+      );
       viewer.setMessageDeliverer(() => {}, 'https://untrusted.com');
       return viewer.getReferrerUrl().then(referrerUrl => {
         expect(referrerUrl).to.equal('https://acme.org/docref');
         // Unconfirmed referrer is reset. Async error is thrown.
-        expect(viewer.getUnconfirmedReferrerUrl())
-            .to.equal('https://acme.org/docref');
+        expect(viewer.getUnconfirmedReferrerUrl()).to.equal(
+          'https://acme.org/docref'
+        );
         expect(expectedErrorStub).to.be.calledOnce;
-        expect(expectedErrorStub.calledWith('Viewer',
+        expect(
+          expectedErrorStub.calledWith(
+            'Viewer',
             sinon.match(arg => {
               return !!arg.match(/Untrusted viewer referrer override/);
-            }))).to.be.true;
+            })
+          )
+        ).to.be.true;
       });
     });
 
     it('should allow full override if async trusted', () => {
       windowApi.parent = {};
-      windowApi.location.hash = '#origin=g.com&referrer=' +
-          encodeURIComponent('https://acme.org/viewer');
+      windowApi.location.hash =
+        '#origin=g.com&referrer=' +
+        encodeURIComponent('https://acme.org/viewer');
       windowApi.document.referrer = 'https://acme.org/docref';
       const viewer = new Viewer(ampdoc);
       // Unconfirmed referrer is overriden and will be confirmed next.
-      expect(viewer.getUnconfirmedReferrerUrl())
-          .to.equal('https://acme.org/viewer');
+      expect(viewer.getUnconfirmedReferrerUrl()).to.equal(
+        'https://acme.org/viewer'
+      );
       viewer.setMessageDeliverer(() => {}, 'https://google.com');
       return viewer.getReferrerUrl().then(referrerUrl => {
         expect(referrerUrl).to.equal('https://acme.org/viewer');
         // Unconfirmed is confirmed and kept.
-        expect(viewer.getUnconfirmedReferrerUrl())
-            .to.equal('https://acme.org/viewer');
+        expect(viewer.getUnconfirmedReferrerUrl()).to.equal(
+          'https://acme.org/viewer'
+        );
         expect(errorStub).to.have.not.been.called;
       });
     });
 
     it('should allow override if iframed and trusted', () => {
       windowApi.parent = {};
-      windowApi.location.hash = '#origin=g.com&referrer=' +
-          encodeURIComponent('https://acme.org/viewer');
+      windowApi.location.hash =
+        '#origin=g.com&referrer=' +
+        encodeURIComponent('https://acme.org/viewer');
       windowApi.document.referrer = 'https://acme.org/docref';
       windowApi.location.ancestorOrigins = ['https://google.com'];
       const viewer = new Viewer(ampdoc);
-      expect(viewer.getUnconfirmedReferrerUrl())
-          .to.equal('https://acme.org/viewer');
+      expect(viewer.getUnconfirmedReferrerUrl()).to.equal(
+        'https://acme.org/viewer'
+      );
       return viewer.getReferrerUrl().then(referrerUrl => {
         expect(referrerUrl).to.equal('https://acme.org/viewer');
         expect(errorStub).to.have.not.been.called;
@@ -1442,8 +1590,7 @@ describe('Viewer', () => {
       windowApi.document.referrer = 'https://acme.org/docref';
       windowApi.location.ancestorOrigins = ['https://google.com'];
       const viewer = new Viewer(ampdoc);
-      expect(viewer.getUnconfirmedReferrerUrl())
-          .to.equal('');
+      expect(viewer.getUnconfirmedReferrerUrl()).to.equal('');
       return viewer.getReferrerUrl().then(referrerUrl => {
         expect(referrerUrl).to.equal('');
         expect(errorStub).to.have.not.been.called;
@@ -1452,7 +1599,6 @@ describe('Viewer', () => {
   });
 
   describe('viewerUrl', () => {
-
     it('should initially always return current location', () => {
       windowApi.location.href = 'https://acme.org/doc1#hash';
       const viewer = new Viewer(ampdoc);
@@ -1474,8 +1620,9 @@ describe('Viewer', () => {
     it('should NOT allow override if not iframed', () => {
       windowApi.parent = windowApi;
       windowApi.location.href = 'https://acme.org/doc1';
-      windowApi.location.hash = '#origin=g.com&viewerUrl=' +
-          encodeURIComponent('https://acme.org/viewer');
+      windowApi.location.hash =
+        '#origin=g.com&viewerUrl=' +
+        encodeURIComponent('https://acme.org/viewer');
       const viewer = new Viewer(ampdoc);
       expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
       return viewer.getViewerUrl().then(viewerUrl => {
@@ -1488,8 +1635,9 @@ describe('Viewer', () => {
     it('should NOT allow override if not trusted', () => {
       windowApi.parent = {};
       windowApi.location.href = 'https://acme.org/doc1';
-      windowApi.location.hash = '#origin=g.com&viewerUrl=' +
-          encodeURIComponent('https://acme.org/viewer');
+      windowApi.location.hash =
+        '#origin=g.com&viewerUrl=' +
+        encodeURIComponent('https://acme.org/viewer');
       windowApi.location.ancestorOrigins = ['https://untrusted.com'];
       const viewer = new Viewer(ampdoc);
       expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
@@ -1497,18 +1645,23 @@ describe('Viewer', () => {
         expect(viewerUrl).to.equal('https://acme.org/doc1');
         expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
         expect(expectedErrorStub).to.be.calledOnce;
-        expect(expectedErrorStub.calledWith('Viewer',
+        expect(
+          expectedErrorStub.calledWith(
+            'Viewer',
             sinon.match(arg => {
               return !!arg.match(/Untrusted viewer url override/);
-            }))).to.be.true;
+            })
+          )
+        ).to.be.true;
       });
     });
 
     it('should NOT allow override if ancestor is empty', () => {
       windowApi.parent = {};
       windowApi.location.href = 'https://acme.org/doc1';
-      windowApi.location.hash = '#origin=g.com&viewerUrl=' +
-          encodeURIComponent('https://acme.org/viewer');
+      windowApi.location.hash =
+        '#origin=g.com&viewerUrl=' +
+        encodeURIComponent('https://acme.org/viewer');
       windowApi.location.ancestorOrigins = [];
       const viewer = new Viewer(ampdoc);
       expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
@@ -1516,18 +1669,23 @@ describe('Viewer', () => {
         expect(viewerUrl).to.equal('https://acme.org/doc1');
         expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
         expect(expectedErrorStub).to.be.calledOnce;
-        expect(expectedErrorStub.calledWith('Viewer',
+        expect(
+          expectedErrorStub.calledWith(
+            'Viewer',
             sinon.match(arg => {
               return !!arg.match(/Untrusted viewer url override/);
-            }))).to.be.true;
+            })
+          )
+        ).to.be.true;
       });
     });
 
     it('should allow partial override if async not trusted', () => {
       windowApi.parent = {};
       windowApi.location.href = 'https://acme.org/doc1';
-      windowApi.location.hash = '#origin=g.com&viewerUrl=' +
-          encodeURIComponent('https://acme.org/viewer');
+      windowApi.location.hash =
+        '#origin=g.com&viewerUrl=' +
+        encodeURIComponent('https://acme.org/viewer');
       const viewer = new Viewer(ampdoc);
       expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
       viewer.setMessageDeliverer(() => {}, 'https://untrusted.com');
@@ -1535,25 +1693,31 @@ describe('Viewer', () => {
         expect(viewerUrl).to.equal('https://acme.org/doc1');
         expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
         expect(expectedErrorStub).to.be.calledOnce;
-        expect(expectedErrorStub.calledWith('Viewer',
+        expect(
+          expectedErrorStub.calledWith(
+            'Viewer',
             sinon.match(arg => {
               return !!arg.match(/Untrusted viewer url override/);
-            }))).to.be.true;
+            })
+          )
+        ).to.be.true;
       });
     });
 
     it('should allow full override if async trusted', () => {
       windowApi.parent = {};
       windowApi.location.href = 'https://acme.org/doc1';
-      windowApi.location.hash = '#origin=g.com&viewerUrl=' +
-          encodeURIComponent('https://acme.org/viewer');
+      windowApi.location.hash =
+        '#origin=g.com&viewerUrl=' +
+        encodeURIComponent('https://acme.org/viewer');
       const viewer = new Viewer(ampdoc);
       expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
       viewer.setMessageDeliverer(() => {}, 'https://google.com');
       return viewer.getViewerUrl().then(viewerUrl => {
         expect(viewerUrl).to.equal('https://acme.org/viewer');
-        expect(viewer.getResolvedViewerUrl())
-            .to.equal('https://acme.org/viewer');
+        expect(viewer.getResolvedViewerUrl()).to.equal(
+          'https://acme.org/viewer'
+        );
         expect(expectedErrorStub).to.have.not.been.called;
       });
     });
@@ -1561,15 +1725,17 @@ describe('Viewer', () => {
     it('should allow override if iframed and trusted', () => {
       windowApi.parent = {};
       windowApi.location.href = 'https://acme.org/doc1';
-      windowApi.location.hash = '#origin=g.com&viewerUrl=' +
-          encodeURIComponent('https://acme.org/viewer');
+      windowApi.location.hash =
+        '#origin=g.com&viewerUrl=' +
+        encodeURIComponent('https://acme.org/viewer');
       windowApi.location.ancestorOrigins = ['https://google.com'];
       const viewer = new Viewer(ampdoc);
       expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
       return viewer.getViewerUrl().then(viewerUrl => {
         expect(viewerUrl).to.equal('https://acme.org/viewer');
-        expect(viewer.getResolvedViewerUrl())
-            .to.equal('https://acme.org/viewer');
+        expect(viewer.getResolvedViewerUrl()).to.equal(
+          'https://acme.org/viewer'
+        );
         expect(expectedErrorStub).to.have.not.been.called;
       });
     });
@@ -1590,7 +1756,6 @@ describe('Viewer', () => {
   });
 
   describe('viewerOrigin', () => {
-
     it('should return empty string if origin is not known', () => {
       const viewer = new Viewer(ampdoc);
       return viewer.getViewerOrigin().then(viewerOrigin => {

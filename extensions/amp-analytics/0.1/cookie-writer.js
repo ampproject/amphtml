@@ -17,7 +17,7 @@
 import {BASE_CID_MAX_AGE_MILLIS} from '../../../src/service/cid-impl';
 import {Services} from '../../../src/services';
 import {getMode} from '../../../src/mode';
-import {getNameArgs, variableServiceForDoc} from './variables';
+import {getNameArgs, variableServiceFor} from './variables';
 import {hasOwn} from '../../../src/utils/object';
 import {isInFie} from '../../../src/friendly-iframe-embed';
 import {isObject} from '../../../src/types';
@@ -42,7 +42,6 @@ const RESERVED_KEYS = {
 };
 
 export class CookieWriter {
-
   /**
    * @param {!Window} win
    * @param {!Element} element
@@ -65,7 +64,7 @@ export class CookieWriter {
     this.config_ = config;
 
     /** @const @private {!JsonObject} */
-    this.bindings_ = variableServiceForDoc(element).getMacros();
+    this.bindings_ = variableServiceFor(this.win_).getMacros();
   }
 
   /**
@@ -96,14 +95,16 @@ export class CookieWriter {
    */
   init_() {
     // TODO: Need the consider the case for shadow doc.
-    if (isInFie(this.element_) || isProxyOrigin(this.win_.location) ||
-        getMode(this.win_).runtime == 'inabox') {
+    if (
+      isInFie(this.element_) ||
+      isProxyOrigin(this.win_.location) ||
+      getMode(this.win_).runtime == 'inabox'
+    ) {
       // Disable cookie writer in friendly iframe and proxy origin and inabox.
       // Note: It's important to check origin here so that setCookie doesn't
       // throw error "should not attempt ot set cookie on proxy origin"
       return Promise.resolve();
     }
-
 
     if (!hasOwn(this.config_, 'cookies')) {
       return Promise.resolve();
@@ -166,8 +167,11 @@ export class CookieWriter {
     // Make sure that only QUERY_PARAM and LINKER_PARAM is supported
     const {name} = getNameArgs(str);
     if (!EXPAND_WHITELIST[name]) {
-      user().error(TAG, `cookie value ${str} not supported. ` +
-        'Only QUERY_PARAM and LINKER_PARAM is supported');
+      user().error(
+        TAG,
+        `cookie value ${str} not supported. ` +
+          'Only QUERY_PARAM and LINKER_PARAM is supported'
+      );
       return false;
     }
 
@@ -183,17 +187,20 @@ export class CookieWriter {
   expandAndWrite_(cookieName, cookieValue) {
     // Note: Have to use `expandStringAsync` because QUERY_PARAM can wait for
     // trackImpressionPromise and resolve async
-    return this.urlReplacementService_.expandStringAsync(cookieValue,
-        this.bindings_, EXPAND_WHITELIST).then(
-        value => {
-          // Note: We ignore empty cookieValue, that means currently we don't
-          // provide a way to overwrite or erase existing cookie
-          if (value) {
-            const expireDate = Date.now() + BASE_CID_MAX_AGE_MILLIS;
-            setCookie(this.win_, cookieName, value, expireDate);
-          }
-        }).catch(e => {
-      user().error(TAG, 'Error expanding cookie string', e);
-    });
+    return this.urlReplacementService_
+      .expandStringAsync(cookieValue, this.bindings_, EXPAND_WHITELIST)
+      .then(value => {
+        // Note: We ignore empty cookieValue, that means currently we don't
+        // provide a way to overwrite or erase existing cookie
+        if (value) {
+          const expireDate = Date.now() + BASE_CID_MAX_AGE_MILLIS;
+          setCookie(this.win_, cookieName, value, expireDate, {
+            highestAvailableDomain: true,
+          });
+        }
+      })
+      .catch(e => {
+        user().error(TAG, 'Error expanding cookie string', e);
+      });
   }
 }

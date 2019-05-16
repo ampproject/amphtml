@@ -7,6 +7,7 @@
     "google-camelcase",
     "jsdoc",
     "notice",
+    "prettier",
     "sort-imports-es6-autofix",
     "sort-requires"
   ],
@@ -59,7 +60,7 @@
     "amphtml-internal/no-export-side-effect": 2,
     "amphtml-internal/no-for-of-statement": 2,
     "amphtml-internal/no-global": 0,
-    "amphtml-internal/no-has-own-property-method": 1,
+    "amphtml-internal/no-has-own-property-method": 2,
     "amphtml-internal/no-import": 2,
     "amphtml-internal/no-import-rename": 2,
     "amphtml-internal/no-is-amp-alt": 2,
@@ -70,25 +71,17 @@
     "amphtml-internal/no-style-display": 2,
     "amphtml-internal/no-style-property-setting": 2,
     "amphtml-internal/no-swallow-return-from-allow-console-error": 2,
-    "amphtml-internal/prefer-deferred-promise": 1,
+    "amphtml-internal/prefer-deferred-promise": 0,
     "amphtml-internal/prefer-destructuring": 2,
     "amphtml-internal/query-selector": 2,
     "amphtml-internal/todo-format": 0,
-    "amphtml-internal/unused-private-field": 1,
-    "amphtml-internal/vsync": 1,
-    "array-bracket-spacing": [2, "never"],
-    "arrow-parens": [2, "as-needed"],
-    "arrow-spacing": 2,
+    "amphtml-internal/unused-private-field": 0,
+    "amphtml-internal/vsync": 0,
     "chai-expect/missing-assertion": 2,
     "chai-expect/no-inner-compare": 2,
     "chai-expect/terminating-properties": 2,
-    "comma-dangle": [2, "always-multiline"],
-    "computed-property-spacing": [2, "never"],
     "curly": 2,
-    "dot-location": [2, "property"],
-    "eol-last": 2,
     "google-camelcase/google-camelcase": 2,
-    "indent": [2, 2, { "SwitchCase": 1, "VariableDeclarator": 2, "MemberExpression": 2, "ObjectExpression": 1, "CallExpression": { "arguments": 2 } }],
     "jsdoc/check-param-names": 2,
     "jsdoc/check-tag-names": 2,
     "jsdoc/check-types": 2,
@@ -96,13 +89,6 @@
     "jsdoc/require-param-name": 2,
     "jsdoc/require-param-type": 2,
     "jsdoc/require-returns-type": 2,
-    "key-spacing": 2,
-    "max-len": [2, 80, 4, {
-      "ignoreTrailingComments": true,
-      "ignoreRegExpLiterals": true,
-      "ignorePattern": "^} from.*;|= require\\(.*;$|@typedef|@param|@return|@private|@const|@type|@implements",
-      "ignoreUrls": true
-    }],
     "no-alert": 2,
     "no-cond-assign": 2,
     "no-debugger": 2,
@@ -111,21 +97,17 @@
     "no-eval": 2,
     "no-extend-native": 2,
     "no-extra-bind": 2,
-    "no-extra-semi": 2,
     "no-implicit-coercion": [2, { "boolean": false }],
     "no-implied-eval": 2,
     "no-iterator": 2,
     "no-lone-blocks": 2,
-    "no-multi-spaces": 2,
     "no-native-reassign": 2,
     "no-redeclare": 2,
     "no-restricted-globals": [2, "error", "event"],
     "no-script-url": 2,
     "no-self-compare": 2,
     "no-sequences": 2,
-    "no-spaced-func": 2,
     "no-throw-literal": 2,
-    "no-trailing-spaces": 2,
     "no-unused-expressions": 0,
     "no-unused-vars": [2, {
       "argsIgnorePattern": "^(var_args$|opt_|unused)",
@@ -145,13 +127,14 @@
         }
       }
     ],
-    "object-curly-spacing": [2, "never", {
-      "objectsInObjects": false,
-      "arraysInObjects": false
-    }],
     "object-shorthand": [2, "properties", { "avoidQuotes": true }],
     "prefer-const": 2,
-    "quotes": [2, "single", "avoid-escape"],
+    "prettier/prettier": [2, {
+      "bracketSpacing": false,
+      "singleQuote": true,
+      "trailingComma": "es5",
+      "quoteProps": "preserve"
+    }],
     "radix": 2,
     "require-jsdoc": [2, {
       "require": {
@@ -162,20 +145,12 @@
         "FunctionExpression": false
       }
     }],
-    "semi": 2,
-    "keyword-spacing": [2, { "before": true, "after": true }],
     "sort-imports-es6-autofix/sort-imports-es6": [2, {
       "ignoreCase": false,
       "ignoreMemberSort": false,
       "memberSyntaxSortOrder": ["none", "all", "multiple", "single"]
     }],
-    "sort-requires/sort-requires": 2,
-    "space-before-blocks": 2,
-    "space-before-function-paren": [2, "never"],
-    "space-in-parens": 2,
-    "space-infix-ops": 2,
-    "space-unary-ops": [1, { "words": true, "nonwords": false }],
-    "wrap-iife": [2, "any"]
+    "sort-requires/sort-requires": 2
   },
   "overrides": [
     {

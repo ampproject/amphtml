@@ -27,14 +27,9 @@ import {
 } from '../../../src/dom';
 import {dict} from '../../../src/utils/object';
 import {getConsentPolicyState} from '../../../src/consent';
-import {
-  getData,
-  listen,
-} from '../../../src/event-helper';
+import {getData, listen} from '../../../src/event-helper';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
-import {
-  installVideoManagerForDoc,
-} from '../../../src/service/video-manager-impl';
+import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isEnumValue, isObject, toArray} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
 
@@ -45,7 +40,6 @@ const TAG = 'amp-ima-video';
  * @implements {../../../src/video-interface.VideoInterface}
  */
 class AmpImaVideo extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -88,26 +82,28 @@ class AmpImaVideo extends AMP.BaseElement {
   buildCallback() {
     this.viewport_ = this.getViewport();
     if (this.element.getAttribute('data-delay-ad-request') === 'true') {
-      this.unlisteners_['onFirstScroll'] =
-          this.viewport_.onScroll(() => {
-            this.sendCommand_('onFirstScroll');
-          });
+      this.unlisteners_['onFirstScroll'] = this.viewport_.onScroll(() => {
+        this.sendCommand_('onFirstScroll');
+      });
       // Request ads after 3 seconds, if something else doesn't trigger an ad
       // request before that.
-      Services.timerFor(this.win).delay(
-          () => { this.sendCommand_('onAdRequestDelayTimeout'); }, 3000);
-
+      Services.timerFor(this.win).delay(() => {
+        this.sendCommand_('onAdRequestDelayTimeout');
+      }, 3000);
     }
 
-    assertHttpsUrl(this.element.getAttribute('data-tag'),
-        'The data-tag attribute is required for <amp-video-ima> and must be ' +
-            'https');
+    assertHttpsUrl(
+      this.element.getAttribute('data-tag'),
+      'The data-tag attribute is required for <amp-video-ima> and must be ' +
+        'https'
+    );
 
     // Handle <source> and <track> children
     const sourceElements = childElementsByTag(this.element, 'SOURCE');
     const trackElements = childElementsByTag(this.element, 'TRACK');
-    const childElements =
-        toArray(sourceElements).concat(toArray(trackElements));
+    const childElements = toArray(sourceElements).concat(
+      toArray(trackElements)
+    );
     if (childElements.length > 0) {
       const children = [];
       childElements.forEach(child => {
@@ -117,17 +113,21 @@ class AmpImaVideo extends AMP.BaseElement {
         } else if (child.tagName == 'TRACK' && !this.preconnectTrack_) {
           this.preconnectTrack_ = child.src;
         }
-        children.push(child./*OK*/outerHTML);
+        children.push(child./*OK*/ outerHTML);
       });
       this.element.setAttribute(
-          'data-child-elements', JSON.stringify(children));
+        'data-child-elements',
+        JSON.stringify(children)
+      );
     }
 
     // Handle IMASetting JSON
     const scriptElement = childElementsByTag(this.element, 'SCRIPT')[0];
     if (scriptElement && isJsonScriptTag(scriptElement)) {
       this.element.setAttribute(
-          'data-ima-settings', scriptElement./*OK*/innerHTML);
+        'data-ima-settings',
+        scriptElement./*OK*/ innerHTML
+      );
     }
   }
 
@@ -135,7 +135,9 @@ class AmpImaVideo extends AMP.BaseElement {
   preconnectCallback() {
     const {element, preconnect} = this;
     preconnect.preload(
-        'https://imasdk.googleapis.com/js/sdkloader/ima3.js', 'script');
+      'https://imasdk.googleapis.com/js/sdkloader/ima3.js',
+      'script'
+    );
     const source = element.getAttribute('data-src');
     if (source) {
       preconnect.url(source);
@@ -168,8 +170,13 @@ class AmpImaVideo extends AMP.BaseElement {
       ? getConsentPolicyState(element, consentPolicyId)
       : Promise.resolve(null);
     return consentPromise.then(initialConsentState => {
-      const iframe = getIframe(win, element, 'ima-video',
-          {initialConsentState}, {allowFullscreen: true});
+      const iframe = getIframe(
+        win,
+        element,
+        'ima-video',
+        {initialConsentState},
+        {allowFullscreen: true}
+      );
 
       this.applyFillContent(iframe);
 
@@ -183,8 +190,9 @@ class AmpImaVideo extends AMP.BaseElement {
       this.playerReadyPromise_ = deferred.promise;
       this.playerReadyResolver_ = deferred.resolve;
 
-      this.unlistenMessage_ = listen(this.win, 'message',
-          e => this.handlePlayerMessage_(/** @type {!Event} */ (e)));
+      this.unlistenMessage_ = listen(this.win, 'message', e =>
+        this.handlePlayerMessage_(/** @type {!Event} */ (e))
+      );
 
       element.appendChild(iframe);
 
@@ -194,7 +202,6 @@ class AmpImaVideo extends AMP.BaseElement {
       return this.loadPromise(iframe).then(() => this.playerReadyPromise_);
     });
   }
-
 
   /** @override */
   viewportCallback(visible) {
@@ -237,11 +244,16 @@ class AmpImaVideo extends AMP.BaseElement {
   sendCommand_(command, opt_args) {
     if (this.iframe_ && this.iframe_.contentWindow) {
       this.playerReadyPromise_.then(() => {
-        this.iframe_.contentWindow./*OK*/postMessage(JSON.stringify(dict({
-          'event': 'command',
-          'func': command,
-          'args': opt_args || '',
-        })), '*');
+        this.iframe_.contentWindow./*OK*/ postMessage(
+          JSON.stringify(
+            dict({
+              'event': 'command',
+              'func': command,
+              'args': opt_args || '',
+            })
+          ),
+          '*'
+        );
       });
     }
     // If we have an unlistener for this command, call it.
@@ -273,7 +285,7 @@ class AmpImaVideo extends AMP.BaseElement {
       return;
     }
     if (videoEvent == ImaPlayerData.IMA_PLAYER_DATA) {
-      this.playerData_ = /** @type {!ImaPlayerData} */(eventData['data']);
+      this.playerData_ = /** @type {!ImaPlayerData} */ (eventData['data']);
       return;
     }
     if (videoEvent == 'fullscreenchange') {
@@ -374,7 +386,6 @@ class AmpImaVideo extends AMP.BaseElement {
     this.user().error(TAG, '`seekTo` not supported.');
   }
 }
-
 
 AMP.extension(TAG, '0.1', AMP => {
   AMP.registerElement(TAG, AmpImaVideo);

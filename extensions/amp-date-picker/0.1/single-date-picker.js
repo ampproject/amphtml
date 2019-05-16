@@ -19,19 +19,20 @@ import {dict} from '../../../src/utils/object';
 import {requireExternal} from '../../../src/module';
 import {withDatePickerCommon} from './date-picker-common';
 
-
 /**
  * Create a SingleDatePicker React component
  * @return {function(new:React.Component, !JsonObject)} A single date picker component class
  */
 function createSingleDatePickerBase() {
-  const constants = /** @type {!JsonObject} */ (
-    requireExternal('react-dates/constants'));
+  const constants = /** @type {!JsonObject} */ (requireExternal(
+    'react-dates/constants'
+  ));
 
   const DAY_SIZE = constants['DAY_SIZE'];
   const HORIZONTAL_ORIENTATION = constants['HORIZONTAL_ORIENTATION'];
-  const DayPickerSingleDateController = /** @type {function(new: React.Component, !JsonObject)} */ (
-    requireExternal('react-dates')['DayPickerSingleDateController']);
+  const DayPickerSingleDateController = /** @type {function(new: React.Component, !JsonObject)} */ (requireExternal(
+    'react-dates'
+  )['DayPickerSingleDateController']);
 
   const defaultProps = dict({
     'date': null,
@@ -83,8 +84,9 @@ function createSingleDatePickerBase() {
     'isRTL': false,
   });
 
-  const WrappedDayPickerSingleDateController =
-      withFocusedTrueHack(withDatePickerCommon(DayPickerSingleDateController));
+  const WrappedDayPickerSingleDateController = withFocusedTrueHack(
+    withDatePickerCommon(DayPickerSingleDateController)
+  );
   WrappedDayPickerSingleDateController.defaultProps = defaultProps;
 
   return WrappedDayPickerSingleDateController;

@@ -13,11 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {
-  NotificationUiManager,
-} from '../../src/service/notification-ui-manager';
+import {NotificationUiManager} from '../../src/service/notification-ui-manager';
 import {macroTask} from '../../testing/yield';
-
 
 describes.realWin('NotificationUiManager', {amp: 1}, () => {
   describe('Notification UI Manager', () => {
@@ -56,10 +53,9 @@ describes.realWin('NotificationUiManager', {amp: 1}, () => {
         showSpy3();
         return p3;
       };
-
     });
 
-    it('show UI in sequence', function* () {
+    it('show UI in sequence', function*() {
       manager.registerUI(show1);
       manager.registerUI(show2);
       manager.registerUI(show3);
@@ -84,7 +80,7 @@ describes.realWin('NotificationUiManager', {amp: 1}, () => {
       expect(showSpy3).to.be.calledOnce;
     });
 
-    it('queue empty handler', function* () {
+    it('queue empty handler', function*() {
       const handler = sandbox.spy();
       manager.registerUI(show1);
       manager.registerUI(show2);
@@ -96,7 +92,7 @@ describes.realWin('NotificationUiManager', {amp: 1}, () => {
       expect(handler).to.be.calledOnce;
     });
 
-    it('queue not empty handler', function* () {
+    it('queue not empty handler', function*() {
       const handler = sandbox.spy();
       manager.onQueueNotEmpty(handler);
       manager.registerUI(show1);

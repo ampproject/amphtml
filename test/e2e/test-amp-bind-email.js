@@ -14,40 +14,49 @@
  * limitations under the License.
  */
 
-describes.endtoend('amp-bind', {
-  testUrl: 'http://localhost:8000/test/fixtures/e2e/amp-bind/' +
+describes.endtoend(
+  'amp-bind',
+  {
+    testUrl:
+      'http://localhost:8000/test/fixtures/e2e/amp-bind/' +
       'bind-amp4email.html',
-}, async env => {
-  let controller;
+  },
+  async env => {
+    let controller;
 
-  beforeEach(async() => {
-    controller = env.controller;
-  });
-
-  // The only difference in amp4email is that URL attributes cannot be bound.
-  describe('amp4email', () => {
-    it('should NOT allow mutation of a[href]', async() => {
-      const button = await controller.findElement('#changeHrefButton');
-      const a = await controller.findElement('#anchorElement');
-
-      await expect(controller.getElementAttribute(a, 'href'))
-          .to.equal('https://foo.com');
-
-      await controller.click(button);
-      await expect(controller.getElementAttribute(a, 'href'))
-          .to.equal('https://foo.com');
+    beforeEach(async () => {
+      controller = env.controller;
     });
 
-    it('should NOT allow mutation of img[src]', async() => {
-      const button = await controller.findElement('#changeImgSrcButton');
-      const image = await controller.findElement('#image');
+    // The only difference in amp4email is that URL attributes cannot be bound.
+    describe('amp4email', () => {
+      it('should NOT allow mutation of a[href]', async () => {
+        const button = await controller.findElement('#changeHrefButton');
+        const a = await controller.findElement('#anchorElement');
 
-      await expect(controller.getElementAttribute(image, 'src'))
-          .to.equal('https://foo.com/foo.jpg');
+        await expect(controller.getElementAttribute(a, 'href')).to.equal(
+          'https://foo.com'
+        );
 
-      await controller.click(button);
-      await expect(controller.getElementAttribute(image, 'src'))
-          .to.equal('https://foo.com/foo.jpg');
+        await controller.click(button);
+        await expect(controller.getElementAttribute(a, 'href')).to.equal(
+          'https://foo.com'
+        );
+      });
+
+      it('should NOT allow mutation of img[src]', async () => {
+        const button = await controller.findElement('#changeImgSrcButton');
+        const image = await controller.findElement('#image');
+
+        await expect(controller.getElementAttribute(image, 'src')).to.equal(
+          'https://foo.com/foo.jpg'
+        );
+
+        await controller.click(button);
+        await expect(controller.getElementAttribute(image, 'src')).to.equal(
+          'https://foo.com/foo.jpg'
+        );
+      });
     });
-  });
-});
+  }
+);

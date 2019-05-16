@@ -81,11 +81,17 @@ export class AmpState extends AMP.BaseElement {
       this.fetchAndUpdate_(/* isInit */ true);
     }
 
-    this.registerAction('refresh', () => {
-      userAssert(this.element.hasAttribute('src'),
-          'Can\'t refresh <amp-state> without "src" attribute.');
-      this.fetchAndUpdate_(/* isInit */ false, /* opt_refresh */ true);
-    }, ActionTrust.HIGH);
+    this.registerAction(
+      'refresh',
+      () => {
+        userAssert(
+          this.element.hasAttribute('src'),
+          'Can\'t refresh <amp-state> without "src" attribute.'
+        );
+        this.fetchAndUpdate_(/* isInit */ false, /* opt_refresh */ true);
+      },
+      ActionTrust.HIGH
+    );
   }
 
   /** @override */
@@ -139,8 +145,10 @@ export class AmpState extends AMP.BaseElement {
     }
     const firstChild = children[0];
     if (!isJsonScriptTag(firstChild)) {
-      this.user().error(TAG,
-          'State should be in a <script> tag with type="application/json".');
+      this.user().error(
+        TAG,
+        'State should be in a <script> tag with type="application/json".'
+      );
       return null;
     }
     return tryParseJson(firstChild.textContent, e => {
@@ -158,8 +166,14 @@ export class AmpState extends AMP.BaseElement {
    * @private
    */
   fetch_(ampdoc, policy, opt_refresh, token = undefined) {
-    return batchFetchJsonFor(ampdoc, this.element, /* opt_expr */ undefined,
-        policy, opt_refresh, token);
+    return batchFetchJsonFor(
+      ampdoc,
+      this.element,
+      /* opt_expr */ undefined,
+      policy,
+      opt_refresh,
+      token
+    );
   }
 
   /**
@@ -174,18 +188,22 @@ export class AmpState extends AMP.BaseElement {
 
     const src = element.getAttribute('src');
     const isCorsFetch =
-        (getSourceOrigin(src) !== getSourceOrigin(ampdoc.win.location));
+      getSourceOrigin(src) !== getSourceOrigin(ampdoc.win.location);
     // Require opt-in for URL variable replacements on CORS fetches triggered
     // by [src] mutation. @see spec/amp-var-substitutions.md
-    const policy = (isCorsFetch && !isInit)
-      ? UrlReplacementPolicy.OPT_IN
-      : UrlReplacementPolicy.ALL;
+    const policy =
+      isCorsFetch && !isInit
+        ? UrlReplacementPolicy.OPT_IN
+        : UrlReplacementPolicy.ALL;
 
     return getViewerAuthTokenIfAvailable(element).then(token =>
       this.fetch_(ampdoc, policy, opt_refresh, token).catch(error => {
         const event = error
-          ? createCustomEvent(this.win, 'amp-state.error',
-              dict({'response': error.response}))
+          ? createCustomEvent(
+              this.win,
+              'amp-state.error',
+              dict({'response': error.response})
+            )
           : null;
         // Trigger "fetch-error" event on fetch failure.
         const actions = Services.actionServiceForDoc(element);
@@ -203,9 +221,10 @@ export class AmpState extends AMP.BaseElement {
   fetchAndUpdate_(isInit, opt_refresh) {
     // Don't fetch in prerender mode.
     const viewer = Services.viewerForDoc(this.element);
-    return viewer.whenFirstVisible()
-        .then(() => this.prepareAndSendFetch_(isInit, opt_refresh))
-        .then(json => this.updateState_(json, isInit));
+    return viewer
+      .whenFirstVisible()
+      .then(() => this.prepareAndSendFetch_(isInit, opt_refresh))
+      .then(json => this.updateState_(json, isInit));
   }
 
   /**
@@ -236,7 +255,6 @@ export class AmpState extends AMP.BaseElement {
    * @private
    */
   getName_() {
-    return '<amp-state> ' +
-        (this.element.getAttribute('id') || '<unknown id>');
+    return '<amp-state> ' + (this.element.getAttribute('id') || '<unknown id>');
   }
 }

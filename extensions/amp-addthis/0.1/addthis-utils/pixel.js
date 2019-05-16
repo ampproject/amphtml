@@ -46,21 +46,21 @@ const groupPixelsByTime = pixelList => {
   });
 
   const delayMap = cleanedPixels
-      .map(pixel => {
-        const delays = pixel.delay;
-        return delays.map(delay => ({
-          delay,
-          pixels: [pixel],
-        }));
-      })
-      .reduce((a, b) => a.concat(b), []) // flatten
-      .reduce((currentDelayMap, {delay, pixels}) => {
-        if (!currentDelayMap[delay]) {
-          currentDelayMap[delay] = [];
-        }
-        currentDelayMap[delay] = currentDelayMap[delay].concat(pixels);
-        return currentDelayMap;
-      }, {});
+    .map(pixel => {
+      const delays = pixel.delay;
+      return delays.map(delay => ({
+        delay,
+        pixels: [pixel],
+      }));
+    })
+    .reduce((a, b) => a.concat(b), []) // flatten
+    .reduce((currentDelayMap, {delay, pixels}) => {
+      if (!currentDelayMap[delay]) {
+        currentDelayMap[delay] = [];
+      }
+      currentDelayMap[delay] = currentDelayMap[delay].concat(pixels);
+      return currentDelayMap;
+    }, {});
 
   return Object.keys(delayMap).map(delay => ({
     delay: Number(delay),
@@ -71,34 +71,35 @@ const groupPixelsByTime = pixelList => {
 export const pixelDrop = (url, ampDoc) => {
   const doc = ampDoc.win.document;
   const ampPixel = createElementWithAttributes(
-      doc,
-      'amp-pixel',
-      dict({
-        'layout': 'nodisplay',
-        'referrerpolicy': 'no-referrer',
-        'src': url,
-      })
+    doc,
+    'amp-pixel',
+    dict({
+      'layout': 'nodisplay',
+      'referrerpolicy': 'no-referrer',
+      'src': url,
+    })
   );
   doc.body.appendChild(ampPixel);
 };
 
-const getIframeName = url => parseUrlDeprecated(url).host
-    .split('.')
+const getIframeName = url =>
+  parseUrlDeprecated(url)
+    .host.split('.')
     .concat(pixelatorFrameTitle.toLowerCase().replace(/\s/, '_'));
 
 const iframeDrop = (url, ampDoc, {name, title}) => {
   const doc = ampDoc.win.document;
   const iframe = createElementWithAttributes(
-      doc,
-      'iframe',
-      dict({
-        'frameborder': 0,
-        'width': 0,
-        'height': 0,
-        'name': name,
-        'title': title,
-        'src': url,
-      })
+    doc,
+    'iframe',
+    dict({
+      'frameborder': 0,
+      'width': 0,
+      'height': 0,
+      'name': name,
+      'title': title,
+      'src': url,
+    })
   );
   toggle(iframe, false);
   setStyles(iframe, {
@@ -171,8 +172,8 @@ function getJsonObject_(object) {
   if (object === undefined || object === null) {
     return params;
   }
-  const stringifiedObject = typeof object === 'string' ?
-    object : JSON.stringify(object);
+  const stringifiedObject =
+    typeof object === 'string' ? object : JSON.stringify(object);
 
   try {
     const parsedObject = parseJson(stringifiedObject);
@@ -181,8 +182,7 @@ function getJsonObject_(object) {
         params[key] = parsedObject[key];
       }
     }
-  } catch (error) {
-  }
+  } catch (error) {}
   return params;
 }
 
@@ -191,20 +191,23 @@ export const callPixelEndpoint = event => {
   const eventData = getJsonObject_(getData(event));
   const url = addParamsToUrl(endpoint, eventData);
 
-  Services.xhrFor(ampDoc.win).fetchJson(url, {
-    mode: 'cors',
-    method: 'GET',
-    // This should be cacheable across publisher domains, so don't append
-    // __amp_source_origin to the URL.
-    ampCors: false,
-    credentials: 'include',
-  }).then(res => res.json()).then(json => {
-    const {pixels = []} = json;
-    if (pixels.length > 0) {
-      dropPixelGroups(pixels, {
-        sid: eventData['sid'],
-        ampDoc,
-      });
-    }
-  });
+  Services.xhrFor(ampDoc.win)
+    .fetchJson(url, {
+      mode: 'cors',
+      method: 'GET',
+      // This should be cacheable across publisher domains, so don't append
+      // __amp_source_origin to the URL.
+      ampCors: false,
+      credentials: 'include',
+    })
+    .then(res => res.json())
+    .then(json => {
+      const {pixels = []} = json;
+      if (pixels.length > 0) {
+        dropPixelGroups(pixels, {
+          sid: eventData['sid'],
+          ampDoc,
+        });
+      }
+    });
 };
