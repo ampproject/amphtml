@@ -341,19 +341,19 @@ describe
           });
         });
 
-    it('should not send "bindReady" until all <amp-state> are built', () => {
-      const element = createElement(env, container, '', 'amp-state', true);
-      const parseAndUpdate = sandbox.spy();
-      element.getImpl = () => {
-        expect(viewer.sendMessage).to.not.be.called;
-        return Promise.resolve({parseAndUpdate});
-      };
-      return onBindReady(env, bind).then(() => {
-        expect(parseAndUpdate).to.be.calledOnce;
-        expect(viewer.sendMessage).to.be.calledOnce;
-        expect(viewer.sendMessage).to.be.calledWith('bindReady');
-      });
-    });
+        it('should not send "bindReady" until all <amp-state> are built', () => {
+          const element = createElement(env, container, '', 'amp-state', true);
+          const parseAndUpdate = sandbox.spy();
+          element.getImpl = () => {
+            expect(viewer.sendMessage).to.not.be.called;
+            return Promise.resolve({parseAndUpdate});
+          };
+          return onBindReady(env, bind).then(() => {
+            expect(parseAndUpdate).to.be.calledOnce;
+            expect(viewer.sendMessage).to.be.calledOnce;
+            expect(viewer.sendMessage).to.be.calledWith('bindReady');
+          });
+        });
 
         it('should scan for bindings when ampdoc is ready', () => {
           createElement(env, container, '[text]="1+1"');
@@ -900,10 +900,16 @@ describe
             });
         });
 
-    it('should ignore <amp-state> updates if specified in setState()', () => {
-      const element = createElement(env, container, '[src]="foo"', 'amp-state');
-      element.getImpl = () => Promise.resolve({parseAndUpdate: sandbox.spy()});
-      expect(element.getAttribute('src')).to.be.null;
+        it('should ignore <amp-state> updates if specified in setState()', () => {
+          const element = createElement(
+            env,
+            container,
+            '[src]="foo"',
+            'amp-state'
+          );
+          element.getImpl = () =>
+            Promise.resolve({parseAndUpdate: sandbox.spy()});
+          expect(element.getAttribute('src')).to.be.null;
 
           const promise = onBindReadyAndSetState(
             env,

@@ -492,36 +492,39 @@ export class Bind {
 
     // The web worker's evaluator also has an instance of BindValidator
     // that should be initialized with the same `allowUrlProperties` value.
-    return this.ww_('bind.init', [allowUrlProperties]).then(() => {
-      return Promise.all([
-        this.addMacros_(),
-        this.addBindingsForNodes_([root]),
-      ]);
-    }).then(() => {
-      // Listen for DOM updates (e.g. template render) to rescan for bindings.
-      root.addEventListener(AmpEvents.DOM_UPDATE, e => this.onDomUpdate_(e));
-      // In dev mode, check default values against initial expression results.
-      if (getMode().development) {
-        return this.evaluate_().then(results => this.verify_(results));
-      }
-    }).then(() => {
-      const ampStates = root.querySelectorAll('AMP-STATE');
-      // Force all query-able <amp-state> elements to parse local data instead
-      // of waiting for runtime to build them all.
-      const whenBuilt = false;
-
-      const whenParsed = toArray(ampStates).map(el => {
-        return whenUpgradedToCustomElement(el)
+    return this.ww_('bind.init', [allowUrlProperties])
+      .then(() => {
+        return Promise.all([
+          this.addMacros_(),
+          this.addBindingsForNodes_([root]),
+        ]);
+      })
+      .then(() => {
+        // Listen for DOM updates (e.g. template render) to rescan for bindings.
+        root.addEventListener(AmpEvents.DOM_UPDATE, e => this.onDomUpdate_(e));
+        // In dev mode, check default values against initial expression results.
+        if (getMode().development) {
+          return this.evaluate_().then(results => this.verify_(results));
+        }
+      })
+      .then(() => {
+        const ampStates = root.querySelectorAll('AMP-STATE');
+        // Force all query-able <amp-state> elements to parse local data instead
+        // of waiting for runtime to build them all.
+        const whenBuilt = false;
+        const whenParsed = toArray(ampStates).map(el => {
+          return whenUpgradedToCustomElement(el)
             .then(() => el.getImpl(whenBuilt))
             .then(impl => impl.parseAndUpdate());
+        });
+        return Promise.all(whenParsed);
+      })
+      .then(() => {
+        // Bind is "ready" when its initialization completes _and_ all <amp-state>
+        // elements' local data is parsed and processed (not remote data).
+        this.viewer_.sendMessage('bindReady', undefined);
+        this.dispatchEventForTesting_(BindEvents.INITIALIZE);
       });
-      return Promise.all(whenParsed);
-    }).then(() => {
-      // Bind is "ready" when its initialization completes _and_ all <amp-state>
-      // elements' local data is parsed and processed (not remote data).
-      this.viewer_.sendMessage('bindReady', undefined);
-      this.dispatchEventForTesting_(BindEvents.INITIALIZE);
-    });
   }
 
   /**
@@ -927,19 +930,24 @@ export class Bind {
    * @return {!Promise<!JsonObject>}
    */
   evaluateExpression_(expression, scope) {
-    return this.initializePromise_.then(() => {
-      // Allow expression to reference current state in addition to event state.
-      Object.assign(scope, this.state_);
-      return this.ww_('bind.evaluateExpression', [expression, scope]);
-    }).then(returnValue => {
-      const {result, error} = returnValue;
-      if (error) {
-        // Throw to reject promise.
-        throw this.reportWorkerError_(error, `${TAG}: Expression eval failed.`);
-      } else {
-        return result;
-      }
-    });
+    return this.initializePromise_
+      .then(() => {
+        // Allow expression to reference current state in addition to event state.
+        Object.assign(scope, this.state_);
+        return this.ww_('bind.evaluateExpression', [expression, scope]);
+      })
+      .then(returnValue => {
+        const {result, error} = returnValue;
+        if (error) {
+          // Throw to reject promise.
+          throw this.reportWorkerError_(
+            error,
+            `${TAG}: Expression eval failed.`
+          );
+        } else {
+          return result;
+        }
+      });
   }
 
   /**

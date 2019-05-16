@@ -613,9 +613,9 @@ export class AmpList extends AMP.BaseElement {
 
     this.renderItems_ = /** @type {?RenderItems} */ ({
       data,
-      append,
       resolver,
       rejecter,
+      append: opt_append,
       payload: opt_payload,
     });
 

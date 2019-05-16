@@ -387,13 +387,13 @@ describes.repeated(
             });
           });
 
-      it('fetch should not be called if `src` is missing or empty', () => {
-        const spy = sandbox.spy(list, 'fetchList_');
-        element.setAttribute('src', '');
-        return list.layoutCallback().then(() => {
-          expect(spy).to.not.be.called;
-        });
-      });
+          it('fetch should not be called if `src` is missing or empty', () => {
+            const spy = sandbox.spy(list, 'fetchList_');
+            element.setAttribute('src', '');
+            return list.layoutCallback().then(() => {
+              expect(spy).to.not.be.called;
+            });
+          });
 
           it('should fail to load b/c data array is absent', () => {
             expectAsyncConsoleError(/Response must contain an array/, 1);
@@ -708,9 +708,9 @@ describes.repeated(
             setBindService(bind);
           });
 
-      it('should not fetch if [src] mutates with URL (before layout)', () => {
-        // Not allowed before layout.
-        listMock.expects('fetchList_').never();
+          it('should not fetch if [src] mutates with URL (before layout)', () => {
+            // Not allowed before layout.
+            listMock.expects('fetchList_').never();
 
             element.setAttribute('src', 'https://new.com/list.json');
             list.mutatedAttributesCallback({
@@ -721,19 +721,19 @@ describes.repeated(
             );
           });
 
-      it('should not render if [src] mutates with data (before layout)', () => {
-        // Not allowed before layout.
-        listMock.expects('scheduleRender_').never();
+          it('should not render if [src] mutates with data (before layout)', () => {
+            // Not allowed before layout.
+            listMock.expects('scheduleRender_').never();
 
-        element.setAttribute('src', 'https://new.com/list.json');
-        list.mutatedAttributesCallback({'src': [{title: 'Title1'}]});
-        // `src` attribute should still be set to empty string.
-        expect(element.getAttribute('src')).to.equal('');
-      });
+            element.setAttribute('src', 'https://new.com/list.json');
+            list.mutatedAttributesCallback({'src': [{title: 'Title1'}]});
+            // `src` attribute should still be set to empty string.
+            expect(element.getAttribute('src')).to.equal('');
+          });
 
-      it('should render if [src] mutates with data', () => {
-        const foo = doc.createElement('div');
-        expectFetchAndRender(DEFAULT_FETCHED_DATA, [foo]);
+          it('should render if [src] mutates with data', () => {
+            const foo = doc.createElement('div');
+            expectFetchAndRender(DEFAULT_FETCHED_DATA, [foo]);
 
             return list.layoutCallback().then(() => {
               expect(list.container_.contains(foo)).to.be.true;
