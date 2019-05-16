@@ -19,7 +19,7 @@ import {AmpStoryPage} from '../amp-story-page';
 import {LiveStoryManager} from '../live-story-manager';
 import {addAttributesToElement} from '../../../../src/dom';
 
-describes.realWin('amp-story-embedded-component', {amp: true}, env => {
+describes.realWin('LiveStoryManager', {amp: true}, env => {
   let win;
   let liveStoryManager;
   let ampStory;

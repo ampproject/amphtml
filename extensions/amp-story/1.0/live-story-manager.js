@@ -15,9 +15,9 @@
  */
 
 import {addAttributesToElement} from '../../../src/dom';
+import {devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {htmlFor} from '../../../src/static-template';
-import {userAssert} from '../../../src/log';
 
 /**
  * Property used for storing id of custom slot. This custom slot can be used to
@@ -62,12 +62,13 @@ export class LiveStoryManager {
   /**
    * Updates the client amp-story with the changes from the server document.
    *
-   * @param {!Element} updatedStoryEl
+   * @param {?EventTarget} updatedStoryEl
    * @param {!NodeList<!Element>} currentPages
    */
   update(updatedStoryEl, currentPages) {
-    const newPageEls = updatedStoryEl.querySelectorAll(
-        'amp-story-page.amp-live-list-item-new');
+    const newPageEls = devAssert(updatedStoryEl,
+        'No updated story EventTarget was found.')
+        .querySelectorAll('amp-story-page.amp-live-list-item-new');
 
     let lastPageEl = currentPages[currentPages.length - 1];
 
