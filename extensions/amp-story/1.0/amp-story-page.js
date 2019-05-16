@@ -310,7 +310,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.advancement_.addProgressListener(progress =>
       this.emitProgress_(progress)
     );
-    this.setDescendentCssTextStyles_();
+    this.setDescendantCssTextStyles_();
   }
 
   /**
@@ -1397,9 +1397,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    * <amp-story-page> element.
    * @private
    */
-  setDescendentCssTextStyles_() {
-    this.mutateElement(() => {
-      setTextBackgroundColor(this.element);
-    });
+  setDescendantCssTextStyles_() {
+    setTextBackgroundColor(this.element);
   }
 }
