@@ -50,7 +50,6 @@ const TAG = 'amp-story-cta-layer';
  * while the user is looking.
  */
 export class AmpStoryCtaLayer extends AmpStoryBaseLayer {
-
   /** @override */
   buildCallback() {
     super.buildCallback();
@@ -98,11 +97,18 @@ export class AmpStoryCtaLayer extends AmpStoryBaseLayer {
    * @private
    */
   checkAndRemoveLayerIfOnFirstPage_() {
-    if (matches(this.element,
-        'amp-story-page:first-of-type > amp-story-cta-layer')) {
+    if (
+      matches(
+        this.element,
+        'amp-story-page:first-of-type > amp-story-cta-layer'
+      )
+    ) {
       removeElement(this.element);
-      user().error(TAG, 'amp-story-cta-layer is not allowed on the first page' +
-          ' of an amp-story.');
+      user().error(
+        TAG,
+        'amp-story-cta-layer is not allowed on the first page' +
+          ' of an amp-story.'
+      );
     }
   }
 }

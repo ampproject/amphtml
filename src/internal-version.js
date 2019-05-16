@@ -23,6 +23,6 @@
  *
  * @return {string}
  */
-export function version() {
+export function internalRuntimeVersion() {
   return '$internalRuntimeVersion$';
 }

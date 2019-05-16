@@ -91,6 +91,25 @@
   background-color: #5f6368;
 }
 
+/*
+  This class defines style only for the container button.
+  All button styles are rendered inside the nested iframe.
+*/
+.swg-smart-button {
+  border: none;
+  padding: 0;
+  background: transparent;
+  min-height: 126px;
+  position: relative;
+  min-width: 300px;
+  width: 300px;
+  border-radius: 0;
+  overflow: hidden;
+}
+
+.swg-smart-button:focus {
+  outline: none;
+}
 
 /**
  * i18n bindings

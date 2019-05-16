@@ -52,10 +52,11 @@ const SUPPORTED_CSS_GRID_ATTRIBUTES = {
  * (e.g. [align-content], [align-items], ...)
  * @private @const {string}
  */
-const SUPPORTED_CSS_GRID_ATTRIBUTES_SELECTOR =
-    Object.keys(SUPPORTED_CSS_GRID_ATTRIBUTES)
-        .map(key => `[${key}]`)
-        .join(',');
+const SUPPORTED_CSS_GRID_ATTRIBUTES_SELECTOR = Object.keys(
+  SUPPORTED_CSS_GRID_ATTRIBUTES
+)
+  .map(key => `[${key}]`)
+  .join(',');
 
 /**
  * The attribute name for grid layer templates.
@@ -89,8 +90,10 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
   /** @override */
   firstAttachedCallback() {
     // Only prerender if child of the first page.
-    this.prerenderAllowed_ = matches(this.element,
-        'amp-story-page:first-of-type amp-story-grid-layer');
+    this.prerenderAllowed_ = matches(
+      this.element,
+      'amp-story-page:first-of-type amp-story-grid-layer'
+    );
   }
 
   /** @override */
@@ -128,8 +131,10 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
    * @private
    */
   setDescendentCssGridStyles_() {
-    const elementsToUpgradeStyles = scopedQuerySelectorAll(this.element,
-        SUPPORTED_CSS_GRID_ATTRIBUTES_SELECTOR);
+    const elementsToUpgradeStyles = scopedQuerySelectorAll(
+      this.element,
+      SUPPORTED_CSS_GRID_ATTRIBUTES_SELECTOR
+    );
 
     Array.prototype.forEach.call(elementsToUpgradeStyles, element => {
       this.setCssGridStyles_(element);

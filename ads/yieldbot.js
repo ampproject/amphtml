@@ -36,10 +36,12 @@ export function yieldbot(global, data) {
         let dimensions;
 
         if (multiSizeDataStr) {
-          dimensions = getMultiSizeDimensions(multiSizeDataStr,
-              primaryWidth,
-              primaryHeight,
-              false);
+          dimensions = getMultiSizeDimensions(
+            multiSizeDataStr,
+            primaryWidth,
+            primaryHeight,
+            false
+          );
           dimensions.unshift([primaryWidth, primaryHeight]);
         } else {
           dimensions = [[primaryWidth, primaryHeight]];
@@ -70,13 +72,16 @@ export function yieldbot(global, data) {
       } catch (e) {
         rethrowAsync(e);
       }
-      user().warn('AMP-AD', 'type="yieldbot" will no longer ' +
-                  'be supported starting on March 29, 2018.' +
-                  ' Please use your amp-ad-network and RTC to configure a' +
-                  ' Yieldbot callout vendor. Refer to' +
-                  ' https://github.com/ampproject/amphtml/blob/master/' +
-                  'extensions/amp-a4a/rtc-publisher-implementation-guide.md' +
-                  '#setting-up-rtc-config for more information.');
+      user().warn(
+        'AMP-AD',
+        'type="yieldbot" will no longer ' +
+          'be supported starting on March 29, 2018.' +
+          ' Please use your amp-ad-network and RTC to configure a' +
+          ' Yieldbot callout vendor. Refer to' +
+          ' https://github.com/ampproject/amphtml/blob/master/' +
+          'extensions/amp-a4a/rtc-publisher-implementation-guide.md' +
+          '#setting-up-rtc-config for more information.'
+      );
     });
   });
 }

@@ -45,7 +45,7 @@ export class Url {
     const doc = root.ownerDocument || root;
 
     /** @private @const {!HTMLAnchorElement} */
-    this.anchor_ = /** @type {!HTMLAnchorElement} */(doc.createElement('a'));
+    this.anchor_ = /** @type {!HTMLAnchorElement} */ (doc.createElement('a'));
 
     /** @private @const {!LruCache} */
     this.cache_ = new LruCache(100);
@@ -53,8 +53,11 @@ export class Url {
 
   /** @override @nocollapse */
   static installInEmbedWindow(embedWin, ampdoc) {
-    installServiceInEmbedScope(embedWin, SERVICE,
-        new Url(ampdoc, embedWin.document));
+    installServiceInEmbedScope(
+      embedWin,
+      SERVICE,
+      new Url(ampdoc, embedWin.document)
+    );
   }
 
   /**
@@ -151,22 +154,20 @@ export class Url {
       return resourceUrl;
     }
 
-    const {
-      host,
-      hash,
-      pathname,
-      search,
-    } = this.parse(resourceUrl);
+    const {host, hash, pathname, search} = this.parse(resourceUrl);
     const encodedHost = encodeURIComponent(host);
     return `${urls.cdn}/c/${encodedHost}${pathname}${search}${hash}`;
   }
 }
 
-
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
  */
 export function installUrlForDoc(ampdoc) {
-  registerServiceBuilderForDoc(ampdoc, SERVICE, Url,
-      /* opt_instantiate */ true);
+  registerServiceBuilderForDoc(
+    ampdoc,
+    SERVICE,
+    Url,
+    /* opt_instantiate */ true
+  );
 }
