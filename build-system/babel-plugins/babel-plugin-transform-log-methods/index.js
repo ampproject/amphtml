@@ -50,7 +50,7 @@
  * Resulting compressed, minified binaries reduce size by ~1.5% depending on
  * their logging density.
  */
-const base62 = require("base62/lib/ascii");
+const base62 = require('base62/lib/ascii');
 const fs = require('fs');
 const path = require('path');
 const {
@@ -262,9 +262,9 @@ module.exports = function({types: t}) {
         }
 
         const shortMessageId = getOrCreateShortMessageId(
-            this.messages,
-            message,
-            this.nextMessageId
+          this.messages,
+          message,
+          this.nextMessageId
         );
 
         if (!this.replaceCallArguments) {

@@ -19,7 +19,6 @@ const argv = require('minimist')(process.argv.slice(2));
 const babel = require('gulp-babel');
 const fs = require('fs-extra');
 const gulp = require('gulp');
-const gulpCache = require('gulp-cache');
 const gulpIf = require('gulp-if');
 const nop = require('gulp-nop');
 const rename = require('gulp-rename');
