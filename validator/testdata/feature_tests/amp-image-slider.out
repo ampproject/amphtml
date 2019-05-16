@@ -44,7 +44,7 @@ FAIL
 |    <!-- Invalid, requires at least 2 children -->
 |    <amp-image-slider tabindex="0" layout="responsive" width="200" height="100">
 >>   ^~~~~~~~~
-feature_tests/amp-image-slider.html:44:2 Tag 'amp-image-slider' must have a minimum of 2 child tags - saw 1 child tags. (see https://www.ampproject.org/docs/reference/components/amp-image-slider) [GENERIC]
+feature_tests/amp-image-slider.html:44:2 Tag 'amp-image-slider' must have a minimum of 2 child tags - saw 1 child tags. (see https://amp.dev/documentation/components/amp-image-slider) [GENERIC]
 |      <amp-img src="/1.jpg" layout="fill"></amp-img>
 |    </amp-image-slider>
 |
@@ -52,7 +52,7 @@ feature_tests/amp-image-slider.html:44:2 Tag 'amp-image-slider' must have a mini
 |    <amp-image-slider tabindex="0" layout="responsive" width="200" height="100">
 |      <span>BAD CONTENT</span>
 >>     ^~~~~~~~~
-feature_tests/amp-image-slider.html:50:4 Tag 'span' is disallowed as child of tag 'amp-image-slider'. Child tag must be one of ['amp-img', 'div']. (see https://www.ampproject.org/docs/reference/components/amp-image-slider) [AMP_TAG_PROBLEM]
+feature_tests/amp-image-slider.html:50:4 Tag 'span' is disallowed as child of tag 'amp-image-slider'. Child tag must be one of ['amp-img', 'div']. (see https://amp.dev/documentation/components/amp-image-slider) [AMP_TAG_PROBLEM]
 |      <amp-img src="/1.jpg" layout="fill"></amp-img>
 |      <amp-img src="/2.jpg" layout="fill"></amp-img>
 |      <div first class="red">BEFORE</div>
@@ -82,9 +82,9 @@ feature_tests/amp-image-slider.html:59:2 The attribute 'second' may not appear i
 |    <!-- Invalid, both initial-slider-position and step-size should not be more than 1 -->
 |    <amp-image-slider tabindex="0" layout="responsive" width="200" height="100" initial-slider-position="1.5" step-size="1.5">
 >>   ^~~~~~~~~
-feature_tests/amp-image-slider.html:74:2 The attribute 'initial-slider-position' in tag 'amp-image-slider' is set to the invalid value '1.5'. (see https://www.ampproject.org/docs/reference/components/amp-image-slider) [DISALLOWED_HTML]
+feature_tests/amp-image-slider.html:74:2 The attribute 'initial-slider-position' in tag 'amp-image-slider' is set to the invalid value '1.5'. (see https://amp.dev/documentation/components/amp-image-slider) [DISALLOWED_HTML]
 >>   ^~~~~~~~~
-feature_tests/amp-image-slider.html:74:2 The attribute 'step-size' in tag 'amp-image-slider' is set to the invalid value '1.5'. (see https://www.ampproject.org/docs/reference/components/amp-image-slider) [DISALLOWED_HTML]
+feature_tests/amp-image-slider.html:74:2 The attribute 'step-size' in tag 'amp-image-slider' is set to the invalid value '1.5'. (see https://amp.dev/documentation/components/amp-image-slider) [DISALLOWED_HTML]
 |      <amp-img src="/1.jpg" layout="fill"></amp-img>
 |      <amp-img src="/2.jpg" layout="fill"></amp-img>
 |    </amp-image-slider>

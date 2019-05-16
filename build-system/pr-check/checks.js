@@ -26,18 +26,19 @@ const {
   printChangeSummary,
   startTimer,
   stopTimer,
-  timedExecOrDie: timedExecOrDieBase} = require('./utils');
+  timedExecOrDie: timedExecOrDieBase,
+} = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
 const {isTravisPullRequestBuild} = require('../travis');
 const {reportAllExpectedTests} = require('../tasks/runtime-test/status-report');
 
 const FILENAME = 'checks.js';
-const timedExecOrDie =
-  (cmd, unusedFileName) => timedExecOrDieBase(cmd, FILENAME);
+const timedExecOrDie = (cmd, unusedFileName) =>
+  timedExecOrDieBase(cmd, FILENAME);
 
 function runCommonChecks() {
-  timedExecOrDie('gulp presubmit');
   timedExecOrDie('gulp lint');
+  timedExecOrDie('gulp presubmit');
   timedExecOrDie('gulp ava');
   timedExecOrDie('node node_modules/jest/bin/jest.js');
   timedExecOrDie('gulp caches-json');
@@ -69,7 +70,7 @@ function main() {
       timedExecOrDie('gulp dev-dashboard-tests');
     }
 
-    if (buildTargets.has('RUNTIME')) {
+    if (buildTargets.has('RUNTIME') || buildTargets.has('BUILD_SYSTEM')) {
       timedExecOrDie('gulp dep-check');
       timedExecOrDie('gulp check-types');
     }

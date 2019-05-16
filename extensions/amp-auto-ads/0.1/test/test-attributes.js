@@ -17,13 +17,9 @@
 import {getAttributesFromConfigObj} from '../attributes';
 
 describe('attributes', () => {
-
   it('should ignore attributes field if an array', () => {
     const configObj = {
-      attributes: [
-        'val1',
-        'val2',
-      ],
+      attributes: ['val1', 'val2'],
     };
 
     expect(getAttributesFromConfigObj(configObj)).to.deep.equal({});

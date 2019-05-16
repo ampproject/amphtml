@@ -23,11 +23,15 @@
  */
 const env = self.AMP_CONFIG || {};
 
-const thirdPartyFrameRegex = typeof env['thirdPartyFrameRegex'] == 'string' ?
-  new RegExp(env['thirdPartyFrameRegex']) : env['thirdPartyFrameRegex'];
+const thirdPartyFrameRegex =
+  typeof env['thirdPartyFrameRegex'] == 'string'
+    ? new RegExp(env['thirdPartyFrameRegex'])
+    : env['thirdPartyFrameRegex'];
 
-const cdnProxyRegex = typeof env['cdnProxyRegex'] == 'string' ?
-  new RegExp(env['cdnProxyRegex']) : env['cdnProxyRegex'];
+const cdnProxyRegex =
+  typeof env['cdnProxyRegex'] == 'string'
+    ? new RegExp(env['cdnProxyRegex'])
+    : env['cdnProxyRegex'];
 
 /** @type {!Object<string, string|boolean|RegExp>} */
 export const urls = {
@@ -38,11 +42,11 @@ export const urls = {
   /* Note that cdnProxyRegex is only ever checked against origins
    * (proto://host[:port]) so does not need to consider path
    */
-  cdnProxyRegex: cdnProxyRegex ||
-      /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org$/,
+  cdnProxyRegex:
+    cdnProxyRegex || /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org$/,
   localhostRegex: /^https?:\/\/localhost(:\d+)?$/,
-  errorReporting: env['errorReportingUrl'] ||
-      'https://amp-error-reporting.appspot.com/r',
+  errorReporting:
+    env['errorReportingUrl'] || 'https://amp-error-reporting.appspot.com/r',
   localDev: env['localDev'] || false,
 };
 

@@ -21,22 +21,19 @@ const TIMEOUT = 15000;
 describe('amp-list (integration)', function() {
   this.timeout(TIMEOUT);
 
-  const basicBody =
-    `<amp-list width=300 height=100 src="http://localhost:9876/list/fruit-data/get?cors=0">
+  const basicBody = `<amp-list width=300 height=100 src="http://localhost:9876/list/fruit-data/get?cors=0">
       <template type="amp-mustache">
         {{name}} : {{quantity}} @ {{unitPrice}}
       </template>
     '</amp-list>`;
 
-  const scriptTemplateBody =
-  `<amp-list width=300 height=100 src="http://localhost:9876/list/fruit-data/get?cors=0">
+  const scriptTemplateBody = `<amp-list width=300 height=100 src="http://localhost:9876/list/fruit-data/get?cors=0">
     <script type="text/plain" template="amp-mustache">
       {{name}} : {{quantity}} @ {{unitPrice}}
     </script>
   '</amp-list>`;
 
   const basicTests = env => {
-
     let browser;
     let doc;
     let win;
@@ -70,23 +67,39 @@ describe('amp-list (integration)', function() {
     });
   };
 
-  describes.integration('basic (mustache-0.1)', {
-    body: basicBody,
-    extensions: ['amp-list', 'amp-mustache:0.1'],
-  }, basicTests);
+  describes.integration(
+    'basic (mustache-0.1)',
+    {
+      body: basicBody,
+      extensions: ['amp-list', 'amp-mustache:0.1'],
+    },
+    basicTests
+  );
 
-  describes.integration('basic (mustache-0.2)', {
-    body: basicBody,
-    extensions: ['amp-list', 'amp-mustache:0.2'],
-  }, basicTests);
+  describes.integration(
+    'basic (mustache-0.2)',
+    {
+      body: basicBody,
+      extensions: ['amp-list', 'amp-mustache:0.2'],
+    },
+    basicTests
+  );
 
-  describes.integration('basic (mustache-0.1) script template', {
-    body: scriptTemplateBody,
-    extensions: ['amp-list', 'amp-mustache:0.1'],
-  }, basicTests);
+  describes.integration(
+    'basic (mustache-0.1) script template',
+    {
+      body: scriptTemplateBody,
+      extensions: ['amp-list', 'amp-mustache:0.1'],
+    },
+    basicTests
+  );
 
-  describes.integration('basic (mustache-0.2) script template', {
-    body: scriptTemplateBody,
-    extensions: ['amp-list', 'amp-mustache:0.2'],
-  }, basicTests);
+  describes.integration(
+    'basic (mustache-0.2) script template',
+    {
+      body: scriptTemplateBody,
+      extensions: ['amp-list', 'amp-mustache:0.2'],
+    },
+    basicTests
+  );
 });
