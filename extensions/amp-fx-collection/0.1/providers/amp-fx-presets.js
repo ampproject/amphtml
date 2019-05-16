@@ -51,18 +51,16 @@ function flyIn(fxElement, axis, coeff) {
   // Not using interpolation in the following assignment since closure compiles
   // to a leading, useless empty string.
   const flyInDistanceAsLength =
-      coeff * fxElement.flyInDistance + (axisIsX ? 'vw' : 'vh');
+    coeff * fxElement.flyInDistance + (axisIsX ? 'vw' : 'vh');
 
   // only do this on the first element
   if (!fxElement.initialTrigger) {
     Services.resourcesForDoc(element).mutateElement(element, () => {
       const style = computedStyle(fxElement.win, element);
       const prop = axisIsX ? 'left' : 'top';
-      const propAsLength = style[prop] === 'auto' ? 0 : style[prop];
+      const propAsLength = style[prop] === 'auto' ? '0px' : style[prop];
       const position =
-          style.position === 'static' ?
-            'relative' :
-            style.position;
+        style.position === 'static' ? 'relative' : style.position;
       const styles = {
         position,
         visibility: 'visible',
@@ -89,9 +87,12 @@ function flyIn(fxElement, axis, coeff) {
 function marginStartAsserts(element) {
   const marginStart = parseFloat(element.getAttribute('data-margin-start'));
   if (marginStart) {
-    userAssert(marginStart >= 0 && marginStart <= 100,
-        'data-margin-start must be a percentage value ' +
-        'and be between 0% and 100% for: %s', element);
+    userAssert(
+      marginStart >= 0 && marginStart <= 100,
+      'data-margin-start must be a percentage value ' +
+        'and be between 0% and 100% for: %s',
+      element
+    );
   }
   return marginStart;
 }
@@ -113,9 +114,11 @@ function topFromPosObsEntryOrNull(entry) {
 function isInViewportForTopAxis(entry, fxElement, coeff) {
   const top = topFromPosObsEntryOrNull(entry);
   devAssert(Math.abs(coeff) == 1);
-  return !!top &&
-    ((top + (coeff * fxElement.viewportHeight * fxElement.flyInDistance / 100))
-      <= (1 - fxElement.marginStart) * fxElement.viewportHeight);
+  return (
+    !!top &&
+    top + (coeff * fxElement.viewportHeight * fxElement.flyInDistance) / 100 <=
+      (1 - fxElement.marginStart) * fxElement.viewportHeight
+  );
 }
 
 /**
@@ -135,12 +138,15 @@ export const Presets = {
   [FxType.PARALLAX]: {
     userAsserts(element) {
       const factorValue = userAssert(
-          element.getAttribute('data-parallax-factor'),
-          'data-parallax-factor=<number> attribute must be provided for: %s',
-          element);
-      userAssert(parseFloat(factorValue) > 0,
-          'data-parallax-factor must be a number and greater than 0 for: %s',
-          element);
+        element.getAttribute('data-parallax-factor'),
+        'data-parallax-factor=<number> attribute must be provided for: %s',
+        element
+      );
+      userAssert(
+        parseFloat(factorValue) > 0,
+        'data-parallax-factor must be a number and greater than 0 for: %s',
+        element
+      );
     },
     update(entry) {
       const fxElement = this;
@@ -161,9 +167,9 @@ export const Presets = {
 
       // If above the threshold of trigger-position
       // Translate the element offset pixels.
-      setStyles(fxElement.element,
-          {transform:
-            `translateY(${fxElement.offset.toFixed(0)}px)`});
+      setStyles(fxElement.element, {
+        transform: `translateY(${fxElement.offset.toFixed(0)}px)`,
+      });
     },
   },
   [FxType.FLY_IN_BOTTOM]: {
@@ -237,21 +243,31 @@ export const Presets = {
         return;
       }
 
-      userAssert(marginEnd >= 0 && marginEnd <= 100,
-          'data-margin-end must be a percentage value ' +
-          'and be between 0% and 100% for: %s', element);
+      userAssert(
+        marginEnd >= 0 && marginEnd <= 100,
+        'data-margin-end must be a percentage value ' +
+          'and be between 0% and 100% for: %s',
+        element
+      );
 
-      userAssert(marginEnd > marginStart,
-          'data-margin-end must be greater than data-margin-start for: %s',
-          element);
+      userAssert(
+        marginEnd > marginStart,
+        'data-margin-end must be greater than data-margin-start for: %s',
+        element
+      );
     },
     update(entry) {
       const fxElement = this;
       const {viewportHeight, marginStart} = fxElement;
       devAssert(fxElement.adjustedViewportHeight);
 
-      if (!isInViewportConsideringMargins(
-          entry, fxElement, fxElement.adjustedViewportHeight)) {
+      if (
+        !isInViewportConsideringMargins(
+          entry,
+          fxElement,
+          fxElement.adjustedViewportHeight
+        )
+      ) {
         return;
       }
 
@@ -266,8 +282,8 @@ export const Presets = {
       // Offset is how much extra to move the element which is position within
       // viewport times adjusted factor.
       const offset =
-        1 * (viewportHeight - top - (marginStart * viewportHeight)) /
-          (marginDelta * viewportHeight);
+        (1 * (viewportHeight - top - marginStart * viewportHeight)) /
+        (marginDelta * viewportHeight);
       fxElement.offset = offset;
 
       // If above the threshold of trigger-position

@@ -93,7 +93,7 @@ export class BindValidator {
    * @return {boolean}
    */
   canBind(tag, property) {
-    return (this.rulesForTagAndProperty_(tag, property) !== undefined);
+    return this.rulesForTagAndProperty_(tag, property) !== undefined;
   }
 
   /**
@@ -221,6 +221,13 @@ export class BindValidator {
 function createElementRules_() {
   // Initialize `rules` with tag-specific constraints.
   const rules = {
+    'AMP-AUTOCOMPLETE': {
+      'src': {
+        'allowedProtocols': {
+          'https': true,
+        },
+      },
+    },
     'AMP-BASE-CAROUSEL': {
       'advance-count': null,
       'auto-advance-count': null,
@@ -440,6 +447,8 @@ function createElementRules_() {
       'selectionstart': null,
       'spellcheck': null,
       'wrap': null,
+      // Non-standard property.
+      'defaulttext': null,
     },
   };
   return rules;

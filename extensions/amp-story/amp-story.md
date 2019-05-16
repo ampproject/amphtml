@@ -2,6 +2,7 @@
 $category@: presentation
 formats:
   - websites
+  - stories
 teaser:
   text: A rich, visual storytelling format.
 ---
@@ -29,10 +30,6 @@ limitations under the License.
     <td>A rich, visual storytelling format.</td>
   </tr>
   <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td><div><a href="https://www.ampproject.org/docs/reference/experimental.html">Experimental</a></td>
-  </tr>
-  <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js">&lt;/script></code></td>
   </tr>
@@ -50,7 +47,7 @@ limitations under the License.
 </table>
 
 {% call callout('Important', type='caution') %}
-This component is experimental and under active development. For any issues, please [file a GitHub issue](https://github.com/ampproject/amphtml/issues/new).
+This component is under active development. For any issues, please [file a GitHub issue](https://github.com/ampproject/amphtml/issues/new).
 {% endcall %}
 
 [TOC]
@@ -345,10 +342,6 @@ A URL to the [story poster](#posters) in landscape format (4x3 aspect ratio).
 
 A "poster" is an image that displays in the UI until your story is loaded. The poster can generally be the first screen of your story, although you can use any image that is representative of the story.
 
-### Children (of amp-story)
-
-The `<amp-story>` component contains one or more [`<amp-story-page>`](#pages:-amp-story-page) components, containing each of the individual screens of the story.  The first page specified in the document order is the first page shown in the story.
-
 ### Landscape orientation and full bleed desktop experience opt in
 
 If the `supports-landscape` attribute is specified on the `<amp-story>` element, it will:
@@ -368,6 +361,10 @@ Usage: `<amp-story ... supports-landscape>...</amp-story>`
   <noscript><img width="400" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/amp-story-desktop-full-bleed.gif" /></noscript>
   </amp-anim>
 </figure>
+
+### Children (of amp-story)
+
+The `<amp-story>` component contains one or more [`<amp-story-page>`](#pages:-amp-story-page) components, containing each of the individual screens of the story.  The first page specified in the document order is the first page shown in the story.
 
 ## Pages: `amp-story-page`
 
@@ -597,6 +594,7 @@ An `amp-story-grid-layer` can contain any of the following elements:
         <li><code>&lt;amp-img></code></li>
         <li><code>&lt;amp-video></code></li>
         <li><code>&lt;source></code></li>
+        <li><code>&lt;svg></code></li>
         <li><code>&lt;track></code></li>
       </ul>
     </td>
@@ -710,6 +708,14 @@ An `amp-story-grid-layer` can contain any of the following elements:
     </td>
   </tr>
   <tr>
+    <td>Links</td>
+    <td>
+      <ul>
+        <li><code>&lt;a></code></li>
+      </ul>
+    </td>
+  </tr>
+  <tr>
     <td>Other</td>
     <td>
       <ul>
@@ -719,6 +725,37 @@ An `amp-story-grid-layer` can contain any of the following elements:
     </td>
   </tr>
 </table>
+
+#### Links in amp-story-grid-layer
+
+We support inline links `<a>` as a descendant of `amp-story-grid-layer`. Whenever a link is tapped a tooltip will be shown - deferring the corresponding action until the user taps again in the tooltip.
+
+#### Customizing tooltip for links
+
+You can customize the contents of the tooltip displayed on top of a user interactive element by specifying the following attributes. If they are not specified, a fallback value will be provided automatically.
+
+<figure class="centered-fig">
+  <span class="special-char">Example:</span>
+  <amp-anim alt="Embedded component example" layout="flex-item" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/amp-story-tooltip.gif" width="300" height="553">
+  <noscript><img width="300" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/amp-story-tooltip.gif" /></noscript>
+  </amp-anim>
+</figure>
+
+##### `data-tooltip-icon`
+
+Takes in a `src` where the icon image is located.
+
+##### `data-tooltip-text`
+
+A string that will be shown when the tooltip appears.
+
+Example:
+
+```html
+<a href="https://www.google.com" role="link" data-tooltip-icon="./assets/ic_amp_googblue_1x_web_24dp.png" data-tooltip-text="Go to page">
+  Click me!
+</a>
+```
 
 ### `amp-story-cta-layer`
 
@@ -1352,8 +1389,8 @@ The `<amp-story-bookend>` must have a `src` attribute pointing to the JSON confi
 ## Other components usable in AMP stories
 The following are other components usable in AMP stories that require some story-specific caveats.
 
-- [amp-sidebar](https://www.ampproject.org/docs/reference/components/amp-sidebar#sidebar-for-stories)
 - [amp-consent](https://www.ampproject.org/docs/reference/components/amp-consent#prompt-ui-for-stories)
+- [amp-sidebar](https://www.ampproject.org/docs/reference/components/amp-sidebar)
 
 For more generally usable components see the [list of allowed children](https://www.ampproject.org/docs/reference/components/amp-story#children).
 
@@ -1363,7 +1400,7 @@ See [amp-story rules](https://github.com/ampproject/amphtml/blob/master/extensio
 
 ## Localization
 
-To localize your story, include the language code in the `lang` attribute on the `<html>` tag of your story, such as `<html lang="en">` for English.  The supported language codes are:
+To localize your story, include the language code in the `lang` attribute on the `<html>` tag of your story, such as `<html ⚡ lang="en">` for English.  The supported language codes are:
 
 * ar (Arabic)
 * de (German)
@@ -1388,7 +1425,7 @@ To localize your story, include the language code in the `lang` attribute on the
 * zh-TW (Traditional Chinese)
 * zh (Simplified Chinese)
 
-Additionally, for right-to-left languages, you may include the `dir="rtl"` attribute on the `<html>` tag of your story.  This may be used in conjunction with the language code as well, e.g. `<html lang="ar" dir="rtl">`.
+Additionally, for right-to-left languages, you may include the `dir="rtl"` attribute on the `<html>` tag of your story.  This may be used in conjunction with the language code as well, e.g. `<html ⚡ lang="ar" dir="rtl">`.
 
 ## Related resources
 

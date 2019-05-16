@@ -36,7 +36,6 @@ const TAG_ = 'Viewport';
  * @visibleForTesting
  */
 export class ViewportBindingIosEmbedWrapper_ {
-
   /**
    * @param {!Window} win
    */
@@ -57,9 +56,6 @@ export class ViewportBindingIosEmbedWrapper_ {
     this.wrapper_ = wrapper;
     wrapper.id = 'i-amphtml-wrapper';
     wrapper.className = topClasses;
-    if (isExperimentOn(win, 'scroll-height-minheight')) {
-      wrapper.classList.add('i-amphtml-body-minheight');
-    }
 
     /** @private @const {!Observable} */
     this.scrollObservable_ = new Observable();
@@ -148,6 +144,18 @@ export class ViewportBindingIosEmbedWrapper_ {
 
   /** @override */
   requiresFixedLayerTransfer() {
+    if (!isExperimentOn(this.win, 'ios-fixed-no-transfer')) {
+      return true;
+    }
+    // The jumping fixed elements have been fixed in iOS 12.2.
+    const iosVersion = parseFloat(
+      Services.platformFor(this.win).getIosVersionString()
+    );
+    return iosVersion < 12.2;
+  }
+
+  /** @override */
+  overrideGlobalScrollTo() {
     return true;
   }
 
@@ -209,14 +217,14 @@ export class ViewportBindingIosEmbedWrapper_ {
   /** @override */
   getSize() {
     return {
-      width: this.win./*OK*/innerWidth,
-      height: this.win./*OK*/innerHeight,
+      width: this.win./*OK*/ innerWidth,
+      height: this.win./*OK*/ innerHeight,
     };
   }
 
   /** @override */
   getScrollTop() {
-    return this.wrapper_./*OK*/scrollTop;
+    return this.wrapper_./*OK*/ scrollTop;
   }
 
   /** @override */
@@ -228,12 +236,12 @@ export class ViewportBindingIosEmbedWrapper_ {
 
   /** @override */
   getScrollWidth() {
-    return this.wrapper_./*OK*/scrollWidth;
+    return this.wrapper_./*OK*/ scrollWidth;
   }
 
   /** @override */
   getScrollHeight() {
-    return this.wrapper_./*OK*/scrollHeight;
+    return this.wrapper_./*OK*/ scrollHeight;
   }
 
   /** @override */
@@ -242,50 +250,39 @@ export class ViewportBindingIosEmbedWrapper_ {
     // document_height)` (we only want the latter), and it doesn't account
     // for margins.
     const scrollingElement = this.win.document.body;
-    const rect = scrollingElement./*OK*/getBoundingClientRect();
+    const rect = scrollingElement./*OK*/ getBoundingClientRect();
     const style = computedStyle(this.win, scrollingElement);
     // Note: unlike viewport-binding-natural.js, there's no need to calculate
     // the "top gap" since the wrapped body _does_ account for child margins.
     // However, the parent's paddingTop still needs to be added.
-    return rect.height
-        + this.paddingTop_
-        + parseInt(style.marginTop, 10)
-        + parseInt(style.marginBottom, 10);
+    return (
+      rect.height +
+      this.paddingTop_ +
+      parseInt(style.marginTop, 10) +
+      parseInt(style.marginBottom, 10)
+    );
   }
 
   /** @override */
-  contentHeightChanged() {
-    if (isExperimentOn(this.win, 'scroll-height-bounce')) {
-      // Refresh the overscroll (`-webkit-overflow-scrolling: touch`) to avoid
-      // iOS rendering bugs. See #8798 for details.
-      const doc = this.win.document;
-      const {documentElement} = doc;
-      this.vsync_.mutate(() => {
-        documentElement.classList.remove('i-amphtml-ios-overscroll');
-        this.vsync_.mutate(() => {
-          documentElement.classList.add('i-amphtml-ios-overscroll');
-        });
-      });
-    }
-  }
+  contentHeightChanged() {}
 
   /** @override */
   getLayoutRect(el, opt_scrollLeft, opt_scrollTop) {
-    const b = el./*OK*/getBoundingClientRect();
+    const b = el./*OK*/ getBoundingClientRect();
     if (this.useLayers_) {
       return layoutRectLtwh(b.left, b.top, b.width, b.height);
     }
 
-    const scrollTop = opt_scrollTop != undefined
-      ? opt_scrollTop
-      : this.getScrollTop();
-    const scrollLeft = opt_scrollLeft != undefined
-      ? opt_scrollLeft
-      : this.getScrollLeft();
-    return layoutRectLtwh(Math.round(b.left + scrollLeft),
-        Math.round(b.top + scrollTop),
-        Math.round(b.width),
-        Math.round(b.height));
+    const scrollTop =
+      opt_scrollTop != undefined ? opt_scrollTop : this.getScrollTop();
+    const scrollLeft =
+      opt_scrollLeft != undefined ? opt_scrollLeft : this.getScrollLeft();
+    return layoutRectLtwh(
+      Math.round(b.left + scrollLeft),
+      Math.round(b.top + scrollTop),
+      Math.round(b.width),
+      Math.round(b.height)
+    );
   }
 
   /** @override */
@@ -297,7 +294,7 @@ export class ViewportBindingIosEmbedWrapper_ {
   setScrollTop(scrollTop) {
     // If scroll top is 0, it's set to 1 to avoid scroll-freeze issue. See
     // `onScrolled_` for more details.
-    this.wrapper_./*OK*/scrollTop = scrollTop || 1;
+    this.wrapper_./*OK*/ scrollTop = scrollTop || 1;
   }
 
   /**
@@ -310,8 +307,8 @@ export class ViewportBindingIosEmbedWrapper_ {
     // This is very sad but very necessary. See #330 for more details.
     // Unfortunately, the same is very expensive to do on the bottom, due to
     // costly scrollHeight.
-    if (this.wrapper_./*OK*/scrollTop == 0) {
-      this.wrapper_./*OK*/scrollTop = 1;
+    if (this.wrapper_./*OK*/ scrollTop == 0) {
+      this.wrapper_./*OK*/ scrollTop = 1;
       if (opt_event) {
         opt_event.preventDefault();
       }

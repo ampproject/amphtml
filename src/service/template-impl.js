@@ -26,7 +26,6 @@ import {rootNodeFor, scopedQuerySelector} from '../dom';
  * {@link https://docs.google.com/document/d/1q-5MPQHnOHLF_uL7lQsGZdzuBgrPTkCy2PdRP-YCbOw/edit#}
  */
 
-
 /**
  * @typedef {function(new:BaseTemplate, !Element, !Window)}
  */
@@ -38,12 +37,10 @@ const PROP_ = '__AMP_IMPL_';
 /** @private @const {string} */
 const PROP_PROMISE_ = '__AMP_WAIT_';
 
-
 /**
  * The interface that is implemented by all templates.
  */
 export class BaseTemplate {
-
   /**
    * @param {!Element} element
    * @param {!Window} win
@@ -131,7 +128,6 @@ export class BaseTemplate {
   }
 }
 
-
 /**
  */
 export class Templates {
@@ -208,8 +204,9 @@ export class Templates {
    */
   findAndRenderTemplate(parent, data, opt_querySelector) {
     return this.renderTemplate(
-        this.findTemplate(parent, opt_querySelector),
-        data);
+      this.findTemplate(parent, opt_querySelector),
+      data
+    );
   }
 
   /**
@@ -224,7 +221,9 @@ export class Templates {
    */
   findAndSetHtmlForTemplate(parent, html, opt_querySelector) {
     return this.setHtmlForTemplate(
-        this.findTemplate(parent, opt_querySelector), html);
+      this.findTemplate(parent, opt_querySelector),
+      html
+    );
   }
 
   /**
@@ -240,8 +239,9 @@ export class Templates {
    */
   findAndRenderTemplateArray(parent, array, opt_querySelector) {
     return this.renderTemplateArray(
-        this.findTemplate(parent, opt_querySelector),
-        array);
+      this.findTemplate(parent, opt_querySelector),
+      array
+    );
   }
 
   /**
@@ -266,10 +266,12 @@ export class Templates {
     userAssert(templateElement, 'Template not found for %s', parent);
     const templateTagName = templateElement.tagName;
     userAssert(
-        (templateTagName == 'TEMPLATE' || (templateTagName == 'SCRIPT'
-            && templateElement.getAttribute('type') === 'text/plain')),
-        'Template must be defined in a <template> or '
-        + '<script type="text/plain"> tag');
+      templateTagName == 'TEMPLATE' ||
+        (templateTagName == 'SCRIPT' &&
+          templateElement.getAttribute('type') === 'text/plain'),
+      'Template must be defined in a <template> or ' +
+        '<script type="text/plain"> tag'
+    );
     return templateElement;
   }
 
@@ -323,7 +325,7 @@ export class Templates {
     }
 
     promise = this.waitForTemplateClass_(element, type).then(templateClass => {
-      const impl = element[PROP_] = new templateClass(element, this.win_);
+      const impl = (element[PROP_] = new templateClass(element, this.win_));
       delete element[PROP_PROMISE_];
       return impl;
     });
@@ -416,7 +418,6 @@ export function installTemplatesService(win) {
  * @param {!Window} win
  * @param {string} type
  * @param {!TemplateClassDef} templateClass
- * @package
  */
 export function registerExtendedTemplate(win, type, templateClass) {
   const templatesService = getService(win, 'templates');

@@ -17,7 +17,6 @@
 import {clamp, mapRange, mod} from '../../../src/utils/math';
 
 describes.sandboxed('utils/math', {}, () => {
-
   describe('mapRange', () => {
     it('should map a number to the current value', () => {
       expect(mapRange(5, 0, 10, 40, 80)).to.equal(60);
@@ -117,4 +116,3 @@ describes.sandboxed('utils/math', {}, () => {
     });
   });
 });
-

@@ -136,6 +136,15 @@ export class VisibilityModel {
     /** @private {time} milliseconds since epoch */
     this.lastVisibleUpdateTime_ = 0;
 
+    /** @private {number} Scroll position at ini-load time */
+    this.initialScrollDepth_ = 0;
+
+    /**
+     * @private {boolean} Whether scroll position at ini-load time has
+     * been set
+     */
+    this.initialScrollDepthAlreadySet_ = false;
+
     /** @private {boolean} */
     this.waitToReset_ = false;
 
@@ -152,8 +161,10 @@ export class VisibilityModel {
    * @private
    */
   reset_() {
-    devAssert(!this.eventResolver_,
-        'Attempt to refresh visible event before previous one resolve');
+    devAssert(
+      !this.eventResolver_,
+      'Attempt to refresh visible event before previous one resolve'
+    );
     const deferred = new Deferred();
     this.eventPromise_ = deferred.promise;
     this.eventResolver_ = deferred.resolve;
@@ -311,7 +322,7 @@ export class VisibilityModel {
     // When ignoreVisibilityForReport_ is true, we update counters but fire the
     // event when the report ready promise is resolved.
     const conditionsMet =
-        this.updateCounters_(visibility) || this.ignoreVisibilityForReport_;
+      this.updateCounters_(visibility) || this.ignoreVisibilityForReport_;
     if (conditionsMet) {
       if (this.scheduledUpdateTimeoutId_) {
         clearTimeout(this.scheduledUpdateTimeoutId_);
@@ -357,8 +368,11 @@ export class VisibilityModel {
    * @return {boolean}
    */
   isVisibilityMatch_(visibility) {
-    devAssert(visibility >= 0 && visibility <= 1,
-        'invalid visibility value: %s', visibility);
+    devAssert(
+      visibility >= 0 && visibility <= 1,
+      'invalid visibility value: %s',
+      visibility
+    );
     // Special case: If visiblePercentageMin is 100%, then it doesn't make
     // sense to do the usual (min, max] since that would never be true.
     if (this.spec_['visiblePercentageMin'] == 1) {
@@ -369,8 +383,10 @@ export class VisibilityModel {
     if (this.spec_['visiblePercentageMax'] == 0) {
       return visibility == 0;
     }
-    return visibility > this.spec_['visiblePercentageMin'] &&
-        visibility <= this.spec_['visiblePercentageMax'];
+    return (
+      visibility > this.spec_['visiblePercentageMin'] &&
+      visibility <= this.spec_['visiblePercentageMax']
+    );
   }
 
   /**
@@ -379,8 +395,11 @@ export class VisibilityModel {
    * @private
    */
   updateCounters_(visibility) {
-    devAssert(visibility >= 0 && visibility <= 1,
-        'invalid visibility value: %s', visibility);
+    devAssert(
+      visibility >= 0 && visibility <= 1,
+      'invalid visibility value: %s',
+      visibility
+    );
     const now = Date.now();
 
     if (visibility > 0) {
@@ -388,14 +407,15 @@ export class VisibilityModel {
       this.lastSeenTime_ = now;
       // Consider it as load time visibility if this happens within 300ms of
       // page load.
-      if (!this.loadTimeVisibility_ && (now - this.createdTime_) < 300) {
+      if (!this.loadTimeVisibility_ && now - this.createdTime_ < 300) {
         this.loadTimeVisibility_ = visibility;
       }
     }
 
     const prevMatchesVisibility = this.matchesVisibility_;
-    const timeSinceLastUpdate =
-        this.lastVisibleUpdateTime_ ? now - this.lastVisibleUpdateTime_ : 0;
+    const timeSinceLastUpdate = this.lastVisibleUpdateTime_
+      ? now - this.lastVisibleUpdateTime_
+      : 0;
     this.matchesVisibility_ = this.isVisibilityMatch_(visibility);
     if (this.matchesVisibility_) {
       this.everMatchedVisibility_ = true;
@@ -403,8 +423,10 @@ export class VisibilityModel {
         // Keep counting.
         this.totalVisibleTime_ += timeSinceLastUpdate;
         this.continuousTime_ += timeSinceLastUpdate;
-        this.maxContinuousVisibleTime_ =
-            Math.max(this.maxContinuousVisibleTime_, this.continuousTime_);
+        this.maxContinuousVisibleTime_ = Math.max(
+          this.maxContinuousVisibleTime_,
+          this.continuousTime_
+        );
       } else {
         // The resource came into view: start counting.
         devAssert(!this.lastVisibleUpdateTime_);
@@ -412,19 +434,22 @@ export class VisibilityModel {
       }
       this.lastVisibleUpdateTime_ = now;
       this.minVisiblePercentage_ =
-          this.minVisiblePercentage_ > 0 ?
-            Math.min(this.minVisiblePercentage_, visibility) :
-            visibility;
-      this.maxVisiblePercentage_ =
-          Math.max(this.maxVisiblePercentage_, visibility);
+        this.minVisiblePercentage_ > 0
+          ? Math.min(this.minVisiblePercentage_, visibility)
+          : visibility;
+      this.maxVisiblePercentage_ = Math.max(
+        this.maxVisiblePercentage_,
+        visibility
+      );
       this.lastVisibleTime_ = now;
     } else if (prevMatchesVisibility) {
       // The resource went out of view. Do final calculations and reset state.
       devAssert(this.lastVisibleUpdateTime_ > 0);
 
       this.maxContinuousVisibleTime_ = Math.max(
-          this.maxContinuousVisibleTime_,
-          this.continuousTime_ + timeSinceLastUpdate);
+        this.maxContinuousVisibleTime_,
+        this.continuousTime_ + timeSinceLastUpdate
+      );
 
       // Reset for next visibility event.
       this.lastVisibleUpdateTime_ = 0;
@@ -433,11 +458,34 @@ export class VisibilityModel {
       this.lastVisibleTime_ = now;
     }
 
-    return this.everMatchedVisibility_ &&
-        (this.totalVisibleTime_ >= this.spec_['totalTimeMin']) &&
-        (this.totalVisibleTime_ <= this.spec_['totalTimeMax']) &&
-        (this.maxContinuousVisibleTime_ >= this.spec_['continuousTimeMin']) &&
-        (this.maxContinuousVisibleTime_ <= this.spec_['continuousTimeMax']);
+    return (
+      this.everMatchedVisibility_ &&
+      this.totalVisibleTime_ >= this.spec_['totalTimeMin'] &&
+      this.totalVisibleTime_ <= this.spec_['totalTimeMax'] &&
+      this.maxContinuousVisibleTime_ >= this.spec_['continuousTimeMin'] &&
+      this.maxContinuousVisibleTime_ <= this.spec_['continuousTimeMax']
+    );
+  }
+
+  /**
+   * Set the amount that the user had scrolled down the page at the time of
+   * page loading.
+   * @param {number} depth
+   */
+  maybeSetInitialScrollDepth(depth) {
+    if (!this.initialScrollDepthAlreadySet_) {
+      this.initialScrollDepth_ = depth;
+      this.initialScrollDepthAlreadySet_ = true;
+    }
+  }
+
+  /**
+   * Gets the amount that the user had scrolled down the page, at the time of
+   * ini-load.
+   * @return {number} depth
+   */
+  getInitialScrollDepth() {
+    return this.initialScrollDepth_;
   }
 
   /**
@@ -448,17 +496,21 @@ export class VisibilityModel {
    */
   computeTimeToWait_() {
     const waitForContinuousTime = Math.max(
-        this.spec_['continuousTimeMin'] - this.continuousTime_, 0);
+      this.spec_['continuousTimeMin'] - this.continuousTime_,
+      0
+    );
     const waitForTotalTime = Math.max(
-        this.spec_['totalTimeMin'] - this.totalVisibleTime_, 0);
+      this.spec_['totalTimeMin'] - this.totalVisibleTime_,
+      0
+    );
     const maxWaitTime = Math.max(waitForContinuousTime, waitForTotalTime);
     return Math.min(
-        maxWaitTime,
-        waitForContinuousTime || Infinity,
-        waitForTotalTime || Infinity);
+      maxWaitTime,
+      waitForContinuousTime || Infinity,
+      waitForTotalTime || Infinity
+    );
   }
 }
-
 
 /**
  * Calculates the specified time based on the given `baseTime`.

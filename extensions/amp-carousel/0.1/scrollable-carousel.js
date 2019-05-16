@@ -27,7 +27,6 @@ import {numeric} from '../../../src/transition';
 const TAG = 'amp-scrollable-carousel';
 
 export class AmpScrollableCarousel extends BaseCarousel {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -64,7 +63,9 @@ export class AmpScrollableCarousel extends BaseCarousel {
     this.container_.classList.add('i-amphtml-scrollable-carousel-container');
     this.element.appendChild(this.container_);
 
-    this.useLayers_ = isExperimentOn(this.win, 'layers');
+    this.useLayers_ =
+      isExperimentOn(this.win, 'layers') &&
+      isExperimentOn(this.win, 'layers-prioritization');
 
     this.cells_.forEach(cell => {
       if (!this.useLayers_) {
@@ -77,16 +78,19 @@ export class AmpScrollableCarousel extends BaseCarousel {
 
     this.cancelTouchEvents_();
 
-    this.container_.addEventListener(
-        'scroll', this.scrollHandler_.bind(this));
+    this.container_.addEventListener('scroll', this.scrollHandler_.bind(this));
 
-    this.registerAction('goToSlide', invocation => {
-      const {args} = invocation;
-      if (args) {
-        const index = parseInt(args['index'], 10);
-        this.goToSlide_(index);
-      }
-    }, ActionTrust.LOW);
+    this.registerAction(
+      'goToSlide',
+      invocation => {
+        const {args} = invocation;
+        if (args) {
+          const index = parseInt(args['index'], 10);
+          this.goToSlide_(index);
+        }
+      },
+      ActionTrust.LOW
+    );
 
     if (this.useLayers_) {
       this.declareLayer(this.container_);
@@ -121,15 +125,20 @@ export class AmpScrollableCarousel extends BaseCarousel {
 
     if (!animate) {
       this.commitSwitch_(newPos);
-      this.container_./*OK*/scrollLeft = newPos;
+      this.container_./*OK*/ scrollLeft = newPos;
     } else {
       /** @const {!TransitionDef<number>} */
       const interpolate = numeric(oldPos, newPos);
       const duration = 200;
       const curve = 'ease-in-out';
-      Animation.animate(this.element, pos => {
-        this.container_./*OK*/scrollLeft = interpolate(pos);
-      }, duration, curve).thenAlways(() => {
+      Animation.animate(
+        this.element,
+        pos => {
+          this.container_./*OK*/ scrollLeft = interpolate(pos);
+        },
+        duration,
+        curve
+      ).thenAlways(() => {
         this.commitSwitch_(newPos);
       });
     }
@@ -163,9 +172,14 @@ export class AmpScrollableCarousel extends BaseCarousel {
       const interpolate = numeric(oldPos, newPos);
       const duration = 200;
       const curve = 'ease-in-out';
-      Animation.animate(this.element, pos => {
-        this.container_./*OK*/scrollLeft = interpolate(pos);
-      }, duration, curve).thenAlways(() => {
+      Animation.animate(
+        this.element,
+        pos => {
+          this.container_./*OK*/ scrollLeft = interpolate(pos);
+        },
+        duration,
+        curve
+      ).thenAlways(() => {
         this.commitSwitch_(newPos);
       });
     };
@@ -178,9 +192,9 @@ export class AmpScrollableCarousel extends BaseCarousel {
    * @param {number} index
    */
   getPosForSlideIndex_(index) {
-    const containerWidth = this.element./*OK*/offsetWidth;
-    const targetPosition = this.cells_[index]./*OK*/offsetLeft;
-    const targetWidth = this.cells_[index]./*OK*/offsetWidth;
+    const containerWidth = this.element./*OK*/ offsetWidth;
+    const targetPosition = this.cells_[index]./*OK*/ offsetLeft;
+    const targetWidth = this.cells_[index]./*OK*/ offsetWidth;
     return targetPosition - (containerWidth - targetWidth) / 2;
   }
 
@@ -189,7 +203,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
    * @private
    */
   scrollHandler_() {
-    const currentScrollLeft = this.container_./*OK*/scrollLeft;
+    const currentScrollLeft = this.container_./*OK*/ scrollLeft;
     this.pos_ = currentScrollLeft;
 
     if (this.scrollTimerId_ === null) {
@@ -202,19 +216,29 @@ export class AmpScrollableCarousel extends BaseCarousel {
    * @private
    */
   waitForScroll_(startingScrollLeft) {
-    this.scrollTimerId_ = Services.timerFor(this.win).delay(() => {
+    this.scrollTimerId_ = /** @type {number} */ (Services.timerFor(
+      this.win
+    ).delay(() => {
       // TODO(yuxichen): test out the threshold for identifying fast scrolling
       if (Math.abs(startingScrollLeft - this.pos_) < 30) {
-        dev().fine(TAG, 'slow scrolling: %s - %s',
-            startingScrollLeft, this.pos_);
+        dev().fine(
+          TAG,
+          'slow scrolling: %s - %s',
+          startingScrollLeft,
+          this.pos_
+        );
         this.scrollTimerId_ = null;
         this.commitSwitch_(this.pos_);
       } else {
-        dev().fine(TAG, 'fast scrolling: %s - %s',
-            startingScrollLeft, this.pos_);
+        dev().fine(
+          TAG,
+          'fast scrolling: %s - %s',
+          startingScrollLeft,
+          this.pos_
+        );
         this.waitForScroll_(this.pos_);
       }
-    }, 100);
+    }, 100));
   }
 
   /**
@@ -242,14 +266,13 @@ export class AmpScrollableCarousel extends BaseCarousel {
    */
   nextPos_(pos, dir) {
     // TODO(jridgewell): this could be using cached values from Layers.
-    const containerWidth = this.element./*OK*/offsetWidth;
-    const fullWidth = this.container_./*OK*/scrollWidth;
+    const containerWidth = this.element./*OK*/ offsetWidth;
+    const fullWidth = this.container_./*OK*/ scrollWidth;
     const newPos = pos + dir * containerWidth;
     if (newPos < 0) {
       return 0;
     }
-    if (fullWidth >= containerWidth &&
-            newPos > fullWidth - containerWidth) {
+    if (fullWidth >= containerWidth && newPos > fullWidth - containerWidth) {
       return fullWidth - containerWidth;
     }
     return newPos;
@@ -264,8 +287,10 @@ export class AmpScrollableCarousel extends BaseCarousel {
     const containerWidth = this.getLayoutWidth();
     for (let i = 0; i < this.cells_.length; i++) {
       const cell = this.cells_[i];
-      if (cell./*OK*/offsetLeft + cell./*OK*/offsetWidth >= pos &&
-            cell./*OK*/offsetLeft <= pos + containerWidth) {
+      if (
+        cell./*OK*/ offsetLeft + cell./*OK*/ offsetWidth >= pos &&
+        cell./*OK*/ offsetLeft <= pos + containerWidth
+      ) {
         callback(cell);
       }
     }
@@ -325,7 +350,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
   hasNext() {
     // TODO(jridgewell): this could be using cached values from Layers.
     const containerWidth = this.getLayoutWidth();
-    const scrollWidth = this.container_./*OK*/scrollWidth;
+    const scrollWidth = this.container_./*OK*/ scrollWidth;
     const maxPos = Math.max(scrollWidth - containerWidth, 0);
     return this.pos_ != maxPos;
   }

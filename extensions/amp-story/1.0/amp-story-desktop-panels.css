@@ -23,10 +23,6 @@ amp-story[standalone].i-amphtml-story-desktop-panels {
  width: 100vw!important;
 }
 
-.i-amphtml-story-desktop-panels .i-amphtml-story-logo {
- display: block!important;
-}
-
 .i-amphtml-story-background-container {
  opacity: .8!important;
  position: absolute!important;
@@ -180,7 +176,8 @@ amp-story[standalone].i-amphtml-story-desktop-panels {
 }
 
 .i-amphtml-story-desktop-panels > amp-story-page,
-.i-amphtml-story-desktop-panels .i-amphtml-story-page-sentinel {
+.i-amphtml-story-desktop-panels .i-amphtml-story-page-sentinel,
+.i-amphtml-story-desktop-panels .i-amphtml-story-media-query-matcher {
   left: 50%!important;
   right: auto !important;
   margin: auto !important;

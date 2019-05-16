@@ -57,6 +57,7 @@ export const TRIPLE_MUSTACHE_WHITELISTED_TAGS = [
   'del',
   'div',
   'em',
+  'hr',
   'i',
   'ins',
   'li',
@@ -124,28 +125,12 @@ export const WHITELISTED_ATTRS = [
  * @const {!Object<string, !Array<string>>}
  */
 export const WHITELISTED_ATTRS_BY_TAGS = {
-  'a': [
-    'rel',
-    'target',
-  ],
-  'div': [
-    'template',
-  ],
-  'form': [
-    'action-xhr',
-    'verify-xhr',
-    'custom-validation-reporting',
-    'target',
-  ],
-  'input': [
-    'mask-output',
-  ],
-  'template': [
-    'type',
-  ],
-  'textarea': [
-    'autoexpand',
-  ],
+  'a': ['rel', 'target'],
+  'div': ['template'],
+  'form': ['action-xhr', 'verify-xhr', 'custom-validation-reporting', 'target'],
+  'input': ['mask-output'],
+  'template': ['type'],
+  'textarea': ['autoexpand'],
 };
 
 /** @const {!Array<string>} */
@@ -167,6 +152,13 @@ const BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES = dict({
   },
 });
 
+/** @const {!Object<string, !Object<string, !RegExp>>} */
+const EMAIL_BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES = dict({
+  'input': {
+    'type': /(?:button|file|image|password)/i,
+  },
+});
+
 /** @const {!Array<string>} */
 const BLACKLISTED_FIELDS_ATTR = [
   'form',
@@ -184,6 +176,15 @@ const BLACKLISTED_TAG_SPECIFIC_ATTRS = dict({
   'select': BLACKLISTED_FIELDS_ATTR,
 });
 
+/** @const {!Object<string, !Array<string>>} */
+const BLACKLISTED_AMP4EMAIL_TAG_SPECIFIC_ATTRS = dict({
+  'amp-anim': ['controls'],
+  'form': ['name'],
+  'input': BLACKLISTED_FIELDS_ATTR,
+  'textarea': BLACKLISTED_FIELDS_ATTR,
+  'select': BLACKLISTED_FIELDS_ATTR,
+});
+
 /**
  * Test for invalid `style` attribute values.
  *
@@ -194,19 +195,25 @@ const BLACKLISTED_TAG_SPECIFIC_ATTRS = dict({
  *
  * @const {!RegExp}
  */
-const INVALID_INLINE_STYLE_REGEX =
-    /!important|position\s*:\s*fixed|position\s*:\s*sticky/i;
+const INVALID_INLINE_STYLE_REGEX = /!important|position\s*:\s*fixed|position\s*:\s*sticky/i;
 
 /**
  * Whether the attribute/value is valid.
  * @param {string} tagName Lowercase tag name.
  * @param {string} attrName Lowercase attribute name.
- * @param {string} attrValue
+ * @param {string} attrValue attribute value
+ * @param {!Document} doc
  * @param {boolean} opt_purify Is true, skips some attribute sanitizations
  *     that are already covered by DOMPurify.
  * @return {boolean}
  */
-export function isValidAttr(tagName, attrName, attrValue, opt_purify = false) {
+export function isValidAttr(
+  tagName,
+  attrName,
+  attrValue,
+  doc,
+  opt_purify = false
+) {
   if (!opt_purify) {
     // "on*" attributes are not allowed.
     if (startsWith(attrName, 'on') && attrName != 'on') {
@@ -240,21 +247,49 @@ export function isValidAttr(tagName, attrName, attrValue, opt_purify = false) {
   }
 
   // Remove blacklisted attributes from specific tags e.g. input[formaction].
-  const attrNameBlacklist = BLACKLISTED_TAG_SPECIFIC_ATTRS[tagName];
-  if (attrNameBlacklist && attrNameBlacklist.indexOf(attrName) != -1) {
+  let attrBlacklist = BLACKLISTED_TAG_SPECIFIC_ATTRS[tagName] || [];
+  if (isAmp4Email(doc)) {
+    attrBlacklist = BLACKLISTED_AMP4EMAIL_TAG_SPECIFIC_ATTRS[tagName] || [];
+  }
+  if (attrBlacklist.indexOf(attrName) != -1) {
     return false;
   }
 
   // Remove blacklisted values for specific attributes for specific tags
   // e.g. input[type=image].
-  const attrBlacklist = BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES[tagName];
-  if (attrBlacklist) {
-    const blacklistedValuesRegex = attrBlacklist[attrName];
-    if (blacklistedValuesRegex &&
-        attrValue.search(blacklistedValuesRegex) != -1) {
+  let attrValueBlacklist = BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES[tagName];
+  if (isAmp4Email(doc)) {
+    attrValueBlacklist = EMAIL_BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES[tagName];
+  }
+  if (attrValueBlacklist) {
+    const blacklistedValuesRegex = attrValueBlacklist[attrName];
+    if (
+      blacklistedValuesRegex &&
+      attrValue.search(blacklistedValuesRegex) != -1
+    ) {
       return false;
     }
   }
 
   return true;
+}
+
+/**
+ * Checks that the document is of an AMP format type.
+ * @param {!Array<string>} formats
+ * @param {!Document} doc
+ * @return {boolean}
+ */
+function isAmpFormatType(formats, doc) {
+  const html = doc.documentElement;
+  const isFormatType = formats.some(format => html.hasAttribute(format));
+  return isFormatType;
+}
+
+/**
+ * @param {!Document} doc
+ * @return {boolean}
+ */
+export function isAmp4Email(doc) {
+  return isAmpFormatType(['⚡4email', 'amp4email'], doc);
 }

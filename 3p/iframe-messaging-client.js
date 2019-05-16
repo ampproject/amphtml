@@ -26,7 +26,6 @@ import {getData} from '../src/event-helper';
 import {getMode} from '../src/mode';
 
 export class IframeMessagingClient {
-
   /**
    *  @param {!Window} win A window object.
    */
@@ -126,11 +125,15 @@ export class IframeMessagingClient {
    *  @param {JsonObject=} opt_payload The payload of message to send.
    */
   sendMessage(type, opt_payload) {
-    this.hostWindow_.postMessage/*OK*/(
-        serializeMessage(
-            type, dev().assertString(this.sentinel_),
-            opt_payload, this.rtvVersion_),
-        '*');
+    this.hostWindow_./*OK*/ postMessage(
+      serializeMessage(
+        type,
+        dev().assertString(this.sentinel_),
+        opt_payload,
+        this.rtvVersion_
+      ),
+      '*'
+    );
   }
 
   /**

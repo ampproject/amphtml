@@ -48,8 +48,9 @@ router.get('/search/countries', function(req, res) {
   if (req.query.hasOwnProperty('q')) {
     const query = req.query.q.toLowerCase();
 
-    filtered = countries.items
-        .filter(country => country.name.toLowerCase().startsWith(query));
+    filtered = countries.items.filter(country =>
+      country.name.toLowerCase().startsWith(query)
+    );
   }
 
   const results = {
@@ -76,19 +77,23 @@ const squareImgUrl = width => {
 const randomFalsy = () => {
   const rand = randInt(4);
   switch (rand) {
-    case 1: return null;
-    case 2: return undefined;
-    case 3: return '';
-    default: return false;
+    case 1:
+      return null;
+    case 2:
+      return undefined;
+    case 3:
+      return '';
+    default:
+      return false;
   }
 };
 
-const generateJson = numberOfItems => {
+const generateJson = (numberOfItems, pagesLeft) => {
   const results = [];
   for (let i = 0; i < numberOfItems; i++) {
     const imageUrl = squareImgUrl(200);
     const r = {
-      'title': 'Item ' + randInt(100),
+      'title': i + pagesLeft * 100,
       imageUrl,
       'price': randInt(8) + 0.99,
     };
@@ -108,8 +113,9 @@ const generateResults = (category, count = 2) => {
   }
 
   r.items = items;
-  r['load-more-src'] =
-      `/list/infinite-scroll-random/${category}?${randInt(10000)}`;
+  r['load-more-src'] = `/list/infinite-scroll-random/${category}?${randInt(
+    10000
+  )}`;
 
   return r;
 };
@@ -144,17 +150,20 @@ router.get('/infinite-scroll', function(req, res) {
   const pagesLeft = query['left'] || 1;
   const latency = query['latency'] || 0;
 
-  const items = generateJson(numberOfItems);
+  const items = generateJson(numberOfItems, pagesLeft);
 
-  const nextUrl = '/list/infinite-scroll?items=' +
-    numberOfItems + '&left=' + (pagesLeft - 1) +
-    '&latency=' + latency;
+  const nextUrl =
+    '/list/infinite-scroll?items=' +
+    numberOfItems +
+    '&left=' +
+    (pagesLeft - 1) +
+    '&latency=' +
+    latency;
   const next = pagesLeft == 0 ? randomFalsy() : nextUrl;
-  const results = next === false ? {items}
-    : {items, next,
-      'loadMoreButtonText': 'test',
-      'loadMoreEndText': 'end',
-    };
+  const results =
+    next === false
+      ? {items}
+      : {items, next, 'loadMoreButtonText': 'test', 'loadMoreEndText': 'end'};
 
   if (latency) {
     setTimeout(() => res.json(results), latency);
@@ -162,7 +171,6 @@ router.get('/infinite-scroll', function(req, res) {
     res.json(results);
   }
 });
-
 
 const generateJsonWithState = (numberOfItems, pagesLeft) => {
   const results = generateJson(numberOfItems);
@@ -179,8 +187,11 @@ router.get('/infinite-scroll-state', function(req, res) {
   const numberOfItems = query['items'] || 2;
   const pagesLeft = query['left'] || 0;
   const items = generateJsonWithState(numberOfItems, pagesLeft);
-  const next = '/list/infinite-scroll-state?left=' + (pagesLeft - 1)
-      + '&items=' + numberOfItems;
+  const next =
+    '/list/infinite-scroll-state?left=' +
+    (pagesLeft - 1) +
+    '&items=' +
+    numberOfItems;
   const results = {
     items,
     next,

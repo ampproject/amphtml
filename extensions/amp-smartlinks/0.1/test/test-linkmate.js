@@ -18,8 +18,7 @@ import * as DocumentReady from '../../../../src/document-ready';
 import {AmpSmartlinks} from '../amp-smartlinks';
 import {Linkmate} from '../linkmate';
 import {Services} from '../../../../src/services';
-import {TwoStepsResponse} from
-  '../../../amp-skimlinks/0.1/link-rewriter/two-steps-response';
+import {TwoStepsResponse} from '../../../amp-skimlinks/0.1/link-rewriter/two-steps-response';
 
 const helpersFactory = env => {
   const {win} = env;
@@ -35,384 +34,527 @@ const helpersFactory = env => {
 
       return new AmpSmartlinks(ampTag);
     },
-    createAnchor(href) {
+    createAnchor(linkOptions) {
       const anchor = win.document.createElement('a');
-      anchor.href = href;
+      anchor.setAttribute(linkOptions['attributeName'], linkOptions['link']);
 
       return anchor;
     },
   };
 };
 
-describes.fakeWin('amp-smartlinks',
-    {amp: {extensions: ['amp-smartlinks']}},
-    env => {
-      let helpers, xhr, linkmate;
+describes.fakeWin(
+  'amp-smartlinks',
+  {amp: {extensions: ['amp-smartlinks']}},
+  env => {
+    let helpers, xhr, linkmate;
+
+    beforeEach(() => {
+      xhr = Services.xhrFor(env.win);
+      helpers = helpersFactory(env);
+    });
+
+    beforeEach(() => {
+      env.sandbox
+        .stub(DocumentReady, 'whenDocumentReady')
+        .returns(Promise.reject());
+    });
+
+    afterEach(() => {
+      env.sandbox.restore();
+    });
+
+    describe('runLinkmate', () => {
+      let anchorList, mockFetch, response;
 
       beforeEach(() => {
-        xhr = Services.xhrFor(env.win);
-        helpers = helpersFactory(env);
+        const linkmateOptions = {
+          exclusiveLinks: false,
+          publisherID: 999,
+          linkAttribute: 'href',
+        };
+        linkmate = new Linkmate(env.ampdoc, xhr, linkmateOptions);
+        anchorList = [
+          {attributeName: 'href', link: 'http://fakelink.example'},
+          {attributeName: 'href', link: 'http://fakelink2.example'},
+          {
+            attributeName: 'href',
+            link: 'https://examplelocklink.example/#locklink',
+          },
+        ].map(helpers.createAnchor);
       });
 
       beforeEach(() => {
-        env.sandbox
-            .stub(DocumentReady, 'whenDocumentReady')
-            .returns(Promise.reject());
+        mockFetch = env.sandbox.mock(xhr);
+
+        response = {
+          json: () => Promise.resolve({}),
+        };
       });
 
       afterEach(() => {
-        env.sandbox.restore();
+        mockFetch.verify();
       });
 
-      describe('runLinkmate', () => {
-        let anchorList, mockFetch, response;
+      it('Should fire an API call if none exists', () => {
+        env.sandbox.spy(linkmate, 'postToLinkmate_');
+        env.sandbox.stub(linkmate, 'mapLinks_');
 
-        beforeEach(() => {
-          const linkmateOptions = {
-            exclusiveLinks: false,
-            publisherID: 999,
-            linkAttribute: 'href',
-          };
-          linkmate = new Linkmate(
-              env.ampdoc,
-              xhr,
-              linkmateOptions,
-          );
-          anchorList = [
-            'http://fakelink.example',
-            'http://fakelink2.example',
-            'https://examplelocklink.example/#locklink',
-          ].map(helpers.createAnchor);
-        });
+        mockFetch
+          .expects('fetchJson')
+          .once()
+          .returns(Promise.resolve(response));
 
-        beforeEach(() => {
-          mockFetch = env.sandbox.mock(xhr);
+        const linkmateResponse = linkmate.runLinkmate(anchorList);
 
-          response = {
-            json: () => Promise.resolve({}),
-          };
-        });
-
-        afterEach(() => {
-          mockFetch.verify();
-        });
-
-        it('Should fire an API call if none exists', () => {
-          env.sandbox.spy(linkmate, 'postToLinkmate_');
-          env.sandbox.stub(linkmate, 'mapLinks_');
-
-          mockFetch
-              .expects('fetchJson')
-              .once()
-              .returns(Promise.resolve(response));
-
-          const linkmateResponse = linkmate.runLinkmate(anchorList);
-
-          expect(linkmate.postToLinkmate_.calledOnce).to.be.true;
-          expect(linkmateResponse).to.be.instanceof(TwoStepsResponse);
-        });
-
-        it('Should fire an API call if anchorList changed', () => {
-          env.sandbox.spy(linkmate, 'postToLinkmate_');
-          env.sandbox.stub(linkmate, 'mapLinks_');
-
-          mockFetch
-              .expects('fetchJson')
-              .once()
-              .returns(Promise.resolve(response));
-          const linkmateResponse = linkmate.runLinkmate(anchorList);
-
-          linkmate.anchorList_ = anchorList;
-          const newAnchorList = [
-            'http://totallynewlink.example',
-            'http://fakelink2.example',
-            'https://examplelocklink.example/#locklink',
-          ].map(helpers.createAnchor);
-
-          mockFetch
-              .expects('fetchJson')
-              .once()
-              .returns(Promise.resolve(response));
-          const linkmateResponse2 = linkmate.runLinkmate(newAnchorList);
-
-          expect(linkmate.postToLinkmate_.calledTwice).to.be.true;
-          expect(linkmateResponse).to.be.instanceof(TwoStepsResponse);
-          expect(linkmateResponse2).to.be.instanceof(TwoStepsResponse);
-        });
-
-        it('Should map new anchors', () => {
-          env.sandbox.spy(linkmate, 'postToLinkmate_');
-          env.sandbox.spy(linkmate, 'mapLinks_');
-
-          mockFetch
-              .expects('fetchJson')
-              .once()
-              .returns(Promise.resolve(response));
-          const linkmateResponse = linkmate.runLinkmate(anchorList);
-
-          linkmate.anchorList_ = anchorList;
-          linkmate.linkmateResponse_ = [{a: 'b'}];
-          const newAnchorList = [
-            'http://totallynewlink.example',
-            'http://fakelink2.example',
-            'https://examplelocklink.example/#locklink',
-          ].map(helpers.createAnchor);
-
-          mockFetch
-              .expects('fetchJson')
-              .once()
-              .returns(Promise.resolve(response));
-          const linkmateResponse2 = linkmate.runLinkmate(newAnchorList);
-
-          expect(linkmate.postToLinkmate_.calledTwice).to.be.true;
-          expect(linkmate.mapLinks_.calledOnce).to.be.true;
-          expect(linkmateResponse).to.be.instanceof(TwoStepsResponse);
-          expect(linkmateResponse2).to.be.instanceof(TwoStepsResponse);
-        });
-
-        it('Should do nothing if no new anchors', () => {
-          env.sandbox.spy(linkmate, 'postToLinkmate_');
-          env.sandbox.stub(linkmate, 'mapLinks_');
-
-          mockFetch
-              .expects('fetchJson')
-              .once()
-              .returns(Promise.resolve(response));
-          const linkmateResponse = linkmate.runLinkmate(anchorList);
-
-          linkmate.anchorList_ = anchorList;
-          linkmate.linkmateResponse_ = [{a: 'b'}];
-          const syncResponse = linkmate.runLinkmate(anchorList);
-
-          expect(linkmate.postToLinkmate_.calledOnce).to.be.true;
-          expect(linkmate.postToLinkmate_.calledTwice).to.be.false;
-          expect(syncResponse).to.not.be.null;
-          expect(linkmateResponse).to.be.instanceof(TwoStepsResponse);
-        });
+        expect(linkmate.postToLinkmate_.calledOnce).to.be.true;
+        expect(linkmateResponse).to.be.instanceof(TwoStepsResponse);
       });
 
-      describe('postToLinkmate_', () => {
-        let mockFetch;
+      it('Should fire an API call if anchorList changed', () => {
+        env.sandbox.spy(linkmate, 'postToLinkmate_');
+        env.sandbox.stub(linkmate, 'mapLinks_');
 
-        beforeEach(() => {
-          mockFetch = env.sandbox.mock(xhr);
-        });
+        mockFetch
+          .expects('fetchJson')
+          .once()
+          .returns(Promise.resolve(response));
+        const linkmateResponse = linkmate.runLinkmate(anchorList);
 
-        afterEach(() => {
-          mockFetch.verify();
-        });
+        linkmate.anchorList_ = anchorList;
+        const newAnchorList = [
+          {attributeName: 'href', link: 'http://totallynewlink.example'},
+          {attributeName: 'href', link: 'http://fakelink2.example'},
+          {
+            attributeName: 'href',
+            link: 'https://examplelocklink.example/#locklink',
+          },
+        ].map(helpers.createAnchor);
 
-        it('Should build payload', () => {
-          const linkmateOptions = {
-            exclusiveLinks: false,
-            publisherID: 999,
-            linkAttribute: 'href',
-          };
-          linkmate = new Linkmate(
-              env.ampdoc,
-              xhr,
-              linkmateOptions,
-          );
-          const response = {
-            json: () => Promise.resolve({}),
-          };
+        mockFetch
+          .expects('fetchJson')
+          .once()
+          .returns(Promise.resolve(response));
+        const linkmateResponse2 = linkmate.runLinkmate(newAnchorList);
 
-          env.sandbox.spy(linkmate, 'postToLinkmate_');
-          env.sandbox
-              .stub(linkmate, 'buildLinksPayload_')
-              .returns({});
-          env.sandbox
-              .stub(linkmate, 'getEditInfo_')
-              .returns({});
-          mockFetch
-              .expects('fetchJson')
-              .once()
-              .returns(Promise.resolve(response));
-          linkmate.postToLinkmate_();
-
-          expect(linkmate.buildLinksPayload_.calledOnce).to.be.true;
-          expect(linkmate.getEditInfo_.calledOnce).to.be.true;
-        });
+        expect(linkmate.postToLinkmate_.calledTwice).to.be.true;
+        expect(linkmateResponse).to.be.instanceof(TwoStepsResponse);
+        expect(linkmateResponse2).to.be.instanceof(TwoStepsResponse);
       });
 
-      describe('buildLinksPayload_', () => {
-        let anchorList;
+      it('Should map new anchors', () => {
+        env.sandbox.spy(linkmate, 'postToLinkmate_');
+        env.sandbox.spy(linkmate, 'mapLinks_');
 
-        beforeEach(() => {
-          const linkmateOptions = {
-            exclusiveLinks: false,
-            publisherID: 999,
-            linkAttribute: 'href',
-          };
-          linkmate = new Linkmate(
-              env.ampdoc,
-              xhr,
-              linkmateOptions,
-          );
+        mockFetch
+          .expects('fetchJson')
+          .once()
+          .returns(Promise.resolve(response));
+        const linkmateResponse = linkmate.runLinkmate(anchorList);
 
-          anchorList = [
-            'http://fakelink.example',
-            'http://fakelink2.example',
-            'https://examplelocklink.example/#locklink',
-          ].map(helpers.createAnchor);
-        });
+        linkmate.anchorList_ = anchorList;
+        linkmate.linkmateResponse_ = [{a: 'b'}];
+        const newAnchorList = [
+          {attributeName: 'href', link: 'http://totallynewlink.example'},
+          {attributeName: 'href', link: 'http://fakelink2.example'},
+          {
+            attributeName: 'href',
+            link: 'https://examplelocklink.example/#locklink',
+          },
+        ].map(helpers.createAnchor);
 
-        it('Should build payload from anchorList', () => {
-          env.sandbox.spy(linkmate, 'buildLinksPayload_');
+        mockFetch
+          .expects('fetchJson')
+          .once()
+          .returns(Promise.resolve(response));
+        const linkmateResponse2 = linkmate.runLinkmate(newAnchorList);
 
-          const expectedPayload = [{
+        expect(linkmate.postToLinkmate_.calledTwice).to.be.true;
+        expect(linkmate.mapLinks_.calledOnce).to.be.true;
+        expect(linkmateResponse).to.be.instanceof(TwoStepsResponse);
+        expect(linkmateResponse2).to.be.instanceof(TwoStepsResponse);
+      });
+
+      it('Should do nothing if no new anchors', () => {
+        env.sandbox.spy(linkmate, 'postToLinkmate_');
+        env.sandbox.stub(linkmate, 'mapLinks_');
+
+        mockFetch
+          .expects('fetchJson')
+          .once()
+          .returns(Promise.resolve(response));
+        const linkmateResponse = linkmate.runLinkmate(anchorList);
+
+        linkmate.anchorList_ = anchorList;
+        linkmate.linkmateResponse_ = [{a: 'b'}];
+        const syncResponse = linkmate.runLinkmate(anchorList);
+
+        expect(linkmate.postToLinkmate_.calledOnce).to.be.true;
+        expect(linkmate.postToLinkmate_.calledTwice).to.be.false;
+        expect(syncResponse).to.not.be.null;
+        expect(linkmateResponse).to.be.instanceof(TwoStepsResponse);
+      });
+    });
+
+    describe('postToLinkmate_', () => {
+      let mockFetch;
+
+      beforeEach(() => {
+        mockFetch = env.sandbox.mock(xhr);
+      });
+
+      afterEach(() => {
+        mockFetch.verify();
+      });
+
+      it('Should build payload', () => {
+        const linkmateOptions = {
+          exclusiveLinks: false,
+          publisherID: 999,
+          linkAttribute: 'href',
+        };
+        linkmate = new Linkmate(env.ampdoc, xhr, linkmateOptions);
+        const response = {
+          json: () => Promise.resolve({}),
+        };
+
+        env.sandbox.spy(linkmate, 'postToLinkmate_');
+        env.sandbox.stub(linkmate, 'buildLinksPayload_').returns({});
+        env.sandbox.stub(linkmate, 'getEditInfo_').returns({});
+        mockFetch
+          .expects('fetchJson')
+          .once()
+          .returns(Promise.resolve(response));
+        linkmate.postToLinkmate_();
+
+        expect(linkmate.buildLinksPayload_.calledOnce).to.be.true;
+        expect(linkmate.getEditInfo_.calledOnce).to.be.true;
+      });
+    });
+
+    describe('buildLinksPayload_', () => {
+      let anchorList;
+
+      beforeEach(() => {
+        const linkmateOptions = {
+          exclusiveLinks: false,
+          publisherID: 999,
+          linkAttribute: 'href',
+        };
+        linkmate = new Linkmate(env.ampdoc, xhr, linkmateOptions);
+
+        anchorList = [
+          {attributeName: 'href', link: 'http://fakelink.example/'},
+          {attributeName: 'href', link: 'http://fakelink2.example/'},
+          {
+            attributeName: 'href',
+            link: 'https://examplelocklink.example/#locklink',
+          },
+        ].map(helpers.createAnchor);
+      });
+
+      it('Should build payload from anchorList', () => {
+        env.sandbox.spy(linkmate, 'buildLinksPayload_');
+
+        const expectedPayload = [
+          {
             'raw_url': 'http://fakelink.example/',
             'exclusive_match_requested': false,
-          }, {
+          },
+          {
             'raw_url': 'http://fakelink2.example/',
             'exclusive_match_requested': false,
-          }, {
+          },
+          {
             'raw_url': 'https://examplelocklink.example/#locklink',
             'exclusive_match_requested': true,
-          }];
+          },
+        ];
 
-          const linkPayload = linkmate.buildLinksPayload_(anchorList);
+        const linkPayload = linkmate.buildLinksPayload_(anchorList);
 
-          expect(linkPayload).to.deep.equal(expectedPayload);
-        });
+        expect(linkPayload).to.deep.equal(expectedPayload);
+      });
 
-        it('Should build all exclusive links if requested', () => {
-          env.sandbox.spy(linkmate, 'buildLinksPayload_');
+      it('Should build all exclusive links if requested', () => {
+        env.sandbox.spy(linkmate, 'buildLinksPayload_');
 
-          linkmate.requestExclusiveLinks_ = true;
-          const expectedPayload = [{
+        linkmate.requestExclusiveLinks_ = true;
+        const expectedPayload = [
+          {
             'raw_url': 'http://fakelink.example/',
             'exclusive_match_requested': true,
-          }, {
+          },
+          {
             'raw_url': 'http://fakelink2.example/',
             'exclusive_match_requested': true,
-          }, {
+          },
+          {
             'raw_url': 'https://examplelocklink.example/#locklink',
             'exclusive_match_requested': true,
-          }];
+          },
+        ];
 
-          const linkPayload = linkmate.buildLinksPayload_(anchorList);
+        const linkPayload = linkmate.buildLinksPayload_(anchorList);
 
-          expect(linkPayload).to.deep.equal(expectedPayload);
-        });
+        expect(linkPayload).to.deep.equal(expectedPayload);
+      });
 
-        it('Should skip existing shop-links', () => {
-          env.sandbox.spy(linkmate, 'buildLinksPayload_');
+      it('Should skip existing shop-links', () => {
+        env.sandbox.spy(linkmate, 'buildLinksPayload_');
 
-          anchorList = [
-            'http://fakelink.example',
-            'http://http://shop-links.co/999',
-            'https://examplelocklink.example/#locklink',
-          ].map(helpers.createAnchor);
+        anchorList = [
+          {attributeName: 'href', link: 'http://fakelink.example/'},
+          {attributeName: 'href', link: 'http://shop-links.co/999'},
+          {
+            attributeName: 'href',
+            link: 'https://examplelocklink.example/#locklink',
+          },
+        ].map(helpers.createAnchor);
 
-          const expectedPayload = [{
+        const expectedPayload = [
+          {
             'raw_url': 'http://fakelink.example/',
             'exclusive_match_requested': false,
-          }, {
+          },
+          {
             'raw_url': 'https://examplelocklink.example/#locklink',
             'exclusive_match_requested': true,
-          }];
+          },
+        ];
 
-          const linkPayload = linkmate.buildLinksPayload_(anchorList);
+        const linkPayload = linkmate.buildLinksPayload_(anchorList);
 
-          expect(linkPayload).to.deep.equal(expectedPayload);
-        });
-
-        it('Should add amp flag to existing shop-links', () => {
-          env.sandbox.spy(linkmate, 'buildLinksPayload_');
-
-          anchorList = [
-            'http://http://shop-links.co/999',
-          ].map(helpers.createAnchor);
-
-          const expectedAnchor = 'http://http//shop-links.co/999?amp=true';
-
-          const linkPayload = linkmate.buildLinksPayload_(anchorList);
-
-          expect(linkPayload).to.deep.equal([]);
-          expect(anchorList[0].href).to.equal(expectedAnchor);
-        });
+        expect(linkPayload).to.deep.equal(expectedPayload);
       });
 
-      describe('getEditInfo_', () => {
-        it('Should build edit info payload', () => {
-          const linkmateOptions = {
-            exclusiveLinks: false,
-            publisherID: 999,
-            linkAttribute: 'href',
-          };
-          linkmate = new Linkmate(
-              env.ampdoc,
-              xhr,
-              linkmateOptions,
-          );
-          const envRoot = env.ampdoc.getRootNode();
-          envRoot.title = 'Fake Website Title';
+      it('Should add amp flag to existing shop-links', () => {
+        env.sandbox.spy(linkmate, 'buildLinksPayload_');
 
-          env.sandbox
-              .stub(env.ampdoc, 'getUrl')
-              .returns('http://fakewebsite.example/');
-          env.sandbox.spy(linkmate, 'getEditInfo_');
+        anchorList = [
+          {attributeName: 'href', link: 'http://shop-links.co/999'},
+        ].map(helpers.createAnchor);
 
-          const expectedPayload = {
-            'name': 'Fake Website Title',
-            'url': 'http://fakewebsite.example/',
-          };
+        const expectedAnchor = 'http://shop-links.co/999?amp=true';
 
-          const editPayload = linkmate.getEditInfo_();
+        const linkPayload = linkmate.buildLinksPayload_(anchorList);
 
-          expect(editPayload).to.deep.equal(expectedPayload);
-        });
+        expect(linkPayload).to.deep.equal([]);
+        expect(anchorList[0].href).to.equal(expectedAnchor);
       });
 
-      describe('mapLinks_', () => {
-        let anchorList;
+      it('Should build payload from anchorList with custom selector', () => {
+        env.sandbox.spy(linkmate, 'buildLinksPayload_');
 
-        beforeEach(() => {
-          const linkmateOptions = {
-            exclusiveLinks: false,
-            publisherID: 999,
-            linkAttribute: 'href',
-          };
-          linkmate = new Linkmate(
-              env.ampdoc,
-              xhr,
-              linkmateOptions,
-          );
+        const linkmateOptions = {
+          exclusiveLinks: false,
+          publisherID: 999,
+          linkSelector: 'a[data-outbound-vars]',
+          linkAttribute: 'data-outbound-vars',
+        };
+        linkmate = new Linkmate(env.ampdoc, xhr, linkmateOptions);
 
-          anchorList = [
-            'http://fakelink.example/',
-            'http://fakelink2.example/',
-            'https://examplelocklink.example/#locklink',
-          ].map(helpers.createAnchor);
-        });
+        anchorList = [
+          {
+            attributeName: 'data-outbound-vars',
+            link: 'http://fakelink.example/',
+          },
+          {
+            attributeName: 'data-outbound-vars',
+            link: 'http://fakelink2.example/',
+          },
+          {
+            attributeName: 'data-outbound-vars',
+            link: 'https://examplelocklink.example/#locklink',
+          },
+        ].map(helpers.createAnchor);
 
-        it('Should map API response to anchorList', () => {
-          env.sandbox.spy(linkmate, 'mapLinks_');
-          const linkmateResponse = [{
+        const expectedPayload = [
+          {
+            'raw_url': 'http://fakelink.example/',
+            'exclusive_match_requested': false,
+          },
+          {
+            'raw_url': 'http://fakelink2.example/',
+            'exclusive_match_requested': false,
+          },
+          {
+            'raw_url': 'https://examplelocklink.example/#locklink',
+            'exclusive_match_requested': true,
+          },
+        ];
+
+        const linkPayload = linkmate.buildLinksPayload_(anchorList);
+
+        expect(linkPayload).to.deep.equal(expectedPayload);
+      });
+    });
+
+    describe('getEditInfo_', () => {
+      it('Should build edit info payload', () => {
+        const linkmateOptions = {
+          exclusiveLinks: false,
+          publisherID: 999,
+          linkAttribute: 'href',
+        };
+        linkmate = new Linkmate(env.ampdoc, xhr, linkmateOptions);
+        const envRoot = env.ampdoc.getRootNode();
+        envRoot.title = 'Fake Website Title';
+
+        env.sandbox
+          .stub(env.ampdoc, 'getUrl')
+          .returns('http://fakewebsite.example/');
+        env.sandbox.spy(linkmate, 'getEditInfo_');
+
+        const expectedPayload = {
+          'name': 'Fake Website Title',
+          'url': 'http://fakewebsite.example/',
+        };
+
+        const editPayload = linkmate.getEditInfo_();
+
+        expect(editPayload).to.deep.equal(expectedPayload);
+      });
+    });
+
+    describe('mapLinks_', () => {
+      let anchorList;
+
+      beforeEach(() => {
+        const linkmateOptions = {
+          exclusiveLinks: false,
+          publisherID: 999,
+          linkAttribute: 'href',
+        };
+        linkmate = new Linkmate(env.ampdoc, xhr, linkmateOptions);
+
+        anchorList = [
+          {attributeName: 'href', link: 'http://fakelink.example/'},
+          {attributeName: 'href', link: 'http://fakelink2.example/'},
+          {attributeName: 'href', link: 'http://fakelink2.example/'},
+          {
+            attributeName: 'href',
+            link: 'https://examplelocklink.example/#locklink',
+          },
+        ].map(helpers.createAnchor);
+      });
+
+      it('Should map API response to anchorList', () => {
+        env.sandbox.spy(linkmate, 'mapLinks_');
+        const linkmateResponse = [
+          {
             'auction_id': '1661245605416735203',
             'exclusive_match_requested': false,
             'pub_id': 999,
             'url': 'http://fakelink.example/',
-          }];
-          linkmate.anchorList_ = anchorList;
-          linkmate.linkmateResponse_ = linkmateResponse;
+          },
+          {
+            'auction_id': '1667546956215651271',
+            'exclusive_match_requested': false,
+            'pub_id': 999,
+            'url': 'http://fakelink2.example/',
+          },
+        ];
+        linkmate.anchorList_ = anchorList;
+        linkmate.linkmateResponse_ = linkmateResponse;
 
-          const expectedMapping = [{
+        const expectedMapping = [
+          {
             anchor: anchorList[0],
-            replacementUrl: `https://shop-links.co/${linkmateResponse[0]['auction_id']}/?amp=true`,
-          }, {
+            replacementUrl: `https://shop-links.co/${
+              linkmateResponse[0]['auction_id']
+            }/?amp=true`,
+          },
+          {
             anchor: anchorList[1],
-            replacementUrl: null,
-          }, {
+            replacementUrl: `https://shop-links.co/${
+              linkmateResponse[1]['auction_id']
+            }/?amp=true`,
+          },
+          {
             anchor: anchorList[2],
-            replacementUrl: null,
-          }];
+            replacementUrl: `https://shop-links.co/${
+              linkmateResponse[1]['auction_id']
+            }/?amp=true`,
+          },
+        ];
 
-          const actualMapping = linkmate.mapLinks_();
+        const actualMapping = linkmate.mapLinks_();
 
-          expect(actualMapping).to.deep.equal(expectedMapping);
-        });
+        expect(actualMapping).to.deep.equal(expectedMapping);
       });
-    }
+
+      it('Should map API response to anchorList with attribute', () => {
+        env.sandbox.spy(linkmate, 'mapLinks_');
+
+        const linkmateOptions = {
+          exclusiveLinks: false,
+          publisherID: 999,
+          linkAttribute: 'data-outbound-vars',
+        };
+        linkmate = new Linkmate(env.ampdoc, xhr, linkmateOptions);
+
+        anchorList = [
+          {
+            attributeName: 'data-outbound-vars',
+            link: 'http://fakelink.example/',
+          },
+          {
+            attributeName: 'data-outbound-vars',
+            link: 'http://fakelink2.example/',
+          },
+          {
+            attributeName: 'data-outbound-vars',
+            link: 'http://fakelink2.example/',
+          },
+          {
+            attributeName: 'data-outbound-vars',
+            link: 'https://examplelocklink.example/#locklink',
+          },
+        ].map(helpers.createAnchor);
+
+        const linkmateResponse = [
+          {
+            'auction_id': '1661245605416735203',
+            'exclusive_match_requested': false,
+            'pub_id': 999,
+            'url': 'http://fakelink.example/',
+          },
+          {
+            'auction_id': '1667546956215651271',
+            'exclusive_match_requested': false,
+            'pub_id': 999,
+            'url': 'http://fakelink2.example/',
+          },
+        ];
+        linkmate.anchorList_ = anchorList;
+        linkmate.linkmateResponse_ = linkmateResponse;
+
+        const expectedMapping = [
+          {
+            anchor: anchorList[0],
+            replacementUrl: `https://shop-links.co/${
+              linkmateResponse[0]['auction_id']
+            }/?amp=true`,
+          },
+          {
+            anchor: anchorList[1],
+            replacementUrl: `https://shop-links.co/${
+              linkmateResponse[1]['auction_id']
+            }/?amp=true`,
+          },
+          {
+            anchor: anchorList[2],
+            replacementUrl: `https://shop-links.co/${
+              linkmateResponse[1]['auction_id']
+            }/?amp=true`,
+          },
+        ];
+
+        const actualMapping = linkmate.mapLinks_();
+
+        expect(actualMapping).to.deep.equal(expectedMapping);
+      });
+    });
+  }
 );

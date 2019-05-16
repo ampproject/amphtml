@@ -19,102 +19,128 @@ import {AnchorAdStrategy} from '../anchor-ad-strategy';
 import {Services} from '../../../../src/services';
 import {waitForChild} from '../../../../src/dom';
 
-
-describes.realWin('anchor-ad-strategy', {
-  amp: {
-    runtimeOn: true,
-    ampdoc: 'single',
-    extensions: ['amp-ad'],
+describes.realWin(
+  'anchor-ad-strategy',
+  {
+    amp: {
+      runtimeOn: true,
+      ampdoc: 'single',
+      extensions: ['amp-ad'],
+    },
   },
-}, env => {
-  let configObj;
-  let attributes;
+  env => {
+    let configObj;
+    let attributes;
 
-  beforeEach(() => {
-    const viewportMock =
-        sandbox.mock(Services.viewportForDoc(env.win.document));
-    viewportMock.expects('getWidth').returns(360).atLeast(1);
+    beforeEach(() => {
+      const viewportMock = sandbox.mock(
+        Services.viewportForDoc(env.win.document)
+      );
+      viewportMock
+        .expects('getWidth')
+        .returns(360)
+        .atLeast(1);
 
-    configObj = {
-      optInStatus: [1],
-    };
+      configObj = {
+        optInStatus: [1],
+      };
 
-    attributes = {
-      'data-ad-client': 'ca-pub-test',
-      'type': 'adsense',
-    };
-  });
+      attributes = {
+        'data-ad-client': 'ca-pub-test',
+        'type': 'adsense',
+      };
+    });
 
-  describe('run', () => {
-    it('should insert sticky ad if opted in', () => {
-      configObj['optInStatus'].push(2);
+    describe('run', () => {
+      it('should insert sticky ad if opted in', () => {
+        configObj['optInStatus'].push(2);
 
-      const anchorAdStrategy = new AnchorAdStrategy(
-          env.ampdoc, attributes, configObj);
+        const anchorAdStrategy = new AnchorAdStrategy(
+          env.ampdoc,
+          attributes,
+          configObj
+        );
 
-      const strategyPromise = anchorAdStrategy.run().then(placed => {
-        expect(placed).to.equal(true);
-      });
-
-      const expectPromise = new Promise(resolve => {
-        waitForChild(env.win.document.body, parent => {
-          return parent.firstChild.tagName == 'AMP-STICKY-AD';
-        }, () => {
-          const stickyAd = env.win.document.body.firstChild;
-          expect(stickyAd.getAttribute('layout')).to.equal('nodisplay');
-          const ampAd = stickyAd.firstChild;
-          expect(ampAd.getAttribute('type')).to.equal('adsense');
-          expect(ampAd.getAttribute('width')).to.equal('360');
-          expect(ampAd.getAttribute('height')).to.equal('100');
-          expect(ampAd.getAttribute('data-ad-client')).to.equal('ca-pub-test');
-          resolve();
+        const strategyPromise = anchorAdStrategy.run().then(placed => {
+          expect(placed).to.equal(true);
         });
+
+        const expectPromise = new Promise(resolve => {
+          waitForChild(
+            env.win.document.body,
+            parent => {
+              return parent.firstChild.tagName == 'AMP-STICKY-AD';
+            },
+            () => {
+              const stickyAd = env.win.document.body.firstChild;
+              expect(stickyAd.getAttribute('layout')).to.equal('nodisplay');
+              const ampAd = stickyAd.firstChild;
+              expect(ampAd.getAttribute('type')).to.equal('adsense');
+              expect(ampAd.getAttribute('width')).to.equal('360');
+              expect(ampAd.getAttribute('height')).to.equal('100');
+              expect(ampAd.getAttribute('data-ad-client')).to.equal(
+                'ca-pub-test'
+              );
+              resolve();
+            }
+          );
+        });
+
+        return Promise.all([strategyPromise, expectPromise]);
       });
 
-      return Promise.all([strategyPromise, expectPromise]);
+      it('should not insert sticky ad if not opted in', () => {
+        const anchorAdStrategy = new AnchorAdStrategy(
+          env.ampdoc,
+          attributes,
+          configObj
+        );
+
+        const strategyPromise = anchorAdStrategy.run().then(placed => {
+          expect(placed).to.equal(false);
+        });
+
+        const expectPromise = new Promise(resolve => {
+          setTimeout(() => {
+            expect(
+              env.win.document.getElementsByTagName('AMP-STICKY-AD')
+            ).to.have.lengthOf(0);
+            resolve();
+          }, 500);
+        });
+
+        return Promise.all([strategyPromise, expectPromise]);
+      });
+
+      it('should not insert sticky ad if exists one', () => {
+        configObj['optInStatus'].push(2);
+
+        const existingStickyAd = env.win.document.createElement(
+          'amp-sticky-ad'
+        );
+        env.win.document.body.appendChild(existingStickyAd);
+
+        const anchorAdStrategy = new AnchorAdStrategy(
+          env.ampdoc,
+          attributes,
+          configObj
+        );
+
+        const strategyPromise = anchorAdStrategy.run().then(placed => {
+          expect(placed).to.equal(false);
+        });
+
+        const expectPromise = new Promise(resolve => {
+          setTimeout(() => {
+            expect(
+              env.win.document.getElementsByTagName('AMP-STICKY-AD')
+            ).to.have.lengthOf(1);
+            resolve();
+          }, 500);
+        });
+
+        return Promise.all([strategyPromise, expectPromise]);
+      });
     });
-
-    it('should not insert sticky ad if not opted in', () => {
-      const anchorAdStrategy = new AnchorAdStrategy(
-          env.ampdoc, attributes, configObj);
-
-      const strategyPromise = anchorAdStrategy.run().then(placed => {
-        expect(placed).to.equal(false);
-      });
-
-      const expectPromise = new Promise(resolve => {
-        setTimeout(() => {
-          expect(env.win.document.getElementsByTagName('AMP-STICKY-AD'))
-              .to.have.lengthOf(0);
-          resolve();
-        }, 500);
-      });
-
-      return Promise.all([strategyPromise, expectPromise]);
-    });
-
-    it('should not insert sticky ad if exists one', () => {
-      configObj['optInStatus'].push(2);
-
-      const existingStickyAd = env.win.document.createElement('amp-sticky-ad');
-      env.win.document.body.appendChild(existingStickyAd);
-
-      const anchorAdStrategy = new AnchorAdStrategy(
-          env.ampdoc, attributes, configObj);
-
-      const strategyPromise = anchorAdStrategy.run().then(placed => {
-        expect(placed).to.equal(false);
-      });
-
-      const expectPromise = new Promise(resolve => {
-        setTimeout(() => {
-          expect(env.win.document.getElementsByTagName('AMP-STICKY-AD'))
-              .to.have.lengthOf(1);
-          resolve();
-        }, 500);
-      });
-
-      return Promise.all([strategyPromise, expectPromise]);
-    });
-  });
-});
+  }
+);

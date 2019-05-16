@@ -19,6 +19,7 @@ import {dev, devAssert, user, userAssert} from './log';
 import {dict} from './utils/object';
 import {getContextMetadata} from '../src/iframe-attributes';
 import {getMode} from './mode';
+import {internalRuntimeVersion} from './internal-version';
 import {isExperimentOn} from './experiments';
 import {setStyle} from './style';
 import {startsWith} from './string';
@@ -53,8 +54,7 @@ function getFrameAttributes(parentWindow, element, opt_type, opt_context) {
   let attributes = dict();
   // Do these first, as the other attributes have precedence.
   addDataAndJsonAttributes_(element, attributes);
-  attributes = getContextMetadata(parentWindow, element, sentinel,
-      attributes);
+  attributes = getContextMetadata(parentWindow, element, sentinel, attributes);
   attributes['type'] = type;
   Object.assign(attributes['_context'], opt_context);
   return attributes;
@@ -71,40 +71,52 @@ function getFrameAttributes(parentWindow, element, opt_type, opt_context) {
  *   disallowCustom,
  *   allowFullscreen,
  * }=} opt_options Options for the created iframe.
- * @return {!Element} The iframe.
+ * @return {!HTMLIFrameElement} The iframe.
  */
 export function getIframe(
-  parentWindow, parentElement, opt_type, opt_context,
-  {disallowCustom, allowFullscreen} = {}) {
+  parentWindow,
+  parentElement,
+  opt_type,
+  opt_context,
+  {disallowCustom, allowFullscreen} = {}
+) {
   // Check that the parentElement is already in DOM. This code uses a new and
   // fast `isConnected` API and thus only used when it's available.
   devAssert(
-      parentElement['isConnected'] === undefined ||
+    parentElement['isConnected'] === undefined ||
       parentElement['isConnected'] === true,
-      'Parent element must be in DOM');
-  const attributes =
-      getFrameAttributes(parentWindow, parentElement, opt_type, opt_context);
-  const iframe = parentWindow.document.createElement('iframe');
+    'Parent element must be in DOM'
+  );
+  const attributes = getFrameAttributes(
+    parentWindow,
+    parentElement,
+    opt_type,
+    opt_context
+  );
+  const iframe = /** @type {!HTMLIFrameElement} */ (parentWindow.document.createElement(
+    'iframe'
+  ));
 
   if (!count[attributes['type']]) {
     count[attributes['type']] = 0;
   }
   count[attributes['type']] += 1;
 
-  const baseUrl = getBootstrapBaseUrl(
-      parentWindow, undefined, disallowCustom);
+  const baseUrl = getBootstrapBaseUrl(parentWindow, undefined, disallowCustom);
   const host = parseUrlDeprecated(baseUrl).hostname;
   // This name attribute may be overwritten if this frame is chosen to
   // be the master frame. That is ok, as we will read the name off
   // for our uses before that would occur.
   // @see https://github.com/ampproject/amphtml/blob/master/3p/integration.js
-  const name = JSON.stringify(dict({
-    'host': host,
-    'type': attributes['type'],
-    // https://github.com/ampproject/amphtml/pull/2955
-    'count': count[attributes['type']],
-    'attributes': attributes,
-  }));
+  const name = JSON.stringify(
+    dict({
+      'host': host,
+      'type': attributes['type'],
+      // https://github.com/ampproject/amphtml/pull/2955
+      'count': count[attributes['type']],
+      'attributes': attributes,
+    })
+  );
 
   iframe.src = baseUrl;
   iframe.ampLocation = parseUrlDeprecated(baseUrl);
@@ -133,15 +145,19 @@ export function getIframe(
     // Block synchronous XHR in ad. These are very rare, but super bad for UX
     // as they block the UI thread for the arbitrary amount of time until the
     // request completes.
-    iframe.setAttribute('allow', 'sync-xhr \'none\';');
+    iframe.setAttribute('allow', "sync-xhr 'none';");
   }
   const excludeFromSandbox = ['facebook'];
-  if (isExperimentOn(parentWindow, 'sandbox-ads')
-      && !excludeFromSandbox.includes(opt_type)) {
+  if (
+    isExperimentOn(parentWindow, 'sandbox-ads') &&
+    !excludeFromSandbox.includes(opt_type)
+  ) {
     applySandbox(iframe);
   }
-  iframe.setAttribute('data-amp-3p-sentinel',
-      attributes['_context']['sentinel']);
+  iframe.setAttribute(
+    'data-amp-3p-sentinel',
+    attributes['_context']['sentinel']
+  );
   return iframe;
 }
 
@@ -168,8 +184,9 @@ export function addDataAndJsonAttributes_(element, attributes) {
     const obj = tryParseJson(json);
     if (obj === undefined) {
       throw user().createError(
-          'Error parsing JSON in json attribute in element %s',
-          element);
+        'Error parsing JSON in json attribute in element %s',
+        element
+      );
     }
     for (const key in obj) {
       attributes[key] = obj[key];
@@ -191,7 +208,7 @@ export function preloadBootstrap(win, preconnect, opt_disallowCustom) {
   // fetched by it.
   const scriptUrl = getMode().localDev
     ? getAdsLocalhost(win) + '/dist.3p/current/integration.js'
-    : `${urls.thirdParty}/$internalRuntimeVersion$/f.js`;
+    : `${urls.thirdParty}/${internalRuntimeVersion()}/f.js`;
   preconnect.preload(scriptUrl, 'script');
 }
 
@@ -204,7 +221,10 @@ export function preloadBootstrap(win, preconnect, opt_disallowCustom) {
  * @visibleForTesting
  */
 export function getBootstrapBaseUrl(
-  parentWindow, opt_strictForUnitTest, opt_disallowCustom) {
+  parentWindow,
+  opt_strictForUnitTest,
+  opt_disallowCustom
+) {
   const customBootstrapBaseUrl = opt_disallowCustom
     ? null
     : getCustomBootstrapBaseUrl(parentWindow, opt_strictForUnitTest);
@@ -238,10 +258,13 @@ export function getDefaultBootstrapBaseUrl(parentWindow, opt_srcFileBasename) {
   }
   // Ensure same sub-domain is used despite potentially different file.
   parentWindow.defaultBootstrapSubDomain =
-      parentWindow.defaultBootstrapSubDomain || getSubDomain(parentWindow);
-  return 'https://' + parentWindow.defaultBootstrapSubDomain +
-      `.${urls.thirdPartyFrameHost}/$internalRuntimeVersion$/` +
-      `${srcFileBasename}.html`;
+    parentWindow.defaultBootstrapSubDomain || getSubDomain(parentWindow);
+  return (
+    'https://' +
+    parentWindow.defaultBootstrapSubDomain +
+    `.${urls.thirdPartyFrameHost}/${internalRuntimeVersion()}/` +
+    `${srcFileBasename}.html`
+  );
 }
 
 /**
@@ -251,11 +274,15 @@ export function getDefaultBootstrapBaseUrl(parentWindow, opt_srcFileBasename) {
  * @return {string}
  */
 export function getDevelopmentBootstrapBaseUrl(parentWindow, srcFileBasename) {
-  return overrideBootstrapBaseUrl || getAdsLocalhost(parentWindow)
-    + '/dist.3p/'
-    + (getMode().minified ? `$internalRuntimeVersion$/${srcFileBasename}`
-      : `current/${srcFileBasename}.max`)
-    + '.html';
+  return (
+    overrideBootstrapBaseUrl ||
+    getAdsLocalhost(parentWindow) +
+      '/dist.3p/' +
+      (getMode().minified
+        ? `${internalRuntimeVersion()}/${srcFileBasename}`
+        : `current/${srcFileBasename}.max`) +
+      '.html'
+  );
 }
 
 /**
@@ -309,26 +336,34 @@ export function getRandom(win) {
  * @return {?string}
  */
 function getCustomBootstrapBaseUrl(parentWindow, opt_strictForUnitTest) {
-  const meta = parentWindow.document
-      .querySelector('meta[name="amp-3p-iframe-src"]');
+  const meta = parentWindow.document.querySelector(
+    'meta[name="amp-3p-iframe-src"]'
+  );
   if (!meta) {
     return null;
   }
   const url = assertHttpsUrl(meta.getAttribute('content'), meta);
-  userAssert(url.indexOf('?') == -1,
-      '3p iframe url must not include query string %s in element %s.',
-      url, meta);
+  userAssert(
+    url.indexOf('?') == -1,
+    '3p iframe url must not include query string %s in element %s.',
+    url,
+    meta
+  );
   // This is not a security primitive, we just don't want this to happen in
   // practice. People could still redirect to the same origin, but they cannot
   // redirect to the proxy origin which is the important one.
   const parsed = parseUrlDeprecated(url);
-  userAssert((parsed.hostname == 'localhost' && !opt_strictForUnitTest) ||
+  userAssert(
+    (parsed.hostname == 'localhost' && !opt_strictForUnitTest) ||
       parsed.origin != parseUrlDeprecated(parentWindow.location.href).origin,
-  '3p iframe url must not be on the same origin as the current document ' +
+    '3p iframe url must not be on the same origin as the current document ' +
       '%s (%s) in element %s. See https://github.com/ampproject/amphtml' +
-      '/blob/master/spec/amp-iframe-origin-policy.md for details.', url,
-  parsed.origin, meta);
-  return url + '?$internalRuntimeVersion$';
+      '/blob/master/spec/amp-iframe-origin-policy.md for details.',
+    url,
+    parsed.origin,
+    meta
+  );
+  return `${url}?${internalRuntimeVersion()}`;
 }
 
 /**
@@ -374,7 +409,7 @@ export function applySandbox(iframe) {
   for (let i = 0; i < requiredFlags.length; i++) {
     const flag = requiredFlags[i];
     if (!iframe.sandbox.supports(flag)) {
-      dev().info(TAG, 'Iframe doesn\'t support %s', flag);
+      dev().info(TAG, "Iframe doesn't support %s", flag);
       return;
     }
   }

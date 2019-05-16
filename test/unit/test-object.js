@@ -83,9 +83,9 @@ describe('Object', () => {
 
     it('should NOT deep merge arrays', () => {
       const destObject = {
-        a: [1,2,3,4,5],
+        a: [1, 2, 3, 4, 5],
         b: {
-          c: [9,8,7,6,5],
+          c: [9, 8, 7, 6, 5],
         },
       };
       const fromObject = {
@@ -94,7 +94,7 @@ describe('Object', () => {
         },
       };
       expect(object.deepMerge(destObject, fromObject)).to.deep.equal({
-        a: [1,2,3,4,5],
+        a: [1, 2, 3, 4, 5],
         b: {
           c: ['h', 'i'],
         },
@@ -150,7 +150,8 @@ describe('Object', () => {
       const fromObject = {};
       fromObject.a = fromObject;
       expect(() => object.deepMerge(destObject, fromObject)).to.throw(
-          /Source object has a circular reference./);
+        /Source object has a circular reference./
+      );
     });
 
     it('should merge null and undefined correctly', () => {

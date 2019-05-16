@@ -17,8 +17,8 @@
 import {
   AmpStoryRequestService,
   BOOKEND_CONFIG_ATTRIBUTE_NAME,
+  BOOKEND_CREDENTIALS_ATTRIBUTE_NAME,
 } from '../amp-story-request-service';
-
 
 describes.fakeWin('amp-story-store-service', {amp: true}, env => {
   let requestService;
@@ -48,18 +48,16 @@ describes.fakeWin('amp-story-store-service', {amp: true}, env => {
     const bookendUrl = 'https://publisher.com/bookend';
 
     bookendElement.setAttribute(BOOKEND_CONFIG_ATTRIBUTE_NAME, bookendUrl);
-    xhrMock.expects('fetchJson')
-        .withExactArgs(
-            bookendUrl,
-            {requireAmpResponseSourceOrigin: false},
-        )
-        .resolves({
-          ok: true,
-          json() {
-            return Promise.resolve();
-          },
-        })
-        .once();
+    xhrMock
+      .expects('fetchJson')
+      .withExactArgs(bookendUrl, {requireAmpResponseSourceOrigin: false})
+      .resolves({
+        ok: true,
+        json() {
+          return Promise.resolve();
+        },
+      })
+      .once();
 
     return requestService.loadBookendConfig().then(() => {
       xhrMock.verify();
@@ -71,14 +69,15 @@ describes.fakeWin('amp-story-store-service', {amp: true}, env => {
     const fetchedConfig = 'amazingConfig';
 
     bookendElement.setAttribute(BOOKEND_CONFIG_ATTRIBUTE_NAME, bookendUrl);
-    xhrMock.expects('fetchJson')
-        .resolves({
-          ok: true,
-          json() {
-            return Promise.resolve(fetchedConfig);
-          },
-        })
-        .once();
+    xhrMock
+      .expects('fetchJson')
+      .resolves({
+        ok: true,
+        json() {
+          return Promise.resolve(fetchedConfig);
+        },
+      })
+      .once();
 
     return requestService.loadBookendConfig().then(config => {
       expect(config).to.equal(fetchedConfig);
@@ -90,19 +89,45 @@ describes.fakeWin('amp-story-store-service', {amp: true}, env => {
     const bookendUrl = 'https://publisher.com/bookend';
 
     bookendElement.setAttribute(BOOKEND_CONFIG_ATTRIBUTE_NAME, bookendUrl);
-    xhrMock.expects('fetchJson')
-        .resolves({
-          ok: true,
-          json() {
-            return Promise.resolve();
-          },
-        })
-        .once();
+    xhrMock
+      .expects('fetchJson')
+      .resolves({
+        ok: true,
+        json() {
+          return Promise.resolve();
+        },
+      })
+      .once();
 
-    return requestService.loadBookendConfig()
-        .then(() => requestService.loadBookendConfig())
-        .then(() => {
-          xhrMock.verify();
-        });
+    return requestService
+      .loadBookendConfig()
+      .then(() => requestService.loadBookendConfig())
+      .then(() => {
+        xhrMock.verify();
+      });
+  });
+
+  it('should fetch the bookend config with credentials', () => {
+    const bookendUrl = 'https://publisher.com/bookend';
+
+    bookendElement.setAttribute(BOOKEND_CONFIG_ATTRIBUTE_NAME, bookendUrl);
+    bookendElement.setAttribute(BOOKEND_CREDENTIALS_ATTRIBUTE_NAME, 'include');
+    xhrMock
+      .expects('fetchJson')
+      .withExactArgs(bookendUrl, {
+        requireAmpResponseSourceOrigin: false,
+        credentials: 'include',
+      })
+      .resolves({
+        ok: true,
+        json() {
+          return Promise.resolve();
+        },
+      })
+      .once();
+
+    return requestService.loadBookendConfig().then(() => {
+      xhrMock.verify();
+    });
   });
 });

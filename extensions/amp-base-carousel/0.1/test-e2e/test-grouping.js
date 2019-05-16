@@ -14,55 +14,50 @@
  * limitations under the License.
  */
 
-import {
-  getScrollingElement,
-  getSlides,
-} from './helpers';
+import {getScrollingElement, getSlides} from './helpers';
 
 const pageWidth = 800;
 const pageHeight = 600;
 
-describes.endtoend('AMP carousel grouping', {
-  testUrl: 'http://localhost:8000/test/manual/amp-base-carousel/' +
+describes.endtoend(
+  'AMP carousel grouping',
+  {
+    testUrl:
+      'http://localhost:8000/test/manual/amp-base-carousel/' +
       'grouping-move-by-2.amp.html',
-  experiments: ['amp-base-carousel', 'layers'],
-  initialRect: {width: pageWidth, height: pageHeight},
-}, async env => {
-  const slideWidth = pageWidth / 2;
-  let controller;
+    experiments: ['amp-base-carousel', 'layers'],
+    initialRect: {width: pageWidth, height: pageHeight},
+  },
+  async env => {
+    const slideWidth = pageWidth / 2;
+    let controller;
 
-  function rect(el) {
-    return controller.getElementRect(el);
-  }
+    function rect(el) {
+      return controller.getElementRect(el);
+    }
 
-  beforeEach(async() => {
-    controller = env.controller;
-  });
+    beforeEach(function() {
+      controller = env.controller;
+      this.timeout(3 * 1000);
+    });
 
-  describe('snapping', () => {
-    it('should snap on next group when past the midpoint', async() => {
+    it('should snap on next group when past the midpoint', async () => {
       const el = await getScrollingElement(controller);
       const slides = await getSlides(controller);
 
-      await controller.scrollBy(el, {left: slideWidth + 1});
+      await controller.scrollTo(el, {left: slideWidth + 1});
       await expect(rect(slides[2])).to.include({x: 0});
     });
 
-    // TODO(sparhami) It seems like scrolling by even 1 pixel using scrollBy
-    // causes snap now. Need touch event support to actually simulate the  user
-    // scrolling.
-    it.skip('should snap on current group when before the midpoint',
-        async() => {
-          const el = await getScrollingElement(controller);
-          const slides = await getSlides(controller);
+    it('should snap on current group when before the midpoint', async () => {
+      const el = await getScrollingElement(controller);
+      const slides = await getSlides(controller);
 
-          await controller.scrollBy(el, {left: slideWidth - 1});
-          await expect(rect(slides[0])).to.include({x: 0});
-        });
-  });
+      await controller.scrollTo(el, {left: slideWidth - 1});
+      await expect(rect(slides[0])).to.include({x: 0});
+    });
 
-  describe('advancing', () => {
-    it('should move forwards by the advance-count', async() => {
+    it.skip('should move forwards by the advance-count', async () => {
       const slides = await getSlides(controller);
       const btn = await controller.findElement('[on="tap:carousel-1.next()"]');
 
@@ -74,7 +69,7 @@ describes.endtoend('AMP carousel grouping', {
       await expect(rect(slides[0])).to.include({x: 0});
     });
 
-    it('should move backwards by the advance-count', async() => {
+    it.skip('should move backwards by the advance-count', async () => {
       const slides = await getSlides(controller);
       const btn = await controller.findElement('[on="tap:carousel-1.prev()"]');
 
@@ -85,5 +80,5 @@ describes.endtoend('AMP carousel grouping', {
       await controller.click(btn);
       await expect(rect(slides[0])).to.include({x: 0});
     });
-  });
-});
+  }
+);

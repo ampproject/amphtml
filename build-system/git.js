@@ -67,7 +67,9 @@ exports.shortSha = function(sha) {
  */
 exports.gitDiffNameOnlyMaster = function() {
   const masterBaseline = gitMasterBaseline();
-  return getStdout(`git diff --name-only ${masterBaseline}`).trim().split('\n');
+  return getStdout(`git diff --name-only ${masterBaseline}`)
+    .trim()
+    .split('\n');
 };
 
 /**
@@ -100,7 +102,9 @@ ${colors.cyan(commitLogMaxCount)} commits. \
 Branch ${colors.cyan(exports.gitBranchName())} may not have been forked from \
 ${colors.cyan('master')}.`;
     commitLog += `\n${colors.yellow('WARNING:')} See \
-${colors.cyan('https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-quick.md')} \
+${colors.cyan(
+  'https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-quick.md'
+)} \
 for how to fix this.`;
   }
   return commitLog;
@@ -114,7 +118,8 @@ for how to fix this.`;
 exports.gitDiffAddedNameOnlyMaster = function() {
   const branchPoint = gitMergeBaseLocalMaster();
   return getStdout(`git diff --name-only --diff-filter=ARC ${branchPoint}`)
-      .trim().split('\n');
+    .trim()
+    .split('\n');
 };
 
 /**
@@ -130,9 +135,9 @@ exports.gitDiffColor = function() {
  * @return {string}
  */
 exports.gitBranchName = function() {
-  return isTravisPullRequestBuild() ?
-    travisPullRequestBranch() :
-    getStdout('git rev-parse --abbrev-ref HEAD').trim();
+  return isTravisPullRequestBuild()
+    ? travisPullRequestBranch()
+    : getStdout('git rev-parse --abbrev-ref HEAD').trim();
 };
 
 /**
@@ -160,17 +165,8 @@ exports.gitCommitterEmail = function() {
  */
 exports.gitCommitFormattedTime = function() {
   return getStdout(
-      'TZ=UTC git log -1 --pretty="%cd" --date=format-local:%y%m%d%H%M%S')
-      .trim();
-};
-
-/**
- * Returns machine parsable list of uncommitted changed files, or an empty
- * string if no files were changed.
- * @return {string}
- */
-exports.gitStatusPorcelain = function() {
-  return getStdout('git status --porcelain').trim();
+    'TZ=UTC git log -1 --pretty="%cd" --date=format-local:%y%m%d%H%M%S'
+  ).trim();
 };
 
 /**
