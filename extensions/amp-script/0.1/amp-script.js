@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {AmpDocShadow} from '../../../src/service/ampdoc-impl';
 import {AmpScriptVariableSource} from './amp-script-variable-source';
 import {CSS} from '../../../build/amp-script-0.1.css';
 import {
@@ -154,7 +153,7 @@ export class AmpScript extends AMP.BaseElement {
 
     const shadowSupport = getShadowDomSupportedVersion();
     if (shadowSupport === ShadowDomVersion.NONE) {
-      dev().info(TAG, 'Iframe mode!');
+      dev().info(TAG, 'Iframe mode:', this.element);
       this.iframe_ = /** @type {!HTMLIFrameElement} */ (
         this.win.document.createElement('iframe'));
       this.iframe_.classList.add('i-amphtml-shadow');
@@ -183,8 +182,8 @@ export class AmpScript extends AMP.BaseElement {
             return this.iframe_.contentWindow.document.body;
           });
     } else {
-      dev().info(TAG, 'Shadow mode!');
-      const shadow = (shadowSupport === ShadowDomVersion.V0)
+      dev().info(TAG, 'Shadow mode:', this.element);
+      const shadowRoot = (shadowSupport === ShadowDomVersion.V0)
         ? this.element.createShadowRoot()
         : this.element.attachShadow({mode: 'open'});
       // Copy runtime & custom styles to shadow root.
@@ -192,21 +191,21 @@ export class AmpScript extends AMP.BaseElement {
       const styles = head.querySelectorAll(
           'style[amp-runtime], style[amp-custom]');
       styles.forEach(style => {
-        shadow.appendChild(style.cloneNode(/* deep */ true));
+        shadowRoot.appendChild(style.cloneNode(/* deep */ true));
       });
       // Move hydratable light DOM to shadow DOM.
       while (this.element.firstChild) {
-        shadow.appendChild(this.element.firstChild);
+        shadowRoot.appendChild(this.element.firstChild);
       }
       // Install services that must be scoped uniquely for amp-script.
       const ampdocService = Services.ampdocServiceFor(this.win);
-      const scriptDoc = new AmpDocScript(this.win, shadow, ampdoc);
-      this.shadowDoc_ = ampdocService.installDocInShadowRoot(scriptDoc, shadow);
+      this.shadowDoc_ =
+          ampdocService.installShadowDoc(shadowRoot, {single: true});
       // Currently, url-replacements is the only service that will retrieve a
       // locally-scoped service instance in single-doc mode.
       installUrlReplacementsServiceForDoc(this.shadowDoc_, varSource);
       // Resolve with shadow root for worker-dom's base element.
-      return Promise.resolve(shadow);
+      return Promise.resolve(shadowRoot);
     }
   }
 
@@ -352,34 +351,6 @@ class AmpScriptService {
   sizeLimitExceeded(size) {
     this.cumulativeSize_ += size;
     return this.cumulativeSize_ > MAX_TOTAL_SCRIPT_SIZE;
-  }
-}
-
-/**
- * TODO(choumx)
- */
-export class AmpDocScript extends AmpDocShadow {
-  /**
-   * @param {*} win
-   * @param {*} shadowRoot
-   * @param {*} parent
-   */
-  constructor(win, shadowRoot, parent) {
-    super(win, shadowRoot);
-
-    this.parent_ = parent;
-  }
-
-  /** @override */
-  isSingleDoc() {
-    // AmpDocScript is just a DOM subtree encapsulated in shadow DOM, so its
-    // "single-doc" state is the same as its parent AmpDoc.
-    return this.parent_.isSingleDoc();
-  }
-
-  /** @override */
-  getUrl() {
-    return this.parent_.getUrl();
   }
 }
 

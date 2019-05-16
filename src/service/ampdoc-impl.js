@@ -197,25 +197,14 @@ export class AmpDocService {
   /**
    * Creates and installs the ampdoc for the shadow root.
    * @param {!ShadowRoot} shadowRoot
-   * @param {string} url
+   * @param {!AmpDocShadowOptions=} options
    * @return {!AmpDocShadow}
    * @restricted
    */
-  installShadowDoc(shadowRoot, url) {
-    const ampdoc = new AmpDocShadow(this.win, shadowRoot, url);
-    this.installDocInShadowRoot(ampdoc, shadowRoot);
-    return ampdoc;
-  }
-
-  /**
-   * TODO(choumx)
-   * @param {!AmpDoc} ampdoc
-   * @param {!ShadowRoot} shadowRoot
-   * @return {!AmpDoc}
-   */
-  installDocInShadowRoot(ampdoc, shadowRoot) {
+  installShadowDoc(shadowRoot, options = {}) {
     devAssert(!shadowRoot[AMPDOC_PROP],
         'The shadow root already contains ampdoc');
+    const ampdoc = new AmpDocShadow(this.win, shadowRoot, options);
     shadowRoot[AMPDOC_PROP] = ampdoc;
     return ampdoc;
   }
@@ -487,6 +476,10 @@ export class AmpDocSingle extends AmpDoc {
   }
 }
 
+/**
+ * @typedef {{single: boolean|undefined, url: string|undefined}}
+ */
+let AmpDocShadowOptionsDef;
 
 /**
  * The version of `AmpDoc` in the shadow-doc mode that is allocated for each
@@ -497,13 +490,16 @@ export class AmpDocShadow extends AmpDoc {
   /**
    * @param {!Window} win
    * @param {!ShadowRoot} shadowRoot
-   * @param {string=} opt_url
+   * @param {!AmpDocShadowOptionsDef=} options
    */
-  constructor(win, shadowRoot, opt_url) {
+  constructor(win, shadowRoot, options = {}) {
     super(win);
 
+    /** @private @const {boolean} */
+    this.single_ = !!options.single;
+
     /** @private @const {string|undefined} */
-    this.url_ = opt_url;
+    this.url_ = options.url;
 
     /** @private @const {!ShadowRoot} */
     this.shadowRoot_ = shadowRoot;
@@ -533,7 +529,7 @@ export class AmpDocShadow extends AmpDoc {
 
   /** @override */
   isSingleDoc() {
-    return false;
+    return this.single_;
   }
 
   /** @override */
@@ -548,7 +544,7 @@ export class AmpDocShadow extends AmpDoc {
 
   /** @override */
   getUrl() {
-    return this.url_;
+    return this.url_ || this.win.location.href;
   }
 
   /** @override */

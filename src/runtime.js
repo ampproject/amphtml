@@ -518,7 +518,7 @@ export class MultidocManager {
     amp.url = url;
     const {origin} = parseUrlDeprecated(url);
 
-    const ampdoc = this.ampdocService_.installShadowDoc(shadowRoot, url);
+    const ampdoc = this.ampdocService_.installShadowDoc(shadowRoot, {url});
     /** @const {!./service/ampdoc-impl.AmpDocShadow} */
     amp.ampdoc = ampdoc;
     dev().fine(TAG, 'Attach to shadow root:', shadowRoot, ampdoc);
