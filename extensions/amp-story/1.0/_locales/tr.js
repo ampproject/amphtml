@@ -57,10 +57,10 @@ const strings = {
     string: 'AMP sonuçları hakkında daha fazla bilgi',
   },
   [LocalizedStringId.AMP_STORY_HINT_UI_NEXT_LABEL]: {
-    string: 'Sonraki\'ye dokunun',
+    string: "Sonraki'ye dokunun",
   },
   [LocalizedStringId.AMP_STORY_HINT_UI_PREVIOUS_LABEL]: {
-    string: 'Geri\'ye dokunun',
+    string: "Geri'ye dokunun",
   },
   [LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL]: {
     string: 'Yukarı kaydır',
@@ -105,21 +105,23 @@ const strings = {
     string: 'WhatsApp',
   },
   [LocalizedStringId.AMP_STORY_TOOLTIP_EXPAND_TWEET]: {
-    string: 'Tweet\'i genişlet',
+    string: "Tweet'i genişlet",
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_HEIGHT_SIZE_TEXT]: {
     string: 'Bu deneyimi görebilmek için pencerenizin yüksekliğini artırın',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT]: {
-    string: 'Bu deneyimi görebilmek için pencerenizin hem yüksekliğini hem ' +
-        'de genişliğini artırın',
+    string:
+      'Bu deneyimi görebilmek için pencerenizin hem yüksekliğini hem ' +
+      'de genişliğini artırın',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_WIDTH_SIZE_TEXT]: {
     string: 'Bu deneyimi görebilmek için pencerenizin genişliğini artırın',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
-    string: 'Bu içeriği görebilmek için amp hikayesi deneyimini ' +
-        'etkinleştirmeniz gerekir.',
+    string:
+      'Bu içeriği görebilmek için amp hikayesi deneyimini ' +
+      'etkinleştirmeniz gerekir.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
     string: 'Sayfa en iyi dikey modda görüntülenir',

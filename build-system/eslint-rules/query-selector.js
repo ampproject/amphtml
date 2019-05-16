@@ -73,8 +73,8 @@ module.exports = function(context) {
       return;
     }
 
-    if (callee.trailingComments) {
-      const ok = callee.trailingComments.some(comment => {
+    if (node.leadingComments) {
+      const ok = node.leadingComments.some(comment => {
         return comment.value === 'OK';
       });
       if (ok) {

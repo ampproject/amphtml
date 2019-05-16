@@ -39,9 +39,9 @@ export class ReadDepthTracker {
 
     /** @private {function()} */
     const debouncedFindTopParagraph_ = debounce(
-        ampdoc.win,
-        this.findTopParagraph_.bind(this),
-        1000
+      ampdoc.win,
+      this.findTopParagraph_.bind(this),
+      1000
     );
 
     this.viewport_ = Services.viewportForDoc(ampdoc);
@@ -59,24 +59,27 @@ export class ReadDepthTracker {
    * @private
    */
   findTopParagraph_() {
-    return Promise.all([].slice.call(this.paragraphs_)
-        .map(p => this.viewport_.getClientRectAsync(p)))
-        .then(rects => {
-          let lastIdxAboveViewport = null;
-          let lastPosition = null;
-          for (let i = rects.length - 1; i >= 0; i--) {
-            const bottomPosition = rects[i].bottom;
-            if (bottomPosition <= 0 &&
-              (lastPosition === null || lastPosition < bottomPosition)
-            ) {
-              lastIdxAboveViewport = i;
-              lastPosition = bottomPosition;
-            }
-          }
-          if (lastIdxAboveViewport !== null) {
-            this.recordLatestRead_(lastIdxAboveViewport);
-          }
-        });
+    return Promise.all(
+      [].slice
+        .call(this.paragraphs_)
+        .map(p => this.viewport_.getClientRectAsync(p))
+    ).then(rects => {
+      let lastIdxAboveViewport = null;
+      let lastPosition = null;
+      for (let i = rects.length - 1; i >= 0; i--) {
+        const bottomPosition = rects[i].bottom;
+        if (
+          bottomPosition <= 0 &&
+          (lastPosition === null || lastPosition < bottomPosition)
+        ) {
+          lastIdxAboveViewport = i;
+          lastPosition = bottomPosition;
+        }
+      }
+      if (lastIdxAboveViewport !== null) {
+        this.recordLatestRead_(lastIdxAboveViewport);
+      }
+    });
   }
 
   /**
@@ -88,7 +91,7 @@ export class ReadDepthTracker {
     if (this.lastReadIndex_ !== paragraphIdx) {
       this.lastReadIndex_ = paragraphIdx;
       this.updateLastRead_(
-          this.paragraphs_[paragraphIdx]./*OK*/innerText.substring(0, 50)
+        this.paragraphs_[paragraphIdx]./*OK*/ innerText.substring(0, 50)
       );
     }
   }
@@ -99,16 +102,19 @@ export class ReadDepthTracker {
    * @private
    */
   updateLastRead_(snippet) {
-    this.accessSource_.buildUrl((
-      `${this.connectHostname_}/amp/updatedepth`
-      + '?rid=READER_ID'
-      + '&cid=CLIENT_ID(scroll1)'
-      + '&c=CANONICAL_URL'
-      + '&o=AMPDOC_URL'
-      + '&rd=' + encodeURIComponent(snippet)
-    ), false).then(url => {
-      Services.xhrFor(this.ampdoc_.win)
-          .fetch(url);
-    });
+    this.accessSource_
+      .buildUrl(
+        `${this.connectHostname_}/amp/updatedepth` +
+          '?rid=READER_ID' +
+          '&cid=CLIENT_ID(scroll1)' +
+          '&c=CANONICAL_URL' +
+          '&o=AMPDOC_URL' +
+          '&rd=' +
+          encodeURIComponent(snippet),
+        false
+      )
+      .then(url => {
+        Services.xhrFor(this.ampdoc_.win).fetch(url);
+      });
   }
 }

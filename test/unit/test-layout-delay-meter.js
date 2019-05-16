@@ -19,76 +19,81 @@ import {LayoutDelayMeter} from '../../src/layout-delay-meter';
 import {Services} from '../../src/services';
 import {installPerformanceService} from '../../src/service/performance-impl';
 
-describes.realWin('layout-delay-meter', {
-  amp: {
-    ampdoc: 'single',
+describes.realWin(
+  'layout-delay-meter',
+  {
+    amp: {
+      ampdoc: 'single',
+    },
   },
-}, env => {
+  env => {
+    let win;
+    let sandbox;
+    let meter;
+    let tickSpy;
+    let clock;
 
-  let win;
-  let sandbox;
-  let meter;
-  let tickSpy;
-  let clock;
+    beforeEach(() => {
+      sandbox = env.sandbox;
+      win = env.win;
+      installPerformanceService(win);
+      const perf = Services.performanceFor(win);
+      sandbox.stub(perf, 'isPerformanceTrackingOn').callsFake(() => true);
+      clock = lolex.install({
+        target: win,
+        toFake: ['Date', 'setTimeout', 'clearTimeout'],
+      });
+      tickSpy = sandbox.spy(perf, 'tickDelta');
 
-  beforeEach(() => {
-    sandbox = env.sandbox;
-    win = env.win;
-    installPerformanceService(win);
-    const perf = Services.performanceFor(win);
-    sandbox.stub(perf, 'isPerformanceTrackingOn').callsFake(() => true);
-    clock = lolex.install({
-      target: win, toFake: ['Date', 'setTimeout', 'clearTimeout']});
-    tickSpy = sandbox.spy(perf, 'tickDelta');
+      meter = new LayoutDelayMeter(win, 2);
+    });
 
-    meter = new LayoutDelayMeter(win, 2);
-  });
+    afterEach(() => {
+      clock.uninstall();
+    });
 
-  afterEach(() => {
-    clock.uninstall();
-  });
+    it('should tick when there is a delay', () => {
+      clock.tick(100);
+      meter.enterViewport(); // first time in viewport
+      clock.tick(100);
+      meter.enterViewport(); // second time in viewport
+      clock.tick(200);
+      meter.startLayout();
+      expect(tickSpy).to.be.calledWith('adld', 300);
 
-  it('should tick when there is a delay', () => {
-    clock.tick(100);
-    meter.enterViewport(); // first time in viewport
-    clock.tick(100);
-    meter.enterViewport(); // second time in viewport
-    clock.tick(200);
-    meter.startLayout();
-    expect(tickSpy).to.be.calledWith('adld', 300);
+      // should only tick once.
+      tickSpy.resetHistory();
+      clock.tick(200);
+      meter.startLayout();
+      expect(tickSpy).to.not.be.called;
+    });
 
-    // should only tick once.
-    tickSpy.resetHistory();
-    clock.tick(200);
-    meter.startLayout();
-    expect(tickSpy).to.not.be.called;
-  });
+    it('should tick when there is no delay', () => {
+      clock.tick(100);
+      meter.startLayout();
+      clock.tick(200);
+      meter.enterViewport();
+      expect(tickSpy).to.be.calledWith('adld', 0);
 
-  it('should tick when there is no delay', () => {
-    clock.tick(100);
-    meter.startLayout();
-    clock.tick(200);
-    meter.enterViewport();
-    expect(tickSpy).to.be.calledWith('adld', 0);
+      // should only tick once.
+      tickSpy.resetHistory();
+      clock.tick(200);
+      meter.enterViewport();
+      expect(tickSpy).to.not.be.called;
+    });
 
-    // should only tick once.
-    tickSpy.resetHistory();
-    clock.tick(200);
-    meter.enterViewport();
-    expect(tickSpy).to.not.be.called;
-  });
+    it('should not tick if it never enterViewport', () => {
+      clock.tick(100);
+      meter.startLayout();
+      clock.tick(200);
+      expect(tickSpy).not.to.be.called;
+    });
 
-  it('should not tick if it never enterViewport', () => {
-    clock.tick(100);
-    meter.startLayout();
-    clock.tick(200);
-    expect(tickSpy).not.to.be.called;
-  });
-
-  it('should not tick if it never startLayout', () => {
-    clock.tick(100);
-    meter.enterViewport();
-    clock.tick(200);
-    expect(tickSpy).not.to.be.called;
-  });
-});
+    it('should not tick if it never startLayout', () => {
+      clock.tick(100);
+      meter.enterViewport();
+      clock.tick(200);
+      expect(tickSpy).not.to.be.called;
+    });
+  }
+);
