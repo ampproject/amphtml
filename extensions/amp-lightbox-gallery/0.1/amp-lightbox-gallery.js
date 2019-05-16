@@ -188,10 +188,11 @@ export class AmpLightboxGallery extends AMP.BaseElement {
 
     /** @private @const */
     this.swipeToDismiss_ = new SwipeToDismiss(
-        this.win,
-        this.element,
-        cb => this.mutateElement(cb),
-        () => this.close_());
+      this.win,
+      this.element,
+      cb => this.mutateElement(cb),
+      () => this.close_()
+    );
   }
 
   /** @override */
@@ -694,7 +695,8 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     if (data.first) {
       const {sourceElement} = this.getCurrentElement_();
       const parentCarousel = this.getSourceElementParentCarousel_(
-          sourceElement);
+        sourceElement
+      );
 
       this.swipeToDismiss_.startSwipe({
         swipeElement: dev().assertElement(this.carousel_),

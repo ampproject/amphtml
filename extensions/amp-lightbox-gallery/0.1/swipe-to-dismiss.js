@@ -157,12 +157,7 @@ export class SwipeToDismiss {
    *   overlay: !Element,
    * }} config
    */
-  startSwipe({
-    swipeElement,
-    hiddenElement,
-    mask,
-    overlay,
-  }) {
+  startSwipe({swipeElement, hiddenElement, mask, overlay}) {
     this.swipeElement_ = swipeElement;
     this.hiddenElement_ = hiddenElement;
     this.mask_ = mask;
@@ -250,7 +245,10 @@ export class SwipeToDismiss {
    * @private
    */
   adjustForSwipePosition_(
-    swipeElementTransform = '', maskOpacity = '', overlayOpacity = '') {
+    swipeElementTransform = '',
+    maskOpacity = '',
+    overlayOpacity = ''
+  ) {
     setStyles(dev().assertElement(this.swipeElement_), {
       transform: swipeElementTransform,
       transition: '',
@@ -293,15 +291,21 @@ export class SwipeToDismiss {
 
     // We always want to carry momentum from the swipe forward, and then use
     // the resting point to decide if we should snap back or close.
-    return this.carrySwipeMomentum_(scale, finalDeltaX, finalDeltaY, velocity)
-        .then(() => {
-          if (finalDistance < SWIPE_TO_CLOSE_DISTANCE_THRESHOLD &&
-              velocity < SWIPE_TO_CLOSE_VELOCITY_THRESHOLD) {
-            return this.snapBackFromSwipe_(finalDistance);
-          }
+    return this.carrySwipeMomentum_(
+      scale,
+      finalDeltaX,
+      finalDeltaY,
+      velocity
+    ).then(() => {
+      if (
+        finalDistance < SWIPE_TO_CLOSE_DISTANCE_THRESHOLD &&
+        velocity < SWIPE_TO_CLOSE_VELOCITY_THRESHOLD
+      ) {
+        return this.snapBackFromSwipe_(finalDistance);
+      }
 
-          return this.onclose_();
-        });
+      return this.onclose_();
+    });
   }
 
   /**
@@ -316,12 +320,15 @@ export class SwipeToDismiss {
     // We do not want the user dragging around to make the carousel think that
     // a scroll happened.
     this.preventScrollUnlistener_ = listen(
-        dev().assertElement(this.swipeElement_),
-        'scroll', event => {
-          event.stopPropagation();
-        }, {
-          capture: true,
-        });
+      dev().assertElement(this.swipeElement_),
+      'scroll',
+      event => {
+        event.stopPropagation();
+      },
+      {
+        capture: true,
+      }
+    );
     // TODO(sparhami) #19259 Tracks a more generic way to do this. Remove once
     // we have something better.
     this.element_.setAttribute('i-amphtml-scale-animation', '');
@@ -341,7 +348,6 @@ export class SwipeToDismiss {
     setStyle(this.overlay_, 'animationFillMode', '');
   }
 
-
   /**
    *
    * @param {!SwipeDef} data The data for the swipe.
@@ -352,29 +358,33 @@ export class SwipeToDismiss {
     // Need to capture these as they will no longer be available after closing.
     const distance = calculateDistance(0, 0, deltaX, deltaY);
     const releasePercentage = Math.min(distance / SWIPE_TO_CLOSE_DISTANCE, 1);
-    const hideOverlayPercentage =
-        Math.min(distance / SWIPE_TO_HIDE_OVERLAY_DISTANCE, 1);
+    const hideOverlayPercentage = Math.min(
+      distance / SWIPE_TO_HIDE_OVERLAY_DISTANCE,
+      1
+    );
     const scale = lerp(1, SWIPE_TO_CLOSE_MIN_SCALE, releasePercentage);
     const maskOpacity = lerp(1, SWIPE_TO_CLOSE_MIN_OPACITY, releasePercentage);
     const overlayOpacity = lerp(1, 0, hideOverlayPercentage);
 
     this.mutateElement_(() => {
       if (isLast) {
-        this.releaseSwipe_(scale, velocityX, velocityY, deltaX, deltaY)
-            .then(() => {
-              // TODO(sparhami) These should be called in a `mutateElement`,
-              // but we are already in an animationFrame, and waiting for the
-              // next one will cause the UI to flicker.
-              this.adjustForSwipePosition_();
-              this.endSwipeToDismiss_();
-            });
+        this.releaseSwipe_(scale, velocityX, velocityY, deltaX, deltaY).then(
+          () => {
+            // TODO(sparhami) These should be called in a `mutateElement`,
+            // but we are already in an animationFrame, and waiting for the
+            // next one will cause the UI to flicker.
+            this.adjustForSwipePosition_();
+            this.endSwipeToDismiss_();
+          }
+        );
         return;
       }
 
       this.adjustForSwipePosition_(
-          `scale(${scale}) translate(${deltaX}px, ${deltaY}px)`,
-          maskOpacity,
-          overlayOpacity);
+        `scale(${scale}) translate(${deltaX}px, ${deltaY}px)`,
+        maskOpacity,
+        overlayOpacity
+      );
     });
   }
 }
