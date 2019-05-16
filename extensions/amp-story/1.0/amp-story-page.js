@@ -46,7 +46,7 @@ import {LoadingSpinner} from './loading-spinner';
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {MediaPool} from './media-pool';
 import {Services} from '../../../src/services';
-import {VideoEvents, delegateAutoplay, delegateAutoplay} from '../../../src/video-interface';
+import {VideoEvents, delegateAutoplay} from '../../../src/video-interface';
 import {
   childElement,
   closestAncestorElementBySelector,
@@ -57,7 +57,6 @@ import {
   whenUpgradedToCustomElement,
 } from '../../../src/dom';
 import {debounce} from '../../../src/utils/rate-limit';
-
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getAmpdoc} from '../../../src/service';
