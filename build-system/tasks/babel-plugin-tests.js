@@ -17,6 +17,7 @@
 
 const gulp = require('gulp');
 const jest = require('gulp-jest').default;
+const {isTravisBuild} = require('../travis');
 
 /**
  * Simple wrapper around the jest tests for custom babel plugins.
@@ -30,7 +31,9 @@ function babelPluginTests() {
       'transformIgnorePatterns': ['/node_modules/'],
       'coveragePathIgnorePatterns': ['/node_modules/'],
       'modulePathIgnorePatterns': ['/test/fixtures/', '<rootDir>/build/'],
-      'reporters': ['jest-dot-reporter'],
+      'reporters': [
+        isTravisBuild() ? 'jest-silent-reporter' : 'jest-dot-reporter',
+      ],
       'automock': false,
     })
   );
