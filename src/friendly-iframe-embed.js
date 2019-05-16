@@ -18,7 +18,11 @@ import {CommonSignals} from './common-signals';
 import {Observable} from './observable';
 import {Services} from './services';
 import {Signals} from './utils/signals';
-import {closestAncestorElementBySelector, escapeHtml} from './dom';
+import {
+  closestAncestorElementBySelector,
+  escapeHtml,
+  waitForBodyOpen,
+} from './dom';
 import {dev, rethrowAsync, userAssert} from './log';
 import {disposeServicesForEmbed, getTopWindow} from './service';
 import {isDocumentReady} from './document-ready';
@@ -133,6 +137,7 @@ export function installFriendlyIframeEmbed(
   const win = getTopWindow(toWin(iframe.ownerDocument.defaultView));
   /** @const {!./service/extensions-impl.Extensions} */
   const extensions = Services.extensionsFor(win);
+  const ampdocService = Services.ampdocServiceFor(win);
 
   setStyle(iframe, 'visibility', 'hidden');
   iframe.setAttribute('referrerpolicy', 'unsafe-url');
@@ -211,10 +216,13 @@ export function installFriendlyIframeEmbed(
   }
 
   return readyPromise.then(() => {
-    const embed = new FriendlyIframeEmbed(iframe, spec, loadedPromise);
+    const childWin = /** @type {!Window} */ (iframe.contentWindow);
+
+    const docroot = ampdocService.createDocRootForIframe(childWin.document,
+        spec.url);
+    const embed = new FriendlyIframeEmbed(iframe, spec, docroot, loadedPromise);
     iframe[EMBED_PROP] = embed;
 
-    const childWin = /** @type {!Window} */ (iframe.contentWindow);
     // Add extensions.
     extensions.installExtensionsInChildWindow(
       childWin,
@@ -328,9 +336,10 @@ export class FriendlyIframeEmbed {
   /**
    * @param {!HTMLIFrameElement} iframe
    * @param {!FriendlyIframeSpec} spec
+   * @param {!DocRoot} docroot
    * @param {!Promise} loadedPromise
    */
-  constructor(iframe, spec, loadedPromise) {
+  constructor(iframe, spec, docroot, loadedPromise) {
     /** @const {!HTMLIFrameElement} */
     this.iframe = iframe;
 
@@ -342,6 +351,9 @@ export class FriendlyIframeEmbed {
 
     /** @const {?AmpElement} */
     this.host = spec.host || null;
+
+    /** @const {!DocRoot} */
+    this.docroot_ = docroot;
 
     /** @const @private {time} */
     this.startTime_ = Date.now();
@@ -361,6 +373,8 @@ export class FriendlyIframeEmbed {
 
     /** @private @const {!Promise} */
     this.winLoadedPromise_ = Promise.all([loadedPromise, this.whenReady()]);
+
+    this.whenReady().then(() => setDocRootReady(this.docroot_));
   }
 
   /**
@@ -487,6 +501,8 @@ export class FriendlyIframeEmbed {
   setVisible_(visible) {
     if (this.visible_ != visible) {
       this.visible_ = visible;
+      setDocRootVisibilityState(this.docroot_,
+          visible ? VisibilityState.VISIBLE : VisibilityState.HIDDEN);
       this.visibilityObservable_.fire(this.visible_);
     }
   }
@@ -649,3 +665,6 @@ export function isInFie(element) {
     !!closestAncestorElementBySelector(element, '.i-amphtml-fie')
   );
 }
+
+
+// QQQQQ: attach docroot

@@ -15,13 +15,19 @@
  */
 
 import {Deferred} from '../utils/promise';
+import {
+  DocRootImpl,
+  setDocRootBodyAvailable,
+  setDocRootReady,
+} from '../runtime/docroot-impl';
 import {Signals} from '../utils/signals';
+import {VisibilityState} from '../visibility-state';
 import {dev, devAssert} from '../log';
 import {getParentWindowFrameElement, registerServiceBuilder} from '../service';
 import {getShadowRootNode} from '../shadow-embed';
-import {isDocumentReady, whenDocumentReady} from '../document-ready';
+import {isDocumentReady, onDocumentReady} from '../document-ready';
 import {isExperimentOn} from '../experiments';
-import {waitForBodyOpenPromise} from '../dom';
+import {waitForBodyOpen} from '../dom';
 
 /** @const {string} */
 const AMPDOC_PROP = '__AMPDOC';
@@ -48,16 +54,11 @@ export class AmpDocService {
     /** @private {?AmpDoc} */
     this.singleDoc_ = null;
     if (isSingleDoc) {
-      this.singleDoc_ = new AmpDocSingle(win);
+      this.singleDoc_ = new AmpDoc(createDocRootForDocument(win.document));
     }
 
     /** @private @const */
     this.alwaysClosestAmpDoc_ = isExperimentOn(win, 'ampdoc-closest');
-
-    /** Guarded by 'ampdoc-shell' experiment
-     * @private {?AmpDocShell}
-     */
-    this.shellShadowDoc_ = null;
   }
 
   /**
@@ -67,14 +68,6 @@ export class AmpDocService {
    */
   isSingleDoc() {
     return !!this.singleDoc_;
-  }
-
-  /**
-   * Whether if an `AmpDocShell` has been installed for the runtime.
-   * @return {boolean}
-   */
-  hasAmpDocShell() {
-    return !!this.shellShadowDoc_;
   }
 
   /**
@@ -97,18 +90,6 @@ export class AmpDocService {
     // Single document: return it immediately.
     if (this.singleDoc_ && !closestAmpDoc && !this.alwaysClosestAmpDoc_) {
       return this.singleDoc_;
-    }
-
-    // Multiple documents and AmpDocShell requested
-    if (
-      isExperimentOn(this.win, 'ampdoc-shell') &&
-      opt_node === this.win.document
-    ) {
-      if (this.shellShadowDoc_) {
-        return this.shellShadowDoc_;
-      } else {
-        throw dev().createError('Ampdoc for shell has not been installed');
-      }
     }
 
     // TODO(sparhami) Should we always require a node to be passed? This will
@@ -138,10 +119,6 @@ export class AmpDocService {
       // Shadow doc.
       const shadowRoot = getShadowRootNode(n);
       if (!shadowRoot) {
-        // If not inside a shadow root, it may belong to AmpDocShell
-        if (this.shellShadowDoc_) {
-          return this.shellShadowDoc_;
-        }
         break;
       }
 
@@ -207,40 +184,24 @@ export class AmpDocService {
       !shadowRoot[AMPDOC_PROP],
       'The shadow root already contains ampdoc'
     );
-    const ampdoc = new AmpDocShadow(this.win, url, shadowRoot);
+    const ampdoc = new AmpDoc(createDocRootForShadowRoot(url, shadowRoot));
     shadowRoot[AMPDOC_PROP] = ampdoc;
     return ampdoc;
   }
 
   /**
-   * Creates and installs an ampdoc for the shell in shadow-doc mode.
-   * `AmpDocShell` is a subclass of `AmpDocShadow` that is installed for
-   * `window.document` and allows to use AMP components as part of the shell,
-   * outside shadow roots
-   *
-   * Currently guarded by 'ampdoc-shell' experiment
-   *
-   * @return {!AmpDocShell}
-   * @restricted
+   * @param {!Document} doc
+   * @param {string} url
+   * @return {!DocRoot}
    */
-  installShellShadowDoc() {
-    devAssert(
-      this.singleDoc_ === null,
-      'AmpDocShell cannot be installed in single-doc mode'
-    );
-    this.shellShadowDoc_ = new AmpDocShell(this.win);
-    this.win.document[AMPDOC_PROP] = this.shellShadowDoc_;
-
-    whenDocumentReady(this.win.document).then(document => {
-      this.shellShadowDoc_.setBody(dev().assertElement(document.body));
-      this.shellShadowDoc_.setReady();
-    });
-
-    return this.shellShadowDoc_;
+  createDocRootForIframe(doc, url) {
+    return createDocRootForIframeDocument(doc, url);
   }
 }
 
 /**
+ * TODO(dvoytenko): deprecate and remove in preference of docroot.
+ *
  * This class represents a single ampdoc. `AmpDocService` can contain only one
  * global ampdoc or multiple, depending on the runtime mode: single-doc or
  * shadow-doc.
@@ -249,17 +210,28 @@ export class AmpDocService {
  */
 export class AmpDoc {
   /**
-   * @param {!Window} win
+   * @param {!../api/docroot.DocRoot} docroot
+   * @param {boolean} isSingleDoc
    */
-  constructor(win) {
-    /** @public @const {!Window} */
-    this.win = win;
+  constructor(docroot, isSingleDoc) {
+    /** @private @const {!../api/docroot.DocRoot} */
+    this.docroot_ = docroot;
 
-    /** @private @const */
-    this.signals_ = new Signals();
+    /** @private @const {boolean} */
+    this.isSingleDoc_ = isSingleDoc;
+
+    /** @public @const {!Window} */
+    this.win = docroot.win;
 
     /** @private @const {!Array<string>} */
     this.declaredExtensions_ = [];
+  }
+
+  /**
+   * @return {!DocRoot}
+   */
+  getDocRoot() {
+    return this.docroot_;
   }
 
   /**
@@ -268,7 +240,7 @@ export class AmpDoc {
    * @return {boolean}
    */
   isSingleDoc() {
-    return /** @type {?} */ (devAssert(null, 'not implemented'));
+    return this.isSingleDoc_;
   }
 
   /**
@@ -282,7 +254,7 @@ export class AmpDoc {
 
   /** @return {!Signals} */
   signals() {
-    return this.signals_;
+    return this.docroot_.signals;
   }
 
   /**
@@ -313,15 +285,16 @@ export class AmpDoc {
    * @return {!Document|!ShadowRoot}
    */
   getRootNode() {
-    return /** @type {?} */ (devAssert(null, 'not implemented'));
+    return this.docroot_.rootNode;
   }
 
   /**
    * Returns the head node. It's either an element or a shadow root.
    * @return {!Element|!ShadowRoot}
-   * @abstract
    */
-  getHeadNode() {}
+  getHeadNode() {
+    return this.docroot_.head;
+  }
 
   /**
    * Returns `true` if the ampdoc's body is available.
@@ -329,7 +302,7 @@ export class AmpDoc {
    * @return {boolean}
    */
   isBodyAvailable() {
-    return /** @type {?} */ (devAssert(false, 'not implemented'));
+    return !!this.docroot_.bodyIfAvailable;
   }
 
   /**
@@ -340,7 +313,7 @@ export class AmpDoc {
    * @return {!Element}
    */
   getBody() {
-    return dev().assertElement(null, 'not implemented');
+    return this.docroot_.body;
   }
 
   /**
@@ -349,7 +322,7 @@ export class AmpDoc {
    * @return {!Promise<!Element>}
    */
   waitForBodyOpen() {
-    return /** @type {?} */ (devAssert(null, 'not implemented'));
+    return this.docroot_.waitForBodyOpen();
   }
 
   /**
@@ -360,7 +333,7 @@ export class AmpDoc {
    * @return {boolean}
    */
   isReady() {
-    return /** @type {?} */ (devAssert(null, 'not implemented'));
+    return this.docroot_.ready;
   }
 
   /**
@@ -369,7 +342,7 @@ export class AmpDoc {
    * @return {!Promise}
    */
   whenReady() {
-    return /** @type {?} */ (devAssert(null, 'not implemented'));
+    return this.docroot_.whenReady();
   }
 
   /**
@@ -377,7 +350,7 @@ export class AmpDoc {
    * @return {string}
    */
   getUrl() {
-    return dev().assertString(null, 'not implemented');
+    return this.docroot_.url;
   }
 
   /**
@@ -389,7 +362,7 @@ export class AmpDoc {
    * @return {?Element}
    */
   getElementById(id) {
-    return this.getRootNode().getElementById(id);
+    return this.docroot_.getElementById(id);
   }
 
   /**
@@ -398,204 +371,59 @@ export class AmpDoc {
    * @return {boolean}
    */
   contains(node) {
-    return this.getRootNode().contains(node);
+    return this.docroot_.contains(node);
   }
 }
+
 
 /**
- * The version of `AmpDoc` in the single-doc mode that corresponds to the
- * global `window.document`.
- * @package @visibleForTesting
+ * @param {!Document} doc
+ * @return {!DocRoot}
  */
-export class AmpDocSingle extends AmpDoc {
-  /**
-   * @param {!Window} win
-   */
-  constructor(win) {
-    super(win);
-
-    /** @private @const {!Promise<!Element>} */
-    this.bodyPromise_ = this.win.document.body
-      ? Promise.resolve(this.win.document.body)
-      : waitForBodyOpenPromise(this.win.document).then(() => this.getBody());
-
-    /** @private @const {!Promise} */
-    this.readyPromise_ = whenDocumentReady(this.win.document);
-  }
-
-  /** @override */
-  isSingleDoc() {
-    return true;
-  }
-
-  /** @override */
-  getRootNode() {
-    return this.win.document;
-  }
-
-  /** @override */
-  getUrl() {
-    return this.win.location.href;
-  }
-
-  /** @override */
-  getHeadNode() {
-    return dev().assertElement(this.win.document.head);
-  }
-
-  /** @override */
-  isBodyAvailable() {
-    return !!this.win.document.body;
-  }
-
-  /** @override */
-  getBody() {
-    return dev().assertElement(this.win.document.body, 'body not available');
-  }
-
-  /** @override */
-  waitForBodyOpen() {
-    return this.bodyPromise_;
-  }
-
-  /** @override */
-  isReady() {
-    return isDocumentReady(this.win.document);
-  }
-
-  /** @override */
-  whenReady() {
-    return this.readyPromise_;
-  }
+function createDocRootForDocument(doc) {
+  const docroot = new DocRootImpl(doc, {
+    // Visibility state will be updated by the viewer for now.
+    visibilityState: VisibilityState.HIDDEN,
+    ready: isDocumentReady(doc),
+  });
+  onDocumentReady(doc, () => setDocRootReady(docroot));
+  waitForBodyOpen(doc, () => setDocRootBodyAvailable(docroot));
+  return docroot;
 }
+
 
 /**
- * The version of `AmpDoc` in the shadow-doc mode that is allocated for each
- * ampdoc hosted within a shadow root.
- * @package @visibleForTesting
+ * @param {!Document} doc
+ * @param {string} url
+ * @return {!DocRoot}
  */
-export class AmpDocShadow extends AmpDoc {
-  /**
-   * @param {!Window} win
-   * @param {string} url
-   * @param {!ShadowRoot} shadowRoot
-   */
-  constructor(win, url, shadowRoot) {
-    super(win);
-    /** @private @const {string} */
-    this.url_ = url;
-    /** @private @const {!ShadowRoot} */
-    this.shadowRoot_ = shadowRoot;
-
-    /** @private {?Element} */
-    this.body_ = null;
-
-    const bodyDeferred = new Deferred();
-
-    /** @private {!Promise<!Element>} */
-    this.bodyPromise_ = bodyDeferred.promise;
-
-    /** @private {function(!Element)|undefined} */
-    this.bodyResolver_ = bodyDeferred.resolve;
-
-    /** @private {boolean} */
-    this.ready_ = false;
-
-    const readyDeferred = new Deferred();
-
-    /** @private {!Promise} */
-    this.readyPromise_ = readyDeferred.promise;
-
-    /** @private {function()|undefined} */
-    this.readyResolver_ = readyDeferred.resolve;
-  }
-
-  /** @override */
-  isSingleDoc() {
-    return false;
-  }
-
-  /** @override */
-  getRootNode() {
-    return this.shadowRoot_;
-  }
-
-  /** @override */
-  getUrl() {
-    return this.url_;
-  }
-
-  /** @override */
-  getHeadNode() {
-    return this.shadowRoot_;
-  }
-
-  /** @override */
-  isBodyAvailable() {
-    return !!this.body_;
-  }
-
-  /** @override */
-  getBody() {
-    return dev().assertElement(this.body_, 'body not available');
-  }
-
-  /**
-   * Signals that the shadow doc has a body.
-   * @param {!Element} body
-   * @restricted
-   */
-  setBody(body) {
-    devAssert(!this.body_, 'Duplicate body');
-    this.body_ = body;
-    this.bodyResolver_(body);
-    this.bodyResolver_ = undefined;
-  }
-
-  /** @override */
-  waitForBodyOpen() {
-    return this.bodyPromise_;
-  }
-
-  /** @override */
-  isReady() {
-    return this.ready_;
-  }
-
-  /**
-   * Signals that the shadow doc is ready.
-   * @restricted
-   */
-  setReady() {
-    devAssert(!this.ready_, 'Duplicate ready state');
-    this.ready_ = true;
-    this.readyResolver_();
-    this.readyResolver_ = undefined;
-  }
-
-  /** @override */
-  whenReady() {
-    return this.readyPromise_;
-  }
+function createDocRootForIframeDocument(doc, url) {
+  const docroot = new DocRootImpl(doc, {
+    url,
+    // Visibility state will be updated by the viewer for now.
+    visibilityState: VisibilityState.HIDDEN,
+    ready: false,
+  });
+  waitForBodyOpen(doc, () => setDocRootBodyAvailable(docroot));
+  return docroot;
 }
+
 
 /**
- * AmpDocShadow for the shell
- * @package @visibleForTesting
+ * @param {string} url
+ * @param {!ShadowRoot} shadowRoot
+ * @return {!DocRoot}
  */
-export class AmpDocShell extends AmpDocShadow {
-  // TODO(choumx): win.document is not a ShadowRoot, which is required by the
-  // super constructor.
-  // eslint-disable-next-line require-jsdoc
-  constructor(win) {
-    super(win, win.location.href, win.document);
-  }
-
-  /** @override */
-  getHeadNode() {
-    return dev().assertElement(this.win.document.head);
-  }
+function createDocRootForShadowRoot(url, shadowRoot) {
+  const docroot = new DocRootImpl(shadowRoot, {
+    url,
+    // Visibility state will be updated by the viewer for now.
+    visibilityState: VisibilityState.HIDDEN,
+    ready: false,
+  });
+  return docroot;
 }
+
 
 /**
  * Install the ampdoc service and immediately configure it for either a

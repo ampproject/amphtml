@@ -193,6 +193,16 @@ export function getShadowRootNode(node) {
 }
 
 /**
+ * Creates a "head" element that can be used inside the shadow doc.
+ * @param {!ShadowRoot} shadowRoot
+ * @return {!Element}
+ */
+export function createShadowHead(shadowRoot) {
+  const doc = shadowRoot.ownerDocument;
+  return doc.createElement(isShadowCssSupported() ? 'head' : 'amp-head');
+}
+
+/**
  * Imports a body into a shadow root with the workaround for a polyfill case.
  * @param {!ShadowRoot} shadowRoot
  * @param {!Element} body

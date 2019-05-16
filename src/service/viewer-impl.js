@@ -32,6 +32,7 @@ import {isIframed} from '../dom';
 import {map} from '../utils/object';
 import {registerServiceBuilderForDoc} from '../service';
 import {reportError} from '../error';
+import {setDocRootVisibilityState} from '../runtime/docroot-impl';
 import {startsWith} from '../string';
 
 const TAG_ = 'Viewer';
@@ -612,6 +613,7 @@ export class Viewer {
     }
 
     this.visibilityState_ = state;
+    setDocRootVisibilityState(this.ampdoc.getDocRoot(), state);
 
     dev().fine(TAG_, 'visibilitychange event:', this.getVisibilityState());
 

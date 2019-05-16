@@ -40,6 +40,7 @@ import {
 import {config} from './config';
 import {
   createShadowDomWriter,
+  createShadowHead,
   createShadowRoot,
   importShadowBody,
 } from './shadow-embed';
@@ -82,6 +83,10 @@ import {internalRuntimeVersion} from './internal-version';
 import {isExperimentOn, toggleExperiment} from './experiments';
 import {parseUrlDeprecated} from './url';
 import {reportErrorForWin} from './error';
+import {
+  setDocRootBodyAvailable,
+  setDocRootReady,
+} from './runtime/docroot-impl';
 import {setStyle} from './style';
 import {startupChunk} from './chunk';
 import {stubElementsForDoc} from './service/custom-element-registry';
@@ -490,7 +495,7 @@ export class MultidocManager {
    * @param {string} url
    * @param {!Object<string, string>|undefined} initParams
    * @param {function(!Object, !ShadowRoot,
-   * !./service/ampdoc-impl.AmpDocShadow):!Promise} builder
+   * !./service/ampdoc-impl.AmpDoc):!Promise} builder
    * @return {!Object}
    * @private
    */
@@ -510,8 +515,20 @@ export class MultidocManager {
     amp.url = url;
     const {origin} = parseUrlDeprecated(url);
 
+    // Setup initial document-like structure for the shadow doc.
+    const documentElement = this.win.document.createElement('root');
+    root.style.display = 'block';
+
+    const head = createShadowHead(shadowRoot);
+    head.style.display = 'none';
+    documentElement.appendChild(head);
+
+    shadowRoot.appendChild(documentElement);
+    shadowRoot['documentElement'] = documentElement;
+    shadowRoot['head'] = head;
+
     const ampdoc = this.ampdocService_.installShadowDoc(url, shadowRoot);
-    /** @const {!./service/ampdoc-impl.AmpDocShadow} */
+    /** @const {!./service/ampdoc-impl.AmpDoc} */
     amp.ampdoc = ampdoc;
     dev().fine(TAG, 'Attach to shadow root:', shadowRoot, ampdoc);
 
@@ -585,7 +602,7 @@ export class MultidocManager {
     // Start building the shadow doc DOM.
     builder(amp, shadowRoot, ampdoc).then(() => {
       // Document is ready.
-      ampdoc.setReady();
+      setDocRootReady(ampdoc.getDocRoot());
       ampdoc.signals().signal(CommonSignals.RENDER_START);
       setStyle(hostElement, 'visibility', 'visible');
     });
@@ -625,7 +642,8 @@ export class MultidocManager {
         if (doc.body) {
           const body = importShadowBody(shadowRoot, doc.body, /* deep */ true);
           body.classList.add('amp-shadow');
-          ampdoc.setBody(body);
+          shadowRoot['body'] = body;
+          setDocRootBodyAvailable(ampdoc.getDocRoot());
         }
 
         // TODO(dvoytenko): find a better and more stable way to make content
@@ -674,7 +692,8 @@ export class MultidocManager {
             /* deep */ false
           );
           body.classList.add('amp-shadow');
-          ampdoc.setBody(body);
+          shadowRoot['body'] = body;
+          setDocRootBodyAvailable(ampdoc.getDocRoot());
           return body;
         });
         writer.onBodyChunk(() => {
@@ -709,6 +728,7 @@ export class MultidocManager {
    * @private
    */
   mergeShadowHead_(ampdoc, shadowRoot, doc) {
+    const head = dev().assertElement(shadowRoot['head']);
     const extensionIds = [];
     if (doc.head) {
       const parentLinks = {};
@@ -826,7 +846,7 @@ export class MultidocManager {
               // Non-src version of script.
               const type = n.getAttribute('type') || 'application/javascript';
               if (type.indexOf('javascript') == -1) {
-                shadowRoot.appendChild(this.win.document.importNode(n, true));
+                head.appendChild(this.win.document.importNode(n, true));
                 dev().fine(TAG, '- non-src script: ', n);
               } else {
                 user().error(TAG, '- unallowed inline javascript: ', n);
