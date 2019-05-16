@@ -60,8 +60,9 @@ export function getAllowedAttributeMutation(
           [mutationAttributeName]
           ['*'];
 
-    if (!allowedAttributeEntry.tags.includes[mutationTagName] &&
-      !allowedAttributeEntry.tags.includes['*']) {
+    if (!allowedAttributeEntry.tags ||
+      (!allowedAttributeEntry.tags.includes[mutationTagName] &&
+      !allowedAttributeEntry.tags.includes['*'])) {
       allowedAttributeEntry = undefined;
     }
   }
