@@ -93,7 +93,7 @@
     "fetch-mock": "7.3.3",
     "find-imports": "1.1.0",
     "formidable": "1.2.1",
-    "fs-extra": "7.0.1",
+    "fs-extra": "8.0.1",
     "fuse.js": "3.4.4",
     "globs-to-files": "1.0.0",
     "google-closure-compiler": "20190215.0.2",
