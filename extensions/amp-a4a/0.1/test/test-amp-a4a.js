@@ -2032,7 +2032,6 @@ describe('amp-a4a', () => {
         a4aElement = createA4aElement(fixture.doc);
         a4a = new MockA4AImpl(a4aElement);
         consentString = 'test-consent-string';
-        toggleExperiment(a4a.win, 'amp-consent', true);
         return fixture;
       }));
 
