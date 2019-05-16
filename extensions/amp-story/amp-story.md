@@ -815,6 +815,26 @@ A UI prompt to open the attachment will automatically be added at the bottom of 
 
 The `<amp-story-page-attachment>` element must be the last child of `<amp-story-page>`, and must have the `layout="nodisplay"` attribute. The attachment AMPHTML content is expected to be provided inline in your AMP Story, within this `<amp-story-page-attachment>` tag.
 
+### Optional customization
+
+#### `data-cta-text`
+
+Customizes the call to action text displayed on the UI prompt to open the attachment.
+Default: "Swipe up"
+
+```html
+<amp-story-page-attachment layout="nodisplay" data-cta-text="Read more">...</amp-story-page-attachment>
+```
+
+#### `data-title`
+
+Displays the provided title in the page attachment header.
+Default: `null`
+
+```html
+<amp-story-page-attachment layout="nodisplay" data-title="My title">...</amp-story-page-attachment>
+```
+
 ### Allowed content and components
 
 Story page attachments allow the same HTML elements as AMP Story along with additional components listed below, such as third party video players or social media embeds. This means you can add additional content that is too verbose or disallowed in an AMP Story page.
