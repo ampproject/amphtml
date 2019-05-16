@@ -19,9 +19,7 @@ import {
   AmpStoryStoreService,
   EmbeddedComponentState,
 } from '../amp-story-store-service';
-import {
-  AmpStoryEmbeddedComponent,
-} from '../amp-story-embedded-component';
+import {AmpStoryEmbeddedComponent} from '../amp-story-embedded-component';
 import {EventType} from '../events';
 import {LocalizationService} from '../../../../src/service/localization';
 import {Services} from '../../../../src/services';
@@ -52,7 +50,9 @@ describes.realWin('amp-story-embedded-component', {amp: true}, env => {
         return Promise.resolve();
       },
       measureMutateElement: (measure, mutate) => {
-        return Promise.resolve().then(measure).then(mutate);
+        return Promise.resolve()
+          .then(measure)
+          .then(mutate);
       },
     });
 
@@ -83,16 +83,18 @@ describes.realWin('amp-story-embedded-component', {amp: true}, env => {
     expect(component.focusedStateOverlay_).to.exist;
   });
 
-  it('should append the tooltip to the parentEl when clicking a clickable ' +
-    'element', () => {
-    fakePage.appendChild(clickableEl);
+  it(
+    'should append the tooltip to the parentEl when clicking a clickable ' +
+      'element',
+    () => {
+      fakePage.appendChild(clickableEl);
 
-    storeService.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT,
-        fakeComponent);
+      storeService.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT, fakeComponent);
 
-    // Children in parentEl: fakeCover, fakePage, and tooltip overlay.
-    expect(parentEl.childElementCount).to.equal(3);
-  });
+      // Children in parentEl: fakeCover, fakePage, and tooltip overlay.
+      expect(parentEl.childElementCount).to.equal(3);
+    }
+  );
 
   it('should show the tooltip on store property update', () => {
     fakePage.appendChild(clickableEl);
@@ -101,8 +103,9 @@ describes.realWin('amp-story-embedded-component', {amp: true}, env => {
 
     // Wait for TOOLTIP_CLOSE_ANIMATION_MS is finished before showing tooltip.
     return timeout(150).then(() => {
-      expect(component.focusedStateOverlay_).to.not.have
-          .class('i-amphtml-hidden');
+      expect(component.focusedStateOverlay_).to.not.have.class(
+        'i-amphtml-hidden'
+      );
     });
   });
 
@@ -131,32 +134,37 @@ describes.realWin('amp-story-embedded-component', {amp: true}, env => {
     const nextPageSpy = sandbox.spy();
     parentEl.addEventListener(EventType.NEXT_PAGE, nextPageSpy);
 
-    const rightButton = component.focusedStateOverlay_
-        .querySelector('.i-amphtml-story-focused-state-layer-nav-button' +
-          '.i-amphtml-story-tooltip-nav-button-right');
+    const rightButton = component.focusedStateOverlay_.querySelector(
+      '.i-amphtml-story-focused-state-layer-nav-button' +
+        '.i-amphtml-story-tooltip-nav-button-right'
+    );
 
     rightButton.dispatchEvent(new Event('click'));
 
     expect(nextPageSpy).to.have.been.calledOnce;
   });
 
-  it('should navigate to previous page when clicked on right arrow and ' +
-    'story is RTL', () => {
-    fakePage.appendChild(clickableEl);
-    storeService.dispatch(Action.TOGGLE_RTL, true);
-    storeService.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT, fakeComponent);
+  it(
+    'should navigate to previous page when clicked on right arrow and ' +
+      'story is RTL',
+    () => {
+      fakePage.appendChild(clickableEl);
+      storeService.dispatch(Action.TOGGLE_RTL, true);
+      storeService.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT, fakeComponent);
 
-    const previousPageSpy = sandbox.spy();
-    parentEl.addEventListener(EventType.PREVIOUS_PAGE, previousPageSpy);
+      const previousPageSpy = sandbox.spy();
+      parentEl.addEventListener(EventType.PREVIOUS_PAGE, previousPageSpy);
 
-    const rightButton = component.focusedStateOverlay_
-        .querySelector('.i-amphtml-story-focused-state-layer-nav-button' +
-          '.i-amphtml-story-tooltip-nav-button-right');
+      const rightButton = component.focusedStateOverlay_.querySelector(
+        '.i-amphtml-story-focused-state-layer-nav-button' +
+          '.i-amphtml-story-tooltip-nav-button-right'
+      );
 
-    rightButton.dispatchEvent(new Event('click'));
+      rightButton.dispatchEvent(new Event('click'));
 
-    expect(previousPageSpy).to.have.been.calledOnce;
-  });
+      expect(previousPageSpy).to.have.been.calledOnce;
+    }
+  );
 
   it('should append icon when icon attribute is present', () => {
     addAttributesToElement(clickableEl, {'data-tooltip-icon': '/my-icon'});
@@ -164,26 +172,31 @@ describes.realWin('amp-story-embedded-component', {amp: true}, env => {
     storeService.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT, fakeComponent);
 
     const tooltipIconEl = component.focusedStateOverlay_.querySelector(
-        '.i-amphtml-story-tooltip-custom-icon');
+      '.i-amphtml-story-tooltip-custom-icon'
+    );
 
     // Wait for TOOLTIP_CLOSE_ANIMATION_MS is finished before building tooltip.
     return timeout(150).then(() => {
-      expect(tooltipIconEl.style['background-image'])
-          .to.equal('url("http://localhost:9876/my-icon")');
+      expect(tooltipIconEl.style['background-image']).to.equal(
+        'url("http://localhost:9876/my-icon")'
+      );
     });
   });
 
   it('should find invalid urls', () => {
-    addAttributesToElement(clickableEl,
-        {'data-tooltip-icon':
-        /*eslint no-script-url: 0*/ 'javascript:alert("evil!")'});
+    addAttributesToElement(clickableEl, {
+      'data-tooltip-icon':
+        /*eslint no-script-url: 0*/ 'javascript:alert("evil!")',
+    });
     fakePage.appendChild(clickableEl);
     expectAsyncConsoleError(
-        '[amp-story-embedded-component] The tooltip icon url is invalid');
+      '[amp-story-embedded-component] The tooltip icon url is invalid'
+    );
 
     storeService.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT, fakeComponent);
     const tooltipIconEl = component.focusedStateOverlay_.querySelector(
-        '.i-amphtml-story-tooltip-custom-icon');
+      '.i-amphtml-story-tooltip-custom-icon'
+    );
 
     expect(tooltipIconEl.style['background-image']).to.equal('');
   });
@@ -193,8 +206,9 @@ describes.realWin('amp-story-embedded-component', {amp: true}, env => {
     fakePage.appendChild(clickableEl);
     storeService.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT, fakeComponent);
 
-    const tooltipTextEl = component.focusedStateOverlay_
-        .querySelector('.i-amphtml-tooltip-text');
+    const tooltipTextEl = component.focusedStateOverlay_.querySelector(
+      '.i-amphtml-tooltip-text'
+    );
 
     // Wait for TOOLTIP_CLOSE_ANIMATION_MS is finished before building tooltip.
     return timeout(150).then(() => {
@@ -206,8 +220,9 @@ describes.realWin('amp-story-embedded-component', {amp: true}, env => {
     fakePage.appendChild(clickableEl);
     storeService.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT, fakeComponent);
 
-    const tooltipTextEl = component.focusedStateOverlay_
-        .querySelector('.i-amphtml-tooltip-text');
+    const tooltipTextEl = component.focusedStateOverlay_.querySelector(
+      '.i-amphtml-tooltip-text'
+    );
 
     // Wait for TOOLTIP_CLOSE_ANIMATION_MS is finished before building tooltip.
     return timeout(150).then(() => {

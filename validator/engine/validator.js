@@ -5992,7 +5992,7 @@ amp.validator.ValidationResult.prototype.outputToTerminal = function(
   }
   if (errorCategoryFilter === null && errors.length !== 0) {
     terminal.info(
-        'See also https://validator.ampproject.org/#url=' +
+        'See also https://validator.amp.dev/#url=' +
         encodeURIComponent(goog.uri.utils.removeFragment(url)));
   }
 };

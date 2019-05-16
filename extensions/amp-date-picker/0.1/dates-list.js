@@ -17,7 +17,6 @@
 import {requireExternal} from '../../../src/module';
 import RRule from '../../../third_party/rrule/rrule';
 
-
 /** @enum {string} */
 const DateType = {
   INVALID: 'invalid',
@@ -33,23 +32,24 @@ export class DatesList {
    * @param {!Array<string>} dates
    */
   constructor(dates) {
-
     /** @private @const */
-    this.ReactDates_ = /** @type {!JsonObject} */ (
-      requireExternal('react-dates'));
+    this.ReactDates_ = /** @type {!JsonObject} */ (requireExternal(
+      'react-dates'
+    ));
 
     /** @private @const */
     this.moment_ = requireExternal('moment');
 
     /** @private @const */
     this.rrulestrs_ = dates
-        .filter(d => this.getDateType_(d) === DateType.RRULE)
-        .map(d => tryParseRrulestr(d));
+      .filter(d => this.getDateType_(d) === DateType.RRULE)
+      .map(d => tryParseRrulestr(d));
 
     /** @private @const */
     this.dates_ = dates
-        .filter(d => this.getDateType_(d) == DateType.DATE)
-        .map(d => this.moment_(d));
+      .filter(d => this.getDateType_(d) == DateType.DATE)
+      .map(d => this.moment_(d))
+      .sort((a, b) => a.toDate() - b.toDate());
   }
 
   /**
@@ -61,6 +61,29 @@ export class DatesList {
   contains(date) {
     const m = this.moment_(date);
     return this.matchesDate_(m) || this.matchesRrule_(m);
+  }
+
+  /**
+   * Gets the first date in the date list after the given date.
+   * @param {!moment|string} date
+   * @return {!moment}
+   */
+  firstDateAfter(date) {
+    const m = this.moment_(date);
+
+    const firstDatesAfter = [];
+    for (let i = 0; i < this.dates_.length; i++) {
+      if (this.dates_[i].toDate() >= date) {
+        firstDatesAfter.push(this.dates_[i]);
+        break;
+      }
+    }
+    const rruleDates = this.rrulestrs_
+      .map(rrule => rrule.after(m.toDate()))
+      .filter(Boolean);
+    firstDatesAfter.concat(rruleDates);
+
+    return firstDatesAfter.sort((a, b) => a.toDate() - b.toDate())[0];
   }
 
   /**
@@ -80,7 +103,11 @@ export class DatesList {
    * @private
    */
   matchesRrule_(date) {
-    const nextDate = date.clone().startOf('day').add(1, 'day').toDate();
+    const nextDate = date
+      .clone()
+      .startOf('day')
+      .add(1, 'day')
+      .toDate();
     return this.rrulestrs_.some(rrule => {
       const rruleDay = this.moment_(rrule.before(nextDate));
       return this.ReactDates_['isSameDay'](rruleDay, date);

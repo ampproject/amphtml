@@ -32,13 +32,19 @@ const SERVICE_ID = 'liveListManager';
 const TRANSFORMED_PREFIX = 'google;v=';
 
 /**
+ * Property used for storing id of custom slot. This custom slot can be used to
+ * replace the default "items" and "update" slot.
+ * @const {string}
+ */
+export const AMP_LIVE_LIST_CUSTOM_SLOT_ID = 'AMP_LIVE_LIST_CUSTOM_SLOT_ID';
+
+/**
  * Manages registered AmpLiveList components.
  * Primarily handles network requests and updates the components
  * if necessary.
  * @implements {../../../src/service.Disposable}
  */
 export class LiveListManager {
-
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
@@ -82,18 +88,20 @@ export class LiveListManager {
       // then make sure to stop polling if viewer is not visible.
       this.interval_ = Math.min.apply(Math, this.intervals_);
 
-      const initialUpdateTimes = Object.keys(this.liveLists_)
-          .map(key => this.liveLists_[key].getUpdateTime());
+      const initialUpdateTimes = Object.keys(this.liveLists_).map(key =>
+        this.liveLists_[key].getUpdateTime()
+      );
       this.latestUpdateTime_ = Math.max.apply(Math, initialUpdateTimes);
 
       // For testing purposes only, we speed up the interval of the update.
       // This should NEVER be allowed in production.
       if (getMode().localDev) {
         const path = this.ampdoc.win.location.pathname;
-        if (path.indexOf('/examples/live-list-update.amp.html') != -1 ||
-            path.indexOf('/examples/live-blog.amp.html') != -1 ||
-            path.indexOf(
-                '/examples/live-blog-non-floating-button.amp.html') != -1) {
+        if (
+          path.indexOf('/examples/live-list-update.amp.html') != -1 ||
+          path.indexOf('/examples/live-blog.amp.html') != -1 ||
+          path.indexOf('/examples/live-blog-non-floating-button.amp.html') != -1
+        ) {
           this.interval_ = 5000;
         }
       }
@@ -133,8 +141,11 @@ export class LiveListManager {
   fetchDocument_() {
     let url = this.url_;
     if (this.latestUpdateTime_ > 0) {
-      url = addParamToUrl(url, 'amp_latest_update_time',
-          String(this.latestUpdateTime_));
+      url = addParamToUrl(
+        url,
+        'amp_latest_update_time',
+        String(this.latestUpdateTime_)
+      );
     }
 
     if (this.isTransformed_) {
@@ -145,19 +156,23 @@ export class LiveListManager {
     // TODO(erwinm): add update time here when possible.
     return fetchDocument(this.ampdoc.win, url, {
       requireAmpResponseSourceOrigin: false,
-    }).then(this.getLiveLists_.bind(this));
+    }).then(this.updateLiveLists_.bind(this));
   }
 
   /**
-   * Queries the document for all `amp-live-list` tags.
+   * Gets all live lists and updates them with their corresponding counterparts.
+   * Saves latest update time.
    *
    * @param {!Document} doc
+   * @private
    */
-  getLiveLists_(doc) {
+  updateLiveLists_(doc) {
     this.installExtensionsForDoc_(doc);
-    const lists = Array.prototype.slice.call(
-        doc.getElementsByTagName('amp-live-list'));
-    const updateTimes = lists.map(this.updateLiveList_.bind(this));
+    const allLiveLists = this.getLiveLists_(doc).concat(
+      this.getCustomSlots_(doc)
+    );
+    const updateTimes = allLiveLists.map(this.updateLiveList_.bind(this));
+
     const latestUpdateTime = Math.max.apply(Math, [0].concat(updateTimes));
     if (latestUpdateTime > 0) {
       this.latestUpdateTime_ = latestUpdateTime;
@@ -170,16 +185,59 @@ export class LiveListManager {
   }
 
   /**
+   * Queries the document for all `amp-live-list` tags.
+   *
+   * @param {!Document} doc
+   * @return {!Array<!Element>}
+   * @private
+   */
+  getLiveLists_(doc) {
+    return Array.prototype.slice.call(
+      doc.getElementsByTagName('amp-live-list')
+    );
+  }
+
+  /**
+   * Queries for custom slots that will be used to host the live elements. This
+   * overrides looking for live elements inside the default <amp-live-list>
+   * element.
+   *
+   * @param {!Document} doc
+   * @return {!Array<!Element>}
+   * @private
+   */
+  getCustomSlots_(doc) {
+    const liveListsWithCustomSlots = Object.keys(this.liveLists_).filter(id =>
+      this.liveLists_[id].hasCustomSlot()
+    );
+
+    return liveListsWithCustomSlots.map(id => {
+      const customSlotId = this.liveLists_[id].element[
+        AMP_LIVE_LIST_CUSTOM_SLOT_ID
+      ];
+      return doc.getElementById(customSlotId);
+    });
+  }
+
+  /**
    * Updates the appropriate `amp-live-list` with its updates from the server.
    *
    * @param {!Element} liveList
    * @return {number}
    */
   updateLiveList_(liveList) {
-    const id = liveList.getAttribute('id');
+    // amp-live-list elements can be appended dynamically by another
+    // component using the [dynamic-live-list] attribute.
+    const id = liveList.hasAttribute('dynamic-live-list')
+      ? liveList.getAttribute('dynamic-live-list')
+      : liveList.getAttribute('id');
     userAssert(id, 'amp-live-list must have an id.');
-    userAssert(id in this.liveLists_,
-        'amp-live-list#%s found but did not exist on original page load.', id);
+    userAssert(
+      id in this.liveLists_,
+      'amp-live-list#%s found but did not exist on original page load.',
+      id
+    );
+
     const inClientDomLiveList = this.liveLists_[id];
     inClientDomLiveList.toggle(!liveList.hasAttribute('disabled'));
 
@@ -233,11 +291,13 @@ export class LiveListManager {
    * @param {!Document} doc
    */
   installExtensionsForDoc_(doc) {
-    const extensions = toArray(doc
-        .querySelectorAll('script[custom-element], script[custom-template]'));
+    const extensions = toArray(
+      doc.querySelectorAll('script[custom-element], script[custom-template]')
+    );
     extensions.forEach(script => {
-      const extensionName = script.getAttribute('custom-element') ||
-          script.getAttribute('custom-template');
+      const extensionName =
+        script.getAttribute('custom-element') ||
+        script.getAttribute('custom-template');
       // This is a cheap operation if extension is already installed so no need
       // to over optimize checks.
       this.extensions_.installExtensionForDoc(this.ampdoc, extensionName);
@@ -284,10 +344,11 @@ function isDocTransformed(root) {
  */
 function installLiveListManager(ampdoc) {
   registerServiceBuilderForDoc(
-      ampdoc,
-      SERVICE_ID,
-      LiveListManager,
-      /* instantiate */ true);
+    ampdoc,
+    SERVICE_ID,
+    LiveListManager,
+    /* instantiate */ true
+  );
 }
 
 /**

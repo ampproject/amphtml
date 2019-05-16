@@ -33,23 +33,23 @@ export function adventive(global, data) {
 }
 
 const adv = {
-      addInstance: () => {},
-      args: {},
-      isLibLoaded: false,
-      mode: {
-        dev: false,
-        live: false,
-        localDev: false,
-        preview: false,
-        prod: false,
-        testing: false,
-      },
+    addInstance: () => {},
+    args: {},
+    isLibLoaded: false,
+    mode: {
+      dev: false,
+      live: false,
+      localDev: false,
+      preview: false,
+      prod: false,
+      testing: false,
     },
-    requiredData = ['pid'],
-    optionalData = ['click', 'async', 'isDev'],
-    sld = {true: 'adventivedev', false: 'adventive'},
-    thld = {true: 'amp', false: 'ads'},
-    cacheTime = 5;
+  },
+  requiredData = ['pid'],
+  optionalData = ['click', 'async', 'isDev'],
+  sld = {true: 'adventivedev', false: 'adventive'},
+  thld = {true: 'amp', false: 'ads'},
+  cacheTime = 5;
 
 /**
  * Future data:
@@ -73,18 +73,23 @@ const adv = {
 function adventive_(global, data) {
   validateData(data, requiredData, optionalData);
 
-  if (!hasOwn(global, 'adventive')) { global.adventive = adv; }
+  if (!hasOwn(global, 'adventive')) {
+    global.adventive = adv;
+  }
   const ns = global.adventive;
-  if (!hasOwn(ns, 'context')) { ns.context = global.context; }
+  if (!hasOwn(ns, 'context')) {
+    ns.context = global.context;
+  }
 
   if (!Object.isFrozen(ns.mode)) {
     updateMode(ns.mode, global.context.location.hostname);
   }
 
   const cb = callback.bind(this, data.pid, ns),
-      url = getUrl(global.context, data, ns);
-  url ?
-    (hasOwn(data, 'async') ? loadScript : writeScript)(global, url, cb) : cb();
+    url = getUrl(global.context, data, ns);
+  url
+    ? (hasOwn(data, 'async') ? loadScript : writeScript)(global, url, cb)
+    : cb();
 }
 
 /**
@@ -106,7 +111,9 @@ function updateMode(mode, hostname) {
  * @param {string} id
  * @param {!Object} ns
  */
-function callback(id, ns) { ns.addInstance(id); }
+function callback(id, ns) {
+  ns.addInstance(id);
+}
 
 /**
  * @param {!Object} context
@@ -117,12 +124,13 @@ function callback(id, ns) { ns.addInstance(id); }
  */
 function getUrl(context, data, ns) {
   const {mode} = ns,
-      isDev = hasOwn(data, 'isDev'),
-      sld_ = sld[!mode.dev],
-      thld_ = thld[isDev && !mode.live],
-      search = reduceSearch(ns, data.pid, data.click, context.referrer),
-      url = search ?
-        addParamsToUrl(`https://${thld_}.${sld_}.com/ad`, search) : false;
+    isDev = hasOwn(data, 'isDev'),
+    sld_ = sld[!mode.dev],
+    thld_ = thld[isDev && !mode.live],
+    search = reduceSearch(ns, data.pid, data.click, context.referrer),
+    url = search
+      ? addParamsToUrl(`https://${thld_}.${sld_}.com/ad`, search)
+      : false;
   return url;
 }
 
@@ -143,15 +151,17 @@ function reduceSearch(ns, placementId, click, referrer) {
   let isRecipeStale = true;
   if (isRecipeLoaded) {
     const info = ns.args[placementId];
-    isRecipeStale = (Date.now() - info['requestTime']) > (60 * cacheTime);
+    isRecipeStale = Date.now() - info['requestTime'] > 60 * cacheTime;
   }
   const needsRequest = !isRecipeLoaded || isRecipeStale;
 
-  return !needsRequest ? null : dict({
-    'click': click,
-    'referrer': referrer,
-    'isAmp': '1',
-    'lib': !ns.isLibLoaded ? '1' : '', // may be prefetchable via _config
-    'pid': needsRequest ? placementId : '',
-  });
+  return !needsRequest
+    ? null
+    : dict({
+        'click': click,
+        'referrer': referrer,
+        'isAmp': '1',
+        'lib': !ns.isLibLoaded ? '1' : '', // may be prefetchable via _config
+        'pid': needsRequest ? placementId : '',
+      });
 }

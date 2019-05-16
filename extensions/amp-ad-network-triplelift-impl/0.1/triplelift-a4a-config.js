@@ -24,6 +24,10 @@ const SRC_PREFIX_ = 'https://ib.3lift.com/';
  */
 export function tripleliftIsA4AEnabled(win, element, useRemoteHtml) {
   let src;
-  return !useRemoteHtml && !!element.getAttribute('data-use-a4a') && !!(src =
-    element.getAttribute('src')) && src.indexOf(SRC_PREFIX_) == 0;
+  return (
+    !useRemoteHtml &&
+    !!element.getAttribute('data-use-a4a') &&
+    !!(src = element.getAttribute('src')) &&
+    src.indexOf(SRC_PREFIX_) == 0
+  );
 }
