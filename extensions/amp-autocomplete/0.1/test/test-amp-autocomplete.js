@@ -132,13 +132,15 @@ describes.realWin('amp-autocomplete unit tests', {
     expect(element).not.to.be.null;
     expect(element).to.have.class('i-amphtml-autocomplete-item');
     expect(element.hasAttribute('role')).to.be.true;
-    expect(element.innerHTML).to.equal('h<strong>el</strong>lo');
+    expect(element.innerHTML).to.equal(
+        'h<span class="autocomplete-partial">el</span>lo');
 
     element = impl.createElementFromItem_('hello', 'HeLlO');
     expect(element).not.to.be.null;
     expect(element).to.have.class('i-amphtml-autocomplete-item');
     expect(element.hasAttribute('role')).to.be.true;
-    expect(element.innerHTML).to.equal('<strong>hello</strong>');
+    expect(element.innerHTML).to.equal(
+        '<span class="autocomplete-partial">hello</span>');
 
     element = impl.createElementFromItem_('hello', 'hellohello');
     expect(element).not.to.be.null;
@@ -220,8 +222,8 @@ describes.realWin('amp-autocomplete unit tests', {
       renderedChildren.push(renderedChild);
     });
     const renderTemplateSpy =
-        sandbox.stub(impl.templates_, 'renderTemplateArray').returns(
-            Promise.resolve(renderedChildren));
+      sandbox.stub(impl.templates_, 'renderTemplateArray').returns(
+          Promise.resolve(renderedChildren));
 
     return impl.renderResults_(sourceData, impl.container_).then(() => {
       expect(impl.container_.children.length).to.equal(3);
@@ -345,7 +347,7 @@ describes.realWin('amp-autocomplete unit tests', {
   });
 
   describe('keyDownHandler_() on arrow keys', () => {
-    const event = {key: Keys.DOWN_ARROW, preventDefault: () => {}};
+    const event = {key: Keys.DOWN_ARROW, preventDefault: () => { }};
     let displayInputSpy, updateActiveSpy, eventPreventSpy;
 
     beforeEach(() => {
@@ -419,7 +421,7 @@ describes.realWin('amp-autocomplete unit tests', {
   describe('keyDownHandler_() on Enter', () => {
     const event = {
       key: Keys.ENTER,
-      preventDefault: () => {},
+      preventDefault: () => { },
       target: {textContent: 'hello'},
     };
     let selectItemSpy, resetSpy, clearAllSpy, eventPreventSpy;
@@ -478,7 +480,7 @@ describes.realWin('amp-autocomplete unit tests', {
   it('should call keyDownHandler_() on Enter not event.preventDefault', () => {
     const event = {
       key: Keys.ENTER,
-      preventDefault: () => {},
+      preventDefault: () => { },
       target: {textContent: 'hello'},
     };
     let selectItemSpy, resetSpy, clearAllSpy, eventPreventSpy;
