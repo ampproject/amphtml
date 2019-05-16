@@ -303,80 +303,83 @@ export class AmpGeo extends AMP.BaseElement {
 
     // Wait for the body before we figure anything out because we might be
     // prerendered and we know that from body classes
-    return ampdoc.whenReady().then(body => {
-      self.findCountry_(ampdoc);
-      self.matchCountryGroups_(config);
+    return ampdoc
+      .whenReady()
+      .then(() => ampdoc.whenBodyAvailable())
+      .then(body => {
+        self.findCountry_(ampdoc);
+        self.matchCountryGroups_(config);
 
-      let classesToRemove = [];
+        let classesToRemove = [];
 
-      switch (self.mode_) {
-        case mode.GEO_OVERRIDE:
-          classesToRemove = self.clearPreRender_(body);
-        // Intentionally fall through.
-        case mode.GEO_HOT_PATCH:
-          // Build the AMP State, add classes
-          states.ISOCountry = self.country_;
+        switch (self.mode_) {
+          case mode.GEO_OVERRIDE:
+            classesToRemove = self.clearPreRender_(body);
+          // Intentionally fall through.
+          case mode.GEO_HOT_PATCH:
+            // Build the AMP State, add classes
+            states.ISOCountry = self.country_;
 
-          const classesToAdd = self.matchedGroups_.map(group => {
-            states[group] = true;
-            return GROUP_PREFIX + group;
-          });
+            const classesToAdd = self.matchedGroups_.map(group => {
+              states[group] = true;
+              return GROUP_PREFIX + group;
+            });
 
-          if (!self.matchedGroups_.length) {
-            classesToAdd.push('amp-geo-no-group');
-          }
-
-          if (self.error_) {
-            classesToAdd.push('amp-geo-error');
-          }
-
-          states.ISOCountryGroups = self.matchedGroups_;
-          classesToAdd.push(COUNTRY_PREFIX + this.country_);
-
-          // Let the runtime know we're mutating the AMP body
-          // Actual change happens in callback so runtime can
-          // optimize dom mutations.
-          self.mutateElement(() => {
-            const {classList} = body;
-            // Always remove the pending class
-            classesToRemove.push('amp-geo-pending');
-            classesToRemove.forEach(toRemove => classList.remove(toRemove));
-
-            // add the new classes to <body>
-            classesToAdd.forEach(toAdd => classList.add(toAdd));
-
-            // Only include amp state if user requests it to
-            // avoid validator issue with missing amp-bind js
-            if (config['AmpBind']) {
-              const geoState = ampdoc.getElementById(GEO_ID);
-              if (geoState) {
-                geoState.parentNode.removeChild(geoState);
-              }
-              const state = ampdoc.win.document.createElement('amp-state');
-              const confScript = ampdoc.win.document.createElement('script');
-              confScript.setAttribute('type', 'application/json');
-              confScript.textContent = JSON.stringify(
-                /** @type {!JsonObject} */ (states)
-              );
-              state.appendChild(confScript);
-              state.id = GEO_ID;
-              body.appendChild(state);
+            if (!self.matchedGroups_.length) {
+              classesToAdd.push('amp-geo-no-group');
             }
-          }, body);
 
-          break;
-        case mode.GEO_PRERENDER:
-          break;
-      }
+            if (self.error_) {
+              classesToAdd.push('amp-geo-error');
+            }
 
-      return {
-        ISOCountry: self.country_,
-        matchedISOCountryGroups: self.matchedGroups_,
-        allISOCountryGroups: this.definedGroups_,
-        /* API */
-        isInCountryGroup: this.isInCountryGroup.bind(this),
-      };
-    });
+            states.ISOCountryGroups = self.matchedGroups_;
+            classesToAdd.push(COUNTRY_PREFIX + this.country_);
+
+            // Let the runtime know we're mutating the AMP body
+            // Actual change happens in callback so runtime can
+            // optimize dom mutations.
+            self.mutateElement(() => {
+              const {classList} = body;
+              // Always remove the pending class
+              classesToRemove.push('amp-geo-pending');
+              classesToRemove.forEach(toRemove => classList.remove(toRemove));
+
+              // add the new classes to <body>
+              classesToAdd.forEach(toAdd => classList.add(toAdd));
+
+              // Only include amp state if user requests it to
+              // avoid validator issue with missing amp-bind js
+              if (config['AmpBind']) {
+                const geoState = ampdoc.getElementById(GEO_ID);
+                if (geoState) {
+                  geoState.parentNode.removeChild(geoState);
+                }
+                const state = ampdoc.win.document.createElement('amp-state');
+                const confScript = ampdoc.win.document.createElement('script');
+                confScript.setAttribute('type', 'application/json');
+                confScript.textContent = JSON.stringify(
+                  /** @type {!JsonObject} */ (states)
+                );
+                state.appendChild(confScript);
+                state.id = GEO_ID;
+                body.appendChild(state);
+              }
+            }, body);
+
+            break;
+          case mode.GEO_PRERENDER:
+            break;
+        }
+
+        return {
+          ISOCountry: self.country_,
+          matchedISOCountryGroups: self.matchedGroups_,
+          allISOCountryGroups: this.definedGroups_,
+          /* API */
+          isInCountryGroup: this.isInCountryGroup.bind(this),
+        };
+      });
   }
 
   /**
