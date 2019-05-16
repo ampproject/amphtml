@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-import {assertHttpsUrl} from '../../../src/url';
+import {
+  getAllowedAttributeMutation
+} from './attribute-allow-list/attribute-allow-list';
 import {isObject} from '../../../src/types';
 import {user, userAssert} from '../../../src/log';
 
@@ -26,35 +28,6 @@ const TAG = 'amp-experiment mutation-parser';
  * This is the value set to the 'type' key.
  */
 const MUTATION_TYPES = ['attributes', 'characterData', 'childList'];
-
-const SUPPORTED_ATTRIBUTES = {
-  style: value => {
-    // Do not allow Important or HTML Comments
-    if (value.match(/(!\s*important|<!--)/)) {
-      return false;
-    }
-
-    // Allow Color
-    if (value.match(/^color:\s*#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3});?$/)) {
-      return true;
-    }
-
-    // Allow Background color
-    if (
-      value.match(/^background-color:\s*#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3});?$/)
-    ) {
-      return true;
-    }
-
-    return false;
-  },
-  src: value => {
-    return assertHttpsUrl(value, 'attributes', 'mutation');
-  },
-  href: value => {
-    return assertHttpsUrl(value, 'attributes', 'mutation');
-  },
-};
 
 /**
  * Function to find all selectors of the mutation
@@ -74,12 +47,11 @@ export function parseMutation(mutation, document) {
   if (mutationRecord['type'] === 'attributes') {
     assertAttributeMutation(mutationRecord, stringifiedMutation);
 
-    return () => {
-      mutationRecord['targetElement'].setAttribute(
-        mutationRecord['attributeName'],
-        mutationRecord['value']
-      );
-    };
+    return getAllowedAttributeMutation(
+      mutationRecord,
+      stringifiedMutation
+    );
+
   } else if (mutationRecord['type'] === 'characterData') {
     assertCharacterDataMutation(mutationRecord, stringifiedMutation);
 
@@ -178,24 +150,6 @@ function assertAttributeMutation(mutationRecord, stringifiedMutation) {
     mutationRecord['attributeName'] !== undefined &&
       typeof mutationRecord['attributeName'] === 'string',
     'Mutation %s must have a attributeName.',
-    stringifiedMutation
-  );
-
-  const supportedAttributeKeys = Object.keys(SUPPORTED_ATTRIBUTES);
-
-  // Assert the mutation attribute is one of the following keys
-  userAssert(
-    supportedAttributeKeys.indexOf(mutationRecord['attributeName']) >= 0,
-    'Mutation %s has an unsupported attributeName.',
-    stringifiedMutation
-  );
-
-  // Assert the mutation attribute passes it's check
-  userAssert(
-    SUPPORTED_ATTRIBUTES[mutationRecord['attributeName']](
-      mutationRecord['value']
-    ),
-    'Mutation %s has an an unsupported value.',
     stringifiedMutation
   );
 }

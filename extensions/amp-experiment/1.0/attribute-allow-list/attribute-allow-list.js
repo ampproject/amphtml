@@ -14,97 +14,82 @@
  * limitations under the License.
  */
 
-import {assertHttpsUrl} from '../../../src/url';
-import {isObject} from '../../../src/types';
+import {
+  DefaultStyleAllowedAttributeEntry,
+  DefaultAllowedURLAttributeEntry
+} from './allowed-attribute-entry';
 import {user, userAssert} from '../../../src/log';
 
+const TAG = 'amp-experiment allowed-mutations';
+
 /**
- * Function to validate that the mutation
- * is a mutation record.
+ * Function to validate the attribute mutation
+ * should be allowed, and return its mutation
  * @param {!Object} mutationRecord
  * @param {string} stringifiedMutation
- * @return {!Boolean}
+ * @return {!Function}
  */
-export function assertAttributeMutationIsAllowed(mutationRecord, stringifiedMutation) {
+export function getAllowedAttributeMutation(mutationRecord, stringifiedMutation) {
 
+  // Assert the mutation attribute is one of the following keys
+  const mutationAttributeName = mutationRecord['attributeName'];
+  userAssert(
+      attributeMutationAllowListKeys.indexOf(mutationAttributeName) >= 0,
+      'Mutation %s has an unsupported attributeName.',
+      stringifiedMutation
+  );
 
+  // Find our allow list entry
+  const mutationTagName = mutationRecord['targetElement']
+    .tagName.toLowerCase();
 
-  return false;
-}
+  // Search through the allow list for our
+  // Allowed attribute entry
+  let allowedAttributeEntry = undefined;
+  if (attributeMutationAllowList[mutationAttributeName][mutationTagName]) {
+    allowedAttributeEntry =
+      attributeMutationAllowList[mutationAttributeName][mutationTagName];
+  } else if (attributeMutationAllowList[mutationAttributeName]['*']) {
+    allowedAttributeEntry = attributeMutationAllowList[mutationAttributeName]['*'];
 
-/**
- * Base class for allowed attribute assertions.
- * This should be extended to ensure the service
- * is properly handled
- *
- * @interface
- */
-class AllowedAttributeEntry {
-
-  constructor(opt_tags) {
-
-  }
-
-  /**
-   * Function to validate the value
-   * for the attribute change. Subclasses
-   * may override.
-   * @param {string} value
-   * @return {!Boolean}
-   */
-  validate(value) {
-    if (value) {
-      return true;
+    if (!allowedAttributeEntry.tags.includes[mutationTagName] &&
+      !allowedAttributeEntry.tags.includes['*']) {
+      allowedAttributeEntry = undefined;
     }
   }
 
-  /**
-   * Function to apply the mutation.
-   * Subclasses may override
-   * @param {!Object} mutationRecord
-   */
-  mutation(mutationRecord) {
-    mutationRecord['targetElement'].setAttribute(
-      mutationRecord['attributeName'],
-      mutationRecord['value']
+  if (!allowedAttributeEntry) {
+    user().error(
+      TAG,
+      'Mutation %s has an unsupported attributeName.',
+      stringifiedMutation
     );
   }
+
+  // Assert the mutation attribute passes it's check
+  userAssert(
+      allowedAttributeEntry.validate(
+          mutationRecord['value']
+      ),
+      'Mutation %s has an an unsupported value.',
+      stringifiedMutation
+  );
+
+  // Return the corresponding mutation
+  return allowedAttributeEntry.mutate.bind(this, mutationRecord);
 }
 
 const attributeMutationAllowList = {
   'style': {
-    '*': {
-      tags: ['*'],
-      validation: (value) => {
-        // Do not allow Important or HTML Comments
-        if (value.match(/(!\s*important|<!--)/)) {
-          return false;
-        }
-
-        // Allow Color
-        if (value.match(/^color:\s*#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3});?$/)) {
-          return true;
-        }
-
-        // Allow Background color
-        if (value.match(/^background-color:\s*#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3});?$/)) {
-          return true;
-        }
-
-        return false;
-      },
-      mutation: (mutationRecord) => applyDefaultAttributeMutation(mutationRecord)
-    }
-  },
+    '*': new DefaultStyleAllowedAttributeEntry()
+  }
   'src': {
-    '*': {
-      tags: ['*'],
-
-    }
+    '*': new DefaultAllowedURLAttributeEntry()
   },
   'href': {
-    '*': {
-      tags: ['*']
-    }
+    '*': new DefaultAllowedURLAttributeEntry()
   }
 };
+
+const attributeMutationAllowListKeys =
+  Object.keys(attributeMutationAllowList);
