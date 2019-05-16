@@ -14,25 +14,25 @@
  * limitations under the License.
  */
 
-import { ActionTrust } from '../../../src/action-constants';
-import { CSS } from '../../../build/amp-autocomplete-0.1.css';
-import { Keys } from '../../../src/utils/key-codes';
-import { Layout } from '../../../src/layout';
-import { Services } from '../../../src/services';
+import {ActionTrust} from '../../../src/action-constants';
+import {CSS} from '../../../build/amp-autocomplete-0.1.css';
+import {Keys} from '../../../src/utils/key-codes';
+import {Layout} from '../../../src/layout';
+import {Services} from '../../../src/services';
 import {
   UrlReplacementPolicy,
   batchFetchJsonFor,
 } from '../../../src/batched-json';
-import { childElementsByTag, removeChildren } from '../../../src/dom';
-import { createCustomEvent } from '../../../src/event-helper';
-import { dev, user, userAssert } from '../../../src/log';
-import { getValueForExpr, parseJson, tryParseJson } from '../../../src/json';
-import { hasOwn, map, ownProperty } from '../../../src/utils/object';
-import { includes, startsWith } from '../../../src/string';
-import { isEnumValue } from '../../../src/types';
-import { isExperimentOn } from '../../../src/experiments';
-import { mod } from '../../../src/utils/math';
-import { toggle } from '../../../src/style';
+import {childElementsByTag, removeChildren} from '../../../src/dom';
+import {createCustomEvent} from '../../../src/event-helper';
+import {dev, user, userAssert} from '../../../src/log';
+import {getValueForExpr, parseJson, tryParseJson} from '../../../src/json';
+import {hasOwn, map, ownProperty} from '../../../src/utils/object';
+import {includes, startsWith} from '../../../src/string';
+import {isEnumValue} from '../../../src/types';
+import {isExperimentOn} from '../../../src/experiments';
+import {mod} from '../../../src/utils/math';
+import {toggle} from '../../../src/style';
 
 const EXPERIMENT = 'amp-autocomplete';
 const TAG = 'amp-autocomplete';
@@ -159,7 +159,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
       user().warn(
         TAG,
         'Expected a <script type="application/json"> child or ' +
-        'a URL specified in "src".'
+          'a URL specified in "src".'
       );
     }
 
@@ -195,14 +195,16 @@ export class AmpAutocomplete extends AMP.BaseElement {
         'template, script[template]'
       );
       // Dummy render to verify existence of "data-value" attribute.
-      this.templates_.renderTemplate(this.templateElement_,
-          /** @type {!JsonObject} */({})).then(
-        renderedEl => {
-          userAssert(renderedEl.hasAttribute('data-value') ||
-            renderedEl.hasAttribute('data-category') ||
-            renderedEl.hasAttribute('data-disabled'),
+      this.templates_
+        .renderTemplate(this.templateElement_, /** @type {!JsonObject} */ ({}))
+        .then(renderedEl => {
+          userAssert(
+            renderedEl.hasAttribute('data-value') ||
+              renderedEl.hasAttribute('data-category') ||
+              renderedEl.hasAttribute('data-disabled'),
             `${TAG} requires the "data-value", "data-category", or 
-            "data-disabled" attribute.`);
+            "data-disabled" attribute.`
+          );
         });
     }
 
@@ -243,7 +245,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
       user().warn(
         TAG,
         'Expected key "items" in data but found nothing. ' +
-        'Rendering empty results.'
+          'Rendering empty results.'
       );
       return [];
     }
@@ -270,7 +272,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
         user().warn(
           TAG,
           'Expected key "items" in data but found nothing. ' +
-          'Rendering empty results.'
+            'Rendering empty results.'
         );
         return [];
       }
@@ -323,7 +325,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
         user().warn(
           TAG,
           'Discovered both inline <script> and remote "src"' +
-          ' data. Was providing two datasets intended?'
+            ' data. Was providing two datasets intended?'
         );
       }
       remoteDataPromise = this.getRemoteData_();
@@ -435,8 +437,9 @@ export class AmpAutocomplete extends AMP.BaseElement {
     let renderPromise = Promise.resolve();
     this.resetActiveElement_();
     if (this.templateElement_) {
-      renderPromise = this.templates_.renderTemplateArray(this.templateElement_,
-        filteredData).then(renderedChildren => {
+      renderPromise = this.templates_
+        .renderTemplateArray(this.templateElement_, filteredData)
+        .then(renderedChildren => {
           renderedChildren.forEach(child => {
             container.appendChild(child);
           });
@@ -469,7 +472,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
           `${TAG} data must provide template for non-string items.`
         );
         container.appendChild(
-          this.createElementFromItem_(/** @type {string} */(item))
+          this.createElementFromItem_(/** @type {string} */ (item))
         );
       });
     }
@@ -512,12 +515,14 @@ export class AmpAutocomplete extends AMP.BaseElement {
     input = input.toLocaleLowerCase();
     const itemsExpr = this.element.getAttribute('filter-value') || 'value';
     const filteredData = [];
-    data.filter(item => {
-      return this.isFilterMatch_(item, input, itemsExpr);
-    }).forEach(item => {
-      item = this.filterCategories_(item, input, itemsExpr);
-      filteredData.push(item);
-    });
+    data
+      .filter(item => {
+        return this.isFilterMatch_(item, input, itemsExpr);
+      })
+      .forEach(item => {
+        item = this.filterCategories_(item, input, itemsExpr);
+        filteredData.push(item);
+      });
 
     return this.truncateToMaxEntries_(filteredData);
   }
@@ -542,11 +547,15 @@ export class AmpAutocomplete extends AMP.BaseElement {
         });
         return filteredOpts.length;
       }
-      item = /**@type {string} */(
-        getValueForExpr(/**@type {!JsonObject} */(item), itemsExpr));
+      item = /**@type {string} */ (getValueForExpr(
+        /**@type {!JsonObject} */ (item),
+        itemsExpr
+      ));
     }
-    userAssert(typeof item === 'string',
-      `${TAG} data property "${itemsExpr}" must map to string type.`);
+    userAssert(
+      typeof item === 'string',
+      `${TAG} data property "${itemsExpr}" must map to string type.`
+    );
     item = item.toLocaleLowerCase();
     switch (this.filter_) {
       case FilterType.SUBSTRING:
@@ -576,14 +585,17 @@ export class AmpAutocomplete extends AMP.BaseElement {
   filterCategories_(item, input, itemsExpr) {
     if (item['category']) {
       const opts = [];
-      item['items'].filter(opt => {
-        return this.isFilterMatch_(opt, input, itemsExpr);
-      }).forEach(opt => {
-        opt = this.filterCategories_(opt, input, itemsExpr);
-        opts.push(opt);
-      });
-      item = /**@type {!JsonObject} */(
-        this.copyJsonObject_(/**@type {!JsonObject} */(item)));
+      item['items']
+        .filter(opt => {
+          return this.isFilterMatch_(opt, input, itemsExpr);
+        })
+        .forEach(opt => {
+          opt = this.filterCategories_(opt, input, itemsExpr);
+          opts.push(opt);
+        });
+      item = /**@type {!JsonObject} */ (this.copyJsonObject_(
+        /**@type {!JsonObject} */ (item)
+      ));
       item['items'] = opts;
     }
     return item;
@@ -821,7 +833,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     const selectEvent = createCustomEvent(
       this.win,
       `amp-autocomplete.${name}`,
-      /** @type {!JsonObject} */({ value })
+      /** @type {!JsonObject} */ ({value})
     );
     this.action_.trigger(this.element, name, selectEvent, ActionTrust.HIGH);
   }
@@ -874,6 +886,10 @@ export class AmpAutocomplete extends AMP.BaseElement {
         if (shouldScroll) {
           this.container_./*OK*/ scrollTop = newTop;
         }
+        this.resetActiveElement_();
+        newActiveElement.classList.add('i-amphtml-autocomplete-item-active');
+        this.activeIndex_ = activeIndex;
+        this.activeElement_ = newActiveElement;
       }
     );
   }
