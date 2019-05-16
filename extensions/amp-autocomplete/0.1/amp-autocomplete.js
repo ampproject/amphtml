@@ -894,7 +894,6 @@ export class AmpAutocomplete extends AMP.BaseElement {
             this.displayUserInput_();
             this.toggleResults_(false);
           }
-          this.resetActiveElement_();
         });
       case Keys.TAB:
         if (this.activeElement_) {

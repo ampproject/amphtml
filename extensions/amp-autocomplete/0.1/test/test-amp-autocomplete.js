@@ -803,7 +803,7 @@ describes.realWin(
 
     it('should error on error when fallback is not provided', () => {
       const expectedError = new Error('error for test');
-      sandbox.stub(impl, 'renderResults_').throws(expectedError);
+      sandbox.stub(impl, 'filterDataAndRenderResults_').throws(expectedError);
       return expect(element.layoutCallback()).to.be.rejectedWith(expectedError);
     });
 
@@ -811,7 +811,7 @@ describes.realWin(
       const fallbackSpy = sandbox.spy(impl, 'renderFallbackUI_');
       const clearAllSpy = sandbox.spy(impl, 'clearAllItems_');
       const expectedError = new Error('error for test');
-      sandbox.stub(impl, 'renderResults_').throws(expectedError);
+      sandbox.stub(impl, 'filterDataAndRenderResults_').throws(expectedError);
       const fallback = win.document.createElement('div');
       fallback.setAttribute('fallback', '');
       element.appendChild(fallback);
