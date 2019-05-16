@@ -337,7 +337,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
       element.textContent = item;
     } else {
       const regex = new RegExp(substring, 'gi');
-      element./*OK*/innerHTML = item.replace(regex, '<strong>$&</strong>');
+      element./*OK*/innerHTML = item.replace(
+        regex, '<span class="autocomplete-partial">$&</span>');
     }
     return element;
   }
@@ -410,8 +411,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
           if (this.userInput_ && valueToReplace &&
             this.userInput_.length <= valueToReplace.length) {
             const regex = new RegExp(this.userInput_, 'gi');
-            const displayValue =
-              valueToReplace.replace(regex, '<strong>$&</strong>');
+            const displayValue = valueToReplace.replace(
+              regex, '<span class="autocomplete-partial">$&</span>');
             child./*OK*/innerHTML =
               child./*OK*/innerHTML.replace(valueToReplace, displayValue);
           }

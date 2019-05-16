@@ -28,6 +28,13 @@
       font: 8pt 'Arial', sans-serif;
       right: 0;
     }
+    .autocomplete-partial {
+      font-weight: bold;
+    }
+    #select-example .autocomplete-partial {
+      color: red;
+      text-decoration: underline;
+    }
   </style>
   <script>
       (self.AMP=self.AMP||[]).push((AMP) => {
@@ -38,9 +45,9 @@
 <body>
     <h1>Autocomplete</h1>
     <h2>Select Event</h2>
-    <p>min-characters = 0</p>
+    <p>min-characters = 0, partial red underline</p>
     <form method="post" action-xhr="/form/echo-json/post" target="_blank">
-      <amp-autocomplete filter="substring" min-characters="0" src="autocomplete-cities.example.json"
+      <amp-autocomplete id="select-example" filter="substring" min-characters="0" src="autocomplete-cities.example.json"
         on="select:AMP.setState({inputSelect: event.value})">
           <input type="text" name="input2" required>
       </amp-autocomplete>
@@ -63,7 +70,7 @@
       <amp-autocomplete filter="substring" min-characters="0">
         <input type="text" name="email" id="frmEmailB" placeholder="name@example.com" required autocomplete="email">  
         <script type="application/json">
-          { "items" : ["Email 1", "Email 2", "Email 3"]}
+          { "items" : ["Email 1", "<span>Email</span> 2", "Email 3"]}
         </script>
       </amp-autocomplete>
       <input name="submit-button" type="submit" value="Submit">
@@ -584,7 +591,7 @@
                     <script type="application/json">
                         { "items" : [
                             {
-                                "value" : "Albany, New York",
+                                "value" : "<span>Albany</span>, New York",
                                 "areaCode" : 518,
                                 "population" : 98251
                             }, {
