@@ -76,7 +76,7 @@
     "envify": "4.1.0",
     "escodegen": "1.11.1",
     "eslint": "5.16.0",
-    "eslint-config-prettier": "4.1.0",
+    "eslint-config-prettier": "4.3.0",
     "eslint-plugin-amphtml-internal": "file:build-system/eslint-rules",
     "eslint-plugin-chai-expect": "2.0.1",
     "eslint-plugin-eslint-plugin": "2.0.1",
