@@ -140,7 +140,7 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
           // complete.
           /*
       it('should immediately disable animations', () => {
-        return ampdoc.whenBodyAvailable().then(() => {
+        return ampdoc.waitForBodyOpen().then(() => {
           expect(doc.body.classList.contains(ANIMATIONS_DISABLED_CLASS))
             .to.be.true;
         });

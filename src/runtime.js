@@ -32,7 +32,7 @@ import {
 } from './log';
 import {Services} from './services';
 import {VisibilityState} from './visibility-state';
-import {childElementsByTag, isConnectedNode, waitForBodyPromise} from './dom';
+import {childElementsByTag, isConnectedNode, waitForBodyOpenPromise} from './dom';
 import {config} from './config';
 import {
   createShadowDomWriter,
@@ -410,7 +410,7 @@ export function adopt(global) {
     global.AMP.viewport.getScrollWidth = viewport.getScrollWidth.bind(viewport);
     global.AMP.viewport.getWidth = viewport.getWidth.bind(viewport);
 
-    return waitForBodyPromise(global.document).then(() => {
+    return waitForBodyOpenPromise(global.document).then(() => {
       // Ensure that all declared extensions are marked and stubbed.
       stubElementsForDoc(ampdoc);
     });
@@ -452,7 +452,7 @@ export function adoptShadowMode(global) {
       manager
     );
 
-    return waitForBodyPromise(global.document);
+    return waitForBodyOpenPromise(global.document);
   });
 }
 

@@ -305,7 +305,7 @@ export class AmpGeo extends AMP.BaseElement {
     // prerendered and we know that from body classes
     return ampdoc
       .whenReady()
-      .then(() => ampdoc.whenBodyAvailable())
+      .then(() => ampdoc.waitForBodyOpen())
       .then(body => {
         self.findCountry_(ampdoc);
         self.matchCountryGroups_(config);
