@@ -1464,7 +1464,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         if (!ts || isNaN(ts)) {
           return;
         }
-        const timestamp = this.secondsToTimestampString_(ts);
+        const timestamp = secondsToTimestampString(ts);
         timestampDiv.appendChild(this.doc_.createTextNode(timestamp));
         timestampDiv.classList.add('i-amphtml-lbg-has-timestamp');
       });
