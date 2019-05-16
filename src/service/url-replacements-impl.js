@@ -402,9 +402,10 @@ export class GlobalVariableSource extends VariableSource {
       /** @type {AsyncResolverDef} */ (type => {
         // Type may be "","lat","lon", and undefined
         return this.getUserLocation_(userLocationService => {
-          return userLocationService.getLocation().then(position => {
-            return consumeUserLocation(position, 'AMP_USER_LOCATION', type);
-          });
+          return userLocationService.getReplacementLocation(
+            'AMP_USER_LOCATION',
+            type
+          );
         }, 'AMP_USER_LOCATION');
       })
     );
@@ -416,45 +417,14 @@ export class GlobalVariableSource extends VariableSource {
       /** @type {AsyncResolverDef} */ (type => {
         // Type may be "","lat","lon", and undefined
         return this.getUserLocation_(userLocationService => {
-          const promise = userLocationService.getLocation(/*opt_poll*/ true);
-          return promise.then(position => {
-            return consumeUserLocation(
-              position,
-              'AMP_USER_LOCATION_POLL',
-              type
-            );
-          });
+          return userLocationService.getReplacementLocation(
+            'AMP_USER_LOCATION_POLL',
+            type,
+            /*opt_poll*/ true
+          );
         }, 'AMP_USER_LOCATION_POLL');
       })
     );
-
-    /**
-     * @param {!../../extensions/amp-user-location/0.1/user-location-service.UserLocation} position
-     * @param {string} expr
-     * @param {string} type
-     */
-    function consumeUserLocation(position, expr, type) {
-      if (type === 'SOURCE') {
-        return position['source'];
-      }
-      if (type === 'LAT') {
-        return position['lat'];
-      }
-      if (type === 'LON') {
-        return position['lon'];
-      }
-      userAssert(
-        type === '' || typeof type === 'undefined',
-        'The value passed to %s is not valid: %s',
-        expr,
-        type
-      );
-
-      if (position['source'] !== 'geolocation') {
-        return '';
-      }
-      return `${position['lat']},${position['lon']}`;
-    }
 
     // Returns incoming share tracking fragment.
     this.setAsync(

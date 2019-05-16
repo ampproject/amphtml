@@ -18,7 +18,7 @@ import {Deferred} from '../../../src/utils/promise';
 import {Observable} from '../../../src/observable';
 import {PositionError} from './position-error';
 import {Services} from '../../../src/services';
-import {devAssert} from '../../../src/log';
+import {devAssert, userAssert} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {includes} from '../../../src/string';
 import {isCanary} from '../../../src/experiments';
@@ -109,7 +109,7 @@ export class UserLocationService {
     /** @private */
     this.firstRequestedDeferred_ = new Deferred();
 
-    const win = ampdoc.getWin();
+    const {win} = ampdoc;
     /** @private @const */
     this.win_ = win;
 
@@ -219,23 +219,24 @@ export class UserLocationService {
    * @private
    */
   getOverride_() {
-    const {localDev, userLocationOverride} = getMode(this.win_);
     if (
-      !userLocationOverride ||
-      !(isCanary(this.win_) || localDev) ||
-      !/^[\w-,]+$/.test(userLocationOverride)
+      !getMode(this.win_).userLocationOverride ||
+      !(isCanary(this.win_) || getMode(this.win_).localDev) ||
+      !/^[\w-,]+$/.test(getMode(this.win_).userLocationOverride)
     ) {
       return null;
     }
 
-    if (includes(userLocationOverride, LOCATION_SEPARATOR)) {
-      const split = userLocationOverride.split(LOCATION_SEPARATOR);
+    if (includes(getMode(this.win_).userLocationOverride, LOCATION_SEPARATOR)) {
+      const split = getMode(this.win_).userLocationOverride.split(
+        LOCATION_SEPARATOR
+      );
       const lat = Number(split[0]);
       const lon = Number(split[1]);
       return new UserLocation(UserLocationSource.DEBUG, lat, lon);
     }
 
-    return userLocationOverride;
+    return getMode(this.win_).userLocationOverride;
   }
 
   /**
@@ -256,6 +257,36 @@ export class UserLocationService {
     // NOTE: This may be reached with a `null` cachedLocation if the user
     // removes geolocation permission after allowing it.
     return Promise.resolve(this.cachedLocation_); // TODO(cvializ): add fallback here, when present
+  }
+
+  /**
+   * @param {string} expr
+   * @param {string} type
+   * @param {boolean=} poll
+   */
+  getReplacementLocation(expr, type, poll = false) {
+    return this.getLocation(poll).then(position => {
+      if (type === 'SOURCE') {
+        return position['source'];
+      }
+      if (type === 'LAT') {
+        return position['lat'];
+      }
+      if (type === 'LON') {
+        return position['lon'];
+      }
+      userAssert(
+        type === '' || typeof type === 'undefined',
+        'The value passed to %s is not valid: %s',
+        expr,
+        type
+      );
+
+      if (position['source'] !== 'geolocation') {
+        return '';
+      }
+      return `${position['lat']},${position['lon']}`;
+    });
   }
 
   /**

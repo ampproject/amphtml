@@ -57,7 +57,7 @@ describes.sandboxed('user-location-service', {}, () => {
       },
     };
 
-    FakeAmpdoc.prototype.getWin = sandbox.stub().returns(win);
+    FakeAmpdoc.prototype.win = win;
     FakeViewerService.prototype.isEmbedded = sandbox.stub().returns(false);
     FakePlatformService.prototype.isChrome = sandbox.stub().returns(false);
     FakePermissionStatus.prototype.addEventListener = sandbox.stub();
