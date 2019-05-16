@@ -315,7 +315,7 @@ function serializeResourceTiming(ampdoc, resourceTimingSpec) {
  */
 export function getResourceTiming(ampdoc, spec, startTime) {
   // Only allow collecting timing within 1s
-  if (spec && (Date.now() < (startTime + 60 * 1000))) {
+  if (spec && Date.now() < startTime + 60 * 1000) {
     return serializeResourceTiming(ampdoc, spec);
   } else {
     return Promise.resolve('');

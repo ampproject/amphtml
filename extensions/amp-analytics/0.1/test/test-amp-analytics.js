@@ -118,161 +118,33 @@ describes.realWin(
               },
             });
           },
-        });
-      }};
-    });
-    resetServiceForTesting(win, 'crypto');
-    installCryptoService(win, 'crypto');
-    crypto = getService(win, 'crypto');
-    const link = doc.createElement('link');
-    link.setAttribute('rel', 'canonical');
-    link.setAttribute('href', './test-canonical.html');
-    doc.head.appendChild(link);
-    cidServiceForDocForTesting(ampdoc);
-    viewer = win.services.viewer.obj;
-    ins = instrumentationServiceForDocForTesting(ampdoc);
-    installUserNotificationManagerForTesting(ampdoc);
-
-    const wi = mockWindowInterface(sandbox);
-    requestVerifier = new ImagePixelVerifier(wi);
-    return Services.userNotificationManagerForDoc(doc.head).then(manager => {
-      uidService = manager;
-    });
-  });
-
-
-  function getAnalyticsTag(config = {}, attrs) {
-    config['transport'] = {
-      xhrpost: false,
-      beacon: false,
-    };
-    config = JSON.stringify(config);
-    const el = doc.createElement('amp-analytics');
-    const script = doc.createElement('script');
-    script.textContent = config;
-    script.setAttribute('type', 'application/json');
-    el.appendChild(script);
-    for (const k in attrs) {
-      el.setAttribute(k, attrs[k]);
-    }
-
-    doc.body.appendChild(el);
-
-    el.connectedCallback();
-    const analytics = new AmpAnalytics(el);
-    analytics.createdCallback();
-    analytics.buildCallback();
-    return analytics;
-  }
-
-  function waitForSendRequest(analytics, opt_max) {
-    expect(analytics.element).to.not.have.display('none');
-    return analytics.layoutCallback().then(() => {
-      expect(analytics.element).to.have.display('none');
-      if (requestVerifier.hasRequestSent()) {
-        return;
-      }
-      return new Promise(resolve => {
-        const start = Date.now();
-        const interval = setInterval(() => {
-          const time = Date.now();
-          if (requestVerifier.hasRequestSent() ||
-              (opt_max && (time - start) > opt_max)) {
-            clearInterval(interval);
-            resolve();
-          }
-        }, 4);
+        };
       });
-    });
-  }
+      resetServiceForTesting(win, 'crypto');
+      installCryptoService(win, 'crypto');
+      crypto = getService(win, 'crypto');
+      const link = doc.createElement('link');
+      link.setAttribute('rel', 'canonical');
+      link.setAttribute('href', './test-canonical.html');
+      doc.head.appendChild(link);
+      cidServiceForDocForTesting(ampdoc);
+      viewer = win.services.viewer.obj;
+      ins = instrumentationServiceForDocForTesting(ampdoc);
+      installUserNotificationManagerForTesting(ampdoc);
 
-  function waitForNoSendRequest(analytics) {
-    return waitForSendRequest(analytics, 100).then(() => {
-      expect(requestVerifier.hasRequestSent()).to.be.false;
-    });
-  }
-
-  describe('send hit', () => {
-    it('sends a basic hit', function() {
-      const analytics = getAnalyticsTag(trivialConfig);
-      return waitForSendRequest(analytics).then(() => {
-        requestVerifier.verifyRequest('https://example.com/bar');
+      const wi = mockWindowInterface(sandbox);
+      requestVerifier = new ImagePixelVerifier(wi);
+      return Services.userNotificationManagerForDoc(doc.head).then(manager => {
+        uidService = manager;
       });
     });
 
-    it('does not send a hit when config is not in a script tag', function() {
-      expectAsyncConsoleError(noTriggersError);
-      expectAsyncConsoleError(noRequestStringsError);
-      const config = JSON.stringify(trivialConfig);
-      const el = doc.createElement('amp-analytics');
-      el.textContent = config;
-      const analytics = new AmpAnalytics(el);
-      doc.body.appendChild(el);
-      el.connectedCallback();
-      analytics.createdCallback();
-      analytics.buildCallback();
-      // Initialization has not started.
-      expect(analytics.iniPromise_).to.be.null;
-
-      return waitForNoSendRequest(analytics);
-    });
-
-    it('does start initialization when requested', () => {
-      const config = JSON.stringify(trivialConfig);
-      const el = doc.createElement('amp-analytics');
-      el.setAttribute('trigger', 'immediate');
-      el.textContent = config;
-      const whenFirstVisibleStub = sandbox.stub(
-          viewer,
-          'whenFirstVisible').callsFake(() => new Promise(function() {}));
-      doc.body.appendChild(el);
-      const analytics = new AmpAnalytics(el);
-      el.getAmpDoc = () => ampdoc;
-      analytics.buildCallback();
-      const iniPromise = analytics.iniPromise_;
-      expect(iniPromise).to.be.ok;
-      expect(el).to.have.attribute('hidden');
-      // Viewer.whenFirstVisible is the first blocking call to initialize.
-      expect(whenFirstVisibleStub).to.be.calledOnce;
-
-      // Repeated call, returns pre-created promise.
-      expect(analytics.ensureInitialized_()).to.equal(iniPromise);
-      expect(whenFirstVisibleStub).to.be.calledOnce;
-    });
-
-    it('does not send a hit when multiple child tags exist', function() {
-      expectAsyncConsoleError(oneScriptChildError);
-      expectAsyncConsoleError(noRequestStringsError);
-      expectAsyncConsoleError(noTriggersError);
-      const analytics = getAnalyticsTag(trivialConfig);
-      const script2 = document.createElement('script');
-      script2.setAttribute('type', 'application/json');
-      analytics.element.appendChild(script2);
-      return waitForNoSendRequest(analytics);
-    });
-
-    it('does not send a hit when script tag does not have a type attribute',
-        function() {
-          expectAsyncConsoleError(scriptTypeError);
-          expectAsyncConsoleError(noRequestStringsError);
-          expectAsyncConsoleError(noTriggersError);
-          const el = doc.createElement('amp-analytics');
-          const script = doc.createElement('script');
-          script.textContent = JSON.stringify(trivialConfig);
-          el.appendChild(script);
-          doc.body.appendChild(el);
-          const analytics = new AmpAnalytics(el);
-          el.connectedCallback();
-          analytics.createdCallback();
-          analytics.buildCallback();
-
-          return waitForNoSendRequest(analytics);
-        });
-
-    it('does not send a hit when json config is not valid', function() {
-      expectAsyncConsoleError(configParseError);
-      expectAsyncConsoleError(noRequestStringsError);
-      expectAsyncConsoleError(noTriggersError);
+    function getAnalyticsTag(config = {}, attrs) {
+      config['transport'] = {
+        xhrpost: false,
+        beacon: false,
+      };
+      config = JSON.stringify(config);
       const el = doc.createElement('amp-analytics');
       const script = doc.createElement('script');
       script.textContent = config;
@@ -353,6 +225,7 @@ describes.realWin(
         const whenFirstVisibleStub = sandbox
           .stub(viewer, 'whenFirstVisible')
           .callsFake(() => new Promise(function() {}));
+        doc.body.appendChild(el);
         const analytics = new AmpAnalytics(el);
         el.getAmpDoc = () => ampdoc;
         analytics.buildCallback();

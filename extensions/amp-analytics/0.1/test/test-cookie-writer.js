@@ -24,34 +24,18 @@ import {stubService} from '../../../../testing/test-helper';
 
 const TAG = '[amp-analytics/cookie-writer]';
 
-describes.realWin('amp-analytics.cookie-writer', {
-  amp: true,
-  runtimeOn: true,
-}, env => {
-
-  let sandbox;
-  let win;
-  let doc;
-  let setCookieSpy;
-  let element;
-
-  beforeEach(() => {
-    sandbox = env.sandbox;
-    setCookieSpy = sandbox.spy();
-    win = env.win;
-    doc = win.document;
-    sandbox.stub(cookie, 'setCookie').callsFake(
-        (win, name, value) => {
-          setCookieSpy(name, value);
-        });
-    element = doc.createElement('div');
-    doc.body.appendChild(element);
-    installVariableServiceForTesting(doc);
-    installLinkerReaderService(win);
-  });
-
-  describe('write with condition', () => {
-    let expandAndWriteSpy;
+describes.realWin(
+  'amp-analytics.cookie-writer',
+  {
+    amp: true,
+    runtimeOn: true,
+  },
+  env => {
+    let sandbox;
+    let win;
+    let doc;
+    let setCookieSpy;
+    let element;
 
     beforeEach(() => {
       sandbox = env.sandbox;
@@ -63,7 +47,7 @@ describes.realWin('amp-analytics.cookie-writer', {
       });
       element = doc.createElement('div');
       doc.body.appendChild(element);
-      installVariableService(win);
+      installVariableServiceForTesting(doc);
       installLinkerReaderService(win);
     });
 
@@ -117,17 +101,17 @@ describes.realWin('amp-analytics.cookie-writer', {
               'value': 'QUERY_PARAM(test)',
             },
           },
-        },
-      });
-      const mockWin = {
-        location: 'https://www-example-com.cdn.ampproject.org',
-      };
-      installLinkerReaderService(mockWin);
-      installVariableServiceForTesting(doc);
-      const cookieWriter = new CookieWriter(mockWin, element, config);
-      expandAndWriteSpy = sandbox.spy(cookieWriter, 'expandAndWrite_');
-      return cookieWriter.write().then(() => {
-        expect(expandAndWriteSpy).to.not.be.called;
+        });
+        const mockWin = {
+          location: 'https://www-example-com.cdn.ampproject.org',
+        };
+        installLinkerReaderService(mockWin);
+        installVariableServiceForTesting(doc);
+        const cookieWriter = new CookieWriter(mockWin, element, config);
+        expandAndWriteSpy = sandbox.spy(cookieWriter, 'expandAndWrite_');
+        return cookieWriter.write().then(() => {
+          expect(expandAndWriteSpy).to.not.be.called;
+        });
       });
 
       it('Resolve when in inabox ad', () => {
@@ -273,7 +257,6 @@ describes.fakeWin('amp-analytics.cookie-writer value', {amp: true}, env => {
   let win;
   let clock;
   let doc;
-
   beforeEach(() => {
     win = env.win;
     doc = env.ampdoc;

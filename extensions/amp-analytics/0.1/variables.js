@@ -149,7 +149,6 @@ export class VariableService {
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
-
     /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
@@ -303,8 +302,11 @@ export function getNameArgs(key) {
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  */
 export function installVariableServiceForTesting(ampdoc) {
-  registerServiceBuilderForDoc(ampdoc, 'amp-analytics-variables',
-      VariableService);
+  registerServiceBuilderForDoc(
+    ampdoc,
+    'amp-analytics-variables',
+    VariableService
+  );
 }
 
 /**

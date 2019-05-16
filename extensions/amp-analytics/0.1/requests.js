@@ -123,7 +123,10 @@ export class RequestHandler {
     this.lastTrigger_ = trigger;
     const bindings = this.variableService_.getMacros();
     bindings['RESOURCE_TIMING'] = getResourceTiming(
-        this.ampdoc_, trigger['resourceTimingSpec'], this.startTime_);
+      this.ampdoc_,
+      trigger['resourceTimingSpec'],
+      this.startTime_
+    );
     // TODO: (@zhouyx) Move to variable service once that becomes
     // a doc level services
     bindings['CONSENT_STATE'] = getConsentStateStr(this.element_);
@@ -335,8 +338,13 @@ export class RequestHandler {
  * @return {Promise<string>}
  */
 export function expandPostMessage(
-  ampdoc, msg, configParams, trigger, expansionOption, element)
-{
+  ampdoc,
+  msg,
+  configParams,
+  trigger,
+  expansionOption,
+  element
+) {
   const variableService = variableServiceForDoc(ampdoc);
   const urlReplacementService = Services.urlReplacementsForDoc(element);
 
