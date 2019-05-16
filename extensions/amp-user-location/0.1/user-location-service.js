@@ -52,8 +52,11 @@ export class UserLocation {
  */
 export let UserLocationConfigDef;
 
-/** @enum {string} */
-const PermissionStatus = {
+/**
+ * @enum {string}
+ * @private visible for testing
+ */
+export const PermissionStatus = {
   GRANTED: 'granted',
   DENIED: 'denied',
   PROMPT: 'prompt',
@@ -204,6 +207,7 @@ export class UserLocationService {
    */
   purge() {
     this.cachedLocation_ = new UserLocation(UserLocationSource.UNAVAILABLE);
+    this.firstRequestedDeferred_ = null; // After purge, do not allow polling
     this.requestedObservable_ = this.createRequestedObservable_();
   }
 
@@ -237,15 +241,15 @@ export class UserLocationService {
   /**
    * Called to retrieve the user location after the user has requested it.
    * This will wait for the location to become available if necessary.
-   * @param {boolean=} opt_poll
+   * @param {boolean=} poll
    * @return {!Promise<!UserLocation>}
    */
-  getLocation(opt_poll) {
+  getLocation(poll = false) {
     if (!this.geolocationSupported_) {
       return Promise.resolve(new UserLocation(UserLocationSource.UNSUPPORTED));
     }
 
-    if (opt_poll && this.firstRequestedDeferred_) {
+    if (poll && this.firstRequestedDeferred_) {
       return this.firstRequestedDeferred_.promise;
     }
 

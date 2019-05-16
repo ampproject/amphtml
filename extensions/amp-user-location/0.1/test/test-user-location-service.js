@@ -15,12 +15,13 @@
  */
 
 import * as mode from '../../../../src/mode';
-import {PositionError} from '../position-error';
-import {Services} from '../../../../src/services';
 import {
+  PermissionStatus,
   UserLocationService,
   UserLocationSource,
 } from '../user-location-service';
+import {PositionError} from '../position-error';
+import {Services} from '../../../../src/services';
 
 describes.sandboxed('user-location-service', {}, () => {
   let win;
@@ -31,6 +32,7 @@ describes.sandboxed('user-location-service', {}, () => {
   class FakeAmpdoc {}
   class FakeViewerService {}
   class FakePlatformService {}
+  class FakePermissionStatus {}
 
   function getFakePosition(lat, lon) {
     return {coords: {latitude: lat, longitude: lon}};
@@ -46,11 +48,19 @@ describes.sandboxed('user-location-service', {}, () => {
   }
 
   beforeEach(() => {
-    win = {navigator: {geolocation: {getCurrentPosition: sandbox.stub()}}};
+    win = {
+      navigator: {
+        geolocation: {getCurrentPosition: sandbox.stub()},
+        permissions: {
+          query: sandbox.stub().resolves(new FakePermissionStatus()),
+        },
+      },
+    };
 
     FakeAmpdoc.prototype.getWin = sandbox.stub().returns(win);
     FakeViewerService.prototype.isEmbedded = sandbox.stub().returns(false);
     FakePlatformService.prototype.isChrome = sandbox.stub().returns(false);
+    FakePermissionStatus.prototype.addEventListener = sandbox.stub();
 
     platformService = new FakePlatformService();
     viewerService = new FakeViewerService();
@@ -247,6 +257,27 @@ describes.sandboxed('user-location-service', {}, () => {
         });
     });
 
+    it(
+      'should poll and return results if called before ' +
+        'the user approves geolocation',
+      () => {
+        win.navigator.geolocation.getCurrentPosition.callsArgWith(
+          0,
+          getFakePosition(10, -10)
+        );
+
+        const service = new UserLocationService(new FakeAmpdoc());
+        const results = service
+          .getLocation(/*opt_poll*/ true)
+          .then(position => {
+            expect(position).to.include({lat: 10, lon: -10});
+          });
+
+        service.requestLocation({});
+        return results;
+      }
+    );
+
     it('should return unavailable after the user denies geolocation', () => {
       win.navigator.geolocation.getCurrentPosition.callsArgWith(
         1,
@@ -266,6 +297,61 @@ describes.sandboxed('user-location-service', {}, () => {
         .then(result => {
           expect(result).to.include({source: UserLocationSource.UNAVAILABLE});
         });
+    });
+
+    it('should return unavailable after the user removes approval', () => {
+      win.navigator.geolocation.getCurrentPosition.callsArgWith(
+        0,
+        getFakePosition(10, -10)
+      );
+
+      // Save a reference to the permission change listener
+      // so we can manually trigger it.
+      const fakeStatus = new FakePermissionStatus();
+      let listener;
+      fakeStatus.addEventListener.callsFake((unusedName, cb) => {
+        listener = cb;
+      });
+      win.navigator.permissions.query.resolves(fakeStatus);
+
+      const service = new UserLocationService(new FakeAmpdoc());
+      return service
+        .requestLocation({})
+        .then(location => {
+          expect(location).to.include({lat: 10, lon: -10});
+
+          // Set up the event listener to respond as if the user
+          // manually edited their settings to remove location
+          // permission
+          const fakeEvent = {
+            target: {
+              state: PermissionStatus.DENIED,
+            },
+          };
+          // This should cause purge to be called.
+          listener(fakeEvent);
+
+          return service.getLocation({});
+        })
+        .then(result => {
+          expect(result).to.include({source: UserLocationSource.UNAVAILABLE});
+        });
+    });
+
+    it('should return unavailable if the platform does not support', () => {
+      platformService.isChrome.returns(true);
+      viewerService.isEmbedded.returns(true);
+      win.navigator.geolocation.getCurrentPosition.callsArgWith(
+        0,
+        getFakePosition(10, -10)
+      );
+
+      const service = new UserLocationService(new FakeAmpdoc());
+      return service.getLocation({}).then(location => {
+        expect(location).to.include({
+          source: UserLocationSource.UNSUPPORTED,
+        });
+      });
     });
   });
 });
