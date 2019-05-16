@@ -95,18 +95,25 @@ describes.realWin('LiveStoryManager', {amp: true}, env => {
     });
   });
 
-  it('should append new page to client from server in update', () => {
+  it('should append new page from server to client in update', () => {
     const currentPages = createPages(ampStory.element, 2, ['cover', 'page-1']);
+    const pagesImplPromises = Array.prototype.map.call(currentPages, pageEl =>
+      pageEl.getImpl()
+    );
+    Promise.all(pagesImplPromises).then(pages => {
+      ampStory.pages_ = pages;
+    });
     expect(ampStory.element.children.length).to.equal(2);
 
     const fromServerStoryEl = win.document.createElement('amp-story');
     const fromServerStory = new AmpStory(fromServerStoryEl);
-    const fromServerPages = createPages(fromServerStory.element, 2, [
+    const fromServerPages = createPages(fromServerStory.element, 3, [
       'cover',
       'page-1',
-      'page-3',
+      'page-2',
     ]);
     const fromServerLastPage = fromServerPages[fromServerPages.length - 1];
+    // This would normally get added by AmpLiveList.
     fromServerLastPage.classList.add('amp-live-list-item-new');
 
     liveStoryManager.build();
@@ -117,17 +124,22 @@ describes.realWin('LiveStoryManager', {amp: true}, env => {
 
   it('should append new page at the end', () => {
     const currentPages = createPages(ampStory.element, 2, ['cover', 'page-1']);
+    const pagesImplPromises = Array.prototype.map.call(currentPages, pageEl =>
+      pageEl.getImpl()
+    );
+    Promise.all(pagesImplPromises).then(pages => {
+      ampStory.pages_ = pages;
+    });
     expect(ampStory.element.children.length).to.equal(2);
 
     const fromServerStoryEl = win.document.createElement('amp-story');
     const fromServerStory = new AmpStory(fromServerStoryEl);
-    const fromServerPages = createPages(fromServerStory.element, 2, [
+    const fromServerPages = createPages(fromServerStory.element, 3, [
       'cover',
-      'page-3',
+      'page-2',
       'page-1',
     ]);
-    const fromServerNewPage =
-      fromServerPages[fromServerPages.getIndexOf('page-3')];
+    const fromServerNewPage = fromServerPages[fromServerPages.length - 1];
     // This would normally get added by AmpLiveList.
     fromServerNewPage.classList.add('amp-live-list-item-new');
 
