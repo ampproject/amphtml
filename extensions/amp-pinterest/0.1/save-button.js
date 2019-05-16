@@ -21,7 +21,8 @@ import {openWindowDialog} from '../../../src/dom';
 import {toWin} from '../../../src/types';
 
 // Popup options
-const POP = 'status=no,resizable=yes,scrollbars=yes,' +
+const POP =
+  'status=no,resizable=yes,scrollbars=yes,' +
   'personalbar=no,directories=no,location=no,toolbar=no,' +
   'menubar=no,width=900,height=500,left=0,top=0';
 
@@ -39,25 +40,31 @@ const POP = 'status=no,resizable=yes,scrollbars=yes,' +
  * @attr data-tall:  should the button be tall  (true if set)
  */
 export class SaveButton {
-
   /** @param {!Element} rootElement */
   constructor(rootElement) {
-    userAssert(rootElement.getAttribute('data-url'),
-        'The data-url attribute is required for Save buttons');
-    userAssert(rootElement.getAttribute('data-media'),
-        'The data-media attribute is required for Save buttons');
-    userAssert(rootElement.getAttribute('data-description'),
-        'The data-description attribute is required for Save buttons');
+    userAssert(
+      rootElement.getAttribute('data-url'),
+      'The data-url attribute is required for Save buttons'
+    );
+    userAssert(
+      rootElement.getAttribute('data-media'),
+      'The data-media attribute is required for Save buttons'
+    );
+    userAssert(
+      rootElement.getAttribute('data-description'),
+      'The data-description attribute is required for Save buttons'
+    );
     this.element = rootElement;
     this.xhr = Services.xhrFor(toWin(rootElement.ownerDocument.defaultView));
     this.color = rootElement.getAttribute('data-color');
     this.count = rootElement.getAttribute('data-count');
     this.lang = rootElement.getAttribute('data-lang');
-    const hasOneToOneDimensions = rootElement.hasAttribute('height') &&
+    const hasOneToOneDimensions =
+      rootElement.hasAttribute('height') &&
       rootElement.hasAttribute('width') &&
       rootElement.getAttribute('height') === rootElement.getAttribute('width');
-    this.round = rootElement.getAttribute('data-round') ||
-      hasOneToOneDimensions;
+    this.round =
+      rootElement.getAttribute('data-round') || hasOneToOneDimensions;
     this.tall = rootElement.getAttribute('data-tall');
     this.description = rootElement.getAttribute('data-description');
     /** @type {?string} */
@@ -83,10 +90,14 @@ export class SaveButton {
    * @return {Promise}
    */
   fetchCount() {
-    const url = `https://widgets.pinterest.com/v1/urls/count.json?return_jsonp=false&url=${this.url}`;
-    return this.xhr.fetchJson(url, {
-      requireAmpResponseSourceOrigin: false,
-    }).then(res => res.json());
+    const url = `https://widgets.pinterest.com/v1/urls/count.json?return_jsonp=false&url=${
+      this.url
+    }`;
+    return this.xhr
+      .fetchJson(url, {
+        requireAmpResponseSourceOrigin: false,
+      })
+      .then(res => res.json());
   }
 
   /**
@@ -117,10 +128,12 @@ export class SaveButton {
    */
   renderCount(count, heightClass) {
     Util.log('&type=pidget&button_count=1');
-    return Util.make(this.element.ownerDocument, {'span': {
-      class: `-amp-pinterest-bubble-${this.count}${heightClass}`,
-      textContent: this.formatPinCount(count),
-    }});
+    return Util.make(this.element.ownerDocument, {
+      'span': {
+        class: `-amp-pinterest-bubble-${this.count}${heightClass}`,
+        textContent: this.formatPinCount(count),
+      },
+    });
   }
 
   /**
@@ -151,11 +164,13 @@ export class SaveButton {
       }
     }
 
-    const saveButton = Util.make(this.element.ownerDocument, {'a': {
-      class: clazz.join(' '),
-      href: this.href,
-      textContent: this.round ? '' : (this.lang === 'ja' ? '保存' : 'Save'),
-    }});
+    const saveButton = Util.make(this.element.ownerDocument, {
+      'a': {
+        class: clazz.join(' '),
+        href: this.href,
+        textContent: this.round ? '' : this.lang === 'ja' ? '保存' : 'Save',
+      },
+    });
 
     if (countBubble) {
       saveButton.appendChild(countBubble);

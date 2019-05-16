@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 /**
  * The structure that combines position and size for an element. The exact
  * interpretation of position and size depends on the use case.
@@ -32,7 +31,6 @@
  */
 export let LayoutRectDef;
 
-
 /**
  * The structure that represents the margins of an Element.
  *
@@ -44,7 +42,6 @@ export let LayoutRectDef;
  * }}
  */
 export let LayoutMarginsDef;
-
 
 /**
  * The structure that represents a requested change to the margins of an
@@ -61,12 +58,12 @@ export let LayoutMarginsDef;
 export let LayoutMarginsChangeDef;
 
 /**
-* RelativePositions
-*
-* Describes the relative position of an element to another (whether the
-* first is inside the second, on top of the second or on the bottom
-* @enum {string}
-*/
+ * RelativePositions
+ *
+ * Describes the relative position of an element to another (whether the
+ * first is inside the second, on top of the second or on the bottom
+ * @enum {string}
+ */
 export const RelativePositions = {
   INSIDE: 'inside',
   TOP: 'top',
@@ -95,7 +92,6 @@ export function layoutRectLtwh(left, top, width, height) {
   };
 }
 
-
 /**
  * Creates a layout rect based on the DOMRect, e.g. obtained from calling
  * getBoundingClientRect.
@@ -103,8 +99,12 @@ export function layoutRectLtwh(left, top, width, height) {
  * @return {!LayoutRectDef}
  */
 export function layoutRectFromDomRect(rect) {
-  return layoutRectLtwh(Number(rect.left), Number(rect.top),
-      Number(rect.width), Number(rect.height));
+  return layoutRectLtwh(
+    Number(rect.left),
+    Number(rect.top),
+    Number(rect.width),
+    Number(rect.height)
+  );
 }
 
 /**
@@ -114,10 +114,13 @@ export function layoutRectFromDomRect(rect) {
  * @return {boolean}
  */
 export function layoutRectsOverlap(r1, r2) {
-  return (r1.top <= r2.bottom && r2.top <= r1.bottom &&
-      r1.left <= r2.right && r2.left <= r1.right);
+  return (
+    r1.top <= r2.bottom &&
+    r2.top <= r1.bottom &&
+    r1.left <= r2.right &&
+    r2.left <= r1.right
+  );
 }
-
 
 /**
  * Returns the intersection between a, b or null if there is none.
@@ -173,14 +176,18 @@ export function layoutRectsRelativePos(r1, r2) {
  * @return {RelativePositions}
  */
 export function layoutPositionRelativeToScrolledViewport(
-  layoutBox, viewport, scrollPos) {
-  const scrollLayoutBox =
-    layoutRectFromDomRect(/** @type {!ClientRect} */ ({
+  layoutBox,
+  viewport,
+  scrollPos
+) {
+  const scrollLayoutBox = layoutRectFromDomRect(
+    /** @type {!ClientRect} */ ({
       top: scrollPos,
       bottom: scrollPos + viewport.getHeight(),
       left: 0,
       right: viewport.getWidth(),
-    }));
+    })
+  );
   if (layoutRectsOverlap(layoutBox, scrollLayoutBox)) {
     return RelativePositions.INSIDE;
   } else {
@@ -196,10 +203,12 @@ export function layoutPositionRelativeToScrolledViewport(
  * @return {!LayoutRectDef}
  */
 export function expandLayoutRect(rect, dw, dh) {
-  return layoutRectLtwh(rect.left - rect.width * dw,
-      rect.top - rect.height * dh,
-      rect.width * (1 + dw * 2),
-      rect.height * (1 + dh * 2));
+  return layoutRectLtwh(
+    rect.left - rect.width * dw,
+    rect.top - rect.height * dh,
+    rect.width * (1 + dw * 2),
+    rect.height * (1 + dh * 2)
+  );
 }
 
 /**
@@ -210,14 +219,11 @@ export function expandLayoutRect(rect, dw, dh) {
  * @return {!LayoutRectDef}
  */
 export function moveLayoutRect(rect, dx, dy) {
-  if ((dx == 0 && dy == 0) ||
-      (rect.width == 0 && rect.height == 0)) {
+  if ((dx == 0 && dy == 0) || (rect.width == 0 && rect.height == 0)) {
     return rect;
   }
-  return layoutRectLtwh(rect.left + dx, rect.top + dy,
-      rect.width, rect.height);
+  return layoutRectLtwh(rect.left + dx, rect.top + dy, rect.width, rect.height);
 }
-
 
 /**
  * @param {!LayoutMarginsDef} margins
@@ -225,10 +231,12 @@ export function moveLayoutRect(rect, dx, dy) {
  * @return {boolean}
  */
 export function areMarginsChanged(margins, change) {
-  return (change.top !== undefined && change.top != margins.top) ||
-      (change.right !== undefined && change.right != margins.right) ||
-      (change.bottom !== undefined && change.bottom != margins.bottom) ||
-      (change.left !== undefined && change.left != margins.left);
+  return (
+    (change.top !== undefined && change.top != margins.top) ||
+    (change.right !== undefined && change.right != margins.right) ||
+    (change.bottom !== undefined && change.bottom != margins.bottom) ||
+    (change.left !== undefined && change.left != margins.left)
+  );
 }
 
 /**
@@ -237,8 +245,7 @@ export function areMarginsChanged(margins, change) {
  * @return {boolean}
  */
 export function layoutRectSizeEquals(from, to) {
-  return from.width == to.width &&
-      from.height === to.height;
+  return from.width == to.width && from.height === to.height;
 }
 
 /**
@@ -250,8 +257,12 @@ export function layoutRectEquals(r1, r2) {
   if (!r1 || !r2) {
     return false;
   }
-  return r1.left == r2.left && r1.top == r2.top &&
-      r1.width == r2.width && r1.height == r2.height;
+  return (
+    r1.left == r2.left &&
+    r1.top == r2.top &&
+    r1.width == r2.width &&
+    r1.height == r2.height
+  );
 }
 
 /**

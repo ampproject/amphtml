@@ -52,7 +52,7 @@ export function getMode(opt_win) {
   if (win.AMP_MODE) {
     return win.AMP_MODE;
   }
-  return win.AMP_MODE = getMode_(win);
+  return (win.AMP_MODE = getMode_(win));
 }
 
 /**
@@ -72,14 +72,15 @@ function getMode_(win) {
   const IS_MINIFIED = false;
 
   const localDevEnabled = !!AMP_CONFIG.localDev;
-  const runningTests = (!!AMP_CONFIG.test) || (
-    IS_DEV && !!(win.AMP_TEST || win.__karma__));
+  const runningTests =
+    !!AMP_CONFIG.test || (IS_DEV && !!(win.AMP_TEST || win.__karma__));
   const runningTestsOnIe = win.__karma__ && win.__karma__.config.amp.testOnIe;
   const isLocalDev = IS_DEV && (localDevEnabled || runningTests);
   const hashQuery = parseQueryString_(
-      // location.originalHash is set by the viewer when it removes the fragment
-      // from the URL.
-      win.location.originalHash || win.location.hash);
+    // location.originalHash is set by the viewer when it removes the fragment
+    // from the URL.
+    win.location.originalHash || win.location.hash
+  );
   const singlePassType = AMP_CONFIG.spt;
 
   const searchQuery = parseQueryString_(win.location.search);
@@ -144,7 +145,6 @@ function getRtvVersion(win, isLocalDev) {
   return `01${internalRuntimeVersion()}`;
 }
 
-
 /**
  * @param {!Window} win
  * @param {boolean} isLocalDev
@@ -154,7 +154,6 @@ function getRtvVersion(win, isLocalDev) {
 export function getRtvVersionForTesting(win, isLocalDev) {
   return getRtvVersion(win, isLocalDev);
 }
-
 
 /** @visibleForTesting */
 export function resetRtvVersionForTesting() {

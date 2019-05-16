@@ -55,7 +55,6 @@ const schemaTemplate = `
 }
 `;
 
-
 describes.sandboxed('MediaSessionAPI Helper Functions', {}, () => {
   let element;
   let ampdoc;
@@ -66,8 +65,10 @@ describes.sandboxed('MediaSessionAPI Helper Functions', {}, () => {
 
   beforeEach(() => {
     element = {};
-    sandbox.stub(Services, 'urlForDoc')
-        .withArgs(element).returns({isProtocolValid});
+    sandbox
+      .stub(Services, 'urlForDoc')
+      .withArgs(element)
+      .returns({isProtocolValid});
 
     head = document.querySelector('head');
     // Favicon
@@ -96,8 +97,7 @@ describes.sandboxed('MediaSessionAPI Helper Functions', {}, () => {
               'artwork': [],
               'title': '',
             },
-            'setActionHandler': () => {
-            },
+            'setActionHandler': () => {},
           },
         },
         'MediaMetadata': Object,
@@ -112,15 +112,21 @@ describes.sandboxed('MediaSessionAPI Helper Functions', {}, () => {
   });
 
   it('should parse the schema and find the image', () => {
-    expect(parseSchemaImage(ampdoc.win.document)).to.equal('http://example.com/image.png');
+    expect(parseSchemaImage(ampdoc.win.document)).to.equal(
+      'http://example.com/image.png'
+    );
   });
 
   it('should parse the og-image', () => {
-    expect(parseOgImage(ampdoc.win.document)).to.equal('http://example.com/og-image.png');
+    expect(parseOgImage(ampdoc.win.document)).to.equal(
+      'http://example.com/og-image.png'
+    );
   });
 
   it('should parse the favicon', () => {
-    expect(parseFavicon(ampdoc.win.document)).to.equal('http://example.com/favicon.ico');
+    expect(parseFavicon(ampdoc.win.document)).to.equal(
+      'http://example.com/favicon.ico'
+    );
   });
 
   it('should set the media session', () => {
@@ -133,9 +139,7 @@ describes.sandboxed('MediaSessionAPI Helper Functions', {}, () => {
     const fakeMetaData = {
       'artist': 'Some artist',
       'album': 'Some album',
-      'artwork': [
-        'http://example.com/image.png',
-      ],
+      'artwork': ['http://example.com/image.png'],
       'title': 'Some title',
     };
     setMediaSession(element, ampdoc.win, fakeMetaData);

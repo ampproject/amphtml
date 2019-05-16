@@ -20,7 +20,6 @@
  * @interface
  */
 export class ViewportBindingDef {
-
   /**
    * Called before a first AMP element is added to resources. The final
    * preparations must be completed here. Called in the mutate context.

@@ -16,12 +16,13 @@
 
 export const NEWRELIC_CONFIG = /** @type {!JsonObject} */ ({
   'requests': {
-    'pageview': 'https://${beacon}/amp?appId=${appId}' +
+    'pageview':
+      'https://${beacon}/amp?appId=${appId}' +
       '&licenseKey=${licenseKey}' +
       '&ampUrl=${ampdocUrl}' +
       '&canonicalUrl=${canonicalUrl}' +
       '&timeToDomContentLoadedEventEnd=' +
-        '${navTiming(domContentLoadedEventEnd)}' +
+      '${navTiming(domContentLoadedEventEnd)}' +
       '&timeToDomInteractive=${navTiming(domInteractive)}' +
       '&timeToDomComplete=${navTiming(domComplete)}' +
       '&timeToDomLoading=${navTiming(domLoading)}' +

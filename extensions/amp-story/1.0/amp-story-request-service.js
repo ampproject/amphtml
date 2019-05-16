@@ -58,16 +58,19 @@ export class AmpStoryRequestService {
    * @private
    */
   loadBookendConfigImpl_() {
-    const bookendEl = childElementByTag(this.storyElement_,
-        'amp-story-bookend');
+    const bookendEl = childElementByTag(
+      this.storyElement_,
+      'amp-story-bookend'
+    );
     if (!bookendEl) {
       return Promise.resolve(null);
     }
 
     if (bookendEl.hasAttribute(BOOKEND_CONFIG_ATTRIBUTE_NAME)) {
       const rawUrl = bookendEl.getAttribute(BOOKEND_CONFIG_ATTRIBUTE_NAME);
-      const credentials =
-        bookendEl.getAttribute(BOOKEND_CREDENTIALS_ATTRIBUTE_NAME);
+      const credentials = bookendEl.getAttribute(
+        BOOKEND_CREDENTIALS_ATTRIBUTE_NAME
+      );
       return this.loadJsonFromAttribute_(rawUrl, credentials);
     }
 
@@ -100,12 +103,12 @@ export class AmpStoryRequestService {
     }
 
     return Services.urlReplacementsForDoc(this.storyElement_)
-        .expandUrlAsync(user().assertString(rawUrl))
-        .then(url => this.xhr_.fetchJson(url, opts))
-        .then(response => {
-          userAssert(response.ok, 'Invalid HTTP response');
-          return response.json();
-        });
+      .expandUrlAsync(user().assertString(rawUrl))
+      .then(url => this.xhr_.fetchJson(url, opts))
+      .then(response => {
+        userAssert(response.ok, 'Invalid HTTP response');
+        return response.json();
+      });
   }
 }
 

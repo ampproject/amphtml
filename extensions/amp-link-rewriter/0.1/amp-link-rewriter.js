@@ -20,7 +20,6 @@ import {Priority} from '../../../src/service/navigation';
 import {Services} from '../../../src/services';
 
 export class AmpLinkRewriter extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -45,10 +44,11 @@ export class AmpLinkRewriter extends AMP.BaseElement {
      * We had to get referrerUrl here because when we use expandUrlSync()
      * inside LinkRewriter it doesn't retrieve the referrerUrl
      */
-    return this.ampDoc_.whenBodyAvailable()
-        .then(() => viewer.getReferrerUrl())
-        .then(referrer => this.referrer_ = referrer)
-        .then(this.letsRockIt_.bind(this));
+    return this.ampDoc_
+      .whenBodyAvailable()
+      .then(() => viewer.getReferrerUrl())
+      .then(referrer => (this.referrer_ = referrer))
+      .then(this.letsRockIt_.bind(this));
   }
 
   /**
@@ -56,9 +56,10 @@ export class AmpLinkRewriter extends AMP.BaseElement {
    */
   letsRockIt_() {
     this.rewriter_ = new LinkRewriter(
-        this.referrer_,
-        this.element,
-        this.ampDoc_);
+      this.referrer_,
+      this.element,
+      this.ampDoc_
+    );
 
     this.attachClickEvent_();
   }

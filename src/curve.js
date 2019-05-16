@@ -18,14 +18,12 @@
 // the type system during compile time.
 import './time';
 
-
 /**
  * A CurveDef is a function that returns a normtime value (0 to 1) for another
  * normtime value.
  * @typedef {function(./time.normtimeDef): ./time.normtimeDef}
  */
 export let CurveDef;
-
 
 /**
  * Returns a cubic bezier curve.
@@ -40,13 +38,11 @@ export function bezierCurve(x1, y1, x2, y2) {
   return bezier.solveYValueFromXValue.bind(bezier);
 }
 
-
 /**
  * Thanks to
  * https://closure-library.googlecode.com/git-history/docs/local_closure_goog_math_bezier.js.source.html
  */
 class Bezier {
-
   /**
    * @param {number} x0 X coordinate of the start point.
    * @param {number} y0 Y coordinate of the start point.
@@ -239,7 +235,6 @@ class Bezier {
   }
 }
 
-
 /**
  * A collection of common curves.
  * See https://developer.mozilla.org/en-US/docs/Web/CSS/timing-function
@@ -251,7 +246,9 @@ export const Curves = {
    * @param {number} n
    * @return {number}
    */
-  LINEAR(n) {return n;},
+  LINEAR(n) {
+    return n;
+  },
 
   /**
    * ease
@@ -274,7 +271,6 @@ export const Curves = {
   EASE_IN_OUT: bezierCurve(0.42, 0.0, 0.58, 1.0),
 };
 
-
 /**
  * @const {!Object<string, !CurveDef>}
  */
@@ -285,7 +281,6 @@ const NAME_MAP = {
   'ease-out': Curves.EASE_OUT,
   'ease-in-out': Curves.EASE_IN_OUT,
 };
-
 
 /**
  * If the argument is a string, this methods matches an existing curve by name.

@@ -29,7 +29,6 @@ const CHECKSUM_OFFSET_MAX_MIN = 1;
 const VALID_VERSION = 1;
 const TAG = 'amp-analytics/linker';
 
-
 /**
  * Creates the linker string, in the format of
  * <version>*<checksum>*<serializedIds>
@@ -133,7 +132,6 @@ function getCheckSum(serializedIds, opt_offsetMin) {
   return crc.toString(36);
 }
 
-
 /**
  * Generates a semi-unique value for page visitor.
  * @return {string}
@@ -143,10 +141,10 @@ function getFingerprint() {
   const timezone = date.getTimezoneOffset();
 
   const language = WindowInterface.getUserLanguage(window);
-  return [WindowInterface.getUserAgent(window), timezone, language]
-      .join(DELIMITER);
+  return [WindowInterface.getUserAgent(window), timezone, language].join(
+    DELIMITER
+  );
 }
-
 
 /**
  * Encode all values & join them together
@@ -158,15 +156,15 @@ function serialize(pairs) {
     return '';
   }
   return Object.keys(pairs)
-      .filter(key => {
-        const valid = KEY_VALIDATOR.test(key);
-        if (!valid) {
-          user().error(TAG, 'Invalid linker key: ' + key);
-        }
-        return valid;
-      })
-      .map(key => key + DELIMITER + encode(pairs[key]))
-      .join(DELIMITER);
+    .filter(key => {
+      const valid = KEY_VALIDATOR.test(key);
+      if (!valid) {
+        user().error(TAG, 'Invalid linker key: ' + key);
+      }
+      return valid;
+    })
+    .map(key => key + DELIMITER + encode(pairs[key]))
+    .join(DELIMITER);
 }
 
 /**
@@ -198,7 +196,6 @@ function getMinSinceEpoch() {
   // Timestamp in minutes, floored.
   return Math.floor(Date.now() / 60000);
 }
-
 
 /**
  * Function that encodesURIComponent but also tilde, since we are using it as

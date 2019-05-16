@@ -50,7 +50,7 @@ export function htmlFor(nodeOrDoc) {
  */
 function html(strings) {
   devAssert(strings.length === 1, 'Improper html template tag usage.');
-  container./*OK*/innerHTML = strings[0];
+  container./*OK*/ innerHTML = strings[0];
 
   const el = container.firstElementChild;
   devAssert(el, 'No elements in template');

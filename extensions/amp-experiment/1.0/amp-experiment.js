@@ -15,10 +15,7 @@
  */
 
 import {Layout} from '../../../src/layout';
-import {
-  Variants,
-  allocateVariant,
-} from './variant';
+import {Variants, allocateVariant} from './variant';
 import {devAssert, user, userAssert} from '../../../src/log';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {
@@ -32,7 +29,6 @@ import {parseMutation} from './mutation-parser';
 const TAG = 'amp-experiment';
 
 export class AmpExperiment extends AMP.BaseElement {
-
   /** @override */
   isLayoutSupported(layout) {
     return layout == Layout.NODISPLAY || layout == Layout.CONTAINER;
@@ -40,7 +36,6 @@ export class AmpExperiment extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-
     const buildCallbackPromises = [
       getServicePromiseForDoc(this.getAmpDoc(), 'variant'),
       this.isExperimentEnabled_(),
@@ -56,9 +51,7 @@ export class AmpExperiment extends AMP.BaseElement {
         // Ensure downstream consumers don't wait for the promise forever.
         variantsService.init(Promise.resolve({}));
 
-        return Promise.reject(
-            'Experiment amp-experiment-1.0 is not enabled.'
-        );
+        return Promise.reject('Experiment amp-experiment-1.0 is not enabled.');
       }
 
       try {
@@ -66,16 +59,18 @@ export class AmpExperiment extends AMP.BaseElement {
         const results = Object.create(null);
         const variants = Object.keys(config).map(experimentName => {
           return allocateVariant(
-              this.getAmpDoc(), experimentName, config[experimentName])
-              .then(variantName => {
-                results[experimentName] = variantName;
-              });
+            this.getAmpDoc(),
+            experimentName,
+            config[experimentName]
+          ).then(variantName => {
+            results[experimentName] = variantName;
+          });
         });
 
         /** @private @const {!Promise<!Object<string, ?string>>} */
         const experimentVariants = Promise.all(variants)
-            .then(() => results)
-            .then(this.applyExperimentVariants_.bind(this, config));
+          .then(() => results)
+          .then(this.applyExperimentVariants_.bind(this, config));
 
         variantsService.init(experimentVariants);
       } catch (e) {
@@ -106,14 +101,16 @@ export class AmpExperiment extends AMP.BaseElement {
   getConfig_() {
     const {children} = this.element;
     userAssert(
-        children.length == 1 && children[0].tagName == 'SCRIPT'
-            && children[0].getAttribute('type').toUpperCase()
-                == 'APPLICATION/JSON',
-        '<amp-experiment> should contain exactly one ' +
-        '<script type="application/json"> child.');
+      children.length == 1 &&
+        children[0].tagName == 'SCRIPT' &&
+        children[0].getAttribute('type').toUpperCase() == 'APPLICATION/JSON',
+      '<amp-experiment> should contain exactly one ' +
+        '<script type="application/json"> child.'
+    );
 
-    return /** @type {!JsonObject} */ (
-      devAssert(parseJson(children[0].textContent)));
+    return /** @type {!JsonObject} */ (devAssert(
+      parseJson(children[0].textContent)
+    ));
   }
 
   /**
@@ -137,7 +134,6 @@ export class AmpExperiment extends AMP.BaseElement {
    * @private
    */
   applyExperimentVariants_(config, experimentToVariant) {
-
     const appliedExperimentToVariantPromises = [];
 
     for (const experimentName in experimentToVariant) {
@@ -145,13 +141,14 @@ export class AmpExperiment extends AMP.BaseElement {
       if (variantName) {
         const variantObject = config[experimentName]['variants'][variantName];
         appliedExperimentToVariantPromises.push(
-            this.applyMutations_(experimentName, variantObject)
+          this.applyMutations_(experimentName, variantObject)
         );
       }
     }
 
-    return Promise.all(appliedExperimentToVariantPromises)
-        .then(() => experimentToVariant);
+    return Promise.all(appliedExperimentToVariantPromises).then(
+      () => experimentToVariant
+    );
   }
 
   /**
@@ -165,16 +162,13 @@ export class AmpExperiment extends AMP.BaseElement {
   applyMutations_(experimentName, variantObject) {
     const doc = this.getAmpDoc();
     return doc.whenBodyAvailable().then(() => {
-
       // Parse / Validate all of our mutations
-      const mutationOperations = variantObject['mutations'].map(
-          mutation => parseMutation(mutation, this.win.document)
+      const mutationOperations = variantObject['mutations'].map(mutation =>
+        parseMutation(mutation, this.win.document)
       );
 
       // Apply our mutations
-      mutationOperations.forEach(
-          mutationOperation => mutationOperation()
-      );
+      mutationOperations.forEach(mutationOperation => mutationOperation());
     });
   }
 
@@ -184,7 +178,6 @@ export class AmpExperiment extends AMP.BaseElement {
    * @return {!Promise<boolean>}
    */
   isExperimentEnabled_() {
-
     // Check if we are enabled by AMP.toggleExperiment
     if (isExperimentOn(this.win, 'amp-experiment-1.0')) {
       return Promise.resolve(true);
@@ -193,13 +186,12 @@ export class AmpExperiment extends AMP.BaseElement {
     // Check if we are enabled by an origin trial
     installOriginExperimentsForDoc(this.getAmpDoc());
     return originExperimentsForDoc(this.element)
-        .getExperiments()
-        .then(trials => {
-          return trials && trials.includes('amp-experiment-1.0');
-        });
+      .getExperiments()
+      .then(trials => {
+        return trials && trials.includes('amp-experiment-1.0');
+      });
   }
 }
-
 
 AMP.extension(TAG, '1.0', AMP => {
   AMP.registerServiceForDoc('variant', Variants);

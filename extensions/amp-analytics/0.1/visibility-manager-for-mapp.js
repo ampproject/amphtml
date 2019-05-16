@@ -52,7 +52,8 @@ export class VisibilityManagerForMApp extends VisibilityManager {
 
     // Initate the listener
     this.visibilityInterface_.onVisibilityChange(
-        this.onVisibilityChangeHandler_.bind(this));
+      this.onVisibilityChangeHandler_.bind(this)
+    );
   }
 
   /** @override */
@@ -81,23 +82,27 @@ export class VisibilityManagerForMApp extends VisibilityManager {
     return this.backgroundedAtStart_;
   }
 
-
   /** @override */
   getRootMinOpacity() {
     // Copied the implementation from VisibilityManagerForDoc,
     // doesn't count iframe opacity
     const root = this.ampdoc.getRootNode();
     const rootElement = dev().assertElement(
-        root.documentElement || root.body || root);
+      root.documentElement || root.body || root
+    );
     return getMinOpacity(rootElement);
   }
 
   /** @override */
   listenElement() {
     // #listenElement not supported in mApp
-    devAssert(false, '%s: element level visibility not supported, ' +
+    devAssert(
+      false,
+      '%s: element level visibility not supported, ' +
         'getElementIntersectionRect should not be called in ' +
-        'VisibilityManager for mApp', TAG);
+        'VisibilityManager for mApp',
+      TAG
+    );
     return () => {};
   }
 
@@ -107,8 +112,9 @@ export class VisibilityManagerForMApp extends VisibilityManager {
   getRootLayoutBox() {
     // By the time `#getRootLayoutBox` is called, it is guaranteed that
     // onVisibilityChangeHandler has been called at least once
-    return /** @type {!../../../src/layout-rect.LayoutRectDef} */ (
-      devAssert(this.intersectionRect_));
+    return /** @type {!../../../src/layout-rect.LayoutRectDef} */ (devAssert(
+      this.intersectionRect_
+    ));
   }
 
   /**
@@ -132,9 +138,13 @@ export class VisibilityManagerForMApp extends VisibilityManager {
    * @override
    */
   observe() {
-    devAssert(false, '%s: element level visibility not supported, ' +
+    devAssert(
+      false,
+      '%s: element level visibility not supported, ' +
         'getElementIntersectionRect should not be called in ' +
-        'VisibilityManager for mApp', TAG);
+        'VisibilityManager for mApp',
+      TAG
+    );
     return () => {};
   }
 
@@ -142,9 +152,13 @@ export class VisibilityManagerForMApp extends VisibilityManager {
    * @override
    */
   getElementVisibility() {
-    devAssert(false, '%s: element level visibility not supported, ' +
+    devAssert(
+      false,
+      '%s: element level visibility not supported, ' +
         'getElementIntersectionRect should not be called in ' +
-        'VisibilityManager for mApp', TAG);
+        'VisibilityManager for mApp',
+      TAG
+    );
     return 0;
   }
 
@@ -153,9 +167,12 @@ export class VisibilityManagerForMApp extends VisibilityManager {
    * @return {?JsonObject}
    */
   getElementIntersectionRect() {
-    dev().error(TAG, 'element level visibility not supported, ' +
+    dev().error(
+      TAG,
+      'element level visibility not supported, ' +
         'getElementIntersectionRect should not be called in ' +
-        'VisibilityManager for mApp');
+        'VisibilityManager for mApp'
+    );
     return dict({});
   }
 }

@@ -17,13 +17,11 @@
 import {Doc} from '../../../third_party/subscriptions-project/config';
 import {dev} from '../../../src/log';
 
-
 /**
  * Adopts config document to ampdoc.
  * @implements {Doc}
  */
 export class DocImpl {
-
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
@@ -68,7 +66,6 @@ export class DocImpl {
     return this.ampdoc_.whenReady();
   }
 }
-
 
 /** @package Visible for testing only. */
 export function getDocClassForTesting() {

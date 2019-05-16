@@ -15,10 +15,7 @@
  */
 import {getChildJsonConfig} from '../../../src/json';
 import {hasOwn} from '../../../src/utils/object';
-import {
-  user,
-  userAssert,
-} from '../../../src/log';
+import {user, userAssert} from '../../../src/log';
 
 /**
  * @typedef {{output: string, section:Array, attribute:Object, vars:Object}}
@@ -30,18 +27,19 @@ let ConfigOptsDef;
  * @return {!ConfigOptsDef}
  */
 export function getConfigOpts(element) {
-
   const config = getConfigJson(element);
-  userAssert(config['output'],
-      'amp-link-rewriter: output config property is required');
+  userAssert(
+    config['output'],
+    'amp-link-rewriter: output config property is required'
+  );
 
   return {
     output: config['output'].toString(),
     section: hasOwn(config, 'section') ? config['section'] : [],
 
-    attribute: hasOwn(config, 'attribute') ?
-      parseAttribute(config['attribute']) :
-      {},
+    attribute: hasOwn(config, 'attribute')
+      ? parseAttribute(config['attribute'])
+      : {},
 
     vars: hasOwn(config, 'vars') ? config['vars'] : {},
   };

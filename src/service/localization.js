@@ -20,19 +20,16 @@
 import {LocalizedStringId} from '../localized-strings';
 import {closest} from '../dom';
 
-
 /**
  * Language code used if there is no language code specified by the document.
  * @const {string}
  */
 const FALLBACK_LANGUAGE_CODE = 'default';
 
-
 /**
  * @const {!RegExp}
  */
 const LANGUAGE_CODE_CHUNK_REGEX = /\w+/gi;
-
 
 /**
  * Gets the string matching the specified localized string ID in the language
@@ -41,15 +38,19 @@ const LANGUAGE_CODE_CHUNK_REGEX = /\w+/gi;
  * @param {!Array<string>} languageCodes
  * @param {!LocalizedStringId} localizedStringId
  */
-function findLocalizedString(localizedStringBundles, languageCodes,
-  localizedStringId) {
+function findLocalizedString(
+  localizedStringBundles,
+  languageCodes,
+  localizedStringId
+) {
   let localizedString = null;
 
   languageCodes.some(languageCode => {
     const localizedStringBundle = localizedStringBundles[languageCode];
     if (localizedStringBundle && localizedStringBundle[localizedStringId]) {
-      localizedString = localizedStringBundle[localizedStringId].string ||
-          localizedStringBundle[localizedStringId].fallback;
+      localizedString =
+        localizedStringBundle[localizedStringId].string ||
+        localizedStringBundle[localizedStringId].fallback;
       return !!localizedString;
     }
 
@@ -58,7 +59,6 @@ function findLocalizedString(localizedStringBundles, languageCodes,
 
   return localizedString;
 }
-
 
 /**
  * @param {string} languageCode
@@ -70,15 +70,18 @@ export function getLanguageCodesFromString(languageCode) {
     return ['en', FALLBACK_LANGUAGE_CODE];
   }
   const matches = languageCode.match(LANGUAGE_CODE_CHUNK_REGEX) || [];
-  return matches.reduce((fallbackLanguageCodeList, chunk, index) => {
-    const fallbackLanguageCode = matches.slice(0, index + 1)
+  return matches.reduce(
+    (fallbackLanguageCodeList, chunk, index) => {
+      const fallbackLanguageCode = matches
+        .slice(0, index + 1)
         .join('-')
         .toLowerCase();
-    fallbackLanguageCodeList.unshift(fallbackLanguageCode);
-    return fallbackLanguageCodeList;
-  }, [FALLBACK_LANGUAGE_CODE]);
+      fallbackLanguageCodeList.unshift(fallbackLanguageCode);
+      return fallbackLanguageCodeList;
+    },
+    [FALLBACK_LANGUAGE_CODE]
+  );
 }
-
 
 /**
  * Localization service.
@@ -102,7 +105,6 @@ export class LocalizationService {
     this.localizedStringBundles_ = {};
   }
 
-
   /**
    * @param {!Element} element
    * @return {!Array<string>}
@@ -113,7 +115,6 @@ export class LocalizationService {
     const languageCode = languageEl ? languageEl.getAttribute('lang') : null;
     return getLanguageCodesFromString(languageCode || '');
   }
-
 
   /**
    * @param {string} languageCode The language code to associate with the
@@ -127,11 +128,12 @@ export class LocalizationService {
       this.localizedStringBundles_[languageCode] = {};
     }
 
-    Object.assign(this.localizedStringBundles_[languageCode],
-        localizedStringBundle);
+    Object.assign(
+      this.localizedStringBundles_[languageCode],
+      localizedStringBundle
+    );
     return this;
   }
-
 
   /**
    * @param {!LocalizedStringId} localizedStringId
@@ -141,11 +143,14 @@ export class LocalizationService {
    *     one exists, or the default otherwise.
    */
   getLocalizedString(localizedStringId, elementToUse = undefined) {
-    const languageCodes = elementToUse ?
-      this.getLanguageCodesForElement_(elementToUse) :
-      this.rootLanguageCodes_;
+    const languageCodes = elementToUse
+      ? this.getLanguageCodesForElement_(elementToUse)
+      : this.rootLanguageCodes_;
 
-    return findLocalizedString(this.localizedStringBundles_, languageCodes,
-        localizedStringId);
+    return findLocalizedString(
+      this.localizedStringBundles_,
+      languageCodes,
+      localizedStringId
+    );
   }
 }

@@ -107,8 +107,12 @@ export class TextMask {
         if (name == hiddenName && TextMask.isMaskOutputElement(element)) {
           return;
         }
-        userAssert(name != hiddenName,
-            'Illegal input name, %s found: %s', name, element);
+        userAssert(
+          name != hiddenName,
+          'Illegal input name, %s found: %s',
+          name,
+          element
+        );
       });
 
       const hidden = this.document_.createElement('input');
@@ -120,8 +124,10 @@ export class TextMask {
       this.hiddenInput_ = hidden;
     }
 
-    this.hiddenInput_.value = this.outputMode_ == OutputMode.ALPHANUMERIC ?
-      this.controller_.getUnmaskedValue() : this.controller_.getValue();
+    this.hiddenInput_.value =
+      this.outputMode_ == OutputMode.ALPHANUMERIC
+        ? this.controller_.getUnmaskedValue()
+        : this.controller_.getValue();
   }
 
   /**
@@ -135,4 +141,3 @@ export class TextMask {
     this.controller_.dispose();
   }
 }
-

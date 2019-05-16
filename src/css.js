@@ -27,7 +27,6 @@ export function assertIsName(name) {
   devAssert(/^[\w-]+$/.test(name));
 }
 
-
 /**
  * @type {boolean|undefined}
  */
@@ -67,7 +66,7 @@ function testScopeSelector(el) {
     testElement.appendChild(testChild);
     // NOTE(cvializ, #12383): Firefox's implementation is incomplete,
     // therefore we test actual functionality of`:scope` as well.
-    return testElement./*OK*/querySelector(':scope div') === testChild;
+    return testElement./*OK*/ querySelector(':scope div') === testChild;
   } catch (e) {
     return false;
   }
@@ -121,4 +120,3 @@ export function escapeCssSelectorNth(ident) {
   devAssert(escaped.indexOf(')') === -1);
   return escaped;
 }
-

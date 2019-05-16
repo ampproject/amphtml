@@ -18,7 +18,6 @@ import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
 import {registerServiceBuilder} from '../../../src/service';
 
-
 /**
  * Util function to retrieve the media query service. Ensures we can retrieve
  * the service synchronously from the amp-story codebase without running into
@@ -56,7 +55,8 @@ export class AmpStoryMediaQueryService {
 
     /** @private @const {!Element} */
     this.storyEl_ = dev().assertElement(
-        this.win_.document.querySelector('amp-story'));
+      this.win_.document.querySelector('amp-story')
+    );
   }
 
   /**

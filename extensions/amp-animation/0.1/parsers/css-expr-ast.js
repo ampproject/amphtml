@@ -15,12 +15,11 @@
  */
 
 const FINAL_URL_RE = /^(data|https)\:/i;
-const DEG_TO_RAD = 2 * Math.PI / 360;
+const DEG_TO_RAD = (2 * Math.PI) / 360;
 const GRAD_TO_RAD = Math.PI / 200;
 const VAR_CSS_RE = /(calc|var|url|rand|index|width|height|num|length)\(/i;
 const NORM_CSS_RE = /\d(%|em|rem|vw|vh|vmin|vmax|s|deg|grad)/i;
 const INFINITY_RE = /^(infinity|infinite)$/i;
-
 
 /**
  * Returns `true` if the CSS expression contains variable components. The CSS
@@ -39,7 +38,6 @@ export function isVarCss(css, normalize) {
  * @interface
  */
 export class CssContext {
-
   /**
    * Returns a resolved URL. The result must be an allowed URL for execution,
    * with HTTPS restrictions.
@@ -116,7 +114,6 @@ export class CssContext {
   withDimension(unusedDim, unusedCallback) {}
 }
 
-
 /**
  * A base class for all CSS node components defined in the
  * `css-expr-impl.jison`.
@@ -174,7 +171,6 @@ export class CssNode {
   }
 }
 
-
 /**
  * A CSS expression that's simply passed through from the original expression.
  * Used for `url()`, colors, etc.
@@ -192,7 +188,6 @@ export class CssPassthroughNode extends CssNode {
     return this.css_;
   }
 }
-
 
 /**
  * A concatenation of CSS expressions: `translateX(...) rotate(...)`,
@@ -235,7 +230,9 @@ export class CssConcatNode extends CssNode {
   /** @override */
   isConst(normalize) {
     return this.array_.reduce(
-        (acc, node) => acc && node.isConst(normalize), true);
+      (acc, node) => acc && node.isConst(normalize),
+      true
+    );
   }
 
   /** @override */
@@ -253,7 +250,6 @@ export class CssConcatNode extends CssNode {
     return new CssConcatNode(resolvedArray);
   }
 }
-
 
 /**
  * Verifies that URL is an HTTPS URL.
@@ -286,7 +282,6 @@ export class CssUrlNode extends CssNode {
     return new CssPassthroughNode(`url("${url}")`);
   }
 }
-
 
 /**
  * @abstract
@@ -354,7 +349,6 @@ export class CssNumericNode extends CssNode {
   }
 }
 
-
 /**
  * A CSS number: `100`, `1e2`, `1e-2`, `0.5`, etc.
  */
@@ -387,7 +381,6 @@ export class CssNumberNode extends CssNumericNode {
   }
 }
 
-
 /**
  * A CSS percent value: `100%`, `0.5%`, etc.
  */
@@ -416,7 +409,6 @@ export class CssPercentNode extends CssNumericNode {
   }
 }
 
-
 /**
  * A CSS length value: `100px`, `80vw`, etc.
  */
@@ -436,7 +428,7 @@ export class CssLengthNode extends CssNumericNode {
 
   /** @override */
   isNorm() {
-    return (this.units_ == 'px');
+    return this.units_ == 'px';
   }
 
   /** @override */
@@ -447,20 +439,23 @@ export class CssLengthNode extends CssNumericNode {
 
     // Font-based: em/rem.
     if (this.units_ == 'em' || this.units_ == 'rem') {
-      const fontSize = this.units_ == 'em' ?
-        context.getCurrentFontSize() :
-        context.getRootFontSize();
+      const fontSize =
+        this.units_ == 'em'
+          ? context.getCurrentFontSize()
+          : context.getRootFontSize();
       return new CssLengthNode(this.num_ * fontSize, 'px');
     }
 
     // Viewport based: vw, vh, vmin, vmax.
-    if (this.units_ == 'vw' ||
-        this.units_ == 'vh' ||
-        this.units_ == 'vmin' ||
-        this.units_ == 'vmax') {
+    if (
+      this.units_ == 'vw' ||
+      this.units_ == 'vh' ||
+      this.units_ == 'vmin' ||
+      this.units_ == 'vmax'
+    ) {
       const vp = context.getViewportSize();
-      const vw = vp.width * this.num_ / 100;
-      const vh = vp.height * this.num_ / 100;
+      const vw = (vp.width * this.num_) / 100;
+      const vh = (vp.height * this.num_) / 100;
       let num = 0;
       if (this.units_ == 'vw') {
         num = vw;
@@ -483,10 +478,9 @@ export class CssLengthNode extends CssNumericNode {
     const dim = context.getDimension();
     const size = context.getCurrentElementSize();
     const side = getDimSide(dim, size);
-    return new CssLengthNode(side * percent / 100, 'px');
+    return new CssLengthNode((side * percent) / 100, 'px');
   }
 }
-
 
 /**
  * A CSS angle value: `45deg`, `0.5rad`, etc.
@@ -507,7 +501,7 @@ export class CssAngleNode extends CssNumericNode {
 
   /** @override */
   isNorm() {
-    return (this.units_ == 'rad');
+    return this.units_ == 'rad';
   }
 
   /** @override */
@@ -524,7 +518,6 @@ export class CssAngleNode extends CssNumericNode {
     throw unknownUnits(this.units_);
   }
 }
-
 
 /**
  * A CSS time value: `1s`, `600ms`.
@@ -545,7 +538,7 @@ export class CssTimeNode extends CssNumericNode {
 
   /** @override */
   isNorm() {
-    return (this.units_ == 'ms');
+    return this.units_ == 'ms';
   }
 
   /** @override */
@@ -585,7 +578,6 @@ export class CssTimeNode extends CssNumericNode {
   }
 }
 
-
 /**
  * A CSS generic function: `rgb(1, 1, 1)`, `translateX(300px)`, etc.
  */
@@ -614,7 +606,9 @@ export class CssFuncNode extends CssNode {
   /** @override */
   isConst(normalize) {
     return this.args_.reduce(
-        (acc, node) => acc && node.isConst(normalize), true);
+      (acc, node) => acc && node.isConst(normalize),
+      true
+    );
   }
 
   /** @override */
@@ -624,8 +618,9 @@ export class CssFuncNode extends CssNode {
       const node = this.args_[i];
       let resolved;
       if (this.dimensions_ && i < this.dimensions_.length) {
-        resolved = context.withDimension(this.dimensions_[i],
-            () => node.resolve(context, normalize));
+        resolved = context.withDimension(this.dimensions_[i], () =>
+          node.resolve(context, normalize)
+        );
       } else {
         resolved = node.resolve(context, normalize);
       }
@@ -639,7 +634,6 @@ export class CssFuncNode extends CssNode {
     return new CssFuncNode(this.name_, resolvedArgs);
   }
 }
-
 
 /**
  * A CSS translate family of functions:
@@ -655,17 +649,25 @@ export class CssTranslateNode extends CssFuncNode {
    * @param {!Array<!CssNode>} args
    */
   constructor(suffix, args) {
-    super(`translate${suffix.toUpperCase()}`, args,
-        suffix == '' ? ['w', 'h'] :
-          suffix == 'x' ? ['w'] :
-            suffix == 'y' ? ['h'] :
-              suffix == 'z' ? ['z'] :
-                suffix == '3d' ? ['w', 'h', 'z'] : null);
+    super(
+      `translate${suffix.toUpperCase()}`,
+      args,
+      suffix == ''
+        ? ['w', 'h']
+        : suffix == 'x'
+        ? ['w']
+        : suffix == 'y'
+        ? ['h']
+        : suffix == 'z'
+        ? ['z']
+        : suffix == '3d'
+        ? ['w', 'h', 'z']
+        : null
+    );
     /** @const @private {string} */
     this.suffix_ = suffix;
   }
 }
-
 
 /**
  * AMP-specific `width()` and `height()` functions.
@@ -698,14 +700,12 @@ export class CssDimSizeNode extends CssNode {
 
   /** @override */
   calc(context) {
-    const size =
-        this.selector_ ?
-          context.getElementSize(this.selector_, this.selectionMethod_) :
-          context.getCurrentElementSize();
+    const size = this.selector_
+      ? context.getElementSize(this.selector_, this.selectionMethod_)
+      : context.getCurrentElementSize();
     return new CssLengthNode(getDimSide(this.dim_, size), 'px');
   }
 }
-
 
 /**
  * AMP-specific `num()` function. Format is `num(value)`. Returns a numeric
@@ -749,7 +749,6 @@ export class CssNumConvertNode extends CssNode {
     return new CssNumberNode(num);
   }
 }
-
 
 /**
  * AMP-specific `rand()` function. Has two forms:
@@ -796,8 +795,10 @@ export class CssRandNode extends CssNode {
     if (left == null || right == null) {
       return null;
     }
-    if (!(left instanceof CssNumericNode) ||
-        !(right instanceof CssNumericNode)) {
+    if (
+      !(left instanceof CssNumericNode) ||
+      !(right instanceof CssNumericNode)
+    ) {
       throw new Error('left and right must be both numerical');
     }
     if (left.type_ != right.type_) {
@@ -818,7 +819,6 @@ export class CssRandNode extends CssNode {
     return left.createSameUnits(num);
   }
 }
-
 
 /**
  * AMP-specific `index()` function. Returns 0-based index of the current
@@ -848,7 +848,6 @@ export class CssIndexNode extends CssNode {
   }
 }
 
-
 /**
  * AMP-specific `length()` function. Returns number of targets selected.
  */
@@ -875,7 +874,6 @@ export class CssLengthFuncNode extends CssNode {
     return new CssNumberNode(context.getTargetLength());
   }
 }
-
 
 /**
  * A CSS `var()` expression: `var(--name)`, `var(--name, 100px)`, etc.
@@ -917,7 +915,6 @@ export class CssVarNode extends CssNode {
   }
 }
 
-
 /**
  * A CSS `calc()` expression: `calc(100px)`, `calc(80vw - 30em)`, etc.
  * See https://drafts.csswg.org/css-values-3/#calc-notation.
@@ -945,7 +942,6 @@ export class CssCalcNode extends CssNode {
     return this.expr_.resolve(context, normalize);
   }
 }
-
 
 /**
  * A CSS `calc()` sum expression: `100px + 20em`, `80vw - 30em`, etc.
@@ -990,8 +986,10 @@ export class CssCalcSumNode extends CssNode {
     if (left == null || right == null) {
       return null;
     }
-    if (!(left instanceof CssNumericNode) ||
-        !(right instanceof CssNumericNode)) {
+    if (
+      !(left instanceof CssNumericNode) ||
+      !(right instanceof CssNumericNode)
+    ) {
       throw new Error('left and right must be both numerical');
     }
     if (left.type_ != right.type_) {
@@ -1016,7 +1014,6 @@ export class CssCalcSumNode extends CssNode {
     return left.createSameUnits(left.num_ + sign * right.num_);
   }
 }
-
 
 /**
  * A CSS `calc()` product expression: `100px * 2`, `80vw / 2`, etc.
@@ -1054,8 +1051,10 @@ export class CssCalcProductNode extends CssNode {
     if (left == null || right == null) {
       return null;
     }
-    if (!(left instanceof CssNumericNode) ||
-        !(right instanceof CssNumericNode)) {
+    if (
+      !(left instanceof CssNumericNode) ||
+      !(right instanceof CssNumericNode)
+    ) {
       throw new Error('left and right must be both numerical');
     }
 
@@ -1097,7 +1096,6 @@ export class CssCalcProductNode extends CssNode {
   }
 }
 
-
 /**
  * @param {string} units
  * @return {!Error}
@@ -1106,7 +1104,6 @@ function unknownUnits(units) {
   return new Error('unknown units: ' + units);
 }
 
-
 /**
  * @return {!Error}
  */
@@ -1114,12 +1111,11 @@ function noCss() {
   return new Error('no css');
 }
 
-
 /**
  * @param {?string} dim
  * @param {!{width: number, height: number}} size
  * @return {number}
  */
 function getDimSide(dim, size) {
-  return (dim == 'w' ? size.width : dim == 'h' ? size.height : 0);
+  return dim == 'w' ? size.width : dim == 'h' ? size.height : 0;
 }

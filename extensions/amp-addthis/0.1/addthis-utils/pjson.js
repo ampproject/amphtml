@@ -16,11 +16,7 @@
 import {API_SERVER} from '../constants';
 import {callPixelEndpoint} from './pixel';
 
-import {
-  classifyPage,
-  classifyReferrer,
-  getKeywordsString,
-} from './classify';
+import {classifyPage, classifyReferrer, getKeywordsString} from './classify';
 import {getMetaElements} from './meta';
 import {getSessionId} from './session';
 import {parseUrlDeprecated} from '../../../../src/url';
@@ -30,33 +26,33 @@ import {toArray} from '../../../../src/types';
 const SHARE = 300;
 
 /**
-  * @param {{
-  * loc:Location,
-  * referrer:string,
-  * title:string,
-  * ampDoc: *,
-  * pubId:string,
-  * data: {
-  *   url: string,
-  *   service: string
-  * }
-  * }} pjson
-  * @return {{amp: number, cb: number, dc: number, dest: *, gen: number, mk: string, pub: *, rb: number, sid, url}}
-  */
+ * @param {{
+ * loc:Location,
+ * referrer:string,
+ * title:string,
+ * ampDoc: *,
+ * pubId:string,
+ * data: {
+ *   url: string,
+ *   service: string
+ * }
+ * }} pjson
+ * @return {{amp: number, cb: number, dc: number, dest: *, gen: number, mk: string, pub: *, rb: number, sid, url}}
+ */
 const getPjsonData = ({loc, referrer, title, ampDoc, pubId, data}) => {
   const {href, hostname, search, pathname, hash, protocol, port} = loc;
   /** @typedef {{
-  * du: string,
-  * hostname: string,
-  * href: string,
-  * referrer: string,
-  * search: string,
-  * pathname: string,
-  * title: string,
-  * hash: string,
-  * protocol: string,
-  * port: string
-  * }} */
+   * du: string,
+   * hostname: string,
+   * href: string,
+   * referrer: string,
+   * search: string,
+   * pathname: string,
+   * title: string,
+   * hash: string,
+   * protocol: string,
+   * port: string
+   * }} */
   const pageInfo = {
     du: href.split('#').shift(),
     hostname,
@@ -81,8 +77,11 @@ const getPjsonData = ({loc, referrer, title, ampDoc, pubId, data}) => {
     gen: SHARE,
     mk: getKeywordsString(metaElements),
     pub: pubId,
-    rb: classifyReferrer(referrer, parsedReferrer,
-        parseUrlDeprecated(pageInfo.du)),
+    rb: classifyReferrer(
+      referrer,
+      parsedReferrer,
+      parseUrlDeprecated(pageInfo.du)
+    ),
     sid: getSessionId(),
     url: data.url,
   };

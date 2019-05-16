@@ -57,10 +57,10 @@ const strings = {
     string: 'AMP ഫലങ്ങളെക്കുറിച്ച് കൂടുതൽ',
   },
   [LocalizedStringId.AMP_STORY_HINT_UI_NEXT_LABEL]: {
-    string: '\'അടുത്തത്\' ടാപ്പ് ചെയ്യുക',
+    string: "'അടുത്തത്' ടാപ്പ് ചെയ്യുക",
   },
   [LocalizedStringId.AMP_STORY_HINT_UI_PREVIOUS_LABEL]: {
-    string: '\'മടങ്ങുക\' ടാപ്പ് ചെയ്യുക',
+    string: "'മടങ്ങുക' ടാപ്പ് ചെയ്യുക",
   },
   [LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL]: {
     string: 'മുകളിലോട്ട് സ്വൈപ്പ് ചെയ്യുക',
@@ -117,15 +117,17 @@ const strings = {
     string: 'ഈ അനുഭവം കാണാൻ നിങ്ങളുടെ വിൻഡോയുടെ വീതി കൂട്ടുക',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
-    string: 'ഈ ഉള്ളടക്കം കാണാൻ AMP സ്‌റ്റോറി പരീക്ഷണം നിങ്ങൾ ' +
-        'പ്രവർത്തനക്ഷമമാക്കേണ്ടതുണ്ട്.',
+    string:
+      'ഈ ഉള്ളടക്കം കാണാൻ AMP സ്‌റ്റോറി പരീക്ഷണം നിങ്ങൾ ' +
+      'പ്രവർത്തനക്ഷമമാക്കേണ്ടതുണ്ട്.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
     string: 'പോർട്രെയ്‌റ്റ് മോഡിൽ ഈ പേജ് ഏറ്റവും മികച്ചതായി കാണാനാകും',
   },
   [LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT]: {
-    string: 'ക്ഷമിക്കണം, നിങ്ങളുടെ ബ്രൗസർ ഈ അനുഭവത്തെ ' +
-        'പിന്തുണയ്ക്കുന്നില്ലെന്ന് തോന്നുന്നു',
+    string:
+      'ക്ഷമിക്കണം, നിങ്ങളുടെ ബ്രൗസർ ഈ അനുഭവത്തെ ' +
+      'പിന്തുണയ്ക്കുന്നില്ലെന്ന് തോന്നുന്നു',
   },
 };
 

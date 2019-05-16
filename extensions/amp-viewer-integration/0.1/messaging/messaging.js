@@ -39,25 +39,25 @@ export let Message;
 export let RequestHandler;
 
 /**
-  * @param {*} message
-  * @return {?Message}
-  */
+ * @param {*} message
+ * @return {?Message}
+ */
 export function parseMessage(message) {
   if (typeof message != 'string') {
-    return /** @type {Message} */(message);
+    return /** @type {Message} */ (message);
   }
   if (message.charAt(0) != '{') {
     return null;
   }
 
   try {
-    return /** @type {?Message} */ (
-    /** @type {?} */ (parseJson(/** @type {string} */ (message))));
+    return /** @type {?Message} */ /** @type {?} */ (parseJson(
+      /** @type {string} */ (message)
+    ));
   } catch (e) {
     return null;
   }
 }
-
 
 /**
  * @fileoverview This class is a de-facto implementation of MessagePort
@@ -85,8 +85,11 @@ export class WindowPortEmulator {
    */
   addEventListener(eventType, handler) {
     this.win.addEventListener('message', e => {
-      if (e.origin == this.origin_ &&
-          e.source == this.target_ && getData(e)['app'] == APP) {
+      if (
+        e.origin == this.origin_ &&
+        e.source == this.target_ &&
+        getData(e)['app'] == APP
+      ) {
         handler(e);
       }
     });
@@ -96,14 +99,13 @@ export class WindowPortEmulator {
    * @param {JsonObject} data
    */
   postMessage(data) {
-    this.target_./*OK*/postMessage(data, this.origin_);
+    this.target_./*OK*/ postMessage(data, this.origin_);
   }
 
   /**
    * Starts the sending of messages queued on the port.
    */
-  start() {
-  }
+  start() {}
 }
 
 /**
@@ -114,7 +116,6 @@ export class WindowPortEmulator {
  * ampdoc and Bob is the viewer.
  */
 export class Messaging {
-
   /**
    * Conversation (messaging protocol) between me and Bob.
    * @param {!Window} win
@@ -234,14 +235,16 @@ export class Messaging {
         this.waitingForResponse_[requestId] = {resolve, reject};
       });
     }
-    this.sendMessage_(/** @type {!AmpViewerMessage} */ ({
-      app: APP,
-      requestid: requestId,
-      type: MessageType.REQUEST,
-      name: messageName,
-      data: messageData,
-      rsvp: awaitResponse,
-    }));
+    this.sendMessage_(
+      /** @type {!AmpViewerMessage} */ ({
+        app: APP,
+        requestid: requestId,
+        type: MessageType.REQUEST,
+        name: messageName,
+        data: messageData,
+        rsvp: awaitResponse,
+      })
+    );
     return promise;
   }
 
@@ -253,13 +256,15 @@ export class Messaging {
    * @private
    */
   sendResponse_(requestId, messageName, messageData) {
-    this.sendMessage_(/** @type {!AmpViewerMessage} */ ({
-      app: APP,
-      requestid: requestId,
-      type: MessageType.RESPONSE,
-      name: messageName,
-      data: messageData,
-    }));
+    this.sendMessage_(
+      /** @type {!AmpViewerMessage} */ ({
+        app: APP,
+        requestid: requestId,
+        type: MessageType.RESPONSE,
+        name: messageName,
+        data: messageData,
+      })
+    );
   }
 
   /**
@@ -271,15 +276,19 @@ export class Messaging {
   sendResponseError_(requestId, messageName, reason) {
     const errString = this.errorToString_(reason);
     this.logError_(
-        TAG + ': sendResponseError_, Message name: ' + messageName, errString);
-    this.sendMessage_(/** @type {!AmpViewerMessage} */ ({
-      app: APP,
-      requestid: requestId,
-      type: MessageType.RESPONSE,
-      name: messageName,
-      data: null,
-      error: errString,
-    }));
+      TAG + ': sendResponseError_, Message name: ' + messageName,
+      errString
+    );
+    this.sendMessage_(
+      /** @type {!AmpViewerMessage} */ ({
+        app: APP,
+        requestid: requestId,
+        type: MessageType.RESPONSE,
+        name: messageName,
+        data: null,
+        error: errString,
+      })
+    );
   }
 
   /**
@@ -291,10 +300,11 @@ export class Messaging {
     if (this.token_) {
       finalMessage['messagingToken'] = this.token_;
     }
-    this.port_./*OK*/postMessage(
-        this.isWebview_
-          ? JSON.stringify(/** @type {!JsonObject} */ (finalMessage))
-          : finalMessage);
+    this.port_./*OK*/ postMessage(
+      this.isWebview_
+        ? JSON.stringify(/** @type {!JsonObject} */ (finalMessage))
+        : finalMessage
+    );
   }
 
   /**
@@ -311,7 +321,8 @@ export class Messaging {
     }
     if (!handler) {
       const error = new Error(
-          'Cannot handle request because handshake is not yet confirmed!');
+        'Cannot handle request because handshake is not yet confirmed!'
+      );
       error.args = message.name;
       throw error;
     }
@@ -321,14 +332,20 @@ export class Messaging {
       const requestId = message.requestid;
       if (!promise) {
         this.sendResponseError_(
-            requestId, message.name, new Error('no response'));
+          requestId,
+          message.name,
+          new Error('no response')
+        );
         throw new Error('expected response but none given: ' + message.name);
       }
-      promise.then(data => {
-        this.sendResponse_(requestId, message.name, data);
-      }, reason => {
-        this.sendResponseError_(requestId, message.name, reason);
-      });
+      promise.then(
+        data => {
+          this.sendResponse_(requestId, message.name, data);
+        },
+        reason => {
+          this.sendResponseError_(requestId, message.name, reason);
+        }
+      );
     }
   }
 
@@ -346,7 +363,8 @@ export class Messaging {
       if (message.error) {
         this.logError_(TAG + ': handleResponse_ error: ', message.error);
         pending.reject(
-            new Error(`Request ${message.name} failed: ${message.error}`));
+          new Error(`Request ${message.name} failed: ${message.error}`)
+        );
       } else {
         pending.resolve(message.data);
       }
@@ -371,8 +389,6 @@ export class Messaging {
    * @private
    */
   errorToString_(err) {
-    return err ?
-      (err.message ? err.message : String(err)) :
-      'unknown error';
+    return err ? (err.message ? err.message : String(err)) : 'unknown error';
   }
 }

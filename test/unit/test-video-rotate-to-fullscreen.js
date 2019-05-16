@@ -13,12 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {
-  AutoFullscreenManager,
-} from '../../src/service/video-manager-impl';
+import {AutoFullscreenManager} from '../../src/service/video-manager-impl';
 import {PlayingStates} from '../../src/video-interface';
 import {Services} from '../../src/services';
-
 
 describes.fakeWin('Rotate-to-fullscreen', {amp: true}, env => {
   let ampdoc;
@@ -150,8 +147,10 @@ describes.fakeWin('Rotate-to-fullscreen', {amp: true}, env => {
       },
     });
 
-    const getPlayingState =
-      sandbox.stub(autoFullscreenManager, 'getPlayingState_');
+    const getPlayingState = sandbox.stub(
+      autoFullscreenManager,
+      'getPlayingState_'
+    );
 
     getPlayingState.withArgs(video1).returns(PlayingStates.PAUSED);
     getPlayingState.withArgs(video2).returns(PlayingStates.PLAYING_AUTO);
@@ -161,8 +160,9 @@ describes.fakeWin('Rotate-to-fullscreen', {amp: true}, env => {
     autoFullscreenManager.register({video: video2});
     autoFullscreenManager.register({video: video3});
 
-    expect(autoFullscreenManager.selectBestCenteredInPortrait_())
-        .to.equal(video3);
+    expect(autoFullscreenManager.selectBestCenteredInPortrait_()).to.equal(
+      video3
+    );
   });
 
   it('selects center-most video among those visible and playing', () => {
@@ -206,8 +206,10 @@ describes.fakeWin('Rotate-to-fullscreen', {amp: true}, env => {
       },
     });
 
-    const getPlayingState =
-      sandbox.stub(autoFullscreenManager, 'getPlayingState_');
+    const getPlayingState = sandbox.stub(
+      autoFullscreenManager,
+      'getPlayingState_'
+    );
 
     getPlayingState.withArgs(video1).returns(PlayingStates.PLAYING_MANUAL);
     getPlayingState.withArgs(video2).returns(PlayingStates.PLAYING_MANUAL);
@@ -217,8 +219,9 @@ describes.fakeWin('Rotate-to-fullscreen', {amp: true}, env => {
     autoFullscreenManager.register({video: video2});
     autoFullscreenManager.register({video: video3});
 
-    expect(autoFullscreenManager.selectBestCenteredInPortrait_())
-        .to.equal(video2);
+    expect(autoFullscreenManager.selectBestCenteredInPortrait_()).to.equal(
+      video2
+    );
   });
 
   it('selects top-most video if two videos are equally centered', () => {
@@ -251,8 +254,10 @@ describes.fakeWin('Rotate-to-fullscreen', {amp: true}, env => {
       },
     });
 
-    const getPlayingState =
-      sandbox.stub(autoFullscreenManager, 'getPlayingState_');
+    const getPlayingState = sandbox.stub(
+      autoFullscreenManager,
+      'getPlayingState_'
+    );
 
     getPlayingState.withArgs(video1).returns(PlayingStates.PLAYING_MANUAL);
     getPlayingState.withArgs(video2).returns(PlayingStates.PLAYING_MANUAL);
@@ -260,8 +265,9 @@ describes.fakeWin('Rotate-to-fullscreen', {amp: true}, env => {
     autoFullscreenManager.register({video: video1});
     autoFullscreenManager.register({video: video2});
 
-    expect(autoFullscreenManager.selectBestCenteredInPortrait_())
-        .to.equal(video1);
+    expect(autoFullscreenManager.selectBestCenteredInPortrait_()).to.equal(
+      video1
+    );
   });
 
   it('selects the highest intersection ratio if two videos are visible', () => {
@@ -293,8 +299,10 @@ describes.fakeWin('Rotate-to-fullscreen', {amp: true}, env => {
       },
     });
 
-    const getPlayingState =
-      sandbox.stub(autoFullscreenManager, 'getPlayingState_');
+    const getPlayingState = sandbox.stub(
+      autoFullscreenManager,
+      'getPlayingState_'
+    );
 
     getPlayingState.withArgs(video1).returns(PlayingStates.PLAYING_MANUAL);
     getPlayingState.withArgs(video2).returns(PlayingStates.PLAYING_MANUAL);
@@ -302,7 +310,8 @@ describes.fakeWin('Rotate-to-fullscreen', {amp: true}, env => {
     autoFullscreenManager.register({video: video1});
     autoFullscreenManager.register({video: video2});
 
-    expect(autoFullscreenManager.selectBestCenteredInPortrait_())
-        .to.equal(video2);
+    expect(autoFullscreenManager.selectBestCenteredInPortrait_()).to.equal(
+      video2
+    );
   });
 });

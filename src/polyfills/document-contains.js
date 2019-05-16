@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 /**
  * Polyfill for `document.contains()` method. Notice that according to spec
  * `document.contains` is inclusionary.
@@ -29,7 +28,6 @@ function documentContainsPolyfill(node) {
   // equality to the document itself.
   return node == this || this.documentElement.contains(node);
 }
-
 
 /**
  * Polyfills `HTMLDocument.contains` API.

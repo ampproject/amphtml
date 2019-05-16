@@ -25,7 +25,7 @@ import {getMode} from '../../../src/mode';
  * }
  */
 
-export const CMP_CONFIG = ({});
+export const CMP_CONFIG = {};
 
 if (getMode().test || getMode().localDev) {
   CMP_CONFIG['_ping_'] = {

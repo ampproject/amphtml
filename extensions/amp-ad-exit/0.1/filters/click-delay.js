@@ -28,9 +28,12 @@ export class ClickDelayFilter extends Filter {
    */
   constructor(name, spec, win) {
     super(name, spec.type);
-    userAssert(spec.type == FilterType.CLICK_DELAY &&
-      typeof spec.delay == 'number' && spec.delay > 0,
-    'Invalid ClickDelay spec');
+    userAssert(
+      spec.type == FilterType.CLICK_DELAY &&
+        typeof spec.delay == 'number' &&
+        spec.delay > 0,
+      'Invalid ClickDelay spec'
+    );
 
     /**
      * @const {!../config.ClickDelayConfig}
@@ -39,20 +42,26 @@ export class ClickDelayFilter extends Filter {
     this.spec = spec;
 
     /**
-    * @type {number}
-    * @visibleForTesting
-    */
+     * @type {number}
+     * @visibleForTesting
+     */
     this.intervalStart = Date.now();
 
     if (spec.startTimingEvent) {
       if (!win['performance'] || !win['performance']['timing']) {
-        dev().warn(TAG, 'Browser does not support performance timing, ' +
-            'falling back to now');
+        dev().warn(
+          TAG,
+          'Browser does not support performance timing, ' +
+            'falling back to now'
+        );
       } else if (
-        win['performance']['timing'][spec.startTimingEvent] == undefined) {
-        dev().warn(TAG,
-            `Invalid performance timing event type ${spec.startTimingEvent}` +
-            ', falling back to now');
+        win['performance']['timing'][spec.startTimingEvent] == undefined
+      ) {
+        dev().warn(
+          TAG,
+          `Invalid performance timing event type ${spec.startTimingEvent}` +
+            ', falling back to now'
+        );
       } else {
         this.intervalStart =
           win['performance']['timing'][spec.startTimingEvent];
@@ -62,7 +71,7 @@ export class ClickDelayFilter extends Filter {
 
   /** @override */
   filter() {
-    return (Date.now() - this.intervalStart) >= this.spec.delay;
+    return Date.now() - this.intervalStart >= this.spec.delay;
   }
 }
 

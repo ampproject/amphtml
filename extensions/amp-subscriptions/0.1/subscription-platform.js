@@ -23,7 +23,6 @@ import {PageConfig} from '../../../third_party/subscriptions-project/config';
  * @interface
  */
 export class SubscriptionPlatform {
-
   /**
    * Returns the service Id.
    * @return {string}

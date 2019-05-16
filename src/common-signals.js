@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-
 /**
  * Commonly used signals across different elements and documents.
  * @enum {string}
  */
 export const CommonSignals = {
-
   /**
    * The element has been built.
    */

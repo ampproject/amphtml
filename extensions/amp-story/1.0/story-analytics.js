@@ -19,7 +19,6 @@ import {dev} from '../../../src/log';
 import {registerServiceBuilder} from '../../../src/service';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
-
 /** @enum {string} */
 export const StoryEventType = {
   PAGE_VISIBLE: 'story-page-visible',
@@ -94,8 +93,9 @@ export class StoryAnalyticsService {
    * @param {boolean} isMuted
    */
   onMutedStateChange(isMuted) {
-    const event = isMuted ? StoryEventType.STORY_MUTED :
-      StoryEventType.STORY_UNMUTED;
+    const event = isMuted
+      ? StoryEventType.STORY_MUTED
+      : StoryEventType.STORY_UNMUTED;
     this.triggerEvent_(event);
   }
 
@@ -106,11 +106,16 @@ export class StoryAnalyticsService {
   triggerEvent_(eventType) {
     const variablesPromise = Services.storyVariableServiceForOrNull(this.win_);
     variablesPromise.then(
-        variables => {
-          triggerAnalyticsEvent(this.element_, eventType,
-              /** @type {!JsonObject} */ (variables)); },
-        reason => {
-          dev().error('AMP-STORY', 'Could not get analytics variables', reason);
-        });
+      variables => {
+        triggerAnalyticsEvent(
+          this.element_,
+          eventType,
+          /** @type {!JsonObject} */ (variables)
+        );
+      },
+      reason => {
+        dev().error('AMP-STORY', 'Could not get analytics variables', reason);
+      }
+    );
   }
 }

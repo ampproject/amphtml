@@ -44,7 +44,8 @@ import {userAssert} from './log';
  */
 export function getElementService(win, id, extension, opt_element) {
   return getElementServiceIfAvailable(win, id, extension, opt_element).then(
-      service => assertService(service, id, extension));
+    service => assertService(service, id, extension)
+  );
 }
 
 /**
@@ -79,7 +80,6 @@ function isElementScheduled(win, elementName) {
   return !!win.ampExtendedElements[elementName];
 }
 
-
 /**
  * Returns a promise for a service for the given id and window. Also expects an
  * element that has the actual implementation. The promise resolves when the
@@ -94,11 +94,13 @@ function isElementScheduled(win, elementName) {
  *     not the extension.
  * @return {!Promise<*>}
  */
-export function getElementServiceForDoc(element, id, extension,
-  opt_element) {
+export function getElementServiceForDoc(element, id, extension, opt_element) {
   return getElementServiceIfAvailableForDoc(
-      element, id, extension, opt_element)
-      .then(service => assertService(service, id, extension));
+    element,
+    id,
+    extension,
+    opt_element
+  ).then(service => assertService(service, id, extension));
 }
 
 /**
@@ -113,26 +115,31 @@ export function getElementServiceForDoc(element, id, extension,
  * @return {!Promise<?Object>}
  */
 export function getElementServiceIfAvailableForDoc(
-  element, id, extension, opt_element
+  element,
+  id,
+  extension,
+  opt_element
 ) {
   const s = getServicePromiseOrNullForDoc(element, id);
   if (s) {
     return /** @type {!Promise<?Object>} */ (s);
   }
   const ampdoc = getAmpdoc(element);
-  return ampdoc.whenBodyAvailable()
-      .then(() => waitForExtensionIfPresent(
-          ampdoc.win, extension, ampdoc.win.document.head))
-      .then(() => {
-        // If this service is provided by an element, then we can't depend on
-        // the service (they may not use the element).
-        if (opt_element) {
-          return getServicePromiseOrNullForDoc(element, id);
-        } else if (isElementScheduled(ampdoc.win, extension)) {
-          return getServicePromiseForDoc(element, id);
-        }
-        return null;
-      });
+  return ampdoc
+    .whenBodyAvailable()
+    .then(() =>
+      waitForExtensionIfPresent(ampdoc.win, extension, ampdoc.win.document.head)
+    )
+    .then(() => {
+      // If this service is provided by an element, then we can't depend on
+      // the service (they may not use the element).
+      if (opt_element) {
+        return getServicePromiseOrNullForDoc(element, id);
+      } else if (isElementScheduled(ampdoc.win, extension)) {
+        return getServicePromiseForDoc(element, id);
+      }
+      return null;
+    });
 }
 
 /**
@@ -147,7 +154,9 @@ export function getElementServiceIfAvailableForDoc(
  * @return {!Promise<?Object>}
  */
 export function getElementServiceIfAvailableForDocInEmbedScope(
-  element, id, extension
+  element,
+  id,
+  extension
 ) {
   const s = getExistingServiceForDocInEmbedScope(element, id);
   if (s) {
@@ -173,11 +182,16 @@ export function getElementServiceIfAvailableForDocInEmbedScope(
  * @private
  */
 function assertService(service, id, extension) {
-  return /** @type {!Object} */ (userAssert(service,
-      'Service %s was requested to be provided through %s, ' +
+  return /** @type {!Object} */ (userAssert(
+    service,
+    'Service %s was requested to be provided through %s, ' +
       'but %s is not loaded in the current page. To fix this ' +
       'problem load the JavaScript file for %s in this page.',
-      id, extension, extension, extension));
+    id,
+    extension,
+    extension,
+    extension
+  ));
 }
 
 /**
@@ -206,11 +220,9 @@ export function extensionScriptsInNode(head) {
  * @return {!Promise<boolean>}
  */
 export function isExtensionScriptInNode(ampdoc, extensionId) {
-  return ampdoc.whenBodyAvailable()
-      .then(() => {
-        return extensionScriptInNode(
-            ampdoc.getHeadNode(), extensionId);
-      });
+  return ampdoc.whenBodyAvailable().then(() => {
+    return extensionScriptInNode(ampdoc.getHeadNode(), extensionId);
+  });
 }
 
 /**
@@ -248,8 +260,10 @@ function waitForExtensionIfPresent(win, extension, head) {
   }
 
   const extensions = getService(win, 'extensions');
-  return /** @type {!Promise<?Object>} */ (
-    extensions.waitForExtension(win, extension));
+  return /** @type {!Promise<?Object>} */ (extensions.waitForExtension(
+    win,
+    extension
+  ));
 }
 
 /**
@@ -263,16 +277,17 @@ function waitForExtensionIfPresent(win, extension, head) {
  * @private
  */
 function getElementServicePromiseOrNull(win, id, extension, opt_element) {
-  return dom.waitForBodyPromise(win.document)
-      .then(() => waitForExtensionIfPresent(win, extension, win.document.head))
-      .then(() => {
-        // If this service is provided by an element, then we can't depend on
-        // the service (they may not use the element).
-        if (opt_element) {
-          return getServicePromiseOrNull(win, id);
-        } else if (isElementScheduled(win, extension)) {
-          return getServicePromise(win, id);
-        }
-        return null;
-      });
+  return dom
+    .waitForBodyPromise(win.document)
+    .then(() => waitForExtensionIfPresent(win, extension, win.document.head))
+    .then(() => {
+      // If this service is provided by an element, then we can't depend on
+      // the service (they may not use the element).
+      if (opt_element) {
+        return getServicePromiseOrNull(win, id);
+      } else if (isElementScheduled(win, extension)) {
+        return getServicePromise(win, id);
+      }
+      return null;
+    });
 }

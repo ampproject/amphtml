@@ -21,12 +21,12 @@ export const ATINTERNET_CONFIG = /** @type {!JsonObject} */ ({
     'domain': '.xiti.com',
   },
   'requests': {
-    'base': 'https://${log}${domain}/${pixelPath}?s=${site}&ts=${timestamp}&r=${screenWidth}x${screenHeight}x${screenColorDepth}&re=${availableScreenWidth}x${availableScreenHeight}',
+    'base':
+      'https://${log}${domain}/${pixelPath}?s=${site}&ts=${timestamp}&r=${screenWidth}x${screenHeight}x${screenColorDepth}&re=${availableScreenWidth}x${availableScreenHeight}',
     'suffix': '&medium=amp&${extraUrlParams}&ref=${documentReferrer}',
-    'pageview': '${base}&' +
-      'p=${title}&' +
-      's2=${level2}${suffix}',
-    'click': '${base}&' +
+    'pageview': '${base}&p=${title}&s2=${level2}${suffix}',
+    'click':
+      '${base}&' +
       'pclick=${title}&' +
       's2click=${level2}&' +
       'p=${label}&' +

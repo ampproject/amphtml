@@ -78,15 +78,16 @@ function createScaffoldingForFluidRendering(impl, sandbox) {
   };
   impl.buildCallback();
   impl.attemptChangeHeight = () => Promise.resolve();
-  sandbox.stub(impl, 'sendXhrRequest').returns(Promise.resolve({
-    arrayBuffer: () => Promise.resolve(utf8Encode(rawCreative)),
-    headers: {has: () => false, get: () => undefined},
-  }));
+  sandbox.stub(impl, 'sendXhrRequest').returns(
+    Promise.resolve({
+      arrayBuffer: () => Promise.resolve(utf8Encode(rawCreative)),
+      headers: {has: () => false, get: () => undefined},
+    })
+  );
   impl.sentinel = 'sentinel';
   impl.initiateAdRequest();
-  impl.safeframeApi_ = new SafeframeHostApi(
-      impl, true, impl.creativeSize_);
-  sandbox./*OK*/stub(impl.safeframeApi_, 'setupGeom_');
+  impl.safeframeApi_ = new SafeframeHostApi(impl, true, impl.creativeSize_);
+  sandbox./*OK*/ stub(impl.safeframeApi_, 'setupGeom_');
 }
 
 describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
@@ -109,10 +110,11 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
     const ampStyle = doc.createElement('style');
     ampStyle.setAttribute('amp-runtime', 'scratch-fortesting');
     doc.head.appendChild(ampStyle);
-    doc.body.appendChild(createElementWithAttributes(
-        env.win.document, 'div', {
-          'style': 'width: 1px; height: 1000px;',
-        }));
+    doc.body.appendChild(
+      createElementWithAttributes(env.win.document, 'div', {
+        'style': 'width: 1px; height: 1000px;',
+      })
+    );
     element = createElementWithAttributes(env.win.document, 'amp-ad', {
       'height': 'fluid',
       'type': 'doubleclick',
@@ -126,7 +128,10 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
     });
     doc.body.appendChild(multiSizeElement);
     multiSizeImpl = new AmpAdNetworkDoubleclickImpl(
-        multiSizeElement, env.win.document, env.win);
+      multiSizeElement,
+      env.win.document,
+      env.win
+    );
 
     const getLayout = () => 'fluid';
     impl.getLayout = getLayout;
@@ -158,8 +163,10 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
   });
 
   it('should NOT load delayed impression amp-pixels', () => {
-    const fireDelayedImpressionsSpy =
-        sandbox.spy(impl, 'fireDelayedImpressions');
+    const fireDelayedImpressionsSpy = sandbox.spy(
+      impl,
+      'fireDelayedImpressions'
+    );
     const size = impl.extractSize({
       get(name) {
         switch (name) {
@@ -192,8 +199,7 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
     multiSizeImpl.initiateAdRequest();
     return multiSizeImpl.adPromise_.then(() => {
       expect(multiSizeImpl.adUrl_).to.be.ok;
-      expect(multiSizeImpl.adUrl_).to.match(
-          /[&?]sz=320x50%7C300x200%7C150x50/);
+      expect(multiSizeImpl.adUrl_).to.match(/[&?]sz=320x50%7C300x200%7C150x50/);
     });
   });
 
@@ -226,11 +232,14 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
 
   it('should fire delayed impression ping', () => {
     createScaffoldingForFluidRendering(impl, sandbox);
-    const connectMessagingChannelSpy =
-          sandbox./*OK*/spy(impl.safeframeApi_,
-              'connectMessagingChannel');
-    const onFluidResizeSpy = sandbox./*OK*/spy(impl.safeframeApi_,
-        'onFluidResize_');
+    const connectMessagingChannelSpy = sandbox./*OK*/ spy(
+      impl.safeframeApi_,
+      'connectMessagingChannel'
+    );
+    const onFluidResizeSpy = sandbox./*OK*/ spy(
+      impl.safeframeApi_,
+      'onFluidResize_'
+    );
     return impl.adPromise_.then(() => {
       return impl.layoutCallback().then(() => {
         expect(connectMessagingChannelSpy).to.be.calledOnce;
@@ -259,8 +268,8 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
     impl.isVerifiedAmpCreative_ = true;
     impl.fluidImpressionUrl_ = 'http://www.foo.co.uk';
     impl.onCreativeRender(null, mockPromise);
-    expect(delayedImpressionSpy.withArgs('http://www.foo.co.uk'))
-        .to.be.calledOnce;
+    expect(delayedImpressionSpy.withArgs('http://www.foo.co.uk')).to.be
+      .calledOnce;
   });
 
   it('should set expansion re-attempt flag after initial failure', () => {

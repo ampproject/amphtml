@@ -57,10 +57,10 @@ const strings = {
     string: 'এমপি ফলফল সম্পর্কে আরও অনেক কিছু জানুন',
   },
   [LocalizedStringId.AMP_STORY_HINT_UI_NEXT_LABEL]: {
-    string: '\'পরবর্তী\' বোতামে ট্যাপ করুন',
+    string: "'পরবর্তী' বোতামে ট্যাপ করুন",
   },
   [LocalizedStringId.AMP_STORY_HINT_UI_PREVIOUS_LABEL]: {
-    string: '\'ফিরে যান\' বোতামে ট্যাপ করুন',
+    string: "'ফিরে যান' বোতামে ট্যাপ করুন",
   },
   [LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL]: {
     string: 'উপরের দিকে সোয়াইপ করুন',
@@ -117,8 +117,9 @@ const strings = {
     string: 'এই পরীক্ষা দেখতে আপনার উইন্ডোর সাইজ বড় করুন',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
-    string: 'এই কন্টেন্ট দেখতে আপনাকে এএমপি স্টোরি এক্সপেরিমেন্ট ফিচারটি ' +
-        'চালু করতে হবে।',
+    string:
+      'এই কন্টেন্ট দেখতে আপনাকে এএমপি স্টোরি এক্সপেরিমেন্ট ফিচারটি ' +
+      'চালু করতে হবে।',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
     string: 'পোর্ট্রেট মোডে পেজটি ভালভাবে দেখা যাবে',

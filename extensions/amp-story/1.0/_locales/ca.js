@@ -69,10 +69,10 @@ const strings = {
     string: 'Reprodueix el vídeo',
   },
   [LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT]: {
-    string: 'No s\'ha pogut copiar l\'enllaç al porta-retalls :(',
+    string: "No s'ha pogut copiar l'enllaç al porta-retalls :(",
   },
   [LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_SUCCESS_TEXT]: {
-    string: 'S\'ha copiat l\'enllaç',
+    string: "S'ha copiat l'enllaç",
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_EMAIL]: {
     string: 'Correu electrònic',
@@ -84,7 +84,7 @@ const strings = {
     string: 'Google+',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINK]: {
-    string: 'Obtén l\'enllaç',
+    string: "Obtén l'enllaç",
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINKEDIN]: {
     string: 'LinkedIn',
@@ -108,18 +108,20 @@ const strings = {
     string: 'Desplega el tuit',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_HEIGHT_SIZE_TEXT]: {
-    string: 'Amplia l\'alçada de la finestra per veure aquesta experiència',
+    string: "Amplia l'alçada de la finestra per veure aquesta experiència",
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT]: {
-    string: 'Amplia l\'alçada i l\'amplada de la finestra per veure aquesta ' +
-        'experiència',
+    string:
+      "Amplia l'alçada i l'amplada de la finestra per veure aquesta " +
+      'experiència',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_WIDTH_SIZE_TEXT]: {
-    string: 'Amplia l\'amplada de la finestra per veure aquesta experiència',
+    string: "Amplia l'amplada de la finestra per veure aquesta experiència",
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
-    string: 'Has d\'activar l\'experiment d\'història AMP per veure aquest ' +
-        'contingut.',
+    string:
+      "Has d'activar l'experiment d'història AMP per veure aquest " +
+      'contingut.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
     string: 'La pàgina es veu millor en mode vertical',

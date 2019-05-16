@@ -23,7 +23,6 @@ import {removeElement} from '../../../src/dom';
 const TAG = 'amp-beopinion';
 
 class AmpBeOpinion extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -65,19 +64,29 @@ class AmpBeOpinion extends AMP.BaseElement {
   layoutCallback() {
     const iframe = getIframe(this.win, this.element, 'beopinion');
     this.applyFillContent(iframe);
-    listenFor(iframe, 'embed-size', data => {
-      // We only get the message if and when there is a tweet to display,
-      // so hide the placeholder
-      this.togglePlaceholder(false);
-      this./*OK*/changeHeight(data['height']);
-    }, /* opt_is3P */true);
-    listenFor(iframe, 'no-content', () => {
-      if (this.getFallback()) {
+    listenFor(
+      iframe,
+      'embed-size',
+      data => {
+        // We only get the message if and when there is a tweet to display,
+        // so hide the placeholder
         this.togglePlaceholder(false);
-        this.toggleFallback(true);
-      }
-      // else keep placeholder displayed since there's no fallback
-    }, /* opt_is3P */true);
+        this./*OK*/ changeHeight(data['height']);
+      },
+      /* opt_is3P */ true
+    );
+    listenFor(
+      iframe,
+      'no-content',
+      () => {
+        if (this.getFallback()) {
+          this.togglePlaceholder(false);
+          this.toggleFallback(true);
+        }
+        // else keep placeholder displayed since there's no fallback
+      },
+      /* opt_is3P */ true
+    );
     this.element.appendChild(iframe);
     this.iframe_ = iframe;
     return this.loadPromise(iframe);

@@ -28,9 +28,10 @@ describes.fakeWin('amp-story origin whitelist', {}, () => {
       return origins;
     }, []);
 
-    expect(hasDuplicates,
-        'Origin list should be:' +
-        `\n\n[\n  '${originList.join('\',\n  \'')}',\n];\n`)
-        .to.be.false;
+    expect(
+      hasDuplicates,
+      'Origin list should be:' +
+        `\n\n[\n  '${originList.join("',\n  '")}',\n];\n`
+    ).to.be.false;
   });
 });

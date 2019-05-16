@@ -21,7 +21,6 @@ import {dev, userAssert} from '../../../src/log';
 /** @const {string} */
 const TAG = 'amp-access-vendor';
 
-
 /**
  * The adapter for a vendor implementation that implements `AccessVendor`
  * interface and delivered via a separate extension. The vendor implementation
@@ -30,7 +29,6 @@ const TAG = 'amp-access-vendor';
  * @implements {./amp-access-source.AccessTypeAdapterDef}
  */
 export class AccessVendorAdapter {
-
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!JsonObject} configJson
@@ -40,8 +38,10 @@ export class AccessVendorAdapter {
     this.ampdoc = ampdoc;
 
     /** @const @private {string} */
-    this.vendorName_ = userAssert(configJson['vendor'],
-        '"vendor" name must be specified');
+    this.vendorName_ = userAssert(
+      configJson['vendor'],
+      '"vendor" name must be specified'
+    );
 
     /** @const @private {!JsonObject} */
     this.vendorConfig_ = configJson[this.vendorName_] || {};

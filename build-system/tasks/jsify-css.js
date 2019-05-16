@@ -15,7 +15,6 @@
  */
 'use strict';
 
-
 const autoprefixer = require('autoprefixer');
 const colors = require('ansi-colors');
 const cssnano = require('cssnano');
@@ -65,8 +64,11 @@ function transformCss(filename, opt_cssnano) {
   opt_cssnano = opt_cssnano || Object.create(null);
   // See http://cssnano.co/optimisations/ for full list.
   // We try and turn off any optimization that is marked unsafe.
-  const cssnanoOptions = Object.assign(Object.create(null),
-      cssNanoDefaultOptions, opt_cssnano);
+  const cssnanoOptions = Object.assign(
+    Object.create(null),
+    cssNanoDefaultOptions,
+    opt_cssnano
+  );
   const cssnanoTransformer = cssnano({preset: ['default', cssnanoOptions]});
 
   const css = fs.readFileSync(filename, 'utf8');

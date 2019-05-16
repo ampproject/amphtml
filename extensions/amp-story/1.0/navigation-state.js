@@ -16,7 +16,6 @@
 import {Observable} from '../../../src/observable';
 import {StateProperty, getStoreService} from './amp-story-store-service';
 
-
 /**
  * Types of state changes that can be consumed.
  * @enum {number}
@@ -28,10 +27,8 @@ export const StateChangeType = {
   END: 3,
 };
 
-
 /** @typedef {{type: !StateChangeType, value: *}} */
 export let StateChangeEventDef;
-
 
 /**
  * State store to decouple navigation changes from consumers.
@@ -88,8 +85,7 @@ export class NavigationState {
    * @param {boolean} isFinalPage
    * TODO(alanorozco): pass whether change was automatic or on user action.
    */
-  updateActivePage(
-    pageIndex, totalPages, pageId, previousPageId, isFinalPage) {
+  updateActivePage(pageIndex, totalPages, pageId, previousPageId, isFinalPage) {
     const changeValue = {
       pageIndex,
       pageId,

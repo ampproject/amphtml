@@ -35,6 +35,7 @@ If you do not yet have a specific code contribution project in mind as you go th
 - [Create a Git branch](#create-a-git-branch)
 - [Pull the latest changes from the amphtml repository](#pull-the-latest-changes-from-the-amphtml-repository)
 - [Edit files and commit them](#edit-files-and-commit-them)
+  * [Code quality and style](#code-quality-and-style)
 - [Testing your changes](#testing-your-changes)
   * [Running tests locally](#running-tests-locally)
   * [Running all the Travis CI checks locally](#running-all-the-travis-ci-checks-locally)
@@ -293,9 +294,9 @@ The common workflow for making changes to files in Git is:
 
 * edit some files using your favorite editor
 
-* if your code requires a new dependency, run `yarn add --dev --exact [packagename]`, which will automatically update `package.json` and `yarn.lock`
+* if your code requires a new dependency, run `yarn add --exact [--dev] <packagename>`, which will automatically update `package.json` and `yarn.lock`
 
-* if you manually edited `package.json`, run `yarn install` to install the dependency and generate an updated `yarn.lock` file
+* if you manually edited `package.json`, run `yarn` to install the dependency and generate an updated `yarn.lock` file
 
 * tell Git that you care about these changes by _staging_ them using the `git add` command
 
@@ -343,13 +344,24 @@ git commit -a -m "<a brief description of your commit>"
 
 Note that you *can* add changes into an existing commit but that opens up some additional Git concepts that you don't really need to make a contribution.
 
+## Code quality and style
+
+The AMP Project uses [Eslint](https://eslint.org/) to ensure code quality and [Prettier](https://prettier.io/) to standardize code style. For easy development, here are two recommendations:
+- Use a code editor with Eslint support to make sure that your code satisfies all of AMP's quality and style rules. [Here](https://eslint.org/docs/user-guide/integrations#editors) is a list of editors with Eslint extension support.
+- Set your editor to automatically fix Eslint errors in your code on save.
+
+For example, if you use [Visual Studio Code](https://code.visualstudio.com/), you can install its [Eslint plugin](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint), and enable the `eslint.autoFixOnSave` setting.
+
+Alternatively, you can manually fix lint errors in your code by running:
+```
+gulp lint --local-changes --fix
+```
+
 # Testing your changes
 
 Before sending your code changes for review, please make sure that all of the affected tests are passing. You may be expected to add/modify some tests as well.
 
-{% call callout('Note', type='note') %}
-Automatically run most checks on `git push` by enabling our pre-push hook. Run `./build-system/enable-git-pre-push.sh`
-{% endcall %}
+Note: You can automatically run critical checks before `git push` by enabling our pre-push hook. To do so, run `./build-system/enable-git-pre-push.sh`.
 
 ## Running tests locally
 

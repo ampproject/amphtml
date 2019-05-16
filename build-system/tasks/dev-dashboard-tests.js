@@ -20,7 +20,6 @@ const deglob = require('globs-to-files');
 const Mocha = require('mocha');
 const {isTravisBuild} = require('../travis');
 
-
 /**
  * Run all the dev dashboard tests
  */
@@ -35,7 +34,9 @@ async function devDashboardTests() {
 
   // Create our deffered
   let resolver;
-  const deferred = new Promise(resolverIn => {resolver = resolverIn;});
+  const deferred = new Promise(resolverIn => {
+    resolver = resolverIn;
+  });
 
   // Run the tests.
   mocha.run(function(failures) {

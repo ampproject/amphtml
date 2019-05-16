@@ -39,8 +39,11 @@ export class DocumentState {
     }
 
     /** @private {string|null} */
-    this.visibilityStateProp_ = getVendorJsPropertyName(this.document_,
-        'visibilityState', true);
+    this.visibilityStateProp_ = getVendorJsPropertyName(
+      this.document_,
+      'visibilityState',
+      true
+    );
     if (this.document_[this.visibilityStateProp_] === undefined) {
       this.visibilityStateProp_ = null;
     }
@@ -55,15 +58,17 @@ export class DocumentState {
       const vendorStop = this.hiddenProp_.indexOf('Hidden');
       if (vendorStop != -1) {
         this.visibilityChangeEvent_ =
-            this.hiddenProp_.substring(0, vendorStop) + 'Visibilitychange';
+          this.hiddenProp_.substring(0, vendorStop) + 'Visibilitychange';
       }
     }
 
     /** @private @const {!Function} */
     this.boundOnVisibilityChanged_ = this.onVisibilityChanged_.bind(this);
     if (this.visibilityChangeEvent_) {
-      this.document_.addEventListener(this.visibilityChangeEvent_,
-          this.boundOnVisibilityChanged_);
+      this.document_.addEventListener(
+        this.visibilityChangeEvent_,
+        this.boundOnVisibilityChanged_
+      );
     }
 
     /** @private {?Observable} */
@@ -122,8 +127,11 @@ export class DocumentState {
     }
     if (!this.bodyAvailableObservable_) {
       this.bodyAvailableObservable_ = new Observable();
-      waitForChild(doc.documentElement, () => !!doc.body,
-          this.onBodyAvailable_.bind(this));
+      waitForChild(
+        doc.documentElement,
+        () => !!doc.body,
+        this.onBodyAvailable_.bind(this)
+      );
     }
     return this.bodyAvailableObservable_.add(handler);
   }
@@ -135,7 +143,6 @@ export class DocumentState {
     this.bodyAvailableObservable_ = null;
   }
 }
-
 
 /**
  * @param {!Window} window

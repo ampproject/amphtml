@@ -21,7 +21,6 @@ import {
 } from '../../../src/url';
 import {listen} from '../../../src/event-helper';
 
-
 /**
  * @private Visible for testing.
  */
@@ -55,8 +54,9 @@ export class LoginDoneDialog {
     if (this.win.opener && this.win.opener != this.win) {
       // This is a dialog postback. Try to communicate with the opener window.
       return this.postback_().then(
-          this.postbackSuccess_.bind(this),
-          this.postbackError_.bind(this));
+        this.postbackSuccess_.bind(this),
+        this.postbackError_.bind(this)
+      );
     }
 
     if (query['url']) {
@@ -83,7 +83,7 @@ export class LoginDoneDialog {
   setStyles_() {
     const doc = this.win.document;
     const style = doc.createElement('style');
-    style./*OK*/textContent = this.buildStyles_();
+    style./*OK*/ textContent = this.buildStyles_();
     doc.head.appendChild(style);
   }
 
@@ -168,21 +168,27 @@ export class LoginDoneDialog {
         }
       });
 
-      opener./*OK*/postMessage({
-        sentinel: 'amp',
-        type: 'result',
-        result: response,
-      }, target);
+      opener./*OK*/ postMessage(
+        {
+          sentinel: 'amp',
+          type: 'result',
+          result: response,
+        },
+        target
+      );
 
       this.win.setTimeout(() => {
         reject(new Error('Timed out'));
       }, 5000);
-    }).then(() => {
-      unlisten();
-    }, error => {
-      unlisten();
-      throw error;
-    });
+    }).then(
+      () => {
+        unlisten();
+      },
+      error => {
+        unlisten();
+        throw error;
+      }
+    );
   }
 
   /**
@@ -211,8 +217,11 @@ export class LoginDoneDialog {
    */
   postbackError_(error) {
     if (this.win.console && this.win.console.log) {
-      (this.win.console./*OK*/error || this.win.console.log).call(
-          this.win.console, 'Postback failed: ', error);
+      (this.win.console./*OK*/ error || this.win.console.log).call(
+        this.win.console,
+        'Postback failed: ',
+        error
+      );
     }
 
     const doc = this.win.document;
@@ -234,7 +243,6 @@ export class LoginDoneDialog {
     };
   }
 }
-
 
 /**
  * The language is selected based on the `hl` query parameter or

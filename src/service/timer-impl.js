@@ -26,10 +26,9 @@ const TAG = 'timer';
 /**
  * Helper with all things Timer.
  *
-* @implements {../service.EmbeddableService}
+ * @implements {../service.EmbeddableService}
  */
 export class Timer {
-
   /**
    * @param {!Window} win
    */
@@ -49,9 +48,9 @@ export class Timer {
   }
 
   /**
-  * Returns time since start in milliseconds.
-  * @return {number}
-  */
+   * Returns time since start in milliseconds.
+   * @return {number}
+   */
   timeSinceStart() {
     return Date.now() - this.startTime_;
   }
@@ -71,13 +70,15 @@ export class Timer {
       // For a delay of zero,  schedule a promise based micro task since
       // they are predictably fast.
       const id = 'p' + this.taskCount_++;
-      this.resolved_.then(() => {
-        if (this.canceled_[id]) {
-          delete this.canceled_[id];
-          return;
-        }
-        callback();
-      }).catch(reportError);
+      this.resolved_
+        .then(() => {
+          if (this.canceled_[id]) {
+            delete this.canceled_[id];
+            return;
+          }
+          callback();
+        })
+        .catch(reportError);
       return id;
     }
     const wrapped = () => {

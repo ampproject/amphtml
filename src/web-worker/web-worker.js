@@ -60,8 +60,12 @@ self.addEventListener('unhandledrejection', errorHandler_);
 self.addEventListener('error', errorHandler_);
 
 self.addEventListener('message', function(event) {
-  const {method, args, id, scope} =
-    /** @type {ToWorkerMessageDef} */ (event.data);
+  const {
+    method,
+    args,
+    id,
+    scope,
+  } = /** @type {ToWorkerMessageDef} */ (event.data);
   let returnValue;
 
   // TODO(choumx): Remove this fallback when we confirm there are no errors.
@@ -100,12 +104,15 @@ self.addEventListener('message', function(event) {
       dev().error(TAG, 'Unrecognized method: %s', method);
   }
 
-  const message =
-    /** @type {FromWorkerMessageDef} */ ({method, returnValue, id});
+  const message = /** @type {FromWorkerMessageDef} */ ({
+    method,
+    returnValue,
+    id,
+  });
   // `message` may only contain values or objects handled by the
   // structured clone algorithm.
   // https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm
-  self./*OK*/postMessage(message);
+  self./*OK*/ postMessage(message);
 });
 
 /**
@@ -121,16 +128,25 @@ function report_(e) {
     e = new Error(e);
   }
   const config = self.AMP_CONFIG || {};
-  const url = urls.errorReporting + '?' +
-      'ww=1' + // Tags request as coming from a worker.
-      '&v=' + encodeURIComponent(config.v) +
-      '&m=' + encodeURIComponent(e.message) +
-      '&ca=' + (config.canary ? 1 : 0) +
-      '&s=' + encodeURIComponent(e.stack || '');
-  fetch(url, /** @type {!RequestInit} */ ({
-    // We don't care about the response.
-    mode: 'no-cors',
-  })).catch(reason => {
-    console./*OK*/error(reason);
+  const url =
+    urls.errorReporting +
+    '?' +
+    'ww=1' + // Tags request as coming from a worker.
+    '&v=' +
+    encodeURIComponent(config.v) +
+    '&m=' +
+    encodeURIComponent(e.message) +
+    '&ca=' +
+    (config.canary ? 1 : 0) +
+    '&s=' +
+    encodeURIComponent(e.stack || '');
+  fetch(
+    url,
+    /** @type {!RequestInit} */ ({
+      // We don't care about the response.
+      mode: 'no-cors',
+    })
+  ).catch(reason => {
+    console./*OK*/ error(reason);
   });
 }

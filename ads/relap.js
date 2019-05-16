@@ -63,7 +63,9 @@ export function relap(global, data) {
     anchorEl.id = data['anchorid'];
     global.document.getElementById('c').appendChild(anchorEl);
 
-    const url = `https://relap.io/api/v6/head.js?token=${encodeURIComponent(data['token'])}&url=${encodeURIComponent(urlParam)}`;
+    const url = `https://relap.io/api/v6/head.js?token=${encodeURIComponent(
+      data['token']
+    )}&url=${encodeURIComponent(urlParam)}`;
     loadScript(global, url);
   }
 }

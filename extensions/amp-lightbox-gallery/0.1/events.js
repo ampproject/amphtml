@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 /** @const @enum {string} */
 export const LightboxGalleryEvents = {
   // Triggered when the lightbox attribute is newly set on an item in order to

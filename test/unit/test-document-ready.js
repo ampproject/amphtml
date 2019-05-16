@@ -15,15 +15,14 @@
  */
 
 import {Services} from '../../src/services';
-import {isDocumentReady,
+import {
+  isDocumentReady,
   onDocumentReady,
   whenDocumentComplete,
   whenDocumentReady,
 } from '../../src/document-ready';
 
-
 describe('documentReady', () => {
-
   let sandbox;
   let testDoc;
   let eventListeners;
@@ -106,14 +105,15 @@ describe('documentReady', () => {
   });
 
   describe('whenDocumentReady', () => {
-
     it('should call callback immediately when ready', () => {
       testDoc.readyState = 'complete';
       const spy = sandbox.spy();
       const spy2 = sandbox.spy();
       const spy3 = sandbox.spy();
 
-      whenDocumentReady(testDoc).then(spy).then(spy2);
+      whenDocumentReady(testDoc)
+        .then(spy)
+        .then(spy2);
 
       whenDocumentReady(testDoc).then(spy3);
 
@@ -161,14 +161,15 @@ describe('documentReady', () => {
   });
 
   describe('whenDocumentComplete', () => {
-
     it('should call callback immediately when complete', () => {
       testDoc.readyState = 'complete';
       const spy = sandbox.spy();
       const spy2 = sandbox.spy();
       const spy3 = sandbox.spy();
 
-      whenDocumentComplete(testDoc).then(spy).then(spy2);
+      whenDocumentComplete(testDoc)
+        .then(spy)
+        .then(spy2);
 
       whenDocumentComplete(testDoc).then(spy3);
 

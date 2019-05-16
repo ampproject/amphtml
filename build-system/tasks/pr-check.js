@@ -23,8 +23,8 @@ const {
 const {determineBuildTargets} = require('../pr-check/build-targets');
 
 const FILENAME = 'pr-check.js';
-const timedExecOrDie =
-  (cmd, unusedFileName) => timedExecOrDieBase(cmd, FILENAME);
+const timedExecOrDie = (cmd, unusedFileName) =>
+  timedExecOrDieBase(cmd, FILENAME);
 
 /**
  * This file runs tests against the local workspace to mimic the CI build as
@@ -51,13 +51,11 @@ async function prCheck() {
     timedExecOrDie('gulp check-types');
   }
 
-  if (buildTargets.has('RUNTIME') ||
-      buildTargets.has('UNIT_TEST')) {
+  if (buildTargets.has('RUNTIME') || buildTargets.has('UNIT_TEST')) {
     timedExecOrDie('gulp test --unit --local-changes --headless');
   }
 
-  if (buildTargets.has('RUNTIME') ||
-      buildTargets.has('INTEGRATION_TEST')) {
+  if (buildTargets.has('RUNTIME') || buildTargets.has('INTEGRATION_TEST')) {
     if (!argv.nobuild) {
       timedExecOrDie('gulp clean');
       timedExecOrDie('gulp dist --fortesting');
@@ -65,13 +63,11 @@ async function prCheck() {
     timedExecOrDie('gulp test --nobuild --integration --headless');
   }
 
-  if (buildTargets.has('RUNTIME') ||
-      buildTargets.has('VALIDATOR')) {
+  if (buildTargets.has('RUNTIME') || buildTargets.has('VALIDATOR')) {
     timedExecOrDie('gulp validator');
   }
 
-  if (buildTargets.has('RUNTIME') ||
-      buildTargets.has('VALIDATOR_WEBUI')) {
+  if (buildTargets.has('RUNTIME') || buildTargets.has('VALIDATOR_WEBUI')) {
     timedExecOrDie('gulp validator-webui');
   }
 }
@@ -81,7 +77,7 @@ module.exports = {
 };
 
 prCheck.description =
-    'Runs a subset of the Travis CI checks against local changes.';
+  'Runs a subset of the Travis CI checks against local changes.';
 prCheck.flags = {
   'nobuild': '  Skips building the runtime via `gulp dist`.',
 };

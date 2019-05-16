@@ -19,7 +19,6 @@ import {deserializeMessage} from '../../../src/3p-frame-messaging';
 import {layoutRectLtwh} from '../../../src/layout-rect';
 
 describes.realWin('inabox-host:messaging', {}, env => {
-
   let win;
   let host;
   let iframe1;
@@ -42,131 +41,169 @@ describes.realWin('inabox-host:messaging', {}, env => {
     iframe3.contentWindow.postMessage = () => {};
     iframeUntrusted.contentWindow.postMessage = () => {};
     iframe1.dataset.ampAllowed =
-        'send-positions,full-overlay-frame,cancel-full-overlay-frame';
-    iframe2.dataset.ampAllowed =
-        'send-positions';
+      'send-positions,full-overlay-frame,cancel-full-overlay-frame';
+    iframe2.dataset.ampAllowed = 'send-positions';
     iframeUntrusted.dataset.ampAllowed =
-        'send-positions,full-overlay-frame,cancel-full-overlay-frame';
+      'send-positions,full-overlay-frame,cancel-full-overlay-frame';
     host = new InaboxMessagingHost(win, [iframe1, iframe2, iframe3]);
   });
 
   describe('processMessage', () => {
-
     it('should process valid message', () => {
-      expect(host.processMessage({
-        source: iframe1.contentWindow,
-        origin: 'www.example.com',
-        data: 'amp-' + JSON.stringify({
-          sentinel: '0-123',
-          type: 'send-positions',
-        }),
-      })).to.be.true;
+      expect(
+        host.processMessage({
+          source: iframe1.contentWindow,
+          origin: 'www.example.com',
+          data:
+            'amp-' +
+            JSON.stringify({
+              sentinel: '0-123',
+              type: 'send-positions',
+            }),
+        })
+      ).to.be.true;
     });
 
     it('should process valid message 2', () => {
-      expect(host.processMessage({
-        source: iframe1.contentWindow,
-        origin: 'www.example.com',
-        data: 'amp-' + JSON.stringify({
-          sentinel: '0-123',
-          type: 'full-overlay-frame',
-        }),
-      })).to.be.true;
+      expect(
+        host.processMessage({
+          source: iframe1.contentWindow,
+          origin: 'www.example.com',
+          data:
+            'amp-' +
+            JSON.stringify({
+              sentinel: '0-123',
+              type: 'full-overlay-frame',
+            }),
+        })
+      ).to.be.true;
     });
 
     it('should ignore non-string message', () => {
-      expect(host.processMessage({
-        source: iframe1.contentWindow,
-        origin: 'www.example.com',
-        data: {x: 1},
-      })).to.be.false;
+      expect(
+        host.processMessage({
+          source: iframe1.contentWindow,
+          origin: 'www.example.com',
+          data: {x: 1},
+        })
+      ).to.be.false;
     });
 
     it('should ignore message without sentinel', () => {
-      expect(host.processMessage({
-        source: iframe1.contentWindow,
-        origin: 'www.example.com',
-        data: 'amp-' + JSON.stringify({
-          type: 'send-positions',
-        }),
-      })).to.be.false;
+      expect(
+        host.processMessage({
+          source: iframe1.contentWindow,
+          origin: 'www.example.com',
+          data:
+            'amp-' +
+            JSON.stringify({
+              type: 'send-positions',
+            }),
+        })
+      ).to.be.false;
     });
 
     it('should ignore message does not start with amp-', () => {
-      expect(host.processMessage({
-        source: iframe1.contentWindow,
-        origin: 'www.example.com',
-        data: 'map-' + JSON.stringify({
-          sentinel: '0-123',
-          type: 'send-positions',
-        }),
-      })).to.be.false;
+      expect(
+        host.processMessage({
+          source: iframe1.contentWindow,
+          origin: 'www.example.com',
+          data:
+            'map-' +
+            JSON.stringify({
+              sentinel: '0-123',
+              type: 'send-positions',
+            }),
+        })
+      ).to.be.false;
     });
 
     it('should ignore message from untrusted iframe', () => {
-      expect(host.processMessage({
-        source: iframeUntrusted.contentWindow,
-        origin: 'www.example.com',
-        data: 'amp-' + JSON.stringify({
-          sentinel: '0-123',
-          type: 'send-positions',
-        }),
-      })).to.be.false;
+      expect(
+        host.processMessage({
+          source: iframeUntrusted.contentWindow,
+          origin: 'www.example.com',
+          data:
+            'amp-' +
+            JSON.stringify({
+              sentinel: '0-123',
+              type: 'send-positions',
+            }),
+        })
+      ).to.be.false;
     });
 
     it('should tolerate message with null source', () => {
       host.processMessage({
         source: null,
         origin: 'www.example.com',
-        data: 'amp-' + JSON.stringify({
-          sentinel: '0-123',
-          type: 'send-positions',
-        }),
+        data:
+          'amp-' +
+          JSON.stringify({
+            sentinel: '0-123',
+            type: 'send-positions',
+          }),
       });
     });
 
     it('should process messages with allowed actions', () => {
-      expect(host.processMessage({
-        source: iframe2.contentWindow,
-        origin: 'www.example.com',
-        data: 'amp-' + JSON.stringify({
-          sentinel: '0-124',
-          type: 'send-positions',
-        }),
-      })).to.be.true;
+      expect(
+        host.processMessage({
+          source: iframe2.contentWindow,
+          origin: 'www.example.com',
+          data:
+            'amp-' +
+            JSON.stringify({
+              sentinel: '0-124',
+              type: 'send-positions',
+            }),
+        })
+      ).to.be.true;
     });
 
     it('should ignore messages with disallowed actions', () => {
-      expect(host.processMessage({
-        source: iframe2.contentWindow,
-        origin: 'www.example.com',
-        data: 'amp-' + JSON.stringify({
-          sentinel: '0-124',
-          type: 'full-overlay-frame',
-        }),
-      })).to.be.false;
+      expect(
+        host.processMessage({
+          source: iframe2.contentWindow,
+          origin: 'www.example.com',
+          data:
+            'amp-' +
+            JSON.stringify({
+              sentinel: '0-124',
+              type: 'full-overlay-frame',
+            }),
+        })
+      ).to.be.false;
     });
 
     it('should allow read-only messages from frames with no whitelist', () => {
-      expect(host.processMessage({
-        source: iframe3.contentWindow,
-        origin: 'www.example.com',
-        data: 'amp-' + JSON.stringify({
-          sentinel: '0-125',
-          type: 'send-positions',
-        }),
-      })).to.be.true;
+      expect(
+        host.processMessage({
+          source: iframe3.contentWindow,
+          origin: 'www.example.com',
+          data:
+            'amp-' +
+            JSON.stringify({
+              sentinel: '0-125',
+              type: 'send-positions',
+            }),
+        })
+      ).to.be.true;
     });
 
     it('should ignore write messages from frames with no whitelist', () => {
-      expect(host.processMessage({
-        source: iframe3.contentWindow,
-        origin: 'www.example.com',
-        data: 'amp-' + JSON.stringify({
-          sentinel: '0-125',
-          type: 'full-overlay-frame',
-        }),
-      })).to.be.false;
+      expect(
+        host.processMessage({
+          source: iframe3.contentWindow,
+          origin: 'www.example.com',
+          data:
+            'amp-' +
+            JSON.stringify({
+              sentinel: '0-125',
+              type: 'full-overlay-frame',
+            }),
+        })
+      ).to.be.false;
     });
   });
 
@@ -182,18 +219,21 @@ describes.realWin('inabox-host:messaging', {}, env => {
         return layoutRectLtwh(10, 10, 100, 100);
       });
       sandbox.stub(host.positionObserver_, 'observe').callsFake(() => {});
-      iframe1.getBoundingClientRect =
-          () => {return layoutRectLtwh(5, 5, 20, 20);};
+      iframe1.getBoundingClientRect = () => {
+        return layoutRectLtwh(5, 5, 20, 20);
+      };
       sandbox.stub(host.positionObserver_, 'getTargetRect').callsFake(() => {
         return iframe1.getBoundingClientRect();
       });
       host.processMessage({
         source: iframe1.contentWindow,
         origin: 'www.example.com',
-        data: 'amp-' + JSON.stringify({
-          sentinel: '0-123',
-          type: 'send-positions',
-        }),
+        data:
+          'amp-' +
+          JSON.stringify({
+            sentinel: '0-123',
+            type: 'send-positions',
+          }),
       });
       const message = postMessageSpy.getCall(0).args[0];
       const targetOrigin = postMessageSpy.getCall(0).args[1];
@@ -208,7 +248,6 @@ describes.realWin('inabox-host:messaging', {}, env => {
   });
 
   describe('send-positions position observer callback', () => {
-
     let callback;
     let target;
     let postMessageSpy;
@@ -230,10 +269,12 @@ describes.realWin('inabox-host:messaging', {}, env => {
       host.processMessage({
         source: iframe1.contentWindow,
         origin: 'www.example.com',
-        data: 'amp-' + JSON.stringify({
-          sentinel: '0-123',
-          type: 'send-positions',
-        }),
+        data:
+          'amp-' +
+          JSON.stringify({
+            sentinel: '0-123',
+            type: 'send-positions',
+          }),
       });
 
       expect(target).to.equal(iframe1);
@@ -253,19 +294,23 @@ describes.realWin('inabox-host:messaging', {}, env => {
       host.processMessage({
         source: iframe1.contentWindow,
         origin: 'www.example.com',
-        data: 'amp-' + JSON.stringify({
-          sentinel: '0-123',
-          type: 'send-positions',
-        }),
+        data:
+          'amp-' +
+          JSON.stringify({
+            sentinel: '0-123',
+            type: 'send-positions',
+          }),
       });
 
       host.processMessage({
         source: iframe1.contentWindow,
         origin: 'www.example.com',
-        data: 'amp-' + JSON.stringify({
-          sentinel: '0-123',
-          type: 'send-positions',
-        }),
+        data:
+          'amp-' +
+          JSON.stringify({
+            sentinel: '0-123',
+            type: 'send-positions',
+          }),
       });
 
       postMessageSpy.resetHistory();
@@ -275,34 +320,35 @@ describes.realWin('inabox-host:messaging', {}, env => {
   });
 
   describe('full-overlay-frame', () => {
-
     let iframePostMessageSpy;
 
     beforeEach(() => {
       iframe1.contentWindow.postMessage = iframePostMessageSpy = sandbox.stub();
     });
 
-
     it('should accept request and expand', () => {
       const boxRect = {a: 1, b: 2}; // we don't care
 
-      const expandFrame = sandbox./*OK*/stub(
-          host.frameOverlayManager_, 'expandFrame').callsFake(
-          (iframe, callback) => {
-            callback(boxRect);
-          });
+      const expandFrame = sandbox
+        ./*OK*/ stub(host.frameOverlayManager_, 'expandFrame')
+        .callsFake((iframe, callback) => {
+          callback(boxRect);
+        });
 
       host.processMessage({
         source: iframe1.contentWindow,
         origin: 'www.example.com',
-        data: 'amp-' + JSON.stringify({
-          sentinel: '0-123',
-          type: 'full-overlay-frame',
-        }),
+        data:
+          'amp-' +
+          JSON.stringify({
+            sentinel: '0-123',
+            type: 'full-overlay-frame',
+          }),
       });
 
       const message = deserializeMessage(
-          iframePostMessageSpy.getCall(0).args[0]);
+        iframePostMessageSpy.getCall(0).args[0]
+      );
 
       expect(expandFrame).calledWith(iframe1, sinon.match.any);
       expect(message.type).to.equal('full-overlay-frame-response');
@@ -313,30 +359,32 @@ describes.realWin('inabox-host:messaging', {}, env => {
     it('should accept reset request and collapse', () => {
       const boxRect = {c: 1, d: 2}; // we don't care
 
-      const collapseFrame = sandbox./*OK*/stub(
-          host.frameOverlayManager_, 'collapseFrame').callsFake(
-          (iframe, callback) => {
-            callback(boxRect);
-          });
+      const collapseFrame = sandbox
+        ./*OK*/ stub(host.frameOverlayManager_, 'collapseFrame')
+        .callsFake((iframe, callback) => {
+          callback(boxRect);
+        });
 
       host.processMessage({
         source: iframe1.contentWindow,
         origin: 'www.example.com',
-        data: 'amp-' + JSON.stringify({
-          sentinel: '0-123',
-          type: 'cancel-full-overlay-frame',
-        }),
+        data:
+          'amp-' +
+          JSON.stringify({
+            sentinel: '0-123',
+            type: 'cancel-full-overlay-frame',
+          }),
       });
 
       const message = deserializeMessage(
-          iframePostMessageSpy.getCall(0).args[0]);
+        iframePostMessageSpy.getCall(0).args[0]
+      );
 
       expect(collapseFrame).calledWith(iframe1, sinon.match.any);
       expect(message.type).to.equal('cancel-full-overlay-frame-response');
       expect(message.success).to.be.true;
       expect(message.boxRect).to.deep.equal(boxRect);
     });
-
   });
 
   function createNestedIframeMocks(depth, numXDomain) {
@@ -374,19 +422,22 @@ describes.realWin('inabox-host:messaging', {}, env => {
 
   function breakCanInspectWindowForWindow(win) {
     Object.defineProperty(win['location'], 'href', {
-      get: () => {throw new Error('Error!!');},
+      get: () => {
+        throw new Error('Error!!');
+      },
     });
     Object.defineProperty(win, 'test', {
-      get: () => {throw new Error('Error!!');},
+      get: () => {
+        throw new Error('Error!!');
+      },
     });
   }
 
   describe('getMeasureableFrame', () => {
     it('should return correct frame when many iframes at same level', () => {
-      const {source} = createNestedIframeMocks(6,3);
+      const {source} = createNestedIframeMocks(6, 3);
       const expectedMeasureableWin = source.parent.parent;
-      const correctFrame =
-            expectedMeasureableWin.parent.document.querySelectorAll()[0];
+      const correctFrame = expectedMeasureableWin.parent.document.querySelectorAll()[0];
       expectedMeasureableWin.parent.document.querySelectorAll = () => {
         const f1 = {};
         const f2 = {};
@@ -394,26 +445,30 @@ describes.realWin('inabox-host:messaging', {}, env => {
         return [f1, f2, correctFrame, f3];
       };
       expect(host.getMeasureableFrame(source).contentWindow).to.deep.equal(
-          expectedMeasureableWin);
+        expectedMeasureableWin
+      );
     });
 
     it('should return correct frame multiple level of xdomain', () => {
-      const {source} = createNestedIframeMocks(6,3);
+      const {source} = createNestedIframeMocks(6, 3);
       const expectedMeasurableWin = source.parent.parent;
       expect(host.getMeasureableFrame(source).contentWindow).to.deep.equal(
-          expectedMeasurableWin);
+        expectedMeasurableWin
+      );
     });
 
     it('should return correct frame for single xdomain frame', () => {
-      const {source} = createNestedIframeMocks(10,1);
+      const {source} = createNestedIframeMocks(10, 1);
       expect(host.getMeasureableFrame(source).contentWindow).to.deep.equal(
-          source);
+        source
+      );
     });
 
     it('should return correct frame for no xdomain frames', () => {
       const {source} = createNestedIframeMocks(5);
       expect(host.getMeasureableFrame(source).contentWindow).to.deep.equal(
-          source);
+        source
+      );
     });
   });
 
@@ -421,7 +476,7 @@ describes.realWin('inabox-host:messaging', {}, env => {
     const sentinel = '123456789101112';
 
     it('should return correct frame when intermediate xdomain frames', () => {
-      const iframeObj = createNestedIframeMocks(6,3);
+      const iframeObj = createNestedIframeMocks(6, 3);
       const {source: sourceMock, topWin: topWinMock} = iframeObj;
       const frameMock = topWinMock.document.querySelectorAll()[0];
       const expectedWin = sourceMock.parent.parent;
@@ -447,8 +502,11 @@ describes.realWin('inabox-host:messaging', {}, env => {
       const frameMockWrong2 = {};
       const frameMock = topWinMock.document.querySelectorAll()[0];
       const expectedWin = sourceMock;
-      host = new InaboxMessagingHost(
-          win, [frameMockWrong1, frameMockWrong2, frameMock]);
+      host = new InaboxMessagingHost(win, [
+        frameMockWrong1,
+        frameMockWrong2,
+        frameMock,
+      ]);
       const {measurableFrame} = host.getFrameElement_(sourceMock, sentinel);
       expect(measurableFrame.contentWindow).to.deep.equal(expectedWin);
     });
@@ -460,20 +518,24 @@ describes.realWin('inabox-host:messaging', {}, env => {
       const creativeWinMock = {};
       const creativeIframeMock = {};
       host.iframeMap_[sentinel] = {
-        'iframe': creativeIframeMock, 'measurableFrame': creativeIframeMock};
-      const {measurableFrame} =
-          host.getFrameElement_(creativeWinMock, sentinel);
+        'iframe': creativeIframeMock,
+        'measurableFrame': creativeIframeMock,
+      };
+      const {measurableFrame} = host.getFrameElement_(
+        creativeWinMock,
+        sentinel
+      );
       expect(measurableFrame).to.equal(creativeIframeMock);
     });
 
     it('should return null if frame is not registered', () => {
-      const iframeObj = createNestedIframeMocks(6,3);
+      const iframeObj = createNestedIframeMocks(6, 3);
       const sourceMock = iframeObj.source;
       expect(host.getFrameElement_(sourceMock, sentinel)).to.be.null;
     });
 
     it('should return null if frame is more than 10 levels deep', () => {
-      const iframeObj = createNestedIframeMocks(12,1);
+      const iframeObj = createNestedIframeMocks(12, 1);
       const {source: sourceMock, topWin: topWinMock} = iframeObj;
       const frameMock = topWinMock.document.querySelectorAll()[0];
       host = new InaboxMessagingHost(win, [frameMock]);
@@ -484,11 +546,11 @@ describes.realWin('inabox-host:messaging', {}, env => {
   describe('unregisterIframe', () => {
     it('unregisters frames', () => {
       // Setup 3 frames with mock sentinel values.
-      const iframeObjA = createNestedIframeMocks(6,3);
+      const iframeObjA = createNestedIframeMocks(6, 3);
       const frameMockA = iframeObjA.topWin.document.querySelectorAll()[0];
-      const iframeObjB = createNestedIframeMocks(6,6);
+      const iframeObjB = createNestedIframeMocks(6, 6);
       const frameMockB = iframeObjB.topWin.document.querySelectorAll()[0];
-      const iframeObjC = createNestedIframeMocks(6,0);
+      const iframeObjC = createNestedIframeMocks(6, 0);
       const frameMockC = iframeObjC.topWin.document.querySelectorAll()[0];
       const observeUnregisterMock = sandbox.spy();
       host = new InaboxMessagingHost(win, [frameMockA, frameMockB, frameMockC]);
@@ -520,11 +582,11 @@ describes.realWin('inabox-host:messaging', {}, env => {
     });
 
     it('no errors or effects if called with a non-registered iframe', () => {
-      const iframeObj = createNestedIframeMocks(6,3);
+      const iframeObj = createNestedIframeMocks(6, 3);
       const frameMock = iframeObj.topWin.document.querySelectorAll()[0];
       host = new InaboxMessagingHost(win, [frameMock]);
       host.getFrameElement_(iframeObj.source, 'sentinelA');
-      host.unregisterIframe(createNestedIframeMocks(1,1));
+      host.unregisterIframe(createNestedIframeMocks(1, 1));
       expect(host.iframes_.length).to.equal(1);
       expect('sentinelA' in host.iframeMap_).to.be.true;
     });

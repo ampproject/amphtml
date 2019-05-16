@@ -36,41 +36,48 @@ export function imedia(global, data) {
   }
   mW.inPagePositions.push({parentElement, context: global.context});
 
-  computeInMasterFrame(global, 'imedia-load', done => {
-    loadScript(global, 'https://i.imedia.cz/js/im3.js', () => {
-      if (global.im != null) {
-        mW.im = global.im;
-        mW.im.conf.referer = context.canonicalUrl;
+  computeInMasterFrame(
+    global,
+    'imedia-load',
+    done => {
+      loadScript(global, 'https://i.imedia.cz/js/im3.js', () => {
+        if (global.im != null) {
+          mW.im = global.im;
+          mW.im.conf.referer = context.canonicalUrl;
 
-        // send request to get all ads
-        mW.im.getAds(positions, {AMPcallback: ads => {
-          mW.ads = ads;
-          done(null);
-        }});
-      }});
-  }, () => {
-    mW.inPagePositions = mW.inPagePositions.filter(inPagePostion => {
-      let used = true;
-      positions.filter((position, index) => {
-
-        // match right element and zone to write advert from adserver
-        if (inPagePostion.parentElement.id == position.id) {
-          used = false;
-          position.id = inPagePostion.parentElement; // right element "c" to position obj.
-          if (mW.im.writeAd) {
-            mW.im.writeAd(mW.ads[index], position);
-
-            // inform AMP runtime when the ad starts rendering
-            if (mW.ads[index].impress) {
-              inPagePostion.context.renderStart();
-            } else {
-              inPagePostion.context.noContentAvailable();
-            }
-          }
-          return false;
+          // send request to get all ads
+          mW.im.getAds(positions, {
+            AMPcallback: ads => {
+              mW.ads = ads;
+              done(null);
+            },
+          });
         }
       });
-      return used; // remove (filter) element filled with add
-    });
-  });
+    },
+    () => {
+      mW.inPagePositions = mW.inPagePositions.filter(inPagePostion => {
+        let used = true;
+        positions.filter((position, index) => {
+          // match right element and zone to write advert from adserver
+          if (inPagePostion.parentElement.id == position.id) {
+            used = false;
+            position.id = inPagePostion.parentElement; // right element "c" to position obj.
+            if (mW.im.writeAd) {
+              mW.im.writeAd(mW.ads[index], position);
+
+              // inform AMP runtime when the ad starts rendering
+              if (mW.ads[index].impress) {
+                inPagePostion.context.renderStart();
+              } else {
+                inPagePostion.context.noContentAvailable();
+              }
+            }
+            return false;
+          }
+        });
+        return used; // remove (filter) element filled with add
+      });
+    }
+  );
 }

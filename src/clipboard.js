@@ -16,7 +16,6 @@
 import {removeElement} from './dom';
 import {setStyles} from './style';
 
-
 /**
  * @param {!Window} win
  * @param {string} text
@@ -61,7 +60,6 @@ export function copyTextToClipboard(win, text) {
 
   return copySuccessful;
 }
-
 
 /**
  * @param {!Document} doc

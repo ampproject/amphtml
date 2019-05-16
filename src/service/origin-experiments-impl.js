@@ -31,7 +31,8 @@ const PUBLIC_JWK = /** @type {!webCrypto.JsonWebKey} */ ({
   'ext': true,
   'key_ops': ['verify'],
   'kty': 'RSA',
-  'n': 'uAGSMYKze8Fit508UaGHz1eZowfX4YsA0lmyi-65xQfjF7nMo61c4Iz4erdqgRp-ov662yVPquhPmTxgB-nzNcTPrj15Jo05Js78Q9hS2hrPIjKMlzcKSYQN_08QieWKOSmVbLSv_-4n9Ms5ta8nRs4pwc_2nX5n7m5B5GH4VerGbqIWIn9FRNYMShBRQ9TCHpb6BIUTwUn6iwmJLenq0A1xhGrQ9rswGC1QJhjotkeReKXZDLLWaFr0uRw-IyvRa5RiiEGntgOvcbvamM5TnbKavc2rxvg2TWTCNQnb7lWSAzldJA_yAOYet_MjnHMyj2srUdbQSDCk8kPWWuafiQ', // eslint-disable-line max-len
+  'n':
+    'uAGSMYKze8Fit508UaGHz1eZowfX4YsA0lmyi-65xQfjF7nMo61c4Iz4erdqgRp-ov662yVPquhPmTxgB-nzNcTPrj15Jo05Js78Q9hS2hrPIjKMlzcKSYQN_08QieWKOSmVbLSv_-4n9Ms5ta8nRs4pwc_2nX5n7m5B5GH4VerGbqIWIn9FRNYMShBRQ9TCHpb6BIUTwUn6iwmJLenq0A1xhGrQ9rswGC1QJhjotkeReKXZDLLWaFr0uRw-IyvRa5RiiEGntgOvcbvamM5TnbKavc2rxvg2TWTCNQnb7lWSAzldJA_yAOYet_MjnHMyj2srUdbQSDCk8kPWWuafiQ', // eslint-disable-line max-len
 });
 
 /**
@@ -96,10 +97,11 @@ export class OriginExperiments {
         const meta = metas[i];
         const token = meta.getAttribute('content');
         if (token) {
-          const p = this.tokenMaster_.verifyToken(
-              token, win.location, publicKey).catch(error => {
-            user().error(TAG, 'Failed to verify experiment token:', error);
-          });
+          const p = this.tokenMaster_
+            .verifyToken(token, win.location, publicKey)
+            .catch(error => {
+              user().error(TAG, 'Failed to verify experiment token:', error);
+            });
           promises.push(p);
         } else {
           user().error(TAG, 'Missing content for experiment token: ', meta);
@@ -133,14 +135,18 @@ export class TokenMaster {
    * @protected
    */
   generateKeys() {
-    const generationAlgo = Object.assign({
-      modulusLength: 2048,
-      publicExponent: Uint8Array.of(1, 0, 1),
-    }, this.crypto_.pkcsAlgo);
+    const generationAlgo = Object.assign(
+      {
+        modulusLength: 2048,
+        publicExponent: Uint8Array.of(1, 0, 1),
+      },
+      this.crypto_.pkcsAlgo
+    );
     return this.crypto_.subtle.generateKey(
-        /** @type {{name: string}} */ (generationAlgo),
-        /* extractable */ true,
-        /* keyUsages */ ['sign', 'verify']);
+      /** @type {{name: string}} */ (generationAlgo),
+      /* extractable */ true,
+      /* keyUsages */ ['sign', 'verify']
+    );
   }
 
   /**
@@ -195,31 +201,35 @@ export class TokenMaster {
       const data = bytes.subarray(0, i);
       const signature = bytes.subarray(i);
 
-      resolve(this.verify_(signature, data, publicKey).then(verified => {
-        if (!verified) {
-          throw new Error('Failed to verify token signature.');
-        }
-        // Convert config from bytes to JS object.
-        const configStr = bytesToString(configBytes);
-        const config = parseJson(configStr);
+      resolve(
+        this.verify_(signature, data, publicKey).then(verified => {
+          if (!verified) {
+            throw new Error('Failed to verify token signature.');
+          }
+          // Convert config from bytes to JS object.
+          const configStr = bytesToString(configBytes);
+          const config = parseJson(configStr);
 
-        // Check token experiment origin against `location`.
-        const approvedOrigin = this.url_.parse(config['origin']).origin;
-        const sourceOrigin = getSourceOrigin(location);
-        if (approvedOrigin !== sourceOrigin) {
-          throw new Error(`Config origin (${approvedOrigin}) does not match ` +
-              `window (${sourceOrigin}).`);
-        }
+          // Check token experiment origin against `location`.
+          const approvedOrigin = this.url_.parse(config['origin']).origin;
+          const sourceOrigin = getSourceOrigin(location);
+          if (approvedOrigin !== sourceOrigin) {
+            throw new Error(
+              `Config origin (${approvedOrigin}) does not match ` +
+                `window (${sourceOrigin}).`
+            );
+          }
 
-        // Check token expiration date.
-        const experimentId = config['experiment'];
-        const expiration = config['expiration'];
-        if (expiration >= Date.now()) {
-          return experimentId;
-        } else {
-          throw new Error(`Experiment "${experimentId}" has expired.`);
-        }
-      }));
+          // Check token expiration date.
+          const experimentId = config['experiment'];
+          const expiration = config['expiration'];
+          if (expiration >= Date.now()) {
+            return experimentId;
+          } else {
+            throw new Error(`Experiment "${experimentId}" has expired.`);
+          }
+        })
+      );
     });
   }
 
@@ -289,6 +299,8 @@ export function installOriginExperimentsForDoc(ampdoc) {
  * @return {!OriginExperiments}
  */
 export function originExperimentsForDoc(element) {
-  return /** @type {!OriginExperiments} */ (
-    getServiceForDoc(element, 'origin-experiments'));
+  return /** @type {!OriginExperiments} */ (getServiceForDoc(
+    element,
+    'origin-experiments'
+  ));
 }

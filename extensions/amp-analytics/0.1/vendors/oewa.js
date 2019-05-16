@@ -17,7 +17,8 @@
 export const OEWA_CONFIG = /** @type {!JsonObject} */ ({
   'transport': {'beacon': false, 'xhrpost': false, 'image': true},
   'requests': {
-    'pageview': '${url}?s=${s}' +
+    'pageview':
+      '${url}?s=${s}' +
       '&amp=1' +
       '&cp=${cp}' +
       '&host=${canonicalHost}' +

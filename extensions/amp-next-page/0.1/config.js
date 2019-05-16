@@ -56,8 +56,10 @@ export function assertConfig(context, config, documentUrl) {
   assertRecos(context, config.pages, documentUrl);
 
   if ('hideSelectors' in config) {
-    userAssert(isArray(config['hideSelectors']),
-        'amp-next-page hideSelectors should be an array');
+    userAssert(
+      isArray(config['hideSelectors']),
+      'amp-next-page hideSelectors should be an array'
+    );
     assertSelectors(config['hideSelectors']);
   }
 
@@ -73,9 +75,7 @@ function assertRecos(context, recos, documentUrl) {
   recos.forEach(reco => assertReco(context, reco, documentUrl));
 }
 
-const BANNED_SELECTOR_PATTERNS = [
-  /(^|\W)i-amphtml-/,
-];
+const BANNED_SELECTOR_PATTERNS = [/(^|\W)i-amphtml-/];
 
 /**
  * Asserts for valid selectors.
@@ -85,10 +85,15 @@ const BANNED_SELECTOR_PATTERNS = [
 function assertSelectors(selectors) {
   selectors.forEach(selector => {
     BANNED_SELECTOR_PATTERNS.forEach(pattern => {
-      user().assertString(selector,
-          'amp-next-page hideSelector value should be a string');
-      userAssert(!pattern.test(selector),
-          'amp-next-page hideSelector %s not allowed', selector);
+      user().assertString(
+        selector,
+        'amp-next-page hideSelector value should be a string'
+      );
+      userAssert(
+        !pattern.test(selector),
+        'amp-next-page hideSelector %s not allowed',
+        selector
+      );
     });
   });
 }
@@ -111,18 +116,23 @@ function assertReco(context, reco, documentUrl) {
   const sourceOrigin = getSourceOrigin(documentUrl);
 
   userAssert(
-      url.origin === origin || url.origin === sourceOrigin
-      || isValidAdSenseURL(context, url, origin),
-      'pages must be from the same origin as the current document');
+    url.origin === origin ||
+      url.origin === sourceOrigin ||
+      isValidAdSenseURL(context, url, origin),
+    'pages must be from the same origin as the current document'
+  );
   user().assertString(reco.image, 'image must be a string');
   user().assertString(reco.title, 'title must be a string');
 
   // Rewrite canonical URLs to cache URLs, when served from the cache.
   if (sourceOrigin !== origin && url.origin === sourceOrigin) {
-    reco.ampUrl = `${origin}/c/` +
-        (url.protocol === 'https:' ? 's/' : '') +
-        encodeURIComponent(url.host) +
-        url.pathname + (url.search || '') + (url.hash || '');
+    reco.ampUrl =
+      `${origin}/c/` +
+      (url.protocol === 'https:' ? 's/' : '') +
+      encodeURIComponent(url.host) +
+      url.pathname +
+      (url.search || '') +
+      (url.hash || '');
   }
 }
 

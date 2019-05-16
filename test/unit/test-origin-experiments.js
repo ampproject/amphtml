@@ -25,7 +25,8 @@ import {user} from '../../src/log';
 describes.fakeWin('OriginExperiments', {amp: true}, env => {
   const TAG = 'OriginExperiments';
   // Token enables experiment "foo" for origin "https://origin.com".
-  const token = 'AAAAAFd7Im9yaWdpbiI6Imh0dHBzOi8vb3JpZ2luLmNvbSIsImV4cGVyaW1lbnQiOiJmb28iLCJleHBpcmF0aW9uIjoxLjc5NzY5MzEzNDg2MjMxNTdlKzMwOH0+0WnsFJFtFJzkrzqxid2h3jnFI2C7FTK+8iRYcU1r+9PZtnMPJCVCkNkxWGpXFZ6z2FwIa/hY4XDM//GJHr+2pdChx67wm6RIY1NDwcYqFbUrugEqWiT/2RviS9PPhtP6PKgUDI+0opQUt2ibXhsc1KynroAcGTaaxofmpnuMdj7vjGlWTF+6WCFYfAzqcLJB5a4+Drop9ZTEYRbRROMVROC8EGHwugeMfoNf3roCqaJydADQ/tSTY/fPZOlcwOtGW8GE4s/KlNyFaonjEYOROuLctJxYAqwIStQ4TdS7xfy70hsgVLCKnLeXIRJKN0eaJCkLy6BFbIrCH5FhjhbY'; // eslint-disable-line max-len
+  const token =
+    'AAAAAFd7Im9yaWdpbiI6Imh0dHBzOi8vb3JpZ2luLmNvbSIsImV4cGVyaW1lbnQiOiJmb28iLCJleHBpcmF0aW9uIjoxLjc5NzY5MzEzNDg2MjMxNTdlKzMwOH0+0WnsFJFtFJzkrzqxid2h3jnFI2C7FTK+8iRYcU1r+9PZtnMPJCVCkNkxWGpXFZ6z2FwIa/hY4XDM//GJHr+2pdChx67wm6RIY1NDwcYqFbUrugEqWiT/2RviS9PPhtP6PKgUDI+0opQUt2ibXhsc1KynroAcGTaaxofmpnuMdj7vjGlWTF+6WCFYfAzqcLJB5a4+Drop9ZTEYRbRROMVROC8EGHwugeMfoNf3roCqaJydADQ/tSTY/fPZOlcwOtGW8GE4s/KlNyFaonjEYOROuLctJxYAqwIStQ4TdS7xfy70hsgVLCKnLeXIRJKN0eaJCkLy6BFbIrCH5FhjhbY'; // eslint-disable-line max-len
 
   let ampdoc;
   let isPkcsAvailable;
@@ -107,7 +108,6 @@ describes.fakeWin('OriginExperiments', {amp: true}, env => {
   });
 });
 
-
 describes.fakeWin('TokenMaster', {amp: true}, env => {
   let tokenMaster;
 
@@ -162,48 +162,74 @@ describes.fakeWin('TokenMaster', {amp: true}, env => {
 
   it('should throw for an unknown token version number', () => {
     const verify = tokenMaster.verifyToken(
-        tokenWithBadVersion, 'https://origin.com', publicKey);
+      tokenWithBadVersion,
+      'https://origin.com',
+      publicKey
+    );
     return expect(verify).to.eventually.be.rejectedWith(
-        'Unrecognized token version: 42');
+      'Unrecognized token version: 42'
+    );
   });
 
   it('should throw if config length exceeds byte length', () => {
     const verify = tokenMaster.verifyToken(
-        tokenWithBadConfigLength, 'https://origin.com', publicKey);
+      tokenWithBadConfigLength,
+      'https://origin.com',
+      publicKey
+    );
     return expect(verify).to.eventually.be.rejectedWith(
-        'Unexpected config length: 999');
+      'Unexpected config length: 999'
+    );
   });
 
   it('should throw if signature cannot be verified', () => {
     const verify = tokenMaster.verifyToken(
-        tokenWithBadSignature, 'https://origin.com', publicKey);
+      tokenWithBadSignature,
+      'https://origin.com',
+      publicKey
+    );
     return expect(verify).to.eventually.be.rejectedWith(
-        'Failed to verify token signature.');
+      'Failed to verify token signature.'
+    );
   });
 
   it('should throw if approved origin is not current origin', () => {
     const verify = tokenMaster.verifyToken(
-        token, 'https://not-origin.com', publicKey);
+      token,
+      'https://not-origin.com',
+      publicKey
+    );
     return expect(verify).to.eventually.be.rejectedWith(
-        /does not match window/);
+      /does not match window/
+    );
   });
 
   it('should return false if trial has expired', () => {
     const verify = tokenMaster.verifyToken(
-        tokenWithExpiredExperiment, 'https://origin.com', publicKey);
+      tokenWithExpiredExperiment,
+      'https://origin.com',
+      publicKey
+    );
     return expect(verify).to.eventually.be.rejectedWith(
-        'Experiment "expired" has expired.');
+      'Experiment "expired" has expired.'
+    );
   });
 
   it('should return true for a well-formed, unexpired token', () => {
     const verify = tokenMaster.verifyToken(
-        token, 'https://origin.com', publicKey);
+      token,
+      'https://origin.com',
+      publicKey
+    );
     return expect(verify).to.eventually.be.fulfilled;
   });
 
   it('should ignore trailing slash on location', () => {
     const verify = tokenMaster.verifyToken(
-        token, 'https://origin.com/', publicKey);
+      token,
+      'https://origin.com/',
+      publicKey
+    );
     return expect(verify).to.eventually.be.fulfilled;
   });
 });

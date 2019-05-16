@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const {VERSION} = require('../../internal-version') ;
+const {VERSION} = require('../../internal-version');
 
 module.exports = function(babel) {
   const {types: t} = babel;

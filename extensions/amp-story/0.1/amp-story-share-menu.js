@@ -26,7 +26,6 @@ import {getAmpdoc} from '../../../src/service';
 import {renderAsElement} from './simple-template';
 import {toggle} from '../../../src/style';
 
-
 /** @const {string} Class to toggle the share menu. */
 export const VISIBLE_CLASS = 'i-amphtml-story-share-menu-visible';
 
@@ -40,7 +39,8 @@ const SHARE_WIDGET_CONTAINER_CLASS = 'i-amphtml-story-share-menu-container';
 const TEMPLATE = {
   tag: 'div',
   attrs: dict({
-    'class': 'i-amphtml-story-share-menu i-amphtml-story-system-reset'}),
+    'class': 'i-amphtml-story-share-menu i-amphtml-story-system-reset',
+  }),
   children: [
     {
       tag: 'div',
@@ -58,7 +58,6 @@ const AMP_SOCIAL_SYSTEM_SHARE_TEMPLATE = {
   tag: 'amp-social-share',
   attrs: /** @type {!JsonObject} */ (dict({'type': 'system'})),
 };
-
 
 /**
  * Share menu UI.
@@ -109,12 +108,13 @@ export class ShareMenu {
 
     this.isBuilt_ = true;
 
-    this.isSystemShareSupported_ =
-        this.shareWidget_.isSystemShareSupported(getAmpdoc(this.parentEl_));
+    this.isSystemShareSupported_ = this.shareWidget_.isSystemShareSupported(
+      getAmpdoc(this.parentEl_)
+    );
 
-    this.isSystemShareSupported_ ?
-      this.buildForSystemSharing_() :
-      this.buildForFallbackSharing_();
+    this.isSystemShareSupported_
+      ? this.buildForSystemSharing_()
+      : this.buildForFallbackSharing_();
   }
 
   /**
@@ -132,8 +132,10 @@ export class ShareMenu {
    */
   buildForSystemSharing_() {
     this.shareWidget_.loadRequiredExtensions(getAmpdoc(this.parentEl_));
-    this.element_ =
-        renderAsElement(this.win_.document, AMP_SOCIAL_SYSTEM_SHARE_TEMPLATE);
+    this.element_ = renderAsElement(
+      this.win_.document,
+      AMP_SOCIAL_SYSTEM_SHARE_TEMPLATE
+    );
 
     this.initializeListeners_();
 
@@ -157,9 +159,9 @@ export class ShareMenu {
 
     this.vsync_.run({
       measure: () => {
-        this.innerContainerEl_ =
-            this.element_
-                ./*OK*/querySelector(`.${SHARE_WIDGET_CONTAINER_CLASS}`);
+        this.innerContainerEl_ = this.element_./*OK*/ querySelector(
+          `.${SHARE_WIDGET_CONTAINER_CLASS}`
+        );
       },
       mutate: () => {
         this.parentEl_.appendChild(root);
@@ -181,8 +183,9 @@ export class ShareMenu {
     // Don't listen to click events if the system share is supported, since the
     // native layer handles all the UI interactions.
     if (!this.isSystemShareSupported_) {
-      this.element_.addEventListener(
-          'click', event => this.onShareMenuClick_(event));
+      this.element_.addEventListener('click', event =>
+        this.onShareMenuClick_(event)
+      );
     }
   }
 

@@ -17,10 +17,7 @@
 import {AmpAdCustom} from '../amp-ad-custom';
 import {LayoutPriority} from '../../../../src/layout';
 import {Services} from '../../../../src/services';
-import {
-  createElementWithAttributes,
-  removeChildren,
-} from '../../../../src/dom';
+import {createElementWithAttributes, removeChildren} from '../../../../src/dom';
 
 describe('Amp custom ad', () => {
   let sandbox;
@@ -65,7 +62,9 @@ describe('Amp custom ad', () => {
     const urlBase1 = '/examples/custom.ad.example.single.json';
     const elem1 = getCustomAd(urlBase1);
     const ad1 = new AmpAdCustom(elem1);
-    sandbox.stub(ad1, 'getFallback').callsFake(() => {return null;});
+    sandbox.stub(ad1, 'getFallback').callsFake(() => {
+      return null;
+    });
     ad1.buildCallback();
 
     // Single ad with a slot
@@ -73,7 +72,9 @@ describe('Amp custom ad', () => {
     const slot = 'myslot2';
     const elem2 = getCustomAd(urlBase2, slot);
     const ad2 = new AmpAdCustom(elem2);
-    sandbox.stub(ad2, 'getFallback').callsFake(() => {return null;});
+    sandbox.stub(ad2, 'getFallback').callsFake(() => {
+      return null;
+    });
     ad2.buildCallback();
     const expected2 = urlBase2 + '&ampslots=' + slot;
 
@@ -82,13 +83,17 @@ describe('Amp custom ad', () => {
     const slot3 = 'myslot3';
     const elem3 = getCustomAd(urlBase34, slot3);
     const ad3 = new AmpAdCustom(elem3);
-    sandbox.stub(ad3, 'getFallback').callsFake(() => {return null;});
+    sandbox.stub(ad3, 'getFallback').callsFake(() => {
+      return null;
+    });
     ad3.buildCallback();
 
     const slot4 = 'myslot4';
     const elem4 = getCustomAd(urlBase34, slot4);
     const ad4 = new AmpAdCustom(elem4);
-    sandbox.stub(ad4, 'getFallback').callsFake(() => {return null;});
+    sandbox.stub(ad4, 'getFallback').callsFake(() => {
+      return null;
+    });
     ad4.buildCallback();
 
     const expected34 = urlBase34 + '?ampslots=' + slot3 + '%2C' + slot4;
@@ -126,29 +131,45 @@ describe('Amp custom ad', () => {
     const url = '/examples/custom.ad.example.json';
     const slot = 'myslot';
 
-    describes.realWin('with shadow AmpDoc', {
-      amp: {
-        ampdoc: 'shadow',
+    describes.realWin(
+      'with shadow AmpDoc',
+      {
+        amp: {
+          ampdoc: 'shadow',
+        },
       },
-    }, env => {
-      it('should return priority of 0', () => {
-        const adElement = getCustomAd(url, slot, /*body*/env.ampdoc.getBody());
-        const customAd = new AmpAdCustom(adElement);
-        expect(customAd.getLayoutPriority()).to.equal(LayoutPriority.CONTENT);
-      });
-    });
+      env => {
+        it('should return priority of 0', () => {
+          const adElement = getCustomAd(
+            url,
+            slot,
+            /*body*/ env.ampdoc.getBody()
+          );
+          const customAd = new AmpAdCustom(adElement);
+          expect(customAd.getLayoutPriority()).to.equal(LayoutPriority.CONTENT);
+        });
+      }
+    );
 
-    describes.realWin('with single AmpDoc', {
-      amp: {
-        ampdoc: 'single',
+    describes.realWin(
+      'with single AmpDoc',
+      {
+        amp: {
+          ampdoc: 'single',
+        },
       },
-    }, env => {
-      it('should return priority of 0', () => {
-        const adElement = getCustomAd(url, slot, /*body*/env.ampdoc.getBody());
-        const customAd = new AmpAdCustom(adElement);
-        expect(customAd.getLayoutPriority()).to.equal(LayoutPriority.CONTENT);
-      });
-    });
+      env => {
+        it('should return priority of 0', () => {
+          const adElement = getCustomAd(
+            url,
+            slot,
+            /*body*/ env.ampdoc.getBody()
+          );
+          const customAd = new AmpAdCustom(adElement);
+          expect(customAd.getLayoutPriority()).to.equal(LayoutPriority.CONTENT);
+        });
+      }
+    );
   });
 
   describe('TemplateData', () => {
@@ -156,17 +177,19 @@ describe('Amp custom ad', () => {
       const elem = getCustomAd('fake.json');
       const ad = new AmpAdCustom(elem);
       ad.buildCallback();
-      expect(ad.handleTemplateData_({
-        'a': '1',
-        'b': '2',
-        'data': {
-          'c': '3',
-        },
-        'templateId': '4',
-        'vars': {
-          'd': '5',
-        },
-      })).to.deep.equal({
+      expect(
+        ad.handleTemplateData_({
+          'a': '1',
+          'b': '2',
+          'data': {
+            'c': '3',
+          },
+          'templateId': '4',
+          'vars': {
+            'd': '5',
+          },
+        })
+      ).to.deep.equal({
         'a': '1',
         'b': '2',
         'data': {
@@ -186,17 +209,19 @@ describe('Amp custom ad', () => {
       removeChildren(elem);
       const ad = new AmpAdCustom(elem);
       ad.buildCallback();
-      expect(ad.handleTemplateData_({
-        'a': '1',
-        'b': '2',
-        'data': {
-          'c': '3',
-        },
-        'templateId': '4',
-        'vars': {
-          'd': '5',
-        },
-      })).to.deep.equal({
+      expect(
+        ad.handleTemplateData_({
+          'a': '1',
+          'b': '2',
+          'data': {
+            'c': '3',
+          },
+          'templateId': '4',
+          'vars': {
+            'd': '5',
+          },
+        })
+      ).to.deep.equal({
         'c': '3',
       });
       expect(elem.getAttribute('template')).to.equal('4');
@@ -233,4 +258,3 @@ describe('Amp custom ad', () => {
     });
   });
 });
-

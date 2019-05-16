@@ -23,7 +23,6 @@ import {createAmpElementForTesting} from '../../src/custom-element';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import {listenOncePromise} from '../../src/event-helper';
 
-
 describes.realWin('BaseElement', {amp: true}, env => {
   let win, doc;
   let customElement;
@@ -32,8 +31,10 @@ describes.realWin('BaseElement', {amp: true}, env => {
   beforeEach(() => {
     win = env.win;
     doc = win.document;
-    win.customElements.define('amp-test-element',
-        createAmpElementForTesting(win, 'amp-test-element', BaseElement));
+    win.customElements.define(
+      'amp-test-element',
+      createAmpElementForTesting(win, 'amp-test-element', BaseElement)
+    );
     customElement = doc.createElement('amp-test-element');
     element = new BaseElement(customElement);
   });
@@ -42,7 +43,9 @@ describes.realWin('BaseElement', {amp: true}, env => {
     const resources = win.services.resources.obj;
     customElement.getResources = () => resources;
     const updateLayoutPriorityStub = sandbox.stub(
-        resources, 'updateLayoutPriority');
+      resources,
+      'updateLayoutPriority'
+    );
     element.updateLayoutPriority(LayoutPriority.METADATA);
     expect(updateLayoutPriorityStub).to.be.calledOnce;
   });
@@ -85,9 +88,11 @@ describes.realWin('BaseElement', {amp: true}, env => {
   });
 
   it('should fail execution of unregistered action', () => {
-    allowConsoleError(() => { expect(() => {
-      element.executeAction({method: 'method1'}, false);
-    }).to.throw(/Method not found/); });
+    allowConsoleError(() => {
+      expect(() => {
+        element.executeAction({method: 'method1'}, false);
+      }).to.throw(/Method not found/);
+    });
   });
 
   it('`this` context of handler should not be the holder', () => {
@@ -120,9 +125,11 @@ describes.realWin('BaseElement', {amp: true}, env => {
     const handler = sandbox.spy();
     const anotherHandler = sandbox.spy();
     element.registerDefaultAction(handler);
-    return allowConsoleError(() => { expect(() => {
-      element.registerDefaultAction(anotherHandler);
-    }).to.throw(/Default action "activate" already registered./);});
+    return allowConsoleError(() => {
+      expect(() => {
+        element.registerDefaultAction(anotherHandler);
+      }).to.throw(/Default action "activate" already registered./);
+    });
   });
 
   it('should check trust before invocation', () => {
@@ -132,22 +139,34 @@ describes.realWin('BaseElement', {amp: true}, env => {
     element.registerDefaultAction(handler, 'foo', minTrust);
 
     // Registered action.
-    element.executeAction({
-      method: 'foo',
-      satisfiesTrust: () => false,
-    }, null, false);
+    element.executeAction(
+      {
+        method: 'foo',
+        satisfiesTrust: () => false,
+      },
+      null,
+      false
+    );
     expect(handler).to.not.be.called;
-    element.executeAction({
-      method: 'foo',
-      satisfiesTrust: t => (t == minTrust),
-    }, null, false);
+    element.executeAction(
+      {
+        method: 'foo',
+        satisfiesTrust: t => t == minTrust,
+      },
+      null,
+      false
+    );
     expect(handler).to.be.called;
 
     // Action 'foo' is invoked by default 'activate' method.
-    element.executeAction({
-      method: 'activate',
-      satisfiesTrust: () => true,
-    }, null, false);
+    element.executeAction(
+      {
+        method: 'activate',
+        satisfiesTrust: () => true,
+      },
+      null,
+      false
+    );
     expect(handler).to.be.called;
   });
 
@@ -155,9 +174,10 @@ describes.realWin('BaseElement', {amp: true}, env => {
     const resources = win.services.resources.obj;
     customElement.getResources = () => resources;
     const resource = new Resource(1, customElement, resources);
-    sandbox.stub(resources, 'getResourceForElement')
-        .withArgs(customElement)
-        .returns(resource);
+    sandbox
+      .stub(resources, 'getResourceForElement')
+      .withArgs(customElement)
+      .returns(resource);
     const layoutBox = layoutRectLtwh(0, 50, 100, 200);
     const pageLayoutBox = layoutRectLtwh(0, 0, 100, 200);
     sandbox.stub(resource, 'getLayoutBox').callsFake(() => layoutBox);
@@ -216,11 +236,7 @@ describes.realWin('BaseElement', {amp: true}, env => {
       target.dispatchEvent(event1);
       target.dispatchEvent(event2);
 
-      return Promise.all([
-        event1Promise,
-        event2Promise,
-      ]);
+      return Promise.all([event1Promise, event2Promise]);
     });
   });
-
 });

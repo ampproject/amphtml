@@ -22,11 +22,11 @@ import {loadScript} from '../3p/3p';
 export function nativo(global, data) {
   let ntvAd;
   (function(ntvAd, global, data) {
-    global
-        .history
-        .replaceState(null,
-            '',
-            location.pathname + location.hash.replace(/({).*(})/, ''));
+    global.history.replaceState(
+      null,
+      '',
+      location.pathname + location.hash.replace(/({).*(})/, '')
+    );
     // Private
     let delayedAdLoad = false;
     let percentageOfadViewed;
@@ -36,26 +36,27 @@ export function nativo(global, data) {
      * @return {boolean}
      */
     function isValidDelayTime(delay) {
-      return ((typeof delay != 'undefined'
-        && !isNaN(delay)
-        && parseInt(delay,10) >= 0));
+      return (
+        typeof delay != 'undefined' && !isNaN(delay) && parseInt(delay, 10) >= 0
+      );
     }
     /**
      * @param {!Object} data
      * @return {boolean}
      */
     function isDelayedTimeStart(data) {
-      return (isValidDelayTime(data.delayByTime)
-        && ('delay' in data)
-        && !('delayByView' in data));
+      return (
+        isValidDelayTime(data.delayByTime) &&
+        'delay' in data &&
+        !('delayByView' in data)
+      );
     }
     /**
      * @param {!Object} data
      * @return {boolean}
      */
     function isDelayedViewStart(data) {
-      return (isValidDelayTime(data.delayByTime)
-        && ('delayByView' in data));
+      return isValidDelayTime(data.delayByTime) && 'delayByView' in data;
     }
     /**
      * Loads ad when done.
@@ -64,9 +65,11 @@ export function nativo(global, data) {
       const g = global;
       global.context.observeIntersection(function(positions) {
         const coordinates = getLastPositionCoordinates(positions);
-        if (typeof coordinates.rootBounds != 'undefined'
-            && (coordinates.intersectionRect.top == (
-              coordinates.rootBounds.top + coordinates.boundingClientRect.y))) {
+        if (
+          typeof coordinates.rootBounds != 'undefined' &&
+          coordinates.intersectionRect.top ==
+            coordinates.rootBounds.top + coordinates.boundingClientRect.y
+        ) {
           if (isDelayedViewStart(data) && !delayedAdLoad) {
             g.PostRelease.Start();
             delayedAdLoad = true;
@@ -104,10 +107,10 @@ export function nativo(global, data) {
     function viewabilityConfiguration(positions) {
       const coordinates = getLastPositionCoordinates(positions);
       setPercentageOfadViewed(
-          (((coordinates.intersectionRect
-              .height * 100) / coordinates
-              .boundingClientRect
-              .height) / 100));
+        (coordinates.intersectionRect.height * 100) /
+          coordinates.boundingClientRect.height /
+          100
+      );
       global.PostRelease.checkIsAdVisible();
     }
     // Public
@@ -124,11 +127,17 @@ export function nativo(global, data) {
       global._prx.push(['cfg.RequestUrl', data['requestUrl'] || loc.href]);
       for (const key in data) {
         switch (key) {
-          case 'premium': global._prx.push(['cfg.SetUserPremium']); break;
-          case 'debug': global._prx.push(['cfg.Debug']); break;
-          case 'delay': if (isValidDelayTime(data.delayByTime)) {
-            global._prx.push(['cfg.SetNoAutoStart']);
-          } break;
+          case 'premium':
+            global._prx.push(['cfg.SetUserPremium']);
+            break;
+          case 'debug':
+            global._prx.push(['cfg.Debug']);
+            break;
+          case 'delay':
+            if (isValidDelayTime(data.delayByTime)) {
+              global._prx.push(['cfg.SetNoAutoStart']);
+            }
+            break;
         }
       }
     };

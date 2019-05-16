@@ -54,7 +54,7 @@ const strings = {
     string: 'Més',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_OPEN_APP]: {
-    string: 'Obre l\'aplicació',
+    string: "Obre l'aplicació",
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_ORDER_NOW]: {
     string: 'Fes una comanda',
@@ -75,13 +75,13 @@ const strings = {
     string: 'Horaris',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SIGN_UP]: {
-    string: 'Registra\'t',
+    string: "Registra't",
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SUBSCRIBE]: {
-    string: 'Subscriu-t\'hi ara',
+    string: "Subscriu-t'hi ara",
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_USE_APP]: {
-    string: 'Utilitza l\'aplicació',
+    string: "Utilitza l'aplicació",
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_VIEW]: {
     string: 'Mostra',
@@ -90,7 +90,7 @@ const strings = {
     string: 'Mira',
   },
   [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_WATCH_EPISODE]: {
-    string: 'Mira l\'episodi',
+    string: "Mira l'episodi",
   },
 };
 

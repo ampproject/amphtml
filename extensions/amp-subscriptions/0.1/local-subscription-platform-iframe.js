@@ -16,8 +16,7 @@
 
 import {Deferred} from '../../../src/utils/promise';
 import {Entitlement} from './entitlement';
-import {LocalSubscriptionBasePlatform}
-  from './local-subscription-platform-base';
+import {LocalSubscriptionBasePlatform} from './local-subscription-platform-base';
 import {Messenger} from '../../amp-access/0.1/iframe-api/messenger';
 import {assertHttpsUrl, parseUrlDeprecated} from '../../../src/url';
 import {devAssert, userAssert} from '../../../src/log';
@@ -25,16 +24,13 @@ import {isArray} from '../../../src/types';
 import {parseJson} from '../../../src/json';
 import {toggle} from '../../../src/style';
 
-
 /**
  * Implments the iframe local subscriptions platform which provides
  * authorization and pingback via an iframe
  *
  * @implements {./subscription-platform.SubscriptionPlatform}
  */
-export class LocalSubscriptionIframePlatform
-  extends LocalSubscriptionBasePlatform {
-
+export class LocalSubscriptionIframePlatform extends LocalSubscriptionBasePlatform {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!JsonObject} platformConfig
@@ -43,20 +39,22 @@ export class LocalSubscriptionIframePlatform
   constructor(ampdoc, platformConfig, serviceAdapter) {
     super(ampdoc, platformConfig, serviceAdapter);
 
-    devAssert(this.serviceConfig_['type'] == 'iframe',
-        'iframe initialized called without iframe config type');
+    devAssert(
+      this.serviceConfig_['type'] == 'iframe',
+      'iframe initialized called without iframe config type'
+    );
 
     /** @const @private {string} */
-    this.iframeSrc_ = userAssert(this.serviceConfig_['iframeSrc'],
-        '"iframeSrc" URL must be specified');
+    this.iframeSrc_ = userAssert(
+      this.serviceConfig_['iframeSrc'],
+      '"iframeSrc" URL must be specified'
+    );
     assertHttpsUrl(this.iframeSrc_, 'iframe Url');
-
 
     /** @const @private {?Array} */
     this.iframeVars_ = this.serviceConfig_['iframeVars'] || null;
     if (this.iframeVars_) {
-      userAssert(isArray(this.iframeVars_),
-          '"iframeVars" must be an array');
+      userAssert(isArray(this.iframeVars_), '"iframeVars" must be an array');
     }
 
     /** @private @const {string} */
@@ -75,9 +73,10 @@ export class LocalSubscriptionIframePlatform
 
     /** @private @const {!Messenger} */
     this.messenger_ = new Messenger(
-        this.ampdoc_.win,
-        () => this.iframe_.contentWindow,
-        this.targetOrigin_);
+      this.ampdoc_.win,
+      () => this.iframe_.contentWindow,
+      this.targetOrigin_
+    );
 
     /** @private {?Promise<!JsonObject>} */
     this.configPromise_ = null;
@@ -88,12 +87,13 @@ export class LocalSubscriptionIframePlatform
   /** @override */
   getEntitlements() {
     return this.connect().then(() => {
-      return this.messenger_.sendCommandRsvp('authorize', {})
-          .then(res => {
-            res.source = 'local-iframe';
-            return res;
-          })
-          .then(resJson => Entitlement.parseFromJson(resJson));
+      return this.messenger_
+        .sendCommandRsvp('authorize', {})
+        .then(res => {
+          res.source = 'local-iframe';
+          return res;
+        })
+        .then(resJson => Entitlement.parseFromJson(resJson));
     });
   }
 
@@ -105,8 +105,9 @@ export class LocalSubscriptionIframePlatform
   /** @override */
   pingback(selectedEntitlement) {
     return this.connect().then(() => {
-      return this.messenger_.sendCommandRsvp(
-          'pingback', {entitlement: selectedEntitlement});
+      return this.messenger_.sendCommandRsvp('pingback', {
+        entitlement: selectedEntitlement,
+      });
     });
   }
 
@@ -142,17 +143,16 @@ export class LocalSubscriptionIframePlatform
         publicationId: pageConfig.getPublicationId(),
         productId: pageConfig.getProductId(),
         encryptedDocumentKey:
-            this.serviceAdapter_.getEncryptedDocumentKey('local') || null,
+          this.serviceAdapter_.getEncryptedDocumentKey('local') || null,
       };
       if (this.iframeVars_) {
         const varsString = this.iframeVars_.join('&');
-        this.urlBuilder_.collectUrlVars(
-            varsString,
-            /* useAuthData */ false)
-            .then(vars => {
-              configJson['iframeVars'] = vars;
-              resolve(configJson);
-            });
+        this.urlBuilder_
+          .collectUrlVars(varsString, /* useAuthData */ false)
+          .then(vars => {
+            configJson['iframeVars'] = vars;
+            resolve(configJson);
+          });
       } else {
         resolve(configJson);
       }
@@ -169,16 +169,18 @@ export class LocalSubscriptionIframePlatform
     if (cmd == 'connect') {
       // First ever message. Indicates that the receiver is listening.
       this.configPromise_.then(configJson => {
-        this.messenger_.sendCommandRsvp('start', {
-          'protocol': 'amp-subscriptions',
-          'config': configJson,
-        }).then(() => {
-          // Confirmation that connection has been successful.
-          if (this.connectedResolver_) {
-            this.connectedResolver_();
-            this.connectedResolver_ = null;
-          }
-        });
+        this.messenger_
+          .sendCommandRsvp('start', {
+            'protocol': 'amp-subscriptions',
+            'config': configJson,
+          })
+          .then(() => {
+            // Confirmation that connection has been successful.
+            if (this.connectedResolver_) {
+              this.connectedResolver_();
+              this.connectedResolver_ = null;
+            }
+          });
       });
       return;
     }

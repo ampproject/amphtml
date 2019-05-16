@@ -111,22 +111,24 @@ const strings = {
     string: 'ಈ ಅನುಭವವನ್ನು ವೀಕ್ಷಿಸಲು ನಿಮ್ಮ ವಿಂಡೋದ ಎತ್ತರವನ್ನು ವಿಸ್ತರಿಸಿ',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT]: {
-    string: 'ನಿಮ್ಮ ವಿಂಡೋದಲ್ಲಿ ಈ ಅನುಭವವನ್ನು ವೀಕ್ಷಿಸಲು, ಎತ್ತರ ಮತ್ತು ಅಗಲ ' +
-        'ಎರಡನ್ನೂ ವಿಸ್ತರಿಸಿ',
+    string:
+      'ನಿಮ್ಮ ವಿಂಡೋದಲ್ಲಿ ಈ ಅನುಭವವನ್ನು ವೀಕ್ಷಿಸಲು, ಎತ್ತರ ಮತ್ತು ಅಗಲ ' +
+      'ಎರಡನ್ನೂ ವಿಸ್ತರಿಸಿ',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_WIDTH_SIZE_TEXT]: {
     string: 'ಈ ಅನುಭವವನ್ನು ವೀಕ್ಷಿಸಲು ನಿಮ್ಮ ವಿಂಡೋದ ಅಗಲವನ್ನು ವಿಸ್ತರಿಸಿ',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
-    string: 'ಈ ವಿಷಯವನ್ನು ವೀಕ್ಷಿಸಲು ನೀವು AMP ಸ್ಟೋರಿ ಪ್ರಯೋಗವನ್ನು ' +
-        'ಸಕ್ರಿಯಗೊಳಿಸಬೇಕು.',
+    string:
+      'ಈ ವಿಷಯವನ್ನು ವೀಕ್ಷಿಸಲು ನೀವು AMP ಸ್ಟೋರಿ ಪ್ರಯೋಗವನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಬೇಕು.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
     string: 'ಪೋರ್ಟೇಟ್ ಮೋಡ್‌ನಲ್ಲಿ ಈ ಪುಟವನ್ನು ಅತ್ಯತ್ತಮವಾಗಿ ವೀಕ್ಷಿಸಬಹುದಾಗಿದೆ',
   },
   [LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT]: {
-    string: 'ನಮ್ಮನ್ನು ಕ್ಷಮಿಸಿ, ಈ ಅನುಭವವನ್ನು ನಿಮ್ಮ ಬ್ರೌಸರ್ ಬೆಂಬಲಿಸುವಂತೆ ' +
-        'ಕಾಣುತ್ತಿಲ್ಲ',
+    string:
+      'ನಮ್ಮನ್ನು ಕ್ಷಮಿಸಿ, ಈ ಅನುಭವವನ್ನು ನಿಮ್ಮ ಬ್ರೌಸರ್ ಬೆಂಬಲಿಸುವಂತೆ ' +
+      'ಕಾಣುತ್ತಿಲ್ಲ',
   },
 };
 

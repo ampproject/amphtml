@@ -43,8 +43,9 @@ function getVersion() {
       lastDigit = parseInt(argv.custom_version_mark, 10);
       if (isNaN(lastDigit) || lastDigit < 0 || lastDigit > 9) {
         throw new Error(
-            `--custom_version_mark is set to ${argv.custom_version_mark}, ` +
-            'expected value between 0 and 9!');
+          `--custom_version_mark is set to ${argv.custom_version_mark}, ` +
+            'expected value between 0 and 9!'
+        );
       }
     }
     return `${lastCommitFormattedTime}${lastDigit}`;

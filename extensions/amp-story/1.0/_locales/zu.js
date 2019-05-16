@@ -111,22 +111,23 @@ const strings = {
     string: 'Nweba ubude bewindi lakho ukuze ubuke lo muzwa',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT]: {
-    string: 'Nweba kokubili ubude nobubanzi bewindi lakho ukuze ubuke lo ' +
-        'muzwa',
+    string: 'Nweba kokubili ubude nobubanzi bewindi lakho ukuze ubuke lo muzwa',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_WIDTH_SIZE_TEXT]: {
     string: 'Nweba ububanzi bewindi lakho ukuze ubuke lo muzwa',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
-    string: 'Kuzomele unike amandla umuzwa wendaba ye-amp ukuze ubuke lokhu ' +
-        'okuqukethwe.',
+    string:
+      'Kuzomele unike amandla umuzwa wendaba ye-amp ukuze ubuke lokhu ' +
+      'okuqukethwe.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
     string: 'Ikhasi libukwa kahle kakhulu kumodi yokuma ngobude',
   },
   [LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT]: {
-    string: 'Siyaxolisa, kubonakala sengathi isiphequluli sakho asisekeli lo ' +
-        'muzwa',
+    string:
+      'Siyaxolisa, kubonakala sengathi isiphequluli sakho asisekeli lo ' +
+      'muzwa',
   },
 };
 

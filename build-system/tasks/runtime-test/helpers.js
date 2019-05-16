@@ -40,8 +40,11 @@ const LARGE_REFACTOR_THRESHOLD = 50;
 function extractCssJsFileMap() {
   //TODO(estherkim): consolidate arg validation logic
   if (!fs.existsSync(extensionsCssMapPath)) {
-    log(red('ERROR:'), 'Could not find the file',
-        cyan(extensionsCssMapPath) + '.');
+    log(
+      red('ERROR:'),
+      'Could not find the file',
+      cyan(extensionsCssMapPath) + '.'
+    );
     log('Make sure', cyan('gulp css'), 'was run prior to this.');
     process.exit();
   }
@@ -53,8 +56,9 @@ function extractCssJsFileMap() {
 
   // Adds an entry that maps a CSS file to a JS file
   function addCssJsEntry(cssData, cssBinaryName, cssJsFileMap) {
-    const cssFilePath = `extensions/${cssData['name']}/${cssData['version']}/` +
-        `${cssBinaryName}.css`;
+    const cssFilePath =
+      `extensions/${cssData['name']}/${cssData['version']}/` +
+      `${cssBinaryName}.css`;
     const jsFilePath = `build/${cssBinaryName}-${cssData['version']}.css.js`;
     cssJsFileMap[cssFilePath] = jsFilePath;
   }
@@ -94,8 +98,11 @@ function getAdTypes() {
   // Add all other ad types
   const files = fs.readdirSync('./ads/');
   for (let i = 0; i < files.length; i++) {
-    if (path.extname(files[i]) == '.js'
-        && files[i][0] != '_' && files[i] != 'ads.extern.js') {
+    if (
+      path.extname(files[i]) == '.js' &&
+      files[i][0] != '_' &&
+      files[i] != 'ads.extern.js'
+    ) {
       const adType = path.basename(files[i], '.js');
       const expanded = namingExceptions[adType];
       if (expanded) {
@@ -180,18 +187,22 @@ function unitTestsToRun(unitTestPaths) {
 
   function shouldRunTest(testFile, srcFiles) {
     const filesImported = getImports(testFile);
-    return filesImported.filter(function(file) {
-      return srcFiles.includes(file);
-    }).length > 0;
+    return (
+      filesImported.filter(function(file) {
+        return srcFiles.includes(file);
+      }).length > 0
+    );
   }
 
   // Retrieves the set of unit tests that should be run
   // for a set of source files.
   function getTestsFor(srcFiles) {
     const allUnitTests = deglob.sync(unitTestPaths);
-    return allUnitTests.filter(testFile => {
-      return shouldRunTest(testFile, srcFiles);
-    }).map(fullPath => path.relative(ROOT_DIR, fullPath));
+    return allUnitTests
+      .filter(testFile => {
+        return shouldRunTest(testFile, srcFiles);
+      })
+      .map(fullPath => path.relative(ROOT_DIR, fullPath));
   }
 
   filesChanged.forEach(file => {

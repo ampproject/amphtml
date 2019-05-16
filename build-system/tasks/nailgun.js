@@ -24,10 +24,12 @@ const {isTravisBuild} = require('../travis');
 
 // Used to start and stop the Closure nailgun server
 let nailgunRunnerReplacer;
-const nailgunRunner =
-    require.resolve('../../third_party/nailgun/nailgun-runner');
-const nailgunServer =
-    require.resolve('../../third_party/nailgun/nailgun-server.jar');
+const nailgunRunner = require.resolve(
+  '../../third_party/nailgun/nailgun-runner'
+);
+const nailgunServer = require.resolve(
+  '../../third_party/nailgun/nailgun-server.jar'
+);
 const customRunner = require.resolve('../runner/dist/runner.jar');
 const DEFAULT_NAILGUN_PORT = '2113';
 const CLOSURE_NAILGUN_PORT = '2114';
@@ -39,17 +41,28 @@ const NAILGUN_STARTUP_TIMEOUT_MS = 5 * 1000;
 function maybeReplaceDefaultCompiler() {
   if (process.platform == 'darwin') {
     return require('require-hijack')
-        .replace('google-closure-compiler-osx').with(nailgunRunner);
+      .replace('google-closure-compiler-osx')
+      .with(nailgunRunner);
     return true;
   } else if (process.platform == 'linux') {
     return require('require-hijack')
-        .replace('google-closure-compiler-linux').with(nailgunRunner);
+      .replace('google-closure-compiler-linux')
+      .with(nailgunRunner);
   } else {
-    log(yellow('WARNING:'), 'Cannot run', cyan('nailgun-server.jar'),
-        'on', cyan(process.platform));
-    log(yellow('WARNING:'),
-        'Closure compiler will be significantly slower than on',
-        cyan('macos'), 'or', cyan('linux'));
+    log(
+      yellow('WARNING:'),
+      'Cannot run',
+      cyan('nailgun-server.jar'),
+      'on',
+      cyan(process.platform)
+    );
+    log(
+      yellow('WARNING:'),
+      'Closure compiler will be significantly slower than on',
+      cyan('macos'),
+      'or',
+      cyan('linux')
+    );
     return null;
   }
 }
@@ -67,14 +80,13 @@ async function startNailgunServer(port, detached) {
 
   // Start up the nailgun server after cleaning up old instances (if any)
   const startNailgunServerCmd =
-      'java -XX:+TieredCompilation -server -cp ' +
-      `${nailgunServer}:${customRunner} ` +
-      `com.facebook.nailgun.NGServer ${port}`;
-  const stopNailgunServerCmd =
-      `${nailgunRunner} --nailgun-port ${port} ng-stop`;
+    'java -XX:+TieredCompilation -server -cp ' +
+    `${nailgunServer}:${customRunner} ` +
+    `com.facebook.nailgun.NGServer ${port}`;
+  const stopNailgunServerCmd = `${nailgunRunner} --nailgun-port ${port} ng-stop`;
   const getVersionCmd =
-      `${nailgunRunner} --nailgun-port ${port} ` +
-      'org.ampproject.AmpCommandLineRunner -- --version';
+    `${nailgunRunner} --nailgun-port ${port} ` +
+    'org.ampproject.AmpCommandLineRunner -- --version';
   exec(stopNailgunServerCmd, {stdio: 'pipe'});
   const nailgunServerProcess = execScriptAsync(startNailgunServerCmd, {
     stdio: detached ? 'ignore' : 'pipe',
@@ -99,8 +111,13 @@ async function startNailgunServer(port, detached) {
       await sleep(1000);
     }
   }
-  log(red('ERROR:'), 'Could not start',
-      cyan('nailgun-server.jar'), 'on port', cyan(port) + '...');
+  log(
+    red('ERROR:'),
+    'Could not start',
+    cyan('nailgun-server.jar'),
+    'on port',
+    cyan(port) + '...'
+  );
   process.exit(1);
 }
 
@@ -114,16 +131,19 @@ async function stopNailgunServer(port) {
     nailgunRunnerReplacer.restore();
   }
   if (process.platform == 'darwin' || process.platform == 'linux') {
-    const stopNailgunServerCmd =
-        `${nailgunRunner} --nailgun-port ${port} ng-stop`;
+    const stopNailgunServerCmd = `${nailgunRunner} --nailgun-port ${port} ng-stop`;
     if (exec(stopNailgunServerCmd, {stdio: 'pipe'}).status == 0) {
       if (!isTravisBuild()) {
-        log('Stopped', cyan('nailgun-server.jar'), 'on port',
-            cyan(port));
+        log('Stopped', cyan('nailgun-server.jar'), 'on port', cyan(port));
       }
     } else {
-      log(yellow('WARNING:'), 'Could not find a running instance of',
-          cyan('nailgun-server.jar'), 'on port', cyan(port));
+      log(
+        yellow('WARNING:'),
+        'Could not find a running instance of',
+        cyan('nailgun-server.jar'),
+        'on port',
+        cyan(port)
+      );
     }
   }
 }

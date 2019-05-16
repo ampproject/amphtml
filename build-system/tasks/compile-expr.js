@@ -36,18 +36,14 @@ function compileExpr(path, jisonFilename, imports, parserName, jsFilename) {
   const generator = new jison.Generator(bnf, settings);
   const jsModule = generator.generate(settings);
 
-  const license = fs.readFileSync(
-      'build-system/tasks/js-license.txt', 'utf8');
-  const suppressCheckTypes = '/** @fileoverview ' +
-      '@suppress {checkTypes, suspiciousCode, uselessCode} */';
+  const license = fs.readFileSync('build-system/tasks/js-license.txt', 'utf8');
+  const suppressCheckTypes =
+    '/** @fileoverview ' +
+    '@suppress {checkTypes, suspiciousCode, uselessCode} */';
   const jsExports = 'export const ' + parserName + ' = parser;';
 
-  const out = [
-    license,
-    suppressCheckTypes,
-    imports,
-    jsModule,
-    jsExports]
+  const out =
+    [license, suppressCheckTypes, imports, jsModule, jsExports]
       .join('\n\n')
       // Required in order to support babel 7, since 'token-stack: true' will
       // adversely affect lexer performance.
@@ -68,7 +64,7 @@ async function compileAccessExpr() {
 async function compileBindExpr() {
   const path = 'extensions/amp-bind/0.1/';
   const jisonFilename = 'bind-expr-impl.jison';
-  const imports = 'import {AstNode, AstNodeType} from \'./bind-expr-defines\';';
+  const imports = "import {AstNode, AstNodeType} from './bind-expr-defines';";
   const parserName = 'bindParser';
   const jsFilename = 'bind-expr-impl.js';
   compileExpr(path, jisonFilename, imports, parserName, jsFilename);
@@ -77,7 +73,7 @@ async function compileBindExpr() {
 async function compileCssExpr() {
   const path = 'extensions/amp-animation/0.1/parsers/';
   const jisonFilename = 'css-expr-impl.jison';
-  const imports = 'import * as ast from \'./css-expr-ast\';';
+  const imports = "import * as ast from './css-expr-ast';";
   const parserName = 'cssParser';
   const jsFilename = 'css-expr-impl.js';
   compileExpr(path, jisonFilename, imports, parserName, jsFilename);

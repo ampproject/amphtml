@@ -23,7 +23,7 @@ const {isTravisBuild} = require('../../travis');
 const CSS_SELECTOR_RETRY_MS = 200;
 const CSS_SELECTOR_RETRY_ATTEMPTS = 50;
 const CSS_SELECTOR_TIMEOUT_MS =
-    CSS_SELECTOR_RETRY_MS * CSS_SELECTOR_RETRY_ATTEMPTS;
+  CSS_SELECTOR_RETRY_MS * CSS_SELECTOR_RETRY_ATTEMPTS;
 
 const HTML_ESCAPE_CHARS = {
   '&': '&amp;',
@@ -89,15 +89,23 @@ function log(mode, ...messages) {
  * @throws {Error} an encountered error.
  */
 async function verifySelectorsInvisible(page, testName, selectors) {
-  log('verbose', 'Waiting for invisibility of all:',
-      colors.cyan(selectors.join(', ')));
+  log(
+    'verbose',
+    'Waiting for invisibility of all:',
+    colors.cyan(selectors.join(', '))
+  );
   try {
-    await Promise.all(selectors.map(
-        selector => waitForElementVisibility(page, selector, {hidden: true})));
+    await Promise.all(
+      selectors.map(selector =>
+        waitForElementVisibility(page, selector, {hidden: true})
+      )
+    );
   } catch (e) {
-    throw new Error(`${colors.cyan(testName)} | An element with the CSS ` +
+    throw new Error(
+      `${colors.cyan(testName)} | An element with the CSS ` +
         `selector ${colors.cyan(e.message)} is still visible after ` +
-        `${CSS_SELECTOR_TIMEOUT_MS} ms`);
+        `${CSS_SELECTOR_TIMEOUT_MS} ms`
+    );
   }
 }
 
@@ -111,25 +119,39 @@ async function verifySelectorsInvisible(page, testName, selectors) {
  * @throws {Error} an encountered error.
  */
 async function verifySelectorsVisible(page, testName, selectors) {
-  log('verbose', 'Waiting for existence of all:',
-      colors.cyan(selectors.join(', ')));
+  log(
+    'verbose',
+    'Waiting for existence of all:',
+    colors.cyan(selectors.join(', '))
+  );
   try {
     await Promise.all(
-        selectors.map(selector => waitForSelectorExistence(page, selector)));
+      selectors.map(selector => waitForSelectorExistence(page, selector))
+    );
   } catch (e) {
-    throw new Error(`${colors.cyan(testName)} | The CSS selector ` +
-        `${colors.cyan(e.message)} does not match any elements in the page`);
+    throw new Error(
+      `${colors.cyan(testName)} | The CSS selector ` +
+        `${colors.cyan(e.message)} does not match any elements in the page`
+    );
   }
 
-  log('verbose', 'Waiting for visibility of all:',
-      colors.cyan(selectors.join(', ')));
+  log(
+    'verbose',
+    'Waiting for visibility of all:',
+    colors.cyan(selectors.join(', '))
+  );
   try {
-    await Promise.all(selectors.map(
-        selector => waitForElementVisibility(page, selector, {visible: true})));
+    await Promise.all(
+      selectors.map(selector =>
+        waitForElementVisibility(page, selector, {visible: true})
+      )
+    );
   } catch (e) {
-    throw new Error(`${colors.cyan(testName)} | An element with the CSS ` +
+    throw new Error(
+      `${colors.cyan(testName)} | An element with the CSS ` +
         `selector ${colors.cyan(e.message)} is still invisible after ` +
-        `${CSS_SELECTOR_TIMEOUT_MS} ms`);
+        `${CSS_SELECTOR_TIMEOUT_MS} ms`
+    );
   }
 }
 
@@ -142,10 +164,15 @@ async function verifySelectorsVisible(page, testName, selectors) {
  */
 async function waitForLoaderDots(page, testName) {
   const allLoaderDotsGone = await waitForElementVisibility(
-      page, '.i-amphtml-loader-dot', {hidden: true});
+    page,
+    '.i-amphtml-loader-dot',
+    {hidden: true}
+  );
   if (!allLoaderDotsGone) {
-    throw new Error(`${colors.cyan(testName)} still has the AMP loader dot ` +
-        `after ${CSS_SELECTOR_TIMEOUT_MS} ms`);
+    throw new Error(
+      `${colors.cyan(testName)} still has the AMP loader dot ` +
+        `after ${CSS_SELECTOR_TIMEOUT_MS} ms`
+    );
   }
 }
 
@@ -165,8 +192,11 @@ async function waitForElementVisibility(page, selector, options) {
   const waitForVisible = Boolean(options['visible']);
   const waitForHidden = Boolean(options['hidden']);
   if (waitForVisible == waitForHidden) {
-    log('fatal', 'waitForElementVisibility must be called with exactly one of',
-        "'visible' or 'hidden' set to true.");
+    log(
+      'fatal',
+      'waitForElementVisibility must be called with exactly one of',
+      "'visible' or 'hidden' set to true."
+    );
   }
 
   let attempt = 0;
@@ -175,24 +205,36 @@ async function waitForElementVisibility(page, selector, options) {
 
     for (const elementHandle of await page.$$(selector)) {
       const boundingBox = await elementHandle.boundingBox();
-      const elementIsVisible = boundingBox != null && boundingBox.height > 0 &&
-          boundingBox.width > 0;
+      const elementIsVisible =
+        boundingBox != null && boundingBox.height > 0 && boundingBox.width > 0;
       elementsAreVisible.push(elementIsVisible);
     }
 
     if (elementsAreVisible.length) {
-      log('verbose', 'Found', colors.cyan(elementsAreVisible.length),
-          'element(s) matching the CSS selector', colors.cyan(selector));
-      log('verbose', 'Expecting all element visibilities to be',
-          colors.cyan(waitForVisible), '; they are',
-          colors.cyan(elementsAreVisible));
+      log(
+        'verbose',
+        'Found',
+        colors.cyan(elementsAreVisible.length),
+        'element(s) matching the CSS selector',
+        colors.cyan(selector)
+      );
+      log(
+        'verbose',
+        'Expecting all element visibilities to be',
+        colors.cyan(waitForVisible),
+        '; they are',
+        colors.cyan(elementsAreVisible)
+      );
     } else {
       log('verbose', 'No', colors.cyan(selector), 'matches found');
     }
     // Since we assert that waitForVisible == !waitForHidden, there is no need
     // to check equality to both waitForVisible and waitForHidden.
-    if (elementsAreVisible.every(
-        elementIsVisible => elementIsVisible == waitForVisible)) {
+    if (
+      elementsAreVisible.every(
+        elementIsVisible => elementIsVisible == waitForVisible
+      )
+    ) {
       return true;
     }
 

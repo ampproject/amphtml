@@ -61,28 +61,26 @@ const DEPRECATED_BOOKEND_VERSION_KEY = 'bookend-version';
  */
 export let BookendConfigDef;
 
-
 /**
  * Scroll amount required for full-bleed in px.
  * @private @const {number}
  */
 const FULLBLEED_THRESHOLD = 88;
 
-
 /** @private @const {string} */
 const FULLBLEED_CLASSNAME = 'i-amphtml-story-bookend-fullbleed';
 
-
 /** @private @const {string} */
 const HIDDEN_CLASSNAME = 'i-amphtml-hidden';
-
 
 /** @private @const {!./simple-template.ElementDef} */
 const ROOT_TEMPLATE = {
   tag: 'section',
   attrs: dict({
-    'class': 'i-amphtml-story-bookend i-amphtml-story-system-reset ' +
-        HIDDEN_CLASSNAME}),
+    'class':
+      'i-amphtml-story-bookend i-amphtml-story-system-reset ' +
+      HIDDEN_CLASSNAME,
+  }),
   children: [
     // Overflow container that gets pushed to the bottom when content height is
     // smaller than viewport.
@@ -100,17 +98,14 @@ const ROOT_TEMPLATE = {
   ],
 };
 
-
 /** @private @const {!./simple-template.ElementDef} */
 const REPLAY_ICON_TEMPLATE = {
   tag: 'div',
   attrs: dict({'class': 'i-amphtml-story-bookend-replay-icon'}),
 };
 
-
 /** @type {string} */
 const TAG = 'amp-story';
-
 
 /**
  * @param {?string} consentId
@@ -125,7 +120,7 @@ const buildPromptConsentTemplate = consentId => {
         tag: 'h3',
         attrs: dict({'class': 'i-amphtml-story-bookend-heading'}),
         localizedStringId:
-            LocalizedStringId.AMP_STORY_BOOKEND_PRIVACY_SETTINGS_TITLE,
+          LocalizedStringId.AMP_STORY_BOOKEND_PRIVACY_SETTINGS_TITLE,
       },
       {
         tag: 'h2',
@@ -136,12 +131,11 @@ const buildPromptConsentTemplate = consentId => {
           'aria-label': 'Change data privacy settings',
         }),
         localizedStringId:
-            LocalizedStringId.AMP_STORY_BOOKEND_PRIVACY_SETTINGS_BUTTON_LABEL,
+          LocalizedStringId.AMP_STORY_BOOKEND_PRIVACY_SETTINGS_BUTTON_LABEL,
       },
     ],
   });
 };
-
 
 /**
  * @param {!./related-articles.RelatedArticleDef} articleData
@@ -170,20 +164,21 @@ function buildArticleTemplate(articleData) {
   });
 
   if (articleData.image) {
-    template.children.unshift(/** @type {!./simple-template.ElementDef} */ ({
-      tag: 'amp-img',
-      attrs: dict({
-        'class': 'i-amphtml-story-bookend-article-image',
-        'src': articleData.image,
-        'width': 100,
-        'height': 100,
-      }),
-    }));
+    template.children.unshift(
+      /** @type {!./simple-template.ElementDef} */ ({
+        tag: 'amp-img',
+        attrs: dict({
+          'class': 'i-amphtml-story-bookend-article-image',
+          'src': articleData.image,
+          'width': 100,
+          'height': 100,
+        }),
+      })
+    );
   }
 
   return template;
 }
-
 
 /**
  * @param {!Array<!./related-articles.RelatedArticleSetDef>} articleSets
@@ -204,13 +199,13 @@ function buildArticlesContainerTemplate(articleSets) {
       tag: 'div',
       attrs: dict({'class': 'i-amphtml-story-bookend-article-set'}),
       children: articleSet.articles.map(article =>
-        buildArticleTemplate(article)),
+        buildArticleTemplate(article)
+      ),
     });
   });
 
   return template;
 }
-
 
 /**
  * @param {!Document} doc
@@ -224,14 +219,16 @@ function buildReplayButtonTemplate(doc, title, domainName, opt_imageUrl) {
     tag: 'div',
     attrs: dict({'class': 'i-amphtml-story-bookend-replay'}),
     children: [
-      !opt_imageUrl ? REPLAY_ICON_TEMPLATE : {
-        tag: 'div',
-        attrs: dict({
-          'class': 'i-amphtml-story-bookend-replay-image',
-          'style': `background-image: url(${opt_imageUrl}) !important`,
-        }),
-        children: [REPLAY_ICON_TEMPLATE],
-      },
+      !opt_imageUrl
+        ? REPLAY_ICON_TEMPLATE
+        : {
+            tag: 'div',
+            attrs: dict({
+              'class': 'i-amphtml-story-bookend-replay-image',
+              'style': `background-image: url(${opt_imageUrl}) !important`,
+            }),
+            children: [REPLAY_ICON_TEMPLATE],
+          },
       {
         tag: 'h2',
         attrs: dict({'class': 'i-amphtml-story-bookend-article-heading'}),
@@ -245,7 +242,6 @@ function buildReplayButtonTemplate(doc, title, domainName, opt_imageUrl) {
     ],
   });
 }
-
 
 /**
  * Bookend component for <amp-story>.
@@ -328,10 +324,10 @@ export class Bookend {
     const consentId = this.storeService_.get(StateProperty.CONSENT_ID);
 
     if (consentId) {
-      const promptConsentEl =
-          renderAsElement(
-              this.win_.document,
-              buildPromptConsentTemplate(String(consentId)));
+      const promptConsentEl = renderAsElement(
+        this.win_.document,
+        buildPromptConsentTemplate(String(consentId))
+      );
       innerContainer.appendChild(promptConsentEl);
     }
 
@@ -346,15 +342,19 @@ export class Bookend {
    * @private
    */
   initializeListeners_() {
-    this.getShadowRoot()
-        .addEventListener('click', event => this.onClick_(event));
-    this.replayButton_.addEventListener(
-        'click', event => this.onReplayButtonClick_(event));
+    this.getShadowRoot().addEventListener('click', event =>
+      this.onClick_(event)
+    );
+    this.replayButton_.addEventListener('click', event =>
+      this.onReplayButtonClick_(event)
+    );
 
-    this.getOverflowContainer_().addEventListener('scroll',
-        // minInterval is high since this is a step function that does not
-        // require smoothness
-        throttle(this.win_, () => this.onScroll_(), 100));
+    this.getOverflowContainer_().addEventListener(
+      'scroll',
+      // minInterval is high since this is a step function that does not
+      // require smoothness
+      throttle(this.win_, () => this.onScroll_(), 100)
+    );
 
     this.win_.addEventListener('keyup', event => {
       if (!this.isActive_()) {
@@ -370,13 +370,21 @@ export class Bookend {
       this.onBookendStateUpdate_(isActive);
     });
 
-    this.storeService_.subscribe(StateProperty.CAN_SHOW_SHARING_UIS, show => {
-      this.onCanShowSharingUisUpdate_(show);
-    }, true /** callToInitialize */);
+    this.storeService_.subscribe(
+      StateProperty.CAN_SHOW_SHARING_UIS,
+      show => {
+        this.onCanShowSharingUisUpdate_(show);
+      },
+      true /** callToInitialize */
+    );
 
-    this.storeService_.subscribe(StateProperty.DESKTOP_STATE, isDesktop => {
-      this.onDesktopStateUpdate_(isDesktop);
-    }, true /** callToInitialize */);
+    this.storeService_.subscribe(
+      StateProperty.DESKTOP_STATE,
+      isDesktop => {
+        this.onDesktopStateUpdate_(isDesktop);
+      },
+      true /** callToInitialize */
+    );
   }
 
   /**
@@ -414,8 +422,10 @@ export class Bookend {
    */
   onCanShowSharingUisUpdate_(canShowSharingUis) {
     this.vsync_.mutate(() => {
-      this.getShadowRoot()
-          .classList.toggle('i-amphtml-story-no-sharing', !canShowSharingUis);
+      this.getShadowRoot().classList.toggle(
+        'i-amphtml-story-no-sharing',
+        !canShowSharingUis
+      );
     });
   }
 
@@ -436,13 +446,19 @@ export class Bookend {
    */
   readBookendVersion_(config) {
     if (config[DEPRECATED_BOOKEND_VERSION_KEY]) {
-      user().warn('AMP-STORY-BOOKEND', '`bookend-version` and ' +
-      '`share-providers` keys in the bookend config are deprecated, please ' +
-      '`bookendVersion` and `shareProviders` keys');
+      user().warn(
+        'AMP-STORY-BOOKEND',
+        '`bookend-version` and ' +
+          '`share-providers` keys in the bookend config are deprecated, please ' +
+          '`bookendVersion` and `shareProviders` keys'
+      );
     }
 
-    return config[DEPRECATED_BOOKEND_VERSION_KEY] ||
-      config[BOOKEND_VERSION_KEY] || null;
+    return (
+      config[DEPRECATED_BOOKEND_VERSION_KEY] ||
+      config[BOOKEND_VERSION_KEY] ||
+      null
+    );
   }
 
   /**
@@ -460,40 +476,41 @@ export class Bookend {
       return Promise.resolve(this.config_);
     }
 
-    return this.requestService_.loadBookendConfig()
-        .then(response => {
-          if (!response) {
-            return null;
-          }
-          if (this.readBookendVersion_(response) === BOOKEND_VERSION_1) {
-            this.config_ = {
-              shareProviders:
-                this.shareWidget_.parseProvidersToClassicApi(
-                    response[SHARE_PROVIDERS_KEY] ||
-                    response[DEPRECATED_SHARE_PROVIDERS_KEY]),
-              relatedArticles:
-                parseArticlesToClassicApi(response['components']),
-            };
-          } else {
-            this.config_ = {
-              shareProviders: response['share-providers'],
-              relatedArticles:
-                  relatedArticlesFromJson(response['related-articles']),
-            };
-          }
-
-          // Allows the config to be fetched before the component is built, for
-          // cases like getting the share providers on desktop.
-          if (applyConfig) {
-            this.setConfig_(this.config_);
-          }
-
-          return this.config_;
-        })
-        .catch(e => {
-          user().error(TAG, 'Error fetching bookend configuration', e.message);
+    return this.requestService_
+      .loadBookendConfig()
+      .then(response => {
+        if (!response) {
           return null;
-        });
+        }
+        if (this.readBookendVersion_(response) === BOOKEND_VERSION_1) {
+          this.config_ = {
+            shareProviders: this.shareWidget_.parseProvidersToClassicApi(
+              response[SHARE_PROVIDERS_KEY] ||
+                response[DEPRECATED_SHARE_PROVIDERS_KEY]
+            ),
+            relatedArticles: parseArticlesToClassicApi(response['components']),
+          };
+        } else {
+          this.config_ = {
+            shareProviders: response['share-providers'],
+            relatedArticles: relatedArticlesFromJson(
+              response['related-articles']
+            ),
+          };
+        }
+
+        // Allows the config to be fetched before the component is built, for
+        // cases like getting the share providers on desktop.
+        if (applyConfig) {
+          this.setConfig_(this.config_);
+        }
+
+        return this.config_;
+      })
+      .catch(e => {
+        user().error(TAG, 'Error fetching bookend configuration', e.message);
+        return null;
+      });
   }
 
   /**
@@ -541,16 +558,22 @@ export class Bookend {
     if (!this.isActive_()) {
       return;
     }
-    this.vsync_.run({
-      measure: state => {
-        state.shouldBeFullBleed =
-            this.getOverflowContainer_()./*OK*/scrollTop >= FULLBLEED_THRESHOLD;
+    this.vsync_.run(
+      {
+        measure: state => {
+          state.shouldBeFullBleed =
+            this.getOverflowContainer_()./*OK*/ scrollTop >=
+            FULLBLEED_THRESHOLD;
+        },
+        mutate: state => {
+          this.getShadowRoot().classList.toggle(
+            FULLBLEED_CLASSNAME,
+            state.shouldBeFullBleed
+          );
+        },
       },
-      mutate: state => {
-        this.getShadowRoot().classList.toggle(
-            FULLBLEED_CLASSNAME, state.shouldBeFullBleed);
-      },
-    }, {});
+      {}
+    );
   }
 
   /**
@@ -570,9 +593,9 @@ export class Bookend {
    */
   toggleDesktopAttribute_(isDesktop) {
     this.vsync_.mutate(() => {
-      isDesktop ?
-        this.getShadowRoot().setAttribute('desktop', '') :
-        this.getShadowRoot().removeAttribute('desktop');
+      isDesktop
+        ? this.getShadowRoot().setAttribute('desktop', '')
+        : this.getShadowRoot().removeAttribute('desktop');
     });
   }
 
@@ -610,8 +633,11 @@ export class Bookend {
   setRelatedArticles_(articleSets) {
     this.vsync_.mutate(() => {
       this.getInnerContainer_().appendChild(
-          renderSimpleTemplate(this.win_.document,
-              buildArticlesContainerTemplate(articleSets)));
+        renderSimpleTemplate(
+          this.win_.document,
+          buildArticlesContainerTemplate(articleSets)
+        )
+      );
     });
   }
 
@@ -658,19 +684,24 @@ export class Bookend {
     const jsonLd = getJsonLd(ampdoc.getRootNode());
 
     const metadata = {
-      title: jsonLd && jsonLd['headline'] ?
-        jsonLd['headline'] :
-        user().assertElement(
-            this.win_.document.head.querySelector('title'),
-            'Please set <title> or structured data (JSON-LD).').textContent,
+      title:
+        jsonLd && jsonLd['headline']
+          ? jsonLd['headline']
+          : user().assertElement(
+              this.win_.document.head.querySelector('title'),
+              'Please set <title> or structured data (JSON-LD).'
+            ).textContent,
 
       domainName: parseUrlDeprecated(
-          Services.documentInfoForDoc(ampdoc).canonicalUrl).hostname,
+        Services.documentInfoForDoc(ampdoc).canonicalUrl
+      ).hostname,
     };
 
     if (jsonLd && isArray(jsonLd['image']) && jsonLd['image'].length) {
-      userAssert(isProtocolValid(jsonLd['image']),
-          `Unsupported protocol for story image URL ${jsonLd['image']}`);
+      userAssert(
+        isProtocolValid(jsonLd['image']),
+        `Unsupported protocol for story image URL ${jsonLd['image']}`
+      );
       metadata.imageUrl = jsonLd['image'][0];
     }
 
@@ -683,10 +714,14 @@ export class Bookend {
    */
   buildReplayButton_() {
     const metadata = this.getStoryMetadata_();
-    return renderAsElement(this.win_.document, buildReplayButtonTemplate(
+    return renderAsElement(
+      this.win_.document,
+      buildReplayButtonTemplate(
         this.win_.document,
         metadata.title,
         metadata.domainName,
-        metadata.imageUrl));
+        metadata.imageUrl
+      )
+    );
   }
 }

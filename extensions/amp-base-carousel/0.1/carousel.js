@@ -28,10 +28,7 @@ import {
 } from './dimensions.js';
 import {AutoAdvance} from './auto-advance';
 import {CarouselAccessibility} from './carousel-accessibility';
-import {
-  backwardWrappingDistance,
-  forwardWrappingDistance,
-} from './array-util';
+import {backwardWrappingDistance, forwardWrappingDistance} from './array-util';
 import {createCustomEvent, listenOnce} from '../../../src/event-helper';
 import {debounce} from '../../../src/utils/rate-limit';
 import {dict} from '../../../src/utils/object';
@@ -146,19 +143,14 @@ function sum(arr) {
  */
 export class Carousel {
   /**
-  * @param {{
-  *   win: !Window,
-  *   element: !Element,
-  *   scrollContainer: !Element,
-  *   runMutate: function(function()),
-  * }} config
-  */
-  constructor({
-    win,
-    element,
-    scrollContainer,
-    runMutate,
-  }) {
+   * @param {{
+   *   win: !Window,
+   *   element: !Element,
+   *   scrollContainer: !Element,
+   *   runMutate: function(function()),
+   * }} config
+   */
+  constructor({win, element, scrollContainer, runMutate}) {
     /** @private @const */
     this.win_ = win;
 
@@ -189,8 +181,10 @@ export class Carousel {
 
     /** @private @const */
     this.debouncedResetScrollReferencePoint_ = debounce(
-        win, () => this.resetScrollReferencePoint_(),
-        RESET_SCROLL_REFERENCE_POINT_WAIT_MS);
+      win,
+      () => this.resetScrollReferencePoint_(),
+      RESET_SCROLL_REFERENCE_POINT_WAIT_MS
+    );
 
     /** @private {number} */
     this.advanceCount_ = 1;
@@ -223,18 +217,18 @@ export class Carousel {
     this.allSpacers_ = [];
 
     /**
-    * Set from sources of programmatic scrolls to avoid doing work associated
-    * with regular scrolling.
-    * @private {boolean}
-    */
+     * Set from sources of programmatic scrolls to avoid doing work associated
+     * with regular scrolling.
+     * @private {boolean}
+     */
     this.ignoreNextScroll_ = false;
 
     /**
-    * The offset from the start edge for the element at the current index.
-    * This is used to preserve relative scroll position when updating the UI
-    * after things have moved (e.g. on rotate).
-    * @private {number}
-    */
+     * The offset from the start edge for the element at the current index.
+     * This is used to preserve relative scroll position when updating the UI
+     * after things have moved (e.g. on rotate).
+     * @private {number}
+     */
     this.currentElementOffset_ = 0;
 
     /**
@@ -247,21 +241,21 @@ export class Carousel {
     this.requestedIndex_ = null;
 
     /**
-    * The reference index where the the scrollable area last stopped
-    * scrolling. This slide is not translated and other slides are translated
-    * to move before or after as needed. This is also used when looping to
-    * prevent a single swipe from wrapping past the starting point.
-    * @private {number}
-    */
+     * The reference index where the the scrollable area last stopped
+     * scrolling. This slide is not translated and other slides are translated
+     * to move before or after as needed. This is also used when looping to
+     * prevent a single swipe from wrapping past the starting point.
+     * @private {number}
+     */
     this.restingIndex_ = NaN;
 
     /**
-    * Whether or not the user is currently touching the scrollable area. This
-    * is used to avoid resetting the resting point while the user is touching
-    * (e.g. they have dragged part way to the next slide, but have not yet
-    * released their finger).
-    * @private {boolean}
-    */
+     * Whether or not the user is currently touching the scrollable area. This
+     * is used to avoid resetting the resting point while the user is touching
+     * (e.g. they have dragged part way to the next slide, but have not yet
+     * released their finger).
+     * @private {boolean}
+     */
     this.touching_ = false;
 
     /**
@@ -308,11 +302,20 @@ export class Carousel {
     this.visibleCount_ = 1;
 
     this.scrollContainer_.addEventListener(
-        'scroll', () => this.handleScroll_(), true);
+      'scroll',
+      () => this.handleScroll_(),
+      true
+    );
     this.scrollContainer_.addEventListener(
-        'touchstart', () => this.handleTouchStart_(), true);
+      'touchstart',
+      () => this.handleTouchStart_(),
+      true
+    );
     this.scrollContainer_.addEventListener(
-        'wheel', () => this.handleWheel_(), true);
+      'wheel',
+      () => this.handleWheel_(),
+      true
+    );
   }
 
   /**
@@ -370,8 +373,11 @@ export class Carousel {
     let slideIndex;
     if (this.loop_) {
       slideIndex = mod(newIndex, endIndex + 1);
-    } else if (delta > 0 && this.inLastWindow_(index) &&
-        this.inLastWindow_(newIndex)) {
+    } else if (
+      delta > 0 &&
+      this.inLastWindow_(index) &&
+      this.inLastWindow_(newIndex)
+    ) {
       slideIndex = 0;
     } else if ((passingStart && atStart) || (passingEnd && !atEnd)) {
       slideIndex = endIndex;
@@ -580,7 +586,9 @@ export class Carousel {
       this.updating_ = false;
       this.scrollContainer_.setAttribute('mixed-length', this.mixedLength_);
       this.scrollContainer_.setAttribute(
-          'user-scrollable', this.userScrollable_);
+        'user-scrollable',
+        this.userScrollable_
+      );
       this.scrollContainer_.setAttribute('horizontal', this.axis_ == Axis.X);
       this.scrollContainer_.setAttribute('loop', this.loop_);
       this.scrollContainer_.setAttribute('snap', this.snap_);
@@ -594,11 +602,12 @@ export class Carousel {
       }
 
       this.autoAdvance_.updateMaxAdvances(
-          (this.autoAdvanceLoops_ * this.slides_.length) - 1);
+        this.autoAdvanceLoops_ * this.slides_.length - 1
+      );
       this.updateSpacers_();
       this.setChildrenSnapAlign_();
       this.hideSpacersAndSlides_();
-      this.resetScrollReferencePoint_(/* force */true);
+      this.resetScrollReferencePoint_(/* force */ true);
     });
   }
 
@@ -620,10 +629,15 @@ export class Carousel {
   updateRestingIndex_(restingIndex) {
     this.restingIndex_ = restingIndex;
     this.element_.dispatchEvent(
-        createCustomEvent(this.win_, 'indexchange', dict({
+      createCustomEvent(
+        this.win_,
+        'indexchange',
+        dict({
           'index': restingIndex,
           'actionSource': this.actionSource_,
-        })));
+        })
+      )
+    );
   }
 
   /**
@@ -636,12 +650,17 @@ export class Carousel {
     this.actionSource_ = ActionSource.TOUCH;
     this.requestedIndex_ = null;
 
-    listenOnce(window, 'touchend', () => {
-      this.touching_ = false;
-      this.debouncedResetScrollReferencePoint_();
-    }, {
-      capture: true,
-    });
+    listenOnce(
+      window,
+      'touchend',
+      () => {
+        this.touching_ = false;
+        this.debouncedResetScrollReferencePoint_();
+      },
+      {
+        capture: true,
+      }
+    );
   }
 
   /**
@@ -674,9 +693,11 @@ export class Carousel {
    *    user flicked the carousel and there is a momentum scroll in progress.
    */
   isUserScrolling_() {
-    return this.scrolling_ && (
-      this.actionSource_ == ActionSource.TOUCH ||
-      this.actionSource_ == ActionSource.WHEEL);
+    return (
+      this.scrolling_ &&
+      (this.actionSource_ == ActionSource.TOUCH ||
+        this.actionSource_ == ActionSource.WHEEL)
+    );
   }
 
   /**
@@ -688,8 +709,7 @@ export class Carousel {
    * @private
    */
   setElementTransform_(el, revolutions, revolutionLength) {
-    setTransformTranslateStyle(
-        this.axis_, el, revolutions * revolutionLength);
+    setTransformTranslateStyle(this.axis_, el, revolutions * revolutionLength);
     el._revolutions = revolutions;
   }
 
@@ -774,8 +794,10 @@ export class Carousel {
       this.scrollContainer_.appendChild(spacer);
     });
 
-    this.allSpacers_ = this.beforeSpacers_
-        .concat(this.replacementSpacers_, this.afterSpacers_);
+    this.allSpacers_ = this.beforeSpacers_.concat(
+      this.replacementSpacers_,
+      this.afterSpacers_
+    );
   }
 
   /**
@@ -785,7 +807,7 @@ export class Carousel {
    */
   setChildrenSnapAlign_() {
     const slideCount = this.slides_.length;
-    const startAligned = this.alignment_ == Alignment.START ;
+    const startAligned = this.alignment_ == Alignment.START;
     const oddVisibleCount = mod(this.visibleCount_, 2) == 1;
     // For the legacy scroll-snap-coordinate, when center aligning with an odd
     // count, actually use a start coordinate. Otherwise it will snap to the
@@ -824,25 +846,22 @@ export class Carousel {
    * @private
    */
   hideSpacersAndSlides_() {
-    const {
-      afterSpacers_,
-      beforeSpacers_,
-      currentIndex_,
-      slides_,
-    } = this;
+    const {afterSpacers_, beforeSpacers_, currentIndex_, slides_} = this;
     const numBeforeSpacers = Math.max(0, slides_.length - currentIndex_ - 1);
     const numAfterSpacers = Math.max(0, currentIndex_ - 1);
 
     beforeSpacers_.forEach((el, i) => {
       const distance = backwardWrappingDistance(
-          currentIndex_, i, beforeSpacers_);
+        currentIndex_,
+        i,
+        beforeSpacers_
+      );
       const tooFar = distance > slides_.length - 1;
       el.hidden = tooFar || i < slides_.length - numBeforeSpacers;
     });
 
     afterSpacers_.forEach((el, i) => {
-      const distance = forwardWrappingDistance(
-          currentIndex_, i, afterSpacers_);
+      const distance = forwardWrappingDistance(currentIndex_, i, afterSpacers_);
       const tooFar = distance > slides_.length - 1;
       el.hidden = tooFar || i > numAfterSpacers;
     });
@@ -870,8 +889,13 @@ export class Carousel {
     // themselves.
     const items = loop_ ? allSpacers_ : slides_;
     const startIndex = loop_ ? currentIndex_ + slides_.length : currentIndex_;
-    const overlappingIndex =
-        findOverlappingIndex(axis_, alignment_, element_, items, startIndex);
+    const overlappingIndex = findOverlappingIndex(
+      axis_,
+      alignment_,
+      element_,
+      items,
+      startIndex
+    );
 
     // Currently not over a slide (e.g. on top of overscroll area).
     if (overlappingIndex === undefined) {
@@ -898,7 +922,6 @@ export class Carousel {
     });
   }
 
-
   /**
    * Resets the frame of reference for scrolling, centering things around the
    * current index and moving things as appropriate.
@@ -919,9 +942,11 @@ export class Carousel {
     // we stopped scrolling. If so, we do not want move anything or fire an
     // event. If we have a programmatic scroll request, we still need to move
     // to that index.
-    if (this.restingIndex_ == this.currentIndex_ &&
-        this.requestedIndex_ != null &&
-        !force) {
+    if (
+      this.restingIndex_ == this.currentIndex_ &&
+      this.requestedIndex_ != null &&
+      !force
+    ) {
       return;
     }
 
@@ -961,8 +986,8 @@ export class Carousel {
     } = this;
     const currentElement = slides_[currentIndex_];
     const {length, start} = getDimension(axis_, scrollContainer_);
-    const currentElementStart = Math.abs(currentElementOffset_) <= length ?
-      currentElementOffset_ : 0;
+    const currentElementStart =
+      Math.abs(currentElementOffset_) <= length ? currentElementOffset_ : 0;
     // Use the offsetStart to figure out the scroll position of the current
     // element. Note that this only works because the element is not translated
     // at this point.
@@ -983,16 +1008,14 @@ export class Carousel {
    * }} options
    * @private
    */
-  scrollSlideIntoView_(slide, {
-    smoothScroll,
-  }) {
+  scrollSlideIntoView_(slide, {smoothScroll}) {
     const runner = smoothScroll ? (el, cb) => cb() : runDisablingSmoothScroll;
     runner(this.scrollContainer_, () => {
       scrollContainerToElement(
-          slide,
-          this.scrollContainer_,
-          this.axis_,
-          this.alignment_
+        slide,
+        this.scrollContainer_,
+        this.axis_,
+        this.alignment_
       );
     });
   }
@@ -1008,11 +1031,11 @@ export class Carousel {
   moveSlidesBeforeOrAfter__(totalLength, count, isAfter) {
     const {currentIndex_, restingIndex_, slides_} = this;
     const current = slides_[currentIndex_];
-    const currentRevolutions = (current._revolutions || 0);
+    const currentRevolutions = current._revolutions || 0;
     const dir = isAfter ? 1 : -1;
 
     for (let i = 1; i <= count; i++) {
-      const elIndex = mod(currentIndex_ + (i * dir), slides_.length);
+      const elIndex = mod(currentIndex_ + i * dir, slides_.length);
 
       // We do not want to move the slide that we started at.
       if (elIndex === restingIndex_ && currentIndex_ !== restingIndex_) {
@@ -1022,8 +1045,9 @@ export class Carousel {
       const el = slides_[elIndex];
       // Check if the element is on the wrong side of the current index.
       const needsMove = elIndex > currentIndex_ !== isAfter;
-      const revolutions = needsMove ? currentRevolutions + dir :
-        currentRevolutions;
+      const revolutions = needsMove
+        ? currentRevolutions + dir
+        : currentRevolutions;
 
       this.setElementTransform_(el, revolutions, totalLength);
     }

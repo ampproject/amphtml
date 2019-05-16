@@ -16,7 +16,6 @@
 
 import {createCustomEvent} from '../../../src/event-helper';
 
-
 /** @const {!Object<string, string>} */
 export const EventType = {
   // Triggered when the user mutes the story
@@ -57,7 +56,6 @@ export const EventType = {
   PAGE_LOADED: 'ampstory:pageload',
 };
 
-
 /**
  * @param {!EventTarget} source
  * @param {string} eventName
@@ -66,12 +64,14 @@ export const EventType = {
 export function dispatch(source, eventName, opt_bubbles) {
   const event = new Event(eventName, {bubbles: !!opt_bubbles});
   if (event.initEvent) {
-    event.initEvent(eventName, /* bubbles */ !!opt_bubbles,
-        /* cancelable */ false);
+    event.initEvent(
+      eventName,
+      /* bubbles */ !!opt_bubbles,
+      /* cancelable */ false
+    );
   }
   source.dispatchEvent(event);
 }
-
 
 /**
  * @param {!Window} win

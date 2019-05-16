@@ -14,18 +14,10 @@
  * limitations under the License.
  */
 
-import {
-  AmpdocAnalyticsRoot,
-  EmbedAnalyticsRoot,
-} from './analytics-root';
-import {
-  AnalyticsEvent,
-  CustomEventTracker,
-} from './events';
+import {AmpdocAnalyticsRoot, EmbedAnalyticsRoot} from './analytics-root';
+import {AnalyticsEvent, CustomEventTracker} from './events';
 import {AnalyticsGroup} from './analytics-group';
-import {
-  getFriendlyIframeEmbedOptional,
-} from '../../../src/friendly-iframe-embed';
+import {getFriendlyIframeEmbedOptional} from '../../../src/friendly-iframe-embed';
 import {
   getParentWindowFrameElement,
   getServiceForDoc,
@@ -85,8 +77,10 @@ export class InstrumentationService {
     // TODO(dvoytenko): rename to `triggerEvent`.
     const event = new AnalyticsEvent(target, eventType, opt_vars);
     const root = this.findRoot_(target);
-    const tracker = /** @type {!CustomEventTracker} */ (
-      root.getTracker('custom', CustomEventTracker));
+    const tracker = /** @type {!CustomEventTracker} */ (root.getTracker(
+      'custom',
+      CustomEventTracker
+    ));
     tracker.trigger(event);
   }
 
@@ -102,8 +96,11 @@ export class InstrumentationService {
       if (embed) {
         const embedNotNull = embed;
         return this.getOrCreateRoot_(embed, () => {
-          return new EmbedAnalyticsRoot(this.ampdoc, embedNotNull,
-              this.ampdocRoot_);
+          return new EmbedAnalyticsRoot(
+            this.ampdoc,
+            embedNotNull,
+            this.ampdocRoot_
+          );
         });
       }
     }
@@ -127,7 +124,6 @@ export class InstrumentationService {
   }
 }
 
-
 /**
  * It's important to resolve instrumentation asynchronously in elements that
  * depends on it in multi-doc scope. Otherwise an element life-cycle could
@@ -137,8 +133,10 @@ export class InstrumentationService {
  * @return {!Promise<InstrumentationService>}
  */
 export function instrumentationServicePromiseForDoc(elementOrAmpDoc) {
-  return /** @type {!Promise<InstrumentationService>} */ (
-    getServicePromiseForDoc(elementOrAmpDoc, 'amp-analytics-instrumentation'));
+  return /** @type {!Promise<InstrumentationService>} */ (getServicePromiseForDoc(
+    elementOrAmpDoc,
+    'amp-analytics-instrumentation'
+  ));
 }
 
 /**
@@ -147,6 +145,9 @@ export function instrumentationServicePromiseForDoc(elementOrAmpDoc) {
  */
 export function instrumentationServiceForDocForTesting(elementOrAmpDoc) {
   registerServiceBuilderForDoc(
-      elementOrAmpDoc, 'amp-analytics-instrumentation', InstrumentationService);
+    elementOrAmpDoc,
+    'amp-analytics-instrumentation',
+    InstrumentationService
+  );
   return getServiceForDoc(elementOrAmpDoc, 'amp-analytics-instrumentation');
 }

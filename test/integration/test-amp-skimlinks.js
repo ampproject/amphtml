@@ -21,12 +21,12 @@ import {parseQueryString} from '../../src/url';
 // Create fake test urls to replace skimlinks API urls.
 // RequestBank allow us to check if an API request has been made
 // or not by calling RequestBank.withdraw later.
-const pageTrackingUrl = RequestBank.getUrl('pageTrackingUrl') +
-  '/track.php?data=${data}';
-const linksTrackingUrl = RequestBank.getUrl('linksTrackingUrl') +
-  '/link?data=${data}';
-const nonAffiliateTrackingUrl = RequestBank.getUrl('nonAffiliateTrackingUrl') +
-  '?call=track&data=${data}';
+const pageTrackingUrl =
+  RequestBank.getUrl('pageTrackingUrl') + '/track.php?data=${data}';
+const linksTrackingUrl =
+  RequestBank.getUrl('linksTrackingUrl') + '/link?data=${data}';
+const nonAffiliateTrackingUrl =
+  RequestBank.getUrl('nonAffiliateTrackingUrl') + '?call=track&data=${data}';
 const waypointUrl = `${RequestBank.getUrl('waypointUrl')}/`;
 
 // Simulated click event created by browser.click() does not trigger
@@ -116,7 +116,10 @@ describe.skip('amp-skimlinks', function() {
 
     // TODO(alanorozco): Unskip on firefox
     const itSkipFirefox = (desc, cb) =>
-      it.configure().skipFirefox().run(desc, cb);
+      it
+        .configure()
+        .skipFirefox()
+        .run(desc, cb);
 
     // TODO(alanorozco): Unskip on firefox
     itSkipFirefox('should send NA-tracking on non-merchant link click ', () => {
@@ -157,7 +160,6 @@ describe.skip('amp-skimlinks', function() {
       });
     });
   });
-
 
   const setupNoConfig = {
     extensions: ['amp-skimlinks'],
@@ -206,7 +208,6 @@ describe.skip('amp-skimlinks', function() {
       });
     });
   });
-
 
   const setupUnknownLinks = {
     extensions: ['amp-skimlinks'],
@@ -259,5 +260,3 @@ describe.skip('amp-skimlinks', function() {
     });
   });
 });
-
-

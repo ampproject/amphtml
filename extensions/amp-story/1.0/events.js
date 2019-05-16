@@ -16,7 +16,6 @@
 
 import {createCustomEvent} from '../../../src/event-helper';
 
-
 /** @const {!Object<string, string>} */
 export const EventType = {
   // Triggered when the user mutes the story
@@ -64,8 +63,13 @@ export const EventType = {
  * @param {!JsonObject=} payload
  * @param {!CustomEventInit=} eventInit
  */
-export function dispatch(win, source, eventName, payload = undefined,
-  eventInit = undefined) {
+export function dispatch(
+  win,
+  source,
+  eventName,
+  payload = undefined,
+  eventInit = undefined
+) {
   const event = createCustomEvent(win, eventName, payload, eventInit);
   source.dispatchEvent(event);
 }

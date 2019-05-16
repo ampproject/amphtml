@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 import * as lolex from 'lolex';
 import {CacheCidApi} from '../../src/service/cache-cid-api';
 import {installTimerService} from '../../src/service/timer-impl';
@@ -39,7 +38,9 @@ describes.realWin('cacheCidApi', {amp: true}, env => {
     ]);
 
     clock = lolex.install({
-      target: env.win, toFake: ['Date', 'setTimeout', 'clearTimeout']});
+      target: env.win,
+      toFake: ['Date', 'setTimeout', 'clearTimeout'],
+    });
     installTimerService(env.win);
     api = new CacheCidApi(env.ampdoc);
   });
@@ -74,73 +75,89 @@ describes.realWin('cacheCidApi', {amp: true}, env => {
     });
 
     it('should use client ID API from api if everything great', () => {
-      fetchJsonStub.returns(Promise.resolve({
-        json: () => { return Promise.resolve({
-          publisherClientId: 'publisher-client-id-from-cache',
-        });
-        },
-      }));
+      fetchJsonStub.returns(
+        Promise.resolve({
+          json: () => {
+            return Promise.resolve({
+              publisherClientId: 'publisher-client-id-from-cache',
+            });
+          },
+        })
+      );
       return api.getScopedCid('AMP_ECID_GOOGLE').then(cid => {
-        expect(cid).to.equal('amp-mJW1ZjoviqBJydzRI8KnitWEpqyhQqDegGCl' +
-        'rvvfkCif_N9oYLdZEB976uJDhYgL');
-        expect(fetchJsonStub)
-            .to.be.calledWith('https://ampcid.google.com/v1/cache:getClientId?key=AIzaSyDKtqGxnoeIqVM33Uf7hRSa3GJxuzR7mLc',
-                {
-                  method: 'POST',
-                  ampCors: false,
-                  credentials: 'include',
-                  mode: 'cors',
-                  body: {
-                    publisherOrigin: 'about:srcdoc',
-                  },
-                });
+        expect(cid).to.equal(
+          'amp-mJW1ZjoviqBJydzRI8KnitWEpqyhQqDegGCl' +
+            'rvvfkCif_N9oYLdZEB976uJDhYgL'
+        );
+        expect(fetchJsonStub).to.be.calledWith(
+          'https://ampcid.google.com/v1/cache:getClientId?key=AIzaSyDKtqGxnoeIqVM33Uf7hRSa3GJxuzR7mLc',
+          {
+            method: 'POST',
+            ampCors: false,
+            credentials: 'include',
+            mode: 'cors',
+            body: {
+              publisherOrigin: 'about:srcdoc',
+            },
+          }
+        );
       });
     });
 
     it('should return null if opted out', () => {
-      fetchJsonStub.returns(Promise.resolve({
-        json: () => {
-	  return Promise.resolve({
-            optOut: true,
-	  });
-        },
-      }));
+      fetchJsonStub.returns(
+        Promise.resolve({
+          json: () => {
+            return Promise.resolve({
+              optOut: true,
+            });
+          },
+        })
+      );
       return api.getScopedCid('AMP_ECID_GOOGLE').then(cid => {
         expect(cid).to.equal(null);
-        expect(fetchJsonStub)
-            .to.be.calledWith('https://ampcid.google.com/v1/cache:getClientId?key=AIzaSyDKtqGxnoeIqVM33Uf7hRSa3GJxuzR7mLc',
-                {
-                  method: 'POST',
-                  ampCors: false,
-                  credentials: 'include',
-                  mode: 'cors',
-                  body: {
-                    publisherOrigin: 'about:srcdoc',
-                  },
-                });
+        expect(fetchJsonStub).to.be.calledWith(
+          'https://ampcid.google.com/v1/cache:getClientId?key=AIzaSyDKtqGxnoeIqVM33Uf7hRSa3GJxuzR7mLc',
+          {
+            method: 'POST',
+            ampCors: false,
+            credentials: 'include',
+            mode: 'cors',
+            body: {
+              publisherOrigin: 'about:srcdoc',
+            },
+          }
+        );
       });
     });
 
     it('should try alternative url if API provides', () => {
-      fetchJsonStub.onCall(0).returns(Promise.resolve({
-        json: () => {
-          return Promise.resolve({
-            alternateUrl: 'https://ampcid.google.co.uk/v1/cache:getClientId',
-          });
-        },
-      }));
-      fetchJsonStub.onCall(1).returns(Promise.resolve({
-        json: () => {
-          return Promise.resolve({
-            publisherClientId: 'publisher-client-id-from-cache',
-          });
-        },
-      }));
+      fetchJsonStub.onCall(0).returns(
+        Promise.resolve({
+          json: () => {
+            return Promise.resolve({
+              alternateUrl: 'https://ampcid.google.co.uk/v1/cache:getClientId',
+            });
+          },
+        })
+      );
+      fetchJsonStub.onCall(1).returns(
+        Promise.resolve({
+          json: () => {
+            return Promise.resolve({
+              publisherClientId: 'publisher-client-id-from-cache',
+            });
+          },
+        })
+      );
       return api.getScopedCid('AMP_ECID_GOOGLE').then(cid => {
-        expect(cid).to.equal('amp-mJW1ZjoviqBJydzRI8KnitWEpqyhQqDegGCl' +
-        'rvvfkCif_N9oYLdZEB976uJDhYgL');
+        expect(cid).to.equal(
+          'amp-mJW1ZjoviqBJydzRI8KnitWEpqyhQqDegGCl' +
+            'rvvfkCif_N9oYLdZEB976uJDhYgL'
+        );
         expect(fetchJsonStub.getCall(1).args[0]).to.equal(
-            'https://ampcid.google.co.uk/v1/cache:getClientId?key=AIzaSyDKtqGxnoeIqVM33Uf7hRSa3GJxuzR7mLc');
+          'https://ampcid.google.co.uk/v1/cache:getClientId?key=AIzaSyDKtqGxnoeIqVM33Uf7hRSa3GJxuzR7mLc'
+        );
       });
     });
 
@@ -154,26 +171,28 @@ describes.realWin('cacheCidApi', {amp: true}, env => {
               });
             },
           });
-        }
-        );
+        });
       });
-      const response = api.getScopedCid('AMP_ECID_GOOGLE').then(cid => {
-        expect(cid).to.equal(null);
-        expect(fetchJsonStub)
-            .to.be.calledWith('https://ampcid.google.com/v1/cache:getClientId?key=AIzaSyDKtqGxnoeIqVM33Uf7hRSa3GJxuzR7mLc',
-                {
-                  method: 'POST',
-                  ampCors: false,
-                  credentials: 'include',
-                  mode: 'cors',
-                  body: {
-                    publisherOrigin: 'about:srcdoc',
-                  },
-                });
-      }).catch(() => {});
+      const response = api
+        .getScopedCid('AMP_ECID_GOOGLE')
+        .then(cid => {
+          expect(cid).to.equal(null);
+          expect(fetchJsonStub).to.be.calledWith(
+            'https://ampcid.google.com/v1/cache:getClientId?key=AIzaSyDKtqGxnoeIqVM33Uf7hRSa3GJxuzR7mLc',
+            {
+              method: 'POST',
+              ampCors: false,
+              credentials: 'include',
+              mode: 'cors',
+              body: {
+                publisherOrigin: 'about:srcdoc',
+              },
+            }
+          );
+        })
+        .catch(() => {});
       clock.tick(30000);
       return response;
     });
-
   });
 });

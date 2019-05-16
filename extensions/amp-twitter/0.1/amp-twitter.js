@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 import {CSS} from '../../../build/amp-twitter-0.1.css';
 import {MessageType} from '../../../src/3p-frame-messaging';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
@@ -61,7 +60,6 @@ function enableDefaultPlaceholder(win) {
 }
 
 class AmpTwitter extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -105,7 +103,9 @@ class AmpTwitter extends AMP.BaseElement {
     preloadBootstrap(this.win, this.preconnect);
     // Hosts the script that renders tweets.
     this.preconnect.preload(
-        'https://platform.twitter.com/widgets.js', 'script');
+      'https://platform.twitter.com/widgets.js',
+      'script'
+    );
     // This domain serves the actual tweets as JSONP.
     this.preconnect.url('https://syndication.twitter.com', opt_onLayout);
     // All images
@@ -125,8 +125,9 @@ class AmpTwitter extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const iframe = getIframe(this.win, this.element, 'twitter', null,
-        {allowFullscreen: true});
+    const iframe = getIframe(this.win, this.element, 'twitter', null, {
+      allowFullscreen: true,
+    });
     this.applyFillContent(iframe);
     iframe.classList.add('i-amphtml-twitter-iframe');
     if (isPulsingPlaceholder(this.win)) {
@@ -139,12 +140,22 @@ class AmpTwitter extends AMP.BaseElement {
       this.element.classList.add('i-amphtml-twitter-burst');
     }
     this.updateForLoadingState_();
-    listenFor(iframe, MessageType.EMBED_SIZE, data => {
-      this.updateForSuccessState_(data['height']);
-    }, /* opt_is3P */true);
-    listenFor(iframe, MessageType.NO_CONTENT, () => {
-      this.updateForFailureState_();
-    }, /* opt_is3P */true);
+    listenFor(
+      iframe,
+      MessageType.EMBED_SIZE,
+      data => {
+        this.updateForSuccessState_(data['height']);
+      },
+      /* opt_is3P */ true
+    );
+    listenFor(
+      iframe,
+      MessageType.NO_CONTENT,
+      () => {
+        this.updateForFailureState_();
+      },
+      /* opt_is3P */ true
+    );
     this.element.appendChild(iframe);
     this.iframe_ = iframe;
     return this.loadPromise(iframe);
@@ -156,13 +167,16 @@ class AmpTwitter extends AMP.BaseElement {
    */
   updateForLoadingState_() {
     let height;
-    this.measureMutateElement(() => {
-      height = this.element./*OK*/getBoundingClientRect().height;
-    }, () => {
-      this.element.setAttribute('i-amphtml-loading', 'start');
-      // Set an explicit height so we can animate it.
-      this./*OK*/changeHeight(height);
-    });
+    this.measureMutateElement(
+      () => {
+        height = this.element./*OK*/ getBoundingClientRect().height;
+      },
+      () => {
+        this.element.setAttribute('i-amphtml-loading', 'start');
+        // Set an explicit height so we can animate it.
+        this./*OK*/ changeHeight(height);
+      }
+    );
   }
 
   /**
@@ -172,22 +186,26 @@ class AmpTwitter extends AMP.BaseElement {
    */
   updateForSuccessState_(height) {
     let placeholderHeight;
-    this.measureMutateElement(() => {
-      if (!this.userPlaceholder_ && isFadingPlaceholder(this.win)) {
-        // Use an explicit height so that the placeholder does not move when\
-        // the container resizes.
-        placeholderHeight = this.element./*OK*/getBoundingClientRect().height;
+    this.measureMutateElement(
+      () => {
+        if (!this.userPlaceholder_ && isFadingPlaceholder(this.win)) {
+          // Use an explicit height so that the placeholder does not move when\
+          // the container resizes.
+          placeholderHeight = this.element./*OK*/ getBoundingClientRect()
+            .height;
+        }
+      },
+      () => {
+        if (this.userPlaceholder_) {
+          this.togglePlaceholder(false);
+        }
+        this.element.setAttribute('i-amphtml-loading', 'done');
+        this./*OK*/ changeHeight(height);
+        if (placeholderHeight) {
+          setStyle(this.getPlaceholder(), 'height', placeholderHeight, 'px');
+        }
       }
-    }, () => {
-      if (this.userPlaceholder_) {
-        this.togglePlaceholder(false);
-      }
-      this.element.setAttribute('i-amphtml-loading', 'done');
-      this./*OK*/changeHeight(height);
-      if (placeholderHeight) {
-        setStyle(this.getPlaceholder(), 'height', placeholderHeight, 'px');
-      }
-    });
+    );
   }
 
   /**
@@ -206,7 +224,7 @@ class AmpTwitter extends AMP.BaseElement {
       }
 
       if (content) {
-        this./*OK*/changeHeight(content./*OK*/offsetHeight);
+        this./*OK*/ changeHeight(content./*OK*/ offsetHeight);
       }
     });
   }
@@ -225,7 +243,6 @@ class AmpTwitter extends AMP.BaseElement {
     return true;
   }
 }
-
 
 AMP.extension('amp-twitter', '0.1', AMP => {
   const styles = enableDefaultPlaceholder(AMP.win) ? CSS : undefined;

@@ -62,15 +62,12 @@ const BSD_SHORT = [
 
 /* eslint-enable */
 
-const LICENSES = [
-  [MIT_FULL, MIT_SHORT],
-  [POLYMER_BSD_FULL, BSD_SHORT],
-];
+const LICENSES = [[MIT_FULL, MIT_SHORT], [POLYMER_BSD_FULL, BSD_SHORT]];
 
 const PATHS = [
   'third_party/webcomponentsjs/ShadowCSS.js',
   'node_modules/document-register-element/build/' +
-      'document-register-element.patched.js',
+    'document-register-element.patched.js',
 ];
 
 /**

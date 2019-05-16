@@ -60,16 +60,16 @@ export function getAmpSkimlinksOptions(element, docInfo) {
  */
 function getExcludedDomains_(element, internalDomains) {
   let excludedDomains = []
-      .concat(internalDomains)
-      .concat(GLOBAL_DOMAIN_BLACKLIST);
+    .concat(internalDomains)
+    .concat(GLOBAL_DOMAIN_BLACKLIST);
 
   const excludedDomainsAttr = element.getAttribute('excluded-domains');
   if (excludedDomainsAttr) {
     excludedDomains = excludedDomains.concat(
-        excludedDomainsAttr
-            .trim()
-            .split(/\s+/)
-            .map(domain => domain.replace(/^www\./, ''))
+      excludedDomainsAttr
+        .trim()
+        .split(/\s+/)
+        .map(domain => domain.replace(/^www\./, ''))
     );
   }
 
@@ -182,14 +182,14 @@ function getConfig_(element) {
     // by google closure compiler on the production build. Therefore, we
     // are converting here the JSON object keys to the internal object keys.
     return {
-      pageTrackingUrl: customConfigJson['pageTrackingUrl'] ||
-        DEFAULT_CONFIG.pageTrackingUrl,
-      linksTrackingUrl: customConfigJson['linksTrackingUrl'] ||
-        DEFAULT_CONFIG.linksTrackingUrl,
-      nonAffiliateTrackingUrl: customConfigJson['nonAffiliateTrackingUrl'] ||
+      pageTrackingUrl:
+        customConfigJson['pageTrackingUrl'] || DEFAULT_CONFIG.pageTrackingUrl,
+      linksTrackingUrl:
+        customConfigJson['linksTrackingUrl'] || DEFAULT_CONFIG.linksTrackingUrl,
+      nonAffiliateTrackingUrl:
+        customConfigJson['nonAffiliateTrackingUrl'] ||
         DEFAULT_CONFIG.nonAffiliateTrackingUrl,
-      beaconUrl: customConfigJson['beaconUrl'] ||
-        DEFAULT_CONFIG.beaconUrl,
+      beaconUrl: customConfigJson['beaconUrl'] || DEFAULT_CONFIG.beaconUrl,
     };
   } catch (err) {
     return DEFAULT_CONFIG;

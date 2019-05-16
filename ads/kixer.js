@@ -54,11 +54,13 @@ export function kixer(global, data) {
   const kxviewCheck = function(intersectionEntry) {
     inView = intersectionEntry.intersectionRatio > 0.5; // Half of the unit is in the viewport
     if (inView) {
-      if (!viewed && viewTimer == null) { // If the ad hasn't been viewed and the timer is not set
+      if (!viewed && viewTimer == null) {
+        // If the ad hasn't been viewed and the timer is not set
         viewTimer = setTimeout(kxviewFire, 900); // Set a Timeout to check the ad in 900ms and fire the view
       }
     } else {
-      if (viewTimer) { // If the Timeout is set
+      if (viewTimer) {
+        // If the Timeout is set
         clearTimeout(viewTimer); // Clear the Timeout
         viewTimer = null;
       }
@@ -66,7 +68,8 @@ export function kixer(global, data) {
   };
 
   const kxviewFire = function() {
-    if (inView) { // if the ad is still in the viewport
+    if (inView) {
+      // if the ad is still in the viewport
       if (typeof __kx_viewability.process_locked === 'function') {
         viewed = true;
         __kx_viewability.process_locked(data.adslot); // Fire kixer view

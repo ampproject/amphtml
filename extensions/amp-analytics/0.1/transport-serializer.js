@@ -43,7 +43,6 @@ export let RequestDef;
  * @interface
  */
 export class TransportSerializerDef {
-
   /**
    * @param {string} unusedBaseUrl
    * @param {!BatchSegmentDef} unusedSegment
@@ -67,7 +66,6 @@ export class TransportSerializerDef {
  * @implements {TransportSerializerDef}
  */
 class DefaultTransportSerializer {
-
   /** @override */
   generateRequest(baseUrl, segment, withPayload = false) {
     if (withPayload) {
@@ -87,7 +85,8 @@ class DefaultTransportSerializer {
       return {
         url: baseUrl.replace(EXTRA_URL_PARAM_VAR, ''),
         payload: JSON.stringify(
-            segments.map(segment => segment['extraUrlParams'])),
+          segments.map(segment => segment['extraUrlParams'])
+        ),
       };
     }
     return {
@@ -115,9 +114,9 @@ export const TransportSerializers = {
  */
 export function defaultSerializer(baseUrl, batchSegments) {
   const extraUrlParamsStr = batchSegments
-      .map(item => serializeQueryString(item['extraUrlParams']))
-      .filter(queryString => !!queryString)
-      .join('&');
+    .map(item => serializeQueryString(item['extraUrlParams']))
+    .filter(queryString => !!queryString)
+    .join('&');
   let requestUrl;
   if (baseUrl.indexOf(EXTRA_URL_PARAM_VAR) >= 0) {
     requestUrl = baseUrl.replace(EXTRA_URL_PARAM_VAR, extraUrlParamsStr);

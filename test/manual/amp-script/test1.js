@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 document.getElementById('simple').addEventListener('click', () => {
   const el = document.createElement('h1');
   el.textContent = 'Hello World!';

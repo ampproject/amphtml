@@ -18,18 +18,14 @@ import {Services} from '../../../src/services';
 import {listenOncePromise} from '../../../src/event-helper';
 import {setStyle} from '../../../src/style';
 
-
 /** @const {number} */
 const SWAP_TIMEOUT_MS = 500;
-
 
 const BACKGROUND_CLASS = 'i-amphtml-story-background';
 
 const BACKGROUND_CONTAINER_CLASS = 'i-amphtml-story-background-container';
 
 const BACKGROUND_OVERLAY_CLASS = 'i-amphtml-story-background-overlay';
-
-
 
 /**
  * @param {?string} url
@@ -39,11 +35,10 @@ function maybeLoadImage(url) {
   if (!url) {
     return Promise.resolve();
   }
-  const img = new Image;
+  const img = new Image();
   img.src = url;
   return listenOncePromise(img, 'load');
 }
-
 
 /**
  * TODO(cvializ): Investigate pre-rendering blurred backgrounds to canvas to
@@ -109,15 +104,17 @@ export class AmpStoryBackground {
   setBackground(color, url, initial = false) {
     const countAtAdd = ++this.count_;
 
-    const whenFresh = (promise, callback) => promise.then(() => {
-      if (this.count_ == countAtAdd) {
-        callback();
-      }
-    });
+    const whenFresh = (promise, callback) =>
+      promise.then(() => {
+        if (this.count_ == countAtAdd) {
+          callback();
+        }
+      });
 
     const imgLoad = maybeLoadImage(url);
-    const timeout =
-        Services.timerFor(this.win_).promise(initial ? 0 : SWAP_TIMEOUT_MS);
+    const timeout = Services.timerFor(this.win_).promise(
+      initial ? 0 : SWAP_TIMEOUT_MS
+    );
 
     const hidden = this.hidden_;
 

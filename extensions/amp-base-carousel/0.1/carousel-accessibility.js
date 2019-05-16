@@ -37,13 +37,7 @@ export class CarouselAccessibility {
    *   stoppable: !StoppableDef,
    * }} config
    */
-  constructor({
-    win,
-    element,
-    scrollContainer,
-    runMutate,
-    stoppable,
-  }) {
+  constructor({win, element, scrollContainer, runMutate, stoppable}) {
     /** @private @const */
     this.win_ = win;
 
@@ -68,9 +62,13 @@ export class CarouselAccessibility {
     /** @private {number} */
     this.index_ = 0;
 
-    element.addEventListener('focus', () => {
-      stoppable.stop();
-    }, true);
+    element.addEventListener(
+      'focus',
+      () => {
+        stoppable.stop();
+      },
+      true
+    );
     element.addEventListener('indexchange', event => {
       this.onIndexChanged_(event);
     });

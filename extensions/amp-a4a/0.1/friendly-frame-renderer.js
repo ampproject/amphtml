@@ -29,7 +29,6 @@ export let CreativeData;
  * Render a validated AMP creative directly in the parent page.
  */
 export class FriendlyFrameRenderer extends Renderer {
-
   /**
    * Constructs a FriendlyFrameRenderer instance. The instance values here are
    * used by TemplateRenderer, which inherits from FriendlyFrameRenderer.
@@ -40,7 +39,6 @@ export class FriendlyFrameRenderer extends Renderer {
 
   /** @override */
   render(context, element, creativeData) {
-
     creativeData = /** @type {CreativeData} */ (creativeData);
 
     const {size, adUrl} = context;
@@ -50,6 +48,10 @@ export class FriendlyFrameRenderer extends Renderer {
     devAssert(adUrl, 'missing ad request url');
 
     return renderCreativeIntoFriendlyFrame(
-        adUrl, size, element, creativeMetadata);
+      adUrl,
+      size,
+      element,
+      creativeMetadata
+    );
   }
 }

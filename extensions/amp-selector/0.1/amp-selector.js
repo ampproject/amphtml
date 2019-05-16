@@ -20,8 +20,11 @@ import {CSS} from '../../../build/amp-selector-0.1.css';
 import {Keys} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
 import {areEqualOrdered} from '../../../src/utils/array';
-import {closestAncestorElementBySelector, isRTL, tryFocus}
-  from '../../../src/dom';
+import {
+  closestAncestorElementBySelector,
+  isRTL,
+  tryFocus,
+} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
@@ -100,9 +103,10 @@ export class AmpSelector extends AMP.BaseElement {
       kbSelectMode = kbSelectMode.toLowerCase();
       user().assertEnumValue(KEYBOARD_SELECT_MODES, kbSelectMode);
       userAssert(
-          !(this.isMultiple_ && kbSelectMode == KEYBOARD_SELECT_MODES.SELECT),
-          '[keyboard-select-mode=select] not supported for multiple ' +
-        'selection amp-selector');
+        !(this.isMultiple_ && kbSelectMode == KEYBOARD_SELECT_MODES.SELECT),
+        '[keyboard-select-mode=select] not supported for multiple ' +
+          'selection amp-selector'
+      );
     } else {
       kbSelectMode = KEYBOARD_SELECT_MODES.NONE;
     }
@@ -115,31 +119,48 @@ export class AmpSelector extends AMP.BaseElement {
     this.element.addEventListener('click', this.clickHandler_.bind(this));
     this.element.addEventListener('keydown', this.keyDownHandler_.bind(this));
 
-    this.registerAction('selectUp', invocation => {
-      const {args} = invocation;
-      const delta = (args && args['delta'] !== undefined) ? -args['delta'] : -1;
-      this.select_(delta);
-    }, ActionTrust.LOW);
+    this.registerAction(
+      'selectUp',
+      invocation => {
+        const {args} = invocation;
+        const delta = args && args['delta'] !== undefined ? -args['delta'] : -1;
+        this.select_(delta);
+      },
+      ActionTrust.LOW
+    );
 
-    this.registerAction('selectDown', invocation => {
-      const {args} = invocation;
-      const delta = (args && args['delta'] !== undefined) ? args['delta'] : 1;
-      this.select_(delta);
-    }, ActionTrust.LOW);
+    this.registerAction(
+      'selectDown',
+      invocation => {
+        const {args} = invocation;
+        const delta = args && args['delta'] !== undefined ? args['delta'] : 1;
+        this.select_(delta);
+      },
+      ActionTrust.LOW
+    );
 
-    this.registerAction('toggle', invocation => {
-      const {args} = invocation;
-      userAssert(args['index'] >= 0, '\'index\' must be greater than 0');
-      userAssert(args['index'] < this.elements_.length, '\'index\' must ' +
-        'be less than the length of options in the <amp-selector>');
-      if (args && args['index'] !== undefined) {
-        this.toggle_(args['index'], args['value']);
-      }
-    }, ActionTrust.LOW);
+    this.registerAction(
+      'toggle',
+      invocation => {
+        const {args} = invocation;
+        userAssert(args['index'] >= 0, "'index' must be greater than 0");
+        userAssert(
+          args['index'] < this.elements_.length,
+          "'index' must " +
+            'be less than the length of options in the <amp-selector>'
+        );
+        if (args && args['index'] !== undefined) {
+          this.toggle_(args['index'], args['value']);
+        }
+      },
+      ActionTrust.LOW
+    );
 
     // Triggers on DOM children updates
-    this.element.addEventListener(AmpEvents.DOM_UPDATE,
-        this.maybeRefreshOnUpdate_.bind(this));
+    this.element.addEventListener(
+      AmpEvents.DOM_UPDATE,
+      this.maybeRefreshOnUpdate_.bind(this)
+    );
   }
 
   /** @override */
@@ -416,11 +437,14 @@ export class AmpSelector extends AMP.BaseElement {
    */
   fireSelectEvent_(el) {
     const name = 'select';
-    const selectEvent =
-        createCustomEvent(this.win, `amp-selector.${name}`, dict({
-          'targetOption': el.getAttribute('option'),
-          'selectedOptions': this.selectedOptions_(),
-        }));
+    const selectEvent = createCustomEvent(
+      this.win,
+      `amp-selector.${name}`,
+      dict({
+        'targetOption': el.getAttribute('option'),
+        'selectedOptions': this.selectedOptions_(),
+      })
+    );
     this.action_.trigger(this.element, name, selectEvent, ActionTrust.HIGH);
   }
 

@@ -19,7 +19,6 @@ import {
   BOOKEND_CONFIG_ATTRIBUTE_NAME,
 } from '../amp-story-request-service';
 
-
 describes.fakeWin('amp-story-store-service', {amp: true}, env => {
   let requestService;
   let storyElement;
@@ -45,18 +44,16 @@ describes.fakeWin('amp-story-store-service', {amp: true}, env => {
     const bookendUrl = 'https://publisher.com/bookend';
 
     storyElement.setAttribute(BOOKEND_CONFIG_ATTRIBUTE_NAME, bookendUrl);
-    xhrMock.expects('fetchJson')
-        .withExactArgs(
-            bookendUrl,
-            {requireAmpResponseSourceOrigin: false},
-        )
-        .resolves({
-          ok: true,
-          json() {
-            return Promise.resolve();
-          },
-        })
-        .once();
+    xhrMock
+      .expects('fetchJson')
+      .withExactArgs(bookendUrl, {requireAmpResponseSourceOrigin: false})
+      .resolves({
+        ok: true,
+        json() {
+          return Promise.resolve();
+        },
+      })
+      .once();
 
     return requestService.loadBookendConfig().then(() => {
       xhrMock.verify();
@@ -68,14 +65,15 @@ describes.fakeWin('amp-story-store-service', {amp: true}, env => {
     const fetchedConfig = 'amazingConfig';
 
     storyElement.setAttribute(BOOKEND_CONFIG_ATTRIBUTE_NAME, bookendUrl);
-    xhrMock.expects('fetchJson')
-        .resolves({
-          ok: true,
-          json() {
-            return Promise.resolve(fetchedConfig);
-          },
-        })
-        .once();
+    xhrMock
+      .expects('fetchJson')
+      .resolves({
+        ok: true,
+        json() {
+          return Promise.resolve(fetchedConfig);
+        },
+      })
+      .once();
 
     return requestService.loadBookendConfig().then(config => {
       expect(config).to.equal(fetchedConfig);
@@ -87,19 +85,21 @@ describes.fakeWin('amp-story-store-service', {amp: true}, env => {
     const bookendUrl = 'https://publisher.com/bookend';
 
     storyElement.setAttribute(BOOKEND_CONFIG_ATTRIBUTE_NAME, bookendUrl);
-    xhrMock.expects('fetchJson')
-        .resolves({
-          ok: true,
-          json() {
-            return Promise.resolve();
-          },
-        })
-        .once();
+    xhrMock
+      .expects('fetchJson')
+      .resolves({
+        ok: true,
+        json() {
+          return Promise.resolve();
+        },
+      })
+      .once();
 
-    return requestService.loadBookendConfig()
-        .then(() => requestService.loadBookendConfig())
-        .then(() => {
-          xhrMock.verify();
-        });
+    return requestService
+      .loadBookendConfig()
+      .then(() => requestService.loadBookendConfig())
+      .then(() => {
+        xhrMock.verify();
+      });
   });
 });

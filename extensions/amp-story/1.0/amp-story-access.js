@@ -33,7 +33,6 @@ import {isArray, isObject} from '../../../src/types';
 import {parseJson} from '../../../src/json';
 import {setImportantStyles} from '../../../src/style';
 
-
 /** @const {string} */
 const TAG = 'amp-story-access';
 
@@ -105,9 +104,11 @@ export class AmpStoryAccess extends AMP.BaseElement {
     const drawerEl = this.renderDrawerEl_();
 
     this.containerEl_ = dev().assertElement(
-        drawerEl.querySelector('.i-amphtml-story-access-container'));
+      drawerEl.querySelector('.i-amphtml-story-access-container')
+    );
     const contentEl = dev().assertElement(
-        drawerEl.querySelector('.i-amphtml-story-access-content'));
+      drawerEl.querySelector('.i-amphtml-story-access-content')
+    );
 
     copyChildren(this.element, contentEl);
     removeChildren(this.element);
@@ -132,10 +133,13 @@ export class AmpStoryAccess extends AMP.BaseElement {
       this.onAccessStateChange_(isAccess);
     });
 
-    this.storeService_
-        .subscribe(StateProperty.CURRENT_PAGE_INDEX, currentPageIndex => {
-          this.onCurrentPageIndexChange_(currentPageIndex);
-        }, true /** callToInitialize */);
+    this.storeService_.subscribe(
+      StateProperty.CURRENT_PAGE_INDEX,
+      currentPageIndex => {
+        this.onCurrentPageIndexChange_(currentPageIndex);
+      },
+      true /** callToInitialize */
+    );
 
     this.element.addEventListener('click', event => this.onClick_(event));
   }
@@ -218,9 +222,9 @@ export class AmpStoryAccess extends AMP.BaseElement {
         const logoSrc = this.getLogoSrc_();
 
         if (logoSrc) {
-          const logoEl =
-              dev().assertElement(
-                  drawerEl.querySelector('.i-amphtml-story-access-logo'));
+          const logoEl = dev().assertElement(
+            drawerEl.querySelector('.i-amphtml-story-access-logo')
+          );
           setImportantStyles(logoEl, {'background-image': `url(${logoSrc})`});
         }
 
@@ -230,8 +234,11 @@ export class AmpStoryAccess extends AMP.BaseElement {
         return getNotificationTemplate(this.element);
         break;
       default:
-        user().error(TAG, 'Unknown "type" attribute, expected one of: ' +
-            'blocking, notification.');
+        user().error(
+          TAG,
+          'Unknown "type" attribute, expected one of: ' +
+            'blocking, notification.'
+        );
     }
   }
 
@@ -243,13 +250,16 @@ export class AmpStoryAccess extends AMP.BaseElement {
    */
   getLogoSrc_() {
     const storyEl = dev().assertElement(
-        closestAncestorElementBySelector(this.element, 'AMP-STORY'));
+      closestAncestorElementBySelector(this.element, 'AMP-STORY')
+    );
     const logoSrc = storyEl && storyEl.getAttribute('publisher-logo-src');
 
-    logoSrc ?
-      assertHttpsUrl(logoSrc, storyEl, 'publisher-logo-src') :
-      user().warn(
-          TAG, 'Expected "publisher-logo-src" attribute on <amp-story>');
+    logoSrc
+      ? assertHttpsUrl(logoSrc, storyEl, 'publisher-logo-src')
+      : user().warn(
+          TAG,
+          'Expected "publisher-logo-src" attribute on <amp-story>'
+        );
 
     return logoSrc;
   }
@@ -268,14 +278,15 @@ export class AmpStoryAccess extends AMP.BaseElement {
    * @private
    */
   whitelistActions_() {
-    const accessEl =
-        dev().assertElement(
-            this.win.document.getElementById('amp-access'),
-            'Cannot find the amp-access configuration');
+    const accessEl = dev().assertElement(
+      this.win.document.getElementById('amp-access'),
+      'Cannot find the amp-access configuration'
+    );
 
     // Configuration validation is handled by the amp-access extension.
-    let accessConfig =
-    /** @type {!Array|!Object} */ (parseJson(accessEl.textContent));
+    let accessConfig = /** @type {!Array|!Object} */ (parseJson(
+      accessEl.textContent
+    ));
 
     if (!isArray(accessConfig)) {
       accessConfig = [accessConfig];
@@ -284,7 +295,8 @@ export class AmpStoryAccess extends AMP.BaseElement {
       // namespace, we want to allow actions with or without namespace.
       if (accessConfig[0].namespace) {
         accessConfig.push(
-            Object.assign({}, accessConfig[0], {namespace: undefined}));
+          Object.assign({}, accessConfig[0], {namespace: undefined})
+        );
       }
     }
 
@@ -295,8 +307,9 @@ export class AmpStoryAccess extends AMP.BaseElement {
 
       if (isObject(login)) {
         const types = Object.keys(login);
-        types.forEach(
-            type => actions.push(this.getActionObject_(namespace, type)));
+        types.forEach(type =>
+          actions.push(this.getActionObject_(namespace, type))
+        );
       } else {
         actions.push(this.getActionObject_(namespace));
       }

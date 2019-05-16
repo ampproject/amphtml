@@ -23,12 +23,17 @@ const TAG = 'AMP.require';
  * @return {?}
  */
 export function requireExternal(module) {
-  const required = (AMP.dependencies && AMP.dependencies[module]) ||
-      (AMP.require && AMP.require(module));
+  const required =
+    (AMP.dependencies && AMP.dependencies[module]) ||
+    (AMP.require && AMP.require(module));
   if (required) {
     return required;
   } else {
-    dev().error(TAG, 'Could not require external module %s.' +
-        ' Did you import the bundle in the extension?', module);
+    dev().error(
+      TAG,
+      'Could not require external module %s.' +
+        ' Did you import the bundle in the extension?',
+      module
+    );
   }
 }

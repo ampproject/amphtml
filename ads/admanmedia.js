@@ -24,12 +24,17 @@ export function admanmedia(global, data) {
   validateData(data, ['id']);
 
   const encodedId = encodeURIComponent(data.id);
-  loadScript(global, `https://mona.admanmedia.com/go?id=${encodedId}`, () => {
-    const pattern = `script[src$="id=${encodedId}"]`;
-    const scriptTag = global.document.querySelector(pattern);
-    scriptTag.setAttribute('id', `hybs-${encodedId}`);
-    global.context.renderStart();
-  }, () => {
-    global.context.noContentAvailable();
-  });
+  loadScript(
+    global,
+    `https://mona.admanmedia.com/go?id=${encodedId}`,
+    () => {
+      const pattern = `script[src$="id=${encodedId}"]`;
+      const scriptTag = global.document.querySelector(pattern);
+      scriptTag.setAttribute('id', `hybs-${encodedId}`);
+      global.context.renderStart();
+    },
+    () => {
+      global.context.noContentAvailable();
+    }
+  );
 }

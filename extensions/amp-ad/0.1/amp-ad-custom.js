@@ -41,7 +41,6 @@ const ampCustomadXhrPromises = {};
 let ampCustomadFullUrls = null;
 
 export class AmpAdCustom extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -62,7 +61,7 @@ export class AmpAdCustom extends AMP.BaseElement {
     return LayoutPriority.CONTENT;
   }
 
-  /** @override **/
+  /** @override */
   isLayoutSupported(layout) {
     /** @TODO Add proper support for more layouts, and figure out which ones
      *  we're permitting */
@@ -76,8 +75,10 @@ export class AmpAdCustom extends AMP.BaseElement {
     this.url_ = this.element.getAttribute('data-url');
     this.slot_ = this.element.getAttribute('data-slot');
     // Ensure that the slot value is legal
-    userAssert(this.slot_ === null || this.slot_.match(/^[0-9a-z]+$/),
-        'custom ad slot should be alphanumeric: ' + this.slot_);
+    userAssert(
+      this.slot_ === null || this.slot_.match(/^[0-9a-z]+$/),
+      'custom ad slot should be alphanumeric: ' + this.slot_
+    );
 
     this.uiHandler = new AmpAdUIHandler(this);
   }
@@ -87,8 +88,11 @@ export class AmpAdCustom extends AMP.BaseElement {
     /** @const {string} fullUrl */
     const fullUrl = this.getFullUrl_();
     // if we have cached the response, find it, otherwise fetch
-    const responsePromise = ampCustomadXhrPromises[fullUrl] ||
-        Services.xhrFor(this.win).fetchJson(fullUrl).then(res => res.json());
+    const responsePromise =
+      ampCustomadXhrPromises[fullUrl] ||
+      Services.xhrFor(this.win)
+        .fetchJson(fullUrl)
+        .then(res => res.json());
     if (this.slot_ !== null) {
       // Cache this response if using `data-slot` feature so only one request
       // is made per url
@@ -98,8 +102,7 @@ export class AmpAdCustom extends AMP.BaseElement {
       // We will get here when the data has been fetched from the server
       let templateData = data;
       if (this.slot_ !== null) {
-        templateData = hasOwn(data, this.slot_) ? data[this.slot_] :
-          null;
+        templateData = hasOwn(data, this.slot_) ? data[this.slot_] : null;
       }
 
       if (!templateData || typeof templateData != 'object') {
@@ -113,16 +116,16 @@ export class AmpAdCustom extends AMP.BaseElement {
 
       try {
         Services.templatesFor(this.win)
-            .findAndRenderTemplate(this.element, templateData)
-            .then(renderedElement => {
-              // Get here when the template has been rendered Clear out the
-              // child template and replace it by the rendered version Note that
-              // we can't clear templates that's not ad's child because they
-              // maybe used by other ad component.
-              removeChildren(this.element);
-              this.element.appendChild(renderedElement);
-              this.signals().signal(CommonSignals.INI_LOAD);
-            });
+          .findAndRenderTemplate(this.element, templateData)
+          .then(renderedElement => {
+            // Get here when the template has been rendered Clear out the
+            // child template and replace it by the rendered version Note that
+            // we can't clear templates that's not ad's child because they
+            // maybe used by other ad component.
+            removeChildren(this.element);
+            this.element.appendChild(renderedElement);
+            this.signals().signal(CommonSignals.INI_LOAD);
+          });
       } catch (e) {
         this.uiHandler.applyNoContentUI();
       }
@@ -161,8 +164,9 @@ export class AmpAdCustom extends AMP.BaseElement {
     userAssert(templateData['templateId'], 'TemplateId not specified');
 
     userAssert(
-        templateData['data'] && typeof templateData['data'] == 'object',
-        'Template data not specified');
+      templateData['data'] && typeof templateData['data'] == 'object',
+      'Template data not specified'
+    );
 
     this.element.setAttribute('template', templateData['templateId']);
 
@@ -225,8 +229,11 @@ export class AmpAdCustom extends AMP.BaseElement {
         }
       }
       for (const baseUrl in slots) {
-        ampCustomadFullUrls[baseUrl] = addParamToUrl(baseUrl, 'ampslots',
-            slots[baseUrl].join(','));
+        ampCustomadFullUrls[baseUrl] = addParamToUrl(
+          baseUrl,
+          'ampslots',
+          slots[baseUrl].join(',')
+        );
       }
     }
     return ampCustomadFullUrls[this.url_];

@@ -44,11 +44,12 @@ export class LightboxCaption {
         <div class="i-amphtml-lbg-caption-mask"></div>
       </div>`;
     return new LightboxCaption(
-        el,
-        dev().assertElement(el.querySelector('.i-amphtml-lbg-caption-scroll')),
-        dev().assertElement(el.querySelector('.i-amphtml-lbg-caption-text')),
-        dev().assertElement(el.querySelector('.i-amphtml-lbg-caption-mask')),
-        measureMutateElement);
+      el,
+      dev().assertElement(el.querySelector('.i-amphtml-lbg-caption-scroll')),
+      dev().assertElement(el.querySelector('.i-amphtml-lbg-caption-text')),
+      dev().assertElement(el.querySelector('.i-amphtml-lbg-caption-mask')),
+      measureMutateElement
+    );
   }
 
   /**
@@ -63,8 +64,8 @@ export class LightboxCaption {
     scrollContainer,
     textContainer,
     overflowMask,
-    measureMutateElement) {
-
+    measureMutateElement
+  ) {
     /** @private @const */
     this.element_ = element;
 
@@ -92,7 +93,7 @@ export class LightboxCaption {
    * @param {string} content The content for the caption.
    */
   setContent(content) {
-    this.textContainer_./*OK*/innerText = content;
+    this.textContainer_./*OK*/ innerText = content;
   }
 
   /**
@@ -106,8 +107,9 @@ export class LightboxCaption {
    * @return {!OverflowState} state
    */
   getOverflowState() {
-    return /** @type {OverflowState} */ (
-      this.scrollContainer_.getAttribute('i-amphtml-lbg-caption-state'));
+    return /** @type {OverflowState} */ (this.scrollContainer_.getAttribute(
+      'i-amphtml-lbg-caption-state'
+    ));
   }
 
   /**
@@ -119,15 +121,10 @@ export class LightboxCaption {
    * @return {!OverflowState} The new state.
    * @private
    */
-  nextOverflowState_(
-    overflowState,
-    overflows,
-    requestExpansion
-  ) {
+  nextOverflowState_(overflowState, overflows, requestExpansion) {
     const isExpanded = overflowState == OverflowState.EXPAND;
-    const expand = requestExpansion !== undefined ?
-      requestExpansion :
-      !isExpanded;
+    const expand =
+      requestExpansion !== undefined ? requestExpansion : !isExpanded;
     // If we are already expanded, we know we have some overflow, even if
     // we are not currently "overflowing".
     const hasOverflow = isExpanded || overflows;
@@ -136,9 +133,7 @@ export class LightboxCaption {
       return OverflowState.NONE;
     }
 
-    return expand ?
-      OverflowState.EXPAND :
-      OverflowState.CLIP;
+    return expand ? OverflowState.EXPAND : OverflowState.CLIP;
   }
 
   /**
@@ -148,10 +143,7 @@ export class LightboxCaption {
    *    current state is toggled.
    */
   toggleOverflow(requestExpansion) {
-    const {
-      scrollContainer_,
-      overflowMask_,
-    } = this;
+    const {scrollContainer_, overflowMask_} = this;
     let descriptionOverflows;
 
     const measureOverflowState = () => {
@@ -159,23 +151,26 @@ export class LightboxCaption {
       // The height of the overflow mask is set to 1 rem. We allow 3 lines
       // for the description and consider it to have overflow if more than 3
       // lines of text.
-      descriptionOverflows = scrollContainer_./*OK*/scrollHeight
-          - scrollContainer_./*OK*/clientHeight
-          >= overflowMask_./*OK*/clientHeight;
+      descriptionOverflows =
+        scrollContainer_./*OK*/ scrollHeight -
+          scrollContainer_./*OK*/ clientHeight >=
+        overflowMask_./*OK*/ clientHeight;
     };
 
     const mutateOverflowState = () => {
       const overflowState = this.getOverflowState();
       const newState = this.nextOverflowState_(
-          overflowState, descriptionOverflows, requestExpansion);
+        overflowState,
+        descriptionOverflows,
+        requestExpansion
+      );
 
       this.setOverflowState(newState);
       if (newState != OverflowState.EXPAND) {
-        scrollContainer_./*OK*/scrollTop = 0;
+        scrollContainer_./*OK*/ scrollTop = 0;
       }
     };
 
     this.measureMutateElement_(measureOverflowState, mutateOverflowState);
   }
-
 }

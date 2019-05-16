@@ -35,23 +35,25 @@ function checkElementUpgrade(element) {
  */
 function testLoadOrderFixture(fixtureName, testElements) {
   let fixture;
-  return createFixtureIframe(fixtureName).then(f => {
-    fixture = f;
-    for (let i = 0; i < testElements.length; i++) {
-      expect(fixture.doc.querySelectorAll(testElements[i]))
-          .to.have.length(1);
-    }
-    return fixture.awaitEvent(AmpEvents.LOAD_START, testElements.length);
-  }).then(() => {
-    for (let i = 0; i < testElements.length; i++) {
-      const testElement = fixture.doc.querySelectorAll(testElements[i])[0];
-      checkElementUpgrade(testElement);
-      if (testElement.tagName == 'AMP-FIT-TEXT') {
-        expect(fixture.doc.getElementsByClassName('i-amphtml-fit-text-content'))
-            .to.have.length(1);
+  return createFixtureIframe(fixtureName)
+    .then(f => {
+      fixture = f;
+      for (let i = 0; i < testElements.length; i++) {
+        expect(fixture.doc.querySelectorAll(testElements[i])).to.have.length(1);
       }
-    }
-  });
+      return fixture.awaitEvent(AmpEvents.LOAD_START, testElements.length);
+    })
+    .then(() => {
+      for (let i = 0; i < testElements.length; i++) {
+        const testElement = fixture.doc.querySelectorAll(testElements[i])[0];
+        checkElementUpgrade(testElement);
+        if (testElement.tagName == 'AMP-FIT-TEXT') {
+          expect(
+            fixture.doc.getElementsByClassName('i-amphtml-fit-text-content')
+          ).to.have.length(1);
+        }
+      }
+    });
 }
 
 const t = describe.configure().retryOnSaucelabs();
@@ -60,38 +62,45 @@ t.run('test extensions loading in multiple orders', function() {
 
   it('one extension, extension loads first, all scripts in header', () => {
     return testLoadOrderFixture(
-        'test/fixtures/script-load-extension-head-v0-head.html',
-        ['amp-fit-text']);
+      'test/fixtures/script-load-extension-head-v0-head.html',
+      ['amp-fit-text']
+    );
   });
 
   it('one extension, v0 loads first, all scripts in header', () => {
     return testLoadOrderFixture(
-        'test/fixtures/script-load-v0-head-extension-head.html',
-        ['amp-fit-text']);
+      'test/fixtures/script-load-v0-head-extension-head.html',
+      ['amp-fit-text']
+    );
   });
 
   it('one extension, extension loads first, all scripts in footer', () => {
     return testLoadOrderFixture(
-        'test/fixtures/script-load-extension-footer-v0-footer.html',
-        ['amp-fit-text']);
+      'test/fixtures/script-load-extension-footer-v0-footer.html',
+      ['amp-fit-text']
+    );
   });
 
   it('one extension, v0 loads first, all scripts in footer', () => {
     return testLoadOrderFixture(
-        'test/fixtures/script-load-v0-footer-extension-footer.html',
-        ['amp-fit-text']);
+      'test/fixtures/script-load-v0-footer-extension-footer.html',
+      ['amp-fit-text']
+    );
   });
 
   it('one extension, v0 in header, extension script in footer', () => {
     return testLoadOrderFixture(
-        'test/fixtures/script-load-v0-head-extension-footer.html',
-        ['amp-fit-text']);
+      'test/fixtures/script-load-v0-head-extension-footer.html',
+      ['amp-fit-text']
+    );
   });
 
   // TODO(choumx); This test times out when run with the prod AMP config.
   // See #11588.
   it.skip('two extensions, one of extension scripts and v0 in header', () => {
-    return testLoadOrderFixture('test/fixtures/script-load-extensions.html',
-        ['amp-fit-text', 'amp-iframe']);
+    return testLoadOrderFixture('test/fixtures/script-load-extensions.html', [
+      'amp-fit-text',
+      'amp-iframe',
+    ]);
   });
 });

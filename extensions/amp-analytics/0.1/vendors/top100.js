@@ -23,23 +23,24 @@ export const TOP100_CONFIG = /** @type {!JsonObject} */ ({
   },
   'requests': {
     'host': 'https://kraken.rambler.ru',
-    'base': '${host}/cnt/?pid=${pid}' +
-                        '&rid=${rid}' +
-                        '&v=${version}' +
-                        '&rn=${random}' +
-                        '&ruid=${ruid}' +
-                        '&ct=amp',
-    'pageview': '${base}&et=pv' +
-                '${_pageData}' +
-                '${_screenData}',
-    '_screenData': '&sr=${screenWidth}x${screenHeight}' +
-                   '&cd=${screenColorDepth}-bit' +
-                   '&bs=${scrollWidth}x${scrollHeight}',
-    '_pageData': '&pt=${title}' +
-                 '&rf=${documentReferrer}' +
-                 '&en=${documentCharset}' +
-                 '&la=${browserLanguage}' +
-                 '&tz=${timezone}',
+    'base':
+      '${host}/cnt/?pid=${pid}' +
+      '&rid=${rid}' +
+      '&v=${version}' +
+      '&rn=${random}' +
+      '&ruid=${ruid}' +
+      '&ct=amp',
+    'pageview': '${base}&et=pv${_pageData}${_screenData}',
+    '_screenData':
+      '&sr=${screenWidth}x${screenHeight}' +
+      '&cd=${screenColorDepth}-bit' +
+      '&bs=${scrollWidth}x${scrollHeight}',
+    '_pageData':
+      '&pt=${title}' +
+      '&rf=${documentReferrer}' +
+      '&en=${documentCharset}' +
+      '&la=${browserLanguage}' +
+      '&tz=${timezone}',
   },
   'triggers': {
     'trackPageview': {

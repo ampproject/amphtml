@@ -51,16 +51,16 @@ const strings = {
     string: 'ਫਿਰ ਵੀ ਜਾਰੀ ਰੱਖੋ',
   },
   [LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LABEL]: {
-    string: 'ਮੂਲ ਡੋਮੇਨ \'ਤੇ ਦੇਖੋ:',
+    string: "ਮੂਲ ਡੋਮੇਨ 'ਤੇ ਦੇਖੋ:",
   },
   [LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LINK]: {
     string: 'AMP ਨਤੀਜਿਆਂ ਬਾਰੇ ਹੋਰ ਜਾਣਕਾਰੀ',
   },
   [LocalizedStringId.AMP_STORY_HINT_UI_NEXT_LABEL]: {
-    string: '\'ਅੱਗੇ\' \'ਤੇ ਟੈਪ ਕਰੋ',
+    string: "'ਅੱਗੇ' 'ਤੇ ਟੈਪ ਕਰੋ",
   },
   [LocalizedStringId.AMP_STORY_HINT_UI_PREVIOUS_LABEL]: {
-    string: '\'ਪਿੱਛੇ ਜਾਓ\' \'ਤੇ ਟੈਪ ਕਰੋ',
+    string: "'ਪਿੱਛੇ ਜਾਓ' 'ਤੇ ਟੈਪ ਕਰੋ",
   },
   [LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL]: {
     string: 'ਉੱਪਰ ਵੱਲ ਸਵਾਈਪ ਕਰੋ',
@@ -69,7 +69,7 @@ const strings = {
     string: 'ਵੀਡੀਓ ਚਲਾਓ',
   },
   [LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT]: {
-    string: 'ਲਿੰਕ ਨੂੰ ਕਲਿੱਪਬੋਰਡ \'ਤੇ ਕਾਪੀ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਿਆ :(',
+    string: "ਲਿੰਕ ਨੂੰ ਕਲਿੱਪਬੋਰਡ 'ਤੇ ਕਾਪੀ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਿਆ :(",
   },
   [LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_SUCCESS_TEXT]: {
     string: 'ਲਿੰਕ ਕਾਪੀ ਕੀਤਾ ਗਿਆ!',
@@ -117,15 +117,17 @@ const strings = {
     string: 'ਇਸ ਅਨੁਭਵ ਨੂੰ ਦੇਖਣ ਲਈ ਆਪਣੀ ਵਿੰਡੋ ਦੀ ਚੌੜਾਈ ਦਾ ਵਿਸਤਾਰ ਕਰੋ',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
-    string: 'ਇਸ ਸਮੱਗਰੀ ਨੂੰ ਦੇਖਣ ਲਈ ਤੁਹਾਨੂੰ AMP ਕਹਾਣੀ ਪ੍ਰਯੋਗ ਨੂੰ ਚਾਲੂ ਕਰਨਾ ' +
-        'ਲਾਜ਼ਮੀ ਹੈ।',
+    string:
+      'ਇਸ ਸਮੱਗਰੀ ਨੂੰ ਦੇਖਣ ਲਈ ਤੁਹਾਨੂੰ AMP ਕਹਾਣੀ ਪ੍ਰਯੋਗ ਨੂੰ ਚਾਲੂ ਕਰਨਾ ' +
+      'ਲਾਜ਼ਮੀ ਹੈ।',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
     string: 'ਪੰਨਾ ਪੋਰਟ੍ਰੇਟ ਮੋਡ ਵਿੱਚ ਚੰਗੀ ਤਰ੍ਹਾਂ ਦਿਸਦਾ ਹੈ',
   },
   [LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT]: {
-    string: 'ਮਾਫ਼ ਕਰਨਾ, ਇੰਝ ਲੱਗਦਾ ਹੈ ਕਿ ਤੁਹਾਡੇ ਬ੍ਰਾਊਜ਼ਰ ਵਿੱਚ ਇਸ ਅਨੁਭਵ ਦੀ ' +
-        'ਸੁਵਿਧਾ ਨਹੀਂ ਹੈ',
+    string:
+      'ਮਾਫ਼ ਕਰਨਾ, ਇੰਝ ਲੱਗਦਾ ਹੈ ਕਿ ਤੁਹਾਡੇ ਬ੍ਰਾਊਜ਼ਰ ਵਿੱਚ ਇਸ ਅਨੁਭਵ ਦੀ ' +
+      'ਸੁਵਿਧਾ ਨਹੀਂ ਹੈ',
   },
 };
 
