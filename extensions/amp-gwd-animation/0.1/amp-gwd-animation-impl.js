@@ -20,9 +20,9 @@ import {escapeCssSelectorIdent} from '../../../src/css';
 import {installServiceInEmbedScope} from '../../../src/service';
 import {
   scopedQuerySelector,
-  waitForBodyPromise,
   waitForChild,
 } from '../../../src/dom';
+import {whenDocumentReady} from '../../../src/document-ready';
 import {toArray} from '../../../src/types';
 
 /**
@@ -168,8 +168,8 @@ export class AmpGwdRuntimeService {
 
     // Initialize once the body and DOM is ready.
     const docReadyPromise = opt_win
-      ? waitForBodyPromise(this.doc_)
-      : ampdoc.whenBodyAvailable();
+      ? whenDocumentReady(this.doc_)
+      : ampdoc.whenReady();
     docReadyPromise.then(() => {
       // If the page deck is not yet in the DOM, wait until it is. The page deck
       // must be present in the body before the runtime can be initialized, as

@@ -161,7 +161,7 @@ export class AmpExperiment extends AMP.BaseElement {
    */
   applyMutations_(experimentName, variantObject) {
     const doc = this.getAmpDoc();
-    return doc.whenBodyAvailable().then(() => {
+    return doc.whenReady().then(() => {
       // Parse / Validate all of our mutations
       const mutationOperations = variantObject['mutations'].map(mutation =>
         parseMutation(mutation, this.win.document)
