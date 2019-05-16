@@ -343,7 +343,7 @@ describe
 
         it('should not send "bindReady" until all <amp-state> are built', () => {
           const element = createElement(env, container, '', 'amp-state', true);
-          // Makes dom.whenUpgradedToCustomElement() to resolve immediately.
+          // Makes dom.whenUpgradedToCustomElement() resolve immediately.
           element.createdCallback = () => {};
           const parseAndUpdate = sandbox.spy();
           element.getImpl = () => {
@@ -909,7 +909,7 @@ describe
             '[src]="foo"',
             'amp-state'
           );
-          // Makes dom.whenUpgradedToCustomElement() to resolve immediately.
+          // Makes dom.whenUpgradedToCustomElement() resolve immediately.
           element.createdCallback = () => {};
           element.getImpl = () =>
             Promise.resolve({parseAndUpdate: sandbox.spy()});
