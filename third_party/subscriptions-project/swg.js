@@ -2637,7 +2637,7 @@ function addAttributesToElement(element, attributes) {
   for (const attr in attributes) {
     if (attr == 'style') {
       setStyles(element,
-           /** @type {!Object<string, string|boolean|number>} */
+           /** @type !Object<string, string|boolean|number> */
            (attributes[attr]));
     } else {
       element.setAttribute(attr,
@@ -8863,7 +8863,7 @@ class PaymentsRequestDelegate {
 
   /** @override */
   isReadyToPay(isReadyToPayRequest) {
-    /** @type {!PaymentRequest} */
+    /** @type{!PaymentRequest} */
     const paymentRequest = this.createPaymentRequest_(isReadyToPayRequest);
     return new Promise((resolve, reject) => {
       paymentRequest.canMakePayment()
@@ -8980,7 +8980,7 @@ class PaymentsRequestDelegate {
     const paymentRequest = this.createPaymentRequest_(
         paymentDataRequest, this.environment_, currencyCode, totalPrice);
     this.callback_(
-        /** @type {!Promise<!PaymentData>} */
+        /** @type{!Promise<!PaymentData>} */
         (paymentRequest.show()
              .then(
                  /**
@@ -9945,7 +9945,7 @@ class PaymentsWebActivityDelegate {
              opt_activities, opt_redirectKey) {
     this.environment_ = environment;
     /** @private @const {boolean} */
-
+    
     /** @const {!ActivityPorts} */
     this.activities = opt_activities || new activityPorts_1(window);
     /** @const @private {!Graypane} */

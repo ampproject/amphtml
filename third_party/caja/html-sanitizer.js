@@ -104,7 +104,7 @@ function encodeIfExists2(unescapedPart, extra) {
 /** converts a character in [\01-\177] to its url encoded equivalent. */
 function encodeOne(ch) {
   var n = ch.charCodeAt(0);
-  return '%0123456789ABCDEF'.charAt((n >> 4) & 0xf) +
+  return '%' + '0123456789ABCDEF'.charAt((n >> 4) & 0xf) +
       '0123456789ABCDEF'.charAt(n & 0xf);
 }
 
