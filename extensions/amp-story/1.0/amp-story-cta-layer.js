@@ -53,7 +53,6 @@ export class AmpStoryCtaLayer extends AmpStoryBaseLayer {
   buildCallback() {
     super.buildCallback();
     this.setOrOverwriteAttributes_();
-    this.setDescendentCssTextStyles_();
     this.checkAndRemoveLayerIfOnFirstPage_();
   }
 
