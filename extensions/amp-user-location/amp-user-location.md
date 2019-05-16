@@ -82,7 +82,7 @@ for the current domain, if the user has not already.
 </tr>
 <tr>
 <td><code>approve</code></td>
-<td>This event is fired when the user triggers the `request` action and then approves the browser prompt to access their location, or the user has previously approved the prompt. The `event` object contains `lat` `lon` and `source` properties.</td><!-- TODO(cvializ): add description of the properties -->
+<td>This event is fired when the user triggers the `request` action and then approves the browser prompt to access their location, or the user has previously approved the prompt. The `event` object contains `lat` `lon` and `source` properties.</td>
 </tr>
 <tr>
 <td><code>deny</code></td>
@@ -100,8 +100,11 @@ The user's location is also available via AMP variable substitution:
 `AMP_USER_LOCATION` or `${ampUserLocation}` returns the latitude and longitude separated by a comma.
 `AMP_USER_LOCATION(LAT)` or `${ampUserLocation(LAT)}` returns the latitude.
 `AMP_USER_LOCATION(LON)` or `${ampUserLocation(LON)}` returns the longitude.
-`AMP_USER_LOCATION(SOURCE)` or `${ampUserLocation(SOURCE)}` returns the source.
+`AMP_USER_LOCATION(SOURCE)` or `${ampUserLocation(SOURCE)}` returns the source. The source may be one of `debug`, `fallback`, `geolocation`, `unavailable`, or `unsupported`.
 
+The `AMP_USER_LOCATION_POLL` or `${ampUserLocationPoll}` substitution is also available with the same
+syntax as above. It will wait for the location to be requested before resolving, and will prevent a
+request from occurring until that time. Polling is useful when the location is required for the request.
 
 ## Validation
 See [amp-user-location rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-user-location/validator-amp-user-location.protoascii) in the AMP validator specification.
