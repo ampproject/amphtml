@@ -243,12 +243,17 @@ export class AmpAutocomplete extends AMP.BaseElement {
       if (this.filter_ === FilterType.PREFIX) {
         this.suggestFirst_ = true;
       } else {
-        user().error(TAG, '"suggest-first" requires "filter" to be prefix.' +
-        ' Unexpected "filter" type: ' + this.filter_);
+        user().error(
+          TAG,
+          '"suggest-first" requires "filter" to be prefix.' +
+            ' Unexpected "filter" type: ' +
+            this.filter_
+        );
       }
     }
-    this.suggestFirst_ = this.element.hasAttribute('suggest-first')
-      && this.filter_ === FilterType.PREFIX;
+    this.suggestFirst_ =
+      this.element.hasAttribute('suggest-first') &&
+      this.filter_ === FilterType.PREFIX;
 
     this.container_ = this.createContainer_();
     this.element.appendChild(this.container_);
@@ -408,8 +413,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
    */
   inputHandler_() {
     // If the input is the first entry in the field.
-    const firstEntry = this.userInput_.length === 0 &&
-    this.inputElement_.value.length === 1;
+    const firstEntry =
+      this.userInput_.length === 0 && this.inputElement_.value.length === 1;
     this.userInput_ = this.inputElement_.value;
     return this.mutateElement(() => {
       this.filterDataAndRenderResults_(this.sourceData_, this.userInput_);
@@ -803,8 +808,10 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
     // Highlight if suggest-first is present.
     if (this.suggestFirst_) {
-      this.inputElement_.setSelectionRange(this.userInput_.length,
-          this.inputElement_.value.length);
+      this.inputElement_.setSelectionRange(
+        this.userInput_.length,
+        this.inputElement_.value.length
+      );
     }
 
     // Element visibility logic
