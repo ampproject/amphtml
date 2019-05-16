@@ -353,7 +353,7 @@ export class Log {
     if (isArray(opt_message)) {
       return this.assert(
         shouldBeTrueish,
-        this.expandLogMessage.apply(this, opt_message)
+        this.expandLogMessage_(/** @type {!Array} */ (opt_message))
       );
     }
     if (!shouldBeTrueish) {
@@ -524,7 +524,7 @@ export class Log {
    */
   maybeExpandArguments_(args) {
     if (isArray(args[0])) {
-      return [this.expandLogMessage_.apply(this, args)];
+      return [this.expandLogMessage_(/** @type {!Array} */ (args[0]))];
     }
     return args;
   }
@@ -537,12 +537,12 @@ export class Log {
    * plugin. It should not be used directly. Use the (*error|assert*|info|warn)
    * methods instead.
    *
-   * @param {string} id
-   * @param {...*} var_args
+   * @param {!Array} parts
    * @return {string}
    * @private
    */
-  expandLogMessage_(id, var_args) {
+  expandLogMessage_(parts) {
+    const id = this.assert(parts[0]);
     // Best effort fetch of message template table.
     // Since this is async, the first few logs might be indirected to a URL even
     // if in development mode. Message table is ~small so this should be a short
@@ -550,7 +550,7 @@ export class Log {
     if (getMode(this.win).development && !this.messages_) {
       this.fetchExternalMessagesOnce_();
     }
-    const args = [].slice.call(arguments, 1);
+    const args = parts.slice(1);
     if (this.messages_ && id in this.messages_) {
       const template = this.messages_[id];
       const {message} = createErrorVargs.apply(null, [template].concat(args));
