@@ -397,26 +397,36 @@ export class GlobalVariableSource extends VariableSource {
     );
 
     // Attempt to returns user location data if available, otherwise null.
-    this.setAsync('AMP_USER_LOCATION', /** @type {AsyncResolverDef} */(type => {
-      // Type may be "","lat","lon", and undefined
-      return this.getUserLocation_(userLocationService => {
-        return userLocationService.getLocation().then(position => {
-          return consumeUserLocation(position, 'AMP_USER_LOCATION', type);
-        });
-      }, 'AMP_USER_LOCATION');
-    }));
+    this.setAsync(
+      'AMP_USER_LOCATION',
+      /** @type {AsyncResolverDef} */ (type => {
+        // Type may be "","lat","lon", and undefined
+        return this.getUserLocation_(userLocationService => {
+          return userLocationService.getLocation().then(position => {
+            return consumeUserLocation(position, 'AMP_USER_LOCATION', type);
+          });
+        }, 'AMP_USER_LOCATION');
+      })
+    );
 
     // Returns user location data only if available,
     // and waits for the user to approve.
-    this.setAsync('AMP_USER_LOCATION_POLL', /** @type {AsyncResolverDef} */(type => {
-      // Type may be "","lat","lon", and undefined
-      return this.getUserLocation_(userLocationService => {
-        const promise = userLocationService.getLocation(/*opt_poll*/ true);
-        return promise.then(position => {
-          return consumeUserLocation(position, 'AMP_USER_LOCATION_POLL', type);
-        });
-      }, 'AMP_USER_LOCATION_POLL');
-    }));
+    this.setAsync(
+      'AMP_USER_LOCATION_POLL',
+      /** @type {AsyncResolverDef} */ (type => {
+        // Type may be "","lat","lon", and undefined
+        return this.getUserLocation_(userLocationService => {
+          const promise = userLocationService.getLocation(/*opt_poll*/ true);
+          return promise.then(position => {
+            return consumeUserLocation(
+              position,
+              'AMP_USER_LOCATION_POLL',
+              type
+            );
+          });
+        }, 'AMP_USER_LOCATION_POLL');
+      })
+    );
 
     /**
      * @param {!../../extensions/amp-user-location/0.1/user-location-service.UserLocation} position
@@ -433,8 +443,12 @@ export class GlobalVariableSource extends VariableSource {
       if (type === 'LON') {
         return position['lon'];
       }
-      userAssert(type === '' || typeof type === 'undefined',
-          'The value passed to %s is not valid: %s', expr, type);
+      userAssert(
+        type === '' || typeof type === 'undefined',
+        'The value passed to %s is not valid: %s',
+        expr,
+        type
+      );
 
       if (position['source'] !== 'geolocation') {
         return '';
@@ -862,13 +876,16 @@ export class GlobalVariableSource extends VariableSource {
    */
   getUserLocation_(getter, expr) {
     const element = this.ampdoc.getHeadNode();
-    return Services.userLocationForDocOrNull(element)
-        .then(userLocationService => {
-          userAssert(location,
-              'To use variable %s, amp-user-location should be configured',
-              expr);
-          return getter(userLocationService);
-        });
+    return Services.userLocationForDocOrNull(element).then(
+      userLocationService => {
+        userAssert(
+          location,
+          'To use variable %s, amp-user-location should be configured',
+          expr
+        );
+        return getter(userLocationService);
+      }
+    );
   }
 
   /**

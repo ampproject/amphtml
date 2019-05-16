@@ -60,17 +60,19 @@ export class AmpUserLocation extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     userAssert(
-        isExperimentOn(this.win, 'amp-user-location'),
-        'The "amp-user-location" experiment must be enabled ' +
-        'to use amp-user-location');
+      isExperimentOn(this.win, 'amp-user-location'),
+      'The "amp-user-location" experiment must be enabled ' +
+        'to use amp-user-location'
+    );
     this.config_ = this.parse_();
 
     this.action_ = Services.actionServiceForDoc(this.element);
 
     this.registerAction(
-        AmpUserLocationAction.REQUEST,
-        () => this.userLocationInteraction_(),
-        ActionTrust.HIGH);
+      AmpUserLocationAction.REQUEST,
+      () => this.userLocationInteraction_(),
+      ActionTrust.HIGH
+    );
   }
 
   /**
@@ -85,16 +87,20 @@ export class AmpUserLocation extends AMP.BaseElement {
 
     const firstChild = children[0];
     if (!isJsonScriptTag(firstChild)) {
-      this.user().error(TAG,
-          'amp-user-location config should be in a <script> tag ' +
-          'with type="application/json".');
+      this.user().error(
+        TAG,
+        'amp-user-location config should be in a <script> tag ' +
+          'with type="application/json".'
+      );
       return null;
     }
 
     const json = tryParseJson(firstChild.textContent, e => {
-      this.user().error(TAG,
-          'Failed to parse amp-user-location config. ' +
-          'Is it valid JSON?', e);
+      this.user().error(
+        TAG,
+        'Failed to parse amp-user-location config. Is it valid JSON?',
+        e
+      );
     });
     if (json === null) {
       return null;
@@ -116,24 +122,30 @@ export class AmpUserLocation extends AMP.BaseElement {
   userLocationInteraction_() {
     const servicePromise = Services.userLocationForDocOrNull(this.element);
 
-    return servicePromise.then(userLocationService => {
-      const config = this.config_ ||
-      /** @type {./user-location-service.UserLocationConfigDef} */ ({});
-      return userLocationService.requestLocation(config);
-    }).then(location => {
-      this.triggerEvent_(AmpUserLocationEvent.APPROVE, location);
-    }).catch(error => {
-      if (error == PositionError.PERMISSION_DENIED) {
-        this.triggerEvent_(AmpUserLocationEvent.DENY);
-        return;
-      }
+    return servicePromise
+      .then(userLocationService => {
+        const config =
+          this.config_ ||
+          /** @type {./user-location-service.UserLocationConfigDef} */ ({});
+        return userLocationService.requestLocation(config);
+      })
+      .then(location => {
+        this.triggerEvent_(AmpUserLocationEvent.APPROVE, location);
+      })
+      .catch(error => {
+        if (error == PositionError.PERMISSION_DENIED) {
+          this.triggerEvent_(AmpUserLocationEvent.DENY);
+          return;
+        }
 
-      if (error == PositionError.PLATFORM_UNSUPPORTED ||
+        if (
+          error == PositionError.PLATFORM_UNSUPPORTED ||
           error == PositionError.POSITION_UNAVAILABLE ||
-          error == PositionError.TIMEOUT) {
-        this.triggerEvent_(AmpUserLocationEvent.ERROR);
-      }
-    });
+          error == PositionError.TIMEOUT
+        ) {
+          this.triggerEvent_(AmpUserLocationEvent.ERROR);
+        }
+      });
   }
 
   /**
@@ -144,8 +156,7 @@ export class AmpUserLocation extends AMP.BaseElement {
    * @private
    */
   triggerEvent_(name, data = undefined) {
-    const event = createCustomEvent(
-        this.win, `${TAG}.${name}`, data);
+    const event = createCustomEvent(this.win, `${TAG}.${name}`, data);
     this.action_.trigger(this.element, name, event, ActionTrust.HIGH);
   }
 }

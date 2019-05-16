@@ -22,8 +22,8 @@
  */
 const ORIGIN_REGEX = new RegExp(
   '^https?://localhost:8000|' +
-    '^https?://.+\.localhost:8000|' +
-    '^https?://.+\.herokuapp.com'
+    '^https?://.+.localhost:8000|' +
+    '^https?://.+.herokuapp.com'
 );
 
 /**
@@ -34,8 +34,8 @@ const ORIGIN_REGEX = new RegExp(
  */
 const SOURCE_ORIGIN_REGEX = new RegExp(
   '^https?://localhost:8000|' +
-    '^https?://.+\.localhost:8000|' +
-    '^https?://.+\.herokuapp.com'
+    '^https?://.+.localhost:8000|' +
+    '^https?://.+.herokuapp.com'
 );
 
 function assertCors(

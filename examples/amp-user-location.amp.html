@@ -169,7 +169,7 @@
 </fieldset>
 
 
-<!-- <h2>amp-list usage with amp-bind</h2>
+<h2>amp-list usage with amp-bind</h2>
 <p>
   This example populates variable substitution for analytics
   and triggers the AMP actions and events.
@@ -194,7 +194,7 @@
     {{#businesses}}<li>{{.}}</li>{{/businesses}}
   </ul>
   </template>
-</amp-list> -->
+</amp-list>
 
 <h2>amp-pixel</h2>
 <amp-pixel width="1" height="1" src="//localhost:8000/pixel?location=$AMP_USER_LOCATION"></amp-pixel>
@@ -224,40 +224,9 @@
         <p>latlon: <b>{{latlon}}</b></p>
         <p>lat: <b>{{lat}}</b></p>
         <p>lon: <b>{{lon}}</b></p>
-        <!-- DO NOT SUBMIT: Remove these API keys before merging PR -->
-        <amp-iframe
-          layout="responsive"
-          width="800"
-          height="600"
-          sandbox="allow-scripts"
-          src="https://www.google.com/maps/embed/v1/view?key=__VIALIZ_MAP_KEY__&center={{lat}},{{lon}}&zoom=17">
-        </iframe>
       </template>
     </div>
   </form>
 </fieldset>
-
-<h2>amp-user-location with amp-iframe and amp-bind</h2>
-<amp-user-location on="
-  approve: AMP.setState({mapLat: event.lat, mapLon: event.lon}), mapWait.hide;
-  deny: mapDenied.show, mapWait.hide;
-  error: mapErrored.show, mapWait.hide;"
-  id="mapLocation" layout="nodisplay">
-</amp-user-location>
-<amp-state id="mapLat"><script type="application/json">0</script></amp-state>
-<amp-state id="mapLon"><script type="application/json">0</script></amp-state>
-<button on="tap: mapWait.show, mapLocation.request()">Use my location</button>
-<span hidden id="mapWait">Getting your location</span>
-<span hidden id="mapDenied">Denied!</span>
-<span hidden id="mapErrored">Errored!</span>
-<!-- DO NOT SUBMIT: Remove these API keys before merging PR -->
-<amp-iframe
-    layout="responsive"
-    width="800"
-    height="600"
-    sandbox="allow-scripts"
-    src="https://www.google.com/maps/embed/v1/view?key=__VIALIZ_MAP_KEY__&center=0,0&zoom=0"
-    [src]="'https://www.google.com/maps/embed/v1/view?key=__VIALIZ_MAP_KEY__&zoom=' + (mapLat ? 17 : 0) + '&center=' +
-    mapLat + ',' + mapLon">
 </body>
 </html>

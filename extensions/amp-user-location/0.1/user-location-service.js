@@ -112,12 +112,13 @@ export class UserLocationService {
 
     const viewer = Services.viewerForDoc(ampdoc);
     const platform = Services.platformFor(win);
-    const viewerSupportsGeolocation =
-        !(viewer.isEmbedded() && platform.isChrome());
+    const viewerSupportsGeolocation = !(
+      viewer.isEmbedded() && platform.isChrome()
+    );
 
     /** @private @const */
-    this.geolocationSupported_ = viewerSupportsGeolocation &&
-        ('geolocation' in win.navigator);
+    this.geolocationSupported_ =
+      viewerSupportsGeolocation && 'geolocation' in win.navigator;
 
     /** @private @const */
     this.supportsPermissions_ = 'permissions' in win.navigator;
@@ -129,8 +130,7 @@ export class UserLocationService {
    */
   createRequestedObservable_() {
     const observable = new Observable();
-    observable.add(
-        position => this.handleLocationAvailable_(position));
+    observable.add(position => this.handleLocationAvailable_(position));
     return observable;
   }
 
@@ -186,7 +186,6 @@ export class UserLocationService {
     const {navigator} = this.win_;
     const permissionQuery = navigator.permissions.query({name: 'geolocation'});
     permissionQuery.then(permissionStatus => {
-
       permissionStatus.addEventListener('change', e => {
         const permissionStatus = devAssert(e.target);
 
@@ -217,9 +216,11 @@ export class UserLocationService {
    */
   getOverride_() {
     const {localDev, userLocationOverride} = getMode(this.win_);
-    if (!userLocationOverride ||
-        !(isCanary(this.win_) || localDev) ||
-        !/^[\w-,]+$/.test(userLocationOverride)) {
+    if (
+      !userLocationOverride ||
+      !(isCanary(this.win_) || localDev) ||
+      !/^[\w-,]+$/.test(userLocationOverride)
+    ) {
       return null;
     }
 
@@ -241,8 +242,7 @@ export class UserLocationService {
    */
   getLocation(opt_poll) {
     if (!this.geolocationSupported_) {
-      return Promise.resolve(
-          new UserLocation(UserLocationSource.UNSUPPORTED));
+      return Promise.resolve(new UserLocation(UserLocationSource.UNSUPPORTED));
     }
 
     if (opt_poll && this.firstRequestedDeferred_) {
@@ -283,9 +283,11 @@ export class UserLocationService {
       if (error == PositionError.PLATFORM_UNSUPPORTED) {
         position = new UserLocation(UserLocationSource.UNSUPPORTED);
       }
-      if (error == PositionError.POSITION_UNAVAILABLE ||
-          error == PositionError.PERMISSION_DENIED ||
-          error == PositionError.TIMEOUT) {
+      if (
+        error == PositionError.POSITION_UNAVAILABLE ||
+        error == PositionError.PERMISSION_DENIED ||
+        error == PositionError.TIMEOUT
+      ) {
         position = new UserLocation(UserLocationSource.UNAVAILABLE);
       }
       observable.fire(position);
@@ -313,33 +315,34 @@ export class UserLocationService {
     }
 
     const {navigator} = this.win_;
-    navigator.geolocation.getCurrentPosition(position => {
-      const {latitude: lat, longitude: lon} = position.coords;
-      resolve(new UserLocation(UserLocationSource.GEOLOCATION, lat, lon));
-    }, error => {
-      const {code} = error;
-      if (code == error.POSITION_UNAVAILABLE) {
-        reject(PositionError.POSITION_UNAVAILABLE);
-        return;
-      }
-      if (code == error.PERMISSION_DENIED) {
-        reject(PositionError.PERMISSION_DENIED);
-        return;
-      }
-      // TODO(cvializ): On Chrome the latency for this can be really high!
-      // Do we need a first-class intermediate state,
-      // or is on="deny: ..." enough?
-      if (code == error.TIMEOUT) {
-        reject(PositionError.TIMEOUT);
-        return;
-      }
+    navigator.geolocation.getCurrentPosition(
+      position => {
+        const {latitude: lat, longitude: lon} = position.coords;
+        resolve(new UserLocation(UserLocationSource.GEOLOCATION, lat, lon));
+      },
+      error => {
+        const {code} = error;
+        if (code == error.POSITION_UNAVAILABLE) {
+          reject(PositionError.POSITION_UNAVAILABLE);
+          return;
+        }
+        if (code == error.PERMISSION_DENIED) {
+          reject(PositionError.PERMISSION_DENIED);
+          return;
+        }
+        if (code == error.TIMEOUT) {
+          reject(PositionError.TIMEOUT);
+          return;
+        }
 
-      reject(null);
-    }, {
-      timeout: config.timeout || DEFAULT_TIMEOUT,
-      maximumAge: config.maximumAge || DEFAULT_MAXIMUM_AGE,
-      precision: config.precision || DEFAULT_PRECISION,
-    });
+        reject(null);
+      },
+      {
+        timeout: config.timeout || DEFAULT_TIMEOUT,
+        maximumAge: config.maximumAge || DEFAULT_MAXIMUM_AGE,
+        precision: config.precision || DEFAULT_PRECISION,
+      }
+    );
 
     return promise;
   }

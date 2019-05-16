@@ -987,8 +987,6 @@ app.get(
           file = addViewerIntegrationScript(req.query['amp_js_v'], file);
         }
         file = file.replace(/__TEST_SERVER_PORT__/g, TEST_SERVER_PORT);
-        file = file.replace(/__VIALIZ_MAP_KEY__/g,
-            fs.readFileSync(`${pc.cwd()}/credentials/vializ_map_key`));
 
         if (inabox && req.headers.origin && req.query.__amp_source_origin) {
           // Allow CORS requests for A4A.

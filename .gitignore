@@ -3,8 +3,6 @@
 build
 .amp-build
 c
-# DO NOT SUBMIT
-credentials
 /dist
 dist.3p
 dist.tools
