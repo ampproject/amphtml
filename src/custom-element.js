@@ -372,6 +372,11 @@ function createBaseCustomElementClass(win) {
       return this.upgradeState_ == UpgradeState.UPGRADED;
     }
 
+    /** @return {!Promise} */
+    whenUpgraded() {
+      return this.signals_.whenSignal(CommonSignals.UPGRADED);
+    }
+
     /**
      * Upgrades the element to the provided new implementation. If element
      * has already been attached, it's layout validation and attachment flows
@@ -425,6 +430,7 @@ function createBaseCustomElementClass(win) {
       this.implementation_.firstAttachedCallback();
       this.dispatchCustomEventForTesting(AmpEvents.ATTACHED);
       this.getResources().upgraded(this);
+      this.signals_.signal(CommonSignals.UPGRADED);
     }
 
     /** @private */
@@ -1108,11 +1114,14 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
-     * Returns reference to implementation after it has been built.
+     * Returns reference to upgraded implementation.
+     * @param {boolean} waitForBuild If true, waits for element to be built before
+     *   resolving the returned Promise. Default is true.
      * @return {!Promise<!./base-element.BaseElement>}
      */
-    getImpl() {
-      return this.whenBuilt().then(() => this.implementation_);
+    getImpl(waitForBuild = true) {
+      const waitFor = waitForBuild ? this.whenBuilt() : this.whenUpgraded();
+      return waitFor.then(() => this.implementation_);
     }
 
     /**

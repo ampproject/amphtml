@@ -507,8 +507,9 @@ export class Bind {
       const ampStates = root.querySelectorAll('AMP-STATE');
       // Force all query-able <amp-state> elements to parse local data instead
       // of waiting for runtime to build them all.
+      const whenBuilt = false;
       const whenParsed = toArray(ampStates).map(el => {
-        return el.getImpl().then(impl => impl.parseAndUpdate());
+        return el.getImpl(whenBuilt).then(impl => impl.parseAndUpdate());
       });
       return Promise.all(whenParsed);
     }).then(() => {
