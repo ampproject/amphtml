@@ -21,10 +21,6 @@ const defaultPlugins = [
   // TODO(alanorozco): Remove `replaceCallArguments` once serving infra is up.
   [localPlugin('transform-log-methods'), {replaceCallArguments: false}],
   localPlugin('transform-parenthesize-expression'),
-];
-
-const singlepassPlugins = [
-  ...defaultPlugins,
   localPlugin('is_minified-constant-transformer'),
   localPlugin('transform-amp-asserts'),
   localPlugin('transform-amp-extension-call'),
@@ -48,7 +44,7 @@ const esmRemovedImports = {
  * @return {!Array<string|!Array<string|!Object>>}
  */
 function plugins({isCommonJsModule, isEsmBuild, isForTesting}) {
-  const applied = [...singlepassPlugins];
+  const applied = [...defaultPlugins];
   if (isEsmBuild) {
     applied.push(['filter-imports', {imports: esmRemovedImports}]);
   }
@@ -64,4 +60,4 @@ function plugins({isCommonJsModule, isEsmBuild, isForTesting}) {
   return applied;
 }
 
-module.exports = {multipassPlugins: [...defaultPlugins], plugins};
+module.exports = {plugins};

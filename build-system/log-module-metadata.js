@@ -32,19 +32,19 @@ const messagesPath = 'dist/log-messages.json';
  * @type {!Object<string, LogMethodMetadataDef>}
  */
 const transformableMethods = {
-  assert: {variadic: true, messageArgPos: 1},
-  assertString: {variadic: false, messageArgPos: 1},
-  assertNumber: {variadic: false, messageArgPos: 1},
-  assertBoolean: {variadic: false, messageArgPos: 1},
-  assertEnumValue: {variadic: false, messageArgPos: 2},
-  assertElement: {variadic: false, messageArgPos: 1},
-  fine: {variadic: true, messageArgPos: 1},
-  info: {variadic: true, messageArgPos: 1},
-  warn: {variadic: true, messageArgPos: 1},
-  error: {variadic: true, messageArgPos: 1},
-  createExpectedError: {variadic: true, messageArgPos: 0},
-  expectedError: {variadic: true, messageArgPos: 1},
-  createError: {variadic: true, messageArgPos: 0},
+  assert: {variadic: true, indirectable: true, messageArgPos: 1},
+  assertString: {variadic: false, indirectable: true, messageArgPos: 1},
+  assertNumber: {variadic: false, indirectable: true, messageArgPos: 1},
+  assertBoolean: {variadic: false, indirectable: true, messageArgPos: 1},
+  assertEnumValue: {variadic: false, indirectable: false, messageArgPos: 2},
+  assertElement: {variadic: false, indirectable: true, messageArgPos: 1},
+  fine: {variadic: true, indirectable: true, messageArgPos: 1},
+  info: {variadic: true, indirectable: true, messageArgPos: 1},
+  warn: {variadic: true, indirectable: true, messageArgPos: 1},
+  error: {variadic: true, indirectable: true, messageArgPos: 1},
+  createExpectedError: {variadic: true, indirectable: true, messageArgPos: 0},
+  expectedError: {variadic: true, indirectable: true, messageArgPos: 1},
+  createError: {variadic: true, indirectable: true, messageArgPos: 0},
 };
 
 module.exports = {

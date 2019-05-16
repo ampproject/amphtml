@@ -16,7 +16,6 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const babel = require('gulp-babel');
 const fs = require('fs-extra');
 const gulp = require('gulp');
 const gulpIf = require('gulp-if');
@@ -30,7 +29,6 @@ const {
   handleTypeCheckError,
 } = require('./closure-compile');
 const {isTravisBuild} = require('../travis');
-const {multipassPlugins: plugins} = require('../build.conf');
 const {shortenLicense, shouldShortenLicense} = require('./shorten-license');
 const {singlePassCompile} = require('./single-pass');
 const {VERSION: internalRuntimeVersion} = require('../internal-version');
@@ -420,9 +418,6 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       .src(srcs, {base: '.'})
       .pipe(gulpIf(shouldShortenLicense, shortenLicense()))
       .pipe(sourcemaps.init({loadMaps: true}))
-      .pipe(
-        gulpIf(/^(?!.*third_party)/, babel({plugins, inputSourceMap: true}))
-      )
       .pipe(gulpClosureCompile(compilerOptionsArray))
       .on('error', err => {
         handleCompilerError(outputFilename);

@@ -21,7 +21,7 @@
  *
  *    dev().assert(foo != bar, 'foo should not be bar')
  *    // transforms into 👇
- *    dev().assert(foo != bar, dev().expandLogMessage('1z'))
+ *    dev().assert(foo != bar, ['1z'])
  *
  * Where `expandLogMessage` is in charge of looking up and expanding the message
  * string, or returning a URL where the interpolated message is displayed.
@@ -34,21 +34,21 @@
  *
  *    dev().assert(false, '%s should not be %s.', foo, bar)
  *    // transforms into 👇
- *    dev().assert(false, dev().expandLogMessage('e2', foo, bar))
+ *    dev().assert(false, ['e2', foo, bar])
  *
  * It also nests arguments of template literals:
  *
  *    dev().assert(false, `Hello, my dear ${name}`);
  *    // transforms into 👇
- *    dev().assert(false, dev().expandLogMessage('0a', name));
+ *    dev().assert(false, ['0a', name]);
  *
  * The motivation of this transform is to reduce binary size. The average length
  * of a log message is ~43 whereas the common minified transformed output (as
  * `x().l('a0')`) is just 11. Since the prefix of the output could repeat
  * throughout a binary, it also compresses well.
  *
- * Resulting compressed, minified binaries reduce size by ~1.5% depending on
- * their logging density.
+ * Resulting compressed, minified binaries reduce size by ~3% depending on their
+ * logging density.
  */
 const base62 = require('base62/lib/ascii');
 const fs = require('fs');
@@ -231,7 +231,11 @@ module.exports = function({types: t}) {
           return;
         }
 
-        const {messageArgPos} = meta;
+        const {indirectable, messageArgPos} = meta;
+        if (!indirectable) {
+          return;
+        }
+
         const messageArg = node.arguments[messageArgPos];
 
         if (!messageArg) {
