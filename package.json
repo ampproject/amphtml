@@ -79,7 +79,7 @@
     "eslint-config-prettier": "4.3.0",
     "eslint-plugin-amphtml-internal": "file:build-system/eslint-rules",
     "eslint-plugin-chai-expect": "2.0.1",
-    "eslint-plugin-eslint-plugin": "2.0.1",
+    "eslint-plugin-eslint-plugin": "2.1.0",
     "eslint-plugin-google-camelcase": "0.0.2",
     "eslint-plugin-jasmine": "2.10.1",
     "eslint-plugin-jsdoc": "5.0.2",
