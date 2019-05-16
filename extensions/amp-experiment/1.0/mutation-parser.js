@@ -15,7 +15,7 @@
  */
 
 import {
-  getAllowedAttributeMutation
+  getAllowedAttributeMutation,
 } from './attribute-allow-list/attribute-allow-list';
 import {isObject} from '../../../src/types';
 import {user, userAssert} from '../../../src/log';
@@ -48,8 +48,8 @@ export function parseMutation(mutation, document) {
     assertAttributeMutation(mutationRecord, stringifiedMutation);
 
     return getAllowedAttributeMutation(
-      mutationRecord,
-      stringifiedMutation
+        mutationRecord,
+        stringifiedMutation
     );
 
   } else if (mutationRecord['type'] === 'characterData') {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {assertHttpsUrl} from '../../../src/url';
+import {assertHttpsUrl} from '../../../../src/url';
 
 /**
  * Base class for allowed attribute assertions.
@@ -23,6 +23,10 @@ import {assertHttpsUrl} from '../../../src/url';
  */
 export class AllowedAttributeEntry {
 
+  /**
+   * Constructor for the class
+   * @param {?Array<string>} opt_tags
+   */
   constructor(opt_tags) {
     this.tags_ = opt_tags;
   }
@@ -31,8 +35,8 @@ export class AllowedAttributeEntry {
    * Function to validate the value
    * for the attribute change. Subclasses
    * may override.
-   * @param {!string} value
-   * @return {!Boolean}
+   * @param {string} value
+   * @return {boolean}
    */
   validate(value) {
     if (value) {
@@ -47,8 +51,8 @@ export class AllowedAttributeEntry {
    */
   mutate(mutationRecord) {
     mutationRecord['targetElement'].setAttribute(
-      mutationRecord['attributeName'],
-      mutationRecord['value']
+        mutationRecord['attributeName'],
+        mutationRecord['value']
     );
   }
 }
@@ -58,6 +62,8 @@ export class AllowedAttributeEntry {
  * mutations
  */
 export class DefaultStyleAllowedAttributeEntry extends AllowedAttributeEntry {
+
+  /** @override */
   constructor() {
     super(['*']);
   }
@@ -88,9 +94,11 @@ export class DefaultStyleAllowedAttributeEntry extends AllowedAttributeEntry {
  * mutations. E.g ['href']['*']
  */
 export class DefaultAllowedURLAttributeEntry extends AllowedAttributeEntry {
+
+  /** @override */
   constructor(opt_tags) {
     if (opt_tags) {
-      super(opt_tags)
+      super(opt_tags);
     } else {
       super(['*']);
     }

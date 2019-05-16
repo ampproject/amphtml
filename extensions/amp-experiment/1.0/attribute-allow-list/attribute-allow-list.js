@@ -15,10 +15,10 @@
  */
 
 import {
+  DefaultAllowedURLAttributeEntry,
   DefaultStyleAllowedAttributeEntry,
-  DefaultAllowedURLAttributeEntry
 } from './allowed-attribute-entry';
-import {user, userAssert} from '../../../src/log';
+import {user, userAssert} from '../../../../src/log';
 
 const TAG = 'amp-experiment allowed-mutations';
 
@@ -29,7 +29,10 @@ const TAG = 'amp-experiment allowed-mutations';
  * @param {string} stringifiedMutation
  * @return {!Function}
  */
-export function getAllowedAttributeMutation(mutationRecord, stringifiedMutation) {
+export function getAllowedAttributeMutation(
+  mutationRecord,
+  stringifiedMutation
+) {
 
   // Assert the mutation attribute is one of the following keys
   const mutationAttributeName = mutationRecord['attributeName'];
@@ -41,16 +44,21 @@ export function getAllowedAttributeMutation(mutationRecord, stringifiedMutation)
 
   // Find our allow list entry
   const mutationTagName = mutationRecord['targetElement']
-    .tagName.toLowerCase();
+      .tagName.toLowerCase();
 
   // Search through the allow list for our
   // Allowed attribute entry
   let allowedAttributeEntry = undefined;
   if (attributeMutationAllowList[mutationAttributeName][mutationTagName]) {
     allowedAttributeEntry =
-      attributeMutationAllowList[mutationAttributeName][mutationTagName];
+      attributeMutationAllowList
+          [mutationAttributeName]
+          [mutationTagName];
   } else if (attributeMutationAllowList[mutationAttributeName]['*']) {
-    allowedAttributeEntry = attributeMutationAllowList[mutationAttributeName]['*'];
+    allowedAttributeEntry =
+      attributeMutationAllowList
+          [mutationAttributeName]
+          ['*'];
 
     if (!allowedAttributeEntry.tags.includes[mutationTagName] &&
       !allowedAttributeEntry.tags.includes['*']) {
@@ -60,9 +68,9 @@ export function getAllowedAttributeMutation(mutationRecord, stringifiedMutation)
 
   if (!allowedAttributeEntry) {
     user().error(
-      TAG,
-      'Mutation %s has an unsupported attributeName.',
-      stringifiedMutation
+        TAG,
+        'Mutation %s has an unsupported attributeName.',
+        stringifiedMutation
     );
   }
 
@@ -81,14 +89,14 @@ export function getAllowedAttributeMutation(mutationRecord, stringifiedMutation)
 
 const attributeMutationAllowList = {
   'style': {
-    '*': new DefaultStyleAllowedAttributeEntry()
-  }
+    '*': new DefaultStyleAllowedAttributeEntry(),
+  },
   'src': {
-    '*': new DefaultAllowedURLAttributeEntry()
+    '*': new DefaultAllowedURLAttributeEntry(),
   },
   'href': {
-    '*': new DefaultAllowedURLAttributeEntry()
-  }
+    '*': new DefaultAllowedURLAttributeEntry(),
+  },
 };
 
 const attributeMutationAllowListKeys =
