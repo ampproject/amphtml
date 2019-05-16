@@ -40,83 +40,79 @@ export const GTAG_CONFIG = /** @type {!JsonObject} */ ({
   'requests': {
     'uaHost': 'https://www.google-analytics.com',
     'uaBasePrefix':
-        'v=1&' +
-         '_v=a1&' +
-         'ds=${dataSource}&' +
-         '${anonymizeIP}&' +
-         '_s=${requestCount}&' +
-         'dt=${title}&' +
-         'sr=${screenWidth}x${screenHeight}&' +
-         'cid=${clientId}&' +
-         'tid=${trackingId}&' +
-         'dl=${sourceUrl}&' +
-         'dr=${externalReferrer}&' +
-         'sd=${screenColorDepth}&' +
-         'ul=${browserLanguage}&' +
-         'de=${documentCharset}',
-    'uaBaseSuffix':
-        '&a=${pageViewId}&' +
-         'z=${random}',
+      'v=1&' +
+      '_v=a1&' +
+      'ds=${dataSource}&' +
+      '${anonymizeIP}&' +
+      '_s=${requestCount}&' +
+      'dt=${title}&' +
+      'sr=${screenWidth}x${screenHeight}&' +
+      'cid=${clientId}&' +
+      'tid=${trackingId}&' +
+      'dl=${sourceUrl}&' +
+      'dr=${externalReferrer}&' +
+      'sd=${screenColorDepth}&' +
+      'ul=${browserLanguage}&' +
+      'de=${documentCharset}',
+    'uaBaseSuffix': '&a=${pageViewId}&' + 'z=${random}',
     'uaPageviewCommon':
-         '&t=pageview&' +
-         'jid=${random}&' +
-         'gjid=${random}&' +
-         '_r=1',
+      '&t=pageview&' + 'jid=${random}&' + 'gjid=${random}&' + '_r=1',
     'uaPageview':
-        '${uaHost}/r/collect?${uaBasePrefix}' +
-         '${uaPageviewCommon}' +
-         '${uaBaseSuffix}',
+      '${uaHost}/r/collect?${uaBasePrefix}' +
+      '${uaPageviewCommon}' +
+      '${uaBaseSuffix}',
     'uaPageviewNpa':
-        '${uaHost}/collect?${uaBasePrefix}' +
-         '${uaPageviewCommon}' +
-         '${uaBaseSuffix}',
+      '${uaHost}/collect?${uaBasePrefix}' +
+      '${uaPageviewCommon}' +
+      '${uaBaseSuffix}',
     'uaEvent':
-        '${uaHost}/collect?${uaBasePrefix}&' +
-         't=event&' +
-         'jid=' +
-         '${uaBaseSuffix}',
+      '${uaHost}/collect?${uaBasePrefix}&' +
+      't=event&' +
+      'jid=' +
+      '${uaBaseSuffix}',
     'uaTiming':
-        '${uaHost}/collect?${uaBasePrefix}&' +
-         'jid=&' +
-         'plt=${pageLoadTime}&' +
-         'dns=${domainLookupTime}&' +
-         'tcp=${tcpConnectTime}&' +
-         'rrt=${redirectTime}&' +
-         'srt=${serverResponseTime}&' +
-         'pdt=${pageDownloadTime}&' +
-         'clt=${contentLoadTime}&' +
-         'dit=${domInteractiveTime}' +
-         '${uaBaseSuffix}',
+      '${uaHost}/collect?${uaBasePrefix}&' +
+      'jid=&' +
+      'plt=${pageLoadTime}&' +
+      'dns=${domainLookupTime}&' +
+      'tcp=${tcpConnectTime}&' +
+      'rrt=${redirectTime}&' +
+      'srt=${serverResponseTime}&' +
+      'pdt=${pageDownloadTime}&' +
+      'clt=${contentLoadTime}&' +
+      'dit=${domInteractiveTime}' +
+      '${uaBaseSuffix}',
     'uaError':
-        '${uaHost}/collect?${uaBasePrefix}&' +
-         't=exception&' +
-         'exd=${errorParam}' +
-         '${uaBaseSuffix}',
-    'awConversionPrefix':
-        'https://www.googleadservices.com/pagead/conversion/',
+      '${uaHost}/collect?${uaBasePrefix}&' +
+      't=exception&' +
+      'exd=${errorParam}' +
+      '${uaBaseSuffix}',
+    'awConversionPrefix': 'https://www.googleadservices.com/pagead/conversion/',
     'awRemarketingPrefix':
-        'https://googleads.g.doubleclick.net/pagead/viewthroughconversion/',
+      'https://googleads.g.doubleclick.net/pagead/viewthroughconversion/',
     'awCommonParams':
-        '${conversionId}/?' +
-         'cv=amp3&' + // Increment when making changes.
-         'label=${conversionLabel}&' +
-         'random=${random}&' +
-         'url=${sourceUrl}&' +
-         'ref=${documentReferrer}&' +
-         'fst=${pageViewId}&' +
-         'num=${counter(googleadwords)}&' +
-         'fmt=3&' +
-         'async=1&' +
-         'u_h=${screenHeight}&u_w=${screenWidth}&' +
-         'u_ah=${availableScreenHeight}&u_aw=${availableScreenWidth}&' +
-         'u_cd=${screenColorDepth}&' +
-         'u_tz=${timezone}&' +
-         'tiba=${title}&' +
-         'guid=ON&script=0',
+      '${conversionId}/?' +
+      'cv=amp3&' + // Increment when making changes.
+      'label=${conversionLabel}&' +
+      'random=${random}&' +
+      'url=${sourceUrl}&' +
+      'ref=${documentReferrer}&' +
+      'fst=${pageViewId}&' +
+      'num=${counter(googleadwords)}&' +
+      'fmt=3&' +
+      'async=1&' +
+      'u_h=${screenHeight}&u_w=${screenWidth}&' +
+      'u_ah=${availableScreenHeight}&u_aw=${availableScreenWidth}&' +
+      'u_cd=${screenColorDepth}&' +
+      'u_tz=${timezone}&' +
+      'tiba=${title}&' +
+      'guid=ON&script=0',
     'awConversion': '${awConversionPrefix}${awCommonParams}',
     'awRemarketing': '${awRemarketingPrefix}${awCommonParams}',
-    'flBase': 'https://ad.doubleclick.net/activity;src=${flSrc};type=${flType};cat=${flCat}',
-    'flDynamicBase': 'https://${flSrc}.fls.doubleclick.net/activityi;src=${flSrc};type=${flType};cat=${flCat}',
+    'flBase':
+      'https://ad.doubleclick.net/activity;src=${flSrc};type=${flType};cat=${flCat}',
+    'flDynamicBase':
+      'https://${flSrc}.fls.doubleclick.net/activityi;src=${flSrc};type=${flType};cat=${flCat}',
     'dnsBase': 'https://ad.doubleclick.net/ddm/clk/',
   },
   'transport': {

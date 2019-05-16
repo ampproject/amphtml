@@ -35,7 +35,6 @@ const TEMPLATE_CORS_CONFIG = {
 };
 
 export class AmpAdTemplateHelper {
-
   /**
    * @param {!Window} win
    */
@@ -54,15 +53,16 @@ export class AmpAdTemplateHelper {
    * @return {!Promise<string>}
    */
   fetch(templateUrl) {
-    const proxyUrl = getMode(this.win_).localDev && !isNaN(templateUrl)
-      ? `http://ads.localhost:${this.win_.location.port}` +
+    const proxyUrl =
+      getMode(this.win_).localDev && !isNaN(templateUrl)
+        ? `http://ads.localhost:${this.win_.location.port}` +
           `/a4a_template/adzerk/${templateUrl}`
-      : this.getTemplateProxyUrl_(templateUrl);
+        : this.getTemplateProxyUrl_(templateUrl);
     let templatePromise = this.cache_.get(proxyUrl);
     if (!templatePromise) {
       templatePromise = Services.xhrFor(this.win_)
-          .fetchText(proxyUrl, TEMPLATE_CORS_CONFIG)
-          .then(response => response.text());
+        .fetchText(proxyUrl, TEMPLATE_CORS_CONFIG)
+        .then(response => response.text());
       this.cache_.put(proxyUrl, templatePromise);
     }
     devAssert(templatePromise);
@@ -75,8 +75,10 @@ export class AmpAdTemplateHelper {
    * @return {!Promise<!Element>} Promise which resolves after rendering completes.
    */
   render(templateValues, element) {
-    return Services.templatesFor(this.win_)
-        .findAndRenderTemplate(element, templateValues);
+    return Services.templatesFor(this.win_).findAndRenderTemplate(
+      element,
+      templateValues
+    );
   }
 
   /**
@@ -84,8 +86,9 @@ export class AmpAdTemplateHelper {
    * @param {!Array|!JsonObject} analyticsValue
    */
   insertAnalytics(element, analyticsValue) {
-    analyticsValue = /**@type {!Array}*/ (
-        isArray(analyticsValue) ? analyticsValue : [analyticsValue]);
+    analyticsValue = /**@type {!Array}*/ (isArray(analyticsValue)
+      ? analyticsValue
+      : [analyticsValue]);
     for (let i = 0; i < analyticsValue.length; i++) {
       const config = analyticsValue[i];
       const analyticsEle = element.ownerDocument.createElement('amp-analytics');
@@ -97,10 +100,12 @@ export class AmpAdTemplateHelper {
       }
       if (config['inline']) {
         const scriptElem = createElementWithAttributes(
-            element.ownerDocument,
-            'script', dict({
-              'type': 'application/json',
-            }));
+          element.ownerDocument,
+          'script',
+          dict({
+            'type': 'application/json',
+          })
+        );
         scriptElem.textContent = JSON.stringify(config['inline']);
         analyticsEle.appendChild(scriptElem);
       }
@@ -116,8 +121,14 @@ export class AmpAdTemplateHelper {
   getTemplateProxyUrl_(url) {
     const cdnUrlSuffix = urls.cdn.slice(8);
     const loc = parseUrlDeprecated(url);
-    return loc.origin.indexOf(cdnUrlSuffix) > 0 ? url :
-      'https://' + loc.hostname.replace(/-/g, '--').replace(/\./g, '-') +
-      '.' + cdnUrlSuffix + '/ad/s/' + loc.hostname + loc.pathname;
+    return loc.origin.indexOf(cdnUrlSuffix) > 0
+      ? url
+      : 'https://' +
+          loc.hostname.replace(/-/g, '--').replace(/\./g, '-') +
+          '.' +
+          cdnUrlSuffix +
+          '/ad/s/' +
+          loc.hostname +
+          loc.pathname;
   }
 }

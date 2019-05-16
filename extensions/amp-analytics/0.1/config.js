@@ -27,12 +27,10 @@ import {variableServiceFor} from './variables';
 const TAG = 'amp-analytics/config';
 
 export class AnalyticsConfig {
-
   /**
    * @param {!Element} element
    */
   constructor(element) {
-
     /** @private {!Element} */
     this.element_ = element;
 
@@ -67,8 +65,8 @@ export class AnalyticsConfig {
     this.isSandbox_ = this.element_.hasAttribute('sandbox');
 
     return this.fetchRemoteConfig_()
-        .then(this.processConfigs_.bind(this))
-        .then(() => this.config_);
+      .then(this.processConfigs_.bind(this))
+      .then(() => this.config_);
   }
 
   /**
@@ -92,20 +90,29 @@ export class AnalyticsConfig {
       fetchConfig.credentials = this.element_.getAttribute('data-credentials');
     }
     return Services.urlReplacementsForDoc(this.element_)
-        .expandUrlAsync(remoteConfigUrl)
-        .then(expandedUrl => {
-          remoteConfigUrl = expandedUrl;
-          return Services.xhrFor(toWin(this.win_)).fetchJson(
-              remoteConfigUrl, fetchConfig);
-        })
-        .then(res => res.json())
-        .then(jsonValue => {
+      .expandUrlAsync(remoteConfigUrl)
+      .then(expandedUrl => {
+        remoteConfigUrl = expandedUrl;
+        return Services.xhrFor(toWin(this.win_)).fetchJson(
+          remoteConfigUrl,
+          fetchConfig
+        );
+      })
+      .then(res => res.json())
+      .then(
+        jsonValue => {
           this.remoteConfig_ = jsonValue;
           dev().fine(TAG, 'Remote config loaded', remoteConfigUrl);
-        }, err => {
-          user().error(TAG,
-              'Error loading remote config: ', remoteConfigUrl, err);
-        });
+        },
+        err => {
+          user().error(
+            TAG,
+            'Error loading remote config: ',
+            remoteConfigUrl,
+            err
+          );
+        }
+      );
   }
 
   /**
@@ -149,23 +156,33 @@ export class AnalyticsConfig {
         requireAmpResponseSourceOrigin: false,
       };
       if (this.element_.hasAttribute('data-credentials')) {
-        fetchConfig.credentials = this.element_
-            .getAttribute('data-credentials');
+        fetchConfig.credentials = this.element_.getAttribute(
+          'data-credentials'
+        );
       }
       return Services.urlReplacementsForDoc(this.element_)
-          .expandUrlAsync(configRewriterUrl)
-          .then(expandedUrl => {
-            return Services.xhrFor(toWin(this.win_)).fetchJson(
-                expandedUrl, fetchConfig);
-          })
-          .then(res => res.json())
-          .then(jsonValue => {
+        .expandUrlAsync(configRewriterUrl)
+        .then(expandedUrl => {
+          return Services.xhrFor(toWin(this.win_)).fetchJson(
+            expandedUrl,
+            fetchConfig
+          );
+        })
+        .then(res => res.json())
+        .then(
+          jsonValue => {
             this.config_ = this.mergeConfigs_(jsonValue);
             dev().fine(TAG, 'Configuration re-written', configRewriterUrl);
-          }, err => {
-            user().error(TAG,
-                'Error rewriting configuration: ', configRewriterUrl, err);
-          });
+          },
+          err => {
+            user().error(
+              TAG,
+              'Error rewriting configuration: ',
+              configRewriterUrl,
+              err
+            );
+          }
+        );
     });
   }
 
@@ -186,8 +203,10 @@ export class AnalyticsConfig {
 
     if (pubVarGroups && !vendorVarGroups) {
       const TAG = this.getName_();
-      user().warn(TAG, 'This analytics provider does not currently ' +
-          'support varGroups');
+      user().warn(
+        TAG,
+        'This analytics provider does not currently ' + 'support varGroups'
+      );
       return Promise.resolve();
     }
 
@@ -209,13 +228,14 @@ export class AnalyticsConfig {
         return;
       }
 
-      const groupPromise = this.shallowExpandObject(this.element_, group)
-          .then(expandedGroup => {
-            // This is part of the user config and should not be sent.
-            delete expandedGroup['enabled'];
-            // Merge all groups into single `vars` object.
-            Object.assign(rewriterConfig['vars'], expandedGroup);
-          });
+      const groupPromise = this.shallowExpandObject(this.element_, group).then(
+        expandedGroup => {
+          // This is part of the user config and should not be sent.
+          delete expandedGroup['enabled'];
+          // Merge all groups into single `vars` object.
+          Object.assign(rewriterConfig['vars'], expandedGroup);
+        }
+      );
       allPromises.push(groupPromise);
     });
 
@@ -251,10 +271,16 @@ export class AnalyticsConfig {
     });
     const defaultConfig = this.predefinedConfig_['default'] || {};
     mergeObjects(expandConfigRequest(defaultConfig), config);
-    mergeObjects(expandConfigRequest(this.getTypeConfig_()), config,
-        /* predefined */ true);
-    mergeObjects(expandConfigRequest(rewrittenConfig), config,
-        /* predefined */ true);
+    mergeObjects(
+      expandConfigRequest(this.getTypeConfig_()),
+      config,
+      /* predefined */ true
+    );
+    mergeObjects(
+      expandConfigRequest(rewrittenConfig),
+      config,
+      /* predefined */ true
+    );
     return config;
   }
 
@@ -291,8 +317,10 @@ export class AnalyticsConfig {
       if (children.length == 1) {
         inlineConfig = getChildJsonConfig(this.element_);
       } else if (children.length > 1) {
-        user().error(TAG, 'The tag should contain only one' +
-            ' <script> child.');
+        user().error(
+          TAG,
+          'The tag should contain only one' + ' <script> child.'
+        );
       }
     } catch (er) {
       user().error(TAG, er.message);
@@ -311,24 +339,33 @@ export class AnalyticsConfig {
       // overwriting
       if (inlineConfig['transport'] || this.remoteConfig_['transport']) {
         const TAG = this.getName_();
-        user().error(TAG, 'Inline or remote config should not ' +
-            'overwrite vendor transport settings');
+        user().error(
+          TAG,
+          'Inline or remote config should not ' +
+            'overwrite vendor transport settings'
+        );
       }
     }
 
     // Do NOT allow inline or remote config to use 'transport: iframe'
     if (inlineConfig['transport'] && inlineConfig['transport']['iframe']) {
-      user().error(TAG, 'Inline configs are not allowed to ' +
-          'specify transport iframe');
+      user().error(
+        TAG,
+        'Inline configs are not allowed to ' + 'specify transport iframe'
+      );
       if (!getMode().localDev || getMode().test) {
         inlineConfig['transport']['iframe'] = undefined;
       }
     }
 
-    if (this.remoteConfig_['transport'] &&
-        this.remoteConfig_['transport']['iframe']) {
-      user().error(TAG, 'Remote configs are not allowed to ' +
-          'specify transport iframe');
+    if (
+      this.remoteConfig_['transport'] &&
+      this.remoteConfig_['transport']['iframe']
+    ) {
+      user().error(
+        TAG,
+        'Remote configs are not allowed to ' + 'specify transport iframe'
+      );
       this.remoteConfig_['transport']['iframe'] = undefined;
     }
   }
@@ -339,8 +376,9 @@ export class AnalyticsConfig {
    * @private
    */
   getName_() {
-    return 'AmpAnalytics ' +
-        (this.element_.getAttribute('id') || '<unknown id>');
+    return (
+      'AmpAnalytics ' + (this.element_.getAttribute('id') || '<unknown id>')
+    );
   }
 
   /**
@@ -357,21 +395,24 @@ export class AnalyticsConfig {
 
     Object.keys(obj).forEach(key => {
       keys.push(key);
-      const expanded = Services.urlReplacementsForDoc(element)
-          .expandStringAsync(obj[key],
-              variableServiceFor(/** @type {!Window} */
-                  (this.win_)).getMacros());
+      const expanded = Services.urlReplacementsForDoc(
+        element
+      ).expandStringAsync(
+        obj[key],
+        variableServiceFor(
+          /** @type {!Window} */
+          (this.win_)
+        ).getMacros()
+      );
       expansionPromises.push(expanded);
     });
 
     return Promise.all(expansionPromises).then(expandedValues => {
-      keys.forEach((key, i) =>
-        expandedObj[key] = expandedValues[i]);
+      keys.forEach((key, i) => (expandedObj[key] = expandedValues[i]));
       return expandedObj;
     });
   }
 }
-
 
 /**
  * Merges two objects. If the value is array or plain object, the values are
@@ -389,29 +430,40 @@ export function mergeObjects(from, to, opt_predefinedConfig) {
   // Assert that optouts are allowed only in predefined configs.
   // The last expression adds an exception of known, safe optout function
   // that is already being used in the wild.
-  userAssert(opt_predefinedConfig
-      || !from || !from['optout']
-      || from['optout'] == '_gaUserPrefs.ioo'
-      || from['optoutElementId'] == '__gaOptOutExtension',
-  'optout property is only available to vendor config.');
+  userAssert(
+    opt_predefinedConfig ||
+      !from ||
+      !from['optout'] ||
+      from['optout'] == '_gaUserPrefs.ioo' ||
+      from['optoutElementId'] == '__gaOptOutExtension',
+    'optout property is only available to vendor config.'
+  );
 
   for (const property in from) {
-    userAssert(opt_predefinedConfig || property != 'iframePing',
-        'iframePing config is only available to vendor config.');
+    userAssert(
+      opt_predefinedConfig || property != 'iframePing',
+      'iframePing config is only available to vendor config.'
+    );
     // Only deal with own properties.
     if (hasOwn(from, property)) {
       if (isArray(from[property])) {
         if (!isArray(to[property])) {
           to[property] = [];
         }
-        to[property] = mergeObjects(from[property], to[property],
-            opt_predefinedConfig);
+        to[property] = mergeObjects(
+          from[property],
+          to[property],
+          opt_predefinedConfig
+        );
       } else if (isObject(from[property])) {
         if (!isObject(to[property])) {
           to[property] = {};
         }
-        to[property] = mergeObjects(from[property], to[property],
-            opt_predefinedConfig);
+        to[property] = mergeObjects(
+          from[property],
+          to[property],
+          opt_predefinedConfig
+        );
       } else {
         to[property] = from[property];
       }

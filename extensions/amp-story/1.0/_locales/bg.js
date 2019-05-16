@@ -111,23 +111,26 @@ const strings = {
     string: 'Разгънете височината на прозореца, за да прегледате материалите',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT]: {
-    string: 'Разгънете височината и ширината на прозореца, за да прегледате ' +
-        'материалите',
+    string:
+      'Разгънете височината и ширината на прозореца, за да прегледате ' +
+      'материалите',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_WIDTH_SIZE_TEXT]: {
     string: 'Разгънете ширината на прозореца, за да прегледате материалите',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
-    string: 'За да прегледате това съдържание, трябва да активирате ' +
-        'експеримента за AMP материали.',
+    string:
+      'За да прегледате това съдържание, трябва да активирате ' +
+      'експеримента за AMP материали.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
-    string: 'Най-добрият начин за преглед на страницата е във вертикален ' +
-        'режим',
+    string:
+      'Най-добрият начин за преглед на страницата е във вертикален ' + 'режим',
   },
   [LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT]: {
-    string: 'За съжаление, изглежда, че браузърът ви не поддържа преглед на ' +
-        'материали.',
+    string:
+      'За съжаление, изглежда, че браузърът ви не поддържа преглед на ' +
+      'материали.',
   },
 };
 

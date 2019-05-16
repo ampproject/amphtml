@@ -19,10 +19,7 @@ import {
   calculateExtensionScriptUrl,
   parseExtensionUrl,
 } from '../../src/service/extension-location';
-import {
-  initLogConstructor,
-  resetLogConstructorForTesting,
-} from '../../src/log';
+import {initLogConstructor, resetLogConstructorForTesting} from '../../src/log';
 
 describes.sandboxed('Extension Location', {}, () => {
   describe('get correct script source', () => {
@@ -37,46 +34,70 @@ describes.sandboxed('Extension Location', {}, () => {
 
     it('with local mode', () => {
       window.AMP_MODE = {rtvVersion: '123'};
-      const script = calculateExtensionScriptUrl({
-        pathname: 'examples/ads.amp.html',
-        host: 'localhost:8000',
-        protocol: 'http:',
-      }, 'amp-ad', /*opt_extensionVersion*/ undefined, true);
+      const script = calculateExtensionScriptUrl(
+        {
+          pathname: 'examples/ads.amp.html',
+          host: 'localhost:8000',
+          protocol: 'http:',
+        },
+        'amp-ad',
+        /*opt_extensionVersion*/ undefined,
+        true
+      );
       expect(script).to.equal(
-          'http://localhost:8000/dist/rtv/123/v0/amp-ad-0.1.js');
+        'http://localhost:8000/dist/rtv/123/v0/amp-ad-0.1.js'
+      );
     });
 
     it('with remote mode', () => {
       window.AMP_MODE = {rtvVersion: '123'};
-      const script = calculateExtensionScriptUrl({
-        pathname: 'examples/ads.amp.html',
-        host: 'localhost:8000',
-        protocol: 'http:',
-      }, 'amp-ad', /*opt_extensionVersion*/ undefined, false);
+      const script = calculateExtensionScriptUrl(
+        {
+          pathname: 'examples/ads.amp.html',
+          host: 'localhost:8000',
+          protocol: 'http:',
+        },
+        'amp-ad',
+        /*opt_extensionVersion*/ undefined,
+        false
+      );
       expect(script).to.equal(
-          'https://cdn.ampproject.org/rtv/123/v0/amp-ad-0.1.js');
+        'https://cdn.ampproject.org/rtv/123/v0/amp-ad-0.1.js'
+      );
     });
 
     it('should allow no versions', () => {
       window.AMP_MODE = {rtvVersion: '123'};
-      const script = calculateExtensionScriptUrl({
-        pathname: 'examples/ads.amp.html',
-        host: 'localhost:8000',
-        protocol: 'http:',
-      }, 'no-version', /* version is empty but defined */ '', true);
+      const script = calculateExtensionScriptUrl(
+        {
+          pathname: 'examples/ads.amp.html',
+          host: 'localhost:8000',
+          protocol: 'http:',
+        },
+        'no-version',
+        /* version is empty but defined */ '',
+        true
+      );
       expect(script).to.equal(
-          'http://localhost:8000/dist/rtv/123/v0/no-version.js');
+        'http://localhost:8000/dist/rtv/123/v0/no-version.js'
+      );
     });
 
     it('should handles single pass experiment', () => {
       window.AMP_MODE = {rtvVersion: '123', singlePassType: 'sp'};
-      const script = calculateExtensionScriptUrl({
-        pathname: 'examples/ads.amp.html',
-        host: 'localhost:8000',
-        protocol: 'http:',
-      }, 'no-version', /* version is empty but defined */ '', true);
+      const script = calculateExtensionScriptUrl(
+        {
+          pathname: 'examples/ads.amp.html',
+          host: 'localhost:8000',
+          protocol: 'http:',
+        },
+        'no-version',
+        /* version is empty but defined */ '',
+        true
+      );
       expect(script).to.equal(
-          'http://localhost:8000/dist/rtv/123/sp/v0/no-version.js');
+        'http://localhost:8000/dist/rtv/123/sp/v0/no-version.js'
+      );
     });
   });
 
@@ -91,59 +112,76 @@ describes.sandboxed('Extension Location', {}, () => {
     });
 
     it('with local mode', () => {
-      const script = calculateEntryPointScriptUrl({
-        pathname: 'examples/ads.amp.html',
-        host: 'localhost:8000',
-        protocol: 'http:',
-      }, 'sw', true);
+      const script = calculateEntryPointScriptUrl(
+        {
+          pathname: 'examples/ads.amp.html',
+          host: 'localhost:8000',
+          protocol: 'http:',
+        },
+        'sw',
+        true
+      );
       expect(script).to.equal('http://localhost:8000/dist/sw.js');
     });
 
     it('with remote mode', () => {
       window.AMP_MODE = {rtvVersion: '123'};
-      const script = calculateEntryPointScriptUrl({
-        pathname: 'examples/ads.amp.html',
-        host: 'localhost:8000',
-        protocol: 'http:',
-      }, 'sw', /* isLocalDev */ false);
-      expect(script).to.equal(
-          'https://cdn.ampproject.org/sw.js');
+      const script = calculateEntryPointScriptUrl(
+        {
+          pathname: 'examples/ads.amp.html',
+          host: 'localhost:8000',
+          protocol: 'http:',
+        },
+        'sw',
+        /* isLocalDev */ false
+      );
+      expect(script).to.equal('https://cdn.ampproject.org/sw.js');
     });
 
     it('with remote mode & rtv', () => {
       window.AMP_MODE = {rtvVersion: '123'};
-      const script = calculateEntryPointScriptUrl({
-        pathname: 'examples/ads.amp.html',
-        host: 'localhost:8000',
-        protocol: 'http:',
-      }, 'ww', /* isLocalDev */ false, /* opt_rtv */ true);
-      expect(script).to.equal(
-          'https://cdn.ampproject.org/rtv/123/ww.js');
+      const script = calculateEntryPointScriptUrl(
+        {
+          pathname: 'examples/ads.amp.html',
+          host: 'localhost:8000',
+          protocol: 'http:',
+        },
+        'ww',
+        /* isLocalDev */ false,
+        /* opt_rtv */ true
+      );
+      expect(script).to.equal('https://cdn.ampproject.org/rtv/123/ww.js');
     });
 
     it('should handle single pass experiment', () => {
       window.AMP_MODE = {rtvVersion: '123', singlePassType: 'sp'};
-      const script = calculateEntryPointScriptUrl({
-        pathname: 'examples/ads.amp.html',
-        host: 'localhost:8000',
-        protocol: 'http:',
-      }, 'ww', /* isLocalDev */ false, /* opt_rtv */ true);
-      expect(script).to.equal(
-          'https://cdn.ampproject.org/rtv/123/sp/ww.js');
+      const script = calculateEntryPointScriptUrl(
+        {
+          pathname: 'examples/ads.amp.html',
+          host: 'localhost:8000',
+          protocol: 'http:',
+        },
+        'ww',
+        /* isLocalDev */ false,
+        /* opt_rtv */ true
+      );
+      expect(script).to.equal('https://cdn.ampproject.org/rtv/123/sp/ww.js');
     });
   });
 
   describe('get correct URL parts', () => {
     it('unversioned urls', () => {
-      const urlParts =
-          parseExtensionUrl('https://cdn.ampproject.org/v0/amp-ad-1.0.js');
+      const urlParts = parseExtensionUrl(
+        'https://cdn.ampproject.org/v0/amp-ad-1.0.js'
+      );
       expect(urlParts.extensionId).to.equal('amp-ad');
       expect(urlParts.extensionVersion).to.equal('1.0');
     });
 
     it('versioned urls', () => {
-      const urlParts = parseExtensionUrl('https://cdn.ampproject.org/rtv/123' +
-          '/v0/amp-ad-0.1.js');
+      const urlParts = parseExtensionUrl(
+        'https://cdn.ampproject.org/rtv/123' + '/v0/amp-ad-0.1.js'
+      );
       expect(urlParts.extensionId).to.equal('amp-ad');
       expect(urlParts.extensionVersion).to.equal('0.1');
     });

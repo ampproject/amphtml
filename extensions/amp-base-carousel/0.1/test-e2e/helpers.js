@@ -24,8 +24,9 @@ const PREV_ARROW_SELECTOR = `${PREV_ARROW_SLOT_SELECTOR} :first-child`;
 const NEXT_ARROW_SELECTOR = `${NEXT_ARROW_SLOT_SELECTOR} :first-child`;
 
 async function waitForImgLoad(controller, el) {
-  await expect(controller.getElementProperty(el, 'naturalWidth'))
-      .to.be.greaterThan(0);
+  await expect(
+    controller.getElementProperty(el, 'naturalWidth')
+  ).to.be.greaterThan(0);
 }
 
 export async function waitForCarouselImg(controller, n) {
@@ -33,8 +34,8 @@ export async function waitForCarouselImg(controller, n) {
   // container. We query all the imgs upfront, since they might not have
   // laid out yet.
   const el = await controller.findElementXPath(
-      `//${TAG_NAME}//*[contains(@class, "${SLOTTED_CLASS}")][${n + 1}]` +
-      '//img');
+    `//${TAG_NAME}//*[contains(@class, "${SLOTTED_CLASS}")][${n + 1}]` + '//img'
+  );
   return await waitForImgLoad(controller, el);
 }
 
@@ -55,11 +56,7 @@ export async function getSpacersForSlide(controller, n) {
   const spacers = await getSpacers(controller);
   const slideCount = spacers.length / 3;
 
-  return [
-    spacers[n],
-    spacers[n + slideCount],
-    spacers[n + 2 * slideCount],
-  ];
+  return [spacers[n], spacers[n + slideCount], spacers[n + 2 * slideCount]];
 }
 
 export async function getScrollingElement(controller) {

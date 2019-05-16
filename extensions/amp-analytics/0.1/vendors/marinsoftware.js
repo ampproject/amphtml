@@ -17,26 +17,26 @@
 export const MARINSOFTWARE_CONFIG = /** @type {!JsonObject} */ ({
   'requests': {
     'base': 'https://tracker.marinsm.com/tp',
-    'baseParams': 'cid=${trackerId}' +
+    'baseParams':
+      'cid=${trackerId}' +
       '&ampVersion=${ampVersion}' +
       '&ds=AMP' +
       '&ref=${externalReferrer}' +
       '&page=${sourceUrl}' +
       '&uuid=${clientId(marin_amp_id)}' +
       '&rnd=${random}',
-    'pageView': '${base}?' +
-      '${baseParams}' +
-      '&act=1',
-    'conversion': '${base}?' +
+    'pageView': '${base}?' + '${baseParams}' + '&act=1',
+    'conversion':
+      '${base}?' +
       '${baseParams}' +
       '&act=2' +
       '&trans=UTM:I' +
-        '|${orderId}' +
-        '|${marinConversionType}' +
-        '|${productName}' +
-        '|${category}' +
-        '|${price}' +
-        '|${quantity}',
+      '|${orderId}' +
+      '|${marinConversionType}' +
+      '|${productName}' +
+      '|${category}' +
+      '|${price}' +
+      '|${quantity}',
   },
   'transport': {
     'beacon': true,

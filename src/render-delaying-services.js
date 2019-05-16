@@ -50,7 +50,6 @@ const SERVICES = {
  * @interface
  */
 export class RenderDelayingService {
-
   /**
    * Function to return a promise for when
    * it is finished delaying render, and is ready.
@@ -68,7 +67,6 @@ export class RenderDelayingService {
  */
 const LOAD_TIMEOUT = 3000;
 
-
 /**
  * Detects any render delaying services that are required on the page, and
  * returns a promise with a timeout.
@@ -78,24 +76,21 @@ const LOAD_TIMEOUT = 3000;
  */
 export function waitForServices(win) {
   const promises = includedServices(win).map(serviceId => {
-
-    const serviceReadyPromise = getServicePromise(
-        win,
-        serviceId
-    ).then(service => {
-      if (service && isRenderDelayingService(service)) {
-        return service.whenReady().then(() => {
-          return service;
-        });
+    const serviceReadyPromise = getServicePromise(win, serviceId).then(
+      service => {
+        if (service && isRenderDelayingService(service)) {
+          return service.whenReady().then(() => {
+            return service;
+          });
+        }
+        return service;
       }
-      return service;
-    });
+    );
 
     return Services.timerFor(win).timeoutPromise(
-        LOAD_TIMEOUT,
-        serviceReadyPromise,
-        `Render timeout waiting for service ${serviceId} ` +
-        'to be ready.'
+      LOAD_TIMEOUT,
+      serviceReadyPromise,
+      `Render timeout waiting for service ${serviceId} ` + 'to be ready.'
     );
   });
   return Promise.all(promises);
@@ -117,8 +112,7 @@ export function hasRenderDelayingServices(win) {
  * @return {boolean}
  */
 export function isRenderDelayingService(service) {
-  const maybeRenderDelayingService =
-    /** @type {!RenderDelayingService}*/ (service);
+  const maybeRenderDelayingService = /** @type {!RenderDelayingService}*/ (service);
   return typeof maybeRenderDelayingService.whenReady == 'function';
 }
 

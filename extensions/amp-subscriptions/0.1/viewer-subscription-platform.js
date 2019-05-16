@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 import {Entitlement, GrantReason} from './entitlement';
 import {JwtHelper} from '../../amp-access/0.1/jwt';
 import {PageConfig} from '../../../third_party/subscriptions-project/config';
@@ -24,13 +23,11 @@ import {dict} from '../../../src/utils/object';
 import {getSourceOrigin, getWinOrigin} from '../../../src/url';
 import {localSubscriptionPlatformFactory} from './local-subscription-platform';
 
-
 /**
  * This implements the methods to interact with viewer subscription platform.
  * @implements {./subscription-platform.SubscriptionPlatform}
  */
 export class ViewerSubscriptionPlatform {
-
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!JsonObject} platformConfig
@@ -49,12 +46,17 @@ export class ViewerSubscriptionPlatform {
 
     /** @private @const {!./subscription-platform.SubscriptionPlatform} */
     this.platform_ = localSubscriptionPlatformFactory(
-        ampdoc, platformConfig, serviceAdapter);
+      ampdoc,
+      platformConfig,
+      serviceAdapter
+    );
 
     /** @const @private {!../../../src/service/viewer-impl.Viewer} */
     this.viewer_ = Services.viewerForDoc(this.ampdoc_);
-    this.viewer_.onMessage('subscriptionchange',
-        this.subscriptionChange_.bind(this));
+    this.viewer_.onMessage(
+      'subscriptionchange',
+      this.subscriptionChange_.bind(this)
+    );
 
     /** @private @const {!JwtHelper} */
     this.jwtHelper_ = new JwtHelper(ampdoc.win);
@@ -86,24 +88,28 @@ export class ViewerSubscriptionPlatform {
     // TODO(chenshay): Viewer Matching: We don't know which viewer it actually
     // is. Need to check the viewerUrl to know, or more specificlly iterate via
     // configured platforms and check whether any of these support the viewer.
-    const encryptedDocumentKey =
-        this.serviceAdapter_.getEncryptedDocumentKey('google.com');
+    const encryptedDocumentKey = this.serviceAdapter_.getEncryptedDocumentKey(
+      'google.com'
+    );
     if (encryptedDocumentKey) {
       messageData['encryptedDocumentKey'] = encryptedDocumentKey;
     }
-    const entitlementPromise = this.viewer_.sendMessageAwaitResponse(
-        'auth', messageData).then(entitlementData => {
-      const authData = (entitlementData || {})['authorization'];
-      const decryptedDocumentKey =
-          (entitlementData || {})['decryptedDocumentKey'];
-      if (!authData) {
-        return Entitlement.empty('local');
-      }
-      return this.verifyAuthToken_(authData, decryptedDocumentKey);
-    }).catch(reason => {
-      this.sendAuthTokenErrorToViewer_(reason.message);
-      throw reason;
-    });
+    const entitlementPromise = this.viewer_
+      .sendMessageAwaitResponse('auth', messageData)
+      .then(entitlementData => {
+        const authData = (entitlementData || {})['authorization'];
+        const decryptedDocumentKey = (entitlementData || {})[
+          'decryptedDocumentKey'
+        ];
+        if (!authData) {
+          return Entitlement.empty('local');
+        }
+        return this.verifyAuthToken_(authData, decryptedDocumentKey);
+      })
+      .catch(reason => {
+        this.sendAuthTokenErrorToViewer_(reason.message);
+        throw reason;
+      });
     return /** @type {!Promise<Entitlement>} */ (entitlementPromise);
   }
 
@@ -120,12 +126,13 @@ export class ViewerSubscriptionPlatform {
       const sourceOrigin = getSourceOrigin(this.ampdoc_.win.location);
       const decodedData = this.jwtHelper_.decode(token);
       const currentProductId = /** @type {string} */ (userAssert(
-          this.pageConfig_.getProductId(),
-          'Product id is null'
+        this.pageConfig_.getProductId(),
+        'Product id is null'
       ));
       if (decodedData['aud'] != origin && decodedData['aud'] != sourceOrigin) {
         throw user().createError(
-            `The mismatching "aud" field: ${decodedData['aud']}`);
+          `The mismatching "aud" field: ${decodedData['aud']}`
+        );
       }
       if (decodedData['exp'] < Math.floor(Date.now() / 1000)) {
         throw user().createError('Payload is expired');
@@ -134,15 +141,17 @@ export class ViewerSubscriptionPlatform {
       let entitlement = Entitlement.empty('local');
       if (Array.isArray(entitlements)) {
         for (let index = 0; index < entitlements.length; index++) {
-          if (entitlements[index]['products'].indexOf(currentProductId)
-              !== -1) {
+          if (
+            entitlements[index]['products'].indexOf(currentProductId) !== -1
+          ) {
             const entitlementObject = entitlements[index];
             entitlement = new Entitlement({
               source: 'viewer',
               raw: token,
               granted: true,
-              grantReason: entitlementObject.subscriptionToken ?
-                GrantReason.SUBSCRIBER : '',
+              grantReason: entitlementObject.subscriptionToken
+                ? GrantReason.SUBSCRIBER
+                : '',
               dataObject: entitlementObject,
               decryptedDocumentKey,
             });
@@ -159,13 +168,15 @@ export class ViewerSubscriptionPlatform {
           dataObject: decodedData['metering'],
           decryptedDocumentKey,
         });
-      } else if (entitlements) { // Not null
+      } else if (entitlements) {
+        // Not null
         entitlement = new Entitlement({
           source: 'viewer',
           raw: token,
           granted: entitlements.granted,
-          grantReason: entitlements.subscriptionToken ?
-            GrantReason.SUBSCRIBER : '',
+          grantReason: entitlements.subscriptionToken
+            ? GrantReason.SUBSCRIBER
+            : '',
           dataObject: entitlements,
           decryptedDocumentKey,
         });
@@ -181,9 +192,12 @@ export class ViewerSubscriptionPlatform {
    * @private
    */
   sendAuthTokenErrorToViewer_(errorString) {
-    this.viewer_.sendMessage('auth-rejected', dict({
-      'reason': errorString,
-    }));
+    this.viewer_.sendMessage(
+      'auth-rejected',
+      dict({
+        'reason': errorString,
+      })
+    );
   }
 
   /** @override */
@@ -192,12 +206,10 @@ export class ViewerSubscriptionPlatform {
   }
 
   /** @override */
-  activate() {
-  }
+  activate() {}
 
   /** @override */
-  reset() {
-  }
+  reset() {}
 
   /** @override */
   isPingbackEnabled() {
@@ -208,7 +220,6 @@ export class ViewerSubscriptionPlatform {
   pingback(selectedPlatform) {
     this.platform_.pingback(selectedPlatform);
   }
-
 
   /** @override */
   getSupportedScoreFactor(factorName) {

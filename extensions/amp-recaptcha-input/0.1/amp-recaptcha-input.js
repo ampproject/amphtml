@@ -36,10 +36,8 @@ import {userAssert} from '../../../src/log';
 /** @const */
 const TAG = 'amp-recaptcha-input';
 
-
 /** @implements {../../../src/async-input.AsyncInput} */
 export class AmpRecaptchaInput extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -59,22 +57,24 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-
     this.sitekey_ = userAssert(
-        this.element.getAttribute('data-sitekey'),
-        'The data-sitekey attribute is required for <amp-recaptcha-input> %s',
-        this.element);
+      this.element.getAttribute('data-sitekey'),
+      'The data-sitekey attribute is required for <amp-recaptcha-input> %s',
+      this.element
+    );
 
     this.action_ = userAssert(
-        this.element.getAttribute('data-action'),
-        'The data-action attribute is required for <amp-recaptcha-input> %s',
-        this.element);
+      this.element.getAttribute('data-action'),
+      'The data-action attribute is required for <amp-recaptcha-input> %s',
+      this.element
+    );
 
     userAssert(
-        this.element.getAttribute(AsyncInputAttributes.NAME),
-        'The %s attribute is required for <amp-recaptcha-input> %s',
-        AsyncInputAttributes.NAME,
-        this.element);
+      this.element.getAttribute(AsyncInputAttributes.NAME),
+      'The %s attribute is required for <amp-recaptcha-input> %s',
+      AsyncInputAttributes.NAME,
+      this.element
+    );
 
     this.recaptchaService_ = recaptchaServiceForDoc(this.getAmpDoc());
 
@@ -131,13 +131,16 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
   getValue() {
     if (this.sitekey_ && this.action_) {
       return this.recaptchaService_.execute(
-          this.element.getResourceId(), this.action_
+        this.element.getResourceId(),
+        this.action_
       );
     }
-    return Promise.reject(new Error(
+    return Promise.reject(
+      new Error(
         'amp-recaptcha-input requires both the data-sitekey,' +
-        ' and data-action attribute'
-    ));
+          ' and data-action attribute'
+      )
+    );
   }
 }
 

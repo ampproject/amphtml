@@ -108,27 +108,30 @@ const strings = {
     string: 'Прошири го твитот',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_HEIGHT_SIZE_TEXT]: {
-    string: 'Проширете ја висината на прозорецот за прикажување на ова ' +
-        'искуство',
+    string:
+      'Проширете ја висината на прозорецот за прикажување на ова ' + 'искуство',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT]: {
-    string: 'Проширете ги висината и ширината на прозорецот за прикажување ' +
-        'на ова искуство',
+    string:
+      'Проширете ги висината и ширината на прозорецот за прикажување ' +
+      'на ова искуство',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_WIDTH_SIZE_TEXT]: {
-    string: 'Проширете ја ширината на прозорецот за прикажување на ова ' +
-        'искуство',
+    string:
+      'Проширете ја ширината на прозорецот за прикажување на ова ' + 'искуство',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
-    string: 'Мора да го овозможите експериментот со AMP-приказната за ' +
-        'прикажување на овие содржини.',
+    string:
+      'Мора да го овозможите експериментот со AMP-приказната за ' +
+      'прикажување на овие содржини.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
     string: 'Страницата најдобро се прикажува во режим на портрет',
   },
   [LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT]: {
-    string: 'За жал, се чини дека вашиот прелистувач не го поддржува ова ' +
-        'искуство',
+    string:
+      'За жал, се чини дека вашиот прелистувач не го поддржува ова ' +
+      'искуство',
   },
 };
 

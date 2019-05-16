@@ -31,8 +31,7 @@ const yarnExecutable = 'npx yarn';
  * @param {string} file Contents to write
  */
 function writeIfUpdated(patchedName, file) {
-  if (!fs.existsSync(patchedName) ||
-      fs.readFileSync(patchedName) != file) {
+  if (!fs.existsSync(patchedName) || fs.readFileSync(patchedName) != file) {
     fs.writeFileSync(patchedName, file);
     if (!isTravisBuild()) {
       log(colors.green('Patched'), colors.cyan(patchedName));
@@ -65,11 +64,11 @@ function replaceInFile(filePath, newFilePath, ...args) {
  */
 function patchWebAnimations() {
   // Copies web-animations-js into a new file that has an export.
-  const patchedName = 'node_modules/web-animations-js/' +
-      'web-animations.install.js';
-  let file = fs.readFileSync(
-      'node_modules/web-animations-js/' +
-      'web-animations.min.js').toString();
+  const patchedName =
+    'node_modules/web-animations-js/' + 'web-animations.install.js';
+  let file = fs
+    .readFileSync('node_modules/web-animations-js/' + 'web-animations.min.js')
+    .toString();
   // Replace |requestAnimationFrame| with |window|.
   file = file.replace(/requestAnimationFrame/g, function(a, b) {
     if (file.charAt(b - 1) == '.') {
@@ -88,11 +87,12 @@ function patchWebAnimations() {
   file = file.replace(/this\._isFinished\s*=\s*\!0,/, '');
 
   // Wrap the contents inside the install function.
-  file = 'export function installWebAnimations(window) {\n' +
-      'var document = window.document;\n' +
-      file +
-      '\n' +
-      '}\n';
+  file =
+    'export function installWebAnimations(window) {\n' +
+    'var document = window.document;\n' +
+    file +
+    '\n' +
+    '}\n';
   writeIfUpdated(patchedName, file);
 }
 
@@ -107,14 +107,15 @@ function patchRegisterElement() {
   // compilation: https://github.com/google/closure-compiler/issues/1831
   const dir = 'node_modules/document-register-element/build/';
   replaceInFile(
-      dir + 'document-register-element.node.js',
-      dir + 'document-register-element.patched.js',
-      // Elimate the immediate side effect.
-      'installCustomElements(global);',
-      '',
-      // Replace CJS export with ES6 export.
-      'module.exports = installCustomElements;',
-      'export {installCustomElements};');
+    dir + 'document-register-element.node.js',
+    dir + 'document-register-element.patched.js',
+    // Elimate the immediate side effect.
+    'installCustomElements(global);',
+    '',
+    // Replace CJS export with ES6 export.
+    'module.exports = installCustomElements;',
+    'export {installCustomElements};'
+  );
 }
 
 /**
@@ -124,8 +125,9 @@ function patchRegisterElement() {
 function patchWorkerDom() {
   const dir = 'node_modules/@ampproject/worker-dom/dist/';
   fs.copyFileSync(
-      dir + 'unminified.index.safe.mjs',
-      dir + 'unminified.index.safe.mjs.patched.js');
+    dir + 'unminified.index.safe.mjs',
+    dir + 'unminified.index.safe.mjs.patched.js'
+  );
 }
 
 /**
@@ -149,8 +151,10 @@ function transformEs6Packages() {
       const updatedPackageJson = JSON.stringify(packageJson, null, 2);
       fs.writeFileSync(packageJsonFile, updatedPackageJson, 'utf8');
       if (!isTravisBuild()) {
-        log(colors.green('Enabled ES6 transforms for runtime dependency'),
-            colors.cyan(es6Package));
+        log(
+          colors.green('Enabled ES6 transforms for runtime dependency'),
+          colors.cyan(es6Package)
+        );
       }
     }
   });
@@ -177,9 +181,13 @@ function installCustomEslintRules() {
 function runYarnCheck() {
   const integrityCmd = yarnExecutable + ' check --integrity';
   if (getStderr(integrityCmd).trim() != '') {
-    log(colors.yellow('WARNING:'), 'The packages in',
-        colors.cyan('node_modules'), 'do not match',
-        colors.cyan('package.json.'));
+    log(
+      colors.yellow('WARNING:'),
+      'The packages in',
+      colors.cyan('node_modules'),
+      'do not match',
+      colors.cyan('package.json.')
+    );
     const verifyTreeCmd = yarnExecutable + ' check --verify-tree';
     exec(verifyTreeCmd);
     log('Running', colors.cyan('yarn'), 'to update packages...');
@@ -190,8 +198,11 @@ function runYarnCheck() {
      */
     execOrDie(`${yarnExecutable} install --production=false`); // Stop execution when Ctrl + C is detected.
   } else {
-    log(colors.green('All packages in'),
-        colors.cyan('node_modules'), colors.green('are up to date.'));
+    log(
+      colors.green('All packages in'),
+      colors.cyan('node_modules'),
+      colors.green('are up to date.')
+    );
   }
 }
 
@@ -227,4 +238,4 @@ module.exports = {
 };
 
 updatePackages.description =
-    'Runs yarn if node_modules is out of date, and applies custom patches';
+  'Runs yarn if node_modules is out of date, and applies custom patches';

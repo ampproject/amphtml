@@ -123,8 +123,8 @@ const strings = {
     string: 'Ovu stranicu je najbolje pregledati u uspravnom načinu',
   },
   [LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT]: {
-    string: 'Žao nam je, ali izgleda da vaš preglednik ne podržava ovo ' +
-        'iskustvo',
+    string:
+      'Žao nam je, ali izgleda da vaš preglednik ne podržava ovo ' + 'iskustvo',
   },
 };
 

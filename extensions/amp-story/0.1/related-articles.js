@@ -20,9 +20,7 @@ import {
   parseUrlDeprecated,
 } from '../../../src/url';
 
-
 const TAG = 'amp-story';
-
 
 /**
  * @typedef {{
@@ -34,7 +32,6 @@ const TAG = 'amp-story';
  */
 export let RelatedArticleDef;
 
-
 /**
  * @typedef {{
  *   heading: (string|undefined),
@@ -44,8 +41,13 @@ export let RelatedArticleDef;
 export let RelatedArticleSetDef;
 
 /** New bookend components only supported in amp-story 1.0. */
-const NEW_COMPONENTS =
-['landscape', 'portrait', 'cta-link', 'heading', 'textbox'];
+const NEW_COMPONENTS = [
+  'landscape',
+  'portrait',
+  'cta-link',
+  'heading',
+  'textbox',
+];
 
 /**
  * @param {!JsonObject} articleJson
@@ -53,14 +55,18 @@ const NEW_COMPONENTS =
  */
 function buildArticleFromJson_(articleJson) {
   if (!articleJson['title'] || !articleJson['url']) {
-    user().error(TAG,
-        'Articles must contain `title` and `url` fields, skipping invalid.');
+    user().error(
+      TAG,
+      'Articles must contain `title` and `url` fields, skipping invalid.'
+    );
     return null;
   }
 
   const articleUrl = devAssert(articleJson['url']);
-  userAssert(isProtocolValid(articleUrl),
-      `Unsupported protocol for article URL ${articleUrl}`);
+  userAssert(
+    isProtocolValid(articleUrl),
+    `Unsupported protocol for article URL ${articleUrl}`
+  );
 
   let domain;
   try {
@@ -77,35 +83,36 @@ function buildArticleFromJson_(articleJson) {
   };
 
   if (articleJson['image']) {
-    userAssert(isProtocolValid(articleJson['image']),
-        `Unsupported protocol for article image URL ${articleJson['image']}`);
+    userAssert(
+      isProtocolValid(articleJson['image']),
+      `Unsupported protocol for article image URL ${articleJson['image']}`
+    );
     article.image = devAssert(articleJson['image']);
   }
 
   return /** @type {!RelatedArticleDef} */ (article);
 }
 
-
 /**
  * @param {!JsonObject=} opt_articleSetsResponse
  * @return {!Array<!RelatedArticleSetDef>}
  */
 export function relatedArticlesFromJson(opt_articleSetsResponse) {
-  return /** @type {!Array<!RelatedArticleSetDef>} */ (
-    Object.keys(opt_articleSetsResponse || {}).map(headingKey => {
-      const articleSet = {
-        articles:
-              opt_articleSetsResponse[headingKey]
-                  .map(buildArticleFromJson_)
-                  .filter(valid => !!valid),
-      };
+  return /** @type {!Array<!RelatedArticleSetDef>} */ (Object.keys(
+    opt_articleSetsResponse || {}
+  ).map(headingKey => {
+    const articleSet = {
+      articles: opt_articleSetsResponse[headingKey]
+        .map(buildArticleFromJson_)
+        .filter(valid => !!valid),
+    };
 
-      if (headingKey.trim().length) {
-        articleSet.heading = headingKey;
-      }
+    if (headingKey.trim().length) {
+      articleSet.heading = headingKey;
+    }
 
-      return /** @type {!RelatedArticleSetDef} */ (articleSet);
-    }));
+    return /** @type {!RelatedArticleSetDef} */ (articleSet);
+  }));
 }
 
 /**
@@ -120,11 +127,17 @@ export function parseArticlesToClassicApi(bookendComponents) {
     if (component['type'] == 'small') {
       articleSet.articles.push(buildArticleFromJson_(component));
     } else if (NEW_COMPONENTS.includes(component['type'])) {
-      user().warn(TAG, component['type'] + ' is not supported in ' +
-      'amp-story-0.1, upgrade to v1.0 to use this feature.');
+      user().warn(
+        TAG,
+        component['type'] +
+          ' is not supported in ' +
+          'amp-story-0.1, upgrade to v1.0 to use this feature.'
+      );
     } else {
-      user().warn(TAG, component['type'] + ' is not valid, ' +
-      'skipping invalid.');
+      user().warn(
+        TAG,
+        component['type'] + ' is not valid, ' + 'skipping invalid.'
+      );
     }
   });
 

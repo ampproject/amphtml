@@ -78,16 +78,17 @@ const ANALYZE_OUTCOME = {
   AD: 1, // Ad integration PR, ping the ad onduty person
 };
 
-const AD_COMMENT = 'Dear contributor! Thank you for the pull request. ' +
-    'It looks like this PR is trying to add support to an ad network. \n \n' +
-    'If this is your first time adding support for ' +
-    'a new third-party ad service, please make sure your follow our ' +
-    '[developer guideline](https://github.com/ampproject/amphtml/blob/master/' +
-    'ads/README.md#developer-guidelines-for-a-pull-request). \n \n' +
-    'If you have not implemented it, we also highly recommend implementing ' +
-    'the [renderStart API](https://github.com/ampproject/amphtml/blob/master/' +
-    'ads/README.md#available-apis) to provide better user experience. ' +
-    'Please let us know if there is any question. \n \n';
+const AD_COMMENT =
+  'Dear contributor! Thank you for the pull request. ' +
+  'It looks like this PR is trying to add support to an ad network. \n \n' +
+  'If this is your first time adding support for ' +
+  'a new third-party ad service, please make sure your follow our ' +
+  '[developer guideline](https://github.com/ampproject/amphtml/blob/master/' +
+  'ads/README.md#developer-guidelines-for-a-pull-request). \n \n' +
+  'If you have not implemented it, we also highly recommend implementing ' +
+  'the [renderStart API](https://github.com/ampproject/amphtml/blob/master/' +
+  'ads/README.md#available-apis) to provide better user experience. ' +
+  'Please let us know if there is any question. \n \n';
 
 const defaultOption = {
   headers: {
@@ -118,12 +119,15 @@ function calculateReviewer() {
  */
 function process3pGithubPr() {
   if (!GITHUB_ACCESS_TOKEN) {
-    log(colors.red('You have not set the ' +
-        'GITHUB_ACCESS_TOKEN env var.'));
-    log(colors.green('See https://help.github.com/articles/' +
-        'creating-an-access-token-for-command-line-use/ ' +
-        'for instructions on how to create a github access token. We only ' +
-        'need `public_repo` scope.'));
+    log(colors.red('You have not set the ' + 'GITHUB_ACCESS_TOKEN env var.'));
+    log(
+      colors.green(
+        'See https://help.github.com/articles/' +
+          'creating-an-access-token-for-command-line-use/ ' +
+          'for instructions on how to create a github access token. We only ' +
+          'need `public_repo` scope.'
+      )
+    );
     return;
   }
 
@@ -135,17 +139,18 @@ function process3pGithubPr() {
     arrayPromises.push(getIssues(batch));
   }
   return BBPromise.all(arrayPromises)
-      .then(requests => [].concat.apply([], requests))
-      .then(issues => {
-        const allIssues = issues;
-        const allTasks = [];
-        allIssues.forEach(function(issue) {
-          allTasks.push(handleIssue(issue));
-        });
-        return Promise.all(allTasks);
-      }).then(() => {
-        log(colors.blue('auto triaging succeed!'));
+    .then(requests => [].concat.apply([], requests))
+    .then(issues => {
+      const allIssues = issues;
+      const allTasks = [];
+      allIssues.forEach(function(issue) {
+        allTasks.push(handleIssue(issue));
       });
+      return Promise.all(allTasks);
+    })
+    .then(() => {
+      log(colors.blue('auto triaging succeed!'));
+    });
 }
 
 function handleIssue(issue) {
@@ -185,8 +190,9 @@ function getIssues(opt_page) {
 function getPullRequestFiles(pr) {
   const options = extend({}, defaultOption);
   const {number} = pr;
-  options.url = 'https://api.github.com/repos/ampproject/amphtml/pulls/'
-      + `${number}/files`;
+  options.url =
+    'https://api.github.com/repos/ampproject/amphtml/pulls/' +
+    `${number}/files`;
   return request(options).then(res => {
     const files = JSON.parse(res.body);
     if (!Array.isArray(files)) {
@@ -260,14 +266,16 @@ function isQualifiedPR(issue) {
 function replyToPR(pr, outcome) {
   let promise = Promise.resolve();
   if (outcome == ANALYZE_OUTCOME.AD) {
-    promise = promise.then(() => {
-      // We should be good with rate limit given the number of
-      // 3p integration PRs today.
-      const comment = AD_COMMENT + `Thank you! Ping @${reviewer} for review`;
-      return applyComment(pr, comment);
-    }).then(() => {
-      return assignIssue(pr, [reviewer]);
-    });
+    promise = promise
+      .then(() => {
+        // We should be good with rate limit given the number of
+        // 3p integration PRs today.
+        const comment = AD_COMMENT + `Thank you! Ping @${reviewer} for review`;
+        return applyComment(pr, comment);
+      })
+      .then(() => {
+        return assignIssue(pr, [reviewer]);
+      });
   }
   return promise;
 }
@@ -279,17 +287,22 @@ function replyToPR(pr, outcome) {
  */
 function applyComment(issue, comment) {
   const {number} = issue;
-  const options = extend({
-    url: 'https://api.github.com/repos/ampproject/amphtml/issues/'
-        + `${number}/comments`,
-    method: 'POST',
-    body: JSON.stringify({
-      'body': comment,
-    }),
-  }, defaultOption);
+  const options = extend(
+    {
+      url:
+        'https://api.github.com/repos/ampproject/amphtml/issues/' +
+        `${number}/comments`,
+      method: 'POST',
+      body: JSON.stringify({
+        'body': comment,
+      }),
+    },
+    defaultOption
+  );
   if (isDryrun) {
-    log(colors.blue(`apply comment to PR #${number}, ` +
-        `comment is ${comment}`));
+    log(
+      colors.blue(`apply comment to PR #${number}, ` + `comment is ${comment}`)
+    );
     return Promise.resolve();
   }
   return request(options);
@@ -302,17 +315,20 @@ function applyComment(issue, comment) {
  */
 function assignIssue(issue, assignees) {
   const {number} = issue;
-  const options = extend({
-    url: 'https://api.github.com/repos/ampproject/amphtml/issues/'
-        + `${number}/assignees`,
-    method: 'POST',
-    body: JSON.stringify({
-      'assignees': assignees,
-    }),
-  }, defaultOption);
+  const options = extend(
+    {
+      url:
+        'https://api.github.com/repos/ampproject/amphtml/issues/' +
+        `${number}/assignees`,
+      method: 'POST',
+      body: JSON.stringify({
+        'assignees': assignees,
+      }),
+    },
+    defaultOption
+  );
   if (isDryrun) {
-    log(colors.blue(`assign PR #${number}, ` +
-        `to ${assignees}`));
+    log(colors.blue(`assign PR #${number}, ` + `to ${assignees}`));
     return Promise.resolve();
   }
   return request(options);
@@ -320,5 +336,5 @@ function assignIssue(issue, assignees) {
 
 process3pGithubPr.description = 'Automatically triage 3P integration PRs';
 process3pGithubPr.flags = {
-  dryrun: '  Generate process but don\'t push it out',
+  dryrun: "  Generate process but don't push it out",
 };

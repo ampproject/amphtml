@@ -69,7 +69,7 @@ export class InaboxHost {
       win.AMP[INABOX_UNREGISTER_IFRAME] = host.unregisterIframe.bind(host);
     }
     const queuedMsgs = win[PENDING_MESSAGES];
-    const processMessageFn = /** @type {function(Event)} */(evt => {
+    const processMessageFn = /** @type {function(Event)} */ (evt => {
       try {
         host.processMessage(evt);
       } catch (err) {
@@ -107,9 +107,10 @@ export class InaboxHost {
 function validateMessage(message) {
   const valid = !!(message.source && message.source.postMessage);
   if (!valid) {
-    user().error(TAG,
-        'Missing message.source. message.data='
-        + JSON.stringify(getData(message)));
+    user().error(
+      TAG,
+      'Missing message.source. message.data=' + JSON.stringify(getData(message))
+    );
   }
   return valid;
 }

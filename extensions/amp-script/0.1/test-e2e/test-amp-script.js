@@ -14,32 +14,36 @@
  * limitations under the License.
  */
 
+describes.endtoend(
+  'amp-script e2e',
+  {
+    testUrl: 'http://localhost:8000/test/manual/amp-script/' + 'test1.amp.html',
+    experiments: ['amp-script'],
+    initialRect: {width: 600, height: 600},
+    environments: ['single'],
+  },
+  async env => {
+    let controller;
 
-describes.endtoend('amp-script e2e', {
-  testUrl: 'http://localhost:8000/test/manual/amp-script/' +
-      'test1.amp.html',
-  experiments: ['amp-script'],
-  initialRect: {width: 600, height: 600},
-  environments: ['single'],
-}, async env => {
-  let controller;
+    beforeEach(async () => {
+      controller = env.controller;
+    });
 
-  beforeEach(async() => {
-    controller = env.controller;
-  });
+    it('should render correctly', async () => {
+      const element = await controller.findElement('amp-script');
+      await expect(controller.getElementAttribute(element, 'class')).to.contain(
+        'i-amphtml-hydrated'
+      );
 
-  it('should render correctly', async() => {
-    const element = await controller.findElement('amp-script');
-    await expect(controller.getElementAttribute(element, 'class'))
-        .to.contain('i-amphtml-hydrated');
+      // Click.
+      const button = await controller.findElement('button#simple');
+      controller.click(button);
 
-    // Click.
-    const button = await controller.findElement('button#simple');
-    controller.click(button);
-
-    // Output.
-    const h1 = await controller.findElement('h1');
-    await expect(controller.getElementText(h1, 'class'))
-        .to.equal('Hello World!');
-  });
-});
+      // Output.
+      const h1 = await controller.findElement('h1');
+      await expect(controller.getElementText(h1, 'class')).to.equal(
+        'Hello World!'
+      );
+    });
+  }
+);

@@ -27,7 +27,7 @@ function getContainerScript(global, scriptSource, cb) {
     global.Yotpo = global.Yotpo || {};
     delete global.Yotpo.widgets['testimonials'];
     const yotpoWidget =
-      (typeof global.yotpo === 'undefined') ? undefined : global.yotpo;
+      typeof global.yotpo === 'undefined' ? undefined : global.yotpo;
     yotpoWidget.on('CssReady', function() {
       cb(yotpoWidget, 'cssLoaded');
     });
@@ -152,8 +152,8 @@ function getReviewsTabContainer(global) {
  */
 function getProductGalleryContainer(global, data) {
   const container = global.document.createElement('div');
-  container.className = 'yotpo yotpo-pictures-gallery yotpo-product-gallery ' +
-    'yotpo-size-6';
+  container.className =
+    'yotpo yotpo-pictures-gallery yotpo-product-gallery ' + 'yotpo-size-6';
   container.setAttribute('data-product-id', data.productId);
   container.setAttribute('data-demo', data.demo);
   container.setAttribute('data-layout-rows', data.layoutRows);
@@ -169,7 +169,6 @@ function getProductGalleryContainer(global, data) {
   container.setAttribute('data-yotpo-element-id', data.yotpoElementId);
   return container;
 }
-
 
 /**
  * Create DOM element for the Yotpo Visual UGC Gallery plugin:
@@ -211,10 +210,14 @@ function getEmbeddedWidgetContainer(global, data) {
   embeddedWidget.setAttribute('data-width', data.width);
   embeddedWidget.setAttribute('data-reviews', data.reviews);
   embeddedWidget.setAttribute('data-header-text', data.headerText);
-  embeddedWidget.setAttribute('data-header-background-color',
-      data.headerBackgroundColor);
-  embeddedWidget.setAttribute('data-body-background-color',
-      data.bodyBackgroundColor);
+  embeddedWidget.setAttribute(
+    'data-header-background-color',
+    data.headerBackgroundColor
+  );
+  embeddedWidget.setAttribute(
+    'data-body-background-color',
+    data.bodyBackgroundColor
+  );
   embeddedWidget.setAttribute('data-font-size', data.fontSize);
   embeddedWidget.setAttribute('data-font-color', data.fontColor);
   embeddedWidget.setAttribute('data-yotpo-element-id', data.yotpoElementId);
@@ -250,7 +253,8 @@ function getPhotosCarouselContainer(global, data) {
  */
 function getPromotedProductsContainer(global, data) {
   const container = global.document.createElement('div');
-  container.className = 'yotpo yotpo-main-widget yotpo-promoted-product ' +
+  container.className =
+    'yotpo yotpo-main-widget yotpo-promoted-product ' +
     'yotpo-medium promoted-products-box';
 
   container.setAttribute('id', 'widget-div-id');
@@ -293,10 +297,10 @@ export function yotpo(global, data) {
 
   global.document.getElementById('c').appendChild(container);
 
-
   let cssLoaded = false;
   let batchLoaded = false;
-  const scriptSource = 'https://staticw2.yotpo.com/' + data.appKey + '/widget.js';
+  const scriptSource =
+    'https://staticw2.yotpo.com/' + data.appKey + '/widget.js';
   getContainerScript(global, scriptSource, (yotpoWidget, eventType) => {
     if (eventType === 'cssLoaded') {
       cssLoaded = true;
@@ -309,8 +313,9 @@ export function yotpo(global, data) {
       setTimeout(() => {
         if (yotpoWidget.widgets[0]) {
           context.updateDimensions(
-              yotpoWidget.widgets[0].element./*OK*/offsetWidth,
-              yotpoWidget.widgets[0].element./*OK*/offsetHeight);
+            yotpoWidget.widgets[0].element./*OK*/ offsetWidth,
+            yotpoWidget.widgets[0].element./*OK*/ offsetHeight
+          );
         }
       }, 100);
     }

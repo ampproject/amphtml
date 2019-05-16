@@ -111,19 +111,21 @@ const strings = {
     string: 'A sztori megtekintéséhez növelje az ablak magasságát',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT]: {
-    string: 'A sztori megtekintéséhez növelje az ablak magasságát és ' +
-        'szélességét is',
+    string:
+      'A sztori megtekintéséhez növelje az ablak magasságát és ' +
+      'szélességét is',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_WIDTH_SIZE_TEXT]: {
     string: 'A sztori megtekintéséhez növelje az ablak szélességét',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
-    string: 'A tartalom megtekintéséhez engedélyeznie kell az AMP-sztori ' +
-        'kísérletet.',
+    string:
+      'A tartalom megtekintéséhez engedélyeznie kell az AMP-sztori ' +
+      'kísérletet.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
-    string: 'A legjobb élmény érdekében álló tájolással tekintse meg az ' +
-        'oldalt',
+    string:
+      'A legjobb élmény érdekében álló tájolással tekintse meg az ' + 'oldalt',
   },
   [LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT]: {
     string: 'Sajnos úgy tűnik, a böngészője nem támogatja ezt a funkciót',

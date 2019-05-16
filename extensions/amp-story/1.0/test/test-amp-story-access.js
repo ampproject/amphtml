@@ -67,12 +67,13 @@ describes.realWin('amp-story-access', {amp: true}, env => {
 
     // Publisher provided button is no longer a child of <amp-story-access>.
     expect(
-        storyAccess.element
-            .querySelector('amp-story-access > .subscribe-button')).to.be.null;
+      storyAccess.element.querySelector('amp-story-access > .subscribe-button')
+    ).to.be.null;
 
     // But has been copied in the drawer.
-    const buttonInDrawerEl = storyAccess.element
-        .querySelector('.i-amphtml-story-access-content > .subscribe-button');
+    const buttonInDrawerEl = storyAccess.element.querySelector(
+      '.i-amphtml-story-access-content > .subscribe-button'
+    );
     expect(buttonInDrawerEl).to.exist;
   });
 
@@ -82,8 +83,9 @@ describes.realWin('amp-story-access', {amp: true}, env => {
     storeService.dispatch(Action.TOGGLE_ACCESS, true);
 
     win.requestAnimationFrame(() => {
-      expect(storyAccess.element)
-          .to.have.class('i-amphtml-story-access-visible');
+      expect(storyAccess.element).to.have.class(
+        'i-amphtml-story-access-visible'
+      );
       done();
     });
   });
@@ -98,8 +100,9 @@ describes.realWin('amp-story-access', {amp: true}, env => {
     });
 
     win.requestAnimationFrame(() => {
-      expect(storyAccess.element)
-          .to.have.class('i-amphtml-story-access-visible');
+      expect(storyAccess.element).to.have.class(
+        'i-amphtml-story-access-visible'
+      );
       done();
     });
   });
@@ -107,8 +110,9 @@ describes.realWin('amp-story-access', {amp: true}, env => {
   it('should whitelist the default <amp-access> actions', () => {
     storyAccess.buildCallback();
 
-    const actions =
-        storyAccess.storeService_.get(StateProperty.ACTIONS_WHITELIST);
+    const actions = storyAccess.storeService_.get(
+      StateProperty.ACTIONS_WHITELIST
+    );
     expect(actions).to.deep.contain({tagOrTarget: 'SCRIPT', method: 'login'});
   });
 
@@ -121,12 +125,17 @@ describes.realWin('amp-story-access', {amp: true}, env => {
 
     storyAccess.buildCallback();
 
-    const actions =
-        storyAccess.storeService_.get(StateProperty.ACTIONS_WHITELIST);
-    expect(actions).to.deep.contain(
-        {tagOrTarget: 'SCRIPT', method: 'login-typefoo'});
-    expect(actions).to.deep.contain(
-        {tagOrTarget: 'SCRIPT', method: 'login-typebar'});
+    const actions = storyAccess.storeService_.get(
+      StateProperty.ACTIONS_WHITELIST
+    );
+    expect(actions).to.deep.contain({
+      tagOrTarget: 'SCRIPT',
+      method: 'login-typefoo',
+    });
+    expect(actions).to.deep.contain({
+      tagOrTarget: 'SCRIPT',
+      method: 'login-typebar',
+    });
   });
 
   it('should whitelist the namespaced and default <amp-access> actions', () => {
@@ -136,36 +145,49 @@ describes.realWin('amp-story-access', {amp: true}, env => {
     storyAccess.buildCallback();
 
     // Both namespaced and default actions are allowed.
-    const actions =
-        storyAccess.storeService_.get(StateProperty.ACTIONS_WHITELIST);
+    const actions = storyAccess.storeService_.get(
+      StateProperty.ACTIONS_WHITELIST
+    );
     expect(actions).to.deep.contain({tagOrTarget: 'SCRIPT', method: 'login'});
-    expect(actions).to.deep.contain(
-        {tagOrTarget: 'SCRIPT', method: 'login-foo'});
+    expect(actions).to.deep.contain({
+      tagOrTarget: 'SCRIPT',
+      method: 'login-foo',
+    });
   });
 
   it('should whitelist namespaced and typed <amp-access> actions', () => {
-    const config = [{
-      namespace: 'namespace1',
-      login: {
-        type1: 'https://example.com',
-        type2: 'https://example.com',
+    const config = [
+      {
+        namespace: 'namespace1',
+        login: {
+          type1: 'https://example.com',
+          type2: 'https://example.com',
+        },
       },
-    }, {
-      namespace: 'namespace2',
-      login: 'https://example.com',
-    }];
+      {
+        namespace: 'namespace2',
+        login: 'https://example.com',
+      },
+    ];
     setConfig(config);
 
     storyAccess.buildCallback();
 
-    const actions =
-        storyAccess.storeService_.get(StateProperty.ACTIONS_WHITELIST);
-    expect(actions).to.deep.contain(
-        {tagOrTarget: 'SCRIPT', method: 'login-namespace1-type1'});
-    expect(actions).to.deep.contain(
-        {tagOrTarget: 'SCRIPT', method: 'login-namespace1-type2'});
-    expect(actions).to.deep.contain(
-        {tagOrTarget: 'SCRIPT', method: 'login-namespace2'});
+    const actions = storyAccess.storeService_.get(
+      StateProperty.ACTIONS_WHITELIST
+    );
+    expect(actions).to.deep.contain({
+      tagOrTarget: 'SCRIPT',
+      method: 'login-namespace1-type1',
+    });
+    expect(actions).to.deep.contain({
+      tagOrTarget: 'SCRIPT',
+      method: 'login-namespace1-type2',
+    });
+    expect(actions).to.deep.contain({
+      tagOrTarget: 'SCRIPT',
+      method: 'login-namespace2',
+    });
   });
 
   it('should require publisher-logo-src to be a URL', () => {
@@ -174,8 +196,9 @@ describes.realWin('amp-story-access', {amp: true}, env => {
     allowConsoleError(() => {
       expect(() => {
         storyAccess.buildCallback();
-      }).to.throw('amp-story publisher-logo-src must start with ' +
-          '"https://" or "//"');
+      }).to.throw(
+        'amp-story publisher-logo-src must start with ' + '"https://" or "//"'
+      );
     });
   });
 });

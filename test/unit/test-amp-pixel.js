@@ -15,9 +15,7 @@
  */
 
 import {VariableSource} from '../../src/service/variable-source';
-import {
-  installUrlReplacementsForEmbed,
-} from '../../src/service/url-replacements-impl';
+import {installUrlReplacementsForEmbed} from '../../src/service/url-replacements-impl';
 
 describes.realWin('amp-pixel', {amp: true}, env => {
   let win;
@@ -31,8 +29,9 @@ describes.realWin('amp-pixel', {amp: true}, env => {
     whenFirstVisiblePromise = new Promise(resolve => {
       whenFirstVisibleResolver = resolve;
     });
-    sandbox.stub(viewer, 'whenFirstVisible').callsFake(
-        () => whenFirstVisiblePromise);
+    sandbox
+      .stub(viewer, 'whenFirstVisible')
+      .callsFake(() => whenFirstVisiblePromise);
     createPixel('https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?');
   });
 
@@ -85,7 +84,8 @@ describes.realWin('amp-pixel', {amp: true}, env => {
     return trigger().then(img => {
       expect(implementation.triggerPromise_).to.be.ok;
       expect(img.src).to.equal(
-          'https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?');
+        'https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?'
+      );
     });
   });
 
@@ -94,26 +94,30 @@ describes.realWin('amp-pixel', {amp: true}, env => {
     return trigger(url).then(img => {
       // Protocol is resolved to `http:` relative to test server.
       expect(img.src).to.equal(
-          'http://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=2');
+        'http://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=2'
+      );
     });
   });
 
   it('should disallow http URLs', () => {
     const url = 'http://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=2';
     return expect(trigger(url)).to.eventually.be.rejectedWith(
-        /src attribute must start with/);
+      /src attribute must start with/
+    );
   });
 
   it('should disallow relative URLs', () => {
     const url = '/activity;dc_iu=1/abc;ord=2';
     return expect(trigger(url)).to.eventually.be.rejectedWith(
-        /src attribute must start with/);
+      /src attribute must start with/
+    );
   });
 
   it('should disallow fake-protocol URLs', () => {
     const url = 'https/activity;dc_iu=1/abc;ord=2';
     return expect(trigger(url)).to.eventually.be.rejectedWith(
-        /src attribute must start with/);
+      /src attribute must start with/
+    );
   });
 
   it('should replace URL parameters', () => {
@@ -121,87 +125,99 @@ describes.realWin('amp-pixel', {amp: true}, env => {
     const url = 'https://pubads.g.doubleclick.net/activity;r=RANDOM';
     return trigger(url).then(img => {
       expect(img.src).to.equal(
-          'https://pubads.g.doubleclick.net/activity;r=111');
+        'https://pubads.g.doubleclick.net/activity;r=111'
+      );
     });
   });
 
-  it('should throw for referrerpolicy with value other than ' +
-      'no-referrer', () => {
-    return allowConsoleError(() => {
-      return createPixel(
+  it(
+    'should throw for referrerpolicy with value other than ' + 'no-referrer',
+    () => {
+      return allowConsoleError(() => {
+        return createPixel(
           'https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?',
-          'origin')
-          .then(() => {
+          'origin'
+        ).then(
+          () => {
             throw new Error('must have failed.');
-          }, reason => {
+          },
+          reason => {
             expect(reason.message).to.match(/referrerpolicy/);
-          });
-    });
-  });
+          }
+        );
+      });
+    }
+  );
 });
 
-
-describes.realWin('amp-pixel in embed', {
-  amp: {
-    ampdoc: 'fie',
+describes.realWin(
+  'amp-pixel in embed',
+  {
+    amp: {
+      ampdoc: 'fie',
+    },
   },
-}, env => {
+  env => {
+    class TestVariableSource extends VariableSource {
+      constructor() {
+        super(env.ampdoc);
+      }
+      initialize() {
+        this.set('TEST', () => 'value1');
+      }
+    }
 
-  class TestVariableSource extends VariableSource {
-    constructor() {
-      super(env.ampdoc);
+    let win, parentWin;
+    let whenFirstVisiblePromise, whenFirstVisibleResolver;
+    let pixel;
+    let implementation;
+
+    beforeEach(() => {
+      win = env.win;
+      parentWin = env.parentWin;
+
+      const viewer = parentWin.services.viewer.obj;
+      whenFirstVisiblePromise = new Promise(resolve => {
+        whenFirstVisibleResolver = resolve;
+      });
+      sandbox
+        .stub(viewer, 'whenFirstVisible')
+        .callsFake(() => whenFirstVisiblePromise);
+
+      installUrlReplacementsForEmbed(env.ampdoc, win, new TestVariableSource());
+
+      pixel = win.document.createElement('amp-pixel');
+      pixel.setAttribute(
+        'src',
+        'https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?'
+      );
+      win.document.body.appendChild(pixel);
+      pixel.build();
+      implementation = pixel.implementation_;
+    });
+
+    /**
+     * @param {string=} opt_src
+     * @return {!Promise<?Image>}
+     */
+    function trigger(opt_src) {
+      if (opt_src) {
+        pixel.setAttribute('src', opt_src);
+      }
+      whenFirstVisibleResolver();
+      return whenFirstVisiblePromise.then(() => {
+        expect(implementation.triggerPromise_).to.be.not.null;
+        return implementation.triggerPromise_;
+      });
     }
-    initialize() {
-      this.set('TEST', () => 'value1');
-    }
+
+    it("should use embed's URL replacer", () => {
+      const url = 'https://pubads.g.doubleclick.net/activity;t=TEST';
+      return trigger(url).then(img => {
+        expect(img.src).to.equal(
+          'https://pubads.g.doubleclick.net/activity;t=value1'
+        );
+      });
+    });
   }
-
-  let win, parentWin;
-  let whenFirstVisiblePromise, whenFirstVisibleResolver;
-  let pixel;
-  let implementation;
-
-  beforeEach(() => {
-    win = env.win;
-    parentWin = env.parentWin;
-
-    const viewer = parentWin.services.viewer.obj;
-    whenFirstVisiblePromise = new Promise(resolve => {
-      whenFirstVisibleResolver = resolve;
-    });
-    sandbox.stub(viewer, 'whenFirstVisible').callsFake(
-        () => whenFirstVisiblePromise);
-
-    installUrlReplacementsForEmbed(env.ampdoc, win, new TestVariableSource());
-
-    pixel = win.document.createElement('amp-pixel');
-    pixel.setAttribute('src',
-        'https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?');
-    win.document.body.appendChild(pixel);
-    pixel.build();
-    implementation = pixel.implementation_;
-  });
-
-  /**
-   * @param {string=} opt_src
-   * @return {!Promise<?Image>}
-   */
-  function trigger(opt_src) {
-    if (opt_src) {
-      pixel.setAttribute('src', opt_src);
-    }
-    whenFirstVisibleResolver();
-    return whenFirstVisiblePromise.then(() => {
-      expect(implementation.triggerPromise_).to.be.not.null;
-      return implementation.triggerPromise_;
-    });
-  }
-
-  it('should use embed\'s URL replacer', () => {
-    const url = 'https://pubads.g.doubleclick.net/activity;t=TEST';
-    return trigger(url).then(img => {
-      expect(img.src).to.equal(
-          'https://pubads.g.doubleclick.net/activity;t=value1');
-    });
-  });
-});
+);

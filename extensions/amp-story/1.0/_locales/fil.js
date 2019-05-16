@@ -108,27 +108,30 @@ const strings = {
     string: 'I-expand ang Tweet',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_HEIGHT_SIZE_TEXT]: {
-    string: 'Palawakin ang taas ng iyong window para makita ang karanasang ' +
-        'ito',
+    string:
+      'Palawakin ang taas ng iyong window para makita ang karanasang ' + 'ito',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT]: {
-    string: 'Palawakin ang parehong taas at lapad ng iyong window para ' +
-        'tingnan ang karanasang ito',
+    string:
+      'Palawakin ang parehong taas at lapad ng iyong window para ' +
+      'tingnan ang karanasang ito',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_WIDTH_SIZE_TEXT]: {
-    string: 'Palawakin ang lapad ng iyong window para makita ang karanasang ' +
-        'ito',
+    string:
+      'Palawakin ang lapad ng iyong window para makita ang karanasang ' + 'ito',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
-    string: 'Kailangan mong i-enable ang amp-story experiment para makita ' +
-        'ang content na ito.',
+    string:
+      'Kailangan mong i-enable ang amp-story experiment para makita ' +
+      'ang content na ito.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
     string: 'Pinakamahusay na tingnan ang page na ito sa portrait mode',
   },
   [LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT]: {
-    string: 'Ikinalulungkot namin, mukhang hindi sinusuportahan ng iyong ' +
-        'browser ang karanasang ito',
+    string:
+      'Ikinalulungkot namin, mukhang hindi sinusuportahan ng iyong ' +
+      'browser ang karanasang ito',
   },
 };
 

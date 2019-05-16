@@ -22,27 +22,26 @@ export const TEAANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
   requests: {
     domain: 'https://${channel}/v1/amp',
     commonParams:
-        'user.user_unique_id=${userUniqueId}' +
-        '&header.app_id=${app_id}' +
-        '&header.language=${browserLanguage}' +
-        '&header.screen_height=${screenHeight}' +
-        '&header.screen_width=${screenWidth}' +
-        '&header.resolution=${screenHeight}x${screenWidth}' +
-        '&header.tz_offset=${timezone}' +
-        '&header.tz_name=${timezoneCode}' +
-        '&header.referrer=${documentReferrer}' +
-        '&header.custom.user_agent=${userAgent}' +
-        '&event.local_time_ms=${timestamp}' +
-        '&event.params._staging_flag=${debug}' +
-        '&verbose=${debug}',
-    base: '${domain}?' +
-        '${commonParams}' +
-        '&rnd=${random}',
-    pageview: '${base}' +
-        '&event=predefine_pageview' +
-        '&event.params.url=${sourceUrl}' +
-        '&event.params.url_path=${sourcePath}' +
-        '&event.params.title=${title}',
+      'user.user_unique_id=${userUniqueId}' +
+      '&header.app_id=${app_id}' +
+      '&header.language=${browserLanguage}' +
+      '&header.screen_height=${screenHeight}' +
+      '&header.screen_width=${screenWidth}' +
+      '&header.resolution=${screenHeight}x${screenWidth}' +
+      '&header.tz_offset=${timezone}' +
+      '&header.tz_name=${timezoneCode}' +
+      '&header.referrer=${documentReferrer}' +
+      '&header.custom.user_agent=${userAgent}' +
+      '&event.local_time_ms=${timestamp}' +
+      '&event.params._staging_flag=${debug}' +
+      '&verbose=${debug}',
+    base: '${domain}?' + '${commonParams}' + '&rnd=${random}',
+    pageview:
+      '${base}' +
+      '&event=predefine_pageview' +
+      '&event.params.url=${sourceUrl}' +
+      '&event.params.url_path=${sourcePath}' +
+      '&event.params.title=${title}',
     event: '${base}',
   },
 });

@@ -34,7 +34,9 @@ describe('Static Template', () => {
 
     it('works as a variable', () => {
       const html = htmlFor(document);
-      const div = html`<div attr="test"><p class="er"></p></div>`;
+      const div = html`
+        <div attr="test"><p class="er"></p></div>
+      `;
 
       expect(div.tagName).to.equal('DIV');
       expect(div.getAttribute('attr')).to.equal('test');
@@ -54,13 +56,17 @@ describe('Static Template', () => {
       const iDoc = iframe.contentDocument;
 
       const html = htmlFor(document);
-      let div = html`<div></div>`;
+      let div = html`
+        <div></div>
+      `;
       expect(div.ownerDocument).to.equal(document);
 
       div = htmlFor(iDoc)`<div></div>`;
       expect(div.ownerDocument).to.equal(iDoc);
 
-      div = html`<div></div>`;
+      div = html`
+        <div></div>
+      `;
       expect(div.ownerDocument).to.equal(iDoc);
 
       // Cleanup
@@ -106,8 +112,8 @@ describe('Static Template', () => {
     it('finds all elements with ref attribute', () => {
       // Prove it doesn't need html helper
       const el = document.createElement('div');
-      el./*TEST*/innerHTML = '<div ref="test"><span ref="s"></span></div>' +
-          '<div ref="d"></div>';
+      el./*TEST*/ innerHTML =
+        '<div ref="test"><span ref="s"></span></div>' + '<div ref="d"></div>';
 
       const refs = htmlRefs(el);
       expect(refs).to.deep.equal({
