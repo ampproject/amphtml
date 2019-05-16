@@ -1777,8 +1777,8 @@ export class Resources {
         const r = this.resources_[i];
         // TODO(dvoytenko): This extra build has to be merged with the
         // scheduleLayoutOrPreload_ method below.
-        if (!r.isBuilt() && !r.hasOwner() && r.isDisplayed() &&
-            r.overlaps(loadRect)) {
+        if (!r.isBuilt() && !r.hasOwner() && r.hasBeenMeasured() &&
+            r.isDisplayed() && r.overlaps(loadRect)) {
           this.buildOrScheduleBuildForResource_(r, /* checkForDupes */ true,
               /* scheduleWhenBuilt */ undefined, /* buildGranted */ true);
         }
