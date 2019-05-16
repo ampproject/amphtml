@@ -29,7 +29,7 @@ const messagesPath = 'dist/log-messages.json';
 
 /**
  * Known transformable logging methods.
- * @type {!Array<LogMethodMetadataDef>}
+ * @type {!Object<string, LogMethodMetadataDef>}
  */
 const transformableMethods = {
   assert: {variadic: true, messageArgPos: 1},
