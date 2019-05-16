@@ -946,3 +946,7 @@ amp-story-page .i-amphtml-story-page-open-attachment-label {
   text-shadow: 0px 0px 6px rgba(0, 0, 0, 0.36) !important;
   white-space: nowrap !important;
 }
+
+amp-story-page amp-twitter {
+  max-width: 500px !important;
+}
