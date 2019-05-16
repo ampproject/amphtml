@@ -27,7 +27,6 @@ import {startsWith} from '../../../src/string';
  * additional guidance on other implementation details.
  */
 export class AmpAdNetworkCloudflareImpl extends AmpA4A {
-
   /**
    * Validate the tag parameters.  If invalid, ad ad will not be displayed.
    * @override
@@ -103,10 +102,16 @@ export class AmpAdNetworkCloudflareImpl extends AmpA4A {
     let pre = url.indexOf('?') < 0 ? '?' : '&';
     for (let i = 0; i < el.attributes.length; i++) {
       const attrib = el.attributes[i];
-      if (attrib.specified && startsWith(attrib.name, 'data-')
-          && !startsWith(attrib.name, 'data-cf-')) {
-        url += pre + encodeURIComponent(attrib.name.substring(5)) +
-          '=' + encodeURIComponent(this.replacements(attrib.value, values));
+      if (
+        attrib.specified &&
+        startsWith(attrib.name, 'data-') &&
+        !startsWith(attrib.name, 'data-cf-')
+      ) {
+        url +=
+          pre +
+          encodeURIComponent(attrib.name.substring(5)) +
+          '=' +
+          encodeURIComponent(this.replacements(attrib.value, values));
         pre = '&';
       }
     }
@@ -115,8 +120,9 @@ export class AmpAdNetworkCloudflareImpl extends AmpA4A {
   }
 }
 
-
 AMP.extension('amp-ad-network-cloudflare-impl', '0.1', AMP => {
-  AMP.registerElement('amp-ad-network-cloudflare-impl',
-      AmpAdNetworkCloudflareImpl);
+  AMP.registerElement(
+    'amp-ad-network-cloudflare-impl',
+    AmpAdNetworkCloudflareImpl
+  );
 });

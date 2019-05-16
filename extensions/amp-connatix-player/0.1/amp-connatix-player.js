@@ -22,7 +22,6 @@ import {removeElement} from '../../../src/dom';
 import {userAssert} from '../../../src/log';
 
 export class AmpConnatixPlayer extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -50,8 +49,10 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
   sendCommand_(command) {
     if (this.iframe_ && this.iframe_.contentWindow) {
       // Send message to the player
-      this.iframe_.contentWindow./*OK*/postMessage(command,
-          this.iframeDomain_);
+      this.iframe_.contentWindow./*OK*/ postMessage(
+        command,
+        this.iframeDomain_
+      );
     }
   }
 
@@ -93,13 +94,13 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
 
     // Player id is mandatory
     this.playerId_ = userAssert(
-        element.getAttribute('data-player-id'),
-        'The data-player-id attribute is required for <amp-connatix-player> %s',
-        element);
+      element.getAttribute('data-player-id'),
+      'The data-player-id attribute is required for <amp-connatix-player> %s',
+      element
+    );
 
     // Media id is optional
-    this.mediaId_ = element.getAttribute('data-media-id') ||
-        '';
+    this.mediaId_ = element.getAttribute('data-media-id') || '';
 
     this.bindToPlayerCommands_();
   }

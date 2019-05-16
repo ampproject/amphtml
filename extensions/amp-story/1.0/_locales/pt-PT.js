@@ -111,22 +111,25 @@ const strings = {
     string: 'Expanda a altura da janela para ver esta experiência.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT]: {
-    string: 'Expanda a altura e a largura da sua janela para ver esta ' +
-        'experiência.',
+    string:
+      'Expanda a altura e a largura da sua janela para ver esta ' +
+      'experiência.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_WIDTH_SIZE_TEXT]: {
     string: 'Expanda a largura da janela para ver esta experiência.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
-    string: 'Tem de ativar a experiência da história AMP para ver este ' +
-        'conteúdo.',
+    string:
+      'Tem de ativar a experiência da história AMP para ver este ' +
+      'conteúdo.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
     string: 'Conseguirá visualizar melhor esta página no modo retrato.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT]: {
-    string: 'Lamentamos, mas parece que o seu navegador não suporta esta ' +
-        'experiência.',
+    string:
+      'Lamentamos, mas parece que o seu navegador não suporta esta ' +
+      'experiência.',
   },
 };
 

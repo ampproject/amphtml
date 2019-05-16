@@ -82,8 +82,8 @@ export class WebviewViewerForTesting {
     const params = {
       history: 1,
       viewportType: this.viewportType_,
-      width: this.containerEl./*OK*/offsetWidth,
-      height: this.containerEl./*OK*/offsetHeight,
+      width: this.containerEl./*OK*/ offsetWidth,
+      height: this.containerEl./*OK*/ offsetHeight,
       visibilityState: this.visibilityState_,
       prerenderSize: 1,
       origin: parseUrlDeprecated(window.location.href).origin,
@@ -101,8 +101,10 @@ export class WebviewViewerForTesting {
     this.iframe.setAttribute('src', url);
     this.frameOrigin_ = parsedUrl.origin;
 
-    this.pollingIntervalIds_[this.intervalCtr] =
-        setInterval(this.pollAMPDoc_.bind(this, this.intervalCtr) , 1000);
+    this.pollingIntervalIds_[this.intervalCtr] = setInterval(
+      this.pollAMPDoc_.bind(this, this.intervalCtr),
+      1000
+    );
 
     this.intervalCtr++;
 
@@ -134,7 +136,7 @@ export class WebviewViewerForTesting {
       app: APP,
       name: 'handshake-poll',
     };
-    this.iframe.contentWindow./*OK*/postMessage(message, this.frameOrigin_);
+    this.iframe.contentWindow./*OK*/ postMessage(message, this.frameOrigin_);
   }
 
   /**
@@ -142,8 +144,9 @@ export class WebviewViewerForTesting {
    * @param {*} e
    */
   isChannelOpen_(e) {
-    return e.type == 'message' && e.data.app == APP &&
-      e.data.name == 'channelOpen';
+    return (
+      e.type == 'message' && e.data.app == APP && e.data.name == 'channelOpen'
+    );
   }
 
   /**
@@ -160,7 +163,7 @@ export class WebviewViewerForTesting {
 
     this.log('############## viewer posting1 Message', message);
 
-    this.iframe.contentWindow./*OK*/postMessage(message, this.frameOrigin_);
+    this.iframe.contentWindow./*OK*/ postMessage(message, this.frameOrigin_);
 
     this.sendRequest_('visibilitychange', {
       state: this.visibilityState_,
@@ -185,7 +188,7 @@ export class WebviewViewerForTesting {
       data: payload,
       type: MessageType.REQUEST,
     };
-    this.iframe.contentWindow./*OK*/postMessage(message, this.frameOrigin_);
+    this.iframe.contentWindow./*OK*/ postMessage(message, this.frameOrigin_);
   }
 
   /**
@@ -222,6 +225,7 @@ export class WebviewViewerForTesting {
    */
   log() {
     const var_args = Array.prototype.slice.call(arguments, 0);
-    console/*OK*/.log.apply(console, var_args);
+    console /*OK*/.log
+      .apply(console, var_args);
   }
 }

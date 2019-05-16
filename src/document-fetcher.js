@@ -39,21 +39,23 @@ export function fetchDocument(win, input, opt_init) {
   init = setupAMPCors(win, input, init);
   input = setupInput(win, input, init);
   const ampdocService = Services.ampdocServiceFor(win);
-  const ampdocSingle =
-  ampdocService.isSingleDoc() ? ampdocService.getAmpDoc() : null;
+  const ampdocSingle = ampdocService.isSingleDoc()
+    ? ampdocService.getAmpDoc()
+    : null;
   init.responseType = 'document';
-  return getViewerInterceptResponse(win, ampdocSingle, input, init)
-      .then(interceptorResponse => {
-        if (interceptorResponse) {
-          return interceptorResponse.text().then(body =>
-            new DOMParser().parseFromString(body, 'text/html')
-          );
-        }
-        return xhrRequest(input, init).then(({xhr, response}) => {
-          verifyAmpCORSHeaders(win, response, init);
-          return xhr.responseXML;
-        });
+  return getViewerInterceptResponse(win, ampdocSingle, input, init).then(
+    interceptorResponse => {
+      if (interceptorResponse) {
+        return interceptorResponse
+          .text()
+          .then(body => new DOMParser().parseFromString(body, 'text/html'));
+      }
+      return xhrRequest(input, init).then(({xhr, response}) => {
+        verifyAmpCORSHeaders(win, response, init);
+        return xhr.responseXML;
       });
+    }
+  );
 }
 
 /**
@@ -67,7 +69,7 @@ function xhrRequest(input, init) {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.open(init.method || 'GET', input, true);
-    xhr.withCredentials = (init.credentials == 'include');
+    xhr.withCredentials = init.credentials == 'include';
     xhr.responseType = 'document';
     // Incoming headers are in fetch format,
     // so we need to convert them into xhr.
@@ -81,8 +83,7 @@ function xhrRequest(input, init) {
       }
       if (xhr.status < 100 || xhr.status > 599) {
         xhr.onreadystatechange = null;
-        reject(user().createExpectedError(
-            `Unknown HTTP status ${xhr.status}`));
+        reject(user().createExpectedError(`Unknown HTTP status ${xhr.status}`));
         return;
       }
       // TODO(dvoytenko): This is currently simplified: we will wait for the
@@ -94,9 +95,14 @@ function xhrRequest(input, init) {
           statusText: xhr.statusText,
           headers: parseHeaders(xhr.getAllResponseHeaders()),
         };
-        const response = new Response('', /** @type {!ResponseInit} */ (options));
-        const promise = assertSuccess(response)
-            .then(response => ({response, xhr}));
+        const response = new Response(
+          '',
+          /** @type {!ResponseInit} */ (options)
+        );
+        const promise = assertSuccess(response).then(response => ({
+          response,
+          xhr,
+        }));
         resolve(promise);
       }
     };
