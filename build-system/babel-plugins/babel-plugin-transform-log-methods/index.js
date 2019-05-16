@@ -169,8 +169,9 @@ function buildMessage(t, node, interpolationArgs) {
  * @return {?Object}
  */
 function getTransformableCallExpressionMeta(t, {callee}) {
+  // devAssert() or userAssert() call.
   if (assertAliases.some(name => t.isIdentifier(callee, {name}))) {
-    return transformableMethods['assert'];
+    return transformableMethods.assert;
   }
   // Looks like a method().call().
   if (!t.isMemberExpression(callee) || !t.isCallExpression(callee.object)) {
@@ -225,16 +226,6 @@ module.exports = function({types: t}) {
        * @param {*} path babel.path
        */
       CallExpression({node}) {
-        const {callee} = node;
-
-        // Looks like a method().call().
-        if (
-          !t.isMemberExpression(callee) ||
-          !t.isCallExpression(callee.object)
-        ) {
-          return;
-        }
-
         const meta = getTransformableCallExpressionMeta(t, node);
         if (!meta) {
           return;
