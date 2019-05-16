@@ -993,9 +993,9 @@ export class UrlReplacements {
     const isAllowedOrigin = this.isAllowedOrigin_(url);
     if (!isAllowedOrigin) {
       if (whitelist) {
-        user().warn('URL', 'Ignoring link replacement', href,
+        user().warn('URL', 'Ignoring link replacement %s' +
             ' because the link does not go to the document\'s' +
-            ' source, canonical, or whitelisted origin.');
+            ' source, canonical, or whitelisted origin.', href);
       }
       return element.href = href;
     }

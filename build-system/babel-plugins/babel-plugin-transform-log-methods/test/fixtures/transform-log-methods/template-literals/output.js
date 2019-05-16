@@ -13,5 +13,5 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-user().assert(false, user().l("0", template));
-user().assert(false, user().l("1", foo, bar, baz));
+user().assert(false, ["0", template]);
+user().assert(false, ["1", foo, bar, baz]);

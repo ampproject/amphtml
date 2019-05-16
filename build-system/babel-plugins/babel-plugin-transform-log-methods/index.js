@@ -50,6 +50,7 @@
  * Resulting compressed, minified binaries reduce size by ~1.5% depending on
  * their logging density.
  */
+const base62 = require("base62/lib/ascii");
 const fs = require('fs');
 const path = require('path');
 const {
@@ -66,20 +67,13 @@ const {
  */
 const defaultMessagesPath = messagesPath;
 
-/** Method on `Log` that this transform outputs to "expand" log messages. */
-const messageExpansionMethod = 'expandLogMessage';
-
-/**
- * Mangled expansion method name to prevent large public method name in
- * multipass build.
- */
-const messageExpansionMethodShortName = 'l';
-
 /**
  * Approximate length of a compressed message expansion call to determine
  * whether an instance of message indirection actually reduces binary size.
  */
-const roughMinifiedExpansionLength = 'a().b("xx")'.length;
+const roughMinifiedExpansionLength = '["xx"]'.length;
+
+const assertAliases = singletonFunctions.map(prefix => `${prefix}Assert`);
 
 /**
  * Determines a filepath relative to the repo root.
@@ -120,19 +114,18 @@ function writeMessages(messagesPath, obj) {
 /**
  * Gets a message id from the table, or adds a new entry for a message if
  * non-existent and returns its new id.
- * @param {string} messagesPath
+ * @param {Object<string, string>} messages
  * @param {string} message
+ * @param {function():number} nextMessageId
  * @return {string} Short message id.
  */
-function getOrCreateShortMessageId(messagesPath, message) {
-  const messages = getMessages(messagesPath);
+function getOrCreateShortMessageId(messages, message, nextMessageId) {
   if (messages[message]) {
     return messages[message];
   }
-  // Base-36 radix for best utilization of ascii space.
-  const shortMessageId = Object.keys(messages).length.toString(36);
+  // Base-62 radix for best utilization of ascii space.
+  const shortMessageId = base62.encode(nextMessageId());
   messages[message] = shortMessageId;
-  writeMessages(messagesPath, messages);
   return shortMessageId;
 }
 
@@ -170,6 +163,34 @@ function buildMessage(t, node, interpolationArgs) {
   return '%s';
 }
 
+/**
+ * @param {@babel/types} t
+ * @param {!Node} node
+ * @return {?Object}
+ */
+function getTransformableCallExpressionMeta(t, {callee}) {
+  if (assertAliases.some(name => t.isIdentifier(callee, {name}))) {
+    return transformableMethods['assert'];
+  }
+  // Looks like a method().call().
+  if (!t.isMemberExpression(callee) || !t.isCallExpression(callee.object)) {
+    return null;
+  }
+  // is either dev() or user() object.
+  const singletonCallee = callee.object.callee;
+  if (
+    !singletonFunctions.some(name => t.isIdentifier(singletonCallee, {name}))
+  ) {
+    return null;
+  }
+  // object property is transformable method.
+  const {property} = callee;
+  if (!t.isIdentifier(property) || !(property.name in transformableMethods)) {
+    return null;
+  }
+  return transformableMethods[property.name];
+}
+
 module.exports = function({types: t}) {
   return {
     /** Resolves plugin config. */
@@ -184,47 +205,21 @@ module.exports = function({types: t}) {
       } = this.opts;
 
       this.messagesPath = relativeToRoot(messagesPath);
+      this.messages = {};
+      this.messagesLength = 0;
+      this.nextMessageId = () => this.messagesLength++;
       this.replaceCallArguments = replaceCallArguments;
     },
     visitor: {
-      /**
-       * Visits definition for expansion method.
-       * @param {*} path babel.path
-       */
-      ClassMethod(path) {
-        const {node} = path;
-
-        if (!t.isIdentifier(node.key, {name: messageExpansionMethod})) {
-          return;
-        }
-
-        if (!this.replaceCallArguments) {
-          // If we're not replacing arguments, runtime method is dead code.
-          // Since it's public, Closure doesn't know that it can be safely
-          // DCE'd, so we remove before Closure pass.
-
-          // Remove JSDoc. The `trailingComments` reference when a previous
-          // node exists would keep the JSDoc even when removing the visited
-          // path.
-          const {node: prevNode} = path.getPrevSibling();
-          if (prevNode && prevNode.trailingComments) {
-            prevNode.trailingComments.length = 0;
-          }
-          if (node.leadingComments) {
-            node.leadingComments.length = 0;
-          }
-
-          // Remove actual path.
-          path.remove();
-          return;
-        }
-
-        // Premangle method name since it's public so it wouldn't be mangled by
-        // Closure on multipass.
-        // TODO(alanorozco): This will not be required once we only do 1pass.
-        node.key.name = messageExpansionMethodShortName;
+      Program: {
+        enter() {
+          this.messages = getMessages(this.messagesPath);
+          this.messagesLength = Object.keys(this.messages).length;
+        },
+        exit() {
+          writeMessages(this.messagesPath, this.messages);
+        },
       },
-
       /**
        * Visits call expressions for known log assertion/error methods.
        * @param {*} path babel.path
@@ -240,24 +235,12 @@ module.exports = function({types: t}) {
           return;
         }
 
-        const singletonCallee = callee.object.callee;
-        if (
-          !singletonFunctions.some(name =>
-            t.isIdentifier(singletonCallee, {name})
-          )
-        ) {
+        const meta = getTransformableCallExpressionMeta(t, node);
+        if (!meta) {
           return;
         }
 
-        const {property} = callee;
-        if (
-          !t.isIdentifier(property) ||
-          !(property.name in transformableMethods)
-        ) {
-          return;
-        }
-
-        const {messageArgPos} = transformableMethods[property.name];
+        const {messageArgPos} = meta;
         const messageArg = node.arguments[messageArgPos];
 
         if (!messageArg) {
@@ -279,8 +262,9 @@ module.exports = function({types: t}) {
         }
 
         const shortMessageId = getOrCreateShortMessageId(
-            this.messagesPath,
-            message
+            this.messages,
+            message,
+            this.nextMessageId
         );
 
         if (!this.replaceCallArguments) {
@@ -289,31 +273,21 @@ module.exports = function({types: t}) {
 
         // We care only about message arguments beyond the first (ie. the body):
         // all previous method arguments (ie. the head) should stay in place.
-        // The body is nested into the expansion method call, after the template
-        // id.
+        // The body is nested into an array expression, after the template id.
         const headArgs = node.arguments.slice(0, Math.max(0, messageArgPos));
         const bodyArgs = node.arguments.slice(messageArgPos + 1);
 
-        // Callee to expansion method, eg. `dev().expandLogMessage`.
-        const messageExpansionCallee = t.memberExpression(
-            t.callExpression(t.identifier(singletonCallee.name), []),
-
-            // Use short method name as "pre-minified" since it's public and
-            // does not get minified on multipass.
-            // TODO(alanorozco): This will not be required once we only do 1pass
-            t.identifier(messageExpansionMethodShortName)
-        );
-
-        // Interpolation order breaks badly when template literals are mixed
-        // with variadic calls. This transform implicitly depends on the
-        // `no-mixed-interpolation` lint rule to prevent such usage.
-        const expansionCall = t.callExpression(messageExpansionCallee, [
-          t.stringLiteral(shortMessageId),
-          ...bodyArgs,
-          ...templateArgs,
-        ]);
-
-        node.arguments = [...headArgs, expansionCall];
+        node.arguments = [
+          ...headArgs,
+          // Interpolation order breaks badly when template literals are mixed
+          // with variadic calls. This transform implicitly depends on the
+          // `no-mixed-interpolation` lint rule to prevent such usage.
+          t.arrayExpression([
+            t.stringLiteral(shortMessageId),
+            ...bodyArgs,
+            ...templateArgs,
+          ]),
+        ];
       },
     },
   };

@@ -1,5 +1,0 @@
-{
-  "plugins": [["../../../../../babel-plugin-transform-log-methods", {
-    "messagesPath": "dist/.log-messages.preminify-method-name.temp"
-  }]]
-}

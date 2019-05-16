@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 // No arguments, should be indirected.
-dev().createError(dev().l("0"));
+dev().createError(["0"]);

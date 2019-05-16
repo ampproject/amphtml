@@ -19,6 +19,7 @@ const argv = require('minimist')(process.argv.slice(2));
 const babel = require('gulp-babel');
 const fs = require('fs-extra');
 const gulp = require('gulp');
+const gulpCache = require('gulp-cache');
 const gulpIf = require('gulp-if');
 const nop = require('gulp-nop');
 const rename = require('gulp-rename');
@@ -400,10 +401,12 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
           .on('end', resolve);
     }
 
+    const babelConfig = {plugins, inputSourceMap: true};
+
     return gulp.src(srcs, {base: '.'})
         .pipe(gulpIf(shouldShortenLicense, shortenLicense()))
         .pipe(sourcemaps.init({loadMaps: true}))
-        .pipe(gulpIf(({path}) => !/third_party/.test(path), babel({plugins})))
+        .pipe(gulpIf(/^(?!.*third_party)/, babel(babelConfig)))
         .pipe(gulpClosureCompile(compilerOptionsArray))
         .on('error', err => {
           handleCompilerError(outputFilename);
