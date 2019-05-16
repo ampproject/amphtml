@@ -275,11 +275,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/13552',
   },
   {
-    id: 'amp-consent',
-    name: 'Enables the amp-consent extension',
-    spec: 'https://github.com/ampproject/amphtml/issues/13716',
-  },
-  {
     id: 'amp-story-branching',
     name: 'Allow for the go to action, advance to, and fragment parameter URLs',
     spec: 'https://github.com/ampproject/amphtml/issues/20083',

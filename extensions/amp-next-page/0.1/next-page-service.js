@@ -20,7 +20,7 @@ import {
   PositionObserverFidelity,
 } from '../../../src/service/position-observer/position-observer-worker';
 import {Services} from '../../../src/services';
-import {dev, userAssert} from '../../../src/log';
+import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getAmpdoc, getServiceForDoc} from '../../../src/service';
 import {
@@ -311,7 +311,7 @@ export class NextPageService {
               }
             });
           }),
-          e => dev().error(TAG, 'failed to fetch %s', next.ampUrl, e))
+          e => user().error(TAG, 'failed to fetch %s', next.ampUrl, e))
           .catch(e => dev().error(TAG,
               'failed to attach shadow document for %s', next.ampUrl, e))
           // The new page may be short and the next may already need fetching.
