@@ -99,7 +99,7 @@ The user action `dismiss` informs AMP runtime that no info on user consent has b
 #### Client information passed to iframe
 When the iframe is created, the following information will be passed to the iframe via the name attribute.
 * `clientConfig`: The configuration from the publisher
-* `consentState`: The stored consent state if there's any. The value will be `'accepted'/'rejected'/'unknown'`. A friendly reminder is to be aware of the difference between the consent state string value (`'accepted'/'rejected'/'unknown'`) and the user action string value (`'accept'/'reject'/'dismiss'`).
+* `consentStateValue`: The stored consent state if there's any. The value will be `'accepted'/'rejected'/'unknown'`. A friendly reminder is to be aware of the difference between the consent state string value (`'accepted'/'rejected'/'unknown'`) and the user action string value (`'accept'/'reject'/'dismiss'`).
 * `consentString`: The stored consent info string if there's any.
 
 One can get access to the client information via the name attribute inside the iframe.
@@ -107,7 +107,7 @@ One can get access to the client information via the name attribute inside the i
   /* Expect info to be an object of format
    * {
    *  'clientConfig': *,
-   *  'consentState': 'accepted'/'rejected'/'unknown'/undefined,
+   *  'consentStateValue': 'accepted'/'rejected'/'unknown'/undefined,
    *  'consentString': string/undefined,
    * };
    */
