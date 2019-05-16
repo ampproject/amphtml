@@ -84,10 +84,10 @@ export class AmpList extends AMP.BaseElement {
     this.renderPass_ = new Pass(this.win, () => this.doRenderPass_());
 
     /**
-     * Local data queued for render (from `src` mutation before layoutCallbacK).
+     * Local data queued for render from `src` mutation before layoutCallback.
      * @private {?Array}
      */
-    this.pendingLocalData_ = null;
+    this.prelayoutLocalData_ = null;
 
     /**
      * Latest fetched items to render and the promise resolver and rejecter
@@ -227,9 +227,12 @@ export class AmpList extends AMP.BaseElement {
     // Don't fetch if `src` is empty string.
     if (!!this.element.getAttribute('src')) {
       return this.fetchList_();
-    } else if (this.pendingLocalData_) {
-      return this.scheduleRender_(this.pendingLocalData_);
+    } else if (this.prelayoutLocalData_) {
+      return this.scheduleRender_(this.prelayoutLocalData_);
     }
+    // Clean up any "prelayout" data now that we're laid out.
+    this.prelayoutLocalData_ = null;
+
     return Promise.resolve();
   }
 
@@ -326,7 +329,7 @@ export class AmpList extends AMP.BaseElement {
         this.resetIfNecessary_(/* isFetch */ false);
         return this.scheduleRender_(array);
       } else {
-        this.pendingLocalData_ = array;
+        this.prelayoutLocalData_ = array;
       }
       return Promise.resolve();
     };
