@@ -965,11 +965,11 @@ export class AmpStory extends AMP.BaseElement {
     // Do not block the layout callback on the completion of these promises, as
     // that prevents descendents from being laid out (and therefore loaded).
     storyLayoutPromise
-        .then(() => this.whenPagesLoaded_(PAGE_LOAD_TIMEOUT_MS))
-        .then(() => {
-          this.markStoryAsLoaded_();
-          this.initializeLiveStory_();
-        });
+      .then(() => this.whenPagesLoaded_(PAGE_LOAD_TIMEOUT_MS))
+      .then(() => {
+        this.markStoryAsLoaded_();
+        this.initializeLiveStory_();
+      });
 
     return storyLayoutPromise;
   }
@@ -983,12 +983,15 @@ export class AmpStory extends AMP.BaseElement {
       this.liveStoryManager_ = new LiveStoryManager(this);
       this.liveStoryManager_.build();
 
-      this.storeService_.dispatch(Action.ADD_TO_ACTIONS_WHITELIST,
-          [{tagOrTarget: 'AMP-LIVE-LIST', method: 'update'}]);
+      this.storeService_.dispatch(Action.ADD_TO_ACTIONS_WHITELIST, [
+        {tagOrTarget: 'AMP-LIVE-LIST', method: 'update'},
+      ]);
 
       this.element.addEventListener(AmpEvents.DOM_UPDATE, ({target}) => {
-        this.liveStoryManager_.update(target,
-            this.element.querySelectorAll('amp-story-page:not([ad])'));
+        this.liveStoryManager_.update(
+          target,
+          this.element.querySelectorAll('amp-story-page:not([ad])')
+        );
       });
     }
   }

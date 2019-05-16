@@ -477,8 +477,8 @@ export class AmpStoryPage extends AMP.BaseElement {
           case 'amp-img':
           case 'amp-anim':
             whenUpgradedToCustomElement(mediaEl)
-                .then(el => el.signals().whenSignal(CommonSignals.LOAD_END))
-                .then(resolve, resolve);
+              .then(el => el.signals().whenSignal(CommonSignals.LOAD_END))
+              .then(resolve, resolve);
             break;
           case 'amp-audio':
           case 'amp-video':

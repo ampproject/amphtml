@@ -32,22 +32,26 @@ describes.realWin('LiveStoryManager', {amp: true}, env => {
    * @return {!Array<!Element>}
    */
   function createPages(container, count, opt_ids) {
-    return Array(count).fill(undefined).map((unused, i) => {
-      const page = win.document.createElement('amp-story-page');
-      page.id = opt_ids && opt_ids[i] ? opt_ids[i] : `-page-${i}`;
-      const storyPage = new AmpStoryPage(page);
-      page.getImpl = () => Promise.resolve(storyPage);
-      sandbox.stub(storyPage, 'mutateElement').callsFake(fn => fn());
-      container.appendChild(page);
-      return page;
-    });
+    return Array(count)
+      .fill(undefined)
+      .map((unused, i) => {
+        const page = win.document.createElement('amp-story-page');
+        page.id = opt_ids && opt_ids[i] ? opt_ids[i] : `-page-${i}`;
+        const storyPage = new AmpStoryPage(page);
+        page.getImpl = () => Promise.resolve(storyPage);
+        sandbox.stub(storyPage, 'mutateElement').callsFake(fn => fn());
+        container.appendChild(page);
+        return page;
+      });
   }
 
   beforeEach(() => {
     win = env.win;
     storyEl = win.document.createElement('amp-story');
-    addAttributesToElement(storyEl,
-        {'id': 'testStory', 'dynamic-live-list': 'storyLiveList'});
+    addAttributesToElement(storyEl, {
+      'id': 'testStory',
+      'dynamic-live-list': 'storyLiveList',
+    });
     ampStory = new AmpStory(storyEl);
     liveStoryManager = new LiveStoryManager(ampStory);
   });
@@ -68,30 +72,40 @@ describes.realWin('LiveStoryManager', {amp: true}, env => {
   });
 
   it('should throw if no dynamic-live-list attr is set', () => {
-    ampStory.element.setAttribute('dynamic-live-list', '');
+    ampStory.element.removeAttribute('dynamic-live-list');
 
-    allowConsoleError(() => { expect(() => {
-      liveStoryManager.build();
-    }).to.throw(/Story must contain dynamic-live-list to build an amp-live-list/); });
+    allowConsoleError(() => {
+      expect(() => {
+        liveStoryManager.build();
+      }).to.throw(
+        /amp-story element must contain the dynamic-live-list attribute to use the live story functionality/
+      );
+    });
   });
 
   it('should throw if no story id is set', () => {
-    ampStory.element.setAttribute('id', '');
+    ampStory.element.removeAttribute('id');
 
-    allowConsoleError(() => { expect(() => {
-      liveStoryManager.build();
-    }).to.throw(/Story must contain id to build an amp-live-list/); });
+    allowConsoleError(() => {
+      expect(() => {
+        liveStoryManager.build();
+      }).to.throw(
+        /amp-story must contain id to use the live story functionality/
+      );
+    });
   });
 
-
-  it('should append new page from server on update', () => {
+  it('should append new page to client from server in update', () => {
     const currentPages = createPages(ampStory.element, 2, ['cover', 'page-1']);
     expect(ampStory.element.children.length).to.equal(2);
 
     const fromServerStoryEl = win.document.createElement('amp-story');
     const fromServerStory = new AmpStory(fromServerStoryEl);
-    const fromServerPages =
-      createPages(fromServerStory.element, 2, ['cover', 'page-1', 'page-3']);
+    const fromServerPages = createPages(fromServerStory.element, 2, [
+      'cover',
+      'page-1',
+      'page-3',
+    ]);
     const fromServerLastPage = fromServerPages[fromServerPages.length - 1];
     fromServerLastPage.classList.add('amp-live-list-item-new');
 
@@ -99,10 +113,31 @@ describes.realWin('LiveStoryManager', {amp: true}, env => {
     liveStoryManager.update(fromServerStory.element, currentPages);
 
     expect(ampStory.element.children.length).to.equal(3);
+  });
 
-    const fromClientLastPage =
-        ampStory.element.querySelector('amp-story-page:last-of-type');
+  it('should append new page at the end', () => {
+    const currentPages = createPages(ampStory.element, 2, ['cover', 'page-1']);
+    expect(ampStory.element.children.length).to.equal(2);
 
-    expect(fromClientLastPage.id).to.equal(fromServerLastPage.id);
+    const fromServerStoryEl = win.document.createElement('amp-story');
+    const fromServerStory = new AmpStory(fromServerStoryEl);
+    const fromServerPages = createPages(fromServerStory.element, 2, [
+      'cover',
+      'page-3',
+      'page-1',
+    ]);
+    const fromServerNewPage =
+      fromServerPages[fromServerPages.getIndexOf('page-3')];
+    // This would normally get added by AmpLiveList.
+    fromServerNewPage.classList.add('amp-live-list-item-new');
+
+    liveStoryManager.build();
+    liveStoryManager.update(fromServerStory.element, currentPages);
+
+    const fromClientLastPage = ampStory.element.querySelector(
+      'amp-story-page:last-of-type'
+    );
+
+    expect(fromClientLastPage.id).to.equal(fromServerNewPage.id);
   });
 });
