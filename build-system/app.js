@@ -124,7 +124,7 @@ app.get('/serve_mode_change', (req, res) => {
 app.get('/proxy', async (req, res, next) => {
   const {mode, url} = req.query;
   const urlSuffixClearPrefixReStr =
-    '^https?://' + '((www.)?google.(com?|[a-z]{2}|com?.[a-z]{2}|cat)/amp/s/)?';
+    '^https?://((www.)?google.(com?|[a-z]{2}|com?.[a-z]{2}|cat)/amp/s/)?';
   const urlSuffix = url.replace(new RegExp(urlSuffixClearPrefixReStr, 'i'), '');
 
   try {

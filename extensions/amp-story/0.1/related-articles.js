@@ -134,10 +134,7 @@ export function parseArticlesToClassicApi(bookendComponents) {
           'amp-story-0.1, upgrade to v1.0 to use this feature.'
       );
     } else {
-      user().warn(
-        TAG,
-        component['type'] + ' is not valid, ' + 'skipping invalid.'
-      );
+      user().warn(TAG, component['type'] + ' is not valid, skipping invalid.');
     }
   });
 

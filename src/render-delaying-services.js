@@ -90,7 +90,7 @@ export function waitForServices(win) {
     return Services.timerFor(win).timeoutPromise(
       LOAD_TIMEOUT,
       serviceReadyPromise,
-      `Render timeout waiting for service ${serviceId} ` + 'to be ready.'
+      `Render timeout waiting for service ${serviceId} to be ready.`
     );
   });
   return Promise.all(promises);

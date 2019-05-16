@@ -239,45 +239,36 @@ describe('vsync', () => {
     });
 
     // TODO(choumx, #12476): Make this test work with sinon 4.0.
-    it.skip(
-      'should return a promise from runPromise that ' + 'executes "run"',
-      () => {
-        const measureSpy = sandbox.spy();
-        const mutateSpy = sandbox.spy();
-        return vsync
-          .runPromise({measure: measureSpy, mutate: mutateSpy})
-          .then(() => {
-            expect(mutateSpy).to.be.calledOnce;
-            expect(measureSpy).to.be.calledOnce;
-          });
-      }
-    );
-
-    // TODO(choumx, #12476): Make this test work with sinon 4.0.
-    it.skip(
-      'should return a promise from measurePromise ' + 'that runs measurer',
-      () => {
-        let measured = false;
-        return vsync
-          .measurePromise(() => {
-            measured = true;
-          })
-          .then(() => {
-            expect(measured).to.be.true;
-          });
-      }
-    );
-
-    // TODO(choumx, #12476): Make this test work with sinon 4.0.
-    it.skip(
-      'should return a promise from mutatePromise' + 'that runs mutator',
-      () => {
-        const mutator = sandbox.spy();
-        return vsync.mutatePromise(mutator).then(() => {
-          expect(mutator).to.be.calledOnce;
+    it.skip('should return a promise from runPromise that executes "run"', () => {
+      const measureSpy = sandbox.spy();
+      const mutateSpy = sandbox.spy();
+      return vsync
+        .runPromise({measure: measureSpy, mutate: mutateSpy})
+        .then(() => {
+          expect(mutateSpy).to.be.calledOnce;
+          expect(measureSpy).to.be.calledOnce;
         });
-      }
-    );
+    });
+
+    // TODO(choumx, #12476): Make this test work with sinon 4.0.
+    it.skip('should return a promise from measurePromise that runs measurer', () => {
+      let measured = false;
+      return vsync
+        .measurePromise(() => {
+          measured = true;
+        })
+        .then(() => {
+          expect(measured).to.be.true;
+        });
+    });
+
+    // TODO(choumx, #12476): Make this test work with sinon 4.0.
+    it.skip('should return a promise from mutatePromisethat runs mutator', () => {
+      const mutator = sandbox.spy();
+      return vsync.mutatePromise(mutator).then(() => {
+        expect(mutator).to.be.calledOnce;
+      });
+    });
 
     it('should schedule via animation frames when doc is visible', () => {
       let rafHandler;

@@ -119,8 +119,7 @@ const strings = {
     string: 'ამ გამოცდილების სანახავად, გაზარდეთ თქვენი ფანჯრის სიგანე',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
-    string:
-      'ამ კონტენტის სანახავად, თქვენ უნდა ჩართოთ AMP ამბის ' + 'ექსპერიმენტი.',
+    string: 'ამ კონტენტის სანახავად, თქვენ უნდა ჩართოთ AMP ამბის ექსპერიმენტი.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
     string: 'გვერდის სანახავად საუკეთესოა პორტრეტის რეჟიმი',

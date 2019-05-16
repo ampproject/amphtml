@@ -118,7 +118,7 @@ const strings = {
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
     string:
-      'AMP-tarinakokeilu on otettava käyttöön tämän sisällön ' + 'näkemiseksi.',
+      'AMP-tarinakokeilu on otettava käyttöön tämän sisällön näkemiseksi.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
     string: 'Sivu toimii parhaiten muotokuvatilassa',

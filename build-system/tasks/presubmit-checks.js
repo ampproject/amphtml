@@ -160,11 +160,12 @@ const forbiddenTerms = {
   },
   'iframePing': {
     message:
-      'This is only available in vendor config for ' + 'temporary workarounds.',
+      'This is only available in vendor config for temporary workarounds.',
     whitelist: [
       'build-system/routes/analytics.js',
       'extensions/amp-analytics/0.1/config.js',
       'extensions/amp-analytics/0.1/requests.js',
+      'extensions/amp-analytics/0.1/vendors.js',
     ],
   },
   // Service factories that should only be installed once.

@@ -899,28 +899,25 @@ describes.fakeWin(
     });
 
     // TODO(alabiaga, #18574): Fails because FakeDom freezes history state.
-    it.skip(
-      'should push a new state and replace it for ' + 'target on Natural',
-      () => {
-        history = new History(
-          new AmpDocSingle(env.win),
-          new HistoryBindingNatural_(env.win)
-        );
-        const startIndex = env.win.history.index;
-        return history.replaceStateForTarget('#hello').then(() => {
-          clock.tick(1);
-          expect(env.win.location.hash).to.equal('#hello');
-          expect(env.win.history.index).to.equal(startIndex + 1);
-          const historyPopPromise = history.pop(history.stackIndex_);
+    it.skip('should push a new state and replace it for target on Natural', () => {
+      history = new History(
+        new AmpDocSingle(env.win),
+        new HistoryBindingNatural_(env.win)
+      );
+      const startIndex = env.win.history.index;
+      return history.replaceStateForTarget('#hello').then(() => {
+        clock.tick(1);
+        expect(env.win.location.hash).to.equal('#hello');
+        expect(env.win.history.index).to.equal(startIndex + 1);
+        const historyPopPromise = history.pop(history.stackIndex_);
 
-          clock.tick(1);
-          return historyPopPromise.then(() => {
-            expect(env.win.location.hash).to.equal('#first');
-            expect(env.win.history.index).to.equal(startIndex);
-          });
+        clock.tick(1);
+        return historyPopPromise.then(() => {
+          expect(env.win.location.hash).to.equal('#first');
+          expect(env.win.history.index).to.equal(startIndex);
         });
-      }
-    );
+      });
+    });
 
     it('should push a new state and replace it for target on Virtual', () => {
       const viewer = {

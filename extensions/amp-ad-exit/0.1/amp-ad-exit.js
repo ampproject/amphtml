@@ -458,7 +458,7 @@ export class AmpAdExit extends AMP.BaseElement {
     );
     userAssert(
       responseMessage['vendor'],
-      'Received malformed message from 3p analytics frame: ' + 'vendor missing'
+      'Received malformed message from 3p analytics frame: vendor missing'
     );
     const vendorURL = parseUrlDeprecated(
       assertVendor(responseMessage['vendor'])

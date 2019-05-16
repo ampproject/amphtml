@@ -111,8 +111,7 @@ const strings = {
     string: 'Amplía el alto de la ventana para ver esta experiencia',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT]: {
-    string:
-      'Amplía el alto y el ancho de la ventana para ver esta ' + 'experiencia',
+    string: 'Amplía el alto y el ancho de la ventana para ver esta experiencia',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_WIDTH_SIZE_TEXT]: {
     string: 'Amplía el ancho de la ventana para ver esta experiencia',

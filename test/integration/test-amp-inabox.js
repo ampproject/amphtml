@@ -186,7 +186,7 @@ describe
     });
 
     describes.integration(
-      'rendered on non-AMP page ATF within ' + 'friendly frame and safe frame',
+      'rendered on non-AMP page ATF within friendly frame and safe frame',
       {
         amp: false,
         body: `
@@ -289,7 +289,7 @@ describe
 describe
   .configure()
   .skipWindows()
-  .run('inabox with a complex ' + 'image ad', function() {
+  .run('inabox with a complex image ad', function() {
     const {testServerPort} = window.ampTestRuntimeConfig;
 
     // The image ad as seen in examples/inabox.gpt.html,

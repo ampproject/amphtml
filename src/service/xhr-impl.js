@@ -115,7 +115,7 @@ export class Xhr {
         const targetOrigin = parseUrlDeprecated(input).origin;
         throw user().createExpectedError(
           'XHR',
-          'Failed fetching' + ` (${targetOrigin}/...):`,
+          `Failed fetching (${targetOrigin}/...):`,
           reason && reason.message
         );
       }

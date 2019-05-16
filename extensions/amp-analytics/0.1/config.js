@@ -205,7 +205,7 @@ export class AnalyticsConfig {
       const TAG = this.getName_();
       user().warn(
         TAG,
-        'This analytics provider does not currently ' + 'support varGroups'
+        'This analytics provider does not currently support varGroups'
       );
       return Promise.resolve();
     }
@@ -317,10 +317,7 @@ export class AnalyticsConfig {
       if (children.length == 1) {
         inlineConfig = getChildJsonConfig(this.element_);
       } else if (children.length > 1) {
-        user().error(
-          TAG,
-          'The tag should contain only one' + ' <script> child.'
-        );
+        user().error(TAG, 'The tag should contain only one <script> child.');
       }
     } catch (er) {
       user().error(TAG, er.message);
@@ -351,7 +348,7 @@ export class AnalyticsConfig {
     if (inlineConfig['transport'] && inlineConfig['transport']['iframe']) {
       user().error(
         TAG,
-        'Inline configs are not allowed to ' + 'specify transport iframe'
+        'Inline configs are not allowed to specify transport iframe'
       );
       if (!getMode().localDev || getMode().test) {
         inlineConfig['transport']['iframe'] = undefined;
@@ -364,7 +361,7 @@ export class AnalyticsConfig {
     ) {
       user().error(
         TAG,
-        'Remote configs are not allowed to ' + 'specify transport iframe'
+        'Remote configs are not allowed to specify transport iframe'
       );
       this.remoteConfig_['transport']['iframe'] = undefined;
     }

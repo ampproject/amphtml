@@ -425,35 +425,32 @@ describes.realWin(
         }).to.not.throw();
       });
 
-      it(
-        'discovers children to insert when they have newly discovered ' + 'ids',
-        () => {
-          buildElement(elem, dftAttrs);
+      it('discovers children to insert when they have newly discovered ids', () => {
+        buildElement(elem, dftAttrs);
 
-          const child = document.createElement('div');
-          child.setAttribute('id', 'id0');
-          child.setAttribute('data-sort-time', '12345');
-          itemsSlot.appendChild(child);
+        const child = document.createElement('div');
+        child.setAttribute('id', 'id0');
+        child.setAttribute('data-sort-time', '12345');
+        itemsSlot.appendChild(child);
 
-          liveList.buildCallback();
-          expect(liveList.itemsSlot_.childElementCount).to.equal(1);
+        liveList.buildCallback();
+        expect(liveList.itemsSlot_.childElementCount).to.equal(1);
 
-          const fromServer1 = createFromServer([{id: 'id0'}]);
-          liveList.update(fromServer1);
-          expect(liveList.pendingItemsInsert_).to.have.length(0);
+        const fromServer1 = createFromServer([{id: 'id0'}]);
+        liveList.update(fromServer1);
+        expect(liveList.pendingItemsInsert_).to.have.length(0);
 
-          const fromServer2 = createFromServer([
-            {id: 'id0'},
-            {id: 'id1'},
-            {id: 'id2'},
-          ]);
-          const fromServer2ItemsCont = fromServer2.querySelector('[items]');
-          expect(fromServer2ItemsCont.childElementCount).to.equal(3);
-          expect(liveList.pendingItemsInsert_).to.have.length(0);
-          liveList.update(fromServer2);
-          expect(liveList.pendingItemsInsert_).to.have.length(2);
-        }
-      );
+        const fromServer2 = createFromServer([
+          {id: 'id0'},
+          {id: 'id1'},
+          {id: 'id2'},
+        ]);
+        const fromServer2ItemsCont = fromServer2.querySelector('[items]');
+        expect(fromServer2ItemsCont.childElementCount).to.equal(3);
+        expect(liveList.pendingItemsInsert_).to.have.length(0);
+        liveList.update(fromServer2);
+        expect(liveList.pendingItemsInsert_).to.have.length(2);
+      });
 
       it('should wait for user interaction before inserting', () => {
         buildElement(elem, dftAttrs);
@@ -483,51 +480,45 @@ describes.realWin(
         expect(liveList.itemsSlot_.childElementCount).to.equal(1);
       });
 
-      it(
-        'should add amp-live-list-item-new class for newly inserted ' + 'items',
-        () => {
-          buildElement(elem, dftAttrs);
-          liveList.buildCallback();
+      it('should add amp-live-list-item-new class for newly inserted items', () => {
+        buildElement(elem, dftAttrs);
+        liveList.buildCallback();
 
-          expect(liveList.itemsSlot_.childElementCount).to.equal(0);
+        expect(liveList.itemsSlot_.childElementCount).to.equal(0);
 
-          const fromServer1 = createFromServer([{id: 'id0'}]);
-          liveList.update(fromServer1);
+        const fromServer1 = createFromServer([{id: 'id0'}]);
+        liveList.update(fromServer1);
+        return liveList.updateAction_().then(() => {
+          expect(liveList.itemsSlot_.firstElementChild).to.have.class(
+            'amp-live-list-item-new'
+          );
+        });
+      });
+
+      it('should remove amp-live-list-item-new when no longer latest items', () => {
+        buildElement(elem, dftAttrs);
+        liveList.buildCallback();
+
+        expect(liveList.itemsSlot_.childElementCount).to.equal(0);
+
+        const fromServer1 = createFromServer([{id: 'id0'}]);
+        liveList.update(fromServer1);
+        return liveList.updateAction_().then(() => {
+          expect(liveList.itemsSlot_.lastElementChild).to.have.class(
+            'amp-live-list-item-new'
+          );
+          expect(liveList.itemsSlot_.childElementCount).to.equal(1);
+
+          const fromServer2 = createFromServer([{id: 'id1'}]);
+          liveList.update(fromServer2);
           return liveList.updateAction_().then(() => {
-            expect(liveList.itemsSlot_.firstElementChild).to.have.class(
+            expect(liveList.itemsSlot_.childElementCount).to.equal(2);
+            expect(liveList.itemsSlot_.lastElementChild).to.not.have.class(
               'amp-live-list-item-new'
             );
           });
-        }
-      );
-
-      it(
-        'should remove amp-live-list-item-new when no longer latest ' + 'items',
-        () => {
-          buildElement(elem, dftAttrs);
-          liveList.buildCallback();
-
-          expect(liveList.itemsSlot_.childElementCount).to.equal(0);
-
-          const fromServer1 = createFromServer([{id: 'id0'}]);
-          liveList.update(fromServer1);
-          return liveList.updateAction_().then(() => {
-            expect(liveList.itemsSlot_.lastElementChild).to.have.class(
-              'amp-live-list-item-new'
-            );
-            expect(liveList.itemsSlot_.childElementCount).to.equal(1);
-
-            const fromServer2 = createFromServer([{id: 'id1'}]);
-            liveList.update(fromServer2);
-            return liveList.updateAction_().then(() => {
-              expect(liveList.itemsSlot_.childElementCount).to.equal(2);
-              expect(liveList.itemsSlot_.lastElementChild).to.not.have.class(
-                'amp-live-list-item-new'
-              );
-            });
-          });
-        }
-      );
+        });
+      });
 
       it('should always add amp-live-list-item class to children', () => {
         buildElement(elem, dftAttrs);

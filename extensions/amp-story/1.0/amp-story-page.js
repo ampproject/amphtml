@@ -94,8 +94,7 @@ const Selectors = {
   // passed to scopedQuerySelectorAll which expects only one selector and not
   // multiple separated by commas. `> audio` has to be kept first of the list to
   // work with this current implementation.
-  ALL_MEDIA:
-    '> audio, amp-story-grid-layer audio, ' + 'amp-story-grid-layer video',
+  ALL_MEDIA: '> audio, amp-story-grid-layer audio, amp-story-grid-layer video',
   ALL_VIDEO: 'amp-story-grid-layer video',
 };
 

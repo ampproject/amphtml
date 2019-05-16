@@ -197,7 +197,7 @@ describes.realWin('amp-story-access', {amp: true}, env => {
       expect(() => {
         storyAccess.buildCallback();
       }).to.throw(
-        'amp-story publisher-logo-src must start with ' + '"https://" or "//"'
+        'amp-story publisher-logo-src must start with "https://" or "//"'
       );
     });
   });

@@ -239,7 +239,7 @@ describes.realWin(
         return ad3p.layoutCallback().then(() => {
           expect(
             win.document.querySelector(
-              'iframe[src="' + `${remoteUrl}?$internalRuntimeVersion$"]`
+              `iframe[src="${remoteUrl}?$internalRuntimeVersion$"]`
             )
           ).to.be.ok;
         });

@@ -119,8 +119,7 @@ const strings = {
     string: 'ဤဇာတ်လမ်းများကိုကြည့်ရန် သင့်ဝင်းဒိုး၏ အကျယ်ကို ချဲ့ပါ',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
-    string:
-      'ဤအကြောင်းအရာကို ကြည့်ရန် amp ဇာတ်လမ်း စမ်းသပ်မှုကို ' + 'ဖွင့်ထားရမည်။',
+    string: 'ဤအကြောင်းအရာကို ကြည့်ရန် amp ဇာတ်လမ်း စမ်းသပ်မှုကို ဖွင့်ထားရမည်။',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
     string:

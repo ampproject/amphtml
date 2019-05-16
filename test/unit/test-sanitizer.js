@@ -227,8 +227,8 @@ function runSanitizerTests() {
     });
 
     it('should NOT default target to _top w/o href', () => {
-      expect(sanitize('<a>b</a>' + '<a target="">d</a>')).to.equal(
-        '<a>b</a>' + '<a target="_top">d</a>'
+      expect(sanitize('<a>b</a><a target="">d</a>')).to.equal(
+        '<a>b</a><a target="_top">d</a>'
       );
     });
 

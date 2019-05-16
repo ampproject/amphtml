@@ -377,7 +377,7 @@ export class BindExpression {
           if (caller === null) {
             user().warn(
               TAG,
-              `Cannot invoke method ${method} on null; ` + 'returning null.'
+              `Cannot invoke method ${method} on null; returning null.`
             );
             return null;
           }

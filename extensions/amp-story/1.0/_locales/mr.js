@@ -120,7 +120,7 @@ const strings = {
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
     string:
-      'तुम्ही हा आशय पाहाण्यासाठी AMP स्टोरी प्रयोग सुरू करणे आवश्यक ' + 'आहे.',
+      'तुम्ही हा आशय पाहाण्यासाठी AMP स्टोरी प्रयोग सुरू करणे आवश्यक आहे.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
     string: 'पेज पोर्ट्रेट मोडमध्ये उत्तम पाहिले जाते',

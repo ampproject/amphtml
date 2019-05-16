@@ -477,7 +477,7 @@ export class ScrollEventTracker extends EventTracker {
     ) {
       user().error(
         TAG,
-        'Boundaries are required for the scroll ' + 'trigger to work.'
+        'Boundaries are required for the scroll trigger to work.'
       );
       return NO_UNLISTEN;
     }
@@ -1171,7 +1171,7 @@ export class VideoEventTracker extends EventTracker {
       if (normalizedType === VideoAnalyticsEvents.SECONDS_PLAYED && !interval) {
         user().error(
           TAG,
-          'video-seconds-played requires interval spec ' + 'with non-zero value'
+          'video-seconds-played requires interval spec with non-zero value'
         );
         return;
       }

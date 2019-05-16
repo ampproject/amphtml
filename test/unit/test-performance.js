@@ -605,27 +605,24 @@ describes.realWin('performance', {amp: true}, env => {
         });
       });
 
-      it(
-        'should call prerenderComplete on viewer even if csi is ' + 'off',
-        () => {
-          clock.tick(100);
-          whenFirstVisibleResolve();
-          sandbox
-            .stub(viewer, 'getParam')
-            .withArgs('csi')
-            .returns(null);
-          return viewer.whenFirstVisible().then(() => {
-            clock.tick(400);
-            whenViewportLayoutCompleteResolve();
-            return perf.whenViewportLayoutComplete_().then(() => {
-              expect(
-                viewerSendMessageStub.withArgs('prerenderComplete').firstCall
-                  .args[1].value
-              ).to.equal(400);
-            });
+      it('should call prerenderComplete on viewer even if csi is off', () => {
+        clock.tick(100);
+        whenFirstVisibleResolve();
+        sandbox
+          .stub(viewer, 'getParam')
+          .withArgs('csi')
+          .returns(null);
+        return viewer.whenFirstVisible().then(() => {
+          clock.tick(400);
+          whenViewportLayoutCompleteResolve();
+          return perf.whenViewportLayoutComplete_().then(() => {
+            expect(
+              viewerSendMessageStub.withArgs('prerenderComplete').firstCall
+                .args[1].value
+            ).to.equal(400);
           });
-        }
-      );
+        });
+      });
 
       it(
         'should tick `pc` with delta=400 when user request document ' +

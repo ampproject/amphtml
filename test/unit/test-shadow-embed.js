@@ -67,25 +67,22 @@ describes.sandboxed('shadow-embed', {}, () => {
             }
           });
 
-          it(
-            'should transform CSS installStylesForDoc ' + 'for shadow root',
-            () => {
-              const shadowRoot = createShadowRoot(hostElement);
-              const ampdoc = new AmpDocShadow(
-                window,
-                'https://a.org/',
-                shadowRoot
-              );
-              const style = installStylesForDoc(ampdoc, 'body {}', null, true);
-              expect(shadowRoot.contains(style)).to.be.true;
-              const css = style.textContent.replace(/\s/g, '');
-              if (scenario == ShadowDomVersion.NONE) {
-                expect(css).to.match(/amp-body/);
-              } else {
-                expect(css).to.equal('body{}');
-              }
+          it('should transform CSS installStylesForDoc for shadow root', () => {
+            const shadowRoot = createShadowRoot(hostElement);
+            const ampdoc = new AmpDocShadow(
+              window,
+              'https://a.org/',
+              shadowRoot
+            );
+            const style = installStylesForDoc(ampdoc, 'body {}', null, true);
+            expect(shadowRoot.contains(style)).to.be.true;
+            const css = style.textContent.replace(/\s/g, '');
+            if (scenario == ShadowDomVersion.NONE) {
+              expect(css).to.match(/amp-body/);
+            } else {
+              expect(css).to.equal('body{}');
             }
-          );
+          });
 
           describe('createShadowRoot', () => {
             it('should clear duplicate root', () => {
@@ -498,7 +495,7 @@ describes.sandboxed('shadow-embed', {}, () => {
 
     it('should not parse noscript as markup', () => {
       writer.write(
-        '<body><child1></child1><noscript><child2></child2>' + '</noscript>'
+        '<body><child1></child1><noscript><child2></child2></noscript>'
       );
       return waitForNextBodyChunk().then(() => {
         expect(win.document.body.querySelector('child1')).to.exist;

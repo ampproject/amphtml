@@ -41,18 +41,15 @@ describes.realWin('jank-meter', {}, env => {
     clock.uninstall();
   });
 
-  it(
-    'should use first schedule time when scheduled ' + 'multiple times ',
-    () => {
-      meter.onScheduled();
-      clock.tick(5);
-      meter.onScheduled();
-      clock.tick(15);
-      meter.onRun();
-      expect(meter.totalFrameCnt_).to.equal(1);
-      expect(meter.badFrameCnt_).to.equal(1);
-    }
-  );
+  it('should use first schedule time when scheduled multiple times ', () => {
+    meter.onScheduled();
+    clock.tick(5);
+    meter.onScheduled();
+    clock.tick(15);
+    meter.onRun();
+    expect(meter.totalFrameCnt_).to.equal(1);
+    expect(meter.badFrameCnt_).to.equal(1);
+  });
 
   it('should count bad frames correctly', () => {
     runTask(16);

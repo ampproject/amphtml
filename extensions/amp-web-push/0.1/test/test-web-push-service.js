@@ -519,39 +519,36 @@ describes.realWin(
     });
 
     // TODO(dvoytenko, #12476): Make this test work with sinon 4.0.
-    it.skip(
-      'should forward amp-web-push-subscription-state ' + 'message to SW',
-      done => {
-        let iframeWindowControllerMock = null;
+    it.skip('should forward amp-web-push-subscription-state message to SW', done => {
+      let iframeWindowControllerMock = null;
 
-        return setupHelperIframe().then(() => {
-          sandbox
-            ./*OK*/ stub(webPush, 'isServiceWorkerActivated')
-            .callsFake(() => Promise.resolve(true));
-          sandbox./*OK*/ stub(webPush, 'queryNotificationPermission', () =>
-            Promise.resolve(NotificationPermission.GRANTED)
-          );
+      return setupHelperIframe().then(() => {
+        sandbox
+          ./*OK*/ stub(webPush, 'isServiceWorkerActivated')
+          .callsFake(() => Promise.resolve(true));
+        sandbox./*OK*/ stub(webPush, 'queryNotificationPermission', () =>
+          Promise.resolve(NotificationPermission.GRANTED)
+        );
 
-          iframeWindowControllerMock = sandbox./*OK*/ mock(
-            iframeWindow._ampWebPushHelperFrame
-          );
-          iframeWindowControllerMock
-            .expects('waitUntilWorkerControlsPage')
-            .returns(Promise.resolve(true));
-          sandbox
-            ./*OK*/ stub(
-              iframeWindow._ampWebPushHelperFrame,
-              'messageServiceWorker'
-            )
-            .callsFake(message => {
-              if (message.topic === 'amp-web-push-subscription-state') {
-                done();
-              }
-            });
-          return webPush.updateWidgetVisibilities();
-        });
-      }
-    );
+        iframeWindowControllerMock = sandbox./*OK*/ mock(
+          iframeWindow._ampWebPushHelperFrame
+        );
+        iframeWindowControllerMock
+          .expects('waitUntilWorkerControlsPage')
+          .returns(Promise.resolve(true));
+        sandbox
+          ./*OK*/ stub(
+            iframeWindow._ampWebPushHelperFrame,
+            'messageServiceWorker'
+          )
+          .callsFake(message => {
+            if (message.topic === 'amp-web-push-subscription-state') {
+              done();
+            }
+          });
+        return webPush.updateWidgetVisibilities();
+      });
+    });
   }
 );
 

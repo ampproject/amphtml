@@ -112,7 +112,7 @@ const strings = {
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT]: {
     string:
-      'Увеличьте высоту и ширину окна браузера, чтобы посмотреть ' + 'контент.',
+      'Увеличьте высоту и ширину окна браузера, чтобы посмотреть контент.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_WIDTH_SIZE_TEXT]: {
     string: 'Увеличьте ширину окна браузера, чтобы посмотреть контент.',

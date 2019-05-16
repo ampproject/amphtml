@@ -108,8 +108,7 @@ const strings = {
     string: 'I-expand ang Tweet',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_HEIGHT_SIZE_TEXT]: {
-    string:
-      'Palawakin ang taas ng iyong window para makita ang karanasang ' + 'ito',
+    string: 'Palawakin ang taas ng iyong window para makita ang karanasang ito',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT]: {
     string:
@@ -118,7 +117,7 @@ const strings = {
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_WIDTH_SIZE_TEXT]: {
     string:
-      'Palawakin ang lapad ng iyong window para makita ang karanasang ' + 'ito',
+      'Palawakin ang lapad ng iyong window para makita ang karanasang ito',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
     string:

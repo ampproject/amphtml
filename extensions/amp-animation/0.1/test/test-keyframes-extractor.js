@@ -114,7 +114,7 @@ describes.realWin('extractKeyframes', {amp: 1}, env => {
 
     it('should replace easing property', () => {
       const css =
-        'from{opacity: 0; animation-timing-function: ease}' + ' to{opacity: 1}';
+        'from{opacity: 0; animation-timing-function: ease} to{opacity: 1}';
       return createStyle({'amp-custom': ''}, keyframesCss('anim1', css)).then(
         () => {
           const keyframes = extractKeyframes(doc, 'anim1');
@@ -145,7 +145,7 @@ describes.realWin('extractKeyframes', {amp: 1}, env => {
     });
 
     it('should support different offsets', () => {
-      const css = '0%{opacity: 0}' + ' 25%{opacity: 0.5}' + ' 100%{opacity: 1}';
+      const css = '0%{opacity: 0} 25%{opacity: 0.5} 100%{opacity: 1}';
       return createStyle({'amp-custom': ''}, keyframesCss('anim1', css)).then(
         () => {
           const keyframes = extractKeyframes(doc, 'anim1');

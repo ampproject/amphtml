@@ -108,8 +108,7 @@ const strings = {
     string: 'Kembangkan Twit',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_HEIGHT_SIZE_TEXT]: {
-    string:
-      'Kembangkan ketinggian tetingkap anda untuk melihat pengalaman ' + 'ini',
+    string: 'Kembangkan ketinggian tetingkap anda untuk melihat pengalaman ini',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT]: {
     string:
@@ -129,7 +128,7 @@ const strings = {
   },
   [LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT]: {
     string:
-      'Maaf, nampaknya penyemak imbas anda tidak menyokong pengalaman ' + 'ini',
+      'Maaf, nampaknya penyemak imbas anda tidak menyokong pengalaman ini',
   },
 };
 

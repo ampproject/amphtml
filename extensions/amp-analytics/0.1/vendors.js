@@ -247,17 +247,13 @@ if (getMode().test || getMode().localDev) {
   ANALYTICS_CONFIG['_fake_'] = _FAKE_;
 }
 
-ANALYTICS_CONFIG['infonline']['triggers']['pageview'][
-  'iframe' + /* TEMPORARY EXCEPTION */ 'Ping'
-] = true;
+ANALYTICS_CONFIG['infonline']['triggers']['pageview']['iframePing'] = true;
 
 ANALYTICS_CONFIG['adobeanalytics_nativeConfig']['triggers']['pageLoad'][
-  'iframe' + /* TEMPORARY EXCEPTION */ 'Ping'
+  'iframePing'
 ] = true;
 
-ANALYTICS_CONFIG['oewa']['triggers']['pageview'][
-  'iframe' + /* TEMPORARY EXCEPTION */ 'Ping'
-] = true;
+ANALYTICS_CONFIG['oewa']['triggers']['pageview']['iframePing'] = true;
 
 mergeIframeTransportConfig(ANALYTICS_CONFIG, IFRAME_TRANSPORTS);
 

@@ -19,7 +19,7 @@ export const METRIKA_CONFIG = /** @type {!JsonObject} */ ({
   'requests': {
     'pageview': '${_watch}?browser-info=${_brInfo}&${_siteInfo}&${_suffix}',
     'notBounce':
-      '${_watch}?browser-info=ar%3A1%3Anb%3A1%3A${_brInfo}' + '&${_suffix}',
+      '${_watch}?browser-info=ar%3A1%3Anb%3A1%3A${_brInfo}&${_suffix}',
     'externalLink': '${_watch}?browser-info=ln%3A1%3A${_brInfo}&${_suffix}',
     'reachGoal':
       '${_watch}?browser-info=ar%3A1%3A${_brInfo}&${_siteInfo}' +

@@ -1670,7 +1670,7 @@ describes.realWin('FixedLayer', {}, env => {
   describe
     .configure()
     .if(() => Element.prototype.attachShadow)
-    .run('shadow ' + 'transfer', function() {
+    .run('shadow transfer', function() {
       beforeEach(function() {
         win = env.win;
         doc = win.document;

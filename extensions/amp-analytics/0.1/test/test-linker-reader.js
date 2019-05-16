@@ -96,7 +96,7 @@ describe('LinkerReader', () => {
       );
       linkerReader.get('testlinker2', 'key1');
       expect(mockWin.location.href).to.equal(
-        'https://example.com/?a=1&b=2&c&' + 'd=2#hash'
+        'https://example.com/?a=1&b=2&c&d=2#hash'
       );
     });
 
@@ -115,7 +115,7 @@ describe('LinkerReader', () => {
 
     it('returns same value when reading the same id', () => {
       mockWin.location.href =
-        'https://example.com?' + 'test=1*1f66u1p*key1*dmFsdWUx&var=foo';
+        'https://example.com?test=1*1f66u1p*key1*dmFsdWUx&var=foo';
       expect(linkerReader.get('test', 'key1')).to.equal('value1');
       expect(linkerReader.get('test', 'key1')).to.equal('value1');
     });

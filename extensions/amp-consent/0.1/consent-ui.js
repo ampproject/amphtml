@@ -138,7 +138,7 @@ export class ConsentUI {
       if (!postPromptUI) {
         user().error(
           TAG,
-          'postPromptUI element with ' + 'id=%s not found',
+          'postPromptUI element with id=%s not found',
           opt_postPromptUI
         );
       }
@@ -154,7 +154,7 @@ export class ConsentUI {
       if (!promptElement || !this.parent_.contains(promptElement)) {
         user().error(
           TAG,
-          'child element of <amp-consent> with ' + 'promptUI id %s not found',
+          'child element of <amp-consent> with promptUI id %s not found',
           promptUI
         );
       }

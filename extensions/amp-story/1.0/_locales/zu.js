@@ -111,8 +111,7 @@ const strings = {
     string: 'Nweba ubude bewindi lakho ukuze ubuke lo muzwa',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT]: {
-    string:
-      'Nweba kokubili ubude nobubanzi bewindi lakho ukuze ubuke lo ' + 'muzwa',
+    string: 'Nweba kokubili ubude nobubanzi bewindi lakho ukuze ubuke lo muzwa',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_WIDTH_SIZE_TEXT]: {
     string: 'Nweba ububanzi bewindi lakho ukuze ubuke lo muzwa',

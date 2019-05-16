@@ -54,9 +54,8 @@ export const GTAG_CONFIG = /** @type {!JsonObject} */ ({
       'sd=${screenColorDepth}&' +
       'ul=${browserLanguage}&' +
       'de=${documentCharset}',
-    'uaBaseSuffix': '&a=${pageViewId}&' + 'z=${random}',
-    'uaPageviewCommon':
-      '&t=pageview&' + 'jid=${random}&' + 'gjid=${random}&' + '_r=1',
+    'uaBaseSuffix': '&a=${pageViewId}&z=${random}',
+    'uaPageviewCommon': '&t=pageview&jid=${random}&gjid=${random}&_r=1',
     'uaPageview':
       '${uaHost}/r/collect?${uaBasePrefix}' +
       '${uaPageviewCommon}' +

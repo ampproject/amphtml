@@ -124,8 +124,7 @@ const strings = {
       'kísérletet.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
-    string:
-      'A legjobb élmény érdekében álló tájolással tekintse meg az ' + 'oldalt',
+    string: 'A legjobb élmény érdekében álló tájolással tekintse meg az oldalt',
   },
   [LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT]: {
     string: 'Sajnos úgy tűnik, a böngészője nem támogatja ezt a funkciót',

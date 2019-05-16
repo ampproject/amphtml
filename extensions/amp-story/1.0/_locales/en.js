@@ -86,7 +86,7 @@ const strings = {
   [LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LINK]: {
     string: 'More about AMP results',
     description:
-      'Label for a link to documentation on how AMP links are ' + 'handled.',
+      'Label for a link to documentation on how AMP links are handled.',
   },
   [LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL]: {
     string: 'Swipe up',
@@ -132,17 +132,17 @@ const strings = {
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_EMAIL]: {
     string: 'Email',
     description:
-      'Button label for the share target that shares a link via ' + 'email.',
+      'Button label for the share target that shares a link via email.',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_FACEBOOK]: {
     string: 'Facebook',
     description:
-      'Button label for the share target that shares a link via ' + 'Facebook.',
+      'Button label for the share target that shares a link via Facebook.',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_GOOGLE_PLUS]: {
     string: 'Google+',
     description:
-      'Button label for the share target that shares a link via ' + 'Google+.',
+      'Button label for the share target that shares a link via Google+.',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINK]: {
     string: 'Get Link',
@@ -153,7 +153,7 @@ const strings = {
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINKEDIN]: {
     string: 'LinkedIn',
     description:
-      'Button label for the share target that shares a link via ' + 'LinkedIn.',
+      'Button label for the share target that shares a link via LinkedIn.',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_PINTEREST]: {
     string: 'Pinterest',
@@ -164,7 +164,7 @@ const strings = {
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_SMS]: {
     string: 'SMS',
     description:
-      'Button label for the share target that shares a link via ' + 'SMS.',
+      'Button label for the share target that shares a link via SMS.',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_SYSTEM]: {
     string: 'More',
@@ -175,22 +175,22 @@ const strings = {
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_TUMBLR]: {
     string: 'Tumblr',
     description:
-      'Button label for the share target that shares a link via ' + 'Tumblr.',
+      'Button label for the share target that shares a link via Tumblr.',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_TWITTER]: {
     string: 'Twitter',
     description:
-      'Button label for the share target that shares a link via ' + 'Twitter.',
+      'Button label for the share target that shares a link via Twitter.',
   },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_WHATSAPP]: {
     string: 'WhatsApp',
     description:
-      'Button label for the share target that shares a link via ' + 'WhatsApp.',
+      'Button label for the share target that shares a link via WhatsApp.',
   },
   [LocalizedStringId.AMP_STORY_TOOLTIP_EXPAND_TWEET]: {
     string: 'Expand Tweet',
     description:
-      'Label in the tooltip text for when a Twitter embed is ' + 'expandable.',
+      'Label in the tooltip text for when a Twitter embed is expandable.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_HEIGHT_SIZE_TEXT]: {
     string: 'Expand the height of your window to view this experience',

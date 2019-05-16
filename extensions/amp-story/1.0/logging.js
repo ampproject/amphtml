@@ -142,7 +142,7 @@ const LogType = {
       'Poster images for full-bleed videos should be in portrait ' +
       'orientation.',
     selector:
-      'amp-story-grid-layer[template="fill"] > amp-video > ' + 'video[poster]',
+      'amp-story-grid-layer[template="fill"] > amp-video > video[poster]',
     predicate: el =>
       getPosterFromVideo(el).then(
         poster => poster.naturalWidth < poster.naturalHeight

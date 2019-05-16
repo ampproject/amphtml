@@ -20,7 +20,7 @@ describe
   .configure()
   .enableIe()
   .retryOnSaucelabs()
-  .run('Rendering of' + ' one ad', () => {
+  .run('Rendering of one ad', () => {
     let fixture;
     let beforeHref;
 

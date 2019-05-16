@@ -19,8 +19,8 @@ export const CLICKY_CONFIG = /** @type {!JsonObject} */ ({
     'site_id': '',
   },
   'requests': {
-    'base': 'https://in.getclicky.com/in.php?' + 'site_id=${site_id}',
-    'baseSuffix': '&mime=${contentType}&' + 'x=${random}',
+    'base': 'https://in.getclicky.com/in.php?site_id=${site_id}',
+    'baseSuffix': '&mime=${contentType}&x=${random}',
     'pageview':
       '${base}&' +
       'res=${screenWidth}x${screenHeight}&' +
@@ -30,7 +30,7 @@ export const CLICKY_CONFIG = /** @type {!JsonObject} */ ({
       'href=${canonicalPath}&' +
       'title=${title}' +
       '${baseSuffix}',
-    'interval': '${base}&' + 'type=ping' + '${baseSuffix}',
+    'interval': '${base}&type=ping${baseSuffix}',
   },
   'triggers': {
     'defaultPageview': {

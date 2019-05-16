@@ -366,7 +366,7 @@ describes.sandboxed('Extensions', {}, () => {
     it.configure()
       .skipSafari()
       .run(
-        'should install declared elements for ' + 'AmpDocShell in shadow-doc',
+        'should install declared elements for AmpDocShell in shadow-doc',
         () => {
           const ampdocShell = new AmpDocShell(win);
           const ampdocServiceMock = sandbox.mock(

@@ -1417,17 +1417,17 @@ describe('amp-a4a', () => {
         return a4a.layoutCallback().then(() => {
           expect(
             doc.querySelector(
-              'link[rel=preload]' + '[href="https://prefetch.me.com?a=b"]'
+              'link[rel=preload][href="https://prefetch.me.com?a=b"]'
             )
           ).to.be.ok;
           expect(
             doc.querySelector(
-              'link[rel=preload]' + '[href="https://prefetch.metoo.com?e=f"]'
+              'link[rel=preload][href="https://prefetch.metoo.com?e=f"]'
             )
           ).to.be.ok;
           expect(
             doc.querySelector(
-              'link[rel=preload]' + '[href="http://do.not.prefetch.me.com?c=d"]'
+              'link[rel=preload][href="http://do.not.prefetch.me.com?c=d"]'
             )
           ).to.not.be.ok;
         });

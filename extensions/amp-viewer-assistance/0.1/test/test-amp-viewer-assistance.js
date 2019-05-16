@@ -133,30 +133,27 @@ describes.fakeWin(
           });
       });
 
-      it(
-        'should not send if both "update" and "error" params are ' + 'missing',
-        () => {
-          const invoke = new ActionInvocation(element, 'updateActionState', {});
-          invoke.trust = ActionTrust.LOW;
-          let actionHandlerPromise;
-          expectAsyncConsoleError(
-            '[amp-viewer-assistance] "updateActionState"' +
-              ' action must have an "update" or "error" parameter.',
-            1
-          );
-          return service
-            .start_()
-            .then(() => {
-              sendMessageStub.resetHistory();
-              actionHandlerPromise = service.actionHandler_(invoke);
-              expect(actionHandlerPromise).to.be.null;
-              return actionHandlerPromise;
-            })
-            .then(() => {
-              expect(sendMessageStub).to.not.be.called;
-            });
-        }
-      );
+      it('should not send if both "update" and "error" params are missing', () => {
+        const invoke = new ActionInvocation(element, 'updateActionState', {});
+        invoke.trust = ActionTrust.LOW;
+        let actionHandlerPromise;
+        expectAsyncConsoleError(
+          '[amp-viewer-assistance] "updateActionState"' +
+            ' action must have an "update" or "error" parameter.',
+          1
+        );
+        return service
+          .start_()
+          .then(() => {
+            sendMessageStub.resetHistory();
+            actionHandlerPromise = service.actionHandler_(invoke);
+            expect(actionHandlerPromise).to.be.null;
+            return actionHandlerPromise;
+          })
+          .then(() => {
+            expect(sendMessageStub).to.not.be.called;
+          });
+      });
 
       it('should not send if "update.actionStatus" param is missing', () => {
         const args = {'update': {}};
@@ -262,32 +259,25 @@ describes.fakeWin(
         });
       });
 
-      it(
-        'should not send if both "update" and "error" params are' + ' present',
-        () => {
-          const args = {
-            'error': {},
-            'update': {},
-          };
-          const invoke = new ActionInvocation(
-            element,
-            'updateActionState',
-            args
-          );
-          invoke.trust = ActionTrust.LOW;
-          expectAsyncConsoleError(
-            '[amp-viewer-assistance] "updateActionState"' +
-              ' must have only one of the parameters "error" and "update".',
-            1
-          );
+      it('should not send if both "update" and "error" params are present', () => {
+        const args = {
+          'error': {},
+          'update': {},
+        };
+        const invoke = new ActionInvocation(element, 'updateActionState', args);
+        invoke.trust = ActionTrust.LOW;
+        expectAsyncConsoleError(
+          '[amp-viewer-assistance] "updateActionState"' +
+            ' must have only one of the parameters "error" and "update".',
+          1
+        );
 
-          return service.start_().then(() => {
-            sendMessageStub.resetHistory();
-            expect(service.actionHandler_(invoke)).to.be.null;
-            expect(sendMessageStub).to.not.be.called;
-          });
-        }
-      );
+        return service.start_().then(() => {
+          sendMessageStub.resetHistory();
+          expect(service.actionHandler_(invoke)).to.be.null;
+          expect(sendMessageStub).to.not.be.called;
+        });
+      });
     });
 
     it('should send handle the signIn action', () => {

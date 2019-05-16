@@ -152,28 +152,22 @@ describes.realWin('Platform store', {}, () => {
       });
     });
 
-    it(
-      'should resolve false if all future entitlement ' + 'are also negative ',
-      done => {
-        const negativeEntitlements = new Entitlement({
-          source: serviceIds[0],
-          raw: '',
-          service: serviceIds[0],
-        });
-        platformStore.entitlements_[serviceIds[0]] = negativeEntitlements;
-        platformStore.getGrantStatus().then(entitlements => {
-          if (entitlements === false) {
-            done();
-          } else {
-            throw new Error('Incorrect entitlement resolved');
-          }
-        });
-        platformStore.resolveEntitlement(
-          serviceIds[1],
-          entitlementsForService2
-        );
-      }
-    );
+    it('should resolve false if all future entitlement are also negative ', done => {
+      const negativeEntitlements = new Entitlement({
+        source: serviceIds[0],
+        raw: '',
+        service: serviceIds[0],
+      });
+      platformStore.entitlements_[serviceIds[0]] = negativeEntitlements;
+      platformStore.getGrantStatus().then(entitlements => {
+        if (entitlements === false) {
+          done();
+        } else {
+          throw new Error('Incorrect entitlement resolved');
+        }
+      });
+      platformStore.resolveEntitlement(serviceIds[1], entitlementsForService2);
+    });
   });
 
   describe('areAllPlatformsResolved_', () => {

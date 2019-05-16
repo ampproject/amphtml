@@ -184,7 +184,7 @@ describe('#line-delimited-response-handler', () => {
 
     // TODO(lannka, #15748): Fails on Safari 11.1.0.
     it.configure().skipSafari(
-      'should handle empty streamed ' + 'response properly',
+      'should handle empty streamed response properly',
       () => {
         slotData = [];
         setup();
@@ -201,7 +201,7 @@ describe('#line-delimited-response-handler', () => {
 
     // TODO(lannka, #15748): Fails on Safari 11.1.0.
     it.configure().skipSafari(
-      'should handle multiple no fill responses ' + 'properly',
+      'should handle multiple no fill responses properly',
       () => {
         slotData = [{headers: {}, creative: ''}, {headers: {}, creative: ''}];
         setup();

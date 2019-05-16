@@ -195,7 +195,7 @@ export class AmpViewerAssistance {
   validateAndTransformUpdateArgs_(args) {
     if (!args) {
       return Promise.reject(
-        '"updateActionState" was called with no' + ' arguments!"'
+        '"updateActionState" was called with no arguments!"'
       );
     }
 

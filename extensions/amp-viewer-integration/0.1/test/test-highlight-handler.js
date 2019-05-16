@@ -58,8 +58,7 @@ describes.fakeWin(
 
     it('too large json', () => {
       const rep = 100 << 10;
-      env.win.location =
-        'page.html#highlight=' + '['.repeat(rep) + ']'.repeat(rep);
+      env.win.location = 'page.html#highlight=['.repeat(rep) + ']'.repeat(rep);
       expect(getHighlightParam(env.ampdoc)).to.be.a('null');
     });
 

@@ -23,7 +23,7 @@ describe
   .configure()
   .skipFirefox()
   .skipEdge()
-  .run('amp-recaptcha-' + 'input', function() {
+  .run('amp-recaptcha-input', function() {
     describes.integration(
       'with form and amp-mustache',
       {

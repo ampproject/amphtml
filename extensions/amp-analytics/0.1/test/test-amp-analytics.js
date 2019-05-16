@@ -559,34 +559,31 @@ describes.realWin(
         });
       });
 
-      it(
-        'expands trigger vars with higher precedence' + 'than config vars',
-        () => {
-          const analytics = getAnalyticsTag({
-            'vars': {
-              'var1': 'config1',
-              'var2': 'config2',
-            },
-            'requests': {
-              'pageview': 'https://example.com/test1=${var1}&test2=${var2}',
-            },
-            'triggers': [
-              {
-                'on': 'visible',
-                'request': 'pageview',
-                'vars': {
-                  'var1': 'trigger1',
-                },
+      it('expands trigger vars with higher precedencethan config vars', () => {
+        const analytics = getAnalyticsTag({
+          'vars': {
+            'var1': 'config1',
+            'var2': 'config2',
+          },
+          'requests': {
+            'pageview': 'https://example.com/test1=${var1}&test2=${var2}',
+          },
+          'triggers': [
+            {
+              'on': 'visible',
+              'request': 'pageview',
+              'vars': {
+                'var1': 'trigger1',
               },
-            ],
-          });
-          return waitForSendRequest(analytics).then(() => {
-            requestVerifier.verifyRequest(
-              'https://example.com/test1=trigger1&test2=config2'
-            );
-          });
-        }
-      );
+            },
+          ],
+        });
+        return waitForSendRequest(analytics).then(() => {
+          requestVerifier.verifyRequest(
+            'https://example.com/test1=trigger1&test2=config2'
+          );
+        });
+      });
 
       it(
         'expands element level vars with higher precedence' +
@@ -615,54 +612,48 @@ describes.realWin(
         }
       );
 
-      it(
-        'expands config vars with higher precedence' + 'than platform vars',
-        () => {
-          const analytics = getAnalyticsTag({
-            'vars': {'random': 428},
-            'requests': {
-              'pageview': 'https://example.com/test1=${title}&test2=${random}',
-            },
-            'triggers': [{'on': 'visible', 'request': 'pageview'}],
-          });
-          return waitForSendRequest(analytics).then(() => {
-            requestVerifier.verifyRequest(
-              'https://example.com/test1=Test%20Title&test2=428'
-            );
-          });
-        }
-      );
+      it('expands config vars with higher precedencethan platform vars', () => {
+        const analytics = getAnalyticsTag({
+          'vars': {'random': 428},
+          'requests': {
+            'pageview': 'https://example.com/test1=${title}&test2=${random}',
+          },
+          'triggers': [{'on': 'visible', 'request': 'pageview'}],
+        });
+        return waitForSendRequest(analytics).then(() => {
+          requestVerifier.verifyRequest(
+            'https://example.com/test1=Test%20Title&test2=428'
+          );
+        });
+      });
 
-      it(
-        'expands and encodes requests, config vars,' + 'and trigger vars',
-        () => {
-          const analytics = getAnalyticsTag({
-            'vars': {
-              'c1': 'config 1',
-              'c2': 'config&2',
-            },
-            'requests': {
-              'base': 'https://example.com/test?c1=${c1}&t1=${t1}',
-              'pageview': '${base}&c2=${c2}&t2=${t2}',
-            },
-            'triggers': [
-              {
-                'on': 'visible',
-                'request': 'pageview',
-                'vars': {
-                  't1': 'trigger=1',
-                  't2': 'trigger?2',
-                },
+      it('expands and encodes requests, config vars,and trigger vars', () => {
+        const analytics = getAnalyticsTag({
+          'vars': {
+            'c1': 'config 1',
+            'c2': 'config&2',
+          },
+          'requests': {
+            'base': 'https://example.com/test?c1=${c1}&t1=${t1}',
+            'pageview': '${base}&c2=${c2}&t2=${t2}',
+          },
+          'triggers': [
+            {
+              'on': 'visible',
+              'request': 'pageview',
+              'vars': {
+                't1': 'trigger=1',
+                't2': 'trigger?2',
               },
-            ],
-          });
-          return waitForSendRequest(analytics).then(() => {
-            requestVerifier.verifyRequest(
-              'https://example.com/test?c1=config%201&t1=trigger%3D1&c2=config%262&t2=trigger%3F2'
-            );
-          });
-        }
-      );
+            },
+          ],
+        });
+        return waitForSendRequest(analytics).then(() => {
+          requestVerifier.verifyRequest(
+            'https://example.com/test?c1=config%201&t1=trigger%3D1&c2=config%262&t2=trigger%3F2'
+          );
+        });
+      });
 
       it('encodes array vars', () => {
         const analytics = getAnalyticsTag({

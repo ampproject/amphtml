@@ -86,19 +86,16 @@ describe('iframe-transport-client', () => {
     }
   );
 
-  it(
-    'fails to create iframeTransportClient if window.name is missing' + ' type',
-    () => {
-      const oldWindowName = window.name;
-      allowConsoleError(() => {
-        expect(() => {
-          window.name = JSON.stringify({sentinel});
-          new IframeTransportClient(window);
-        }).to.throw(/must supply vendor name/);
-      });
-      window.name = oldWindowName;
-    }
-  );
+  it('fails to create iframeTransportClient if window.name is missing type', () => {
+    const oldWindowName = window.name;
+    allowConsoleError(() => {
+      expect(() => {
+        window.name = JSON.stringify({sentinel});
+        new IframeTransportClient(window);
+      }).to.throw(/must supply vendor name/);
+    });
+    window.name = oldWindowName;
+  });
 
   it('sets sentinel from window.name.sentinel ', () => {
     const client = iframeTransportClient.getIframeMessagingClient();

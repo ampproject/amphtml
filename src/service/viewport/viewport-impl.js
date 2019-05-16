@@ -1204,7 +1204,7 @@ export class Viewport {
     }
     dev().fine(
       TAG_,
-      'scroll: ' + 'scrollTop=' + newScrollTop + '; ' + 'velocity=' + velocity
+      'scroll: scrollTop=' + newScrollTop + '; velocity=' + velocity
     );
     if (Math.abs(velocity) < 0.03) {
       this.changed_(/* relayoutAll */ false, velocity);

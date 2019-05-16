@@ -124,8 +124,7 @@ const strings = {
       'експеримента за AMP материали.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
-    string:
-      'Най-добрият начин за преглед на страницата е във вертикален ' + 'режим',
+    string: 'Най-добрият начин за преглед на страницата е във вертикален режим',
   },
   [LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT]: {
     string:

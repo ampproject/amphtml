@@ -432,7 +432,7 @@ export class AmpConsent extends AMP.BaseElement {
     userAssert(
       this.consentConfig_['checkConsentHref'] ||
         this.consentConfig_['promptIfUnknownForGeoGroup'],
-      'neither checkConsentHref nor ' + 'promptIfUnknownForGeoGroup is defined'
+      'neither checkConsentHref nor promptIfUnknownForGeoGroup is defined'
     );
     let consentRequiredPromise = null;
     if (this.consentConfig_['promptIfUnknownForGeoGroup']) {

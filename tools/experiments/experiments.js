@@ -440,7 +440,7 @@ if (getMode().localDev) {
   EXPERIMENTS.forEach(experiment => {
     devAssert(
       experiment.cleanupIssue,
-      `experiment ${experiment.name} must` + ' have a `cleanupIssue` field.'
+      `experiment ${experiment.name} must have a \`cleanupIssue\` field.`
     );
   });
 }

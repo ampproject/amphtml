@@ -1004,22 +1004,19 @@ describes.realWin('Resource', {amp: true}, env => {
       resource.startLayout();
     });
 
-    it(
-      'should call unlayoutCallback on built element' + ' but NOT update state',
-      () => {
-        resource.state_ = ResourceState.LAYOUT_COMPLETE;
-        elementMock
-          .expects('unlayoutCallback')
-          .returns(false)
-          .once();
-        elementMock
-          .expects('togglePlaceholder')
-          .withArgs(true)
-          .never();
-        resource.unlayout();
-        expect(resource.getState()).to.equal(ResourceState.LAYOUT_COMPLETE);
-      }
-    );
+    it('should call unlayoutCallback on built element but NOT update state', () => {
+      resource.state_ = ResourceState.LAYOUT_COMPLETE;
+      elementMock
+        .expects('unlayoutCallback')
+        .returns(false)
+        .once();
+      elementMock
+        .expects('togglePlaceholder')
+        .withArgs(true)
+        .never();
+      resource.unlayout();
+      expect(resource.getState()).to.equal(ResourceState.LAYOUT_COMPLETE);
+    });
 
     it('should call viewportCallback when resource not in viewport', () => {
       resource.state_ = ResourceState.LAYOUT_COMPLETE;

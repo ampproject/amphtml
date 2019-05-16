@@ -580,7 +580,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       const TAG = this.getName_();
       this.user().error(
         TAG,
-        'Ignoring request for event. Request string ' + 'not found: ',
+        'Ignoring request for event. Request string not found: ',
         trigger['request']
       );
       if (!hasPostMessage) {

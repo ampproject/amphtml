@@ -153,7 +153,7 @@ function getReviewsTabContainer(global) {
 function getProductGalleryContainer(global, data) {
   const container = global.document.createElement('div');
   container.className =
-    'yotpo yotpo-pictures-gallery yotpo-product-gallery ' + 'yotpo-size-6';
+    'yotpo yotpo-pictures-gallery yotpo-product-gallery yotpo-size-6';
   container.setAttribute('data-product-id', data.productId);
   container.setAttribute('data-demo', data.demo);
   container.setAttribute('data-layout-rows', data.layoutRows);

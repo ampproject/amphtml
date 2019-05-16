@@ -84,27 +84,24 @@ describes.realWin('yield', {}, env => {
     expect(value).to.be.true;
   });
 
-  it(
-    'should work with manually resolved promise inside ' + 'setTimeout',
-    function*() {
-      let value;
-      let resolver;
-      const promise = new Promise(r => {
-        resolver = r;
-      });
-      promise.then(() => {
-        value = true;
-      });
-      win.setTimeout(() => {
-        value = false;
-        resolver();
-      }, 100);
-      clock.tick(100);
-      expect(value).to.be.false;
-      yield macroTask();
-      expect(value).to.be.true;
-    }
-  );
+  it('should work with manually resolved promise inside setTimeout', function*() {
+    let value;
+    let resolver;
+    const promise = new Promise(r => {
+      resolver = r;
+    });
+    promise.then(() => {
+      value = true;
+    });
+    win.setTimeout(() => {
+      value = false;
+      resolver();
+    }, 100);
+    clock.tick(100);
+    expect(value).to.be.false;
+    yield macroTask();
+    expect(value).to.be.true;
+  });
 
   it('should block a promise', function*() {
     let resolver;

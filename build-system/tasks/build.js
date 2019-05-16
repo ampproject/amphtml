@@ -108,7 +108,7 @@ watch.flags = {
   with_shadow: '  Also watch and build the amp-shadow.js binary.',
   extensions: '  Watches and builds only the listed extensions.',
   extensions_from:
-    '  Watches and builds only the extensions from the ' + 'listed AMP(s).',
+    '  Watches and builds only the extensions from the listed AMP(s).',
   noextensions: '  Watches and builds with no extensions.',
 };
 
@@ -116,6 +116,6 @@ defaultTask.description = 'Runs "watch" and then "serve"';
 defaultTask.flags = {
   extensions: '  Watches and builds only the listed extensions.',
   extensions_from:
-    '  Watches and builds only the extensions from the ' + 'listed AMP(s).',
+    '  Watches and builds only the extensions from the listed AMP(s).',
   noextensions: '  Watches and builds with no extensions.',
 };

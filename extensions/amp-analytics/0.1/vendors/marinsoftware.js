@@ -25,7 +25,7 @@ export const MARINSOFTWARE_CONFIG = /** @type {!JsonObject} */ ({
       '&page=${sourceUrl}' +
       '&uuid=${clientId(marin_amp_id)}' +
       '&rnd=${random}',
-    'pageView': '${base}?' + '${baseParams}' + '&act=1',
+    'pageView': '${base}?${baseParams}&act=1',
     'conversion':
       '${base}?' +
       '${baseParams}' +

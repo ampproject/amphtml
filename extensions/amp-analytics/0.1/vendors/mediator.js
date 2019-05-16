@@ -18,8 +18,7 @@ export const MEDIATOR_CONFIG = /** @type {!JsonObject} */ ({
   'requests': {
     'host': '//collector.mediator.media/script/${mediator_id}/amp/',
     'renderstart': '${host}init/?url=${canonicalUrl}',
-    'prefix':
-      '${host}register/?url=${canonicalUrl}' + '&ref=${documentReferrer}&',
+    'prefix': '${host}register/?url=${canonicalUrl}&ref=${documentReferrer}&',
     'suffix': 'vh=${viewportHeight}&sh=${scrollHeight}&st=${scrollTop}',
     'pageview': '${prefix}e=v',
     'timer': '${prefix}e=t&${suffix}',

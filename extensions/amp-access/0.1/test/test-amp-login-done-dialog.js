@@ -98,7 +98,7 @@ describe('LoginDoneDialog', () => {
     it('should build complete CSS expression', () => {
       windowApi.navigator.language = 'fr-FR';
       expect(dialog.buildStyles_()).to.equal(
-        '[lang="fr"], [lang="fr-FR"] ' + '{display: block}'
+        '[lang="fr"], [lang="fr-FR"] {display: block}'
       );
     });
 
@@ -106,7 +106,7 @@ describe('LoginDoneDialog', () => {
       windowApi.navigator.language = 'fr-FR';
       windowApi.location.search = '?hl=en-US';
       expect(dialog.buildStyles_()).to.equal(
-        '[lang="en"], [lang="en-US"] ' + '{display: block}'
+        '[lang="en"], [lang="en-US"] {display: block}'
       );
     });
 
@@ -114,7 +114,7 @@ describe('LoginDoneDialog', () => {
       windowApi.navigator.language = 'fr-FR';
       windowApi.location.search = '?hl=unk';
       expect(dialog.buildStyles_()).to.equal(
-        '[lang="fr"], [lang="fr-FR"] ' + '{display: block}'
+        '[lang="fr"], [lang="fr-FR"] {display: block}'
       );
     });
 
@@ -123,7 +123,7 @@ describe('LoginDoneDialog', () => {
       windowApi.navigator.language = 'unk';
       windowApi.location.search = '?hl=unk';
       expect(dialog.buildStyles_()).to.equal(
-        '[lang="de"], [lang="de-DE"] ' + '{display: block}'
+        '[lang="de"], [lang="de-DE"] {display: block}'
       );
     });
 
@@ -132,7 +132,7 @@ describe('LoginDoneDialog', () => {
       windowApi.navigator.language = 'unk';
       windowApi.location.search = '?hl=unk';
       expect(dialog.buildStyles_()).to.equal(
-        '[lang="en"], [lang="en-US"] ' + '{display: block}'
+        '[lang="en"], [lang="en-US"] {display: block}'
       );
     });
   });

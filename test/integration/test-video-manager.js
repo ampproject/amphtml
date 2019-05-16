@@ -25,7 +25,7 @@ import {toArray} from '../../src/types';
 
 // TODO(dvoytenko): These tests time out when run with the prod AMP config.
 // See #11588.
-describe.configure().skip('Fake Video Player' + 'Integration Tests', () => {
+describe.configure().skip('Fake Video PlayerIntegration Tests', () => {
   // We run the video player integration tests on a fake video player as part
   // of functional testing. Same tests run on real video players such as
   // `amp-video` and `amp-youtube` as part of integration testing.

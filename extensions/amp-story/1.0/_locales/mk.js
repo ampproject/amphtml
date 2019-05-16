@@ -109,7 +109,7 @@ const strings = {
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_HEIGHT_SIZE_TEXT]: {
     string:
-      'Проширете ја висината на прозорецот за прикажување на ова ' + 'искуство',
+      'Проширете ја висината на прозорецот за прикажување на ова искуство',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT]: {
     string:
@@ -118,7 +118,7 @@ const strings = {
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_WIDTH_SIZE_TEXT]: {
     string:
-      'Проширете ја ширината на прозорецот за прикажување на ова ' + 'искуство',
+      'Проширете ја ширината на прозорецот за прикажување на ова искуство',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
     string:

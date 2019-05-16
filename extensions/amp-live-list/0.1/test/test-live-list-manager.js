@@ -275,55 +275,52 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
     }
   );
 
-  it(
-    "should not poll if all amp-live-list's are disabled after " + 'updates',
-    () => {
-      const liveList2 = getLiveList({'data-poll-interval': '8000'}, 'id-2');
+  it("should not poll if all amp-live-list's are disabled after updates", () => {
+    const liveList2 = getLiveList({'data-poll-interval': '8000'}, 'id-2');
 
-      ready();
-      // Important that we set this before build since then is when they register
-      liveList.buildCallback();
-      liveList2.buildCallback();
+    ready();
+    // Important that we set this before build since then is when they register
+    liveList.buildCallback();
+    liveList2.buildCallback();
+    expect(liveList.isEnabled()).to.be.true;
+    expect(liveList2.isEnabled()).to.be.true;
+    return manager.whenDocReady_().then(() => {
+      expect(manager.poller_.isRunning()).to.be.true;
+
+      const fromServer1 = doc.createElement('div');
+      const fromServer1List1 = doc.createElement('amp-live-list');
+      fromServer1List1.setAttribute('id', 'id-1');
+      const fromServer1List2 = doc.createElement('amp-live-list');
+      fromServer1List2.setAttribute('id', 'id-2');
+      fromServer1List2.setAttribute('disabled', '');
+      fromServer1.appendChild(fromServer1List1);
+      fromServer1.appendChild(fromServer1List2);
+
       expect(liveList.isEnabled()).to.be.true;
       expect(liveList2.isEnabled()).to.be.true;
-      return manager.whenDocReady_().then(() => {
-        expect(manager.poller_.isRunning()).to.be.true;
 
-        const fromServer1 = doc.createElement('div');
-        const fromServer1List1 = doc.createElement('amp-live-list');
-        fromServer1List1.setAttribute('id', 'id-1');
-        const fromServer1List2 = doc.createElement('amp-live-list');
-        fromServer1List2.setAttribute('id', 'id-2');
-        fromServer1List2.setAttribute('disabled', '');
-        fromServer1.appendChild(fromServer1List1);
-        fromServer1.appendChild(fromServer1List2);
+      manager.updateLiveLists_(fromServer1);
 
-        expect(liveList.isEnabled()).to.be.true;
-        expect(liveList2.isEnabled()).to.be.true;
+      // Still polls since at least one live list can still receive updates.
+      expect(liveList.isEnabled()).to.be.true;
+      expect(liveList2.isEnabled()).to.be.false;
+      expect(manager.poller_.isRunning()).to.be.true;
 
-        manager.updateLiveLists_(fromServer1);
+      const fromServer2 = doc.createElement('div');
+      const fromServer2List1 = doc.createElement('amp-live-list');
+      fromServer2List1.setAttribute('id', 'id-1');
+      fromServer2List1.setAttribute('disabled', '');
+      fromServer2.appendChild(fromServer2List1);
 
-        // Still polls since at least one live list can still receive updates.
-        expect(liveList.isEnabled()).to.be.true;
-        expect(liveList2.isEnabled()).to.be.false;
-        expect(manager.poller_.isRunning()).to.be.true;
+      manager.updateLiveLists_(fromServer2);
 
-        const fromServer2 = doc.createElement('div');
-        const fromServer2List1 = doc.createElement('amp-live-list');
-        fromServer2List1.setAttribute('id', 'id-1');
-        fromServer2List1.setAttribute('disabled', '');
-        fromServer2.appendChild(fromServer2List1);
-
-        manager.updateLiveLists_(fromServer2);
-
-        expect(liveList.isEnabled()).to.be.false;
-        expect(liveList2.isEnabled()).to.be.false;
-        // At this point nothing can ever turn this back on since we stopped
-        // polling altogether.
-        expect(manager.poller_.isRunning()).to.be.false;
-      });
-    }
-  );
+      expect(liveList.isEnabled()).to.be.false;
+      expect(liveList2.isEnabled()).to.be.false;
+      // At this point nothing can ever turn this back on since we stopped
+      // polling altogether.
+      expect(manager.poller_.isRunning()).to.be.false;
+    });
+  });
 
   it('should respect `disabled` property on amp-live-list', () => {
     const liveList2 = getLiveList({'data-poll-interval': '8000'}, 'id-2');

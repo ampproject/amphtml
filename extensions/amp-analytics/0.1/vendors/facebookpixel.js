@@ -21,7 +21,7 @@ export const FACEBOOKPIXEL_CONFIG = /** @type {!JsonObject} */ ({
   'requests': {
     'host': 'https://www.facebook.com',
     'base': '${host}/tr?noscript=1',
-    'pageview': '${base}&ev=PageView&' + 'id=${pixelId}',
+    'pageview': '${base}&ev=PageView&id=${pixelId}',
     'event':
       '${base}&ev=${eventName}&' +
       'id=${pixelId}' +

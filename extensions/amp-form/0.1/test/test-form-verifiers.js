@@ -140,38 +140,35 @@ describes.fakeWin('amp-form async verification', {}, env => {
       }
     );
 
-    it(
-      'should assign an error to elements that the server ' + 'fails to verify',
-      () => {
-        const errorMessage = 'Zip code and city do not match';
-        const errorResponse = {
-          json() {
-            return Promise.resolve({
-              verifyErrors: [
-                {
-                  name: 'zip',
-                  message: errorMessage,
-                },
-              ],
-            });
-          },
-        };
-        const xhrSpy = sandbox.spy(() =>
-          Promise.reject({
-            response: errorResponse,
-          })
-        );
-        const form = getForm(env.win.document);
-        const verifier = getFormVerifier(form, xhrSpy);
+    it('should assign an error to elements that the server fails to verify', () => {
+      const errorMessage = 'Zip code and city do not match';
+      const errorResponse = {
+        json() {
+          return Promise.resolve({
+            verifyErrors: [
+              {
+                name: 'zip',
+                message: errorMessage,
+              },
+            ],
+          });
+        },
+      };
+      const xhrSpy = sandbox.spy(() =>
+        Promise.reject({
+          response: errorResponse,
+        })
+      );
+      const form = getForm(env.win.document);
+      const verifier = getFormVerifier(form, xhrSpy);
 
-        form.city.value = 'Mountain View';
-        form.zip.value = '94043';
-        return verifier.onCommit().then(() => {
-          expect(form.zip.validity.customError).to.be.true;
-          expect(form.zip.validationMessage).to.equal(errorMessage);
-        });
-      }
-    );
+      form.city.value = 'Mountain View';
+      form.zip.value = '94043';
+      return verifier.onCommit().then(() => {
+        expect(form.zip.validity.customError).to.be.true;
+        expect(form.zip.validationMessage).to.equal(errorMessage);
+      });
+    });
 
     it(
       'should clear errors when any sibling of an input with an error ' +

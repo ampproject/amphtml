@@ -188,7 +188,7 @@ export class WindowMessenger {
     if (this.debug_) {
       dev().fine(
         TAG,
-        'Window message for listen() connection ' + 'received:',
+        'Window message for listen() connection received:',
         message
       );
     }
@@ -198,7 +198,7 @@ export class WindowMessenger {
         `Discarding connection message from ${origin} ` +
           "because it isn't an allowed origin:",
         message,
-        ' (allowed ' + ' origins are)',
+        ' (allowed  origins are)',
         allowedOrigins
       );
       return;
@@ -216,11 +216,7 @@ export class WindowMessenger {
       return;
     }
 
-    dev().fine(
-      TAG,
-      'Received expected connection handshake ' + 'message:',
-      message
-    );
+    dev().fine(TAG, 'Received expected connection handshake message:', message);
     // This was our expected handshake message Remove our message handler so we
     // don't get spammed with cross-domain messages
     this.window_.removeEventListener(
@@ -318,7 +314,7 @@ export class WindowMessenger {
     if (this.debug_) {
       dev().fine(
         TAG,
-        `Messenger channel to ${expectedRemoteOrigin} ` + 'established.'
+        `Messenger channel to ${expectedRemoteOrigin} established.`
       );
     }
     // Remove our message handler

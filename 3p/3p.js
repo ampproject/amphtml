@@ -79,8 +79,8 @@ export function run(id, win, data) {
  * @param {function()=} opt_cb
  */
 export function writeScript(win, url, opt_cb) {
-  /*eslint no-useless-concat: 0*/
   win.document.write(
+    // eslint-disable-next-line no-useless-concat
     '<' + 'script src="' + encodeURI(url) + '"><' + '/script>'
   );
   if (opt_cb) {
@@ -133,6 +133,7 @@ export function nextTick(win, fn) {
 function executeAfterWriteScript(win, fn) {
   const index = syncScriptLoads++;
   win['__runScript' + index] = fn;
+  // eslint-disable-next-line no-useless-concat
   win.document.write('<' + 'script>__runScript' + index + '()<' + '/script>');
 }
 

@@ -141,7 +141,7 @@ describes.repeated(
 
       it('should parse data-&style=value output correctly', () => {
         innerHtmlSetup(
-          'value = <a href="{{value}}"' + ' data-&style="color:red;">abc</a>'
+          'value = <a href="{{value}}" data-&style="color:red;">abc</a>'
         );
         template.compileCallback();
         const result = template.render({
@@ -182,7 +182,7 @@ describes.repeated(
     describe('Rendering Form Fields', () => {
       it('should allow rendering inputs', () => {
         innerHtmlSetup(
-          'value = ' + '<input value="{{value}}" onchange="{{invalidValue}}">'
+          'value = <input value="{{value}}" onchange="{{invalidValue}}">'
         );
         template.compileCallback();
         const result = template.render({
@@ -206,9 +206,7 @@ describes.repeated(
       });
 
       it('should not allow image/file input types rendering', () => {
-        innerHtmlSetup(
-          'value = ' + '<input value="{{value}}" type="{{type}}">'
-        );
+        innerHtmlSetup('value = <input value="{{value}}" type="{{type}}">');
         template.compileCallback();
         allowConsoleError(() => {
           const result = template.render({
@@ -248,9 +246,7 @@ describes.repeated(
       });
 
       it('should allow text input type rendering', () => {
-        innerHtmlSetup(
-          'value = ' + '<input value="{{value}}" type="{{type}}">'
-        );
+        innerHtmlSetup('value = <input value="{{value}}" type="{{type}}">');
         template.compileCallback();
         const result = template.render({
           value: 'myid',

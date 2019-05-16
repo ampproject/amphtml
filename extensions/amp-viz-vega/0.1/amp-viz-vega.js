@@ -154,7 +154,7 @@ export class AmpVizVega extends AMP.BaseElement {
         err => {
           userAssert(
             !err,
-            'data could not be ' + 'parsed. Is it in a valid JSON format?: %s',
+            'data could not be parsed. Is it in a valid JSON format?: %s',
             err
           );
         }
@@ -191,14 +191,14 @@ export class AmpVizVega extends AMP.BaseElement {
 
     userAssert(
       scripts.length == 1,
-      '%s: more than one ' + '<script> tags found. Only one allowed.',
+      '%s: more than one <script> tags found. Only one allowed.',
       this.getName_()
     );
 
     const child = scripts[0];
     userAssert(
       dom.isJsonScriptTag(child),
-      '%s: data should ' + 'be put in a <script type="application/json"> tag.',
+      '%s: data should be put in a <script type="application/json"> tag.',
       this.getName_()
     );
 

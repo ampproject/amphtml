@@ -141,7 +141,7 @@ export class ConsentConfig {
         if (keys[i] != 'default') {
           user().warn(
             TAG,
-            'policy %s is currently not supported ' + 'and will be ignored',
+            'policy %s is currently not supported and will be ignored',
             keys[i]
           );
           delete config['policy'][keys[i]];

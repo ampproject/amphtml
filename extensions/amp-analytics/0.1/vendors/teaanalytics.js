@@ -35,7 +35,7 @@ export const TEAANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       '&event.local_time_ms=${timestamp}' +
       '&event.params._staging_flag=${debug}' +
       '&verbose=${debug}',
-    base: '${domain}?' + '${commonParams}' + '&rnd=${random}',
+    base: '${domain}?${commonParams}&rnd=${random}',
     pageview:
       '${base}' +
       '&event=predefine_pageview' +

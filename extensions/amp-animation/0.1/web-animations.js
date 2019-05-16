@@ -137,7 +137,7 @@ class Scanner {
   /** @param {!Object} unusedSpec */
   onUnknownAnimation(unusedSpec) {
     throw dev().createError(
-      'unknown animation type:' + ' must have "animations" or "keyframes" field'
+      'unknown animation type: must have "animations" or "keyframes" field'
     );
   }
 }

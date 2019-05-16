@@ -430,7 +430,7 @@ describe('IntersectionObserverPolyfill', () => {
     });
 
     describe('mutation observer', () => {
-      it('should create a mutation observer,' + ' on initial observer', () => {
+      it('should create a mutation observer, on initial observer', () => {
         io = new IntersectionObserverPolyfill(callbackSpy, {
           threshold: [0, 1],
         });
@@ -441,7 +441,7 @@ describe('IntersectionObserverPolyfill', () => {
         expect(io.hiddenObserverUnlistener_).to.be.ok;
       });
 
-      it('should remove mutation observer,' + ' on disconnect', () => {
+      it('should remove mutation observer, on disconnect', () => {
         io = new IntersectionObserverPolyfill(callbackSpy, {
           threshold: [0, 1],
         });

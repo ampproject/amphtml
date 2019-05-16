@@ -110,7 +110,7 @@ const buildReplayButtonTemplate = (title, domainName, imageUrl = undefined) => {
     tag: 'div',
     attrs: dict({
       'class':
-        'i-amphtml-story-bookend-replay ' + 'i-amphtml-story-bookend-top-level',
+        'i-amphtml-story-bookend-replay i-amphtml-story-bookend-top-level',
     }),
     children: [
       {

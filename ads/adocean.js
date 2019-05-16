@@ -118,8 +118,8 @@ let runSyncCount = 0;
  */
 function runSync(global, cb) {
   global['__aoPrivFnct' + ++runSyncCount] = cb;
-  /*eslint no-useless-concat: 0*/
   global.document.write(
+    // eslint-disable-next-line no-useless-concat
     '<' + 'script>__aoPrivFnct' + runSyncCount + '();<' + '/script>'
   );
 }

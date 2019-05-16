@@ -1224,77 +1224,74 @@ describes.realWin(
         }
       );
 
-      it(
-        `throttles ${hoverEvent} (hover)` + ' for showing controls',
-        function() {
-          const div = doc.createElement('div');
-          div.setAttribute('id', 'c');
-          doc.body.appendChild(div);
+      it(`throttles ${hoverEvent} (hover) for showing controls`, function() {
+        const div = doc.createElement('div');
+        div.setAttribute('id', 'c');
+        doc.body.appendChild(div);
 
-          imaVideoObj.imaVideo(win, {
-            width: 640,
-            height: 360,
-            src: srcUrl,
-            tag: adTagUrl,
+        imaVideoObj.imaVideo(win, {
+          width: 640,
+          height: 360,
+          src: srcUrl,
+          tag: adTagUrl,
+        });
+
+        imaVideoObj.hideControls();
+        expect(imaVideoObj.getPropertiesForTesting().controlsVisible).to.be
+          .false;
+        expect(
+          imaVideoObj.getPropertiesForTesting().controlsDiv.style.display
+        ).to.eql('none');
+
+        const interactEvent = new Event(hoverEvent);
+        const videoPlayerElement = imaVideoObj.getPropertiesForTesting()
+          .videoPlayer;
+
+        imaVideoObj.setPlayerStateForTesting(
+          imaVideoObj.getPropertiesForTesting().PlayerStates.PLAYING
+        );
+        imaVideoObj.addHoverEventToElement(
+          videoPlayerElement,
+          imaVideoObj.getShowControlsThrottledForTesting()
+        );
+        videoPlayerElement.dispatchEvent(interactEvent);
+
+        expect(imaVideoObj.getPropertiesForTesting().controlsVisible).to.be
+          .true;
+        expect(
+          imaVideoObj.getPropertiesForTesting().controlsDiv.style.display
+        ).to.eql('flex');
+
+        imaVideoObj.hideControls();
+        expect(imaVideoObj.getPropertiesForTesting().controlsVisible).to.be
+          .false;
+        expect(
+          imaVideoObj.getPropertiesForTesting().controlsDiv.style.display
+        ).to.eql('none');
+
+        return timer
+          .promise(100)
+          .then(() => {
+            videoPlayerElement.dispatchEvent(interactEvent);
+
+            expect(imaVideoObj.getPropertiesForTesting().controlsVisible).to.be
+              .false;
+            expect(
+              imaVideoObj.getPropertiesForTesting().controlsDiv.style.display
+            ).to.eql('none');
+
+            return timer.promise(950);
+          })
+          .then(() => {
+            videoPlayerElement.dispatchEvent(interactEvent);
+
+            expect(imaVideoObj.getPropertiesForTesting().controlsVisible).to.be
+              .true;
+            expect(
+              imaVideoObj.getPropertiesForTesting().controlsDiv.style.display
+            ).to.eql('flex');
           });
-
-          imaVideoObj.hideControls();
-          expect(imaVideoObj.getPropertiesForTesting().controlsVisible).to.be
-            .false;
-          expect(
-            imaVideoObj.getPropertiesForTesting().controlsDiv.style.display
-          ).to.eql('none');
-
-          const interactEvent = new Event(hoverEvent);
-          const videoPlayerElement = imaVideoObj.getPropertiesForTesting()
-            .videoPlayer;
-
-          imaVideoObj.setPlayerStateForTesting(
-            imaVideoObj.getPropertiesForTesting().PlayerStates.PLAYING
-          );
-          imaVideoObj.addHoverEventToElement(
-            videoPlayerElement,
-            imaVideoObj.getShowControlsThrottledForTesting()
-          );
-          videoPlayerElement.dispatchEvent(interactEvent);
-
-          expect(imaVideoObj.getPropertiesForTesting().controlsVisible).to.be
-            .true;
-          expect(
-            imaVideoObj.getPropertiesForTesting().controlsDiv.style.display
-          ).to.eql('flex');
-
-          imaVideoObj.hideControls();
-          expect(imaVideoObj.getPropertiesForTesting().controlsVisible).to.be
-            .false;
-          expect(
-            imaVideoObj.getPropertiesForTesting().controlsDiv.style.display
-          ).to.eql('none');
-
-          return timer
-            .promise(100)
-            .then(() => {
-              videoPlayerElement.dispatchEvent(interactEvent);
-
-              expect(imaVideoObj.getPropertiesForTesting().controlsVisible).to
-                .be.false;
-              expect(
-                imaVideoObj.getPropertiesForTesting().controlsDiv.style.display
-              ).to.eql('none');
-
-              return timer.promise(950);
-            })
-            .then(() => {
-              videoPlayerElement.dispatchEvent(interactEvent);
-
-              expect(imaVideoObj.getPropertiesForTesting().controlsVisible).to
-                .be.true;
-              expect(
-                imaVideoObj.getPropertiesForTesting().controlsDiv.style.display
-              ).to.eql('flex');
-            });
-        }
-      );
+      });
     });
 
     it('suppresses IMA load with unknown consent', () => {

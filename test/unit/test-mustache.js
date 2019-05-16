@@ -66,7 +66,7 @@ describe('Mustache', () => {
     };
     expect(
       mustache.render(
-        '{{#t}}{{x.pop}}X{{x.pop}}{{/t}}' + '{{#t}}{{0}}Y{{1}}{{/t}}',
+        '{{#t}}{{x.pop}}X{{x.pop}}{{/t}}{{#t}}{{0}}Y{{1}}{{/t}}',
         obj
       )
     ).to.equal('X0Y1');
@@ -74,7 +74,7 @@ describe('Mustache', () => {
 
   it('should NOT allow delimiter substituion', () => {
     expect(
-      mustache.render('{{value}}' + '{{=<% %>=}}' + '<% value %>', {
+      mustache.render('{{value}}{{=<% %>=}}<% value %>', {
         value: 'abc',
       })
     ).to.equal('abc<% value %>');

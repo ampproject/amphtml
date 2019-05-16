@@ -35,8 +35,7 @@ const LANDSCAPE_OVERLAY_CLASS = 'i-amphtml-story-landscape';
 const LANDSCAPE_ORIENTATION_WARNING_TEMPLATE = {
   tag: 'div',
   attrs: dict({
-    'class':
-      'i-amphtml-story-no-rotation-overlay ' + 'i-amphtml-story-system-reset',
+    'class': 'i-amphtml-story-no-rotation-overlay i-amphtml-story-system-reset',
   }),
   children: [
     {
@@ -66,8 +65,7 @@ const LANDSCAPE_ORIENTATION_WARNING_TEMPLATE = {
 const DESKTOP_SIZE_WARNING_TEMPLATE = {
   tag: 'div',
   attrs: dict({
-    'class':
-      'i-amphtml-story-no-rotation-overlay ' + 'i-amphtml-story-system-reset',
+    'class': 'i-amphtml-story-no-rotation-overlay i-amphtml-story-system-reset',
   }),
   children: [
     {

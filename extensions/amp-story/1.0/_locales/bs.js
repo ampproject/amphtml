@@ -124,7 +124,7 @@ const strings = {
   },
   [LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT]: {
     string:
-      'Žao nam je, ali izgleda da vaš preglednik ne podržava ovo ' + 'iskustvo',
+      'Žao nam je, ali izgleda da vaš preglednik ne podržava ovo iskustvo',
   },
 };
 

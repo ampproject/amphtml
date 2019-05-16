@@ -167,7 +167,7 @@ describes.realWin(
 
     it('should parse child and fetch `src` if both provided', () => {
       element.innerHTML =
-        '<script type="application/json">' + '{"foo": "bar"}</script>';
+        '<script type="application/json">{"foo": "bar"}</script>';
       element.setAttribute('src', 'https://foo.com/bar?baz=1');
       element.build();
 

@@ -32,7 +32,7 @@ export function videonow(global, data) {
   // production version by default
   let script =
     (data.src && decodeURI(data.src)) ||
-    'https://static.videonow.ru/vn_init.js' + '?amp=1&profileId=' + profileId;
+    'https://static.videonow.ru/vn_init.js?amp=1&profileId=' + profileId;
 
   if (kind === 'local') {
     script =

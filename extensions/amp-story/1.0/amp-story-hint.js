@@ -43,7 +43,7 @@ const TEMPLATE = {
         {
           tag: 'div',
           attrs: dict({
-            'class': 'i-amphtml-story-navigation-help-section' + ' prev-page',
+            'class': 'i-amphtml-story-navigation-help-section prev-page',
           }),
           children: [
             {
@@ -77,7 +77,7 @@ const TEMPLATE = {
         {
           tag: 'div',
           attrs: dict({
-            'class': 'i-amphtml-story-navigation-help-section' + ' next-page',
+            'class': 'i-amphtml-story-navigation-help-section next-page',
           }),
           children: [
             {

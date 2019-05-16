@@ -302,7 +302,7 @@ prependGlobal.flags = {
     '  Switch to a git branch to get config source from. ' +
     'Uses master by default.',
   'local_branch':
-    "  Don't switch branches and use the config from the " + 'local branch.',
+    "  Don't switch branches and use the config from the local branch.",
   'fortesting': '  Force the config to return true for getMode().test',
   'remove':
     '  Removes previously prepended json config from the target ' +

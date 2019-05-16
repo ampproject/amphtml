@@ -535,34 +535,31 @@ describes.sandboxed('VisibilityModel', {}, () => {
         ];
 
         for (const i in shouldTriggerEventTestSpecs) {
-          it(
-            'should trigger event with reportWhen,' + `test case #${i}`,
-            async () => {
-              const vh = new VisibilityModel(
-                shouldTriggerEventTestSpecs[i],
-                () => 0
-              );
+          it(`should trigger event with reportWhen, test case #${i}`, async () => {
+            const vh = new VisibilityModel(
+              shouldTriggerEventTestSpecs[i],
+              () => 0
+            );
 
-              vh.onTriggerEvent(eventSpy);
-              // TODO(warrengm): Inverting the two following lines will break this
-              // test. Consider updating the API to make it safer.
-              vh.setReportReady(() => reportPromise);
-              vh.setReady(true);
+            vh.onTriggerEvent(eventSpy);
+            // TODO(warrengm): Inverting the two following lines will break this
+            // test. Consider updating the API to make it safer.
+            vh.setReportReady(() => reportPromise);
+            vh.setReady(true);
 
-              vh.update();
-              await tick();
-              expect(eventSpy).to.not.be.called;
+            vh.update();
+            await tick();
+            expect(eventSpy).to.not.be.called;
 
-              promiseResolver();
-              await tick();
-              expect(eventSpy).to.be.calledOnce;
+            promiseResolver();
+            await tick();
+            expect(eventSpy).to.be.calledOnce;
 
-              // Subsequent calls should not trigger the event again.
-              vh.update();
-              await tick();
-              expect(eventSpy).to.be.calledOnce;
-            }
-          );
+            // Subsequent calls should not trigger the event again.
+            vh.update();
+            await tick();
+            expect(eventSpy).to.be.calledOnce;
+          });
         }
       });
     });

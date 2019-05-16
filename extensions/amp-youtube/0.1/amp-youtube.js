@@ -197,7 +197,7 @@ class AmpYoutube extends AMP.BaseElement {
       delete params['autoplay'];
       this.user().error(
         'AMP-YOUTUBE',
-        'Use autoplay attribute instead of ' + 'data-param-autoplay'
+        'Use autoplay attribute instead of data-param-autoplay'
       );
     }
 

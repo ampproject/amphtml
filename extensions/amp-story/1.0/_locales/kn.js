@@ -120,7 +120,7 @@ const strings = {
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
     string:
-      'ಈ ವಿಷಯವನ್ನು ವೀಕ್ಷಿಸಲು ನೀವು AMP ಸ್ಟೋರಿ ಪ್ರಯೋಗವನ್ನು ' + 'ಸಕ್ರಿಯಗೊಳಿಸಬೇಕು.',
+      'ಈ ವಿಷಯವನ್ನು ವೀಕ್ಷಿಸಲು ನೀವು AMP ಸ್ಟೋರಿ ಪ್ರಯೋಗವನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಬೇಕು.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
     string: 'ಪೋರ್ಟೇಟ್ ಮೋಡ್‌ನಲ್ಲಿ ಈ ಪುಟವನ್ನು ಅತ್ಯತ್ತಮವಾಗಿ ವೀಕ್ಷಿಸಬಹುದಾಗಿದೆ',

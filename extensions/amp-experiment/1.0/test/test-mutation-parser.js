@@ -174,20 +174,17 @@ describes.realWin('amp-experiment mutation-parser', {}, env => {
       });
     });
 
-    it(
-      'should return an operation that,' + ' changes attribute of selector',
-      () => {
-        const expectedStyle = 'color: #FFF';
-        const mutation = getAttributeMutation('style', expectedStyle);
-        const mutationOperation = parseMutation(mutation, doc);
+    it('should return an operation that, changes attribute of selector', () => {
+      const expectedStyle = 'color: #FFF';
+      const mutation = getAttributeMutation('style', expectedStyle);
+      const mutationOperation = parseMutation(mutation, doc);
 
-        mutationOperation();
+      mutationOperation();
 
-        expect(
-          doc.querySelector(mutation['target']).getAttribute('style')
-        ).to.be.equal(expectedStyle);
-      }
-    );
+      expect(
+        doc.querySelector(mutation['target']).getAttribute('style')
+      ).to.be.equal(expectedStyle);
+    });
   });
 
   describe('characterData', () => {
@@ -207,19 +204,16 @@ describes.realWin('amp-experiment mutation-parser', {}, env => {
       });
     });
 
-    it(
-      'should return an operation that,' + ' changes textContent of selector',
-      () => {
-        const expectedTextContent = 'Expected';
-        const mutation = getCharacterDataMutation(expectedTextContent);
-        const mutationOperation = parseMutation(mutation, doc);
+    it('should return an operation that, changes textContent of selector', () => {
+      const expectedTextContent = 'Expected';
+      const mutation = getCharacterDataMutation(expectedTextContent);
+      const mutationOperation = parseMutation(mutation, doc);
 
-        mutationOperation();
+      mutationOperation();
 
-        expect(doc.querySelector(mutation['target']).textContent).to.be.equal(
-          expectedTextContent
-        );
-      }
-    );
+      expect(doc.querySelector(mutation['target']).textContent).to.be.equal(
+        expectedTextContent
+      );
+    });
   });
 });

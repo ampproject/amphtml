@@ -593,7 +593,7 @@ describes.repeated(
               listContainer.setAttribute('role', 'list');
               listContainer.setAttribute(
                 'class',
-                'i-amphtml-fill-content ' + 'i-amphtml-replace-content'
+                'i-amphtml-fill-content i-amphtml-replace-content'
               );
               const listItem = document.createElement('div');
               listItem.setAttribute('role', 'item');

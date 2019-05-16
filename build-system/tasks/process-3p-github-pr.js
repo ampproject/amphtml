@@ -119,7 +119,7 @@ function calculateReviewer() {
  */
 function process3pGithubPr() {
   if (!GITHUB_ACCESS_TOKEN) {
-    log(colors.red('You have not set the ' + 'GITHUB_ACCESS_TOKEN env var.'));
+    log(colors.red('You have not set the GITHUB_ACCESS_TOKEN env var.'));
     log(
       colors.green(
         'See https://help.github.com/articles/' +
@@ -300,9 +300,7 @@ function applyComment(issue, comment) {
     defaultOption
   );
   if (isDryrun) {
-    log(
-      colors.blue(`apply comment to PR #${number}, ` + `comment is ${comment}`)
-    );
+    log(colors.blue(`apply comment to PR #${number}, comment is ${comment}`));
     return Promise.resolve();
   }
   return request(options);
@@ -328,7 +326,7 @@ function assignIssue(issue, assignees) {
     defaultOption
   );
   if (isDryrun) {
-    log(colors.blue(`assign PR #${number}, ` + `to ${assignees}`));
+    log(colors.blue(`assign PR #${number}, to ${assignees}`));
     return Promise.resolve();
   }
   return request(options);

@@ -219,31 +219,28 @@ export function runVideoPlayerIntegrationTests(
       });
 
       // TODO (#16154): this test times out on master
-      it.skip(
-        'should trigger session analytics when ' + 'a visible session ends',
-        function() {
-          let viewport;
-          return getVideoPlayer({
-            outsideView: true,
-            autoplay: true,
+      it.skip('should trigger session analytics when a visible session ends', function() {
+        let viewport;
+        return getVideoPlayer({
+          outsideView: true,
+          autoplay: true,
+        })
+          .then(r => {
+            video = r.video;
+            viewport = video.implementation_.getViewport();
+            // scroll to the bottom, make video fully visible
+            viewport.scrollIntoView(video);
+            return listenOncePromise(video, VideoEvents.PLAYING);
           })
-            .then(r => {
-              video = r.video;
-              viewport = video.implementation_.getViewport();
-              // scroll to the bottom, make video fully visible
-              viewport.scrollIntoView(video);
-              return listenOncePromise(video, VideoEvents.PLAYING);
-            })
-            .then(() => {
-              // scroll to the bottom, make video fully visible
-              viewport.setScrollTop(0);
-              return listenOncePromise(
-                video,
-                VideoAnalyticsEvents.SESSION_VISIBLE
-              );
-            });
-        }
-      );
+          .then(() => {
+            // scroll to the bottom, make video fully visible
+            viewport.setScrollTop(0);
+            return listenOncePromise(
+              video,
+              VideoAnalyticsEvents.SESSION_VISIBLE
+            );
+          });
+      });
 
       describe('should trigger ended analytics', () => {
         let player;
@@ -310,64 +307,61 @@ export function runVideoPlayerIntegrationTests(
           });
       });
 
-      it.skip(
-        'should trigger video-seconds-played when visible' + 'and playing',
-        () => {
-          let video;
-          let timer;
-          let pauseButton;
-          let playButton;
+      it.skip('should trigger video-seconds-played when visibleand playing', () => {
+        let video;
+        let timer;
+        let pauseButton;
+        let playButton;
 
-          return getVideoPlayer({
-            outsideView: true,
-            autoplay: true,
+        return getVideoPlayer({
+          outsideView: true,
+          autoplay: true,
+        })
+          .then(r => {
+            timer = Services.timerFor(r.video.implementation_.win);
+            video = r.video;
+            pauseButton = createButton(r, 'pause');
+            playButton = createButton(r, 'play');
+            return Promise.race([
+              listenOncePromise(
+                video,
+                VideoAnalyticsEvents.SECONDS_PLAYED
+              ).then(() => Promise.reject('Triggered video-seconds-played')),
+              timer.promise(2000),
+            ]);
           })
-            .then(r => {
-              timer = Services.timerFor(r.video.implementation_.win);
-              video = r.video;
-              pauseButton = createButton(r, 'pause');
-              playButton = createButton(r, 'play');
-              return Promise.race([
-                listenOncePromise(
-                  video,
-                  VideoAnalyticsEvents.SECONDS_PLAYED
-                ).then(() => Promise.reject('Triggered video-seconds-played')),
-                timer.promise(2000),
-              ]);
-            })
-            .then(() => {
-              const viewport = video.implementation_.getViewport();
-              viewport.scrollIntoView(video);
-              return listenOncePromise(
+          .then(() => {
+            const viewport = video.implementation_.getViewport();
+            viewport.scrollIntoView(video);
+            return listenOncePromise(
+              video,
+              VideoAnalyticsEvents.SECONDS_PLAYED
+            );
+          })
+          .then(() => {
+            pauseButton.click();
+            return listenOncePromise(video, VideoEvents.PAUSE);
+          })
+          .then(() => {
+            return Promise.race([
+              listenOncePromise(
                 video,
                 VideoAnalyticsEvents.SECONDS_PLAYED
-              );
-            })
-            .then(() => {
-              pauseButton.click();
-              return listenOncePromise(video, VideoEvents.PAUSE);
-            })
-            .then(() => {
-              return Promise.race([
-                listenOncePromise(
-                  video,
-                  VideoAnalyticsEvents.SECONDS_PLAYED
-                ).then(() => Promise.reject('Triggered video-seconds-played')),
-                timer.promise(2000),
-              ]);
-            })
-            .then(() => {
-              playButton.click();
-              return listenOncePromise(video, VideoEvents.PLAYING);
-            })
-            .then(() => {
-              return listenOncePromise(
-                video,
-                VideoAnalyticsEvents.SECONDS_PLAYED
-              );
-            });
-        }
-      );
+              ).then(() => Promise.reject('Triggered video-seconds-played')),
+              timer.promise(2000),
+            ]);
+          })
+          .then(() => {
+            playButton.click();
+            return listenOncePromise(video, VideoEvents.PLAYING);
+          })
+          .then(() => {
+            return listenOncePromise(
+              video,
+              VideoAnalyticsEvents.SECONDS_PLAYED
+            );
+          });
+      });
 
       afterEach(cleanUp);
     });

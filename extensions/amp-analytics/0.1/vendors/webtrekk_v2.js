@@ -41,7 +41,7 @@ export const WEBTREKK_V2_CONFIG = /** @type {!JsonObject} */ ({
     'scroll':
       '${trackURL}${parameterPrefix}&ct=${actionName}' +
       '&ck540=${verticalScrollBoundary}${parameterSuffix}',
-    'mediaPrefix': '${trackURL}${basePrefix}${baseSuffix}' + '&mi=${mediaName}',
+    'mediaPrefix': '${trackURL}${basePrefix}${baseSuffix}&mi=${mediaName}',
     'mediaSuffix':
       '&mt1=${currentTime}&mt2=${duration}' +
       '&${extraUrlParams}${parameterSuffix}&x=${playedTotal}',

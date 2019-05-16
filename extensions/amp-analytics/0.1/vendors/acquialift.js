@@ -32,8 +32,8 @@ export const ACQUIALIFT_CONFIG = /** @type {!JsonObject} */ ({
       '&url=${canonicalUrl}' +
       '&rurl=${documentReferrer}' +
       '&cttl=${title}',
-    'pageview': '${basicCapture}' + '&en=Content View',
-    'click': '${basicCapture}' + '&en=Click-Through',
+    'pageview': '${basicCapture}&en=Content View',
+    'click': '${basicCapture}&en=Click-Through',
   },
   'triggers': {
     'defaultPageview': {

@@ -108,8 +108,7 @@ const strings = {
     string: 'Extindeți tweetul',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_HEIGHT_SIZE_TEXT]: {
-    string:
-      'Extindeți înălțimea ferestrei pentru a viziona această ' + 'experiență',
+    string: 'Extindeți înălțimea ferestrei pentru a viziona această experiență',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT]: {
     string:

@@ -75,7 +75,7 @@ describe('SizeList parseSizeList', () => {
 
   it('should accept CSS functions', () => {
     const res = parseSizeList(
-      'screen calc(111vw + 10px) \n' + ', ca_1-C((50vw+20px) / 2) '
+      'screen calc(111vw + 10px) \n, ca_1-C((50vw+20px) / 2) '
     );
     expect(res.sizes_.length).to.equal(2);
     expect(res.sizes_[0].mediaQuery).to.equal('screen');
@@ -86,7 +86,7 @@ describe('SizeList parseSizeList', () => {
 
   it('should tolerate right paren', () => {
     const res = parseSizeList(
-      '(min-width:2000px)calc(11px)' + ',(min-width:1000px)11px,12px'
+      '(min-width:2000px)calc(11px),(min-width:1000px)11px,12px'
     );
     expect(res.sizes_.length).to.equal(3);
     expect(res.sizes_[0].mediaQuery).to.equal('(min-width:2000px)');

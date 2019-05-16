@@ -117,19 +117,13 @@ describes.realWin(
     });
 
     describe('decorateServiceAction', () => {
-      it(
-        'should call decorateServiceAction of ' + 'subscription service',
-        () => {
-          const element = win.document.createElement('div');
-          const serviceId = 'local';
-          const stub = sandbox.stub(
-            subscriptionService,
-            'decorateServiceAction'
-          );
-          serviceAdapter.decorateServiceAction(element, serviceId, 'action');
-          expect(stub).to.be.calledWith(element, serviceId, 'action');
-        }
-      );
+      it('should call decorateServiceAction of subscription service', () => {
+        const element = win.document.createElement('div');
+        const serviceId = 'local';
+        const stub = sandbox.stub(subscriptionService, 'decorateServiceAction');
+        serviceAdapter.decorateServiceAction(element, serviceId, 'action');
+        expect(stub).to.be.calledWith(element, serviceId, 'action');
+      });
     });
 
     describe('getReaderId', () => {

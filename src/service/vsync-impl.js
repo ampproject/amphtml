@@ -306,7 +306,7 @@ export class Vsync {
     if (!this.canAnimate_(contextNode)) {
       dev().warn(
         'VSYNC',
-        'Did not schedule a vsync request, because' + ' document was invisible'
+        'Did not schedule a vsync request, because document was invisible'
       );
       return false;
     }
@@ -460,7 +460,7 @@ function callTaskNoInline(callback, state) {
     if (ret !== undefined) {
       dev().error(
         'VSYNC',
-        'callback returned a value but vsync cannot ' + 'propogate it: %s',
+        'callback returned a value but vsync cannot propogate it: %s',
         callback.toString()
       );
     }

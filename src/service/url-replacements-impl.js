@@ -823,7 +823,7 @@ export class GlobalVariableSource extends VariableSource {
     return this.shareTrackingFragments_.then(fragments => {
       userAssert(
         fragments,
-        'To use variable %s, ' + 'amp-share-tracking should be configured',
+        'To use variable %s, amp-share-tracking should be configured',
         expr
       );
       return getter(/** @type {!ShareTrackingFragmentsDef} */ (fragments));
@@ -866,7 +866,7 @@ export class GlobalVariableSource extends VariableSource {
       return service.then(viewerIntegrationVariables => {
         userAssert(
           viewerIntegrationVariables,
-          'To use variable %s ' + 'amp-viewer-integration must be installed',
+          'To use variable %s amp-viewer-integration must be installed',
           name
         );
         return viewerIntegrationVariables[property](param, defaultValue);

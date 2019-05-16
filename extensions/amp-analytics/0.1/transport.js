@@ -252,7 +252,7 @@ export class Transport {
         if (!suppressWarnings) {
           user().warn(
             TAG_,
-            'Response unparseable or failed to send image ' + 'request',
+            'Response unparseable or failed to send image request',
             request.url
           );
         }

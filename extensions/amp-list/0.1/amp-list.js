@@ -539,7 +539,7 @@ export class AmpList extends AMP.BaseElement {
         response => {
           userAssert(
             response && response['html'],
-            'Expected response with ' + 'format {html: <string>}. Received: ',
+            'Expected response with format {html: <string>}. Received: ',
             response
           );
           request.fetchOpt.responseType = 'application/json';

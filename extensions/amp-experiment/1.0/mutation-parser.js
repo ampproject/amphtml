@@ -91,7 +91,7 @@ export function parseMutation(mutation, document) {
 
     user().error(
       TAG,
-      'childList mutations not supported ' + 'in the current experiment state.'
+      'childList mutations not supported in the current experiment state.'
     );
 
     // TODO (torch2424): Remove this NOOP after reviews

@@ -705,7 +705,7 @@ export class AmpIframe extends AMP.BaseElement {
         unexpectedMessages++;
         user().error(
           TAG_,
-          '"message" event may only be triggered ' + 'from a user gesture.'
+          '"message" event may only be triggered from a user gesture.'
         );
         // Disable the 'message' event if the iframe is behaving badly.
         if (unexpectedMessages >= maxUnexpectedMessages) {

@@ -24,7 +24,7 @@ export const ATINTERNET_CONFIG = /** @type {!JsonObject} */ ({
     'base':
       'https://${log}${domain}/${pixelPath}?s=${site}&ts=${timestamp}&r=${screenWidth}x${screenHeight}x${screenColorDepth}&re=${availableScreenWidth}x${availableScreenHeight}',
     'suffix': '&medium=amp&${extraUrlParams}&ref=${documentReferrer}',
-    'pageview': '${base}&' + 'p=${title}&' + 's2=${level2}${suffix}',
+    'pageview': '${base}&p=${title}&s2=${level2}${suffix}',
     'click':
       '${base}&' +
       'pclick=${title}&' +

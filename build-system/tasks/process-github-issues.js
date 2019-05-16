@@ -72,7 +72,7 @@ const NUM_BATCHES = 14;
 // We start processing the issues by checking token first
 function processGithubIssues() {
   if (!GITHUB_ACCESS_TOKEN) {
-    log(colors.red('You have not set the ' + 'GITHUB_ACCESS_TOKEN env var.'));
+    log(colors.red('You have not set the GITHUB_ACCESS_TOKEN env var.'));
     log(
       colors.green(
         'See https://help.github.com/articles/' +
@@ -308,9 +308,7 @@ function updateGitHubIssues() {
               issueNewMilestone === MILESTONE_GREAT_ISSUES
             ) {
               if (isDryrun) {
-                log(
-                  colors.green('No comment needed ' + ' for #' + issue.number)
-                );
+                log(colors.green('No comment needed  for #' + issue.number));
               }
             } else {
               updates.push(

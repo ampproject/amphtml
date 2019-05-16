@@ -370,8 +370,8 @@ exports.rules = [
         'src/service/navigation.js',
       'extensions/amp-skimlinks/0.1/link-rewriter/link-rewriter-manager.js->' +
         'src/service/navigation.js',
-      'extensions/amp-list/0.1/amp-list.js->' + 'src/service/xhr-impl.js',
-      'extensions/amp-form/0.1/amp-form.js->' + 'src/service/xhr-impl.js',
+      'extensions/amp-list/0.1/amp-list.js->src/service/xhr-impl.js',
+      'extensions/amp-form/0.1/amp-form.js->src/service/xhr-impl.js',
       // Accessing extension-location.calculateExtensionScriptUrl().
       'extensions/amp-script/0.1/amp-script.js->' +
         'src/service/extension-location.js',
@@ -390,8 +390,8 @@ exports.rules = [
       'extensions/amp-link-rewriter/0.1/amp-link-rewriter.js->' +
         'src/service/navigation.js',
       // For localization.
-      'extensions/amp-story/0.1/amp-story.js->' + 'src/service/localization.js',
-      'extensions/amp-story/1.0/amp-story.js->' + 'src/service/localization.js',
+      'extensions/amp-story/0.1/amp-story.js->src/service/localization.js',
+      'extensions/amp-story/1.0/amp-story.js->src/service/localization.js',
       'extensions/amp-story/1.0/_locales/af.js->' +
         'src/service/localization.js',
       'extensions/amp-story/1.0/_locales/am.js->' +

@@ -177,7 +177,7 @@ class AmpWorker {
     if (!message) {
       dev().error(
         TAG,
-        `Received unexpected message (${method}, ${id}) ` + 'from worker.'
+        `Received unexpected message (${method}, ${id}) from worker.`
       );
       return;
     }

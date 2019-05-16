@@ -122,7 +122,7 @@ describes.realWin(
       }
     );
 
-    it('should return when the iframe is' + ' loaded and ready', () => {
+    it('should return when the iframe is loaded and ready', () => {
       expect(recaptchaService.registeredElementCount_).to.be.equal(0);
       return recaptchaService.register(fakeSitekey).then(() => {
         expect(recaptchaService.unlisteners_.length).to.be.equal(3);

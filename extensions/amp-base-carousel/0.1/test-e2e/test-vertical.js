@@ -122,35 +122,32 @@ describes.endtoend(
       // Make sure we can move all the way backwards to the second slide and that
       // it is in the right place.
       // TODO(sparhami): unskip
-      it.skip(
-        'should display slides correctly when ' + 'moving backwards',
-        async () => {
-          const el = await getScrollingElement(controller);
-          const secondSlide = await getSlide(controller, 1);
+      it.skip('should display slides correctly when moving backwards', async () => {
+        const el = await getScrollingElement(controller);
+        const secondSlide = await getSlide(controller, 1);
 
-          // Wait for the first and second slides to load.
-          await waitForCarouselImg(controller, 0);
-          await waitForCarouselImg(controller, 1);
+        // Wait for the first and second slides to load.
+        await waitForCarouselImg(controller, 0);
+        await waitForCarouselImg(controller, 1);
 
-          // Go to the last slide, wait for scrolling to move.
-          const {y: carouselTop} = await rect(el);
-          const slideHeight = await prop(secondSlide, 'offsetHeight');
-          const restingScrollTop = await prop(el, 'scrollTop');
-          await controller.scrollBy(el, {
-            top: -(slideHeight * (SLIDE_COUNT - 1)),
-          });
+        // Go to the last slide, wait for scrolling to move.
+        const {y: carouselTop} = await rect(el);
+        const slideHeight = await prop(secondSlide, 'offsetHeight');
+        const restingScrollTop = await prop(el, 'scrollTop');
+        await controller.scrollBy(el, {
+          top: -(slideHeight * (SLIDE_COUNT - 1)),
+        });
 
-          await expect(prop(el, 'scrollTop')).to.not.equal(restingScrollTop);
-          await expect(prop(el, 'scrollTop')).to.equal(restingScrollTop);
-          await expect(controller.getElementRect(secondSlide)).to.include({
-            y: carouselTop,
-            height: slideHeight,
-          });
-          await controller.takeScreenshot(
-            'screenshots/vertical/loop-move-backwards-to-second.png'
-          );
-        }
-      );
+        await expect(prop(el, 'scrollTop')).to.not.equal(restingScrollTop);
+        await expect(prop(el, 'scrollTop')).to.equal(restingScrollTop);
+        await expect(controller.getElementRect(secondSlide)).to.include({
+          y: carouselTop,
+          height: slideHeight,
+        });
+        await controller.takeScreenshot(
+          'screenshots/vertical/loop-move-backwards-to-second.png'
+        );
+      });
     });
   }
 );

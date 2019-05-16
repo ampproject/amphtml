@@ -785,7 +785,7 @@ export class LayoutElement {
   declareLayer(isRootLayer, scrollsLikeViewport) {
     devAssert(
       !scrollsLikeViewport || isRootLayer,
-      'Only root layers may' + ' scroll like a viewport.'
+      'Only root layers may scroll like a viewport.'
     );
 
     if (this.isLayer_) {

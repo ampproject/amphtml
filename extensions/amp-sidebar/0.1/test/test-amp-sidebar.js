@@ -185,23 +185,20 @@ describes.realWin(
         });
       });
 
-      it(
-        'should create an invisible close ' + 'button for screen readers only',
-        () => {
-          return getAmpSidebar().then(sidebarElement => {
-            const impl = sidebarElement.implementation_;
-            impl.close_ = sandbox.spy();
-            const closeButton = sidebarElement.lastElementChild;
-            expect(closeButton).to.exist;
-            expect(closeButton.tagName).to.equal('BUTTON');
-            assertScreenReaderElement(closeButton);
-            expect(closeButton.textContent).to.equal('Close the sidebar');
-            expect(impl.close_).to.have.not.been.called;
-            closeButton.click();
-            expect(impl.close_).to.be.calledOnce;
-          });
-        }
-      );
+      it('should create an invisible close button for screen readers only', () => {
+        return getAmpSidebar().then(sidebarElement => {
+          const impl = sidebarElement.implementation_;
+          impl.close_ = sandbox.spy();
+          const closeButton = sidebarElement.lastElementChild;
+          expect(closeButton).to.exist;
+          expect(closeButton.tagName).to.equal('BUTTON');
+          assertScreenReaderElement(closeButton);
+          expect(closeButton.textContent).to.equal('Close the sidebar');
+          expect(impl.close_).to.have.not.been.called;
+          closeButton.click();
+          expect(impl.close_).to.be.calledOnce;
+        });
+      });
 
       it('should open sidebar on button click', () => {
         return getAmpSidebar().then(sidebarElement => {
@@ -471,51 +468,44 @@ describes.realWin(
         });
       });
 
-      it(
-        'should not close sidebar if clicked on a new origin ' + 'navigation',
-        () => {
-          return getAmpSidebar({stubHistory: true}).then(sidebarElement => {
-            const anchor = sidebarElement.getElementsByTagName('a')[0];
-            anchor.href = '#newloc';
-            const impl = sidebarElement.implementation_;
-            impl.schedulePause = sandbox.spy();
-            sandbox.stub(timer, 'delay').callsFake(function(callback) {
-              callback();
-            });
-            expect(sidebarElement.hasAttribute('open')).to.be.false;
-            impl.open_();
-            expect(sidebarElement.hasAttribute('open')).to.be.true;
-            expect(sidebarElement.getAttribute('aria-hidden')).to.equal(
-              'false'
-            );
-            const eventObj = doc.createEventObject
-              ? doc.createEventObject()
-              : doc.createEvent('Events');
-            if (eventObj.initEvent) {
-              eventObj.initEvent('click', true, true);
-            }
-            sandbox.stub(sidebarElement, 'getAmpDoc').callsFake(() => {
-              return {
-                win: {
-                  location: {
-                    // Mocking navigating from example.com -> localhost:9876
-                    href: 'http://example.com',
-                  },
-                },
-              };
-            });
-            anchor.dispatchEvent
-              ? anchor.dispatchEvent(eventObj)
-              : anchor.fireEvent('onkeydown', eventObj);
-            expect(sidebarElement.hasAttribute('open')).to.be.true;
-            expect(sidebarElement.getAttribute('aria-hidden')).to.equal(
-              'false'
-            );
-            expect(sidebarElement).to.not.have.display('');
-            expect(impl.schedulePause).to.have.not.been.called;
+      it('should not close sidebar if clicked on a new origin navigation', () => {
+        return getAmpSidebar({stubHistory: true}).then(sidebarElement => {
+          const anchor = sidebarElement.getElementsByTagName('a')[0];
+          anchor.href = '#newloc';
+          const impl = sidebarElement.implementation_;
+          impl.schedulePause = sandbox.spy();
+          sandbox.stub(timer, 'delay').callsFake(function(callback) {
+            callback();
           });
-        }
-      );
+          expect(sidebarElement.hasAttribute('open')).to.be.false;
+          impl.open_();
+          expect(sidebarElement.hasAttribute('open')).to.be.true;
+          expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
+          const eventObj = doc.createEventObject
+            ? doc.createEventObject()
+            : doc.createEvent('Events');
+          if (eventObj.initEvent) {
+            eventObj.initEvent('click', true, true);
+          }
+          sandbox.stub(sidebarElement, 'getAmpDoc').callsFake(() => {
+            return {
+              win: {
+                location: {
+                  // Mocking navigating from example.com -> localhost:9876
+                  href: 'http://example.com',
+                },
+              },
+            };
+          });
+          anchor.dispatchEvent
+            ? anchor.dispatchEvent(eventObj)
+            : anchor.fireEvent('onkeydown', eventObj);
+          expect(sidebarElement.hasAttribute('open')).to.be.true;
+          expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
+          expect(sidebarElement).to.not.have.display('');
+          expect(impl.schedulePause).to.have.not.been.called;
+        });
+      });
 
       it('should not close sidebar if clicked on new page navigation', () => {
         return getAmpSidebar({stubHistory: true}).then(sidebarElement => {

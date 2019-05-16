@@ -458,7 +458,7 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
 
           expect(logErrorSpy).to.have.been.calledOnce;
           const state =
-            'amp-viewer-messaging: sendResponseError_, ' + 'Message name: name';
+            'amp-viewer-messaging: sendResponseError_, Message name: name';
           expect(logErrorSpy).to.have.been.calledWith(state, errString);
         });
       });

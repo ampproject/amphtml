@@ -215,7 +215,7 @@ describes.realWin(
           success: {message: 'Should not render this.', template: true},
           error: {
             message:
-              'Oops. {{name}} your email {{email}} is already ' + 'subscribed.',
+              'Oops. {{name}} your email {{email}} is already subscribed.',
             template: true,
           },
         });
@@ -294,7 +294,7 @@ describes.realWin(
           success: {message: 'Should not render this.', template: true},
           error: {
             message:
-              'Oops. {{name}} your email {{email}} is already ' + 'subscribed.',
+              'Oops. {{name}} your email {{email}} is already subscribed.',
             template: true,
           },
         });

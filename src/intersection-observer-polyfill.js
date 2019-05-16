@@ -239,7 +239,7 @@ export class IntersectionObserverPolyfill {
     for (let i = 0; i < threshold.length; i++) {
       devAssert(
         isFiniteNumber(threshold[i]),
-        'Threshold should be a ' + 'finite number or an array of finite numbers'
+        'Threshold should be a finite number or an array of finite numbers'
       );
     }
 

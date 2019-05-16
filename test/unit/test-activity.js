@@ -144,16 +144,13 @@ describe('Activity getTotalEngagedTime', () => {
     return expect(activity.getTotalEngagedTime()).to.equal(0);
   });
 
-  it(
-    'should have 5 seconds of engaged time after viewer becomes' + ' visible',
-    () => {
-      whenFirstVisibleResolve();
-      return viewer.whenFirstVisible().then(() => {
-        clock.tick(10000);
-        return expect(activity.getTotalEngagedTime()).to.equal(5);
-      });
-    }
-  );
+  it('should have 5 seconds of engaged time after viewer becomes visible', () => {
+    whenFirstVisibleResolve();
+    return viewer.whenFirstVisible().then(() => {
+      clock.tick(10000);
+      return expect(activity.getTotalEngagedTime()).to.equal(5);
+    });
+  });
 
   it('should have 4 seconds of engaged time 4 seconds after visible', () => {
     whenFirstVisibleResolve();
@@ -360,12 +357,9 @@ describe('Activity getIncrementalEngagedTime', () => {
     sandbox.restore();
   });
 
-  it(
-    'should have 0 seconds of incremental engaged ' + 'time with no activity',
-    () => {
-      return expect(activity.getIncrementalEngagedTime('tests')).to.equal(0);
-    }
-  );
+  it('should have 0 seconds of incremental engaged time with no activity', () => {
+    return expect(activity.getIncrementalEngagedTime('tests')).to.equal(0);
+  });
 
   it(
     'should have 5 seconds of incremental engaged time after viewer ' +
@@ -379,16 +373,13 @@ describe('Activity getIncrementalEngagedTime', () => {
     }
   );
 
-  it(
-    'should have 4 seconds of incremental engaged time after 4' + ' seconds',
-    () => {
-      whenFirstVisibleResolve();
-      return viewer.whenFirstVisible().then(() => {
-        clock.tick(4000);
-        return expect(activity.getIncrementalEngagedTime('tests')).to.equal(4);
-      });
-    }
-  );
+  it('should have 4 seconds of incremental engaged time after 4 seconds', () => {
+    whenFirstVisibleResolve();
+    return viewer.whenFirstVisible().then(() => {
+      clock.tick(4000);
+      return expect(activity.getIncrementalEngagedTime('tests')).to.equal(4);
+    });
+  });
 
   it('should reset incremental engaged time after each poll', () => {
     whenFirstVisibleResolve();

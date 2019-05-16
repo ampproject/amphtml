@@ -34,7 +34,7 @@ export const SHINYSTAT_CONFIG = /** @type {!JsonObject} */ ({
       '&PAGID=${pageViewId}' +
       '&TITL=${title}' +
       '&RQC=${requestCount}',
-    'pagepar': '&VIE=${viewer}' + '&PLT=${pageLoadTime}',
+    'pagepar': '&VIE=${viewer}&PLT=${pageLoadTime}',
     'eventpar': '&SSXL=1',
     'linkpar': '&LINK=${outboundLink}',
     'pageview': '${base}?${commpar}${pagepar}',

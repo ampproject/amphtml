@@ -382,7 +382,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
     }
     userAssert(
       unit == 'px' || unit == 'vh',
-      'Only pixel or vh are valid ' + 'as units for exclusion margins: ' + val
+      'Only pixel or vh are valid as units for exclusion margins: ' + val
     );
 
     if (unit == 'vh') {

@@ -39,7 +39,7 @@ export class HeadingComponent {
   assertValidity(headingJson) {
     userAssert(
       'text' in headingJson,
-      'Heading component must contain ' + '`text` field, skipping invalid.'
+      'Heading component must contain `text` field, skipping invalid.'
     );
   }
 

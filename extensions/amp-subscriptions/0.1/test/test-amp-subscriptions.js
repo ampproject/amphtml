@@ -757,19 +757,16 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
       }
     );
 
-    it(
-      'should not fetch entitlements for any platform other than ' + 'local',
-      () => {
-        subscriptionService.start();
-        return subscriptionService.initialize_().then(() => {
-          subscriptionService.registerPlatform(
-            'google.subscription',
-            new SubscriptionPlatform()
-          );
-          expect(fetchEntitlementsStub).to.not.be.called;
-        });
-      }
-    );
+    it('should not fetch entitlements for any platform other than local', () => {
+      subscriptionService.start();
+      return subscriptionService.initialize_().then(() => {
+        subscriptionService.registerPlatform(
+          'google.subscription',
+          new SubscriptionPlatform()
+        );
+        expect(fetchEntitlementsStub).to.not.be.called;
+      });
+    });
 
     it(
       'should fetch entitlements for other platforms if viewer does ' +

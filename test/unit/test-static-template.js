@@ -113,7 +113,7 @@ describe('Static Template', () => {
       // Prove it doesn't need html helper
       const el = document.createElement('div');
       el./*TEST*/ innerHTML =
-        '<div ref="test"><span ref="s"></span></div>' + '<div ref="d"></div>';
+        '<div ref="test"><span ref="s"></span></div><div ref="d"></div>';
 
       const refs = htmlRefs(el);
       expect(refs).to.deep.equal({

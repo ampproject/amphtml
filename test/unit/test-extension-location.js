@@ -180,7 +180,7 @@ describes.sandboxed('Extension Location', {}, () => {
 
     it('versioned urls', () => {
       const urlParts = parseExtensionUrl(
-        'https://cdn.ampproject.org/rtv/123' + '/v0/amp-ad-0.1.js'
+        'https://cdn.ampproject.org/rtv/123/v0/amp-ad-0.1.js'
       );
       expect(urlParts.extensionId).to.equal('amp-ad');
       expect(urlParts.extensionVersion).to.equal('0.1');

@@ -228,7 +228,7 @@ export class ConsentPolicyManager {
     if (!WHITELIST_POLICY[policyId]) {
       user().error(
         TAG,
-        'can not find policy %s, ' + 'only predefined policies are supported',
+        'can not find policy %s, only predefined policies are supported',
         policyId
       );
       return Promise.resolve(CONSENT_POLICY_STATE.UNKNOWN);
@@ -250,7 +250,7 @@ export class ConsentPolicyManager {
     if (!WHITELIST_POLICY[policyId]) {
       user().error(
         TAG,
-        'can not find policy %s, ' + 'only predefined policies are supported',
+        'can not find policy %s, only predefined policies are supported',
         policyId
       );
       return Promise.resolve(false);

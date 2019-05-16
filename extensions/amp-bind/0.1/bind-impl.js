@@ -1172,7 +1172,7 @@ export class Bind {
           element.mutatedAttributesCallback(mutations);
         } catch (e) {
           const error = user().createError(
-            '%s: Applying expression results' + ' (%s) failed with error,',
+            '%s: Applying expression results (%s) failed with error,',
             TAG,
             JSON.stringify(mutations),
             e
@@ -1341,7 +1341,7 @@ export class Bind {
       return true;
     } catch (e) {
       const error = user().createError(
-        '%s: "%s" is not a ' + 'valid result for [%]',
+        '%s: "%s" is not a valid result for [%]',
         TAG,
         value,
         attrName,

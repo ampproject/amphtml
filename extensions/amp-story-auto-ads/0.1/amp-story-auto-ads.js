@@ -390,7 +390,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     const {type} = adAttributes;
     userAssert(
       type,
-      `<${TAG}>: Error reading config.` + 'Missing ["ad-attribues"]["type"] key'
+      `<${TAG}>: Error reading config.Missing ["ad-attribues"]["type"] key`
     );
   }
 
@@ -523,7 +523,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     const {type} = configAttrs;
     userAssert(
       !!ALLOWED_AD_TYPES[type],
-      `${TAG}: ` + `"${type}" ad type is not supported`
+      `${TAG}: "${type}" ad type is not supported`
     );
 
     if (type === 'fake') {
@@ -556,7 +556,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     if (!ctaUrl || !ctaType) {
       user().error(
         TAG,
-        'Both CTA Type & CTA Url ' + 'are required in ad-server response."'
+        'Both CTA Type & CTA Url are required in ad-server response."'
       );
       return false;
     }

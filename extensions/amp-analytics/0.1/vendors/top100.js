@@ -30,7 +30,7 @@ export const TOP100_CONFIG = /** @type {!JsonObject} */ ({
       '&rn=${random}' +
       '&ruid=${ruid}' +
       '&ct=amp',
-    'pageview': '${base}&et=pv' + '${_pageData}' + '${_screenData}',
+    'pageview': '${base}&et=pv${_pageData}${_screenData}',
     '_screenData':
       '&sr=${screenWidth}x${screenHeight}' +
       '&cd=${screenColorDepth}-bit' +

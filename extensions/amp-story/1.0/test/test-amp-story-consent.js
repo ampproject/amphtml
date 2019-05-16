@@ -361,7 +361,7 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
       expect(() => {
         storyConsent.buildCallback();
       }).to.throw(
-        'amp-story publisher-logo-src must start with ' + '"https://" or "//"'
+        'amp-story publisher-logo-src must start with "https://" or "//"'
       );
     });
   });

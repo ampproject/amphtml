@@ -203,16 +203,13 @@ describe
             );
           });
 
-          it(
-            'should defend against invalid source origin query ' + 'parameter',
-            () => {
-              allowConsoleError(() => {
-                expect(() => {
-                  xhr.fetchJson('/get?k=v1&__amp_source_origin=invalid#h1');
-                }).to.throw(/Source origin is not allowed/);
-              });
-            }
-          );
+          it('should defend against invalid source origin query parameter', () => {
+            allowConsoleError(() => {
+              expect(() => {
+                xhr.fetchJson('/get?k=v1&__amp_source_origin=invalid#h1');
+              }).to.throw(/Source origin is not allowed/);
+            });
+          });
 
           it('should defend against empty source origin query parameter', () => {
             allowConsoleError(() => {

@@ -185,7 +185,7 @@ describes.realWin(
 
     it('should error with invalid JSON script', () => {
       expectAsyncConsoleError(
-        'Unexpected token o in JSON at position' + ' 32 [object HTMLElement]'
+        'Unexpected token o in JSON at position 32 [object HTMLElement]'
       );
       return expect(
         getAutocomplete(

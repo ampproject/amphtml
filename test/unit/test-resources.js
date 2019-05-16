@@ -300,56 +300,50 @@ describe('Resources', () => {
     }
   );
 
-  it(
-    'should schedule prerenderable resource when' + ' document is in prerender',
-    () => {
-      const resource = {
-        getState: () => ResourceState.READY_FOR_LAYOUT,
-        isDisplayed: () => true,
-        isFixed: () => false,
-        isInViewport: () => true,
-        prerenderAllowed: () => true,
-        renderOutsideViewport: () => true,
-        getLayoutPriority: () => LayoutPriority.METADATA,
-        startLayout: () => {},
-        layoutScheduled: () => {},
-        getTaskId: () => 'resource#P',
-        applySizesAndMediaQuery: () => {},
-      };
-      resources.visible_ = false;
-      sandbox
-        .stub(resources.viewer_, 'getVisibilityState')
-        .returns(VisibilityState.PRERENDER);
-      resources.scheduleLayoutOrPreload_(resource, true);
-      expect(resources.queue_.getSize()).to.equal(1);
-      expect(resources.queue_.tasks_[0].forceOutsideViewport).to.be.false;
-    }
-  );
+  it('should schedule prerenderable resource when document is in prerender', () => {
+    const resource = {
+      getState: () => ResourceState.READY_FOR_LAYOUT,
+      isDisplayed: () => true,
+      isFixed: () => false,
+      isInViewport: () => true,
+      prerenderAllowed: () => true,
+      renderOutsideViewport: () => true,
+      getLayoutPriority: () => LayoutPriority.METADATA,
+      startLayout: () => {},
+      layoutScheduled: () => {},
+      getTaskId: () => 'resource#P',
+      applySizesAndMediaQuery: () => {},
+    };
+    resources.visible_ = false;
+    sandbox
+      .stub(resources.viewer_, 'getVisibilityState')
+      .returns(VisibilityState.PRERENDER);
+    resources.scheduleLayoutOrPreload_(resource, true);
+    expect(resources.queue_.getSize()).to.equal(1);
+    expect(resources.queue_.tasks_[0].forceOutsideViewport).to.be.false;
+  });
 
-  it(
-    'should not schedule prerenderable resource when' + ' document is hidden',
-    () => {
-      const resource = {
-        getState: () => ResourceState.READY_FOR_LAYOUT,
-        isDisplayed: () => true,
-        isFixed: () => false,
-        isInViewport: () => true,
-        prerenderAllowed: () => true,
-        renderOutsideViewport: () => true,
-        getLayoutPriority: () => LayoutPriority.METADATA,
-        startLayout: () => {},
-        layoutScheduled: () => {},
-        getTaskId: () => 'resource#P',
-        applySizesAndMediaQuery: () => {},
-      };
-      resources.visible_ = false;
-      sandbox
-        .stub(resources.viewer_, 'getVisibilityState')
-        .returns(VisibilityState.HIDDEN);
-      resources.scheduleLayoutOrPreload_(resource, true);
-      expect(resources.queue_.getSize()).to.equal(0);
-    }
-  );
+  it('should not schedule prerenderable resource when document is hidden', () => {
+    const resource = {
+      getState: () => ResourceState.READY_FOR_LAYOUT,
+      isDisplayed: () => true,
+      isFixed: () => false,
+      isInViewport: () => true,
+      prerenderAllowed: () => true,
+      renderOutsideViewport: () => true,
+      getLayoutPriority: () => LayoutPriority.METADATA,
+      startLayout: () => {},
+      layoutScheduled: () => {},
+      getTaskId: () => 'resource#P',
+      applySizesAndMediaQuery: () => {},
+    };
+    resources.visible_ = false;
+    sandbox
+      .stub(resources.viewer_, 'getVisibilityState')
+      .returns(VisibilityState.HIDDEN);
+    resources.scheduleLayoutOrPreload_(resource, true);
+    expect(resources.queue_.getSize()).to.equal(0);
+  });
 
   it(
     'should not schedule non-renderOutsideViewport resource when' +
@@ -3239,7 +3233,7 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, env => {
 
   // TODO(jridgewell, #15748): Fails on Safari 11.1.0.
   it.configure().skipSafari(
-    'should not schedule pass when immediate ' + 'build fails',
+    'should not schedule pass when immediate build fails',
     () => {
       const schedulePassStub = sandbox.stub(resources, 'schedulePass');
       child1.isBuilt = () => false;
@@ -3269,7 +3263,7 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, env => {
 
   // TODO(amphtml, #15748): Fails on Safari 11.1.0.
   it.configure().skipSafari(
-    'should add element to pending build when ' + 'document is not ready',
+    'should add element to pending build when document is not ready',
     () => {
       child1.isBuilt = () => false;
       child2.isBuilt = () => false;
@@ -3308,7 +3302,7 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, env => {
 
     // TODO(amphtml, #15748): Fails on Safari 11.1.0.
     it.configure().skipSafari(
-      'should build ready resources and remove ' + 'them from pending',
+      'should build ready resources and remove them from pending',
       () => {
         resources.pendingBuildResources_ = [resource1, resource2];
         resources.buildReadyResources_();
@@ -3403,7 +3397,7 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, env => {
 
     // TODO(amphtml, #15748): Fails on Safari 11.1.0.
     it.configure().skipSafari(
-      'should build everything pending when ' + 'document is ready',
+      'should build everything pending when document is ready',
       () => {
         resources.documentReady_ = true;
         resources.pendingBuildResources_ = [
@@ -3447,7 +3441,7 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, env => {
 
     // TODO(amphtml, #15748): Fails on Safari 11.1.0.
     it.configure().skipSafari(
-      'should not schedule pass if all ' + 'builds failed',
+      'should not schedule pass if all builds failed',
       () => {
         resources.documentReady_ = true;
         resources.pendingBuildResources_ = [resource1];

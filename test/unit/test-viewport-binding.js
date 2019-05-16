@@ -525,7 +525,7 @@ describes.realWin('ViewportBindingIosEmbedShadowRoot_', {ampCss: true}, env => {
   describe
     .configure()
     .if(() => Element.prototype.attachShadow)
-    .run('Viewport' + 'BindingIosEmbedShadowRoot_', function() {
+    .run('ViewportBindingIosEmbedShadowRoot_', function() {
       beforeEach(function() {
         iframe = env.iframe;
         iframe.style.width = '100px';

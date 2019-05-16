@@ -107,15 +107,15 @@ program
   .description('Scope global `require` calls to an object.')
   .option(
     '-i, --infile [filename]',
-    'The path of the input file.' + ' Reads from stdin if unspecified'
+    'The path of the input file. Reads from stdin if unspecified'
   )
   .option(
     '-o, --outfile [filename]',
-    'The path for the output file.' + ' Writes to stdout if unspecified.'
+    'The path for the output file. Writes to stdout if unspecified.'
   )
   .option(
     '-n --name [name]',
-    'The name to reference `require` calls from.' + ' The default is `AMP`',
+    'The name to reference `require` calls from. The default is `AMP`',
     'AMP'
   )
   .parse(process.argv);

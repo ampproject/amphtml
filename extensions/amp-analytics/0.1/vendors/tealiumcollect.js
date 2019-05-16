@@ -48,14 +48,13 @@ export const TEALIUMCOLLECT_CONFIG = /** @type {!JsonObject} */ ({
       'title=${title}&' +
       'viewport_width=${availableScreenWidth}&' +
       'viewport_height=${availableScreenHeight}',
-    'datetime':
-      'timestamp=${timestamp}&' + 'tz=${timezone}&lang=${browserLanguage}',
+    'datetime': 'timestamp=${timestamp}&tz=${timezone}&lang=${browserLanguage}',
     'pageview':
       '${base}&referrer=${documentReferrer}&' +
       'screen_size=${screenWidth}x${screenHeight}&' +
       'content_load_ms=${contentLoadTime}&' +
       'page_view_id=${pageViewId}',
-    'event': '${base}&' + 'scroll_y=${scrollTop}&scroll_x=${scrollLeft}',
+    'event': '${base}&scroll_y=${scrollTop}&scroll_x=${scrollLeft}',
   },
   'triggers': {
     'defaultPageview': {

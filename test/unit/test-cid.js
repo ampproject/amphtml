@@ -714,26 +714,23 @@ describe('cid', () => {
       });
     });
 
-    it(
-      'should return same value for multiple calls on non-proxied ' + 'urls',
-      () => {
-        fakeWin.location.href = 'https://abc.org/foo/?f=0';
-        fakeWin.location.hostname = 'foo.abc.org';
-        const cid1 = cid.get(
-          {scope: 'cookie', createCookieIfNotPresent: true},
-          hasConsent
-        );
-        const cid2 = cid.get(
-          {scope: 'cookie', createCookieIfNotPresent: true},
-          hasConsent
-        );
-        return cid1.then(c1 => {
-          return cid2.then(c2 => {
-            expect(c1).to.equal(c2);
-          });
+    it('should return same value for multiple calls on non-proxied urls', () => {
+      fakeWin.location.href = 'https://abc.org/foo/?f=0';
+      fakeWin.location.hostname = 'foo.abc.org';
+      const cid1 = cid.get(
+        {scope: 'cookie', createCookieIfNotPresent: true},
+        hasConsent
+      );
+      const cid2 = cid.get(
+        {scope: 'cookie', createCookieIfNotPresent: true},
+        hasConsent
+      );
+      return cid1.then(c1 => {
+        return cid2.then(c2 => {
+          expect(c1).to.equal(c2);
         });
-      }
-    );
+      });
+    });
 
     it('should return same value for multiple calls on proxied urls', () => {
       fakeWin.location.href = 'https://cdn.ampproject.org/v/abc.org/foo/?f=0';

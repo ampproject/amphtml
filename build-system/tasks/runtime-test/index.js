@@ -686,7 +686,7 @@ test.flags = {
   'watch': '  Watches for changes in files, runs corresponding test(s)',
   'saucelabs': '  Runs integration tests on saucelabs (requires setup)',
   'saucelabs_lite':
-    '  Runs tests on a subset of saucelabs browsers ' + '(requires setup)',
+    '  Runs tests on a subset of saucelabs browsers (requires setup)',
   'safari': '  Runs tests on Safari',
   'firefox': '  Runs tests on Firefox',
   'edge': '  Runs tests on Edge',

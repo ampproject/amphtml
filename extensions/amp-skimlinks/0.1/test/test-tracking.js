@@ -125,38 +125,32 @@ describes.fakeWin(
         });
       });
 
-      it(
-        'Should call both page and link impressions analytics ' + 'if AE links',
-        () => {
-          const urls = {
-            'https://merchants.com/product': {'ae': 1, 'count': 1},
-          };
-          trackingService = helpers.createTrackingWithStubAnalytics();
-          env.sandbox
-            .stub(trackingService, 'extractAnchorTrackingInfo_')
-            .returns({numberAffiliateLinks: 1, urls});
+      it('Should call both page and link impressions analytics if AE links', () => {
+        const urls = {
+          'https://merchants.com/product': {'ae': 1, 'count': 1},
+        };
+        trackingService = helpers.createTrackingWithStubAnalytics();
+        env.sandbox
+          .stub(trackingService, 'extractAnchorTrackingInfo_')
+          .returns({numberAffiliateLinks: 1, urls});
 
-          trackingService.sendImpressionTracking([]);
-          const stub = trackingService.analytics_.trigger;
-          expect(stub.withArgs('page-impressions').calledOnce).to.be.true;
-          expect(stub.withArgs('link-impressions').calledOnce).to.be.true;
-        }
-      );
+        trackingService.sendImpressionTracking([]);
+        const stub = trackingService.analytics_.trigger;
+        expect(stub.withArgs('page-impressions').calledOnce).to.be.true;
+        expect(stub.withArgs('link-impressions').calledOnce).to.be.true;
+      });
 
-      it(
-        'Should only call page impressions analytics ' + 'if no AE links',
-        () => {
-          trackingService = helpers.createTrackingWithStubAnalytics();
-          env.sandbox
-            .stub(trackingService, 'extractAnchorTrackingInfo_')
-            .returns({numberAffiliateLinks: 0, urls: []});
+      it('Should only call page impressions analytics if no AE links', () => {
+        trackingService = helpers.createTrackingWithStubAnalytics();
+        env.sandbox
+          .stub(trackingService, 'extractAnchorTrackingInfo_')
+          .returns({numberAffiliateLinks: 0, urls: []});
 
-          trackingService.sendImpressionTracking([]);
-          const stub = trackingService.analytics_.trigger;
-          expect(stub.withArgs('page-impressions').calledOnce).to.be.true;
-          expect(stub.withArgs('link-impressions').called).to.be.false;
-        }
-      );
+        trackingService.sendImpressionTracking([]);
+        const stub = trackingService.analytics_.trigger;
+        expect(stub.withArgs('page-impressions').calledOnce).to.be.true;
+        expect(stub.withArgs('link-impressions').called).to.be.false;
+      });
 
       it(
         'Should not call page nor link impressions if skimOptions ' +

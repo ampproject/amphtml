@@ -1092,7 +1092,7 @@ export class BaseElement {
   declareLayer(opt_element) {
     devAssert(
       isExperimentOn(this.win, 'layers'),
-      'Layers must be enabled' + ' to declare layer.'
+      'Layers must be enabled to declare layer.'
     );
     if (opt_element) {
       devAssert(this.element.contains(opt_element));

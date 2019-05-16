@@ -210,7 +210,7 @@ describes.realWin(
       ).then(pin => {
         const img = pin.querySelector('img');
         expect(img.getAttribute('alt')).to.equal(
-          'Hands making heart over ' + 'Pinterest logo'
+          'Hands making heart over Pinterest logo'
         );
       });
     });

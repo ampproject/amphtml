@@ -46,7 +46,7 @@ export const BURT_CONFIG = /** @type {!JsonObject} */ ({
       'sd=${screenWidth}x${screenHeight}&' +
       'wd=${availableScreenWidth}x${availableScreenHeight}&' +
       'ws=${scrollLeft}x${scrollTop}',
-    'pageping': '${base}' + 'type=pageping',
+    'pageping': '${base}type=pageping',
   },
   'triggers': {
     'pageview': {

@@ -29,8 +29,8 @@ export const PERMUTIVE_CONFIG = /** @type {!JsonObject} */ ({
       '&e=Pageview' +
       '&_ep_isp_info=%24ip_isp_info' +
       '&_ep_geo_info=%24ip_geo_info',
-    'engagement': '${track}' + '&e=PageviewEngagement' + '&_ep_engaged_time=5',
-    'completion': '${track}' + '&e=PageviewEngagement' + '&_ep_completion=0.25',
+    'engagement': '${track}&e=PageviewEngagement&_ep_engaged_time=5',
+    'completion': '${track}&e=PageviewEngagement&_ep_completion=0.25',
   },
   'triggers': {
     'trackPageview': {

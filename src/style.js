@@ -172,7 +172,7 @@ export function assertNotDisplay(style) {
   if (style === 'display') {
     dev().error(
       'STYLE',
-      '`display` style detected. You must use toggle ' + 'instead.'
+      '`display` style detected. You must use toggle instead.'
     );
   }
   return style;
@@ -193,7 +193,7 @@ export function assertDoesNotContainDisplay(styles) {
   if ('display' in styles) {
     dev().error(
       'STYLE',
-      '`display` style detected in styles. You must use ' + 'toggle instead.'
+      '`display` style detected in styles. You must use toggle instead.'
     );
   }
   return styles;
@@ -211,7 +211,7 @@ export function setInitialDisplay(el, value) {
   const {style} = el;
   devAssert(
     value !== '' && value !== 'none',
-    'Initial display value must ' + 'not be "none". Use toggle instead.'
+    'Initial display value must not be "none". Use toggle instead.'
   );
   devAssert(
     !style['display'],

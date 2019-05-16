@@ -111,8 +111,7 @@ const strings = {
     string: 'Luaskan tinggi jendela untuk menampilkan pengalaman ini',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT]: {
-    string:
-      'Luaskan tinggi dan lebar jendela untuk menampilkan pengalaman ' + 'ini',
+    string: 'Luaskan tinggi dan lebar jendela untuk menampilkan pengalaman ini',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_WIDTH_SIZE_TEXT]: {
     string: 'Luaskan lebar jendela untuk menampilkan pengalaman ini',

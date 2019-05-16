@@ -164,7 +164,7 @@ describes.realWin(
       }
     );
 
-    it('should display timeleft in the format ' + '{d} {days} {h}:{mm}', () => {
+    it('should display timeleft in the format {d} {days} {h}:{mm}', () => {
       element.build();
       const timeObj = Object.assign(
         impl.getYDHMSFromMs_(endDate - twoDaysBeforeEndDate - 1000),

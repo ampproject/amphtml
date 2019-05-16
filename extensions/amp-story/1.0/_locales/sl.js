@@ -112,7 +112,7 @@ const strings = {
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT]: {
     string:
-      'Če si želite ogledati to izkušnjo, povečajte višino in širino ' + 'okna',
+      'Če si želite ogledati to izkušnjo, povečajte višino in širino okna',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_WIDTH_SIZE_TEXT]: {
     string: 'Če si želite ogledati to izkušnjo, povečajte širino okna',

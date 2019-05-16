@@ -645,7 +645,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
   // TODO(alanorozco, #11827): Make this test work on Safari.
   it.configure()
     .skipSafari()
-    .run('should replace CLIENT_ID synchronously ' + 'when available', () => {
+    .run('should replace CLIENT_ID synchronously when available', () => {
       return getReplacements({withCid: true}).then(urlReplacements => {
         setCookie(window, 'url-abc', 'cid-for-abc');
         setCookie(window, 'url-xyz', 'cid-for-xyz');
@@ -721,18 +721,15 @@ describes.sandboxed('UrlReplacements', {}, () => {
     }
   );
 
-  it(
-    'should replace SHARE_TRACKING_INCOMING and' + ' SHARE_TRACKING_OUTGOING',
-    () => {
-      return expect(
-        expandUrlAsync(
-          '?in=SHARE_TRACKING_INCOMING&out=SHARE_TRACKING_OUTGOING',
-          /*opt_bindings*/ undefined,
-          {withShareTracking: true}
-        )
-      ).to.eventually.equal('?in=12345&out=54321');
-    }
-  );
+  it('should replace SHARE_TRACKING_INCOMING and SHARE_TRACKING_OUTGOING', () => {
+    return expect(
+      expandUrlAsync(
+        '?in=SHARE_TRACKING_INCOMING&out=SHARE_TRACKING_OUTGOING',
+        /*opt_bindings*/ undefined,
+        {withShareTracking: true}
+      )
+    ).to.eventually.equal('?in=12345&out=54321');
+  });
 
   // TODO(#16916): Make this test work with synchronous throws.
   it.skip(
@@ -1127,7 +1124,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
 
   it('should replace INCREMENTAL_ENGAGED_TIME', () => {
     return expandUrlAsync(
-      '?sh=' + 'INCREMENTAL_ENGAGED_TIME',
+      '?sh=INCREMENTAL_ENGAGED_TIME',
       /*opt_bindings*/ undefined,
       {withActivity: true}
     ).then(res => {
@@ -1212,48 +1209,42 @@ describes.sandboxed('UrlReplacements', {}, () => {
   });
 
   // TODO(#16916): Make this test work with synchronous throws.
-  it.skip(
-    'should report errors & replace them with empty ' + 'string (sync)',
-    () => {
-      const clock = sandbox.useFakeTimers();
-      const {documentElement} = window.document;
-      const replacements = Services.urlReplacementsForDoc(documentElement);
-      replacements.getVariableSource().set('ONE', () => {
-        throw new Error('boom');
-      });
-      const p = expect(
-        replacements.expandUrlAsync('?a=ONE')
-      ).to.eventually.equal('?a=');
-      allowConsoleError(() => {
-        expect(() => {
-          clock.tick(1);
-        }).to.throw(/boom/);
-      });
-      return p;
-    }
-  );
+  it.skip('should report errors & replace them with empty string (sync)', () => {
+    const clock = sandbox.useFakeTimers();
+    const {documentElement} = window.document;
+    const replacements = Services.urlReplacementsForDoc(documentElement);
+    replacements.getVariableSource().set('ONE', () => {
+      throw new Error('boom');
+    });
+    const p = expect(replacements.expandUrlAsync('?a=ONE')).to.eventually.equal(
+      '?a='
+    );
+    allowConsoleError(() => {
+      expect(() => {
+        clock.tick(1);
+      }).to.throw(/boom/);
+    });
+    return p;
+  });
 
   // TODO(#16916): Make this test work with synchronous throws.
-  it.skip(
-    'should report errors & replace them with empty ' + 'string (promise)',
-    () => {
-      const clock = sandbox.useFakeTimers();
-      const {documentElement} = window.document;
-      const replacements = Services.urlReplacementsForDoc(documentElement);
-      replacements.getVariableSource().set('ONE', () => {
-        return Promise.reject(new Error('boom'));
-      });
-      return expect(replacements.expandUrlAsync('?a=ONE'))
-        .to.eventually.equal('?a=')
-        .then(() => {
-          allowConsoleError(() => {
-            expect(() => {
-              clock.tick(1);
-            }).to.throw(/boom/);
-          });
+  it.skip('should report errors & replace them with empty string (promise)', () => {
+    const clock = sandbox.useFakeTimers();
+    const {documentElement} = window.document;
+    const replacements = Services.urlReplacementsForDoc(documentElement);
+    replacements.getVariableSource().set('ONE', () => {
+      return Promise.reject(new Error('boom'));
+    });
+    return expect(replacements.expandUrlAsync('?a=ONE'))
+      .to.eventually.equal('?a=')
+      .then(() => {
+        allowConsoleError(() => {
+          expect(() => {
+            clock.tick(1);
+          }).to.throw(/boom/);
         });
-    }
-  );
+      });
+  });
 
   it('should support positional arguments', () => {
     const {documentElement} = window.document;
@@ -1612,7 +1603,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
       }
     );
     expect(expanded).to.equal(
-      'r=RANDOM&c=ABC&f=FUNCT(hello,world)' + '&a=b&d=PROM&e=PAGE_LOAD_TIME'
+      'r=RANDOM&c=ABC&f=FUNCT(hello,world)&a=b&d=PROM&e=PAGE_LOAD_TIME'
     );
   });
 

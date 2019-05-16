@@ -196,16 +196,13 @@ describes.fakeWin(
         expect(stub.calledOnce).to.be.true;
       });
 
-      it(
-        'Should send NA click if other vendor ' + 'has replaced the link',
-        () => {
-          ampSkimlinks.onClick_({
-            linkRewriterId: 'vendorX',
-          });
+      it('Should send NA click if other vendor has replaced the link', () => {
+        ampSkimlinks.onClick_({
+          linkRewriterId: 'vendorX',
+        });
 
-          expect(stub.calledOnce).to.be.true;
-        }
-      );
+        expect(stub.calledOnce).to.be.true;
+      });
 
       it('Should send NA click if skimlinks has not replaced the link', () => {
         ampSkimlinks.onClick_({

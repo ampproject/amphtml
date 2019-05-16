@@ -41,7 +41,7 @@ export const GOOGLEANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       'sd=${screenColorDepth}&' +
       'ul=${browserLanguage}&' +
       'de=${documentCharset}',
-    'baseSuffix': '&a=${pageViewId}&' + 'z=${random}',
+    'baseSuffix': '&a=${pageViewId}&z=${random}',
     'pageview':
       '${host}/r/collect?${basePrefix}&' +
       't=pageview&' +

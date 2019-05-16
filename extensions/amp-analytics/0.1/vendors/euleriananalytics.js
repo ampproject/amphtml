@@ -35,10 +35,9 @@ export const EULERIANANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       '${base}/action/${basePrefix}' +
       'eact=${actionCode}&' +
       'actr=${actionRef}',
-    'user':
-      '${base}/uparam/${basePrefix}' + 'euk${userParamKey}=${userParamVal}',
+    'user': '${base}/uparam/${basePrefix}euk${userParamKey}=${userParamVal}',
     'contextflag':
-      '${base}/cflag2/${basePrefix}' + 'ecf0k=${cflagKey}&ecf0v=${cflagVal}',
+      '${base}/cflag2/${basePrefix}ecf0k=${cflagKey}&ecf0v=${cflagVal}',
   },
   'transport': {
     'beacon': false,

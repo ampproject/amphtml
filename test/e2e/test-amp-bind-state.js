@@ -17,8 +17,7 @@
 describes.endtoend(
   'amp-bind',
   {
-    testUrl:
-      'http://localhost:8000/test/fixtures/e2e/amp-bind/' + 'bind-basic.html',
+    testUrl: 'http://localhost:8000/test/fixtures/e2e/amp-bind/bind-basic.html',
   },
   async env => {
     let controller;
@@ -30,54 +29,51 @@ describes.endtoend(
     describe('+ amp-state', () => {
       // TODO(cvializ, choumx): Update server to have an endpoint that
       // would test the infinite-loop blocking behavior
-      it.skip(
-        'should not loop infinitely if updates change its ' + 'src binding',
-        async () => {
-          const changeAmpStateSrcButton = await controller.findElement(
-            '#changeAmpStateSrc'
-          );
-          const setState = await controller.findElement('#setState');
-          const ampState = await controller.findElement('#ampState');
+      it.skip('should not loop infinitely if updates change its src binding', async () => {
+        const changeAmpStateSrcButton = await controller.findElement(
+          '#changeAmpStateSrc'
+        );
+        const setState = await controller.findElement('#setState');
+        const ampState = await controller.findElement('#ampState');
 
-          // TODO(cvializ, choumx): Replace this with a test server endpoint
-          // // Stub XHR for endpoint such that it returns state that would
-          // // point the amp-state element back to its original source.
-          // sandbox.stub(batchedXhr, 'fetchJson')
-          //     .withArgs(
-          //         'https://www.google.com/bind/second/source', sinon.match.any)
-          //     .returns(Promise.resolve({
-          //       json() {
-          //         return Promise.resolve({
-          //           stateSrc: 'https://www.google.com/bind/first/source',
-          //         });
-          //       },
-          //     }));
-          // // Changes amp-state's src from
-          // // .../first/source to .../second/source.
+        // TODO(cvializ, choumx): Replace this with a test server endpoint
+        // // Stub XHR for endpoint such that it returns state that would
+        // // point the amp-state element back to its original source.
+        // sandbox.stub(batchedXhr, 'fetchJson')
+        //     .withArgs(
+        //         'https://www.google.com/bind/second/source', sinon.match.any)
+        //     .returns(Promise.resolve({
+        //       json() {
+        //         return Promise.resolve({
+        //           stateSrc: 'https://www.google.com/bind/first/source',
+        //         });
+        //       },
+        //     }));
+        // // Changes amp-state's src from
+        // // .../first/source to .../second/source.
 
-          await expect(
-            controller.getElementAttribute(ampState, 'src')
-          ).to.equal('https://www.google.com/bind/first/source');
+        await expect(controller.getElementAttribute(ampState, 'src')).to.equal(
+          'https://www.google.com/bind/first/source'
+        );
 
-          await controller.click(changeAmpStateSrcButton);
-          // bind applications caused by an amp-state mutation SHOULD NOT
-          // update src attributes on amp-state elements.
-          await expect(
-            controller.getElementAttribute(ampState, 'src')
-          ).to.not.equal('https://www.google.com/bind/first/source');
-          await expect(
-            controller.getElementAttribute(ampState, 'src')
-          ).to.equal('https://www.google.com/bind/second/source');
+        await controller.click(changeAmpStateSrcButton);
+        // bind applications caused by an amp-state mutation SHOULD NOT
+        // update src attributes on amp-state elements.
+        await expect(
+          controller.getElementAttribute(ampState, 'src')
+        ).to.not.equal('https://www.google.com/bind/first/source');
+        await expect(controller.getElementAttribute(ampState, 'src')).to.equal(
+          'https://www.google.com/bind/second/source'
+        );
 
-          await controller.click(setState);
-          // Now that a non-amp-state mutation has ocurred, the
-          // amp-state's src attribute can be updated with the new
-          // src from the XHR.
-          await expect(
-            controller.getElementAttribute(ampState, 'src')
-          ).to.equal('https://www.google.com/bind/first/source');
-        }
-      );
+        await controller.click(setState);
+        // Now that a non-amp-state mutation has ocurred, the
+        // amp-state's src attribute can be updated with the new
+        // src from the XHR.
+        await expect(controller.getElementAttribute(ampState, 'src')).to.equal(
+          'https://www.google.com/bind/first/source'
+        );
+      });
     });
   }
 );

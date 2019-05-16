@@ -65,9 +65,9 @@ function replaceInFile(filePath, newFilePath, ...args) {
 function patchWebAnimations() {
   // Copies web-animations-js into a new file that has an export.
   const patchedName =
-    'node_modules/web-animations-js/' + 'web-animations.install.js';
+    'node_modules/web-animations-js/web-animations.install.js';
   let file = fs
-    .readFileSync('node_modules/web-animations-js/' + 'web-animations.min.js')
+    .readFileSync('node_modules/web-animations-js/web-animations.min.js')
     .toString();
   // Replace |requestAnimationFrame| with |window|.
   file = file.replace(/requestAnimationFrame/g, function(a, b) {

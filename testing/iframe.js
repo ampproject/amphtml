@@ -230,7 +230,7 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
   return new Promise(function(resolve, reject) {
     const iframe = document.createElement('iframe');
     iframe.name = 'test_' + iframeCount++;
-    iframe.srcdoc = '<!doctype><html><head>' + '<body><div id=parent></div>';
+    iframe.srcdoc = '<!doctype><html><head><body><div id=parent></div>';
     iframe.onload = function() {
       // Flag as being a test window.
       iframe.contentWindow.AMP_TEST_IFRAME = true;

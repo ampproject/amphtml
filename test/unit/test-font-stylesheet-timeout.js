@@ -61,25 +61,22 @@ describes.realWin(
     // TODO(cramforce, #11827): Make this test work on Safari.
     it.configure()
       .skipSafari()
-      .run(
-        'should not time out for immediately ' + 'loading style sheets',
-        () => {
-          const link = addLink();
-          fontStylesheetTimeout(win);
-          clock.tick(10000);
-          expect(
-            win.document.querySelectorAll('link[rel="stylesheet"]')
-          ).to.have.length(1);
-          expect(win.document.querySelector('link[rel="stylesheet"]')).to.equal(
-            link
-          );
-          expect(
-            win.document.querySelectorAll(
-              'link[rel="stylesheet"][i-amphtml-timeout]'
-            )
-          ).to.have.length(0);
-        }
-      );
+      .run('should not time out for immediately loading style sheets', () => {
+        const link = addLink();
+        fontStylesheetTimeout(win);
+        clock.tick(10000);
+        expect(
+          win.document.querySelectorAll('link[rel="stylesheet"]')
+        ).to.have.length(1);
+        expect(win.document.querySelector('link[rel="stylesheet"]')).to.equal(
+          link
+        );
+        expect(
+          win.document.querySelectorAll(
+            'link[rel="stylesheet"][i-amphtml-timeout]'
+          )
+        ).to.have.length(0);
+      });
 
     it('should time out if style sheets do not load', () => {
       const link = addLink(undefined, '/does-not-exist.css');

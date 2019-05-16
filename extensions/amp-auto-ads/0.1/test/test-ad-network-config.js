@@ -68,7 +68,7 @@ describes.realWin(
         const adNetwork = getAdNetworkConfig('adsense', ampAutoAdsElem);
 
         const canonicalUrl =
-          'http://foo.bar/' + 'a'.repeat(4050) + 'shouldnt_be_included';
+          'http://foo.bar/a'.repeat(4050) + 'shouldnt_be_included';
 
         const docInfo = Services.documentInfoForDoc(ampAutoAdsElem);
         sandbox.stub(docInfo, 'canonicalUrl').callsFake(canonicalUrl);
@@ -161,7 +161,7 @@ describes.realWin(
         const adNetwork = getAdNetworkConfig('doubleclick', ampAutoAdsElem);
 
         const canonicalUrl =
-          'http://foo.bar/' + 'a'.repeat(4050) + 'shouldnt_be_included';
+          'http://foo.bar/a'.repeat(4050) + 'shouldnt_be_included';
 
         const docInfo = Services.documentInfoForDoc(ampAutoAdsElem);
         sandbox.stub(docInfo, 'canonicalUrl').callsFake(canonicalUrl);

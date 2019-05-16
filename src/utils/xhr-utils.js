@@ -390,7 +390,7 @@ export function verifyAmpCORSHeaders(win, response, init) {
     // returned but required, return error.
     userAssert(
       false,
-      'Response must contain the' + ` ${ALLOW_SOURCE_ORIGIN_HEADER} header`
+      `Response must contain the ${ALLOW_SOURCE_ORIGIN_HEADER} header`
     );
   }
   return response;
