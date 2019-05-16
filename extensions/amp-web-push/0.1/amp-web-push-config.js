@@ -78,8 +78,8 @@ export class WebPushConfig extends AMP.BaseElement {
     for (const attribute in WebPushConfigAttributes) {
       const value = WebPushConfigAttributes[attribute];
       userAssert(
-          this.element.getAttribute(value) || value === 'service-worker-scope',
-          `The ${value} attribute is required for <${CONFIG_TAG}>`
+        this.element.getAttribute(value) || value === 'service-worker-scope',
+        `The ${value} attribute is required for <${CONFIG_TAG}>`
       );
       config[value] = this.element.getAttribute(value);
     }
@@ -88,7 +88,7 @@ export class WebPushConfig extends AMP.BaseElement {
       !this.isValidHelperOrPermissionDialogUrl_(config['helper-iframe-url'])
     ) {
       throw user().createError(
-          `<${CONFIG_TAG}> must have a valid ` +
+        `<${CONFIG_TAG}> must have a valid ` +
           'helper-iframe-url attribute. It should begin with ' +
           'the https:// protocol and point to the provided lightweight ' +
           'template page provided for AMP messaging.'
@@ -99,23 +99,23 @@ export class WebPushConfig extends AMP.BaseElement {
       !this.isValidHelperOrPermissionDialogUrl_(config['permission-dialog-url'])
     ) {
       throw user().createError(
-          `<${CONFIG_TAG}> must have a valid ` +
+        `<${CONFIG_TAG}> must have a valid ` +
           'permission-dialog-url attribute. It should begin with ' +
           'the https:// protocol and point to the provided template page ' +
           'for showing the permission prompt.'
       );
     }
 
-    if (parseUrlDeprecated(config['service-worker-url']).protocol
-      !== 'https:') {
+    if (
+      parseUrlDeprecated(config['service-worker-url']).protocol !== 'https:'
+    ) {
       throw user().createError(
-          `<${CONFIG_TAG}> must have a valid ` +
+        `<${CONFIG_TAG}> must have a valid ` +
           'service-worker-url attribute. It should begin with the ' +
           'https:// protocol and point to the service worker JavaScript file ' +
           'to be installed.'
       );
     }
-
 
     if (
       parseUrlDeprecated(config['service-worker-url']).origin !==
@@ -124,7 +124,7 @@ export class WebPushConfig extends AMP.BaseElement {
         parseUrlDeprecated(config['helper-iframe-url']).origin
     ) {
       throw user().createError(
-          `<${CONFIG_TAG}> URL attributes ` +
+        `<${CONFIG_TAG}> URL attributes ` +
           'service-worker-url, permission-dialog-url, and ' +
           'helper-iframe-url must all share the same origin.'
       );
@@ -132,9 +132,9 @@ export class WebPushConfig extends AMP.BaseElement {
   }
 
   /**
-  * Parses the JSON configuration and returns a JavaScript object.
-  * @return {AmpWebPushConfig}
-  */
+   * Parses the JSON configuration and returns a JavaScript object.
+   * @return {AmpWebPushConfig}
+   */
   parseConfig() {
     const config = {};
 
@@ -154,12 +154,12 @@ export class WebPushConfig extends AMP.BaseElement {
     webPushService.start(config).catch(() => {});
 
     this.registerAction(
-        WebPushWidgetActions.SUBSCRIBE,
-        this.onSubscribe_.bind(this)
+      WebPushWidgetActions.SUBSCRIBE,
+      this.onSubscribe_.bind(this)
     );
     this.registerAction(
-        WebPushWidgetActions.UNSUBSCRIBE,
-        this.onUnsubscribe_.bind(this)
+      WebPushWidgetActions.UNSUBSCRIBE,
+      this.onUnsubscribe_.bind(this)
     );
   }
 
@@ -170,7 +170,7 @@ export class WebPushConfig extends AMP.BaseElement {
   ensureSpecificElementId_() {
     if (this.element.getAttribute('id') !== TAG) {
       throw user().createError(
-          `<${CONFIG_TAG}> must have an id ` +
+        `<${CONFIG_TAG}> must have an id ` +
           "attribute with value '" +
           TAG +
           "'."
@@ -184,11 +184,11 @@ export class WebPushConfig extends AMP.BaseElement {
    */
   ensureUniqueElement_() {
     const webPushConfigElements = this.getAmpDoc()
-        .getRootNode()
-        .querySelectorAll(`#${escapeCssSelectorIdent(CONFIG_TAG)}`);
+      .getRootNode()
+      .querySelectorAll(`#${escapeCssSelectorIdent(CONFIG_TAG)}`);
     if (webPushConfigElements.length > 1) {
       throw user().createError(
-          `Only one <${CONFIG_TAG}> element may exist on a page.`
+        `Only one <${CONFIG_TAG}> element may exist on a page.`
       );
     }
   }
@@ -206,14 +206,14 @@ export class WebPushConfig extends AMP.BaseElement {
     this.setWidgetDisabled_(widget, true);
     const webPushService = getServiceForDoc(this.getAmpDoc(), SERVICE_TAG);
     webPushService
-        .subscribe(() => {
+      .subscribe(() => {
         // On popup closed
-          this.setWidgetDisabled_(widget, false);
-        })
-        .then(() => {
+        this.setWidgetDisabled_(widget, false);
+      })
+      .then(() => {
         // On browser notification permission granted, denied, or dismissed
-          this.setWidgetDisabled_(widget, false);
-        });
+        this.setWidgetDisabled_(widget, false);
+      });
   }
 
   /**
@@ -244,7 +244,7 @@ export class WebPushConfig extends AMP.BaseElement {
    * @private
    * @param {string} url
    * @return {boolean}
-  */
+   */
   isValidHelperOrPermissionDialogUrl_(url) {
     try {
       const parsedUrl = parseUrlDeprecated(url);

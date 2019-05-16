@@ -26,21 +26,18 @@ import {scopedQuerySelectorAll} from '../../../src/dom';
  *     !function(!Element, !./amp-story-page.AmpStoryPage): !PageElement>}
  */
 const PAGE_ELEMENT_FACTORIES = {
-  'amp-audio, amp-video, .i-amphtml-story-background-audio':
-      (element, page) => new MediaElement(element, page),
-  'amp-img, amp-anim':
-      (element, page) => new ImageElement(element, page),
-  '.i-amphtml-video-interface':
-      (element, page) => new VideoInterfaceElement(element, page),
+  'amp-audio, amp-video, .i-amphtml-story-background-audio': (element, page) =>
+    new MediaElement(element, page),
+  'amp-img, amp-anim': (element, page) => new ImageElement(element, page),
+  '.i-amphtml-video-interface': (element, page) =>
+    new VideoInterfaceElement(element, page),
 };
-
 
 /**
  * CSS class for an element on an amp-story-page.
  * @const {string}
  */
 const ELEMENT_CLASS_NAME = 'i-amphtml-story-page-element';
-
 
 /**
  * CSS class for an element on an amp-story-page that indicates the element is
@@ -49,14 +46,12 @@ const ELEMENT_CLASS_NAME = 'i-amphtml-story-page-element';
  */
 const ELEMENT_LOADED_CLASS_NAME = 'i-amphtml-story-page-element-loaded';
 
-
 /**
  * CSS class for an element on an amp-story-page that indicates the element can
  * be shown in the UI.
  * @const {string}
  */
 const ELEMENT_SHOW_CLASS_NAME = 'i-amphtml-story-page-element-shown';
-
 
 /**
  * CSS class for an element on an amp-story-page that indicates the element has
@@ -65,14 +60,12 @@ const ELEMENT_SHOW_CLASS_NAME = 'i-amphtml-story-page-element-shown';
  */
 const ELEMENT_FAILED_CLASS_NAME = 'i-amphtml-story-page-element-failed';
 
-
 /**
  * CSS class for an element on an amp-story-page that indicates the element was
  * hidden by a media query rule.
  * @const {string}
  */
 const HIDDEN_BY_MEDIA_QUERY_CLASS_NAME = 'i-amphtml-hidden-by-media-query';
-
 
 /**
  * The minimum amount of a media item (by percentage) that must be loaded in
@@ -81,14 +74,11 @@ const HIDDEN_BY_MEDIA_QUERY_CLASS_NAME = 'i-amphtml-hidden-by-media-query';
  */
 const MINIMUM_MEDIA_BUFFER_PERCENTAGE_FROM_BEGINNING = 0.25;
 
-
 /**
  * The minimum amount of a media item (in seconds) that must be loaded in order
  * for that element to be considered "loaded".
  */
 const MINIMUM_MEDIA_BUFFER_SECONDS_FROM_BEGINNING = 3;
-
-
 
 /**
  * Represents a single element on an <amp-story-page> that can affect the system
@@ -147,20 +137,26 @@ export class PageElement {
   updateState() {
     if (!this.isLoaded && !this.hasFailed) {
       this.isLoaded = this.isLoaded_();
-      this.element.classList
-          .toggle(ELEMENT_LOADED_CLASS_NAME, /* force */ this.isLoaded);
+      this.element.classList.toggle(
+        ELEMENT_LOADED_CLASS_NAME,
+        /* force */ this.isLoaded
+      );
     }
 
     if (!this.hasFailed && !this.isLoaded) {
       this.hasFailed = this.hasFailed_();
-      this.element.classList
-          .toggle(ELEMENT_FAILED_CLASS_NAME, /* force */ this.hasFailed);
+      this.element.classList.toggle(
+        ELEMENT_FAILED_CLASS_NAME,
+        /* force */ this.hasFailed
+      );
     }
 
     if (!this.canBeShown) {
       this.canBeShown = this.canBeShown_() || this.isLoaded;
-      this.element.classList
-          .toggle(ELEMENT_SHOW_CLASS_NAME, /* force */ this.canBeShown);
+      this.element.classList.toggle(
+        ELEMENT_SHOW_CLASS_NAME,
+        /* force */ this.canBeShown
+      );
     }
   }
 
@@ -260,8 +256,10 @@ class MediaElement extends PageElement {
   /** @private */
   maybeManuallyForceLoading_() {
     const mediaElement = this.getMediaElement_();
-    if (!mediaElement ||
-        (mediaElement.buffered && mediaElement.buffered.length > 0)) {
+    if (
+      !mediaElement ||
+      (mediaElement.buffered && mediaElement.buffered.length > 0)
+    ) {
       return;
     }
 
@@ -285,14 +283,18 @@ class MediaElement extends PageElement {
       return false;
     }
 
-    const firstTimeRange = dev().assertNumber(firstTimeRangeOrNull,
-        'No first time range was found, despite media element existing.');
+    const firstTimeRange = dev().assertNumber(
+      firstTimeRangeOrNull,
+      'No first time range was found, despite media element existing.'
+    );
     const bufferedSeconds = mediaElement.buffered.end(firstTimeRange);
     const bufferedPercentage =
-        (mediaElement.buffered.end(firstTimeRange) / mediaElement.duration);
+      mediaElement.buffered.end(firstTimeRange) / mediaElement.duration;
 
-    return bufferedSeconds >= MINIMUM_MEDIA_BUFFER_SECONDS_FROM_BEGINNING ||
-        bufferedPercentage >= MINIMUM_MEDIA_BUFFER_PERCENTAGE_FROM_BEGINNING;
+    return (
+      bufferedSeconds >= MINIMUM_MEDIA_BUFFER_SECONDS_FROM_BEGINNING ||
+      bufferedPercentage >= MINIMUM_MEDIA_BUFFER_PERCENTAGE_FROM_BEGINNING
+    );
   }
 
   /** @override */
@@ -360,15 +362,22 @@ class ImageElement extends PageElement {
   /** @override */
   isLoaded_() {
     const imageElement = this.getImageElement_();
-    return Boolean(imageElement && imageElement.complete &&
-        imageElement.naturalWidth && imageElement.naturalHeight);
+    return Boolean(
+      imageElement &&
+        imageElement.complete &&
+        imageElement.naturalWidth &&
+        imageElement.naturalHeight
+    );
   }
 
   /** @override */
   hasFailed_() {
     const imageElement = this.getImageElement_();
-    return Boolean(imageElement && imageElement.complete &&
-        (imageElement.naturalWidth === 0 || imageElement.naturalHeight === 0));
+    return Boolean(
+      imageElement &&
+        imageElement.complete &&
+        (imageElement.naturalWidth === 0 || imageElement.naturalHeight === 0)
+    );
   }
 
   /** @override */

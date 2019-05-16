@@ -59,7 +59,7 @@ function installRepl(global, env) {
       });
     }
 
-    console./*OK*/log(READY_MESSAGE);
+    console./*OK*/ log(READY_MESSAGE);
 
     return replPromise;
   };
@@ -76,7 +76,7 @@ function installRepl(global, env) {
     delete global.repl.env;
     delete global.repl.continue;
 
-    console./*OK*/log(CONTINUE_MESSAGE);
+    console./*OK*/ log(CONTINUE_MESSAGE);
   }
 }
 

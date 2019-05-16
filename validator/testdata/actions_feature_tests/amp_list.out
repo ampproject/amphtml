@@ -71,17 +71,5 @@ actions_feature_tests/amp_list.html:31:2 The extension 'amp-mustache' is referen
 |        </div>
 |      </template>
 |    </amp-list>
-|
-|    <!-- Valid: Should allow cross-origin -->
-|    <amp-list width="auto" height="100" layout="fixed-height"
->>   ^~~~~~~~~
-actions_feature_tests/amp_list.html:73:2 The attribute 'cross-origin' in tag 'AMP-LIST (ACTIONS)' is deprecated - use 'crossorigin' instead. (see https://github.com/ampproject/amphtml/issues/21399) [DEPRECATION]
-|      src="https://someserver.json" cross-origin="amp-viewer-auth-token-via-post" credentials="123">
-|      <template type="amp-mustache">
-|        <div class="url-entry">
-|          <a href="https://somelink.com">{{blah}}</a>
-|        </div>
-|      </template>
-|    </amp-list>
 |  </body>
 |  </html>

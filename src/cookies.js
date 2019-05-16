@@ -15,13 +15,8 @@
  */
 
 import {endsWith} from './string';
-import {
-  isProxyOrigin,
-  parseUrlDeprecated,
-  tryDecodeUriComponent,
-} from './url';
+import {isProxyOrigin, parseUrlDeprecated, tryDecodeUriComponent} from './url';
 import {urls} from './config';
-
 
 /**
  * Returns the value of the cookie. The cookie access is restricted and must
@@ -128,11 +123,14 @@ function trySetCookie(win, name, value, expirationTime, domain) {
     value = 'delete';
     expirationTime = 0;
   }
-  const cookie = encodeURIComponent(name) + '=' +
-      encodeURIComponent(value) +
-      '; path=/' +
-      (domain ? '; domain=' + domain : '') +
-      '; expires=' + new Date(expirationTime).toUTCString();
+  const cookie =
+    encodeURIComponent(name) +
+    '=' +
+    encodeURIComponent(value) +
+    '; path=/' +
+    (domain ? '; domain=' + domain : '') +
+    '; expires=' +
+    new Date(expirationTime).toUTCString();
   try {
     win.document.cookie = cookie;
   } catch (ignore) {
@@ -155,14 +153,18 @@ function checkOriginForSettingCookie(win, options, name) {
     return;
   }
   if (isProxyOrigin(win.location.href)) {
-    throw new Error('Should never attempt to set cookie on proxy origin: '
-        + name);
+    throw new Error(
+      'Should never attempt to set cookie on proxy origin: ' + name
+    );
   }
 
   const current = parseUrlDeprecated(win.location.href).hostname.toLowerCase();
   const proxy = parseUrlDeprecated(urls.cdn).hostname.toLowerCase();
   if (current == proxy || endsWith(current, '.' + proxy)) {
-    throw new Error('Should never attempt to set cookie on proxy origin.'
-        + ' (in depth check): ' + name);
+    throw new Error(
+      'Should never attempt to set cookie on proxy origin.' +
+        ' (in depth check): ' +
+        name
+    );
   }
 }

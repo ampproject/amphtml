@@ -22,7 +22,6 @@ import {listen} from '../../../src/event-helper';
  * viewer.
  */
 export class FocusHandler {
-
   /**
    * @param {!Window} win
    * @param {!./messaging/messaging.Messaging} messaging
@@ -41,8 +40,9 @@ export class FocusHandler {
    */
   listenForFocusEvents_() {
     const doc = this.win.document;
-    listen(doc, 'focusin', this.forwardEventToViewer_.bind(this),
-        {capture: false});
+    listen(doc, 'focusin', this.forwardEventToViewer_.bind(this), {
+      capture: false,
+    });
   }
 
   /**
@@ -54,9 +54,9 @@ export class FocusHandler {
       return;
     }
     this.messaging_.sendRequest(
-        e.type,
-        dict({'focusTargetRect': e.target./*OK*/getBoundingClientRect()}),
-        /* awaitResponse */ false
+      e.type,
+      dict({'focusTargetRect': e.target./*OK*/ getBoundingClientRect()}),
+      /* awaitResponse */ false
     );
   }
 }

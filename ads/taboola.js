@@ -27,8 +27,12 @@ export function taboola(global, data) {
 
   // ensure we have vlid publisher, placement and mode
   // and exactly one page-type
-  validateData(data, ['publisher', 'placement', 'mode',
-    ['article', 'video', 'photo', 'search', 'category', 'homepage', 'other']]);
+  validateData(data, [
+    'publisher',
+    'placement',
+    'mode',
+    ['article', 'video', 'photo', 'search', 'category', 'homepage', 'other'],
+  ]);
 
   // setup default values for referrer and url
   const params = {
@@ -44,17 +48,18 @@ export function taboola(global, data) {
   });
 
   // push the two object into the '_taboola' global
-  (global._taboola = global._taboola || []).push([{
-    viewId: global.context.pageViewId,
-    publisher: data.publisher,
-    placement: data.placement,
-    mode: data.mode,
-    framework: 'amp',
-    container: 'c',
-  },
-  params,
-  {flush: true}]
-  );
+  (global._taboola = global._taboola || []).push([
+    {
+      viewId: global.context.pageViewId,
+      publisher: data.publisher,
+      placement: data.placement,
+      mode: data.mode,
+      framework: 'amp',
+      container: 'c',
+    },
+    params,
+    {flush: true},
+  ]);
 
   // install observation on entering/leaving the view
   global.context.observeIntersection(function(changes) {
@@ -70,5 +75,10 @@ export function taboola(global, data) {
   });
 
   // load the taboola loader asynchronously
-  loadScript(global, `https://cdn.taboola.com/libtrc/${encodeURIComponent(data.publisher)}/loader.js`);
+  loadScript(
+    global,
+    `https://cdn.taboola.com/libtrc/${encodeURIComponent(
+      data.publisher
+    )}/loader.js`
+  );
 }
