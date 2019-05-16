@@ -55,7 +55,7 @@ export const CommonSignals = {
    * INI_LOAD is an optional signal, implemented by ads, story, and elements
    * that consist of other resources.
    * It instructs that all critical resources has been loaded, and can be used
-   * for more acurate visibility measurement.
+   * for more accurate visibility measurement.
    * When an element doesn't consist multiple child resources, LOAD_END signal
    * can be used to indicate resource load completion.
    * Note: Based on the implementation, INI_LOAD can trigger before or after
