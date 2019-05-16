@@ -483,7 +483,7 @@ async function runTests() {
     let errored = false;
     let totalStableSuccess = 0;
     let totalStableFailed = 0;
-    const partialTestRunCompleteFn = async(browsers, results) => {
+    const partialTestRunCompleteFn = async (browsers, results) => {
       if (results.error) {
         errored = true;
       } else {
@@ -519,7 +519,8 @@ async function runTests() {
       const allBatchesExitCodes = await runTestInBatchesWithBrowsers(
         'beta',
         browsers.beta,
-        /* runCompleteFn */ () => {});
+        /* runCompleteFn */ () => {}
+      );
       if (allBatchesExitCodes) {
         log(
           yellow('Some tests have failed on'),
@@ -549,7 +550,10 @@ async function runTests() {
    * @return {number} processExitCode
    */
   async function runTestInBatchesWithBrowsers(
-    batchName, browsers, runCompleteFn) {
+    batchName,
+    browsers,
+    runCompleteFn
+  ) {
     let batch = 1;
     let startIndex = 0;
     let endIndex = batchSize;
