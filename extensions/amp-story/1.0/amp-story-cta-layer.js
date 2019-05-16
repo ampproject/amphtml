@@ -32,6 +32,7 @@
 import {AmpStoryBaseLayer} from './amp-story-base-layer';
 import {addAttributesToElement, matches, removeElement} from '../../../src/dom';
 import {dict} from '../../../src/utils/object';
+import {setTextBackgroundColor} from './utils';
 import {user} from '../../../src/log';
 
 /**
@@ -54,6 +55,7 @@ export class AmpStoryCtaLayer extends AmpStoryBaseLayer {
   buildCallback() {
     super.buildCallback();
     this.setOrOverwriteAttributes_();
+    this.setDescendentCssTextStyles_();
     this.checkAndRemoveLayerIfOnFirstPage_();
   }
 
@@ -77,6 +79,17 @@ export class AmpStoryCtaLayer extends AmpStoryBaseLayer {
         addAttributesToElement(ctaButtons[i], dict({'role': 'button'}));
       }
     }
+  }
+
+  /**
+   * Sets text styles for descendants of the
+   * <amp-story-cta-layer> element.
+   * @private
+   */
+  setDescendentCssTextStyles_() {
+    this.mutateElement(() => {
+      setTextBackgroundColor(this.element);
+    });
   }
 
   /**

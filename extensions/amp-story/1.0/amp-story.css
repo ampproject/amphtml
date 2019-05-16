@@ -241,6 +241,15 @@ amp-story-page[distance="2"] {
   transform: translateY(100%) !important;
 }
 
+amp-story-page [text-background-color] {
+  border-radius: 3px;
+  line-height: 1.5em;
+  padding: 2px 4px;
+  text-indent: 0;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
 [desktop].i-amphtml-story-bookend-active amp-story-page[active] {
   filter: blur(3px) !important;
   transition: filter 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
@@ -346,11 +355,6 @@ amp-story-grid-layer > * {
 /** Ensure clicks inside anchor tags are handled by the tooltip. */
 amp-story-grid-layer a * {
   pointer-events: none !important;
-}
-
-amp-story-grid-layer [text-background-color] > span {
-  padding: 2px 4px;
-  box-decoration-break: clone;
 }
 
 /** Apply click shield on embedded components on initial load. */

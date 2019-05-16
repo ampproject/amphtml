@@ -28,12 +28,8 @@
 
 import {AmpStoryBaseLayer} from './amp-story-base-layer';
 import {assertDoesNotContainDisplay, setStyles} from '../../../src/style';
-import {
-  createElementWithAttributes,
-  matches,
-  scopedQuerySelectorAll,
-} from '../../../src/dom';
-import {dict} from '../../../src/utils/object';
+import {matches, scopedQuerySelectorAll} from '../../../src/dom';
+import {setTextBackgroundColor} from './utils';
 
 /**
  * A mapping of attribute names we support for grid layers to the CSS Grid
@@ -60,19 +56,6 @@ const SUPPORTED_CSS_GRID_ATTRIBUTES_SELECTOR =
     Object.keys(SUPPORTED_CSS_GRID_ATTRIBUTES)
         .map(key => `[${key}]`)
         .join(',');
-
-/**
- * The attribute name for text background color
- * @private @const {string}
- */
-const TEXT_BACKGROUND_COLOR_ATTRIBUTE_NAME = 'text-background-color';
-
-/**
- * The selector for text background color
- * @private @const {string}
- */
-const TEXT_BACKGROUND_COLOR_SELECTOR =
-    `[${TEXT_BACKGROUND_COLOR_ATTRIBUTE_NAME}]`;
 
 /**
  * The attribute name for grid layer templates.
@@ -154,29 +137,6 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
   }
 
   /**
-   * Styles text with a background color based on the value of
-   * the text-background-color attribute
-   * @private
-   */
-  setDescendentCssTextStyles_() {
-    const elementsToUpgradeStyles = scopedQuerySelectorAll(this.element,
-        TEXT_BACKGROUND_COLOR_SELECTOR);
-
-    Array.prototype.forEach.call(elementsToUpgradeStyles, element => {
-      const color = element.getAttribute(TEXT_BACKGROUND_COLOR_ATTRIBUTE_NAME);
-      const attributes = dict({
-        'style': `background-color:${color}`,
-      });
-      const spanEl = createElementWithAttributes(
-          /** @type {!Document} */ (this.element.ownerDocument),
-          'span', attributes);
-      spanEl.textContent = element.textContent;
-      element.textContent = null;
-      element.appendChild(spanEl);
-    });
-  }
-
-  /**
    * Copies the whitelisted CSS grid styles for the <amp-story-grid-layer>
    * element itself.
    * @private
@@ -204,5 +164,16 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
       }
     }
     setStyles(element, assertDoesNotContainDisplay(styles));
+  }
+
+  /**
+   * Sets text styles for descendants of the
+   * <amp-story-grid-layer> element.
+   * @private
+   */
+  setDescendentCssTextStyles_() {
+    this.mutateElement(() => {
+      setTextBackgroundColor(this.element);
+    });
   }
 }
