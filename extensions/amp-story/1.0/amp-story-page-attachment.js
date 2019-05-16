@@ -25,7 +25,6 @@ import {
   HistoryState,
   createShadowRootWithStyle,
   setHistoryState,
-  setTextBackgroundColor,
 } from './utils';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
@@ -454,7 +453,6 @@ export class AmpStoryPageAttachment extends AMP.BaseElement {
         transform: translate,
         transition: 'none',
       });
-      setTextBackgroundColor(this.element);
     });
   }
 
@@ -481,8 +479,6 @@ export class AmpStoryPageAttachment extends AMP.BaseElement {
         setImportantStyles(this.element, {transition: 'initial'});
         this.mutateElement(() => resetStyles(this.element, ['transition']));
       }
-
-      setTextBackgroundColor(this.element);
 
       this.element.classList.add('i-amphtml-story-page-attachment-open');
       toggle(dev().assertElement(this.containerEl_), true);

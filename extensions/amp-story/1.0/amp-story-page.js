@@ -65,7 +65,7 @@ import {getLogEntries} from './logging';
 import {getMode} from '../../../src/mode';
 import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
-import {isMediaDisplayed} from './utils';
+import {isMediaDisplayed, setTextBackgroundColor} from './utils';
 import {toggle} from '../../../src/style';
 import {upgradeBackgroundAudio} from './audio';
 
@@ -310,6 +310,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.advancement_.addProgressListener(progress =>
       this.emitProgress_(progress)
     );
+    this.setDescendentCssTextStyles_();
   }
 
   /**
@@ -1389,5 +1390,16 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   isAd() {
     return this.element.hasAttribute(ADVERTISEMENT_ATTR_NAME);
+  }
+
+  /**
+   * Sets text styles for descendants of the
+   * <amp-story-page> element.
+   * @private
+   */
+  setDescendentCssTextStyles_() {
+    this.mutateElement(() => {
+      setTextBackgroundColor(this.element);
+    });
   }
 }

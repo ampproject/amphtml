@@ -29,7 +29,6 @@
 import {AmpStoryBaseLayer} from './amp-story-base-layer';
 import {assertDoesNotContainDisplay, setStyles} from '../../../src/style';
 import {matches, scopedQuerySelectorAll} from '../../../src/dom';
-import {setTextBackgroundColor} from './utils';
 
 /**
  * A mapping of attribute names we support for grid layers to the CSS Grid
@@ -102,7 +101,6 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
     this.applyTemplateClassName_();
     this.setOwnCssGridStyles_();
     this.setDescendentCssGridStyles_();
-    this.setDescendentCssTextStyles_();
   }
 
   /** @override */
@@ -169,16 +167,5 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
       }
     }
     setStyles(element, assertDoesNotContainDisplay(styles));
-  }
-
-  /**
-   * Sets text styles for descendants of the
-   * <amp-story-grid-layer> element.
-   * @private
-   */
-  setDescendentCssTextStyles_() {
-    this.mutateElement(() => {
-      setTextBackgroundColor(this.element);
-    });
   }
 }

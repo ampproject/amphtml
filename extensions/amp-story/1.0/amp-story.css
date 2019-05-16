@@ -242,12 +242,12 @@ amp-story-page[distance="2"] {
 }
 
 amp-story-page [text-background-color] {
-  border-radius: 3px;
-  line-height: 1.5em;
-  padding: 2px 4px;
-  text-indent: 0;
-  box-decoration-break: clone;
-  -webkit-box-decoration-break: clone;
+  border-radius: 3px !important;
+  line-height: 1.5em !important;
+  padding: 2px 4px !important;
+  text-indent: 0 !important;
+  box-decoration-break: clone !important;
+  -webkit-box-decoration-break: clone !important;
 }
 
 [desktop].i-amphtml-story-bookend-active amp-story-page[active] {
