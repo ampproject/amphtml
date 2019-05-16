@@ -23,9 +23,7 @@ import {parseJson} from '../../../src/json';
 const TAG = 'amp-experiment';
 const ATTR_PREFIX = 'amp-x-';
 
-
 export class AmpExperiment extends AMP.BaseElement {
-
   /** @override */
   isLayoutSupported(layout) {
     return layout == Layout.NODISPLAY || layout == Layout.CONTAINER;
@@ -33,45 +31,50 @@ export class AmpExperiment extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    return getServicePromiseForDoc(this.getAmpDoc(), 'variant')
-        .then(variantsService => {
-          try {
-            const config = this.getConfig_();
-            const results = Object.create(null);
-            const variants = Object.keys(config).map(experimentName => {
-              return allocateVariant(
-                  this.getAmpDoc(), experimentName, config[experimentName])
-                  .then(variantName => {
-                    results[experimentName] = variantName;
-                  });
+    return getServicePromiseForDoc(this.getAmpDoc(), 'variant').then(
+      variantsService => {
+        try {
+          const config = this.getConfig_();
+          const results = Object.create(null);
+          const variants = Object.keys(config).map(experimentName => {
+            return allocateVariant(
+              this.getAmpDoc(),
+              experimentName,
+              config[experimentName]
+            ).then(variantName => {
+              results[experimentName] = variantName;
             });
+          });
 
-            /** @private @const {!Promise<!Object<string, ?string>>} */
-            const experimentVariants = Promise.all(variants)
-                .then(() => results)
-                .then(this.addToBody_.bind(this));
+          /** @private @const {!Promise<!Object<string, ?string>>} */
+          const experimentVariants = Promise.all(variants)
+            .then(() => results)
+            .then(this.addToBody_.bind(this));
 
-            variantsService.init(experimentVariants);
-          } catch (e) {
-            // Ensure downstream consumers don't wait for the promise forever.
-            variantsService.init({});
-            throw e;
-          }
-        });
+          variantsService.init(experimentVariants);
+        } catch (e) {
+          // Ensure downstream consumers don't wait for the promise forever.
+          variantsService.init({});
+          throw e;
+        }
+      }
+    );
   }
 
   /** @return {!JsonObject} [description] */
   getConfig_() {
     const {children} = this.element;
     userAssert(
-        children.length == 1 && children[0].tagName == 'SCRIPT'
-            && children[0].getAttribute('type').toUpperCase()
-                == 'APPLICATION/JSON',
-        '<amp-experiment> should contain exactly one ' +
-        '<script type="application/json"> child.');
+      children.length == 1 &&
+        children[0].tagName == 'SCRIPT' &&
+        children[0].getAttribute('type').toUpperCase() == 'APPLICATION/JSON',
+      '<amp-experiment> should contain exactly one ' +
+        '<script type="application/json"> child.'
+    );
 
-    return /** @type {!JsonObject} */ (
-      devAssert(parseJson(children[0].textContent)));
+    return /** @type {!JsonObject} */ (devAssert(
+      parseJson(children[0].textContent)
+    ));
   }
 
   /**
@@ -87,15 +90,16 @@ export class AmpExperiment extends AMP.BaseElement {
     return doc.whenBodyAvailable().then(body => {
       for (const name in experiments) {
         if (experiments[name]) {
-          body.setAttribute(ATTR_PREFIX + name,
-              dev().assertString(experiments[name]));
+          body.setAttribute(
+            ATTR_PREFIX + name,
+            dev().assertString(experiments[name])
+          );
         }
       }
       return experiments;
     });
   }
 }
-
 
 AMP.extension(TAG, '0.1', AMP => {
   AMP.registerServiceForDoc('variant', Variants);

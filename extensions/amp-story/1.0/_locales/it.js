@@ -63,7 +63,7 @@ const strings = {
     string: 'Tocca Indietro',
   },
   [LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL]: {
-    string: 'Scorri verso l\'alto',
+    string: "Scorri verso l'alto",
   },
   [LocalizedStringId.AMP_STORY_PAGE_PLAY_VIDEO]: {
     string: 'Riproduci video',
@@ -108,28 +108,34 @@ const strings = {
     string: 'Espandi tweet',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_HEIGHT_SIZE_TEXT]: {
-    string: 'Espandi l\'altezza della finestra per visualizzare questa ' +
-        'esperienza',
+    string:
+      "Espandi l'altezza della finestra per visualizzare questa " +
+      'esperienza',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT]: {
-    string: 'Espandi sia l\'altezza che la larghezza della finestra per ' +
-        'visualizzare questa esperienza',
+    string:
+      "Espandi sia l'altezza che la larghezza della finestra per " +
+      'visualizzare questa esperienza',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_WIDTH_SIZE_TEXT]: {
-    string: 'Espandi la larghezza della finestra per visualizzare questa ' +
-        'esperienza',
+    string:
+      'Espandi la larghezza della finestra per visualizzare questa ' +
+      'esperienza',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
-    string: 'Devi attivare l\'esperimento di storia AMP per visualizzare ' +
-        'questi contenuti.',
+    string:
+      "Devi attivare l'esperimento di storia AMP per visualizzare " +
+      'questi contenuti.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
-    string: 'La pagina viene visualizzata in modo ottimale in orientamento ' +
-        'verticale',
+    string:
+      'La pagina viene visualizzata in modo ottimale in orientamento ' +
+      'verticale',
   },
   [LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT]: {
-    string: 'Spiacenti, sembra che il tuo browser non supporti questa ' +
-        'esperienza',
+    string:
+      'Spiacenti, sembra che il tuo browser non supporti questa ' +
+      'esperienza',
   },
 };
 
