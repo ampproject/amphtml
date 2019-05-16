@@ -845,6 +845,8 @@ amp-list[load-more] [load-more-end]
  * amp-story
  */
 amp-story[standalone], amp-story-page {
+  /* Ensures amp-story and amp-story-page have a height and are prerendered. */
+  min-height: 1px !important;
   display: block !important;
   height: 100% !important;
   margin: 0 !important;

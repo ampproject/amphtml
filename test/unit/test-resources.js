@@ -23,6 +23,7 @@ import {Signals} from '../../src/utils/signals';
 import {VisibilityState} from '../../src/visibility-state';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import {loadPromise} from '../../src/event-helper';
+import {toggleExperiment} from '../../src/experiments';
 
 /*eslint "google-camelcase/google-camelcase": 0*/
 describe('Resources', () => {
@@ -1141,6 +1142,7 @@ describe('Resources discoverWork', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox;
+    toggleExperiment(window, 'amp-force-prerender-visible-elements', true);
     resources = new Resources(new AmpDocSingle(window));
     viewportMock = sandbox.mock(resources.viewport_);
 
@@ -1163,6 +1165,7 @@ describe('Resources discoverWork', () => {
   });
 
   afterEach(() => {
+    toggleExperiment(window, 'amp-force-prerender-visible-elements', false);
     viewportMock.verify();
     sandbox.restore();
   });
@@ -1530,7 +1533,12 @@ describe('Resources discoverWork', () => {
     const buildResourceSpy = sandbox.spy(resources, 'buildResourceUnsafe_');
     sandbox.stub(resources, 'schedule_');
     resources.documentReady_ = true;
-    resource1.element.isBuilt = () => false;
+    resource1.element.isBuilt = sandbox
+      .stub()
+      .onFirstCall()
+      .returns(true)
+      .onSecondCall()
+      .returns(false);
     resource2.element.idleRenderOutsideViewport = () => false;
     resource1.state_ = ResourceState.NOT_BUILT;
     resource1.build = sandbox.spy();
@@ -1540,7 +1548,8 @@ describe('Resources discoverWork', () => {
     expect(resource1.build).to.be.calledOnce;
     expect(buildResourceSpy).calledWithExactly(
       resource1,
-      /* schedulePass */ true
+      /* schedulePass */ true,
+      /* force */ false
     );
   });
 
@@ -1549,7 +1558,12 @@ describe('Resources discoverWork', () => {
     sandbox.stub(resources, 'schedule_');
     resources.documentReady_ = false;
     resource1.element.nextSibling = {};
-    resource1.element.isBuilt = () => false;
+    resource1.element.isBuilt = sandbox
+      .stub()
+      .onFirstCall()
+      .returns(false)
+      .onSecondCall()
+      .returns(true);
     resource2.element.idleRenderOutsideViewport = () => false;
     resource1.state_ = ResourceState.NOT_BUILT;
     resource1.build = sandbox.spy();
@@ -1595,6 +1609,34 @@ describe('Resources discoverWork', () => {
     resources.discoverWork_();
 
     expect(schedulePassStub).to.be.calledOnce;
+  });
+
+  it('should force build resources during discoverWork layout phase', () => {
+    const buildResourceSpy = sandbox.spy(resources, 'buildResourceUnsafe_');
+    sandbox.stub(resources, 'schedule_');
+    resources.documentReady_ = true;
+    // Emulates a resource not building, maybe because grantBuildPermission()
+    // returned false.
+    resource1.element.isBuilt = sandbox.stub().returns(false);
+    resource2.element.idleRenderOutsideViewport = () => false;
+    resource1.state_ = ResourceState.NOT_BUILT;
+    resource1.build = sandbox.spy();
+
+    resources.discoverWork_();
+
+    expect(resource1.build).to.be.calledTwice;
+    // discoverWork_ phase 1 build.
+    expect(buildResourceSpy).calledWithExactly(
+      resource1,
+      /* schedulePass */ true,
+      /* force */ false
+    );
+    // discoverWork_ phase 4 layout grants build.
+    expect(buildResourceSpy).calledWithExactly(
+      resource1,
+      /* schedulePass */ true,
+      /* force */ true
+    );
   });
 
   describe('getResourcesInRect', () => {
