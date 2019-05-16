@@ -434,6 +434,14 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/22059',
     cleanupIssue: 'TODO',
   },
+  {
+    id: 'amp-force-prerender-visible-elements',
+    name:
+      'Force builds the AMP elements that are visible and in the viewport ' +
+      'during prerendering, beyond the 20 elements limit.',
+    spec: 'https://github.com/ampproject/amphtml/issues/21791',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/21792',
+  },
 ];
 
 if (getMode().localDev) {
