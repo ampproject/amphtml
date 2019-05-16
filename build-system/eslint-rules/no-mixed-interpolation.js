@@ -107,7 +107,7 @@ module.exports = {
           'exclusively',
         ].join(' ');
 
-        const hasVariadicInterpolation = node.arguments.length >= messageArgPos;
+        const hasVariadicInterpolation = node.arguments[metadata.startPos + 1];
         if (hasVariadicInterpolation && hasTemplateLiteral(argToEval)) {
           context.report({
             node: argToEval,
