@@ -11,7 +11,7 @@ For those new to AMPHTML ads, see the background docs at the bottom of this arti
 ## AMPHTML Ads in RTB: High-Level Approach
  
 ### RTB Bid Request
-
+ 
 Exchanges will need to indicate in the RTB bid request whether a page is built in AMP, and any specific requirements or treatment of AMPHTML ads.  As of [OpenRTB 2.5](http://www.iab.com/wp-content/uploads/2016/03/OpenRTB-API-Specification-Version-2-5-FINAL.pdf), this is not yet included in the spec, but the proposed implementation to the IAB committee is as follows.
  
 **`Site` Object additional field: `amp`**
@@ -46,13 +46,13 @@ A new field is added to the `Imp` object of the OpenRTB standard to provide more
 SSPs will need to provide a new field in the bid response to allow bidders to return AMPHTML content, and RTB bidders will need to populate that field in order to return AMPHTML ads.  As of [OpenRTB 2.5](http://www.iab.com/wp-content/uploads/2016/03/OpenRTB-API-Specification-Version-2-5-FINAL.pdf), this is not yet included in the spec, but the proposed workflow is a new field that accepts a URL pointing to AMP ad content.  
  
 **`Bid` Object additional field: `ampadurl`**
-
+ 
 | Field         | Type     | Description        | 
 | ------------- |------     |-----              |
-| `ampadurl`       | string  | Optional means of conveying AMPHTML ad markup in case the bid wins; only one of `ampadurl` or `adm` should be set. Substitution macros (Section 4.4) may be included.  URL should point to a creative server containing valid AMP Ad html.           |
-
+| `ampadurl`       | string  | Optional means of conveying AMPHTML ad markup in case the bid wins; only one of `ampadurl` or `adm` should be set. Substitution macros (Section 4.4) may be included.  URL should point to a creative server containing valid AMP Ad html.           |  
+ 
 ### Verification of valid AMP
-
+ 
 * For AMPHTML ads to be rendered early, the exchange is required to verify and sign in real time that the ad is written in amp4ads  `<html amp4ads>` creative format.
 * See "[Proposed Design](https://github.com/ampproject/amphtml/issues/3133)" for signing.
 * Ads that are valid AMPHTML ads will be allowed to render early by AMP pages.  Ads that are not verified as valid AMPHTML ads  will render at the same speed as non-AMPHTML ads.
@@ -66,7 +66,7 @@ SSPs will need to provide a new field in the bid response to allow bidders to re
 * The AMPHTML ad will be injected into the adslot and subsequently rendered.  Note that since a valid AMPHTML ad cannot contain an iframe or another ad tag, the server-side fetch must retrieve the actual HTML of the creative.
  
 ### Impression Tracking and Billing URLs
-
+ 
 * RTB buyers often include impression trackers as a structured field in the bid response (for example `Bid.burl`, the "billing notice URL" in OpenRTB 2.5).
 * It is up to the exchange or publisher ad server to determine how these URLs are fired, but <code><[amp-pixel](https://amp.dev/documentation/components/amp-pixel)></code> and <code><[amp-analytics](https://amp.dev/documentation/components/amp-analytics)></code> can handle most impression tracking and analytics use cases.
 
