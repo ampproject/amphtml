@@ -298,21 +298,6 @@ amp-story-page[distance="2"] {
   display: none !important;
 }
 
-/**
- * Click shield to make sure click events are never swallowed by videos on
- * Safari iOS 11.2, which would prevent the user from navigating through the
- * story.
- * See #14401
- */
-amp-story-grid-layer amp-video::after {
-  content: "" !important;
-  position: absolute !important;
-  height: 100% !important;
-  width: 100% !important;
-  top: 0 !important;
-  left: 0 !important;
-}
-
 /** Call to action layer, positioned at the bottom 20% of the screen. */
 amp-story-cta-layer {
   display: block !important;
@@ -337,6 +322,31 @@ amp-story-grid-layer {
   z-index: 2 !important;
   /** Make sure grid layer does not act as a click shield on elements underneath */
   pointer-events: none !important;
+}
+
+/**
+ * Click shield to make sure click events are never swallowed by videos on
+ * Safari iOS 11.2, which would prevent the user from navigating through the
+ * story.
+ * See #14401
+ */
+ amp-story-grid-layer amp-video::after {
+  content: "" !important;
+  position: absolute !important;
+  height: 100% !important;
+  width: 100% !important;
+  top: 0 !important;
+  left: 0 !important;
+}
+
+/**
+ * Adds a width limit to make sure amp-twitter element only takes required
+ * space, otherwise it takes whole width and causes a tooltip trigger in blank
+ * space.
+ * See #22334
+ */
+amp-story-grid-layer amp-twitter {
+  max-width: 500px !important;
 }
 
 amp-story-grid-layer > * {
