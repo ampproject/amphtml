@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {devAssert} from './log';
 import {endsWith} from './string';
 import {isProxyOrigin, parseUrlDeprecated, tryDecodeUriComponent} from './url';
 import {urls} from './config';
@@ -152,19 +153,15 @@ function checkOriginForSettingCookie(win, options, name) {
   if (options && options.allowOnProxyOrigin) {
     return;
   }
-  if (isProxyOrigin(win.location.href)) {
-    throw new Error(
-      'Should never attempt to set cookie on proxy origin: ' + name
-    );
-  }
-
+  devAssert(
+    !isProxyOrigin(win.location.href),
+    `Should never attempt to set cookie on proxy origin: ${name}`
+  );
   const current = parseUrlDeprecated(win.location.href).hostname.toLowerCase();
   const proxy = parseUrlDeprecated(urls.cdn).hostname.toLowerCase();
-  if (current == proxy || endsWith(current, '.' + proxy)) {
-    throw new Error(
-      'Should never attempt to set cookie on proxy origin.' +
-        ' (in depth check): ' +
-        name
-    );
-  }
+  devAssert(
+    !(current == proxy || endsWith(current, '.' + proxy)),
+    'Should never attempt to set cookie on proxy origin. (in depth check): ' +
+      name
+  );
 }

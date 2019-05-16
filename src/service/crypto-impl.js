@@ -22,7 +22,6 @@ import {stringToBytes, utf8Encode} from '../utils/bytes';
 
 /** @const {string} */
 const TAG = 'Crypto';
-const FALLBACK_MSG = 'SubtleCrypto failed, fallback to closure lib.';
 
 /**
  * @typedef {function((string|Uint8Array))}
@@ -96,14 +95,18 @@ export class Crypto {
               // non-secure origin: https://www.chromium.org/Home/chromium-security/prefer-secure-origins-for-powerful-new-features
               if (e.message && e.message.indexOf('secure origin') < 0) {
                 // Log unexpected fallback.
-                user().error(TAG, FALLBACK_MSG, e);
+                user().error(
+                  TAG,
+                  'SubtleCrypto failed, fallback to closure lib.',
+                  e
+                );
               }
               return this.loadPolyfill_().then(() => this.sha384(input));
             }
           )
       );
     } catch (e) {
-      dev().error(TAG, FALLBACK_MSG, e);
+      dev().error(TAG, 'SubtleCrypto failed, fallback to closure lib.', e);
       return this.loadPolyfill_().then(() => this.sha384(input));
     }
   }
