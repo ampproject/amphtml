@@ -84,7 +84,8 @@ let KEY_COUNTER = 0;
  */
 export function sanitizeHtml(html, doc, diffing) {
   const tagPolicy = htmlSanitizer.makeTagPolicy(parsed =>
-    parsed.getScheme() === 'https' ? parsed : null);
+    parsed.getScheme() === 'https' ? parsed : null
+  );
   const output = [];
   let ignore = 0;
 
@@ -96,7 +97,9 @@ export function sanitizeHtml(html, doc, diffing) {
 
   // No Caja support for <script> or <svg>.
   const cajaBlacklistedTags = Object.assign(
-      {'script': true, 'svg': true}, BLACKLISTED_TAGS);
+    {'script': true, 'svg': true},
+    BLACKLISTED_TAGS
+  );
 
   const parser = htmlSanitizer.makeSaxParser({
     'startTag': function(tagName, attribs) {
@@ -131,8 +134,10 @@ export function sanitizeHtml(html, doc, diffing) {
         // Ask Caja to validate the element as well.
         // Use the resulting properties.
         const savedAttribs = attribs.slice(0);
-        const scrubbed = /** @type {!JsonObject} */ (
-          tagPolicy(tagName, attribs));
+        const scrubbed = /** @type {!JsonObject} */ (tagPolicy(
+          tagName,
+          attribs
+        ));
         if (!scrubbed) {
           ignore++;
         } else {
@@ -145,8 +150,10 @@ export function sanitizeHtml(html, doc, diffing) {
               attribs[i + 1] = savedAttribs[i + 1];
             } else if (attrName.search(WHITELISTED_ATTR_PREFIX_REGEX) == 0) {
               attribs[i + 1] = savedAttribs[i + 1];
-            } else if (WHITELISTED_ATTRS_BY_TAGS[tagName] &&
-                       WHITELISTED_ATTRS_BY_TAGS[tagName].includes(attrName)) {
+            } else if (
+              WHITELISTED_ATTRS_BY_TAGS[tagName] &&
+              WHITELISTED_ATTRS_BY_TAGS[tagName].includes(attrName)
+            ) {
               attribs[i + 1] = savedAttribs[i + 1];
             }
           }
@@ -208,8 +215,11 @@ export function sanitizeHtml(html, doc, diffing) {
         const attrName = attribs[i];
         const attrValue = attribs[i + 1];
         if (!isValidAttr(tagName, attrName, attrValue, doc, false)) {
-          user().error(TAG, `Removing "${attrName}" attribute with invalid `
-              + `value in <${tagName} ${attrName}="${attrValue}">.`);
+          user().error(
+            TAG,
+            `Removing "${attrName}" attribute with invalid ` +
+              `value in <${tagName} ${attrName}="${attrValue}">.`
+          );
           continue;
         }
         emit(' ');
@@ -222,7 +232,7 @@ export function sanitizeHtml(html, doc, diffing) {
         if (attrValue) {
           // Rewrite attribute values unless this attribute is a binding.
           // Bindings contain expressions and shouldn't be rewritten.
-          const rewrite = (bindingAttribs.includes(i))
+          const rewrite = bindingAttribs.includes(i)
             ? attrValue
             : rewriteAttributeValue(tagName, attrName, attrValue);
           emit(htmlSanitizer.escapeAttrib(rewrite));

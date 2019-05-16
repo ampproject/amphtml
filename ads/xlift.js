@@ -39,14 +39,18 @@ export function xlift(global, data) {
   //assign XliftAmpHelper property to global(window)
   global.XliftAmpHelper = null;
 
-  loadScript(global, 'https://cdn.x-lift.jp/resources/common/xlift_amp.js', () => {
-    if (!global.XliftAmpHelper) {
+  loadScript(
+    global,
+    'https://cdn.x-lift.jp/resources/common/xlift_amp.js',
+    () => {
+      if (!global.XliftAmpHelper) {
+        global.context.noContentAvailable();
+      } else {
+        global.XliftAmpHelper.show();
+      }
+    },
+    () => {
       global.context.noContentAvailable();
     }
-    else {
-      global.XliftAmpHelper.show();
-    }
-  }, () => {
-    global.context.noContentAvailable();
-  });
+  );
 }

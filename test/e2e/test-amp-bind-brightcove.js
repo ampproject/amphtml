@@ -14,27 +14,34 @@
  * limitations under the License.
  */
 
-describes.endtoend('amp-bind', {
-  testUrl: 'http://localhost:8000/test/fixtures/e2e/amp-bind/' +
+describes.endtoend(
+  'amp-bind',
+  {
+    testUrl:
+      'http://localhost:8000/test/fixtures/e2e/amp-bind/' +
       'bind-brightcove.html',
-}, async env => {
-  let controller;
+  },
+  async env => {
+    let controller;
 
-  beforeEach(async() => {
-    controller = env.controller;
-  });
-
-  describe('with <amp-brightcove>', () => {
-    it('should support binding to data-account', async() => {
-      const button = await controller.findElement('#brightcoveButton');
-      const iframe = await controller.findElement('#brightcove iframe');
-
-      await expect(controller.getElementProperty(iframe, 'src'))
-          .to.not.contain('bound');
-
-      await controller.click(button);
-      await expect(controller.getElementProperty(iframe, 'src'))
-          .to.contain('bound');
+    beforeEach(async () => {
+      controller = env.controller;
     });
-  });
-});
+
+    describe('with <amp-brightcove>', () => {
+      it('should support binding to data-account', async () => {
+        const button = await controller.findElement('#brightcoveButton');
+        const iframe = await controller.findElement('#brightcove iframe');
+
+        await expect(
+          controller.getElementProperty(iframe, 'src')
+        ).to.not.contain('bound');
+
+        await controller.click(button);
+        await expect(controller.getElementProperty(iframe, 'src')).to.contain(
+          'bound'
+        );
+      });
+    });
+  }
+);

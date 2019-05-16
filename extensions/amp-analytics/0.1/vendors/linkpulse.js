@@ -27,35 +27,38 @@ export const LINKPULSE_CONFIG = /** @type {!JsonObject} */ ({
   },
   'requests': {
     'base': 'https://${host}',
-    'pageview': '${base}/p?i=${id}' +
-              '&r=${documentReferrer}' +
-              '&p=${pageUrl}' +
-              '&s=${section}' +
-              '&t=${type}' +
-              '&c=${channel}' +
-              '&mt=${title}' +
-              '&_t=amp' +
-              '&_r=${random}',
-    'pageload': '${base}/pl?i=${id}' +
-              '&ct=${domInteractiveTime}' +
-              '&rt=${pageDownloadTime}' +
-              '&pt=${pageLoadTime}' +
-              '&p=${pageUrl}' +
-              '&c=${channel}' +
-              '&t=${type}' +
-              '&s=${section}' +
-              '&_t=amp' +
-              '&_r=${random}',
-    'ping': '${base}/u?i=${id}' +
-              '&u=${clientId(_lp4_u)}' +
-              '&p=${pageUrl}' +
-              '&uActive=true' +
-              '&isPing=yes' +
-              '&c=${channel}' +
-              '&t=${type}' +
-              '&s=${section}' +
-              '&_t=amp' +
-              '&_r=${random}',
+    'pageview':
+      '${base}/p?i=${id}' +
+      '&r=${documentReferrer}' +
+      '&p=${pageUrl}' +
+      '&s=${section}' +
+      '&t=${type}' +
+      '&c=${channel}' +
+      '&mt=${title}' +
+      '&_t=amp' +
+      '&_r=${random}',
+    'pageload':
+      '${base}/pl?i=${id}' +
+      '&ct=${domInteractiveTime}' +
+      '&rt=${pageDownloadTime}' +
+      '&pt=${pageLoadTime}' +
+      '&p=${pageUrl}' +
+      '&c=${channel}' +
+      '&t=${type}' +
+      '&s=${section}' +
+      '&_t=amp' +
+      '&_r=${random}',
+    'ping':
+      '${base}/u?i=${id}' +
+      '&u=${clientId(_lp4_u)}' +
+      '&p=${pageUrl}' +
+      '&uActive=true' +
+      '&isPing=yes' +
+      '&c=${channel}' +
+      '&t=${type}' +
+      '&s=${section}' +
+      '&_t=amp' +
+      '&_r=${random}',
   },
   'triggers': {
     'pageview': {

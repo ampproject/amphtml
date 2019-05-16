@@ -21,13 +21,7 @@ const del = require('del');
  * Clean up the build artifacts
  */
 async function clean() {
-  return del([
-    'dist',
-    'dist.3p',
-    'dist.tools',
-    'build',
-    '.amp-build',
-  ]);
+  return del(['dist', 'dist.3p', 'dist.tools', 'build', '.amp-build']);
 }
 
 module.exports = {

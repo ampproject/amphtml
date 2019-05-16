@@ -111,22 +111,25 @@ const strings = {
     string: 'اس تجربے کو دیکھنے کے لیے اپنی ونڈو کی لمبائی کو پھیلائیں',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT]: {
-    string: 'اس تجربے کو دیکھنے کے لیے اپنی ونڈو کی لمبائی اور چوڑائی دونوں ' +
-        'کو پھیلائیں',
+    string:
+      'اس تجربے کو دیکھنے کے لیے اپنی ونڈو کی لمبائی اور چوڑائی دونوں ' +
+      'کو پھیلائیں',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_WIDTH_SIZE_TEXT]: {
     string: 'اس تجربے کو دیکھنے کے لیے اپنی ونڈو کی چوڑائی کو پھیلائیں',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
-    string: 'اس مواد کو دیکھنے کے لیے آپ کو amp کہانی کے تجربے کو فعال کرنا ' +
-        'ہوگا۔',
+    string:
+      'اس مواد کو دیکھنے کے لیے آپ کو amp کہانی کے تجربے کو فعال کرنا ' +
+      'ہوگا۔',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
     string: 'پورٹریٹ وضع میں صفحہ بہت اچھی طرح نظر آتا ہے',
   },
   [LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT]: {
-    string: 'ہمیں افسوس ہے، لگتا ہے کہ آپ کا براؤزر اس تجربے کو سپورٹ نہیں ' +
-        'کرتا ہے',
+    string:
+      'ہمیں افسوس ہے، لگتا ہے کہ آپ کا براؤزر اس تجربے کو سپورٹ نہیں ' +
+      'کرتا ہے',
   },
 };
 

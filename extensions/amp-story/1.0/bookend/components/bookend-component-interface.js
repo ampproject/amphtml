@@ -19,7 +19,6 @@
  * @interface
  */
 export class BookendComponentInterface {
-
   /**
    * Asserts whether the comopnent is valid.
    * @param {../bookend-component.BookendComponentDef} unusedComponentJson

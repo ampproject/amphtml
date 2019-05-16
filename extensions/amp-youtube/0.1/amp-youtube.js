@@ -38,15 +38,11 @@ import {
 } from '../../../src/dom';
 import {getData, listen} from '../../../src/event-helper';
 import {htmlFor} from '../../../src/static-template';
-import {
-  installVideoManagerForDoc,
-} from '../../../src/service/video-manager-impl';
+import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {setStyles} from '../../../src/style';
 
-
 const TAG = 'amp-youtube';
-
 
 // Correct PlayerStates taken from
 // https://developers.google.com/youtube/iframe_api_reference#Playback_status
@@ -70,10 +66,8 @@ const PlayerFlags = {
   HIDE_ANNOTATION: 3,
 };
 
-
 /** @implements {../../../src/video-interface.VideoInterface} */
 class AmpYoutube extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -178,8 +172,9 @@ class AmpYoutube extends AMP.BaseElement {
     if (this.videoid_) {
       descriptor = `${encodeURIComponent(this.videoid_ || '')}?`;
     } else {
-      descriptor = 'live_stream?channel='
-        + `${encodeURIComponent(this.liveChannelid_ || '')}&`;
+      descriptor =
+        'live_stream?channel=' +
+        `${encodeURIComponent(this.liveChannelid_ || '')}&`;
     }
     return `${baseUrl}${descriptor}enablejsapi=1&amp=1`;
   }
@@ -201,8 +196,9 @@ class AmpYoutube extends AMP.BaseElement {
       // Autoplay is managed by video manager, do not pass it to YouTube.
       delete params['autoplay'];
       this.user().error(
-          'AMP-YOUTUBE', 'Use autoplay attribute instead of ' +
-          'data-param-autoplay');
+        'AMP-YOUTUBE',
+        'Use autoplay attribute instead of data-param-autoplay'
+      );
     }
 
     // Unless inline play policy is set explicitly, enable inline play for iOS
@@ -228,7 +224,7 @@ class AmpYoutube extends AMP.BaseElement {
     }
 
     src = addParamsToUrl(src, params);
-    return this.videoIframeSrc_ = src;
+    return (this.videoIframeSrc_ = src);
   }
 
   /** @override */
@@ -247,25 +243,25 @@ class AmpYoutube extends AMP.BaseElement {
     Services.videoManagerForDoc(this.element).register(this);
 
     this.unlistenMessage_ = listen(
-        this.win,
-        'message',
-        this.handleYoutubeMessage_.bind(this)
+      this.win,
+      'message',
+      this.handleYoutubeMessage_.bind(this)
     );
 
     const loaded = this.loadPromise(this.iframe_)
-        // Make sure the YT player is ready for this. For some reason YT player
-        // would send couple of messages but then stop. Waiting for a bit before
-        // sending the 'listening' event seems to fix that and allow YT Player
-        // to send messages continuously.
-        //
-        // This was removed in #6915 but due to #17979 it has been taken back
-        // for a workaround.
-        .then(() => Services.timerFor(this.win).promise(300))
-        .then(() => {
-          // Tell YT that we want to receive messages
-          this.listenToFrame_();
-          this.element.dispatchCustomEvent(VideoEvents.LOAD);
-        });
+      // Make sure the YT player is ready for this. For some reason YT player
+      // would send couple of messages but then stop. Waiting for a bit before
+      // sending the 'listening' event seems to fix that and allow YT Player
+      // to send messages continuously.
+      //
+      // This was removed in #6915 but due to #17979 it has been taken back
+      // for a workaround.
+      .then(() => Services.timerFor(this.win).promise(300))
+      .then(() => {
+        // Tell YT that we want to receive messages
+        this.listenToFrame_();
+        this.element.dispatchCustomEvent(VideoEvents.LOAD);
+      });
     this.playerReadyResolver_(loaded);
     return loaded;
   }
@@ -333,12 +329,14 @@ class AmpYoutube extends AMP.BaseElement {
    * @private
    */
   assertDatasourceExists_() {
-    const datasourceExists = !(this.videoid_ && this.liveChannelid_)
-      && (this.videoid_ || this.liveChannelid_);
+    const datasourceExists =
+      !(this.videoid_ && this.liveChannelid_) &&
+      (this.videoid_ || this.liveChannelid_);
     userAssert(
-        datasourceExists, 'Exactly one of data-videoid or '
-      + 'data-live-channelid should be present for <amp-youtube> %s',
-        this.element
+      datasourceExists,
+      'Exactly one of data-videoid or ' +
+        'data-live-channelid should be present for <amp-youtube> %s',
+      this.element
     );
   }
 
@@ -351,12 +349,14 @@ class AmpYoutube extends AMP.BaseElement {
   sendCommand_(command, opt_args) {
     this.playerReadyPromise_.then(() => {
       if (this.iframe_ && this.iframe_.contentWindow) {
-        const message = JSON.stringify(dict({
-          'event': 'command',
-          'func': command,
-          'args': opt_args || '',
-        }));
-        this.iframe_.contentWindow./*OK*/postMessage(message, '*');
+        const message = JSON.stringify(
+          dict({
+            'event': 'command',
+            'func': command,
+            'args': opt_args || '',
+          })
+        );
+        this.iframe_.contentWindow./*OK*/ postMessage(message, '*');
       }
     });
   }
@@ -425,9 +425,14 @@ class AmpYoutube extends AMP.BaseElement {
     if (!this.iframe_) {
       return;
     }
-    this.iframe_.contentWindow./*OK*/postMessage(JSON.stringify(dict({
-      'event': 'listening',
-    })), '*');
+    this.iframe_.contentWindow./*OK*/ postMessage(
+      JSON.stringify(
+        dict({
+          'event': 'listening',
+        })
+      ),
+      '*'
+    );
   }
 
   /** @private */
@@ -447,12 +452,15 @@ class AmpYoutube extends AMP.BaseElement {
     // TODO(mkhatib): Maybe add srcset to allow the browser to
     // load the needed size or even better match YTPlayer logic for loading
     // player thumbnails for different screen sizes for a cache win!
-    imgPlaceholder.src = 'https://i.ytimg.com/vi/' +
-        encodeURIComponent(videoid) + '/sddefault.jpg#404_is_fine';
+    imgPlaceholder.src =
+      'https://i.ytimg.com/vi/' +
+      encodeURIComponent(videoid) +
+      '/sddefault.jpg#404_is_fine';
 
     if (imgPlaceholder.hasAttribute('aria-label')) {
-      imgPlaceholder.setAttribute('alt',
-          'Loading video - ' + imgPlaceholder.getAttribute('aria-label')
+      imgPlaceholder.setAttribute(
+        'alt',
+        'Loading video - ' + imgPlaceholder.getAttribute('aria-label')
       );
     } else {
       imgPlaceholder.setAttribute('alt', 'Loading video');
@@ -462,26 +470,33 @@ class AmpYoutube extends AMP.BaseElement {
 
     // Because sddefault.jpg isn't available for all videos, we try to load
     // it and fallback to hqdefault.jpg.
-    this.loadPromise(imgPlaceholder).then(() => {
-      // A pretty ugly hack since onerror won't fire on YouTube image 404.
-      // This might be due to the fact that YouTube returns data to the request
-      // even when the status is 404. YouTube returns a placeholder image that
-      // is 120x90.
-      if (imgPlaceholder.naturalWidth == 120 &&
-          imgPlaceholder.naturalHeight == 90) {
-        throw new Error('sddefault.jpg is not found');
-      }
-    }).catch(() => {
-      imgPlaceholder.src = 'https://i.ytimg.com/vi/' +
-          encodeURIComponent(videoid) + '/hqdefault.jpg';
-      return this.loadPromise(imgPlaceholder);
-    }).then(() => {
-      this.getVsync().mutate(() => {
-        setStyles(imgPlaceholder, {
-          'visibility': '',
+    this.loadPromise(imgPlaceholder)
+      .then(() => {
+        // A pretty ugly hack since onerror won't fire on YouTube image 404.
+        // This might be due to the fact that YouTube returns data to the request
+        // even when the status is 404. YouTube returns a placeholder image that
+        // is 120x90.
+        if (
+          imgPlaceholder.naturalWidth == 120 &&
+          imgPlaceholder.naturalHeight == 90
+        ) {
+          throw new Error('sddefault.jpg is not found');
+        }
+      })
+      .catch(() => {
+        imgPlaceholder.src =
+          'https://i.ytimg.com/vi/' +
+          encodeURIComponent(videoid) +
+          '/hqdefault.jpg';
+        return this.loadPromise(imgPlaceholder);
+      })
+      .then(() => {
+        this.getVsync().mutate(() => {
+          setStyles(imgPlaceholder, {
+            'visibility': '',
+          });
         });
       });
-    });
   }
 
   // VideoInterface Implementation. See ../src/video-interface.VideoInterface
@@ -598,7 +613,6 @@ class AmpYoutube extends AMP.BaseElement {
     this.user().error(TAG, '`seekTo` not supported.');
   }
 }
-
 
 AMP.extension(TAG, '0.1', AMP => {
   AMP.registerElement(TAG, AmpYoutube);

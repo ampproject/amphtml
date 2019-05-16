@@ -37,8 +37,9 @@ exports.isTravisBuild = function() {
  * @return {boolean}
  */
 exports.isTravisPullRequestBuild = function() {
-  return exports.isTravisBuild() &&
-      process.env.TRAVIS_EVENT_TYPE === 'pull_request';
+  return (
+    exports.isTravisBuild() && process.env.TRAVIS_EVENT_TYPE === 'pull_request'
+  );
 };
 
 /**
@@ -46,8 +47,7 @@ exports.isTravisPullRequestBuild = function() {
  * @return {boolean}
  */
 exports.isTravisPushBuild = function() {
-  return exports.isTravisBuild() &&
-      process.env.TRAVIS_EVENT_TYPE === 'push';
+  return exports.isTravisBuild() && process.env.TRAVIS_EVENT_TYPE === 'push';
 };
 
 /**
@@ -56,8 +56,11 @@ exports.isTravisPushBuild = function() {
  */
 exports.travisBuildNumber = function() {
   if (!exports.isTravisBuild()) {
-    log(red('ERROR:'), 'This is not a Travis build. Cannot get',
-        cyan('process.env.TRAVIS_BUILD_NUMBER') + '.');
+    log(
+      red('ERROR:'),
+      'This is not a Travis build. Cannot get',
+      cyan('process.env.TRAVIS_BUILD_NUMBER') + '.'
+    );
   }
   return process.env.TRAVIS_BUILD_NUMBER;
 };
@@ -68,8 +71,11 @@ exports.travisBuildNumber = function() {
  */
 exports.travisJobNumber = function() {
   if (!exports.isTravisBuild()) {
-    log(red('ERROR:'), 'This is not a Travis build. Cannot get',
-        cyan('process.env.TRAVIS_JOB_NUMBER') + '.');
+    log(
+      red('ERROR:'),
+      'This is not a Travis build. Cannot get',
+      cyan('process.env.TRAVIS_JOB_NUMBER') + '.'
+    );
   }
   return process.env.TRAVIS_JOB_NUMBER;
 };
@@ -80,8 +86,11 @@ exports.travisJobNumber = function() {
  */
 exports.travisRepoSlug = function() {
   if (!exports.isTravisBuild()) {
-    log(red('ERROR:'), 'This is not a Travis build. Cannot get',
-        cyan('process.env.TRAVIS_REPO_SLUG') + '.');
+    log(
+      red('ERROR:'),
+      'This is not a Travis build. Cannot get',
+      cyan('process.env.TRAVIS_REPO_SLUG') + '.'
+    );
   }
   return process.env.TRAVIS_REPO_SLUG;
 };
@@ -92,8 +101,11 @@ exports.travisRepoSlug = function() {
  */
 exports.travisPullRequestSha = function() {
   if (!exports.isTravisPullRequestBuild()) {
-    log(red('ERROR:'), 'This is not a Travis PR build. Cannot get',
-        cyan('process.env.TRAVIS_PULL_REQUEST_SHA') + '.');
+    log(
+      red('ERROR:'),
+      'This is not a Travis PR build. Cannot get',
+      cyan('process.env.TRAVIS_PULL_REQUEST_SHA') + '.'
+    );
   }
   return process.env.TRAVIS_PULL_REQUEST_SHA;
 };
@@ -104,8 +116,11 @@ exports.travisPullRequestSha = function() {
  */
 exports.travisPullRequestBranch = function() {
   if (!exports.isTravisPullRequestBuild()) {
-    log(red('ERROR:'), 'This is not a Travis PR build. Cannot get',
-        cyan('process.env.TRAVIS_PULL_REQUEST_BRANCH') + '.');
+    log(
+      red('ERROR:'),
+      'This is not a Travis PR build. Cannot get',
+      cyan('process.env.TRAVIS_PULL_REQUEST_BRANCH') + '.'
+    );
   }
   return process.env.TRAVIS_PULL_REQUEST_BRANCH;
 };

@@ -66,7 +66,6 @@ describe('includes', () => {
 });
 
 describe('expandTemplate', () => {
-
   const data = {
     'x': 'Test 1',
     'y': 'Test 2',
@@ -112,12 +111,11 @@ describe('expandTemplate', () => {
   it('should handle multiple iterations when asked to.', () => {
     expect(expandTemplate('${tox}', testGetter, 2)).to.equal('Test 1');
     expect(expandTemplate('${toxy}', testGetter, 2)).to.equal('Test 1Test 2');
-    expect(expandTemplate('${totoxy}', testGetter, 2)).to.equal(
-        '${x}${y}');
-    expect(expandTemplate('${totoxy}', testGetter, 3)).to.equal(
-        'Test 1Test 2');
+    expect(expandTemplate('${totoxy}', testGetter, 2)).to.equal('${x}${y}');
+    expect(expandTemplate('${totoxy}', testGetter, 3)).to.equal('Test 1Test 2');
     expect(expandTemplate('${totoxy}', testGetter, 10)).to.equal(
-        'Test 1Test 2');
+      'Test 1Test 2'
+    );
   });
 
   it('should handle circular expansions without hanging', () => {

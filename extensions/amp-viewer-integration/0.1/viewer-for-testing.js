@@ -78,8 +78,8 @@ export class ViewerForTesting {
     const params = {
       history: 1,
       viewportType: this.viewportType_,
-      width: this.containerEl./*OK*/offsetWidth,
-      height: this.containerEl./*OK*/offsetHeight,
+      width: this.containerEl./*OK*/ offsetWidth,
+      height: this.containerEl./*OK*/ offsetHeight,
       visibilityState: this.visibilityState_,
       prerenderSize: 1,
       origin: parseUrlDeprecated(window.location.href).origin,
@@ -100,38 +100,43 @@ export class ViewerForTesting {
 
     // Listening for messages, hoping that I get a request for a handshake and
     // a notification that a document was loaded.
-    window.addEventListener('message', e => {
-      this.log('message received', e, e.data);
-      const target = this.iframe.contentWindow;
-      const targetOrigin = this.frameOrigin_;
-      // IMPORTANT: There could be many windows with the same origin!
-      // IMPORTANT: Event.source might not be available in all browsers!?
-      if (e.origin != targetOrigin ||
+    window.addEventListener(
+      'message',
+      e => {
+        this.log('message received', e, e.data);
+        const target = this.iframe.contentWindow;
+        const targetOrigin = this.frameOrigin_;
+        // IMPORTANT: There could be many windows with the same origin!
+        // IMPORTANT: Event.source might not be available in all browsers!?
+        if (
+          e.origin != targetOrigin ||
           e.source != target ||
-          e.data.app != APP) {
-        this.log('This message is not for us: ', e);
-        return;
-      }
-      if (e.data.name == 'channelOpen' &&
-          this.handshakeReceivedResolve_) {
-        // Send handshake confirmation.
-        const message = {
-          app: APP,
-          requestid: e.data.requestid,
-          data: {},
-          type: 's',
-        };
-        target./*OK*/postMessage(message, targetOrigin);
+          e.data.app != APP
+        ) {
+          this.log('This message is not for us: ', e);
+          return;
+        }
+        if (e.data.name == 'channelOpen' && this.handshakeReceivedResolve_) {
+          // Send handshake confirmation.
+          const message = {
+            app: APP,
+            requestid: e.data.requestid,
+            data: {},
+            type: 's',
+          };
+          target./*OK*/ postMessage(message, targetOrigin);
 
-        this.log('handshake request received!');
-        this.handshakeReceivedResolve_();
-        this.handshakeReceivedResolve_ = null;
-      }
-      if (e.data.name == 'documentLoaded') {
-        this.log('documentLoaded!');
-        this.documentLoadedResolve_();
-      }
-    }, false);
+          this.log('handshake request received!');
+          this.handshakeReceivedResolve_();
+          this.handshakeReceivedResolve_ = null;
+        }
+        if (e.data.name == 'documentLoaded') {
+          this.log('documentLoaded!');
+          this.documentLoadedResolve_();
+        }
+      },
+      false
+    );
 
     this.containerEl.appendChild(this.iframe);
 
@@ -143,8 +148,10 @@ export class ViewerForTesting {
    * well.
    */
   confirmHandshake() {
-    this.iframe.contentWindow./*OK*/postMessage(
-        'amp-handshake-response', this.frameOrigin_);
+    this.iframe.contentWindow./*OK*/ postMessage(
+      'amp-handshake-response',
+      this.frameOrigin_
+    );
   }
 
   /**
@@ -165,8 +172,7 @@ export class ViewerForTesting {
   /**
    * This is only used for a unit test.
    */
-  setMessageDeliverer() {
-  }
+  setMessageDeliverer() {}
 
   /**
    * Fake docs for testing
@@ -174,6 +180,7 @@ export class ViewerForTesting {
   log() {
     const var_args = Array.prototype.slice.call(arguments, 0);
     var_args.unshift('[VIEWER]');
-    console/*OK*/.log.apply(console, var_args);
+    console /*OK*/.log
+      .apply(console, var_args);
   }
 }

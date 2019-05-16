@@ -12,11 +12,7 @@ firebase
 third_party
 test/coverage
 **/*.extern.js
-validator/dist
-validator/webui/dist
-validator/node_modules
-validator/nodejs/node_modules
-validator/webui/node_modules
+validator/
 eslint-rules
 babel.config.js
 karma.conf.js

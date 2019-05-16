@@ -29,6 +29,10 @@ export function pubguru(global, data) {
   el.setAttribute('id', 'the-ad-unit');
 
   global.document.getElementById('c').appendChild(el);
-  loadScript(global, 'https://amp.pubguru.org/amp.'
-      + encodeURIComponent(data.publisher) + '.min.js');
+  loadScript(
+    global,
+    'https://amp.pubguru.org/amp.' +
+      encodeURIComponent(data.publisher) +
+      '.min.js'
+  );
 }

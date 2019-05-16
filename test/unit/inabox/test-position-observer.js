@@ -18,7 +18,6 @@ import {PositionObserver} from '../../../ads/inabox/position-observer';
 import {layoutRectLtwh} from '../../../src/layout-rect';
 
 describes.realWin('inabox-host:position-observer', {}, env => {
-
   let win;
   let observer;
   let target1;
@@ -103,7 +102,8 @@ describes.realWin('inabox-host:position-observer', {}, env => {
     iframe1.getBoundingClientRect = () => layoutRectLtwh(1, 2, 70, 80);
     iframe2.getBoundingClientRect = () => layoutRectLtwh(5, 6, 30, 40);
     iframe3.getBoundingClientRect = () => layoutRectLtwh(7, 8, 10, 20);
-    expect(observer.getTargetRect(element))
-        .to.deep.equal(layoutRectLtwh(14, 18, 30, 40));
+    expect(observer.getTargetRect(element)).to.deep.equal(
+      layoutRectLtwh(14, 18, 30, 40)
+    );
   });
 });

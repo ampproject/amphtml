@@ -18,10 +18,14 @@ import {createIframePromise} from '../../testing/iframe';
 import {generateSentinel} from '../../src/3p-frame.js';
 
 describe('iframe-helper', function() {
-  const iframeSrc = 'http://iframe.localhost:' + location.port +
-      '/test/fixtures/served/iframe-intersection.html';
-  const nestedIframeSrc = 'http://iframe.localhost:' + location.port +
-      '/test/fixtures/served/iframe-intersection-outer.html';
+  const iframeSrc =
+    'http://iframe.localhost:' +
+    location.port +
+    '/test/fixtures/served/iframe-intersection.html';
+  const nestedIframeSrc =
+    'http://iframe.localhost:' +
+    location.port +
+    '/test/fixtures/served/iframe-intersection-outer.html';
 
   let testIframe;
   let sandbox;
@@ -48,29 +52,36 @@ describe('iframe-helper', function() {
   it('should assert src in iframe', () => {
     const iframe = container.doc.createElement('iframe');
     iframe.srcdoc = '<html>';
-    allowConsoleError(() => { expect(() => {
-      IframeHelper.listenFor(iframe, 'test', () => {});
-    }).to.throw('only iframes with src supported'); });
+    allowConsoleError(() => {
+      expect(() => {
+        IframeHelper.listenFor(iframe, 'test', () => {});
+      }).to.throw('only iframes with src supported');
+    });
   });
 
   it('should assert iframe is detached', () => {
     const iframe = container.doc.createElement('iframe');
     iframe.src = iframeSrc;
     insert(iframe);
-    allowConsoleError(() => { expect(() => {
-      IframeHelper.listenFor(iframe, 'test', () => {});
-    }).to.throw('cannot register events on an attached iframe'); });
+    allowConsoleError(() => {
+      expect(() => {
+        IframeHelper.listenFor(iframe, 'test', () => {});
+      }).to.throw('cannot register events on an attached iframe');
+    });
   });
 
   it('should listen to iframe messages from non-3P frame', () => {
     let unlisten;
     let calls = 0;
     return new Promise(resolve => {
-      unlisten = IframeHelper.listenFor(testIframe, 'send-intersections',
-          () => {
-            calls++;
-            resolve();
-          });
+      unlisten = IframeHelper.listenFor(
+        testIframe,
+        'send-intersections',
+        () => {
+          calls++;
+          resolve();
+        }
+      );
       insert(testIframe);
     }).then(() => {
       const total = calls;
@@ -90,11 +101,15 @@ describe('iframe-helper', function() {
       const sentinel = generateSentinel(testIframe.ownerDocument.defaultView);
       testIframe.src = iframeSrc + '#amp-3p-sentinel=' + sentinel;
       testIframe.setAttribute('data-amp-3p-sentinel', sentinel);
-      unlisten = IframeHelper.listenFor(testIframe, 'send-intersections',
-          () => {
-            calls++;
-            resolve();
-          }, true /* opt_is3P */);
+      unlisten = IframeHelper.listenFor(
+        testIframe,
+        'send-intersections',
+        () => {
+          calls++;
+          resolve();
+        },
+        true /* opt_is3P */
+      );
       insert(testIframe);
     }).then(() => {
       const total = calls;
@@ -116,11 +131,16 @@ describe('iframe-helper', function() {
       // usual iframe-intersection.html within a nested iframe.
       testIframe.src = nestedIframeSrc + '#amp-3p-sentinel=' + sentinel;
       testIframe.setAttribute('data-amp-3p-sentinel', sentinel);
-      unlisten = IframeHelper.listenFor(testIframe, 'send-intersections',
-          () => {
-            calls++;
-            resolve();
-          }, true /* opt_is3P */, true /* opt_includingNestedWindows */);
+      unlisten = IframeHelper.listenFor(
+        testIframe,
+        'send-intersections',
+        () => {
+          calls++;
+          resolve();
+        },
+        true /* opt_is3P */,
+        true /* opt_includingNestedWindows */
+      );
       insert(testIframe);
     }).then(() => {
       const total = calls;
@@ -137,13 +157,14 @@ describe('iframe-helper', function() {
   it.skip('should un-listen and resolve promise after first hit', () => {
     let calls = 0;
     return new Promise(resolve => {
-      IframeHelper.listenForOncePromise(testIframe,
-          ['no-msg', 'send-intersections'])
-          .then(obj => {
-            expect(obj.message).to.equal('send-intersections');
-            calls++;
-            resolve();
-          });
+      IframeHelper.listenForOncePromise(testIframe, [
+        'no-msg',
+        'send-intersections',
+      ]).then(obj => {
+        expect(obj.message).to.equal('send-intersections');
+        calls++;
+        resolve();
+      });
       insert(testIframe);
     }).then(() => {
       const total = calls;
@@ -190,14 +211,19 @@ describe('iframe-helper', function() {
 
   it('should set sentinel on postMessage data', () => {
     insert(testIframe);
-    const postMessageSpy = sinon/*OK*/.spy(testIframe.contentWindow,
-        'postMessage');
+    const postMessageSpy = sinon /*OK*/
+      .spy(testIframe.contentWindow, 'postMessage');
     IframeHelper.postMessage(
-        testIframe, 'testMessage', {}, 'http://google.com');
+      testIframe,
+      'testMessage',
+      {},
+      'http://google.com'
+    );
     expect(postMessageSpy.getCall(0).args[0].sentinel).to.equal('amp');
     expect(postMessageSpy.getCall(0).args[0].type).to.equal('testMessage');
     // Very important to do this outside of the sandbox, or else hell
     // breaks loose.
-    postMessageSpy/*OK*/.restore();
+    postMessageSpy /*OK*/
+      .restore();
   });
 });

@@ -22,10 +22,9 @@ import {userAssert} from '../../../src/log';
 const TAG = 'amp-action-macro';
 
 /**
-* The <amp-action-macro> element is used to define a reusable action.
-*/
+ * The <amp-action-macro> element is used to define a reusable action.
+ */
 export class AmpActionMacro extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -39,8 +38,10 @@ export class AmpActionMacro extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    userAssert(isExperimentOn(this.win, 'amp-action-macro'),
-        'Experiment is off');
+    userAssert(
+      isExperimentOn(this.win, 'amp-action-macro'),
+      'Experiment is off'
+    );
     const {element} = this;
 
     this.actions_ = Services.actionServiceForDoc(element);
@@ -70,20 +71,30 @@ export class AmpActionMacro extends AMP.BaseElement {
       // Verify that the argument variable names defined on the macro are used
       // in the caller invocation.
       for (const arg in args) {
-        userAssert(this.arguments_.includes(arg),
-            'Variable argument name "%s" is not defined in %s',
-            arg, this.element);
+        userAssert(
+          this.arguments_.includes(arg),
+          'Variable argument name "%s" is not defined in %s',
+          arg,
+          this.element
+        );
       }
     }
     if (invocation.caller.tagName.toLowerCase() === TAG) {
-      userAssert(this.isValidMacroReference_(
-          invocation.caller),
-      'Action macro with ID "%s" cannot reference itself or macros defined '
-          + 'after it', this.element.getAttribute('id'));
+      userAssert(
+        this.isValidMacroReference_(invocation.caller),
+        'Action macro with ID "%s" cannot reference itself or macros defined ' +
+          'after it',
+        this.element.getAttribute('id')
+      );
     }
     // Trigger the macro's action.
     this.actions_.trigger(
-        this.element, `${actionEventType}`, event, trust, args);
+      this.element,
+      `${actionEventType}`,
+      event,
+      trust,
+      args
+    );
   }
 
   /** @override */
@@ -100,11 +111,12 @@ export class AmpActionMacro extends AMP.BaseElement {
    * @private
    */
   isValidMacroReference_(invokingElement) {
-    return !!(this.element.compareDocumentPosition(invokingElement)
-        & Node.DOCUMENT_POSITION_FOLLOWING);
+    return !!(
+      this.element.compareDocumentPosition(invokingElement) &
+      Node.DOCUMENT_POSITION_FOLLOWING
+    );
   }
 }
-
 
 AMP.extension(TAG, '0.1', AMP => {
   AMP.registerElement(TAG, AmpActionMacro);

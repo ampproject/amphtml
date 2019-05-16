@@ -42,46 +42,56 @@ describe('ad-helper', () => {
       });
     });
 
-    it('should not allow position fixed element that is non-whitelisted ' +
-        'element', () => {
-      return createIframePromise().then(iframe => {
-        const nonWhitelistedElement = iframe.doc.createElement('foo-bar');
-        nonWhitelistedElement.style.position = 'fixed';
-        iframe.doc.body.appendChild(nonWhitelistedElement);
-        expect(isAdPositionAllowed(nonWhitelistedElement, iframe.win))
-            .to.be.false;
-      });
-    });
+    it(
+      'should not allow position fixed element that is non-whitelisted ' +
+        'element',
+      () => {
+        return createIframePromise().then(iframe => {
+          const nonWhitelistedElement = iframe.doc.createElement('foo-bar');
+          nonWhitelistedElement.style.position = 'fixed';
+          iframe.doc.body.appendChild(nonWhitelistedElement);
+          expect(isAdPositionAllowed(nonWhitelistedElement, iframe.win)).to.be
+            .false;
+        });
+      }
+    );
 
-    it('should not allow position sticky-fixed element that is ' +
-        'non-whitelisted element', () => {
-      return createIframePromise().then(iframe => {
-        const nonWhitelistedElement = iframe.doc.createElement('foo-bar');
-        nonWhitelistedElement.style.position = 'sticky';
-        // Check if browser support position:sticky
-        const styles = computedStyle(iframe.win, nonWhitelistedElement);
-        if (styles.position != 'sticky') {
-          return;
-        }
-        iframe.doc.body.appendChild(nonWhitelistedElement);
-        expect(isAdPositionAllowed(nonWhitelistedElement, iframe.win))
-            .to.be.false;
-      });
-    });
+    it(
+      'should not allow position sticky-fixed element that is ' +
+        'non-whitelisted element',
+      () => {
+        return createIframePromise().then(iframe => {
+          const nonWhitelistedElement = iframe.doc.createElement('foo-bar');
+          nonWhitelistedElement.style.position = 'sticky';
+          // Check if browser support position:sticky
+          const styles = computedStyle(iframe.win, nonWhitelistedElement);
+          if (styles.position != 'sticky') {
+            return;
+          }
+          iframe.doc.body.appendChild(nonWhitelistedElement);
+          expect(isAdPositionAllowed(nonWhitelistedElement, iframe.win)).to.be
+            .false;
+        });
+      }
+    );
 
-    it('should not allow position fixed element inside non-whitelisted ' +
-        'element', () => {
-      return createIframePromise().then(iframe => {
-        const nonWhitelistedElement = iframe.doc.createElement('foo-bar');
-        nonWhitelistedElement.style.position = 'fixed';
-        const childElement = iframe.doc.createElement('div');
-        const childChildElement = iframe.doc.createElement('div');
-        childElement.appendChild(childChildElement);
-        nonWhitelistedElement.appendChild(childElement);
-        iframe.doc.body.appendChild(nonWhitelistedElement);
-        expect(isAdPositionAllowed(childChildElement, iframe.win)).to.be.false;
-      });
-    });
+    it(
+      'should not allow position fixed element inside non-whitelisted ' +
+        'element',
+      () => {
+        return createIframePromise().then(iframe => {
+          const nonWhitelistedElement = iframe.doc.createElement('foo-bar');
+          nonWhitelistedElement.style.position = 'fixed';
+          const childElement = iframe.doc.createElement('div');
+          const childChildElement = iframe.doc.createElement('div');
+          childElement.appendChild(childChildElement);
+          nonWhitelistedElement.appendChild(childElement);
+          iframe.doc.body.appendChild(nonWhitelistedElement);
+          expect(isAdPositionAllowed(childChildElement, iframe.win)).to.be
+            .false;
+        });
+      }
+    );
   });
 
   describe('getAdContainer function', () => {
@@ -104,7 +114,8 @@ describe('ad-helper', () => {
         parentElement.appendChild(childElement);
         childElement.appendChild(childChildElement);
         expect(getAdContainer(childChildElement)).to.equal(
-            childElement.tagName);
+          childElement.tagName
+        );
       });
     });
 

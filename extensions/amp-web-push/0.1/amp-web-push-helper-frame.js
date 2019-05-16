@@ -59,13 +59,13 @@ export let NotificationPermissionStateMessage;
 export let StorageGetMessage;
 
 /**
-  * @fileoverview
-  * Loaded as an invisible iframe on the AMP page, and serving a page on the
-  * canonical origin, this iframe enables same-origin access to push
-  * subscription, notification permission, and IndexedDb data stored on the
-  * canonical origin to query the user's permission state, register service
-  * workers, and enable communication with the registered service worker.
-  */
+ * @fileoverview
+ * Loaded as an invisible iframe on the AMP page, and serving a page on the
+ * canonical origin, this iframe enables same-origin access to push
+ * subscription, notification permission, and IndexedDb data stored on the
+ * canonical origin to query the user's permission state, register service
+ * workers, and enable communication with the registered service worker.
+ */
 export class AmpWebPushHelperFrame {
   /** @param {!HelperFrameOptions} options */
   constructor(options) {
@@ -151,10 +151,10 @@ export class AmpWebPushHelperFrame {
     } else {
       // Reply with our standard notification permission state response
       this.replyToFrameWithPayload_(
-          replyToFrame,
-          true,
-          null,
-          Notification.permission
+        replyToFrame,
+        true,
+        null,
+        Notification.permission
       );
     }
   }
@@ -225,30 +225,30 @@ export class AmpWebPushHelperFrame {
   onAmpPageMessageReceivedServiceWorkerRegistration_(message, replyToFrame) {
     if (!message || !message.workerUrl || !message.registrationOptions) {
       throw new Error(
-          'Expected arguments workerUrl and registrationOptions ' +
+        'Expected arguments workerUrl and registrationOptions ' +
           'in message, got:',
-          message
+        message
       );
     }
 
     this.window_.navigator.serviceWorker
-        .register(message.workerUrl, message.registrationOptions)
-        .then(() => {
-          this.replyToFrameWithPayload_(replyToFrame, true, null, null);
-        })
-        .catch(error => {
-          this.replyToFrameWithPayload_(
-              replyToFrame,
-              true,
-              null,
-              error ? error.message || error.toString() : null
-          );
-        });
+      .register(message.workerUrl, message.registrationOptions)
+      .then(() => {
+        this.replyToFrameWithPayload_(replyToFrame, true, null, null);
+      })
+      .catch(error => {
+        this.replyToFrameWithPayload_(
+          replyToFrame,
+          true,
+          null,
+          error ? error.message || error.toString() : null
+        );
+      });
   }
 
   /**
    * @param {ServiceWorkerMessage} message
-  */
+   */
   messageServiceWorker(message) {
     this.window_.navigator.serviceWorker.controller./*OK*/ postMessage({
       command: message.topic,
@@ -278,10 +278,10 @@ export class AmpWebPushHelperFrame {
 
       // The service worker's reply is forwarded back to the AMP page
       return this.replyToFrameWithPayload_(
-          replyToFrame,
-          true,
-          null,
-          workerReplyPayload
+        replyToFrame,
+        true,
+        null,
+        workerReplyPayload
       );
     });
   }
@@ -314,21 +314,21 @@ export class AmpWebPushHelperFrame {
   }
 
   /**
-    * Service worker postMessage() communication relies on the property
-    * navigator.serviceWorker.controller to be non-null. The controller property
-    * references the active service worker controlling the page. Without this
-    * property, there is no service worker to message.
-    *
-    * The controller property is set when a service worker has successfully
-    * registered, installed, and activated a worker, and when a page isn't
-    * loaded in a hard refresh mode bypassing the cache.
-    *
-    * It's possible for a service worker to take a second page load to be fully
-    * activated.
-    *
-    * @return {boolean}
-    * @private
-    */
+   * Service worker postMessage() communication relies on the property
+   * navigator.serviceWorker.controller to be non-null. The controller property
+   * references the active service worker controlling the page. Without this
+   * property, there is no service worker to message.
+   *
+   * The controller property is set when a service worker has successfully
+   * registered, installed, and activated a worker, and when a page isn't
+   * loaded in a hard refresh mode bypassing the cache.
+   *
+   * It's possible for a service worker to take a second page load to be fully
+   * activated.
+   *
+   * @return {boolean}
+   * @private
+   */
   isWorkerControllingPage_() {
     return (
       this.window_.navigator.serviceWorker &&
@@ -349,24 +349,23 @@ export class AmpWebPushHelperFrame {
         resolve();
       } else {
         this.window_.navigator.serviceWorker.addEventListener(
-            'controllerchange',
-            () => {
+          'controllerchange',
+          () => {
             // Service worker has been claimed
-              if (this.isWorkerControllingPage_()) {
-                resolve();
-              } else {
-                this.window_.navigator.serviceWorker
-                    .controller.addEventListener(
-                        'statechange',
-                        () => {
-                          if (this.isWorkerControllingPage_()) {
-                            // Service worker has been activated
-                            resolve();
-                          }
-                        }
-                    );
-              }
+            if (this.isWorkerControllingPage_()) {
+              resolve();
+            } else {
+              this.window_.navigator.serviceWorker.controller.addEventListener(
+                'statechange',
+                () => {
+                  if (this.isWorkerControllingPage_()) {
+                    // Service worker has been activated
+                    resolve();
+                  }
+                }
+              );
             }
+          }
         );
       }
     });
@@ -381,30 +380,30 @@ export class AmpWebPushHelperFrame {
    */
   run(allowedOrigin) {
     this.ampMessenger_.on(
-        WindowMessenger.Topics.NOTIFICATION_PERMISSION_STATE,
-        this.onAmpPageMessageReceivedNotificationPermissionState_.bind(this)
+      WindowMessenger.Topics.NOTIFICATION_PERMISSION_STATE,
+      this.onAmpPageMessageReceivedNotificationPermissionState_.bind(this)
     );
     this.ampMessenger_.on(
-        WindowMessenger.Topics.SERVICE_WORKER_STATE,
-        this.onAmpPageMessageReceivedServiceWorkerState_.bind(this)
+      WindowMessenger.Topics.SERVICE_WORKER_STATE,
+      this.onAmpPageMessageReceivedServiceWorkerState_.bind(this)
     );
     this.ampMessenger_.on(
-        WindowMessenger.Topics.SERVICE_WORKER_REGISTRATION,
-        this.onAmpPageMessageReceivedServiceWorkerRegistration_.bind(this)
+      WindowMessenger.Topics.SERVICE_WORKER_REGISTRATION,
+      this.onAmpPageMessageReceivedServiceWorkerRegistration_.bind(this)
     );
     this.ampMessenger_.on(
-        WindowMessenger.Topics.SERVICE_WORKER_QUERY,
-        this.onAmpPageMessageReceivedServiceWorkerQuery_.bind(this)
+      WindowMessenger.Topics.SERVICE_WORKER_QUERY,
+      this.onAmpPageMessageReceivedServiceWorkerQuery_.bind(this)
     );
     this.ampMessenger_.on(
-        WindowMessenger.Topics.STORAGE_GET,
-        this.onAmpPageMessageReceivedStorageGet_.bind(this)
+      WindowMessenger.Topics.STORAGE_GET,
+      this.onAmpPageMessageReceivedStorageGet_.bind(this)
     );
 
     this.waitUntilWorkerControlsPage().then(() => {
       this.window_.navigator.serviceWorker.addEventListener(
-          'message',
-          this.onPageMessageReceivedFromServiceWorker_.bind(this)
+        'message',
+        this.onPageMessageReceivedFromServiceWorker_.bind(this)
       );
     });
     this.ampMessenger_.listen([allowedOrigin || this.getParentOrigin_()]);

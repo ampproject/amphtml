@@ -48,10 +48,7 @@ const TAG = 'purifier';
 const WHITELISTED_TAGS_BY_ATTRS = {
   'script': {
     'attribute': 'type',
-    'values': [
-      'application/json',
-      'application/ld+json',
-    ],
+    'values': ['application/json', 'application/ld+json'],
   },
 };
 
@@ -111,17 +108,21 @@ export function createPurifier(doc, opt_config) {
  * @return {!DomPurifyConfig}
  */
 function standardPurifyConfig() {
-  const config = Object.assign({}, PURIFY_PROFILES, /** @type {!DomPurifyConfig} */ ({
-    ADD_ATTR: WHITELISTED_ATTRS,
-    FORBID_TAGS: Object.keys(BLACKLISTED_TAGS),
-    // Avoid reparenting of some elements to document head e.g. <script>.
-    FORCE_BODY: true,
-    // Avoid need for serializing to/from string by returning Node directly.
-    RETURN_DOM: true,
-    // Allows native app deeplinks. DOMPurify's remaining checks are sufficient
-    // to prevent code execution.
-    ALLOW_UNKNOWN_PROTOCOLS: true,
-  }));
+  const config = Object.assign(
+    {},
+    PURIFY_PROFILES,
+    /** @type {!DomPurifyConfig} */ ({
+      ADD_ATTR: WHITELISTED_ATTRS,
+      FORBID_TAGS: Object.keys(BLACKLISTED_TAGS),
+      // Avoid reparenting of some elements to document head e.g. <script>.
+      FORCE_BODY: true,
+      // Avoid need for serializing to/from string by returning Node directly.
+      RETURN_DOM: true,
+      // Allows native app deeplinks. DOMPurify's remaining checks are sufficient
+      // to prevent code execution.
+      ALLOW_UNKNOWN_PROTOCOLS: true,
+    })
+  );
   return /** @type {!DomPurifyConfig} */ (config);
 }
 
@@ -194,8 +195,10 @@ function addPurifyHooks(purifier, diffing, doc) {
     const whitelist = WHITELISTED_TAGS_BY_ATTRS[tagName];
     if (whitelist) {
       const {attribute, values} = whitelist;
-      if (node.hasAttribute(attribute)
-          && values.includes(node.getAttribute(attribute))) {
+      if (
+        node.hasAttribute(attribute) &&
+        values.includes(node.getAttribute(attribute))
+      ) {
         allowedTags[tagName] = true;
         allowedTagsChanges.push(tagName);
       }
@@ -285,14 +288,24 @@ function addPurifyHooks(purifier, diffing, doc) {
       disableDiffingFor(node);
     }
 
-    if (isValidAttr(tagName, attrName, attrValue,
-        /* doc */ doc, /* opt_purify */ true)) {
+    if (
+      isValidAttr(
+        tagName,
+        attrName,
+        attrValue,
+        /* doc */ doc,
+        /* opt_purify */ true
+      )
+    ) {
       if (attrValue && !startsWith(attrName, 'data-amp-bind-')) {
         attrValue = rewriteAttributeValue(tagName, attrName, attrValue);
       }
     } else {
-      user().error(TAG, `Removing "${attrName}" attribute with invalid `
-          + `value in <${tagName} ${attrName}="${attrValue}">.`);
+      user().error(
+        TAG,
+        `Removing "${attrName}" attribute with invalid ` +
+          `value in <${tagName} ${attrName}="${attrValue}">.`
+      );
       data.keepAttr = false;
     }
 
@@ -411,7 +424,8 @@ export function validateAttributeChange(purifier, node, attr, value) {
     }
   }
   const doc = node.ownerDocument
-    ? node.ownerDocument : /** @type {!Document} */ (node);
+    ? node.ownerDocument
+    : /** @type {!Document} */ (node);
   // Perform AMP-specific attribute validation e.g. __amp_source_origin.
   if (value && !isValidAttr(tag, attr, value, doc, /* opt_purify */ true)) {
     return false;
@@ -460,5 +474,5 @@ export function purifyTagsForTripleMustache(html, doc = self.document) {
   // namespaces for all elements and attributes.
   const div = doc.createElement('div');
   div.appendChild(fragment);
-  return div./*OK*/innerHTML;
+  return div./*OK*/ innerHTML;
 }

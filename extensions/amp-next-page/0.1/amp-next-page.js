@@ -45,7 +45,6 @@ const SERVICE_ID = 'next-page';
 const ADSENSE_BASE_URL = 'https://googleads.g.doubleclick.net/pagead/ads';
 
 export class AmpNextPage extends AMP.BaseElement {
-
   /** @override */
   isLayoutSupported(layout) {
     return layout == Layout.CONTAINER;
@@ -53,12 +52,17 @@ export class AmpNextPage extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    userAssert(isExperimentOn(this.win, 'amp-next-page'),
-        'Experiment amp-next-page disabled');
+    userAssert(
+      isExperimentOn(this.win, 'amp-next-page'),
+      'Experiment amp-next-page disabled'
+    );
 
     const separatorElements = childElementsByAttr(this.element, 'separator');
-    userAssert(separatorElements.length <= 1,
-        '%s should contain at most one <div separator> child', TAG);
+    userAssert(
+      separatorElements.length <= 1,
+      '%s should contain at most one <div separator> child',
+      TAG
+    );
 
     let separator = null;
     if (separatorElements.length === 1) {
@@ -84,44 +88,60 @@ export class AmpNextPage extends AMP.BaseElement {
         const client = element.getAttribute('data-client');
         const slot = element.getAttribute('data-slot');
 
-        userAssert(/^ca-pub-\d+$/.test(client),
-            `${TAG} AdSense client should be of the format 'ca-pub-123456'`);
-        userAssert(/^\d+$/.test(slot),
-            `${TAG} AdSense slot should be a number`);
+        userAssert(
+          /^ca-pub-\d+$/.test(client),
+          `${TAG} AdSense client should be of the format 'ca-pub-123456'`
+        );
+        userAssert(
+          /^\d+$/.test(slot),
+          `${TAG} AdSense slot should be a number`
+        );
 
         const consentPolicyId = this.getConsentPolicy();
-        const consent = consentPolicyId ?
-          getConsentPolicyState(element, consentPolicyId)
-              .catch(err => {
-                user().error(TAG, 'Error determining consent state', err);
-                return CONSENT_POLICY_STATE.UNKNOWN;
-              }) : Promise.resolve(CONSENT_POLICY_STATE.SUFFICIENT);
+        const consent = consentPolicyId
+          ? getConsentPolicyState(element, consentPolicyId).catch(err => {
+              user().error(TAG, 'Error determining consent state', err);
+              return CONSENT_POLICY_STATE.UNKNOWN;
+            })
+          : Promise.resolve(CONSENT_POLICY_STATE.SUFFICIENT);
 
-        pagesPromise = consent.then(
-            state => this.fetchAdSensePages_(client, slot,
-                state === CONSENT_POLICY_STATE.SUFFICIENT ||
-                state === CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED))
-            .catch(error => {
-              user().warn(
-                  TAG, 'error fetching recommendations from AdSense', error);
-              // Resolve this promise with an empty array anyway so we can use
-              // the inline/src config as a fallback.
-              return [];
-            });
+        pagesPromise = consent
+          .then(state =>
+            this.fetchAdSensePages_(
+              client,
+              slot,
+              state === CONSENT_POLICY_STATE.SUFFICIENT ||
+                state === CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED
+            )
+          )
+          .catch(error => {
+            user().warn(
+              TAG,
+              'error fetching recommendations from AdSense',
+              error
+            );
+            // Resolve this promise with an empty array anyway so we can use
+            // the inline/src config as a fallback.
+            return [];
+          });
       }
 
       const inlineConfig = this.getInlineConfig_();
 
       if (src) {
-        configPromise = this.fetchConfig_().catch(
-            error => user().error(TAG, 'error fetching config', error));
+        configPromise = this.fetchConfig_().catch(error =>
+          user().error(TAG, 'error fetching config', error)
+        );
       } else {
         configPromise = Promise.resolve(inlineConfig);
       }
 
-      userAssert(inlineConfig || src || type,
-          '%s should contain a <script> child, a URL specified in [src], or a '
-          + '[type]', TAG);
+      userAssert(
+        inlineConfig || src || type,
+        '%s should contain a <script> child, a URL specified in [src], or a ' +
+          '[type]',
+        TAG
+      );
 
       return Promise.all([configPromise, pagesPromise]).then(values => {
         const config = values[0] || {};
@@ -142,12 +162,16 @@ export class AmpNextPage extends AMP.BaseElement {
     if (!scriptElements.length) {
       return null;
     }
-    userAssert(scriptElements.length === 1,
-        `${TAG} should contain at most one <script> child`);
+    userAssert(
+      scriptElements.length === 1,
+      `${TAG} should contain at most one <script> child`
+    );
     const scriptElement = scriptElements[0];
-    userAssert(isJsonScriptTag(scriptElement),
-        `${TAG} config should ` +
-        'be inside a <script> tag with type="application/json"');
+    userAssert(
+      isJsonScriptTag(scriptElement),
+      `${TAG} config should ` +
+        'be inside a <script> tag with type="application/json"'
+    );
     return tryParseJson(scriptElement.textContent, error => {
       user().error(TAG, 'failed to parse config', error);
     });
@@ -165,14 +189,14 @@ export class AmpNextPage extends AMP.BaseElement {
    * @private
    */
   fetchAdSensePages_(client, slot, personalized) {
-    const adUrl = `${ADSENSE_BASE_URL}?client=${client}&slotname=${slot}`
-        + `&url=${encodeURIComponent(this.getAmpDoc().getUrl())}`
-        + '&ecr=1&crui=title&is_amp=3&output=xml';
+    const adUrl =
+      `${ADSENSE_BASE_URL}?client=${client}&slotname=${slot}` +
+      `&url=${encodeURIComponent(this.getAmpDoc().getUrl())}` +
+      '&ecr=1&crui=title&is_amp=3&output=xml';
     return fetchDocument(this.win, adUrl, {
       credentials: personalized ? 'include' : 'omit',
     }).then(doc => {
-      const urlService =
-              Services.urlForDoc(dev().assertElement(this.element));
+      const urlService = Services.urlForDoc(dev().assertElement(this.element));
       const {origin} = urlService.parse(this.getAmpDoc().getUrl());
 
       const recs = [];
@@ -231,7 +255,11 @@ export class AmpNextPage extends AMP.BaseElement {
     const ampdoc = this.getAmpDoc();
     const policy = UrlReplacementPolicy.ALL;
     return batchFetchJsonFor(
-        ampdoc, this.element, /* opt_expr */ undefined, policy);
+      ampdoc,
+      this.element,
+      /* opt_expr */ undefined,
+      policy
+    );
   }
 }
 
@@ -240,8 +268,10 @@ export class AmpNextPage extends AMP.BaseElement {
  * @return {!Promise<!NextPageService>}
  */
 function nextPageServiceForDoc(elementOrAmpDoc) {
-  return /** @type {!Promise<!NextPageService>} */ (
-    getServicePromiseForDoc(elementOrAmpDoc, SERVICE_ID));
+  return /** @type {!Promise<!NextPageService>} */ (getServicePromiseForDoc(
+    elementOrAmpDoc,
+    SERVICE_ID
+  ));
 }
 
 /**

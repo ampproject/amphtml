@@ -20,9 +20,7 @@ import {
   getExperimentBranch,
   randomlySelectUnsetExperiments,
 } from '../../../src/experiments';
-import {
-  addExperimentIdToElement,
-} from './traffic-experiments';
+import {addExperimentIdToElement} from './traffic-experiments';
 
 /**
  * Attempts to select into experiment and forces branch if selected.
@@ -33,12 +31,23 @@ import {
  * @param {boolean=} optAddExpIdToElement
  */
 export function selectAndSetExperiments(
-  win, element, branches, expName, optAddExpIdToElement) {
+  win,
+  element,
+  branches,
+  expName,
+  optAddExpIdToElement
+) {
   const experimentId = expUtils.maybeSelectExperiment(
-      win, element, branches, expName);
+    win,
+    element,
+    branches,
+    expName
+  );
   if (!!experimentId) {
-    addExperimentIdToElement(optAddExpIdToElement ?
-      experimentId : undefined, element);
+    addExperimentIdToElement(
+      optAddExpIdToElement ? experimentId : undefined,
+      element
+    );
     forceExperimentBranch(win, expName, experimentId);
   }
   return experimentId;
@@ -51,10 +60,8 @@ export class ExperimentUtils {
    * @param {!Array<string>} selectionBranches
    * @param {string} experimentName
    */
-  maybeSelectExperiment(
-    win, element, selectionBranches, experimentName) {
-    const experimentInfoMap =
-    /** @type {!Object<string, !ExperimentInfo>} */ ({});
+  maybeSelectExperiment(win, element, selectionBranches, experimentName) {
+    const experimentInfoMap = /** @type {!Object<string, !ExperimentInfo>} */ ({});
     experimentInfoMap[experimentName] = {
       isTrafficEligible: () => true,
       branches: selectionBranches,
@@ -67,5 +74,5 @@ export class ExperimentUtils {
 /**
  * ExperimentUtils singleton.
  * @type {!ExperimentUtils}
-*/
+ */
 const expUtils = new ExperimentUtils();

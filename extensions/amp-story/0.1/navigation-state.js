@@ -17,7 +17,6 @@ import {Observable} from '../../../src/observable';
 import {Services} from '../../../src/services';
 import {StateProperty} from './amp-story-store-service';
 
-
 /**
  * Types of state changes that can be consumed.
  * @enum {number}
@@ -29,10 +28,8 @@ export const StateChangeType = {
   END: 3,
 };
 
-
 /** @typedef {{type: !StateChangeType, value: *}} */
 export let StateChangeEventDef;
-
 
 /**
  * State store to decouple navigation changes from consumers.

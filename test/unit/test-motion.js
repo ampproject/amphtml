@@ -16,9 +16,7 @@
 
 import {calcVelocity, continueMotion} from '../../src/motion';
 
-
 describe('Motion calcVelocity', () => {
-
   it('should dampen velocity when prevVelocity is 0', () => {
     expect(calcVelocity(200, 10, 0)).to.be.closeTo(15.999, 1e-3);
   });
@@ -52,7 +50,6 @@ describe('Motion calcVelocity', () => {
   });
 });
 
-
 describe('Motion continueMotion', () => {
   let sandbox;
   let clock;
@@ -80,14 +77,19 @@ describe('Motion continueMotion', () => {
   function testContinuation(maxVelocity, haltAfterTime) {
     let resultX = null;
     let resultY = null;
-    const motion = continueMotion(contextNode,
-        141, 104, maxVelocity, maxVelocity,
-        (x, y) => {
-          resultX = x;
-          resultY = y;
-          return true;
-        },
-        vsync);
+    const motion = continueMotion(
+      contextNode,
+      141,
+      104,
+      maxVelocity,
+      maxVelocity,
+      (x, y) => {
+        resultX = x;
+        resultY = y;
+        return true;
+      },
+      vsync
+    );
 
     expect(vsyncTasks.length).to.equal(1);
     const mutator = vsyncTasks[0];

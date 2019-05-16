@@ -16,8 +16,10 @@
 
 export const DYNATRACE_CONFIG = /** @type {!JsonObject} */ ({
   'requests': {
-    'endpoint': '${protocol}://${tenant}${separator}${environment}:${port}/ampbf/${tenantpath}',
-    'pageview': '${endpoint}?type=js&' +
+    'endpoint':
+      '${protocol}://${tenant}${separator}${environment}:${port}/ampbf/${tenantpath}',
+    'pageview':
+      '${endpoint}?type=js&' +
       'flavor=amp&' +
       'v=1&' +
       'a=1%7C1%7C_load_%7C_load_%7C-%7C${navTiming(navigationStart)}%7C' +

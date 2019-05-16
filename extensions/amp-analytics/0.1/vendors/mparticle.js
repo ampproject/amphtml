@@ -23,31 +23,34 @@ export const MPARTICLE_CONFIG = /** @type {!JsonObject} */ ({
   'requests': {
     'host': 'https://pixels.mparticle.com',
     'endpointPath': '/v1/${apiKey}/Pixel',
-    'baseParams': 'et=${eventType}&' +
-        'amp_id=${amp_clientId}&' +
-        'attrs_k=${eventAttributes_Keys}&' +
-        'attrs_v=${eventAttributes_Values}&' +
-        'ua_k=${userAttributes_Keys}&' +
-        'ua_v=${userAttributes_Values}&' +
-        'ui_t=${userIdentities_Types}&' +
-        'ui_v=${userIdentities_Values}&' +
-        'flags_k=${customFlags_Keys}&' +
-        'flags_v=${customFlags_Values}&' +
-        'ct=${timestamp}&' +
-        'dbg=${debug}&' +
-        'lc=${location}&' +
-        'av=${appVersion}',
-    'pageview': '${host}${endpointPath}?' +
-        'dt=ScreenView&' +
-        'n=${pageName}&' +
-        'hn=${ampdocUrl}&' +
-        'ttl=${title}&' +
-        'path=${canonicalPath}&' +
-        '${baseParams}',
-    'event': '${host}${endpointPath}?' +
-        'dt=AppEvent&' +
-        'n=${eventName}&' +
-        '${baseParams}',
+    'baseParams':
+      'et=${eventType}&' +
+      'amp_id=${amp_clientId}&' +
+      'attrs_k=${eventAttributes_Keys}&' +
+      'attrs_v=${eventAttributes_Values}&' +
+      'ua_k=${userAttributes_Keys}&' +
+      'ua_v=${userAttributes_Values}&' +
+      'ui_t=${userIdentities_Types}&' +
+      'ui_v=${userIdentities_Values}&' +
+      'flags_k=${customFlags_Keys}&' +
+      'flags_v=${customFlags_Values}&' +
+      'ct=${timestamp}&' +
+      'dbg=${debug}&' +
+      'lc=${location}&' +
+      'av=${appVersion}',
+    'pageview':
+      '${host}${endpointPath}?' +
+      'dt=ScreenView&' +
+      'n=${pageName}&' +
+      'hn=${ampdocUrl}&' +
+      'ttl=${title}&' +
+      'path=${canonicalPath}&' +
+      '${baseParams}',
+    'event':
+      '${host}${endpointPath}?' +
+      'dt=AppEvent&' +
+      'n=${eventName}&' +
+      '${baseParams}',
   },
   'transport': {
     'beacon': false,

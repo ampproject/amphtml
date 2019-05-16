@@ -38,9 +38,29 @@ import {layoutRectLtwh, moveLayoutRect, rectIntersection} from './layout-rect';
  */
 export let DOMRect;
 
-export const DEFAULT_THRESHOLD =
-    [0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4,
-      0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1];
+export const DEFAULT_THRESHOLD = [
+  0,
+  0.05,
+  0.1,
+  0.15,
+  0.2,
+  0.25,
+  0.3,
+  0.35,
+  0.4,
+  0.45,
+  0.5,
+  0.55,
+  0.6,
+  0.65,
+  0.7,
+  0.75,
+  0.8,
+  0.85,
+  0.9,
+  0.95,
+  1,
+];
 
 /** @typedef {{
  *    element: !Element,
@@ -65,13 +85,12 @@ const INIT_TIME = Date.now();
  * @param {!./layout-rect.LayoutRectDef} hostViewport hostViewport's rect
  * @return {!IntersectionObserverEntry} A change entry.
  */
-export function getIntersectionChangeEntry(
-  element, owner, hostViewport) {
-  const intersection = rectIntersection(element, owner, hostViewport) ||
-      layoutRectLtwh(0, 0, 0, 0);
+export function getIntersectionChangeEntry(element, owner, hostViewport) {
+  const intersection =
+    rectIntersection(element, owner, hostViewport) ||
+    layoutRectLtwh(0, 0, 0, 0);
   const ratio = intersectionRatio(intersection, element);
-  return calculateChangeEntry(
-      element, hostViewport, intersection, ratio);
+  return calculateChangeEntry(element, hostViewport, intersection, ratio);
 }
 
 /**
@@ -79,9 +98,11 @@ export function getIntersectionChangeEntry(
  * @return {boolean}
  */
 export function nativeIntersectionObserverSupported(win) {
-  return 'IntersectionObserver' in win &&
-      'IntersectionObserverEntry' in win &&
-      'intersectionRatio' in win.IntersectionObserverEntry.prototype;
+  return (
+    'IntersectionObserver' in win &&
+    'IntersectionObserverEntry' in win &&
+    'intersectionRatio' in win.IntersectionObserverEntry.prototype
+  );
 }
 
 /**
@@ -115,17 +136,24 @@ export class IntersectionObserverApi {
 
     /** @private {?SubscriptionApi} */
     this.subscriptionApi_ = new SubscriptionApi(
-        iframe, 'send-intersections', opt_is3p || false, () => {
-          this.startSendingIntersection_();
-        });
-
-    this.intersectionObserver_ = new IntersectionObserverPolyfill(entries => {
-      // Remove target info from cross origin iframe.
-      for (let i = 0; i < entries.length; i++) {
-        delete entries[i]['target'];
+      iframe,
+      'send-intersections',
+      opt_is3p || false,
+      () => {
+        this.startSendingIntersection_();
       }
-      this.subscriptionApi_.send('intersection', dict({'changes': entries}));
-    }, {threshold: DEFAULT_THRESHOLD});
+    );
+
+    this.intersectionObserver_ = new IntersectionObserverPolyfill(
+      entries => {
+        // Remove target info from cross origin iframe.
+        for (let i = 0; i < entries.length; i++) {
+          delete entries[i]['target'];
+        }
+        this.subscriptionApi_.send('intersection', dict({'changes': entries}));
+      },
+      {threshold: DEFAULT_THRESHOLD}
+    );
     this.intersectionObserver_.tick(this.viewport_.getRect());
 
     /** @const {function()} */
@@ -181,7 +209,6 @@ export class IntersectionObserverApi {
   }
 }
 
-
 /**
  * The IntersectionObserverPolyfill class lets any element receive its
  * intersection data with the viewport. It acts like native browser supported
@@ -204,15 +231,16 @@ export class IntersectionObserverPolyfill {
     // The input threshold can be a number or an array of numbers.
     let threshold = opt_option && opt_option.threshold;
     if (threshold) {
-      threshold = isArray(threshold) ?
-        threshold : [threshold];
+      threshold = isArray(threshold) ? threshold : [threshold];
     } else {
       threshold = [0];
     }
 
     for (let i = 0; i < threshold.length; i++) {
-      devAssert(isFiniteNumber(threshold[i]), 'Threshold should be a ' +
-          'finite number or an array of finite numbers');
+      devAssert(
+        isFiniteNumber(threshold[i]),
+        'Threshold should be a finite number or an array of finite numbers'
+      );
     }
 
     /**
@@ -220,9 +248,11 @@ export class IntersectionObserverPolyfill {
      * @private @const {!Array}
      */
     this.threshold_ = threshold.sort();
-    devAssert(this.threshold_[0] >= 0 &&
+    devAssert(
+      this.threshold_[0] >= 0 &&
         this.threshold_[this.threshold_.length - 1] <= 1,
-    'Threshold should be in the range from "[0, 1]"');
+      'Threshold should be in the range from "[0, 1]"'
+    );
 
     /** @private {?./layout-rect.LayoutRectDef} */
     this.lastViewportRect_ = null;
@@ -282,12 +312,14 @@ export class IntersectionObserverPolyfill {
     // Get the new observed element's first changeEntry based on last viewport
     if (this.lastViewportRect_) {
       const change = this.getValidIntersectionChangeEntry_(
-          newState, this.lastViewportRect_, this.lastIframeRect_);
+        newState,
+        this.lastViewportRect_,
+        this.lastIframeRect_
+      );
       if (change) {
         this.callback_([change]);
       }
     }
-
 
     // Add a mutation observer to tick ourself
     // TODO (@torch2424): Allow this to observe elements,
@@ -295,12 +327,12 @@ export class IntersectionObserverPolyfill {
     const ampdoc = Services.ampdoc(element);
     if (ampdoc.win.MutationObserver && !this.hiddenObserverUnlistener_) {
       this.mutationPass_ = new Pass(
-          ampdoc.win,
-          this.handleMutationObserverPass_.bind(this, element)
+        ampdoc.win,
+        this.handleMutationObserverPass_.bind(this, element)
       );
       const hiddenObserver = Services.hiddenObserverForDoc(element);
       this.hiddenObserverUnlistener_ = hiddenObserver.add(
-          this.handleMutationObserverNotification_.bind(this)
+        this.handleMutationObserverNotification_.bind(this)
       );
     }
 
@@ -337,10 +369,16 @@ export class IntersectionObserverPolyfill {
   tick(hostViewport, opt_iframe) {
     if (opt_iframe) {
       // If element inside an iframe. Adjust origin to the iframe.left/top.
-      hostViewport =
-          moveLayoutRect(hostViewport, -opt_iframe.left, -opt_iframe.top);
-      opt_iframe =
-          moveLayoutRect(opt_iframe, -opt_iframe.left, -opt_iframe.top);
+      hostViewport = moveLayoutRect(
+        hostViewport,
+        -opt_iframe.left,
+        -opt_iframe.top
+      );
+      opt_iframe = moveLayoutRect(
+        opt_iframe,
+        -opt_iframe.left,
+        -opt_iframe.top
+      );
     }
 
     this.lastViewportRect_ = hostViewport;
@@ -350,9 +388,9 @@ export class IntersectionObserverPolyfill {
 
     for (let i = 0; i < this.observeEntries_.length; i++) {
       const change = this.getValidIntersectionChangeEntry_(
-          this.observeEntries_[i],
-          hostViewport,
-          opt_iframe
+        this.observeEntries_[i],
+        hostViewport,
+        opt_iframe
       );
       if (change) {
         changes.push(change);
@@ -389,8 +427,8 @@ export class IntersectionObserverPolyfill {
     // calculate intersectionRect. that the element intersects with hostViewport
     // and intersects with owner element and container iframe if exists.
     const intersectionRect =
-        rectIntersection(elementRect, ownerRect, hostViewport, opt_iframe) ||
-        layoutRectLtwh(0, 0, 0, 0);
+      rectIntersection(elementRect, ownerRect, hostViewport, opt_iframe) ||
+      layoutRectLtwh(0, 0, 0, 0);
     // calculate ratio, call callback based on new ratio value.
     const ratio = intersectionRatio(intersectionRect, elementRect);
     const newThresholdSlot = getThresholdSlot(this.threshold_, ratio);
@@ -402,8 +440,12 @@ export class IntersectionObserverPolyfill {
 
     // To get same behavior as native IntersectionObserver set hostViewport null
     // if inside an iframe
-    const changeEntry = calculateChangeEntry(elementRect,
-        (opt_iframe ? null : hostViewport), intersectionRect, ratio);
+    const changeEntry = calculateChangeEntry(
+      elementRect,
+      opt_iframe ? null : hostViewport,
+      intersectionRect,
+      ratio
+    );
     changeEntry.target = element;
     return changeEntry;
   }
@@ -503,8 +545,7 @@ export function getThresholdSlot(sortedThreshold, ratio) {
  * @param {number} ratio
  * @return {!IntersectionObserverEntry}}
  */
-function calculateChangeEntry(
-  element, hostViewport, intersection, ratio) {
+function calculateChangeEntry(element, hostViewport, intersection, ratio) {
   // If element not in an iframe.
   // adjust all LayoutRect to hostViewport Origin.
   let boundingClientRect = element;
@@ -519,20 +560,31 @@ function calculateChangeEntry(
     // If element not in an iframe.
     // adjust all LayoutRect to hostViewport Origin.
     rootBounds = /** @type {!./layout-rect.LayoutRectDef} */ (rootBounds);
-    intersection = moveLayoutRect(intersection, -hostViewport.left,
-        -hostViewport.top);
+    intersection = moveLayoutRect(
+      intersection,
+      -hostViewport.left,
+      -hostViewport.top
+    );
     // The element is relative to (0, 0), while the viewport moves. So, we must
     // adjust.
-    boundingClientRect = moveLayoutRect(boundingClientRect,
-        -hostViewport.left, -hostViewport.top);
+    boundingClientRect = moveLayoutRect(
+      boundingClientRect,
+      -hostViewport.left,
+      -hostViewport.top
+    );
     // Now, move the viewport to (0, 0)
-    rootBounds = moveLayoutRect(rootBounds,
-        -hostViewport.left, -hostViewport.top);
+    rootBounds = moveLayoutRect(
+      rootBounds,
+      -hostViewport.left,
+      -hostViewport.top
+    );
   }
 
   return /** @type {!IntersectionObserverEntry} */ ({
-    time: (typeof performance !== 'undefined' && performance.now) ?
-      performance.now() : Date.now() - INIT_TIME,
+    time:
+      typeof performance !== 'undefined' && performance.now
+        ? performance.now()
+        : Date.now() - INIT_TIME,
     rootBounds,
     boundingClientRect,
     intersectionRect: intersection,

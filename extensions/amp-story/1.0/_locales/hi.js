@@ -57,10 +57,10 @@ const strings = {
     string: 'एएमपी नतीजों के बारे में ज़्यादा जानें',
   },
   [LocalizedStringId.AMP_STORY_HINT_UI_NEXT_LABEL]: {
-    string: '\'अगला\' पर टैप करें',
+    string: "'अगला' पर टैप करें",
   },
   [LocalizedStringId.AMP_STORY_HINT_UI_PREVIOUS_LABEL]: {
-    string: '\'वापस जाएं\' पर टैप करें',
+    string: "'वापस जाएं' पर टैप करें",
   },
   [LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL]: {
     string: 'ऊपर की ओर स्वाइप करें',
@@ -111,15 +111,17 @@ const strings = {
     string: 'इस वर्शन को देखने के लिए अपनी विंडो की लंबाई बढ़ाएं',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT]: {
-    string: 'यह वर्शन देखने के लिए अपनी विंडो की लंबाई और चौड़ाई, दोनों को ' +
-        'बढ़ाएं',
+    string:
+      'यह वर्शन देखने के लिए अपनी विंडो की लंबाई और चौड़ाई, दोनों को ' +
+      'बढ़ाएं',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_WIDTH_SIZE_TEXT]: {
     string: 'यह वर्शन देखने के लिए अपनी विंडो की चौड़ाई बढ़ाएं',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
-    string: 'यह सामग्री देखने के लिए आपको एएमपी-कहानी की परफ़ॉर्मेंस जाँच ' +
-        'चालू करनी होगी.',
+    string:
+      'यह सामग्री देखने के लिए आपको एएमपी-कहानी की परफ़ॉर्मेंस जाँच ' +
+      'चालू करनी होगी.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
     string: 'यह पेज पोर्ट्रेट मोड में सबसे अच्छा दिखाई देता है',

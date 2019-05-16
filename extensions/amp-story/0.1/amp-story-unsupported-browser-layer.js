@@ -20,7 +20,6 @@ import {createShadowRootWithStyle} from './utils';
 import {dict} from './../../../src/utils/object';
 import {renderAsElement} from './simple-template';
 
-
 /**
  * Full viewport black layer indicating browser is not supported.
  * @private @const {!./simple-template.ElementDef}
@@ -41,13 +40,12 @@ const UNSUPPORTED_BROWSER_LAYER_TEMPLATE = {
           tag: 'div',
           attrs: dict({'class': 'i-amphtml-story-overlay-text'}),
           localizedStringId:
-              LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT,
+            LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT,
         },
       ],
     },
   ],
 };
-
 
 /**
  * Unsupported browser layer UI.
@@ -73,8 +71,10 @@ export class UnsupportedBrowserLayer {
     }
 
     this.root_ = this.win_.document.createElement('div');
-    const overlayEl =
-        renderAsElement(this.win_.document, UNSUPPORTED_BROWSER_LAYER_TEMPLATE);
+    const overlayEl = renderAsElement(
+      this.win_.document,
+      UNSUPPORTED_BROWSER_LAYER_TEMPLATE
+    );
 
     createShadowRootWithStyle(this.root_, overlayEl, CSS);
 

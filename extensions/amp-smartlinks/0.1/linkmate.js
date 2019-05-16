@@ -18,10 +18,8 @@ import {deepEquals} from '../../../src/json';
 import {dict} from '../../../src/utils/object';
 
 import {ENDPOINTS} from './constants';
-import {TwoStepsResponse} from
-  '../../amp-skimlinks/0.1/link-rewriter/two-steps-response';
+import {TwoStepsResponse} from '../../amp-skimlinks/0.1/link-rewriter/two-steps-response';
 import {getData} from '../../../src/event-helper';
-
 
 export class Linkmate {
   /**
@@ -67,8 +65,8 @@ export class Linkmate {
     // changed since last API call then map any new anchors to existing
     // API response
     let syncMappedLinks = null;
-    const anchorListChanged = this.anchorList_ &&
-      !deepEquals(this.anchorList_, anchorList);
+    const anchorListChanged =
+      this.anchorList_ && !deepEquals(this.anchorList_, anchorList);
 
     if (this.linkmateResponse_ && anchorListChanged) {
       syncMappedLinks = this.mapLinks_();
@@ -77,12 +75,11 @@ export class Linkmate {
     // If we don't have an API response or the anchor list has changed since
     // last API call then build a new payload and post to API
     if (!this.linkmateResponse_ || anchorListChanged) {
-      const asyncMappedLinks = this.postToLinkmate_(anchorList)
-          .then(res => {
-            this.linkmateResponse_ = getData(res)[0]['smart_links'];
-            this.anchorList_ = anchorList;
-            return this.mapLinks_();
-          });
+      const asyncMappedLinks = this.postToLinkmate_(anchorList).then(res => {
+        this.linkmateResponse_ = getData(res)[0]['smart_links'];
+        this.anchorList_ = anchorList;
+        return this.mapLinks_();
+      });
 
       return new TwoStepsResponse(syncMappedLinks, asyncMappedLinks);
     } else {
@@ -108,7 +105,8 @@ export class Linkmate {
     });
 
     const fetchUrl = ENDPOINTS.LINKMATE_ENDPOINT.replace(
-        '.pub_id.', this.publisherID_.toString()
+      '.pub_id.',
+      this.publisherID_.toString()
     );
     const postOptions = {
       method: 'POST',
@@ -117,8 +115,7 @@ export class Linkmate {
       body: payload,
     };
 
-    return this.xhr_.fetchJson(fetchUrl, postOptions)
-        .then(res => res.json());
+    return this.xhr_.fetchJson(fetchUrl, postOptions).then(res => res.json());
   }
 
   /**
@@ -138,14 +135,16 @@ export class Linkmate {
       if (/shop-links.co/.test(link)) {
         // Check if amp flag is there. Add if necessary. Don't add to payload.
         if (!/\?amp=true$/.test(link)) {
-          anchor[this.linkAttribute_] =
-              `${anchor[this.linkAttribute_]}?amp=true`;
+          anchor[this.linkAttribute_] = `${
+            anchor[this.linkAttribute_]
+          }?amp=true`;
         }
         return;
       }
 
       if (!/#donotlink$/.test(link)) {
-        const exclusive = this.requestExclusiveLinks_ || /#locklink$/.test(link);
+        const exclusive =
+          this.requestExclusiveLinks_ || /#locklink$/.test(link);
         const linkObj = {
           'raw_url': link,
           'exclusive_match_requested': exclusive,
@@ -180,10 +179,16 @@ export class Linkmate {
     const mappings = [];
     this.anchorList_.forEach(anchor => {
       this.linkmateResponse_.forEach(smartLink => {
-        if (anchor.getAttribute(this.linkAttribute_) === smartLink['url']
-            && smartLink['auction_id']) {
-          mappings.push({anchor, replacementUrl:
-              `https://shop-links.co/${smartLink['auction_id']}/?amp=true`});
+        if (
+          anchor.getAttribute(this.linkAttribute_) === smartLink['url'] &&
+          smartLink['auction_id']
+        ) {
+          mappings.push({
+            anchor,
+            replacementUrl: `https://shop-links.co/${
+              smartLink['auction_id']
+            }/?amp=true`,
+          });
         }
       });
     });

@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-
 /**
  * Exports the substitution variables for access services.
  *
  * @interface
  */
 export class AccessVars {
-
   /**
    * Returns the promise that will yield the access READER_ID.
    *

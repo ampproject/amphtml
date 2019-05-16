@@ -43,7 +43,6 @@ export let InternalWebAnimationRequestDef;
  */
 export let WebAnimationDef;
 
-
 /**
  * @mixes WebAnimationSelectorDef
  * @mixes WebAnimationTimingDef
@@ -54,7 +53,6 @@ export let WebAnimationDef;
  * }}
  */
 export let WebMultiAnimationDef;
-
 
 /**
  * @mixes WebAnimationSelectorDef
@@ -67,7 +65,6 @@ export let WebMultiAnimationDef;
  */
 export let WebSwitchAnimationDef;
 
-
 /**
  * @mixes WebAnimationSelectorDef
  * @mixes WebAnimationTimingDef
@@ -78,7 +75,6 @@ export let WebSwitchAnimationDef;
  * }}
  */
 export let WebCompAnimationDef;
-
 
 /**
  * @mixes WebAnimationSelectorDef
@@ -91,12 +87,10 @@ export let WebCompAnimationDef;
  */
 export let WebKeyframeAnimationDef;
 
-
 /**
  * @typedef {!Object<string, *>|!Array<!Object<string, *>>}
  */
 export let WebKeyframesDef;
-
 
 /**
  * See https://developer.mozilla.org/en-US/docs/Web/API/AnimationEffectTimingProperties
@@ -115,7 +109,6 @@ export let WebKeyframesDef;
  */
 export let WebAnimationTimingDef;
 
-
 /**
  * Indicates an extension to a type that allows specifying vars. Vars are
  * specified as properties with the name in the format of `--varName`.
@@ -124,7 +117,6 @@ export let WebAnimationTimingDef;
  * @typedef {Object}
  */
 export let WebAnimationVarsDef;
-
 
 /**
  * Defines media parameters for an animation.
@@ -137,7 +129,6 @@ export let WebAnimationVarsDef;
  */
 export let WebAnimationConditionalDef;
 
-
 /**
  * @typedef {{
  *   target: (!Element|undefined),
@@ -146,7 +137,6 @@ export let WebAnimationConditionalDef;
  * }}
  */
 export let WebAnimationSelectorDef;
-
 
 /**
  * @mixes WebAnimationTimingDef
@@ -158,7 +148,6 @@ export let WebAnimationSelectorDef;
  * }}
  */
 export let WebAnimationSubtargetDef;
-
 
 /**
  * See https://developer.mozilla.org/en-US/docs/Web/API/Animation/playState
@@ -172,7 +161,6 @@ export const WebAnimationPlayState = {
   FINISHED: 'finished',
 };
 
-
 /**
  * See https://developer.mozilla.org/en-US/docs/Web/API/AnimationEffectTimingProperties/direction
  * @enum {string}
@@ -183,7 +171,6 @@ export const WebAnimationTimingDirection = {
   ALTERNATE: 'alternate',
   ALTERNATE_REVERSE: 'alternate-reverse',
 };
-
 
 /**
  * See https://developer.mozilla.org/en-US/docs/Web/API/AnimationEffectTimingProperties/fill
@@ -197,7 +184,6 @@ export const WebAnimationTimingFill = {
   AUTO: 'auto',
 };
 
-
 /** @const {!Object<string, boolean>} */
 const WHITELISTED_RPOPS = {
   'opacity': true,
@@ -207,7 +193,6 @@ const WHITELISTED_RPOPS = {
   'offset-distance': true,
   'offsetDistance': true,
 };
-
 
 /**
  * @param {string} prop

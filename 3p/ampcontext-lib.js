@@ -20,14 +20,11 @@ import './polyfills'; // eslint-disable-line sort-imports-es6-autofix/sort-impor
 import {AmpContext} from './ampcontext.js';
 import {initLogConstructor, setReportError} from '../src/log';
 
-
 initLogConstructor();
-
 
 // TODO(alanorozco): Refactor src/error.reportError so it does not contain big
 // transitive dependencies and can be included here.
 setReportError(() => {});
-
 
 /**
  *  If window.context does not exist, we must instantiate a replacement and

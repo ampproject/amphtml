@@ -41,8 +41,8 @@ describe('canonicalizeString', () => {
   it('test examples', () => {
     expect(canonicalizeString('a b  c')).to.equal('abc');
     expect(canonicalizeString('abc.d')).to.equal('abcd');
-    expect(canonicalizeString('a\u2019b')).to.equal('a\'b');
-    expect(canonicalizeString('\u201chello\u201d')).to.equal('\"hello\"');
+    expect(canonicalizeString('a\u2019b')).to.equal("a'b");
+    expect(canonicalizeString('\u201chello\u201d')).to.equal('"hello"');
     expect(canonicalizeString('\u2022 hello')).to.equal('hello');
     expect(canonicalizeString('a,b.c')).to.equal('abc');
   });
@@ -74,9 +74,11 @@ describes.realWin('findSentences', {}, env => {
   it('multiple nodes', () => {
     const root = document.createElement('div');
     root.innerHTML =
-        '<h4>header with <b>bold text</b></h4>\n<p>and additional text</p>';
-    const ranges = findSentences(
-        win, root, ['header with bold text', 'additional text']);
+      '<h4>header with <b>bold text</b></h4>\n<p>and additional text</p>';
+    const ranges = findSentences(win, root, [
+      'header with bold text',
+      'additional text',
+    ]);
     expect(ranges).to.not.be.null;
     const texts = [];
     for (let i = 0; i < ranges.length; i++) {
@@ -92,9 +94,10 @@ describes.realWin('findSentences', {}, env => {
   it('block node', () => {
     const root = document.createElement('div');
     root.innerHTML =
-        '<p>Here’s an instruction:</p><ul><li>Do something.</li></ul>';
-    const ranges = findSentences(
-        win, root, ['Here\'s an instruction: Do something.']);
+      '<p>Here’s an instruction:</p><ul><li>Do something.</li></ul>';
+    const ranges = findSentences(win, root, [
+      "Here's an instruction: Do something.",
+    ]);
     expect(ranges).to.not.be.null;
     const texts = [];
     for (let i = 0; i < ranges.length; i++) {
@@ -110,8 +113,9 @@ describes.realWin('findSentences', {}, env => {
   it('special chars', () => {
     const root = document.createElement('div');
     root.innerHTML = '<p>“double ‘single quoted’ quoted text,<p>';
-    const ranges = findSentences(
-        win, root, ['"double \'single quoted\' quoted']);
+    const ranges = findSentences(win, root, [
+      "\"double 'single quoted' quoted",
+    ]);
     expect(ranges).to.not.be.null;
     const texts = [];
     for (let i = 0; i < ranges.length; i++) {
@@ -156,8 +160,9 @@ describes.realWin('TextScanner', {}, env => {
   });
 
   it('elements', () => {
-    root.innerHTML = '<b>bold</b><i>italic</i><div>block</div>' +
-        '<ul><li>nest0</li><li>nest1</li></ul>';
+    root.innerHTML =
+      '<b>bold</b><i>italic</i><div>block</div>' +
+      '<ul><li>nest0</li><li>nest1</li></ul>';
 
     const chars = [];
     const scanner = new TextScanner(win, root);
@@ -213,14 +218,17 @@ describes.realWin('markTextRangeList', {}, env => {
     root.innerHTML = '<b>abc</b><div>def</div><i>ghi</i>';
     const b = root.querySelector('b');
     const i = root.querySelector('i');
-    markTextRangeList(win, [{
-      start: {node: b.firstChild, offset: 1},
-      end: {node: i.firstChild, offset: 1},
-    }]);
-    '<b>a<span>bc</span></b><div>def</div><i>ghi</i>';
+    markTextRangeList(win, [
+      {
+        start: {node: b.firstChild, offset: 1},
+        end: {node: i.firstChild, offset: 1},
+      },
+    ]);
+    ('<b>a<span>bc</span></b><div>def</div><i>ghi</i>');
     expect(root.innerHTML).to.equal(
-        '<b>a<span>bc</span></b><div><span>def</span></div>' +
-          '<i><span>g</span>hi</i>');
+      '<b>a<span>bc</span></b><div><span>def</span></div>' +
+        '<i><span>g</span>hi</i>'
+    );
   });
 
   it('concat ranges', () => {

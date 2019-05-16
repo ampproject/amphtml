@@ -21,15 +21,19 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {propagateObjectFitStyles} from '../../../src/style';
 
 const TAG = 'amp-anim';
-const BUILD_ATTRIBUTES = ['alt', 'aria-label', 'aria-describedby',
-  'aria-labelledby'];
+const BUILD_ATTRIBUTES = [
+  'alt',
+  'aria-label',
+  'aria-describedby',
+  'aria-labelledby',
+];
 const LAYOUT_ATTRIBUTES = ['src', 'srcset'];
 /** @visibleForTesting */
-export const SRC_PLACEHOLDER = 'data:image/gif;base64,' +
-'R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+export const SRC_PLACEHOLDER =
+  'data:image/gif;base64,' +
+  'R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 
 export class AmpAnim extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -59,15 +63,16 @@ export class AmpAnim extends AMP.BaseElement {
     if (this.element.getAttribute('role') == 'img') {
       this.element.removeAttribute('role');
       this.user().error(
-          'AMP-ANIM', 'Setting role=img on amp-anim elements ' +
+        'AMP-ANIM',
+        'Setting role=img on amp-anim elements ' +
           'breaks screen readers. Please just set alt or ARIA attributes, ' +
           'they will be correctly propagated for the underlying <img> ' +
-          'element.');
+          'element.'
+      );
     }
 
     // The image is initially hidden if a placeholder is available.
-    st.toggle(dev().assertElement(this.img_),
-        !this.getPlaceholder());
+    st.toggle(dev().assertElement(this.img_), !this.getPlaceholder());
 
     this.element.appendChild(this.img_);
   }

@@ -117,8 +117,9 @@ const strings = {
     string: 'Povećajte prozor u širinu da biste vidjeli taj sadržaj',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
-    string: 'Morate omogućiti eksperiment AMP priča da biste mogli vidjeti ' +
-        'taj sadržaj.',
+    string:
+      'Morate omogućiti eksperiment AMP priča da biste mogli vidjeti ' +
+      'taj sadržaj.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
     string: 'Najbolje je pregledavati stranicu u portretnom načinu',

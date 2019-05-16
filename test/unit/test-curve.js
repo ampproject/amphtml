@@ -17,7 +17,6 @@
 import {Curves, bezierCurve, getCurve} from '../../src/curve';
 
 describe('Curve', () => {
-
   let sandbox;
 
   beforeEach(() => {
@@ -69,5 +68,4 @@ describe('Curve', () => {
     expect(curveExpected(0.6)).to.be.closeTo(curveGet(0.6), 1e-6);
     expect(curveExpected(0.9)).to.be.closeTo(curveGet(0.9), 1e-6);
   });
-
 });

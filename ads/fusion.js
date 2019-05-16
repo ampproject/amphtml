@@ -24,10 +24,13 @@ function queryParametersToObject(input) {
   if (!input) {
     return undefined;
   }
-  return input.split('&').filter(_ => _).reduce((obj, val) => {
-    const kv = val.split('=');
-    return Object.assign(obj, {[kv[0]]: kv[1] || true});
-  }, {});
+  return input
+    .split('&')
+    .filter(_ => _)
+    .reduce((obj, val) => {
+      const kv = val.split('=');
+      return Object.assign(obj, {[kv[0]]: kv[1] || true});
+    }, {});
 }
 
 /**
@@ -35,8 +38,11 @@ function queryParametersToObject(input) {
  * @param {!Object} data
  */
 export function fusion(global, data) {
-  validateData(data, [],
-      ['mediaZone', 'layout', 'adServer', 'space', 'parameters']);
+  validateData(
+    data,
+    [],
+    ['mediaZone', 'layout', 'adServer', 'space', 'parameters']
+  );
 
   const container = global.document.getElementById('c');
   const ad = global.document.createElement('div');
@@ -44,14 +50,17 @@ export function fusion(global, data) {
   container.appendChild(ad);
   const parameters = queryParametersToObject(data.parameters);
 
-  writeScript(global,
-      'https://assets.adtomafusion.net/fusion/latest/fusion-amp.min.js', () => {
-        global.Fusion.apply(container, global.Fusion.loadAds(data, parameters));
+  writeScript(
+    global,
+    'https://assets.adtomafusion.net/fusion/latest/fusion-amp.min.js',
+    () => {
+      global.Fusion.apply(container, global.Fusion.loadAds(data, parameters));
 
-        global.Fusion.on.warning.run(ev => {
-          if (ev.msg === 'Space not present in response.') {
-            global.context.noContentAvailable();
-          }
-        });
+      global.Fusion.on.warning.run(ev => {
+        if (ev.msg === 'Space not present in response.') {
+          global.context.noContentAvailable();
+        }
       });
+    }
+  );
 }

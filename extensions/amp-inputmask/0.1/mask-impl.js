@@ -14,17 +14,11 @@
  * limitations under the License.
  */
 
-import {
-  MASK_SEPARATOR_CHAR,
-  MaskChars,
-  NamedMasks,
-} from './constants';
+import {MASK_SEPARATOR_CHAR, MaskChars, NamedMasks} from './constants';
 import {MaskInterface} from './mask-interface';
 import {dict} from '../../../src/utils/object';
 import {factory as inputmaskCustomAliasFactory} from './inputmask-custom-alias';
-import {
-  factory as inputmaskPaymentCardAliasFactory,
-} from './inputmask-payment-card-alias';
+import {factory as inputmaskPaymentCardAliasFactory} from './inputmask-payment-card-alias';
 import {requireExternal} from '../../../src/module';
 
 const NamedMasksToInputmask = dict({
@@ -114,22 +108,23 @@ export class Mask {
       return this.Inputmask_;
     }
 
-
     const inputmaskFactory = requireExternal('inputmaskFactory');
     const Inputmask = inputmaskFactory(element);
     inputmaskCustomAliasFactory(Inputmask);
     inputmaskPaymentCardAliasFactory(Inputmask);
 
-    Inputmask.extendDefaults(dict({
-      // A list of supported input type attribute values
-      'supportsInputType': [
-        'text',
-        'tel',
-        'search',
-        // 'password', // use-case?
-        // 'email', // doesn't support setSelectionRange. workaround?
-      ],
-    }));
+    Inputmask.extendDefaults(
+      dict({
+        // A list of supported input type attribute values
+        'supportsInputType': [
+          'text',
+          'tel',
+          'search',
+          // 'password', // use-case?
+          // 'email', // doesn't support setSelectionRange. workaround?
+        ],
+      })
+    );
 
     return Inputmask;
   }
@@ -152,7 +147,7 @@ export class Mask {
 
   /** @override */
   dispose() {
-    this.controller_./*OK*/remove();
+    this.controller_./*OK*/ remove();
     this.controller_ = null;
   }
 }
@@ -171,16 +166,19 @@ export class Mask {
  */
 function convertAmpMaskToInputmask(ampMask) {
   const masks = ampMask
-      .split(MASK_SEPARATOR_CHAR)
-      .map(m => m.replace(/_/g, ' '));
+    .split(MASK_SEPARATOR_CHAR)
+    .map(m => m.replace(/_/g, ' '));
   return masks.map(mask => {
     let escapeNext = false;
-    return mask.split('').map(c => {
-      const escape = escapeNext;
-      escapeNext = (c == MaskChars.ESCAPE);
+    return mask
+      .split('')
+      .map(c => {
+        const escape = escapeNext;
+        escapeNext = c == MaskChars.ESCAPE;
 
-      return (escape ? c : MaskCharsToInputmask[c]) || c;
-    }).join('');
+        return (escape ? c : MaskCharsToInputmask[c]) || c;
+      })
+      .join('');
   });
 }
 

@@ -18,15 +18,19 @@
 
 const {html} = require('./html');
 
+const Option = ({value, name}) =>
+  html`
+    <option value=${value}>${name}</option>
+  `;
 
-const Option = ({value, name}) => html`<option value=${value}>${name}</option>`;
-
-
-const KeyValueOptions = options => Object.keys(options).map(name =>
-  Option({
-    name,
-    value: options[name],
-  })).join('');
-
+const KeyValueOptions = options =>
+  Object.keys(options)
+    .map(name =>
+      Option({
+        name,
+        value: options[name],
+      })
+    )
+    .join('');
 
 module.exports = {Option, KeyValueOptions};

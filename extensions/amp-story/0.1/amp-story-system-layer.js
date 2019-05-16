@@ -28,8 +28,6 @@ import {getMode} from '../../../src/mode';
 import {matches} from '../../../src/dom';
 import {renderAsElement} from './simple-template';
 
-
-
 /** @private @const {string} */
 const AUDIO_MUTED_ATTRIBUTE = 'muted';
 
@@ -48,8 +46,9 @@ const INFO_CLASS = 'i-amphtml-story-info-control';
 /** @private @const {!./simple-template.ElementDef} */
 const TEMPLATE = {
   tag: 'aside',
-  attrs: dict(
-      {'class': 'i-amphtml-story-system-layer i-amphtml-story-system-reset'}),
+  attrs: dict({
+    'class': 'i-amphtml-story-system-layer i-amphtml-story-system-reset',
+  }),
   children: [
     {
       tag: 'div',
@@ -87,7 +86,6 @@ const TEMPLATE = {
     },
   ],
 };
-
 
 /**
  * System Layer (i.e. UI Chrome) for <amp-story>.
@@ -155,11 +153,13 @@ export class SystemLayer {
     createShadowRootWithStyle(this.root_, this.systemLayerEl_, CSS);
 
     this.systemLayerEl_.insertBefore(
-        this.progressBar_.build(pageIds), this.systemLayerEl_.lastChild);
+      this.progressBar_.build(pageIds),
+      this.systemLayerEl_.lastChild
+    );
 
-    this.buttonsContainer_ =
-        this.systemLayerEl_.querySelector(
-            '.i-amphtml-story-system-layer-buttons');
+    this.buttonsContainer_ = this.systemLayerEl_.querySelector(
+      '.i-amphtml-story-system-layer-buttons'
+    );
 
     this.buildForDevelopmentMode_();
 
@@ -174,8 +174,9 @@ export class SystemLayer {
       this.systemLayerEl_.setAttribute('ios', '');
     }
 
-    if (Services.viewerForDoc(this.win_.document.documentElement)
-        .isEmbedded()) {
+    if (
+      Services.viewerForDoc(this.win_.document.documentElement).isEmbedded()
+    ) {
       this.systemLayerEl_.classList.add('i-amphtml-embedded');
     }
 
@@ -190,8 +191,11 @@ export class SystemLayer {
       return;
     }
 
-    this.buttonsContainer_.appendChild(this.developerButtons_.build(
-        this.developerLog_.toggle.bind(this.developerLog_)));
+    this.buttonsContainer_.appendChild(
+      this.developerButtons_.build(
+        this.developerLog_.toggle.bind(this.developerLog_)
+      )
+    );
     this.getShadowRoot().appendChild(this.developerLog_.build());
   }
 
@@ -218,25 +222,45 @@ export class SystemLayer {
       this.onBookendStateUpdate_(isActive);
     });
 
-    this.storeService_.subscribe(StateProperty.CAN_SHOW_SHARING_UIS, show => {
-      this.onCanShowSharingUisUpdate_(show);
-    }, true /** callToInitialize */);
+    this.storeService_.subscribe(
+      StateProperty.CAN_SHOW_SHARING_UIS,
+      show => {
+        this.onCanShowSharingUisUpdate_(show);
+      },
+      true /** callToInitialize */
+    );
 
-    this.storeService_.subscribe(StateProperty.DESKTOP_STATE, isDesktop => {
-      this.onDesktopStateUpdate_(isDesktop);
-    }, true /** callToInitialize */);
+    this.storeService_.subscribe(
+      StateProperty.DESKTOP_STATE,
+      isDesktop => {
+        this.onDesktopStateUpdate_(isDesktop);
+      },
+      true /** callToInitialize */
+    );
 
-    this.storeService_.subscribe(StateProperty.HAS_AUDIO_STATE, hasAudio => {
-      this.onHasAudioStateUpdate_(hasAudio);
-    }, true /** callToInitialize */);
+    this.storeService_.subscribe(
+      StateProperty.HAS_AUDIO_STATE,
+      hasAudio => {
+        this.onHasAudioStateUpdate_(hasAudio);
+      },
+      true /** callToInitialize */
+    );
 
-    this.storeService_.subscribe(StateProperty.MUTED_STATE, isMuted => {
-      this.onMutedStateUpdate_(isMuted);
-    }, true /** callToInitialize */);
+    this.storeService_.subscribe(
+      StateProperty.MUTED_STATE,
+      isMuted => {
+        this.onMutedStateUpdate_(isMuted);
+      },
+      true /** callToInitialize */
+    );
 
-    this.storeService_.subscribe(StateProperty.CURRENT_PAGE_INDEX, index => {
-      this.onPageIndexUpdate_(index);
-    }, true /** callToInitialize */);
+    this.storeService_.subscribe(
+      StateProperty.CURRENT_PAGE_INDEX,
+      index => {
+        this.onPageIndexUpdate_(index);
+      },
+      true /** callToInitialize */
+    );
   }
 
   /**
@@ -259,8 +283,10 @@ export class SystemLayer {
    * @private
    */
   onBookendStateUpdate_(isActive) {
-    this.getShadowRoot()
-        .classList.toggle('i-amphtml-story-bookend-active', isActive);
+    this.getShadowRoot().classList.toggle(
+      'i-amphtml-story-bookend-active',
+      isActive
+    );
   }
 
   /**
@@ -271,8 +297,10 @@ export class SystemLayer {
    */
   onCanShowSharingUisUpdate_(canShowSharingUis) {
     this.vsync_.mutate(() => {
-      this.getShadowRoot()
-          .classList.toggle('i-amphtml-story-no-sharing', !canShowSharingUis);
+      this.getShadowRoot().classList.toggle(
+        'i-amphtml-story-no-sharing',
+        !canShowSharingUis
+      );
     });
   }
 
@@ -283,9 +311,9 @@ export class SystemLayer {
    */
   onDesktopStateUpdate_(isDesktop) {
     this.vsync_.mutate(() => {
-      isDesktop ?
-        this.getShadowRoot().setAttribute('desktop', '') :
-        this.getShadowRoot().removeAttribute('desktop');
+      isDesktop
+        ? this.getShadowRoot().setAttribute('desktop', '')
+        : this.getShadowRoot().removeAttribute('desktop');
     });
   }
 
@@ -307,9 +335,9 @@ export class SystemLayer {
    */
   onMutedStateUpdate_(isMuted) {
     this.vsync_.mutate(() => {
-      isMuted ?
-        this.getShadowRoot().setAttribute(AUDIO_MUTED_ATTRIBUTE, '') :
-        this.getShadowRoot().removeAttribute(AUDIO_MUTED_ATTRIBUTE);
+      isMuted
+        ? this.getShadowRoot().setAttribute(AUDIO_MUTED_ATTRIBUTE, '')
+        : this.getShadowRoot().removeAttribute(AUDIO_MUTED_ATTRIBUTE);
     });
   }
 

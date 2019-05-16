@@ -54,7 +54,8 @@ export function getAddThisModeObject({pubId, widgetId, productCode}) {
   // widget ids are 4-character strings with lower-case letters and numbers only
   const hasWidgetId = isWidgetId(widgetId);
   // product code is one of just a few values
-  const hasProductCode = typeof productCode === 'string' &&
+  const hasProductCode =
+    typeof productCode === 'string' &&
     (productCode === 'shin' || productCode === 'shfs');
   return {hasPubId, hasWidgetId, hasProductCode};
 }

@@ -23,12 +23,19 @@ import {validateData, writeScript} from '../3p/3p';
 export function advertserve(global, data) {
   validateData(data, [], ['zid', 'pid', 'client']);
 
-  const url = 'https://' + data.client + '.advertserve.com' +
-      '/servlet/view/banner/javascript/zone?amp=true' +
-      '&zid=' + encodeURIComponent(data.zid) +
-      '&pid=' + encodeURIComponent(data.pid) +
-      '&random=' + Math.floor(89999999 * Math.random() + 10000000) +
-      '&millis=' + Date.now();
+  const url =
+    'https://' +
+    data.client +
+    '.advertserve.com' +
+    '/servlet/view/banner/javascript/zone?amp=true' +
+    '&zid=' +
+    encodeURIComponent(data.zid) +
+    '&pid=' +
+    encodeURIComponent(data.pid) +
+    '&random=' +
+    Math.floor(89999999 * Math.random() + 10000000) +
+    '&millis=' +
+    Date.now();
 
   writeScript(global, url);
 }

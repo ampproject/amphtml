@@ -16,7 +16,6 @@
 import {isEnumValue} from '../../../src/types';
 import {parseQueryString} from '../../../src/url';
 
-
 /**
  * Embed mode for AMP story.  See ../embed-modes.md for details.
  * @enum {number}
@@ -53,13 +52,11 @@ export const EmbedMode = {
   NO_SHARING: 2,
 };
 
-
 /**
  * Parameter to retrieve the embed mode from the location hash.
  * @type {string}
  */
 export const EmbedModeParam = 'embedMode';
-
 
 /**
  * @param {string} str

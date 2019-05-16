@@ -34,7 +34,6 @@ const VISIBLE_VALIDATION_CACHE = '__AMP_VISIBLE_VALIDATION';
  */
 const CUSTOM_PATTERN_ERROR = 'Please match the requested format.';
 
-
 /** @type {boolean|undefined} */
 let reportValiditySupported;
 
@@ -44,7 +43,6 @@ let checkValiditySupported;
 /** @type {number} */
 let validationBubbleCount = 0;
 
-
 /**
  * @param {boolean} isSupported
  * @private visible for testing.
@@ -52,7 +50,6 @@ let validationBubbleCount = 0;
 export function setReportValiditySupportedForTesting(isSupported) {
   reportValiditySupported = isSupported;
 }
-
 
 /**
  * @param {boolean} isSupported
@@ -62,7 +59,6 @@ export function setCheckValiditySupportedForTesting(isSupported) {
   checkValiditySupported = isSupported;
 }
 
-
 /** @const @enum {string} */
 const CustomValidationTypes = {
   AsYouGo: 'as-you-go',
@@ -71,13 +67,11 @@ const CustomValidationTypes = {
   ShowFirstOnSubmit: 'show-first-on-submit',
 };
 
-
 /**
  * Form validator interface.
  * @abstract
  */
 export class FormValidator {
-
   /**
    * @param {!HTMLFormElement} form
    */
@@ -132,8 +126,10 @@ export class FormValidator {
     if (input.tagName === 'TEXTAREA' && input.hasAttribute('pattern')) {
       // FormVerifier also uses setCustomValidity() to signal verification
       // errors. Make sure we only override pattern errors here.
-      if (input.checkValidity()
-          || input.validationMessage === CUSTOM_PATTERN_ERROR) {
+      if (
+        input.checkValidity() ||
+        input.validationMessage === CUSTOM_PATTERN_ERROR
+      ) {
         const pattern = input.getAttribute('pattern');
         const re = new RegExp(`^${pattern}$`, 'm');
         const valid = re.test(input.value);
@@ -196,10 +192,8 @@ export class FormValidator {
   }
 }
 
-
 /** @private visible for testing */
 export class DefaultValidator extends FormValidator {
-
   /** @override */
   report() {
     this.reportFormValidity(this.form);
@@ -207,10 +201,8 @@ export class DefaultValidator extends FormValidator {
   }
 }
 
-
 /** @private visible for testing */
 export class PolyfillDefaultValidator extends FormValidator {
-
   /**
    * Creates an instance of PolyfillDefaultValidator.
    * @param {!HTMLFormElement} form
@@ -227,7 +219,7 @@ export class PolyfillDefaultValidator extends FormValidator {
     const inputs = this.inputs();
     for (let i = 0; i < inputs.length; i++) {
       if (!this.checkInputValidity(inputs[i])) {
-        inputs[i]./*REVIEW*/focus();
+        inputs[i]./*REVIEW*/ focus();
         this.validationBubble_.show(inputs[i], inputs[i].validationMessage);
         break;
       }
@@ -264,13 +256,11 @@ export class PolyfillDefaultValidator extends FormValidator {
   }
 }
 
-
 /**
  * @abstract
  * @private visible for testing
  */
 export class AbstractCustomValidator extends FormValidator {
-
   /**
    * Creates an instance of AbstractCustomValidator.
    * @param {!HTMLFormElement} form
@@ -316,8 +306,9 @@ export class AbstractCustomValidator extends FormValidator {
     }
     const property = VALIDATION_CACHE_PREFIX + invalidType;
     if (!(property in input)) {
-      const selector = `[visible-when-invalid=${invalidType}]`
-          + `[validation-for=${input.id}]`;
+      const selector =
+        `[visible-when-invalid=${invalidType}]` +
+        `[validation-for=${input.id}]`;
       input[property] = this.root.querySelector(selector);
     }
     return input[property];
@@ -337,10 +328,12 @@ export class AbstractCustomValidator extends FormValidator {
     }
     input[VISIBLE_VALIDATION_CACHE] = validation;
 
-    this.resources.mutateElement(input,
-        () => input.setAttribute('aria-invalid', 'true'));
-    this.resources.mutateElement(validation,
-        () => validation.classList.add('visible'));
+    this.resources.mutateElement(input, () =>
+      input.setAttribute('aria-invalid', 'true')
+    );
+    this.resources.mutateElement(validation, () =>
+      validation.classList.add('visible')
+    );
   }
 
   /**
@@ -353,10 +346,12 @@ export class AbstractCustomValidator extends FormValidator {
     }
     delete input[VISIBLE_VALIDATION_CACHE];
 
-    this.resources.mutateElement(input,
-        () => input.removeAttribute('aria-invalid'));
-    this.resources.mutateElement(visibleValidation,
-        () => visibleValidation.classList.remove('visible'));
+    this.resources.mutateElement(input, () =>
+      input.removeAttribute('aria-invalid')
+    );
+    this.resources.mutateElement(visibleValidation, () =>
+      visibleValidation.classList.remove('visible')
+    );
   }
 
   /**
@@ -382,7 +377,7 @@ export class AbstractCustomValidator extends FormValidator {
   onInteraction(event) {
     const input = dev().assertElement(event.target);
     const shouldValidate =
-        !!input.checkValidity && this.shouldValidateOnInteraction(input);
+      !!input.checkValidity && this.shouldValidateOnInteraction(input);
 
     this.hideValidationFor(input);
     if (shouldValidate && !this.checkInputValidity(input)) {
@@ -401,10 +396,8 @@ export class AbstractCustomValidator extends FormValidator {
   }
 }
 
-
 /** @private visible for testing */
 export class ShowFirstOnSubmitValidator extends AbstractCustomValidator {
-
   /** @override */
   report() {
     this.hideAllValidations();
@@ -412,7 +405,7 @@ export class ShowFirstOnSubmitValidator extends AbstractCustomValidator {
     for (let i = 0; i < inputs.length; i++) {
       if (!this.checkInputValidity(inputs[i])) {
         this.reportInput(inputs[i]);
-        inputs[i]./*REVIEW*/focus();
+        inputs[i]./*REVIEW*/ focus();
         break;
       }
     }
@@ -426,10 +419,8 @@ export class ShowFirstOnSubmitValidator extends AbstractCustomValidator {
   }
 }
 
-
 /** @private visible for testing */
 export class ShowAllOnSubmitValidator extends AbstractCustomValidator {
-
   /** @override */
   report() {
     this.hideAllValidations();
@@ -443,7 +434,7 @@ export class ShowAllOnSubmitValidator extends AbstractCustomValidator {
     }
 
     if (firstInvalidInput) {
-      firstInvalidInput./*REVIEW*/focus();
+      firstInvalidInput./*REVIEW*/ focus();
     }
 
     this.fireValidityEventIfNecessary();
@@ -454,7 +445,6 @@ export class ShowAllOnSubmitValidator extends AbstractCustomValidator {
     return !!this.getVisibleValidationFor(input);
   }
 }
-
 
 /** @private visible for testing */
 export class AsYouGoValidator extends AbstractCustomValidator {
@@ -470,7 +460,6 @@ export class AsYouGoValidator extends AbstractCustomValidator {
   }
 }
 
-
 /** @private visible for testing */
 export class InteractAndSubmitValidator extends ShowAllOnSubmitValidator {
   /** @override */
@@ -485,7 +474,6 @@ export class InteractAndSubmitValidator extends ShowAllOnSubmitValidator {
   }
 }
 
-
 /**
  * Returns the form validator instance.
  *
@@ -493,8 +481,7 @@ export class InteractAndSubmitValidator extends ShowAllOnSubmitValidator {
  * @return {!FormValidator}
  */
 export function getFormValidator(form) {
-  const customValidation = form.getAttribute(
-      'custom-validation-reporting');
+  const customValidation = form.getAttribute('custom-validation-reporting');
   switch (customValidation) {
     case CustomValidationTypes.AsYouGo:
       return new AsYouGoValidator(form);
@@ -513,7 +500,6 @@ export function getFormValidator(form) {
   return new PolyfillDefaultValidator(form);
 }
 
-
 /**
  * Returns whether reportValidity API is supported.
  * @param {?Document} doc
@@ -526,7 +512,6 @@ function isReportValiditySupported(doc) {
   return !!reportValiditySupported;
 }
 
-
 /**
  * Returns whether reportValidity API is supported.
  * @param {!Document} doc
@@ -538,7 +523,6 @@ export function isCheckValiditySupported(doc) {
   }
   return checkValiditySupported;
 }
-
 
 /**
  * Returns invalid error type on the input.
@@ -556,7 +540,6 @@ function getInvalidType(input) {
     }
   }
   // Finding error type with value true
-  const response = validityTypes.filter(type =>
-    input.validity[type] === true);
+  const response = validityTypes.filter(type => input.validity[type] === true);
   return response.length ? response[0] : null;
 }

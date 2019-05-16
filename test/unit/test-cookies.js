@@ -16,15 +16,18 @@
 
 import {getCookie, setCookie} from '../../src/cookies';
 
-
 describe('cookies', () => {
-
   function expectCookie(cookiesString, cookieName, opt_locationHref) {
-    return expect(getCookie({
-      document: {
-        cookie: cookiesString,
-      },
-    }, cookieName));
+    return expect(
+      getCookie(
+        {
+          document: {
+            cookie: cookiesString,
+          },
+        },
+        cookieName
+      )
+    );
   }
 
   it('should return null for no cookie, malformed, or not found', () => {
@@ -52,14 +55,20 @@ describe('cookies', () => {
 
   it('should write the cookie', () => {
     const doc = {};
-    setCookie({
-      document: doc,
-      location: {
-        href: 'https://www.example.com/test',
+    setCookie(
+      {
+        document: doc,
+        location: {
+          href: 'https://www.example.com/test',
+        },
       },
-    }, 'c&1', 'v&1', 1447383159853);
+      'c&1',
+      'v&1',
+      1447383159853
+    );
     expect(doc.cookie).to.equal(
-        'c%261=v%261; path=/; expires=Fri, 13 Nov 2015 02:52:39 GMT');
+      'c%261=v%261; path=/; expires=Fri, 13 Nov 2015 02:52:39 GMT'
+    );
   });
 
   it('should write the cookie to the right domain', () => {
@@ -68,8 +77,12 @@ describe('cookies', () => {
       const doc = {
         set cookie(val) {
           // Delete cookies on ampproject.org
-          if (val.indexOf('domain=ampproject.org; ' +
-              'expires=Thu, 01 Jan 1970 00:00:00 GMT') != -1) {
+          if (
+            val.indexOf(
+              'domain=ampproject.org; ' +
+                'expires=Thu, 01 Jan 1970 00:00:00 GMT'
+            ) != -1
+          ) {
             cookie = undefined;
             return;
           }
@@ -81,22 +94,30 @@ describe('cookies', () => {
           return cookie;
         },
       };
-      setCookie({
-        document: doc,
-        location: {
-          hostname,
-          href: 'https://' + hostname + '/test.html',
-        }},
-      'c&1', 'v&1', 1447383159853, {
-        highestAvailableDomain: true,
-        allowOnProxyOrigin: !!opt_allowOnProxyOrigin,
-      });
+      setCookie(
+        {
+          document: doc,
+          location: {
+            hostname,
+            href: 'https://' + hostname + '/test.html',
+          },
+        },
+        'c&1',
+        'v&1',
+        1447383159853,
+        {
+          highestAvailableDomain: true,
+          allowOnProxyOrigin: !!opt_allowOnProxyOrigin,
+        }
+      );
       if (opt_noset) {
         expect(cookie).to.be.undefined;
       } else {
         expect(cookie).to.equal(
-            'c%261=v%261; path=/; domain=' + targetDomain +
-            '; expires=Fri, 13 Nov 2015 02:52:39 GMT');
+          'c%261=v%261; path=/; domain=' +
+            targetDomain +
+            '; expires=Fri, 13 Nov 2015 02:52:39 GMT'
+        );
       }
     }
     test('www.example.com', 'example.com');

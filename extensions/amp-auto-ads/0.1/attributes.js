@@ -55,9 +55,12 @@ function parseAttributes(attributeObject) {
       user().warn(TAG, 'Attribute not whitlisted: ' + key);
       continue;
     }
-    const valueType = (typeof attributeObject[key]);
-    if (valueType != 'number' && valueType != 'string' &&
-        valueType != 'boolean') {
+    const valueType = typeof attributeObject[key];
+    if (
+      valueType != 'number' &&
+      valueType != 'string' &&
+      valueType != 'boolean'
+    ) {
       user().warn(TAG, 'Attribute type not supported: ' + valueType);
       continue;
     }

@@ -19,9 +19,10 @@ import {clearOurFragment} from '../../addthis-utils/fragment';
 describe('fragment', () => {
   it('clears AddThis fragments from an url', () => {
     let url =
-        'http://www.example.com/2012-07-25?utm_campaign=linkedin-Share-Web#at_pco=cfd-1.0';
+      'http://www.example.com/2012-07-25?utm_campaign=linkedin-Share-Web#at_pco=cfd-1.0';
     expect(clearOurFragment(url)).to.equal(
-        'http://www.example.com/2012-07-25?utm_campaign=linkedin-Share-Web');
+      'http://www.example.com/2012-07-25?utm_campaign=linkedin-Share-Web'
+    );
 
     url = 'http://www.addthis.com/#.WNU1xGHp7QE.facebook;text';
     expect(clearOurFragment(url)).to.equal('http://www.addthis.com/');

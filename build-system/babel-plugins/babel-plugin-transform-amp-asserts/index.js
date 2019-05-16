@@ -43,7 +43,6 @@ const removableDevAsserts = [
 
 const removableUserAsserts = ['fine'];
 
-
 module.exports = function(babel) {
   const {types: t} = babel;
   return {
@@ -52,8 +51,8 @@ module.exports = function(babel) {
         const {node} = path;
         const {callee} = node;
         const {parenthesized} = node.extra || {};
-        const isMemberAndCallExpression = t.isMemberExpression(callee)
-            && t.isCallExpression(callee.object);
+        const isMemberAndCallExpression =
+          t.isMemberExpression(callee) && t.isCallExpression(callee.object);
 
         if (!isMemberAndCallExpression) {
           return;
@@ -61,11 +60,13 @@ module.exports = function(babel) {
 
         const logCallee = callee.object.callee;
         const {property} = callee;
-        const isRemovableDevCall = t.isIdentifier(logCallee, {name: 'dev'}) &&
-            isRemovableMethod(t, property, removableDevAsserts);
+        const isRemovableDevCall =
+          t.isIdentifier(logCallee, {name: 'dev'}) &&
+          isRemovableMethod(t, property, removableDevAsserts);
 
-        const isRemovableUserCall = t.isIdentifier(logCallee, {name: 'user'}) &&
-            isRemovableMethod(t, property, removableUserAsserts);
+        const isRemovableUserCall =
+          t.isIdentifier(logCallee, {name: 'user'}) &&
+          isRemovableMethod(t, property, removableUserAsserts);
 
         if (!(isRemovableDevCall || isRemovableUserCall)) {
           return;
@@ -81,9 +82,9 @@ module.exports = function(babel) {
           if (parenthesized) {
             path.replaceWith(t.parenthesizedExpression(args));
             path.skip();
-          // If is not an assert type, we won't need to do type annotation.
-          // If it has no type that we can cast to, then we also won't need to
-          // do type annotation.
+            // If is not an assert type, we won't need to do type annotation.
+            // If it has no type that we can cast to, then we also won't need to
+            // do type annotation.
           } else if (!property.name.startsWith('assert') || !type) {
             path.replaceWith(args);
           } else {

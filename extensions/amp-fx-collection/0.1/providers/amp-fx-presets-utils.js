@@ -44,9 +44,11 @@ export function convertEasingKeyword(keyword) {
   if (curves[keyword]) {
     return curves[keyword];
   }
-  userAssert(startsWith(keyword, 'cubic-bezier'),
-      'All custom bezier curves should be specified by following the ' +
-        '`cubic-bezier()` function notation.');
+  userAssert(
+    startsWith(keyword, 'cubic-bezier'),
+    'All custom bezier curves should be specified by following the ' +
+      '`cubic-bezier()` function notation.'
+  );
   return keyword;
 }
 
@@ -117,9 +119,15 @@ export function defaultDurationValues(ampdoc, fxType) {
     case FxType.FLY_IN_LEFT:
     case FxType.FLY_IN_RIGHT:
       const {width} = Services.viewportForDoc(ampdoc).getSize();
-      return mapRange(
-          Math.min(1000, width), MAX_MOBILE_WIDTH, MAX_TABLET_WIDTH, 400, 600)
-          + 'ms';
+      return (
+        mapRange(
+          Math.min(1000, width),
+          MAX_MOBILE_WIDTH,
+          MAX_TABLET_WIDTH,
+          400,
+          600
+        ) + 'ms'
+      );
     default:
       return '1ms';
   }
@@ -137,7 +145,8 @@ export function defaultFlyInDistanceValues(ampdoc, fxType) {
     case FxType.FLY_IN_BOTTOM:
     case FxType.FLY_IN_TOP:
       const {width} = Services.viewportForDoc(ampdoc).getSize();
-      if (width < MAX_TABLET_WIDTH) { // mobile and tablets
+      if (width < MAX_TABLET_WIDTH) {
+        // mobile and tablets
         return 25;
       }
       // laptops and desktops

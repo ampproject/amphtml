@@ -18,7 +18,6 @@ import {IframeMessagingClient} from '../../../3p/iframe-messaging-client';
 import {serializeMessage} from '../../../src/3p-frame-messaging';
 
 describes.realWin('iframe-messaging-client', {}, env => {
-
   let win;
   let client;
   let postMessageStub;
@@ -38,87 +37,126 @@ describes.realWin('iframe-messaging-client', {}, env => {
     it('should get data', () => {
       const callbackSpy = sandbox.spy();
       client.getData('type-a', {a: 1}, callbackSpy);
-      expect(postMessageStub).to.be.calledWith(serializeMessage(
-          'type-a', 'sentinel-123', {
+      expect(postMessageStub).to.be.calledWith(
+        serializeMessage(
+          'type-a',
+          'sentinel-123',
+          {
             'payload': {
               a: 1,
             },
             'messageId': 1,
-          }, '$internalRuntimeVersion$'));
+          },
+          '$internalRuntimeVersion$'
+        )
+      );
 
-      postAmpMessage({
-        type: 'type-a-result',
-        sentinel: 'sentinel-123',
-        'messageId': 1,
-        'content': 'result-a',
-      }, hostWindow);
+      postAmpMessage(
+        {
+          type: 'type-a-result',
+          sentinel: 'sentinel-123',
+          'messageId': 1,
+          'content': 'result-a',
+        },
+        hostWindow
+      );
       expect(callbackSpy).to.be.calledWith('result-a');
     });
 
     it('should not get data with wrong messageId', () => {
       const callbackSpy = sandbox.spy();
       client.getData('type-a', {a: 1}, callbackSpy);
-      expect(postMessageStub).to.be.calledWith(serializeMessage(
-          'type-a', 'sentinel-123', {
+      expect(postMessageStub).to.be.calledWith(
+        serializeMessage(
+          'type-a',
+          'sentinel-123',
+          {
             'payload': {
               a: 1,
             },
             'messageId': 1,
-          }, '$internalRuntimeVersion$'));
+          },
+          '$internalRuntimeVersion$'
+        )
+      );
 
-      postAmpMessage({
-        type: 'type-a-result',
-        sentinel: 'sentinel-123',
-        'messageId': 2, // wrong messageId
-        'content': 'result-a',
-      }, hostWindow);
+      postAmpMessage(
+        {
+          type: 'type-a-result',
+          sentinel: 'sentinel-123',
+          'messageId': 2, // wrong messageId
+          'content': 'result-a',
+        },
+        hostWindow
+      );
       expect(callbackSpy).to.not.be.called;
     });
 
     it('should not get data with wrong response type', () => {
       const callbackSpy = sandbox.spy();
       client.getData('type-a', {a: 1}, callbackSpy);
-      expect(postMessageStub).to.be.calledWith(serializeMessage(
-          'type-a', 'sentinel-123', {
+      expect(postMessageStub).to.be.calledWith(
+        serializeMessage(
+          'type-a',
+          'sentinel-123',
+          {
             'payload': {
               a: 1,
             },
             'messageId': 1,
-          }, '$internalRuntimeVersion$'));
+          },
+          '$internalRuntimeVersion$'
+        )
+      );
 
-      postAmpMessage({
-        type: 'type-b-result', // wrong response type
-        sentinel: 'sentinel-123',
-        'messageId': 1,
-        'content': 'result-a',
-      }, hostWindow);
+      postAmpMessage(
+        {
+          type: 'type-b-result', // wrong response type
+          sentinel: 'sentinel-123',
+          'messageId': 1,
+          'content': 'result-a',
+        },
+        hostWindow
+      );
       expect(callbackSpy).to.not.be.called;
     });
 
     it('should have callback called once', () => {
       const callbackSpy = sandbox.spy();
       client.getData('type-a', {a: 1}, callbackSpy);
-      expect(postMessageStub).to.be.calledWith(serializeMessage(
-          'type-a', 'sentinel-123', {
+      expect(postMessageStub).to.be.calledWith(
+        serializeMessage(
+          'type-a',
+          'sentinel-123',
+          {
             'payload': {
               a: 1,
             },
             'messageId': 1,
-          }, '$internalRuntimeVersion$'));
+          },
+          '$internalRuntimeVersion$'
+        )
+      );
 
-      postAmpMessage({
-        type: 'type-a-result',
-        sentinel: 'sentinel-123',
-        'messageId': 1,
-        'content': 'result-a',
-      }, hostWindow);
+      postAmpMessage(
+        {
+          type: 'type-a-result',
+          sentinel: 'sentinel-123',
+          'messageId': 1,
+          'content': 'result-a',
+        },
+        hostWindow
+      );
 
-      postAmpMessage({
-        type: 'type-a-result',
-        sentinel: 'sentinel-123',
-        'messageId': 1,
-        'content': 'result-b',
-      }, hostWindow);
+      postAmpMessage(
+        {
+          type: 'type-a-result',
+          sentinel: 'sentinel-123',
+          'messageId': 1,
+          'content': 'result-b',
+        },
+        hostWindow
+      );
       expect(callbackSpy).to.be.calledOnce;
       expect(callbackSpy).to.be.calledWith('result-a');
     });
@@ -128,14 +166,24 @@ describes.realWin('iframe-messaging-client', {}, env => {
     it('should send the request via postMessage', () => {
       const callbackSpy = sandbox.spy();
       client.makeRequest('request-type', 'response-type', callbackSpy);
-      expect(postMessageStub).to.be.calledWith(serializeMessage(
-          'request-type', 'sentinel-123', {}, '$internalRuntimeVersion$'));
+      expect(postMessageStub).to.be.calledWith(
+        serializeMessage(
+          'request-type',
+          'sentinel-123',
+          {},
+          '$internalRuntimeVersion$'
+        )
+      );
 
       postAmpMessage(
-          {type: 'response-type', sentinel: 'sentinel-123'}, hostWindow);
+        {type: 'response-type', sentinel: 'sentinel-123'},
+        hostWindow
+      );
       expect(callbackSpy).to.be.calledOnce;
       postAmpMessage(
-          {type: 'response-type', sentinel: 'sentinel-123'}, hostWindow);
+        {type: 'response-type', sentinel: 'sentinel-123'},
+        hostWindow
+      );
       expect(callbackSpy).to.be.calledTwice;
     });
   });
@@ -144,78 +192,105 @@ describes.realWin('iframe-messaging-client', {}, env => {
     it('should unlisten after message received', () => {
       const callbackSpy = sandbox.spy();
       client.requestOnce('request-type', 'response-type', callbackSpy);
-      expect(postMessageStub).to.be.calledWith(serializeMessage(
-          'request-type', 'sentinel-123', {}, '$internalRuntimeVersion$'));
+      expect(postMessageStub).to.be.calledWith(
+        serializeMessage(
+          'request-type',
+          'sentinel-123',
+          {},
+          '$internalRuntimeVersion$'
+        )
+      );
 
       postAmpMessage(
-          {type: 'response-type', sentinel: 'sentinel-123'}, hostWindow);
+        {type: 'response-type', sentinel: 'sentinel-123'},
+        hostWindow
+      );
       expect(callbackSpy).to.be.calledOnce;
       postAmpMessage(
-          {type: 'response-type', sentinel: 'sentinel-123'}, hostWindow);
+        {type: 'response-type', sentinel: 'sentinel-123'},
+        hostWindow
+      );
       expect(callbackSpy).to.be.calledOnce;
     });
   });
 
   describe('registerCallback', () => {
-    it('should invoke callback on receiving a message of' +
-        ' expected response type', () => {
-      const callbackSpy = sandbox.spy();
-      client.registerCallback('response-type', callbackSpy);
+    it(
+      'should invoke callback on receiving a message of' +
+        ' expected response type',
+      () => {
+        const callbackSpy = sandbox.spy();
+        client.registerCallback('response-type', callbackSpy);
 
-      postAmpMessage({
-        type: 'response-type',
-        sentinel: 'sentinel-123',
-        x: 1,
-        y: 'abc',
-      }, hostWindow);
-      expect(callbackSpy).to.be.calledWith({
-        type: 'response-type',
-        sentinel: 'sentinel-123',
-        origin: 'http://www.example.com',
-        x: 1,
-        y: 'abc',
-      });
-    });
+        postAmpMessage(
+          {
+            type: 'response-type',
+            sentinel: 'sentinel-123',
+            x: 1,
+            y: 'abc',
+          },
+          hostWindow
+        );
+        expect(callbackSpy).to.be.calledWith({
+          type: 'response-type',
+          sentinel: 'sentinel-123',
+          origin: 'http://www.example.com',
+          x: 1,
+          y: 'abc',
+        });
+      }
+    );
 
-    it('should invoke multiple callbacks on receiving a message of' +
-        ' expected response type', () => {
-      const callbackSpy1 = sandbox.spy();
-      const callbackSpy2 = sandbox.spy();
-      const irrelevantCallbackSpy = sandbox.spy();
+    it(
+      'should invoke multiple callbacks on receiving a message of' +
+        ' expected response type',
+      () => {
+        const callbackSpy1 = sandbox.spy();
+        const callbackSpy2 = sandbox.spy();
+        const irrelevantCallbackSpy = sandbox.spy();
 
-      const expectedResponseObject = {
-        type: 'response-type',
-        sentinel: 'sentinel-123',
-        origin: 'http://www.example.com',
-        x: 1,
-        y: 'abc',
-      };
+        const expectedResponseObject = {
+          type: 'response-type',
+          sentinel: 'sentinel-123',
+          origin: 'http://www.example.com',
+          x: 1,
+          y: 'abc',
+        };
 
-      client.registerCallback('response-type', callbackSpy1);
-      client.registerCallback('response-type', callbackSpy2);
-      client.registerCallback('irrelevant-response', irrelevantCallbackSpy);
+        client.registerCallback('response-type', callbackSpy1);
+        client.registerCallback('response-type', callbackSpy2);
+        client.registerCallback('irrelevant-response', irrelevantCallbackSpy);
 
-      postAmpMessage({
-        type: 'response-type',
-        sentinel: 'sentinel-123',
-        x: 1,
-        y: 'abc',
-      }, hostWindow);
+        postAmpMessage(
+          {
+            type: 'response-type',
+            sentinel: 'sentinel-123',
+            x: 1,
+            y: 'abc',
+          },
+          hostWindow
+        );
 
-      expect(callbackSpy1).to.be.calledWith(expectedResponseObject);
-      expect(callbackSpy2).to.be.calledWith(expectedResponseObject);
-      expect(irrelevantCallbackSpy).to.not.be.called;
-    });
+        expect(callbackSpy1).to.be.calledWith(expectedResponseObject);
+        expect(callbackSpy2).to.be.calledWith(expectedResponseObject);
+        expect(irrelevantCallbackSpy).to.not.be.called;
+      }
+    );
 
-    it('should not invoke callback on receiving a message of' +
-        ' irrelevant response type', () => {
-      const callbackSpy = sandbox.spy();
-      client.registerCallback('response-type', callbackSpy);
+    it(
+      'should not invoke callback on receiving a message of' +
+        ' irrelevant response type',
+      () => {
+        const callbackSpy = sandbox.spy();
+        client.registerCallback('response-type', callbackSpy);
 
-      postAmpMessage(
-          {type: 'response-type-2', sentinel: 'sentinel-123'}, hostWindow);
-      expect(callbackSpy).to.not.be.called;
-    });
+        postAmpMessage(
+          {type: 'response-type-2', sentinel: 'sentinel-123'},
+          hostWindow
+        );
+        expect(callbackSpy).to.not.be.called;
+      }
+    );
 
     it('should not invoke callback on receiving a non-AMP message', () => {
       const callbackSpy = sandbox.spy();
@@ -225,53 +300,71 @@ describes.realWin('iframe-messaging-client', {}, env => {
         type: 'message',
         source: hostWindow,
         origin: 'http://www.example.com',
-        data: 'nonamp-' + JSON.stringify({
-          type: 'response-type',
-          sentinel: 'sentinel-123',
-        }),
+        data:
+          'nonamp-' +
+          JSON.stringify({
+            type: 'response-type',
+            sentinel: 'sentinel-123',
+          }),
       });
       expect(callbackSpy).to.not.be.called;
     });
 
-    it('should not invoke callback on receiving a message ' +
-        'not from host window', () => {
-      const callbackSpy = sandbox.spy();
-      client.registerCallback('response-type', callbackSpy);
-      const randomWindow = {};
+    it(
+      'should not invoke callback on receiving a message ' +
+        'not from host window',
+      () => {
+        const callbackSpy = sandbox.spy();
+        client.registerCallback('response-type', callbackSpy);
+        const randomWindow = {};
 
-      postAmpMessage(
-          {type: 'response-type', sentinel: 'sentinel-123'}, randomWindow);
-      expect(callbackSpy).to.not.be.called;
-    });
+        postAmpMessage(
+          {type: 'response-type', sentinel: 'sentinel-123'},
+          randomWindow
+        );
+        expect(callbackSpy).to.not.be.called;
+      }
+    );
 
-    it('should not invoke callback on receiving a message ' +
-        'containing no sentinel', () => {
-      const callbackSpy = sandbox.spy();
-      client.registerCallback('response-type', callbackSpy);
+    it(
+      'should not invoke callback on receiving a message ' +
+        'containing no sentinel',
+      () => {
+        const callbackSpy = sandbox.spy();
+        client.registerCallback('response-type', callbackSpy);
 
-      postAmpMessage({type: 'response-type'}, hostWindow);
-      expect(callbackSpy).to.not.be.called;
-    });
+        postAmpMessage({type: 'response-type'}, hostWindow);
+        expect(callbackSpy).to.not.be.called;
+      }
+    );
 
-    it('should not invoke callback on receiving a message ' +
-        'containing wrong sentinel', () => {
-      const callbackSpy = sandbox.spy();
-      client.registerCallback('response-type', callbackSpy);
+    it(
+      'should not invoke callback on receiving a message ' +
+        'containing wrong sentinel',
+      () => {
+        const callbackSpy = sandbox.spy();
+        client.registerCallback('response-type', callbackSpy);
 
-      postAmpMessage(
-          {type: 'response-type', sentinel: 'sentinel-123-1'}, hostWindow);
-      expect(callbackSpy).to.not.be.called;
-    });
+        postAmpMessage(
+          {type: 'response-type', sentinel: 'sentinel-123-1'},
+          hostWindow
+        );
+        expect(callbackSpy).to.not.be.called;
+      }
+    );
   });
 
   describe('sendMessage', () => {
     it('should send postMessage to host window', () => {
       client.sendMessage('request-type', {x: 1, y: 'abc'});
-      expect(postMessageStub).to.be.calledWith(serializeMessage(
+      expect(postMessageStub).to.be.calledWith(
+        serializeMessage(
           'request-type',
           'sentinel-123',
           {x: 1, y: 'abc'},
-          '$internalRuntimeVersion$'));
+          '$internalRuntimeVersion$'
+        )
+      );
     });
   });
 

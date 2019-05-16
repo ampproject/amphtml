@@ -70,36 +70,41 @@ config.run('amp-position-observer', function() {
     `;
 
   /*
-  * scrollbound amp-animation will make the target will go
-  * from opacity 0 to 1 with scroll.
-  **/
-  describes.integration('scrollbound animation', {
-    body: scrollboundBody,
-    css,
-    extensions,
-    experiments,
-  }, env => {
-    it('runs animation with scroll', () => {
-      // Not visible yet, opacity = 0;
-      expect(getOpacity(env.win)).to.equal(0);
+   * scrollbound amp-animation will make the target will go
+   * from opacity 0 to 1 with scroll.
+   **/
+  describes.integration(
+    'scrollbound animation',
+    {
+      body: scrollboundBody,
+      css,
+      extensions,
+      experiments,
+    },
+    env => {
+      it('runs animation with scroll', () => {
+        // Not visible yet, opacity = 0;
+        expect(getOpacity(env.win)).to.equal(0);
 
-      // Scroll bring to middle of viewport, height of target is 10
-      env.win.scrollTo(0, getViewportHeight(env.win) / 2 + 5);
-      // Half way: opacity = 0.5
-      return waitForOpacity(env.win, 'equals', 0.5).then(() => {
-        // Scroll to the end
-        env.win.scrollTo(0, getViewportHeight(env.win) * 2);
-        // All the way: opacity = 1;
-        return waitForOpacity(env.win, 'equals', 1);
-      }).then(() => {
-        // Scroll back to the top
-        env.win.scrollTo(0, 0);
-        // Back to starting position: opacity: 0
-        return waitForOpacity(env.win, 'equals', 0);
+        // Scroll bring to middle of viewport, height of target is 10
+        env.win.scrollTo(0, getViewportHeight(env.win) / 2 + 5);
+        // Half way: opacity = 0.5
+        return waitForOpacity(env.win, 'equals', 0.5)
+          .then(() => {
+            // Scroll to the end
+            env.win.scrollTo(0, getViewportHeight(env.win) * 2);
+            // All the way: opacity = 1;
+            return waitForOpacity(env.win, 'equals', 1);
+          })
+          .then(() => {
+            // Scroll back to the top
+            env.win.scrollTo(0, 0);
+            // Back to starting position: opacity: 0
+            return waitForOpacity(env.win, 'equals', 0);
+          });
       });
-    });
-  });
-
+    }
+  );
 
   const animationSceneBody = `
     <amp-animation id="anim" layout="nodisplay">
@@ -134,44 +139,48 @@ config.run('amp-position-observer', function() {
     `;
 
   /*
-  * Animation scene will start when 50% visible above the 10vh margin
-  * and paused when 50% invisible below the 10vh margin.
-  * There is no scrollbound behavior, purely time-based animation.
-  **/
-  describes.integration('animation scene', {
-    body: animationSceneBody,
-    css,
-    extensions,
-    experiments,
-  }, env => {
+   * Animation scene will start when 50% visible above the 10vh margin
+   * and paused when 50% invisible below the 10vh margin.
+   * There is no scrollbound behavior, purely time-based animation.
+   **/
+  describes.integration(
+    'animation scene',
+    {
+      body: animationSceneBody,
+      css,
+      extensions,
+      experiments,
+    },
+    env => {
+      // TODO(#18657, aghassemi): Fails due to timeout.
+      it.skip('plays/pauses animation scene based on visibility', () => {
+        // Not visible yet, opacity = 0;
+        expect(getOpacity(env.win)).to.equal(0);
+        // Scroll to edge of visibility
+        // ratio is 0.5 and height of element is 10
+        // exclusion margin is 10% of viewport
+        // so we need to scroll = 10% * vh + 5px;
+        const scrollBy = getViewportHeight(env.win) * 0.1 + 5;
+        env.win.scrollTo(0, scrollBy);
+        return waitForOpacity(env.win, 'greater-than', 0)
+          .then(() => {
+            // Scroll to the end
+            env.win.scrollTo(0, getViewportHeight(env.win) * 2);
 
-    // TODO(#18657, aghassemi): Fails due to timeout.
-    it.skip('plays/pauses animation scene based on visibility', () => {
-      // Not visible yet, opacity = 0;
-      expect(getOpacity(env.win)).to.equal(0);
-      // Scroll to edge of visibility
-      // ratio is 0.5 and height of element is 10
-      // exclusion margin is 10% of viewport
-      // so we need to scroll = 10% * vh + 5px;
-      const scrollBy = getViewportHeight(env.win) * 0.1 + 5;
-      env.win.scrollTo(0, scrollBy);
-      return waitForOpacity(env.win, 'greater-than', 0).then(() => {
-        // Scroll to the end
-        env.win.scrollTo(0, getViewportHeight(env.win) * 2);
-
-        // Now we need to ensure opacity is not changing anymore to prove
-        // animation is paused.
-        return ensureOpacityIsNoChangingAnymore(env.win);
-      }).then(() => {
-        // Ok, animation is paused and given the long duration, opacity must be
-        // stuck somewhere between 0 and 1
-        const opacity = getOpacity(env.win);
-        expect(opacity).to.be.above(0);
-        expect(opacity).to.be.below(1);
+            // Now we need to ensure opacity is not changing anymore to prove
+            // animation is paused.
+            return ensureOpacityIsNoChangingAnymore(env.win);
+          })
+          .then(() => {
+            // Ok, animation is paused and given the long duration, opacity must be
+            // stuck somewhere between 0 and 1
+            const opacity = getOpacity(env.win);
+            expect(opacity).to.be.above(0);
+            expect(opacity).to.be.below(1);
+          });
       });
-
-    });
-  });
+    }
+  );
 });
 
 function getOpacity(win) {

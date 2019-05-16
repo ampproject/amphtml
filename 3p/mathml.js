@@ -40,43 +40,44 @@ function getMathmlJs(global, scriptSource, cb) {
  */
 export function mathml(global, data) {
   userAssert(
-      data.formula,
-      'The formula attribute is required for <amp-mathml> %s',
-      data.element);
+    data.formula,
+    'The formula attribute is required for <amp-mathml> %s',
+    data.element
+  );
 
   getMathmlJs(
-      global,
-      'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML',
-      mathjax => {
-        // Dimensions are given by the parent frame.
-        delete data.width;
-        delete data.height;
-        const div = document.createElement('div');
-        div.setAttribute('id', 'mathmlformula');
-        div.textContent = data.formula;
-        setStyle(div, 'visibility', 'hidden');
-        global.document.body.appendChild(div);
-        mathjax.Hub.Config({
-          showMathMenu: false,
-        });
-        mathjax.Hub.Queue(function() {
-          const rendered = document.getElementById('MathJax-Element-1-Frame');
-          // Remove built in mathjax margins.
-          let display = document.getElementsByClassName('MJXc-display');
-          if (!display[0]) {
-            const span = document.createElement('span');
-            span.setAttribute('class', 'mjx-chtml MJXc-display');
-            span.appendChild(rendered);
-            div.appendChild(span);
-            display = document.getElementsByClassName('MJXc-display');
-          }
-          display[0].setAttribute('style','margin-top:0;margin-bottom:0');
-          context.requestResize(
-              rendered./*OK*/offsetWidth,
-              rendered./*OK*/offsetHeight
-          );
-          setStyle(div, 'visibility', 'visible');
-        });
-      }
+    global,
+    'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML',
+    mathjax => {
+      // Dimensions are given by the parent frame.
+      delete data.width;
+      delete data.height;
+      const div = document.createElement('div');
+      div.setAttribute('id', 'mathmlformula');
+      div.textContent = data.formula;
+      setStyle(div, 'visibility', 'hidden');
+      global.document.body.appendChild(div);
+      mathjax.Hub.Config({
+        showMathMenu: false,
+      });
+      mathjax.Hub.Queue(function() {
+        const rendered = document.getElementById('MathJax-Element-1-Frame');
+        // Remove built in mathjax margins.
+        let display = document.getElementsByClassName('MJXc-display');
+        if (!display[0]) {
+          const span = document.createElement('span');
+          span.setAttribute('class', 'mjx-chtml MJXc-display');
+          span.appendChild(rendered);
+          div.appendChild(span);
+          display = document.getElementsByClassName('MJXc-display');
+        }
+        display[0].setAttribute('style', 'margin-top:0;margin-bottom:0');
+        context.requestResize(
+          rendered./*OK*/ offsetWidth,
+          rendered./*OK*/ offsetHeight
+        );
+        setStyle(div, 'visibility', 'visible');
+      });
+    }
   );
 }

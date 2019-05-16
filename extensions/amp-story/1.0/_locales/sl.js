@@ -111,15 +111,16 @@ const strings = {
     string: 'Če si želite ogledati to izkušnjo, povečajte višino okna',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT]: {
-    string: 'Če si želite ogledati to izkušnjo, povečajte višino in širino ' +
-        'okna',
+    string:
+      'Če si želite ogledati to izkušnjo, povečajte višino in širino okna',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_WIDTH_SIZE_TEXT]: {
     string: 'Če si želite ogledati to izkušnjo, povečajte širino okna',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
-    string: 'Če si želite ogledati to vsebino, morate omogočiti preizkus ' +
-        'zgodb amp.',
+    string:
+      'Če si želite ogledati to vsebino, morate omogočiti preizkus ' +
+      'zgodb amp.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
     string: 'Stran si je najbolje ogledati v pokončnem načinu',

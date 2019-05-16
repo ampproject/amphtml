@@ -36,15 +36,19 @@ const {
 const useHttps = process.env.SERVE_USEHTTPS == 'true';
 const quiet = process.env.SERVE_QUIET == 'true';
 const sendCachingHeaders = process.env.SERVE_CACHING_HEADERS == 'true';
-const noCachingExtensions = process.env.SERVE_EXTENSIONS_WITHOUT_CACHING ==
-    'true';
+const noCachingExtensions =
+  process.env.SERVE_EXTENSIONS_WITHOUT_CACHING == 'true';
 const header = require('connect-header');
 
 // Exit if the port is in use.
 process.on('uncaughtException', function(err) {
   if (err.errno === 'EADDRINUSE') {
-    log(colors.red('ERROR:'), 'Port', colors.cyan(port),
-        'in use, shutting down server');
+    log(
+      colors.red('ERROR:'),
+      'Port',
+      colors.cyan(port),
+      'in use, shutting down server'
+    );
   } else {
     log(colors.red(err));
   }
@@ -65,9 +69,11 @@ if (!quiet) {
 }
 middleware.push(app);
 if (sendCachingHeaders) {
-  middleware.push(header({
-    'cache-control': ' max-age=600',
-  }));
+  middleware.push(
+    header({
+      'cache-control': ' max-age=600',
+    })
+  );
 }
 
 if (noCachingExtensions) {
@@ -81,11 +87,12 @@ if (noCachingExtensions) {
 }
 
 // Start gulp webserver
-gulp.src(process.cwd())
-    .pipe(webserver({
-      port,
-      host,
-      directoryListing: true,
-      https: useHttps,
-      middleware,
-    }));
+gulp.src(process.cwd()).pipe(
+  webserver({
+    port,
+    host,
+    directoryListing: true,
+    https: useHttps,
+    middleware,
+  })
+);

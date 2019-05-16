@@ -33,14 +33,17 @@ export function imonomy(global, data) {
   if (!('slot' in data)) {
     global.CasaleArgs = data;
     writeScript(global, `//tag.imonomy.com/${data.pid}/indexJTag.js`);
-  } else { //DFP ad request call
+  } else {
+    //DFP ad request call
     let calledDoubleclick = false;
     data.timeout = isNaN(data.timeout) ? DEFAULT_TIMEOUT : data.timeout;
     const timer = setTimeout(() => {
       callDoubleclick(EVENT_TIMEOUT);
     }, data.timeout);
     const callDoubleclick = function(code) {
-      if (calledDoubleclick) { return; }
+      if (calledDoubleclick) {
+        return;
+      }
       calledDoubleclick = true;
       clearTimeout(timer);
       reportStats(data, code);
@@ -60,11 +63,15 @@ export function imonomy(global, data) {
     };
 
     loadScript(
-        global, `//tag.imonomy.com/amp/${data.pid}/amp.js`, () => {
-          global.context.renderStart();
-        }, () => {
-          global.context.noContentAvailable();
-        });
+      global,
+      `//tag.imonomy.com/amp/${data.pid}/amp.js`,
+      () => {
+        global.context.renderStart();
+      },
+      () => {
+        global.context.noContentAvailable();
+      }
+    );
   }
 }
 
@@ -87,7 +94,9 @@ function prepareData(data) {
  */
 function reportStats(data, code) {
   try {
-    if (code == EVENT_BADTAG) { return; }
+    if (code == EVENT_BADTAG) {
+      return;
+    }
     const xhttp = new XMLHttpRequest();
     xhttp.withCredentials = true;
     let unitFormat = '';
@@ -96,19 +105,19 @@ function reportStats(data, code) {
       pageLocation = encodeURIComponent(window.context.location.href);
     }
     const {subId, pid} = data,
-        trackId = 'AMP',
-        notFirst = true,
-        cid = '',
-        abLabel = '',
-        rand = Math.random();
+      trackId = 'AMP',
+      notFirst = true,
+      cid = '',
+      abLabel = '',
+      rand = Math.random();
     if (!isNaN(data.width) && !isNaN(data.height)) {
       unitFormat = `${data.width}x${data.height}`;
     }
     const uid = '',
-        isLocked = false,
-        isTrackable = false,
-        isClient = false,
-        tier = 0;
+      isLocked = false,
+      isTrackable = false,
+      isClient = false,
+      tier = 0;
     const baseUrl = '//srv.imonomy.com/internal/reporter';
     let unitCodeUrl = `${baseUrl}?v=2&subid=${subId}&sid=${pid}&`;
     unitCodeUrl = unitCodeUrl + `format=${unitFormat}&ai=`;
@@ -134,6 +143,5 @@ function reportStats(data, code) {
     xhttp.open('GET', unitCodeUrl, true);
     xhttp.setRequestHeader('Content-Type', 'application/json');
     xhttp.send();
-
   } catch (e) {}
 }

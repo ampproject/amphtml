@@ -14,22 +14,18 @@
  * limitations under the License.
  */
 
-import {validateData,writeScript} from '../3p/3p';
+import {validateData, writeScript} from '../3p/3p';
 
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function mixpo(global, data) {
-  validateData(data, [
-    'guid',
-    'subdomain',
-  ]);
+  validateData(data, ['guid', 'subdomain']);
 
   const g = global,
-      cdnSubdomain = (data.subdomain == 'www') ?
-        'cdn' : data.subdomain + '-cdn',
-      url = data.loader || `https://${cdnSubdomain}.mixpo.com/js/loader.js`;
+    cdnSubdomain = data.subdomain == 'www' ? 'cdn' : data.subdomain + '-cdn',
+    url = data.loader || `https://${cdnSubdomain}.mixpo.com/js/loader.js`;
 
   g.mixpoAd = {
     amp: true,

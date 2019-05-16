@@ -39,7 +39,6 @@ const TRIPLELIFT_BASE_A4A_URL_ = 'amp.3lift.com/_a4a/amp/auction';
  * the cloudflare signing key.
  */
 export class AmpAdNetworkTripleliftImpl extends AmpA4A {
-
   /** @override */
   isValidElement() {
     return this.isAmpAdElement();
@@ -52,13 +51,15 @@ export class AmpAdNetworkTripleliftImpl extends AmpA4A {
 
   /** @override */
   getAdUrl() {
-    return this.element.getAttribute('src').replace(TRIPLELIFT_BASE_URL_,
-        TRIPLELIFT_BASE_A4A_URL_);
+    return this.element
+      .getAttribute('src')
+      .replace(TRIPLELIFT_BASE_URL_, TRIPLELIFT_BASE_A4A_URL_);
   }
 }
 
-
 AMP.extension('amp-ad-network-triplelift-impl', '0.1', AMP => {
-  AMP.registerElement('amp-ad-network-triplelift-impl',
-      AmpAdNetworkTripleliftImpl);
+  AMP.registerElement(
+    'amp-ad-network-triplelift-impl',
+    AmpAdNetworkTripleliftImpl
+  );
 });

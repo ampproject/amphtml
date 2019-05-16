@@ -35,14 +35,12 @@ export let SsrTemplateDef;
  * Helper, that manages the proxying of template rendering to the viewer.
  */
 export class SsrTemplateHelper {
-
   /**
    * @param {string} sourceComponent
    * @param {!./service/viewer-impl.Viewer} viewer
    * @param {!./service/template-impl.Templates} templates
    */
   constructor(sourceComponent, viewer, templates) {
-
     /** @private @const */
     this.viewer_ = viewer;
 
@@ -81,19 +79,24 @@ export class SsrTemplateHelper {
    * return {!Promise<{data:{?JsonObject|string|undefined}}>}
    */
   fetchAndRenderTemplate(
-    element, request, opt_templates = null, opt_attributes = {}) {
+    element,
+    request,
+    opt_templates = null,
+    opt_attributes = {}
+  ) {
     let mustacheTemplate;
     if (!opt_templates) {
       mustacheTemplate = this.templates_.maybeFindTemplate(element);
     }
     return this.viewer_.sendMessageAwaitResponse(
-        'viewerRenderTemplate',
-        this.buildPayload_(
-            request,
-            mustacheTemplate,
-            opt_templates,
-            opt_attributes
-        ));
+      'viewerRenderTemplate',
+      this.buildPayload_(
+        request,
+        mustacheTemplate,
+        opt_templates,
+        opt_attributes
+      )
+    );
   }
 
   /**
@@ -104,16 +107,24 @@ export class SsrTemplateHelper {
   renderTemplate(element, data) {
     let renderTemplatePromise;
     if (this.isSupported()) {
-      userAssert(typeof data['html'] === 'string',
-          'Server side html response must be defined');
+      userAssert(
+        typeof data['html'] === 'string',
+        'Server side html response must be defined'
+      );
       renderTemplatePromise = this.templates_.findAndSetHtmlForTemplate(
-          element, /** @type {string} */ (data['html']));
+        element,
+        /** @type {string} */ (data['html'])
+      );
     } else if (isArray(data)) {
-      renderTemplatePromise = this.templates_
-          .findAndRenderTemplateArray(element, /** @type {!Array} */ (data));
+      renderTemplatePromise = this.templates_.findAndRenderTemplateArray(
+        element,
+        /** @type {!Array} */ (data)
+      );
     } else {
-      renderTemplatePromise =
-          this.templates_.findAndRenderTemplate(element, /** @type {!JsonObject} */ (data));
+      renderTemplatePromise = this.templates_.findAndRenderTemplate(
+        element,
+        /** @type {!JsonObject} */ (data)
+      );
     }
 
     return renderTemplatePromise;
@@ -127,29 +138,30 @@ export class SsrTemplateHelper {
    * @return {!JsonObject}
    * @private
    */
-  buildPayload_(
-    request, mustacheTemplate, opt_templates, opt_attributes = {}) {
+  buildPayload_(request, mustacheTemplate, opt_templates, opt_attributes = {}) {
     const ampComponent = dict({'type': this.sourceComponent_});
 
     const successTemplateKey = 'successTemplate';
     const successTemplate =
-      (opt_templates && opt_templates[successTemplateKey])
-        ? opt_templates[successTemplateKey] : mustacheTemplate;
+      opt_templates && opt_templates[successTemplateKey]
+        ? opt_templates[successTemplateKey]
+        : mustacheTemplate;
     if (successTemplate) {
       ampComponent[successTemplateKey] = {
         'type': 'amp-mustache',
-        'payload': successTemplate./*REVIEW*/innerHTML,
+        'payload': successTemplate./*REVIEW*/ innerHTML,
       };
     }
 
     const errorTemplateKey = 'errorTemplate';
     const errorTemplate =
-      (opt_templates && opt_templates[errorTemplateKey])
-        ? opt_templates[errorTemplateKey] : null;
+      opt_templates && opt_templates[errorTemplateKey]
+        ? opt_templates[errorTemplateKey]
+        : null;
     if (errorTemplate) {
       ampComponent[errorTemplateKey] = {
         'type': 'amp-mustache',
-        'payload': errorTemplate./*REVIEW*/innerHTML,
+        'payload': errorTemplate./*REVIEW*/ innerHTML,
       };
     }
 
@@ -158,8 +170,10 @@ export class SsrTemplateHelper {
     }
 
     const data = dict({
-      'originalRequest':
-        toStructuredCloneable(request.xhrUrl, request.fetchOpt),
+      'originalRequest': toStructuredCloneable(
+        request.xhrUrl,
+        request.fetchOpt
+      ),
       'ampComponent': ampComponent,
     });
 
@@ -174,10 +188,9 @@ export class SsrTemplateHelper {
    */
   verifySsrResponse(win, response, request) {
     verifyAmpCORSHeaders(
-        win,
-        fromStructuredCloneable(
-            response,
-            request.fetchOpt.responseType),
-        request.fetchOpt);
+      win,
+      fromStructuredCloneable(response, request.fetchOpt.responseType),
+      request.fetchOpt
+    );
   }
 }

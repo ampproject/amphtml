@@ -44,9 +44,7 @@ export const SubscriptionAnalyticsEvents = {
   LINK_CANCELED: 'subscriptions-link-canceled',
 };
 
-
 export class SubscriptionAnalytics {
-
   /**
    * Creates an instance of SubscriptionAnalytics.
    * @param {!Element} element
@@ -61,9 +59,15 @@ export class SubscriptionAnalytics {
    * @param {!JsonObject=} opt_vars
    */
   serviceEvent(eventType, serviceId, opt_vars) {
-    this.event(eventType, /** @type {!JsonObject} */ (Object.assign(dict({
-      'serviceId': serviceId,
-    }), opt_vars)));
+    this.event(
+      eventType,
+      /** @type {!JsonObject} */ (Object.assign(
+        dict({
+          'serviceId': serviceId,
+        }),
+        opt_vars
+      ))
+    );
   }
 
   /**
@@ -83,6 +87,9 @@ export class SubscriptionAnalytics {
    */
   actionEvent(serviceId, action, status, opt_vars) {
     this.serviceEvent(
-        `subscriptions-action-${action}-${status}`, serviceId, opt_vars);
+      `subscriptions-action-${action}-${status}`,
+      serviceId,
+      opt_vars
+    );
   }
 }

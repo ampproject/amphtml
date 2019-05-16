@@ -117,8 +117,9 @@ const strings = {
     string: 'Энэ хэрэглээг харахын тулд цонхоо өргөнөөр нь дэлгэнэ үү',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
-    string: 'Та энэ контентыг харахын тулд amp түүхийн туршилтыг идэвхжүүлэх ' +
-        'ёстой.',
+    string:
+      'Та энэ контентыг харахын тулд amp түүхийн туршилтыг идэвхжүүлэх ' +
+      'ёстой.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
     string: 'Хуудсыг босоо горимд хамгийн их харсан',

@@ -17,7 +17,8 @@
 export const KRUX_CONFIG = /** @type {!JsonObject} */ ({
   'requests': {
     'beaconHost': 'https://beacon.krxd.net',
-    'timing': 't_navigation_type=0&' +
+    'timing':
+      't_navigation_type=0&' +
       't_dns=${domainLookupTime}&' +
       't_tcp=${tcpConnectTime}&' +
       't_http_request=${serverResponseTime}&' +
@@ -25,7 +26,8 @@ export const KRUX_CONFIG = /** @type {!JsonObject} */ ({
       't_content_ready=${contentLoadTime}&' +
       't_window_load=${pageLoadTime}&' +
       't_redirect=${redirectTime}',
-    'common': 'source=amp&' +
+    'common':
+      'source=amp&' +
       'confid=${confid}&' +
       '_kpid=${pubid}&' +
       '_kcp_s=${site}&' +

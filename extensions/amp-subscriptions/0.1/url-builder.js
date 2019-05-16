@@ -17,7 +17,6 @@
 import {Services} from '../../../src/services';
 import {getValueForExpr} from '../../../src/json';
 
-
 export class UrlBuilder {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc

@@ -75,7 +75,10 @@ export const clearOurFragment = url => {
 export const getFragmentId = url => {
   const fragment = getModernFragment(url);
   if (fragment) {
-    return fragment.split('.').slice(1).shift();
+    return fragment
+      .split('.')
+      .slice(1)
+      .shift();
   } else {
     return undefined;
   }
@@ -89,7 +92,10 @@ export const getFragmentId = url => {
 export const getServiceFromUrlFragment = url => {
   const fragment = getModernFragment(url);
   if (fragment) {
-    return fragment.split('.').slice(2).shift();
+    return fragment
+      .split('.')
+      .slice(2)
+      .shift();
   } else {
     return undefined;
   }

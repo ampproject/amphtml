@@ -29,7 +29,6 @@ const TAG = 'POSITION_OBSERVER';
 /** @const @private */
 const SCROLL_TIMEOUT = 500;
 
-
 export class PositionObserver {
   /**
    * @param {!../ampdoc-impl.AmpDoc} ampdoc
@@ -63,9 +62,13 @@ export class PositionObserver {
     this.callbackStarted_ = false;
 
     /** @private {function()} */
-    this.boundStopScroll_ = debounce(this.win_, () => {
-      this.inScroll_ = false;
-    }, SCROLL_TIMEOUT);
+    this.boundStopScroll_ = debounce(
+      this.win_,
+      () => {
+        this.inScroll_ = false;
+      },
+      SCROLL_TIMEOUT
+    );
   }
 
   /**
@@ -75,8 +78,12 @@ export class PositionObserver {
    * @return {!UnlistenDef}
    */
   observe(element, fidelity, handler) {
-    const worker =
-        new PositionObserverWorker(this.ampdoc_, element, fidelity, handler);
+    const worker = new PositionObserverWorker(
+      this.ampdoc_,
+      element,
+      fidelity,
+      handler
+    );
 
     this.workers_.push(worker);
 
@@ -127,12 +134,16 @@ export class PositionObserver {
   startCallback_() {
     this.callbackStarted_ = true;
     // listen to viewport scroll event to help pass determine if need to
-    this.unlisteners_.push(this.viewport_.onScroll(() => {
-      this.onScrollHandler_();
-    }));
-    this.unlisteners_.push(this.viewport_.onResize(() => {
-      this.onResizeHandler_();
-    }));
+    this.unlisteners_.push(
+      this.viewport_.onScroll(() => {
+        this.onScrollHandler_();
+      })
+    );
+    this.unlisteners_.push(
+      this.viewport_.onResize(() => {
+        this.onResizeHandler_();
+      })
+    );
   }
 
   /**
@@ -151,7 +162,7 @@ export class PositionObserver {
    * This should always be called in vsync.
    * @param {boolean=} opt_force
    * @visibleForTesting
-  */
+   */
   updateAllEntries(opt_force) {
     for (let i = 0; i < this.workers_.length; i++) {
       const worker = this.workers_[i];

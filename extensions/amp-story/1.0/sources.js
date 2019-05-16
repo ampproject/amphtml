@@ -17,8 +17,6 @@
 import {ampMediaElementFor} from './utils';
 import {removeElement} from '../../../src/dom';
 
-
-
 /**
  * Class handling HTMLMediaElements sources.
  */
@@ -40,7 +38,6 @@ export class Sources {
     /** @private @const {!IArrayLike<!Element>} */
     this.trackEls_ = opt_trackEls || [];
   }
-
 
   /**
    * Applies track tags to a specified element. This is done in a separate
@@ -67,7 +64,6 @@ export class Sources {
     });
   }
 
-
   /**
    * Applies the src attribute and source tags to a specified element.
    * @param {!HTMLMediaElement} element The element to adopt the sources
@@ -82,8 +78,9 @@ export class Sources {
       element.setAttribute('src', this.srcAttr_);
     }
 
-    Array.prototype.forEach.call(this.srcEls_,
-        srcEl => element.appendChild(srcEl));
+    Array.prototype.forEach.call(this.srcEls_, srcEl =>
+      element.appendChild(srcEl)
+    );
 
     if (this.trackEls_.length > 0) {
       // Wait for "loadedmetadata" before adding tracks.
@@ -101,7 +98,6 @@ export class Sources {
       }
     }
   }
-
 
   /**
    * Removes and returns the sources from a specified element.

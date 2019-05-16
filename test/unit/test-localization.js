@@ -29,28 +29,32 @@ describes.fakeWin('localization', {}, env => {
       // Transform string IDs from a map of keys to values to a multimap of
       // values to a list of keys that have that value.
       const localizedStringIdKeys = Object.keys(LocalizedStringId);
-      const valuesToKeys = localizedStringIdKeys
-          .reduce((freq, LocalizedStringIdKey) => {
-            const LocalizedStringIdValue =
-                LocalizedStringId[LocalizedStringIdKey];
-            if (!freq[LocalizedStringIdValue]) {
-              freq[LocalizedStringIdValue] = [];
-            }
+      const valuesToKeys = localizedStringIdKeys.reduce(
+        (freq, LocalizedStringIdKey) => {
+          const LocalizedStringIdValue =
+            LocalizedStringId[LocalizedStringIdKey];
+          if (!freq[LocalizedStringIdValue]) {
+            freq[LocalizedStringIdValue] = [];
+          }
 
-            freq[LocalizedStringIdValue].push(LocalizedStringIdKey);
-            return freq;
-          }, {});
+          freq[LocalizedStringIdValue].push(LocalizedStringIdKey);
+          return freq;
+        },
+        {}
+      );
 
       // Assert that each of the lists of keys from the created multimap has
       // exactly one value.
       const localizedStringIdValues = Object.keys(valuesToKeys);
       localizedStringIdValues.forEach(value => {
         const keys = valuesToKeys[value];
-        expect(keys, `${value} is never used in a localized string ID`)
-            .to.not.be.empty;
-        expect(keys).to.have
-            .lengthOf(1, `${value} is used as a value for more than one ` +
-                `localized string ID: ${keys}`);
+        expect(keys, `${value} is never used in a localized string ID`).to.not
+          .be.empty;
+        expect(keys).to.have.lengthOf(
+          1,
+          `${value} is used as a value for more than one ` +
+            `localized string ID: ${keys}`
+        );
       });
     });
   });
@@ -64,8 +68,9 @@ describes.fakeWin('localization', {}, env => {
         },
       });
 
-      expect(localizationService.getLocalizedString('test_string_id'))
-          .to.equal('test string content');
+      expect(localizationService.getLocalizedString('test_string_id')).to.equal(
+        'test string content'
+      );
     });
 
     it('should utilize fallback if string is missing', () => {
@@ -76,8 +81,9 @@ describes.fakeWin('localization', {}, env => {
         },
       });
 
-      expect(localizationService.getLocalizedString('test_string_id'))
-          .to.equal('test fallback content');
+      expect(localizationService.getLocalizedString('test_string_id')).to.equal(
+        'test fallback content'
+      );
     });
 
     it('should not utilize fallback if string is present', () => {
@@ -89,13 +95,18 @@ describes.fakeWin('localization', {}, env => {
         },
       });
 
-      expect(localizationService.getLocalizedString('test_string_id'))
-          .to.equal('test string content');
+      expect(localizationService.getLocalizedString('test_string_id')).to.equal(
+        'test string content'
+      );
     });
 
     it('should have language fallbacks', () => {
-      expect(getLanguageCodesFromString('de-hi-1')).to
-          .deep.equal(['de-hi-1', 'de-hi', 'de', 'default']);
+      expect(getLanguageCodesFromString('de-hi-1')).to.deep.equal([
+        'de-hi-1',
+        'de-hi',
+        'de',
+        'default',
+      ]);
     });
 
     it('should default to English', () => {
@@ -108,8 +119,10 @@ describes.fakeWin('localization', {}, env => {
       const originalStringBundle = {
         'test_string_id': {string: 'foo'},
       };
-      const pseudoLocaleBundle = createPseudoLocale(originalStringBundle,
-          s => `${s} ${s}`);
+      const pseudoLocaleBundle = createPseudoLocale(
+        originalStringBundle,
+        s => `${s} ${s}`
+      );
 
       expect(pseudoLocaleBundle['test_string_id'].string).to.equal('foo foo');
     });
@@ -122,11 +135,14 @@ describes.fakeWin('localization', {}, env => {
         'msg_id_4': {string: 'msg4'},
         'msg_id_5': {string: 'msg5'},
       };
-      const pseudoLocaleBundle = createPseudoLocale(originalStringBundle,
-          s => `${s} ${s}`);
+      const pseudoLocaleBundle = createPseudoLocale(
+        originalStringBundle,
+        s => `${s} ${s}`
+      );
 
-      expect(Object.keys(originalStringBundle)).to
-          .deep.equal(Object.keys(pseudoLocaleBundle));
+      expect(Object.keys(originalStringBundle)).to.deep.equal(
+        Object.keys(pseudoLocaleBundle)
+      );
     });
   });
 });

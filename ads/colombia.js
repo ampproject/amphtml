@@ -22,8 +22,11 @@ import {loadScript, validateData} from '../3p/3p';
  */
 export function colombia(global, data) {
   validateData(data, [
-    'clmb_slot', 'clmb_position', 'clmb_section',
-    'clmb_divid', 'loadingStrategy',
+    'clmb_slot',
+    'clmb_position',
+    'clmb_section',
+    'clmb_divid',
+    'loadingStrategy',
   ]);
   // push the two object into the '_colombia' global
   (global._colombia = global._colombia || []).push({
@@ -43,5 +46,8 @@ export function colombia(global, data) {
       }
     });
   });
-  loadScript(global, 'https://static.clmbtech.com/ad/commons/js/colombia-amp.js');
+  loadScript(
+    global,
+    'https://static.clmbtech.com/ad/commons/js/colombia-amp.js'
+  );
 }

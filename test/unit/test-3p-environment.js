@@ -18,13 +18,9 @@ import * as lolex from 'lolex';
 import {Services} from '../../src/services';
 import {createIframePromise} from '../../testing/iframe';
 import {loadPromise} from '../../src/event-helper';
-import {
-  manageWin,
-  setInViewportForTesting,
-} from '../../3p/environment';
+import {manageWin, setInViewportForTesting} from '../../3p/environment';
 
 describe('3p environment', () => {
-
   let testWin;
   let iframeCount;
   const timer = Services.timerFor(window);
@@ -167,12 +163,14 @@ describe('3p environment', () => {
       setInViewportForTesting(true);
       clock.tick(20);
       expect(progress).to.equal(
-          'aaaaaaaaabaaaaaaaaaacbaabcaaaaaaaaaaaaaaaaaaba');
+        'aaaaaaaaabaaaaaaaaaacbaabcaaaaaaaaaaaaaaaaaaba'
+      );
       testWin.clearInterval(ia);
       testWin.clearInterval(ic);
       clock.tick(20);
       expect(progress).to.equal(
-          'aaaaaaaaabaaaaaaaaaacbaabcaaaaaaaaaaaaaaaaaababb');
+        'aaaaaaaaabaaaaaaaaaacbaabcaaaaaaaaaaaaaaaaaababb'
+      );
       testWin.ran = false;
       testWin.setInterval('ran=true', 1);
       clock.tick(1);
@@ -220,8 +218,11 @@ describe('3p environment', () => {
   }
 
   function waitForMutationObserver(iframe) {
-    if (iframe.contentWindow && iframe.contentWindow.document &&
-        iframe.contentWindow.document.body.childNodes.length) {
+    if (
+      iframe.contentWindow &&
+      iframe.contentWindow.document &&
+      iframe.contentWindow.document.body.childNodes.length
+    ) {
       return timer.promise(10);
     }
     return loadPromise(iframe).then(() => {
@@ -232,7 +233,7 @@ describe('3p environment', () => {
   function makeChildIframeSrcdoc(win) {
     const doc = win.document;
     const iframe = doc.createElement('iframe');
-    iframe.name = 'testChild' + (iframeCount++);
+    iframe.name = 'testChild' + iframeCount++;
     iframe.setAttribute('srcdoc', 'hello: ' + iframe.name);
     doc.body.appendChild(iframe);
     doc.body.appendChild(doc.createElement('hr'));
@@ -242,7 +243,7 @@ describe('3p environment', () => {
   function makeChildIframeDocWrite(win) {
     const doc = win.document;
     const iframe = doc.createElement('iframe');
-    iframe.name = 'testChild' + (iframeCount++);
+    iframe.name = 'testChild' + iframeCount++;
     iframe.src = 'about:blank';
     doc.body.appendChild(iframe);
     iframe.contentWindow.document.open();

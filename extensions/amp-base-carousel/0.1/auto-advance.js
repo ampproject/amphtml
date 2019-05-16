@@ -42,11 +42,7 @@ export class AutoAdvance {
    *   advanceable: !AdvanceDef
    * }} config
    */
-  constructor({
-    win,
-    scrollContainer,
-    advanceable,
-  }) {
+  constructor({win, scrollContainer, advanceable}) {
     /** @private @const */
     this.win_ = win;
 
@@ -82,9 +78,15 @@ export class AutoAdvance {
 
     this.createDebouncedAdvance_(this.autoAdvanceInterval_);
     this.scrollContainer_.addEventListener(
-        'scroll', () => this.handleScroll_(), true);
+      'scroll',
+      () => this.handleScroll_(),
+      true
+    );
     this.scrollContainer_.addEventListener(
-        'touchstart', () => this.handleTouchStart_(), true);
+      'touchstart',
+      () => this.handleTouchStart_(),
+      true
+    );
   }
 
   /**
@@ -144,7 +146,9 @@ export class AutoAdvance {
    */
   updateAutoAdvanceInterval(autoAdvanceInterval) {
     this.autoAdvanceInterval_ = Math.max(
-        autoAdvanceInterval, MIN_AUTO_ADVANCE_INTERVAL);
+      autoAdvanceInterval,
+      MIN_AUTO_ADVANCE_INTERVAL
+    );
     this.createDebouncedAdvance_(this.autoAdvanceInterval_);
     this.resetAutoAdvance_();
   }
@@ -164,7 +168,10 @@ export class AutoAdvance {
    */
   createDebouncedAdvance_(interval) {
     this.debouncedAdvance_ = debounce(
-        this.win_, () => this.advance_(), interval);
+      this.win_,
+      () => this.advance_(),
+      interval
+    );
   }
 
   /**
@@ -173,11 +180,16 @@ export class AutoAdvance {
   handleTouchStart_() {
     this.pause();
 
-    listenOnce(window, 'touchend', () => {
-      this.resume();
-    }, {
-      capture: true,
-    });
+    listenOnce(
+      window,
+      'touchend',
+      () => {
+        this.resume();
+      },
+      {
+        capture: true,
+      }
+    );
   }
 
   /**
@@ -185,10 +197,12 @@ export class AutoAdvance {
    * @private
    */
   shouldAutoAdvance_() {
-    return this.autoAdvance_ &&
-        !this.paused_ &&
-        !this.stopped_ &&
-        this.advances_ < this.maxAdvances_;
+    return (
+      this.autoAdvance_ &&
+      !this.paused_ &&
+      !this.stopped_ &&
+      this.advances_ < this.maxAdvances_
+    );
   }
 
   /**

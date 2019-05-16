@@ -27,14 +27,24 @@ export function kiosked(global, data) {
   if (hasOwn(data, 'scriptid')) {
     scriptId = data['scriptid'];
   }
-  window.addEventListener('kioskedAdRender', function() {
-    global.context.renderStart();
-  }, false);
+  window.addEventListener(
+    'kioskedAdRender',
+    function() {
+      global.context.renderStart();
+    },
+    false
+  );
 
-  window.addEventListener('kioskedAdNoFill', function() {
-    global.context.noContentAvailable();
-  }, false);
+  window.addEventListener(
+    'kioskedAdNoFill',
+    function() {
+      global.context.noContentAvailable();
+    },
+    false
+  );
 
-  writeScript(global, 'https://scripts.kiosked.com/loader/kiosked-ad.js?staticTagId=' + scriptId);
-
+  writeScript(
+    global,
+    'https://scripts.kiosked.com/loader/kiosked-ad.js?staticTagId=' + scriptId
+  );
 }

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 import {CONSENT_POLICY_STATE} from '../src/consent-state';
 import {computeInMasterFrame, validateData, writeScript} from '../3p/3p';
 import {parseJson} from '../src/json';
@@ -43,7 +42,7 @@ function isFalseString(str) {
 function setupAdoConfig(mode, global, consent) {
   if (global['ado']) {
     const config = {
-      mode: (mode == 'sync') ? 'old' : 'new',
+      mode: mode == 'sync' ? 'old' : 'new',
       protocol: 'https:',
       fif: {
         enabled: mode != 'sync',
@@ -119,9 +118,10 @@ let runSyncCount = 0;
  */
 function runSync(global, cb) {
   global['__aoPrivFnct' + ++runSyncCount] = cb;
-  /*eslint no-useless-concat: 0*/
-  global.document
-      .write('<' + 'script>__aoPrivFnct' + runSyncCount + '();<' + '/script>');
+  global.document.write(
+    // eslint-disable-next-line no-useless-concat
+    '<' + 'script>__aoPrivFnct' + runSyncCount + '();<' + '/script>'
+  );
 }
 
 /**
@@ -201,15 +201,20 @@ function executeMaster(masterId, data, global, callback) {
 function requestCodes(masterId, data, global, callback) {
   const slaveId = data['aoId'];
 
-  computeInMasterFrame(global, 'ao-master-exec', done => {
-    executeMaster(masterId, data, global,codes => done(codes));
-  }, codes => {
-    const creative = codes[slaveId];
-    if (codes[slaveId + '_second_phase']) {
-      creative['code'] += '\n' + codes[slaveId + '_second_phase']['code'];
+  computeInMasterFrame(
+    global,
+    'ao-master-exec',
+    done => {
+      executeMaster(masterId, data, global, codes => done(codes));
+    },
+    codes => {
+      const creative = codes[slaveId];
+      if (codes[slaveId + '_second_phase']) {
+        creative['code'] += '\n' + codes[slaveId + '_second_phase']['code'];
+      }
+      callback(creative);
     }
-    callback(creative);
-  });
+  );
 }
 
 class AdoBuffer {
@@ -233,8 +238,8 @@ class AdoBuffer {
 
     if (this.global.document.readyState === 'loading') {
       this.global.document.addEventListener(
-          'DOMContentLoaded',
-          this._init.bind(this)
+        'DOMContentLoaded',
+        this._init.bind(this)
       );
     } else {
       this._init();
@@ -276,7 +281,6 @@ class AdoBuffer {
   }
 }
 
-
 /**
  *
  * @param {string} slaveId
@@ -297,7 +301,7 @@ function executeSlave(slaveId, config, global) {
     } else {
       const buffer = new AdoBuffer(placement, global);
       buffer.render(() => {
-        (new Function(config['sendHitsDef'] + config['code']))();
+        new Function(config['sendHitsDef'] + config['code'])();
       });
     }
   }
@@ -308,20 +312,14 @@ function executeSlave(slaveId, config, global) {
  * @param {!Object} data
  */
 export function adocean(global, data) {
-  validateData(data, [
-    'aoEmitter',
-    'aoId',
-  ], [
-    'aoMode',
-    'aoPreview',
-    'aoKeys',
-    'aoVars',
-    'aoClusters',
-    'aoMaster',
-  ]);
+  validateData(
+    data,
+    ['aoEmitter', 'aoId'],
+    ['aoMode', 'aoPreview', 'aoKeys', 'aoVars', 'aoClusters', 'aoMaster']
+  );
 
   const masterId = data['aoMaster'];
-  const mode = (data['aoMode'] !== 'sync' || masterId ? 'buffered' : 'sync');
+  const mode = data['aoMode'] !== 'sync' || masterId ? 'buffered' : 'sync';
   const adoUrl = 'https://' + data['aoEmitter'] + ADO_JS_PATHS[mode];
   const ctx = global.context;
 
@@ -329,11 +327,10 @@ export function adocean(global, data) {
    * INSUFFICIENT and UNKNOWN should be treated as INSUFFICIENT
    * not defined states should be treated as INSUFFICIENT
    */
-  const consent = (
+  const consent =
     ctx.initialConsentState === null /* tags without data-block-on-consent */ ||
     ctx.initialConsentState === CONSENT_POLICY_STATE.SUFFICIENT ||
-    ctx.initialConsentState === CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED
-  );
+    ctx.initialConsentState === CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED;
 
   writeScript(global, adoUrl, () => {
     setupAdoConfig(mode, global, consent);

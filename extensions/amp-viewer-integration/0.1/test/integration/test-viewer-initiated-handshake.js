@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  WebviewViewerForTesting,
-} from '../../viewer-initiated-handshake-viewer-for-testing';
-
+import {WebviewViewerForTesting} from '../../viewer-initiated-handshake-viewer-for-testing';
 
 describes.sandboxed('AmpWebviewViewerIntegration', {}, () => {
   const ampDocSrc = '/test/fixtures/served/ampdoc-with-messaging.html';
@@ -28,8 +25,9 @@ describes.sandboxed('AmpWebviewViewerIntegration', {}, () => {
 
     beforeEach(() => {
       const loc = window.location;
-      const ampDocUrl =
-        `${loc.protocol}//iframe.${loc.hostname}:${loc.port}${ampDocSrc}`;
+      const ampDocUrl = `${loc.protocol}//iframe.${loc.hostname}:${
+        loc.port
+      }${ampDocSrc}`;
 
       viewerEl = document.createElement('div');
       document.body.appendChild(viewerEl);

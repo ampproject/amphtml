@@ -28,12 +28,15 @@ describes.fakeWin('UrlBuilder', {amp: true}, env => {
   });
 
   it('should resolve URL without auth response and no authdata vars', () => {
-    expectAsyncConsoleError(
-        /Access or subsciptions service is not installed/);
-    return urlBuilder.buildUrl('?rid=READER_ID&type=AUTHDATA(child.type)',
-        /* useAuthData */ false).then(url => {
-      expect(url).to.equal('?rid=reader1&type=');
-    });
+    expectAsyncConsoleError(/Access or subsciptions service is not installed/);
+    return urlBuilder
+      .buildUrl(
+        '?rid=READER_ID&type=AUTHDATA(child.type)',
+        /* useAuthData */ false
+      )
+      .then(url => {
+        expect(url).to.equal('?rid=reader1&type=');
+      });
   });
 
   it('should accept reader_id synonyms', () => {
@@ -43,46 +46,65 @@ describes.fakeWin('UrlBuilder', {amp: true}, env => {
   });
 
   it('should resolve URL without auth response and with authdata vars', () => {
-    return urlBuilder.buildUrl('?rid=READER_ID&type=AUTHDATA(child.type)',
-        /* useAuthData */ true).then(url => {
-      expect(url).to.equal('?rid=reader1&type=');
-    });
+    return urlBuilder
+      .buildUrl(
+        '?rid=READER_ID&type=AUTHDATA(child.type)',
+        /* useAuthData */ true
+      )
+      .then(url => {
+        expect(url).to.equal('?rid=reader1&type=');
+      });
   });
 
   it('should resolve URL with auth response and no authdata vars', () => {
-    expectAsyncConsoleError(
-        /Access or subsciptions service is not installed/);
+    expectAsyncConsoleError(/Access or subsciptions service is not installed/);
     urlBuilder.setAuthResponse({child: {type: 'premium'}});
-    return urlBuilder.buildUrl('?rid=READER_ID&type=AUTHDATA(child.type)',
-        /* useAuthData */ false).then(url => {
-      expect(url).to.equal('?rid=reader1&type=');
-    });
+    return urlBuilder
+      .buildUrl(
+        '?rid=READER_ID&type=AUTHDATA(child.type)',
+        /* useAuthData */ false
+      )
+      .then(url => {
+        expect(url).to.equal('?rid=reader1&type=');
+      });
   });
 
   it('should resolve URL with auth response and with authdata vars', () => {
     urlBuilder.setAuthResponse({child: {type: 'premium'}});
-    return urlBuilder.buildUrl('?rid=READER_ID&type=AUTHDATA(child.type)',
-        /* useAuthData */ true).then(url => {
-      expect(url).to.equal('?rid=reader1&type=premium');
-    });
+    return urlBuilder
+      .buildUrl(
+        '?rid=READER_ID&type=AUTHDATA(child.type)',
+        /* useAuthData */ true
+      )
+      .then(url => {
+        expect(url).to.equal('?rid=reader1&type=premium');
+      });
   });
 
   it('should resolve URL with unknown authdata var', () => {
     urlBuilder.setAuthResponse({child: {type: 'premium'}});
-    return urlBuilder.buildUrl('?rid=READER_ID&type=AUTHDATA(child.type2)',
-        /* useAuthData */ true).then(url => {
-      expect(url).to.equal('?rid=reader1&type=');
-    });
+    return urlBuilder
+      .buildUrl(
+        '?rid=READER_ID&type=AUTHDATA(child.type2)',
+        /* useAuthData */ true
+      )
+      .then(url => {
+        expect(url).to.equal('?rid=reader1&type=');
+      });
   });
 
   it('should colect URL vars with auth response and with authdata vars', () => {
     urlBuilder.setAuthResponse({child: {type: 'premium'}});
-    return urlBuilder.collectUrlVars('?rid=READER_ID&type=AUTHDATA(child.type)',
-        /* useAuthData */ true).then(vars => {
-      expect(vars).to.deep.equal({
-        'READER_ID': 'reader1',
-        'AUTHDATA(child.type)': 'premium',
+    return urlBuilder
+      .collectUrlVars(
+        '?rid=READER_ID&type=AUTHDATA(child.type)',
+        /* useAuthData */ true
+      )
+      .then(vars => {
+        expect(vars).to.deep.equal({
+          'READER_ID': 'reader1',
+          'AUTHDATA(child.type)': 'premium',
+        });
       });
-    });
   });
 });

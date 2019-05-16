@@ -19,27 +19,29 @@ export const GOOGLEADWORDS_CONFIG = /** @type {!JsonObject} */ ({
   'requests': {
     'conversion_prefix': 'https://www.googleadservices.com/pagead/conversion/',
     'remarketing_prefix':
-        'https://googleads.g.doubleclick.net/pagead/viewthroughconversion/',
-    'common_params': '${googleConversionId}/?' +
-        'cv=amp2&' + // Increment when making changes.
-        'label=${googleConversionLabel}&' +
-        'random=${random}&' +
-        'url=${sourceUrl}&' +
-        'ref=${documentReferrer}&' +
-        'fst=${pageViewId}&' +
-        'num=${counter(googleadwords)}&' +
-        'fmt=3&' +
-        'async=1&' +
-        'u_h=${screenHeight}&u_w=${screenWidth}&' +
-        'u_ah=${availableScreenHeight}&u_aw=${availableScreenWidth}&' +
-        'u_cd=${screenColorDepth}&' +
-        'u_tz=${timezone}&' +
-        'tiba=${title}&' +
-        'guid=ON&script=0',
-    'conversion_params': 'value=${googleConversionValue}&' +
-        'currency_code=${googleConversionCurrency}&' +
-        'bg=${googleConversionColor}&' +
-        'hl=${googleConversionLanguage}',
+      'https://googleads.g.doubleclick.net/pagead/viewthroughconversion/',
+    'common_params':
+      '${googleConversionId}/?' +
+      'cv=amp2&' + // Increment when making changes.
+      'label=${googleConversionLabel}&' +
+      'random=${random}&' +
+      'url=${sourceUrl}&' +
+      'ref=${documentReferrer}&' +
+      'fst=${pageViewId}&' +
+      'num=${counter(googleadwords)}&' +
+      'fmt=3&' +
+      'async=1&' +
+      'u_h=${screenHeight}&u_w=${screenWidth}&' +
+      'u_ah=${availableScreenHeight}&u_aw=${availableScreenWidth}&' +
+      'u_cd=${screenColorDepth}&' +
+      'u_tz=${timezone}&' +
+      'tiba=${title}&' +
+      'guid=ON&script=0',
+    'conversion_params':
+      'value=${googleConversionValue}&' +
+      'currency_code=${googleConversionCurrency}&' +
+      'bg=${googleConversionColor}&' +
+      'hl=${googleConversionLanguage}',
     'conversion': '${conversion_prefix}${common_params}&${conversion_params}',
     'remarketing': '${remarketing_prefix}${common_params}',
   },

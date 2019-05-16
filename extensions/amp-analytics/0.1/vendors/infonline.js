@@ -21,7 +21,8 @@ export const INFONLINE_CONFIG = /** @type {!JsonObject} */ ({
   },
   'transport': {'beacon': false, 'xhrpost': false, 'image': true},
   'requests': {
-    'pageview': '${url}?st=${st}' +
+    'pageview':
+      '${url}?st=${st}' +
       '&sv=${sv}' +
       '&ap=${ap}' +
       '&co=${co}' +

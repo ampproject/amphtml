@@ -65,14 +65,13 @@ class PercyAssetsLoader {
           assetFile = assetFile.replace(/\\/g, '/');
         }
 
-
         const content = fs.readFileSync(assetFile);
         resources.push(
-            percyClient.makeResource({
-              resourceUrl: encodeURI(`/${assetFile}`),
-              content,
-              mimetype: mime.lookup(assetFile),
-            }),
+          percyClient.makeResource({
+            resourceUrl: encodeURI(`/${assetFile}`),
+            content,
+            mimetype: mime.lookup(assetFile),
+          })
         );
       }
     }

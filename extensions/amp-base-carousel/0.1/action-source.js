@@ -15,8 +15,8 @@
  */
 
 /**
-  * @enum {number}
-  */
+ * @enum {number}
+ */
 export const ActionSource = {
   GENERIC_HIGH_TRUST: 0,
   GENERIC_LOW_TRUST: 1,

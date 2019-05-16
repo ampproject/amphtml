@@ -40,7 +40,6 @@ export class ScrollManager {
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
-
     /** @const @private {!../../../src/service/viewport/viewport-impl.Viewport} */
     this.viewport_ = Services.viewportForDoc(ampdoc);
 
@@ -75,7 +74,6 @@ export class ScrollManager {
    * @return {!UnlistenDef}
    */
   addScrollHandler(handler) {
-
     // Trigger an event to fire events that might have already happened.
     const size = this.viewport_.getSize();
     /** {./scroll-manager.ScrollEventDef} */
@@ -109,7 +107,6 @@ export class ScrollManager {
       height: e.height,
       scrollWidth: this.viewport_.getScrollWidth(),
       scrollHeight: this.viewport_.getScrollHeight(),
-
     };
     // Fire all of our children scroll observables
     this.scrollObservable_.fire(scrollEvent);
@@ -131,9 +128,8 @@ export class ScrollManager {
    * @private
    */
   addViewportOnChangedListener_() {
-    this.viewportOnChangedUnlistener_ =
-      this.viewport_.onChanged(this.onScroll_.bind(this));
+    this.viewportOnChangedUnlistener_ = this.viewport_.onChanged(
+      this.onScroll_.bind(this)
+    );
   }
-
 }
-

@@ -16,119 +16,131 @@
 
 import {AmpStoryCtaLayer} from '../amp-story-cta-layer';
 
-describes.realWin('amp-story-cta-layer', {
-  amp: {
-    runtimeOn: true,
-    extensions: ['amp-story:1.0'],
+describes.realWin(
+  'amp-story-cta-layer',
+  {
+    amp: {
+      runtimeOn: true,
+      extensions: ['amp-story:1.0'],
+    },
   },
-}, env => {
-  let win;
-  let ampStoryCtaLayer;
+  env => {
+    let win;
+    let ampStoryCtaLayer;
 
-  beforeEach(() => {
-    win = env.win;
-    const ampStoryCtaLayerEl =
-      win.document.createElement('amp-story-cta-layer');
-    win.document.body.appendChild(ampStoryCtaLayerEl);
-    ampStoryCtaLayer = new AmpStoryCtaLayer(ampStoryCtaLayerEl);
-  });
-
-  it('should build the cta layer', () => {
-    ampStoryCtaLayer.buildCallback();
-    return ampStoryCtaLayer.layoutCallback().then(() => {
-      expect(ampStoryCtaLayer.element).to.have.class('i-amphtml-story-layer');
+    beforeEach(() => {
+      win = env.win;
+      const ampStoryCtaLayerEl = win.document.createElement(
+        'amp-story-cta-layer'
+      );
+      win.document.body.appendChild(ampStoryCtaLayerEl);
+      ampStoryCtaLayer = new AmpStoryCtaLayer(ampStoryCtaLayerEl);
     });
-  });
 
-  it('should add or overwrite target attribute to links', () => {
-    const ctaLink = win.document.createElement('a');
-    expect(ctaLink).to.not.have.attribute('target');
-
-    ampStoryCtaLayer.element.appendChild(ctaLink);
-    ampStoryCtaLayer.buildCallback();
-
-    return ampStoryCtaLayer.layoutCallback().then(() => {
-      expect(ctaLink).to.have.attribute('target');
-      expect(ctaLink.getAttribute('target')).to.equal('_blank');
-    });
-  });
-
-  it('should not add target attribute to other elements', () => {
-    const elem = win.document.createElement('span');
-    ampStoryCtaLayer.element.appendChild(elem);
-    ampStoryCtaLayer.buildCallback();
-
-    return ampStoryCtaLayer.layoutCallback().then(() => {
-      expect(elem).to.not.have.attribute('target');
-    });
-  });
-
-  it('should not allow a cta layer on the first page', () => {
-    win.document.body.appendChild(win.document.createElement('amp-story-page'));
-    win.document.body.appendChild(win.document.createElement('amp-story-page'));
-
-    const pageElements =
-    win.document.getElementsByTagName('amp-story-page');
-
-    pageElements[0].appendChild(ampStoryCtaLayer.element);
-
-    ampStoryCtaLayer.layoutCallback().then(layer => {
-      return allowConsoleError(() => {
-        return expect(layer).to.throw();
+    it('should build the cta layer', () => {
+      ampStoryCtaLayer.buildCallback();
+      return ampStoryCtaLayer.layoutCallback().then(() => {
+        expect(ampStoryCtaLayer.element).to.have.class('i-amphtml-story-layer');
       });
     });
-  });
 
-  it('should allow a cta layer on the second or third page', () => {
-    win.document.body.appendChild(win.document.createElement('amp-story-page'));
-    win.document.body.appendChild(win.document.createElement('amp-story-page'));
-    win.document.body.appendChild(win.document.createElement('amp-story-page'));
+    it('should add or overwrite target attribute to links', () => {
+      const ctaLink = win.document.createElement('a');
+      expect(ctaLink).to.not.have.attribute('target');
 
-    const pageElements =
-    win.document.getElementsByTagName('amp-story-page');
+      ampStoryCtaLayer.element.appendChild(ctaLink);
+      ampStoryCtaLayer.buildCallback();
 
-    pageElements[1].appendChild(ampStoryCtaLayer.element);
-    pageElements[2].appendChild(ampStoryCtaLayer.element);
-
-    ampStoryCtaLayer.layoutCallback().then(layer => {
-      return expect(layer).to.not.throw();
+      return ampStoryCtaLayer.layoutCallback().then(() => {
+        expect(ctaLink).to.have.attribute('target');
+        expect(ctaLink.getAttribute('target')).to.equal('_blank');
+      });
     });
-  });
 
-  it('should add or overwrite role attribute to links', () => {
-    const ctaLink = win.document.createElement('a');
-    expect(ctaLink).to.not.have.attribute('role');
+    it('should not add target attribute to other elements', () => {
+      const elem = win.document.createElement('span');
+      ampStoryCtaLayer.element.appendChild(elem);
+      ampStoryCtaLayer.buildCallback();
 
-    ampStoryCtaLayer.element.appendChild(ctaLink);
-    ampStoryCtaLayer.buildCallback();
-
-    return ampStoryCtaLayer.layoutCallback().then(() => {
-      expect(ctaLink).to.have.attribute('role');
-      expect(ctaLink.getAttribute('role')).to.equal('link');
+      return ampStoryCtaLayer.layoutCallback().then(() => {
+        expect(elem).to.not.have.attribute('target');
+      });
     });
-  });
 
-  it('should add or overwrite role attribute to buttons', () => {
-    const ctaButton = win.document.createElement('button');
-    expect(ctaButton).to.not.have.attribute('role');
+    it('should not allow a cta layer on the first page', () => {
+      win.document.body.appendChild(
+        win.document.createElement('amp-story-page')
+      );
+      win.document.body.appendChild(
+        win.document.createElement('amp-story-page')
+      );
 
-    ampStoryCtaLayer.element.appendChild(ctaButton);
-    ampStoryCtaLayer.buildCallback();
+      const pageElements = win.document.getElementsByTagName('amp-story-page');
 
-    return ampStoryCtaLayer.layoutCallback().then(() => {
-      expect(ctaButton).to.have.attribute('role');
-      expect(ctaButton.getAttribute('role')).to.equal('button');
+      pageElements[0].appendChild(ampStoryCtaLayer.element);
+
+      ampStoryCtaLayer.layoutCallback().then(layer => {
+        return allowConsoleError(() => {
+          return expect(layer).to.throw();
+        });
+      });
     });
-  });
 
-  it('should not add role attribute to other elements', () => {
-    const elem = win.document.createElement('span');
-    ampStoryCtaLayer.element.appendChild(elem);
-    ampStoryCtaLayer.buildCallback();
+    it('should allow a cta layer on the second or third page', () => {
+      win.document.body.appendChild(
+        win.document.createElement('amp-story-page')
+      );
+      win.document.body.appendChild(
+        win.document.createElement('amp-story-page')
+      );
+      win.document.body.appendChild(
+        win.document.createElement('amp-story-page')
+      );
 
-    return ampStoryCtaLayer.layoutCallback().then(() => {
-      expect(elem).to.not.have.attribute('role');
+      const pageElements = win.document.getElementsByTagName('amp-story-page');
+
+      pageElements[1].appendChild(ampStoryCtaLayer.element);
+      pageElements[2].appendChild(ampStoryCtaLayer.element);
+
+      ampStoryCtaLayer.layoutCallback().then(layer => {
+        return expect(layer).to.not.throw();
+      });
     });
-  });
 
-});
+    it('should add or overwrite role attribute to links', () => {
+      const ctaLink = win.document.createElement('a');
+      expect(ctaLink).to.not.have.attribute('role');
+
+      ampStoryCtaLayer.element.appendChild(ctaLink);
+      ampStoryCtaLayer.buildCallback();
+
+      return ampStoryCtaLayer.layoutCallback().then(() => {
+        expect(ctaLink).to.have.attribute('role');
+        expect(ctaLink.getAttribute('role')).to.equal('link');
+      });
+    });
+
+    it('should add or overwrite role attribute to buttons', () => {
+      const ctaButton = win.document.createElement('button');
+      expect(ctaButton).to.not.have.attribute('role');
+
+      ampStoryCtaLayer.element.appendChild(ctaButton);
+      ampStoryCtaLayer.buildCallback();
+
+      return ampStoryCtaLayer.layoutCallback().then(() => {
+        expect(ctaButton).to.have.attribute('role');
+        expect(ctaButton.getAttribute('role')).to.equal('button');
+      });
+    });
+
+    it('should not add role attribute to other elements', () => {
+      const elem = win.document.createElement('span');
+      ampStoryCtaLayer.element.appendChild(elem);
+      ampStoryCtaLayer.buildCallback();
+
+      return ampStoryCtaLayer.layoutCallback().then(() => {
+        expect(elem).to.not.have.attribute('role');
+      });
+    });
+  }
+);

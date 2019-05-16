@@ -15,7 +15,6 @@
  */
 'use strict';
 
-
 const fs = require('fs');
 const gulp = require('gulp');
 const PluginError = require('plugin-error');
@@ -23,16 +22,12 @@ const postcss = require('postcss');
 const table = require('text-table');
 const through = require('through2');
 
-const tableHeaders = [
-  ['selector', 'z-index', 'file'],
-  ['---', '---', '---'],
-];
+const tableHeaders = [['selector', 'z-index', 'file'], ['---', '---', '---']];
 
 const tableOptions = {
   align: ['l', 'l', 'l'],
   hsep: '   |   ',
 };
-
 
 /**
  * @param {!Object<string, !Array<number>} acc accumulator object for selectors
@@ -74,11 +69,12 @@ function onFileThrough(file, enc, cb) {
   const selectors = Object.create(null);
 
   postcss([zIndexCollector.bind(null, selectors)])
-      .process(file.contents.toString(), {
-        from: file.relative,
-      }).then(() => {
-        cb(null, {name: file.relative, selectors});
-      });
+    .process(file.contents.toString(), {
+      from: file.relative,
+    })
+    .then(() => {
+      cb(null, {name: file.relative, selectors});
+    });
 }
 
 /**
@@ -88,14 +84,18 @@ function onFileThrough(file, enc, cb) {
  */
 function createTable(filesData) {
   const rows = [];
-  Object.keys(filesData).sort().forEach(fileName => {
-    const selectors = filesData[fileName];
-    Object.keys(selectors).sort().forEach(selectorName => {
-      const zIndex = selectors[selectorName];
-      const row = [selectorName, zIndex, fileName];
-      rows.push(row);
+  Object.keys(filesData)
+    .sort()
+    .forEach(fileName => {
+      const selectors = filesData[fileName];
+      Object.keys(selectors)
+        .sort()
+        .forEach(selectorName => {
+          const zIndex = selectors[selectorName];
+          const row = [selectorName, zIndex, fileName];
+          rows.push(row);
+        });
     });
-  });
   rows.sort((a, b) => {
     const aZIndex = parseInt(a[1], 10);
     const bZIndex = parseInt(b[1], 10);
@@ -103,7 +103,6 @@ function createTable(filesData) {
   });
   return rows;
 }
-
 
 /**
  * @param {string} glob
@@ -120,16 +119,16 @@ function getZindex(cb) {
   const filesData = Object.create(null);
   // Don't return the stream here since we do a `writeFileSync`
   getZindexStream('{css,src,extensions}/**/*.css')
-      .on('data', chunk => {
-        filesData[chunk.name] = chunk.selectors;
-      })
-      .on('end', () => {
-        const rows = createTable(filesData);
-        rows.unshift.apply(rows, tableHeaders);
-        const tbl = table(rows, tableOptions);
-        fs.writeFileSync('css/Z_INDEX.md', tbl);
-        cb();
-      });
+    .on('data', chunk => {
+      filesData[chunk.name] = chunk.selectors;
+    })
+    .on('end', () => {
+      const rows = createTable(filesData);
+      rows.unshift.apply(rows, tableHeaders);
+      const tbl = table(rows, tableOptions);
+      fs.writeFileSync('css/Z_INDEX.md', tbl);
+      cb();
+    });
 }
 
 module.exports = {
@@ -139,4 +138,4 @@ module.exports = {
 };
 
 getZindex.description =
-    'Runs through all css files of project to gather z-index values';
+  'Runs through all css files of project to gather z-index values';

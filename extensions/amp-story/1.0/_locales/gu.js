@@ -117,8 +117,9 @@ const strings = {
     string: 'આ અનુભવ જોવા માટે તમારી વિંડોની પહોળાઈ વધારો',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
-    string: 'જો તમારે આ કન્ટેન્ટ જોવું હોય, તો તમારે AMP સ્ટોરીનો અનુભવ ચાલુ ' +
-        'કરવો પડશે.',
+    string:
+      'જો તમારે આ કન્ટેન્ટ જોવું હોય, તો તમારે AMP સ્ટોરીનો અનુભવ ચાલુ ' +
+      'કરવો પડશે.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
     string: 'આ પેજને પોર્ટ્રેટ મોડમાં જોવાથી શ્રેષ્ઠ દેખાય છે',

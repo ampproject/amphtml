@@ -22,8 +22,8 @@ describes.realWin('validation-bubble', {amp: true}, env => {
     const document = ampdoc.getRootNode();
 
     new ValidationBubble(ampdoc);
-    expect(document.querySelector('.i-amphtml-validation-bubble'))
-        .to.not.be.null;
+    expect(document.querySelector('.i-amphtml-validation-bubble')).to.not.be
+      .null;
   });
 
   it('should show and hide bubble', () => {

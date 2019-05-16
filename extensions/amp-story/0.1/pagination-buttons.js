@@ -21,10 +21,8 @@ import {devAssert} from '../../../src/log';
 import {dict} from './../../../src/utils/object';
 import {renderAsElement} from './simple-template';
 
-
 /** @struct @typedef {{className: string, triggers: (string|undefined)}} */
 let ButtonStateDef;
-
 
 /** @const {!Object<string, !ButtonStateDef>} */
 const BackButtonStates = {
@@ -39,7 +37,6 @@ const BackButtonStates = {
     triggers: EventType.PREVIOUS_PAGE,
   },
 };
-
 
 /** @const {!Object<string, !ButtonStateDef>} */
 const ForwardButtonStates = {
@@ -58,7 +55,6 @@ const ForwardButtonStates = {
   },
 };
 
-
 /** @private @const {!./simple-template.ElementDef} */
 const BUTTON = {
   tag: 'div',
@@ -75,7 +71,6 @@ const BUTTON = {
   ],
 };
 
-
 /**
  * @param {!Element} hoverEl
  * @param {!Element} targetEl
@@ -89,7 +84,6 @@ function setClassOnHover(hoverEl, targetEl, className) {
     targetEl.classList.remove(className);
   });
 }
-
 
 /**
  * Desktop navigation buttons.
@@ -132,8 +126,11 @@ class PaginationButton {
   onClick_(e) {
     e.preventDefault();
     if (this.state_.triggers) {
-      dispatch(this.element, devAssert(this.state_.triggers),
-          /* opt_bubbles */ true);
+      dispatch(
+        this.element,
+        devAssert(this.state_.triggers),
+        /* opt_bubbles */ true
+      );
       return;
     }
     if (this.state_.action) {
@@ -143,7 +140,6 @@ class PaginationButton {
   }
 }
 
-
 /** Pagination buttons layer. */
 export class PaginationButtons {
   /** @param {!Window} win */
@@ -152,12 +148,18 @@ export class PaginationButtons {
     const storeService = Services.storyStoreServiceV01(win);
 
     /** @private @const {!PaginationButton} */
-    this.forwardButton_ =
-        new PaginationButton(doc, ForwardButtonStates.NEXT_PAGE, storeService);
+    this.forwardButton_ = new PaginationButton(
+      doc,
+      ForwardButtonStates.NEXT_PAGE,
+      storeService
+    );
 
     /** @private @const {!PaginationButton} */
-    this.backButton_ =
-        new PaginationButton(doc, BackButtonStates.HIDDEN, storeService);
+    this.backButton_ = new PaginationButton(
+      doc,
+      BackButtonStates.HIDDEN,
+      storeService
+    );
 
     this.forwardButton_.element.classList.add('next-container');
     this.backButton_.element.classList.add('prev-container');
@@ -174,10 +176,16 @@ export class PaginationButtons {
   /** @param {!Element} element */
   attach(element) {
     setClassOnHover(
-        this.forwardButton_.element, element, 'i-amphtml-story-next-hover');
+      this.forwardButton_.element,
+      element,
+      'i-amphtml-story-next-hover'
+    );
 
     setClassOnHover(
-        this.backButton_.element, element, 'i-amphtml-story-prev-hover');
+      this.backButton_.element,
+      element,
+      'i-amphtml-story-prev-hover'
+    );
 
     element.appendChild(this.forwardButton_.element);
     element.appendChild(this.backButton_.element);
@@ -190,14 +198,16 @@ export class PaginationButtons {
         const {pageIndex, totalPages} = event.value;
 
         this.backButton_.updateState(
-            pageIndex === 0 ?
-              BackButtonStates.HIDDEN :
-              BackButtonStates.PREVIOUS_PAGE);
+          pageIndex === 0
+            ? BackButtonStates.HIDDEN
+            : BackButtonStates.PREVIOUS_PAGE
+        );
 
         this.forwardButton_.updateState(
-            pageIndex === totalPages - 1 ?
-              ForwardButtonStates.SHOW_BOOKEND :
-              ForwardButtonStates.NEXT_PAGE);
+          pageIndex === totalPages - 1
+            ? ForwardButtonStates.SHOW_BOOKEND
+            : ForwardButtonStates.NEXT_PAGE
+        );
         break;
 
       case StateChangeType.BOOKEND_ENTER:

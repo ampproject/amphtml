@@ -25,8 +25,12 @@ const year = new Date().getFullYear();
 /*eslint "max-len": 0*/
 
 function pascalCase(str) {
-  return str[0].toUpperCase() + str.slice(1).replace(/-([a-z])/g,
-      function(g) { return g[1].toUpperCase(); });
+  return (
+    str[0].toUpperCase() +
+    str.slice(1).replace(/-([a-z])/g, function(g) {
+      return g[1].toUpperCase();
+    })
+  );
 }
 
 function getValidatorFile(name) {
@@ -274,33 +278,45 @@ function getExamplesFile(name) {
 
 async function makeExtension() {
   if (!argv.name) {
-    log(colors.red(
-        'Error! Please pass in the "--name" flag with a value'));
+    log(colors.red('Error! Please pass in the "--name" flag with a value'));
   }
   const {name} = argv;
   const examplesFile = getExamplesFile(name);
 
   fs.mkdirpSync(`extensions/${name}/0.1/test`);
-  fs.writeFileSync(`extensions/${name}/${name}.md`,
-      getMarkdownExtensionFile(name));
-  fs.writeFileSync(`extensions/${name}/validator-${name}.protoascii`,
-      getValidatorFile(name));
-  fs.writeFileSync(`extensions/${name}/0.1/${name}.js`,
-      getJsExtensionFile(name));
-  fs.writeFileSync(`extensions/${name}/0.1/test/test-${name}.js`,
-      getJsTestExtensionFile(name));
-  fs.writeFileSync(`extensions/${name}/0.1/test/validator-${name}.html`,
-      examplesFile);
+  fs.writeFileSync(
+    `extensions/${name}/${name}.md`,
+    getMarkdownExtensionFile(name)
+  );
+  fs.writeFileSync(
+    `extensions/${name}/validator-${name}.protoascii`,
+    getValidatorFile(name)
+  );
+  fs.writeFileSync(
+    `extensions/${name}/0.1/${name}.js`,
+    getJsExtensionFile(name)
+  );
+  fs.writeFileSync(
+    `extensions/${name}/0.1/test/test-${name}.js`,
+    getJsTestExtensionFile(name)
+  );
+  fs.writeFileSync(
+    `extensions/${name}/0.1/test/validator-${name}.html`,
+    examplesFile
+  );
 
-  const examplesFileValidatorOut = examplesFile.trim().split('\n')
-      .map(line => `|  ${line}`)
-      .join('\n');
+  const examplesFileValidatorOut = examplesFile
+    .trim()
+    .split('\n')
+    .map(line => `|  ${line}`)
+    .join('\n');
 
-  fs.writeFileSync(`extensions/${name}/0.1/test/validator-${name}.out`,
-      ['PASS', examplesFileValidatorOut].join('\n'));
+  fs.writeFileSync(
+    `extensions/${name}/0.1/test/validator-${name}.out`,
+    ['PASS', examplesFileValidatorOut].join('\n')
+  );
 
-  fs.writeFileSync(`examples/${name}.amp.html`,
-      examplesFile);
+  fs.writeFileSync(`examples/${name}.amp.html`, examplesFile);
 }
 
 module.exports = {

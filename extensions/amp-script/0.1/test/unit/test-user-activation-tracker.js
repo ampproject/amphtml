@@ -20,7 +20,6 @@ import {
 } from '../../user-activation-tracker';
 import {htmlFor} from '../../../../../src/static-template';
 
-
 describes.realWin('UserActivationTracker', {}, env => {
   let win;
   let root;
@@ -32,7 +31,9 @@ describes.realWin('UserActivationTracker', {}, env => {
     const doc = win.document;
     const html = htmlFor(doc);
 
-    root = html`<root></root>`;
+    root = html`
+      <root></root>
+    `;
     doc.body.appendChild(root);
 
     tracker = new UserActivationTracker(root);
@@ -97,20 +98,22 @@ describes.realWin('UserActivationTracker', {}, env => {
       clock.tick(ACTIVATION_TIMEOUT + 1);
       expect(tracker.isActive()).to.be.true;
 
-      return promise.then(() => {
-        // Skip microtask.
-        return microTask();
-      }).then(() => {
-        // The gesture window is expanded for an extra window.
-        expect(tracker.isActive()).to.be.true;
-        expect(tracker.isInLongTask()).to.be.false;
+      return promise
+        .then(() => {
+          // Skip microtask.
+          return microTask();
+        })
+        .then(() => {
+          // The gesture window is expanded for an extra window.
+          expect(tracker.isActive()).to.be.true;
+          expect(tracker.isInLongTask()).to.be.false;
 
-        clock.tick(ACTIVATION_TIMEOUT - 1);
-        expect(tracker.isActive()).to.be.true;
+          clock.tick(ACTIVATION_TIMEOUT - 1);
+          expect(tracker.isActive()).to.be.true;
 
-        clock.tick(2);
-        expect(tracker.isActive()).to.be.false;
-      });
+          clock.tick(2);
+          expect(tracker.isActive()).to.be.false;
+        });
     });
 
     it('should NOT expand when not active', () => {
@@ -128,19 +131,22 @@ describes.realWin('UserActivationTracker', {}, env => {
       clock.tick(ACTIVATION_TIMEOUT + 1);
       expect(tracker.isActive()).to.be.true;
 
-      return promise.catch(() => {}).then(() => {
-        // Skip microtask.
-        return microTask();
-      }).then(() => {
-        // The gesture window is expanded for an extra window.
-        expect(tracker.isActive()).to.be.true;
+      return promise
+        .catch(() => {})
+        .then(() => {
+          // Skip microtask.
+          return microTask();
+        })
+        .then(() => {
+          // The gesture window is expanded for an extra window.
+          expect(tracker.isActive()).to.be.true;
 
-        clock.tick(ACTIVATION_TIMEOUT - 1);
-        expect(tracker.isActive()).to.be.true;
+          clock.tick(ACTIVATION_TIMEOUT - 1);
+          expect(tracker.isActive()).to.be.true;
 
-        clock.tick(2);
-        expect(tracker.isActive()).to.be.false;
-      });
+          clock.tick(2);
+          expect(tracker.isActive()).to.be.false;
+        });
     });
   });
 });

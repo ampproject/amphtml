@@ -15,10 +15,8 @@
  */
 
 const helpersMaker = () => {
-
   return {
     createLinkRewriterElement(config) {
-
       const element = document.createElement('amp-link-rewriter');
       element.setAttribute('layout', 'nodisplay');
 

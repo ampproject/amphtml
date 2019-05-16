@@ -17,19 +17,20 @@
 export const PISTATS_CONFIG = /** @type {!JsonObject} */ ({
   'requests': {
     'host': 'https://events.pi-stats.com',
-    'basePrefix': '${host}/eventsamp/?' +
-        'e=PageLoad&' +
-        'pid=${property}&' +
-        'url=${ampdocUrl}&' +
-        'cnt=${cntId}&' +
-        'lang=${language}&' +
-        'ref=${documentReferrer}&' +
-        'id=${clientId(piStatsDEVICEID)}&' +
-        'ua=${userAgent}&' +
-        'ctype=web&' +
-        'blang=${browserLanguage}&' +
-        'v=2.0&' +
-        'dist=Javascript',
+    'basePrefix':
+      '${host}/eventsamp/?' +
+      'e=PageLoad&' +
+      'pid=${property}&' +
+      'url=${ampdocUrl}&' +
+      'cnt=${cntId}&' +
+      'lang=${language}&' +
+      'ref=${documentReferrer}&' +
+      'id=${clientId(piStatsDEVICEID)}&' +
+      'ua=${userAgent}&' +
+      'ctype=web&' +
+      'blang=${browserLanguage}&' +
+      'v=2.0&' +
+      'dist=Javascript',
     'pageview': '${basePrefix}&eventtype=pageview',
   },
   'triggers': {

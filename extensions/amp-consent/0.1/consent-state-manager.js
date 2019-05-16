@@ -32,7 +32,6 @@ import {assertHttpsUrl} from '../../../src/url';
 import {dev, devAssert, user} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
 
-
 const TAG = 'CONSENT-STATE-MANAGER';
 const CID_SCOPE = 'AMP-CONSENT';
 
@@ -68,9 +67,13 @@ export class ConsentStateManager {
    */
   registerConsentInstance(instanceId, config) {
     if (this.instance_) {
-      dev().error(TAG, 'Cannot register consent instance %s, ' +
+      dev().error(
+        TAG,
+        'Cannot register consent instance %s, ' +
           'instance %s has already been registered.',
-      instanceId, this.instanceId_);
+        instanceId,
+        this.instanceId_
+      );
       return;
     }
 
@@ -107,8 +110,7 @@ export class ConsentStateManager {
    * @return {Promise<!ConsentInfoDef>}
    */
   getLastConsentInstanceInfo() {
-    devAssert(this.instance_,
-        '%s: cannot find the instance', TAG);
+    devAssert(this.instance_, '%s: cannot find the instance', TAG);
     return this.instance_.get();
   }
 
@@ -117,8 +119,7 @@ export class ConsentStateManager {
    * @return {Promise<!ConsentInfoDef>}
    */
   getConsentInstanceInfo() {
-    devAssert(this.instance_,
-        '%s: cannot find the instance', TAG);
+    devAssert(this.instance_, '%s: cannot find the instance', TAG);
     return this.instance_.get().then(info => {
       if (hasDirtyBit(info)) {
         return constructConsentInfo(CONSENT_ITEM_STATE.UNKNOWN);
@@ -132,11 +133,13 @@ export class ConsentStateManager {
    * @param {function(!ConsentInfoDef)} handler
    */
   onConsentStateChange(handler) {
-    devAssert(this.instance_,
-        '%s: cannot find the instance', TAG);
+    devAssert(this.instance_, '%s: cannot find the instance', TAG);
 
-    devAssert(!this.consentChangeHandler_,
-        '%s: Duplicate consent change handler, will be ignored', TAG);
+    devAssert(
+      !this.consentChangeHandler_,
+      '%s: Duplicate consent change handler, will be ignored',
+      TAG
+    );
 
     this.consentChangeHandler_ = handler;
 
@@ -146,7 +149,6 @@ export class ConsentStateManager {
     });
   }
 
-
   /**
    * Sets a promise which resolves to a shareData object that is to be returned
    * from the remote endpoint.
@@ -154,8 +156,7 @@ export class ConsentStateManager {
    * @param {Promise<?Object>} sharedDataPromise
    */
   setConsentInstanceSharedData(sharedDataPromise) {
-    devAssert(this.instance_,
-        '%s: cannot find the instance', TAG);
+    devAssert(this.instance_, '%s: cannot find the instance', TAG);
     this.instance_.sharedDataPromise = sharedDataPromise;
   }
 
@@ -174,8 +175,7 @@ export class ConsentStateManager {
    * @return {?Promise<?Object>}
    */
   getConsentInstanceSharedData() {
-    devAssert(this.instance_,
-        '%s: cannot find the instance', TAG);
+    devAssert(this.instance_, '%s: cannot find the instance', TAG);
     return this.instance_.sharedDataPromise;
   }
 
@@ -210,8 +210,10 @@ export class ConsentInstance {
     this.ampdoc_ = ampdoc;
 
     /** @private {boolean} */
-    this.isAmpConsentV2ExperimentOn_ =
-        isExperimentOn(ampdoc.win, 'amp-consent-v2');
+    this.isAmpConsentV2ExperimentOn_ = isExperimentOn(
+      ampdoc.win,
+      'amp-consent-v2'
+    );
 
     /** @private {string} */
     this.id_ = id;
@@ -267,16 +269,17 @@ export class ConsentInstance {
    */
   update(state, consentString, opt_systemUpdate) {
     const localState =
-        this.localConsentInfo_ && this.localConsentInfo_['consentState'];
+      this.localConsentInfo_ && this.localConsentInfo_['consentState'];
     const localConsentStr =
-        this.localConsentInfo_ && this.localConsentInfo_['consentString'];
-    const calculatedState =
-        recalculateConsentStateValue(state, localState);
+      this.localConsentInfo_ && this.localConsentInfo_['consentString'];
+    const calculatedState = recalculateConsentStateValue(state, localState);
 
     if (state === CONSENT_ITEM_STATE.DISMISSED) {
       // If state is dismissed, use the old consent string.
-      this.localConsentInfo_ =
-          constructConsentInfo(calculatedState, localConsentStr);
+      this.localConsentInfo_ = constructConsentInfo(
+        calculatedState,
+        localConsentStr
+      );
       return;
     }
 
@@ -285,16 +288,24 @@ export class ConsentInstance {
     const oldValue = this.localConsentInfo_;
     if (opt_systemUpdate && hasDirtyBit(oldValue)) {
       this.localConsentInfo_ = constructConsentInfo(
-          calculatedState, consentString, true);
+        calculatedState,
+        consentString,
+        true
+      );
     } else {
       // Any user update makes the current state valid, thus remove dirtyBit
       // from localConsentInfo_
       this.localConsentInfo_ = constructConsentInfo(
-          calculatedState, consentString);
+        calculatedState,
+        consentString
+      );
     }
 
     const newConsentInfo = constructConsentInfo(
-        calculatedState, consentString, this.hasDirtyBitNext_);
+      calculatedState,
+      consentString,
+      this.hasDirtyBitNext_
+    );
 
     if (isConsentInfoStoredValueSame(newConsentInfo, this.savedConsentInfo_)) {
       // Only update/save to localstorage if it's not dismiss
@@ -312,8 +323,13 @@ export class ConsentInstance {
    */
   updateStoredValue_(consentInfo) {
     this.storagePromise_.then(storage => {
-      if (!isConsentInfoStoredValueSame(
-          consentInfo, this.localConsentInfo_, this.hasDirtyBitNext_)) {
+      if (
+        !isConsentInfoStoredValueSame(
+          consentInfo,
+          this.localConsentInfo_,
+          this.hasDirtyBitNext_
+        )
+      ) {
         // If state has changed. do not store outdated value.
         return;
       }
@@ -323,9 +339,11 @@ export class ConsentInstance {
         // Verify the length of consentString.
         // 150 * 2 (utf8Encode) * 4/3 (base64) = 400 bytes.
         // TODO: Need utf8Encode if necessary.
-        user().error(TAG,
-            'Cannot store consentString which length exceeds 150 ' +
-            'Previous stored consentInfo will be cleared');
+        user().error(
+          TAG,
+          'Cannot store consentString which length exceeds 150 ' +
+            'Previous stored consentInfo will be cleared'
+        );
         // If new consentInfo value cannot be stored, need to remove previous
         // value
         storage.remove(this.storageKey_);
@@ -334,7 +352,9 @@ export class ConsentInstance {
       }
 
       const value = composeStoreValue(
-          consentInfo, this.isAmpConsentV2ExperimentOn_);
+        consentInfo,
+        this.isAmpConsentV2ExperimentOn_
+      );
       if (value == null) {
         // Value can be false, do not use !value check
         // Nothing to store to localStorage
@@ -357,34 +377,38 @@ export class ConsentInstance {
     }
 
     let storage;
-    return this.storagePromise_.then(s => {
-      storage = s;
-      return storage.get(this.storageKey_);
-    }).then(storedValue => {
-      if (this.localConsentInfo_) {
-        // If local value has been updated, return most updated value;
+    return this.storagePromise_
+      .then(s => {
+        storage = s;
+        return storage.get(this.storageKey_);
+      })
+      .then(storedValue => {
+        if (this.localConsentInfo_) {
+          // If local value has been updated, return most updated value;
+          return this.localConsentInfo_;
+        }
+
+        const consentInfo = getStoredConsentInfo(storedValue);
+        this.savedConsentInfo_ = consentInfo;
+
+        if (hasDirtyBit(consentInfo)) {
+          // clear stored value.
+          this.sendUpdateHrefRequest_(
+            constructConsentInfo(CONSENT_ITEM_STATE.UNKNOWN)
+          );
+          storage.remove(this.storageKey_);
+          this.savedConsentInfo_ = null;
+        }
+        // Note: this.localConsentInfo dirtyBit can only be set to false
+        // if the stored value has dirtyBit.
+        // Any local update reset the value to true.
+        this.localConsentInfo_ = consentInfo;
         return this.localConsentInfo_;
-      }
-
-      const consentInfo = getStoredConsentInfo(storedValue);
-      this.savedConsentInfo_ = consentInfo;
-
-      if (hasDirtyBit(consentInfo)) {
-        // clear stored value.
-        this.sendUpdateHrefRequest_(
-            constructConsentInfo(CONSENT_ITEM_STATE.UNKNOWN));
-        storage.remove(this.storageKey_);
-        this.savedConsentInfo_ = null;
-      }
-      // Note: this.localConsentInfo dirtyBit can only be set to false
-      // if the stored value has dirtyBit.
-      // Any local update reset the value to true.
-      this.localConsentInfo_ = consentInfo;
-      return this.localConsentInfo_;
-    }).catch(e => {
-      dev().error(TAG, 'Failed to read storage', e);
-      return constructConsentInfo(CONSENT_ITEM_STATE.UNKNOWN);
-    });
+      })
+      .catch(e => {
+        dev().error(TAG, 'Failed to read storage', e);
+        return constructConsentInfo(CONSENT_ITEM_STATE.UNKNOWN);
+      });
   }
 
   /**
@@ -400,11 +424,14 @@ export class ConsentInstance {
       // No need to send update request if the stored consent info is dirty
       return;
     }
-    const legacyConsentState =
-        calculateLegacyStateValue(consentInfo['consentState']);
+    const legacyConsentState = calculateLegacyStateValue(
+      consentInfo['consentState']
+    );
     const cidPromise = Services.cidForDoc(this.ampdoc_).then(cid => {
-      return cid.get({scope: CID_SCOPE, createCookieIfNotPresent: true},
-          Promise.resolve());
+      return cid.get(
+        {scope: CID_SCOPE, createCookieIfNotPresent: true},
+        Promise.resolve()
+      );
     });
     cidPromise.then(userId => {
       const request = /** @type {!JsonObject} */ ({
@@ -415,8 +442,9 @@ export class ConsentInstance {
       if (legacyConsentState != null) {
         request['consentState'] = legacyConsentState;
       }
-      request['consentStateValue'] =
-          getConsentStateValue(consentInfo['consentState']);
+      request['consentStateValue'] = getConsentStateValue(
+        consentInfo['consentState']
+      );
       if (consentInfo['consentString']) {
         request['consentString'] = consentInfo['consentString'];
       }
@@ -426,10 +454,14 @@ export class ConsentInstance {
         body: request,
         ampCors: false,
       };
-      Services.viewerForDoc(this.ampdoc_).whenFirstVisible().then(() => {
-        Services.xhrFor(this.ampdoc_.win).fetchJson(
-            /** @type {string} */ (this.onUpdateHref_), init);
-      });
+      Services.viewerForDoc(this.ampdoc_)
+        .whenFirstVisible()
+        .then(() => {
+          Services.xhrFor(this.ampdoc_.win).fetchJson(
+            /** @type {string} */ (this.onUpdateHref_),
+            init
+          );
+        });
     });
   }
 }

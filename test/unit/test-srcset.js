@@ -21,10 +21,8 @@ import {
   srcsetFromSrc,
 } from '../../src/srcset';
 
-
 describe('Srcset', () => {
   describe('parseSrcset', () => {
-
     function test(s, expected) {
       const res = parseSrcset(s);
       expect(res.sources_.length).to.equal(expected.length);
@@ -38,18 +36,12 @@ describe('Srcset', () => {
     }
 
     it('should accept single source, default to 1px', () => {
-      test(' \n image \n ', [
-        {url: 'image', dpr: 1},
-      ]);
+      test(' \n image \n ', [{url: 'image', dpr: 1}]);
     });
 
     it('should ignore empty source', () => {
-      test(' \n image \n, ', [
-        {url: 'image', dpr: 1},
-      ]);
-      test(' , \n image \n, ', [
-        {url: 'image', dpr: 1},
-      ]);
+      test(' \n image \n, ', [{url: 'image', dpr: 1}]);
+      test(' , \n image \n, ', [{url: 'image', dpr: 1}]);
     });
 
     it('should accept multiple sources, default to 1x', () => {
@@ -124,12 +116,8 @@ describe('Srcset', () => {
         {url: 'image,1x', dpr: 1},
         {url: 'image,2x', dpr: 2},
       ]);
-      test(' \n image,1 \n ', [
-        {url: 'image,1', dpr: 1},
-      ]);
-      test(' \n image,1x \n ', [
-        {url: 'image,1x', dpr: 1},
-      ]);
+      test(' \n image,1 \n ', [{url: 'image,1', dpr: 1}]);
+      test(' \n image,1x \n ', [{url: 'image,1x', dpr: 1}]);
     });
 
     it('should accept no-whitestpace', () => {
@@ -145,12 +133,8 @@ describe('Srcset', () => {
         {url: 'image,2', dpr: 1},
         {url: 'image,1', dpr: 2},
       ]);
-      test('image,2 2x', [
-        {url: 'image,2', dpr: 2},
-      ]);
-      test('image,1', [
-        {url: 'image,1', dpr: 1},
-      ]);
+      test('image,2 2x', [{url: 'image,2', dpr: 2}]);
+      test('image,1', [{url: 'image,1', dpr: 1}]);
     });
 
     it('should accept other special chars in URLs', () => {
@@ -169,34 +153,31 @@ describe('Srcset', () => {
         {url: 'image,2x', dpr: 1},
         {url: 'image,1x', dpr: 2},
       ]);
-      test(' \n image,1x \n ', [
-        {url: 'image,1x', dpr: 1},
-      ]);
-      test(' \n image,1w \n ', [
-        {url: 'image,1w', dpr: 1},
-      ]);
+      test(' \n image,1x \n ', [{url: 'image,1x', dpr: 1}]);
+      test(' \n image,1w \n ', [{url: 'image,1w', dpr: 1}]);
     });
 
     it('should not accept mixed sources', () => {
-      allowConsoleError(() => { expect(() => {
-        parseSrcset(' \n image1 100w\n , \n image2 1.5x\n , image3 ');
-      }).to.throw(/Srcset must have width or dpr sources, but not both/); });
+      allowConsoleError(() => {
+        expect(() => {
+          parseSrcset(' \n image1 100w\n , \n image2 1.5x\n , image3 ');
+        }).to.throw(/Srcset must have width or dpr sources, but not both/);
+      });
     });
 
     it('should parse misc examples', () => {
-      test('image-1x.png 1x, image-2x.png 2x, image-3x.png 3x, image-4x.png 4x',
-          [
-            {url: 'image-1x.png', dpr: 1},
-            {url: 'image-2x.png', dpr: 2},
-            {url: 'image-3x.png', dpr: 3},
-            {url: 'image-4x.png', dpr: 4},
-          ]);
-      test('image,one.png', [
-        {url: 'image,one.png', dpr: 1},
-      ]);
+      test(
+        'image-1x.png 1x, image-2x.png 2x, image-3x.png 3x, image-4x.png 4x',
+        [
+          {url: 'image-1x.png', dpr: 1},
+          {url: 'image-2x.png', dpr: 2},
+          {url: 'image-3x.png', dpr: 3},
+          {url: 'image-4x.png', dpr: 4},
+        ]
+      );
+      test('image,one.png', [{url: 'image,one.png', dpr: 1}]);
     });
   });
-
 
   describe('srcsetFromElement', () => {
     function test(srcset, src, expected) {
@@ -233,15 +214,11 @@ describe('Srcset', () => {
     });
 
     it('should select src when only src available', () => {
-      test(undefined, 'image-0.png', [
-        {url: 'image-0.png', dpr: 1},
-      ]);
+      test(undefined, 'image-0.png', [{url: 'image-0.png', dpr: 1}]);
     });
 
     it('should select src when only srcset is empty', () => {
-      test('', 'image-0.png', [
-        {url: 'image-0.png', dpr: 1},
-      ]);
+      test('', 'image-0.png', [{url: 'image-0.png', dpr: 1}]);
     });
 
     it('should prefer srcset to src', () => {
@@ -252,20 +229,19 @@ describe('Srcset', () => {
     });
 
     it('should allow non-compliant src with space', () => {
-      test(undefined, 'image 0.png', [
-        {url: 'image 0.png', dpr: 1},
-      ]);
+      test(undefined, 'image 0.png', [{url: 'image 0.png', dpr: 1}]);
     });
 
     it('should require srcset or src to be available', () => {
-      allowConsoleError(() => { expect(() => {
-        srcsetFromElement(document.createElement('div'));
-      }).to.throw(
-          /Either non-empty "srcset" or "src" attribute must be specified/);
+      allowConsoleError(() => {
+        expect(() => {
+          srcsetFromElement(document.createElement('div'));
+        }).to.throw(
+          /Either non-empty "srcset" or "src" attribute must be specified/
+        );
       });
     });
   });
-
 
   describe('srcsetFromSrc', () => {
     it('should construct with undefined width and 1 dpr', () => {
@@ -279,49 +255,61 @@ describe('Srcset', () => {
     });
   });
 
-
   describe('construct', () => {
     it('should enforce only one type of descriptor per source', () => {
-      allowConsoleError(() => { expect(() => {
-        new Srcset([{url: 'image-1000', width: 100, dpr: 2}]);
-      }).to.throw(/Srcset must have width or dpr sources, but not both/); });
+      allowConsoleError(() => {
+        expect(() => {
+          new Srcset([{url: 'image-1000', width: 100, dpr: 2}]);
+        }).to.throw(/Srcset must have width or dpr sources, but not both/);
+      });
     });
 
     it('should not allow 0-width descriptor', () => {
-      allowConsoleError(() => { expect(() => {
-        new Srcset([{url: 'image-1000', width: 0}]);
-      }).to.throw(/Srcset must have width or dpr sources, but not both/); });
+      allowConsoleError(() => {
+        expect(() => {
+          new Srcset([{url: 'image-1000', width: 0}]);
+        }).to.throw(/Srcset must have width or dpr sources, but not both/);
+      });
     });
 
     it('should not allow 0-dpr descriptor', () => {
-      allowConsoleError(() => { expect(() => {
-        new Srcset([{url: 'image-1000', dpr: 0}]);
-      }).to.throw(/Srcset must have width or dpr sources, but not both/); });
+      allowConsoleError(() => {
+        expect(() => {
+          new Srcset([{url: 'image-1000', dpr: 0}]);
+        }).to.throw(/Srcset must have width or dpr sources, but not both/);
+      });
     });
 
     it('should enforce only one type of descriptor total', () => {
-      allowConsoleError(() => { expect(() => {
-        new Srcset([{url: 'image-1000', width: 100},
-          {url: 'image-2x', dpr: 2}]);
-      }).to.throw(/Srcset must have width or dpr sources, but not both/); });
+      allowConsoleError(() => {
+        expect(() => {
+          new Srcset([
+            {url: 'image-1000', width: 100},
+            {url: 'image-2x', dpr: 2},
+          ]);
+        }).to.throw(/Srcset must have width or dpr sources, but not both/);
+      });
     });
 
     it('should not allow duplicate sources', () => {
-      allowConsoleError(() => { expect(() => {
-        new Srcset([{url: 'image', width: 100},
-          {url: 'image', width: 100}]);
-      }).to.throw(/Duplicate width/); });
-      allowConsoleError(() => { expect(() => {
-        new Srcset([{url: 'image', dpr: 2}, {url: 'image', dpr: 2}]);
-      }).to.throw(/Duplicate dpr/); });
+      allowConsoleError(() => {
+        expect(() => {
+          new Srcset([{url: 'image', width: 100}, {url: 'image', width: 100}]);
+        }).to.throw(/Duplicate width/);
+      });
+      allowConsoleError(() => {
+        expect(() => {
+          new Srcset([{url: 'image', dpr: 2}, {url: 'image', dpr: 2}]);
+        }).to.throw(/Duplicate dpr/);
+      });
     });
   });
-
 
   describe('select', () => {
     it('select by width', () => {
       const srcset = parseSrcset(
-          'image-1000 1000w, image-500 500w, image-250 250w, image 50w');
+        'image-1000 1000w, image-500 500w, image-250 250w, image 50w'
+      );
 
       // DPR = 1
       expect(srcset.select(2000, 1)).to.equal('image-1000');
@@ -359,7 +347,8 @@ describe('Srcset', () => {
 
     it('select by width with preference toward higher width', () => {
       const srcset = parseSrcset(
-          'image-1000 1000w, image-500 500w, image-250 250w, image 50w');
+        'image-1000 1000w, image-500 500w, image-250 250w, image 50w'
+      );
 
       // For DPR=1 and 2.
       // Bull's eye.

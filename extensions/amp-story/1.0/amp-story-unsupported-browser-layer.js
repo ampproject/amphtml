@@ -44,7 +44,7 @@ const UNSUPPORTED_BROWSER_LAYER_TEMPLATE = {
           tag: 'div',
           attrs: dict({'class': 'i-amphtml-story-overlay-text'}),
           localizedStringId:
-              LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT,
+            LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT,
         },
         // The continue button functionality will only be present in the default
         // layer. Publisher provided fallbacks will not provide users with the
@@ -53,13 +53,12 @@ const UNSUPPORTED_BROWSER_LAYER_TEMPLATE = {
           tag: 'button',
           attrs: dict({'class': 'i-amphtml-continue-button'}),
           localizedStringId:
-              LocalizedStringId.AMP_STORY_CONTINUE_ANYWAY_BUTTON_LABEL,
+            LocalizedStringId.AMP_STORY_CONTINUE_ANYWAY_BUTTON_LABEL,
         },
       ],
     },
   ],
 };
-
 
 /**
  * Unsupported browser layer UI.
@@ -93,11 +92,14 @@ export class UnsupportedBrowserLayer {
       return this.root_;
     }
     this.root_ = this.win_.document.createElement('div');
-    this.element_ =
-        renderAsElement(this.win_.document, UNSUPPORTED_BROWSER_LAYER_TEMPLATE);
+    this.element_ = renderAsElement(
+      this.win_.document,
+      UNSUPPORTED_BROWSER_LAYER_TEMPLATE
+    );
     createShadowRootWithStyle(this.root_, this.element_, CSS);
-    this.continueButton_ =
-      this.element_./*OK*/querySelector(`.${CONTINUE_ANYWAY_BUTTON_CLASS}`);
+    this.continueButton_ = this.element_./*OK*/ querySelector(
+      `.${CONTINUE_ANYWAY_BUTTON_CLASS}`
+    );
     this.continueButton_.addEventListener('click', () => {
       this.storeService_.dispatch(Action.TOGGLE_SUPPORTED_BROWSER, true);
     });

@@ -117,15 +117,17 @@ const strings = {
     string: 'Gør vinduet bredere for at se denne oplevelse',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
-    string: 'Du skal aktivere AMP-historieeksperimentet for at se dette ' +
-        'indhold.',
+    string:
+      'Du skal aktivere AMP-historieeksperimentet for at se dette ' +
+      'indhold.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
     string: 'Denne side fungerer bedst i stående format',
   },
   [LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT]: {
-    string: 'Det ser desværre ud til, at din browser ikke understøtter denne ' +
-        'oplevelse',
+    string:
+      'Det ser desværre ud til, at din browser ikke understøtter denne ' +
+      'oplevelse',
   },
 };
 

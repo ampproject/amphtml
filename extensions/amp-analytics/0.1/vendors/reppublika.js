@@ -18,7 +18,8 @@ export const REPPUBLIKA_CONFIG = /** @type {!JsonObject} */ ({
   'requests': {
     'host': 'https://t5.mindtake.com',
     'basePrefix': '/tag/cid/',
-    'baseSuffix': 'Service=${service}&Category=${category}&' +
+    'baseSuffix':
+      'Service=${service}&Category=${category}&' +
       'Url=${sourceUrl}&Device=${device}&uid=${random}',
     'pageview': '${host}${basePrefix}${code}/track.gif?${baseSuffix}',
   },

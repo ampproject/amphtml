@@ -21,7 +21,6 @@ import {removeElement} from '../../../src/dom';
 import {setStyles} from '../../../src/style';
 
 export class AmpMathml extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -54,7 +53,6 @@ export class AmpMathml extends AMP.BaseElement {
         height: '1rem',
       });
     });
-
   }
 
   /**
@@ -66,14 +64,20 @@ export class AmpMathml extends AMP.BaseElement {
     const iframe = getIframe(this.win, this.element, 'mathml');
     this.applyFillContent(iframe);
     // Triggered by context.updateDimensions() inside the iframe.
-    listenFor(iframe, 'embed-size', data => {
-      if (!this.element.hasAttribute('inline')) {
-        // Don't change the width if not inlined.
-        data['width'] = undefined;
-      }
-      this.element.getResources()./*OK*/changeSize(
-          this.element, data['height'], data['width']);
-    }, /* opt_is3P */true);
+    listenFor(
+      iframe,
+      'embed-size',
+      data => {
+        if (!this.element.hasAttribute('inline')) {
+          // Don't change the width if not inlined.
+          data['width'] = undefined;
+        }
+        this.element
+          .getResources()
+          ./*OK*/ changeSize(this.element, data['height'], data['width']);
+      },
+      /* opt_is3P */ true
+    );
     this.element.appendChild(iframe);
     this.iframe_ = iframe;
     return this.loadPromise(iframe);

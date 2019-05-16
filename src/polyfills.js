@@ -19,20 +19,15 @@
 import {getMode} from './mode';
 import {install as installArrayIncludes} from './polyfills/array-includes';
 import {install as installCustomElements} from './polyfills/custom-elements';
-import {
-  install as installDOMTokenListToggle,
-} from './polyfills/domtokenlist-toggle';
+import {install as installDOMTokenListToggle} from './polyfills/domtokenlist-toggle';
 import {install as installDocContains} from './polyfills/document-contains';
 import {install as installFetch} from './polyfills/fetch';
-import {
-  install as installGetBoundingClientRect,
-} from './get-bounding-client-rect';
+import {install as installGetBoundingClientRect} from './get-bounding-client-rect';
 import {install as installMathSign} from './polyfills/math-sign';
 import {install as installObjectAssign} from './polyfills/object-assign';
 import {install as installObjectValues} from './polyfills/object-values';
 import {install as installPromise} from './polyfills/promise';
-import {installCustomElements as installRegisterElement} from
-  'document-register-element/build/document-register-element.patched';
+import {installCustomElements as installRegisterElement} from 'document-register-element/build/document-register-element.patched';
 import {isExperimentOn} from './experiments';
 
 installFetch(self);
@@ -53,8 +48,10 @@ if (self.document) {
   // is DCE'd from production builds. Note: When the hack is removed, remove the
   // @suppress {suspiciousCode} annotation at the top of this file.
   // TODO(jridgewell, estherkim): Find out why CE isn't being polyfilled for IE.
-  if ((false && isExperimentOn(self, 'custom-elements-v1')) ||
-      (getMode().test && !getMode().testIe)) {
+  if (
+    (false && isExperimentOn(self, 'custom-elements-v1')) ||
+    (getMode().test && !getMode().testIe)
+  ) {
     installCustomElements(self);
   } else {
     installRegisterElement(self, 'auto');

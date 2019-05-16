@@ -16,7 +16,6 @@
 
 import {devAssert, userAssert} from './log';
 
-
 /**
  * A single source within a srcset. Only one: width or DPR can be specified at
  * a time.
@@ -34,8 +33,7 @@ let SrcsetSourceDef;
  * Example 2: "image1.png 2x, image2.png"
  * Example 3: "image1,100w.png 100w, image2.png 50w"
  */
-const srcsetRegex =
-    /(\S+)(?:\s+(?:(-?\d+(?:\.\d+)?)([a-zA-Z]*)))?\s*(?:,|$)/g;
+const srcsetRegex = /(\S+)(?:\s+(?:(-?\d+(?:\.\d+)?)([a-zA-Z]*)))?\s*(?:,|$)/g;
 
 /**
  * Extracts `srcset` and fallbacks to `src` if not available.
@@ -50,9 +48,11 @@ export function srcsetFromElement(element) {
   // We can't push `src` via `parseSrcset` because URLs in `src` are not always
   // RFC compliant and can't be easily parsed as an `srcset`. For instance,
   // they sometimes contain space characters.
-  const srcAttr = userAssert(element.getAttribute('src'),
-      'Either non-empty "srcset" or "src" attribute must be specified: %s',
-      element);
+  const srcAttr = userAssert(
+    element.getAttribute('src'),
+    'Either non-empty "srcset" or "src" attribute must be specified: %s',
+    element
+  );
   return srcsetFromSrc(srcAttr);
 }
 
@@ -96,7 +96,6 @@ export function parseSrcset(s) {
   return new Srcset(sources);
 }
 
-
 /**
  * A srcset object contains one or more sources.
  *
@@ -109,7 +108,6 @@ export function parseSrcset(s) {
  * See https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img#Attributes
  */
 export class Srcset {
-
   /**
    * @param {!Array<!SrcsetSourceDef>} sources
    */
@@ -126,8 +124,10 @@ export class Srcset {
       hasWidth = hasWidth || !!source.width;
       hasDpr = hasDpr || !!source.dpr;
     }
-    userAssert(!!(hasWidth ^ hasDpr),
-        'Srcset must have width or dpr sources, but not both');
+    userAssert(
+      !!(hasWidth ^ hasDpr),
+      'Srcset must have width or dpr sources, but not both'
+    );
 
     // Source and assert duplicates.
     sources.sort(hasWidth ? sortByWidth : sortByDpr);

@@ -25,21 +25,17 @@
  */
 let FontConfigDef;
 
-
 const DEFAULT_FONTS_ = ['sans-serif', 'serif'];
 
 const TEST_STRING_ = 'MAxmTYklsjo190QW';
 
 const TOLERANCE_ = 2;
 
-
 import {Services} from '../../../src/services';
 import {removeElement} from '../../../src/dom';
 import {setStyles} from '../../../src/style';
 
-
 export class FontLoader {
-
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
@@ -63,7 +59,6 @@ export class FontLoader {
     this.fontLoadRejected_ = false;
   }
 
-
   /**
    * Triggers the font load. Returns promise that will complete when loading
    * is considered to be complete.
@@ -76,17 +71,19 @@ export class FontLoader {
   load(fontConfig, timeout) {
     this.fontConfig_ = fontConfig;
     return Services.timerFor(this.ampdoc_.win)
-        .timeoutPromise(timeout, this.load_())
-        .then(() => {
+      .timeoutPromise(timeout, this.load_())
+      .then(
+        () => {
           this.fontLoadResolved_ = true;
           this.dispose_();
-        }, reason => {
+        },
+        reason => {
           this.fontLoadRejected_ = true;
           this.dispose_();
           throw reason;
-        });
+        }
+      );
   }
-
 
   /**
    * Triggers the font load. Returns promise that will complete when loading
@@ -98,12 +95,17 @@ export class FontLoader {
     return new Promise((resolve, reject) => {
       /* style | variant | weight | size/line-height | family */
       /* font: italic small-caps bolder 16px/3 cursive; */
-      const fontString = (
-        this.fontConfig_.fontStyle + ' ' +
-        this.fontConfig_.variant + ' ' +
-        this.fontConfig_.weight + ' ' +
-        this.fontConfig_.size + ' \'' +
-        this.fontConfig_.family + '\'');
+      const fontString =
+        this.fontConfig_.fontStyle +
+        ' ' +
+        this.fontConfig_.variant +
+        ' ' +
+        this.fontConfig_.weight +
+        ' ' +
+        this.fontConfig_.size +
+        " '" +
+        this.fontConfig_.family +
+        "'";
 
       if (this.canUseNativeApis_()) {
         // Check if font already exists.
@@ -111,18 +113,26 @@ export class FontLoader {
           resolve();
         } else {
           // Load font with native api if supported.
-          this.document_.fonts.load(fontString).then(() => {
-            // Workaround for chrome bug
-            // https://bugs.chromium.org/p/chromium/issues/detail?id=347460
-            return this.document_.fonts.load(fontString);
-          }).then(() => {
-            if (this.document_.fonts.check(fontString)) {
-              resolve();
-            } else {
-              reject(new Error('Font could not be loaded,'
-                  + ' probably due to incorrect @font-face.'));
-            }
-          }).catch(reject);
+          this.document_.fonts
+            .load(fontString)
+            .then(() => {
+              // Workaround for chrome bug
+              // https://bugs.chromium.org/p/chromium/issues/detail?id=347460
+              return this.document_.fonts.load(fontString);
+            })
+            .then(() => {
+              if (this.document_.fonts.check(fontString)) {
+                resolve();
+              } else {
+                reject(
+                  new Error(
+                    'Font could not be loaded,' +
+                      ' probably due to incorrect @font-face.'
+                  )
+                );
+              }
+            })
+            .catch(reject);
         }
       } else {
         // Load font with polyfill if native api is not supported.
@@ -131,7 +141,6 @@ export class FontLoader {
     });
   }
 
-
   /**
    * @return {boolean} True when native font api is supported by the browser.
    * @private
@@ -139,7 +148,6 @@ export class FontLoader {
   canUseNativeApis_() {
     return 'fonts' in this.document_;
   }
-
 
   /**
    * Make the browsers that don't support font loading events to download the
@@ -171,7 +179,6 @@ export class FontLoader {
     });
   }
 
-
   /**
    * Create hidden divs and measure dimensions for fonts.
    * @return {!Array<!FontComparator>} An array of comparators, one for each
@@ -179,8 +186,9 @@ export class FontLoader {
    * @private
    */
   createFontComparators_() {
-    const containerElement = this.container_ =
-        this.document_.createElement('div');
+    const containerElement = (this.container_ = this.document_.createElement(
+      'div'
+    ));
     setStyles(containerElement, {
       // Use larger font-size to better detect font load.
       fontSize: '40px',
@@ -196,12 +204,17 @@ export class FontLoader {
       visibility: 'hidden',
     });
 
-    const comparators = DEFAULT_FONTS_.map(defaultFont => new FontComparator(
-        containerElement, this.fontConfig_.family, defaultFont));
+    const comparators = DEFAULT_FONTS_.map(
+      defaultFont =>
+        new FontComparator(
+          containerElement,
+          this.fontConfig_.family,
+          defaultFont
+        )
+    );
     this.ampdoc_.getBody().appendChild(containerElement);
     return comparators;
   }
-
 
   /**
    * @private
@@ -215,7 +228,6 @@ export class FontLoader {
 }
 
 class FontComparator {
-
   /**
    * Create two elements to compare fonts and insert them into a container.
    * @param {!Element} container Contains the backing font comparison elements
@@ -235,7 +247,6 @@ class FontComparator {
     container.appendChild(this.defaultFontElement_);
     container.appendChild(this.testFontElement_);
   }
-
 
   /**
    * Create and style a DOM element to use to compare two fonts.
@@ -257,23 +268,22 @@ class FontComparator {
     return element;
   }
 
-
   /**
    * Compare dimensions between elements styled with default and custom fonts.
    * If the divs are identical, the custom font has not loaded.
    * @return {boolean} Returns true if the dimensions are noticeably different.
    */
   compare() {
-    const hasWidthChanged = (
+    const hasWidthChanged =
       Math.abs(
-          this.defaultFontElement_./*OK*/offsetWidth -
-            this.testFontElement_./*OK*/offsetWidth) >
-            TOLERANCE_);
-    const hasHeightChanged = (
+        this.defaultFontElement_./*OK*/ offsetWidth -
+          this.testFontElement_./*OK*/ offsetWidth
+      ) > TOLERANCE_;
+    const hasHeightChanged =
       Math.abs(
-          this.defaultFontElement_./*OK*/offsetHeight -
-            this.testFontElement_./*OK*/offsetHeight) >
-            TOLERANCE_);
-    return (hasWidthChanged || hasHeightChanged);
+        this.defaultFontElement_./*OK*/ offsetHeight -
+          this.testFontElement_./*OK*/ offsetHeight
+      ) > TOLERANCE_;
+    return hasWidthChanged || hasHeightChanged;
   }
 }

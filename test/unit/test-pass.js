@@ -18,7 +18,6 @@ import {Pass} from '../../src/pass';
 import {Services} from '../../src/services';
 
 describe('Pass', () => {
-
   let sandbox;
   let pass;
   let timerMock;
@@ -41,10 +40,17 @@ describe('Pass', () => {
 
   it('handler called', () => {
     let delayedFunc = null;
-    timerMock.expects('delay').withExactArgs(sinon.match(value => {
-      delayedFunc = value;
-      return true;
-    }), 0).returns(1).once();
+    timerMock
+      .expects('delay')
+      .withExactArgs(
+        sinon.match(value => {
+          delayedFunc = value;
+          return true;
+        }),
+        0
+      )
+      .returns(1)
+      .once();
     pass.schedule();
     expect(pass.isPending()).to.equal(true);
 
@@ -57,22 +63,31 @@ describe('Pass', () => {
   });
 
   it('schedule no delay', () => {
-    timerMock.expects('delay').withExactArgs(sinon.match.func, 0)
-        .returns(1).once();
+    timerMock
+      .expects('delay')
+      .withExactArgs(sinon.match.func, 0)
+      .returns(1)
+      .once();
     timerMock.expects('cancel').never();
     pass.schedule();
   });
 
   it('schedule with delay', () => {
-    timerMock.expects('delay').withExactArgs(sinon.match.func, 111)
-        .returns(1).once();
+    timerMock
+      .expects('delay')
+      .withExactArgs(sinon.match.func, 111)
+      .returns(1)
+      .once();
     timerMock.expects('cancel').never();
     pass.schedule(111);
   });
 
   it('schedule later', () => {
-    timerMock.expects('delay').withExactArgs(sinon.match.func, 111)
-        .returns(1).once();
+    timerMock
+      .expects('delay')
+      .withExactArgs(sinon.match.func, 111)
+      .returns(1)
+      .once();
     timerMock.expects('cancel').never();
     pass.schedule(111);
     // Will never schedule b/c there's an earlier pass still pending.
@@ -81,11 +96,20 @@ describe('Pass', () => {
   });
 
   it('schedule earlier', () => {
-    timerMock.expects('delay').withExactArgs(sinon.match.func, 222)
-        .returns(1).once();
-    timerMock.expects('delay').withExactArgs(sinon.match.func, 111)
-        .returns(2).once();
-    timerMock.expects('cancel').withExactArgs(1).once();
+    timerMock
+      .expects('delay')
+      .withExactArgs(sinon.match.func, 222)
+      .returns(1)
+      .once();
+    timerMock
+      .expects('delay')
+      .withExactArgs(sinon.match.func, 111)
+      .returns(2)
+      .once();
+    timerMock
+      .expects('cancel')
+      .withExactArgs(1)
+      .once();
     pass.schedule(222);
     // Will re-schedule b/c the existing pass is later.
     const isScheduled = pass.schedule(111);
@@ -101,14 +125,28 @@ describe('Pass', () => {
     });
     let delayedFunc0 = null;
     let delayedFunc1 = null;
-    timerMock.expects('delay').withExactArgs(sinon.match(value => {
-      delayedFunc0 = value;
-      return true;
-    }), 0).returns(1).once();
-    timerMock.expects('delay').withExactArgs(sinon.match(value => {
-      delayedFunc1 = value;
-      return true;
-    }), 10).returns(1).once();
+    timerMock
+      .expects('delay')
+      .withExactArgs(
+        sinon.match(value => {
+          delayedFunc0 = value;
+          return true;
+        }),
+        0
+      )
+      .returns(1)
+      .once();
+    timerMock
+      .expects('delay')
+      .withExactArgs(
+        sinon.match(value => {
+          delayedFunc1 = value;
+          return true;
+        }),
+        10
+      )
+      .returns(1)
+      .once();
     pass.schedule();
     expect(pass.isPending()).to.equal(true);
 

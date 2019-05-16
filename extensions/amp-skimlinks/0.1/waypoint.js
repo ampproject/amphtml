@@ -14,14 +14,10 @@
  * limitations under the License.
  */
 
-import {
-  PLATFORM_NAME,
-  XCUST_ATTRIBUTE_NAME,
-} from './constants';
+import {PLATFORM_NAME, XCUST_ATTRIBUTE_NAME} from './constants';
 import {Services} from '../../../src/services';
 import {addParamsToUrl} from '../../../src/url';
 import {dict} from '../../../src/utils/object';
-
 
 /**
  * The waypoint class is responsible for building the URL to
@@ -86,6 +82,9 @@ export class Waypoint {
       queryParams['xcust'] = xcust;
     }
     const affiliationUrl = this.skimOptions_.waypointBaseUrl;
-    return addParamsToUrl(affiliationUrl, /** @type {!JsonObject} */ (queryParams));
+    return addParamsToUrl(
+      affiliationUrl,
+      /** @type {!JsonObject} */ (queryParams)
+    );
   }
 }

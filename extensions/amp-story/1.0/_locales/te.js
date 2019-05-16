@@ -111,8 +111,7 @@ const strings = {
     string: 'ఈ కథనాన్ని చూడడానికి మీ విండో యొక్క ఎత్తును పెంచండి',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT]: {
-    string: 'ఈ కథనాన్ని చూడడానికి మీ విండో యొక్క ఎత్తు మరియు వెడల్పును ' +
-        'పెంచండి',
+    string: 'ఈ కథనాన్ని చూడడానికి మీ విండో యొక్క ఎత్తు మరియు వెడల్పును పెంచండి',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_WIDTH_SIZE_TEXT]: {
     string: 'ఈ కథనాన్ని చూడడానికి మీ విండో యొక్క వెడల్పును పెంచండి',

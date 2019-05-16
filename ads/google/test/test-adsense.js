@@ -17,7 +17,6 @@ import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {adsense} from '../adsense';
 
 describes.realWin('adsenseDelayedFetch', {}, env => {
-
   let containerElem, data;
   const canonicalUrl = 'https://foo.com?some=page';
   const clientId = 'some_clientId';
@@ -42,7 +41,8 @@ describes.realWin('adsenseDelayedFetch', {}, env => {
     env.win.context = {canonicalUrl, clientId, pageViewId};
     data = {};
     Object.keys(elementAttributes).forEach(
-        attr => data[attr] = `some-${attr}`);
+      attr => (data[attr] = `some-${attr}`)
+    );
     data['experimentId'] = '1234,567,890';
   });
 
@@ -55,15 +55,20 @@ describes.realWin('adsenseDelayedFetch', {}, env => {
       },
     };
     adsense(env.win, data);
-    expect(env.win.document.querySelector('script[src=' +
-        '"https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"]'))
-        .to.be.ok;
+    expect(
+      env.win.document.querySelector(
+        'script[src=' +
+          '"https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"]'
+      )
+    ).to.be.ok;
     const insElement = env.win.document.querySelector('ins.adsbygoogle');
     expect(insElement).to.be.ok;
     expect(insElement.getAttribute('data-page-url')).to.equal(canonicalUrl);
     Object.keys(elementAttributes).forEach(attr =>
-      expect(insElement.getAttribute(elementAttributes[attr]))
-          .to.equal(`some-${attr}`));
+      expect(insElement.getAttribute(elementAttributes[attr])).to.equal(
+        `some-${attr}`
+      )
+    );
     expect(pushArg).to.be.ok;
     expect(pushArg).to.jsonEqual({
       params: {
@@ -91,7 +96,8 @@ describes.realWin('adsenseDelayedFetch', {}, env => {
     data['height'] = '666';
     allowConsoleError(() => {
       expect(() => adsense(env.win, data)).to.throw(
-          /Specified height 666 in <amp-ad> tag is not equal to the required/);
+        /Specified height 666 in <amp-ad> tag is not equal to the required/
+      );
     });
   });
 
@@ -100,13 +106,12 @@ describes.realWin('adsenseDelayedFetch', {}, env => {
     data['height'] = '320';
     allowConsoleError(() => {
       expect(() => adsense(env.win, data)).to.throw(
-          /Responsive AdSense ad units require the attribute data-full-width.​/
+        /Responsive AdSense ad units require the attribute data-full-width.​/
       );
     });
   });
 
   describe('amp-consent integration', () => {
-
     let pushCount = 0;
     beforeEach(() => {
       pushCount = 0;
@@ -175,17 +180,17 @@ describes.realWin('adsenseDelayedFetch', {}, env => {
         if (result == RESULT_STATE.NO_REQUEST) {
           expect(insElement).to.not.be.ok;
           expect(pushCount).to.equal(0);
-          expect(env.win.adsbygoogle['requestNonPersonalizedAds'])
-              .to.be.undefined;
+          expect(env.win.adsbygoogle['requestNonPersonalizedAds']).to.be
+            .undefined;
         } else {
           expect(insElement).to.be.ok;
           expect(pushCount).to.equal(1);
           expect(env.win.adsbygoogle).to.be.ok;
           expect(env.win.adsbygoogle['requestNonPersonalizedAds']).to.equal(
-              result == RESULT_STATE.NPA ? true : undefined);
+            result == RESULT_STATE.NPA ? true : undefined
+          );
         }
       });
     }
-
   });
 });

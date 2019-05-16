@@ -23,71 +23,77 @@ import {
   mutateElementStub,
 } from '../../../../testing/test-helper';
 
-describes.realWin('amp-list layout container', {
-  amp: {
-    ampdoc: 'single',
-    extensions: ['amp-list'],
+describes.realWin(
+  'amp-list layout container',
+  {
+    amp: {
+      ampdoc: 'single',
+      extensions: ['amp-list'],
+    },
   },
-}, env => {
-  let win;
-  let doc;
-  let ampdoc;
-  let sandbox;
-  let element, list;
-  let templates;
+  env => {
+    let win;
+    let doc;
+    let ampdoc;
+    let sandbox;
+    let element, list;
+    let templates;
 
-  beforeEach(() => {
-    win = env.win;
-    doc = win.document;
-    ampdoc = env.ampdoc;
-    sandbox = env.sandbox;
+    beforeEach(() => {
+      win = env.win;
+      doc = win.document;
+      ampdoc = env.ampdoc;
+      sandbox = env.sandbox;
 
-    templates = {
-      findAndSetHtmlForTemplate: sandbox.stub(),
-      findAndRenderTemplate: sandbox.stub(),
-      findAndRenderTemplateArray: sandbox.stub(),
-    };
-    sandbox.stub(Services, 'templatesFor').returns(templates);
-    sandbox.stub(AmpDocService.prototype, 'getAmpDoc').returns(ampdoc);
+      templates = {
+        findAndSetHtmlForTemplate: sandbox.stub(),
+        findAndRenderTemplate: sandbox.stub(),
+        findAndRenderTemplateArray: sandbox.stub(),
+      };
+      sandbox.stub(Services, 'templatesFor').returns(templates);
+      sandbox.stub(AmpDocService.prototype, 'getAmpDoc').returns(ampdoc);
 
-    element = doc.createElement('amp-list');
-    list = new AmpList(element);
+      element = doc.createElement('amp-list');
+      list = new AmpList(element);
 
-    sandbox.stub(list, 'getAmpDoc').returns(ampdoc);
-    sandbox.stub(list, 'getFallback').returns(null);
+      sandbox.stub(list, 'getAmpDoc').returns(ampdoc);
+      sandbox.stub(list, 'getFallback').returns(null);
 
-    sandbox.stub(list, 'mutateElement').callsFake(mutateElementStub);
-    sandbox.stub(list, 'measureElement').callsFake(measureElementStub);
-    sandbox.stub(list, 'measureMutateElement').callsFake(
-        measureMutateElementStub);
-    element.setAttribute('src', '/list');
-    element.setAttribute('layout', 'fixed');
-    element.setAttribute('width', '50');
-    element.setAttribute('height', '10');
-    doc.body.appendChild(element);
+      sandbox.stub(list, 'mutateElement').callsFake(mutateElementStub);
+      sandbox.stub(list, 'measureElement').callsFake(measureElementStub);
+      sandbox
+        .stub(list, 'measureMutateElement')
+        .callsFake(measureMutateElementStub);
+      element.setAttribute('src', '/list');
+      element.setAttribute('layout', 'fixed');
+      element.setAttribute('width', '50');
+      element.setAttribute('height', '10');
+      doc.body.appendChild(element);
 
-    sandbox.stub(list, 'getOverflowElement').returns(null);
-    sandbox.stub(list, 'fetchList_').returns(Promise.resolve());
-    list.element.changeSize = () => {};
-    list.buildCallback();
-  });
+      sandbox.stub(list, 'getOverflowElement').returns(null);
+      sandbox.stub(list, 'fetchList_').returns(Promise.resolve());
+      list.element.changeSize = () => {};
+      list.buildCallback();
+    });
 
-  it('should change to layout container', async() => {
-    await list.layoutCallback();
-    await list.changeToLayoutContainer_();
-    expect(element.style.height).to.equal('');
-    expect(element.getAttribute('layout')).to.equal('container');
-    expect(element.classList.contains('i-amphtml-layout-container')).to.be.true;
-    const containerClasses = list.container_.classList;
-    expect(containerClasses.contains('i-amphtml-fill-content')).to.be.false;
-    expect(containerClasses.contains('i-amphtml-replaced-content')).to.be.false;
-  });
+    it('should change to layout container', async () => {
+      await list.layoutCallback();
+      await list.changeToLayoutContainer_();
+      expect(element.style.height).to.equal('');
+      expect(element.getAttribute('layout')).to.equal('container');
+      expect(element.classList.contains('i-amphtml-layout-container')).to.be
+        .true;
+      const containerClasses = list.container_.classList;
+      expect(containerClasses.contains('i-amphtml-fill-content')).to.be.false;
+      expect(containerClasses.contains('i-amphtml-replaced-content')).to.be
+        .false;
+    });
 
-  it('should trigger on bind', async() => {
-    const changeSpy = sandbox.spy(list, 'changeToLayoutContainer_');
-    await list.layoutCallback();
-    await list.mutatedAttributesCallback({'is-layout-container': true});
-    expect(changeSpy).to.be.calledOnce;
-  });
-
-});
+    it('should trigger on bind', async () => {
+      const changeSpy = sandbox.spy(list, 'changeToLayoutContainer_');
+      await list.layoutCallback();
+      await list.mutatedAttributesCallback({'is-layout-container': true});
+      expect(changeSpy).to.be.calledOnce;
+    });
+  }
+);

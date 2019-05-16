@@ -41,12 +41,18 @@ export function contentad(global, data) {
   }
 
   /* Build API URL */
-  const cadApi = 'https://api.content-ad.net/Scripts/widget2.aspx'
-    + '?id=' + encodeURIComponent(global.id)
-    + '&d=' + encodeURIComponent(global.d)
-    + '&wid=' + global.wid
-    + '&url=' + encodeURIComponent(sourceUrl)
-    + '&cb=' + Date.now();
+  const cadApi =
+    'https://api.content-ad.net/Scripts/widget2.aspx' +
+    '?id=' +
+    encodeURIComponent(global.id) +
+    '&d=' +
+    encodeURIComponent(global.d) +
+    '&wid=' +
+    global.wid +
+    '&url=' +
+    encodeURIComponent(sourceUrl) +
+    '&cb=' +
+    Date.now();
 
   /* Call Content.ad Widget */
   writeScript(global, cadApi);

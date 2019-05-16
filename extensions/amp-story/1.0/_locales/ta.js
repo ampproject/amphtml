@@ -57,10 +57,10 @@ const strings = {
     string: 'AMP முடிவுகள் குறித்த கூடுதல் தகவல்',
   },
   [LocalizedStringId.AMP_STORY_HINT_UI_NEXT_LABEL]: {
-    string: '\'அடுத்தது\' என்பதைத் தட்டவும்',
+    string: "'அடுத்தது' என்பதைத் தட்டவும்",
   },
   [LocalizedStringId.AMP_STORY_HINT_UI_PREVIOUS_LABEL]: {
-    string: '\'முந்தையது\' என்பதைத் தட்டவும்',
+    string: "'முந்தையது' என்பதைத் தட்டவும்",
   },
   [LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL]: {
     string: 'மேல்நோக்கி ஸ்வைப் செய்யவும்',
@@ -108,16 +108,19 @@ const strings = {
     string: 'ட்வீட்டை விரிவாக்கும்',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_HEIGHT_SIZE_TEXT]: {
-    string: 'இந்த அனுபவத்தைப் பார்க்க உங்கள் சாளரத்தின் உயரத்தை ' +
-        'விரிவுபடுத்தவும்',
+    string:
+      'இந்த அனுபவத்தைப் பார்க்க உங்கள் சாளரத்தின் உயரத்தை ' +
+      'விரிவுபடுத்தவும்',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT]: {
-    string: 'இந்த அனுபவத்தைப் பார்க்க உங்கள் சாளரத்தின் உயரத்தையும் ' +
-        'அகலத்தையும் விரிவுபடுத்தவும்',
+    string:
+      'இந்த அனுபவத்தைப் பார்க்க உங்கள் சாளரத்தின் உயரத்தையும் ' +
+      'அகலத்தையும் விரிவுபடுத்தவும்',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_WIDTH_SIZE_TEXT]: {
-    string: 'இந்த அனுபவத்தைப் பார்க்க உங்கள் சாளரத்தின் அகலத்தை ' +
-        'விரிவுபடுத்தவும்',
+    string:
+      'இந்த அனுபவத்தைப் பார்க்க உங்கள் சாளரத்தின் அகலத்தை ' +
+      'விரிவுபடுத்தவும்',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
     string: 'இந்தக் கதைகளைப் பார்க்க AMP ஸ்டோரி சோதனையை இயக்க வேண்டும்.',

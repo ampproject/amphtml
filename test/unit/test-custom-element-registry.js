@@ -29,9 +29,7 @@ import {
 import {createElementWithAttributes} from '../../src/dom';
 import {installDocumentStateService} from '../../src/service/document-state';
 
-
 describes.realWin('CustomElement register', {amp: true}, env => {
-
   class ConcreteElement extends BaseElement {}
 
   let win, doc, ampdoc, extensions;
@@ -58,8 +56,9 @@ describes.realWin('CustomElement register', {amp: true}, env => {
 
   it('should go through stub/upgrade cycle', () => {
     registerElement(win, 'amp-element1', ElementStub);
-    expect(getElementClassForTesting(win, 'amp-element1'))
-        .to.equal(ElementStub);
+    expect(getElementClassForTesting(win, 'amp-element1')).to.equal(
+      ElementStub
+    );
 
     // Pre-download elements are created as ElementStub.
     const element1 = doc.createElement('amp-element1');
@@ -69,8 +68,9 @@ describes.realWin('CustomElement register', {amp: true}, env => {
 
     // Post-download, elements are upgraded.
     upgradeOrRegisterElement(win, 'amp-element1', ConcreteElement);
-    expect(getElementClassForTesting(win, 'amp-element1'))
-        .to.equal(ConcreteElement);
+    expect(getElementClassForTesting(win, 'amp-element1')).to.equal(
+      ConcreteElement
+    );
     expect(element1.implementation_).to.be.instanceOf(ConcreteElement);
 
     // Elements created post-download and immediately upgraded.
@@ -136,26 +136,29 @@ describes.realWin('CustomElement register', {amp: true}, env => {
 
   it('insert script for amp-ad when script is not included', () => {
     insertElement('amp-ad');
-    expect(doc.head.querySelectorAll('[custom-element="amp-ad"]'))
-        .to.have.length(1);
+    expect(
+      doc.head.querySelectorAll('[custom-element="amp-ad"]')
+    ).to.have.length(1);
   });
 
   it('insert script for amp-embed when script is not included', () => {
     insertElement('amp-embed');
-    expect(doc.head.querySelectorAll('[custom-element="amp-embed"]'))
-        .to.have.length(0);
-    expect(doc.head.querySelectorAll('[custom-element="amp-ad"]'))
-        .to.have.length(1);
+    expect(
+      doc.head.querySelectorAll('[custom-element="amp-embed"]')
+    ).to.have.length(0);
+    expect(
+      doc.head.querySelectorAll('[custom-element="amp-ad"]')
+    ).to.have.length(1);
   });
 
   it('insert script for amp-video when script is not included', () => {
     insertElement('amp-video');
-    expect(doc.head.querySelectorAll('[custom-element="amp-video"]'))
-        .to.have.length(1);
+    expect(
+      doc.head.querySelectorAll('[custom-element="amp-video"]')
+    ).to.have.length(1);
   });
 
   describe('no body', () => {
-
     let elements;
     let doc;
     let win;
@@ -277,14 +280,16 @@ describes.realWin('CustomElement register', {amp: true}, env => {
       expect(childWin.ampExtendedElements['amp-test1']).to.equal(ElementStub);
       const firstCallCount = registerElement.callCount;
       expect(firstCallCount).to.equal(1);
-      expect(registerElement.getCall(firstCallCount - 1).args[0])
-          .to.equal('amp-test1');
+      expect(registerElement.getCall(firstCallCount - 1).args[0]).to.equal(
+        'amp-test1'
+      );
 
       copyElementToChildWindow(win, childWin, 'amp-test2');
       expect(childWin.ampExtendedElements['amp-test1']).to.equal(ElementStub);
       expect(registerElement.callCount).to.be.above(firstCallCount);
-      expect(registerElement.getCall(registerElement.callCount - 1).args[0])
-          .to.equal('amp-test2');
+      expect(
+        registerElement.getCall(registerElement.callCount - 1).args[0]
+      ).to.equal('amp-test2');
     });
   });
 });

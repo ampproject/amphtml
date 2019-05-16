@@ -25,7 +25,6 @@ export const GrantReason = {
  * The single entitlement object.
  */
 export class Entitlement {
-
   /**
    * @param {string} service
    * @return {!Entitlement}
@@ -49,8 +48,15 @@ export class Entitlement {
    * @param {?JsonObject} [input.dataObject]
    * @param {?string} [input.decryptedDocumentKey]
    */
-  constructor({source, raw = '', service, granted = false,
-    grantReason = '', dataObject, decryptedDocumentKey}) {
+  constructor({
+    source,
+    raw = '',
+    service,
+    granted = false,
+    grantReason = '',
+    dataObject,
+    decryptedDocumentKey,
+  }) {
     /** @const {string} */
     this.raw = raw;
     /** @const {string} */
@@ -79,7 +85,7 @@ export class Entitlement {
       'grantReason': this.grantReason,
       'data': this.data,
     });
-    return (entitlementJson);
+    return entitlementJson;
   }
 
   /**
@@ -88,9 +94,11 @@ export class Entitlement {
    * @return {!JsonObject}
    */
   jsonForPingback() {
-    return /** @type {!JsonObject} */ (Object.assign({},
-        {'raw': this.raw},
-        this.json()));
+    return /** @type {!JsonObject} */ (Object.assign(
+      {},
+      {'raw': this.raw},
+      this.json()
+    ));
   }
 
   /**
@@ -108,8 +116,15 @@ export class Entitlement {
     const grantReason = json['grantReason'];
     const dataObject = json['data'] || null;
     const decryptedDocumentKey = json['decryptedDocumentKey'] || null;
-    return new Entitlement({source, raw, service: '',
-      granted, grantReason, dataObject, decryptedDocumentKey});
+    return new Entitlement({
+      source,
+      raw,
+      service: '',
+      granted,
+      grantReason,
+      dataObject,
+      decryptedDocumentKey,
+    });
   }
 
   /**

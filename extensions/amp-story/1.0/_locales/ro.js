@@ -108,19 +108,20 @@ const strings = {
     string: 'Extindeți tweetul',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_HEIGHT_SIZE_TEXT]: {
-    string: 'Extindeți înălțimea ferestrei pentru a viziona această ' +
-        'experiență',
+    string: 'Extindeți înălțimea ferestrei pentru a viziona această experiență',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT]: {
-    string: 'Extindeți înălțimea și lățimea ferestrei pentru a viziona ' +
-        'această experiență',
+    string:
+      'Extindeți înălțimea și lățimea ferestrei pentru a viziona ' +
+      'această experiență',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_WIDTH_SIZE_TEXT]: {
     string: 'Extindeți lățimea ferestrei pentru a viziona această experiență',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
-    string: 'Trebuie să activați experimentul pentru subiectul AMP ca să ' +
-        'vizionați acest conținut.',
+    string:
+      'Trebuie să activați experimentul pentru subiectul AMP ca să ' +
+      'vizionați acest conținut.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
     string: 'Pagina poate fi vizionată cel mai bine în modul portret',

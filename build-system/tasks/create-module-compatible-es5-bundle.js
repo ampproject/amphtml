@@ -30,11 +30,18 @@ const sourcemaps = require('gulp-sourcemaps');
  * Changes `global?global:VARNAME}(this)` to `global?global:VARNAME}(self)`
  */
 function createModuleCompatibleES5Bundle(src) {
-  return gulp.src('dist/' + src)
-      .pipe(sourcemaps.init({loadMaps: true}))
-      .pipe(regexpSourcemaps(/(window.global\?window.global:\w*)this/, '$1self', 'module-global'))
-      .pipe(sourcemaps.write('./'))
-      .pipe(gulp.dest('dist'));
+  return gulp
+    .src('dist/' + src)
+    .pipe(sourcemaps.init({loadMaps: true}))
+    .pipe(
+      regexpSourcemaps(
+        /(window.global\?window.global:\w*)this/,
+        '$1self',
+        'module-global'
+      )
+    )
+    .pipe(sourcemaps.write('./'))
+    .pipe(gulp.dest('dist'));
 }
 
 module.exports = {

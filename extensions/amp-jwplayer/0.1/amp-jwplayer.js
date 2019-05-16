@@ -20,9 +20,7 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeElement} from '../../../src/dom';
 import {userAssert} from '../../../src/log';
 
-
 class AmpJWPlayer extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -69,27 +67,25 @@ class AmpJWPlayer extends AMP.BaseElement {
   buildCallback() {
     const {element} = this;
     this.contentid_ = userAssert(
-        (element.getAttribute('data-playlist-id') ||
-        element.getAttribute('data-media-id')),
-        'Either the data-media-id or the data-playlist-id ' +
+      element.getAttribute('data-playlist-id') ||
+        element.getAttribute('data-media-id'),
+      'Either the data-media-id or the data-playlist-id ' +
         'attributes must be specified for <amp-jwplayer> %s',
-        element);
+      element
+    );
 
     this.playerid_ = userAssert(
-        element.getAttribute('data-player-id'),
-        'The data-player-id attribute is required for <amp-jwplayer> %s',
-        element);
+      element.getAttribute('data-player-id'),
+      'The data-player-id attribute is required for <amp-jwplayer> %s',
+      element
+    );
 
-    this.contentSearch_ = element.getAttribute('data-content-search') ||
-        '';
-    this.contentContextual_ = element.getAttribute('data-content-contextual') ||
-        '';
-    this.contentRecency_ = element.getAttribute('data-content-recency') ||
-        '';
-    this.contentBackfill_ = element.getAttribute('data-content-backfill') ||
-        '';
+    this.contentSearch_ = element.getAttribute('data-content-search') || '';
+    this.contentContextual_ =
+      element.getAttribute('data-content-contextual') || '';
+    this.contentRecency_ = element.getAttribute('data-content-recency') || '';
+    this.contentBackfill_ = element.getAttribute('data-content-backfill') || '';
   }
-
 
   /** @override */
   layoutCallback() {
@@ -120,8 +116,10 @@ class AmpJWPlayer extends AMP.BaseElement {
     if (this.iframe_ && this.iframe_.contentWindow) {
       // The /players page can respond to "play" and "pause" commands from the
       // iframe's parent
-      this.iframe_.contentWindow./*OK*/postMessage('pause',
-          'https://content.jwplatform.com');
+      this.iframe_.contentWindow./*OK*/ postMessage(
+        'pause',
+        'https://content.jwplatform.com'
+      );
     }
   }
 
@@ -141,14 +139,19 @@ class AmpJWPlayer extends AMP.BaseElement {
     }
     const placeholder = this.win.document.createElement('amp-img');
     this.propagateAttributes(['aria-label'], placeholder);
-    placeholder.setAttribute('src', 'https://content.jwplatform.com/thumbs/' +
-      encodeURIComponent(this.contentid_) + '-720.jpg');
+    placeholder.setAttribute(
+      'src',
+      'https://content.jwplatform.com/thumbs/' +
+        encodeURIComponent(this.contentid_) +
+        '-720.jpg'
+    );
     placeholder.setAttribute('layout', 'fill');
     placeholder.setAttribute('placeholder', '');
     placeholder.setAttribute('referrerpolicy', 'origin');
     if (placeholder.hasAttribute('aria-label')) {
-      placeholder.setAttribute('alt',
-          'Loading video - ' + placeholder.getAttribute('aria-label')
+      placeholder.setAttribute(
+        'alt',
+        'Loading video - ' + placeholder.getAttribute('aria-label')
       );
     } else {
       placeholder.setAttribute('alt', 'Loading video');
@@ -156,18 +159,19 @@ class AmpJWPlayer extends AMP.BaseElement {
     return placeholder;
   }
   /**
-  *
-  */
+   *
+   */
   getContextualVal() {
     if (this.contentSearch_ === '__CONTEXTUAL__') {
       const context = this.getAmpDoc().getHeadNode();
       const ogTitleElement = context.querySelector('meta[property="og:title"]');
-      const ogTitle = ogTitleElement ?
-        ogTitleElement.getAttribute('content') : null;
+      const ogTitle = ogTitleElement
+        ? ogTitleElement.getAttribute('content')
+        : null;
       const title = (context.querySelector('title') || {}).textContent;
       return ogTitle || title || '';
     }
-    return this.contentSearch_ ;
+    return this.contentSearch_;
   }
 }
 

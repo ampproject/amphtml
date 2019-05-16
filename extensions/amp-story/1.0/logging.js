@@ -17,7 +17,6 @@ import {LogLevel, devAssert} from '../../../src/log';
 import {scopedQuerySelectorAll} from '../../../src/dom';
 import {tryResolve} from '../../../src/utils/promise';
 
-
 /** @typedef {function(!Element): (boolean|!Promise<boolean>)} */
 let ElementPredicateDef;
 
@@ -54,7 +53,6 @@ let ElementPredicateDef;
  */
 let AmpStoryLogTypeDef;
 
-
 /**
  * A log entry is a more concrete version of a rule or best practice; it refers
  * to whether a specific element on a specific page of a specific story conforms
@@ -71,10 +69,8 @@ let AmpStoryLogTypeDef;
  */
 export let AmpStoryLogEntryDef;
 
-
 /** @private @const {string} */
 const AMPPROJECT_DOCS = 'https://www.ampproject.org/docs';
-
 
 /**
  * @param {!HTMLMediaElement} el
@@ -101,8 +97,9 @@ const LogType = {
 
   /** Warnings */
   IMAGES_MAX_720P_OR_SRCSET: {
-    message: 'Images should not be larger than 720p.  If you wish to use' +
-        ' images that are larger than 720p, you should specify a srcset.',
+    message:
+      'Images should not be larger than 720p.  If you wish to use' +
+      ' images that are larger than 720p, you should specify a srcset.',
     moreInfo: AMPPROJECT_DOCS + '/guides/responsive/art_direction#srcset',
     selector: 'img:not([srcset])',
     predicate: el => el.naturalWidth <= 720 && el.naturalHeight <= 1280,
@@ -133,24 +130,26 @@ const LogType = {
   VIDEO_POSTER_MAX_720P: {
     message: 'Video poster images should not be larger than 720p.',
     selector: 'video[poster]',
-    predicate: el => getPosterFromVideo(el)
-        .then(poster => {
-          return poster.naturalWidth <= 720 && poster.naturalHeight <= 1280;
-        }),
+    predicate: el =>
+      getPosterFromVideo(el).then(poster => {
+        return poster.naturalWidth <= 720 && poster.naturalHeight <= 1280;
+      }),
     level: LogLevel.WARN,
   },
 
   VIDEO_POSTER_POTRAIT: {
-    message: 'Poster images for full-bleed videos should be in portrait ' +
-        'orientation.',
-    selector: 'amp-story-grid-layer[template="fill"] > amp-video > ' +
-        'video[poster]',
-    predicate: el => getPosterFromVideo(el)
-        .then(poster => poster.naturalWidth < poster.naturalHeight),
+    message:
+      'Poster images for full-bleed videos should be in portrait ' +
+      'orientation.',
+    selector:
+      'amp-story-grid-layer[template="fill"] > amp-video > video[poster]',
+    predicate: el =>
+      getPosterFromVideo(el).then(
+        poster => poster.naturalWidth < poster.naturalHeight
+      ),
     level: LogLevel.WARN,
   },
 };
-
 
 /**
  * Gets the log type associated with the specified key.
@@ -160,14 +159,17 @@ const LogType = {
 function getLogType(logTypeKey) {
   const logType = LogType[logTypeKey];
   devAssert(logType, `There is no log type "${logTypeKey}".`);
-  devAssert(logType.message,
-      `Log type "${logTypeKey}" has no associated message.`);
-  devAssert(logType.level,
-      `Log type "${logTypeKey}" has no associated log level.`);
+  devAssert(
+    logType.message,
+    `Log type "${logTypeKey}" has no associated message.`
+  );
+  devAssert(
+    logType.level,
+    `Log type "${logTypeKey}" has no associated log level.`
+  );
 
   return logType;
 }
-
 
 /**
  * @param {!Element} rootElement
@@ -178,21 +180,19 @@ function getLogType(logTypeKey) {
 function getLogEntry(rootElement, logType, element) {
   const predicate = logType.predicate || (unusedEl => false);
 
-  return tryResolve(() => predicate(element))
-      .then(conforms => {
-        return new Promise(resolve => {
-          resolve({
-            rootElement,
-            element,
-            conforms,
-            level: logType.level,
-            message: logType.message,
-            moreInfo: logType.moreInfo,
-          });
-        });
+  return tryResolve(() => predicate(element)).then(conforms => {
+    return new Promise(resolve => {
+      resolve({
+        rootElement,
+        element,
+        conforms,
+        level: logType.level,
+        message: logType.message,
+        moreInfo: logType.moreInfo,
       });
+    });
+  });
 }
-
 
 /**
  * @param {!Element} rootElement
@@ -202,13 +202,13 @@ function getLogEntry(rootElement, logType, element) {
 function getLogEntriesForType(rootElement, logType) {
   const precondition = logType.precondition || (unusedEl => true);
 
-  const elements = logType.selector ?
-    [].slice.call(scopedQuerySelectorAll(rootElement, logType.selector)) :
-    [rootElement];
+  const elements = logType.selector
+    ? [].slice.call(scopedQuerySelectorAll(rootElement, logType.selector))
+    : [rootElement];
 
   return elements
-      .filter(precondition)
-      .map(getLogEntry.bind(/** thisArg */ null, rootElement, logType));
+    .filter(precondition)
+    .map(getLogEntry.bind(/** thisArg */ null, rootElement, logType));
 }
 
 /**
@@ -227,7 +227,6 @@ function logEntryCompareFn(logEntryA, logEntryB) {
   }
 }
 
-
 /**
  * Gets a promise which yields a list of log entries for the specified element.
  * @param {!Element} rootElement
@@ -240,8 +239,7 @@ export function getLogEntries(rootElement) {
     return entries.concat(newEntries);
   }, []);
 
-  return Promise.all(logEntryPromises)
-      .then(logEntries => {
-        return logEntries.sort(logEntryCompareFn);
-      });
+  return Promise.all(logEntryPromises).then(logEntries => {
+    return logEntries.sort(logEntryCompareFn);
+  });
 }

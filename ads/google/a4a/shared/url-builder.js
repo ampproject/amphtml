@@ -29,15 +29,22 @@ export let QueryParameterDef;
  * @return {string} the fully constructed URL.
  */
 export function buildUrl(
-  baseUrl, queryParams, maxLength, opt_truncationQueryParam) {
+  baseUrl,
+  queryParams,
+  maxLength,
+  opt_truncationQueryParam
+) {
   const encodedParams = [];
   const encodedTruncationParam =
-      opt_truncationQueryParam &&
-      !(opt_truncationQueryParam.value == null ||
-      opt_truncationQueryParam.value === '') ?
-        encodeURIComponent(opt_truncationQueryParam.name) + '=' +
-      encodeURIComponent(String(opt_truncationQueryParam.value)) :
-        null;
+    opt_truncationQueryParam &&
+    !(
+      opt_truncationQueryParam.value == null ||
+      opt_truncationQueryParam.value === ''
+    )
+      ? encodeURIComponent(opt_truncationQueryParam.name) +
+        '=' +
+        encodeURIComponent(String(opt_truncationQueryParam.value))
+      : null;
   let capacity = maxLength - baseUrl.length;
   if (encodedTruncationParam) {
     capacity -= encodedTruncationParam.length + 1;
@@ -54,9 +61,9 @@ export function buildUrl(
     const fullLength = encodedNameAndSep.length + encodedValue.length + 1;
     if (fullLength > capacity) {
       const truncatedValue = encodedValue
-          .substr(0, capacity - encodedNameAndSep.length - 1)
-      // Don't end with a partially truncated escape sequence
-          .replace(/%\w?$/, '');
+        .substr(0, capacity - encodedNameAndSep.length - 1)
+        // Don't end with a partially truncated escape sequence
+        .replace(/%\w?$/, '');
       if (truncatedValue) {
         encodedParams.push(encodedNameAndSep + truncatedValue);
       }

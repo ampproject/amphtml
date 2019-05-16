@@ -57,10 +57,10 @@ const strings = {
     string: 'AMP ရလဒ်များအကြောင်း နောက်ထပ် အချက်အလက်',
   },
   [LocalizedStringId.AMP_STORY_HINT_UI_NEXT_LABEL]: {
-    string: '\'ရှေ့သို့\' ကိုတို့ရန်',
+    string: "'ရှေ့သို့' ကိုတို့ရန်",
   },
   [LocalizedStringId.AMP_STORY_HINT_UI_PREVIOUS_LABEL]: {
-    string: '\'နောက်သို့\' ကိုတို့ရန်',
+    string: "'နောက်သို့' ကိုတို့ရန်",
   },
   [LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL]: {
     string: 'အပေါ်သို့ ပွတ်ဆွဲရန်',
@@ -111,19 +111,20 @@ const strings = {
     string: 'ဤဇာတ်လမ်းများကိုကြည့်ရန် သင့်ဝင်းဒိုး၏ အမြင့်ကို ချဲ့ပါ',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT]: {
-    string: 'ဤဇာတ်လမ်းများကိုကြည့်ရန် သင့်ဝင်းဒိုး၏ အမြင့်နှင့်အကျယ် ' +
-        'နှစ်ခုစလုံးကို ချဲ့ပါ',
+    string:
+      'ဤဇာတ်လမ်းများကိုကြည့်ရန် သင့်ဝင်းဒိုး၏ အမြင့်နှင့်အကျယ် ' +
+      'နှစ်ခုစလုံးကို ချဲ့ပါ',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_WIDTH_SIZE_TEXT]: {
     string: 'ဤဇာတ်လမ်းများကိုကြည့်ရန် သင့်ဝင်းဒိုး၏ အကျယ်ကို ချဲ့ပါ',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
-    string: 'ဤအကြောင်းအရာကို ကြည့်ရန် amp ဇာတ်လမ်း စမ်းသပ်မှုကို ' +
-        'ဖွင့်ထားရမည်။',
+    string: 'ဤအကြောင်းအရာကို ကြည့်ရန် amp ဇာတ်လမ်း စမ်းသပ်မှုကို ဖွင့်ထားရမည်။',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
-    string: 'ဤစာမျက်နှာကို ထောင်လိုက်အနေအထားတွင် ကြည့်လျှင် ' +
-        'အကောင်းဆုံးဖြစ်ပါသည်',
+    string:
+      'ဤစာမျက်နှာကို ထောင်လိုက်အနေအထားတွင် ကြည့်လျှင် ' +
+      'အကောင်းဆုံးဖြစ်ပါသည်',
   },
   [LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT]: {
     string: 'သင့်ဘရောင်ဇာသည် ဤဇာတ်လမ်းများကို ပံ့ပိုးပုံမရပါ',

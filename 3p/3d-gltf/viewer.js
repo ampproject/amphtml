@@ -21,8 +21,7 @@ import AnimationLoop from './animation-loop';
 
 const CAMERA_DISTANCE_FACTOR = 1;
 const CAMERA_FAR_FACTOR = 50;
-const CAMERA_NEAR_FACTOR = .1;
-
+const CAMERA_NEAR_FACTOR = 0.1;
 
 export default class GltfViewer {
   /**
@@ -45,8 +44,9 @@ export default class GltfViewer {
 
     /** @private */
     this.controls_ = new THREE.OrbitControls(
-        this.camera_,
-        this.renderer_.domElement);
+      this.camera_,
+      this.renderer_.domElement
+    );
 
     /** @private */
     this.scene_ = new THREE.Scene();
@@ -59,7 +59,7 @@ export default class GltfViewer {
 
     /** @private */
     this.ampInViewport_ =
-        options['initialIntersection']['intersectionRatio'] > 0;
+      options['initialIntersection']['intersectionRatio'] > 0;
 
     /** @private */
     this.setSize_ = this.setupSize_();
@@ -86,17 +86,20 @@ export default class GltfViewer {
    * @private
    */
   setModelRotation_(args) {
-    const xAngle = 'x' in args
-      ? this.getModelRotationOnAxis_(args, 'x')
-      : this.model_.rotation.x;
+    const xAngle =
+      'x' in args
+        ? this.getModelRotationOnAxis_(args, 'x')
+        : this.model_.rotation.x;
 
-    const yAngle = 'y' in args
-      ? this.getModelRotationOnAxis_(args, 'y')
-      : this.model_.rotation.y;
+    const yAngle =
+      'y' in args
+        ? this.getModelRotationOnAxis_(args, 'y')
+        : this.model_.rotation.y;
 
-    const zAngle = 'z' in args
-      ? this.getModelRotationOnAxis_(args, 'z')
-      : this.model_.rotation.z;
+    const zAngle =
+      'z' in args
+        ? this.getModelRotationOnAxis_(args, 'z')
+        : this.model_.rotation.z;
 
     this.model_.rotation.set(xAngle, yAngle, zAngle);
     this.animationLoop_.needsUpdate = true;
@@ -161,12 +164,12 @@ export default class GltfViewer {
    *
    * @private */
   setupLight_() {
-    const amb = new THREE.AmbientLight(0xEDECD5, .5);
+    const amb = new THREE.AmbientLight(0xedecd5, 0.5);
 
-    const dir1 = new THREE.DirectionalLight(0xFFFFFF, .5);
+    const dir1 = new THREE.DirectionalLight(0xffffff, 0.5);
     dir1.position.set(0, 5, 3);
 
-    const dir2 = new THREE.DirectionalLight(0xAECDD6, .4);
+    const dir2 = new THREE.DirectionalLight(0xaecdd6, 0.4);
     dir2.position.set(-1, -2, 4);
 
     const light = new THREE.Group();
@@ -188,12 +191,14 @@ export default class GltfViewer {
     this.renderer_.gammaOutput = true;
     this.renderer_.gammaFactor = 2.2;
     this.renderer_.setPixelRatio(
-        Math.min(
-            this.options_['rendererSettings']['maxPixelRatio'],
-            devicePixelRatio));
+      Math.min(
+        this.options_['rendererSettings']['maxPixelRatio'],
+        devicePixelRatio
+      )
+    );
     this.renderer_.setClearColor(
-        this.options_['rendererSettings']['clearColor'],
-        this.options_['rendererSettings']['clearAlpha']
+      this.options_['rendererSettings']['clearColor'],
+      this.options_['rendererSettings']['clearAlpha']
     );
   }
 
@@ -222,9 +227,9 @@ export default class GltfViewer {
     this.camera_.far = sizeLength * CAMERA_FAR_FACTOR;
     this.camera_.near = sizeLength * CAMERA_NEAR_FACTOR;
     this.camera_.position.lerpVectors(
-        center,
-        bbox.max,
-        1 + CAMERA_DISTANCE_FACTOR
+      center,
+      bbox.max,
+      1 + CAMERA_DISTANCE_FACTOR
     );
     this.camera_.lookAt(center);
 
@@ -240,23 +245,22 @@ export default class GltfViewer {
     loader.crossOrigin = true;
 
     loader.load(
-        this.options_['src'],
-        /** @param {{scene: !THREE.Scene}} gltfData */
-        gltfData => {
-          this.setupCameraForObject_(gltfData.scene);
-          gltfData.scene.children
-              .slice()
-              .forEach(child => {
-                this.model_.add(child);
-              });
+      this.options_['src'],
+      /** @param {{scene: !THREE.Scene}} gltfData */
+      gltfData => {
+        this.setupCameraForObject_(gltfData.scene);
+        gltfData.scene.children.slice().forEach(child => {
+          this.model_.add(child);
+        });
 
-          this.scene_.add(this.model_);
+        this.scene_.add(this.model_);
 
-          this.animationLoop_.needsUpdate = true;
-          this.handlers_.onload();
-        },
-        this.handlers_.onprogress,
-        this.handlers_.onerror);
+        this.animationLoop_.needsUpdate = true;
+        this.handlers_.onload();
+      },
+      this.handlers_.onprogress,
+      this.handlers_.onerror
+    );
   }
 
   /** @private */

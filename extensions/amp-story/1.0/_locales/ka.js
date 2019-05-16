@@ -111,22 +111,23 @@ const strings = {
     string: 'ამ გამოცდილების სანახავად, გაზარდეთ თქვენი ფანჯრის სიმაღლე',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT]: {
-    string: 'ამ გამოცდილების სანახავად, გაზარდეთ თქვენი ფანჯრის სიმაღლეც და ' +
-        'სიგანეც',
+    string:
+      'ამ გამოცდილების სანახავად, გაზარდეთ თქვენი ფანჯრის სიმაღლეც და ' +
+      'სიგანეც',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_WIDTH_SIZE_TEXT]: {
     string: 'ამ გამოცდილების სანახავად, გაზარდეთ თქვენი ფანჯრის სიგანე',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
-    string: 'ამ კონტენტის სანახავად, თქვენ უნდა ჩართოთ AMP ამბის ' +
-        'ექსპერიმენტი.',
+    string: 'ამ კონტენტის სანახავად, თქვენ უნდა ჩართოთ AMP ამბის ექსპერიმენტი.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
     string: 'გვერდის სანახავად საუკეთესოა პორტრეტის რეჟიმი',
   },
   [LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT]: {
-    string: 'ვწუხვართ, როგორც ჩანს, თქვენს ბრაუზერს არ აქვს ამ გამოცდილების ' +
-        'მხარდაჭერა',
+    string:
+      'ვწუხვართ, როგორც ჩანს, თქვენს ბრაუზერს არ აქვს ამ გამოცდილების ' +
+      'მხარდაჭერა',
   },
 };
 

@@ -17,7 +17,6 @@ import {dev} from '../log';
 import {once} from './function';
 import {setStyles} from '../style';
 
-
 /**
  * @param {!Window} win
  * @param {boolean} isLiteViewer
@@ -64,7 +63,6 @@ function isAutoplaySupportedImpl(win, isLiteViewer) {
   return Promise.resolve(!detectionElement.paused);
 }
 
-
 /** @private {?(function(Window, boolean):!Promise<boolean>)} */
 let isAutoplaySupported = null;
 
@@ -72,11 +70,10 @@ let isAutoplaySupported = null;
  * Sets if autoplay is supported.
  */
 function setIsAutoplaySupported() {
-  isAutoplaySupported =
-    /** @type {function(Window, boolean):!Promise<boolean>} */ (
-      once(isAutoplaySupportedImpl));
+  isAutoplaySupported = /** @type {function(Window, boolean):!Promise<boolean>} */ (once(
+    isAutoplaySupportedImpl
+  ));
 }
-
 
 /**
  * Wrapper around static utilities for testability.

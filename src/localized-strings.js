@@ -100,7 +100,6 @@ export const LocalizedStringId = {
   DEPRECATED_AMP_STORY_SYSTEM_LAYER_SHARE_WIDGET_LABEL: '17',
 };
 
-
 /**
  * @typedef {{
  *   string: string,
@@ -109,12 +108,10 @@ export const LocalizedStringId = {
  */
 export let LocalizedStringDef;
 
-
 /**
  * @typedef {!Object<!LocalizedStringId, !LocalizedStringDef>}
  */
 export let LocalizedStringBundleDef;
-
 
 /**
  * Creates a deep copy of the specified LocalizedStringBundle.
@@ -123,9 +120,9 @@ export let LocalizedStringBundleDef;
  */
 function cloneLocalizedStringBundle(localizedStringBundle) {
   return /** @type {!LocalizedStringBundleDef} */ (parseJson(
-      JSON.stringify(/** @type {!JsonObject} */ (localizedStringBundle))));
+    JSON.stringify(/** @type {!JsonObject} */ (localizedStringBundle))
+  ));
 }
-
 
 /**
  * Creates a pseudo locale by applying string transformations (specified by the
@@ -138,16 +135,18 @@ function cloneLocalizedStringBundle(localizedStringBundle) {
  */
 export function createPseudoLocale(localizedStringBundle, localizationFn) {
   /** @type {!LocalizedStringBundleDef} */
-  const pseudoLocaleStringBundle =
-      cloneLocalizedStringBundle(localizedStringBundle);
+  const pseudoLocaleStringBundle = cloneLocalizedStringBundle(
+    localizedStringBundle
+  );
 
   Object.keys(pseudoLocaleStringBundle).forEach(localizedStringIdAsStr => {
-    const localizedStringId =
-    /** @type {!LocalizedStringId} */ (localizedStringIdAsStr);
-    pseudoLocaleStringBundle[localizedStringId].string =
-        localizationFn(localizedStringBundle[localizedStringId].string);
-    pseudoLocaleStringBundle[localizedStringId].fallback =
-        localizationFn(localizedStringBundle[localizedStringId].fallback);
+    const localizedStringId = /** @type {!LocalizedStringId} */ (localizedStringIdAsStr);
+    pseudoLocaleStringBundle[localizedStringId].string = localizationFn(
+      localizedStringBundle[localizedStringId].string
+    );
+    pseudoLocaleStringBundle[localizedStringId].fallback = localizationFn(
+      localizedStringBundle[localizedStringId].fallback
+    );
   });
 
   return pseudoLocaleStringBundle;

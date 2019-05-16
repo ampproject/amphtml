@@ -30,7 +30,6 @@ export const NOENCODE_WHITELIST = {'ANCESTOR_ORIGIN': true};
 
 /** Rudamentary parser to handle nested Url replacement. */
 export class Expander {
-
   /**
    * Link this instance of parser to the calling UrlReplacment
    * @param {?../variable-source.VariableSource} variableSource the keywords to replace
@@ -42,9 +41,14 @@ export class Expander {
    *   that can be substituted.
    * @param {boolean=} opt_noEncode Should not urlEncode macro resolution.
    */
-  constructor(variableSource, opt_bindings, opt_collectVars, opt_sync,
-    opt_whiteList, opt_noEncode) {
-
+  constructor(
+    variableSource,
+    opt_bindings,
+    opt_collectVars,
+    opt_sync,
+    opt_whiteList,
+    opt_noEncode
+  ) {
     /** @const {?../variable-source.VariableSource} */
     this.variableSource_ = variableSource;
 
@@ -64,7 +68,6 @@ export class Expander {
     /**@const {boolean|undefined} */
     this.encode_ = !opt_noEncode;
   }
-
 
   /**
    * take the template url and return a promise of its evaluated value
@@ -122,7 +125,6 @@ export class Expander {
     return matches;
   }
 
-
   /**
    * @param {string} url
    * @param {!Array<Object<string, string|number>>} matches Array of objects
@@ -157,8 +159,10 @@ export class Expander {
             };
           } else {
             // or the global source
-            binding = Object.assign({}, this.variableSource_.get(match.name),
-                {name: match.name, encode});
+            binding = Object.assign({}, this.variableSource_.get(match.name), {
+              name: match.name,
+              encode,
+            });
           }
 
           urlIndex = match.stop + 1;
@@ -182,23 +186,25 @@ export class Expander {
           }
 
           builder = '';
-        }
-
-        else if (url[urlIndex] === PARSER_IGNORE_FLAG) {
+        } else if (url[urlIndex] === PARSER_IGNORE_FLAG) {
           if (!ignoringChars) {
             ignoringChars = true;
             nextArgShouldBeRaw = true;
-            userAssert(builder.trim() === '',
-                `The substring "${builder}" was lost during url-replacement. ` +
-                'Please ensure the url syntax is correct');
+            userAssert(
+              builder.trim() === '',
+              `The substring "${builder}" was lost during url-replacement. ` +
+                'Please ensure the url syntax is correct'
+            );
             builder = '';
           } else {
             ignoringChars = false;
           }
           urlIndex++;
-        }
-
-        else if (numOfPendingCalls && url[urlIndex] === ',' && !ignoringChars) {
+        } else if (
+          numOfPendingCalls &&
+          url[urlIndex] === ',' &&
+          !ignoringChars
+        ) {
           if (builder.length) {
             const nextArg = nextArgShouldBeRaw ? builder : builder.trim();
             results.push(nextArg);
@@ -225,9 +231,7 @@ export class Expander {
           nextArgShouldBeRaw = false;
           const value = this.evaluateBinding_(binding, /* opt_args */ results);
           return value;
-        }
-
-        else {
+        } else {
           builder += url[urlIndex];
           urlIndex++;
         }
@@ -243,16 +247,15 @@ export class Expander {
       }
 
       return Promise.all(results)
-          .then(promiseArray => promiseArray.join(''))
-          .catch(e => {
-            rethrowAsync(e);
-            return '';
-          });
+        .then(promiseArray => promiseArray.join(''))
+        .catch(e => {
+          rethrowAsync(e);
+          return '';
+        });
     };
 
     return evaluateNextLevel(this.encode_);
   }
-
 
   /**
    * Called when a binding is ready to be resolved. Determines which version of
@@ -283,14 +286,14 @@ export class Expander {
     // We should only ever encode the top level resolution, or not at all.
     const shouldEncode = encode && !NOENCODE_WHITELIST[name];
     if (this.sync_) {
-      const result = this.evaluateBindingSync_(binding, name,opt_args);
+      const result = this.evaluateBindingSync_(binding, name, opt_args);
       return shouldEncode ? encodeURIComponent(result) : result;
     } else {
-      return this.evaluateBindingAsync_(binding, name, opt_args)
-          .then(result => shouldEncode ? encodeURIComponent(result) : result);
+      return this.evaluateBindingAsync_(binding, name, opt_args).then(result =>
+        shouldEncode ? encodeURIComponent(result) : result
+      );
     }
   }
-
 
   /**
    * Resolves binding to value to be substituted asyncronously.
@@ -304,31 +307,31 @@ export class Expander {
     try {
       if (typeof binding === 'function') {
         if (opt_args) {
-          value = Promise.all(opt_args)
-              .then(args => binding.apply(null, args));
+          value = Promise.all(opt_args).then(args => binding.apply(null, args));
         } else {
           value = tryResolve(binding);
         }
       } else {
         value = Promise.resolve(binding);
       }
-      return value.then(val => {
-        this.maybeCollectVars_(name, val, opt_args);
+      return value
+        .then(val => {
+          this.maybeCollectVars_(name, val, opt_args);
 
-        let result;
+          let result;
 
-        if (val == null) {
-          result = '';
-        } else {
-          result = val;
-        }
-        return result;
-      }).catch(e => {
-        rethrowAsync(e);
-        this.maybeCollectVars_(name, '', opt_args);
-        return Promise.resolve('');
-      });
-
+          if (val == null) {
+            result = '';
+          } else {
+            result = val;
+          }
+          return result;
+        })
+        .catch(e => {
+          rethrowAsync(e);
+          this.maybeCollectVars_(name, '', opt_args);
+          return Promise.resolve('');
+        });
     } catch (e) {
       // Report error, but do not disrupt URL replacement. This will
       // interpolate as the empty string.
@@ -337,7 +340,6 @@ export class Expander {
       return Promise.resolve('');
     }
   }
-
 
   /**
    * Resolves binding to value to be substituted asyncronously.
@@ -348,8 +350,8 @@ export class Expander {
    */
   evaluateBindingSync_(binding, name, opt_args) {
     try {
-      const value = typeof binding === 'function' ?
-        binding.apply(null, opt_args) : binding;
+      const value =
+        typeof binding === 'function' ? binding.apply(null, opt_args) : binding;
 
       let result;
 
@@ -359,8 +361,11 @@ export class Expander {
         // even if collectVars exists.
         user().error(TAG, 'ignoring async macro resolution');
         result = '';
-      } else if (typeof value === 'string' || typeof value === 'number' ||
-          typeof value === 'boolean') {
+      } else if (
+        typeof value === 'string' ||
+        typeof value === 'number' ||
+        typeof value === 'boolean'
+      ) {
         // Normal case.
         this.maybeCollectVars_(name, value, opt_args);
         result = value.toString();
@@ -369,7 +374,6 @@ export class Expander {
         this.maybeCollectVars_(name, '', opt_args);
         result = '';
       }
-
 
       return result;
     } catch (e) {
