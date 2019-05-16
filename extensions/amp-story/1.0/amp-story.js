@@ -85,6 +85,7 @@ import {
   createElementWithAttributes,
   isRTL,
   scopedQuerySelectorAll,
+  whenUpgradedToCustomElement,
 } from '../../../src/dom';
 import {
   computedStyle,
@@ -963,6 +964,16 @@ export class AmpStory extends AMP.BaseElement {
       .then(() => this.whenPagesLoaded_(PAGE_LOAD_TIMEOUT_MS))
       .then(() => this.markStoryAsLoaded_());
 
+    // Story is being prerendered: resolve the layoutCallback when the first
+    // page is built. Other pages will only build if the document becomes
+    // visible.
+    if (!Services.viewerForDoc(this.element).hasBeenVisible()) {
+      return whenUpgradedToCustomElement(firstPageEl).then(() =>
+        firstPageEl.whenBuilt()
+      );
+    }
+
+    // Will resolve when all pages are built.
     return storyLayoutPromise;
   }
 
