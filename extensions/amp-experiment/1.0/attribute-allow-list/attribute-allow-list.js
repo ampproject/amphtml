@@ -44,7 +44,7 @@ export function getAllowedAttributeMutation(
 
   // Find our allow list entry
   const mutationTagName = mutationRecord['targetElement']
-      .tagName.toLowerCase();
+    .tagName.toLowerCase();
 
   // Search through the allow list for our
   // Allowed attribute entry
@@ -58,11 +58,12 @@ export function getAllowedAttributeMutation(
     allowedAttributeEntry =
       attributeMutationAllowList
           [mutationAttributeName]
-          ['*'];
+    ['*'];
 
-    if (!allowedAttributeEntry.tags ||
-      (!allowedAttributeEntry.tags.includes[mutationTagName] &&
-      !allowedAttributeEntry.tags.includes['*'])) {
+    if (!allowedAttributeEntry.tags) {
+      allowedAttributeEntry = undefined;
+    } else if (!allowedAttributeEntry.tags.includes(mutationTagName) &&
+      !allowedAttributeEntry.tags.includes('*')) {
       allowedAttributeEntry = undefined;
     }
   }
@@ -90,7 +91,7 @@ export function getAllowedAttributeMutation(
 
 const attributeMutationAllowList = {
   'style': {
-    '*': new DefaultStyleAllowedAttributeEntry(),
+    'h1': new DefaultStyleAllowedAttributeEntry(),
   },
   'src': {
     '*': new DefaultAllowedURLAttributeEntry(),

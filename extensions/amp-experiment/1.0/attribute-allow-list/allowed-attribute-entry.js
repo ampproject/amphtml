@@ -28,7 +28,7 @@ export class AllowedAttributeEntry {
    * @param {?Array<string>} opt_tags
    */
   constructor(opt_tags) {
-    this.tags_ = opt_tags;
+    this.tags = opt_tags;
   }
 
   /**
