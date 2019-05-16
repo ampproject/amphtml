@@ -47,11 +47,7 @@ const esmRemovedImports = {
  * @param {!Object<string, boolean>} buildFlags
  * @return {!Array<string|!Array<string|!Object>>}
  */
-function plugins({
-  isCommonJsModule,
-  isEsmBuild,
-  isForTesting,
-}) {
+function plugins({isCommonJsModule, isEsmBuild, isForTesting}) {
   const applied = [...singlepassPlugins];
   if (isEsmBuild) {
     applied.push(['filter-imports', {imports: esmRemovedImports}]);
@@ -61,8 +57,8 @@ function plugins({
   }
   if (!isForTesting) {
     applied.push(
-        localPlugin('amp-mode-transformer'),
-        localPlugin('is_dev-constant-transformer')
+      localPlugin('amp-mode-transformer'),
+      localPlugin('is_dev-constant-transformer')
     );
   }
   return applied;

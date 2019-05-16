@@ -25,16 +25,10 @@
 // src/polyfills.js must be the first import.
 import './polyfills'; // eslint-disable-line sort-imports-es6-autofix/sort-imports-es6
 
-import {
-  IntegrationAmpContext,
-} from './ampcontext-integration';
+import {IntegrationAmpContext} from './ampcontext-integration';
 import {dict} from '../src/utils/object.js';
 import {endsWith} from '../src/string';
-import {
-  getAmpConfig,
-  getEmbedType,
-  getLocation,
-} from './frame-metadata';
+import {getAmpConfig, getEmbedType, getLocation} from './frame-metadata';
 import {getMode} from '../src/mode';
 import {getSourceUrl, isProxyOrigin, parseUrlDeprecated} from '../src/url';
 import {
@@ -46,14 +40,9 @@ import {
 import {installEmbedStateListener, manageWin} from './environment';
 import {internalRuntimeVersion} from '../src/internal-version';
 import {parseJson} from '../src/json';
-import {
-  register,
-  run,
-  setExperimentToggles,
-} from './3p';
+import {register, run, setExperimentToggles} from './3p';
 import {startsWith} from '../src/string.js';
 import {urls} from '../src/config';
-
 
 // 3P - please keep in alphabetic order
 import {beopinion} from './beopinion';
@@ -110,6 +99,7 @@ import {adyoulike} from '../ads/adyoulike';
 import {affiliateb} from '../ads/affiliateb';
 import {aja} from '../ads/aja';
 import {amoad} from '../ads/amoad';
+import {aniview} from '../ads/aniview';
 import {appnexus} from '../ads/appnexus';
 import {appvador} from '../ads/appvador';
 import {atomx} from '../ads/atomx';
@@ -122,7 +112,7 @@ import {caajainfeed} from '../ads/caajainfeed';
 import {capirs} from '../ads/capirs';
 import {caprofitx} from '../ads/caprofitx';
 import {cedato} from '../ads/cedato';
-import {chargeads} from '../ads/chargeads';
+import {chargeads, nws} from '../ads/nws';
 import {colombia} from '../ads/colombia';
 import {connatix} from '../ads/connatix';
 import {contentad} from '../ads/contentad';
@@ -194,6 +184,7 @@ import {onead} from '../ads/onead';
 import {onnetwork} from '../ads/onnetwork';
 import {openadstream} from '../ads/openadstream';
 import {openx} from '../ads/openx';
+import {opinary} from '../ads/opinary';
 import {outbrain} from '../ads/outbrain';
 import {pixels} from '../ads/pixels';
 import {plista} from '../ads/plista';
@@ -284,6 +275,7 @@ const AMP_EMBED_ALLOWED = {
   'mantis-recommend': true,
   miximedia: true,
   mywidget: true,
+  opinary: true,
   outbrain: true,
   plista: true,
   postquare: true,
@@ -300,7 +292,6 @@ const AMP_EMBED_ALLOWED = {
 };
 
 init(window);
-
 
 if (getMode().test || getMode().localDev) {
   register('_ping_', _ping_);
@@ -347,6 +338,7 @@ register('adyoulike', adyoulike);
 register('affiliateb', affiliateb);
 register('aja', aja);
 register('amoad', amoad);
+register('aniview', aniview);
 register('appnexus', appnexus);
 register('appvador', appvador);
 register('atomx', atomx);
@@ -363,7 +355,7 @@ register('caprofitx', caprofitx);
 register('cedato', cedato);
 register('chargeads', chargeads);
 register('colombia', colombia);
-register('connatix',connatix);
+register('connatix', connatix);
 register('contentad', contentad);
 register('criteo', criteo);
 register('csa', csa);
@@ -435,10 +427,12 @@ register('nend', nend);
 register('netletix', netletix);
 register('noddus', noddus);
 register('nokta', nokta);
+register('nws', nws);
 register('onead', onead);
 register('onnetwork', onnetwork);
 register('openadstream', openadstream);
 register('openx', openx);
+register('opinary', opinary);
 register('outbrain', outbrain);
 register('pixels', pixels);
 register('plista', plista);
@@ -501,7 +495,7 @@ register('weborama-display', weboramaDisplay);
 register('widespace', widespace);
 register('wisteria', wisteria);
 register('wpmedia', wpmedia);
-register('xlift' , xlift);
+register('xlift', xlift);
 register('yahoo', yahoo);
 register('yahoojp', yahoojp);
 register('yandex', yandex);
@@ -531,7 +525,6 @@ const defaultAllowedTypesInCustomFrame = [
   '_ping_',
 ];
 
-
 /**
  * Initialize 3p frame.
  * @param {!Window} win
@@ -548,7 +541,6 @@ function init(win) {
   setExperimentToggles(config.experimentToggles);
 }
 
-
 /**
  * Visible for testing.
  * Draws a 3p embed to the window. Expects the data to include the 3p type.
@@ -563,12 +555,15 @@ function init(win) {
 export function draw3p(win, data, configCallback) {
   const type = data['type'];
 
-  userAssert(isTagNameAllowed(type, win.context.tagName),
-      'Embed type %s not allowed with tag %s', type, win.context.tagName);
+  userAssert(
+    isTagNameAllowed(type, win.context.tagName),
+    'Embed type %s not allowed with tag %s',
+    type,
+    win.context.tagName
+  );
   if (configCallback) {
     configCallback(data, data => {
-      userAssert(data,
-          'Expected configuration to be passed as first argument');
+      userAssert(data, 'Expected configuration to be passed as first argument');
       run(type, win, data);
     });
   } else {
@@ -588,8 +583,11 @@ export function draw3p(win, data, configCallback) {
  * @param {!Array<string>=} opt_allowedEmbeddingOrigins List of domain suffixes
  *     that are allowed to embed this frame.
  */
-window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
-  opt_allowedEmbeddingOrigins) {
+window.draw3p = function(
+  opt_configCallback,
+  opt_allowed3pTypes,
+  opt_allowedEmbeddingOrigins
+) {
   try {
     const location = getLocation();
 
@@ -607,9 +605,10 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
     // and the compiler not being able to discern otherwise
     // TODO(alanorozco): Do this more elegantly once old impl is cleaned up.
     draw3p(
-        window,
-        (/** @type {!IntegrationAmpContext} */ (window.context)).data || {},
-        opt_configCallback);
+      window,
+      /** @type {!IntegrationAmpContext} */ (window.context).data || {},
+      opt_configCallback
+    );
 
     window.context.bootstrapLoaded();
   } catch (e) {
@@ -645,9 +644,12 @@ export function validateParentOrigin(window, parentLocation) {
   if (!ancestors || !ancestors.length) {
     return;
   }
-  userAssert(ancestors[0] == parentLocation.origin,
-      'Parent origin mismatch: %s, %s',
-      ancestors[0], parentLocation.origin);
+  userAssert(
+    ancestors[0] == parentLocation.origin,
+    'Parent origin mismatch: %s, %s',
+    ancestors[0],
+    parentLocation.origin
+  );
 }
 
 /**
@@ -673,8 +675,11 @@ export function validateAllowedTypes(window, type, allowedTypes) {
   if (defaultAllowedTypesInCustomFrame.indexOf(type) != -1) {
     return;
   }
-  userAssert(allowedTypes && allowedTypes.indexOf(type) != -1,
-      'Non-whitelisted 3p type for custom iframe: %s', type);
+  userAssert(
+    allowedTypes && allowedTypes.indexOf(type) != -1,
+    'Non-whitelisted 3p type for custom iframe: %s',
+    type
+  );
 }
 
 /**
@@ -697,7 +702,7 @@ export function validateAllowedEmbeddingOrigins(window, allowedHostnames) {
     // the referrer. The referrer is used because it should be
     // trustable.
     hostname = parseUrlDeprecated(getSourceUrl(window.document.referrer))
-        .hostname;
+      .hostname;
   }
   for (let i = 0; i < allowedHostnames.length; i++) {
     // Either the hostname is exactly as whitelisted…
@@ -709,8 +714,9 @@ export function validateAllowedEmbeddingOrigins(window, allowedHostnames) {
       return;
     }
   }
-  throw new Error('Invalid embedding hostname: ' + hostname + ' not in '
-      + allowedHostnames);
+  throw new Error(
+    'Invalid embedding hostname: ' + hostname + ' not in ' + allowedHostnames
+  );
 }
 
 /**
@@ -771,10 +777,16 @@ export function isTagNameAllowed(type, tagName) {
  * @param {boolean} isCanary
  */
 function lightweightErrorReport(e, isCanary) {
-  new Image().src = urls.errorReporting +
-      '?3p=1&v=' + encodeURIComponent(internalRuntimeVersion()) +
-      '&m=' + encodeURIComponent(e.message) +
-      '&ca=' + (isCanary ? 1 : 0) +
-      '&r=' + encodeURIComponent(document.referrer) +
-      '&s=' + encodeURIComponent(e.stack || '');
+  new Image().src =
+    urls.errorReporting +
+    '?3p=1&v=' +
+    encodeURIComponent(internalRuntimeVersion()) +
+    '&m=' +
+    encodeURIComponent(e.message) +
+    '&ca=' +
+    (isCanary ? 1 : 0) +
+    '&r=' +
+    encodeURIComponent(document.referrer) +
+    '&s=' +
+    encodeURIComponent(e.stack || '');
 }

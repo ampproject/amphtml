@@ -20,10 +20,8 @@ import {isProxyOrigin} from '../../../src/url';
 /** @const {string} */
 const TAG = 'amp-access-other';
 
-
 /** @implements {./amp-access-source.AccessTypeAdapterDef} */
 export class AccessOtherAdapter {
-
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!JsonObject} configJson
@@ -38,7 +36,7 @@ export class AccessOtherAdapter {
 
     /** @private {?JsonObject} */
     this.authorizationResponse_ =
-        configJson['authorizationFallbackResponse'] || null;
+      configJson['authorizationFallbackResponse'] || null;
 
     /** @const @private {boolean} */
     this.isProxyOrigin_ = isProxyOrigin(ampdoc.win.location);
@@ -55,7 +53,7 @@ export class AccessOtherAdapter {
   isAuthorizationEnabled() {
     // The `type=other` is allowed to use the authorization fallback, but
     // only if it's not on `cdn.ampproject.org`.
-    return (!!this.authorizationResponse_ && !this.isProxyOrigin_);
+    return !!this.authorizationResponse_ && !this.isProxyOrigin_;
   }
 
   /** @override */

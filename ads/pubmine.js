@@ -17,8 +17,8 @@
 import {loadScript, validateData} from '../3p/3p';
 
 const pubmineOptional = ['section', 'pt', 'ht'],
-    pubmineRequired = ['siteid'],
-    pubmineURL = 'https://s.pubmine.com/head.js';
+  pubmineRequired = ['siteid'],
+  pubmineURL = 'https://s.pubmine.com/head.js';
 
 /**
  * @param {!Object} data

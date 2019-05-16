@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  ancestorElementsByTag,
-  iterateCursor,
-} from './dom';
+import {ancestorElementsByTag, iterateCursor} from './dom';
 
 /** @const {string} */
 const FORM_PROP_ = '__AMP_FORM';
@@ -55,19 +52,14 @@ export function getFormAsObject(form) {
 
   for (let i = 0; i < elements.length; i++) {
     const input = elements[i];
-    const {
-      checked,
-      name,
-      multiple,
-      options,
-      tagName,
-      type,
-      value,
-    } = input;
-    if (!name || isDisabled(input) ||
-        !submittableTagsRegex.test(tagName) ||
-        unsubmittableTypesRegex.test(type) ||
-        (checkableType.test(type) && !checked)) {
+    const {checked, name, multiple, options, tagName, type, value} = input;
+    if (
+      !name ||
+      isDisabled(input) ||
+      !submittableTagsRegex.test(tagName) ||
+      unsubmittableTypesRegex.test(type) ||
+      (checkableType.test(type) && !checked)
+    ) {
       continue;
     }
 
@@ -149,10 +141,7 @@ export function getSubmitButtonUsed(form) {
  * @return {boolean}
  */
 function isSubmitButton(element) {
-  const {
-    tagName,
-    type,
-  } = element;
+  const {tagName, type} = element;
   return tagName == 'BUTTON' || type == 'submit';
 }
 

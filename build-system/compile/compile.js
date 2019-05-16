@@ -25,12 +25,16 @@ const nop = require('gulp-nop');
 const rename = require('gulp-rename');
 const rimraf = require('rimraf');
 const sourcemaps = require('gulp-sourcemaps');
-const {gulpClosureCompile, handleCompilerError, handleTypeCheckError} = require('./closure-compile');
+const {
+  gulpClosureCompile,
+  handleCompilerError,
+  handleTypeCheckError,
+} = require('./closure-compile');
 const {isTravisBuild} = require('../travis');
 const {multipassPlugins: plugins} = require('../build.conf');
 const {shortenLicense, shouldShortenLicense} = require('./shorten-license');
 const {singlePassCompile} = require('./single-pass');
-const {VERSION: internalRuntimeVersion} = require('../internal-version') ;
+const {VERSION: internalRuntimeVersion} = require('../internal-version');
 
 const isProdBuild = !!argv.type;
 const queue = [];
@@ -40,23 +44,29 @@ const MAX_PARALLEL_CLOSURE_INVOCATIONS = argv.single_pass ? 1 : 4;
 // Compiles AMP with the closure compiler. This is intended only for
 // production use. During development we intend to continue using
 // babel, as it has much faster incremental compilation.
-exports.closureCompile = async function(entryModuleFilename, outputDir,
-  outputFilename, options) {
+exports.closureCompile = async function(
+  entryModuleFilename,
+  outputDir,
+  outputFilename,
+  options
+) {
   // Rate limit closure compilation to MAX_PARALLEL_CLOSURE_INVOCATIONS
   // concurrent processes.
   return new Promise(function(resolve, reject) {
     function start() {
       inProgress++;
-      compile(entryModuleFilename, outputDir, outputFilename, options)
-          .then(function() {
-            if (isTravisBuild()) {
-              // Print a progress dot after each task to avoid Travis timeouts.
-              process.stdout.write('.');
-            }
-            inProgress--;
-            next();
-            resolve();
-          }, reason => reject(reason));
+      compile(entryModuleFilename, outputDir, outputFilename, options).then(
+        function() {
+          if (isTravisBuild()) {
+            // Print a progress dot after each task to avoid Travis timeouts.
+            process.stdout.write('.');
+          }
+          inProgress--;
+          next();
+          resolve();
+        },
+        reason => reject(reason)
+      );
     }
     function next() {
       if (!queue.length) {
@@ -110,9 +120,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
     'third_party/moment/moment.extern.js',
     'third_party/react-externs/externs.js',
   ];
-  const define = [
-    `VERSION=${internalRuntimeVersion}`,
-  ];
+  const define = [`VERSION=${internalRuntimeVersion}`];
   if (argv.pseudo_names) {
     define.push('PSEUDO_NAMES=true');
   }
@@ -132,7 +140,8 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       define.push('ESM_BUILD=true');
     }
 
-    console/*OK*/.assert(typeof entryModuleFilenames == 'string');
+    console /*OK*/
+      .assert(typeof entryModuleFilenames == 'string');
     return singlePassCompile(entryModuleFilenames, compilationOptions);
   }
 
@@ -154,8 +163,10 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
     let sourceMapBase = 'http://localhost:8000/';
     if (isProdBuild) {
       // Point sourcemap to fetch files from correct GitHub tag.
-      sourceMapBase = 'https://raw.githubusercontent.com/ampproject/amphtml/' +
-            internalRuntimeVersion + '/';
+      sourceMapBase =
+        'https://raw.githubusercontent.com/ampproject/amphtml/' +
+        internalRuntimeVersion +
+        '/';
     }
     const srcs = [
       '3p/3p.js',
@@ -233,9 +244,9 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       'node_modules/web-activities/activity-ports.js',
       'node_modules/@ampproject/animations/dist/animations.mjs',
       'node_modules/@ampproject/worker-dom/dist/' +
-          'unminified.index.safe.mjs.patched.js',
+        'unminified.index.safe.mjs.patched.js',
       'node_modules/document-register-element/build/' +
-          'document-register-element.patched.js',
+        'document-register-element.patched.js',
       // 'node_modules/core-js/modules/**.js',
       // Not sure what these files are, but they seem to duplicate code
       // one level below and confuse the compiler.
@@ -255,9 +266,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       srcs.push.apply(srcs, options.extraGlobs);
     }
     if (options.include3pDirectories) {
-      srcs.push(
-          '3p/**/*.js',
-          'ads/**/*.js');
+      srcs.push('3p/**/*.js', 'ads/**/*.js');
     }
     // Many files include the polyfills, but we only want to deliver them
     // once. Since all files automatically wait for the main binary to load
@@ -269,42 +278,47 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
         return p !== 'custom-elements.js';
       });
       srcs.push(
-          '!build/fake-module/src/polyfills.js',
-          '!build/fake-module/src/polyfills/**/*.js',
-          '!build/fake-polyfills/src/polyfills.js',
-          'src/polyfills/custom-elements.js',
-          'build/fake-polyfills/**/*.js');
+        '!build/fake-module/src/polyfills.js',
+        '!build/fake-module/src/polyfills/**/*.js',
+        '!build/fake-polyfills/src/polyfills.js',
+        'src/polyfills/custom-elements.js',
+        'build/fake-polyfills/**/*.js'
+      );
       polyfillsShadowList.forEach(polyfillFile => {
         srcs.push(`!src/polyfills/${polyfillFile}`);
-        fs.writeFileSync('build/fake-polyfills/src/polyfills/' + polyfillFile,
-            'export function install() {}');
+        fs.writeFileSync(
+          'build/fake-polyfills/src/polyfills/' + polyfillFile,
+          'export function install() {}'
+        );
       });
     } else if (options.includePolyfills) {
       srcs.push(
-          '!build/fake-module/src/polyfills.js',
-          '!build/fake-module/src/polyfills/**/*.js',
-          '!build/fake-polyfills/**/*.js',
+        '!build/fake-module/src/polyfills.js',
+        '!build/fake-module/src/polyfills/**/*.js',
+        '!build/fake-polyfills/**/*.js'
       );
     } else {
-      srcs.push('!src/polyfills.js', '!build/fake-polyfills/**/*.js',);
+      srcs.push('!src/polyfills.js', '!build/fake-polyfills/**/*.js');
       unneededFiles.push('build/fake-module/src/polyfills.js');
     }
     // Negative globstars must come at the end.
     srcs.push(
-        // Don't include rollup configs
-        '!**/rollup.config.js',
-        // Don't include tests.
-        '!**_test.js',
-        '!**/test-*.js',
-        '!**/test-e2e/*.js',
-        // Don't include externs.
-        '!**/*.extern.js',
+      // Don't include rollup configs
+      '!**/rollup.config.js',
+      // Don't include tests.
+      '!**_test.js',
+      '!**/test-*.js',
+      '!**/test-e2e/*.js',
+      // Don't include externs.
+      '!**/*.extern.js'
     );
     unneededFiles.forEach(function(fake) {
       if (!fs.existsSync(fake)) {
-        fs.writeFileSync(fake,
-            '// Not needed in closure compiler\n' +
-            'export function deadCode() {}');
+        fs.writeFileSync(
+          fake,
+          '// Not needed in closure compiler\n' +
+            'export function deadCode() {}'
+        );
       }
     });
 
@@ -361,13 +375,14 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       // it won't do strict type checking if its whitespace only.
       compilerOptions.define.push('TYPECHECK_ONLY=true');
       compilerOptions.jscomp_error.push(
-          'checkTypes',
-          'accessControls',
-          'const',
-          'constantProperty',
-          'globalThis');
+        'checkTypes',
+        'accessControls',
+        'const',
+        'constantProperty',
+        'globalThis'
+      );
       compilerOptions.conformance_configs =
-          'build-system/conformance-config.textproto';
+        'build-system/conformance-config.textproto';
     }
 
     if (compilerOptions.define.length == 0) {
@@ -391,30 +406,32 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
     });
 
     if (options.typeCheckOnly) {
-      return gulp.src(srcs, {base: '.'})
-          .pipe(gulpClosureCompile(compilerOptionsArray))
-          .on('error', err => {
-            handleTypeCheckError();
-            reject(err);
-          })
-          .pipe(nop())
-          .on('end', resolve);
-    }
-
-    const babelConfig = {plugins, inputSourceMap: true};
-
-    return gulp.src(srcs, {base: '.'})
-        .pipe(gulpIf(shouldShortenLicense, shortenLicense()))
-        .pipe(sourcemaps.init({loadMaps: true}))
-        .pipe(gulpIf(/^(?!.*third_party)/, babel(babelConfig)))
+      return gulp
+        .src(srcs, {base: '.'})
         .pipe(gulpClosureCompile(compilerOptionsArray))
         .on('error', err => {
-          handleCompilerError(outputFilename);
+          handleTypeCheckError();
           reject(err);
         })
-        .pipe(rename(outputFilename))
-        .pipe(sourcemaps.write('.'))
-        .pipe(gulp.dest(outputDir))
+        .pipe(nop())
         .on('end', resolve);
+    }
+
+    return gulp
+      .src(srcs, {base: '.'})
+      .pipe(gulpIf(shouldShortenLicense, shortenLicense()))
+      .pipe(sourcemaps.init({loadMaps: true}))
+      .pipe(
+        gulpIf(/^(?!.*third_party)/, babel({plugins, inputSourceMap: true}))
+      )
+      .pipe(gulpClosureCompile(compilerOptionsArray))
+      .on('error', err => {
+        handleCompilerError(outputFilename);
+        reject(err);
+      })
+      .pipe(rename(outputFilename))
+      .pipe(sourcemaps.write('.'))
+      .pipe(gulp.dest(outputDir))
+      .on('end', resolve);
   });
 }

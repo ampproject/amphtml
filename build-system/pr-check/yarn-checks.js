@@ -34,19 +34,34 @@ function isYarnLockFileInSync(fileName = 'yarn-checks.js') {
   const fileLogPrefix = colors.bold(colors.yellow(`${fileName}:`));
   const yarnIntegrityCheck = getStderr('yarn check --integrity').trim();
   if (yarnIntegrityCheck.includes('error')) {
-    console.error(fileLogPrefix, colors.red('ERROR:'),
-        'Found the following', colors.cyan('yarn'), 'errors:\n' +
-        colors.cyan(yarnIntegrityCheck));
-    console.error(fileLogPrefix, colors.red('ERROR:'),
-        'Updates to', colors.cyan('package.json'),
-        'must be accompanied by a corresponding update to',
-        colors.cyan('yarn.lock'));
-    console.error(fileLogPrefix, colors.yellow('NOTE:'),
-        'To update', colors.cyan('yarn.lock'), 'after changing',
-        colors.cyan('package.json') + ',', 'run',
-        '"' + colors.cyan('yarn install') + '"',
-        'and include the updated', colors.cyan('yarn.lock'),
-        'in your PR.');
+    console.error(
+      fileLogPrefix,
+      colors.red('ERROR:'),
+      'Found the following',
+      colors.cyan('yarn'),
+      'errors:\n' + colors.cyan(yarnIntegrityCheck)
+    );
+    console.error(
+      fileLogPrefix,
+      colors.red('ERROR:'),
+      'Updates to',
+      colors.cyan('package.json'),
+      'must be accompanied by a corresponding update to',
+      colors.cyan('yarn.lock')
+    );
+    console.error(
+      fileLogPrefix,
+      colors.yellow('NOTE:'),
+      'To update',
+      colors.cyan('yarn.lock'),
+      'after changing',
+      colors.cyan('package.json') + ',',
+      'run',
+      '"' + colors.cyan('yarn install') + '"',
+      'and include the updated',
+      colors.cyan('yarn.lock'),
+      'in your PR.'
+    );
     return false;
   }
   return true;
@@ -62,12 +77,20 @@ function isYarnLockFileProperlyUpdated(fileName = 'yarn-checks.js') {
   const fileLogPrefix = colors.bold(colors.yellow(`${fileName}:`));
 
   if (localChanges.includes('yarn.lock')) {
-    console.error(fileLogPrefix, colors.red('ERROR:'),
-        'This PR did not properly update', colors.cyan('yarn.lock') + '.');
-    console.error(fileLogPrefix, colors.yellow('NOTE:'),
-        'To fix this, sync your branch to', colors.cyan('upstream/master') +
-        ', run', colors.cyan('gulp update-packages') +
-        ', and push a new commit containing the changes.');
+    console.error(
+      fileLogPrefix,
+      colors.red('ERROR:'),
+      'This PR did not properly update',
+      colors.cyan('yarn.lock') + '.'
+    );
+    console.error(
+      fileLogPrefix,
+      colors.yellow('NOTE:'),
+      'To fix this, sync your branch to',
+      colors.cyan('upstream/master') + ', run',
+      colors.cyan('gulp update-packages') +
+        ', and push a new commit containing the changes.'
+    );
     console.error(fileLogPrefix, 'Expected changes:');
     console.log(localChanges);
     return false;
@@ -81,8 +104,9 @@ function isYarnLockFileProperlyUpdated(fileName = 'yarn-checks.js') {
  * @return {boolean}
  */
 function runYarnChecks(filename) {
-  return isYarnLockFileInSync(filename) &&
-      isYarnLockFileProperlyUpdated(filename);
+  return (
+    isYarnLockFileInSync(filename) && isYarnLockFileProperlyUpdated(filename)
+  );
 }
 
 module.exports = {

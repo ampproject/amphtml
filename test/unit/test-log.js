@@ -30,7 +30,6 @@ import {
 } from '../../src/log';
 
 describe('Logging', () => {
-
   const RETURNS_FINE = () => LogLevel.FINE;
   const RETURNS_INFO = () => LogLevel.INFO;
   const RETURNS_WARN = () => LogLevel.WARN;
@@ -69,7 +68,6 @@ describe('Logging', () => {
   });
 
   describe('Level', () => {
-
     it('should be enabled when directly allowed', () => {
       expect(new Log(win, RETURNS_FINE).level_).to.equal(LogLevel.FINE);
     });
@@ -229,7 +227,6 @@ describe('Logging', () => {
   });
 
   describe('UserLog', () => {
-
     it('should be WARN by default', () => {
       expect(user().levelFunc_(mode)).to.equal(LogLevel.WARN);
     });
@@ -261,7 +258,6 @@ describe('Logging', () => {
   });
 
   describe('DevLog', () => {
-
     it('should be disabled by default', () => {
       expect(dev().levelFunc_(mode)).to.equal(LogLevel.OFF);
     });
@@ -292,7 +288,6 @@ describe('Logging', () => {
   });
 
   describe('asserts', () => {
-
     let log;
 
     beforeEach(() => {
@@ -537,7 +532,6 @@ describe('Logging', () => {
   });
 
   describe('assertEnumValue', () => {
-
     let log;
 
     beforeEach(() => {
@@ -553,15 +547,18 @@ describe('Logging', () => {
     it('should fail with unknown enum value', () => {
       const enum1 = {a: 'value1', b: 'value2'};
       expect(() => log.assertEnumValue(enum1, 'value3')).to.throw(
-          'Unknown enum value: "value3"');
+        'Unknown enum value: "value3"'
+      );
       expect(() => log.assertEnumValue(enum1, 'value3', 'MyEnum')).to.throw(
-          'Unknown MyEnum value: "value3"');
+        'Unknown MyEnum value: "value3"'
+      );
     });
 
     it('should fail with values of different case', () => {
       const enum1 = {a: 'value1', b: 'value2'};
       expect(() => log.assertEnumValue(enum1, 'VALUE1')).to.throw(
-          'Unknown enum value: "VALUE1"');
+        'Unknown enum value: "VALUE1"'
+      );
     });
   });
 
@@ -582,10 +579,8 @@ describe('Logging', () => {
     });
 
     it('should fail with non-array values', () => {
-      expect(() => log.assertArray('a')).to.throw(
-          'Array expected: a');
-      expect(() => log.assertArray(1)).to.throw(
-          'Array expected: 1');
+      expect(() => log.assertArray('a')).to.throw('Array expected: a');
+      expect(() => log.assertArray(1)).to.throw('Array expected: 1');
     });
   });
 
@@ -791,9 +786,9 @@ describe('Logging', () => {
       const id = 'foo';
       const queryRe = `id=${id}`;
       const expectedRe = new RegExp(`${prefixRe}${queryRe}$`);
-      const result = log.expandLogMessage(id);
-      expect(expectedRe.test(result), `${expectedRe}.test('${result}')`)
-          .to.be.true;
+      const result = log.expandLogMessage_(id);
+      expect(expectedRe.test(result), `${expectedRe}.test('${result}')`).to.be
+        .true;
     });
 
     it('returns url with one arg', () => {
@@ -801,9 +796,9 @@ describe('Logging', () => {
       const arg1 = 'bar';
       const queryRe = `id=${id}&s\\[\\]=${arg1}`;
       const expectedRe = new RegExp(`${prefixRe}${queryRe}$`);
-      const result = log.expandLogMessage(id, arg1);
-      expect(expectedRe.test(result), `${expectedRe}.test('${result}')`)
-          .to.be.true;
+      const result = log.expandLogMessage_(id, arg1);
+      expect(expectedRe.test(result), `${expectedRe}.test('${result}')`).to.be
+        .true;
     });
 
     it('returns url with many args', () => {
@@ -811,12 +806,11 @@ describe('Logging', () => {
       const arg1 = 'bar';
       const arg2 = 'baz';
       const arg3 = 'taquitos';
-      const queryRe =
-        `id=${id}&s\\[\\]=${arg1}&s\\[\\]=${arg2}&s\\[\\]=${arg3}`;
+      const queryRe = `id=${id}&s\\[\\]=${arg1}&s\\[\\]=${arg2}&s\\[\\]=${arg3}`;
       const expectedRe = new RegExp(`${prefixRe}${queryRe}$`);
-      const result = log.expandLogMessage(id, arg1, arg2, arg3);
-      expect(expectedRe.test(result), `${expectedRe}.test('${result}')`)
-          .to.be.true;
+      const result = log.expandLogMessage_(id, arg1, arg2, arg3);
+      expect(expectedRe.test(result), `${expectedRe}.test('${result}')`).to.be
+        .true;
     });
   });
 });

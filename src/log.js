@@ -33,14 +33,12 @@ const noop = () => {};
  */
 export const USER_ERROR_SENTINEL = '\u200B\u200B\u200B';
 
-
 /**
  * Four zero width space.
  *
  * @const {string}
  */
 export const USER_ERROR_EMBED_SENTINEL = '\u200B\u200B\u200B\u200B';
-
 
 /**
  * @param {string} message
@@ -57,7 +55,6 @@ export function isUserErrorMessage(message) {
 export function isUserErrorEmbed(message) {
   return message.indexOf(USER_ERROR_EMBED_SENTINEL) >= 0;
 }
-
 
 /**
  * @enum {number}
@@ -130,7 +127,7 @@ export class Log {
      * the tests runs because only the former is relayed to the console.
      * @const {!Window}
      */
-    this.win = (getMode().test && win.AMP_TEST_IFRAME) ? win.parent : win;
+    this.win = getMode().test && win.AMP_TEST_IFRAME ? win.parent : win;
 
     /** @private @const {function(!./mode.ModeDef):!LogLevel} */
     this.levelFunc_ = levelFunc;
@@ -161,7 +158,7 @@ export class Log {
    * @private
    */
   getLevel_() {
-    return (levelOverride_ !== undefined) ? levelOverride_ : this.level_;
+    return levelOverride_ !== undefined ? levelOverride_ : this.level_;
   }
 
   /**
@@ -269,8 +266,10 @@ export class Log {
     if (this.getLevel_() >= LogLevel.ERROR) {
       this.msg_(tag, 'ERROR', Array.prototype.slice.call(arguments, 1));
     } else {
-      const error = createErrorVargs.apply(null,
-          Array.prototype.slice.call(arguments, 1));
+      const error = createErrorVargs.apply(
+        null,
+        Array.prototype.slice.call(arguments, 1)
+      );
       this.prepareError_(error);
       return error;
     }
@@ -399,8 +398,11 @@ export class Log {
    */
   assertElement(shouldBeElement, opt_message) {
     const shouldBeTrueish = shouldBeElement && shouldBeElement.nodeType == 1;
-    this.assert(shouldBeTrueish, (opt_message || 'Element expected') + ': %s',
-        shouldBeElement);
+    this.assert(
+      shouldBeTrueish,
+      (opt_message || 'Element expected') + ': %s',
+      shouldBeElement
+    );
     return /** @type {!Element} */ (shouldBeElement);
   }
 
@@ -416,8 +418,11 @@ export class Log {
    * eslint "google-camelcase/google-camelcase": 2
    */
   assertString(shouldBeString, opt_message) {
-    this.assert(typeof shouldBeString == 'string',
-        (opt_message || 'String expected') + ': %s', shouldBeString);
+    this.assert(
+      typeof shouldBeString == 'string',
+      (opt_message || 'String expected') + ': %s',
+      shouldBeString
+    );
     return /** @type {string} */ (shouldBeString);
   }
 
@@ -433,8 +438,11 @@ export class Log {
    *   and `NaN`.
    */
   assertNumber(shouldBeNumber, opt_message) {
-    this.assert(typeof shouldBeNumber == 'number',
-        (opt_message || 'Number expected') + ': %s', shouldBeNumber);
+    this.assert(
+      typeof shouldBeNumber == 'number',
+      (opt_message || 'Number expected') + ': %s',
+      shouldBeNumber
+    );
     return /** @type {number} */ (shouldBeNumber);
   }
 
@@ -447,8 +455,11 @@ export class Log {
    * @return {!Array} The array value
    */
   assertArray(shouldBeArray, opt_message) {
-    this.assert(Array.isArray(shouldBeArray),
-        (opt_message || 'Array expected') + ': %s', shouldBeArray);
+    this.assert(
+      Array.isArray(shouldBeArray),
+      (opt_message || 'Array expected') + ': %s',
+      shouldBeArray
+    );
     return /** @type {!Array} */ (shouldBeArray);
   }
 
@@ -462,8 +473,11 @@ export class Log {
    * @return {boolean} The boolean value.
    */
   assertBoolean(shouldBeBoolean, opt_message) {
-    this.assert(!!shouldBeBoolean === shouldBeBoolean,
-        (opt_message || 'Boolean expected') + ': %s', shouldBeBoolean);
+    this.assert(
+      !!shouldBeBoolean === shouldBeBoolean,
+      (opt_message || 'Boolean expected') + ': %s',
+      shouldBeBoolean
+    );
     return /** @type {boolean} */ (shouldBeBoolean);
   }
 
@@ -482,9 +496,7 @@ export class Log {
     if (isEnumValue(enumObj, s)) {
       return s;
     }
-    this.assert(false,
-        'Unknown %s value: "%s"',
-        opt_enumName || 'enum', s);
+    this.assert(false, 'Unknown %s value: "%s"', opt_enumName || 'enum', s);
   }
 
   /**
@@ -563,7 +575,6 @@ function toString(val) {
   return /** @type {string} */ (val);
 }
 
-
 /**
  * @param {!Array} array
  * @param {*} val
@@ -624,7 +635,6 @@ export function createErrorVargs(var_args) {
   return error;
 }
 
-
 /**
  * Rethrows the error without terminating the current context. This preserves
  * whether the original error designation is a user error or a dev error.
@@ -639,17 +649,16 @@ export function rethrowAsync(var_args) {
   });
 }
 
-
 /**
  * Cache for logs. We do not use a Service since the service module depends
  * on Log and closure literally can't even.
  * @type {{user: ?Log, dev: ?Log, userForEmbed: ?Log}}
  */
-self.log = (self.log || {
+self.log = self.log || {
   user: null,
   dev: null,
   userForEmbed: null,
-});
+};
 
 const logs = self.log;
 
@@ -707,7 +716,7 @@ export function user(opt_element) {
     if (logs.userForEmbed) {
       return logs.userForEmbed;
     }
-    return logs.userForEmbed = getUserLogger(USER_ERROR_EMBED_SENTINEL);
+    return (logs.userForEmbed = getUserLogger(USER_ERROR_EMBED_SENTINEL));
   }
 }
 
@@ -720,13 +729,17 @@ function getUserLogger(suffix) {
   if (!logConstructor) {
     throw new Error('failed to call initLogConstructor');
   }
-  return new logConstructor(self, mode => {
-    const logNum = parseInt(mode.log, 10);
-    if (mode.development || logNum >= 1) {
-      return LogLevel.FINE;
-    }
-    return LogLevel.WARN;
-  }, suffix);
+  return new logConstructor(
+    self,
+    mode => {
+      const logNum = parseInt(mode.log, 10);
+      if (mode.development || logNum >= 1) {
+        return LogLevel.FINE;
+      }
+      return LogLevel.WARN;
+    },
+    suffix
+  );
 }
 
 /**
@@ -748,7 +761,7 @@ export function dev() {
   if (!logConstructor) {
     throw new Error('failed to call initLogConstructor');
   }
-  return logs.dev = new logConstructor(self, mode => {
+  return (logs.dev = new logConstructor(self, mode => {
     const logNum = parseInt(mode.log, 10);
     if (logNum >= 3) {
       return LogLevel.FINE;
@@ -757,7 +770,7 @@ export function dev() {
       return LogLevel.INFO;
     }
     return LogLevel.OFF;
-  });
+  }));
 }
 
 /**
@@ -800,13 +813,35 @@ export function isFromEmbed(win, opt_element) {
  * @template T
  * eslint "google-camelcase/google-camelcase": 0
  */
-export function devAssert(shouldBeTrueish, opt_message, opt_1, opt_2,
-  opt_3, opt_4, opt_5, opt_6, opt_7, opt_8, opt_9) {
+export function devAssert(
+  shouldBeTrueish,
+  opt_message,
+  opt_1,
+  opt_2,
+  opt_3,
+  opt_4,
+  opt_5,
+  opt_6,
+  opt_7,
+  opt_8,
+  opt_9
+) {
   if (getMode().minified) {
     return shouldBeTrueish;
   }
-  return dev()./*Orig call*/assert(shouldBeTrueish, opt_message, opt_1, opt_2,
-      opt_3, opt_4, opt_5, opt_6, opt_7, opt_8, opt_9);
+  return dev()./*Orig call*/ assert(
+    shouldBeTrueish,
+    opt_message,
+    opt_1,
+    opt_2,
+    opt_3,
+    opt_4,
+    opt_5,
+    opt_6,
+    opt_7,
+    opt_8,
+    opt_9
+  );
 }
 
 /**
@@ -837,8 +872,30 @@ export function devAssert(shouldBeTrueish, opt_message, opt_1, opt_2,
  * @template T
  * eslint "google-camelcase/google-camelcase": 0
  */
-export function userAssert(shouldBeTrueish, opt_message, opt_1, opt_2,
-  opt_3, opt_4, opt_5, opt_6, opt_7, opt_8, opt_9) {
-  return user()./*Orig call*/assert(shouldBeTrueish, opt_message, opt_1, opt_2,
-      opt_3, opt_4, opt_5, opt_6, opt_7, opt_8, opt_9);
+export function userAssert(
+  shouldBeTrueish,
+  opt_message,
+  opt_1,
+  opt_2,
+  opt_3,
+  opt_4,
+  opt_5,
+  opt_6,
+  opt_7,
+  opt_8,
+  opt_9
+) {
+  return user()./*Orig call*/ assert(
+    shouldBeTrueish,
+    opt_message,
+    opt_1,
+    opt_2,
+    opt_3,
+    opt_4,
+    opt_5,
+    opt_6,
+    opt_7,
+    opt_8,
+    opt_9
+  );
 }

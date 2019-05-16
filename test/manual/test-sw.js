@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-console./*OK*/info('ServiceWorker loaded.');
+console./*OK*/ info('ServiceWorker loaded.');

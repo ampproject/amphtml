@@ -14,12 +14,8 @@
  * limitations under the License.
  */
 
-import {
-  LocalSubscriptionIframePlatform,
-} from './local-subscription-platform-iframe';
-import {
-  LocalSubscriptionRemotePlatform,
-} from './local-subscription-platform-remote';
+import {LocalSubscriptionIframePlatform} from './local-subscription-platform-iframe';
+import {LocalSubscriptionRemotePlatform} from './local-subscription-platform-remote';
 import {PageConfig} from '../../../third_party/subscriptions-project/config';
 
 /**
@@ -30,14 +26,23 @@ import {PageConfig} from '../../../third_party/subscriptions-project/config';
  * @return {!./subscription-platform.SubscriptionPlatform}
  */
 export function localSubscriptionPlatformFactory(
-  ampdoc, platformConfig, serviceAdapter) {
+  ampdoc,
+  platformConfig,
+  serviceAdapter
+) {
   /* Return the correxct platform based on the config */
   if (platformConfig['type'] === 'iframe') {
     return new LocalSubscriptionIframePlatform(
-        ampdoc, platformConfig, serviceAdapter);
+      ampdoc,
+      platformConfig,
+      serviceAdapter
+    );
   }
   return new LocalSubscriptionRemotePlatform(
-      ampdoc, platformConfig, serviceAdapter);
+    ampdoc,
+    platformConfig,
+    serviceAdapter
+  );
 }
 
 /**
