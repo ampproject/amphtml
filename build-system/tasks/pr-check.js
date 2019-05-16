@@ -16,59 +16,64 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const {
-  printChangeSummary,
-  timedExecOrDie: timedExecOrDieBase,
-} = require('../pr-check/utils');
 const {determineBuildTargets} = require('../pr-check/build-targets');
+const {printChangeSummary, timedExec} = require('../pr-check/utils');
 
 const FILENAME = 'pr-check.js';
-const timedExecOrDie = (cmd, unusedFileName) =>
-  timedExecOrDieBase(cmd, FILENAME);
 
 /**
  * This file runs tests against the local workspace to mimic the CI build as
  * closely as possible.
+ * @param {Function} cb
  */
-async function prCheck() {
+async function prCheck(cb) {
+  const runCheck = cmd => {
+    const {status} = timedExec(cmd, FILENAME);
+    if (status != 0) {
+      const err = new Error('Local PR check failed. See logs above.');
+      err.showStack = false;
+      cb(err);
+    }
+  };
+
   printChangeSummary(FILENAME);
 
   const buildTargets = determineBuildTargets();
 
-  timedExecOrDie('gulp presubmit');
-  timedExecOrDie('gulp lint --local-changes');
-  timedExecOrDie('gulp ava');
-  timedExecOrDie('node node_modules/jest/bin/jest.js');
-  timedExecOrDie('gulp caches-json');
-  timedExecOrDie('gulp json-syntax');
+  runCheck('gulp lint --local-changes');
+  runCheck('gulp presubmit');
+  runCheck('gulp ava');
+  runCheck('node node_modules/jest/bin/jest.js');
+  runCheck('gulp caches-json');
+  runCheck('gulp json-syntax');
 
   if (buildTargets.has('DOCS')) {
-    timedExecOrDie('gulp check-links');
+    runCheck('gulp check-links');
   }
 
   if (buildTargets.has('RUNTIME')) {
-    timedExecOrDie('gulp dep-check');
-    timedExecOrDie('gulp check-types');
+    runCheck('gulp dep-check');
+    runCheck('gulp check-types');
   }
 
   if (buildTargets.has('RUNTIME') || buildTargets.has('UNIT_TEST')) {
-    timedExecOrDie('gulp test --unit --local-changes --headless');
+    runCheck('gulp test --unit --local-changes --headless');
   }
 
   if (buildTargets.has('RUNTIME') || buildTargets.has('INTEGRATION_TEST')) {
     if (!argv.nobuild) {
-      timedExecOrDie('gulp clean');
-      timedExecOrDie('gulp dist --fortesting');
+      runCheck('gulp clean');
+      runCheck('gulp dist --fortesting');
     }
-    timedExecOrDie('gulp test --nobuild --integration --headless');
+    runCheck('gulp test --nobuild --integration --headless');
   }
 
   if (buildTargets.has('RUNTIME') || buildTargets.has('VALIDATOR')) {
-    timedExecOrDie('gulp validator');
+    runCheck('gulp validator');
   }
 
   if (buildTargets.has('RUNTIME') || buildTargets.has('VALIDATOR_WEBUI')) {
-    timedExecOrDie('gulp validator-webui');
+    runCheck('gulp validator-webui');
   }
 }
 
