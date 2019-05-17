@@ -41,7 +41,6 @@ describe('getElementServiceIfAvailable()', () => {
   let setIntervalCallback;
 
   beforeEach(() => {
-    let readyState = 'loading';
     doc = {
       head: {},
       body: {},
@@ -55,8 +54,7 @@ describe('getElementServiceIfAvailable()', () => {
       setInterval: callback => {
         setIntervalCallback = callback;
       },
-      clearInterval: () => {
-      },
+      clearInterval: () => {},
     };
     doc.defaultView = win;
 
