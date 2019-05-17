@@ -24,7 +24,6 @@ import {evaluateExpr} from './expr';
  *
  */
 export class LocalSubscriptionPlatformRenderer {
-
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!./dialog.Dialog} dialog
@@ -54,7 +53,7 @@ export class LocalSubscriptionPlatformRenderer {
   render(renderState) {
     return Promise.all([
       this.renderActions_(renderState),
-      this.renderDialog_(/** @type {!JsonObject} */(renderState)),
+      this.renderDialog_(/** @type {!JsonObject} */ (renderState)),
     ]);
   }
 
@@ -82,42 +81,48 @@ export class LocalSubscriptionPlatformRenderer {
    */
   renderDialog_(authResponse) {
     // Make sure the document is fully parsed.
-    return this.ampdoc_.whenReady().then(() => {
-      // Find the first matching dialog.
-      const candidates = this.ampdoc_.getRootNode()
+    return this.ampdoc_
+      .whenReady()
+      .then(() => {
+        // Find the first matching dialog.
+        const candidates = this.ampdoc_
+          .getRootNode()
           .querySelectorAll('[subscriptions-dialog][subscriptions-display]');
-      for (let i = 0; i < candidates.length; i++) {
-        const candidate = candidates[i];
-        const expr = candidate.getAttribute('subscriptions-display');
-        if (expr && evaluateExpr(expr, authResponse)) {
-          return candidate;
+        for (let i = 0; i < candidates.length; i++) {
+          const candidate = candidates[i];
+          const expr = candidate.getAttribute('subscriptions-display');
+          if (expr && evaluateExpr(expr, authResponse)) {
+            return candidate;
+          }
         }
-      }
-    }).then(candidate => {
-      if (!candidate) {
-        return;
-      }
-      if (candidate.tagName == 'TEMPLATE') {
-        return this.templates_.renderTemplate(candidate, authResponse)
+      })
+      .then(candidate => {
+        if (!candidate) {
+          return;
+        }
+        if (candidate.tagName == 'TEMPLATE') {
+          return this.templates_
+            .renderTemplate(candidate, authResponse)
             .then(element => {
-              const renderState =
-                /** @type {!JsonObject} */(authResponse);
+              const renderState = /** @type {!JsonObject} */ (authResponse);
               return this.renderActionsInNode_(
-                  renderState,
-                  element,
-                  evaluateExpr);
+                renderState,
+                element,
+                evaluateExpr
+              );
             });
-      }
-      const clone = candidate.cloneNode(true);
-      clone.removeAttribute('subscriptions-dialog');
-      clone.removeAttribute('subscriptions-display');
-      return clone;
-    }).then(element => {
-      if (!element) {
-        return;
-      }
-      return this.dialog_.open(element, /* showCloseButton */ true);
-    });
+        }
+        const clone = candidate.cloneNode(true);
+        clone.removeAttribute('subscriptions-dialog');
+        clone.removeAttribute('subscriptions-display');
+        return clone;
+      })
+      .then(element => {
+        if (!element) {
+          return;
+        }
+        return this.dialog_.open(element, /* showCloseButton */ true);
+      });
   }
 
   /**
@@ -133,24 +138,28 @@ export class LocalSubscriptionPlatformRenderer {
       // Find the matching actions and sections and make them visible if
       // evalutes to true.
       const querySelectors =
-          '[subscriptions-action], [subscriptions-section="actions"],'
-              + ' [subscriptions-actions]';
+        '[subscriptions-action], [subscriptions-section="actions"],' +
+        ' [subscriptions-actions]';
       const actionCandidates = rootNode.querySelectorAll(querySelectors);
       for (let i = 0; i < actionCandidates.length; i++) {
         const candidate = actionCandidates[i];
         const expr = candidate.getAttribute('subscriptions-display');
-        if (expr && evaluateExpr(expr,
-            /** @type {!JsonObject} */(renderState))) {
+        if (
+          expr &&
+          evaluateExpr(expr, /** @type {!JsonObject} */ (renderState))
+        ) {
           candidate.classList.add('i-amphtml-subs-display');
-          if (candidate.getAttribute('subscriptions-service')
-            && candidate.getAttribute('subscriptions-action')
-            && candidate.getAttribute('subscriptions-decorate') !== 'false'
-            && !candidate.hasAttribute('i-amphtml-subs-decorated')) {
+          if (
+            candidate.getAttribute('subscriptions-service') &&
+            candidate.getAttribute('subscriptions-action') &&
+            candidate.getAttribute('subscriptions-decorate') !== 'false' &&
+            !candidate.hasAttribute('i-amphtml-subs-decorated')
+          ) {
             this.serviceAdapter_.decorateServiceAction(
-                candidate,
-                candidate.getAttribute('subscriptions-service'),
-                candidate.getAttribute('subscriptions-action'),
-                null
+              candidate,
+              candidate.getAttribute('subscriptions-service'),
+              candidate.getAttribute('subscriptions-action'),
+              null
             );
             candidate.setAttribute('i-amphtml-subs-decorated', true);
           }

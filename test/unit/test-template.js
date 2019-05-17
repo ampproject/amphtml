@@ -73,8 +73,11 @@ describes.fakeWin('Template', {amp: true}, env => {
 
   it('should render immediately', () => {
     const templateElement = createTemplateElement();
-    registerExtendedTemplate(win, templateElement.getAttribute('type'),
-        TemplateImpl);
+    registerExtendedTemplate(
+      win,
+      templateElement.getAttribute('type'),
+      TemplateImpl
+    );
     return templates.renderTemplate(templateElement, {value: 1}).then(res => {
       expect(res.textContent).to.equal('abc1');
     });
@@ -84,45 +87,65 @@ describes.fakeWin('Template', {amp: true}, env => {
     const templateElement = createTemplateElement();
     // Use TemplateImplCheckingViewer to make sure viewerCanRenderTemplates
     // works correctly when the template is later detached.
-    registerExtendedTemplate(win, templateElement.getAttribute('type'),
-        TemplateImplCheckingViewer);
+    registerExtendedTemplate(
+      win,
+      templateElement.getAttribute('type'),
+      TemplateImplCheckingViewer
+    );
     const viewerService = getServiceForDoc(templateElement, 'viewer');
     env.sandbox.stub(viewerService, 'hasCapability').returns(true);
-    return templates.renderTemplate(templateElement, {value: 1}).then(() => {
-      templateElement.parentElement.removeChild(templateElement);
-      return templates.renderTemplate(templateElement, {value: 2});
-    }).then(res => {
-      expect(res.textContent).to.equal('abc2');
-    });
+    return templates
+      .renderTemplate(templateElement, {value: 1})
+      .then(() => {
+        templateElement.parentElement.removeChild(templateElement);
+        return templates.renderTemplate(templateElement, {value: 2});
+      })
+      .then(res => {
+        expect(res.textContent).to.equal('abc2');
+      });
   });
 
   it('should render array', () => {
     const templateElement = createTemplateElement();
-    registerExtendedTemplate(win, templateElement.getAttribute('type'),
-        TemplateImpl);
-    return templates.renderTemplateArray(templateElement,
-        [{value: 1}, {value: 2}]).then(res => {
-      expect(res).to.have.length.of(2);
-      expect(res[0].textContent).to.equal('abc1');
-      expect(res[1].textContent).to.equal('abc2');
-    });
+    registerExtendedTemplate(
+      win,
+      templateElement.getAttribute('type'),
+      TemplateImpl
+    );
+    return templates
+      .renderTemplateArray(templateElement, [{value: 1}, {value: 2}])
+      .then(res => {
+        expect(res).to.have.length.of(2);
+        expect(res[0].textContent).to.equal('abc1');
+        expect(res[1].textContent).to.equal('abc2');
+      });
   });
 
   it('should NOT allow registering template class twice', () => {
     const templateElement = createTemplateElement();
-    registerExtendedTemplate(win, templateElement.getAttribute('type'),
-        TemplateImpl);
-    allowConsoleError(() => { expect(() => {
-      registerExtendedTemplate(win, templateElement.getAttribute('type'),
-          TemplateImpl);
-    }).to.throw(/Duplicate template type/); });
+    registerExtendedTemplate(
+      win,
+      templateElement.getAttribute('type'),
+      TemplateImpl
+    );
+    allowConsoleError(() => {
+      expect(() => {
+        registerExtendedTemplate(
+          win,
+          templateElement.getAttribute('type'),
+          TemplateImpl
+        );
+      }).to.throw(/Duplicate template type/);
+    });
   });
 
   it('should block render until template registered', () => {
     const templateElement = createTemplateElement();
     const scriptElement = doc.createElement('script');
-    scriptElement.setAttribute('custom-template',
-        templateElement.getAttribute('type'));
+    scriptElement.setAttribute(
+      'custom-template',
+      templateElement.getAttribute('type')
+    );
     doc.body.appendChild(scriptElement);
     let result = undefined;
     templates.renderTemplate(templateElement, {value: 0}).then(res => {
@@ -138,12 +161,17 @@ describes.fakeWin('Template', {amp: true}, env => {
   it('should unblock render when template registered', () => {
     const templateElement = createTemplateElement();
     const scriptElement = doc.createElement('script');
-    scriptElement.setAttribute('custom-template',
-        templateElement.getAttribute('type'));
+    scriptElement.setAttribute(
+      'custom-template',
+      templateElement.getAttribute('type')
+    );
     doc.body.appendChild(scriptElement);
     const p = templates.renderTemplate(templateElement, {value: 1});
-    registerExtendedTemplate(win, templateElement.getAttribute('type'),
-        TemplateImpl);
+    registerExtendedTemplate(
+      win,
+      templateElement.getAttribute('type'),
+      TemplateImpl
+    );
     return p.then(res => {
       expect(res.textContent).to.equal('abc1');
     });
@@ -152,22 +180,29 @@ describes.fakeWin('Template', {amp: true}, env => {
   it('should unblock render for parallel templates', () => {
     const templateElement = createTemplateElement();
     const scriptElement = doc.createElement('script');
-    scriptElement.setAttribute('custom-template',
-        templateElement.getAttribute('type'));
+    scriptElement.setAttribute(
+      'custom-template',
+      templateElement.getAttribute('type')
+    );
     doc.body.appendChild(scriptElement);
     const p1 = templates.renderTemplate(templateElement, {value: 1});
     const p2 = templates.renderTemplate(templateElement, {value: 2});
-    registerExtendedTemplate(win, templateElement.getAttribute('type'),
-        TemplateImpl);
+    registerExtendedTemplate(
+      win,
+      templateElement.getAttribute('type'),
+      TemplateImpl
+    );
     // This is just a complicated way to say Promise -> all.
-    return p1.then(res1 => {
-      return p2.then(res2 => {
-        return [res1, res2];
+    return p1
+      .then(res1 => {
+        return p2.then(res2 => {
+          return [res1, res2];
+        });
+      })
+      .then(res => {
+        expect(res[0].textContent).to.equal('abc1');
+        expect(res[1].textContent).to.equal('abc2');
       });
-    }).then(res => {
-      expect(res[0].textContent).to.equal('abc1');
-      expect(res[1].textContent).to.equal('abc2');
-    });
   });
 
   it('should discover template via ID', () => {
@@ -181,10 +216,11 @@ describes.fakeWin('Template', {amp: true}, env => {
     const parentElement = doc.createElement('div');
     parentElement.setAttribute('template', id);
     doc.body.appendChild(parentElement);
-    return templates.findAndRenderTemplate(parentElement, {value: 1}).then(
-        res => {
-          expect(res.textContent).to.equal('abc1');
-        });
+    return templates
+      .findAndRenderTemplate(parentElement, {value: 1})
+      .then(res => {
+        expect(res.textContent).to.equal('abc1');
+      });
   });
 
   it('should require discovered template via ID to be "template"', () => {
@@ -197,11 +233,14 @@ describes.fakeWin('Template', {amp: true}, env => {
     parentElement.setAttribute('template', id);
     doc.body.appendChild(parentElement);
     const regexError = new RegExp(
-        'Template must be defined in a <template> or '
-            + '<script type="text/plain"> tag');
-    allowConsoleError(() => { expect(() => {
-      templates.findAndRenderTemplate(parentElement, {value: 0});
-    }).to.throw(regexError);});
+      'Template must be defined in a <template> or ' +
+        '<script type="text/plain"> tag'
+    );
+    allowConsoleError(() => {
+      expect(() => {
+        templates.findAndRenderTemplate(parentElement, {value: 0});
+      }).to.throw(regexError);
+    });
   });
 
   it('should require discovered "script" with type defined', () => {
@@ -215,11 +254,14 @@ describes.fakeWin('Template', {amp: true}, env => {
     parentElement.setAttribute('template', id);
     doc.body.appendChild(parentElement);
     const regexError = new RegExp(
-        'Template must be defined in a <template> or '
-            + '<script type="text/plain"> tag');
-    allowConsoleError(() => { expect(() => {
-      templates.findAndRenderTemplate(parentElement, {value: 0});
-    }).to.throw(regexError);});
+      'Template must be defined in a <template> or ' +
+        '<script type="text/plain"> tag'
+    );
+    allowConsoleError(() => {
+      expect(() => {
+        templates.findAndRenderTemplate(parentElement, {value: 0});
+      }).to.throw(regexError);
+    });
   });
 
   it('should discover template via children', () => {
@@ -230,23 +272,28 @@ describes.fakeWin('Template', {amp: true}, env => {
     const parentElement = doc.createElement('div');
     parentElement.appendChild(templateElement);
     container.appendChild(parentElement);
-    return templates.findAndRenderTemplate(parentElement, {value: 1}).then(
-        res => {
-          expect(res.textContent).to.equal('abc1');
-        });
+    return templates
+      .findAndRenderTemplate(parentElement, {value: 1})
+      .then(res => {
+        expect(res.textContent).to.equal('abc1');
+      });
   });
 
   it('should fail when template not found', () => {
     const parentElement = doc.createElement('div');
     doc.body.appendChild(parentElement);
-    allowConsoleError(() => { expect(() => {
-      templates.findAndRenderTemplate(parentElement, {value: 0});
-    }).to.throw(/Template not found/); });
+    allowConsoleError(() => {
+      expect(() => {
+        templates.findAndRenderTemplate(parentElement, {value: 0});
+      }).to.throw(/Template not found/);
+    });
 
     parentElement.setAttribute('template', 'notemplate' + Math.random());
-    allowConsoleError(() => { expect(() => {
-      templates.findAndRenderTemplate(parentElement, {value: 0});
-    }).to.throw(/Template not found/); });
+    allowConsoleError(() => {
+      expect(() => {
+        templates.findAndRenderTemplate(parentElement, {value: 0});
+      }).to.throw(/Template not found/);
+    });
   });
 
   it('should detect if a template is present in a container', () => {
@@ -281,18 +328,17 @@ describes.fakeWin('Template', {amp: true}, env => {
     const parentElement = doc.createElement('div');
     parentElement.setAttribute('template', id);
     doc.body.appendChild(parentElement);
-    return templates.findAndRenderTemplateArray(parentElement,
-        [{value: 1}, {value: 2}]).then(res => {
-      expect(res).to.have.length.of(2);
-      expect(res[0].textContent).to.equal('abc1');
-      expect(res[1].textContent).to.equal('abc2');
-    });
+    return templates
+      .findAndRenderTemplateArray(parentElement, [{value: 1}, {value: 2}])
+      .then(res => {
+        expect(res).to.have.length.of(2);
+        expect(res[0].textContent).to.equal('abc1');
+        expect(res[1].textContent).to.equal('abc2');
+      });
   });
 });
 
-
 describes.fakeWin('BaseTemplate', {}, env => {
-
   let win;
   let doc;
   let templateElement;

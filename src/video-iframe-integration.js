@@ -89,17 +89,15 @@ const validEvents = [
  */
 export function getVideoJs(win, opt_initializer) {
   return userAssert(
-      opt_initializer || /** @type (function()) */ (win.videojs),
-      'Video.JS not imported or initializer undefined.');
+    opt_initializer || /** @type {function()} */ (win.videojs),
+    'Video.JS not imported or initializer undefined.'
+  );
 }
-
 
 /** @visibleForTesting */
 export class AmpVideoIntegration {
-
   /** @param {!Window} win */
   constructor(win) {
-
     /**
      * Used for checking callback return type.
      * @visibleForTesting
@@ -152,9 +150,9 @@ export class AmpVideoIntegration {
     userAssert(validMethods.indexOf(name) > -1, `Invalid method ${name}.`);
 
     const wrappedCallback =
-        (name == 'play' || name == 'pause') ?
-          this.safePlayOrPause_(callback) :
-          callback;
+      name == 'play' || name == 'pause'
+        ? this.safePlayOrPause_(callback)
+        : callback;
 
     this.methods_[name] = wrappedCallback;
     this.listenToOnce_();
@@ -206,24 +204,30 @@ export class AmpVideoIntegration {
    *    will be taken from the `window` object.
    */
   listenTo(type, obj, opt_initializer) {
-    userAssert(!this.usedListenToHelper_,
-        '%s `listenTo` is meant to be used once per page.',
-        TAG);
+    userAssert(
+      !this.usedListenToHelper_,
+      '%s `listenTo` is meant to be used once per page.',
+      TAG
+    );
     const types = {
       'jwplayer': () => {
-        userAssert(!opt_initializer,
-            '%s jwplayer integration does not take an initializer',
-            TAG);
+        userAssert(
+          !opt_initializer,
+          '%s jwplayer integration does not take an initializer',
+          TAG
+        );
         this.listenToJwPlayer_(obj);
       },
       'videojs': () => {
         this.listenToVideoJs_(obj, opt_initializer);
       },
     };
-    userAssert(types[type.toLowerCase()],
-        `%s Invalid listener type [${type}]. ` +
+    userAssert(
+      types[type.toLowerCase()],
+      `%s Invalid listener type [${type}]. ` +
         `Valid types are [${Object.keys(types).join(', ')}]`,
-        TAG)(); // notice the call here ;)
+      TAG
+    )(); // notice the call here ;)
     this.usedListenToHelper_ = true;
   }
 
@@ -291,7 +295,8 @@ export class AmpVideoIntegration {
       }
 
       listen(element, 'volumechange', () =>
-        this.onVolumeChange_(player.volume()));
+        this.onVolumeChange_(player.volume())
+      );
 
       this.method('play', () => player.play());
       this.method('pause', () => player.pause());
@@ -339,8 +344,11 @@ export class AmpVideoIntegration {
    * @param {string} event
    */
   postEvent(event) {
-    userAssert(validEvents.indexOf(event) > -1,
-        `%s Invalid event [${event}]`, TAG);
+    userAssert(
+      validEvents.indexOf(event) > -1,
+      `%s Invalid event [${event}]`,
+      TAG
+    );
     this.postToParent_(dict({'event': event}));
   }
 
@@ -350,13 +358,15 @@ export class AmpVideoIntegration {
    * @param {!Object<string, string>=} opt_vars
    */
   postAnalyticsEvent(eventType, opt_vars) {
-    this.postToParent_(dict({
-      'event': 'analytics',
-      'analytics': {
-        'eventType': eventType,
-        'vars': opt_vars,
-      },
-    }));
+    this.postToParent_(
+      dict({
+        'event': 'analytics',
+        'analytics': {
+          'eventType': eventType,
+          'vars': opt_vars,
+        },
+      })
+    );
   }
 
   /**
@@ -369,7 +379,7 @@ export class AmpVideoIntegration {
     const completeData = Object.assign({id}, data);
 
     if (!getMode(this.win_).test && this.win_.parent) {
-      this.win_.parent./*OK*/postMessage(completeData, '*');
+      this.win_.parent./*OK*/ postMessage(completeData, '*');
     }
 
     if (opt_callback) {
@@ -420,8 +430,10 @@ function listenTo(win, onMessage) {
  * @visibleForTesting
  */
 export function adopt(global) {
-  userAssert(!global[__AMP__],
-      '%s video-iframe-integration-v0.js should only be included once.');
+  userAssert(
+    !global[__AMP__],
+    '%s video-iframe-integration-v0.js should only be included once.'
+  );
 
   global[__AMP__] = true;
 
