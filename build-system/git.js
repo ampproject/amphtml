@@ -37,11 +37,9 @@ const {getStdout} = require('./exec');
 exports.gitBranchCreationPoint = function() {
   if (isTravisBuild()) {
     const traviPrSha = travisPullRequestSha();
-    const boundaryCommits = getStdout(
-      `git rev-list --boundary ${traviPrSha}...master | grep "^-"`
+    return getStdout(
+      `git rev-list --boundary ${traviPrSha}...master | grep "^-" | head -n 1 | cut -c2-`
     ).trim();
-    const firstBoundaryCommit = boundaryCommits.split('\n')[0];
-    return firstBoundaryCommit.slice(1);
   }
   return gitMergeBaseLocalMaster();
 };
