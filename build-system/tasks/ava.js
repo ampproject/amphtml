@@ -29,7 +29,13 @@ function ava() {
       require.resolve('./get-zindex/test.js'),
       require.resolve('./prepend-global/test.js'),
     ])
-    .pipe(gulpAva({silent: isTravisBuild()}));
+    .pipe(
+      gulpAva({
+        'concurrency': 5,
+        'failFast': true,
+        'silent': isTravisBuild(),
+      })
+    );
 }
 
 module.exports = {
