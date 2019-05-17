@@ -14,25 +14,32 @@
  * limitations under the License.
  */
 
-describes.endtoend('amp-bind', {
-  testUrl: 'http://localhost:8000/test/fixtures/e2e/amp-bind/bind-youtube.html',
-}, async env => {
-  let controller;
+describes.endtoend(
+  'amp-bind',
+  {
+    testUrl:
+      'http://localhost:8000/test/fixtures/e2e/amp-bind/bind-youtube.html',
+  },
+  async env => {
+    let controller;
 
-  beforeEach(async() => {
-    controller = env.controller;
-  });
-
-  describe('with <amp-youtube>', () => {
-    it('should support binding to data-video-id', async() => {
-      const button = await controller.findElement('#youtubeButton');
-      const yt = await controller.findElement('#youtube');
-      await expect(controller.getElementAttribute(yt, 'data-videoid'))
-          .to.equal('unbound');
-
-      await controller.click(button);
-      await expect(controller.getElementAttribute(yt, 'data-videoid'))
-          .to.equal('bound');
+    beforeEach(async () => {
+      controller = env.controller;
     });
-  });
-});
+
+    describe('with <amp-youtube>', () => {
+      it('should support binding to data-video-id', async () => {
+        const button = await controller.findElement('#youtubeButton');
+        const yt = await controller.findElement('#youtube');
+        await expect(
+          controller.getElementAttribute(yt, 'data-videoid')
+        ).to.equal('unbound');
+
+        await controller.click(button);
+        await expect(
+          controller.getElementAttribute(yt, 'data-videoid')
+        ).to.equal('bound');
+      });
+    });
+  }
+);

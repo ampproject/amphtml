@@ -21,24 +21,35 @@ describe('fetch-mock', () => {
     it('should mock fetches', () => {
       const mock = env.expectFetch('fake.com', {payload: 'foo'});
 
-      return env.win.fetch('fake.com').then(response => {
-        return response.json();
-      }).then(data => {
-        expect(data.payload).to.equal('foo');
-        expect(mock.called('fake.com')).to.be.true;
-      });
+      return env.win
+        .fetch('fake.com')
+        .then(response => {
+          return response.json();
+        })
+        .then(data => {
+          expect(data.payload).to.equal('foo');
+          expect(mock.called('fake.com')).to.be.true;
+        });
     });
   }
 
-  describes.realWin('on realWin', {
-    mockFetch: true,
-  }, env => {
-    runTests(env);
-  });
+  describes.realWin(
+    'on realWin',
+    {
+      mockFetch: true,
+    },
+    env => {
+      runTests(env);
+    }
+  );
 
-  describes.fakeWin('on fakeWin', {
-    mockFetch: true,
-  }, env => {
-    runTests(env);
-  });
+  describes.fakeWin(
+    'on fakeWin',
+    {
+      mockFetch: true,
+    },
+    env => {
+      runTests(env);
+    }
+  );
 });

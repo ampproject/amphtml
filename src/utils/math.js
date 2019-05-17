@@ -36,7 +36,6 @@
  * @return {number} the equivalent value in the target range
  */
 export function mapRange(val, min1, max1, min2, max2) {
-
   let max1Bound = max1;
   let min1Bound = min1;
   if (min1 > max1) {
@@ -50,7 +49,7 @@ export function mapRange(val, min1, max1, min2, max2) {
     val = max1Bound;
   }
 
-  return (val - min1) * (max2 - min2) / (max1 - min1) + min2;
+  return ((val - min1) * (max2 - min2)) / (max1 - min1) + min2;
 }
 
 /**

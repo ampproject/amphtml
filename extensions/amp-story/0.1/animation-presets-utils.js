@@ -19,15 +19,8 @@
  * presets.
  */
 
-import {
-  KeyframesDef,
-  StoryAnimationDimsDef,
-} from './animation-types';
-import {
-  rotate,
-  scale,
-  translate,
-} from '../../../src/style';
+import {KeyframesDef, StoryAnimationDimsDef} from './animation-types';
+import {rotate, scale, translate} from '../../../src/style';
 
 /**
  * Translates the element on the 2d plane according to the given points.
@@ -89,8 +82,10 @@ export function whooshIn(startX, startY, endX, endY) {
  * @visibleForTesting
  */
 export function targetFitsWithinPage(dimensions) {
-  return dimensions.targetWidth <= dimensions.pageWidth ||
-         dimensions.targetHeight <= dimensions.pageHeight;
+  return (
+    dimensions.targetWidth <= dimensions.pageWidth ||
+    dimensions.targetHeight <= dimensions.pageHeight
+  );
 }
 
 /**
@@ -102,10 +97,14 @@ export function targetFitsWithinPage(dimensions) {
 export function calculateTargetScalingFactor(dimensions) {
   if (targetFitsWithinPage(dimensions)) {
     const scalingFactor = 1.25;
-    const widthFactor = dimensions.pageWidth > dimensions.targetWidth ?
-      dimensions.pageWidth / dimensions.targetWidth : 1;
-    const heightFactor = dimensions.pageHeight > dimensions.targetHeight ?
-      dimensions.pageHeight / dimensions.targetHeight : 1;
+    const widthFactor =
+      dimensions.pageWidth > dimensions.targetWidth
+        ? dimensions.pageWidth / dimensions.targetWidth
+        : 1;
+    const heightFactor =
+      dimensions.pageHeight > dimensions.targetHeight
+        ? dimensions.pageHeight / dimensions.targetHeight
+        : 1;
     return Math.max(widthFactor, heightFactor) * scalingFactor;
   }
   return 1;
@@ -139,5 +138,7 @@ export function scaleAndTranslate(startX, startY, endX, endY, scalingFactor) {
     return translate2d(startX, startY, endX, endY);
   }
   return enlargeKeyFrames(
-      translate2d(startX, startY, endX, endY), scalingFactor);
+    translate2d(startX, startY, endX, endY),
+    scalingFactor
+  );
 }
