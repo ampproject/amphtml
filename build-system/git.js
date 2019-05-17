@@ -19,7 +19,6 @@
  * @fileoverview Provides functions for executing various git commands.
  */
 
-const colors = require('ansi-colors');
 const {
   isTravisBuild,
   isTravisPullRequestBuild,
@@ -27,8 +26,6 @@ const {
   travisPullRequestSha,
 } = require('./travis');
 const {getStdout} = require('./exec');
-
-const commitLogMaxCount = 100;
 
 /**
  * Returns the commit at which the current branch was forked off of master.
@@ -90,22 +87,17 @@ exports.gitDiffStatMaster = function() {
 
 /**
  * Returns a detailed log of commits included in a PR check, starting with (and
- * including) the branch point off of master. Limited to at most 100 commits to
- * keep the output sane.
+ * including) the branch point off of master. Limited to commits in the past
+ * 30 days to keep the output sane.
  *
  * @return {string}
  */
 exports.gitDiffCommitLog = function() {
   const branchCreationPoint = exports.gitBranchCreationPoint();
-  let commitLog = getStdout(`git -c color.ui=always log --graph \
+  const commitLog = getStdout(`git -c color.ui=always log --graph \
 --pretty=format:"%C(red)%h%C(reset) %C(bold cyan)%an%C(reset) \
 -%C(yellow)%d%C(reset) %C(reset)%s%C(reset) %C(green)(%cr)%C(reset)" \
---abbrev-commit ${branchCreationPoint}^...HEAD \
---max-count=${commitLogMaxCount}`).trim();
-  if (commitLog.split('\n').length >= commitLogMaxCount) {
-    commitLog += `\n${colors.yellow('WARNING:')} Truncating commit log, \
-since it is longer than ${colors.cyan(commitLogMaxCount)} commits.`;
-  }
+--abbrev-commit ${branchCreationPoint}^...HEAD --since "30 days ago"`).trim();
   return commitLog;
 };
 
