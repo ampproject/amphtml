@@ -22,13 +22,20 @@
  * This object is separated from vendors.js to be shared with extensions
  * other than amp-analytics, for instance amp-ad-exit.
  *
- * @const {!JsonObject}
+ * @const {!Object}
  */
-export const IFRAME_TRANSPORTS = /** @type {!JsonObject} */ ({
+const prodConfig = {
   'bg': 'https://tpc.googlesyndication.com/b4a/b4a-runner.html',
   'moat': 'https://z.moatads.com/ampanalytics093284/iframe.html',
+};
+/**
+ * Canary config override
+ *
+ * @const {!Object}
+ */
+const canaryConfig = Object.assign({}, prodConfig, {
+  'bg': 'https://tpc.googlesyndication.com/b4a/experimental/b4a-runner.html',
 });
 
-export const IFRAME_TRANSPORTS_CANARY = Object.assign(
-    {}, IFRAME_TRANSPORTS,
-    {bg: 'https://tpc.googlesyndication.com/b4a/experimental/b4a-runner.html'});
+export const IFRAME_TRANSPORTS = /** @type {!JsonObject} */ (prodConfig);
+export const IFRAME_TRANSPORTS_CANARY = /** @type {!JsonObject} */ (canaryConfig);
