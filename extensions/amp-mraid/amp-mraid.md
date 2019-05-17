@@ -1,3 +1,10 @@
+---
+$category@: dynamic-content
+formats:
+  - ads
+teaser:
+  text: Supports interaction with the MRAID host API within Ad webviews in mobile apps
+---
 <!--
 Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 
