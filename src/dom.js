@@ -22,7 +22,6 @@ import {
 } from './css';
 import {dev, devAssert} from './log';
 import {dict} from './utils/object';
-import {onDocumentReady} from './document-ready';
 import {startsWith} from './string';
 import {toWin} from './types';
 
@@ -90,24 +89,6 @@ export function waitForChildPromise(parent, checkFunc) {
 }
 
 /**
- * Waits for document's head to be available.
- * @param {!Document} doc
- * @param {function()} callback
- */
-export function waitForHead(doc, callback) {
-  waitForChild(doc.documentElement, () => !!doc.body, callback);
-}
-
-/**
- * Waits for the document's head to be available.
- * @param {!Document} doc
- * @return {!Promise}
- */
-export function waitForHeadPromise(doc) {
-  return new Promise(resolve => waitForHead(doc, resolve));
-}
-
-/**
  * Waits for document's body to be available and ready.
  * Will be deprecated soon; use {@link AmpDoc#waitForBodyOpen} or
  * @{link DocumentState#onBodyAvailable} instead.
@@ -115,7 +96,7 @@ export function waitForHeadPromise(doc) {
  * @param {function()} callback
  */
 export function waitForBodyOpen(doc, callback) {
-  onDocumentReady(doc, () => waitForHead(doc, callback));
+  waitForChild(doc.documentElement, () => !!doc.body, callback);
 }
 
 /**
