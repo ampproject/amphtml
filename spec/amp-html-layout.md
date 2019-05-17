@@ -17,7 +17,7 @@ limitations under the License.
 # AMP HTML Layout System
 
 [tip]
-**TIP** - For a quick overview of what you can do with AMP's layout system, skip ahead and see all layouts in action on [Demonstrating AMP layouts](/documentation/guides-and-tutorials/learn/amp-html-layout/layouts_demonstrated.html).
+**TIP** - For a quick overview of what you can do with AMP's layout system, skip ahead and see all layouts in action on [Demonstrating AMP layouts](https://amp.dev/documentation/guides-and-tutorials/learn/amp-html-layout/layouts_demonstrated).
 [/tip]
 
 ## Overview
