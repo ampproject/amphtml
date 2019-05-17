@@ -117,8 +117,14 @@ export class LinkerManager {
 
     if (this.allLinkerPromises_.length) {
       const navigation = Services.navigationForDoc(this.ampdoc_);
-      navigation.registerAnchorMutator(
-        this.handleAnchorMutation_.bind(this),
+      navigation.registerAnchorMutator((element, event) => {
+        if (!element.href || event.type !== 'click') {
+          return;
+        }
+        element.href = this.applyLinkers_(element.href);
+      }, Priority.ANALYTICS_LINKER);
+      navigation.registerNavigateToMutator(
+        url => this.applyLinkers_(url),
         Priority.ANALYTICS_LINKER
       );
     }
@@ -234,41 +240,41 @@ export class LinkerManager {
   }
 
   /**
-   * Called on click on any anchor element. Adds linker param if a match for
-   * given linker configuration.
-   * @param {!Element} element
-   * @param {!Event} event
+   * Apply linkers to the given url. Linker params are appended if there
+   * are matching linker configs.
+   *
+   * @param {string} url
+   * @return {string}
    * @private
    */
-  handleAnchorMutation_(element, event) {
-    if (!element.href || event.type !== 'click') {
-      return;
-    }
-
+  applyLinkers_(url) {
     const linkerConfigs = this.config_;
     for (const linkerName in linkerConfigs) {
       // The linker param is created asynchronously. This callback should be
       // synchronous, so we skip if value is not there yet.
       if (this.resolvedIds_[linkerName]) {
-        this.maybeAppendLinker_(element, linkerName, linkerConfigs[linkerName]);
+        url = this.maybeAppendLinker_(
+          url,
+          linkerName,
+          linkerConfigs[linkerName]
+        );
       }
     }
+    return url;
   }
 
   /**
    * Appends the linker param if the given url falls within rules defined in
    * linker configuration.
-   * @param {!Element} el
+   * @param {string} url
    * @param {string} name
    * @param {!Object} config
+   * @return {string}
    * @private
    */
-  maybeAppendLinker_(el, name, config) {
-    const {href, hostname} = el;
-
+  maybeAppendLinker_(url, name, config) {
     const /** @type {Array} */ domains = config['destinationDomains'];
-
-    if (this.isDomainMatch_(hostname, name, domains)) {
+    if (this.isDomainMatch_(url, name, domains)) {
       const linkerValue = createLinker(
         /* version */ '1',
         this.resolvedIds_[name]
@@ -276,18 +282,20 @@ export class LinkerManager {
       if (linkerValue) {
         const params = dict();
         params[name] = linkerValue;
-        el.href = addMissingParamsToUrl(href, params);
+        return addMissingParamsToUrl(url, params);
       }
     }
+    return url;
   }
 
   /**
    * Check to see if the url is a match for the given set of domains.
-   * @param {string} hostname
+   * @param {string} url
    * @param {string} name Name given in linker config.
    * @param {?Array} domains
    */
-  isDomainMatch_(hostname, name, domains) {
+  isDomainMatch_(url, name, domains) {
+    const {hostname} = this.urlService_.parse(url);
     // If given domains, but not in the right format.
     if (domains && !Array.isArray(domains)) {
       user().warn(TAG, '%s destinationDomains must be an array.', name);
@@ -321,13 +329,10 @@ export class LinkerManager {
     const {sourceUrl, canonicalUrl} = Services.documentInfoForDoc(this.ampdoc_);
     const sourceOrigin = this.urlService_.parse(sourceUrl).hostname;
     const canonicalOrigin = this.urlService_.parse(canonicalUrl).hostname;
-    if (
-      !areFriendlyDomains(sourceOrigin, hostname) &&
-      !areFriendlyDomains(canonicalOrigin, hostname)
-    ) {
-      return false;
-    }
-    return true;
+    return (
+      areFriendlyDomains(sourceOrigin, hostname) ||
+      areFriendlyDomains(canonicalOrigin, hostname)
+    );
   }
 
   /**
@@ -359,9 +364,8 @@ export class LinkerManager {
 
       const url =
         form.getAttribute('action-xhr') || form.getAttribute('action');
-      const {hostname} = this.urlService_.parse(url);
 
-      if (this.isDomainMatch_(hostname, linkerName, domains)) {
+      if (this.isDomainMatch_(url, linkerName, domains)) {
         this.addDataToForm_(form, actionXhrMutator, linkerName);
       }
     }
