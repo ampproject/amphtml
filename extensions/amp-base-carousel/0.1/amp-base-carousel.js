@@ -36,7 +36,6 @@ import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {toArray} from '../../../src/types';
 
-
 /**
  * @param {!Element} el The Element to check.
  * @return {boolean} Whether or not the Element is a sizer Element.
@@ -150,7 +149,8 @@ class AmpCarousel extends AMP.BaseElement {
     element.appendChild(this.renderContainerDom_());
 
     const scrollContainer = dev().assertElement(
-        this.element.querySelector('.i-amphtml-carousel-scroll'));
+      this.element.querySelector('.i-amphtml-carousel-scroll')
+    );
 
     this.carousel_ = new Carousel({
       win,
@@ -166,9 +166,11 @@ class AmpCarousel extends AMP.BaseElement {
       scrollContainer.appendChild(slide);
     });
     this.prevArrowSlot_ = this.element.querySelector(
-        '.i-amphtml-carousel-arrow-prev-slot');
+      '.i-amphtml-carousel-arrow-prev-slot'
+    );
     this.nextArrowSlot_ = this.element.querySelector(
-        '.i-amphtml-carousel-arrow-next-slot');
+      '.i-amphtml-carousel-arrow-next-slot'
+    );
     // Slot the arrows, with defaults
     this.prevArrowSlot_.appendChild(prevArrow || this.createPrevArrow_());
     this.nextArrowSlot_.appendChild(nextArrow || this.createNextArrow_());
@@ -206,7 +208,9 @@ class AmpCarousel extends AMP.BaseElement {
     // TODO(sparhami) #19259 Tracks a more generic way to do this. Remove once
     // we have something better.
     const isScaled = closestAncestorElementBySelector(
-        this.element, '[i-amphtml-scale-animation]');
+      this.element,
+      '[i-amphtml-scale-animation]'
+    );
     if (isScaled) {
       return Promise.resolve();
     }
@@ -280,9 +284,10 @@ class AmpCarousel extends AMP.BaseElement {
   createNextArrow_() {
     const html = htmlFor(this.element);
     return html`
-      <button class="i-amphtml-carousel-next"
-          aria-label="Next item in carousel">
-      </button>
+      <button
+        class="i-amphtml-carousel-next"
+        aria-label="Next item in carousel"
+      ></button>
     `;
   }
 
@@ -293,9 +298,10 @@ class AmpCarousel extends AMP.BaseElement {
   createPrevArrow_() {
     const html = htmlFor(this.element);
     return html`
-      <button class="i-amphtml-carousel-prev"
-          aria-label="Previous item in carousel">
-      </button>
+      <button
+        class="i-amphtml-carousel-prev"
+        aria-label="Previous item in carousel"
+      ></button>
     `;
   }
 
@@ -305,26 +311,38 @@ class AmpCarousel extends AMP.BaseElement {
    * @return {!ActionSource}
    */
   getActionSource_(trust) {
-    return trust == ActionTrust.HIGH ?
-      ActionSource.GENERIC_HIGH_TRUST :
-      ActionSource.GENERIC_LOW_TRUST ;
+    return trust == ActionTrust.HIGH
+      ? ActionSource.GENERIC_HIGH_TRUST
+      : ActionSource.GENERIC_LOW_TRUST;
   }
 
   /**
    * @private
    */
   setupActions_() {
-    this.registerAction('prev', ({trust}) => {
-      this.carousel_.prev(this.getActionSource_(trust));
-    }, ActionTrust.LOW);
-    this.registerAction('next', ({trust}) => {
-      this.carousel_.next(this.getActionSource_(trust));
-    }, ActionTrust.LOW);
-    this.registerAction('goToSlide', ({args, trust}) => {
-      this.carousel_.goToSlide(args['index'] || -1, {
-        actionSource: this.getActionSource_(trust),
-      });
-    }, ActionTrust.LOW);
+    this.registerAction(
+      'prev',
+      ({trust}) => {
+        this.carousel_.prev(this.getActionSource_(trust));
+      },
+      ActionTrust.LOW
+    );
+    this.registerAction(
+      'next',
+      ({trust}) => {
+        this.carousel_.next(this.getActionSource_(trust));
+      },
+      ActionTrust.LOW
+    );
+    this.registerAction(
+      'goToSlide',
+      ({args, trust}) => {
+        this.carousel_.goToSlide(args['index'] || -1, {
+          actionSource: this.getActionSource_(trust),
+        });
+      },
+      ActionTrust.LOW
+    );
   }
 
   /**
@@ -346,7 +364,10 @@ class AmpCarousel extends AMP.BaseElement {
       toggleAttribute(child, 'disabled', disabled);
     });
     toggleAttribute(
-        this.element, 'i-amphtml-carousel-hide-buttons', this.hadTouch_);
+      this.element,
+      'i-amphtml-carousel-hide-buttons',
+      this.hadTouch_
+    );
   }
 
   /**
@@ -364,9 +385,11 @@ class AmpCarousel extends AMP.BaseElement {
    * @private
    */
   isHighTrustActionSource_(actionSource) {
-    return actionSource == ActionSource.WHEEL ||
-        actionSource == ActionSource.TOUCH ||
-        actionSource == ActionSource.GENERIC_HIGH_TRUST;
+    return (
+      actionSource == ActionSource.WHEEL ||
+      actionSource == ActionSource.TOUCH ||
+      actionSource == ActionSource.GENERIC_HIGH_TRUST
+    );
   }
 
   /**
@@ -400,8 +423,10 @@ class AmpCarousel extends AMP.BaseElement {
 }
 
 AMP.extension('amp-base-carousel', '0.1', AMP => {
-  if (!isExperimentOn(AMP.win, 'amp-base-carousel') &&
-      !isExperimentOn(AMP.win, 'amp-lightbox-gallery-base-carousel')) {
+  if (
+    !isExperimentOn(AMP.win, 'amp-base-carousel') &&
+    !isExperimentOn(AMP.win, 'amp-lightbox-gallery-base-carousel')
+  ) {
     return;
   }
 

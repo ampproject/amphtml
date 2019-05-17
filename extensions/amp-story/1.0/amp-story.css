@@ -298,21 +298,6 @@ amp-story-page[distance="2"] {
   display: none !important;
 }
 
-/**
- * Click shield to make sure click events are never swallowed by videos on
- * Safari iOS 11.2, which would prevent the user from navigating through the
- * story.
- * See #14401
- */
-amp-story-grid-layer amp-video::after {
-  content: "" !important;
-  position: absolute !important;
-  height: 100% !important;
-  width: 100% !important;
-  top: 0 !important;
-  left: 0 !important;
-}
-
 /** Call to action layer, positioned at the bottom 20% of the screen. */
 amp-story-cta-layer {
   display: block !important;
@@ -337,6 +322,31 @@ amp-story-grid-layer {
   z-index: 2 !important;
   /** Make sure grid layer does not act as a click shield on elements underneath */
   pointer-events: none !important;
+}
+
+/**
+ * Click shield to make sure click events are never swallowed by videos on
+ * Safari iOS 11.2, which would prevent the user from navigating through the
+ * story.
+ * See #14401
+ */
+ amp-story-grid-layer amp-video::after {
+  content: "" !important;
+  position: absolute !important;
+  height: 100% !important;
+  width: 100% !important;
+  top: 0 !important;
+  left: 0 !important;
+}
+
+/**
+ * Adds a width limit to make sure amp-twitter element only takes required
+ * space, otherwise it takes whole width and causes a tooltip trigger in blank
+ * space.
+ * See #22334
+ */
+amp-story-grid-layer amp-twitter {
+  max-width: 500px !important;
 }
 
 amp-story-grid-layer > * {
@@ -380,18 +390,8 @@ amp-story-grid-layer .i-amphtml-embedded-component::after {
   padding: 0 !important;
 }
 
-.i-amphtml-story-grid-template-fill > :not(:first-child) {
-  display: none !important;
-}
-
-.i-amphtml-story-logo {
-  display: none !important;
-  margin: 15px !important;
-}
-
-.i-amphtml-story-grid-template-fill > :first-child {
+.i-amphtml-story-grid-template-fill > * {
   bottom: 0 !important;
-  display: block !important;
   height: auto !important;
   left: 0 !important;
   position: absolute !important;
@@ -940,14 +940,19 @@ amp-story-page .i-amphtml-story-page-open-attachment-icon::after {
              open-attachment-bar-right 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) both !important;
 }
 
-amp-story-page .i-amphtml-story-page-open-attachment-text {
+amp-story-page .i-amphtml-story-page-open-attachment-label {
   position: relative !important;
   padding: 0 24px !important;
+  height: 40px !important;
+  max-width: calc(100% - 48px) !important;
   color: #FFF !important;
   font-family: 'Roboto', sans-serif !important;
   font-size: 15px !important;
   font-weight: bold !important;
   letter-spacing: 0.3px;
   line-height: 40px !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
   text-shadow: 0px 0px 6px rgba(0, 0, 0, 0.36) !important;
+  white-space: nowrap !important;
 }

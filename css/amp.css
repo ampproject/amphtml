@@ -26,13 +26,15 @@
 html {
   overflow-x: hidden !important;
 }
-html, body {
-  height: auto !important;
-}
 
 html.i-amphtml-fie {
   height: 100% !important;
   width: 100% !important;
+}
+
+html:not([amp4ads]),
+html:not([amp4ads]) body {
+  height: auto !important;
 }
 
 /**
@@ -40,7 +42,21 @@ html.i-amphtml-fie {
  * See:
  * https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md
  */
-body {
+html:not([amp4ads]) body {
+  margin: 0 !important;
+}
+
+/**
+ * TODO(torch2424, #22059): if/when "inabox-preserve-height-auto" launched, merge
+ * these styles into : `html:not([amp4ads]), html:not([amp4ads]) body` above, and a new.
+ * :not([amp4ads])
+ */
+html.i-amphtml-inabox-preserve-height-auto,
+html.i-amphtml-inabox-preserve-height-auto body {
+  height: auto !important;
+}
+
+html.i-amphtml-inabox-preserve-height-auto body {
   margin: 0 !important;
 }
 

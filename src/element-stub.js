@@ -20,7 +20,6 @@ import {devAssert} from './log';
 /** @type {!Array} */
 export const stubbedElements = [];
 
-
 export class ElementStub extends BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {

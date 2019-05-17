@@ -55,14 +55,13 @@ jobs:
       script:
         - node build-system/pr-check/validator-tests.js
     - stage: build
-      name: "Dist"
-      if: type != pull_request
+      name: "Dist, Bundle Size"
       script:
-        - node build-system/pr-check/dist.js
+        - node build-system/pr-check/dist-bundle-size.js
     - stage: test
-      name: "Dist, Bundle Size, Single Pass Tests"
+      name: "Single Pass Tests"
       script:
-        - node build-system/pr-check/dist-tests.js
+        - node build-system/pr-check/single-pass-tests.js
     - stage: test
       name: "Visual Diff Tests"
       script:
@@ -72,7 +71,7 @@ jobs:
       script:
         - node build-system/pr-check/local-tests.js
     - stage: test
-      name: "[NON-BLOCKING] Remote (Sauce Labs) Tests"
+      name: "Remote (Sauce Labs) Tests"
       script:
         - node build-system/pr-check/remote-tests.js
       after_script:
@@ -83,10 +82,8 @@ jobs:
         - node build-system/pr-check/e2e-tests.js
   fast_finish: true
 
-  # TODO(ampproject/wg-infra): remove when remote tests stabilize
+  # TODO(ampproject/wg-infra): remove when these tests stabilize
   allow_failures:
-    - script:
-      - node build-system/pr-check/remote-tests.js
     - script:
       - node build-system/pr-check/e2e-tests.js
 cache:

@@ -40,9 +40,24 @@ class ElementHandle {
    * @package
    */
   getElement() {
-  	return this.element_;
+    return this.element_;
   }
 }
+
+/**
+ * Key to send to the FunctionalTestController#type method to trigger
+ * actions instead of text.
+ * @enum {string}
+ */
+const Key = {
+  'ArrowDown': 'ArrowDown',
+  'ArrowLeft': 'ArrowLeft',
+  'ArrowRight': 'ArrowRight',
+  'ArrowUp': 'ArrowUp',
+  'Enter': 'Enter',
+  'Escape': 'Escape',
+  'Tab': 'Tab',
+};
 
 /**
  * Allow expectations to await the expected value. Duck-type a real Promise.
@@ -60,9 +75,10 @@ class ControllerPromise {
    * @param {function(TYPE,function(TYPE): ?TYPE): !Promise=} opt_waitForValue
    */
   constructor(executorOrPromise, opt_waitForValue) {
-    this.promise_ = typeof executorOrPromise == 'function' ?
-      new Promise(executorOrPromise) :
-      executorOrPromise;
+    this.promise_ =
+      typeof executorOrPromise == 'function'
+        ? new Promise(executorOrPromise)
+        : executorOrPromise;
 
     /**
      * Returns a Promise that resolves when the given expected value fulfills
@@ -76,15 +92,17 @@ class ControllerPromise {
   /** @override */
   catch(onRejected) {
     return new ControllerPromise(
-        this.promise_.catch(onRejected),
-        this.waitForValue);
+      this.promise_.catch(onRejected),
+      this.waitForValue
+    );
   }
 
- 	/** @override */
+  /** @override */
   finally(onFinally) {
     return new ControllerPromise(
-        this.promise_.finally(onFinally),
-        this.waitForValue);
+      this.promise_.finally(onFinally),
+      this.waitForValue
+    );
   }
 
   /** @override */
@@ -96,13 +114,15 @@ class ControllerPromise {
       wrappedWait = (condition, opt_mutate) => {
         opt_mutate = opt_mutate || (x => x);
         return this.waitForValue(condition, value =>
-          opt_mutate(opt_onFulfilled(value)));
+          opt_mutate(opt_onFulfilled(value))
+        );
       };
     }
 
     return new ControllerPromise(
-        this.promise_.then(opt_onFulfilled, opt_onRejected),
-        wrappedWait);
+      this.promise_.then(opt_onFulfilled, opt_onRejected),
+      wrappedWait
+    );
   }
 }
 
@@ -396,7 +416,7 @@ class FunctionalTestController {
    * {@link https://www.w3.org/TR/webdriver1/#element-send-keys}
    *
    * @param {?ElementHandle} unusedHandle
-   * @param {string} unusedKeys
+   * @param {string|Key} unusedKeys
    * @return {!Promise}
    */
   async type(unusedHandle, unusedKeys) {}
@@ -430,13 +450,12 @@ class FunctionalTestController {
   async dispose() {}
 }
 
-
 /**
  * @typedef {{
  *   width: number,
  *   height: number
  * }} WindowRectDef
-*/
+ */
 let WindowRectDef;
 
 /**
@@ -450,7 +469,7 @@ let WindowRectDef;
  *   width: number,
  *   height: number
  * }}
-*/
+ */
 let DOMRectDef;
 
 /** @enum {string} */
@@ -472,6 +491,7 @@ module.exports = {
   ElementHandle,
   ControllerPromise,
   FunctionalTestController,
+  Key,
   WindowRectDef,
   DOMRectDef,
   ScrollToOptionsDef,

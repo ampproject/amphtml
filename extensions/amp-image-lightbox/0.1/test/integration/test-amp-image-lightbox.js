@@ -16,10 +16,13 @@
 
 import {poll} from '../../../../../testing/iframe';
 
-describe.configure().run('amp-image-lightbox', function() {
-  this.timeout(5000);
-  const extensions = ['amp-image-lightbox'];
-  const imageLightboxBody = `
+describe
+  .configure()
+  .skipFirefox()
+  .run('amp-image-lightbox', function() {
+    this.timeout(5000);
+    const extensions = ['amp-image-lightbox'];
+    const imageLightboxBody = `
   <figure>
   <amp-img id="img0"
       srcset="
@@ -39,39 +42,47 @@ describe.configure().run('amp-image-lightbox', function() {
   data-close-button-aria-label="Close">
 </amp-image-lightbox>
   `;
-  describes.integration('amp-image-lightbox opens', {
-    body: imageLightboxBody,
-    extensions,
-  }, env => {
+    describes.integration(
+      'amp-image-lightbox opens',
+      {
+        body: imageLightboxBody,
+        extensions,
+      },
+      env => {
+        let win;
+        beforeEach(() => {
+          win = env.win;
+        });
 
-    let win;
-    beforeEach(() => {
-      win = env.win;
-    });
-
-    it('should activate on tap of source image', () => {
-      const lightbox = win.document.getElementById('image-lightbox-1');
-      expect(lightbox).to.have.display('none');
-      const ampImage = win.document.getElementById('img0');
-      const imageLoadedPromise = waitForImageToLoad(ampImage);
-      return imageLoadedPromise.then(() => {
-        const ampImage = win.document.getElementById('img0');
-        // Simulate a click on the img inside the amp-img, because this is
-        // what people tend to actually click on.
-        const openerImage = ampImage.querySelector('img[amp-img-id="img0"]');
-        const openedPromise = waitForLightboxOpen(win.document);
-        openerImage.click();
-        return openedPromise;
-      }).then(() => {
-        const imageSelection = win.document
-            .getElementsByClassName('i-amphtml-image-lightbox-viewer-image');
-        expect(imageSelection.length).to.equal(1);
-        const image = imageSelection[0];
-        expect(image.tagName).to.equal('IMG');
-      });
-    });
+        it('should activate on tap of source image', () => {
+          const lightbox = win.document.getElementById('image-lightbox-1');
+          expect(lightbox).to.have.display('none');
+          const ampImage = win.document.getElementById('img0');
+          const imageLoadedPromise = waitForImageToLoad(ampImage);
+          return imageLoadedPromise
+            .then(() => {
+              const ampImage = win.document.getElementById('img0');
+              // Simulate a click on the img inside the amp-img, because this is
+              // what people tend to actually click on.
+              const openerImage = ampImage.querySelector(
+                'img[amp-img-id="img0"]'
+              );
+              const openedPromise = waitForLightboxOpen(win.document);
+              openerImage.click();
+              return openedPromise;
+            })
+            .then(() => {
+              const imageSelection = win.document.getElementsByClassName(
+                'i-amphtml-image-lightbox-viewer-image'
+              );
+              expect(imageSelection.length).to.equal(1);
+              const image = imageSelection[0];
+              expect(image.tagName).to.equal('IMG');
+            });
+        });
+      }
+    );
   });
-});
 
 function waitForLightboxOpen(document) {
   return poll('wait for image-lightbox-1 to open', () => {

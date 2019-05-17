@@ -20,7 +20,6 @@ const argv = require('minimist')(process.argv.slice(2));
 const ciReporter = require('../mocha-ci-reporter');
 const config = require('../../config');
 const glob = require('glob');
-const gulp = require('gulp-help')(require('gulp'));
 const log = require('fancy-log');
 const Mocha = require('mocha');
 const tryConnect = require('try-net-connect');
@@ -45,7 +44,9 @@ function buildRuntime_() {
 
 function launchWebServer_() {
   webServerProcess_ = execScriptAsync(
-      `gulp serve --host ${HOST} --port ${PORT}`);
+    `gulp serve --host ${HOST} --port ${PORT}`,
+    {stdio: 'ignore'}
+  );
 
   let resolver;
   const deferred = new Promise(resolverIn => {
@@ -63,9 +64,9 @@ function launchWebServer_() {
   return deferred;
 }
 
-function cleanUp_() {
+async function cleanUp_() {
   if (webServerProcess_ && !webServerProcess_.killed) {
-    webServerProcess_.kill('SIGINT');
+    webServerProcess_.kill('SIGKILL');
   }
 }
 
@@ -86,10 +87,9 @@ async function e2e() {
   installPackages_();
 
   // set up promise to return to gulp.task()
-  let resolver, rejecter;
-  const deferred = new Promise((resolverIn, rejecterIn) => {
+  let resolver;
+  const deferred = new Promise(resolverIn => {
     resolver = resolverIn;
-    rejecter = rejecterIn;
   });
 
   require('@babel/register');
@@ -117,8 +117,7 @@ async function e2e() {
         delete require.cache[file];
         mocha.addFile(file);
       });
-    }
-    else {
+    } else {
       config.e2eTestPaths.forEach(path => {
         glob.sync(path).forEach(file => {
           delete require.cache[file];
@@ -127,20 +126,15 @@ async function e2e() {
       });
     }
 
-    mocha.run(failures => {
+    mocha.run(async failures => {
       // end web server
-      cleanUp_();
+      await cleanUp_();
 
       // end task
-      if (failures) {
-        process.exitCode = 1;
-        rejecter();
-      }
-      process.exit();
-      resolver();
+      process.exitCode = failures ? 1 : 0;
+      await resolver();
     });
-  }
-  else {
+  } else {
     const filesToWatch = argv.files ? [argv.files] : [config.e2eTestPaths];
     const watcher = watch(filesToWatch);
     log('Watching', cyan(filesToWatch), 'for changes...');
@@ -158,11 +152,14 @@ async function e2e() {
   return deferred;
 }
 
-gulp.task('e2e', 'Runs e2e tests', e2e, {
-  options: {
-    'nobuild': '  Skips building the runtime via `gulp build`',
-    'files': '  Run tests found in a specific path (ex: **/test-e2e/*.js)',
-    'testnames': '  Lists the name of each test being run',
-    'watch': '  Watches for changes in files, runs corresponding test(s)',
-  },
-});
+module.exports = {
+  e2e,
+};
+
+e2e.description = 'Runs e2e tests';
+e2e.flags = {
+  'nobuild': '  Skips building the runtime via `gulp build`',
+  'files': '  Run tests found in a specific path (ex: **/test-e2e/*.js)',
+  'testnames': '  Lists the name of each test being run',
+  'watch': '  Watches for changes in files, runs corresponding test(s)',
+};

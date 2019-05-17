@@ -16,28 +16,35 @@
 
 import {CSS} from '../../../build/amp-script-0.1.css';
 import {
-  DomPurifyDef, createPurifier, validateAttributeChange,
+  DomPurifyDef,
+  createPurifier,
+  getAllowedTags,
+  validateAttributeChange,
 } from '../../../src/purifier';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {UserActivationTracker} from './user-activation-tracker';
-import {
-  calculateExtensionScriptUrl,
-} from '../../../src/service/extension-location';
+import {calculateExtensionScriptUrl} from '../../../src/service/extension-location';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {getElementServiceForDoc} from '../../../src/element-service';
 import {getMode} from '../../../src/mode';
+import {
+  installOriginExperimentsForDoc,
+  originExperimentsForDoc,
+} from '../../../src/service/origin-experiments-impl';
 import {isExperimentOn} from '../../../src/experiments';
 import {rewriteAttributeValue} from '../../../src/url-rewrite';
-import {
-  upgrade,
-} from '@ampproject/worker-dom/dist/unminified.index.safe.mjs.patched';
+import {upgrade} from '@ampproject/worker-dom/dist/unminified.index.safe.mjs.patched';
 
 /** @const {string} */
 const TAG = 'amp-script';
 
-/** @const {number} */
-const MAX_SCRIPT_SIZE = 150000;
+/**
+ * Max cumulative size of author scripts from all amp-script elements on page.
+ * @const {number}
+ */
+const MAX_TOTAL_SCRIPT_SIZE = 150000;
 
 /**
  * Size-contained elements up to 300px are allowed to mutate freely.
@@ -48,7 +55,6 @@ const PHASE_HYDRATING = 1;
 const PHASE_MUTATING = 2;
 
 export class AmpScript extends AMP.BaseElement {
-
   /**
    * @param {!Element} element
    */
@@ -63,21 +69,39 @@ export class AmpScript extends AMP.BaseElement {
 
     /** @private {?UserActivationTracker} */
     this.userActivation_ = null;
+
+    /** @private {?AmpScriptService} */
+    this.service_ = null;
   }
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.CONTAINER ||
-        isLayoutSizeDefined(layout);
+    return layout == Layout.CONTAINER || isLayoutSizeDefined(layout);
+  }
+
+  /** @return {!Promise<boolean>} */
+  isExperimentOn_() {
+    if (isExperimentOn(this.win, 'amp-script')) {
+      return Promise.resolve(true);
+    }
+    installOriginExperimentsForDoc(this.getAmpDoc());
+    return originExperimentsForDoc(this.element)
+      .getExperiments()
+      .then(trials => trials && trials.includes(TAG));
+  }
+
+  /** @override */
+  buildCallback() {
+    return this.isExperimentOn_().then(on => {
+      if (!on) {
+        // Return rejected Promise to buildCallback() to disable component.
+        throw user().createError(TAG, `Experiment "${TAG}" is not enabled.`);
+      }
+    });
   }
 
   /** @override */
   layoutCallback() {
-    if (!isExperimentOn(this.win, 'amp-script')) {
-      user().error(TAG, 'Experiment "amp-script" is not enabled.');
-      return Promise.reject('Experiment "amp-script" is not enabled.');
-    }
-
     this.userActivation_ = new UserActivationTracker(this.element);
 
     // Create worker and hydrate.
@@ -90,12 +114,20 @@ export class AmpScript extends AMP.BaseElement {
       // `workerUrl` is from CDN, so no need for `ampCors`.
       xhr.fetchText(workerUrl, {ampCors: false}).then(r => r.text()),
       xhr.fetchText(authorUrl).then(r => r.text()),
+      getElementServiceForDoc(this.element, TAG, TAG),
     ]).then(results => {
       const workerScript = results[0];
       const authorScript = results[1];
-      if (authorScript.length > MAX_SCRIPT_SIZE) {
-        user().error(TAG, `Max script size exceeded: ${authorScript.length} > `
-            + MAX_SCRIPT_SIZE);
+      this.service_ = results[2];
+
+      if (this.service_.sizeLimitExceeded(authorScript.length)) {
+        user().error(
+          TAG,
+          'Maximum total script size exceeded ' +
+            `(${MAX_TOTAL_SCRIPT_SIZE}). Disabled:`,
+          this.element
+        );
+        this.element.classList.add('i-amphtml-broken');
         return [];
       }
       return [workerScript, authorScript];
@@ -134,11 +166,17 @@ export class AmpScript extends AMP.BaseElement {
    */
   workerThreadUrl_() {
     // Use `testLocation` for testing with iframes. @see testing/iframe.js.
-    const location = (getMode().test && this.win.testLocation)
-      ? this.win.testLocation : this.win.location;
+    const location =
+      getMode().test && this.win.testLocation
+        ? this.win.testLocation
+        : this.win.location;
     const useLocal = getMode().localDev || getMode().test;
     return calculateExtensionScriptUrl(
-        location, 'amp-script-worker', '0.1', useLocal);
+      location,
+      'amp-script-worker',
+      '0.1',
+      useLocal
+    );
   }
 
   /**
@@ -148,18 +186,18 @@ export class AmpScript extends AMP.BaseElement {
    */
   mutationPump_(flush, phase) {
     if (phase == PHASE_HYDRATING) {
-      this.vsync_.mutate(
-          () => this.element.classList.add('i-amphtml-hydrated'));
+      this.vsync_.mutate(() =>
+        this.element.classList.add('i-amphtml-hydrated')
+      );
     }
-    const allowMutation = (
+    const allowMutation =
       // Hydration is always allowed.
-      phase != PHASE_MUTATING
+      phase != PHASE_MUTATING ||
       // Mutation depends on the gesture state and long tasks.
-      || this.userActivation_.isActive()
+      this.userActivation_.isActive() ||
       // If the element is size-contained and small enough.
-      || (isLayoutSizeDefined(this.getLayout())
-          && this.getLayoutBox().height <= MAX_FREE_MUTATION_HEIGHT)
-    );
+      (isLayoutSizeDefined(this.getLayout()) &&
+        this.getLayoutBox().height <= MAX_FREE_MUTATION_HEIGHT);
 
     if (allowMutation) {
       this.vsync_.mutate(flush);
@@ -176,6 +214,28 @@ export class AmpScript extends AMP.BaseElement {
 }
 
 /**
+ * Service for sharing data across <amp-script> elements.
+ */
+class AmpScriptService {
+  /**
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} unusedAmpdoc
+   */
+  constructor(unusedAmpdoc) {
+    /** @private {number} */
+    this.cumulativeSize_ = 0;
+  }
+
+  /**
+   * @param {number} size
+   * @return {boolean}
+   */
+  sizeLimitExceeded(size) {
+    this.cumulativeSize_ += size;
+    return this.cumulativeSize_ > MAX_TOTAL_SCRIPT_SIZE;
+  }
+}
+
+/**
  * A DOMPurify wrapper that implements the worker-dom.Sanitizer interface.
  * @visibleForTesting
  */
@@ -185,13 +245,25 @@ export class SanitizerImpl {
    */
   constructor(win) {
     /** @private {!DomPurifyDef} */
-    this.purifier_ = createPurifier(dict({'IN_PLACE': true}));
+    this.purifier_ = createPurifier(win.document, dict({'IN_PLACE': true}));
+
+    /** @private {!Object<string, boolean>} */
+    this.allowedTags_ = getAllowedTags();
+    // For now, only allow built-in AMP components.
+    this.allowedTags_['amp-img'] = true;
+    this.allowedTags_['amp-layout'] = true;
+    this.allowedTags_['amp-pixel'] = true;
 
     /** @const @private {!Element} */
     this.wrapper_ = win.document.createElement('div');
   }
 
   /**
+   * TODO(choumx): This is currently called by worker-dom on node creation,
+   * so all invocations are on super-simple nodes like <p></p>.
+   * Either it should be moved to node insertion to justify the more expensive
+   * sanitize() call, or this method should be a simple string lookup.
+   *
    * @param {!Node} node
    * @return {boolean}
    */
@@ -207,7 +279,7 @@ export class SanitizerImpl {
     this.purifier_.sanitize(parent);
     const clean = parent.firstChild;
     if (!clean) {
-      dev().info(TAG, 'Sanitized node:', node);
+      user().warn(TAG, 'Sanitized node:', node);
       return false;
     }
     // Detach `node` if we used a wrapper div.
@@ -226,32 +298,33 @@ export class SanitizerImpl {
    * @return {boolean}
    */
   mutateAttribute(node, attribute, value) {
-    // TODO(choumx): Per Gabor, check node against DOMPurify's tag whitelist.
-    // We could also call sanitize() on the node, but that could result in
-    // node removal, whereas we'd want to no-op ideally.
-
     // TODO(choumx): Call mutatedAttributesCallback() on AMP elements e.g.
     // so an amp-img can update its child img when [src] is changed.
 
     const tag = node.nodeName.toLowerCase();
-    const attr = attribute.toLowerCase();
-
-    if (validateAttributeChange(this.purifier_, tag, attr, value)) {
-      if (value == null) {
-        node.removeAttribute(attr);
-      } else {
-        const newValue = rewriteAttributeValue(tag, attr, value);
-        node.setAttribute(attr, newValue);
-      }
-
-      // a[href] requires [target], which defaults to _top.
-      if (tag === 'a') {
-        if (node.hasAttribute('href') && !node.hasAttribute('target')) {
-          node.setAttribute('target', '_top');
+    // DOMPurify's attribute validation is tag-agnostic, so we need to check
+    // that the tag itself is valid. E.g. a[href] is ok, but base[href] is not.
+    // TODO(choumx): This is actually more strict than sanitize().
+    if (this.allowedTags_[tag]) {
+      const attr = attribute.toLowerCase();
+      if (validateAttributeChange(this.purifier_, node, attr, value)) {
+        if (value == null) {
+          node.removeAttribute(attr);
+        } else {
+          const newValue = rewriteAttributeValue(tag, attr, value);
+          node.setAttribute(attr, newValue);
         }
+
+        // a[href] requires [target], which defaults to _top.
+        if (tag === 'a') {
+          if (node.hasAttribute('href') && !node.hasAttribute('target')) {
+            node.setAttribute('target', '_top');
+          }
+        }
+        return true;
       }
-      return true;
     }
+    user().warn(TAG, 'Sanitized [%s]="%s":', attribute, value, node);
     return false;
   }
 
@@ -262,12 +335,11 @@ export class SanitizerImpl {
    * @return {boolean}
    */
   mutateProperty(node, property, value) {
-    const tag = node.nodeName.toLowerCase();
     const prop = property.toLowerCase();
 
     // worker-dom's supported properties and corresponding attribute name
     // differences are minor, e.g. acceptCharset vs. accept-charset.
-    if (validateAttributeChange(this.purifier_, tag, prop, value)) {
+    if (validateAttributeChange(this.purifier_, node, prop, value)) {
       node[property] = value;
       return true;
     }
@@ -275,6 +347,7 @@ export class SanitizerImpl {
   }
 }
 
-AMP.extension('amp-script', '0.1', function(AMP) {
-  AMP.registerElement('amp-script', AmpScript, CSS);
+AMP.extension(TAG, '0.1', function(AMP) {
+  AMP.registerServiceForDoc(TAG, AmpScriptService);
+  AMP.registerElement(TAG, AmpScript, CSS);
 });

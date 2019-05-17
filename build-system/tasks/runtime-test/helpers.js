@@ -22,12 +22,15 @@ const fs = require('fs');
 const log = require('fancy-log');
 const minimatch = require('minimatch');
 const path = require('path');
+const {exec} = require('../../exec');
 const {gitDiffNameOnlyMaster} = require('../../git');
 const {green, cyan, red} = colors;
 const {isTravisBuild} = require('../../travis');
 const extensionsCssMapPath = 'EXTENSIONS_CSS_MAP';
 
 const ROOT_DIR = path.resolve(__dirname, '../../../');
+const LARGE_REFACTOR_THRESHOLD = 50;
+
 /**
  * Extracts a mapping from CSS files to JS files from a well known file
  * generated during `gulp css`.
@@ -37,8 +40,11 @@ const ROOT_DIR = path.resolve(__dirname, '../../../');
 function extractCssJsFileMap() {
   //TODO(estherkim): consolidate arg validation logic
   if (!fs.existsSync(extensionsCssMapPath)) {
-    log(red('ERROR:'), 'Could not find the file',
-        cyan(extensionsCssMapPath) + '.');
+    log(
+      red('ERROR:'),
+      'Could not find the file',
+      cyan(extensionsCssMapPath) + '.'
+    );
     log('Make sure', cyan('gulp css'), 'was run prior to this.');
     process.exit();
   }
@@ -50,8 +56,9 @@ function extractCssJsFileMap() {
 
   // Adds an entry that maps a CSS file to a JS file
   function addCssJsEntry(cssData, cssBinaryName, cssJsFileMap) {
-    const cssFilePath = `extensions/${cssData['name']}/${cssData['version']}/` +
-        `${cssBinaryName}.css`;
+    const cssFilePath =
+      `extensions/${cssData['name']}/${cssData['version']}/` +
+      `${cssBinaryName}.css`;
     const jsFilePath = `build/${cssBinaryName}-${cssData['version']}.css.js`;
     cssJsFileMap[cssFilePath] = jsFilePath;
   }
@@ -91,8 +98,11 @@ function getAdTypes() {
   // Add all other ad types
   const files = fs.readdirSync('./ads/');
   for (let i = 0; i < files.length; i++) {
-    if (path.extname(files[i]) == '.js'
-        && files[i][0] != '_' && files[i] != 'ads.extern.js') {
+    if (
+      path.extname(files[i]) == '.js' &&
+      files[i][0] != '_' &&
+      files[i] != 'ads.extern.js'
+    ) {
       const adType = path.basename(files[i], '.js');
       const expanded = namingExceptions[adType];
       if (expanded) {
@@ -177,18 +187,22 @@ function unitTestsToRun(unitTestPaths) {
 
   function shouldRunTest(testFile, srcFiles) {
     const filesImported = getImports(testFile);
-    return filesImported.filter(function(file) {
-      return srcFiles.includes(file);
-    }).length > 0;
+    return (
+      filesImported.filter(function(file) {
+        return srcFiles.includes(file);
+      }).length > 0
+    );
   }
 
   // Retrieves the set of unit tests that should be run
   // for a set of source files.
   function getTestsFor(srcFiles) {
     const allUnitTests = deglob.sync(unitTestPaths);
-    return allUnitTests.filter(testFile => {
-      return shouldRunTest(testFile, srcFiles);
-    }).map(fullPath => path.relative(ROOT_DIR, fullPath));
+    return allUnitTests
+      .filter(testFile => {
+        return shouldRunTest(testFile, srcFiles);
+      })
+      .map(fullPath => path.relative(ROOT_DIR, fullPath));
   }
 
   filesChanged.forEach(file => {
@@ -217,4 +231,27 @@ function unitTestsToRun(unitTestPaths) {
   return testsToRun;
 }
 
-module.exports = {getAdTypes, unitTestsToRun};
+/**
+ * Mitigates https://github.com/karma-runner/karma-sauce-launcher/issues/117
+ * by refreshing the wd cache so that Karma can launch without an error.
+ */
+function refreshKarmaWdCache() {
+  exec('node ./node_modules/wd/scripts/build-browser-scripts.js');
+}
+
+/**
+ * Returns true if the PR is a large refactor.
+ * (Used to skip testing local changes.)
+ * @return {boolean}
+ */
+function isLargeRefactor() {
+  const filesChanged = gitDiffNameOnlyMaster();
+  return filesChanged.length >= LARGE_REFACTOR_THRESHOLD;
+}
+
+module.exports = {
+  getAdTypes,
+  isLargeRefactor,
+  refreshKarmaWdCache,
+  unitTestsToRun,
+};

@@ -46,11 +46,10 @@ export class HiddenObserver {
   constructor(ampdoc, opt_root) {
     /** @const {!Document|!ShadowRoot} */
     this.root_ = opt_root || ampdoc.getRootNode();
-
-    const doc = opt_root ? opt_root.ownerDocument : this.root_;
+    const doc = this.root_.ownerDocument || this.root_;
 
     /** @const {!Window} */
-    this.win_ = /** @type {!Window} */(devAssert(doc.defaultView));
+    this.win_ = /** @type {!Window} */ (devAssert(doc.defaultView));
 
     /** @private {?MutationObserver} */
     this.mutationObserver_ = null;
@@ -61,8 +60,11 @@ export class HiddenObserver {
 
   /** @override @nocollapse */
   static installInEmbedWindow(embedWin, ampdoc) {
-    installServiceInEmbedScope(embedWin, 'hidden-observer',
-        new HiddenObserver(ampdoc, embedWin.document));
+    installServiceInEmbedScope(
+      embedWin,
+      'hidden-observer',
+      new HiddenObserver(ampdoc, embedWin.document)
+    );
   }
 
   /**

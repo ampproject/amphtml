@@ -26,14 +26,15 @@ const {
   printChangeSummary,
   startTimer,
   stopTimer,
-  timedExecOrDie: timedExecOrDieBase} = require('./utils');
+  timedExecOrDie: timedExecOrDieBase,
+} = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
 const {isTravisPullRequestBuild} = require('../travis');
 
 const FILENAME = 'validator-tests.js';
 const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
-const timedExecOrDie =
-  (cmd, unusedFileName) => timedExecOrDieBase(cmd, FILENAME);
+const timedExecOrDie = (cmd, unusedFileName) =>
+  timedExecOrDieBase(cmd, FILENAME);
 
 function main() {
   const startTime = startTimer(FILENAME, FILENAME);
@@ -44,15 +45,33 @@ function main() {
     timedExecOrDie('gulp validator-webui');
   } else {
     printChangeSummary(FILENAME);
-    if (buildTargets.has('VALIDATOR')) {
+    let ranTests = false;
+
+    if (
+      buildTargets.has('RUNTIME') ||
+      buildTargets.has('BUILD_SYSTEM') ||
+      buildTargets.has('VALIDATOR')
+    ) {
       timedExecOrDie('gulp validator');
-    } else if (buildTargets.has('VALIDATOR_WEBUI')) {
+      ranTests = true;
+    }
+
+    if (
+      buildTargets.has('RUNTIME') ||
+      buildTargets.has('BUILD_SYSTEM') ||
+      buildTargets.has('VALIDATOR_WEBUI')
+    ) {
       timedExecOrDie('gulp validator-webui');
-    } else {
+      ranTests = true;
+    }
+
+    if (!ranTests) {
       console.log(
-          `${FILELOGPREFIX} Skipping ` + colors.cyan('Validator Tests ') +
-          'because this commit does not affect ' +
-          'the validator or validator web UI.');
+        `${FILELOGPREFIX} Skipping ` +
+          colors.cyan('Validator Tests ') +
+          'because this commit does not affect the runtime, build system, ' +
+          'validator, or validator web UI.'
+      );
     }
   }
 
