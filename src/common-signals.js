@@ -20,6 +20,11 @@
  */
 export const CommonSignals = {
   /**
+   * The element has been upgraded from ElementStub to its real implementation.
+   */
+  UPGRADED: 'upgraded',
+
+  /**
    * The element has been built.
    */
   BUILT: 'built',
