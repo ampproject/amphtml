@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {getAllowedAttributeMutation} from './attribute-allow-list/attribute-allow-list';
+import {getAllowedAttributeMutationEntry} from './attribute-allow-list/attribute-allow-list';
 import {isObject} from '../../../src/types';
 import {user, userAssert} from '../../../src/log';
 
@@ -36,18 +36,35 @@ const MUTATION_TYPES = ['attributes', 'characterData', 'childList'];
  * @return {!Function}
  */
 export function parseMutation(mutation, document) {
-  const mutationRecord = assertMutationRecord(mutation);
+  const mutationRecord = assertMutationRecordFormat(mutation);
 
   const stringifiedMutation = JSON.stringify(mutation);
 
   setSelectorToElement('target', mutationRecord, document);
 
   if (mutationRecord['type'] === 'attributes') {
-    assertAttributeMutation(mutationRecord, stringifiedMutation);
+    assertAttributeMutationFormat(mutationRecord, stringifiedMutation);
 
-    return getAllowedAttributeMutation(mutationRecord, stringifiedMutation);
+    // Get the AttribeMutationEntry
+    // From the Attribute allow list
+    const allowedAttributeMutationEntry = getAllowedAttributeMutationEntry(
+      mutationRecord,
+      stringifiedMutation
+    );
+
+    // Assert the attribute mutation passes it's check
+    // that is allowed and validated.
+    userAssert(
+      allowedAttributeMutationEntry.validate(mutationRecord['value']),
+      'Mutation %s has an an unsupported value.',
+      stringifiedMutation
+    );
+
+    // Return the corresponding mutation
+    // For the allowed attribute mutation
+    return allowedAttributeMutationEntry.mutate.bind(this, mutationRecord);
   } else if (mutationRecord['type'] === 'characterData') {
-    assertCharacterDataMutation(mutationRecord, stringifiedMutation);
+    assertCharacterDataMutationFormat(mutationRecord, stringifiedMutation);
 
     return () => {
       mutationRecord['targetElement'].textContent = mutationRecord['value'];
@@ -67,12 +84,12 @@ export function parseMutation(mutation, document) {
 }
 
 /**
- * Function to validate that the mutation
- * is a mutation record.
+ * Function to assert the format to ensure
+ * that the mutation is a mutation record.
  * @param {!JsonObject} mutation
  * @return {!Object}
  */
-function assertMutationRecord(mutation) {
+function assertMutationRecordFormat(mutation) {
   // Assert that the mutation is an object
   userAssert(
     isObject(mutation),
@@ -105,32 +122,13 @@ function assertMutationRecord(mutation) {
 }
 
 /**
- * Function to set the target element from the
- * target selector to the target selector key,
- * and assert that we found the element.
- * @param {string} selectorKey
- * @param {!Object} mutationRecord
- * @param {!Document} document
- */
-function setSelectorToElement(selectorKey, mutationRecord, document) {
-  const targetElement = document.querySelector(mutationRecord[selectorKey]);
 
-  userAssert(
-    targetElement !== null,
-    'No element on the document matches the selector, %s .',
-    mutationRecord[selectorKey]
-  );
-
-  mutationRecord[selectorKey + 'Element'] = targetElement;
-}
-
-/**
- * Function to assert allowing setting the textContent
- * of a node.
+ * Function to assert the format for attribute
+ * mutations.
  * @param {!Object} mutationRecord
  * @param {string} stringifiedMutation
  */
-function assertAttributeMutation(mutationRecord, stringifiedMutation) {
+function assertAttributeMutationFormat(mutationRecord, stringifiedMutation) {
   // Assert the mutation value
   userAssert(
     mutationRecord['value'] !== undefined &&
@@ -149,12 +147,15 @@ function assertAttributeMutation(mutationRecord, stringifiedMutation) {
 }
 
 /**
- * Function to assert allowing setting the textContent
- * of a node.
+ * Function to assert the format for textContent
+ * mutations.
  * @param {!Object} mutationRecord
  * @param {string} stringifiedMutation
  */
-function assertCharacterDataMutation(mutationRecord, stringifiedMutation) {
+function assertCharacterDataMutationFormat(
+  mutationRecord,
+  stringifiedMutation
+) {
   // Assert the mutation value
   userAssert(
     mutationRecord['value'] !== undefined &&
@@ -162,4 +163,24 @@ function assertCharacterDataMutation(mutationRecord, stringifiedMutation) {
     'Mutation %s must have a value.',
     stringifiedMutation
   );
+}
+
+/**
+ * Function to set the target element from the
+ * target selector to the target selector key,
+ * and assert that we found the element.
+ * @param {string} selectorKey
+ * @param {!Object} mutationRecord
+ * @param {!Document} document
+ */
+function setSelectorToElement(selectorKey, mutationRecord, document) {
+  const targetElement = document.querySelector(mutationRecord[selectorKey]);
+
+  userAssert(
+    targetElement !== null,
+    'No element on the document matches the selector, %s .',
+    mutationRecord[selectorKey]
+  );
+
+  mutationRecord[selectorKey + 'Element'] = targetElement;
 }

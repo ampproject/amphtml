@@ -21,7 +21,7 @@ import {assertHttpsUrl} from '../../../../src/url';
  * This should be extended to ensure the service
  * is properly handled
  */
-export class AllowedAttributeEntry {
+export class AllowedAttributeMutationEntry {
   /**
    * Constructor for the class
    * @param {Array<string>=} opt_tags
@@ -60,7 +60,7 @@ export class AllowedAttributeEntry {
  * Class for handling ['style']['*'] attribute
  * mutations
  */
-export class DefaultStyleAllowedAttributeEntry extends AllowedAttributeEntry {
+export class DefaultStyleAllowedAttributeMutationEntry extends AllowedAttributeMutationEntry {
   /** @override */
   constructor() {
     super(['*']);
@@ -93,7 +93,7 @@ export class DefaultStyleAllowedAttributeEntry extends AllowedAttributeEntry {
  * Class for handling URL type attribute
  * mutations. E.g ['href']['*']
  */
-export class DefaultAllowedURLAttributeEntry extends AllowedAttributeEntry {
+export class DefaultAllowedURLAttributeMutationEntry extends AllowedAttributeMutationEntry {
   /**
    * @param {Array<string>=} opt_tags
    * @override
