@@ -747,6 +747,38 @@ describes.sandboxed('DOM', {}, env => {
         });
       });
     });
+
+    it('should yield body asap even if doc is not complete', () => {
+      return new Promise((resolve, reject) => {
+        const doc = {
+          readyState: 'loading',
+          body: null,
+          documentElement: {
+            ownerDocument: {
+              defaultView: {
+                setInterval() {
+                  return window.setInterval.apply(window, arguments);
+                },
+                clearInterval() {
+                  return window.clearInterval.apply(window, arguments);
+                },
+              },
+            },
+          },
+        };
+        setTimeout(() => {
+          doc.body = {};
+        }, 50);
+        dom.waitForBodyOpen(doc, () => {
+          try {
+            expect(doc.body).to.exist;
+            resolve();
+          } catch (e) {
+            reject(new Error("body doesn't exist"));
+          }
+        });
+      });
+    });
   });
 
   describe('getDataParamsFromAttributes', () => {
