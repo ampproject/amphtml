@@ -38,6 +38,7 @@ import {
 import {ActionTrust} from '../../../src/action-constants';
 import {AdvancementConfig, TapNavigationDirection} from './page-advancement';
 import {AdvancementMode, getAnalyticsService} from './story-analytics';
+import {AmpEvents} from '../../../src/amp-events';
 import {AmpStoryAccess} from './amp-story-access';
 import {AmpStoryBackground} from './background';
 import {AmpStoryBookend} from './bookend/amp-story-bookend';
@@ -64,6 +65,7 @@ import {
 import {InfoDialog} from './amp-story-info-dialog';
 import {Keys} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
+import {LiveStoryManager} from './live-story-manager';
 import {LocalizationService} from '../../../src/service/localization';
 import {MediaPool, MediaType} from './media-pool';
 import {NavigationState} from './navigation-state';
@@ -356,6 +358,9 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private {?Element} */
     this.maskElement_ = null;
+
+    /** @private {?LiveStoryManager} */
+    this.liveStoryManager_ = null;
 
     /** @private @const {!LocalizationService} */
     this.localizationService_ = new LocalizationService(this.win);
@@ -961,9 +966,34 @@ export class AmpStory extends AMP.BaseElement {
     // that prevents descendents from being laid out (and therefore loaded).
     storyLayoutPromise
       .then(() => this.whenPagesLoaded_(PAGE_LOAD_TIMEOUT_MS))
-      .then(() => this.markStoryAsLoaded_());
+      .then(() => {
+        this.markStoryAsLoaded_();
+        this.initializeLiveStory_();
+      });
 
     return storyLayoutPromise;
+  }
+
+  /**
+   * Initialize LiveStoryManager if this is a live story.
+   * @private
+   */
+  initializeLiveStory_() {
+    if (this.element.hasAttribute('dynamic-live-list')) {
+      this.liveStoryManager_ = new LiveStoryManager(this);
+      this.liveStoryManager_.build();
+
+      this.storeService_.dispatch(Action.ADD_TO_ACTIONS_WHITELIST, [
+        {tagOrTarget: 'AMP-LIVE-LIST', method: 'update'},
+      ]);
+
+      this.element.addEventListener(AmpEvents.DOM_UPDATE, ({target}) => {
+        this.liveStoryManager_.update(
+          target,
+          this.element.querySelectorAll('amp-story-page:not([ad])')
+        );
+      });
+    }
   }
 
   /**
@@ -2549,6 +2579,8 @@ export class AmpStory extends AMP.BaseElement {
     if (page.isAd()) {
       this.adPages_.push(page);
     }
+
+    this.storeService_.dispatch(Action.SET_PAGES_COUNT, this.getPageCount());
   }
 
   /**
@@ -2591,9 +2623,13 @@ export class AmpStory extends AMP.BaseElement {
 
     const nextPageEl = nextPage.element;
     const nextPageId = nextPageEl.id;
-    pageToBeInsertedEl.setAttribute(advanceAttr, nextPageId);
-    pageToBeInsertedEl.setAttribute(Attributes.AUTO_ADVANCE_TO, nextPageId);
-    nextPageEl.setAttribute(Attributes.RETURN_TO, pageToBeInsertedId);
+    // For a live story, nextPage is the same as pageToBeInserted. But not for
+    // ads since it's inserted between two pages.
+    if (nextPageId !== pageToBeInsertedId) {
+      pageToBeInsertedEl.setAttribute(advanceAttr, nextPageId);
+      pageToBeInsertedEl.setAttribute(Attributes.AUTO_ADVANCE_TO, nextPageId);
+      nextPageEl.setAttribute(Attributes.RETURN_TO, pageToBeInsertedId);
+    }
 
     return true;
   }

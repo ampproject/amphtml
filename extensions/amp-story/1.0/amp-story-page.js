@@ -54,6 +54,7 @@ import {
   iterateCursor,
   matches,
   scopedQuerySelectorAll,
+  whenUpgradedToCustomElement,
 } from '../../../src/dom';
 import {debounce} from '../../../src/utils/rate-limit';
 import {dev} from '../../../src/log';
@@ -476,9 +477,8 @@ export class AmpStoryPage extends AMP.BaseElement {
         switch (mediaEl.tagName.toLowerCase()) {
           case 'amp-img':
           case 'amp-anim':
-            mediaEl
-              .signals()
-              .whenSignal(CommonSignals.LOAD_END)
+            whenUpgradedToCustomElement(mediaEl)
+              .then(el => el.signals().whenSignal(CommonSignals.LOAD_END))
               .then(resolve, resolve);
             break;
           case 'amp-audio':
