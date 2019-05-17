@@ -269,13 +269,7 @@ describes.realWin(
           ['interesting', 'into', 'stint', 'indigo', 'tin'],
           'int'
         )
-      ).to.have.ordered.members([
-        'interesting',
-        'into',
-        'stint',
-        'indigo',
-        'tin',
-      ]);
+      ).to.have.ordered.members(['interesting', 'into', 'stint']);
       // Remaining filters should error
       impl.filter_ = 'custom';
       expect(() => impl.filterData_(['a', 'b', 'c'], 'a')).to.throw(
