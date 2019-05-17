@@ -43,7 +43,8 @@ const NEXT_SCREEN_AREA_RATIO = 0.75;
 const PREVIOUS_SCREEN_AREA_RATIO = 0.25;
 
 /**
- * Protected edges of the screen in pixels.
+ * Protected edges of the screen in pixels. When tapped on these areas, we will
+ * always perform navigation. Even if a clickable element is there.
  * @const {number}
  * @private
  */
@@ -517,7 +518,7 @@ class ManualAdvancement extends AdvancementConfig {
   }
 
   /**
-   * Checks if click was inside of one of the horizontal edges of the screen.
+   * Checks if click was inside of one of the side edges of the screen.
    * @param {!Event} event
    * @param {!ClientRect} pageRect
    * @return {boolean}
