@@ -32,6 +32,7 @@ import {includes, startsWith} from '../../../src/string';
 import {isEnumValue} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {mod} from '../../../src/utils/math';
+import {sanitizeHtml} from '../../../src/sanitizer';
 import {toggle} from '../../../src/style';
 
 const EXPERIMENT = 'amp-autocomplete';
@@ -374,7 +375,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
     if (!substring || substring.length > item.length) {
       element.textContent = item;
     } else {
-      const regex = new RegExp(substring, 'gi');
+      const sanitized = sanitizeHtml(substring, this.win.document);
+      const regex = new RegExp(sanitized, 'gi');
       element./*OK*/ innerHTML = item.replace(
         regex,
         '<span class="autocomplete-partial">$&</span>'
