@@ -711,7 +711,7 @@ describes.sandboxed('DOM', {}, env => {
     });
 
     it('should wait for body', () => {
-      return dom.waitForBodyPromise(document).then(() => {
+      return dom.waitForBodyOpenPromise(document).then(() => {
         expect(document.body).to.exist;
       });
     });
@@ -737,7 +737,7 @@ describes.sandboxed('DOM', {}, env => {
         setTimeout(() => {
           doc.body = {};
         }, 50);
-        dom.waitForBody(doc, () => {
+        dom.waitForBodyOpen(doc, () => {
           try {
             expect(doc.body).to.exist;
             resolve();

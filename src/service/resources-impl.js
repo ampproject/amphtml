@@ -425,7 +425,7 @@ export class Resources {
    * @private
    */
   toggleInputClass_(clazz, on) {
-    this.ampdoc.whenBodyAvailable().then(body => {
+    this.ampdoc.waitForBodyOpen().then(body => {
       this.vsync_.mutate(() => {
         body.classList.toggle(clazz, on);
       });

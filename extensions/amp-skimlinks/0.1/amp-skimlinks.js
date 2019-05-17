@@ -85,7 +85,7 @@ export class AmpSkimlinks extends AMP.BaseElement {
     this.skimOptions_ = getAmpSkimlinksOptions(this.element, this.docInfo_);
 
     return this.ampDoc_
-      .whenBodyAvailable()
+      .waitForBodyOpen()
       .then(() => this.viewer_.getReferrerUrl())
       .then(referrer => {
         this.referrer_ = referrer;

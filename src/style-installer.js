@@ -16,7 +16,7 @@
 
 import {Services} from './services';
 import {dev, devAssert, rethrowAsync} from './log';
-import {insertAfterOrAtStart, waitForBodyPromise} from './dom';
+import {insertAfterOrAtStart, waitForBodyOpenPromise} from './dom';
 import {map} from './utils/object';
 import {setStyles} from './style';
 import {waitForServices} from './render-delaying-services';
@@ -257,7 +257,7 @@ export function makeBodyVisible(doc) {
     renderStartedNoInline(doc);
   };
 
-  waitForBodyPromise(doc)
+  waitForBodyOpenPromise(doc)
     .then(() => {
       return waitForServices(win);
     })
