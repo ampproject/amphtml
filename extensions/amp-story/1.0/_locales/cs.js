@@ -117,8 +117,9 @@ const strings = {
     string: 'Chcete-li tento prvek zobrazit, zvětšete šířku okna',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
-    string: 'Chcete-li tento obsah zobrazit, musíte povolit experiment s ' +
-        'příběhem AMP',
+    string:
+      'Chcete-li tento obsah zobrazit, musíte povolit experiment s ' +
+      'příběhem AMP',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
     string: 'Stránku je nejlepší zobrazit na výšku',

@@ -55,7 +55,7 @@ The request is always made from the client, even if the document was served from
 
 Filtered results will not be displayed until user focuses on the input field or begins typing into it. Leaving the viewport hides the filtered results.
 
-By default, `<amp-autocomplete>` adds a `list` ARIA role to the filtered results element and a `listitem` role to item elements rendered via the template.
+By default, `<amp-autocomplete>` adds a `list` ARIA role to the filtered results element and `listitem` and `data-value` attributes to item elements rendered via the template.
 
 Example:
 ```html
@@ -127,7 +127,7 @@ Read more about [AMP Actions and Events](../../spec/amp-actions-and-events.md).
 <table>
   <tr>
     <td width="40%"><strong>select</strong></td>
-    <td><code>amp-autocomplete</code> triggers the <code>select</code> event when the user selects an option via click, tap, keyboard navigation or accepting typeahead.
+    <td><code>amp-autocomplete</code> triggers the <code>select</code> event when the user selects an option via click, tap, keyboard navigation or accepting typeahead. It also fires the <code>select</code> event if a user keyboard navigates to an item and Tabs away from the input field.
     <code>event</code> contains the <code>value</code> attribute value of the selected element.</td>
   </tr>
 

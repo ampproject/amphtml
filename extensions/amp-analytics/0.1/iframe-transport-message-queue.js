@@ -35,7 +35,6 @@ export class IframeTransportMessageQueue {
    * messages to
    */
   constructor(win, frame) {
-
     /** @private {!HTMLIFrameElement} */
     this.frame_ = frame;
 
@@ -49,12 +48,14 @@ export class IframeTransportMessageQueue {
     this.pendingEvents_ = [];
 
     /** @private {!../../../src/iframe-helper.SubscriptionApi} */
-    this.postMessageApi_ = new SubscriptionApi(this.frame_,
-        MessageType.SEND_IFRAME_TRANSPORT_EVENTS,
-        true,
-        () => {
-          this.setIsReady();
-        });
+    this.postMessageApi_ = new SubscriptionApi(
+      this.frame_,
+      MessageType.SEND_IFRAME_TRANSPORT_EVENTS,
+      true,
+      () => {
+        this.setIsReady();
+      }
+    );
   }
 
   /**
@@ -92,13 +93,16 @@ export class IframeTransportMessageQueue {
    * creative) is sending it.
    */
   enqueue(event) {
-    devAssert(event && event.creativeId && event.message,
-        'Attempted to enqueue malformed message for: ' +
-        event.creativeId);
+    devAssert(
+      event && event.creativeId && event.message,
+      'Attempted to enqueue malformed message for: ' + event.creativeId
+    );
     this.pendingEvents_.push(event);
     if (this.queueSize() >= MAX_QUEUE_SIZE_) {
-      dev().warn(TAG_, 'Exceeded maximum size of queue for: ' +
-          event.creativeId);
+      dev().warn(
+        TAG_,
+        'Exceeded maximum size of queue for: ' + event.creativeId
+      );
       this.pendingEvents_.shift();
     }
     this.flushQueue_();
@@ -110,11 +114,12 @@ export class IframeTransportMessageQueue {
    */
   flushQueue_() {
     if (this.isReady() && this.queueSize()) {
-      this.postMessageApi_.send(MessageType.IFRAME_TRANSPORT_EVENTS,
-          /** @type {!JsonObject} */
-          ({events: this.pendingEvents_}));
+      this.postMessageApi_.send(
+        MessageType.IFRAME_TRANSPORT_EVENTS,
+        /** @type {!JsonObject} */
+        ({events: this.pendingEvents_})
+      );
       this.pendingEvents_ = [];
     }
   }
 }
-

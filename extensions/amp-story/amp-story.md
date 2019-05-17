@@ -30,10 +30,6 @@ limitations under the License.
     <td>A rich, visual storytelling format.</td>
   </tr>
   <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td><div><a href="https://www.ampproject.org/docs/reference/experimental.html">Experimental</a></td>
-  </tr>
-  <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js">&lt;/script></code></td>
   </tr>
@@ -51,7 +47,7 @@ limitations under the License.
 </table>
 
 {% call callout('Important', type='caution') %}
-This component is experimental and under active development. For any issues, please [file a GitHub issue](https://github.com/ampproject/amphtml/issues/new).
+This component is under active development. For any issues, please [file a GitHub issue](https://github.com/ampproject/amphtml/issues/new).
 {% endcall %}
 
 [TOC]
@@ -598,6 +594,7 @@ An `amp-story-grid-layer` can contain any of the following elements:
         <li><code>&lt;amp-img></code></li>
         <li><code>&lt;amp-video></code></li>
         <li><code>&lt;source></code></li>
+        <li><code>&lt;svg></code></li>
         <li><code>&lt;track></code></li>
       </ul>
     </td>
@@ -817,6 +814,26 @@ Story page attachments allow you to provide additional AMPHTML content to specif
 A UI prompt to open the attachment will automatically be added at the bottom of every page that configured an attachment.
 
 The `<amp-story-page-attachment>` element must be the last child of `<amp-story-page>`, and must have the `layout="nodisplay"` attribute. The attachment AMPHTML content is expected to be provided inline in your AMP Story, within this `<amp-story-page-attachment>` tag.
+
+### Optional customization
+
+#### `data-cta-text`
+
+Customizes the call to action text displayed on the UI prompt to open the attachment.
+Default: "Swipe up"
+
+```html
+<amp-story-page-attachment layout="nodisplay" data-cta-text="Read more">...</amp-story-page-attachment>
+```
+
+#### `data-title`
+
+Displays the provided title in the page attachment header.
+Default: `null`
+
+```html
+<amp-story-page-attachment layout="nodisplay" data-title="My title">...</amp-story-page-attachment>
+```
 
 ### Allowed content and components
 

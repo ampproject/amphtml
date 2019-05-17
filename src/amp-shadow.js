@@ -39,9 +39,9 @@ import {deactivateChunking} from './chunk';
 import {doNotTrackImpression} from './impression';
 import {installDocService} from './service/ampdoc-impl';
 import {installPerformanceService} from './service/performance-impl';
+import {internalRuntimeVersion} from './internal-version';
 import {isExperimentOn} from './experiments';
 import {stubElementsForDoc} from './service/custom-element-registry';
-import {version} from './internal-version';
 
 // This feature doesn't make sense in shadow mode as it only applies to
 // background rendered iframes;
@@ -62,21 +62,27 @@ if (isExperimentOn(self, 'ampdoc-shell')) {
   installPerformanceService(self);
   const ampdocService = Services.ampdocServiceFor(self);
   const ampdocShell = ampdocService.installShellShadowDoc();
-  installStylesForDoc(ampdocShell, cssText, () => {
-    installAmpdocServices(ampdocShell);
+  installStylesForDoc(
+    ampdocShell,
+    cssText,
+    () => {
+      installAmpdocServices(ampdocShell);
 
-    // Builtins.
-    installBuiltins(self);
+      // Builtins.
+      installBuiltins(self);
 
-    // Final configuration and stubbing.
-    adoptShadowMode(self);
+      // Final configuration and stubbing.
+      adoptShadowMode(self);
 
-    // Pre-stub already known elements.
-    stubElementsForDoc(ampdocShell);
+      // Pre-stub already known elements.
+      stubElementsForDoc(ampdocShell);
 
-    makeBodyVisible(self.document);
-    Services.resourcesForDoc(ampdocShell).ampInitComplete();
-  }, /* opt_isRuntimeCss */ true, /* opt_ext */ 'amp-runtime');
+      makeBodyVisible(self.document);
+      Services.resourcesForDoc(ampdocShell).ampInitComplete();
+    },
+    /* opt_isRuntimeCss */ true,
+    /* opt_ext */ 'amp-runtime'
+  );
 } else {
   // PWA shell manages its own visibility and shadow ampdocs their own.
   bodyAlwaysVisible(self);
@@ -92,7 +98,12 @@ if (isExperimentOn(self, 'ampdoc-shell')) {
 // tag to give some information that can be used in error reports.
 // (At least by sophisticated users).
 if (self.console) {
-  (console.info || console.log).call(console,
-      `Powered by AMP ⚡ HTML shadows – Version ${version()}`);
+  (console.info || console.log).call(
+    console,
+    `Powered by AMP ⚡ HTML shadows – Version ${internalRuntimeVersion()}`
+  );
 }
-self.document.documentElement.setAttribute('amp-version', version());
+self.document.documentElement.setAttribute(
+  'amp-version',
+  internalRuntimeVersion()
+);

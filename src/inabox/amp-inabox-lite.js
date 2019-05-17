@@ -24,11 +24,7 @@ import {
   installGlobalNavigationHandlerForDoc,
 } from '../service/navigation';
 import {Services} from '../services';
-import {
-  adopt,
-  installBuiltins,
-  installRuntimeServices,
-} from '../runtime';
+import {adopt, installBuiltins, installRuntimeServices} from '../runtime';
 import {cssText} from '../../build/css';
 import {fontStylesheetTimeout} from '../font-stylesheet-timeout';
 import {getMode} from '../mode';
@@ -43,9 +39,9 @@ import {
   makeBodyVisibleRecovery,
 } from '../style-installer';
 import {installViewerServiceForDoc} from '../service/viewer-impl';
+import {internalRuntimeVersion} from '../internal-version';
 import {registerIniLoadListener} from './utils';
 import {stubElementsForDoc} from '../service/custom-element-registry';
-import {version} from '../internal-version';
 
 import {installActionServiceForDoc} from '../service/action-impl';
 import {installCidService} from '../service/cid-impl';
@@ -57,9 +53,7 @@ import {installResourcesServiceForDoc} from '../service/resources-impl';
 import {installStandardActionsForDoc} from '../service/standard-actions-impl';
 import {installStorageServiceForDoc} from '../service/storage-impl';
 import {installUrlForDoc} from '../service/url-impl';
-import {
-  installUrlReplacementsServiceForDoc,
-} from '../service/url-replacements-impl';
+import {installUrlReplacementsServiceForDoc} from '../service/url-replacements-impl';
 
 getMode(self).runtime = 'inabox';
 
@@ -87,39 +81,50 @@ const ampdoc = ampdocService.getAmpDoc(self.document);
 installPerformanceService(self); // TODO: to be removed
 
 self.document.documentElement.classList.add('i-amphtml-inabox');
-const fullCss = cssText
-    + 'html.i-amphtml-inabox{width:100%!important;height:100%!important}';
-installStylesForDoc(ampdoc, fullCss, () => {
-  // Core services.
-  installRuntimeServices(self);
-  fontStylesheetTimeout(self);
-  installIframeMessagingClient(self); // TODO: to be removed
-  installAmpdocServices(ampdoc);
-  // We need the core services (viewer/resources) to start instrumenting
-  registerIniLoadListener(ampdoc);
+const fullCss =
+  cssText + 'html.i-amphtml-inabox{width:100%!important;height:100%!important}';
+installStylesForDoc(
+  ampdoc,
+  fullCss,
+  () => {
+    // Core services.
+    installRuntimeServices(self);
+    fontStylesheetTimeout(self);
+    installIframeMessagingClient(self); // TODO: to be removed
+    installAmpdocServices(ampdoc);
+    // We need the core services (viewer/resources) to start instrumenting
+    registerIniLoadListener(ampdoc);
 
-  // Builtins.
-  installBuiltins(self);
-  adopt(self);
+    // Builtins.
+    installBuiltins(self);
+    adopt(self);
 
-  // Pre-stub already known elements.
-  stubElementsForDoc(ampdoc);
+    // Pre-stub already known elements.
+    stubElementsForDoc(ampdoc);
 
-  Navigation.installAnchorClickInterceptor(ampdoc, self);
-  makeBodyVisible(self.document); // TODO: to be simplified
+    Navigation.installAnchorClickInterceptor(ampdoc, self);
+    makeBodyVisible(self.document); // TODO: to be simplified
 
-  Services.resourcesForDoc(ampdoc).ampInitComplete();
-}, /* opt_isRuntimeCss */ true, /* opt_ext */ 'amp-runtime');
+    Services.resourcesForDoc(ampdoc).ampInitComplete();
+  },
+  /* opt_isRuntimeCss */ true,
+  /* opt_ext */ 'amp-runtime'
+);
 
 // Output a message to the console and add an attribute to the <html>
 // tag to give some information that can be used in error reports.
 // (At least by sophisticated users).
 if (self.console) {
-  (console.info || console.log).call(console,
-      `Powered by AMP ⚡ HTML – Version ${version()}`,
-      self.location.href);
+  (console.info || console.log).call(
+    console,
+    `Powered by AMP ⚡ HTML – Version ${internalRuntimeVersion()}`,
+    self.location.href
+  );
 }
-self.document.documentElement.setAttribute('amp-version', version());
+self.document.documentElement.setAttribute(
+  'amp-version',
+  internalRuntimeVersion()
+);
 
 /**
  * Install ampdoc-level services.

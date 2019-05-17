@@ -22,7 +22,6 @@ import {WebLoginDialog} from '../../../amp-access/0.1/login-dialog';
 const LOCAL = 'local';
 const LOCAL_OPTS = {serviceId: LOCAL};
 
-
 describes.realWin('Actions', {amp: true}, env => {
   let ampdoc;
   let clock;
@@ -69,78 +68,99 @@ describes.realWin('Actions', {amp: true}, env => {
     return actions.build().then(() => {
       const builtActions = actions.builtActionUrlMap_;
       expect(Object.keys(builtActions)).to.have.length(2);
-      expect(builtActions['login'])
-          .to.equal('https://example.org/login?rid=RD');
-      expect(builtActions['subscribe'])
-          .to.equal('https://example.org/subscribe?rid=RD&a=A');
+      expect(builtActions['login']).to.equal(
+        'https://example.org/login?rid=RD'
+      );
+      expect(builtActions['subscribe']).to.equal(
+        'https://example.org/subscribe?rid=RD&a=A'
+      );
     });
   });
 
   it('should open the action popup window synchronously', () => {
-    analyticsMock.expects('event')
-        .withExactArgs('subscriptions-action-login-started', LOCAL_OPTS)
-        .once();
-    analyticsMock.expects('event')
-        .withExactArgs('subscriptions-action-login-success', LOCAL_OPTS)
-        .once();
-    return actions.build().then(() => {
-      const promise = actions.execute('login');
-      expect(openStub).to.be.calledOnce;
-      openResolver('#success=yes');
-      return promise;
-    }).then(result => {
-      expect(result).to.be.true;
-    });
+    analyticsMock
+      .expects('event')
+      .withExactArgs('subscriptions-action-login-started', LOCAL_OPTS)
+      .once();
+    analyticsMock
+      .expects('event')
+      .withExactArgs('subscriptions-action-login-success', LOCAL_OPTS)
+      .once();
+    return actions
+      .build()
+      .then(() => {
+        const promise = actions.execute('login');
+        expect(openStub).to.be.calledOnce;
+        openResolver('#success=yes');
+        return promise;
+      })
+      .then(result => {
+        expect(result).to.be.true;
+      });
   });
 
   it('should accept success=true', () => {
-    return actions.build().then(() => {
-      const promise = actions.execute('login');
-      expect(openStub).to.be.calledOnce;
-      openResolver('#success=true');
-      return promise;
-    }).then(result => {
-      expect(result).to.be.true;
-    });
+    return actions
+      .build()
+      .then(() => {
+        const promise = actions.execute('login');
+        expect(openStub).to.be.calledOnce;
+        openResolver('#success=true');
+        return promise;
+      })
+      .then(result => {
+        expect(result).to.be.true;
+      });
   });
 
   it('should accept success=1', () => {
-    return actions.build().then(() => {
-      const promise = actions.execute('login');
-      expect(openStub).to.be.calledOnce;
-      openResolver('#success=1');
-      return promise;
-    }).then(result => {
-      expect(result).to.be.true;
-    });
+    return actions
+      .build()
+      .then(() => {
+        const promise = actions.execute('login');
+        expect(openStub).to.be.calledOnce;
+        openResolver('#success=1');
+        return promise;
+      })
+      .then(result => {
+        expect(result).to.be.true;
+      });
   });
 
   it('should accept success=no', () => {
-    analyticsMock.expects('event')
-        .withExactArgs('subscriptions-action-login-started', LOCAL_OPTS)
-        .once();
-    analyticsMock.expects('event')
-        .withExactArgs('subscriptions-action-login-rejected', LOCAL_OPTS)
-        .once();
-    return actions.build().then(() => {
-      const promise = actions.execute('login');
-      expect(openStub).to.be.calledOnce;
-      openResolver('#success=no');
-      return promise;
-    }).then(result => {
-      expect(result).to.be.false;
-    });
+    analyticsMock
+      .expects('event')
+      .withExactArgs('subscriptions-action-login-started', LOCAL_OPTS)
+      .once();
+    analyticsMock
+      .expects('event')
+      .withExactArgs('subscriptions-action-login-rejected', LOCAL_OPTS)
+      .once();
+    return actions
+      .build()
+      .then(() => {
+        const promise = actions.execute('login');
+        expect(openStub).to.be.calledOnce;
+        openResolver('#success=no');
+        return promise;
+      })
+      .then(result => {
+        expect(result).to.be.false;
+      });
   });
 
   it('should accept no response', () => {
-    return actions.build().then(() => {
-      const promise = actions.execute('login');
-      expect(openStub).to.be.calledOnce;
-      openResolver('');
-      return promise;
-    }).then(result => {
-      expect(result).to.be.true;
-    });
+    return actions
+      .build()
+      .then(() => {
+        const promise = actions.execute('login');
+        expect(openStub).to.be.calledOnce;
+        openResolver('');
+        return promise;
+      })
+      .then(result => {
+        expect(result).to.be.true;
+      });
   });
 
   it('should block re-execution of actions for some time', () => {
@@ -156,36 +176,48 @@ describes.realWin('Actions', {amp: true}, env => {
   });
 
   it('should handle failures', () => {
-    analyticsMock.expects('event')
-        .withExactArgs('subscriptions-action-login-started', LOCAL_OPTS)
-        .once();
-    analyticsMock.expects('event')
-        .withExactArgs('subscriptions-action-login-failed', LOCAL_OPTS)
-        .once();
-    return actions.build().then(() => {
-      const promise = actions.execute('login');
-      expect(openStub).to.be.calledOnce;
-      openResolver(Promise.reject(new Error('broken')));
-      return promise;
-    }).then(() => {
-      throw new Error('must have failed');
-    }, reason => {
-      expect(() => {
-        throw reason;
-      }).to.throw(/broken/);
-      expect(actions.actionPromise_).to.be.null;
-    });
+    analyticsMock
+      .expects('event')
+      .withExactArgs('subscriptions-action-login-started', LOCAL_OPTS)
+      .once();
+    analyticsMock
+      .expects('event')
+      .withExactArgs('subscriptions-action-login-failed', LOCAL_OPTS)
+      .once();
+    return actions
+      .build()
+      .then(() => {
+        const promise = actions.execute('login');
+        expect(openStub).to.be.calledOnce;
+        openResolver(Promise.reject(new Error('broken')));
+        return promise;
+      })
+      .then(
+        () => {
+          throw new Error('must have failed');
+        },
+        reason => {
+          expect(() => {
+            throw reason;
+          }).to.throw(/broken/);
+          expect(actions.actionPromise_).to.be.null;
+        }
+      );
   });
 
   it('should disallow unknown action', () => {
-    allowConsoleError(() => { expect(() => {
-      actions.execute('unknown');
-    }).to.throw(/Action URL is not configured/); });
+    allowConsoleError(() => {
+      expect(() => {
+        actions.execute('unknown');
+      }).to.throw(/Action URL is not configured/);
+    });
   });
 
   it('should fail before build is complete', () => {
-    allowConsoleError(() => { expect(() => {
-      actions.execute('login');
-    }).to.throw(/Action URL is not ready/); });
+    allowConsoleError(() => {
+      expect(() => {
+        actions.execute('login');
+      }).to.throw(/Action URL is not ready/);
+    });
   });
 });

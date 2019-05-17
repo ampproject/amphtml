@@ -121,7 +121,7 @@ tags: {  # <amp-video> not in amp-story.
   attr_lists: "extended-amp-global"
   attr_lists: "amp-video-common"
   attr_lists: "lightboxable-elements"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-video"
+  spec_url: "https://amp.dev/documentation/components/amp-video"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED
@@ -150,7 +150,7 @@ tags: {  # <amp-video> in amp-story
   }
   attr_lists: "extended-amp-global"
   attr_lists: "amp-video-common"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-video"
+  spec_url: "https://amp.dev/documentation/components/amp-video"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

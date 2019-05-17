@@ -41,11 +41,11 @@ import {
   makeBodyVisible,
   makeBodyVisibleRecovery,
 } from './style-installer';
+import {internalRuntimeVersion} from './internal-version';
 import {maybeTrackImpression} from './impression';
 import {maybeValidate} from './validator-integration';
 import {startupChunk} from './chunk';
 import {stubElementsForDoc} from './service/custom-element-registry';
-import {version} from './internal-version';
 
 /**
  * self.IS_AMP_ALT (is AMP alternative binary) is undefined by default in the
@@ -91,57 +91,69 @@ if (shouldMainBootstrapRun) {
     installPerformanceService(self);
     /** @const {!./service/performance-impl.Performance} */
     const perf = Services.performanceFor(self);
-    if (self.document.documentElement
-        .hasAttribute('i-amphtml-no-boilerplate')) {
+    if (
+      self.document.documentElement.hasAttribute('i-amphtml-no-boilerplate')
+    ) {
       perf.addEnabledExperiment('no-boilerplate');
     }
     installPlatformService(self);
     fontStylesheetTimeout(self);
     perf.tick('is');
-    installStylesForDoc(ampdoc, cssText, () => {
-      startupChunk(self.document, function services() {
-        // Core services.
-        installRuntimeServices(self);
-        installAmpdocServices(ampdoc);
-        // We need the core services (viewer/resources) to start instrumenting
-        perf.coreServicesAvailable();
-        maybeTrackImpression(self);
-      });
-      startupChunk(self.document, function adoptWindow() {
-        adopt(self);
-      });
-      startupChunk(self.document, function builtins() {
-        // Builtins.
-        installBuiltins(self);
-      });
-      startupChunk(self.document, function stub() {
-        // Pre-stub already known elements.
-        stubElementsForDoc(ampdoc);
-      });
-      startupChunk(self.document, function final() {
-        installPullToRefreshBlocker(self);
-        installAutoLightboxExtension(ampdoc);
+    installStylesForDoc(
+      ampdoc,
+      cssText,
+      () => {
+        startupChunk(self.document, function services() {
+          // Core services.
+          installRuntimeServices(self);
+          installAmpdocServices(ampdoc);
+          // We need the core services (viewer/resources) to start instrumenting
+          perf.coreServicesAvailable();
+          maybeTrackImpression(self);
+        });
+        startupChunk(self.document, function adoptWindow() {
+          adopt(self);
+        });
+        startupChunk(self.document, function builtins() {
+          // Builtins.
+          installBuiltins(self);
+        });
+        startupChunk(self.document, function stub() {
+          // Pre-stub already known elements.
+          stubElementsForDoc(ampdoc);
+        });
+        startupChunk(self.document, function final() {
+          installPullToRefreshBlocker(self);
+          installAutoLightboxExtension(ampdoc);
 
-        maybeValidate(self);
-        makeBodyVisible(self.document);
-      });
-      startupChunk(self.document, function finalTick() {
-        perf.tick('e_is');
-        Services.resourcesForDoc(ampdoc).ampInitComplete();
-        // TODO(erwinm): move invocation of the `flush` method when we have the
-        // new ticks in place to batch the ticks properly.
-        perf.flush();
-      });
-    }, /* opt_isRuntimeCss */ true, /* opt_ext */ 'amp-runtime');
+          maybeValidate(self);
+          makeBodyVisible(self.document);
+        });
+        startupChunk(self.document, function finalTick() {
+          perf.tick('e_is');
+          Services.resourcesForDoc(ampdoc).ampInitComplete();
+          // TODO(erwinm): move invocation of the `flush` method when we have the
+          // new ticks in place to batch the ticks properly.
+          perf.flush();
+        });
+      },
+      /* opt_isRuntimeCss */ true,
+      /* opt_ext */ 'amp-runtime'
+    );
   });
 
   // Output a message to the console and add an attribute to the <html>
   // tag to give some information that can be used in error reports.
   // (At least by sophisticated users).
   if (self.console) {
-    (console.info || console.log).call(console,
-        `Powered by AMP ⚡ HTML – Version ${version()}`,
-        self.location.href);
+    (console.info || console.log).call(
+      console,
+      `Powered by AMP ⚡ HTML – Version ${internalRuntimeVersion()}`,
+      self.location.href
+    );
   }
-  self.document.documentElement.setAttribute('amp-version', version());
+  self.document.documentElement.setAttribute(
+    'amp-version',
+    internalRuntimeVersion()
+  );
 }

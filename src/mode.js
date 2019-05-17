@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
+import {internalRuntimeVersion} from './internal-version';
 import {parseQueryString_} from './url-parse-query-string';
-import {version} from './internal-version';
 
 /**
  * @typedef {{
@@ -52,7 +52,7 @@ export function getMode(opt_win) {
   if (win.AMP_MODE) {
     return win.AMP_MODE;
   }
-  return win.AMP_MODE = getMode_(win);
+  return (win.AMP_MODE = getMode_(win));
 }
 
 /**
@@ -72,13 +72,15 @@ function getMode_(win) {
   const IS_MINIFIED = false;
 
   const localDevEnabled = !!AMP_CONFIG.localDev;
-  const runningTests = (!!AMP_CONFIG.test) || (
-    IS_DEV && !!(win.AMP_TEST || win.__karma__));
+  const runningTests =
+    !!AMP_CONFIG.test || (IS_DEV && !!(win.AMP_TEST || win.__karma__));
+  const runningTestsOnIe = win.__karma__ && win.__karma__.config.amp.testOnIe;
   const isLocalDev = IS_DEV && (localDevEnabled || runningTests);
   const hashQuery = parseQueryString_(
-      // location.originalHash is set by the viewer when it removes the fragment
-      // from the URL.
-      win.location.originalHash || win.location.hash);
+    // location.originalHash is set by the viewer when it removes the fragment
+    // from the URL.
+    win.location.originalHash || win.location.hash
+  );
   const singlePassType = AMP_CONFIG.spt;
 
   const searchQuery = parseQueryString_(win.location.search);
@@ -108,8 +110,9 @@ function getMode_(win) {
     // would prefer to use less bandwidth.
     lite: searchQuery['amp_lite'] != undefined,
     test: runningTests,
+    testIe: runningTestsOnIe,
     log: hashQuery['log'],
-    version: version(),
+    version: internalRuntimeVersion(),
     rtvVersion,
     singlePassType,
   };
@@ -127,7 +130,7 @@ function getRtvVersion(win, isLocalDev) {
   // If it's local dev then we won't actually have a full version so
   // just use the version.
   if (isLocalDev) {
-    return version();
+    return internalRuntimeVersion();
   }
 
   if (win.AMP_CONFIG && win.AMP_CONFIG.v) {
@@ -139,9 +142,8 @@ function getRtvVersion(win, isLocalDev) {
   // We will default to production default `01` minor version for now.
   // TODO(erwinmombay): decide whether internalRuntimeVersion should contain
   // minor version.
-  return `01${version()}`;
+  return `01${internalRuntimeVersion()}`;
 }
-
 
 /**
  * @param {!Window} win
@@ -152,7 +154,6 @@ function getRtvVersion(win, isLocalDev) {
 export function getRtvVersionForTesting(win, isLocalDev) {
   return getRtvVersion(win, isLocalDev);
 }
-
 
 /** @visibleForTesting */
 export function resetRtvVersionForTesting() {

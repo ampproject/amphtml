@@ -38,12 +38,10 @@ const TAG = 'amp-fx-collection';
  * @visibleForTesting
  */
 export class AmpFxCollection {
-
   /**
    * @param  {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
-
     /** @private @const {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
@@ -53,16 +51,15 @@ export class AmpFxCollection {
     /** @private @const {!../../../src/service/viewer-impl.Viewer} */
     this.viewer_ = Services.viewerForDoc(ampdoc);
 
-    Promise.all([
-      ampdoc.whenReady(),
-      this.viewer_.whenFirstVisible(),
-    ]).then(() => {
-      const root = this.ampdoc_.getRootNode();
-      // Scan when page becomes visible.
-      this.scan_();
-      // Rescan as DOM changes happen.
-      listen(root, AmpEvents.DOM_UPDATE, () => this.scan_());
-    });
+    Promise.all([ampdoc.whenReady(), this.viewer_.whenFirstVisible()]).then(
+      () => {
+        const root = this.ampdoc_.getRootNode();
+        // Scan when page becomes visible.
+        this.scan_();
+        // Rescan as DOM changes happen.
+        listen(root, AmpEvents.DOM_UPDATE, () => this.scan_());
+      }
+    );
   }
 
   /**

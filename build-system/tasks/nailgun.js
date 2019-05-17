@@ -16,7 +16,6 @@
 'use strict';
 
 const colors = require('ansi-colors');
-const gulp = require('gulp-help')(require('gulp'));
 const log = require('fancy-log');
 const sleep = require('sleep-promise');
 const {exec, execScriptAsync, getStdout} = require('../exec');
@@ -25,14 +24,16 @@ const {isTravisBuild} = require('../travis');
 
 // Used to start and stop the Closure nailgun server
 let nailgunRunnerReplacer;
-const nailgunRunner =
-    require.resolve('../../third_party/nailgun/nailgun-runner');
-const nailgunServer =
-    require.resolve('../../third_party/nailgun/nailgun-server.jar');
+const nailgunRunner = require.resolve(
+  '../../third_party/nailgun/nailgun-runner'
+);
+const nailgunServer = require.resolve(
+  '../../third_party/nailgun/nailgun-server.jar'
+);
 const customRunner = require.resolve('../runner/dist/runner.jar');
 const DEFAULT_NAILGUN_PORT = '2113';
+const CLOSURE_NAILGUN_PORT = '2114';
 const NAILGUN_STARTUP_TIMEOUT_MS = 5 * 1000;
-
 
 /**
  * Replaces the default compiler binary with nailgun on linux and macos
@@ -40,17 +41,28 @@ const NAILGUN_STARTUP_TIMEOUT_MS = 5 * 1000;
 function maybeReplaceDefaultCompiler() {
   if (process.platform == 'darwin') {
     return require('require-hijack')
-        .replace('google-closure-compiler-osx').with(nailgunRunner);
+      .replace('google-closure-compiler-osx')
+      .with(nailgunRunner);
     return true;
   } else if (process.platform == 'linux') {
     return require('require-hijack')
-        .replace('google-closure-compiler-linux').with(nailgunRunner);
+      .replace('google-closure-compiler-linux')
+      .with(nailgunRunner);
   } else {
-    log(yellow('WARNING:'), 'Cannot run', cyan('nailgun-server.jar'),
-        'on', cyan(process.platform));
-    log(yellow('WARNING:'),
-        'Closure compiler will be significantly slower than on',
-        cyan('macos'), 'or', cyan('linux'));
+    log(
+      yellow('WARNING:'),
+      'Cannot run',
+      cyan('nailgun-server.jar'),
+      'on',
+      cyan(process.platform)
+    );
+    log(
+      yellow('WARNING:'),
+      'Closure compiler will be significantly slower than on',
+      cyan('macos'),
+      'or',
+      cyan('linux')
+    );
     return null;
   }
 }
@@ -60,7 +72,7 @@ function maybeReplaceDefaultCompiler() {
  * @param {string} port
  * @param {boolean} detached
  */
-exports.startNailgunServer = async function(port, detached) {
+async function startNailgunServer(port, detached) {
   nailgunRunnerReplacer = maybeReplaceDefaultCompiler();
   if (!nailgunRunnerReplacer) {
     return;
@@ -68,14 +80,13 @@ exports.startNailgunServer = async function(port, detached) {
 
   // Start up the nailgun server after cleaning up old instances (if any)
   const startNailgunServerCmd =
-      'java -XX:+TieredCompilation -server -cp ' +
-      `${nailgunServer}:${customRunner} ` +
-      `com.facebook.nailgun.NGServer ${port}`;
-  const stopNailgunServerCmd =
-      `${nailgunRunner} --nailgun-port ${port} ng-stop`;
+    'java -XX:+TieredCompilation -server -cp ' +
+    `${nailgunServer}:${customRunner} ` +
+    `com.facebook.nailgun.NGServer ${port}`;
+  const stopNailgunServerCmd = `${nailgunRunner} --nailgun-port ${port} ng-stop`;
   const getVersionCmd =
-      `${nailgunRunner} --nailgun-port ${port} ` +
-      'org.ampproject.AmpCommandLineRunner -- --version';
+    `${nailgunRunner} --nailgun-port ${port} ` +
+    'org.ampproject.AmpCommandLineRunner -- --version';
   exec(stopNailgunServerCmd, {stdio: 'pipe'});
   const nailgunServerProcess = execScriptAsync(startNailgunServerCmd, {
     stdio: detached ? 'ignore' : 'pipe',
@@ -100,49 +111,62 @@ exports.startNailgunServer = async function(port, detached) {
       await sleep(1000);
     }
   }
-  log(red('ERROR:'), 'Could not start',
-      cyan('nailgun-server.jar'), 'on port', cyan(port) + '...');
+  log(
+    red('ERROR:'),
+    'Could not start',
+    cyan('nailgun-server.jar'),
+    'on port',
+    cyan(port) + '...'
+  );
   process.exit(1);
-};
+}
 
 /**
  * Stops the nailgun server if it's running, and restores the binary used by
  * google-closure-compiler
  * @param {string} port
  */
-exports.stopNailgunServer = async function(port) {
+async function stopNailgunServer(port) {
   if (nailgunRunnerReplacer) {
     nailgunRunnerReplacer.restore();
   }
   if (process.platform == 'darwin' || process.platform == 'linux') {
-    const stopNailgunServerCmd =
-        `${nailgunRunner} --nailgun-port ${port} ng-stop`;
+    const stopNailgunServerCmd = `${nailgunRunner} --nailgun-port ${port} ng-stop`;
     if (exec(stopNailgunServerCmd, {stdio: 'pipe'}).status == 0) {
       if (!isTravisBuild()) {
-        log('Stopped', cyan('nailgun-server.jar'), 'on port',
-            cyan(port));
+        log('Stopped', cyan('nailgun-server.jar'), 'on port', cyan(port));
       }
     } else {
-      log(yellow('WARNING:'), 'Could not find a running instance of',
-          cyan('nailgun-server.jar'), 'on port', cyan(port));
+      log(
+        yellow('WARNING:'),
+        'Could not find a running instance of',
+        cyan('nailgun-server.jar'),
+        'on port',
+        cyan(port)
+      );
     }
   }
-};
+}
 
 async function nailgunStart() {
   log(green('Usage:'));
   log('⤷ To start a server:', cyan('gulp nailgun-start'));
   log('⤷ To compile code:', cyan('build-system/tasks/nailgun-compile <args>'));
   log('⤷ To stop the server:', cyan('gulp nailgun-stop'));
-  await exports.startNailgunServer(DEFAULT_NAILGUN_PORT, /* detached */ true);
+  await startNailgunServer(DEFAULT_NAILGUN_PORT, /* detached */ true);
 }
 
 async function nailgunStop() {
-  await exports.stopNailgunServer(DEFAULT_NAILGUN_PORT);
+  await stopNailgunServer(DEFAULT_NAILGUN_PORT);
 }
 
-gulp.task('nailgun-start', 'Starts up a nailgun server for closure compiler',
-    nailgunStart);
+module.exports = {
+  closureNailgunPort: CLOSURE_NAILGUN_PORT,
+  nailgunStart,
+  nailgunStop,
+  startNailgunServer,
+  stopNailgunServer,
+};
 
-gulp.task('nailgun-stop', 'Stops an already running nailgun server',
-    nailgunStop);
+nailgunStart.description = 'Starts up a nailgun server for closure compiler';
+nailgunStop.description = 'Stops an already running nailgun server';

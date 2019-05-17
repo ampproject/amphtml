@@ -1,6 +1,7 @@
 # AMP HTML ⚡
 
 [![Renovate enabled](https://img.shields.io/badge/renovate-enabled-brightgreen.svg)](https://renovateapp.com/)
+[![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
 
 [AMP HTML](https://amp.dev) is a way to build web pages that render with reliable and fast performance. It is our attempt at fixing what many perceive as painfully slow page load times – especially when reading content on the mobile web.  AMP HTML is built on existing web technologies; an AMP page will load (quickly) in any modern browser.
 
