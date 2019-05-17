@@ -51,7 +51,6 @@
     "ast-replace": "1.1.3",
     "atob": "2.1.2",
     "autoprefixer": "9.5.1",
-    "ava": "1.4.1",
     "babel-eslint": "10.0.1",
     "babel-plugin-filter-imports": "3.0.0",
     "babel-plugin-istanbul": "5.1.4",
@@ -184,13 +183,5 @@
     "vinyl-buffer": "1.0.1",
     "vinyl-source-stream": "2.0.0",
     "watchify": "3.11.1"
-  },
-  "ava": {
-    "files": [
-      "build-system/tasks/**/{test,test-*}.js"
-    ],
-    "concurrency": 5,
-    "tap": true,
-    "failFast": true
   }
 }
