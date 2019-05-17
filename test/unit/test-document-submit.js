@@ -59,7 +59,7 @@ describe('test-document-submit onDocumentFormSubmit_', () => {
       ampdoc = {
         getHeadNode: () => headNode,
         getRootNode: () => rootNode,
-        whenBodyAvailable: () => Promise.resolve({}),
+        waitForBodyOpen: () => Promise.resolve({}),
       };
     });
 
