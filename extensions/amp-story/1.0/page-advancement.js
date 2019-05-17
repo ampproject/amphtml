@@ -42,6 +42,14 @@ const NEXT_SCREEN_AREA_RATIO = 0.75;
 /** @private @const {number} */
 const PREVIOUS_SCREEN_AREA_RATIO = 0.25;
 
+/**
+ * Protected edges of the screen in pixels. When tapped on these areas, we will
+ * always perform navigation. Even if a clickable element is there.
+ * @const {number}
+ * @private
+ */
+const PROTECTED_SCREEN_EDGE_PX = 48;
+
 const INTERACTIVE_EMBEDDED_COMPONENTS_SELECTORS = Object.values(
   interactiveElementsSelectors()
 ).join(',');
@@ -478,12 +486,17 @@ class ManualAdvancement extends AdvancementConfig {
    * For an element to trigger a tooltip it has to be descendant of
    * amp-story-page but not of amp-story-cta-layer or amp-story-page-attachment.
    * @param {!Event} event
+   * @param {!ClientRect} pageRect
    * @return {boolean}
    * @private
    */
-  canShowTooltip_(event) {
+  canShowTooltip_(event, pageRect) {
     let valid = true;
     let tagName;
+
+    if (this.isInScreenSideEdge_(event, pageRect)) {
+      return false;
+    }
 
     return !!closest(
       dev().assertElement(event.target),
@@ -505,6 +518,41 @@ class ManualAdvancement extends AdvancementConfig {
   }
 
   /**
+   * Checks if click was inside of one of the side edges of the screen.
+   * @param {!Event} event
+   * @param {!ClientRect} pageRect
+   * @return {boolean}
+   * @private
+   */
+  isInScreenSideEdge_(event, pageRect) {
+    return (
+      event.clientX <= PROTECTED_SCREEN_EDGE_PX ||
+      event.clientX >= pageRect.width - PROTECTED_SCREEN_EDGE_PX
+    );
+  }
+
+  /**
+   * Checks if click should be handled by the embedded component logic rather
+   * than by navigation.
+   * @param {!Event} event
+   * @param {!ClientRect} pageRect
+   * @return {boolean}
+   * @private
+   */
+  isHandledByEmbeddedComponent_(event, pageRect) {
+    const target = dev().assertElement(event.target);
+    const inExpandedMode =
+      this.storeService_.get(StateProperty.INTERACTIVE_COMPONENT_STATE)
+        .state === EmbeddedComponentState.EXPANDED;
+
+    return (
+      inExpandedMode ||
+      (matches(target, INTERACTIVE_EMBEDDED_COMPONENTS_SELECTORS) &&
+        this.canShowTooltip_(event, pageRect))
+    );
+  }
+
+  /**
    * Performs a system navigation if it is determined that the specified event
    * was a click intended for navigation.
    * @param {!Event} event 'click' event
@@ -512,13 +560,9 @@ class ManualAdvancement extends AdvancementConfig {
    */
   maybePerformNavigation_(event) {
     const target = dev().assertElement(event.target);
+    const pageRect = this.element_.getLayoutBox();
 
-    if (
-      this.canShowTooltip_(event) &&
-      matches(target, INTERACTIVE_EMBEDDED_COMPONENTS_SELECTORS)
-    ) {
-      // Clicked element triggers a tooltip, so we dispatch the corresponding
-      // event and skip navigation.
+    if (this.isHandledByEmbeddedComponent_(event, pageRect)) {
       event.preventDefault();
       const embedComponent = /** @type {InteractiveComponentDef} */ (this.storeService_.get(
         StateProperty.INTERACTIVE_COMPONENT_STATE
@@ -549,8 +593,6 @@ class ManualAdvancement extends AdvancementConfig {
       Action.SET_ADVANCEMENT_MODE,
       AdvancementMode.MANUAL_ADVANCE
     );
-
-    const pageRect = this.element_./*OK*/ getBoundingClientRect();
 
     // Using `left` as a fallback since Safari returns a ClientRect in some
     // cases.
