@@ -131,11 +131,14 @@ describes.realWin('amp-experiment mutation-parser', {}, env => {
     it('should error when no attributeName', () => {
       const mutation = getAttributeMutation();
       delete mutation['attributeName'];
-      allowConsoleError(() => {
-        expect(() => {
-          parseMutation(mutation, doc);
-        }).to.throw(/attributeName/);
-      });
+
+      expectAsyncConsoleError(/attributeName/);
+      try {
+        parseMutation(mutation, doc);
+        expect(false).to.be.ok;
+      } catch (e) {
+        expect(e.message).to.match(/attributeName/);
+      }
     });
 
     it('should error when unallowed attributeName', () => {

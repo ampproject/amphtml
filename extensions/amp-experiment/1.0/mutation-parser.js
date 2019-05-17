@@ -95,9 +95,9 @@ function assertMutationRecord(mutation) {
 
   // Assert the mutation type is one of the following keys
   userAssert(
-    MUTATION_TYPES.indexOf(mutation['type']) >= 0,
-    'Mutation %s must have a type.',
-    JSON.stringify(mutation)
+      MUTATION_TYPES.indexOf(mutation['type']) >= 0,
+      'Mutation %s must have a valid type.',
+      JSON.stringify(mutation)
   );
 
   // Assert the mutation target

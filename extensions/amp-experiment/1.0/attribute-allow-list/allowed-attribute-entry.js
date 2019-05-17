@@ -25,7 +25,7 @@ export class AllowedAttributeEntry {
 
   /**
    * Constructor for the class
-   * @param {?Array<string>} opt_tags
+   * @param {Array<string>=} opt_tags
    */
   constructor(opt_tags) {
     this.tags = opt_tags;
@@ -95,7 +95,10 @@ export class DefaultStyleAllowedAttributeEntry extends AllowedAttributeEntry {
  */
 export class DefaultAllowedURLAttributeEntry extends AllowedAttributeEntry {
 
-  /** @override */
+  /**
+   * @param {Array<string>=} opt_tags
+   * @override
+   */
   constructor(opt_tags) {
     if (opt_tags) {
       super(opt_tags);
@@ -106,6 +109,7 @@ export class DefaultAllowedURLAttributeEntry extends AllowedAttributeEntry {
 
   /** @override */
   validate(value) {
-    return assertHttpsUrl(value, 'attributes', 'mutation');
+    assertHttpsUrl(value, 'attributes', 'mutation');
+    return true;
   }
 }
