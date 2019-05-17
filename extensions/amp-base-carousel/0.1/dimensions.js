@@ -85,16 +85,6 @@ export function getStart(axis, el) {
 }
 
 /**
- * @param {!Axis} axis The Axis to get the offset for.
- * @param {!Element} el The Element to get the offset for.
- * @return {number} The offsetLeft or offsetTop for the Element, depending on
- *    the axis.
- */
-export function getOffsetStart(axis, el) {
-  return axis == Axis.X ? el./*OK*/ offsetLeft : el./*OK*/ offsetTop;
-}
-
-/**
  * @param {!Axis} axis The axis along which to set the length.
  * @param {!Element} el The Element to set the length for.
  * @param {number} length The length value, in pixels, to set.

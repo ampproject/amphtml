@@ -91,6 +91,9 @@ class AmpCarousel extends AMP.BaseElement {
       'auto-advance-loops': newValue => {
         this.carousel_.updateAutoAdvanceLoops(Number(newValue) || 0);
       },
+      'dir': newValue => {
+        this.carousel_.updateForwards(newValue != 'rtl');
+      },
       'horizontal': newValue => {
         this.carousel_.updateHorizontal(newValue == 'true');
       },
@@ -266,8 +269,10 @@ class AmpCarousel extends AMP.BaseElement {
     return html`
       <div class="i-amphtml-carousel-content">
         <div class="i-amphtml-carousel-scroll"></div>
-        <div class="i-amphtml-carousel-arrow-prev-slot"></div>
-        <div class="i-amphtml-carousel-arrow-next-slot"></div>
+        <div class="i-amphtml-carousel-arrows">
+          <div class="i-amphtml-carousel-arrow-prev-slot"></div>
+          <div class="i-amphtml-carousel-arrow-next-slot"></div>
+        </div>
       </div>
     `;
   }
