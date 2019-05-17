@@ -14,25 +14,25 @@
  * limitations under the License.
  */
 
-import { ActionTrust } from '../../../src/action-constants';
-import { CSS } from '../../../build/amp-autocomplete-0.1.css';
-import { Keys } from '../../../src/utils/key-codes';
-import { Layout } from '../../../src/layout';
-import { Services } from '../../../src/services';
+import {ActionTrust} from '../../../src/action-constants';
+import {CSS} from '../../../build/amp-autocomplete-0.1.css';
+import {Keys} from '../../../src/utils/key-codes';
+import {Layout} from '../../../src/layout';
+import {Services} from '../../../src/services';
 import {
   UrlReplacementPolicy,
   batchFetchJsonFor,
 } from '../../../src/batched-json';
-import { childElementsByTag, removeChildren } from '../../../src/dom';
-import { createCustomEvent } from '../../../src/event-helper';
-import { dev, user, userAssert } from '../../../src/log';
-import { getValueForExpr, tryParseJson } from '../../../src/json';
-import { hasOwn, map, ownProperty } from '../../../src/utils/object';
-import { includes, startsWith } from '../../../src/string';
-import { isEnumValue } from '../../../src/types';
-import { isExperimentOn } from '../../../src/experiments';
-import { mod } from '../../../src/utils/math';
-import { toggle } from '../../../src/style';
+import {childElementsByTag, removeChildren} from '../../../src/dom';
+import {createCustomEvent} from '../../../src/event-helper';
+import {dev, user, userAssert} from '../../../src/log';
+import {getValueForExpr, tryParseJson} from '../../../src/json';
+import {hasOwn, map, ownProperty} from '../../../src/utils/object';
+import {includes, startsWith} from '../../../src/string';
+import {isEnumValue} from '../../../src/types';
+import {isExperimentOn} from '../../../src/experiments';
+import {mod} from '../../../src/utils/math';
+import {toggle} from '../../../src/style';
 
 const EXPERIMENT = 'amp-autocomplete';
 const TAG = 'amp-autocomplete';
@@ -159,7 +159,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
       user().warn(
         TAG,
         'Expected a <script type="application/json"> child or ' +
-        'a URL specified in "src".'
+          'a URL specified in "src".'
       );
     }
 
@@ -179,6 +179,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
       `${TAG} requires the "type=text|search" attribute on <input>`
     );
     this.inputElement_.setAttribute('dir', 'auto');
+    this.inputElement_.setAttribute('aria-autocomplete', 'list');
+    this.inputElement_.setAttribute('role', 'combobox');
 
     userAssert(this.inputElement_.form, `${TAG} should be inside a <form> tag`);
     if (this.inputElement_.form.hasAttribute('autocomplete')) {
@@ -196,11 +198,11 @@ export class AmpAutocomplete extends AMP.BaseElement {
       );
       // Dummy render to verify existence of "data-value" attribute.
       this.templates_
-        .renderTemplate(this.templateElement_, /** @type {!JsonObject} */({}))
+        .renderTemplate(this.templateElement_, /** @type {!JsonObject} */ ({}))
         .then(renderedEl => {
           userAssert(
             renderedEl.hasAttribute('data-value') ||
-            renderedEl.hasAttribute('data-disabled'),
+              renderedEl.hasAttribute('data-disabled'),
             `${TAG} requires a "data-value" or "data-disabled" attribute.`
           );
         });
@@ -225,7 +227,6 @@ export class AmpAutocomplete extends AMP.BaseElement {
     this.submitOnEnter_ = this.element.hasAttribute('submit-on-enter');
 
     // Set accessibility attributes
-    this.element.setAttribute('role', 'combobox');
     this.element.setAttribute('aria-haspopup', 'listbox');
     this.container_ = this.createContainer_();
     this.element.appendChild(this.container_);
@@ -247,7 +248,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
       user().warn(
         TAG,
         'Expected key "items" in data but found nothing. ' +
-        'Rendering empty results.'
+          'Rendering empty results.'
       );
       return [];
     }
@@ -274,7 +275,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
         user().warn(
           TAG,
           'Expected key "items" in data but found nothing. ' +
-          'Rendering empty results.'
+            'Rendering empty results.'
         );
         return [];
       }
@@ -327,7 +328,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
         user().warn(
           TAG,
           'Discovered both inline <script> and remote "src"' +
-          ' data. Was providing two datasets intended?'
+            ' data. Was providing two datasets intended?'
         );
       }
       remoteDataPromise = this.getRemoteData_();
@@ -439,8 +440,9 @@ export class AmpAutocomplete extends AMP.BaseElement {
     let renderPromise = Promise.resolve();
     this.resetActiveElement_();
     if (this.templateElement_) {
-      renderPromise = this.templates_.renderTemplateArray(this.templateElement_,
-        filteredData).then(renderedChildren => {
+      renderPromise = this.templates_
+        .renderTemplateArray(this.templateElement_, filteredData)
+        .then(renderedChildren => {
           renderedChildren.map(child => {
             if (child.hasAttribute('data-disabled')) {
               child.setAttribute('aria-disabled', 'true');
@@ -449,19 +451,19 @@ export class AmpAutocomplete extends AMP.BaseElement {
             child.setAttribute('role', 'option');
             container.appendChild(child);
           });
-        } else {
-            filteredData.forEach(item => {
-              userAssert(
-                typeof item === 'string',
-                `${TAG} data must provide template for non-string items.`
-              );
-              container.appendChild(
-                this.createElementFromItem_(/** @type {string} */(item))
-              );
-            });
-          }
-    return renderPromise;
+        });
+    } else {
+      filteredData.forEach(item => {
+        userAssert(
+          typeof item === 'string',
+          `${TAG} data must provide template for non-string items.`
+        );
+        container.appendChild(
+          this.createElementFromItem_(/** @type {string} */ (item))
+        );
+      });
     }
+    return renderPromise;
   }
 
   /**
@@ -482,7 +484,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     const itemsExpr = this.element.getAttribute('filter-value') || 'value';
     const filteredData = data.filter(item => {
       if (typeof item === 'object') {
-        item = getValueForExpr(/** @type {!JsonObject} */(item), itemsExpr);
+        item = getValueForExpr(/** @type {!JsonObject} */ (item), itemsExpr);
       }
       userAssert(
         typeof item === 'string',
@@ -619,7 +621,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
    * @private
    */
   toggleResults_(opt_display) {
-    this.element.setAttribute('aria-expanded', opt_display);
+    this.inputElement_.setAttribute('aria-expanded', opt_display);
     toggle(dev().assertElement(this.container_), opt_display);
   }
 
@@ -645,17 +647,20 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
     // Toggle results.
     let renderAbove = false;
-    return this.measureMutateElement(() => {
-      renderAbove = this.shouldRenderAbove_();
-    }, () => {
-      if (!display) {
-        this.userInput_ = this.inputElement_.value;
-        this.filterDataAndRenderResults_(this.sourceData_, this.userInput_);
-        this.resetActiveElement_();
+    return this.measureMutateElement(
+      () => {
+        renderAbove = this.shouldRenderAbove_();
+      },
+      () => {
+        if (!display) {
+          this.userInput_ = this.inputElement_.value;
+          this.filterDataAndRenderResults_(this.sourceData_, this.userInput_);
+          this.resetActiveElement_();
+        }
+        this.setResultDisplayDirection_(renderAbove);
+        this.toggleResults_(display);
       }
-      this.setResultDisplayDirection_(renderAbove);
-      this.toggleResults_(display);
-    });
+    );
   }
 
   /**
@@ -738,7 +743,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     const selectEvent = createCustomEvent(
       this.win,
       `amp-autocomplete.${name}`,
-      /** @type {!JsonObject} */({ value })
+      /** @type {!JsonObject} */ ({value})
     );
     this.action_.trigger(this.element, name, selectEvent, ActionTrust.HIGH);
   }
@@ -770,7 +775,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
     return this.measureMutateElement(
       () => {
-        const { offsetTop: itemTop, offsetHeight: itemHeight } = newActiveElement;
+        const {offsetTop: itemTop, offsetHeight: itemHeight} = newActiveElement;
         const {
           scrollTop: resultTop,
           offsetHeight: resultHeight,
@@ -789,7 +794,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
         newActiveElement.setAttribute('aria-selected', 'true');
         this.activeIndex_ = activeIndex;
         this.activeElement_ = newActiveElement;
-      });
+      }
+    );
   }
 
   /** Returns all item elements in the results container that do not have the
@@ -822,7 +828,9 @@ export class AmpAutocomplete extends AMP.BaseElement {
       return;
     }
     this.activeElement_.classList.toggle(
-      'i-amphtml-autocomplete-item-active', false);
+      'i-amphtml-autocomplete-item-active',
+      false
+    );
     this.activeElement_.removeAttribute('aria-selected');
     this.activeElement_ = null;
     this.activeIndex_ = -1;
