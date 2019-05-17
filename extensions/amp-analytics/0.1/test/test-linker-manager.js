@@ -56,19 +56,8 @@ describes.realWin('Linker Manager', {amp: true}, env => {
       canonicalUrl: 'https://www.canonical.com/some/path?q=123',
     });
 
-    // LinkerManager uses Url/UrlReplacements services scoped to the element,
-    // but for testing stub in the top-level ampdoc service for simplicity.
-    element = {};
-    const urlReplacements = Services.urlReplacementsForDoc(doc.documentElement);
-    sandbox
-      .stub(Services, 'urlReplacementsForDoc')
-      .withArgs(element)
-      .returns(urlReplacements);
-    const url = Services.urlForDoc(doc.documentElement);
-    sandbox
-      .stub(Services, 'urlForDoc')
-      .withArgs(element)
-      .returns(url);
+    element = doc.createElement('div');
+    doc.body.appendChild(element);
 
     handlers = [];
     sandbox.stub(Services, 'navigationForDoc').returns({
@@ -700,7 +689,7 @@ describes.realWin('Linker Manager', {amp: true}, env => {
         },
       };
 
-      new LinkerManager(ampdoc, config, 'googleanalytics');
+      new LinkerManager(ampdoc, config, 'googleanalytics', element);
       expect(handlers.length).to.equal(0);
     });
 
