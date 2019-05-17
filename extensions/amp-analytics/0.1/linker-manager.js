@@ -240,7 +240,8 @@ export class LinkerManager {
   }
 
   /**
-   * Apply linkers to the given url.
+   * Apply linkers to the given url. Linker params are appended if there
+   * are matching linker configs.
    *
    * @param {string} url
    * @return {string}
