@@ -650,6 +650,16 @@ export class SystemLayer {
   }
 
   /**
+   * Updates the progress bar with a newly added page.
+   *
+   * @param {string} pageId
+   * @public
+   */
+  updateProgressBar(pageId) {
+    this.progressBar_.addSegment(pageId);
+  }
+
+  /**
    * @param {!./logging.AmpStoryLogEntryDef} logEntry
    * @private
    */

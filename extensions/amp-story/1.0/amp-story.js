@@ -990,7 +990,8 @@ export class AmpStory extends AMP.BaseElement {
       this.element.addEventListener(AmpEvents.DOM_UPDATE, ({target}) => {
         this.liveStoryManager_.update(
           target,
-          this.element.querySelectorAll('amp-story-page:not([ad])')
+          this.element.querySelectorAll('amp-story-page:not([ad])'),
+          this.systemLayer_
         );
       });
     }

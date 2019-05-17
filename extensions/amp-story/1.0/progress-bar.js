@@ -75,6 +75,8 @@ export class ProgressBar {
   }
 
   /**
+   * Builds the progress bar.
+   *
    * @param {!Array<string>} segmentIds The id of each segment in the story.
    * @return {!Element}
    */
@@ -87,26 +89,42 @@ export class ProgressBar {
     devAssert(segmentCount > 0);
 
     this.isBuilt_ = true;
-    this.segmentCount_ = segmentCount;
-
-    segmentIds.forEach((id, i) => (this.segmentIdMap_[id] = i));
 
     this.root_ = this.win_.document.createElement('ol');
     this.root_.classList.add('i-amphtml-story-progress-bar');
 
-    for (let i = 0; i < this.segmentCount_; i++) {
-      const segmentProgressBar = this.win_.document.createElement('li');
-      segmentProgressBar.classList.add('i-amphtml-story-page-progress-bar');
-      const segmentProgressValue = this.win_.document.createElement('div');
-      segmentProgressValue.classList.add('i-amphtml-story-page-progress-value');
-      segmentProgressBar.appendChild(segmentProgressValue);
-      this.root_.appendChild(segmentProgressBar);
-    }
+    segmentIds.forEach(id => this.addSegment(id));
 
     return this.getRoot();
   }
 
   /**
+   * Builds a new segment element and appends it to the progress bar.
+   *
+   * @private
+   */
+  buildSegmentEl_() {
+    const segmentProgressBar = this.win_.document.createElement('li');
+    segmentProgressBar.classList.add('i-amphtml-story-page-progress-bar');
+    const segmentProgressValue = this.win_.document.createElement('div');
+    segmentProgressValue.classList.add('i-amphtml-story-page-progress-value');
+    segmentProgressBar.appendChild(segmentProgressValue);
+    this.root_.appendChild(segmentProgressBar);
+  }
+
+  /**
+   * Adds a segment to the progress bar.
+   *
+   * @param {string} id The id of the segment.
+   */
+  addSegment(id) {
+    this.segmentIdMap_[id] = this.segmentCount_++;
+    this.buildSegmentEl_();
+  }
+
+  /**
+   * Gets the root element of the progress bar.
+   *
    * @return {!Element}
    */
   getRoot() {
@@ -114,6 +132,8 @@ export class ProgressBar {
   }
 
   /**
+   * Validates that segment id exists.
+   *
    * @param {string} segmentId The index to assert validity
    * @private
    */
@@ -125,7 +145,8 @@ export class ProgressBar {
   }
 
   /**
-   * The
+   * Updates a segment with its corresponding progress.
+   *
    * @param {string} segmentId the id of the segment whos progress to change
    * @param {number} progress A number from 0.0 to 1.0, representing the
    *     progress of the current segment.
@@ -154,6 +175,7 @@ export class ProgressBar {
   /**
    * Updates all the progress bar segments, and decides whether the update has
    * to be animated.
+   *
    * @param {number} activeSegmentIndex
    * @param {number} activeSegmentProgress
    * @param {number} prevSegmentIndex
@@ -205,6 +227,8 @@ export class ProgressBar {
   }
 
   /**
+   * Updates styles to show progress to a corresponding segment.
+   *
    * @param {number} segmentIndex The index of the progress bar segment whose progress should be
    *     changed.
    * @param {number} progress A number from 0.0 to 1.0, representing the

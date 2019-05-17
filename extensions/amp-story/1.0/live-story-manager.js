@@ -70,8 +70,9 @@ export class LiveStoryManager {
    *
    * @param {?EventTarget} updatedStoryEl
    * @param {!NodeList<!Element>} currentPages
+   * @param {!./amp-story-system-layer.SystemLayer} systemLayer
    */
-  update(updatedStoryEl, currentPages) {
+  update(updatedStoryEl, currentPages, systemLayer) {
     const newPageEls = devAssert(
       updatedStoryEl,
       'No updated story EventTarget was found.'
@@ -89,6 +90,7 @@ export class LiveStoryManager {
         this.storyEl_.insertBefore(page.element, lastPageEl.nextElementSibling);
         this.ampStory_.addPage(page);
         this.ampStory_.insertPage(lastPageEl.id, page.element.id);
+        systemLayer.updateProgressBar(page.element.id);
         lastPageEl = page.element;
       });
     });
