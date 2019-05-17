@@ -153,7 +153,7 @@ describes.realWin(
         expect(borderStyle).to.equal('none');
 
         impl.viewport_.updatePaddingBottom(50);
-        return impl.viewport_.ampdoc.whenBodyAvailable().then(() => {
+        return impl.viewport_.ampdoc.waitForBodyOpen().then(() => {
           borderWidth = win
             .getComputedStyle(win.document.body, null)
             .getPropertyValue('border-bottom-width');
@@ -395,7 +395,7 @@ describes.realWin(
       impl.ad_.signals().signal('built');
       impl.ad_.signals().signal('load-end');
       const layoutPromise = impl.layoutAd_();
-      const bodyPromise = impl.viewport_.ampdoc.whenBodyAvailable();
+      const bodyPromise = impl.viewport_.ampdoc.waitForBodyOpen();
       const p = Promise.all([
         addToFixedLayerPromise,
         layoutPromise,
@@ -408,7 +408,7 @@ describes.realWin(
         expect(borderWidth).to.equal('54px');
         expect(impl.element.children[2]).to.be.not.null;
         impl.element.children[2].dispatchEvent(new Event('click'));
-        return impl.viewport_.ampdoc.whenBodyAvailable().then(() => {
+        return impl.viewport_.ampdoc.waitForBodyOpen().then(() => {
           borderWidth = win
             .getComputedStyle(win.document.body, null)
             .getPropertyValue('border-bottom-width');
@@ -440,7 +440,7 @@ describes.realWin(
       impl.ad_.signals().signal('built');
       impl.ad_.signals().signal('load-end');
       const layoutPromise = impl.layoutAd_();
-      const bodyPromise = impl.viewport_.ampdoc.whenBodyAvailable();
+      const bodyPromise = impl.viewport_.ampdoc.waitForBodyOpen();
       const p = Promise.all([
         addToFixedLayerPromise,
         layoutPromise,
@@ -452,7 +452,7 @@ describes.realWin(
           .getPropertyValue('border-bottom-width');
         expect(borderWidth).to.equal('54px');
         impl.collapsedCallback();
-        return impl.viewport_.ampdoc.whenBodyAvailable().then(() => {
+        return impl.viewport_.ampdoc.waitForBodyOpen().then(() => {
           borderWidth = win
             .getComputedStyle(win.document.body, null)
             .getPropertyValue('border-bottom-width');

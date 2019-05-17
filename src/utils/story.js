@@ -35,7 +35,7 @@ export function descendsFromStory(element) {
  */
 export function isStoryDocument(ampdoc) {
   return new Promise(resolve => {
-    ampdoc.whenBodyAvailable().then(() => {
+    ampdoc.waitForBodyOpen().then(() => {
       const body = ampdoc.getBody();
       waitForChild(
         body,

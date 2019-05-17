@@ -377,7 +377,7 @@ describe('AmpDocService', () => {
       // Set document ready
       readyCallback(mockDoc);
 
-      return ampdocShell.whenBodyAvailable().then(() => {
+      return ampdocShell.waitForBodyOpen().then(() => {
         expect(ampdocShell.isBodyAvailable()).to.be.true;
         expect(ampdocShell.getBody()).to.equal(mockDoc.body);
         expect(ampdocShell.isReady()).to.be.true;
@@ -422,7 +422,7 @@ describe('AmpDocSingle', () => {
     expect(ampdoc.getBody()).to.equal(window.document.body);
     expect(ampdoc.isBodyAvailable()).to.be.true;
     expect(ampdoc.isReady()).to.be.true;
-    return Promise.all([ampdoc.whenBodyAvailable(), ampdoc.whenReady()]).then(
+    return Promise.all([ampdoc.waitForBodyOpen(), ampdoc.whenReady()]).then(
       results => {
         expect(results[0]).to.equal(window.document.body);
         expect(ampdoc.getBody()).to.equal(window.document.body);
@@ -437,7 +437,7 @@ describe('AmpDocSingle', () => {
     const win = {document: doc};
 
     let bodyCallback;
-    sandbox.stub(dom, 'waitForBodyPromise').callsFake(() => {
+    sandbox.stub(dom, 'waitForBodyOpenPromise').callsFake(() => {
       return new Promise(resolve => {
         bodyCallback = resolve;
       });
@@ -459,7 +459,7 @@ describe('AmpDocSingle', () => {
     allowConsoleError(() => {
       expect(() => ampdoc.getBody()).to.throw(/body not available/);
     });
-    const bodyPromise = ampdoc.whenBodyAvailable();
+    const bodyPromise = ampdoc.waitForBodyOpen();
     const readyPromise = ampdoc.whenReady();
 
     doc.body = {nodeType: 1};
@@ -559,7 +559,7 @@ describe('AmpDocShadow', () => {
     expect(ampdoc.bodyResolver_).to.be.ok;
 
     // Set body.
-    const bodyPromise = ampdoc.whenBodyAvailable();
+    const bodyPromise = ampdoc.waitForBodyOpen();
     const body = {nodeType: 1};
     ampdoc.setBody(body);
     expect(ampdoc.isBodyAvailable()).to.be.true;
