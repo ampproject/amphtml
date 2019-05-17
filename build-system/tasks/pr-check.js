@@ -16,8 +16,12 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const {determineBuildTargets} = require('../pr-check/build-targets');
+const {
+  areValidBuildTargets,
+  determineBuildTargets,
+} = require('../pr-check/build-targets');
 const {printChangeSummary, timedExec} = require('../pr-check/utils');
+const {runYarnChecks} = require('../pr-check/yarn-checks');
 
 const FILENAME = 'pr-check.js';
 
@@ -27,18 +31,28 @@ const FILENAME = 'pr-check.js';
  * @param {Function} cb
  */
 async function prCheck(cb) {
+  const failTask = () => {
+    const err = new Error('Local PR check failed. See logs above.');
+    err.showStack = false;
+    cb(err);
+  };
+
   const runCheck = cmd => {
     const {status} = timedExec(cmd, FILENAME);
     if (status != 0) {
-      const err = new Error('Local PR check failed. See logs above.');
-      err.showStack = false;
-      cb(err);
+      failTask();
     }
   };
 
   printChangeSummary(FILENAME);
 
   const buildTargets = determineBuildTargets();
+  if (
+    !runYarnChecks(FILENAME) ||
+    !areValidBuildTargets(buildTargets, FILENAME)
+  ) {
+    failTask();
+  }
 
   runCheck('gulp lint --local-changes');
   runCheck('gulp presubmit');
