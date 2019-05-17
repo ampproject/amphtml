@@ -36,30 +36,41 @@ const FILENAME = 'checks.js';
 const timedExecOrDie = (cmd, unusedFileName) =>
   timedExecOrDieBase(cmd, FILENAME);
 
-function runCommonChecks() {
-  timedExecOrDie('gulp lint');
-  timedExecOrDie('gulp presubmit');
-  timedExecOrDie('gulp ava');
-  timedExecOrDie('gulp babel-plugin-tests');
-  timedExecOrDie('gulp caches-json');
-  timedExecOrDie('gulp json-syntax');
-}
-
 function main() {
   const startTime = startTimer(FILENAME, FILENAME);
-  const buildTargets = determineBuildTargets();
+  const buildTargets = determineBuildTargets(FILENAME);
 
   if (!isTravisPullRequestBuild()) {
     timedExecOrDie('gulp update-packages');
-    runCommonChecks();
+    timedExecOrDie('gulp lint');
+    timedExecOrDie('gulp presubmit');
+    timedExecOrDie('gulp ava');
+    timedExecOrDie('gulp babel-plugin-tests');
+    timedExecOrDie('gulp caches-json');
+    timedExecOrDie('gulp json-syntax');
     timedExecOrDie('gulp dev-dashboard-tests');
     timedExecOrDie('gulp dep-check');
     timedExecOrDie('gulp check-types');
   } else {
     printChangeSummary(FILENAME);
-    timedExecOrDie('gulp update-packages');
     reportAllExpectedTests(buildTargets);
-    runCommonChecks();
+    timedExecOrDie('gulp update-packages');
+
+    timedExecOrDie('gulp lint');
+    timedExecOrDie('gulp presubmit');
+
+    if (buildTargets.has('AVA')) {
+      timedExecOrDie('gulp ava');
+    }
+
+    if (buildTargets.has('BABEL_PLUGIN')) {
+      timedExecOrDie('gulp babel-plugin-tests');
+    }
+
+    if (buildTargets.has('CACHES_JSON')) {
+      timedExecOrDie('gulp caches-json');
+      timedExecOrDie('gulp json-syntax');
+    }
 
     // Check document links only for PR builds.
     if (buildTargets.has('DOCS')) {
@@ -70,7 +81,7 @@ function main() {
       timedExecOrDie('gulp dev-dashboard-tests');
     }
 
-    if (buildTargets.has('RUNTIME') || buildTargets.has('BUILD_SYSTEM')) {
+    if (buildTargets.has('RUNTIME')) {
       timedExecOrDie('gulp dep-check');
       timedExecOrDie('gulp check-types');
     }

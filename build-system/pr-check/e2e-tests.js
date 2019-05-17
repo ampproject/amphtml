@@ -24,7 +24,6 @@
 const colors = require('ansi-colors');
 const {
   downloadBuildOutput,
-  downloadDistOutput,
   printChangeSummary,
   startTimer,
   stopTimer,
@@ -40,31 +39,28 @@ const timedExecOrDie = (cmd, unusedFileName) =>
 
 async function main() {
   const startTime = startTimer(FILENAME, FILENAME);
-  const buildTargets = determineBuildTargets();
+  const buildTargets = determineBuildTargets(FILENAME);
 
   if (!isTravisPullRequestBuild()) {
-    downloadDistOutput(FILENAME);
+    downloadBuildOutput(FILENAME);
     timedExecOrDie('gulp update-packages');
     timedExecOrDie('gulp e2e --nobuild --headless');
   } else {
     printChangeSummary(FILENAME);
     if (
       buildTargets.has('RUNTIME') ||
-      buildTargets.has('UNIT_TEST') ||
-      buildTargets.has('INTEGRATION_TEST') ||
-      buildTargets.has('BUILD_SYSTEM') ||
       buildTargets.has('FLAG_CONFIG') ||
-      buildTargets.has('VISUAL_DIFF')
+      buildTargets.has('E2E_TEST')
     ) {
       downloadBuildOutput(FILENAME);
       timedExecOrDie('gulp update-packages');
       timedExecOrDie('gulp e2e --nobuild --headless');
     } else {
       console.log(
-        `${FILELOGPREFIX} Skipping ` +
-          colors.cyan('End to End Tests ') +
-          'because this commit does not affect the runtime, build system, ' +
-          'test files, or visual diff files'
+        `${FILELOGPREFIX} Skipping`,
+        colors.cyan('End to End Tests'),
+        'because this commit does not affect the runtime, flag configs,',
+        'or end-to-end tests'
       );
     }
   }

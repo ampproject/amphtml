@@ -40,7 +40,7 @@ const timedExecOrDie = (cmd, unusedFileName) =>
 
 function main() {
   const startTime = startTimer(FILENAME, FILENAME);
-  const buildTargets = determineBuildTargets();
+  const buildTargets = determineBuildTargets(FILENAME);
 
   if (!isTravisPullRequestBuild()) {
     downloadBuildOutput(FILENAME);
@@ -52,10 +52,8 @@ function main() {
     process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
     if (
       buildTargets.has('RUNTIME') ||
-      buildTargets.has('BUILD_SYSTEM') ||
-      buildTargets.has('INTEGRATION_TEST') ||
-      buildTargets.has('VISUAL_DIFF') ||
-      buildTargets.has('FLAG_CONFIG')
+      buildTargets.has('FLAG_CONFIG') ||
+      buildTargets.has('VISUAL_DIFF')
     ) {
       downloadBuildOutput(FILENAME);
       timedExecOrDie('gulp update-packages');
@@ -63,11 +61,10 @@ function main() {
     } else {
       timedExecOrDie('gulp visual-diff --nobuild --empty');
       console.log(
-        `${FILELOGPREFIX} Skipping ` +
-          colors.cyan('Visual Diff Tests ') +
-          'because this commit does not affect the ' +
-          'runtime, build system, integration test files, ' +
-          'visual diff test files, or flag config files.'
+        `${FILELOGPREFIX} Skipping`,
+        colors.cyan('Visual Diff Tests'),
+        'because this commit does not affect the runtime, flag configs,',
+        'or visual diff tests.'
       );
     }
   }

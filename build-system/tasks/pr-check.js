@@ -51,7 +51,7 @@ async function prCheck(cb) {
   };
 
   const startTime = startTimer(FILENAME, FILENAME);
-  const buildTargets = determineBuildTargets();
+  const buildTargets = determineBuildTargets(FILENAME);
   printChangeSummary(FILENAME);
 
   if (
@@ -63,13 +63,26 @@ async function prCheck(cb) {
 
   runCheck('gulp lint --local-changes');
   runCheck('gulp presubmit');
-  runCheck('gulp ava');
-  runCheck('gulp babel-plugin-tests');
-  runCheck('gulp caches-json');
-  runCheck('gulp json-syntax');
+
+  if (buildTargets.has('AVA')) {
+    runCheck('gulp ava');
+  }
+
+  if (buildTargets.has('BABEL_PLUGIN')) {
+    runCheck('gulp babel-plugin-tests');
+  }
+
+  if (buildTargets.has('CACHES_JSON')) {
+    runCheck('gulp caches-json');
+    runCheck('gulp json-syntax');
+  }
 
   if (buildTargets.has('DOCS')) {
     runCheck('gulp check-links');
+  }
+
+  if (buildTargets.has('DEV_DASHBOARD')) {
+    runCheck('gulp dev-dashboard-tests');
   }
 
   if (buildTargets.has('RUNTIME')) {
@@ -81,19 +94,23 @@ async function prCheck(cb) {
     runCheck('gulp test --unit --local-changes --headless');
   }
 
-  if (buildTargets.has('RUNTIME') || buildTargets.has('INTEGRATION_TEST')) {
+  if (
+    buildTargets.has('RUNTIME') ||
+    buildTargets.has('FLAG_CONFIG') ||
+    buildTargets.has('INTEGRATION_TEST')
+  ) {
     if (!argv.nobuild) {
       runCheck('gulp clean');
       runCheck('gulp dist --fortesting');
     }
-    runCheck('gulp test --nobuild --integration --headless');
+    runCheck('gulp test --nobuild --compiled --integration --headless');
   }
 
   if (buildTargets.has('RUNTIME') || buildTargets.has('VALIDATOR')) {
     runCheck('gulp validator');
   }
 
-  if (buildTargets.has('RUNTIME') || buildTargets.has('VALIDATOR_WEBUI')) {
+  if (buildTargets.has('VALIDATOR_WEBUI')) {
     runCheck('gulp validator-webui');
   }
 

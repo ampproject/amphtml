@@ -43,7 +43,7 @@ const timedExecOrDie = (cmd, unusedFileName) =>
 
 function main() {
   const startTime = startTimer(FILENAME, FILENAME);
-  const buildTargets = determineBuildTargets();
+  const buildTargets = determineBuildTargets(FILENAME);
   if (
     !runYarnChecks(FILENAME) ||
     !areValidBuildTargets(buildTargets, FILENAME)
@@ -61,10 +61,9 @@ function main() {
     printChangeSummary(FILENAME);
     if (
       buildTargets.has('RUNTIME') ||
-      buildTargets.has('UNIT_TEST') ||
-      buildTargets.has('INTEGRATION_TEST') ||
-      buildTargets.has('BUILD_SYSTEM') ||
       buildTargets.has('FLAG_CONFIG') ||
+      buildTargets.has('INTEGRATION_TEST') ||
+      buildTargets.has('E2E_TEST') ||
       buildTargets.has('VISUAL_DIFF')
     ) {
       timedExecOrDie('gulp update-packages');
@@ -72,10 +71,10 @@ function main() {
       uploadBuildOutput(FILENAME);
     } else {
       console.log(
-        `${FILELOGPREFIX} Skipping ` +
-          colors.cyan('Build ') +
-          'because this commit does not affect the runtime, build system, ' +
-          'test files, or visual diff files'
+        `${FILELOGPREFIX} Skipping`,
+        colors.cyan('Build'),
+        'because this commit does not affect the runtime, flag configs,',
+        'integration tests, end-to-end tests, or visual diff tests.'
       );
     }
   }

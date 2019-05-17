@@ -44,7 +44,7 @@ const timedExecOrDie = (cmd, unusedFileName) =>
 
 function main() {
   const startTime = startTimer(FILENAME, FILENAME);
-  const buildTargets = determineBuildTargets();
+  const buildTargets = determineBuildTargets(FILENAME);
   if (
     !runYarnChecks(FILENAME) ||
     !areValidBuildTargets(buildTargets, FILENAME)
@@ -63,10 +63,8 @@ function main() {
     printChangeSummary(FILENAME);
     if (
       buildTargets.has('RUNTIME') ||
-      buildTargets.has('UNIT_TEST') ||
-      buildTargets.has('INTEGRATION_TEST') ||
-      buildTargets.has('BUILD_SYSTEM') ||
-      buildTargets.has('FLAG_CONFIG')
+      buildTargets.has('FLAG_CONFIG') ||
+      buildTargets.has('INTEGRATION_TEST')
     ) {
       timedExecOrDie('gulp update-packages');
       timedExecOrDie('gulp dist --fortesting');
@@ -75,10 +73,10 @@ function main() {
     } else {
       timedExecOrDie('gulp bundle-size --on_skipped_build');
       console.log(
-        `${FILELOGPREFIX} Skipping ` +
-          colors.cyan('Dist, Bundle Size ') +
-          'because this commit does not affect the runtime, build system, ' +
-          'test files, or visual diff files'
+        `${FILELOGPREFIX} Skipping`,
+        colors.cyan('Dist, Bundle Size'),
+        'because this commit does not affect the runtime, flag configs,',
+        'or integration tests'
       );
     }
   }
