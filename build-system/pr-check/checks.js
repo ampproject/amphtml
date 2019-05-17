@@ -40,7 +40,7 @@ function runCommonChecks() {
   timedExecOrDie('gulp lint');
   timedExecOrDie('gulp presubmit');
   timedExecOrDie('gulp ava');
-  timedExecOrDie('node node_modules/jest/bin/jest.js');
+  timedExecOrDie('gulp babel-plugin-tests');
   timedExecOrDie('gulp caches-json');
   timedExecOrDie('gulp json-syntax');
 }
