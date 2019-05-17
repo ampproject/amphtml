@@ -33,7 +33,6 @@ function ava() {
       gulpAva({
         'files': ['build-system/tasks/**/{test,test-*}.js'],
         'concurrency': 5,
-        'tap': true,
         'failFast': true,
         'silent': isTravisBuild(),
       })
