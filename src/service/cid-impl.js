@@ -301,11 +301,6 @@ export class Cid {
           apiKeyMap[scope] = pair[1].trim();
         } else {
           const clientName = item;
-          // We have installations that specified gtag API that never became
-          // supported. Make sure that there's no error reported in this case.
-          if (clientName === 'gtag') {
-            return;
-          }
           const scope = CID_API_SCOPE_WHITELIST[clientName];
           if (scope) {
             apiKeyMap[scope] = API_KEYS[clientName];

@@ -993,12 +993,6 @@ describes.realWin('cid', {amp: true}, env => {
         expect(cid.isScopeOptedIn_('AMP_ECID_GOOGLE')).to.equal(undefined);
       });
     });
-
-    it('should not report error for gtag client ID API', () => {
-      ampdoc.win.document.head.innerHTML +=
-          '<meta name="amp-google-client-id-api" content="gtag">';
-      expect(cid.isScopeOptedIn_('AMP_ECID_GOOGLE')).to.equal(undefined);
-    });
   });
 });
 
