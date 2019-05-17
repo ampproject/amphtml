@@ -35,7 +35,7 @@ export class AmpStoryRenderService {
    * @return {!Promise}
    */
   whenReady() {
-    return this.ampdoc_.whenBodyAvailable().then(body => {
+    return this.ampdoc_.whenReady().then(body => {
       const storyEl = body.querySelector('amp-story[standalone]');
 
       if (!storyEl) {

@@ -45,7 +45,7 @@ export class AmpLinkRewriter extends AMP.BaseElement {
      * inside LinkRewriter it doesn't retrieve the referrerUrl
      */
     return this.ampDoc_
-      .whenBodyAvailable()
+      .whenReady()
       .then(() => viewer.getReferrerUrl())
       .then(referrer => (this.referrer_ = referrer))
       .then(this.letsRockIt_.bind(this));
