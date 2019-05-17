@@ -64,7 +64,7 @@ async function prCheck(cb) {
   runCheck('gulp lint --local-changes');
   runCheck('gulp presubmit');
   runCheck('gulp ava');
-  runCheck('node node_modules/jest/bin/jest.js');
+  runCheck('gulp babel-plugin-tests');
   runCheck('gulp caches-json');
   runCheck('gulp json-syntax');
 
