@@ -26,6 +26,10 @@ If your run into any issues finding a Reviewer/Owner or have any other questions
 
 Significant changes (e.g. new components or significant changes to behavior) require consultation with and approval from knowledgeable members of the community.
 
+**If you are making a change to existing behavior, familiarize yourself with AMP's [policy on breaking changes](https://github.com/ampproject/amphtml/blob/master/spec/amp-versioning-policy.md#breaking-changes).**
+
+**If you are deprecating/removing a feature, follow the [deprecation process](https://github.com/ampproject/amphtml/blob/master/spec/amp-versioning-policy.md#deprecations) instead of this process.**
+
 - [ ] *Before you start coding*, [find a guide](#find-a-guide) who you can discuss your change with and who can help guide you through the process.
 - [ ] Sign the [Contributor License Agreement (CLA)](#contributor-license-agreement) as soon as possible if you haven't already done so.  If you are contributing code on behalf of your company and your company is not yet covered by a CLA it can take a few days for the CLA to be verified.
 - [ ] File an [Intent-to-implement (I2I)](https://github.com/ampproject/amphtml/issues/new?assignees=&labels=INTENT+TO+IMPLEMENT&template=intent-to-implement--i2i-.md&title=I2I:%20%3Cyour%20change/update%3E) GitHub issue and cc your guide on it.  The I2I should include:
