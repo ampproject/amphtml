@@ -53,12 +53,12 @@ exports.gitTravisMasterBaseline = function() {
 };
 
 /**
- * Shortens a commit SHA to 9 characters (git default) for human readability.
+ * Shortens a commit SHA to 7 characters for human readability.
  * @param {string} sha 40 characters SHA.
- * @return {string} 9 characters SHA.
+ * @return {string} 7 characters SHA.
  */
 exports.shortSha = function(sha) {
-  return sha.substr(0, 9);
+  return sha.substr(0, 7);
 };
 
 /**
