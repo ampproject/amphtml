@@ -105,6 +105,7 @@
     "gulp-git": "2.9.0",
     "gulp-help": "chmontgomery/gulp-help#gulp4",
     "gulp-if": "2.0.2",
+    "gulp-jest": "4.0.2",
     "gulp-nop": "0.0.3",
     "gulp-regexp-sourcemaps": "1.0.1",
     "gulp-rename": "1.4.0",
@@ -114,7 +115,6 @@
     "gzip-size": "5.1.0",
     "html-minifier": "4.0.0",
     "is-running": "2.1.0",
-    "jest": "24.8.0",
     "jest-dot-reporter": "1.0.7",
     "jison": "0.4.18",
     "jsdom": "15.1.0",
@@ -190,28 +190,5 @@
     "concurrency": 5,
     "tap": true,
     "failFast": true
-  },
-  "jest": {
-    "testRegex": "./build-system/babel-plugins/[^/]+/test/.+\\.m?js$",
-    "testPathIgnorePatterns": [
-      "/node_modules/"
-    ],
-    "testEnvironment": "node",
-    "setupFilesAfterEnv": [
-      "./build-system/babel-plugins/testSetupFile.js"
-    ],
-    "transformIgnorePatterns": [
-      "/node_modules/"
-    ],
-    "coveragePathIgnorePatterns": [
-      "/node_modules/"
-    ],
-    "modulePathIgnorePatterns": [
-      "/test/fixtures/",
-      "<rootDir>/build/"
-    ],
-    "reporters": [
-      "jest-dot-reporter"
-    ]
   }
 }
