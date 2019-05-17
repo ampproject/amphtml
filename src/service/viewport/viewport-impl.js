@@ -329,7 +329,7 @@ export class Viewport {
    * @param {number} paddingBottom
    */
   updatePaddingBottom(paddingBottom) {
-    this.ampdoc.whenBodyAvailable().then(body => {
+    this.ampdoc.waitForBodyOpen().then(body => {
       setStyle(body, 'borderBottom', `${paddingBottom}px solid transparent`);
     });
   }

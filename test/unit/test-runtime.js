@@ -472,7 +472,7 @@ describes.fakeWin(
       const bodyPromise = new Promise(resolve => {
         bodyResolver = resolve;
       });
-      sandbox.stub(dom, 'waitForBodyPromise').callsFake(() => bodyPromise);
+      sandbox.stub(dom, 'waitForBodyOpenPromise').callsFake(() => bodyPromise);
 
       function skipMicro() {
         return Promise.resolve().then(() => Promise.resolve());
@@ -548,7 +548,7 @@ describes.fakeWin(
       const bodyPromise = new Promise(resolve => {
         bodyResolver = resolve;
       });
-      sandbox.stub(dom, 'waitForBodyPromise').callsFake(() => bodyPromise);
+      sandbox.stub(dom, 'waitForBodyOpenPromise').callsFake(() => bodyPromise);
 
       function skipMicro() {
         return Promise.resolve().then(() => Promise.resolve());
@@ -1433,7 +1433,7 @@ describes.realWin(
         writer.write('<script custom-element="amp-ext" src=""></script>');
         writer.write('<body>');
 
-        return ampdoc.whenBodyAvailable().then(() => {
+        return ampdoc.waitForBodyOpen().then(() => {
           return extensions.waitForExtension(win, 'amp-ext').then(() => {
             // Factories have been applied.
             expect(getServiceForDoc(ampdoc, 'service1')).to.be.instanceOf(
@@ -1461,7 +1461,7 @@ describes.realWin(
         expect(hostElement.style.visibility).to.equal('hidden');
 
         return ampdoc
-          .whenBodyAvailable()
+          .waitForBodyOpen()
           .then(() => {
             // After timeout the doc rendered is started.
             expect(hostElement.style.visibility).to.equal('hidden');
@@ -1476,7 +1476,7 @@ describes.realWin(
         shadowDoc = win.AMP.attachShadowDocAsStream(hostElement, docUrl);
         writer = shadowDoc.writer;
         writer.write('<body><child>');
-        return ampdoc.whenBodyAvailable().then(() => {
+        return ampdoc.waitForBodyOpen().then(() => {
           const shadowRoot = getShadowRoot(hostElement);
           const body =
             shadowRoot.querySelector('body') ||
@@ -1494,7 +1494,7 @@ describes.realWin(
         shadowDoc = win.AMP.attachShadowDocAsStream(hostElement, docUrl);
         writer = shadowDoc.writer;
         writer.write('<body><child>');
-        return ampdoc.whenBodyAvailable().then(() => {
+        return ampdoc.waitForBodyOpen().then(() => {
           expect(ampdoc.isReady()).to.be.false;
           writer.write('</child></body>');
           writer.write('</html>');
@@ -1509,7 +1509,7 @@ describes.realWin(
         shadowDoc = win.AMP.attachShadowDocAsStream(hostElement, docUrl);
         writer = shadowDoc.writer;
         writer.write('<title>test title</title><body>');
-        return ampdoc.whenBodyAvailable().then(() => {
+        return ampdoc.waitForBodyOpen().then(() => {
           expect(shadowDoc.title).to.equal('test title');
           expect(getShadowRoot(hostElement).AMP.title).to.equal('test title');
         });
@@ -1521,7 +1521,7 @@ describes.realWin(
         writer.write(
           '<link rel="canonical" href="http://example.org/canonical"><body>'
         );
-        return ampdoc.whenBodyAvailable().then(() => {
+        return ampdoc.waitForBodyOpen().then(() => {
           expect(shadowDoc.canonicalUrl).to.equal(
             'http://example.org/canonical'
           );
@@ -1543,7 +1543,7 @@ describes.realWin(
         fontEl2.setAttribute('href', 'http://example.org/font2');
         win.document.head.appendChild(fontEl2);
 
-        return ampdoc.whenBodyAvailable().then(() => {
+        return ampdoc.waitForBodyOpen().then(() => {
           expect(
             win.document.querySelector('link[href="http://example.org/font1"]')
           ).to.exist;
@@ -1567,7 +1567,7 @@ describes.realWin(
         shadowDoc = win.AMP.attachShadowDocAsStream(hostElement, docUrl);
         writer = shadowDoc.writer;
         writer.write('<style amp-boilerplate></style><body>');
-        return ampdoc.whenBodyAvailable().then(() => {
+        return ampdoc.waitForBodyOpen().then(() => {
           const shadowRoot = getShadowRoot(hostElement);
           expect(shadowRoot.querySelector('style[amp-boilerplate]')).to.not
             .exist;
@@ -1578,7 +1578,7 @@ describes.realWin(
         shadowDoc = win.AMP.attachShadowDocAsStream(hostElement, docUrl);
         writer = shadowDoc.writer;
         writer.write('<style amp-custom>.custom{}</style><body>');
-        return ampdoc.whenBodyAvailable().then(() => {
+        return ampdoc.waitForBodyOpen().then(() => {
           const shadowRoot = getShadowRoot(hostElement);
           expect(shadowRoot.querySelector('style[amp-custom]')).to.exist;
           expect(
@@ -1595,7 +1595,7 @@ describes.realWin(
           '<script src="https://cdn.ampproject.org/v0.js"></script>'
         );
         writer.write('<body>');
-        return ampdoc.whenBodyAvailable();
+        return ampdoc.waitForBodyOpen();
       });
 
       it('should ignore unknown script', () => {
@@ -1612,7 +1612,7 @@ describes.realWin(
             ' src="https://cdn.ampproject.org/other.js"></script>'
         );
         writer.write('<body>');
-        return ampdoc.whenBodyAvailable().then(() => {
+        return ampdoc.waitForBodyOpen().then(() => {
           expect(
             getShadowRoot(hostElement).querySelector(
               'script[data-id="unknown1"]'
@@ -1639,7 +1639,7 @@ describes.realWin(
           .once();
         writer.write('<script custom-element="amp-ext1" src=""></script>');
         writer.write('<body>');
-        return ampdoc.whenBodyAvailable().then(() => {
+        return ampdoc.waitForBodyOpen().then(() => {
           expect(
             win.document.querySelector('script[custom-element="amp-ext1"]')
           ).to.not.exist;
@@ -1656,7 +1656,7 @@ describes.realWin(
           .once();
         writer.write('<script custom-template="amp-ext1" src=""></script>');
         writer.write('<body>');
-        return ampdoc.whenBodyAvailable().then(() => {
+        return ampdoc.waitForBodyOpen().then(() => {
           expect(
             win.document.querySelector('script[custom-template="amp-ext1"]')
           ).to.not.exist;
@@ -1670,7 +1670,7 @@ describes.realWin(
           '<script type="application/json" data-id="test1">{}</script>'
         );
         writer.write('<body>');
-        return ampdoc.whenBodyAvailable().then(() => {
+        return ampdoc.waitForBodyOpen().then(() => {
           expect(
             getShadowRoot(hostElement).querySelector('script[data-id="test1"]')
           ).to.exist;
@@ -1695,7 +1695,7 @@ describes.realWin(
         );
         writer.write('<script data-id="test1"></script>');
         writer.write('<body>');
-        return ampdoc.whenBodyAvailable(() => {
+        return ampdoc.waitForBodyOpen(() => {
           expect(
             getShadowRoot(hostElement).querySelector('script[data-id="test1"]')
           ).to.not.exist;
@@ -1706,7 +1706,7 @@ describes.realWin(
         shadowDoc = win.AMP.attachShadowDocAsStream(hostElement, docUrl);
         writer = shadowDoc.writer;
         writer.write('<body>');
-        return ampdoc.whenBodyAvailable().then(() => {
+        return ampdoc.waitForBodyOpen().then(() => {
           const viewer = getServiceForDoc(ampdoc, 'viewer');
           expect(viewer.getVisibilityState()).to.equal('visible');
         });
@@ -1718,7 +1718,7 @@ describes.realWin(
         });
         writer = shadowDoc.writer;
         writer.write('<body>');
-        return ampdoc.whenBodyAvailable().then(() => {
+        return ampdoc.waitForBodyOpen().then(() => {
           const viewer = getServiceForDoc(ampdoc, 'viewer');
           expect(viewer.getVisibilityState()).to.equal('prerender');
         });
@@ -1728,7 +1728,7 @@ describes.realWin(
         shadowDoc = win.AMP.attachShadowDocAsStream(hostElement, docUrl);
         writer = shadowDoc.writer;
         writer.write('<body>');
-        return ampdoc.whenBodyAvailable().then(() => {
+        return ampdoc.waitForBodyOpen().then(() => {
           const viewer = getServiceForDoc(ampdoc, 'viewer');
           expect(shadowDoc.setVisibilityState).to.be.a('function');
           expect(viewer.getVisibilityState()).to.equal('visible');
@@ -1742,7 +1742,7 @@ describes.realWin(
         shadowDoc = win.AMP.attachShadowDocAsStream(hostElement, docUrl);
         writer = shadowDoc.writer;
         writer.write('<body>');
-        return ampdoc.whenBodyAvailable().then(() => {
+        return ampdoc.waitForBodyOpen().then(() => {
           const viewer = getServiceForDoc(ampdoc, 'viewer');
           expect(shadowDoc.close).to.be.a('function');
           expect(viewer.getVisibilityState()).to.equal('visible');

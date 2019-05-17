@@ -109,12 +109,12 @@ export function waitForHeadPromise(doc) {
 
 /**
  * Waits for document's body to be available and ready.
- * Will be deprecated soon; use {@link AmpDoc#whenBodyAvailable} or
+ * Will be deprecated soon; use {@link AmpDoc#waitForBodyOpen} or
  * @{link DocumentState#onBodyAvailable} instead.
  * @param {!Document} doc
  * @param {function()} callback
  */
-export function waitForBody(doc, callback) {
+export function waitForBodyOpen(doc, callback) {
   onDocumentReady(doc, () => waitForHead(doc, callback));
 }
 
@@ -123,8 +123,8 @@ export function waitForBody(doc, callback) {
  * @param {!Document} doc
  * @return {!Promise}
  */
-export function waitForBodyPromise(doc) {
-  return new Promise(resolve => waitForBody(doc, resolve));
+export function waitForBodyOpenPromise(doc) {
+  return new Promise(resolve => waitForBodyOpen(doc, resolve));
 }
 
 /**

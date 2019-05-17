@@ -21,7 +21,7 @@ import {computedStyle, px, setImportantStyles} from '../../style';
 import {dev} from '../../log';
 import {isExperimentOn} from '../../experiments';
 import {layoutRectLtwh} from '../../layout-rect';
-import {waitForBody} from '../../dom';
+import {waitForBodyOpen} from '../../dom';
 import {whenDocumentReady} from '../../document-ready';
 
 const TAG_ = 'Viewport';
@@ -78,7 +78,7 @@ export class ViewportBindingIosEmbedWrapper_ {
     // Setup UI.
     /** @private {boolean} */
     this.setupDone_ = false;
-    waitForBody(doc, this.setup_.bind(this));
+    waitForBodyOpen(doc, this.setup_.bind(this));
 
     // Set overscroll (`-webkit-overflow-scrolling: touch`) later to avoid
     // iOS rendering bugs. See #8798 for details.

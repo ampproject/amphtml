@@ -21,7 +21,7 @@ import {getParentWindowFrameElement, registerServiceBuilder} from '../service';
 import {getShadowRootNode} from '../shadow-embed';
 import {isDocumentReady, whenDocumentReady} from '../document-ready';
 import {isExperimentOn} from '../experiments';
-import {waitForBodyPromise} from '../dom';
+import {waitForBodyOpenPromise} from '../dom';
 
 /** @const {string} */
 const AMPDOC_PROP = '__AMPDOC';
@@ -335,7 +335,7 @@ export class AmpDoc {
   /**
    * Returns the ampdoc's body. Requires the body to already be available.
    *
-   * See `isBodyAvailable` and `whenBodyAvailable`.
+   * See `isBodyAvailable` and `waitForBodyOpen`.
    *
    * @return {!Element}
    */
@@ -348,7 +348,7 @@ export class AmpDoc {
    * available.
    * @return {!Promise<!Element>}
    */
-  whenBodyAvailable() {
+  waitForBodyOpen() {
     return /** @type {?} */ (devAssert(null, 'not implemented'));
   }
 
@@ -417,7 +417,7 @@ export class AmpDocSingle extends AmpDoc {
     /** @private @const {!Promise<!Element>} */
     this.bodyPromise_ = this.win.document.body
       ? Promise.resolve(this.win.document.body)
-      : waitForBodyPromise(this.win.document).then(() => this.getBody());
+      : waitForBodyOpenPromise(this.win.document).then(() => this.getBody());
 
     /** @private @const {!Promise} */
     this.readyPromise_ = whenDocumentReady(this.win.document);
@@ -454,7 +454,7 @@ export class AmpDocSingle extends AmpDoc {
   }
 
   /** @override */
-  whenBodyAvailable() {
+  waitForBodyOpen() {
     return this.bodyPromise_;
   }
 
@@ -553,7 +553,7 @@ export class AmpDocShadow extends AmpDoc {
   }
 
   /** @override */
-  whenBodyAvailable() {
+  waitForBodyOpen() {
     return this.bodyPromise_;
   }
 

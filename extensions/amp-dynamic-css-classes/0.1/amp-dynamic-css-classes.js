@@ -91,7 +91,7 @@ function addDynamicCssClasses(ampdoc, classes) {
   if (ampdoc.isBodyAvailable()) {
     addCssClassesToBody(ampdoc.getBody(), classes);
   } else {
-    ampdoc.whenBodyAvailable().then(body => addCssClassesToBody(body, classes));
+    ampdoc.waitForBodyOpen().then(body => addCssClassesToBody(body, classes));
   }
 }
 
