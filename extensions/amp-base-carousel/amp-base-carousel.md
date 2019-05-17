@@ -220,6 +220,18 @@ If you want more customization for the arrow buttons, you can use the `next` and
 
 ## Usage Notes
 
+### RTL
+
+`<amp-base-carousel>` currently requires that you let it know when it is in an right-to-left (rtl) context (e.g. Arabic, Hebrew pages). While the carousel will generally work without this, there may be a few bugs. You can let the carousel know that it should operate as `rtl` as follows:
+
+```html
+<amp-base-carousel dir="rtl" …>
+  …
+</amp-base-carousel>
+```
+
+If the carousel is in a RTL context, and you want the carousel to operate as LTR, you can explicitly set the `dir="ltr"` on the carousel.
+
 ### Slide layout
 
 Slides are automatically sized by the carousel when **not** specifying `mixed-lengths`. You should give the slides `layout="flex-item"`:

@@ -351,7 +351,8 @@ class FunctionalTestController {
 
   /**
    * The Get Element Rect command returns the dimensions and coordinates of
-   * the given web element.
+   * the given web element. Unlike the webdriver version, this also returns
+   * the left, right, top and bottom properties.
    * {@link https://www.w3.org/TR/webdriver1/#get-element-rect}
    *
    * @param {!ElementHandle} unusedHandle
@@ -461,6 +462,10 @@ let WindowRectDef;
  * @typedef {{
  *   x: number,
  *   y: number,
+ *   top: number,
+ *   bottom: number,
+ *   left: number,
+ *   right: number,
  *   width: number,
  *   height: number
  * }}
