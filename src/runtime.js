@@ -32,7 +32,11 @@ import {
 } from './log';
 import {Services} from './services';
 import {VisibilityState} from './visibility-state';
-import {childElementsByTag, isConnectedNode, waitForBodyOpenPromise} from './dom';
+import {
+  childElementsByTag,
+  isConnectedNode,
+  waitForBodyOpenPromise,
+} from './dom';
 import {config} from './config';
 import {
   createShadowDomWriter,
