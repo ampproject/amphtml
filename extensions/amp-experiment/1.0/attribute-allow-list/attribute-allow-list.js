@@ -33,58 +33,48 @@ export function getAllowedAttributeMutation(
   mutationRecord,
   stringifiedMutation
 ) {
-
   // Assert the mutation attribute is one of the following keys
   const mutationAttributeName = mutationRecord['attributeName'];
   userAssert(
-      attributeMutationAllowList[mutationAttributeName] !== undefined,
-      'Mutation %s has an unsupported attributeName.',
-      stringifiedMutation
+    attributeMutationAllowList[mutationAttributeName] !== undefined,
+    'Mutation %s has an unsupported attributeName.',
+    stringifiedMutation
   );
 
   // Find our allow list entry
-  const mutationTagName = mutationRecord['targetElement']
-      .tagName.toLowerCase();
+  const mutationTagName = mutationRecord['targetElement'].tagName.toLowerCase();
 
   // Search through the allow list for our
   // Allowed attribute entry
   let allowedAttributeEntry = undefined;
   if (attributeMutationAllowList[mutationAttributeName][mutationTagName]) {
     allowedAttributeEntry =
-      attributeMutationAllowList
-          [mutationAttributeName]
-          [mutationTagName];
+      attributeMutationAllowList[mutationAttributeName][mutationTagName];
   } else if (attributeMutationAllowList[mutationAttributeName]['*']) {
     allowedAttributeEntry =
-      attributeMutationAllowList
-          [mutationAttributeName]
-          ['*'];
+      attributeMutationAllowList[mutationAttributeName]['*'];
 
     if (!allowedAttributeEntry.tags) {
       allowedAttributeEntry = undefined;
-    } else if (!allowedAttributeEntry.tags.includes(mutationTagName) &&
-      !allowedAttributeEntry.tags.includes('*')) {
+    } else if (
+      !allowedAttributeEntry.tags.includes(mutationTagName) &&
+      !allowedAttributeEntry.tags.includes('*')
+    ) {
       allowedAttributeEntry = undefined;
     }
   }
 
   if (!allowedAttributeEntry) {
-    const error =
-      `Mutation ${stringifiedMutation} has an unsupported attributeName.`;
-    user().error(
-        TAG,
-        error
-    );
+    const error = `Mutation ${stringifiedMutation} has an unsupported attributeName.`;
+    user().error(TAG, error);
     throw new Error(error);
   }
 
   // Assert the mutation attribute passes it's check
   userAssert(
-      allowedAttributeEntry.validate(
-          mutationRecord['value']
-      ),
-      'Mutation %s has an an unsupported value.',
-      stringifiedMutation
+    allowedAttributeEntry.validate(mutationRecord['value']),
+    'Mutation %s has an an unsupported value.',
+    stringifiedMutation
   );
 
   // Return the corresponding mutation

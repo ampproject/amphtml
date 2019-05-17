@@ -22,7 +22,6 @@ import {assertHttpsUrl} from '../../../../src/url';
  * is properly handled
  */
 export class AllowedAttributeEntry {
-
   /**
    * Constructor for the class
    * @param {Array<string>=} opt_tags
@@ -51,8 +50,8 @@ export class AllowedAttributeEntry {
    */
   mutate(mutationRecord) {
     mutationRecord['targetElement'].setAttribute(
-        mutationRecord['attributeName'],
-        mutationRecord['value']
+      mutationRecord['attributeName'],
+      mutationRecord['value']
     );
   }
 }
@@ -62,7 +61,6 @@ export class AllowedAttributeEntry {
  * mutations
  */
 export class DefaultStyleAllowedAttributeEntry extends AllowedAttributeEntry {
-
   /** @override */
   constructor() {
     super(['*']);
@@ -81,7 +79,9 @@ export class DefaultStyleAllowedAttributeEntry extends AllowedAttributeEntry {
     }
 
     // Allow Background color
-    if (value.match(/^background-color:\s*#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3});?$/)) {
+    if (
+      value.match(/^background-color:\s*#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3});?$/)
+    ) {
       return true;
     }
 
@@ -94,7 +94,6 @@ export class DefaultStyleAllowedAttributeEntry extends AllowedAttributeEntry {
  * mutations. E.g ['href']['*']
  */
 export class DefaultAllowedURLAttributeEntry extends AllowedAttributeEntry {
-
   /**
    * @param {Array<string>=} opt_tags
    * @override

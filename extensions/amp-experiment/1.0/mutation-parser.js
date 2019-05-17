@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  getAllowedAttributeMutation,
-} from './attribute-allow-list/attribute-allow-list';
+import {getAllowedAttributeMutation} from './attribute-allow-list/attribute-allow-list';
 import {isObject} from '../../../src/types';
 import {user, userAssert} from '../../../src/log';
 
@@ -47,11 +45,7 @@ export function parseMutation(mutation, document) {
   if (mutationRecord['type'] === 'attributes') {
     assertAttributeMutation(mutationRecord, stringifiedMutation);
 
-    return getAllowedAttributeMutation(
-        mutationRecord,
-        stringifiedMutation
-    );
-
+    return getAllowedAttributeMutation(mutationRecord, stringifiedMutation);
   } else if (mutationRecord['type'] === 'characterData') {
     assertCharacterDataMutation(mutationRecord, stringifiedMutation);
 
@@ -95,9 +89,9 @@ function assertMutationRecord(mutation) {
 
   // Assert the mutation type is one of the following keys
   userAssert(
-      MUTATION_TYPES.indexOf(mutation['type']) >= 0,
-      'Mutation %s must have a valid type.',
-      JSON.stringify(mutation)
+    MUTATION_TYPES.indexOf(mutation['type']) >= 0,
+    'Mutation %s must have a valid type.',
+    JSON.stringify(mutation)
   );
 
   // Assert the mutation target

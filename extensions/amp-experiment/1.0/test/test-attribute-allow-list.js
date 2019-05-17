@@ -14,29 +14,20 @@
  * limitations under the License.
  */
 
+import {AllowedAttributeEntry} from '../attribute-allow-list/allowed-attribute-entry';
 import {
+  attributeMutationAllowList,
   getAllowedAttributeMutation,
-  attributeMutationAllowList
 } from '../attribute-allow-list/attribute-allow-list';
-import {
-  AllowedAttributeEntry
-} from '../attribute-allow-list/allowed-attribute-entry';
 
 const MUTATION_NAME = 'test-mutation';
 
-describes.realWin('amp-experiment attribute-allow-list', {}, env => {
-  let win, doc;
-
-  beforeEach(() => {
-    win = env.win;
-    doc = win.document;
-  });
-
+describes.realWin('amp-experiment attribute-allow-list', {}, () => {
   function getAttributeMutation(opt_attributeName, opt_value) {
     return {
       type: 'attributes',
       targetElement: {
-        tagName: 'DIV'
+        tagName: 'DIV',
       },
       attributeName: opt_attributeName || 'style',
       value: opt_value || 'color: #FF0000',
@@ -44,60 +35,64 @@ describes.realWin('amp-experiment attribute-allow-list', {}, env => {
   }
 
   it('should allow a valid tag, attribute, value', () => {
-    expect(getAllowedAttributeMutation(
-      getAttributeMutation(),
-      MUTATION_NAME
-    )).to.be.ok;
+    expect(getAllowedAttributeMutation(getAttributeMutation(), MUTATION_NAME))
+      .to.be.ok;
   });
 
   it('should travese by attributeName', () => {
     const testAttributeName = 'test';
     attributeMutationAllowList[testAttributeName] = {
-      '*': new AllowedAttributeEntry(['*'])
+      '*': new AllowedAttributeEntry(['*']),
     };
 
-    expect(getAllowedAttributeMutation(
-      getAttributeMutation(testAttributeName),
-      MUTATION_NAME
-    )).to.be.ok;
+    expect(
+      getAllowedAttributeMutation(
+        getAttributeMutation(testAttributeName),
+        MUTATION_NAME
+      )
+    ).to.be.ok;
   });
 
   it('should travese by tagName', () => {
     const testAttributeName = 'test';
     attributeMutationAllowList[testAttributeName] = {
-      'div': new AllowedAttributeEntry()
+      'div': new AllowedAttributeEntry(),
     };
 
-    expect(getAllowedAttributeMutation(
-      getAttributeMutation(testAttributeName),
-      MUTATION_NAME
-    )).to.be.ok;
-  });
-
-  it('should handle * tagName, ' +
-    'and use specifc tag in entry tags array', () => {
-    const testAttributeName = 'test';
-    attributeMutationAllowList[testAttributeName] = {
-      '*': new AllowedAttributeEntry(['div'])
-    };
-
-    expect(getAllowedAttributeMutation(
-      getAttributeMutation(testAttributeName),
-      MUTATION_NAME
-    )).to.be.ok;
-  });
-
-  it('should handle * tagName, ' +
-    'and allow * in entry tags array', () => {
-      const testAttributeName = 'test';
-      attributeMutationAllowList[testAttributeName] = {
-        '*': new AllowedAttributeEntry(['*'])
-      };
-
-      expect(getAllowedAttributeMutation(
+    expect(
+      getAllowedAttributeMutation(
         getAttributeMutation(testAttributeName),
         MUTATION_NAME
-      )).to.be.ok;
+      )
+    ).to.be.ok;
+  });
+
+  it('should handle * tagName, and use specifc tag in entry tags array', () => {
+    const testAttributeName = 'test';
+    attributeMutationAllowList[testAttributeName] = {
+      '*': new AllowedAttributeEntry(['div']),
+    };
+
+    expect(
+      getAllowedAttributeMutation(
+        getAttributeMutation(testAttributeName),
+        MUTATION_NAME
+      )
+    ).to.be.ok;
+  });
+
+  it('should handle * tagName, and allow * in entry tags array', () => {
+    const testAttributeName = 'test';
+    attributeMutationAllowList[testAttributeName] = {
+      '*': new AllowedAttributeEntry(['*']),
+    };
+
+    expect(
+      getAllowedAttributeMutation(
+        getAttributeMutation(testAttributeName),
+        MUTATION_NAME
+      )
+    ).to.be.ok;
   });
 
   it('should validate the value', () => {
@@ -105,7 +100,7 @@ describes.realWin('amp-experiment attribute-allow-list', {}, env => {
     const allowedAttributeEntry = new AllowedAttributeEntry(['*']);
     const validateStub = sandbox.spy(allowedAttributeEntry, 'validate');
     attributeMutationAllowList[testAttributeName] = {
-      '*': allowedAttributeEntry
+      '*': allowedAttributeEntry,
     };
 
     const mutate = getAllowedAttributeMutation(
@@ -118,85 +113,76 @@ describes.realWin('amp-experiment attribute-allow-list', {}, env => {
   });
 
   it('should not allow unsupported attributeName', () => {
-
     const testAttributeName = 'test-invalid';
     attributeMutationAllowList['test'] = {
-      '*': new AllowedAttributeEntry(['*'])
+      '*': new AllowedAttributeEntry(['*']),
     };
 
     expectAsyncConsoleError(/attributeName/);
     try {
-      const mutate = getAllowedAttributeMutation(
+      getAllowedAttributeMutation(
         getAttributeMutation(testAttributeName),
         MUTATION_NAME
       );
       expect(false).to.be.ok;
-    } catch(e) {
+    } catch (e) {
       expect(e.message).to.match(/attributeName/);
     }
   });
 
   it('should not allow unsupported tagName', () => {
-
     const testAttributeName = 'test';
     attributeMutationAllowList['test'] = {
-      'invalid': new AllowedAttributeEntry(['*'])
+      'invalid': new AllowedAttributeEntry(['*']),
     };
 
     expectAsyncConsoleError(/attributeName/);
     try {
-      const mutate = getAllowedAttributeMutation(
+      getAllowedAttributeMutation(
         getAttributeMutation(testAttributeName),
         MUTATION_NAME
       );
       expect(false).to.be.ok;
-    } catch(e) {
+    } catch (e) {
       expect(e.message).to.match(/attributeName/);
     }
   });
 
-  it('should not allow * tagName, ' +
-    'without matching tag in entry tags array', () => {
-
+  it('should not allow * tagName, without matching tag in entry tags array', () => {
     const testAttributeName = 'test';
     attributeMutationAllowList['test'] = {
-      '*': new AllowedAttributeEntry(['invalid'])
+      '*': new AllowedAttributeEntry(['invalid']),
     };
 
     expectAsyncConsoleError(/attributeName/);
     try {
-      const mutate = getAllowedAttributeMutation(
+      getAllowedAttributeMutation(
         getAttributeMutation(testAttributeName),
         MUTATION_NAME
       );
       expect(false).to.be.ok;
-    } catch(e) {
+    } catch (e) {
       expect(e.message).to.match(/attributeName/);
     }
   });
 
   it('should not allow an invalid value', () => {
-
     const testAttributeName = 'test';
     const allowedAttributeEntry = new AllowedAttributeEntry(['*']);
-    const validateStub = sandbox
-      .stub(allowedAttributeEntry, 'validate')
-      .returns(false);
+    sandbox.stub(allowedAttributeEntry, 'validate').returns(false);
     attributeMutationAllowList[testAttributeName] = {
-      '*': allowedAttributeEntry
+      '*': allowedAttributeEntry,
     };
 
-
-      expectAsyncConsoleError(/value/);
-      try {
-        const mutate = getAllowedAttributeMutation(
-          getAttributeMutation(testAttributeName),
-          MUTATION_NAME
-        );
-        expect(false).to.be.ok;
-      } catch(e) {
-        expect(e.message).to.match(/value/);
-      }
-    });
+    expectAsyncConsoleError(/value/);
+    try {
+      getAllowedAttributeMutation(
+        getAttributeMutation(testAttributeName),
+        MUTATION_NAME
+      );
+      expect(false).to.be.ok;
+    } catch (e) {
+      expect(e.message).to.match(/value/);
+    }
+  });
 });
-
