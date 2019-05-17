@@ -20,7 +20,12 @@ const {
   areValidBuildTargets,
   determineBuildTargets,
 } = require('../pr-check/build-targets');
-const {printChangeSummary, timedExec} = require('../pr-check/utils');
+const {
+  printChangeSummary,
+  startTimer,
+  stopTimer,
+  timedExec,
+} = require('../pr-check/utils');
 const {runYarnChecks} = require('../pr-check/yarn-checks');
 
 const FILENAME = 'pr-check.js';
@@ -32,6 +37,7 @@ const FILENAME = 'pr-check.js';
  */
 async function prCheck(cb) {
   const failTask = () => {
+    stopTimer(FILENAME, FILENAME, startTime);
     const err = new Error('Local PR check failed. See logs above.');
     err.showStack = false;
     cb(err);
@@ -44,9 +50,10 @@ async function prCheck(cb) {
     }
   };
 
+  const startTime = startTimer(FILENAME, FILENAME);
+  const buildTargets = determineBuildTargets();
   printChangeSummary(FILENAME);
 
-  const buildTargets = determineBuildTargets();
   if (
     !runYarnChecks(FILENAME) ||
     !areValidBuildTargets(buildTargets, FILENAME)
@@ -89,6 +96,8 @@ async function prCheck(cb) {
   if (buildTargets.has('RUNTIME') || buildTargets.has('VALIDATOR_WEBUI')) {
     runCheck('gulp validator-webui');
   }
+
+  stopTimer(FILENAME, FILENAME, startTime);
 }
 
 module.exports = {
