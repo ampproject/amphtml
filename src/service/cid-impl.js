@@ -309,7 +309,7 @@ export class Cid {
             // supported. Make sure that the warning message looks appropriate.
             user().warn(
               TAG_,
-              `<meta name="amp-google-client-id-api" content="gtag"> is not supported. Please remove it from the page`
+              `<meta name="amp-google-client-id-api" content="gtag"> is not supported. Please remove it from the page.`
             );
           } else {
             user().error(
