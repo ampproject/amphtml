@@ -229,10 +229,8 @@ export class AmpStoryPage extends AMP.BaseElement {
     /** @private @const {!Promise} */
     this.mediaLayoutPromise_ = this.waitForMediaLayout_();
 
-    /** @private @const {!Promise} */
-    this.pageLoadPromise_ = this.mediaLayoutPromise_.then(() => {
-      this.markPageAsLoaded_();
-    });
+    /** @private @const {?Promise} */
+    this.pageLoadPromise_ = null;
 
     const deferred = new Deferred();
 
@@ -300,6 +298,9 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.pageLoadPromise_ = this.mediaLayoutPromise_.then(() => {
+      this.markPageAsLoaded_();
+    });
     this.delegateVideoAutoplay();
     this.markMediaElementsWithPreload_();
     this.initializeMediaPool_();
