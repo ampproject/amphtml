@@ -581,7 +581,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
    */
   tokenizeString_(inputStr) {
     inputStr = inputStr.replace(/[\.]+/g, '');
-    return inputStr.split(/[/`~(){}_|+\-;:\'",\[\]\\\/ ]+/g);
+    return inputStr.split(/[`~(){}_|+\-;:\'",\[\]\\\/ ]+/g);
   }
 
   /**
