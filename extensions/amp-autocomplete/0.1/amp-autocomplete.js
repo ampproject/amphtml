@@ -457,22 +457,6 @@ export class AmpAutocomplete extends AMP.BaseElement {
             }
             child.classList.add('i-amphtml-autocomplete-item');
             child.setAttribute('role', 'listitem');
-            const valueToReplace = child.getAttribute('data-value');
-            if (
-              input &&
-              valueToReplace &&
-              input.length <= valueToReplace.length
-            ) {
-              const regex = new RegExp(input, 'gi');
-              const displayValue = valueToReplace.replace(
-                regex,
-                '<span class="autocomplete-partial">$&</span>'
-              );
-              child./*OK*/ innerHTML = child./*OK*/ innerHTML.replace(
-                valueToReplace,
-                displayValue
-              );
-            }
             container.appendChild(child);
           });
         });
