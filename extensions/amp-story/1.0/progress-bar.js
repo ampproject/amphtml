@@ -21,7 +21,6 @@ import {hasOwn, map} from '../../../src/utils/object';
 import {scale, setImportantStyles} from '../../../src/style';
 import {scopedQuerySelector} from '../../../src/dom';
 
-
 /**
  * Transition used to show the progress of a media. Has to be linear so the
  * animation is smooth and constant.
@@ -34,7 +33,6 @@ const TRANSITION_LINEAR = `transform ${POLL_INTERVAL_MS}ms linear`;
  * @const {string}
  */
 const TRANSITION_EASE = 'transform 200ms ease';
-
 
 /**
  * Progress bar for <amp-story>.
@@ -91,7 +89,7 @@ export class ProgressBar {
     this.isBuilt_ = true;
     this.segmentCount_ = segmentCount;
 
-    segmentIds.forEach((id, i) => this.segmentIdMap_[id] = i);
+    segmentIds.forEach((id, i) => (this.segmentIdMap_[id] = i));
 
     this.root_ = this.win_.document.createElement('ol');
     this.root_.classList.add('i-amphtml-story-progress-bar');
@@ -120,8 +118,10 @@ export class ProgressBar {
    * @private
    */
   assertVaildSegmentId_(segmentId) {
-    devAssert(hasOwn(this.segmentIdMap_, segmentId),
-        'Invalid segment-id passed to progress-bar');
+    devAssert(
+      hasOwn(this.segmentIdMap_, segmentId),
+      'Invalid segment-id passed to progress-bar'
+    );
   }
 
   /**
@@ -140,10 +140,11 @@ export class ProgressBar {
     // bar segments.
     if (this.activeSegmentIndex_ !== segmentIndex) {
       this.updateSegments_(
-          segmentIndex,
-          progress,
-          this.activeSegmentIndex_,
-          this.activeSegmentProgress_);
+        segmentIndex,
+        progress,
+        this.activeSegmentIndex_,
+        this.activeSegmentProgress_
+      );
     }
 
     this.activeSegmentProgress_ = progress;
@@ -163,7 +164,8 @@ export class ProgressBar {
     activeSegmentIndex,
     activeSegmentProgress,
     prevSegmentIndex,
-    prevSegmentProgress) {
+    prevSegmentProgress
+  ) {
     let shouldAnimatePreviousSegment = false;
 
     // Animating the transition from one full segment to another, which is the
@@ -194,8 +196,9 @@ export class ProgressBar {
       const progress = i < activeSegmentIndex ? 1 : 0;
 
       // Only animate the segment corresponding to the previous page, if needed.
-      const withTransition =
-          shouldAnimatePreviousSegment ? (i === prevSegmentIndex) : false;
+      const withTransition = shouldAnimatePreviousSegment
+        ? i === prevSegmentIndex
+        : false;
 
       this.updateProgressByIndex_(i, progress, withTransition);
     }
@@ -213,17 +216,20 @@ export class ProgressBar {
     // Offset the index by 1, since nth-child indices start at 1 while
     // JavaScript indices start at 0.
     const nthChildIndex = segmentIndex + 1;
-    const progressEl = scopedQuerySelector(this.getRoot(),
-        `.i-amphtml-story-page-progress-bar:nth-child(${
-          escapeCssSelectorNth(nthChildIndex)
-        }) .i-amphtml-story-page-progress-value`);
+    const progressEl = scopedQuerySelector(
+      this.getRoot(),
+      `.i-amphtml-story-page-progress-bar:nth-child(${escapeCssSelectorNth(
+        nthChildIndex
+      )}) .i-amphtml-story-page-progress-value`
+    );
     this.vsync_.mutate(() => {
       let transition = 'none';
       if (withTransition) {
         // Using an eased transition only if filling the bar to 0 or 1.
         transition =
-            (progress === 1 || progress === 0) ?
-              TRANSITION_EASE : TRANSITION_LINEAR;
+          progress === 1 || progress === 0
+            ? TRANSITION_EASE
+            : TRANSITION_LINEAR;
       }
       setImportantStyles(dev().assertElement(progressEl), {
         'transform': scale(`${progress},1`),

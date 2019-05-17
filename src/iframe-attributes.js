@@ -31,7 +31,11 @@ import {urls} from './config';
  * @return {!JsonObject}
  */
 export function getContextMetadata(
-  parentWindow, element, sentinel, attributes) {
+  parentWindow,
+  element,
+  sentinel,
+  attributes
+) {
   const startTime = Date.now();
   const width = element.getAttribute('width');
   const height = element.getAttribute('height');
@@ -67,8 +71,9 @@ export function getContextMetadata(
   // name to the extern list.
   attributes['_context'] = dict({
     'ampcontextVersion': internalRuntimeVersion(),
-    'ampcontextFilepath':
-        `${urls.thirdParty}/${internalRuntimeVersion()}/ampcontext-v0.js`,
+    'ampcontextFilepath': `${
+      urls.thirdParty
+    }/${internalRuntimeVersion()}/ampcontext-v0.js`,
     'sourceUrl': docInfo.sourceUrl,
     'referrer': referrer,
     'canonicalUrl': docInfo.canonicalUrl,
@@ -81,12 +86,14 @@ export function getContextMetadata(
     'mode': getModeObject(),
     'canary': isCanary(parentWindow),
     'hidden': !viewer.isVisible(),
-    'initialLayoutRect': layoutRect ? {
-      'left': layoutRect.left,
-      'top': layoutRect.top,
-      'width': layoutRect.width,
-      'height': layoutRect.height,
-    } : null,
+    'initialLayoutRect': layoutRect
+      ? {
+          'left': layoutRect.left,
+          'top': layoutRect.top,
+          'width': layoutRect.width,
+          'height': layoutRect.height,
+        }
+      : null,
     'initialIntersection': element.getIntersectionChangeEntry(),
     'domFingerprint': DomFingerprint.generate(element),
     'experimentToggles': experimentToggles(parentWindow),

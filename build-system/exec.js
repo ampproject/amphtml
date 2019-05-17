@@ -21,8 +21,8 @@
 
 const childProcess = require('child_process');
 
-const shellCmd = (process.platform == 'win32') ? 'cmd' : '/bin/sh';
-const shellFlag = (process.platform == 'win32') ? '/C' : '-c';
+const shellCmd = process.platform == 'win32' ? 'cmd' : '/bin/sh';
+const shellFlag = process.platform == 'win32' ? '/C' : '-c';
 
 /**
  * Spawns the given command in a child process with the given options.
@@ -77,14 +77,12 @@ exports.execOrDie = function(cmd, options) {
  * @return {!Object}
  */
 function getOutput(cmd) {
-  const p = spawnProcess(
-      cmd,
-      {
-        'cwd': process.cwd(),
-        'env': process.env,
-        'stdio': 'pipe',
-        'encoding': 'utf-8',
-      });
+  const p = spawnProcess(cmd, {
+    'cwd': process.cwd(),
+    'env': process.env,
+    'stdio': 'pipe',
+    'encoding': 'utf-8',
+  });
   return p;
 }
 

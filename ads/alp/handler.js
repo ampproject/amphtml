@@ -73,8 +73,11 @@ export function handleClick(e, opt_viewerNavigate) {
 
   // Tag the original href with &amp=1 and make it a fragment param with
   // name click.
-  const fragment = 'click=' + encodeURIComponent(
-      addParamToUrl(link.a.href, 'amp', '1', /* opt_addToFront */ true));
+  const fragment =
+    'click=' +
+    encodeURIComponent(
+      addParamToUrl(link.a.href, 'amp', '1', /* opt_addToFront */ true)
+    );
   let destination = link.eventualUrl;
   if (link.eventualUrl.indexOf('#') == -1) {
     destination += '#' + fragment;
@@ -85,8 +88,9 @@ export function handleClick(e, opt_viewerNavigate) {
   const ancestors = win.location.ancestorOrigins;
   if (ancestors && ancestors[ancestors.length - 1] == 'http://localhost:8000') {
     destination = destination.replace(
-        `${parseUrlDeprecated(link.eventualUrl).host}/c/`,
-        'http://localhost:8000/max/');
+      `${parseUrlDeprecated(link.eventualUrl).host}/c/`,
+      'http://localhost:8000/max/'
+    );
   }
   e.preventDefault();
   if (opt_viewerNavigate) {
@@ -134,8 +138,10 @@ function getEventualUrl(a) {
   if (!eventualUrl) {
     return;
   }
-  if (!isProxyOrigin(eventualUrl) ||
-      !startsWith(parseUrlDeprecated(eventualUrl).pathname, '/c/')) {
+  if (
+    !isProxyOrigin(eventualUrl) ||
+    !startsWith(parseUrlDeprecated(eventualUrl).pathname, '/c/')
+  ) {
     return;
   }
   return eventualUrl;
@@ -152,9 +158,15 @@ function navigateTo(win, a, url) {
   const target = (a.target || '_top').toLowerCase();
   const a2aAncestor = getA2AAncestor(win);
   if (a2aAncestor) {
-    a2aAncestor.win./*OK*/postMessage('a2a;' + JSON.stringify(dict({
-      'url': url,
-    })), a2aAncestor.origin);
+    a2aAncestor.win./*OK*/ postMessage(
+      'a2a;' +
+        JSON.stringify(
+          dict({
+            'url': url,
+          })
+        ),
+      a2aAncestor.origin
+    );
     return;
   }
   openWindowDialog(win, url, target);
@@ -171,7 +183,7 @@ export function warmupStatic(win) {
   // preconnects.
   new win.Image().src = `${urls.cdn}/preconnect.gif`;
   // Preload the primary AMP JS that is render blocking.
-  const linkRel = /*OK*/document.createElement('link');
+  const linkRel = /*OK*/ document.createElement('link');
   linkRel.rel = 'preload';
   linkRel.setAttribute('as', 'script');
   linkRel.href = `${urls.cdn}/v0.js`;
@@ -192,10 +204,10 @@ export function warmupDynamic(e) {
   // Preloading with empty as and newly specced value `fetch` meaning the same
   // thing. `document` would be the right value, but this is not yet supported
   // in browsers.
-  const linkRel0 = /*OK*/document.createElement('link');
+  const linkRel0 = /*OK*/ document.createElement('link');
   linkRel0.rel = 'preload';
   linkRel0.href = link.eventualUrl;
-  const linkRel1 = /*OK*/document.createElement('link');
+  const linkRel1 = /*OK*/ document.createElement('link');
   linkRel1.rel = 'preload';
   linkRel1.as = 'fetch';
   linkRel1.href = link.eventualUrl;

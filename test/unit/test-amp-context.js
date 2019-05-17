@@ -13,9 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {
-  AmpContext,
-} from '../../3p/ampcontext';
+import {AmpContext} from '../../3p/ampcontext';
 import {MessageType, serializeMessage} from '../../src/3p-frame-messaging';
 import {Platform} from '../../src/service/platform-impl';
 
@@ -69,12 +67,14 @@ describe('3p ampcontext.js', () => {
     windowPostMessageSpy.resetHistory();
     context.report3pError(new Error('test'));
     expect(windowPostMessageSpy).to.be.called;
-    expect(windowPostMessageSpy).to.be.calledWith(serializeMessage(
+    expect(windowPostMessageSpy).to.be.calledWith(
+      serializeMessage(
         'user-error-in-iframe',
         '1-291921',
         {'message': 'test'},
         '$internalRuntimeVersion$'
-    ));
+      )
+    );
   });
 
   it('should add metadata to window.context using name as per 3P.', () => {
@@ -157,8 +157,11 @@ describe('3p ampcontext.js', () => {
   it('should throw error if metadata missing', () => {
     win.name = generateIncorrectAttributes();
     const platform = new Platform(window);
-    expect(() => new AmpContext(win)).to.throw(platform.isSafari() ?
-      /undefined is not an object/ : /Cannot read property/);
+    expect(() => new AmpContext(win)).to.throw(
+      platform.isSafari()
+        ? /undefined is not an object/
+        : /Cannot read property/
+    );
   });
 
   it('should be able to send an intersection observer request', () => {
@@ -175,9 +178,10 @@ describe('3p ampcontext.js', () => {
     // observer
     expect(windowPostMessageSpy).to.be.calledOnce;
     expect(windowPostMessageSpy).to.be.calledWith(
-        'amp-$internalRuntimeVersion$' +
+      'amp-$internalRuntimeVersion$' +
         '{"type":"send-intersections","sentinel":"1-291921"}',
-        '*');
+      '*'
+    );
 
     // send an intersection message down
     const messagePayload = {
@@ -222,8 +226,10 @@ describe('3p ampcontext.js', () => {
     // observer
     expect(windowPostMessageSpy).to.be.calledOnce;
     expect(windowPostMessageSpy).to.be.calledWith(
-        'amp-$internalRuntimeVersion$' +
-        '{"type":"send-embed-state","sentinel":"1-291921"}', '*');
+      'amp-$internalRuntimeVersion$' +
+        '{"type":"send-embed-state","sentinel":"1-291921"}',
+      '*'
+    );
 
     // send a page visibility message down
     const messagePayload = {
@@ -273,9 +279,10 @@ describe('3p ampcontext.js', () => {
     // window.context should have sent postMessage requesting resize
     expect(windowPostMessageSpy).to.be.calledOnce;
     expect(windowPostMessageSpy).to.be.calledWith(
-        'amp-$internalRuntimeVersion$' +
+      'amp-$internalRuntimeVersion$' +
         '{"width":100,"height":200,"type":"embed-size","sentinel":"1-291921"}',
-        '*');
+      '*'
+    );
 
     // send a resize success message down
     const messagePayload = {
@@ -319,9 +326,10 @@ describe('3p ampcontext.js', () => {
     // window.context should have sent resize request postMessage
     expect(windowPostMessageSpy).to.be.calledOnce;
     expect(windowPostMessageSpy).to.be.calledWith(
-        'amp-$internalRuntimeVersion$' +
+      'amp-$internalRuntimeVersion$' +
         '{"width":100,"height":200,"type":"embed-size","sentinel":"1-291921"}',
-        '*');
+      '*'
+    );
 
     // send a resize denied message down
     const messagePayload = {
@@ -387,7 +395,6 @@ function generateAttributesA4A(opt_sentinel) {
 
   return attributes;
 }
-
 
 function generateIncorrectAttributes() {
   const name = {};

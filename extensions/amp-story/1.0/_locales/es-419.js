@@ -111,15 +111,17 @@ const strings = {
     string: 'Expande la altura de la ventana para ver esta experiencia',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT]: {
-    string: 'Expande el ancho y la altura de la ventana para ver esta ' +
-        'experiencia',
+    string:
+      'Expande el ancho y la altura de la ventana para ver esta ' +
+      'experiencia',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_WIDTH_SIZE_TEXT]: {
     string: 'Expande el ancho de la ventana para ver esta experiencia',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
-    string: 'Debes habilitar el experimento de historia en formato AMP para ' +
-        'ver este contenido.',
+    string:
+      'Debes habilitar el experimento de historia en formato AMP para ' +
+      'ver este contenido.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
     string: 'La página está optimizada para verse en orientación vertical.',

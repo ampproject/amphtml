@@ -17,7 +17,6 @@
 import {Observable} from '../../src/observable';
 
 describe('Observable', () => {
-
   let sandbox;
   let observable;
 
@@ -67,5 +66,4 @@ describe('Observable', () => {
     expect(observer1Called).to.equal(1);
     expect(observer2Called).to.equal(2);
   });
-
 });
