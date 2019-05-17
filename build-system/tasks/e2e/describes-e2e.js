@@ -274,7 +274,7 @@ function describeEnv(factory) {
         asyncErrorTimerId = setTimeout(() => {
           const lastExpectError = getLastExpectError();
           if (lastExpectError) {
-            throw lastExpectError;
+            this.test.error(lastExpectError);
           }
         }, this.timeout() - 1);
         fn.call(this, env);

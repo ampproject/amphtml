@@ -325,6 +325,8 @@ class SeleniumWebDriverController {
   }
 
   /**
+   * Gets the element property. Note that this is different
+   * than getElementAttribute()
    * @param {!ElementHandle<!WebElement>} handle
    * @param {string} property
    * @return {!Promise<string>}
