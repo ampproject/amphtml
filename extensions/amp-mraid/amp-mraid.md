@@ -28,8 +28,7 @@ limitations under the License.
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>Supports interaction with the [MRAID](https://www.iab.com/guidelines/mobile-rich-media-ad-interface-definitions-mraid/) host API within Ad webviews in
-        mobile apps.</td>
+    <td>Supports interaction with the <a href="https://www.iab.com/guidelines/mobile-rich-media-ad-interface-definitions-mraid/">MRAID</a> host API within Ad webviews in mobile apps.</td>
   </tr>
   <tr>
     <td><strong>Required Script</strong></td>
