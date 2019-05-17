@@ -153,6 +153,13 @@ export class Navigation {
      * @const
      */
     this.anchorMutators_ = new PriorityQueue();
+
+    /**
+     * @type {!PriorityQueue<function(string)>}
+     * @private
+     * @const
+     */
+    this.navigateToMutators_ = new PriorityQueue();
   }
 
   /**
@@ -238,6 +245,7 @@ export class Navigation {
     opt_requestedBy,
     {target = '_top', opener = false} = {}
   ) {
+    url = this.applyNavigateToMutators_(url);
     const urlService = Services.urlForDoc(this.serviceContext_);
     if (!urlService.isProtocolValid(url)) {
       user().error(TAG, 'Cannot navigate to invalid protocol: ' + url);
@@ -362,7 +370,7 @@ export class Navigation {
       return;
     }
 
-    this.anchorMutatorHandlers_(target, e);
+    this.applyAnchorMutators_(target, e);
     location = this.parseUrl_(target.href);
 
     // Finally, handle normal click-navigation behavior.
@@ -383,18 +391,30 @@ export class Navigation {
     // TODO(alabiaga): investigate fix for handling A2A and custom link
     // protocols.
     this.expandVarsForAnchor_(target);
-    this.anchorMutatorHandlers_(target, e);
+    this.applyAnchorMutators_(target, e);
   }
 
   /**
-   * Handle anchor transformations.
+   * Apply anchor transformations.
    * @param {!Element} target
    * @param {!Event} e
    */
-  anchorMutatorHandlers_(target, e) {
+  applyAnchorMutators_(target, e) {
     this.anchorMutators_.forEach(anchorMutator => {
       anchorMutator(target, e);
     });
+  }
+
+  /**
+   * Apply URL transformations for AMP.navigateTo.
+   * @param {string} url
+   * @return {string}
+   */
+  applyNavigateToMutators_(url) {
+    this.navigateToMutators_.forEach(mutator => {
+      url = mutator(url);
+    });
+    return url;
   }
 
   /**
@@ -577,6 +597,14 @@ export class Navigation {
    */
   registerAnchorMutator(callback, priority) {
     this.anchorMutators_.enqueue(callback, priority);
+  }
+
+  /**
+   * @param {function(string)} callback
+   * @param {number} priority
+   */
+  registerNavigateToMutator(callback, priority) {
+    this.navigateToMutators_.enqueue(callback, priority);
   }
 
   /**
