@@ -34,6 +34,7 @@ const {
   processGithubIssues,
 } = require('./build-system/tasks/process-github-issues');
 const {ava} = require('./build-system/tasks/ava');
+const {babelPluginTests} = require('./build-system/tasks/babel-plugin-tests');
 const {build, defaultTask, watch} = require('./build-system/tasks/build');
 const {bundleSize} = require('./build-system/tasks/bundle-size');
 const {cachesJson, jsonSyntax} = require('./build-system/tasks/json-check');
@@ -66,6 +67,7 @@ const {visualDiff} = require('./build-system/tasks/visual-diff');
 
 // Keep this list alphabetized.
 gulp.task('ava', ava);
+gulp.task('babel-plugin-tests', babelPluginTests);
 gulp.task('build', build);
 gulp.task('build-experiments', buildExperiments);
 gulp.task('build-login-done', buildLoginDone);
