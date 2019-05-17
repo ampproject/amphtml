@@ -25,7 +25,7 @@ import {
   installLinkerReaderService,
   linkerReaderServiceFor,
 } from '../linker-reader';
-import {installVariableService} from '../variables';
+import {installVariableServiceForTesting} from '../variables';
 import {mockWindowInterface} from '../../../../testing/test-helper';
 import {toggleExperiment} from '../../../../src/experiments';
 
@@ -78,7 +78,7 @@ describes.realWin('Linker Manager', {amp: true}, env => {
       origin: 'https://amp-source-com.cdn.ampproject.org',
     });
     windowInterface.getHostname.returns('amp-source-com.cdn.ampproject.org');
-    installVariableService(win);
+    installVariableServiceForTesting(env.ampdoc);
     installLinkerReaderService(win);
   });
 

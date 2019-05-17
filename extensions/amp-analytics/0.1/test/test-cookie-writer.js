@@ -19,7 +19,7 @@ import * as lolex from 'lolex';
 import {CookieWriter} from '../cookie-writer';
 import {dict} from '../../../../src/utils/object';
 import {installLinkerReaderService} from '../linker-reader';
-import {installVariableService} from '../variables';
+import {installVariableServiceForTesting} from '../variables';
 import {stubService} from '../../../../testing/test-helper';
 
 const TAG = '[amp-analytics/cookie-writer]';
@@ -47,7 +47,7 @@ describes.realWin(
       });
       element = doc.createElement('div');
       doc.body.appendChild(element);
-      installVariableService(win);
+      installVariableServiceForTesting(doc);
       installLinkerReaderService(win);
     });
 
@@ -106,7 +106,7 @@ describes.realWin(
           location: 'https://www-example-com.cdn.ampproject.org',
         };
         installLinkerReaderService(mockWin);
-        installVariableService(mockWin);
+        installVariableServiceForTesting(doc);
         const cookieWriter = new CookieWriter(mockWin, element, config);
         expandAndWriteSpy = sandbox.spy(cookieWriter, 'expandAndWrite_');
         return cookieWriter.write().then(() => {
@@ -256,13 +256,15 @@ describes.realWin(
 describes.fakeWin('amp-analytics.cookie-writer value', {amp: true}, env => {
   let win;
   let clock;
+  let doc;
   beforeEach(() => {
     win = env.win;
+    doc = env.ampdoc;
     clock = lolex.install({
       target: window,
       now: new Date('2018-01-01T08:00:00Z'),
     });
-    installVariableService(win);
+    installVariableServiceForTesting(doc);
     installLinkerReaderService(win);
   });
 
