@@ -39,8 +39,9 @@ const commitLogMaxCount = 100;
  */
 exports.gitBranchCreationPoint = function() {
   if (isTravisBuild()) {
+    const traviPrSha = travisPullRequestSha();
     const boundaryCommits = getStdout(
-      'git rev-list --boundary HEAD...master | grep "^-"'
+      `git rev-list --boundary ${traviPrSha}...master | grep "^-"`
     ).trim();
     const firstBoundaryCommit = boundaryCommits.split('\n')[0];
     return firstBoundaryCommit.slice(1);
