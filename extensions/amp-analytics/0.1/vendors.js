@@ -270,7 +270,8 @@ ANALYTICS_CONFIG['oewa']['triggers']['pageview']['iframe' +
 
 mergeIframeTransportConfig(
   ANALYTICS_CONFIG,
-  isCanary(self) ? IFRAME_TRANSPORTS_CANARY : IFRAME_TRANSPORTS);
+  isCanary(self) ? IFRAME_TRANSPORTS_CANARY : IFRAME_TRANSPORTS
+);
 
 /**
  * Merges iframe transport config.
