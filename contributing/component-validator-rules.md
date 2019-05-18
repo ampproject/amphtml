@@ -457,9 +457,13 @@ Optionally, you may add more than one valid variant and/or invalid examples.
 
 ## Test Output files
 
-For each test file, also add a matching output file which will display the
-validator output for the test case. If you only added valid examples, this file
-should contain a single line:
+After creating your validator html file, You need to create the corresponding `.out` file to act as your test results which is used to verify if the validator is still validating correctly for your extension. Todo this, navigate to the root of the project, `amphtml/` and run `gulp validator --update_tests`. This shoudl generate a matching `.out` file, and for this example, it would be:
+
+<pre>
+amphtml/extensions/<b>amp-cat</b>/0.1/test/validator-<b>amp-cat.out</b>
+</pre>
+
+After generating the `.out` file, you should check it's contents that it gives the correct validation results/errors. If you only added valid examples, this file should contain a single line:
 
 ```
 PASS
