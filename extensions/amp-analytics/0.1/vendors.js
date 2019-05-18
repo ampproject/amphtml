@@ -269,8 +269,8 @@ ANALYTICS_CONFIG['oewa']['triggers']['pageview']['iframe' +
 /* TEMPORARY EXCEPTION */ 'Ping'] = true;
 
 mergeIframeTransportConfig(
-    ANALYTICS_CONFIG,
-    isCanary(self) ? IFRAME_TRANSPORTS_CANARY : IFRAME_TRANSPORTS);
+  ANALYTICS_CONFIG,
+  isCanary(self) ? IFRAME_TRANSPORTS_CANARY : IFRAME_TRANSPORTS);
 
 /**
  * Merges iframe transport config.
