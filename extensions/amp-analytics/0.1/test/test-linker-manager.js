@@ -190,7 +190,7 @@ describes.realWin('Linker Manager', {amp: true}, env => {
     windowInterface.getUserLanguage.returns('en-US');
     sandbox.useFakeTimers(1533329483292);
     sandbox.stub(Date.prototype, 'getTimezoneOffset').returns(420);
-    doc.title = 'TEST TITLE';
+    doc.title = 'TEST PAGE';
     const config = {
       linkers: {
         enabled: true,
@@ -219,7 +219,7 @@ describes.realWin('Linker Manager', {amp: true}, env => {
       const finalUrl =
         'https://www.source.com/dest' +
         '?a=1' +
-        '&testLinker1=1*1pgvkob*_key*VEVTVCUyMFRJVExF*gclid*MjM0' +
+        '&testLinker1=1*15chdxd*_key*VEVTVCBQQUdF*gclid*MjM0' +
         '&testLinker2=1*1u4ugj3*foo*YmFy';
       expect(clickAnchor(origUrl)).to.equal(finalUrl);
       expect(navigateTo(origUrl)).to.equal(finalUrl);

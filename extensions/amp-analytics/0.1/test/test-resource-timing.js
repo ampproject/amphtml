@@ -89,6 +89,7 @@ export function newPerformanceResourceTiming(
 describes.realWin('resourceTiming', {amp: true}, env => {
   let win;
   let ampdoc;
+  let element;
 
   /**
    * @param {!Array<!PerformanceResourceTiming} fakeEntries
@@ -102,35 +103,45 @@ describes.realWin('resourceTiming', {amp: true}, env => {
     expectedResult
   ) {
     sandbox.stub(win.performance, 'getEntriesByType').returns(fakeEntries);
-    return getResourceTiming(ampdoc, resourceTimingSpec, Date.now()).then(
-      result => {
-        expect(result).to.equal(expectedResult);
-      }
-    );
+    return getResourceTiming(
+      ampdoc,
+      element,
+      resourceTimingSpec,
+      Date.now()
+    ).then(result => {
+      expect(result).to.equal(expectedResult);
+    });
   };
 
   beforeEach(() => {
     win = env.win;
     ampdoc = env.ampdoc;
+    element = env.win.document.documentElement;
     installVariableServiceForTesting(ampdoc);
     installLinkerReaderService(win);
   });
 
   it('should return empty if the performance API is not supported', () => {
-    return getResourceTiming(ampdoc, newResourceTimingSpec(), Date.now()).then(
-      result => {
-        expect(result).to.equal('');
-      }
-    );
+    return getResourceTiming(
+      ampdoc,
+      element,
+      newResourceTimingSpec(),
+      Date.now()
+    ).then(result => {
+      expect(result).to.equal('');
+    });
   });
 
   it('should return empty when resource timing is not supported', () => {
     // Performance API (ampdoc.performance) doesn't support resource timing.
-    return getResourceTiming(ampdoc, newResourceTimingSpec(), Date.now()).then(
-      result => {
-        expect(result).to.equal('');
-      }
-    );
+    return getResourceTiming(
+      ampdoc,
+      element,
+      newResourceTimingSpec(),
+      Date.now()
+    ).then(result => {
+      expect(result).to.equal('');
+    });
   });
 
   it('should return empty when start time has passed 1s', () => {
@@ -144,9 +155,11 @@ describes.realWin('resourceTiming', {amp: true}, env => {
     );
     const spec = newResourceTimingSpec();
     sandbox.stub(win.performance, 'getEntriesByType').returns([entry]);
-    return getResourceTiming(win, spec, Date.now() - 60 * 1000).then(result => {
-      expect(result).to.equal('');
-    });
+    return getResourceTiming(win, element, spec, Date.now() - 60 * 1000).then(
+      result => {
+        expect(result).to.equal('');
+      }
+    );
   });
 
   it('should return empty if resourceTimingSpec is empty', () => {
@@ -601,13 +614,13 @@ describes.realWin('resourceTiming', {amp: true}, env => {
     const spec = newResourceTimingSpec();
     spec['encoding']['entry'] = '${initiatorType}.${startTime}.${duration}';
 
-    return getResourceTiming(ampdoc, spec, Date.now())
+    return getResourceTiming(ampdoc, element, spec, Date.now())
       .then(result => {
         expect(result).to.equal('link.100.400');
         expect(spec['responseAfter']).to.equal(600);
 
         // Check resource timings a second time.
-        return getResourceTiming(ampdoc, spec, Date.now());
+        return getResourceTiming(ampdoc, element, spec, Date.now());
       })
       .then(result => {
         expect(result).to.equal('script.200.500');

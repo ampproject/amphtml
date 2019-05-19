@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {SANDBOX_AVAILABLE_VARS} from './sandbox-vars-whitelist';
 import {Services} from '../../../src/services';
 import {base64UrlEncodeFromString} from '../../../src/utils/base64';
 import {cookieReader} from './cookie-reader';
@@ -27,7 +28,6 @@ import {
 } from '../../../src/service';
 import {isArray, isFiniteNumber} from '../../../src/types';
 import {linkerReaderServiceFor} from './linker-reader';
-import {tryResolve} from '../../../src/utils/promise';
 
 /** @const {string} */
 const TAG = 'amp-analytics/variables';
@@ -189,6 +189,11 @@ export class VariableService {
     /** @const @private {!./linker-reader.LinkerReader} */
     this.linkerReader_ = linkerReaderServiceFor(this.ampdoc_.win);
 
+    /** @const @private {!../../../src/service/url-replacements-impl.UrlReplacements} */
+    this.urlReplacementService_ = Services.urlReplacementsForDoc(
+      this.ampdoc_.getHeadNode()
+    );
+
     this.register_('$DEFAULT', defaultMacro);
     this.register_('$SUBSTR', substrMacro);
     this.register_('$TRIM', value => value.trim());
@@ -237,22 +242,13 @@ export class VariableService {
   }
 
   /**
-   * @param {string} template The template to expand
-   * @param {!ExpansionOptions} options configuration to use for expansion
-   * @return {!Promise<string>} The expanded string
+   * @param {string} template The template to expand.
+   * @param {!ExpansionOptions} options configuration to use for expansion.
+   * @param {!Element} element amp-analytics element.
+   * @return {!Promise<string>} The expanded string.
    */
-  expandTemplate(template, options) {
-    return tryResolve(this.expandTemplateSync.bind(this, template, options));
-  }
-
-  /**
-   * @param {string} template The template to expand
-   * @param {!ExpansionOptions} options configuration to use for expansion
-   * @return {string} The expanded string
-   * @visibleForTesting
-   */
-  expandTemplateSync(template, options) {
-    return template.replace(/\${([^}]*)}/g, (match, key) => {
+  expandTemplate(template, options, element) {
+    return this.asyncStringReplace_(template, /\${([^}]*)}/g, (match, key) => {
       if (options.iterations < 0) {
         user().error(
           TAG,
@@ -277,24 +273,67 @@ export class VariableService {
       let value = options.getVar(name);
 
       if (typeof value == 'string') {
-        value = this.expandTemplateSync(
+        value = this.expandTemplate(
           value,
           new ExpansionOptions(
             options.vars,
             options.iterations - 1,
             true /* noEncode */
-          )
+          ),
+          element
         );
       }
 
-      if (!options.noEncode) {
-        value = encodeVars(/** @type {string|?Array<string>} */ (value));
-      }
-      if (value) {
-        value += argList;
-      }
-      return value;
+      const bindings = this.getMacros();
+      const urlReplacements = this.urlReplacementService_;
+      const whitelist = element.hasAttribute('sandbox')
+        ? SANDBOX_AVAILABLE_VARS
+        : undefined;
+
+      return Promise.resolve(value)
+        .then(value => {
+          if (isArray(value)) {
+            return Promise.all(
+              value.map(item =>
+                urlReplacements.expandStringAsync(item, bindings, whitelist)
+              )
+            );
+          }
+          return urlReplacements.expandStringAsync(
+            value + argList,
+            bindings,
+            whitelist
+          );
+        })
+        .then(value => {
+          if (!options.noEncode) {
+            value = encodeVars(/** @type {string|?Array<string>} */ (value));
+          }
+          return value;
+        });
     });
+  }
+
+  /**
+   * Wrapper around String.replace that handles asynchronous resolution.
+   * @param {string} str
+   * @param {RegExp} regex
+   * @param {Function} replacer
+   */
+  asyncStringReplace_(str, regex, replacer) {
+    const stringBuilder = [];
+    let lastIndex = 0;
+
+    str.replace(regex, (match, key, matchIndex) => {
+      stringBuilder.push(str.slice(lastIndex, matchIndex));
+      // Store the promise in it's eventual string position.
+      const replacementPromise = replacer(match, key);
+      stringBuilder.push(replacementPromise);
+      lastIndex = matchIndex + match.length;
+    });
+
+    stringBuilder.push(str.slice(lastIndex));
+    return Promise.all(stringBuilder).then(resolved => resolved.join(''));
   }
 
   /**

@@ -28,6 +28,8 @@ import {
   linkerReaderServiceFor,
 } from '../linker-reader';
 
+const fakeElement = document.documentElement;
+
 describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
   let variables;
 
@@ -59,11 +61,12 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
     };
 
     function check(template, expected, vars) {
-      const actual = variables.expandTemplateSync(
+      const actual = variables.expandTemplate(
         template,
-        new ExpansionOptions(vars)
+        new ExpansionOptions(vars),
+        fakeElement
       );
-      expect(actual).to.equal(expected);
+      expect(actual).to.eventually.equal(expected);
     }
 
     it('expands nested vars (encode once)', () => {
@@ -71,11 +74,12 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
     });
 
     it('expands nested vars (no encode)', () => {
-      const actual = variables.expandTemplateSync(
+      const actual = variables.expandTemplate(
         '${a}',
-        new ExpansionOptions(vars, undefined, true)
+        new ExpansionOptions(vars, undefined, true),
+        fakeElement
       );
-      expect(actual).to.equal('https://www.google.com/a?b=1&c=2');
+      expect(actual).to.eventually.equal('https://www.google.com/a?b=1&c=2');
     });
 
     it('expands complicated string', () => {
@@ -132,11 +136,12 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
         'freeze': 'error',
       });
       vars.freezeVar('freeze');
-      const actual = variables.expandTemplateSync(
+      const actual = variables.expandTemplate(
         '${fooParam(foo,bar)}${nonfreeze}${freeze}',
-        vars
+        vars,
+        fakeElement
       );
-      expect(actual).to.equal('QUERY_PARAM(foo,bar)${freeze}');
+      expect(actual).to.eventually.equal('QUERY_PARAM(foo,bar)${freeze}');
     });
 
     it('expands array vars', () => {
@@ -178,11 +183,12 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
         expectAsyncConsoleError(
           /Maximum depth reached while expanding variables/
         );
-        const actual = variables.expandTemplateSync(
+        const actual = variables.expandTemplate(
           '${1}',
-          new ExpansionOptions(recursiveVars, 5)
+          new ExpansionOptions(recursiveVars, 5),
+          fakeElement
         );
-        expect(actual).to.equal('123412%24%7B3%7D');
+        expect(actual).to.eventually.equal('123412%24%7B3%7D');
       });
     });
   });

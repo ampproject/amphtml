@@ -794,20 +794,6 @@ describes.realWin(
         ':not(p)',
         'p:nth-child(2)',
       ].map(selectorExpansionTest);
-
-      it('does not expands selector with platform variable', () => {
-        const tracker = ins.root_.getTracker('click', ClickEventTracker);
-        const addStub = sandbox.stub(tracker, 'add');
-        const analytics = getAnalyticsTag({
-          requests: {foo: 'https://example.com/bar'},
-          triggers: [{on: 'click', selector: '${title}', request: 'foo'}],
-        });
-        return waitForNoSendRequest(analytics).then(() => {
-          expect(addStub).to.be.calledOnce;
-          const config = addStub.args[0][2];
-          expect(config['selector']).to.equal('TITLE');
-        });
-      });
     });
 
     describe('optout by function', () => {
