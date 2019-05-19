@@ -66,11 +66,15 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
         new ExpansionOptions(vars),
         fakeElement
       );
-      expect(actual).to.eventually.equal(expected);
+      return expect(actual).to.eventually.equal(expected);
     }
 
     it('expands nested vars (encode once)', () => {
-      check('${a}', 'https%3A%2F%2Fwww.google.com%2Fa%3Fb%3D1%26c%3D2', vars);
+      return check(
+        '${a}',
+        'https%3A%2F%2Fwww.google.com%2Fa%3Fb%3D1%26c%3D2',
+        vars
+      );
     });
 
     it('expands nested vars (no encode)', () => {
@@ -83,7 +87,7 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
     });
 
     it('expands complicated string', () => {
-      check('${foo}', 'HELLO%2FWORLD%2BWORLD%2BHELLO%2BHELLO', {
+      return check('${foo}', 'HELLO%2FWORLD%2BWORLD%2BHELLO%2BHELLO', {
         'foo': '${a}+${b}+${c}+${hello}',
         'a': '${hello}/${world}',
         'b': '${world}',
@@ -94,41 +98,49 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
     });
 
     it('expands zeros', () => {
-      check('${zero}', '0', {'zero': 0});
+      return check('${zero}', '0', {'zero': 0});
     });
 
     it('drops unknown vars', () => {
-      check('a=${known}&b=${unknown}', 'a=KNOWN&b=', {'known': 'KNOWN'});
+      return check('a=${known}&b=${unknown}', 'a=KNOWN&b=', {'known': 'KNOWN'});
     });
 
     it('does not expand macros', () => {
-      check('MACRO(a,b)', 'MACRO(a,b)', {});
+      return check('MACRO(a,b)', 'MACRO(a,b)', {});
     });
 
-    it('supports macro args', () => {
+    it('supports macro args', () =>
       check('${foo}', 'AAA(BBB(1))', {
         'foo': 'AAA(BBB(1))',
-      });
-
-      // TODO: fix this, should be 'AAA(BBB(1,2))'
-      check('${foo}', 'AAA(BBB(1%2C2))', {
-        'foo': 'AAA(BBB(1,2))',
-      });
-
-      check('${foo}&${bar(3,4)}', 'FOO(1,2)&BAR(3,4)', {
-        'foo': 'FOO(1,2)',
-        'bar': 'BAR',
-      });
-
-      // TODO: fix this, should be 'AAA(1,2)%26BBB(3,4)%26CCC(5,6)%26DDD(7,8)'
-      check('${all}', 'AAA(1%2C2)%26BBB(3%2C4)%26CCC(5%2C6)%26DDD(7,8)', {
-        'a': 'AAA',
-        'b': 'BBB',
-        'c': 'CCC(5,6)',
-        'd': 'DDD(7,8)',
-        'all': '${a(1,2)}&${b(3,4)}&${c}&${d}',
-      });
-    });
+      })
+        .then(() =>
+          // TODO: fix this, should be 'AAA(BBB(1,2))'
+          check('${foo}', 'AAA(BBB(1%2C2))', {
+            'foo': 'AAA(BBB(1,2))',
+          })
+        )
+        .then(() =>
+          check('${foo}&${bar(3,4)}', 'FOO(1,2)&BAR(3,4)', {
+            'foo': 'FOO(1,2)',
+            'bar': 'BAR',
+          })
+        )
+        .then(() =>
+          // TODO: fix this, should be 'AAA(1,2)%26BBB(3,4)%26CCC(5,6)%26DDD(7,8)'
+          check('${all}', 'AAA(1%2C2)%26BBB(3%2C4)%26CCC(5%2C6)%26DDD(7,8)', {
+            'a': 'AAA',
+            'b': 'BBB',
+            'c': 'CCC(5,6)',
+            'd': 'DDD(7,8)',
+            'all': '${a(1,2)}&${b(3,4)}&${c}&${d}',
+          })
+        )
+        .then(() =>
+          check('${nested}', 'default', {
+            'nested': '${deeper}',
+            'deeper': '$IF(true, QUERY_PARAM(foo, default), never)',
+          })
+        ));
 
     it('respect freeze variables', () => {
       const vars = new ExpansionOptions({
@@ -141,11 +153,11 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
         vars,
         fakeElement
       );
-      expect(actual).to.eventually.equal('QUERY_PARAM(foo,bar)${freeze}');
+      return expect(actual).to.eventually.equal('bar${freeze}');
     });
 
     it('expands array vars', () => {
-      check(
+      return check(
         '${array}',
         'xy%26x,MACRO(abc,def),MACRO(abc%2Cdef)%26123,%24%7Bfoo%7D',
         {
@@ -161,7 +173,7 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
     });
 
     it('handles empty var name', () => {
-      check('${}', '', {});
+      return check('${}', '', {});
     });
 
     describe('should handle recursive vars', () => {
@@ -176,7 +188,7 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
         expectAsyncConsoleError(
           /Maximum depth reached while expanding variables/
         );
-        check('${1}', '123%24%7B4%7D', recursiveVars);
+        return check('${1}', '123%24%7B4%7D', recursiveVars);
       });
 
       it('customize recursions to 5', () => {
@@ -188,7 +200,7 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
           new ExpansionOptions(recursiveVars, 5),
           fakeElement
         );
-        expect(actual).to.eventually.equal('123412%24%7B3%7D');
+        return expect(actual).to.eventually.equal('123412%24%7B3%7D');
       });
     });
   });
