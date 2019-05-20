@@ -20,7 +20,7 @@ import {BaseSlides} from './base-slides';
 import {Services} from '../../../src/services';
 import {bezierCurve} from '../../../src/curve';
 import {closestAncestorElementBySelector} from '../../../src/dom';
-import {createCustomEvent} from '../../../src/event-helper';
+import {createCustomEvent, listen} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getStyle, setStyle} from '../../../src/style';
@@ -209,14 +209,18 @@ export class AmpSlideScroll extends BaseSlides {
       this.scrollHandler_.bind(this)
     );
 
-    this.slidesContainer_.addEventListener(
+    listen(
+      this.slidesContainer_,
       'touchmove',
-      this.touchMoveHandler_.bind(this)
+      this.touchMoveHandler_.bind(this),
+      {passive: true}
     );
 
-    this.slidesContainer_.addEventListener(
+    listen(
+      this.slidesContainer_,
       'touchend',
-      this.touchEndHandler_.bind(this)
+      this.touchEndHandler_.bind(this),
+      {passive: true}
     );
 
     this.registerAction(
@@ -836,8 +840,8 @@ export class AmpSlideScroll extends BaseSlides {
   cancelTouchEvents_() {
     // TODO(aghassemi, #4754): Ideally we only stop propagation of horizontal
     // touchmove events.
-    this.element.addEventListener('touchmove', event => {
-      event.stopPropagation();
+    listen(this.element, 'touchmove', event => event.stopPropagation(), {
+      passive: true,
     });
   }
 
