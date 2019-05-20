@@ -29,7 +29,7 @@ import {
 import {AutoAdvance} from './auto-advance';
 import {CarouselAccessibility} from './carousel-accessibility';
 import {backwardWrappingDistance, forwardWrappingDistance} from './array-util';
-import {createCustomEvent, listenOnce} from '../../../src/event-helper';
+import {createCustomEvent, listen, listenOnce} from '../../../src/event-helper';
 import {debounce} from '../../../src/utils/rate-limit';
 import {dict} from '../../../src/utils/object';
 import {
@@ -317,16 +317,16 @@ export class Carousel {
       () => this.handleScroll_(),
       true
     );
-    this.scrollContainer_.addEventListener(
+    listen(
+      this.scrollContainer_,
       'touchstart',
       () => this.handleTouchStart_(),
-      true
+      {capture: true, passive: true}
     );
-    this.scrollContainer_.addEventListener(
-      'wheel',
-      () => this.handleWheel_(),
-      true
-    );
+    listen(this.scrollContainer_, 'wheel', () => this.handleWheel_(), {
+      capture: true,
+      passive: true,
+    });
   }
 
   /**
@@ -679,6 +679,7 @@ export class Carousel {
       },
       {
         capture: true,
+        passive: true,
       }
     );
   }
