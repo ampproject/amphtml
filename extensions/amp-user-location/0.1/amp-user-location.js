@@ -108,7 +108,7 @@ export class AmpUserLocation extends AMP.BaseElement {
 
     return {
       fallback: json['fallback'],
-      maxAge: json['maxAge'],
+      maximumAge: json['maximumAge'],
       precision: json['precision'],
       timeout: json['timeout'],
     };

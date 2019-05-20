@@ -184,8 +184,11 @@
 <span hidden id="errored6">Errored!</span>
 <span hidden id="requesting6">Please wait</span>
 <amp-list
-    src="https://localhost:8000/user-location/general-deals"
-    [src]="'https://localhost:8000/user-location/localized-deals/TODO?lat=' + listLat + '&lon=' + listLon"
+    src="//localhost:8000/user-location/general-deals"
+    [src]="listLat ?
+        ('//localhost:8000/user-location/localized-deals?lat=' + listLat + '&lon=' + listLon) :
+        '//localhost:8000/user-location/general-deals'"
+    items="."
     layout="responsive" width="16" height="9" single-item
 >
   <template type="amp-mustache">

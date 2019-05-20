@@ -160,7 +160,11 @@ describes.sandboxed('user-location-service', {}, () => {
       );
 
       const service = new UserLocationService(new FakeAmpdoc());
-      return service.requestLocation({}).then(
+      let promise;
+      allowConsoleError(() => {
+        promise = service.requestLocation({});
+      });
+      return promise.then(
         () => {
           throw new Error('should not succeed');
         },
@@ -338,7 +342,7 @@ describes.sandboxed('user-location-service', {}, () => {
         });
     });
 
-    it('should return unavailable if the platform does not support', () => {
+    it('should return unsupported if the platform does not support', () => {
       platformService.isChrome.returns(true);
       viewerService.isEmbedded.returns(true);
       win.navigator.geolocation.getCurrentPosition.callsArgWith(

@@ -18,7 +18,7 @@ import {Deferred} from '../../../src/utils/promise';
 import {Observable} from '../../../src/observable';
 import {PositionError} from './position-error';
 import {Services} from '../../../src/services';
-import {devAssert, userAssert} from '../../../src/log';
+import {devAssert, user, userAssert} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {includes} from '../../../src/string';
 import {isCanary} from '../../../src/experiments';
@@ -45,12 +45,35 @@ export class UserLocation {
 /**
  * @typedef {{
  *   fallback: UserLocation,
- *   maxAge: number,
+ *   maximumAge: number,
  *   precision: string,
  *   timeout: number
  * }}
  */
 export let UserLocationConfigDef;
+
+/** @dict */
+class PositionOptionsDef {
+  /**
+   * Define the parameters of the config object for navigator.getCurrentPosition
+   * https://w3c.github.io/geolocation-api/#dom-positionoptions
+   * @param {boolean=} enableHighAccuracy
+   * @param {number=} maximumAge
+   * @param {number=} timeout
+   */
+  constructor(
+    enableHighAccuracy = undefined,
+    maximumAge = undefined,
+    timeout = undefined
+  ) {
+    /** @const */
+    this['maximumAge'] = maximumAge;
+    /** @const */
+    this['enableHighAccuracy'] = enableHighAccuracy;
+    /** @const */
+    this['timeout'] = timeout;
+  }
+}
 
 /**
  * @enum {string}
@@ -82,13 +105,6 @@ const DEFAULT_MAXIMUM_AGE = 60000;
  * At this time, the error callback will be called with code TIMEOUT.
  */
 const DEFAULT_TIMEOUT = 30000;
-
-/**
- * For now, precision should remain 'low', since 'high' precision typically
- * requires more battery-intensive hardware to be activated, and is not
- * needed for the use-cases we currently support, like "deals near me".
- */
-const DEFAULT_PRECISION = 'low';
 
 const LOCATION_SEPARATOR = ',';
 
@@ -246,8 +262,14 @@ export class UserLocationService {
    * @return {!Promise<!UserLocation>}
    */
   getLocation(poll = false) {
-    if (!this.geolocationSupported_) {
-      return Promise.resolve(new UserLocation(UserLocationSource.UNSUPPORTED));
+    const staticResult = this.maybeGetStaticResult_();
+    if (staticResult) {
+      return staticResult.catch(err => {
+        if (err == PositionError.PLATFORM_UNSUPPORTED) {
+          return new UserLocation(UserLocationSource.UNSUPPORTED);
+        }
+        return new UserLocation(UserLocationSource.UNAVAILABLE);
+      });
     }
 
     if (poll && this.firstRequestedDeferred_) {
@@ -296,89 +318,96 @@ export class UserLocationService {
    *
    * The promise from this method resolves for the requesting component, but
    * not for other amp-user-location elements or for runtime services
-   * like variable substitution.
+   * like variable substitution. The reject case behaves the same way.
    *
    * Variable substitution is notified through the `getLocation` method.
    *
-   * @param {UserLocationConfigDef} config
+   * @param {!UserLocationConfigDef} config
    * @return {!Promise<!UserLocation>}
    */
   requestLocation(config) {
-    const observable = this.requestedObservable_;
-    const locationDeferred = new Deferred();
-    const {promise} = locationDeferred;
-
-    const resolve = position => {
-      observable.fire(position);
-      locationDeferred.resolve(position);
-    };
-
-    const reject = error => {
-      let position;
-      if (error == PositionError.PLATFORM_UNSUPPORTED) {
-        position = new UserLocation(UserLocationSource.UNSUPPORTED);
-      }
-      if (
-        error == PositionError.POSITION_UNAVAILABLE ||
-        error == PositionError.PERMISSION_DENIED ||
-        error == PositionError.TIMEOUT
-      ) {
-        position = new UserLocation(UserLocationSource.UNAVAILABLE);
-      }
-      observable.fire(position);
-      locationDeferred.reject(error);
-    };
-
-    if (!this.geolocationSupported_) {
-      reject(PositionError.PLATFORM_UNSUPPORTED);
-      return promise;
+    const staticResult = this.maybeGetStaticResult_();
+    if (staticResult) {
+      return staticResult;
     }
 
-    const override = this.getOverride_();
-    if (override === 'error') {
-      reject(PositionError.POSITION_UNAVAILABLE);
-      return promise;
-    }
-
+    // We only need to initialize the permission listener
+    // if we expect that to change. If override is specified,
+    // we do not expect the permission listener to change.
     if (!this.initialized_) {
       this.initialize_();
     }
 
-    if (override) {
-      resolve(override);
-      return promise;
+    const result = getCurrentPosition(
+      this.win_,
+      /** @type {!PositionOptionsDef} */ ({
+        enableHighAccuracy: config.precision == 'high',
+        maximumAge: config.maximumAge || DEFAULT_MAXIMUM_AGE,
+        timeout: config.timeout || DEFAULT_TIMEOUT,
+      })
+    );
+
+    const observable = this.requestedObservable_;
+    result.then(
+      position => observable.fire(position),
+      () => observable.fire(new UserLocation(UserLocationSource.UNAVAILABLE))
+    );
+
+    return result;
+  }
+
+  /**
+   * If a result can be known without asking the user, for example
+   * in the debug case, return that result promise.
+   * Otherwise, return null.
+   * @return {?Promise<!UserLocation>}
+   */
+  maybeGetStaticResult_() {
+    if (!this.geolocationSupported_) {
+      return Promise.reject(PositionError.PLATFORM_UNSUPPORTED);
     }
 
-    const {navigator} = this.win_;
-    navigator.geolocation.getCurrentPosition(
+    const override = this.getOverride_();
+    if (override) {
+      return override == 'error'
+        ? Promise.reject(PositionError.POSITION_UNAVAILABLE)
+        : Promise.resolve(override);
+    }
+
+    return null;
+  }
+}
+
+/**
+ * A promise-based wrapper for navigator.geolocation.getCurrentPosition
+ * @param {Window} win
+ * @param {!PositionOptionsDef} config
+ * @return {!Promise<!UserLocation>}
+ */
+function getCurrentPosition(win, config) {
+  return new Promise((resolve, reject) => {
+    win.navigator.geolocation.getCurrentPosition(
       position => {
-        const {latitude: lat, longitude: lon} = position.coords;
-        resolve(new UserLocation(UserLocationSource.GEOLOCATION, lat, lon));
+        const {latitude, longitude} = position.coords;
+        resolve(
+          new UserLocation(UserLocationSource.GEOLOCATION, latitude, longitude)
+        );
       },
       error => {
         const {code} = error;
-        if (code == error.POSITION_UNAVAILABLE) {
-          reject(PositionError.POSITION_UNAVAILABLE);
-          return;
+        switch (code) {
+          case error.POSITION_UNAVAILABLE:
+            return reject(PositionError.POSITION_UNAVAILABLE);
+          case error.PERMISSION_DENIED:
+            return reject(PositionError.PERMISSION_DENIED);
+          case error.TIMEOUT:
+            return reject(PositionError.TIMEOUT);
+          default:
+            user().error('unknown geolocation error');
+            reject(null);
         }
-        if (code == error.PERMISSION_DENIED) {
-          reject(PositionError.PERMISSION_DENIED);
-          return;
-        }
-        if (code == error.TIMEOUT) {
-          reject(PositionError.TIMEOUT);
-          return;
-        }
-
-        reject(null);
       },
-      {
-        timeout: config.timeout || DEFAULT_TIMEOUT,
-        maximumAge: config.maximumAge || DEFAULT_MAXIMUM_AGE,
-        precision: config.precision || DEFAULT_PRECISION,
-      }
+      config
     );
-
-    return promise;
-  }
+  });
 }
