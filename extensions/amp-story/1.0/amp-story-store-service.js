@@ -204,11 +204,6 @@ const stateComparisonFunctions = {
  */
 const actions = (state, action, data) => {
   switch (action) {
-    case Action.ADD_TO_PAGE_IDS:
-      const newPageIds = [].concat(state[StateProperty.STORY_PAGE_IDS], data);
-      return /** @type {!State} */ (Object.assign({}, state, {
-        [StateProperty.STORY_PAGE_IDS]: newPageIds,
-      }));
     case Action.ADD_TO_ACTIONS_WHITELIST:
       const newActionsWhitelist = [].concat(
         state[StateProperty.ACTIONS_WHITELIST],
@@ -216,6 +211,11 @@ const actions = (state, action, data) => {
       );
       return /** @type {!State} */ (Object.assign({}, state, {
         [StateProperty.ACTIONS_WHITELIST]: newActionsWhitelist,
+      }));
+    case Action.ADD_TO_PAGE_IDS:
+      const newPageIds = [].concat(state[StateProperty.STORY_PAGE_IDS], data);
+      return /** @type {!State} */ (Object.assign({}, state, {
+        [StateProperty.STORY_PAGE_IDS]: newPageIds,
       }));
     // Triggers the amp-acess paywall.
     case Action.TOGGLE_ACCESS:
