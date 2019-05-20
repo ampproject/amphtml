@@ -429,18 +429,19 @@ function createBaseCustomElementClass(win) {
 
     /** @private */
     assertLayout_() {
-      userAssert(
-        this.getAttribute('layout'),
-        'The element did not specify a layout attribute. ' +
-          'Check https://amp.dev/documentation/guides-and-tutorials/develop/' +
-          'style_and_layout/control_layout and the respective element ' +
-          'documentation for details.'
-      );
-      userAssert(
-        this.layout_ == Layout.NODISPLAY ||
-          this.implementation_.isLayoutSupported(this.layout_),
-        `Layout not supported: ${this.layout_}`
-      );
+      if (
+        this.layout_ != Layout.NODISPLAY &&
+        !this.implementation_.isLayoutSupported(this.layout_)
+      ) {
+        userAssert(
+          this.getAttribute('layout'),
+          'The element did not specify a layout attribute. ' +
+            'Check https://amp.dev/documentation/guides-and-tutorials/' +
+            'develop/style_and_layout/control_layout and the respective ' +
+            'element documentation for details.'
+        );
+        userAssert(false, `Layout not supported: ${this.layout_}`);
+      }
     }
 
     /**
