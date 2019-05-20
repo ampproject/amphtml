@@ -38,20 +38,21 @@ const timedExecOrDie = (cmd, unusedFileName) =>
 
 function main() {
   const startTime = startTimer(FILENAME, FILENAME);
-  const buildTargets = determineBuildTargets();
 
   if (!isTravisPullRequestBuild()) {
     timedExecOrDie('gulp update-packages');
     timedExecOrDie('gulp dist --fortesting --single_pass --pseudo_names');
     timedExecOrDie(
-      'gulp test --integration ' +
-        '--nobuild --compiled --single_pass --headless'
+      'gulp test --integration --nobuild --compiled --single_pass --headless'
     );
   } else {
     printChangeSummary(FILENAME);
+    const buildTargets = new Set();
+    determineBuildTargets(buildTargets, FILENAME);
+
     if (
       buildTargets.has('RUNTIME') ||
-      buildTargets.has('BUILD_SYSTEM') ||
+      buildTargets.has('FLAG_CONFIG') ||
       buildTargets.has('INTEGRATION_TEST')
     ) {
       timedExecOrDie('gulp update-packages');
@@ -62,10 +63,10 @@ function main() {
       );
     } else {
       console.log(
-        `${FILELOGPREFIX} Skipping ` +
-          colors.cyan('Single Pass Tests ') +
-          'because this commit does not affect the runtime, build system, ' +
-          'or integration test files.'
+        `${FILELOGPREFIX} Skipping`,
+        colors.cyan('Single Pass Tests'),
+        'because this commit does not affect the runtime, flag configs,',
+        'or integration tests.'
       );
     }
   }
