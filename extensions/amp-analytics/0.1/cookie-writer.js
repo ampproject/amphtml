@@ -17,13 +17,14 @@
 import {BASE_CID_MAX_AGE_MILLIS} from '../../../src/service/cid-impl';
 import {Services} from '../../../src/services';
 import {getMode} from '../../../src/mode';
-import {getNameArgs, variableServiceForDoc} from './variables';
+import {variableServiceForDoc} from './variables';
 import {hasOwn} from '../../../src/utils/object';
 import {isInFie} from '../../../src/friendly-iframe-embed';
 import {isObject} from '../../../src/types';
 import {isProxyOrigin} from '../../../src/url';
 import {setCookie} from '../../../src/cookies';
 import {user} from '../../../src/log';
+import {variableServiceFor} from './variables';
 
 const TAG = 'amp-analytics/cookie-writer';
 
