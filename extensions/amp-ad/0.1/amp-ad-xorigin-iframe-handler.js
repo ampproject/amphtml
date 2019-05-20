@@ -231,7 +231,7 @@ export class AmpAdXOriginIframeHandler {
       ).then(info => {
         const {data} = info;
         if (data['type'] == 'render-start') {
-          this.renderStart_(info);
+          this.renderStartMsgHandler_(info);
           renderStartResolve();
         } else {
           this.noContent_();
@@ -243,7 +243,6 @@ export class AmpAdXOriginIframeHandler {
       // This will avoid keeping the Ad empty until it's fully loaded, which
       // could be a long time.
       listenForOncePromise(this.iframe, 'bootstrap-loaded', true).then(() => {
-        this.renderStart_();
         renderStartResolve();
       });
       // Likewise, no-content is observed here. However, it's impossible to
@@ -271,7 +270,7 @@ export class AmpAdXOriginIframeHandler {
       // impose no loader delay.  Network is using renderStart or
       // bootstrap-loaded to indicate ad request was sent, either way we know
       // that occurred for Fast Fetch.
-      this.renderStart_();
+      this.baseInstance_.renderStarted();
       renderStartResolve();
     } else {
       // Set iframe initially hidden which will be removed on render-start or
@@ -284,6 +283,12 @@ export class AmpAdXOriginIframeHandler {
       iframeLoadPromise,
       timer.promise(VISIBILITY_TIMEOUT),
     ]).then(() => {
+      // Common signal RENDER_START invoked at toggle visibility time
+      // Note: 'render-start' msg and common signal RENDER_START are different
+      // 'render-start' msg is a way for implemented Ad to display ad earlier
+      // RENDER_START signal is a signal to inform AMP runtime and other AMP
+      // elements that the component visibility has been toggled on.
+      this.baseInstance_.renderStarted();
       if (this.iframe) {
         setStyle(this.iframe, 'visibility', '');
       }
@@ -332,20 +337,16 @@ export class AmpAdXOriginIframeHandler {
 
   /**
    * callback functon on receiving render-start
-   * @param {{data: !JsonObject}=} opt_info
+   * @param {{data: !JsonObject}} info
    * @private
    */
-  renderStart_(opt_info) {
-    this.baseInstance_.renderStarted();
-    if (!opt_info) {
-      return;
-    }
-    const data = getData(opt_info);
+  renderStartMsgHandler_(info) {
+    const data = getData(info);
     this.handleResize_(
       data['height'],
       data['width'],
-      opt_info['source'],
-      opt_info['origin']
+      info['source'],
+      info['origin']
     );
   }
 
