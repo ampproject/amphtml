@@ -19,7 +19,6 @@
  * @fileoverview Provides functions for executing various git commands.
  */
 
-const colors = require('ansi-colors');
 const {
   isTravisBuild,
   isTravisPullRequestBuild,
@@ -28,17 +27,19 @@ const {
 } = require('./travis');
 const {getStdout} = require('./exec');
 
-const commitLogMaxCount = 100;
-
 /**
- * Returns the merge base of the current branch off of master, regardless of
- * the running environment.
+ * Returns the commit at which the current branch was forked off of master.
+ * On Travis, there is an additional merge commit, so we must pick the first of
+ * the boundary commits (prefixed with a -) returned by git rev-list.
+ * On local branches, this is merge base of the current branch off of master.
  * @return {string}
  */
-exports.gitMergeBaseMaster = function() {
+exports.gitBranchCreationPoint = function() {
   if (isTravisBuild()) {
     const traviPrSha = travisPullRequestSha();
-    return getStdout(`git merge-base master ${traviPrSha}`).trim();
+    return getStdout(
+      `git rev-list --boundary ${traviPrSha}...master | grep "^-" | head -n 1 | cut -c2-`
+    ).trim();
   }
   return gitMergeBaseLocalMaster();
 };
@@ -84,29 +85,17 @@ exports.gitDiffStatMaster = function() {
 
 /**
  * Returns a detailed log of commits included in a PR check, starting with (and
- * including) the branch point off of master. Limited to at most 100 commits to
- * keep the output sane.
+ * including) the branch point off of master. Limited to commits in the past
+ * 30 days to keep the output sane.
  *
  * @return {string}
  */
 exports.gitDiffCommitLog = function() {
-  const branchPoint = exports.gitMergeBaseMaster();
-  let commitLog = getStdout(`git -c color.ui=always log --graph \
+  const branchCreationPoint = exports.gitBranchCreationPoint();
+  const commitLog = getStdout(`git -c color.ui=always log --graph \
 --pretty=format:"%C(red)%h%C(reset) %C(bold cyan)%an%C(reset) \
 -%C(yellow)%d%C(reset) %C(reset)%s%C(reset) %C(green)(%cr)%C(reset)" \
---abbrev-commit ${branchPoint}^...HEAD \
---max-count=${commitLogMaxCount}`).trim();
-  if (commitLog.split('\n').length >= commitLogMaxCount) {
-    commitLog += `\n${colors.yellow('WARNING:')} Commit log is longer than \
-${colors.cyan(commitLogMaxCount)} commits. \
-Branch ${colors.cyan(exports.gitBranchName())} may not have been forked from \
-${colors.cyan('master')}.`;
-    commitLog += `\n${colors.yellow('WARNING:')} See \
-${colors.cyan(
-  'https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-quick.md'
-)} \
-for how to fix this.`;
-  }
+--abbrev-commit ${branchCreationPoint}^...HEAD --since "30 days ago"`).trim();
   return commitLog;
 };
 
