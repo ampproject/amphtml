@@ -60,14 +60,6 @@ const {
 } = require('../../log-module-metadata.js');
 
 /**
- * Path to messages file for this version relative to the repo root.
- * This is a default since tests can configure this table's output path, but for
- * all building purposes this should be considered the canonical messages
- * filepath for the built version.
- */
-const defaultMessagesPath = messagesPath;
-
-/**
  * Approximate length of a compressed message expansion call to determine
  * whether an instance of message indirection actually reduces binary size.
  */
@@ -163,61 +155,39 @@ function buildMessage(t, node, interpolationArgs) {
   return '%s';
 }
 
-/**
- * @param {@babel/types} t
- * @param {!Node} node
- * @return {?Object}
- */
-function getTransformableCallExpressionMeta(t, {callee}) {
-  // devAssert() or userAssert() call.
-  if (assertAliases.some(name => t.isIdentifier(callee, {name}))) {
-    return transformableMethods.assert;
-  }
-  // Looks like a method().call().
-  if (!t.isMemberExpression(callee) || !t.isCallExpression(callee.object)) {
-    return null;
-  }
-  // is either dev() or user() object.
-  const singletonCallee = callee.object.callee;
-  if (
-    !singletonFunctions.some(name => t.isIdentifier(singletonCallee, {name}))
-  ) {
-    return null;
-  }
-  // object property is transformable method.
-  const {property} = callee;
-  if (!t.isIdentifier(property) || !(property.name in transformableMethods)) {
-    return null;
-  }
-  return transformableMethods[property.name];
-}
+let messages;
+let nextMessageId;
+let relativeMessagesPath;
+
+let shouldReplaceCallArguments = true;
+
+/** @return {number} */
+const getMessageId = () => nextMessageId++;
 
 module.exports = function({types: t}) {
   return {
     /** Resolves plugin config. */
     pre() {
-      const {
-        // Configurable to isolate test output.
-        messagesPath = defaultMessagesPath,
+      // Temporary option to not replace call arguments, but still output the
+      // table to keep build code and infra independent from rollout.
+      if (this.opts.replaceCallArguments !== undefined) {
+        shouldReplaceCallArguments = this.opts.replaceCallArguments;
+      }
 
-        // Temporary option to not replace call arguments, but still output the
-        // table to keep build code and infra independent from rollout.
-        replaceCallArguments = true,
-      } = this.opts;
-
-      this.messagesPath = relativeToRoot(messagesPath);
-      this.replaceCallArguments = replaceCallArguments;
+      // Configurable to isolate test output.
+      relativeMessagesPath = relativeToRoot(
+        this.opts.messagesPath || messagesPath
+      );
     },
     visitor: {
       /** Message table I/O. */
       Program: {
         enter() {
-          this.messages = getMessages(this.messagesPath);
-          this.nextMessageId = Object.keys(this.messages).length;
-          this.getMessageId = () => this.nextMessageId++;
+          messages = getMessages(relativeMessagesPath);
+          nextMessageId = Object.keys(messages).length;
         },
         exit() {
-          writeMessages(this.messagesPath, this.messages);
+          writeMessages(relativeMessagesPath, messages);
         },
       },
       /**
@@ -225,13 +195,47 @@ module.exports = function({types: t}) {
        * @param {*} path babel.path
        */
       CallExpression({node}) {
-        const meta = getTransformableCallExpressionMeta(t, node);
-        if (!meta) {
-          return;
+        const {callee} = node;
+
+        // Transformable method metadata when available;
+        let meta;
+
+        // devAssert() or userAssert() call.
+        if (assertAliases.some(name => t.isIdentifier(callee, {name}))) {
+          meta = transformableMethods.assert;
+        } else {
+          // Looks like a method().call().
+          if (
+            !t.isMemberExpression(callee) ||
+            !t.isCallExpression(callee.object)
+          ) {
+            return;
+          }
+
+          // is either dev() or user() object.
+          const singletonCallee = callee.object.callee;
+          if (
+            !singletonFunctions.some(name =>
+              t.isIdentifier(singletonCallee, {name})
+            )
+          ) {
+            return;
+          }
+
+          // object property is transformable method.
+          const {property} = callee;
+          if (
+            !t.isIdentifier(property) ||
+            !(property.name in transformableMethods)
+          ) {
+            return;
+          }
+
+          meta = transformableMethods[property.name];
         }
 
-        const {indirectable, messageArgPos} = meta;
-        if (!indirectable) {
+        const {extractMessages, messageArgPos} = meta;
+        if (!extractMessages) {
           return;
         }
 
@@ -256,32 +260,33 @@ module.exports = function({types: t}) {
         }
 
         const shortMessageId = getOrCreateShortMessageId(
-          this.messages,
+          messages,
           message,
-          this.getMessageId
+          getMessageId
         );
 
-        if (!this.replaceCallArguments) {
+        if (!shouldReplaceCallArguments) {
           return;
         }
 
         // We care only about message arguments beyond the first (ie. the body):
         // all previous method arguments (ie. the head) should stay in place.
         // The body is nested into an array expression, after the template id.
-        const headArgs = node.arguments.slice(0, Math.max(0, messageArgPos));
         const bodyArgs = node.arguments.slice(messageArgPos + 1);
 
-        node.arguments = [
-          ...headArgs,
-          // Interpolation order breaks badly when template literals are mixed
-          // with variadic calls. This transform implicitly depends on the
-          // `no-mixed-interpolation` lint rule to prevent such usage.
+        // Truncate to keep head arguments.
+        node.arguments.length = messageArgPos;
+
+        // Interpolation order breaks badly when template literals are mixed
+        // with variadic calls. This transform implicitly depends on the
+        // `no-mixed-interpolation` lint rule to prevent such usage.
+        node.arguments.push(
           t.arrayExpression([
             t.stringLiteral(shortMessageId),
             ...bodyArgs,
             ...templateArgs,
-          ]),
-        ];
+          ])
+        );
       },
     },
   };

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {devAssert} from './log';
 import {endsWith} from './string';
 import {isProxyOrigin, parseUrlDeprecated, tryDecodeUriComponent} from './url';
 import {urls} from './config';
+import {userAssert} from './log';
 
 /**
  * Returns the value of the cookie. The cookie access is restricted and must
@@ -153,13 +153,13 @@ function checkOriginForSettingCookie(win, options, name) {
   if (options && options.allowOnProxyOrigin) {
     return;
   }
-  devAssert(
+  userAssert(
     !isProxyOrigin(win.location.href),
     `Should never attempt to set cookie on proxy origin: ${name}`
   );
   const current = parseUrlDeprecated(win.location.href).hostname.toLowerCase();
   const proxy = parseUrlDeprecated(urls.cdn).hostname.toLowerCase();
-  devAssert(
+  userAssert(
     !(current == proxy || endsWith(current, '.' + proxy)),
     'Should never attempt to set cookie on proxy origin. (in depth check): ' +
       name

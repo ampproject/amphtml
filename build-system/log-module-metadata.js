@@ -32,19 +32,23 @@ const messagesPath = 'dist/log-messages.json';
  * @type {!Object<string, LogMethodMetadataDef>}
  */
 const transformableMethods = {
-  assert: {variadic: true, indirectable: true, messageArgPos: 1},
-  assertString: {variadic: false, indirectable: true, messageArgPos: 1},
-  assertNumber: {variadic: false, indirectable: true, messageArgPos: 1},
-  assertBoolean: {variadic: false, indirectable: true, messageArgPos: 1},
-  assertEnumValue: {variadic: false, indirectable: false, messageArgPos: 2},
-  assertElement: {variadic: false, indirectable: true, messageArgPos: 1},
-  fine: {variadic: true, indirectable: true, messageArgPos: 1},
-  info: {variadic: true, indirectable: true, messageArgPos: 1},
-  warn: {variadic: true, indirectable: true, messageArgPos: 1},
-  error: {variadic: true, indirectable: true, messageArgPos: 1},
-  createExpectedError: {variadic: true, indirectable: true, messageArgPos: 0},
-  expectedError: {variadic: true, indirectable: true, messageArgPos: 1},
-  createError: {variadic: true, indirectable: true, messageArgPos: 0},
+  assert: {variadic: true, extractMessages: true, messageArgPos: 1},
+  assertString: {variadic: false, extractMessages: true, messageArgPos: 1},
+  assertNumber: {variadic: false, extractMessages: true, messageArgPos: 1},
+  assertBoolean: {variadic: false, extractMessages: true, messageArgPos: 1},
+  assertEnumValue: {variadic: false, extractMessages: false, messageArgPos: 2},
+  assertElement: {variadic: false, extractMessages: true, messageArgPos: 1},
+  fine: {variadic: true, extractMessages: true, messageArgPos: 1},
+  info: {variadic: true, extractMessages: true, messageArgPos: 1},
+  warn: {variadic: true, extractMessages: true, messageArgPos: 1},
+  error: {variadic: true, extractMessages: true, messageArgPos: 1},
+  createExpectedError: {
+    variadic: true,
+    extractMessages: true,
+    messageArgPos: 0,
+  },
+  expectedError: {variadic: true, extractMessages: true, messageArgPos: 1},
+  createError: {variadic: true, extractMessages: true, messageArgPos: 0},
 };
 
 module.exports = {
