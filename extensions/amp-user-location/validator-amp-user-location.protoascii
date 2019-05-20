@@ -35,3 +35,27 @@ tags: {  # <amp-user-location>
   }
   attr_lists: "mandatory-id-attr"
 }
+tags: {  # amp-user-location (json)
+  html_format: AMP
+  tag_name: "SCRIPT"
+  spec_name: "amp-user-location extension .json script"
+  requires_extension: amp-user-location"
+  mandatory_parent: "AMP-USER-LOCATION"
+  attrs: {
+    disabled_by: "transformed"
+    name: "nonce"
+  }
+  attrs: {
+    name: "type"
+    mandatory: true
+    value_casei: "application/json"
+    dispatch_key: NAME_VALUE_PARENT_DISPATCH
+  }
+  cdata: {
+    blacklisted_cdata_regex: {
+      regex: "<!--"
+      error_message: "html comments"
+    }
+  }
+  spec_url: "https://amp.dev/documentation/components/amp-user-location"
+}

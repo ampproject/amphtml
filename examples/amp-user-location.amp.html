@@ -19,10 +19,6 @@
 <h1>amp-user-location</h1>
 
 <h2>Basic usage</h2>
-<p>
-  This example populates variable substitution for analytics
-  and triggers the AMP actions and events.
-</p>
 <amp-user-location id="location" layout="nodisplay"
     on="approve: approved.show; deny: denied.show; error: errored.show"
 ></amp-user-location>
@@ -32,10 +28,6 @@
 <span hidden id="errored">Errored!</span>
 
 <h2>Bind usage</h2>
-<p>
-  This example populates variable substitution for analytics
-  and triggers the AMP actions and events.
-</p>
 <amp-state id="example3"><script type="application/json">{}</script></amp-state>
 <amp-user-location id="location3" layout="nodisplay"
     on="
@@ -52,9 +44,6 @@
 
 
 <h2>Analytics usage</h2>
-<p>
-  This example consumes analytics variables exposed by the component
-</p>
 <amp-user-location id="location4" layout="nodisplay"
     on="approve: approved4.show;
     deny: denied4.show;
@@ -133,10 +122,6 @@
 </amp-analytics>
 
 <h2>amp-list usage without amp-bind</h2>
-<p>
-  This example populates variable substitution for analytics
-  and triggers the AMP actions and events.
-</p>
 <amp-user-location on="
   approve: list-form.submit;
   deny: denied5.show, requesting5.hide;
@@ -170,10 +155,6 @@
 
 
 <h2>amp-list usage with amp-bind</h2>
-<p>
-  This example populates variable substitution for analytics
-  and triggers the AMP actions and events.
-</p>
 <amp-user-location on="
   approve: AMP.setState({listLat: event.lat, listLon: event.lon}), requesting6.hide;
   deny: denied6.show, requesting6.hide;
@@ -204,10 +185,6 @@
 
 
 <h2>Form and variable substitution usage</h2>
-<p>
-  This example populates variable substitution for analytics
-  and triggers the AMP actions and events.
-</p>
 <amp-user-location on="
   approve: locationForm.submit;
   deny: formDenied.show;

@@ -83,9 +83,14 @@ export class AmpUserLocation extends AMP.BaseElement {
    */
   parse_() {
     const {children} = this.element;
-    if (children.length != 1) {
+    if (children.length == 0) {
       return null;
     }
+
+    userAssert(
+      children.length == 1,
+      'amp-user-location may only have one configuration json <script> tag'
+    );
 
     const firstChild = children[0];
     if (!isJsonScriptTag(firstChild)) {
@@ -147,23 +152,21 @@ export class AmpUserLocation extends AMP.BaseElement {
           this.triggerEvent_(AmpUserLocationEvent.APPROVE, position);
         },
         error => {
-          if (error.code == PositionError.PERMISSION_DENIED) {
-            this.triggerEvent_(
-              AmpUserLocationEvent.DENY,
-              dict({'fallback': error.fallback})
-            );
-            return;
-          }
-
-          if (
-            error.code == PositionError.PLATFORM_UNSUPPORTED ||
-            error.code == PositionError.POSITION_UNAVAILABLE ||
-            error.code == PositionError.TIMEOUT
-          ) {
-            this.triggerEvent_(
-              AmpUserLocationEvent.ERROR,
-              dict({'fallback': error.fallback})
-            );
+          switch (error.code) {
+            case PositionError.PERMISSION_DENIED:
+              this.triggerEvent_(
+                AmpUserLocationEvent.DENY,
+                dict({'fallback': error.fallback})
+              );
+              return;
+            case PositionError.PLATFORM_UNSUPPORTED:
+            case PositionError.POSITION_UNAVAILABLE:
+            case PositionError.TIMEOUT:
+            default:
+              this.triggerEvent_(
+                AmpUserLocationEvent.ERROR,
+                dict({'fallback': error.fallback})
+              );
           }
         }
       );
