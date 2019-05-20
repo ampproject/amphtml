@@ -37,7 +37,7 @@ Provides a "lightbox” experience. Upon user interaction, a UI component expand
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-lightbox-gallery/">amp-lightbox-gallery</a> sample.</td>
+    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-lightbox-gallery/">amp-lightbox-gallery</a> sample.</td>
   </tr>
 </table>
 
