@@ -27,11 +27,6 @@ import {user} from '../../../src/log';
 
 const TAG = 'amp-analytics/cookie-writer';
 
-const EXPAND_WHITELIST = {
-  'QUERY_PARAM': true,
-  'LINKER_PARAM': true,
-};
-
 const RESERVED_KEYS = {
   'referrerDomains': true,
   'enabled': true,
@@ -163,18 +158,6 @@ export class CookieWriter {
       return false;
     }
 
-    const str = cookieConfig['value'];
-    // Make sure that only QUERY_PARAM and LINKER_PARAM is supported
-    const {name} = getNameArgs(str);
-    if (!EXPAND_WHITELIST[name]) {
-      user().error(
-        TAG,
-        `cookie value ${str} not supported. ` +
-          'Only QUERY_PARAM and LINKER_PARAM is supported'
-      );
-      return false;
-    }
-
     return true;
   }
 
@@ -188,7 +171,7 @@ export class CookieWriter {
     // Note: Have to use `expandStringAsync` because QUERY_PARAM can wait for
     // trackImpressionPromise and resolve async
     return this.urlReplacementService_
-      .expandStringAsync(cookieValue, this.bindings_, EXPAND_WHITELIST)
+      .expandStringAsync(cookieValue, this.bindings_)
       .then(value => {
         // Note: We ignore empty cookieValue, that means currently we don't
         // provide a way to overwrite or erase existing cookie
