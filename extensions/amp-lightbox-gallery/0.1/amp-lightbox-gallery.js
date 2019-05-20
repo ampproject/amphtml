@@ -36,7 +36,7 @@ import {
   scopedQuerySelector,
   scopedQuerySelectorAll,
 } from '../../../src/dom';
-import {clamp, distance} from '../../../src/utils/math';
+import {clamp} from '../../../src/utils/math';
 import {
   delayAfterDeferringToEventLoop,
   secondsToTimestampString,
