@@ -51,7 +51,7 @@
  * their logging density.
  */
 const base62 = require('base62/lib/ascii');
-const fs = require('fs');
+const fs = require('fs-extra');
 const path = require('path');
 const {
   messagesPath,
@@ -95,12 +95,8 @@ function getMessages(messagesPath) {
  * @param {!Object<string, string>} obj
  */
 function writeMessages(messagesPath, obj) {
-  const json = JSON.stringify(obj, /* replacer */ null, /* spaces */ 2);
-  const messagesPathDir = path.dirname(messagesPath);
-  if (!fs.existsSync(messagesPathDir)) {
-    fs.mkdirSync(messagesPathDir);
-  }
-  fs.writeFileSync(messagesPath, json);
+  fs.ensureDirSync(path.dirname(messagesPath));
+  fs.writeJsonSync(messagesPath, obj, {spaces: 2});
 }
 
 /**
