@@ -37,6 +37,10 @@ import {
   scopedQuerySelectorAll,
 } from '../../../src/dom';
 import {clamp, distance} from '../../../src/utils/math';
+import {
+  delayAfterDeferringToEventLoop,
+  secondsToTimestampString,
+} from './utils';
 import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {escapeCssSelectorIdent} from '../../../src/css';
@@ -89,38 +93,6 @@ const MOTION_DURATION_RATIO = 0.8; // fraction of animation
  * }}
  */
 let LightboxElementMetadataDef;
-
-/**
- * A linear interpolation.
- * TODO(#21104) Refactor.
- * @param {number} start
- * @param {number} end
- * @param {number} percentage
- * @return {number} The value percentage of the way between start and end.
- */
-function lerp(start, end, percentage) {
-  return start + (end - start) * percentage;
-}
-
-/**
- * Runs a delay after deferring to the event loop. This is useful to call from
- * within an animation frame, as you can be sure that at least duration
- * milliseconds has elapsed after the animation has started. Simply waiting
- * for the desired duration may result in running code before an animation has
- * completed.
- * @param {!Window} win A Window object.
- * @param {number} duration How long to wait for.
- * @return {!Promise} A Promise that resolves after the specified duration.
- */
-function delayAfterDeferringToEventLoop(win, duration) {
-  const timer = Services.timerFor(win);
-  // Timer.promise does not defer to event loop for 0.
-  const eventLoopDelay = 1;
-  // First, defer to the JavaScript execution loop. If we are in a
-  // requestAnimationFrame, this will place us after render. Second, wait
-  // for duration to elapse.
-  return timer.promise(eventLoopDelay).then(() => timer.promise(duration));
-}
 
 /**
  * @private visible for testing.
@@ -708,34 +680,10 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * Set up gestures
    * @private
    */
-  releaseSwipe_(scale, velocityX, velocityY, deltaX, deltaY) {
-    const velocity = distance(0, 0, velocityX, velocityY);
-    const distanceX = velocityX * SWIPE_TO_CLOSE_VELOCITY_TO_DISTANCE_FACTOR;
-    const distanceY = velocityY * SWIPE_TO_CLOSE_VELOCITY_TO_DISTANCE_FACTOR;
-    const finalDeltaX = distanceX + deltaX;
-    const finalDeltaY = distanceY + deltaY;
-    // We want to figure out the final distance we will rest at if the user
-    // flicked the lightbox and use that to determine we should animate to. We
-    // will then use that resting position to determine if we should snap back
-    // or close.
-    const finalDistance = distance(0, 0, finalDeltaX, finalDeltaY);
-
-    // We always want to carry momentum from the swipe forward, and then use
-    // the resting point to decide if we should snap back or close.
-    return this.carrySwipeMomentum_(
-      scale,
-      finalDeltaX,
-      finalDeltaY,
-      velocity
-    ).then(() => {
-      if (
-        finalDistance < SWIPE_TO_CLOSE_DISTANCE_THRESHOLD &&
-        velocity < SWIPE_TO_CLOSE_VELOCITY_THRESHOLD
-      ) {
-        return this.snapBackFromSwipe_(finalDistance);
-      }
-
-      return this.close_();
+  setupGestures_() {
+    const gestures = Gestures.get(dev().assertElement(this.carousel_));
+    gestures.onGesture(SwipeYRecognizer, ({data}) => {
+      this.swipeGesture_(data);
     });
   }
 
@@ -743,26 +691,12 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * Handles a swipe gesture, updating the current swipe to dismiss state.
    * @param {!SwipeDef} data
    */
-  handleSwipeMove_(data) {
-    const {deltaX, deltaY, first, last, velocityX, velocityY} = data;
-    // Need to capture these as they will no longer be available after closing.
-    const carousel = devAssert(this.carousel_);
-    const {sourceElement} = this.getCurrentElement_();
-    const dist = distance(0, 0, deltaX, deltaY);
-    const releasePercentage = Math.min(dist / SWIPE_TO_CLOSE_DISTANCE, 1);
-    const hideControlsPercentage = Math.min(
-      dist / SWIPE_TO_HIDE_CONTROLS_DISTANCE,
-      1
-    );
-    const scale = lerp(1, SWIPE_TO_CLOSE_MIN_SCALE, releasePercentage);
-    const maskOpacity = lerp(1, SWIPE_TO_CLOSE_MIN_OPACITY, releasePercentage);
-    const controlsOpacity = lerp(1, 0, hideControlsPercentage);
-
-    this.mutateElement(() => {
-      if (first) {
-        this.startSwipeToDismiss_(sourceElement);
-        return;
-      }
+  swipeGesture_(data) {
+    if (data.first) {
+      const {sourceElement} = this.getCurrentElement_();
+      const parentCarousel = this.getSourceElementParentCarousel_(
+        sourceElement
+      );
 
       this.swipeToDismiss_.startSwipe({
         swipeElement: dev().assertElement(this.carousel_),
