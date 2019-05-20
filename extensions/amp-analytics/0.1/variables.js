@@ -170,6 +170,10 @@ export class VariableService {
       value ? thenValue : elseValue
     );
     this.register_('$REPLACE', replaceMacro);
+    this.register_(
+      '$EQUALS',
+      (firstValue, secValue) => firstValue === secValue
+    );
     // TODO(ccordry): Make sure this stays a window level service when this
     // VariableService is migrated to document level.
     this.register_('LINKER_PARAM', (name, id) =>
