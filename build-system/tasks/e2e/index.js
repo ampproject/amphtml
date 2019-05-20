@@ -40,12 +40,12 @@ function installPackages_() {
 }
 
 function buildRuntime_() {
-  execOrDie('gulp build');
+  execOrDie('gulp dist');
 }
 
 function launchWebServer_() {
   webServerProcess_ = execScriptAsync(
-    `gulp serve --host ${HOST} --port ${PORT}`,
+    `gulp serve --compiled --host ${HOST} --port ${PORT}`,
     {stdio: 'ignore'}
   );
 
