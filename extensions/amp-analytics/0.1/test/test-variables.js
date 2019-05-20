@@ -244,6 +244,14 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
 
     it('if works', () => check('$IF(hey, truthy, falsey)', 'truthy'));
 
+    it('equals works (truth-y test)', () => {
+      return check('$EQUALS(testValue, testValue)', 'true');
+    });
+
+    it('equals works (false-y test)', () => {
+      return check('$EQUALS(testValue, otherValue)', 'false');
+    });
+
     it('chaining works', () => {
       return check('$SUBSTR(Hello world!, 6)', 'world!')
         .then(() => check('$TOUPPERCASE($SUBSTR(Hello world!, 6))', 'WORLD!'))

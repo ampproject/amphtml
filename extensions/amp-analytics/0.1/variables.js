@@ -175,6 +175,9 @@ export class VariableService {
     this.register_('LINKER_PARAM', (name, id) =>
       this.linkerReader_.get(name, id)
     );
+    this.register_('$EQUALS', (firstValue, secValue) =>
+      firstValue === secValue
+    );
   }
 
   /**
