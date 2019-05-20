@@ -1,3 +1,12 @@
+---
+$category@: dynamic-content
+formats:
+  - websites
+  - email
+  - ads
+teaser:
+  text: Allows you to create forms to submit input fields in an AMP document.
+---
 <!---
 Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 
