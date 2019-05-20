@@ -100,6 +100,7 @@ export class BaseCarousel extends AMP.BaseElement {
     this.nextButton_ = this.buildButton('amp-carousel-button-next', () => {
       this.interactionNext();
     });
+    this.updateButtonTitles();
     this.element.appendChild(this.nextButton_);
   }
 

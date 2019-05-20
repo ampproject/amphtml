@@ -111,6 +111,9 @@ describes.realWin(
             .true;
           expect(impl.nextButton_.classList.contains('amp-disabled')).to.be
             .false;
+          // has a11y titles for the controls
+          expect(impl.nextButton_.title).to.not.be.empty;
+          expect(impl.prevButton_.title).to.not.be.empty;
         });
       }
     );
