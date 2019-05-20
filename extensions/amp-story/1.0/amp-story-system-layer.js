@@ -392,6 +392,10 @@ export class SystemLayer {
         this.onSystemUiIsVisibleStateUpdate_(isVisible);
       }
     );
+
+    this.storeService_.subscribe(StateProperty.NEW_PAGE_ADDED_ID, pageId => {
+      this.progressBar_.addSegment(pageId);
+    });
   }
 
   /**
@@ -647,16 +651,6 @@ export class SystemLayer {
   updateProgress(pageId, progress) {
     // TODO(newmuis) avoid passing progress logic through system-layer
     this.progressBar_.updateProgress(pageId, progress);
-  }
-
-  /**
-   * Updates the progress bar with a newly added page.
-   *
-   * @param {string} pageId
-   * @public
-   */
-  updateProgressBar(pageId) {
-    this.progressBar_.addSegment(pageId);
   }
 
   /**
