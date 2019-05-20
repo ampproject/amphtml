@@ -17,7 +17,7 @@
 
 const del = require('del');
 const fs = require('fs');
-const gulp = require('gulp-help')(require('gulp'));
+const gulp = require('gulp');
 const gzipSize = require('gzip-size');
 const PluginError = require('plugin-error');
 const prettyBytes = require('pretty-bytes');
