@@ -39,7 +39,6 @@ const timedExecOrDie = (cmd, unusedFileName) =>
 
 function main() {
   const startTime = startTimer(FILENAME, FILENAME);
-  const buildTargets = determineBuildTargets();
 
   if (!isTravisPullRequestBuild()) {
     downloadBuildOutput(FILENAME);
@@ -48,47 +47,41 @@ function main() {
     timedExecOrDie('gulp test --unit --nobuild --headless --coverage');
   } else {
     printChangeSummary(FILENAME);
+    const buildTargets = new Set();
+    determineBuildTargets(buildTargets, FILENAME);
 
     if (
-      !(
-        buildTargets.has('RUNTIME') ||
-        buildTargets.has('BUILD_SYSTEM') ||
-        buildTargets.has('UNIT_TEST') ||
-        buildTargets.has('INTEGRATION_TEST')
-      )
+      !buildTargets.has('RUNTIME') &&
+      !buildTargets.has('FLAG_CONFIG') &&
+      !buildTargets.has('UNIT_TEST') &&
+      !buildTargets.has('INTEGRATION_TEST')
     ) {
       console.log(
-        `${FILELOGPREFIX} Skipping ` +
-          colors.cyan('Local Tests ') +
-          'because this commit not affect the runtime, build system, ' +
-          'unit test files, or integration test files.'
+        `${FILELOGPREFIX} Skipping`,
+        colors.cyan('Local Tests'),
+        'because this commit not affect the runtime, flag configs,',
+        'unit tests, or integration tests.'
       );
       stopTimer(FILENAME, FILENAME, startTime);
       return;
     }
+
     downloadBuildOutput(FILENAME);
     timedExecOrDie('gulp update-packages');
-    if (
-      buildTargets.has('RUNTIME') ||
-      buildTargets.has('BUILD_SYSTEM') ||
-      buildTargets.has('UNIT_TEST')
-    ) {
+
+    if (buildTargets.has('RUNTIME') || buildTargets.has('UNIT_TEST')) {
       timedExecOrDie('gulp test --unit --nobuild --headless --local-changes');
     }
 
     if (
       buildTargets.has('RUNTIME') ||
-      buildTargets.has('BUILD_SYSTEM') ||
+      buildTargets.has('FLAG_CONFIG') ||
       buildTargets.has('INTEGRATION_TEST')
     ) {
       timedExecOrDie('gulp test --integration --nobuild --headless --coverage');
     }
 
-    if (
-      buildTargets.has('RUNTIME') ||
-      buildTargets.has('BUILD_SYSTEM') ||
-      buildTargets.has('UNIT_TEST')
-    ) {
+    if (buildTargets.has('RUNTIME') || buildTargets.has('UNIT_TEST')) {
       timedExecOrDie('gulp test --unit --nobuild --headless --coverage');
     }
   }
