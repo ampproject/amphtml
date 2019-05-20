@@ -1,0 +1,75 @@
+
+<!doctype html>
+<html>
+<head>
+  <title>amp-analytics referrer PWA Test</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <script async src="https://cdn.ampproject.org/shadow-v0.js"></script>
+  <style>
+    body {
+      margin: 0;
+    }
+  </style>
+</head>
+<body>
+  <div id="shadowHost"></div>
+  <script>
+    (window.AMP = window.AMP || []).push(function(AMP) {
+        let shadowDoc;
+        let firstNav = true;
+
+        function loadInPwa(url) {
+
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', url);
+            xhr.responseType = 'document';
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === XMLHttpRequest.DONE) {
+                    if (xhr.status === 200) {
+                        // Close shadow AMP
+                        if (shadowDoc)
+                            shadowDoc.close();
+
+                        // Restore host element
+                        var hostElement = document.querySelector('#shadowHost');
+                        document.body.removeChild(hostElement);
+                        hostElement = document.createElement('div');
+                        hostElement.id = 'shadowHost';
+                        document.body.insertBefore(hostElement, document.body.firstChild);
+
+                        // Update analytics to include empty referrer
+                        var doc = xhr.response;
+                        if (!firstNav) {
+                            var myanalytics = doc.querySelector('#myanalytics script');
+                            var parsedAnalytics = JSON.parse(myanalytics.textContent);
+                            parsedAnalytics.requests = {};
+                            parsedAnalytics.vars.externalReferrer = '';
+                            myanalytics.textContent = JSON.stringify(parsedAnalytics);
+                        }
+
+                        // Future uses of this function are no longer "firstNav"
+                        firstNav = false;
+
+                        // Attach shadow AMP
+                        shadowDoc = AMP.attachShadowDoc(hostElement, doc, url);
+                        const shadowBody = shadowDoc.ampdoc.getBody();
+
+                        // Listen for anchor clicks
+                        shadowBody.querySelector('a').onclick = clickHandler;
+                    }
+                }
+            };
+            xhr.send(null);
+        }
+
+        function clickHandler(event) {
+            event.preventDefault();
+            loadInPwa(event.currentTarget.href);
+        }
+
+        loadInPwa(location.href.replace('-pwa', '-amp1'));
+    });
+  </script>
+</body>
+</html>
