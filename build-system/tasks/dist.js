@@ -31,6 +31,7 @@ const {
   hostname,
   mkdirSync,
   printConfigHelp,
+  printNobuildHelp,
   toPromise,
 } = require('./helpers');
 const {
@@ -65,6 +66,7 @@ async function dist() {
   maybeUpdatePackages();
   const handlerProcess = createCtrlcHandler('dist');
   process.env.NODE_ENV = 'production';
+  printNobuildHelp();
   await clean();
   cleanupBuildDir();
   if (argv.fortesting) {

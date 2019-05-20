@@ -39,9 +39,9 @@ const {
   reportTestStarted,
 } = require('./status-report');
 const {app} = require('../../test-server');
-const {build} = require('../build');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../../ctrlcHandler');
 const {css} = require('../css');
+const {dist} = require('../dist');
 const {getStdout} = require('../../exec');
 const {isTravisBuild} = require('../../travis');
 
@@ -163,7 +163,8 @@ function printArgvMessages() {
     testnames: 'Listing the names of all tests being run.',
     files: 'Running tests in the file(s): ' + cyan(argv.files),
     integration:
-      'Running only the integration tests. Prerequisite: ' + cyan('gulp build'),
+      'Running only the integration tests. Prerequisite: ' +
+      cyan('gulp dist --fortesting'),
     unit: 'Running only the unit tests. Prerequisite: ' + cyan('gulp css'),
     a4a: 'Running only A4A tests.',
     compiled: 'Running tests against minified code.',
@@ -661,7 +662,9 @@ async function test() {
     if (argv.unit || argv.a4a || argv['local-changes']) {
       await css();
     } else {
-      await build();
+      argv.fortesting = true;
+      argv.compiled = true;
+      await dist();
     }
   }
   // TODO(alanorozco): Come up with a more elegant check?
