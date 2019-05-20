@@ -277,25 +277,17 @@ export class AmpSidebar extends AMP.BaseElement {
   }
 
   /**
-   * Updates the sidebar before it opens. This needs to be done as a separate
-   * step from opening so that we can animate, as the sidebar is initially
-   * display: none.
+   * Updates the sidebar while it is animating to the opened state.
    */
-  updateForPreOpening_() {
+  updateForOpening_() {
     toggle(this.element, /* display */ true);
     this.viewport_.addToFixedLayer(this.element, /* forceTransfer */ true);
 
     if (this.isIos_ && this.isSafari_) {
       this.compensateIosBottombar_();
     }
-    this.element./*OK*/ scrollTop = 1;
-    this.setUpdateFn_(() => this.updateForOpening_());
-  }
 
-  /**
-   * Updates the sidebar while it is animating to the opened state.
-   */
-  updateForOpening_() {
+    this.element./*OK*/ scrollTop = 1;
     this.openMask_();
     this.element.setAttribute('open', '');
     this.element.setAttribute('aria-hidden', 'false');
@@ -344,7 +336,7 @@ export class AmpSidebar extends AMP.BaseElement {
       return;
     }
     this.viewport_.enterOverlayMode();
-    this.setUpdateFn_(() => this.updateForPreOpening_());
+    this.setUpdateFn_(() => this.updateForOpening_());
     this.getHistory_()
       .push(this.close_.bind(this))
       .then(historyId => {
