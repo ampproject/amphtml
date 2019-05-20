@@ -104,7 +104,7 @@ export let InteractiveComponentDef;
  *    currentPageId: string,
  *    currentPageIndex: number,
  *    pagesCount: number,
- *    newPageAddedId: string,
+ *    storyPageIds: !Array<string>,
  * }}
  */
 export let State;
@@ -149,12 +149,12 @@ export const StateProperty = {
   CURRENT_PAGE_INDEX: 'currentPageIndex',
   PAGES_COUNT: 'pagesCount',
   ADVANCEMENT_MODE: 'advancementMode',
-  NEW_PAGE_ADDED_ID: 'newPageAddedId',
+  STORY_PAGE_IDS: 'storyPageIds',
 };
 
 /** @private @const @enum {string} */
 export const Action = {
-  ADD_NEW_PAGE_ID: 'addNewPageId',
+  ADD_TO_PAGE_IDS: 'addToPageIds',
   ADD_TO_ACTIONS_WHITELIST: 'addToActionsWhitelist',
   CHANGE_PAGE: 'setCurrentPageId',
   SET_CONSENT_ID: 'setConsentId',
@@ -204,9 +204,10 @@ const stateComparisonFunctions = {
  */
 const actions = (state, action, data) => {
   switch (action) {
-    case Action.ADD_NEW_PAGE_ID:
+    case Action.ADD_TO_PAGE_IDS:
+      const newPageIds = [].concat(state[StateProperty.STORY_PAGE_IDS], data);
       return /** @type {!State} */ (Object.assign({}, state, {
-        [StateProperty.NEW_PAGE_ADDED_ID]: data,
+        [StateProperty.STORY_PAGE_IDS]: newPageIds,
       }));
     case Action.ADD_TO_ACTIONS_WHITELIST:
       const newActionsWhitelist = [].concat(
@@ -465,9 +466,10 @@ export class AmpStoryStoreService {
       [StateProperty.CONSENT_ID]: null,
       [StateProperty.CURRENT_PAGE_ID]: '',
       [StateProperty.CURRENT_PAGE_INDEX]: 0,
+      // TODO(#22398): replace usage of PAGES_COUNT with STORY_PAGE_IDS.length.
       [StateProperty.PAGES_COUNT]: 0,
       [StateProperty.ADVANCEMENT_MODE]: '',
-      [StateProperty.NEW_PAGE_ADDED_ID]: '',
+      [StateProperty.STORY_PAGE_IDS]: [],
     });
   }
 

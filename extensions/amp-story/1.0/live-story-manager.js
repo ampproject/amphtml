@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
+import {Action, getStoreService} from './amp-story-store-service';
 import {createElementWithAttributes} from '../../../src/dom';
 import {devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {Action, getStoreService} from './amp-story-store-service';
 
 /**
  * Property used for storing id of custom slot. This custom slot can be used to
@@ -96,7 +96,7 @@ export class LiveStoryManager {
         this.storyEl_.insertBefore(page.element, lastPageEl.nextElementSibling);
         this.ampStory_.addPage(page);
         this.ampStory_.insertPage(lastPageEl.id, page.element.id);
-        this.storeService_.dispatch(Action.ADD_NEW_PAGE_ID, page.element.id);
+        this.storeService_.dispatch(Action.ADD_TO_PAGE_IDS, [page.element.id]);
         lastPageEl = page.element;
       });
     });

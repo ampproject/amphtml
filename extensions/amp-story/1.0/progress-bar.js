@@ -15,6 +15,7 @@
  */
 import {POLL_INTERVAL_MS} from './page-advancement';
 import {Services} from '../../../src/services';
+import {StateProperty, getStoreService} from './amp-story-store-service';
 import {dev, devAssert} from '../../../src/log';
 import {escapeCssSelectorNth} from '../../../src/css';
 import {hasOwn, map} from '../../../src/utils/object';
@@ -65,6 +66,9 @@ export class ProgressBar {
 
     /** @private {!Object<string, number>} */
     this.segmentIdMap_ = map();
+
+    /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
+    this.storeService_ = getStoreService(this.win_);
   }
 
   /**
@@ -77,23 +81,29 @@ export class ProgressBar {
   /**
    * Builds the progress bar.
    *
-   * @param {!Array<string>} segmentIds The id of each segment in the story.
    * @return {!Element}
    */
-  build(segmentIds) {
+  build() {
     if (this.isBuilt_) {
       return this.getRoot();
     }
-
-    const segmentCount = segmentIds.length;
-    devAssert(segmentCount > 0);
 
     this.isBuilt_ = true;
 
     this.root_ = this.win_.document.createElement('ol');
     this.root_.classList.add('i-amphtml-story-progress-bar');
 
-    segmentIds.forEach(id => this.addSegment(id));
+    this.storeService_.subscribe(
+      StateProperty.STORY_PAGE_IDS,
+      pageIds => {
+        pageIds.forEach(id => {
+          if (!(id in this.segmentIdMap_)) {
+            this.addSegment_(id);
+          }
+        });
+      },
+      true /** callToInitialize */
+    );
 
     return this.getRoot();
   }
@@ -116,8 +126,9 @@ export class ProgressBar {
    * Adds a segment to the progress bar.
    *
    * @param {string} id The id of the segment.
+   * @private
    */
-  addSegment(id) {
+  addSegment_(id) {
     this.segmentIdMap_[id] = this.segmentCount_++;
     this.buildSegmentEl_();
   }
