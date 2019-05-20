@@ -40,7 +40,7 @@ function installPackages_() {
 }
 
 function buildRuntime_() {
-  execOrDie('gulp dist');
+  execOrDie('gulp dist --fortesting');
 }
 
 function launchWebServer_() {
