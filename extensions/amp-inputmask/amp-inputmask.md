@@ -1,3 +1,10 @@
+---
+$category@: dynamic-content
+formats:
+  - websites
+teaser:
+  text: Provides input masking capabilities to inputs in AMP forms
+---
 <!--
 Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 
