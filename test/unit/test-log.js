@@ -786,7 +786,7 @@ describe('Logging', () => {
       const id = 'foo';
       const queryRe = `id=${id}`;
       const expectedRe = new RegExp(`${prefixRe}${queryRe}$`);
-      const result = log.expandLogMessage_(id);
+      const result = log.expandLogMessage_([id]);
       expect(expectedRe.test(result), `${expectedRe}.test('${result}')`).to.be
         .true;
     });
@@ -796,7 +796,7 @@ describe('Logging', () => {
       const arg1 = 'bar';
       const queryRe = `id=${id}&s\\[\\]=${arg1}`;
       const expectedRe = new RegExp(`${prefixRe}${queryRe}$`);
-      const result = log.expandLogMessage_(id, arg1);
+      const result = log.expandLogMessage_([id, arg1]);
       expect(expectedRe.test(result), `${expectedRe}.test('${result}')`).to.be
         .true;
     });
@@ -808,7 +808,7 @@ describe('Logging', () => {
       const arg3 = 'taquitos';
       const queryRe = `id=${id}&s\\[\\]=${arg1}&s\\[\\]=${arg2}&s\\[\\]=${arg3}`;
       const expectedRe = new RegExp(`${prefixRe}${queryRe}$`);
-      const result = log.expandLogMessage_(id, arg1, arg2, arg3);
+      const result = log.expandLogMessage_([id, arg1, arg2, arg3]);
       expect(expectedRe.test(result), `${expectedRe}.test('${result}')`).to.be
         .true;
     });
