@@ -97,8 +97,8 @@ describe('amp-ad-xorigin-iframe-handler', () => {
         expect(iframe.style.visibility).to.equal('hidden');
         return initPromise.then(() => {
           expect(iframe.style.visibility).to.equal('');
-          expect(renderStartedSpy).to.not.be.called;
-          expect(signals.get('render-start')).to.be.null;
+          // Should signal RENDER_START at toggling visibility even w/o msg
+          expect(signals.get('render-start')).to.be.ok;
         });
       });
 
@@ -277,7 +277,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
         };
       }).then(() => {
         expect(iframe.style.visibility).to.equal('');
-        expect(renderStartedSpy).to.not.be.called;
+        expect(renderStartedSpy).to.be.calledOnce;
       });
     });
 
