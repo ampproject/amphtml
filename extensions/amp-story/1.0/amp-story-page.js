@@ -226,10 +226,10 @@ export class AmpStoryPage extends AMP.BaseElement {
     /** @private @const {!../../../src/service/resources-impl.Resources} */
     this.resources_ = Services.resourcesForDoc(getAmpdoc(this.win.document));
 
-    /** @private @const {!Promise} */
-    this.mediaLayoutPromise_ = this.waitForMediaLayout_();
+    /** @private {?Promise} */
+    this.mediaLayoutPromise_ = null;
 
-    /** @private @const {?Promise} */
+    /** @private {?Promise} */
     this.pageLoadPromise_ = null;
 
     const deferred = new Deferred();
@@ -298,9 +298,6 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.pageLoadPromise_ = this.mediaLayoutPromise_.then(() => {
-      this.markPageAsLoaded_();
-    });
     this.delegateVideoAutoplay();
     this.markMediaElementsWithPreload_();
     this.initializeMediaPool_();
@@ -442,6 +439,10 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    this.mediaLayoutPromise_ = this.waitForMediaLayout_();
+    this.pageLoadPromise_ = this.mediaLayoutPromise_.then(() => {
+      this.markPageAsLoaded_();
+    });
     upgradeBackgroundAudio(this.element);
     this.muteAllMedia();
     this.getViewport().onResize(
@@ -568,7 +569,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     });
   }
 
-  /** @return {!Promise} */
+  /** @return {?Promise} */
   whenLoaded() {
     return this.pageLoadPromise_;
   }
