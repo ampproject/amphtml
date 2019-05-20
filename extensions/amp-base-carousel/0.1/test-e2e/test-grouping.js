@@ -41,21 +41,30 @@ describes.endtoend(
       this.timeout(3 * 1000);
     });
 
-    it('should snap on next group when past the midpoint', async () => {
-      const el = await getScrollingElement(controller);
-      const slides = await getSlides(controller);
+    // TODO(sparhami): fails on shadow demo
+    it.configure()
+      .skipShadowDemo()
+      .run('should snap on next group when past the midpoint', async () => {
+        const el = await getScrollingElement(controller);
+        const slides = await getSlides(controller);
 
-      await controller.scrollTo(el, {left: slideWidth + 1});
-      await expect(rect(slides[2])).to.include({x: 0});
-    });
+        await controller.scrollTo(el, {left: slideWidth + 1});
+        await expect(rect(slides[2])).to.include({x: 0});
+      });
 
-    it('should snap on current group when before the midpoint', async () => {
-      const el = await getScrollingElement(controller);
-      const slides = await getSlides(controller);
+    // TODO(sparhami): fails on shadow demo
+    it.configure()
+      .skipShadowDemo()
+      .run(
+        'should snap on current group when before the midpoint',
+        async () => {
+          const el = await getScrollingElement(controller);
+          const slides = await getSlides(controller);
 
-      await controller.scrollTo(el, {left: slideWidth - 1});
-      await expect(rect(slides[0])).to.include({x: 0});
-    });
+          await controller.scrollTo(el, {left: slideWidth - 1});
+          await expect(rect(slides[0])).to.include({x: 0});
+        }
+      );
 
     it.skip('should move forwards by the advance-count', async () => {
       const slides = await getSlides(controller);

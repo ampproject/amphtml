@@ -31,6 +31,7 @@ const HOST = 'localhost';
 const PORT = 8000;
 const WEBSERVER_TIMEOUT_RETRIES = 10;
 const SLOW_TEST_THRESHOLD_MS = 2500;
+const TEST_RETRIES = 2;
 
 let webServerProcess_;
 
@@ -76,6 +77,7 @@ function createMocha_() {
     // so we set a non-default threshold.
     slow: SLOW_TEST_THRESHOLD_MS,
     reporter: argv.testnames || argv.watch ? '' : ciReporter,
+    retries: TEST_RETRIES,
     fullStackTrace: true,
   });
 
