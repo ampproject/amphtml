@@ -491,7 +491,6 @@ tags: {
   spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags"
 }
 # AMP & AMP4ADS metadata, name=amp-experiments-opt-in
-# https://github.com/lannka/amphtml/blob/master/tools/experiments/README.md
 tags: {
   html_format: AMP
   html_format: AMP4ADS
@@ -508,6 +507,7 @@ tags: {
     value_casei: "amp-experiments-opt-in"
     dispatch_key: NAME_VALUE_DISPATCH
   }
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/experimental"
 }
 # AMP metadata, name=amp-3p-iframe-src
 tags: {
