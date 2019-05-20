@@ -270,24 +270,19 @@ async function runTests() {
     c.reporters = ['mocha'];
   }
 
-  c.browserify = {
-    transform: [['babelify', {global: true}]],
-    configure: function(bundle) {
-      bundle.on('prebundle', function() {
-        log(
-          green('Transforming tests with'),
-          cyan('browserify') + green('...')
-        );
-      });
-      bundle.on('transform', function(tr) {
-        if (tr instanceof babelify) {
-          tr.once('babelify', function() {
-            process.stdout.write('.');
-          });
-        }
-      });
-    },
+  c.browserify.configure = function(bundle) {
+    bundle.on('prebundle', function() {
+      log(green('Transforming tests with'), cyan('browserify') + green('...'));
+    });
+    bundle.on('transform', function(tr) {
+      if (tr instanceof babelify) {
+        tr.once('babelify', function() {
+          process.stdout.write('.');
+        });
+      }
+    });
   };
+
   // Exclude chai-as-promised from runs on the full set of sauce labs browsers.
   // See test/chai-as-promised/chai-as-promised.js for why this is necessary.
   c.files = argv.saucelabs ? [] : config.chaiAsPromised;
