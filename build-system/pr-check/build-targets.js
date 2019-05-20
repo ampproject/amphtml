@@ -200,39 +200,40 @@ function areValidBuildTargets(buildTargets, fileName) {
 }
 
 /**
- * Returns a set of build targets contained in a PR. Used to determine which
- * checks to perform / tests to run.
+ * Populates buildTargets with a set of build targets contained in a PR after
+ * making sure they are valid. Used to determine which checks to perform / tests
+ * to run during PR builds.
+ * @param {!Set<string>} buildTargets
  * @param {string} fileName
- * @return {!Set<string>}
+ * @return {boolean}
  */
-function determineBuildTargets(fileName = 'build-targets.js') {
+function determineBuildTargets(buildTargets, fileName = 'build-targets.js') {
   const filesChanged = gitDiffNameOnlyMaster();
-  const targetSet = new Set();
+  buildTargets.clear;
   for (const file of filesChanged) {
     let matched = false;
     targetMatchers.forEach(matcher => {
       if (matcher.func(file)) {
-        matcher.targets.forEach(target => targetSet.add(target));
+        matcher.targets.forEach(target => buildTargets.add(target));
         matched = true;
       }
     });
     if (!matched) {
-      targetSet.add('RUNTIME'); // Default to RUNTIME for files that don't match a target.
+      buildTargets.add('RUNTIME'); // Default to RUNTIME for files that don't match a target.
     }
   }
   const fileLogPrefix = colors.bold(colors.yellow(`${fileName}:`));
   console.log(
     `${fileLogPrefix} Detected build targets:`,
     colors.cyan(
-      Array.from(targetSet)
+      Array.from(buildTargets)
         .sort()
         .join(', ')
     )
   );
-  return targetSet;
+  return areValidBuildTargets(buildTargets, fileName);
 }
 
 module.exports = {
-  areValidBuildTargets,
   determineBuildTargets,
 };

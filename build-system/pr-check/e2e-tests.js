@@ -39,7 +39,6 @@ const timedExecOrDie = (cmd, unusedFileName) =>
 
 async function main() {
   const startTime = startTimer(FILENAME, FILENAME);
-  const buildTargets = determineBuildTargets(FILENAME);
 
   if (!isTravisPullRequestBuild()) {
     downloadBuildOutput(FILENAME);
@@ -47,6 +46,9 @@ async function main() {
     timedExecOrDie('gulp e2e --nobuild --headless');
   } else {
     printChangeSummary(FILENAME);
+    const buildTargets = new Set();
+    determineBuildTargets(buildTargets, FILENAME);
+
     if (
       buildTargets.has('RUNTIME') ||
       buildTargets.has('FLAG_CONFIG') ||

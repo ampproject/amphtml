@@ -17,15 +17,12 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const {
-  areValidBuildTargets,
-  determineBuildTargets,
-} = require('../pr-check/build-targets');
-const {
   printChangeSummary,
   startTimer,
   stopTimer,
   timedExec,
 } = require('../pr-check/utils');
+const {determineBuildTargets} = require('../pr-check/build-targets');
 const {runYarnChecks} = require('../pr-check/yarn-checks');
 
 const FILENAME = 'pr-check.js';
@@ -51,14 +48,18 @@ async function prCheck(cb) {
   };
 
   const startTime = startTimer(FILENAME, FILENAME);
-  const buildTargets = determineBuildTargets(FILENAME);
-  printChangeSummary(FILENAME);
+  if (!runYarnChecks(FILENAME)) {
+    stopTimer(FILENAME, FILENAME, startTime);
+    process.exitCode = 1;
+    return;
+  }
 
-  if (
-    !runYarnChecks(FILENAME) ||
-    !areValidBuildTargets(buildTargets, FILENAME)
-  ) {
-    failTask();
+  printChangeSummary(FILENAME);
+  const buildTargets = new Set();
+  if (!determineBuildTargets(buildTargets, FILENAME)) {
+    stopTimer(FILENAME, FILENAME, startTime);
+    process.exitCode = 1;
+    return;
   }
 
   runCheck('gulp lint --local-changes');

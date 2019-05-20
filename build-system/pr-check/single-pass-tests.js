@@ -38,7 +38,6 @@ const timedExecOrDie = (cmd, unusedFileName) =>
 
 function main() {
   const startTime = startTimer(FILENAME, FILENAME);
-  const buildTargets = determineBuildTargets(FILENAME);
 
   if (!isTravisPullRequestBuild()) {
     timedExecOrDie('gulp update-packages');
@@ -48,6 +47,9 @@ function main() {
     );
   } else {
     printChangeSummary(FILENAME);
+    const buildTargets = new Set();
+    determineBuildTargets(buildTargets, FILENAME);
+
     if (
       buildTargets.has('RUNTIME') ||
       buildTargets.has('FLAG_CONFIG') ||

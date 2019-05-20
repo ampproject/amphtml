@@ -41,7 +41,6 @@ const timedExecOrDie = (cmd, unusedFileName) =>
 
 async function main() {
   const startTime = startTimer(FILENAME, FILENAME);
-  const buildTargets = determineBuildTargets(FILENAME);
 
   if (!isTravisPullRequestBuild()) {
     downloadDistOutput(FILENAME);
@@ -54,6 +53,9 @@ async function main() {
     stopSauceConnect(FILENAME);
   } else {
     printChangeSummary(FILENAME);
+    const buildTargets = new Set();
+    determineBuildTargets(buildTargets, FILENAME);
+
     if (
       !buildTargets.has('RUNTIME') &&
       !buildTargets.has('FLAG_CONFIG') &&

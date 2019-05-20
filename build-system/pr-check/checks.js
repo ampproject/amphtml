@@ -31,6 +31,7 @@ const {
 const {determineBuildTargets} = require('./build-targets');
 const {isTravisPullRequestBuild} = require('../travis');
 const {reportAllExpectedTests} = require('../tasks/runtime-test/status-report');
+const {runYarnChecks} = require('./yarn-checks');
 
 const FILENAME = 'checks.js';
 const timedExecOrDie = (cmd, unusedFileName) =>
@@ -38,7 +39,11 @@ const timedExecOrDie = (cmd, unusedFileName) =>
 
 function main() {
   const startTime = startTimer(FILENAME, FILENAME);
-  const buildTargets = determineBuildTargets(FILENAME);
+  if (!runYarnChecks(FILENAME)) {
+    stopTimer(FILENAME, FILENAME, startTime);
+    process.exitCode = 1;
+    return;
+  }
 
   if (!isTravisPullRequestBuild()) {
     timedExecOrDie('gulp update-packages');
@@ -53,6 +58,13 @@ function main() {
     timedExecOrDie('gulp check-types');
   } else {
     printChangeSummary(FILENAME);
+    const buildTargets = new Set();
+    if (!determineBuildTargets(buildTargets, FILENAME)) {
+      stopTimer(FILENAME, FILENAME, startTime);
+      process.exitCode = 1;
+      return;
+    }
+
     reportAllExpectedTests(buildTargets);
     timedExecOrDie('gulp update-packages');
 

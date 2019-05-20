@@ -40,7 +40,6 @@ const timedExecOrDie = (cmd, unusedFileName) =>
 
 function main() {
   const startTime = startTimer(FILENAME, FILENAME);
-  const buildTargets = determineBuildTargets(FILENAME);
 
   if (!isTravisPullRequestBuild()) {
     downloadBuildOutput(FILENAME);
@@ -49,6 +48,9 @@ function main() {
     timedExecOrDie('gulp visual-diff --nobuild --master');
   } else {
     printChangeSummary(FILENAME);
+    const buildTargets = new Set();
+    determineBuildTargets(buildTargets, FILENAME);
+
     process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
     if (
       buildTargets.has('RUNTIME') ||

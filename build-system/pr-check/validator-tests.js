@@ -30,6 +30,7 @@ const {
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
 const {isTravisPullRequestBuild} = require('../travis');
+const {runYarnChecks} = require('./yarn-checks');
 
 const FILENAME = 'validator-tests.js';
 const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
@@ -38,13 +39,23 @@ const timedExecOrDie = (cmd, unusedFileName) =>
 
 function main() {
   const startTime = startTimer(FILENAME, FILENAME);
-  const buildTargets = determineBuildTargets(FILENAME);
+  if (!runYarnChecks(FILENAME)) {
+    stopTimer(FILENAME, FILENAME, startTime);
+    process.exitCode = 1;
+    return;
+  }
 
   if (!isTravisPullRequestBuild()) {
     timedExecOrDie('gulp validator');
     timedExecOrDie('gulp validator-webui');
   } else {
     printChangeSummary(FILENAME);
+    const buildTargets = new Set();
+    if (!determineBuildTargets(buildTargets, FILENAME)) {
+      stopTimer(FILENAME, FILENAME, startTime);
+      process.exitCode = 1;
+      return;
+    }
 
     if (
       !buildTargets.has('RUNTIME') &&

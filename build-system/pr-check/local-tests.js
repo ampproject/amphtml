@@ -39,7 +39,6 @@ const timedExecOrDie = (cmd, unusedFileName) =>
 
 function main() {
   const startTime = startTimer(FILENAME, FILENAME);
-  const buildTargets = determineBuildTargets(FILENAME);
 
   if (!isTravisPullRequestBuild()) {
     downloadBuildOutput(FILENAME);
@@ -48,6 +47,8 @@ function main() {
     timedExecOrDie('gulp test --unit --nobuild --headless --coverage');
   } else {
     printChangeSummary(FILENAME);
+    const buildTargets = new Set();
+    determineBuildTargets(buildTargets, FILENAME);
 
     if (
       !buildTargets.has('RUNTIME') &&
