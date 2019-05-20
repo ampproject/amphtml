@@ -18,29 +18,14 @@ import {Deferred} from '../../../src/utils/promise';
 import {Observable} from '../../../src/observable';
 import {PositionError} from './position-error';
 import {Services} from '../../../src/services';
-import {devAssert, user, userAssert} from '../../../src/log';
+import {
+  UserLocation,
+  UserLocationSource,
+  parseLocationString,
+} from './user-location';
+import {devAssert, userAssert} from '../../../src/log';
 import {getMode} from '../../../src/mode';
-import {includes} from '../../../src/string';
 import {isCanary} from '../../../src/experiments';
-
-/** @dict @extends {JsonObject} */
-export class UserLocation {
-  /**
-   * @param {UserLocationSource} source
-   * @param {number=} lat
-   * @param {number=} lon
-   */
-  constructor(source, lat = undefined, lon = undefined) {
-    /** @const */
-    this['lat'] = lat;
-
-    /** @const */
-    this['lon'] = lon;
-
-    /** @const */
-    this['source'] = source;
-  }
-}
 
 /**
  * @typedef {{
@@ -85,15 +70,6 @@ export const PermissionStatus = {
   PROMPT: 'prompt',
 };
 
-/** @enum {string} */
-export const UserLocationSource = {
-  DEBUG: 'debug',
-  FALLBACK: 'fallback',
-  GEOLOCATION: 'geolocation',
-  UNAVAILABLE: 'unavailable',
-  UNSUPPORTED: 'unsupported',
-};
-
 /**
  * The reported position will be at most this many milliseconds old.
  */
@@ -106,8 +82,6 @@ const DEFAULT_MAXIMUM_AGE = 60000;
  */
 const DEFAULT_TIMEOUT = 30000;
 
-const LOCATION_SEPARATOR = ',';
-
 export class UserLocationService {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
@@ -116,8 +90,8 @@ export class UserLocationService {
     /** @private */
     this.initialized_ = false;
 
-    /** @private {!UserLocation} */
-    this.cachedLocation_ = new UserLocation(UserLocationSource.UNAVAILABLE);
+    /** @private {?UserLocation} */
+    this.cachedLocation_ = null;
 
     /** @private */
     this.requestedObservable_ = this.createRequestedObservable_();
@@ -222,7 +196,7 @@ export class UserLocationService {
    * Remove variables from global AMP state.
    */
   purge() {
-    this.cachedLocation_ = new UserLocation(UserLocationSource.UNAVAILABLE);
+    this.cachedLocation_ = null;
     this.firstRequestedDeferred_ = null; // After purge, do not allow polling
     this.requestedObservable_ = this.createRequestedObservable_();
   }
@@ -231,7 +205,7 @@ export class UserLocationService {
    * Debug override case, only works in canary or localdev and matches
    * numeric and limited symbolic characters only to prevent xss vector.
    * The regex is not trying to ensure correctness.
-   * @return {?UserLocation|string}
+   * @return {?UserLocation|Error}
    * @private
    */
   getOverride_() {
@@ -243,16 +217,16 @@ export class UserLocationService {
       return null;
     }
 
-    if (includes(getMode(this.win_).userLocationOverride, LOCATION_SEPARATOR)) {
-      const split = getMode(this.win_).userLocationOverride.split(
-        LOCATION_SEPARATOR
-      );
-      const lat = Number(split[0]);
-      const lon = Number(split[1]);
-      return new UserLocation(UserLocationSource.DEBUG, lat, lon);
+    if (getMode(this.win_).userLocationOverride === 'error') {
+      const error = new Error('geolocation simulated error');
+      error.code = PositionError.POSITION_UNAVAILABLE;
+      return error;
     }
 
-    return getMode(this.win_).userLocationOverride;
+    const {lat, lon} = parseLocationString(
+      getMode(this.win_).userLocationOverride
+    );
+    return new UserLocation(UserLocationSource.DEBUG, lat, lon);
   }
 
   /**
@@ -265,7 +239,7 @@ export class UserLocationService {
     const staticResult = this.maybeGetStaticResult_();
     if (staticResult) {
       return staticResult.catch(err => {
-        if (err == PositionError.PLATFORM_UNSUPPORTED) {
+        if (err.code == PositionError.PLATFORM_UNSUPPORTED) {
           return new UserLocation(UserLocationSource.UNSUPPORTED);
         }
         return new UserLocation(UserLocationSource.UNAVAILABLE);
@@ -276,9 +250,14 @@ export class UserLocationService {
       return this.firstRequestedDeferred_.promise;
     }
 
+    if (this.cachedLocation_) {
+      return Promise.resolve(this.cachedLocation_);
+    }
+
     // NOTE: This may be reached with a `null` cachedLocation if the user
     // removes geolocation permission after allowing it.
-    return Promise.resolve(this.cachedLocation_); // TODO(cvializ): add fallback here, when present
+    // NOTE: At this time, `fallback` is not used with `getLocation`
+    return Promise.resolve(new UserLocation(UserLocationSource.UNAVAILABLE));
   }
 
   /**
@@ -326,13 +305,15 @@ export class UserLocationService {
    * @return {!Promise<!UserLocation>}
    */
   requestLocation(config) {
+    const {fallback} = config;
+
     const staticResult = this.maybeGetStaticResult_();
     if (staticResult) {
-      return staticResult;
+      return staticResult.catch(e => handleErrorFallback(e, fallback));
     }
 
     // We only need to initialize the permission listener
-    // if we expect that to change. If override is specified,
+    // if we expect permission to change. If override is specified,
     // we do not expect the permission listener to change.
     if (!this.initialized_) {
       this.initialize_();
@@ -341,7 +322,7 @@ export class UserLocationService {
     const result = getCurrentPosition(
       this.win_,
       /** @type {!PositionOptionsDef} */ ({
-        enableHighAccuracy: config.precision == 'high',
+        enableHighAccuracy: false,
         maximumAge: config.maximumAge || DEFAULT_MAXIMUM_AGE,
         timeout: config.timeout || DEFAULT_TIMEOUT,
       })
@@ -353,7 +334,7 @@ export class UserLocationService {
       () => observable.fire(new UserLocation(UserLocationSource.UNAVAILABLE))
     );
 
-    return result;
+    return result.catch(e => handleErrorFallback(e, fallback));
   }
 
   /**
@@ -364,18 +345,32 @@ export class UserLocationService {
    */
   maybeGetStaticResult_() {
     if (!this.geolocationSupported_) {
-      return Promise.reject(PositionError.PLATFORM_UNSUPPORTED);
+      const error = new Error('geolocation error');
+      error.code = PositionError.PLATFORM_UNSUPPORTED;
+      return Promise.reject(error);
     }
 
     const override = this.getOverride_();
     if (override) {
-      return override == 'error'
-        ? Promise.reject(PositionError.POSITION_UNAVAILABLE)
+      return override instanceof Error
+        ? Promise.reject(override)
         : Promise.resolve(override);
     }
 
     return null;
   }
+}
+
+/**
+ * @param {*} error
+ * @param {UserLocation=} fallback
+ * @return {!Promise}
+ */
+function handleErrorFallback(error, fallback = undefined) {
+  if (fallback) {
+    error.fallback = fallback;
+  }
+  return Promise.reject(error);
 }
 
 /**
@@ -394,18 +389,24 @@ function getCurrentPosition(win, config) {
         );
       },
       error => {
+        // We reject with a different error object than what the standard
+        // method returns so we can extend the error cases with the
+        // PLATFORM_UNSUPPORTED case and future cases if needed.
         const {code} = error;
+        const geolocationError = new Error('geolocation failed');
         switch (code) {
           case error.POSITION_UNAVAILABLE:
-            return reject(PositionError.POSITION_UNAVAILABLE);
+            geolocationError.code = PositionError.POSITION_UNAVAILABLE;
+            break;
           case error.PERMISSION_DENIED:
-            return reject(PositionError.PERMISSION_DENIED);
+            geolocationError.code = PositionError.PERMISSION_DENIED;
+            break;
           case error.TIMEOUT:
-            return reject(PositionError.TIMEOUT);
+            geolocationError.code = PositionError.TIMEOUT;
+            break;
           default:
-            user().error('unknown geolocation error');
-            reject(null);
         }
+        reject(geolocationError);
       },
       config
     );

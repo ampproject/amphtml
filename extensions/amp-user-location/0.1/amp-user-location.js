@@ -18,8 +18,10 @@ import {ActionTrust} from '../../../src/action-constants';
 import {Layout} from '../../../src/layout';
 import {PositionError} from './position-error';
 import {Services} from '../../../src/services';
+import {UserLocation, UserLocationSource} from './user-location';
 import {UserLocationService} from './user-location-service';
 import {createCustomEvent} from '../../../src/event-helper';
+import {dict} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
 import {isJsonScriptTag} from '../../../src/dom';
 import {tryParseJson} from '../../../src/json';
@@ -106,8 +108,19 @@ export class AmpUserLocation extends AMP.BaseElement {
       return null;
     }
 
+    let jsonFallback = json['fallback'];
+    let fallback = null;
+    if (jsonFallback) {
+      jsonFallback = jsonFallback.split(',');
+      fallback = new UserLocation(
+        UserLocationSource.FALLBACK,
+        Number(jsonFallback[0]),
+        Number(jsonFallback[1])
+      );
+    }
+
     return {
-      fallback: json['fallback'],
+      fallback,
       maximumAge: json['maximumAge'],
       precision: json['precision'],
       timeout: json['timeout'],
@@ -129,30 +142,38 @@ export class AmpUserLocation extends AMP.BaseElement {
           /** @type {./user-location-service.UserLocationConfigDef} */ ({});
         return userLocationService.requestLocation(config);
       })
-      .then(position => {
-        this.triggerEvent_(AmpUserLocationEvent.APPROVE, position);
-      })
-      .catch(error => {
-        if (error == PositionError.PERMISSION_DENIED) {
-          this.triggerEvent_(AmpUserLocationEvent.DENY);
-          return;
-        }
+      .then(
+        position => {
+          this.triggerEvent_(AmpUserLocationEvent.APPROVE, position);
+        },
+        error => {
+          if (error.code == PositionError.PERMISSION_DENIED) {
+            this.triggerEvent_(
+              AmpUserLocationEvent.DENY,
+              dict({'fallback': error.fallback})
+            );
+            return;
+          }
 
-        if (
-          error == PositionError.PLATFORM_UNSUPPORTED ||
-          error == PositionError.POSITION_UNAVAILABLE ||
-          error == PositionError.TIMEOUT
-        ) {
-          this.triggerEvent_(AmpUserLocationEvent.ERROR);
+          if (
+            error.code == PositionError.PLATFORM_UNSUPPORTED ||
+            error.code == PositionError.POSITION_UNAVAILABLE ||
+            error.code == PositionError.TIMEOUT
+          ) {
+            this.triggerEvent_(
+              AmpUserLocationEvent.ERROR,
+              dict({'fallback': error.fallback})
+            );
+          }
         }
-      });
+      );
   }
 
   /**
    * Trigger the given AMP action. Triggered when the overlay opens or when
    * the static date picker should receive focus from the attached input.
    * @param {string} name
-   * @param {!./user-location-service.UserLocation=} data
+   * @param {JsonObject=} data
    * @private
    */
   triggerEvent_(name, data = undefined) {

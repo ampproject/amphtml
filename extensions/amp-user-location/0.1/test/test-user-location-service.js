@@ -15,13 +15,10 @@
  */
 
 import * as mode from '../../../../src/mode';
-import {
-  PermissionStatus,
-  UserLocationService,
-  UserLocationSource,
-} from '../user-location-service';
+import {PermissionStatus, UserLocationService} from '../user-location-service';
 import {PositionError} from '../position-error';
 import {Services} from '../../../../src/services';
+import {UserLocationSource} from '../user-location';
 
 describes.sandboxed('user-location-service', {}, () => {
   let win;
@@ -114,7 +111,30 @@ describes.sandboxed('user-location-service', {}, () => {
           throw new Error('should not succeed');
         },
         err => {
-          expect(err).to.equal(PositionError.PERMISSION_DENIED);
+          expect(err.code).to.equal(PositionError.PERMISSION_DENIED);
+        }
+      );
+    });
+
+    it('should return fallback when user denies with fallback', () => {
+      win.navigator.geolocation.getCurrentPosition.callsArgWith(
+        1,
+        getFakeError(PositionError.PERMISSION_DENIED)
+      );
+
+      const fallback = {source: UserLocationSource.FALLBACK, lat: 20, lon: -20};
+      const service = new UserLocationService(new FakeAmpdoc());
+      return service.requestLocation({fallback}).then(
+        () => {
+          throw new Error('should not succeed');
+        },
+        err => {
+          expect(err.code).to.equal(PositionError.PERMISSION_DENIED);
+          expect(err.fallback).to.deep.include({
+            source: UserLocationSource.FALLBACK,
+            lat: 20,
+            lon: -20,
+          });
         }
       );
     });
@@ -131,7 +151,30 @@ describes.sandboxed('user-location-service', {}, () => {
           throw new Error('should not succeed');
         },
         err => {
-          expect(err).to.equal(PositionError.TIMEOUT);
+          expect(err.code).to.equal(PositionError.TIMEOUT);
+        }
+      );
+    });
+
+    it('should return fallback when geolocation timeouts with fallback', () => {
+      win.navigator.geolocation.getCurrentPosition.callsArgWith(
+        1,
+        getFakeError(PositionError.TIMEOUT)
+      );
+
+      const fallback = {source: UserLocationSource.FALLBACK, lat: 20, lon: -20};
+      const service = new UserLocationService(new FakeAmpdoc());
+      return service.requestLocation({fallback}).then(
+        () => {
+          throw new Error('should not succeed');
+        },
+        err => {
+          expect(err.code).to.equal(PositionError.TIMEOUT);
+          expect(err.fallback).to.deep.include({
+            source: UserLocationSource.FALLBACK,
+            lat: 20,
+            lon: -20,
+          });
         }
       );
     });
@@ -148,7 +191,30 @@ describes.sandboxed('user-location-service', {}, () => {
           throw new Error('should not succeed');
         },
         err => {
-          expect(err).to.equal(PositionError.POSITION_UNAVAILABLE);
+          expect(err.code).to.equal(PositionError.POSITION_UNAVAILABLE);
+        }
+      );
+    });
+
+    it('should return fallback when geolocation is unavailable with fallback', () => {
+      win.navigator.geolocation.getCurrentPosition.callsArgWith(
+        1,
+        getFakeError(PositionError.POSITION_UNAVAILABLE)
+      );
+
+      const fallback = {source: UserLocationSource.FALLBACK, lat: 20, lon: -20};
+      const service = new UserLocationService(new FakeAmpdoc());
+      return service.requestLocation({fallback}).then(
+        () => {
+          throw new Error('should not succeed');
+        },
+        err => {
+          expect(err.code).to.equal(PositionError.POSITION_UNAVAILABLE);
+          expect(err.fallback).to.deep.include({
+            source: UserLocationSource.FALLBACK,
+            lat: 20,
+            lon: -20,
+          });
         }
       );
     });
@@ -160,16 +226,37 @@ describes.sandboxed('user-location-service', {}, () => {
       );
 
       const service = new UserLocationService(new FakeAmpdoc());
-      let promise;
-      allowConsoleError(() => {
-        promise = service.requestLocation({});
-      });
-      return promise.then(
+      return service.requestLocation({}).then(
         () => {
           throw new Error('should not succeed');
         },
         err => {
-          expect(err).to.equal(null);
+          expect(err).to.match(/geolocation/);
+          expect(err.code).to.equal(undefined);
+        }
+      );
+    });
+
+    it('should return fallback when an unknown error occurs with fallback', () => {
+      win.navigator.geolocation.getCurrentPosition.callsArgWith(
+        1,
+        getFakeError(-1)
+      );
+
+      const fallback = {source: UserLocationSource.FALLBACK, lat: 20, lon: -20};
+      const service = new UserLocationService(new FakeAmpdoc());
+      return service.requestLocation({fallback}).then(
+        () => {
+          throw new Error('should not succeed');
+        },
+        err => {
+          expect(err).to.match(/geolocation/);
+          expect(err.code).to.equal(undefined);
+          expect(err.fallback).to.deep.include({
+            source: UserLocationSource.FALLBACK,
+            lat: 20,
+            lon: -20,
+          });
         }
       );
     });
@@ -188,7 +275,32 @@ describes.sandboxed('user-location-service', {}, () => {
           throw new Error('should not succeed');
         },
         err => {
-          expect(err).to.equal(PositionError.PLATFORM_UNSUPPORTED);
+          expect(err.code).to.equal(PositionError.PLATFORM_UNSUPPORTED);
+        }
+      );
+    });
+
+    it('should return fallback when geolocation is not supported with fallback', () => {
+      platformService.isChrome.returns(true);
+      viewerService.isEmbedded.returns(true);
+      win.navigator.geolocation.getCurrentPosition.callsArgWith(
+        0,
+        getFakePosition(10, -10)
+      );
+
+      const fallback = {source: UserLocationSource.FALLBACK, lat: 20, lon: -20};
+      const service = new UserLocationService(new FakeAmpdoc());
+      return service.requestLocation({fallback}).then(
+        () => {
+          throw new Error('should not succeed');
+        },
+        err => {
+          expect(err.code).to.equal(PositionError.PLATFORM_UNSUPPORTED);
+          expect(err.fallback).to.deep.include({
+            source: UserLocationSource.FALLBACK,
+            lat: 20,
+            lon: -20,
+          });
         }
       );
     });
@@ -202,7 +314,27 @@ describes.sandboxed('user-location-service', {}, () => {
           throw new Error('should not succeed');
         },
         err => {
-          expect(err).to.equal(PositionError.PLATFORM_UNSUPPORTED);
+          expect(err.code).to.equal(PositionError.PLATFORM_UNSUPPORTED);
+        }
+      );
+    });
+
+    it('should return fallback when geolocation is not available with fallback', () => {
+      delete win.navigator.geolocation;
+
+      const fallback = {source: UserLocationSource.FALLBACK, lat: 20, lon: -20};
+      const service = new UserLocationService(new FakeAmpdoc());
+      return service.requestLocation({fallback}).then(
+        () => {
+          throw new Error('should not succeed');
+        },
+        err => {
+          expect(err.code).to.equal(PositionError.PLATFORM_UNSUPPORTED);
+          expect(err.fallback).to.deep.include({
+            source: UserLocationSource.FALLBACK,
+            lat: 20,
+            lon: -20,
+          });
         }
       );
     });
@@ -229,7 +361,8 @@ describes.sandboxed('user-location-service', {}, () => {
           throw new Error('should not succeed');
         },
         err => {
-          expect(err).to.equal(PositionError.POSITION_UNAVAILABLE);
+          expect(err.message).to.match(/geolocation/);
+          expect(err.code).to.equal(PositionError.POSITION_UNAVAILABLE);
         }
       );
     });
@@ -293,7 +426,7 @@ describes.sandboxed('user-location-service', {}, () => {
         .requestLocation({})
         .catch(error => {
           // swallow the error
-          expect(error).to.equal(PositionError.PERMISSION_DENIED);
+          expect(error.code).to.equal(PositionError.PERMISSION_DENIED);
         })
         .then(() => {
           return service.getLocation();

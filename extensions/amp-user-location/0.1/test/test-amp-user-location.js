@@ -17,6 +17,7 @@
 import {AmpUserLocationEvent} from '../amp-user-location';
 import {PositionError} from '../position-error';
 import {Services} from '../../../../src/services';
+import {UserLocationSource} from '../user-location';
 import {toggleExperiment} from '../../../../src/experiments';
 
 describes.realWin(
@@ -98,7 +99,7 @@ describes.realWin(
     it('should parse recognized fields in the config', () => {
       const testConfig = {
         fallback: '40,-22',
-        maxAge: 60000,
+        maximumAge: 60000,
         precision: 'low',
         timeout: 10000,
         doNotExpose: 'wow',
@@ -109,9 +110,9 @@ describes.realWin(
           return element.getImpl();
         })
         .then(impl => {
-          expect(impl.config_).to.include({
-            fallback: '40,-22',
-            maxAge: 60000,
+          expect(impl.config_).to.deep.include({
+            fallback: {source: 'fallback', lat: 40, lon: -22},
+            maximumAge: 60000,
             timeout: 10000,
           });
           expect(impl.config_).to.not.have.property('doNotExpose');
@@ -145,9 +146,9 @@ describes.realWin(
 
     it('should trigger the "deny" event if user denies geolocation', () => {
       class UserLocationFake {}
-      UserLocationFake.prototype.requestLocation = sandbox
-        .stub()
-        .rejects(PositionError.PERMISSION_DENIED);
+      UserLocationFake.prototype.requestLocation = sandbox.stub().rejects({
+        code: PositionError.PERMISSION_DENIED,
+      });
       sandbox
         .stub(Services, 'userLocationForDocOrNull')
         .resolves(new UserLocationFake());
@@ -164,11 +165,46 @@ describes.realWin(
         });
     });
 
+    it(
+      'should trigger the "deny" event with fallback if user' +
+        ' denies geolocation',
+      () => {
+        class UserLocationFake {}
+        UserLocationFake.prototype.requestLocation = sandbox.stub().rejects({
+          code: PositionError.PERMISSION_DENIED,
+          fallback: {source: UserLocationSource.FALLBACK, lat: 20, lon: -20},
+        });
+        sandbox
+          .stub(Services, 'userLocationForDocOrNull')
+          .resolves(new UserLocationFake());
+
+        let triggerSpy;
+        return newUserLocation({fallback: '20,-20'})
+          .then(element => element.getImpl())
+          .then(impl => {
+            triggerSpy = sandbox.spy(impl, 'triggerEvent_');
+            return impl.userLocationInteraction_();
+          })
+          .then(() => {
+            expect(triggerSpy).to.have.been.calledWith(
+              AmpUserLocationEvent.DENY,
+              {
+                'fallback': {
+                  'source': UserLocationSource.FALLBACK,
+                  'lat': 20,
+                  'lon': -20,
+                },
+              }
+            );
+          });
+      }
+    );
+
     it('should trigger the "error" event if geolocation timeouts', () => {
       class UserLocationFake {}
-      UserLocationFake.prototype.requestLocation = sandbox
-        .stub()
-        .rejects(PositionError.TIMEOUT);
+      UserLocationFake.prototype.requestLocation = sandbox.stub().rejects({
+        code: PositionError.TIMEOUT,
+      });
       sandbox
         .stub(Services, 'userLocationForDocOrNull')
         .resolves(new UserLocationFake());
@@ -187,11 +223,46 @@ describes.realWin(
         });
     });
 
+    it(
+      'should trigger the "error" event with fallback if ' +
+        'geolocation timeouts',
+      () => {
+        class UserLocationFake {}
+        UserLocationFake.prototype.requestLocation = sandbox.stub().rejects({
+          code: PositionError.TIMEOUT,
+          fallback: {source: UserLocationSource.FALLBACK, lat: 20, lon: -20},
+        });
+        sandbox
+          .stub(Services, 'userLocationForDocOrNull')
+          .resolves(new UserLocationFake());
+
+        let triggerSpy;
+        return newUserLocation({fallback: '20,-20'})
+          .then(element => element.getImpl())
+          .then(impl => {
+            triggerSpy = sandbox.spy(impl, 'triggerEvent_');
+            return impl.userLocationInteraction_();
+          })
+          .then(() => {
+            expect(triggerSpy).to.have.been.calledWith(
+              AmpUserLocationEvent.ERROR,
+              {
+                'fallback': {
+                  'source': UserLocationSource.FALLBACK,
+                  'lat': 20,
+                  'lon': -20,
+                },
+              }
+            );
+          });
+      }
+    );
+
     it('should trigger the "error" event if geolocation is unavailable', () => {
       class UserLocationFake {}
       UserLocationFake.prototype.requestLocation = sandbox
         .stub()
-        .rejects(PositionError.POSITION_UNAVAILABLE);
+        .rejects({code: PositionError.POSITION_UNAVAILABLE});
       sandbox
         .stub(Services, 'userLocationForDocOrNull')
         .resolves(new UserLocationFake());
@@ -217,7 +288,7 @@ describes.realWin(
         class UserLocationFake {}
         UserLocationFake.prototype.requestLocation = sandbox
           .stub()
-          .rejects(PositionError.PLATFORM_UNSUPPORTED);
+          .rejects({code: PositionError.PLATFORM_UNSUPPORTED});
         sandbox
           .stub(Services, 'userLocationForDocOrNull')
           .resolves(new UserLocationFake());
@@ -236,29 +307,5 @@ describes.realWin(
           });
       }
     );
-
-    it('should "approve" with override if override is present', () => {
-      class UserLocationFake {}
-      UserLocationFake.prototype.requestLocation = sandbox
-        .stub()
-        .callsFake(() => ({lat: 10, lon: -10}));
-      sandbox
-        .stub(Services, 'userLocationForDocOrNull')
-        .resolves(new UserLocationFake());
-
-      let triggerSpy;
-      return newUserLocation()
-        .then(element => element.getImpl())
-        .then(impl => {
-          triggerSpy = sandbox.spy(impl, 'triggerEvent_');
-          return impl.userLocationInteraction_();
-        })
-        .then(() => {
-          expect(triggerSpy).to.have.been.calledWith(
-            AmpUserLocationEvent.APPROVE,
-            {lat: 10, lon: -10}
-          );
-        });
-    });
   }
 );
