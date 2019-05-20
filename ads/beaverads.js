@@ -1,7 +1,4 @@
 /**
- * @fileoverview Description of this file.
- */
-/**
  * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,16 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-'use strict';
 
-const {verifySelectorsVisible} = require('../../../build-system/tasks/visual-diff/helpers');
+import {loadScript, validateData} from '../3p/3p';
 
-module.exports = {
-  // Since the sidebar now uses animations to open/close, the screenshots will
-  // not capture the correct state (Percy does not run animations).
-  // 'open sidebar toolbar': async (page, name) => {
-  //   await page.tap('[on="tap:sidebar.toggle"]');
-  //   await verifySelectorsVisible(page, name, ['amp-sidebar[open]']);
-  //   await verifySelectorsVisible(page, name, ['nav[toolbar]']);
-  // },
-};
+/**
+ * @param {!Window} global
+ * @param {!Object} data
+ */
+export function beaverads(global, data) {
+  validateData(data, ['blockId']);
+
+  const url = 'https://code.beaverads.com/data/' +
+      encodeURIComponent(data['blockId']) + '.js?async=1&div=c';
+
+  loadScript(global, url, () => {
+    global.context.renderStart();
+  }, () => {
+    global.context.noContentAvailable();
+  });
+
+}
