@@ -16,12 +16,12 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
+const del = require('del');
 const fs = require('fs-extra');
 const gulp = require('gulp');
 const gulpIf = require('gulp-if');
 const nop = require('gulp-nop');
 const rename = require('gulp-rename');
-const rimraf = require('rimraf');
 const sourcemaps = require('gulp-sourcemaps');
 const {
   gulpClosureCompile,
@@ -79,8 +79,8 @@ exports.closureCompile = async function(
 };
 
 function cleanupBuildDir() {
-  rimraf.sync('build/fake-module');
-  rimraf.sync('build/patched-module');
+  del.sync('build/fake-module');
+  del.sync('build/patched-module');
   fs.mkdirsSync('build/patched-module/document-register-element/build');
   fs.mkdirsSync('build/fake-module/third_party/babel');
   fs.mkdirsSync('build/fake-module/src/polyfills/');
