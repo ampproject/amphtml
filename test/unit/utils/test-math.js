@@ -142,17 +142,15 @@ describes.sandboxed('utils/math', {}, () => {
       expect(boundValue(1000, -Infinity, Infinity, Infinity)).to.equal(1000);
     });
 
-    it('should not bound if larger than the range but within the extent',
-        () => {
-          expect(boundValue(1.2, 0, 1, 0.3)).to.equal(1.2);
-          expect(boundValue(1, -20, 0, 3)).to.equal(1);
-        });
+    it('should not bound if larger than the range but within the extent', () => {
+      expect(boundValue(1.2, 0, 1, 0.3)).to.equal(1.2);
+      expect(boundValue(1, -20, 0, 3)).to.equal(1);
+    });
 
-    it('should not bound if smaller than the range but within the extent',
-        () => {
-          expect(boundValue(-0.2, 0, 1, 0.3)).to.equal(-0.2);
-          expect(boundValue(-22, -20, 0, 3)).to.equal(-22);
-        });
+    it('should not bound if smaller than the range but within the extent', () => {
+      expect(boundValue(-0.2, 0, 1, 0.3)).to.equal(-0.2);
+      expect(boundValue(-22, -20, 0, 3)).to.equal(-22);
+    });
 
     it('should be inclusive of the extended range', () => {
       expect(boundValue(1.3, 0, 1, 0.3)).to.equal(1.3);
@@ -208,13 +206,12 @@ describes.sandboxed('utils/math', {}, () => {
       expect(magnitude(-1.5, -2.5)).be.closeTo(2.915, 0.001);
     });
 
-    it('should yield the absolute value of one delta if the other is zero',
-        () => {
-          expect(magnitude(3, 0)).to.equal(3);
-          expect(magnitude(0, 4)).to.equal(4);
-          expect(magnitude(-1.5, 0)).to.equal(1.5);
-          expect(magnitude(0, -0.0005)).to.equal(0.0005);
-        });
+    it('should yield the absolute value of one delta if the other is zero', () => {
+      expect(magnitude(3, 0)).to.equal(3);
+      expect(magnitude(0, 4)).to.equal(4);
+      expect(magnitude(-1.5, 0)).to.equal(1.5);
+      expect(magnitude(0, -0.0005)).to.equal(0.0005);
+    });
 
     it('should yield zero for the zero-vector', () => {
       expect(magnitude(0, 0)).to.equal(0);

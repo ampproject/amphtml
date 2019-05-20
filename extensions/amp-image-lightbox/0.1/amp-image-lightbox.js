@@ -415,8 +415,12 @@ export class ImageViewer {
    * @private
    */
   boundScale_(s, allowExtent) {
-    return boundValue(s, this.minScale_, this.maxScale_,
-        allowExtent ? 0.25 : 0);
+    return boundValue(
+      s,
+      this.minScale_,
+      this.maxScale_,
+      allowExtent ? 0.25 : 0
+    );
   }
 
   /**
@@ -427,8 +431,12 @@ export class ImageViewer {
    * @private
    */
   boundX_(x, allowExtent) {
-    return boundValue(x, this.minX_, this.maxX_,
-        allowExtent && this.scale_ > 1 ? this.viewerBox_.width * 0.25 : 0);
+    return boundValue(
+      x,
+      this.minX_,
+      this.maxX_,
+      allowExtent && this.scale_ > 1 ? this.viewerBox_.width * 0.25 : 0
+    );
   }
 
   /**
@@ -439,8 +447,12 @@ export class ImageViewer {
    * @private
    */
   boundY_(y, allowExtent) {
-    return boundValue(y, this.minY_, this.maxY_,
-        allowExtent ? this.viewerBox_.height * 0.25 : 0);
+    return boundValue(
+      y,
+      this.minY_,
+      this.maxY_,
+      allowExtent ? this.viewerBox_.height * 0.25 : 0
+    );
   }
 
   /**
@@ -1067,7 +1079,7 @@ class AmpImageLightbox extends AMP.BaseElement {
       const scaleX = rect.width != 0 ? imageBox.width / rect.width : 1;
       // Duration will be somewhere between 0.2 and 0.8 depending on how far
       // the image needs to move.
-      const motionTime = clamp(Math.abs(dy) / 250 * 0.8, 0.2, 0.8);
+      const motionTime = clamp((Math.abs(dy) / 250) * 0.8, 0.2, 0.8);
       anim.add(
         0,
         tr.setStyles(clone, {
@@ -1185,7 +1197,7 @@ class AmpImageLightbox extends AMP.BaseElement {
       // Duration will be somewhere between 0.2 and 0.8 depending on how far
       // the image needs to move. Start the motion later too, but no later
       // than 0.2.
-      const motionTime = clamp(Math.abs(dy) / 250 * 0.8, 0.2, 0.8);
+      const motionTime = clamp((Math.abs(dy) / 250) * 0.8, 0.2, 0.8);
       anim.add(
         Math.min(0.8 - motionTime, 0.2),
         (time, complete) => {
@@ -1210,7 +1222,7 @@ class AmpImageLightbox extends AMP.BaseElement {
 
       // Duration will be somewhere between 300ms and 700ms depending on
       // how far the image needs to move.
-      dur = clamp(Math.abs(dy) / 250 * dur, 300, dur);
+      dur = clamp((Math.abs(dy) / 250) * dur, 300, dur);
     }
 
     return anim.start(dur).thenAlways(() => {

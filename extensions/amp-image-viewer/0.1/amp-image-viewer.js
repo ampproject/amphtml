@@ -552,8 +552,12 @@ export class AmpImageViewer extends AMP.BaseElement {
    * @private
    */
   boundScale_(s, allowExtent) {
-    return boundValue(s, this.minScale_, this.maxScale_,
-        allowExtent ? 0.25 : 0);
+    return boundValue(
+      s,
+      this.minScale_,
+      this.maxScale_,
+      allowExtent ? 0.25 : 0
+    );
   }
 
   /**
@@ -564,8 +568,12 @@ export class AmpImageViewer extends AMP.BaseElement {
    * @private
    */
   boundX_(x, allowExtent) {
-    return boundValue(x, this.minX_, this.maxX_,
-        allowExtent && this.scale_ > 1 ? this.elementBox_.width * 0.25 : 0);
+    return boundValue(
+      x,
+      this.minX_,
+      this.maxX_,
+      allowExtent && this.scale_ > 1 ? this.elementBox_.width * 0.25 : 0
+    );
   }
 
   /**
@@ -576,8 +584,12 @@ export class AmpImageViewer extends AMP.BaseElement {
    * @private
    */
   boundY_(y, allowExtent) {
-    return boundValue(y, this.minY_, this.maxY_,
-        allowExtent ? this.elementBox_.height * 0.25 : 0);
+    return boundValue(
+      y,
+      this.minY_,
+      this.maxY_,
+      allowExtent ? this.elementBox_.height * 0.25 : 0
+    );
   }
 
   /**
