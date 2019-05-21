@@ -66,6 +66,9 @@ describes.realWin(
         .map((unused, i) => {
           const page = win.document.createElement('amp-story-page');
           page.id = opt_ids && opt_ids[i] ? opt_ids[i] : `-page-${i}`;
+          page.signals = () => ({
+            whenSignal: () => Promise.resolve(),
+          });
           container.appendChild(page);
           return page;
         });

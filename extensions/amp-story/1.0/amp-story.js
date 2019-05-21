@@ -1052,7 +1052,9 @@ export class AmpStory extends AMP.BaseElement {
         : [this.pages_[0]];
 
     const storyLoadPromise = Promise.all(
-      pagesToWaitFor.filter(page => !!page).map(page => page.whenLoaded())
+      pagesToWaitFor
+        .filter(page => !!page)
+        .map(page => page.element.signals().whenSignal(CommonSignals.LOAD_END))
     );
 
     return this.timer_
@@ -2214,8 +2216,9 @@ export class AmpStory extends AMP.BaseElement {
     // Once the media pool is ready, registers and preloads the background
     // audio, and then gets the swapped element from the DOM to mute/unmute/play
     // it programmatically later.
-    this.activePage_
-      .whenLoaded()
+    this.activePage_.element
+      .signals()
+      .whenSignal(CommonSignals.LOAD_END)
       .then(() => {
         backgroundAudioEl = /** @type {!HTMLMediaElement} */ (backgroundAudioEl);
         this.mediaPool_.register(backgroundAudioEl);
