@@ -37,14 +37,6 @@ function isBinaryConcat(node) {
  * @param {!Node} node
  * @return {boolean}
  */
-function isLiteralString(node) {
-  return node.type === 'Literal' && typeof node.value === 'string';
-}
-
-/**
- * @param {!Node} node
- * @return {boolean}
- */
 function hasTemplateLiteral(node) {
   if (node.type === 'TemplateLiteral') {
     return true;

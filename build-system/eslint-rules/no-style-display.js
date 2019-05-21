@@ -15,8 +15,6 @@
  */
 'use strict';
 
-const path = require('path');
-
 module.exports = function(context) {
   const setStyleCall = 'CallExpression[callee.name=setStyle]';
   const setStylesCall =

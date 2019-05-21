@@ -75,7 +75,6 @@ module.exports = {
           return;
         }
         for (let i = 0; i < specifiers.length; i++) {
-          const spec = specifiers[i];
           if (specifiers[i].type === 'ImportNamespaceSpecifier') {
             return;
           }
