@@ -2232,6 +2232,7 @@ tags: {
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
+  attrs: { name: "slot" }
   attrs: {
     name: "src"
     alternative_names: "srcset"
