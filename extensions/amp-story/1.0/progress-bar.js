@@ -94,8 +94,9 @@ export class ProgressBar {
     this.root_.classList.add('i-amphtml-story-progress-bar');
 
     this.storeService_.subscribe(
-      StateProperty.STORY_PAGE_IDS,
+      StateProperty.PAGE_IDS,
       pageIds => {
+        // Assumes the new page is the last page.
         pageIds.forEach(id => {
           if (!(id in this.segmentIdMap_)) {
             this.addSegment_(id);
