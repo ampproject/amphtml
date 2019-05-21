@@ -1,5 +1,5 @@
 ---
-$category: presentation
+$category@: presentation
 formats:
   - ads-analytics
   - websites
