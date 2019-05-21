@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 /**
  * @fileoverview Embeds an instagram photo. The data-shortcode attribute can be
  * easily copied from a normal instagram URL. Example: <code> <amp-instagram
@@ -47,7 +46,6 @@ import {tryParseJson} from '../../../src/json';
 import {userAssert} from '../../../src/log';
 
 class AmpInstagram extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -55,7 +53,7 @@ class AmpInstagram extends AMP.BaseElement {
     /** @private {?Element} */
     this.iframe_ = null;
 
-    /** @private {?string} */
+    /** @private {string} */
     this.shortcode_ = '';
 
     /** @private {?Function} */
@@ -65,23 +63,25 @@ class AmpInstagram extends AMP.BaseElement {
     this.captioned_ = '';
 
     /**
-    * @private {?Promise}
-    * @visibleForTesting
-    */
+     * @private {?Promise}
+     * @visibleForTesting
+     */
     this.iframePromise_ = null;
   }
   /**
-  * @param {boolean=} opt_onLayout
-  * @override
-  */
+   * @param {boolean=} opt_onLayout
+   * @override
+   */
   preconnectCallback(opt_onLayout) {
     // See
     // https://instagram.com/developer/embedding/?hl=en
     this.preconnect.url('https://www.instagram.com', opt_onLayout);
     // Host instagram used for image serving. While the host name is
     // funky this appears to be stable in the post-domain sharding era.
-    this.preconnect.url('https://instagram.fsnc1-1.fna.fbcdn.net',
-        opt_onLayout);
+    this.preconnect.url(
+      'https://instagram.fsnc1-1.fna.fbcdn.net',
+      opt_onLayout
+    );
   }
 
   /** @override */
@@ -92,12 +92,14 @@ class AmpInstagram extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.shortcode_ = userAssert(
-        (this.element.getAttribute('data-shortcode') ||
-        this.element.getAttribute('shortcode')),
-        'The data-shortcode attribute is required for <amp-instagram> %s',
-        this.element);
-    this.captioned_ = this.element.hasAttribute('data-captioned') ?
-      'captioned/' : '';
+      this.element.getAttribute('data-shortcode') ||
+        this.element.getAttribute('shortcode'),
+      'The data-shortcode attribute is required for <amp-instagram> %s',
+      this.element
+    );
+    this.captioned_ = this.element.hasAttribute('data-captioned')
+      ? 'captioned/'
+      : '';
   }
 
   /** @override */
@@ -108,8 +110,12 @@ class AmpInstagram extends AMP.BaseElement {
     image.setAttribute('noprerender', '');
     // This will redirect to the image URL. By experimentation this is
     // always the same URL that is actually used inside of the embed.
-    image.setAttribute('src', 'https://www.instagram.com/p/' +
-        encodeURIComponent(this.shortcode_) + '/media/?size=l');
+    image.setAttribute(
+      'src',
+      'https://www.instagram.com/p/' +
+        encodeURIComponent(this.shortcode_) +
+        '/media/?size=l'
+    );
     image.setAttribute('layout', 'fill');
     image.setAttribute('referrerpolicy', 'origin');
 
@@ -144,32 +150,37 @@ class AmpInstagram extends AMP.BaseElement {
     this.iframe_ = iframe;
 
     this.unlistenMessage_ = listen(
-        this.win,
-        'message',
-        this.handleInstagramMessages_.bind(this)
+      this.win,
+      'message',
+      this.handleInstagramMessages_.bind(this)
     );
 
     iframe.setAttribute('scrolling', 'no');
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowtransparency', 'true');
     //Add title to the iframe for better accessibility.
-    iframe.setAttribute('title', 'Instagram: ' +
-        this.element.getAttribute('alt'));
-    iframe.src = 'https://www.instagram.com/p/' +
-        encodeURIComponent(this.shortcode_) + '/embed/' +
-        this.captioned_ + '?cr=1&v=9';
+    iframe.setAttribute(
+      'title',
+      'Instagram: ' + this.element.getAttribute('alt')
+    );
+    iframe.src =
+      'https://www.instagram.com/p/' +
+      encodeURIComponent(this.shortcode_) +
+      '/embed/' +
+      this.captioned_ +
+      '?cr=1&v=9';
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
     setStyles(iframe, {
       'opacity': 0,
     });
-    return this.iframePromise_ = this.loadPromise(iframe).then(() => {
+    return (this.iframePromise_ = this.loadPromise(iframe).then(() => {
       this.getVsync().mutate(() => {
         setStyles(iframe, {
           'opacity': 1,
         });
       });
-    });
+    }));
   }
 
   /**
@@ -177,13 +188,20 @@ class AmpInstagram extends AMP.BaseElement {
    * @private
    */
   handleInstagramMessages_(event) {
-    if (event.origin != 'https://www.instagram.com' ||
-        event.source != this.iframe_.contentWindow) {
+    if (
+      event.origin != 'https://www.instagram.com' ||
+      event.source != this.iframe_.contentWindow
+    ) {
       return;
     }
     const eventData = getData(event);
-    if (!eventData || !(isObject(eventData)
-        || startsWith(/** @type {string} */ (eventData), '{'))) {
+    if (
+      !eventData ||
+      !(
+        isObject(eventData) ||
+        startsWith(/** @type {string} */ (eventData), '{')
+      )
+    ) {
       return; // Doesn't look like JSON.
     }
     const data = isObject(eventData) ? eventData : tryParseJson(eventData);
@@ -193,8 +211,8 @@ class AmpInstagram extends AMP.BaseElement {
     if (data['type'] == 'MEASURE' && data['details']) {
       const height = data['details']['height'];
       this.getVsync().measure(() => {
-        if (this.iframe_ && this.iframe_./*OK*/offsetHeight !== height) {
-          this./*OK*/changeHeight(height);
+        if (this.iframe_ && this.iframe_./*OK*/ offsetHeight !== height) {
+          this./*OK*/ changeHeight(height);
         }
       });
     }
@@ -218,7 +236,6 @@ class AmpInstagram extends AMP.BaseElement {
     return true; // Call layoutCallback again.
   }
 }
-
 
 AMP.extension('amp-instagram', '0.1', AMP => {
   AMP.registerElement('amp-instagram', AmpInstagram, CSS);

@@ -22,10 +22,7 @@
  * impacts on click-throughs.
  */
 
-import {
-  EXPERIMENT_ATTRIBUTE,
-  mergeExperimentIds,
-} from './utils';
+import {EXPERIMENT_ATTRIBUTE, mergeExperimentIds} from './utils';
 import {
   ExperimentInfo, // eslint-disable-line no-unused-vars
   isExperimentOn,
@@ -43,12 +40,23 @@ export let A4aExperimentBranches;
 export const MANUAL_EXPERIMENT_ID = '117152632';
 
 /**
+ * Experiment IDs used to identify single pass experiments.
+ *
+ * @enum {string}
+ */
+export const SINGLE_PASS_EXPERIMENT_IDS = {
+  MULTI_PASS: '21063529',
+  SINGLE_PASS: '21063530',
+};
+
+/**
  * @param {!Window} win
  * @param {!Element} element Ad tag Element.
  * @return {?string} experiment extracted from page url.
  */
 export function extractUrlExperimentId(win, element) {
-  const expParam = Services.viewerForDoc(element).getParam('exp') ||
+  const expParam =
+    Services.viewerForDoc(element).getParam('exp') ||
     parseQueryString(win.location.search)['exp'];
   if (!expParam) {
     return null;
@@ -56,15 +64,20 @@ export function extractUrlExperimentId(win, element) {
   // Allow for per type experiment control with Doubleclick key set for 'da'
   // and AdSense using 'aa'.  Fallback to 'a4a' if type specific is missing.
   const expKeys = [
-    (element.getAttribute('type') || '').toLowerCase() == 'doubleclick' ?
-      'da' : 'aa',
+    (element.getAttribute('type') || '').toLowerCase() == 'doubleclick'
+      ? 'da'
+      : 'aa',
     'a4a',
   ];
   let arg;
   let match;
-  expKeys.forEach(key => arg = arg ||
-    ((match = new RegExp(`(?:^|,)${key}:(-?\\d+)`).exec(expParam)) &&
-      match[1]));
+  expKeys.forEach(
+    key =>
+      (arg =
+        arg ||
+        ((match = new RegExp(`(?:^|,)${key}:(-?\\d+)`).exec(expParam)) &&
+          match[1]))
+  );
   return arg || null;
 }
 
@@ -100,7 +113,10 @@ export function parseExperimentIds(idString) {
  */
 export function isInExperiment(element, id) {
   return parseExperimentIds(element.getAttribute(EXPERIMENT_ATTRIBUTE)).some(
-      x => { return x === id; });
+    x => {
+      return x === id;
+    }
+  );
 }
 
 /**
@@ -146,7 +162,9 @@ export function hasLaunched(win, element) {
  * @return {boolean} Whether all list elements are valid experiment IDs.
  */
 export function validateExperimentIds(idList) {
-  return idList.every(id => { return !isNaN(parseInt(id, 10)); });
+  return idList.every(id => {
+    return !isNaN(parseInt(id, 10));
+  });
 }
 
 /**
@@ -162,8 +180,10 @@ export function addExperimentIdToElement(experimentId, element) {
   }
   const currentEids = element.getAttribute(EXPERIMENT_ATTRIBUTE);
   if (currentEids && validateExperimentIds(parseExperimentIds(currentEids))) {
-    element.setAttribute(EXPERIMENT_ATTRIBUTE,
-        mergeExperimentIds([experimentId], currentEids));
+    element.setAttribute(
+      EXPERIMENT_ATTRIBUTE,
+      mergeExperimentIds([experimentId], currentEids)
+    );
   } else {
     element.setAttribute(EXPERIMENT_ATTRIBUTE, experimentId);
   }

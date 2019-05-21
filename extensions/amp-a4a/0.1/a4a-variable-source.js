@@ -23,7 +23,6 @@ import {
 } from '../../../src/service/variable-source';
 import {user, userAssert} from '../../../src/log';
 
-
 const WHITELISTED_VARIABLES = [
   'AMPDOC_HOST',
   'AMPDOC_HOSTNAME',
@@ -102,19 +101,27 @@ export class A4AVariableSource extends VariableSource {
     }
 
     this.set('NAV_TIMING', (startAttribute, endAttribute) => {
-      userAssert(startAttribute, 'The first argument to NAV_TIMING, the' +
-          ' start attribute name, is required');
+      userAssert(
+        startAttribute,
+        'The first argument to NAV_TIMING, the' +
+          ' start attribute name, is required'
+      );
       return getTimingDataSync(
-          this.win_,
-          /**@type {string}*/(startAttribute),
-          /**@type {string}*/(endAttribute));
+        this.win_,
+        /**@type {string}*/ (startAttribute),
+        /**@type {string}*/ (endAttribute)
+      );
     }).setAsync('NAV_TIMING', (startAttribute, endAttribute) => {
-      userAssert(startAttribute, 'The first argument to NAV_TIMING, the' +
-          ' start attribute name, is required');
+      userAssert(
+        startAttribute,
+        'The first argument to NAV_TIMING, the' +
+          ' start attribute name, is required'
+      );
       return getTimingDataAsync(
-          this.win_,
-          /**@type {string}*/(startAttribute),
-          /**@type {string}*/(endAttribute));
+        this.win_,
+        /**@type {string}*/ (startAttribute),
+        /**@type {string}*/ (endAttribute)
+      );
     });
 
     this.set('NAV_TYPE', () => {
@@ -125,33 +132,10 @@ export class A4AVariableSource extends VariableSource {
       return getNavigationData(this.win_, 'redirectCount');
     });
 
-    // TODO: Remove once the migration to NAV_TIMING is done
-    this.set('AD_NAV_TIMING', (startAttribute, endAttribute) => {
-      userAssert(startAttribute, 'The first argument to AD_NAV_TIMING, the' +
-          ' start attribute name, is required');
-      return getTimingDataSync(
-          this.win_,
-          /**@type {string}*/(startAttribute),
-          /**@type {string}*/(endAttribute));
-    }).setAsync('AD_NAV_TIMING', (startAttribute, endAttribute) => {
-      userAssert(startAttribute, 'The first argument to AD_NAV_TIMING, the' +
-          ' start attribute name, is required');
-      return getTimingDataAsync(
-          this.win_,
-          /**@type {string}*/(startAttribute),
-          /**@type {string}*/(endAttribute));
-    });
-
-    this.set('AD_NAV_TYPE', () => {
-      return getNavigationData(this.win_, 'type');
-    });
-
-    this.set('AD_NAV_REDIRECT_COUNT', () => {
-      return getNavigationData(this.win_, 'redirectCount');
-    });
-
-    this.set('HTML_ATTR',
-        /** @type {function(...*)} */(this.htmlAttributeBinding_.bind(this)));
+    this.set(
+      'HTML_ATTR',
+      /** @type {function(...*)} */ (this.htmlAttributeBinding_.bind(this))
+    );
 
     this.set('CLIENT_ID', () => null);
   }
@@ -204,20 +188,27 @@ export class A4AVariableSource extends VariableSource {
       return '[]';
     }
     if (elements.length > HTML_ATTR_MAX_ELEMENTS_TO_TRAVERSE) {
-      user().error(TAG, 'CSS selector may match at most ' +
-          `${HTML_ATTR_MAX_ELEMENTS_TO_TRAVERSE} elements.`);
+      user().error(
+        TAG,
+        'CSS selector may match at most ' +
+          `${HTML_ATTR_MAX_ELEMENTS_TO_TRAVERSE} elements.`
+      );
       return '[]';
     }
     const result = [];
-    for (let i = 0; i < elements.length &&
-        result.length < HTML_ATTR_MAX_ELEMENTS_TO_RETURN; ++i) {
+    for (
+      let i = 0;
+      i < elements.length && result.length < HTML_ATTR_MAX_ELEMENTS_TO_RETURN;
+      ++i
+    ) {
       const currentResult = {};
       let foundAtLeastOneAttr = false;
       for (let j = 0; j < attributeNames.length; ++j) {
         const attributeName = attributeNames[j];
         if (elements[i].hasAttribute(attributeName)) {
-          currentResult[attributeName] =
-              elements[i].getAttribute(attributeName);
+          currentResult[attributeName] = elements[i].getAttribute(
+            attributeName
+          );
           foundAtLeastOneAttr = true;
         }
       }

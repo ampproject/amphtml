@@ -99,7 +99,7 @@ The user action `dismiss` informs AMP runtime that no info on user consent has b
 #### Client information passed to iframe
 When the iframe is created, the following information will be passed to the iframe via the name attribute.
 * `clientConfig`: The configuration from the publisher
-* `consentState`: The stored consent state if there's any. The value will be `'accepted'/'rejected'/'unknown'`. A friendly reminder is to be aware of the difference between the consent state string value (`'accepted'/'rejected'/'unknown'`) and the user action string value (`'accept'/'reject'/'dismiss'`).
+* `consentStateValue`: The stored consent state if there's any. The value will be `'accepted'/'rejected'/'unknown'`. A friendly reminder is to be aware of the difference between the consent state string value (`'accepted'/'rejected'/'unknown'`) and the user action string value (`'accept'/'reject'/'dismiss'`).
 * `consentString`: The stored consent info string if there's any.
 
 One can get access to the client information via the name attribute inside the iframe.
@@ -107,7 +107,7 @@ One can get access to the client information via the name attribute inside the i
   /* Expect info to be an object of format
    * {
    *  'clientConfig': *,
-   *  'consentState': 'accepted'/'rejected'/'unknown'/undefined,
+   *  'consentStateValue': 'accepted'/'rejected'/'unknown'/undefined,
    *  'consentString': string/undefined,
    * };
    */
@@ -122,8 +122,9 @@ Once you have the remote endpoint and prompt UI iframe ready, you are ready to a
         1. `consentInstanceId`: The localStorage key to store/retrieve the user consent response.
         1. `checkConsentHref`: Your remote endpoint destination.
         1. `promptUISrc`: Your prompt UI iframe src.
-    1. Create and example AMP page using your service.
-    1. Add documentation.
+    1. Add an example to the [`cmp-vendors.amp.html`](../../examples/cmp-vendors.amp.html) using your service. Note, the examples and filters should be in alphabetical order, and `_ping_` should be the first example.
+    1. Add documentation for your configuration in [`extensions/amp-consent/cmp`](./cmps). See the [`_ping_`](./cmps/_ping_.md) documentation as an example.
+    1. Add your platform unde the "Supported Consent Management Platforms" section in [`extensions/amp-consent/amp-consent.md`](./amp-consent.md).
     1. Add your GH user name as the POC for future maintenance issue.
 1. Run end to end test on the new example you create.
 1. Submit a Pull Request with this patch, referencing the Intent-To-Implement issue. @ampproject/wg-monetization for review.

@@ -46,6 +46,10 @@ function expect(actual, opt_message) {
     chai.use(installLengthWrapper);
     chai.use(installAboveWrapper);
     chai.use(installBelowWrapper);
+    chai.use(installIsTrueWrapper);
+    chai.use(installIsFalseWrapper);
+    chai.use(installIsOkWrapper);
+    chai.use(installIsNullWrapper);
   }
 
   return chai.expect(actual, opt_message);
@@ -65,13 +69,25 @@ function installIncludeWrapper(chai, utils) {
 
   const overwrite = overwriteAlwaysUseSuper(utils);
   Assertion.overwriteChainableMethod(
-      'include', overwrite, inheritChainingBehavior);
+    'include',
+    overwrite,
+    inheritChainingBehavior
+  );
   Assertion.overwriteChainableMethod(
-      'includes', overwrite, inheritChainingBehavior);
+    'includes',
+    overwrite,
+    inheritChainingBehavior
+  );
   Assertion.overwriteChainableMethod(
-      'contain', overwrite, inheritChainingBehavior);
+    'contain',
+    overwrite,
+    inheritChainingBehavior
+  );
   Assertion.overwriteChainableMethod(
-      'contains', overwrite, inheritChainingBehavior);
+    'contains',
+    overwrite,
+    inheritChainingBehavior
+  );
 }
 
 function installMatchWrapper(chai, utils) {
@@ -87,9 +103,15 @@ function installLengthWrapper(chai, utils) {
 
   const overwrite = overwriteAlwaysUseSuper(utils);
   Assertion.overwriteChainableMethod(
-      'length', overwrite, inheritChainingBehavior);
+    'length',
+    overwrite,
+    inheritChainingBehavior
+  );
   Assertion.overwriteChainableMethod(
-      'lengthOf', overwrite, inheritChainingBehavior);
+    'lengthOf',
+    overwrite,
+    inheritChainingBehavior
+  );
 }
 
 function installAboveWrapper(chai, utils) {
@@ -108,6 +130,38 @@ function installBelowWrapper(chai, utils) {
   Assertion.overwriteMethod('below', overwrite);
   Assertion.overwriteMethod('lt', overwrite);
   Assertion.overwriteMethod('lessThan', overwrite);
+}
+
+function installIsTrueWrapper(chai, utils) {
+  const {Assertion} = chai;
+
+  const overwrite = overwriteAlwaysUseSuper(utils);
+  Assertion.overwriteProperty('isTrue', overwrite);
+  Assertion.overwriteProperty('true', overwrite);
+}
+
+function installIsFalseWrapper(chai, utils) {
+  const {Assertion} = chai;
+
+  const overwrite = overwriteAlwaysUseSuper(utils);
+  Assertion.overwriteProperty('isFalse', overwrite);
+  Assertion.overwriteProperty('false', overwrite);
+}
+
+function installIsOkWrapper(chai, utils) {
+  const {Assertion} = chai;
+
+  const overwrite = overwriteAlwaysUseSuper(utils);
+  Assertion.overwriteProperty('isOk', overwrite);
+  Assertion.overwriteProperty('ok', overwrite);
+}
+
+function installIsNullWrapper(chai, utils) {
+  const {Assertion} = chai;
+
+  const overwrite = overwriteAlwaysUseSuper(utils);
+  Assertion.overwriteProperty('isNull', overwrite);
+  Assertion.overwriteProperty('null', overwrite);
 }
 
 function overwriteAlwaysUseSuper(utils) {

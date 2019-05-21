@@ -22,6 +22,7 @@ tags: {  # amp-experiment
   extension_spec: {
     name: "amp-experiment"
     version: "0.1"
+    version: "1.0"
     version: "latest"
     requires_usage: GRANDFATHERED
     deprecated_allow_duplicates: true
@@ -45,12 +46,14 @@ tags: {  # amp-experiment (json)
     dispatch_key: NAME_VALUE_PARENT_DISPATCH
   }
   cdata: {
+    max_bytes: 15000
+    max_bytes_spec_url: "https://amp.dev/documentation/components/amp-experiment#configuration"
     blacklisted_cdata_regex: {
       regex: "<!--"
       error_message: "html comments"
     }
   }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-experiment"
+  spec_url: "https://amp.dev/documentation/components/amp-experiment"
 }
 tags: {  # <amp-experiment>
   html_format: AMP
@@ -58,5 +61,5 @@ tags: {  # <amp-experiment>
   tag_name: "AMP-EXPERIMENT"
   requires_extension: "amp-experiment"
   unique: true
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-experiment"
+  spec_url: "https://amp.dev/documentation/components/amp-experiment"
 }

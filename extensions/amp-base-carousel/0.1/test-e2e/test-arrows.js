@@ -14,95 +14,33 @@
  * limitations under the License.
  */
 
-import {
-  getNextArrow,
-  getNextArrowSlot,
-  getPrevArrow,
-  getPrevArrowSlot,
-  getScrollingElement,
-  getSlide,
-} from './helpers';
+import {getNextArrow, getPrevArrow, getSlide} from './helpers';
 
+/** The total number of slides in the carousel */
+const SLIDE_COUNT = 7;
 
-describes.endtoend('AMP carousel arrows', {
-}, async env => {
-  /** The total number of slides in the carousel */
-  const SLIDE_COUNT = 7;
-  const pageWidth = 600;
-  const pageHeight = 600;
-  let controller;
-  let ampDriver;
-
-  function css(handle, name) {
-    return controller.getElementCssValue(handle, name);
-  }
-
-  beforeEach(async() => {
-    controller = env.controller;
-    ampDriver = env.ampDriver;
-
-    await controller.setWindowRect({
-      width: pageWidth,
-      height: pageHeight,
-    });
-
-  });
-
-  describe('when non-looping', () => {
-    let nextArrow;
-    let prevArrowSlot;
-    let nextArrowSlot;
-
-    beforeEach(async() => {
-      await controller.navigateTo('http://localhost:8000/test/manual/amp-base-carousel/non-looping.amp.html');
-      await ampDriver.toggleExperiment('layers', true);
-      await ampDriver.toggleExperiment('amp-base-carousel', true);
-
-      await controller.navigateTo(
-          'http://localhost:8000/test/manual/amp-base-carousel/non-looping.amp.html');
-
-      prevArrowSlot = await getPrevArrowSlot(controller);
-      nextArrowSlot = await getNextArrowSlot(controller);
-      nextArrow = await getNextArrow(controller);
-    });
-
-    it('should have the arrows in the correct initial state', async() => {
-      await expect(css(prevArrowSlot, 'opacity')).to.equal('0');
-      await expect(css(nextArrowSlot, 'opacity')).to.equal('1');
-    });
-
-    it('should show the prev arrow when going to the first slide', async() => {
-      await controller.click(nextArrow);
-      await expect(css(prevArrowSlot, 'opacity')).to.equal('1');
-      await expect(css(nextArrowSlot, 'opacity')).to.equal('1');
-    });
-
-    it('should hide the next arrow when going to the end', async() => {
-      const el = await getScrollingElement(controller);
-      await controller.scrollBy(el, {left: SLIDE_COUNT * pageWidth});
-
-      await expect(css(prevArrowSlot, 'opacity')).to.equal('1');
-      await expect(css(nextArrowSlot, 'opacity')).to.equal('0');
-    });
-  });
-
-  describe('with custom arrows', () => {
+describes.endtoend(
+  'AMP carousel arrows with custom arrows',
+  {
+    testUrl:
+      'http://localhost:8000/test/manual/amp-base-carousel/custom-arrows.amp.html',
+    experiments: ['amp-base-carousel', 'layers'],
+    //TODO(spaharmi): fails on shadow demo
+    environments: ['single', 'viewer-demo'],
+  },
+  async function(env) {
+    let controller;
     let prevArrow;
     let nextArrow;
 
-    beforeEach(async() => {
-      await controller.navigateTo('http://localhost:8000/test/manual/amp-base-carousel/custom-arrows.amp.html');
-      await ampDriver.toggleExperiment('layers', true);
-      await ampDriver.toggleExperiment('amp-base-carousel', true);
-
-      await controller.navigateTo(
-          'http://localhost:8000/test/manual/amp-base-carousel/custom-arrows.amp.html');
+    beforeEach(async () => {
+      controller = env.controller;
 
       nextArrow = await getNextArrow(controller);
       prevArrow = await getPrevArrow(controller);
     });
 
-    it('should go to the next slide', async() => {
+    it('should go to the next slide', async () => {
       const secondSlide = await getSlide(controller, 1);
 
       await controller.click(nextArrow);
@@ -111,8 +49,7 @@ describes.endtoend('AMP carousel arrows', {
       });
     });
 
-
-    it('should go to the previous slide', async() => {
+    it('should go to the previous slide', async () => {
       const lastSlide = await getSlide(controller, SLIDE_COUNT - 1);
 
       await controller.click(prevArrow);
@@ -120,5 +57,5 @@ describes.endtoend('AMP carousel arrows', {
         'x': 0,
       });
     });
-  });
-});
+  }
+);

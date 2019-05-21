@@ -22,19 +22,19 @@ export const SHINYSTAT_CONFIG = /** @type {!JsonObject} */ ({
   },
   'requests': {
     'base': 'https://amp.shinystat.com/cgi-bin/shinyamp.cgi',
-    'commpar': 'AMP=1&RM=${random}' +
-               '&USER=${account}' +
-               '&PAG=${page}' +
-               '&HR=${sourceUrl}' +
-               '&REFER=${documentReferrer}' +
-               '&RES=${screenWidth}X${screenHeight}' +
-               '&COLOR=${screenColorDepth}' +
-               '&CID=${clientId(AMP_CID)}' +
-               '&PAGID=${pageViewId}' +
-               '&TITL=${title}' +
-               '&RQC=${requestCount}',
-    'pagepar': '&VIE=${viewer}' +
-               '&PLT=${pageLoadTime}',
+    'commpar':
+      'AMP=1&RM=${random}' +
+      '&USER=${account}' +
+      '&PAG=${page}' +
+      '&HR=${sourceUrl}' +
+      '&REFER=${documentReferrer}' +
+      '&RES=${screenWidth}X${screenHeight}' +
+      '&COLOR=${screenColorDepth}' +
+      '&CID=${clientId(AMP_CID)}' +
+      '&PAGID=${pageViewId}' +
+      '&TITL=${title}' +
+      '&RQC=${requestCount}',
+    'pagepar': '&VIE=${viewer}&PLT=${pageLoadTime}',
     'eventpar': '&SSXL=1',
     'linkpar': '&LINK=${outboundLink}',
     'pageview': '${base}?${commpar}${pagepar}',

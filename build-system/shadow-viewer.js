@@ -16,7 +16,7 @@
 /* eslint-disable amphtml-internal/html-template */
 /* eslint-disable indent */
 
-const html = require('./app-index/html');
+const {html} = require('./app-index/html');
 
 const SCRIPT = `
 /**
@@ -144,19 +144,21 @@ const SCRIPT = `
 };
 `;
 
-
-const renderShadowViewer = ({src, baseHref}) => html`<!doctype html>
-<html>
-  <head>
-    <base href="${baseHref}">
-    <script>
-      ${SCRIPT}
-    </script>
-  </head>
-  <body style="padding: 0; margin: 0">
-    <amp-viewer src="http://localhost:8000/${src}"></amp-viewer>
-  </body>
-</html>`;
-
+const renderShadowViewer = ({src, baseHref, port = 8000}) =>
+  html`
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <base href="${baseHref}" />
+        <title>Shadow Viewer</title>
+        <script>
+          ${SCRIPT};
+        </script>
+      </head>
+      <body style="padding: 0; margin: 0">
+        <amp-viewer src="http://localhost:${port}/${src}"></amp-viewer>
+      </body>
+    </html>
+  `;
 
 module.exports = {renderShadowViewer};

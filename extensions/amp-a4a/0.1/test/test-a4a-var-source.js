@@ -16,12 +16,9 @@
 
 import {A4AVariableSource} from '../a4a-variable-source';
 import {createIframePromise} from '../../../../testing/iframe';
-import {installDocumentInfoServiceForDoc} from
-  '../../../../src/service/document-info-impl';
-
+import {installDocumentInfoServiceForDoc} from '../../../../src/service/document-info-impl';
 
 describe('A4AVariableSource', () => {
-
   let varSource;
 
   beforeEach(() => {
@@ -49,23 +46,9 @@ describe('A4AVariableSource', () => {
   });
 
   it('should replace CANONICAL_URL', () => {
-    expect(expandSync('CANONICAL_URL'))
-        .to.equal('https://pinterest.com:8080/pin1');
-  });
-
-  it('should replace AD_NAV_TIMING', () => {
-    expect(expandSync('AD_NAV_TIMING', ['navigationStart'])).to.match(/\d+/);
-    return expandAsync('AD_NAV_TIMING', ['navigationStart']).then(val =>
-      expect(val).to.match(/\d+/)
+    expect(expandSync('CANONICAL_URL')).to.equal(
+      'https://pinterest.com:8080/pin1'
     );
-  });
-
-  it('should replace AD_NAV_TYPE', () => {
-    expect(expandSync('AD_NAV_TYPE')).to.match(/\d/);
-  });
-
-  it('should replace AD_NAV_REDIRECT_COUNT', () => {
-    expect(expandSync('AD_NAV_REDIRECT_COUNT')).to.match(/\d/);
   });
 
   it('should replace NAV_TIMING', () => {
@@ -85,7 +68,8 @@ describe('A4AVariableSource', () => {
 
   it('should replace HTML_ATTR', () => {
     expect(expandSync('HTML_ATTR', ['div', 'id'])).to.equal(
-        '[{\"id\":\"parent\"}]');
+      '[{"id":"parent"}]'
+    );
   });
 
   it('should replace CLIENT_ID with null', () => {

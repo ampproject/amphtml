@@ -46,15 +46,14 @@ FAIL
 |    <!-- Invalid, requires ID -->
 |    <amp-action-macro execute="amp-component.doSomething()">
 >>   ^~~~~~~~~
-feature_tests/amp-action-macro.html:46:2 The mandatory attribute 'id' is missing in tag 'amp-action-macro'. (see https://www.ampproject.org/docs/reference/components/amp-action-macro) [AMP_TAG_PROBLEM]
+feature_tests/amp-action-macro.html:46:2 The mandatory attribute 'id' is missing in tag 'amp-action-macro'. (see https://amp.dev/documentation/components/amp-action-macro) [AMP_TAG_PROBLEM]
 |    </amp-action-macro>
 |
 |    <!-- Invalid, requires execute -->
 |    <amp-action-macro id="action-macro-id">
 >>   ^~~~~~~~~
-feature_tests/amp-action-macro.html:50:2 The mandatory attribute 'execute' is missing in tag 'amp-action-macro'. (see https://www.ampproject.org/docs/reference/components/amp-action-macro) [AMP_TAG_PROBLEM]
+feature_tests/amp-action-macro.html:50:2 The mandatory attribute 'execute' is missing in tag 'amp-action-macro'. (see https://amp.dev/documentation/components/amp-action-macro) [AMP_TAG_PROBLEM]
 |    </amp-action-macro>
 |
 |  </body>
 |  </html>
-

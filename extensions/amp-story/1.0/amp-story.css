@@ -17,6 +17,7 @@
 @import './amp-story-access.css';
 @import './amp-story-desktop-panels.css';
 @import './amp-story-page-attachment.css';
+@import './amp-story-templates.css';
 @import './amp-story-user-overridable.css';
 @import './pagination-buttons.css';
 
@@ -49,6 +50,7 @@ amp-consent {
   margin: 0 !important;
   padding: 0 !important;
   text-align: start !important;
+  text-shadow: none !important;
   width: auto !important;
 }
 
@@ -64,12 +66,12 @@ amp-story {
 }
 
 html.i-amphtml-story-standalone {
-  font-size: calc(2 * var(--i-amphtml-story-vmax, 8px));
+  font-size: calc(2.5 * var(--i-amphtml-story-vmax, 8px));
 }
 
 html.i-amphtml-story-standalone,
 html.i-amphtml-story-standalone body {
-  font-size: calc(2 * var(--i-amphtml-story-vh, 8px));
+  font-size: calc(2.5 * var(--i-amphtml-story-vh, 8px));
   height: 100% !important;
   margin: 0 !important;
   padding: 0 !important;
@@ -166,6 +168,7 @@ amp-story .amp-video-eq:not(.amp-video-eq-play) {
 }
 
 /** Page level */
+.i-amphtml-story-media-query-matcher,
 amp-story-page {
   bottom: 0 !important;
   height: auto !important;
@@ -176,6 +179,13 @@ amp-story-page {
   opacity: 1 !important;
   transition: none !important;
   z-index: 0 !important;
+}
+
+.i-amphtml-story-media-query-matcher {
+  height: inherit !important;
+  width: inherit !important;
+  border: 0 !important;
+  z-index: -1 !important;
 }
 
 amp-story-page[active] {
@@ -209,10 +219,18 @@ amp-story-page[active] {
  * not be automatically laid out. Max distance is set to 2 (next 2 pages) since
  * we don't want to schedule any further pages. */
 
-amp-story-page:not([active]) {
-  transform: translateY(1000%) !important;
+amp-story-page:not(:first-of-type):not([distance]):not([active]) {
+  transform: translateY(1000vh) !important;
 }
 
+amp-story-page:not([active]) {
+  transform: translateY(1000vh) !important;
+}
+
+/**
+ * Note: If updating the [active] or [distance] attributes names, please also
+ * update them in the amp.css file.
+ */
 amp-story-page[active],
 amp-story-page[distance="0"],
 amp-story-page[distance="1"] {
@@ -221,6 +239,15 @@ amp-story-page[distance="1"] {
 
 amp-story-page[distance="2"] {
   transform: translateY(100%) !important;
+}
+
+amp-story-page [text-background-color] {
+  border-radius: 3px !important;
+  line-height: 1.5em !important;
+  padding: 2px 4px !important;
+  text-indent: 0 !important;
+  box-decoration-break: clone !important;
+  -webkit-box-decoration-break: clone !important;
 }
 
 [desktop].i-amphtml-story-bookend-active amp-story-page[active] {
@@ -280,21 +307,6 @@ amp-story-page[distance="2"] {
   display: none !important;
 }
 
-/**
- * Click shield to make sure click events are never swallowed by videos on
- * Safari iOS 11.2, which would prevent the user from navigating through the
- * story.
- * See #14401
- */
-amp-story-grid-layer amp-video::after {
-  content: "" !important;
-  position: absolute !important;
-  height: 100% !important;
-  width: 100% !important;
-  top: 0 !important;
-  left: 0 !important;
-}
-
 /** Call to action layer, positioned at the bottom 20% of the screen. */
 amp-story-cta-layer {
   display: block !important;
@@ -321,6 +333,31 @@ amp-story-grid-layer {
   pointer-events: none !important;
 }
 
+/**
+ * Click shield to make sure click events are never swallowed by videos on
+ * Safari iOS 11.2, which would prevent the user from navigating through the
+ * story.
+ * See #14401
+ */
+ amp-story-grid-layer amp-video::after {
+  content: "" !important;
+  position: absolute !important;
+  height: 100% !important;
+  width: 100% !important;
+  top: 0 !important;
+  left: 0 !important;
+}
+
+/**
+ * Adds a width limit to make sure amp-twitter element only takes required
+ * space, otherwise it takes whole width and causes a tooltip trigger in blank
+ * space.
+ * See #22334
+ */
+amp-story-grid-layer amp-twitter {
+  max-width: 500px !important;
+}
+
 amp-story-grid-layer > * {
   pointer-events: auto !important;
 }
@@ -331,7 +368,7 @@ amp-story-grid-layer a * {
 }
 
 /** Apply click shield on embedded components on initial load. */
-amp-story-grid-layer amp-twitter::after {
+amp-story-grid-layer .i-amphtml-embedded-component::after {
   content: "" !important;
   position: absolute !important;
   height: 100% !important;
@@ -340,7 +377,7 @@ amp-story-grid-layer amp-twitter::after {
   left: 0 !important;
 }
 
-.i-amphtml-expanded-mode amp-twitter::after {
+.i-amphtml-expanded-mode .i-amphtml-embedded-component::after {
   height: 0px !important;
   width: 0px !important;
 }
@@ -351,11 +388,8 @@ amp-story-grid-layer amp-twitter::after {
   z-index: auto !important;
 }
 
-.i-amphtml-expanded-mode amp-twitter {
+.i-amphtml-expanded-mode .i-amphtml-embedded-component.i-amphtml-expanded-component {
   z-index: 1 !important;
-}
-
-.i-amphtml-animate-expand-in {
   transition: transform 0.225s cubic-bezier(0.4, 0.0, 0.2, 1) !important;
 }
 
@@ -365,18 +399,8 @@ amp-story-grid-layer amp-twitter::after {
   padding: 0 !important;
 }
 
-.i-amphtml-story-grid-template-fill > :not(:first-child) {
-  display: none !important;
-}
-
-.i-amphtml-story-logo {
-  display: none !important;
-  margin: 15px !important;
-}
-
-.i-amphtml-story-grid-template-fill > :first-child {
+.i-amphtml-story-grid-template-fill > * {
   bottom: 0 !important;
-  display: block !important;
   height: auto !important;
   left: 0 !important;
   position: absolute !important;
@@ -754,10 +778,10 @@ amp-story .amp-video-eq,
   position: absolute !important;
   top: 0 !important;
   left: 0 !important;
-  margin: 8px !important;
+  margin: 12px !important;
   height: 24px !important;
   width: 24px !important;
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 36 36" fill="rgba(255, 255, 255, 0.7)"><path d="M28.5 9.62L26.38 7.5 18 15.88 9.62 7.5 7.5 9.62 15.88 18 7.5 26.38l2.12 2.12L18 20.12l8.38 8.38 2.12-2.12L20.12 18z"/><path d="M0 0h36v36H0z" fill="none"/></svg>') !important;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 36 36" fill="rgba(255, 255, 255, 0.8)"><path d="M28.5 9.62L26.38 7.5 18 15.88 9.62 7.5 7.5 9.62 15.88 18 7.5 26.38l2.12 2.12L18 20.12l8.38 8.38 2.12-2.12L20.12 18z"/><path d="M0 0h36v36H0z" fill="none"/></svg>') !important;
   cursor: pointer !important;
   text-align: center !important;
 }
@@ -925,14 +949,19 @@ amp-story-page .i-amphtml-story-page-open-attachment-icon::after {
              open-attachment-bar-right 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) both !important;
 }
 
-amp-story-page .i-amphtml-story-page-open-attachment-text {
+amp-story-page .i-amphtml-story-page-open-attachment-label {
   position: relative !important;
   padding: 0 24px !important;
+  height: 40px !important;
+  max-width: calc(100% - 48px) !important;
   color: #FFF !important;
   font-family: 'Roboto', sans-serif !important;
   font-size: 15px !important;
   font-weight: bold !important;
   letter-spacing: 0.3px;
   line-height: 40px !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
   text-shadow: 0px 0px 6px rgba(0, 0, 0, 0.36) !important;
+  white-space: nowrap !important;
 }

@@ -18,9 +18,8 @@
 const argv = require('minimist')(process.argv.slice(2));
 const BBPromise = require('bluebird');
 const colors = require('ansi-colors');
-const gulp = require('gulp-help')(require('gulp'));
 const log = require('fancy-log');
-const octokit = require('@octokit/rest')();
+const Octokit = require('@octokit/rest');
 const path = require('path');
 const requestPost = BBPromise.promisify(require('request').post);
 const url = require('url');
@@ -70,21 +69,32 @@ function getGzippedBundleSize() {
  */
 function storeBundleSize() {
   if (!isTravisPushBuild()) {
-    log(yellow('Skipping'), cyan('--on_push_build') + ':',
-        'this action can only be performed on `push` builds on Travis');
+    log(
+      yellow('Skipping'),
+      cyan('--on_push_build') + ':',
+      'this action can only be performed on `push` builds on Travis'
+    );
     return;
   }
 
   if (travisRepoSlug() !== expectedGitHubRepoSlug) {
-    log(yellow('Skipping'), cyan('--on_push_build') + ':',
-        'this action can only be performed on Travis builds on the',
-        cyan(expectedGitHubRepoSlug), 'repository');
+    log(
+      yellow('Skipping'),
+      cyan('--on_push_build') + ':',
+      'this action can only be performed on Travis builds on the',
+      cyan(expectedGitHubRepoSlug),
+      'repository'
+    );
     return;
   }
 
   if (!process.env.GITHUB_ARTIFACTS_RW_TOKEN) {
-    log(red('ERROR: Missing GITHUB_ARTIFACTS_RW_TOKEN, cannot store the ' +
-        'bundle size in the artifacts repository on GitHub!'));
+    log(
+      red(
+        'ERROR: Missing GITHUB_ARTIFACTS_RW_TOKEN, cannot store the ' +
+          'bundle size in the artifacts repository on GitHub!'
+      )
+    );
     process.exitCode = 1;
     return;
   }
@@ -95,28 +105,47 @@ function storeBundleSize() {
     path: path.join('bundle-size', commitHash),
   });
 
-  octokit.authenticate({
-    type: 'token',
-    token: process.env.GITHUB_ARTIFACTS_RW_TOKEN,
+  const octokit = new Octokit({
+    auth: `token ${process.env.GITHUB_ARTIFACTS_RW_TOKEN}`,
   });
 
-  return octokit.repos.getContents(githubApiCallOptions).then(() => {
-    log('The file', cyan(`bundle-size/${commitHash}`), 'already exists in the',
-        'build artifacts repository on GitHub. Skipping...');
-  }).catch(() => {
-    return octokit.repos.createFile(Object.assign(githubApiCallOptions, {
-      message: `bundle-size: ${commitHash} (${bundleSize})`,
-      content: Buffer.from(bundleSize).toString('base64'),
-    })).then(() => {
-      log('Stored the new bundle size of', cyan(bundleSize), 'in the artifacts',
-          'repository on GitHub');
-    }).catch(error => {
-      log(red(`ERROR: Failed to create the bundle-size/${commitHash} file in`),
-          red('the build artifacts repository on GitHub!'));
-      log(red('Error message was:'), error.message);
-      process.exitCode = 1;
+  return octokit.repos
+    .getContents(githubApiCallOptions)
+    .then(() => {
+      log(
+        'The file',
+        cyan(`bundle-size/${commitHash}`),
+        'already exists in the',
+        'build artifacts repository on GitHub. Skipping...'
+      );
+    })
+    .catch(() => {
+      return octokit.repos
+        .createFile(
+          Object.assign(githubApiCallOptions, {
+            message: `bundle-size: ${commitHash} (${bundleSize})`,
+            content: Buffer.from(bundleSize).toString('base64'),
+          })
+        )
+        .then(() => {
+          log(
+            'Stored the new bundle size of',
+            cyan(bundleSize),
+            'in the artifacts',
+            'repository on GitHub'
+          );
+        })
+        .catch(error => {
+          log(
+            red(
+              `ERROR: Failed to create the bundle-size/${commitHash} file in`
+            ),
+            red('the build artifacts repository on GitHub!')
+          );
+          log(red('Error message was:'), error.message);
+          process.exitCode = 1;
+        });
     });
-  });
 }
 
 /**
@@ -126,12 +155,16 @@ async function skipBundleSize() {
   if (isTravisPullRequestBuild()) {
     const commitHash = gitCommitHash();
     try {
-      const response = await requestPost(url.resolve(bundleSizeAppBaseUrl,
-          path.join('commit', commitHash, 'skip')));
+      const response = await requestPost(
+        url.resolve(
+          bundleSizeAppBaseUrl,
+          path.join('commit', commitHash, 'skip')
+        )
+      );
       if (response.statusCode < 200 || response.statusCode >= 300) {
         throw new Error(
-            `${response.statusCode} ${response.statusMessage}: ` +
-            response.body);
+          `${response.statusCode} ${response.statusMessage}: ` + response.body
+        );
       }
     } catch (error) {
       log(red('Could not report a skipped pull request'));
@@ -140,8 +173,12 @@ async function skipBundleSize() {
       return;
     }
   } else {
-    log(yellow('Not marking this pull request to skip because that can only be '
-               + 'done on Travis'));
+    log(
+      yellow(
+        'Not marking this pull request to skip because that can only be ' +
+          'done on Travis'
+      )
+    );
   }
 }
 
@@ -155,8 +192,10 @@ async function reportBundleSize() {
     const commitHash = gitCommitHash();
     try {
       const response = await requestPost({
-        uri: url.resolve(bundleSizeAppBaseUrl,
-            path.join('commit', commitHash, 'report')),
+        uri: url.resolve(
+          bundleSizeAppBaseUrl,
+          path.join('commit', commitHash, 'report')
+        ),
         json: true,
         body: {
           baseSha,
@@ -165,8 +204,8 @@ async function reportBundleSize() {
       });
       if (response.statusCode < 200 || response.statusCode >= 300) {
         throw new Error(
-            `${response.statusCode} ${response.statusMessage}: ` +
-            response.body);
+          `${response.statusCode} ${response.statusMessage}: ` + response.body
+        );
       }
     } catch (error) {
       log(red('Could not report the bundle size of this pull request'));
@@ -175,12 +214,16 @@ async function reportBundleSize() {
       return;
     }
   } else {
-    log(yellow('Not reporting the bundle size of this pull request because '
-               + 'that can only be done on Travis'));
+    log(
+      yellow(
+        'Not reporting the bundle size of this pull request because ' +
+          'that can only be done on Travis'
+      )
+    );
   }
 }
 
-async function performBundleSizeCheck() {
+async function bundleSize() {
   if (argv.on_skipped_build) {
     return await skipBundleSize();
   } else if (argv.on_push_build) {
@@ -193,18 +236,18 @@ async function performBundleSizeCheck() {
   }
 }
 
+module.exports = {
+  bundleSize,
+};
 
-gulp.task(
-    'bundle-size',
-    'Checks if the minified AMP binary has exceeded its size cap',
-    performBundleSizeCheck,
-    {
-      options: {
-        'on_push_build': '  Store bundle size in AMP build artifacts repo '
-            + '(also implies --on_pr_build)',
-        'on_pr_build': '  Report the bundle size of this pull request to '
-            + 'GitHub',
-        'on_skipped_build': '  Set the status of this pull request\'s bundle '
-            + 'size check in GitHub to `skipped`',
-      },
-    });
+bundleSize.description =
+  'Checks if the minified AMP binary has exceeded its size cap';
+bundleSize.flags = {
+  'on_push_build':
+    '  Store bundle size in AMP build artifacts repo ' +
+    '(also implies --on_pr_build)',
+  'on_pr_build': '  Report the bundle size of this pull request to GitHub',
+  'on_skipped_build':
+    "  Set the status of this pull request's bundle " +
+    'size check in GitHub to `skipped`',
+};

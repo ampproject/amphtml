@@ -23,7 +23,6 @@ import {PageConfig} from '../../../third_party/subscriptions-project/config';
  * @interface
  */
 export class SubscriptionPlatform {
-
   /**
    * Returns the service Id.
    * @return {string}
@@ -50,6 +49,13 @@ export class SubscriptionPlatform {
    * from the platform.
    */
   reset() {}
+
+  /**
+   * True if this platform can fetch entitlement safely in pre-render
+   * without leaking information to the publisher or a 3rd party
+   * @return {boolean}
+   */
+  isPrerenderSafe() {}
 
   /**
    * Returns if pingback is enabled for this platform.

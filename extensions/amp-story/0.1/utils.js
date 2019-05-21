@@ -33,14 +33,13 @@ export function timeStrToMillis(time) {
   const units = match[2];
 
   userAssert(
-      match &&
-          match.length == 3 &&
-          (units == 's' || units == 'ms'),
-      'Invalid time string %s', time);
+    match && match.length == 3 && (units == 's' || units == 'ms'),
+    'Invalid time string %s',
+    time
+  );
 
   return units == 's' ? parseFloat(num) * 1000 : parseInt(num, 10);
 }
-
 
 /**
  * Determines whether the specified element has an action for its on="tap:..."
@@ -51,10 +50,10 @@ export function timeStrToMillis(time) {
 export function hasTapAction(el) {
   // There are better ways to determine this, but they're all bound to action
   // service race conditions. This is good enough for our use case.
-  return el.hasAttribute('on') &&
-      !!el.getAttribute('on').match(/(^|;)\s*tap\s*:/);
+  return (
+    el.hasAttribute('on') && !!el.getAttribute('on').match(/(^|;)\s*tap\s*:/)
+  );
 }
-
 
 /**
  * Calculates a client rect without applying scaling transformations.
@@ -63,10 +62,10 @@ export function hasTapAction(el) {
  * @return {!ClientRect}
  */
 export function unscaledClientRect(el) {
-  const {width, height, left, top} = el./*OK*/getBoundingClientRect();
+  const {width, height, left, top} = el./*OK*/ getBoundingClientRect();
 
-  const scaleFactorX = width == 0 ? 1 : width / el./*OK*/offsetWidth;
-  const scaleFactorY = height == 0 ? 1 : height / el./*OK*/offsetHeight;
+  const scaleFactorX = width == 0 ? 1 : width / el./*OK*/ offsetWidth;
+  const scaleFactorY = height == 0 ? 1 : height / el./*OK*/ offsetHeight;
 
   return /** @type {!ClientRect} */ ({
     left: left / scaleFactorX,
@@ -76,7 +75,6 @@ export function unscaledClientRect(el) {
   });
 }
 
-
 /**
  * Finds an amp-video/amp-audio ancestor.
  * @param {!Element} el
@@ -85,7 +83,6 @@ export function unscaledClientRect(el) {
 export function ampMediaElementFor(el) {
   return closestAncestorElementBySelector(el, 'amp-video, amp-audio');
 }
-
 
 /**
  * Creates a shadow root for the provided container, and appends the element
@@ -99,14 +96,13 @@ export function createShadowRootWithStyle(container, element, css) {
   const shadowRoot = createShadowRoot(container);
 
   const style = self.document.createElement('style');
-  style./*OK*/textContent = css;
+  style./*OK*/ textContent = css;
 
   shadowRoot.appendChild(style);
   shadowRoot.appendChild(element);
 
   return shadowRoot;
 }
-
 
 /**
  * Parses the resolved CSS color property, that is always in the form of
@@ -120,8 +116,11 @@ export function getRGBFromCssColorValue(cssValue) {
   const regexPattern = /rgba?\((\d{1,3}), (\d{1,3}), (\d{1,3})/;
 
   if (!cssValue.match(regexPattern)) {
-    user().error('UTILS', 'getRGBFromCssColorValue expects a parameter in ' +
-        `the form of 'rgba(0, 0, 0, 1)' or 'rgb(0, 0, 0)' but got ${cssValue}`);
+    user().error(
+      'UTILS',
+      'getRGBFromCssColorValue expects a parameter in ' +
+        `the form of 'rgba(0, 0, 0, 1)' or 'rgb(0, 0, 0)' but got ${cssValue}`
+    );
     // Returns a fallback value, to fail 'gracefully' in case a browser we don't
     // know about gave an unexpected value.
     return {r: 0, g: 0, b: 0};
@@ -135,7 +134,6 @@ export function getRGBFromCssColorValue(cssValue) {
     b: Number(matches[3]),
   };
 }
-
 
 /**
  * Returns the color, either black or white, that has the best contrast ratio
@@ -158,7 +156,7 @@ export function getTextColorForRGB({r, g, b}) {
   const linearG = getLinearRGBValue(g);
   const linearB = getLinearRGBValue(b);
 
-  const L = (0.2126 * linearR) + (0.7152 * linearG) + (0.0722 * linearB);
+  const L = 0.2126 * linearR + 0.7152 * linearG + 0.0722 * linearB;
 
   // Determines which one of the white and black text have a better contrast
   // ratio against the used background color.

@@ -25,7 +25,7 @@ import {getMode} from '../../../src/mode';
  * }
  */
 
-export const CMP_CONFIG = ({});
+export const CMP_CONFIG = {};
 
 if (getMode().test || getMode().localDev) {
   CMP_CONFIG['_ping_'] = {
@@ -34,3 +34,9 @@ if (getMode().test || getMode().localDev) {
     'promptUISrc': '/test/manual/diy-consent.html',
   };
 }
+
+CMP_CONFIG['didomi'] = {
+  'consentInstanceId': 'didomi',
+  'checkConsentHref': 'https://api.privacy-center.org/amp/check-consent',
+  'promptUISrc': 'https://sdk-amp.privacy-center.org/loader.html',
+};

@@ -64,7 +64,7 @@ and in many features builds on top of `amp-access`. However, it's a much more
 specialized version of access/paywall protocol. Some of the key differences are:
 
 1. The `amp-subscriptions` entitlements response is similar to the amp-access
-authorization, but it's striclty defined and standardized.
+authorization, but it's strictly defined and standardized.
 2. The `amp-subscriptions` extension allows multiple services to be configured
 for the page to participate in access/paywall decisions. Services are executed
 concurrently and prioritized based on which service returns the positive response.
@@ -194,7 +194,17 @@ If all configured services fail to get the entitlements, the entitlement configu
 
 ### The "local" service configuration
 
-The "local" service is configured as following:
+Two modes of operation are supported for the local service,
+"remote" and "iframe". 
+
+In the remote mode authorization and pingback requests
+are sent via CORS requests to the specified endpoints. In the
+"iframe" mode authorization and pingback are provided by 
+messaging to a publisher supplied iframe.
+
+The "local" service is configured as following 
+
+remote mode:
 
 ```
 <script type="application/json" id="amp-subscriptions">
@@ -214,10 +224,46 @@ The "local" service is configured as following:
 </script>
 ```
 
-The properties in the "local" service are:
+iframe mode:
+
+```
+<script type="application/json" id="amp-subscriptions">
+{
+  "services": [
+    {
+      "type": "iframe",
+      "iframeSrc": "https://...",
+      "iframeVars": [
+        "READER_ID",
+        "CANONICAL_URL",
+        "AMPDOC_URL",
+        "SOURCE_URL",
+        "DOCUMENT_REFERRER"
+      ],
+      "actions":{
+        "login": "https://...",
+        "subscribe": "https://..."
+      }
+    },
+    ...
+  ]
+}
+</script>
+```
+
+The properties in the "local" service are (remote mode):
+ - "type" - optional type, defaults to "remote"
  - "authorizationUrl" - the authorization endpoint URL.
  - "pingbackUrl" - the pingback endpoint URL.
  - "actions" - a named map of action URLs. At a minimum there must be two actions specified: "login" and "subscribe".
+
+In iframe mode the `authorzationUrl` and `pingbackUrl` are deleted
+and replaced by:
+ - "iframeSrc" - publisher supplied iframe
+ - "iframeVars - AMP variables to be sent to the iframe
+ - "type" - must be "iframe"
+
+See [amp-access-iframe](../amp-access/0.1/iframe-api/README.md) for details of the messaging protocol.
 
 ### The vendor service configuration
 
@@ -254,9 +300,13 @@ The Entitlement response returned by the authorization endpoint must conform to 
 ```
 
 The properties in the Entitlement response are:
- - "granted" - boolean stating if the access to the document is granted or not.
- - "grantReason" - the string of the reason for giving the access to the document, recognized reasons are either SUBSCRIBER meaning the user is fully subscribed or METERING meaning user is on metering.
- - "data" - any free form data which can be used for render templating.
+ - `granted` - boolean stating if the access to the document is granted or not.
+
+ - `grantReason` - the string of the reason for giving the access to the document, recognized reasons are either SUBSCRIBER meaning the user is fully subscribed or METERING meaning user is on metering.
+
+ - `data` - free-form data which can be used for template rendering, e.g. messaging related to metering or article count.
+
+In cases where the access is granted by a means other than the Entitlement response, messaging via the data property may not be seen by the user.  Do not use `data` for granting/denying access to content, conditional display of content based on user access, or displaying user or account related information.
 
 Notice, while it's not explicitly visible, all vendor services also implement authorization endpoints of their own and conform to the same response format.
 

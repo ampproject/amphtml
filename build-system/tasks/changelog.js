@@ -30,7 +30,6 @@ const colors = require('ansi-colors');
 const config = require('../config');
 const extend = require('util')._extend;
 const git = require('gulp-git');
-const gulp = require('gulp-help')(require('gulp'));
 const log = require('fancy-log');
 const request = BBPromise.promisify(require('request'));
 
@@ -99,14 +98,22 @@ let LogMetadataDef;
  */
 let PrMetadataDef;
 
-function changelog() {
+async function changelog() {
   if (!GITHUB_ACCESS_TOKEN) {
-    log(colors.red('Warning! You have not set the ' +
-        'GITHUB_ACCESS_TOKEN env var. Aborting "changelog" task.'));
-    log(colors.green('See https://help.github.com/articles/' +
-        'creating-an-access-token-for-command-line-use/ ' +
-        'for instructions on how to create a github access token. We only ' +
-        'need `public_repo` scope.'));
+    log(
+      colors.red(
+        'Warning! You have not set the ' +
+          'GITHUB_ACCESS_TOKEN env var. Aborting "changelog" task.'
+      )
+    );
+    log(
+      colors.green(
+        'See https://help.github.com/articles/' +
+          'creating-an-access-token-for-command-line-use/ ' +
+          'for instructions on how to create a github access token. We only ' +
+          'need `public_repo` scope.'
+      )
+    );
     return;
   }
 
@@ -128,24 +135,23 @@ function getGitMetadata() {
     branch: undefined,
   };
   return getLastProdReleasedGitTag(gitMetadata)
-      .then(getCurrentBranchName)
-      .then(getGitLog)
-      .then(getGithubPullRequestsMetadata)
-      .then(getGithubFilesMetadata)
-      .then(getLastGitTag)
-      .then(buildChangelog)
-      .then(function(gitMetadata) {
-        log(colors.blue('\n' + gitMetadata.changelog));
-        if (isDryrun) {
-          return;
-        }
-        return getCurrentSha().then(
-            submitReleaseNotes.bind(null, argv.tag, gitMetadata.changelog)
-        );
-      })
-      .catch(errHandler);
+    .then(getCurrentBranchName)
+    .then(getGitLog)
+    .then(getGithubPullRequestsMetadata)
+    .then(getGithubFilesMetadata)
+    .then(getLastGitTag)
+    .then(buildChangelog)
+    .then(function(gitMetadata) {
+      log(colors.blue('\n' + gitMetadata.changelog));
+      if (isDryrun) {
+        return;
+      }
+      return getCurrentSha().then(
+        submitReleaseNotes.bind(null, argv.tag, gitMetadata.changelog)
+      );
+    })
+    .catch(errHandler);
 }
-
 
 /**
  * Get the last git tag this current HEAD bases off of from.
@@ -235,39 +241,45 @@ function buildChangelog(gitMetadata) {
   let changelog = `## Version: ${argv.tag}\n\n`;
 
   if (gitMetadata.baseTag) {
-    changelog += `## Baseline: [${gitMetadata.baseTag}]` +
-        '(https://github.com/ampproject/amphtml/releases/' +
-        `tag/${gitMetadata.baseTag})\n\n`;
+    changelog +=
+      `## Baseline: [${gitMetadata.baseTag}]` +
+      '(https://github.com/ampproject/amphtml/releases/' +
+      `tag/${gitMetadata.baseTag})\n\n`;
   }
 
   // Append all titles
-  changelog += gitMetadata.logs.filter(function(log) {
-    const {pr} = log;
-    if (!pr) {
-      return true;
-    }
-    // Ignore PRs that are just all docs changes.
-    return !pr.filenames.every(function(filename) {
-      return config.changelogIgnoreFileTypes.test(filename);
-    });
-  }).map(function(log) {
-    const {pr} = log;
-    if (!pr) {
-      return '  - ' + log.title;
-    }
-    return `  - ${pr.title.trim()} (#${pr.id})`;
-  }).join('\n');
+  changelog += gitMetadata.logs
+    .filter(function(log) {
+      const {pr} = log;
+      if (!pr) {
+        return true;
+      }
+      // Ignore PRs that are just all docs changes.
+      return !pr.filenames.every(function(filename) {
+        return config.changelogIgnoreFileTypes.test(filename);
+      });
+    })
+    .map(function(log) {
+      const {pr} = log;
+      if (!pr) {
+        return '  - ' + log.title;
+      }
+      return `  - ${pr.title.trim()} (#${pr.id})`;
+    })
+    .join('\n');
   changelog += '\n\n## Breakdown by component\n\n';
   const sections = buildSections(gitMetadata);
 
-  Object.keys(sections).sort().forEach(function(section) {
-    changelog += `<details>\n<summary>${section}</summary>\n`;
-    const uniqueItems = sections[section].filter(function(title, idx) {
-      return sections[section].indexOf(title) == idx;
+  Object.keys(sections)
+    .sort()
+    .forEach(function(section) {
+      changelog += `<details>\n<summary>${section}</summary>\n`;
+      const uniqueItems = sections[section].filter(function(title, idx) {
+        return sections[section].indexOf(title) == idx;
+      });
+      changelog += uniqueItems.join('');
+      changelog += '</details>\n';
     });
-    changelog += uniqueItems.join('');
-    changelog += '</details>\n';
-  });
 
   gitMetadata.changelog = changelog;
   return gitMetadata;
@@ -353,15 +365,21 @@ function getLastProdReleasedGitTag(gitMetadata) {
  * @return {!Promise<GitMetadataDef>}
  */
 function getGitLog(gitMetadata) {
-  const args = `log ${gitMetadata.branch}...${gitMetadata.tag} ` +
-      '--pretty=oneline --first-parent';
+  const args =
+    `log ${gitMetadata.branch}...${gitMetadata.tag} ` +
+    '--pretty=oneline --first-parent';
   const options = {args};
   return gitExec(options).then(function(logs) {
     if (!logs) {
-      throw new Error('No logs found "git log ' + gitMetadata.branch + '...' +
-          gitMetadata.tag + '".\nIs it possible that there is no delta?\n' +
+      throw new Error(
+        'No logs found "git log ' +
+          gitMetadata.branch +
+          '...' +
+          gitMetadata.tag +
+          '".\nIs it possible that there is no delta?\n' +
           'Make sure to fetch and rebase (or reset --hard) the latest ' +
-          'from remote upstream.');
+          'from remote upstream.'
+      );
     }
     const commits = logs.split('\n').filter(log => !!log.length);
     gitMetadata.logs = commits.map(log => {
@@ -384,31 +402,31 @@ function getGithubPullRequestsMetadata(gitMetadata) {
     getClosedPullRequests(2),
     getClosedPullRequests(3),
   ])
-      .then(requests => [].concat.apply([], requests))
-      .then(prs => {
-        gitMetadata.prs = prs;
-        const githubPrRequest = gitMetadata.logs.map(log => {
-          const pr = prs.filter(pr => pr.merge_commit_sha == log.sha)[0];
-          if (pr) {
-            log.pr = buildPrMetadata(pr);
-          } else if (isPrIdInTitle(log.title)) {
-            const id = getPrIdFromCommit(log.title);
-            const prOptions = extend({}, pullOptions);
-            prOptions.url += `/${id}`;
-            const fileOptions = extend({}, prOptions);
-            fileOptions.url += '/files';
-            // If we couldn't find the matching pull request from 3 pages
-            // of closed pull request try and fetch it through the id
-            // if we can retrieve it from the commit message (only available
-            // through github merge).
-            return getPullRequest(prOptions, log);
-          }
-          return BBPromise.resolve();
-        });
-        return BBPromise.all(githubPrRequest).then(() => {
-          return gitMetadata;
-        });
+    .then(requests => [].concat.apply([], requests))
+    .then(prs => {
+      gitMetadata.prs = prs;
+      const githubPrRequest = gitMetadata.logs.map(log => {
+        const pr = prs.filter(pr => pr.merge_commit_sha == log.sha)[0];
+        if (pr) {
+          log.pr = buildPrMetadata(pr);
+        } else if (isPrIdInTitle(log.title)) {
+          const id = getPrIdFromCommit(log.title);
+          const prOptions = extend({}, pullOptions);
+          prOptions.url += `/${id}`;
+          const fileOptions = extend({}, prOptions);
+          fileOptions.url += '/files';
+          // If we couldn't find the matching pull request from 3 pages
+          // of closed pull request try and fetch it through the id
+          // if we can retrieve it from the commit message (only available
+          // through github merge).
+          return getPullRequest(prOptions, log);
+        }
+        return BBPromise.resolve();
       });
+      return BBPromise.all(githubPrRequest).then(() => {
+        return gitMetadata;
+      });
+    });
 }
 
 /**
@@ -477,8 +495,10 @@ function getPullRequestFiles(filesOption, pr) {
   return request(filesOption).then(function(res) {
     const body = JSON.parse(res.body);
 
-    assert(Array.isArray(body) && body.length > 0,
-        'Pull request response must not be empty. ' + res.body);
+    assert(
+      Array.isArray(body) && body.length > 0,
+      'Pull request response must not be empty. ' + res.body
+    );
     const filenames = body.map(function(file) {
       return file.filename;
     });
@@ -502,7 +522,7 @@ function errHandler(err) {
  * @return {boolean}
  */
 function isPrIdInTitle(str) {
-  return str./* OK*/indexOf('Merge pull request #') == 0;
+  return str./* OK*/ indexOf('Merge pull request #') == 0;
 }
 
 /**
@@ -523,9 +543,8 @@ function getPrIdFromCommit(commit) {
  * @return {boolean}
  */
 function isJs(str) {
-  return str./* OK*/endsWith('.js');
+  return str./* OK*/ endsWith('.js');
 }
-
 
 /**
  * @param {!JSONValue} pr
@@ -541,14 +560,22 @@ function buildPrMetadata(pr) {
   };
 }
 
-function changelogUpdate() {
+async function changelogUpdate() {
   if (!GITHUB_ACCESS_TOKEN) {
-    log(colors.red('Warning! You have not set the ' +
-        'GITHUB_ACCESS_TOKEN env var. Aborting "changelog" task.'));
-    log(colors.green('See https://help.github.com/articles/' +
-        'creating-an-access-token-for-command-line-use/ ' +
-        'for instructions on how to create a github access token. We only ' +
-        'need `public_repo` scope.'));
+    log(
+      colors.red(
+        'Warning! You have not set the ' +
+          'GITHUB_ACCESS_TOKEN env var. Aborting "changelog" task.'
+      )
+    );
+    log(
+      colors.green(
+        'See https://help.github.com/articles/' +
+          'creating-an-access-token-for-command-line-use/ ' +
+          'for instructions on how to create a github access token. We only ' +
+          'need `public_repo` scope.'
+      )
+    );
     return;
   }
   if (!argv.message) {
@@ -558,8 +585,9 @@ function changelogUpdate() {
 }
 
 function update() {
-  const url = 'https://api.github.com/repos/ampproject/amphtml/releases/tags/' +
-      `${argv.tag}`;
+  const url =
+    'https://api.github.com/repos/ampproject/amphtml/releases/tags/' +
+    `${argv.tag}`;
   const tagsOptions = {
     url,
     method: 'GET',
@@ -601,28 +629,32 @@ function update() {
     } else {
       releasesOptions.body.body = argv.message + release.body;
     }
-    return request(releasesOptions).then(() => {
-      log(colors.green('Update Successful.'));
-    })
-        .catch(e => {
-          log(colors.red('Update Failed. ' + e.message));
-        });
+    return request(releasesOptions)
+      .then(() => {
+        log(colors.green('Update Successful.'));
+      })
+      .catch(e => {
+        log(colors.red('Update Failed. ' + e.message));
+      });
   });
 }
 
-gulp.task('changelog', 'Create github release draft', changelog, {
-  options: {
-    dryrun: '  Generate changelog but dont push it out',
-    type: '  Pass in "canary" to generate a canary changelog',
-    tag: '  The git tag and github release label',
-  },
-});
+module.exports = {
+  changelog,
+  changelogUpdate,
+};
 
-const updateMessage = 'Update github release. Ex. prepend ' +
-    'canary percentage changes to release';
-gulp.task('changelog:update', updateMessage, changelogUpdate, {
-  options: {
-    dryrun: '  Generate changelog but dont push it out',
-    tag: '  The git tag and github release label',
-  },
-});
+changelog.description = 'Create github release draft';
+changelog.flags = {
+  dryrun: '  Generate changelog but dont push it out',
+  type: '  Pass in "canary" to generate a canary changelog',
+  tag: '  The git tag and github release label',
+};
+
+changelogUpdate.description =
+  'Update github release. Ex. prepend ' +
+  'canary percentage changes to release';
+changelogUpdate.flags = {
+  dryrun: '  Generate changelog but dont push it out',
+  tag: '  The git tag and github release label',
+};

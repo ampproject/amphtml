@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  IntersectionObserverPolyfill,
-} from '../../../src/intersection-observer-polyfill';
+import {IntersectionObserverPolyfill} from '../../../src/intersection-observer-polyfill';
 import {devAssert} from '../../../src/log';
 
 export class RefreshIntersectionObserverWrapper {
@@ -28,12 +26,13 @@ export class RefreshIntersectionObserverWrapper {
    * @param {Object} config
    */
   constructor(callback, baseElement, config) {
-
     /**
      * @private @const {!IntersectionObserverPolyfill}
      */
     this.intersectionObserver_ = new IntersectionObserverPolyfill(
-        callback, config);
+      callback,
+      config
+    );
 
     /**
      * Stores elements and their original viewportCallback functions so that

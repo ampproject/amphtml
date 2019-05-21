@@ -50,9 +50,11 @@ describe('batchFetchJsonFor', () => {
     };
     sandbox.stub(Services, 'urlReplacementsForDoc').returns(urlReplacements);
 
-    fetchJson = sandbox.stub().returns(Promise.resolve({
-      json: () => Promise.resolve(data),
-    }));
+    fetchJson = sandbox.stub().returns(
+      Promise.resolve({
+        json: () => Promise.resolve(data),
+      })
+    );
     batchedXhr = {fetchJson};
     sandbox.stub(Services, 'batchedXhrFor').returns(batchedXhr);
   });
@@ -72,30 +74,36 @@ describe('batchFetchJsonFor', () => {
       });
     });
 
-    it('should throw user error if expanding non-whitelisted vars with ' +
-      'opt_urlReplacement == OPT_IN', () => {
-      const el = element('https://data.com?x=FOO&y=BAR');
+    it(
+      'should throw user error if expanding non-whitelisted vars with ' +
+        'opt_urlReplacement == OPT_IN',
+      () => {
+        const el = element('https://data.com?x=FOO&y=BAR');
 
-      urlReplacements.expandUrlAsync
+        urlReplacements.expandUrlAsync
           .withArgs('https://data.com?x=FOO&y=BAR')
           .returns(Promise.resolve('https://data.com?x=abc&y=BAR'));
-      urlReplacements.collectUnwhitelistedVarsSync
+        urlReplacements.collectUnwhitelistedVarsSync
           .withArgs(el)
           .returns(['BAR']);
 
-      const optIn = UrlReplacementPolicy.OPT_IN;
-      const rejectError =
-          /Please add data-amp-replace="BAR" to the <AMP-LIST> element./;
-      return batchFetchJsonFor(ampdoc, el, null, optIn)
-          .should.eventually.be.rejectedWith(rejectError);
-    });
+        const optIn = UrlReplacementPolicy.OPT_IN;
+        const rejectError = /Please add data-amp-replace="BAR" to the <AMP-LIST> element./;
+        return batchFetchJsonFor(
+          ampdoc,
+          el,
+          null,
+          optIn
+        ).should.eventually.be.rejectedWith(rejectError);
+      }
+    );
 
     it('should replace all URL vars if opt_urlReplacement == ALL', () => {
       const el = element('https://data.com?x=FOO&y=BAR');
 
       urlReplacements.expandUrlAsync
-          .withArgs('https://data.com?x=FOO&y=BAR')
-          .returns(Promise.resolve('https://data.com?x=abc&y=BAR'));
+        .withArgs('https://data.com?x=FOO&y=BAR')
+        .returns(Promise.resolve('https://data.com?x=abc&y=BAR'));
 
       const userError = sandbox.stub(user(), 'error');
       const all = UrlReplacementPolicy.ALL;
@@ -107,5 +115,69 @@ describe('batchFetchJsonFor', () => {
     });
   });
 
+  describe('POST based identity', () => {
+    it('should send POST request with auth token is present', () => {
+      const el = element('https://data.com');
+      const all = UrlReplacementPolicy.ALL;
+
+      urlReplacements.expandUrlAsync
+        .withArgs('https://data.com')
+        .returns(Promise.resolve('https://data.com'));
+
+      const expectedRequest = {
+        'body': {'ampViewerAuthToken': 'idtoken'},
+        'headers': {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        'method': 'POST',
+        'requireAmpResponseSourceOrigin': false,
+      };
+
+      return batchFetchJsonFor(ampdoc, el, null, all, false, 'idtoken').then(
+        () => {
+          expect(fetchJson).to.be.calledWithExactly(
+            'https://data.com',
+            expectedRequest
+          );
+        }
+      );
+    });
+
+    it('should send POST request with empty, defined identity token', () => {
+      const el = element('https://data.com');
+      const all = UrlReplacementPolicy.ALL;
+
+      urlReplacements.expandUrlAsync
+        .withArgs('https://data.com')
+        .returns(Promise.resolve('https://data.com'));
+
+      const token = '';
+      return batchFetchJsonFor(ampdoc, el, null, all, false, token).then(() => {
+        const fetchOpt = fetchJson.firstCall.args[1];
+        expect(fetchOpt.body.ampViewerAuthToken).to.equal('');
+        expect(fetchOpt.method).to.equal('POST');
+      });
+    });
+
+    it('should not transform the request with an undefined token', () => {
+      const el = element('https://data.com');
+      const all = UrlReplacementPolicy.ALL;
+
+      urlReplacements.expandUrlAsync
+        .withArgs('https://data.com')
+        .returns(Promise.resolve('https://data.com'));
+
+      const expectedRequest = {
+        'requireAmpResponseSourceOrigin': false,
+      };
+
+      return batchFetchJsonFor(ampdoc, el, null, all, false).then(() => {
+        expect(fetchJson).to.be.calledWithExactly(
+          'https://data.com',
+          expectedRequest
+        );
+      });
+    });
+  });
   // TODO(choumx): Add tests for normal fetch functionality.
 });

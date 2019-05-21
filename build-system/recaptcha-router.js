@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const enableCors = require('./amp-cors');
+const cors = require('./amp-cors');
 const pc = process;
 const BBPromise = require('bluebird');
 const fs = BBPromise.promisifyAll(require('fs'));
@@ -33,7 +33,10 @@ window.grecaptcha = {
 const recaptchaFrameRequestHandler = (req, res, next) => {
   if (global.AMP_TESTING) {
     fs.readFileAsync(pc.cwd() + req.path, 'utf8').then(file => {
-      file = file.replace(/initRecaptcha\(.*\)/g, 'initRecaptcha("/recaptcha/mock.js?sitekey=")');
+      file = file.replace(
+        /initRecaptcha\(.*\)/g,
+        'initRecaptcha("/recaptcha/mock.js?sitekey=")'
+      );
       res.end(file);
     });
   } else {
@@ -45,34 +48,31 @@ recaptchaRouter.get('/mock.js', (req, res) => {
   res.end(recaptchaMock);
 });
 
-recaptchaRouter.post(
-    '/submit',
-    upload.array(),
-    (req, res) => {
-      enableCors(req, res);
+recaptchaRouter.post('/submit', upload.array(), (req, res) => {
+  cors.enableCors(req, res);
 
-      const responseJson = {
-        message: 'Success!',
-      };
+  const responseJson = {
+    message: 'Success!',
+  };
 
-      Object.keys(req.body).forEach(bodyKey => {
-        responseJson[bodyKey] = req.body[bodyKey];
-      });
+  Object.keys(req.body).forEach(bodyKey => {
+    responseJson[bodyKey] = req.body[bodyKey];
+  });
 
-      const containsRecaptchaInResponse = Object.keys(responseJson)
-          .some(responseJsonKey => {
-            return responseJsonKey.toLowerCase().includes('recaptcha');
-          });
-
-      if (containsRecaptchaInResponse) {
-        res.status(200).json(responseJson);
-      } else {
-        res.status(400).json({
-          message: 'Did not include a recaptcha token',
-        });
-      }
+  const containsRecaptchaInResponse = Object.keys(responseJson).some(
+    responseJsonKey => {
+      return responseJsonKey.toLowerCase().includes('recaptcha');
     }
-);
+  );
+
+  if (containsRecaptchaInResponse) {
+    res.status(200).json(responseJson);
+  } else {
+    res.status(400).json({
+      message: 'Did not include a recaptcha token',
+    });
+  }
+});
 
 module.exports = {
   recaptchaFrameRequestHandler,

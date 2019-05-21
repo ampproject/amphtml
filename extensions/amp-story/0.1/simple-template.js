@@ -13,12 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {LocalizedStringId} from './localization'; // eslint-disable-line no-unused-vars
+import {LocalizedStringId} from '../../../src/localized-strings'; // eslint-disable-line no-unused-vars
 import {Services} from '../../../src/services';
 import {createElementWithAttributes} from '../../../src/dom';
 import {devAssert} from '../../../src/log';
 import {isArray, toWin} from '../../../src/types';
-
 
 /**
  * @typedef {{
@@ -30,7 +29,6 @@ import {isArray, toWin} from '../../../src/types';
  * }}
  */
 export let ElementDef;
-
 
 /**
  * @param {!Document} doc
@@ -44,7 +42,6 @@ export function renderSimpleTemplate(doc, elementsDef) {
   return renderSingle(doc, /** @type {!ElementDef} */ (elementsDef));
 }
 
-
 /**
  * @param {!Document} doc
  * @param {!ElementDef} elementDef
@@ -54,7 +51,6 @@ export function renderAsElement(doc, elementDef) {
   return renderSingle(doc, elementDef);
 }
 
-
 /**
  * @param {!Document} doc
  * @param {!Array<!ElementDef>} elementsDef
@@ -63,10 +59,10 @@ export function renderAsElement(doc, elementDef) {
 function renderMulti(doc, elementsDef) {
   const fragment = doc.createDocumentFragment();
   elementsDef.forEach(elementDef =>
-    fragment.appendChild(renderSingle(doc, elementDef)));
+    fragment.appendChild(renderSingle(doc, elementDef))
+  );
   return fragment;
 }
-
 
 /**
  * @param {!Document} doc
@@ -74,18 +70,17 @@ function renderMulti(doc, elementsDef) {
  * @return {!Element}
  */
 function renderSingle(doc, elementDef) {
-  const el = elementDef.attrs ?
-    createElementWithAttributes(doc, elementDef.tag, elementDef.attrs) :
-    doc.createElement(elementDef.tag);
+  const el = elementDef.attrs
+    ? createElementWithAttributes(doc, elementDef.tag, elementDef.attrs)
+    : doc.createElement(elementDef.tag);
 
   if (elementDef.localizedStringId) {
     const win = toWin(doc.defaultView);
     Services.localizationServiceForOrNullV01(win).then(localizationService => {
-      devAssert(localizationService,
-          'Could not retrieve LocalizationService.');
-      el.textContent = localizationService
-          .getLocalizedString(/** @type {!LocalizedStringId} */ (
-            elementDef.localizedStringId));
+      devAssert(localizationService, 'Could not retrieve LocalizationService.');
+      el.textContent = localizationService.getLocalizedString(
+        /** @type {!LocalizedStringId} */ (elementDef.localizedStringId)
+      );
     });
   }
 

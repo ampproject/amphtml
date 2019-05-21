@@ -26,13 +26,15 @@
 html {
   overflow-x: hidden !important;
 }
-html, body {
-  height: auto !important;
-}
 
 html.i-amphtml-fie {
   height: 100% !important;
   width: 100% !important;
+}
+
+html:not([amp4ads]),
+html:not([amp4ads]) body {
+  height: auto !important;
 }
 
 /**
@@ -40,7 +42,21 @@ html.i-amphtml-fie {
  * See:
  * https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md
  */
-body {
+html:not([amp4ads]) body {
+  margin: 0 !important;
+}
+
+/**
+ * TODO(torch2424, #22059): if/when "inabox-preserve-height-auto" launched, merge
+ * these styles into : `html:not([amp4ads]), html:not([amp4ads]) body` above, and a new.
+ * :not([amp4ads])
+ */
+html.i-amphtml-inabox-preserve-height-auto,
+html.i-amphtml-inabox-preserve-height-auto body {
+  height: auto !important;
+}
+
+html.i-amphtml-inabox-preserve-height-auto body {
   margin: 0 !important;
 }
 
@@ -194,18 +210,6 @@ html.i-amphtml-singledoc.i-amphtml-ios-embed-sd > body {
   right: 0 !important;
   bottom: 0 !important;
   overflow: hidden !important;
-}
-
-/**
- * TODO(dvoytenko, #19004): if/when "scroll-height-minheight" launched, merge
- * these styles into _both_: `#i-amphtml-wrapper > body` and
- * `html.i-amphtml-ios-embed-sd > body` sections above.
- */
-.i-amphtml-body-minheight > body {
-  /* A slightly overflowing height is necessary to avoid scrolling and
-     rendering bugs on iOS due to
-     https://bugs.webkit.org/show_bug.cgi?id=158342. */
-  min-height: calc(100vh + 1px);
 }
 
 
@@ -841,6 +845,8 @@ amp-list[load-more] [load-more-end]
  * amp-story
  */
 amp-story[standalone], amp-story-page {
+  /* Ensures amp-story and amp-story-page have a height and are prerendered. */
+  min-height: 1px !important;
   display: block !important;
   height: 100% !important;
   margin: 0 !important;
@@ -850,7 +856,7 @@ amp-story[standalone], amp-story-page {
 }
 
 amp-story[standalone] {
-  background-color: #fff !important;
+  background-color: #202125 !important;
   position: relative !important;
 }
 
@@ -860,6 +866,34 @@ amp-story-page {
 
 amp-story .i-amphtml-loader {
   display: none !important;
+}
+
+/**
+ * Uses a selector that stops targeting amp-story-page elements once they have a
+ * [distance] or [active] attribute, so amp-story.css doesn't have to rely on
+ * CSS specificity hacks to override these styles after the JavaScript ran.
+ */
+amp-story-page:not(:first-of-type):not([distance]):not([active]) {
+  transform: translateY(1000vh) !important;
+}
+
+/**
+ * amp-autocomplete to avoid FOUC.
+ */
+amp-autocomplete {
+  position: relative !important;
+  display: inline-block !important;
+}
+
+amp-autocomplete > input {
+  padding: .5rem; /* default-ui-space-large */
+  border: 1px solid rgba(0,0,0,.33) /* default-ui-med-gray */
+}
+
+amp-autocomplete > input,
+.i-amphtml-autocomplete-results {
+  font-size: 1rem; /* default-ui-font-size */
+  line-height: 1.5rem; /* default-ui-space-large */
 }
 
 /**
@@ -890,8 +924,11 @@ amp-story .i-amphtml-loader {
     bottom: 0;
   }
 }
-@media only screen and (min-width: 980px) {
+@media only screen and (min-width: 979px) {
   amp-addthis[data-widget-type="floating"] {
-    display:none;
+    position: fixed !important;
+    width: 70px !important;
+    height: 320px!important;
+    top: 200px;
   }
 }

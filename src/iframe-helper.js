@@ -131,8 +131,10 @@ function getListenForEvents(parentWin, sentinel, origin, triggerWin) {
     const {contentWindow} = we.frame;
     if (!contentWindow) {
       setTimeout(dropListenSentinel, 0, listenSentinel);
-    } else if (triggerWin == contentWindow ||
-        isDescendantWindow(contentWindow, triggerWin)) {
+    } else if (
+      triggerWin == contentWindow ||
+      isDescendantWindow(contentWindow, triggerWin)
+    ) {
       // 3p code path, we may accept messages from nested frames.
       windowEvents = we;
       break;
@@ -202,10 +204,10 @@ function registerGlobalListenerIfNeeded(parentWin) {
     }
 
     const listenForEvents = getListenForEvents(
-        parentWin,
-        data['sentinel'],
-        event.origin,
-        event.source
+      parentWin,
+      data['sentinel'],
+      event.origin,
+      event.source
     );
     if (!listenForEvents) {
       return;
@@ -250,25 +252,28 @@ export function listenFor(
   callback,
   opt_is3P,
   opt_includingNestedWindows,
-  opt_allowOpaqueOrigin) {
-
+  opt_allowOpaqueOrigin
+) {
   devAssert(iframe.src, 'only iframes with src supported');
-  devAssert(!iframe.parentNode, 'cannot register events on an attached ' +
-      'iframe. It will cause hair-pulling bugs like #2942');
+  devAssert(
+    !iframe.parentNode,
+    'cannot register events on an attached ' +
+      'iframe. It will cause hair-pulling bugs like #2942'
+  );
   devAssert(callback);
   const parentWin = iframe.ownerDocument.defaultView;
 
   registerGlobalListenerIfNeeded(parentWin);
 
   const listenForEvents = getOrCreateListenForEvents(
-      parentWin,
-      iframe,
-      opt_is3P
+    parentWin,
+    iframe,
+    opt_is3P
   );
 
   const iframeOrigin = parseUrlDeprecated(iframe.src).origin;
-  let events = listenForEvents[typeOfMessage] ||
-    (listenForEvents[typeOfMessage] = []);
+  let events =
+    listenForEvents[typeOfMessage] || (listenForEvents[typeOfMessage] = []);
 
   let unlisten;
   let listener = function(data, source, origin) {
@@ -304,7 +309,7 @@ export function listenFor(
 
   events.push(listener);
 
-  return unlisten = function() {
+  return (unlisten = function() {
     if (listener) {
       const index = events.indexOf(listener);
       if (index > -1) {
@@ -316,7 +321,7 @@ export function listenFor(
       events = null;
       callback = null;
     }
-  };
+  });
 }
 
 /**
@@ -335,12 +340,17 @@ export function listenForOncePromise(iframe, typeOfMessages, opt_is3P) {
   return new Promise(resolve => {
     for (let i = 0; i < typeOfMessages.length; i++) {
       const message = typeOfMessages[i];
-      const unlisten = listenFor(iframe, message, (data, source, origin) => {
-        for (let i = 0; i < unlistenList.length; i++) {
-          unlistenList[i]();
-        }
-        resolve({data, source, origin});
-      }, opt_is3P);
+      const unlisten = listenFor(
+        iframe,
+        message,
+        (data, source, origin) => {
+          for (let i = 0; i < unlistenList.length; i++) {
+            unlistenList[i]();
+          }
+          resolve({data, source, origin});
+        },
+        opt_is3P
+      );
       unlistenList.push(unlisten);
     }
   });
@@ -355,9 +365,13 @@ export function listenForOncePromise(iframe, typeOfMessages, opt_is3P) {
  * @param {boolean=} opt_is3P set to true if the iframe is 3p.
  */
 export function postMessage(iframe, type, object, targetOrigin, opt_is3P) {
-  postMessageToWindows(iframe,
-      [{win: iframe.contentWindow, origin: targetOrigin}], type, object,
-      opt_is3P);
+  postMessageToWindows(
+    iframe,
+    [{win: iframe.contentWindow, origin: targetOrigin}],
+    type,
+    object,
+    opt_is3P
+  );
 }
 
 /**
@@ -384,7 +398,7 @@ export function postMessageToWindows(iframe, targets, type, object, opt_is3P) {
   }
   for (let i = 0; i < targets.length; i++) {
     const target = targets[i];
-    target.win./*OK*/postMessage(payload, target.origin);
+    target.win./*OK*/ postMessage(payload, target.origin);
   }
 }
 
@@ -409,11 +423,15 @@ function getSentinel_(iframe, opt_is3P) {
 export function parseIfNeeded(data) {
   if (typeof data == 'string') {
     if (data.charAt(0) == '{') {
-      data = tryParseJson(data, e => {
-        dev().warn('IFRAME-HELPER',
+      data =
+        tryParseJson(data, e => {
+          dev().warn(
+            'IFRAME-HELPER',
             'Postmessage could not be parsed. ' +
-            'Is it in a valid JSON format?', e);
-      }) || null;
+              'Is it in a valid JSON format?',
+            e
+          );
+        }) || null;
     } else if (isAmpMessage(data)) {
       data = deserializeMessage(data);
     } else {
@@ -422,8 +440,6 @@ export function parseIfNeeded(data) {
   }
   return /** @type {?JsonObject} */ (data);
 }
-
-
 
 /**
  * Manages a postMessage API for an iframe with a subscription message and
@@ -447,16 +463,21 @@ export class SubscriptionApi {
     this.clientWindows_ = [];
 
     /** @private @const {!UnlistenDef} */
-    this.unlisten_ = listenFor(this.iframe_, type, (data, source, origin) => {
-      // This message might be from any window within the iframe, we need
-      // to keep track of which windows want to be sent updates.
-      if (!this.clientWindows_.some(entry => entry.win == source)) {
-        this.clientWindows_.push({win: source, origin});
-      }
-      requestCallback(data, source, origin);
-    }, this.is3p_,
-    // For 3P frames we also allow nested frames within them to subscribe..
-    this.is3p_ /* opt_includingNestedWindows */);
+    this.unlisten_ = listenFor(
+      this.iframe_,
+      type,
+      (data, source, origin) => {
+        // This message might be from any window within the iframe, we need
+        // to keep track of which windows want to be sent updates.
+        if (!this.clientWindows_.some(entry => entry.win == source)) {
+          this.clientWindows_.push({win: source, origin});
+        }
+        requestCallback(data, source, origin);
+      },
+      this.is3p_,
+      // For 3P frames we also allow nested frames within them to subscribe..
+      this.is3p_ /* opt_includingNestedWindows */
+    );
   }
 
   /**
@@ -468,11 +489,12 @@ export class SubscriptionApi {
     // Remove clients that have been removed from the DOM.
     remove(this.clientWindows_, client => !client.win.parent);
     postMessageToWindows(
-        this.iframe_,
-        this.clientWindows_,
-        type,
-        data,
-        this.is3p_);
+      this.iframe_,
+      this.clientWindows_,
+      type,
+      data,
+      this.is3p_
+    );
   }
 
   /**
@@ -500,12 +522,7 @@ export function looksLikeTrackingIframe(element) {
 
 // Most common ad sizes
 // Array of [width, height] pairs.
-const adSizes = [
-  [300, 250],
-  [320, 50],
-  [300, 50],
-  [320, 100],
-];
+const adSizes = [[300, 250], [320, 50], [300, 50], [320, 100]];
 
 /**
  * Guess whether this element might be an ad.
@@ -545,4 +562,27 @@ export function disableScrollingOnIframe(iframe) {
   setStyle(iframe, 'overflow', 'hidden');
 
   return iframe;
+}
+
+/**
+ * Returns true if win's properties can be accessed and win is defined.
+ * This functioned is used to determine if a window is cross-domained
+ * from the perspective of the current window.
+ * @param {!Window} win
+ * @return {boolean}
+ * @private
+ */
+export function canInspectWindow(win) {
+  // TODO: this is not reliable.  The compiler assumes that property reads are
+  // side-effect free.  The recommended fix is to use goog.reflect.sinkValue
+  // but since we're not using the closure library I'm not sure how to do this.
+  // See https://github.com/google/closure-compiler/issues/3156
+  try {
+    // win['test'] could be truthy but not true the compiler shouldn't be able
+    // to optimize this check away.
+    return !!win.location.href && (win['test'] || true);
+  } catch (unusedErr) {
+    // eslint-disable-line no-unused-vars
+    return false;
+  }
 }

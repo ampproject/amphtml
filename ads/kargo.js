@@ -14,11 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  computeInMasterFrame,
-  loadScript,
-  validateData,
-} from '../3p/3p';
+import {computeInMasterFrame, loadScript, validateData} from '../3p/3p';
 
 /**
  * @param {!Window} global
@@ -30,7 +26,8 @@ export function kargo(global, data) {
   validateData(data, ['site', 'slot'], ['options']);
 
   // Kargo AdTag url
-  const kargoScriptUrl = 'https://storage.cloud.kargo.com/ad/network/tag/v3/' + data.site + '.js';
+  const kargoScriptUrl =
+    'https://storage.cloud.kargo.com/ad/network/tag/v3/' + data.site + '.js';
 
   // parse extra ad call options (optional)
   let options = {};
@@ -43,28 +40,33 @@ export function kargo(global, data) {
   // Add window source reference to ad options
   options.source_window = global;
 
-  computeInMasterFrame(global, 'kargo-load', function(done) {
-    // load AdTag in Master window
-    loadScript(this, kargoScriptUrl, () => {
-      let success = false;
-      if (this.Kargo != null && this.Kargo.loaded) {
-        success = true;
+  computeInMasterFrame(
+    global,
+    'kargo-load',
+    function(done) {
+      // load AdTag in Master window
+      loadScript(this, kargoScriptUrl, () => {
+        let success = false;
+        if (this.Kargo != null && this.Kargo.loaded) {
+          success = true;
+        }
+
+        done(success);
+      });
+    },
+    success => {
+      if (success) {
+        const w = options.source_window;
+
+        // Add reference to Kargo api to this window if it's not the Master window
+        if (!w.context.isMaster) {
+          w.Kargo = w.context.master.Kargo;
+        }
+
+        w.Kargo.getAd(data.slot, options);
+      } else {
+        throw new Error('Kargo AdTag failed to load');
       }
-
-      done(success);
-    });
-  }, success => {
-    if (success) {
-      const w = options.source_window;
-
-      // Add reference to Kargo api to this window if it's not the Master window
-      if (!w.context.isMaster) {
-        w.Kargo = w.context.master.Kargo;
-      }
-
-      w.Kargo.getAd(data.slot, options);
-    } else {
-      throw new Error('Kargo AdTag failed to load');
     }
-  });
+  );
 }

@@ -21,28 +21,53 @@ amp-base-carousel {
   overflow: hidden;
 }
 
-.i-amphtml-carousel-arrow-prev-slot,
-.i-amphtml-carousel-arrow-next-slot {
+/*
+ * This is a flex container containing the arrow slots. Since this uses flex,
+ * it will reverse the arrow positions when using RTL.
+ */
+.i-amphtml-carousel-arrows {
   position: absolute;
   top: 0;
   bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  /* Make this container not block swipe since it is stacked on top. */
+  pointer-events: none;
+}
+
+.i-amphtml-carousel-arrow-prev-slot,
+.i-amphtml-carousel-arrow-next-slot {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
 }
 
-.i-amphtml-carousel-arrow-prev-slot {
-  left: 0;
+.i-amphtml-carousel-arrow-prev-slot > *,
+.i-amphtml-carousel-arrow-next-slot > * {
+  /* Reenable pointer events stopped at the parent container. */
+  pointer-events: all;
 }
 
-.i-amphtml-carousel-arrow-next-slot {
-  right: 0;
+/* Rotate arrow slots for RTL. This applies to default / custom arrows. */
+amp-base-carousel[dir="rtl"] .i-amphtml-carousel-arrow-prev-slot,
+amp-base-carousel[dir="rtl"] .i-amphtml-carousel-arrow-next-slot {
+  transform: scaleX(-1);
 }
 
-[i-amphtml-carousel-at-start="true"] .i-amphtml-carousel-scroll[loop="false"] ~ .i-amphtml-carousel-arrow-prev-slot,
-[i-amphtml-carousel-at-end="true"] .i-amphtml-carousel-scroll[loop="false"] ~ .i-amphtml-carousel-arrow-next-slot,
-[i-amphtml-carousel-hide-buttons="true"] .i-amphtml-carousel-arrow-prev-slot,
-[i-amphtml-carousel-hide-buttons="true"] .i-amphtml-carousel-arrow-next-slot {
+amp-base-carousel[loop="false"] .i-amphtml-carousel-arrow-prev-slot > [disabled],
+amp-base-carousel[loop="false"] .i-amphtml-carousel-arrow-next-slot > [disabled],
+amp-base-carousel[i-amphtml-carousel-hide-buttons] .i-amphtml-carousel-arrow-prev-slot,
+amp-base-carousel[i-amphtml-carousel-hide-buttons] .i-amphtml-carousel-arrow-next-slot {
   opacity: 0;
+  /** 
+   * Note, screen readers can still activate the buttons when hide buttons is
+   * specified, even though we have `pointer-events: none`.
+   */
   pointer-events: none;
 }
 

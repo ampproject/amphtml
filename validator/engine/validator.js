@@ -380,8 +380,7 @@ function getTagSpecUrl(tagSpec) {
 
   if (tagSpec.specUrl !== null) {return tagSpec.specUrl;}
 
-  const extensionSpecUrlPrefix =
-      'https://www.ampproject.org/docs/reference/components/';
+  const extensionSpecUrlPrefix = 'https://amp.dev/documentation/components/';
   if (tagSpec.extensionSpec !== null && tagSpec.extensionSpec.name !== null)
   {return extensionSpecUrlPrefix + tagSpec.extensionSpec.name;}
   if (tagSpec.requiresExtension.length > 0) {
@@ -1703,6 +1702,7 @@ class TagStack {
     goog.asserts.assert(query !== amp.validator.AncestorMarker.Marker.UNKNOWN);
     // Skip the first element, which is "$ROOT".
     for (let i = 1; i < this.stack_.length; ++i) {
+      if (this.stack_[i].tagSpec === null) {continue;}
       const spec = this.stack_[i].tagSpec.getSpec();
       if (spec.markDescendants === null) {continue;}
       for (const marker of spec.markDescendants.marker) {
@@ -2729,6 +2729,14 @@ class Context {
   }
 
   /**
+   * Returns true iff "transformed" is a type identifier in this document.
+   * @return {boolean}
+   */
+  isTransformed() {
+    return this.typeIdentifiers_.includes('transformed');
+  }
+
+  /**
    * Record that this document contains a tag which is a member of a list
    * of mandatory alternatives.
    * @param {!ParsedTagSpec} parsedTagSpec
@@ -3179,6 +3187,46 @@ function validateNonTemplateAttrValueAgainstSpec(
 }
 
 /**
+ * @param {!amp.validator.AmpLayout.Layout} layout
+ * @return {string}
+ */
+function getLayoutClass(layout) {
+  return 'i-amphtml-layout-' + getLayoutName(layout);
+}
+
+/**
+ * @param {!amp.validator.AmpLayout.Layout} layout
+ * @return {string}
+ */
+function getLayoutName(layout) {
+  const idx = amp.validator.AmpLayout.Layout_ValuesByIndex.indexOf(layout);
+  return amp.validator.AmpLayout.Layout_NamesByIndex[idx].toLowerCase().replace(
+      '_', '-');
+}
+
+/**
+ * @return {string}
+ */
+function getLayoutSizeDefinedClass() {
+  return 'i-amphtml-layout-size-defined';
+}
+
+/**
+ * @param {!amp.validator.AmpLayout.Layout} layout
+ * @return {boolean}
+ */
+function isLayoutSizeDefined(layout) {
+  return (
+    layout === amp.validator.AmpLayout.Layout.FILL ||
+      layout === amp.validator.AmpLayout.Layout.FIXED ||
+      layout === amp.validator.AmpLayout.Layout.FIXED_HEIGHT ||
+      layout === amp.validator.AmpLayout.Layout.FLEX_ITEM ||
+      layout === amp.validator.AmpLayout.Layout.FLUID ||
+      layout === amp.validator.AmpLayout.Layout.INTRINSIC ||
+      layout === amp.validator.AmpLayout.Layout.RESPONSIVE);
+}
+
+/**
  * @param {string} layout
  * @return {!amp.validator.AmpLayout.Layout}
  */
@@ -3265,7 +3313,31 @@ amp.validator.CssLength = class {
 };
 
 /**
- * Calculates the effective width from the input layout and width.
+ * Calculates the effective width from the input layout, input width and tag.
+ * For certain tags it uses explicit dimensions.
+ * @param {!amp.validator.AmpLayout.Layout} inputLayout
+ * @param {!amp.validator.CssLength} inputWidth
+ * @param {string} tagName
+ * @return {!amp.validator.CssLength}
+ */
+function CalculateWidthForTag(inputLayout, inputWidth, tagName) {
+  if ((inputLayout === amp.validator.AmpLayout.Layout.UNKNOWN ||
+       inputLayout === amp.validator.AmpLayout.Layout.FIXED) &&
+      !inputWidth.isSet) {
+    if (tagName === 'AMP-ANALYTICS' || tagName === 'AMP-PIXEL') {
+      return new amp.validator.CssLength(
+          '1px', /* allowAuto */ false, /* allowFluid */ false);
+    }
+    if (tagName === 'AMP-SOCIAL-SHARE') {
+      return new amp.validator.CssLength(
+          '60px', /* allowAuto */ false, /* allowFluid */ false);
+    }
+  }
+  return inputWidth;
+}
+
+/**
+ * Calculates the effective width from the input layout and input width.
  * This involves considering that some elements, such as amp-audio and
  * amp-pixel, have natural dimensions (browser or implementation-specific
  * defaults for width / height).
@@ -3282,6 +3354,31 @@ function CalculateWidth(spec, inputLayout, inputWidth) {
         '1px', /* allowAuto */ false, /* allowFluid */ false);
   }
   return inputWidth;
+}
+
+/**
+ * Calculates the effective height from the input layout, input height and tag.
+ * For certain tags it uses explicit dimensions.
+ * @param {!amp.validator.AmpLayout.Layout} inputLayout
+ * @param {!amp.validator.CssLength} inputHeight
+ * @param {string} tagName
+ * @return {!amp.validator.CssLength}
+ */
+function CalculateHeightForTag(inputLayout, inputHeight, tagName) {
+  if ((inputLayout === amp.validator.AmpLayout.Layout.UNKNOWN ||
+       inputLayout === amp.validator.AmpLayout.Layout.FIXED ||
+       inputLayout === amp.validator.AmpLayout.Layout.FIXED_HEIGHT) &&
+      !inputHeight.isSet) {
+    if (tagName === 'AMP-ANALYTICS' || tagName === 'AMP-PIXEL') {
+      return new amp.validator.CssLength(
+          '1px', /* allowAuto */ false, /* allowFluid */ false);
+    }
+    if (tagName === 'AMP-SOCIAL-SHARE') {
+      return new amp.validator.CssLength(
+          '44px', /* allowAuto */ false, /* allowFluid */ false);
+    }
+  }
+  return inputHeight;
 }
 
 /**
@@ -3670,6 +3767,79 @@ function validateAncestorTags(parsedTagSpec, context, validationResult) {
 }
 
 /**
+ * Helper method for validateLayout.
+ * Validates the server-side rendering related attributes for the given layout.
+ * @param {!amp.validator.TagSpec} spec
+ * @param {!amp.htmlparser.ParsedHtmlTag} encounteredTag
+ * @param {!amp.validator.AmpLayout.Layout} inputLayout
+ * @param {!amp.validator.CssLength} inputWidth
+ * @param {!amp.validator.CssLength} inputHeight
+ * @param {string} sizesAttr
+ * @param {string} heightsAttr
+ * @param {!Context} context
+ * @param {!amp.validator.ValidationResult} result
+ */
+function validateSsrLayout(
+  spec, encounteredTag, inputLayout, inputWidth, inputHeight, sizesAttr,
+  heightsAttr, context, result) {
+  // Only applies to transformed AMP and custom elements (<amp-...>).
+  if (!context.isTransformed() ||
+      !goog.string./*OK*/ startsWith(encounteredTag.lowerName(), 'amp-')) {
+    return;
+  }
+
+  // calculate effective ssr layout
+  const width =
+      CalculateWidthForTag(inputLayout, inputWidth, encounteredTag.upperName());
+  const height = CalculateHeightForTag(
+      inputLayout, inputHeight, encounteredTag.upperName());
+  const layout =
+      CalculateLayout(inputLayout, width, height, sizesAttr, heightsAttr);
+
+  const attrsByKey = encounteredTag.attrsByKey();
+
+  // class attribute
+  const classAttr = attrsByKey['class'];
+  if (classAttr !== undefined) {
+    // i-amphtml-layout-{layout_name}
+    const validInternalClasses = Object.create(null);
+    validInternalClasses[getLayoutClass(layout)] = 0;
+    if (isLayoutSizeDefined(layout)) {
+      // i-amphtml-layout-size-defined
+      validInternalClasses[getLayoutSizeDefinedClass()] = 0;
+    }
+    const classes = classAttr.split(/[\s+]/);
+    for (const classValue of classes) {
+      if (goog.string./*OK*/ startsWith(classValue, 'i-amphtml-') &&
+          !(classValue in validInternalClasses)) {
+        context.addError(
+            amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
+            context.getLineCol(),
+            /* params */['class', getTagSpecName(spec), classAttr],
+            getTagSpecUrl(spec), result);
+      }
+    }
+  }
+
+  // i-amphtml-layout attribute
+  const ssrAttr = attrsByKey['i-amphtml-layout'];
+  if (ssrAttr !== undefined) {
+    const layoutName = getLayoutName(layout);
+    if (layoutName !== ssrAttr.toLowerCase()) {
+      context.addError(
+          amp.validator.ValidationError.Code.ATTR_VALUE_REQUIRED_BY_LAYOUT,
+          context.getLineCol(),
+          /* params */
+          [
+            ssrAttr, 'i-amphtml-layout', getTagSpecName(spec),
+            layoutName.toUpperCase(), layoutName,
+          ],
+          getTagSpecUrl(spec), result);
+    }
+  }
+}
+
+/**
  * Validates the layout for the given tag. This involves checking the
  * layout, width, height, sizes attributes with AMP specific logic.
  * @param {!ParsedTagSpec} parsedTagSpec
@@ -3738,6 +3908,11 @@ function validateLayout(parsedTagSpec, context, encounteredTag, result) {
   const height = CalculateHeight(spec.ampLayout, inputLayout, inputHeight);
   const layout =
       CalculateLayout(inputLayout, width, height, sizesAttr, heightsAttr);
+
+  // Validate for transformed AMP the server-side rendering layout.
+  validateSsrLayout(
+      spec, encounteredTag, inputLayout, inputWidth, inputHeight, sizesAttr,
+      heightsAttr, context, result);
 
   // Only FLEX_ITEM allows for height to be set to auto.
   if (height.isAuto && layout !== amp.validator.AmpLayout.Layout.FLEX_ITEM) {
@@ -3915,6 +4090,24 @@ function validateAttrValueBelowTemplateTag(
 }
 
 /**
+ * Determines the name of the attribute where you find the name of this sort of
+ * extension.  Typically, this will return 'custom-element'.
+ *
+ * @param {!amp.validator.ExtensionSpec} extensionSpec
+ * @return {string}
+ */
+function getExtensionNameAttribute(extensionSpec) {
+  switch (extensionSpec.extensionType) {
+    case amp.validator.ExtensionSpec.ExtensionType.CUSTOM_TEMPLATE:
+      return 'custom-template';
+    case amp.validator.ExtensionSpec.ExtensionType.HOST_SERVICE:
+      return 'host-service';
+    default:
+      return 'custom-element';
+  }
+}
+
+/**
  * Validates whether an encountered attribute is validated by an ExtensionSpec.
  * ExtensionSpec's validate the 'custom-element', 'custom-template', and 'src'
  * attributes. If an error is found, it is added to the |result|. The return
@@ -3931,18 +4124,12 @@ function validateAttributeInExtension(tagSpec, context, attr, result) {
 
   const {extensionSpec} = tagSpec;
   // TagSpecs with extensions will only be evaluated if their dispatch_key
-  // matches, which is based on this custom-element/custom-template field
-  // attribute value. The dispatch key matching is case-insensitive for
-  // faster lookups, so it still possible for the attribute value to not
-  // match if it contains upper-case letters.
-  if (!extensionSpec.isCustomTemplate && attr.name === 'custom-element') {
-    if (extensionSpec.name !== attr.value) {
-      goog.asserts.assert(extensionSpec.name === attr.value.toLowerCase());
-      return false;
-    }
-    return true;
-  } else if (
-    extensionSpec.isCustomTemplate && attr.name === 'custom-template') {
+  // matches, which is based on this custom-element/custom-template/host-service
+  // field attribute value. The dispatch key matching is case-insensitive for
+  // faster lookups, so it still possible for the attribute value to not match
+  // if it contains upper-case letters.
+  if (extensionSpec !== null &&
+      getExtensionNameAttribute(extensionSpec) === attr.name) {
     if (extensionSpec.name !== attr.value) {
       goog.asserts.assert(extensionSpec.name === attr.value.toLowerCase());
       return false;
@@ -4094,6 +4281,12 @@ function validateAttributes(
   // values. We skip over this array 2 at a time to iterate over the keys.
   const attrsByName = parsedTagSpec.getAttrsByName();
   for (const attr of encounteredTag.attrs()) {
+    // For transformed AMP, attributes `class` and `i-amphtml-layout` are
+    // handled within validateSsrLayout.
+    if (context.isTransformed() &&
+        (attr.name === 'class' || attr.name === 'i-amphtml-layout')) {
+      continue;
+    }
     if (!(attr.name in attrsByName)) {
       // The HTML tag specifies type identifiers which are validated in
       // validateHtmlTag(), so we skip them here.
@@ -4111,9 +4304,9 @@ function validateAttributes(
       {continue;}
 
       // If |spec| is an extension, then we ad-hoc validate 'custom-element',
-      // 'custom-template', and 'src' attributes by calling this method.
-      // For 'src', we also keep track whether we validated it this way,
-      // (seen_src_attr), since it's a mandatory attr.
+      // 'custom-template', 'host-service', and 'src' attributes by calling this
+      // method.  For 'src', we also keep track whether we validated it this
+      // way, (seen_src_attr), since it's a mandatory attr.
       if (spec.extensionSpec !== null &&
           validateAttributeInExtension(spec, context, attr, result)) {
         if (attr.name === 'src') {seenExtensionSrcAttr = true;}
@@ -4796,12 +4989,10 @@ class ParsedValidatorRules {
           // This tag is an extension. Compute and register a dispatch key
           // for it.
           let dispatchKey;
-          const attrName = tag.extensionSpec.isCustomTemplate ?
-            'custom-template' :
-            'custom-element';
           dispatchKey = makeDispatchKey(
               amp.validator.AttrSpec.DispatchKeyType.NAME_VALUE_DISPATCH,
-              attrName, /** @type {string} */ (tag.extensionSpec.name), '');
+              getExtensionNameAttribute(tag.extensionSpec),
+              /** @type {string} */ (tag.extensionSpec.name), '');
           tagnameDispatch.registerDispatchKey(dispatchKey, tagSpecId);
         } else {
           const dispatchKey = this.rules_.dispatchKeyByTagSpecId[tagSpecId];
@@ -4985,7 +5176,7 @@ class ParsedValidatorRules {
                   amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
                   context.getLineCol(),
                   /*params=*/[attr.name, 'html', attr.value],
-                  'https://www.ampproject.org/docs/reference/spec#required-markup',
+                  'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup',
                   validationResult);
             }
           }
@@ -4993,7 +5184,7 @@ class ParsedValidatorRules {
           context.addError(
               amp.validator.ValidationError.Code.DISALLOWED_ATTR,
               context.getLineCol(), /*params=*/[attr.name, 'html'],
-              'https://www.ampproject.org/docs/reference/spec#required-markup',
+              'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup',
               validationResult);
         }
       }
@@ -5004,7 +5195,7 @@ class ParsedValidatorRules {
       context.addError(
           amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING,
           context.getLineCol(), /*params=*/[formatIdentifiers[0], 'html'],
-          'https://www.ampproject.org/docs/reference/spec#required-markup',
+          'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup',
           validationResult);
     }
   }
@@ -5035,15 +5226,12 @@ class ParsedValidatorRules {
         this.validateTypeIdentifiers(
             htmlTag.attrs(), ['⚡', 'amp', 'actions'], context,
             validationResult);
-        // TODO(honeybadgerdontcare): require "actions" as a type identifier
-        // when publishers are ready. Uncomment code below and update test.
-        // if (validationResult.typeIdentifier.indexOf("actions") === -1) {
-        //   context.addError(
-        //       amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING,
-        //       context.getLineCol(), /*params=*/["actions", 'html'],
-        //       'https://www.ampproject.org/docs/reference/spec#required-markup',
-        //       validationResult);
-        // }
+        if (validationResult.typeIdentifier.indexOf('actions') === -1) {
+          context.addError(
+              amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING,
+              context.getLineCol(), /* params */['actions', 'html'],
+              /* url */'', validationResult);
+        }
         break;
     }
   }
@@ -5753,6 +5941,8 @@ amp.validator.ValidationResult.prototype.outputToTerminal = function(
   const {status} = this;
   if (status === amp.validator.ValidationResult.Status.PASS) {
     terminal.info('AMP validation successful.');
+    terminal.info('Review our \'publishing checklist\' to ensure '
+        + 'successful AMP document distribution. See https://go.amp.dev/publishing-checklist');
     if (this.errors.length === 0) {
       return;
     }
@@ -5802,7 +5992,7 @@ amp.validator.ValidationResult.prototype.outputToTerminal = function(
   }
   if (errorCategoryFilter === null && errors.length !== 0) {
     terminal.info(
-        'See also https://validator.ampproject.org/#url=' +
+        'See also https://validator.amp.dev/#url=' +
         encodeURIComponent(goog.uri.utils.removeFragment(url)));
   }
 };
@@ -6192,7 +6382,6 @@ amp.validator.categorizeError = function(error) {
       error.code ===
           amp.validator.ValidationError.Code
               .WARNING_EXTENSION_DEPRECATED_VERSION ||
-
       error.code ===
           amp.validator.ValidationError.Code.WARNING_TAG_REQUIRED_BY_MISSING) {
     return amp.validator.ErrorCategory.Code.DEPRECATION;

@@ -40,9 +40,24 @@ class ElementHandle {
    * @package
    */
   getElement() {
-  	return this.element_;
+    return this.element_;
   }
 }
+
+/**
+ * Key to send to the FunctionalTestController#type method to trigger
+ * actions instead of text.
+ * @enum {string}
+ */
+const Key = {
+  'ArrowDown': 'ArrowDown',
+  'ArrowLeft': 'ArrowLeft',
+  'ArrowRight': 'ArrowRight',
+  'ArrowUp': 'ArrowUp',
+  'Enter': 'Enter',
+  'Escape': 'Escape',
+  'Tab': 'Tab',
+};
 
 /**
  * Allow expectations to await the expected value. Duck-type a real Promise.
@@ -60,9 +75,10 @@ class ControllerPromise {
    * @param {function(TYPE,function(TYPE): ?TYPE): !Promise=} opt_waitForValue
    */
   constructor(executorOrPromise, opt_waitForValue) {
-    this.promise_ = typeof executorOrPromise == 'function' ?
-      new Promise(executorOrPromise) :
-      executorOrPromise;
+    this.promise_ =
+      typeof executorOrPromise == 'function'
+        ? new Promise(executorOrPromise)
+        : executorOrPromise;
 
     /**
      * Returns a Promise that resolves when the given expected value fulfills
@@ -76,15 +92,17 @@ class ControllerPromise {
   /** @override */
   catch(onRejected) {
     return new ControllerPromise(
-        this.promise_.catch(onRejected),
-        this.waitForValue);
+      this.promise_.catch(onRejected),
+      this.waitForValue
+    );
   }
 
- 	/** @override */
+  /** @override */
   finally(onFinally) {
     return new ControllerPromise(
-        this.promise_.finally(onFinally),
-        this.waitForValue);
+      this.promise_.finally(onFinally),
+      this.waitForValue
+    );
   }
 
   /** @override */
@@ -96,13 +114,15 @@ class ControllerPromise {
       wrappedWait = (condition, opt_mutate) => {
         opt_mutate = opt_mutate || (x => x);
         return this.waitForValue(condition, value =>
-          opt_mutate(opt_onFulfilled(value)));
+          opt_mutate(opt_onFulfilled(value))
+        );
       };
     }
 
     return new ControllerPromise(
-        this.promise_.then(opt_onFulfilled, opt_onRejected),
-        wrappedWait);
+      this.promise_.then(opt_onFulfilled, opt_onRejected),
+      wrappedWait
+    );
   }
 }
 
@@ -121,7 +141,7 @@ class FunctionalTestController {
    * Retrieves the URL for the current page.
    * {@link https://www.w3.org/TR/webdriver1/#get-current-url}
    *
-   * @return {!Promise<string>}
+   * @return {!ControllerPromise<string>}
    */
   async getCurrentUrl() {}
 
@@ -129,7 +149,7 @@ class FunctionalTestController {
    * Returns the document title.
    * {@link https://www.w3.org/TR/webdriver1/#get-title}
    *
-   * @return {!Promise<string>}
+   * @return {!ControllerPromise<string>}
    */
   async getTitle() {}
 
@@ -140,18 +160,54 @@ class FunctionalTestController {
    * {@link https://www.w3.org/TR/webdriver1/#switch-to-frame}
    *
    * @param {!ElementHandle} unusedHandle
-   * @param {function():(!Promise|undefined)} unusedFn
    * @return {!Promise}
    */
-  async usingFrame(unusedHandle, unusedFn) {}
+  async switchToFrame(unusedHandle) {}
+
+  /**
+   * Selects the current top-level browsing context or a child browsing context
+   * of the current browsing context to use as the current browsing context for
+   * subsequent commands.
+   * {@link https://www.w3.org/TR/webdriver1/#switch-to-frame}
+   *
+   * @return {!Promise}
+   */
+  async switchToParent() {}
+
+  /**
+   * Selects a subtree inside a ShadowDOM ShadowRoot to use as the current
+   * browsing context for subsequent commands.
+   * {@link https://github.com/w3c/webdriver/pull/1320}
+   * https://github.com/SeleniumHQ/selenium/issues/5869
+   *
+   * @param {!ElementHandle} unusedHandle
+   * @return {!Promise}
+   */
+  async switchToShadow(unusedHandle) {}
+
+  /**
+   * Selects the main top-level DOM tree to use as the current
+   * browsing context for subsequent commands.
+   * {@link https://github.com/w3c/webdriver/pull/1320}
+   * https://github.com/SeleniumHQ/selenium/issues/5869
+   *
+   * @return {!Promise}
+   */
+  async switchToLight() {}
 
   /**
    * Gets the active element of the current browsing context’s document element.
    * {@link https://www.w3.org/TR/webdriver1/#get-active-element}
    *
-   * @return {!Promise<!ElementHandle>}
+   * @return {!ControllerPromise<!ElementHandle>}
    */
   async getActiveElement() {}
+
+  /**
+   * Gets the root of the current document, for use in scrolling e.g.
+   * @return {!Promise<!ElementHandle>}
+   */
+  async getDocumentElement() {}
 
   /**
    * The Find Element command is used to find the first element matching the
@@ -238,10 +294,9 @@ class FunctionalTestController {
    * {@link https://www.w3.org/TR/webdriver1/#is-element-selected}
    *
    * @param {!ElementHandle} unusedHandle
-   * @param {boolean=} opt_expect An expected value to wait for
-   * @return {!Promise<boolean>}
+   * @return {!ControllerPromise<boolean>}
    */
-  async isElementSelected(unusedHandle, opt_expect) {}
+  async isElementSelected(unusedHandle) {}
 
   /**
    * Return the value of the given attribute name on the given element.
@@ -250,10 +305,9 @@ class FunctionalTestController {
    *
    * @param {!ElementHandle} unusedHandle
    * @param {string} unusedAttribute
-   * @param {string=} opt_expect An expected value to wait for
-   * @return {!Promise<string>}
+   * @return {!ControllerPromise<string>}
    */
-  async getElementAttribute(unusedHandle, unusedAttribute, opt_expect) {}
+  async getElementAttribute(unusedHandle, unusedAttribute) {}
 
   /**
    * Return the value of the given property name on the given element.
@@ -261,20 +315,9 @@ class FunctionalTestController {
    *
    * @param {!ElementHandle} unusedHandle
    * @param {string} unusedProperty
-   * @param {string=} opt_expect An expected value to wait for
-   * @return {!Promise<string>}
+   * @return {!ControllerPromise<string>}
    */
-  async getElementProperty(unusedHandle, unusedProperty, opt_expect) {}
-
-
-  /**
-   * Returns the rect for a given Element.
-   * {@link https://www.w3.org/TR/webdriver1/#get-element-rect}
-   *
-   * @param {!ElementHandle} unusedHandle
-   * @return {!Promise<!{x: number, y: number, height: number. width: number}>}
-   */
-  async getElementRect(unusedHandle) {}
+  async getElementProperty(unusedHandle, unusedProperty) {}
 
   /**
    * Return the value of the given CSS value on the given element.
@@ -282,10 +325,9 @@ class FunctionalTestController {
    *
    * @param {!ElementHandle} unusedHandle
    * @param {string} unusedStyleProperty
-   * @param {string=} opt_expect An expected value to wait for
-   * @return {!Promise<string>} styleProperty
+   * @return {!ControllerPromise<string>} styleProperty
    */
-  async getElementCssValue(unusedHandle, unusedStyleProperty, opt_expect) {}
+  async getElementCssValue(unusedHandle, unusedStyleProperty) {}
 
   /**
    * The Get Element Text command intends to return an element’s text
@@ -294,10 +336,9 @@ class FunctionalTestController {
    * {@link https://www.w3.org/TR/webdriver1/#get-element-text}
    *
    * @param {!ElementHandle} unusedHandle
-   * @param {(string|RegExp)=} opt_expect An expected value to wait for
-   * @return {!Promise<string>}
+   * @return {!ControllerPromise<string>}
    */
-  async getElementText(unusedHandle, opt_expect) {}
+  async getElementText(unusedHandle) {}
 
   /**
    * Return the value of the tag name for the given element.
@@ -310,11 +351,12 @@ class FunctionalTestController {
 
   /**
    * The Get Element Rect command returns the dimensions and coordinates of
-   * the given web element.
+   * the given web element. Unlike the webdriver version, this also returns
+   * the left, right, top and bottom properties.
    * {@link https://www.w3.org/TR/webdriver1/#get-element-rect}
    *
    * @param {!ElementHandle} unusedHandle
-   * @return {!Promise<!DOMRectDef>}
+   * @return {!ControllerPromise<!DOMRectDef>}
    */
   async getElementRect(unusedHandle) {}
 
@@ -324,10 +366,9 @@ class FunctionalTestController {
    * {@link https://www.w3.org/TR/webdriver1/#is-element-enabled}
    *
    * @param {!ElementHandle} unusedHandle
-   * @param {boolean=} opt_expect An expected value to wait for
-   * @return {!Promise<boolean>}
+   * @return {!ControllerPromise<boolean>}
    */
-  async isElementEnabled(unusedHandle, opt_expect) {}
+  async isElementEnabled(unusedHandle) {}
 
   /**
    * The Set Window Rect command alters the size and the position of the
@@ -375,7 +416,7 @@ class FunctionalTestController {
    * {@link https://www.w3.org/TR/webdriver1/#element-send-keys}
    *
    * @param {?ElementHandle} unusedHandle
-   * @param {string} unusedKeys
+   * @param {string|Key} unusedKeys
    * @return {!Promise}
    */
   async type(unusedHandle, unusedKeys) {}
@@ -401,25 +442,34 @@ class FunctionalTestController {
    * @package
    */
   async evaluate(unusedFn, ...unusedArgs) {}
-}
 
+  /**
+   * Cleanup any resources
+   * @return {!Promise}
+   */
+  async dispose() {}
+}
 
 /**
  * @typedef {{
  *   width: number,
  *   height: number
  * }} WindowRectDef
-*/
+ */
 let WindowRectDef;
 
 /**
  * @typedef {{
  *   x: number,
  *   y: number,
+ *   top: number,
+ *   bottom: number,
+ *   left: number,
+ *   right: number,
  *   width: number,
  *   height: number
  * }}
-*/
+ */
 let DOMRectDef;
 
 /** @enum {string} */
@@ -441,6 +491,7 @@ module.exports = {
   ElementHandle,
   ControllerPromise,
   FunctionalTestController,
+  Key,
   WindowRectDef,
   DOMRectDef,
   ScrollToOptionsDef,

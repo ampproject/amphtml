@@ -14,25 +14,12 @@
  * limitations under the License.
  */
 
-const {bundleComponent} = require('../bundler');
 const {expect} = require('chai');
-const {join} = require('path');
 const {serveIndexForTesting} = require('../index');
 
 const NOOP = () => {};
 
 describe('devdash', () => {
-
-  describe('bundling', () => {
-
-    // Bundling unused at the moment, so no use to test.
-    it.skip('bundles', async() => {
-      const mainComponentPath = '../components/main.js';
-      const bundle = await bundleComponent(join(__dirname, mainComponentPath));
-      expect(bundle).to.be.ok;
-    });
-
-  });
 
   describe('express middleware', () => {
 

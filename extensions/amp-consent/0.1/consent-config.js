@@ -32,7 +32,6 @@ const ALLOWED_DEPR_CONSENTINSTANCE_ATTRS = {
 };
 
 export class ConsentConfig {
-
   /** @param {!Element} element */
   constructor(element) {
     /** @private {!Element} */
@@ -64,8 +63,11 @@ export class ConsentConfig {
     const consentsConfigDepr = config['consents'];
     if (!isExperimentOn(this.win_, 'amp-consent-v2')) {
       userAssert(consentsConfigDepr, '%s: consents config is required', TAG);
-      userAssert(Object.keys(consentsConfigDepr).length != 0,
-          '%s: can\'t find consent instance', TAG);
+      userAssert(
+        Object.keys(consentsConfigDepr).length != 0,
+        "%s: can't find consent instance",
+        TAG
+      );
     }
 
     if (!config['consents']) {
@@ -75,8 +77,11 @@ export class ConsentConfig {
     // Assert single consent instance
     const keys = Object.keys(consentsConfigDepr);
 
-    userAssert(keys.length <= 1,
-        '%s: only single consent instance is supported', TAG);
+    userAssert(
+      keys.length <= 1,
+      '%s: only single consent instance is supported',
+      TAG
+    );
 
     if (keys.length > 0) {
       config['consentInstanceId'] = keys[0];
@@ -108,15 +113,25 @@ export class ConsentConfig {
    */
   validateAndParseConfig_() {
     const inlineConfig = this.convertInlineConfigFormat_(
-        userAssert(this.getInlineConfig_(), '%s: Inline config not found'));
+      /** @type {!JsonObject} */ (userAssert(
+        this.getInlineConfig_(),
+        '%s: Inline config not found'
+      ))
+    );
 
     const cmpConfig = this.getCMPConfig_();
 
-    const config = /** @type {!JsonObject} */
-        (deepMerge(cmpConfig || {}, inlineConfig || {}, 1));
+    const config = /** @type {!JsonObject} */ (deepMerge(
+      cmpConfig || {},
+      inlineConfig || {},
+      1
+    ));
 
-    userAssert(config['consentInstanceId'],
-        '%s: consentInstanceId to store consent info is required', TAG);
+    userAssert(
+      config['consentInstanceId'],
+      '%s: consentInstanceId to store consent info is required',
+      TAG
+    );
 
     if (config['policy']) {
       // Only respect 'default' consent policy;
@@ -124,8 +139,11 @@ export class ConsentConfig {
       // TODO (@zhouyx): Validate waitFor value
       for (let i = 0; i < keys.length; i++) {
         if (keys[i] != 'default') {
-          user().warn(TAG, 'policy %s is currently not supported ' +
-            'and will be ignored', keys[i]);
+          user().warn(
+            TAG,
+            'policy %s is currently not supported and will be ignored',
+            keys[i]
+          );
           delete config['policy'][keys[i]];
         }
       }
@@ -181,8 +199,11 @@ export class ConsentConfig {
    * @param {!JsonObject} config
    */
   validateCMPConfig_(config) {
-    const assertValues =
-        ['consentInstanceId', 'checkConsentHref', 'promptUISrc'];
+    const assertValues = [
+      'consentInstanceId',
+      'checkConsentHref',
+      'promptUISrc',
+    ];
     for (let i = 0; i < assertValues.length; i++) {
       const attribute = assertValues[i];
       devAssert(config[attribute], 'CMP config must specify %s', attribute);

@@ -36,6 +36,7 @@ This document provides details for testing and building your AMP code.
   * [Testing with ngrok](#testing-with-ngrok)
   * [Testing with Heroku](#testing-with-heroku)
   * [Testing with Firebase](#testing-with-firebase)
+- [End-to-end Tests](#end-to-end-tests)
 
 ## Testing commands
 
@@ -102,7 +103,6 @@ Command                                                                 | Descri
 `gulp dep-check`                                                        | Runs a dependency check on each module. Run automatically upon push.
 `gulp presubmit`                                                        | Run validation against files to check for forbidden and required terms. Run automatically upon push.
 `gulp validator`                                                        | Builds and tests the AMP validator. Run automatically upon push.
-`node build-system/pr-check.js`                                         | Runs all tests that will be run upon pushing a CL.
 `gulp ava`                                                              | Run node tests for tasks and offline/node code using [ava](https://github.com/avajs/ava).
 `gulp todos:find-closed`                                                | Find `TODO`s in code for issues that have been closed.
 `gulp visual-diff`                                                      | Runs all visual diff tests on a headless instance of local Chrome. Requires `PERCY_PROJECT` and `PERCY_TOKEN` to be set as environment variables or passed to the task with `--percy_project` and `--percy_token`.
@@ -117,6 +117,9 @@ Command                                                                 | Descri
 `gulp e2e --files=<test-files-path-glob>`                               | Runs end-to-end tests from the specified files on the latest Chrome browser.
 `gulp e2e --nobuild`                                                    | Runs all end-to-end tests without building the runtime.
 `gulp e2e --testnames`                                                  | Lists the name of each test being run, and prints a summary at the end.
+`gulp e2e --engine=ENGINE`                                              | Runs end-to-end tests with the given Web Driver engine. Allowed values are `puppeteer` and `selenium`.
+`gulp e2e --headless`                                                   | Runs end-to-end tests in a headless browser instance.
+`gulp e2e --watch`                                                      | Watches for changes in test files, runs tests.
 
 ## Manual testing
 
@@ -246,6 +249,10 @@ The [`ampproject/amphtml`](https://github.com/ampproject/amphtml) repository on 
 
 When a test run fails due to visual diffs being present, click the `details` link next to `percy/amphtml` in your PR and examine the results. By default, Percy highlights the changes between snapshots in red. Clicking on the new snapshot will show it in its raw form. If the diffs indicate a problem that is likely to be due to your PR, you can try running the visual diffs locally in order to debug (see section below). However, if you are sure that the problem is not due to your PR, you may click the green `Approve` button on Percy to approve the snapshots and unblock your PR from being merged.
 
+### Flaky Tests
+
+If a Percy test flakes and you would like to trigger a rerun, you can't do that from within Percy.  Instead, from your PR on GitHub open up the "Details" for the `continuous-integration/travis-ci/pr` check to load the Travis run for your PR.  There you should see a "passed" test shard labeled "Visual Diff Tests".  Click the "Restart Job" icon on just that shard to trigger a rerun on Percy.
+
 ### Running Visual Diff Tests Locally
 
 You can also run the visual tests locally during development. You must first create a free Percy account at [https://percy.io](https://percy.io), create a project, and set the `PERCY_PROJECT` and `PERCY_TOKEN` environment variables using the unique values you find at `https://percy.io/<org>/<project>/settings`. Once the environment variables are set up, you can run the AMP visual diff tests as described below.
@@ -307,6 +314,8 @@ firebase deploy
 * When initializing firebase within the directory via `firebase init`, make sure to select the following options when asked:
 - "Which Firebase CLI features do you want to setup for this folder?" select `Hosting: Configure and deploy Firebase Hosting sites`.
 - "What do you want to use as your public directory?" enter `firebase`.
+- "Select a default Firebase project for this directory:" select your project name if it's already created, otherwise choose `[don't setup a new project]` and add one later.
+  - Note: If you haven't already, you will have to create a project via the [Firebase Console](https://console.firebase.google.com) after you are done initializing and before you deploy. Once you create the project, you can make it active in your CLI with `firebase use your-project-name` or give it an alias by selecting your project after running `firebase use --add`.
 - "Configure as a single-page app (rewrite all urls to /index.html)?" select `n`.
 
 
@@ -327,6 +336,10 @@ firebase deploy
 
 If you are only testing a single file, you can use `gulp firebase --file=path/to/my/file.amp.html` to avoid copying over all of `test/manual` and `examples`. It will copy over the specified file to `firebase/index.html`, which simplifies debugging.
 
+After deploying, you can access your project publically at its hosting URL `https://your-project-name.firebaseapp.com`.
+
+Additionally, you can create multiple projects and switch between them in the CLI using `firebase use your-project-name`.
+
 ## End-to-End Tests
 
 You can run and create E2E tests locally during development. Currently tests only run on Chrome, but support for additional browsers is underway. These tests have not been added to our CI build yet - but they will be added soon.
@@ -338,4 +351,4 @@ gulp e2e
 
 The task will kick off `gulp build` and then `gulp serve` before running the tests. To skip building the runtime, use `--nobuild`.
 
-Create your own tests by adding them to `test\e2e` or `extensions\**\test-e2e`. For examples, see `test\e2e\test-github.js` and `extensions\amp-carousel\0.2\test-e2e\test-carousel.js`.
+[Consult the E2E testing documentation](../build-system/tasks/e2e/README.md) to learn how to create your own end-to-end tests.

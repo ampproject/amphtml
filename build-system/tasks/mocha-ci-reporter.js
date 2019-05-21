@@ -48,8 +48,9 @@ function ciReporter(runner) {
     const {failures, stats} = self;
     Base.list(failures);
     process.stdout.write(
-        `Executed ${stats.failures + stats.passes} of ${stats.tests} ` +
-        `(Skipped ${stats.pending}) `);
+      `Executed ${stats.failures + stats.passes} of ${stats.tests} ` +
+        `(Skipped ${stats.pending}) `
+    );
     if (stats.failures == 0) {
       process.stdout.write(Base.color('green', 'SUCCESS \n'));
     } else {

@@ -19,6 +19,7 @@ import {
   dashToCamelCase,
   endsWith,
   expandTemplate,
+  includes,
 } from '../../src/string';
 
 describe('dashToCamelCase', () => {
@@ -46,8 +47,25 @@ describe('endsWith', () => {
   });
 });
 
-describe('expandTemplate', () => {
+describe('includes', () => {
+  it('should determine whether string includes.', () => {
+    expect(includes('a', 'a')).to.be.true;
+    expect(includes('a', 'a', 0)).to.be.true;
+    expect(includes('a', 'a', 1)).to.be.false;
+    expect(includes('b', 'a')).to.be.false;
+    expect(includes('ab', 'a')).to.be.true;
+    expect(includes('aba', 'a')).to.be.true;
+    expect(includes('aba', 'aba')).to.be.true;
+    expect(includes('Xaba', 'aba')).to.be.true;
+    expect(includes('Xaba', '')).to.be.true;
+    expect(includes('', 'a')).to.be.false;
+    expect(includes('aa', 'aaa')).to.be.false;
+    expect(includes('aa', 'aaaa')).to.be.false;
+    expect(includes('', '')).to.be.true;
+  });
+});
 
+describe('expandTemplate', () => {
   const data = {
     'x': 'Test 1',
     'y': 'Test 2',
@@ -93,12 +111,11 @@ describe('expandTemplate', () => {
   it('should handle multiple iterations when asked to.', () => {
     expect(expandTemplate('${tox}', testGetter, 2)).to.equal('Test 1');
     expect(expandTemplate('${toxy}', testGetter, 2)).to.equal('Test 1Test 2');
-    expect(expandTemplate('${totoxy}', testGetter, 2)).to.equal(
-        '${x}${y}');
-    expect(expandTemplate('${totoxy}', testGetter, 3)).to.equal(
-        'Test 1Test 2');
+    expect(expandTemplate('${totoxy}', testGetter, 2)).to.equal('${x}${y}');
+    expect(expandTemplate('${totoxy}', testGetter, 3)).to.equal('Test 1Test 2');
     expect(expandTemplate('${totoxy}', testGetter, 10)).to.equal(
-        'Test 1Test 2');
+      'Test 1Test 2'
+    );
   });
 
   it('should handle circular expansions without hanging', () => {

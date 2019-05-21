@@ -54,7 +54,7 @@ const DEFAULT_DEBOUNCE_WAIT = 300; // ms
 const DEFAULT_THROTTLE_INTERVAL = 100; // ms
 
 /** @const {!Object<string,!Array<string>>} */
-const ELEMENTS_ACTIONS_MAP_ = {
+const NON_AMP_ELEMENTS_ACTIONS_ = {
   'form': ['submit', 'clear'],
 };
 
@@ -166,8 +166,18 @@ export class ActionInvocation {
    * @param {number} sequenceId An identifier for this action's sequence (all
    *   actions triggered by one event e.g. "tap:form1.submit, form2.submit").
    */
-  constructor(node, method, args, source, caller, event, trust,
-    actionEventType = '?', tagOrTarget = null, sequenceId = Math.random()) {
+  constructor(
+    node,
+    method,
+    args,
+    source,
+    caller,
+    event,
+    trust,
+    actionEventType = '?',
+    tagOrTarget = null,
+    sequenceId = Math.random()
+  ) {
     /** @type {!Node} */
     this.node = node;
     /** @const {string} */
@@ -203,8 +213,11 @@ export class ActionInvocation {
       return false;
     }
     if (this.trust < minimumTrust) {
-      user().error(TAG_, `"${this.actionEventType}" is not allowed to invoke ` +
-          `"${this.tagOrTarget}.${this.method}".`);
+      user().error(
+        TAG_,
+        `"${this.actionEventType}" is not allowed to invoke ` +
+          `"${this.tagOrTarget}.${this.method}".`
+      );
       return false;
     }
     return true;
@@ -254,6 +267,7 @@ export class ActionService {
      * @const @private {!Object<string, {handler: ActionHandlerDef, minTrust: ActionTrust}>}
      */
     this.globalMethodHandlers_ = map();
+
     // Add core events.
     this.addEvent('tap');
     this.addEvent('submit');
@@ -266,8 +280,11 @@ export class ActionService {
 
   /** @override @nocollapse */
   static installInEmbedWindow(embedWin, ampdoc) {
-    installServiceInEmbedScope(embedWin, 'action',
-        new ActionService(ampdoc, embedWin.document));
+    installServiceInEmbedScope(
+      embedWin,
+      'action',
+      new ActionService(ampdoc, embedWin.document)
+    );
   }
 
   /**
@@ -286,15 +303,25 @@ export class ActionService {
         }
       });
       this.root_.addEventListener('keydown', event => {
-        const element = dev().assertElement(event.target);
-        const {key} = event;
+        const {key, target} = event;
+        const element = dev().assertElement(target);
         if (key == Keys.ENTER || key == Keys.SPACE) {
           const role = element.getAttribute('role');
           const isTapEventRole =
-              (role && hasOwn(TAPPABLE_ARIA_ROLES, role.toLowerCase()));
+            role && hasOwn(TAPPABLE_ARIA_ROLES, role.toLowerCase());
           if (!event.defaultPrevented && isTapEventRole) {
-            event.preventDefault();
-            this.trigger(element, name, event, ActionTrust.HIGH);
+            const hasAction = this.trigger(
+              element,
+              name,
+              event,
+              ActionTrust.HIGH
+            );
+            // Only if the element has an action do we prevent the default.
+            // In the absence of an action, e.g. on="[event].method", we do not
+            // want to stop default behavior.
+            if (hasAction) {
+              event.preventDefault();
+            }
           }
         }
       });
@@ -312,11 +339,19 @@ export class ActionService {
         this.trigger(element, name, event, ActionTrust.HIGH);
       });
     } else if (name == 'input-debounced') {
-      const debouncedInput = debounce(this.ampdoc.win, event => {
-        const target = dev().assertElement(event.target);
-        this.trigger(target, name, /** @type {!ActionEventDef} */ (event),
-            ActionTrust.HIGH);
-      }, DEFAULT_DEBOUNCE_WAIT);
+      const debouncedInput = debounce(
+        this.ampdoc.win,
+        event => {
+          const target = dev().assertElement(event.target);
+          this.trigger(
+            target,
+            name,
+            /** @type {!ActionEventDef} */ (event),
+            ActionTrust.HIGH
+          );
+        },
+        DEFAULT_DEBOUNCE_WAIT
+      );
 
       this.root_.addEventListener('input', event => {
         // Create a DeferredEvent to avoid races where the browser cleans up
@@ -326,11 +361,19 @@ export class ActionService {
         debouncedInput(deferredEvent);
       });
     } else if (name == 'input-throttled') {
-      const throttledInput = throttle(this.ampdoc.win, event => {
-        const target = dev().assertElement(event.target);
-        this.trigger(target, name, /** @type {!ActionEventDef} */ (event),
-            ActionTrust.HIGH);
-      }, DEFAULT_THROTTLE_INTERVAL);
+      const throttledInput = throttle(
+        this.ampdoc.win,
+        event => {
+          const target = dev().assertElement(event.target);
+          this.trigger(
+            target,
+            name,
+            /** @type {!ActionEventDef} */ (event),
+            ActionTrust.HIGH
+          );
+        },
+        DEFAULT_THROTTLE_INTERVAL
+      );
 
       this.root_.addEventListener('input', event => {
         const deferredEvent = new DeferredEvent(event);
@@ -371,9 +414,10 @@ export class ActionService {
    * @param {?ActionEventDef} event
    * @param {!ActionTrust} trust
    * @param {?JsonObject=} opt_args
+   * @return {boolean} true if the target has an action.
    */
   trigger(target, eventType, event, trust, opt_args) {
-    this.action_(target, eventType, event, trust, opt_args);
+    return this.action_(target, eventType, event, trust, opt_args);
   }
 
   /**
@@ -388,44 +432,52 @@ export class ActionService {
    */
   execute(target, method, args, source, caller, event, trust) {
     const invocation = new ActionInvocation(
-        target, method, args, source, caller, event, trust);
+      target,
+      method,
+      args,
+      source,
+      caller,
+      event,
+      trust
+    );
     this.invoke_(invocation);
   }
 
   /**
-   * Installs action handler for the specified element.
+   * Installs action handler for the specified element. The action handler is
+   * responsible for checking invocation trust.
+   *
+   * For AMP elements, use base-element.registerAction() instead.
+   *
    * @param {!Element} target
    * @param {ActionHandlerDef} handler
-   * @param {ActionTrust} minTrust
    */
-  installActionHandler(target, handler, minTrust = ActionTrust.HIGH) {
+  installActionHandler(target, handler) {
     // TODO(dvoytenko, #7063): switch back to `target.id` with form proxy.
     const targetId = target.getAttribute('id') || '';
-    const debugId = target.tagName + '#' + targetId;
-    devAssert((targetId && targetId.substring(0, 4) == 'amp-') ||
-        target.tagName.toLowerCase() in ELEMENTS_ACTIONS_MAP_,
-    'AMP element or a whitelisted target element is expected: %s', debugId);
+
+    devAssert(
+      isAmpTagName(targetId) ||
+        target.tagName.toLowerCase() in NON_AMP_ELEMENTS_ACTIONS_,
+      'AMP or special element expected: %s',
+      target.tagName + '#' + targetId
+    );
 
     if (target[ACTION_HANDLER_]) {
       dev().error(TAG_, `Action handler already installed for ${target}`);
       return;
     }
+    target[ACTION_HANDLER_] = handler;
 
     /** @const {Array<!ActionInvocation>} */
-    const currentQueue = target[ACTION_QUEUE_];
-
-    target[ACTION_HANDLER_] = {handler, minTrust};
-
-    // Dequeue the current queue.
-    if (isArray(currentQueue)) {
+    const queuedInvocations = target[ACTION_QUEUE_];
+    if (isArray(queuedInvocations)) {
+      // Invoke and clear all queued invocations now handler is installed.
       Services.timerFor(toWin(target.ownerDocument.defaultView)).delay(() => {
         // TODO(dvoytenko, #1260): dedupe actions.
-        currentQueue.forEach(invocation => {
+        queuedInvocations.forEach(invocation => {
           try {
-            if (invocation.satisfiesTrust(
-                /** @type {ActionTrust} */ (minTrust))) {
-              handler(invocation);
-            }
+            handler(invocation);
           } catch (e) {
             dev().error(TAG_, 'Action execution failed:', invocation, e);
           }
@@ -470,9 +522,9 @@ export class ActionService {
    * @private
    */
   getActionNode_(target) {
-    return this.globalTargets_[target] ?
-      this.root_ :
-      this.root_.getElementById(target);
+    return this.globalTargets_[target]
+      ? this.root_
+      : this.root_.getElementById(target);
   }
 
   /**
@@ -502,19 +554,20 @@ export class ActionService {
    * @param {?ActionEventDef} event
    * @param {!ActionTrust} trust
    * @param {?JsonObject=} opt_args
+   * @return {boolean} True if the element has an action.
    * @private
    */
   action_(source, actionEventType, event, trust, opt_args) {
-    const action =
-        this.findAction_(source, actionEventType);
+    const action = this.findAction_(source, actionEventType);
     if (!action) {
-      return;
+      return false;
     }
     // Use a pseudo-UUID to uniquely identify this sequence of actions.
     // A sequence is all actions triggered by a single event.
     const sequenceId = Math.random();
     // Invoke actions serially, where each action waits for its predecessor
     // to complete. `currentPromise` is the i'th promise in the chain.
+    /** @type {?Promise} */
     let currentPromise = null;
     action.actionInfos.forEach(({target, args, method, str}) => {
       const dereferencedArgs = dereferenceArgsVariables(args, event, opt_args);
@@ -524,16 +577,27 @@ export class ActionService {
           this.error_(`Target "${target}" not found for action [${str}].`);
           return;
         }
-        const invocation = new ActionInvocation(node, method,
-            dereferencedArgs, source, action.node, event, trust,
-            actionEventType, node.tagName || target, sequenceId);
+        const invocation = new ActionInvocation(
+          node,
+          method,
+          dereferencedArgs,
+          source,
+          action.node,
+          event,
+          trust,
+          actionEventType,
+          node.tagName || target,
+          sequenceId
+        );
         return this.invoke_(invocation);
       };
       // Wait for the previous action, if any.
-      currentPromise = (currentPromise)
+      currentPromise = currentPromise
         ? currentPromise.then(invokeAction)
         : invokeAction();
     });
+
+    return action.actionInfos.length >= 1;
   }
 
   /**
@@ -552,7 +616,6 @@ export class ActionService {
     }
   }
 
-
   /**
    * @param {!ActionInvocation} invocation
    * @return {?Promise}
@@ -563,9 +626,12 @@ export class ActionService {
 
     // Check that this action is whitelisted (if a whitelist is set).
     if (this.whitelist_) {
-      if (!isActionWhitelisted_(invocation, this.whitelist_)) {
-        this.error_(`"${tagOrTarget}.${method}" is not whitelisted ${
-          JSON.stringify(this.whitelist_)}.`);
+      if (!isActionWhitelisted(invocation, this.whitelist_)) {
+        this.error_(
+          `"${tagOrTarget}.${method}" is not whitelisted ${JSON.stringify(
+            this.whitelist_
+          )}.`
+        );
         return null;
       }
     }
@@ -587,7 +653,7 @@ export class ActionService {
 
     // Handle element-specific actions.
     const lowerTagName = node.tagName.toLowerCase();
-    if (lowerTagName.substring(0, 4) == 'amp-') {
+    if (isAmpTagName(lowerTagName)) {
       if (node.enqueAction) {
         node.enqueAction(invocation);
       } else {
@@ -596,18 +662,17 @@ export class ActionService {
       return null;
     }
 
-    // Special elements with AMP ID or known supported actions.
-    const supportedActions = ELEMENTS_ACTIONS_MAP_[lowerTagName];
+    // Special non-AMP elements with AMP ID or known supported actions.
+    const nonAmpActions = NON_AMP_ELEMENTS_ACTIONS_[lowerTagName];
     // TODO(dvoytenko, #7063): switch back to `target.id` with form proxy.
     const targetId = node.getAttribute('id') || '';
-    if ((targetId && targetId.substring(0, 4) == 'amp-') ||
-        (supportedActions && supportedActions.indexOf(method) > -1)) {
-      const holder = node[ACTION_HANDLER_];
-      if (holder) {
-        const {handler, minTrust} = holder;
-        if (invocation.satisfiesTrust(minTrust)) {
-          handler(invocation);
-        }
+    if (
+      isAmpTagName(targetId) ||
+      (nonAmpActions && nonAmpActions.indexOf(method) > -1)
+    ) {
+      const handler = node[ACTION_HANDLER_];
+      if (handler) {
+        handler(invocation);
       } else {
         node[ACTION_QUEUE_] = node[ACTION_QUEUE_] || [];
         node[ACTION_QUEUE_].push(invocation);
@@ -616,8 +681,10 @@ export class ActionService {
     }
 
     // Unsupported method.
-    this.error_(`Target (${tagOrTarget}) doesn't support "${method}" action.`,
-        invocation.caller);
+    this.error_(
+      `Target (${tagOrTarget}) doesn't support "${method}" action.`,
+      invocation.caller
+    );
 
     return null;
   }
@@ -713,7 +780,10 @@ export class ActionService {
     if (!meta) {
       return null;
     }
-    return meta.getAttribute('content').split(',')
+    return (
+      meta
+        .getAttribute('content')
+        .split(',')
         // Turn an empty string whitelist into an empty array, otherwise the
         // parse error in the mapper below would trigger.
         .filter(action => action)
@@ -728,7 +798,8 @@ export class ActionService {
           return {tagOrTarget, method};
         })
         // Filter out undefined elements because of the parse error above.
-        .filter(action => action);
+        .filter(action => action)
+    );
   }
 
   /**
@@ -767,6 +838,15 @@ export class ActionService {
 }
 
 /**
+ * @param {string} lowercaseTagName
+ * @return {boolean}
+ * @private
+ */
+function isAmpTagName(lowercaseTagName) {
+  return lowercaseTagName.substring(0, 4) === 'amp-';
+}
+
+/**
  * Returns `true` if the given action invocation is whitelisted in the given
  * whitelist. Default actions' alias, 'activate', are automatically
  * whitelisted if their corresponding registered alias is whitelisted.
@@ -775,19 +855,23 @@ export class ActionService {
  * @return {boolean}
  * @private
  */
-function isActionWhitelisted_(invocation, whitelist) {
+function isActionWhitelisted(invocation, whitelist) {
   let {method} = invocation;
   const {node, tagOrTarget} = invocation;
   // Use alias if default action is invoked.
-  if (method === DEFAULT_ACTION
-      && (typeof node.getDefaultActionAlias == 'function')) {
+  if (
+    method === DEFAULT_ACTION &&
+    typeof node.getDefaultActionAlias == 'function'
+  ) {
     method = node.getDefaultActionAlias();
   }
   const lcMethod = method.toLowerCase();
   const lcTagOrTarget = tagOrTarget.toLowerCase();
   return whitelist.some(w => {
-    if (w.tagOrTarget.toLowerCase() === lcTagOrTarget
-        || (w.tagOrTarget === '*')) {
+    if (
+      w.tagOrTarget.toLowerCase() === lcTagOrTarget ||
+      w.tagOrTarget === '*'
+    ) {
       if (w.method.toLowerCase() === lcMethod) {
         return true;
       }
@@ -816,7 +900,6 @@ export class DeferredEvent {
   }
 }
 
-
 /**
  * Clones an object and replaces its function properties with throws.
  * @param {!T} original
@@ -838,12 +921,10 @@ function cloneWithoutFunctions(original, opt_dest) {
   return clone;
 }
 
-
 /** @private */
 function notImplemented() {
   devAssert(null, 'Deferred events cannot access native event functions.');
 }
-
 
 /**
  * @param {string} action
@@ -862,11 +943,12 @@ export function parseActionMap(action, context) {
   let peek;
   do {
     tok = toks.next();
-    if (tok.type == TokenType.EOF ||
-            (tok.type == TokenType.SEPARATOR && tok.value == ';')) {
+    if (
+      tok.type == TokenType.EOF ||
+      (tok.type == TokenType.SEPARATOR && tok.value == ';')
+    ) {
       // Expected, ignore.
     } else if (tok.type == TokenType.LITERAL || tok.type == TokenType.ID) {
-
       // Format: event:target.method
 
       // Event: "event:"
@@ -879,8 +961,10 @@ export function parseActionMap(action, context) {
 
       // Handlers for event.
       do {
-        const target = assertToken(
-            toks.next(), [TokenType.LITERAL, TokenType.ID]).value;
+        const target = assertToken(toks.next(), [
+          TokenType.LITERAL,
+          TokenType.ID,
+        ]).value;
 
         // Method: ".method". Method is optional.
         let method = DEFAULT_ACTION;
@@ -889,8 +973,9 @@ export function parseActionMap(action, context) {
         peek = toks.peek();
         if (peek.type == TokenType.SEPARATOR && peek.value == '.') {
           toks.next(); // Skip '.'
-          method = assertToken(
-              toks.next(), [TokenType.LITERAL, TokenType.ID]).value || method;
+          method =
+            assertToken(toks.next(), [TokenType.LITERAL, TokenType.ID]).value ||
+            method;
 
           // Optionally, there may be arguments: "(key = value, key = value)".
           peek = toks.peek();
@@ -904,15 +989,19 @@ export function parseActionMap(action, context) {
           event,
           target,
           method,
-          args: (args && getMode().test && Object.freeze) ?
-            Object.freeze(args) : args,
+          args:
+            args && getMode().test && Object.freeze
+              ? Object.freeze(args)
+              : args,
           str: action,
         });
 
         peek = toks.peek();
-
-      } while (peek.type == TokenType.SEPARATOR && peek.value == ','
-          && toks.next()); // skip "," when found
+      } while (
+        peek.type == TokenType.SEPARATOR &&
+        peek.value == ',' &&
+        toks.next()
+      ); // skip "," when found
 
       if (!actionMap) {
         actionMap = map();
@@ -923,7 +1012,6 @@ export function parseActionMap(action, context) {
       // Unexpected token.
       assertAction(false, `; unexpected token [${tok.value || ''}]`);
     }
-
   } while (tok.type != TokenType.EOF);
 
   return actionMap;
@@ -960,14 +1048,18 @@ function tokenizeMethodArguments(toks, assertToken, assertAction) {
         // Key: "key = "
         assertToken(toks.next(), [TokenType.SEPARATOR], '=');
         // Value is either a literal or an expression: "foo.bar.baz"
-        tok = assertToken(toks.next(/* convertValue */ true),
-            [TokenType.LITERAL, TokenType.ID]);
+        tok = assertToken(toks.next(/* convertValue */ true), [
+          TokenType.LITERAL,
+          TokenType.ID,
+        ]);
         const argValueTokens = [tok];
         // Expressions have one or more dereferences: ".identifier"
         if (tok.type == TokenType.ID) {
-          for (peek = toks.peek();
+          for (
+            peek = toks.peek();
             peek.type == TokenType.SEPARATOR && peek.value == '.';
-            peek = toks.peek()) {
+            peek = toks.peek()
+          ) {
             toks.next(); // Skip '.'.
             tok = assertToken(toks.next(false), [TokenType.ID]);
             argValueTokens.push(tok);
@@ -980,9 +1072,10 @@ function tokenizeMethodArguments(toks, assertToken, assertAction) {
         args[value] = argValue;
         peek = toks.peek();
         assertAction(
-            peek.type == TokenType.SEPARATOR &&
+          peek.type == TokenType.SEPARATOR &&
             (peek.value == ',' || peek.value == ')'),
-            'Expected either [,] or [)]');
+          'Expected either [,] or [)]'
+        );
       } else {
         // Unexpected token.
         assertAction(false, `; unexpected token [${tok.value || ''}]`);
@@ -1036,11 +1129,10 @@ export function dereferenceArgsVariables(args, event, opt_args) {
     // dereferencing strings like `foo` iff there is a corresponding key in
     // `data`. Otherwise, `foo` is treated as a string "foo".
     if (typeof value == 'object' && value.expression) {
-      const expr =
-        /** @type {ActionInfoArgExpressionDef} */ (value).expression;
+      const expr = /** @type {ActionInfoArgExpressionDef} */ (value).expression;
       const exprValue = getValueForExpr(data, expr);
       // If expr can't be found in data, use null instead of undefined.
-      value = (exprValue === undefined) ? null : exprValue;
+      value = exprValue === undefined ? null : exprValue;
     }
     if (data[value]) {
       applied[key] = data[value];
@@ -1061,8 +1153,13 @@ export function dereferenceArgsVariables(args, event, opt_args) {
  * @private
  */
 function assertActionForParser(s, context, condition, opt_message) {
-  return userAssert(condition, 'Invalid action definition in %s: [%s] %s',
-      context, s, opt_message || '');
+  return userAssert(
+    condition,
+    'Invalid action definition in %s: [%s] %s',
+    context,
+    s,
+    opt_message || ''
+  );
 }
 
 /**
@@ -1076,9 +1173,12 @@ function assertActionForParser(s, context, condition, opt_message) {
  */
 function assertTokenForParser(s, context, tok, types, opt_value) {
   if (opt_value !== undefined) {
-    assertActionForParser(s, context,
-        types.includes(tok.type) && tok.value == opt_value,
-        `; expected [${opt_value}]`);
+    assertActionForParser(
+      s,
+      context,
+      types.includes(tok.type) && tok.value == opt_value,
+      `; expected [${opt_value}]`
+    );
   } else {
     assertActionForParser(s, context, types.includes(tok.type));
   }
@@ -1115,8 +1215,7 @@ const STRING_SET = '"\'';
 const OBJECT_SET = '{}';
 
 /** @private @const {string} */
-const SPECIAL_SET =
-    WHITESPACE_SET + SEPARATOR_SET + STRING_SET + OBJECT_SET;
+const SPECIAL_SET = WHITESPACE_SET + SEPARATOR_SET + STRING_SET + OBJECT_SET;
 
 /** @private */
 class ParserTokenizer {
@@ -1178,9 +1277,13 @@ class ParserTokenizer {
     }
 
     // A numeric. Notice that it steals the `.` from separators.
-    if (convertValues && (isNum(c) ||
-            (c == '.' && newIndex + 1 < this.str_.length &&
-            isNum(this.str_[newIndex + 1])))) {
+    if (
+      convertValues &&
+      (isNum(c) ||
+        (c == '.' &&
+          newIndex + 1 < this.str_.length &&
+          isNum(this.str_[newIndex + 1])))
+    ) {
       let hasFraction = c == '.';
       let end = newIndex + 1;
       for (; end < this.str_.length; end++) {
@@ -1257,7 +1360,7 @@ class ParserTokenizer {
 
     // Boolean literal.
     if (convertValues && (s == 'true' || s == 'false')) {
-      const value = (s == 'true');
+      const value = s == 'true';
       return {type: TokenType.LITERAL, value, index: newIndex};
     }
 
@@ -1271,7 +1374,6 @@ class ParserTokenizer {
   }
 }
 
-
 /**
  * Tests whether a chacter is a number.
  * @param {string} c
@@ -1281,14 +1383,14 @@ function isNum(c) {
   return c >= '0' && c <= '9';
 }
 
-
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
  */
 export function installActionServiceForDoc(ampdoc) {
   registerServiceBuilderForDoc(
-      ampdoc,
-      'action',
-      ActionService,
-      /* opt_instantiate */ true);
+    ampdoc,
+    'action',
+    ActionService,
+    /* opt_instantiate */ true
+  );
 }

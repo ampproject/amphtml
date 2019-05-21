@@ -15,27 +15,28 @@
  */
 import '../amp-riddle-quiz';
 
-
-describes.realWin('amp-riddle-quiz', {
-  amp: {
-    extensions: ['amp-riddle-quiz'],
+describes.realWin(
+  'amp-riddle-quiz',
+  {
+    amp: {
+      extensions: ['amp-riddle-quiz'],
+    },
   },
-}, env => {
-  let win;
-  let element;
+  env => {
+    let win;
+    let element;
 
-  beforeEach(() => {
-    win = env.win;
-    element = win.document.createElement('amp-riddle-quiz');
-    win.document.body.appendChild(element);
-  });
-
-  it('should have iframe when built', () => {
-    element.build().then(() => {
-      const iframe = element.querySelector('iframe');
-      expect(iframe).to.not.be.null;
+    beforeEach(() => {
+      win = env.win;
+      element = win.document.createElement('amp-riddle-quiz');
+      win.document.body.appendChild(element);
     });
-  });
 
-
-});
+    it('should have iframe when built', () => {
+      element.build().then(() => {
+        const iframe = element.querySelector('iframe');
+        expect(iframe).to.not.be.null;
+      });
+    });
+  }
+);

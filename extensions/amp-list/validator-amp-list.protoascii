@@ -204,7 +204,7 @@ tags: {  # <amp-list>
   }
   attrs: { name: "credentials" }
   attrs: {
-    name: "cross-origin"
+    name: "crossorigin"
     value: "amp-viewer-auth-token-via-post"
   }
   attrs: { name: "items" }

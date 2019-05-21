@@ -35,7 +35,6 @@ const TAG = 'Resource';
 const RESOURCE_PROP_ = '__AMP__RESOURCE';
 const OWNER_PROP_ = '__AMP__OWNER';
 
-
 /**
  * Resource state.
  *
@@ -75,7 +74,6 @@ export const ResourceState = {
   LAYOUT_FAILED: 5,
 };
 
-
 /** @typedef {{
   distance: (boolean|number),
     viewportHeight: (number|undefined),
@@ -88,15 +86,16 @@ let ViewportRatioDef;
  * @package
  */
 export class Resource {
-
   /**
    * @param {!Element} element
    * @return {!Resource}
    */
   static forElement(element) {
-    return /** @type {!Resource} */ (
-      devAssert(Resource.forElementOptional(element),
-          'Missing resource prop on %s', element));
+    return /** @type {!Resource} */ (devAssert(
+      Resource.forElementOptional(element),
+      'Missing resource prop on %s',
+      element
+    ));
   }
 
   /**
@@ -163,8 +162,9 @@ export class Resource {
     this.owner_ = undefined;
 
     /** @private {!ResourceState} */
-    this.state_ = element.isBuilt() ? ResourceState.NOT_LAID_OUT :
-      ResourceState.NOT_BUILT;
+    this.state_ = element.isBuilt()
+      ? ResourceState.NOT_LAID_OUT
+      : ResourceState.NOT_BUILT;
 
     /** @private {number} */
     this.priorityOverride_ = -1;
@@ -198,9 +198,9 @@ export class Resource {
     this.layoutPromise_ = null;
 
     /**
-    * Pending change size that was requested but could not be satisfied.
-    * @private {!./resources-impl.SizeDef|undefined}
-    */
+     * Pending change size that was requested but could not be satisfied.
+     * @private {!./resources-impl.SizeDef|undefined}
+     */
     this.pendingChangeSize_ = undefined;
 
     /** @private {boolean} */
@@ -216,6 +216,12 @@ export class Resource {
 
     /** @private @const {boolean} */
     this.useLayers_ = isExperimentOn(this.hostWin, 'layers');
+
+    /** @private @const {boolean} */
+    this.useLayersPrioritization_ = isExperimentOn(
+      this.hostWin,
+      'layers-prioritization'
+    );
   }
 
   /**
@@ -316,34 +322,40 @@ export class Resource {
   /**
    * Requests the resource's element to be built. See {@link AmpElement.build}
    * for details.
+   * @param {boolean=} force
    * @return {?Promise}
    */
-  build() {
-    if (this.isBuilding_ ||
-        !this.element.isUpgraded() ||
-        !this.resources_.grantBuildPermission()) {
+  build(force = false) {
+    if (
+      this.isBuilding_ ||
+      !this.element.isUpgraded() ||
+      (!force && !this.resources_.grantBuildPermission())
+    ) {
       return null;
     }
     this.isBuilding_ = true;
-    return this.element.build().then(() => {
-      this.isBuilding_ = false;
-      if (this.hasBeenMeasured()) {
-        this.state_ = ResourceState.READY_FOR_LAYOUT;
-        this.element.updateLayoutBox(this.getLayoutBox(), true);
-      } else {
-        this.state_ = ResourceState.NOT_LAID_OUT;
+    return this.element.build().then(
+      () => {
+        this.isBuilding_ = false;
+        if (this.hasBeenMeasured()) {
+          this.state_ = ResourceState.READY_FOR_LAYOUT;
+          this.element.updateLayoutBox(this.getLayoutBox(), true);
+        } else {
+          this.state_ = ResourceState.NOT_LAID_OUT;
+        }
+        // TODO(dvoytenko): merge with the standard BUILT signal.
+        this.element.signals().signal('res-built');
+        // TODO(dvoytenko, #7389): cleanup once amp-sticky-ad signals are
+        // in PROD.
+        this.element.dispatchCustomEvent(AmpEvents.BUILT);
+      },
+      reason => {
+        this.maybeReportErrorOnBuildFailure(reason);
+        this.isBuilding_ = false;
+        this.element.signals().rejectSignal('res-built', reason);
+        throw reason;
       }
-      // TODO(dvoytenko): merge with the standard BUILT signal.
-      this.element.signals().signal('res-built');
-      // TODO(dvoytenko, #7389): cleanup once amp-sticky-ad signals are
-      // in PROD.
-      this.element.dispatchCustomEvent(AmpEvents.BUILT);
-    }, reason => {
-      this.maybeReportErrorOnBuildFailure(reason);
-      this.isBuilding_ = false;
-      this.element.signals().rejectSignal('res-built', reason);
-      throw reason;
-    });
+    );
   }
 
   /**
@@ -371,7 +383,7 @@ export class Resource {
    * @param {!../layout-rect.LayoutMarginsChangeDef=} opt_newMargins
    */
   changeSize(newHeight, newWidth, opt_newMargins) {
-    this.element./*OK*/changeSize(newHeight, newWidth, opt_newMargins);
+    this.element./*OK*/ changeSize(newHeight, newWidth, opt_newMargins);
 
     // Schedule for re-measure and possible re-layout.
     this.requestMeasure();
@@ -384,8 +396,12 @@ export class Resource {
    * @param {number|undefined} requestedWidth
    * @param {!../layout-rect.LayoutMarginsChangeDef|undefined} requestedMargins
    */
-  overflowCallback(overflown, requestedHeight, requestedWidth,
-    requestedMargins) {
+  overflowCallback(
+    overflown,
+    requestedHeight,
+    requestedWidth,
+    requestedMargins
+  ) {
     if (overflown) {
       this.pendingChangeSize_ = {
         height: requestedHeight,
@@ -393,8 +409,12 @@ export class Resource {
         margins: requestedMargins,
       };
     }
-    this.element.overflowCallback(overflown, requestedHeight, requestedWidth,
-        requestedMargins);
+    this.element.overflowCallback(
+      overflown,
+      requestedHeight,
+      requestedWidth,
+      requestedMargins
+    );
   }
 
   /** reset pending change sizes */
@@ -429,12 +449,14 @@ export class Resource {
     // that placeholders need to at least wait until the parent element
     // has been stubbed. We can tell whether the parent has been stubbed
     // by whether a resource has been attached to it.
-    if (this.isPlaceholder_ &&
-        this.element.parentElement &&
-        // Use prefix to recognize AMP element. This is necessary because stub
-        // may not be attached yet.
-        startsWith(this.element.parentElement.tagName, 'AMP-') &&
-        !(RESOURCE_PROP_ in this.element.parentElement)) {
+    if (
+      this.isPlaceholder_ &&
+      this.element.parentElement &&
+      // Use prefix to recognize AMP element. This is necessary because stub
+      // may not be attached yet.
+      startsWith(this.element.parentElement.tagName, 'AMP-') &&
+      !(RESOURCE_PROP_ in this.element.parentElement)
+    ) {
       return;
     }
 
@@ -450,12 +472,17 @@ export class Resource {
 
     // Note that "left" doesn't affect readiness for the layout.
     const sizeChanges = !layoutRectSizeEquals(oldBox, box);
-    if (this.state_ == ResourceState.NOT_LAID_OUT ||
-          oldBox.top != box.top || sizeChanges) {
-      if (this.element.isUpgraded() &&
-              this.state_ != ResourceState.NOT_BUILT &&
-              (this.state_ == ResourceState.NOT_LAID_OUT ||
-                  this.element.isRelayoutNeeded())) {
+    if (
+      this.state_ == ResourceState.NOT_LAID_OUT ||
+      oldBox.top != box.top ||
+      sizeChanges
+    ) {
+      if (
+        this.element.isUpgraded() &&
+        this.state_ != ResourceState.NOT_BUILT &&
+        (this.state_ == ResourceState.NOT_LAID_OUT ||
+          this.element.isRelayoutNeeded())
+      ) {
         this.state_ = ResourceState.READY_FOR_LAYOUT;
       }
     }
@@ -478,13 +505,15 @@ export class Resource {
     if (viewport.supportsPositionFixed() && this.isDisplayed()) {
       const {win} = this.resources_;
       const {body} = win.document;
-      for (let n = this.element; n && n != body; n = n./*OK*/offsetParent) {
+      for (let n = this.element; n && n != body; n = n./*OK*/ offsetParent) {
         if (n.isAlwaysFixed && n.isAlwaysFixed()) {
           isFixed = true;
           break;
         }
-        if (viewport.isDeclaredFixed(n)
-            && computedStyle(win, n).position == 'fixed') {
+        if (
+          viewport.isDeclaredFixed(n) &&
+          computedStyle(win, n).position == 'fixed'
+        ) {
           isFixed = true;
           break;
         }
@@ -496,8 +525,11 @@ export class Resource {
       // For fixed position elements, we need the relative position to the
       // viewport. When accessing the layoutBox through #getLayoutBox, we'll
       // return the new absolute position.
-      this.layoutBox_ = moveLayoutRect(box, -viewport.getScrollLeft(),
-          -viewport.getScrollTop());
+      this.layoutBox_ = moveLayoutRect(
+        box,
+        -viewport.getScrollLeft(),
+        -viewport.getScrollTop()
+      );
     }
   }
 
@@ -530,9 +562,11 @@ export class Resource {
       this.layoutBox_ = layoutRectLtwh(0, 0, 0, 0);
     } else {
       this.layoutBox_ = layoutRectLtwh(
-          this.layoutBox_.left,
-          this.layoutBox_.top,
-          0, 0);
+        this.layoutBox_.left,
+        this.layoutBox_.top,
+        0,
+        0
+      );
     }
     this.isFixed_ = false;
     this.element.updateLayoutBox(this.getLayoutBox());
@@ -594,8 +628,11 @@ export class Resource {
       return this.layoutBox_;
     }
     const viewport = this.resources_.getViewport();
-    return moveLayoutRect(this.layoutBox_, viewport.getScrollLeft(),
-        viewport.getScrollTop());
+    return moveLayoutRect(
+      this.layoutBox_,
+      viewport.getScrollLeft(),
+      viewport.getScrollTop()
+    );
   }
 
   /**
@@ -635,9 +672,11 @@ export class Resource {
     // TODO(jridgewell): #getSize
     const box = this.getLayoutBox();
     const hasNonZeroSize = box.height > 0 && box.width > 0;
-    return (isFluid || hasNonZeroSize) &&
-        !!this.element.ownerDocument &&
-        !!this.element.ownerDocument.defaultView;
+    return (
+      (isFluid || hasNonZeroSize) &&
+      !!this.element.ownerDocument &&
+      !!this.element.ownerDocument.defaultView
+    );
   }
 
   /**
@@ -679,8 +718,7 @@ export class Resource {
     // See if pre-existing promise.
     const viewportNum = dev().assertNumber(viewport);
     const key = String(viewportNum);
-    if (this.withViewportDeferreds_ &&
-        this.withViewportDeferreds_[key]) {
+    if (this.withViewportDeferreds_ && this.withViewportDeferreds_[key]) {
       return this.withViewportDeferreds_[key].promise;
     }
     // See if already within viewport multiplier.
@@ -709,11 +747,12 @@ export class Resource {
 
   /** @return {!ViewportRatioDef} */
   getDistanceViewportRatio() {
-    if (this.useLayers_) {
+    if (this.useLayers_ && this.useLayersPrioritization_) {
       const {element} = this;
       return {
-        distance: element.getLayers().iterateAncestry(element,
-            this.layersDistanceRatio_),
+        distance: element
+          .getLayers()
+          .iterateAncestry(element, this.layersDistanceRatio_),
       };
     }
 
@@ -725,8 +764,10 @@ export class Resource {
     let scrollPenalty = 1;
     let distance = 0;
 
-    if (viewportBox.right < layoutBox.left ||
-        viewportBox.left > layoutBox.right) {
+    if (
+      viewportBox.right < layoutBox.left ||
+      viewportBox.left > layoutBox.right
+    ) {
       // If outside of viewport's x-axis, element is not in viewport so return
       // false.
       return {distance: false};
@@ -767,13 +808,13 @@ export class Resource {
     }
     const {distance, scrollPenalty, viewportHeight} =
       opt_viewportRatio || this.getDistanceViewportRatio();
-    if (this.useLayers_) {
+    if (this.useLayers_ && this.useLayersPrioritization_) {
       return dev().assertNumber(distance) < multiplier;
     }
     if (typeof distance == 'boolean') {
       return distance;
     }
-    return distance < viewportHeight * multiplier / scrollPenalty;
+    return distance < (viewportHeight * multiplier) / scrollPenalty;
   }
 
   /**
@@ -788,11 +829,12 @@ export class Resource {
    */
   layersDistanceRatio_(currentScore, layout, depth) {
     currentScore = currentScore || 0;
-    const depthPenalty = 1 + (depth / 10);
+    const depthPenalty = 1 + depth / 10;
     const nonActivePenalty = layout.isActiveUnsafe() ? 1 : 2;
-    const distance = layout.getHorizontalViewportsFromParent() +
-        layout.getVerticalViewportsFromParent();
-    return currentScore + (nonActivePenalty * depthPenalty * distance);
+    const distance =
+      layout.getHorizontalViewportsFromParent() +
+      layout.getVerticalViewportsFromParent();
+    return currentScore + nonActivePenalty * depthPenalty * distance;
   }
 
   /**
@@ -807,8 +849,10 @@ export class Resource {
     // outside of viewport. For now, blindly trust that owner knows what it's
     // doing.
     this.resolveDeferredsWhenWithinViewports_();
-    return this.hasOwner() || this.isWithinViewportRatio(
-        this.element.renderOutsideViewport());
+    return (
+      this.hasOwner() ||
+      this.isWithinViewportRatio(this.element.renderOutsideViewport())
+    );
   }
 
   /**
@@ -817,8 +861,7 @@ export class Resource {
    * @return {boolean}
    */
   idleRenderOutsideViewport() {
-    return this.isWithinViewportRatio(
-        this.element.idleRenderOutsideViewport());
+    return this.isWithinViewportRatio(this.element.idleRenderOutsideViewport());
   }
 
   /**
@@ -834,10 +877,9 @@ export class Resource {
    * Undoes `layoutScheduled`.
    */
   layoutCanceled() {
-    this.state_ =
-        this.hasBeenMeasured() ?
-          ResourceState.READY_FOR_LAYOUT :
-          ResourceState.NOT_LAID_OUT;
+    this.state_ = this.hasBeenMeasured()
+      ? ResourceState.READY_FOR_LAYOUT
+      : ResourceState.NOT_LAID_OUT;
   }
 
   /**
@@ -858,15 +900,22 @@ export class Resource {
       return Promise.reject(this.lastLayoutError_);
     }
 
-    devAssert(this.state_ != ResourceState.NOT_BUILT,
-        'Not ready to start layout: %s (%s)', this.debugid, this.state_);
-    devAssert(this.isDisplayed(),
-        'Not displayed for layout: %s', this.debugid);
+    devAssert(
+      this.state_ != ResourceState.NOT_BUILT,
+      'Not ready to start layout: %s (%s)',
+      this.debugid,
+      this.state_
+    );
+    devAssert(this.isDisplayed(), 'Not displayed for layout: %s', this.debugid);
 
     // Unwanted re-layouts are ignored.
     if (this.layoutCount_ > 0 && !this.element.isRelayoutNeeded()) {
-      dev().fine(TAG, 'layout canceled since it wasn\'t requested:',
-          this.debugid, this.state_);
+      dev().fine(
+        TAG,
+        "layout canceled since it wasn't requested:",
+        this.debugid,
+        this.state_
+      );
       this.state_ = ResourceState.LAYOUT_COMPLETE;
       return Promise.resolve();
     }
@@ -885,8 +934,10 @@ export class Resource {
       });
     });
 
-    this.layoutPromise_ = promise.then(() => this.layoutComplete_(true),
-        reason => this.layoutComplete_(false, reason));
+    this.layoutPromise_ = promise.then(
+      () => this.layoutComplete_(true),
+      reason => this.layoutComplete_(false, reason)
+    );
     return this.layoutPromise_;
   }
 
@@ -902,8 +953,9 @@ export class Resource {
     }
     this.layoutPromise_ = null;
     this.loadedOnce_ = true;
-    this.state_ = success ? ResourceState.LAYOUT_COMPLETE :
-      ResourceState.LAYOUT_FAILED;
+    this.state_ = success
+      ? ResourceState.LAYOUT_COMPLETE
+      : ResourceState.LAYOUT_FAILED;
     this.lastLayoutError_ = opt_reason;
     if (success) {
       dev().fine(TAG, 'layout complete:', this.debugid);
@@ -918,8 +970,10 @@ export class Resource {
    * @return {boolean}
    * */
   isLayoutPending() {
-    return this.state_ != ResourceState.LAYOUT_COMPLETE &&
-        this.state_ != ResourceState.LAYOUT_FAILED;
+    return (
+      this.state_ != ResourceState.LAYOUT_COMPLETE &&
+      this.state_ != ResourceState.LAYOUT_FAILED
+    );
   }
 
   /**
@@ -965,8 +1019,10 @@ export class Resource {
    * relayout in case document becomes active again.
    */
   unlayout() {
-    if (this.state_ == ResourceState.NOT_BUILT ||
-        this.state_ == ResourceState.NOT_LAID_OUT) {
+    if (
+      this.state_ == ResourceState.NOT_BUILT ||
+      this.state_ == ResourceState.NOT_LAID_OUT
+    ) {
       return;
     }
     this.setInViewport(false);
