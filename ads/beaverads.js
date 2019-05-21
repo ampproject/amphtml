@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,16 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-'use strict';
 
-const selector = 'AssignmentExpression Identifier[name=IS_AMP_ALT]';
-module.exports = function(context) {
-  return {
-    [selector]: function(node) {
-      context.report({
-        node,
-        message: 'No Assignment to IS_AMP_ALT global property allowed',
-      });
+import {loadScript, validateData} from '../3p/3p';
+
+/**
+ * @param {!Window} global
+ * @param {!Object} data
+ */
+export function beaverads(global, data) {
+  validateData(data, ['blockId']);
+
+  const url =
+    'https://code.beaverads.com/data/' +
+    encodeURIComponent(data['blockId']) +
+    '.js?async=1&div=c';
+
+  loadScript(
+    global,
+    url,
+    () => {
+      global.context.renderStart();
     },
-  };
-};
+    () => {
+      global.context.noContentAvailable();
+    }
+  );
+}

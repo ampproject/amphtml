@@ -14,7 +14,14 @@
  * limitations under the License.
  */
 
-import {clamp, mapRange, mod} from '../../../src/utils/math';
+import {
+  boundValue,
+  clamp,
+  distance,
+  magnitude,
+  mapRange,
+  mod,
+} from '../../../src/utils/math';
 
 describes.sandboxed('utils/math', {}, () => {
   describe('mapRange', () => {
@@ -113,6 +120,125 @@ describes.sandboxed('utils/math', {}, () => {
       expect(clamp(-5, 0, 1)).to.equal(0);
       expect(clamp(-0.0001, 0, 1)).to.equal(0);
       expect(clamp(-21, -20, 0)).to.equal(-20);
+    });
+
+    it('should fail if the minimum is greater than the maximum', () => {
+      allowConsoleError(() => {
+        expect(() => clamp(1, 1, 0)).to.throw();
+        expect(() => clamp(0.3, 0.5, 0.1)).to.throw();
+        expect(() => clamp(0, 10, -10)).to.throw();
+      });
+    });
+  });
+
+  describe('boundValue', () => {
+    it('should not bound if within the range', () => {
+      expect(boundValue(0.5, 0, 1, 0.3)).to.equal(0.5);
+      expect(boundValue(-10, -20, 0, 3)).to.equal(-10);
+      expect(boundValue(1000, -Infinity, Infinity, Infinity)).to.equal(1000);
+    });
+
+    it('should not bound if larger than the range but within the extent', () => {
+      expect(boundValue(1.2, 0, 1, 0.3)).to.equal(1.2);
+      expect(boundValue(1, -20, 0, 3)).to.equal(1);
+    });
+
+    it('should not bound if smaller than the range but within the extent', () => {
+      expect(boundValue(-0.2, 0, 1, 0.3)).to.equal(-0.2);
+      expect(boundValue(-22, -20, 0, 3)).to.equal(-22);
+    });
+
+    it('should be inclusive of the extended range', () => {
+      expect(boundValue(1.3, 0, 1, 0.3)).to.equal(1.3);
+      expect(boundValue(-0.3, 0, 1, 0.3)).to.equal(-0.3);
+      expect(boundValue(-23, -20, 0, 3)).to.equal(-23);
+      expect(boundValue(3, -20, 0, 3)).to.equal(3);
+    });
+
+    it('should bound values larger than the extended range', () => {
+      expect(boundValue(1.4, 0, 1, 0.3)).to.equal(1.3);
+      expect(boundValue(4, 0, 1, 0.3)).to.equal(1.3);
+      expect(boundValue(1.3001, 0, 1, 0.3)).to.equal(1.3);
+      expect(boundValue(3.1, -20, 0, 3)).to.equal(3);
+    });
+
+    it('should bound values smaller the extended range', () => {
+      expect(boundValue(-0.5, 0, 1, 0.3)).to.equal(-0.3);
+      expect(boundValue(-5, 0, 1, 0.3)).to.equal(-0.3);
+      expect(boundValue(-0.3001, 0, 1, 0.3)).to.equal(-0.3);
+      expect(boundValue(-24, -20, 0, 3)).to.equal(-23);
+    });
+
+    it('should fail if the minimum is greater than the maximum', () => {
+      allowConsoleError(() => {
+        expect(() => boundValue(1, 1, 0, 1)).to.throw();
+        expect(() => boundValue(0.3, 0.5, 0.1, 1)).to.throw();
+        expect(() => boundValue(0, 10, -10, 1)).to.throw();
+      });
+    });
+  });
+
+  describe('magnitude', () => {
+    it('should operate on all-positive vectors', () => {
+      expect(magnitude(3, 4)).to.equal(5);
+      expect(magnitude(5, 12)).to.equal(13);
+      expect(magnitude(1.5, 2.5)).be.closeTo(2.915, 0.001);
+    });
+
+    it('should operate on partially-negative vectors', () => {
+      expect(magnitude(-3, 4)).to.equal(5);
+      expect(magnitude(5, -12)).to.equal(13);
+      expect(magnitude(-1.5, 2.5)).be.closeTo(2.915, 0.001);
+      expect(magnitude(1.5, -2.5)).be.closeTo(2.915, 0.001);
+    });
+
+    it('should operate on all-negative vectors', () => {
+      expect(magnitude(-3, -4)).to.equal(5);
+      expect(magnitude(-5, -12)).to.equal(13);
+      expect(magnitude(-1.5, -2.5)).be.closeTo(2.915, 0.001);
+    });
+
+    it('should yield the absolute value of one delta if the other is zero', () => {
+      expect(magnitude(3, 0)).to.equal(3);
+      expect(magnitude(0, 4)).to.equal(4);
+      expect(magnitude(-1.5, 0)).to.equal(1.5);
+      expect(magnitude(0, -0.0005)).to.equal(0.0005);
+    });
+
+    it('should yield zero for the zero-vector', () => {
+      expect(magnitude(0, 0)).to.equal(0);
+    });
+  });
+
+  describe('distance', () => {
+    it('should yield zero distance for identical points', () => {
+      expect(distance(1, 2, 1, 2)).to.equal(0);
+      expect(distance(0.5, 0.001, 0.5, 0.001)).to.equal(0);
+      expect(distance(3.6, 0, 3.6, 0)).to.equal(0);
+    });
+
+    it('should compute distance when one point is the origin', () => {
+      expect(distance(0, 0, 3, 4)).to.equal(5);
+      expect(distance(5, 12, 0, 0)).to.equal(13);
+      expect(distance(0, 0, 1.5, 2.5)).be.closeTo(2.915, 0.001);
+    });
+
+    it('should compute distance when all coordinates are positive', () => {
+      expect(distance(3, 4, 6, 8)).to.equal(5);
+      expect(distance(7.5, 13.5, 2.5, 1.5)).to.equal(13);
+      expect(distance(3, 5, 1.5, 2.5)).be.closeTo(2.915, 0.001);
+    });
+
+    it('should compute distance when all coordinates are negative', () => {
+      expect(distance(-3, -4, -6, -8)).to.equal(5);
+      expect(distance(-7.5, -13.5, -2.5, -1.5)).to.equal(13);
+      expect(distance(-3, -5, -1.5, -2.5)).be.closeTo(2.915, 0.001);
+    });
+
+    it('should compute distance when some coordinates are negative', () => {
+      expect(distance(-1.5, -3, 1.5, 1)).to.equal(5);
+      expect(distance(4, 6, -1, -6)).to.equal(13);
+      expect(distance(-0.5, -0.5, 1, 2)).be.closeTo(2.915, 0.001);
     });
   });
 });
