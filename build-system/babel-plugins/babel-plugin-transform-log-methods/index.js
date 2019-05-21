@@ -52,7 +52,6 @@
  */
 const base62 = require('base62/lib/ascii');
 const fs = require('fs-extra');
-const path = require('path');
 const {
   messagesPath,
   singletonFunctions,
@@ -73,25 +72,6 @@ const assertAliases = singletonFunctions.map(prefix => `${prefix}Assert`);
  * @return {string}
  */
 const relativeToRoot = path => `${__dirname}/../../../${path}`;
-
-/**
- * Reads the messages table from the JSON file.
- * @param {string} messagesPath
- * @return {!Object<string, string>}
- */
-function getMessages(messagesPath) {
-  return fs.readJsonSync(messagesPath, {throws: false}) || {};
-}
-
-/**
- * Writes the messages table to the JSON file.
- * @param {string} messagesPath
- * @param {!Object<string, string>} obj
- */
-function writeMessages(messagesPath, obj) {
-  fs.ensureDirSync(path.dirname(messagesPath));
-  fs.writeJsonSync(messagesPath, obj, {spaces: 2});
-}
 
 /**
  * Gets a message id from the table, or adds a new entry for a message if
@@ -147,7 +127,7 @@ function buildMessage(t, node, interpolationArgs) {
 
 let messages;
 let nextMessageId;
-let relativeMessagesPath;
+let relMessagesPath;
 
 let shouldReplaceCallArguments;
 
@@ -164,19 +144,17 @@ module.exports = function({types: t}) {
       shouldReplaceCallArguments = replaceCallArguments;
 
       // Configurable to isolate test output.
-      relativeMessagesPath = relativeToRoot(
-        this.opts.messagesPath || messagesPath
-      );
+      relMessagesPath = relativeToRoot(this.opts.messagesPath || messagesPath);
     },
     visitor: {
       /** Message table I/O. */
       Program: {
         enter() {
-          messages = getMessages(relativeMessagesPath);
+          messages = fs.readJsonSync(relMessagesPath, {throws: false}) || {};
           nextMessageId = Object.keys(messages).length;
         },
         exit() {
-          writeMessages(relativeMessagesPath, messages);
+          fs.outputJsonSync(relMessagesPath, messages, {spaces: 2});
         },
       },
       /**
