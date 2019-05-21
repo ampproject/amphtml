@@ -384,6 +384,9 @@ class AmpAccordion extends AMP.BaseElement {
           () => {
             setStyles(section, {
               'overflow': 'hidden',
+              // Set the height of the section immediately, so it is correct
+              // until the animation below starts (on the next frame).
+              'height': `${headerHeight}px`,
             });
             setStyles(sectionChild, {
               'position': '',
