@@ -102,7 +102,7 @@ export class CryptoHandler {
     const encryptedBytes = base64DecodeToBytes(encryptedContent);
 
     // 3. Get document Key in the correct format.
-    return this.formatDocumentKey_(documentKey).then(function(formattedDocKey) {
+    return this.stringToCryptoKey_(documentKey).then(function(formattedDocKey) {
       // 4. Decrypt.
       const decryptedContent = crypto.subtle.decrypt(
           {
@@ -116,7 +116,6 @@ export class CryptoHandler {
         return base64EncodeFromBytes(buffer);
       });
       return decryptedContent;
-
     });
   }
 
@@ -125,7 +124,7 @@ export class CryptoHandler {
    * @param {string} documentKey
    * @return {Promise<CryptoKey>}
    */
-  formatDocumentKey_(documentKey) {
+  stringToCryptoKey_(documentKey) {
     // 1. Trim and remove all whitespaces (e.g. line breaks).
     documentKey = documentKey.trim();
 
