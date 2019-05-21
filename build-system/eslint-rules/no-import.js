@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 'use strict';
- const imports = ['sinon'];
- module.exports = function(context) {
+const imports = ['sinon'];
+module.exports = function(context) {
   return {
     ImportDeclaration(node) {
       const name = node.source.value;
       if (imports.includes(name)) {
-        context.report(node, `Importing ${name} is forbidden.`);
+        context.report({node, message: `Importing ${name} is forbidden.`});
       }
     },
   };

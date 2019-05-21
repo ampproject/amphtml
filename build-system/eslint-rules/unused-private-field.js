@@ -81,13 +81,14 @@ module.exports = {
         }
 
         const {parent} = node;
-        if (parent.type === 'MemberExpression' &&
-            shouldCheckMember(parent, false) &&
-            !isAssignment(parent)) {
+        if (
+          parent.type === 'MemberExpression' &&
+          shouldCheckMember(parent, false) &&
+          !isAssignment(parent)
+        ) {
           return;
         }
       }
-
 
       const message = [
         `Unused restricted private "${name}".`.padEnd(80),
@@ -132,13 +133,13 @@ module.exports = {
       context.report({node, message});
     }
 
-
-
     function shouldCheckMember(node, needsThis = true) {
       const {computed, object, property} = node;
-      if (computed ||
+      if (
+        computed ||
         (needsThis && object.type !== 'ThisExpression') ||
-        property.type !== 'Identifier') {
+        property.type !== 'Identifier'
+      ) {
         return false;
       }
 
@@ -185,8 +186,7 @@ module.exports = {
         }
 
         const {computed, key} = node;
-        if (computed ||
-          !isPrivateName(key)) {
+        if (computed || !isPrivateName(key)) {
           return;
         }
 
@@ -196,9 +196,11 @@ module.exports = {
       },
 
       'MethodDefinition[kind="constructor"] MemberExpression': function(node) {
-        if (shouldIgnoreFile() ||
-            !shouldCheckMember(node) ||
-            !isAssignment(node)) {
+        if (
+          shouldIgnoreFile() ||
+          !shouldCheckMember(node) ||
+          !isAssignment(node)
+        ) {
           return;
         }
 
@@ -208,9 +210,11 @@ module.exports = {
       },
 
       'ClassBody MemberExpression': function(node) {
-        if (shouldIgnoreFile() ||
-            !shouldCheckMember(node, false) ||
-            isAssignment(node)) {
+        if (
+          shouldIgnoreFile() ||
+          !shouldCheckMember(node, false) ||
+          isAssignment(node)
+        ) {
           return;
         }
 

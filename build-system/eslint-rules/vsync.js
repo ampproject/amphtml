@@ -46,7 +46,7 @@ module.exports = function(context) {
         message: [
           'VSync is now a privileged service.',
           'You likely want to use the `BaseElement` methods' +
-              ' `measureElement`, `mutateElement`, or `runElement`.',
+            ' `measureElement`, `mutateElement`, or `runElement`.',
           'In the worst case use the same methods on `Resources`.',
         ].join('\n\t'),
       });

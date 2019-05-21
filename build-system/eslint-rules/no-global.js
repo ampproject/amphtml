@@ -28,17 +28,21 @@ module.exports = function(context) {
       if (!(name in GLOBALS)) {
         return;
       }
-      if (!(/Expression/.test(node.parent.type))) {
+      if (!/Expression/.test(node.parent.type)) {
         return;
       }
 
-      if (node.parent.type === 'MemberExpression' &&
-          node.parent.property === node) {
+      if (
+        node.parent.type === 'MemberExpression' &&
+        node.parent.property === node
+      ) {
         return;
       }
 
-      const variable =
-          astUtils.getVariableByName(context.getScope(), node.name);
+      const variable = astUtils.getVariableByName(
+        context.getScope(),
+        node.name
+      );
       if (variable.defs.length > 0) {
         return;
       }
