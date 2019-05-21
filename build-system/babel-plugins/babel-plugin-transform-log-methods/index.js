@@ -189,11 +189,13 @@ module.exports = function({types: t}) {
         // Transformable method metadata when available;
         let meta;
 
-        // devAssert() or userAssert() call.
+        // userAssert() or devAssert() alias.
         if (assertAliases.some(name => t.isIdentifier(callee, {name}))) {
           meta = transformableMethods.assert;
-        } else {
-          // Looks like a method().call().
+        }
+        // dev().*() and user().*() calls.
+        else {
+          // is method().call().
           if (
             !t.isMemberExpression(callee) ||
             !t.isCallExpression(callee.object)
