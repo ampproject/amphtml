@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import {Layout} from '../../../src/layout';
-import {Variants, allocateVariant} from './variant';
 import {devAssert, user, userAssert} from '../../../src/log';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {
@@ -23,8 +21,11 @@ import {
   originExperimentsForDoc,
 } from '../../../src/service/origin-experiments-impl';
 import {isExperimentOn} from '../../../src/experiments';
+import {Layout} from '../../../src/layout';
 import {parseJson} from '../../../src/json';
 import {parseMutation} from './mutation-parser';
+import {Services} from '../../../src/services';
+import {Variants, allocateVariant, ATTR_PREFIX} from './variant';
 
 const TAG = 'amp-experiment';
 
@@ -45,21 +46,33 @@ export class AmpExperiment extends AMP.BaseElement {
       const variantsService = responses[0];
       const enabled = responses[1];
 
+      const config = this.getConfig_();
+
       if (!enabled) {
         user().error(TAG, 'Experiment amp-experiment-1.0 is not enabled.');
 
         // Ensure downstream consumers don't wait for the promise forever.
-        variantsService.init(Promise.resolve({}));
+        variantsService.init(Promise.resolve(this.getEmptyExperimentToVariant_(config)));
 
         return Promise.reject('Experiment amp-experiment-1.0 is not enabled.');
       }
 
+      const ampdoc = this.getAmpDoc();
+
+      // All experiments can be disabled by a hash param
+      const viewer = Services.viewerForDoc(ampdoc);
+      const override = viewer.getParam(ATTR_PREFIX + '_disable_all_experiments_');
+      if (override !== undefined) {
+        variantsService.init(Promise.resolve(this.getEmptyExperimentToVariant_(config)));
+        return;
+      }
+
       try {
-        const config = this.getConfig_();
         const results = Object.create(null);
         const variants = Object.keys(config).map(experimentName => {
           return allocateVariant(
-            this.getAmpDoc(),
+            ampdoc,
+            viewer,
             experimentName,
             config[experimentName]
           ).then(variantName => {
@@ -75,7 +88,7 @@ export class AmpExperiment extends AMP.BaseElement {
         variantsService.init(experimentVariants);
       } catch (e) {
         // Ensure downstream consumers don't wait for the promise forever.
-        variantsService.init(Promise.resolve({}));
+        variantsService.init(Promise.resolve(this.getEmptyExperimentToVariant_(config)));
         throw e;
       }
     });
@@ -111,6 +124,22 @@ export class AmpExperiment extends AMP.BaseElement {
     return /** @type {!JsonObject} */ (devAssert(
       parseJson(children[0].textContent)
     ));
+  }
+
+  /**
+   * Function to return an empty experiment to variant
+   * Object. This is useful for type checking in analytics
+   * and disabling all experiments manually.
+   * @param {!JsonObject} config
+   * @return {!Object<string, ?string>}
+   */
+  getEmptyExperimentToVariant_(config) {
+    const results = Object.create(null);
+    Object.keys(config).map(experimentName => {
+      results[experimentName] = null;
+    });
+
+    return results;
   }
 
   /**

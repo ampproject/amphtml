@@ -20,7 +20,7 @@ import {dev, userAssert} from '../../../src/log';
 import {hasOwn} from '../../../src/utils/object';
 import {isArray, isObject} from '../../../src/types';
 
-const ATTR_PREFIX = 'amp-x-';
+export const ATTR_PREFIX = 'amp-x-';
 const nameValidator = /^[\w-]+$/;
 
 /**
@@ -71,16 +71,16 @@ export class Variants {
  * Allocates the current page view to an experiment variant based on the given
  * experiment from the config.
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!../../../src/service/viewer-impl.Viewer} viewer
  * @param {string} experimentName
  * @param {!JsonObject} experimentObject
  * @return {!Promise<?string>}
  */
-export function allocateVariant(ampdoc, experimentName, experimentObject) {
+export function allocateVariant(ampdoc, viewer, experimentName, experimentObject) {
   assertName(experimentName);
   validateExperiment(experimentName, experimentObject);
 
   // Variant can be overridden from URL fragment.
-  const viewer = Services.viewerForDoc(ampdoc);
   const override = viewer.getParam(ATTR_PREFIX + experimentName);
   if (override && hasOwn(experimentObject['variants'], override)) {
     return Promise.resolve(/** @type {?string} */ (override));
