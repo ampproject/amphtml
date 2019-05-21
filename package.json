@@ -104,7 +104,7 @@
     "gulp-sourcemaps": "2.6.5",
     "gulp-watch": "5.0.1",
     "gulp-webserver": "0.9.1",
-    "gzip-size": "5.1.0",
+    "gzip-size": "5.1.1",
     "html-minifier": "4.0.0",
     "is-running": "2.1.0",
     "jest-cli": "24.8.0",
