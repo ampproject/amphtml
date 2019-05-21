@@ -792,10 +792,7 @@ exports.extensionBundles = [
     latestVersion: '0.1',
     options: {
       hasCss: true,
-      cssBinaries: [
-        'amp-truncate-text',
-        'amp-truncate-text-shadow',
-      ],
+      cssBinaries: ['amp-truncate-text', 'amp-truncate-text-shadow'],
     },
     type: TYPES.MISC,
   },

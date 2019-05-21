@@ -15,9 +15,7 @@
  */
 
 import {CSS} from '../../../build/amp-truncate-text-0.1.css';
-import {
-  CSS as ShadowCSS,
-} from '../../../build/amp-truncate-text-shadow-0.1.css';
+import {CSS as ShadowCSS} from '../../../build/amp-truncate-text-shadow-0.1.css';
 import {createShadowRoot} from './shadow-utils';
 import {dev, userAssert} from '../../../src/log';
 import {htmlFor} from '../../../src/static-template';
@@ -67,11 +65,13 @@ export class AmpTruncateText extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     userAssert(
-        isExperimentOn(this.win, 'amp-truncate-text'),
-        'The amp-truncate-text experiment must be enabled to use this ' +
-      'component.');
+      isExperimentOn(this.win, 'amp-truncate-text'),
+      'The amp-truncate-text experiment must be enabled to use this ' +
+        'component.'
+    );
 
-    this.useShadow_ = !!this.element.attachShadow &&
+    this.useShadow_ =
+      !!this.element.attachShadow &&
       isExperimentOn(this.win, 'amp-truncate-text-shadow');
 
     if (this.useShadow_) {
@@ -98,10 +98,12 @@ export class AmpTruncateText extends AMP.BaseElement {
     `;
 
     const defaultSlot = this.content_.querySelector('.i-amphtml-default-slot');
-    this.expandSlot_ = this.content_
-        .querySelector('.i-amphtml-truncate-expand-slot');
-    this.collapseSlot_ = this.content_
-        .querySelector('.i-amphtml-truncate-collapse-slot');
+    this.expandSlot_ = this.content_.querySelector(
+      '.i-amphtml-truncate-expand-slot'
+    );
+    this.collapseSlot_ = this.content_.querySelector(
+      '.i-amphtml-truncate-collapse-slot'
+    );
 
     iterateCursor(this.element.querySelectorAll('[slot="expand"]'), el => {
       this.expandSlot_.appendChild(el);
@@ -121,13 +123,17 @@ export class AmpTruncateText extends AMP.BaseElement {
    */
   buildShadow_() {
     const html = htmlFor(this.element);
-    const sr = createShadowRoot(this.element, ShadowCSS, html`
-      <div class="content">
-        <slot></slot>
-        <slot class="expand-slot" name="expand"></slot>
-        <slot class="collapse-slot" name="collapse"></slot>
-      </div>
-    `);
+    const sr = createShadowRoot(
+      this.element,
+      ShadowCSS,
+      html`
+        <div class="content">
+          <slot></slot>
+          <slot class="expand-slot" name="expand"></slot>
+          <slot class="collapse-slot" name="collapse"></slot>
+        </div>
+      `
+    );
 
     this.content_ = null;
     this.expandSlot_ = sr.querySelector('.expand-slot');
@@ -167,10 +173,11 @@ export class AmpTruncateText extends AMP.BaseElement {
    */
   truncate_() {
     const container = dev().assertElement(
-        this.useShadow_ ? this.element : this.content_);
-    const overflowElement = this.useShadow_ ?
-      this.element.querySelector('[slot="expand"]') :
-      this.element.querySelector('.i-amphtml-truncate-expand-slot');
+      this.useShadow_ ? this.element : this.content_
+    );
+    const overflowElement = this.useShadow_
+      ? this.element.querySelector('[slot="expand"]')
+      : this.element.querySelector('.i-amphtml-truncate-expand-slot');
 
     truncateText({
       container,

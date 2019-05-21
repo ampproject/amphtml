@@ -31,9 +31,15 @@ describe('binarySearch', () => {
    * @param {BinarySearchPreference=} preference
    */
   function arrayBinarySearch(arr, target, stop, preference) {
-    return binarySearch(0, arr.length, index => {
-      return target - arr[index];
-    }, stop, preference);
+    return binarySearch(
+      0,
+      arr.length,
+      index => {
+        return target - arr[index];
+      },
+      stop,
+      preference
+    );
   }
 
   it('should find existing items', () => {
@@ -110,7 +116,6 @@ describe('binarySearch', () => {
 
       expect(results).to.have.ordered.members([0, 1, 2, 3, 4, 5, 6]);
     });
-
   });
 
   describe('boundary conditions', () => {
@@ -137,13 +142,13 @@ describe('binarySearch', () => {
     describe('low preference', () => {
       it('should return the first index for smaller values', () => {
         expect(arrayBinarySearch([1, 3], 0, undefined, PREV)).to.satisfy(i => {
-          return Object.is(i , -0);
+          return Object.is(i, -0);
         });
       });
 
       it('should find the lower element', () => {
         expect(arrayBinarySearch([1, 3], 1, undefined, PREV)).to.satisfy(i => {
-          return Object.is(i , +0);
+          return Object.is(i, +0);
         });
       });
 

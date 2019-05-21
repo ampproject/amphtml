@@ -15,13 +15,13 @@
  */
 
 /**
-  * Creates a ShadowRoot for a given Element with some style text. This also
-  * tags the first sizer element found with a slot, which is placed at the top
-  * level of the ShadowRoot.
-  * @param {!Element} element An Element to create a ShadowRoot for.
-  * @param {string} styleText The style text for the ShadowRoot.
-  * @param {!Element} content The content of the shadowRoot.
-  */
+ * Creates a ShadowRoot for a given Element with some style text. This also
+ * tags the first sizer element found with a slot, which is placed at the top
+ * level of the ShadowRoot.
+ * @param {!Element} element An Element to create a ShadowRoot for.
+ * @param {string} styleText The style text for the ShadowRoot.
+ * @param {!Element} content The content of the shadowRoot.
+ */
 export function createShadowRoot(element, styleText, content) {
   // TODO(sparhami) Where is the right place to put this? Runtime? What about
   // SSR?
