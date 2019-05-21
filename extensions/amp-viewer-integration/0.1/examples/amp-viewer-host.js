@@ -29,7 +29,6 @@ const CHANNEL_OPEN_MSG = 'channelOpen';
  * for communication with the AMP docs.
  */
 export class AmpViewerHost {
-
   /**
    * @param {!Window} win
    * @param {!HTMLIFrameElement} ampIframe
@@ -40,8 +39,15 @@ export class AmpViewerHost {
    * @param {boolean=} opt_isHandshakePoll
    * looking at.
    */
-  constructor(win, ampIframe, frameOrigin, messageHandler, opt_logsId,
-    opt_isWebview, opt_isHandshakePoll) {
+  constructor(
+    win,
+    ampIframe,
+    frameOrigin,
+    messageHandler,
+    opt_logsId,
+    opt_isWebview,
+    opt_isHandshakePoll
+  ) {
     /** @const {!Window} */
     this.win = win;
     /** @private {!HTMLIFrameElement} */
@@ -56,7 +62,9 @@ export class AmpViewerHost {
     if (this.isWebview_ || opt_isHandshakePoll) {
       /** @private {number} */
       this.pollingIntervalId_ = setInterval(
-          this.initiateHandshake_.bind(this, this.intervalCtr) , 1000); //poll every second
+        this.initiateHandshake_.bind(this, this.intervalCtr),
+        1000
+      ); //poll every second
     } else {
       this.waitForHandshake_(frameOrigin);
     }
@@ -74,8 +82,9 @@ export class AmpViewerHost {
         name: 'handshake-poll',
       };
       message = this.isWebview_ ? JSON.stringify(message) : message;
-      this.ampIframe_.contentWindow./*OK*/postMessage(
-          message, '*', [channel.port2]);
+      this.ampIframe_.contentWindow./*OK*/ postMessage(message, '*', [
+        channel.port2,
+      ]);
 
       channel.port1.onmessage = function(e) {
         const data = this.isWebview_ ? JSON.parse(e.data) : e.data;
@@ -100,9 +109,11 @@ export class AmpViewerHost {
     const target = this.ampIframe_.contentWindow;
 
     const listener = function(event) {
-      if (event.origin == targetOrigin &&
-              this.isChannelOpen_(event.data) &&
-              (!event.source || event.source == target)) {
+      if (
+        event.origin == targetOrigin &&
+        this.isChannelOpen_(event.data) &&
+        (!event.source || event.source == target)
+      ) {
         this.log(' messaging established with ', targetOrigin);
         unlisten();
         const port = new WindowPortEmulator(this.win, targetOrigin, target);
@@ -126,15 +137,19 @@ export class AmpViewerHost {
 
     message = this.isWebview_ ? JSON.stringify(message) : message;
     this.log('posting Message', message);
-    port./*OK*/postMessage(message);
+    port./*OK*/ postMessage(message);
 
     this.messaging_ = new Messaging(this.win, port);
     this.messaging_.setDefaultHandler(this.messageHandler_);
 
-    this.sendRequest('visibilitychange', {
-      state: this.visibilityState_,
-      prerenderSize: this.prerenderSize,
-    }, true);
+    this.sendRequest(
+      'visibilitychange',
+      {
+        state: this.visibilityState_,
+        prerenderSize: this.prerenderSize,
+      },
+      true
+    );
   }
 
   /**
@@ -167,7 +182,8 @@ export class AmpViewerHost {
   log() {
     const var_args = Array.prototype.slice.call(arguments, 0);
     var_args.unshift('[ViewerHost ' + this.logsId + ']');
-    console/*OK*/.log.apply(console, var_args);
+    console /*OK*/.log
+      .apply(console, var_args);
   }
 }
 

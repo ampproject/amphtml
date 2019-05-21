@@ -66,4 +66,3 @@ function hasAwaitParent(node) {
   }
   return false;
 }
-
