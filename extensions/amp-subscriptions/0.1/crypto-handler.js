@@ -100,7 +100,7 @@ export class CryptoHandler {
     // 1. Trim and remove all whitespaces (e.g. line breaks).
     encryptedContent = encryptedContent.replace(/\s+/g, '');
 
-    // 2. Un-base64 the encrypted content. This way we get the actual crypted
+    // 2. Un-base64 the encrypted content. This way we get the actual encrypted
     //    bytes.
     const encryptedBytes = base64DecodeToBytes(encryptedContent);
 
