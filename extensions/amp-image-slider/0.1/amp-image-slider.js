@@ -643,7 +643,7 @@ export class AmpImageSlider extends AMP.BaseElement {
       width = layoutBox.width;
       left = layoutBox.left;
       right = layoutBox.right;
-      const newPos = Math.max(left, Math.min(pointerX, right));
+      const newPos = clamp(pointerX, left, right);
       const newPercentage = (newPos - left) / width;
       this.mutateElement(() => {
         this.updatePositions_(newPercentage);
@@ -661,7 +661,7 @@ export class AmpImageSlider extends AMP.BaseElement {
           right = rect.right;
         },
         () => {
-          const newPos = Math.max(left, Math.min(pointerX, right));
+          const newPos = clamp(pointerX, left, right);
           const newPercentage = (newPos - left) / width;
           this.updatePositions_(newPercentage);
         }

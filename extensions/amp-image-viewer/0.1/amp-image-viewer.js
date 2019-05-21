@@ -29,6 +29,7 @@ import {
 import {Gestures} from '../../../src/gesture';
 import {Layout} from '../../../src/layout';
 import {bezierCurve} from '../../../src/curve';
+import {boundValue, distance, magnitude} from '../../../src/utils/math';
 import {closestAncestorElementBySelector, elementByTag} from '../../../src/dom';
 import {continueMotion} from '../../../src/motion';
 import {createCustomEvent} from '../../../src/event-helper';
@@ -544,19 +545,6 @@ export class AmpImageViewer extends AMP.BaseElement {
   }
 
   /**
-   * Returns value bound to min and max values +/- extent.
-   * @param {number} v
-   * @param {number} min
-   * @param {number} max
-   * @param {number} extent
-   * @return {number}
-   * @private
-   */
-  boundValue_(v, min, max, extent) {
-    return Math.max(min - extent, Math.min(max + extent, v));
-  }
-
-  /**
    * Returns the scale within the allowed range with possible extent.
    * @param {number} s
    * @param {boolean} allowExtent
@@ -564,7 +552,7 @@ export class AmpImageViewer extends AMP.BaseElement {
    * @private
    */
   boundScale_(s, allowExtent) {
-    return this.boundValue_(
+    return boundValue(
       s,
       this.minScale_,
       this.maxScale_,
@@ -580,7 +568,7 @@ export class AmpImageViewer extends AMP.BaseElement {
    * @private
    */
   boundX_(x, allowExtent) {
-    return this.boundValue_(
+    return boundValue(
       x,
       this.minX_,
       this.maxX_,
@@ -596,7 +584,7 @@ export class AmpImageViewer extends AMP.BaseElement {
    * @private
    */
   boundY_(y, allowExtent) {
-    return this.boundValue_(
+    return boundValue(
       y,
       this.minY_,
       this.maxY_,
@@ -742,7 +730,7 @@ export class AmpImageViewer extends AMP.BaseElement {
     if (dir == 0) {
       return;
     }
-    const dist = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+    const dist = magnitude(deltaX, deltaY);
     const newScale = this.startScale_ * (1 + (dir * dist) / 100);
     const deltaCenterX = this.elementBox_.width / 2 - centerClientX;
     const deltaCenterY = this.elementBox_.height / 2 - centerClientY;
@@ -851,9 +839,7 @@ export class AmpImageViewer extends AMP.BaseElement {
    */
   set_(newScale, newPosX, newPosY, animate) {
     const ds = newScale - this.scale_;
-    const dx = newPosX - this.posX_;
-    const dy = newPosY - this.posY_;
-    const dist = Math.sqrt(dx * dx + dy * dy);
+    const dist = distance(this.posX_, this.posY_, newPosX, newPosY);
 
     let dur = 0;
     if (animate) {

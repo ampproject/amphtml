@@ -29,6 +29,7 @@ import {Gestures} from '../../../src/gesture';
 import {Keys} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
 import {bezierCurve} from '../../../src/curve';
+import {boundValue, clamp, distance, magnitude} from '../../../src/utils/math';
 import {continueMotion} from '../../../src/motion';
 import {dev, userAssert} from '../../../src/log';
 import {isLoaded} from '../../../src/event-helper';
@@ -407,19 +408,6 @@ export class ImageViewer {
   }
 
   /**
-   * Returns value bound to min and max values +/- extent.
-   * @param {number} v
-   * @param {number} min
-   * @param {number} max
-   * @param {number} extent
-   * @return {number}
-   * @private
-   */
-  boundValue_(v, min, max, extent) {
-    return Math.max(min - extent, Math.min(max + extent, v));
-  }
-
-  /**
    * Returns the scale within the allowed range with possible extent.
    * @param {number} s
    * @param {boolean} allowExtent
@@ -427,7 +415,7 @@ export class ImageViewer {
    * @private
    */
   boundScale_(s, allowExtent) {
-    return this.boundValue_(
+    return boundValue(
       s,
       this.minScale_,
       this.maxScale_,
@@ -443,7 +431,7 @@ export class ImageViewer {
    * @private
    */
   boundX_(x, allowExtent) {
-    return this.boundValue_(
+    return boundValue(
       x,
       this.minX_,
       this.maxX_,
@@ -459,7 +447,7 @@ export class ImageViewer {
    * @private
    */
   boundY_(y, allowExtent) {
-    return this.boundValue_(
+    return boundValue(
       y,
       this.minY_,
       this.maxY_,
@@ -580,7 +568,7 @@ export class ImageViewer {
    * @private
    */
   onZoomInc_(centerClientX, centerClientY, deltaX, deltaY) {
-    const dist = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+    const dist = magnitude(deltaX, deltaY);
 
     const zoomSign =
       Math.abs(deltaY) > Math.abs(deltaX)
@@ -678,9 +666,7 @@ export class ImageViewer {
    */
   set_(newScale, newPosX, newPosY, animate) {
     const ds = newScale - this.scale_;
-    const dx = newPosX - this.posX_;
-    const dy = newPosY - this.posY_;
-    const dist = Math.sqrt(dx * dx + dy * dy);
+    const dist = distance(this.posX_, this.posY_, newPosX, newPosY);
 
     let dur = 0;
     if (animate) {
@@ -1093,10 +1079,7 @@ class AmpImageLightbox extends AMP.BaseElement {
       const scaleX = rect.width != 0 ? imageBox.width / rect.width : 1;
       // Duration will be somewhere between 0.2 and 0.8 depending on how far
       // the image needs to move.
-      const motionTime = Math.max(
-        0.2,
-        Math.min(0.8, (Math.abs(dy) / 250) * 0.8)
-      );
+      const motionTime = clamp((Math.abs(dy) / 250) * 0.8, 0.2, 0.8);
       anim.add(
         0,
         tr.setStyles(clone, {
@@ -1214,10 +1197,7 @@ class AmpImageLightbox extends AMP.BaseElement {
       // Duration will be somewhere between 0.2 and 0.8 depending on how far
       // the image needs to move. Start the motion later too, but no later
       // than 0.2.
-      const motionTime = Math.max(
-        0.2,
-        Math.min(0.8, (Math.abs(dy) / 250) * 0.8)
-      );
+      const motionTime = clamp((Math.abs(dy) / 250) * 0.8, 0.2, 0.8);
       anim.add(
         Math.min(0.8 - motionTime, 0.2),
         (time, complete) => {
@@ -1242,7 +1222,7 @@ class AmpImageLightbox extends AMP.BaseElement {
 
       // Duration will be somewhere between 300ms and 700ms depending on
       // how far the image needs to move.
-      dur = Math.max(Math.min((Math.abs(dy) / 250) * dur, dur), 300);
+      dur = clamp((Math.abs(dy) / 250) * dur, 300, dur);
     }
 
     return anim.start(dur).thenAlways(() => {
