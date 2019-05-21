@@ -304,17 +304,10 @@ export class Cid {
           const scope = CID_API_SCOPE_WHITELIST[clientName];
           if (scope) {
             apiKeyMap[scope] = API_KEYS[clientName];
-          } else if (scope === 'gtag') {
-            // We have installations that specified gtag API that never became
-            // supported. Make sure that the warning message looks appropriate.
+          } else {
             user().warn(
               TAG_,
-              `<meta name="amp-google-client-id-api" content="gtag"> is not supported. Please remove it from the page.`
-            );
-          } else {
-            user().error(
-              TAG_,
-              `Unsupported client for Google CID API: ${clientName}`
+              `Unsupported client for Google CID API: ${clientName}. Please remove or correct ${optInMeta.outerHTML}`
             );
           }
         }
