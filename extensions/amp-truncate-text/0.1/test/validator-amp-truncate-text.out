@@ -1,13 +1,13 @@
-PASS
+FAIL
 |  <!--
 |    Copyright 2019 The AMP HTML Authors. All Rights Reserved.
-|  
+|
 |    Licensed under the Apache License, Version 2.0 (the "License");
 |    you may not use this file except in compliance with the License.
 |    You may obtain a copy of the License at
-|  
+|
 |        http://www.apache.org/licenses/LICENSE-2.0
-|  
+|
 |    Unless required by applicable law or agreed to in writing, software
 |    distributed under the License is distributed on an "AS-IS" BASIS,
 |    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -27,17 +27,39 @@ PASS
 |  </head>
 |  <body>
 |    <amp-truncate-text layout="fixed" width="150" height="80">
+>>   ^~~~~~~~~
+amp-truncate-text/0.1/test/validator-amp-truncate-text.html:28:2 The tag 'amp-truncate-text' is disallowed. [DISALLOWED_HTML]
 |      Hello world
 |    </amp-truncate-text>
 |
 |    <amp-truncate-text layout="fixed" width="150" height="80" overflow-style="right">
+>>   ^~~~~~~~~
+amp-truncate-text/0.1/test/validator-amp-truncate-text.html:32:2 The tag 'amp-truncate-text' is disallowed. [DISALLOWED_HTML]
 |      Hello world
 |      <div slot="expand">Expand</div>
+>>     ^~~~~~~~~
+amp-truncate-text/0.1/test/validator-amp-truncate-text.html:34:4 The attribute 'slot' may not appear in tag 'div'. [DISALLOWED_HTML]
 |    </amp-truncate-text>
 |
 |    <amp-truncate-text layout="responsive" width="150" height="80">
+>>   ^~~~~~~~~
+amp-truncate-text/0.1/test/validator-amp-truncate-text.html:37:2 The tag 'amp-truncate-text' is disallowed. [DISALLOWED_HTML]
 |      Hello world
 |      <div slot="expand">Expand</div>
+>>     ^~~~~~~~~
+amp-truncate-text/0.1/test/validator-amp-truncate-text.html:39:4 The attribute 'slot' may not appear in tag 'div'. [DISALLOWED_HTML]
+|    </amp-truncate-text>
+|
+|    <!-- Invalid overflow-style -->
+|    <amp-truncate-text layout="fixed" width="150" height="80" overflow-style="left">
+>>   ^~~~~~~~~
+amp-truncate-text/0.1/test/validator-amp-truncate-text.html:43:2 The tag 'amp-truncate-text' is disallowed. [DISALLOWED_HTML]
+|      Hello world
+|      <div slot="expand">Expand</div>
+>>     ^~~~~~~~~
+amp-truncate-text/0.1/test/validator-amp-truncate-text.html:45:4 The attribute 'slot' may not appear in tag 'div'. [DISALLOWED_HTML]
 |    </amp-truncate-text>
 |  </body>
 |  </html>
+>>       ^~~~~~~~~
+amp-truncate-text/0.1/test/validator-amp-truncate-text.html:48:6 The extension 'amp-truncate-text' was found on this page, but is unused. Please remove this extension. [AMP_TAG_PROBLEM]
