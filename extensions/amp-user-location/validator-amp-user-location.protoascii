@@ -39,7 +39,7 @@ tags: {  # amp-user-location (json)
   html_format: AMP
   tag_name: "SCRIPT"
   spec_name: "amp-user-location extension .json script"
-  requires_extension: amp-user-location"
+  requires_extension: "amp-user-location"
   mandatory_parent: "AMP-USER-LOCATION"
   attrs: {
     disabled_by: "transformed"
