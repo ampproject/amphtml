@@ -71,7 +71,7 @@ export class AmpExperiment extends AMP.BaseElement {
           return;
         }
 
-        const results = Object.create(null);
+        const experimentToVariant = Object.create(null);
         const variants = Object.keys(config).map(experimentName => {
           return allocateVariant(
             ampdoc,
@@ -79,14 +79,13 @@ export class AmpExperiment extends AMP.BaseElement {
             experimentName,
             config[experimentName]
           ).then(variantName => {
-            results[experimentName] = variantName;
+            experimentToVariant[experimentName] = variantName;
           });
         });
 
         /** @private @const {!Promise<!Object<string, ?string>>} */
         const experimentVariants = Promise.all(variants)
-          .then(() => results)
-          .then(this.applyExperimentVariants_.bind(this, config));
+          .then(this.applyExperimentVariants_.bind(this, config, experimentToVariant));
 
         variantsService.init(experimentVariants);
       } catch (e) {
@@ -137,12 +136,12 @@ export class AmpExperiment extends AMP.BaseElement {
    * @return {!Object<string, ?string>}
    */
   getEmptyExperimentToVariant_(config) {
-    const results = Object.create(null);
+    const experimentToVariant = Object.create(null);
     Object.keys(config).map(experimentName => {
-      results[experimentName] = null;
+      experimentToVariant[experimentName] = null;
     });
 
-    return results;
+    return experimentToVariant;
   }
 
   /**

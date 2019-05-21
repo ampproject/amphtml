@@ -89,15 +89,16 @@ describes.realWin(
     }
 
     function stubAllocateVariant() {
+      const viewer = Services.viewerForDoc(ampdoc);
       const stub = sandbox.stub(variant, 'allocateVariant');
       stub
-        .withArgs(ampdoc, 'experiment-1', config['experiment-1'])
+        .withArgs(ampdoc, viewer, 'experiment-1', config['experiment-1'])
         .returns(Promise.resolve('variant-a'));
       stub
-        .withArgs(ampdoc, 'experiment-2', config['experiment-2'])
+        .withArgs(ampdoc, viewer, 'experiment-2', config['experiment-2'])
         .returns(Promise.resolve('variant-d'));
       stub
-        .withArgs(ampdoc, 'experiment-3', config['experiment-3'])
+        .withArgs(ampdoc, viewer, 'experiment-3', config['experiment-3'])
         .returns(Promise.resolve(null));
     }
 
