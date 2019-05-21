@@ -29,11 +29,11 @@ module.exports = {
   },
 
   create(context) {
-   const imports = new Map();
+    const imports = new Map();
 
     return {
-      "Program:exit": function() {
-        imports.forEach((imports) => {
+      'Program:exit': function() {
+        imports.forEach(imports => {
           const original = imports[0];
 
           for (let i = 1; i < imports.length; i++) {
@@ -59,11 +59,8 @@ module.exports = {
                   }
                 }
 
-                return [
-                  fixer.remove(node),
-                  fixer.insertTextAfter(last, text),
-                ];
-              }
+                return [fixer.remove(node), fixer.insertTextAfter(last, text)];
+              },
             });
           }
         });
@@ -91,7 +88,7 @@ module.exports = {
         }
 
         nodes.push(node);
-      }
+      },
     };
   },
 };

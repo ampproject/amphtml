@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-const transformableMethods =
-    require('../log-module-metadata').transformableMethods;
+const {transformableMethods} = require('../log-module-metadata');
 
 /**
  * @typedef {{
@@ -67,10 +66,11 @@ function getMetadata(name) {
   return transformableMethods.find(cur => cur.name === name);
 }
 
-const selector = transformableMethods.map(method => {
-  return `CallExpression[callee.property.name=${method.name}]`;
-}).join(',');
-
+const selector = transformableMethods
+  .map(method => {
+    return `CallExpression[callee.property.name=${method.name}]`;
+  })
+  .join(',');
 
 module.exports = {
   create(context) {
@@ -83,14 +83,14 @@ module.exports = {
         // Make sure that callee is a CallExpression as well.
         // dev().assert() // enforce rule
         // dev.assert() // ignore
-        const callee = node.callee;
+        const {callee} = node;
         const calleeObject = callee.object;
         if (!calleeObject || calleeObject.type !== 'CallExpression') {
           return;
         }
 
         // Make sure that the CallExpression is one of dev() or user().
-        if(!['dev', 'user'].includes(calleeObject.callee.name)) {
+        if (!['dev', 'user'].includes(calleeObject.callee.name)) {
           return;
         }
 
@@ -110,7 +110,7 @@ module.exports = {
           return;
         }
 
-        let errMsg = [
+        const errMsg = [
           'Mixing Template Strings and %s interpolation for log methods is',
           `not supported on ${metadata.name}. Please either use template `,
           'literals or use the log strformat(%s) style interpolation ',
@@ -119,7 +119,7 @@ module.exports = {
 
         // If method is not variadic we don't need to check.
         if (!metadata.variadic) {
-         return;
+          return;
         }
 
         const hasVariadicInterpolation = node.arguments[metadata.startPos + 1];

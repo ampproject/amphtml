@@ -19,7 +19,8 @@ const path = require('path');
 
 module.exports = function(context) {
   const setStyleCall = 'CallExpression[callee.name=setStyle]';
-  const setStylesCall = 'CallExpression[callee.name=setStyles], CallExpression[callee.name=setImportantStyles]';
+  const setStylesCall =
+    'CallExpression[callee.name=setStyles], CallExpression[callee.name=setImportantStyles]';
   const resetStylesCall = 'CallExpression[callee.name=resetStyles]';
 
   const displayMessage = [
@@ -43,14 +44,18 @@ module.exports = function(context) {
       if (arg.type !== 'Literal' || typeof arg.value !== 'string') {
         if (arg.type === 'CallExpression') {
           const {callee} = arg;
-          if (callee.type === 'Identifier' && callee.name === 'assertNotDisplay') {
+          if (
+            callee.type === 'Identifier' &&
+            callee.name === 'assertNotDisplay'
+          ) {
             return;
           }
         }
 
         return context.report({
           node: arg,
-          message: 'property argument (the second argument) to setStyle must be a string literal',
+          message:
+            'property argument (the second argument) to setStyle must be a string literal',
         });
       }
 
@@ -73,7 +78,10 @@ module.exports = function(context) {
       if (arg.type !== 'ObjectExpression') {
         if (arg.type === 'CallExpression') {
           const {callee} = arg;
-          if (callee.type === 'Identifier' && callee.name === 'assertDoesNotContainDisplay') {
+          if (
+            callee.type === 'Identifier' &&
+            callee.name === 'assertDoesNotContainDisplay'
+          ) {
             return;
           }
         }
