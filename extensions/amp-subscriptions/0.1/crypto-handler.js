@@ -17,6 +17,7 @@
 import {base64DecodeToBytes} from '../../../src/utils/base64';
 import {iterateCursor} from '../../../src/dom';
 import {tryParseJson} from '../../../src/json';
+import {utf8Decode} from '../../../src/utils/bytes';
 
 
 export class CryptoHandler {
@@ -112,7 +113,7 @@ export class CryptoHandler {
           encryptedBytes
       ).then(function(buffer) {
         // 5. Decryption gives us raw bytes and we need to turn them into text.
-        return new TextDecoder().decode(new Uint8Array(buffer));
+        return utf8Decode(new Uint8Array(buffer));
       });
       return decryptedContent;
     });
