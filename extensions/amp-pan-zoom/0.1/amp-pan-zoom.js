@@ -27,7 +27,7 @@ import {Gestures} from '../../../src/gesture';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {bezierCurve} from '../../../src/curve';
-import {clamp} from '../../../src/utils/math';
+import {boundValue, distance, magnitude} from '../../../src/utils/math';
 import {continueMotion} from '../../../src/motion';
 import {createCustomEvent, listen} from '../../../src/event-helper';
 import {dev, userAssert} from '../../../src/log';
@@ -652,19 +652,6 @@ export class AmpPanZoom extends AMP.BaseElement {
   }
 
   /**
-   * Returns value bound to min and max values +/- extent.
-   * @param {number} value
-   * @param {number} min
-   * @param {number} max
-   * @param {number} extent
-   * @return {number}
-   * @private
-   */
-  boundValue_(value, min, max, extent) {
-    return clamp(value, min - extent, max + extent);
-  }
-
-  /**
    * Returns the scale within the allowed range with possible extent.
    * @param {number} s
    * @param {boolean} allowExtent
@@ -673,7 +660,7 @@ export class AmpPanZoom extends AMP.BaseElement {
    */
   boundScale_(s, allowExtent) {
     const extent = allowExtent ? 0.25 : 0;
-    return this.boundValue_(s, this.minScale_, this.maxScale_, extent);
+    return boundValue(s, this.minScale_, this.maxScale_, extent);
   }
 
   /**
@@ -686,7 +673,7 @@ export class AmpPanZoom extends AMP.BaseElement {
   boundX_(x, allowExtent) {
     const maxExtent = this.elementBox_.width * 0.25;
     const extent = allowExtent && this.scale_ > 1 ? maxExtent : 0;
-    return this.boundValue_(x, this.minX_, this.maxX_, extent);
+    return boundValue(x, this.minX_, this.maxX_, extent);
   }
 
   /**
@@ -699,7 +686,7 @@ export class AmpPanZoom extends AMP.BaseElement {
   boundY_(y, allowExtent) {
     const maxExtent = this.elementBox_.height * 0.25;
     const extent = allowExtent && this.scale_ > 1 ? maxExtent : 0;
-    return this.boundValue_(y, this.minY_, this.maxY_, extent);
+    return boundValue(y, this.minY_, this.maxY_, extent);
   }
 
   /**
@@ -865,7 +852,7 @@ export class AmpPanZoom extends AMP.BaseElement {
       return Promise.resolve();
     }
     const {width, height} = this.elementBox_;
-    const dist = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+    const dist = magnitude(deltaX, deltaY);
     const newScale = this.startScale_ * (1 + (dir * dist) / 100);
     const deltaCenterX = width / 2 - this.getOffsetX_(centerClientX);
     const deltaCenterY = height / 2 - this.getOffsetY_(centerClientY);
@@ -946,9 +933,7 @@ export class AmpPanZoom extends AMP.BaseElement {
    */
   set_(newScale, newPosX, newPosY, animate) {
     const ds = newScale - this.scale_;
-    const dx = newPosX - this.posX_;
-    const dy = newPosY - this.posY_;
-    const dist = Math.sqrt(dx * dx + dy * dy);
+    const dist = distance(this.posX_, this.posY_, newPosX, newPosY);
 
     const dur = animate
       ? Math.min(
