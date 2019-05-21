@@ -37,7 +37,7 @@ describes.realWin(
       toggleExperiment(win, 'amp-user-location', true);
     });
 
-    function newUserLocation(opt_config) {
+    async function newUserLocation(opt_config) {
       const userLocation = doc.createElement('amp-user-location');
       doc.body.appendChild(userLocation);
 
@@ -52,51 +52,50 @@ describes.realWin(
         userLocation.appendChild(configElement);
       }
 
-      return userLocation.build().then(() => userLocation);
+      await userLocation.build();
+      return userLocation;
     }
 
-    it('should build if experiment is on', () => {
-      const element = newUserLocation();
-      return element.catch(unused => {
-        throw new Error('component should have built');
-      });
+    it('should build if experiment is on', async () => {
+      const element = await newUserLocation();
+      expect(element.tagName).to.equal('AMP-USER-LOCATION');
     });
 
     it('should not build if experiment is off', () => {
-      return allowConsoleError(() => {
-        toggleExperiment(env.win, 'amp-user-location', false);
-        return newUserLocation().catch(err => {
-          expect(err.message).to.include('experiment must be enabled');
-        });
+      toggleExperiment(env.win, 'amp-user-location', false);
+
+      allowConsoleError(() => {
+        try {
+          newUserLocation();
+        } catch (e) {
+          expect(e.message).to.include('experiment must be enabled');
+        }
       });
     });
 
-    it('should parse config when built, if present', () => {
-      return Promise.all([
-        newUserLocation()
-          .then(element => element.getImpl())
-          .then(impl => {
-            expect(impl.config_).to.be.null;
-          }),
-        newUserLocation({})
-          .then(element => element.getImpl())
-          .then(impl => {
-            expect(impl.config_).to.not.be.null;
-          }),
-      ]);
+    it('should parse config when built, if present', async () => {
+      const elementNoConfig = await newUserLocation();
+      const implNoConfig = await elementNoConfig.getImpl();
+      expect(implNoConfig.config_).to.be.null;
+
+      const elementWithConfig = await newUserLocation({});
+      const implWithConfig = await elementWithConfig.getImpl();
+      expect(implWithConfig.config_).to.not.be.null;
     });
 
     it('should error with invalid config', () => {
       return allowConsoleError(() => {
-        return newUserLocation('this is not valid json').catch(err => {
+        try {
+          newUserLocation('this is not valid json');
+        } catch (err) {
           expect(err.message).to.include(
             'Failed to parse amp-user-location config'
           );
-        });
+        }
       });
     });
 
-    it('should parse recognized fields in the config', () => {
+    it('should parse recognized fields in the config', async () => {
       const testConfig = {
         fallback: '40,-22',
         maximumAge: 60000,
@@ -105,21 +104,17 @@ describes.realWin(
         doNotExpose: 'wow',
       };
 
-      return newUserLocation(testConfig)
-        .then(element => {
-          return element.getImpl();
-        })
-        .then(impl => {
-          expect(impl.config_).to.deep.include({
-            fallback: {source: 'fallback', lat: 40, lon: -22},
-            maximumAge: 60000,
-            timeout: 10000,
-          });
-          expect(impl.config_).to.not.have.property('doNotExpose');
-        });
+      const element = await newUserLocation(testConfig);
+      const impl = await element.getImpl();
+      expect(impl.config_).to.deep.include({
+        fallback: {lat: 40, lon: -22},
+        maximumAge: 60000,
+        timeout: 10000,
+      });
+      expect(impl.config_).to.not.have.property('doNotExpose');
     });
 
-    it('should trigger the "approve" event if user approves geolocation', () => {
+    it('should trigger the "approve" event if user approves geolocation', async () => {
       class UserLocationFake {}
       UserLocationFake.prototype.requestLocation = sandbox.stub().resolves({
         lat: 10,
@@ -129,22 +124,19 @@ describes.realWin(
         .stub(Services, 'userLocationForDocOrNull')
         .resolves(new UserLocationFake());
 
-      let triggerSpy;
-      return newUserLocation()
-        .then(element => element.getImpl())
-        .then(impl => {
-          triggerSpy = sandbox.spy(impl, 'triggerEvent_');
-          return impl.userLocationInteraction_();
-        })
-        .then(() => {
-          expect(triggerSpy).to.have.been.calledWith(
-            AmpUserLocationEvent.APPROVE,
-            {lat: 10, lon: -10}
-          );
-        });
+      const element = await newUserLocation();
+      const impl = await element.getImpl();
+
+      const triggerSpy = sandbox.spy(impl, 'triggerEvent_');
+      await impl.userLocationInteraction_();
+
+      expect(triggerSpy).to.have.been.calledWith(AmpUserLocationEvent.APPROVE, {
+        lat: 10,
+        lon: -10,
+      });
     });
 
-    it('should trigger the "deny" event if user denies geolocation', () => {
+    it('should trigger the "deny" event if user denies geolocation', async () => {
       class UserLocationFake {}
       UserLocationFake.prototype.requestLocation = sandbox.stub().rejects({
         code: PositionError.PERMISSION_DENIED,
@@ -153,54 +145,48 @@ describes.realWin(
         .stub(Services, 'userLocationForDocOrNull')
         .resolves(new UserLocationFake());
 
-      let triggerSpy;
-      return newUserLocation()
-        .then(element => element.getImpl())
-        .then(impl => {
-          triggerSpy = sandbox.spy(impl, 'triggerEvent_');
-          return impl.userLocationInteraction_();
-        })
-        .then(() => {
-          expect(triggerSpy).to.have.been.calledWith(AmpUserLocationEvent.DENY);
-        });
+      const element = await newUserLocation();
+      const impl = await element.getImpl();
+
+      const triggerSpy = sandbox.spy(impl, 'triggerEvent_');
+      await impl.userLocationInteraction_();
+
+      expect(triggerSpy).to.have.been.calledWith(AmpUserLocationEvent.DENY);
     });
 
     it(
       'should trigger the "deny" event with fallback if user' +
         ' denies geolocation',
-      () => {
+      async () => {
         class UserLocationFake {}
-        UserLocationFake.prototype.requestLocation = sandbox.stub().rejects({
-          code: PositionError.PERMISSION_DENIED,
-          fallback: {source: UserLocationSource.FALLBACK, lat: 20, lon: -20},
-        });
+        UserLocationFake.prototype.requestLocation = sandbox
+          .stub()
+          .withArgs({fallback: {lat: 20, lon: -20}})
+          .rejects({
+            code: PositionError.PERMISSION_DENIED,
+            fallback: {source: UserLocationSource.FALLBACK, lat: 20, lon: -20},
+          });
         sandbox
           .stub(Services, 'userLocationForDocOrNull')
           .resolves(new UserLocationFake());
 
-        let triggerSpy;
-        return newUserLocation({fallback: '20,-20'})
-          .then(element => element.getImpl())
-          .then(impl => {
-            triggerSpy = sandbox.spy(impl, 'triggerEvent_');
-            return impl.userLocationInteraction_();
-          })
-          .then(() => {
-            expect(triggerSpy).to.have.been.calledWith(
-              AmpUserLocationEvent.DENY,
-              {
-                'fallback': {
-                  'source': UserLocationSource.FALLBACK,
-                  'lat': 20,
-                  'lon': -20,
-                },
-              }
-            );
-          });
+        const element = await newUserLocation({fallback: '20,-20'});
+        const impl = await element.getImpl();
+
+        const triggerSpy = sandbox.spy(impl, 'triggerEvent_');
+        await impl.userLocationInteraction_();
+
+        expect(triggerSpy).to.have.been.calledWith(AmpUserLocationEvent.DENY, {
+          'fallback': {
+            'source': UserLocationSource.FALLBACK,
+            'lat': 20,
+            'lon': -20,
+          },
+        });
       }
     );
 
-    it('should trigger the "error" event if geolocation timeouts', () => {
+    it('should trigger the "error" event if geolocation timeouts', async () => {
       class UserLocationFake {}
       UserLocationFake.prototype.requestLocation = sandbox.stub().rejects({
         code: PositionError.TIMEOUT,
@@ -209,56 +195,48 @@ describes.realWin(
         .stub(Services, 'userLocationForDocOrNull')
         .resolves(new UserLocationFake());
 
-      let triggerSpy;
-      return newUserLocation()
-        .then(element => element.getImpl())
-        .then(impl => {
-          triggerSpy = sandbox.spy(impl, 'triggerEvent_');
-          return impl.userLocationInteraction_();
-        })
-        .then(() => {
-          expect(triggerSpy).to.have.been.calledWith(
-            AmpUserLocationEvent.ERROR
-          );
-        });
+      const element = await newUserLocation();
+      const impl = await element.getImpl();
+
+      const triggerSpy = sandbox.spy(impl, 'triggerEvent_');
+      await impl.userLocationInteraction_();
+
+      expect(triggerSpy).to.have.been.calledWith(AmpUserLocationEvent.ERROR);
     });
 
     it(
       'should trigger the "error" event with fallback if ' +
         'geolocation timeouts',
-      () => {
+      async () => {
         class UserLocationFake {}
-        UserLocationFake.prototype.requestLocation = sandbox.stub().rejects({
-          code: PositionError.TIMEOUT,
-          fallback: {source: UserLocationSource.FALLBACK, lat: 20, lon: -20},
-        });
+        UserLocationFake.prototype.requestLocation = sandbox
+          .stub()
+          .withArgs({fallback: {lat: 20, lon: -20}})
+          .rejects({
+            code: PositionError.TIMEOUT,
+            fallback: {source: UserLocationSource.FALLBACK, lat: 20, lon: -20},
+          });
         sandbox
           .stub(Services, 'userLocationForDocOrNull')
           .resolves(new UserLocationFake());
 
-        let triggerSpy;
-        return newUserLocation({fallback: '20,-20'})
-          .then(element => element.getImpl())
-          .then(impl => {
-            triggerSpy = sandbox.spy(impl, 'triggerEvent_');
-            return impl.userLocationInteraction_();
-          })
-          .then(() => {
-            expect(triggerSpy).to.have.been.calledWith(
-              AmpUserLocationEvent.ERROR,
-              {
-                'fallback': {
-                  'source': UserLocationSource.FALLBACK,
-                  'lat': 20,
-                  'lon': -20,
-                },
-              }
-            );
-          });
+        const element = await newUserLocation();
+        const impl = await element.getImpl();
+
+        const triggerSpy = sandbox.spy(impl, 'triggerEvent_');
+        await impl.userLocationInteraction_();
+
+        expect(triggerSpy).to.have.been.calledWith(AmpUserLocationEvent.ERROR, {
+          'fallback': {
+            'source': UserLocationSource.FALLBACK,
+            'lat': 20,
+            'lon': -20,
+          },
+        });
       }
     );
 
-    it('should trigger the "error" event if geolocation is unavailable', () => {
+    it('should trigger the "error" event if geolocation is unavailable', async () => {
       class UserLocationFake {}
       UserLocationFake.prototype.requestLocation = sandbox
         .stub()
@@ -267,24 +245,19 @@ describes.realWin(
         .stub(Services, 'userLocationForDocOrNull')
         .resolves(new UserLocationFake());
 
-      let triggerSpy;
-      return newUserLocation()
-        .then(element => element.getImpl())
-        .then(impl => {
-          triggerSpy = sandbox.spy(impl, 'triggerEvent_');
-          return impl.userLocationInteraction_();
-        })
-        .then(() => {
-          expect(triggerSpy).to.have.been.calledWith(
-            AmpUserLocationEvent.ERROR
-          );
-        });
+      const element = await newUserLocation();
+      const impl = await element.getImpl();
+
+      const triggerSpy = sandbox.spy(impl, 'triggerEvent_');
+      await impl.userLocationInteraction_();
+
+      expect(triggerSpy).to.have.been.calledWith(AmpUserLocationEvent.ERROR);
     });
 
     it(
       'should trigger the "error" event if the platform ' +
         'does not support geolocation',
-      () => {
+      async () => {
         class UserLocationFake {}
         UserLocationFake.prototype.requestLocation = sandbox
           .stub()
@@ -293,18 +266,13 @@ describes.realWin(
           .stub(Services, 'userLocationForDocOrNull')
           .resolves(new UserLocationFake());
 
-        let triggerSpy;
-        return newUserLocation()
-          .then(element => element.getImpl())
-          .then(impl => {
-            triggerSpy = sandbox.spy(impl, 'triggerEvent_');
-            return impl.userLocationInteraction_();
-          })
-          .then(() => {
-            expect(triggerSpy).to.have.been.calledWith(
-              AmpUserLocationEvent.ERROR
-            );
-          });
+        const element = await newUserLocation();
+        const impl = await element.getImpl();
+
+        const triggerSpy = sandbox.spy(impl, 'triggerEvent_');
+        await impl.userLocationInteraction_();
+
+        expect(triggerSpy).to.have.been.calledWith(AmpUserLocationEvent.ERROR);
       }
     );
   }

@@ -18,7 +18,6 @@ import {ActionTrust} from '../../../src/action-constants';
 import {Layout} from '../../../src/layout';
 import {PositionError} from './position-error';
 import {Services} from '../../../src/services';
-import {UserLocation, UserLocationSource} from './user-location';
 import {UserLocationService} from './user-location-service';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dict} from '../../../src/utils/object';
@@ -114,14 +113,10 @@ export class AmpUserLocation extends AMP.BaseElement {
     }
 
     let jsonFallback = json['fallback'];
-    let fallback = null;
+    let fallback;
     if (jsonFallback) {
       jsonFallback = jsonFallback.split(',');
-      fallback = new UserLocation(
-        UserLocationSource.FALLBACK,
-        Number(jsonFallback[0]),
-        Number(jsonFallback[1])
-      );
+      fallback = {lat: Number(jsonFallback[0]), lon: Number(jsonFallback[1])};
     }
 
     return {

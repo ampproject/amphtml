@@ -17,19 +17,19 @@
 /** @dict @extends {JsonObject} */
 export class UserLocation {
   /**
-   * @param {UserLocationSource} source
+   * @param {!UserLocationSource} source
    * @param {number=} lat
    * @param {number=} lon
    */
   constructor(source, lat = undefined, lon = undefined) {
     /** @const */
+    this['source'] = source;
+
+    /** @const */
     this['lat'] = lat;
 
     /** @const */
     this['lon'] = lon;
-
-    /** @const */
-    this['source'] = source;
   }
 }
 

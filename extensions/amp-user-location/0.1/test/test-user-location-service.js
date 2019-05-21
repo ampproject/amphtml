@@ -67,201 +67,182 @@ describes.sandboxed('user-location-service', {}, () => {
   });
 
   describe('location requests', () => {
-    it('should return location when user approves', () => {
+    it('should return location when user approves', async () => {
       win.navigator.geolocation.getCurrentPosition.callsArgWith(
         0,
         getFakePosition(10, -10)
       );
 
       const service = new UserLocationService(new FakeAmpdoc());
-      return service.requestLocation({}).then(location => {
-        expect(location).to.include({lat: 10, lon: -10});
-      });
+      const position = await service.requestLocation({});
+      expect(position).to.include({lat: 10, lon: -10});
     });
 
-    it('should return location when user requests a second time', () => {
+    it('should return location when user requests a second time', async () => {
       win.navigator.geolocation.getCurrentPosition.callsArgWith(
         0,
         getFakePosition(10, -10)
       );
 
       const service = new UserLocationService(new FakeAmpdoc());
-      return service
-        .requestLocation({})
-        .then(location => {
-          expect(location).to.include({lat: 10, lon: -10});
-          return service.requestLocation({});
-        })
-        .then(location => {
-          expect(win.navigator.geolocation.getCurrentPosition).to.have.been
-            .calledTwice;
-          expect(location).to.include({lat: 10, lon: -10});
+      const position = await service.requestLocation({});
+      expect(position).to.include({lat: 10, lon: -10});
+
+      const secondPosition = await service.requestLocation({});
+      expect(win.navigator.geolocation.getCurrentPosition).to.have.been
+        .calledTwice;
+      expect(secondPosition).to.include({lat: 10, lon: -10});
+    });
+
+    it('should not return location when user denies', async () => {
+      win.navigator.geolocation.getCurrentPosition.callsArgWith(
+        1,
+        getFakeError(PositionError.PERMISSION_DENIED)
+      );
+
+      const service = new UserLocationService(new FakeAmpdoc());
+      try {
+        await service.requestLocation({});
+        throw new Error('should not succeed');
+      } catch (e) {
+        expect(e).to.match(/geolocation/);
+        expect(e.code).to.equal(PositionError.PERMISSION_DENIED);
+      }
+    });
+
+    it('should return fallback when user denies with fallback', async () => {
+      win.navigator.geolocation.getCurrentPosition.callsArgWith(
+        1,
+        getFakeError(PositionError.PERMISSION_DENIED)
+      );
+
+      const service = new UserLocationService(new FakeAmpdoc());
+      try {
+        await service.requestLocation({fallback: {lat: 20, lon: -20}});
+        throw new Error('should not succeed');
+      } catch (e) {
+        expect(e).to.match(/geolocation/);
+        expect(e.code).to.equal(PositionError.PERMISSION_DENIED);
+        expect(e.fallback).to.deep.include({
+          source: UserLocationSource.FALLBACK,
+          lat: 20,
+          lon: -20,
         });
+      }
     });
 
-    it('should not return location when user denies', () => {
-      win.navigator.geolocation.getCurrentPosition.callsArgWith(
-        1,
-        getFakeError(PositionError.PERMISSION_DENIED)
-      );
-
-      const service = new UserLocationService(new FakeAmpdoc());
-      return service.requestLocation({}).then(
-        () => {
-          throw new Error('should not succeed');
-        },
-        err => {
-          expect(err.code).to.equal(PositionError.PERMISSION_DENIED);
-        }
-      );
-    });
-
-    it('should return fallback when user denies with fallback', () => {
-      win.navigator.geolocation.getCurrentPosition.callsArgWith(
-        1,
-        getFakeError(PositionError.PERMISSION_DENIED)
-      );
-
-      const fallback = {source: UserLocationSource.FALLBACK, lat: 20, lon: -20};
-      const service = new UserLocationService(new FakeAmpdoc());
-      return service.requestLocation({fallback}).then(
-        () => {
-          throw new Error('should not succeed');
-        },
-        err => {
-          expect(err.code).to.equal(PositionError.PERMISSION_DENIED);
-          expect(err.fallback).to.deep.include({
-            source: UserLocationSource.FALLBACK,
-            lat: 20,
-            lon: -20,
-          });
-        }
-      );
-    });
-
-    it('should not return location when geolocation timeouts', () => {
+    it('should not return location when geolocation timeouts', async () => {
       win.navigator.geolocation.getCurrentPosition.callsArgWith(
         1,
         getFakeError(PositionError.TIMEOUT)
       );
 
       const service = new UserLocationService(new FakeAmpdoc());
-      return service.requestLocation({}).then(
-        () => {
-          throw new Error('should not succeed');
-        },
-        err => {
-          expect(err.code).to.equal(PositionError.TIMEOUT);
-        }
-      );
+      try {
+        await service.requestLocation({});
+        throw new Error('should not succeed');
+      } catch (e) {
+        expect(e).to.match(/geolocation/);
+        expect(e.code).to.equal(PositionError.TIMEOUT);
+      }
     });
 
-    it('should return fallback when geolocation timeouts with fallback', () => {
+    it('should return fallback when geolocation timeouts with fallback', async () => {
       win.navigator.geolocation.getCurrentPosition.callsArgWith(
         1,
         getFakeError(PositionError.TIMEOUT)
       );
 
-      const fallback = {source: UserLocationSource.FALLBACK, lat: 20, lon: -20};
       const service = new UserLocationService(new FakeAmpdoc());
-      return service.requestLocation({fallback}).then(
-        () => {
-          throw new Error('should not succeed');
-        },
-        err => {
-          expect(err.code).to.equal(PositionError.TIMEOUT);
-          expect(err.fallback).to.deep.include({
-            source: UserLocationSource.FALLBACK,
-            lat: 20,
-            lon: -20,
-          });
-        }
-      );
+      try {
+        await service.requestLocation({fallback: {lat: 20, lon: -20}});
+        throw new Error('should not succeed');
+      } catch (e) {
+        expect(e).to.match(/geolocation/);
+        expect(e.code).to.equal(PositionError.TIMEOUT);
+        expect(e.fallback).to.deep.include({
+          source: UserLocationSource.FALLBACK,
+          lat: 20,
+          lon: -20,
+        });
+      }
     });
 
-    it('should not return location when geolocation is unavailable', () => {
+    it('should not return location when geolocation is unavailable', async () => {
       win.navigator.geolocation.getCurrentPosition.callsArgWith(
         1,
         getFakeError(PositionError.POSITION_UNAVAILABLE)
       );
 
       const service = new UserLocationService(new FakeAmpdoc());
-      return service.requestLocation({}).then(
-        () => {
-          throw new Error('should not succeed');
-        },
-        err => {
-          expect(err.code).to.equal(PositionError.POSITION_UNAVAILABLE);
-        }
-      );
+      try {
+        await service.requestLocation({});
+        throw new Error('should not succeed');
+      } catch (e) {
+        expect(e).to.match(/geolocation/);
+        expect(e.code).to.equal(PositionError.POSITION_UNAVAILABLE);
+      }
     });
 
-    it('should return fallback when geolocation is unavailable with fallback', () => {
+    it('should return fallback when geolocation is unavailable with fallback', async () => {
       win.navigator.geolocation.getCurrentPosition.callsArgWith(
         1,
         getFakeError(PositionError.POSITION_UNAVAILABLE)
       );
 
-      const fallback = {source: UserLocationSource.FALLBACK, lat: 20, lon: -20};
       const service = new UserLocationService(new FakeAmpdoc());
-      return service.requestLocation({fallback}).then(
-        () => {
-          throw new Error('should not succeed');
-        },
-        err => {
-          expect(err.code).to.equal(PositionError.POSITION_UNAVAILABLE);
-          expect(err.fallback).to.deep.include({
-            source: UserLocationSource.FALLBACK,
-            lat: 20,
-            lon: -20,
-          });
-        }
-      );
+      try {
+        await service.requestLocation({fallback: {lat: 20, lon: -20}});
+        throw new Error('should not succeed');
+      } catch (e) {
+        expect(e).to.match(/geolocation/);
+        expect(e.code).to.equal(PositionError.POSITION_UNAVAILABLE);
+        expect(e.fallback).to.deep.include({
+          source: UserLocationSource.FALLBACK,
+          lat: 20,
+          lon: -20,
+        });
+      }
     });
 
-    it('should not return location when an unknown error occurs', () => {
+    it('should not return location when an unknown error occurs', async () => {
       win.navigator.geolocation.getCurrentPosition.callsArgWith(
         1,
         getFakeError(-1)
       );
 
       const service = new UserLocationService(new FakeAmpdoc());
-      return service.requestLocation({}).then(
-        () => {
-          throw new Error('should not succeed');
-        },
-        err => {
-          expect(err).to.match(/geolocation/);
-          expect(err.code).to.equal(undefined);
-        }
-      );
+      try {
+        await service.requestLocation({});
+        throw new Error('should not succeed');
+      } catch (e) {
+        expect(e).to.match(/geolocation/);
+        expect(e.code).to.equal(undefined);
+      }
     });
 
-    it('should return fallback when an unknown error occurs with fallback', () => {
+    it('should return fallback when an unknown error occurs with fallback', async () => {
       win.navigator.geolocation.getCurrentPosition.callsArgWith(
         1,
         getFakeError(-1)
       );
 
-      const fallback = {source: UserLocationSource.FALLBACK, lat: 20, lon: -20};
       const service = new UserLocationService(new FakeAmpdoc());
-      return service.requestLocation({fallback}).then(
-        () => {
-          throw new Error('should not succeed');
-        },
-        err => {
-          expect(err).to.match(/geolocation/);
-          expect(err.code).to.equal(undefined);
-          expect(err.fallback).to.deep.include({
-            source: UserLocationSource.FALLBACK,
-            lat: 20,
-            lon: -20,
-          });
-        }
-      );
+      try {
+        await service.requestLocation({fallback: {lat: 20, lon: -20}});
+        throw new Error('should not succeed');
+      } catch (e) {
+        expect(e).to.match(/geolocation/);
+        expect(e.code).to.equal(undefined);
+        expect(e.fallback).to.deep.include({
+          source: UserLocationSource.FALLBACK,
+          lat: 20,
+          lon: -20,
+        });
+      }
     });
 
-    it('should not return location when geolocation is not supported', () => {
+    it('should not return location when geolocation is not supported', async () => {
       platformService.isChrome.returns(true);
       viewerService.isEmbedded.returns(true);
       win.navigator.geolocation.getCurrentPosition.callsArgWith(
@@ -270,17 +251,16 @@ describes.sandboxed('user-location-service', {}, () => {
       );
 
       const service = new UserLocationService(new FakeAmpdoc());
-      return service.requestLocation({}).then(
-        () => {
-          throw new Error('should not succeed');
-        },
-        err => {
-          expect(err.code).to.equal(PositionError.PLATFORM_UNSUPPORTED);
-        }
-      );
+      try {
+        await service.requestLocation({});
+        throw new Error('should not succeed');
+      } catch (e) {
+        expect(e).to.match(/geolocation/);
+        expect(e.code).to.equal(PositionError.PLATFORM_UNSUPPORTED);
+      }
     });
 
-    it('should return fallback when geolocation is not supported with fallback', () => {
+    it('should return fallback when geolocation is not supported with fallback', async () => {
       platformService.isChrome.returns(true);
       viewerService.isEmbedded.returns(true);
       win.navigator.geolocation.getCurrentPosition.callsArgWith(
@@ -288,155 +268,140 @@ describes.sandboxed('user-location-service', {}, () => {
         getFakePosition(10, -10)
       );
 
-      const fallback = {source: UserLocationSource.FALLBACK, lat: 20, lon: -20};
       const service = new UserLocationService(new FakeAmpdoc());
-      return service.requestLocation({fallback}).then(
-        () => {
-          throw new Error('should not succeed');
-        },
-        err => {
-          expect(err.code).to.equal(PositionError.PLATFORM_UNSUPPORTED);
-          expect(err.fallback).to.deep.include({
-            source: UserLocationSource.FALLBACK,
-            lat: 20,
-            lon: -20,
-          });
-        }
-      );
+      try {
+        await service.requestLocation({fallback: {lat: 20, lon: -20}});
+        throw new Error('should not succeed');
+      } catch (e) {
+        expect(e).to.match(/geolocation/);
+        expect(e.code).to.equal(PositionError.PLATFORM_UNSUPPORTED);
+        expect(e.fallback).to.deep.include({
+          source: UserLocationSource.FALLBACK,
+          lat: 20,
+          lon: -20,
+        });
+      }
     });
 
-    it('should not return location when geolocation is not available', () => {
+    it('should not return location when geolocation is not available', async () => {
       delete win.navigator.geolocation;
 
       const service = new UserLocationService(new FakeAmpdoc());
-      return service.requestLocation({}).then(
-        () => {
-          throw new Error('should not succeed');
-        },
-        err => {
-          expect(err.code).to.equal(PositionError.PLATFORM_UNSUPPORTED);
-        }
-      );
+      try {
+        await service.requestLocation({});
+        throw new Error('should not succeed');
+      } catch (e) {
+        expect(e).to.match(/geolocation/);
+        expect(e.code).to.equal(PositionError.PLATFORM_UNSUPPORTED);
+      }
     });
 
-    it('should return fallback when geolocation is not available with fallback', () => {
+    it('should return fallback when geolocation is not available with fallback', async () => {
       delete win.navigator.geolocation;
 
-      const fallback = {source: UserLocationSource.FALLBACK, lat: 20, lon: -20};
       const service = new UserLocationService(new FakeAmpdoc());
-      return service.requestLocation({fallback}).then(
-        () => {
-          throw new Error('should not succeed');
-        },
-        err => {
-          expect(err.code).to.equal(PositionError.PLATFORM_UNSUPPORTED);
-          expect(err.fallback).to.deep.include({
-            source: UserLocationSource.FALLBACK,
-            lat: 20,
-            lon: -20,
-          });
-        }
-      );
+      try {
+        await service.requestLocation({fallback: {lat: 20, lon: -20}});
+        throw new Error('should not succeed');
+      } catch (e) {
+        expect(e).to.match(/geolocation/);
+        expect(e.code).to.equal(PositionError.PLATFORM_UNSUPPORTED);
+        expect(e.fallback).to.deep.include({
+          source: UserLocationSource.FALLBACK,
+          lat: 20,
+          lon: -20,
+        });
+      }
     });
 
-    it('should return location when override is specified', () => {
+    it('should return override when override is specified', async () => {
       const userLocationOverride = '10,-10';
       getModeStub.returns({userLocationOverride, localDev: true});
 
       const service = new UserLocationService(new FakeAmpdoc());
-      return service.requestLocation({}).then(location => {
-        expect(win.navigator.geolocation.getCurrentPosition).to.not.have.been
-          .called;
-        expect(location).to.include({lat: 10, lon: -10});
-      });
+      const position = await service.requestLocation({});
+
+      expect(win.navigator.geolocation.getCurrentPosition).to.not.have.been
+        .called;
+      expect(position).to.include({lat: 10, lon: -10});
     });
 
-    it('should not return location when override error is specified', () => {
+    it('should not return location when override error is specified', async () => {
       const error = 'error';
       getModeStub.returns({userLocationOverride: error, localDev: true});
 
       const service = new UserLocationService(new FakeAmpdoc());
-      return service.requestLocation({}).then(
-        () => {
-          throw new Error('should not succeed');
-        },
-        err => {
-          expect(err.message).to.match(/geolocation/);
-          expect(err.code).to.equal(PositionError.POSITION_UNAVAILABLE);
-        }
-      );
+      try {
+        await service.requestLocation({});
+        throw new Error('should not succeed');
+      } catch (e) {
+        expect(e).to.match(/geolocation/);
+        expect(e.code).to.equal(PositionError.POSITION_UNAVAILABLE);
+      }
     });
   });
 
   describe('exposed location information', () => {
-    it('should return a value even if none are available', () => {
+    it('should return a value even if none are available', async () => {
       const service = new UserLocationService(new FakeAmpdoc());
 
-      return service.getLocation().then(position => {
-        expect(position).to.include({source: UserLocationSource.UNAVAILABLE});
-      });
+      const position = await service.getLocation();
+      expect(position).to.include({source: UserLocationSource.UNAVAILABLE});
     });
 
-    it('should return results after the user approves geolocation', () => {
+    it('should return results after the user approves geolocation', async () => {
       win.navigator.geolocation.getCurrentPosition.callsArgWith(
         0,
         getFakePosition(10, -10)
       );
 
       const service = new UserLocationService(new FakeAmpdoc());
-      return service
-        .requestLocation({})
-        .then(() => {
-          return service.getLocation();
-        })
-        .then(position => {
-          expect(position).to.include({lat: 10, lon: -10});
-        });
+      await service.requestLocation({});
+
+      const position = await service.getLocation();
+      expect(position).to.include({lat: 10, lon: -10});
     });
 
     it(
       'should poll and return results if called before ' +
         'the user approves geolocation',
-      () => {
+      async () => {
         win.navigator.geolocation.getCurrentPosition.callsArgWith(
           0,
           getFakePosition(10, -10)
         );
 
         const service = new UserLocationService(new FakeAmpdoc());
-        const results = service
-          .getLocation(/*opt_poll*/ true)
-          .then(position => {
-            expect(position).to.include({lat: 10, lon: -10});
-          });
+        const result = await Promise.all([
+          service.getLocation(/*opt_poll*/ true),
+          service.requestLocation({}),
+        ]);
 
-        service.requestLocation({});
-        return results;
+        const position = result[0];
+        expect(position).to.include({lat: 10, lon: -10});
       }
     );
 
-    it('should return unavailable after the user denies geolocation', () => {
+    it('should return unavailable after the user denies geolocation', async () => {
       win.navigator.geolocation.getCurrentPosition.callsArgWith(
         1,
         getFakeError(PositionError.PERMISSION_DENIED)
       );
 
       const service = new UserLocationService(new FakeAmpdoc());
-      return service
-        .requestLocation({})
-        .catch(error => {
-          // swallow the error
-          expect(error.code).to.equal(PositionError.PERMISSION_DENIED);
-        })
-        .then(() => {
-          return service.getLocation();
-        })
-        .then(result => {
-          expect(result).to.include({source: UserLocationSource.UNAVAILABLE});
-        });
+      try {
+        service.requestLocation({});
+      } catch (e) {
+        expect(e).to.match(/geolocation/);
+        // swallow the error
+        expect(e.code).to.equal(PositionError.PERMISSION_DENIED);
+      }
+
+      const position = await service.getLocation();
+      expect(position).to.include({source: UserLocationSource.UNAVAILABLE});
     });
 
-    it('should return unavailable after the user removes approval', () => {
+    it('should return unavailable after the user removes approval', async () => {
       win.navigator.geolocation.getCurrentPosition.callsArgWith(
         0,
         getFakePosition(10, -10)
@@ -452,30 +417,23 @@ describes.sandboxed('user-location-service', {}, () => {
       win.navigator.permissions.query.resolves(fakeStatus);
 
       const service = new UserLocationService(new FakeAmpdoc());
-      return service
-        .requestLocation({})
-        .then(location => {
-          expect(location).to.include({lat: 10, lon: -10});
+      const position = await service.requestLocation({});
+      expect(position).to.include({lat: 10, lon: -10});
 
-          // Set up the event listener to respond as if the user
-          // manually edited their settings to remove location
-          // permission
-          const fakeEvent = {
-            target: {
-              state: PermissionStatus.DENIED,
-            },
-          };
-          // This should cause purge to be called.
-          listener(fakeEvent);
+      // Set up the event listener to respond as if the user
+      // manually edited their settings to remove location
+      // permission
+      const fakeEvent = {target: {state: PermissionStatus.DENIED}};
+      // This causes purge() to be called.
+      listener(fakeEvent);
 
-          return service.getLocation({});
-        })
-        .then(result => {
-          expect(result).to.include({source: UserLocationSource.UNAVAILABLE});
-        });
+      const clearedPosition = await service.getLocation();
+      expect(clearedPosition).to.include({
+        source: UserLocationSource.UNAVAILABLE,
+      });
     });
 
-    it('should return unsupported if the platform does not support', () => {
+    it('should return unsupported if the platform does not support', async () => {
       platformService.isChrome.returns(true);
       viewerService.isEmbedded.returns(true);
       win.navigator.geolocation.getCurrentPosition.callsArgWith(
@@ -484,11 +442,8 @@ describes.sandboxed('user-location-service', {}, () => {
       );
 
       const service = new UserLocationService(new FakeAmpdoc());
-      return service.getLocation({}).then(location => {
-        expect(location).to.include({
-          source: UserLocationSource.UNSUPPORTED,
-        });
-      });
+      const position = await service.getLocation();
+      expect(position).to.include({source: UserLocationSource.UNSUPPORTED});
     });
   });
 });

@@ -29,7 +29,7 @@ import {isCanary} from '../../../src/experiments';
 
 /**
  * @typedef {{
- *   fallback: UserLocation,
+ *   fallback: ({lat: number, lon: number}|undefined),
  *   maximumAge: number,
  *   precision: string,
  *   timeout: number
@@ -363,12 +363,16 @@ export class UserLocationService {
 
 /**
  * @param {*} error
- * @param {UserLocation=} fallback
+ * @param {{lat: number, lon: number}} fallback
  * @return {!Promise}
  */
 function handleErrorFallback(error, fallback = undefined) {
   if (fallback) {
-    error.fallback = fallback;
+    error.fallback = new UserLocation(
+      UserLocationSource.FALLBACK,
+      fallback.lat,
+      fallback.lon
+    );
   }
   return Promise.reject(error);
 }
