@@ -696,7 +696,7 @@
     {
       "url": "examples/visual-tests/amp-ad/amp-ad.html",
       "name": "AMP ad",
-    }
+    },
     {
       "url": "examples/visual-tests/amp-ad/amp-inabox.html",
       "name": "AMP Inabox ad",
