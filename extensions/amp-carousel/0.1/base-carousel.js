@@ -92,6 +92,7 @@ export class BaseCarousel extends AMP.BaseElement {
    * The ARIA role for the controls. Either `button` or `presentation` based
    * on usage.
    * @return {string}
+   * @protected
    */
   buttonsAriaRole() {
     // Subclasses may override.
