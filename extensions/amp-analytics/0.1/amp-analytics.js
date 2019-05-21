@@ -21,7 +21,7 @@ import {CookieWriter} from './cookie-writer';
 import {
   ExpansionOptions,
   VariableService,
-  variableServiceForDoc,
+  variableServicePromiseForDoc,
 } from './variables';
 import {
   InstrumentationService,
@@ -121,8 +121,6 @@ export class AmpAnalytics extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.variableService_ = variableServiceForDoc(this.element);
-
     this.isSandbox_ = this.element.hasAttribute('sandbox');
 
     this.element.setAttribute('aria-hidden', 'true');
@@ -219,9 +217,15 @@ export class AmpAnalytics extends AMP.BaseElement {
           closestAmpDoc: true,
         });
       })
-      .then(instrumentationServicePromiseForDoc)
-      .then(instrumentation => {
-        this.instrumentation_ = instrumentation;
+      .then(ampdoc =>
+        Promise.all([
+          instrumentationServicePromiseForDoc(ampdoc),
+          variableServicePromiseForDoc(ampdoc),
+        ])
+      )
+      .then(services => {
+        this.instrumentation_ = services[0];
+        this.variableService_ = services[1];
         return new AnalyticsConfig(this.element).loadConfig();
       })
       .then(config => {
