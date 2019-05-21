@@ -107,7 +107,8 @@ export class CryptoHandler {
     // 3. Get document Key in the correct format.
     return this.stringToCryptoKey_(documentKey).then(function(formattedDocKey) {
       // 4. Decrypt.
-      const decryptedContent = crypto.subtle.decrypt(
+      const decryptedContent = crypto.subtle
+        .decrypt(
           {
             name: 'AES-CTR',
             counter: new Uint8Array(16), // iv: all zeros.
@@ -115,10 +116,11 @@ export class CryptoHandler {
           },
           formattedDocKey,
           encryptedBytes
-      ).then(function(buffer) {
-        // 5. Decryption gives us raw bytes and we need to turn them into text.
-        return utf8Decode(new Uint8Array(buffer));
-      });
+        )
+        .then(function(buffer) {
+          // 5. Decryption gives us raw bytes and we need to turn them into text.
+          return utf8Decode(new Uint8Array(buffer));
+        });
       return decryptedContent;
     });
   }
@@ -133,12 +135,8 @@ export class CryptoHandler {
     const documentKeyBytes = base64DecodeToBytes(documentKey);
 
     // 2. Convert to CryptoKey format.
-    return crypto.subtle.importKey(
-        'raw',
-        documentKeyBytes,
-        'AES-CTR',
-        true,
-        ['decrypt']
-    );
+    return crypto.subtle.importKey('raw', documentKeyBytes, 'AES-CTR', true, [
+      'decrypt',
+    ]);
   }
 }

@@ -1463,7 +1463,7 @@ function decryptDocumentKey(encryptedDocumentKey) {
   if (!encryptedDocumentKey.includes(cryptoStart, 0)) {
     return null;
   }
-  let jsonString = encryptedDocumentKey.replace(cryptoStart,'');
+  let jsonString = encryptedDocumentKey.replace(cryptoStart, '');
   jsonString = jsonString.substring(0, jsonString.length - 1);
   const parsedJson = JSON.parse(jsonString);
   if (!parsedJson) {
