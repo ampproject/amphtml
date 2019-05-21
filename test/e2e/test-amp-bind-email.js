@@ -49,12 +49,12 @@ describes.endtoend(
         const image = await controller.findElement('#image');
 
         await expect(controller.getElementAttribute(image, 'src')).to.equal(
-          'https://foo.com/foo.jpg'
+          '/examples/img/ampicon.png'
         );
 
         await controller.click(button);
         await expect(controller.getElementAttribute(image, 'src')).to.equal(
-          'https://foo.com/foo.jpg'
+          '/examples/img/ampicon.png'
         );
       });
     });
