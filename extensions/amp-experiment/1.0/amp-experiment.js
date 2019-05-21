@@ -46,28 +46,31 @@ export class AmpExperiment extends AMP.BaseElement {
       const variantsService = responses[0];
       const enabled = responses[1];
 
-      const config = this.getConfig_();
-
-      if (!enabled) {
-        user().error(TAG, 'Experiment amp-experiment-1.0 is not enabled.');
-
-        // Ensure downstream consumers don't wait for the promise forever.
-        variantsService.init(Promise.resolve(this.getEmptyExperimentToVariant_(config)));
-
-        return Promise.reject('Experiment amp-experiment-1.0 is not enabled.');
-      }
-
-      const ampdoc = this.getAmpDoc();
-
-      // All experiments can be disabled by a hash param
-      const viewer = Services.viewerForDoc(ampdoc);
-      const override = viewer.getParam(ATTR_PREFIX + '_disable_all_experiments_');
-      if (override !== undefined) {
-        variantsService.init(Promise.resolve(this.getEmptyExperimentToVariant_(config)));
-        return;
-      }
+      let config = {};
 
       try {
+
+        config = this.getConfig_();
+
+        if (!enabled) {
+          user().error(TAG, 'Experiment amp-experiment-1.0 is not enabled.');
+
+          // Ensure downstream consumers don't wait for the promise forever.
+          variantsService.init(Promise.resolve(this.getEmptyExperimentToVariant_(config)));
+
+          return Promise.reject('Experiment amp-experiment-1.0 is not enabled.');
+        }
+
+        const ampdoc = this.getAmpDoc();
+
+        // All experiments can be disabled by a hash param
+        const viewer = Services.viewerForDoc(ampdoc);
+        const override = viewer.getParam(ATTR_PREFIX + '_disable_all_experiments_');
+        if (override !== undefined) {
+          variantsService.init(Promise.resolve(this.getEmptyExperimentToVariant_(config)));
+          return;
+        }
+
         const results = Object.create(null);
         const variants = Object.keys(config).map(experimentName => {
           return allocateVariant(
