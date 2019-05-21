@@ -21,6 +21,7 @@ import {dict} from '../../../src/utils/object';
 import {getConsentPolicyState} from '../../../src/consent';
 import {
   getServiceForDoc,
+  getServicePromiseForDoc,
   registerServiceBuilderForDoc,
 } from '../../../src/service';
 import {isArray, isFiniteNumber} from '../../../src/types';
@@ -315,6 +316,17 @@ export function installVariableServiceForTesting(ampdoc) {
  */
 export function variableServiceForDoc(elementOrAmpDoc) {
   return getServiceForDoc(elementOrAmpDoc, 'amp-analytics-variables');
+}
+
+/**
+ * @param {!Element|!ShadowRoot|!../../../src/service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+ * @return {!Promise<!VariableService>}
+ */
+export function variableServicePromiseForDoc(elementOrAmpDoc) {
+  return /** @type {!Promise<!VariableService>} */ (getServicePromiseForDoc(
+    elementOrAmpDoc,
+    'amp-analytics-variables'
+  ));
 }
 
 /**
