@@ -37,8 +37,8 @@ const TEST_TYPE_SUBTYPES = new Map([
   // TODO(danielrozenberg): add 'e2e' tests.
 ]);
 const TEST_TYPE_BUILD_TARGETS = new Map([
-  ['integration', ['RUNTIME', 'BUILD_SYSTEM', 'INTEGRATION_TEST']],
-  ['unit', ['RUNTIME', 'BUILD_SYSTEM', 'UNIT_TEST']],
+  ['integration', ['RUNTIME', 'FLAG_CONFIG', 'INTEGRATION_TEST']],
+  ['unit', ['RUNTIME', 'UNIT_TEST']],
 ]);
 
 function inferTestType() {

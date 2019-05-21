@@ -372,6 +372,11 @@ function createBaseCustomElementClass(win) {
       return this.upgradeState_ == UpgradeState.UPGRADED;
     }
 
+    /** @return {!Promise} */
+    whenUpgraded() {
+      return this.signals_.whenSignal(CommonSignals.UPGRADED);
+    }
+
     /**
      * Upgrades the element to the provided new implementation. If element
      * has already been attached, it's layout validation and attachment flows
@@ -425,6 +430,7 @@ function createBaseCustomElementClass(win) {
       this.implementation_.firstAttachedCallback();
       this.dispatchCustomEventForTesting(AmpEvents.ATTACHED);
       this.getResources().upgraded(this);
+      this.signals_.signal(CommonSignals.UPGRADED);
     }
 
     /** @private */
@@ -488,7 +494,8 @@ function createBaseCustomElementClass(win) {
      * Requests or requires the element to be built. The build is done by
      * invoking {@link BaseElement.buildCallback} method.
      *
-     * This method can only be called on a upgraded element.
+     * Can only be called on a upgraded element. May only be called from
+     * resource.js to ensure an element and its resource are in sync.
      *
      * @return {?Promise}
      * @final @this {!Element}
@@ -1042,9 +1049,7 @@ function createBaseCustomElementClass(win) {
      * @final @this {!Element}
      */
     getLayoutBox() {
-      return this.getResources()
-        .getResourceForElement(this)
-        .getLayoutBox();
+      return this.getResource_().getLayoutBox();
     }
 
     /**
@@ -1054,9 +1059,7 @@ function createBaseCustomElementClass(win) {
      * @final @this {!Element}
      */
     getPageLayoutBox() {
-      return this.getResources()
-        .getResourceForElement(this)
-        .getPageLayoutBox();
+      return this.getResource_().getPageLayoutBox();
     }
 
     /**
@@ -1064,9 +1067,7 @@ function createBaseCustomElementClass(win) {
      * @final @this {!Element}
      */
     getOwner() {
-      return this.getResources()
-        .getResourceForElement(this)
-        .getOwner();
+      return this.getResource_().getOwner();
     }
 
     /**
@@ -1077,9 +1078,7 @@ function createBaseCustomElementClass(win) {
      */
     getIntersectionChangeEntry() {
       const box = this.implementation_.getIntersectionElementLayoutBox();
-      const owner = this.getResources()
-        .getResourceForElement(this)
-        .getOwner();
+      const owner = this.getOwner();
       const viewportBox = this.implementation_.getViewport().getRect();
       // TODO(jridgewell, #4826): We may need to make this recursive.
       const ownerBox = owner && owner.getLayoutBox();
@@ -1087,23 +1086,20 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
+     * Returns the resource of the element.
+     * @return {!./service/resource.Resource}
+     * @private
+     */
+    getResource_() {
+      return this.getResources().getResourceForElement(this);
+    }
+
+    /**
      * Returns the resource ID of the element.
      * @return {number}
      */
     getResourceId() {
-      return this.getResources()
-        .getResourceForElement(this)
-        .getId();
-    }
-
-    /**
-     * Returns the current resource state of the element.
-     * @return {!ResourceState}
-     */
-    getResourceState_() {
-      return this.getResources()
-        .getResourceForElement(this)
-        .getState();
+      return this.getResource_().getId();
     }
 
     /**
@@ -1117,11 +1113,14 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
-     * Returns reference to implementation after it has been built.
+     * Returns reference to upgraded implementation.
+     * @param {boolean} waitForBuild If true, waits for element to be built before
+     *   resolving the returned Promise. Default is true.
      * @return {!Promise<!./base-element.BaseElement>}
      */
-    getImpl() {
-      return this.whenBuilt().then(() => this.implementation_);
+    getImpl(waitForBuild = true) {
+      const waitFor = waitForBuild ? this.whenBuilt() : this.whenUpgraded();
+      return waitFor.then(() => this.implementation_);
     }
 
     /**
@@ -1574,7 +1573,7 @@ function createBaseCustomElementClass(win) {
      */
     toggleFallback(show) {
       assertNotTemplate(this);
-      const resourceState = this.getResourceState_();
+      const resourceState = this.getResource_().getState();
       // Do not show fallback before layout
       if (
         show &&

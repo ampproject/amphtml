@@ -32,14 +32,6 @@ function isBinaryConcat(node) {
  * @param {!Node} node
  * @return {boolean}
  */
-function isLiteralString(node) {
-  return node.type === 'Literal' && typeof node.value === 'string';
-}
-
-/**
- * @param {!Node} node
- * @return {boolean}
- */
 function hasTemplateLiteral(node) {
   if (node.type === 'TemplateLiteral') {
     return true;
@@ -68,14 +60,14 @@ module.exports = {
         // Make sure that callee is a CallExpression as well.
         // dev().assert() // enforce rule
         // dev.assert() // ignore
-        const callee = node.callee;
+        const {callee} = node;
         const calleeObject = callee.object;
         if (!calleeObject || calleeObject.type !== 'CallExpression') {
           return;
         }
 
         // Make sure that the CallExpression is one of dev() or user().
-        if(!singletonFunctions.includes(calleeObject.callee.name)) {
+        if (!singletonFunctions.includes(calleeObject.callee.name)) {
           return;
         }
 
@@ -92,7 +84,7 @@ module.exports = {
         const {variadic, messageArgPos} = metadata;
         // If method is not variadic we don't need to check.
         if (!variadic) {
-         return;
+          return;
         }
 
         const argToEval = node.arguments[messageArgPos];
@@ -100,7 +92,7 @@ module.exports = {
           return;
         }
 
-        let errMsg = [
+        const errMsg = [
           'Mixing Template Strings and %s interpolation for log methods is',
           `not supported on ${methodInvokedName}. Please either use template`,
           'literals or use the log strformat(%s) style interpolation',
