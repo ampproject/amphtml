@@ -2232,7 +2232,6 @@ tags: {
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
-  attrs: { name: "slot" }
   attrs: {
     name: "src"
     alternative_names: "srcset"
@@ -6362,6 +6361,7 @@ attr_lists: {
         ")(\\s|$)"
   }
   attrs: { name: "lang" }
+  attrs: { name: "slot" }
   attrs: { name: "tabindex" }
   attrs: { name: "title" }
   attrs: { name: "translate" }

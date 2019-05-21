@@ -26,7 +26,7 @@ tags: {  # amp-truncate-text
 }
 tags: {  # <amp-truncate-text>
   html_format: AMP
-  tag_name: "AMP-CLAMP-TEXT"
+  tag_name: "AMP-TRUNCATE-TEXT"
   requires_extension: "amp-truncate-text"
   attr_lists: "extended-amp-global"
   attrs: {
