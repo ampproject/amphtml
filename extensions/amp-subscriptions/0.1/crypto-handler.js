@@ -133,7 +133,7 @@ export class CryptoHandler {
     // 1. Un-base64 the encrypted content. This way we get the key bytes.
     const documentKeyBytes = base64DecodeToBytes(documentKey);
 
-    // 2. Convert to CryptoKey format.
+    // 2. Convert bytes to CryptoKey format.
     return crypto.subtle.importKey('raw', documentKeyBytes, 'AES-CTR', true, [
       'decrypt',
     ]);
