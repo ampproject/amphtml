@@ -126,7 +126,9 @@ async function dist() {
         return Promise.resolve();
       }
     })
-    .then(() => exitCtrlcHandler(handlerProcess));
+    .then(() => {
+      return exitCtrlcHandler(handlerProcess);
+    });
 }
 
 /**
