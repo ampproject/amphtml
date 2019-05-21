@@ -615,8 +615,11 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
   /** @override */
   letCreativeTriggerRenderStart() {
-    if (this.element && this.element.parentElement &&
-	this.element.parentElement.tagName == 'AMP-STICKY-AD') {
+    if (
+      this.element &&
+      this.element.parentElement &&
+      this.element.parentElement.tagName == 'AMP-STICKY-AD'
+    ) {
       this.win.addEventListener('message', event => {
         if (event['data'] == 'fill_sticky') {
           this.renderStarted();

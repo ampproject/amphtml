@@ -1579,9 +1579,11 @@ export class AmpA4A extends AMP.BaseElement {
     // Iframe is appended to element as part of xorigin frame handler init.
     // Executive onCreativeRender after init to ensure it can get reference
     // to frame but prior to load to allow for earlier access.
-    const frameLoadPromise =
-          this.xOriginIframeHandler_.init(
-	      this.iframe, /* opt_isA4A */ true, letCreativeTriggerRenderStart);
+    const frameLoadPromise = this.xOriginIframeHandler_.init(
+      this.iframe,
+      /* opt_isA4A */ true,
+      letCreativeTriggerRenderStart
+    );
     protectFunctionWrapper(this.onCreativeRender, this, err => {
       dev().error(
         TAG,
@@ -1615,11 +1617,15 @@ export class AmpA4A extends AMP.BaseElement {
    */
   renderViaIframeGet_(adUrl) {
     this.maybeTriggerAnalyticsEvent_('renderCrossDomainStart');
-    return this.iframeRenderHelper_(dict({
-      'src': Services.xhrFor(this.win).getCorsUrl(this.win, adUrl),
-      'name': JSON.stringify(
-          getContextMetadata(this.win, this.element, this.sentinel)),
-    }), this.letCreativeTriggerRenderStart());
+    return this.iframeRenderHelper_(
+      dict({
+        'src': Services.xhrFor(this.win).getCorsUrl(this.win, adUrl),
+        'name': JSON.stringify(
+          getContextMetadata(this.win, this.element, this.sentinel)
+        ),
+      }),
+      this.letCreativeTriggerRenderStart()
+    );
   }
 
   /**
@@ -1695,7 +1701,9 @@ export class AmpA4A extends AMP.BaseElement {
           `${contextMetadata}`;
       }
       return this.iframeRenderHelper_(
-	  dict({'src': srcPath, 'name': name}), false);
+        dict({'src': srcPath, 'name': name}),
+        false
+      );
     });
   }
 
