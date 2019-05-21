@@ -80,13 +80,7 @@ const relativeToRoot = path => `${__dirname}/../../../${path}`;
  * @return {!Object<string, string>}
  */
 function getMessages(messagesPath) {
-  try {
-    return JSON.parse(fs.readFileSync(messagesPath));
-  } catch {
-    // When non-existent or empty just return an empty object. Transformations
-    // that read will write as well.
-    return {};
-  }
+  return fs.readJsonSync(messagesPath, {throws: false}) || {};
 }
 
 /**
@@ -155,7 +149,7 @@ let messages;
 let nextMessageId;
 let relativeMessagesPath;
 
-let shouldReplaceCallArguments = true;
+let shouldReplaceCallArguments;
 
 /** @return {number} */
 const getMessageId = () => nextMessageId++;
@@ -166,9 +160,8 @@ module.exports = function({types: t}) {
     pre() {
       // Temporary option to not replace call arguments, but still output the
       // table to keep build code and infra independent from rollout.
-      if (this.opts.replaceCallArguments !== undefined) {
-        shouldReplaceCallArguments = this.opts.replaceCallArguments;
-      }
+      const {replaceCallArguments = true} = this.opts;
+      shouldReplaceCallArguments = replaceCallArguments;
 
       // Configurable to isolate test output.
       relativeMessagesPath = relativeToRoot(
