@@ -16,29 +16,68 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const {execOrDie} = require('../exec');
+const {
+  printChangeSummary,
+  timedExecOrDie: timedExecOrDieBase,
+} = require('../pr-check/utils');
+const {determineBuildTargets} = require('../pr-check/build-targets');
 
+const FILENAME = 'pr-check.js';
+const timedExecOrDie = (cmd, unusedFileName) =>
+  timedExecOrDieBase(cmd, FILENAME);
 
 /**
- * Simple wrapper around pr-check.js.
+ * This file runs tests against the local workspace to mimic the CI build as
+ * closely as possible.
  */
 async function prCheck() {
-  let cmd = 'node build-system/pr-check.js';
-  if (argv.files) {
-    cmd = cmd + ' --files ' + argv.files;
+  printChangeSummary(FILENAME);
+
+  const buildTargets = determineBuildTargets();
+
+  timedExecOrDie('gulp presubmit');
+  timedExecOrDie('gulp lint --local-changes');
+  timedExecOrDie('gulp ava');
+  timedExecOrDie('node node_modules/jest/bin/jest.js');
+  timedExecOrDie('gulp caches-json');
+  timedExecOrDie('gulp json-syntax');
+
+  if (buildTargets.has('DOCS')) {
+    timedExecOrDie('gulp check-links');
   }
-  if (argv.nobuild) {
-    cmd = cmd + ' --nobuild';
+
+  if (buildTargets.has('RUNTIME')) {
+    timedExecOrDie('gulp dep-check');
+    timedExecOrDie('gulp check-types');
   }
-  execOrDie(cmd);
+
+  if (buildTargets.has('RUNTIME') || buildTargets.has('UNIT_TEST')) {
+    timedExecOrDie('gulp test --unit --local-changes --headless');
+  }
+
+  if (buildTargets.has('RUNTIME') || buildTargets.has('INTEGRATION_TEST')) {
+    if (!argv.nobuild) {
+      timedExecOrDie('gulp clean');
+      timedExecOrDie('gulp dist --fortesting');
+    }
+    timedExecOrDie('gulp test --nobuild --integration --headless');
+  }
+
+  if (buildTargets.has('RUNTIME') || buildTargets.has('VALIDATOR')) {
+    timedExecOrDie('gulp validator');
+  }
+
+  if (buildTargets.has('RUNTIME') || buildTargets.has('VALIDATOR_WEBUI')) {
+    timedExecOrDie('gulp validator-webui');
+  }
 }
 
 module.exports = {
   prCheck,
 };
 
-prCheck.description = 'Locally runs the PR checks that are run by Travis CI.';
+prCheck.description =
+  'Runs a subset of the Travis CI checks against local changes.';
 prCheck.flags = {
-  'files': '  Restricts unit / integration tests to just these files',
-  'nobuild': '  Skips building the runtime via `gulp build`.',
+  'nobuild': '  Skips building the runtime via `gulp dist`.',
 };

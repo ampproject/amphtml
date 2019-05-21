@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 /**
  *
  * @param {?../../../src/service/ampdoc-impl.AmpDoc} ampDoc
@@ -22,7 +21,6 @@
  * @return {!Array<!Element>}
  */
 export function getScopeElements(ampDoc, configOpts) {
-
   const doc = ampDoc.getRootNode();
   let cssSelector = configOpts.section.join(' a, ');
   let selection = doc.querySelectorAll('a');

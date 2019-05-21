@@ -117,8 +117,8 @@ const strings = {
     string: 'Amplía a largura da ventá para ver esta experiencia',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
-    string: 'Debes activar o experimento da historia AMP para ver este ' +
-        'contido.',
+    string:
+      'Debes activar o experimento da historia AMP para ver este contido.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
     string: 'A páxina vese mellor no modo retrato',

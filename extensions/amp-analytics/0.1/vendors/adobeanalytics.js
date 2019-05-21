@@ -27,18 +27,20 @@ export const ADOBEANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
   'requests': {
     'requestPath': '/b/ss/${reportSuites}/0/amp-1.0/s${random}',
     // vid starts with z to work around #2198
-    'basePrefix': 'vid=z${clientId(adobe_amp_id)}' +
-        '&ndh=0' +
-        '&ce=${documentCharset}' +
-        '&pageName=${pageName}' +
-        '&g=${ampdocUrl}' +
-        '&r=${documentReferrer}' +
-        '&bh=${availableScreenHeight}' +
-        '&bw=${availableScreenWidth}' +
-        '&c=${screenColorDepth}' +
-        '&j=amp' +
-        '&s=${screenWidth}x${screenHeight}',
+    'basePrefix':
+      'vid=z${clientId(adobe_amp_id)}' +
+      '&ndh=0' +
+      '&ce=${documentCharset}' +
+      '&pageName=${pageName}' +
+      '&g=${ampdocUrl}' +
+      '&r=${documentReferrer}' +
+      '&bh=${availableScreenHeight}' +
+      '&bw=${availableScreenWidth}' +
+      '&c=${screenColorDepth}' +
+      '&j=amp' +
+      '&s=${screenWidth}x${screenHeight}',
     'pageview': 'https://${host}${requestPath}?${basePrefix}',
-    'click': 'https://${host}${requestPath}?${basePrefix}&pe=lnk_${linkType}&pev1=${linkUrl}&pev2=${linkName}',
+    'click':
+      'https://${host}${requestPath}?${basePrefix}&pe=lnk_${linkType}&pev1=${linkUrl}&pev2=${linkName}',
   },
 });
