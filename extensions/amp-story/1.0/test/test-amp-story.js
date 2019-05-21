@@ -66,9 +66,6 @@ describes.realWin(
         .map((unused, i) => {
           const page = win.document.createElement('amp-story-page');
           page.id = opt_ids && opt_ids[i] ? opt_ids[i] : `-page-${i}`;
-          page.signals = () => ({
-            whenSignal: () => Promise.resolve(),
-          });
           container.appendChild(page);
           return page;
         });
@@ -942,7 +939,6 @@ describes.realWin(
           .resolves();
 
         createPages(story.element, 2, ['cover', 'page-1']);
-
         return story.layoutCallback().then(() => {
           expect(story.backgroundAudioEl_).to.exist;
           expect(story.backgroundAudioEl_.src).to.equal(src);

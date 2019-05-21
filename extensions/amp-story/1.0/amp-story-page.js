@@ -440,7 +440,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     );
     return Promise.all([
       this.beforeVisible(),
-      this.waitForMediaLayout_,
+      this.waitForMediaLayout_(),
       this.mediaPoolPromise_,
     ]);
   }

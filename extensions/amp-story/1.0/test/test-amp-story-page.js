@@ -107,6 +107,14 @@ describes.realWin('amp-story-page', {amp: true}, env => {
     });
   });
 
+  it('should call waitForMedia after layoutCallback resolves', () => {
+    const spy = sandbox.spy(page, 'waitForMediaLayout_');
+    page.buildCallback();
+    return page.layoutCallback().then(() => {
+      expect(spy).to.have.been.calledOnce;
+    });
+  });
+
   it('should start the animations if needed when state becomes active', () => {
     // Adding an element that has to be animated.
     const animatedEl = win.document.createElement('div');
