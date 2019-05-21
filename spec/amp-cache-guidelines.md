@@ -98,15 +98,10 @@ For resources (i.e., HTML, images, fonts) that are larger than 12 MB, you may no
 
 ## Guidelines: Adding a new cache to the AMP ecosystem
 
-* Contact relevant publishers to make sure they update their CORS policies to include your origin.
-  * For further information please refer to the [CORS Security in AMP Guidelines](https://github.com/ampproject/amphtml/blob/master/spec/amp-cors-requests.md#cors-security-in-amp).
+* Add the details of your cache to [caches.json](../caches.json).
+  * Some tools use the deployed version of this file (<https://cdn.ampproject.org/caches.json>) to automatically generate appropriate CORS headers as described at [CORS Security in AMP Guidelines](https://github.com/ampproject/amphtml/blob/master/spec/amp-cors-requests.md#cors-security-in-amp).
 * Handle dynamically generated components:
   * [`<amp-geo>`](../extensions/amp-geo/amp-geo.md) — at delivery time, the string `{{AMP_ISO_COUNTRY_HOTPATCH}}` in [`amp-geo.js`](../extensions/amp-geo/0.1/amp-geo.js) is replaced by a string consisting of the user's ISO country code followed by exactly 26 spaces (to avoid breaking map files).
-* Publicly announce your cache so people know where to find your documentation.
-* Examples of AMP Cache providers:
-  * [Google AMP Cache](https://developers.google.com/amp/cache/)
-  * [Cloudflare AMP Cache](https://www.cloudflare.com/website-optimization/accelerated-mobile-links/)
-
 
 ## References
 
