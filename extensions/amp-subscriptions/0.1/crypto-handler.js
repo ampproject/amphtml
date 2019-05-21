@@ -109,7 +109,7 @@ export class CryptoHandler {
             length: 128, // block size (16): 1-128
           },
           formattedDocKey,
-          encryptedBytes,
+          encryptedBytes
       ).then(function(buffer) {
         // 5. Decryption gives us raw bytes and we need to turn them into text.
         return new TextDecoder().decode(new Uint8Array(buffer));
@@ -121,7 +121,7 @@ export class CryptoHandler {
   /**
    * @private
    * @param {string} documentKey
-   * @return {Promise<CryptoKey>}
+   * @return {Promise<!webCrypto.CryptoKey>}
    */
   stringToCryptoKey_(documentKey) {
     // 1. Un-base64 the encrypted content. This way we get the key bytes.
@@ -133,7 +133,7 @@ export class CryptoHandler {
         documentKeyBytes,
         'AES-CTR',
         true,
-        ['decrypt'],
+        ['decrypt']
     );
   }
 }
