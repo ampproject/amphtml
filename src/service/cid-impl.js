@@ -308,7 +308,7 @@ export class Cid {
             user().warn(
               TAG_,
               `Unsupported client for Google CID API: ${clientName}. Please remove or correct ${
-                optInMeta.outerHTML
+                optInMeta./*OK*/ outerHTML
               }`
             );
           }
