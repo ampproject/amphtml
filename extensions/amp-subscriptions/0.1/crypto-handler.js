@@ -107,7 +107,7 @@ export class CryptoHandler {
     // 3. Get document Key in the correct format.
     return this.stringToCryptoKey_(documentKey).then(function(formattedDocKey) {
       // 4. Decrypt.
-      const decryptedContent = crypto.subtle
+      return crypto.subtle
         .decrypt(
           {
             name: 'AES-CTR',
@@ -121,14 +121,13 @@ export class CryptoHandler {
           // 5. Decryption gives us raw bytes and we need to turn them into text.
           return utf8Decode(new Uint8Array(buffer));
         });
-      return decryptedContent;
     });
   }
 
   /**
    * @private
    * @param {string} documentKey
-   * @return {Promise<!webCrypto.CryptoKey>}
+   * @return {!Promise<!webCrypto.CryptoKey>}
    */
   stringToCryptoKey_(documentKey) {
     // 1. Un-base64 the encrypted content. This way we get the key bytes.
