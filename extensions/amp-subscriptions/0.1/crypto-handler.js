@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-
-import {
-  base64DecodeToBytes, base64EncodeFromBytes} from '../../../src/utils/base64';
+import {base64DecodeToBytes} from '../../../src/utils/base64';
 import {iterateCursor} from '../../../src/dom';
 import {tryParseJson} from '../../../src/json';
 
@@ -95,7 +93,7 @@ export class CryptoHandler {
    */
   decryptDocumentContent_(encryptedContent, documentKey) {
     // 1. Trim and remove all whitespaces (e.g. line breaks).
-    encryptedContent = encryptedContent.trim();
+    encryptedContent = encryptedContent.replace(/\s+/g, '');
 
     // 2. Un-base64 the encrypted content. This way we get the actual crypted
     //    bytes.
@@ -113,7 +111,8 @@ export class CryptoHandler {
           formattedDocKey,
           encryptedBytes,
       ).then(function(buffer) {
-        return base64EncodeFromBytes(buffer);
+        // 5. Decryption gives us raw bytes and we need to turn them into text.
+        return new TextDecoder().decode(new Uint8Array(buffer));
       });
       return decryptedContent;
     });
@@ -125,13 +124,10 @@ export class CryptoHandler {
    * @return {Promise<CryptoKey>}
    */
   stringToCryptoKey_(documentKey) {
-    // 1. Trim and remove all whitespaces (e.g. line breaks).
-    documentKey = documentKey.trim();
-
-    // 2. Un-base64 the encrypted content. This way we get the key bytes.
+    // 1. Un-base64 the encrypted content. This way we get the key bytes.
     const documentKeyBytes = base64DecodeToBytes(documentKey);
 
-    // 3. Convert to CryptoKey format.
+    // 2. Convert to CryptoKey format.
     return crypto.subtle.importKey(
         'raw',
         documentKeyBytes,
