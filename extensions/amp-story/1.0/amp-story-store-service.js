@@ -186,6 +186,7 @@ export const Action = {
  * @private @const {!Object<string, !function(*, *):boolean>}
  */
 const stateComparisonFunctions = {
+  [StateProperty.PAGE_IDS]: (old, curr) => old.length !== curr.length,
   [StateProperty.ACTIONS_WHITELIST]: (old, curr) => old.length !== curr.length,
   [StateProperty.INTERACTIVE_COMPONENT_STATE]:
     /**
