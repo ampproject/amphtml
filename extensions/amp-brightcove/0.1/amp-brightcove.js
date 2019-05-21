@@ -35,19 +35,14 @@ import {
   removeElement,
 } from '../../../src/dom';
 import {getData, listen} from '../../../src/event-helper';
-import {
-  installVideoManagerForDoc,
-} from '../../../src/service/video-manager-impl';
+import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
-
 
 /** @private @const {string} */
 const TAG = 'amp-brightcove';
 
-
 /** @implements {../../../src/video-interface.VideoInterface} */
 class AmpBrightcove extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -118,12 +113,17 @@ class AmpBrightcove extends AMP.BaseElement {
     this.playerReadyResolver_ = deferred.resolve;
 
     // Warn if the player does not have video interface support
-    this.readyTimeout_ = /** @type {number} */ (
-      Services.timerFor(window).delay(() => {
-        user().warn(TAG,
-            'Did not receive ready callback from player %s.' +
-          ' Ensure it has the videojs-amp-support plugin.', this.playerId_);
-      }, 3000));
+    this.readyTimeout_ = /** @type {number} */ (Services.timerFor(window).delay(
+      () => {
+        user().warn(
+          TAG,
+          'Did not receive ready callback from player %s.' +
+            ' Ensure it has the videojs-amp-support plugin.',
+          this.playerId_
+        );
+      },
+      3000
+    ));
 
     this.playerReadyResolver_(this.iframe_);
   }
@@ -134,13 +134,11 @@ class AmpBrightcove extends AMP.BaseElement {
 
     this.iframe_ = iframe;
 
-    this.unlistenMessage_ = listen(
-        this.win,
-        'message',
-        e => this.handlePlayerMessage_(e));
+    this.unlistenMessage_ = listen(this.win, 'message', e =>
+      this.handlePlayerMessage_(e)
+    );
 
-    return this.loadPromise(iframe)
-        .then(() => this.playerReadyPromise_);
+    return this.loadPromise(iframe).then(() => this.playerReadyPromise_);
   }
 
   /**
@@ -154,10 +152,15 @@ class AmpBrightcove extends AMP.BaseElement {
       // We still need to check this.iframe_ as the component may have
       // been unlaid out by now.
       if (this.iframe_ && this.iframe_.contentWindow) {
-        this.iframe_.contentWindow. /*OK*/ postMessage(JSON.stringify(dict({
-          'command': command,
-          'args': arg,
-        })), 'https://players.brightcove.net');
+        this.iframe_.contentWindow./*OK*/ postMessage(
+          JSON.stringify(
+            dict({
+              'command': command,
+              'args': arg,
+            })
+          ),
+          'https://players.brightcove.net'
+        );
       }
     });
   }
@@ -209,21 +212,22 @@ class AmpBrightcove extends AMP.BaseElement {
       this.duration_ = data['dur'];
     }
 
-    if (redispatch(element, eventType, {
-      'ready': VideoEvents.LOAD,
-      'playing': VideoEvents.PLAYING,
-      'pause': VideoEvents.PAUSE,
-      'ended': VideoEvents.ENDED,
-      'ads-ad-started': VideoEvents.AD_START,
-      'ads-ad-ended': VideoEvents.AD_END,
-    })) {
+    if (
+      redispatch(element, eventType, {
+        'ready': VideoEvents.LOAD,
+        'playing': VideoEvents.PLAYING,
+        'pause': VideoEvents.PAUSE,
+        'ended': VideoEvents.ENDED,
+        'ads-ad-started': VideoEvents.AD_START,
+        'ads-ad-ended': VideoEvents.AD_END,
+      })
+    ) {
       return;
     }
 
     if (eventType === 'volumechange') {
       const muted = data['muted'];
-      if (muted == null ||
-          this.muted_ == muted) {
+      if (muted == null || this.muted_ == muted) {
         return;
       }
       this.muted_ = muted;
@@ -239,18 +243,20 @@ class AmpBrightcove extends AMP.BaseElement {
   onReady_(data) {
     this.hasAmpSupport_ = true;
 
-    Services.timerFor(this.win)
-        .cancel(this.readyTimeout_);
+    Services.timerFor(this.win).cancel(this.readyTimeout_);
 
     const {element} = this;
 
     installVideoManagerForDoc(element);
     Services.videoManagerForDoc(element).register(this);
 
-    dev().info(TAG,
-        'Player %s ready. ' +
+    dev().info(
+      TAG,
+      'Player %s ready. ' +
         'Brightcove Player version: %s AMP Support version: %s',
-        this.playerId_, data['bcVersion'], data['ampSupportVersion']
+      this.playerId_,
+      data['bcVersion'],
+      data['ampSupportVersion']
     );
   }
 
@@ -261,34 +267,34 @@ class AmpBrightcove extends AMP.BaseElement {
   getIframeSrc_() {
     const {element: el} = this;
     const account = userAssert(
-        el.getAttribute('data-account'),
-        'The data-account attribute is required for <amp-brightcove> %s',
-        el);
-    const embed = (el.getAttribute('data-embed') || 'default');
+      el.getAttribute('data-account'),
+      'The data-account attribute is required for <amp-brightcove> %s',
+      el
+    );
+    const embed = el.getAttribute('data-embed') || 'default';
 
-    this.playerId_ = (el.getAttribute('data-player') ||
+    this.playerId_ =
+      el.getAttribute('data-player') ||
       el.getAttribute('data-player-id') ||
-      'default');
+      'default';
 
     const src =
-        `https://players.brightcove.net/${encodeURIComponent(account)}` +
-        `/${encodeURIComponent(this.playerId_)}` +
-        `_${encodeURIComponent(embed)}/index.html` +
-        // These are encodeURIComponent'd in encodeId_().
-        (el.getAttribute('data-playlist-id') ?
-          '?playlistId=' + this.encodeId_(el.getAttribute('data-playlist-id')) :
-          (el.getAttribute('data-video-id') ?
-            '?videoId=' + this.encodeId_(el.getAttribute('data-video-id')) :
-            ''
-          )
-        );
+      `https://players.brightcove.net/${encodeURIComponent(account)}` +
+      `/${encodeURIComponent(this.playerId_)}` +
+      `_${encodeURIComponent(embed)}/index.html` +
+      // These are encodeURIComponent'd in encodeId_().
+      (el.getAttribute('data-playlist-id')
+        ? '?playlistId=' + this.encodeId_(el.getAttribute('data-playlist-id'))
+        : el.getAttribute('data-video-id')
+        ? '?videoId=' + this.encodeId_(el.getAttribute('data-video-id'))
+        : '');
 
     const customReferrer = el.getAttribute('data-referrer');
 
     if (customReferrer) {
       el.setAttribute(
-          'data-param-referrer',
-          this.urlReplacements_.expandUrlSync(customReferrer)
+        'data-param-referrer',
+        this.urlReplacements_.expandUrlSync(customReferrer)
       );
     }
 
@@ -305,9 +311,13 @@ class AmpBrightcove extends AMP.BaseElement {
     const embed = mutations['data-embed'];
     const playlistId = mutations['data-playlist-id'];
     const videoId = mutations['data-video-id'];
-    if (account !== undefined || playerId !== undefined ||
-      playlistId !== undefined || embed !== undefined ||
-      videoId !== undefined) {
+    if (
+      account !== undefined ||
+      playerId !== undefined ||
+      playlistId !== undefined ||
+      embed !== undefined ||
+      videoId !== undefined
+    ) {
       if (this.iframe_) {
         this.iframe_.src = this.getIframeSrc_();
       }
@@ -315,10 +325,10 @@ class AmpBrightcove extends AMP.BaseElement {
   }
 
   /**
-    * @param {string} id
-    * @return {string}
-    * @private
-    */
+   * @param {string} id
+   * @return {string}
+   * @private
+   */
   encodeId_(id) {
     /* id is either a Brightcove-assigned id, or a customer-generated
        reference id. reference ids are prefixed 'ref:' and the colon
@@ -331,8 +341,12 @@ class AmpBrightcove extends AMP.BaseElement {
 
   /** @override */
   pauseCallback() {
-    if (this.iframe_ && this.iframe_.contentWindow &&
-      this.hasAmpSupport_ && this.playing_) {
+    if (
+      this.iframe_ &&
+      this.iframe_.contentWindow &&
+      this.hasAmpSupport_ &&
+      this.playing_
+    ) {
       this.pause();
     }
   }
@@ -462,7 +476,6 @@ class AmpBrightcove extends AMP.BaseElement {
     this.user().error(TAG, '`seekTo` not supported.');
   }
 }
-
 
 AMP.extension(TAG, '0.1', AMP => {
   AMP.registerElement(TAG, AmpBrightcove);

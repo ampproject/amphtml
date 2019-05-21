@@ -25,12 +25,12 @@ const {
   printNobuildHelp,
 } = require('./helpers');
 const {buildExtensions} = require('./extension-helpers');
+const {clean} = require('./clean');
 const {compileCss} = require('./css');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
 const {maybeUpdatePackages} = require('./update-packages');
 const {parseExtensionFlags} = require('./extension-helpers');
 const {serve} = require('./serve');
-
 
 /**
  * Enables watching for file changes in css, extensions.
@@ -60,6 +60,7 @@ async function build() {
 async function performBuild(watch) {
   process.env.NODE_ENV = 'development';
   printNobuildHelp();
+  await clean();
   printConfigHelp(watch ? 'gulp watch' : 'gulp build');
   parseExtensionFlags();
   return compileCss(watch).then(() => {
@@ -108,16 +109,15 @@ watch.flags = {
   with_inabox: '  Also watch and build the amp-inabox.js binary.',
   with_shadow: '  Also watch and build the amp-shadow.js binary.',
   extensions: '  Watches and builds only the listed extensions.',
-  extensions_from: '  Watches and builds only the extensions from the ' +
-      'listed AMP(s).',
+  extensions_from:
+    '  Watches and builds only the extensions from the listed AMP(s).',
   noextensions: '  Watches and builds with no extensions.',
 };
 
 defaultTask.description = 'Runs "watch" and then "serve"';
 defaultTask.flags = {
   extensions: '  Watches and builds only the listed extensions.',
-  extensions_from: '  Watches and builds only the extensions from the ' +
-      'listed AMP(s).',
+  extensions_from:
+    '  Watches and builds only the extensions from the listed AMP(s).',
   noextensions: '  Watches and builds with no extensions.',
 };
-

@@ -45,7 +45,7 @@ var FetchInitDef;
  */
 var FetchRequestDef;
 
-/** @constructor **/
+/** @constructor */
 var FormDataWrapperInterface = function() {};
 
 FormDataWrapperInterface.prototype.entries = function() {};

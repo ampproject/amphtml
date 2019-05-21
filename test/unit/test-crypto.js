@@ -17,14 +17,9 @@
 import {Crypto} from '../../src/service/crypto-impl';
 import {Platform} from '../../src/service/platform-impl';
 import {Services} from '../../src/services';
-import {
-  installCryptoPolyfill,
-} from '../../extensions/amp-crypto-polyfill/0.1/amp-crypto-polyfill';
+import {installCryptoPolyfill} from '../../extensions/amp-crypto-polyfill/0.1/amp-crypto-polyfill';
 import {installDocService} from '../../src/service/ampdoc-impl';
-import {
-  installExtensionsService,
-} from '../../src/service/extensions-impl';
-
+import {installExtensionsService} from '../../src/service/extensions-impl';
 
 describes.realWin('crypto-impl', {}, env => {
   let win;
@@ -77,7 +72,8 @@ describes.realWin('crypto-impl', {}, env => {
           expectAsyncConsoleError(expectedError);
         }
         return expect(crypto.sha384Base64('abc')).to.eventually.equal(
-            'ywB1P0WjXou1oD1pmsZQBycsMqsO3tFjGotgWkP_W-2AhgcroefMI1i67KE0yCWn');
+          'ywB1P0WjXou1oD1pmsZQBycsMqsO3tFjGotgWkP_W-2AhgcroefMI1i67KE0yCWn'
+        );
       });
 
       it('should hash "foobar" in sha384Base64', () => {
@@ -85,17 +81,20 @@ describes.realWin('crypto-impl', {}, env => {
           expectAsyncConsoleError(expectedError);
         }
         return expect(crypto.sha384Base64('foobar')).to.eventually.equal(
-            'PJww2fZl501RXIQpYNSkUcg6ASX9Pec5LXs3IxrxDHLqWK7fzfiaV2W_kCr5Ps8G');
+          'PJww2fZl501RXIQpYNSkUcg6ASX9Pec5LXs3IxrxDHLqWK7fzfiaV2W_kCr5Ps8G'
+        );
       });
 
       it('should hash [1,2,3] in sha384', () => {
         if (expectedError) {
           expectAsyncConsoleError(expectedError);
         }
-        return expect(crypto.sha384Base64(uint8Array([1, 2, 3])))
-            .to.eventually.equal(
-                'hiKdxtL_vqxzgHRBVKpwApHAZDUqDb3H' +
-                'e57T8sjh2sTcMlhn053f8dJim3o5PUf2');
+        return expect(
+          crypto.sha384Base64(uint8Array([1, 2, 3]))
+        ).to.eventually.equal(
+          'hiKdxtL_vqxzgHRBVKpwApHAZDUqDb3H' +
+            'e57T8sjh2sTcMlhn053f8dJim3o5PUf2'
+        );
       });
 
       it('should throw when input contains chars out of range [0,255]', () => {
@@ -147,39 +146,56 @@ describes.realWin('crypto-impl', {}, env => {
       },
     },
   });
-  testSuite('with native crypto API throws', {
-    crypto: {
-      subtle: {
-        digest: () => {throw new Error();},
+  testSuite(
+    'with native crypto API throws',
+    {
+      crypto: {
+        subtle: {
+          digest: () => {
+            throw new Error();
+          },
+        },
       },
     },
-  }, '[Crypto] SubtleCrypto failed, fallback to closure lib. Error');
+    '[Crypto] SubtleCrypto failed, fallback to closure lib. Error'
+  );
 
   it('native API result should exactly equal to crypto lib result', () => {
-    return Promise
-        .all([createCrypto(win).sha384('abc'), createCrypto({}).sha384('abc')])
-        .then(results => {
-          expect(results[0]).to.jsonEqual(results[1]);
-        });
+    return Promise.all([
+      createCrypto(win).sha384('abc'),
+      createCrypto({}).sha384('abc'),
+    ]).then(results => {
+      expect(results[0]).to.jsonEqual(results[1]);
+    });
   });
 
   // Run tests below only on browsers that we're confident about the existence
   // of native Crypto API.
   if (isModernChrome()) {
-    it('should not load closure lib when native API is available ' +
-        '(string input)', () => {
-      return new Crypto(win).sha384Base64('abc').then(hash => {
-        expect(hash).to.equal(
-            'ywB1P0WjXou1oD1pmsZQBycsMqsO3tFjGotgWkP_W-2AhgcroefMI1i67KE0yCWn');
-      });
-    });
+    it(
+      'should not load closure lib when native API is available ' +
+        '(string input)',
+      () => {
+        return new Crypto(win).sha384Base64('abc').then(hash => {
+          expect(hash).to.equal(
+            'ywB1P0WjXou1oD1pmsZQBycsMqsO3tFjGotgWkP_W-2AhgcroefMI1i67KE0yCWn'
+          );
+        });
+      }
+    );
 
-    it('should not load closure lib when native API is available ' +
-        '(Uint8Array input)', () => {
-      return new Crypto(win).sha384Base64(uint8Array([1,2,3])).then(hash => {
-        expect(hash).to.equal(
-            'hiKdxtL_vqxzgHRBVKpwApHAZDUqDb3He57T8sjh2sTcMlhn053f8dJim3o5PUf2');
-      });
-    });
+    it(
+      'should not load closure lib when native API is available ' +
+        '(Uint8Array input)',
+      () => {
+        return new Crypto(win)
+          .sha384Base64(uint8Array([1, 2, 3]))
+          .then(hash => {
+            expect(hash).to.equal(
+              'hiKdxtL_vqxzgHRBVKpwApHAZDUqDb3He57T8sjh2sTcMlhn053f8dJim3o5PUf2'
+            );
+          });
+      }
+    );
   }
 });
