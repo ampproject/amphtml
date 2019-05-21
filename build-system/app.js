@@ -1051,7 +1051,7 @@ app.use('/bind/ecommerce/sizes', (req, res) => {
 });
 
 // Simulated subscription entitlement
-app.use('/subscription/:id/entitlements/', (req, res) => {
+app.use('/subscription/:id/entitlements', (req, res) => {
   cors.assertCors(req, res, ['GET']);
   res.json({
     source: 'local' + req.params.id,
@@ -1338,6 +1338,9 @@ function generateInfo(filePath) {
 }
 
 function decryptDocumentKey(encryptedDocumentKey) {
+  if (!encryptedDocumentKey) {
+    return null;
+  }
   const cryptoStart = 'ENCRYPT(';
   if (!encryptedDocumentKey.includes(cryptoStart, 0)) {
     return null;

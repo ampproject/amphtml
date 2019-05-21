@@ -15,6 +15,8 @@
  */
 
 
+import {
+  base64DecodeToBytes, base64EncodeFromBytes} from '../../../src/utils/base64';
 import {iterateCursor} from '../../../src/dom';
 import {tryParseJson} from '../../../src/json';
 
@@ -91,37 +93,52 @@ export class CryptoHandler {
    * @param {string} documentKey
    * @return {Promise<string>}
    */
-  decryptDocumentContent_(
-    encryptedContent, documentKey) {
+  decryptDocumentContent_(encryptedContent, documentKey) {
+    // 1. Trim and remove all whitespaces (e.g. line breaks).
+    encryptedContent = encryptedContent.trim();
 
-console.log('encryptedContent', encryptedContent);
-console.log('documentKey', documentKey);
+    // 2. Un-base64 the encrypted content. This way we get the actual crypted
+    //    bytes.
+    const encryptedBytes = base64DecodeToBytes(encryptedContent);
 
-    const decryptedContent = crypto.subtle.decrypt(
-        {
-          name: 'AES-CTR',
-          counter: new Uint8Array(16), // iv: all zeros.
-          length: 128, // block size (16): 1-128
-        },
-        this.base64ToBytes(documentKey),
-        encryptedContent.trim(),
-    ).then(function(buffer) {
-      return new TextDecoder().decode(new Uint8Array(buffer));
+    // 3. Get document Key in the correct format.
+    return this.formatDocumentKey_(documentKey).then(function(formattedDocKey) {
+      // 4. Decrypt.
+      const decryptedContent = crypto.subtle.decrypt(
+          {
+            name: 'AES-CTR',
+            counter: new Uint8Array(16), // iv: all zeros.
+            length: 128, // block size (16): 1-128
+          },
+          formattedDocKey,
+          encryptedBytes,
+      ).then(function(buffer) {
+        return base64EncodeFromBytes(buffer);
+      });
+      return decryptedContent;
+
     });
-    return Promise.resolve('<h2><i>' + decryptedContent + '</i></h2>');
   }
 
   /**
-   * @param {string} s
-   * @return {ArrayBuffer}
+   * @private
+   * @param {string} documentKey
+   * @return {Promise<CryptoKey>}
    */
-  base64ToBytes(s) {
-    s = s.trim();
-    const bytesString = atob(s);
-    const bytes = new Uint8Array(bytesString.length);
-    for (let i = 0; i < bytesString.length; i++) {
-      bytes[i] = bytesString.charCodeAt(i);
-    }
-    return bytes;
+  formatDocumentKey_(documentKey) {
+    // 1. Trim and remove all whitespaces (e.g. line breaks).
+    documentKey = documentKey.trim();
+
+    // 2. Un-base64 the encrypted content. This way we get the key bytes.
+    const documentKeyBytes = base64DecodeToBytes(documentKey);
+
+    // 3. Convert to CryptoKey format.
+    return crypto.subtle.importKey(
+        'raw',
+        documentKeyBytes,
+        'AES-CTR',
+        true,
+        ['decrypt'],
+    );
   }
 }
