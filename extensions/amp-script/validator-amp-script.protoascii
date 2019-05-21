@@ -14,40 +14,41 @@
 # limitations under the license.
 #
 
-# Invalid until launch ready.
-# tags: {
-#   tag_name: "SCRIPT"
-#   extension_spec: {
-#     name: "amp-script"
-#     version: "0.1"
-#     version: "latest"
-#   }
-#   attr_lists: "common-extension-attrs"
-# }
+tags: {
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-script"
+    version: "0.1"
+    version: "latest"
+  }
+  attr_lists: "common-extension-attrs"
+}
 
-# tags: {  # <amp-script>
-#   html_format: AMP
-#   tag_name: "AMP-SCRIPT"
-#   disallowed_ancestor: "AMP-SCRIPT"
-#   requires_extension: "amp-script"
-#   unique: true # TODO(choumx): Remove when global size limit is implemented.
-#   attrs: {
-#     name: "src"
-#     mandatory: true
-#     value_url: {
-#       protocol: "https"
-#       allow_relative: false
-#     }
-#     blacklisted_value_regex: "__amp_source_origin"
-#   }
-#   attr_lists: "extended-amp-global"
-#   amp_layout {
-#     supported_layouts: CONTAINER
-#     supported_layouts: FILL
-#     supported_layouts: FIXED
-#     supported_layouts: FIXED_HEIGHT
-#     supported_layouts: FLEX_ITEM
-#     supported_layouts: NODISPLAY
-#     supported_layouts: RESPONSIVE
-#   }
-# }
+tags: {  # <amp-script>
+  html_format: AMP
+  tag_name: "AMP-SCRIPT"
+  disallowed_ancestor: "AMP-SCRIPT"
+  requires_extension: "amp-script"
+  requires: "amp-experiment-token"
+  unique: true # TODO(choumx): Remove when global size limit is implemented.
+  attrs: {
+    name: "src"
+    mandatory: true
+    value_url: {
+      protocol: "https"
+      allow_relative: false
+    }
+    blacklisted_value_regex: "__amp_source_origin"
+  }
+  attr_lists: "extended-amp-global"
+  amp_layout {
+    supported_layouts: CONTAINER
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+}
