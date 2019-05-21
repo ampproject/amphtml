@@ -1574,6 +1574,7 @@ export class AmpDatePicker extends AMP.BaseElement {
     }
 
     const days = normalizedEndDate.diff(startDate, 'days');
+    cb(startDate);
     for (let i = 0; i < days; i++) {
       cb(startDate.clone().add(i + 1, 'days'));
     }
