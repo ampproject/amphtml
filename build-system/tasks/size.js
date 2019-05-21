@@ -17,13 +17,12 @@
 
 const del = require('del');
 const fs = require('fs');
-const gulp = require('gulp-help')(require('gulp'));
+const gulp = require('gulp');
 const gzipSize = require('gzip-size');
 const PluginError = require('plugin-error');
 const prettyBytes = require('pretty-bytes');
 const table = require('text-table');
 const through = require('through2');
-
 
 const tempFolderName = '__size-temp';
 
@@ -97,11 +96,19 @@ function normalizeRows(rows) {
   // normalize integration.js
   normalizeRow(rows, 'current-min/f.js', 'current/integration.js', true);
 
-  normalizeRow(rows, 'current-min/ampcontext-v0.js',
-      'current/ampcontext-lib.js', true);
+  normalizeRow(
+    rows,
+    'current-min/ampcontext-v0.js',
+    'current/ampcontext-lib.js',
+    true
+  );
 
-  normalizeRow(rows, 'current-min/iframe-transport-client-v0.js',
-      'current/iframe-transport-client-lib.js', true);
+  normalizeRow(
+    rows,
+    'current-min/iframe-transport-client-v0.js',
+    'current/iframe-transport-client-lib.js',
+    true
+  );
 
   // normalize alp.js
   normalizeRow(rows, 'alp.js', 'alp.max.js', true);
@@ -142,13 +149,17 @@ function normalizeRows(rows) {
  */
 function normalizeExtension(rows, filename) {
   const isMax = /\.max\.js$/.test(filename);
-  const counterpartName = filename.replace(/(v0\/.*?)(\.max)?(\.js)$/,
-      function(full, grp1, grp2, grp3) {
-        if (isMax) {
-          return grp1 + grp3;
-        }
-        return full;
-      });
+  const counterpartName = filename.replace(/(v0\/.*?)(\.max)?(\.js)$/, function(
+    full,
+    grp1,
+    grp2,
+    grp3
+  ) {
+    if (isMax) {
+      return grp1 + grp3;
+    }
+    return full;
+  });
 
   if (isMax) {
     normalizeRow(rows, counterpartName, filename, false);
@@ -198,7 +209,8 @@ function onFileThroughEnd(rows, cb) {
   rows = normalizeRows(rows);
   rows.unshift.apply(rows, tableHeaders);
   const tbl = table(rows, tableOptions);
-  console/* OK*/.log(tbl);
+  console /* OK*/
+    .log(tbl);
   fs.writeFileSync('test/size.txt', tbl);
   cb();
 }
@@ -211,8 +223,8 @@ function onFileThroughEnd(rows, cb) {
 function sizer() {
   const rows = [];
   return through.obj(
-      onFileThrough.bind(null, rows),
-      onFileThroughEnd.bind(null, rows)
+    onFileThrough.bind(null, rows),
+    onFileThroughEnd.bind(null, rows)
   );
 }
 
@@ -222,16 +234,17 @@ function sizer() {
  * output from the process.
  */
 function size() {
-  gulp.src([
-    'dist/**/*.js',
-    '!dist/**/*-latest.js',
-    '!dist/**/*check-types.js',
-    '!dist/**/amp-viewer-host.max.js',
-    'dist.3p/{current,current-min}/**/*.js',
-  ])
-      .pipe(sizer())
-      .pipe(gulp.dest(tempFolderName))
-      .on('end', del.bind(null, [tempFolderName]));
+  gulp
+    .src([
+      'dist/**/*.js',
+      '!dist/**/*-latest.js',
+      '!dist/**/*check-types.js',
+      '!dist/**/amp-viewer-host.max.js',
+      'dist.3p/{current,current-min}/**/*.js',
+    ])
+    .pipe(sizer())
+    .pipe(gulp.dest(tempFolderName))
+    .on('end', del.bind(null, [tempFolderName]));
 }
 
 module.exports = {

@@ -19,7 +19,6 @@ import {dict} from './utils/object';
 import {internalListenImplementation} from './event-helper-listen';
 import {parseJson} from './json';
 
-
 /** @const */
 const AMP_MESSAGE_PREFIX = 'amp-';
 export const CONSTANTS = {
@@ -76,9 +75,12 @@ export const MessageType = {
  */
 export function listen(element, eventType, listener, opt_evtListenerOpts) {
   return internalListenImplementation(
-      element, eventType, listener, opt_evtListenerOpts);
+    element,
+    eventType,
+    listener,
+    opt_evtListenerOpts
+  );
 }
-
 
 /**
  * Serialize an AMP post message. Output looks like:
@@ -89,15 +91,18 @@ export function listen(element, eventType, listener, opt_evtListenerOpts) {
  * @param {?string=} rtvVersion
  * @return {string}
  */
-export function serializeMessage(type, sentinel, data = dict(),
-  rtvVersion = null) {
+export function serializeMessage(
+  type,
+  sentinel,
+  data = dict(),
+  rtvVersion = null
+) {
   // TODO: consider wrap the data in a "data" field. { type, sentinal, data }
   const message = data;
   message['type'] = type;
   message['sentinel'] = sentinel;
   return AMP_MESSAGE_PREFIX + (rtvVersion || '') + JSON.stringify(message);
 }
-
 
 /**
  * Deserialize an AMP post message.
@@ -120,16 +125,17 @@ export function deserializeMessage(message) {
   }
 }
 
-
 /**
  *  Returns true if message looks like it is an AMP postMessage
  *  @param {*} message
  *  @return {boolean}
  */
 export function isAmpMessage(message) {
-  return (typeof message == 'string' &&
-      message.indexOf(AMP_MESSAGE_PREFIX) == 0 &&
-      message.indexOf('{') != -1);
+  return (
+    typeof message == 'string' &&
+    message.indexOf(AMP_MESSAGE_PREFIX) == 0 &&
+    message.indexOf('{') != -1
+  );
 }
 
 /** @typedef {{creativeId: string, message: string}} */

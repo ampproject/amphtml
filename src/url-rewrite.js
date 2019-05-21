@@ -42,8 +42,12 @@ const ORIGINAL_TARGET_VALUE = '__AMP_ORIGINAL_TARGET_VALUE_';
  * @return {string}
  */
 export function rewriteAttributesForElement(
-  element, attrName, attrValue, opt_location, opt_updateProperty)
-{
+  element,
+  attrName,
+  attrValue,
+  opt_location,
+  opt_updateProperty
+) {
   const tag = element.tagName.toLowerCase();
   const attr = attrName.toLowerCase();
   const rewrittenValue = rewriteAttributeValue(tag, attr, attrValue);
@@ -99,7 +103,7 @@ export function rewriteAttributeValue(tagName, attrName, attrValue) {
  * @return {boolean}
  */
 export function isUrlAttribute(attrName) {
-  return (attrName == 'src' || attrName == 'href' || attrName == 'srcset');
+  return attrName == 'src' || attrName == 'href' || attrName == 'srcset';
 }
 
 /**
@@ -143,8 +147,9 @@ export function resolveUrlAttr(tagName, attrName, attrValue, windowLocation) {
       user().error(TAG, 'Failed to parse srcset: ', e);
       return attrValue;
     }
-    return srcset.stringify(url => resolveImageUrlAttr(url, baseUrl,
-        isProxyHost));
+    return srcset.stringify(url =>
+      resolveImageUrlAttr(url, baseUrl, isProxyHost)
+    );
   }
 
   return attrValue;
@@ -167,8 +172,12 @@ function resolveImageUrlAttr(attrValue, baseUrl, isProxyHost) {
   }
 
   // Rewrite as a proxy URL.
-  return `${urls.cdn}/i/` +
-      (src.protocol == 'https:' ? 's/' : '') +
-      encodeURIComponent(src.host) +
-      src.pathname + (src.search || '') + (src.hash || '');
+  return (
+    `${urls.cdn}/i/` +
+    (src.protocol == 'https:' ? 's/' : '') +
+    encodeURIComponent(src.host) +
+    src.pathname +
+    (src.search || '') +
+    (src.hash || '')
+  );
 }

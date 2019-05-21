@@ -55,16 +55,15 @@ jobs:
       script:
         - node build-system/pr-check/validator-tests.js
     - stage: build
-      name: "Dist"
-      if: type != pull_request
+      name: "Dist, Bundle Size"
       script:
-        - node build-system/pr-check/dist.js
+        - node build-system/pr-check/dist-bundle-size.js
     - stage: test
-      name: "Dist, Bundle Size, Single Pass Tests"
+      name: "Single Pass Tests"
       script:
-        - node build-system/pr-check/dist-tests.js
+        - node build-system/pr-check/single-pass-tests.js
     - stage: test
-      name: "[NON-BLOCKING] Visual Diff Tests"
+      name: "Visual Diff Tests"
       script:
         - node build-system/pr-check/visual-diff-tests.js
     - stage: test
@@ -87,8 +86,6 @@ jobs:
   allow_failures:
     - script:
       - node build-system/pr-check/e2e-tests.js
-    - script:
-      - node build-system/pr-check/visual-diff-tests.js
 cache:
   directories:
     - node_modules

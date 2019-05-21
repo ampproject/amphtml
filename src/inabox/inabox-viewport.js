@@ -24,10 +24,7 @@ import {canInspectWindow} from '../iframe-helper';
 import {dev, devAssert} from '../log';
 import {iframeMessagingClientFor} from './inabox-iframe-messaging-client';
 import {isExperimentOn} from '../experiments';
-import {
-  layoutRectLtwh,
-  moveLayoutRect,
-} from '../layout-rect';
+import {layoutRectLtwh, moveLayoutRect} from '../layout-rect';
 import {px, resetStyles, setImportantStyles} from '../style';
 import {registerServiceBuilderForDoc} from '../service';
 import {throttle} from '../utils/rate-limit';
@@ -44,29 +41,31 @@ const MIN_EVENT_INTERVAL = 100;
  * @visibleForTesting
  */
 export function prepareBodyForOverlay(win, bodyElement) {
-  return Services.vsyncFor(win).runPromise({
-    measure: state => {
-      state.width = win./*OK*/innerWidth;
-      state.height = win./*OK*/innerHeight;
+  return Services.vsyncFor(win).runPromise(
+    {
+      measure: state => {
+        state.width = win./*OK*/ innerWidth;
+        state.height = win./*OK*/ innerHeight;
+      },
+      mutate: state => {
+        // We need to override runtime-level !important rules
+        setImportantStyles(bodyElement, {
+          'background': 'transparent',
+          'left': '50%',
+          'top': '50%',
+          'right': 'auto',
+          'bottom': 'auto',
+          'position': 'absolute',
+          'height': px(state.height),
+          'width': px(state.width),
+          'margin-top': px(-state.height / 2),
+          'margin-left': px(-state.width / 2),
+        });
+      },
     },
-    mutate: state => {
-      // We need to override runtime-level !important rules
-      setImportantStyles(bodyElement, {
-        'background': 'transparent',
-        'left': '50%',
-        'top': '50%',
-        'right': 'auto',
-        'bottom': 'auto',
-        'position': 'absolute',
-        'height': px(state.height),
-        'width': px(state.width),
-        'margin-top': px(-state.height / 2),
-        'margin-left': px(-state.width / 2),
-      });
-    },
-  }, {});
+    {}
+  );
 }
-
 
 /**
  * @param {!Window} win
@@ -91,7 +90,6 @@ export function resetBodyForOverlay(win, bodyElement) {
   });
 }
 
-
 /**
  * Implementation of ViewportBindingDef that works inside an non-scrollable
  * iframe box by listening to host doc for position and resize updates.
@@ -100,7 +98,6 @@ export function resetBodyForOverlay(win, bodyElement) {
  * @implements {ViewportBindingDef}
  */
 export class ViewportBindingInabox {
-
   /**
    * @param {!Window} win
    */
@@ -114,8 +111,8 @@ export class ViewportBindingInabox {
     /** @private @const {!Observable} */
     this.resizeObservable_ = new Observable();
 
-    const boxWidth = win./*OK*/innerWidth;
-    const boxHeight = win./*OK*/innerHeight;
+    const boxWidth = win./*OK*/ innerWidth;
+    const boxHeight = win./*OK*/ innerHeight;
 
     /**
      * The current viewport rect.
@@ -144,9 +141,13 @@ export class ViewportBindingInabox {
     this.requestPositionPromise_ = null;
 
     /** @private {function()} */
-    this.fireScrollThrottle_ = throttle(this.win, () => {
-      this.scrollObservable_.fire();
-    }, MIN_EVENT_INTERVAL);
+    this.fireScrollThrottle_ = throttle(
+      this.win,
+      () => {
+        this.scrollObservable_.fire();
+      },
+      MIN_EVENT_INTERVAL
+    );
 
     /** @private @const {boolean} */
     this.useLayers_ = isExperimentOn(this.win, 'layers');
@@ -162,8 +163,10 @@ export class ViewportBindingInabox {
 
   /** @override */
   connect() {
-    if (isExperimentOn(this.win, 'inabox-viewport-friendly') &&
-        canInspectWindow(this.win.top)) {
+    if (
+      isExperimentOn(this.win, 'inabox-viewport-friendly') &&
+      canInspectWindow(this.win.top)
+    ) {
       return this.listenForPositionSameDomain_();
     } else {
       return this.listenForPosition_();
@@ -172,12 +175,16 @@ export class ViewportBindingInabox {
 
   /** @private */
   listenForPosition_() {
-    return this.iframeClient_.then(client => client.makeRequest(
-        MessageType.SEND_POSITIONS, MessageType.POSITION,
+    return this.iframeClient_.then(client =>
+      client.makeRequest(
+        MessageType.SEND_POSITIONS,
+        MessageType.POSITION,
         data => {
           dev().fine(TAG, 'Position changed: ', data);
           this.updateLayoutRects_(data['viewportRect'], data['targetRect']);
-        }));
+        }
+      )
+    );
   }
 
   /** @private */
@@ -189,18 +196,18 @@ export class ViewportBindingInabox {
     if (this.unobserveFunction_) {
       return Promise.resolve();
     }
-    return Services.resourcesPromiseForDoc(this.win.document.documentElement)
-        .then(() => {
-          this.topWindowPositionObserver_ = this.topWindowPositionObserver_ ||
-              new PositionObserver(this.win.top);
-          this.unobserveFunction_ = this.topWindowPositionObserver_.observe(
-              /** @type {!HTMLIFrameElement} */(this.win.frameElement),
-              data => {
-                this.updateLayoutRects_(
-                    data['viewportRect'],
-                    data['targetRect']);
-              });
-        });
+    return Services.resourcesPromiseForDoc(
+      this.win.document.documentElement
+    ).then(() => {
+      this.topWindowPositionObserver_ =
+        this.topWindowPositionObserver_ || new PositionObserver(this.win.top);
+      this.unobserveFunction_ = this.topWindowPositionObserver_.observe(
+        /** @type {!HTMLIFrameElement} */ (this.win.frameElement),
+        data => {
+          this.updateLayoutRects_(data['viewportRect'], data['targetRect']);
+        }
+      );
+    });
   }
 
   /**
@@ -222,17 +229,18 @@ export class ViewportBindingInabox {
 
   /** @override */
   getLayoutRect(el) {
-    const b = el./*OK*/getBoundingClientRect();
+    const b = el./*OK*/ getBoundingClientRect();
     let {left, top} = b;
     if (this.useLayers_) {
       left -= this.viewportRect_.left;
       top -= this.viewportRect_.top;
     }
     return layoutRectLtwh(
-        Math.round(left + this.boxRect_.left),
-        Math.round(top + this.boxRect_.top),
-        Math.round(b.width),
-        Math.round(b.height));
+      Math.round(left + this.boxRect_.left),
+      Math.round(top + this.boxRect_.top),
+      Math.round(b.width),
+      Math.round(b.height)
+    );
   }
 
   /** @override */
@@ -287,8 +295,11 @@ export class ViewportBindingInabox {
       return;
     }
 
-    const boxRect = moveLayoutRect(positionRect, this.viewportRect_.left,
-        this.viewportRect_.top);
+    const boxRect = moveLayoutRect(
+      positionRect,
+      this.viewportRect_.left,
+      this.viewportRect_.top
+    );
 
     if (isChanged(boxRect, this.boxRect_)) {
       dev().fine(TAG, 'Updating viewport box rect: ', boxRect);
@@ -325,35 +336,44 @@ export class ViewportBindingInabox {
 
   /** @override */
   getRootClientRectAsync() {
-    if (isExperimentOn(this.win, 'inabox-viewport-friendly') &&
-        canInspectWindow(this.win.top)) {
+    if (
+      isExperimentOn(this.win, 'inabox-viewport-friendly') &&
+      canInspectWindow(this.win.top)
+    ) {
       // Set up the listener if we haven't already.
       return this.listenForPositionSameDomain_().then(() =>
         this.topWindowPositionObserver_.getTargetRect(
-            /** @type {!HTMLIFrameElement} */(this.win.frameElement)));
+          /** @type {!HTMLIFrameElement} */ (this.win.frameElement)
+        )
+      );
     }
     if (!this.requestPositionPromise_) {
-      this.requestPositionPromise_ =
-        this.iframeClient_.then(client => new Promise(resolve =>
-          client.requestOnce(
-              MessageType.SEND_POSITIONS, MessageType.POSITION,
+      this.requestPositionPromise_ = this.iframeClient_.then(
+        client =>
+          new Promise(resolve =>
+            client.requestOnce(
+              MessageType.SEND_POSITIONS,
+              MessageType.POSITION,
               data => {
                 this.requestPositionPromise_ = null;
                 devAssert(data.targetRect, 'Host should send targetRect');
                 resolve(data.targetRect);
-              })));
+              }
+            )
+          )
+      );
     }
     return this.requestPositionPromise_;
   }
-
 
   /**
    * @return {!Promise}
    * @private
    */
   tryToEnterOverlayMode_() {
-    return this.prepareBodyForOverlay_()
-        .then(() => this.requestFullOverlayFrame_());
+    return this.prepareBodyForOverlay_().then(() =>
+      this.requestFullOverlayFrame_()
+    );
   }
 
   /**
@@ -361,8 +381,9 @@ export class ViewportBindingInabox {
    * @private
    */
   leaveOverlayMode_() {
-    return this.requestCancelFullOverlayFrame_()
-        .then(() => this.resetBodyForOverlay_());
+    return this.requestCancelFullOverlayFrame_().then(() =>
+      this.resetBodyForOverlay_()
+    );
   }
 
   /**
@@ -388,18 +409,23 @@ export class ViewportBindingInabox {
    * @private
    */
   requestFullOverlayFrame_() {
-    return this.iframeClient_.then(client => new Promise((resolve, reject) =>
-      client.requestOnce(
-          MessageType.FULL_OVERLAY_FRAME,
-          MessageType.FULL_OVERLAY_FRAME_RESPONSE,
-          response => {
-            if (response['success']) {
-              this.updateBoxRect_(response['boxRect']);
-              resolve();
-            } else {
-              reject('Request to open lightbox rejected by host document');
+    return this.iframeClient_.then(
+      client =>
+        new Promise((resolve, reject) =>
+          client.requestOnce(
+            MessageType.FULL_OVERLAY_FRAME,
+            MessageType.FULL_OVERLAY_FRAME_RESPONSE,
+            response => {
+              if (response['success']) {
+                this.updateBoxRect_(response['boxRect']);
+                resolve();
+              } else {
+                reject('Request to open lightbox rejected by host document');
+              }
             }
-          })));
+          )
+        )
+    );
   }
 
   /**
@@ -407,14 +433,19 @@ export class ViewportBindingInabox {
    * @private
    */
   requestCancelFullOverlayFrame_() {
-    return this.iframeClient_.then(client => new Promise(resolve =>
-      client.requestOnce(
-          MessageType.CANCEL_FULL_OVERLAY_FRAME,
-          MessageType.CANCEL_FULL_OVERLAY_FRAME_RESPONSE,
-          response => {
-            this.updateBoxRect_(response['boxRect']);
-            resolve();
-          })));
+    return this.iframeClient_.then(
+      client =>
+        new Promise(resolve =>
+          client.requestOnce(
+            MessageType.CANCEL_FULL_OVERLAY_FRAME,
+            MessageType.CANCEL_FULL_OVERLAY_FRAME_RESPONSE,
+            response => {
+              this.updateBoxRect_(response['boxRect']);
+              resolve();
+            }
+          )
+        )
+    );
   }
 
   /** @visibleForTesting */
@@ -433,13 +464,13 @@ export class ViewportBindingInabox {
   /** @override */
   getScrollWidth() {
     // Get actual width of document body, regardless of iframe size.
-    return this.getScrollingElement()./*OK*/offsetWidth;
+    return this.getScrollingElement()./*OK*/ offsetWidth;
   }
 
   /** @override */
   getScrollHeight() {
     // Get actual height of document body, regardless of iframe size.
-    return this.getScrollingElement()./*OK*/offsetHeight;
+    return this.getScrollingElement()./*OK*/ offsetHeight;
   }
 
   /** @override */
@@ -447,16 +478,37 @@ export class ViewportBindingInabox {
     return this.getScrollHeight();
   }
 
-  /** @override */ updatePaddingTop() {/* no-op */}
-  /** @override */ hideViewerHeader() {/* no-op */}
-  /** @override */ showViewerHeader() {/* no-op */}
-  /** @override */ disableScroll() {/* no-op */}
-  /** @override */ resetScroll() {/* no-op */}
-  /** @override */ ensureReadyForElements() {/* no-op */}
-  /** @override */ setScrollTop() {/* no-op */}
+  /** @override */ updatePaddingTop() {
+    /* no-op */
+  }
+  /** @override */ hideViewerHeader() {
+    /* no-op */
+  }
+  /** @override */ showViewerHeader() {
+    /* no-op */
+  }
+  /** @override */ disableScroll() {
+    /* no-op */
+  }
+  /** @override */ resetScroll() {
+    /* no-op */
+  }
+  /** @override */ ensureReadyForElements() {
+    /* no-op */
+  }
+  /** @override */ setScrollTop() {
+    /* no-op */
+  }
   /** @override */ contentHeightChanged() {}
-  /** @override */ getBorderTop() {return 0;}
-  /** @override */ requiresFixedLayerTransfer() {return false;}
+  /** @override */ getBorderTop() {
+    return 0;
+  }
+  /** @override */ requiresFixedLayerTransfer() {
+    return false;
+  }
+  /** @override */ overrideGlobalScrollTo() {
+    return false;
+  }
 }
 
 /**
@@ -465,12 +517,14 @@ export class ViewportBindingInabox {
 export function installInaboxViewportService(ampdoc) {
   const binding = new ViewportBindingInabox(ampdoc.win);
   const viewer = Services.viewerForDoc(ampdoc);
-  registerServiceBuilderForDoc(ampdoc,
-      'viewport',
-      function() {
-        return new Viewport(ampdoc, binding, viewer);
-      },
-      /* opt_instantiate */ true);
+  registerServiceBuilderForDoc(
+    ampdoc,
+    'viewport',
+    function() {
+      return new Viewport(ampdoc, binding, viewer);
+    },
+    /* opt_instantiate */ true
+  );
 }
 
 /**

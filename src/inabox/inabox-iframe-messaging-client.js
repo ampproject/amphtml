@@ -25,18 +25,22 @@ import {tryParseJson} from '../json';
  * @return {!Promise<!../../3p/iframe-messaging-client.IframeMessagingClient>}
  */
 export function iframeMessagingClientFor(win) {
-  return /** @type {!Promise<!../../3p/iframe-messaging-client.IframeMessagingClient>} */(
-    getServicePromise(win, 'iframeMessagingClient'));
+  return /** @type {!Promise<!../../3p/iframe-messaging-client.IframeMessagingClient>} */ (getServicePromise(
+    win,
+    'iframeMessagingClient'
+  ));
 }
 
 /**
  * @param {!Window} win
  */
 export function installIframeMessagingClient(win) {
-  registerServiceBuilder(win,
-      'iframeMessagingClient',
-      createIframeMessagingClient.bind(null, win),
-      /* opt_instantiate */ true);
+  registerServiceBuilder(
+    win,
+    'iframeMessagingClient',
+    createIframeMessagingClient.bind(null, win),
+    /* opt_instantiate */ true
+  );
 }
 
 /**
@@ -55,18 +59,19 @@ function createIframeMessagingClient(win) {
 
   iframeClient.setBroadcastMode(true);
   return new Promise(resolve => {
-    const unlisten = iframeClient.registerCallback(MessageType.HOST_RESPONSE,
-        message => {
-          iframeClient.setBroadcastMode(false);
-          iframeClient.setHostWindow(message['source']);
-          unlisten();
-          resolve(iframeClient);
-        });
+    const unlisten = iframeClient.registerCallback(
+      MessageType.HOST_RESPONSE,
+      message => {
+        iframeClient.setBroadcastMode(false);
+        iframeClient.setHostWindow(message['source']);
+        unlisten();
+        resolve(iframeClient);
+      }
+    );
     for (let j = 0, hostWin = win; j < 10 && hostWin != win.top; j++) {
       hostWin = hostWin.parent;
       iframeClient.setHostWindow(hostWin);
-      iframeClient./*OK*/sendMessage(
-          MessageType.HOST_BROADCAST, dict({}));
+      iframeClient./*OK*/ sendMessage(MessageType.HOST_BROADCAST, dict({}));
       j++;
     }
   });

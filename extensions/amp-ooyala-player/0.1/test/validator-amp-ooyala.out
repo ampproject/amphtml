@@ -51,7 +51,7 @@ FAIL
 |      <!-- invalid, needs data-pcode -->
 |      <amp-ooyala-player
 >>     ^~~~~~~~~
-amp-ooyala-player/0.1/test/validator-amp-ooyala.html:51:4 The mandatory attribute 'data-pcode' is missing in tag 'amp-ooyala-player'. (see https://www.ampproject.org/docs/reference/components/amp-ooyala-player) [AMP_TAG_PROBLEM]
+amp-ooyala-player/0.1/test/validator-amp-ooyala.html:51:4 The mandatory attribute 'data-pcode' is missing in tag 'amp-ooyala-player'. (see https://amp.dev/documentation/components/amp-ooyala-player) [AMP_TAG_PROBLEM]
 |        height=400
 |        width=400
 |        data-embedcode="xkeHRiMjE6ls2aXoPoiqmPO6IU8HtXsg"
@@ -61,7 +61,7 @@ amp-ooyala-player/0.1/test/validator-amp-ooyala.html:51:4 The mandatory attribut
 |      <!-- invalid, needs data-embedcode -->
 |      <amp-ooyala-player
 >>     ^~~~~~~~~
-amp-ooyala-player/0.1/test/validator-amp-ooyala.html:59:4 The mandatory attribute 'data-embedcode' is missing in tag 'amp-ooyala-player'. (see https://www.ampproject.org/docs/reference/components/amp-ooyala-player) [AMP_TAG_PROBLEM]
+amp-ooyala-player/0.1/test/validator-amp-ooyala.html:59:4 The mandatory attribute 'data-embedcode' is missing in tag 'amp-ooyala-player'. (see https://amp.dev/documentation/components/amp-ooyala-player) [AMP_TAG_PROBLEM]
 |        height=400
 |        width=400
 |        data-pcode="5zb2wxOlZcNCe_HVT3a6cawW298X"
@@ -71,7 +71,7 @@ amp-ooyala-player/0.1/test/validator-amp-ooyala.html:59:4 The mandatory attribut
 |      <!-- invalid, needs data-playerid -->
 |      <amp-ooyala-player
 >>     ^~~~~~~~~
-amp-ooyala-player/0.1/test/validator-amp-ooyala.html:67:4 The mandatory attribute 'data-playerid' is missing in tag 'amp-ooyala-player'. (see https://www.ampproject.org/docs/reference/components/amp-ooyala-player) [AMP_TAG_PROBLEM]
+amp-ooyala-player/0.1/test/validator-amp-ooyala.html:67:4 The mandatory attribute 'data-playerid' is missing in tag 'amp-ooyala-player'. (see https://amp.dev/documentation/components/amp-ooyala-player) [AMP_TAG_PROBLEM]
 |        height=400
 |        width=400
 |        data-embedcode="xkeHRiMjE6ls2aXoPoiqmPO6IU8HtXsg"

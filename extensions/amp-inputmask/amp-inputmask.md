@@ -1,3 +1,10 @@
+---
+$category@: dynamic-content
+formats:
+  - websites
+teaser:
+  text: Provides input masking capabilities to inputs in AMP forms
+---
 <!--
 Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 
@@ -149,6 +156,18 @@ Space characters " " will be automatically added as the user types.
 ```html
 <input type="tel" mask="payment-card" placeholder="0000 0000 0000 0000">
 ```
+
+#### mask-trim-zeros
+
+Specifies how many zeros the mask will remove from pasted values into
+custom masks. For backwards compatibility, the default is `2`.
+Specify `0` to disable this behavior.
+
+When users paste values from spreadsheets, often there is a zero padding
+on the left side. For example, North American phone numbers are sometimes
+stored as 015551112222 where 1 is the country code, but it has been zero-padded.
+The `mask-trim-zeros` attribute will remove up to the given number of zeros.
+The `mask-trim-zeros` attribute does not affect named masks.
 
 #### mask-output
 

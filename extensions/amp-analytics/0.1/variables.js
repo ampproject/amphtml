@@ -19,7 +19,10 @@ import {base64UrlEncodeFromString} from '../../../src/utils/base64';
 import {devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getConsentPolicyState} from '../../../src/consent';
-import {getService, registerServiceBuilder} from '../../../src/service';
+import {
+  getServiceForDoc,
+  registerServiceBuilderForDoc,
+} from '../../../src/service';
 import {isArray, isFiniteNumber} from '../../../src/types';
 import {linkerReaderServiceFor} from './linker-reader';
 import {tryResolve} from '../../../src/utils/promise';
@@ -84,8 +87,6 @@ export class ExpansionOptions {
   }
 }
 
-
-
 /**
  * @param {string} str
  * @param {string} s
@@ -95,12 +96,16 @@ export class ExpansionOptions {
 function substrMacro(str, s, opt_l) {
   const start = Number(s);
   let {length} = str;
-  userAssert(isFiniteNumber(start),
-      'Start index ' + start + 'in substr macro should be a number');
+  userAssert(
+    isFiniteNumber(start),
+    'Start index ' + start + 'in substr macro should be a number'
+  );
   if (opt_l) {
     length = Number(opt_l);
-    userAssert(isFiniteNumber(length),
-        'Length ' + length + ' in substr macro should be a number');
+    userAssert(
+      isFiniteNumber(length),
+      'Length ' + length + ' in substr macro should be a number'
+    );
   }
 
   return str.substr(start, length);
@@ -135,25 +140,23 @@ function replaceMacro(string, matchPattern, opt_newSubStr) {
   return string.replace(regex, opt_newSubStr);
 }
 
-
 /**
  * Provides support for processing of advanced variable syntax like nested
  * expansions macros etc.
  */
 export class VariableService {
   /**
-   * @param {!Window} window
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
-  constructor(window) {
-
-    /** @private {!Window} */
-    this.win_ = window;
+  constructor(ampdoc) {
+    /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
+    this.ampdoc_ = ampdoc;
 
     /** @private {!JsonObject} */
     this.macros_ = dict({});
 
     /** @const @private {!./linker-reader.LinkerReader} */
-    this.linkerReader_ = linkerReaderServiceFor(this.win_);
+    this.linkerReader_ = linkerReaderServiceFor(this.ampdoc_.win);
 
     this.register_('$DEFAULT', defaultMacro);
     this.register_('$SUBSTR', substrMacro);
@@ -163,13 +166,15 @@ export class VariableService {
     this.register_('$NOT', value => String(!value));
     this.register_('$BASE64', value => base64UrlEncodeFromString(value));
     this.register_('$HASH', this.hashMacro_.bind(this));
-    this.register_('$IF',
-        (value, thenValue, elseValue) => value ? thenValue : elseValue);
+    this.register_('$IF', (value, thenValue, elseValue) =>
+      value ? thenValue : elseValue
+    );
     this.register_('$REPLACE', replaceMacro);
     // TODO(ccordry): Make sure this stays a window level service when this
     // VariableService is migrated to document level.
     this.register_('LINKER_PARAM', (name, id) =>
-      this.linkerReader_.get(name, id));
+      this.linkerReader_.get(name, id)
+    );
   }
 
   /**
@@ -184,8 +189,7 @@ export class VariableService {
    * @param {*} macro
    */
   register_(name, macro) {
-    devAssert(!this.macros_[name], 'Macro "' + name
-        + '" already registered.');
+    devAssert(!this.macros_[name], 'Macro "' + name + '" already registered.');
     this.macros_[name] = macro;
   }
 
@@ -207,8 +211,11 @@ export class VariableService {
   expandTemplateSync(template, options) {
     return template.replace(/\${([^}]*)}/g, (match, key) => {
       if (options.iterations < 0) {
-        user().error(TAG, 'Maximum depth reached while expanding variables. ' +
-            'Please ensure that the variables are not recursive.');
+        user().error(
+          TAG,
+          'Maximum depth reached while expanding variables. ' +
+            'Please ensure that the variables are not recursive.'
+        );
         return match;
       }
 
@@ -227,13 +234,18 @@ export class VariableService {
       let value = options.getVar(name);
 
       if (typeof value == 'string') {
-        value = this.expandTemplateSync(value,
-            new ExpansionOptions(options.vars, options.iterations - 1,
-                true /* noEncode */));
+        value = this.expandTemplateSync(
+          value,
+          new ExpansionOptions(
+            options.vars,
+            options.iterations - 1,
+            true /* noEncode */
+          )
+        );
       }
 
       if (!options.noEncode) {
-        value = encodeVars(/** @type {string|?Array<string>} */(value));
+        value = encodeVars(/** @type {string|?Array<string>} */ (value));
       }
       if (value) {
         value += argList;
@@ -242,13 +254,12 @@ export class VariableService {
     });
   }
 
-
   /**
    * @param {string} value
    * @return {!Promise<string>}
    */
   hashMacro_(value) {
-    return Services.cryptoFor(this.win_).sha384Base64(value);
+    return Services.cryptoFor(this.ampdoc_.win).sha384Base64(value);
   }
 }
 
@@ -288,18 +299,22 @@ export function getNameArgs(key) {
 }
 
 /**
- * @param {!Window} win
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  */
-export function installVariableService(win) {
-  registerServiceBuilder(win, 'amp-analytics-variables', VariableService);
+export function installVariableServiceForTesting(ampdoc) {
+  registerServiceBuilderForDoc(
+    ampdoc,
+    'amp-analytics-variables',
+    VariableService
+  );
 }
 
 /**
- * @param {!Window} win
+ * @param {!Element|!ShadowRoot|!../../../src/service/ampdoc-impl.AmpDoc} elementOrAmpDoc
  * @return {!VariableService}
  */
-export function variableServiceFor(win) {
-  return getService(win, 'amp-analytics-variables');
+export function variableServiceForDoc(elementOrAmpDoc) {
+  return getServiceForDoc(elementOrAmpDoc, 'amp-analytics-variables');
 }
 
 /**

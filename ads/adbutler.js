@@ -20,11 +20,11 @@ import {loadScript, validateData} from '../3p/3p';
  * @param {!Window} global
  * @param {!Object} data
  */
-export function adbutler(global,data) {
+export function adbutler(global, data) {
   validateData(
-      data,
-      ['account', 'zone', 'width', 'height'],
-      ['keyword', 'place']
+    data,
+    ['account', 'zone', 'width', 'height'],
+    ['keyword', 'place']
   );
 
   data['place'] = data['place'] || 0;
@@ -42,11 +42,11 @@ export function adbutler(global,data) {
   global.AdButler.ads.push({
     handler(opt) {
       global.AdButler.register(
-          data['account'],
-          data['zone'],
-          [data['width'], data['height']],
-          placeholderID,
-          opt
+        data['account'],
+        data['zone'],
+        [data['width'], data['height']],
+        placeholderID,
+        opt
       );
     },
     opt: {

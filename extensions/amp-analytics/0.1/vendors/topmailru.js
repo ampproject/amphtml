@@ -26,17 +26,20 @@ export const TOPMAILRU_CONFIG = /** @type {!JsonObject} */ ({
   },
   'requests': {
     'pageView': '${_domain}/counter?${_basicMessage};title=${title}',
-    'reachGoal': '${_domain}/tracker?${_basicMessage};title=${title}' +
-                 ';e=RG%3A${value}%2F${goal}',
-    'sendEvent': '${_domain}/tracker?${_basicMessage}' +
-                 ';e=CE%3A${value}%2F${category}%3B${action}%3B${label}',
+    'reachGoal':
+      '${_domain}/tracker?${_basicMessage};title=${title}' +
+      ';e=RG%3A${value}%2F${goal}',
+    'sendEvent':
+      '${_domain}/tracker?${_basicMessage}' +
+      ';e=CE%3A${value}%2F${category}%3B${action}%3B${label}',
     '_domain': 'https://top-fwz1.mail.ru',
-    '_basicMessage': 'js=13;id=${id};u=${url};r=${referrer}' +
-                     ';s=${screenWidth}*${screenHeight}' +
-                     ';vp=${viewportWidth}*${viewportHeight}' +
-                     ';st=${start};gender=${gender};age=${age}' +
-                     ';pid=${pid};userid=${userid};device=${device}' +
-                     ';params=${params};_=${random}',
+    '_basicMessage':
+      'js=13;id=${id};u=${url};r=${referrer}' +
+      ';s=${screenWidth}*${screenHeight}' +
+      ';vp=${viewportWidth}*${viewportHeight}' +
+      ';st=${start};gender=${gender};age=${age}' +
+      ';pid=${pid};userid=${userid};device=${device}' +
+      ';params=${params};_=${random}',
   },
   'triggers': {
     'pageView': {

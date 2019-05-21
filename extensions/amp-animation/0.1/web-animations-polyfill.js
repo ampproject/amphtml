@@ -15,9 +15,7 @@
  */
 import {installWebAnimations} from 'web-animations-js/web-animations.install';
 
-
 const POLYFILLED = '__AMP_WA';
-
 
 /**
  * @param {!Window} win

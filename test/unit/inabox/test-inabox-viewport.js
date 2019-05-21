@@ -27,11 +27,9 @@ import {
 import {layoutRectLtwh} from '../../../src/layout-rect';
 import {toggleExperiment} from '../../../src/experiments';
 
-
 const NOOP = () => {};
 
 describes.fakeWin('inabox-viewport', {amp: {}}, env => {
-
   let win;
   let binding;
   let element;
@@ -43,22 +41,28 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
   let iframeClient;
 
   function stubIframeClientMakeRequest(
-    requestType, responseType, callback, opt_sync, opt_once) {
+    requestType,
+    responseType,
+    callback,
+    opt_sync,
+    opt_once
+  ) {
     const methodName = opt_once ? 'requestOnce' : 'makeRequest';
 
-    return sandbox./*OK*/stub(
-        iframeClient, methodName).callsFake((req, res, cb) => {
-      expect(req).to.equal(requestType);
-      expect(res).to.equal(responseType);
+    return sandbox
+      ./*OK*/ stub(iframeClient, methodName)
+      .callsFake((req, res, cb) => {
+        expect(req).to.equal(requestType);
+        expect(res).to.equal(responseType);
 
-      if (opt_sync) {
-        callback(req, res, cb);
-      } else {
-        setTimeout(() => callback(req, res, cb), 10);
-      }
+        if (opt_sync) {
+          callback(req, res, cb);
+        } else {
+          setTimeout(() => callback(req, res, cb), 10);
+        }
 
-      return NOOP;
-    });
+        return NOOP;
+      });
   }
 
   beforeEach(() => {
@@ -90,8 +94,9 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
       requestOnce() {},
       makeRequest() {},
     };
-    sandbox.stub(service, 'getServicePromise').returns(
-        Promise.resolve(iframeClient));
+    sandbox
+      .stub(service, 'getServicePromise')
+      .returns(Promise.resolve(iframeClient));
     binding = new ViewportBindingInabox(win);
     measureSpy = sandbox.spy();
     element = {
@@ -100,10 +105,14 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
       },
       measure: measureSpy,
     };
-    sandbox.stub(
-        Services.resourcesForDoc(win.document), 'get').returns([element]);
+    sandbox
+      .stub(Services.resourcesForDoc(win.document), 'get')
+      .returns([element]);
     sandbox.stub(Services, 'resourcesPromiseForDoc').returns(
-        new Promise(resolve => { resolve(); }));
+      new Promise(resolve => {
+        resolve();
+      })
+    );
   });
 
   afterEach(() => {
@@ -111,29 +120,32 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
   });
 
   describe('should work for size, layoutRect and position observer', () => {
-
     let viewportRect;
     let targetRect;
 
     it('cross domain', () => {
-      sandbox./*OK*/stub(iframeHelper, 'canInspectWindow').returns(false);
+      sandbox./*OK*/ stub(iframeHelper, 'canInspectWindow').returns(false);
       stubIframeClientMakeRequest(
-          'send-positions',
-          'position',
-          (req, res, cb) => { positionCallback = cb; },
-          /* opt_sync */ true);
+        'send-positions',
+        'position',
+        (req, res, cb) => {
+          positionCallback = cb;
+        },
+        /* opt_sync */ true
+      );
       return binding.connect().then(() => {
         testPositionCallback();
       });
     });
 
     it('same domain', () => {
-      sandbox./*OK*/stub(iframeHelper, 'canInspectWindow').returns(true);
+      sandbox./*OK*/ stub(iframeHelper, 'canInspectWindow').returns(true);
       toggleExperiment(win, 'inabox-viewport-friendly', true);
-      sandbox.stub(PositionObserver.prototype, 'observe')
-          .callsFake((e, callback) => {
-            topWindowObservable.add(() => callback({viewportRect, targetRect}));
-          });
+      sandbox
+        .stub(PositionObserver.prototype, 'observe')
+        .callsFake((e, callback) => {
+          topWindowObservable.add(() => callback({viewportRect, targetRect}));
+        });
 
       positionCallback = data => {
         viewportRect = data.viewportRect;
@@ -154,8 +166,9 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
 
       // Initial state
       expect(binding.getSize()).to.deep.equal({width: 200, height: 150});
-      expect(binding.getLayoutRect(element))
-          .to.deep.equal(layoutRectLtwh(0, 151, 100, 100));
+      expect(binding.getLayoutRect(element)).to.deep.equal(
+        layoutRectLtwh(0, 151, 100, 100)
+      );
 
       // Initial position received
       positionCallback({
@@ -166,8 +179,9 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
       expect(onScrollCallback).to.not.be.called;
       expect(onResizeCallback).to.be.calledOnce;
       expect(measureSpy).to.be.calledOnce;
-      expect(binding.getLayoutRect(element))
-          .to.deep.equal(layoutRectLtwh(10, 20, 100, 100));
+      expect(binding.getLayoutRect(element)).to.deep.equal(
+        layoutRectLtwh(10, 20, 100, 100)
+      );
       sandbox.reset();
 
       // Scroll, viewport position changed
@@ -179,8 +193,9 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
       expect(onScrollCallback).to.be.calledOnce;
       expect(onResizeCallback).to.not.be.called;
       expect(measureSpy).to.not.be.called;
-      expect(binding.getLayoutRect(element))
-          .to.deep.equal(layoutRectLtwh(10, 20, 100, 100));
+      expect(binding.getLayoutRect(element)).to.deep.equal(
+        layoutRectLtwh(10, 20, 100, 100)
+      );
       sandbox.reset();
 
       // Resize, viewport size changed
@@ -192,14 +207,16 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
       expect(onScrollCallback).to.not.be.called;
       expect(onResizeCallback).to.be.calledOnce;
       expect(measureSpy).to.not.be.called;
-      expect(binding.getLayoutRect(element))
-          .to.deep.equal(layoutRectLtwh(10, 20, 100, 100));
+      expect(binding.getLayoutRect(element)).to.deep.equal(
+        layoutRectLtwh(10, 20, 100, 100)
+      );
       sandbox.reset();
 
       // DOM change, target position changed
       sandbox.restore();
-      sandbox.stub(
-          Services.resourcesForDoc(win.document), 'get').returns([element]);
+      sandbox
+        .stub(Services.resourcesForDoc(win.document), 'get')
+        .returns([element]);
       positionCallback({
         viewportRect: layoutRectLtwh(0, 10, 200, 100),
         targetRect: layoutRectLtwh(20, 10, 50, 50),
@@ -208,27 +225,32 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
       expect(onScrollCallback).to.not.be.called;
       expect(onResizeCallback).to.not.be.called;
       expect(measureSpy).to.be.calledOnce;
-      expect(binding.getLayoutRect(element))
-          .to.deep.equal(layoutRectLtwh(20, 20, 100, 100));
+      expect(binding.getLayoutRect(element)).to.deep.equal(
+        layoutRectLtwh(20, 20, 100, 100)
+      );
     }
   });
 
   it('should center content, resize and remeasure on overlay mode', () => {
-    const allResourcesMock = Array(5).fill(undefined).map(() => ({
-      measure: sandbox.spy(),
-    }));
+    const allResourcesMock = Array(5)
+      .fill(undefined)
+      .map(() => ({
+        measure: sandbox.spy(),
+      }));
 
-    sandbox.stub(binding, 'getChildResources').callsFake(
-        () => allResourcesMock);
+    sandbox
+      .stub(binding, 'getChildResources')
+      .callsFake(() => allResourcesMock);
 
-    const prepareContainer =
-        sandbox.stub(binding, 'prepareBodyForOverlay_')
-            .returns(Promise.resolve());
+    const prepareContainer = sandbox
+      .stub(binding, 'prepareBodyForOverlay_')
+      .returns(Promise.resolve());
 
     const makeRequest = stubIframeClientMakeRequest(
-        'full-overlay-frame',
-        'full-overlay-frame-response',
-        (req, res, cb) => cb({
+      'full-overlay-frame',
+      'full-overlay-frame-response',
+      (req, res, cb) =>
+        cb({
           success: true,
           boxRect: {
             left: 0,
@@ -239,7 +261,9 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
             height: 2000,
           },
         }),
-        /* opt_sync */ false, /* opt_once */ true);
+      /* opt_sync */ false,
+      /* opt_once */ true
+    );
 
     return binding.updateLightboxMode(true).then(() => {
       expect(prepareContainer).to.be.calledOnce;
@@ -252,15 +276,17 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
   });
 
   it('should reset content and request resize on leave overlay mode', () => {
-    const resetContainer =
-        sandbox.stub(binding, 'resetBodyForOverlay_')
-            .returns(Promise.resolve());
+    const resetContainer = sandbox
+      .stub(binding, 'resetBodyForOverlay_')
+      .returns(Promise.resolve());
 
     const makeRequest = stubIframeClientMakeRequest(
-        'cancel-full-overlay-frame',
-        'cancel-full-overlay-frame-response',
-        (req, res, cb) => cb({success: true}),
-        /* opt_sync */ false, /* opt_once */ true);
+      'cancel-full-overlay-frame',
+      'cancel-full-overlay-frame-response',
+      (req, res, cb) => cb({success: true}),
+      /* opt_sync */ false,
+      /* opt_once */ true
+    );
 
     return binding.updateLightboxMode(false).then(() => {
       expect(resetContainer).to.be.calledOnce;
@@ -278,14 +304,17 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
       height: 300,
     };
 
-    const updateBoxRectStub = sandbox.stub(binding, 'updateBoxRect_').callsFake(
-        NOOP);
+    const updateBoxRectStub = sandbox
+      .stub(binding, 'updateBoxRect_')
+      .callsFake(NOOP);
 
     stubIframeClientMakeRequest(
-        'full-overlay-frame',
-        'full-overlay-frame-response',
-        (req, res, cb) => cb({success: true, boxRect}),
-        /* opt_sync */ false, /* opt_once */ true);
+      'full-overlay-frame',
+      'full-overlay-frame-response',
+      (req, res, cb) => cb({success: true, boxRect}),
+      /* opt_sync */ false,
+      /* opt_once */ true
+    );
 
     sandbox.stub(binding, 'prepareBodyForOverlay_').returns(Promise.resolve());
 
@@ -304,14 +333,17 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
       height: 300,
     };
 
-    const updateBoxRectStub = sandbox.stub(binding, 'updateBoxRect_').callsFake(
-        NOOP);
+    const updateBoxRectStub = sandbox
+      .stub(binding, 'updateBoxRect_')
+      .callsFake(NOOP);
 
     stubIframeClientMakeRequest(
-        'cancel-full-overlay-frame',
-        'cancel-full-overlay-frame-response',
-        (req, res, cb) => cb({success: true, boxRect}),
-        /* opt_sync */ false, /* opt_once */ true);
+      'cancel-full-overlay-frame',
+      'cancel-full-overlay-frame-response',
+      (req, res, cb) => cb({success: true, boxRect}),
+      /* opt_sync */ false,
+      /* opt_once */ true
+    );
 
     sandbox.stub(binding, 'resetBodyForOverlay_').returns(Promise.resolve());
 
@@ -321,7 +353,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
   });
 
   // TODO(zhouyx, #12476): Make this test work with sinon 4.0.
-  it.skip('should center the fixed container properly', function* () {
+  it.skip('should center the fixed container properly', function*() {
     const w = 120;
     const h = 90;
 
@@ -343,7 +375,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
     expect(el.style['margin-top']).to.equal(`-${h / 2}px`);
   });
 
-  it('should undo styling when the fixed container is reset', function* () {
+  it('should undo styling when the fixed container is reset', function*() {
     const el = document.createElement('div');
 
     yield resetBodyForOverlay(win, el);
@@ -360,14 +392,18 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
   });
 
   it('should request the position async from host', () => {
-    sandbox./*OK*/stub(iframeHelper, 'canInspectWindow').returns(false);
+    sandbox./*OK*/ stub(iframeHelper, 'canInspectWindow').returns(false);
     const requestSpy = stubIframeClientMakeRequest(
-        'send-positions',
-        'position',
-        (req, res, cb) => cb({
+      'send-positions',
+      'position',
+      (req, res, cb) =>
+        cb({
           targetRect: layoutRectLtwh(10, 20, 100, 100),
           viewportRect: layoutRectLtwh(1, 1, 1, 1),
-        }), /* opt_sync */ false, /* opt_once */ true);
+        }),
+      /* opt_sync */ false,
+      /* opt_once */ true
+    );
     return binding.getRootClientRectAsync().then(rect => {
       expect(rect).to.jsonEqual(layoutRectLtwh(10, 20, 100, 100));
       expect(requestSpy).to.be.calledOnce;
@@ -376,10 +412,11 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
 
   it('should request the position directly from host if friendly', () => {
     // this is implicit but we make it explicit anyway for clarity
-    sandbox./*OK*/stub(iframeHelper, 'canInspectWindow').returns(true);
+    sandbox./*OK*/ stub(iframeHelper, 'canInspectWindow').returns(true);
     toggleExperiment(win, 'inabox-viewport-friendly', true);
-    sandbox.stub(PositionObserver.prototype, 'getTargetRect')
-        .returns(layoutRectLtwh(10, 20, 100, 100));
+    sandbox
+      .stub(PositionObserver.prototype, 'getTargetRect')
+      .returns(layoutRectLtwh(10, 20, 100, 100));
     return binding.getRootClientRectAsync().then(rect => {
       expect(rect).to.jsonEqual(layoutRectLtwh(10, 20, 100, 100));
     });
@@ -390,15 +427,18 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
     const observeFunction = sandbox.stub(PositionObserver.prototype, 'observe');
     observeFunction.returns(unobserveFunction);
     toggleExperiment(win, 'inabox-viewport-friendly', true);
-    sandbox./*OK*/stub(iframeHelper, 'canInspectWindow').returns(true);
-    return binding.connect().then(() => {
-      expect(observeFunction).to.be.calledOnce;
-      expect(unobserveFunction).to.not.be.called;
-      binding.disconnect();
-      expect(unobserveFunction).to.be.called;
-      return binding.connect();
-    }).then(() => {
-      expect(observeFunction).to.be.calledTwice;
-    });
+    sandbox./*OK*/ stub(iframeHelper, 'canInspectWindow').returns(true);
+    return binding
+      .connect()
+      .then(() => {
+        expect(observeFunction).to.be.calledOnce;
+        expect(unobserveFunction).to.not.be.called;
+        binding.disconnect();
+        expect(unobserveFunction).to.be.called;
+        return binding.connect();
+      })
+      .then(() => {
+        expect(observeFunction).to.be.calledTwice;
+      });
   });
 });

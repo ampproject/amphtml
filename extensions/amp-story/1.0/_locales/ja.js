@@ -111,13 +111,15 @@ const strings = {
     string: 'この記事を表示するには、ウィンドウの高さを拡大してください',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT]: {
-    string: 'この記事を表示するには、ウィンドウの高さと幅の両方を拡大してください',
+    string:
+      'この記事を表示するには、ウィンドウの高さと幅の両方を拡大してください',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_WIDTH_SIZE_TEXT]: {
     string: 'この記事を表示するには、ウィンドウの幅を拡大してください',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
-    string: 'このコンテンツを表示するには amp-story テストを有効にする必要があります。',
+    string:
+      'このコンテンツを表示するには amp-story テストを有効にする必要があります。',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
     string: 'このページはポートレート モードで最適に表示されます',

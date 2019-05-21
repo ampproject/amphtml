@@ -25,8 +25,12 @@ const year = new Date().getFullYear();
 /*eslint "max-len": 0*/
 
 function pascalCase(str) {
-  return str[0].toUpperCase() + str.slice(1).replace(/-([a-z])/g,
-      function(g) { return g[1].toUpperCase(); });
+  return (
+    str[0].toUpperCase() +
+    str.slice(1).replace(/-([a-z])/g, function(g) {
+      return g[1].toUpperCase();
+    })
+  );
 }
 
 function getValidatorFile(name) {
@@ -61,7 +65,7 @@ tags: {  # <${name}>
   tag_name: "${name.toUpperCase()}"
   requires_extension: "${name}"
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/${name}"
+  spec_url: "https://amp.dev/documentation/components/${name}"
   amp_layout: {
     supported_layouts: RESPONSIVE
   }
@@ -124,7 +128,7 @@ limitations under the License.
     <td><code>&lt;script async custom-element="${name}" src="https://cdn.ampproject.org/v0/${name}-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
     <td>FILL THIS IN</td>
   </tr>
   <tr>
@@ -274,33 +278,45 @@ function getExamplesFile(name) {
 
 async function makeExtension() {
   if (!argv.name) {
-    log(colors.red(
-        'Error! Please pass in the "--name" flag with a value'));
+    log(colors.red('Error! Please pass in the "--name" flag with a value'));
   }
   const {name} = argv;
   const examplesFile = getExamplesFile(name);
 
   fs.mkdirpSync(`extensions/${name}/0.1/test`);
-  fs.writeFileSync(`extensions/${name}/${name}.md`,
-      getMarkdownExtensionFile(name));
-  fs.writeFileSync(`extensions/${name}/validator-${name}.protoascii`,
-      getValidatorFile(name));
-  fs.writeFileSync(`extensions/${name}/0.1/${name}.js`,
-      getJsExtensionFile(name));
-  fs.writeFileSync(`extensions/${name}/0.1/test/test-${name}.js`,
-      getJsTestExtensionFile(name));
-  fs.writeFileSync(`extensions/${name}/0.1/test/validator-${name}.html`,
-      examplesFile);
+  fs.writeFileSync(
+    `extensions/${name}/${name}.md`,
+    getMarkdownExtensionFile(name)
+  );
+  fs.writeFileSync(
+    `extensions/${name}/validator-${name}.protoascii`,
+    getValidatorFile(name)
+  );
+  fs.writeFileSync(
+    `extensions/${name}/0.1/${name}.js`,
+    getJsExtensionFile(name)
+  );
+  fs.writeFileSync(
+    `extensions/${name}/0.1/test/test-${name}.js`,
+    getJsTestExtensionFile(name)
+  );
+  fs.writeFileSync(
+    `extensions/${name}/0.1/test/validator-${name}.html`,
+    examplesFile
+  );
 
-  const examplesFileValidatorOut = examplesFile.trim().split('\n')
-      .map(line => `|  ${line}`)
-      .join('\n');
+  const examplesFileValidatorOut = examplesFile
+    .trim()
+    .split('\n')
+    .map(line => `|  ${line}`)
+    .join('\n');
 
-  fs.writeFileSync(`extensions/${name}/0.1/test/validator-${name}.out`,
-      ['PASS', examplesFileValidatorOut].join('\n'));
+  fs.writeFileSync(
+    `extensions/${name}/0.1/test/validator-${name}.out`,
+    ['PASS', examplesFileValidatorOut].join('\n')
+  );
 
-  fs.writeFileSync(`examples/${name}.amp.html`,
-      examplesFile);
+  fs.writeFileSync(`examples/${name}.amp.html`, examplesFile);
 }
 
 module.exports = {
