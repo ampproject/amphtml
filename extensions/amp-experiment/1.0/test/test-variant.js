@@ -76,7 +76,7 @@ describes.sandboxed('allocateVariant', {}, env => {
       );
 
     fakeViewer = {
-      getParam: () => 'true'
+      getParam: () => 'true',
     };
     getParamStub = sandbox.stub(fakeViewer, 'getParam').returns('true');
 

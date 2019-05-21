@@ -189,30 +189,32 @@ describes.realWin(
         });
     });
 
-    it('should not apply any experiments when ' +
-      '_disable_all_experiments_ is enabled', () => {
-      addConfigElement('script');
-      stubAllocateVariant();
+    it(
+      'should not apply any experiments when ' +
+        '_disable_all_experiments_ is enabled',
+      () => {
+        addConfigElement('script');
+        stubAllocateVariant();
 
-      const applyStub = sandbox.stub(experiment, 'applyMutations_');
+        const applyStub = sandbox.stub(experiment, 'applyMutations_');
 
-      sandbox.stub(Services, 'viewerForDoc').returns({
-        getParam: () => true
-      });
-
-      experiment.buildCallback();
-      return Services.variantsForDocOrNull(ampdoc.getHeadNode())
-        .then(variantsService => variantsService.getVariants())
-        .then(variants => {
-          expect(variants).to.jsonEqual({
-            'experiment-1': null,
-            'experiment-2': null,
-            'experiment-3': null,
-          });
-
-          expect(applyStub).to.not.be.called;
+        sandbox.stub(Services, 'viewerForDoc').returns({
+          getParam: () => true,
         });
-    });
 
+        experiment.buildCallback();
+        return Services.variantsForDocOrNull(ampdoc.getHeadNode())
+          .then(variantsService => variantsService.getVariants())
+          .then(variants => {
+            expect(variants).to.jsonEqual({
+              'experiment-1': null,
+              'experiment-2': null,
+              'experiment-3': null,
+            });
+
+            expect(applyStub).to.not.be.called;
+          });
+      }
+    );
   }
 );

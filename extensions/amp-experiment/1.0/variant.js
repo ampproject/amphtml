@@ -76,7 +76,12 @@ export class Variants {
  * @param {!JsonObject} experimentObject
  * @return {!Promise<?string>}
  */
-export function allocateVariant(ampdoc, viewer, experimentName, experimentObject) {
+export function allocateVariant(
+  ampdoc,
+  viewer,
+  experimentName,
+  experimentObject
+) {
   assertName(experimentName);
   validateExperiment(experimentName, experimentObject);
 

@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+import {ATTR_PREFIX, Variants, allocateVariant} from './variant';
+import {Layout} from '../../../src/layout';
+import {Services} from '../../../src/services';
 import {devAssert, user, userAssert} from '../../../src/log';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {
@@ -21,11 +24,8 @@ import {
   originExperimentsForDoc,
 } from '../../../src/service/origin-experiments-impl';
 import {isExperimentOn} from '../../../src/experiments';
-import {Layout} from '../../../src/layout';
 import {parseJson} from '../../../src/json';
 import {parseMutation} from './mutation-parser';
-import {Services} from '../../../src/services';
-import {Variants, allocateVariant, ATTR_PREFIX} from './variant';
 
 const TAG = 'amp-experiment';
 
@@ -49,25 +49,32 @@ export class AmpExperiment extends AMP.BaseElement {
       let config = {};
 
       try {
-
         config = this.getConfig_();
 
         if (!enabled) {
           user().error(TAG, 'Experiment amp-experiment-1.0 is not enabled.');
 
           // Ensure downstream consumers don't wait for the promise forever.
-          variantsService.init(Promise.resolve(this.getEmptyExperimentToVariant_(config)));
+          variantsService.init(
+            Promise.resolve(this.getEmptyExperimentToVariant_(config))
+          );
 
-          return Promise.reject('Experiment amp-experiment-1.0 is not enabled.');
+          return Promise.reject(
+            'Experiment amp-experiment-1.0 is not enabled.'
+          );
         }
 
         const ampdoc = this.getAmpDoc();
 
         // All experiments can be disabled by a hash param
         const viewer = Services.viewerForDoc(ampdoc);
-        const override = viewer.getParam(ATTR_PREFIX + '_disable_all_experiments_');
+        const override = viewer.getParam(
+          ATTR_PREFIX + '_disable_all_experiments_'
+        );
         if (override !== undefined) {
-          variantsService.init(Promise.resolve(this.getEmptyExperimentToVariant_(config)));
+          variantsService.init(
+            Promise.resolve(this.getEmptyExperimentToVariant_(config))
+          );
           return;
         }
 
@@ -84,13 +91,16 @@ export class AmpExperiment extends AMP.BaseElement {
         });
 
         /** @private @const {!Promise<!Object<string, ?string>>} */
-        const experimentVariants = Promise.all(variants)
-          .then(this.applyExperimentVariants_.bind(this, config, experimentToVariant));
+        const experimentVariants = Promise.all(variants).then(
+          this.applyExperimentVariants_.bind(this, config, experimentToVariant)
+        );
 
         variantsService.init(experimentVariants);
       } catch (e) {
         // Ensure downstream consumers don't wait for the promise forever.
-        variantsService.init(Promise.resolve(this.getEmptyExperimentToVariant_(config)));
+        variantsService.init(
+          Promise.resolve(this.getEmptyExperimentToVariant_(config))
+        );
         throw e;
       }
     });
