@@ -49,6 +49,7 @@ app.use(bodyParser.text());
 app.use('/amp4test', require('./amp4test').app);
 app.use('/analytics', require('./routes/analytics'));
 app.use('/list/', require('./routes/list'));
+app.use('/user-location/', require('./routes/user-location'));
 
 // Append ?csp=1 to the URL to turn on the CSP header.
 // TODO: shall we turn on CSP all the time?
@@ -284,7 +285,24 @@ app.use('/form/redirect-to/post', (req, res) => {
 app.use('/form/echo-json/post', (req, res) => {
   cors.assertCors(req, res, ['POST']);
   const form = new formidable.IncomingForm();
-  form.parse(req, (err, fields) => {
+  const fields = Object.create(null);
+  form.on('field', function(name, value) {
+    if (!(name in fields)) {
+      fields[name] = value;
+      return;
+    }
+
+    const realName = name;
+    if (realName in fields) {
+      if (!Array.isArray(fields[realName])) {
+        fields[realName] = [fields[realName]];
+      }
+    } else {
+      fields[realName] = [];
+    }
+    fields[realName].push(value);
+  });
+  form.parse(req, unusedErr => {
     res.setHeader('Content-Type', 'application/json; charset=utf-8');
     if (fields['email'] == 'already@subscribed.com') {
       res.statusCode = 500;
