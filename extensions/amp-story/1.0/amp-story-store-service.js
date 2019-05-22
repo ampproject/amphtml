@@ -104,6 +104,7 @@ export let InteractiveComponentDef;
  *    currentPageId: string,
  *    currentPageIndex: number,
  *    pagesCount: number,
+ *    pageIds: !Array<string>,
  * }}
  */
 export let State;
@@ -148,11 +149,13 @@ export const StateProperty = {
   CURRENT_PAGE_INDEX: 'currentPageIndex',
   PAGES_COUNT: 'pagesCount',
   ADVANCEMENT_MODE: 'advancementMode',
+  PAGE_IDS: 'pageIds',
 };
 
 /** @private @const @enum {string} */
 export const Action = {
   ADD_TO_ACTIONS_WHITELIST: 'addToActionsWhitelist',
+  ADD_TO_PAGE_IDS: 'addToPageIds',
   CHANGE_PAGE: 'setCurrentPageId',
   SET_CONSENT_ID: 'setConsentId',
   SET_PAGES_COUNT: 'setPagesCount',
@@ -183,6 +186,7 @@ export const Action = {
  * @private @const {!Object<string, !function(*, *):boolean>}
  */
 const stateComparisonFunctions = {
+  [StateProperty.PAGE_IDS]: (old, curr) => old.length !== curr.length,
   [StateProperty.ACTIONS_WHITELIST]: (old, curr) => old.length !== curr.length,
   [StateProperty.INTERACTIVE_COMPONENT_STATE]:
     /**
@@ -208,6 +212,11 @@ const actions = (state, action, data) => {
       );
       return /** @type {!State} */ (Object.assign({}, state, {
         [StateProperty.ACTIONS_WHITELIST]: newActionsWhitelist,
+      }));
+    case Action.ADD_TO_PAGE_IDS:
+      const newPageIds = [].concat(state[StateProperty.PAGE_IDS], data);
+      return /** @type {!State} */ (Object.assign({}, state, {
+        [StateProperty.PAGE_IDS]: newPageIds,
       }));
     // Triggers the amp-acess paywall.
     case Action.TOGGLE_ACCESS:
@@ -458,8 +467,10 @@ export class AmpStoryStoreService {
       [StateProperty.CONSENT_ID]: null,
       [StateProperty.CURRENT_PAGE_ID]: '',
       [StateProperty.CURRENT_PAGE_INDEX]: 0,
+      // TODO(#22398): replace usage of PAGES_COUNT with PAGE_IDS.length.
       [StateProperty.PAGES_COUNT]: 0,
       [StateProperty.ADVANCEMENT_MODE]: '',
+      [StateProperty.PAGE_IDS]: [],
     });
   }
 

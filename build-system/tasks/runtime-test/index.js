@@ -131,8 +131,8 @@ function getConfig() {
       : [
           // With --saucelabs_lite, a subset of the unit tests are run.
           // Only browsers that support chai-as-promised may be included below.
-          // TODO(rsimha): Add more browsers to this list. #6039.
           'SL_Safari_12',
+          'SL_Firefox',
         ];
 
     return Object.assign({}, karmaDefault, {
@@ -617,9 +617,8 @@ async function runTests() {
         const result = browser.lastResult;
         // Prevent cases where Karma detects zero tests and still passes. #16851.
         if (result.total == 0) {
-          log(
-            red('ERROR: Zero tests detected by Karma. Something went wrong.')
-          );
+          log(red('ERROR: Zero tests detected by Karma.'));
+          log(red(JSON.stringify(result)));
           reportTestErrored().finally(() => {
             if (!argv.watch) {
               process.exit(1);
