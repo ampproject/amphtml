@@ -3,17 +3,18 @@ License: Apache License
 License File: https://github.com/google/closure-compiler/blob/master/COPYING
 
 Description:
-Temporary check in of a compiled closure compiler while we wait for
-a patch to land.
+Temporary check in of a custom-built closure compiler while we wait for
+https://github.com/google/closure-compiler/issues/3041 to be fixed.
 
 Local Modifications:
-- Apply ./Allow-relative-path-reference-types.patch to closure-compiler to the
-  "closure-compiler-parent-v20190301" tag
-  (Needed until https://github.com/google/closure-compiler/issues/3041 is fixed)
-- Add custom built compiler.jar (after the above revert) to use for building.
-- Apply ./POM-file-changes.patch to closure-compiler and move all files from
-  test/ to src/
-- Add custom built compiler-and-tests.jar (after the above changes) to use
-  for testing.
-- Add Messages.properties and ParserConfig.properties for testing.
-- Copy web_animations.js extern missing from default externs.
+1. Check out closure-compiler at the "closure-compiler-parent-v20190513" tag
+   from the https://github.com/google/closure-compiler repo
+2. Revert commit 0393c80ca01b6b861376dad7f91043a38bb37dc0.
+3. Apply ./Allow-relative-path-reference-types.patch.
+4. Add custom built compiler.jar (after the above revert) to use for building.
+5. Apply ./POM-file-changes.patch to closure-compiler and move all files from
+   test/ to src/.
+6. Add custom built compiler-and-tests.jar (after steps 4. and 5.) to use
+   for testing.
+7. Add Messages.properties and ParserConfig.properties for testing.
+8. Copy web_animations.js extern missing from default externs.

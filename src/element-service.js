@@ -180,6 +180,7 @@ export function getElementServiceIfAvailableForDocInEmbedScope(
  * @param {string} extension
  * @return {!Object}
  * @private
+ * @closurePrimitive {asserts.matchesReturn}
  */
 function assertService(service, id, extension) {
   return /** @type {!Object} */ (userAssert(

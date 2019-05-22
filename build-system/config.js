@@ -159,6 +159,7 @@ module.exports = {
     '!validator/webui/node_modules/**/*.*',
     '!build-system/tasks/e2e/node_modules/**/*.*',
     '!build-system/tasks/presubmit-checks.js',
+    '!build-system/runner/build/**/*.*',
     '!build-system/tasks/visual-diff/node_modules/**/*.*',
     '!build-system/tasks/visual-diff/snippets/*.js',
     '!build/polyfills.js',
