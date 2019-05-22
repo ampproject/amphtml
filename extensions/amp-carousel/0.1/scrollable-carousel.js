@@ -99,6 +99,18 @@ export class AmpScrollableCarousel extends BaseCarousel {
   }
 
   /** @override */
+  buttonsAriaRole() {
+    /**
+     * In scrollable carousel, the next/previous buttons add no functionality
+     * for screen readers as scrollable carousel is just a horizontally
+     * scrollable div which ATs navigate just like any other content.
+     * To avoid confusion, we therefore set the role to presentation for the
+     * controls in this case.
+     */
+    return 'presentation';
+  }
+
+  /** @override */
   layoutCallback() {
     if (!this.useLayers_) {
       this.doLayout_(this.pos_);
