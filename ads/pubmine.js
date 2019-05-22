@@ -23,9 +23,8 @@ const pubmineOptional = ['section', 'pt', 'ht'],
 /**
  * @param {!Object} data
  * @param {!Window} global
- * @param {!Function} [scriptLoader=loadScript]
  */
-function initMasterFrame(data, global, scriptLoader = loadScript) {
+function initMasterFrame(data, global) {
   global['__ATA_PP'] = {
     pt: data['pt'] || 1,
     ht: data['ht'] || 1,
@@ -34,15 +33,16 @@ function initMasterFrame(data, global, scriptLoader = loadScript) {
   };
   global['__ATA'] = global['__ATA'] || {};
   global['__ATA']['cmd'] = global['__ATA']['cmd'] || [];
-  scriptLoader(global, pubmineURL);
+  loadScript(global, pubmineURL);
 }
 
 /**
  * @param {string} slotId
+ * @param {!Window} global
  */
-function createSlot(slotId) {
-  const containerEl = document.getElementById('c');
-  const adSlot = document.createElement('div');
+function createSlot(slotId, global) {
+  const containerEl = global.document.getElementById('c');
+  const adSlot = global.document.createElement('div');
   adSlot.setAttribute('id', slotId);
   containerEl.appendChild(adSlot);
 }
@@ -50,15 +50,8 @@ function createSlot(slotId) {
 /**
  * @param {!Window} global
  * @param {!Object} data
- * @param {!Function} [slotCreator=createSlot]
- * @param {!Function} [scriptLoader=loadScript]
  */
-export function pubmine(
-  global,
-  data,
-  slotCreator = createSlot,
-  scriptLoader = loadScript
-) {
+export function pubmine(global, data) {
   validateData(data, pubmineRequired, pubmineOptional);
 
   const sectionId = data['siteid'] + (data['section'] || '1');
@@ -72,10 +65,10 @@ export function pubmine(
 
   const slotId = `atatags-${sectionId}`;
 
-  slotCreator(slotId);
+  createSlot(slotId, global);
   const {isMaster} = global.context;
   if (isMaster) {
-    initMasterFrame(data, global, scriptLoader);
+    initMasterFrame(data, global);
   }
   const master = isMaster ? global : global.context.master;
   master['__ATA']['cmd']['push'](function() {

@@ -16,58 +16,61 @@
 
 import {pubmine} from '../../../ads/pubmine';
 
-describe('pubmine', () => {
-  it('should set pubmine publisher config on global if loader in a master frame', () => {
-    const mockGlobal = {
-      context: {
-        isMaster: true,
-      },
-    };
-    const mockData = {
-      siteid: 'amp-test',
-      section: 1,
-      pt: 2,
-      ht: 2,
-    };
-    const expectedConfig = {
-      pt: 2,
-      ht: 2,
-      tn: 'amp',
-      amp: true,
-    };
-    const mockScriptLoader = sandbox.spy();
-    const mockSlotCreator = () => {};
-    pubmine(mockGlobal, mockData, mockSlotCreator, mockScriptLoader);
-    expect(mockGlobal.__ATA_PP).to.deep.equal(expectedConfig);
-    expect(mockGlobal.__ATA.cmd).to.be.an('array');
-    expect(mockGlobal.__ATA.cmd).to.have.length(1);
-    expect(mockScriptLoader).to.be.calledOnce;
-    expect(mockScriptLoader.args[0][1]).to.equal(
-      'https://s.pubmine.com/head.js'
+describes.fakeWin('amp-ad-csa-impl', {}, env => {
+  let win;
+
+  function getPubmineScriptElement() {
+    return win.document.querySelector(
+      'script[src="https://s.pubmine.com/head.js"]'
     );
+  }
+
+  beforeEach(() => {
+    win = env.win;
+    win.document.body.innerHTML = '<div id="c"></div>';
   });
-  it('should set pubmine publisher config on global if loaded in a slave frame', () => {
-    const mockGlobal = {
-      context: {
+
+  describe('pubmine', () => {
+    it('should set pubmine publisher config on global if loader in a master frame', () => {
+      win.context = {
+        isMaster: true,
+      };
+      const mockData = {
+        siteid: 'amp-test',
+        section: 1,
+        pt: 2,
+        ht: 2,
+      };
+      const expectedConfig = {
+        pt: 2,
+        ht: 2,
+        tn: 'amp',
+        amp: true,
+      };
+      pubmine(win, mockData);
+      expect(win.__ATA_PP).to.deep.equal(expectedConfig);
+      expect(win.__ATA.cmd).to.be.an('array');
+      expect(win.__ATA.cmd).to.have.length(1);
+      expect(getPubmineScriptElement()).not.to.equal(null);
+    });
+
+    it('should add a command and not to load the script if loaded in a slave frame', () => {
+      win.__ATA = {
+        cmd: [],
+      };
+      win.context = {
         isMaster: false,
-        master: {
-          __ATA: {
-            cmd: [],
-          },
-        },
-      },
-    };
-    const mockData = {
-      siteid: 'amp-test',
-      section: 1,
-      pt: 2,
-      ht: 2,
-    };
-    const mockScriptLoader = sandbox.spy();
-    const mockSlotCreator = () => {};
-    pubmine(mockGlobal, mockData, mockSlotCreator, mockScriptLoader);
-    expect(mockGlobal.context.master.__ATA.cmd).to.be.an('array');
-    expect(mockGlobal.context.master.__ATA.cmd).to.have.length(1);
-    expect(mockScriptLoader).not.to.be.called;
+        master: win,
+      };
+      const mockData = {
+        siteid: 'amp-test',
+        section: 1,
+        pt: 2,
+        ht: 2,
+      };
+      pubmine(win, mockData);
+      expect(win.context.master.__ATA.cmd).to.have.length(1);
+      expect(getPubmineScriptElement()).to.equal(null);
+    });
   });
 });
