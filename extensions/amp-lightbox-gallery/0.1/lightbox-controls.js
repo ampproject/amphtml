@@ -20,7 +20,6 @@ import {devAssert} from '../../../src/log';
 import {htmlFor} from '../../../src/static-template';
 import {toArray} from '../../../src/types';
 
-
 /**
  * @enum {string}
  */
@@ -77,24 +76,23 @@ export class LightboxControls {
 
     const input = Services.inputFor(win);
     if (!input.isMouseDetected()) {
-      el.querySelector('[data-action="prev"]')
-          .classList.add('i-amphtml-screen-reader');
-      el.querySelector('[data-action="next"]')
-          .classList.add('i-amphtml-screen-reader');
+      el.querySelector('[data-action="prev"]').classList.add(
+        'i-amphtml-screen-reader'
+      );
+      el.querySelector('[data-action="next"]').classList.add(
+        'i-amphtml-screen-reader'
+      );
     }
 
     const actionStrings = Object.values(LightboxControlsAction);
     devAssert(
-        toArray(el.querySelectorAll('[data-action]'))
-            .map(div => div.getAttribute('data-action'))
-            .every(action => actionStrings.includes(action)),
-        'Action for a button does not map to enum.'
+      toArray(el.querySelectorAll('[data-action]'))
+        .map(div => div.getAttribute('data-action'))
+        .every(action => actionStrings.includes(action)),
+      'Action for a button does not map to enum.'
     );
 
-    return new LightboxControls(
-        win,
-        el,
-        measureMutateElement);
+    return new LightboxControls(win, el, measureMutateElement);
   }
 
   /**
@@ -102,10 +100,7 @@ export class LightboxControls {
    * @param {!Element} element
    * @param {function(function(), function())} measureMutateElement
    */
-  constructor(
-    win,
-    element,
-    measureMutateElement) {
+  constructor(win, element, measureMutateElement) {
     /** @private @const */
     this.win_ = win;
 
@@ -138,9 +133,11 @@ export class LightboxControls {
       return;
     }
 
-    this.element_.dispatchEvent(createCustomEvent(this.win_, 'action', {
-      action,
-    }));
+    this.element_.dispatchEvent(
+      createCustomEvent(this.win_, 'action', {
+        action,
+      })
+    );
     event.stopPropagation();
     event.preventDefault();
   }
