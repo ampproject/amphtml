@@ -696,7 +696,7 @@
     {
       "url": "examples/visual-tests/amp-ad/amp-ad.html",
       "name": "AMP ad",
-      "enable_percy_javascript": true
+      "interactive_tests": "examples/visual-tests/amp-ad/amp-ad.js"
     },
     {
       "url": "examples/visual-tests/amp-ad/amp-inabox.html",
@@ -704,7 +704,7 @@
       "loading_complete_selectors": [
         ".view", ".activeview"
       ],
-      "enable_percy_javascript": true
+      "interactive_tests": "examples/visual-tests/amp-ad/amp-inabox.js"
     }
   ]
 }
