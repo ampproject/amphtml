@@ -1543,7 +1543,7 @@ where `page-id` refers to the unique id of an `amp-story-page`. You can also use
 With branching turned on, users will have the option to share the story from the page they are currently seeing. If a user selects the option to share from the page they are currently seeing, the URL generated will be in the form described above. **Important**, branching may expose the `amp-story-page` ids to the user.
 
 ## Integration with Sidebar for Stories
-The use of `amp-sidebar` is supported for use within `amp-story`. See the [Sidebar for Stories documentation](https://amp.dev/documentation/components/reference/amp-sidebar.html?format=websites#sidebar-for-stories) for information on limitations and caveats.
+The use of `amp-sidebar` is supported for use within `amp-story`. See the [Sidebar for Stories documentation](https://amp.dev/documentation/components/amp-sidebar?format=websites#sidebar-for-stories) for information on limitations and caveats.
 
 By using both branching features and `amp-sidebar`, you can create stories that have a table of contents. To do this, make use of the goToPage action and URL fragment parameter.
 
