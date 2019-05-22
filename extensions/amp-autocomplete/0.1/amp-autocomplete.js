@@ -23,11 +23,7 @@ import {
   UrlReplacementPolicy,
   batchFetchJsonFor,
 } from '../../../src/batched-json';
-import {
-  childElementByAttr,
-  childElementsByTag,
-  removeChildren,
-} from '../../../src/dom';
+import {childElementsByTag, removeChildren} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user, userAssert} from '../../../src/log';
 import {getValueForExpr, tryParseJson} from '../../../src/json';
@@ -266,23 +262,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
   getRemoteData_() {
     const ampdoc = this.getAmpDoc();
     const policy = UrlReplacementPolicy.ALL;
-    return batchFetchJsonFor(
-      ampdoc,
-      this.element,
-      /* opt_expr */ undefined,
-      policy
-    ).then(json => {
-      const items = json['items'];
-      if (!items) {
-        user().warn(
-          TAG,
-          'Expected key "items" in data but found nothing. ' +
-            'Rendering empty results.'
-        );
-        return [];
-      }
-      return items;
-    });
+    return batchFetchJsonFor(ampdoc, this.element, 'items', policy);
   }
 
   /**
@@ -333,16 +313,16 @@ export class AmpAutocomplete extends AMP.BaseElement {
             ' data. Was providing two datasets intended?'
         );
       }
-      remoteDataPromise = this.getRemoteData_();
+      remoteDataPromise = this.getRemoteData_().catch(e => {
+        this.enterFallback_(e);
+      });
     }
 
-    return remoteDataPromise
-      .then(remoteData => {
-        // If both types of data are provided, display remote data.
-        this.sourceData_ = remoteData || this.sourceData_;
-        this.filterDataAndRenderResults_(this.sourceData_);
-      })
-      .catch(e => this.renderFallbackUI_(e));
+    return remoteDataPromise.then(remoteData => {
+      // If both types of data are provided, display remote data.
+      this.sourceData_ = remoteData || this.sourceData_;
+      this.filterDataAndRenderResults_(this.sourceData_);
+    });
   }
 
   /** @override */
@@ -352,10 +332,14 @@ export class AmpAutocomplete extends AMP.BaseElement {
       return Promise.resolve();
     }
     if (typeof src === 'string') {
-      return this.getRemoteData_().then(remoteData => {
-        this.sourceData_ = remoteData;
-        this.filterDataAndRenderResults_(this.sourceData_, this.userInput_);
-      });
+      return this.getRemoteData_()
+        .catch(e => {
+          this.enterFallback_(e);
+        })
+        .then(remoteData => {
+          this.sourceData_ = remoteData;
+          this.filterDataAndRenderResults_(this.sourceData_, this.userInput_);
+        });
     }
     if (typeof src === 'object') {
       this.sourceData_ = src['items'] || [];
@@ -393,7 +377,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     return this.mutateElement(() => {
       this.filterDataAndRenderResults_(this.sourceData_, this.userInput_);
       this.toggleResults_(true);
-    }).catch(e => this.renderFallbackUI_(e));
+    });
   }
 
   /**
@@ -913,16 +897,18 @@ export class AmpAutocomplete extends AMP.BaseElement {
    * @throws {!Error} If fallback element is not present.
    * @private
    */
-  renderFallbackUI_(error) {
+  enterFallback_(error) {
+    if (this.fallbackDisplayed_) {
+      return;
+    }
     this.clearAllItems_();
-    const fallback = childElementByAttr(this.element, 'fallback');
+    const fallback = this.getFallback();
     if (fallback) {
       this.fallbackDisplayed_ = true;
-      // Expose the 'autocomplete-fallback' class.
-      fallback.classList.add('autocomplete-fallback');
-      this.container_.appendChild(fallback);
+      this.toggleFallback(true);
+      user().warn(TAG, 'Triggered fallback due to error:', error);
     } else {
-      throw error;
+      user().warn(TAG, 'No fallback found. Triggered due to error:', error);
     }
   }
 
