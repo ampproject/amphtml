@@ -617,12 +617,12 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
   /**
    * Shows or hides the results container_.
-   * @param {boolean=} opt_display
+   * @param {boolean} display
    * @private
    */
-  toggleResults_(opt_display) {
-    this.inputElement_.setAttribute('aria-expanded', opt_display);
-    toggle(dev().assertElement(this.container_), opt_display);
+  toggleResults_(display) {
+    this.inputElement_.setAttribute('aria-expanded', display);
+    toggle(dev().assertElement(this.container_), display);
   }
 
   /**
