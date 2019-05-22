@@ -524,4 +524,5 @@ Join in on the discussion where we are discussing [upcoming potential features](
 
 ## Supported Consent Management Platforms
 
+- Didomi : [Website](https://www.didomi.io/) - [Documentation](https://developers.didomi.io/)
 - Your Integrated platform here!
