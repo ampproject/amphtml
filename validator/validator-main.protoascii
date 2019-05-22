@@ -509,25 +509,6 @@ tags: {
     dispatch_key: NAME_VALUE_DISPATCH
   }
 }
-# AMP & AMP4ADS metadata, name=amp-experiments-opt-out
-# https://github.com/lannka/amphtml/blob/master/tools/experiments/README.md
-tags: {
-  html_format: AMP
-  html_format: AMP4ADS
-  tag_name: "META"
-  spec_name: "meta name=amp-experiments-opt-out"
-  mandatory_parent: "HEAD"
-  attrs: {
-    name: "content"
-    mandatory: true
-  }
-  attrs: {
-    name: "name"
-    mandatory: true
-    value_casei: "amp-experiments-opt-out"
-    dispatch_key: NAME_VALUE_DISPATCH
-  }
-}
 # AMP metadata, name=amp-3p-iframe-src
 tags: {
   html_format: AMP
