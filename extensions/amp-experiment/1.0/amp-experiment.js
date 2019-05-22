@@ -28,6 +28,9 @@ import {parseMutation} from './mutation-parser';
 
 const TAG = 'amp-experiment';
 
+/** @const {number} */
+const MAX_MUTATIONS = 70;
+
 export class AmpExperiment extends AMP.BaseElement {
   /** @override */
   isLayoutSupported(layout) {
@@ -56,23 +59,42 @@ export class AmpExperiment extends AMP.BaseElement {
 
       try {
         const config = this.getConfig_();
-        const results = Object.create(null);
+        const experimentToVariant = Object.create(null);
         const variants = Object.keys(config).map(experimentName => {
           return allocateVariant(
             this.getAmpDoc(),
             experimentName,
             config[experimentName]
           ).then(variantName => {
-            results[experimentName] = variantName;
+            experimentToVariant[experimentName] = variantName;
           });
         });
 
         /** @private @const {!Promise<!Object<string, ?string>>} */
         const experimentVariants = Promise.all(variants)
-          .then(() => results)
-          .then(this.applyExperimentVariants_.bind(this, config));
+          .then(() => {
+            this.validateExperimentToVariant_(config, experimentToVariant);
+            const applyExperimentsPromise = this.applyExperimentVariants_(
+              config,
+              experimentToVariant
+            );
+            variantsService.init(applyExperimentsPromise);
+            return applyExperimentsPromise;
+          })
+          .catch(e => {
+            // Ensure downstream consumers don't wait for the promise forever.
+            variantsService.init(Promise.resolve({}));
+            throw e;
+          });
 
-        variantsService.init(experimentVariants);
+        /**
+         * Returning the experimentVariants promise here
+         * So that the buildCallback that is waiting for
+         * the parent promise, will wait for this promise as well.
+         * And wait for the variants to be applied before finishing
+         * our buildCallback.
+         */
+        return experimentVariants;
       } catch (e) {
         // Ensure downstream consumers don't wait for the promise forever.
         variantsService.init(Promise.resolve({}));
@@ -111,6 +133,42 @@ export class AmpExperiment extends AMP.BaseElement {
     return /** @type {!JsonObject} */ (devAssert(
       parseJson(children[0].textContent)
     ));
+  }
+
+  /**
+   * Function to run validations and limitations on the current
+   * chosen Experiment / variant combination.
+   *
+   * @param {!JsonObject} config
+   * @param {!Object<string, ?string>} experimentToVariant
+   */
+  validateExperimentToVariant_(config, experimentToVariant) {
+    // Ensure that the current experiment / variant
+    // combination does not exceed the maximum mutations.
+    // NOTE: We are not validating the entire config,
+    // As that would take more time, and affect the user,
+    // vs. help the developer.
+    let totalMutations = 0;
+    const experimentToVariantKeys = Object.keys(experimentToVariant);
+
+    for (let i = 0; i < experimentToVariantKeys.length; i++) {
+      const experimentKey = experimentToVariantKeys[i];
+      const variantKey = experimentToVariant[experimentKey];
+      const variant =
+        /** @type {!JsonObject} */ (config[experimentKey]['variants'][
+          variantKey
+        ]);
+      totalMutations += variant['mutations'].length;
+    }
+
+    if (totalMutations > MAX_MUTATIONS) {
+      const numMutationsError =
+        'Max number of mutations for the total ' +
+        `applied experiments exceeded: ${totalMutations} > ` +
+        MAX_MUTATIONS;
+      user().error(TAG, numMutationsError);
+      throw new Error(numMutationsError);
+    }
   }
 
   /**
