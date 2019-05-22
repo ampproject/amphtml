@@ -22,7 +22,6 @@ import com.google.javascript.jscomp.ClosureCodingConvention;
 import com.google.javascript.jscomp.CodingConvention;
 import com.google.javascript.jscomp.CodingConvention.AssertionFunctionSpec;
 import com.google.javascript.jscomp.CodingConventions;
-import com.google.javascript.jscomp.ClosureCodingConvention;
 import com.google.javascript.rhino.jstype.JSType;
 import com.google.javascript.rhino.jstype.JSTypeNative;
 
@@ -48,20 +47,20 @@ public final class AmpCodingConvention extends CodingConventions.Proxy {
   @Override
   public ImmutableCollection<AssertionFunctionSpec> getAssertionFunctions() {
     return ImmutableList.of(
-      AssertionFunctionSpec.makeReturnTypeAssertion(
-          "module$src$log.devAssert"),
-      AssertionFunctionSpec.makeReturnTypeAssertion(
-          "devAssert$$module$src$log"),
-      AssertionFunctionSpec.makeReturnTypeAssertion(
-          "module$src$log.userAssert"),
-      AssertionFunctionSpec.makeReturnTypeAssertion(
-          "userAssert$$module$src$log"),
-      AssertionFunctionSpec.makeReturnTypeAssertion(
-          "assertService$$module$src$element_service"),
-      AssertionFunctionSpec.makeReturnTypeAssertion(
-          "module$src$layout.assertLength"),
-      AssertionFunctionSpec.makeReturnTypeAssertion(
-          "assertLength$$module$src$layout")
+      AssertionFunctionSpec.forMatchesReturn().setFunctionName(
+          "module$src$log.devAssert").build(),
+      AssertionFunctionSpec.forMatchesReturn().setFunctionName(
+          "devAssert$$module$src$log").build(),
+      AssertionFunctionSpec.forMatchesReturn().setFunctionName(
+          "module$src$log.userAssert").build(),
+      AssertionFunctionSpec.forMatchesReturn().setFunctionName(
+          "userAssert$$module$src$log").build(),
+      AssertionFunctionSpec.forMatchesReturn().setFunctionName(
+          "assertService$$module$src$element_service").build(),
+      AssertionFunctionSpec.forMatchesReturn().setFunctionName(
+          "module$src$layout.assertLength").build(),
+      AssertionFunctionSpec.forMatchesReturn().setFunctionName(
+          "assertLength$$module$src$layout").build()
     );
   }
 
