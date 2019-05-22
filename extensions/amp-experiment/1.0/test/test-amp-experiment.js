@@ -107,8 +107,19 @@ describes.realWin(
 
       expectAsyncConsoleError(/Experiment/);
       addConfigElement('script');
-      experiment.buildCallback();
-    }).to.not.throw();
+      doc.body.appendChild(el);
+      return experiment.buildCallback()
+          .should.eventually.be.rejectedWith(
+              /Experiment/
+          );
+    });
+
+    it('should not throw on valid config', () => {
+      expect(() => {
+        addConfigElement('script');
+        experiment.buildCallback();
+      }).to.not.throw();
+    });
 
     it('should throw if it has no child element', () => {
       expectAsyncConsoleError(/should contain exactly one/);

@@ -86,6 +86,14 @@ export class AmpExperiment extends AMP.BaseElement {
             variantsService.init(Promise.resolve({}));
             throw e;
           });
+
+        /**
+         * Returning the experimentVariants promise here
+         * So that the buildCallback that is waiting for
+         * the parent promise, will wait for this promise as well.
+         * And wait for the variants to be applied before finishing
+         * our buildCallback.
+         */
         return experimentVariants;
       } catch (e) {
         // Ensure downstream consumers don't wait for the promise forever.
@@ -146,10 +154,11 @@ export class AmpExperiment extends AMP.BaseElement {
     for (let i = 0; i < experimentToVariantKeys.length; i++) {
       const experimentKey = experimentToVariantKeys[i];
       const variantKey = experimentToVariant[experimentKey];
-      const variant = config[experimentKey]['variants'][variantKey];
-      if (variant.mutations) {
-        totalMutations += variant.mutations.length;
-      }
+      const variant =
+        /** @type {!JsonObject} */ (config[experimentKey]['variants'][
+          variantKey
+        ]);
+      totalMutations += variant['mutations'].length;
     }
 
     if (totalMutations > MAX_MUTATIONS) {
