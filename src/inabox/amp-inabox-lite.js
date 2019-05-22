@@ -25,7 +25,8 @@ import {
 } from '../service/navigation';
 import {Services} from '../services';
 import {adopt, installBuiltins, installRuntimeServices} from '../runtime';
-import {cssText} from '../../build/css';
+import {cssText as ampDocCss} from '../../build/ampdoc-css';
+import {cssText as ampElementCss} from '../../build/ampelement-css';
 import {fontStylesheetTimeout} from '../font-stylesheet-timeout';
 import {getMode} from '../mode';
 import {installDocService} from '../service/ampdoc-impl';
@@ -82,7 +83,9 @@ installPerformanceService(self); // TODO: to be removed
 
 self.document.documentElement.classList.add('i-amphtml-inabox');
 const fullCss =
-  cssText + 'html.i-amphtml-inabox{width:100%!important;height:100%!important}';
+  ampDocCss +
+  ampElementCss +
+  'html.i-amphtml-inabox{width:100%!important;height:100%!important}';
 installStylesForDoc(
   ampdoc,
   fullCss,

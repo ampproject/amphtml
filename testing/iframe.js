@@ -19,7 +19,8 @@ import {BindEvents} from '../extensions/amp-bind/0.1/bind-events';
 import {FakeLocation} from './fake-dom';
 import {FormEvents} from '../extensions/amp-form/0.1/form-events';
 import {Services} from '../src/services';
-import {cssText} from '../build/css';
+import {cssText as ampDocCss} from '../build/ampdoc-css';
+import {cssText as ampElementCss} from '../build/ampelement-css';
 import {deserializeMessage, isAmpMessage} from '../src/3p-frame-messaging';
 import {installAmpdocServices, installRuntimeServices} from '../src/runtime';
 import {install as installCustomElements} from '../src/polyfills/custom-elements';
@@ -255,40 +256,44 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
       installAmpdocServices(ampdoc);
       Services.resourcesForDoc(ampdoc).ampInitComplete();
       // Act like no other elements were loaded by default.
-      installStylesLegacy(iframe.contentWindow.document, cssText, () => {
-        resolve({
-          win: iframe.contentWindow,
-          doc: iframe.contentWindow.document,
-          ampdoc,
-          iframe,
-          addElement: function(element) {
-            const iWin = iframe.contentWindow;
-            const p = onInsert(iWin)
-              .then(() => {
-                return element.build();
-              })
-              .then(() => {
-                if (!element.getPlaceholder()) {
-                  const placeholder = element.createPlaceholder();
-                  if (placeholder) {
-                    element.appendChild(placeholder);
+      installStylesLegacy(
+        iframe.contentWindow.document,
+        ampDocCss + ampElementCss,
+        () => {
+          resolve({
+            win: iframe.contentWindow,
+            doc: iframe.contentWindow.document,
+            ampdoc,
+            iframe,
+            addElement: function(element) {
+              const iWin = iframe.contentWindow;
+              const p = onInsert(iWin)
+                .then(() => {
+                  return element.build();
+                })
+                .then(() => {
+                  if (!element.getPlaceholder()) {
+                    const placeholder = element.createPlaceholder();
+                    if (placeholder) {
+                      element.appendChild(placeholder);
+                    }
                   }
-                }
-                if (element.layoutCount_ == 0) {
-                  if (opt_beforeLayoutCallback) {
-                    opt_beforeLayoutCallback(element);
+                  if (element.layoutCount_ == 0) {
+                    if (opt_beforeLayoutCallback) {
+                      opt_beforeLayoutCallback(element);
+                    }
+                    return element.layoutCallback().then(() => {
+                      return element;
+                    });
                   }
-                  return element.layoutCallback().then(() => {
-                    return element;
-                  });
-                }
-                return element;
-              });
-            iWin.document.getElementById('parent').appendChild(element);
-            return p;
-          },
-        });
-      });
+                  return element;
+                });
+              iWin.document.getElementById('parent').appendChild(element);
+              return p;
+            },
+          });
+        }
+      );
     };
     iframe.onerror = reject;
     document.body.appendChild(iframe);
