@@ -24,4 +24,5 @@ export function adop(global, data) {
   validateData(data, ['z']);
   global.adop = data;
   writeScript(global, 'https://compass.adop.cc/assets/js/adop/amp.js');
+
 }

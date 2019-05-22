@@ -77,7 +77,7 @@ import {adman} from '../ads/adman';
 import {admanmedia} from '../ads/admanmedia';
 import {admixer} from '../ads/admixer';
 import {adocean} from '../ads/adocean';
-import {adop} from '../ads/adop';
+import {adop}  from '../ads/adop';
 import {adpicker} from '../ads/adpicker';
 import {adplugg} from '../ads/adplugg';
 import {adpon} from '../ads/adpon';
