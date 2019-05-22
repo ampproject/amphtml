@@ -16,8 +16,14 @@
 
 import {pubmine} from '../../../ads/pubmine';
 
-describes.fakeWin('amp-ad-csa-impl', {}, env => {
+describes.fakeWin('pubmine', {}, env => {
   let win;
+  const mockData = {
+    siteid: 'amp-test',
+    section: 1,
+    pt: 2,
+    ht: 2,
+  };
 
   function getPubmineScriptElement() {
     return win.document.querySelector(
@@ -25,52 +31,44 @@ describes.fakeWin('amp-ad-csa-impl', {}, env => {
     );
   }
 
+  function getSlotElement() {
+    return win.document.querySelector('#atatags-amp-test1');
+  }
+
   beforeEach(() => {
     win = env.win;
     win.document.body.innerHTML = '<div id="c"></div>';
   });
 
-  describe('pubmine', () => {
-    it('should set pubmine publisher config on global if loader in a master frame', () => {
-      win.context = {
-        isMaster: true,
-      };
-      const mockData = {
-        siteid: 'amp-test',
-        section: 1,
-        pt: 2,
-        ht: 2,
-      };
-      const expectedConfig = {
-        pt: 2,
-        ht: 2,
-        tn: 'amp',
-        amp: true,
-      };
-      pubmine(win, mockData);
-      expect(win.__ATA_PP).to.deep.equal(expectedConfig);
-      expect(win.__ATA.cmd).to.be.an('array');
-      expect(win.__ATA.cmd).to.have.length(1);
-      expect(getPubmineScriptElement()).not.to.equal(null);
-    });
+  it('should set pubmine publisher config on global if loader in a master frame', () => {
+    win.context = {
+      isMaster: true,
+    };
+    const expectedConfig = {
+      pt: 2,
+      ht: 2,
+      tn: 'amp',
+      amp: true,
+    };
+    pubmine(win, mockData);
+    expect(win.__ATA_PP).to.deep.equal(expectedConfig);
+    expect(win.__ATA.cmd).to.be.an('array');
+    expect(win.__ATA.cmd).to.have.length(1);
+    expect(getPubmineScriptElement()).to.be.ok;
+    expect(getSlotElement()).to.be.ok;
+  });
 
-    it('should add a command and not to load the script if loaded in a slave frame', () => {
-      win.__ATA = {
-        cmd: [],
-      };
-      win.context = {
-        isMaster: false,
-        master: win,
-      };
-      const mockData = {
-        siteid: 'amp-test',
-        section: 1,
-        pt: 2,
-        ht: 2,
-      };
-      pubmine(win, mockData);
-      expect(win.context.master.__ATA.cmd).to.have.length(1);
-      expect(getPubmineScriptElement()).to.equal(null);
-    });
+  it('should add a command and not to load the script if loaded in a slave frame', () => {
+    win.__ATA = {
+      cmd: [],
+    };
+    win.context = {
+      isMaster: false,
+      master: win,
+    };
+    pubmine(win, mockData);
+    expect(win.context.master.__ATA.cmd).to.have.length(1);
+    expect(getPubmineScriptElement()).to.be.null;
+    expect(getSlotElement()).to.be.ok;
   });
 });
