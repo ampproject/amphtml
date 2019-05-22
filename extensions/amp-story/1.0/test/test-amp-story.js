@@ -96,9 +96,8 @@ describes.realWin(
         .withArgs('swipe')
         .returns(hasSwipeCapability);
 
-      sandbox
-        .stub(Services, 'storyStoreService')
-        .callsFake(() => new AmpStoryStoreService(win));
+      const storeService = new AmpStoryStoreService(win);
+      registerServiceBuilder(win, 'story-store', () => storeService);
 
       element = win.document.createElement('amp-story');
       win.document.body.appendChild(element);
@@ -339,10 +338,10 @@ describes.realWin(
       const firstPageId = 'page-one';
       const pageCount = 2;
       createPages(story.element, pageCount, [firstPageId, 'page-1']);
-      const dispatchStub = sandbox.stub(story.storeService_, 'dispatch');
+      const dispatchSpy = sandbox.spy(story.storeService_, 'dispatch');
 
       return story.layoutCallback().then(() => {
-        expect(dispatchStub).to.have.been.calledWith(Action.CHANGE_PAGE, {
+        expect(dispatchSpy).to.have.been.calledWith(Action.CHANGE_PAGE, {
           id: firstPageId,
           index: 0,
         });
@@ -771,10 +770,10 @@ describes.realWin(
       it('should not display layout', () => {
         AmpStory.isBrowserSupported = () => false;
         story = new AmpStory(element);
-        const dispatchStub = sandbox.stub(story.storeService_, 'dispatch');
+        const dispatchSpy = sandbox.spy(story.storeService_, 'dispatch');
         createPages(story.element, 2, ['cover', 'page-4']);
         return story.layoutCallback().then(() => {
-          expect(dispatchStub).to.have.been.calledWith(
+          expect(dispatchSpy).to.have.been.calledWith(
             Action.TOGGLE_SUPPORTED_BROWSER,
             false
           );
@@ -784,7 +783,7 @@ describes.realWin(
       it('should display the story after clicking "continue" button', () => {
         AmpStory.isBrowserSupported = () => false;
         story = new AmpStory(element);
-        const dispatchStub = sandbox.stub(
+        const dispatchSpy = sandbox.spy(
           story.unsupportedBrowserLayer_.storeService_,
           'dispatch'
         );
@@ -798,7 +797,7 @@ describes.realWin(
             story.unsupportedBrowserLayer_.continueButton_.click();
           })
           .then(() => {
-            expect(dispatchStub).to.have.been.calledWith(
+            expect(dispatchSpy).to.have.been.calledWith(
               Action.TOGGLE_SUPPORTED_BROWSER,
               true
             );
