@@ -467,7 +467,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     );
     const el = this.lightboxControls_.getElement();
     el.addEventListener('action', event => {
-      switch (getDetail(event).action) {
+      switch (getDetail(event)['action']) {
         case LightboxControlsAction.CLOSE:
           this.close_();
           break;

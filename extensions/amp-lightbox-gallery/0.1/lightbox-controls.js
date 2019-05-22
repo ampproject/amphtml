@@ -17,6 +17,7 @@
 import {Services} from '../../../src/services';
 import {createCustomEvent} from '../../../src/event-helper';
 import {devAssert} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {htmlFor} from '../../../src/static-template';
 import {toArray} from '../../../src/types';
 
@@ -39,7 +40,7 @@ export class LightboxControls {
    * @param {!Window} win
    * @param {!Document} doc
    * @param {function(function(), function())} measureMutateElement
-   * @return {!LightboxCaption} A LightboxCaption instance.
+   * @return {!LightboxControls} A LightboxCaption instance.
    */
   static build(win, doc, measureMutateElement) {
     // TODO(aghassemi): i18n and customization. See https://git.io/v6JWu
@@ -134,9 +135,13 @@ export class LightboxControls {
     }
 
     this.element_.dispatchEvent(
-      createCustomEvent(this.win_, 'action', {
-        action,
-      })
+      createCustomEvent(
+        this.win_,
+        'action',
+        dict({
+          'action': action,
+        })
+      )
     );
     event.stopPropagation();
     event.preventDefault();
