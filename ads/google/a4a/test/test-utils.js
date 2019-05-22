@@ -872,27 +872,31 @@ describe('Google A4A utils', () => {
       );
     });
 
-    it('should not fetch if INSUFFICIENT consent', () => {
-      sandbox.stub(Services, 'consentPolicyServiceForDocOrNull').returns(
-        Promise.resolve({
-          whenPolicyResolved: () => CONSENT_POLICY_STATE.INSUFFICIENT,
-        })
-      );
-      return expect(
-        getIdentityToken(env.win, env.ampdoc, 'default')
-      ).to.eventually.jsonEqual({});
-    });
+    it.configure()
+      .skipFirefox()
+      .run('should not fetch if INSUFFICIENT consent', () => {
+        sandbox.stub(Services, 'consentPolicyServiceForDocOrNull').returns(
+          Promise.resolve({
+            whenPolicyResolved: () => CONSENT_POLICY_STATE.INSUFFICIENT,
+          })
+        );
+        return expect(
+          getIdentityToken(env.win, env.ampdoc, 'default')
+        ).to.eventually.jsonEqual({});
+      });
 
-    it('should not fetch if UNKNOWN consent', () => {
-      sandbox.stub(Services, 'consentPolicyServiceForDocOrNull').returns(
-        Promise.resolve({
-          whenPolicyResolved: () => CONSENT_POLICY_STATE.UNKNOWN,
-        })
-      );
-      return expect(
-        getIdentityToken(env.win, env.ampdoc, 'default')
-      ).to.eventually.jsonEqual({});
-    });
+    it.configure()
+      .skipFirefox()
+      .run('should not fetch if UNKNOWN consent', () => {
+        sandbox.stub(Services, 'consentPolicyServiceForDocOrNull').returns(
+          Promise.resolve({
+            whenPolicyResolved: () => CONSENT_POLICY_STATE.UNKNOWN,
+          })
+        );
+        return expect(
+          getIdentityToken(env.win, env.ampdoc, 'default')
+        ).to.eventually.jsonEqual({});
+      });
   });
 
   describe('variables for amp-analytics', () => {

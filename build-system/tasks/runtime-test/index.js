@@ -131,8 +131,8 @@ function getConfig() {
       : [
           // With --saucelabs_lite, a subset of the unit tests are run.
           // Only browsers that support chai-as-promised may be included below.
-          // TODO(rsimha): Add more browsers to this list. #6039.
           'SL_Safari_12',
+          'SL_Firefox',
         ];
 
     return Object.assign({}, karmaDefault, {

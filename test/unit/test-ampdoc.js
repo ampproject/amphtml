@@ -247,6 +247,7 @@ describe('AmpDocService', () => {
     // TODO(dvoytenko, #11827): Make this test work on Safari.
     it.configure()
       .skipSafari()
+      .skipFirefox()
       .run('should navigate via host', () => {
         if (!shadowRoot) {
           return;
