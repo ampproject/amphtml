@@ -26,7 +26,7 @@ min_validator_revision_required: 375
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 873
+spec_file_revision: 876
 
 styles_spec_url: "https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages"
 script_spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags"
@@ -509,6 +509,25 @@ tags: {
     dispatch_key: NAME_VALUE_DISPATCH
   }
 }
+# AMP & AMP4ADS metadata, name=amp-experiments-opt-out
+# https://github.com/lannka/amphtml/blob/master/tools/experiments/README.md
+tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  tag_name: "META"
+  spec_name: "meta name=amp-experiments-opt-out"
+  mandatory_parent: "HEAD"
+  attrs: {
+    name: "content"
+    mandatory: true
+  }
+  attrs: {
+    name: "name"
+    mandatory: true
+    value_casei: "amp-experiments-opt-out"
+    dispatch_key: NAME_VALUE_DISPATCH
+  }
+}
 # AMP metadata, name=amp-3p-iframe-src
 tags: {
   html_format: AMP
@@ -566,6 +585,7 @@ tags: {
     value_casei: "amp-experiment-token"
     dispatch_key: NAME_VALUE_DISPATCH
   }
+  satisfies: "amp-experiment-token"
 }
 # AMP metadata, name=amp-link-variable-allowed-origin
 # https://github.com/ampproject/amphtml/issues/8132
