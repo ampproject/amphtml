@@ -70,7 +70,7 @@ let describesConfig = null;
 const capabilitiesKeys = {
   'chrome': 'chromeOptions',
   'firefox': 'moz:firefoxOptions',
-}
+};
 
 /**
  * Configure all tests. This may only be called once, since it is only read once
@@ -410,10 +410,10 @@ class EndToEndFixture {
  * @param {!DescribesConfigDef} describesConfig
  * @param {string} browserName
  */
-async function getController({
-  engine = 'selenium',
-  headless = false,
-}, browserName) {
+async function getController(
+  {engine = 'selenium', headless = false},
+  browserName
+) {
   if (engine == 'puppeteer') {
     const browser = await createPuppeteer({headless});
     return new PuppeteerController(browser);

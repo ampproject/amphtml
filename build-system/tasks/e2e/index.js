@@ -165,7 +165,8 @@ e2e.flags = {
   'files': '  Run tests found in a specific path (ex: **/test-e2e/*.js)',
   'testnames': '  Lists the name of each test being run',
   'watch': '  Watches for changes in files, runs corresponding test(s)',
-  'engine': '  The automation engine that orchestrates the browser. ' +
-      'Options are `puppeteer` or `selenium`. Default: `selenium`',
+  'engine':
+    '  The automation engine that orchestrates the browser. ' +
+    'Options are `puppeteer` or `selenium`. Default: `selenium`',
   'headless': '  Runs the browser in headless mode',
 };
