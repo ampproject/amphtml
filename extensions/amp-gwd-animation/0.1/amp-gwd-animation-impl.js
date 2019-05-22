@@ -187,7 +187,10 @@ export class AmpGwdRuntimeService {
     });
   }
 
-  /** @override @nocollapse */
+  /**
+   * @param {!Window} embedWin
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   */
   static installInEmbedWindow(embedWin, ampdoc) {
     installServiceInEmbedScope(
       embedWin,

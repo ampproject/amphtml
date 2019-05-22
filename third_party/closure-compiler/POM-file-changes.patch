@@ -1,24 +1,23 @@
-From 252d7b8a79d38ba2c99365109cc2c5cb8045bd86 Mon Sep 17 00:00:00 2001
+From 4314a4c9f74eaafac6b5ad70f6aa4c27f0b6f961 Mon Sep 17 00:00:00 2001
 From: Raghu Simha <rsimha@ampproject.org>
-Date: Thu, 15 Nov 2018 11:04:29 -0500
+Date: Wed, 22 May 2019 14:20:12 -0400
 Subject: [PATCH] POM file changes
 
 ---
- pom-gwt.xml         | 8 ++++----
+ pom-gwt.xml         | 4 ----
  pom-main-shaded.xml | 2 +-
- pom-main.xml        | 8 ++++----
- 3 files changed, 9 insertions(+), 9 deletions(-)
+ pom-main.xml        | 4 ----
+ 3 files changed, 1 insertion(+), 9 deletions(-)
 
 diff --git a/pom-gwt.xml b/pom-gwt.xml
-index 17b1c10e9..3a76b17c2 100644
+index a17a989ba..45a61c692 100644
 --- a/pom-gwt.xml
 +++ b/pom-gwt.xml
-@@ -108,21 +108,21 @@
+@@ -108,21 +108,18 @@
        <groupId>com.google.truth</groupId>
        <artifactId>truth</artifactId>
-       <version>0.41</version>
+       <version>0.44</version>
 -      <scope>test</scope>
-+
      </dependency>
  
      <dependency>
@@ -26,7 +25,6 @@ index 17b1c10e9..3a76b17c2 100644
        <artifactId>mockito-core</artifactId>
        <version>2.2.21</version>
 -      <scope>test</scope>
-+
      </dependency>
  
      <dependency>
@@ -34,21 +32,19 @@ index 17b1c10e9..3a76b17c2 100644
        <artifactId>guava-testlib</artifactId>
        <!-- See <dependencyManagement> in pom.xml for <version> -->
 -      <scope>test</scope>
-+
      </dependency>
  
      <!-- Ant is a provided scope as it is only needed to compile; ant will provide itself when using the jar -->
-@@ -137,7 +137,7 @@
+@@ -137,7 +134,6 @@
        <groupId>junit</groupId>
        <artifactId>junit</artifactId>
        <version>4.12</version>
 -      <scope>test</scope>
-+
      </dependency>
  
      <dependency>
 diff --git a/pom-main-shaded.xml b/pom-main-shaded.xml
-index a6f7aa03d..280302219 100644
+index 1bd5a201e..ad1c8e73d 100644
 --- a/pom-main-shaded.xml
 +++ b/pom-main-shaded.xml
 @@ -78,7 +78,7 @@
@@ -61,24 +57,22 @@ index a6f7aa03d..280302219 100644
                  <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                    <mainClass>com.google.javascript.jscomp.CommandLineRunner</mainClass>
 diff --git a/pom-main.xml b/pom-main.xml
-index 8dea161d2..50af5c124 100644
+index c30bfe37f..1c0637cfa 100644
 --- a/pom-main.xml
 +++ b/pom-main.xml
-@@ -116,7 +116,7 @@
+@@ -116,7 +116,6 @@
        <groupId>com.google.truth</groupId>
        <artifactId>truth</artifactId>
-       <version>0.41</version>
+       <version>0.44</version>
 -      <scope>test</scope>
-+
      </dependency>
  
      <!-- Ant is a provided scope as it is only needed to compile; ant will provide itself when using the jar -->
-@@ -131,21 +131,21 @@
+@@ -131,21 +130,18 @@
        <groupId>junit</groupId>
        <artifactId>junit</artifactId>
        <version>4.12</version>
 -      <scope>test</scope>
-+
      </dependency>
  
      <dependency>
@@ -86,7 +80,6 @@ index 8dea161d2..50af5c124 100644
        <artifactId>mockito-core</artifactId>
        <version>2.2.21</version>
 -      <scope>test</scope>
-+
      </dependency>
  
      <dependency>
@@ -94,10 +87,9 @@ index 8dea161d2..50af5c124 100644
        <artifactId>guava-testlib</artifactId>
        <!-- See <dependencyManagement> in pom.xml for <version> -->
 -      <scope>test</scope>
-+
      </dependency>
    </dependencies>
  
 -- 
-2.21.0.392.gf8f6787159e-goog
+2.21.0.1020.gf2820cf01a-goog
 

@@ -52,10 +52,6 @@ FormDataWrapperInterface.prototype.entries = function() {};
 FormDataWrapperInterface.prototype.getFormData = function() {};
 
 FormData.prototype.entries = function () {};
-/**
- * @param {string} unusedName
- */
-FormData.prototype.delete = function (unusedName) {};
 
 /**
  * A type for Objects that can be JSON serialized or that come from

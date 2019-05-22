@@ -81,7 +81,10 @@ export class StandardActions {
     this.installActions_(Services.actionServiceForDoc(context));
   }
 
-  /** @override @nocollapse */
+  /**
+   * @param {!Window} embedWin
+   * @param {!./ampdoc-impl.AmpDoc} ampdoc
+   */
   static installInEmbedWindow(embedWin, ampdoc) {
     installServiceInEmbedScope(
       embedWin,

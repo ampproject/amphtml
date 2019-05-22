@@ -358,7 +358,9 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       jscomp_error: [],
       // moduleLoad: Demote "module not found" errors to ignore missing files
       //     in type declarations in the swg.js bundle.
-      jscomp_warning: ['moduleLoad'],
+      // accessControls: Demote "Access to private variable" errors to allow
+      //     AMP code to access variables in other files.
+      jscomp_warning: ['moduleLoad', 'accessControls'],
       // Turn off warning for "Unknown @define" since we use define to pass
       // args such as FORTESTING to our runner.
       jscomp_off: ['unknownDefines'],
