@@ -1001,6 +1001,18 @@ Fly from left!
 </h2>
 ```
 
+##### animate-in-timing-function [optional]
+
+Use this attribute to specify the timing function (animation curve) of the entrance animation. The default timing function depends on the animation preset you specified.
+
+*Example*: A heading flies in from left of the page and the animation decelerates (ease-out).
+
+```html
+<h2 animate-in="fly-in-left" animate-in-timing-function="cubic-bezier(0.0, 0.0, 0.2, 1)" >
+Fly from left!
+</h2>
+```
+
 ##### animate-in-delay [optional]
 
 Use this attribute to specify the delay before starting the animation. The value must be greater than or equal to 0, in seconds or milliseconds (for example, 0.2s or 200ms). The default delay depends on the animation preset you specified.
