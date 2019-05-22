@@ -5532,10 +5532,10 @@ eslint-plugin-chai-expect@2.0.1:
   resolved "https://registry.yarnpkg.com/eslint-plugin-chai-expect/-/eslint-plugin-chai-expect-2.0.1.tgz#0f9267745feafa723b8ec1bb151c073df5558f60"
   integrity sha512-HiFoh9F9grVdVQEIwADwPA7SlcGZcsm9gdzZGDoH2SeUoUmYrUuq1cQmfjyOfqRpFOL6qlhcz5nZW2ppTH9ZlQ==
 
-eslint-plugin-eslint-plugin@2.0.1:
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-eslint-plugin/-/eslint-plugin-eslint-plugin-2.0.1.tgz#d275434969dbde3da1d4cb7a121dc8d88457c786"
-  integrity sha512-kJ5TZsRJH/xYstG07v3YeOy/W5SDAEzV+bvvoL0aiG1HtqDmg4mJvNPnn/JngANMmsx8oXlJrIcBTCpJzm+9kg==
+eslint-plugin-eslint-plugin@2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-eslint-plugin/-/eslint-plugin-eslint-plugin-2.1.0.tgz#a7a00f15a886957d855feacaafee264f039e62d5"
+  integrity sha512-kT3A/ZJftt28gbl/Cv04qezb/NQ1dwYIbi8lyf806XMxkus7DvOVCLIfTXMrorp322Pnoez7+zabXH29tADIDg==
 
 eslint-plugin-google-camelcase@0.0.2:
   version "0.0.2"
