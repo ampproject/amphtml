@@ -111,6 +111,12 @@ describes.realWin(
             .true;
           expect(impl.nextButton_.classList.contains('amp-disabled')).to.be
             .false;
+          // Controls are hidden from screen readers as they do not provide
+          // any functionality for scrollable carousel.
+          // ATs see this is a scrolling div and can scroll it as user navigates
+          // items just fine (unlike type=slide which requires next/prev)
+          expect(impl.nextButton_.getAttribute('role')).equal('presentation');
+          expect(impl.prevButton_.getAttribute('role')).equal('presentation');
         });
       }
     );
