@@ -221,10 +221,9 @@ export class SystemLayer {
   }
 
   /**
-   * @param {!Array<string>} pageIds the ids of each page in the story
    * @return {!Element}
    */
-  build(pageIds) {
+  build() {
     if (this.isBuilt_) {
       return this.getRoot();
     }
@@ -237,7 +236,7 @@ export class SystemLayer {
     createShadowRootWithStyle(this.root_, this.systemLayerEl_, CSS);
 
     this.systemLayerEl_.insertBefore(
-      this.progressBar_.build(pageIds),
+      this.progressBar_.build(),
       this.systemLayerEl_.firstChild
     );
 
