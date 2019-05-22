@@ -49,7 +49,7 @@ amp-autocomplete > input {
   margin-bottom: .5rem; /* default-ui-space-small */
 }
 
-.i-amphtml-autocomplete-item, .autocomplete-fallback {
+.i-amphtml-autocomplete-item {
   position: relative;
   padding: .5rem 1rem; /* default-ui-space-small default-ui-space-medium */
   cursor: pointer;
