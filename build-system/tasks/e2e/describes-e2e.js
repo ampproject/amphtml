@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-// import to install chromedriver and gecko driver
+// import to install chromedriver and geckodriver
 require('chromedriver'); // eslint-disable-line no-unused-vars
 require('geckodriver'); // eslint-disable-line no-unused-vars
 
