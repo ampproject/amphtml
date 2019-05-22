@@ -89,13 +89,14 @@ export class ExpansionOptions {
 }
 
 /**
- * @param {string} str
+ * @param {*} value
  * @param {string} s
  * @param {string=} opt_l
  * @return {string}
  */
-function substrMacro(str, s, opt_l) {
+function substrMacro(value, s, opt_l) {
   const start = Number(s);
+  const str = value.toString();
   let {length} = str;
   userAssert(
     isFiniteNumber(start),
