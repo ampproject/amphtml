@@ -524,7 +524,9 @@ export class AmpAnalytics extends AMP.BaseElement {
             request,
             this.preconnect,
             this.transport_,
-            this.isSandbox_
+            this.isSandbox_,
+            // pass in request origin because it is declared outside of request
+            this.config_['requestOrigin']
           );
         }
       }

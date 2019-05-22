@@ -47,17 +47,63 @@ describes.realWin('Requests', {amp: 1}, env => {
     clock.uninstall();
   });
 
-  function createRequestHandler(request, spy) {
+  function createRequestHandler(request, spy, requestOrigin) {
     return new RequestHandler(
       analyticsElement,
       request,
       preconnect,
       {sendRequest: spy},
-      false
+      false,
+      requestOrigin
     );
   }
 
   describe('RequestHandler', () => {
+    describe('send with request origin', () => {
+      let spy;
+      beforeEach(() => {
+        spy = sandbox.spy();
+      });
+
+      it('should prepend request origin', function*() {
+        const r = {'baseUrl': '/r1'};
+        const requestOrigin = 'http://example.com';
+        const handler = createRequestHandler(r, spy, requestOrigin);
+        const expansionOptions = new ExpansionOptions({});
+
+        handler.send({}, {}, expansionOptions, {});
+        yield macroTask();
+        expect(spy).to.be.calledWith('http://example.com/r1');
+      });
+
+      it('should expand request origin', function*() {
+        const r = {'baseUrl': '/r2'};
+        const requestOrigin = '${documentReferrer}';
+        const handler = createRequestHandler(r, spy, requestOrigin);
+        const expansionOptions = new ExpansionOptions({
+          'documentReferrer': 'http://example.com',
+        });
+
+        handler.send({}, {}, expansionOptions, {});
+        yield macroTask();
+        expect(spy).to.be.calledWith('http://example.com/r2');
+      });
+
+      it('should expand nested request origin', function*() {
+        const r = {'baseUrl': '/r3'};
+        const requestOrigin = '${a}';
+        const handler = createRequestHandler(r, spy, requestOrigin);
+        const expansionOptions = new ExpansionOptions({
+          'a': '${b}',
+          'b': 'http://example.com',
+        });
+
+        handler.send({}, {}, expansionOptions, {});
+        yield macroTask();
+        expect(spy).to.be.calledWith('http://example.com/r3');
+      });
+    });
+
     describe('batch', () => {
       it('should batch multiple send', function*() {
         const spy = sandbox.spy();

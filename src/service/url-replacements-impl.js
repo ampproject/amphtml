@@ -967,15 +967,17 @@ export class UrlReplacements {
    * @param {!Object<string, *>=} opt_bindings
    * @param {!Object<string, boolean>=} opt_whiteList Optional white list of names
    *     that can be substituted.
+   * @param {boolean} opt_noEncode should not encode URL
    * @return {!Promise<string>}
    */
-  expandUrlAsync(url, opt_bindings, opt_whiteList) {
+  expandUrlAsync(url, opt_bindings, opt_whiteList, opt_noEncode) {
     return /** @type {!Promise<string>} */ (new Expander(
       this.variableSource_,
       opt_bindings,
       /* opt_collectVars */ undefined,
       /* opt_sync */ undefined,
-      opt_whiteList
+      opt_whiteList,
+      opt_noEncode
     )
       ./*OK*/ expand(url)
       .then(replacement => this.ensureProtocolMatches_(url, replacement)));

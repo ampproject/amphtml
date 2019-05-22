@@ -36,8 +36,16 @@ export class RequestHandler {
    * @param {!../../../src/preconnect.Preconnect} preconnect
    * @param {./transport.Transport} transport
    * @param {boolean} isSandbox
+   * @param {string} requestOrigin
    */
-  constructor(element, request, preconnect, transport, isSandbox) {
+  constructor(
+    element,
+    request,
+    preconnect,
+    transport,
+    isSandbox,
+    requestOrigin
+  ) {
     /** @const {!Element} */
     this.element_ = element;
 
@@ -46,6 +54,9 @@ export class RequestHandler {
 
     /** @const {!Window} */
     this.win = this.ampdoc_.win;
+
+    /** @const {string} !if specified, all requests are prepended with this */
+    this.requestOrigin = requestOrigin;
 
     /** @const {string} */
     this.baseUrl = devAssert(request['baseUrl']);
@@ -133,10 +144,46 @@ export class RequestHandler {
 
     if (!this.baseUrlPromise_) {
       expansionOption.freezeVar('extraUrlParams');
-      this.baseUrlTemplatePromise_ = this.variableService_.expandTemplate(
-        this.baseUrl,
-        expansionOption
-      );
+
+      // expand requestOrigin if it is declared
+      if (this.requestOrigin) {
+        const baseUrlTemplatePromise = this.variableService_.expandTemplate(
+          this.baseUrl,
+          expansionOption
+        );
+
+        // do not encode vars in request origin
+        const requestOriginExpansionOpt = {...expansionOption, noEncode: true};
+
+        const requestOriginPromise = this.variableService_
+          // expand variables in request origin
+          .expandTemplate(this.requestOrigin, requestOriginExpansionOpt)
+          // substitute in URL values e.g. DOCUMENT_REFERRER -> https://example.com
+          .then(expandedRequestOrigin => {
+            return this.urlReplacementService_.expandUrlAsync(
+              expandedRequestOrigin,
+              bindings,
+              this.whitelist_,
+              true // opt_noEncode
+            );
+          });
+
+        this.baseUrlTemplatePromise_ = Promise.all([
+          requestOriginPromise,
+          baseUrlTemplatePromise,
+        ]).then(promiseValues => {
+          // remove trailing forward slashes in request origin
+          const requestOrigin = promiseValues[0].replace(/\/+$/, '');
+          const baseUrl = promiseValues[1];
+          return requestOrigin + baseUrl;
+        });
+      } else {
+        this.baseUrlTemplatePromise_ = this.variableService_.expandTemplate(
+          this.baseUrl,
+          expansionOption
+        );
+      }
+
       this.baseUrlPromise_ = this.baseUrlTemplatePromise_.then(baseUrl => {
         return this.urlReplacementService_.expandUrlAsync(
           baseUrl,
