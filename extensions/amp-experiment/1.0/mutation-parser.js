@@ -40,7 +40,7 @@ export function parseMutation(mutation, document) {
 
   const stringifiedMutation = JSON.stringify(mutation);
 
-  setSelectorToElement('target', mutationRecord, document);
+  setSelectorToElement(mutationRecord, document);
 
   if (mutationRecord['type'] === 'attributes') {
     assertAttributeMutationFormat(mutationRecord, stringifiedMutation);
@@ -55,7 +55,7 @@ export function parseMutation(mutation, document) {
     // Assert the attribute mutation passes it's check
     // that is allowed and validated.
     userAssert(
-      allowedAttributeMutationEntry.validate(mutationRecord['value']),
+      allowedAttributeMutationEntry.validate(mutationRecord),
       'Mutation %s has an an unsupported value.',
       stringifiedMutation
     );
@@ -64,6 +64,8 @@ export function parseMutation(mutation, document) {
     // For the allowed attribute mutation
     return allowedAttributeMutationEntry.mutate.bind(this, mutationRecord);
   } else if (mutationRecord['type'] === 'characterData') {
+    // TODO (torch2424) #21705: When we implement the mutation record
+    // interface, have our validate() noop.
     assertCharacterDataMutationFormat(mutationRecord, stringifiedMutation);
 
     return () => {
@@ -169,18 +171,17 @@ function assertCharacterDataMutationFormat(
  * Function to set the target element from the
  * target selector to the target selector key,
  * and assert that we found the element.
- * @param {string} selectorKey
  * @param {!Object} mutationRecord
  * @param {!Document} document
  */
-function setSelectorToElement(selectorKey, mutationRecord, document) {
-  const targetElement = document.querySelector(mutationRecord[selectorKey]);
+function setSelectorToElement(mutationRecord, document) {
+  const targetElement = document.querySelector(mutationRecord['target']);
 
   userAssert(
     targetElement !== null,
     'No element on the document matches the selector, %s .',
-    mutationRecord[selectorKey]
+    mutationRecord['target']
   );
 
-  mutationRecord[selectorKey + 'Element'] = targetElement;
+  mutationRecord['targetElement'] = targetElement;
 }

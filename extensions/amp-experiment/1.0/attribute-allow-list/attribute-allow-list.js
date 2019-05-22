@@ -46,7 +46,7 @@ export function getAllowedAttributeMutationEntry(
 
   // Search through the allow list for our
   // Allowed attribute entry
-  let allowedAttributeMutationEntry = undefined;
+  let allowedAttributeMutationEntry;
   if (attributeMutationAllowList[mutationAttributeName][mutationTagName]) {
     allowedAttributeMutationEntry =
       attributeMutationAllowList[mutationAttributeName][mutationTagName];

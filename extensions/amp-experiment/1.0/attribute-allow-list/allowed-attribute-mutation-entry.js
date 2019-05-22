@@ -34,11 +34,11 @@ export class AllowedAttributeMutationEntry {
    * Function to validate the value
    * for the attribute change. Subclasses
    * may override.
-   * @param {string} value
+   * @param {!Object} mutationRecord
    * @return {boolean}
    */
-  validate(value) {
-    if (value) {
+  validate(mutationRecord) {
+    if (mutationRecord['value']) {
       return true;
     }
   }
@@ -67,7 +67,9 @@ export class DefaultStyleAllowedAttributeMutationEntry extends AllowedAttributeM
   }
 
   /** @override */
-  validate(value) {
+  validate(mutationRecord) {
+    const value = mutationRecord['value'];
+
     // Do not allow Important or HTML Comments
     if (value.match(/(!\s*important|<!--)/)) {
       return false;
@@ -107,8 +109,12 @@ export class DefaultAllowedURLAttributeMutationEntry extends AllowedAttributeMut
   }
 
   /** @override */
-  validate(value) {
-    assertHttpsUrl(value, 'attributes', 'mutation');
+  validate(mutationRecord) {
+    assertHttpsUrl(
+      mutationRecord['value'],
+      mutationRecord['target'],
+      'attributes mutation'
+    );
     return true;
   }
 }
