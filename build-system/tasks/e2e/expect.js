@@ -186,6 +186,7 @@ function overwriteAlwaysUseSuper(utils) {
           flag(this, 'object', obj);
           // Run the code that checks the condition.
           _super.apply(this, arguments);
+          clearLastExpectError();
           // Let waitForValue know we are done.
           return true;
         } catch (e) {

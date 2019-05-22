@@ -169,7 +169,7 @@ function compile(watch, shouldMinify) {
         watch,
         extraGlobs: ['extensions/amp-viewer-integration/**/*.js'],
         compilationLevel: 'WHITESPACE_ONLY',
-        minify: false,
+        minify: shouldMinify,
       }
     ),
   ];
