@@ -34,39 +34,37 @@ describe('A4A', function() {
       extensions: ['amp-ad'],
     },
     () => {
-      // TODO(#21545): Unskip flaky test
-      it.configure()
-        .skipFirefox()
-        .run('should layout amp-img, amp-pixel, amp-analytics', () => {
-          // See amp4test.js for creative content
-          return Promise.all([
-            RequestBank.withdraw('image'),
-            RequestBank.withdraw('pixel'),
-            RequestBank.withdraw('analytics'),
-          ]).then(reqs => {
-            const imageReq = reqs[0];
-            const pixelReq = reqs[1];
-            const analyticsReq = reqs[2];
-            expect(imageReq.url).to.equal('/');
-            expect(pixelReq.url).to.equal('/foo?cid=');
-            expect(analyticsReq.url).to.match(/^\/bar\?/);
-            const queries = parseQueryString(
-              analyticsReq.url.substr('/bar'.length)
-            );
-            expect(queries).to.include({
-              title: 'AMP TEST', // ${title},
-              cid: '', // ${clientId(a)}
-              navTiming: '0', // ${navTiming(requestStart,requestStart)}
-              navType: '0', // ${navType}
-              navRedirectCount: '0', // ${navRedirectCount}
-            });
-            expect(queries['ampdocUrl']).to.contain(
-              'http://localhost:9876/amp4test/compose-doc?'
-            );
-            expect(queries['canonicalUrl']).to.equal('http://nonblocking.io/');
-            expect(queries['img']).to.contain('/deposit/image'); // ${htmlAttr(amp-img,src)}
+      // TODO(@zombifer, #21545): Unskip flaky test
+      it.skip('should layout amp-img, amp-pixel, amp-analytics', () => {
+        // See amp4test.js for creative content
+        return Promise.all([
+          RequestBank.withdraw('image'),
+          RequestBank.withdraw('pixel'),
+          RequestBank.withdraw('analytics'),
+        ]).then(reqs => {
+          const imageReq = reqs[0];
+          const pixelReq = reqs[1];
+          const analyticsReq = reqs[2];
+          expect(imageReq.url).to.equal('/');
+          expect(pixelReq.url).to.equal('/foo?cid=');
+          expect(analyticsReq.url).to.match(/^\/bar\?/);
+          const queries = parseQueryString(
+            analyticsReq.url.substr('/bar'.length)
+          );
+          expect(queries).to.include({
+            title: 'AMP TEST', // ${title},
+            cid: '', // ${clientId(a)}
+            navTiming: '0', // ${navTiming(requestStart,requestStart)}
+            navType: '0', // ${navType}
+            navRedirectCount: '0', // ${navRedirectCount}
           });
+          expect(queries['ampdocUrl']).to.contain(
+            'http://localhost:9876/amp4test/compose-doc?'
+          );
+          expect(queries['canonicalUrl']).to.equal('http://nonblocking.io/');
+          expect(queries['img']).to.contain('/deposit/image'); // ${htmlAttr(amp-img,src)}
         });
+      });
     }
   );
 
@@ -92,7 +90,8 @@ describe('A4A', function() {
       `,
     },
     env => {
-      it('p[text]', function*() {
+      // TODO(@zombifer, #21545): Unskip flaky test
+      it.skip('p[text]', function*() {
         // Wait for the amp-ad to construct its child iframe.
         const ad = env.win.document.getElementById('i-amphtml-demo-id');
         yield poll('amp-ad > iframe', () => ad.querySelector('iframe'));

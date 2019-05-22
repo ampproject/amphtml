@@ -33,6 +33,7 @@
       },
       "additionalTagNames": {
         "customTags": [
+          "closurePrimitive",
           "deprecated",
           "export",
           "final",

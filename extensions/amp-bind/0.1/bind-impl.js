@@ -204,7 +204,10 @@ export class Bind {
     g.eval = g.eval || this.debugEvaluate_.bind(this);
   }
 
-  /** @override @nocollapse */
+  /**
+   * @param {!Window} embedWin
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   */
   static installInEmbedWindow(embedWin, ampdoc) {
     installServiceInEmbedScope(embedWin, 'bind', new Bind(ampdoc, embedWin));
   }
