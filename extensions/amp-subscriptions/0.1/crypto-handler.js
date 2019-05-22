@@ -93,10 +93,10 @@ export class CryptoHandler {
   /**
    * @private
    * @param {string} encryptedContent
-   * @param {string} documentKey
+   * @param {string} decryptedDocumentKey
    * @return {Promise<string>}
    */
-  decryptDocumentContent_(encryptedContent, documentKey) {
+  decryptDocumentContent_(encryptedContent, decryptedDocumentKey) {
     // 1. Trim and remove all whitespaces (e.g. line breaks).
     encryptedContent = encryptedContent.replace(/\s+/g, '');
 
@@ -105,7 +105,9 @@ export class CryptoHandler {
     const encryptedBytes = base64DecodeToBytes(encryptedContent);
 
     // 3. Get document Key in the correct format.
-    return this.stringToCryptoKey_(documentKey).then(function(formattedDocKey) {
+    return this.stringToCryptoKey_(decryptedDocumentKey).then(function(
+      formattedDocKey
+    ) {
       // 4. Decrypt.
       return crypto.subtle
         .decrypt(
@@ -126,12 +128,12 @@ export class CryptoHandler {
 
   /**
    * @private
-   * @param {string} documentKey
+   * @param {string} decryptedDocumentKey
    * @return {!Promise<!webCrypto.CryptoKey>}
    */
-  stringToCryptoKey_(documentKey) {
+  stringToCryptoKey_(decryptedDocumentKey) {
     // 1. Un-base64 the encrypted content. This way we get the key bytes.
-    const documentKeyBytes = base64DecodeToBytes(documentKey);
+    const documentKeyBytes = base64DecodeToBytes(decryptedDocumentKey);
 
     // 2. Convert bytes to CryptoKey format.
     return crypto.subtle.importKey('raw', documentKeyBytes, 'AES-CTR', true, [
