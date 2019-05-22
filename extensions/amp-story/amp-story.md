@@ -1416,7 +1416,7 @@ All branching features are behind an `amp-story-branching` experiment. To turn o
 For more information see, [experimental features](https://amp.dev/documentation/guides-and-tutorials/learn/experimental.html?format=stories).
 
 ## Manipulating Navigation
-The features listed below allow you to manipulate navigation within a story. When using branching features, navigation throughout the story from a 'branch-off point' will follow the path that a user takes. That is, if a user navigates from page-1 to page-5 and then page-6, navigating backwards will follow this exact path (page-6 to page-5 and finally page-1). The other pages will not be exposed to the user.
+The features listed below allow you to manipulate navigation within a story. When using branching features, navigation throughout the story from a 'branch-off point' will follow the path that a user takes. If a user navigates from `page-1` to `page-5` and then `page-6`, navigating backwards will follow this exact path (`page-6` to `page-5` and finally `page-1`). The other pages will not be exposed to the user.
 
 ### `goToPage` action
 The `goToPage` action allows for 'jumping' from one page within a story to another. The action can be used with allowed elements in `amp-story` and their respective events. Clicking on an element with this action should bring the user to another page within the same story. Using this action **requires** that you give the `amp-story` element an id, a unique identifier, as the story itself is the target.  Read more about actions and events in AMP [here](https://amp.dev/documentation/guides-and-tutorials/learn/amp-actions-and-events.html?format=stories).
@@ -1531,7 +1531,7 @@ The following is a modification of the previous [story with a quiz experience](#
 If the `advance-to` attribute had not been used with the `fallback-answer` value and the user advanced forward without selecting a choice, the story would have presented the the `bacon-answer` page.
 
 ## Sharing Options
-We've added support for creating and sharing URLs to specific pages within the story.
+Specific pages within a story are shareable through URLs. 
 
 ### URL Fragment Parameter
 With branching, AMP Stories now supports URLs in the form of:
@@ -1540,12 +1540,16 @@ https://www.mydomain.com/good-story/#page=<page-id>
 ```
 where `page-id` refers to the unique id of an `amp-story-page`. You can also use the fragment parameter and the `page-id` value like an anchor link in some use cases. See [Integration with Sidebar for Stories](#integrationwithsidebarforstories) for an example.
 ### Sharing a Specific Story Page
-With branching turned on, users will have the option to share the story from the page they are currently seeing. If a user selects the option to share from the page they are currently seeing, the URL generated will be in the form described above. **Important**, branching may expose the `amp-story-page` ids to the user.
+With the branching feature, users will have the option to share the story from the page they are currently seeing. If a user selects the option to share from the page they are currently seeing, the URL generated will be in the form described above.
+
+[tip type="important"]
+**Important**, branching may expose the `amp-story-page` ids to the user.
+[/tip]
 
 ## Integration with Sidebar for Stories
 The use of `amp-sidebar` is supported for use within `amp-story`. See the [Sidebar for Stories documentation](https://amp.dev/documentation/components/amp-sidebar?format=websites#sidebar-for-stories) for information on limitations and caveats.
 
-By using both branching features and `amp-sidebar`, you can create stories that have a table of contents. To do this, make use of the goToPage action and URL fragment parameter.
+By using both branching features and `amp-sidebar`, you can create stories that have a table of contents. To do this, make use of the `goToPage` action and URL fragment parameter.
 
 The following is a modification of the previous [story with a quiz experience](#quiz-example). We add an `amp-sidebar` that has in it both a table of contents and out-links to other links of interest. While there are two valid ways to link to pages within the story within a sidebar, we recommend using the `goToPage` action.
 
