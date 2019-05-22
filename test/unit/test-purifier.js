@@ -24,152 +24,155 @@ import {
 let purify;
 let html;
 
-describe('DOMPurify-based', () => {
-  beforeEach(() => {
-    html = document.createElement('html');
-    const documentEl = {documentElement: html};
-    /**
-     * Helper that serializes output of purifyHtml() to string.
-     * @param {string} html
-     * @param {Document=} doc
-     * @param {boolean=} diffing
-     * @return {string}
-     */
-    purify = (html, diffing = false) => {
-      const body = purifyHtml(html, documentEl, diffing);
-      return body.innerHTML;
-    };
-  });
-
-  runSanitizerTests();
-
-  describe('<script>', () => {
-    it('should not allow plain <script> tags', () => {
-      expect(purify('<script>alert(1)</script>')).to.equal('');
+describe
+  .configure()
+  .skipFirefox()
+  .run('DOMPurify-based', () => {
+    beforeEach(() => {
+      html = document.createElement('html');
+      const documentEl = {documentElement: html};
+      /**
+       * Helper that serializes output of purifyHtml() to string.
+       * @param {string} html
+       * @param {Document=} doc
+       * @param {boolean=} diffing
+       * @return {string}
+       */
+      purify = (html, diffing = false) => {
+        const body = purifyHtml(html, documentEl, diffing);
+        return body.innerHTML;
+      };
     });
 
-    it('should not allow script[type="text/javascript"]', () => {
-      expect(
-        purify('<script type="text/javascript">alert(1)</script>')
-      ).to.equal('');
+    runSanitizerTests();
+
+    describe('<script>', () => {
+      it('should not allow plain <script> tags', () => {
+        expect(purify('<script>alert(1)</script>')).to.equal('');
+      });
+
+      it('should not allow script[type="text/javascript"]', () => {
+        expect(
+          purify('<script type="text/javascript">alert(1)</script>')
+        ).to.equal('');
+      });
+
+      it('should not allow script[type="application/javascript"]', () => {
+        const html = '<script type="application/javascript">alert(1)</script>';
+        expect(purify(html)).to.equal('');
+      });
+
+      it('should allow script[type="application/json"]', () => {
+        const html = '<script type="application/json">{}</script>';
+        expect(purify(html)).to.equal(html);
+      });
+
+      it('should allow script[type="application/ld+json"]', () => {
+        const html = '<script type="application/ld+json">{}</script>';
+        expect(purify(html)).to.equal(html);
+      });
+
+      it('should not allow insecure <script> tags around secure ones', () => {
+        const html = '<script type="application/json">{}</script>';
+        // Should not allow an insecure tag following a secure one.
+        expect(purify(html + '<script>alert(1)</script>')).to.equal(html);
+        // Should not allow an insecure tag preceding a secure one.
+        expect(purify('<script>alert(1)</script>' + html)).to.equal(html);
+        // Should not allow an insecure tag containing a secure one.
+        expect(
+          purify(
+            '<script>alert(1)' +
+              '<script type="application/json">{}</script></script>'
+          )
+        ).to.equal('');
+      });
     });
 
-    it('should not allow script[type="application/javascript"]', () => {
-      const html = '<script type="application/javascript">alert(1)</script>';
-      expect(purify(html)).to.equal('');
+    describe('for <amp-bind>', () => {
+      it('should rewrite [text] and [class] attributes', () => {
+        expect(purify('<p [text]="foo"></p>')).to.be.equal(
+          '<p data-amp-bind-text="foo" i-amphtml-binding=""></p>'
+        );
+        expect(purify('<p [class]="bar"></p>')).to.be.equal(
+          '<p data-amp-bind-class="bar" i-amphtml-binding=""></p>'
+        );
+      });
+
+      it('should add "i-amphtml-binding" for data-amp-bind-*', () => {
+        expect(purify('<p data-amp-bind-text="foo"></p>')).to.be.equal(
+          '<p i-amphtml-binding="" data-amp-bind-text="foo"></p>'
+        );
+      });
+
+      it('should NOT rewrite values of binding attributes', () => {
+        // Should not change "foo.bar".
+        expect(purify('<a [href]="foo.bar">link</a>')).to.equal(
+          '<a data-amp-bind-href="foo.bar" i-amphtml-binding="">link</a>'
+        );
+      });
     });
 
-    it('should allow script[type="application/json"]', () => {
-      const html = '<script type="application/json">{}</script>';
-      expect(purify(html)).to.equal(html);
-    });
-
-    it('should allow script[type="application/ld+json"]', () => {
-      const html = '<script type="application/ld+json">{}</script>';
-      expect(purify(html)).to.equal(html);
-    });
-
-    it('should not allow insecure <script> tags around secure ones', () => {
-      const html = '<script type="application/json">{}</script>';
-      // Should not allow an insecure tag following a secure one.
-      expect(purify(html + '<script>alert(1)</script>')).to.equal(html);
-      // Should not allow an insecure tag preceding a secure one.
-      expect(purify('<script>alert(1)</script>' + html)).to.equal(html);
-      // Should not allow an insecure tag containing a secure one.
-      expect(
-        purify(
-          '<script>alert(1)' +
-            '<script type="application/json">{}</script></script>'
-        )
-      ).to.equal('');
-    });
-  });
-
-  describe('for <amp-bind>', () => {
-    it('should rewrite [text] and [class] attributes', () => {
-      expect(purify('<p [text]="foo"></p>')).to.be.equal(
-        '<p data-amp-bind-text="foo" i-amphtml-binding=""></p>'
-      );
-      expect(purify('<p [class]="bar"></p>')).to.be.equal(
-        '<p data-amp-bind-class="bar" i-amphtml-binding=""></p>'
-      );
-    });
-
-    it('should add "i-amphtml-binding" for data-amp-bind-*', () => {
-      expect(purify('<p data-amp-bind-text="foo"></p>')).to.be.equal(
-        '<p i-amphtml-binding="" data-amp-bind-text="foo"></p>'
-      );
-    });
-
-    it('should NOT rewrite values of binding attributes', () => {
-      // Should not change "foo.bar".
-      expect(purify('<a [href]="foo.bar">link</a>')).to.equal(
-        '<a data-amp-bind-href="foo.bar" i-amphtml-binding="">link</a>'
-      );
-    });
-  });
-
-  // Select SVG XSS tests from https://html5sec.org/#svg.
-  describe('SVG', () => {
-    it('should prevent XSS via <G> tag and onload attribute', () => {
-      const svg =
-        '<svg xmlns="http://www.w3.org/2000/svg">' +
-        '<g onload="javascript:alert(1)"></g></svg>';
-      expect(purify(svg)).to.equal(
-        '<svg xmlns="http://www.w3.org/2000/svg"><g></g></svg>'
-      );
-    });
-
-    it('should prevent XSS via <SCRIPT> tag', () => {
-      const svg =
-        '<svg xmlns="http://www.w3.org/2000/svg">' +
-        '<script>alert(1)</script></svg>';
-      expect(purify(svg)).to.equal(
-        '<svg xmlns="http://www.w3.org/2000/svg"></svg>'
-      );
-    });
-
-    it(
-      'should prevent automatic execution of onload attribute without other ' +
-        'SVG elements',
-      () => {
+    // Select SVG XSS tests from https://html5sec.org/#svg.
+    describe('SVG', () => {
+      it('should prevent XSS via <G> tag and onload attribute', () => {
         const svg =
-          '<svg onload="javascript:alert(1)" ' +
-          'xmlns="http://www.w3.org/2000/svg"></svg>';
+          '<svg xmlns="http://www.w3.org/2000/svg">' +
+          '<g onload="javascript:alert(1)"></g></svg>';
+        expect(purify(svg)).to.equal(
+          '<svg xmlns="http://www.w3.org/2000/svg"><g></g></svg>'
+        );
+      });
+
+      it('should prevent XSS via <SCRIPT> tag', () => {
+        const svg =
+          '<svg xmlns="http://www.w3.org/2000/svg">' +
+          '<script>alert(1)</script></svg>';
         expect(purify(svg)).to.equal(
           '<svg xmlns="http://www.w3.org/2000/svg"></svg>'
         );
-      }
-    );
+      });
 
-    it('should prevent simple passive XSS via XLink', () => {
-      const svg =
-        '<svg xmlns="http://www.w3.org/2000/svg">' +
-        '<a xmlns:xlink="http://www.w3.org/1999/xlink" ' +
-        'xlink:href="javascript:alert(1)">' +
-        '<rect width="1000" height="1000" fill="white"/></a></svg>';
-      expect(purify(svg)).to.equal(
-        '<svg xmlns="http://www.w3.org/2000/svg">' +
-          '<a xmlns:xlink="http://www.w3.org/1999/xlink">' +
-          '<rect fill="white" height="1000" width="1000"></rect></a></svg>'
+      it(
+        'should prevent automatic execution of onload attribute without other ' +
+          'SVG elements',
+        () => {
+          const svg =
+            '<svg onload="javascript:alert(1)" ' +
+            'xmlns="http://www.w3.org/2000/svg"></svg>';
+          expect(purify(svg)).to.equal(
+            '<svg xmlns="http://www.w3.org/2000/svg"></svg>'
+          );
+        }
       );
-    });
 
-    it('should prevent XSS via "from" attribute in SVG and inline-SVG', () => {
-      const svg =
-        '<svg>' +
-        '<a xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="?">' +
-        '<circle r="400"></circle>' +
-        '<animate attributeName="xlink:href" begin="0" ' +
-        'from="javascript:alert(1)" to="&" />' +
-        '</a></svg>';
-      expect(purify(svg)).to.equal(
-        '<svg><a xlink:href="?" xmlns:xlink="http://www.w3.org/1999/xlink">' +
-          '<circle r="400"></circle></a></svg>'
-      );
+      it('should prevent simple passive XSS via XLink', () => {
+        const svg =
+          '<svg xmlns="http://www.w3.org/2000/svg">' +
+          '<a xmlns:xlink="http://www.w3.org/1999/xlink" ' +
+          'xlink:href="javascript:alert(1)">' +
+          '<rect width="1000" height="1000" fill="white"/></a></svg>';
+        expect(purify(svg)).to.equal(
+          '<svg xmlns="http://www.w3.org/2000/svg">' +
+            '<a xmlns:xlink="http://www.w3.org/1999/xlink">' +
+            '<rect fill="white" height="1000" width="1000"></rect></a></svg>'
+        );
+      });
+
+      it('should prevent XSS via "from" attribute in SVG and inline-SVG', () => {
+        const svg =
+          '<svg>' +
+          '<a xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="?">' +
+          '<circle r="400"></circle>' +
+          '<animate attributeName="xlink:href" begin="0" ' +
+          'from="javascript:alert(1)" to="&" />' +
+          '</a></svg>';
+        expect(purify(svg)).to.equal(
+          '<svg><a xlink:href="?" xmlns:xlink="http://www.w3.org/1999/xlink">' +
+            '<circle r="400"></circle></a></svg>'
+        );
+      });
     });
   });
-});
 
 function runSanitizerTests() {
   describe('purifyHtml', () => {

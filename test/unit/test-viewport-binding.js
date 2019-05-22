@@ -327,46 +327,48 @@ describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
     expect(binding.wrapper_).to.have.class('top');
   });
 
-  it('should have CSS setup', () => {
-    win.document.body.style.display = 'table';
-    const htmlCss = win.getComputedStyle(win.document.documentElement);
-    const wrapperCss = win.getComputedStyle(binding.wrapper_);
-    const bodyCss = win.getComputedStyle(win.document.body);
+  it.configure()
+    .skipFirefox()
+    .run('should have CSS setup', () => {
+      win.document.body.style.display = 'table';
+      const htmlCss = win.getComputedStyle(win.document.documentElement);
+      const wrapperCss = win.getComputedStyle(binding.wrapper_);
+      const bodyCss = win.getComputedStyle(win.document.body);
 
-    // `<html>` must have `position: static` or layout is broken.
-    expect(htmlCss.position).to.equal('static');
+      // `<html>` must have `position: static` or layout is broken.
+      expect(htmlCss.position).to.equal('static');
 
-    // `<html>` and `<i-amphtml-wrapper>` must be scrollable, but not `body`.
-    // Unfortunately, we can't test here `-webkit-overflow-scrolling`.
-    expect(htmlCss.overflowY).to.equal('auto');
-    expect(htmlCss.overflowX).to.equal('hidden');
-    expect(wrapperCss.overflowY).to.equal('auto');
-    expect(wrapperCss.overflowX).to.equal('hidden');
-    expect(bodyCss.overflowY).to.equal('visible');
-    expect(bodyCss.overflowX).to.equal('visible');
+      // `<html>` and `<i-amphtml-wrapper>` must be scrollable, but not `body`.
+      // Unfortunately, we can't test here `-webkit-overflow-scrolling`.
+      expect(htmlCss.overflowY).to.equal('auto');
+      expect(htmlCss.overflowX).to.equal('hidden');
+      expect(wrapperCss.overflowY).to.equal('auto');
+      expect(wrapperCss.overflowX).to.equal('hidden');
+      expect(bodyCss.overflowY).to.equal('visible');
+      expect(bodyCss.overflowX).to.equal('visible');
 
-    // Wrapper must be a block and positioned absolute at 0/0/0/0.
-    expect(wrapperCss.display).to.equal('block');
-    expect(wrapperCss.position).to.equal('absolute');
-    expect(wrapperCss.top).to.equal('0px');
-    expect(wrapperCss.left).to.equal('0px');
-    expect(wrapperCss.right).to.equal('0px');
-    expect(wrapperCss.bottom).to.equal('0px');
-    expect(wrapperCss.margin).to.equal('0px');
+      // Wrapper must be a block and positioned absolute at 0/0/0/0.
+      expect(wrapperCss.display).to.equal('block');
+      expect(wrapperCss.position).to.equal('absolute');
+      expect(wrapperCss.top).to.equal('0px');
+      expect(wrapperCss.left).to.equal('0px');
+      expect(wrapperCss.right).to.equal('0px');
+      expect(wrapperCss.bottom).to.equal('0px');
+      expect(wrapperCss.margin).to.equal('0px');
 
-    // `body` must have `relative` positioning and `block` display.
-    expect(bodyCss.position).to.equal('relative');
-    // Preserve the customized `display` value.
-    expect(bodyCss.display).to.equal('table');
+      // `body` must have `relative` positioning and `block` display.
+      expect(bodyCss.position).to.equal('relative');
+      // Preserve the customized `display` value.
+      expect(bodyCss.display).to.equal('table');
 
-    // `body` must have a 1px transparent border for two purposes:
-    // (1) to cancel out margin collapse in body's children;
-    // (2) to offset scroll adjustment to 1 to avoid scroll freeze problem.
-    expect(
-      bodyCss.borderTop.replace('rgba(0, 0, 0, 0)', 'transparent')
-    ).to.equal('1px solid transparent');
-    expect(bodyCss.margin).to.equal('0px');
-  });
+      // `body` must have a 1px transparent border for two purposes:
+      // (1) to cancel out margin collapse in body's children;
+      // (2) to offset scroll adjustment to 1 to avoid scroll freeze problem.
+      expect(
+        bodyCss.borderTop.replace('rgba(0, 0, 0, 0)', 'transparent')
+      ).to.equal('1px solid transparent');
+      expect(bodyCss.margin).to.equal('0px');
+    });
 
   it('should be immediately scrolled to 1 to avoid freeze', () => {
     expect(binding.wrapper_.scrollTop).to.equal(1);
@@ -601,67 +603,69 @@ describes.realWin('ViewportBindingIosEmbedShadowRoot_', {ampCss: true}, env => {
         expect(child.textContent).to.equal('test');
       });
 
-      it('should have CSS setup', () => {
-        const htmlCss = win.getComputedStyle(win.document.documentElement);
-        const scrollerCss = win.getComputedStyle(binding.scroller_);
-        const wrapperCss = win.getComputedStyle(binding.wrapper_);
-        const bodyCss = win.getComputedStyle(win.document.body);
+      it.configure()
+        .skipFirefox()
+        .run('should have CSS setup', () => {
+          const htmlCss = win.getComputedStyle(win.document.documentElement);
+          const scrollerCss = win.getComputedStyle(binding.scroller_);
+          const wrapperCss = win.getComputedStyle(binding.wrapper_);
+          const bodyCss = win.getComputedStyle(win.document.body);
 
-        // `<html>` must have `position: static` or layout is broken. It must
-        // not be scrollable.
-        expect(htmlCss.position).to.equal('static');
-        expect(htmlCss.overflowY).to.equal('hidden');
-        expect(htmlCss.overflowX).to.equal('hidden');
+          // `<html>` must have `position: static` or layout is broken. It must
+          // not be scrollable.
+          expect(htmlCss.position).to.equal('static');
+          expect(htmlCss.overflowY).to.equal('hidden');
+          expect(htmlCss.overflowX).to.equal('hidden');
 
-        // Body takes full viewport and not scrollable.
-        expect(bodyCss.overflowY).to.equal('hidden');
-        expect(bodyCss.overflowX).to.equal('hidden');
-        expect(bodyCss.margin).to.equal('0px');
-        expect(bodyCss.position).to.equal('absolute');
-        expect(bodyCss.top).to.equal('0px');
-        expect(bodyCss.left).to.equal('0px');
-        expect(bodyCss.right).to.equal('0px');
-        expect(bodyCss.bottom).to.equal('0px');
+          // Body takes full viewport and not scrollable.
+          expect(bodyCss.overflowY).to.equal('hidden');
+          expect(bodyCss.overflowX).to.equal('hidden');
+          expect(bodyCss.margin).to.equal('0px');
+          expect(bodyCss.position).to.equal('absolute');
+          expect(bodyCss.top).to.equal('0px');
+          expect(bodyCss.left).to.equal('0px');
+          expect(bodyCss.right).to.equal('0px');
+          expect(bodyCss.bottom).to.equal('0px');
 
-        // Scroller is full-viewport size and scrollable.
-        // Unfortunately, we can't test here `-webkit-overflow-scrolling`.
-        expect(scrollerCss.overflowY).to.equal('auto');
-        expect(scrollerCss.overflowX).to.equal('hidden');
-        expect(wrapperCss.overflowY).to.equal('visible');
-        expect(wrapperCss.overflowX).to.equal('visible');
+          // Scroller is full-viewport size and scrollable.
+          // Unfortunately, we can't test here `-webkit-overflow-scrolling`.
+          expect(scrollerCss.overflowY).to.equal('auto');
+          expect(scrollerCss.overflowX).to.equal('hidden');
+          expect(wrapperCss.overflowY).to.equal('visible');
+          expect(wrapperCss.overflowX).to.equal('visible');
 
-        // Scroller must be a block and positioned absolute at 0/0/0/0.
-        expect(scrollerCss.display).to.equal('block');
-        expect(scrollerCss.boxSizing).to.equal('border-box');
-        expect(scrollerCss.position).to.equal('absolute');
-        expect(scrollerCss.top).to.equal('0px');
-        expect(scrollerCss.left).to.equal('0px');
-        expect(scrollerCss.right).to.equal('0px');
-        expect(scrollerCss.bottom).to.equal('0px');
-        expect(scrollerCss.margin).to.equal('0px');
-        // Scroler must have a 1px transparent border for two purposes:
-        // (1) to cancel out margin collapse in body's children;
-        // (2) to offset scroll adjustment to 1 to avoid scroll freeze problem.
-        expect(
-          scrollerCss.borderTop.replace('rgba(0, 0, 0, 0)', 'transparent')
-        ).to.equal('1px solid transparent');
+          // Scroller must be a block and positioned absolute at 0/0/0/0.
+          expect(scrollerCss.display).to.equal('block');
+          expect(scrollerCss.boxSizing).to.equal('border-box');
+          expect(scrollerCss.position).to.equal('absolute');
+          expect(scrollerCss.top).to.equal('0px');
+          expect(scrollerCss.left).to.equal('0px');
+          expect(scrollerCss.right).to.equal('0px');
+          expect(scrollerCss.bottom).to.equal('0px');
+          expect(scrollerCss.margin).to.equal('0px');
+          // Scroler must have a 1px transparent border for two purposes:
+          // (1) to cancel out margin collapse in body's children;
+          // (2) to offset scroll adjustment to 1 to avoid scroll freeze problem.
+          expect(
+            scrollerCss.borderTop.replace('rgba(0, 0, 0, 0)', 'transparent')
+          ).to.equal('1px solid transparent');
 
-        // Wrapper must additionally have `will-change: transform` to avoid iOS
-        // rendering bug where contents inside the `-webkit-overflow-scrolling`
-        // element would occasionally fail to paint. This bug appears to trigger
-        // more often when Shadow DOM is involved.
-        expect(wrapperCss.willChange).to.equal('transform');
+          // Wrapper must additionally have `will-change: transform` to avoid iOS
+          // rendering bug where contents inside the `-webkit-overflow-scrolling`
+          // element would occasionally fail to paint. This bug appears to trigger
+          // more often when Shadow DOM is involved.
+          expect(wrapperCss.willChange).to.equal('transform');
 
-        // Preserve and inherit the customized body styles.
-        win.document.body.style.display = 'flex';
-        win.document.body.style.flexDirection = 'row';
-        win.document.body.style.alignItems = 'center';
-        return vsync.mutatePromise().then(() => {
-          expect(binding.wrapper_.style.display).to.equal('flex');
-          expect(binding.wrapper_.style.flexDirection).to.equal('row');
-          expect(binding.wrapper_.style.alignItems).to.equal('center');
+          // Preserve and inherit the customized body styles.
+          win.document.body.style.display = 'flex';
+          win.document.body.style.flexDirection = 'row';
+          win.document.body.style.alignItems = 'center';
+          return vsync.mutatePromise().then(() => {
+            expect(binding.wrapper_.style.display).to.equal('flex');
+            expect(binding.wrapper_.style.flexDirection).to.equal('row');
+            expect(binding.wrapper_.style.alignItems).to.equal('center');
+          });
         });
-      });
 
       it('should update body styles on class changes', () => {
         // Body styles are moved to the wrapper.
