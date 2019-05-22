@@ -675,6 +675,21 @@ export class Services {
   }
 
   /**
+   * Returns a promise for the geo service or a promise for null if
+   * the service is not available on the current page.
+   * @param {!Element|!ShadowRoot} element
+   * @return {!Promise<?../extensions/amp-user-location/0.1/user-location-service.UserLocationService>}
+   */
+  static userLocationForDocOrNull(element) {
+    return /** @type {!Promise<?../extensions/amp-user-location/0.1/user-location-service.UserLocationService>} */ (getElementServiceIfAvailableForDoc(
+      element,
+      'user-location',
+      'amp-user-location',
+      true
+    ));
+  }
+
+  /**
    * Unlike most service getters, passing `Node` is necessary for some FIE-scope
    * services since sometimes we only have the FIE Document for context.
    * @param {!Element|!ShadowRoot} element
