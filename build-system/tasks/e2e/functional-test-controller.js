@@ -40,7 +40,7 @@ class ElementHandle {
    * @package
    */
   getElement() {
-  	return this.element_;
+    return this.element_;
   }
 }
 
@@ -97,7 +97,7 @@ class ControllerPromise {
     );
   }
 
- 	/** @override */
+  /** @override */
   finally(onFinally) {
     return new ControllerPromise(
       this.promise_.finally(onFinally),
