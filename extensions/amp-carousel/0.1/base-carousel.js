@@ -74,7 +74,7 @@ export class BaseCarousel extends AMP.BaseElement {
     button.tabIndex = 0;
     button.classList.add('amp-carousel-button');
     button.classList.add(className);
-    button.setAttribute('role', 'button');
+    button.setAttribute('role', this.buttonsAriaRole());
     button.onkeydown = event => {
       if (event.key == Keys.ENTER || event.key == Keys.SPACE) {
         if (!event.defaultPrevented) {
@@ -89,6 +89,17 @@ export class BaseCarousel extends AMP.BaseElement {
   }
 
   /**
+   * The ARIA role for the controls. Either `button` or `presentation` based
+   * on usage.
+   * @return {string}
+   * @protected
+   */
+  buttonsAriaRole() {
+    // Subclasses may override.
+    return 'button';
+  }
+
+  /**
    * Builds the next and previous buttons.
    */
   buildButtons() {
@@ -100,6 +111,7 @@ export class BaseCarousel extends AMP.BaseElement {
     this.nextButton_ = this.buildButton('amp-carousel-button-next', () => {
       this.interactionNext();
     });
+    this.updateButtonTitles();
     this.element.appendChild(this.nextButton_);
   }
 
