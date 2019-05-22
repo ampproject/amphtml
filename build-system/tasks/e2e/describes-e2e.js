@@ -240,7 +240,6 @@ function describeEnv(factory) {
 
     function doTemplate(name, variant) {
       const env = Object.create(variant);
-      let asyncErrorTimerId;
       this.timeout(TEST_TIMEOUT);
       beforeEach(async function() {
         this.timeout(SETUP_TIMEOUT);
@@ -253,8 +252,13 @@ function describeEnv(factory) {
       });
 
       afterEach(async function() {
-        clearLastExpectError();
-        clearTimeout(asyncErrorTimerId);
+        // If there is an async expect error, throw it in the final state.
+        const lastExpectError = getLastExpectError();
+        if (lastExpectError) {
+          this.test.error(lastExpectError);
+          clearLastExpectError();
+        }
+
         await fixture.teardown(env);
         for (const key in env) {
           delete env[key];
@@ -265,18 +269,7 @@ function describeEnv(factory) {
         }
       });
 
-      after(function() {
-        clearTimeout(asyncErrorTimerId);
-      });
-
       describe(SUB, function() {
-        // If there is an async expect error, throw it in the final state.
-        asyncErrorTimerId = setTimeout(() => {
-          const lastExpectError = getLastExpectError();
-          if (lastExpectError) {
-            this.test.error(lastExpectError);
-          }
-        }, this.timeout() - 1);
         fn.call(this, env);
       });
     }
