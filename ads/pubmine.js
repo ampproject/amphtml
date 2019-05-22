@@ -22,8 +22,10 @@ const pubmineOptional = ['section', 'pt', 'ht'],
 
 /**
  * @param {!Object} data
+ * @param {!Window} global
+ * @param {!Function} [scriptLoader=loadScript]
  */
-function initMasterFrame(data) {
+function initMasterFrame(data, global, scriptLoader = loadScript) {
   global['__ATA_PP'] = {
     pt: data['pt'] || 1,
     ht: data['ht'] || 1,
@@ -32,7 +34,7 @@ function initMasterFrame(data) {
   };
   global['__ATA'] = global['__ATA'] || {};
   global['__ATA']['cmd'] = global['__ATA']['cmd'] || [];
-  loadScript(global, pubmineURL);
+  scriptLoader(global, pubmineURL);
 }
 
 /**
@@ -48,8 +50,15 @@ function createSlot(slotId) {
 /**
  * @param {!Window} global
  * @param {!Object} data
+ * @param {!Function} [slotCreator=createSlot]
+ * @param {!Function} [scriptLoader=loadScript]
  */
-export function pubmine(global, data) {
+export function pubmine(
+  global,
+  data,
+  slotCreator = createSlot,
+  scriptLoader = loadScript
+) {
   validateData(data, pubmineRequired, pubmineOptional);
 
   const sectionId = data['siteid'] + (data['section'] || '1');
@@ -63,10 +72,10 @@ export function pubmine(global, data) {
 
   const slotId = `atatags-${sectionId}`;
 
-  createSlot(slotId);
+  slotCreator(slotId);
   const {isMaster} = global.context;
   if (isMaster) {
-    initMasterFrame(data);
+    initMasterFrame(data, global, scriptLoader);
   }
   const master = isMaster ? global : global.context.master;
   master['__ATA']['cmd']['push'](function() {
