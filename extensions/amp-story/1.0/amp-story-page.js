@@ -441,7 +441,6 @@ export class AmpStoryPage extends AMP.BaseElement {
     return Promise.all([
       this.beforeVisible(),
       this.waitForMediaLayout_(),
-      this.markPageAsLoaded_(),
       this.mediaPoolPromise_,
     ]);
   }
@@ -495,8 +494,7 @@ export class AmpStoryPage extends AMP.BaseElement {
         mediaEl.addEventListener('error', resolve, true /* useCapture */);
       });
     });
-
-    return Promise.all(mediaPromises);
+    return Promise.all(mediaPromises).then(() => this.markPageAsLoaded_());
   }
 
   /**
