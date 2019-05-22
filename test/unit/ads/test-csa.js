@@ -26,7 +26,6 @@ import {
 } from '../../../ads/google/csa';
 import {createIframePromise} from '../../../testing/iframe';
 
-
 function getAds(type) {
   const generic = {ampSlotIndex: '0', height: 300, type: 'csa'};
   const afsObj = {
@@ -117,7 +116,6 @@ describes.fakeWin('amp-ad-csa-impl', {}, () => {
   });
 
   describe('callback', () => {
-
     beforeEach(() => {
       // Create container and iframe
       const div = win.document.createElement('div');
@@ -296,6 +294,5 @@ describes.fakeWin('amp-ad-csa-impl', {}, () => {
       // Should make a new request for ads
       expect(_googCsaSpy.args[0][0]).to.equal('ads');
     });
-
   });
 });

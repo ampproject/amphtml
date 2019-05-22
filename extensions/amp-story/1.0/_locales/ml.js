@@ -13,14 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import {LocalizedStringBundleDef, LocalizedStringId} from '../localization';
+import {
+  LocalizedStringBundleDef,
+  LocalizedStringId,
+} from '../../../../src/service/localization';
 
 /**
  * Localized string bundle used for ml strings.
  * @const {!LocalizedStringBundleDef}
  */
-export default /** @const {!LocalizedStringBundleDef} */ ({
+const strings = {
   [LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT]: {
     string: 'ശബ്‌ദം ഓഫ് ചെയ്യുക',
   },
@@ -29,75 +31,6 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
   },
   [LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_SOUND_TEXT]: {
     string: 'ശബ്‌ദം ഓണാണ്',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_APPLY_NOW]: {
-    string: 'ഇപ്പോൾ പ്രയോഗിക്കുക',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_BOOK_NOW]: {
-    string: 'ബുക്ക് ചെയ്യുക',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_BUY_TICKETS]: {
-    string: 'ടിക്കറ്റുകൾ വാങ്ങുക',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_DOWNLOAD]: {
-    string: 'ഡൗൺലോഡ് ചെയ്യുക',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_EXPLORE]: {
-    string: 'അടുത്തറിയുക',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_GET_NOW]: {
-    string: 'ഇപ്പോൾ നേടുക',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_INSTALL]: {
-    string: 'ഇപ്പോൾ ഇൻസ്‌റ്റാൾ ചെയ്യുക',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_LEARN_MORE]: {
-    string: 'കൂടുതലറിയുക',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_LISTEN]: {
-    string: 'കേൾക്കുക',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_MORE]: {
-    string: 'കൂടുതൽ',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_OPEN_APP]: {
-    string: 'ആപ്പ് തുറക്കുക',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_ORDER_NOW]: {
-    string: 'ഇപ്പോൾ ഓർഡർ ചെയ്യുക',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_PLAY]: {
-    string: 'പ്ലേ ചെയ്യുക',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_READ]: {
-    string: 'വായിക്കുക',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SHOP]: {
-    string: 'ഷോപ്പ് ചെയ്യുക',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SHOW]: {
-    string: 'കാണിക്കുക',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SHOWTIMES]: {
-    string: 'പ്രദർശനസമയങ്ങൾ',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SIGN_UP]: {
-    string: 'സൈൻ അപ്പ്',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SUBSCRIBE]: {
-    string: 'ഇപ്പോൾ വരിക്കാരാവുക',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_USE_APP]: {
-    string: 'ആപ്പ് ഉപയോഗിക്കുക',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_VIEW]: {
-    string: 'കാണുക',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_WATCH]: {
-    string: 'കാണുക',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_WATCH_EPISODE]: {
-    string: 'എപ്പിസോഡ് കാണുക',
   },
   [LocalizedStringId.AMP_STORY_BOOKEND_MORE_TO_READ_LABEL]: {
     string: 'വായിക്കാൻ കൂടുതൽ',
@@ -124,10 +57,10 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
     string: 'AMP ഫലങ്ങളെക്കുറിച്ച് കൂടുതൽ',
   },
   [LocalizedStringId.AMP_STORY_HINT_UI_NEXT_LABEL]: {
-    string: '\'അടുത്തത്\' ടാപ്പ് ചെയ്യുക',
+    string: "'അടുത്തത്' ടാപ്പ് ചെയ്യുക",
   },
   [LocalizedStringId.AMP_STORY_HINT_UI_PREVIOUS_LABEL]: {
-    string: '\'മടങ്ങുക\' ടാപ്പ് ചെയ്യുക',
+    string: "'മടങ്ങുക' ടാപ്പ് ചെയ്യുക",
   },
   [LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL]: {
     string: 'മുകളിലോട്ട് സ്വൈപ്പ് ചെയ്യുക',
@@ -184,14 +117,18 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
     string: 'ഈ അനുഭവം കാണാൻ നിങ്ങളുടെ വിൻഡോയുടെ വീതി കൂട്ടുക',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
-    string: 'ഈ ഉള്ളടക്കം കാണാൻ AMP സ്‌റ്റോറി പരീക്ഷണം നിങ്ങൾ ' +
-        'പ്രവർത്തനക്ഷമമാക്കേണ്ടതുണ്ട്.',
+    string:
+      'ഈ ഉള്ളടക്കം കാണാൻ AMP സ്‌റ്റോറി പരീക്ഷണം നിങ്ങൾ ' +
+      'പ്രവർത്തനക്ഷമമാക്കേണ്ടതുണ്ട്.',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
     string: 'പോർട്രെയ്‌റ്റ് മോഡിൽ ഈ പേജ് ഏറ്റവും മികച്ചതായി കാണാനാകും',
   },
   [LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT]: {
-    string: 'ക്ഷമിക്കണം, നിങ്ങളുടെ ബ്രൗസർ ഈ അനുഭവത്തെ ' +
-        'പിന്തുണയ്ക്കുന്നില്ലെന്ന് തോന്നുന്നു',
+    string:
+      'ക്ഷമിക്കണം, നിങ്ങളുടെ ബ്രൗസർ ഈ അനുഭവത്തെ ' +
+      'പിന്തുണയ്ക്കുന്നില്ലെന്ന് തോന്നുന്നു',
   },
-});
+};
+
+export default strings;

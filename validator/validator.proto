@@ -384,7 +384,7 @@ message ReferencePoint {
 
 // Specs specific to AMP Extensions. This is a field within TagSpec that
 // replaces the standard tagspec list of attributes, requirements, etc.
-// NEXT AVAILABLE TAG: 8
+// NEXT AVAILABLE TAG: 9
 message ExtensionSpec {
   // e.g. "amp-video". This is used both as the attribute value for the
   // 'custom-element' attribute value as well as part of the 'src' attribute
@@ -398,7 +398,13 @@ message ExtensionSpec {
 
   // Most extensions are custom-elements. For custom-template extensions, this
   // value needs to be set true. E.g: amp-mustache.
-  optional bool is_custom_template = 4 [default = false];
+  enum ExtensionType {
+    UNKNOWN = 0;
+    CUSTOM_ELEMENT = 1;
+    CUSTOM_TEMPLATE = 2;
+    HOST_SERVICE = 3;
+  }
+  optional ExtensionType extension_type = 8 [default = CUSTOM_ELEMENT];
 
   // For older tags, we did not originally require that the tag only be included
   // once, so those tags are grandfathered in for multiple inclusion in the file
@@ -431,7 +437,7 @@ message ExtensionSpec {
   optional ExtensionUsageRequirement requires_usage = 7 [default = ERROR];
 
   // Deprecated fields, do not reuse.
-  // reserved 5;
+  // reserved 4, 5;
 }
 
 // The HtmlFormat is the declared format in the top-level html tag, which

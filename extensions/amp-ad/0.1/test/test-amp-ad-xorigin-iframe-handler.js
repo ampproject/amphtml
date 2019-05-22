@@ -26,7 +26,6 @@ import {
 import {layoutRectLtwh} from '../../../../src/layout-rect';
 import {toggleExperiment} from '../../../../src/experiments';
 
-
 describe('amp-ad-xorigin-iframe-handler', () => {
   let sandbox;
   let adImpl;
@@ -78,7 +77,6 @@ describe('amp-ad-xorigin-iframe-handler', () => {
     let initPromise;
 
     describe('if render-start is implemented', () => {
-
       let noContentSpy;
 
       beforeEach(() => {
@@ -90,8 +88,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
             newHeight: 217,
           });
         });
-        noContentSpy =
-            sandbox.spy/*OK*/(iframeHandler, 'freeXOriginIframe');
+        noContentSpy = sandbox./*OK*/ spy(iframeHandler, 'freeXOriginIframe');
 
         initPromise = iframeHandler.init(iframe);
       });
@@ -100,8 +97,8 @@ describe('amp-ad-xorigin-iframe-handler', () => {
         expect(iframe.style.visibility).to.equal('hidden');
         return initPromise.then(() => {
           expect(iframe.style.visibility).to.equal('');
-          expect(renderStartedSpy).to.not.be.called;
-          expect(signals.get('render-start')).to.be.null;
+          // Should signal RENDER_START at toggling visibility even w/o msg
+          expect(signals.get('render-start')).to.be.ok;
         });
       });
 
@@ -112,21 +109,26 @@ describe('amp-ad-xorigin-iframe-handler', () => {
           type: 'render-start',
         });
         const renderStartPromise = signals.whenSignal('render-start');
-        return Promise.all([renderStartPromise, initPromise]).then(() => {
-          expect(iframe.style.visibility).to.equal('');
-          expect(renderStartedSpy).to.be.calledOnce;
-        }).then(() => {
-          const message = {
-            sentinel: 'amp3ptest' + testIndex,
-            type: 'no-content',
-          };
-          const promise = expectPostMessage(
-              iframe.contentWindow, window, message);
-          iframe.postMessageToParent(message);
-          return promise.then(() => {
-            expect(noContentSpy).to.not.been.called;
+        return Promise.all([renderStartPromise, initPromise])
+          .then(() => {
+            expect(iframe.style.visibility).to.equal('');
+            expect(renderStartedSpy).to.be.calledOnce;
+          })
+          .then(() => {
+            const message = {
+              sentinel: 'amp3ptest' + testIndex,
+              type: 'no-content',
+            };
+            const promise = expectPostMessage(
+              iframe.contentWindow,
+              window,
+              message
+            );
+            iframe.postMessageToParent(message);
+            return promise.then(() => {
+              expect(noContentSpy).to.not.been.called;
+            });
           });
-        });
       });
 
       it('should resolve and resize on message "render-start" w/ size', () => {
@@ -138,33 +140,40 @@ describe('amp-ad-xorigin-iframe-handler', () => {
           sentinel: 'amp3ptest' + testIndex,
         });
         const expectResponsePromise = iframe.expectMessageFromParent(
-            'embed-size-changed');
+          'embed-size-changed'
+        );
         const renderStartPromise = signals.whenSignal('render-start');
-        return Promise.all([renderStartPromise, initPromise]).then(() => {
-          expect(iframe.style.visibility).to.equal('');
-          return expectResponsePromise;
-        }).then(data => {
-          expect(data).to.jsonEqual({
-            requestedWidth: 114,
-            requestedHeight: 217,
-            type: 'embed-size-changed',
-            sentinel: 'amp3ptest' + testIndex,
+        return Promise.all([renderStartPromise, initPromise])
+          .then(() => {
+            expect(iframe.style.visibility).to.equal('');
+            return expectResponsePromise;
+          })
+          .then(data => {
+            expect(data).to.jsonEqual({
+              requestedWidth: 114,
+              requestedHeight: 217,
+              type: 'embed-size-changed',
+              sentinel: 'amp3ptest' + testIndex,
+            });
           });
-        });
       });
 
-      it('should resolve on message "no-content" ' +
-          'and remove non-master iframe', () => {
-        expect(iframe.style.visibility).to.equal('hidden');
-        iframe.postMessageToParent({
-          sentinel: 'amp3ptest' + testIndex,
-          type: 'no-content',
-        });
-        return initPromise.then(() => {
-          expect(noContentSpy).to.be.calledWith(false);
-          expect(iframeHandler.iframe).to.be.null;
-        });
-      });
+      // TODO(@lannka): unskip flaky test
+      it.skip(
+        'should resolve on message "no-content" ' +
+          'and remove non-master iframe',
+        () => {
+          expect(iframe.style.visibility).to.equal('hidden');
+          iframe.postMessageToParent({
+            sentinel: 'amp3ptest' + testIndex,
+            type: 'no-content',
+          });
+          return initPromise.then(() => {
+            expect(noContentSpy).to.be.calledWith(false);
+            expect(iframeHandler.iframe).to.be.null;
+          });
+        }
+      );
 
       it('should NOT remove master iframe on message "no-content"', () => {
         iframe.name = 'test_master';
@@ -193,11 +202,14 @@ describe('amp-ad-xorigin-iframe-handler', () => {
         }).then(() => {
           const clock = sandbox.useFakeTimers();
           clock.tick(0);
-          const timeoutPromise =
-              Services.timerFor(window).timeoutPromise(2000, initPromise);
+          const timeoutPromise = Services.timerFor(window).timeoutPromise(
+            2000,
+            initPromise
+          );
           clock.tick(2001);
-          return expect(timeoutPromise).to.eventually
-              .be.rejectedWith(/timeout/);
+          return expect(timeoutPromise).to.eventually.be.rejectedWith(
+            /timeout/
+          );
         });
       });
 
@@ -220,8 +232,10 @@ describe('amp-ad-xorigin-iframe-handler', () => {
       it('should be able to use user-error API', () => {
         const err = new Error();
         err.message = 'error test';
-        const userErrorReportSpy =
-                sandbox.spy/*OK*/(iframeHandler, 'userErrorForAnalytics_');
+        const userErrorReportSpy = sandbox./*OK*/ spy(
+          iframeHandler,
+          'userErrorForAnalytics_'
+        );
         iframe.postMessageToParent({
           type: 'user-error-in-iframe',
           sentinel: 'amp3ptest' + testIndex,
@@ -234,18 +248,21 @@ describe('amp-ad-xorigin-iframe-handler', () => {
       });
     });
 
-    it('should trigger render-start on message "bootstrap-loaded" if' +
-       ' render-start is NOT implemented', () => {
-      initPromise = iframeHandler.init(iframe);
-      iframe.postMessageToParent({
-        sentinel: 'amp3ptest' + testIndex,
-        type: 'bootstrap-loaded',
-      });
-      const renderStartPromise = signals.whenSignal('render-start');
-      return renderStartPromise.then(() => {
-        expect(renderStartedSpy).to.be.calledOnce;
-      });
-    });
+    it(
+      'should trigger render-start on message "bootstrap-loaded" if' +
+        ' render-start is NOT implemented',
+      () => {
+        initPromise = iframeHandler.init(iframe);
+        iframe.postMessageToParent({
+          sentinel: 'amp3ptest' + testIndex,
+          type: 'bootstrap-loaded',
+        });
+        const renderStartPromise = signals.whenSignal('render-start');
+        return renderStartPromise.then(() => {
+          expect(renderStartedSpy).to.be.calledOnce;
+        });
+      }
+    );
 
     it('should trigger visibility on timeout', () => {
       const clock = sandbox.useFakeTimers();
@@ -260,7 +277,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
         };
       }).then(() => {
         expect(iframe.style.visibility).to.equal('');
-        expect(renderStartedSpy).to.not.be.called;
+        expect(renderStartedSpy).to.be.calledOnce;
       });
     });
 
@@ -275,14 +292,14 @@ describe('amp-ad-xorigin-iframe-handler', () => {
   });
 
   describe('Initialized iframe', () => {
-
     beforeEach(() => {
       iframeHandler.init(iframe);
     });
 
     it('should be able to use embed-state API', () => {
-      sandbox.stub/*OK*/(iframeHandler.viewer_, 'isVisible').callsFake(
-          () => true);
+      sandbox
+        ./*OK*/ stub(iframeHandler.viewer_, 'isVisible')
+        .callsFake(() => true);
       iframe.postMessageToParent({
         type: 'send-embed-state',
         sentinel: 'amp3ptest' + testIndex,
@@ -375,12 +392,12 @@ describe('amp-ad-xorigin-iframe-handler', () => {
       iframe.setAttribute('data-amp-3p-sentinel', 'amp3ptest' + testIndex);
       iframe.name = 'test_nomaster';
       iframeHandler.init(iframe);
-      sandbox.stub/*OK*/(
-          iframeHandler.viewport_,
-          'getClientRectAsync').callsFake(() => {
-        return Promise.resolve(layoutRectLtwh(1, 1, 1, 1));
-      });
-      sandbox.stub/*OK*/(iframeHandler.viewport_, 'getRect').callsFake(() => {
+      sandbox
+        ./*OK*/ stub(iframeHandler.viewport_, 'getClientRectAsync')
+        .callsFake(() => {
+          return Promise.resolve(layoutRectLtwh(1, 1, 1, 1));
+        });
+      sandbox./*OK*/ stub(iframeHandler.viewport_, 'getRect').callsFake(() => {
         return layoutRectLtwh(1, 1, 1, 1);
       });
       iframe.postMessageToParent({
@@ -404,17 +421,18 @@ describe('amp-ad-xorigin-iframe-handler', () => {
         sentinel: 'amp3ptest' + testIndex,
         messageId: 3,
       });
-      return iframe.expectMessageFromParent(
-          'get-consent-state-result').then(data => {
-        expect(data).to.jsonEqual({
-          type: 'get-consent-state-result',
-          sentinel: 'amp3ptest' + testIndex,
-          messageId: 3,
-          content: {
-            consentState: 2,
-          },
+      return iframe
+        .expectMessageFromParent('get-consent-state-result')
+        .then(data => {
+          expect(data).to.jsonEqual({
+            type: 'get-consent-state-result',
+            sentinel: 'amp3ptest' + testIndex,
+            messageId: 3,
+            content: {
+              consentState: 2,
+            },
+          });
         });
-      });
     });
   });
 });

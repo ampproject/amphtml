@@ -13,14 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import {LocalizedStringBundleDef, LocalizedStringId} from '../localization';
+import {
+  LocalizedStringBundleDef,
+  LocalizedStringId,
+} from '../../../../src/service/localization';
 
 /**
  * Localized string bundle used for pa strings.
  * @const {!LocalizedStringBundleDef}
  */
-export default /** @const {!LocalizedStringBundleDef} */ ({
+const strings = {
   [LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT]: {
     string: 'ਧੁਨੀ ਬੰਦ',
   },
@@ -29,75 +31,6 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
   },
   [LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_SOUND_TEXT]: {
     string: 'ਧੁਨੀ ਚਾਲੂ',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_APPLY_NOW]: {
-    string: 'ਹੁਣੇ ਅਰਜ਼ੀ ਦਿਓ',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_BOOK_NOW]: {
-    string: 'ਬੁੱਕ ਕਰੋ',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_BUY_TICKETS]: {
-    string: 'ਟਿਕਟਾਂ ਖਰੀਦੋ',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_DOWNLOAD]: {
-    string: 'ਡਾਊਨਲੋਡ ਕਰੋ',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_EXPLORE]: {
-    string: 'ਪੜਚੋਲ ਕਰੋ',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_GET_NOW]: {
-    string: 'ਹੁਣੇ ਪ੍ਰਾਪਤ ਕਰੋ',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_INSTALL]: {
-    string: 'ਹੁਣੇ ਸਥਾਪਤ ਕਰੋ',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_LEARN_MORE]: {
-    string: 'ਹੋਰ ਜਾਣੋ',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_LISTEN]: {
-    string: 'ਸੁਣੋ',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_MORE]: {
-    string: 'ਹੋਰ',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_OPEN_APP]: {
-    string: 'ਐਪ ਖੋਲ੍ਹੋ',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_ORDER_NOW]: {
-    string: 'ਹੁਣੇ ਆਰਡਰ ਕਰੋ',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_PLAY]: {
-    string: 'ਚਲਾਓ',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_READ]: {
-    string: 'ਪੜ੍ਹੋ',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SHOP]: {
-    string: 'ਖਰੀਦੋ',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SHOW]: {
-    string: 'ਦਿਖਾਓ',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SHOWTIMES]: {
-    string: 'ਸ਼ੋਅਟਾਈਮ',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SIGN_UP]: {
-    string: 'ਸਾਈਨ-ਅੱਪ ਕਰੋ',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SUBSCRIBE]: {
-    string: 'ਹੁਣੇ ਗਾਹਕ ਬਣੋ',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_USE_APP]: {
-    string: 'ਐਪ ਵਰਤੋ',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_VIEW]: {
-    string: 'ਦੇਖੋ',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_WATCH]: {
-    string: 'ਦੇਖੋ',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_WATCH_EPISODE]: {
-    string: 'ਐਪੀਸੋਡ ਦੇਖੋ',
   },
   [LocalizedStringId.AMP_STORY_BOOKEND_MORE_TO_READ_LABEL]: {
     string: 'ਹੋਰ ਪੜ੍ਹੋ',
@@ -118,16 +51,16 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
     string: 'ਫਿਰ ਵੀ ਜਾਰੀ ਰੱਖੋ',
   },
   [LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LABEL]: {
-    string: 'ਮੂਲ ਡੋਮੇਨ \'ਤੇ ਦੇਖੋ:',
+    string: "ਮੂਲ ਡੋਮੇਨ 'ਤੇ ਦੇਖੋ:",
   },
   [LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LINK]: {
     string: 'AMP ਨਤੀਜਿਆਂ ਬਾਰੇ ਹੋਰ ਜਾਣਕਾਰੀ',
   },
   [LocalizedStringId.AMP_STORY_HINT_UI_NEXT_LABEL]: {
-    string: '\'ਅੱਗੇ\' \'ਤੇ ਟੈਪ ਕਰੋ',
+    string: "'ਅੱਗੇ' 'ਤੇ ਟੈਪ ਕਰੋ",
   },
   [LocalizedStringId.AMP_STORY_HINT_UI_PREVIOUS_LABEL]: {
-    string: '\'ਪਿੱਛੇ ਜਾਓ\' \'ਤੇ ਟੈਪ ਕਰੋ',
+    string: "'ਪਿੱਛੇ ਜਾਓ' 'ਤੇ ਟੈਪ ਕਰੋ",
   },
   [LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL]: {
     string: 'ਉੱਪਰ ਵੱਲ ਸਵਾਈਪ ਕਰੋ',
@@ -136,7 +69,7 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
     string: 'ਵੀਡੀਓ ਚਲਾਓ',
   },
   [LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT]: {
-    string: 'ਲਿੰਕ ਨੂੰ ਕਲਿੱਪਬੋਰਡ \'ਤੇ ਕਾਪੀ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਿਆ :(',
+    string: "ਲਿੰਕ ਨੂੰ ਕਲਿੱਪਬੋਰਡ 'ਤੇ ਕਾਪੀ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਿਆ :(",
   },
   [LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_SUCCESS_TEXT]: {
     string: 'ਲਿੰਕ ਕਾਪੀ ਕੀਤਾ ਗਿਆ!',
@@ -184,14 +117,18 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
     string: 'ਇਸ ਅਨੁਭਵ ਨੂੰ ਦੇਖਣ ਲਈ ਆਪਣੀ ਵਿੰਡੋ ਦੀ ਚੌੜਾਈ ਦਾ ਵਿਸਤਾਰ ਕਰੋ',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
-    string: 'ਇਸ ਸਮੱਗਰੀ ਨੂੰ ਦੇਖਣ ਲਈ ਤੁਹਾਨੂੰ AMP ਕਹਾਣੀ ਪ੍ਰਯੋਗ ਨੂੰ ਚਾਲੂ ਕਰਨਾ ' +
-        'ਲਾਜ਼ਮੀ ਹੈ।',
+    string:
+      'ਇਸ ਸਮੱਗਰੀ ਨੂੰ ਦੇਖਣ ਲਈ ਤੁਹਾਨੂੰ AMP ਕਹਾਣੀ ਪ੍ਰਯੋਗ ਨੂੰ ਚਾਲੂ ਕਰਨਾ ' +
+      'ਲਾਜ਼ਮੀ ਹੈ।',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
     string: 'ਪੰਨਾ ਪੋਰਟ੍ਰੇਟ ਮੋਡ ਵਿੱਚ ਚੰਗੀ ਤਰ੍ਹਾਂ ਦਿਸਦਾ ਹੈ',
   },
   [LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT]: {
-    string: 'ਮਾਫ਼ ਕਰਨਾ, ਇੰਝ ਲੱਗਦਾ ਹੈ ਕਿ ਤੁਹਾਡੇ ਬ੍ਰਾਊਜ਼ਰ ਵਿੱਚ ਇਸ ਅਨੁਭਵ ਦੀ ' +
-        'ਸੁਵਿਧਾ ਨਹੀਂ ਹੈ',
+    string:
+      'ਮਾਫ਼ ਕਰਨਾ, ਇੰਝ ਲੱਗਦਾ ਹੈ ਕਿ ਤੁਹਾਡੇ ਬ੍ਰਾਊਜ਼ਰ ਵਿੱਚ ਇਸ ਅਨੁਭਵ ਦੀ ' +
+      'ਸੁਵਿਧਾ ਨਹੀਂ ਹੈ',
   },
-});
+};
+
+export default strings;

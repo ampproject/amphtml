@@ -22,7 +22,6 @@ const TAG = 'amp-auto-ads';
 const STICKY_AD_TAG = 'amp-sticky-ad';
 const OPT_IN_STATUS_ANCHOR_ADS = 2;
 
-
 export class AnchorAdStrategy {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
@@ -52,8 +51,11 @@ export class AnchorAdStrategy {
       user().warn(TAG, 'exists <amp-sticky-ad>');
       return Promise.resolve(false);
     }
-    Services.extensionsFor(this.ampdoc.win)./*OK*/installExtensionForDoc(
-        this.ampdoc, STICKY_AD_TAG);
+    Services.extensionsFor(this.ampdoc.win)./*OK*/ installExtensionForDoc(
+      this.ampdoc,
+      STICKY_AD_TAG,
+      '1.0'
+    );
     this.placeStickyAd_();
     return Promise.resolve(true);
   }
@@ -63,8 +65,7 @@ export class AnchorAdStrategy {
    * @private
    */
   hasExistingStickyAd_() {
-    return this.ampdoc.getRootNode()
-        .getElementsByTagName('AMP-STICKY-AD').length > 0;
+    return !!this.ampdoc.getRootNode().querySelector('AMP-STICKY-AD');
   }
 
   /**
@@ -88,18 +89,22 @@ export class AnchorAdStrategy {
    * @private
    */
   placeStickyAd_() {
-    const viewportWidth =
-        Services.viewportForDoc(this.ampdoc).getWidth();
-    const attributes = /** @type {!JsonObject} */ (
-      Object.assign(dict(), this.baseAttributes_, dict({
+    const viewportWidth = Services.viewportForDoc(this.ampdoc).getWidth();
+    const attributes = /** @type {!JsonObject} */ (Object.assign(
+      dict(),
+      this.baseAttributes_,
+      dict({
         'width': String(viewportWidth),
         'height': '100',
-      })));
+      })
+    ));
     const doc = this.ampdoc.win.document;
-    const ampAd = createElementWithAttributes(
-        doc, 'amp-ad', attributes);
+    const ampAd = createElementWithAttributes(doc, 'amp-ad', attributes);
     const stickyAd = createElementWithAttributes(
-        doc, 'amp-sticky-ad', dict({'layout': 'nodisplay'}));
+      doc,
+      'amp-sticky-ad',
+      dict({'layout': 'nodisplay'})
+    );
     stickyAd.appendChild(ampAd);
     const body = this.ampdoc.getBody();
     body.insertBefore(stickyAd, body.firstChild);

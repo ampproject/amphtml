@@ -14,17 +14,11 @@
  * limitations under the License.
  */
 
-import {
-  MASK_SEPARATOR_CHAR,
-  MaskChars,
-  NamedMasks,
-} from './constants';
+import {MASK_SEPARATOR_CHAR, MaskChars, NamedMasks} from './constants';
 import {MaskInterface} from './mask-interface';
 import {dict} from '../../../src/utils/object';
 import {factory as inputmaskCustomAliasFactory} from './inputmask-custom-alias';
-import {
-  factory as inputmaskPaymentCardAliasFactory,
-} from './inputmask-payment-card-alias';
+import {factory as inputmaskPaymentCardAliasFactory} from './inputmask-payment-card-alias';
 import {requireExternal} from '../../../src/module';
 
 const NamedMasksToInputmask = dict({
@@ -59,36 +53,6 @@ const MaskCharsToInputmask = dict({
   [MaskChars.ESCAPE]: '\\',
 });
 
-let Inputmask_;
-/**
- * Require and configure the Inputmask dependency.
- * @param {!Element} element
- * @return {function(!Object):!Inputmask}
- */
-function getInputmask(element) {
-  if (Inputmask_) {
-    return Inputmask_;
-  }
-
-  const inputmaskFactory = requireExternal('inputmaskFactory');
-  Inputmask_ = inputmaskFactory(element);
-  inputmaskCustomAliasFactory(Inputmask_);
-  inputmaskPaymentCardAliasFactory(Inputmask_);
-
-  Inputmask_.extendDefaults(dict({
-    // A list of supported input type attribute values
-    'supportsInputType': [
-      'text',
-      'tel',
-      'search',
-      // 'password', // use-case?
-      // 'email', // doesn't support setSelectionRange. workaround?
-    ],
-  }));
-
-  return Inputmask_;
-}
-
 /**
  * TODO(cvializ): allow masks to be passed as data
  * @implements {MaskInterface}
@@ -100,7 +64,7 @@ export class Mask {
    * @param {string} mask
    */
   constructor(element, mask) {
-    const Inputmask = getInputmask(element);
+    this.Inputmask_ = Mask.getInputmask_(element);
 
     this.element_ = element;
 
@@ -121,12 +85,48 @@ export class Mask {
         config['alias'] = namedFormat;
       }
     } else {
-      const inputmaskMask = convertAmpMaskToInputmask(trimmedMask);
+      // If not a named mask, it is a custom mask
       config['alias'] = 'custom';
+
+      const inputmaskMask = convertAmpMaskToInputmask(trimmedMask);
       config['customMask'] = inputmaskMask;
+      const trimZeros = element.getAttribute('mask-trim-zeros');
+      config['trimZeros'] = trimZeros ? Number(trimZeros) : 2;
     }
 
-    this.controller_ = Inputmask(config);
+    this.controller_ = this.Inputmask_(config);
+  }
+
+  /**
+   * Require and configure the Inputmask dependency.
+   * @param {!Element} element
+   * @return {function(!Object):!Inputmask}
+   * @private visible for testing
+   */
+  static getInputmask_(element) {
+    if (this.Inputmask_) {
+      return this.Inputmask_;
+    }
+
+    const inputmaskFactory = requireExternal('inputmaskFactory');
+    const Inputmask = inputmaskFactory(element);
+    inputmaskCustomAliasFactory(Inputmask);
+    inputmaskPaymentCardAliasFactory(Inputmask);
+
+    Inputmask.extendDefaults(
+      dict({
+        // A list of supported input type attribute values
+        'supportsInputType': [
+          'text',
+          'tel',
+          'search',
+          // 'password', // use-case?
+          // 'email', // doesn't support setSelectionRange. workaround?
+        ],
+      })
+    );
+
+    return Inputmask;
   }
 
   /** @override */
@@ -147,7 +147,7 @@ export class Mask {
 
   /** @override */
   dispose() {
-    this.controller_./*OK*/remove();
+    this.controller_./*OK*/ remove();
     this.controller_ = null;
   }
 }
@@ -166,16 +166,19 @@ export class Mask {
  */
 function convertAmpMaskToInputmask(ampMask) {
   const masks = ampMask
-      .split(MASK_SEPARATOR_CHAR)
-      .map(m => m.replace(/_/g, ' '));
+    .split(MASK_SEPARATOR_CHAR)
+    .map(m => m.replace(/_/g, ' '));
   return masks.map(mask => {
     let escapeNext = false;
-    return mask.split('').map(c => {
-      const escape = escapeNext;
-      escapeNext = (c == MaskChars.ESCAPE);
+    return mask
+      .split('')
+      .map(c => {
+        const escape = escapeNext;
+        escapeNext = c == MaskChars.ESCAPE;
 
-      return (escape ? c : MaskCharsToInputmask[c]) || c;
-    }).join('');
+        return (escape ? c : MaskCharsToInputmask[c]) || c;
+      })
+      .join('');
   });
 }
 

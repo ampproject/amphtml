@@ -31,6 +31,7 @@ const jsdom = require('jsdom');
 const multer = require('multer');
 const path = require('path');
 const request = require('request');
+const {appTestEndpoints} = require('./app-test');
 const pc = process;
 const runVideoTestBench = require('./app-video-testbench');
 const {
@@ -42,6 +43,8 @@ const {replaceUrls} = require('./app-utils');
 
 const upload = multer();
 
+const TEST_SERVER_PORT = process.env.SERVE_PORT;
+
 app.use(bodyParser.text());
 app.use('/amp4test', require('./amp4test').app);
 app.use('/analytics', require('./routes/analytics'));
@@ -52,7 +55,8 @@ app.use('/list/', require('./routes/list'));
 app.use((req, res, next) => {
   if (req.query.csp) {
     res.set({
-      'content-security-policy': "default-src * blob: data:; script-src https://cdn.ampproject.org/rtv/ https://cdn.ampproject.org/v0.js https://cdn.ampproject.org/v0/ https://cdn.ampproject.org/viewer/ http://localhost:8000 https://localhost:8000; object-src 'none'; style-src 'unsafe-inline' https://cdn.ampproject.org/rtv/ https://cdn.materialdesignicons.com https://cloud.typography.com https://fast.fonts.net https://fonts.googleapis.com https://maxcdn.bootstrapcdn.com https://p.typekit.net https://use.fontawesome.com https://use.typekit.net; report-uri https://csp-collector.appspot.com/csp/amp",
+      'content-security-policy':
+        "default-src * blob: data:; script-src https://cdn.ampproject.org/rtv/ https://cdn.ampproject.org/v0.js https://cdn.ampproject.org/v0/ https://cdn.ampproject.org/viewer/ http://localhost:8000 https://localhost:8000; object-src 'none'; style-src 'unsafe-inline' https://cdn.ampproject.org/rtv/ https://cdn.materialdesignicons.com https://cloud.typography.com https://fast.fonts.net https://fonts.googleapis.com https://maxcdn.bootstrapcdn.com https://p.typekit.net https://use.fontawesome.com https://use.typekit.net; report-uri https://csp-collector.appspot.com/csp/amp",
     });
   }
   next();
@@ -82,7 +86,6 @@ if (!global.AMP_TESTING) {
   devDashboard.installExpressMiddleware(app);
 }
 
-
 // Changes the current serve mode via query param
 // e.g. /serve_mode_change?mode=(default|compiled|cdn)
 // (See ./app-index/settings.js)
@@ -99,7 +102,6 @@ app.get('/serve_mode_change', (req, res) => {
   }
   res.status(400).json({ok: false});
 });
-
 
 // Redirects to a proxied document with optional mode through query params.
 //
@@ -119,11 +121,10 @@ app.get('/serve_mode_change', (req, res) => {
 //
 // This passthrough is useful to generate the URL from <form> values,
 // (See ./app-index/proxy-form.js)
-app.get('/proxy', async(req, res, next) => {
+app.get('/proxy', async (req, res, next) => {
   const {mode, url} = req.query;
   const urlSuffixClearPrefixReStr =
-      '^https?://' +
-      '((www\.)?google\.(com?|[a-z]{2}|com?\.[a-z]{2}|cat)/amp/s/)?';
+    '^https?://((www.)?google.(com?|[a-z]{2}|com?.[a-z]{2}|cat)/amp/s/)?';
   const urlSuffix = url.replace(new RegExp(urlSuffixClearPrefixReStr, 'i'), '');
 
   try {
@@ -138,7 +139,6 @@ app.get('/proxy', async(req, res, next) => {
   }
 });
 
-
 /**
  * Resolves an AMPHTML URL from a canonical URL. If AMPHTML is canonical, same
  * URL is returned.
@@ -151,9 +151,10 @@ function requestAmphtmlDocUrl(urlSuffix, protocol = 'https') {
   console.log(`Fetching URL: ${defaultUrl}`);
   return new Promise((resolve, reject) => {
     request(defaultUrl, (error, response, body) => {
-      if (error || (response && (
-        response.statusCode < 200 || response.statusCode >= 300))) {
-
+      if (
+        error ||
+        (response && (response.statusCode < 200 || response.statusCode >= 300))
+      ) {
         if (protocol == 'https') {
           return requestAmphtmlDocUrl(urlSuffix, 'http');
         }
@@ -178,25 +179,22 @@ function requestAmphtmlDocUrl(urlSuffix, protocol = 'https') {
  * integration tests. Using this to mock
  * out the recaptcha api.
  */
-app.get(
-    '/dist.3p/*/recaptcha.*html',
-    recaptchaFrameRequestHandler
-);
-app.use(
-    '/recaptcha',
-    recaptchaRouter
-);
+app.get('/dist.3p/*/recaptcha.*html', recaptchaFrameRequestHandler);
+app.use('/recaptcha', recaptchaRouter);
 
 // Deprecate usage of .min.html/.max.html
-app.get([
-  '/examples/*.(min|max).html',
-  '/test/manual/*.(min|max).html',
-  '/test/fixtures/e2e/*/*.(min|max).html',
-  '/dist/cache-sw.(min|max).html',
-], (req, res) => {
-  const filePath = req.url;
-  res.send(generateInfo(filePath));
-});
+app.get(
+  [
+    '/examples/*.(min|max).html',
+    '/test/manual/*.(min|max).html',
+    '/test/fixtures/e2e/*/*.(min|max).html',
+    '/dist/cache-sw.(min|max).html',
+  ],
+  (req, res) => {
+    const filePath = req.url;
+    res.send(generateInfo(filePath));
+  }
+);
 
 app.use('/pwa', (req, res) => {
   let file;
@@ -243,6 +241,14 @@ app.use('/api/dont-show', (req, res) => {
   });
 });
 
+app.use('/api/echo/query', (req, res) => {
+  const sourceOrigin = req.query['__amp_source_origin'];
+  if (sourceOrigin) {
+    res.setHeader('AMP-Access-Control-Allow-Source-Origin', sourceOrigin);
+  }
+  res.json(JSON.parse(req.query.data));
+});
+
 app.use('/api/echo/post', (req, res) => {
   res.setHeader('Content-Type', 'application/json');
   res.end(req.body);
@@ -269,13 +275,11 @@ app.use('/form/html/post', (req, res) => {
   });
 });
 
-
 app.use('/form/redirect-to/post', (req, res) => {
   cors.assertCors(req, res, ['POST'], ['AMP-Redirect-To']);
   res.setHeader('AMP-Redirect-To', 'https://google.com');
   res.end('{}');
 });
-
 
 app.use('/form/echo-json/post', (req, res) => {
   cors.assertCors(req, res, ['POST']);
@@ -294,21 +298,28 @@ app.use('/form/json/poll1', (req, res) => {
   const form = new formidable.IncomingForm();
   form.parse(req, () => {
     res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify({
-      result: [{
-        answer: 'Penguins',
-        percentage: new Array(77),
-      }, {
-        answer: 'Ostriches',
-        percentage: new Array(8),
-      }, {
-        answer: 'Kiwis',
-        percentage: new Array(14),
-      }, {
-        answer: 'Wekas',
-        percentage: new Array(1),
-      }],
-    }));
+    res.end(
+      JSON.stringify({
+        result: [
+          {
+            answer: 'Penguins',
+            percentage: new Array(77),
+          },
+          {
+            answer: 'Ostriches',
+            percentage: new Array(8),
+          },
+          {
+            answer: 'Kiwis',
+            percentage: new Array(14),
+          },
+          {
+            answer: 'Wekas',
+            percentage: new Array(1),
+          },
+        ],
+      })
+    );
   });
 });
 
@@ -340,7 +351,6 @@ app.use('/form/search-html/get', (req, res) => {
   `);
 });
 
-
 app.use('/form/search-json/get', (req, res) => {
   cors.assertCors(req, res, ['GET']);
   res.json({
@@ -350,26 +360,81 @@ app.use('/form/search-json/get', (req, res) => {
   });
 });
 
-const autosuggestLanguages = ['ActionScript', 'AppleScript', 'Asp', 'BASIC',
-  'C', 'C++', 'Clojure', 'COBOL', 'ColdFusion', 'Erlang', 'Fortran', 'Go',
-  'Groovy', 'Haskell', 'Java', 'JavaScript', 'Lisp', 'Perl', 'PHP', 'Python',
-  'Ruby', 'Scala', 'Scheme'];
+const autocompleteColors = [
+  'red',
+  'orange',
+  'yellow',
+  'green',
+  'blue',
+  'purple',
+  'pink',
+  'black',
+  'white',
+];
+
+app.use('/form/autocomplete/query', (req, res) => {
+  const query = req.query.q;
+  if (!query) {
+    res.json({items: autocompleteColors});
+  } else {
+    const lowerCaseQuery = query.toLowerCase();
+    const filtered = autocompleteColors.filter(l =>
+      l.toLowerCase().includes(lowerCaseQuery)
+    );
+    res.json({items: filtered});
+  }
+});
+
+const autosuggestLanguages = [
+  'ActionScript',
+  'AppleScript',
+  'Asp',
+  'BASIC',
+  'C',
+  'C++',
+  'Clojure',
+  'COBOL',
+  'ColdFusion',
+  'Erlang',
+  'Fortran',
+  'Go',
+  'Groovy',
+  'Haskell',
+  'Java',
+  'JavaScript',
+  'Lisp',
+  'Perl',
+  'PHP',
+  'Python',
+  'Ruby',
+  'Scala',
+  'Scheme',
+];
 
 app.use('/form/autosuggest/query', (req, res) => {
   cors.assertCors(req, res, ['GET']);
   const MAX_RESULTS = 4;
   const query = req.query.q;
   if (!query) {
-    res.json({items: [{
-      results: autosuggestLanguages.slice(0, MAX_RESULTS),
-    }]});
+    res.json({
+      items: [
+        {
+          results: autosuggestLanguages.slice(0, MAX_RESULTS),
+        },
+      ],
+    });
   } else {
     const lowerCaseQuery = query.toLowerCase();
-    const filtered = autosuggestLanguages.filter(
-        l => l.toLowerCase().includes(lowerCaseQuery));
-    res.json({items: [{
-      results: filtered.slice(0, MAX_RESULTS)},
-    ]});
+    const filtered = autosuggestLanguages.filter(l =>
+      l.toLowerCase().includes(lowerCaseQuery)
+    );
+    res.json({
+      items: [
+        {
+          results: filtered.slice(0, MAX_RESULTS),
+        },
+      ],
+    });
   }
 });
 
@@ -403,19 +468,21 @@ app.use('/form/verify-search-json/post', (req, res) => {
     if (fields.city !== 'Mountain View' || fields.zip !== '94043') {
       errors.push({
         name: 'city',
-        message: 'City doesn\'t match zip (Mountain View and 94043)',
+        message: "City doesn't match zip (Mountain View and 94043)",
       });
     }
 
     if (errors.length === 0) {
-      res.end(JSON.stringify({
-        results: [
-          {title: 'Result 1'},
-          {title: 'Result 2'},
-          {title: 'Result 3'},
-        ],
-        committed: true,
-      }));
+      res.end(
+        JSON.stringify({
+          results: [
+            {title: 'Result 1'},
+            {title: 'Result 2'},
+            {title: 'Result 3'},
+          ],
+          committed: true,
+        })
+      );
     } else {
       res.statusCode = 400;
       res.end(JSON.stringify({verifyErrors: errors}));
@@ -424,8 +491,10 @@ app.use('/form/verify-search-json/post', (req, res) => {
 });
 
 app.use('/share-tracking/get-outgoing-fragment', (req, res) => {
-  res.setHeader('AMP-Access-Control-Allow-Source-Origin',
-      req.protocol + '://' + req.headers.host);
+  res.setHeader(
+    'AMP-Access-Control-Allow-Source-Origin',
+    req.protocol + '://' + req.headers.host
+  );
   res.json({
     fragment: '54321',
   });
@@ -434,17 +503,20 @@ app.use('/share-tracking/get-outgoing-fragment', (req, res) => {
 // Fetches an AMP document from the AMP proxy and replaces JS
 // URLs, so that they point to localhost.
 function proxyToAmpProxy(req, res, mode) {
-  const url = 'https://cdn.ampproject.org/'
-      + (req.query['amp_js_v'] ? 'v' : 'c')
-      + req.url;
+  const url =
+    'https://cdn.ampproject.org/' +
+    (req.query['amp_js_v'] ? 'v' : 'c') +
+    req.url;
   console.log('Fetching URL: ' + url);
   request(url, function(error, response, body) {
     body = body
-        // Unversion URLs.
-        .replace(/https\:\/\/cdn\.ampproject\.org\/rtv\/\d+\//g,
-            'https://cdn.ampproject.org/')
-        // <base> href pointing to the proxy, so that images, etc. still work.
-        .replace('<head>', '<head><base href="https://cdn.ampproject.org/">');
+      // Unversion URLs.
+      .replace(
+        /https\:\/\/cdn\.ampproject\.org\/rtv\/\d+\//g,
+        'https://cdn.ampproject.org/'
+      )
+      // <base> href pointing to the proxy, so that images, etc. still work.
+      .replace('<head>', '<head><base href="https://cdn.ampproject.org/">');
     const inabox = req.query['inabox'];
     // TODO(ccordry): Remove this when story v01 is depricated.
     const storyV1 = req.query['story_v'] === '1';
@@ -458,7 +530,6 @@ function proxyToAmpProxy(req, res, mode) {
     res.status(response.statusCode).send(body);
   });
 }
-
 
 let itemCtr = 2;
 const doctype = '<!doctype html>\n';
@@ -474,7 +545,7 @@ app.use('/examples/live-list-update(-reverse)?.amp.html', (req, res, next) => {
   // When we already have state in memory and user refreshes page, we flush
   // the dom we maintain on the server.
   if (!('amp_latest_update_time' in req.query) && liveListDoc) {
-    let outerHTML = liveListDoc.documentElement./*OK*/outerHTML;
+    let outerHTML = liveListDoc.documentElement./*OK*/ outerHTML;
     outerHTML = replaceUrls(mode, outerHTML);
     res.send(`${doctype}${outerHTML}`);
     return;
@@ -483,8 +554,9 @@ app.use('/examples/live-list-update(-reverse)?.amp.html', (req, res, next) => {
     const liveListUpdateFullPath = `${pc.cwd()}${req.baseUrl}`;
     console.log('liveListUpdateFullPath', liveListUpdateFullPath);
     const liveListFile = fs.readFileSync(liveListUpdateFullPath);
-    liveListDoc = liveListDocs[req.baseUrl] = new jsdom.JSDOM(liveListFile)
-        .window.document;
+    liveListDoc = liveListDocs[req.baseUrl] = new jsdom.JSDOM(
+      liveListFile
+    ).window.document;
     liveListDoc.ctr = 0;
   }
   const liveList = liveListDoc.querySelector('#my-live-list');
@@ -493,35 +565,38 @@ app.use('/examples/live-list-update(-reverse)?.amp.html', (req, res, next) => {
   const pagination = liveListDoc.querySelector('#my-live-list [pagination]');
   const item1 = liveList.querySelector('#list-item-1');
   if (liveListDoc.ctr != 0) {
-    if (Math.random() < .8) {
+    if (Math.random() < 0.8) {
       // Always run a replace on the first item
       liveListReplace(item1);
 
-      if (Math.random() < .5) {
+      if (Math.random() < 0.5) {
         liveListTombstone(liveList);
       }
 
-      if (Math.random() < .8) {
+      if (Math.random() < 0.8) {
         liveListInsert(liveList, item1);
       }
       pagination.textContent = '';
-      const liveChildren = [].slice.call(items.children)
-          .filter(x => !x.hasAttribute('data-tombstone'));
+      const liveChildren = [].slice
+        .call(items.children)
+        .filter(x => !x.hasAttribute('data-tombstone'));
 
       const pageCount = Math.ceil(liveChildren.length / perPage);
       const pageListItems = Array.apply(null, Array(pageCount))
-          .map((_, i) => `<li>${i + 1}</li>`).join('');
-      const newPagination = '<nav aria-label="amp live list pagination">' +
-          `<ul class="pagination">${pageListItems}</ul>` +
-          '</nav>';
-      pagination./*OK*/innerHTML = newPagination;
+        .map((_, i) => `<li>${i + 1}</li>`)
+        .join('');
+      const newPagination =
+        '<nav aria-label="amp live list pagination">' +
+        `<ul class="pagination">${pageListItems}</ul>` +
+        '</nav>';
+      pagination./*OK*/ innerHTML = newPagination;
     } else {
       // Sometimes we want an empty response to simulate no changes.
       res.send(`${doctype}<html></html>`);
       return;
     }
   }
-  let outerHTML = liveListDoc.documentElement./*OK*/outerHTML;
+  let outerHTML = liveListDoc.documentElement./*OK*/ outerHTML;
   outerHTML = replaceUrls(mode, outerHTML);
   liveListDoc.ctr++;
   res.send(`${doctype}${outerHTML}`);
@@ -551,19 +626,19 @@ function liveListTombstone(liveList) {
   // We can tombstone any list item except item-1 since we always do a
   // replace example on item-1.
   if (tombstoneId != 1) {
-    const item = liveList./*OK*/querySelector(`#list-item-${tombstoneId}`);
+    const item = liveList./*OK*/ querySelector(`#list-item-${tombstoneId}`);
     if (item) {
       item.setAttribute('data-tombstone', '');
     }
   }
 }
 
-
 // Generate a random number between min and max
 // Value is inclusive of both min and max values.
 function range(min, max) {
-  const values =
-      Array.apply(null, new Array(max - min + 1)).map((_, i) => min + i);
+  const values = Array.apply(null, new Array(max - min + 1)).map(
+    (_, i) => min + i
+  );
   return values[Math.round(Math.random() * (max - min))];
 }
 
@@ -577,12 +652,18 @@ function getLiveBlogItem() {
   // Generate a 3 to 7 worded headline
   const headline = bacon(range(3, 7));
   const numOfParagraphs = range(1, 2);
-  const body = Array.apply(null, new Array(numOfParagraphs)).map(() => {
-    return `<p>${bacon(range(50, 90))}</p>`;
-  }).join('\n');
+  const body = Array.apply(null, new Array(numOfParagraphs))
+    .map(() => {
+      return `<p>${bacon(range(50, 90))}</p>`;
+    })
+    .join('\n');
 
   const img = `<amp-img
-        src="${flip() ? 'https://placekitten.com/300/350' : 'https://baconmockup.com/300/350'}"
+        src="${
+          flip()
+            ? 'https://placekitten.com/300/350'
+            : 'https://baconmockup.com/300/350'
+        }"
         layout="responsive"
          height="300" width="350">
       </amp-img>`;
@@ -625,9 +706,11 @@ function getLiveBlogItemWithBindAttributes() {
   const now = Date.now();
   // Generate a 3 to 7 worded headline
   const numOfParagraphs = range(1, 2);
-  const body = Array.apply(null, new Array(numOfParagraphs)).map(() => {
-    return `<p>${bacon(range(50, 90))}</p>`;
-  }).join('\n');
+  const body = Array.apply(null, new Array(numOfParagraphs))
+    .map(() => {
+      return `<p>${bacon(range(50, 90))}</p>`;
+    })
+    .join('\n');
 
   return `<!doctype html>
     <html amp><body>
@@ -644,25 +727,26 @@ function getLiveBlogItemWithBindAttributes() {
     </amp-live-list></body></html>`;
 }
 
-app.use('/examples/live-blog(-non-floating-button)?.amp.html',
-    (req, res, next) => {
-      if ('amp_latest_update_time' in req.query) {
-        res.setHeader('Content-Type', 'text/html');
-        res.end(getLiveBlogItem());
-        return;
-      }
-      next();
-    });
+app.use(
+  '/examples/live-blog(-non-floating-button)?.amp.html',
+  (req, res, next) => {
+    if ('amp_latest_update_time' in req.query) {
+      res.setHeader('Content-Type', 'text/html');
+      res.end(getLiveBlogItem());
+      return;
+    }
+    next();
+  }
+);
 
-app.use('/examples/bind/live-list.amp.html',
-    (req, res, next) => {
-      if ('amp_latest_update_time' in req.query) {
-        res.setHeader('Content-Type', 'text/html');
-        res.end(getLiveBlogItemWithBindAttributes());
-        return;
-      }
-      next();
-    });
+app.use('/examples/bind/live-list.amp.html', (req, res, next) => {
+  if ('amp_latest_update_time' in req.query) {
+    res.setHeader('Content-Type', 'text/html');
+    res.end(getLiveBlogItemWithBindAttributes());
+    return;
+  }
+  next();
+});
 
 app.use('/impression-proxy/', (req, res) => {
   cors.assertCors(req, res, ['GET']);
@@ -680,16 +764,30 @@ app.use('/impression-proxy/', (req, res) => {
   // Or fake response with status 204 if viewer replaceUrl is provided
 });
 
+let forcePromptOnNext = false;
 app.post('/get-consent-v1/', (req, res) => {
   cors.assertCors(req, res, ['POST']);
   const body = {
     'promptIfUnknown': true,
+    'forcePromptOnNext': forcePromptOnNext,
     'sharedData': {
       'tfua': true,
       'coppa': true,
     },
   };
   res.json(body);
+});
+
+app.get('/get-consent-v1-set/', (req, res) => {
+  cors.assertCors(req, res, ['GET']);
+  const value = req.query['forcePromptOnNext'];
+  if (value == 'false' || value == '0') {
+    forcePromptOnNext = false;
+  } else {
+    forcePromptOnNext = true;
+  }
+  res.json({});
+  res.end();
 });
 
 app.post('/get-consent-no-prompt/', (req, res) => {
@@ -729,16 +827,19 @@ app.get('/a4a_template/*', (req, res) => {
     res.end('Invalid path: ' + req.path);
     return;
   }
-  const filePath = `${pc.cwd()}/extensions/amp-ad-network-${match[1]}-impl/` +
-      `0.1/data/${match[2]}.template`;
-  fs.readFileAsync(filePath).then(file => {
-    res.setHeader('Content-Type', 'application/json');
-    res.setHeader('AMP-template-amp-creative', 'amp-mustache');
-    res.end(file);
-  }).error(() => {
-    res.status(404);
-    res.end('Not found: ' + filePath);
-  });
+  const filePath =
+    `${pc.cwd()}/extensions/amp-ad-network-${match[1]}-impl/` +
+    `0.1/data/${match[2]}.template`;
+  fs.readFileAsync(filePath)
+    .then(file => {
+      res.setHeader('Content-Type', 'application/json');
+      res.setHeader('AMP-template-amp-creative', 'amp-mustache');
+      res.end(file);
+    })
+    .error(() => {
+      res.status(404);
+      res.end('Not found: ' + filePath);
+    });
 });
 
 // Returns a document that echoes any post messages received from parent.
@@ -749,7 +850,7 @@ app.get('/a4a_template/*', (req, res) => {
 app.get('/iframe-echo-message', (req, res) => {
   const {message} = req.query;
   res.send(
-      `<!doctype html>
+    `<!doctype html>
         <body style="background-color: yellow">
         <script>
         if (${message}) {
@@ -763,7 +864,8 @@ app.get('/iframe-echo-message', (req, res) => {
         }
         </script>
         </body>
-      </html>`);
+      </html>`
+  );
 });
 
 // A4A envelope.
@@ -775,8 +877,7 @@ app.use('/a4a(|-3p)/', (req, res) => {
   let adUrl = req.url;
   const templatePath = '/build-system/server-a4a-template.html';
   const urlPrefix = getUrlPrefix(req);
-  if (!adUrl.startsWith('/proxy') &&
-      urlPrefix.indexOf('//localhost') != -1) {
+  if (!adUrl.startsWith('/proxy') && urlPrefix.indexOf('//localhost') != -1) {
     // This is a special case for testing. `localhost` URLs are transformed to
     // `ads.localhost` to ensure that the iframe is fully x-origin.
     adUrl = urlPrefix.replace('localhost', 'ads.localhost') + adUrl;
@@ -784,12 +885,12 @@ app.use('/a4a(|-3p)/', (req, res) => {
   adUrl = addQueryParam(adUrl, 'inabox', 1);
   fs.readFileAsync(pc.cwd() + templatePath, 'utf8').then(template => {
     const result = template
-        .replace(/CHECKSIG/g, force3p || '')
-        .replace(/DISABLE3PFALLBACK/g, !force3p)
-        .replace(/OFFSET/g, req.query.offset || '0px')
-        .replace(/AD_URL/g, adUrl)
-        .replace(/AD_WIDTH/g, req.query.width || '300')
-        .replace(/AD_HEIGHT/g, req.query.height || '250');
+      .replace(/CHECKSIG/g, force3p || '')
+      .replace(/DISABLE3PFALLBACK/g, !force3p)
+      .replace(/OFFSET/g, req.query.offset || '0px')
+      .replace(/AD_URL/g, adUrl)
+      .replace(/AD_WIDTH/g, req.query.width || '300')
+      .replace(/AD_HEIGHT/g, req.query.height || '250');
     res.end(result);
   });
 });
@@ -802,8 +903,10 @@ app.use('/inabox/:version/', (req, res) => {
   let adUrl = req.url;
   const templatePath = '/build-system/server-inabox-template.html';
   const urlPrefix = getUrlPrefix(req);
-  if (!adUrl.startsWith('/proxy') && // Ignore /proxy
-      urlPrefix.indexOf('//localhost') != -1) {
+  if (
+    !adUrl.startsWith('/proxy') && // Ignore /proxy
+    urlPrefix.indexOf('//localhost') != -1
+  ) {
     // This is a special case for testing. `localhost` URLs are transformed to
     // `ads.localhost` to ensure that the iframe is fully x-origin.
     adUrl = urlPrefix.replace('localhost', 'ads.localhost') + adUrl;
@@ -811,10 +914,10 @@ app.use('/inabox/:version/', (req, res) => {
   adUrl = addQueryParam(adUrl, 'inabox', req.params['version']);
   fs.readFileAsync(pc.cwd() + templatePath, 'utf8').then(template => {
     const result = template
-        .replace(/AD_URL/g, adUrl)
-        .replace(/OFFSET/g, req.query.offset || '0px')
-        .replace(/AD_WIDTH/g, req.query.width || '300')
-        .replace(/AD_HEIGHT/g, req.query.height || '250');
+      .replace(/AD_URL/g, adUrl)
+      .replace(/OFFSET/g, req.query.offset || '0px')
+      .replace(/AD_WIDTH/g, req.query.width || '300')
+      .replace(/AD_HEIGHT/g, req.query.height || '250');
     res.end(result);
   });
 });
@@ -824,14 +927,16 @@ app.use('/examples/analytics.config.json', (req, res, next) => {
   next();
 });
 
-app.use(['/examples/*', '/extensions/*', '/test/manual/*'],
-    (req, res, next) => {
-      const sourceOrigin = req.query['__amp_source_origin'];
-      if (sourceOrigin) {
-        res.setHeader('AMP-Access-Control-Allow-Source-Origin', sourceOrigin);
-      }
-      next();
-    });
+app.use(
+  ['/examples/*', '/extensions/*', '/test/manual/*'],
+  (req, res, next) => {
+    const sourceOrigin = req.query['__amp_source_origin'];
+    if (sourceOrigin) {
+      res.setHeader('AMP-Access-Control-Allow-Source-Origin', sourceOrigin);
+    }
+    next();
+  }
+);
 
 /**
  * Append ?sleep=5 to any included JS file in examples to emulate delay in
@@ -853,66 +958,94 @@ app.use(['/dist/v0/amp-*.js'], (req, res, next) => {
  */
 app.get('/test/manual/amp-video.amp.html', runVideoTestBench);
 
-app.get([
-  '/examples/*.html',
-  '/test/manual/*.html',
-  '/test/fixtures/e2e/*/*.html'], (req, res, next) => {
-  const filePath = req.path;
-  const mode = pc.env.SERVE_MODE;
-  const inabox = req.query['inabox'];
-  const stream = Number(req.query['stream']);
-  fs.readFileAsync(pc.cwd() + filePath, 'utf8').then(file => {
-    if (req.query['amp_js_v']) {
-      file = addViewerIntegrationScript(req.query['amp_js_v'], file);
-    }
-
-
-    if (inabox && req.headers.origin && req.query.__amp_source_origin) {
-      // Allow CORS requests for A4A.
-      cors.enableCors(req, res, req.headers.origin);
-    } else {
-      file = replaceUrls(mode, file, '', inabox);
-    }
-
-    // Extract amp-ad for the given 'type' specified in URL query.
-    if (req.path.indexOf('/examples/ads.amp.html') == 0 && req.query.type) {
-      const ads = file.match(
-          elementExtractor('(amp-ad|amp-embed)', req.query.type));
-      file = file.replace(
-          /<body>[\s\S]+<\/body>/m, '<body>' + ads.join('') + '</body>');
-    }
-
-    // Extract amp-analytics for the given 'type' specified in URL query.
-    if (req.path.indexOf(
-        '/examples/analytics-vendors.amp.html') == 0 && req.query.type) {
-      const analytics = file.match(
-          elementExtractor('amp-analytics', req.query.type));
-      file = file.replace(
-          /<div id="container">[\s\S]+<\/div>/m,
-          '<div id="container">' + analytics.join('') + '</div>');
-    }
-
-    if (stream > 0) {
-      res.writeHead(200, {'Content-Type': 'text/html'});
-      let pos = 0;
-      const writeChunk = function() {
-        const chunk = file.substring(pos, Math.min(pos + stream, file.length));
-        res.write(chunk);
-        pos += stream;
-        if (pos < file.length) {
-          setTimeout(writeChunk, 500);
-        } else {
-          res.end();
+app.get(
+  ['/examples/*.html', '/test/manual/*.html', '/test/fixtures/e2e/*/*.html'],
+  (req, res, next) => {
+    const filePath = req.path;
+    const mode = pc.env.SERVE_MODE;
+    const inabox = req.query['inabox'];
+    const stream = Number(req.query['stream']);
+    fs.readFileAsync(pc.cwd() + filePath, 'utf8')
+      .then(file => {
+        if (req.query['amp_js_v']) {
+          file = addViewerIntegrationScript(req.query['amp_js_v'], file);
         }
-      };
-      writeChunk();
-    } else {
-      res.send(file);
-    }
-  }).catch(() => {
-    next();
-  });
-});
+        file = file.replace(/__TEST_SERVER_PORT__/g, TEST_SERVER_PORT);
+
+        if (inabox && req.headers.origin && req.query.__amp_source_origin) {
+          // Allow CORS requests for A4A.
+          cors.enableCors(req, res, req.headers.origin);
+        } else {
+          file = replaceUrls(mode, file, '', inabox);
+        }
+
+        // Extract amp-ad for the given 'type' specified in URL query.
+        if (req.path.indexOf('/examples/ads.amp.html') == 0 && req.query.type) {
+          const ads = file.match(
+            elementExtractor('(amp-ad|amp-embed)', req.query.type)
+          );
+          file = file.replace(
+            /<body>[\s\S]+<\/body>/m,
+            '<body>' + ads.join('') + '</body>'
+          );
+        }
+
+        // Extract amp-analytics for the given 'type' specified in URL query.
+        if (
+          req.path.indexOf('/examples/analytics-vendors.amp.html') == 0 &&
+          req.query.type
+        ) {
+          const analytics = file.match(
+            elementExtractor('amp-analytics', req.query.type)
+          );
+          file = file.replace(
+            /<div id="container">[\s\S]+<\/div>/m,
+            '<div id="container">' + analytics.join('') + '</div>'
+          );
+        }
+
+        // Extract amp-consent for the given 'type' specified in URL query.
+        if (
+          req.path.indexOf('/examples/cmp-vendors.amp.html') == 0 &&
+          req.query.type
+        ) {
+          const consent = file.match(
+            elementExtractor('amp-consent', req.query.type)
+          );
+          file = file.replace(
+            /<div id="container">[\s\S]+<\/div>/m,
+            '<div id="container">' + consent.join('') + '</div>'
+          );
+        }
+
+        if (stream > 0) {
+          res.writeHead(200, {'Content-Type': 'text/html'});
+          let pos = 0;
+          const writeChunk = function() {
+            const chunk = file.substring(
+              pos,
+              Math.min(pos + stream, file.length)
+            );
+            res.write(chunk);
+            pos += stream;
+            if (pos < file.length) {
+              setTimeout(writeChunk, 500);
+            } else {
+              res.end();
+            }
+          };
+          writeChunk();
+        } else {
+          res.send(file);
+        }
+      })
+      .catch(() => {
+        next();
+      });
+  }
+);
+
+appTestEndpoints(app);
 
 function escapeRegExp(string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -921,8 +1054,9 @@ function escapeRegExp(string) {
 function elementExtractor(tagName, type) {
   type = escapeRegExp(type);
   return new RegExp(
-      `<${tagName}[\\s][^>]*['"]${type}['"][^>]*>([\\s\\S]+?)</${tagName}>`,
-      'gm');
+    `<${tagName}[\\s][^>]*['"]${type}['"][^>]*>([\\s\\S]+?)</${tagName}>`,
+    'gm'
+  );
 }
 
 // Data for example: http://localhost:8000/examples/bind/xhr.amp.html
@@ -998,6 +1132,12 @@ app.use('/bind/ecommerce/sizes', (req, res) => {
   }, 1000); // Simulate network delay.
 });
 
+/*
+//TODO(chenshay): Accept '?crypto=bla'
+implement authorizer here.
+this is for local testing.
+*/
+
 // Simulated subscription entitlement
 app.use('/subscription/:id/entitlements', (req, res) => {
   cors.assertCors(req, res, ['GET']);
@@ -1028,75 +1168,81 @@ app.get('/adzerk/*', (req, res) => {
     return;
   }
   const filePath =
-      pc.cwd() + '/extensions/amp-ad-network-adzerk-impl/0.1/data/' + match[1];
-  fs.readFileAsync(filePath).then(file => {
-    res.setHeader('Content-Type', 'application/json');
-    res.setHeader('AMP-Ad-Template-Extension', 'amp-mustache');
-    res.setHeader('AMP-Ad-Response-Type', 'template');
-    res.end(file);
-  }).error(() => {
-    res.status(404);
-    res.end('Not found: ' + filePath);
-  });
+    pc.cwd() + '/extensions/amp-ad-network-adzerk-impl/0.1/data/' + match[1];
+  fs.readFileAsync(filePath)
+    .then(file => {
+      res.setHeader('Content-Type', 'application/json');
+      res.setHeader('AMP-Ad-Template-Extension', 'amp-mustache');
+      res.setHeader('AMP-Ad-Response-Type', 'template');
+      res.end(file);
+    })
+    .error(() => {
+      res.status(404);
+      res.end('Not found: ' + filePath);
+    });
 });
 
 /*
  * Serve extension scripts and their source maps.
  */
-app.get(['/dist/rtv/*/v0/*.js', '/dist/rtv/*/v0/*.js.map'],
-    (req, res, next) => {
-      const mode = pc.env.SERVE_MODE;
-      const fileName = path.basename(req.path).replace('.max.', '.');
-      let filePath = 'https://cdn.ampproject.org/v0/' + fileName;
-      if (mode == 'cdn') {
-        // This will not be useful until extension-location.js change in prod
-        // Require url from cdn
-        request(filePath, (error, response) => {
-          if (error) {
-            res.status(404);
-            res.end();
-          } else {
-            res.send(response);
-          }
-        });
-        return;
-      }
-      const isJsMap = filePath.endsWith('.map');
-      if (isJsMap) {
-        filePath = filePath.replace(/\.js\.map$/, '\.js');
-      }
-      filePath = replaceUrls(mode, filePath);
-      req.url = filePath + (isJsMap ? '.map' : '');
-      next();
-    });
+app.get(
+  ['/dist/rtv/*/v0/*.js', '/dist/rtv/*/v0/*.js.map'],
+  (req, res, next) => {
+    const mode = pc.env.SERVE_MODE;
+    const fileName = path.basename(req.path).replace('.max.', '.');
+    let filePath = 'https://cdn.ampproject.org/v0/' + fileName;
+    if (mode == 'cdn') {
+      // This will not be useful until extension-location.js change in prod
+      // Require url from cdn
+      request(filePath, (error, response) => {
+        if (error) {
+          res.status(404);
+          res.end();
+        } else {
+          res.send(response);
+        }
+      });
+      return;
+    }
+    const isJsMap = filePath.endsWith('.map');
+    if (isJsMap) {
+      filePath = filePath.replace(/\.js\.map$/, '.js');
+    }
+    filePath = replaceUrls(mode, filePath);
+    req.url = filePath + (isJsMap ? '.map' : '');
+    next();
+  }
+);
 
 /**
  * Serve entry point script url
  */
-app.get(['/dist/sw.js', '/dist/sw-kill.js', '/dist/ww.js'],
-    (req, res, next) => {
-      // Special case for entry point script url. Use compiled for testing
-      const mode = pc.env.SERVE_MODE;
-      const fileName = path.basename(req.path);
-      if (mode == 'cdn') {
-        // This will not be useful until extension-location.js change in prod
-        // Require url from cdn
-        const filePath = 'https://cdn.ampproject.org/' + fileName;
-        request(filePath, function(error, response) {
-          if (error) {
-            res.status(404);
-            res.end();
-          } else {
-            res.send(response);
-          }
-        });
-        return;
-      }
-      if (mode == 'default') {
-        req.url = req.url.replace(/\.js$/, '.max.js');
-      }
-      next();
-    });
+app.get(
+  ['/dist/sw.js', '/dist/sw-kill.js', '/dist/ww.js'],
+  (req, res, next) => {
+    // Special case for entry point script url. Use compiled for testing
+    const mode = pc.env.SERVE_MODE;
+    const fileName = path.basename(req.path);
+    if (mode == 'cdn') {
+      // This will not be useful until extension-location.js change in prod
+      // Require url from cdn
+      const filePath = 'https://cdn.ampproject.org/' + fileName;
+      request(filePath, function(error, response) {
+        if (error) {
+          res.status(404);
+          res.end();
+        } else {
+          res.send(response);
+        }
+      });
+      return;
+    }
+    if (mode == 'default') {
+      req.url = req.url.replace(/\.js$/, '.max.js');
+    }
+    next();
+  }
+);
 
 app.get('/dist/iframe-transport-client-lib.js', (req, res, next) => {
   req.url = req.url.replace(/dist/, 'dist.3p/current');
@@ -1116,19 +1262,26 @@ app.get('/dist/amp-inabox-host.js', (req, res, next) => {
  */
 app.get('/dist/sw(.max)?.js', (req, res, next) => {
   const filePath = req.path;
-  fs.readFileAsync(pc.cwd() + filePath, 'utf8').then(file => {
-    let n = new Date();
-    // Round down to the nearest 5 minutes.
-    n -= ((n.getMinutes() % 5) * 1000 * 60)
-        + (n.getSeconds() * 1000) + n.getMilliseconds();
-    file = 'self.AMP_CONFIG = {v: "99' + n + '",' +
-        'cdnUrl: "http://localhost:8000/dist"};'
-        + file;
-    res.setHeader('Content-Type', 'application/javascript');
-    res.setHeader('Date', new Date().toUTCString());
-    res.setHeader('Cache-Control', 'no-cache;max-age=150');
-    res.end(file);
-  }).catch(next);
+  fs.readFileAsync(pc.cwd() + filePath, 'utf8')
+    .then(file => {
+      let n = new Date();
+      // Round down to the nearest 5 minutes.
+      n -=
+        (n.getMinutes() % 5) * 1000 * 60 +
+        n.getSeconds() * 1000 +
+        n.getMilliseconds();
+      file =
+        'self.AMP_CONFIG = {v: "99' +
+        n +
+        '",' +
+        'cdnUrl: "http://localhost:8000/dist"};' +
+        file;
+      res.setHeader('Content-Type', 'application/javascript');
+      res.setHeader('Date', new Date().toUTCString());
+      res.setHeader('Cache-Control', 'no-cache;max-age=150');
+      res.end(file);
+    })
+    .catch(next);
 });
 
 app.get('/dist/rtv/9[89]*/*.js', (req, res, next) => {
@@ -1140,10 +1293,12 @@ app.get('/dist/rtv/9[89]*/*.js', (req, res, next) => {
     // Cause a delay, to show the "stale-while-revalidate"
     if (req.path.includes('v0.js')) {
       const path = req.path.replace(/rtv\/\d+/, '');
-      return fs.readFileAsync(pc.cwd() + path, 'utf8')
-          .then(file => {
-            res.end(file);
-          }).catch(next);
+      return fs
+        .readFileAsync(pc.cwd() + path, 'utf8')
+        .then(file => {
+          res.end(file);
+        })
+        .catch(next);
     }
 
     res.end(`
@@ -1156,30 +1311,36 @@ app.get('/dist/rtv/9[89]*/*.js', (req, res, next) => {
 
 app.get(['/dist/cache-sw.html'], (req, res, next) => {
   const filePath = '/test/manual/cache-sw.html';
-  fs.readFileAsync(pc.cwd() + filePath, 'utf8').then(file => {
-    let n = new Date();
-    // Round down to the nearest 5 minutes.
-    n -= ((n.getMinutes() % 5) * 1000 * 60)
-        + (n.getSeconds() * 1000) + n.getMilliseconds();
-    const percent = parseFloat(req.query.canary) || 0.01;
-    let env = '99';
-    if (Math.random() < percent) {
-      env = '98';
-      n += 5 * 1000 * 60;
-    }
-    file = file.replace(/dist\/v0/g, `dist/rtv/${env}${n}/v0`);
-    file = file.replace(/CURRENT_RTV/, env + n);
+  fs.readFileAsync(pc.cwd() + filePath, 'utf8')
+    .then(file => {
+      let n = new Date();
+      // Round down to the nearest 5 minutes.
+      n -=
+        (n.getMinutes() % 5) * 1000 * 60 +
+        n.getSeconds() * 1000 +
+        n.getMilliseconds();
+      const percent = parseFloat(req.query.canary) || 0.01;
+      let env = '99';
+      if (Math.random() < percent) {
+        env = '98';
+        n += 5 * 1000 * 60;
+      }
+      file = file.replace(/dist\/v0/g, `dist/rtv/${env}${n}/v0`);
+      file = file.replace(/CURRENT_RTV/, env + n);
 
-    res.setHeader('Content-Type', 'text/html');
-    res.end(file);
-  }).catch(next);
+      res.setHeader('Content-Type', 'text/html');
+      res.end(file);
+    })
+    .catch(next);
 });
 
 app.get('/dist/diversions', (req, res) => {
   let n = new Date();
   // Round down to the nearest 5 minutes.
-  n -= ((n.getMinutes() % 5) * 1000 * 60)
-      + (n.getSeconds() * 1000) + n.getMilliseconds();
+  n -=
+    (n.getMinutes() % 5) * 1000 * 60 +
+    n.getSeconds() * 1000 +
+    n.getMilliseconds();
   n += 5 * 1000 * 60;
   res.setHeader('Content-Type', 'application/json');
   res.setHeader('Date', new Date().toUTCString());
@@ -1203,20 +1364,27 @@ app.get('/dist/ww(.max)?.js', (req, res) => {
 });
 
 /**
- * Shadow viewer
+ * Shadow viewer. Fetches shadow runtime from cdn by default.
+ * Setting the param useLocal=1 will load the runtime from the local build.
  */
 app.use('/shadow/', (req, res) => {
   const {url} = req;
   const isProxyUrl = /^\/proxy\//.test(url);
 
-  const baseHref = isProxyUrl ?
-    'https://cdn.ampproject.org/' :
-    `${path.dirname(url)}/`;
+  const baseHref = isProxyUrl
+    ? 'https://cdn.ampproject.org/'
+    : `${path.dirname(url)}/`;
 
-  res.end(renderShadowViewer({
+  const viewerHtml = renderShadowViewer({
     src: req.url.replace(/^\//, ''),
     baseHref,
-  }));
+  });
+
+  if (!req.query.useLocal) {
+    res.end(viewerHtml);
+    return;
+  }
+  res.end(replaceUrls(pc.env.SERVE_MODE, viewerHtml));
 });
 
 /**
@@ -1229,18 +1397,22 @@ function addViewerIntegrationScript(ampJsVersion, file) {
     return file;
   }
   let viewerScript;
-  if (Number.isInteger(ampJsVersion)) { // eslint-disable-line amphtml-internal/no-es2015-number-props
+  // eslint-disable-next-line amphtml-internal/no-es2015-number-props
+  if (Number.isInteger(ampJsVersion)) {
     // Viewer integration script from gws, such as
     // https://cdn.ampproject.org/viewer/google/v7.js
     viewerScript =
-        '<script async src="https://cdn.ampproject.org/viewer/google/v' +
-        ampJsVersion + '.js"></script>';
+      '<script async src="https://cdn.ampproject.org/viewer/google/v' +
+      ampJsVersion +
+      '.js"></script>';
   } else {
     // Viewer integration script from runtime, such as
     // https://cdn.ampproject.org/v0/amp-viewer-integration-0.1.js
-    viewerScript = '<script async ' +
-        'src="https://cdn.ampproject.org/v0/amp-viewer-integration-' +
-        ampJsVersion + '.js" data-amp-report-test="viewer-integr.js"></script>';
+    viewerScript =
+      '<script async ' +
+      'src="https://cdn.ampproject.org/v0/amp-viewer-integration-' +
+      ampJsVersion +
+      '.js" data-amp-report-test="viewer-integr.js"></script>';
   }
   file = file.replace('</head>', viewerScript + '</head>');
   return file;
@@ -1258,7 +1430,7 @@ function getUrlPrefix(req) {
  */
 function addQueryParam(url, param, value) {
   const paramValue =
-      encodeURIComponent(param) + '=' + encodeURIComponent(value);
+    encodeURIComponent(param) + '=' + encodeURIComponent(value);
   if (!url.includes('?')) {
     url += '?' + paramValue;
   } else {
@@ -1267,21 +1439,25 @@ function addQueryParam(url, param, value) {
   return url;
 }
 
-
 function generateInfo(filePath) {
   const mode = pc.env.SERVE_MODE;
   filePath = filePath.substr(0, filePath.length - 9) + '.html';
 
-  return '<h2>Please note that .min/.max is no longer supported</h2>' +
-      '<h3>Current serving mode is ' + mode + '</h3>' +
-      '<h3>Please go to <a href= ' + filePath +
-      '>Unversioned Link</a> to view the page<h3>' +
-      '<h3></h3>' +
-      '<h3><a href = /serve_mode=default>' +
-      'Change to DEFAULT mode (unminified JS)</a></h3>' +
-      '<h3><a href = /serve_mode=compiled>' +
-      'Change to COMPILED mode (minified JS)</a></h3>' +
-      '<h3><a href = /serve_mode=cdn>Change to CDN mode (prod JS)</a></h3>';
+  return (
+    '<h2>Please note that .min/.max is no longer supported</h2>' +
+    '<h3>Current serving mode is ' +
+    mode +
+    '</h3>' +
+    '<h3>Please go to <a href= ' +
+    filePath +
+    '>Unversioned Link</a> to view the page<h3>' +
+    '<h3></h3>' +
+    '<h3><a href = /serve_mode=default>' +
+    'Change to DEFAULT mode (unminified JS)</a></h3>' +
+    '<h3><a href = /serve_mode=compiled>' +
+    'Change to COMPILED mode (minified JS)</a></h3>' +
+    '<h3><a href = /serve_mode=cdn>Change to CDN mode (prod JS)</a></h3>'
+  );
 }
 
 module.exports = app;

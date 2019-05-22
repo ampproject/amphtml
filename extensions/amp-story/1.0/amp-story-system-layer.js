@@ -24,7 +24,7 @@ import {
   DevelopmentModeLog,
   DevelopmentModeLogButtonSet,
 } from './development-ui';
-import {LocalizedStringId} from './localization';
+import {LocalizedStringId} from '../../../src/localized-strings';
 import {ProgressBar} from './progress-bar';
 import {Services} from '../../../src/services';
 import {createShadowRootWithStyle} from './utils';
@@ -33,7 +33,6 @@ import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {matches} from '../../../src/dom';
 import {renderAsElement} from './simple-template';
-
 
 /** @private @const {string} */
 const AD_SHOWING_ATTRIBUTE = 'ad-showing';
@@ -74,8 +73,9 @@ const HIDE_AUDIO_MESSAGE_TIMEOUT_MS = 1500;
 /** @private @const {!./simple-template.ElementDef} */
 const TEMPLATE = {
   tag: 'aside',
-  attrs: dict(
-      {'class': 'i-amphtml-story-system-layer i-amphtml-story-system-reset'}),
+  attrs: dict({
+    'class': 'i-amphtml-story-system-layer i-amphtml-story-system-reset',
+  }),
   children: [
     {
       tag: 'div',
@@ -103,10 +103,10 @@ const TEMPLATE = {
                 {
                   tag: 'div',
                   attrs: dict({
-                    'class': 'i-amphtml-story-mute-text' ,
+                    'class': 'i-amphtml-story-mute-text',
                   }),
                   localizedStringId:
-                        LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT,
+                    LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT,
                 },
                 {
                   tag: 'div',
@@ -114,15 +114,15 @@ const TEMPLATE = {
                     'class': 'i-amphtml-story-unmute-sound-text',
                   }),
                   localizedStringId:
-                        LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_SOUND_TEXT,
+                    LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_SOUND_TEXT,
                 },
                 {
                   tag: 'div',
                   attrs: dict({
-                    'class': 'i-amphtml-story-unmute-no-sound-text' ,
+                    'class': 'i-amphtml-story-unmute-no-sound-text',
                   }),
                   localizedStringId:
-                        LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_NO_SOUND_TEXT,
+                    LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_NO_SOUND_TEXT,
                 },
               ],
             },
@@ -160,7 +160,6 @@ const TEMPLATE = {
     },
   ],
 };
-
 
 /**
  * System Layer (i.e. UI Chrome) for <amp-story>.
@@ -238,28 +237,36 @@ export class SystemLayer {
     createShadowRootWithStyle(this.root_, this.systemLayerEl_, CSS);
 
     this.systemLayerEl_.insertBefore(
-        this.progressBar_.build(pageIds), this.systemLayerEl_.firstChild);
+      this.progressBar_.build(pageIds),
+      this.systemLayerEl_.firstChild
+    );
 
-    this.buttonsContainer_ =
-        this.systemLayerEl_.querySelector(
-            '.i-amphtml-story-system-layer-buttons');
+    this.buttonsContainer_ = this.systemLayerEl_.querySelector(
+      '.i-amphtml-story-system-layer-buttons'
+    );
 
     this.buildForDevelopmentMode_();
 
     this.initializeListeners_();
 
-    this.storeService_.subscribe(StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS,
-        canShowButtons => {
-          this.systemLayerEl_.classList
-              .toggle('i-amphtml-story-ui-no-buttons', !canShowButtons);
-        }, true /* callToInitialize */);
+    this.storeService_.subscribe(
+      StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS,
+      canShowButtons => {
+        this.systemLayerEl_.classList.toggle(
+          'i-amphtml-story-ui-no-buttons',
+          !canShowButtons
+        );
+      },
+      true /* callToInitialize */
+    );
 
     if (Services.platformFor(this.win_).isIos()) {
       this.systemLayerEl_.setAttribute('ios', '');
     }
 
-    if (Services.viewerForDoc(this.win_.document.documentElement)
-        .isEmbedded()) {
+    if (
+      Services.viewerForDoc(this.win_.document.documentElement).isEmbedded()
+    ) {
       this.systemLayerEl_.classList.add('i-amphtml-embedded');
       this.getShadowRoot().setAttribute(HAS_INFO_BUTTON_ATTRIBUTE, '');
     } else {
@@ -278,8 +285,11 @@ export class SystemLayer {
       return;
     }
 
-    this.buttonsContainer_.appendChild(this.developerButtons_.build(
-        this.developerLog_.toggle.bind(this.developerLog_)));
+    this.buttonsContainer_.appendChild(
+      this.developerButtons_.build(
+        this.developerLog_.toggle.bind(this.developerLog_)
+      )
+    );
     this.getShadowRoot().appendChild(this.developerLog_.build());
   }
 
@@ -312,44 +322,76 @@ export class SystemLayer {
       this.onBookendStateUpdate_(isActive);
     });
 
-    this.storeService_.subscribe(StateProperty.CAN_SHOW_SHARING_UIS, show => {
-      this.onCanShowSharingUisUpdate_(show);
-    }, true /** callToInitialize */);
+    this.storeService_.subscribe(
+      StateProperty.CAN_SHOW_SHARING_UIS,
+      show => {
+        this.onCanShowSharingUisUpdate_(show);
+      },
+      true /** callToInitialize */
+    );
 
-    this.storeService_.subscribe(StateProperty.STORY_HAS_AUDIO_STATE,
-        hasAudio => {
-          this.onStoryHasAudioStateUpdate_(hasAudio);
-        }, true /** callToInitialize */);
+    this.storeService_.subscribe(
+      StateProperty.STORY_HAS_AUDIO_STATE,
+      hasAudio => {
+        this.onStoryHasAudioStateUpdate_(hasAudio);
+      },
+      true /** callToInitialize */
+    );
 
-    this.storeService_.subscribe(StateProperty.MUTED_STATE, isMuted => {
-      this.onMutedStateUpdate_(isMuted);
-    }, true /** callToInitialize */);
+    this.storeService_.subscribe(
+      StateProperty.MUTED_STATE,
+      isMuted => {
+        this.onMutedStateUpdate_(isMuted);
+      },
+      true /** callToInitialize */
+    );
 
-    this.storeService_.subscribe(StateProperty.UI_STATE, uiState => {
-      this.onUIStateUpdate_(uiState);
-    }, true /** callToInitialize */);
+    this.storeService_.subscribe(
+      StateProperty.UI_STATE,
+      uiState => {
+        this.onUIStateUpdate_(uiState);
+      },
+      true /** callToInitialize */
+    );
 
-    this.storeService_.subscribe(StateProperty.CURRENT_PAGE_INDEX, index => {
-      this.onPageIndexUpdate_(index);
-    }, true /** callToInitialize */);
+    this.storeService_.subscribe(
+      StateProperty.CURRENT_PAGE_INDEX,
+      index => {
+        this.onPageIndexUpdate_(index);
+      },
+      true /** callToInitialize */
+    );
 
-    this.storeService_.subscribe(StateProperty.RTL_STATE, rtlState => {
-      this.onRtlStateUpdate_(rtlState);
-    }, true /** callToInitialize */);
+    this.storeService_.subscribe(
+      StateProperty.RTL_STATE,
+      rtlState => {
+        this.onRtlStateUpdate_(rtlState);
+      },
+      true /** callToInitialize */
+    );
 
-    this.storeService_.subscribe(StateProperty.PAGE_HAS_AUDIO_STATE, audio => {
-      this.onPageHasAudioStateUpdate_(audio);
-    }, true /** callToInitialize */);
+    this.storeService_.subscribe(
+      StateProperty.PAGE_HAS_AUDIO_STATE,
+      audio => {
+        this.onPageHasAudioStateUpdate_(audio);
+      },
+      true /** callToInitialize */
+    );
 
-    this.storeService_.subscribe(StateProperty.HAS_SIDEBAR_STATE,
-        hasSidebar => {
-          this.onHasSidebarStateUpdate_(hasSidebar);
-        }, true /** callToInitialize */);
+    this.storeService_.subscribe(
+      StateProperty.HAS_SIDEBAR_STATE,
+      hasSidebar => {
+        this.onHasSidebarStateUpdate_(hasSidebar);
+      },
+      true /** callToInitialize */
+    );
 
-    this.storeService_.subscribe(StateProperty.SYSTEM_UI_IS_VISIBLE_STATE,
-        isVisible => {
-          this.onSystemUiIsVisibleStateUpdate_(isVisible);
-        });
+    this.storeService_.subscribe(
+      StateProperty.SYSTEM_UI_IS_VISIBLE_STATE,
+      isVisible => {
+        this.onSystemUiIsVisibleStateUpdate_(isVisible);
+      }
+    );
   }
 
   /**
@@ -373,9 +415,9 @@ export class SystemLayer {
    */
   onAdStateUpdate_(isAd) {
     this.vsync_.mutate(() => {
-      isAd ?
-        this.getShadowRoot().setAttribute(AD_SHOWING_ATTRIBUTE, '') :
-        this.getShadowRoot().removeAttribute(AD_SHOWING_ATTRIBUTE);
+      isAd
+        ? this.getShadowRoot().setAttribute(AD_SHOWING_ATTRIBUTE, '')
+        : this.getShadowRoot().removeAttribute(AD_SHOWING_ATTRIBUTE);
     });
   }
 
@@ -385,8 +427,10 @@ export class SystemLayer {
    * @private
    */
   onBookendStateUpdate_(isActive) {
-    this.getShadowRoot()
-        .classList.toggle('i-amphtml-story-bookend-active', isActive);
+    this.getShadowRoot().classList.toggle(
+      'i-amphtml-story-bookend-active',
+      isActive
+    );
   }
 
   /**
@@ -411,8 +455,10 @@ export class SystemLayer {
    */
   onCanShowSharingUisUpdate_(canShowSharingUis) {
     this.vsync_.mutate(() => {
-      this.getShadowRoot()
-          .classList.toggle('i-amphtml-story-no-sharing', !canShowSharingUis);
+      this.getShadowRoot().classList.toggle(
+        'i-amphtml-story-no-sharing',
+        !canShowSharingUis
+      );
     });
   }
 
@@ -424,8 +470,10 @@ export class SystemLayer {
    */
   onStoryHasAudioStateUpdate_(hasAudio) {
     this.vsync_.mutate(() => {
-      this.getShadowRoot()
-          .classList.toggle('i-amphtml-story-has-audio', hasAudio);
+      this.getShadowRoot().classList.toggle(
+        'i-amphtml-story-has-audio',
+        hasAudio
+      );
     });
   }
 
@@ -437,13 +485,17 @@ export class SystemLayer {
    */
   onPageHasAudioStateUpdate_(pageHasAudio) {
     pageHasAudio =
-        pageHasAudio || !!this.storeService_.get(
-            StateProperty.STORY_HAS_BACKGROUND_AUDIO_STATE);
+      pageHasAudio ||
+      !!this.storeService_.get(StateProperty.STORY_HAS_BACKGROUND_AUDIO_STATE);
     this.vsync_.mutate(() => {
-      pageHasAudio ?
-        this.getShadowRoot()
-            .setAttribute(CURRENT_PAGE_HAS_AUDIO_ATTRIBUTE, '') :
-        this.getShadowRoot().removeAttribute(CURRENT_PAGE_HAS_AUDIO_ATTRIBUTE);
+      pageHasAudio
+        ? this.getShadowRoot().setAttribute(
+            CURRENT_PAGE_HAS_AUDIO_ATTRIBUTE,
+            ''
+          )
+        : this.getShadowRoot().removeAttribute(
+            CURRENT_PAGE_HAS_AUDIO_ATTRIBUTE
+          );
     });
   }
   /**
@@ -453,9 +505,9 @@ export class SystemLayer {
    */
   onMutedStateUpdate_(isMuted) {
     this.vsync_.mutate(() => {
-      isMuted ?
-        this.getShadowRoot().setAttribute(AUDIO_MUTED_ATTRIBUTE, '') :
-        this.getShadowRoot().removeAttribute(AUDIO_MUTED_ATTRIBUTE);
+      isMuted
+        ? this.getShadowRoot().setAttribute(AUDIO_MUTED_ATTRIBUTE, '')
+        : this.getShadowRoot().removeAttribute(AUDIO_MUTED_ATTRIBUTE);
     });
   }
 
@@ -467,10 +519,10 @@ export class SystemLayer {
     if (this.timeoutId_) {
       this.timer_.cancel(this.timeoutId_);
     }
-    this.timeoutId_ =
-        this.timer_.delay(
-            () => this.hideAudioMessageInternal_(),
-            HIDE_AUDIO_MESSAGE_TIMEOUT_MS);
+    this.timeoutId_ = this.timer_.delay(
+      () => this.hideAudioMessageInternal_(),
+      HIDE_AUDIO_MESSAGE_TIMEOUT_MS
+    );
   }
 
   /**
@@ -516,8 +568,10 @@ export class SystemLayer {
    */
   onSystemUiIsVisibleStateUpdate_(isVisible) {
     this.vsync_.mutate(() => {
-      this.getShadowRoot()
-          .classList.toggle('i-amphtml-story-hidden', !isVisible);
+      this.getShadowRoot().classList.toggle(
+        'i-amphtml-story-hidden',
+        !isVisible
+      );
     });
   }
 
@@ -538,9 +592,9 @@ export class SystemLayer {
    */
   onRtlStateUpdate_(rtlState) {
     this.vsync_.mutate(() => {
-      rtlState ?
-        this.getShadowRoot().setAttribute('dir', 'rtl') :
-        this.getShadowRoot().removeAttribute('dir');
+      rtlState
+        ? this.getShadowRoot().setAttribute('dir', 'rtl')
+        : this.getShadowRoot().removeAttribute('dir');
     });
   }
 

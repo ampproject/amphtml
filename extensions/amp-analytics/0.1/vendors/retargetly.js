@@ -17,9 +17,10 @@
 export const RETARGETLY_CONFIG = /** @type {!JsonObject} */ ({
   'requests': {
     'host': 'https://api.retargetly.com',
-    'page': '${host}/api?id=${accountId}&src=${sourceId}&url=${sourceUrl}' +
-    '&n=${title}&ref=${documentReferrer}&ua=${userAgent}' +
-    '&random=${random}&bl=${browserLanguage}&source=amp',
+    'page':
+      '${host}/api?id=${accountId}&src=${sourceId}&url=${sourceUrl}' +
+      '&n=${title}&ref=${documentReferrer}&ua=${userAgent}' +
+      '&random=${random}&bl=${browserLanguage}&source=amp',
   },
   'transport': {
     'beacon': false,
@@ -33,5 +34,3 @@ export const RETARGETLY_CONFIG = /** @type {!JsonObject} */ ({
     },
   },
 });
-
-

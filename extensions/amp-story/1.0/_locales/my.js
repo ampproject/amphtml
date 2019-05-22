@@ -13,14 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import {LocalizedStringBundleDef, LocalizedStringId} from '../localization';
+import {
+  LocalizedStringBundleDef,
+  LocalizedStringId,
+} from '../../../../src/service/localization';
 
 /**
  * Localized string bundle used for my strings.
  * @const {!LocalizedStringBundleDef}
  */
-export default /** @const {!LocalizedStringBundleDef} */ ({
+const strings = {
   [LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT]: {
     string: 'အသံပိတ်ထားသည်',
   },
@@ -29,75 +31,6 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
   },
   [LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_SOUND_TEXT]: {
     string: 'အသံဖွင့်ထားသည်',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_APPLY_NOW]: {
-    string: 'ယခု လျှောက်ထားရန်',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_BOOK_NOW]: {
-    string: 'စာအုပ်',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_BUY_TICKETS]: {
-    string: 'လက်မှတ်ဝယ်ရန်',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_DOWNLOAD]: {
-    string: 'ဒေါင်းလုဒ်လုပ်ရန်',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_EXPLORE]: {
-    string: 'လေ့လာရန်',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_GET_NOW]: {
-    string: 'ယခု ရယူရန်',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_INSTALL]: {
-    string: 'ယခု ထည့်သွင်းရန်',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_LEARN_MORE]: {
-    string: 'ပိုမိုလေ့လာရန်',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_LISTEN]: {
-    string: 'နားဆင်ရန်',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_MORE]: {
-    string: 'နောက်ထပ်',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_OPEN_APP]: {
-    string: 'အက်ပ်ဖွင့်ရန်',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_ORDER_NOW]: {
-    string: 'ယခုမှာယူရန်',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_PLAY]: {
-    string: 'ဖွင့်ရန်',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_READ]: {
-    string: 'ဖတ်ရန်',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SHOP]: {
-    string: 'ဝယ်ရန်',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SHOW]: {
-    string: 'ပြရန်',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SHOWTIMES]: {
-    string: 'ရုပ်ရှင်ပြချိန်များ',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SIGN_UP]: {
-    string: 'အကောင့်ဖွင့်ရန်',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SUBSCRIBE]: {
-    string: 'ယခု စာရင်းသွင်းရန်',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_USE_APP]: {
-    string: 'အက်ပ်ကို အသုံးပြုရန်',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_VIEW]: {
-    string: 'ကြည့်ရန်',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_WATCH]: {
-    string: 'ကြည့်ရန်',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_WATCH_EPISODE]: {
-    string: 'ဇာတ်လမ်းပိုင်းကို ကြည့်ရန်',
   },
   [LocalizedStringId.AMP_STORY_BOOKEND_MORE_TO_READ_LABEL]: {
     string: 'နောက်ထပ် ဖတ်ရန်များ',
@@ -124,10 +57,10 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
     string: 'AMP ရလဒ်များအကြောင်း နောက်ထပ် အချက်အလက်',
   },
   [LocalizedStringId.AMP_STORY_HINT_UI_NEXT_LABEL]: {
-    string: '\'ရှေ့သို့\' ကိုတို့ရန်',
+    string: "'ရှေ့သို့' ကိုတို့ရန်",
   },
   [LocalizedStringId.AMP_STORY_HINT_UI_PREVIOUS_LABEL]: {
-    string: '\'နောက်သို့\' ကိုတို့ရန်',
+    string: "'နောက်သို့' ကိုတို့ရန်",
   },
   [LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL]: {
     string: 'အပေါ်သို့ ပွတ်ဆွဲရန်',
@@ -178,21 +111,24 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
     string: 'ဤဇာတ်လမ်းများကိုကြည့်ရန် သင့်ဝင်းဒိုး၏ အမြင့်ကို ချဲ့ပါ',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT]: {
-    string: 'ဤဇာတ်လမ်းများကိုကြည့်ရန် သင့်ဝင်းဒိုး၏ အမြင့်နှင့်အကျယ် ' +
-        'နှစ်ခုစလုံးကို ချဲ့ပါ',
+    string:
+      'ဤဇာတ်လမ်းများကိုကြည့်ရန် သင့်ဝင်းဒိုး၏ အမြင့်နှင့်အကျယ် ' +
+      'နှစ်ခုစလုံးကို ချဲ့ပါ',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_WIDTH_SIZE_TEXT]: {
     string: 'ဤဇာတ်လမ်းများကိုကြည့်ရန် သင့်ဝင်းဒိုး၏ အကျယ်ကို ချဲ့ပါ',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
-    string: 'ဤအကြောင်းအရာကို ကြည့်ရန် amp ဇာတ်လမ်း စမ်းသပ်မှုကို ' +
-        'ဖွင့်ထားရမည်။',
+    string: 'ဤအကြောင်းအရာကို ကြည့်ရန် amp ဇာတ်လမ်း စမ်းသပ်မှုကို ဖွင့်ထားရမည်။',
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
-    string: 'ဤစာမျက်နှာကို ထောင်လိုက်အနေအထားတွင် ကြည့်လျှင် ' +
-        'အကောင်းဆုံးဖြစ်ပါသည်',
+    string:
+      'ဤစာမျက်နှာကို ထောင်လိုက်အနေအထားတွင် ကြည့်လျှင် ' +
+      'အကောင်းဆုံးဖြစ်ပါသည်',
   },
   [LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT]: {
     string: 'သင့်ဘရောင်ဇာသည် ဤဇာတ်လမ်းများကို ပံ့ပိုးပုံမရပါ',
   },
-});
+};
+
+export default strings;

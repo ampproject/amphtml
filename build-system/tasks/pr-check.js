@@ -16,32 +16,114 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const gulp = require('gulp-help')(require('gulp'));
-const {execOrDie} = require('../exec');
+const {
+  printChangeSummary,
+  startTimer,
+  stopTimer,
+  timedExec,
+} = require('../pr-check/utils');
+const {determineBuildTargets} = require('../pr-check/build-targets');
+const {runYarnChecks} = require('../pr-check/yarn-checks');
 
+const FILENAME = 'pr-check.js';
 
 /**
- * Simple wrapper around pr-check.js.
+ * This file runs tests against the local workspace to mimic the CI build as
+ * closely as possible.
+ * @param {Function} cb
  */
-function prCheck() {
-  let cmd = 'node build-system/pr-check.js';
-  if (argv.files) {
-    cmd = cmd + ' --files ' + argv.files;
+async function prCheck(cb) {
+  const failTask = () => {
+    stopTimer(FILENAME, FILENAME, startTime);
+    const err = new Error('Local PR check failed. See logs above.');
+    err.showStack = false;
+    cb(err);
+  };
+
+  const runCheck = cmd => {
+    const {status} = timedExec(cmd, FILENAME);
+    if (status != 0) {
+      failTask();
+    }
+  };
+
+  const startTime = startTimer(FILENAME, FILENAME);
+  if (!runYarnChecks(FILENAME)) {
+    stopTimer(FILENAME, FILENAME, startTime);
+    process.exitCode = 1;
+    return;
   }
-  if (argv.nobuild) {
-    cmd = cmd + ' --nobuild';
+
+  printChangeSummary(FILENAME);
+  const buildTargets = new Set();
+  if (!determineBuildTargets(buildTargets, FILENAME)) {
+    stopTimer(FILENAME, FILENAME, startTime);
+    process.exitCode = 1;
+    return;
   }
-  execOrDie(cmd);
+
+  runCheck('gulp lint --local-changes');
+  runCheck('gulp presubmit');
+
+  if (buildTargets.has('AVA')) {
+    runCheck('gulp ava');
+  }
+
+  if (buildTargets.has('BABEL_PLUGIN')) {
+    runCheck('gulp babel-plugin-tests');
+  }
+
+  if (buildTargets.has('CACHES_JSON')) {
+    runCheck('gulp caches-json');
+    runCheck('gulp json-syntax');
+  }
+
+  if (buildTargets.has('DOCS')) {
+    runCheck('gulp check-links');
+  }
+
+  if (buildTargets.has('DEV_DASHBOARD')) {
+    runCheck('gulp dev-dashboard-tests');
+  }
+
+  if (buildTargets.has('RUNTIME')) {
+    runCheck('gulp dep-check');
+    runCheck('gulp check-types');
+  }
+
+  if (buildTargets.has('RUNTIME') || buildTargets.has('UNIT_TEST')) {
+    runCheck('gulp test --unit --local-changes --headless');
+  }
+
+  if (
+    buildTargets.has('RUNTIME') ||
+    buildTargets.has('FLAG_CONFIG') ||
+    buildTargets.has('INTEGRATION_TEST')
+  ) {
+    if (!argv.nobuild) {
+      runCheck('gulp clean');
+      runCheck('gulp dist --fortesting');
+    }
+    runCheck('gulp test --nobuild --compiled --integration --headless');
+  }
+
+  if (buildTargets.has('RUNTIME') || buildTargets.has('VALIDATOR')) {
+    runCheck('gulp validator');
+  }
+
+  if (buildTargets.has('VALIDATOR_WEBUI')) {
+    runCheck('gulp validator-webui');
+  }
+
+  stopTimer(FILENAME, FILENAME, startTime);
 }
 
-gulp.task(
-    'pr-check',
-    'Locally runs the PR checks that are run by Travis CI.',
-    prCheck,
-    {
-      options: {
-        'files': '  Restricts unit / integration tests to just these files',
-        'nobuild': '  Skips building the runtime via `gulp build`.',
-      },
-    }
-);
+module.exports = {
+  prCheck,
+};
+
+prCheck.description =
+  'Runs a subset of the Travis CI checks against local changes.';
+prCheck.flags = {
+  'nobuild': '  Skips building the runtime via `gulp dist`.',
+};

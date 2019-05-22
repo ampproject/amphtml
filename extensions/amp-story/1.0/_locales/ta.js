@@ -13,14 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import {LocalizedStringBundleDef, LocalizedStringId} from '../localization';
+import {
+  LocalizedStringBundleDef,
+  LocalizedStringId,
+} from '../../../../src/service/localization';
 
 /**
  * Localized string bundle used for ta strings.
  * @const {!LocalizedStringBundleDef}
  */
-export default /** @const {!LocalizedStringBundleDef} */ ({
+const strings = {
   [LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT]: {
     string: 'ஒலி முடக்கப்பட்டுள்ளது',
   },
@@ -29,75 +31,6 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
   },
   [LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_SOUND_TEXT]: {
     string: 'ஒலி இயக்கப்பட்டுள்ளது',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_APPLY_NOW]: {
-    string: 'இப்போதே விண்ணப்பியுங்கள்',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_BOOK_NOW]: {
-    string: 'புத்தகம்',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_BUY_TICKETS]: {
-    string: 'டிக்கெட்களை வாங்குங்கள்',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_DOWNLOAD]: {
-    string: 'பதிவிறக்குங்கள்',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_EXPLORE]: {
-    string: 'கண்டறி',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_GET_NOW]: {
-    string: 'இப்போதே பெறுங்கள்',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_INSTALL]: {
-    string: 'இப்போதே நிறுவு',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_LEARN_MORE]: {
-    string: 'மேலும் அறிக',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_LISTEN]: {
-    string: 'இசையைக் கேளுங்கள்',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_MORE]: {
-    string: 'மேலும்',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_OPEN_APP]: {
-    string: 'ஆப்ஸைத் திறந்திடுங்கள்',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_ORDER_NOW]: {
-    string: 'இப்போதே ஆர்டர் செய்',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_PLAY]: {
-    string: 'இயக்குங்கள்',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_READ]: {
-    string: 'வாசியுங்கள்',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SHOP]: {
-    string: 'ஷாப்பிங் செய்க',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SHOW]: {
-    string: 'காட்டு',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SHOWTIMES]: {
-    string: 'காட்சிநேரங்கள்',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SIGN_UP]: {
-    string: 'பதிவு செய்யுங்கள்',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_SUBSCRIBE]: {
-    string: 'இப்போதே குழு சேர்க',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_USE_APP]: {
-    string: 'ஆப்ஸைப் பயன்படுத்து',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_VIEW]: {
-    string: 'காட்டு',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_WATCH]: {
-    string: 'பாருங்கள்',
-  },
-  [LocalizedStringId.AMP_STORY_AUTO_ADS_BUTTON_LABEL_WATCH_EPISODE]: {
-    string: 'எபிசோடைக் காட்டு',
   },
   [LocalizedStringId.AMP_STORY_BOOKEND_MORE_TO_READ_LABEL]: {
     string: 'மேலும் படிக்க',
@@ -124,10 +57,10 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
     string: 'AMP முடிவுகள் குறித்த கூடுதல் தகவல்',
   },
   [LocalizedStringId.AMP_STORY_HINT_UI_NEXT_LABEL]: {
-    string: '\'அடுத்தது\' என்பதைத் தட்டவும்',
+    string: "'அடுத்தது' என்பதைத் தட்டவும்",
   },
   [LocalizedStringId.AMP_STORY_HINT_UI_PREVIOUS_LABEL]: {
-    string: '\'முந்தையது\' என்பதைத் தட்டவும்',
+    string: "'முந்தையது' என்பதைத் தட்டவும்",
   },
   [LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL]: {
     string: 'மேல்நோக்கி ஸ்வைப் செய்யவும்',
@@ -175,16 +108,19 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
     string: 'ட்வீட்டை விரிவாக்கும்',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_HEIGHT_SIZE_TEXT]: {
-    string: 'இந்த அனுபவத்தைப் பார்க்க உங்கள் சாளரத்தின் உயரத்தை ' +
-        'விரிவுபடுத்தவும்',
+    string:
+      'இந்த அனுபவத்தைப் பார்க்க உங்கள் சாளரத்தின் உயரத்தை ' +
+      'விரிவுபடுத்தவும்',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT]: {
-    string: 'இந்த அனுபவத்தைப் பார்க்க உங்கள் சாளரத்தின் உயரத்தையும் ' +
-        'அகலத்தையும் விரிவுபடுத்தவும்',
+    string:
+      'இந்த அனுபவத்தைப் பார்க்க உங்கள் சாளரத்தின் உயரத்தையும் ' +
+      'அகலத்தையும் விரிவுபடுத்தவும்',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_WIDTH_SIZE_TEXT]: {
-    string: 'இந்த அனுபவத்தைப் பார்க்க உங்கள் சாளரத்தின் அகலத்தை ' +
-        'விரிவுபடுத்தவும்',
+    string:
+      'இந்த அனுபவத்தைப் பார்க்க உங்கள் சாளரத்தின் அகலத்தை ' +
+      'விரிவுபடுத்தவும்',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
     string: 'இந்தக் கதைகளைப் பார்க்க AMP ஸ்டோரி சோதனையை இயக்க வேண்டும்.',
@@ -195,4 +131,6 @@ export default /** @const {!LocalizedStringBundleDef} */ ({
   [LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT]: {
     string: 'உங்கள் உலாவியில் இந்த அனுபவம் ஆதரிக்கப்படாதது போல் தெரிகிறது',
   },
-});
+};
+
+export default strings;

@@ -28,6 +28,7 @@
     "web-animations-js"
   ],
   "includePaths": [
-    "package.json"
+    "package.json",
+    "build-system/tasks/e2e/package.json"
   ]
 }

@@ -56,10 +56,17 @@ function centerAd(global) {
  */
 export function uas(global, data) {
   validateData(
-      data,
-      ['accId', 'adUnit', 'sizes'],
-      ['locLat', 'locLon', 'locSrc', 'pageURL', 'targetings', 'extraParams',
-        'visibility']
+    data,
+    ['accId', 'adUnit', 'sizes'],
+    [
+      'locLat',
+      'locLon',
+      'locSrc',
+      'pageURL',
+      'targetings',
+      'extraParams',
+      'visibility',
+    ]
   );
   global.Phoenix = {EQ: []};
   const uasDivId = 'uas-amp-slot';
@@ -67,15 +74,22 @@ export function uas(global, data) {
   loadScript(global, 'https://ads.pubmatic.com/AdServer/js/phoenix.js', () => {
     global.Phoenix.EQ.push(function() {
       global.Phoenix.enableSingleRequestCallMode();
-      global.Phoenix.setInfo('AMP', 1);// Need to set the AMP flag
+      global.Phoenix.setInfo('AMP', 1); // Need to set the AMP flag
       global.Phoenix.setInfo('ACCID', data.accId);
-      global.Phoenix.setInfo('PAGEURL', global.context.location.href);
+      // Reading PAGEURL from sourceUrl or location.href
+      global.Phoenix.setInfo(
+        'PAGEURL',
+        global.context.sourceUrl || global.context.location.href
+      ); // eslint-disable-line max-len
       data.pageURL && global.Phoenix.setInfo('PAGEURL', data.pageURL);
       data.locLat && global.Phoenix.setInfo('LAT', data.locLat);
       data.locLon && global.Phoenix.setInfo('LON', data.locLon);
       data.locSrc && global.Phoenix.setInfo('LOC_SRC', data.locSrc);
-      const slot = global.Phoenix.defineAdSlot(data.adUnit, data.sizes,
-          uasDivId);
+      const slot = global.Phoenix.defineAdSlot(
+        data.adUnit,
+        data.sizes,
+        uasDivId
+      );
       slot.setVisibility(1);
       forEachOnObject(data.targetings, function(key, value) {
         slot.setTargeting(key, value);

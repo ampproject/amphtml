@@ -16,7 +16,7 @@
 
 import {ActionSource} from './action-source';
 import {debounce} from '../../../src/utils/rate-limit';
-import {listenOnce} from '../../../src/event-helper';
+import {listen, listenOnce} from '../../../src/event-helper';
 
 const MIN_AUTO_ADVANCE_INTERVAL = 1000;
 
@@ -42,11 +42,7 @@ export class AutoAdvance {
    *   advanceable: !AdvanceDef
    * }} config
    */
-  constructor({
-    win,
-    scrollContainer,
-    advanceable,
-  }) {
+  constructor({win, scrollContainer, advanceable}) {
     /** @private @const */
     this.win_ = win;
 
@@ -71,6 +67,9 @@ export class AutoAdvance {
     /** @private {boolean} */
     this.paused_ = false;
 
+    /** @private {boolean} */
+    this.stopped_ = false;
+
     /** @private {?function()} */
     this.debouncedAdvance_ = null;
 
@@ -79,9 +78,49 @@ export class AutoAdvance {
 
     this.createDebouncedAdvance_(this.autoAdvanceInterval_);
     this.scrollContainer_.addEventListener(
-        'scroll', () => this.handleScroll_(), true);
-    this.scrollContainer_.addEventListener(
-        'touchstart', () => this.handleTouchStart_(), true);
+      'scroll',
+      () => this.handleScroll_(),
+      true
+    );
+    listen(
+      this.scrollContainer_,
+      'touchstart',
+      () => this.handleTouchStart_(),
+      {capture: true, passive: true}
+    );
+  }
+
+  /**
+   * Stops the auto advance. Once stopped, auto advance cannot be started
+   * again. This  sets the `stopped_` flag, which is checked in
+   * `shouldAutoAdvance_`.
+   */
+  stop() {
+    this.stopped_ = true;
+  }
+
+  /**
+   * Pauses the auto advance. It can be resumed again by calling `resume`. This
+   * sets the `paused_` flag, which is checked in `shouldAutoAdvance_`.
+   *
+   * This should only be used internally, rather than by an external developer.
+   * If the functionallity is desired, `stop` shoould be used instead.
+   */
+  pause() {
+    this.paused_ = true;
+  }
+
+  /**
+   * Resumes the auto advance as long as it is not stopped. This clears the
+   * `paused_` flag, which is checked in `shouldAutoAdvance_`.
+   *
+   * This should only be used internally, rather than by an external developer
+   * If the functionallity is desired, a `start` function, undoing
+   * `stop` should be implemented instead.
+   */
+  resume() {
+    this.paused_ = false;
+    this.resetAutoAdvance_();
   }
 
   /**
@@ -108,7 +147,9 @@ export class AutoAdvance {
    */
   updateAutoAdvanceInterval(autoAdvanceInterval) {
     this.autoAdvanceInterval_ = Math.max(
-        autoAdvanceInterval, MIN_AUTO_ADVANCE_INTERVAL);
+      autoAdvanceInterval,
+      MIN_AUTO_ADVANCE_INTERVAL
+    );
     this.createDebouncedAdvance_(this.autoAdvanceInterval_);
     this.resetAutoAdvance_();
   }
@@ -128,21 +169,26 @@ export class AutoAdvance {
    */
   createDebouncedAdvance_(interval) {
     this.debouncedAdvance_ = debounce(
-        this.win_, () => this.advance_(), interval);
+      this.win_,
+      () => this.advance_(),
+      interval
+    );
   }
 
   /**
    * Handles touchstart, pausing the autoadvance until the user lets go.
    */
   handleTouchStart_() {
-    this.paused_ = true;
+    this.pause();
 
-    listenOnce(window, 'touchend', () => {
-      this.paused_ = false;
-      this.resetAutoAdvance_();
-    }, {
-      capture: true,
-    });
+    listenOnce(
+      window,
+      'touchend',
+      () => {
+        this.resume();
+      },
+      {capture: true, passive: true}
+    );
   }
 
   /**
@@ -150,9 +196,12 @@ export class AutoAdvance {
    * @private
    */
   shouldAutoAdvance_() {
-    return this.autoAdvance_ &&
-        !this.paused_ &&
-        this.advances_ < this.maxAdvances_;
+    return (
+      this.autoAdvance_ &&
+      !this.paused_ &&
+      !this.stopped_ &&
+      this.advances_ < this.maxAdvances_
+    );
   }
 
   /**
