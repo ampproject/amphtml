@@ -210,6 +210,7 @@ describe('Resources', () => {
     };
 
     // 0 for in viewport
+    expect(1).to.equal(0);
     expect(resources.calcTaskScore_(task_in_viewport_p0)).to.equal(0);
     expect(resources.calcTaskScore_(task_in_viewport_p1)).to.equal(10);
 
