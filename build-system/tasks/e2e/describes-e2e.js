@@ -274,7 +274,7 @@ function describeEnv(factory) {
 
     // Use chrome as default if no browser is specified
     if (!Array.isArray(spec.browsers)) {
-      spec.browsers = ['chrome', 'firefox'];
+      spec.browsers = ['chrome'];
     }
 
     function createBrowserDescribe() {
