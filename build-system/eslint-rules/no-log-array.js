@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,31 +21,6 @@ const {
   transformableMethods,
 } = require('../log-module-metadata.js');
 
-/**
- * @param {!Node} node
- * @return {boolean}
- */
-function isBinaryConcat(node) {
-  return node.type === 'BinaryExpression' && node.operator === '+';
-}
-
-/**
- * @param {!Node} node
- * @return {boolean}
- */
-function hasTemplateLiteral(node) {
-  if (node.type === 'TemplateLiteral') {
-    return true;
-  }
-
-  // Allow for string concatenation operations.
-  if (isBinaryConcat(node)) {
-    return hasTemplateLiteral(node.left) && hasTemplateLiteral(node.right);
-  }
-
-  return false;
-}
-
 const selector = Object.keys(transformableMethods)
   .map(name => `CallExpression[callee.property.name=${name}]`)
   .join(',');
@@ -60,6 +35,8 @@ module.exports = {
         }
 
         let methodInvokedName;
+
+        // Make sure that callee is a CallExpression as well.
 
         const {callee} = node;
 
@@ -94,31 +71,22 @@ module.exports = {
           return;
         }
 
-        const {variadic, messageArgPos} = metadata;
-        // If method is not variadic we don't need to check.
-        if (!variadic) {
-          return;
-        }
+        const {messageArgPos} = metadata;
 
         const argToEval = node.arguments[messageArgPos];
-        if (!argToEval) {
+        if (!argToEval || argToEval.type != 'ArrayExpression') {
           return;
         }
 
-        const errMsg = [
-          'Mixing Template Strings and %s interpolation for log methods is',
-          `not supported on ${methodInvokedName}. Please either use template`,
-          'literals or use the log strformat(%s) style interpolation',
-          'exclusively',
-        ].join(' ');
+        const errMsg =
+          `Don't pass an array to ${methodInvokedName}. ` +
+          'Array syntax is to be used by compiled output only. ' +
+          'Use variadic or sprintf (%s) syntax.';
 
-        const hasVariadicInterpolation = node.arguments[metadata.startPos + 1];
-        if (hasVariadicInterpolation && hasTemplateLiteral(argToEval)) {
-          context.report({
-            node: argToEval,
-            message: errMsg,
-          });
-        }
+        context.report({
+          node: argToEval,
+          message: errMsg,
+        });
       },
     };
   },

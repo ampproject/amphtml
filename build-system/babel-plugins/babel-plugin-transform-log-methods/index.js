@@ -53,6 +53,7 @@
 const base62 = require('base62/lib/ascii');
 const fs = require('fs-extra');
 const {
+  assertAliases,
   messagesPath,
   singletonFunctions,
   transformableMethods,
@@ -63,8 +64,6 @@ const {
  * whether an instance of message indirection actually reduces binary size.
  */
 const roughMinifiedExpansionLength = '["xx"]'.length;
-
-const assertAliases = singletonFunctions.map(prefix => `${prefix}Assert`);
 
 /**
  * Determines a filepath relative to the repo root.

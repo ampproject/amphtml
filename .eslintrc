@@ -64,6 +64,7 @@
     "amphtml-internal/no-import": 2,
     "amphtml-internal/no-import-rename": 2,
     "amphtml-internal/no-is-amp-alt": 2,
+    "amphtml-internal/no-log-array": 2,
     "amphtml-internal/no-mixed-operators": 2,
     "amphtml-internal/no-module-exports": 2,
     "amphtml-internal/no-mixed-interpolation": 2,

@@ -27,6 +27,8 @@ const singletonFunctions = ['dev', 'user'];
 /** Path to messages table output from transform. */
 const messagesPath = 'dist/log-messages.json';
 
+const assertAliases = singletonFunctions.map(prefix => `${prefix}Assert`);
+
 /**
  * Known transformable logging methods.
  * @type {!Object<string, LogMethodMetadataDef>}
@@ -52,6 +54,7 @@ const transformableMethods = {
 };
 
 module.exports = {
+  assertAliases,
   definitionFile,
   messagesPath,
   singletonFunctions,
