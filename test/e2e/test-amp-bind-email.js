@@ -30,11 +30,10 @@ describes.endtoend(
 
     // The only difference in amp4email is that URL attributes cannot be bound.
     // TODO(choumx): fails in shadow env when using shadow-v0.js but succeeds when using amp-shadow.js
-    describe
-      .configure()
-      .skipShadowDemo()
-      .run('amp4email', () => {
-        it('should NOT allow mutation of a[href]', async () => {
+    describe('amp4email', () => {
+      it.configure()
+        .skipShadowDemo()
+        .run('should NOT allow mutation of a[href]', async () => {
           const button = await controller.findElement('#changeHrefButton');
           const a = await controller.findElement('#anchorElement');
 
@@ -48,7 +47,9 @@ describes.endtoend(
           );
         });
 
-        it('should NOT allow mutation of img[src]', async () => {
+      it.configure()
+        .skipShadowDemo()
+        .run('should NOT allow mutation of img[src]', async () => {
           const button = await controller.findElement('#changeImgSrcButton');
           const image = await controller.findElement('#image');
 
@@ -61,6 +62,6 @@ describes.endtoend(
             'https://foo.com/foo.jpg'
           );
         });
-      });
+    });
   }
 );
