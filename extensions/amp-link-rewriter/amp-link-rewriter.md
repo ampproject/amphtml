@@ -1,3 +1,10 @@
+---
+$category@: dynamic-content
+formats:
+  - websites
+teaser:
+  text: Allows publishers to rewrite URL based on configurable pattern
+---
 <!--
 Copyright 2019 The AMP HTML Authors. All Rights Reserved.
 

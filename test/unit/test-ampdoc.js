@@ -31,9 +31,7 @@ import {
 import {createShadowRoot} from '../../src/shadow-embed';
 import {toggleExperiment} from '../../src/experiments';
 
-
 describe('AmpDocService', () => {
-
   let sandbox;
 
   beforeEach(() => {
@@ -45,7 +43,6 @@ describe('AmpDocService', () => {
   });
 
   describe('single-doc mode', () => {
-
     let service;
 
     beforeEach(() => {
@@ -119,7 +116,10 @@ describe('AmpDocService', () => {
           return;
         }
 
-        const newAmpDoc = service.installShadowDoc('https://a.org/', shadowRoot);
+        const newAmpDoc = service.installShadowDoc(
+          'https://a.org/',
+          shadowRoot
+        );
         const ampDoc = service.getAmpDoc(content, {closestAmpDoc: true});
         expect(ampDoc).to.equal(newAmpDoc);
       });
@@ -131,7 +131,10 @@ describe('AmpDocService', () => {
 
         toggleExperiment(window, 'ampdoc-closest', true);
         service = new AmpDocService(window, /* isSingleDoc */ true);
-        const newAmpDoc = service.installShadowDoc('https://a.org/', shadowRoot);
+        const newAmpDoc = service.installShadowDoc(
+          'https://a.org/',
+          shadowRoot
+        );
         const ampDoc = service.getAmpDoc(content);
         expect(ampDoc).to.equal(newAmpDoc);
       });
@@ -139,7 +142,6 @@ describe('AmpDocService', () => {
   });
 
   describe('shadow-doc mode', () => {
-
     let service;
     let host, shadowRoot, content;
 
@@ -235,35 +237,43 @@ describe('AmpDocService', () => {
         return;
       }
       service.installShadowDoc('https://a.org/', shadowRoot);
-      allowConsoleError(() => { expect(() => {
-        service.installShadowDoc('https://a.org/', shadowRoot);
-      }).to.throw(/The shadow root already contains ampdoc/); });
+      allowConsoleError(() => {
+        expect(() => {
+          service.installShadowDoc('https://a.org/', shadowRoot);
+        }).to.throw(/The shadow root already contains ampdoc/);
+      });
     });
 
     // TODO(dvoytenko, #11827): Make this test work on Safari.
-    it.configure().skipSafari().run('should navigate via host', () => {
-      if (!shadowRoot) {
-        return;
-      }
+    it.configure()
+      .skipSafari()
+      .skipFirefox()
+      .run('should navigate via host', () => {
+        if (!shadowRoot) {
+          return;
+        }
 
-      const newAmpDoc = service.installShadowDoc('https://a.org/', shadowRoot);
-      const ampDoc = service.getAmpDoc(content);
-      expect(ampDoc).to.equal(newAmpDoc);
+        const newAmpDoc = service.installShadowDoc(
+          'https://a.org/',
+          shadowRoot
+        );
+        const ampDoc = service.getAmpDoc(content);
+        expect(ampDoc).to.equal(newAmpDoc);
 
-      const content2 = document.createElement('span');
-      const host2 = document.createElement('div');
-      const shadowRoot2 = host2.createShadowRoot();
-      shadowRoot2.appendChild(content2);
-      shadowRoot.appendChild(host2);
-      expect(content2.parentNode).to.equal(shadowRoot2);
-      expect(shadowRoot2.host).to.equal(host2);
-      expect(host2.shadowRoot).to.equal(shadowRoot2);
-      expect(host2.parentNode).to.equal(shadowRoot);
+        const content2 = document.createElement('span');
+        const host2 = document.createElement('div');
+        const shadowRoot2 = host2.createShadowRoot();
+        shadowRoot2.appendChild(content2);
+        shadowRoot.appendChild(host2);
+        expect(content2.parentNode).to.equal(shadowRoot2);
+        expect(shadowRoot2.host).to.equal(host2);
+        expect(host2.shadowRoot).to.equal(shadowRoot2);
+        expect(host2.parentNode).to.equal(shadowRoot);
 
-      expect(service.getAmpDoc(host2)).to.equal(ampDoc);
-      expect(service.getAmpDoc(content2)).to.equal(ampDoc);
-      expect(service.getAmpDoc(shadowRoot2)).to.equal(ampDoc);
-    });
+        expect(service.getAmpDoc(host2)).to.equal(ampDoc);
+        expect(service.getAmpDoc(content2)).to.equal(ampDoc);
+        expect(service.getAmpDoc(shadowRoot2)).to.equal(ampDoc);
+      });
   });
 
   describe('install AmpDocShell', () => {
@@ -285,9 +295,11 @@ describe('AmpDocService', () => {
 
     it('should fail when installing AmpDocShell in single-doc mode', () => {
       const ampdocService = new AmpDocService(window, /* isSingleDoc */ true);
-      allowConsoleError(() => { expect(() => {
-        ampdocService.installShellShadowDoc();
-      }).to.throw(/AmpDocShell cannot be installed in single-doc mode/); });
+      allowConsoleError(() => {
+        expect(() => {
+          ampdocService.installShellShadowDoc();
+        }).to.throw(/AmpDocShell cannot be installed in single-doc mode/);
+      });
     });
 
     it('should install AmpDocShell in shadow-doc mode', () => {
@@ -313,14 +325,17 @@ describe('AmpDocService', () => {
       expect(ampdocService.getAmpDoc(content)).to.equal(ampdocShell);
     });
 
-    it('should yield AmpDocShell for custom-element when Shadow Dom is ' +
-        'not supported', () => {
-      setShadowDomSupportedVersionForTesting(ShadowDomVersion.NONE);
-      const ampdocShell = ampdocService.installShellShadowDoc();
-      window.document.body.appendChild(content);
+    it(
+      'should yield AmpDocShell for custom-element when Shadow Dom is ' +
+        'not supported',
+      () => {
+        setShadowDomSupportedVersionForTesting(ShadowDomVersion.NONE);
+        const ampdocShell = ampdocService.installShellShadowDoc();
+        window.document.body.appendChild(content);
 
-      expect(ampdocService.getAmpDoc(content)).to.equal(ampdocShell);
-    });
+        expect(ampdocService.getAmpDoc(content)).to.equal(ampdocShell);
+      }
+    );
 
     it('should yield custom-element shadow-doc', () => {
       const shadowRoot = createShadowRoot(host);
@@ -331,16 +346,19 @@ describe('AmpDocService', () => {
       expect(ampdocService.getAmpDoc(content)).to.equal(ampDoc);
     });
 
-    it('should yield custom-element shadow-doc when Shadow Dom is ' +
-        'not supported', () => {
-      setShadowDomSupportedVersionForTesting(ShadowDomVersion.NONE);
-      const shadowRoot = createShadowRoot(host);
-      shadowRoot.appendChild(content);
-      const ampDoc = {};
-      shadowRoot['__AMPDOC'] = ampDoc;
+    it(
+      'should yield custom-element shadow-doc when Shadow Dom is ' +
+        'not supported',
+      () => {
+        setShadowDomSupportedVersionForTesting(ShadowDomVersion.NONE);
+        const shadowRoot = createShadowRoot(host);
+        shadowRoot.appendChild(content);
+        const ampDoc = {};
+        shadowRoot['__AMPDOC'] = ampDoc;
 
-      expect(ampdocService.getAmpDoc(content)).to.equal(ampDoc);
-    });
+        expect(ampdocService.getAmpDoc(content)).to.equal(ampDoc);
+      }
+    );
 
     it('waits for document ready to set body', () => {
       const mockDoc = {body: {nodeType: 1}};
@@ -360,7 +378,7 @@ describe('AmpDocService', () => {
       // Set document ready
       readyCallback(mockDoc);
 
-      return ampdocShell.whenBodyAvailable().then(() => {
+      return ampdocShell.waitForBodyOpen().then(() => {
         expect(ampdocShell.isBodyAvailable()).to.be.true;
         expect(ampdocShell.getBody()).to.equal(mockDoc.body);
         expect(ampdocShell.isReady()).to.be.true;
@@ -369,9 +387,7 @@ describe('AmpDocService', () => {
   });
 });
 
-
 describe('AmpDocSingle', () => {
-
   let sandbox;
   let ampdoc;
 
@@ -407,13 +423,14 @@ describe('AmpDocSingle', () => {
     expect(ampdoc.getBody()).to.equal(window.document.body);
     expect(ampdoc.isBodyAvailable()).to.be.true;
     expect(ampdoc.isReady()).to.be.true;
-    return Promise.all([ampdoc.whenBodyAvailable(), ampdoc.whenReady()])
-        .then(results => {
-          expect(results[0]).to.equal(window.document.body);
-          expect(ampdoc.getBody()).to.equal(window.document.body);
-          expect(ampdoc.isBodyAvailable()).to.be.true;
-          expect(ampdoc.isReady()).to.be.true;
-        });
+    return Promise.all([ampdoc.waitForBodyOpen(), ampdoc.whenReady()]).then(
+      results => {
+        expect(results[0]).to.equal(window.document.body);
+        expect(ampdoc.getBody()).to.equal(window.document.body);
+        expect(ampdoc.isBodyAvailable()).to.be.true;
+        expect(ampdoc.isReady()).to.be.true;
+      }
+    );
   });
 
   it('should wait for body and ready state', () => {
@@ -421,7 +438,7 @@ describe('AmpDocSingle', () => {
     const win = {document: doc};
 
     let bodyCallback;
-    sandbox.stub(dom, 'waitForBodyPromise').callsFake(() => {
+    sandbox.stub(dom, 'waitForBodyOpenPromise').callsFake(() => {
       return new Promise(resolve => {
         bodyCallback = resolve;
       });
@@ -443,7 +460,7 @@ describe('AmpDocSingle', () => {
     allowConsoleError(() => {
       expect(() => ampdoc.getBody()).to.throw(/body not available/);
     });
-    const bodyPromise = ampdoc.whenBodyAvailable();
+    const bodyPromise = ampdoc.waitForBodyOpen();
     const readyPromise = ampdoc.whenReady();
 
     doc.body = {nodeType: 1};
@@ -486,9 +503,7 @@ describe('AmpDocSingle', () => {
   });
 });
 
-
 describe('AmpDocShadow', () => {
-
   const URL = 'https://example.org/document';
 
   let sandbox;
@@ -545,7 +560,7 @@ describe('AmpDocShadow', () => {
     expect(ampdoc.bodyResolver_).to.be.ok;
 
     // Set body.
-    const bodyPromise = ampdoc.whenBodyAvailable();
+    const bodyPromise = ampdoc.waitForBodyOpen();
     const body = {nodeType: 1};
     ampdoc.setBody(body);
     expect(ampdoc.isBodyAvailable()).to.be.true;
@@ -561,9 +576,11 @@ describe('AmpDocShadow', () => {
   it('should only allow one body update', () => {
     const body = {nodeType: 1};
     ampdoc.setBody(body);
-    allowConsoleError(() => { expect(() => {
-      ampdoc.setBody(body);
-    }).to.throw(/Duplicate body/); });
+    allowConsoleError(() => {
+      expect(() => {
+        ampdoc.setBody(body);
+      }).to.throw(/Duplicate body/);
+    });
   });
 
   it('should update when doc is ready', () => {
@@ -584,9 +601,11 @@ describe('AmpDocShadow', () => {
 
   it('should only allow one ready update', () => {
     ampdoc.setReady();
-    allowConsoleError(() => { expect(() => {
-      ampdoc.setReady();
-    }).to.throw(/Duplicate ready state/); });
+    allowConsoleError(() => {
+      expect(() => {
+        ampdoc.setReady();
+      }).to.throw(/Duplicate ready state/);
+    });
   });
 });
 

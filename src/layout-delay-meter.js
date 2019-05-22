@@ -27,7 +27,6 @@ const LABEL_MAP = {
  * "start to layout" of an element.
  */
 export class LayoutDelayMeter {
-
   /**
    * @param {!Window} win
    * @param {number} priority
@@ -85,7 +84,9 @@ export class LayoutDelayMeter {
       return;
     }
     const delay = this.win_.Math.max(
-        this.firstLayoutTime_ - this.firstInViewportTime_, 0);
+      this.firstLayoutTime_ - this.firstInViewportTime_,
+      0
+    );
     this.performance_.tickDelta(dev().assertString(this.label_), delay);
     this.performance_.throttledFlush();
     this.done_ = true;

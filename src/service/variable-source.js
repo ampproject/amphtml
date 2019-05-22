@@ -29,7 +29,6 @@ export let AsyncResolverDef;
 /** @typedef {{sync: SyncResolverDef, async: AsyncResolverDef}} */
 let ReplacementDef;
 
-
 /**
  * Returns navigation timing information based on the start and end events.
  * The data for the timing events is retrieved from performance.timing API.
@@ -66,9 +65,10 @@ export function getTimingDataSync(win, startEvent, endEvent) {
     return;
   }
 
-  const metric = (endEvent === undefined)
-    ? timingInfo[startEvent]
-    : timingInfo[endEvent] - timingInfo[startEvent];
+  const metric =
+    endEvent === undefined
+      ? timingInfo[startEvent]
+      : timingInfo[endEvent] - timingInfo[startEvent];
 
   if (!isFiniteNumber(metric) || metric < 0) {
     // The metric is not supported.
@@ -86,8 +86,7 @@ export function getTimingDataSync(win, startEvent, endEvent) {
  * @private
  */
 export function getNavigationData(win, attribute) {
-  const navigationInfo = win['performance'] &&
-    win['performance']['navigation'];
+  const navigationInfo = win['performance'] && win['performance']['navigation'];
   if (!navigationInfo || navigationInfo[attribute] === undefined) {
     // PerformanceNavigation interface is not supported or attribute is not
     // implemented.
@@ -95,7 +94,6 @@ export function getNavigationData(win, attribute) {
   }
   return navigationInfo[attribute];
 }
-
 
 /**
  * A class to provide variable substitution related features. Extend this class
@@ -159,8 +157,10 @@ export class VariableSource {
    */
   set(varName, syncResolver) {
     devAssert(varName.indexOf('RETURN') == -1);
-    this.replacements_[varName] =
-        this.replacements_[varName] || {sync: undefined, async: undefined};
+    this.replacements_[varName] = this.replacements_[varName] || {
+      sync: undefined,
+      async: undefined,
+    };
     this.replacements_[varName].sync = syncResolver;
     return this;
   }
@@ -177,8 +177,10 @@ export class VariableSource {
    */
   setAsync(varName, asyncResolver) {
     devAssert(varName.indexOf('RETURN') == -1);
-    this.replacements_[varName] =
-        this.replacements_[varName] || {sync: undefined, async: undefined};
+    this.replacements_[varName] = this.replacements_[varName] || {
+      sync: undefined,
+      async: undefined,
+    };
     this.replacements_[varName].async = asyncResolver;
     return this;
   }
@@ -273,8 +275,7 @@ export class VariableSource {
 
     // A meta[name="amp-allowed-url-macros"] tag, if present,
     // contains, in its content attribute, a whitelist of variable substitution.
-    const meta =
-      head.querySelector('meta[name="amp-allowed-url-macros"]');
+    const meta = head.querySelector('meta[name="amp-allowed-url-macros"]');
     if (!meta) {
       return null;
     }
@@ -283,8 +284,10 @@ export class VariableSource {
      * The whitelist of variables allowed for variable substitution.
      * @private {?Array<string>}
      */
-    this.variableWhitelist_ = meta.getAttribute('content').split(',')
-        .map(variable => variable.trim());
+    this.variableWhitelist_ = meta
+      .getAttribute('content')
+      .split(',')
+      .map(variable => variable.trim());
     return this.variableWhitelist_;
   }
 }

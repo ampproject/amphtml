@@ -23,10 +23,12 @@ branches:
 addons:
   apt:
     packages:
+      # Use unbuffer (from expect-dev) for log coloring (github.com/travis-ci/travis-ci/issues/7967)
+      - expect-dev
+      - google-cloud-sdk
+      - openssl
       - protobuf-compiler
       - python-protobuf
-      - openssl
-      - google-cloud-sdk
   chrome: stable
   hosts:
     - ads.localhost
@@ -45,48 +47,47 @@ jobs:
     - stage: build
       name: "Build"
       script:
-        - node build-system/pr-check/build.js
+        - unbuffer node build-system/pr-check/build.js
     - stage: build
       name: "Checks"
       script:
-        - node build-system/pr-check/checks.js
+        - unbuffer node build-system/pr-check/checks.js
     - stage: build
       name: "Validator Tests"
       script:
-        - node build-system/pr-check/validator-tests.js
+        - unbuffer node build-system/pr-check/validator-tests.js
     - stage: build
-      name: "Dist"
-      if: type != pull_request
+      name: "Dist, Bundle Size"
       script:
-        - node build-system/pr-check/dist.js
+        - unbuffer node build-system/pr-check/dist-bundle-size.js
     - stage: test
-      name: "Dist, Bundle Size, Single Pass Tests"
+      name: "Single Pass Tests"
       script:
-        - node build-system/pr-check/dist-tests.js
+        - unbuffer node build-system/pr-check/single-pass-tests.js
     - stage: test
       name: "Visual Diff Tests"
       script:
-        - node build-system/pr-check/visual-diff-tests.js
+        - unbuffer node build-system/pr-check/visual-diff-tests.js
     - stage: test
       name: "Local Tests"
       script:
-        - node build-system/pr-check/local-tests.js
+        - unbuffer node build-system/pr-check/local-tests.js
     - stage: test
       name: "Remote (Sauce Labs) Tests"
       script:
-        - node build-system/pr-check/remote-tests.js
+        - unbuffer node build-system/pr-check/remote-tests.js
       after_script:
         - build-system/sauce_connect/stop_sauce_connect.sh
     - stage: test
       name: "[NON-BLOCKING] End to End Tests"
       script:
-        - node build-system/pr-check/e2e-tests.js
+        - unbuffer node build-system/pr-check/e2e-tests.js
   fast_finish: true
 
   # TODO(ampproject/wg-infra): remove when these tests stabilize
   allow_failures:
     - script:
-      - node build-system/pr-check/e2e-tests.js
+      - unbuffer node build-system/pr-check/e2e-tests.js
 cache:
   directories:
     - node_modules

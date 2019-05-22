@@ -37,8 +37,8 @@ const TEST_TYPE_SUBTYPES = new Map([
   // TODO(danielrozenberg): add 'e2e' tests.
 ]);
 const TEST_TYPE_BUILD_TARGETS = new Map([
-  ['integration', ['RUNTIME', 'BUILD_SYSTEM', 'INTEGRATION_TEST']],
-  ['unit', ['RUNTIME', 'BUILD_SYSTEM', 'UNIT_TEST']],
+  ['integration', ['RUNTIME', 'FLAG_CONFIG', 'INTEGRATION_TEST']],
+  ['unit', ['RUNTIME', 'UNIT_TEST']],
 ]);
 
 function inferTestType() {
@@ -71,19 +71,33 @@ function postReport(type, action) {
   if (type !== null && isTravisPullRequestBuild()) {
     const commitHash = gitCommitHash();
     const postUrl = `${reportBaseUrl}/${commitHash}/${type}/${action}`;
-    return requestPromise.post(postUrl)
-        .then(body => {
-          log(green('INFO:'), 'reported', cyan(`${type}/${action}`),
-              'to the test-status GitHub App');
-          if (body.length > 0) {
-            log(green('INFO:'), 'response from test-status was',
-                cyan(body.substr(0, 100)));
-          }
-        }).catch(error => {
-          log(yellow('WARNING:'), 'failed to report', cyan(`${type}/${action}`),
-              'to the test-status GitHub App:\n', error.message.substr(0, 100));
-          return;
-        });
+    return requestPromise
+      .post(postUrl)
+      .then(body => {
+        log(
+          green('INFO:'),
+          'reported',
+          cyan(`${type}/${action}`),
+          'to the test-status GitHub App'
+        );
+        if (body.length > 0) {
+          log(
+            green('INFO:'),
+            'response from test-status was',
+            cyan(body.substr(0, 100))
+          );
+        }
+      })
+      .catch(error => {
+        log(
+          yellow('WARNING:'),
+          'failed to report',
+          cyan(`${type}/${action}`),
+          'to the test-status GitHub App:\n',
+          error.message.substr(0, 100)
+        );
+        return;
+      });
   }
   return Promise.resolve();
 }
@@ -108,7 +122,8 @@ async function reportAllExpectedTests(buildTargets) {
   for (const [type, subTypes] of TEST_TYPE_SUBTYPES) {
     const testTypeBuildTargets = TEST_TYPE_BUILD_TARGETS.get(type);
     const action = testTypeBuildTargets.some(target => buildTargets.has(target))
-      ? 'queued' : 'skipped';
+      ? 'queued'
+      : 'skipped';
     for (const subType of subTypes) {
       await postReport(`${type}/${subType}`, action);
     }

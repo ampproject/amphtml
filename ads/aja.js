@@ -21,7 +21,6 @@ import {loadScript, validateData} from '../3p/3p';
  * @param {!Object} data
  */
 export function aja(global, data) {
-
   validateData(data, ['asi']);
 
   const {document} = global;
@@ -33,5 +32,4 @@ export function aja(global, data) {
   document.getElementById('c').appendChild(d);
 
   loadScript(global, 'https://cdn.as.amanad.adtdp.com/sdk/asot-amp.js');
-
 }

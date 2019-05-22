@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {validateSrcPrefix, writeScript} from '../3p/3p';
-
 /**
- * @param {!Window} global
- * @param {!Object} data
+ * The spec does not expose this enum, so we define it here.
+ * This is 1-indexed corresponding with the spec.
+ * @enum {number}
  */
-export function chargeads(global, data) {
-  const {src} = data;
-  validateSrcPrefix(['https://www.chargeplatform.com/', 'https://tags.chargeplatform.com/'], src);
-  writeScript(global, src);
-}
+export const PositionError = {
+  PERMISSION_DENIED: 1,
+  POSITION_UNAVAILABLE: 2,
+  TIMEOUT: 3,
+  PLATFORM_UNSUPPORTED: 4,
+};

@@ -31,6 +31,7 @@ const HOST = 'localhost';
 const PORT = 8000;
 const WEBSERVER_TIMEOUT_RETRIES = 10;
 const SLOW_TEST_THRESHOLD_MS = 2500;
+const TEST_RETRIES = 2;
 
 let webServerProcess_;
 
@@ -44,7 +45,9 @@ function buildRuntime_() {
 
 function launchWebServer_() {
   webServerProcess_ = execScriptAsync(
-      `gulp serve --host ${HOST} --port ${PORT}`);
+    `gulp serve --host ${HOST} --port ${PORT}`,
+    {stdio: 'ignore'}
+  );
 
   let resolver;
   const deferred = new Promise(resolverIn => {
@@ -62,9 +65,9 @@ function launchWebServer_() {
   return deferred;
 }
 
-function cleanUp_() {
+async function cleanUp_() {
   if (webServerProcess_ && !webServerProcess_.killed) {
-    webServerProcess_.kill('SIGINT');
+    webServerProcess_.kill('SIGKILL');
   }
 }
 
@@ -74,6 +77,7 @@ function createMocha_() {
     // so we set a non-default threshold.
     slow: SLOW_TEST_THRESHOLD_MS,
     reporter: argv.testnames || argv.watch ? '' : ciReporter,
+    retries: TEST_RETRIES,
     fullStackTrace: true,
   });
 
@@ -85,10 +89,9 @@ async function e2e() {
   installPackages_();
 
   // set up promise to return to gulp.task()
-  let resolver, rejecter;
-  const deferred = new Promise((resolverIn, rejecterIn) => {
+  let resolver;
+  const deferred = new Promise(resolverIn => {
     resolver = resolverIn;
-    rejecter = rejecterIn;
   });
 
   require('@babel/register');
@@ -116,8 +119,7 @@ async function e2e() {
         delete require.cache[file];
         mocha.addFile(file);
       });
-    }
-    else {
+    } else {
       config.e2eTestPaths.forEach(path => {
         glob.sync(path).forEach(file => {
           delete require.cache[file];
@@ -126,20 +128,15 @@ async function e2e() {
       });
     }
 
-    mocha.run(failures => {
+    mocha.run(async failures => {
       // end web server
-      cleanUp_();
+      await cleanUp_();
 
       // end task
-      if (failures) {
-        process.exitCode = 1;
-        rejecter();
-      }
-      process.exit();
-      resolver();
+      process.exitCode = failures ? 1 : 0;
+      await resolver();
     });
-  }
-  else {
+  } else {
     const filesToWatch = argv.files ? [argv.files] : [config.e2eTestPaths];
     const watcher = watch(filesToWatch);
     log('Watching', cyan(filesToWatch), 'for changes...');

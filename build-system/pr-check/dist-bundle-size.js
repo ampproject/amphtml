@@ -17,68 +17,68 @@
 
 /**
  * @fileoverview
- * This script runs the bundle size check and single pass test.
- * This is run during the CI stage = test; job = dist tests.
+ * This script builds the AMP runtime for production and runs the bundle size
+ * check.
+ * This is run during the CI stage = build; job = dist.
  */
 
 const colors = require('ansi-colors');
 const {
-  downloadDistOutput,
   printChangeSummary,
   startTimer,
   stopTimer,
-  timedExecOrDie: timedExecOrDieBase} = require('./utils');
+  timedExecOrDie: timedExecOrDieBase,
+  uploadDistOutput,
+} = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
 const {isTravisPullRequestBuild} = require('../travis');
+const {runYarnChecks} = require('./yarn-checks');
 
-const FILENAME = 'dist-tests.js';
+const FILENAME = 'dist-bundle-size.js';
 const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
-const timedExecOrDie =
-  (cmd, unusedFileName) => timedExecOrDieBase(cmd, FILENAME);
-
-function runSinglePassTest_() {
-  timedExecOrDie('gulp clean');
-  timedExecOrDie('gulp update-packages');
-  timedExecOrDie('gulp dist --fortesting --single_pass --pseudo_names');
-  timedExecOrDie('gulp test --integration ' +
-      '--nobuild --compiled --single_pass --headless');
-}
+const timedExecOrDie = (cmd, unusedFileName) =>
+  timedExecOrDieBase(cmd, FILENAME);
 
 function main() {
   const startTime = startTimer(FILENAME, FILENAME);
-  const buildTargets = determineBuildTargets();
+  if (!runYarnChecks(FILENAME)) {
+    stopTimer(FILENAME, FILENAME, startTime);
+    process.exitCode = 1;
+    return;
+  }
 
   if (!isTravisPullRequestBuild()) {
     timedExecOrDie('gulp update-packages');
-    downloadDistOutput(FILENAME);
+    timedExecOrDie('gulp dist --fortesting');
     timedExecOrDie('gulp bundle-size --on_push_build');
-    runSinglePassTest_();
+    uploadDistOutput(FILENAME);
   } else {
     printChangeSummary(FILENAME);
-    let ranTests = false;
+    const buildTargets = new Set();
+    if (!determineBuildTargets(buildTargets, FILENAME)) {
+      stopTimer(FILENAME, FILENAME, startTime);
+      process.exitCode = 1;
+      return;
+    }
 
-    if (buildTargets.has('RUNTIME')) {
+    if (
+      buildTargets.has('RUNTIME') ||
+      buildTargets.has('FLAG_CONFIG') ||
+      buildTargets.has('INTEGRATION_TEST') ||
+      buildTargets.has('VISUAL_DIFF')
+    ) {
       timedExecOrDie('gulp update-packages');
-      timedExecOrDie('gulp dist --fortesting --noextensions');
+      timedExecOrDie('gulp dist --fortesting');
       timedExecOrDie('gulp bundle-size --on_pr_build');
-      ranTests = true;
+      uploadDistOutput(FILENAME);
     } else {
       timedExecOrDie('gulp bundle-size --on_skipped_build');
-    }
-
-    if (buildTargets.has('RUNTIME') ||
-        buildTargets.has('BUILD_SYSTEM') ||
-        buildTargets.has('INTEGRATION_TEST')) {
-
-      runSinglePassTest_();
-      ranTests = true;
-    }
-
-    if (!ranTests) {
-      console.log(`${FILELOGPREFIX} Skipping ` +
-          colors.cyan('Dist, Bundle Size, Single Pass Tests ') +
-          'because this commit does not affect the runtime, build system, ' +
-          'or integration test files.');
+      console.log(
+        `${FILELOGPREFIX} Skipping`,
+        colors.cyan('Dist, Bundle Size'),
+        'because this commit does not affect the runtime, flag configs,',
+        'integration tests, or visual diff tests.'
+      );
     }
   }
 

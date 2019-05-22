@@ -31,6 +31,21 @@ import {toggle} from '../../../src/style';
 import {tryParseJson} from '../../../src/json';
 
 export class AmpState extends AMP.BaseElement {
+  /**
+   * @param {!Element} element
+   */
+  constructor(element) {
+    super(element);
+
+    /**
+     * JSON in child <script>, if any.
+     * - `undefined` if the script has never been parsed.
+     * - `null` or `!JsonObject` once the script has been parsed.
+     * @private {?JsonObject|undefined}
+     */
+    this.localData_ = undefined;
+  }
+
   /** @override */
   getLayoutPriority() {
     // Loads after other content.
@@ -61,20 +76,22 @@ export class AmpState extends AMP.BaseElement {
     }
     // Parse child <script> tag and/or fetch JSON from `src` attribute.
     // The latter is allowed to overwrite the former.
-    const {children} = element;
-    if (children.length > 0) {
-      // Bind relies on this happening synchronously in buildCallback().
-      this.parseAndUpdate_();
-    }
+    this.parseAndUpdate();
     if (this.element.hasAttribute('src')) {
       this.fetchAndUpdate_(/* isInit */ true);
     }
 
-    this.registerAction('refresh', () => {
-      userAssert(this.element.hasAttribute('src'),
-          'Can\'t refresh <amp-state> without "src" attribute.');
-      this.fetchAndUpdate_(/* isInit */ false, /* opt_refresh */ true);
-    }, ActionTrust.HIGH);
+    this.registerAction(
+      'refresh',
+      () => {
+        userAssert(
+          this.element.hasAttribute('src'),
+          'Can\'t refresh <amp-state> without "src" attribute.'
+        );
+        this.fetchAndUpdate_(/* isInit */ false, /* opt_refresh */ true);
+      },
+      ActionTrust.HIGH
+    );
   }
 
   /** @override */
@@ -99,25 +116,44 @@ export class AmpState extends AMP.BaseElement {
 
   /**
    * Parses JSON in child <script> and updates state.
+   * @return {!Promise}
+   */
+  parseAndUpdate() {
+    if (this.localData_ === undefined) {
+      this.localData_ = this.parse_();
+      if (this.localData_) {
+        return this.updateState_(this.localData_, /* isInit */ true);
+      }
+    }
+    return Promise.resolve();
+  }
+
+  /**
+   * Parses JSON in child <script> and returns it.
+   * @return {?JsonObject}
    * @private
    */
-  parseAndUpdate_() {
-    const TAG = this.getName_();
+  parse_() {
     const {children} = this.element;
+    if (children.length == 0) {
+      return null;
+    }
+    const TAG = this.getName_();
     if (children.length != 1) {
       this.user().error(TAG, 'Should contain exactly one <script> child.');
-      return;
+      return null;
     }
     const firstChild = children[0];
     if (!isJsonScriptTag(firstChild)) {
-      this.user().error(TAG,
-          'State should be in a <script> tag with type="application/json".');
-      return;
+      this.user().error(
+        TAG,
+        'State should be in a <script> tag with type="application/json".'
+      );
+      return null;
     }
-    const json = tryParseJson(firstChild.textContent, e => {
+    return tryParseJson(firstChild.textContent, e => {
       this.user().error(TAG, 'Failed to parse state. Is it valid JSON?', e);
     });
-    this.updateState_(json, /* isInit */ true);
   }
 
   /**
@@ -130,8 +166,14 @@ export class AmpState extends AMP.BaseElement {
    * @private
    */
   fetch_(ampdoc, policy, opt_refresh, token = undefined) {
-    return batchFetchJsonFor(ampdoc, this.element, /* opt_expr */ undefined,
-        policy, opt_refresh, token);
+    return batchFetchJsonFor(
+      ampdoc,
+      this.element,
+      /* opt_expr */ undefined,
+      policy,
+      opt_refresh,
+      token
+    );
   }
 
   /**
@@ -146,18 +188,22 @@ export class AmpState extends AMP.BaseElement {
 
     const src = element.getAttribute('src');
     const isCorsFetch =
-        (getSourceOrigin(src) !== getSourceOrigin(ampdoc.win.location));
+      getSourceOrigin(src) !== getSourceOrigin(ampdoc.win.location);
     // Require opt-in for URL variable replacements on CORS fetches triggered
     // by [src] mutation. @see spec/amp-var-substitutions.md
-    const policy = (isCorsFetch && !isInit)
-      ? UrlReplacementPolicy.OPT_IN
-      : UrlReplacementPolicy.ALL;
+    const policy =
+      isCorsFetch && !isInit
+        ? UrlReplacementPolicy.OPT_IN
+        : UrlReplacementPolicy.ALL;
 
     return getViewerAuthTokenIfAvailable(element).then(token =>
       this.fetch_(ampdoc, policy, opt_refresh, token).catch(error => {
         const event = error
-          ? createCustomEvent(this.win, 'amp-state.error',
-              dict({'response': error.response}))
+          ? createCustomEvent(
+              this.win,
+              'amp-state.error',
+              dict({'response': error.response})
+            )
           : null;
         // Trigger "fetch-error" event on fetch failure.
         const actions = Services.actionServiceForDoc(element);
@@ -175,22 +221,24 @@ export class AmpState extends AMP.BaseElement {
   fetchAndUpdate_(isInit, opt_refresh) {
     // Don't fetch in prerender mode.
     const viewer = Services.viewerForDoc(this.element);
-    return viewer.whenFirstVisible()
-        .then(() => this.prepareAndSendFetch_(isInit, opt_refresh))
-        .then(json => this.updateState_(json, isInit));
+    return viewer
+      .whenFirstVisible()
+      .then(() => this.prepareAndSendFetch_(isInit, opt_refresh))
+      .then(json => this.updateState_(json, isInit));
   }
 
   /**
    * @param {*} json
    * @param {boolean} isInit
+   * @return {!Promise}
    * @private
    */
   updateState_(json, isInit) {
     if (json === undefined || json === null) {
-      return;
+      return Promise.resolve();
     }
     const id = userAssert(this.element.id, '<amp-state> must have an id.');
-    Services.bindForDocOrNull(this.element).then(bind => {
+    return Services.bindForDocOrNull(this.element).then(bind => {
       devAssert(bind);
       const state = /** @type {!JsonObject} */ (map());
       state[id] = json;
@@ -207,7 +255,6 @@ export class AmpState extends AMP.BaseElement {
    * @private
    */
   getName_() {
-    return '<amp-state> ' +
-        (this.element.getAttribute('id') || '<unknown id>');
+    return '<amp-state> ' + (this.element.getAttribute('id') || '<unknown id>');
   }
 }
