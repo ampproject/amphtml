@@ -62,6 +62,17 @@ let SeleniumConfigDef;
 let describesConfig = null;
 
 /**
+ * Map the browserName to the capabilities name. (firefox for example has a
+ * prefix.
+ *
+ * @enum {string}
+ */
+const capabilitiesKeys = {
+  'chrome': 'chromeOptions',
+  'firefox': 'moz:firefoxOptions',
+}
+
+/**
  * Configure all tests. This may only be called once, since it is only read once
  * and writes after reading will not have any effect.
  * @param {!DescribesConfigDef} config
@@ -122,7 +133,7 @@ async function createSelenium(browserName, opt_config = {}) {
 
 async function createDriver(browserName, args) {
   const capabilities = Capabilities[browserName]();
-  capabilities.set(`${browserName}Options`, {'args': args});
+  capabilities.set(capabilitiesKeys[browserName], {'args': args});
   const builder = new Builder().withCapabilities(capabilities);
   const driver = await builder.build();
   return driver;
