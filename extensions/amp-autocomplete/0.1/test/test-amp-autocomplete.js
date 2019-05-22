@@ -801,23 +801,39 @@ describes.realWin(
       });
     });
 
-    it('should error on error when fallback is not provided', () => {
-      const expectedError = new Error('error for test');
-      impl.element.setAttribute('src', '');
-      sandbox.stub(impl, 'getRemoteData_').throws(expectedError);
-      return expect(element.layoutCallback()).to.be.rejectedWith(expectedError);
-    });
+    describe('fallback on error', () => {
+      let fallbackSpy;
+      let clearAllSpy;
+      let getDataSpy;
 
-    it('should display fallback on error when fallback is provided', () => {
-      const fallbackSpy = sandbox.spy(impl, 'enterFallback_');
-      sandbox.stub(impl, 'getFallback').returns(true);
-      const clearAllSpy = sandbox.spy(impl, 'clearAllItems_');
-      const expectedError = new Error('error for test');
-      impl.element.setAttribute('src', '');
-      sandbox.stub(impl, 'getRemoteData_').throws(expectedError);
-      return element.layoutCallback().then(() => {
-        expect(fallbackSpy).to.have.been.calledWith(expectedError);
-        expect(clearAllSpy).to.have.been.calledOnce;
+      beforeEach(() => {
+        impl.element.setAttribute('src', 'invalid-path');
+        fallbackSpy = sandbox.spy(impl, 'displayFallback_');
+        clearAllSpy = sandbox.spy(impl, 'clearAllItems_');
+        getDataSpy = sandbox
+          .stub(impl, 'getRemoteData_')
+          .throws('Error for test');
+      });
+
+      it('should throw error when fallback is not provided', () => {
+        return element.layoutCallback().catch(e => {
+          expect(e.name).to.equal('Error for test');
+          expect(getDataSpy).to.have.been.calledOnce;
+          expect(fallbackSpy).to.have.been.calledOnce;
+          expect(clearAllSpy).to.have.been.calledOnce;
+          expect(impl.fallbackDisplayed_).to.be.false;
+        });
+      });
+
+      it('should display fallback when provided', () => {
+        sandbox.stub(impl, 'getFallback').returns(true);
+        return element.layoutCallback().catch(e => {
+          expect(e.name).to.equal('Error for test');
+          expect(getDataSpy).to.have.been.calledOnce;
+          expect(fallbackSpy).to.have.been.calledOnce;
+          expect(clearAllSpy).to.have.been.calledOnce;
+          expect(impl.fallbackDisplayed_).to.be.true;
+        });
       });
     });
   }

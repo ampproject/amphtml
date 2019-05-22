@@ -314,7 +314,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
         );
       }
       remoteDataPromise = this.getRemoteData_().catch(e => {
-        this.enterFallback_(e);
+        this.displayFallback_(e);
       });
     }
 
@@ -334,7 +334,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     if (typeof src === 'string') {
       return this.getRemoteData_()
         .catch(e => {
-          this.enterFallback_(e);
+          this.displayFallback_(e);
         })
         .then(remoteData => {
           this.sourceData_ = remoteData;
@@ -897,7 +897,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
    * @throws {!Error} If fallback element is not present.
    * @private
    */
-  enterFallback_(error) {
+  displayFallback_(error) {
     if (this.fallbackDisplayed_) {
       return;
     }
