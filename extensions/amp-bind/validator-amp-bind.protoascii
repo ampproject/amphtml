@@ -51,13 +51,13 @@ tags: {  # <amp-state> (json)
   }
   cdata: {
     max_bytes: 100000
-    max_bytes_spec_url: "https://www.ampproject.org/docs/reference/components/dynamic/amp-bind#state"
+    max_bytes_spec_url: "https://amp.dev/documentation/components/amp-bind#state"
     blacklisted_cdata_regex: {
       regex: "<!--"
       error_message: "html comments"
     }
   }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-bind"
+  spec_url: "https://amp.dev/documentation/components/amp-bind"
 }
 tags: {  # <amp-state>
   html_format: AMP
@@ -84,7 +84,7 @@ tags: {  # <amp-state>
   child_tags: {
     first_child_tag_name_oneof: "SCRIPT"
   }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-bind"
+  spec_url: "https://amp.dev/documentation/components/amp-bind"
 }
 # AMP4ADS and AMP4EMAIL enforces the the same restrictions on the 'src'
 # attribute of AMP-IMG and AMP-LIST on the src attribute of AMP-STATE. Use of
@@ -103,7 +103,7 @@ tags: {  # <amp-state>
   child_tags: {
     first_child_tag_name_oneof: "SCRIPT"
   }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-bind"
+  spec_url: "https://amp.dev/documentation/components/amp-bind"
 }
 # ACTIONS <amp-state> with POST identity
 tags: { # <amp-state>
@@ -113,12 +113,6 @@ tags: { # <amp-state>
   requires_extension: "amp-bind"
   attrs: {
     name: "credentials"
-  }
-  attrs: {
-    name: "cross-origin"
-    value: "amp-viewer-auth-token-via-post"
-    deprecation: "crossorigin"
-    deprecation_url: "https://github.com/ampproject/amphtml/issues/21399"
   }
   attrs: {
     name: "crossorigin"
@@ -141,7 +135,7 @@ tags: { # <amp-state>
   child_tags: {
     first_child_tag_name_oneof: "SCRIPT"
   }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-bind"
+  spec_url: "https://amp.dev/documentation/components/amp-bind"
 }
 tags: {  # <amp-bind-macro>
   html_format: AMP
@@ -156,5 +150,5 @@ tags: {  # <amp-bind-macro>
     mandatory: true
   }
   attr_lists: "mandatory-id-attr"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-bind"
+  spec_url: "https://amp.dev/documentation/components/amp-bind"
 }

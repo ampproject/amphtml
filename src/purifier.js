@@ -21,9 +21,9 @@ import {
   WHITELISTED_ATTRS,
   WHITELISTED_ATTRS_BY_TAGS,
   WHITELISTED_TARGETS,
+  isAmp4Email,
   isValidAttr,
 } from './sanitation';
-import {remove} from './utils/array';
 import {rewriteAttributeValue} from './url-rewrite';
 import {startsWith} from './string';
 import {user} from './log';
@@ -32,8 +32,9 @@ import purify from 'dompurify/dist/purify.es';
 /**
  * @typedef {{addHook: !Function, removeAllHooks: !Function, sanitize: !Function}}
  */
-let DomPurifyDef;
+export let DomPurifyDef;
 
+// TODO(choumx): Convert this into a class to avoid import side effects.
 /** @private @const {!DomPurifyDef} */
 const DomPurify = purify(self);
 
@@ -47,14 +48,11 @@ const TAG = 'purifier';
 const WHITELISTED_TAGS_BY_ATTRS = {
   'script': {
     'attribute': 'type',
-    'values': [
-      'application/json',
-      'application/ld+json',
-    ],
+    'values': ['application/json', 'application/ld+json'],
   },
 };
 
-const PURIFY_CONFIG = /** @type {!DomPurifyConfig} */ ({
+const PURIFY_PROFILES = /** @type {!DomPurifyConfig} */ ({
   USE_PROFILES: {
     html: true,
     svg: true,
@@ -69,21 +67,37 @@ const PURIFY_CONFIG = /** @type {!DomPurifyConfig} */ ({
 let KEY_COUNTER = 0;
 
 /**
- * Returns a <body> element containing the sanitized, serialized `dirty`.
+ * Returns a <body> element containing the sanitized `dirty` markup.
+ * Uses the standard DOMPurify config.
  * @param {string} dirty
+ * @param {!Document} doc
  * @param {boolean=} diffing
  * @return {!Node}
  */
-export function purifyHtml(dirty, diffing = false) {
-  const config = purifyConfig();
-  addPurifyHooks(DomPurify, diffing);
+export function purifyHtml(dirty, doc, diffing = false) {
+  const config = standardPurifyConfig();
+  addPurifyHooks(DomPurify, diffing, doc);
   const body = DomPurify.sanitize(dirty, config);
   DomPurify.removeAllHooks();
   return body;
 }
 
 /**
- * Returns DOMPurify config for normal, escaped templates.
+ * Creates a new DOMPurify instance with a custom DOMPurify configuration.
+ * @param {!Document} doc
+ * @param {!JsonObject=} opt_config
+ * @return {!DomPurifyDef}
+ */
+export function createPurifier(doc, opt_config) {
+  const domPurify = purify(self);
+  const config = Object.assign(opt_config || {}, standardPurifyConfig());
+  domPurify.setConfig(config);
+  addPurifyHooks(domPurify, /* diffing */ false, doc);
+  return domPurify;
+}
+
+/**
+ * Returns standard DOMPurify config for escaped templates.
  * Do not use for unescaped templates.
  *
  * NOTE: See that we use DomPurifyConfig found in
@@ -93,27 +107,53 @@ export function purifyHtml(dirty, diffing = false) {
  *
  * @return {!DomPurifyConfig}
  */
-export function purifyConfig() {
-  const config = Object.assign({}, PURIFY_CONFIG, /** @type {!DomPurifyConfig} */ ({
-    ADD_ATTR: WHITELISTED_ATTRS,
-    FORBID_TAGS: Object.keys(BLACKLISTED_TAGS),
-    // Avoid reparenting of some elements to document head e.g. <script>.
-    FORCE_BODY: true,
-    // Avoid need for serializing to/from string by returning Node directly.
-    RETURN_DOM: true,
-    // BLACKLISTED_ATTR_VALUES are enough. Other unknown protocols are safe.
-    // This allows native app deeplinks.
-    ALLOW_UNKNOWN_PROTOCOLS: true,
-  }));
+function standardPurifyConfig() {
+  const config = Object.assign(
+    {},
+    PURIFY_PROFILES,
+    /** @type {!DomPurifyConfig} */ ({
+      ADD_ATTR: WHITELISTED_ATTRS,
+      FORBID_TAGS: Object.keys(BLACKLISTED_TAGS),
+      // Avoid reparenting of some elements to document head e.g. <script>.
+      FORCE_BODY: true,
+      // Avoid need for serializing to/from string by returning Node directly.
+      RETURN_DOM: true,
+      // Allows native app deeplinks. DOMPurify's remaining checks are sufficient
+      // to prevent code execution.
+      ALLOW_UNKNOWN_PROTOCOLS: true,
+    })
+  );
   return /** @type {!DomPurifyConfig} */ (config);
+}
+
+/**
+ * Gets a copy of the map of allowed tag names (standard DOMPurify config).
+ * @return {!Object<string, boolean>}
+ */
+export function getAllowedTags() {
+  const allowedTags = {};
+  // Use this hook to extract purifier's allowed tags.
+  DomPurify.addHook('uponSanitizeElement', function(node, data) {
+    Object.assign(allowedTags, data.allowedTags);
+  });
+  // Sanitize dummy markup so that the hook is invoked.
+  DomPurify.sanitize('<p></p>');
+  // Remove any blacklisted tags.
+  Object.keys(BLACKLISTED_TAGS).forEach(blacklistedTag => {
+    delete allowedTags[blacklistedTag];
+  });
+  // Pops the last hook added.
+  DomPurify.removeHook('uponSanitizeElement');
+  return allowedTags;
 }
 
 /**
  * Adds AMP hooks to given DOMPurify object.
  * @param {!DomPurifyDef} purifier
  * @param {boolean} diffing
+ * @param {!Document} doc
  */
-export function addPurifyHooks(purifier, diffing) {
+function addPurifyHooks(purifier, diffing, doc) {
   // Reference to DOMPurify's `allowedTags` whitelist.
   let allowedTags;
   const allowedTagsChanges = [];
@@ -139,8 +179,7 @@ export function addPurifyHooks(purifier, diffing) {
     const {tagName} = data;
     allowedTags = data.allowedTags;
 
-    // Allow all AMP elements (constrained by AMP Validator since tag
-    // calculation is not possible).
+    // Allow all AMP elements.
     if (startsWith(tagName, 'amp-')) {
       allowedTags[tagName] = true;
       // AMP elements don't support arbitrary mutation, so don't DOM diff them.
@@ -156,8 +195,10 @@ export function addPurifyHooks(purifier, diffing) {
     const whitelist = WHITELISTED_TAGS_BY_ATTRS[tagName];
     if (whitelist) {
       const {attribute, values} = whitelist;
-      if (node.hasAttribute(attribute)
-          && values.includes(node.getAttribute(attribute))) {
+      if (
+        node.hasAttribute(attribute) &&
+        values.includes(node.getAttribute(attribute))
+      ) {
         allowedTags[tagName] = true;
         allowedTagsChanges.push(tagName);
       }
@@ -229,17 +270,15 @@ export function addPurifyHooks(purifier, diffing) {
       }
     }
 
-    const classicBinding = attrName[0] == '['
-        && attrName[attrName.length - 1] == ']';
-    const alternativeBinding = startsWith(attrName, BIND_PREFIX);
+    const bindingType = bindingTypeForAttr(attrName);
     // Rewrite classic bindings e.g. [foo]="bar" -> data-amp-bind-foo="bar".
     // This is because DOMPurify eagerly removes attributes and re-adds them
     // after sanitization, which fails because `[]` are not valid attr chars.
-    if (classicBinding) {
+    if (bindingType === BindingType.CLASSIC) {
       const property = attrName.substring(1, attrName.length - 1);
       node.setAttribute(`${BIND_PREFIX}${property}`, attrValue);
     }
-    if (classicBinding || alternativeBinding) {
+    if (bindingType !== BindingType.NONE) {
       // Set a custom attribute to mark this element as containing a binding.
       // This is an optimization that obviates the need for DOM scan later.
       node.setAttribute('i-amphtml-binding', '');
@@ -249,13 +288,24 @@ export function addPurifyHooks(purifier, diffing) {
       disableDiffingFor(node);
     }
 
-    if (isValidAttr(tagName, attrName, attrValue, /* opt_purify */ true)) {
+    if (
+      isValidAttr(
+        tagName,
+        attrName,
+        attrValue,
+        /* doc */ doc,
+        /* opt_purify */ true
+      )
+    ) {
       if (attrValue && !startsWith(attrName, 'data-amp-bind-')) {
         attrValue = rewriteAttributeValue(tagName, attrName, attrValue);
       }
     } else {
-      user().error(TAG, `Removing "${attrName}" attribute with invalid `
-          + `value in <${tagName} ${attrName}="${attrValue}">.`);
+      user().error(
+        TAG,
+        `Removing "${attrName}" attribute with invalid ` +
+          `value in <${tagName} ${attrName}="${attrValue}">.`
+      );
       data.keepAttr = false;
     }
 
@@ -276,24 +326,111 @@ export function addPurifyHooks(purifier, diffing) {
     });
     allowedAttributesChanges.length = 0;
 
-    // Restore the `on` attribute which DOMPurify incorrectly flags as an
-    // unknown protocol due to presence of the `:` character.
-    remove(this.removed, r => {
-      if (r.from === node && r.attribute) {
-        const {name, value} = r.attribute;
-        if (name.toLowerCase() === 'on') {
-          node.setAttribute('on', value);
-          return true; // Delete from `removed` array once processed.
-        }
+    // TODO(alabiaga): Revert this change once DOM Purifier patch to make
+    // this work is live. https://github.com/cure53/DOMPurify/pull/329
+    // Remove input type file if applicable. The purifier will actually
+    // not remove this attribute because of a Safari bug where removing it
+    // will result in not being able to add it programmatically afterwards.
+    // For AMP HTML's usage, this is fine.
+    const nodeName = node.nodeName.toLowerCase();
+    if (nodeName == 'input') {
+      const inputType = node.getAttribute('type');
+      if (inputType && inputType.toLowerCase() == 'file' && isAmp4Email(doc)) {
+        node.removeAttribute('type');
       }
-      return false;
-    });
+    }
   };
 
   purifier.addHook('uponSanitizeElement', uponSanitizeElement);
   purifier.addHook('afterSanitizeElements', afterSanitizeElements);
   purifier.addHook('uponSanitizeAttribute', uponSanitizeAttribute);
   purifier.addHook('afterSanitizeAttributes', afterSanitizeAttributes);
+}
+
+/**
+ * @enum {number}
+ */
+const BindingType = {
+  NONE: 0,
+  CLASSIC: 1,
+  ALTERNATIVE: 2,
+};
+
+/**
+ * @param {string} attrName
+ * @return {BindingType}
+ */
+function bindingTypeForAttr(attrName) {
+  if (attrName[0] == '[' && attrName[attrName.length - 1] == ']') {
+    return BindingType.CLASSIC;
+  }
+  if (startsWith(attrName, BIND_PREFIX)) {
+    return BindingType.ALTERNATIVE;
+  }
+  return BindingType.NONE;
+}
+
+/**
+ * Returns whether an attribute addition/modification/removal is valid.
+ *
+ * This function's behavior should match that of addPurifyHooks(), except
+ * that it operates on attribute changes instead of rendering new HTML.
+ *
+ * @param {!DomPurifyDef} purifier
+ * @param {!Node} node
+ * @param {string} attr Lower-case attribute name.
+ * @param {string|null} value
+ * @return {boolean}
+ */
+export function validateAttributeChange(purifier, node, attr, value) {
+  const tag = node.nodeName.toLowerCase();
+  // Disallow change of attributes that are required for certain tags,
+  // e.g. script[type].
+  const whitelist = WHITELISTED_TAGS_BY_ATTRS[tag];
+  if (whitelist) {
+    const {attribute, values} = whitelist;
+    if (attribute === attr) {
+      if (value == null || !values.includes(value)) {
+        return false;
+      }
+    }
+  }
+  // a[target] is required and only certain values are allowed.
+  if (tag === 'a' && attr === 'target') {
+    if (value == null || !WHITELISTED_TARGETS.includes(value)) {
+      return false;
+    }
+  }
+  // Don't allow binding attributes for now.
+  if (bindingTypeForAttr(attr) !== BindingType.NONE) {
+    return false;
+  }
+  const pure = purifier.isValidAttribute(tag, attr, value);
+  if (!pure) {
+    // DOMPurify.isValidAttribute() by default rejects certain attributes that
+    // we should allow: (1) AMP element attributes, (2) tag-specific attributes.
+    // Reject if _not_ one of the above.
+    //
+    // TODO(choumx): This opts out of DOMPurify's attribute _value_ sanitization
+    // for the above, which assumes that the attributes don't have security
+    // implications beyond URLs etc. that are covered by isValidAttr().
+    // This is OK for now, but we should instead somehow modify ALLOWED_ATTR
+    // to preserve value sanitization.
+    const whitelisted = WHITELISTED_ATTRS.includes(attr);
+    const attrsByTags = WHITELISTED_ATTRS_BY_TAGS[tag];
+    const whitelistedForTag = attrsByTags && attrsByTags.includes(attr);
+    if (!whitelisted && !whitelistedForTag && !startsWith(tag, 'amp-')) {
+      return false;
+    }
+  }
+  const doc = node.ownerDocument
+    ? node.ownerDocument
+    : /** @type {!Document} */ (node);
+  // Perform AMP-specific attribute validation e.g. __amp_source_origin.
+  if (value && !isValidAttr(tag, attr, value, doc, /* opt_purify */ true)) {
+    return false;
+  }
+  return true;
 }
 
 /**
@@ -307,7 +444,6 @@ export function addPurifyHooks(purifier, diffing) {
 export function purifyTagsForTripleMustache(html, doc = self.document) {
   // Reference to DOMPurify's `allowedTags` whitelist.
   let allowedTags;
-
   DomPurify.addHook('uponSanitizeElement', (node, data) => {
     const {tagName} = data;
     allowedTags = data.allowedTags;
@@ -338,5 +474,5 @@ export function purifyTagsForTripleMustache(html, doc = self.document) {
   // namespaces for all elements and attributes.
   const div = doc.createElement('div');
   div.appendChild(fragment);
-  return div./*OK*/innerHTML;
+  return div./*OK*/ innerHTML;
 }

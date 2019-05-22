@@ -17,18 +17,14 @@
 import {Deferred} from '../utils/promise';
 import {Signals} from '../utils/signals';
 import {dev, devAssert} from '../log';
-import {
-  getParentWindowFrameElement,
-  registerServiceBuilder,
-} from '../service';
+import {getParentWindowFrameElement, registerServiceBuilder} from '../service';
 import {getShadowRootNode} from '../shadow-embed';
 import {isDocumentReady, whenDocumentReady} from '../document-ready';
 import {isExperimentOn} from '../experiments';
-import {waitForBodyPromise} from '../dom';
+import {waitForBodyOpenPromise} from '../dom';
 
 /** @const {string} */
 const AMPDOC_PROP = '__AMPDOC';
-
 
 /**
  * This service helps locate an ampdoc (`AmpDoc` instance) for any node,
@@ -104,8 +100,10 @@ export class AmpDocService {
     }
 
     // Multiple documents and AmpDocShell requested
-    if (isExperimentOn(this.win, 'ampdoc-shell') &&
-        opt_node === this.win.document) {
+    if (
+      isExperimentOn(this.win, 'ampdoc-shell') &&
+      opt_node === this.win.document
+    ) {
       if (this.shellShadowDoc_) {
         return this.shellShadowDoc_;
       } else {
@@ -183,9 +181,10 @@ export class AmpDocService {
     // See https://www.chromestatus.com/feature/5676110549352448.
     if (opt_node) {
       devAssert(
-          opt_node['isConnected'] === undefined ||
+        opt_node['isConnected'] === undefined ||
           opt_node['isConnected'] === true,
-          'The node must be attached to request ampdoc.');
+        'The node must be attached to request ampdoc.'
+      );
     }
 
     const ampdoc = this.getAmpDocIfAvailable(opt_node, opt_options);
@@ -204,8 +203,10 @@ export class AmpDocService {
    * @restricted
    */
   installShadowDoc(url, shadowRoot) {
-    devAssert(!shadowRoot[AMPDOC_PROP],
-        'The shadow root already contains ampdoc');
+    devAssert(
+      !shadowRoot[AMPDOC_PROP],
+      'The shadow root already contains ampdoc'
+    );
     const ampdoc = new AmpDocShadow(this.win, url, shadowRoot);
     shadowRoot[AMPDOC_PROP] = ampdoc;
     return ampdoc;
@@ -223,8 +224,10 @@ export class AmpDocService {
    * @restricted
    */
   installShellShadowDoc() {
-    devAssert(this.singleDoc_ === null,
-        'AmpDocShell cannot be installed in single-doc mode');
+    devAssert(
+      this.singleDoc_ === null,
+      'AmpDocShell cannot be installed in single-doc mode'
+    );
     this.shellShadowDoc_ = new AmpDocShell(this.win);
     this.win.document[AMPDOC_PROP] = this.shellShadowDoc_;
 
@@ -236,7 +239,6 @@ export class AmpDocService {
     return this.shellShadowDoc_;
   }
 }
-
 
 /**
  * This class represents a single ampdoc. `AmpDocService` can contain only one
@@ -333,7 +335,7 @@ export class AmpDoc {
   /**
    * Returns the ampdoc's body. Requires the body to already be available.
    *
-   * See `isBodyAvailable` and `whenBodyAvailable`.
+   * See `isBodyAvailable` and `waitForBodyOpen`.
    *
    * @return {!Element}
    */
@@ -346,7 +348,7 @@ export class AmpDoc {
    * available.
    * @return {!Promise<!Element>}
    */
-  whenBodyAvailable() {
+  waitForBodyOpen() {
     return /** @type {?} */ (devAssert(null, 'not implemented'));
   }
 
@@ -400,7 +402,6 @@ export class AmpDoc {
   }
 }
 
-
 /**
  * The version of `AmpDoc` in the single-doc mode that corresponds to the
  * global `window.document`.
@@ -414,9 +415,9 @@ export class AmpDocSingle extends AmpDoc {
     super(win);
 
     /** @private @const {!Promise<!Element>} */
-    this.bodyPromise_ = this.win.document.body ?
-      Promise.resolve(this.win.document.body) :
-      waitForBodyPromise(this.win.document).then(() => this.getBody());
+    this.bodyPromise_ = this.win.document.body
+      ? Promise.resolve(this.win.document.body)
+      : waitForBodyOpenPromise(this.win.document).then(() => this.getBody());
 
     /** @private @const {!Promise} */
     this.readyPromise_ = whenDocumentReady(this.win.document);
@@ -453,7 +454,7 @@ export class AmpDocSingle extends AmpDoc {
   }
 
   /** @override */
-  whenBodyAvailable() {
+  waitForBodyOpen() {
     return this.bodyPromise_;
   }
 
@@ -467,7 +468,6 @@ export class AmpDocSingle extends AmpDoc {
     return this.readyPromise_;
   }
 }
-
 
 /**
  * The version of `AmpDoc` in the shadow-doc mode that is allocated for each
@@ -553,7 +553,7 @@ export class AmpDocShadow extends AmpDoc {
   }
 
   /** @override */
-  whenBodyAvailable() {
+  waitForBodyOpen() {
     return this.bodyPromise_;
   }
 
@@ -578,7 +578,6 @@ export class AmpDocShadow extends AmpDoc {
     return this.readyPromise_;
   }
 }
-
 
 /**
  * AmpDocShadow for the shell
@@ -606,10 +605,7 @@ export class AmpDocShell extends AmpDocShadow {
  * @param {boolean} isSingleDoc
  */
 export function installDocService(win, isSingleDoc) {
-  registerServiceBuilder(
-      win,
-      'ampdoc',
-      function() {
-        return new AmpDocService(win, isSingleDoc);
-      });
+  registerServiceBuilder(win, 'ampdoc', function() {
+    return new AmpDocService(win, isSingleDoc);
+  });
 }

@@ -26,37 +26,63 @@ const {
   printChangeSummary,
   startTimer,
   stopTimer,
-  timedExecOrDie: timedExecOrDieBase} = require('./utils');
+  timedExecOrDie: timedExecOrDieBase,
+} = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
 const {isTravisPullRequestBuild} = require('../travis');
+const {reportAllExpectedTests} = require('../tasks/runtime-test/status-report');
+const {runYarnChecks} = require('./yarn-checks');
 
 const FILENAME = 'checks.js';
-const timedExecOrDie =
-  (cmd, unusedFileName) => timedExecOrDieBase(cmd, FILENAME);
-
-function runCommonChecks() {
-  timedExecOrDie('gulp presubmit');
-  timedExecOrDie('gulp lint');
-  timedExecOrDie('gulp ava');
-  timedExecOrDie('node node_modules/jest/bin/jest.js');
-  timedExecOrDie('gulp caches-json');
-  timedExecOrDie('gulp json-syntax');
-}
+const timedExecOrDie = (cmd, unusedFileName) =>
+  timedExecOrDieBase(cmd, FILENAME);
 
 function main() {
   const startTime = startTimer(FILENAME, FILENAME);
-  const buildTargets = determineBuildTargets();
+  if (!runYarnChecks(FILENAME)) {
+    stopTimer(FILENAME, FILENAME, startTime);
+    process.exitCode = 1;
+    return;
+  }
 
   if (!isTravisPullRequestBuild()) {
     timedExecOrDie('gulp update-packages');
-    runCommonChecks();
+    timedExecOrDie('gulp lint');
+    timedExecOrDie('gulp presubmit');
+    timedExecOrDie('gulp ava');
+    timedExecOrDie('gulp babel-plugin-tests');
+    timedExecOrDie('gulp caches-json');
+    timedExecOrDie('gulp json-syntax');
     timedExecOrDie('gulp dev-dashboard-tests');
     timedExecOrDie('gulp dep-check');
     timedExecOrDie('gulp check-types');
   } else {
     printChangeSummary(FILENAME);
+    const buildTargets = new Set();
+    if (!determineBuildTargets(buildTargets, FILENAME)) {
+      stopTimer(FILENAME, FILENAME, startTime);
+      process.exitCode = 1;
+      return;
+    }
+
+    reportAllExpectedTests(buildTargets);
     timedExecOrDie('gulp update-packages');
-    runCommonChecks();
+
+    timedExecOrDie('gulp lint');
+    timedExecOrDie('gulp presubmit');
+
+    if (buildTargets.has('AVA')) {
+      timedExecOrDie('gulp ava');
+    }
+
+    if (buildTargets.has('BABEL_PLUGIN')) {
+      timedExecOrDie('gulp babel-plugin-tests');
+    }
+
+    if (buildTargets.has('CACHES_JSON')) {
+      timedExecOrDie('gulp caches-json');
+      timedExecOrDie('gulp json-syntax');
+    }
 
     // Check document links only for PR builds.
     if (buildTargets.has('DOCS')) {

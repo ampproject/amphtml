@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 /**
  * @fileoverview Shows a Pinterest widget.
  * Examples:
@@ -50,7 +49,6 @@ import {user, userAssert} from '../../../src/log';
  *    - buttonFollow: User follow button
  */
 class AmpPinterest extends AMP.BaseElement {
-
   /**
    * @param {boolean=} onLayout
    * @override
@@ -67,9 +65,11 @@ class AmpPinterest extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const selector = userAssert(this.element.getAttribute('data-do'),
-        'The data-do attribute is required for <amp-pinterest> %s',
-        this.element);
+    const selector = userAssert(
+      this.element.getAttribute('data-do'),
+      'The data-do attribute is required for <amp-pinterest> %s',
+      this.element
+    );
 
     return this.render(selector).then(node => {
       return this.element.appendChild(node);
@@ -92,7 +92,6 @@ class AmpPinterest extends AMP.BaseElement {
     return Promise.reject(user().createError('Invalid selector: %s', selector));
   }
 }
-
 
 AMP.extension('amp-pinterest', '0.1', AMP => {
   AMP.registerElement('amp-pinterest', AmpPinterest, CSS);

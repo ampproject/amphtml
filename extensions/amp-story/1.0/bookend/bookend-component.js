@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-
 import {ArticleComponent} from './components/article';
 import {CtaLinkComponent} from './components/cta-link';
 import {HeadingComponent} from './components/heading';
 import {LandscapeComponent} from './components/landscape';
-import {LocalizedStringId} from '../localization';
+import {LocalizedStringId} from '../../../../src/localized-strings';
 import {PortraitComponent} from './components/portrait';
 import {TextBoxComponent} from './components/text-box';
 import {dev} from '../../../../src/log';
@@ -49,7 +48,6 @@ export let BookendDataDef;
  */
 export let BookendComponentDef;
 
-
 /**
  * @typedef {
  *   (!ArticleComponent|
@@ -62,10 +60,8 @@ export let BookendComponentDef;
  */
 export let BookendComponentClass;
 
-
 /** @private @const {!Object<string, !BookendComponentClass>} */
 const builderInstances = {};
-
 
 /**
  * @param {string} type
@@ -76,7 +72,6 @@ const builderInstances = {};
 function setBuilderInstance(type, ctor) {
   return (builderInstances[type] = builderInstances[type] || new ctor());
 }
-
 
 /**
  * Dispatches the components to their specific builder classes.
@@ -107,7 +102,7 @@ function componentBuilderInstanceFor(type) {
  * Prepend a heading to the related articles section if first component is not a
  * heading already.
  * @param {!Array<BookendComponentDef>} components
- * @param {?../localization.LocalizationService} localizationService
+ * @param {?../../../../src/service/localization.LocalizationService} localizationService
  * @return {!Array<BookendComponentDef>}
  */
 function prependTitle(components, localizationService) {
@@ -115,9 +110,9 @@ function prependTitle(components, localizationService) {
     return components;
   }
 
-  const title = localizationService
-      .getLocalizedString(
-          LocalizedStringId.AMP_STORY_BOOKEND_MORE_TO_READ_LABEL);
+  const title = localizationService.getLocalizedString(
+    LocalizedStringId.AMP_STORY_BOOKEND_MORE_TO_READ_LABEL
+  );
   components.unshift({'type': 'heading', 'text': title});
   return components;
 }
@@ -138,8 +133,12 @@ export class BookendComponent {
     return components.reduce((builtComponents, component) => {
       const componentBuilder = componentBuilderInstanceFor(component.type);
       if (!componentBuilder) {
-        dev().error(TAG, 'Component type `' + component.type +
-        '` is not supported. Skipping invalid.');
+        dev().error(
+          TAG,
+          'Component type `' +
+            component.type +
+            '` is not supported. Skipping invalid.'
+        );
         return builtComponents;
       }
       componentBuilder.assertValidity(component, el);
@@ -153,7 +152,7 @@ export class BookendComponent {
    * class and appending the elements to the container.
    * @param {!Array<BookendComponentDef>} components
    * @param {!Document} doc
-   * @param {?../localization.LocalizationService} localizationService
+   * @param {?../../../../src/service/localization.LocalizationService} localizationService
    * @return {!DocumentFragment}
    */
   static buildElements(components, doc, localizationService) {
@@ -164,8 +163,9 @@ export class BookendComponent {
     components.forEach(component => {
       const {type} = component;
       if (type && componentBuilderInstanceFor(type)) {
-        fragment.appendChild(componentBuilderInstanceFor(type)
-            .buildElement(component, doc));
+        fragment.appendChild(
+          componentBuilderInstanceFor(type).buildElement(component, doc)
+        );
       }
     });
     return fragment;
@@ -179,9 +179,12 @@ export class BookendComponent {
    */
   static buildContainer(element, doc) {
     const html = htmlFor(doc);
-    const containerTemplate =
-      html`<div class="i-amphtml-story-bookend-component-set
-          i-amphtml-story-bookend-top-level"></div>`;
+    const containerTemplate = html`
+      <div
+        class="i-amphtml-story-bookend-component-set
+          i-amphtml-story-bookend-top-level"
+      ></div>
+    `;
     element.appendChild(containerTemplate);
     return element.lastElementChild;
   }
