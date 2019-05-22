@@ -40,7 +40,6 @@ function installPackages_() {
 }
 
 function buildRuntime_() {
-  execOrDie('gulp clean');
   execOrDie('gulp dist --fortesting');
 }
 
