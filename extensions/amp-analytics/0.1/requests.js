@@ -153,11 +153,11 @@ export class RequestHandler {
         );
 
         // do not encode vars in request origin
-        const requestOriginExpansionOpt = {...expansionOption, noEncode: true};
+        expansionOption.noEncode = true;
 
         const requestOriginPromise = this.variableService_
           // expand variables in request origin
-          .expandTemplate(this.requestOrigin, requestOriginExpansionOpt)
+          .expandTemplate(this.requestOrigin, expansionOption)
           // substitute in URL values e.g. DOCUMENT_REFERRER -> https://example.com
           .then(expandedRequestOrigin => {
             return this.urlReplacementService_.expandUrlAsync(
