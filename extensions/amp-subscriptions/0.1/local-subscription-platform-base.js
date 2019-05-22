@@ -183,13 +183,13 @@ export class LocalSubscriptionBasePlatform {
   }
 
   /**
-   * @abstract @override
+   * @override
    * @return {!Promise<?./entitlement.Entitlement>}
    */
   getEntitlements() {}
 
   /**
-   * @abstract @override
+   * @override
    * @param {?./entitlement.Entitlement} unusedEntitlement
    * @return {!Promise|undefined}
    */
