@@ -25,7 +25,6 @@ const {
   printNobuildHelp,
 } = require('./helpers');
 const {buildExtensions} = require('./extension-helpers');
-const {clean} = require('./clean');
 const {compileCss} = require('./css');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
 const {maybeUpdatePackages} = require('./update-packages');
@@ -60,7 +59,6 @@ async function build() {
 async function performBuild(watch) {
   process.env.NODE_ENV = 'development';
   printNobuildHelp();
-  await clean();
   printConfigHelp(watch ? 'gulp watch' : 'gulp build');
   parseExtensionFlags();
   return compileCss(watch).then(() => {
@@ -107,7 +105,10 @@ build.flags = {
 watch.description = 'Watches for changes in files, re-builds when detected';
 watch.flags = {
   with_inabox: '  Also watch and build the amp-inabox.js binary.',
+  with_inabox_lite: '  Also watch and build the amp-inabox-lite.js binary.',
   with_shadow: '  Also watch and build the amp-shadow.js binary.',
+  with_video_iframe_integration:
+    '  Also watch and build the video-iframe-integration.js binary.',
   extensions: '  Watches and builds only the listed extensions.',
   extensions_from:
     '  Watches and builds only the extensions from the listed AMP(s).',
