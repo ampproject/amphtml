@@ -32,7 +32,6 @@ import {includes, startsWith} from '../../../src/string';
 import {isEnumValue} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {mod} from '../../../src/utils/math';
-import {sanitizeHtml} from '../../../src/sanitizer';
 import {toggle} from '../../../src/style';
 
 const EXPERIMENT = 'amp-autocomplete';
