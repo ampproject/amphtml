@@ -925,6 +925,12 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     let imageAnimation;
 
     const measure = () => {
+      const srcCropEl = closestAncestorElementBySelector(srcImg, 'amp-img');
+      const targetCropEl = closestAncestorElementBySelector(
+        targetImg,
+        'amp-img'
+      );
+
       duration = this.getTransitionDurationFromElements_(srcImg, targetImg);
       motionDuration = MOTION_DURATION_RATIO * duration;
       // Prepare the actual image animation.
@@ -933,9 +939,9 @@ export class AmpLightboxGallery extends AMP.BaseElement {
           styleContainer: this.getAmpDoc().getHeadNode(),
           transitionContainer: this.getAmpDoc().getBody(),
           srcImg,
+          srcCropRect: (srcCropEl || srcImg).getBoundingClientRect(),
           targetImg,
-          srcImgRect: undefined,
-          targetImgRect: undefined,
+          targetCropRect: (targetCropEl || targetImg).getBoundingClientRect(),
           styles: {
             'animationDuration': `${motionDuration}ms`,
             // Matches z-index for `.i-amphtml-lbg`.
