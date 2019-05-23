@@ -32,7 +32,10 @@ Allows rendering of custom UI components running on third-party JavaScript.
 <table>
   <tr>
     <td><strong>Availability</strong></td>
-    <td><a href="https://www.ampproject.org/docs/reference/experimental.html">Experimental</a></td>
+    <td>
+      <a href="https://www.ampproject.org/docs/reference/experimental.html">Experimental</a><br/>
+      This component is available under Origin Trial. To sign up for an Origin Trial please sign up at bit.ly/amp-script-trial.
+    </td>
   </tr>
   <tr>
     <td class="col-fourty"><strong>Required Script</strong></td>
