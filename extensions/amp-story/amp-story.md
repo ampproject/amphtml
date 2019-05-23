@@ -446,17 +446,16 @@ The `<amp-story-grid-layer>` component lays its children out into a grid.  Its i
 
 <div class="flex-images">
   <amp-img alt="Layer 1" layout="flex-item" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/layers-layer-1.gif" width="200" height="355">
-  <noscript><img width="200" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/layers-layer-1.gif" /></noscript>
-  </amp-img>
+  <noscript><img width="200" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/layers-layer-1.gif" /></noscript></amp-img>
   <span class="special-char">+</span>
   <amp-img alt="Layer 2" layout="flex-item" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/layers-layer-2.jpg" width="200" height="355">
   <noscript><img width="200" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/layers-layer-2.jpg" /></noscript></amp-img>
   <span class="special-char">+</span>
   <amp-img alt="Layer 3" layout="flex-item" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/layers-layer-3.jpg" width="200" height="355">
-  <noscript><img width="200" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/layers-layer-3.jpg" /></noscript></amp-img></amp-img>
+  <noscript><img width="200" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/layers-layer-3.jpg" /></noscript></amp-img>
   <span class="special-char">=</span>
   <amp-img alt="All layers" layout="flex-item" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/layers-layer-4.gif" width="200" height="355">
-  <noscript><img width="200" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/layers-layer-4.gif" /></noscript></amp-img></amp-im</amp-img>
+  <noscript><img width="200" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/layers-layer-4.gif" /></noscript></amp-img>
 </div>
 
 #### Attributes
@@ -1135,6 +1134,42 @@ You can apply multiple entrance animations on one element (for example, an eleme
 {% call callout('Note', type='note') %}
 If a composed animation is supposed to start after the end of a separate element's animation, make sure that all nested elements that compose the animation have the attribute `animate-in-after` set to the same `id`.
 {% endcall %}
+
+## Optional customization
+
+### `data-text-background-color`
+
+Use this attribute inside a `amp-story-page` to highlight the text with a color of your choice. To highlight the entire block, add this attribute directly to the text element. To only highlight the text, add the attribute and your text to an inner `<span>`.
+
+Example:
+<amp-img alt="text background color only example" layout="fixed" src="https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/img/text-background-color-ex-1.png" width="300" height="533">
+  <noscript>
+    <img alt="text background color only example" src="https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/img/text-background-color-ex-1.png" />
+  </noscript>
+</amp-img>
+```html
+<amp-story-grid-layer template="vertical">
+  <h2>
+    <span data-text-background-color="crimson">
+      Cat ipsum dolor sit amet, sleeps on my head, but lounge in doorway so if human is on laptop sit on the keyboard
+    </span>
+  </h2>
+</amp-story-grid-layer>
+```
+
+Example:
+<amp-img alt="text background color full example" layout="fixed" src="https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/img/text-background-color-ex-2.png" width="300" height="533">
+  <noscript>
+    <img alt="text background color full example" src="https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/img/text-background-color-ex-2.png" />
+  </noscript>
+</amp-img>
+```html
+<amp-story-grid-layer template="vertical"> 
+  <h2 data-text-background-color="midnightblue">
+    Cat ipsum dolor sit amet, sleeps on my head, but lounge in doorway so if human is on laptop sit on the keyboard
+  </h2>
+</amp-story-grid-layer>
+```
 
 ## Bookend: `amp-story-bookend`
 
