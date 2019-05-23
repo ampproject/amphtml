@@ -159,6 +159,7 @@
     "request-promise": "4.2.4",
     "require-hijack": "1.2.1",
     "rocambole": "0.7.0",
+    "selenium-webdriver": "4.0.0-alpha.1",
     "sinon": "7.3.2",
     "sinon-chai": "3.3.0",
     "sleep-promise": "8.0.1",
