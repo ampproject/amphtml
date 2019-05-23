@@ -33,8 +33,7 @@ function outputMessages(path, key, transform) {
         path,
         Object.fromEntries(
           Object.keys(obj).map(k => [obj[k][key], transform(obj[k])])
-        ),
-        {spaces: 2}
+        )
       ),
     // We don't care if non existant or invalid.
     () => {}
