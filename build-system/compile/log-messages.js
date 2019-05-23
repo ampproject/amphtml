@@ -44,17 +44,17 @@ const messagesByIdSimplePath = `${messagesPathPrefix}.simple.json`;
 
 /**
  * @param {string} path
- * @param {string} key
  * @param {function(!Object):!Object} transform
  * @return {!Promise}
  */
-const outputMessagesTable = (path, key, transform) =>
+const outputMessagesById = (path, transform) =>
   fs.readJson(messagesByMessagePath).then(
     obj =>
       fs.outputJson(
         path,
         Object.fromEntries(
-          Object.keys(obj).map(k => [obj[k][key], transform(obj[k])])
+          // key by id, content defined by caller
+          Object.keys(obj).map(k => [obj[k]['id'], transform(obj[k])])
         )
       ),
     // We don't care if non existant or invalid.
@@ -62,15 +62,10 @@ const outputMessagesTable = (path, key, transform) =>
   );
 
 /** @return {!Promise} */
-const outputMessagesById = () =>
-  outputMessagesTable(messagesByIdPath, 'id', ({id: unused, ...rest}) => rest);
-
-/** @return {!Promise} */
-const outputMessagesByIdSimple = () =>
-  outputMessagesTable(messagesByIdSimplePath, 'id', ({message}) => message);
-
-/** @return {!Promise} */
 const outputMessages = () =>
-  Promise.all([outputMessagesById(), outputMessagesByIdSimple()]);
+  Promise.all([
+    outputMessagesById(messagesByIdPath, ({id: unused, ...rest}) => rest),
+    outputMessagesById(messagesByIdSimplePath, ({message}) => message),
+  ]);
 
 module.exports = {messagesByMessagePath, outputMessages};
