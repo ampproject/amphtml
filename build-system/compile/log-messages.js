@@ -33,7 +33,7 @@ const messagesByMessagePath = `${messagesPathPrefix}.by-message.json`;
  * @param {function(!Object):!Object} transform
  * @return {!Promise}
  */
-const outputMessagesById = (outputPath, transform) =>
+const outputExtractedMessagesById = (outputPath, transform) =>
   fs.readJson(messagesByMessagePath, {throws: false}).then(obj =>
     fs.outputJson(
       outputPath,
@@ -55,20 +55,20 @@ const outputMessagesById = (outputPath, transform) =>
  *
  * @return {!Promise}
  */
-const outputMessages = () =>
+const formatExtractedMessages = () =>
   Promise.all([
     // Consumed by logging server. Format may allow further fields in the
     // future.
-    outputMessagesById(
+    outputExtractedMessagesById(
       `${messagesPathPrefix}.json`,
       ({id: unused, ...other}) => other
     ),
 
     // Consumed by runtime function in development mode.
-    outputMessagesById(
+    outputExtractedMessagesById(
       `${messagesPathPrefix}.simple.json`,
       ({message}) => message
     ),
   ]);
 
-module.exports = {messagesByMessagePath, outputMessages};
+module.exports = {messagesByMessagePath, formatExtractedMessages};

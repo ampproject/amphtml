@@ -41,8 +41,8 @@ const {
   gulpClosureCompile,
   handleSinglePassCompilerError,
 } = require('./closure-compile');
+const {formatExtractedMessages} = require('./log-messages');
 const {isTravisBuild} = require('../travis');
-const {outputMessages} = require('./log-messages');
 const {shortenLicense, shouldShortenLicense} = require('./shorten-license');
 const {TopologicalSort} = require('topological-sort');
 const {toPromise} = require('../tasks/helpers');
@@ -663,7 +663,7 @@ function compile(flagsArray) {
       .pipe(sourcemaps.write('.'))
       .pipe(gulpIf(/(\/amp-|\/_base)/, rename(path => (path.dirname += '/v0'))))
       .pipe(gulp.dest('.'))
-  ).then(outputMessages, e => {
+  ).then(formatExtractedMessages, e => {
     handleSinglePassCompilerError();
     throw e;
   });
