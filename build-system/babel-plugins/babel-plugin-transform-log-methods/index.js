@@ -144,14 +144,14 @@ module.exports = function({types: t}) {
 
       // Configurable to isolate test output.
       relMessagesPath = relativeToRoot(this.opts.messagesPath || messagesPath);
+
+      // Read table.
+      messages = fs.readJsonSync(relMessagesPath, {throws: false}) || {};
+      nextMessageId = Object.keys(messages).length;
     },
     visitor: {
-      /** Message table I/O. */
+      /** Write table on every exit. */
       Program: {
-        enter() {
-          messages = fs.readJsonSync(relMessagesPath, {throws: false}) || {};
-          nextMessageId = Object.keys(messages).length;
-        },
         exit() {
           fs.outputJsonSync(relMessagesPath, messages, {spaces: 2});
         },
