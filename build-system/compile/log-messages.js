@@ -32,17 +32,14 @@ const messagesByMessagePath = `${messagesPathPrefix}.by-message.json`;
  * @return {!Promise}
  */
 const outputMessagesById = (path, transform) =>
-  fs.readJson(messagesByMessagePath).then(
-    obj =>
-      fs.outputJson(
-        path,
-        Object.fromEntries(
-          // key by id, content defined by caller
-          Object.keys(obj).map(k => [obj[k]['id'], transform(obj[k])])
-        )
-      ),
-    // We don't care if non existant or invalid.
-    () => {}
+  fs.readJson(messagesByMessagePath, {throws: false}).then(obj =>
+    fs.outputJson(
+      path,
+      Object.fromEntries(
+        // key by id, content defined by caller
+        Object.keys(obj).map(k => [obj[k]['id'], transform(obj[k])])
+      )
+    )
   );
 
 /** @return {!Promise} */
