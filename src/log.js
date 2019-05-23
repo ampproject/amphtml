@@ -542,7 +542,8 @@ export class Log {
    * @private
    */
   expandLogMessage_(parts) {
-    const id = this.assert(parts[0]);
+    // First value should exist.
+    const id = parts[0];
     // Best effort fetch of message template table.
     // Since this is async, the first few logs might be indirected to a URL even
     // if in development mode. Message table is ~small so this should be a short
