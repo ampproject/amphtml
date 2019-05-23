@@ -34,7 +34,9 @@ const gulpHelpUrl =
 const yarnExecutable = 'npx yarn';
 const gulpExecutable = 'npx gulp';
 
-const updatesNeeded = [];
+const warningDelaySecs = 10;
+
+const updatesNeeded = new Set();
 
 // Color formatting libraries may not be available when this script is run.
 function red(text) {
@@ -123,7 +125,7 @@ function checkNodeVersion() {
               cyan('https://nodejs.org/en/download/package-manager'),
               yellow('for instructions.')
             );
-            updatesNeeded.push('node');
+            updatesNeeded.add('node');
           } else {
             console.log(
               green('Detected'),
@@ -194,7 +196,7 @@ function checkYarnVersion() {
       cyan('https://yarnpkg.com/docs/install'),
       yellow('for instructions.')
     );
-    updatesNeeded.push('yarn');
+    updatesNeeded.add('yarn');
   } else {
     console.log(
       green('Detected'),
@@ -217,11 +219,23 @@ function getYarnStableVersion(infoJson) {
   }
 }
 
-function checkGlobalGulp() {
+function getParentShellPath() {
+  const nodePath = process.env.PATH;
+  const pathSeparator = process.platform == 'win32' ? ';' : ':';
+  // nodejs adds a few extra variables to $PATH, ending with '../../bin/node-gyp-bin'.
+  // See https://github.com/nodejs/node-convergence-archive/blob/master/deps/npm/lib/utils/lifecycle.js#L81-L85
+  return nodePath.split(`node-gyp-bin${pathSeparator}`).pop();
+}
+
+function runGulpChecks() {
   const firstInstall = !fs.existsSync('node_modules');
   const globalPackages = getStdout(yarnExecutable + ' global list').trim();
   const globalGulp = globalPackages.match(/"gulp@.*" has binaries/);
   const globalGulpCli = globalPackages.match(/"gulp-cli@.*" has binaries/);
+  const defaultGulpPath = getStdout('which gulp', {
+    'env': {'PATH': getParentShellPath()},
+  }).trim();
+  const wrongGulp = !defaultGulpPath.includes('yarn');
   if (globalGulp) {
     console.log(
       yellow('WARNING: Detected a global install of'),
@@ -240,7 +254,7 @@ function checkGlobalGulp() {
       cyan(gulpHelpUrl),
       yellow('for more information.')
     );
-    updatesNeeded.push('gulp');
+    updatesNeeded.add('gulp');
   } else if (!globalGulpCli) {
     console.log(
       yellow('WARNING: Could not find'),
@@ -250,7 +264,36 @@ function checkGlobalGulp() {
       yellow('⤷ To install it, run'),
       cyan('"yarn global add gulp-cli"') + yellow('.')
     );
-  } else if (!firstInstall) {
+    console.log(
+      yellow('⤷ See'),
+      cyan(gulpHelpUrl),
+      yellow('for more information.')
+    );
+    updatesNeeded.add('gulp-cli');
+  }
+  if (wrongGulp) {
+    console.log(
+      yellow('WARNING: Found'),
+      cyan('gulp'),
+      yellow('in an unexpected location:'),
+      cyan(defaultGulpPath) + yellow('. (The location usually contains'),
+      cyan('yarn'),
+      yellow('in the path.)')
+    );
+    console.log(
+      yellow('⤷ To fix this, consider removing'),
+      cyan(defaultGulpPath),
+      yellow('from your default'),
+      cyan('$PATH') + yellow(', or deleting it.')
+    );
+    console.log(
+      yellow('⤷ Run'),
+      cyan('"which gulp"'),
+      yellow('for more information.')
+    );
+    updatesNeeded.add('gulp');
+  }
+  if (!firstInstall) {
     const gulpVersions = getStdout(gulpExecutable + ' --version').trim();
     const gulpVersion = gulpVersions.match(/Local version[:]? (.*?)$/);
     if (gulpVersion && gulpVersion.length == 2) {
@@ -279,16 +322,16 @@ function main() {
   }
   ensureYarn();
   return checkNodeVersion().then(() => {
-    checkGlobalGulp();
+    runGulpChecks();
     checkYarnVersion();
-    if (!process.env.TRAVIS && updatesNeeded.length > 0) {
+    if (!process.env.TRAVIS && updatesNeeded.size > 0) {
       console.log(
-        yellow('\nWARNING: Detected missing updates for'),
-        cyan(updatesNeeded.join(', '))
+        yellow('\nWARNING: Detected problems with'),
+        cyan(Array.from(updatesNeeded).join(', '))
       );
       console.log(
         yellow('⤷ Continuing install in'),
-        cyan('5'),
+        cyan(warningDelaySecs),
         yellow('seconds...')
       );
       console.log(
@@ -303,7 +346,7 @@ function main() {
       setTimeout(() => {
         console.log(yellow('\nAttempting to install packages...'));
         resolver();
-      }, 5000);
+      }, warningDelaySecs * 1000);
       return deferred;
     }
   });
