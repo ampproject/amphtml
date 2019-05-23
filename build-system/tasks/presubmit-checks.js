@@ -302,8 +302,9 @@ const forbiddenTerms = {
     ],
   },
   'getServiceForDoc': {
-    message: 'Synchronous access to element services is unreliable. '
-        + 'Use getServicePromiseForDoc() instead.',
+    message:
+      'Synchronous access to element services is unreliable. ' +
+      'Use getServicePromiseForDoc() instead.',
     whitelist: [
       // Do not whitelist additional "extensions/*" paths.
       // TODO(#22414): Remove paths as they are migrated off of sync API.
