@@ -131,6 +131,20 @@ export class DocRoot {
   getElementById(id) {}
 
   /**
+   * @param {string} type
+   * @param {!Function} listener
+   * @param {boolean|!Object=} opt_optionsOrCapture
+   */
+  addEventListener(type, listener, opt_optionsOrCapture) {}
+
+  /**
+   * @param {string} type
+   * @param {!Function} listener
+   * @param {boolean|!Object=} opt_optionsOrCapture
+   */
+  removeEventListener(type, listener, opt_optionsOrCapture) {}
+
+  /**
    * @return {boolean}
    */
   get ready() {}
