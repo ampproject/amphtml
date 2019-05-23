@@ -292,6 +292,28 @@ describes.fakeWin('amp-analytics.cookie-writer value', {amp: true}, env => {
     });
   });
 
+  it('should write cookie with custom expiration', () => {
+    win.location = 'https://www.example.com/';
+    const cookieWriter = new CookieWriter(
+      win,
+      win.document.body,
+      dict({
+        'cookies': {
+          'cookieMaxAge': 604800, // 1 week in seconds
+          'aCookie': {
+            'value': 'testValue',
+          },
+        },
+      })
+    );
+    return cookieWriter.write().then(() => {
+      expect(win.document.lastSetCookieRaw).to.equal(
+        'aCookie=testValue; path=/; domain=example.com; ' +
+          'expires=Mon, 08 Jan 2018 08:00:00 GMT'
+      );
+    });
+  });
+
   it('should not write empty cookie', () => {
     win.location = 'https://www.example.com/?a=123&b=567';
     const cookieWriter = new CookieWriter(

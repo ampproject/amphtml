@@ -118,13 +118,24 @@ export class CookieWriter {
       return Promise.resolve();
     }
 
+    // convert cookieMaxAge (sec) to milliseconds
+    const cookieExpireDateMs = hasOwn(inputConfig, 'cookieMaxAge')
+      ? inputConfig['cookieMaxAge'] * 1000
+      : undefined;
+
     const ids = Object.keys(inputConfig);
     const promises = [];
     for (let i = 0; i < ids.length; i++) {
       const cookieName = ids[i];
       const cookieObj = inputConfig[cookieName];
       if (this.isValidCookieConfig_(cookieName, cookieObj)) {
-        promises.push(this.expandAndWrite_(cookieName, cookieObj['value']));
+        promises.push(
+          this.expandAndWrite_(
+            cookieName,
+            cookieObj['value'],
+            cookieExpireDateMs
+          )
+        );
       }
     }
 
@@ -165,9 +176,10 @@ export class CookieWriter {
    * Expand the value and write to cookie if necessary
    * @param {string} cookieName
    * @param {string} cookieValue
+   * @param {number} cookieExpireDateMs
    * @return {!Promise}
    */
-  expandAndWrite_(cookieName, cookieValue) {
+  expandAndWrite_(cookieName, cookieValue, cookieExpireDateMs) {
     // Note: Have to use `expandStringAsync` because QUERY_PARAM can wait for
     // trackImpressionPromise and resolve async
     return this.urlReplacementService_
@@ -176,7 +188,9 @@ export class CookieWriter {
         // Note: We ignore empty cookieValue, that means currently we don't
         // provide a way to overwrite or erase existing cookie
         if (value) {
-          const expireDate = Date.now() + BASE_CID_MAX_AGE_MILLIS;
+          const expireDate = cookieExpireDateMs
+            ? Date.now() + cookieExpireDateMs
+            : Date.now() + BASE_CID_MAX_AGE_MILLIS;
           setCookie(this.win_, cookieName, value, expireDate, {
             highestAvailableDomain: true,
           });
