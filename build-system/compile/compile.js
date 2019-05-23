@@ -223,6 +223,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       'third_party/caja/html-sanitizer.js',
       'third_party/closure-library/sha384-generated.js',
       'third_party/css-escape/css-escape.js',
+      'third_party/fuzzysearch/index.js',
       'third_party/mustache/**/*.js',
       'third_party/timeagojs/**/*.js',
       'third_party/vega/**/*.js',
