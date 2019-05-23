@@ -2,6 +2,7 @@
 
 [![GitHub Release](https://img.shields.io/github/release/ampproject/amphtml.svg)](https://github.com/ampproject/amphtml/releases)
 [![Contributors](https://img.shields.io/github/contributors-anon/ampproject/amphtml.svg)](https://github.com/ampproject/amphtml/graphs/contributors)
+[![Commits](https://img.shields.io/github/commit-activity/m/ampproject/amphtml.svg)](https://github.com/ampproject/amphtml/pulse/monthly)
 [![Build Status](https://img.shields.io/travis/ampproject/amphtml/master.svg)](https://travis-ci.org/ampproject/amphtml/builds)
 [![GitHub Issues (open)](https://img.shields.io/github/issues/ampproject/amphtml.svg)](https://github.com/ampproject/amphtml/issues?q=is%3Aopen+is%3Aissue)
 [![GitHub Issues (closed)](https://img.shields.io/github/issues-closed/ampproject/amphtml.svg)](https://github.com/ampproject/amphtml/issues?q=is%3Aissue+is%3Aclosed)
