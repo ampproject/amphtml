@@ -15,9 +15,10 @@
  */
 
 import {Deferred} from '../utils/promise';
+import {Services} from '../services';
 import {dev, devAssert, userAssert} from '../log';
 import {getMode} from '../mode';
-import {getService, getServiceForDoc, registerServiceBuilder} from '../service';
+import {getService, registerServiceBuilder} from '../service';
 import {rootNodeFor, scopedQuerySelector} from '../dom';
 
 /**
@@ -53,7 +54,7 @@ export class BaseTemplate {
     this.win = element.ownerDocument.defaultView || win;
 
     /** @private @const */
-    this.viewer_ = getServiceForDoc(this.element, 'viewer');
+    this.viewer_ = Services.viewerForDoc(this.element, 'viewer');
 
     this.compileCallback();
   }

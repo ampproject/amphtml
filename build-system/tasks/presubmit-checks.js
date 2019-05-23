@@ -301,6 +301,30 @@ const forbiddenTerms = {
       'src/service/video/autoplay.js',
     ],
   },
+  'getServiceForDoc': {
+    message: 'Synchronous access to element services is unreliable. '
+        + 'Use getServicePromiseForDoc() instead.',
+    whitelist: [
+      // Do not whitelist additional "extensions/*" paths.
+      // TODO(#22414): Remove paths as they are migrated off of sync API.
+      'extensions/amp-analytics/0.1/instrumentation.js',
+      'extensions/amp-analytics/0.1/variables.js',
+      'extensions/amp-fx-collection/0.1/providers/fx-provider.js',
+      'extensions/amp-live-list/0.1/live-list-manager.js',
+      'extensions/amp-next-page/0.1/next-page-service.js',
+      'extensions/amp-position-observer/0.1/amp-position-observer.js',
+      'extensions/amp-recaptcha-input/0.1/amp-recaptcha-service.js',
+      'extensions/amp-user-notification/0.1/test/test-amp-user-notification.js',
+      'extensions/amp-video-docking/0.1/amp-video-docking.js',
+      'extensions/amp-web-push/0.1/amp-web-push-config.js',
+      'src/chunk.js',
+      'src/service.js',
+      'src/service/cid-impl.js',
+      'src/service/origin-experiments-impl.js',
+      'src/services.js',
+      'testing/test-helper.js',
+    ],
+  },
   'initLogConstructor|setReportError': {
     message: 'Should only be called from JS binary entry files.',
     whitelist: [
