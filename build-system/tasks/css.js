@@ -75,9 +75,7 @@ function compileCss(watch, opt_compileAll) {
    */
   function writeCss(css, originalCssFilename, jsFilename, cssFilename) {
     return toPromise(
-      gulp
-        .src(`css/${originalCssFilename}`)
-        .pipe(file(jsFilename, 'export const cssText = ' + JSON.stringify(css)))
+      file(jsFilename, 'export const cssText = ' + JSON.stringify(css), {src: true})
         .pipe(gulp.dest('build'))
         .on('end', function() {
           mkdirSync('build');
