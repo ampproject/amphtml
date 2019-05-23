@@ -54,7 +54,7 @@ export class BaseTemplate {
     this.win = element.ownerDocument.defaultView || win;
 
     /** @private @const */
-    this.viewer_ = Services.viewerForDoc(this.element, 'viewer');
+    this.viewer_ = Services.viewerForDoc(this.element);
 
     this.compileCallback();
   }
