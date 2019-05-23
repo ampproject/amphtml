@@ -235,7 +235,9 @@ function runGulpChecks() {
   const defaultGulpPath = getStdout('which gulp', {
     'env': {'PATH': getParentShellPath()},
   }).trim();
-  const wrongGulp = !defaultGulpPath.includes('yarn');
+  const wrongGulp =
+    !defaultGulpPath.includes('yarn') &&
+    !defaultGulpPath.includes('amphtml/node_modules');
   if (globalGulp) {
     console.log(
       yellow('WARNING: Detected a global install of'),
@@ -278,6 +280,8 @@ function runGulpChecks() {
       yellow('in an unexpected location:'),
       cyan(defaultGulpPath) + yellow('. (The location usually contains'),
       cyan('yarn'),
+      yellow('or'),
+      cyan('amphtml/node_modules'),
       yellow('in the path.)')
     );
     console.log(
