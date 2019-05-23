@@ -803,36 +803,32 @@ describes.realWin(
 
     describe('fallback on error', () => {
       let fallbackSpy;
-      let clearAllSpy;
+      let toggleFallbackSpy;
       let getDataSpy;
 
       beforeEach(() => {
         impl.element.setAttribute('src', 'invalid-path');
         fallbackSpy = sandbox.spy(impl, 'displayFallback_');
-        clearAllSpy = sandbox.spy(impl, 'clearAllItems_');
+        toggleFallbackSpy = sandbox.spy(impl, 'toggleFallback');
         getDataSpy = sandbox
           .stub(impl, 'getRemoteData_')
-          .throws('Error for test');
+          .returns(Promise.reject('Error for test'));
       });
 
       it('should throw error when fallback is not provided', () => {
-        return element.layoutCallback().catch(e => {
-          expect(e.name).to.equal('Error for test');
+        return element.layoutCallback().then(() => {
           expect(getDataSpy).to.have.been.calledOnce;
-          expect(fallbackSpy).to.have.been.calledOnce;
-          expect(clearAllSpy).to.have.been.calledOnce;
-          expect(impl.fallbackDisplayed_).to.be.false;
+          expect(fallbackSpy).to.have.been.calledWith('Error for test');
+          expect(toggleFallbackSpy).not.to.have.been.called;
         });
       });
 
       it('should display fallback when provided', () => {
         sandbox.stub(impl, 'getFallback').returns(true);
-        return element.layoutCallback().catch(e => {
-          expect(e.name).to.equal('Error for test');
+        return element.layoutCallback().then(() => {
           expect(getDataSpy).to.have.been.calledOnce;
-          expect(fallbackSpy).to.have.been.calledOnce;
-          expect(clearAllSpy).to.have.been.calledOnce;
-          expect(impl.fallbackDisplayed_).to.be.true;
+          expect(fallbackSpy).to.have.been.calledWith('Error for test');
+          expect(toggleFallbackSpy).to.have.been.calledWith(true);
         });
       });
     });
