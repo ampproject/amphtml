@@ -222,6 +222,20 @@
     </div>
     </form>
 
+    <p>fuzzy</p>
+    <form method="post" action-xhr="/form/echo-json/post" target="_blank">
+      <amp-autocomplete filter="fuzzy" min-characters="0"
+        src="autocomplete-cities.example.json" submit-on-enter>
+          <input type="text" name="input9" required>
+      </amp-autocomplete>
+      <input name="submit-button" type="submit" value="Submit">
+    <div submit-success>
+        <template type="amp-mustache">
+            Success! {{input9}}
+        </template>
+    </div>
+    </form>
+
     <p>none to inline data</p>
     <form method="post" action-xhr="/form/echo-json/post" target="_blank">
       <amp-autocomplete filter="none" min-characters="0"

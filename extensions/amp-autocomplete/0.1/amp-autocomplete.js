@@ -33,6 +33,7 @@ import {isEnumValue} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {mod} from '../../../src/utils/math';
 import {toggle} from '../../../src/style';
+import fuzzysearch from '../../../third_party/fuzzysearch/index';
 
 const EXPERIMENT = 'amp-autocomplete';
 const TAG = 'amp-autocomplete';
@@ -494,7 +495,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
         case FilterType.TOKEN_PREFIX:
           return this.tokenPrefixMatch_(item, input);
         case FilterType.FUZZY:
-          throw new Error(`Filter not yet supported: ${this.filter_}`);
+          return fuzzysearch(input, item);
         case FilterType.CUSTOM:
           throw new Error(`Filter not yet supported: ${this.filter_}`);
         default:
