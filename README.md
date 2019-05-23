@@ -6,7 +6,8 @@
 [![GitHub Issues](https://img.shields.io/github/issues/ampproject/amphtml.svg)](https://github.com/ampproject/amphtml/issues)
 [![GitHub Pull Requests](https://img.shields.io/github/issues-pr-closed/ampproject/amphtml.svg)](https://github.com/ampproject/amphtml/pulls)
 [![Codecov](https://img.shields.io/codecov/c/github/ampproject/amphtml/master.svg)](https://codecov.io/gh/ampproject/amphtml/)
-[![LGTM](https://img.shields.io/lgtm/grade/javascript/github/ampproject/amphtml.svg)](https://lgtm.com/projects/g/ampproject/amphtml/)
+[![LGTM](https://img.shields.io/lgtm/alerts/github/ampproject/amphtml.svg)](https://lgtm.com/projects/g/ampproject/amphtml/)
+[![Percy](https://percy.io/static/images/percy-badge.svg)](https://percy.io/ampproject/amphtml)
 [![Renovate](https://img.shields.io/badge/renovate-enabled-brightgreen.svg)](https://renovateapp.com/)
 [![Prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
 
