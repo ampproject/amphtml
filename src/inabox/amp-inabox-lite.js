@@ -82,6 +82,7 @@ const ampdoc = ampdocService.getAmpDoc(self.document);
 installPerformanceService(self); // TODO: to be removed
 
 self.document.documentElement.classList.add('i-amphtml-inabox');
+// TODO(lannka): remove ampDocCss for inabox rendering #22418
 const fullCss =
   ampDocCss +
   ampElementCss +

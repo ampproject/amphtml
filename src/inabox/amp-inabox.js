@@ -81,6 +81,7 @@ startupChunk(self.document, function initial() {
   perf.tick('is');
 
   self.document.documentElement.classList.add('i-amphtml-inabox');
+  // TODO(lannka): remove ampDocCss for inabox rendering #22418
   const fullCss =
     ampDocCss +
     ampElementCss +

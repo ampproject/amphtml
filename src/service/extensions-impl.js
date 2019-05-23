@@ -461,6 +461,7 @@ export class Extensions {
     // Install runtime styles.
     installStylesLegacy(
       childWin.document,
+      // TODO(lannka): remove ampDocCss for FIE rendering #22418
       ampDocCss + ampElementCss,
       /* callback */ null,
       /* opt_isRuntimeCss */ true,
