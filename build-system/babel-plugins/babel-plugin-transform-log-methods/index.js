@@ -57,6 +57,9 @@ const {
   singletonFunctions,
   transformableMethods,
 } = require('../../log-module-metadata.js');
+
+// Considered default for this transform, configurable only for tests.
+// For other files output from this transform see linked module.
 const {messagesByMessagePath} = require('../../compile/log-messages');
 
 /**
