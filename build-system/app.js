@@ -1150,12 +1150,6 @@ app.use('/bind/ecommerce/sizes', (req, res) => {
   }, 1000); // Simulate network delay.
 });
 
-/*
-//TODO(chenshay): Accept '?crypto=bla'
-implement authorizer here.
-this is for local testing.
-*/
-
 // Simulated subscription entitlement
 app.use('/subscription/:id/entitlements', (req, res) => {
   cors.assertCors(req, res, ['GET']);
@@ -1166,6 +1160,7 @@ app.use('/subscription/:id/entitlements', (req, res) => {
     data: {
       login: true,
     },
+    decryptedDocumentKey: decryptDocumentKey(req.query.crypt),
   });
 });
 
@@ -1476,6 +1471,23 @@ function generateInfo(filePath) {
     'Change to COMPILED mode (minified JS)</a></h3>' +
     '<h3><a href = /serve_mode=cdn>Change to CDN mode (prod JS)</a></h3>'
   );
+}
+
+function decryptDocumentKey(encryptedDocumentKey) {
+  if (!encryptedDocumentKey) {
+    return null;
+  }
+  const cryptoStart = 'ENCRYPT(';
+  if (!encryptedDocumentKey.includes(cryptoStart, 0)) {
+    return null;
+  }
+  let jsonString = encryptedDocumentKey.replace(cryptoStart, '');
+  jsonString = jsonString.substring(0, jsonString.length - 1);
+  const parsedJson = JSON.parse(jsonString);
+  if (!parsedJson) {
+    return null;
+  }
+  return parsedJson.key;
 }
 
 module.exports = app;
