@@ -15,11 +15,15 @@
  */
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
-import {closestAncestorElementBySelector} from '../../../src/dom';
+import {
+  closestAncestorElementBySelector,
+  scopedQuerySelectorAll,
+} from '../../../src/dom';
 import {createShadowRoot} from '../../../src/shadow-embed';
 import {getMode} from '../../../src/mode';
 import {getSourceOrigin} from '../../../src/url';
 import {getState} from '../../../src/history';
+import {setStyle} from '../../../src/style';
 import {user, userAssert} from '../../../src/log';
 
 /**
@@ -280,4 +284,33 @@ export function isMediaDisplayed(ampMediaEl, resource) {
     (ampMediaEl.tagName === 'AMP-AUDIO' &&
       ampMediaEl.getLayout() === Layout.NODISPLAY)
   );
+}
+
+/**
+ * The attribute name for text background color
+ * @private @const {string}
+ */
+const TEXT_BACKGROUND_COLOR_ATTRIBUTE_NAME = 'text-background-color';
+
+/**
+ * The selector for text background color
+ * @private @const {string}
+ */
+const TEXT_BACKGROUND_COLOR_SELECTOR = `[${TEXT_BACKGROUND_COLOR_ATTRIBUTE_NAME}]`;
+
+/**
+ * Styles text with a background color based on the value of
+ * the text-background-color attribute
+ * @param {!Element} element
+ */
+export function setTextBackgroundColor(element) {
+  const elementsToUpgradeStyles = scopedQuerySelectorAll(
+    element,
+    TEXT_BACKGROUND_COLOR_SELECTOR
+  );
+
+  Array.prototype.forEach.call(elementsToUpgradeStyles, el => {
+    const color = el.getAttribute(TEXT_BACKGROUND_COLOR_ATTRIBUTE_NAME);
+    setStyle(el, 'background-color', color);
+  });
 }

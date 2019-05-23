@@ -18,12 +18,9 @@ import {dev, user} from '../../../src/log';
 import {dict, hasOwn} from '../../../src/utils/object';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {installServiceInEmbedScope} from '../../../src/service';
-import {
-  scopedQuerySelector,
-  waitForBodyPromise,
-  waitForChild,
-} from '../../../src/dom';
+import {scopedQuerySelector, waitForChild} from '../../../src/dom';
 import {toArray} from '../../../src/types';
+import {whenDocumentReady} from '../../../src/document-ready';
 
 /**
  * CSS class used to deactivate animations.
@@ -168,8 +165,8 @@ export class AmpGwdRuntimeService {
 
     // Initialize once the body and DOM is ready.
     const docReadyPromise = opt_win
-      ? waitForBodyPromise(this.doc_)
-      : ampdoc.whenBodyAvailable();
+      ? whenDocumentReady(this.doc_)
+      : ampdoc.whenReady();
     docReadyPromise.then(() => {
       // If the page deck is not yet in the DOM, wait until it is. The page deck
       // must be present in the body before the runtime can be initialized, as
@@ -190,7 +187,10 @@ export class AmpGwdRuntimeService {
     });
   }
 
-  /** @override @nocollapse */
+  /**
+   * @param {!Window} embedWin
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   */
   static installInEmbedWindow(embedWin, ampdoc) {
     installServiceInEmbedScope(
       embedWin,

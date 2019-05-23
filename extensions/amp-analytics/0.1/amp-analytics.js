@@ -20,8 +20,8 @@ import {AnalyticsEventType} from './events';
 import {CookieWriter} from './cookie-writer';
 import {
   ExpansionOptions,
-  installVariableService,
-  variableServiceFor,
+  VariableService,
+  variableServicePromiseForDoc,
 } from './variables';
 import {
   InstrumentationService,
@@ -84,8 +84,8 @@ export class AmpAnalytics extends AMP.BaseElement {
     /** @private {?./analytics-group.AnalyticsGroup} */
     this.analyticsGroup_ = null;
 
-    /** @private {!./variables.VariableService} */
-    this.variableService_ = variableServiceFor(this.win);
+    /** @private {?./variables.VariableService} */
+    this.variableService_ = null;
 
     /** @private {!../../../src/service/crypto-impl.Crypto} */
     this.cryptoService_ = Services.cryptoFor(this.win);
@@ -217,9 +217,15 @@ export class AmpAnalytics extends AMP.BaseElement {
           closestAmpDoc: true,
         });
       })
-      .then(instrumentationServicePromiseForDoc)
-      .then(instrumentation => {
-        this.instrumentation_ = instrumentation;
+      .then(ampdoc =>
+        Promise.all([
+          instrumentationServicePromiseForDoc(ampdoc),
+          variableServicePromiseForDoc(ampdoc),
+        ])
+      )
+      .then(services => {
+        this.instrumentation_ = services[0];
+        this.variableService_ = services[1];
         return new AnalyticsConfig(this.element).loadConfig();
       })
       .then(config => {
@@ -783,8 +789,8 @@ AMP.extension(TAG, '0.1', AMP => {
     InstrumentationService
   );
   AMP.registerServiceForDoc('activity', Activity);
-  installVariableService(AMP.win);
   installLinkerReaderService(AMP.win);
+  AMP.registerServiceForDoc('amp-analytics-variables', VariableService);
   // Register the element.
   AMP.registerElement(TAG, AmpAnalytics);
 });

@@ -19,7 +19,7 @@ import * as lolex from 'lolex';
 import {CookieWriter} from '../cookie-writer';
 import {dict} from '../../../../src/utils/object';
 import {installLinkerReaderService} from '../linker-reader';
-import {installVariableService} from '../variables';
+import {installVariableServiceForTesting} from '../variables';
 import {stubService} from '../../../../testing/test-helper';
 
 const TAG = '[amp-analytics/cookie-writer]';
@@ -47,7 +47,7 @@ describes.realWin(
       });
       element = doc.createElement('div');
       doc.body.appendChild(element);
-      installVariableService(win);
+      installVariableServiceForTesting(doc);
       installLinkerReaderService(win);
     });
 
@@ -106,7 +106,7 @@ describes.realWin(
           location: 'https://www-example-com.cdn.ampproject.org',
         };
         installLinkerReaderService(mockWin);
-        installVariableService(mockWin);
+        installVariableServiceForTesting(doc);
         const cookieWriter = new CookieWriter(mockWin, element, config);
         expandAndWriteSpy = sandbox.spy(cookieWriter, 'expandAndWrite_');
         return cookieWriter.write().then(() => {
@@ -205,50 +205,6 @@ describes.realWin(
           expect(expandAndWriteSpy).to.not.be.called;
         });
       });
-
-      it('Resolve when cookie value is not supported', () => {
-        const config = dict({
-          'cookies': {
-            'testId': {
-              'value': 'RANDOM',
-            },
-            'testId1': {
-              'value': 'static',
-            },
-            'testId2': {
-              'value': 'QUERY_PARAM(abc)-suf',
-            },
-            'testId3': {
-              'value': 'pre-QUERY_PARAM(abc)',
-            },
-          },
-        });
-        const cookieWriter = new CookieWriter(win, element, config);
-        expectAsyncConsoleError(
-          TAG +
-            ' cookie value RANDOM not supported. ' +
-            'Only QUERY_PARAM and LINKER_PARAM is supported'
-        );
-        expectAsyncConsoleError(
-          TAG +
-            ' cookie value static not supported. ' +
-            'Only QUERY_PARAM and LINKER_PARAM is supported'
-        );
-        expectAsyncConsoleError(
-          TAG +
-            ' cookie value QUERY_PARAM(abc)-suf not ' +
-            'supported. Only QUERY_PARAM and LINKER_PARAM is supported'
-        );
-        expectAsyncConsoleError(
-          TAG +
-            ' cookie value pre-QUERY_PARAM(abc) not ' +
-            'supported. Only QUERY_PARAM and LINKER_PARAM is supported'
-        );
-        expandAndWriteSpy = sandbox.spy(cookieWriter, 'expandAndWrite_');
-        return cookieWriter.write().then(() => {
-          expect(expandAndWriteSpy).to.not.be.called;
-        });
-      });
     });
   }
 );
@@ -256,13 +212,15 @@ describes.realWin(
 describes.fakeWin('amp-analytics.cookie-writer value', {amp: true}, env => {
   let win;
   let clock;
+  let doc;
   beforeEach(() => {
     win = env.win;
+    doc = env.ampdoc;
     clock = lolex.install({
       target: window,
       now: new Date('2018-01-01T08:00:00Z'),
     });
-    installVariableService(win);
+    installVariableServiceForTesting(doc);
     installLinkerReaderService(win);
   });
 
@@ -291,6 +249,15 @@ describes.fakeWin('amp-analytics.cookie-writer value', {amp: true}, env => {
           'bCookie': {
             'value': 'LINKER_PARAM(b,c)',
           },
+          'testId1': {
+            'value': 'static',
+          },
+          'testId2': {
+            'value': '$SUBSTR(QUERY_PARAM(a),1)-suf',
+          },
+          'testId3': {
+            'value': 'pre-TIMESTAMPQUERY_PARAM(abc)',
+          },
         },
       })
     );
@@ -298,6 +265,9 @@ describes.fakeWin('amp-analytics.cookie-writer value', {amp: true}, env => {
       const cookies = win.document.cookie.split(';');
       expect(cookies).to.include('aCookie=123');
       expect(cookies).to.include('bCookie=b-c');
+      expect(cookies).to.include('testId1=static');
+      expect(cookies).to.include('testId2=23-suf');
+      expect(cookies).to.include('testId3=pre-1514793600000');
     });
   });
 

@@ -134,12 +134,13 @@ git checkout -b <branch name> master
     git push -u origin <branch name>
     ```
 3. Go to [https://github.com/ampproject/amphtml](https://github.com/ampproject/amphtml) and in the banner indicating you've recently pushed a branch, click the "Compare & pull request"  (if this banner does not appear, go to your fork at `https://github.com/<your username>/amphtml`, choose your branch from the "Branch" dropdown and click "New pull request")
-4. Make sure you've signed the CLA (using the same email address as your git config indicates)
-5. If your reviewer requests changes make them locally and then repeat the steps in this section to push the changes to your branch back up to GitHub again.
+4. Make sure you've signed the [CLA](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#contributor-license-agreement) (using the same email address as your git config indicates)
+5. [Find people to review your code](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#code-review-and-approval) and add them as a reviewer on the PR (if you can) or cc them (by adding `/cc @username` in the PR description/comment).  If your run into any issues finding the reviewers or have any other questions, ping the [#contributing channel](https://amphtml.slack.com/messages/C9HRJ1GPN/) on [Slack](https://bit.ly/amp-slack-signup).
+6. If a reviewer requests changes make them locally and then repeat the steps in this section to push the changes to your branch back up to GitHub again.
 6. For pushes after the first, just use `git push`
-7. If you don't get a new review within 2 business days, feel free to ping the pull request by adding a comment.
-8. If you see visual diffs reported by [Percy](http://percy.io/ampproject/amphtml), click through the check on GitHub to access the results. Differences that are expected can be approved by a core contributor.
-9. Once approved your changes are merged into the amphtml repository by a core committer (you don't do this merge).
+8. If you don't get a new review within 2 business days, feel free to ping the pull request by adding a comment.
+9. If you see visual diffs reported by [Percy](http://percy.io/ampproject/amphtml), click through the check on GitHub to access the results. Differences that are expected can be approved by one of your reviewers.
+10. Once approved your changes are merged into the amphtml repository by one of your reviewers.
 
 ## Delete your branch after your changes are merged (optional)
 

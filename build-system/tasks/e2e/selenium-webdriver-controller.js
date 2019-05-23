@@ -17,6 +17,7 @@
 const fs = require('fs');
 const {
   ControllerPromise,
+  DOMRectDef,
   ElementHandle,
   Key,
 } = require('./functional-test-controller');
@@ -324,6 +325,8 @@ class SeleniumWebDriverController {
   }
 
   /**
+   * Gets the element property. Note that this is different
+   * than getElementAttribute()
    * @param {!ElementHandle<!WebElement>} handle
    * @param {string} property
    * @return {!Promise<string>}
@@ -343,14 +346,37 @@ class SeleniumWebDriverController {
 
   /**
    * @param {!ElementHandle<!WebElement>} handle
-   * @return {!Promise<!{x: number, y: number, height: number. width: number}>}
+   * @return {!Promise<!DOMRectDef>}
    * @override
    */
   getElementRect(handle) {
     const webElement = handle.getElement();
+    const getter = element => {
+      // Extracting the values seems to perform better than returning
+      // the raw ClientRect from the element, in terms of flakiness.
+      // The raw ClientRect also has hundredths of a pixel. We round to int.
+      const {
+        width,
+        height,
+        top,
+        bottom,
+        left,
+        right,
+      } = element./*OK*/ getBoundingClientRect();
+      return {
+        x: Math.round(left),
+        y: Math.round(top),
+        width: Math.round(width),
+        height: Math.round(height),
+        top: Math.round(top),
+        bottom: Math.round(bottom),
+        left: Math.round(left),
+        right: Math.round(right),
+      };
+    };
     return new ControllerPromise(
-      webElement.getRect(),
-      this.getWaitFn_(() => webElement.getRect())
+      this.driver.executeScript(getter, webElement),
+      this.getWaitFn_(() => this.driver.executeScript(getter, webElement))
     );
   }
 
