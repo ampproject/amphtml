@@ -47,14 +47,13 @@ describes.realWin('Requests', {amp: 1}, env => {
     clock.uninstall();
   });
 
-  function createRequestHandler(request, spy, requestOrigin) {
+  function createRequestHandler(request, spy) {
     return new RequestHandler(
       analyticsElement,
       request,
       preconnect,
       {sendRequest: spy},
-      false,
-      requestOrigin
+      false
     );
   }
 
@@ -66,9 +65,8 @@ describes.realWin('Requests', {amp: 1}, env => {
       });
 
       it('should prepend request origin', function*() {
-        const r = {'baseUrl': '/r1'};
-        const requestOrigin = 'http://example.com';
-        const handler = createRequestHandler(r, spy, requestOrigin);
+        const r = {'baseUrl': '/r1', 'requestOrigin': 'http://example.com'};
+        const handler = createRequestHandler(r, spy);
         const expansionOptions = new ExpansionOptions({});
 
         handler.send({}, {}, expansionOptions, {});
@@ -77,9 +75,8 @@ describes.realWin('Requests', {amp: 1}, env => {
       });
 
       it('should expand request origin', function*() {
-        const r = {'baseUrl': '/r2'};
-        const requestOrigin = '${documentReferrer}';
-        const handler = createRequestHandler(r, spy, requestOrigin);
+        const r = {'baseUrl': '/r2', 'requestOrigin': '${documentReferrer}'};
+        const handler = createRequestHandler(r, spy);
         const expansionOptions = new ExpansionOptions({
           'documentReferrer': 'http://example.com',
         });
@@ -90,9 +87,8 @@ describes.realWin('Requests', {amp: 1}, env => {
       });
 
       it('should expand nested request origin', function*() {
-        const r = {'baseUrl': '/r3'};
-        const requestOrigin = '${a}';
-        const handler = createRequestHandler(r, spy, requestOrigin);
+        const r = {'baseUrl': '/r3', 'requestOrigin': '${a}'};
+        const handler = createRequestHandler(r, spy);
         const expansionOptions = new ExpansionOptions({
           'a': '${b}',
           'b': 'http://example.com',
