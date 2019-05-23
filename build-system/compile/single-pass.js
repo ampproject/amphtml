@@ -163,9 +163,9 @@ exports.getFlags = function(config) {
       }
     });
 
-  return exports
-    .getGraph(config.modules, config)
-    .then(g => flagsArray.concat(exports.getBundleFlags(g, flagsArray)));
+  return exports.getGraph(config.modules, config).then(function(g) {
+    return flagsArray.concat(exports.getBundleFlags(g, flagsArray));
+  });
 };
 
 exports.getBundleFlags = function(g) {
@@ -465,7 +465,7 @@ function setupBundles(graph) {
 }
 
 /**
- * Return true if the file is known to be a common JS module.
+ * Returns true if the file is known to be a common JS module.
  * @param {string} file
  */
 function isCommonJsModule(file) {
