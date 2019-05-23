@@ -98,6 +98,11 @@ export class AmpAutocomplete extends AMP.BaseElement {
     this.submitOnEnter_ = false;
 
     /**
+     * If the "highlight-user-entry" attribute is present on <autocomplete>.
+     */
+    this.highlightUserEntry_ = false;
+
+    /**
      * The index of the active suggested item.
      * @private {number}
      */
@@ -222,6 +227,9 @@ export class AmpAutocomplete extends AMP.BaseElement {
       ? parseInt(this.element.getAttribute('max-entries'), 10)
       : null;
     this.submitOnEnter_ = this.element.hasAttribute('submit-on-enter');
+    this.highlightUserEntry_ = this.element.hasAttribute(
+      'highlight-user-entry'
+    );
 
     this.container_ = this.createContainer_();
     this.element.appendChild(this.container_);
@@ -376,6 +384,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     const lowerCaseItem = item.toLocaleLowerCase();
     const lowerCaseSubstring = substring.toLocaleLowerCase();
     if (
+      this.highlightUserEntry_ &&
       substring &&
       substring.length <= item.length &&
       includes(lowerCaseItem, lowerCaseSubstring)
