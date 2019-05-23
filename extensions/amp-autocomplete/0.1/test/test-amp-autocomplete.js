@@ -15,8 +15,8 @@
  */
 
 import '../amp-autocomplete';
-import {Keys} from '../../../../src/utils/key-codes';
-import {toggleExperiment} from '../../../../src/experiments';
+import { Keys } from '../../../../src/utils/key-codes';
+import { toggleExperiment } from '../../../../src/experiments';
 
 describes.realWin(
   'amp-autocomplete unit tests',
@@ -74,14 +74,14 @@ describes.realWin(
       });
 
       it('should resolve when src is undefined', () => {
-        return impl.mutatedAttributesCallback({'src': undefined}).then(() => {
+        return impl.mutatedAttributesCallback({ 'src': undefined }).then(() => {
           expect(remoteDataSpy).not.to.have.been.called;
           expect(filterAndRenderSpy).not.to.have.been.called;
         });
       });
 
       it('should resolve when src is null', () => {
-        return impl.mutatedAttributesCallback({'src': null}).then(() => {
+        return impl.mutatedAttributesCallback({ 'src': null }).then(() => {
           expect(remoteDataSpy).not.to.have.been.called;
           expect(filterAndRenderSpy).not.to.have.been.called;
         });
@@ -89,7 +89,7 @@ describes.realWin(
 
       it('should pass on calls when src is type str', () => {
         return impl
-          .mutatedAttributesCallback({'src': 'example.json'})
+          .mutatedAttributesCallback({ 'src': 'example.json' })
           .then(() => {
             expect(remoteDataSpy).to.have.been.calledOnce;
             expect(impl.sourceData_).to.have.ordered.members(['a', 'b', 'c']);
@@ -103,7 +103,7 @@ describes.realWin(
 
       it('should pass on calls when src is type object with "items"', () => {
         return impl
-          .mutatedAttributesCallback({'src': {'items': ['a', 'b', 'c']}})
+          .mutatedAttributesCallback({ 'src': { 'items': ['a', 'b', 'c'] } })
           .then(() => {
             expect(remoteDataSpy).not.to.have.been.called;
             expect(impl.sourceData_).to.have.ordered.members(['a', 'b', 'c']);
@@ -117,7 +117,7 @@ describes.realWin(
 
       it('should pass on calls when src is type object without "items"', () => {
         return impl
-          .mutatedAttributesCallback({'src': {'random': 'value'}})
+          .mutatedAttributesCallback({ 'src': { 'random': 'value' } })
           .then(() => {
             expect(remoteDataSpy).not.to.have.been.called;
             expect(impl.sourceData_).to.be.an('array').that.is.empty;
@@ -129,6 +129,19 @@ describes.realWin(
 
     it('createElementFromItem_() should return element', () => {
       let element = impl.createElementFromItem_('hello');
+      expect(element).not.to.be.null;
+      expect(element).to.have.class('i-amphtml-autocomplete-item');
+      expect(element.hasAttribute('role')).to.be.true;
+      expect(element.innerText).to.equal('hello');
+
+      element = impl.createElementFromItem_('');
+      expect(element).not.to.be.null;
+      expect(element).to.have.class('i-amphtml-autocomplete-item');
+      expect(element.hasAttribute('role')).to.be.true;
+      expect(element.innerText).to.equal('');
+
+      impl.highlightUserEntry_ = true;
+      element = impl.createElementFromItem_('hello');
       expect(element).not.to.be.null;
       expect(element).to.have.class('i-amphtml-autocomplete-item');
       expect(element.hasAttribute('role')).to.be.true;
@@ -232,7 +245,7 @@ describes.realWin(
     });
 
     it('renderResults_() should update the container_ with rich text', () => {
-      const sourceData = [{value: 'apple'}, {value: 'mango'}, {value: 'pear'}];
+      const sourceData = [{ value: 'apple' }, { value: 'mango' }, { value: 'pear' }];
       impl.templateElement_ = doc.createElement('template');
       const renderedChildren = [];
       sourceData.forEach(item => {
@@ -399,7 +412,7 @@ describes.realWin(
     });
 
     describe('keyDownHandler_() on arrow keys', () => {
-      const event = {key: Keys.DOWN_ARROW, preventDefault: () => {}};
+      const event = { key: Keys.DOWN_ARROW, preventDefault: () => { } };
       let displayInputSpy, updateActiveSpy, eventPreventSpy;
 
       beforeEach(() => {
@@ -494,8 +507,8 @@ describes.realWin(
     describe('keyDownHandler_() on Enter', () => {
       const event = {
         key: Keys.ENTER,
-        preventDefault: () => {},
-        target: {textContent: 'hello'},
+        preventDefault: () => { },
+        target: { textContent: 'hello' },
       };
       let selectItemSpy, resetSpy, clearAllSpy, eventPreventSpy;
       function layoutAndSetSpies() {
@@ -559,8 +572,8 @@ describes.realWin(
     it('should call keyDownHandler_() on Enter not event.preventDefault', () => {
       const event = {
         key: Keys.ENTER,
-        preventDefault: () => {},
-        target: {textContent: 'hello'},
+        preventDefault: () => { },
+        target: { textContent: 'hello' },
       };
       let selectItemSpy, resetSpy, clearAllSpy, eventPreventSpy;
       return element
@@ -604,7 +617,7 @@ describes.realWin(
     });
 
     it('should call keyDownHandler_() on Esc', () => {
-      const event = {key: Keys.ESCAPE};
+      const event = { key: Keys.ESCAPE };
       const displayInputSpy = sandbox.spy(impl, 'displayUserInput_');
       const resetSpy = sandbox.spy(impl, 'resetActiveElement_');
       const toggleResultsSpy = sandbox.spy(impl, 'toggleResults_');
@@ -630,7 +643,7 @@ describes.realWin(
     });
 
     it('should call keyDownHandler_() on Tab', () => {
-      const event = {key: Keys.TAB};
+      const event = { key: Keys.TAB };
       impl.inputElement_.value = 'expected';
       impl.activeElement_ = doc.createElement('div');
       expect(impl.userInput_).not.to.equal(impl.inputElement_.value);
@@ -647,7 +660,7 @@ describes.realWin(
     });
 
     it('should call keyDownHandler_() and fallthrough on any other key', () => {
-      const event = {key: Keys.LEFT_ARROW};
+      const event = { key: Keys.LEFT_ARROW };
       return element.layoutCallback().then(() => {
         return expect(impl.keyDownHandler_(event)).to.be.fulfilled;
       });
@@ -686,14 +699,14 @@ describes.realWin(
         .then(() => {
           impl.toggleResults_(true);
           mockEl.textContent = 'test';
-          return impl.selectHandler_({target: mockEl});
+          return impl.selectHandler_({ target: mockEl });
         })
         .then(() => {
           expect(getItemSpy).to.have.been.calledTwice;
           expect(selectItemSpy).to.have.been.called;
           expect(impl.inputElement_.value).to.equal('');
           mockEl = impl.createElementFromItem_('abc');
-          return impl.selectHandler_({target: mockEl});
+          return impl.selectHandler_({ target: mockEl });
         })
         .then(() => {
           expect(getItemSpy).to.have.been.calledWith(mockEl);
