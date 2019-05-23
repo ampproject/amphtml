@@ -27,8 +27,8 @@ import {
   installBuiltins,
   installRuntimeServices,
 } from '../runtime';
-import {cssText as ampDocCss} from '../../build/ampdoc-css';
-import {cssText as ampElementCss} from '../../build/ampelement-css';
+import {cssText as ampDocCss} from '../../build/ampdoc.css';
+import {cssText as ampElementCss} from '../../build/ampelement.css';
 import {fontStylesheetTimeout} from '../font-stylesheet-timeout';
 import {getA4AId, registerIniLoadListener} from './utils';
 import {getMode} from '../mode';

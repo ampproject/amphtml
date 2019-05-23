@@ -32,8 +32,8 @@ import {
 } from './log';
 import {Services} from './services';
 import {VisibilityState} from './visibility-state';
-import {cssText as ampDocCss} from '../build/ampdoc-css';
-import {cssText as ampElementCss} from '../build/ampelement-css';
+import {cssText as ampDocCss} from '../build/ampdoc.css';
+import {cssText as ampElementCss} from '../build/ampelement.css';
 import {
   childElementsByTag,
   isConnectedNode,

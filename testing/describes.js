@@ -96,8 +96,8 @@ import {
   installAmpdocServices,
   installRuntimeServices,
 } from '../src/runtime';
-import {cssText as ampDocCss} from '../build/ampdoc-css';
-import {cssText as ampElementCss} from '../build/ampelement-css';
+import {cssText as ampDocCss} from '../build/ampdoc.css';
+import {cssText as ampElementCss} from '../build/ampelement.css';
 import {createAmpElementForTesting} from '../src/custom-element';
 import {createElementWithAttributes} from '../src/dom';
 import {doNotLoadExternalResourcesInTest} from './iframe';

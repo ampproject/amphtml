@@ -16,8 +16,8 @@
 
 import {Deferred} from '../utils/promise';
 import {Services} from '../services';
-import {cssText as ampDocCss} from '../../build/ampdoc-css';
-import {cssText as ampElementCss} from '../../build/ampelement-css';
+import {cssText as ampDocCss} from '../../build/ampdoc.css';
+import {cssText as ampElementCss} from '../../build/ampelement.css';
 import {
   calculateExtensionScriptUrl,
   parseExtensionUrl,

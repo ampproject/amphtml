@@ -29,8 +29,8 @@ import {
   installBuiltins,
   installRuntimeServices,
 } from './runtime';
-import {cssText as ampDocCss} from '../build/ampdoc-css';
-import {cssText as ampElementCss} from '../build/ampelement-css';
+import {cssText as ampDocCss} from '../build/ampdoc.css';
+import {cssText as ampElementCss} from '../build/ampelement.css';
 import {
   bodyAlwaysVisible,
   installStylesForDoc,

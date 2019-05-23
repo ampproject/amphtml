@@ -25,8 +25,8 @@ import {
 } from '../service/navigation';
 import {Services} from '../services';
 import {adopt, installBuiltins, installRuntimeServices} from '../runtime';
-import {cssText as ampDocCss} from '../../build/ampdoc-css';
-import {cssText as ampElementCss} from '../../build/ampelement-css';
+import {cssText as ampDocCss} from '../../build/ampdoc.css';
+import {cssText as ampElementCss} from '../../build/ampelement.css';
 import {fontStylesheetTimeout} from '../font-stylesheet-timeout';
 import {getMode} from '../mode';
 import {installDocService} from '../service/ampdoc-impl';
