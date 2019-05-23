@@ -99,6 +99,7 @@ async function e2e() {
   require('@babel/register');
   const {describes} = require('./helper');
   describes.configure({
+    browsers: argv.browsers,
     engine: argv.engine,
     headless: argv.headless,
   });
@@ -163,6 +164,8 @@ module.exports = {
 
 e2e.description = 'Runs e2e tests';
 e2e.flags = {
+  'browsers': '  Run only the specified browser tests. Options are ' +
+      '`chrome`, `firefox`.',
   'nobuild': '  Skips building the runtime via `gulp dist --fortesting`',
   'files': '  Run tests found in a specific path (ex: **/test-e2e/*.js)',
   'testnames': '  Lists the name of each test being run',
