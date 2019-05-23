@@ -262,7 +262,20 @@ export class AmpAutocomplete extends AMP.BaseElement {
   getRemoteData_() {
     const ampdoc = this.getAmpDoc();
     const policy = UrlReplacementPolicy.ALL;
-    return batchFetchJsonFor(ampdoc, this.element, 'items', policy);
+    return batchFetchJsonFor(ampdoc, this.element, 'items', policy)
+      .catch(e => {
+        if (e.message === 'Response is undefined.') {
+          user().warn(
+            TAG,
+            'Expected key "items" in data but found nothing. ' +
+              'Rendering empty results.'
+          );
+          return [];
+        }
+      })
+      .then(items => {
+        return items;
+      });
   }
 
   /**
@@ -337,7 +350,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
           this.displayFallback_(e);
         })
         .then(remoteData => {
-          this.sourceData_ = remoteData;
+          this.sourceData_ = remoteData || [];
           this.filterDataAndRenderResults_(this.sourceData_, this.userInput_);
         });
     }
