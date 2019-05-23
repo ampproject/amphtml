@@ -35,8 +35,9 @@ describes.realWin('amp-experiment attribute-allow-list', {}, () => {
   }
 
   it('should allow a valid tag, attribute, value', () => {
-    expect(getAllowedAttributeMutationEntry(getAttributeMutation(), MUTATION_NAME))
-      .to.be.ok;
+    expect(
+      getAllowedAttributeMutationEntry(getAttributeMutation(), MUTATION_NAME)
+    ).to.be.ok;
   });
 
   it('should travese by attributeName', () => {

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import * as AttributeAllowList from '../attribute-allow-list/attribute-allow-list';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {parseMutation} from '../mutation-parser';
-import * as AttributeAllowList from '../attribute-allow-list/attribute-allow-list';
 
 describes.realWin('amp-experiment mutation-parser', {}, env => {
   let win, doc;
@@ -153,10 +153,12 @@ describes.realWin('amp-experiment mutation-parser', {}, env => {
 
     it('should validate the value', () => {
       const validateStub = sandbox.stub().returns(true);
-      sandbox.stub(AttributeAllowList, 'getAllowedAttributeMutationEntry').returns({
-        validate: validateStub,
-        mutate: () => {}
-      });
+      sandbox
+        .stub(AttributeAllowList, 'getAllowedAttributeMutationEntry')
+        .returns({
+          validate: validateStub,
+          mutate: () => {},
+        });
 
       const mutation = getAttributeMutation();
       const mutationOperation = parseMutation(mutation, doc);
@@ -167,15 +169,17 @@ describes.realWin('amp-experiment mutation-parser', {}, env => {
 
     it('should not allow an invalid value', () => {
       const validateStub = sandbox.stub().returns(false);
-      sandbox.stub(AttributeAllowList, 'getAllowedAttributeMutationEntry').returns({
-        validate: validateStub,
-        mutate: () => {}
-      });
+      sandbox
+        .stub(AttributeAllowList, 'getAllowedAttributeMutationEntry')
+        .returns({
+          validate: validateStub,
+          mutate: () => {},
+        });
 
       expectAsyncConsoleError(/value/);
       try {
         const mutation = getAttributeMutation();
-        const mutationOperation = parseMutation(mutation, doc);
+        parseMutation(mutation, doc);
         expect(false).to.be.ok;
       } catch (e) {
         expect(e.message).to.match(/value/);
