@@ -34,6 +34,8 @@ const gulpHelpUrl =
 const yarnExecutable = 'npx yarn';
 const gulpExecutable = 'npx gulp';
 
+const warningDelaySecs = 10;
+
 const updatesNeeded = new Set();
 
 // Color formatting libraries may not be available when this script is run.
@@ -329,7 +331,7 @@ function main() {
       );
       console.log(
         yellow('⤷ Continuing install in'),
-        cyan('10'),
+        cyan(warningDelaySecs),
         yellow('seconds...')
       );
       console.log(
@@ -344,7 +346,7 @@ function main() {
       setTimeout(() => {
         console.log(yellow('\nAttempting to install packages...'));
         resolver();
-      }, 10000);
+      }, warningDelaySecs * 1000);
       return deferred;
     }
   });
