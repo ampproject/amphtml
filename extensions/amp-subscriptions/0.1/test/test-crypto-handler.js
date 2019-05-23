@@ -39,14 +39,18 @@ describes.realWin(
       ],
     };
     // eslint-disable-next-line max-len
-    const encryptedLocalKey =
-      'ENCRYPT({"accessRequirements": ["googleAccessRequirements:123"], "key":"googlePublickey"})';
+    const encryptedContent =
+      'PTzfydqid9+FitGB3xeQEG98u+zj6/wpZ/KMeZewGldw/pp2MCvwstHGCtqjIN5ROi61OmZkQDW9c2ezuu1WTXDANoE5UY5ED51lftywdTYmLk+rvtRL/fUVaPIOaiP/wkm+I2Ssw99cOnv4hFphOuz9Db2/RisQXVT/7yiaiHDEE5aJlxuAYqyjMnDweGhKjuXpgAOpbOOEI78t91AKpTbsQg9bxXafruB46+3jI6COfzI3e7griJ5LoQSPG4JEn7bw8jnD67djb9J3c6hak++vbSvqBxewNpSV+v9HU+w=';
     // eslint-disable-next-line max-len
-    const encryptedGoogleKey =
-      'ENCRYPT({"accessRequirements": ["googleAccessRequirements:123"], "key":"googlePublickey"})';
+    const decryptedContent =
+      "\n      This is section is top secret.\n      You should only be able to read this if you have the correct permissions.\n      If you don't have the correct permissions, you shouldn't be able to read this section at all.\n      ";
+    // eslint-disable-next-line max-len
+    const encryptedKey =
+      "ENCRYPT({'accessRequirements': ['googleAccessRequirements:123'], 'key':'0noKkOifsbYqKGUyPv+1JJLygWa3PuMA8vGBvRCmkaQ='})";
+    const decryptedDocKey = '0noKkOifsbYqKGUyPv+1JJLygWa3PuMA8vGBvRCmkaQ=';
     const encryptedKeys = {
-      'local': encryptedLocalKey,
-      'google.com': encryptedGoogleKey,
+      'local': encryptedKey,
+      'google.com': encryptedKey,
     };
 
     beforeEach(() => {
@@ -71,7 +75,7 @@ describes.realWin(
       const crypt1 = win.document.createElement('script');
       crypt1.setAttribute('encrypted', '');
       crypt1.setAttribute('type', 'application/octet-stream');
-      crypt1.textContent = JSON.stringify('ENCRYPT("Premium content 1")');
+      crypt1.textContent = encryptedContent;
       cryptDiv1 = win.document.createElement('div');
       cryptDiv1.appendChild(crypt1);
       win.document.body.appendChild(cryptDiv1);
@@ -80,7 +84,7 @@ describes.realWin(
       const crypt2 = win.document.createElement('script');
       crypt2.setAttribute('encrypted', '');
       crypt2.setAttribute('type', 'application/octet-stream');
-      crypt2.textContent = JSON.stringify('ENCRYPT("Premium content 2")');
+      crypt2.textContent = encryptedContent;
       cryptDiv2 = win.document.createElement('div');
       cryptDiv2.appendChild(crypt2);
       win.document.body.appendChild(cryptDiv2);
@@ -100,20 +104,28 @@ describes.realWin(
 
       it('should return expected value to a matching key', () => {
         return expect(cryptoHandler.getEncryptedDocumentKey('local')).to.equal(
-          encryptedLocalKey
+          encryptedKey
         );
+      });
+    });
+
+    describe('decryptDocumentContent_', () => {
+      it('should decrypt the content correctly', () => {
+        return cryptoHandler
+          .decryptDocumentContent_(encryptedContent, decryptedDocKey)
+          .then(decryptedContent => {
+            expect(decryptedContent).to.equal(decryptedContent);
+          });
       });
     });
 
     describe('tryToDecryptDocument', () => {
       // eslint-disable-next-line max-len
       it('should replace the encrypted content with decrypted content in multiple sections', () => {
-        return cryptoHandler
-          .tryToDecryptDocument('decryptedDocumentKey')
-          .then(() => {
-            expect(cryptDiv1.textContent).to.equal(' abc ');
-            expect(cryptDiv2.textContent).to.equal(' abc ');
-          });
+        return cryptoHandler.tryToDecryptDocument(decryptedDocKey).then(() => {
+          expect(cryptDiv1.textContent).to.equal(decryptedContent);
+          expect(cryptDiv2.textContent).to.equal(decryptedContent);
+        });
       });
     });
   }
