@@ -27,6 +27,8 @@ const messagesPathPrefix = 'dist/log-messages';
 const messagesByMessagePath = `${messagesPathPrefix}.by-message.json`;
 
 /**
+ * Reads from the plugin output table and writes keyed by id with items mapped
+ * thru `transform`.
  * @param {string} outputPath
  * @param {function(!Object):!Object} transform
  * @return {!Promise}
@@ -42,7 +44,17 @@ const outputMessagesById = (outputPath, transform) =>
     )
   );
 
-/** @return {!Promise} */
+/**
+ * `transform-log-methods` babel plugin keys by message string for deduping.
+ * This reads from the plugin output table, and writes different output format
+ * files, all keyed by id.
+ *
+ * Outputs:
+ * - `dist/log-messages.json` shaped `{id: {...item}}`
+ * - `dist/log-messages.simple.json` shaped `{id: message}`
+ *
+ * @return {!Promise}
+ */
 const outputMessages = () =>
   Promise.all([
     // Consumed by logging server. Format may allow further fields in the
