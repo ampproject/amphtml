@@ -28,14 +28,16 @@ const messagesPathPrefix = 'dist/log-messages';
 
 /**
  * Consumed by `transform-log-methods` babel plugin. This is the source of truth
- * for all extracted messages.
+ * for all extracted messages during build, but it should not be deployed
+ * anywhere. Format may allow further fields in the future.
  * This looks like:
  *   {"my message": {"id": "xx", "message": "my message"}}
  */
 const messagesByMessagePath = `${messagesPathPrefix}.by-message.json`;
 
 /**
- * Output from `messagesByMessagePath`. Consumed by logging server.
+ * Output from `messagesByMessagePath`. Consumed by logging server. Format may
+ * allow further fields in the future.
  * This looks like:
  *   {"xx": {"message": "my message"}}
  */
