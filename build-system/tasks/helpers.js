@@ -106,149 +106,149 @@ function compileAllUnminifiedTargets(watch) {
  */
 function compile(watch, shouldMinify) {
   const promises = [
-    compileJs(
-      './3p/',
-      'integration.js',
-      './dist.3p/' + (shouldMinify ? internalRuntimeVersion : 'current'),
-      {
-        minifiedName: 'f.js',
-        watch,
-        minify: shouldMinify,
-        externs: ['./ads/ads.extern.js'],
-        include3pDirectories: true,
-        includePolyfills: true,
-      }
-    ),
-    compileJs(
-      './3p/',
-      'ampcontext-lib.js',
-      './dist.3p/' + (shouldMinify ? internalRuntimeVersion : 'current'),
-      {
-        minifiedName: 'ampcontext-v0.js',
-        watch,
-        minify: shouldMinify,
-        externs: ['./ads/ads.extern.js'],
-        include3pDirectories: true,
-        includePolyfills: false,
-      }
-    ),
-    compileJs(
-      './3p/',
-      'iframe-transport-client-lib.js',
-      './dist.3p/' + (shouldMinify ? internalRuntimeVersion : 'current'),
-      {
-        minifiedName: 'iframe-transport-client-v0.js',
-        watch,
-        minify: shouldMinify,
-        externs: ['./ads/ads.extern.js'],
-        include3pDirectories: true,
-        includePolyfills: false,
-      }
-    ),
-    compileJs(
-      './3p/',
-      'recaptcha.js',
-      './dist.3p/' + (shouldMinify ? internalRuntimeVersion : 'current'),
-      {
-        minifiedName: 'recaptcha.js',
-        watch,
-        minify: shouldMinify,
-        externs: [],
-        include3pDirectories: true,
-        includePolyfills: true,
-      }
-    ),
-    compileJs(
-      './extensions/amp-viewer-integration/0.1/examples/',
-      'amp-viewer-host.js',
-      './dist/v0/examples',
-      {
-        toName: 'amp-viewer-host.max.js',
-        minifiedName: 'amp-viewer-host.js',
-        incudePolyfills: true,
-        watch,
-        extraGlobs: ['extensions/amp-viewer-integration/**/*.js'],
-        compilationLevel: 'WHITESPACE_ONLY',
-        minify: shouldMinify,
-      }
-    ),
+    //compileJs(
+    //  './3p/',
+    //  'integration.js',
+    //  './dist.3p/' + (shouldMinify ? internalRuntimeVersion : 'current'),
+    //  {
+    //    minifiedName: 'f.js',
+    //    watch,
+    //    minify: shouldMinify,
+    //    externs: ['./ads/ads.extern.js'],
+    //    include3pDirectories: true,
+    //    includePolyfills: true,
+    //  }
+    //),
+    //compileJs(
+    //  './3p/',
+    //  'ampcontext-lib.js',
+    //  './dist.3p/' + (shouldMinify ? internalRuntimeVersion : 'current'),
+    //  {
+    //    minifiedName: 'ampcontext-v0.js',
+    //    watch,
+    //    minify: shouldMinify,
+    //    externs: ['./ads/ads.extern.js'],
+    //    include3pDirectories: true,
+    //    includePolyfills: false,
+    //  }
+    //),
+    //compileJs(
+    //  './3p/',
+    //  'iframe-transport-client-lib.js',
+    //  './dist.3p/' + (shouldMinify ? internalRuntimeVersion : 'current'),
+    //  {
+    //    minifiedName: 'iframe-transport-client-v0.js',
+    //    watch,
+    //    minify: shouldMinify,
+    //    externs: ['./ads/ads.extern.js'],
+    //    include3pDirectories: true,
+    //    includePolyfills: false,
+    //  }
+    //),
+    //compileJs(
+    //  './3p/',
+    //  'recaptcha.js',
+    //  './dist.3p/' + (shouldMinify ? internalRuntimeVersion : 'current'),
+    //  {
+    //    minifiedName: 'recaptcha.js',
+    //    watch,
+    //    minify: shouldMinify,
+    //    externs: [],
+    //    include3pDirectories: true,
+    //    includePolyfills: true,
+    //  }
+    //),
+    //compileJs(
+    //  './extensions/amp-viewer-integration/0.1/examples/',
+    //  'amp-viewer-host.js',
+    //  './dist/v0/examples',
+    //  {
+    //    toName: 'amp-viewer-host.max.js',
+    //    minifiedName: 'amp-viewer-host.js',
+    //    incudePolyfills: true,
+    //    watch,
+    //    extraGlobs: ['extensions/amp-viewer-integration/**/*.js'],
+    //    compilationLevel: 'WHITESPACE_ONLY',
+    //    minify: shouldMinify,
+    //  }
+    //),
   ];
 
-  if (!argv.single_pass && (!watch || argv.with_shadow)) {
-    promises.push(
-      compileJs('./src/', 'amp-shadow.js', './dist', {
-        minifiedName: 'shadow-v0.js',
-        includePolyfills: true,
-        watch,
-        minify: shouldMinify,
-      })
-    );
-  }
+  //if (!argv.single_pass && (!watch || argv.with_shadow)) {
+  //  promises.push(
+  //    compileJs('./src/', 'amp-shadow.js', './dist', {
+  //      minifiedName: 'shadow-v0.js',
+  //      includePolyfills: true,
+  //      watch,
+  //      minify: shouldMinify,
+  //    })
+  //  );
+  //}
+  //
+  //if (!watch || argv.with_video_iframe_integration) {
+  //  promises.push(
+  //    compileJs('./src/', 'video-iframe-integration.js', './dist', {
+  //      minifiedName: 'video-iframe-integration-v0.js',
+  //      includePolyfills: false,
+  //      watch,
+  //      minify: shouldMinify,
+  //    })
+  //  );
+  //}
 
-  if (!watch || argv.with_video_iframe_integration) {
-    promises.push(
-      compileJs('./src/', 'video-iframe-integration.js', './dist', {
-        minifiedName: 'video-iframe-integration-v0.js',
-        includePolyfills: false,
-        watch,
-        minify: shouldMinify,
-      })
-    );
-  }
-
-  if (!watch || argv.with_inabox) {
-    if (!argv.single_pass) {
-      promises.push(
-        // Entry point for inabox runtime.
-        compileJs('./src/inabox/', 'amp-inabox.js', './dist', {
-          toName: 'amp-inabox.js',
-          minifiedName: 'amp4ads-v0.js',
-          includePolyfills: true,
-          extraGlobs: ['src/inabox/*.js', '3p/iframe-messaging-client.js'],
-          watch,
-          minify: shouldMinify,
-        })
-      );
-    }
-    promises.push(
-      // inabox-host
-      compileJs('./ads/inabox/', 'inabox-host.js', './dist', {
-        toName: 'amp-inabox-host.js',
-        minifiedName: 'amp4ads-host-v0.js',
-        includePolyfills: false,
-        watch,
-        minify: shouldMinify,
-      })
-    );
-  }
-
-  if (argv.with_inabox_lite) {
-    promises.push(
-      // Entry point for inabox runtime.
-      compileJs('./src/inabox/', 'amp-inabox-lite.js', './dist', {
-        toName: 'amp-inabox-lite.js',
-        minifiedName: 'amp4ads-lite-v0.js',
-        includePolyfills: true,
-        extraGlobs: ['src/inabox/*.js', '3p/iframe-messaging-client.js'],
-        watch,
-        minify: shouldMinify,
-      })
-    );
-  }
-
-  thirdPartyFrames.forEach(frameObject => {
-    promises.push(
-      thirdPartyBootstrap(frameObject.max, frameObject.min, shouldMinify)
-    );
-  });
-
-  if (watch) {
-    thirdPartyFrames.forEach(frameObject => {
-      gulpWatch(frameObject.max, function() {
-        thirdPartyBootstrap(frameObject.max, frameObject.min, shouldMinify);
-      });
-    });
-  }
+  //if (!watch || argv.with_inabox) {
+  //  if (!argv.single_pass) {
+  //    promises.push(
+  //      // Entry point for inabox runtime.
+  //      compileJs('./src/inabox/', 'amp-inabox.js', './dist', {
+  //        toName: 'amp-inabox.js',
+  //        minifiedName: 'amp4ads-v0.js',
+  //        includePolyfills: true,
+  //        extraGlobs: ['src/inabox/*.js', '3p/iframe-messaging-client.js'],
+  //        watch,
+  //        minify: shouldMinify,
+  //      })
+  //    );
+  //  }
+  //  promises.push(
+  //    // inabox-host
+  //    compileJs('./ads/inabox/', 'inabox-host.js', './dist', {
+  //      toName: 'amp-inabox-host.js',
+  //      minifiedName: 'amp4ads-host-v0.js',
+  //      includePolyfills: false,
+  //      watch,
+  //      minify: shouldMinify,
+  //    })
+  //  );
+  //}
+  //
+  //if (argv.with_inabox_lite) {
+  //  promises.push(
+  //    // Entry point for inabox runtime.
+  //    compileJs('./src/inabox/', 'amp-inabox-lite.js', './dist', {
+  //      toName: 'amp-inabox-lite.js',
+  //      minifiedName: 'amp4ads-lite-v0.js',
+  //      includePolyfills: true,
+  //      extraGlobs: ['src/inabox/*.js', '3p/iframe-messaging-client.js'],
+  //      watch,
+  //      minify: shouldMinify,
+  //    })
+  //  );
+  //}
+  //
+  //thirdPartyFrames.forEach(frameObject => {
+  //  promises.push(
+  //    thirdPartyBootstrap(frameObject.max, frameObject.min, shouldMinify)
+  //  );
+  //});
+  //
+  //if (watch) {
+  //  thirdPartyFrames.forEach(frameObject => {
+  //    gulpWatch(frameObject.max, function() {
+  //      thirdPartyBootstrap(frameObject.max, frameObject.min, shouldMinify);
+  //    });
+  //  });
+  //}
 
   return Promise.all(promises)
     .then(() => {

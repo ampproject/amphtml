@@ -16,8 +16,8 @@
 
 import {Deferred} from '../utils/promise';
 import {Services} from '../services';
-import {cssText as ampDocCss} from '../../build/ampdoc.css';
-import {cssText as ampElementCss} from '../../build/ampelement.css';
+import {cssText} from '../../build/acss.js';
+//import {cssText as ampElementCss} from '../../build/ampelement.css';
 import {
   calculateExtensionScriptUrl,
   parseExtensionUrl,
@@ -461,7 +461,7 @@ export class Extensions {
     // Install runtime styles.
     installStylesLegacy(
       childWin.document,
-      ampDocCss + ampElementCss,
+      cssText, //ampDocCss + ampElementCss,
       /* callback */ null,
       /* opt_isRuntimeCss */ true,
       /* opt_ext */ 'amp-runtime'

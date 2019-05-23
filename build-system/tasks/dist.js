@@ -95,13 +95,13 @@ async function dist() {
         // NOTE: When adding a line here,
         // consider whether you need to include polyfills
         // and whether you need to init logging (initLogConstructor).
-        buildAlp({minify: true, watch: false}),
-        buildExaminer({minify: true, watch: false}),
-        buildWebWorker({minify: true, watch: false}),
-        buildExtensions({minify: true, watch: false}),
-        buildExperiments({minify: true, watch: false}),
-        buildLoginDone({minify: true, watch: false}),
-        buildWebPushPublisherFiles({minify: true, watch: false}),
+        //buildAlp({minify: true, watch: false}),
+        //buildExaminer({minify: true, watch: false}),
+        //buildWebWorker({minify: true, watch: false}),
+        //buildExtensions({minify: true, watch: false}),
+        //buildExperiments({minify: true, watch: false}),
+        //buildLoginDone({minify: true, watch: false}),
+        //buildWebPushPublisherFiles({minify: true, watch: false}),
         copyCss(),
       ]);
     })

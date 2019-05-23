@@ -41,15 +41,15 @@ async function css() {
 const cssEntryPoints = [
   {
     path: 'ampdoc.css',
-    outJs: 'ampdoc.css.js',
+    outJs: 'acss.js',
     outCss: 'v0.css',
   },
-  {
-    path: 'ampelement.css',
-    outJs: 'ampelement.css.js',
-    outCss: 'v0.css',
-    append: true,
-  },
+  //{
+  //  path: 'ampelement.css',
+  //  outJs: 'ampelement.css.js',
+  //  outCss: 'v0.css',
+  //  append: true,
+  //},
   {
     path: 'video-autoplay.css',
     outJs: 'video-autoplay.css.js',
