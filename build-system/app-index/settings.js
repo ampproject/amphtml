@@ -27,7 +27,7 @@ const serveModes = [
   {
     value: 'compiled',
     description: `Minified AMP JavaScript is served from the local server. This
-      is only available after running \`gulp dist--fortesting \`.`,
+      is only available after running \`gulp dist --fortesting \`.`,
   },
   {
     value: 'cdn',

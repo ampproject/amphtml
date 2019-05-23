@@ -21,7 +21,6 @@ const {
   stopNailgunServer,
 } = require('./nailgun');
 const {cleanupBuildDir, closureCompile} = require('../compile/compile');
-const {clean} = require('./clean');
 const {compileCss} = require('./css');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
 const {extensions, maybeInitializeExtensions} = require('./extension-helpers');
@@ -36,7 +35,6 @@ async function checkTypes() {
   maybeUpdatePackages();
   const handlerProcess = createCtrlcHandler('check-types');
   process.env.NODE_ENV = 'production';
-  await clean();
   cleanupBuildDir();
   maybeInitializeExtensions();
   const compileSrcs = [
