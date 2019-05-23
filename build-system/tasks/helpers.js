@@ -18,6 +18,7 @@ const babelify = require('babelify');
 const browserify = require('browserify');
 const buffer = require('vinyl-buffer');
 const colors = require('ansi-colors');
+const del = require('del');
 const file = require('gulp-file');
 const fs = require('fs-extra');
 const gulp = require('gulp');
@@ -27,7 +28,6 @@ const log = require('fancy-log');
 const path = require('path');
 const regexpSourcemaps = require('gulp-regexp-sourcemaps');
 const rename = require('gulp-rename');
-const rimraf = require('rimraf');
 const source = require('vinyl-source-stream');
 const sourcemaps = require('gulp-sourcemaps');
 const touch = require('touch');
@@ -169,7 +169,7 @@ function compile(watch, shouldMinify) {
         watch,
         extraGlobs: ['extensions/amp-viewer-integration/**/*.js'],
         compilationLevel: 'WHITESPACE_ONLY',
-        minify: false,
+        minify: shouldMinify,
       }
     ),
   ];
@@ -533,7 +533,7 @@ async function compileTs(srcDir, srcFilename, destDir, options) {
   options = options || {};
   await transpileTs(srcDir, srcFilename);
   await compileJs(srcDir, srcFilename, destDir, options);
-  rimraf.sync(path.join(srcDir, '**/*.js'));
+  del.sync(path.join(srcDir, '**/*.js'));
 }
 
 /**

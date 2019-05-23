@@ -32,6 +32,7 @@
   */
   "asset_globs": [
     "examples/visual-tests/**",
+    "examples/inabox-tag-integration.js"
   ],
 
   /**
@@ -691,6 +692,19 @@
       "url": "examples/visual-tests/amp-autocomplete/amp-autocomplete.amp.html",
       "name": "amp-autocomplete",
       "interactive_tests": "examples/visual-tests/amp-autocomplete/amp-autocomplete.js",
+    },
+    {
+      "url": "examples/visual-tests/amp-ad/amp-ad.html",
+      "name": "AMP ad",
+      "interactive_tests": "examples/visual-tests/amp-ad/amp-ad.js"
+    },
+    {
+      "url": "examples/visual-tests/amp-ad/amp-inabox.html",
+      "name": "AMP Inabox ad",
+      "loading_complete_selectors": [
+        ".view", ".activeview"
+      ],
+      "interactive_tests": "examples/visual-tests/amp-ad/amp-inabox.js"
     }
   ]
 }

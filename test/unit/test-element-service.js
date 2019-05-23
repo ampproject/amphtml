@@ -38,30 +38,10 @@ import {
 describe('getElementServiceIfAvailable()', () => {
   let doc;
   let win;
-  let readyStateListeners;
+  let setIntervalCallback;
 
   beforeEach(() => {
-    let readyState = 'loading';
-    readyStateListeners = [];
     doc = {
-      get readyState() {
-        return readyState;
-      },
-      set readyState(state) {
-        readyState = state;
-        readyStateListeners.forEach(cb => cb());
-      },
-      addEventListener(event, cb) {
-        expect(event).to.equal('readystatechange');
-        readyStateListeners.push(cb);
-      },
-      removeEventListener(event, cb) {
-        expect(event).to.equal('readystatechange');
-        const i = readyStateListeners.indexOf(cb);
-        if (i > -1) {
-          readyStateListeners.splice(i, 1);
-        }
-      },
       head: {},
       body: {},
     };
@@ -71,6 +51,10 @@ describe('getElementServiceIfAvailable()', () => {
 
     win = {
       document: doc,
+      setInterval: callback => {
+        setIntervalCallback = callback;
+      },
+      clearInterval: () => {},
     };
     doc.defaultView = win;
 
@@ -78,7 +62,12 @@ describe('getElementServiceIfAvailable()', () => {
     resetScheduledElementForTesting(win, 'element-1');
   });
 
+  afterEach(() => {
+    setIntervalCallback = undefined;
+  });
+
   it('should wait for doc ready when not available', () => {
+    doc.body = null; // Body not available
     let resolvedService;
     const p1 = getElementServiceIfAvailable(win, 'e1', 'element-1').then(
       service => {
@@ -88,11 +77,12 @@ describe('getElementServiceIfAvailable()', () => {
     );
     return Promise.resolve()
       .then(() => {
-        expect(readyStateListeners).to.not.be.empty;
+        expect(setIntervalCallback).to.exist;
         expect(resolvedService).to.be.undefined;
 
         // Resolve body.
-        doc.readyState = 'complete';
+        doc.body = {};
+        setIntervalCallback();
         return p1;
       })
       .then(service => {
@@ -101,12 +91,12 @@ describe('getElementServiceIfAvailable()', () => {
       });
   });
 
-  it('should resolve when ready when service not available', () => {
-    doc.readyState = 'complete';
+  it('should resolve with body when not available', () => {
+    doc.body = {}; // Body is available
     const p1 = getElementServiceIfAvailable(win, 'e1', 'element-1');
     return Promise.resolve()
       .then(() => {
-        expect(readyStateListeners).to.be.empty;
+        expect(setIntervalCallback).to.be.undefined;
         return p1;
       })
       .then(service => {
@@ -114,7 +104,8 @@ describe('getElementServiceIfAvailable()', () => {
       });
   });
 
-  it('should wait for document ready when service available', () => {
+  it('should wait for body when available', () => {
+    doc.body = null; // Body not available
     let resolvedService;
     const p1 = getElementServiceIfAvailable(win, 'e1', 'element-1').then(
       service => {
@@ -124,7 +115,7 @@ describe('getElementServiceIfAvailable()', () => {
     );
     return Promise.resolve()
       .then(() => {
-        expect(readyStateListeners).to.not.be.empty;
+        expect(setIntervalCallback).to.exist;
         expect(resolvedService).to.be.undefined;
 
         // Resolve body.
@@ -132,7 +123,8 @@ describe('getElementServiceIfAvailable()', () => {
         registerServiceBuilder(win, 'e1', function() {
           return {str: 'fake1'};
         });
-        doc.readyState = 'complete';
+        doc.body = {};
+        setIntervalCallback();
         return p1;
       })
       .then(service => {
@@ -141,13 +133,13 @@ describe('getElementServiceIfAvailable()', () => {
       });
   });
 
-  it('should resolve when ready when service available', () => {
-    doc.readyState = 'complete';
+  it('should resolve with body when available', () => {
+    doc.body = {}; // Body is available
     markElementScheduledForTesting(win, 'element-1');
     const p1 = getElementServiceIfAvailable(win, 'e1', 'element-1');
     return Promise.resolve()
       .then(() => {
-        expect(readyStateListeners).to.be.empty;
+        expect(setIntervalCallback).to.be.undefined;
         registerServiceBuilder(win, 'e1', function() {
           return {str: 'fake1'};
         });

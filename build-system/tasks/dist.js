@@ -31,6 +31,7 @@ const {
   hostname,
   mkdirSync,
   printConfigHelp,
+  printNobuildHelp,
   toPromise,
 } = require('./helpers');
 const {
@@ -64,6 +65,7 @@ async function dist() {
   maybeUpdatePackages();
   const handlerProcess = createCtrlcHandler('dist');
   process.env.NODE_ENV = 'production';
+  printNobuildHelp();
   cleanupBuildDir();
   if (argv.fortesting) {
     let cmd = 'gulp dist --fortesting';
@@ -126,7 +128,9 @@ async function dist() {
         return Promise.resolve();
       }
     })
-    .then(() => exitCtrlcHandler(handlerProcess));
+    .then(() => {
+      return exitCtrlcHandler(handlerProcess);
+    });
 }
 
 /**

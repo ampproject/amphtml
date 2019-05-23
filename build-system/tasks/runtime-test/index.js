@@ -19,7 +19,7 @@ const argv = require('minimist')(process.argv.slice(2));
 const babelify = require('babelify');
 const colors = require('ansi-colors');
 const config = require('../../config');
-const gulp = require('gulp-help')(require('gulp'));
+const gulp = require('gulp');
 const Karma = require('karma').Server;
 const karmaDefault = require('../karma.conf');
 const log = require('fancy-log');
@@ -39,9 +39,10 @@ const {
   reportTestStarted,
 } = require('./status-report');
 const {app} = require('../../test-server');
-const {build} = require('../build');
+const {clean} = require('../clean');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../../ctrlcHandler');
 const {css} = require('../css');
+const {dist} = require('../dist');
 const {getStdout} = require('../../exec');
 const {isTravisBuild} = require('../../travis');
 
@@ -131,8 +132,8 @@ function getConfig() {
       : [
           // With --saucelabs_lite, a subset of the unit tests are run.
           // Only browsers that support chai-as-promised may be included below.
-          // TODO(rsimha): Add more browsers to this list. #6039.
           'SL_Safari_12',
+          'SL_Firefox',
         ];
 
     return Object.assign({}, karmaDefault, {
@@ -163,7 +164,8 @@ function printArgvMessages() {
     testnames: 'Listing the names of all tests being run.',
     files: 'Running tests in the file(s): ' + cyan(argv.files),
     integration:
-      'Running only the integration tests. Prerequisite: ' + cyan('gulp build'),
+      'Running only the integration tests. Prerequisite: ' +
+      cyan('gulp dist --fortesting'),
     unit: 'Running only the unit tests. Prerequisite: ' + cyan('gulp css'),
     a4a: 'Running only A4A tests.',
     compiled: 'Running tests against minified code.',
@@ -270,24 +272,19 @@ async function runTests() {
     c.reporters = ['mocha'];
   }
 
-  c.browserify = {
-    transform: [['babelify', {global: true}]],
-    configure: function(bundle) {
-      bundle.on('prebundle', function() {
-        log(
-          green('Transforming tests with'),
-          cyan('browserify') + green('...')
-        );
-      });
-      bundle.on('transform', function(tr) {
-        if (tr instanceof babelify) {
-          tr.once('babelify', function() {
-            process.stdout.write('.');
-          });
-        }
-      });
-    },
+  c.browserify.configure = function(bundle) {
+    bundle.on('prebundle', function() {
+      log(green('Transforming tests with'), cyan('browserify') + green('...'));
+    });
+    bundle.on('transform', function(tr) {
+      if (tr instanceof babelify) {
+        tr.once('babelify', function() {
+          process.stdout.write('.');
+        });
+      }
+    });
   };
+
   // Exclude chai-as-promised from runs on the full set of sauce labs browsers.
   // See test/chai-as-promised/chai-as-promised.js for why this is necessary.
   c.files = argv.saucelabs ? [] : config.chaiAsPromised;
@@ -621,9 +618,8 @@ async function runTests() {
         const result = browser.lastResult;
         // Prevent cases where Karma detects zero tests and still passes. #16851.
         if (result.total == 0) {
-          log(
-            red('ERROR: Zero tests detected by Karma. Something went wrong.')
-          );
+          log(red('ERROR: Zero tests detected by Karma.'));
+          log(red(JSON.stringify(result)));
           reportTestErrored().finally(() => {
             if (!argv.watch) {
               process.exit(1);
@@ -661,7 +657,10 @@ async function test() {
     if (argv.unit || argv.a4a || argv['local-changes']) {
       await css();
     } else {
-      await build();
+      argv.fortesting = true;
+      argv.compiled = true;
+      await clean();
+      await dist();
     }
   }
   // TODO(alanorozco): Come up with a more elegant check?

@@ -316,7 +316,7 @@ The name of the story's publisher.
 
 ##### publisher-logo-src [required]
 
-A URL to the story publisher's logo in square format (1x1 aspect ratio). For example `publisher-logo-src="https://example.com/logo/1x1.png"`, where 1x1.png is a 36x36 px logo.
+A URL to the story publisher's logo in square format (1x1 aspect ratio). For example `publisher-logo-src="https://example.com/logo/1x1.png"`, where 1x1.png is a 96x96 px logo.
 
 ##### poster-portrait-src [required]
 
@@ -815,6 +815,26 @@ A UI prompt to open the attachment will automatically be added at the bottom of 
 
 The `<amp-story-page-attachment>` element must be the last child of `<amp-story-page>`, and must have the `layout="nodisplay"` attribute. The attachment AMPHTML content is expected to be provided inline in your AMP Story, within this `<amp-story-page-attachment>` tag.
 
+### Optional customization
+
+#### `data-cta-text`
+
+Customizes the call to action text displayed on the UI prompt to open the attachment.
+Default: "Swipe up"
+
+```html
+<amp-story-page-attachment layout="nodisplay" data-cta-text="Read more">...</amp-story-page-attachment>
+```
+
+#### `data-title`
+
+Displays the provided title in the page attachment header.
+Default: `null`
+
+```html
+<amp-story-page-attachment layout="nodisplay" data-title="My title">...</amp-story-page-attachment>
+```
+
 ### Allowed content and components
 
 Story page attachments allow the same HTML elements as AMP Story along with additional components listed below, such as third party video players or social media embeds. This means you can add additional content that is too verbose or disallowed in an AMP Story page.
@@ -977,6 +997,18 @@ Use this attribute to specify the duration of the entrance animation, in seconds
 
 ```html
 <h2 animate-in="fly-in-left" animate-in-duration="0.5s" >
+Fly from left!
+</h2>
+```
+
+##### animate-in-timing-function [optional]
+
+Use this attribute to specify the timing function (animation curve) of the entrance animation. The default timing function depends on the animation preset you specified.
+
+*Example*: A heading flies in from left of the page and the animation decelerates (ease-out).
+
+```html
+<h2 animate-in="fly-in-left" animate-in-timing-function="cubic-bezier(0.0, 0.0, 0.2, 1)" >
 Fly from left!
 </h2>
 ```

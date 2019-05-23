@@ -295,6 +295,10 @@ export const adConfig = {
     prefetch: 'https://s.ato.mx/p.js',
   },
 
+  'beaverads': {
+    renderStartImplemented: true,
+  },
+
   'beopinion': {
     prefetch: 'https://widget.beopinion.com/sdk.js',
     preconnect: [

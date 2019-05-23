@@ -126,7 +126,7 @@ export function getElementServiceIfAvailableForDoc(
   }
   const ampdoc = getAmpdoc(element);
   return ampdoc
-    .whenBodyAvailable()
+    .waitForBodyOpen()
     .then(() =>
       waitForExtensionIfPresent(ampdoc.win, extension, ampdoc.win.document.head)
     )
@@ -180,6 +180,7 @@ export function getElementServiceIfAvailableForDocInEmbedScope(
  * @param {string} extension
  * @return {!Object}
  * @private
+ * @closurePrimitive {asserts.matchesReturn}
  */
 function assertService(service, id, extension) {
   return /** @type {!Object} */ (userAssert(
@@ -220,7 +221,7 @@ export function extensionScriptsInNode(head) {
  * @return {!Promise<boolean>}
  */
 export function isExtensionScriptInNode(ampdoc, extensionId) {
-  return ampdoc.whenBodyAvailable().then(() => {
+  return ampdoc.waitForBodyOpen().then(() => {
     return extensionScriptInNode(ampdoc.getHeadNode(), extensionId);
   });
 }
@@ -278,7 +279,7 @@ function waitForExtensionIfPresent(win, extension, head) {
  */
 function getElementServicePromiseOrNull(win, id, extension, opt_element) {
   return dom
-    .waitForBodyPromise(win.document)
+    .waitForBodyOpenPromise(win.document)
     .then(() => waitForExtensionIfPresent(win, extension, win.document.head))
     .then(() => {
       // If this service is provided by an element, then we can't depend on

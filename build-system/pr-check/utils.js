@@ -18,11 +18,11 @@
 const colors = require('ansi-colors');
 const requestPromise = require('request-promise');
 const {
+  gitBranchCreationPoint,
   gitBranchName,
   gitCommitHash,
   gitDiffCommitLog,
   gitDiffStatMaster,
-  gitMergeBaseMaster,
   gitTravisMasterBaseline,
   shortSha,
 } = require('../git');
@@ -71,11 +71,12 @@ function printChangeSummary(fileName) {
   const filesChanged = gitDiffStatMaster();
   console.log(filesChanged);
 
-  const branchPoint = gitMergeBaseMaster();
+  const branchCreationPoint = gitBranchCreationPoint();
   console.log(
-    `${fileLogPrefix} Commit log since branch ` +
-      `${colors.cyan(gitBranchName())} was forked from ` +
-      `${colors.cyan('master')} at ${colors.cyan(shortSha(branchPoint))}:`
+    `${fileLogPrefix} Commit log since branch`,
+    `${colors.cyan(gitBranchName())} was forked from`,
+    `${colors.cyan('master')} at`,
+    `${colors.cyan(shortSha(branchCreationPoint))}:`
   );
   console.log(gitDiffCommitLog() + '\n');
 }

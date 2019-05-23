@@ -72,7 +72,7 @@ export class AmpSmartlinks extends AMP.BaseElement {
     this.linkRewriterService_ = new LinkRewriterManager(this.ampDoc_);
 
     return this.ampDoc_
-      .whenBodyAvailable()
+      .whenReady()
       .then(() => viewer.getReferrerUrl())
       .then(referrer => {
         this.referrer_ = referrer;

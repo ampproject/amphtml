@@ -54,6 +54,7 @@ import {
   iterateCursor,
   matches,
   scopedQuerySelectorAll,
+  whenUpgradedToCustomElement,
 } from '../../../src/dom';
 import {debounce} from '../../../src/utils/rate-limit';
 import {dev} from '../../../src/log';
@@ -65,7 +66,7 @@ import {getLogEntries} from './logging';
 import {getMode} from '../../../src/mode';
 import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
-import {isMediaDisplayed} from './utils';
+import {isMediaDisplayed, setTextBackgroundColor} from './utils';
 import {toggle} from '../../../src/style';
 import {upgradeBackgroundAudio} from './audio';
 
@@ -310,6 +311,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.advancement_.addProgressListener(progress =>
       this.emitProgress_(progress)
     );
+    this.setDescendantCssTextStyles_();
   }
 
   /**
@@ -475,9 +477,8 @@ export class AmpStoryPage extends AMP.BaseElement {
         switch (mediaEl.tagName.toLowerCase()) {
           case 'amp-img':
           case 'amp-anim':
-            mediaEl
-              .signals()
-              .whenSignal(CommonSignals.LOAD_END)
+            whenUpgradedToCustomElement(mediaEl)
+              .then(el => el.signals().whenSignal(CommonSignals.LOAD_END))
               .then(resolve, resolve);
             break;
           case 'amp-audio':
@@ -1389,5 +1390,14 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   isAd() {
     return this.element.hasAttribute(ADVERTISEMENT_ATTR_NAME);
+  }
+
+  /**
+   * Sets text styles for descendants of the
+   * <amp-story-page> element.
+   * @private
+   */
+  setDescendantCssTextStyles_() {
+    setTextBackgroundColor(this.element);
   }
 }
