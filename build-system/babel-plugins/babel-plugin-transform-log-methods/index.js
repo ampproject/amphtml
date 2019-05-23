@@ -54,10 +54,10 @@ const base62 = require('base62/lib/ascii');
 const fs = require('fs-extra');
 const {
   assertAliases,
-  messagesByMessagePath,
   singletonFunctions,
   transformableMethods,
 } = require('../../log-module-metadata.js');
+const {messagesByMessagePath} = require('../../compile/log-messages');
 
 /**
  * Approximate length of a compressed message expansion call to determine

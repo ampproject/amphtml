@@ -24,33 +24,6 @@ const definitionFile = 'src/log.js';
 /** Functions exposed as singleton getters for `Log`. */
 const singletonFunctions = ['dev', 'user'];
 
-const messagesPathPrefix = 'dist/log-messages';
-
-/**
- * Consumed by `transform-log-methods` babel plugin. This is the source of truth
- * for all extracted messages during build, but it should not be deployed
- * anywhere. Format may allow further fields in the future.
- * This looks like:
- *   {"my message": {"id": "xx", "message": "my message"}}
- */
-const messagesByMessagePath = `${messagesPathPrefix}.by-message.json`;
-
-/**
- * Output from `messagesByMessagePath`. Consumed by logging server. Format may
- * allow further fields in the future.
- * This looks like:
- *   {"xx": {"message": "my message"}}
- */
-const messagesByIdPath = `${messagesPathPrefix}.json`;
-
-/**
- * Output from `messagesByMessagePath`. Consumed by runtime function in
- * development mode.
- * This looks like:
- *   {"xx": "my message"}
- */
-const messagesByIdSimplePath = `${messagesPathPrefix}.simple.json`;
-
 const assertAliases = singletonFunctions.map(prefix => `${prefix}Assert`);
 
 /**
@@ -80,9 +53,6 @@ const transformableMethods = {
 module.exports = {
   assertAliases,
   definitionFile,
-  messagesByMessagePath,
-  messagesByIdPath,
-  messagesByIdSimplePath,
   singletonFunctions,
   transformableMethods,
 };

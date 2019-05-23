@@ -41,13 +41,11 @@ const {
   gulpClosureCompile,
   handleSinglePassCompilerError,
 } = require('./closure-compile');
-const {
-  outputMessagesById,
-  outputMessagesByIdSimple,
-} = require('./log-messages');
 const {isTravisBuild} = require('../travis');
+const {outputMessages} = require('./log-messages');
 const {shortenLicense, shouldShortenLicense} = require('./shorten-license');
 const {TopologicalSort} = require('topological-sort');
+const {toPromise} = require('../tasks/helpers');
 const TYPES_VALUES = Object.keys(TYPES).map(x => TYPES[x]);
 const wrappers = require('../compile-wrappers');
 const {VERSION: internalRuntimeVersion} = require('../internal-version');
@@ -656,21 +654,14 @@ function postProcessConcat() {
 
 function compile(flagsArray) {
   // TODO(@cramforce): Run the post processing step
-  return new Promise((resolve, reject) => {
+  return toPromise(
     gulp
       .src(srcs, {base: transformDir})
       .pipe(gulpIf(shouldShortenLicense, shortenLicense()))
       .pipe(sourcemaps.init({loadMaps: true}))
       .pipe(gulpClosureCompile(flagsArray))
-      .on('error', err => {
-        handleSinglePassCompilerError();
-        reject(err);
-      })
       .pipe(sourcemaps.write('.'))
       .pipe(gulpIf(/(\/amp-|\/_base)/, rename(path => (path.dirname += '/v0'))))
       .pipe(gulp.dest('.'))
-      .on('end', resolve);
-  }).then(() =>
-    Promise.all([outputMessagesById(), outputMessagesByIdSimple()])
-  );
+  ).then(outputMessages, handleSinglePassCompilerError);
 }

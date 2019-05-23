@@ -14,11 +14,33 @@
  * limitations under the License.
  */
 const fs = require('fs-extra');
-const {
-  messagesByMessagePath,
-  messagesByIdPath,
-  messagesByIdSimplePath,
-} = require('../log-module-metadata');
+
+const messagesPathPrefix = 'dist/log-messages';
+
+/**
+ * Consumed by `transform-log-methods` babel plugin. This is the source of truth
+ * for all extracted messages during build, but it should not be deployed
+ * anywhere. Format may allow further fields in the future.
+ * This looks like:
+ *   {"my message": {"id": "xx", "message": "my message"}}
+ */
+const messagesByMessagePath = `${messagesPathPrefix}.by-message.json`;
+
+/**
+ * Output from `messagesByMessagePath`. Consumed by logging server. Format may
+ * allow further fields in the future.
+ * This looks like:
+ *   {"xx": {"message": "my message"}}
+ */
+const messagesByIdPath = `${messagesPathPrefix}.json`;
+
+/**
+ * Output from `messagesByMessagePath`. Consumed by runtime function in
+ * development mode.
+ * This looks like:
+ *   {"xx": "my message"}
+ */
+const messagesByIdSimplePath = `${messagesPathPrefix}.simple.json`;
 
 /**
  * @param {string} path
@@ -26,8 +48,8 @@ const {
  * @param {function(!Object):!Object} transform
  * @return {!Promise}
  */
-function outputMessages(path, key, transform) {
-  return fs.readJson(messagesByMessagePath).then(
+const outputMessagesTable = (path, key, transform) =>
+  fs.readJson(messagesByMessagePath).then(
     obj =>
       fs.outputJson(
         path,
@@ -38,20 +60,17 @@ function outputMessages(path, key, transform) {
     // We don't care if non existant or invalid.
     () => {}
   );
-}
 
 /** @return {!Promise} */
-function outputMessagesById() {
-  return outputMessages(
-    messagesByIdPath,
-    'id',
-    ({id: unused, ...rest}) => rest
-  );
-}
+const outputMessagesById = () =>
+  outputMessagesTable(messagesByIdPath, 'id', ({id: unused, ...rest}) => rest);
 
 /** @return {!Promise} */
-function outputMessagesByIdSimple() {
-  return outputMessages(messagesByIdSimplePath, 'id', ({message}) => message);
-}
+const outputMessagesByIdSimple = () =>
+  outputMessagesTable(messagesByIdSimplePath, 'id', ({message}) => message);
 
-module.exports = {outputMessagesById, outputMessagesByIdSimple};
+/** @return {!Promise} */
+const outputMessages = () =>
+  Promise.all([outputMessagesById(), outputMessagesByIdSimple()]);
+
+module.exports = {messagesByMessagePath, outputMessages};
