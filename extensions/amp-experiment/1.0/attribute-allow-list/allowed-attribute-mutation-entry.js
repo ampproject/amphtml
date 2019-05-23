@@ -24,10 +24,10 @@ import {assertHttpsUrl} from '../../../../src/url';
 export class AllowedAttributeMutationEntry {
   /**
    * Constructor for the class
-   * @param {Array<string>=} opt_tags
+   * @param {!Array<string>=} tags
    */
-  constructor(opt_tags) {
-    this.tags = opt_tags;
+  constructor(tags) {
+    this.tags = tags;
   }
 
   /**
@@ -96,16 +96,9 @@ export class DefaultStyleAllowedAttributeMutationEntry extends AllowedAttributeM
  * mutations. E.g ['href']['*']
  */
 export class DefaultAllowedURLAttributeMutationEntry extends AllowedAttributeMutationEntry {
-  /**
-   * @param {Array<string>=} opt_tags
-   * @override
-   */
-  constructor(opt_tags) {
-    if (opt_tags) {
-      super(opt_tags);
-    } else {
-      super(['*']);
-    }
+  /** @override */
+  constructor() {
+    super(['*']);
   }
 
   /** @override */
