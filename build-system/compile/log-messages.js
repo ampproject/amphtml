@@ -27,14 +27,14 @@ const messagesPathPrefix = 'dist/log-messages';
 const messagesByMessagePath = `${messagesPathPrefix}.by-message.json`;
 
 /**
- * @param {string} path
+ * @param {string} outputPath
  * @param {function(!Object):!Object} transform
  * @return {!Promise}
  */
-const outputMessagesById = (path, transform) =>
+const outputMessagesById = (outputPath, transform) =>
   fs.readJson(messagesByMessagePath, {throws: false}).then(obj =>
     fs.outputJson(
-      path,
+      outputPath,
       Object.fromEntries(
         // key by id, content defined by caller
         Object.keys(obj).map(k => [obj[k]['id'], transform(obj[k])])
