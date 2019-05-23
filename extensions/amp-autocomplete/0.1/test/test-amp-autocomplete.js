@@ -262,11 +262,15 @@ describes.realWin(
       expect(
         impl.filterData_(['a', 'b a', 'ab', 'ba', 'c a'], 'a')
       ).to.have.ordered.members(['a', 'b a', 'ab', 'ba', 'c a']);
-      // Remaining filters should error
+      // Fuzzy filter
       impl.filter_ = 'fuzzy';
-      expect(() => impl.filterData_(['a', 'b', 'c'], 'a')).to.throw(
-        'Filter not yet supported: fuzzy'
-      );
+      expect(
+        impl.filterData_(
+          ['interesting', 'into', 'stint', 'indigo', 'tin'],
+          'int'
+        )
+      ).to.have.ordered.members(['interesting', 'into', 'stint']);
+      // Remaining filters should error
       impl.filter_ = 'custom';
       expect(() => impl.filterData_(['a', 'b', 'c'], 'a')).to.throw(
         'Filter not yet supported: custom'
