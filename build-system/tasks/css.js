@@ -68,16 +68,15 @@ function compileCss(watch, opt_compileAll) {
    * Writes CSS to build folder
    *
    * @param {string} css
-   * @param {string} originalCssFilename
    * @param {string} jsFilename
    * @param {string} cssFilename
    * @return {Promise}
    */
-  function writeCss(css, originalCssFilename, jsFilename, cssFilename) {
+  function writeCss(css, jsFilename, cssFilename) {
     return toPromise(
-      gulp
-        .src(`css/${originalCssFilename}`)
-        .pipe(file(jsFilename, 'export const cssText = ' + JSON.stringify(css)))
+      file(jsFilename, 'export const cssText = ' + JSON.stringify(css), {
+        src: true,
+      })
         .pipe(gulp.dest('build'))
         .on('end', function() {
           mkdirSync('build');
@@ -94,7 +93,7 @@ function compileCss(watch, opt_compileAll) {
    */
   function writeCssEntryPoint(path, outJs, outCss) {
     return jsifyCssAsync(`css/${path}`).then(css =>
-      writeCss(css, path, outJs, outCss)
+      writeCss(css, outJs, outCss)
     );
   }
 
