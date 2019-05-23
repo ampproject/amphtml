@@ -112,20 +112,6 @@ const connectHostname = config => {
 };
 
 /**
- * The scroll web server hostname.
- *
- * @param {!JsonObject} config
- * @return {string}
- */
-const scrollHostname = config => {
-  const devScrollEtld = devEtld(config);
-  if (devScrollEtld) {
-    return `https://scroll${devScrollEtld}`;
-  }
-  return 'https://scroll.com';
-};
-
-/**
  * amp-access vendor that authenticates against the scroll.com service.
  * If the user is authenticated, also adds a fixed position iframe
  * to the page.
@@ -341,7 +327,7 @@ class ScrollElement {
   addActivateButton(accessSource, vendorConfig) {
     accessSource
       .buildUrl(
-        `${scrollHostname(vendorConfig)}/activateamp` +
+        `${connectHostname(vendorConfig)}/html/amp/activate` +
           '?rid=READER_ID' +
           '&cid=CLIENT_ID(scroll1)' +
           '&c=CANONICAL_URL' +
