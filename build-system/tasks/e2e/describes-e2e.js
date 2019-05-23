@@ -281,15 +281,17 @@ function describeEnv(factory) {
     function createBrowserDescribe() {
       const {browsers} = getConfig();
 
-      const allowedBrowsers = browsers ?
-          new Set(browsers.split(',').map(x => x.trim())) : defaultBrowsers;
+      const allowedBrowsers = browsers
+        ? new Set(browsers.split(',').map(x => x.trim()))
+        : defaultBrowsers;
 
-      spec.browsers.filter(x => allowedBrowsers.has(x))
-          .forEach(browserName => {
-            describe(browserName, function() {
-              createVariantDescribe(browserName);
-            });
+      spec.browsers
+        .filter(x => allowedBrowsers.has(x))
+        .forEach(browserName => {
+          describe(browserName, function() {
+            createVariantDescribe(browserName);
           });
+        });
     }
 
     function createVariantDescribe(browserName) {
