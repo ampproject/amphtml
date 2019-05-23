@@ -19,6 +19,7 @@ const fs = require('fs-extra');
 const log = require('fancy-log');
 const path = require('path');
 const {build} = require('./build');
+const {clean} = require('./clean');
 const {dist} = require('./dist');
 
 async function walk(dest) {
@@ -58,6 +59,7 @@ async function modifyThirdPartyUrl() {
 
 async function firebase() {
   if (!argv.nobuild) {
+    await clean();
     if (argv.min) {
       await dist();
     } else {

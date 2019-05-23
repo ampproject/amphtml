@@ -442,6 +442,14 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/21791',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/21792',
   },
+  {
+    id: 'amp-user-location',
+    name:
+      'Expose the browser geolocation API for latitude and longitude ' +
+      'access after user interaction and approval',
+    spec: 'https://github.com/ampproject/amphtml/issues/8929',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22177',
+  },
 ];
 
 if (getMode().localDev) {

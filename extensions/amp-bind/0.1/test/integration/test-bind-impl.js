@@ -343,22 +343,18 @@ describe
 
         it('should not send "bindReady" until all <amp-state> are built', () => {
           const element = createElement(env, container, '', 'amp-state', true);
-          let buildAmpState;
-          const builtPromise = new Promise(resolve => {
-            buildAmpState = resolve;
+          // Makes dom.whenUpgradedToCustomElement() resolve immediately.
+          element.createdCallback = () => {};
+          const parseAndUpdate = sandbox.spy();
+          element.getImpl = () => {
+            expect(viewer.sendMessage).to.not.be.called;
+            return Promise.resolve({parseAndUpdate});
+          };
+          return onBindReady(env, bind).then(() => {
+            expect(parseAndUpdate).to.be.calledOnce;
+            expect(viewer.sendMessage).to.be.calledOnce;
+            expect(viewer.sendMessage).to.be.calledWith('bindReady');
           });
-          element.whenBuilt = () => builtPromise;
-
-          return onBindReady(env, bind)
-            .then(() => {
-              expect(viewer.sendMessage).to.not.be.called;
-              buildAmpState();
-              return element.whenBuilt();
-            })
-            .then(() => {
-              expect(viewer.sendMessage).to.be.calledOnce;
-              expect(viewer.sendMessage).to.be.calledWith('bindReady');
-            });
         });
 
         it('should scan for bindings when ampdoc is ready', () => {
@@ -913,7 +909,10 @@ describe
             '[src]="foo"',
             'amp-state'
           );
-          element.whenBuilt = () => Promise.resolve();
+          // Makes dom.whenUpgradedToCustomElement() resolve immediately.
+          element.createdCallback = () => {};
+          element.getImpl = () =>
+            Promise.resolve({parseAndUpdate: sandbox.spy()});
           expect(element.getAttribute('src')).to.be.null;
 
           const promise = onBindReadyAndSetState(

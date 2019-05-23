@@ -316,7 +316,7 @@ The name of the story's publisher.
 
 ##### publisher-logo-src [required]
 
-A URL to the story publisher's logo in square format (1x1 aspect ratio). For example `publisher-logo-src="https://example.com/logo/1x1.png"`, where 1x1.png is a 36x36 px logo.
+A URL to the story publisher's logo in square format (1x1 aspect ratio). For example `publisher-logo-src="https://example.com/logo/1x1.png"`, where 1x1.png is a 96x96 px logo.
 
 ##### poster-portrait-src [required]
 
@@ -997,6 +997,18 @@ Use this attribute to specify the duration of the entrance animation, in seconds
 
 ```html
 <h2 animate-in="fly-in-left" animate-in-duration="0.5s" >
+Fly from left!
+</h2>
+```
+
+##### animate-in-timing-function [optional]
+
+Use this attribute to specify the timing function (animation curve) of the entrance animation. The default timing function depends on the animation preset you specified.
+
+*Example*: A heading flies in from left of the page and the animation decelerates (ease-out).
+
+```html
+<h2 animate-in="fly-in-left" animate-in-timing-function="cubic-bezier(0.0, 0.0, 0.2, 1)" >
 Fly from left!
 </h2>
 ```
