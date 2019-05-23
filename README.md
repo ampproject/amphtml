@@ -1,7 +1,14 @@
 # AMP HTML ⚡
 
-[![Renovate enabled](https://img.shields.io/badge/renovate-enabled-brightgreen.svg)](https://renovateapp.com/)
-[![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
+[![GitHub Release](https://img.shields.io/github/release/ampproject/amphtml.svg)](https://github.com/ampproject/amphtml/releases)
+[![Contributors](https://img.shields.io/github/contributors-anon/ampproject/amphtml.svg)](https://github.com/ampproject/amphtml/graphs/contributors)
+[![Build Status](https://img.shields.io/travis/ampproject/amphtml/master.svg)](https://travis-ci.org/ampproject/amphtml)
+[![GitHub Issues](https://img.shields.io/github/issues/ampproject/amphtml.svg)](https://github.com/ampproject/amphtml/issues)
+[![GitHub Pull Requests](https://img.shields.io/github/issues-pr-closed/ampproject/amphtml.svg)](https://github.com/ampproject/amphtml/pulls)
+[![Codecov](https://img.shields.io/codecov/c/github/ampproject/amphtml/master.svg)](https://codecov.io/gh/ampproject/amphtml/)
+[![LGTM](https://img.shields.io/lgtm/grade/javascript/github/ampproject/amphtml.svg)](https://lgtm.com/projects/g/ampproject/amphtml/)
+[![Renovate](https://img.shields.io/badge/renovate-enabled-brightgreen.svg)](https://renovateapp.com/)
+[![Prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
 
 [AMP HTML](https://amp.dev) is a way to build web pages that render with reliable and fast performance. It is our attempt at fixing what many perceive as painfully slow page load times – especially when reading content on the mobile web.  AMP HTML is built on existing web technologies; an AMP page will load (quickly) in any modern browser.
 
