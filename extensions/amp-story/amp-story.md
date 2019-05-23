@@ -725,6 +725,42 @@ An `amp-story-grid-layer` can contain any of the following elements:
   </tr>
 </table>
 
+#### Optional customization
+
+##### `data-text-background-color`
+
+The data-text-background-color attribute highlights the text of the element with a specified color. To highlight the entire block, add this attribute directly to the text element. To only highlight the text, add the attribute and text to an inner <span>.
+
+Example:
+<amp-img alt="text background color only example" layout="fixed" src="https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/img/text-background-color-ex-1.png" width="145" height="255">
+  <noscript>
+    <img alt="text background color only example" src="https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/img/text-background-color-ex-1.png" />
+  </noscript>
+</amp-img>
+```html
+<amp-story-grid-layer template="vertical">
+  <h2>
+    <span data-text-background-color="crimson">
+      Cat ipsum dolor sit amet, sleeps on my head, but lounge in doorway so if human is on laptop sit on the keyboard
+    </span>
+  </h2>
+</amp-story-grid-layer>
+```
+
+Example:
+<amp-img alt="text background color full example" layout="fixed" src="https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/img/text-background-color-ex-2.png" width="145" height="255">
+  <noscript>
+    <img alt="text background color full example" src="https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/img/text-background-color-ex-2.png" />
+  </noscript>
+</amp-img>
+```html
+<amp-story-grid-layer template="vertical"> 
+  <h2 data-text-background-color="midnightblue">
+    Cat ipsum dolor sit amet, sleeps on my head, but lounge in doorway so if human is on laptop sit on the keyboard
+  </h2>
+</amp-story-grid-layer>
+```
+
 #### Links in amp-story-grid-layer
 
 We support inline links `<a>` as a descendant of `amp-story-grid-layer`. Whenever a link is tapped a tooltip will be shown - deferring the corresponding action until the user taps again in the tooltip.
@@ -1134,42 +1170,6 @@ You can apply multiple entrance animations on one element (for example, an eleme
 {% call callout('Note', type='note') %}
 If a composed animation is supposed to start after the end of a separate element's animation, make sure that all nested elements that compose the animation have the attribute `animate-in-after` set to the same `id`.
 {% endcall %}
-
-## Optional customization
-
-### `data-text-background-color`
-
-Use this attribute inside a `amp-story-page` to highlight the text with a color of your choice. To highlight the entire block, add this attribute directly to the text element. To only highlight the text, add the attribute and your text to an inner `<span>`.
-
-Example:
-<amp-img alt="text background color only example" layout="fixed" src="https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/img/text-background-color-ex-1.png" width="300" height="533">
-  <noscript>
-    <img alt="text background color only example" src="https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/img/text-background-color-ex-1.png" />
-  </noscript>
-</amp-img>
-```html
-<amp-story-grid-layer template="vertical">
-  <h2>
-    <span data-text-background-color="crimson">
-      Cat ipsum dolor sit amet, sleeps on my head, but lounge in doorway so if human is on laptop sit on the keyboard
-    </span>
-  </h2>
-</amp-story-grid-layer>
-```
-
-Example:
-<amp-img alt="text background color full example" layout="fixed" src="https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/img/text-background-color-ex-2.png" width="300" height="533">
-  <noscript>
-    <img alt="text background color full example" src="https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/img/text-background-color-ex-2.png" />
-  </noscript>
-</amp-img>
-```html
-<amp-story-grid-layer template="vertical"> 
-  <h2 data-text-background-color="midnightblue">
-    Cat ipsum dolor sit amet, sleeps on my head, but lounge in doorway so if human is on laptop sit on the keyboard
-  </h2>
-</amp-story-grid-layer>
-```
 
 ## Bookend: `amp-story-bookend`
 
