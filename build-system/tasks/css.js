@@ -40,16 +40,10 @@ async function css() {
 
 const cssEntryPoints = [
   {
-    path: 'ampdoc.css',
+    path: 'amp.css',
     outJs: 'acss.js',
     outCss: 'v0.css',
   },
-  //{
-  //  path: 'ampelement.css',
-  //  outJs: 'ampelement.css.js',
-  //  outCss: 'v0.css',
-  //  append: true,
-  //},
   {
     path: 'video-autoplay.css',
     outJs: 'video-autoplay.css.js',
@@ -76,10 +70,9 @@ function compileCss(watch, opt_compileAll) {
    * @param {string} css
    * @param {string} jsFilename
    * @param {string} cssFilename
-   * @param {boolean} append append CSS to existing file
    * @return {Promise}
    */
-  function writeCss(css, jsFilename, cssFilename, append) {
+  function writeCss(css, jsFilename, cssFilename) {
     return toPromise(
       file(jsFilename, 'export const cssText = ' + JSON.stringify(css), {
         src: true,
@@ -88,11 +81,7 @@ function compileCss(watch, opt_compileAll) {
         .on('end', function() {
           mkdirSync('build');
           mkdirSync('build/css');
-          if (append) {
-            fs.appendFileSync(`build/css/${cssFilename}`, css);
-          } else {
-            fs.writeFileSync(`build/css/${cssFilename}`, css);
-          }
+          fs.writeFileSync(`build/css/${cssFilename}`, css);
         })
     );
   }
@@ -101,11 +90,10 @@ function compileCss(watch, opt_compileAll) {
    * @param {string} path
    * @param {string} outJs
    * @param {string} outCss
-   * @param {boolean} append
    */
-  function writeCssEntryPoint(path, outJs, outCss, append) {
+  function writeCssEntryPoint(path, outJs, outCss) {
     return jsifyCssAsync(`css/${path}`).then(css =>
-      writeCss(css, outJs, outCss, append)
+      writeCss(css, outJs, outCss)
     );
   }
 
@@ -117,10 +105,8 @@ function compileCss(watch, opt_compileAll) {
   let promise = Promise.resolve();
 
   cssEntryPoints.forEach(entryPoint => {
-    const {path, outJs, outCss, append} = entryPoint;
-    promise = promise.then(() =>
-      writeCssEntryPoint(path, outJs, outCss, append)
-    );
+    const {path, outJs, outCss} = entryPoint;
+    promise = promise.then(() => writeCssEntryPoint(path, outJs, outCss));
   });
 
   return promise
