@@ -29,13 +29,12 @@ import {
   installBuiltins,
   installRuntimeServices,
 } from './runtime';
-import {cssText as ampDocCss} from '../build/ampdoc.css';
-import {cssText as ampElementCss} from '../build/ampelement.css';
 import {
   bodyAlwaysVisible,
   installStylesForDoc,
   makeBodyVisible,
 } from './style-installer';
+import {cssText} from '../build/css';
 import {deactivateChunking} from './chunk';
 import {doNotTrackImpression} from './impression';
 import {installDocService} from './service/ampdoc-impl';
@@ -65,7 +64,7 @@ if (isExperimentOn(self, 'ampdoc-shell')) {
   const ampdocShell = ampdocService.installShellShadowDoc();
   installStylesForDoc(
     ampdocShell,
-    ampDocCss + ampElementCss,
+    cssText,
     () => {
       installAmpdocServices(ampdocShell);
 

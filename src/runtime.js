@@ -32,8 +32,6 @@ import {
 } from './log';
 import {Services} from './services';
 import {VisibilityState} from './visibility-state';
-import {cssText as ampDocCss} from '../build/ampdoc.css';
-import {cssText as ampElementCss} from '../build/ampelement.css';
 import {
   childElementsByTag,
   isConnectedNode,
@@ -45,6 +43,7 @@ import {
   createShadowRoot,
   importShadowBody,
 } from './shadow-embed';
+import {cssText} from '../build/acss';
 import {disposeServicesForDoc} from './service';
 import {getMode} from './mode';
 import {hasRenderDelayingServices} from './render-delaying-services';
@@ -519,7 +518,7 @@ export class MultidocManager {
     // Install runtime CSS.
     installStylesForDoc(
       ampdoc,
-      ampElementCss + ampDocCss,
+      cssText,
       /* callback */ null,
       /* opt_isRuntimeCss */ true
     );

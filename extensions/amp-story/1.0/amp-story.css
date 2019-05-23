@@ -229,7 +229,7 @@ amp-story-page:not([active]) {
 
 /**
  * Note: If updating the [active] or [distance] attributes names, please also
- * update them in the ampdoc.css file.
+ * update them in the amp.css file.
  */
 amp-story-page[active],
 amp-story-page[distance="0"],

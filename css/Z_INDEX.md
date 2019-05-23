@@ -26,11 +26,11 @@ amp-story-page                                                                  
 .i-amphtml-image-slider-label-wrapper                                                                     |   1            |   extensions/amp-image-slider/0.1/amp-image-slider.css
 .i-amphtml-image-slider-right-mask                                                                        |   1            |   extensions/amp-image-slider/0.1/amp-image-slider.css
 .i-amphtml-story-background-overlay::after                                                                |   1            |   extensions/amp-story/1.0/amp-story-desktop-panels.css
-.i-amphtml-layout-size-defined > [fallback]                                                               |   1            |   css/ampdoc.css
+.i-amphtml-layout-size-defined > [fallback]                                                               |   1            |   css/amp.css
 .i-amphtml-story-background-overlay                                                                       |   1            |   extensions/amp-story/1.0/amp-story-desktop-panels.css
 .i-amphtml-lbg-caption-scroll                                                                             |   1            |   extensions/amp-lightbox-gallery/0.1/lightbox-caption.css
 [i-amphtml-lbg-caption-state="clip"] + .i-amphtml-lbg-caption-mask                                        |   1            |   extensions/amp-lightbox-gallery/0.1/lightbox-caption.css
-.i-amphtml-loading-container                                                                              |   1            |   css/ampdoc.css
+.i-amphtml-loading-container                                                                              |   1            |   css/amp.css
 .i-amphtml-carousel-arrow-next-slot                                                                       |   1            |   extensions/amp-base-carousel/0.1/amp-base-carousel.css
 .i-amphtml-carousel-arrow-prev-slot                                                                       |   1            |   extensions/amp-base-carousel/0.1/amp-base-carousel.css
 .amp-video-eq                                                                                             |   1            |   css/video-autoplay.css
@@ -44,7 +44,7 @@ amp-story-page[active]                                                          
 amp-story-page[active]                                                                                    |   1            |   extensions/amp-story/0.1/amp-story.css
 .i-amphtml-story-consent-actions                                                                          |   1            |   extensions/amp-story/0.1/amp-story-consent.css
 .i-amphtml-story-page-attachment-header                                                                   |   1            |   extensions/amp-story/1.0/amp-story-page-attachment-header.css
-.i-amphtml-layout-size-defined > [placeholder]                                                            |   1            |   css/ampdoc.css
+.i-amphtml-layout-size-defined > [placeholder]                                                            |   1            |   css/amp.css
 .i-amphtml-story-hint-container .i-amphtml-story-hint-tap-button-icon                                     |   1            |   extensions/amp-story/1.0/amp-story-hint.css
 .i-amphtml-story-background-overlay                                                                       |   1            |   extensions/amp-story/0.1/amp-story-desktop.css
 .i-amphtml-story-background-overlay::after                                                                |   1            |   extensions/amp-story/0.1/amp-story-desktop.css
@@ -60,9 +60,9 @@ div.i-amphtml-story-top                                                         
 amp-story-grid-layer                                                                                      |   2            |   extensions/amp-story/1.0/amp-story.css
 amp-consent                                                                                               |   initial      |   extensions/amp-story/1.0/amp-story.css
 .i-amphtml-image-lightbox-caption                                                                         |   2            |   extensions/amp-image-lightbox/0.1/amp-image-lightbox.css
-.i-amphtml-loader-moving-line                                                                             |   2            |   css/ampdoc.css
+.i-amphtml-loader-moving-line                                                                             |   2            |   css/amp.css
 .i-amphtml-story-access-header                                                                            |   2            |   extensions/amp-story/1.0/amp-story-access.css
-.i-amphtml-element > [overflow]                                                                           |   2            |   css/ampdoc.css
+.i-amphtml-element > [overflow]                                                                           |   2            |   css/amp.css
 amp-story-grid-layer                                                                                      |   2            |   extensions/amp-story/0.1/amp-story.css
 amp-consent                                                                                               |   initial      |   extensions/amp-story/0.1/amp-story.css
 .i-amphtml-story-bookend-active > amp-story-page[active]::after                                           |   2            |   extensions/amp-story/0.1/amp-story.css
@@ -92,7 +92,7 @@ amp-live-list > [update]                                                        
 i-amphtml-ad-close-header                                                                                 |   1000         |   extensions/amp-lightbox/0.1/amp-lightbox.css
 amp-lightbox                                                                                              |   1000         |   extensions/amp-lightbox/0.1/amp-lightbox.css
 amp-user-notification                                                                                     |   1000         |   extensions/amp-user-notification/0.1/amp-user-notification.css
-.i-amphtml-jank-meter                                                                                     |   1000         |   css/ampdoc.css
+.i-amphtml-jank-meter                                                                                     |   1000         |   css/amp.css
 .i-amphtml-image-lightbox-trans                                                                           |   1001         |   extensions/amp-image-lightbox/0.1/amp-image-lightbox.css
 .i-amphtml-story-page-play-button                                                                         |   10000        |   extensions/amp-story/1.0/amp-story.css
 .i-amphtml-story-system-layer                                                                             |   100000       |   extensions/amp-story/1.0/amp-story-system-layer.css
