@@ -28,6 +28,7 @@ import {
   FORM_VERIFY_PARAM,
   getFormVerifier,
 } from './form-verifiers';
+import {FormDirtiness} from './form-dirtiness';
 import {FormEvents} from './form-events';
 import {FormSubmitService} from './form-submit-service';
 import {SOURCE_ORIGIN_PARAM, addParamsToUrl} from '../../../src/url';
@@ -194,6 +195,9 @@ export class AmpForm {
         inputs[i]
       );
     }
+
+    /** @const @private {!./form-dirtiness.FormDirtiness} */
+    this.dirtinessHandler_ = new FormDirtiness(this.form_);
 
     /** @const @private {!./form-validators.FormValidator} */
     this.validator_ = getFormValidator(this.form_);
@@ -536,6 +540,8 @@ export class AmpForm {
       AsyncInputClasses.ASYNC_INPUT
     );
 
+    this.dirtinessHandler_.onSubmitting();
+
     // Do any assertions we may need to do
     // For NonXhrGET
     // That way we can determine if
@@ -557,6 +563,7 @@ export class AmpForm {
         const shouldSubmitFormElement = !event;
 
         this.handleNonXhrGet_(shouldSubmitFormElement);
+        this.dirtinessHandler_.onSubmitSuccess();
         return Promise.resolve();
       }
 
@@ -888,6 +895,7 @@ export class AmpForm {
         this.setState_(FormState.SUBMIT_SUCCESS);
         this.renderTemplate_(json || {}).then(() => {
           this.triggerAction_(FormEvents.SUBMIT_SUCCESS, json);
+          this.dirtinessHandler_.onSubmitSuccess();
         });
       },
       error => {
@@ -929,6 +937,7 @@ export class AmpForm {
     return tryResolve(() => {
       this.renderTemplate_(json).then(() => {
         this.triggerAction_(FormEvents.SUBMIT_ERROR, json);
+        this.dirtinessHandler_.onSubmitError();
       });
     });
   }
