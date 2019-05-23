@@ -39,6 +39,7 @@ const {
   reportTestStarted,
 } = require('./status-report');
 const {app} = require('../../test-server');
+const {clean} = require('../clean');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../../ctrlcHandler');
 const {css} = require('../css');
 const {dist} = require('../dist');
@@ -658,6 +659,7 @@ async function test() {
     } else {
       argv.fortesting = true;
       argv.compiled = true;
+      await clean();
       await dist();
     }
   }

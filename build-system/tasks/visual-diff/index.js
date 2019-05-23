@@ -840,6 +840,7 @@ async function ensureOrBuildAmpRuntimeInTestMode_() {
       );
     }
   } else {
+    execOrDie('gulp clean');
     execOrDie('gulp dist --fortesting');
   }
 }
