@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-// import to install chromedriver
+// import to install chromedriver and geckodriver
 require('chromedriver'); // eslint-disable-line no-unused-vars
+require('geckodriver'); // eslint-disable-line no-unused-vars
 
 const puppeteer = require('puppeteer');
 const {
@@ -60,6 +61,17 @@ let SeleniumConfigDef;
 let describesConfig = null;
 
 /**
+ * Map the browserName to the capabilities name. (firefox for example has a
+ * prefix.
+ *
+ * @enum {string}
+ */
+const capabilitiesKeys = {
+  'chrome': 'chromeOptions',
+  'firefox': 'moz:firefoxOptions',
+};
+
+/**
  * Configure all tests. This may only be called once, since it is only read once
  * and writes after reading will not have any effect.
  * @param {!DescribesConfigDef} config
@@ -102,27 +114,60 @@ async function createPuppeteer(opt_config = {}) {
 
 /**
  * Configure and launch a Selenium instance
+ * @param {string} browserName
  * @param {!SeleniumConfigDef=} opt_config
+ * @return {!SeleniumDriver}
  */
-async function createSelenium(opt_config = {}) {
-  const args = [];
-  args.push('--no-sandbox');
-  args.push('--disable-gpu');
-  if (opt_config.headless) {
-    args.push('--headless');
+async function createSelenium(browserName, opt_config = {}) {
+  // TODO(estherkim): implement sessions
+  // See https://w3c.github.io/webdriver/#sessions
+  switch (browserName) {
+    case 'firefox':
+      return createDriver(browserName, getFirefoxArgs(opt_config));
+    case 'chrome':
+    default:
+      return createDriver(browserName, getChromeArgs(opt_config));
   }
+}
 
-  const capabilities = Capabilities.chrome();
-  const chromeOptions = {
-    // TODO(cvializ,estherkim,sparhami):
-    // figure out why headless causes more flakes
-    'args': args,
-  };
-  capabilities.set('chromeOptions', chromeOptions);
-
+async function createDriver(browserName, args) {
+  const capabilities = Capabilities[browserName]();
+  capabilities.set(capabilitiesKeys[browserName], {'args': args});
   const builder = new Builder().withCapabilities(capabilities);
   const driver = await builder.build();
   return driver;
+}
+
+/**
+ * Configure chrome args.
+ *
+ * @param {!SeleniumConfigDef} config
+ * @return {!Array<string>}
+ */
+function getChromeArgs(config) {
+  const args = ['--no-sandbox', '--disable-gpu'];
+
+  // TODO(cvializ,estherkim,sparhami):
+  // figure out why headless causes more flakes
+  if (config.headless) {
+    args.push('--headless');
+  }
+  return args;
+}
+
+/**
+ * Configure firefox args.
+ *
+ * @param {!SeleniumConfigDef} config
+ * @return {!Array<string>}
+ */
+function getFirefoxArgs(config) {
+  const args = [];
+
+  if (config.headless) {
+    args.push('-headless');
+  }
+  return args;
 }
 
 /**
@@ -212,12 +257,12 @@ class ItConfig {
  */
 function describeEnv(factory) {
   /**
-   * @param {string} name
+   * @param {string} suiteName
    * @param {!Object} spec
    * @param {function(!Object)} fn
    * @param {function(string, function())} describeFunc
    */
-  const templateFunc = function(name, spec, fn, describeFunc) {
+  const templateFunc = function(suiteName, spec, fn, describeFunc) {
     const fixture = factory(spec);
     const environments = spec.environments || defaultEnvironments;
     const variants = Object.create(null);
@@ -226,24 +271,41 @@ function describeEnv(factory) {
       variants[o.name] = o.value;
     });
 
-    return describeFunc(name, function() {
+    // Use chrome as default if no browser is specified
+    if (!Array.isArray(spec.browsers)) {
+      spec.browsers = ['chrome'];
+    }
+
+    function createBrowserDescribe() {
+      spec.browsers.forEach(browserName => {
+        describe(browserName, function() {
+          createVariantDescribe(browserName);
+        });
+      });
+    }
+
+    function createVariantDescribe(browserName) {
       for (const name in variants) {
         it.configure = function() {
           return new ItConfig(it, variants[name]);
         };
 
         describe(name ? ` ${name} ` : SUB, function() {
-          doTemplate.call(this, name, variants[name]);
+          doTemplate.call(this, name, variants[name], browserName);
         });
       }
+    }
+
+    return describeFunc(suiteName, function() {
+      createBrowserDescribe();
     });
 
-    function doTemplate(name, variant) {
+    function doTemplate(name, variant, browserName) {
       const env = Object.create(variant);
       this.timeout(TEST_TIMEOUT);
       beforeEach(async function() {
         this.timeout(SETUP_TIMEOUT);
-        await fixture.setup(env);
+        await fixture.setup(env, browserName);
 
         // don't install for CI
         if (!isTravisBuild()) {
@@ -307,9 +369,13 @@ class EndToEndFixture {
     this.spec = spec;
   }
 
-  async setup(env) {
+  /**
+   * @param {!Object} env
+   * @param {string} browserName
+   */
+  async setup(env, browserName) {
     const config = getConfig();
-    const controller = await getController(config);
+    const controller = await getController(config, browserName);
     const ampDriver = new AmpDriver(controller);
     env.controller = controller;
     env.ampDriver = ampDriver;
@@ -341,15 +407,19 @@ class EndToEndFixture {
 /**
  * Get the controller object for the configured engine.
  * @param {!DescribesConfigDef} describesConfig
+ * @param {string} browserName
  */
-async function getController({engine = 'selenium', headless = false}) {
+async function getController(
+  {engine = 'selenium', headless = false},
+  browserName
+) {
   if (engine == 'puppeteer') {
     const browser = await createPuppeteer({headless});
     return new PuppeteerController(browser);
   }
 
   if (engine == 'selenium') {
-    const driver = await createSelenium({headless});
+    const driver = await createSelenium(browserName, {headless});
     return new SeleniumWebDriverController(driver);
   }
 }

@@ -8,6 +8,7 @@
     "babel-regenerator-runtime": "6.5.0",
     "chromedriver": "74.0.0",
     "puppeteer": "1.16.0",
+    "geckodriver": "1.16.2",
     "selenium-webdriver": "4.0.0-alpha.1"
   }
 }
