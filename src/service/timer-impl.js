@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-// Requires polyfills in immediate side effect.
-import '../polyfills';
-
 import {installServiceInEmbedScope, registerServiceBuilder} from '../service';
 import {reportError} from '../error';
 import {user} from '../log';
@@ -170,7 +167,10 @@ export class Timer {
     });
   }
 
-  /** @override @nocollapse */
+  /**
+   * @param {!Window} embedWin
+   * @param {!./ampdoc-impl.AmpDoc} unusedAmpDoc
+   */
   static installInEmbedWindow(embedWin, unusedAmpDoc) {
     installServiceInEmbedScope(embedWin, TAG, new Timer(embedWin));
   }
