@@ -362,25 +362,37 @@ export class AmpAutocomplete extends AMP.BaseElement {
   /**
    * Create and return <div> element from given plan-text item.
    * @param {string} item
-   * @param {string} substring
+   * @param {string=} substring
    * @return {!Element}
    * @private
    */
-  createElementFromItem_(item, substring) {
+  createElementFromItem_(item, substring = '') {
     const element = this.element.ownerDocument.createElement('div');
     element.classList.add('i-amphtml-autocomplete-item');
     element.setAttribute('role', 'listitem');
     element.setAttribute('data-value', item);
     element.setAttribute('dir', 'auto');
-    if (!substring || substring.length > item.length) {
-      element.textContent = item;
-    } else {
-      const sanitized = sanitizeHtml(substring, this.win.document);
-      const regex = new RegExp(sanitized, 'gi');
-      element./*OK*/ innerHTML = item.replace(
-        regex,
-        '<span class="autocomplete-partial">$&</span>'
+    element.textContent = item;
+    const text = element.childNodes[0];
+    const lowerCaseItem = item.toLocaleLowerCase();
+    const lowerCaseSubstring = substring.toLocaleLowerCase();
+    if (
+      substring &&
+      substring.length <= item.length &&
+      includes(lowerCaseItem, lowerCaseSubstring)
+    ) {
+      const loc = lowerCaseItem.indexOf(lowerCaseSubstring);
+      const span = this.element.ownerDocument.createElement('span');
+      span.classList.add('autocomplete-partial');
+      span.appendChild(
+        this.element.ownerDocument.createTextNode(
+          // Preserve any capitalization from the original item.
+          item.slice(loc, loc + substring.length)
+        )
       );
+      const textToRemove = text.splitText(loc);
+      textToRemove.splitText(substring.length);
+      element.replaceChild(span, textToRemove);
     }
     return element;
   }
