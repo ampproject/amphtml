@@ -663,5 +663,8 @@ function compile(flagsArray) {
       .pipe(sourcemaps.write('.'))
       .pipe(gulpIf(/(\/amp-|\/_base)/, rename(path => (path.dirname += '/v0'))))
       .pipe(gulp.dest('.'))
-  ).then(outputMessages, handleSinglePassCompilerError);
+  ).then(outputMessages, e => {
+    handleSinglePassCompilerError();
+    throw e;
+  });
 }
