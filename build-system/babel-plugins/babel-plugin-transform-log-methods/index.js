@@ -54,7 +54,7 @@ const base62 = require('base62/lib/ascii');
 const fs = require('fs-extra');
 const {
   assertAliases,
-  messagesPath,
+  messagesByMessagePath,
   singletonFunctions,
   transformableMethods,
 } = require('../../log-module-metadata.js');
@@ -85,9 +85,9 @@ function getOrCreateShortMessageId(messages, message, getMessageId) {
     return messages[message];
   }
   // Base-62 radix for best utilization of ascii space.
-  const shortMessageId = base62.encode(getMessageId());
-  messages[message] = shortMessageId;
-  return shortMessageId;
+  const id = base62.encode(getMessageId());
+  messages[message] = {id, message};
+  return id;
 }
 
 /**
@@ -126,7 +126,7 @@ function buildMessage(t, node, interpolationArgs) {
 
 let messages;
 let nextMessageId;
-let relMessagesPath;
+let messagesPath;
 
 let shouldReplaceCallArguments;
 
@@ -143,17 +143,19 @@ module.exports = function({types: t}) {
       shouldReplaceCallArguments = replaceCallArguments;
 
       // Configurable to isolate test output.
-      relMessagesPath = relativeToRoot(this.opts.messagesPath || messagesPath);
+      messagesPath = relativeToRoot(
+        this.opts.messagesPath || messagesByMessagePath
+      );
 
       // Read table.
-      messages = fs.readJsonSync(relMessagesPath, {throws: false}) || {};
+      messages = fs.readJsonSync(messagesPath, {throws: false}) || {};
       nextMessageId = Object.keys(messages).length;
     },
     visitor: {
       /** Write table on every exit. */
       Program: {
         exit() {
-          fs.outputJsonSync(relMessagesPath, messages, {spaces: 2});
+          fs.outputJsonSync(messagesPath, messages, {spaces: 2});
         },
       },
       /**

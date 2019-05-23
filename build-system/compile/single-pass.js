@@ -41,8 +41,11 @@ const {
   gulpClosureCompile,
   handleSinglePassCompilerError,
 } = require('./closure-compile');
+const {
+  outputMessagesById,
+  outputMessagesByIdSimple,
+} = require('./log-messages');
 const {isTravisBuild} = require('../travis');
-const {messagesPath} = require('../log-module-metadata');
 const {shortenLicense, shouldShortenLicense} = require('./shorten-license');
 const {TopologicalSort} = require('topological-sort');
 const TYPES_VALUES = Object.keys(TYPES).map(x => TYPES[x]);
@@ -160,8 +163,8 @@ exports.getFlags = function(config) {
       }
     });
 
-  return ensureMessagesValuesLongerThanKeys(false)
-    .then(() => exports.getGraph(config.modules, config))
+  return exports
+    .getGraph(config.modules, config)
     .then(g => flagsArray.concat(exports.getBundleFlags(g, flagsArray)));
 };
 
@@ -667,41 +670,7 @@ function compile(flagsArray) {
       .pipe(gulpIf(/(\/amp-|\/_base)/, rename(path => (path.dirname += '/v0'))))
       .pipe(gulp.dest('.'))
       .on('end', resolve);
-  }).then(() => ensureMessagesValuesLongerThanKeys(true));
-}
-
-/**
- * The extracted messages table from the `transform-log-methods` babel plugin
- * must be in [message: id] format. However, the output must be in
- * [id: message] format.
- *
- * Messages will ~always be longer than their id, so this ensures that it's in
- * either format before and after compilation.
- *
- * @param {boolean} valuesLongerThanKeys
- * @return {!Promise}
- */
-function ensureMessagesValuesLongerThanKeys(valuesLongerThanKeys) {
-  return fs.readJson(messagesPath).then(
-    obj => {
-      const keys = Object.keys(obj);
-      const avgValueKeyLengthSub = keys.reduce(
-        (acc, k) => acc + (obj[k].length - k.length) / keys.length,
-        0
-      );
-      if (
-        (avgValueKeyLengthSub >= 0 && valuesLongerThanKeys) ||
-        (avgValueKeyLengthSub < 0 && !valuesLongerThanKeys)
-      ) {
-        return;
-      }
-      const inverted = {};
-      keys.forEach(k => {
-        inverted[obj[k]] = k;
-      });
-      return fs.writeJson(messagesPath, inverted, {spaces: 2});
-    },
-    // We don't care if non existant or invalid.
-    () => {}
+  }).then(() =>
+    Promise.all([outputMessagesById(), outputMessagesByIdSimple()])
   );
 }
