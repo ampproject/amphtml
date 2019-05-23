@@ -18,29 +18,13 @@ const fs = require('fs-extra');
 const messagesPathPrefix = 'dist/log-messages';
 
 /**
- * Consumed by `transform-log-methods` babel plugin. This is the source of truth
+ * Written by `transform-log-methods` babel plugin. This is the source of truth
  * for all extracted messages during build, but it should not be deployed
  * anywhere. Format may allow further fields in the future.
  * This looks like:
  *   {"my message": {"id": "xx", "message": "my message"}}
  */
 const messagesByMessagePath = `${messagesPathPrefix}.by-message.json`;
-
-/**
- * Output from `messagesByMessagePath`. Consumed by logging server. Format may
- * allow further fields in the future.
- * This looks like:
- *   {"xx": {"message": "my message"}}
- */
-const messagesByIdPath = `${messagesPathPrefix}.json`;
-
-/**
- * Output from `messagesByMessagePath`. Consumed by runtime function in
- * development mode.
- * This looks like:
- *   {"xx": "my message"}
- */
-const messagesByIdSimplePath = `${messagesPathPrefix}.simple.json`;
 
 /**
  * @param {string} path
@@ -64,8 +48,18 @@ const outputMessagesById = (path, transform) =>
 /** @return {!Promise} */
 const outputMessages = () =>
   Promise.all([
-    outputMessagesById(messagesByIdPath, ({id: unused, ...rest}) => rest),
-    outputMessagesById(messagesByIdSimplePath, ({message}) => message),
+    // Consumed by logging server. Format may allow further fields in the
+    // future.
+    outputMessagesById(
+      `${messagesPathPrefix}.json`,
+      ({id: unused, ...other}) => other
+    ),
+
+    // Consumed by runtime function in development mode.
+    outputMessagesById(
+      `${messagesPathPrefix}.simple.json`,
+      ({message}) => message
+    ),
   ]);
 
 module.exports = {messagesByMessagePath, outputMessages};
