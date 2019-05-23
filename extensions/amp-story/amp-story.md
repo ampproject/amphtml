@@ -729,7 +729,7 @@ An `amp-story-grid-layer` can contain any of the following elements:
 
 ##### `data-text-background-color`
 
-The data-text-background-color attribute highlights the text of the element with a specified color. To highlight the entire block, add this attribute directly to the text element. To only highlight the text, add the attribute and text to an inner <span>.
+The `data-text-background-color` attribute highlights the text of the element with a specified color. To highlight the entire block, add this attribute directly to the text element. To only highlight the text, add the attribute and text to an inner <span>.
 
 Example:
 <amp-img alt="text background color only example" layout="fixed" src="https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/img/text-background-color-ex-1.png" width="145" height="255">
