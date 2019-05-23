@@ -36,16 +36,8 @@ export class RequestHandler {
    * @param {!../../../src/preconnect.Preconnect} preconnect
    * @param {./transport.Transport} transport
    * @param {boolean} isSandbox
-   * @param {string} requestOrigin
    */
-  constructor(
-    element,
-    request,
-    preconnect,
-    transport,
-    isSandbox,
-    requestOrigin
-  ) {
+  constructor(element, request, preconnect, transport, isSandbox) {
     /** @const {!Element} */
     this.element_ = element;
 
@@ -56,7 +48,7 @@ export class RequestHandler {
     this.win = this.ampdoc_.win;
 
     /** @const {string} !if specified, all requests are prepended with this */
-    this.requestOrigin = requestOrigin;
+    this.requestOrigin_ = request['requestOrigin'];
 
     /** @const {string} */
     this.baseUrl = devAssert(request['baseUrl']);
@@ -81,6 +73,9 @@ export class RequestHandler {
 
     /** @private {?Promise<string>} */
     this.baseUrlTemplatePromise_ = null;
+
+    /** @private {?Promise<string>} */
+    this.requestOriginPromise_ = null;
 
     /** @private {!Array<!Promise<!BatchSegmentDef>>} */
     this.batchSegmentPromises_ = [];
@@ -146,18 +141,14 @@ export class RequestHandler {
       expansionOption.freezeVar('extraUrlParams');
 
       // expand requestOrigin if it is declared
-      if (this.requestOrigin) {
-        const baseUrlTemplatePromise = this.variableService_.expandTemplate(
-          this.baseUrl,
-          expansionOption
-        );
-
+      if (this.requestOrigin_) {
         // do not encode vars in request origin
-        expansionOption.noEncode = true;
+        const requestOriginExpansionOpt = expansionOption.makeCopy();
+        requestOriginExpansionOpt.noEncode = true;
 
-        const requestOriginPromise = this.variableService_
+        this.requestOriginPromise_ = this.variableService_
           // expand variables in request origin
-          .expandTemplate(this.requestOrigin, expansionOption)
+          .expandTemplate(this.requestOrigin_, requestOriginExpansionOpt)
           // substitute in URL values e.g. DOCUMENT_REFERRER -> https://example.com
           .then(expandedRequestOrigin => {
             return this.urlReplacementService_.expandUrlAsync(
@@ -166,23 +157,15 @@ export class RequestHandler {
               this.whitelist_,
               true // opt_noEncode
             );
-          });
-
-        this.baseUrlTemplatePromise_ = Promise.all([
-          requestOriginPromise,
-          baseUrlTemplatePromise,
-        ]).then(promiseValues => {
-          // remove trailing forward slashes in request origin
-          const requestOrigin = promiseValues[0].replace(/\/+$/, '');
-          const baseUrl = promiseValues[1];
-          return requestOrigin + baseUrl;
-        });
-      } else {
-        this.baseUrlTemplatePromise_ = this.variableService_.expandTemplate(
-          this.baseUrl,
-          expansionOption
-        );
+          })
+          // remove trailing forward slashes
+          .then(requestOrigin => requestOrigin.replace(/\/+$/, ''));
       }
+
+      this.baseUrlTemplatePromise_ = this.variableService_.expandTemplate(
+        this.baseUrl,
+        expansionOption
+      );
 
       this.baseUrlPromise_ = this.baseUrlTemplatePromise_.then(baseUrl => {
         return this.urlReplacementService_.expandUrlAsync(
@@ -254,6 +237,7 @@ export class RequestHandler {
    */
   fire_() {
     const {
+      requestOriginPromise_: requestOriginPromise,
       baseUrlTemplatePromise_: baseUrlTemplatePromise,
       baseUrlPromise_: baseUrlPromise,
       batchSegmentPromises_: segmentPromises,
@@ -261,11 +245,19 @@ export class RequestHandler {
     const trigger = /** @type {!JsonObject} */ (this.lastTrigger_);
     this.reset_();
 
-    baseUrlTemplatePromise.then(preUrl => {
+    // preconnect to requestOrigin if available, otherwise baseUrlTemplate
+    const preconnectPromise = requestOriginPromise
+      ? requestOriginPromise
+      : baseUrlTemplatePromise;
+
+    preconnectPromise.then(preUrl => {
       this.preconnect_.url(preUrl, true);
       Promise.all([baseUrlPromise, Promise.all(segmentPromises)]).then(
         results => {
-          const baseUrl = results[0];
+          // prepend requestOrigin if available
+          const baseUrl = requestOriginPromise
+            ? preUrl + results[0]
+            : results[0];
           const batchSegments = results[1];
           if (batchSegments.length === 0) {
             return;
@@ -297,6 +289,7 @@ export class RequestHandler {
     this.queueSize_ = 0;
     this.baseUrlPromise_ = null;
     this.baseUrlTemplatePromise_ = null;
+    this.requestOriginPromise_ = null;
     this.batchSegmentPromises_ = [];
     this.lastTrigger_ = null;
   }

@@ -86,6 +86,21 @@ export class ExpansionOptions {
     }
     return value;
   }
+
+  /**
+   * Creates a copy of this instance of ExpansionOptions
+   * @return {ExpansionOptions}
+   */
+  makeCopy() {
+    const copy = new ExpansionOptions(
+      this.vars,
+      this.iterations,
+      this.noEncode
+    );
+    copy.freezeVars = this.freezeVars;
+
+    return copy;
+  }
 }
 
 /**
