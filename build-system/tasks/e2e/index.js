@@ -40,6 +40,7 @@ function installPackages_() {
 }
 
 function buildRuntime_() {
+  execOrDie('gulp clean');
   execOrDie('gulp dist --fortesting');
 }
 
@@ -160,7 +161,7 @@ module.exports = {
 
 e2e.description = 'Runs e2e tests';
 e2e.flags = {
-  'nobuild': '  Skips building the runtime via `gulp build`',
+  'nobuild': '  Skips building the runtime via `gulp dist --fortesting`',
   'files': '  Run tests found in a specific path (ex: **/test-e2e/*.js)',
   'testnames': '  Lists the name of each test being run',
   'watch': '  Watches for changes in files, runs corresponding test(s)',
