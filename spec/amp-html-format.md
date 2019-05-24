@@ -139,6 +139,10 @@ HTML tags can be used unchanged in AMP HTML. Certain tags have equivalent custom
     <td>Replaced with <code>amp-img</code>.<br>
         Please note: <code>&lt;img&gt;</code> is a <a href="https://www.w3.org/TR/html5/syntax.html#void-elements">Void Element according to HTML5</a>, so it does not have an end tag. However, <code>&lt;amp-img&gt;</code> does have an end tag <code>&lt;/amp-img&gt;</code>.</td>
   </tr>
+    <tr>
+    <td width="30%">picture</td>
+    <td>Prohibited. Serve different image formats by using the [fallback](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/placeholders?format=websites) attribute or provide multiple [<code>srcset</code> on <code>&lt;amp-img&gt;</code>](https://amp.dev/documentation/components/amp-img#attributes).</td>
+  </tr>
   <tr>
     <td width="30%">video</td>
     <td>Replaced with <code>amp-video</code>.</td>
