@@ -19,10 +19,13 @@ const argv = require('minimist')(process.argv.slice(2));
 const log = require('fancy-log');
 const requestPromise = require('request-promise');
 const {cyan, green, yellow} = require('ansi-colors');
-const {gitCommitHash} = require('../../git');
-const {isTravisPullRequestBuild} = require('../../travis');
+const {gitCommitHash} = require('../git');
+const {isTravisPullRequestBuild} = require('../travis');
 
 const reportBaseUrl = 'https://amp-test-status-bot.appspot.com/v0/tests';
+
+const IS_GULP_E2E = argv._[0] === 'e2e';
+const IS_GULP_TEST = argv._[0] === 'test';
 
 const IS_INTEGRATION = !!argv.integration;
 const IS_LOCAL_CHANGES = !!argv['local-changes'];
@@ -34,37 +37,43 @@ const TEST_TYPE_SUBTYPES = new Map([
   // TODO(danielrozenberg): add 'saucelabs' to integration tests when supported.
   ['integration', ['local', 'single-pass']],
   ['unit', ['local', 'local-changes', 'saucelabs']],
-  // TODO(danielrozenberg): add 'e2e' tests.
+  ['e2e', ['local']],
 ]);
 const TEST_TYPE_BUILD_TARGETS = new Map([
   ['integration', ['RUNTIME', 'FLAG_CONFIG', 'INTEGRATION_TEST']],
   ['unit', ['RUNTIME', 'UNIT_TEST']],
+  ['e2e', ['RUNTIME', 'FLAG_CONFIG', 'E2E_TEST']],
 ]);
 
 function inferTestType() {
-  let type;
-  if (IS_UNIT) {
-    type = 'unit';
-  } else if (IS_INTEGRATION) {
-    type = 'integration';
+  if (IS_GULP_TEST) {
+    let type;
+    if (IS_UNIT) {
+      type = 'unit';
+    } else if (IS_INTEGRATION) {
+      type = 'integration';
 
-    // TODO(danielrozenberg): report integration on saucelabs
-    if (IS_SAUCELABS) {
+      // TODO(danielrozenberg): report integration on saucelabs
+      if (IS_SAUCELABS) {
+        return null;
+      }
+    } else {
       return null;
     }
-  } else {
-    return null;
-  }
 
-  if (IS_LOCAL_CHANGES) {
-    return `${type}/local-changes`;
-  } else if (IS_SAUCELABS) {
-    return `${type}/saucelabs`;
-  } else if (IS_SINGLE_PASS) {
-    return `${type}/single-pass`;
-  } else {
-    return `${type}/local`;
+    if (IS_LOCAL_CHANGES) {
+      return `${type}/local-changes`;
+    } else if (IS_SAUCELABS) {
+      return `${type}/saucelabs`;
+    } else if (IS_SINGLE_PASS) {
+      return `${type}/single-pass`;
+    } else {
+      return `${type}/local`;
+    }
+  } else if (IS_GULP_E2E) {
+    return 'e2e/local';
   }
+  return null;
 }
 
 function postReport(type, action) {
