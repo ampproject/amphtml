@@ -170,15 +170,13 @@ export class AmpAutocomplete extends AMP.BaseElement {
       `${TAG} should contain exactly one <input> child`
     );
     this.inputElement_ = /** @type {!HTMLInputElement} */ (inputElements[0]);
-    userAssert(
-      this.inputElement_.hasAttribute('type'),
-      `${TAG} requires the "type" attribute on <input>`
-    );
-    const inputType = this.inputElement_.getAttribute('type');
-    userAssert(
-      inputType === 'text' || inputType === 'search',
-      `${TAG} requires the "type=text|search" attribute on <input>`
-    );
+    if (this.inputElement_.hasAttribute('type')) {
+      const inputType = this.inputElement_.getAttribute('type');
+      userAssert(
+        inputType === 'text' || inputType === 'search',
+        `${TAG} requires the "type" attribute to be "text" or "search" if present on <input>`
+      );
+    }
     this.inputElement_.setAttribute('dir', 'auto');
     this.inputElement_.setAttribute('aria-autocomplete', 'list');
     this.inputElement_.setAttribute('role', 'combobox');
