@@ -207,7 +207,7 @@ class AmpVimeo extends AMP.BaseElement {
       !originMatches(
         event,
         this.iframe_,
-        /^(https?:)?\/\/((player|www).)?vimeo.com(?=$|\/)/
+        /^(https?:)?\/\/((player|www)\.)?vimeo.com(?=$|\/)/
       )
     ) {
       return;

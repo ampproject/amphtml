@@ -60,12 +60,12 @@ export const CardOptions = {
  * Loads embedly card SDK that is consumed by this 3p integration.
  *
  * @param {!Window} global
- * @param {function(!Object)} callback
+ * @param {function()} callback
  * @visibleForTesting
  */
 function getEmbedly(global, callback) {
   loadScript(global, EMBEDLY_SDK_URL, function() {
-    callback(global);
+    callback();
   });
 }
 
