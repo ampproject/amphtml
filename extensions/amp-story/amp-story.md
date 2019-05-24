@@ -754,8 +754,8 @@ Example:
   </noscript>
 </amp-img>
 ```html
-<amp-story-grid-layer template="vertical"> 
-  <h2 data-text-background-color="midnightblue">
+<amp-story-grid-layer template="vertical">
+  <h2 data-text-background-color="crimson">
     Cat ipsum dolor sit amet, sleeps on my head, but lounge in doorway so if human is on laptop sit on the keyboard
   </h2>
 </amp-story-grid-layer>
