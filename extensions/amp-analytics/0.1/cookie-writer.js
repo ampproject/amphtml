@@ -118,10 +118,7 @@ export class CookieWriter {
       return Promise.resolve();
     }
 
-    // convert cookieMaxAge (sec) to milliseconds
-    const cookieExpireDateMs = hasOwn(inputConfig, 'cookieMaxAge')
-      ? inputConfig['cookieMaxAge'] * 1000
-      : undefined;
+    const cookieExpireDateMs = this.getCookieMaxAgeMs_(inputConfig);
 
     const ids = Object.keys(inputConfig);
     const promises = [];
@@ -143,11 +140,27 @@ export class CookieWriter {
   }
 
   /**
+   * Retrieves cookieMaxAge from given config,
+   * @param {JsonObject} inputConfig
+   * @return {number}
+   */
+  getCookieMaxAgeMs_(inputConfig) {
+    if (!hasOwn(inputConfig, 'cookieMaxAge')) {
+      return BASE_CID_MAX_AGE_MILLIS;
+    }
+
+    // convert cookieMaxAge (sec) to milliseconds
+    return (
+      Number(inputConfig['cookieMaxAge']) * 1000 || BASE_CID_MAX_AGE_MILLIS
+    );
+  }
+
+  /**
    * Check whether the cookie value is supported. Currently only support
    * QUERY_PARAM(***) and LINKER_PARAM(***, ***)
    *
    * CookieObj should looks like
-   * cookeName: {
+   * cookieName: {
    *  value: string (cookieValue),
    * }
    * @param {string} cookieName
@@ -176,10 +189,10 @@ export class CookieWriter {
    * Expand the value and write to cookie if necessary
    * @param {string} cookieName
    * @param {string} cookieValue
-   * @param {number} cookieExpireDateMs
+   * @param {number=} opt_cookieExpireDateMs
    * @return {!Promise}
    */
-  expandAndWrite_(cookieName, cookieValue, cookieExpireDateMs) {
+  expandAndWrite_(cookieName, cookieValue, opt_cookieExpireDateMs) {
     // Note: Have to use `expandStringAsync` because QUERY_PARAM can wait for
     // trackImpressionPromise and resolve async
     return this.urlReplacementService_
@@ -188,8 +201,8 @@ export class CookieWriter {
         // Note: We ignore empty cookieValue, that means currently we don't
         // provide a way to overwrite or erase existing cookie
         if (value) {
-          const expireDate = cookieExpireDateMs
-            ? Date.now() + cookieExpireDateMs
+          const expireDate = opt_cookieExpireDateMs
+            ? Date.now() + opt_cookieExpireDateMs
             : Date.now() + BASE_CID_MAX_AGE_MILLIS;
           setCookie(this.win_, cookieName, value, expireDate, {
             highestAvailableDomain: true,
