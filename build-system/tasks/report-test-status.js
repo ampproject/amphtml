@@ -37,7 +37,7 @@ const TEST_TYPE_SUBTYPES = new Map([
   // TODO(danielrozenberg): add 'saucelabs' to integration tests when supported.
   ['integration', ['local', 'single-pass']],
   ['unit', ['local', 'local-changes', 'saucelabs']],
-  // TODO(danielrozenberg): add 'e2e' tests.
+  ['e2e', ['local']],
 ]);
 const TEST_TYPE_BUILD_TARGETS = new Map([
   ['integration', ['RUNTIME', 'FLAG_CONFIG', 'INTEGRATION_TEST']],
