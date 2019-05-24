@@ -215,7 +215,7 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
       win.location.href = 'https://example.com/?test=yes';
       return check(
         '$IF(QUERY_PARAM(test), 1.$SUBSTR(TIMESTAMP, 0, 10)QUERY_PARAM(test), ``)',
-        '%201.123456789yes'
+        '1.123456789yes'
       );
     });
 
