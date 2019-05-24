@@ -25,6 +25,7 @@ const Mocha = require('mocha');
 const tryConnect = require('try-net-connect');
 const {cyan} = require('ansi-colors');
 const {execOrDie, execScriptAsync} = require('../../exec');
+const {reportTestStarted} = require('../runtime-test/status-report');
 const {watch} = require('gulp');
 
 const HOST = 'localhost';
@@ -129,6 +130,7 @@ async function e2e() {
       });
     }
 
+    await reportTestStarted();
     mocha.run(async failures => {
       // end web server
       await cleanUp_();
