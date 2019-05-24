@@ -16,41 +16,37 @@
 
 /**
  * @fileoverview Indirects log messages through expansion calls with
- * base36-encoded message ids. These redirect to a URL or look up a message
- * table to interpolate and display the logged string.
+ * base62-encoded ([0-9a-zA-Z]) ids. These redirect to a URL or look up a table
+ * to interpolate and display the logged string.
  *
  *    dev().assert(foo != bar, 'foo should not be bar')
- *    // transforms into 👇
+ *    // 👇
  *    dev().assert(foo != bar, ['1z'])
  *
  * `assert is overloaded so array syntax causes lookup of the message template
- * and expansion of the message, or displaying a URL where the interpolated
+ * and expansion of the message, or returning a URL where the interpolated
  * message is displayed.
  *
- * Additionally outputs a JSON file containing [template, id] pairs keyed by
- * message template. This table is "backwards" for deduping, to key by id its
- * rows should be reversed separately.
+ * Additionally outputs a JSON table containing {message: {...item}}. This table
+ * is "backwards" for deduping, to key by id its rows should be reversed
+ * separately.
  *
  * When the template has arguments they are nested into the expansion method:
  *
  *    dev().assert(false, '%s should not be %s.', foo, bar)
- *    // transforms into 👇
+ *    // 👇
  *    dev().assert(false, ['e2', foo, bar])
  *
  * It also nests arguments of template literals:
  *
  *    dev().assert(false, `Hello, my dear ${name}`);
- *    // transforms into 👇
+ *    // 👇
  *    dev().assert(false, ['0a', name]);
  *
- * The motivation of this transform is to reduce binary size. The average length
- * of a log message is ~43 whereas the common minified transformed output (as
- * `['xx']`) is just 6.
- *
- * Resulting compressed, minified binaries reduce size by ~2.8% depending on
- * their logging density.
+ * The motivation of this transform is to reduce binary size. Resulting minified
+ * compressed binaries are reduced by ~2.8% depending on logging density.
  */
-const base62 = require('base62/lib/ascii');
+const base62ascii = require('base62/lib/ascii');
 const fs = require('fs-extra');
 const {
   assertAliases,
@@ -69,74 +65,90 @@ const {messagesByMessagePath} = require('../../compile/log-messages');
 const roughMinifiedExpansionLength = '["xx"]'.length;
 
 /**
- * Determines a filepath relative to the repo root.
  * @param {string} path
  * @return {string}
  */
 const relativeToRoot = path => `${__dirname}/../../../${path}`;
 
-/**
- * Gets a message id from the table, or adds a new entry for a message if
- * non-existent and returns its new id.
- * @param {Object<string, string>} messages
- * @param {string} message
- * @param {function():number} getMessageId
- * @return {string} Short message id.
- */
-function getOrCreateShortMessageId(messages, message, getMessageId) {
-  if (message in messages) {
-    return messages[message].id;
-  }
-  // Base-62 radix for best utilization of ascii space.
-  const id = base62.encode(getMessageId());
-  messages[message] = {id, message};
-  return id;
-}
-
-/**
- * Builds a message template using printf syntax from a starting node.
- * @param {@babel/types} t
- * @param {!Node} node
- * @param {!Array<!Node>} interpolationArgs
- * @return {string} Template for the message.
- */
-function buildMessage(t, node, interpolationArgs) {
-  if (t.isStringLiteral(node)) {
-    return node.value;
-  }
-
-  if (t.isBinaryExpression(node, {operator: '+'})) {
-    return (
-      buildMessage(t, node.left, interpolationArgs) +
-      buildMessage(t, node.right, interpolationArgs)
-    );
-  }
-
-  if (t.isTemplateLiteral(node)) {
-    let quasied = '';
-    let i = 0;
-    for (; i < node.quasis.length - 1; i++) {
-      quasied += node.quasis[i].value.cooked;
-      quasied += buildMessage(t, node.expressions[i], interpolationArgs);
-    }
-    quasied += node.quasis[i].value.cooked;
-    return quasied;
-  }
-
-  interpolationArgs.push(node);
-  return '%s';
-}
-
-let messages;
-let nextMessageId;
-let messagesPath;
-
-let shouldReplaceCallArguments;
-
-/** @return {number} */
-const getMessageId = () => nextMessageId++;
-
 module.exports = function({types: t}) {
+  let messages;
+  let nextMessageId;
+  let messagesPath;
+
+  let shouldReplaceCallArguments;
+
+  /**
+   * @param {string} message
+   * @return {string} Short message id.
+   */
+  function getOrCreateMessageId(message) {
+    if (message in messages) {
+      return messages[message].id;
+    }
+    const id = base62ascii.encode(nextMessageId++); // [0-9a-zA-Z]
+    messages[message] = {id, message};
+    return id;
+  }
+
+  /**
+   * Builds a message template using printf syntax from a starting node.
+   * @param {!Node} node
+   * @param {!Array<!Node>} interpolationArgs
+   * @return {string} Template for the message.
+   */
+  function buildMessage(node, interpolationArgs) {
+    if (t.isStringLiteral(node)) {
+      return node.value;
+    }
+
+    if (t.isBinaryExpression(node, {operator: '+'})) {
+      return (
+        buildMessage(node.left, interpolationArgs) +
+        buildMessage(node.right, interpolationArgs)
+      );
+    }
+
+    if (t.isTemplateLiteral(node)) {
+      let quasied = '';
+      let i = 0;
+      for (; i < node.quasis.length - 1; i++) {
+        quasied += node.quasis[i].value.cooked;
+        quasied += buildMessage(node.expressions[i], interpolationArgs);
+      }
+      quasied += node.quasis[i].value.cooked;
+      return quasied;
+    }
+
+    interpolationArgs.push(node);
+    return '%s';
+  }
+
+  /**
+   * @param {!Node} node
+   * @return {../../log-module-metadata.LogMethodMetadataDef}
+   */
+  function getTransformableCalleeMeta({callee}) {
+    if (assertAliases.some(name => t.isIdentifier(callee, {name}))) {
+      return transformableMethods.assert;
+    }
+    // is method().call().
+    if (!t.isMemberExpression(callee) || !t.isCallExpression(callee.object)) {
+      return;
+    }
+    // is either dev() or user() object.
+    const singletonCallee = callee.object.callee;
+    if (
+      !singletonFunctions.some(name => t.isIdentifier(singletonCallee, {name}))
+    ) {
+      return;
+    }
+    if (!t.isIdentifier(callee.property)) {
+      return;
+    }
+    // callee property is transformable method, otherwise undefined.
+    return transformableMethods[callee.property.name];
+  }
+
   return {
     /** Resolves plugin config. */
     pre() {
@@ -166,45 +178,9 @@ module.exports = function({types: t}) {
        * @param {*} path babel.path
        */
       CallExpression({node}) {
-        const {callee} = node;
-
-        // Transformable method metadata when available;
-        let meta;
-
-        // userAssert() or devAssert() alias.
-        if (assertAliases.some(name => t.isIdentifier(callee, {name}))) {
-          meta = transformableMethods.assert;
-        }
-        // dev().*() and user().*() calls.
-        else {
-          // is method().call().
-          if (
-            !t.isMemberExpression(callee) ||
-            !t.isCallExpression(callee.object)
-          ) {
-            return;
-          }
-
-          // is either dev() or user() object.
-          const singletonCallee = callee.object.callee;
-          if (
-            !singletonFunctions.some(name =>
-              t.isIdentifier(singletonCallee, {name})
-            )
-          ) {
-            return;
-          }
-
-          // object property is transformable method.
-          const {property} = callee;
-          if (
-            !t.isIdentifier(property) ||
-            !(property.name in transformableMethods)
-          ) {
-            return;
-          }
-
-          meta = transformableMethods[property.name];
+        const meta = getTransformableCalleeMeta(node);
+        if (!meta) {
+          return;
         }
 
         const {extractMessages, messageArgPos} = meta;
@@ -213,7 +189,6 @@ module.exports = function({types: t}) {
         }
 
         const messageArg = node.arguments[messageArgPos];
-
         if (!messageArg) {
           return;
         }
@@ -222,7 +197,7 @@ module.exports = function({types: t}) {
         // non-string types among string literals in variadic calls, so the
         // template includes them as interpolated arguments.
         const templateArgs = [];
-        const message = buildMessage(t, messageArg, templateArgs);
+        const message = buildMessage(messageArg, templateArgs);
 
         // Bounce when indirection increases minified size (±1 byte). Also
         // catches the the case where the top-level message is variable (ie.
@@ -232,11 +207,7 @@ module.exports = function({types: t}) {
           return;
         }
 
-        const shortMessageId = getOrCreateShortMessageId(
-          messages,
-          message,
-          getMessageId
-        );
+        const id = getOrCreateMessageId(message);
 
         if (!shouldReplaceCallArguments) {
           return;
@@ -254,11 +225,7 @@ module.exports = function({types: t}) {
         // with variadic calls. This transform implicitly depends on the
         // `no-mixed-interpolation` lint rule to prevent such usage.
         node.arguments.push(
-          t.arrayExpression([
-            t.stringLiteral(shortMessageId),
-            ...bodyArgs,
-            ...templateArgs,
-          ])
+          t.arrayExpression([t.stringLiteral(id), ...bodyArgs, ...templateArgs])
         );
       },
     },

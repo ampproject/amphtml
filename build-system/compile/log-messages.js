@@ -19,56 +19,35 @@ const messagesPathPrefix = 'dist/log-messages';
 
 /**
  * Written by `transform-log-methods` babel plugin. This is the source of truth
- * for all extracted messages during build, but it should not be deployed
- * anywhere. Format may allow further fields in the future.
- * This looks like:
- *   {"my message": {"id": "xx", "message": "my message"}}
+ * for extracted messages during build, but it should not be deployed. Shaped:
+ * `{message: {id, message, ...}}`
  */
 const messagesByMessagePath = `${messagesPathPrefix}.by-message.json`;
 
-/**
- * Reads from the plugin output table and writes keyed by id with items mapped
- * thru `transform`.
- * @param {string} outputPath
- * @param {function(!Object):!Object} transform
- * @return {!Promise}
- */
-const outputExtractedMessagesById = (outputPath, transform) =>
-  fs.readJson(messagesByMessagePath, {throws: false}).then(obj =>
-    fs.outputJson(
-      outputPath,
-      Object.fromEntries(
-        // key by id, content defined by caller
-        Object.keys(obj).map(k => [obj[k]['id'], transform(obj[k])])
-      )
-    )
-  );
+/** Values are transformer fns, output shaped `{id: fn({id, message, ...})}`. */
+const formattedMessagesById = {
+  // Consumed by logging server. Format may allow further fields.
+  [`${messagesPathPrefix}.json`]: ({id: unused, ...other}) => other,
+
+  // Consumed by runtime function in `#development`.
+  [`${messagesPathPrefix}.simple.json`]: ({message}) => message,
+};
 
 /**
  * `transform-log-methods` babel plugin keys by message string for deduping.
  * This reads from the plugin output table, and writes different output format
- * files, all keyed by id.
- *
- * Outputs:
- * - `dist/log-messages.json` shaped `{id: {...item}}`
- * - `dist/log-messages.simple.json` shaped `{id: message}`
- *
+ * files, in JSON keyed by id.
  * @return {!Promise}
  */
 const formatExtractedMessages = () =>
-  Promise.all([
-    // Consumed by logging server. Format may allow further fields in the
-    // future.
-    outputExtractedMessagesById(
-      `${messagesPathPrefix}.json`,
-      ({id: unused, ...other}) => other
-    ),
-
-    // Consumed by runtime function in development mode.
-    outputExtractedMessagesById(
-      `${messagesPathPrefix}.simple.json`,
-      ({message}) => message
-    ),
-  ]);
+  fs.readJson(messagesByMessagePath).then(byMessage =>
+    Promise.all(
+      Object.entries(formattedMessagesById).map(([path, transform]) => {
+        const byId = {};
+        Object.values(byMessage).forEach(i => (byId[i.id] = transform(i)));
+        return fs.outputJson(path, byId);
+      })
+    )
+  );
 
 module.exports = {messagesByMessagePath, formatExtractedMessages};

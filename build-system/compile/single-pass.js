@@ -45,7 +45,6 @@ const {formatExtractedMessages} = require('./log-messages');
 const {isTravisBuild} = require('../travis');
 const {shortenLicense, shouldShortenLicense} = require('./shorten-license');
 const {TopologicalSort} = require('topological-sort');
-const {toPromise} = require('../tasks/helpers');
 const TYPES_VALUES = Object.keys(TYPES).map(x => TYPES[x]);
 const wrappers = require('../compile-wrappers');
 const {VERSION: internalRuntimeVersion} = require('../internal-version');
@@ -578,6 +577,7 @@ exports.singlePassCompile = async function(entryModule, options) {
     .then(compile)
     .then(wrapMainBinaries)
     .then(postProcessConcat)
+    .then(formatExtractedMessages)
     .catch(err => {
       err.showStack = false; // Useless node_modules stack
       return Promise.reject(err);
@@ -654,17 +654,19 @@ function postProcessConcat() {
 
 function compile(flagsArray) {
   // TODO(@cramforce): Run the post processing step
-  return toPromise(
+  return new Promise(function(resolve, reject) {
     gulp
       .src(srcs, {base: transformDir})
       .pipe(gulpIf(shouldShortenLicense, shortenLicense()))
       .pipe(sourcemaps.init({loadMaps: true}))
       .pipe(gulpClosureCompile(flagsArray))
+      .on('error', err => {
+        handleSinglePassCompilerError();
+        reject(err);
+      })
       .pipe(sourcemaps.write('.'))
       .pipe(gulpIf(/(\/amp-|\/_base)/, rename(path => (path.dirname += '/v0'))))
       .pipe(gulp.dest('.'))
-  ).then(formatExtractedMessages, e => {
-    handleSinglePassCompilerError();
-    throw e;
+      .on('end', resolve);
   });
 }
