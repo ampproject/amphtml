@@ -84,8 +84,8 @@ const relativeToRoot = path => `${__dirname}/../../../${path}`;
  * @return {string} Short message id.
  */
 function getOrCreateShortMessageId(messages, message, getMessageId) {
-  if (messages[message]) {
-    return messages[message];
+  if (message in messages) {
+    return messages[message].id;
   }
   // Base-62 radix for best utilization of ascii space.
   const id = base62.encode(getMessageId());
