@@ -19,8 +19,8 @@ const argv = require('minimist')(process.argv.slice(2));
 const log = require('fancy-log');
 const requestPromise = require('request-promise');
 const {cyan, green, yellow} = require('ansi-colors');
-const {gitCommitHash} = require('../../git');
-const {isTravisPullRequestBuild} = require('../../travis');
+const {gitCommitHash} = require('../git');
+const {isTravisPullRequestBuild} = require('../travis');
 
 const reportBaseUrl = 'https://amp-test-status-bot.appspot.com/v0/tests';
 
