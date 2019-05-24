@@ -24,8 +24,8 @@ const messagesPathPrefix = 'dist/log-messages';
  */
 const messagesByMessagePath = `${messagesPathPrefix}.by-message.json`;
 
-/** Values are transformer fns, output shaped `{id: fn({id, message, ...})}`. */
-const formattedMessagesById = {
+/** Values are formatters for entries read from `messagesByMessagePath`. */
+const messagesById = {
   // Consumed by logging server. Format may allow further fields.
   [`${messagesPathPrefix}.json`]: ({id: unused, ...other}) => other,
 
@@ -36,18 +36,21 @@ const formattedMessagesById = {
 /**
  * `transform-log-methods` babel plugin keys by message string for deduping.
  * This reads from the plugin output table, and writes different output format
- * files, in JSON keyed by id.
+ * files, in JSON, keyed by id.
  * @return {!Promise}
  */
 const formatExtractedMessages = () =>
-  fs.readJson(messagesByMessagePath).then(byMessage =>
-    Promise.all(
-      Object.entries(formattedMessagesById).map(([path, transform]) => {
-        const byId = {};
-        Object.values(byMessage).forEach(i => (byId[i.id] = transform(i)));
-        return fs.outputJson(path, byId);
-      })
-    )
-  );
+  fs
+    .readJson(messagesByMessagePath)
+    .then(Object.values)
+    .then(items =>
+      Promise.all(
+        Object.entries(messagesById).map(([path, format]) => {
+          const byId = {};
+          items.forEach(item => (byId[item.id] = format(item)));
+          return fs.outputJson(path, byId);
+        })
+      )
+    );
 
 module.exports = {messagesByMessagePath, formatExtractedMessages};
