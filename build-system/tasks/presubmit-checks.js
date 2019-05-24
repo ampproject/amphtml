@@ -896,6 +896,7 @@ const forbiddenTermsSrcInclusive = {
       'build-system/amp4test.js',
       'dist.3p/current/integration.js',
       'extensions/amp-iframe/0.1/amp-iframe.js',
+      'src/3p-frame.js',
       'src/config.js',
       'testing/local-amp-chrome-extension/background.js',
       'tools/errortracker/errortracker.go',
