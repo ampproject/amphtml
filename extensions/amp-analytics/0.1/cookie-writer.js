@@ -140,7 +140,8 @@ export class CookieWriter {
   }
 
   /**
-   * Retrieves cookieMaxAge from given config,
+   * Retrieves cookieMaxAge from given config, provides default value if no
+   * value is found or value is invalid
    * @param {JsonObject} inputConfig
    * @return {number}
    */
@@ -149,10 +150,14 @@ export class CookieWriter {
       return BASE_CID_MAX_AGE_MILLIS;
     }
 
-    // convert cookieMaxAge (sec) to milliseconds
-    return (
-      Number(inputConfig['cookieMaxAge']) * 1000 || BASE_CID_MAX_AGE_MILLIS
-    );
+    const cookieMaxAgeNumber = Number(inputConfig['cookieMaxAge']);
+    if (!cookieMaxAgeNumber) {
+      user().error(TAG, 'invalid cookieMaxAge, falling back to default value');
+      return BASE_CID_MAX_AGE_MILLIS;
+    } else {
+      // convert cookieMaxAge (sec) to milliseconds
+      return cookieMaxAgeNumber * 1000;
+    }
   }
 
   /**
