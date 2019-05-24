@@ -23,7 +23,7 @@
 
 const colors = require('ansi-colors');
 const {
-  downloadBuildOutput,
+  downloadDistOutput,
   printChangeSummary,
   startTimer,
   stopTimer,
@@ -41,7 +41,7 @@ async function main() {
   const startTime = startTimer(FILENAME, FILENAME);
 
   if (!isTravisPullRequestBuild()) {
-    downloadBuildOutput(FILENAME);
+    downloadDistOutput(FILENAME);
     timedExecOrDie('gulp update-packages');
     timedExecOrDie('gulp e2e --nobuild --headless');
   } else {
@@ -54,7 +54,7 @@ async function main() {
       buildTargets.has('FLAG_CONFIG') ||
       buildTargets.has('E2E_TEST')
     ) {
-      downloadBuildOutput(FILENAME);
+      downloadDistOutput(FILENAME);
       timedExecOrDie('gulp update-packages');
       timedExecOrDie('gulp e2e --nobuild --headless');
     } else {
