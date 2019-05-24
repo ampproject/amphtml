@@ -613,6 +613,8 @@
       "interactive_tests": "examples/visual-tests/amp-story/amp-story-pagination-buttons.js"
     },
     {
+      // TODO(#22499): Re-enable this test once the animations run.
+      "flaky": true,
       "url": "examples/visual-tests/amp-story/amp-story-sidebar.html",
       "name": "amp-story: sidebar",
       "viewport": {"width": 1440, "height": 900},
