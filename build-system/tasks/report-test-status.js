@@ -42,6 +42,7 @@ const TEST_TYPE_SUBTYPES = new Map([
 const TEST_TYPE_BUILD_TARGETS = new Map([
   ['integration', ['RUNTIME', 'FLAG_CONFIG', 'INTEGRATION_TEST']],
   ['unit', ['RUNTIME', 'UNIT_TEST']],
+  ['e2e', ['RUNTIME', 'FLAG_CONFIG', 'E2E_TEST']],
 ]);
 
 function inferTestType() {
