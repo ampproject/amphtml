@@ -442,7 +442,7 @@ export class Expander {
    * passed to a function.apply call. Will not wait for any promise to resolve.
    * This will cast all arguments to string before calling the macro.
    *  [[Result of BAR, Result of BAR], 123]. => ['resultresult', '123']
-   * @param {!Array<!Array>} argsArray
+   * @param {Array<!Array>|undefined} argsArray
    */
   processArgsSync_(argsArray) {
     if (!argsArray) {
