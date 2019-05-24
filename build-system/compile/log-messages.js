@@ -25,7 +25,7 @@ const messagesPathPrefix = 'dist/log-messages';
 const messagesByMessagePath = `${messagesPathPrefix}.by-message.json`;
 
 /** Values are formatters for entries read from `messagesByMessagePath`. */
-const messagesById = {
+const messagesByIdFormats = {
   // Consumed by logging server. Format may allow further fields.
   [`${messagesPathPrefix}.json`]: ({id: unused, ...other}) => other,
 
@@ -45,7 +45,7 @@ const formatExtractedMessages = () =>
     .then(Object.values)
     .then(items =>
       Promise.all(
-        Object.entries(messagesById).map(([path, format]) => {
+        Object.entries(messagesByIdFormats).map(([path, format]) => {
           const byId = {};
           items.forEach(item => (byId[item.id] = format(item)));
           return fs.outputJson(path, byId);
