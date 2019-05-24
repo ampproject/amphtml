@@ -33,6 +33,7 @@ import {isEnumValue} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {mod} from '../../../src/utils/math';
 import {toggle} from '../../../src/style';
+import fuzzysearch from '../../../third_party/fuzzysearch/index';
 
 const EXPERIMENT = 'amp-autocomplete';
 const TAG = 'amp-autocomplete';
@@ -179,6 +180,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
       `${TAG} requires the "type=text|search" attribute on <input>`
     );
     this.inputElement_.setAttribute('dir', 'auto');
+    this.inputElement_.setAttribute('aria-autocomplete', 'list');
+    this.inputElement_.setAttribute('role', 'combobox');
 
     userAssert(this.inputElement_.form, `${TAG} should be inside a <form> tag`);
     if (this.inputElement_.form.hasAttribute('autocomplete')) {
@@ -215,6 +218,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
       `Unexpected filter: ${this.filter_}`
     );
 
+    // Read configuration attributes
     this.minChars_ = this.element.hasAttribute('min-characters')
       ? parseInt(this.element.getAttribute('min-characters'), 10)
       : 1;
@@ -223,6 +227,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
       : null;
     this.submitOnEnter_ = this.element.hasAttribute('submit-on-enter');
 
+    // Set accessibility attributes
+    this.element.setAttribute('aria-haspopup', 'listbox');
     this.container_ = this.createContainer_();
     this.element.appendChild(this.container_);
   }
@@ -290,7 +296,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     if (this.shouldRenderAbove_()) {
       container.classList.add('i-amphtml-autocomplete-results-up');
     }
-    container.setAttribute('role', 'list');
+    container.setAttribute('role', 'listbox');
     toggle(container, false);
     return container;
   }
@@ -367,7 +373,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
   createElementFromItem_(item) {
     const element = this.element.ownerDocument.createElement('div');
     element.classList.add('i-amphtml-autocomplete-item');
-    element.setAttribute('role', 'listitem');
+    element.setAttribute('role', 'option');
     element.setAttribute('data-value', item);
     element.setAttribute('dir', 'auto');
     element.textContent = item;
@@ -443,7 +449,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
               child.setAttribute('aria-disabled', 'true');
             }
             child.classList.add('i-amphtml-autocomplete-item');
-            child.setAttribute('role', 'listitem');
+            child.setAttribute('role', 'option');
             container.appendChild(child);
           });
         });
@@ -494,7 +500,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
         case FilterType.TOKEN_PREFIX:
           return this.tokenPrefixMatch_(item, input);
         case FilterType.FUZZY:
-          throw new Error(`Filter not yet supported: ${this.filter_}`);
+          return fuzzysearch(input, item);
         case FilterType.CUSTOM:
           throw new Error(`Filter not yet supported: ${this.filter_}`);
         default:
@@ -612,11 +618,12 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
   /**
    * Shows or hides the results container_.
-   * @param {boolean=} opt_display
+   * @param {boolean} display
    * @private
    */
-  toggleResults_(opt_display) {
-    toggle(dev().assertElement(this.container_), opt_display);
+  toggleResults_(display) {
+    this.inputElement_.setAttribute('aria-expanded', display);
+    toggle(dev().assertElement(this.container_), display);
   }
 
   /**
@@ -650,8 +657,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
           this.userInput_ = this.inputElement_.value;
           this.filterDataAndRenderResults_(this.sourceData_, this.userInput_);
           this.resetActiveElement_();
-          this.setResultDisplayDirection_(renderAbove);
         }
+        this.setResultDisplayDirection_(renderAbove);
         this.toggleResults_(display);
       }
     );
@@ -785,6 +792,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
         }
         this.resetActiveElement_();
         newActiveElement.classList.add('i-amphtml-autocomplete-item-active');
+        newActiveElement.setAttribute('aria-selected', 'true');
         this.activeIndex_ = activeIndex;
         this.activeElement_ = newActiveElement;
       }
@@ -824,6 +832,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
       'i-amphtml-autocomplete-item-active',
       false
     );
+    this.activeElement_.removeAttribute('aria-selected');
     this.activeElement_ = null;
     this.activeIndex_ = -1;
   }

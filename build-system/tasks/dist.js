@@ -49,7 +49,6 @@ const {
   createModuleCompatibleES5Bundle,
 } = require('./create-module-compatible-es5-bundle');
 const {cleanupBuildDir} = require('../compile/compile');
-const {clean} = require('./clean');
 const {compileCss, cssEntryPoints} = require('./css');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
 const {isTravisBuild} = require('../travis');
@@ -67,7 +66,6 @@ async function dist() {
   const handlerProcess = createCtrlcHandler('dist');
   process.env.NODE_ENV = 'production';
   printNobuildHelp();
-  await clean();
   cleanupBuildDir();
   if (argv.fortesting) {
     let cmd = 'gulp dist --fortesting';

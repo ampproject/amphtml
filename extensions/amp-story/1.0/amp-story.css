@@ -229,7 +229,7 @@ amp-story-page:not([active]) {
 
 /**
  * Note: If updating the [active] or [distance] attributes names, please also
- * update them in the amp.css file.
+ * update them in the ampdoc.css file.
  */
 amp-story-page[active],
 amp-story-page[distance="0"],
@@ -241,7 +241,7 @@ amp-story-page[distance="2"] {
   transform: translateY(100%) !important;
 }
 
-amp-story-page [text-background-color] {
+amp-story-page [data-text-background-color] {
   border-radius: 3px !important;
   line-height: 1.5em !important;
   padding: 2px 4px !important;
