@@ -39,9 +39,10 @@ function scopeRequire(src, scopeName) {
   const flatGlobals = globals.reduce((acc, g) => acc.concat(g.nodes), []);
 
   flatGlobals
-      .filter(node => isIdentifier(node) && isRequire(node))
-      .forEach(node =>
-        replaceIdentifier(node.parent, test => test === node, scopeName));
+    .filter(node => isIdentifier(node) && isRequire(node))
+    .forEach(node =>
+      replaceIdentifier(node.parent, test => test === node, scopeName)
+    );
 
   return escodegen.generate(ast, {format: {compact: true}});
 }
@@ -102,35 +103,44 @@ function createMemberNode(identifierNode, scopeName) {
   };
 }
 
-
 program
-    .description('Scope global `require` calls to an object.')
-    .option('-i, --infile [filename]', 'The path of the input file.' +
-        ' Reads from stdin if unspecified')
-    .option('-o, --outfile [filename]', 'The path for the output file.' +
-        ' Writes to stdout if unspecified.')
-    .option('-n --name [name]', 'The name to reference `require` calls from.' +
-        ' The default is `AMP`', 'AMP')
-    .parse(process.argv);
+  .description('Scope global `require` calls to an object.')
+  .option(
+    '-i, --infile [filename]',
+    'The path of the input file. Reads from stdin if unspecified'
+  )
+  .option(
+    '-o, --outfile [filename]',
+    'The path for the output file. Writes to stdout if unspecified.'
+  )
+  .option(
+    '-n --name [name]',
+    'The name to reference `require` calls from. The default is `AMP`',
+    'AMP'
+  )
+  .parse(process.argv);
 
-const inputStream = (program.infile && program.infile !== '-' ?
-  fs.createReadStream(program.infile) :
-  process.stdin);
+const inputStream =
+  program.infile && program.infile !== '-'
+    ? fs.createReadStream(program.infile)
+    : process.stdin;
 inputStream.on('error', err => {
-  console./*OK*/error(colors.red('\nError reading file: ' + err.path));
+  console./*OK*/ error(colors.red('\nError reading file: ' + err.path));
 });
 
-const outputStream = (program.outfile && program.outfile !== '-' ?
-  fs.createWriteStream(program.outfile) :
-  process.stdout);
+const outputStream =
+  program.outfile && program.outfile !== '-'
+    ? fs.createWriteStream(program.outfile)
+    : process.stdout;
 outputStream.on('error', err => {
-  console./*OK*/error(colors.red('\nError writing file: ' + err.path));
+  console./*OK*/ error(colors.red('\nError writing file: ' + err.path));
 });
 
 const scopeRequireStream = es.map((inputFile, cb) =>
-  cb(null, scopeRequire(inputFile.toString('utf8'), program.name)));
+  cb(null, scopeRequire(inputFile.toString('utf8'), program.name))
+);
 
 inputStream
-    .pipe(es.wait())
-    .pipe(scopeRequireStream)
-    .pipe(outputStream);
+  .pipe(es.wait())
+  .pipe(scopeRequireStream)
+  .pipe(outputStream);

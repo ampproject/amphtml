@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 const file = require('gulp-file');
 const fs = require('fs-extra');
 const gulp = require('gulp');
@@ -41,9 +40,15 @@ async function css() {
 
 const cssEntryPoints = [
   {
-    path: 'amp.css',
-    outJs: 'css.js',
+    path: 'ampdoc.css',
+    outJs: 'ampdoc.css.js',
     outCss: 'v0.css',
+  },
+  {
+    path: 'ampelement.css',
+    outJs: 'ampelement.css.js',
+    outCss: 'v0.css',
+    append: true,
   },
   {
     path: 'video-autoplay.css',
@@ -69,31 +74,40 @@ function compileCss(watch, opt_compileAll) {
    * Writes CSS to build folder
    *
    * @param {string} css
-   * @param {string} originalCssFilename
    * @param {string} jsFilename
    * @param {string} cssFilename
+   * @param {boolean} append append CSS to existing file
    * @return {Promise}
    */
-  function writeCss(css, originalCssFilename, jsFilename, cssFilename) {
-    return toPromise(gulp.src(`css/${originalCssFilename}`)
-        .pipe(file(jsFilename, 'export const cssText = ' +
-          JSON.stringify(css)))
+  function writeCss(css, jsFilename, cssFilename, append) {
+    return toPromise(
+      // cssText is hardcoded in AmpCodingConvention.java
+      file(jsFilename, 'export const cssText = ' + JSON.stringify(css), {
+        src: true,
+      })
         .pipe(gulp.dest('build'))
         .on('end', function() {
           mkdirSync('build');
           mkdirSync('build/css');
-          fs.writeFileSync(`build/css/${cssFilename}`, css);
-        }));
+          if (append) {
+            fs.appendFileSync(`build/css/${cssFilename}`, css);
+          } else {
+            fs.writeFileSync(`build/css/${cssFilename}`, css);
+          }
+        })
+    );
   }
 
   /**
    * @param {string} path
    * @param {string} outJs
    * @param {string} outCss
+   * @param {boolean} append
    */
-  function writeCssEntryPoint(path, outJs, outCss) {
-    return jsifyCssAsync(`css/${path}`)
-        .then(css => writeCss(css, path, outJs, outCss));
+  function writeCssEntryPoint(path, outJs, outCss, append) {
+    return jsifyCssAsync(`css/${path}`).then(css =>
+      writeCss(css, outJs, outCss, append)
+    );
   }
 
   const startTime = Date.now();
@@ -101,21 +115,26 @@ function compileCss(watch, opt_compileAll) {
   // Used by `gulp test --local-changes` to map CSS files to JS files.
   fs.writeFileSync('EXTENSIONS_CSS_MAP', JSON.stringify(extensions));
 
-
   let promise = Promise.resolve();
 
   cssEntryPoints.forEach(entryPoint => {
-    const {path, outJs, outCss} = entryPoint;
-    promise = promise.then(() => writeCssEntryPoint(path, outJs, outCss));
+    const {path, outJs, outCss, append} = entryPoint;
+    promise = promise.then(() =>
+      writeCssEntryPoint(path, outJs, outCss, append)
+    );
   });
 
-  return promise.then(() => buildExtensions({
-    bundleOnlyIfListedInFiles: false,
-    compileOnlyCss: true,
-    compileAll: opt_compileAll,
-  })).then(() => {
-    endBuildStep('Recompiled all CSS files into', 'build/', startTime);
-  });
+  return promise
+    .then(() =>
+      buildExtensions({
+        bundleOnlyIfListedInFiles: false,
+        compileOnlyCss: true,
+        compileAll: opt_compileAll,
+      })
+    )
+    .then(() => {
+      endBuildStep('Recompiled all CSS files into', 'build/', startTime);
+    });
 }
 
 module.exports = {

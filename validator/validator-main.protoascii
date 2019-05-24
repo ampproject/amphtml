@@ -26,7 +26,7 @@ min_validator_revision_required: 375
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 872
+spec_file_revision: 876
 
 styles_spec_url: "https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages"
 script_spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags"
@@ -566,6 +566,7 @@ tags: {
     value_casei: "amp-experiment-token"
     dispatch_key: NAME_VALUE_DISPATCH
   }
+  satisfies: "amp-experiment-token"
 }
 # AMP metadata, name=amp-link-variable-allowed-origin
 # https://github.com/ampproject/amphtml/issues/8132
@@ -4054,15 +4055,6 @@ tags: {  # <form method=POST ...>
         "{{|}}"    # Mustache is disallowed in action-xhr.
   }
   attrs: { name: "autocomplete" }
-  attrs: {
-    name: "cross-origin"
-    value: "amp-viewer-auth-token-via-post"
-    trigger: {
-      also_requires_attr: "action-xhr"
-    }
-    deprecation: "crossorigin"
-    deprecation_url: "https://github.com/ampproject/amphtml/issues/21399"
-  }
   attrs: {
     name: "crossorigin"
     value: "amp-viewer-auth-token-via-post"

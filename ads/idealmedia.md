@@ -1,5 +1,5 @@
 <!---
-Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+Copyright 2019 The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,24 +14,31 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# Chargeads
+# Idealmedia
 
 ## Example
 
 ### Basic
 
 ```html
-<amp-ad width="100" height="283"
-    type="chargeads"
-    layout="responsive"
-    src="https://www.chargeplatform.com/ads/?id={id}">
-</amp-ad>
+  <amp-embed width="100" height="283"
+       type="idealmedia"
+       data-publisher="amp-demo"
+       data-widget="12345"
+       data-container="demo-container">
+  </amp-embed>
 ```
 
 ## Configuration
 
-For configuration semantics, please [contact Chargeads](http://chargeads.com).
+For details on the configuration semantics, please contact the ad network or refer to their documentation. 
 
-Supported parameters:
+### Required parameters
 
-- `src`
+- `data-publisher`
+- `data-widget`
+- `data-container`
+
+### Optional parameters
+
+- `data-url`

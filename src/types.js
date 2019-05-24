@@ -62,7 +62,7 @@ export function isObject(value) {
  * @return {boolean}
  */
 export function isFiniteNumber(value) {
-  return (typeof value === 'number' && isFinite(value));
+  return typeof value === 'number' && isFinite(value);
 }
 
 /**
@@ -95,4 +95,3 @@ export function isEnumValue(enumObj, s) {
 export function toWin(winOrNull) {
   return /** @type {!Window} */ (winOrNull);
 }
-

@@ -60,8 +60,12 @@ adoptShadowMode(self);
 // tag to give some information that can be used in error reports.
 // (At least by sophisticated users).
 if (self.console) {
-  (console.info || console.log).call(console,
-      `Powered by AMP ⚡ HTML shadows – Version ${internalRuntimeVersion()}`);
+  (console.info || console.log).call(
+    console,
+    `Powered by AMP ⚡ HTML shadows – Version ${internalRuntimeVersion()}`
+  );
 }
-self.document.documentElement.setAttribute('amp-version',
-    internalRuntimeVersion());
+self.document.documentElement.setAttribute(
+  'amp-version',
+  internalRuntimeVersion()
+);
