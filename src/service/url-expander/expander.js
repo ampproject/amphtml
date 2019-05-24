@@ -147,10 +147,13 @@ export class Expander {
 
       while (urlIndex < url.length && matchIndex <= matches.length) {
         if (match && urlIndex === match.start) {
+          // If we know we are at the start of a macro, we figure out how to
+          // resolve it, and move our pointer to after the token.
           let binding;
-          // find out where this keyword is coming from
+          // Find out where this macro is coming from. Could be from the passed
+          // in optional bindings, or the global variable source.
           if (this.bindings_ && hasOwn(this.bindings_, match.name)) {
-            // the optional bindings
+            // Macro is from optional bindings.
             binding = {
               // This construction helps us save the match name and determine
               // precedence of resolution choices in #expandBinding_ later.
@@ -159,7 +162,7 @@ export class Expander {
               encode,
             };
           } else {
-            // or the global source
+            // Macro is from the global source.
             binding = Object.assign({}, this.variableSource_.get(match.name), {
               name: match.name,
               encode,
@@ -170,16 +173,22 @@ export class Expander {
           match = matches[++matchIndex];
 
           if (url[urlIndex] === '(') {
-            // if we hit a left parenthesis we still need to get args
+            // When we see a `(` we know we need to resolve one level deeper
+            // before continuing. We push the binding in the stack for
+            // resolution later, collect any chars that may be prefixing the
+            // macro, and then make the recursive call.
             urlIndex++;
             numOfPendingCalls++;
             stack.push(binding);
-            // Trim space in between args.
+            // Trim space in between args that builder has collected.
             if (builder.trim().length) {
               results.push(builder.trim());
             }
             results.push(evaluateNextLevel(/* encode */ false));
           } else {
+            // Many macros do not take arguments, in this case we do not need to
+            // recurse, we just store any prefix and start resolution in it's
+            // position
             if (builder.length) {
               results.push(builder);
             }
@@ -206,6 +215,10 @@ export class Expander {
           url[urlIndex] === ',' &&
           !ignoringChars
         ) {
+          // Commas tell us to create a new argument when in nested context and
+          // not ignoring them due to backticks. We push any string built so far,
+          // create a new array for the next argument, and reset our string
+          // builder.
           if (builder.length) {
             const nextArg = nextArgShouldBeRaw ? builder : builder.trim();
             results.push(nextArg);
@@ -213,8 +226,8 @@ export class Expander {
           }
           args.push(results);
           results = [];
-          // support existing two comma format
-          // eg CLIENT_ID(__ga,,ga-url)
+          // Support existing two comma format by pushing an empty string as
+          // argument. eg CLIENT_ID(__ga,,ga-url)
           if (url[urlIndex + 1] === ',') {
             results.push(['']);
             urlIndex++;
@@ -224,7 +237,10 @@ export class Expander {
         }
 
         // Invoke a function on every right parenthesis unless the stack is
-        // empty.
+        // empty. This is where we actually evaluate any macro that takes an
+        // argument. We pop the macro resover off the stack, and take anying left
+        // in our string builder and add it as the final section of the final
+        // arg. Then we call the resolver.
         else if (numOfPendingCalls && url[urlIndex] === ')' && !ignoringChars) {
           urlIndex++;
           numOfPendingCalls--;
@@ -238,11 +254,13 @@ export class Expander {
           const value = this.evaluateBinding_(binding, /* opt_args */ args);
           return value;
         } else {
+          // This is the most common case. Just building a string as we walk
+          // along.
           builder += url[urlIndex];
           urlIndex++;
         }
 
-        //capture trailing characters
+        // Capture any trailing characters.
         if (urlIndex === url.length && builder.length) {
           results.push(builder);
         }
