@@ -41,9 +41,7 @@ import {
 import {isExperimentOn} from '../../../src/experiments';
 import {rewriteAttributeValue} from '../../../src/url-rewrite';
 import {setImportantStyles} from '../../../src/style';
-import {
-  upgrade,
-} from '@ampproject/worker-dom/dist/unminified.index.safe.mjs.patched';
+import {upgrade} from '@ampproject/worker-dom/dist/unminified.index.safe.mjs.patched';
 
 /** @const {string} */
 const TAG = 'amp-script';
@@ -145,37 +143,43 @@ export class AmpScript extends AMP.BaseElement {
     const shadowSupport = getShadowDomSupportedVersion();
     if (shadowSupport === ShadowDomVersion.NONE) {
       dev().info(TAG, 'Iframe mode!');
-      this.iframe_ = /** @type {!HTMLIFrameElement} */ (
-        this.win.document.createElement('iframe'));
+      this.iframe_ = /** @type {!HTMLIFrameElement} */ (this.win.document.createElement(
+        'iframe'
+      ));
       this.iframe_.classList.add('i-amphtml-shadow');
       // Copy custom styles into friendly iframe.
       let styleHtml = '';
       const styles = head.querySelectorAll('style[amp-custom]');
       styles.forEach(style => {
-        styleHtml += style./*OK*/outerHTML;
+        styleHtml += style./*OK*/ outerHTML;
       });
       // Copy this element's children into the iframe. They'll be overlaid
       // on top of existing children to avoid jank, and the real children
       // will be removed on the first mutation. See mutationPump_().
-      const html = `<head>${styleHtml}</head>`
-          + `<body>${this.element./*OK*/innerHTML}</body>`;
+      const html =
+        `<head>${styleHtml}</head>` +
+        `<body>${this.element./*OK*/ innerHTML}</body>`;
       const spec = {
         html,
         url: this.win.location.origin,
       };
       // TODO(choumx): installUrlReplacementsForEmbed().
-      return installFriendlyIframeEmbed(this.iframe_, this.element, spec)
+      return (
+        installFriendlyIframeEmbed(this.iframe_, this.element, spec)
           // The iframe body is worker-dom's base element.
-          .then(() => this.iframe_.contentWindow.document.body);
+          .then(() => this.iframe_.contentWindow.document.body)
+      );
     } else {
       dev().info(TAG, 'Shadow mode!');
-      const shadow = (shadowSupport === ShadowDomVersion.V0)
-        ? this.element.createShadowRoot()
-        : this.element.attachShadow({mode: 'open'});
+      const shadow =
+        shadowSupport === ShadowDomVersion.V0
+          ? this.element.createShadowRoot()
+          : this.element.attachShadow({mode: 'open'});
       // Copy runtime & custom styles to shadow root.
       // TODO(choumx): Include extension CSS (and avoid race condition).
       const styles = head.querySelectorAll(
-          'style[amp-runtime], style[amp-custom]');
+        'style[amp-runtime], style[amp-custom]'
+      );
       styles.forEach(style => {
         shadow.appendChild(style.cloneNode(/* deep */ true));
       });
@@ -267,10 +271,10 @@ export class AmpScript extends AMP.BaseElement {
 
   /**
    * @param {function()} flushMutations
-   * @param {number} phase
+   * @param {!Phase} phase
    * @private
    */
-  mutationPump_(flush, phase) {
+  mutationPump_(flushMutations, phase) {
     if (phase == Phase.HYDRATING) {
       this.vsync_.mutate(() =>
         this.element.classList.add('i-amphtml-hydrated')
@@ -293,17 +297,20 @@ export class AmpScript extends AMP.BaseElement {
         // don't behave this way, so we do it manually instead.
         if (this.iframe_ && this.getLayout() === Layout.CONTAINER) {
           let height;
-          this.measureMutateElement(() => {
-            const {body} = this.iframe_.contentWindow.document;
-            height = body./*OK*/scrollHeight;
-          }, () => {
-            // Match iframe height and remove original children.
-            const iframe = /** @type {!HTMLIFrameElement} */ (this.iframe_);
-            setImportantStyles(iframe, {'height': height + 'px'});
-            while (this.element.firstChild !== iframe) {
-              this.element.removeChild(this.element.firstChild);
+          this.measureMutateElement(
+            () => {
+              const {body} = this.iframe_.contentWindow.document;
+              height = body./*OK*/ scrollHeight;
+            },
+            () => {
+              // Match iframe height and remove original children.
+              const iframe = /** @type {!HTMLIFrameElement} */ (this.iframe_);
+              setImportantStyles(iframe, {'height': height + 'px'});
+              while (this.element.firstChild !== iframe) {
+                this.element.removeChild(this.element.firstChild);
+              }
             }
-          });
+          );
         }
       });
     } else {
