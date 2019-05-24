@@ -1019,7 +1019,7 @@ export class UrlReplacements {
    * @param {!Object<string, *>=} opt_bindings
    * @param {!Object<string, boolean>=} opt_whiteList Optional white list of names
    *     that can be substituted.
-   * @param {boolean} opt_noEncode should not encode URL
+   * @param {boolean=} opt_noEncode should not encode URL
    * @return {!Promise<string>}
    */
   expandUrlAsync(url, opt_bindings, opt_whiteList, opt_noEncode) {

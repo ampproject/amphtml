@@ -154,7 +154,7 @@ export class RequestHandler {
             return this.urlReplacementService_.expandUrlAsync(
               expandedRequestOrigin,
               bindings,
-              this.whitelist_,
+              this.whiteList_,
               true // opt_noEncode
             );
           })
