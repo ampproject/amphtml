@@ -61,7 +61,8 @@ public final class AmpCodingConvention extends CodingConventions.Proxy {
     // Bad hack, but we should really not try to inline CSS as these strings can
     // be very long.
     // See https://github.com/ampproject/amphtml/issues/10118
-    if (name.equals("cssText$$module$build$css")) {
+    // cssText is defined in build-system/tasks/css.js#writeCss
+    if (name.startsWith("cssText$$module$build$")) {
       return true;
     }
 
