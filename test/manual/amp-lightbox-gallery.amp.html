@@ -22,6 +22,10 @@
       object-fit: none;
     }
 
+    .scale-2x img {
+      transform: scale(2);
+    }
+
     footer {
       position: fixed;
       position: sticky;
@@ -56,6 +60,14 @@
   </amp-img>
 
   <h2>Test with single src, object-fit: cover</h2>
+  <h3>Test with a scale, causing a crop</h3>
+  <amp-img width=120 height=200
+    class="object-fit-cover scale-2x"
+    lightbox
+    src="https://ampbyexample-com.cdn.ampproject.org/i/s/ampbyexample.com/img/clean-2.jpg">
+  </amp-img>
+  
+
   <h3>Expand horizontally</h3>
   <amp-img width=120 height=200
     class="object-fit-cover"
