@@ -24,6 +24,7 @@ import {Signals} from '../../../src/utils/signals';
 import {
   closestAncestorElementBySelector,
   iterateCursor,
+  whenUpgradedToCustomElement,
 } from '../../../src/dom';
 import {debounce} from '../../../src/utils/rate-limit';
 import {deepEquals, getValueForExpr, parseJson} from '../../../src/json';
@@ -115,10 +116,13 @@ export class Bind {
     this.actionSequenceIds_ = [];
 
     /** @const @private {!Function} */
-    this.eventuallyClearActionSequenceIds_ = debounce(this.win_,
-        () => {
-          this.actionSequenceIds_.length = 0;
-        }, 5000);
+    this.eventuallyClearActionSequenceIds_ = debounce(
+      this.win_,
+      () => {
+        this.actionSequenceIds_.length = 0;
+      },
+      5000
+    );
 
     /** @private {!Array<BoundElementDef>} */
     this.boundElements_ = [];
@@ -171,20 +175,21 @@ export class Bind {
      * Resolved when the service finishes scanning the document for bindings.
      * @const @private {Promise}
      */
-    this.initializePromise_ = this.viewer_.whenFirstVisible()
-        .then(() => {
-          if (opt_win) {
-            // In FIE, scan the document node of the iframe window.
-            const {document} = opt_win;
-            return whenDocumentReady(document).then(() => document);
-          } else {
-            // Otherwise, scan the root node of the ampdoc.
-            return ampdoc.whenReady().then(() => ampdoc.getRootNode());
-          }
-        })
-        .then(root => {
-          return this.initialize_(root);
-        });
+    this.initializePromise_ = this.viewer_
+      .whenFirstVisible()
+      .then(() => {
+        if (opt_win) {
+          // In FIE, scan the document node of the iframe window.
+          const {document} = opt_win;
+          return whenDocumentReady(document).then(() => document);
+        } else {
+          // Otherwise, scan the root node of the ampdoc.
+          return ampdoc.whenReady().then(() => ampdoc.getRootNode());
+        }
+      })
+      .then(root => {
+        return this.initialize_(root);
+      });
 
     /** @private {Promise} */
     this.setStatePromise_ = null;
@@ -199,10 +204,12 @@ export class Bind {
     g.eval = g.eval || this.debugEvaluate_.bind(this);
   }
 
-  /** @override @nocollapse */
+  /**
+   * @param {!Window} embedWin
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   */
   static installInEmbedWindow(embedWin, ampdoc) {
-    installServiceInEmbedScope(
-        embedWin, 'bind', new Bind(ampdoc, embedWin));
+    installServiceInEmbedScope(embedWin, 'bind', new Bind(ampdoc, embedWin));
   }
 
   /**
@@ -221,21 +228,21 @@ export class Bind {
    * @return {!Promise}
    */
   setState(state, opt_skipEval, opt_skipAmpState) {
+    dev().info(TAG, 'setState:', state);
+
     try {
       deepMerge(this.state_, state, MAX_MERGE_DEPTH);
     } catch (e) {
       user().error(TAG, 'Failed to merge result from AMP.setState().', e);
     }
 
-    dev().info(TAG, 'state:', this.state_);
-
     if (opt_skipEval) {
       return Promise.resolve();
     }
 
     const promise = this.initializePromise_
-        .then(() => this.evaluate_())
-        .then(results => this.apply_(results, opt_skipAmpState));
+      .then(() => this.evaluate_())
+      .then(results => this.apply_(results, opt_skipAmpState));
 
     if (getMode().test) {
       promise.then(() => {
@@ -243,7 +250,7 @@ export class Bind {
       });
     }
 
-    return this.setStatePromise_ = promise;
+    return (this.setStatePromise_ = promise);
   }
 
   /**
@@ -267,8 +274,10 @@ export class Bind {
     const expression = args[RAW_OBJECT_ARGS_KEY];
     if (expression) {
       // Increment bindings limit by 500 on each invocation to a max of 2000.
-      this.maxNumberOfBindings_ = Math.min(2000,
-          Math.max(1000, this.maxNumberOfBindings_ + 500));
+      this.maxNumberOfBindings_ = Math.min(
+        2000,
+        Math.max(1000, this.maxNumberOfBindings_ + 500)
+      );
 
       this.signals_.signal('FIRST_MUTATE');
 
@@ -282,13 +291,17 @@ export class Bind {
         case 'pushState':
           return this.pushStateWithExpression(expression, scope);
         default:
-          return Promise.reject(dev().createError('Unrecognized method: %s.%s',
-              tagOrTarget, method));
+          return Promise.reject(
+            dev().createError('Unrecognized method: %s.%s', tagOrTarget, method)
+          );
       }
     } else {
-      user().error('AMP-BIND', 'Please use the object-literal syntax, '
-          + 'e.g. "AMP.setState({foo: \'bar\'})" instead of '
-          + '"AMP.setState(foo=\'bar\')".');
+      user().error(
+        'AMP-BIND',
+        'Please use the object-literal syntax, ' +
+          'e.g. "AMP.setState({foo: \'bar\'})" instead of ' +
+          '"AMP.setState(foo=\'bar\')".'
+      );
     }
     return Promise.resolve();
   }
@@ -301,16 +314,16 @@ export class Bind {
    * @return {!Promise}
    */
   setStateWithExpression(expression, scope) {
-    dev().info(TAG, 'setState:', `"${expression}"`);
+    dev().info(TAG, 'setState:', expression);
     this.setStatePromise_ = this.evaluateExpression_(expression, scope)
-        .then(result => this.setState(result))
-        .then(() => this.getDataForHistory_())
-        .then(data => {
-          // Don't bother calling History.replace with empty data.
-          if (data) {
-            this.history_.replace(data);
-          }
-        });
+      .then(result => this.setState(result))
+      .then(() => this.getDataForHistory_())
+      .then(data => {
+        // Don't bother calling History.replace with empty data.
+        if (data) {
+          this.history_.replace(data);
+        }
+      });
     return this.setStatePromise_;
   }
 
@@ -337,10 +350,10 @@ export class Bind {
 
       const onPop = () => this.setState(oldState);
       return this.setState(result)
-          .then(() => this.getDataForHistory_())
-          .then(data => {
-            this.history_.push(onPop, data);
-          });
+        .then(() => this.getDataForHistory_())
+        .then(data => {
+          this.history_.push(onPop, data);
+        });
     });
   }
 
@@ -361,7 +374,7 @@ export class Bind {
     // Only pass state for history updates to trusted viewers, since they
     // may contain user data e.g. form input.
     return this.viewer_.isTrustedViewer().then(trusted => {
-      return (trusted) ? data : null;
+      return trusted ? data : null;
     });
   }
 
@@ -404,8 +417,14 @@ export class Bind {
      */
     const cleanup = added => {
       this.removeBindingsForNodes_(removedElements).then(removed => {
-        dev().info(TAG,
-            '⤷', 'Δ:', (added - removed), ', ∑:', this.numberOfBindings());
+        dev().info(
+          TAG,
+          '⤷',
+          'Δ:',
+          added - removed,
+          ', ∑:',
+          this.numberOfBindings()
+        );
       });
       return Promise.resolve();
     };
@@ -431,15 +450,21 @@ export class Bind {
     if (added === 0) {
       return cleanup(0);
     }
-    const promise = this.sendBindingsToWorker_(bindings).then(() => {
-      return this.evaluate_().then(results =>
-        this.applyElements_(results, addedElements));
-    }).then(() => {
-      // Remove bindings at the end to reduce evaluation/apply latency.
-      cleanup(added);
-    });
-    return this.timer_.timeoutPromise(timeout, promise,
-        'Timed out waiting for amp-bind to process rendered template.');
+    const promise = this.sendBindingsToWorker_(bindings)
+      .then(() => {
+        return this.evaluate_().then(results =>
+          this.applyElements_(results, addedElements)
+        );
+      })
+      .then(() => {
+        // Remove bindings at the end to reduce evaluation/apply latency.
+        cleanup(added);
+      });
+    return this.timer_.timeoutPromise(
+      timeout,
+      promise,
+      'Timed out waiting for amp-bind to process rendered template.'
+    );
   }
 
   /**
@@ -451,7 +476,7 @@ export class Bind {
   getStateValue(expr) {
     const value = getValueForExpr(this.state_, expr);
     if (isObject(value) || isArray(value)) {
-      return JSON.stringify(/** @type {JsonObject} */(value));
+      return JSON.stringify(/** @type {JsonObject} */ (value));
     } else {
       return String(value);
     }
@@ -470,44 +495,39 @@ export class Bind {
 
     // The web worker's evaluator also has an instance of BindValidator
     // that should be initialized with the same `allowUrlProperties` value.
-    return this.ww_('bind.init', [allowUrlProperties]).then(() => {
-      return Promise.all([
-        this.addMacros_(),
-        this.addBindingsForNodes_([root]),
-      ]);
-    }).then(results => {
-      dev().info(TAG, '⤷', 'Δ:', results);
-      // Listen for DOM updates (e.g. template render) to rescan for bindings.
-      root.addEventListener(AmpEvents.DOM_UPDATE, e => this.onDomUpdate_(e));
-      // In dev mode, check default values against initial expression results.
-      if (getMode().development) {
-        return this.evaluate_().then(results => this.verify_(results));
-      }
-    }).then(() => this.checkReadiness_(root));
-  }
-
-  /**
-   * Bind is "ready" when its initialization completes _and_ all <amp-state>
-   * elements' local data is parsed and processed (not remote data).
-   * @param {!Node} root
-   * @private
-   */
-  checkReadiness_(root) {
-    const ampStates = root.querySelectorAll('AMP-STATE');
-    if (ampStates.length > 0) {
-      const whenBuilt = toArray(ampStates).map(el => el.whenBuilt());
-      Promise.all(whenBuilt).then(() => this.onReady_());
-    } else {
-      this.onReady_();
-    }
-  }
-
-  /**
-   * @private
-   */
-  onReady_() {
-    this.viewer_.sendMessage('bindReady', undefined);
-    this.dispatchEventForTesting_(BindEvents.INITIALIZE);
+    return this.ww_('bind.init', [allowUrlProperties])
+      .then(() => {
+        return Promise.all([
+          this.addMacros_(),
+          this.addBindingsForNodes_([root]),
+        ]);
+      })
+      .then(() => {
+        // Listen for DOM updates (e.g. template render) to rescan for bindings.
+        root.addEventListener(AmpEvents.DOM_UPDATE, e => this.onDomUpdate_(e));
+        // In dev mode, check default values against initial expression results.
+        if (getMode().development) {
+          return this.evaluate_().then(results => this.verify_(results));
+        }
+      })
+      .then(() => {
+        const ampStates = root.querySelectorAll('AMP-STATE');
+        // Force all query-able <amp-state> elements to parse local data instead
+        // of waiting for runtime to build them all.
+        const whenBuilt = false;
+        const whenParsed = toArray(ampStates).map(el => {
+          return whenUpgradedToCustomElement(el)
+            .then(() => el.getImpl(whenBuilt))
+            .then(impl => impl.parseAndUpdate());
+        });
+        return Promise.all(whenParsed);
+      })
+      .then(() => {
+        // Bind is "ready" when its initialization completes _and_ all <amp-state>
+        // elements' local data is parsed and processed (not remote data).
+        this.viewer_.sendMessage('bindReady', undefined);
+        this.dispatchEventForTesting_(BindEvents.INITIALIZE);
+      });
   }
 
   /**
@@ -516,8 +536,8 @@ export class Bind {
    */
   isAmp4Email_() {
     const html = this.localWin_.document.documentElement;
-    const amp4email = html.hasAttribute('amp4email')
-        || html.hasAttribute('⚡4email');
+    const amp4email =
+      html.hasAttribute('amp4email') || html.hasAttribute('⚡4email');
     return amp4email;
   }
 
@@ -562,9 +582,12 @@ export class Bind {
         }
       });
       if (ignoredKeys.length > 0) {
-        user().warn(TAG, 'Some state keys could not be premutated ' +
-              'because they are missing the overridable attribute: ' +
-              ignoredKeys.join(', '));
+        user().warn(
+          TAG,
+          'Some state keys could not be premutated ' +
+            'because they are missing the overridable attribute: ' +
+            ignoredKeys.join(', ')
+        );
       }
       return this.setState(data['state']);
     });
@@ -595,8 +618,8 @@ export class Bind {
     const macros = /** @type {!Array<!BindMacroDef>} */ ([]);
     iterateCursor(elements, element => {
       const argumentNames = (element.getAttribute('arguments') || '')
-          .split(',')
-          .map(s => s.trim());
+        .split(',')
+        .map(s => s.trim());
       macros.push({
         id: element.getAttribute('id'),
         argumentNames,
@@ -610,7 +633,10 @@ export class Bind {
         // Report macros that failed to parse (e.g. expression size exceeded).
         errors.forEach((e, i) => {
           this.reportWorkerError_(
-              e, `${TAG}: Parsing amp-bind-macro failed.`, elements[i]);
+            e,
+            `${TAG}: Parsing amp-bind-macro failed.`,
+            elements[i]
+          );
         });
         return macros.length;
       });
@@ -632,9 +658,10 @@ export class Bind {
     // For each node, scan it for bindings and store them.
     const scanPromises = nodes.map(node => {
       // Limit number of total bindings (unless in local manual testing).
-      const limit = (getMode().localDev && !getMode().test)
-        ? Number.POSITIVE_INFINITY
-        : this.maxNumberOfBindings_ - this.numberOfBindings();
+      const limit =
+        getMode().localDev && !getMode().test
+          ? Number.POSITIVE_INFINITY
+          : this.maxNumberOfBindings_ - this.numberOfBindings();
 
       return this.scanNode_(node, limit).then(results => {
         const {bindings, limitExceeded} = results;
@@ -651,15 +678,18 @@ export class Bind {
       // `results` is a 2D array where results[i] is an array of bindings.
       // Flatten this into a 1D array of bindings via concat.
       const bindings = Array.prototype.concat.apply([], results);
-      return (bindings.length > 0) ? this.sendBindingsToWorker_(bindings) : 0;
+      return bindings.length > 0 ? this.sendBindingsToWorker_(bindings) : 0;
     });
   }
 
   /** Emits console error stating that the binding limit was exceeded. */
   emitMaxBindingsExceededError_() {
-    dev().expectedError(TAG, 'Maximum number of bindings reached ' +
+    dev().expectedError(
+      TAG,
+      'Maximum number of bindings reached ' +
         '(%s). Additional elements with bindings will be ignored.',
-    this.maxNumberOfBindings_);
+      this.maxNumberOfBindings_
+    );
   }
 
   /**
@@ -673,9 +703,11 @@ export class Bind {
       Object.keys(parseErrors).forEach(expressionString => {
         const elements = this.expressionToElements_[expressionString];
         if (elements.length > 0) {
-          this.reportWorkerError_(parseErrors[expressionString],
-              `${TAG}: Expression compile error in "${expressionString}".`,
-              elements[0]);
+          this.reportWorkerError_(
+            parseErrors[expressionString],
+            `${TAG}: Expression compile error in "${expressionString}".`,
+            elements[0]
+          );
         }
       });
       return bindings.length;
@@ -725,8 +757,9 @@ export class Bind {
     // Remove the bindings from the evaluator.
     const removed = deletedExpressions.length;
     if (removed > 0) {
-      return this.ww_('bind.removeBindingsWithExpressionStrings',
-          [deletedExpressions]).then(() => removed);
+      return this.ww_('bind.removeBindingsWithExpressionStrings', [
+        deletedExpressions,
+      ]).then(() => removed);
     } else {
       return Promise.resolve(0);
     }
@@ -743,11 +776,17 @@ export class Bind {
   scanNode_(node, limit) {
     /** @type {!Array<!BindBindingDef>} */
     const bindings = [];
-    const doc = devAssert(node.nodeType == Node.DOCUMENT_NODE
-      ? node : node.ownerDocument, 'ownerDocument is null.');
+    const doc = devAssert(
+      node.nodeType == Node.DOCUMENT_NODE ? node : node.ownerDocument,
+      'ownerDocument is null.'
+    );
     // Third and fourth params of `createTreeWalker` are not optional on IE11.
-    const walker = doc.createTreeWalker(node, NodeFilter.SHOW_ELEMENT, null,
-        /* entityReferenceExpansion */ false);
+    const walker = doc.createTreeWalker(
+      node,
+      NodeFilter.SHOW_ELEMENT,
+      null,
+      /* entityReferenceExpansion */ false
+    );
     // Set to true if number of bindings in `node` exceeds `limit`.
     let limitExceeded = false;
     // Helper function for scanning the tree walker's next node.
@@ -876,7 +915,11 @@ export class Bind {
         return {property, expressionString: attribute.value};
       } else {
         const err = user().createError(
-            '%s: Binding to [%s] on <%s> is not allowed.', TAG, property, tag);
+          '%s: Binding to [%s] on <%s> is not allowed.',
+          TAG,
+          property,
+          tag
+        );
         this.reportError_(err, element);
       }
     }
@@ -890,20 +933,24 @@ export class Bind {
    * @return {!Promise<!JsonObject>}
    */
   evaluateExpression_(expression, scope) {
-    return this.initializePromise_.then(() => {
-      // Allow expression to reference current state in addition to event state.
-      Object.assign(scope, this.state_);
-      return this.ww_('bind.evaluateExpression', [expression, scope]);
-    }).then(returnValue => {
-      const {result, error} = returnValue;
-      if (error) {
-        // Throw to reject promise.
-        throw this.reportWorkerError_(error, `${TAG}: Expression eval failed.`);
-      } else {
-        dev().info(TAG, '⤷', result);
-        return result;
-      }
-    });
+    return this.initializePromise_
+      .then(() => {
+        // Allow expression to reference current state in addition to event state.
+        Object.assign(scope, this.state_);
+        return this.ww_('bind.evaluateExpression', [expression, scope]);
+      })
+      .then(returnValue => {
+        const {result, error} = returnValue;
+        if (error) {
+          // Throw to reject promise.
+          throw this.reportWorkerError_(
+            error,
+            `${TAG}: Expression eval failed.`
+          );
+        } else {
+          return result;
+        }
+      });
   }
 
   /**
@@ -921,13 +968,16 @@ export class Bind {
         if (elements.length > 0) {
           const evalError = errors[expressionString];
           const userError = user().createError(
-              '%s: Expression evaluation error in "%s". %s', TAG,
-              expressionString, evalError.message);
+            '%s: Expression evaluation error in "%s". %s',
+            TAG,
+            expressionString,
+            evalError.message
+          );
           userError.stack = evalError.stack;
           this.reportError_(userError, elements[0]);
         }
       });
-      dev().info(TAG, 'bindings:', results);
+      dev().info(TAG, 'evaluation:', results);
       return results;
     });
   }
@@ -973,11 +1023,14 @@ export class Bind {
         mismatches[`${tagName}[${property}]${expected}:${actual}`] = true;
 
         if (warn) {
-          user().warn(TAG, `Default value (${actual}) does not match first `
-            + `result (${expected}) for <${tagName} [${property}]="`
-            + `${expressionString}">. We recommend writing expressions with `
-            + 'matching default values, but this can be safely ignored if '
-            + 'intentional.');
+          user().warn(
+            TAG,
+            `Default value (${actual}) does not match first ` +
+              `result (${expected}) for <${tagName} [${property}]="` +
+              `${expressionString}">. We recommend writing expressions with ` +
+              'matching default values, but this can be safely ignored if ' +
+              'intentional.'
+          );
         }
       });
     });
@@ -1017,8 +1070,10 @@ export class Bind {
       const newValue = results[expressionString];
       // Support equality checks for arrays of objects containing arrays.
       // Useful for rendering amp-list with amp-bind state via [src].
-      if (newValue === undefined ||
-          deepEquals(newValue, previousResult, /* depth */ 10)) {
+      if (
+        newValue === undefined ||
+        deepEquals(newValue, previousResult, /* depth */ 10)
+      ) {
       } else {
         boundProperty.previousResult = newValue;
         updates.push({boundProperty, newValue});
@@ -1043,9 +1098,7 @@ export class Bind {
       }
       return this.applyBoundElement_(results, boundElement);
     });
-    return Promise.all(promises).then(() => {
-      dev().info(TAG, 'updated:', promises.length, 'elements');
-    });
+    return Promise.all(promises);
   }
 
   /**
@@ -1063,9 +1116,7 @@ export class Bind {
         }
       });
     });
-    return Promise.all(promises).then(() => {
-      dev().info(TAG, 'updated:', promises.length, 'elements');
-    });
+    return Promise.all(promises);
   }
 
   /**
@@ -1102,7 +1153,7 @@ export class Bind {
         // TODO(choumx): Add new Resources method for adding change-size
         // request without scheduling vsync pass since `mutateElement()`
         // will schedule a pass after a short delay anyways.
-        this.resources_./*OK*/changeSize(element, height, width);
+        this.resources_./*OK*/ changeSize(element, height, width);
       }
 
       if (typeof element.mutatedAttributesCallback === 'function') {
@@ -1111,8 +1162,12 @@ export class Bind {
         try {
           element.mutatedAttributesCallback(mutations);
         } catch (e) {
-          const error = user().createError('%s: Applying expression results' +
-              ' (%s) failed with error,', TAG, JSON.stringify(mutations), e);
+          const error = user().createError(
+            '%s: Applying expression results (%s) failed with error,',
+            TAG,
+            JSON.stringify(mutations),
+            e
+          );
           this.reportError_(error, element);
         }
       }
@@ -1139,8 +1194,10 @@ export class Bind {
       case 'text':
         const stringValue = String(newValue);
         // If <title> element in the <head>, also update the document title.
-        if (tag === 'TITLE'
-            && element.parentNode === this.localWin_.document.head) {
+        if (
+          tag === 'TITLE' &&
+          element.parentNode === this.localWin_.document.head
+        ) {
           this.localWin_.document.title = stringValue;
         }
         // For <textarea>, [text] sets `value` (current value), while
@@ -1167,7 +1224,10 @@ export class Bind {
           element.setAttribute('class', ampClasses.join(' '));
         } else {
           const err = user().createError(
-              '%s: "%s" is not a valid result for [class].', TAG, newValue);
+            '%s: "%s" is not a valid result for [class].',
+            TAG,
+            newValue
+          );
           this.reportError_(err, element);
         }
         break;
@@ -1177,7 +1237,7 @@ export class Bind {
         // property (current value) for bindings e.g. [value].
         // TODO(choumx): Investigate if splitting into [value] and
         // [defaultValue] is possible without version bump.
-        const updateProperty = (tag === 'INPUT' && property in element);
+        const updateProperty = tag === 'INPUT' && property in element;
         const oldValue = element.getAttribute(property);
 
         let mutated = false;
@@ -1202,7 +1262,11 @@ export class Bind {
           }
         } else if (newValue !== oldValue) {
           mutated = this.rewriteAttributes_(
-              element, property, String(newValue), updateProperty);
+            element,
+            property,
+            String(newValue),
+            updateProperty
+          );
         }
 
         if (mutated) {
@@ -1259,12 +1323,21 @@ export class Bind {
     // `url#parseUrl` which uses <a>. Worker has URL API but not on IE11.
     try {
       rewriteAttributesForElement(
-          element, attrName, value, /* opt_location */ undefined,
-          updateProperty);
+        element,
+        attrName,
+        value,
+        /* opt_location */ undefined,
+        updateProperty
+      );
       return true;
     } catch (e) {
-      const error = user().createError('%s: "%s" is not a ' +
-          'valid result for [%]', TAG, value, attrName, e);
+      const error = user().createError(
+        '%s: "%s" is not a valid result for [%]',
+        TAG,
+        value,
+        attrName,
+        e
+      );
       this.reportError_(error, element);
     }
     return false;
@@ -1297,7 +1370,7 @@ export class Bind {
       case 'text':
         initialValue = element.textContent;
         expectedValue = String(expectedValue);
-        match = (initialValue.trim() === expectedValue.trim());
+        match = initialValue.trim() === expectedValue.trim();
         break;
 
       case 'class':
@@ -1321,8 +1394,10 @@ export class Bind {
           }
         } else {
           const err = user().createError(
-              '%s: "%s" is not a valid result for [class].',
-              TAG, expectedValue);
+            '%s: "%s" is not a valid result for [class].',
+            TAG,
+            expectedValue
+          );
           this.reportError_(err, element);
         }
         match = this.compareStringArrays_(initialValue, classes);
@@ -1332,13 +1407,13 @@ export class Bind {
         initialValue = element.getAttribute(property);
         // Boolean attributes return values of either '' or null.
         if (expectedValue === true) {
-          match = (initialValue === '');
+          match = initialValue === '';
         } else if (expectedValue === false) {
-          match = (initialValue === null);
+          match = initialValue === null;
         } else if (typeof expectedValue === 'number') {
-          match = (Number(initialValue) === expectedValue);
+          match = Number(initialValue) === expectedValue;
         } else {
-          match = (initialValue === expectedValue);
+          match = initialValue === expectedValue;
         }
         break;
     }
@@ -1374,15 +1449,21 @@ export class Bind {
   removeThenAdd_(remove, add) {
     let removed = 0;
     return this.removeBindingsForNodes_(remove)
-        .then(r => {
-          removed = r;
-          return this.addBindingsForNodes_(add);
-        })
-        .then(added => {
-          dev().info(TAG,
-              '⤷', 'Δ:', (added - removed), ', ∑:', this.numberOfBindings());
-          return {added, removed};
-        });
+      .then(r => {
+        removed = r;
+        return this.addBindingsForNodes_(add);
+      })
+      .then(added => {
+        dev().info(
+          TAG,
+          '⤷',
+          'Δ:',
+          added - removed,
+          ', ∑:',
+          this.numberOfBindings()
+        );
+        return {added, removed};
+      });
   }
 
   /**
@@ -1474,9 +1555,12 @@ export class Bind {
         const element = user().assertElement(opt_elementOrExpr);
         this.debugPrintElement_(element);
       } else {
-        user().info(TAG, 'Invalid argument. Pass a JSON expression or an ' +
+        user().info(
+          TAG,
+          'Invalid argument. Pass a JSON expression or an ' +
             'element instead e.g. AMP.printState("foo.bar") or ' +
-            'AMP.printState($0) after selecting an element.');
+            'AMP.printState($0) after selecting an element.'
+        );
       }
     } else {
       user().info(TAG, this.state_);

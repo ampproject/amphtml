@@ -20,7 +20,9 @@ import {Services} from '../services';
 import {computedStyle, toggle} from '../style';
 import {dev, user, userAssert} from '../log';
 import {
-  getAmpdoc, installServiceInEmbedScope, registerServiceBuilderForDoc,
+  getAmpdoc,
+  installServiceInEmbedScope,
+  registerServiceBuilderForDoc,
 } from '../service';
 import {isFiniteNumber, toWin} from '../types';
 import {startsWith} from '../string';
@@ -49,7 +51,6 @@ export function getAutofocusElementForShowAction(element) {
 /** @const {string} */
 const TAG = 'STANDARD-ACTIONS';
 
-
 /**
  * This service contains implementations of some of the most typical actions,
  * such as hiding DOM elements.
@@ -65,7 +66,7 @@ export class StandardActions {
     /** @const {!./ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
-    const context = (opt_win)
+    const context = opt_win
       ? opt_win.document.documentElement
       : ampdoc.getHeadNode();
 
@@ -80,10 +81,16 @@ export class StandardActions {
     this.installActions_(Services.actionServiceForDoc(context));
   }
 
-  /** @override @nocollapse */
+  /**
+   * @param {!Window} embedWin
+   * @param {!./ampdoc-impl.AmpDoc} ampdoc
+   */
   static installInEmbedWindow(embedWin, ampdoc) {
-    installServiceInEmbedScope(embedWin, 'standard-actions',
-        new StandardActions(ampdoc, embedWin));
+    installServiceInEmbedScope(
+      embedWin,
+      'standard-actions',
+      new StandardActions(ampdoc, embedWin)
+    );
   }
 
   /**
@@ -96,23 +103,26 @@ export class StandardActions {
     // All standard actions require high trust by default via
     // addGlobalMethodHandler.
 
-    actionService.addGlobalMethodHandler(
-        'hide', this.handleHide_.bind(this));
+    actionService.addGlobalMethodHandler('hide', this.handleHide_.bind(this));
+
+    actionService.addGlobalMethodHandler('show', this.handleShow_.bind(this));
 
     actionService.addGlobalMethodHandler(
-        'show', this.handleShow_.bind(this));
+      'toggleVisibility',
+      this.handleToggle_.bind(this)
+    );
 
     actionService.addGlobalMethodHandler(
-        'toggleVisibility', this.handleToggle_.bind(this));
+      'scrollTo',
+      this.handleScrollTo_.bind(this)
+    );
+
+    actionService.addGlobalMethodHandler('focus', this.handleFocus_.bind(this));
 
     actionService.addGlobalMethodHandler(
-        'scrollTo', this.handleScrollTo_.bind(this));
-
-    actionService.addGlobalMethodHandler(
-        'focus', this.handleFocus_.bind(this));
-
-    actionService.addGlobalMethodHandler(
-        'toggleClass', this.handleToggleClass_.bind(this));
+      'toggleClass',
+      this.handleToggleClass_.bind(this)
+    );
   }
 
   /**
@@ -133,8 +143,8 @@ export class StandardActions {
     switch (method) {
       case 'pushState':
       case 'setState':
-        const element = (node.nodeType === Node.DOCUMENT_NODE)
-          ? node.documentElement : node;
+        const element =
+          node.nodeType === Node.DOCUMENT_NODE ? node.documentElement : node;
         return Services.bindForDocOrNull(element).then(bind => {
           userAssert(bind, 'AMP-BIND is not installed.');
           return bind.invoke(invocation);
@@ -147,11 +157,10 @@ export class StandardActions {
         return this.handleCloseOrNavigateTo_(invocation);
 
       case 'scrollTo':
-        userAssert(args['id'],
-            'AMP.scrollTo must provide element ID');
+        userAssert(args['id'], 'AMP.scrollTo must provide element ID');
         invocation.node = dev().assertElement(
-            getAmpdoc(node).getElementById(args['id']),
-            'scrollTo element ID must exist on page'
+          getAmpdoc(node).getElementById(args['id']),
+          'scrollTo element ID must exist on page'
         );
         return this.handleScrollTo_(invocation);
 
@@ -165,10 +174,10 @@ export class StandardActions {
 
       case 'optoutOfCid':
         return Services.cidForDoc(this.ampdoc)
-            .then(cid => cid.optOut())
-            .catch(reason => {
-              dev().error(TAG, 'Failed to opt out of CID', reason);
-            });
+          .then(cid => cid.optOut())
+          .catch(reason => {
+            dev().error(TAG, 'Failed to opt out of CID', reason);
+          });
     }
     throw user().createError('Unknown AMP action ', method);
   }
@@ -191,13 +200,19 @@ export class StandardActions {
         }
       });
     }
-    return permission.then(() => {
-      Services.navigationForDoc(this.ampdoc).navigateTo(
-          win, args['url'], `AMP.${method}`,
-          {target: args['target'], opener: args['opener']});
-    }, /* onrejected */ e => {
-      user().error(TAG, e.message);
-    });
+    return permission.then(
+      () => {
+        Services.navigationForDoc(this.ampdoc).navigateTo(
+          win,
+          args['url'],
+          `AMP.${method}`,
+          {target: args['target'], opener: args['opener']}
+        );
+      },
+      /* onrejected */ e => {
+        user().error(TAG, e.message);
+      }
+    );
   }
 
   /**
@@ -264,7 +279,10 @@ export class StandardActions {
     // Animate the scroll
     // Should return a promise instead of null
     return this.viewport_.animateScrollIntoView(
-        node, posOrUndef, durationOrUndef);
+      node,
+      posOrUndef,
+      durationOrUndef
+    );
   }
 
   /**
@@ -294,7 +312,7 @@ export class StandardActions {
 
     this.resources_.mutateElement(target, () => {
       if (target.classList.contains('i-amphtml-element')) {
-        target./*OK*/collapse();
+        target./*OK*/ collapse();
       } else {
         toggle(target, false);
       }
@@ -316,21 +334,24 @@ export class StandardActions {
 
     if (target.classList.contains(getLayoutClass(Layout.NODISPLAY))) {
       user().warn(
-          TAG,
-          'Elements with layout=nodisplay cannot be dynamically shown.',
-          target);
+        TAG,
+        'Elements with layout=nodisplay cannot be dynamically shown.',
+        target
+      );
       return null;
     }
 
     this.resources_.measureElement(() => {
-      if (computedStyle(ownerWindow, target).display == 'none' &&
-          !isShowable(target)) {
-
+      if (
+        computedStyle(ownerWindow, target).display == 'none' &&
+        !isShowable(target)
+      ) {
         user().warn(
-            TAG,
-            'Elements can only be dynamically shown when they have the ' +
+          TAG,
+          'Elements can only be dynamically shown when they have the ' +
             '"hidden" attribute set or when they were dynamically hidden.',
-            target);
+          target
+        );
       }
     });
 
@@ -355,7 +376,7 @@ export class StandardActions {
    */
   handleShowSync_(target, autofocusElOrNull) {
     if (target.classList.contains('i-amphtml-element')) {
-      target./*OK*/expand();
+      target./*OK*/ expand();
     } else {
       toggle(target, true);
     }
@@ -386,14 +407,18 @@ export class StandardActions {
   handleToggleClass_(invocation) {
     const target = dev().assertElement(invocation.node);
     const {args} = invocation;
-    const className = user().assertString(args['class'],
-        "Argument 'class' must be a string.");
+    const className = user().assertString(
+      args['class'],
+      "Argument 'class' must be a string."
+    );
 
     this.resources_.mutateElement(target, () => {
       if (args['force'] !== undefined) {
         // must be boolean, won't do type conversion
-        const shouldForce = user().assertBoolean(args['force'],
-            "Optional argument 'force' must be a boolean.");
+        const shouldForce = user().assertBoolean(
+          args['force'],
+          "Optional argument 'force' must be a boolean."
+        );
         target.classList.toggle(className, shouldForce);
       } else {
         target.classList.toggle(className);
@@ -404,14 +429,14 @@ export class StandardActions {
   }
 }
 
-
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
  */
 export function installStandardActionsForDoc(ampdoc) {
   registerServiceBuilderForDoc(
-      ampdoc,
-      'standard-actions',
-      StandardActions,
-      /* opt_instantiate */ true);
+    ampdoc,
+    'standard-actions',
+    StandardActions,
+    /* opt_instantiate */ true
+  );
 }

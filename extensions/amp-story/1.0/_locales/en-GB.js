@@ -111,8 +111,9 @@ const strings = {
     string: 'Expand the height of your window to view this experience',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT]: {
-    string: 'Expand both the height and width of your window to view this ' +
-        'experience',
+    string:
+      'Expand both the height and width of your window to view this ' +
+      'experience',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_WIDTH_SIZE_TEXT]: {
     string: 'Expand the width of your window to view this experience',
@@ -124,8 +125,9 @@ const strings = {
     string: 'The page is best viewed in portrait mode',
   },
   [LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT]: {
-    string: 'We\'re sorry, it looks like your browser doesn\'t support this ' +
-        'experience',
+    string:
+      "We're sorry, it looks like your browser doesn't support this " +
+      'experience',
   },
 };
 

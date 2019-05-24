@@ -38,17 +38,13 @@ import {
   mergeExperimentIds,
 } from '../utils';
 import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
-import {
-  MockA4AImpl,
-} from '../../../../extensions/amp-a4a/0.1/test/utils';
+import {MockA4AImpl} from '../../../../extensions/amp-a4a/0.1/test/utils';
 import {Services} from '../../../../src/services';
 import {buildUrl} from '../shared/url-builder';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {createIframePromise} from '../../../../testing/iframe';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
-import {
-  installExtensionsService,
-} from '../../../../src/service/extensions-impl';
+import {installExtensionsService} from '../../../../src/service/extensions-impl';
 import {installXhrService} from '../../../../src/service/xhr-impl';
 import {toggleExperiment} from '../../../../src/experiments';
 
@@ -68,9 +64,19 @@ function setupForAdTesting(fixture) {
 // Because of the way the element is constructed, it doesn't have all of the
 // machinery that AMP expects it to have, so just no-op the irrelevant
 // functions.
-function noopMethods(impl, doc, sandbox, pageLayoutBox = {
-  top: 11, left: 12, right: 0, bottom: 0, width: 0, height: 0,
-}) {
+function noopMethods(
+  impl,
+  doc,
+  sandbox,
+  pageLayoutBox = {
+    top: 11,
+    left: 12,
+    right: 0,
+    bottom: 0,
+    width: 0,
+    height: 0,
+  }
+) {
   const noop = () => {};
   impl.element.build = noop;
   impl.element.getPlaceholder = noop;
@@ -80,7 +86,6 @@ function noopMethods(impl, doc, sandbox, pageLayoutBox = {
 }
 
 describe('Google A4A utils', () => {
-
   //TODO: Add tests for other utils functions.
 
   describe('#additionalDimensions', () => {
@@ -102,7 +107,8 @@ describe('Google A4A utils', () => {
         height: '101px',
       };
       return expect(additionalDimensions(fakeWin, fakeSize)).to.equal(
-          '3,4,1,2,11,12,5,6,100px,101px');
+        '3,4,1,2,11,12,5,6,100px,101px'
+      );
     });
   });
 
@@ -167,10 +173,12 @@ describe('Google A4A utils', () => {
         });
         const a4a = new MockA4AImpl(element);
         url = 'not an array';
-        allowConsoleError(() =>
-          expect(extractAmpAnalyticsConfig(a4a, headers)).to.not.be.ok);
-        allowConsoleError(() =>
-          expect(extractAmpAnalyticsConfig(a4a, headers)).to.be.null);
+        allowConsoleError(
+          () => expect(extractAmpAnalyticsConfig(a4a, headers)).to.not.be.ok
+        );
+        allowConsoleError(
+          () => expect(extractAmpAnalyticsConfig(a4a, headers)).to.be.null
+        );
         url = [];
         expect(extractAmpAnalyticsConfig(a4a, headers)).to.not.be.ok;
         expect(extractAmpAnalyticsConfig(a4a, headers)).to.be.null;
@@ -203,15 +211,21 @@ describe('Google A4A utils', () => {
       };
       const qqid = 'qqid_string';
       let newConfig = addCsiSignalsToAmpAnalyticsConfig(
-          window, mockElement, builtConfig, qqid,
-          /* isVerifiedAmpCreative */ true);
+        window,
+        mockElement,
+        builtConfig,
+        qqid,
+        /* isVerifiedAmpCreative */ true
+      );
 
       expect(newConfig.requests.iniLoadCsi).to.not.be.null;
       expect(newConfig.requests.renderStartCsi).to.not.be.null;
-      expect(newConfig.triggers.continuousVisibleIniLoad.request)
-          .to.equal('iniLoadCsi');
-      expect(newConfig.triggers.continuousVisibleRenderStart.request)
-          .to.equal('renderStartCsi');
+      expect(newConfig.triggers.continuousVisibleIniLoad.request).to.equal(
+        'iniLoadCsi'
+      );
+      expect(newConfig.triggers.continuousVisibleRenderStart.request).to.equal(
+        'renderStartCsi'
+      );
       const getRegExps = metricName => [
         /^https:\/\/csi\.gstatic\.com\/csi\?/,
         /(\?|&)s=a4a(&|$)/,
@@ -234,48 +248,62 @@ describe('Google A4A utils', () => {
         expect(newConfig.requests.renderStartCsi).to.match(regExp);
       });
       newConfig = addCsiSignalsToAmpAnalyticsConfig(
-          window, mockElement, builtConfig, qqid,
-          /* isVerifiedAmpCreative */ false,
-          /* lifecycle time events; not relevant here */ -1, -1);
+        window,
+        mockElement,
+        builtConfig,
+        qqid,
+        /* isVerifiedAmpCreative */ false,
+        /* lifecycle time events; not relevant here */ -1,
+        -1
+      );
       getRegExps('iniLoadCsiCrossDomain').forEach(regExp => {
         expect(newConfig.requests.iniLoadCsi).to.match(regExp);
       });
       getRegExps('renderStartCsiCrossDomain').forEach(regExp => {
         expect(newConfig.requests.renderStartCsi).to.match(regExp);
       });
-
     });
   });
 
   describe('#getAmpRuntimeTypeParameter', () => {
     it('should specify that this is canary', () => {
-      expect(getAmpRuntimeTypeParameter({
-        AMP_CONFIG: {type: 'canary'},
-        location: {origin: 'https://www-example-com.cdn.ampproject.org'},
-      })).to.equal('2');
+      expect(
+        getAmpRuntimeTypeParameter({
+          AMP_CONFIG: {type: 'canary'},
+          location: {origin: 'https://www-example-com.cdn.ampproject.org'},
+        })
+      ).to.equal('2');
     });
     it('should specify that this is control', () => {
-      expect(getAmpRuntimeTypeParameter({
-        AMP_CONFIG: {type: 'control'},
-        location: {origin: 'https://www-example-com.cdn.ampproject.org'},
-      })).to.equal('1');
+      expect(
+        getAmpRuntimeTypeParameter({
+          AMP_CONFIG: {type: 'control'},
+          location: {origin: 'https://www-example-com.cdn.ampproject.org'},
+        })
+      ).to.equal('1');
     });
     it('should not have `art` parameter when AMP_CONFIG is undefined', () => {
-      expect(getAmpRuntimeTypeParameter({
-        location: {origin: 'https://www-example-com.cdn.ampproject.org'},
-      })).to.be.null;
+      expect(
+        getAmpRuntimeTypeParameter({
+          location: {origin: 'https://www-example-com.cdn.ampproject.org'},
+        })
+      ).to.be.null;
     });
     it('should not have `art` parameter when binary type is production', () => {
-      expect(getAmpRuntimeTypeParameter({
-        AMP_CONFIG: {type: 'production'},
-        location: {origin: 'https://www-example-com.cdn.ampproject.org'},
-      })).to.be.null;
+      expect(
+        getAmpRuntimeTypeParameter({
+          AMP_CONFIG: {type: 'production'},
+          location: {origin: 'https://www-example-com.cdn.ampproject.org'},
+        })
+      ).to.be.null;
     });
     it('should not have `art` parameter when canonical', () => {
-      expect(getAmpRuntimeTypeParameter({
-        AMP_CONFIG: {type: 'canary'},
-        location: {origin: 'https://www.example.com'},
-      })).to.be.null;
+      expect(
+        getAmpRuntimeTypeParameter({
+          AMP_CONFIG: {type: 'canary'},
+          location: {origin: 'https://www.example.com'},
+        })
+      ).to.be.null;
     });
   });
 
@@ -325,8 +353,12 @@ describe('Google A4A utils', () => {
         });
         const impl = new MockA4AImpl(elem);
         noopMethods(impl, doc, sandbox);
-        const getRect = () => { return {'width': 100, 'height': 200}; };
-        const getSize = () => { return {'width': 100, 'height': 200}; };
+        const getRect = () => {
+          return {'width': 100, 'height': 200};
+        };
+        const getSize = () => {
+          return {'width': 100, 'height': 200};
+        };
         const getScrollLeft = () => 12;
         const getScrollTop = () => 34;
         const viewportStub = sandbox.stub(Services, 'viewportForDoc');
@@ -418,8 +450,10 @@ describe('Google A4A utils', () => {
         });
         const impl = new MockA4AImpl(elem);
         noopMethods(impl, doc, sandbox);
-        const createElementStub =
-          sandbox.stub(impl.win.document, 'createElement');
+        const createElementStub = sandbox.stub(
+          impl.win.document,
+          'createElement'
+        );
         createElementStub.withArgs('iframe').returns({
           sandbox: {
             supports: () => true,
@@ -427,7 +461,8 @@ describe('Google A4A utils', () => {
         });
         return fixture.addElement(elem).then(() => {
           return expect(googleAdUrl(impl, '', 0, {}, [])).to.eventually.match(
-              /[&?]bc=7[&$]/);
+            /[&?]bc=7[&$]/
+          );
         });
       });
     });
@@ -444,14 +479,17 @@ describe('Google A4A utils', () => {
         });
         const impl = new MockA4AImpl(elem);
         noopMethods(impl, doc, sandbox);
-        const createElementStub =
-          sandbox.stub(impl.win.document, 'createElement');
+        const createElementStub = sandbox.stub(
+          impl.win.document,
+          'createElement'
+        );
         createElementStub.withArgs('iframe').returns({
           sandbox: {},
         });
         return fixture.addElement(elem).then(() => {
           return expect(googleAdUrl(impl, '', 0, {}, [])).to.eventually.match(
-              /[&?]bc=1[&$]/);
+            /[&?]bc=1[&$]/
+          );
         });
       });
     });
@@ -469,8 +507,10 @@ describe('Google A4A utils', () => {
         const impl = new MockA4AImpl(elem);
         noopMethods(impl, doc, sandbox);
         impl.win.SVGElement = undefined;
-        const createElementStub =
-          sandbox.stub(impl.win.document, 'createElement');
+        const createElementStub = sandbox.stub(
+          impl.win.document,
+          'createElement'
+        );
         createElementStub.withArgs('iframe').returns({
           sandbox: {
             supports: () => false,
@@ -478,8 +518,8 @@ describe('Google A4A utils', () => {
         });
         return fixture.addElement(elem).then(() => {
           return expect(
-              googleAdUrl(impl, '', 0, {}, [])).to.eventually.not.match(
-              /[&?]bc=1[&$]/);
+            googleAdUrl(impl, '', 0, {}, [])
+          ).to.eventually.not.match(/[&?]bc=1[&$]/);
         });
       });
     });
@@ -496,10 +536,13 @@ describe('Google A4A utils', () => {
         });
         const impl = new MockA4AImpl(elem);
         noopMethods(impl, doc, sandbox);
-        sandbox.stub(Services.viewerForDoc(impl.getAmpDoc()), 'getReferrerUrl')
-            .returns(new Promise(() => {}));
-        const createElementStub =
-          sandbox.stub(impl.win.document, 'createElement');
+        sandbox
+          .stub(Services.viewerForDoc(impl.getAmpDoc()), 'getReferrerUrl')
+          .returns(new Promise(() => {}));
+        const createElementStub = sandbox.stub(
+          impl.win.document,
+          'createElement'
+        );
         createElementStub.withArgs('iframe').returns({
           sandbox: {
             supports: () => false,
@@ -508,8 +551,8 @@ describe('Google A4A utils', () => {
         expectAsyncConsoleError(/Referrer timeout/, 1);
         return fixture.addElement(elem).then(() => {
           return expect(
-              googleAdUrl(impl, '', 0, {}, [])).to.eventually.not.match(
-              /[&?]ref=[&$]/);
+            googleAdUrl(impl, '', 0, {}, [])
+          ).to.eventually.not.match(/[&?]ref=[&$]/);
         });
       });
     });
@@ -538,19 +581,27 @@ describe('Google A4A utils', () => {
         const elem = createElementWithAttributes(doc, 'amp-a4a', {});
         const impl = new MockA4AImpl(elem);
         noopMethods(impl, doc, sandbox, {
-          top: 0, left: 0, right: 0, bottom: 0, width: 0, height: 0,
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          width: 0,
+          height: 0,
         });
         return fixture.addElement(elem).then(() =>
           googleAdUrl(impl, '', Date.now(), [], []).then(url => {
             expect(url).to.match(/[&?]adx=0[&$]/);
             expect(url).to.match(/[&?]adx=0[&$]/);
             elem.setAttribute(
-                'data-experiment-id', `123,${ADX_ADY_EXP.experiment},789`,);
+              'data-experiment-id',
+              `123,${ADX_ADY_EXP.experiment},789`
+            );
             return googleAdUrl(impl, '', Date.now(), [], []).then(url => {
               expect(url).to.match(/[&?]adx=1[&$]/);
               expect(url).to.match(/[&?]adx=1[&$]/);
             });
-          }));
+          })
+        );
       });
     });
   });
@@ -560,12 +611,14 @@ describe('Google A4A utils', () => {
       expect(mergeExperimentIds(['12345'])).to.equal('12345');
     });
     it('should merge a single ID to a list', () => {
-      expect(mergeExperimentIds(['12345'], '3,4,5,6'))
-          .to.equal('3,4,5,6,12345');
+      expect(mergeExperimentIds(['12345'], '3,4,5,6')).to.equal(
+        '3,4,5,6,12345'
+      );
     });
     it('should merge multiple IDs into a list', () => {
-      expect(mergeExperimentIds(['12345','6789'], '3,4,5,6'))
-          .to.equal('3,4,5,6,12345,6789');
+      expect(mergeExperimentIds(['12345', '6789'], '3,4,5,6')).to.equal(
+        '3,4,5,6,12345,6789'
+      );
     });
     it('should discard invalid ID', () => {
       expect(mergeExperimentIds(['frob'], '3,4,5,6')).to.equal('3,4,5,6');
@@ -585,7 +638,11 @@ describe('Google A4A utils', () => {
     });
     it('should not append parameter if truncated', () => {
       const truncUrl = buildUrl(
-          'https://foo.com/bar', {hello: 'world'}, 15, TRUNCATION_PARAM);
+        'https://foo.com/bar',
+        {hello: 'world'},
+        15,
+        TRUNCATION_PARAM
+      );
       expect(truncUrl.indexOf(TRUNCATION_PARAM.name)).to.not.equal(-1);
       expect(maybeAppendErrorParameter(truncUrl, 'n')).to.not.be.ok;
     });
@@ -593,8 +650,10 @@ describe('Google A4A utils', () => {
 
   describes.realWin('#getEnclosingContainerTypes', {}, env => {
     it('should return empty if no containers', () => {
-      expect(getEnclosingContainerTypes(
-          env.win.document.createElement('amp-ad')).length).to.equal(0);
+      expect(
+        getEnclosingContainerTypes(env.win.document.createElement('amp-ad'))
+          .length
+      ).to.equal(0);
     });
 
     Object.keys(ValidAdContainerTypes).forEach(container => {
@@ -603,8 +662,9 @@ describe('Google A4A utils', () => {
         env.win.document.body.appendChild(containerElem);
         const ampAdElem = env.win.document.createElement('amp-ad');
         containerElem.appendChild(ampAdElem);
-        expect(getEnclosingContainerTypes(ampAdElem))
-            .to.deep.equal([ValidAdContainerTypes[container]]);
+        expect(getEnclosingContainerTypes(ampAdElem)).to.deep.equal([
+          ValidAdContainerTypes[container],
+        ]);
       });
     });
 
@@ -617,12 +677,14 @@ describe('Google A4A utils', () => {
       });
       const ampAdElem = env.win.document.createElement('amp-ad');
       prevContainer.appendChild(ampAdElem);
-      const ValidAdContainerTypeValues =
-          Object.keys(ValidAdContainerTypes).map(function(key) {
-            return ValidAdContainerTypes[key];
-          });
-      expect(getEnclosingContainerTypes(ampAdElem).sort())
-          .to.deep.equal(ValidAdContainerTypeValues.sort());
+      const ValidAdContainerTypeValues = Object.keys(ValidAdContainerTypes).map(
+        function(key) {
+          return ValidAdContainerTypes[key];
+        }
+      );
+      expect(getEnclosingContainerTypes(ampAdElem).sort()).to.deep.equal(
+        ValidAdContainerTypeValues.sort()
+      );
     });
   });
 
@@ -633,44 +695,49 @@ describe('Google A4A utils', () => {
       const documentInfoStub = sandbox.stub(Services, 'documentInfoForDoc');
       doc = {};
       fakeWin = {location: {}};
-      documentInfoStub.withArgs(doc)
-          .returns({canonicalUrl: 'http://f.blah.com?some_site'});
+      documentInfoStub
+        .withArgs(doc)
+        .returns({canonicalUrl: 'http://f.blah.com?some_site'});
     });
 
     it('should use google.com if at top', () => {
       fakeWin.top = fakeWin;
       fakeWin.location.ancestorOrigins = ['foo.google.com.eu'];
       expect(getIdentityTokenRequestUrl(fakeWin, doc)).to.equal(
-          'https://adservice.google.com/adsid/integrator.json?' +
-          'domain=f.blah.com');
+        'https://adservice.google.com/adsid/integrator.json?' +
+          'domain=f.blah.com'
+      );
     });
 
     it('should use google.com if no ancestorOrigins', () => {
       expect(getIdentityTokenRequestUrl(fakeWin, doc)).to.equal(
-          'https://adservice.google.com/adsid/integrator.json?' +
-          'domain=f.blah.com');
+        'https://adservice.google.com/adsid/integrator.json?' +
+          'domain=f.blah.com'
+      );
     });
 
     it('should use google.com if non-google top', () => {
       fakeWin.location.ancestorOrigins = ['foo.google2.com'];
       expect(getIdentityTokenRequestUrl(fakeWin, doc)).to.equal(
-          'https://adservice.google.com/adsid/integrator.json?' +
-          'domain=f.blah.com');
+        'https://adservice.google.com/adsid/integrator.json?' +
+          'domain=f.blah.com'
+      );
     });
 
     it('should use google ancestor origin based top domain', () => {
-      fakeWin.location.ancestorOrigins =
-          ['foo.google.eu', 'blah.google.fr'];
+      fakeWin.location.ancestorOrigins = ['foo.google.eu', 'blah.google.fr'];
       expect(getIdentityTokenRequestUrl(fakeWin, doc)).to.equal(
-          'https://adservice.google.fr/adsid/integrator.json?' +
-          'domain=f.blah.com');
+        'https://adservice.google.fr/adsid/integrator.json?' +
+          'domain=f.blah.com'
+      );
     });
 
     it('should use supplied domain', () => {
       fakeWin.location.ancestorOrigins = ['foo.google.fr'];
       expect(getIdentityTokenRequestUrl(fakeWin, doc, '.google.eu')).to.equal(
-          'https://adservice.google.eu/adsid/integrator.json?' +
-          'domain=f.blah.com');
+        'https://adservice.google.eu/adsid/integrator.json?' +
+          'domain=f.blah.com'
+      );
     });
   });
 
@@ -678,8 +745,9 @@ describe('Google A4A utils', () => {
     beforeEach(() => {
       installXhrService(env.win);
       const documentInfoStub = sandbox.stub(Services, 'documentInfoForDoc');
-      documentInfoStub.withArgs(env.ampdoc)
-          .returns({canonicalUrl: 'http://f.blah.com?some_site'});
+      documentInfoStub
+        .withArgs(env.ampdoc)
+        .returns({canonicalUrl: 'http://f.blah.com?some_site'});
     });
 
     afterEach(() => {
@@ -688,9 +756,11 @@ describe('Google A4A utils', () => {
     });
 
     const getUrl = domain => {
-      domain = domain || 'google\.com';
-      return `https:\/\/adservice\.${domain}\/adsid\/integrator\.json\?` +
-          'domain=f\.blah\.com';
+      domain = domain || 'google.com';
+      return (
+        `https:\/\/adservice\.${domain}\/adsid\/integrator\.json\?` +
+        'domain=f.blah.com'
+      );
     };
 
     it('should ignore response if required fields are missing', () => {
@@ -706,13 +776,16 @@ describe('Google A4A utils', () => {
     });
 
     it('should fetch full token as expected', () => {
-      env.expectFetch(getUrl(), JSON.stringify({
-        newToken: 'abc',
-        '1p_jar': 'some_jar',
-        pucrd: 'some_pucrd',
-        freshLifetimeSecs: '1234',
-        validLifetimeSecs: '5678',
-      }));
+      env.expectFetch(
+        getUrl(),
+        JSON.stringify({
+          newToken: 'abc',
+          '1p_jar': 'some_jar',
+          pucrd: 'some_pucrd',
+          freshLifetimeSecs: '1234',
+          validLifetimeSecs: '5678',
+        })
+      );
       return getIdentityToken(env.win, env.ampdoc).then(result => {
         expect(result.token).to.equal('abc');
         expect(result.jar).to.equal('some_jar');
@@ -725,11 +798,14 @@ describe('Google A4A utils', () => {
 
     it('should redirect as expected', () => {
       env.expectFetch(getUrl(), JSON.stringify({altDomain: '.google.fr'}));
-      env.expectFetch(getUrl('google\.fr'), JSON.stringify({
-        newToken: 'abc',
-        freshLifetimeSecs: '1234',
-        validLifetimeSecs: '5678',
-      }));
+      env.expectFetch(
+        getUrl('google.fr'),
+        JSON.stringify({
+          newToken: 'abc',
+          freshLifetimeSecs: '1234',
+          validLifetimeSecs: '5678',
+        })
+      );
       return getIdentityToken(env.win, env.ampdoc, '').then(result => {
         expect(result.token).to.equal('abc');
         expect(result.jar).to.equal('');
@@ -743,7 +819,9 @@ describe('Google A4A utils', () => {
     it('should stop after 1 redirect', () => {
       env.expectFetch(getUrl(), JSON.stringify({altDomain: '.google.fr'}));
       env.expectFetch(
-          getUrl('google\.fr'), JSON.stringify({altDomain: '.google.com'}));
+        getUrl('google.fr'),
+        JSON.stringify({altDomain: '.google.com'})
+      );
       return getIdentityToken(env.win, env.ampdoc).then(result => {
         expect(result.token).to.not.be.ok;
         expect(result.jar).to.not.be.ok;
@@ -759,50 +837,66 @@ describe('Google A4A utils', () => {
         validLifetimeSecs: '5678',
       };
       env.win['goog_identity_prom'] = Promise.resolve(ident);
-      return getIdentityToken(env.win, env.ampdoc)
-          .then(result => expect(result).to.jsonEqual(ident));
+      return getIdentityToken(env.win, env.ampdoc).then(result =>
+        expect(result).to.jsonEqual(ident)
+      );
     });
 
     it('should handle fetch error', () => {
-      sandbox.stub(Services, 'xhrFor').returns(
-          {fetchJson: () => Promise.reject('some network failure')});
-      return getIdentityToken(env.win, env.ampdoc)
-          .then(result => expect(result).to.jsonEqual({}));
+      sandbox
+        .stub(Services, 'xhrFor')
+        .returns({fetchJson: () => Promise.reject('some network failure')});
+      return getIdentityToken(env.win, env.ampdoc).then(result =>
+        expect(result).to.jsonEqual({})
+      );
     });
 
     it('should fetch if SUFFICIENT consent', () => {
-      env.expectFetch(getUrl(), JSON.stringify({
-        newToken: 'abc',
-        '1p_jar': 'some_jar',
-        pucrd: 'some_pucrd',
-        freshLifetimeSecs: '1234',
-        validLifetimeSecs: '5678',
-      }));
+      env.expectFetch(
+        getUrl(),
+        JSON.stringify({
+          newToken: 'abc',
+          '1p_jar': 'some_jar',
+          pucrd: 'some_pucrd',
+          freshLifetimeSecs: '1234',
+          validLifetimeSecs: '5678',
+        })
+      );
       sandbox.stub(Services, 'consentPolicyServiceForDocOrNull').returns(
-          Promise.resolve({
-            whenPolicyResolved: () => CONSENT_POLICY_STATE.SUFFICIENT,
-          }));
-      return getIdentityToken(env.win, env.ampdoc, 'default').then(
-          result => expect(result.token).to.equal('abc'));
+        Promise.resolve({
+          whenPolicyResolved: () => CONSENT_POLICY_STATE.SUFFICIENT,
+        })
+      );
+      return getIdentityToken(env.win, env.ampdoc, 'default').then(result =>
+        expect(result.token).to.equal('abc')
+      );
     });
 
-    it('should not fetch if INSUFFICIENT consent', () => {
-      sandbox.stub(Services, 'consentPolicyServiceForDocOrNull').returns(
+    it.configure()
+      .skipFirefox()
+      .run('should not fetch if INSUFFICIENT consent', () => {
+        sandbox.stub(Services, 'consentPolicyServiceForDocOrNull').returns(
           Promise.resolve({
             whenPolicyResolved: () => CONSENT_POLICY_STATE.INSUFFICIENT,
-          }));
-      return expect(getIdentityToken(env.win, env.ampdoc, 'default'))
-          .to.eventually.jsonEqual({});
-    });
+          })
+        );
+        return expect(
+          getIdentityToken(env.win, env.ampdoc, 'default')
+        ).to.eventually.jsonEqual({});
+      });
 
-    it('should not fetch if UNKNOWN consent', () => {
-      sandbox.stub(Services, 'consentPolicyServiceForDocOrNull').returns(
+    it.configure()
+      .skipFirefox()
+      .run('should not fetch if UNKNOWN consent', () => {
+        sandbox.stub(Services, 'consentPolicyServiceForDocOrNull').returns(
           Promise.resolve({
             whenPolicyResolved: () => CONSENT_POLICY_STATE.UNKNOWN,
-          }));
-      return expect(getIdentityToken(env.win, env.ampdoc, 'default'))
-          .to.eventually.jsonEqual({});
-    });
+          })
+        );
+        return expect(
+          getIdentityToken(env.win, env.ampdoc, 'default')
+        ).to.eventually.jsonEqual({});
+      });
   });
 
   describe('variables for amp-analytics', () => {
@@ -851,8 +945,7 @@ describe('Google A4A utils', () => {
 
     it('should include scheduleTime for ad render start triggers', () => {
       a4a.element.layoutScheduleTime = 200;
-      const vars = getCsiAmpAnalyticsVariables(
-          'ad-render-start', a4a, null);
+      const vars = getCsiAmpAnalyticsVariables('ad-render-start', a4a, null);
       expect(vars['scheduleTime']).to.be.a('number');
       expect(vars['scheduleTime']).not.to.equal(0);
     });
@@ -892,7 +985,8 @@ describe('Google A4A utils', () => {
       {in: 'hello.com', out: 'hello.com'},
       {in: '', out: ''},
     ].forEach(test =>
-      it(test.in, () => expect(extractHost(test.in)).to.equal(test.out)));
+      it(test.in, () => expect(extractHost(test.in)).to.equal(test.out))
+    );
   });
 
   describes.realWin('#getCorrelator', {}, env => {
@@ -946,17 +1040,21 @@ describes.realWin('#groupAmpAdsByType', {amp: true}, env => {
   }
 
   it('should find amp-ad of only given type', () => {
-    const resources = [createResource({type: 'doubleclick'}),
-      createResource({type: 'blah'}), createResource({}, 'amp-foo')];
-    sandbox.stub(Services.resourcesForDoc(doc), 'getMeasuredResources')
-        .callsFake((doc, fn) => Promise.resolve(resources.filter(fn)));
+    const resources = [
+      createResource({type: 'doubleclick'}),
+      createResource({type: 'blah'}),
+      createResource({}, 'amp-foo'),
+    ];
+    sandbox
+      .stub(Services.resourcesForDoc(doc), 'getMeasuredResources')
+      .callsFake((doc, fn) => Promise.resolve(resources.filter(fn)));
     return groupAmpAdsByType(win, 'doubleclick', () => 'foo').then(result => {
       expect(Object.keys(result).length).to.equal(1);
       expect(result['foo']).to.be.ok;
       expect(result['foo'].length).to.equal(1);
       return result['foo'][0].then(baseElement =>
-        expect(baseElement.element.getAttribute('type'))
-            .to.equal('doubleclick'));
+        expect(baseElement.element.getAttribute('type')).to.equal('doubleclick')
+      );
     });
   });
 
@@ -967,49 +1065,63 @@ describes.realWin('#groupAmpAdsByType', {amp: true}, env => {
     // as its owned by amp-sticky-ad.  It will locate associated element
     // and block on whenUpgradedToCustomElement so override createdCallback
     // to cause it to return immediately.
-    const ampAdResource =
-      createResource({type: 'doubleclick'}, 'amp-ad', stickyResource.element);
+    const ampAdResource = createResource(
+      {type: 'doubleclick'},
+      'amp-ad',
+      stickyResource.element
+    );
     ampAdResource.element.createdCallback = true;
-    sandbox.stub(Services.resourcesForDoc(doc), 'getMeasuredResources')
-        .callsFake((doc, fn) => Promise.resolve(resources.filter(fn)));
-    return groupAmpAdsByType(win, 'doubleclick', () => 'foo').then(
-        result => {
-          expect(Object.keys(result).length).to.equal(1);
-          expect(result['foo']).to.be.ok;
-          expect(result['foo'].length).to.equal(1);
-          return result['foo'][0].then(baseElement =>
-            expect(baseElement.element.getAttribute('type'))
-                .to.equal('doubleclick'));
-        });
+    sandbox
+      .stub(Services.resourcesForDoc(doc), 'getMeasuredResources')
+      .callsFake((doc, fn) => Promise.resolve(resources.filter(fn)));
+    return groupAmpAdsByType(win, 'doubleclick', () => 'foo').then(result => {
+      expect(Object.keys(result).length).to.equal(1);
+      expect(result['foo']).to.be.ok;
+      expect(result['foo'].length).to.equal(1);
+      return result['foo'][0].then(baseElement =>
+        expect(baseElement.element.getAttribute('type')).to.equal('doubleclick')
+      );
+    });
   });
 
   it('should find and group multiple, some in containers', () => {
     const stickyResource = createResource({}, 'amp-sticky-ad');
-    const resources = [stickyResource, createResource({}, 'amp-foo'),
+    const resources = [
+      stickyResource,
+      createResource({}, 'amp-foo'),
       createResource({type: 'doubleclick', foo: 'bar'}),
-      createResource({type: 'doubleclick', foo: 'hello'})];
+      createResource({type: 'doubleclick', foo: 'hello'}),
+    ];
     // Do not expect ampAdResource to be returned by getMeasuredResources
     // as its owned by amp-sticky-ad.  It will locate associated element
     // and block on whenUpgradedToCustomElement so override createdCallback
     // to cause it to return immediately.
-    const ampAdResource = createResource({type: 'doubleclick', foo: 'bar'},
-        'amp-ad', stickyResource.element);
+    const ampAdResource = createResource(
+      {type: 'doubleclick', foo: 'bar'},
+      'amp-ad',
+      stickyResource.element
+    );
     ampAdResource.element.createdCallback = true;
-    sandbox.stub(Services.resourcesForDoc(doc), 'getMeasuredResources')
-        .callsFake((doc, fn) => Promise.resolve(resources.filter(fn)));
-    return groupAmpAdsByType(
-        win, 'doubleclick', element => element.getAttribute('foo')).then(
-        result => {
-          expect(Object.keys(result).length).to.equal(2);
-          expect(result['bar']).to.be.ok;
-          expect(result['bar'].length).to.equal(2);
-          expect(result['hello']).to.be.ok;
-          expect(result['hello'].length).to.equal(1);
-          return Promise.all(result['bar'].concat(result['hello'])).then(
-              baseElements => baseElements.forEach(baseElement =>
-                expect(baseElement.element.getAttribute('type'))
-                    .to.equal('doubleclick')));
-        });
+    sandbox
+      .stub(Services.resourcesForDoc(doc), 'getMeasuredResources')
+      .callsFake((doc, fn) => Promise.resolve(resources.filter(fn)));
+    return groupAmpAdsByType(win, 'doubleclick', element =>
+      element.getAttribute('foo')
+    ).then(result => {
+      expect(Object.keys(result).length).to.equal(2);
+      expect(result['bar']).to.be.ok;
+      expect(result['bar'].length).to.equal(2);
+      expect(result['hello']).to.be.ok;
+      expect(result['hello'].length).to.equal(1);
+      return Promise.all(result['bar'].concat(result['hello'])).then(
+        baseElements =>
+          baseElements.forEach(baseElement =>
+            expect(baseElement.element.getAttribute('type')).to.equal(
+              'doubleclick'
+            )
+          )
+      );
+    });
   });
 });
 
@@ -1021,7 +1133,11 @@ describes.realWin('#getContainerWidth', {amp: true}, env => {
   });
 
   function createResource(
-    config, layout, tagName = 'amp-ad', parent = doc.body) {
+    config,
+    layout,
+    tagName = 'amp-ad',
+    parent = doc.body
+  ) {
     config['layout'] = layout;
     const element = createElementWithAttributes(doc, tagName, config);
     parent.appendChild(element);
@@ -1062,7 +1178,7 @@ describes.realWin('#getContainerWidth', {amp: true}, env => {
     expect(getContainerWidth(win, element)).to.equal(300);
   });
 
-  it('should return parent\'s fixed width for FILL layout', () => {
+  it("should return parent's fixed width for FILL layout", () => {
     const parent = document.createElement('div');
     parent.setAttribute('width', 300);
     parent.setAttribute('layout', 'fixed');
@@ -1071,20 +1187,23 @@ describes.realWin('#getContainerWidth', {amp: true}, env => {
     expect(getContainerWidth(win, element)).to.equal(300);
   });
 
-  it('should return the max-width, if present, for FIXED_HEIGHT layout',
-      () => {
-        const element = createResource({height: 300}, 'fixed-height');
-        element.style.maxWidth = '250px';
-        expect(getContainerWidth(win, element)).to.equal(250);
-      });
+  it('should return the max-width, if present, for FIXED_HEIGHT layout', () => {
+    const element = createResource({height: 300}, 'fixed-height');
+    element.style.maxWidth = '250px';
+    expect(getContainerWidth(win, element)).to.equal(250);
+  });
 
-  it('should return parent\'s fixed width for FIXED_HEIGHT layout', () => {
+  it("should return parent's fixed width for FIXED_HEIGHT layout", () => {
     const parent = document.createElement('div');
     parent.setAttribute('width', 300);
     parent.setAttribute('layout', 'fixed');
     doc.body.appendChild(parent);
     const element = createResource(
-        {height: 250}, 'fixed-height', 'amp-ad', parent);
+      {height: 250},
+      'fixed-height',
+      'amp-ad',
+      parent
+    );
     expect(getContainerWidth(win, element)).to.equal(300);
   });
 
@@ -1094,13 +1213,12 @@ describes.realWin('#getContainerWidth', {amp: true}, env => {
     expect(getContainerWidth(win, element)).to.equal(250);
   });
 
-  it('should return parent\'s fixed width for FLUID layout', () => {
+  it("should return parent's fixed width for FLUID layout", () => {
     const parent = document.createElement('div');
     parent.setAttribute('width', 300);
     parent.setAttribute('layout', 'fixed');
     doc.body.appendChild(parent);
-    const element = createResource(
-        {height: 250}, 'fluid', 'amp-ad', parent);
+    const element = createResource({height: 250}, 'fluid', 'amp-ad', parent);
     expect(getContainerWidth(win, element)).to.equal(300);
   });
 
@@ -1110,20 +1228,25 @@ describes.realWin('#getContainerWidth', {amp: true}, env => {
     expect(getContainerWidth(win, element)).to.equal(250);
   });
 
-  it('should return parent\'s fixed width for RESPONSIVE layout', () => {
+  it("should return parent's fixed width for RESPONSIVE layout", () => {
     const parent = document.createElement('div');
     parent.setAttribute('width', 300);
     parent.setAttribute('layout', 'fixed');
     doc.body.appendChild(parent);
     const element = createResource(
-        {height: 250, width: 250}, 'responsive', 'amp-ad', parent);
+      {height: 250, width: 250},
+      'responsive',
+      'amp-ad',
+      parent
+    );
     expect(getContainerWidth(win, element)).to.equal(300);
   });
 
   it('should return the viewport width for CONTAINER layout', () => {
     const element = createResource({} /* config */, 'container');
-    sandbox.stub(Services.viewportForDoc(element), 'getSize')
-        .returns({width: 300});
+    sandbox
+      .stub(Services.viewportForDoc(element), 'getSize')
+      .returns({width: 300});
     expect(getContainerWidth(win, element)).to.equal(300);
   });
 
@@ -1133,8 +1256,7 @@ describes.realWin('#getContainerWidth', {amp: true}, env => {
       parent.setAttribute('width', 300);
       parent.setAttribute('layout', 'fixed');
       doc.body.appendChild(parent);
-      const element = createResource(
-          {height: 250}, layout, 'amp-ad', parent);
+      const element = createResource({height: 250}, layout, 'amp-ad', parent);
       expect(getContainerWidth(win, element, 1)).to.equal(-1);
     });
   });

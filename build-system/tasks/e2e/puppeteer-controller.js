@@ -23,6 +23,7 @@ const {
 } = require('puppeteer');
 const {
   ControllerPromise,
+  DOMRectDef,
   ElementHandle,
   FunctionalTestController, // eslint-disable-line no-unused-vars
   Key,
@@ -65,7 +66,10 @@ async function waitFor(page, valueFn, args, condition, opt_mutate) {
 
   while (!condition(value)) {
     const handle = await page.waitForFunction(
-        valueFn, {timeout: DEFAULT_WAIT_TIMEOUT}, ...args);
+      valueFn,
+      {timeout: DEFAULT_WAIT_TIMEOUT},
+      ...args
+    );
     value = await handle.jsonValue();
     if (opt_mutate) {
       value = await opt_mutate(value);
@@ -141,7 +145,7 @@ class PuppeteerController {
    * @template T
    */
   getWaitFn_(valueFn, ...args) {
-    return async(condition, opt_mutate) => {
+    return async (condition, opt_mutate) => {
       const frame = await this.getCurrentFrame_();
       return waitFor(frame, valueFn, args, condition, opt_mutate);
     };
@@ -167,9 +171,14 @@ class PuppeteerController {
   async findElement(selector) {
     const frame = await this.getCurrentFrame_();
     const root = await this.getRoot_();
-    const jsHandle = await frame.waitForFunction((root, selector) => {
-      return root./*OK*/querySelector(selector);
-    }, {timeout: DEFAULT_WAIT_TIMEOUT}, root, selector);
+    const jsHandle = await frame.waitForFunction(
+      (root, selector) => {
+        return root./*OK*/ querySelector(selector);
+      },
+      {timeout: DEFAULT_WAIT_TIMEOUT},
+      root,
+      selector
+    );
     const elementHandle = jsHandle.asElement();
     return new ElementHandle(elementHandle);
   }
@@ -182,10 +191,15 @@ class PuppeteerController {
   async findElements(selector) {
     const frame = await this.getCurrentFrame_();
     const root = await this.getRoot_();
-    const nodeListHandle = await frame.waitForFunction((root, selector) => {
-      const nodeList = root./*OK*/querySelectorAll(selector);
-      return nodeList.length > 0 ? nodeList : null;
-    }, {timeout: DEFAULT_WAIT_TIMEOUT}, root, selector);
+    const nodeListHandle = await frame.waitForFunction(
+      (root, selector) => {
+        const nodeList = root./*OK*/ querySelectorAll(selector);
+        return nodeList.length > 0 ? nodeList : null;
+      },
+      {timeout: DEFAULT_WAIT_TIMEOUT},
+      root,
+      selector
+    );
 
     const lengthHandle = await nodeListHandle.getProperty('length');
     const length = await lengthHandle.jsonValue();
@@ -209,10 +223,15 @@ class PuppeteerController {
     const frame = await this.getCurrentFrame_();
 
     const root = await this.getRoot_();
-    const jsHandle = await frame.waitForFunction((xpath, root) => {
-      const results = window.queryXpath(xpath, root);
-      return results && results[0];
-    }, {timeout: DEFAULT_WAIT_TIMEOUT}, xpath, root);
+    const jsHandle = await frame.waitForFunction(
+      (xpath, root) => {
+        const results = window.queryXpath(xpath, root);
+        return results && results[0];
+      },
+      {timeout: DEFAULT_WAIT_TIMEOUT},
+      xpath,
+      root
+    );
     return new ElementHandle(jsHandle.asElement());
   }
 
@@ -227,9 +246,14 @@ class PuppeteerController {
     const frame = await this.getCurrentFrame_();
     const root = await this.getRoot_();
 
-    const arrayHandle = await frame.waitForFunction((xpath, root) => {
-      return window.queryXpath(xpath, root);
-    }, {timeout: DEFAULT_WAIT_TIMEOUT}, xpath, root);
+    const arrayHandle = await frame.waitForFunction(
+      (xpath, root) => {
+        return window.queryXpath(xpath, root);
+      },
+      {timeout: DEFAULT_WAIT_TIMEOUT},
+      xpath,
+      root
+    );
 
     const lengthHandle = await arrayHandle.getProperty('length');
     const length = await lengthHandle.jsonValue();
@@ -289,10 +313,9 @@ class PuppeteerController {
    */
   async type(handle, keys) {
     const frame = await this.getCurrentFrame_();
-    const targetElement = handle ?
-      handle.getElement() :
-      await frame.$(':focus');
-
+    const targetElement = handle
+      ? handle.getElement()
+      : await frame.$(':focus');
 
     const key = KeyToPuppeteerMap[keys];
     if (key) {
@@ -312,8 +335,9 @@ class PuppeteerController {
     const element = handle.getElement();
     const getter = element => element.textContent;
     return new ControllerPromise(
-        this.evaluate(getter, element),
-        this.getWaitFn_(getter, element));
+      this.evaluate(getter, element),
+      this.getWaitFn_(getter, element)
+    );
   }
 
   /**
@@ -325,11 +349,12 @@ class PuppeteerController {
   getElementCssValue(handle, styleProperty) {
     const element = handle.getElement();
     const getter = (element, styleProperty) => {
-      return window/*OK*/['getComputedStyle'](element)[styleProperty];
+      return window /*OK*/['getComputedStyle'](element)[styleProperty];
     };
     return new ControllerPromise(
-        this.evaluate(getter, element, styleProperty),
-        this.getWaitFn_(getter, element, styleProperty));
+      this.evaluate(getter, element, styleProperty),
+      this.getWaitFn_(getter, element, styleProperty)
+    );
   }
 
   /**
@@ -342,8 +367,9 @@ class PuppeteerController {
     const element = handle.getElement();
     const getter = (element, attribute) => element.getAttribute(attribute);
     return new ControllerPromise(
-        this.evaluate(getter, element, attribute),
-        this.getWaitFn_(getter, element, attribute));
+      this.evaluate(getter, element, attribute),
+      this.getWaitFn_(getter, element, attribute)
+    );
   }
 
   /**
@@ -358,13 +384,14 @@ class PuppeteerController {
       return element[property];
     };
     return new ControllerPromise(
-        this.evaluate(getter, element, property),
-        this.getWaitFn_(getter, element, property));
+      this.evaluate(getter, element, property),
+      this.getWaitFn_(getter, element, property)
+    );
   }
 
   /**
    * @param {!ElementHandle<!PuppeteerHandle>} handle
-   * @return {!Promise<!{x: number, y: number, height: number. width: number}>}
+   * @return {!Promise<!DOMRectDef>}
    * @override
    */
   getElementRect(handle) {
@@ -373,17 +400,31 @@ class PuppeteerController {
       // Extracting the values seems to perform better than returning
       // the raw ClientRect from the element, in terms of flakiness.
       // The raw ClientRect also has hundredths of a pixel. We round to int.
-      const {x, y, width, height} = element./*OK*/getBoundingClientRect();
+      const {
+        x,
+        y,
+        width,
+        height,
+        top,
+        bottom,
+        left,
+        right,
+      } = element./*OK*/ getBoundingClientRect();
       return {
         x: Math.round(x),
         y: Math.round(y),
         width: Math.round(width),
         height: Math.round(height),
+        top: Math.round(top),
+        bottom: Math.round(bottom),
+        left: Math.round(left),
+        right: Math.round(right),
       };
     };
     return new ControllerPromise(
-        this.evaluate(getter, element),
-        this.getWaitFn_(getter, element));
+      this.evaluate(getter, element),
+      this.getWaitFn_(getter, element)
+    );
   }
 
   /**
@@ -392,13 +433,9 @@ class PuppeteerController {
    * @override
    */
   async setWindowRect(rect) {
-    const {
-      width,
-      height,
-    } = rect;
+    const {width, height} = rect;
     await this.resizeWindow_(width, height);
   }
-
 
   /**
    * Resize the window and the viewport. The `page.setViewport` method only
@@ -438,7 +475,7 @@ class PuppeteerController {
     });
     const chromePaddingWidth = outerWidth > 0 ? outerWidth - clientWidth : 0;
     const chromePaddingHeight =
-        outerHeight > 0 ? outerHeight - clientHeight : 0;
+      outerHeight > 0 ? outerHeight - clientHeight : 0;
 
     await page.setViewport({
       width: width + chromePaddingWidth,
@@ -447,27 +484,30 @@ class PuppeteerController {
     });
 
     // Any tab.
-    const {targetInfos: [{targetId}]} = await browser._connection.send(
-        'Target.getTargets');
+    const {
+      targetInfos: [{targetId}],
+    } = await browser._connection.send('Target.getTargets');
 
     // Tab window.
     try {
       const {windowId} = await browser._connection.send(
-          'Browser.getWindowForTarget', {targetId});
+        'Browser.getWindowForTarget',
+        {targetId}
+      );
 
       // Resize.
-      await browser._connection.send(
-          'Browser.setWindowBounds', {
-            bounds: {
-              width: width + chromePaddingWidth,
-              height: height + chromePaddingHeight,
-            },
-            windowId,
-          });
+      await browser._connection.send('Browser.setWindowBounds', {
+        bounds: {
+          width: width + chromePaddingWidth,
+          height: height + chromePaddingHeight,
+        },
+        windowId,
+      });
     } catch (e) {
       // Catch if we're in headless.
-      if (!e.toString().includes(
-          'Protocol error (Browser.getWindowForTarget)')) {
+      if (
+        !e.toString().includes('Protocol error (Browser.getWindowForTarget)')
+      ) {
         throw e;
       }
     }
@@ -478,8 +518,9 @@ class PuppeteerController {
    */
   getTitle() {
     const title = this.getCurrentFrame_().then(frame => frame.title());
-    return new ControllerPromise(
-        title, () => this.getCurrentFrame_().then(frame => frame.title()));
+    return new ControllerPromise(title, () =>
+      this.getCurrentFrame_().then(frame => frame.title())
+    );
   }
 
   /**
@@ -510,9 +551,13 @@ class PuppeteerController {
    */
   async scroll(handle, opt_scrollToOptions) {
     const element = handle.getElement();
-    await this.evaluate((element, opt_scrollToOptions) => {
-      element./*OK*/scrollTo(opt_scrollToOptions);
-    }, element, opt_scrollToOptions);
+    await this.evaluate(
+      (element, opt_scrollToOptions) => {
+        element./*OK*/ scrollTo(opt_scrollToOptions);
+      },
+      element,
+      opt_scrollToOptions
+    );
   }
 
   /**
@@ -523,9 +568,13 @@ class PuppeteerController {
    */
   async scrollBy(handle, opt_scrollToOptions) {
     const element = handle.getElement();
-    await this.evaluate((element, opt_scrollToOptions) => {
-      element./*OK*/scrollBy(opt_scrollToOptions);
-    }, element, opt_scrollToOptions);
+    await this.evaluate(
+      (element, opt_scrollToOptions) => {
+        element./*OK*/ scrollBy(opt_scrollToOptions);
+      },
+      element,
+      opt_scrollToOptions
+    );
   }
 
   /**

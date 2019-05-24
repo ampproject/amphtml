@@ -26,14 +26,13 @@ const {FileList} = require('./file-list');
 const {html, joinFragments} = require('./html');
 const {SettingsModal, SettingsOpenButton} = require('./settings');
 
-
 const HeaderLink = ({name, href, divider}) => html`
   <li class="${divider ? 'divider' : ''}">
     <a target="_blank" rel="noopener noreferrer" href="${href}">
       ${name}
     </a>
-  </li>`;
-
+  </li>
+`;
 
 const Header = ({isMainPage, links}) => html`
   <header>
@@ -43,31 +42,26 @@ const Header = ({isMainPage, links}) => html`
     </div>
     <ul class="right-nav">
       ${joinFragments(links, ({name, href, divider}, i) =>
-          HeaderLink({
-            divider: divider || i == links.length - 1,
-            name,
-            href,
-          }))}
+        HeaderLink({
+          divider: divider || i == links.length - 1,
+          name,
+          href,
+        })
+      )}
       <li>${SettingsOpenButton()}</li>
     </ul>
-  </header>`;
+  </header>
+`;
 
+const HeaderBackToMainLink = () =>
+  html`
+    <a href="/">← Back to main</a>
+  `;
 
-const HeaderBackToMainLink = () => html`<a href="/">← Back to main</a>`;
-
-
-const ProxyFormOptional = ({isMainPage}) => isMainPage ? ProxyForm() : '';
-
+const ProxyFormOptional = ({isMainPage}) => (isMainPage ? ProxyForm() : '');
 
 function renderTemplate(opt_params) {
-  const {
-    basepath,
-    css,
-    isMainPage,
-    fileSet,
-    serveMode,
-    selectModePrefix,
-  } = {
+  const {basepath, css, isMainPage, fileSet, serveMode, selectModePrefix} = {
     basepath: '/',
     isMainPage: false,
     fileSet: [],
@@ -77,17 +71,21 @@ function renderTemplate(opt_params) {
   };
 
   const body = joinFragments([
-    html`<div class="wrap">
-      ${Header({isMainPage, links: headerLinks})}
-      ${ProxyFormOptional({isMainPage})}
-    </div>`,
+    html`
+      <div class="wrap">
+        ${Header({isMainPage, links: headerLinks})}
+        ${ProxyFormOptional({isMainPage})}
+      </div>
+    `,
 
     FileList({basepath, selectModePrefix, fileSet}),
 
-    html`<div class="center">
-      Built with 💙  by
-      <a href="https://ampproject.org" class="underlined">the AMP Project</a>.
-    </div>`,
+    html`
+      <div class="center">
+        Built with 💙 by
+        <a href="https://ampproject.org" class="underlined">the AMP Project</a>.
+      </div>
+    `,
 
     SettingsModal({serveMode}),
   ]);
@@ -96,6 +94,5 @@ function renderTemplate(opt_params) {
 
   return addRequiredExtensionsToHead(docWithoutExtensions);
 }
-
 
 module.exports = {renderTemplate};

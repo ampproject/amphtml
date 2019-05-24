@@ -27,7 +27,7 @@ const strings = {
     string: 'Son désactivé',
   },
   [LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_NO_SOUND_TEXT]: {
-    string: 'Cette page n\'a pas de son',
+    string: "Cette page n'a pas de son",
   },
   [LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_SOUND_TEXT]: {
     string: 'Son activé',
@@ -51,7 +51,7 @@ const strings = {
     string: 'Continuer quand même',
   },
   [LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LABEL]: {
-    string: 'Afficher sur le domaine d\'origine :',
+    string: "Afficher sur le domaine d'origine :",
   },
   [LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LINK]: {
     string: 'En savoir plus sur les résultats AMP',
@@ -63,7 +63,7 @@ const strings = {
     string: 'Appuyer sur Retour',
   },
   [LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL]: {
-    string: 'Balayer l\'écran vers le haut',
+    string: "Balayer l'écran vers le haut",
   },
   [LocalizedStringId.AMP_STORY_PAGE_PLAY_VIDEO]: {
     string: 'Regarder la vidéo',
@@ -111,21 +111,23 @@ const strings = {
     string: 'Augmentez la hauteur de votre fenêtre pour voir cette expérience',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_SIZE_TEXT]: {
-    string: 'Modifiez la hauteur et la largeur de la fenêtre pour voir cette ' +
-        'expérience',
+    string:
+      'Modifiez la hauteur et la largeur de la fenêtre pour voir cette ' +
+      'expérience',
   },
   [LocalizedStringId.AMP_STORY_WARNING_DESKTOP_WIDTH_SIZE_TEXT]: {
     string: 'Élargissez la fenêtre pour voir cette expérience',
   },
   [LocalizedStringId.AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT]: {
-    string: 'Vous devez activer l\'expérience story AMP pour voir ce contenu.',
+    string: "Vous devez activer l'expérience story AMP pour voir ce contenu.",
   },
   [LocalizedStringId.AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT]: {
-    string: 'La page s\'affiche mieux en mode Portrait',
+    string: "La page s'affiche mieux en mode Portrait",
   },
   [LocalizedStringId.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT]: {
-    string: 'Nous sommes désolés, mais votre navigateur n\'est pas ' +
-        'compatible avec cette expérience',
+    string:
+      "Nous sommes désolés, mais votre navigateur n'est pas " +
+      'compatible avec cette expérience',
   },
 };
 
