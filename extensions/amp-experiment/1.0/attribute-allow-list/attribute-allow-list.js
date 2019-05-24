@@ -53,15 +53,6 @@ export function getAllowedAttributeMutationEntry(
   } else if (attributeMutationAllowList[mutationAttributeName]['*']) {
     allowedAttributeMutationEntry =
       attributeMutationAllowList[mutationAttributeName]['*'];
-
-    if (!allowedAttributeMutationEntry.tags) {
-      allowedAttributeMutationEntry = undefined;
-    } else if (
-      !allowedAttributeMutationEntry.tags.includes(mutationTagName) &&
-      !allowedAttributeMutationEntry.tags.includes('*')
-    ) {
-      allowedAttributeMutationEntry = undefined;
-    }
   }
 
   if (!allowedAttributeMutationEntry) {

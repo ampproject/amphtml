@@ -23,14 +23,6 @@ import {assertHttpsUrl} from '../../../../src/url';
  */
 export class AllowedAttributeMutationEntry {
   /**
-   * Constructor for the class
-   * @param {!Array<string>=} tags
-   */
-  constructor(tags) {
-    this.tags = tags;
-  }
-
-  /**
    * Function to validate the value
    * for the attribute change. Subclasses
    * may override.
@@ -62,11 +54,6 @@ export class AllowedAttributeMutationEntry {
  */
 export class DefaultStyleAllowedAttributeMutationEntry extends AllowedAttributeMutationEntry {
   /** @override */
-  constructor() {
-    super(['*']);
-  }
-
-  /** @override */
   validate(mutationRecord) {
     const value = mutationRecord['value'];
 
@@ -96,11 +83,6 @@ export class DefaultStyleAllowedAttributeMutationEntry extends AllowedAttributeM
  * mutations. E.g ['href']['*']
  */
 export class DefaultAllowedURLAttributeMutationEntry extends AllowedAttributeMutationEntry {
-  /** @override */
-  constructor() {
-    super(['*']);
-  }
-
   /** @override */
   validate(mutationRecord) {
     assertHttpsUrl(
