@@ -820,9 +820,9 @@ describes.realWin(
       });
 
       it('should throw error when fallback is not provided', () => {
-        return element.layoutCallback().then(() => {
+        return element.layoutCallback().catch(e => {
           expect(getDataSpy).to.have.been.calledOnce;
-          expect(fallbackSpy).to.have.been.calledWith('Error for test');
+          expect(fallbackSpy).to.have.been.calledWith(e);
           expect(toggleFallbackSpy).not.to.have.been.called;
         });
       });
