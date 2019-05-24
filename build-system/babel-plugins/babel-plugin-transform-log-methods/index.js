@@ -16,8 +16,7 @@
 
 /**
  * @fileoverview Indirects log messages through expansion calls with
- * base62-encoded ([0-9a-zA-Z]) ids. These redirect to a URL or look up a table
- * to interpolate and display the logged string.
+ * base62-encoded ([0-9a-zA-Z]) ids.
  *
  *    dev().assert(foo != bar, 'foo should not be bar')
  *    // 👇
@@ -56,13 +55,13 @@ const {
 
 // Considered default for this transform, configurable only for tests.
 // For other files output from this transform see linked module.
-const {messagesByMessagePath} = require('../../compile/log-messages');
+const {extractedPath} = require('../../compile/log-messages');
 
 /**
- * Approximate length of a compressed message expansion call to determine
- * whether an instance of message indirection actually reduces binary size.
+ * Approximate length of a nested argument to determine whether a message
+ * being indirected actually reduces binary size.
  */
-const roughMinifiedExpansionLength = '["xx"]'.length;
+const roughNestedLength = '["xx"]'.length;
 
 /**
  * @param {string} path
@@ -96,15 +95,15 @@ module.exports = function({types: t}) {
    * @param {!Array<!Node>} interpolationArgs
    * @return {string} Template for the message.
    */
-  function buildMessage(node, interpolationArgs) {
+  function buildMessageSprintf(node, interpolationArgs) {
     if (t.isStringLiteral(node)) {
       return node.value;
     }
 
     if (t.isBinaryExpression(node, {operator: '+'})) {
       return (
-        buildMessage(node.left, interpolationArgs) +
-        buildMessage(node.right, interpolationArgs)
+        buildMessageSprintf(node.left, interpolationArgs) +
+        buildMessageSprintf(node.right, interpolationArgs)
       );
     }
 
@@ -113,7 +112,7 @@ module.exports = function({types: t}) {
       let i = 0;
       for (; i < node.quasis.length - 1; i++) {
         quasied += node.quasis[i].value.cooked;
-        quasied += buildMessage(node.expressions[i], interpolationArgs);
+        quasied += buildMessageSprintf(node.expressions[i], interpolationArgs);
       }
       quasied += node.quasis[i].value.cooked;
       return quasied;
@@ -158,9 +157,7 @@ module.exports = function({types: t}) {
       shouldReplaceCallArguments = replaceCallArguments;
 
       // Configurable to isolate test output.
-      messagesPath = relativeToRoot(
-        this.opts.messagesPath || messagesByMessagePath
-      );
+      messagesPath = relativeToRoot(this.opts.messagesPath || extractedPath);
 
       // Read table.
       messages = fs.readJsonSync(messagesPath, {throws: false}) || {};
@@ -193,39 +190,30 @@ module.exports = function({types: t}) {
           return;
         }
 
-        // Construct a printf template from the argument set. There could be
-        // non-string types among string literals in variadic calls, so the
-        // template includes them as interpolated arguments.
+        // Recursively construct sprintf template from arguments.
         const templateArgs = [];
-        const message = buildMessage(messageArg, templateArgs);
+        const message = buildMessageSprintf(messageArg, templateArgs);
 
-        // Bounce when indirection increases minified size (±1 byte). Also
-        // catches the the case where the top-level message is variable (ie.
-        // when its template is exactly '%s'), in which indirection would be
-        // pointless.
-        if (message.length <= roughMinifiedExpansionLength) {
+        // Bounce when indirection does nothing (±1 byte delta). (Also catches
+        // the case when its template is exactly `%s`).
+        if (message.length <= roughNestedLength) {
           return;
         }
 
-        const id = getOrCreateMessageId(message);
+        const idLiteral = t.stringLiteral(getOrCreateMessageId(message));
 
         if (!shouldReplaceCallArguments) {
           return;
         }
 
-        // We care only about message arguments beyond the first (ie. the body):
-        // all previous method arguments (ie. the head) should stay in place.
-        // The body is nested into an array expression, after the template id.
-        const bodyArgs = node.arguments.slice(messageArgPos + 1);
+        const variadicArgs = node.arguments.slice(messageArgPos + 1);
 
-        // Truncate to keep head arguments.
+        // Keep leading arguments in place.
         node.arguments.length = messageArgPos;
 
-        // Interpolation order breaks badly when template literals are mixed
-        // with variadic calls. This transform implicitly depends on the
-        // `no-mixed-interpolation` lint rule to prevent such usage.
         node.arguments.push(
-          t.arrayExpression([t.stringLiteral(id), ...bodyArgs, ...templateArgs])
+          // Arg order implicitly depends on `no-mixed-interpolation` lint rule.
+          t.arrayExpression([idLiteral, ...variadicArgs, ...templateArgs])
         );
       },
     },

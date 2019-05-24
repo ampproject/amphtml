@@ -15,41 +15,38 @@
  */
 const fs = require('fs-extra');
 
-const messagesPathPrefix = 'dist/log-messages';
+const pathPrefix = 'dist/log-messages';
 
 /**
- * Written by `transform-log-methods` babel plugin. This is the source of truth
- * for extracted messages during build, but it should not be deployed. Shaped:
- * `{message: {id, message, ...}}`
+ * Source of truth for extracted for extracted messages during build, but should
+ * not be deployed. Shaped `{message: {id, message, ...}}`.
  */
-const messagesByMessagePath = `${messagesPathPrefix}.by-message.json`;
+const extractedPath = `${pathPrefix}.by-message.json`;
 
-const messagesByIdFormats = {
+const formats = {
   // Consumed by logging server. Format may allow further fields.
-  [`${messagesPathPrefix}.json`]: ({id: unused, ...other}) => other,
+  [`${pathPrefix}.json`]: ({id: unused, ...other}) => other,
 
   // Consumed by runtime function in `#development`.
-  [`${messagesPathPrefix}.simple.json`]: ({message}) => message,
+  [`${pathPrefix}.simple.json`]: ({message}) => message,
 };
 
+/** @return {!Promise<!Array<!Object>>} */
+const extractedItems = () => fs.readJson(extractedPath).then(Object.values);
+
 /**
- * `transform-log-methods` babel plugin keys by message string for deduping.
- * This reads from the plugin output table, and writes different output format
- * files, in JSON, keyed by id.
+ * Format extracted messages table in multiple outputs, keyed by id.
  * @return {!Promise}
  */
 const formatExtractedMessages = () =>
-  fs
-    .readJson(messagesByMessagePath)
-    .then(Object.values)
-    .then(items =>
-      Promise.all(
-        Object.entries(messagesByIdFormats).map(([path, format]) => {
-          const formatted = {};
-          items.forEach(item => (formatted[item.id] = format(item)));
-          return fs.outputJson(path, formatted);
-        })
-      )
-    );
+  extractedItems().then(items =>
+    Promise.all(
+      Object.entries(formats).map(([path, format]) => {
+        const formatted = {};
+        items.forEach(item => (formatted[item.id] = format(item)));
+        return fs.outputJson(path, formatted);
+      })
+    )
+  );
 
-module.exports = {messagesByMessagePath, formatExtractedMessages};
+module.exports = {extractedPath, formatExtractedMessages};
