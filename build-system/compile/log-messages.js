@@ -24,7 +24,6 @@ const messagesPathPrefix = 'dist/log-messages';
  */
 const messagesByMessagePath = `${messagesPathPrefix}.by-message.json`;
 
-/** Values are formatters for entries read from `messagesByMessagePath`. */
 const messagesByIdFormats = {
   // Consumed by logging server. Format may allow further fields.
   [`${messagesPathPrefix}.json`]: ({id: unused, ...other}) => other,
