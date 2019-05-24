@@ -1,0 +1,133 @@
+/**
+ * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+.i-amphtml-lbg-top-bar {
+  position: absolute !important;
+  left: 0 !important;
+  right: 0 !important;
+  top: 0 !important;
+  height: 56px !important; /* Matches top of gallery */
+  z-index: 1 !important;
+  background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0));
+}
+
+@media (min-width: 1024px) {
+  .i-amphtml-lbg-top-bar {
+    height: 80px !important; /* Matches top of gallery */
+  }
+}
+
+.i-amphtml-lbg-button {
+  position: absolute !important;
+  cursor: pointer !important;
+  width: 24px;
+  height: 24px;
+  padding: 16px;
+  box-sizing: content-box;
+}
+
+@media (min-width: 1024px) {
+  .i-amphtml-lbg-button {
+    width: 40px;
+    height: 40px;
+    padding: 20px;
+  }
+}
+
+.i-amphtml-lbg-button::after {
+  content: '' !important;
+  width: 100% !important;
+  height: 100% !important;
+  display: block !important;
+  background-repeat: no-repeat !important;
+  background-position: center center !important;
+}
+
+.i-amphtml-lbg-button[data-action="close"] {
+  top: 0 !important;
+  right: 0 !important;
+}
+
+.i-amphtml-lbg-button[data-action="close"]::after {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg"><path d="M6.405 6.405 L17.605 17.605 Z M17.605 6.405 L6.405 17.605 Z" stroke="#fff" stroke-width="2" stroke-linejoin="round" /></svg>');
+}
+
+.i-amphtml-lbg-button[data-action="gallery"] {
+  top: 0 !important;
+  left: 0 !important;
+}
+
+.i-amphtml-lbg-button[data-action="gallery"]::after {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg"><g fill="#fff"><rect x="3" y="3" width="6" height="8" rx="1" ry="1" /><rect x="15" y="13" width="6" height="8" rx="1" ry="1" /><rect x="11" y="3" width="10" height="8" rx="1" ry="1" /><rect x="3" y="13" width="10" height="8" rx="1" ry="1" /></g></svg>');
+}
+
+.i-amphtml-lbg-button[data-action="slides"] {
+  top: 0 !important;
+  left: 0 !important;
+  display: none;
+}
+
+.i-amphtml-lbg-button[data-action="slides"]::after {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg"><path d="M5,3 L19,3 C20.1045695,3 21,3.8954305 21,5 L21,19 C21,20.1045695 20.1045695,21 19,21 L5,21 C3.8954305,21 3,20.1045695 3,19 L3,5 C3,3.8954305 3.8954305,3 5,3 Z M19,15 L19,5 L5,5 L5,13.0000896 L8,10.0003584 L13,15 L16,12 L19,15 Z M15.5,10 C14.6715729,10 14,9.32842712 14,8.5 C14,7.67157288 14.6715729,7 15.5,7 C16.3284271,7 17,7.67157288 17,8.5 C17,9.32842712 16.3284271,10 15.5,10 Z" stroke="none" fill="#fff" /></svg>');
+}
+
+.i-amphtml-lbg-button[data-action="next"],
+.i-amphtml-lbg-button[data-action="prev"] {
+  top: 0 !important;
+  bottom: 0 !important;
+  margin: auto !important;
+  filter: drop-shadow(0 0 1px black) !important;
+  width: 40px;
+  height: 40px;
+  padding: 20px;
+}
+
+.i-amphtml-lbg-button[data-action="next"] {
+  right: 0 !important;
+  /* Needed for screen reader mode to size correctly. */
+  left: auto !important;
+}
+
+.i-amphtml-lbg-button[data-action="next"]::after {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path  d="M10,7.4 L14.6,12 L10,16.6" fill="none" stroke="#fff" stroke-width="2px" stroke-linejoin="round" stroke-linecap="round" /></svg>');
+}
+
+.i-amphtml-lbg-button[data-action="prev"] {
+  /* Needed for screen reader mode to size correctly. */
+  right: auto !important; 
+  left: 0 !important;
+}
+
+.i-amphtml-lbg-button[data-action="prev"]::after {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path  d="M14,7.4 L9.4,12 L14,16.6" fill="none" stroke="#fff" stroke-width="2px" stroke-linejoin="round" stroke-linecap="round" /></svg>');
+}
+
+[i-amphtml-lbg-single-item] .i-amphtml-lbg-button[data-action="gallery"],
+[i-amphtml-lbg-single-item] .i-amphtml-lbg-button[data-action="prev"],
+[i-amphtml-lbg-single-item] .i-amphtml-lbg-button[data-action="next"] {
+  visibility: hidden !important;
+}
+
+.i-amphtml-lbg[gallery-view] .i-amphtml-lbg-button[data-action="gallery"],
+.i-amphtml-lbg[gallery-view] .i-amphtml-lbg-button[data-action="next"],
+.i-amphtml-lbg[gallery-view] .i-amphtml-lbg-button[data-action="prev"] {
+  display: none !important;
+}
+
+.i-amphtml-lbg[gallery-view] .i-amphtml-lbg-button[data-action="slides"] {
+  display: block !important;
+}

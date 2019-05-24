@@ -15,9 +15,7 @@
  */
 'use strict';
 
-const initTestsPath = [
-  'test/_init_tests.js',
-];
+const initTestsPath = ['test/_init_tests.js'];
 
 const fixturesExamplesPaths = [
   'test/fixtures/*.html',
@@ -58,8 +56,10 @@ const builtRuntimePaths = [
 
 const commonUnitTestPaths = initTestsPath.concat(fixturesExamplesPaths);
 
-const commonIntegrationTestPaths =
-    initTestsPath.concat(fixturesExamplesPaths, builtRuntimePaths);
+const commonIntegrationTestPaths = initTestsPath.concat(
+  fixturesExamplesPaths,
+  builtRuntimePaths
+);
 
 const testPaths = commonIntegrationTestPaths.concat([
   'test/*/!(e2e)/**/*.js',
@@ -73,9 +73,7 @@ const a4aTestPaths = initTestsPath.concat([
   'ads/google/a4a/test/*.js',
 ]);
 
-const chaiAsPromised = [
-  'test/chai-as-promised/chai-as-promised.js',
-];
+const chaiAsPromised = ['test/chai-as-promised/chai-as-promised.js'];
 
 const unitTestPaths = [
   'test/unit/**/*.js',
@@ -83,24 +81,16 @@ const unitTestPaths = [
   'extensions/**/test/*.js',
 ];
 
-const unitTestOnSaucePaths = [
-  'test/unit/**/*.js',
-  'ads/**/test/test-*.js',
-];
+const unitTestOnSaucePaths = ['test/unit/**/*.js', 'ads/**/test/test-*.js'];
 
 const integrationTestPaths = [
   'test/integration/**/*.js',
   'extensions/**/test/integration/**/*.js',
 ];
 
-const e2eTestPaths = [
-  'test/e2e/*.js',
-  'extensions/**/test-e2e/*.js',
-];
+const e2eTestPaths = ['test/e2e/*.js', 'extensions/**/test-e2e/*.js'];
 
-const devDashboardTestPaths = [
-  'build-system/app-index/test/**/*.js',
-];
+const devDashboardTestPaths = ['build-system/app-index/test/**/*.js'];
 
 const lintGlobs = [
   '**/*.js',
@@ -149,7 +139,7 @@ module.exports = {
   jsonGlobs: [
     '**/*.json',
     '!{node_modules,build,dist,dist.3p,dist.tools,' +
-        'third_party,build-system}/**/*.*',
+      'third_party,build-system}/**/*.*',
   ],
   presubmitGlobs: [
     '**/*.{css,js,go}',
@@ -157,7 +147,7 @@ module.exports = {
     // built 3p binary. This is done, so we make sure our special 3p checks
     // run against the entire transitive closure of deps.
     '!{node_modules,build,dist,dist.tools,' +
-        'dist.3p/[0-9]*,dist.3p/current,dist.3p/current-min}/**/*.*',
+      'dist.3p/[0-9]*,dist.3p/current,dist.3p/current-min}/**/*.*',
     '!dist.3p/current/**/ampcontext-lib.js',
     '!dist.3p/current/**/iframe-transport-client-lib.js',
     '!out/**/*.*',
@@ -169,6 +159,7 @@ module.exports = {
     '!validator/webui/node_modules/**/*.*',
     '!build-system/tasks/e2e/node_modules/**/*.*',
     '!build-system/tasks/presubmit-checks.js',
+    '!build-system/runner/build/**/*.*',
     '!build-system/tasks/visual-diff/node_modules/**/*.*',
     '!build-system/tasks/visual-diff/snippets/*.js',
     '!build/polyfills.js',

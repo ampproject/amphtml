@@ -18,6 +18,7 @@ const babelify = require('babelify');
 const browserify = require('browserify');
 const buffer = require('vinyl-buffer');
 const colors = require('ansi-colors');
+const del = require('del');
 const file = require('gulp-file');
 const fs = require('fs-extra');
 const gulp = require('gulp');
@@ -27,7 +28,6 @@ const log = require('fancy-log');
 const path = require('path');
 const regexpSourcemaps = require('gulp-regexp-sourcemaps');
 const rename = require('gulp-rename');
-const rimraf = require('rimraf');
 const source = require('vinyl-source-stream');
 const sourcemaps = require('gulp-sourcemaps');
 const touch = require('touch');
@@ -39,7 +39,7 @@ const {closureCompile} = require('../compile/compile');
 const {isTravisBuild} = require('../travis');
 const {thirdPartyFrames} = require('../config');
 const {transpileTs} = require('../typescript');
-const {VERSION: internalRuntimeVersion} = require('../internal-version') ;
+const {VERSION: internalRuntimeVersion} = require('../internal-version');
 
 const {green, red, cyan} = colors;
 const argv = require('minimist')(process.argv.slice(2));
@@ -57,9 +57,7 @@ const EXTENSION_BUNDLE_MAP = {
     'third_party/d3-geo-projection/d3-geo-projection.js',
     'third_party/vega/vega.js',
   ],
-  'amp-inputmask.js': [
-    'third_party/inputmask/bundle.js',
-  ],
+  'amp-inputmask.js': ['third_party/inputmask/bundle.js'],
 };
 
 const UNMINIFIED_TARGETS = [
@@ -108,157 +106,178 @@ function compileAllUnminifiedTargets(watch) {
  */
 function compile(watch, shouldMinify) {
   const promises = [
-    compileJs('./3p/', 'integration.js',
-        './dist.3p/' + (shouldMinify ? internalRuntimeVersion : 'current'), {
-          minifiedName: 'f.js',
-          watch,
-          minify: shouldMinify,
-          externs: ['./ads/ads.extern.js'],
-          include3pDirectories: true,
-          includePolyfills: true,
-        }),
-    compileJs('./3p/', 'ampcontext-lib.js',
-        './dist.3p/' + (shouldMinify ? internalRuntimeVersion : 'current'), {
-          minifiedName: 'ampcontext-v0.js',
-          watch,
-          minify: shouldMinify,
-          externs: ['./ads/ads.extern.js'],
-          include3pDirectories: true,
-          includePolyfills: false,
-        }),
-    compileJs('./3p/', 'iframe-transport-client-lib.js',
-        './dist.3p/' + (shouldMinify ? internalRuntimeVersion : 'current'), {
-          minifiedName: 'iframe-transport-client-v0.js',
-          watch,
-          minify: shouldMinify,
-          externs: ['./ads/ads.extern.js'],
-          include3pDirectories: true,
-          includePolyfills: false,
-        }),
-    compileJs('./3p/', 'recaptcha.js',
-        './dist.3p/' + (shouldMinify ? internalRuntimeVersion : 'current'), {
-          minifiedName: 'recaptcha.js',
-          watch,
-          minify: shouldMinify,
-          externs: [],
-          include3pDirectories: true,
-          includePolyfills: true,
-        }),
-    compileJs('./extensions/amp-viewer-integration/0.1/examples/',
-        'amp-viewer-host.js', './dist/v0/examples', {
-          toName: 'amp-viewer-host.max.js',
-          minifiedName: 'amp-viewer-host.js',
-          incudePolyfills: true,
-          watch,
-          extraGlobs: ['extensions/amp-viewer-integration/**/*.js'],
-          compilationLevel: 'WHITESPACE_ONLY',
-          minify: false,
-        }),
+    compileJs(
+      './3p/',
+      'integration.js',
+      './dist.3p/' + (shouldMinify ? internalRuntimeVersion : 'current'),
+      {
+        minifiedName: 'f.js',
+        watch,
+        minify: shouldMinify,
+        externs: ['./ads/ads.extern.js'],
+        include3pDirectories: true,
+        includePolyfills: true,
+      }
+    ),
+    compileJs(
+      './3p/',
+      'ampcontext-lib.js',
+      './dist.3p/' + (shouldMinify ? internalRuntimeVersion : 'current'),
+      {
+        minifiedName: 'ampcontext-v0.js',
+        watch,
+        minify: shouldMinify,
+        externs: ['./ads/ads.extern.js'],
+        include3pDirectories: true,
+        includePolyfills: false,
+      }
+    ),
+    compileJs(
+      './3p/',
+      'iframe-transport-client-lib.js',
+      './dist.3p/' + (shouldMinify ? internalRuntimeVersion : 'current'),
+      {
+        minifiedName: 'iframe-transport-client-v0.js',
+        watch,
+        minify: shouldMinify,
+        externs: ['./ads/ads.extern.js'],
+        include3pDirectories: true,
+        includePolyfills: false,
+      }
+    ),
+    compileJs(
+      './3p/',
+      'recaptcha.js',
+      './dist.3p/' + (shouldMinify ? internalRuntimeVersion : 'current'),
+      {
+        minifiedName: 'recaptcha.js',
+        watch,
+        minify: shouldMinify,
+        externs: [],
+        include3pDirectories: true,
+        includePolyfills: true,
+      }
+    ),
+    compileJs(
+      './extensions/amp-viewer-integration/0.1/examples/',
+      'amp-viewer-host.js',
+      './dist/v0/examples',
+      {
+        toName: 'amp-viewer-host.max.js',
+        minifiedName: 'amp-viewer-host.js',
+        incudePolyfills: true,
+        watch,
+        extraGlobs: ['extensions/amp-viewer-integration/**/*.js'],
+        compilationLevel: 'WHITESPACE_ONLY',
+        minify: shouldMinify,
+      }
+    ),
   ];
 
   if (!argv.single_pass && (!watch || argv.with_shadow)) {
     promises.push(
-        compileJs('./src/', 'amp-shadow.js', './dist', {
-          minifiedName: 'shadow-v0.js',
-          includePolyfills: true,
-          watch,
-          minify: shouldMinify,
-        })
+      compileJs('./src/', 'amp-shadow.js', './dist', {
+        minifiedName: 'shadow-v0.js',
+        includePolyfills: true,
+        watch,
+        minify: shouldMinify,
+      })
     );
   }
 
   if (!watch || argv.with_video_iframe_integration) {
     promises.push(
-        compileJs('./src/', 'video-iframe-integration.js', './dist', {
-          minifiedName: 'video-iframe-integration-v0.js',
-          includePolyfills: false,
-          watch,
-          minify: shouldMinify,
-        }));
+      compileJs('./src/', 'video-iframe-integration.js', './dist', {
+        minifiedName: 'video-iframe-integration-v0.js',
+        includePolyfills: false,
+        watch,
+        minify: shouldMinify,
+      })
+    );
   }
 
   if (!watch || argv.with_inabox) {
     if (!argv.single_pass) {
       promises.push(
-          // Entry point for inabox runtime.
-          compileJs('./src/inabox/', 'amp-inabox.js', './dist', {
-            toName: 'amp-inabox.js',
-            minifiedName: 'amp4ads-v0.js',
-            includePolyfills: true,
-            extraGlobs: ['src/inabox/*.js', '3p/iframe-messaging-client.js'],
-            watch,
-            minify: shouldMinify,
-          }));
-    }
-    promises.push(
-        // inabox-host
-        compileJs('./ads/inabox/', 'inabox-host.js', './dist', {
-          toName: 'amp-inabox-host.js',
-          minifiedName: 'amp4ads-host-v0.js',
-          includePolyfills: false,
+        // Entry point for inabox runtime.
+        compileJs('./src/inabox/', 'amp-inabox.js', './dist', {
+          toName: 'amp-inabox.js',
+          minifiedName: 'amp4ads-v0.js',
+          includePolyfills: true,
+          extraGlobs: ['src/inabox/*.js', '3p/iframe-messaging-client.js'],
           watch,
           minify: shouldMinify,
         })
+      );
+    }
+    promises.push(
+      // inabox-host
+      compileJs('./ads/inabox/', 'inabox-host.js', './dist', {
+        toName: 'amp-inabox-host.js',
+        minifiedName: 'amp4ads-host-v0.js',
+        includePolyfills: false,
+        watch,
+        minify: shouldMinify,
+      })
     );
   }
 
   if (argv.with_inabox_lite) {
     promises.push(
-        // Entry point for inabox runtime.
-        compileJs('./src/inabox/', 'amp-inabox-lite.js', './dist', {
-          toName: 'amp-inabox-lite.js',
-          minifiedName: 'amp4ads-lite-v0.js',
-          includePolyfills: true,
-          extraGlobs: ['src/inabox/*.js', '3p/iframe-messaging-client.js'],
-          watch,
-          minify: shouldMinify,
-        }));
+      // Entry point for inabox runtime.
+      compileJs('./src/inabox/', 'amp-inabox-lite.js', './dist', {
+        toName: 'amp-inabox-lite.js',
+        minifiedName: 'amp4ads-lite-v0.js',
+        includePolyfills: true,
+        extraGlobs: ['src/inabox/*.js', '3p/iframe-messaging-client.js'],
+        watch,
+        minify: shouldMinify,
+      })
+    );
   }
 
   thirdPartyFrames.forEach(frameObject => {
     promises.push(
-        thirdPartyBootstrap(
-            frameObject.max, frameObject.min, shouldMinify)
+      thirdPartyBootstrap(frameObject.max, frameObject.min, shouldMinify)
     );
   });
 
   if (watch) {
     thirdPartyFrames.forEach(frameObject => {
       gulpWatch(frameObject.max, function() {
-        thirdPartyBootstrap(
-            frameObject.max, frameObject.min, shouldMinify);
+        thirdPartyBootstrap(frameObject.max, frameObject.min, shouldMinify);
       });
     });
   }
 
   return Promise.all(promises)
-      .then(() => {
+    .then(() => {
+      return compileJs('./src/', 'amp.js', './dist', {
+        toName: 'amp.js',
+        minifiedName: 'v0.js',
+        includePolyfills: true,
+        watch,
+        minify: shouldMinify,
+        wrapper: wrappers.mainBinary,
+        singlePassCompilation: argv.single_pass,
+        esmPassCompilation: argv.esm,
+      });
+    })
+    .then(() => {
+      if (!argv.single_pass) {
         return compileJs('./src/', 'amp.js', './dist', {
-          toName: 'amp.js',
-          minifiedName: 'v0.js',
+          toName: 'amp-esm.js',
+          minifiedName: 'v0-esm.js',
           includePolyfills: true,
+          includeOnlyESMLevelPolyfills: true,
           watch,
           minify: shouldMinify,
           wrapper: wrappers.mainBinary,
-          singlePassCompilation: argv.single_pass,
-          esmPassCompilation: argv.esm,
         });
-      })
-      .then(() => {
-        if (!argv.single_pass) {
-          return compileJs('./src/', 'amp.js', './dist', {
-            toName: 'amp-esm.js',
-            minifiedName: 'v0-esm.js',
-            includePolyfills: true,
-            includeOnlyESMLevelPolyfills: true,
-            watch,
-            minify: shouldMinify,
-            wrapper: wrappers.mainBinary,
-          });
-        } else {
-          return Promise.resolve();
-        }
-      });
+      } else {
+        return Promise.resolve();
+      }
+    });
 }
 
 /**
@@ -279,10 +298,14 @@ function appendToCompiledFile(srcFilename, destFilePath) {
     const firstLineBreak = file.indexOf('\n');
     const wrapperOpen = file.substr(0, firstLineBreak + 1);
     const reactDates = fs.readFileSync(
-        'third_party/react-dates/bundle.js', 'utf8');
+      'third_party/react-dates/bundle.js',
+      'utf8'
+    );
     // Inject the bundle inside the standard AMP wrapper (after the first line).
     const newSource = [
-      wrapperOpen, reactDates, file.substr(firstLineBreak + 1),
+      wrapperOpen,
+      reactDates,
+      file.substr(firstLineBreak + 1),
     ].join('\n');
     fs.writeFileSync(destFilePath, newSource, 'utf8');
   }
@@ -301,44 +324,44 @@ function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
   const entryPoint = path.join(srcDir, srcFilename);
   const {minifiedName} = options;
   return closureCompile(entryPoint, destDir, minifiedName, options)
-      .then(function() {
-        const destPath = path.join(destDir, minifiedName);
-        appendToCompiledFile(srcFilename, destPath);
-        fs.writeFileSync(
-            path.join(destDir, 'version.txt'), internalRuntimeVersion);
-        if (options.latestName) {
-          fs.copySync(
-              destPath,
-              path.join(destDir, options.latestName));
-        }
-      })
-      .then(() => {
-        let name = minifiedName;
-        if (options.latestName) {
-          name += ` → ${options.latestName}`;
-        }
-        if (options.singlePassCompilation) {
-          altMainBundles.forEach(bundle => {
-            name += `, ${bundle.name}.js`;
-          });
-          name += ', and all extensions';
-        }
-        endBuildStep('Minified', name, startTime);
-      })
-      .then(() => {
-        if (argv.fortesting && MINIFIED_TARGETS.includes(minifiedName)) {
-          return enableLocalTesting(`${destDir}/${minifiedName}`);
-        }
-      })
-      .then(() => {
-        if (argv.fortesting && options.singlePassCompilation) {
-          const promises = [];
-          altMainBundles.forEach(bundle => {
-            promises.push(enableLocalTesting(`dist/${bundle.name}.js`));
-          });
-          return Promise.all(promises);
-        }
-      });
+    .then(function() {
+      const destPath = path.join(destDir, minifiedName);
+      appendToCompiledFile(srcFilename, destPath);
+      fs.writeFileSync(
+        path.join(destDir, 'version.txt'),
+        internalRuntimeVersion
+      );
+      if (options.latestName) {
+        fs.copySync(destPath, path.join(destDir, options.latestName));
+      }
+    })
+    .then(() => {
+      let name = minifiedName;
+      if (options.latestName) {
+        name += ` → ${options.latestName}`;
+      }
+      if (options.singlePassCompilation) {
+        altMainBundles.forEach(bundle => {
+          name += `, ${bundle.name}.js`;
+        });
+        name += ', and all extensions';
+      }
+      endBuildStep('Minified', name, startTime);
+    })
+    .then(() => {
+      if (argv.fortesting && MINIFIED_TARGETS.includes(minifiedName)) {
+        return enableLocalTesting(`${destDir}/${minifiedName}`);
+      }
+    })
+    .then(() => {
+      if (argv.fortesting && options.singlePassCompilation) {
+        const promises = [];
+        altMainBundles.forEach(bundle => {
+          promises.push(enableLocalTesting(`dist/${bundle.name}.js`));
+        });
+        return Promise.all(promises);
+      }
+    });
 }
 
 /**
@@ -370,17 +393,16 @@ function handleBundleError(err, failOnError, srcFilename, startTime) {
  * @param {?Object} options
  */
 function finishBundle(srcFilename, destDir, destFilename, options) {
-  appendToCompiledFile(srcFilename,
-      path.join(destDir, destFilename));
+  appendToCompiledFile(srcFilename, path.join(destDir, destFilename));
 
   if (options.latestName) {
     // "amp-foo-latest.js" -> "amp-foo-latest.max.js"
-    const latestMaxName =
-        options.latestName.split('.js')[0] + '.max.js';
+    const latestMaxName = options.latestName.split('.js')[0] + '.max.js';
     // Copy amp-foo-0.1.js to amp-foo-latest.max.js.
     fs.copySync(
-        path.join(destDir, options.toName),
-        path.join(destDir, latestMaxName));
+      path.join(destDir, options.toName),
+      path.join(destDir, latestMaxName)
+    );
   }
 }
 
@@ -407,15 +429,37 @@ function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
   const devWrapper = wrapper.replace('<%= contents %>', '$1');
 
   const lazybuild = lazypipe()
-      .pipe(source, srcFilename)
-      .pipe(buffer)
-      .pipe(sourcemaps.init.bind(sourcemaps), {loadMaps: true})
-      .pipe(regexpSourcemaps, /\$internalRuntimeVersion\$/g, internalRuntimeVersion, 'runtime-version')
-      .pipe(regexpSourcemaps, /([^]+)/, devWrapper, 'wrapper');
+    .pipe(
+      source,
+      srcFilename
+    )
+    .pipe(buffer)
+    .pipe(
+      sourcemaps.init.bind(sourcemaps),
+      {loadMaps: true}
+    )
+    .pipe(
+      regexpSourcemaps,
+      /\$internalRuntimeVersion\$/g,
+      internalRuntimeVersion,
+      'runtime-version'
+    )
+    .pipe(
+      regexpSourcemaps,
+      /([^]+)/,
+      devWrapper,
+      'wrapper'
+    );
 
   const lazywrite = lazypipe()
-      .pipe(sourcemaps.write.bind(sourcemaps), './')
-      .pipe(gulp.dest.bind(gulp), destDir);
+    .pipe(
+      sourcemaps.write.bind(sourcemaps),
+      './'
+    )
+    .pipe(
+      gulp.dest.bind(gulp),
+      destDir
+    );
 
   const destFilename = options.toName || srcFilename;
   /**
@@ -425,28 +469,31 @@ function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
   function rebundle(failOnError) {
     const startTime = Date.now();
     return toPromise(
-        bundler.bundle()
-            .on('error', err => handleBundleError(
-                err, failOnError, srcFilename, startTime))
-            .pipe(lazybuild())
-            .pipe(rename(destFilename))
-            .pipe(lazywrite())
-            .on('end', () => finishBundle(
-                srcFilename, destDir, destFilename, options)))
-        .then(() => {
-          let name = destFilename;
-          if (options.latestName) {
-            const latestMaxName =
-                options.latestName.split('.js')[0] + '.max.js';
-            name = `${name} → ${latestMaxName}`;
-          }
-          endBuildStep('Compiled', name, startTime);
-        })
-        .then(() => {
-          if (UNMINIFIED_TARGETS.includes(destFilename)) {
-            return enableLocalTesting(`${destDir}/${destFilename}`);
-          }
-        });
+      bundler
+        .bundle()
+        .on('error', err =>
+          handleBundleError(err, failOnError, srcFilename, startTime)
+        )
+        .pipe(lazybuild())
+        .pipe(rename(destFilename))
+        .pipe(lazywrite())
+        .on('end', () =>
+          finishBundle(srcFilename, destDir, destFilename, options)
+        )
+    )
+      .then(() => {
+        let name = destFilename;
+        if (options.latestName) {
+          const latestMaxName = options.latestName.split('.js')[0] + '.max.js';
+          name = `${name} → ${latestMaxName}`;
+        }
+        endBuildStep('Compiled', name, startTime);
+      })
+      .then(() => {
+        if (UNMINIFIED_TARGETS.includes(destFilename)) {
+          return enableLocalTesting(`${destDir}/${destFilename}`);
+        }
+      });
   }
 
   if (options.watch) {
@@ -486,7 +533,7 @@ async function compileTs(srcDir, srcFilename, destDir, options) {
   options = options || {};
   await transpileTs(srcDir, srcFilename);
   await compileJs(srcDir, srcFilename, destDir, options);
-  rimraf.sync(path.join(srcDir, '**/*.js'));
+  del.sync(path.join(srcDir, '**/*.js'));
 }
 
 /**
@@ -536,12 +583,20 @@ function endBuildStep(stepName, targetName, startTime) {
  */
 function printConfigHelp(command) {
   if (!isTravisBuild()) {
-    log(green('Building version'), cyan(internalRuntimeVersion),
-        green('of the runtime for local testing with the'),
-        cyan((argv.config === 'canary') ? 'canary' : 'prod'),
-        green('AMP config.'));
-    log(green('⤷ Use'), cyan('--config={canary|prod}'), green('with your'),
-        cyan(command), green('command to specify which config to apply.'));
+    log(
+      green('Building version'),
+      cyan(internalRuntimeVersion),
+      green('of the runtime for local testing with the'),
+      cyan(argv.config === 'canary' ? 'canary' : 'prod'),
+      green('AMP config.')
+    );
+    log(
+      green('⤷ Use'),
+      cyan('--config={canary|prod}'),
+      green('with your'),
+      cyan(command),
+      green('command to specify which config to apply.')
+    );
   }
 }
 
@@ -550,11 +605,18 @@ function printConfigHelp(command) {
  */
 function printNobuildHelp() {
   if (!isTravisBuild()) {
-    for (const task of NOBUILD_HELP_TASKS) { // eslint-disable-line amphtml-internal/no-for-of-statement
+    for (const task of NOBUILD_HELP_TASKS) {
+      // eslint-disable-line amphtml-internal/no-for-of-statement
       if (argv._.includes(task)) {
-        log(green('To skip building during future'), cyan(task),
-            green('runs, use'), cyan('--nobuild'), green('with your'),
-            cyan(`gulp ${task}`), green('command.'));
+        log(
+          green('To skip building during future'),
+          cyan(task),
+          green('runs, use'),
+          cyan('--nobuild'),
+          green('with your'),
+          cyan(`gulp ${task}`),
+          green('command.')
+        );
         return;
       }
     }
@@ -567,15 +629,20 @@ function printNobuildHelp() {
  * @param {string} targetFile File to which the config is to be written.
  */
 async function enableLocalTesting(targetFile) {
-  const config = (argv.config === 'canary') ? 'canary' : 'prod';
+  const config = argv.config === 'canary' ? 'canary' : 'prod';
   const baseConfigFile =
-      'build-system/global-configs/' + config + '-config.json';
+    'build-system/global-configs/' + config + '-config.json';
 
   return removeConfig(targetFile).then(() => {
     return applyConfig(
-        config, targetFile, baseConfigFile,
-        /* opt_localDev */ true, /* opt_localBranch */ true,
-        /* opt_branch */ false, /* opt_fortesting */ !!argv.fortesting);
+      config,
+      targetFile,
+      baseConfigFile,
+      /* opt_localDev */ true,
+      /* opt_localBranch */ true,
+      /* opt_branch */ false,
+      /* opt_fortesting */ !!argv.fortesting
+    );
   });
 }
 
@@ -586,9 +653,11 @@ async function enableLocalTesting(targetFile) {
  * @return {string} The concatenated contents of the given files.
  */
 function concatFilesToString(files) {
-  return files.map(function(filePath) {
-    return fs.readFileSync(filePath, 'utf8');
-  }).join(MODULE_SEPARATOR);
+  return files
+    .map(function(filePath) {
+      return fs.readFileSync(filePath, 'utf8');
+    })
+    .join(MODULE_SEPARATOR);
 }
 
 /**
@@ -603,11 +672,11 @@ function concatFilesToString(files) {
 function thirdPartyBootstrap(input, outputName, shouldMinify) {
   const startTime = Date.now();
   if (!shouldMinify) {
-    return toPromise(gulp.src(input)
-        .pipe(gulp.dest('dist.3p/current')))
-        .then(() => {
-          endBuildStep('Processed', input, startTime);
-        });
+    return toPromise(gulp.src(input).pipe(gulp.dest('dist.3p/current'))).then(
+      () => {
+        endBuildStep('Processed', input, startTime);
+      }
+    );
   }
 
   // By default we use an absolute URL, that is independent of the
@@ -618,9 +687,11 @@ function thirdPartyBootstrap(input, outputName, shouldMinify) {
     ? './f.js'
     : `https://${hostname3p}/${internalRuntimeVersion}/f.js`;
   // Convert default relative URL to absolute min URL.
-  const html = fs.readFileSync(input, 'utf8')
-      .replace(/\.\/integration\.js/g, integrationJs);
-  return toPromise(file(outputName, html, {src: true})
+  const html = fs
+    .readFileSync(input, 'utf8')
+    .replace(/\.\/integration\.js/g, integrationJs);
+  return toPromise(
+    file(outputName, html, {src: true})
       .pipe(gulp.dest('dist.3p/' + internalRuntimeVersion))
       .on('end', function() {
         const aliasToLatestBuild = 'dist.3p/current-min';
@@ -628,13 +699,14 @@ function thirdPartyBootstrap(input, outputName, shouldMinify) {
           fs.unlinkSync(aliasToLatestBuild);
         }
         fs.symlinkSync(
-            './' + internalRuntimeVersion,
-            aliasToLatestBuild,
-            'dir');
-      }))
-      .then(() => {
-        endBuildStep('Processed', input, startTime);
-      });
+          './' + internalRuntimeVersion,
+          aliasToLatestBuild,
+          'dir'
+        );
+      })
+  ).then(() => {
+    endBuildStep('Processed', input, startTime);
+  });
 }
 
 /**
@@ -666,28 +738,37 @@ async function buildExperiments(options) {
 
   // Build HTML.
   const html = fs.readFileSync(htmlPath, 'utf8');
-  const minHtml = html.replace('/dist.tools/experiments/experiments.js',
-      `https://${hostname}/v0/experiments.js`);
-  gulp.src(htmlPath)
-      .pipe(file('experiments.cdn.html', minHtml))
-      .pipe(gulp.dest('dist.tools/experiments/'));
+  const minHtml = html.replace(
+    '/dist.tools/experiments/experiments.js',
+    `https://${hostname}/v0/experiments.js`
+  );
+  gulp
+    .src(htmlPath)
+    .pipe(file('experiments.cdn.html', minHtml))
+    .pipe(gulp.dest('dist.tools/experiments/'));
 
   // Build JS.
   const js = fs.readFileSync(jsPath, 'utf8');
   const builtName = 'experiments.max.js';
   const minifiedName = 'experiments.js';
-  return toPromise(gulp.src(path + '/*.js')
+  return toPromise(
+    gulp
+      .src(path + '/*.js')
       .pipe(file(builtName, js))
-      .pipe(gulp.dest('build/experiments/')))
-      .then(function() {
-        return compileJs(
-            './build/experiments/', builtName, './dist.tools/experiments/', {
-              watch: false,
-              minify: options.minify || argv.minify,
-              includePolyfills: true,
-              minifiedName,
-            });
-      });
+      .pipe(gulp.dest('build/experiments/'))
+  ).then(function() {
+    return compileJs(
+      './build/experiments/',
+      builtName,
+      './dist.tools/experiments/',
+      {
+        watch: false,
+        minify: options.minify || argv.minify,
+        includePolyfills: true,
+        minifiedName,
+      }
+    );
+  });
 }
 
 /**

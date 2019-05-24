@@ -72,13 +72,12 @@ export class ViewerTracker {
       return this.reportViewPromise_;
     }
     dev().fine(TAG, 'start view monitoring');
-    this.reportViewPromise_ = this.whenViewed_(timeToView)
-        .catch(reason => {
-          // Ignore - view has been canceled.
-          dev().fine(TAG, 'view cancelled:', reason);
-          this.reportViewPromise_ = null;
-          throw reason;
-        });
+    this.reportViewPromise_ = this.whenViewed_(timeToView).catch(reason => {
+      // Ignore - view has been canceled.
+      dev().fine(TAG, 'view cancelled:', reason);
+      this.reportViewPromise_ = null;
+      throw reason;
+    });
 
     return this.reportViewPromise_;
   }
@@ -102,11 +101,13 @@ export class ViewerTracker {
     const unlistenSet = [];
     return new Promise((resolve, reject) => {
       // 1. Document becomes invisible again: cancel.
-      unlistenSet.push(this.viewer_.onVisibilityChanged(() => {
-        if (!this.viewer_.isVisible()) {
-          reject(cancellation());
-        }
-      }));
+      unlistenSet.push(
+        this.viewer_.onVisibilityChanged(() => {
+          if (!this.viewer_.isVisible()) {
+            reject(cancellation());
+          }
+        })
+      );
 
       // 2. After a few seconds: register a view.
       const timeoutId = this.timer_.delay(resolve, timeToView);
@@ -116,13 +117,17 @@ export class ViewerTracker {
       unlistenSet.push(this.viewport_.onScroll(resolve));
 
       // 4. Tap: register a view.
-      unlistenSet.push(listenOnce(this.ampdoc_.getRootNode(),
-          'click', resolve));
-    }).then(() => {
-      unlistenSet.forEach(unlisten => unlisten());
-    }, reason => {
-      unlistenSet.forEach(unlisten => unlisten());
-      throw reason;
-    });
+      unlistenSet.push(
+        listenOnce(this.ampdoc_.getRootNode(), 'click', resolve)
+      );
+    }).then(
+      () => {
+        unlistenSet.forEach(unlisten => unlisten());
+      },
+      reason => {
+        unlistenSet.forEach(unlisten => unlisten());
+        throw reason;
+      }
+    );
   }
 }

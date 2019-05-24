@@ -27,7 +27,7 @@ const serveModes = [
   {
     value: 'compiled',
     description: `Minified AMP JavaScript is served from the local server. This
-      is only available after running \`gulp dist--fortesting \`.`,
+      is only available after running \`gulp dist --fortesting \`.`,
   },
   {
     value: 'cdn',
@@ -35,64 +35,75 @@ const serveModes = [
   },
 ];
 
-
 const SelectorBlock = ({id, value, selected, children}) => html`
-  <div class="selector-block"
-      ${selected ? ' selected' : ''}
-      id="${id}"
-      option="${value}">
+  <div
+    class="selector-block"
+    ${selected ? ' selected' : ''}
+    id="${id}"
+    option="${value}"
+  >
     <div class="check-icon icon"></div>
     ${children}
-  </div>`;
-
+  </div>
+`;
 
 const ServeModeSelector = ({serveMode}) => html`
   <form
     action="/serve_mode_change"
     action-xhr="/serve_mode_change"
     target="_blank"
-    id="serve-mode-form">
+    id="serve-mode-form"
+  >
     <amp-selector
       layout="container"
       on="select:serve-mode-form.submit"
-      name="mode">
+      name="mode"
+    >
       ${joinFragments(serveModes, ({value, description}) =>
         SelectorBlock({
           id: `serve_mode_${value}`,
           value,
           selected: serveMode == value,
-          children: html`<strong>${value}</strong>
-            <p>${description}</p>`,
-        }))}
+          children: html`
+            <strong>${value}</strong>
+            <p>${description}</p>
+          `,
+        })
+      )}
     </amp-selector>
-  </form>`;
+  </form>
+`;
 
-
-const SettingsOpenButton = () => html`<div
+const SettingsOpenButton = () => html`
+  <div
     on="tap: settings-modal.open"
     role="button"
     tabindex="0"
-    class="settings-cog-icon icon">
+    class="settings-cog-icon icon"
+  >
     Settings
-  </div>`;
+  </div>
+`;
 
-
-const SettingsCloseButton = () => html`<div
+const SettingsCloseButton = () => html`
+  <div
     on="tap: settings-modal.close"
     role="button"
     tabindex="1"
-    class="close-icon icon">
+    class="close-icon icon"
+  >
     Close Settings
-  </div>`;
+  </div>
+`;
 
-
-const SettingsModal = ({serveMode}) => html`<amp-lightbox
-    layout="nodisplay"
-    id="settings-modal">
-    <div class="settings-modal-header"
-        on="tap: settings-modal.close"
-        role="button"
-        tabindex="1">
+const SettingsModal = ({serveMode}) => html`
+  <amp-lightbox layout="nodisplay" id="settings-modal">
+    <div
+      class="settings-modal-header"
+      on="tap: settings-modal.close"
+      role="button"
+      tabindex="1"
+    >
       <div class="wrap">
         <div class="settings-close-button-container">
           ${SettingsCloseButton()}
@@ -106,7 +117,7 @@ const SettingsModal = ({serveMode}) => html`<amp-lightbox
         ${ServeModeSelector({serveMode})}
       </div>
     </div>
-  </amp-lightbox>`;
-
+  </amp-lightbox>
+`;
 
 module.exports = {SettingsModal, SettingsOpenButton};

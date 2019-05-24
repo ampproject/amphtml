@@ -34,117 +34,146 @@ describe.configure().skip('amp-lightbox-gallery', function() {
 </figure>
 `;
 
-  describes.integration('amp-lightbox-gallery with one image', {
-    body,
-    extensions,
-  }, env => {
+  describes.integration(
+    'amp-lightbox-gallery with one image',
+    {
+      body,
+      extensions,
+    },
+    env => {
+      let win;
+      let triggerAnalyticsEventSpy;
 
-    let win;
-    let triggerAnalyticsEventSpy;
-
-    beforeEach(() => {
-      win = env.win;
-      win.AMP_MODE.localDev = true;
-      triggerAnalyticsEventSpy =
-        env.sandbox.spy(analytics, 'triggerAnalyticsEvent');
-    });
-
-    it('should open and close correctly', () => {
-      const lightbox = win.document.getElementById('amp-lightbox-gallery');
-      return openLightbox(win.document).then(() => {
-        expect(lightbox).to.not.have.display('none');
-        const carouselQuery = lightbox.getElementsByTagName('AMP-CAROUSEL');
-        expect(carouselQuery.length).to.equal(1);
-        const carousel = carouselQuery[0];
-        const imageViewerQuery = carousel
-            .getElementsByTagName('AMP-IMAGE-VIEWER');
-        expect(imageViewerQuery.length).to.equal(1);
-        const imageViewer = imageViewerQuery[0];
-        const img = imageViewer
-            .querySelector('img.i-amphtml-image-viewer-image');
-        expect(img.getAttribute('src')).to.equal('/examples/img/sample.jpg');
-        const closeButton = lightbox
-            .querySelector('.i-amphtml-lbg-button-close.i-amphtml-lbg-button');
-        const lightboxClose = waitForLightboxClose(lightbox, carousel);
-        closeButton.click();
-        return lightboxClose;
-      }).then(() => {
-        expect(lightbox).to.have.display('none');
+      beforeEach(() => {
+        win = env.win;
+        win.AMP_MODE.localDev = true;
+        triggerAnalyticsEventSpy = env.sandbox.spy(
+          analytics,
+          'triggerAnalyticsEvent'
+        );
       });
-    });
 
-    it('should show close button only for one lightboxed item', () => {
-      return openLightbox(win.document).then(() => {
-        const controlsContainerQuery =
-          win.document.getElementsByClassName('i-amphtml-lbg-controls');
-        expect(controlsContainerQuery.length).to.equal(1);
-        const controlsContainer = controlsContainerQuery[0];
-        expect(controlsContainer.classList
-            .contains('i-amphtml-lbg-single')).to.be.true;
-
-        const closeButton = getButton(win.document,
-            'i-amphtml-lbg-button-close');
-        expect(closeButton.getAttribute('aria-label')).to.equal('Close');
-        expect(closeButton).to.have.display('block');
-
-        const galleryButton = getButton(win.document,
-            'i-amphtml-lbg-button-gallery');
-        expect(galleryButton.getAttribute('aria-label')).to.equal('Gallery');
-        expect(galleryButton).to.have.display('none');
-
-        const prevButton = getButton(win.document, 'i-amphtml-lbg-button-prev');
-        expect(prevButton.getAttribute('aria-label')).to.equal('Prev');
-        expect(prevButton).to.have.display('none');
-
-        const nextButton = getButton(win.document, 'i-amphtml-lbg-button-next');
-        expect(nextButton.getAttribute('aria-label')).to.equal('Next');
-        expect(nextButton).to.have.display('none');
+      it('should open and close correctly', () => {
+        const lightbox = win.document.getElementById('amp-lightbox-gallery');
+        return openLightbox(win.document)
+          .then(() => {
+            expect(lightbox).to.not.have.display('none');
+            const carouselQuery = lightbox.getElementsByTagName('AMP-CAROUSEL');
+            expect(carouselQuery.length).to.equal(1);
+            const carousel = carouselQuery[0];
+            const imageViewerQuery = carousel.getElementsByTagName(
+              'AMP-IMAGE-VIEWER'
+            );
+            expect(imageViewerQuery.length).to.equal(1);
+            const imageViewer = imageViewerQuery[0];
+            const img = imageViewer.querySelector(
+              'img.i-amphtml-image-viewer-image'
+            );
+            expect(img.getAttribute('src')).to.equal(
+              '/examples/img/sample.jpg'
+            );
+            const closeButton = lightbox.querySelector(
+              '.i-amphtml-lbg-button-close.i-amphtml-lbg-button'
+            );
+            const lightboxClose = waitForLightboxClose(lightbox, carousel);
+            closeButton.click();
+            return lightboxClose;
+          })
+          .then(() => {
+            expect(lightbox).to.have.display('none');
+          });
       });
-    });
 
-    it('should display text description', () => {
-      openLightbox(win.document).then(() => {
-        const descBoxQuery =
-          win.document.getElementsByClassName('i-amphtml-lbg-desc-box');
-        expect(descBoxQuery.length).to.equal(1);
-        const descBox = descBoxQuery[0];
-        expect(descBox.classList.contains('i-amphtml-lbg-standard')).to.be.true;
-        expect(descBox.children.length).to.equal(2);
-        const descriptionMask = descBox.children[0];
-        expect(descriptionMask.classList.contains('i-amphtml-lbg-desc-mask'))
+      it('should show close button only for one lightboxed item', () => {
+        return openLightbox(win.document).then(() => {
+          const controlsContainerQuery = win.document.getElementsByClassName(
+            'i-amphtml-lbg-controls'
+          );
+          expect(controlsContainerQuery.length).to.equal(1);
+          const controlsContainer = controlsContainerQuery[0];
+          expect(controlsContainer.classList.contains('i-amphtml-lbg-single'))
             .to.be.true;
 
-        const descriptionText = descBox.children[1];
-        expect(descriptionText.classList.contains('i-amphtml-lbg-desc-text'))
+          const closeButton = getButton(
+            win.document,
+            'i-amphtml-lbg-button-close'
+          );
+          expect(closeButton.getAttribute('aria-label')).to.equal('Close');
+          expect(closeButton).to.have.display('block');
+
+          const galleryButton = getButton(
+            win.document,
+            'i-amphtml-lbg-button-gallery'
+          );
+          expect(galleryButton.getAttribute('aria-label')).to.equal('Gallery');
+          expect(galleryButton).to.have.display('none');
+
+          const prevButton = getButton(
+            win.document,
+            'i-amphtml-lbg-button-prev'
+          );
+          expect(prevButton.getAttribute('aria-label')).to.equal('Prev');
+          expect(prevButton).to.have.display('none');
+
+          const nextButton = getButton(
+            win.document,
+            'i-amphtml-lbg-button-next'
+          );
+          expect(nextButton.getAttribute('aria-label')).to.equal('Next');
+          expect(nextButton).to.have.display('none');
+        });
+      });
+
+      it('should display text description', () => {
+        openLightbox(win.document).then(() => {
+          const descBoxQuery = win.document.getElementsByClassName(
+            'i-amphtml-lbg-desc-box'
+          );
+          expect(descBoxQuery.length).to.equal(1);
+          const descBox = descBoxQuery[0];
+          expect(descBox.classList.contains('i-amphtml-lbg-standard')).to.be
+            .true;
+          expect(descBox.children.length).to.equal(2);
+          const descriptionMask = descBox.children[0];
+          expect(descriptionMask.classList.contains('i-amphtml-lbg-desc-mask'))
             .to.be.true;
-        expect(descriptionText.textContent).to.equal('This is a figcaption.');
-      });
-    });
 
-    it('should trigger analytics events for description displayed', () => {
-      openLightbox(win.document).then(() => {
-        expect(triggerAnalyticsEventSpy).to.be.called;
-        expect(triggerAnalyticsEventSpy).to.be.calledWith(
-            win.document.getElementById('amp-lightbox-gallery'),
-            'controlsToggled');
+          const descriptionText = descBox.children[1];
+          expect(descriptionText.classList.contains('i-amphtml-lbg-desc-text'))
+            .to.be.true;
+          expect(descriptionText.textContent).to.equal('This is a figcaption.');
+        });
       });
-    });
 
-    it('should trigger analytics events for thumbnails displayed', () => {
-      openLightbox(win.document).then(() => {
-        const thumbnail =
-          document.getElementsByClassName('i-amphtml-lbg-button-gallery');
-        thumbnail[0].click();
-        const thumbnailQuery =
-          win.document.getElementsByClassName('i-amphtml-lbg-gallery');
-        expect(triggerAnalyticsEventSpy).to.be.called;
-        expect(triggerAnalyticsEventSpy).to.be.calledWith(
+      it('should trigger analytics events for description displayed', () => {
+        openLightbox(win.document).then(() => {
+          expect(triggerAnalyticsEventSpy).to.be.called;
+          expect(triggerAnalyticsEventSpy).to.be.calledWith(
             win.document.getElementById('amp-lightbox-gallery'),
-            'descriptionToggled');
-        expect(thumbnailQuery.length).to.equal(1);
+            'controlsToggled'
+          );
+        });
       });
-    });
-  });
+
+      it('should trigger analytics events for thumbnails displayed', () => {
+        openLightbox(win.document).then(() => {
+          const thumbnail = document.getElementsByClassName(
+            'i-amphtml-lbg-button-gallery'
+          );
+          thumbnail[0].click();
+          const thumbnailQuery = win.document.getElementsByClassName(
+            'i-amphtml-lbg-gallery'
+          );
+          expect(triggerAnalyticsEventSpy).to.be.called;
+          expect(triggerAnalyticsEventSpy).to.be.calledWith(
+            win.document.getElementById('amp-lightbox-gallery'),
+            'descriptionToggled'
+          );
+          expect(thumbnailQuery.length).to.equal(1);
+        });
+      });
+    }
+  );
 
   const multipleImagesBody = `
   <figure>
@@ -169,34 +198,41 @@ describe.configure().skip('amp-lightbox-gallery', function() {
   </figure>
   `;
 
-  describes.integration('amp-lightbox-gallery with multiple images', {
-    multipleImagesBody,
-    extensions,
-  }, env => {
+  describes.integration(
+    'amp-lightbox-gallery with multiple images',
+    {
+      multipleImagesBody,
+      extensions,
+    },
+    env => {
+      let win;
+      let triggerAnalyticsEventSpy;
 
-    let win;
-    let triggerAnalyticsEventSpy;
-
-    beforeEach(() => {
-      win = env.win;
-      win.AMP_MODE.localDev = true;
-      triggerAnalyticsEventSpy =
-        env.sandbox.spy(analytics, 'triggerAnalyticsEvent');
-    });
-
-    it('should trigger analytics events for description toggled', () => {
-      const lightbox = win.document.getElementById('amp-lightbox-gallery');
-      openLightbox(win.document).then(() => {
-        const nextButton = lightbox
-            .querySelector('i-amphtml-lbg-button-next');
-        nextButton.click();
-        expect(triggerAnalyticsEventSpy).to.be.called;
-        expect(triggerAnalyticsEventSpy).to.be.calledWith(
-            win.document.getElementById('amp-lightbox-gallery'),
-            'descriptionToggled');
+      beforeEach(() => {
+        win = env.win;
+        win.AMP_MODE.localDev = true;
+        triggerAnalyticsEventSpy = env.sandbox.spy(
+          analytics,
+          'triggerAnalyticsEvent'
+        );
       });
-    });
-  });
+
+      it('should trigger analytics events for description toggled', () => {
+        const lightbox = win.document.getElementById('amp-lightbox-gallery');
+        openLightbox(win.document).then(() => {
+          const nextButton = lightbox.querySelector(
+            'i-amphtml-lbg-button-next'
+          );
+          nextButton.click();
+          expect(triggerAnalyticsEventSpy).to.be.called;
+          expect(triggerAnalyticsEventSpy).to.be.calledWith(
+            win.document.getElementById('amp-lightbox-gallery'),
+            'descriptionToggled'
+          );
+        });
+      });
+    }
+  );
 });
 
 function openLightbox(document) {

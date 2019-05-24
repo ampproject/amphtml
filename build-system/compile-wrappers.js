@@ -18,17 +18,22 @@ const {VERSION} = require('./internal-version');
 
 // If there is a sync JS error during initial load,
 // at least try to unhide the body.
-exports.mainBinary = 'var global=self;self.AMP=self.AMP||[];' +
-    'try{(function(_){\n<%= contents %>})(AMP._=AMP._||{})}catch(e){' +
-    'setTimeout(function(){' +
-    'var s=document.body.style;' +
-    's.opacity=1;' +
-    's.visibility="visible";' +
-    's.animation="none";' +
-    's.WebkitAnimation="none;"},1000);throw e};';
+exports.mainBinary =
+  'var global=self;self.AMP=self.AMP||[];' +
+  'try{(function(_){\n<%= contents %>})(AMP._=AMP._||{})}catch(e){' +
+  'setTimeout(function(){' +
+  'var s=document.body.style;' +
+  's.opacity=1;' +
+  's.visibility="visible";' +
+  's.animation="none";' +
+  's.WebkitAnimation="none;"},1000);throw e};';
 
-exports.extension = function(name, loadPriority, intermediateDeps,
-  opt_splitMarker) {
+exports.extension = function(
+  name,
+  loadPriority,
+  intermediateDeps,
+  opt_splitMarker
+) {
   opt_splitMarker = opt_splitMarker || '';
   let deps = '';
   if (intermediateDeps) {
@@ -50,9 +55,11 @@ exports.extension = function(name, loadPriority, intermediateDeps,
     }
     priority = 'p:"high",';
   }
-  return `(self.AMP=self.AMP||[]).push({n:"${name}",${priority}${deps}` +
-      `v:"${VERSION}",f:(function(AMP,_){${opt_splitMarker}\n` +
-      '<%= contents %>\n})});';
+  return (
+    `(self.AMP=self.AMP||[]).push({n:"${name}",${priority}${deps}` +
+    `v:"${VERSION}",f:(function(AMP,_){${opt_splitMarker}\n` +
+    '<%= contents %>\n})});'
+  );
 };
 
 exports.none = '<%= contents %>';

@@ -66,8 +66,9 @@ export class MraidInitializer {
     /** @private {boolean} */
     this.fallback_ = true;
 
-    const ampMraidScripts = this.ampdoc_.getHeadNode().querySelectorAll(
-        'script[host-service="amp-mraid"]');
+    const ampMraidScripts = this.ampdoc_
+      .getHeadNode()
+      .querySelectorAll('script[host-service="amp-mraid"]');
     if (ampMraidScripts.length > 1) {
       dev().error(TAG, 'Multiple amp-mraid scripts.');
       return;
@@ -122,26 +123,30 @@ export class MraidInitializer {
 
     if (this.mraid_.addEventListener) {
       HostServices.installVisibilityServiceForDoc(
-          this.ampdoc_, () => mraidService);
+        this.ampdoc_,
+        () => mraidService
+      );
     } else {
-      HostServices.rejectVisibilityServiceForDoc(
-          this.ampdoc_, {fallback: false});
+      HostServices.rejectVisibilityServiceForDoc(this.ampdoc_, {
+        fallback: false,
+      });
     }
 
     if (this.mraid_.expand && this.mraid_.close) {
       HostServices.installFullscreenServiceForDoc(
-          this.ampdoc_, () => mraidService);
+        this.ampdoc_,
+        () => mraidService
+      );
     } else {
-      HostServices.rejectFullscreenServiceForDoc(
-          this.ampdoc_, {fallback: false});
+      HostServices.rejectFullscreenServiceForDoc(this.ampdoc_, {
+        fallback: false,
+      });
     }
 
     if (this.mraid_.open) {
-      HostServices.installExitServiceForDoc(
-          this.ampdoc_, () => mraidService);
+      HostServices.installExitServiceForDoc(this.ampdoc_, () => mraidService);
     } else {
-      HostServices.rejectExitServiceForDoc(
-          this.ampdoc_, {fallback: true}); // always fallback for exit service
+      HostServices.rejectExitServiceForDoc(this.ampdoc_, {fallback: true}); // always fallback for exit service
     }
     this.registeredWithHostServices_ = true;
   }
@@ -169,12 +174,13 @@ export class MraidInitializer {
    * Called when we determine that MRAID isn't available.
    */
   handleMismatch_() {
-    HostServices.rejectVisibilityServiceForDoc(
-        this.ampdoc_, {fallback: this.fallback_});
-    HostServices.rejectExitServiceForDoc(
-        this.ampdoc_, {fallback: true}); // always fallback for exit service
-    HostServices.rejectFullscreenServiceForDoc(
-        this.ampdoc_, {fallback: this.fallback_});
+    HostServices.rejectVisibilityServiceForDoc(this.ampdoc_, {
+      fallback: this.fallback_,
+    });
+    HostServices.rejectExitServiceForDoc(this.ampdoc_, {fallback: true}); // always fallback for exit service
+    HostServices.rejectFullscreenServiceForDoc(this.ampdoc_, {
+      fallback: this.fallback_,
+    });
   }
 }
 

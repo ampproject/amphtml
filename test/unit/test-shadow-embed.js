@@ -39,207 +39,219 @@ describes.sandboxed('shadow-embed', {}, () => {
     setShadowDomSupportedVersionForTesting(undefined);
   });
 
-  [ShadowDomVersion.NONE, ShadowDomVersion.V0, ShadowDomVersion.V1]
-      .forEach(scenario => {
-        describe('shadow APIs', () => {
-          let hostElement;
+  [ShadowDomVersion.NONE, ShadowDomVersion.V0, ShadowDomVersion.V1].forEach(
+    scenario => {
+      describe('shadow APIs', () => {
+        let hostElement;
 
-          beforeEach(function() {
-            hostElement = document.createElement('div');
-            setShadowDomSupportedVersionForTesting(scenario);
-            setShadowCssSupportedForTesting(undefined);
+        beforeEach(function() {
+          hostElement = document.createElement('div');
+          setShadowDomSupportedVersionForTesting(scenario);
+          setShadowCssSupportedForTesting(undefined);
+        });
+
+        describe(scenario, function() {
+          before(function() {
+            if (
+              scenario == ShadowDomVersion.V0 &&
+              !Element.prototype.createShadowRoot
+            ) {
+              this.skipTest();
+            }
+
+            if (
+              scenario == ShadowDomVersion.V1 &&
+              !Element.prototype.attachShadow
+            ) {
+              this.skipTest();
+            }
           });
 
-          describe(scenario, function() {
-            before(function() {
-              if (scenario == ShadowDomVersion.V0 &&
-                  !Element.prototype.createShadowRoot) {
-                this.skipTest();
-              }
+          it('should transform CSS installStylesForDoc for shadow root', () => {
+            const shadowRoot = createShadowRoot(hostElement);
+            const ampdoc = new AmpDocShadow(
+              window,
+              'https://a.org/',
+              shadowRoot
+            );
+            const style = installStylesForDoc(ampdoc, 'body {}', null, true);
+            expect(shadowRoot.contains(style)).to.be.true;
+            const css = style.textContent.replace(/\s/g, '');
+            if (scenario == ShadowDomVersion.NONE) {
+              expect(css).to.match(/amp-body/);
+            } else {
+              expect(css).to.equal('body{}');
+            }
+          });
 
-              if (scenario == ShadowDomVersion.V1 &&
-                  !Element.prototype.attachShadow) {
-                this.skipTest();
-              }
+          describe('createShadowRoot', () => {
+            it('should clear duplicate root', () => {
+              const shadowRoot1 = createShadowRoot(hostElement);
+              const span = document.createElement('span');
+              shadowRoot1.appendChild(span);
+              expect(shadowRoot1.contains(span)).to.be.true;
+
+              const shadowRoot2 = createShadowRoot(hostElement);
+              expect(shadowRoot2).to.equal(shadowRoot1);
+              expect(shadowRoot2.contains(span)).to.be.false;
             });
 
-            it('should transform CSS installStylesForDoc ' +
-                'for shadow root', () => {
+            it('should have host', () => {
+              const shadowRoot = createShadowRoot(hostElement);
+              expect(shadowRoot.host).to.equal(hostElement);
+            });
+
+            it('should have getElementById', () => {
+              const shadowRoot = createShadowRoot(hostElement);
+              expect(shadowRoot.getElementById).to.be.ok;
+
+              const spanId = 'test' + Math.floor(Math.random() * 10000);
+              const span = document.createElement('span');
+              span.id = spanId;
+              shadowRoot.appendChild(span);
+              expect(shadowRoot.getElementById(spanId)).to.equal(span);
+            });
+
+            if (scenario == ShadowDomVersion.NONE) {
+              it('should add id for polyfill', () => {
+                const shadowRoot = createShadowRoot(hostElement);
+                expect(shadowRoot.tagName).to.equal('I-AMPHTML-SHADOW-ROOT');
+                expect(shadowRoot.id).to.match(/i-amphtml-sd-\d+/);
+              });
+
+              it('should add host style for polyfill', () => {
+                const doc = hostElement.ownerDocument;
+                doc.body.appendChild(hostElement);
+                const slot = doc.createElement('div');
+                hostElement.appendChild(slot);
+                expect(slot).to.have.display('block');
+                const shadowRoot = createShadowRoot(hostElement);
+                expect(hostElement).to.have.class(
+                  'i-amphtml-shadow-host-polyfill'
+                );
+                expect(slot).to.have.display('none');
+                expect(shadowRoot).to.not.have.display('none');
+                doc.body.removeChild(hostElement);
+              });
+            }
+
+            // Test scenarios where Shadow Css is not supported
+            it('Should add an id and class for CSS \
+                encapsulation to the shadow root', () => {
+              setShadowCssSupportedForTesting(false);
+              const shadowRoot = createShadowRoot(hostElement);
+              expect(shadowRoot.id).to.match(/i-amphtml-sd-\d+/);
+              // Browserify does not support arrow functions with params.
+              // Using Old School for
+              const shadowRootClassListArray = toArray(
+                shadowRoot.host.classList
+              );
+              let foundShadowCssClass = false;
+              for (let i = 0; i < shadowRootClassListArray.length; i++) {
+                if (shadowRootClassListArray[i].match(/i-amphtml-sd-\d+/)) {
+                  foundShadowCssClass = true;
+                  break;
+                }
+              }
+              expect(foundShadowCssClass).to.be.ok;
+            });
+
+            it('Should transform CSS for the shadow root', () => {
+              setShadowCssSupportedForTesting(false);
               const shadowRoot = createShadowRoot(hostElement);
               const ampdoc = new AmpDocShadow(
-                  window, 'https://a.org/', shadowRoot);
+                window,
+                'https://a.org/',
+                shadowRoot
+              );
               const style = installStylesForDoc(ampdoc, 'body {}', null, true);
               expect(shadowRoot.contains(style)).to.be.true;
               const css = style.textContent.replace(/\s/g, '');
+              expect(css).to.match(/amp-body/);
+            });
+          });
+
+          describe('stylesheets', () => {
+            let parentStylesheet;
+
+            beforeEach(() => {
+              parentStylesheet = document.createElement('style');
+              parentStylesheet.textContent = '.x {background: red}';
+              document.body.appendChild(parentStylesheet);
+              document.body.appendChild(hostElement);
+            });
+
+            afterEach(() => {
+              document.body.removeChild(parentStylesheet);
+              document.body.removeChild(hostElement);
+            });
+
+            it('should have shadow stylesheets and not global', () => {
+              const shadowRoot = createShadowRoot(hostElement);
+              const shadowStyle = document.createElement('style');
+              shadowStyle.textContent = '.x {background: green}';
+              shadowRoot.appendChild(shadowStyle);
+
+              const {styleSheets} = shadowRoot;
+              expect(styleSheets).to.exist;
+              expect(styleSheets).to.have.length(1);
+              expect(styleSheets[0].ownerNode).to.equal(shadowStyle);
+            });
+          });
+
+          // TODO(aghassemi, #12499): Make this work with latest mocha / karma
+          describe.skip('importShadowBody', () => {
+            let shadowRoot, source, child1, child2;
+
+            beforeEach(() => {
+              shadowRoot = createShadowRoot(hostElement);
+              source = document.createElement('body');
+              child1 = document.createElement('div');
+              child1.id = 'child1';
+              child2 = document.createElement('div');
+              child2.id = 'child2';
+              source.appendChild(child1);
+              source.appendChild(child2);
+            });
+
+            it('should import body with all children', () => {
+              expect(shadowRoot.body).to.be.undefined;
+              const body = importShadowBody(shadowRoot, source, true);
+              expect(shadowRoot.body).to.equal(body);
+              expect(body.tagName).to.equal(
+                scenario == ShadowDomVersion.NONE ? 'AMP-BODY' : 'BODY'
+              );
+              expect(body.style.position).to.equal('relative');
               if (scenario == ShadowDomVersion.NONE) {
-                expect(css).to.match(/amp-body/);
-              } else {
-                expect(css).to.equal('body{}');
+                expect(body.style.display).to.equal('block');
               }
+              expect(shadowRoot.contains(body)).to.be.true;
+              expect(body.children).to.have.length(2);
+              expect(body.children[0].id).to.equal('child1');
+              expect(body.children[1].id).to.equal('child2');
             });
 
-            describe('createShadowRoot', () => {
-              it('should clear duplicate root', () => {
-                const shadowRoot1 = createShadowRoot(hostElement);
-                const span = document.createElement('span');
-                shadowRoot1.appendChild(span);
-                expect(shadowRoot1.contains(span)).to.be.true;
-
-                const shadowRoot2 = createShadowRoot(hostElement);
-                expect(shadowRoot2).to.equal(shadowRoot1);
-                expect(shadowRoot2.contains(span)).to.be.false;
-              });
-
-              it('should have host', () => {
-                const shadowRoot = createShadowRoot(hostElement);
-                expect(shadowRoot.host).to.equal(hostElement);
-              });
-
-              it('should have getElementById', () => {
-                const shadowRoot = createShadowRoot(hostElement);
-                expect(shadowRoot.getElementById).to.be.ok;
-
-                const spanId = 'test' + Math.floor(Math.random() * 10000);
-                const span = document.createElement('span');
-                span.id = spanId;
-                shadowRoot.appendChild(span);
-                expect(shadowRoot.getElementById(spanId)).to.equal(span);
-              });
-
+            it('should import shallow body', () => {
+              expect(shadowRoot.body).to.be.undefined;
+              const body = importShadowBody(shadowRoot, source, false);
+              expect(shadowRoot.body).to.equal(body);
+              expect(body.tagName).to.equal(
+                scenario == ShadowDomVersion.NONE ? 'AMP-BODY' : 'BODY'
+              );
+              expect(body.style.position).to.equal('relative');
               if (scenario == ShadowDomVersion.NONE) {
-                it('should add id for polyfill', () => {
-                  const shadowRoot = createShadowRoot(hostElement);
-                  expect(shadowRoot.tagName).to.equal('I-AMPHTML-SHADOW-ROOT');
-                  expect(shadowRoot.id).to.match(/i-amphtml-sd-\d+/);
-                });
-
-                it('should add host style for polyfill', () => {
-                  const doc = hostElement.ownerDocument;
-                  doc.body.appendChild(hostElement);
-                  const slot = doc.createElement('div');
-                  hostElement.appendChild(slot);
-                  expect(slot).to.have.display('block');
-                  const shadowRoot = createShadowRoot(hostElement);
-                  expect(hostElement).to.have.class(
-                      'i-amphtml-shadow-host-polyfill');
-                  expect(slot).to.have.display('none');
-                  expect(shadowRoot).to.not.have.display('none');
-                  doc.body.removeChild(hostElement);
-                });
+                expect(body.style.display).to.equal('block');
               }
-
-              // Test scenarios where Shadow Css is not supported
-              it('Should add an id and class for CSS \
-                encapsulation to the shadow root', () => {
-                setShadowCssSupportedForTesting(false);
-                const shadowRoot = createShadowRoot(hostElement);
-                expect(shadowRoot.id).to.match(/i-amphtml-sd-\d+/);
-                // Browserify does not support arrow functions with params.
-                // Using Old School for
-                const shadowRootClassListArray =
-                  toArray(shadowRoot.host.classList);
-                let foundShadowCssClass = false;
-                for (let i = 0; i < shadowRootClassListArray.length; i++) {
-                  if (shadowRootClassListArray[i].match(/i-amphtml-sd-\d+/)) {
-                    foundShadowCssClass = true;
-                    break;
-                  }
-                }
-                expect(foundShadowCssClass).to.be.ok;
-              });
-
-              it('Should transform CSS for the shadow root', () => {
-                setShadowCssSupportedForTesting(false);
-                const shadowRoot = createShadowRoot(hostElement);
-                const ampdoc = new AmpDocShadow(
-                    window, 'https://a.org/', shadowRoot);
-                const style =
-                    installStylesForDoc(ampdoc, 'body {}', null, true);
-                expect(shadowRoot.contains(style)).to.be.true;
-                const css = style.textContent.replace(/\s/g, '');
-                expect(css).to.match(/amp-body/);
-              });
-            });
-
-            describe('stylesheets', () => {
-              let parentStylesheet;
-
-              beforeEach(() => {
-                parentStylesheet = document.createElement('style');
-                parentStylesheet.textContent = '.x {background: red}';
-                document.body.appendChild(parentStylesheet);
-                document.body.appendChild(hostElement);
-              });
-
-              afterEach(() => {
-                document.body.removeChild(parentStylesheet);
-                document.body.removeChild(hostElement);
-              });
-
-              it('should have shadow stylesheets and not global', () => {
-                const shadowRoot = createShadowRoot(hostElement);
-                const shadowStyle = document.createElement('style');
-                shadowStyle.textContent = '.x {background: green}';
-                shadowRoot.appendChild(shadowStyle);
-
-                const {styleSheets} = shadowRoot;
-                expect(styleSheets).to.exist;
-                expect(styleSheets).to.have.length(1);
-                expect(styleSheets[0].ownerNode).to.equal(shadowStyle);
-              });
-            });
-
-            // TODO(aghassemi, #12499): Make this work with latest mocha / karma
-            describe.skip('importShadowBody', () => {
-              let shadowRoot, source, child1, child2;
-
-              beforeEach(() => {
-                shadowRoot = createShadowRoot(hostElement);
-                source = document.createElement('body');
-                child1 = document.createElement('div');
-                child1.id = 'child1';
-                child2 = document.createElement('div');
-                child2.id = 'child2';
-                source.appendChild(child1);
-                source.appendChild(child2);
-              });
-
-              it('should import body with all children', () => {
-                expect(shadowRoot.body).to.be.undefined;
-                const body = importShadowBody(shadowRoot, source, true);
-                expect(shadowRoot.body).to.equal(body);
-                expect(body.tagName).to.equal(
-                    scenario == ShadowDomVersion.NONE ? 'AMP-BODY' : 'BODY');
-                expect(body.style.position).to.equal('relative');
-                if (scenario == ShadowDomVersion.NONE) {
-                  expect(body.style.display).to.equal('block');
-                }
-                expect(shadowRoot.contains(body)).to.be.true;
-                expect(body.children).to.have.length(2);
-                expect(body.children[0].id).to.equal('child1');
-                expect(body.children[1].id).to.equal('child2');
-              });
-
-              it('should import shallow body', () => {
-                expect(shadowRoot.body).to.be.undefined;
-                const body = importShadowBody(shadowRoot, source, false);
-                expect(shadowRoot.body).to.equal(body);
-                expect(body.tagName).to.equal(
-                    scenario == ShadowDomVersion.NONE ? 'AMP-BODY' : 'BODY');
-                expect(body.style.position).to.equal('relative');
-                if (scenario == ShadowDomVersion.NONE) {
-                  expect(body.style.display).to.equal('block');
-                }
-                expect(shadowRoot.contains(body)).to.be.true;
-                expect(body.children).to.have.length(0);
-              });
+              expect(shadowRoot.contains(body)).to.be.true;
+              expect(body.children).to.have.length(0);
             });
           });
         });
       });
+    }
+  );
 
   describe('isShadowRoot', () => {
-
     it('should yield false for non-nodes', () => {
       expect(isShadowRoot(null)).to.be.false;
       expect(isShadowRoot(undefined)).to.be.false;
@@ -274,8 +286,8 @@ describes.sandboxed('shadow-embed', {}, () => {
     });
 
     it('should yield true for polyfill', () => {
-      expect(isShadowRoot(document.createElement(
-          'i-amphtml-shadow-root'))).to.be.true;
+      expect(isShadowRoot(document.createElement('i-amphtml-shadow-root'))).to
+        .be.true;
     });
   });
 
@@ -318,8 +330,7 @@ describes.sandboxed('shadow-embed', {}, () => {
     it('should replace root selectors', () => {
       expect(scope('html {}')).to.equal('.h amp-html {}');
       expect(scope('body {}')).to.equal('.h amp-body {}');
-      expect(scope('html {} body {}')).to.equal(
-          '.h amp-html {}.h amp-body {}');
+      expect(scope('html {} body {}')).to.equal('.h amp-html {}.h amp-body {}');
       expect(scope('html, body {}')).to.equal('.h amp-html, .h amp-body {}');
       expect(scope('body.x {}')).to.equal('.h amp-body.x {}');
       expect(scope('body::after {}')).to.equal('.h amp-body::after {}');
@@ -369,155 +380,159 @@ describes.sandboxed('shadow-embed', {}, () => {
     });
 
     it('should resolve to streamer', () => {
-      expect(createShadowDomWriter(win))
-          .to.be.instanceOf(ShadowDomWriterStreamer);
+      expect(createShadowDomWriter(win)).to.be.instanceOf(
+        ShadowDomWriterStreamer
+      );
       expect(createHTMLDocumentSpy).to.be.calledOnce;
       expect(createHTMLDocumentSpy).to.be.calledWith('');
     });
 
     it('should resolve to bulk without API', () => {
       delete win.document.implementation.createHTMLDocument;
-      expect(createShadowDomWriter(win))
-          .to.be.instanceOf(ShadowDomWriterBulk);
+      expect(createShadowDomWriter(win)).to.be.instanceOf(ShadowDomWriterBulk);
       delete win.document.implementation;
-      expect(createShadowDomWriter(win))
-          .to.be.instanceOf(ShadowDomWriterBulk);
+      expect(createShadowDomWriter(win)).to.be.instanceOf(ShadowDomWriterBulk);
       expect(createHTMLDocumentSpy).to.not.be.called;
     });
 
     it('should resolve to bulk on firefox', () => {
       isFirefox = true;
-      expect(createShadowDomWriter(win))
-          .to.be.instanceOf(ShadowDomWriterBulk);
+      expect(createShadowDomWriter(win)).to.be.instanceOf(ShadowDomWriterBulk);
       expect(createHTMLDocumentSpy).to.not.be.called;
     });
   });
 
   describes.fakeWin('ShadowDomWriterStreamer', {amp: true}, env => {
-    let win;
-    let writer;
-    let onBodySpy, onBodyChunkSpy;
-    let onBodyPromise, onBodyChunkPromiseResolver, onEndPromise;
+    describe
+      .configure()
+      .skipFirefox()
+      .run('ShadowDomWriterStreamer', () => {
+        let win;
+        let writer;
+        let onBodySpy, onBodyChunkSpy;
+        let onBodyPromise, onBodyChunkPromiseResolver, onEndPromise;
 
-    beforeEach(() => {
-      win = env.win;
-      writer = new ShadowDomWriterStreamer(win);
-      onBodySpy = sandbox.spy();
-      onBodyChunkSpy = sandbox.spy();
-      onBodyPromise = new Promise(resolve => {
-        writer.onBody(parsedDoc => {
-          resolve(parsedDoc.body);
-          onBodySpy();
-          return win.document.body;
+        beforeEach(() => {
+          win = env.win;
+          writer = new ShadowDomWriterStreamer(win);
+          onBodySpy = sandbox.spy();
+          onBodyChunkSpy = sandbox.spy();
+          onBodyPromise = new Promise(resolve => {
+            writer.onBody(parsedDoc => {
+              resolve(parsedDoc.body);
+              onBodySpy();
+              return win.document.body;
+            });
+          });
+          writer.onBodyChunk(() => {
+            if (onBodyChunkPromiseResolver) {
+              onBodyChunkPromiseResolver();
+              onBodyChunkPromiseResolver = null;
+            }
+            onBodyChunkSpy();
+          });
+          onEndPromise = new Promise(resolve => {
+            writer.onEnd(resolve);
+          });
         });
-      });
-      writer.onBodyChunk(() => {
-        if (onBodyChunkPromiseResolver) {
-          onBodyChunkPromiseResolver();
-          onBodyChunkPromiseResolver = null;
+
+        function waitForNextBodyChunk() {
+          return new Promise(resolve => {
+            onBodyChunkPromiseResolver = resolve;
+          });
         }
-        onBodyChunkSpy();
-      });
-      onEndPromise = new Promise(resolve => {
-        writer.onEnd(resolve);
-      });
-    });
 
-    function waitForNextBodyChunk() {
-      return new Promise(resolve => {
-        onBodyChunkPromiseResolver = resolve;
-      });
-    }
-
-    it('should complete when writer has been closed', () => {
-      writer.close();
-      return onEndPromise.then(() => {
-        expect(onBodySpy).to.be.calledOnce;
-        env.flushVsync();
-        expect(onBodyChunkSpy).to.not.be.called;
-      });
-    });
-
-    it('should resolve body as soon as available', () => {
-      writer.write('<body class="b">');
-      expect(onBodySpy).to.not.be.called;
-      return onBodyPromise.then(body => {
-        expect(body.getAttribute('class')).to.equal('b');
-        expect(onBodySpy).to.be.calledOnce;
-      });
-    });
-
-    it('should schedule body chunk', () => {
-      writer.write('<body>');
-      return onBodyPromise.then(() => {
-        expect(onBodySpy).to.be.calledOnce;
-        writer.write('<child>');
-        expect(onBodyChunkSpy).to.not.be.called;
-        return waitForNextBodyChunk().then(() => {
-          env.flushVsync();
-          expect(onBodySpy).to.be.calledOnce;
-          expect(onBodyChunkSpy).to.be.calledOnce;
-          expect(win.document.body.querySelector('child')).to.exist;
-
-          writer.write('</child><child2>');
-          return waitForNextBodyChunk().then(() => {
+        it('should complete when writer has been closed', () => {
+          writer.close();
+          return onEndPromise.then(() => {
+            expect(onBodySpy).to.be.calledOnce;
             env.flushVsync();
-            expect(win.document.body.querySelector('child2')).to.exist;
+            expect(onBodyChunkSpy).to.not.be.called;
+          });
+        });
+
+        it('should resolve body as soon as available', () => {
+          writer.write('<body class="b">');
+          expect(onBodySpy).to.not.be.called;
+          return onBodyPromise.then(body => {
+            expect(body.getAttribute('class')).to.equal('b');
+            expect(onBodySpy).to.be.calledOnce;
+          });
+        });
+
+        it('should schedule body chunk', () => {
+          writer.write('<body>');
+          return onBodyPromise.then(() => {
+            expect(onBodySpy).to.be.calledOnce;
+            writer.write('<child>');
+            expect(onBodyChunkSpy).to.not.be.called;
+            return waitForNextBodyChunk().then(() => {
+              env.flushVsync();
+              expect(onBodySpy).to.be.calledOnce;
+              expect(onBodyChunkSpy).to.be.calledOnce;
+              expect(win.document.body.querySelector('child')).to.exist;
+
+              writer.write('</child><child2>');
+              return waitForNextBodyChunk().then(() => {
+                env.flushVsync();
+                expect(win.document.body.querySelector('child2')).to.exist;
+              });
+            });
+          });
+        });
+
+        it('should schedule several body chunks together', () => {
+          writer.write('<body>');
+          return onBodyPromise.then(() => {
+            expect(onBodySpy).to.be.calledOnce;
+            writer.write('<child></child>');
+            expect(onBodyChunkSpy).to.not.be.called;
+            const promise = waitForNextBodyChunk();
+            writer.write('<child2></child2>');
+            return promise.then(() => {
+              expect(onBodyChunkSpy).to.be.calledOnce;
+              expect(win.document.body.querySelector('child')).to.exist;
+              expect(win.document.body.querySelector('child2')).to.exist;
+            });
+          });
+        });
+
+        it('should not parse noscript as markup', () => {
+          writer.write(
+            '<body><child1></child1><noscript><child2></child2></noscript>'
+          );
+          return waitForNextBodyChunk().then(() => {
+            expect(win.document.body.querySelector('child1')).to.exist;
+            expect(win.document.body.querySelector('child2')).not.to.exist;
+            writer.write('<noscript><child3></child3></noscript>');
+            writer.write('<child4></child4>');
+            writer.close();
+            env.flushVsync();
+
+            return onEndPromise.then(() => {
+              expect(win.document.body.querySelector('child3')).not.to.exist;
+              expect(win.document.body.querySelector('child4')).to.exist;
+            });
+          });
+        });
+
+        it('should not parse noscript as markup across writes', () => {
+          writer.write('<body><child1></child1><noscript><child2>');
+          return waitForNextBodyChunk().then(() => {
+            expect(win.document.body.querySelector('child1')).to.exist;
+            writer.write('</child2></noscript>');
+            writer.write('<child3></child3>');
+            writer.close();
+            env.flushVsync();
+
+            return onEndPromise.then(() => {
+              expect(win.document.body.querySelector('child1')).to.exist;
+              expect(win.document.body.querySelector('child2')).not.to.exist;
+              expect(win.document.body.querySelector('child3')).to.exist;
+            });
           });
         });
       });
-    });
-
-    it('should schedule several body chunks together', () => {
-      writer.write('<body>');
-      return onBodyPromise.then(() => {
-        expect(onBodySpy).to.be.calledOnce;
-        writer.write('<child></child>');
-        expect(onBodyChunkSpy).to.not.be.called;
-        const promise = waitForNextBodyChunk();
-        writer.write('<child2></child2>');
-        return promise.then(() => {
-          expect(onBodyChunkSpy).to.be.calledOnce;
-          expect(win.document.body.querySelector('child')).to.exist;
-          expect(win.document.body.querySelector('child2')).to.exist;
-        });
-      });
-    });
-
-    it('should not parse noscript as markup', () => {
-      writer.write('<body><child1></child1><noscript><child2></child2>' +
-          '</noscript>');
-      return waitForNextBodyChunk().then(() => {
-        expect(win.document.body.querySelector('child1')).to.exist;
-        expect(win.document.body.querySelector('child2')).not.to.exist;
-        writer.write('<noscript><child3></child3></noscript>');
-        writer.write('<child4></child4>');
-        writer.close();
-        env.flushVsync();
-
-        return onEndPromise.then(() => {
-          expect(win.document.body.querySelector('child3')).not.to.exist;
-          expect(win.document.body.querySelector('child4')).to.exist;
-        });
-      });
-    });
-
-    it('should not parse noscript as markup across writes', () => {
-      writer.write('<body><child1></child1><noscript><child2>');
-      return waitForNextBodyChunk().then(() => {
-        expect(win.document.body.querySelector('child1')).to.exist;
-        writer.write('</child2></noscript>');
-        writer.write('<child3></child3>');
-        writer.close();
-        env.flushVsync();
-
-        return onEndPromise.then(() => {
-          expect(win.document.body.querySelector('child1')).to.exist;
-          expect(win.document.body.querySelector('child2')).not.to.exist;
-          expect(win.document.body.querySelector('child3')).to.exist;
-        });
-      });
-    });
   });
 
   describes.fakeWin('ShadowDomWriterBulk', {amp: true}, env => {

@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-
+import {base64DecodeToBytes} from '../../../src/utils/base64';
 import {iterateCursor} from '../../../src/dom';
 import {tryParseJson} from '../../../src/json';
-
+import {utf8Decode} from '../../../src/utils/bytes';
 
 export class CryptoHandler {
-
   /**
    * Creates an instance of CryptoHandler.
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
@@ -32,11 +31,13 @@ export class CryptoHandler {
     /** @private {?Promise} */
     this.decryptionPromise_ = null;
 
-    const parsedEncryptedKeys =
-        this.ampdoc_.getRootNode().querySelector('script[cryptokeys]');
+    const parsedEncryptedKeys = this.ampdoc_
+      .getRootNode()
+      .querySelector('script[cryptokeys]');
     /** @type {?JsonObject} */
-    this.encryptedKeys_ = (parsedEncryptedKeys &&
-      tryParseJson(parsedEncryptedKeys.textContent)) || null;
+    this.encryptedKeys_ =
+      (parsedEncryptedKeys && tryParseJson(parsedEncryptedKeys.textContent)) ||
+      null;
   }
 
   /**
@@ -70,15 +71,19 @@ export class CryptoHandler {
       return this.decryptionPromise_;
     }
     this.decryptionPromise_ = this.ampdoc_.whenReady().then(() => {
-      const encryptedSections =
-          this.ampdoc_.getRootNode().querySelectorAll('script[encrypted]');
+      const encryptedSections = this.ampdoc_
+        .getRootNode()
+        .querySelectorAll('script[encrypted]');
       const promises = [];
       iterateCursor(encryptedSections, encryptedSection => {
         promises.push(
-            this.decryptDocumentContent_(encryptedSection.textContent,
-                decryptedDocumentKey).then(decryptedContent => {
-              encryptedSection./*OK*/outerHTML = decryptedContent;
-            }));
+          this.decryptDocumentContent_(
+            encryptedSection.textContent,
+            decryptedDocumentKey
+          ).then(decryptedContent => {
+            encryptedSection./*OK*/ outerHTML = decryptedContent;
+          })
+        );
       });
       return Promise.all(promises);
     });
@@ -88,15 +93,51 @@ export class CryptoHandler {
   /**
    * @private
    * @param {string} encryptedContent
-   * @param {string} documentKey
+   * @param {string} decryptedDocumentKey
    * @return {Promise<string>}
    */
-  decryptDocumentContent_(
-    // eslint-disable-next-line no-unused-vars
-    encryptedContent, documentKey) {
-    // Don't really return this. Placeholder for the real thing.
-    // const placeholder = encryptedContent.trim() + documentKey;
-    const placeholder = '<h2><i> abc </i></h2>';
-    return Promise.resolve(placeholder);
+  decryptDocumentContent_(encryptedContent, decryptedDocumentKey) {
+    // 1. Trim and remove all whitespaces (e.g. line breaks).
+    encryptedContent = encryptedContent.replace(/\s+/g, '');
+
+    // 2. Un-base64 the encrypted content. This way we get the actual encrypted
+    //    bytes.
+    const encryptedBytes = base64DecodeToBytes(encryptedContent);
+
+    // 3. Get document Key in the correct format.
+    return this.stringToCryptoKey_(decryptedDocumentKey).then(function(
+      formattedDocKey
+    ) {
+      // 4. Decrypt.
+      return crypto.subtle
+        .decrypt(
+          {
+            name: 'AES-CTR',
+            counter: new Uint8Array(16), // iv: all zeros.
+            length: 128, // block size (16): 1-128
+          },
+          formattedDocKey,
+          encryptedBytes
+        )
+        .then(function(buffer) {
+          // 5. Decryption gives us raw bytes and we need to turn them into text.
+          return utf8Decode(new Uint8Array(buffer));
+        });
+    });
+  }
+
+  /**
+   * @private
+   * @param {string} decryptedDocumentKey
+   * @return {!Promise<!webCrypto.CryptoKey>}
+   */
+  stringToCryptoKey_(decryptedDocumentKey) {
+    // 1. Un-base64 the encrypted content. This way we get the key bytes.
+    const documentKeyBytes = base64DecodeToBytes(decryptedDocumentKey);
+
+    // 2. Convert bytes to CryptoKey format.
+    return crypto.subtle.importKey('raw', documentKeyBytes, 'AES-CTR', true, [
+      'decrypt',
+    ]);
   }
 }
