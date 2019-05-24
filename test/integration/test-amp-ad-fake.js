@@ -35,7 +35,7 @@ describe('A4A', function() {
     },
     () => {
       // TODO(@zombifer, #21545): Unskip flaky test
-      it.skip('should layout amp-img, amp-pixel, amp-analytics', () => {
+      it('should layout amp-img, amp-pixel, amp-analytics', () => {
         // See amp4test.js for creative content
         return Promise.all([
           RequestBank.withdraw('image'),
