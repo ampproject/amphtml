@@ -25,7 +25,7 @@ const Mocha = require('mocha');
 const tryConnect = require('try-net-connect');
 const {cyan} = require('ansi-colors');
 const {execOrDie, execScriptAsync} = require('../../exec');
-const {reportTestStarted} = require('../runtime-test/status-report');
+const {reportTestStarted} = require('../report-test-status');
 const {watch} = require('gulp');
 
 const HOST = 'localhost';

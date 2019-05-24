@@ -17,7 +17,7 @@
 
 const {Base} = require('mocha').reporters;
 const {inherits} = require('mocha').utils;
-const {reportTestFinished} = require('./runtime-test/status-report');
+const {reportTestFinished} = require('./report-test-status');
 const {symbols} = require('./karma.conf').mochaReporter;
 
 /**
