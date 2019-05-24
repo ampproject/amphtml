@@ -48,7 +48,6 @@ import {disposeServicesForDoc} from './service';
 import {getMode} from './mode';
 import {hasRenderDelayingServices} from './render-delaying-services';
 import {install as installAmpdocServices} from './service/standard-ampdoc-services';
-import {installActionServiceForDoc} from './service/action-impl';
 import {installBatchedXhrService} from './service/batched-xhr-impl';
 import {
   installBuiltinElements,
@@ -59,18 +58,14 @@ import {installCidService} from './service/cid-impl';
 import {installCryptoService} from './service/crypto-impl';
 import {installDocumentInfoServiceForDoc} from './service/document-info-impl';
 import {installDocumentStateService} from './service/document-state';
-import {installGlobalNavigationHandlerForDoc} from './service/navigation';
 import {installGlobalSubmitListenerForDoc} from './document-submit';
-import {installHiddenObserverForDoc} from './service/hidden-observer-impl';
 import {installHistoryServiceForDoc} from './service/history-impl';
 import {installInputService} from './input';
 import {installPlatformService} from './service/platform-impl';
 import {installResourcesServiceForDoc} from './service/resources-impl';
-import {installStandardActionsForDoc} from './service/standard-actions-impl';
 import {installStorageServiceForDoc} from './service/storage-impl';
 import {installStylesForDoc} from './style-installer';
 import {installTimerService} from './service/timer-impl';
-import {installUrlForDoc} from './service/url-impl';
 import {installUrlReplacementsServiceForDoc} from './service/url-replacements-impl';
 import {
   installViewerServiceForDoc,

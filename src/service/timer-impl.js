@@ -22,8 +22,6 @@ const TAG = 'timer';
 
 /**
  * Helper with all things Timer.
- *
- * @implements {../service.EmbeddableService}
  */
 export class Timer {
   /**

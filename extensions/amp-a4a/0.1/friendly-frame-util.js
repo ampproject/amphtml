@@ -79,12 +79,11 @@ export function renderCreativeIntoFriendlyFrame(
       extensionIds: creativeMetadata.customElementExtensions || [],
       fonts: fontsArray,
     },
-    ampdoc => {
-      // TODO(dvoytenko): use service overrides for ampdoc instead.
+    embedWin => {
       installUrlReplacementsForEmbed(
         element.getAmpDoc(),
-        ampdoc.win,
-        new A4AVariableSource(element.getAmpDoc(), ampdoc.win)
+        embedWin,
+        new A4AVariableSource(element.getAmpDoc(), embedWin)
       );
     }
   ).then(friendlyIframeEmbed => {

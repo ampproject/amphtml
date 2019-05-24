@@ -39,17 +39,12 @@ import {install as installAmpdocServices} from './standard-ampdoc-services';
 import {install as installCustomElements} from '../polyfills/custom-elements';
 import {install as installDOMTokenListToggle} from '../polyfills/domtokenlist-toggle';
 import {install as installDocContains} from '../polyfills/document-contains';
-import {installActionServiceForDoc} from './action-impl';
 import {installImg} from '../../builtins/amp-img';
 import {installLayout} from '../../builtins/amp-layout';
 import {installPixel} from '../../builtins/amp-pixel';
 import {installCustomElements as installRegisterElement} from 'document-register-element/build/document-register-element.patched';
-import {installGlobalNavigationHandlerForDoc} from './navigation';
-import {installHiddenObserverForDoc} from './hidden-observer-impl'
-import {installStandardActionsForDoc} from './standard-actions-impl';
 import {installStylesForDoc} from '../style-installer';
 import {installTimerInEmbedWindow} from './timer-impl';
-import {installUrlForDoc} from './url-impl';
 import {isExperimentOn} from '../experiments';
 import {map} from '../utils/object';
 import {startsWith} from '../string';
