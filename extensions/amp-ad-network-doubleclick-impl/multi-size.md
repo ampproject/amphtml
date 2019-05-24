@@ -72,7 +72,7 @@ Example - Valid multi-size request (ignores minimum size constraint)
     type="doubleclick"
     layout="fixed"
     data-slot="/6355419/Travel"
-    data-multi-size="700x90,700x60,300x25">
+    data-multi-size="700x90,700x60,300x25"
     data-multi-size-validation="false">
 </amp-ad>
 ```
