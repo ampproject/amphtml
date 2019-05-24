@@ -45,9 +45,9 @@ const formatExtractedMessages = () =>
     .then(items =>
       Promise.all(
         Object.entries(messagesByIdFormats).map(([path, format]) => {
-          const byId = {};
-          items.forEach(item => (byId[item.id] = format(item)));
-          return fs.outputJson(path, byId);
+          const formatted = {};
+          items.forEach(item => (formatted[item.id] = format(item)));
+          return fs.outputJson(path, formatted);
         })
       )
     );
