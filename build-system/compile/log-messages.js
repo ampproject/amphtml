@@ -18,8 +18,8 @@ const fs = require('fs-extra');
 const pathPrefix = 'dist/log-messages';
 
 /**
- * Source of truth for extracted for extracted messages during build, but should
- * not be deployed. Shaped `{message: {id, message, ...}}`.
+ * Source of truth for extracted messages during build, but should not be
+ * deployed. Shaped `{message: {id, message, ...}}`.
  */
 const extractedPath = `${pathPrefix}.by-message.json`;
 
