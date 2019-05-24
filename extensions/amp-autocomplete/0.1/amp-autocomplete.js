@@ -263,20 +263,16 @@ export class AmpAutocomplete extends AMP.BaseElement {
   getRemoteData_() {
     const ampdoc = this.getAmpDoc();
     const policy = UrlReplacementPolicy.ALL;
-    return batchFetchJsonFor(ampdoc, this.element, 'items', policy)
-      .catch(e => {
-        if (e.message === 'Response is undefined.') {
-          user().warn(
-            TAG,
-            'Expected key "items" in data but found nothing. ' +
-              'Rendering empty results.'
-          );
-          return [];
-        }
-      })
-      .then(items => {
-        return items;
-      });
+    return batchFetchJsonFor(ampdoc, this.element, 'items', policy).catch(e => {
+      if (e.message === 'Response is undefined.') {
+        user().warn(
+          TAG,
+          'Expected key "items" in data but found nothing. ' +
+            'Rendering empty results.'
+        );
+        return [];
+      }
+    });
   }
 
   /**
@@ -920,9 +916,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
     if (fallback) {
       this.fallbackDisplayed_ = true;
       this.toggleFallback(true);
-      user().warn(TAG, 'Triggered fallback due to error:', error);
     } else {
-      user().warn(TAG, 'No fallback found. Triggered due to error:', error);
+      throw error;
     }
   }
 
