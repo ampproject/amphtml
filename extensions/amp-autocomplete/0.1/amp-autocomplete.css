@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-/* NOTE: styles that affect sizing are in amp.css to avoid FOUC */
+/* NOTE: styles that affect sizing are in ampdoc.css to avoid FOUC */
 amp-autocomplete,
 amp-autocomplete > input {
   font-family: sans-serif; /* default-ui-font-stack */

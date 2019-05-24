@@ -27,7 +27,8 @@ import {
   installBuiltins,
   installRuntimeServices,
 } from '../runtime';
-import {cssText} from '../../build/css';
+import {cssText as ampDocCss} from '../../build/ampdoc.css';
+import {cssText as ampElementCss} from '../../build/ampelement.css';
 import {fontStylesheetTimeout} from '../font-stylesheet-timeout';
 import {getA4AId, registerIniLoadListener} from './utils';
 import {getMode} from '../mode';
@@ -80,8 +81,10 @@ startupChunk(self.document, function initial() {
   perf.tick('is');
 
   self.document.documentElement.classList.add('i-amphtml-inabox');
+  // TODO(lannka): remove ampDocCss for inabox rendering #22418
   const fullCss =
-    cssText +
+    ampDocCss +
+    ampElementCss +
     'html.i-amphtml-inabox{width:100%!important;height:100%!important}';
   installStylesForDoc(
     ampdoc,
