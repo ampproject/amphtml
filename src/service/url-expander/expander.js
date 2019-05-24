@@ -142,7 +142,8 @@ export class Expander {
 
     const evaluateNextLevel = encode => {
       let builder = '';
-      const results = [];
+      let results = [];
+      const args = [];
 
       while (urlIndex < url.length && matchIndex <= matches.length) {
         if (match && urlIndex === match.start) {
@@ -173,9 +174,9 @@ export class Expander {
             urlIndex++;
             numOfPendingCalls++;
             stack.push(binding);
-            // trim space in between args
+            // Trim space in between args.
             if (builder.trim().length) {
-              results.push(builder);
+              results.push(builder.trim());
             }
             results.push(evaluateNextLevel(/* encode */ false));
           } else {
@@ -210,10 +211,12 @@ export class Expander {
             results.push(nextArg);
             nextArgShouldBeRaw = false;
           }
+          args.push(results);
+          results = [];
           // support existing two comma format
           // eg CLIENT_ID(__ga,,ga-url)
           if (url[urlIndex + 1] === ',') {
-            results.push(''); // TODO(ccordry): may want this to be undefined at some point
+            results.push(['']);
             urlIndex++;
           }
           builder = '';
@@ -227,9 +230,12 @@ export class Expander {
           numOfPendingCalls--;
           const binding = stack.pop();
           const nextArg = nextArgShouldBeRaw ? builder : builder.trim();
-          results.push(nextArg);
+          if (nextArg) {
+            results.push(nextArg);
+          }
+          args.push(results);
           nextArgShouldBeRaw = false;
-          const value = this.evaluateBinding_(binding, /* opt_args */ results);
+          const value = this.evaluateBinding_(binding, /* opt_args */ args);
           return value;
         } else {
           builder += url[urlIndex];
@@ -242,6 +248,8 @@ export class Expander {
         }
       }
 
+      // TODO: If there is a single item in results, we should preserve it's
+      // type when returning here and the async version below.
       if (this.sync_) {
         return results.join('');
       }
@@ -260,9 +268,14 @@ export class Expander {
   /**
    * Called when a binding is ready to be resolved. Determines which version of
    * binding to use and if syncronous or asyncronous version should be called.
-   * @param {Object<string, *>} bindingInfo An object containing the name of macro
-   *   and value to be resolved.
-   * @param {Array=} opt_args Arguments passed to the macro.
+   * @param {Object<string, *>} bindingInfo An object containing the name of
+   *    macro and value to be resolved.
+   * @param {Array=} opt_args Arguments passed to the macro. Arguments come as
+   *    an array of arrays that will be eventually passed to a function.apply
+   *    invocation. For example: FOO(BARBAR, 123) => When we are ready to evaluate
+   *    the FOO binding opt_args will be [[Result of BAR, Result of BAR], [123]].
+   *    This structure is so that the outer array will have the correct number of
+   *    arguments, but we still can resolve each macro separately.
    */
   evaluateBinding_(bindingInfo, opt_args) {
     const {encode, name} = bindingInfo;
@@ -307,7 +320,9 @@ export class Expander {
     try {
       if (typeof binding === 'function') {
         if (opt_args) {
-          value = Promise.all(opt_args).then(args => binding.apply(null, args));
+          value = this.processArgsAsync_(opt_args).then(args =>
+            binding.apply(null, args)
+          );
         } else {
           value = tryResolve(binding);
         }
@@ -342,6 +357,22 @@ export class Expander {
   }
 
   /**
+   * Flattens the inner layer of an array of arrays so that the result can be
+   * passed to a function.apply call. Must wait for any inner macros to resolve.
+   * This will cast all arguments to string before calling the macro.
+   *  [[Result of BAR, Result of BAR], 123]. => ['resultresult', '123']
+   * @param {!Array<!Array>} argsArray
+   * @return {!Promise<Array<string>>}
+   */
+  processArgsAsync_(argsArray) {
+    return Promise.all(
+      argsArray.map(argArray => {
+        return Promise.all(argArray).then(resolved => resolved.join(''));
+      })
+    );
+  }
+
+  /**
    * Resolves binding to value to be substituted asyncronously.
    * @param {*} binding Container for sync/async resolutions.
    * @param {string} name
@@ -350,8 +381,10 @@ export class Expander {
    */
   evaluateBindingSync_(binding, name, opt_args) {
     try {
-      const value =
-        typeof binding === 'function' ? binding.apply(null, opt_args) : binding;
+      let value = binding;
+      if (typeof binding === 'function') {
+        value = binding.apply(null, this.processArgsSync_(opt_args));
+      }
 
       let result;
 
@@ -368,6 +401,7 @@ export class Expander {
       ) {
         // Normal case.
         this.maybeCollectVars_(name, value, opt_args);
+        // TODO: We should try to preserve type here.
         result = value.toString();
       } else {
         // Most likely a broken binding gets us here.
@@ -383,6 +417,22 @@ export class Expander {
       this.maybeCollectVars_(name, '', opt_args);
       return '';
     }
+  }
+
+  /**
+   * Flattens the inner layer of an array of arrays so that the result can be
+   * passed to a function.apply call. Will not wait for any promise to resolve.
+   * This will cast all arguments to string before calling the macro.
+   *  [[Result of BAR, Result of BAR], 123]. => ['resultresult', '123']
+   * @param {!Array<!Array>} argsArray
+   */
+  processArgsSync_(argsArray) {
+    if (!argsArray) {
+      return argsArray;
+    }
+    return argsArray.map(argArray => {
+      return argArray.join('');
+    });
   }
 
   /**
