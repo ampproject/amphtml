@@ -120,7 +120,7 @@ export function getFriendlyIframeEmbedOptional(iframe) {
  * @param {!HTMLIFrameElement} iframe
  * @param {!Element} container
  * @param {!FriendlyIframeSpec} spec
- * @param {function(!Window)=} opt_preinstallCallback
+ * @param {function(!AmpDoc)=} opt_preinstallCallback
  * @return {!Promise<!FriendlyIframeEmbed>}
  */
 export function installFriendlyIframeEmbed(
@@ -133,6 +133,8 @@ export function installFriendlyIframeEmbed(
   const win = getTopWindow(toWin(iframe.ownerDocument.defaultView));
   /** @const {!./service/extensions-impl.Extensions} */
   const extensions = Services.extensionsFor(win);
+  /** @const {!./service/ampdoc-impl.AmpDocService} */
+  const ampdocService = Services.ampdocServiceFor(win);
 
   setStyle(iframe, 'visibility', 'hidden');
   iframe.setAttribute('referrerpolicy', 'unsafe-url');
@@ -211,13 +213,14 @@ export function installFriendlyIframeEmbed(
   }
 
   return readyPromise.then(() => {
-    const embed = new FriendlyIframeEmbed(iframe, spec, loadedPromise);
+    const childWin = /** @type {!Window} */ (iframe.contentWindow);
+    const ampdoc = ampdocService.installFieDoc(childWin, spec.url);
+    const embed = new FriendlyIframeEmbed(iframe, spec, loadedPromise, ampdoc);
     iframe[EMBED_PROP] = embed;
 
-    const childWin = /** @type {!Window} */ (iframe.contentWindow);
     // Add extensions.
-    extensions.installExtensionsInChildWindow(
-      childWin,
+    extensions.installExtensionsInFie(
+      ampdoc,
       spec.extensionIds || [],
       opt_preinstallCallback
     );
@@ -329,13 +332,17 @@ export class FriendlyIframeEmbed {
    * @param {!HTMLIFrameElement} iframe
    * @param {!FriendlyIframeSpec} spec
    * @param {!Promise} loadedPromise
+   * @param {!AmpDocFie} ampdoc
    */
-  constructor(iframe, spec, loadedPromise) {
+  constructor(iframe, spec, loadedPromise, ampdoc) {
     /** @const {!HTMLIFrameElement} */
     this.iframe = iframe;
 
     /** @const {!Window} */
     this.win = /** @type {!Window} */ (iframe.contentWindow);
+
+    /** @const {!AmpDocFie} */
+    this.ampdoc = ampdoc;
 
     /** @const {!FriendlyIframeSpec} */
     this.spec = spec;
@@ -361,6 +368,7 @@ export class FriendlyIframeEmbed {
 
     /** @private @const {!Promise} */
     this.winLoadedPromise_ = Promise.all([loadedPromise, this.whenReady()]);
+    this.whenReady().then(() => this.ampdoc.setReady());
   }
 
   /**

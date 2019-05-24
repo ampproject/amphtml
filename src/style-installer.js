@@ -80,6 +80,7 @@ export function installStylesForDoc(
 }
 
 /**
+ * QQQQQQ: REMOVE
  * Adds the given css text to the given document.
  * TODO(dvoytenko, #10705): Remove this method once FIE/ampdoc migration is
  * done.

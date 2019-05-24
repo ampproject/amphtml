@@ -33,14 +33,13 @@ import {urls} from '../config';
 const SERVICE = 'url';
 
 /**
- * @implements {../service.EmbeddableService}
  */
 export class Url {
   /**
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
    * @param {(!Document|!ShadowRoot)=} opt_rootNode
    */
-  constructor(ampdoc, opt_rootNode) {
+  constructor(ampdoc, opt_rootNode) {// QQQQQ: remove rootNode
     const root = opt_rootNode || ampdoc.getRootNode();
     const doc = root.ownerDocument || root;
 
@@ -49,18 +48,6 @@ export class Url {
 
     /** @private @const {!LruCache} */
     this.cache_ = new LruCache(100);
-  }
-
-  /**
-   * @param {!Window} embedWin
-   * @param {!./ampdoc-impl.AmpDoc} ampdoc
-   */
-  static installInEmbedWindow(embedWin, ampdoc) {
-    installServiceInEmbedScope(
-      embedWin,
-      SERVICE,
-      new Url(ampdoc, embedWin.document)
-    );
   }
 
   /**

@@ -35,14 +35,21 @@ import {
   setParentWindow,
 } from '../service';
 import {getMode} from '../mode';
+import {install as installAmpdocServices} from './standard-ampdoc-services';
 import {install as installCustomElements} from '../polyfills/custom-elements';
 import {install as installDOMTokenListToggle} from '../polyfills/domtokenlist-toggle';
 import {install as installDocContains} from '../polyfills/document-contains';
+import {installActionServiceForDoc} from './action-impl';
 import {installImg} from '../../builtins/amp-img';
 import {installLayout} from '../../builtins/amp-layout';
 import {installPixel} from '../../builtins/amp-pixel';
 import {installCustomElements as installRegisterElement} from 'document-register-element/build/document-register-element.patched';
-import {installStylesForDoc, installStylesLegacy} from '../style-installer';
+import {installGlobalNavigationHandlerForDoc} from './navigation';
+import {installHiddenObserverForDoc} from './hidden-observer-impl'
+import {installStandardActionsForDoc} from './standard-actions-impl';
+import {installStylesForDoc} from '../style-installer';
+import {installTimerInEmbedWindow} from './timer-impl';
+import {installUrlForDoc} from './url-impl';
 import {isExperimentOn} from '../experiments';
 import {map} from '../utils/object';
 import {startsWith} from '../string';
@@ -439,17 +446,18 @@ export class Extensions {
    * Install extensions in the child window (friendly iframe). The pre-install
    * callback, if specified, is executed after polyfills have been configured
    * but before the first extension is installed.
-   * @param {!Window} childWin
+   * @param {!AmpDocFie} ampdoc
    * @param {!Array<string>} extensionIds
-   * @param {function(!Window)=} opt_preinstallCallback
+   * @param {function(!AmpDoc)=} opt_preinstallCallback
    * @return {!Promise}
    * @restricted
    */
-  installExtensionsInChildWindow(
-    childWin,
+  installExtensionsInFie(
+    ampdoc,
     extensionIds,
     opt_preinstallCallback
   ) {
+    const childWin = ampdoc.win;
     const topWin = this.win;
     const parentWin = toWin(childWin.frameElement.ownerDocument.defaultView);
     setParentWindow(childWin, parentWin);
@@ -458,8 +466,8 @@ export class Extensions {
     installPolyfillsInChildWindow(parentWin, childWin);
 
     // Install runtime styles.
-    installStylesLegacy(
-      childWin.document,
+    installStylesForDoc(
+      ampdoc,
       cssText,
       /* callback */ null,
       /* opt_isRuntimeCss */ true,
@@ -468,68 +476,24 @@ export class Extensions {
 
     // Run pre-install callback.
     if (opt_preinstallCallback) {
-      opt_preinstallCallback(childWin);
+      opt_preinstallCallback(ampdoc);
     }
 
     // Install embeddable standard services.
-    installStandardServicesInEmbed(childWin, parentWin);
+    installStandardServicesInEmbed(ampdoc);
 
     // Install built-ins and legacy elements.
     copyBuiltinElementsToChildWindow(topWin, childWin);
     stubLegacyElements(childWin);
 
-    const promises = [];
-    extensionIds.forEach(extensionId => {
+    return Promise.all(extensionIds.map(extensionId => {
       // This will extend automatic upgrade of custom elements from top
       // window to the child window.
       if (!LEGACY_ELEMENTS.includes(extensionId)) {
         stubElementIfNotKnown(childWin, extensionId);
       }
-
-      // Install CSS.
-      const promise = this.preloadExtension(extensionId).then(extension => {
-        // Adopt embeddable extension services.
-        extension.services.forEach(service => {
-          installServiceInEmbedIfEmbeddable(childWin, service.serviceClass);
-        });
-
-        // Adopt the custom elements.
-        let elementPromises = null;
-        for (const elementName in extension.elements) {
-          const elementDef = extension.elements[elementName];
-          const elementPromise = new Promise(resolve => {
-            if (elementDef.css) {
-              installStylesLegacy(
-                childWin.document,
-                elementDef.css,
-                /* completeCallback */ resolve,
-                /* isRuntime */ false,
-                extensionId
-              );
-            } else {
-              resolve();
-            }
-          }).then(() => {
-            upgradeOrRegisterElement(
-              childWin,
-              elementName,
-              elementDef.implementationClass
-            );
-          });
-          if (elementPromises) {
-            elementPromises.push(elementPromise);
-          } else {
-            elementPromises = [elementPromise];
-          }
-        }
-        if (elementPromises) {
-          return Promise.all(elementPromises).then(() => extension);
-        }
-        return extension;
-      });
-      promises.push(promise);
-    });
-    return Promise.all(promises);
+      return this.installExtensionInDoc_(ampdoc, extensionId);
+    }));
   }
 
   /**
@@ -728,28 +692,12 @@ function installPolyfillsInChildWindow(parentWin, childWin) {
 
 /**
  * Adopt predefined core services for the child window (friendly iframe).
- * @param {!Window} childWin
- * @param {!Window} parentWin
+ * @param {!AmpDoc} ampdoc
  * @visibleForTesting
  */
-export function installStandardServicesInEmbed(childWin, parentWin) {
-  const frameElement = dev().assertElement(
-    childWin.frameElement,
-    'frameElement not found for embed'
-  );
-  const standardServices = [
-    // The order of service adoptations is important.
-    Services.urlForDoc(frameElement),
-    Services.actionServiceForDoc(frameElement),
-    Services.standardActionsForDoc(frameElement),
-    Services.navigationForDoc(frameElement),
-    Services.timerFor(parentWin),
-  ];
-  const ampdoc = getAmpdoc(frameElement);
-  standardServices.forEach(service => {
-    // Static functions must be invoked on the class, not the instance.
-    service.constructor.installInEmbedWindow(childWin, ampdoc);
-  });
+export function installStandardServicesInEmbed(ampdoc) {
+  installAmpdocServices(ampdoc);
+  installTimerInEmbedWindow(ampdoc.win);
 }
 
 /**

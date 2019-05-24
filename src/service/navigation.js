@@ -81,7 +81,6 @@ export function maybeExpandUrlParamsForTesting(ampdoc, e) {
 /**
  * Intercept any click on the current document and prevent any
  * linking to an identifier from pushing into the history stack.
- * @implements {../service.EmbeddableService}
  * @visibleForTesting
  */
 export class Navigation {
@@ -89,7 +88,7 @@ export class Navigation {
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
    * @param {(!Document|!ShadowRoot)=} opt_rootNode
    */
-  constructor(ampdoc, opt_rootNode) {
+  constructor(ampdoc, opt_rootNode) {//QQQQ: remove rootNode
     /** @const {!./ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
@@ -173,18 +172,6 @@ export class Navigation {
       'click',
       maybeExpandUrlParams.bind(null, ampdoc),
       /* capture */ true
-    );
-  }
-
-  /**
-   * @param {!Window} embedWin
-   * @param {!./ampdoc-impl.AmpDoc} ampdoc
-   */
-  static installInEmbedWindow(embedWin, ampdoc) {
-    installServiceInEmbedScope(
-      embedWin,
-      TAG,
-      new Navigation(ampdoc, embedWin.document)
     );
   }
 

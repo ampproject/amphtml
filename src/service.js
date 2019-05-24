@@ -57,19 +57,6 @@ export class Disposable {
 }
 
 /**
- * Services must implement this interface to be embeddable in FIEs.
- * @interface
- */
-export class EmbeddableService {
-  /**
-   * Installs a new instance of the service in the given FIE window.
-   * @param {!Window} unusedEmbedWin
-   * @param {!./service/ampdoc-impl.AmpDoc} unusedAmpDoc
-   */
-  static installInEmbedWindow(unusedEmbedWin, unusedAmpDoc) {}
-}
-
-/**
  * Returns a service with the given id. Assumes that it has been constructed
  * already.
  *
@@ -607,6 +594,17 @@ export function installServiceInEmbedIfEmbeddable(embedWin, serviceClass) {
   const ampdoc = getAmpdoc(frameElement);
   serviceClass.installInEmbedWindow(embedWin, ampdoc);
   return true;
+}
+
+/**
+ * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {string} id
+ */
+export function adoptServiceForEmbedDoc(ampdoc, id) {
+  const service = getServiceInternal(
+      getAmpdocServiceHolder(ampdoc.getEmbedder()), id);
+  registerServiceInternal(
+      getAmpdocServiceHolder(ampdoc), ampdoc, id, () => service);
 }
 
 /**

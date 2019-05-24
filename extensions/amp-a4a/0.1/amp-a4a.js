@@ -1503,11 +1503,12 @@ export class AmpA4A extends AMP.BaseElement {
         extensionIds: creativeMetaData.customElementExtensions || [],
         fonts: fontsArray,
       },
-      embedWin => {
+      ampdoc => {
+        // TODO(dvoytenko): use service overrides for ampdoc instead.
         installUrlReplacementsForEmbed(
           this.getAmpDoc(),
-          embedWin,
-          new A4AVariableSource(this.getAmpDoc(), embedWin)
+          ampdoc.win,
+          new A4AVariableSource(this.getAmpDoc(), ampdoc.win)
         );
       }
     ).then(friendlyIframeEmbed => {

@@ -133,7 +133,6 @@ function setCounter(receiver, counterName, counterValue) {
 /**
  * AMP GWD animation runtime service.
  * @implements {../../../src/service.Disposable}
- * @implements {../../../src/service.EmbeddableService}
  */
 export class AmpGwdRuntimeService {
   /**
@@ -142,7 +141,7 @@ export class AmpGwdRuntimeService {
    * @param {!Window=} opt_win If in a FIE, the FIE window in which to install
    *     the service.
    */
-  constructor(ampdoc, opt_win) {
+  constructor(ampdoc, opt_win) {//QQQQQ: opt_win
     /** @const @private {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
@@ -185,18 +184,6 @@ export class AmpGwdRuntimeService {
         this.initialize_.bind(this)
       );
     });
-  }
-
-  /**
-   * @param {!Window} embedWin
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-   */
-  static installInEmbedWindow(embedWin, ampdoc) {
-    installServiceInEmbedScope(
-      embedWin,
-      GWD_SERVICE_NAME,
-      new AmpGwdRuntimeService(ampdoc, embedWin)
-    );
   }
 
   /**

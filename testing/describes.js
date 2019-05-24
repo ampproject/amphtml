@@ -772,7 +772,8 @@ class AmpFixture {
           html,
           extensionIds,
         },
-        embedWin => {
+        ampdoc => {
+          const embedWin = ampdoc.win;
           interceptEventListeners(embedWin);
           interceptEventListeners(embedWin.document);
           interceptEventListeners(embedWin.document.documentElement);

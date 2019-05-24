@@ -54,7 +54,6 @@ const TAG = 'STANDARD-ACTIONS';
 /**
  * This service contains implementations of some of the most typical actions,
  * such as hiding DOM elements.
- * @implements {../service.EmbeddableService}
  * @private Visible for testing.
  */
 export class StandardActions {
@@ -62,7 +61,7 @@ export class StandardActions {
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
    * @param {!Window=} opt_win
    */
-  constructor(ampdoc, opt_win) {
+  constructor(ampdoc, opt_win) {//QQQQQ: remove opt_win
     /** @const {!./ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
@@ -79,18 +78,6 @@ export class StandardActions {
     // Explicitly not setting `Action` as a member to scope installation to one
     // method and for bundle size savings. 💰
     this.installActions_(Services.actionServiceForDoc(context));
-  }
-
-  /**
-   * @param {!Window} embedWin
-   * @param {!./ampdoc-impl.AmpDoc} ampdoc
-   */
-  static installInEmbedWindow(embedWin, ampdoc) {
-    installServiceInEmbedScope(
-      embedWin,
-      'standard-actions',
-      new StandardActions(ampdoc, embedWin)
-    );
   }
 
   /**

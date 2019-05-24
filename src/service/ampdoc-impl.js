@@ -51,9 +51,6 @@ export class AmpDocService {
       this.singleDoc_ = new AmpDocSingle(win);
     }
 
-    /** @private @const */
-    this.alwaysClosestAmpDoc_ = isExperimentOn(win, 'ampdoc-closest');
-
     /** Guarded by 'ampdoc-shell' experiment
      * @private {?AmpDocShell}
      */
@@ -79,83 +76,42 @@ export class AmpDocService {
 
   /**
    * Returns the instance of the ampdoc (`AmpDoc`) that contains the specified
-   * node. If the runtime is in the single-doc mode, the one global `AmpDoc`
-   * instance is returned, unless specfically looking for a closer `AmpDoc`.
-   * Otherwise, this method locates the `AmpDoc` that contains the specified
-   * node and, if necessary, initializes it.
+   * node.
    *
-   * TODO(#17614): We should always look for the closest AmpDoc (make
-   * closestAmpDoc always true).
-   *
-   * @param {!Node=} opt_node
-   * @param {{
-   *  closestAmpDoc: boolean
-   * }=} opt_options
+   * @param {!Node} node
    * @return {?AmpDoc}
    */
-  getAmpDocIfAvailable(opt_node = undefined, {closestAmpDoc = false} = {}) {
-    // Single document: return it immediately.
-    if (this.singleDoc_ && !closestAmpDoc && !this.alwaysClosestAmpDoc_) {
-      return this.singleDoc_;
-    }
+  getAmpDocIfAvailable(node) {
+    devAssert(node);
 
-    // Multiple documents and AmpDocShell requested
-    if (
-      isExperimentOn(this.win, 'ampdoc-shell') &&
-      opt_node === this.win.document
-    ) {
-      if (this.shellShadowDoc_) {
-        return this.shellShadowDoc_;
-      } else {
-        throw dev().createError('Ampdoc for shell has not been installed');
-      }
-    }
-
-    // TODO(sparhami) Should we always require a node to be passed? This will
-    // make sure any functionality that works for a standalone AmpDoc works if
-    // the AmpDoc is loaded in a shadow doc.
-    if (!this.singleDoc_) {
-      devAssert(opt_node);
-    }
-    // Otherwise discover and possibly create the ampdoc.
-    let n = opt_node;
+    let n = node;
     while (n) {
       // A custom element may already have the reference. If we are looking
       // for the closest AmpDoc, the element might have a reference to the
       // global AmpDoc, which we do not want. This occurs when using
       // <amp-next-page>.
-      if (n.ampdoc_ && (this.alwaysClosestAmpDoc_ || !closestAmpDoc)) {
+      if (n.ampdoc_) {
         return n.ampdoc_;
       }
 
-      // Traverse the boundary of a friendly iframe.
-      const frameElement = getParentWindowFrameElement(n, this.win);
-      if (frameElement) {
-        n = frameElement;
-        continue;
-      }
-
-      // Shadow doc.
-      const shadowRoot = getShadowRootNode(n);
-      if (!shadowRoot) {
-        // If not inside a shadow root, it may belong to AmpDocShell
-        if (this.shellShadowDoc_) {
-          return this.shellShadowDoc_;
-        }
+      // Root note: it's either a document, or a shadow document.
+      const rootNode = getRootNode(n);
+      if (!rootNode) {
         break;
       }
-
-      const ampdoc = shadowRoot[AMPDOC_PROP];
+      const ampdoc = rootNode[AMPDOC_PROP];
       if (ampdoc) {
         return ampdoc;
       }
-      n = shadowRoot.host;
-    }
 
-    // If we were looking for the closest AmpDoc, then fall back to the single
-    // doc if there is no other AmpDoc that is closer.
-    if (this.singleDoc_) {
-      return this.singleDoc_;
+      // Try to iterate to the host of the current root node.
+      // First try the shadow root's host.
+      if (rootNode.host) {
+        n = rootNode.host;
+      } else {
+        // Then, traverse the boundary of a friendly iframe.
+        n = getParentWindowFrameElement(rootNode, this.win);
+      }
     }
 
     return null;
@@ -169,27 +125,21 @@ export class AmpDocService {
    * node and, if necessary, initializes it.
    *
    * An Error is thrown in development if no `AmpDoc` is found.
-   * @param {!Node=} opt_node
-   * @param {{
-   *  closestAmpDoc: boolean
-   * }=} opt_options
+   * @param {!Node} node
    * @return {!AmpDoc}
    */
-  getAmpDoc(opt_node, opt_options) {
+  getAmpDoc(node) {
     // Ensure that node is attached if specified. This check uses a new and
     // fast `isConnected` API and thus only checked on platforms that have it.
     // See https://www.chromestatus.com/feature/5676110549352448.
-    if (opt_node) {
-      devAssert(
-        opt_node['isConnected'] === undefined ||
-          opt_node['isConnected'] === true,
-        'The node must be attached to request ampdoc.'
-      );
-    }
+    devAssert(
+      node['isConnected'] === undefined || node['isConnected'] === true,
+      'The node must be attached to request ampdoc.'
+    );
 
-    const ampdoc = this.getAmpDocIfAvailable(opt_node, opt_options);
+    const ampdoc = this.getAmpDocIfAvailable(node, opt_options);
     if (!ampdoc) {
-      throw dev().createError('No ampdoc found for', opt_node);
+      throw dev().createError('No ampdoc found for', node);
     }
 
     return ampdoc;
@@ -209,6 +159,25 @@ export class AmpDocService {
     );
     const ampdoc = new AmpDocShadow(this.win, url, shadowRoot);
     shadowRoot[AMPDOC_PROP] = ampdoc;
+    return ampdoc;
+  }
+
+  /**
+   * Creates and installs the ampdoc for the shadow root.
+   * @param {string} url
+   * @param {!Window} childWin
+   * @return {!AmpDocFie}
+   * @restricted
+   */
+  installFieDoc(url, childWin) {
+    const doc = childWin.document;
+    devAssert(
+      !doc[AMPDOC_PROP],
+      'The fie already contains ampdoc'
+    );
+    const frameElement = getParentWindowFrameElement(doc, this.win);
+    const ampdoc = new AmpDocFie(childWin, url, this.getAmpDoc(frameElement));
+    doc[AMPDOC_PROP] = ampdoc;
     return ampdoc;
   }
 
@@ -269,6 +238,13 @@ export class AmpDoc {
    */
   isSingleDoc() {
     return /** @type {?} */ (devAssert(null, 'not implemented'));
+  }
+
+  /**
+   * @return {?AmpDoc}
+   */
+  getEmbedder() {
+    return null;
   }
 
   /**
@@ -576,6 +552,101 @@ export class AmpDocShadow extends AmpDoc {
   /** @override */
   whenReady() {
     return this.readyPromise_;
+  }
+}
+
+/**
+ * The version of `AmpDoc` for FIE embeds.
+ * @package @visibleForTesting
+ */
+export class AmpDocFie extends AmpDoc {
+  /**
+   * @param {!Window} win
+   * @param {string} url
+   */
+  constructor(win, url, embedder) {
+    super(win);
+
+    /** @private @const {string} */
+    this.url_ = url;
+
+    /** @private @const {!AmpDoc} */
+    this.embedder_ = embedder;
+
+    /** @private @const {!Promise<!Element>} */
+    this.bodyPromise_ = this.win.document.body
+      ? Promise.resolve(this.win.document.body)
+      : waitForBodyOpenPromise(this.win.document).then(() => this.getBody());
+
+    /** @private {boolean} */
+    this.ready_ = false;
+
+    const readyDeferred = new Deferred();
+    /** @private {!Promise} */
+    this.readyPromise_ = readyDeferred.promise;
+    /** @private {function()|undefined} */
+    this.readyResolver_ = readyDeferred.resolve;
+  }
+
+  /** @override */
+  isSingleDoc() {
+    return false;
+  }
+
+  /** @overrde */
+  getEmbedder() {
+    return this.embedder_;
+  }
+
+  /** @override */
+  getRootNode() {
+    return this.win.document;
+  }
+
+  /** @override */
+  getUrl() {
+    return this.win.location.href;
+  }
+
+  /** @override */
+  getHeadNode() {
+    return dev().assertElement(this.win.document.head);
+  }
+
+  /** @override */
+  isBodyAvailable() {
+    return !!this.win.document.body;
+  }
+
+  /** @override */
+  getBody() {
+    return dev().assertElement(this.win.document.body, 'body not available');
+  }
+
+  /** @override */
+  waitForBodyOpen() {
+    return this.bodyPromise_;
+  }
+
+  /** @override */
+  isReady() {
+    return this.ready_;
+  }
+
+  /** @override */
+  whenReady() {
+    return this.readyPromise_;
+  }
+
+  /**
+   * Signals that the FIE doc is ready.
+   * @restricted
+   */
+  setReady() {
+    devAssert(!this.ready_, 'Duplicate ready state');
+    this.ready_ = true;
+    this.readyResolver_();
+    this.readyResolver_ = undefined;
   }
 }
 

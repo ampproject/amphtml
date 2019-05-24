@@ -166,14 +166,6 @@ export class Timer {
       }, delay);
     });
   }
-
-  /**
-   * @param {!Window} embedWin
-   * @param {!./ampdoc-impl.AmpDoc} unusedAmpDoc
-   */
-  static installInEmbedWindow(embedWin, unusedAmpDoc) {
-    installServiceInEmbedScope(embedWin, TAG, new Timer(embedWin));
-  }
 }
 
 /**
@@ -181,4 +173,11 @@ export class Timer {
  */
 export function installTimerService(window) {
   registerServiceBuilder(window, TAG, Timer);
+}
+
+/**
+ * @param {!Window} embedWin
+ */
+export function installTimerInEmbedWindow(embedWin) {
+  installServiceInEmbedScope(embedWin, TAG, new Timer(embedWin));
 }

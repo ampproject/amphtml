@@ -33,7 +33,6 @@ import {dev, devAssert, user} from '../../../src/log';
 import {findIndex, remove} from '../../../src/utils/array';
 import {getDetail} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
-import {installServiceInEmbedScope} from '../../../src/service';
 import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
 import {isArray, isFiniteNumber, isObject, toArray} from '../../../src/types';
 import {reportError} from '../../../src/error';
@@ -85,7 +84,6 @@ const BIND_ONLY_ATTRIBUTES = map({
 /**
  * Bind is an ampdoc-scoped service that handles the Bind lifecycle, from
  * scanning for bindings to evaluating expressions to mutating elements.
- * @implements {../../../src/service.EmbeddableService}
  */
 export class Bind {
   /**
@@ -93,7 +91,7 @@ export class Bind {
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!Window=} opt_win
    */
-  constructor(ampdoc, opt_win) {
+  constructor(ampdoc, opt_win) {//QQQQQ: remove opt_win
     /** @const {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
@@ -202,14 +200,6 @@ export class Bind {
     g.printState = g.printState || this.debugPrintState_.bind(this);
     g.setState = g.setState || (state => this.setState(state));
     g.eval = g.eval || this.debugEvaluate_.bind(this);
-  }
-
-  /**
-   * @param {!Window} embedWin
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-   */
-  static installInEmbedWindow(embedWin, ampdoc) {
-    installServiceInEmbedScope(embedWin, 'bind', new Bind(ampdoc, embedWin));
   }
 
   /**

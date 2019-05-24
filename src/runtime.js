@@ -47,6 +47,7 @@ import {cssText} from '../build/css';
 import {disposeServicesForDoc} from './service';
 import {getMode} from './mode';
 import {hasRenderDelayingServices} from './render-delaying-services';
+import {install as installAmpdocServices} from './service/standard-ampdoc-services';
 import {installActionServiceForDoc} from './service/action-impl';
 import {installBatchedXhrService} from './service/batched-xhr-impl';
 import {
@@ -99,35 +100,13 @@ const TAG = 'runtime';
 export function installRuntimeServices(global) {
   installCryptoService(global);
   installBatchedXhrService(global);
-  installDocumentStateService(global);
+  installDocumentStateService(global);  // QQQQ: this seems wrong
   installPlatformService(global);
   installTemplatesService(global);
   installTimerService(global);
   installVsyncService(global);
   installXhrService(global);
   installInputService(global);
-}
-
-/**
- * Install ampdoc-level services.
- * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
- * @param {!Object<string, string>=} opt_initParams
- */
-export function installAmpdocServices(ampdoc, opt_initParams) {
-  installUrlForDoc(ampdoc);
-  installCidService(ampdoc);
-  installDocumentInfoServiceForDoc(ampdoc);
-  installViewerServiceForDoc(ampdoc, opt_initParams);
-  installViewportServiceForDoc(ampdoc);
-  installHiddenObserverForDoc(ampdoc);
-  installHistoryServiceForDoc(ampdoc);
-  installResourcesServiceForDoc(ampdoc);
-  installUrlReplacementsServiceForDoc(ampdoc);
-  installActionServiceForDoc(ampdoc);
-  installStandardActionsForDoc(ampdoc);
-  installStorageServiceForDoc(ampdoc);
-  installGlobalNavigationHandlerForDoc(ampdoc);
-  installGlobalSubmitListenerForDoc(ampdoc);
 }
 
 /**

@@ -230,14 +230,13 @@ export class ActionInvocation {
  *    simply can search target in DOM and trigger methods on it.
  * 2. A class that configures event recognizers and rules and then
  *    simply calls action.trigger.
- * @implements {../service.EmbeddableService}
  */
 export class ActionService {
   /**
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
    * @param {(!Document|!ShadowRoot)=} opt_root
    */
-  constructor(ampdoc, opt_root) {
+  constructor(ampdoc, opt_root) { // QQQQ: remove root
     /** @const {!./ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
@@ -276,18 +275,6 @@ export class ActionService {
     this.addEvent('input-throttled');
     this.addEvent('valid');
     this.addEvent('invalid');
-  }
-
-  /**
-   * @param {!Window} embedWin
-   * @param {!./ampdoc-impl.AmpDoc} ampdoc
-   */
-  static installInEmbedWindow(embedWin, ampdoc) {
-    installServiceInEmbedScope(
-      embedWin,
-      'action',
-      new ActionService(ampdoc, embedWin.document)
-    );
   }
 
   /**
