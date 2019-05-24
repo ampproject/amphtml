@@ -887,7 +887,7 @@ exports.extensionBundles = [
     type: TYPES.MISC,
   },
   {
-    name: 'amp-yotpo',
+    name: 'amp-ym-chatbot',
     version: '0.1',
     latestVersion: '0.1',
     type: TYPES.MISC,
