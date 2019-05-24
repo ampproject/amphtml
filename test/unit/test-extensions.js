@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  AmpDocShadow,
-  installDocService,
-} from '../../src/service/ampdoc-impl';
+import {AmpDocShadow, installDocService} from '../../src/service/ampdoc-impl';
 import {BaseElement} from '../../src/base-element';
 import {ElementStub} from '../../src/element-stub';
 import {
