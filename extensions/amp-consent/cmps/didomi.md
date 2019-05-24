@@ -37,4 +37,4 @@ A new generation platform of privacy management.
 
 ## Configuration
 
-Please visit our [Documentation](https://developers.didomi.io/) for more information.
+Please visit our [Documentation](https://developers.didomi.io/cmp/amp) for more information.
