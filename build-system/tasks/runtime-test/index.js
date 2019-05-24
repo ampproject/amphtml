@@ -37,7 +37,7 @@ const {
   reportTestFinished,
   reportTestSkipped,
   reportTestStarted,
-} = require('./status-report');
+} = require('../report-test-status');
 const {app} = require('../../test-server');
 const {clean} = require('../clean');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../../ctrlcHandler');
