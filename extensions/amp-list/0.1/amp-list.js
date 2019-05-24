@@ -575,7 +575,7 @@ export class AmpList extends AMP.BaseElement {
       .then(
         response => {
           userAssert(
-            response && response['html'],
+            response && typeof response['html'] === 'string',
             'Expected response with format {html: <string>}. Received: ',
             response
           );
