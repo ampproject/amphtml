@@ -51,7 +51,7 @@
     "babel-plugin-transform-es2015-modules-commonjs": "6.26.2",
     "babelify": "10.0.0",
     "baconipsum": "0.1.2",
-    "bluebird": "3.5.4",
+    "bluebird": "3.5.5",
     "body-parser": "1.19.0",
     "browserify": "16.2.3",
     "chai": "4.2.0",
