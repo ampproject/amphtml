@@ -939,9 +939,9 @@ export class AmpLightboxGallery extends AMP.BaseElement {
           styleContainer: this.getAmpDoc().getHeadNode(),
           transitionContainer: this.getAmpDoc().getBody(),
           srcImg,
-          srcCropRect: (srcCropEl || srcImg).getBoundingClientRect(),
+          srcCropRect: (srcCropEl || srcImg)./*OK*/ getBoundingClientRect(),
           targetImg,
-          targetCropRect: (targetCropEl || targetImg).getBoundingClientRect(),
+          targetCropRect: (targetCropEl || targetImg)./*OK*/ getBoundingClientRect(),
           styles: {
             'animationDuration': `${motionDuration}ms`,
             // Matches z-index for `.i-amphtml-lbg`.
