@@ -30,7 +30,7 @@ import {writeScript} from './3p';
  */
 function getGistJs(global, scriptSource, cb) {
   writeScript(global, scriptSource, function() {
-    cb(global.gist);
+    cb();
   });
 }
 

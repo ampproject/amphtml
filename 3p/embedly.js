@@ -65,7 +65,7 @@ export const CardOptions = {
  */
 function getEmbedly(global, callback) {
   loadScript(global, EMBEDLY_SDK_URL, function() {
-    callback(global);
+    callback();
   });
 }
 

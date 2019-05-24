@@ -51,8 +51,8 @@ function getUrl(url) {
  */
 amp.validator.isAmpCacheUrl = function(url) {
   return (
-    url.toLowerCase().indexOf('cdn.ampproject.org') !== -1 ||
-    url.toLowerCase().indexOf('amp.cloudflare.com') !== -1);
+    url.toLowerCase().startsWith('https://cdn.ampproject.org') ||
+    url.toLowerCase().startsWith('https://amp.cloudflare.com'));
 };
 
 /**
