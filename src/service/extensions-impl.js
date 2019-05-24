@@ -16,6 +16,8 @@
 
 import {Deferred} from '../utils/promise';
 import {Services} from '../services';
+import {cssText as ampDocCss} from '../../build/ampdoc.css';
+import {cssText as ampElementCss} from '../../build/ampelement.css';
 import {
   calculateExtensionScriptUrl,
   parseExtensionUrl,
@@ -25,7 +27,6 @@ import {
   stubElementIfNotKnown,
   upgradeOrRegisterElement,
 } from './custom-element-registry';
-import {cssText} from '../../build/css';
 import {dev, devAssert, rethrowAsync} from '../log';
 import {
   getAmpdoc,
@@ -460,7 +461,8 @@ export class Extensions {
     // Install runtime styles.
     installStylesLegacy(
       childWin.document,
-      cssText,
+      // TODO(lannka): remove ampDocCss for FIE rendering #22418
+      ampDocCss + ampElementCss,
       /* callback */ null,
       /* opt_isRuntimeCss */ true,
       /* opt_ext */ 'amp-runtime'
