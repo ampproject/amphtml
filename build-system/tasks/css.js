@@ -81,6 +81,7 @@ function compileCss(watch, opt_compileAll) {
    */
   function writeCss(css, jsFilename, cssFilename, append) {
     return toPromise(
+      // cssText is hardcoded in AmpCodingConvention.java
       file(jsFilename, 'export const cssText = ' + JSON.stringify(css), {
         src: true,
       })
