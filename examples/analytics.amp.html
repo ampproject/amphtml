@@ -51,6 +51,7 @@ Container for analytics tags. Positioned far away from top to make sure that doe
 <script type="application/json">
 {
   "transport": {"beacon": true, "xhrpost": false},
+  "requestOrigin": "${documentReferrer}",
   "requests": {
     "endpoint": "/analytics",
     "base": "${endpoint}/${type}?path=${canonicalPath}",

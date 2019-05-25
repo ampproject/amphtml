@@ -22,11 +22,12 @@ import {
 } from './variables';
 import {SANDBOX_AVAILABLE_VARS} from './sandbox-vars-whitelist';
 import {Services} from '../../../src/services';
-import {devAssert, userAssert} from '../../../src/log';
+import {devAssert, userAssert, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getResourceTiming} from './resource-timing';
 import {isArray, isFiniteNumber, isObject} from '../../../src/types';
 
+const TAG = 'amp-analytics/requests';
 const BATCH_INTERVAL_MIN = 200;
 
 export class RequestHandler {
@@ -143,8 +144,11 @@ export class RequestHandler {
       // expand requestOrigin if it is declared
       if (this.requestOrigin_) {
         // do not encode vars in request origin
-        const requestOriginExpansionOpt = expansionOption.makeCopy();
-        requestOriginExpansionOpt.noEncode = true;
+        const requestOriginExpansionOpt = new ExpansionOptions(
+          expansionOption.vars,
+          expansionOption.iterations,
+          true // opt_noEncode
+        );
 
         this.requestOriginPromise_ = this.variableService_
           // expand variables in request origin
@@ -157,9 +161,7 @@ export class RequestHandler {
               this.whiteList_,
               true // opt_noEncode
             );
-          })
-          // remove trailing forward slashes
-          .then(requestOrigin => requestOrigin.replace(/\/+$/, ''));
+          });
       }
 
       this.baseUrlTemplatePromise_ = this.variableService_.expandTemplate(
@@ -255,9 +257,18 @@ export class RequestHandler {
       Promise.all([baseUrlPromise, Promise.all(segmentPromises)]).then(
         results => {
           // prepend requestOrigin if available
-          const baseUrl = requestOriginPromise
-            ? preUrl + results[0]
-            : results[0];
+          let baseUrl;
+          if (requestOriginPromise) {
+            try {
+              baseUrl = (new URL(results[0], preUrl)).href;
+            } catch (e) {
+              user().error(TAG, e);
+              baseUrl = results[0];
+            }
+          } else {
+            baseUrl = results[0];
+          }
+
           const batchSegments = results[1];
           if (batchSegments.length === 0) {
             return;
@@ -289,7 +300,6 @@ export class RequestHandler {
     this.queueSize_ = 0;
     this.baseUrlPromise_ = null;
     this.baseUrlTemplatePromise_ = null;
-    this.requestOriginPromise_ = null;
     this.batchSegmentPromises_ = [];
     this.lastTrigger_ = null;
   }

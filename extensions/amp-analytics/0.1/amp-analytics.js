@@ -520,11 +520,6 @@ export class AmpAnalytics extends AMP.BaseElement {
         if (hasOwn(this.config_['requests'], k)) {
           const request = this.config_['requests'][k];
 
-          // add top level request origin into request if it doesn't have one
-          if (!hasOwn(request, 'requestOrigin')) {
-            request['requestOrigin'] = this.config_['requestOrigin'];
-          }
-
           requests[k] = new RequestHandler(
             this.element,
             request,

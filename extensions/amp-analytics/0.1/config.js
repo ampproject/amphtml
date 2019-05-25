@@ -66,7 +66,24 @@ export class AnalyticsConfig {
 
     return this.fetchRemoteConfig_()
       .then(this.processConfigs_.bind(this))
+      .then(this.handleTopLevelAttributes_.bind(this))
       .then(() => this.config_);
+  }
+
+  /**
+   * Handles top level fields in config
+   */
+  handleTopLevelAttributes_() {
+    // add top level request origin into request if it doesn't have one
+    if (hasOwn(this.config_, 'requests') && hasOwn(this.config_, 'requestOrigin')) {
+      const requestOrigin = this.config_['requestOrigin'];
+
+      for (const requestName in this.config_['requests']) {
+        if (!hasOwn(this.config_['requests'][requestName], 'requestOrigin')) {
+          this.config_['requests'][requestName]['requestOrigin'] = requestOrigin;
+        }
+      }
+    }
   }
 
   /**
