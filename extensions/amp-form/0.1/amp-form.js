@@ -214,8 +214,11 @@ export class AmpForm {
     /** @private {?Promise} */
     this.renderTemplatePromise_ = null;
 
-    /** @private {./form-submit-service.FormSubmitService} */
-    this.formSubmitService_ = Services.formSubmitForDoc(element);
+    /** @private {?./form-submit-service.FormSubmitService} */
+    this.formSubmitService_ = null;
+    Services.formSubmitForDoc(element).then(service => {
+      this.formSubmitService_ = service;
+    });
   }
 
   /**
@@ -525,7 +528,7 @@ export class AmpForm {
         form: this.form_,
         actionXhrMutator: this.setXhrAction.bind(this),
       };
-      this.formSubmitService_.fire(event);
+      devAssert(this.formSubmitService_).fire(event);
     } catch (e) {
       dev().error(TAG, 'Form submit service failed: %s', e);
     }

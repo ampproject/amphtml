@@ -359,9 +359,11 @@ describes.repeated(
 
         it('should fire the form submit service', () => {
           const fireStub = sandbox.stub();
-          sandbox.stub(Services, 'formSubmitForDoc').returns({
-            fire: fireStub,
-          });
+          sandbox.stub(Services, 'formSubmitForDoc').returns(
+            Promise.resolve({
+              fire: fireStub,
+            })
+          );
 
           const form = getForm();
           return getAmpForm(form).then(ampForm => {
