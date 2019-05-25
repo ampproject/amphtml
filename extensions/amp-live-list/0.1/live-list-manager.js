@@ -24,7 +24,8 @@ import {startsWith} from '../../../src/string';
 import {toArray} from '../../../src/types';
 import {userAssert} from '../../../src/log';
 
-const SERVICE_ID = 'liveListManager';
+/** @const {string} */
+export const SERVICE_ID = 'liveListManager';
 
 const TRANSFORMED_PREFIX = 'google;v=';
 
@@ -123,7 +124,10 @@ export class LiveListManager {
    * @return {!Promise<!LiveListManager>}
    */
   static forDoc(element) {
-    return getServicePromiseForDoc(element, SERVICE_ID);
+    return /** @type {!Promise<!LiveListManager>} */ (getServicePromiseForDoc(
+      element,
+      SERVICE_ID
+    ));
   }
 
   /**

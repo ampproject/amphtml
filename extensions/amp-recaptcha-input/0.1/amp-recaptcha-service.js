@@ -394,5 +394,8 @@ export class AmpRecaptchaService {
  * @return {!Promise<!AmpRecaptchaService>}
  */
 export function recaptchaServiceForDoc(element) {
-  return getServicePromiseForDoc(element, 'amp-recaptcha');
+  return /** @type {!Promise<!AmpRecaptchaService>} */ (getServicePromiseForDoc(
+    element,
+    'amp-recaptcha'
+  ));
 }

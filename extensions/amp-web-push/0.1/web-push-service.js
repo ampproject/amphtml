@@ -62,7 +62,10 @@ export let AmpWebPushConfig;
  * @return {!Promise<!./web-push-service.WebPushService>}
  */
 export function webPushServiceForDoc(element) {
-  return getServicePromiseForDoc(element, SERVICE_TAG);
+  return /** @type {!Promise<!./web-push-service.WebPushService>} */ (getServicePromiseForDoc(
+    element,
+    SERVICE_TAG
+  ));
 }
 
 /**
