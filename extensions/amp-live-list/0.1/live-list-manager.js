@@ -19,10 +19,7 @@ import {Services} from '../../../src/services';
 import {addParamToUrl} from '../../../src/url';
 import {fetchDocument} from '../../../src/document-fetcher';
 import {getMode} from '../../../src/mode';
-import {
-  getServiceForDoc,
-  registerServiceBuilderForDoc,
-} from '../../../src/service';
+import {getServicePromiseForDoc} from '../../../src/service';
 import {startsWith} from '../../../src/string';
 import {toArray} from '../../../src/types';
 import {userAssert} from '../../../src/log';
@@ -119,6 +116,14 @@ export class LiveListManager {
   /** @override */
   dispose() {
     this.poller_.stop();
+  }
+
+  /**
+   * @param {!Element} element
+   * @return {!Promise<!LiveListManager>}
+   */
+  static forDoc(element) {
+    return getServicePromiseForDoc(element, SERVICE_ID);
   }
 
   /**
@@ -337,25 +342,4 @@ function isDocTransformed(root) {
   const {documentElement} = root.ownerDocument;
   const transformed = documentElement.getAttribute('transformed');
   return Boolean(transformed) && startsWith(transformed, TRANSFORMED_PREFIX);
-}
-
-/**
- * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
- */
-function installLiveListManager(ampdoc) {
-  registerServiceBuilderForDoc(
-    ampdoc,
-    SERVICE_ID,
-    LiveListManager,
-    /* instantiate */ true
-  );
-}
-
-/**
- * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
- * @return {!LiveListManager}
- */
-export function liveListManagerForDoc(ampdoc) {
-  installLiveListManager(ampdoc);
-  return getServiceForDoc(ampdoc, SERVICE_ID);
 }
