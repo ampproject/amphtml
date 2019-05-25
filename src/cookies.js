@@ -94,9 +94,6 @@ export function setCookie(win, name, value, expirationTime, opt_options) {
     domain = opt_options.domain;
   } else if (opt_options && opt_options.highestAvailableDomain) {
     domain = getHighestAvailableDomain(win);
-    if (!domain) {
-      return;
-    }
   }
   trySetCookie(win, name, value, expirationTime, domain);
 }
