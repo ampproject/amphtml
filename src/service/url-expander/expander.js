@@ -229,7 +229,7 @@ export class Expander {
           // Support existing two comma format by pushing an empty string as
           // argument. eg CLIENT_ID(__ga,,ga-url)
           if (url[urlIndex + 1] === ',') {
-            results.push(['']);
+            args.push(['']);
             urlIndex++;
           }
           builder = '';
