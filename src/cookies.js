@@ -83,27 +83,60 @@ function tryGetDocumentCookieNoInline(win) {
  *     - highestAvailableDomain: If true, set the cookie at the widest domain
  *       scope allowed by the browser. E.g. on example.com if we are currently
  *       on www.example.com.
- *     - domain: Explicit domain to set.
+ *     - domain: Explicit domain to set. domain overrides HigestAvailableDomain
  *     - allowOnProxyOrigin: Allow setting a cookie on the AMP Cache.
  */
 export function setCookie(win, name, value, expirationTime, opt_options) {
   checkOriginForSettingCookie(win, opt_options, name);
-  if (opt_options && opt_options.highestAvailableDomain) {
-    const parts = win.location.hostname.split('.');
-    let domain = parts[parts.length - 1];
-    for (let i = parts.length - 2; i >= 0; i--) {
-      domain = parts[i] + '.' + domain;
-      trySetCookie(win, name, value, expirationTime, domain);
-      if (getCookie(win, name) == value) {
-        return;
-      }
-    }
-  }
   let domain = undefined;
+  // Respect explicitily set domain over higestAvailabeDomain
   if (opt_options && opt_options.domain) {
     domain = opt_options.domain;
+  } else if (opt_options && opt_options.highestAvailableDomain) {
+    domain = getHighestAvailableDomain(win);
+    if (!domain) {
+      return;
+    }
   }
   trySetCookie(win, name, value, expirationTime, domain);
+}
+
+/**
+ * Attemp to find the HighestAvailableDomain on
+ * @param {!Window} win
+ */
+export function getHighestAvailableDomain(win) {
+  // TODO(zhouyx@): Once we decide to allow publisher to put
+  // <meta name='amp-cookie-scope'>. Need to respect the meta first.
+  if (!isProxyOrigin(win.location.href)) {
+    // Use the set cookie hack to find the higestAvailableDomain on non proxy
+    // origin.
+
+    const parts = win.location.hostname.split('.');
+    let domain = parts[parts.length - 1];
+    const randomName = Math.random().toString();
+    for (let i = parts.length - 2; i >= 0; i--) {
+      domain = parts[i] + '.' + domain;
+      // Try set a cookie for testing only, expire after 1 sec
+      trySetCookie(win, randomName, 'delete', Date.now() + 1000, domain);
+      if (getCookie(win, randomName) == 'delete') {
+        // Remove the cookie for testing
+        trySetCookie(win, randomName, 'test', Date.now() - 1000, domain);
+        return domain;
+      }
+    }
+  } else {
+    // Use the <meta name='amp-cookie-scope'> value if there is one
+    const metaTag = win.document.head.querySelector(
+      "meta[name='amp-cookie-scope']"
+    );
+    if (metaTag) {
+      // The content value could be an empty string. Return null instead
+      return metaTag.getAttribute('content') || null;
+    }
+  }
+  // Couldn't find the higestAvailableDomain
+  return null;
 }
 
 /**
@@ -150,8 +183,15 @@ function trySetCookie(win, name, value, expirationTime, domain) {
  */
 function checkOriginForSettingCookie(win, options, name) {
   if (options && options.allowOnProxyOrigin) {
+    if (!options.domain) {
+      throw new Error(
+        'Should specify domain explicitly when setting cookie ' +
+          'on proxy origin'
+      );
+    }
     return;
   }
+
   if (isProxyOrigin(win.location.href)) {
     throw new Error(
       'Should never attempt to set cookie on proxy origin: ' + name
