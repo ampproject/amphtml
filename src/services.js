@@ -370,14 +370,16 @@ export class Services {
   }
 
   /**
-   * PositionObserver service is not installed by default; it must be installed
-   * in a given extension.
+   * Not installed by default; must be installed in extension code before use.
    * @param {!Element|!ShadowRoot} element
-   * @return {!./service/position-observer-impl.PositionObserver}
+   * @return {!./service/position-observer/position-observer-impl.PositionObserver}
    * @throws If the service is not installed.
    */
   static positionObserverForDoc(element) {
-    return getServiceForDoc(element, 'position-observer');
+    return /** @type {!./service/position-observer/position-observer-impl.PositionObserver} */ (getServiceForDoc(
+      element,
+      'position-observer'
+    ));
   }
 
   /**
