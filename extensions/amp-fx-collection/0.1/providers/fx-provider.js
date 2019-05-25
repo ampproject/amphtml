@@ -145,7 +145,7 @@ export class FxElement {
     this.win = ampdoc.win;
 
     /** @private @const {!../../../../src/service/position-observer/position-observer-impl.PositionObserver} */
-    this.positionObserver_ = getServiceForDoc(ampdoc, 'position-observer');
+    this.positionObserver_ = Services.positionObserverForDoc(element);
 
     /** @private @const {!../../../../src/service/viewport/viewport-impl.Viewport} */
     this.viewport_ = Services.viewportForDoc(element);

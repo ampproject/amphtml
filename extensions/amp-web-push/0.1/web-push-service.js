@@ -16,13 +16,20 @@
 
 import {CSS} from '../../../build/amp-web-push-0.1.css';
 import {IFrameHost} from './iframehost';
-import {NotificationPermission, StorageKeys, TAG, WIDGET_TAG} from './vars';
+import {
+  NotificationPermission,
+  SERVICE_TAG,
+  StorageKeys,
+  TAG,
+  WIDGET_TAG,
+} from './vars';
 import {Services} from '../../../src/services';
 import {WebPushWidgetVisibilities} from './amp-web-push-widget';
 import {WindowMessenger} from './window-messenger';
 import {dev, user} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {getMode} from '../../../src/mode';
+import {getServicePromiseForDoc} from '../../../src/service';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {openWindowDialog} from '../../../src/dom';
 import {parseQueryString, parseUrlDeprecated} from '../../../src/url';
@@ -49,6 +56,14 @@ export let ServiceWorkerRegistrationMessage;
  * }}
  */
 export let AmpWebPushConfig;
+
+/**
+ * @param {!Element} element
+ * @return {!Promise<!./web-push-service.WebPushService>}
+ */
+export function webPushServiceForDoc(element) {
+  return getServicePromiseForDoc(element, SERVICE_TAG);
+}
 
 /**
  * @fileoverview
