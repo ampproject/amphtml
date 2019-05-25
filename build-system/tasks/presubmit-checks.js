@@ -313,7 +313,6 @@ const forbiddenTerms = {
       'extensions/amp-analytics/0.1/instrumentation.js',
       'extensions/amp-analytics/0.1/variables.js',
       'extensions/amp-fx-collection/0.1/providers/fx-provider.js',
-      'extensions/amp-recaptcha-input/0.1/amp-recaptcha-service.js',
       'src/chunk.js',
       'src/service.js',
       'src/service/cid-impl.js',

@@ -62,9 +62,9 @@ export function installScrollToggledFx(ampdoc, element, type) {
   const fxScrollDispatch = 'fx-scroll-dispatch';
 
   registerServiceBuilderForDoc(ampdoc, fxScrollDispatch, ScrollToggleDispatch);
+  const dispatch = getServiceForDoc(ampdoc, fxScrollDispatch);
 
   const resources = Services.resourcesForDoc(element);
-  const dispatch = getServiceForDoc(ampdoc, fxScrollDispatch);
 
   let shouldMutate = true;
 

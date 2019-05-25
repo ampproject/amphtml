@@ -21,15 +21,15 @@
  */
 
 import {
+  AmpRecaptchaService,
+  recaptchaServiceForDoc,
+} from './amp-recaptcha-service';
+import {
   AsyncInputAttributes,
   AsyncInputClasses,
 } from '../../../src/async-input';
 import {CSS} from '../../../build/amp-recaptcha-input-0.1.css';
 import {Layout} from '../../../src/layout';
-import {
-  installRecaptchaServiceForDoc,
-  recaptchaServiceForDoc,
-} from './amp-recaptcha-service';
 import {setStyles, toggle} from '../../../src/style';
 import {userAssert} from '../../../src/log';
 
@@ -76,8 +76,6 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
       this.element
     );
 
-    this.recaptchaService_ = recaptchaServiceForDoc(this.getAmpDoc());
-
     return this.mutateElement(() => {
       toggle(this.element);
       // Add the required AsyncInput class
@@ -95,6 +93,10 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
         'overflow': 'hidden',
         'visibility': 'hidden',
       });
+
+      return recaptchaServiceForDoc(this.element);
+    }).then(service => {
+      this.recaptchaService_ = service;
     });
   }
 
@@ -144,6 +146,6 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
 }
 
 AMP.extension(TAG, '0.1', AMP => {
-  installRecaptchaServiceForDoc(AMP.ampdoc);
+  AMP.registerServiceForDoc('amp-recaptcha', AmpRecaptchaService);
   AMP.registerElement(TAG, AmpRecaptchaInput, CSS);
 });
