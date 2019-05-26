@@ -1,3 +1,20 @@
+/**
+ * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import {Layout} from '../../../src/layout';
 import {addParamsToUrl} from '../../../src/url';
 import {dict} from '../../../src/utils/object';
 import {removeElement} from '../../../src/dom';
@@ -6,14 +23,13 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 /** @const */
 const TAG = 'amp-mplayer';
 
-class AmpMPlayer extends AMP.BaseElement {
+export class AmpMPlayer extends AMP.BaseElement {
 
   /** @implements {../../../src/video-interface.VideoInterface} */
   constructor(element) {
     super(element);
 
     // Declare instance variables with type annotations.
-
     /** @private {Element} */
     this.iframe = null;
 
@@ -50,14 +66,6 @@ class AmpMPlayer extends AMP.BaseElement {
   }
 
   /** @override */
-  isLayoutSupported(layout) {
-    //Define which layouts our element support
-
-    //Size-defined layouts: fixed, fixed height, responsive and fill
-    return isLayoutSizeDefined(layout);
-  }
-
-  /** @override */
   buildCallback() {
     // Get attributes, assertions of values, assign instance variables.
     // Build lightweight DOM and append to this.element.
@@ -68,7 +76,16 @@ class AmpMPlayer extends AMP.BaseElement {
         user().warn(TAG,
           'Did not receive ready callback from player %s.' +
           ' Ensure it has the videojs-amp-support plugin.', this.player_id);
-    }, 3000));
+      }, 3000));
+  }
+
+  /** @override */
+  isLayoutSupported(layout) {
+    //Define which layouts our element support
+
+    //Size-defined layouts: fixed, fixed height, responsive and fill
+    return isLayoutSizeDefined(layout);
+    //return layout == Layout.RESPONSIVE;
   }
 
   iframeSource() {
@@ -81,7 +98,7 @@ class AmpMPlayer extends AMP.BaseElement {
     const source = '/Users/ofirshlifer/Downloads/mplayer.html' +
       ((this.content_id !== '') ?
         '?content_id=' +
-      `${encodeURIComponent(this.content_id)}` :
+        `${encodeURIComponent(this.content_id)}` :
         ('?scanned_element=' +
           `${encodeURIComponent(this.scanned_element)}` +
           '&tags=' +
@@ -118,7 +135,6 @@ class AmpMPlayer extends AMP.BaseElement {
   }
 }
 
-  AMP.extension(TAG, '0.1', AMP => {
-    AMP.registerElement(TAG, AmpMPlayer);
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpMPlayer);
 });
-
