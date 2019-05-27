@@ -19,6 +19,7 @@ import {
   UIType,
   getStoreService,
 } from './amp-story-store-service';
+import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-story-system-layer-1.0.css';
 import {
   DevelopmentModeLog,
@@ -66,6 +67,12 @@ const INFO_CLASS = 'i-amphtml-story-info-control';
 
 /** @private @const {string} */
 const SIDEBAR_CLASS = 'i-amphtml-story-sidebar-control';
+
+/** @private @const {string} */
+const NEW_UPDATE_AVAILABLE_CLASS = 'i-amphtml-story-new-update-control';
+
+/** @private @const {string} */
+const HAS_NEW_UPDATE_ATTRIBUTE = 'i-amphtml-story-has-new-update';
 
 /** @private @const {number} */
 const HIDE_AUDIO_MESSAGE_TIMEOUT_MS = 1500;
@@ -156,6 +163,13 @@ const TEMPLATE = {
             'class': SIDEBAR_CLASS + ' i-amphtml-story-button',
           }),
         },
+        {
+          tag: 'div',
+          attrs: dict({
+            'role': 'button',
+            'class': NEW_UPDATE_AVAILABLE_CLASS + ' i-amphtml-story-button',
+          }),
+        },
       ],
     },
   ],
@@ -166,7 +180,11 @@ const TEMPLATE = {
  * Chrome contains:
  *   - mute/unmute button
  *   - story progress bar
- *   - bookend close butotn
+ *   - bookend close button
+ *   - share button
+ *   - domain info button
+ *   - sidebar
+ *   - new page updates available button
  */
 export class SystemLayer {
   /**
@@ -310,6 +328,20 @@ export class SystemLayer {
         this.onInfoClick_();
       } else if (matches(target, `.${SIDEBAR_CLASS}, .${SIDEBAR_CLASS} *`)) {
         this.onSidebarClick_();
+      } else if (
+        matches(
+          target,
+          `.${NEW_UPDATE_AVAILABLE_CLASS}, .${NEW_UPDATE_AVAILABLE_CLASS} *`
+        )
+      ) {
+        // Forward event to amp-story.
+        Services.actionServiceForDoc(this.parentEl_).trigger(
+          target,
+          'tap',
+          event,
+          ActionTrust.HIGH
+        );
+        this.toggleNewPageAvailableButton_(false);
       }
     });
 
@@ -391,6 +423,10 @@ export class SystemLayer {
         this.onSystemUiIsVisibleStateUpdate_(isVisible);
       }
     );
+
+    this.storeService_.subscribe(StateProperty.NEW_PAGE_AVAILABLE_ID, id => {
+      this.onNewPageAvailable_(id);
+    });
   }
 
   /**
@@ -409,6 +445,7 @@ export class SystemLayer {
 
   /**
    * Reacts to the ad state updates and updates the UI accordingly.
+   *
    * @param {boolean} isAd
    * @private
    */
@@ -422,6 +459,7 @@ export class SystemLayer {
 
   /**
    * Reacts to the bookend state updates and updates the UI accordingly.
+   *
    * @param {boolean} isActive
    * @private
    */
@@ -435,6 +473,7 @@ export class SystemLayer {
   /**
    * Checks if the story has a sidebar in order to display the icon representing
    * the opening of the sidebar.
+   *
    * @param {boolean} hasSidebar
    * @private
    */
@@ -449,6 +488,7 @@ export class SystemLayer {
   /**
    * Reacts to updates to whether sharing UIs may be shown, and updates the UI
    * accordingly.
+   *
    * @param {boolean} canShowSharingUis
    * @private
    */
@@ -464,6 +504,7 @@ export class SystemLayer {
   /**
    * Reacts to has audio state updates, determining if the story has a global
    * audio track playing, or if any page has audio.
+   *
    * @param {boolean} hasAudio
    * @private
    */
@@ -479,6 +520,7 @@ export class SystemLayer {
   /**
    * Reacts to the presence of audio on a page to determine which audio messages
    * to display.
+   *
    * @param {boolean} pageHasAudio
    * @private
    */
@@ -499,6 +541,7 @@ export class SystemLayer {
   }
   /**
    * Reacts to muted state updates.
+   *
    * @param {boolean} isMuted
    * @private
    */
@@ -512,6 +555,7 @@ export class SystemLayer {
 
   /**
    * Hides audio message after elapsed time.
+   *
    * @private
    */
   hideAudioMessageAfterTimeout_() {
@@ -526,6 +570,7 @@ export class SystemLayer {
 
   /**
    * Hides audio message.
+   *
    * @private
    */
   hideAudioMessageInternal_() {
@@ -539,6 +584,7 @@ export class SystemLayer {
 
   /**
    * Reacts to UI state updates and triggers the expected UI.
+   *
    * @param {!UIType} uiState
    * @private
    */
@@ -562,6 +608,7 @@ export class SystemLayer {
 
   /**
    * Reacts to system UI visibility state updates.
+   *
    * @param {boolean} isVisible
    * @private
    */
@@ -576,6 +623,7 @@ export class SystemLayer {
 
   /**
    * Reacts to the active page index changing.
+   *
    * @param {number} index
    */
   onPageIndexUpdate_(index) {
@@ -586,6 +634,7 @@ export class SystemLayer {
 
   /**
    * Reacts to RTL state updates and triggers the UI for RTL.
+   *
    * @param {boolean} rtlState
    * @private
    */
@@ -599,6 +648,7 @@ export class SystemLayer {
 
   /**
    * Handles click events on the mute and unmute buttons.
+   *
    * @param {boolean} mute Specifies if the audio is being muted or unmuted.
    * @private
    */
@@ -612,6 +662,7 @@ export class SystemLayer {
 
   /**
    * Handles click events on the share button and toggles the share menu.
+   *
    * @private
    */
   onShareClick_() {
@@ -621,6 +672,7 @@ export class SystemLayer {
 
   /**
    * Handles click events on the info button and toggles the info dialog.
+   *
    * @private
    */
   onInfoClick_() {
@@ -630,10 +682,42 @@ export class SystemLayer {
 
   /**
    * Handles click events on the sidebar button and toggles the sidebar.
+   *
    * @private
    */
   onSidebarClick_() {
     this.storeService_.dispatch(Action.TOGGLE_SIDEBAR, true);
+  }
+
+  /**
+   * Updates the "see new update" button with the new page id.
+   * When clicked it will take the user to the newest page.
+   *
+   * @param {string} id
+   * @private
+   */
+  onNewPageAvailable_(id) {
+    this.vsync_.mutate(() => {
+      const button = this.buttonsContainer_.querySelector(
+        '.i-amphtml-story-new-update-control'
+      );
+
+      button.setAttribute('on', `tap:${this.parentEl_.id}.goToPage(id=${id})`);
+      this.toggleNewPageAvailableButton_(true);
+    });
+  }
+
+  /**
+   * Displays or hides the "see new update" button.
+   *
+   * @param {boolean} isVisible
+   */
+  toggleNewPageAvailableButton_(isVisible) {
+    this.vsync_.mutate(() => {
+      isVisible
+        ? this.getShadowRoot().setAttribute(HAS_NEW_UPDATE_ATTRIBUTE, '')
+        : this.getShadowRoot().removeAttribute(HAS_NEW_UPDATE_ATTRIBUTE);
+    });
   }
 
   /**
@@ -659,6 +743,7 @@ export class SystemLayer {
 
   /**
    * Logs an array of entries to the developer logs.
+   *
    * @param {!Array<!./logging.AmpStoryLogEntryDef>} logEntries
    */
   logAll(logEntries) {
@@ -673,6 +758,7 @@ export class SystemLayer {
 
   /**
    * Logs a single entry to the developer logs.
+   *
    * @param {!./logging.AmpStoryLogEntryDef} logEntry
    */
   log(logEntry) {
@@ -698,6 +784,7 @@ export class SystemLayer {
   /**
    * Sets the string providing context for the developer logs window.  This is
    * often the name or ID of the element that all logs are for (e.g. the page).
+   *
    * @param {string} contextString
    */
   setDeveloperLogContextString(contextString) {
