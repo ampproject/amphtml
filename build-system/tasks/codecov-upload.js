@@ -19,7 +19,8 @@ const colors = require('ansi-colors');
 const fs = require('fs-extra');
 const log = require('fancy-log');
 const {getStdout} = require('../exec');
-const {isTravisBuild} = require('../travis');
+const {isTravisBuild, travisPullRequestSha} = require('../travis');
+const {shortSha} = require('../git');
 
 const {green, yellow, cyan} = colors;
 
@@ -35,13 +36,7 @@ function uploadReport(file, flags) {
   const viewReportPrefix = 'View report at: ';
   const viewReport = output.match(`${viewReportPrefix}.*`);
   if (viewReport && viewReport.length > 0) {
-    log(
-      green('INFO:'),
-      'Uploaded',
-      cyan(file),
-      'to',
-      cyan(viewReport[0].replace(viewReportPrefix, ''))
-    );
+    log(green('INFO:'), 'Uploaded', cyan(file));
   } else {
     log(
       yellow('WARNING:'),
@@ -63,10 +58,11 @@ async function codecovUpload() {
     );
     return;
   }
+  const commitSha = shortSha(travisPullRequestSha());
   log(
     green('INFO:'),
     'Uploading coverage reports to',
-    cyan('https://codecov.io/gh/ampproject/amphtml')
+    cyan(`https://codecov.io/gh/ampproject/amphtml/commit/${commitSha}`)
   );
   const unitTestsReport = 'test/coverage/lcov-unit.info';
   const integrationTestsReport = 'test/coverage/lcov-integration.info';
