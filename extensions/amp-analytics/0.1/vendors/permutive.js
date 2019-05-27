@@ -38,7 +38,7 @@ export const PERMUTIVE_CONFIG = /** @type {!JsonObject} */ ({
       'request': 'pageview',
     },
     'trackEngagement': {
-      'on': 'visible',
+      'on': 'timer',
       'timerSpec': {
         'interval': 5,
         'maxTimerLength': 600,
