@@ -14,9 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# \DIDOMI
+# DIDOMI
 
-A new generation platform of privacy management.
+Collect and enforce user consent with the Didomi Consent Management Platform. Use the [Didomi Console](https://console.didomi.io/) to create and configure your consent notices.
 
 ## Example
 
@@ -37,4 +37,4 @@ A new generation platform of privacy management.
 
 ## Configuration
 
-Please visit our [Documentation](https://developers.didomi.io/cmp/amp) for more information.
+Visit the [Didomi Console](https://console.didomi.io/) and our [Documentation](https://developers.didomi.io/cmp/amp) for more information.
