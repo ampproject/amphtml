@@ -191,7 +191,7 @@
 .i-amphtml-story-unmute-sound-text,
 .i-amphtml-story-unmute-no-sound-text,
 .i-amphtml-story-sidebar-control,
-.i-amphtml-story-new-update-control   {
+.i-amphtml-story-new-page-control   {
   display: none !important;
 }
 
@@ -243,12 +243,12 @@
   display: none !important;
 }
 
-.i-amphtml-story-new-update-control {
+.i-amphtml-story-new-page-control {
   /* TODO(enriqe): this is a placehoder, replace when new icon is ready. */
   background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 48 48" fill="#FFFFFF"><path d="M0 0h48v48H0z" fill="none"/><path d="M22 34h4V22h-4v12zm2-30C12.95 4 4 12.95 4 24s8.95 20 20 20 20-8.95 20-20S35.05 4 24 4zm0 36c-8.82 0-16-7.18-16-16S15.18 8 24 8s16 7.18 16 16-7.18 16-16 16zm-2-22h4v-4h-4v4z"/></svg>') !important;
 }
 
-[i-amphtml-story-has-new-update] .i-amphtml-story-new-update-control {
+[i-amphtml-story-has-new-page] .i-amphtml-story-new-page-control {
   display: block !important;
 }
 
