@@ -26,6 +26,7 @@ import {ActionTrust} from '../../../../src/action-constants';
 import {AmpStory} from '../amp-story';
 import {AmpStoryBookend} from '../bookend/amp-story-bookend';
 import {AmpStoryConsent} from '../amp-story-consent';
+import {CommonSignals} from '../../../../src/common-signals';
 import {Keys} from '../../../../src/utils/key-codes';
 import {LocalizationService} from '../../../../src/service/localization';
 import {MediaType} from '../media-pool';
@@ -939,13 +940,19 @@ describes.realWin(
           .resolves();
 
         createPages(story.element, 2, ['cover', 'page-1']);
-
-        return story.layoutCallback().then(() => {
-          expect(story.backgroundAudioEl_).to.exist;
-          expect(story.backgroundAudioEl_.src).to.equal(src);
-          expect(registerStub).to.have.been.calledOnce;
-          expect(preloadStub).to.have.been.calledOnce;
-        });
+        story
+          .layoutCallback()
+          .then(() =>
+            story.activePage_.element
+              .signals()
+              .whenSignal(CommonSignals.LOAD_END)
+          )
+          .then(() => {
+            expect(story.backgroundAudioEl_).to.exist;
+            expect(story.backgroundAudioEl_.src).to.equal(src);
+            expect(registerStub).to.have.been.calledOnce;
+            expect(preloadStub).to.have.been.calledOnce;
+          });
       });
 
       it('should bless the media on unmute', () => {
