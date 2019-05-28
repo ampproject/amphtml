@@ -180,10 +180,10 @@ function trySetCookie(win, name, value, expirationTime, domain) {
  */
 function checkOriginForSettingCookie(win, options, name) {
   if (options && options.allowOnProxyOrigin) {
-    if (!options.domain) {
+    if (options.highestAvailableDomain) {
       throw new Error(
-        'Should specify domain explicitly when setting cookie ' +
-          'on proxy origin'
+        'Could not support higestAvailable Domain on proxy origin, ' +
+        'specify domain explicitly'
       );
     }
     return;

@@ -167,12 +167,13 @@ describes.fakeWin('test-cookies', {amp: true}, env => {
       setCookie(win, 'c&1', 'v&1', Date.now() + BASE_CID_MAX_AGE_MILLIS, {});
     }).to.throw(/in depth check/);
 
-    // Must have domain specified when allowOnProxyOrigin
+    // Can't use higestAvailableDomain when allowOnProxyOrigin
     expect(() => {
       setCookie(win, 'c&1', 'v&1', Date.now() + BASE_CID_MAX_AGE_MILLIS, {
         allowOnProxyOrigin: true,
+        highestAvailableDomain: true,
       });
-    }).to.throw(/Should specify domain explicitly/);
+    }).to.throw(/specify domain explicitly/);
 
     // Cannot write to 'ampproject.org'
     setCookie(win, 'c&1', 'v&1', Date.now() + BASE_CID_MAX_AGE_MILLIS, {
