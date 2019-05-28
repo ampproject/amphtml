@@ -27,6 +27,7 @@
   "amp-auto-ads": 1,
   "amp-auto-ads-adsense-holdout": 0.1,
   "amp-auto-lightbox": 1,
+  "amp-consent-v2": 1,
   "amp-date-picker": 1,
   "amp-force-prerender-visible-elements": 0.01,
   "amp-ima-video": 1,
