@@ -290,7 +290,7 @@ export function isMediaDisplayed(ampMediaEl, resource) {
  * The attribute name for text background color
  * @private @const {string}
  */
-const TEXT_BACKGROUND_COLOR_ATTRIBUTE_NAME = 'text-background-color';
+const TEXT_BACKGROUND_COLOR_ATTRIBUTE_NAME = 'data-text-background-color';
 
 /**
  * The selector for text background color
@@ -300,7 +300,7 @@ const TEXT_BACKGROUND_COLOR_SELECTOR = `[${TEXT_BACKGROUND_COLOR_ATTRIBUTE_NAME}
 
 /**
  * Styles text with a background color based on the value of
- * the text-background-color attribute
+ * the data-text-background-color attribute
  * @param {!Element} element
  */
 export function setTextBackgroundColor(element) {

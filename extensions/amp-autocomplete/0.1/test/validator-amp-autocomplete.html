@@ -6,6 +6,7 @@
   You may obtain a copy of the License at
  
       http://www.apache.org/licenses/LICENSE-2.0
+      
   Unless required by applicable law or agreed to in writing, software
   distributed under the License is distributed on an "AS-IS" BASIS,
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -35,18 +36,24 @@
   <form method="post" action-xhr="https://example.com/subscribe"> 
     <!-- Valid: input and script tags as direct child to FORM -->
     <amp-autocomplete>
-      <input type="text">
+      <input>
       <script type="application/json"> {} </script>
     </amp-autocomplete>  
 
     <!-- Valid: input and src attr as direct child to FORM -->
     <amp-autocomplete src="https://data.com/articles.json?ref=CANONICAL_URL">
-      <input type="text">
+      <input>
     </amp-autocomplete>  
 
     <!-- Valid: input and [src] attr as direct child to FORM -->
     <amp-autocomplete [src]="foo.bar">
+      <input>
+    </amp-autocomplete>
+
+    <!-- Valid: input tag with type "text" and script tag -->
+    <amp-autocomplete>
       <input type="text">
+      <script type="application/json"> {} </script>
     </amp-autocomplete>  
 
     <!-- Valid: input tag with type "search" and script tag -->
@@ -57,7 +64,7 @@
 
     <!-- Valid: input tag with type "search" and src attr -->
     <amp-autocomplete src="https://data.com/articles.json?ref=CANONICAL_URL">
-      <input type="search">
+      <input>
     </amp-autocomplete>  
 
     <!-- Valid: deeply nested with FORM still as ancestor -->
@@ -65,7 +72,7 @@
       <div>
         <div>
           <amp-autocomplete>
-            <input type="search">
+            <input>
             <script type="application/json"> {} </script>
           </amp-autocomplete>  
         </div>
@@ -77,7 +84,7 @@
       <div>
         <div>
           <amp-autocomplete src="https://data.com/articles.json?ref=CANONICAL_URL">
-            <input type="search">
+            <input>
           </amp-autocomplete>  
         </div>
       </div>
@@ -85,101 +92,101 @@
 
     <!-- Valid: amp-component with static data and filter=prefix attribute -->
     <amp-autocomplete filter="prefix">
-      <input type="text">
+      <input>
       <script type="application/json"> {} </script>
     </amp-autocomplete>
 
     <!-- Valid: amp-component with remote data and filter=prefix attribute -->
     <amp-autocomplete filter="prefix" src="https://data.com/articles.json?ref=CANONICAL_URL">
-      <input type="text">
+      <input>
     </amp-autocomplete>
 
     <!-- Valid: amp-component with static data and filter=token-prefix attribute -->
     <amp-autocomplete filter="token-prefix">
-        <input type="text">
+      <input>
         <script type="application/json"> {} </script>
     </amp-autocomplete>
 
     <!-- Valid: amp-component with remote data and filter=token-prefix attribute -->
     <amp-autocomplete filter="token-prefix" src="https://data.com/articles.json?ref=CANONICAL_URL">
-        <input type="text">
+      <input>
     </amp-autocomplete>
   
     <!-- Valid: amp-component with static data and filter=substring attribute -->
     <amp-autocomplete filter="substring">
-        <input type="text">
+      <input>
         <script type="application/json"> {} </script>
     </amp-autocomplete>
 
     <!-- Valid: amp-component with remote data and filter=substring attribute -->
     <amp-autocomplete filter="substring" src="https://data.com/articles.json?ref=CANONICAL_URL">
-      <input type="text">
+      <input>
     </amp-autocomplete>
 
     <!-- Valid: amp-component with static data and filter=fuzzy attribute -->
     <amp-autocomplete filter="fuzzy">
-        <input type="text">
+      <input>
         <script type="application/json"> {} </script>
     </amp-autocomplete>
 
     <!-- Valid: amp-component with remote data and filter=fuzzy attribute -->
     <amp-autocomplete filter="fuzzy" src="https://data.com/articles.json?ref=CANONICAL_URL">
-      <input type="text">
+      <input>
     </amp-autocomplete>
 
     <!-- Valid: amp-component with static data and filter=none attribute -->
     <amp-autocomplete filter="none">
-        <input type="text">
+      <input>
         <script type="application/json"> {} </script>
     </amp-autocomplete>
     
     <!-- Valid: amp-component with remote data and filter=none attribute -->
     <amp-autocomplete filter="none" src="https://data.com/articles.json?ref=CANONICAL_URL">
-      <input type="text">
+      <input>
     </amp-autocomplete>
 
     <!-- Valid: amp-component with static data and filter=custom and filter-expr attribute -->
     <amp-autocomplete filter="custom" filter-expr="true">
-        <input type="text">
+      <input>
         <script type="application/json"> {} </script>
     </amp-autocomplete>
 
     <!-- Valid: amp-component with remote data and filter=custom and filter-expr attribute -->
     <amp-autocomplete filter="custom" filter-expr="true" src="https://data.com/articles.json?ref=CANONICAL_URL">
-      <input type="text">
+      <input>
     </amp-autocomplete>
 
     <!-- Valid: amp-component with static data and min-characters attribute -->
     <amp-autocomplete min-characters=3>
-        <input type="text">
+      <input>
         <script type="application/json"> {} </script>
     </amp-autocomplete>
 
     <!-- Valid: amp-component with remote data and min-characters attribute -->
     <amp-autocomplete min-characters=3 src="https://data.com/articles.json?ref=CANONICAL_URL">
-      <input type="text">
+      <input>
   </amp-autocomplete>
 
     <!-- Valid: amp-component with static data and max-entries attribute -->
     <amp-autocomplete max-entries=10>
-        <input type="text">
+      <input>
         <script type="application/json"> {} </script>
     </amp-autocomplete>
 
     <!-- Valid: amp-component with remote data and max-entries attribute -->
     <amp-autocomplete max-entries=10 src="https://data.com/articles.json?ref=CANONICAL_URL">
-        <input type="text">
+      <input>
     </amp-autocomplete>
 
     <!-- Valid: amp-component with static data and suggest-first attribute -->
     <amp-autocomplete suggest-first>
-        <input type="text">
+      <input>
         <script type="application/json"> {} </script>
     </amp-autocomplete>  
 
     <!-- Valid: amp-component with remote data and suggest-first attribute -->
     <amp-autocomplete suggest-first src="https://data.com/articles.json?ref=CANONICAL_URL">
-        <input type="text">
+      <input>
     </amp-autocomplete>
 
     <!-- Valid: amp-component with static data and highlight-user-entry attribute -->
@@ -195,18 +202,18 @@
 
     <!-- Valid: amp-component with static data and submit-on-enter attribute -->
     <amp-autocomplete submit-on-enter>
-        <input type="text">
+      <input>
         <script type="application/json"> {} </script>
     </amp-autocomplete> 
 
     <!-- Valid: amp-component with remote data and submit-on-enter attribute -->
     <amp-autocomplete submit-on-enter src="https://data.com/articles.json?ref=CANONICAL_URL">
-      <input type="text">
+      <input>
     </amp-autocomplete> 
 
     <!-- Valid: amp-component with static data and rich content template -->
     <amp-autocomplete>
-      <input type="text">
+      <input>
       <script type="application/json"> {} </script>
       <template type="amp-mustache" id="amp-template-default">
         <div class="city-item" data-value="{{value}}">
@@ -218,7 +225,7 @@
 
     <!-- Valid: amp-component with remote data and rich content template -->
     <amp-autocomplete src="https://data.com/articles.json?ref=CANONICAL_URL">
-      <input type="text">
+      <input>
       <template type="amp-mustache" id="amp-template-default">
         <div class="city-item" data-value="{{value}}">
             <div>{{value}}</div>
@@ -229,7 +236,7 @@
 
     <!-- Valid: amp-component with remote data and rich content template -->
     <amp-autocomplete src="https://data.com/articles.json?ref=CANONICAL_URL">
-      <input type="text">
+      <input>
       <template type="amp-mustache" id="amp-template-default">
         {{#disabled}}
           <div data-disabled>
@@ -247,18 +254,18 @@
 
     <!-- Valid: amp-component with static data and template attr -->
     <amp-autocomplete template="my-template-id">
-      <input type="text">
+      <input>
       <script type="application/json"> {} </script>
     </amp-autocomplete> 
     
     <!-- Valid: amp-component with remote data and template attr -->
     <amp-autocomplete src="https://data.com/articles.json?ref=CANONICAL_URL" template="my-template-id">
-      <input type="text">
+      <input>
     </amp-autocomplete> 
 
     <!-- Valid: amp-component with static data and template script child -->
     <amp-autocomplete>
-      <input type="text">
+      <input>
       <script type="application/json"> {} </script>
       <script type="text/plain" template="amp-mustache">
         <div class="city-item" data-value="{{value}}">
@@ -270,7 +277,7 @@
     
     <!-- Valid: amp-component with remote data and template attr -->
     <amp-autocomplete src="https://data.com/articles.json?ref=CANONICAL_URL">
-      <input type="text">
+      <input>
       <script type="application/json"> {} </script>
       <script type="text/plain" template="amp-mustache">
         <div class="city-item" data-value="{{value}}">
@@ -282,48 +289,54 @@
 
     <!-- Invalid: width is mistyped -->
     <amp-autocomplete widht=100>
-        <input type="text">
+      <input>
         <script type="application/json"> {} </script>
     </amp-autocomplete>  
 
     <!-- Invalid: responsive layout is not supported -->
     <amp-autocomplete layout="responsive">
-        <input type="text">
+      <input>
+      <script type="application/json"> {} </script>
+    </amp-autocomplete>
+
+    <!-- Invalid: amp-autocomplete with invalid input types -->
+    <amp-autocomplete widht=100>
+      <input type="button">
         <script type="application/json"> {} </script>
     </amp-autocomplete>
 
     <!-- Invalid: amp-autocomplete with filter=custom and no filter-expr attribute -->
     <amp-autocomplete filter="custom">
-      <input type="text">
+      <input>
       <script type="application/json"> {} </script>
     </amp-autocomplete>
 
     <!-- Invalid: amp-autocomplete with filter=custom and no filter-expr attribute -->
     <amp-autocomplete filter="custom" src="https://data.com/articles.json?ref=CANONICAL_URL">
-      <input type="text">
+      <input>
     </amp-autocomplete>
 
     <!-- Invalid: amp-autocomplete with unexpected filter -->
     <amp-autocomplete filter="random">
-      <input type="text">
+      <input>
       <script type="application/json"> {} </script>
     </amp-autocomplete>
 
     <!-- Invalid: amp-autocomplete with unexpected filter and src attr -->
     <amp-autocomplete filter="random" src="https://data.com/articles.json?ref=CANONICAL_URL">
-      <input type="text">
+      <input>
     </amp-autocomplete>
   </form>
 
   <!-- Invalid: amp-autocomplete with static data without FORM ancestor -->
   <amp-autocomplete>
-    <input type="text">
+    <input>
     <script type="application/json"> {} </script>
   </amp-autocomplete>
 
   <!-- Invalid: amp-autocomplete with remote data without FORM ancestor -->
   <amp-autocomplete src="https://data.com/articles.json?ref=CANONICAL_URL">
-    <input type="text">
+    <input>
   </amp-autocomplete>
 
 </body>

@@ -51,7 +51,7 @@
     <form method="post" action-xhr="/form/echo-json/post" target="_blank">
     <amp-autocomplete id="select-example" filter="substring" min-characters="0" highlight-user-entry
       src="autocomplete-cities.example.json" on="select:AMP.setState({inputSelect: event.value})">
-          <input type="text" name="input2" required>
+          <input name="input2" required>
       </amp-autocomplete>
       <input name="submit-button" type="submit" value="Submit">
     <div submit-success>
@@ -66,11 +66,11 @@
     <p>form has no autocomplete attr</p>
     <form method="post" action-xhr="/form/echo-json/post" target="_blank">
       <label for="frmEmailA">Personal Email</label>
-      <input type="text" name="email" id="frmEmailA" placeholder="name@example.com" required autocomplete="email"><br>
+    <input name="email" id="frmEmailA" placeholder="name@example.com" required autocomplete="email"><br>
 
       <label for="frmEmailB">Autocomplete Email</label>
       <amp-autocomplete filter="substring" min-characters="0">
-        <input type="text" name="email" id="frmEmailB" placeholder="name@example.com" required autocomplete="email">  
+      <input name="email" id="frmEmailB" placeholder="name@example.com" required autocomplete="email">
         <script type="application/json">
           { "items" : ["Email 1", "<span>Email</span> 2", "Email 3"]}
         </script>
@@ -81,11 +81,11 @@
     <p>form has autocomplete="on"</p>
     <form method="post" action-xhr="/form/echo-json/post" target="_blank" autocomplete="on">
       <label for="frmEmailC">Personal Email</label>
-      <input type="text" name="email" id="frmEmailC" placeholder="name@example.com" required autocomplete="email"><br>
+    <input name="email" id="frmEmailC" placeholder="name@example.com" required autocomplete="email"><br>
 
       <label for="frmEmailD">Autocomplete Email</label>
       <amp-autocomplete filter="substring" min-characters="0">
-        <input type="text" name="email" id="frmEmailD" placeholder="name@example.com" required autocomplete="email">  
+      <input name="email" id="frmEmailD" placeholder="name@example.com" required autocomplete="email">
         <script type="application/json">
           { "items" : ["Email 1", "Email 2", "Email 3"]}
         </script>
@@ -96,11 +96,11 @@
     <p>form and input have autocomplete="off"</p>
     <form method="post" action-xhr="/form/echo-json/post" target="_blank" autocomplete="off">
       <label for="frmEmailE">Personal Email</label>
-      <input type="text" name="email" id="frmEmailE" placeholder="name@example.com" required autocomplete="off"><br>
+    <input name="email" id="frmEmailE" placeholder="name@example.com" required autocomplete="off"><br>
 
       <label for="frmEmailF">Autocomplete Email</label>
       <amp-autocomplete filter="substring" min-characters="0">
-        <input type="text" name="email" id="frmEmailF" placeholder="name@example.com" required autocomplete="email">  
+      <input name="email" id="frmEmailF" placeholder="name@example.com" required autocomplete="email">
         <script type="application/json">
           { "items" : ["Email 1", "Email 2", "Email 3"]}
         </script>
@@ -112,7 +112,7 @@
     <p>no attributes</p>
     <form method="post" action-xhr="/form/echo-json/post" target="_blank">
       <amp-autocomplete filter="substring" src="autocomplete-cities.example.json">
-          <input type="text" name="input1" required>
+      <input name="input1" required>
       </amp-autocomplete>
       <input name="submit-button" type="submit" value="Submit">
     <div submit-success>
@@ -125,7 +125,7 @@
     <p>min-characters = 0</p>
     <form method="post" action-xhr="/form/echo-json/post" target="_blank">
       <amp-autocomplete filter="substring" min-characters="0" src="autocomplete-cities.example.json">
-          <input type="text" name="input2" required>
+      <input name="input2" required>
       </amp-autocomplete>
       <input name="submit-button" type="submit" value="Submit">
     <div submit-success>
@@ -138,7 +138,7 @@
     <p>min-characters = 3</p>
     <form method="post" action-xhr="/form/echo-json/post" target="_blank">
       <amp-autocomplete filter="substring" min-characters="3" src="autocomplete-cities.example.json">
-          <input type="text" name="input3" required>
+      <input name="input3" required>
       </amp-autocomplete>
       <input name="submit-button" type="submit" value="Submit">
     <div submit-success>
@@ -151,7 +151,7 @@
     <p>max-entries = 3</p>
     <form method="post" action-xhr="/form/echo-json/post" target="_blank">
       <amp-autocomplete filter="substring" max-entries="3" src="autocomplete-cities.example.json">
-          <input type="text" name="input4" required>
+      <input name="input4" required>
       </amp-autocomplete>
       <input name="submit-button" type="submit" value="Submit">
     <div submit-success>

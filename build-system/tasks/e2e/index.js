@@ -25,6 +25,7 @@ const Mocha = require('mocha');
 const tryConnect = require('try-net-connect');
 const {cyan} = require('ansi-colors');
 const {execOrDie, execScriptAsync} = require('../../exec');
+const {reportTestStarted} = require('../report-test-status');
 const {watch} = require('gulp');
 
 const HOST = 'localhost';
@@ -129,6 +130,7 @@ async function e2e() {
       });
     }
 
+    await reportTestStarted();
     mocha.run(async failures => {
       // end web server
       await cleanUp_();
@@ -165,4 +167,8 @@ e2e.flags = {
   'files': '  Run tests found in a specific path (ex: **/test-e2e/*.js)',
   'testnames': '  Lists the name of each test being run',
   'watch': '  Watches for changes in files, runs corresponding test(s)',
+  'engine':
+    '  The automation engine that orchestrates the browser. ' +
+    'Options are `puppeteer` or `selenium`. Default: `selenium`',
+  'headless': '  Runs the browser in headless mode',
 };
