@@ -1343,9 +1343,9 @@ tags: {
     value_casei: "text/css"
   }
   cdata: {
+    # This will always cause the tagspec matching to fail.
     max_bytes: -1
   }
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#stylesheets"
 }
 tags: {
   html_format: AMP
