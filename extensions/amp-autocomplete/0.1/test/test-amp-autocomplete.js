@@ -139,12 +139,48 @@ describes.realWin(
       expect(element).to.have.class('i-amphtml-autocomplete-item');
       expect(element.hasAttribute('role')).to.be.true;
       expect(element.innerText).to.equal('');
+
+      impl.highlightUserEntry_ = true;
+      element = impl.createElementFromItem_('hello');
+      expect(element).not.to.be.null;
+      expect(element).to.have.class('i-amphtml-autocomplete-item');
+      expect(element.hasAttribute('role')).to.be.true;
+      expect(element.innerHTML).to.equal('hello');
+
+      element = impl.createElementFromItem_('');
+      expect(element).not.to.be.null;
+      expect(element).to.have.class('i-amphtml-autocomplete-item');
+      expect(element.hasAttribute('role')).to.be.true;
+      expect(element.innerHTML).to.equal('');
+
+      element = impl.createElementFromItem_('hello', 'el');
+      expect(element).not.to.be.null;
+      expect(element).to.have.class('i-amphtml-autocomplete-item');
+      expect(element.hasAttribute('role')).to.be.true;
+      expect(element.innerHTML).to.equal(
+        'h<span class="autocomplete-partial">el</span>lo'
+      );
+
+      element = impl.createElementFromItem_('hello', 'HeLlO');
+      expect(element).not.to.be.null;
+      expect(element).to.have.class('i-amphtml-autocomplete-item');
+      expect(element.hasAttribute('role')).to.be.true;
+      expect(element.innerHTML).to.equal(
+        '<span class="autocomplete-partial">hello</span>'
+      );
+
+      element = impl.createElementFromItem_('hello', 'hellohello');
+      expect(element).not.to.be.null;
+      expect(element).to.have.class('i-amphtml-autocomplete-item');
+      expect(element.hasAttribute('role')).to.be.true;
+      expect(element.innerHTML).to.equal('hello');
     });
 
     describe('filterDataAndRenderResults_()', () => {
       let clearAllItemsSpy;
       let renderSpy;
       let filterDataSpy;
+
       beforeEach(() => {
         expect(impl.container_).not.to.be.null;
         expect(impl.container_.children.length).to.equal(0);
