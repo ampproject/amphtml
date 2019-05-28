@@ -112,6 +112,11 @@ Example:
       The user flow is as follows: If <code>submit-on-enter</code> is <code>true</code>, pressing <code>Enter</code> will select any currently active item and engage in default behavior, including submitting the form if applicable. If <code>submit-on-enter</code> is <code>false</code>, pressing <code>Enter</code> <em>while suggestions are displaying</em> will select any currently active item only and prevent any other default behavior. If suggestions are not displaying, autocomplete allows default behavior. <strong>Defaults to false.</strong>
     </td>
   </tr>
+  <tr>
+    <td width="40%"><strong>highlight-user-entry [optional]</strong></td>
+    <td>If <code>true</code>, exposes the <code>autocomplete-partial</code> class on the substring within the suggested item that resulted in its match with the user input. This can be used to stylize the corresponding match to stand out to the user. <strong>Defaults to false.</strong>
+    </td>
+  </tr>
 </table>
 
 ## Events
