@@ -35,8 +35,5 @@ feature_tests/css_lengthcheck.html:29:2 The author stylesheet specified in tag '
 |  </head>
 |  <body>
 |    Hello, world.
-|    <div style="replace_inline_style"></div>
->>   ^~~~~~~~~
-feature_tests/css_lengthcheck.html:35:2 CSS syntax error in tag 'div' - incomplete declaration. [GENERIC]
 |  </body>
 |  </html>

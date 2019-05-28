@@ -18,5 +18,8 @@
     "google-closure-compiler": "20180506.0.0",
     "google-closure-library": "20180506.0.0",
     "jasmine": "3.1.0"
+  },
+  "dependencies": {
+    "gulp": "^4.0.2"
   }
 }
