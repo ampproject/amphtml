@@ -76,27 +76,27 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
       this.element
     );
 
-    return this.mutateElement(() => {
-      toggle(this.element);
-      // Add the required AsyncInput class
-      this.element.classList.add(AsyncInputClasses.ASYNC_INPUT);
-      /**
-       * These styles will create an in-place element, that is 1x1,
-       * but invisible. Absolute positioning keeps it where it would have
-       * been, without taking up space. Thus, layoutCallback will still
-       * be called at the appropriate time
-       */
-      setStyles(this.element, {
-        'position': 'absolute',
-        'width': '1px',
-        'height': '1px',
-        'overflow': 'hidden',
-        'visibility': 'hidden',
-      });
-
-      return recaptchaServiceForDoc(this.element);
-    }).then(service => {
+    return recaptchaServiceForDoc(this.element).then(service => {
       this.recaptchaService_ = service;
+
+      return this.mutateElement(() => {
+        toggle(this.element);
+        // Add the required AsyncInput class
+        this.element.classList.add(AsyncInputClasses.ASYNC_INPUT);
+        /**
+         * These styles will create an in-place element, that is 1x1,
+         * but invisible. Absolute positioning keeps it where it would have
+         * been, without taking up space. Thus, layoutCallback will still
+         * be called at the appropriate time
+         */
+        setStyles(this.element, {
+          'position': 'absolute',
+          'width': '1px',
+          'height': '1px',
+          'overflow': 'hidden',
+          'visibility': 'hidden',
+        });
+      });
     });
   }
 
