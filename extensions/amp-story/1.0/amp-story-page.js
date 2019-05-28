@@ -71,6 +71,12 @@ import {toggle} from '../../../src/style';
 import {upgradeBackgroundAudio} from './audio';
 
 /**
+ * CSS class for an amp-story-page that indicates the entire page is loaded.
+ * @const {string}
+ */
+const PAGE_LOADED_CLASS_NAME = 'i-amphtml-story-page-loaded';
+
+/**
  * Selectors for media elements.
  * Only get the page media: direct children of amp-story-page (ie:
  * background-audio), or descendant of amp-story-grid-layer. That excludes media
@@ -488,7 +494,7 @@ export class AmpStoryPage extends AMP.BaseElement {
         mediaEl.addEventListener('error', resolve, true /* useCapture */);
       });
     });
-    return Promise.all(mediaPromises);
+    return Promise.all(mediaPromises).then(() => this.markPageAsLoaded_());
   }
 
   /**
@@ -549,6 +555,20 @@ export class AmpStoryPage extends AMP.BaseElement {
         // Run in case target never changes size.
         debouncePrepareForAnimation(el, null /* unlisten */);
       }
+    });
+  }
+
+  /** @private */
+  markPageAsLoaded_() {
+    dispatch(
+      this.win,
+      this.element,
+      EventType.PAGE_LOADED,
+      /* payload */ undefined,
+      {bubbles: true}
+    );
+    this.mutateElement(() => {
+      this.element.classList.add(PAGE_LOADED_CLASS_NAME);
     });
   }
 
