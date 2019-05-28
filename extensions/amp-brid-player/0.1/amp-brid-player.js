@@ -33,9 +33,7 @@ import {
 } from '../../../src/dom';
 import {getData, listen} from '../../../src/event-helper';
 import {htmlFor} from '../../../src/static-template';
-import {
-  installVideoManagerForDoc,
-} from '../../../src/service/video-manager-impl';
+import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
 
 const TAG = 'amp-brid-player';
@@ -44,7 +42,6 @@ const TAG = 'amp-brid-player';
  * @implements {../../../src/video-interface.VideoInterface}
  */
 class AmpBridPlayer extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -115,11 +112,18 @@ class AmpBridPlayer extends AMP.BaseElement {
     }
 
     //Create iframe
-    const src = 'https://services.brid.tv/services/iframe/' +
-        encodeURIComponent(feedType) +
-        '/' + encodeURIComponent(this.feedID_) +
-        '/' + encodeURIComponent(this.partnerID_) +
-        '/' + encodeURIComponent(this.playerID_) + '/0/' + itemsNum + '/?amp=1';
+    const src =
+      'https://services.brid.tv/services/iframe/' +
+      encodeURIComponent(feedType) +
+      '/' +
+      encodeURIComponent(this.feedID_) +
+      '/' +
+      encodeURIComponent(this.partnerID_) +
+      '/' +
+      encodeURIComponent(this.playerID_) +
+      '/0/' +
+      itemsNum +
+      '/?amp=1';
 
     this.videoIframeSrc_ = assertAbsoluteHttpOrHttpsUrl(src);
 
@@ -131,21 +135,25 @@ class AmpBridPlayer extends AMP.BaseElement {
     const {element} = this;
 
     this.partnerID_ = userAssert(
-        element.getAttribute('data-partner'),
-        'The data-partner attribute is required for <amp-brid-player> %s',
-        element);
+      element.getAttribute('data-partner'),
+      'The data-partner attribute is required for <amp-brid-player> %s',
+      element
+    );
 
-    this.playerID_ = userAssert(element.getAttribute('data-player'),
-        'The data-player attribute is required for <amp-brid-player> %s',
-        element);
+    this.playerID_ = userAssert(
+      element.getAttribute('data-player'),
+      'The data-player attribute is required for <amp-brid-player> %s',
+      element
+    );
 
     this.feedID_ = userAssert(
-        (element.getAttribute('data-video') ||
-            element.getAttribute('data-playlist') ||
-            element.getAttribute('data-outstream')),
-        'Either the data-video or the data-playlist or the data-outstream ' +
+      element.getAttribute('data-video') ||
+        element.getAttribute('data-playlist') ||
+        element.getAttribute('data-outstream'),
+      'Either the data-video or the data-playlist or the data-outstream ' +
         'attributes must be specified for <amp-brid-player> %s',
-        element);
+      element
+    );
 
     const deferred = new Deferred();
     this.playerReadyPromise_ = deferred.promise;
@@ -159,16 +167,15 @@ class AmpBridPlayer extends AMP.BaseElement {
   layoutCallback() {
     const iframe = createFrameFor(this, this.getVideoIframeSrc_());
 
-    this.iframe_ = iframe;
+    this.iframe_ = /** @type {HTMLIFrameElement} */ (iframe);
 
     this.unlistenMessage_ = listen(
-        this.win,
-        'message',
-        this.handleBridMessage_.bind(this)
+      this.win,
+      'message',
+      this.handleBridMessage_.bind(this)
     );
 
-    return this.loadPromise(iframe)
-        .then(() => this.playerReadyPromise_);
+    return this.loadPromise(iframe).then(() => this.playerReadyPromise_);
   }
 
   /** @override */
@@ -196,8 +203,10 @@ class AmpBridPlayer extends AMP.BaseElement {
   createPlaceholderCallback() {
     const {element} = this;
 
-    if (!element.hasAttribute('data-video') &&
-        !element.hasAttribute('data-playlist')) {
+    if (
+      !element.hasAttribute('data-video') &&
+      !element.hasAttribute('data-playlist')
+    ) {
       return;
     }
 
@@ -213,13 +222,15 @@ class AmpBridPlayer extends AMP.BaseElement {
     this.propagateAttributes(['aria-label'], placeholder);
     this.applyFillContent(placeholder);
 
-    placeholder.setAttribute('src',
-        `https://cdn.brid.tv/live/partners/${encodeURIComponent(partnerID)}` +
-        `/snapshot/${encodeURIComponent(feedID)}.jpg`);
+    placeholder.setAttribute(
+      'src',
+      `https://cdn.brid.tv/live/partners/${encodeURIComponent(partnerID)}` +
+        `/snapshot/${encodeURIComponent(feedID)}.jpg`
+    );
 
-    const altText = placeholder.hasAttribute('aria-label') ?
-      'Loading video - ' + placeholder.getAttribute('aria-label') :
-      'Loading video';
+    const altText = placeholder.hasAttribute('aria-label')
+      ? 'Loading video - ' + placeholder.getAttribute('aria-label')
+      : 'Loading video';
 
     placeholder.setAttribute('alt', altText);
 
@@ -233,12 +244,11 @@ class AmpBridPlayer extends AMP.BaseElement {
    * @private
    * */
   sendCommand_(command, opt_arg) {
-
     this.playerReadyPromise_.then(() => {
       if (this.iframe_ && this.iframe_.contentWindow) {
         const args = opt_arg === undefined ? '' : '|' + opt_arg;
         const message = 'Brid|' + command + args;
-        this.iframe_.contentWindow./*OK*/postMessage(message, '*');
+        this.iframe_.contentWindow./*OK*/ postMessage(message, '*');
       }
     });
   }
@@ -387,7 +397,6 @@ class AmpBridPlayer extends AMP.BaseElement {
     this.user().error(TAG, '`seekTo` not supported.');
   }
 }
-
 
 AMP.extension(TAG, '0.1', AMP => {
   AMP.registerElement(TAG, AmpBridPlayer);

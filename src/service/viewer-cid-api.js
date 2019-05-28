@@ -22,13 +22,11 @@ import {parseUrlDeprecated} from '../url';
  * Exposes CID API if provided by the Viewer.
  */
 export class ViewerCidApi {
-
   /**
    * Creates an instance of ViewerCidApi.
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
-
     /** @private {!./ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 

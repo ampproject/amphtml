@@ -179,11 +179,6 @@ event.value</pre>
     <td><pre>// Slide number.
 event.index</pre></td>
   </tr>
-  <tr>
-    <td><code>toggleAutoplay</code></td>
-    <td>Will, on user tap or click, toggle the autoplay status for the carousel. You can either specify the status you want by specifying it: <code>carousel-id.toggleAutoplay(toggleOn=false)</code> or flip the status by not specifying a value.</td>
-    <td><pre>optional toggle status</pre></td>
-  </tr>
 </table>
 
 ### amp-lightbox
@@ -201,6 +196,20 @@ event.index</pre></td>
   <tr>
     <td><code>lightboxClose</code></td>
     <td>Fired when lightbox is fully closed.</td>
+    <td>None</td>
+  </tr>
+</table>
+
+### amp-list
+<table>
+  <tr>
+    <th width="25%">Event</th>
+    <th width="35%">Description</th>
+    <th width="40%">Data</th>
+  </tr>
+  <tr>
+    <td><code>fetch-error</code>(low-trust)</td>
+    <td>Fired when fetching data fails.</td>
     <td>None</td>
   </tr>
 </table>
@@ -238,6 +247,20 @@ event.selectedOptions</pre></td>
   <tr>
     <td><code>sidebarClose</code></td>
     <td>Fired when sidebar is fully closed after transition has ended.</td>
+    <td>None</td>
+  </tr>
+</table>
+
+### amp-state
+<table>
+  <tr>
+    <th width="25%">Event</th>
+    <th width="35%">Description</th>
+    <th width="40%">Data</th>
+  </tr>
+  <tr>
+    <td><code>fetch-error</code>(low-trust)</td>
+    <td>Fired when fetching data fails.</td>
     <td>None</td>
   </tr>
 </table>
@@ -398,6 +421,10 @@ event.response</pre></td>
   <tr>
     <td><code>goToSlide(index=INTEGER)</code></td>
     <td>Advances the carousel to a specified slide index.</td>
+  </tr>
+  <tr>
+    <td><code>toggleAutoplay(toggleOn=true|false)</code></td>
+    <td>Toggle the carousel's autoplay status. <code>toggleOn</code> is optional.</td>
   </tr>
 </table>
 

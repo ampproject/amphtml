@@ -1,10 +1,22 @@
 # AMP HTML ⚡
 
-[![Renovate enabled](https://img.shields.io/badge/renovate-enabled-brightgreen.svg)](https://renovateapp.com/)
+[![GitHub Release](https://img.shields.io/github/release/ampproject/amphtml.svg)](https://github.com/ampproject/amphtml/releases)
+[![Contributors](https://img.shields.io/github/contributors-anon/ampproject/amphtml.svg)](https://github.com/ampproject/amphtml/graphs/contributors)
+[![Commits](https://img.shields.io/github/commit-activity/m/ampproject/amphtml.svg)](https://github.com/ampproject/amphtml/pulse/monthly)
+[![Build Status](https://img.shields.io/travis/ampproject/amphtml/master.svg)](https://travis-ci.org/ampproject/amphtml/builds)
+[![GitHub Issues (open)](https://img.shields.io/github/issues/ampproject/amphtml.svg)](https://github.com/ampproject/amphtml/issues?q=is%3Aopen+is%3Aissue)
+[![GitHub Issues (closed)](https://img.shields.io/github/issues-closed/ampproject/amphtml.svg)](https://github.com/ampproject/amphtml/issues?q=is%3Aissue+is%3Aclosed)
+[![GitHub Pull Requests (open)](https://img.shields.io/github/issues-pr/ampproject/amphtml.svg)](https://github.com/ampproject/amphtml/pulls?q=is%3Aopen+is%3Apr)
+[![GitHub Pull Requests (closed)](https://img.shields.io/github/issues-pr-closed/ampproject/amphtml.svg)](https://github.com/ampproject/amphtml/pulls?q=is%3Apr+is%3Aclosed)
+[![Codecov](https://img.shields.io/codecov/c/github/ampproject/amphtml/master.svg)](https://codecov.io/gh/ampproject/amphtml/)
+[![LGTM](https://img.shields.io/lgtm/alerts/github/ampproject/amphtml.svg)](https://lgtm.com/projects/g/ampproject/amphtml/)
+[![Percy](https://percy.io/static/images/percy-badge.svg)](https://percy.io/ampproject/amphtml)
+[![Renovate](https://img.shields.io/badge/renovate-enabled-brightgreen.svg)](https://renovateapp.com/)
+[![Prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
 
-[AMP HTML](https://www.ampproject.org/docs/get_started/about-amp.html) is a way to build web pages that render with reliable and fast performance. It is our attempt at fixing what many perceive as painfully slow page load times – especially when reading content on the mobile web.  AMP HTML is built on existing web technologies; an AMP page will load (quickly) in any modern browser.
+[AMP HTML](https://amp.dev) is a way to build web pages that render with reliable and fast performance. It is our attempt at fixing what many perceive as painfully slow page load times – especially when reading content on the mobile web.  AMP HTML is built on existing web technologies; an AMP page will load (quickly) in any modern browser.
 
-You can learn more at [ampproject.org](https://www.ampproject.org/) including [what AMP is](https://www.ampproject.org/learn/about-amp/), [how it works](https://www.ampproject.org/learn/how-amp-works/) and the importance of [validation in AMP](https://www.ampproject.org/docs/guides/validate).  You can also walk through [creating an AMP page](https://www.ampproject.org/docs/get_started/create) and read through the [reference docs](https://www.ampproject.org/docs/reference/components).
+You can learn more at [amp.dev](https://amp.dev/) including [how AMP works](https://amp.dev/about/how-amp-works) and the importance of [validation in AMP](https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validate_amp).  You can also walk through [creating an AMP page](https://amp.dev/documentation/guides-and-tutorials/start/create/) and read through the [reference docs](https://amp.dev/documentation/components/).
 
 ## We'd love your help making AMP better!
 
@@ -16,21 +28,20 @@ If you're new to **contributing to the AMP open source project**, sign up for ou
 
 ## Using AMP on your site
 
-If you are using AMP on your site,
-check out the docs on [ampproject.org](https://www.ampproject.org/), samples on [ampbyexample.com](https://ampbyexample.com/) and templates on [ampstart.com](https://ampstart.com).
+If you are using AMP on your site, check out the [docs](https://amp.dev), [examples](https://amp.dev/documentation/examples/) and [templates](https://amp.dev/documentation/templates/).
 
 The best place to get help with **questions about using AMP** on your site is [Stack Overflow](https://stackoverflow.com/questions/tagged/amp-html).  You'll find answers to many common questions there.  In the event your question hasn't already been answered you can post a new one, and one of the many people who are knowledgeable about AMP and who monitor Stack Overflow will likely answer it before too long.
 
 ## Further reading
 
-* [Component reference](https://www.ampproject.org/docs/reference/components)
+* [Component reference](https://amp.dev/documentation/components/)
 * [Release schedule](contributing/release-schedule.md) or [is my PR in production yet?](contributing/release-schedule.md#determining-if-your-change-is-in-production)
 * [Format specification](spec/amp-html-format.md)
 * [Custom element specification](spec/amp-html-components.md)
 
 ## Who makes AMP HTML?
 
-AMP HTML is made by the [AMP Project](https://www.ampproject.org/).  If you're a [contributor to the open source community](https://github.com/ampproject/amphtml/graphs/contributors) this includes you!
+AMP HTML is made by the [AMP Project](https://amp.dev).  If you're a [contributor to the open source community](https://github.com/ampproject/amphtml/graphs/contributors) this includes you!
 
 ## Security disclosures
 

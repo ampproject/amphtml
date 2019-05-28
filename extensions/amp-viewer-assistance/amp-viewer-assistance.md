@@ -63,13 +63,36 @@ The `amp-viewer-assistance` extension currently has two functions that can be in
   </tr>
   <tr>
     <td class="col-fourty"><code>updateActionState</code></td>
-    <td>A function to send a message to the outer viewer representing a state change. Should contain an argument of the resulting state change.</td>
+    <td>A function to send a message to the outer viewer representing a state change. Requires either an <code>update</code> or <code>error</code> object parameter
   </tr>
 </table>
 
+### UpdateActionState Payloads
+A valid `amp-viewer-assistance.updateActionState` payload can either be an `update` object of the format:
+```
+{
+  "actionStatus": "COMPLETED_ACTION_STATUS" | "ACTIVE_ACTION_STATUS" |
+      "FAILED_ACTION_STATUS",
+  "result": { ... }, // optional field used with COMPLETED_ACTION_STATUS
+}
+```
+
+or an `error` standard [Response](https://developer.mozilla.org/en-US/docs/Web/API/Response) object.
+
+## Handling Errors
+
+In the event of an error with the `amp-list` extension, we can listen to the `fetch-error` event and call `amp-viewer-assistance.updateActionState` to pass the error to the viewer. With an `error` parameter, `amp-viewer-assistance` will transform the parameter into a `FAILED_ACTION_STATUS` payload before sending it to the viewer.
+
+```html
+<amp-list id="my-failing-list"
+    src="failing.xhr.address.com"
+    on="fetch-error:amp-viewer-assistance.updateActionState(error=event.response)">
+</amp-list>
+```
+
 ## Messages Sent
 
-There are several messages that can be sent from the amp-viewer-assistance extension to the external viewer. 
+There are several messages that can be sent from the amp-viewer-assistance extension to the external viewer.
 
 <table>
   <tr>
@@ -103,8 +126,8 @@ In order to act upon a successful sign in from the viewer assistance, a `signedI
 {
   "myConfigItem1": {
     "foo": 123,
-    "bar": 456,
-  },
+    "bar": 456
+  }
 }
 </script>
 <div id="success-message" hidden>
@@ -133,7 +156,7 @@ Here are some examples:
 
 `amp-state:`
 ```html
-<amp-state id="myRemoteState" src="https://data.com/articles.json" 
+<amp-state id="myRemoteState" src="https://data.com/articles.json"
      crossorigin=”amp-viewer-auth-token-via-post”>
 </amp-state>
 ```

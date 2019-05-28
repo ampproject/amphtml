@@ -31,20 +31,17 @@ import {isObject} from './types';
  */
 let JSONScalarDef;
 
-
 /**
  * JSON object. It's a map with string keys and JSON values.
  * @typedef {*} should be !Object<string, ?JSONValueDef>
  */
 let JSONObjectDef;
 
-
 /**
  * JSON array. It's an array with JSON values.
  * @typedef {*} should be !Array<?JSONValueDef>
  */
 let JSONArrayDef;
-
 
 /**
  * JSON value. It's either a scalar, an object or an array.
@@ -89,10 +86,11 @@ export function getValueForExpr(obj, expr) {
   let value = obj;
   for (let i = 0; i < parts.length; i++) {
     const part = parts[i];
-    if (part &&
-        value &&
-        value[part] !== undefined &&
-        hasOwnProperty(value, part)
+    if (
+      part &&
+      value &&
+      value[part] !== undefined &&
+      hasOwnProperty(value, part)
     ) {
       value = value[part];
       continue;
@@ -111,7 +109,7 @@ export function getValueForExpr(obj, expr) {
  * @return {?JsonObject} May be extend to parse arrays.
  */
 export function parseJson(json) {
-  return /** @type {?JsonObject} */(JSON.parse(/** @type {string} */ (json)));
+  return /** @type {?JsonObject} */ (JSON.parse(/** @type {string} */ (json)));
 }
 
 /**
@@ -121,7 +119,7 @@ export function parseJson(json) {
  * @param {*} json JSON string to parse
  * @param {function(!Error)=} opt_onFailed Optional function that will be called
  *     with the error if parsing fails.
- * @return {?JsonObject|undefined} May be extend to parse arrays.
+ * @return {?JsonObject} May be extend to parse arrays.
  */
 export function tryParseJson(json, opt_onFailed) {
   try {
@@ -130,7 +128,7 @@ export function tryParseJson(json, opt_onFailed) {
     if (opt_onFailed) {
       opt_onFailed(e);
     }
-    return undefined;
+    return null;
   }
 }
 
@@ -211,7 +209,6 @@ export function deepEquals(a, b, depth = 5) {
   return true;
 }
 
-
 /**
  * @param {*} obj
  * @param {string} key
@@ -222,5 +219,7 @@ function hasOwnProperty(obj, key) {
     return false;
   }
   return Object.prototype.hasOwnProperty.call(
-      /** @type {!Object} */ (obj), key);
+    /** @type {!Object} */ (obj),
+    key
+  );
 }

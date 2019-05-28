@@ -16,7 +16,6 @@
 
 import {requireExternal} from '../../../src/module';
 
-
 /**
  * Create a React component that can render Promises.
  * Note: The nested class cannot be named Deferred, since src/promise.js already
@@ -26,7 +25,6 @@ import {requireExternal} from '../../../src/module';
 function createDeferred_() {
   const React = requireExternal('react');
 
-  /** @extends {React.Component} */
   class DeferredType extends React.Component {
     /**
      * @param {!Object} props
@@ -46,8 +44,9 @@ function createDeferred_() {
 
     /** @override */
     shouldComponentUpdate(props, state) {
-      return shallowDiffers(this.props, props) ||
-          shallowDiffers(this.state, state);
+      return (
+        shallowDiffers(this.props, props) || shallowDiffers(this.state, state)
+      );
     }
 
     /** @override */
@@ -102,4 +101,3 @@ export function createDeferred() {
   }
   return DeferredType_;
 }
-

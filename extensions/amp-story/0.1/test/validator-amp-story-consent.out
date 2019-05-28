@@ -21,6 +21,8 @@ PASS
 |    <meta charset="utf-8">
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
 |    <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-0.1.js"></script>
+>>   ^~~~~~~~~
+amp-story/0.1/test/validator-amp-story-consent.html:22:2 The extension 'amp-story' is referenced at version '0.1' which is a deprecated version. Please use a more recent version of this extension. This may become an error in the future. (see https://amp.dev/documentation/components/amp-story) [DEPRECATION]
 |    <script async custom-element="amp-consent" src="https://cdn.ampproject.org/v0/amp-consent-0.1.js"></script>
 |    <title>My Story</title>
 |    <meta name="description" content="Get started with amp-story">

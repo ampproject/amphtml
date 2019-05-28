@@ -35,6 +35,7 @@ If you do not yet have a specific code contribution project in mind as you go th
 - [Create a Git branch](#create-a-git-branch)
 - [Pull the latest changes from the amphtml repository](#pull-the-latest-changes-from-the-amphtml-repository)
 - [Edit files and commit them](#edit-files-and-commit-them)
+  * [Code quality and style](#code-quality-and-style)
 - [Testing your changes](#testing-your-changes)
   * [Running tests locally](#running-tests-locally)
   * [Running all the Travis CI checks locally](#running-all-the-travis-ci-checks-locally)
@@ -99,7 +100,7 @@ If you are new to Git it may seem surprising that there are three different repo
 
 Note that each of these repositories has a complete copy of the entire amphtml codebase.  If your local repository is on your computer and you lose your internet connection you'll still be able to make changes to any file in your local repository.  Part of the workflow for Git that we'll go through is how you keep these three repositories in sync.
 
-One thing that might put your mind at ease:  if you aren't currently a [core committer](../GOVERNANCE.md) to the amphtml project, you can't actually make changes to the amphtml repository directly. So go ahead and try out different Git commands without worrying you're going to break things for other people!
+One thing that might put your mind at ease:  if you aren't in a [role](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#roles) that lets you make changes to the amphtml repository directly any changes you make will only affect you. So go ahead and try out different Git commands without worrying you're going to break things for other people!
 
 ## Creating your GitHub fork and your local repository
 To create your fork on GitHub and your local copy of that fork:
@@ -293,9 +294,9 @@ The common workflow for making changes to files in Git is:
 
 * edit some files using your favorite editor
 
-* if your code requires a new dependency, run `yarn add --dev --exact [packagename]`, which will automatically update `package.json` and `yarn.lock`
+* if your code requires a new dependency, run `yarn add --exact [--dev] <packagename>`, which will automatically update `package.json` and `yarn.lock`
 
-* if you manually edited `package.json`, run `yarn install` to install the dependency and generate an updated `yarn.lock` file
+* if you manually edited `package.json`, run `yarn` to install the dependency and generate an updated `yarn.lock` file
 
 * tell Git that you care about these changes by _staging_ them using the `git add` command
 
@@ -343,13 +344,24 @@ git commit -a -m "<a brief description of your commit>"
 
 Note that you *can* add changes into an existing commit but that opens up some additional Git concepts that you don't really need to make a contribution.
 
+## Code quality and style
+
+The AMP Project uses [Eslint](https://eslint.org/) to ensure code quality and [Prettier](https://prettier.io/) to standardize code style. For easy development, here are two recommendations:
+- Use a code editor with Eslint support to make sure that your code satisfies all of AMP's quality and style rules. [Here](https://eslint.org/docs/user-guide/integrations#editors) is a list of editors with Eslint extension support.
+- Set your editor to automatically fix Eslint errors in your code on save.
+
+For example, if you use [Visual Studio Code](https://code.visualstudio.com/), you can install its [Eslint plugin](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint), and enable the `eslint.autoFixOnSave` setting.
+
+Alternatively, you can manually fix lint errors in your code by running:
+```
+gulp lint --local-changes --fix
+```
+
 # Testing your changes
 
 Before sending your code changes for review, please make sure that all of the affected tests are passing. You may be expected to add/modify some tests as well.
 
-{% call callout('Note', type='note') %}
-Automatically run most checks on `git push` by enabling our pre-push hook. Run `./build-system/enable-git-pre-push.sh`
-{% endcall %}
+Note: You can automatically run critical checks before `git push` by enabling our pre-push hook. To do so, run `./build-system/enable-git-pre-push.sh`.
 
 ## Running tests locally
 
@@ -444,7 +456,7 @@ Note that you *can* edit files in your branch directly on GitHub using the web U
 
 # Send a Pull Request (i.e. request a code review)
 
-In order for your changes to become part of the amphtml repository, you will need to get your code reviewed by one of the [core committers](../GOVERNANCE.md) via a Pull Request (PR).  In fact you won't actually merge your code into the amphtml repository directly; once a core committer approves it he or she will handle the merge for you.
+In order for your changes to become part of the amphtml repository, you will need to get your [code reviewed](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#code-review-and-approval) via a Pull Request (PR).  In fact you won't actually merge your code into the amphtml repository directly; after your code has been reviewed [someone with the permission to modify the amphtml repository](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#roles) will handle the merge for you.
 
 Once your code is ready for a review, go to [https://github.com/ampproject/amphtml](https://github.com/ampproject/amphtml) and click on the "Compare & pull request" button on the "recently pushed branches" banner.  If that banner isn't visible, go to your GitHub fork at
 `https://github.com/<username>/amphtml`, use the Branch dropdown to select the branch that contains the changes you want reviewed and press the "New pull request" button.
@@ -455,9 +467,13 @@ On the "Open a pull request" page, you will see dropdowns at the top indicating 
 amproject/amphtml / master … <username>/amphtml / <branch name>
 ```
 
-Below this are text boxes where you can provide a title and description for your pull request.  Please follow the guidelines in the template for providing a good title and description.  Make sure to refer to any Issues that you are fixing (by typing "Issue #" and selecting it from the autocomplete) so that people can see which issue you are fixing and people watching the issue will see that there's a PR for it.
+Below this are text boxes where you can provide a title and description for your pull request.  Please follow the guidelines in the template for providing a good title and description.
 
-The reviewer should be one of the [core committers](../GOVERNANCE.md) and ideally someone who is familiar with the change you are making (e.g. someone you've been communicating with through an associated GitHub issue).
+In your PR description or comments refer to any GitHub issues that your PR is addressing.  This will let people reviewing your PR know what issue your change is addressing and let anyone watching the issue know that there's a PR for it.  You can do this by including the text `issue #<your issue number>` in the description/comment.  If your PR completely fixes the issue, make this `fixes #<your issue number>` instead, which will also cause the issue to be closed once your PR is merged.
+
+You will need to find a [Reviewer and Owner](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#code-review-and-approval) to review your code and approve it.  When you find someone to review your code, cc them on the Pull Request (by adding a line "/cc @username", e.g. "/cc @mrjoro").
+
+When you're new to contributing to AMP it can be tricky to figure out who should review your code.  In general if you've been working with someone in the community on your change, they can likely review your code or know who can review it.  The [people who previously changed the files you're changing](https://help.github.com/en/articles/tracking-changes-in-a-file) are also good candidates for reviewing your change.  If you aren't sure who to ask to review your code, the steps for [finding a guide](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#find-a-guide) can also work for finding a reviewer for your change.
 
 When you're done click "Create pull request."  This will bring you to your Pull Request page where you can track progress, add comments, etc.
 
@@ -518,7 +534,7 @@ You can see whether your change made it into a given build on the [amphtml Relea
 
 You can set your browser to use the Dev Channel build by enabling `dev-channel` on the [AMP Experiments](https://cdn.ampproject.org/experiments.html) page.  This will let you see how your changes will affect any AMP page before your changes are rolled out to all AMP pages.  Note that this only affects the browser in which you enable the experiment.
 
-You can verify the AMP version your browser is using for a given page by looking at your browser's developer console.  After loading an AMP page (e.g. [https://ampproject.org](https://ampproject.org)) the console will have a message like `Powered by AMP ⚡ HTML – Version <build number>`).  The `<build number>` will match one of the build numbers on the [amphtml Releases page](https://github.com/ampproject/amphtml/releases).
+You can verify the AMP version your browser is using for a given page by looking at your browser's developer console.  After loading an AMP page (e.g. [https://amp.dev](https://amp.dev)) the console will have a message like `Powered by AMP ⚡ HTML – Version <build number>`).  The `<build number>` will match one of the build numbers on the [amphtml Releases page](https://github.com/ampproject/amphtml/releases).
 
 The [Release Schedule](release-schedule.md) doc has more details on the release process.
 

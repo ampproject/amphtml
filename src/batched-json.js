@@ -50,30 +50,30 @@ export function batchFetchJsonFor(
   opt_expr = '.',
   opt_urlReplacement = UrlReplacementPolicy.NONE,
   opt_refresh = false,
-  opt_token = undefined)
-{
+  opt_token = undefined
+) {
   assertHttpsUrl(element.getAttribute('src'), element);
   const xhr = Services.batchedXhrFor(ampdoc.win);
   return requestForBatchFetch(element, opt_urlReplacement, opt_refresh)
-      .then(data => {
-        if (opt_token) {
-          data.fetchOpt['method'] = 'POST';
-          data.fetchOpt['headers'] = {
-            'Content-Type': 'application/x-www-form-urlencoded',
-          };
-          data.fetchOpt['body'] = {
-            'ampViewerAuthToken': opt_token,
-          };
-        }
-        return xhr.fetchJson(data.xhrUrl, data.fetchOpt);
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (data == null) {
-          throw new Error('Response is undefined.');
-        }
-        return getValueForExpr(data, opt_expr || '.');
-      });
+    .then(data => {
+      if (opt_token !== undefined) {
+        data.fetchOpt['method'] = 'POST';
+        data.fetchOpt['headers'] = {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        };
+        data.fetchOpt['body'] = {
+          'ampViewerAuthToken': opt_token,
+        };
+      }
+      return xhr.fetchJson(data.xhrUrl, data.fetchOpt);
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data == null) {
+        throw new Error('Response is undefined.');
+      }
+      return getValueForExpr(data, opt_expr || '.');
+    });
 }
 
 /**
@@ -90,9 +90,10 @@ export function requestForBatchFetch(element, replacement, refresh) {
 
   // Replace vars in URL if desired.
   const urlReplacements = Services.urlReplacementsForDoc(element);
-  const promise = (replacement >= UrlReplacementPolicy.OPT_IN)
-    ? urlReplacements.expandUrlAsync(url)
-    : Promise.resolve(url);
+  const promise =
+    replacement >= UrlReplacementPolicy.OPT_IN
+      ? urlReplacements.expandUrlAsync(url)
+      : Promise.resolve(url);
 
   return promise.then(xhrUrl => {
     // Throw user error if this element is performing URL substitutions
@@ -100,10 +101,12 @@ export function requestForBatchFetch(element, replacement, refresh) {
     if (replacement == UrlReplacementPolicy.OPT_IN) {
       const invalid = urlReplacements.collectUnwhitelistedVarsSync(element);
       if (invalid.length > 0) {
-        throw user().createError('URL variable substitutions in CORS ' +
+        throw user().createError(
+          'URL variable substitutions in CORS ' +
             'fetches from dynamic URLs (e.g. via amp-bind) require opt-in. ' +
             `Please add data-amp-replace="${invalid.join(' ')}" to the ` +
-           `<${element.tagName}> element. See https://bit.ly/amp-var-subs.`);
+            `<${element.tagName}> element. See https://bit.ly/amp-var-subs.`
+        );
       }
     }
     const fetchOpt = {};

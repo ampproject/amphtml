@@ -68,7 +68,7 @@ module.exports = {
     debug: true,
     basedir: __dirname + '/../../',
     transform: [
-      ['babelify', {'sourceMapsAbsolute': true}],
+      ['babelify', {'global': isTravisBuild(), 'sourceMapsAbsolute': true}],
     ],
     // Prevent "cannot find module" errors on Travis. See #14166.
     bundleDelay: isTravisBuild() ? 5000 : 1200,
@@ -132,9 +132,7 @@ module.exports = {
 
   autoWatch: true,
 
-  browsers: [
-    isTravisBuild() ? 'Chrome_travis_ci' : 'Chrome_no_extensions',
-  ],
+  browsers: [isTravisBuild() ? 'Chrome_travis_ci' : 'Chrome_no_extensions'],
 
   customLaunchers: {
     /* eslint "google-camelcase/google-camelcase": 0*/
@@ -149,84 +147,118 @@ module.exports = {
     Chrome_no_extensions_headless: {
       base: 'ChromeHeadless',
       // https://developers.google.com/web/updates/2017/04/headless-chrome#frontend
-      flags: ['--no-sandbox --remote-debugging-port=9222']
-          .concat(COMMON_CHROME_FLAGS),
+      flags: ['--no-sandbox --remote-debugging-port=9222'].concat(
+        COMMON_CHROME_FLAGS
+      ),
     },
     // SauceLabs configurations.
     // New configurations can be created here:
     // https://wiki.saucelabs.com/display/DOCS/Platform+Configurator#/
-    SL_Chrome: Object.assign({
-      base: 'SauceLabs',
-      browserName: 'chrome',
-      platform: 'Windows 10',
-      version: 'latest',
-    }, SAUCE_TIMEOUT_CONFIG),
-    SL_Chrome_Beta: Object.assign({
-      base: 'SauceLabs',
-      browserName: 'chrome',
-      platform: 'Windows 10',
-      version: 'beta',
-    }, SAUCE_TIMEOUT_CONFIG),
-    SL_Chrome_Android_7: Object.assign({
-      base: 'SauceLabs',
-      appiumVersion: '1.8.1',
-      deviceName: 'Android GoogleAPI Emulator',
-      browserName: 'Chrome',
-      platformName: 'Android',
-      platformVersion: '7.1',
-    }, SAUCE_TIMEOUT_CONFIG),
-    SL_iOS_12: Object.assign({
-      base: 'SauceLabs',
-      appiumVersion: '1.9.1',
-      deviceName: 'iPhone X Simulator',
-      browserName: 'Safari',
-      platformName: 'iOS',
-      platformVersion: '12.0',
-    }, SAUCE_TIMEOUT_CONFIG),
-    SL_iOS_11: Object.assign({
-      base: 'SauceLabs',
-      appiumVersion: '1.9.1',
-      deviceName: 'iPhone X Simulator',
-      browserName: 'Safari',
-      platformName: 'iOS',
-      platformVersion: '11.3',
-    }, SAUCE_TIMEOUT_CONFIG),
-    SL_Firefox: Object.assign({
-      base: 'SauceLabs',
-      browserName: 'firefox',
-      platform: 'Windows 10',
-      version: 'latest',
-    }, SAUCE_TIMEOUT_CONFIG),
-    SL_Firefox_Beta: Object.assign({
-      base: 'SauceLabs',
-      browserName: 'firefox',
-      platform: 'Windows 10',
-      version: 'beta',
-    }, SAUCE_TIMEOUT_CONFIG),
-    SL_Safari_12: Object.assign({
-      base: 'SauceLabs',
-      browserName: 'safari',
-      platform: 'macOS 10.13',
-      version: '12.0',
-    }, SAUCE_TIMEOUT_CONFIG),
-    SL_Safari_11: Object.assign({
-      base: 'SauceLabs',
-      browserName: 'safari',
-      platform: 'macOS 10.13',
-      version: '11.1',
-    }, SAUCE_TIMEOUT_CONFIG),
-    SL_Edge_17: Object.assign({
-      base: 'SauceLabs',
-      browserName: 'MicrosoftEdge',
-      platform: 'Windows 10',
-      version: '17.17134',
-    }, SAUCE_TIMEOUT_CONFIG),
-    SL_IE_11: Object.assign({
-      base: 'SauceLabs',
-      browserName: 'internet explorer',
-      platform: 'Windows 10',
-      version: '11.103',
-    }, SAUCE_TIMEOUT_CONFIG),
+    SL_Chrome: Object.assign(
+      {
+        base: 'SauceLabs',
+        browserName: 'chrome',
+        platform: 'Windows 10',
+        version: 'latest',
+      },
+      SAUCE_TIMEOUT_CONFIG
+    ),
+    SL_Chrome_Beta: Object.assign(
+      {
+        base: 'SauceLabs',
+        browserName: 'chrome',
+        platform: 'Windows 10',
+        version: 'beta',
+      },
+      SAUCE_TIMEOUT_CONFIG
+    ),
+    SL_Chrome_Android_7: Object.assign(
+      {
+        base: 'SauceLabs',
+        appiumVersion: '1.8.1',
+        deviceName: 'Android GoogleAPI Emulator',
+        browserName: 'Chrome',
+        platformName: 'Android',
+        platformVersion: '7.1',
+      },
+      SAUCE_TIMEOUT_CONFIG
+    ),
+    SL_iOS_12: Object.assign(
+      {
+        base: 'SauceLabs',
+        appiumVersion: '1.9.1',
+        deviceName: 'iPhone X Simulator',
+        browserName: 'Safari',
+        platformName: 'iOS',
+        platformVersion: '12.0',
+      },
+      SAUCE_TIMEOUT_CONFIG
+    ),
+    SL_iOS_11: Object.assign(
+      {
+        base: 'SauceLabs',
+        appiumVersion: '1.9.1',
+        deviceName: 'iPhone X Simulator',
+        browserName: 'Safari',
+        platformName: 'iOS',
+        platformVersion: '11.3',
+      },
+      SAUCE_TIMEOUT_CONFIG
+    ),
+    SL_Firefox: Object.assign(
+      {
+        base: 'SauceLabs',
+        browserName: 'firefox',
+        platform: 'Windows 10',
+        version: 'latest',
+      },
+      SAUCE_TIMEOUT_CONFIG
+    ),
+    SL_Firefox_Beta: Object.assign(
+      {
+        base: 'SauceLabs',
+        browserName: 'firefox',
+        platform: 'Windows 10',
+        version: 'beta',
+      },
+      SAUCE_TIMEOUT_CONFIG
+    ),
+    SL_Safari_12: Object.assign(
+      {
+        base: 'SauceLabs',
+        browserName: 'safari',
+        platform: 'macOS 10.13',
+        version: '12.0',
+      },
+      SAUCE_TIMEOUT_CONFIG
+    ),
+    SL_Safari_11: Object.assign(
+      {
+        base: 'SauceLabs',
+        browserName: 'safari',
+        platform: 'macOS 10.13',
+        version: '11.1',
+      },
+      SAUCE_TIMEOUT_CONFIG
+    ),
+    SL_Edge_17: Object.assign(
+      {
+        base: 'SauceLabs',
+        browserName: 'MicrosoftEdge',
+        platform: 'Windows 10',
+        version: '17.17134',
+      },
+      SAUCE_TIMEOUT_CONFIG
+    ),
+    SL_IE_11: Object.assign(
+      {
+        base: 'SauceLabs',
+        browserName: 'internet explorer',
+        platform: 'Windows 10',
+        version: '11.103',
+      },
+      SAUCE_TIMEOUT_CONFIG
+    ),
   },
 
   sauceLabs: {
@@ -242,8 +274,10 @@ module.exports = {
   client: {
     mocha: {
       reporter: 'html',
-      // Longer timeout on Travis; fail quickly at local.
+      // Longer timeout on Travis; fail quickly during local runs.
       timeout: isTravisBuild() ? 10000 : 2000,
+      // Run tests up to 3 times before failing them on Travis.
+      retries: isTravisBuild() ? 2 : 0,
     },
     captureConsole: false,
     verboseLogging: false,
@@ -251,10 +285,16 @@ module.exports = {
   },
 
   singleRun: true,
-  browserDisconnectTimeout: 10000,
-  browserNoActivityTimeout: 4 * 60 * 1000,
   captureTimeout: 4 * 60 * 1000,
   failOnEmptyTestSuite: false,
+
+  // AMP tests on Sauce take ~9 minutes, so don't fail if the browser doesn't
+  // communicate with the proxy for up to 10 minutes.
+  // TODO(rsimha): Reduce this number once keepalives are implemented by
+  // karma-sauce-launcher.
+  // See https://github.com/karma-runner/karma-sauce-launcher/pull/161.
+  browserDisconnectTimeout: 10 * 60 * 1000,
+  browserNoActivityTimeout: 10 * 60 * 1000,
 
   // IF YOU CHANGE THIS, DEBUGGING WILL RANDOMLY KILL THE BROWSER
   browserDisconnectTolerance: isTravisBuild() ? 2 : 0,
@@ -280,9 +320,12 @@ module.exports = {
     'karma-source-map-support',
     'karma-super-dots-reporter',
     {
-      'middleware:custom': ['factory', function() {
-        return require(require.resolve('../app.js'));
-      }],
+      'middleware:custom': [
+        'factory',
+        function() {
+          return require(require.resolve('../app.js'));
+        },
+      ],
     },
   ],
 };
