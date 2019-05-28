@@ -81,12 +81,12 @@ def CheckPrereqs():
     Die('Expected libprotoc 2.5.0 or newer, saw: %s' % libprotoc_version)
 
   # Ensure that the Python protobuf package is installed.
-  for m in ['descriptor', 'text_format']:
+  for m in ['descriptor', 'text_format', 'json_format']:
     module = 'google.protobuf.%s' % m
     try:
       __import__(module)
     except ImportError:
-      Die('%s not found. Try "apt-get install python-protobuf" or follow the install instructions at https://github.com/ampproject/amphtml/blob/master/validator/README.md#installation' % module)
+      Die('%s not found. Try "pip install protobuf" or follow the install instructions at https://github.com/ampproject/amphtml/blob/master/validator/README.md#installation' % module)
 
   # Ensure that yarn is installed.
   try:
