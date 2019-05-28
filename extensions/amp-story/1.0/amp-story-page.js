@@ -226,14 +226,6 @@ export class AmpStoryPage extends AMP.BaseElement {
     /** @private @const {!../../../src/service/resources-impl.Resources} */
     this.resources_ = Services.resourcesForDoc(getAmpdoc(this.win.document));
 
-    /** @private @const {!Promise} */
-    this.mediaLayoutPromise_ = this.waitForMediaLayout_();
-
-    /** @private @const {!Promise} */
-    this.pageLoadPromise_ = this.mediaLayoutPromise_.then(() => {
-      this.markPageAsLoaded_();
-    });
-
     const deferred = new Deferred();
 
     /** @private @const {!Promise<!MediaPool>} */
@@ -448,7 +440,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     );
     return Promise.all([
       this.beforeVisible(),
-      this.mediaLayoutPromise_,
+      this.waitForMediaLayout_(),
       this.mediaPoolPromise_,
     ]);
   }
@@ -502,8 +494,7 @@ export class AmpStoryPage extends AMP.BaseElement {
         mediaEl.addEventListener('error', resolve, true /* useCapture */);
       });
     });
-
-    return Promise.all(mediaPromises);
+    return Promise.all(mediaPromises).then(() => this.markPageAsLoaded_());
   }
 
   /**
@@ -565,11 +556,6 @@ export class AmpStoryPage extends AMP.BaseElement {
         debouncePrepareForAnimation(el, null /* unlisten */);
       }
     });
-  }
-
-  /** @return {!Promise} */
-  whenLoaded() {
-    return this.pageLoadPromise_;
   }
 
   /** @private */
