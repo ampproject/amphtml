@@ -370,25 +370,49 @@ describes.fakeWin('isDisabled', {}, env => {
     doc = env.win.document;
   });
 
-  it('returns true for disabled elements', () => {
-    const disabled = doc.createElement('input');
+  describe('elements without ancestral fieldset', () => {
+    let element;
 
-    disabled.disabled = false;
-    expect(isDisabled(disabled)).to.be.false;
+    beforeEach(() => {
+      element = doc.createElement('input');
+    });
 
-    disabled.disabled = true;
-    expect(isDisabled(disabled)).to.be.true;
+    it('returns true for disabled elements', () => {
+      element.disabled = true;
+      expect(isDisabled(element)).to.be.true;
+    });
+
+    it('returns false for enabled elements', () => {
+      element.disabled = false;
+      expect(isDisabled(element)).to.be.false;
+    });
   });
 
-  it('returns true for elements with disabled ancestral fieldset', () => {
-    const fieldset = doc.createElement('fieldset');
-    const input = doc.createElement('input');
-    fieldset.appendChild(input);
+  describe('elements with ancestral fieldset', () => {
+    let element, fieldset;
 
-    fieldset.disabled = true;
-    expect(isDisabled(input)).to.be.true;
+    beforeEach(() => {
+      fieldset = doc.createElement('fieldset');
+      element = doc.createElement('input');
+      fieldset.appendChild(element);
+    });
 
-    fieldset.disabled = false;
-    expect(isDisabled(input)).to.be.false;
+    it('returns true for enabled elements with disabled ancestral fieldset', () => {
+      element.disabled = false;
+      fieldset.disabled = true;
+      expect(isDisabled(element)).to.be.true;
+    });
+
+    it('returns false for enabled elements with enabled ancestral fieldset', () => {
+      element.disabled = false;
+      fieldset.disabled = false;
+      expect(isDisabled(element)).to.be.false;
+    });
+
+    it('returns true for disabled elements with enabled ancestral fieldset', () => {
+      element.disabled = true;
+      fieldset.disabled = false;
+      expect(isDisabled(element)).to.be.true;
+    });
   });
 });
