@@ -64,6 +64,12 @@ export class SubscriptionPlatform {
   isPingbackEnabled() {}
 
   /**
+   * True if pingback returns all entitlments
+   * @return {boolean}
+   */
+  pingbackReturnsAllEntitlements() {}
+
+  /**
    * Performs the pingback to the subscription platform.
    * @param {!./entitlement.Entitlement} unusedSelectedPlatform
    * @return {!Promise|undefined}
