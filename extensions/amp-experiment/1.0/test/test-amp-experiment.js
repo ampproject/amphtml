@@ -17,125 +17,205 @@
 import * as variant from '../variant';
 import {AmpExperiment} from '../amp-experiment';
 import {Services} from '../../../../src/services';
-import {hasOwn} from '../../../../src/utils/object';
+import {toggleExperiment} from '../../../../src/experiments';
 
-
-describes.realWin('amp-experiment', {
-  amp: {
-    extensions: ['amp-experiment:1.0'],
+describes.realWin(
+  'amp-experiment',
+  {
+    amp: {
+      extensions: ['amp-experiment:1.0'],
+    },
   },
-}, env => {
-
-  const config = {
-    'experiment-1': {
-      variants: {
-        'variant-a': 50,
-        'variant-b': 50,
+  env => {
+    // Config has empty mutations
+    // As mutation parser tests will handle this
+    const config = {
+      'experiment-1': {
+        variants: {
+          'variant-a': {
+            weight: 50,
+            mutations: [{}],
+          },
+          'variant-b': {
+            weight: 50,
+            mutations: [{}],
+          },
+        },
       },
-    },
-    'experiment-2': {
-      variants: {
-        'variant-c': 50,
-        'variant-d': 50,
+      'experiment-2': {
+        variants: {
+          'variant-c': {
+            weight: 50,
+            mutations: [{}],
+          },
+          'variant-d': {
+            weight: 50,
+            mutations: [{}],
+          },
+        },
       },
-    },
-    'experiment-3': {
-      variants: {
-        'variant-e': 1,
+      'experiment-3': {
+        variants: {
+          'variant-e': {
+            weight: 1,
+            mutations: [{}],
+          },
+        },
       },
-    },
-  };
+    };
 
-  let win, doc;
-  let ampdoc;
-  let experiment;
+    let win, doc;
+    let ampdoc;
+    let experiment;
+    let el;
 
-  beforeEach(() => {
-    win = env.win;
-    doc = win.document;
-    ampdoc = env.ampdoc;
-    const el = doc.createElement('amp-experiment');
-    el.ampdoc_ = ampdoc;
-    experiment = new AmpExperiment(el);
-  });
+    beforeEach(() => {
+      win = env.win;
+      doc = win.document;
+      ampdoc = env.ampdoc;
 
-  function addConfigElement(opt_elementName, opt_type, opt_textContent) {
-    const child = doc.createElement(opt_elementName || 'script');
-    child.setAttribute('type', opt_type || 'application/json');
-    child.textContent = opt_textContent || JSON.stringify(config);
-    experiment.element.appendChild(child);
-  }
+      toggleExperiment(win, 'amp-experiment-1.0', true);
 
-  function expectBodyHasAttributes(attributes) {
-    for (const attributeName in attributes) {
-      if (hasOwn(attributes, attributeName)) {
-        expect(doc.body.getAttribute(attributeName))
-            .to.equal(attributes[attributeName]);
-      }
-    }
-  }
-
-  it('should not throw on valid config', () => {
-    expect(() => {
-      addConfigElement('script');
-      experiment.buildCallback();
-    }).to.not.throw();
-  });
-
-  it('should throw if it has no child element', () => {
-    expectAsyncConsoleError(/should contain exactly one/);
-    return expect(experiment.buildCallback()).to.eventually
-        .be.rejectedWith(/should contain exactly one/);
-  });
-
-  it('should throw if it has multiple child elements', () => {
-    addConfigElement('script');
-    addConfigElement('script');
-    expectAsyncConsoleError(/should contain exactly one/);
-    return expect(experiment.buildCallback()).to.eventually
-        .be.rejectedWith(/should contain exactly one/);
-  });
-
-  it('should throw if the child element is not a <script> element', () => {
-    addConfigElement('a');
-    expectAsyncConsoleError(/script/);
-    return expect(experiment.buildCallback()).to.eventually
-        .be.rejectedWith(/script/);
-  });
-
-  it('should throw if the child script element is not json typed', () => {
-    addConfigElement('script', 'wrongtype');
-    expectAsyncConsoleError(/application\/json/);
-    return expect(experiment.buildCallback()).to.eventually
-        .be.rejectedWith(/application\/json/);
-  });
-
-  it('should throw if the child script element has non-JSON content', () => {
-    addConfigElement('script', 'application/json', '{not json}');
-    expectAsyncConsoleError();
-    return experiment.buildCallback().then(() => {
-      throw new Error('must have failed');
-    }, () => {
-      return Services.variantsForDocOrNull(ampdoc.getHeadNode())
-          .then(service => service.getVariants())
-          .then(variants => {
-            expect(variants).to.deep.equal({});
-          });
+      el = doc.createElement('amp-experiment');
+      el.ampdoc_ = ampdoc;
+      experiment = new AmpExperiment(el);
     });
-  });
 
-  it('should add attributes to body element for the allocated variants', () => {
-    addConfigElement('script');
-    const stub = sandbox.stub(variant, 'allocateVariant');
-    stub.withArgs(ampdoc, 'experiment-1', config['experiment-1'])
+    function addConfigElement(opt_elementName, opt_type, opt_textContent) {
+      const child = doc.createElement(opt_elementName || 'script');
+      child.setAttribute('type', opt_type || 'application/json');
+      child.textContent = opt_textContent || JSON.stringify(config);
+      experiment.element.appendChild(child);
+    }
+
+    function stubAllocateVariant(sandbox, config) {
+      const stub = sandbox.stub(variant, 'allocateVariant');
+      stub
+        .withArgs(ampdoc, 'experiment-1', config['experiment-1'])
         .returns(Promise.resolve('variant-a'));
-    stub.withArgs(ampdoc, 'experiment-2', config['experiment-2'])
+      stub
+        .withArgs(ampdoc, 'experiment-2', config['experiment-2'])
         .returns(Promise.resolve('variant-d'));
-    stub.withArgs(ampdoc, 'experiment-3', config['experiment-3'])
+      stub
+        .withArgs(ampdoc, 'experiment-3', config['experiment-3'])
         .returns(Promise.resolve(null));
+      return stub;
+    }
 
-    experiment.buildCallback();
-    return Services.variantsForDocOrNull(ampdoc.getHeadNode())
+    it('Rejects because experiment is not enabled', () => {
+      toggleExperiment(win, 'amp-experiment-1.0', false);
+
+      expectAsyncConsoleError(/Experiment/);
+      addConfigElement('script');
+      doc.body.appendChild(el);
+      return experiment
+        .buildCallback()
+        .should.eventually.be.rejectedWith(/Experiment/);
+    });
+
+    it('should not throw on valid config', () => {
+      expect(() => {
+        addConfigElement('script');
+        experiment.buildCallback();
+      }).to.not.throw();
+    });
+
+    it('should throw if it has no child element', () => {
+      expectAsyncConsoleError(/should contain exactly one/);
+      return expect(experiment.buildCallback()).to.eventually.be.rejectedWith(
+        /should contain exactly one/
+      );
+    });
+
+    it('should throw if it has multiple child elements', () => {
+      addConfigElement('script');
+      addConfigElement('script');
+      expectAsyncConsoleError(/should contain exactly one/);
+      return expect(experiment.buildCallback()).to.eventually.be.rejectedWith(
+        /should contain exactly one/
+      );
+    });
+
+    it('should throw if the child element is not a <script> element', () => {
+      addConfigElement('a');
+      expectAsyncConsoleError(/script/);
+      return expect(experiment.buildCallback()).to.eventually.be.rejectedWith(
+        /script/
+      );
+    });
+
+    it('should throw if the child script element is not json typed', () => {
+      addConfigElement('script', 'wrongtype');
+      expectAsyncConsoleError(/application\/json/);
+      return expect(experiment.buildCallback()).to.eventually.be.rejectedWith(
+        /application\/json/
+      );
+    });
+
+    it('should throw if the child script element has non-JSON content', () => {
+      addConfigElement('script', 'application/json', '{not json}');
+      expectAsyncConsoleError();
+      return experiment.buildCallback().then(
+        () => {
+          throw new Error('must have failed');
+        },
+        () => {
+          return Services.variantsForDocOrNull(ampdoc.getHeadNode())
+            .then(service => service.getVariants())
+            .then(variants => {
+              expect(variants).to.deep.equal({});
+            });
+        }
+      );
+    });
+
+    it(
+      'should throw if the chosen experiment / ' +
+        'variant config has too many mutations',
+      () => {
+        const tooManyMutationsConfig = {
+          'experiment-1': {
+            variants: {
+              'variant-a': {
+                weight: 50,
+                mutations: new Array(200).fill({}),
+              },
+              'variant-b': {
+                weight: 50,
+                mutations: new Array(200).fill({}),
+              },
+            },
+          },
+        };
+
+        addConfigElement(
+          'script',
+          'application/json',
+          JSON.stringify(tooManyMutationsConfig)
+        );
+        stubAllocateVariant(sandbox, tooManyMutationsConfig);
+
+        expectAsyncConsoleError(/Max number of mutations/);
+        return experiment.buildCallback().then(
+          () => {
+            throw new Error('must have failed');
+          },
+          e => {
+            expect(e).to.match(/Max number of mutations/);
+          }
+        );
+      }
+    );
+
+    it('should match the variant to the experiment', () => {
+      addConfigElement('script');
+      stubAllocateVariant(sandbox, config);
+
+      const applyStub = sandbox.stub(experiment, 'applyMutations_');
+      sandbox.stub(experiment, 'validateExperimentToVariant_');
+
+      experiment.buildCallback();
+      return Services.variantsForDocOrNull(ampdoc.getHeadNode())
         .then(variantsService => variantsService.getVariants())
         .then(variants => {
           expect(variants).to.jsonEqual({
@@ -143,12 +223,9 @@ describes.realWin('amp-experiment', {
             'experiment-2': 'variant-d',
             'experiment-3': null,
           });
-          expectBodyHasAttributes({
-            'amp-x-experiment-1': 'variant-a',
-            'amp-x-experiment-2': 'variant-d',
-          });
-          expect(doc.body.getAttribute('amp-x-experiment-3'))
-              .to.equal(null);
+
+          expect(applyStub).to.be.calledTwice;
         });
-  });
-});
+    });
+  }
+);

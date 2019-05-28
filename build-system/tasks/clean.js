@@ -16,21 +16,16 @@
 'use strict';
 
 const del = require('del');
-const gulp = require('gulp-help')(require('gulp'));
-
 
 /**
  * Clean up the build artifacts
  */
-function clean() {
-  return del([
-    'dist',
-    'dist.3p',
-    'dist.tools',
-    'build',
-    '.amp-build',
-  ]);
+async function clean() {
+  return del(['dist', 'dist.3p', 'dist.tools', 'build', '.amp-build']);
 }
 
+module.exports = {
+  clean,
+};
 
-gulp.task('clean', 'Removes build output', clean);
+clean.description = 'Removes build output';

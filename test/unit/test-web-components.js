@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-
 import {
   ShadowDomVersion,
   getShadowDomSupportedVersion,
   isShadowDomSupported,
   setShadowDomSupportedVersionForTesting,
 } from '../../src/web-components';
-
 
 describe('web components', () => {
   beforeEach(() => {
@@ -48,15 +46,19 @@ describes.realWin('Web Components spec', {}, env => {
       win.Element.prototype.createShadowRoot = undefined;
       win.Element.prototype.attachShadow = undefined;
 
-      expect(getShadowDomSupportedVersion(win.Element))
-          .to.equal(ShadowDomVersion.NONE);
+      expect(getShadowDomSupportedVersion(win.Element)).to.equal(
+        ShadowDomVersion.NONE
+      );
     });
 
     it('gives preference to v1 over v0 when both specs are available', () => {
-      if (!!win.Element.prototype.createShadowRoot &&
-          !!win.Element.prototype.attachShadow) {
-        expect(getShadowDomSupportedVersion(win.Element))
-            .to.equal(ShadowDomVersion.V1);
+      if (
+        !!win.Element.prototype.createShadowRoot &&
+        !!win.Element.prototype.attachShadow
+      ) {
+        expect(getShadowDomSupportedVersion(win.Element)).to.equal(
+          ShadowDomVersion.V1
+        );
       }
     });
 
@@ -64,8 +66,9 @@ describes.realWin('Web Components spec', {}, env => {
       if (!!win.Element.prototype.createShadowRoot) {
         win.Element.prototype.attachShadow = undefined;
 
-        expect(getShadowDomSupportedVersion(win.Element))
-            .to.equal(ShadowDomVersion.V0);
+        expect(getShadowDomSupportedVersion(win.Element)).to.equal(
+          ShadowDomVersion.V0
+        );
       }
     });
   });

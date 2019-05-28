@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 /**
  * Implements `Object.values` API.
  * See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_objects/Object/values.
@@ -25,7 +24,6 @@
 export function values(target) {
   return Object.keys(target).map(k => target[k]);
 }
-
 
 /**
  * Sets the Object.values polyfill if it does not exist.

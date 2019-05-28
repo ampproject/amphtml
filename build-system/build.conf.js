@@ -15,36 +15,37 @@
  */
 
 const defaultPlugins = [
+  require.resolve('./babel-plugins/babel-plugin-transform-amp-asserts'),
+  require.resolve('./babel-plugins/babel-plugin-transform-html-template'),
   require.resolve(
-      './babel-plugins/babel-plugin-transform-amp-asserts'),
+    './babel-plugins/babel-plugin-transform-parenthesize-expression'
+  ),
   require.resolve(
-      './babel-plugins/babel-plugin-transform-html-template'),
-  require.resolve(
-      './babel-plugins/babel-plugin-transform-parenthesize-expression'),
-  require.resolve(
-      './babel-plugins/babel-plugin-is_minified-constant-transformer'),
+    './babel-plugins/babel-plugin-is_minified-constant-transformer'
+  ),
+  require.resolve('./babel-plugins/babel-plugin-transform-amp-extension-call'),
+  require.resolve('./babel-plugins/babel-plugin-transform-version-call'),
 ];
 
 module.exports = {
-  plugins: ({
-    isEsmBuild,
-    isCommonJsModule,
-    isForTesting,
-  }) => {
+  plugins: ({isEsmBuild, isCommonJsModule, isForTesting}) => {
     let pluginsToApply = defaultPlugins;
     if (isEsmBuild) {
       pluginsToApply = pluginsToApply.concat([
-        [require.resolve('babel-plugin-filter-imports'), {
-          'imports': {
-            './polyfills/fetch': ['installFetch'],
-            './polyfills/domtokenlist-toggle': ['installDOMTokenListToggle'],
-            './polyfills/document-contains': ['installDocContains'],
-            './polyfills/math-sign': ['installMathSign'],
-            './polyfills/object-assign': ['installObjectAssign'],
-            './polyfills/object-values': ['installObjectValues'],
-            './polyfills/promise': ['installPromise'],
+        [
+          require.resolve('babel-plugin-filter-imports'),
+          {
+            'imports': {
+              './polyfills/fetch': ['installFetch'],
+              './polyfills/domtokenlist-toggle': ['installDOMTokenListToggle'],
+              './polyfills/document-contains': ['installDocContains'],
+              './polyfills/math-sign': ['installMathSign'],
+              './polyfills/object-assign': ['installObjectAssign'],
+              './polyfills/object-values': ['installObjectValues'],
+              './polyfills/promise': ['installPromise'],
+            },
           },
-        }],
+        ],
       ]);
     }
     if (isCommonJsModule) {
@@ -55,11 +56,9 @@ module.exports = {
     if (!isForTesting) {
       pluginsToApply = pluginsToApply.concat([
         require.resolve(
-            './babel-plugins/babel-plugin-is_dev-constant-transformer'
+          './babel-plugins/babel-plugin-is_dev-constant-transformer'
         ),
-        require.resolve(
-            './babel-plugins/babel-plugin-amp-mode-transformer'
-        ),
+        require.resolve('./babel-plugins/babel-plugin-amp-mode-transformer'),
       ]);
     }
     return pluginsToApply;

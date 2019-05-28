@@ -73,6 +73,7 @@ const getHeaderEl = element => {
       <span
           class="i-amphtml-story-page-attachment-close-button" role="button">
       </span>
+      <span class="i-amphtml-story-page-attachment-title"></span>
     </div>`;
 };
 
@@ -131,16 +132,31 @@ export class AmpStoryPageAttachment extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     const templateEl = getTemplateEl(this.element);
-
     const headerShadowRootEl = this.win.document.createElement('div');
     this.headerEl_ = getHeaderEl(this.element);
+
+    if (this.element.hasAttribute('data-title')) {
+      this.headerEl_.querySelector(
+        '.i-amphtml-story-page-attachment-title'
+      ).textContent = this.element.getAttribute('data-title');
+    }
+
+    if (this.element.hasAttribute('data-dark-mode')) {
+      this.headerEl_.classList.add('i-amphtml-story-page-attachment-dark-mode');
+      this.element.classList.add('i-amphtml-story-page-attachment-dark-mode');
+    }
+
     createShadowRootWithStyle(headerShadowRootEl, this.headerEl_, CSS);
     templateEl.insertBefore(headerShadowRootEl, templateEl.firstChild);
 
     this.containerEl_ = dev().assertElement(
-        templateEl.querySelector('.i-amphtml-story-page-attachment-container'));
-    this.contentEl_ = dev().assertElement(this.containerEl_
-        .querySelector('.i-amphtml-story-page-attachment-content'));
+      templateEl.querySelector('.i-amphtml-story-page-attachment-container')
+    );
+    this.contentEl_ = dev().assertElement(
+      this.containerEl_.querySelector(
+        '.i-amphtml-story-page-attachment-content'
+      )
+    );
 
     while (this.element.firstChild) {
       this.contentEl_.appendChild(this.element.firstChild);
@@ -161,27 +177,41 @@ export class AmpStoryPageAttachment extends AMP.BaseElement {
    */
   initializeListeners_() {
     this.headerEl_
-        .querySelector('.i-amphtml-story-page-attachment-close-button')
-        .addEventListener('click', () => this.close_(), true /** useCapture */);
+      .querySelector('.i-amphtml-story-page-attachment-close-button')
+      .addEventListener('click', () => this.close_(), true /** useCapture */);
 
     // Always open links in a new tab.
-    this.contentEl_.addEventListener('click', event => {
-      const {target} = event;
-      if (target.tagName.toLowerCase() === 'a') {
-        target.setAttribute('target', '_blank');
-      }
-    }, true /** useCapture */);
+    this.contentEl_.addEventListener(
+      'click',
+      event => {
+        const {target} = event;
+        if (target.tagName.toLowerCase() === 'a') {
+          target.setAttribute('target', '_blank');
+        }
+      },
+      true /** useCapture */
+    );
 
     // Closes the attachment on opacity background clicks.
-    this.element.addEventListener('click', event => {
-      if (event.target.tagName.toLowerCase() === 'amp-story-page-attachment') {
-        this.close_();
-      }
-    }, true /** useCapture */);
+    this.element.addEventListener(
+      'click',
+      event => {
+        if (
+          event.target.tagName.toLowerCase() === 'amp-story-page-attachment'
+        ) {
+          this.close_();
+        }
+      },
+      true /** useCapture */
+    );
 
-    this.storeService_.subscribe(StateProperty.UI_STATE, uiState => {
-      this.onUIStateUpdate_(uiState);
-    }, true /** callToInitialize */);
+    this.storeService_.subscribe(
+      StateProperty.UI_STATE,
+      uiState => {
+        this.onUIStateUpdate_(uiState);
+      },
+      true /** callToInitialize */
+    );
   }
 
   /**
@@ -190,9 +220,9 @@ export class AmpStoryPageAttachment extends AMP.BaseElement {
    * @private
    */
   onUIStateUpdate_(uiState) {
-    uiState === UIType.MOBILE ?
-      this.startListeningForTouchEvents_() :
-      this.stopListeningForTouchEvents_();
+    uiState === UIType.MOBILE
+      ? this.startListeningForTouchEvents_()
+      : this.stopListeningForTouchEvents_();
   }
 
   /**
@@ -203,14 +233,20 @@ export class AmpStoryPageAttachment extends AMP.BaseElement {
     const storyPageEl = dev().assertElement(this.element.parentElement);
 
     this.touchEventUnlisteners_.push(
-        listen(storyPageEl, 'touchstart', this.onTouchStart_.bind(this),
-            {capture: true}));
+      listen(storyPageEl, 'touchstart', this.onTouchStart_.bind(this), {
+        capture: true,
+      })
+    );
     this.touchEventUnlisteners_.push(
-        listen(storyPageEl, 'touchmove', this.onTouchMove_.bind(this),
-            {capture: true}));
+      listen(storyPageEl, 'touchmove', this.onTouchMove_.bind(this), {
+        capture: true,
+      })
+    );
     this.touchEventUnlisteners_.push(
-        listen(storyPageEl, 'touchend', this.onTouchEnd_.bind(this),
-            {capture: true}));
+      listen(storyPageEl, 'touchend', this.onTouchEnd_.bind(this), {
+        capture: true,
+      })
+    );
   }
 
   /**
@@ -273,8 +309,8 @@ export class AmpStoryPageAttachment extends AMP.BaseElement {
 
     if (this.touchEventState_.isSwipeY === null) {
       this.touchEventState_.isSwipeY =
-          Math.abs(this.touchEventState_.startY - y) >
-              Math.abs(this.touchEventState_.startX - x);
+        Math.abs(this.touchEventState_.startY - y) >
+        Math.abs(this.touchEventState_.startX - x);
       if (!this.touchEventState_.isSwipeY) {
         return;
       }
@@ -336,7 +372,8 @@ export class AmpStoryPageAttachment extends AMP.BaseElement {
     // content, or actually close the attachment.
     if (this.state_ === AttachmentState.OPEN) {
       const isContentSwipe = this.isAttachmentContentDescendant_(
-          dev().assertElement(gesture.event.target));
+        dev().assertElement(gesture.event.target)
+      );
 
       // If user is swiping up, exit so the event bubbles up and maybe scrolls
       // the attachment content.
@@ -344,9 +381,10 @@ export class AmpStoryPageAttachment extends AMP.BaseElement {
       // user scroll the content.
       // If user is swiping down and scrollTop is zero, don't exit and start
       // dragging/closing the attachment.
-      if ((isContentSwipe && deltaY < 0) ||
-          (isContentSwipe && deltaY > 0 &&
-              this.containerEl_./*OK*/scrollTop > 0)) {
+      if (
+        (isContentSwipe && deltaY < 0) ||
+        (isContentSwipe && deltaY > 0 && this.containerEl_./*OK*/ scrollTop > 0)
+      ) {
         this.ignoreCurrentSwipeYGesture_ = true;
         return;
       }
@@ -356,15 +394,15 @@ export class AmpStoryPageAttachment extends AMP.BaseElement {
 
     if (data.last === true) {
       if (this.state_ === AttachmentState.DRAGGING_TO_CLOSE) {
-        (!swipingUp && deltaY > TOGGLE_THRESHOLD_PX) ?
-          this.close_() :
-          this.open();
+        !swipingUp && deltaY > TOGGLE_THRESHOLD_PX
+          ? this.close_()
+          : this.open();
       }
 
       if (this.state_ === AttachmentState.DRAGGING_TO_OPEN) {
-        (swipingUp && -deltaY > TOGGLE_THRESHOLD_PX) ?
-          this.open() :
-          this.close_();
+        swipingUp && -deltaY > TOGGLE_THRESHOLD_PX
+          ? this.open()
+          : this.close_();
       }
       return;
     }
@@ -379,9 +417,13 @@ export class AmpStoryPageAttachment extends AMP.BaseElement {
    * @private
    */
   isAttachmentContentDescendant_(element) {
-    return !!closest(element, el => {
-      return el.classList.contains('i-amphtml-story-page-attachment-content');
-    }, /* opt_stopAt */ this.element);
+    return !!closest(
+      element,
+      el => {
+        return el.classList.contains('i-amphtml-story-page-attachment-content');
+      },
+      /* opt_stopAt */ this.element
+    );
   }
 
   /**
@@ -412,8 +454,10 @@ export class AmpStoryPageAttachment extends AMP.BaseElement {
     }
 
     this.mutateElement(() => {
-      setImportantStyles(
-          this.element, {transform: translate, transition: 'none'});
+      setImportantStyles(this.element, {
+        transform: translate,
+        transition: 'none',
+      });
     });
   }
 
@@ -445,11 +489,13 @@ export class AmpStoryPageAttachment extends AMP.BaseElement {
       toggle(dev().assertElement(this.containerEl_), true);
     });
 
-    const currentHistoryState = /** @type {!Object} */
-        (getState(this.win.history));
+    const currentHistoryState = /** @type {!Object} */ (getState(
+      this.win.history
+    ));
     const historyState = Object.assign({}, currentHistoryState, {
-      [HistoryState.ATTACHMENT_PAGE_ID]:
-          this.storeService_.get(StateProperty.CURRENT_PAGE_ID),
+      [HistoryState.ATTACHMENT_PAGE_ID]: this.storeService_.get(
+        StateProperty.CURRENT_PAGE_ID
+      ),
     });
 
     this.historyService_.push(() => this.closeInternal_(), historyState);
@@ -496,7 +542,9 @@ export class AmpStoryPageAttachment extends AMP.BaseElement {
       // Note: if you change the duration here, you'll also have to change the
       // animation duration in the CSS.
       setTimeout(
-          () => toggle(dev().assertElement(this.containerEl_), false), 250);
+        () => toggle(dev().assertElement(this.containerEl_), false),
+        250
+      );
     });
 
     setHistoryState(this.win, HistoryState.ATTACHMENT_PAGE_ID, null);

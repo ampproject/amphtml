@@ -17,13 +17,11 @@
 import {Deferred} from './promise';
 import {map} from './object';
 
-
 /**
  * This object tracts signals and allows blocking until a signal has been
  * received.
  */
 export class Signals {
-
   /**
    * Creates an instance of Signals.
    */
@@ -69,9 +67,10 @@ export class Signals {
       const result = this.map_[name];
       if (result != null) {
         // Immediately resolve signal.
-        const promise = typeof result == 'number' ?
-          Promise.resolve(result) :
-          Promise.reject(result);
+        const promise =
+          typeof result == 'number'
+            ? Promise.resolve(result)
+            : Promise.reject(result);
         promiseStruct = {promise};
       } else {
         // Allocate the promise/resolver for when the signal arrives in the

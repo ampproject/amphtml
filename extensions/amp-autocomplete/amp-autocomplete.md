@@ -1,7 +1,8 @@
 ---
-$category: misc
-formats: websites
-teaser: 
+$category: dynamic-content
+formats:
+ - websites
+teaser:
   text: Suggests completed results corresponding to the user input as they type into the input field.
 ---
 <!--
@@ -55,14 +56,14 @@ The request is always made from the client, even if the document was served from
 
 Filtered results will not be displayed until user focuses on the input field or begins typing into it. Leaving the viewport hides the filtered results.
 
-By default, `<amp-autocomplete>` adds a `list` ARIA role to the filtered results element and a `listitem` role to item elements rendered via the template.
+By default, `<amp-autocomplete>` adds a `list` ARIA role to the filtered results element and `listitem` and `data-value` attributes to item elements rendered via the template.
 
 Example:
 ```html
   <amp-autocomplete filter="substring" id="myAutocomplete">
     <input type="text">
     <script type="application/json">
-      { items: ["a", "b", "c"] }
+      { "items": ["a", "b", "c"] }
     </script>
   </amp-autocomplete>
 ```
@@ -72,19 +73,19 @@ Example:
 <table>
   <tr>
     <td width="40%"><strong>filter [required]</strong></td>
-    <td>The filtering mechanism applied to source data to produce filtered results for user input. In all cases the filtered results will be displayed in array order of data retrieved. If filtering is being done (filter != none), it is done client side. The following are supported values:
+    <td>The filtering mechanism applied to source data to produce filtered results for user input. In all cases the filtered results will be displayed in array order of data retrieved. If filtering is being done (<code>filter != none</code>), it is done client side. The following are supported values:
     <ul>
       <li><strong>substring</strong>: if the user input is a substring of an item, then the item is suggested</li>
       <li><strong>prefix</strong>: if the user input is a prefix of an item, then the item gets suggested</li>
       <li><strong>token-prefix</strong>: if the user input is a prefix of any word in a multi-worded item, then the item gets suggested; example “je” is a token-prefix in “blue jeans”</li>
       <li><strong>fuzzy</strong>: typos in the input field can result in partial match items appearing in the filtered results—need further research</li>
-      <li><strong>none</strong>: no client-side rendering; a provided server endpoint will be queried for results</li>
-      <li><strong>custom</strong>: a conditional statement involving an item and a user input to be applied to each item such that evaluating to true implies the item gets suggested; using this filter requires including `amp-bind`; if `filter==custom`, an additional attribute `filter-expr` is required to specify a boolean expression by which to perform the custom filter.</li>
+      <li><strong>none</strong>: no client-side filter; renders retrieved data based on bound <code>[src]</code> attribute; truncates to <code>max-entries</code> attribute if provided</li>
+      <li><strong>custom</strong>: a conditional statement involving an item and a user input to be applied to each item such that evaluating to true implies the item gets suggested; using this filter requires including <code>amp-bind</code> if <code>filter==custom</code>, an additional attribute <code>filter-expr</code> is required to specify a boolean expression by which to perform the custom filter.</li>
     </td>
   </tr>
   <tr>
     <td width="40%"><strong>filter-expr [optional]</strong></td>
-    <td>Required if `filter==custom`</td>
+    <td>Required if <code>filter==custom</code></td>
   </tr>
   <tr>
     <td width="40%"><strong>filter-value [optional]</strong></td>
@@ -99,19 +100,36 @@ Example:
   <tr>
     <td width="40%"><strong>max-entries [optional]</strong></td>
     <td>
-      The max specified number of items to suggest at once based on a user input, displays all if unspecified 
+      The max specified number of items to suggest at once based on a user input, displays all if unspecified
     </td>
   </tr>
   <tr>
     <td width="40%"><strong>suggest-first [optional]</strong></td>
     <td>
-      Suggest the first entry in the list of results by marking it active; only possible if `filter==prefix` (does nothing otherwise)
+      Suggest the first entry in the list of results by marking it active; only possible if <code>filter==prefix</code> (does nothing otherwise)
     </td>
   </tr>
   <tr>
     <td width="40%"><strong>submit-on-enter [optional]</strong></td>
     <td>
-      The enter key is primarily used for selecting suggestions in autocomplete, so it shouldn’t also submit the form unless the developer explicitly sets it to do so (for search fields/one field forms, et cetera). Defaults to false. 
+      The enter key is primarily used for selecting suggestions in autocomplete, so it shouldn’t also submit the form unless the developer explicitly sets it to do so (for search fields/one field forms, et cetera).
+      The user flow is as follows: If <code>submit-on-enter</code> is <code>true</code>, pressing <code>Enter</code> will select any currently active item and engage in default behavior, including submitting the form if applicable. If <code>submit-on-enter</code> is <code>false</code>, pressing <code>Enter</code> <em>while suggestions are displaying</em> will select any currently active item only and prevent any other default behavior. If suggestions are not displaying, autocomplete allows default behavior. <strong>Defaults to false.</strong>
     </td>
   </tr>
+</table>
+
+## Events
+
+Events may trigger actions on other AMP components using the `on` attribute.
+e.g. `on="select: my-tab.show"`
+
+Read more about [AMP Actions and Events](../../spec/amp-actions-and-events.md).
+
+<table>
+  <tr>
+    <td width="40%"><strong>select</strong></td>
+    <td><code>amp-autocomplete</code> triggers the <code>select</code> event when the user selects an option via click, tap, keyboard navigation or accepting typeahead. It also fires the <code>select</code> event if a user keyboard navigates to an item and Tabs away from the input field.
+    <code>event</code> contains the <code>value</code> attribute value of the selected element.</td>
+  </tr>
+
 </table>

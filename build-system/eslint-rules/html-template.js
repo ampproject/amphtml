@@ -19,36 +19,41 @@ module.exports = function(context) {
   function htmlCannotBeCalled(node) {
     context.report({
       node,
-      message: 'The html helper MUST NOT be called directly. ' +
-          'Instead, use it as a template literal tag: ``` html`<div />` ```',
+      message:
+        'The html helper MUST NOT be called directly. ' +
+        'Instead, use it as a template literal tag: ``` html`<div />` ```',
     });
   }
 
   function htmlForUsage(node) {
     const {parent} = node;
-    if (parent.type === 'TaggedTemplateExpression' &&
-        parent.tag === node) {
+    if (parent.type === 'TaggedTemplateExpression' && parent.tag === node) {
       return htmlTagUsage(parent);
     }
 
-    if (parent.type === 'VariableDeclarator' &&
-        parent.init === node &&
-        parent.id.type === 'Identifier' &&
-        parent.id.name === 'html') {
+    if (
+      parent.type === 'VariableDeclarator' &&
+      parent.init === node &&
+      parent.id.type === 'Identifier' &&
+      parent.id.name === 'html'
+    ) {
       return;
     }
 
-    if (parent.type === 'AssignmentExpression' &&
-        parent.right === node &&
-        parent.left.type === 'Identifier' &&
-        parent.left.name === 'html') {
+    if (
+      parent.type === 'AssignmentExpression' &&
+      parent.right === node &&
+      parent.left.type === 'Identifier' &&
+      parent.left.name === 'html'
+    ) {
       return;
     }
 
     context.report({
       node,
-      message: 'htmlFor result must be stored into a variable ' +
-          'named "html", or used as the tag of a tagged template literal.',
+      message:
+        'htmlFor result must be stored into a variable ' +
+        'named "html", or used as the tag of a tagged template literal.',
     });
   }
 
@@ -57,8 +62,9 @@ module.exports = function(context) {
     if (quasi.expressions.length !== 0) {
       context.report({
         node,
-        message: 'The html template tag CANNOT accept expression. ' +
-            'The template MUST be static only.',
+        message:
+          'The html template tag CANNOT accept expression. ' +
+          'The template MUST be static only.',
       });
     }
 
@@ -74,9 +80,10 @@ module.exports = function(context) {
     if (/<(html|body|head)/i.test(string)) {
       context.report({
         node: template,
-        message: 'It it not possible to generate HTML, BODY, or' +
-            ' HEAD root elements. Please do so manually with' +
-            ' document.createElement.',
+        message:
+          'It it not possible to generate HTML, BODY, or' +
+          ' HEAD root elements. Please do so manually with' +
+          ' document.createElement.',
       });
     }
 

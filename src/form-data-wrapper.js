@@ -15,10 +15,7 @@
  */
 
 import {Services} from './services';
-import {
-  getFormAsObject,
-  getSubmitButtonUsed,
-} from './form';
+import {getFormAsObject, getSubmitButtonUsed} from './form';
 import {iterateCursor} from './dom';
 import {map} from './utils/object';
 
@@ -106,9 +103,9 @@ export class PolyfillFormDataWrapper {
     let nextIndex = 0;
     return /** @type {!Iterator<!Array<string>>} */ ({
       next() {
-        return nextIndex < fieldEntries.length ?
-          {value: fieldEntries[nextIndex++], done: false} :
-          {value: undefined, done: true};
+        return nextIndex < fieldEntries.length
+          ? {value: fieldEntries[nextIndex++], done: false}
+          : {value: undefined, done: true};
       },
     });
   }

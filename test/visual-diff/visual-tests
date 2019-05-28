@@ -20,7 +20,10 @@
  {
   /**
   * An array of glob strings to use to load assets to Percy, relative to
-  * the base amphtml/ directory.
+  * the base amphtml/ directory. All assets accessed by the test must be
+  * relative to the server path (i.e., use relative paths such as
+  * <amp-img src="/examples/visual-tests/..."> - never external domains such as
+  * <amp-img src="https://ampbyexample.com/...">)
   *
   * Note that if you add a new test from a sub-directory that is not matched
   * by any glob string in this list, it will be missing its resources!
@@ -29,6 +32,7 @@
   */
   "asset_globs": [
     "examples/visual-tests/**",
+    "examples/inabox-tag-integration.js"
   ],
 
   /**
@@ -225,6 +229,17 @@
       "name": "amp-sidebar",
       "viewport": {"width": 400, "height": 800},
       "interactive_tests": "examples/visual-tests/amp-sidebar/amp-sidebar.js",
+    },
+    {
+      "url": "examples/visual-tests/amp-sidebar/amp-sidebar-toolbar-ol.amp.html",
+      "name": "amp-sidebar toolbar > ol",
+      "viewport": {"width": 400, "height": 800},
+      "interactive_tests": "examples/visual-tests/amp-sidebar/amp-sidebar-toolbar.js",
+    },{
+      "url": "examples/visual-tests/amp-sidebar/amp-sidebar-toolbar-ul.amp.html",
+      "name": "amp-sidebar toolbar > ul",
+      "viewport": {"width": 400, "height": 800},
+      "interactive_tests": "examples/visual-tests/amp-sidebar/amp-sidebar-toolbar.js",
     },
     {
       "url": "examples/visual-tests/amp-sticky-ad/amp-sticky-ad.amp.html",
@@ -557,6 +572,8 @@
       ]
     },
     {
+      // TODO(zombifier): disabled in #21935 because this test is not hermetic.
+      "flaky": true,
       "url": "examples/visual-tests/amp-inabox/amp-inabox-gpt.html",
       "name": "AMP Inabox GPT Ad",
       "loading_complete_selectors": [
@@ -574,6 +591,8 @@
       "interactive_tests": "examples/visual-tests/amp-story/amp-story-tooltip.js"
     },
     {
+      // TODO(#21665): Re-enable test.
+      "flaky": true,
       "url": "examples/visual-tests/amp-story/amp-story-tooltip.html",
       "name": "amp-story: tooltip desktop",
       "viewport": {"width": 1440, "height": 900},
@@ -583,6 +602,8 @@
       "interactive_tests": "examples/visual-tests/amp-story/amp-story-tooltip-desktop.js"
     },
     {
+      // TODO(#22070): Re-enable test.
+      "flaky": true,
       "url": "examples/visual-tests/amp-story/amp-story-pagination-buttons.html",
       "name": "amp-story: pagination-buttons desktop",
       "viewport": {"width": 1440, "height": 900},
@@ -592,6 +613,8 @@
       "interactive_tests": "examples/visual-tests/amp-story/amp-story-pagination-buttons.js"
     },
     {
+      // TODO(#22499): Re-enable this test once the animations run.
+      "flaky": true,
       "url": "examples/visual-tests/amp-story/amp-story-sidebar.html",
       "name": "amp-story: sidebar",
       "viewport": {"width": 1440, "height": 900},
@@ -620,6 +643,17 @@
       "interactive_tests": "examples/visual-tests/amp-story/amp-story-page-attachment-desktop.js"
     },
     {
+      // TODO(#21749): Re-enable test.
+      "flaky": true,
+      "url": "examples/visual-tests/amp-story/amp-story-landscape-templates.html",
+      "name": "amp-story: landscape templates",
+      "viewport": {"width": 1440, "height": 900},
+      "loading_complete_selectors": [
+        ".i-amphtml-story-loaded",
+      ],
+      "interactive_tests": "examples/visual-tests/amp-story/amp-story-landscape-templates.js"
+    },
+    {
       "flaky": true,
       // See https://percy.io/ampproject/amphtml/builds/1434487/view/95137509/375?browser=firefox&mode=diff
       "url": "examples/visual-tests/amp-date-picker/amp-date-picker.amp.html",
@@ -640,6 +674,8 @@
       "interactive_tests": "examples/visual-tests/amp-form/amp-form.js",
     },
     {
+      "flaky": true,
+      // TODO(#22162, cvializ): see https://percy.io/ampproject/amphtml/builds/1828636
       "url": "examples/visual-tests/amp-accordion/amp-accordion.html",
       "name": "amp-accordion: page loads",
       "loading_complete_delay_ms": 1000,
@@ -653,6 +689,24 @@
         "amp-user-notification.amp-active",
       ],
       "interactive_tests": "examples/visual-tests/amp-user-notification/amp-user-notification.js"
+    },
+    {
+      "url": "examples/visual-tests/amp-autocomplete/amp-autocomplete.amp.html",
+      "name": "amp-autocomplete",
+      "interactive_tests": "examples/visual-tests/amp-autocomplete/amp-autocomplete.js",
+    },
+    {
+      "url": "examples/visual-tests/amp-ad/amp-ad.html",
+      "name": "AMP ad",
+      "interactive_tests": "examples/visual-tests/amp-ad/amp-ad.js"
+    },
+    {
+      "url": "examples/visual-tests/amp-ad/amp-inabox.html",
+      "name": "AMP Inabox ad",
+      "loading_complete_selectors": [
+        ".view", ".activeview"
+      ],
+      "interactive_tests": "examples/visual-tests/amp-ad/amp-inabox.js"
     }
   ]
 }
