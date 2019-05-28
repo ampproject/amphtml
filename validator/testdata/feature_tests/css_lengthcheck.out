@@ -1,0 +1,42 @@
+FAIL
+|  <!--
+|    Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+|
+|    Licensed under the Apache License, Version 2.0 (the "License");
+|    you may not use this file except in compliance with the License.
+|    You may obtain a copy of the License at
+|
+|        http://www.apache.org/licenses/LICENSE-2.0
+|
+|    Unless required by applicable law or agreed to in writing, software
+|    distributed under the License is distributed on an "AS-IS" BASIS,
+|    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+|    See the License for the specific language governing permissions and
+|    limitations under the license.
+|  -->
+|  <!--
+|    Test Description:
+|      Demonstrates the use of <style amp-custom-length-check> which can be
+|      used if you want to see how many bytes are present in your style tag
+|      as the validator sees it. If present, this tag will always report an
+|      error as it requires -1 or fewer bytes in the tag.
+|  -->
+|  <!doctype html>
+|  <html ⚡>
+|  <head>
+|    <meta charset="utf-8">
+|    <meta name="viewport" content="width=device-width,minimum-scale=1">
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|    <style amp-custom-lencheck>0123456789</style>
+>>   ^~~~~~~~~
+feature_tests/css_lengthcheck.html:29:2 The attribute 'amp-custom-lencheck' may not appear in tag 'style amp-custom'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#stylesheets) [DISALLOWED_HTML]
+|    <link rel="canonical" href="./regular-html-version.html">
+|    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+|  </head>
+|  <body>
+|    Hello, world.
+|    <div style="replace_inline_style"></div>
+>>   ^~~~~~~~~
+feature_tests/css_lengthcheck.html:35:2 CSS syntax error in tag 'div' - incomplete declaration. [GENERIC]
+|  </body>
+|  </html>

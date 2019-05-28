@@ -1313,6 +1313,40 @@ tags: {  # Special custom 'author' spreadsheet for AMP
   }
   spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#stylesheets"
 }
+# This variant of <style amp-custom> is designed to help developers see how
+# close they are to the byte limit, even if the page is passing. By changing
+# the attribute to <style amp-custom-length-check>, this tagspec will be used
+# to match errors. It cannot pass however as it has a cdata.max_bytes set to
+# -1. As a result, it will always fail and report the length found in the
+# tag's cdata. This is a small hack, and may be deleted in the future if there
+# are problems maintaining it. Deleting this tagspec will of course never
+# break any valid AMP documents as if it matches, the page will be invalid.
+tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  html_format: AMP4EMAIL
+  html_format: ACTIONS
+  disabled_by: "transformed"
+  tag_name: "STYLE"
+  spec_name: "style amp-custom-length-check"
+  unique: true
+  mandatory_parent: "HEAD"
+  attrs: {
+    name: "amp-custom-length-check"
+    mandatory: true
+    value: ""
+    dispatch_key: NAME_DISPATCH
+  }
+  attrs: { name: "nonce" }
+  attrs: {  # This is a default, but it doesn't hurt.
+    name: "type"
+    value_casei: "text/css"
+  }
+  cdata: {
+    max_bytes: -1
+  }
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#stylesheets"
+}
 tags: {
   html_format: AMP
   html_format: ACTIONS
