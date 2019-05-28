@@ -168,6 +168,17 @@
       text-decoration: underline;
     }
 
+    viewer[data-show-container="8"] #container8 {
+      visibility: visible;
+      -webkit-transform: none;
+      -ms-transform: none;
+      transform: none;
+    }
+
+    viewer[data-show-container="8"] #show-container8-anchor {
+      text-decoration: underline;
+    }
+
     viewer[data-show-container="dynamic"] #container-dynamic {
       visibility: visible;
       -webkit-transform: none;
@@ -210,7 +221,7 @@
       this.csi_ = 1;
       this.startResolve_ = null;
       this.startPromise_ = null;
-      this.caps_ = opt_caps || 'a2a,focus-rect,foo,keyboard,swipe,viewerRenderTemplate';
+      this.caps_ = opt_caps || 'xhrInterceptor';
       this.isIos_ = /iPhone|iPad|iPod/i.test(window.navigator.userAgent);
 
       this.viewer = document.querySelector('viewer');
@@ -327,14 +338,12 @@
       return Promise.resolve();
     };
 
-
     Viewer.prototype.onScroll_ = function() {
       log('Viewer.prototype.onScroll_');
       this.ampViewerHost_.sendRequest('viewport', {
         scrollTop: this.container./*OK*/scrollTop
       }, false);
     };
-
 
     Viewer.prototype.onResize_ = function() {
       log('Resized to ', this.container./*OK*/offsetWidth,
@@ -349,20 +358,17 @@
       }, false);
     };
 
-
     Viewer.prototype.requestFullOverlay_ = function() {
       log('requestFullOverlay');
       this.header.style.opacity = 0;
       return Promise.resolve();
     };
 
-
     Viewer.prototype.cancelFullOverlay_ = function() {
       log('cancelFullOverlay');
       this.header.style.opacity = 1;
       return Promise.resolve();
     };
-
 
     Viewer.prototype.pushHistory_ = function(stackIndex) {
       log('push history to ', stackIndex);
@@ -375,7 +381,6 @@
       return Promise.resolve();
     };
 
-
     Viewer.prototype.popHistory_ = function(stackIndex) {
       log('pop history at ', stackIndex);
       // Super trivial. Only one step allowed.
@@ -387,7 +392,6 @@
       return Promise.resolve();
     };
 
-
     Viewer.prototype.onPopState_ = function() {
       // Even more trivial. Always assumes that only one step was popped in
       // history.
@@ -398,12 +402,10 @@
       log('history popped to ', this.stackIndex_);
     };
 
-
     Viewer.prototype.updateVisibilityToggle_ = function() {
       this.visibilityToggle_.textContent = this.visibilityState_ == 'visible' ?
           'Visible' : 'Prerendering';
     };
-
 
     Viewer.prototype.broadcast_ = function(message) {
       log('broadcast: ', message);
@@ -415,12 +417,10 @@
       });
     };
 
-
     Viewer.prototype.scrollAmpDoc = function(scrollTop) {
       log('viewer scroll amp doc: ', scrollTop);
       this.ampViewerHost_.sendRequest('scroll', {scrollTop: scrollTop}, true);
     };
-
 
     Viewer.prototype.processRequest_ = function(name, data, awaitResponse) {
       log(this.id + ': Viewer.prototype.processRequest_', name);
@@ -475,6 +475,8 @@
         case 'replaceHistory':
         case 'visibilitychange':
           return Promise.resolve();
+        case 'xhr':
+          return this.handleXhrIntercept_(data);
         default:
           return Promise.reject('request not supported: ', name);
       }
@@ -504,6 +506,27 @@
       });
     };
 
+    Viewer.prototype.handleXhrIntercept_ = function(data) {
+    // Mocked response.
+    return Promise.resolve({
+        "body" : {
+          "json": {
+            "items": [
+              {
+                "title": "Intercepted response",
+                "url": "http://ampdev.org"
+              }
+            ],
+          }
+        },
+        "init" : {
+          "headers": {
+            "Content-Type": "application/json",
+          }
+        }
+      });
+    }
+
     // TODO(alabiaga): We mock the template but don't verify the data
     // that should be used to construct it. The data should be used
     // and verified to an extent.
@@ -529,7 +552,6 @@
       return Promise.resolve();
     };
 
-
     function log() {
       var var_args = Array.prototype.slice.call(arguments, 0);
       var_args.unshift('[VIEWER]');
@@ -551,7 +573,6 @@
         origin: a.protocol + '//' + a.host
       };
     }
-
 
     function paramsStr(params) {
       var s = '';
@@ -678,6 +699,13 @@
           false).start();
       addShowContainer('7');
 
+      new Viewer(
+          'container8',
+          '8',
+          './xhr-intercept.html?amp_js_v=0.1',
+          false).start();
+      addShowContainer('8');
+
       if (href) {
         new Viewer(
             'container-dynamic',
@@ -692,8 +720,6 @@
         showContainer('1');
       }
     }
-
-
 
     function addShowContainer(id) {
       var anchor = document.getElementById('show-container' + id + '-anchor');
@@ -736,6 +762,7 @@
       <a class="show-container-anchor" id="show-container5-anchor">Five</a>
       <a class="show-container-anchor" id="show-container6-anchor">Six</a>
       <a class="show-container-anchor" id="show-container7-anchor">Seven</a>
+      <a class="show-container-anchor" id="show-container8-anchor">Eight</a>
       <a class="show-container-anchor" id="show-containerdynamic-anchor" hidden>Dynamic</a>
       <a>|</a>
       <a id="visibilityToggle">Visible</a>
@@ -774,6 +801,11 @@
     <div class="wait">
       Please wait, the AMP doc will appear here...
     </div>
+    </container>
+    <container id="container8">
+      <div class="wait">
+        Please wait, the AMP doc will appear here...
+      </div>
     </container>
     <container id="container-dynamic">
     <div class="wait">

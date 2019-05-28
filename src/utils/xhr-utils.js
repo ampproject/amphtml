@@ -140,7 +140,13 @@ export function fromStructuredCloneable(response, responseType) {
     // type is `document`, we must fall back to `FetchResponse` polyfill
     // because callers would then rely on the `responseXML` property being
     // present, which is not supported by the Response type.
-    return new Response(response['body'], response['init']);
+    let body = response['body'];
+    if (body['json'] && isArray(body['json']['items'])) {
+      const init = {type: 'application/json'};
+      body = new Blob([JSON.stringify(body['json'])], init);
+    }
+
+    return new Response(body, response['init']);
   }
 
   const lowercasedHeaders = map();
