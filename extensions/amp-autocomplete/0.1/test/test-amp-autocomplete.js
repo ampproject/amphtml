@@ -804,5 +804,37 @@ describes.realWin(
           .true;
       });
     });
+
+    describe('fallback on error', () => {
+      let fallbackSpy;
+      let toggleFallbackSpy;
+      let getDataSpy;
+
+      beforeEach(() => {
+        impl.element.setAttribute('src', 'invalid-path');
+        fallbackSpy = sandbox.spy(impl, 'displayFallback_');
+        toggleFallbackSpy = sandbox.spy(impl, 'toggleFallback');
+        getDataSpy = sandbox
+          .stub(impl, 'getRemoteData_')
+          .returns(Promise.reject('Error for test'));
+      });
+
+      it('should throw error when fallback is not provided', () => {
+        return element.layoutCallback().catch(e => {
+          expect(getDataSpy).to.have.been.calledOnce;
+          expect(fallbackSpy).to.have.been.calledWith(e);
+          expect(toggleFallbackSpy).not.to.have.been.called;
+        });
+      });
+
+      it('should display fallback when provided', () => {
+        sandbox.stub(impl, 'getFallback').returns(true);
+        return element.layoutCallback().then(() => {
+          expect(getDataSpy).to.have.been.calledOnce;
+          expect(fallbackSpy).to.have.been.calledWith('Error for test');
+          expect(toggleFallbackSpy).to.have.been.calledWith(true);
+        });
+      });
+    });
   }
 );

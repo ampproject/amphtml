@@ -651,5 +651,91 @@
       </amp-autocomplete>
       <input name="submit-button" type="submit" value="Submit">
     </form>
+
+  <h2>Fallback</h2>
+  <p>Invalid src path, fallback provided</p>
+  <form method="post" action-xhr="/form/echo-json/post" target="_blank">
+    <fieldset>
+      <label>
+        Your hometown<br>
+        <amp-autocomplete filter="substring" min-characters="0" src="autocomplete-invalid.example.json">
+          <input type="text" name="city" required>
+          <div fallback>
+            Sorry, we couldn't load suggestions.
+          </div>
+        </amp-autocomplete>
+      </label>
+      <input name="submit-button" type="submit" value="Submit">
+    </fieldset>
+
+    <div submit-success>
+      <template type="amp-mustache">
+        Success! Mailing a postcard to {{city}}.
+      </template>
+    </div>
+  </form>
+
+  <p>Failing src path, fallback provided</p>
+  <form method="post" action-xhr="/form/echo-json/post" target="_blank">
+    <fieldset>
+      <label>
+        Your hometown<br>
+        <amp-autocomplete filter="substring" min-characters="0" src="/form/autocomplete/error"
+          [src]="'/form/autocomplete/error?q=' + (queryForFallback || '')">
+          <input type="text" name="city" required on="input-debounced:AMP.setState({ queryForFallback: event.value })">
+          <div fallback>
+            Sorry, we couldn't load suggestions.
+          </div>
+        </amp-autocomplete>
+      </label>
+      <input name="submit-button" type="submit" value="Submit">
+    </fieldset>
+
+    <div submit-success>
+      <template type="amp-mustache">
+        Success! Mailing a postcard to {{city}}.
+      </template>
+    </div>
+  </form>
+
+  <p>Invalid src path, no fallback provided</p>
+  <form method="post" action-xhr="/form/echo-json/post" target="_blank">
+    <fieldset>
+      <label>
+        Your hometown<br>
+        <amp-autocomplete filter="substring" min-characters="0" src="autocomplete-invalid.example.json">
+          <input type="text" name="city" required>
+        </amp-autocomplete>
+      </label>
+      <input name="submit-button" type="submit" value="Submit">
+    </fieldset>
+
+    <div submit-success>
+      <template type="amp-mustache">
+        Success! Mailing a postcard to {{city}}.
+      </template>
+    </div>
+  </form>
+
+  <p>Failing src path, no fallback provided</p>
+  <form method="post" action-xhr="/form/echo-json/post" target="_blank">
+    <fieldset>
+      <label>
+        Your hometown<br>
+        <amp-autocomplete filter="substring" min-characters="0" src="/form/autocomplete/error"
+          [src]="'/form/autocomplete/error?q=' + (queryForFallback2 || '')">
+          <input type="text" name="city" required on="input-debounced:AMP.setState({ queryForFallback2: event.value })">
+        </amp-autocomplete>
+      </label>
+      <input name="submit-button" type="submit" value="Submit">
+    </fieldset>
+
+    <div submit-success>
+      <template type="amp-mustache">
+        Success! Mailing a postcard to {{city}}.
+      </template>
+    </div>
+  </form>
 </body>
+
 </html>
