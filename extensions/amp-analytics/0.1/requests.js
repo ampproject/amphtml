@@ -22,7 +22,7 @@ import {
 } from './variables';
 import {SANDBOX_AVAILABLE_VARS} from './sandbox-vars-whitelist';
 import {Services} from '../../../src/services';
-import {devAssert, userAssert, user} from '../../../src/log';
+import {devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getResourceTiming} from './resource-timing';
 import {isArray, isFiniteNumber, isObject} from '../../../src/types';
@@ -260,10 +260,13 @@ export class RequestHandler {
           let baseUrl;
           if (requestOriginPromise) {
             try {
-              baseUrl = (new URL(results[0], preUrl)).href;
+              baseUrl = new URL(results[0], preUrl).href;
             } catch (e) {
-              user().error(TAG, e);
-              baseUrl = results[0];
+              user().error(
+                TAG,
+                'Unable to construct URL with ' + preUrl + ' and ' + results[0]
+              );
+              return;
             }
           } else {
             baseUrl = results[0];

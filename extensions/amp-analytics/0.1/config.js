@@ -74,13 +74,19 @@ export class AnalyticsConfig {
    * Handles top level fields in config
    */
   handleTopLevelAttributes_() {
-    // add top level request origin into request if it doesn't have one
-    if (hasOwn(this.config_, 'requests') && hasOwn(this.config_, 'requestOrigin')) {
+    // handle a top level requestOrigin
+    if (
+      hasOwn(this.config_, 'requests') &&
+      hasOwn(this.config_, 'requestOrigin')
+    ) {
       const requestOrigin = this.config_['requestOrigin'];
 
       for (const requestName in this.config_['requests']) {
+        // only add top level request origin into request if it doesn't have one
         if (!hasOwn(this.config_['requests'][requestName], 'requestOrigin')) {
-          this.config_['requests'][requestName]['requestOrigin'] = requestOrigin;
+          this.config_['requests'][requestName][
+            'requestOrigin'
+          ] = requestOrigin;
         }
       }
     }
