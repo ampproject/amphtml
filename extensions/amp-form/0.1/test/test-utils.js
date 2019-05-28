@@ -24,93 +24,134 @@ describes.realWin('amp-form-utils', {}, env => {
   });
 
   describe('isFieldDefault', () => {
-    it("returns if a text field's value matches its default value", () => {
-      const html = '<input type="text" value="default">';
-      doc.body.insertAdjacentHTML('afterbegin', html);
-      const element = doc.querySelector('input');
+    describe('text field', () => {
+      let textField;
 
-      element.value = 'not default';
-      expect(isFieldDefault(element)).to.be.false;
+      beforeEach(() => {
+        const html = '<input type="text" value="default">';
+        doc.body.insertAdjacentHTML('afterbegin', html);
+        textField = doc.querySelector('input');
+      });
 
-      element.value = 'default';
-      expect(isFieldDefault(element)).to.be.true;
+      it("returns true if text field's value matches its default value", () => {
+        expect(isFieldDefault(textField)).to.be.true;
+      });
+
+      it("returns false if text field's value does not match its default value", () => {
+        textField.value = 'not default';
+        expect(isFieldDefault(textField)).to.be.false;
+      });
     });
 
-    it("returns if a textarea's value matches its default value", () => {
-      const html = '<textarea>default</textarea>';
-      doc.body.insertAdjacentHTML('afterbegin', html);
-      const element = doc.querySelector('textarea');
+    describe('textarea', () => {
+      let textarea;
 
-      element.value = 'not default';
-      expect(isFieldDefault(element)).to.be.false;
+      beforeEach(() => {
+        const html = '<textarea>default</textarea>';
+        doc.body.insertAdjacentHTML('afterbegin', html);
+        textarea = doc.querySelector('textarea');
+      });
 
-      element.value = 'default';
-      expect(isFieldDefault(element)).to.be.true;
+      it("returns true if textarea's value matches its default value", () => {
+        expect(isFieldDefault(textarea)).to.be.true;
+      });
+
+      it("returns false if textarea's value does not match its default value", () => {
+        textarea.value = 'not default';
+        expect(isFieldDefault(textarea)).to.be.false;
+      });
     });
 
-    it("returns if a radio button's value matches its default value", () => {
-      const html = `
-        <input type="radio" id="radio-a" name="radio" value="A" checked>
-        <input type="radio" id="radio-b" name="radio" value="B">
-      `;
-      doc.body.insertAdjacentHTML('afterbegin', html);
+    describe('radio button', () => {
+      let optionA, optionB;
 
-      const optionA = doc.querySelector('#radio-a');
-      const optionB = doc.querySelector('#radio-b');
+      beforeEach(() => {
+        const html = `
+          <input type="radio" id="radio-a" name="radio" value="A" checked>
+          <input type="radio" id="radio-b" name="radio" value="B">
+        `;
+        doc.body.insertAdjacentHTML('afterbegin', html);
+        optionA = doc.querySelector('#radio-a');
+        optionB = doc.querySelector('#radio-b');
+      });
 
-      optionB.checked = true;
-      expect(isFieldDefault(optionA)).to.be.false;
-      expect(isFieldDefault(optionB)).to.be.false;
+      it('returns true if the radio button is in its default state', () => {
+        expect(isFieldDefault(optionA)).to.be.true;
+        expect(isFieldDefault(optionB)).to.be.true;
+      });
 
-      optionA.checked = true;
-      expect(isFieldDefault(optionA)).to.be.true;
-      expect(isFieldDefault(optionB)).to.be.true;
+      it('returns false if the radio button is not in its default state', () => {
+        optionB.checked = true;
+        expect(isFieldDefault(optionA)).to.be.false;
+        expect(isFieldDefault(optionB)).to.be.false;
+      });
     });
 
-    it("returns if a checkbox's value matches its default value", () => {
-      const html = '<input type="checkbox" checked>';
-      doc.body.insertAdjacentHTML('afterbegin', html);
-      const checkbox = doc.querySelector('input');
+    describe('checkbox', () => {
+      let checkbox;
 
-      checkbox.checked = false;
-      expect(isFieldDefault(checkbox)).to.be.false;
+      beforeEach(() => {
+        const html = '<input type="checkbox" checked>';
+        doc.body.insertAdjacentHTML('afterbegin', html);
+        checkbox = doc.querySelector('input');
+      });
 
-      checkbox.checked = true;
-      expect(isFieldDefault(checkbox)).to.be.true;
+      it('returns true if checkbox is in its default state', () => {
+        expect(isFieldDefault(checkbox)).to.be.true;
+      });
+
+      it('returns false if checkbox is not in its default state', () => {
+        checkbox.checked = false;
+        expect(isFieldDefault(checkbox)).to.be.false;
+      });
     });
 
-    it("returns if a single-select dropdown's selection matches its default selection", () => {
-      const html = `
-        <select>
-          <option value="A" selected>A</option>
-          <option value="B">B</option>
-        </select>
-      `;
-      doc.body.insertAdjacentHTML('afterbegin', html);
-      const dropdown = doc.querySelector('select');
+    describe('single select dropdown', () => {
+      let dropdown;
 
-      dropdown.options[1].selected = true;
-      expect(isFieldDefault(dropdown)).to.be.false;
+      beforeEach(() => {
+        const html = `
+          <select>
+            <option value="A" selected>A</option>
+            <option value="B">B</option>
+          </select>
+        `;
+        doc.body.insertAdjacentHTML('afterbegin', html);
+        dropdown = doc.querySelector('select');
+      });
 
-      dropdown.options[0].selected = true;
-      expect(isFieldDefault(dropdown)).to.be.true;
+      it("returns true if the dropdown's selections match its default selections", () => {
+        expect(isFieldDefault(dropdown)).to.be.true;
+      });
+
+      it("returns false if the dropdown's selections does not match its default selections", () => {
+        dropdown.options[1].selected = true;
+        expect(isFieldDefault(dropdown)).to.be.false;
+      });
     });
 
-    it("returns if a multi-select dropdown's selections match its default selections", () => {
-      const html = `
-        <select multiple>
-          <option value="A" selected>A</option>
-          <option value="B">B</option>
-        </select>
-      `;
-      doc.body.insertAdjacentHTML('afterbegin', html);
-      const dropdown = doc.querySelector('select');
+    describe('multi select dropdown', () => {
+      let dropdown;
 
-      dropdown.options[1].selected = true;
-      expect(isFieldDefault(dropdown)).to.be.false;
+      beforeEach(() => {
+        const html = `
+          <select>
+            <option value="A" selected>A</option>
+            <option value="B">B</option>
+          </select>
+        `;
+        doc.body.insertAdjacentHTML('afterbegin', html);
+        dropdown = doc.querySelector('select');
+      });
 
-      dropdown.options[1].selected = false;
-      expect(isFieldDefault(dropdown)).to.be.true;
+      it("returns true if the dropdown's selections match its default selections", () => {
+        expect(isFieldDefault(dropdown)).to.be.true;
+      });
+
+      it("returns false if the dropdown's selections does not match its default selections", () => {
+        dropdown.options[1].selected = true;
+        expect(isFieldDefault(dropdown)).to.be.false;
+      });
     });
   });
 });
