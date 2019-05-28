@@ -116,6 +116,9 @@ export class AmpAutocomplete extends AMP.BaseElement {
      */
     this.container_ = null;
 
+    /** @private {boolean} */
+    this.fallbackDisplayed_ = false;
+
     /**
      * The developer specified value of the 'autocomplete' attribute on the
      * <form> ancestor that contains <amp-autocomplete>. Used to reset the
@@ -170,16 +173,16 @@ export class AmpAutocomplete extends AMP.BaseElement {
       `${TAG} should contain exactly one <input> child`
     );
     this.inputElement_ = /** @type {!HTMLInputElement} */ (inputElements[0]);
-    userAssert(
-      this.inputElement_.hasAttribute('type'),
-      `${TAG} requires the "type" attribute on <input>`
-    );
-    const inputType = this.inputElement_.getAttribute('type');
-    userAssert(
-      inputType === 'text' || inputType === 'search',
-      `${TAG} requires the "type=text|search" attribute on <input>`
-    );
+    if (this.inputElement_.hasAttribute('type')) {
+      const inputType = this.inputElement_.getAttribute('type');
+      userAssert(
+        inputType === 'text' || inputType === 'search',
+        `${TAG} requires the "type" attribute to be "text" or "search" if present on <input>`
+      );
+    }
     this.inputElement_.setAttribute('dir', 'auto');
+    this.inputElement_.setAttribute('aria-autocomplete', 'list');
+    this.inputElement_.setAttribute('role', 'combobox');
 
     userAssert(this.inputElement_.form, `${TAG} should be inside a <form> tag`);
     if (this.inputElement_.form.hasAttribute('autocomplete')) {
@@ -216,6 +219,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
       `Unexpected filter: ${this.filter_}`
     );
 
+    // Read configuration attributes
     this.minChars_ = this.element.hasAttribute('min-characters')
       ? parseInt(this.element.getAttribute('min-characters'), 10)
       : 1;
@@ -224,6 +228,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
       : null;
     this.submitOnEnter_ = this.element.hasAttribute('submit-on-enter');
 
+    // Set accessibility attributes
+    this.element.setAttribute('aria-haspopup', 'listbox');
     this.container_ = this.createContainer_();
     this.element.appendChild(this.container_);
   }
@@ -260,14 +266,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
   getRemoteData_() {
     const ampdoc = this.getAmpDoc();
     const policy = UrlReplacementPolicy.ALL;
-    return batchFetchJsonFor(
-      ampdoc,
-      this.element,
-      /* opt_expr */ undefined,
-      policy
-    ).then(json => {
-      const items = json['items'];
-      if (!items) {
+    return batchFetchJsonFor(ampdoc, this.element, 'items', policy).catch(e => {
+      if (e.message === 'Response is undefined.') {
         user().warn(
           TAG,
           'Expected key "items" in data but found nothing. ' +
@@ -275,7 +275,6 @@ export class AmpAutocomplete extends AMP.BaseElement {
         );
         return [];
       }
-      return items;
     });
   }
 
@@ -291,7 +290,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     if (this.shouldRenderAbove_()) {
       container.classList.add('i-amphtml-autocomplete-results-up');
     }
-    container.setAttribute('role', 'list');
+    container.setAttribute('role', 'listbox');
     toggle(container, false);
     return container;
   }
@@ -327,7 +326,9 @@ export class AmpAutocomplete extends AMP.BaseElement {
             ' data. Was providing two datasets intended?'
         );
       }
-      remoteDataPromise = this.getRemoteData_();
+      remoteDataPromise = this.getRemoteData_().catch(e => {
+        this.displayFallback_(e);
+      });
     }
 
     return remoteDataPromise.then(remoteData => {
@@ -344,10 +345,14 @@ export class AmpAutocomplete extends AMP.BaseElement {
       return Promise.resolve();
     }
     if (typeof src === 'string') {
-      return this.getRemoteData_().then(remoteData => {
-        this.sourceData_ = remoteData;
-        this.filterDataAndRenderResults_(this.sourceData_, this.userInput_);
-      });
+      return this.getRemoteData_()
+        .catch(e => {
+          this.displayFallback_(e);
+        })
+        .then(remoteData => {
+          this.sourceData_ = remoteData || [];
+          this.filterDataAndRenderResults_(this.sourceData_, this.userInput_);
+        });
     }
     if (typeof src === 'object') {
       this.sourceData_ = src['items'] || [];
@@ -368,7 +373,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
   createElementFromItem_(item) {
     const element = this.element.ownerDocument.createElement('div');
     element.classList.add('i-amphtml-autocomplete-item');
-    element.setAttribute('role', 'listitem');
+    element.setAttribute('role', 'option');
     element.setAttribute('data-value', item);
     element.setAttribute('dir', 'auto');
     element.textContent = item;
@@ -444,7 +449,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
               child.setAttribute('aria-disabled', 'true');
             }
             child.classList.add('i-amphtml-autocomplete-item');
-            child.setAttribute('role', 'listitem');
+            child.setAttribute('role', 'option');
             container.appendChild(child);
           });
         });
@@ -613,11 +618,12 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
   /**
    * Shows or hides the results container_.
-   * @param {boolean=} opt_display
+   * @param {boolean} display
    * @private
    */
-  toggleResults_(opt_display) {
-    toggle(dev().assertElement(this.container_), opt_display);
+  toggleResults_(display) {
+    this.inputElement_.setAttribute('aria-expanded', display);
+    toggle(dev().assertElement(this.container_), display);
   }
 
   /**
@@ -651,8 +657,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
           this.userInput_ = this.inputElement_.value;
           this.filterDataAndRenderResults_(this.sourceData_, this.userInput_);
           this.resetActiveElement_();
-          this.setResultDisplayDirection_(renderAbove);
         }
+        this.setResultDisplayDirection_(renderAbove);
         this.toggleResults_(display);
       }
     );
@@ -751,7 +757,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
    * @private
    */
   updateActiveItem_(delta) {
-    if (delta === 0 || !this.resultsShowing_()) {
+    if (delta === 0 || !this.resultsShowing_() || this.fallbackDisplayed_) {
       return Promise.resolve();
     }
     // Active element logic
@@ -786,6 +792,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
         }
         this.resetActiveElement_();
         newActiveElement.classList.add('i-amphtml-autocomplete-item-active');
+        newActiveElement.setAttribute('aria-selected', 'true');
         this.activeIndex_ = activeIndex;
         this.activeElement_ = newActiveElement;
       }
@@ -825,6 +832,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
       'i-amphtml-autocomplete-item-active',
       false
     );
+    this.activeElement_.removeAttribute('aria-selected');
     this.activeElement_ = null;
     this.activeIndex_ = -1;
   }
@@ -834,6 +842,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
    * @private
    */
   clearAllItems_() {
+    this.fallbackDisplayed_ = false;
     removeChildren(dev().assertElement(this.container_));
   }
 
@@ -881,8 +890,10 @@ export class AmpAutocomplete extends AMP.BaseElement {
       case Keys.ESCAPE:
         // Select user's partial input and hide results.
         return this.mutateElement(() => {
-          this.displayUserInput_();
-          this.toggleResults_(false);
+          if (!this.fallbackDisplayed_) {
+            this.displayUserInput_();
+            this.toggleResults_(false);
+          }
         });
       case Keys.TAB:
         if (this.activeElement_) {
@@ -892,6 +903,27 @@ export class AmpAutocomplete extends AMP.BaseElement {
         return Promise.resolve();
       default:
         return Promise.resolve();
+    }
+  }
+
+  /**
+   * If a fallback element is provided, displays it instead of suggestions.
+   * Otherwise, throws given error. Must be called in a mutate context.
+   * @param {*=} error
+   * @throws {!Error} If fallback element is not present.
+   * @private
+   */
+  displayFallback_(error) {
+    if (this.fallbackDisplayed_) {
+      return;
+    }
+    this.clearAllItems_();
+    const fallback = this.getFallback();
+    if (fallback) {
+      this.fallbackDisplayed_ = true;
+      this.toggleFallback(true);
+    } else {
+      throw error;
     }
   }
 

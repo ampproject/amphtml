@@ -1577,10 +1577,10 @@
     once "^1.4.0"
     universal-user-agent "^2.1.0"
 
-"@octokit/rest@16.26.0":
-  version "16.26.0"
-  resolved "https://registry.yarnpkg.com/@octokit/rest/-/rest-16.26.0.tgz#5c12b28763219045e1c9a15182e8dfaed10004e8"
-  integrity sha512-NBpzre44ZAQWZhlH+zUYTgqI0pHN+c9rNj4d+pCydGEiKTGc1HKmoTghEUyr9GxazDyoAvmpx9nL0I7QS1Olvg==
+"@octokit/rest@16.27.0":
+  version "16.27.0"
+  resolved "https://registry.yarnpkg.com/@octokit/rest/-/rest-16.27.0.tgz#6c2d1cba3efb8866ef2741c64d23b8f257c9dc89"
+  integrity sha512-UvCxVOCfHzEhOaltSKQBy81kMqQ+hglF3rAR4STut4WWr2tXvVnrIkGxeblO0TvmTt5zuxfgQfgG5kAHUT44RA==
   dependencies:
     "@octokit/request" "^4.0.1"
     "@octokit/request-error" "^1.0.2"
@@ -2997,10 +2997,10 @@ blob@0.0.5:
   resolved "https://registry.yarnpkg.com/blob/-/blob-0.0.5.tgz#d680eeef25f8cd91ad533f5b01eed48e64caf683"
   integrity sha512-gaqbzQPqOoamawKg0LGVd7SzLgXS+JH61oWprSLH+P+abTczqJbhTR8CmJ2u9/bUYNmHTGJx/UEmn6doAvvuig==
 
-bluebird@3.5.4:
-  version "3.5.4"
-  resolved "https://registry.yarnpkg.com/bluebird/-/bluebird-3.5.4.tgz#d6cc661595de30d5b3af5fcedd3c0b3ef6ec5714"
-  integrity sha512-FG+nFEZChJrbQ9tIccIfZJBz3J7mLrAhxakAbnrJWn8d7aKOC+LWifa0G+p4ZqKp4y13T7juYvdhq9NzKdsrjw==
+bluebird@3.5.5:
+  version "3.5.5"
+  resolved "https://registry.yarnpkg.com/bluebird/-/bluebird-3.5.5.tgz#a8d0afd73251effbbd5fe384a77d73003c17a71f"
+  integrity sha512-5am6HnnfN+urzt4yfg7IgTbotDjIT/u8AJpEt0sIU9FtXfVeezXAPKswrG+xKUCOYAINpSdgZVDU6QFh+cuH3w==
 
 bluebird@^3.3.0, bluebird@^3.5.0, bluebird@^3.5.3:
   version "3.5.3"
@@ -5597,10 +5597,10 @@ eslint-plugin-jasmine@2.10.1:
   resolved "https://registry.yarnpkg.com/eslint-plugin-jasmine/-/eslint-plugin-jasmine-2.10.1.tgz#5733b709e751f4bc40e31e1c16989bd2cdfbec97"
   integrity sha1-VzO3CedR9LxA4x4cFpib0s377Jc=
 
-eslint-plugin-jsdoc@5.0.2:
-  version "5.0.2"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-jsdoc/-/eslint-plugin-jsdoc-5.0.2.tgz#3387a116511ce188008670bbea598dec1de11549"
-  integrity sha512-ACSu4NEEG5KZK7liCZz9jm5f5hFHcCL29zsN0RTixIZe1kuZOVO3oVbvnpe6o/U/3h9dMLJ42Yhe6umBS6aO7A==
+eslint-plugin-jsdoc@7.0.2:
+  version "7.0.2"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-jsdoc/-/eslint-plugin-jsdoc-7.0.2.tgz#d1c1bf04f65c121a50928a87658a7508a7cdd57f"
+  integrity sha512-iqPdJsBy88FLrr8ru69Ab+SKPrjNEQwK2vicGXrBbDA6aia8IRVz2J2LPCfwdyuSxrI91bd4Za1Z57TC5tUp2w==
   dependencies:
     comment-parser "^0.5.4"
     jsdoctypeparser "3.1.0"

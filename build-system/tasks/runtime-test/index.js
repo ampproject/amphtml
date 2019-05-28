@@ -37,13 +37,12 @@ const {
   reportTestFinished,
   reportTestSkipped,
   reportTestStarted,
-} = require('./status-report');
+} = require('../report-test-status');
 const {app} = require('../../test-server');
 const {clean} = require('../clean');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../../ctrlcHandler');
 const {css} = require('../css');
 const {dist} = require('../dist');
-const {getStdout} = require('../../exec');
 const {isTravisBuild} = require('../../travis');
 
 const {green, yellow, cyan, red} = colors;
@@ -373,14 +372,14 @@ async function runTests() {
         {
           plugins: [
             [
-              'babel-plugin-istanbul',
+              'istanbul',
               {
                 exclude: [
-                  './ads/**/*.js',
-                  './third_party/**/*.js',
-                  './test/**/*.js',
-                  './extensions/**/test/**/*.js',
-                  './testing/**/*.js',
+                  'ads/**/*.js',
+                  'third_party/**/*.js',
+                  'test/**/*.js',
+                  'extensions/**/test/**/*.js',
+                  'testing/**/*.js',
                 ],
               },
             ],
@@ -392,7 +391,14 @@ async function runTests() {
     c.reporters = c.reporters.concat(['coverage-istanbul']);
     c.coverageIstanbulReporter = {
       dir: 'test/coverage',
-      reports: isTravisBuild() ? ['lcov'] : ['html', 'text', 'text-summary'],
+      reports: isTravisBuild()
+        ? ['lcovonly']
+        : ['html', 'text', 'text-summary'],
+      'report-config': {
+        lcovonly: {
+          file: argv.unit ? 'lcov-unit.info' : 'lcov-integration.info',
+        },
+      },
     };
   }
 
@@ -558,49 +564,15 @@ async function runTests() {
       resolver = resolverIn;
     });
     new Karma(configBatch, function(exitCode) {
-      if (argv.coverage) {
-        if (isTravisBuild()) {
-          const codecovCmd =
-            './node_modules/.bin/codecov --file=test/coverage/lcov.info';
-          let flags = '';
-          if (argv.unit) {
-            flags = ' --flags=unit_tests';
-          } else if (argv.integration) {
-            flags = ' --flags=integration_tests';
-          }
-          log(
-            green('INFO:'),
-            'Uploading code coverage report to',
-            cyan('https://codecov.io/gh/ampproject/amphtml'),
-            'by running',
-            cyan(codecovCmd + flags) + '...'
-          );
-          const output = getStdout(codecovCmd + flags);
-          const viewReportPrefix = 'View report at: ';
-          const viewReport = output.match(`${viewReportPrefix}.*`);
-          if (viewReport && viewReport.length > 0) {
-            log(
-              green('INFO:'),
-              viewReportPrefix +
-                cyan(viewReport[0].replace(viewReportPrefix, ''))
-            );
-          } else {
-            log(
-              yellow('WARNING:'),
-              'Code coverage report upload may have failed:\n',
-              yellow(output)
-            );
-          }
-        } else {
-          const coverageReportUrl =
-            'file://' + path.resolve('test/coverage/index.html');
-          log(
-            green('INFO:'),
-            'Generated code coverage report at',
-            cyan(coverageReportUrl)
-          );
-          opn(coverageReportUrl, {wait: false});
-        }
+      if (argv.coverage && !isTravisBuild()) {
+        const coverageReportUrl =
+          'file://' + path.resolve('test/coverage/index.html');
+        log(
+          green('INFO:'),
+          'Generated code coverage report at',
+          cyan(coverageReportUrl)
+        );
+        opn(coverageReportUrl, {wait: false});
       }
       resolver(exitCode);
     })

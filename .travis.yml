@@ -79,15 +79,9 @@ jobs:
       after_script:
         - build-system/sauce_connect/stop_sauce_connect.sh
     - stage: test
-      name: "[NON-BLOCKING] End to End Tests"
+      name: "End to End Tests"
       script:
         - unbuffer node build-system/pr-check/e2e-tests.js
-  fast_finish: true
-
-  # TODO(ampproject/wg-infra): remove when these tests stabilize
-  allow_failures:
-    - script:
-      - unbuffer node build-system/pr-check/e2e-tests.js
 cache:
   directories:
     - node_modules
