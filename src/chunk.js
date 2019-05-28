@@ -402,12 +402,13 @@ class Chunks {
    * @private
    */
   executeAsap_(idleDeadline) {
-    // This
+    // If we've spent over 5 millseconds executing the
+    // last instruction yeild back to the main thread.
     if (Date.now() - this.timeSinceLastExecution_ > 5) {
       this.requestMacroTask_();
       return;
     }
-    resolved.then(() => this.boundExecute_(idleDeadline));
+    resolved.then(this.boundExecute_(idleDeadline));
   }
 
   /**
