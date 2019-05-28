@@ -21,6 +21,7 @@ import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
+import {listen} from '../../../src/event-helper';
 import {numeric} from '../../../src/transition';
 
 /** @const {string} */
@@ -95,6 +96,18 @@ export class AmpScrollableCarousel extends BaseCarousel {
     if (this.useLayers_) {
       this.declareLayer(this.container_);
     }
+  }
+
+  /** @override */
+  buttonsAriaRole() {
+    /**
+     * In scrollable carousel, the next/previous buttons add no functionality
+     * for screen readers as scrollable carousel is just a horizontally
+     * scrollable div which ATs navigate just like any other content.
+     * To avoid confusion, we therefore set the role to presentation for the
+     * controls in this case.
+     */
+    return 'presentation';
   }
 
   /** @override */
@@ -363,8 +376,8 @@ export class AmpScrollableCarousel extends BaseCarousel {
   cancelTouchEvents_() {
     // TODO(aghassemi, #4754): Ideally we only stop propagation of horizontal
     // touchmove events.
-    this.element.addEventListener('touchmove', event => {
-      event.stopPropagation();
+    listen(this.element, 'touchmove', event => event.stopPropagation(), {
+      passive: true,
     });
   }
 }

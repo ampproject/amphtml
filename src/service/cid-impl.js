@@ -305,9 +305,10 @@ export class Cid {
           if (scope) {
             apiKeyMap[scope] = API_KEYS[clientName];
           } else {
-            user().error(
+            user().warn(
               TAG_,
-              `Unsupported client for Google CID API: ${clientName}`
+              `Unsupported client for Google CID API: ${clientName}.` +
+                `Please remove or correct ${optInMeta./*OK*/ outerHTML}`
             );
           }
         }

@@ -381,6 +381,10 @@ describes.realWin(
         expect(impl.hasPrev()).to.be.true;
         expect(impl.nextButton_.classList.contains('amp-disabled')).to.be.true;
         expect(impl.prevButton_.classList.contains('amp-disabled')).to.be.false;
+
+        // Verify aria roles for the button
+        expect(impl.nextButton_.getAttribute('role')).equal('button');
+        expect(impl.prevButton_.getAttribute('role')).equal('button');
       });
     });
 

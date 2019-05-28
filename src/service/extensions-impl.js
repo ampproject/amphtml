@@ -16,6 +16,8 @@
 
 import {Deferred} from '../utils/promise';
 import {Services} from '../services';
+import {cssText as ampDocCss} from '../../build/ampdoc.css';
+import {cssText as ampElementCss} from '../../build/ampelement.css';
 import {
   calculateExtensionScriptUrl,
   parseExtensionUrl,
@@ -25,7 +27,6 @@ import {
   stubElementIfNotKnown,
   upgradeOrRegisterElement,
 } from './custom-element-registry';
-import {cssText} from '../../build/css';
 import {dev, devAssert, rethrowAsync} from '../log';
 import {
   getAmpdoc,
@@ -381,13 +382,8 @@ export class Extensions {
     const holder = this.getCurrentExtensionHolder_(opt_forName);
     holder.docFactories.push(factory);
 
-    // If a single-doc mode, or is shadow-doc mode and has AmpDocShell,
-    // run factory right away if it's included by the doc.
-    if (
-      this.currentExtensionId_ &&
-      (this.ampdocService_.isSingleDoc() ||
-        this.ampdocService_.hasAmpDocShell())
-    ) {
+    // If a single-doc mode, run factory right away if it's included by the doc.
+    if (this.currentExtensionId_ && this.ampdocService_.isSingleDoc()) {
       const ampdoc = this.ampdocService_.getAmpDoc(this.win.document);
       const extensionId = dev().assertString(this.currentExtensionId_);
       // Note that this won't trigger for FIE extensions that are not present
@@ -460,7 +456,8 @@ export class Extensions {
     // Install runtime styles.
     installStylesLegacy(
       childWin.document,
-      cssText,
+      // TODO(lannka): remove ampDocCss for FIE rendering #22418
+      ampDocCss + ampElementCss,
       /* callback */ null,
       /* opt_isRuntimeCss */ true,
       /* opt_ext */ 'amp-runtime'

@@ -25,12 +25,14 @@ const Mocha = require('mocha');
 const tryConnect = require('try-net-connect');
 const {cyan} = require('ansi-colors');
 const {execOrDie, execScriptAsync} = require('../../exec');
+const {reportTestStarted} = require('../report-test-status');
 const {watch} = require('gulp');
 
 const HOST = 'localhost';
 const PORT = 8000;
 const WEBSERVER_TIMEOUT_RETRIES = 10;
 const SLOW_TEST_THRESHOLD_MS = 2500;
+const TEST_RETRIES = 2;
 
 let webServerProcess_;
 
@@ -39,12 +41,13 @@ function installPackages_() {
 }
 
 function buildRuntime_() {
-  execOrDie('gulp build');
+  execOrDie('gulp clean');
+  execOrDie('gulp dist --fortesting');
 }
 
 function launchWebServer_() {
   webServerProcess_ = execScriptAsync(
-    `gulp serve --host ${HOST} --port ${PORT}`,
+    `gulp serve --compiled --host ${HOST} --port ${PORT}`,
     {stdio: 'ignore'}
   );
 
@@ -76,6 +79,7 @@ function createMocha_() {
     // so we set a non-default threshold.
     slow: SLOW_TEST_THRESHOLD_MS,
     reporter: argv.testnames || argv.watch ? '' : ciReporter,
+    retries: TEST_RETRIES,
     fullStackTrace: true,
   });
 
@@ -126,6 +130,7 @@ async function e2e() {
       });
     }
 
+    await reportTestStarted();
     mocha.run(async failures => {
       // end web server
       await cleanUp_();
@@ -158,8 +163,12 @@ module.exports = {
 
 e2e.description = 'Runs e2e tests';
 e2e.flags = {
-  'nobuild': '  Skips building the runtime via `gulp build`',
+  'nobuild': '  Skips building the runtime via `gulp dist --fortesting`',
   'files': '  Run tests found in a specific path (ex: **/test-e2e/*.js)',
   'testnames': '  Lists the name of each test being run',
   'watch': '  Watches for changes in files, runs corresponding test(s)',
+  'engine':
+    '  The automation engine that orchestrates the browser. ' +
+    'Options are `puppeteer` or `selenium`. Default: `selenium`',
+  'headless': '  Runs the browser in headless mode',
 };

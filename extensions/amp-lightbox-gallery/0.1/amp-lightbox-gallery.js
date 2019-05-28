@@ -25,21 +25,27 @@ import {
 import {Gestures} from '../../../src/gesture';
 import {Keys} from '../../../src/utils/key-codes';
 import {LightboxCaption, OverflowState} from './lightbox-caption';
+import {LightboxControls, LightboxControlsAction} from './lightbox-controls';
 import {Services} from '../../../src/services';
 import {SwipeDef, SwipeYRecognizer} from '../../../src/gesture-recognizers';
+import {SwipeToDismiss} from './swipe-to-dismiss';
 import {
   childElementByTag,
   closest,
   closestAncestorElementBySelector,
   elementByTag,
-  scopedQuerySelector,
   scopedQuerySelectorAll,
+  toggleAttribute,
 } from '../../../src/dom';
 import {clamp} from '../../../src/utils/math';
+import {
+  delayAfterDeferringToEventLoop,
+  secondsToTimestampString,
+} from './utils';
 import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {escapeCssSelectorIdent} from '../../../src/css';
-import {getData, isLoaded, listen} from '../../../src/event-helper';
+import {getData, getDetail, isLoaded, listen} from '../../../src/event-helper';
 import {getElementServiceForDoc} from '../../../src/element-service';
 import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
@@ -66,53 +72,6 @@ const LightboxControlsModes = {
   CONTROLS_HIDDEN: 0,
 };
 
-/**
- * The number of pixels of movement to go from the darkest to lightest overlay
- * while doing a swipe to close gesture.
- */
-const SWIPE_TO_CLOSE_DISTANCE = 200;
-/**
- * The number of pixels needed to close when doing a swipe to close gesture.
- */
-const SWIPE_TO_CLOSE_DISTANCE_THRESHOLD = SWIPE_TO_CLOSE_DISTANCE / 4;
-/**
- * The number of pixels needed to completely fade out the controls when doing a
- * swipe to close gesture.
- */
-const SWIPE_TO_HIDE_CONTROLS_DISTANCE = SWIPE_TO_CLOSE_DISTANCE / 4;
-/**
- * The velocity at which to close light box from a swipe, regardless of distance
- * travelled.
- */
-const SWIPE_TO_CLOSE_VELOCITY_THRESHOLD = 0.65;
-/**
- * The lowest opacity for the background and controls when doing swipe to close
- * gesture.
- */
-const SWIPE_TO_CLOSE_MIN_OPACITY = 0.2;
-/** The smallest scale possible when doing swipe to close gesture. */
-const SWIPE_TO_CLOSE_MIN_SCALE = 0.85;
-/**
- * How much distance to cover, based on the velocity, when a user releases a
- * swipe to close gesture.
- */
-const SWIPE_TO_CLOSE_VELOCITY_TO_DISTANCE_FACTOR = 22.5;
-/**
- * How much time to spend, based on the distance to travel, when moving to the
- * final location of a swipe (after the user has released).
- */
-const SWIPE_TO_CLOSE_DISTANCE_TO_TIME_FACTOR = 1;
-/**
- * How much time to spend, based on the distance to travel, when snapping back
- * after an cancelled swipe to close gesture.
- */
-const SWIPE_TO_CLOSE_SNAP_BACK_TIME_FACTOR = 5;
-/**
- * The timing function to use when carrying momentum after releasing a swipe to
- * close gesture. This closely approximates an expontential decay of velocity.
- */
-const SWIPE_TO_CLOSE_MOMENTUM_TIMING = 'cubic-bezier(0.15, .55, .3, 0.95)';
-
 // Use S Curves for entry and exit animations
 const TRANSITION_CURVE = {x1: 0.8, y1: 0, x2: 0.2, y2: 1};
 
@@ -135,51 +94,6 @@ const MOTION_DURATION_RATIO = 0.8; // fraction of animation
  * }}
  */
 let LightboxElementMetadataDef;
-
-/**
- * Calculates the distance between two points in two dimensions.
- * TODO(#21104) Refactor.
- * @param {number} x1 The x coordinate of the first point.
- * @param {number} y1 The y coordinate of the first point.
- * @param {number} x2 The x coordinate of the second point.
- * @param {number} y2 The y coordinate of the second point.
- * @return {number} The distance.
- */
-function calculateDistance(x1, y1, x2, y2) {
-  return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
-}
-
-/**
- * A linear interpolation.
- * TODO(#21104) Refactor.
- * @param {number} start
- * @param {number} end
- * @param {number} percentage
- * @return {number} The value percentage of the way between start and end.
- */
-function lerp(start, end, percentage) {
-  return start + (end - start) * percentage;
-}
-
-/**
- * Runs a delay after deferring to the event loop. This is useful to call from
- * within an animation frame, as you can be sure that at least duration
- * milliseconds has elapsed after the animation has started. Simply waiting
- * for the desired duration may result in running code before an animation has
- * completed.
- * @param {!Window} win A Window object.
- * @param {number} duration How long to wait for.
- * @return {!Promise} A Promise that resolves after the specified duration.
- */
-function delayAfterDeferringToEventLoop(win, duration) {
-  const timer = Services.timerFor(win);
-  // Timer.promise does not defer to event loop for 0.
-  const eventLoopDelay = 1;
-  // First, defer to the JavaScript execution loop. If we are in a
-  // requestAnimationFrame, this will place us after render. Second, wait
-  // for duration to elapse.
-  return timer.promise(eventLoopDelay).then(() => timer.promise(duration));
-}
 
 /**
  * @private visible for testing.
@@ -236,7 +150,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     this.carouselContainer_ = null;
 
     /** @private {?Element} */
-    this.controlsContainer_ = null;
+    this.overlay_ = null;
 
     /** @private {?Element} */
     this.mask_ = null;
@@ -249,6 +163,9 @@ export class AmpLightboxGallery extends AMP.BaseElement {
 
     /** @private {?LightboxCaption} */
     this.lightboxCaption_ = null;
+
+    /** @private {?LightboxControls} */
+    this.lightboxControls_ = null;
 
     /** @private  {?Element} */
     this.gallery_ = null;
@@ -269,17 +186,20 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     this.sourceElement_ = null;
 
     /**
-     * A listener is set up to prevent carousel scrolling when we do a swipe to
-     * dismiss gesture. This is used to clean up the listener when no longer
-     * needed.
-     * @private {?function()}
-     */
-    this.preventCarouselScrollUnlistener_ = null;
-
-    /**
      * @private {boolean}
      */
     this.hasVerticalScrollbarWidth_ = false;
+
+    /** @private @const */
+    this.boundMeasureMutate_ = this.measureMutateElement.bind(this);
+
+    /** @private @const */
+    this.swipeToDismiss_ = new SwipeToDismiss(
+      this.win,
+      this.element,
+      cb => this.mutateElement(cb),
+      () => this.close_()
+    );
   }
 
   /** @override */
@@ -326,14 +246,15 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * lightbox container
    * @private
    */
-  buildControls_() {
-    this.controlsContainer_ = htmlFor(/** @type {!Document} */ (this.doc_))`
-      <div class="i-amphtml-lbg-controls"></div>`;
-    this.buildDescriptionBox_();
-    this.buildTopBar_();
-    this.buildNavControls_();
+  buildOverlay_() {
+    this.overlay_ = htmlFor(this.doc_)`
+      <div class="i-amphtml-lbg-overlay"></div>`;
+    const descriptionBoxElement = this.buildDescriptionBox_();
+    const controlsElement = this.buildControls_();
     this.mutateElement(() => {
-      this.container_.appendChild(this.controlsContainer_);
+      this.overlay_.appendChild(descriptionBoxElement);
+      this.overlay_.appendChild(controlsElement);
+      this.container_.appendChild(this.overlay_);
     });
   }
 
@@ -348,8 +269,8 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       this.container_.appendChild(this.carouselContainer_);
     }
 
-    if (!this.controlsContainer_) {
-      this.buildControls_();
+    if (!this.overlay_) {
+      this.buildOverlay_();
     }
     return this.findOrBuildCarousel_(lightboxGroupId);
   }
@@ -486,18 +407,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @private
    */
   maybeEnableMultipleItemControls_(itemLength) {
-    const isDisabled = itemLength <= 1;
-    const ghost = 'i-amphtml-ghost';
-    const container = dev().assertElement(this.controlsContainer_);
-    [
-      '.i-amphtml-lbg-button-next',
-      '.i-amphtml-lbg-button-prev',
-      '.i-amphtml-lbg-button-gallery',
-    ].forEach(selector => {
-      dev()
-        .assertElement(scopedQuerySelector(container, selector))
-        .classList.toggle(ghost, isDisabled);
-    });
+    toggleAttribute(this.element, 'i-amphtml-lbg-single-item', itemLength <= 1);
   }
 
   /**
@@ -519,15 +429,15 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   }
 
   /**
-   * Build description box and append it to the container.
+   * Builds the description box, containing the current slide's caption, if
+   * any.
+   * @return {!Element} The description box element.
    * @private
    */
   buildDescriptionBox_() {
     this.lightboxCaption_ = LightboxCaption.build(
       this.doc_,
-      (measure, mutate) => {
-        this.measureMutateElement(measure, mutate);
-      }
+      this.boundMeasureMutate_
     );
     const el = this.lightboxCaption_.getElement();
     el.addEventListener('click', event => {
@@ -540,7 +450,44 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       event.stopPropagation();
       event.preventDefault();
     });
-    this.controlsContainer_.appendChild(el);
+    return el;
+  }
+
+  /**
+   * Builds the overlay controls including the close, gallery toggle and next/
+   * prev slide buttons.
+   * @return {!Element} The container for the controls.
+   * @private
+   */
+  buildControls_() {
+    this.lightboxControls_ = LightboxControls.build(
+      this.win,
+      this.doc_,
+      this.boundMeasureMutate_
+    );
+    const el = this.lightboxControls_.getElement();
+    el.addEventListener('action', event => {
+      switch (getDetail(event)['action']) {
+        case LightboxControlsAction.CLOSE:
+          this.close_();
+          break;
+        case LightboxControlsAction.GALLERY:
+          this.openGallery_();
+          break;
+        case LightboxControlsAction.SLIDES:
+          this.closeGallery_();
+          break;
+        case LightboxControlsAction.NEXT:
+          this.nextSlide_();
+          break;
+        case LightboxControlsAction.PREV:
+          this.prevSlide_();
+          break;
+        default:
+          break;
+      }
+    });
+    return el;
   }
 
   /**
@@ -584,97 +531,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   }
 
   /**
-   * @private
-   */
-  buildNavControls_() {
-    this.navControls_ = this.doc_.createElement('div');
-    const nextSlide = this.nextSlide_.bind(this);
-    const prevSlide = this.prevSlide_.bind(this);
-
-    const nextButton = this.buildButton_(
-      'Next',
-      'i-amphtml-lbg-button-next',
-      nextSlide
-    );
-    const prevButton = this.buildButton_(
-      'Prev',
-      'i-amphtml-lbg-button-prev',
-      prevSlide
-    );
-
-    const input = Services.inputFor(this.win);
-    if (!input.isMouseDetected()) {
-      prevButton.classList.add('i-amphtml-screen-reader');
-      nextButton.classList.add('i-amphtml-screen-reader');
-    }
-    this.navControls_.appendChild(prevButton);
-    this.navControls_.appendChild(nextButton);
-    this.controlsContainer_.appendChild(this.navControls_);
-  }
-  /**
-   * Builds the top bar containing buttons and appends them to the container.
-   * @private
-   */
-  buildTopBar_() {
-    devAssert(this.container_);
-    this.topBar_ = this.doc_.createElement('div');
-    this.topBar_.classList.add('i-amphtml-lbg-top-bar');
-
-    const close = this.close_.bind(this);
-    const openGallery = this.openGallery_.bind(this);
-    const closeGallery = this.closeGallery_.bind(this);
-
-    // TODO(aghassemi): i18n and customization. See https://git.io/v6JWu
-    const closeButton = this.buildButton_(
-      'Close',
-      'i-amphtml-lbg-button-close',
-      close
-    );
-    const openGalleryButton = this.buildButton_(
-      'Gallery',
-      'i-amphtml-lbg-button-gallery',
-      openGallery
-    );
-    const closeGalleryButton = this.buildButton_(
-      'Content',
-      'i-amphtml-lbg-button-slide',
-      closeGallery
-    );
-
-    this.topBar_.appendChild(closeButton);
-    this.topBar_.appendChild(openGalleryButton);
-    this.topBar_.appendChild(closeGalleryButton);
-
-    this.controlsContainer_.appendChild(this.topBar_);
-  }
-
-  /**
-   * Builds a button and appends it to the container.
-   * @param {string} label Text of the button for a11y
-   * @param {string} className Css classname
-   * @param {function()} action function to call when tapped
-   * @private
-   */
-  buildButton_(label, className, action) {
-    devAssert(this.topBar_);
-
-    const button = htmlFor(/** @type {!Document} */ (this.doc_))`
-    <div role="button" class="i-amphtml-lbg-button">
-      <span class="i-amphtml-lbg-icon"></span>
-    </div>`;
-
-    button.setAttribute('aria-label', label);
-    button.classList.add(className);
-
-    button.addEventListener('click', event => {
-      action();
-      event.stopPropagation();
-      event.preventDefault();
-    });
-    return button;
-  }
-
-  /**
    * We should not try to toggle controls or otherwise handle a click on
    * the lightbox if the click has already been handled by a link, a button,
    * or an existing tap action handler.
@@ -705,14 +561,14 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   }
 
   /**
-   * Toggle lightbox controls including topbar and description.
+   * Toggle lightbox overlay (description and controls).
    * @param {!Event} e
    * @private
    */
-  onToggleControls_(e) {
+  onToggleOverlay_(e) {
     if (this.shouldHandleClick_(e)) {
       if (this.controlsMode_ == LightboxControlsModes.CONTROLS_HIDDEN) {
-        this.showControls_();
+        this.showOverlay_();
       } else if (!this.container_.hasAttribute('gallery-view')) {
         this.hideControls_();
       }
@@ -721,20 +577,20 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   }
 
   /**
-   * Show lightbox controls.
+   * Show the lightbox overlay (description and controls).
    * @private
    */
-  showControls_() {
-    this.controlsContainer_.setAttribute('i-amphtml-lbg-fade', 'in');
+  showOverlay_() {
+    this.overlay_.setAttribute('i-amphtml-lbg-fade', 'in');
     this.controlsMode_ = LightboxControlsModes.CONTROLS_DISPLAYED;
   }
 
   /**
-   * Hide lightbox controls without fade effect.
+   * Hide the lightbox overlay (description and controls).
    * @private
    */
   hideControls_() {
-    this.controlsContainer_.setAttribute('i-amphtml-lbg-fade', 'out');
+    this.overlay_.setAttribute('i-amphtml-lbg-fade', 'out');
     this.controlsMode_ = LightboxControlsModes.CONTROLS_HIDDEN;
   }
 
@@ -744,7 +600,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    */
   setupEventListeners_() {
     devAssert(this.container_);
-    const onToggleControls = this.onToggleControls_.bind(this);
+    const onToggleControls = this.onToggleOverlay_.bind(this);
     this.unlistenClick_ = listen(
       dev().assertElement(this.container_),
       'click',
@@ -764,234 +620,42 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   }
 
   /**
-   * Carries momentum for the swipe forwards to a final destination, with the
-   * duration depending on the velocity.
-   * @param {number} scale The current scale.
-   * @param {number} deltaX How far in the x direction we should keep moving.
-   * @param {number} deltaY How far in the y direction we should keep moving.
-   * @param {number} velocity The current velocity.
-   * @return {Promise} A Promise that resolves once the momentum based movement
-   *    based movement has ended.
-   * @private
-   */
-  carrySwipeMomentum_(scale, deltaX, deltaY, velocity) {
-    const duration = velocity * SWIPE_TO_CLOSE_DISTANCE_TO_TIME_FACTOR;
-
-    setStyles(devAssert(dev().assertElement(this.carousel_)), {
-      transform: `scale(${scale}) translate(${deltaX}px, ${deltaY}px)`,
-      transition: `${duration}ms transform ${SWIPE_TO_CLOSE_MOMENTUM_TIMING}`,
-    });
-
-    return delayAfterDeferringToEventLoop(this.win, duration);
-  }
-
-  /**
-   * Snaps back to the starting point, with the duration based on the distance
-   * that needs to be travelled.
-   * @param {number} finalDistance
-   * @return {Promise} A Promise that resolves once the snapping has completed.
-   * @private
-   */
-  snapBackFromSwipe_(finalDistance) {
-    const duration = finalDistance * SWIPE_TO_CLOSE_SNAP_BACK_TIME_FACTOR;
-
-    return this.mutateElement(() => {
-      setStyles(dev().assertElement(this.carousel_), {
-        transform: '',
-        transition: `${duration}ms transform ease-out`,
-      });
-      setStyles(dev().assertElement(this.mask_), {
-        opacity: '',
-        transition: `${duration}ms opacity ease-out`,
-      });
-      setStyles(dev().assertElement(this.controlsContainer_), {
-        opacity: '',
-        transition: `${duration}ms opacity ease-out`,
-      });
-    }).then(() => {
-      return delayAfterDeferringToEventLoop(this.win, duration);
-    });
-  }
-
-  /**
-   * Adjusts the UI elements for the current swipe position in a swipe to
-   * dismiss gesture. This should be called in a mutate context.
-   * @param {!Element} carousel The carousel element to adjust. This is passed
-   *    as `this.carousel_` will be null if this is called after the lightbox
-   *    has been closed.
-   * @param {string} carouselTransform How to transform the carousel.
-   * @param {number|string} maskOpacity The opacity for the mask element.
-   * @param {number|string} controlsOpacity The opacity for the controls
-   *    container.
-   * @private
-   */
-  adjustForSwipePosition_(
-    carousel,
-    carouselTransform = '',
-    maskOpacity = '',
-    controlsOpacity = ''
-  ) {
-    setStyles(carousel, {
-      transform: carouselTransform,
-      transition: '',
-    });
-    setStyles(dev().assertElement(this.mask_), {
-      opacity: maskOpacity,
-      transition: '',
-    });
-    setStyles(devAssert(dev().assertElement(this.controlsContainer_)), {
-      opacity: controlsOpacity,
-      transition: '',
-    });
-  }
-
-  /**
-   * Releases the user's swipe to dismiss gesture. This carries the momentum
-   * forwards and either closes the lightbox or snaps back based on the speed
-   * and distance. This should be called in a mutate context.
-   * @param {number} scale The scale when releasing the swipe. We do not change
-   *    the scale as we carry forward any momentum.
-   * @param {number} velocityX The X velocity when the swipe was released.
-   * @param {number} velocityY The Y velocity when the swipe was released.
-   * @param {number} deltaX The x distance when the swipe was released.
-   * @param {number} deltaY The y distance when the swipe was released.
-   * @return {!Promise} A Promise that resolves once the release is completed,
-   *    either snapping back to the start or closing the carousel.
-   * @private
-   */
-  releaseSwipe_(scale, velocityX, velocityY, deltaX, deltaY) {
-    const velocity = calculateDistance(0, 0, velocityX, velocityY);
-    const distanceX = velocityX * SWIPE_TO_CLOSE_VELOCITY_TO_DISTANCE_FACTOR;
-    const distanceY = velocityY * SWIPE_TO_CLOSE_VELOCITY_TO_DISTANCE_FACTOR;
-    const finalDeltaX = distanceX + deltaX;
-    const finalDeltaY = distanceY + deltaY;
-    // We want to figure out the final distance we will rest at if the user
-    // flicked the lightbox and use that to determine we should animate to. We
-    // will then use that resting position to determine if we should snap back
-    // or close.
-    const finalDistance = calculateDistance(0, 0, finalDeltaX, finalDeltaY);
-
-    // We always want to carry momentum from the swipe forward, and then use
-    // the resting point to decide if we should snap back or close.
-    return this.carrySwipeMomentum_(
-      scale,
-      finalDeltaX,
-      finalDeltaY,
-      velocity
-    ).then(() => {
-      if (
-        finalDistance < SWIPE_TO_CLOSE_DISTANCE_THRESHOLD &&
-        velocity < SWIPE_TO_CLOSE_VELOCITY_THRESHOLD
-      ) {
-        return this.snapBackFromSwipe_(finalDistance);
-      }
-
-      return this.close_();
-    });
-  }
-
-  /**
-   * Handles the start of a swipe to dimiss gesture:
-   *  - Prevents a scroll event from the carousel during the swipe.
-   *  - Hides the source element on the page.
-   * This should be called in a mutate context.
-   * @param {!Element} sourceElement
-   * @private
-   */
-  startSwipeToDismiss_(sourceElement) {
-    const parentCarousel = this.getSourceElementParentCarousel_(sourceElement);
-    const hiddenElement = parentCarousel || sourceElement;
-    hiddenElement.classList.add('i-amphtml-ghost');
-    // We do not want the user dragging around to make the carousel think that
-    // a scroll happened.
-    this.preventCarouselScrollUnlistener_ = listen(
-      dev().assertElement(this.carousel_),
-      'scroll',
-      event => {
-        event.stopPropagation();
-      },
-      {
-        capture: true,
-      }
-    );
-    // TODO(sparhami) #19259 Tracks a more generic way to do this. Remove once
-    // we have something better.
-    this.element.setAttribute('i-amphtml-scale-animation', '');
-    // Need to clear this so that we can control the opacity as the user drags.
-    setStyle(this.controlsContainer_, 'animationFillMode', 'none');
-  }
-
-  /**
-   * Ends a drag swipe, cleaning up the effects from `startSwipeToDismiss_`.
-   * This should be called in a mutate context.
-   * @param {!Element} sourceElement
-   * @private
-   */
-  endSwipeToDismiss_(sourceElement) {
-    const parentCarousel = this.getSourceElementParentCarousel_(sourceElement);
-    const hiddenElement = parentCarousel || sourceElement;
-    hiddenElement.classList.remove('i-amphtml-ghost');
-    this.preventCarouselScrollUnlistener_();
-    this.element.removeAttribute('i-amphtml-scale-animation');
-    setStyle(this.controlsContainer_, 'animationFillMode', '');
-  }
-
-  /**
-   * @param {!SwipeDef} data
-   * @private
-   */
-  handleSwipeMove_(data) {
-    const {deltaX, deltaY, first, last, velocityX, velocityY} = data;
-    // Need to capture these as they will no longer be available after closing.
-    const carousel = devAssert(this.carousel_);
-    const {sourceElement} = this.getCurrentElement_();
-    const distance = calculateDistance(0, 0, deltaX, deltaY);
-    const releasePercentage = Math.min(distance / SWIPE_TO_CLOSE_DISTANCE, 1);
-    const hideControlsPercentage = Math.min(
-      distance / SWIPE_TO_HIDE_CONTROLS_DISTANCE,
-      1
-    );
-    const scale = lerp(1, SWIPE_TO_CLOSE_MIN_SCALE, releasePercentage);
-    const maskOpacity = lerp(1, SWIPE_TO_CLOSE_MIN_OPACITY, releasePercentage);
-    const controlsOpacity = lerp(1, 0, hideControlsPercentage);
-
-    this.mutateElement(() => {
-      if (first) {
-        this.startSwipeToDismiss_(sourceElement);
-        return;
-      }
-
-      if (last) {
-        this.releaseSwipe_(scale, velocityX, velocityY, deltaX, deltaY).then(
-          () => {
-            // TODO(sparhami) These should be called in a `mutateElement`,
-            // but we are already in an animationFrame, and waiting for the
-            // next one will cause the UI to flicker.
-            this.adjustForSwipePosition_(dev().assertElement(carousel));
-            this.endSwipeToDismiss_(sourceElement);
-          }
-        );
-        return;
-      }
-
-      this.adjustForSwipePosition_(
-        dev().assertElement(carousel),
-        `scale(${scale}) translate(${deltaX}px, ${deltaY}px)`,
-        maskOpacity,
-        controlsOpacity
-      );
-    });
-  }
-
-  /**
    * Set up gestures
    * @private
    */
   setupGestures_() {
     const gestures = Gestures.get(dev().assertElement(this.carousel_));
-    gestures.onGesture(SwipeYRecognizer, e => {
-      this.handleSwipeMove_(e.data);
+    gestures.onGesture(SwipeYRecognizer, ({data}) => {
+      this.swipeGesture_(data);
     });
+  }
+
+  /**
+   * Handles a swipe gesture, updating the current swipe to dismiss state.
+   * @param {!SwipeDef} data
+   */
+  swipeGesture_(data) {
+    if (data.first) {
+      const {sourceElement} = this.getCurrentElement_();
+      const parentCarousel = this.getSourceElementParentCarousel_(
+        sourceElement
+      );
+
+      this.swipeToDismiss_.startSwipe({
+        swipeElement: dev().assertElement(this.carousel_),
+        hiddenElement: parentCarousel || sourceElement,
+        mask: dev().assertElement(this.mask_),
+        overlay: dev().assertElement(this.overlay_),
+      });
+      return;
+    }
+
+    if (data.last) {
+      this.swipeToDismiss_.endSwipe(data);
+      return;
+    }
+
+    this.swipeToDismiss_.swipeMove(data);
   }
 
   /**
@@ -1084,7 +748,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         return this.mutateElement(() => {
           toggle(this.element, true);
           setStyle(this.element, 'opacity', 0);
-          this.controlsContainer_.removeAttribute('i-amphtml-lbg-fade');
+          this.overlay_.removeAttribute('i-amphtml-lbg-fade');
         });
       })
       .then(() => {
@@ -1111,7 +775,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       .then(() => this.openLightboxForElement_(element, expandDescription))
       .then(() => {
         setStyle(this.element, 'opacity', '');
-        this.showControls_();
+        this.showOverlay_();
         triggerAnalyticsEvent(this.element, 'lightboxOpened', dict({}));
       });
   }
@@ -1261,6 +925,11 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     let imageAnimation;
 
     const measure = () => {
+      const srcCropEl =
+        closestAncestorElementBySelector(srcImg, 'amp-img') || srcImg;
+      const targetCropEl =
+        closestAncestorElementBySelector(targetImg, 'amp-img') || targetImg;
+
       duration = this.getTransitionDurationFromElements_(srcImg, targetImg);
       motionDuration = MOTION_DURATION_RATIO * duration;
       // Prepare the actual image animation.
@@ -1269,9 +938,9 @@ export class AmpLightboxGallery extends AMP.BaseElement {
           styleContainer: this.getAmpDoc().getHeadNode(),
           transitionContainer: this.getAmpDoc().getBody(),
           srcImg,
+          srcCropRect: srcCropEl./*OK*/ getBoundingClientRect(),
           targetImg,
-          srcImgRect: undefined,
-          targetImgRect: undefined,
+          targetCropRect: targetCropEl./*OK*/ getBoundingClientRect(),
           styles: {
             'animationDuration': `${motionDuration}ms`,
             // Matches z-index for `.i-amphtml-lbg`.
@@ -1584,7 +1253,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     this.lightboxCaption_.toggleOverflow(false);
     this.mutateElement(() => {
       this.container_.setAttribute('gallery-view', '');
-      toggle(dev().assertElement(this.navControls_), false);
       toggle(dev().assertElement(this.carousel_), false);
     });
     triggerAnalyticsEvent(this.element, 'thumbnailsViewToggled', dict({}));
@@ -1598,7 +1266,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   closeGallery_() {
     return this.mutateElement(() => {
       this.container_.removeAttribute('gallery-view');
-      toggle(dev().assertElement(this.navControls_), true);
       toggle(dev().assertElement(this.carousel_), true);
       this.updateDescriptionBox_();
     });
@@ -1653,7 +1320,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
           if (!ts || isNaN(ts)) {
             return;
           }
-          const timestamp = this.secondsToTimestampString_(ts);
+          const timestamp = secondsToTimestampString(ts);
           const thumbnailContainer = dev().assertElement(
             this.gallery_.childNodes[thumbnail.index]
           );
@@ -1691,41 +1358,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         this.gallery_.appendChild(thumbnailElement);
       });
     });
-  }
-
-  /**
-   * Pads the beginning of a string with a substring to a target length.
-   * @param {string} s
-   * @param {number} targetLength
-   * @param {string} padString
-   * @private
-   */
-  padStart_(s, targetLength, padString) {
-    if (s.length >= targetLength) {
-      return s;
-    }
-    targetLength = targetLength - s.length;
-    let padding = padString;
-    while (targetLength > padding.length) {
-      padding += padString;
-    }
-    return padding.slice(0, targetLength) + s;
-  }
-
-  /**
-   * Converts seconds to a timestamp formatted string.
-   * @param {number} seconds
-   * @return {string}
-   * @private
-   */
-  secondsToTimestampString_(seconds) {
-    const h = Math.floor(seconds / 3600);
-    const m = Math.floor(seconds / 60);
-    const s = Math.floor(seconds % 60);
-    const hh = this.padStart_(h.toString(), 2, '0');
-    const mm = this.padStart_(m.toString(), 2, '0');
-    const ss = this.padStart_(s.toString(), 2, '0');
-    return hh + ':' + mm + ':' + ss;
   }
 
   /**
@@ -1778,7 +1410,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         if (!ts || isNaN(ts)) {
           return;
         }
-        const timestamp = this.secondsToTimestampString_(ts);
+        const timestamp = secondsToTimestampString(ts);
         timestampDiv.appendChild(this.doc_.createTextNode(timestamp));
         timestampDiv.classList.add('i-amphtml-lbg-has-timestamp');
       });

@@ -193,8 +193,9 @@ amp-story-page[active] {
 }
 
 .i-amphtml-story-sidebar[open] {
-  transform: translate3d(0, 0, 0) !important;
-  transition: transform 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
+  animation-timing-function: cubic-bezier(0.0, 0.0, 0.2, 1) !important;
+  animation-duration: 0.3s !important;
+  animation-name: i-amphtml-sidebar-slide-in-right;
 }
 
 [desktop] .i-amphtml-story-sidebar[open] {
@@ -205,9 +206,9 @@ amp-story-page[active] {
   max-width: 280px !important;
   min-width: 280px !important;
   width: 280px !important;
-  transform: translate3d(100%, 0, 0) !important;
-  transition: transform 0.2s cubic-bezier(0.4, 0.0, 1, 1) !important;
-  display: block !important;
+  animation-timing-function: cubic-bezier(0.4, 0.0, 1, 1)  !important;
+  animation-duration: 0.2s !important;
+  animation-name: i-amphtml-sidebar-slide-out-right;
 }
 
 .i-amphtml-story-fallback amp-story-page {
@@ -229,7 +230,7 @@ amp-story-page:not([active]) {
 
 /**
  * Note: If updating the [active] or [distance] attributes names, please also
- * update them in the amp.css file.
+ * update them in the ampdoc.css file.
  */
 amp-story-page[active],
 amp-story-page[distance="0"],
@@ -239,6 +240,15 @@ amp-story-page[distance="1"] {
 
 amp-story-page[distance="2"] {
   transform: translateY(100%) !important;
+}
+
+amp-story-page [data-text-background-color] {
+  border-radius: 3px !important;
+  line-height: 1.5em !important;
+  padding: 2px 4px !important;
+  text-indent: 0 !important;
+  box-decoration-break: clone !important;
+  -webkit-box-decoration-break: clone !important;
 }
 
 [desktop].i-amphtml-story-bookend-active amp-story-page[active] {
@@ -298,21 +308,6 @@ amp-story-page[distance="2"] {
   display: none !important;
 }
 
-/**
- * Click shield to make sure click events are never swallowed by videos on
- * Safari iOS 11.2, which would prevent the user from navigating through the
- * story.
- * See #14401
- */
-amp-story-grid-layer amp-video::after {
-  content: "" !important;
-  position: absolute !important;
-  height: 100% !important;
-  width: 100% !important;
-  top: 0 !important;
-  left: 0 !important;
-}
-
 /** Call to action layer, positioned at the bottom 20% of the screen. */
 amp-story-cta-layer {
   display: block !important;
@@ -337,6 +332,31 @@ amp-story-grid-layer {
   z-index: 2 !important;
   /** Make sure grid layer does not act as a click shield on elements underneath */
   pointer-events: none !important;
+}
+
+/**
+ * Click shield to make sure click events are never swallowed by videos on
+ * Safari iOS 11.2, which would prevent the user from navigating through the
+ * story.
+ * See #14401
+ */
+ amp-story-grid-layer amp-video::after {
+  content: "" !important;
+  position: absolute !important;
+  height: 100% !important;
+  width: 100% !important;
+  top: 0 !important;
+  left: 0 !important;
+}
+
+/**
+ * Adds a width limit to make sure amp-twitter element only takes required
+ * space, otherwise it takes whole width and causes a tooltip trigger in blank
+ * space.
+ * See #22334
+ */
+amp-story-grid-layer amp-twitter {
+  max-width: 500px !important;
 }
 
 amp-story-grid-layer > * {

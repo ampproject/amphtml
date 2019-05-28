@@ -47,6 +47,7 @@ tags: {  # <amp-autocomplete>
     name: "filter-expr"
     requires_extension: "amp-bind"
   }
+  attrs: { name: "filter-value" }
   attrs: { name: "max-entries" }
   attrs: { name: "min-characters" }
   attrs: {

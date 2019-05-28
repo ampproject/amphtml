@@ -242,7 +242,12 @@ class AmpViewer {
     this.amp_ = null;
 
     // Immediately install amp-shadow.js.
-    this.installScript_('/dist/amp-shadow.js');
+    try {
+      // Install compiled version if it exists
+      this.installScript_('/dist/shadow-v0.js')
+    } catch (ex) {
+      this.installScript_('/dist/amp-shadow.js');      
+    }    
   }
 
   /**
@@ -363,7 +368,7 @@ class AmpViewer {
  * @return {boolean}
  */
 function isShellUrl(url) {
-  return (url == '/pwa' || url == '/pwa/' || url == '/pwa/ampdoc-shell');
+  return (url == '/pwa' || url == '/pwa/');
 }
 
 

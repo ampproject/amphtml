@@ -33,6 +33,7 @@
       },
       "additionalTagNames": {
         "customTags": [
+          "closurePrimitive",
           "deprecated",
           "export",
           "final",
@@ -84,7 +85,7 @@
     "google-camelcase/google-camelcase": 2,
     "jsdoc/check-param-names": 2,
     "jsdoc/check-tag-names": 2,
-    "jsdoc/check-types": 2,
+    "jsdoc/check-types": [2, { "noDefaults": true }],
     "jsdoc/require-param": 2,
     "jsdoc/require-param-name": 2,
     "jsdoc/require-param-type": 2,

@@ -19,8 +19,8 @@ import {
   VariableService,
   encodeVars,
   getNameArgsForTesting,
-  installVariableService,
-  variableServiceFor,
+  installVariableServiceForTesting,
+  variableServiceForDoc,
 } from '../variables';
 import {Services} from '../../../../src/services';
 import {
@@ -28,13 +28,12 @@ import {
   linkerReaderServiceFor,
 } from '../linker-reader';
 
-describe('amp-analytics.VariableService', function() {
+describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
   let variables;
 
   beforeEach(() => {
-    const fakeWin = {};
-    installLinkerReaderService(fakeWin);
-    variables = new VariableService(fakeWin);
+    installLinkerReaderService(env.win);
+    variables = new VariableService(env.ampdoc);
   });
 
   describe('encodeVars', () => {
@@ -189,6 +188,7 @@ describe('amp-analytics.VariableService', function() {
   });
 
   describes.fakeWin('macros', {amp: true}, env => {
+    let doc;
     let win;
     let urlReplacementService;
     let sandbox;
@@ -196,20 +196,19 @@ describe('amp-analytics.VariableService', function() {
     beforeEach(() => {
       sandbox = env.sandbox;
       win = env.win;
+      doc = win.document;
       installLinkerReaderService(win);
-      installVariableService(win);
-      variables = variableServiceFor(win);
+      installVariableServiceForTesting(doc);
+      variables = variableServiceForDoc(doc);
       const {documentElement} = win.document;
       urlReplacementService = Services.urlReplacementsForDoc(documentElement);
     });
 
-    function check(input, output) {
-      const macros = variables.getMacros();
+    function check(input, output, opt_bindings) {
+      const macros = Object.assign(variables.getMacros(), opt_bindings);
       const expanded = urlReplacementService.expandUrlAsync(input, macros);
       return expect(expanded).to.eventually.equal(output);
     }
-
-    it('default works', () => check('$DEFAULT(one,two)', 'one'));
 
     it('default works without first arg', () => check('$DEFAULT(,two)', 'two'));
 
@@ -223,6 +222,9 @@ describe('amp-analytics.VariableService', function() {
       ));
 
     it('substr works', () => check('$SUBSTR(Hello world!, 1, 4)', 'ello'));
+
+    it('substr works with number as input', () =>
+      check('$SUBSTR(NUM, 2, 5)', '3456', {NUM: 123456}));
 
     it('trim works', () => check('$TRIM(hello      )', 'hello'));
 

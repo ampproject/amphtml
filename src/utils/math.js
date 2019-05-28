@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {devAssert} from '../log';
+
 /**
  * Maps a value in a first range to its equivalent in a second range
  * Ex.: 5 in the range [0,10] gives 60 in the range[40,80]
@@ -79,7 +81,8 @@ export function mod(a, b) {
 }
 
 /**
- * Restricts a number to be in the given min/max range.
+ * Restricts a number to be in the given min/max range. The minimum value must
+ * be less than or equal to the maximum value.
  *
  * Examples:
  * clamp(0.5, 0, 1) -> 0.5
@@ -92,5 +95,42 @@ export function mod(a, b) {
  * @return {number} the clamped value.
  */
 export function clamp(val, min, max) {
+  devAssert(min <= max, 'Minimum value is greater than the maximum.');
   return Math.min(Math.max(val, min), max);
+}
+
+/**
+ * Returns value bound to min and max values +/- extent. The lower bound must
+ * be less than or equal to the upper bound.
+ * @param {number} val the value to bound.
+ * @param {number} min the lower bound.
+ * @param {number} max the upper bound
+ * @param {number} extent the allowed extent beyond the bounds.
+ * @return {number} the bounded value.
+ */
+export function boundValue(val, min, max, extent) {
+  devAssert(min <= max, 'Lower bound is greater than the upper bound.');
+  return clamp(val, min - extent, max + extent);
+}
+
+/**
+ * Returns the length of a vector given in X- and Y-coordinates.
+ * @param {number} deltaX distance in the X direction.
+ * @param {number} deltaY distance in the Y direction.
+ * @return {number} the magnitude of the vector.
+ */
+export function magnitude(deltaX, deltaY) {
+  return Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+}
+
+/**
+ * Returns the distance between two points.
+ * @param {number} x1 X-coordinate of the first point.
+ * @param {number} y1 Y-coordinate of the first point.
+ * @param {number} x2 X-coordinate of the second point.
+ * @param {number} y2 Y-coordinate of the second point.
+ * @return {number} the distance between the two points.
+ */
+export function distance(x1, y1, x2, y2) {
+  return magnitude(x2 - x1, y2 - y1);
 }
