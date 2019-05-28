@@ -6362,6 +6362,7 @@ attr_lists: {
         ")(\\s|$)"
   }
   attrs: { name: "lang" }
+  attrs: { name: "slot" }
   attrs: { name: "tabindex" }
   attrs: { name: "title" }
   attrs: { name: "translate" }
