@@ -99,6 +99,11 @@ export class AmpAutocomplete extends AMP.BaseElement {
     this.submitOnEnter_ = false;
 
     /**
+     * If the "highlight-user-entry" attribute is present on <autocomplete>.
+     */
+    this.highlightUserEntry_ = false;
+
+    /**
      * The index of the active suggested item.
      * @private {number}
      */
@@ -227,6 +232,9 @@ export class AmpAutocomplete extends AMP.BaseElement {
       ? parseInt(this.element.getAttribute('max-entries'), 10)
       : null;
     this.submitOnEnter_ = this.element.hasAttribute('submit-on-enter');
+    this.highlightUserEntry_ = this.element.hasAttribute(
+      'highlight-user-entry'
+    );
 
     // Set accessibility attributes
     this.element.setAttribute('aria-haspopup', 'listbox');
@@ -367,16 +375,39 @@ export class AmpAutocomplete extends AMP.BaseElement {
   /**
    * Create and return <div> element from given plan-text item.
    * @param {string} item
+   * @param {string=} substring
    * @return {!Element}
    * @private
    */
-  createElementFromItem_(item) {
+  createElementFromItem_(item, substring = '') {
     const element = this.element.ownerDocument.createElement('div');
     element.classList.add('i-amphtml-autocomplete-item');
     element.setAttribute('role', 'option');
     element.setAttribute('data-value', item);
     element.setAttribute('dir', 'auto');
     element.textContent = item;
+    const text = element.childNodes[0];
+    const lowerCaseItem = item.toLocaleLowerCase();
+    const lowerCaseSubstring = substring.toLocaleLowerCase();
+    if (
+      this.highlightUserEntry_ &&
+      substring &&
+      substring.length <= item.length &&
+      includes(lowerCaseItem, lowerCaseSubstring)
+    ) {
+      const loc = lowerCaseItem.indexOf(lowerCaseSubstring);
+      const span = this.element.ownerDocument.createElement('span');
+      span.classList.add('autocomplete-partial');
+      span.appendChild(
+        this.element.ownerDocument.createTextNode(
+          // Preserve any capitalization from the original item.
+          item.slice(loc, loc + substring.length)
+        )
+      );
+      const textToRemove = text.splitText(loc);
+      textToRemove.splitText(substring.length);
+      element.replaceChild(span, textToRemove);
+    }
     return element;
   }
 
@@ -426,7 +457,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
     const filteredData = this.filterData_(sourceData, opt_input);
     return this.renderResults_(
       filteredData,
-      dev().assertElement(this.container_)
+      dev().assertElement(this.container_),
+      opt_input
     );
   }
 
@@ -434,10 +466,11 @@ export class AmpAutocomplete extends AMP.BaseElement {
    * Render the given data into item elements in the given container element.
    * @param {!Array<!JsonObject|string>} filteredData
    * @param {!Element} container
+   * @param {string} input
    * @return {!Promise}
    * @private
    */
-  renderResults_(filteredData, container) {
+  renderResults_(filteredData, container, input) {
     let renderPromise = Promise.resolve();
     this.resetActiveElement_();
     if (this.templateElement_) {
@@ -460,7 +493,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
           `${TAG} data must provide template for non-string items.`
         );
         container.appendChild(
-          this.createElementFromItem_(/** @type {string} */ (item))
+          this.createElementFromItem_(/** @type {string} */ (item), input)
         );
       });
     }
