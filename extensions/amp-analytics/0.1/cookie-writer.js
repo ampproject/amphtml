@@ -158,10 +158,10 @@ export class CookieWriter {
         inputConfig['cookieMaxAge']
       );
       return BASE_CID_MAX_AGE_MILLIS;
-    } else {
-      // convert cookieMaxAge (sec) to milliseconds
-      return cookieMaxAgeNumber * 1000;
     }
+
+    // convert cookieMaxAge (sec) to milliseconds
+    return cookieMaxAgeNumber * 1000;
   }
 
   /**
@@ -198,7 +198,7 @@ export class CookieWriter {
    * Expand the value and write to cookie if necessary
    * @param {string} cookieName
    * @param {string} cookieValue
-   * @param {number=} opt_cookieExpireDateMs
+   * @param {number} opt_cookieExpireDateMs
    * @return {!Promise}
    */
   expandAndWrite_(cookieName, cookieValue, opt_cookieExpireDateMs) {
@@ -210,9 +210,7 @@ export class CookieWriter {
         // Note: We ignore empty cookieValue, that means currently we don't
         // provide a way to overwrite or erase existing cookie
         if (value) {
-          const expireDate = opt_cookieExpireDateMs
-            ? Date.now() + opt_cookieExpireDateMs
-            : Date.now() + BASE_CID_MAX_AGE_MILLIS;
+          const expireDate = Date.now() + opt_cookieExpireDateMs;
           setCookie(this.win_, cookieName, value, expireDate, {
             highestAvailableDomain: true,
           });
