@@ -122,6 +122,9 @@ class PuppeteerController {
 
     /** @private */
     this.isXpathInstalled_ = false;
+
+    /** @private */
+    this.requests_ = [];
   }
 
   /**
@@ -325,6 +328,7 @@ class PuppeteerController {
    * @override
    */
   async navigateTo(url) {
+    this.requests_ = [];
     const frame = await this.getCurrentFrame_();
     await frame.goto(url, {waitUntil: 'domcontentloaded'});
   }
@@ -565,7 +569,6 @@ class PuppeteerController {
   }
 
   /**
-   * TODO(cvializ): decide if we need to waitForNavigation on click and keypress
    * @param {!ElementHandle<!PuppeteerHandle>} handle
    * @return {!Promise}
    * @override
@@ -606,6 +609,44 @@ class PuppeteerController {
       element,
       opt_scrollToOptions
     );
+  }
+
+  /**
+   *
+   */
+  async enableNetworkLogging() {
+    const page = await this.getPage_();
+    await page.setRequestInterception(true);
+
+    page.on('request', req => {
+      this.requests_.push({url: req.url(), body: req.postData()});
+      req.continue();
+    });
+  }
+
+  /**
+   * @param {!RegExp|string} matcher
+   * @return {!Promise}
+   */
+  getNetworkRequest(matcher) {
+    // Query past requests
+    const matches = this.requests_.filter(request =>
+      request.url.includes(matcher)
+    );
+
+    // Create a getter that will wait for future requests.
+    const getter = async () => {
+      const page = await this.getPage_();
+      const request = await page.waitForRequest(req =>
+        req.url().includes(matcher)
+      );
+      return {
+        url: request.url(),
+        body: null,
+      };
+    };
+
+    return new ControllerPromise(matches[0], getter);
   }
 
   /**

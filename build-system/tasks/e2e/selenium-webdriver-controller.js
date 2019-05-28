@@ -89,6 +89,9 @@ class SeleniumWebDriverController {
 
     /** @private {boolean} */
     this.isXpathInstalled_ = false;
+
+    /** @private {boolean} */
+    this.isRequestProxyInstalled_ = false;
   }
 
   /**
@@ -264,7 +267,7 @@ class SeleniumWebDriverController {
    * @override
    */
   async navigateTo(location) {
-    return await this.driver.get(location);
+    await this.driver.get(location);
   }
 
   /**
@@ -532,6 +535,59 @@ class SeleniumWebDriverController {
       webElement,
       opt_scrollToOptions
     );
+  }
+
+  /**
+   * Begins tracking network requests from the current page.
+   * Not designed to be called by test code.
+   * @return {!Promise}
+   */
+  async enableNetworkLogging() {
+    await this.maybeInstallRequestProxy_();
+  }
+
+  /**
+   * Get the value of a request to a URL matching the given matcher.
+   * Precondition: the request proxy ServiceWorker is installed in the page
+   * under test by maybeInstallRequestProxy_ (e.g. in `navigateTo`)
+   * @param {RegExp|string} matcher
+   * @return {!ControllerPromise}
+   */
+  getNetworkRequest(matcher) {
+    const getter = matcher => {
+      return window.requestService && window.requestService.getRequest(matcher);
+    };
+
+    return new ControllerPromise(
+      this.evaluate(getter, matcher),
+      this.getWaitFn_(() => this.evaluate(getter, matcher))
+    );
+  }
+
+  /**
+   * Install request proxy ServiceWorker and a service to monitor and cache
+   * messages from the service worker.
+   * @return {!Promise}
+   */
+  async maybeInstallRequestProxy_() {
+    const installed = await this.evaluate(() => window.requestService);
+    if (installed) {
+      return;
+    }
+
+    const script = await fs.readFileAsync(
+      'build-system/tasks/e2e/driver/install-service-worker.js',
+      'utf8'
+    );
+    await this.driver.executeScript(script);
+
+    const label = 'for request proxy ServiceWorker to be installed';
+    const condition = new Condition(label, async () => {
+      return await this.evaluate(
+        () => window.requestService && window.requestService.isReady()
+      );
+    });
+    await this.driver.wait(condition, ELEMENT_WAIT_TIMEOUT);
   }
 
   /**

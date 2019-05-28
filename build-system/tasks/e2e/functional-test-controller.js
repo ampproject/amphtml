@@ -411,7 +411,8 @@ let DOMRectDef;
 //   SMOOTH: 'smooth',
 // }
 
-/** @typedef {{
+/**
+ * @typedef {{
  *   left: number,
  *   top: number,
  *   behavior: ScrollBehavior

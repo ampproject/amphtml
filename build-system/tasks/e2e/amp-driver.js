@@ -23,8 +23,8 @@ const AmpdocEnvironment = {
 
 const EnvironmentBehaviorMap = {
   [AmpdocEnvironment.SINGLE]: {
-    ready(unusedController) {
-      return Promise.resolve();
+    ready(controller) {
+      return controller.enableNetworkLogging();
     },
 
     url(url) {
@@ -36,7 +36,8 @@ const EnvironmentBehaviorMap = {
     ready(controller) {
       return controller
         .findElement('#AMP_DOC_dynamic[data-loaded]')
-        .then(frame => controller.switchToFrame(frame));
+        .then(frame => controller.switchToFrame(frame))
+        .then(() => controller.enableNetworkLogging());
     },
 
     url(url) {
@@ -56,7 +57,9 @@ const EnvironmentBehaviorMap = {
       const shadowHost = await controller.findElement(
         '.amp-doc-host[style="visibility: visible;"]'
       );
-      await controller.switchToShadow(shadowHost);
+      await controller
+        .switchToShadow(shadowHost)
+        .then(() => controller.enableNetworkLogging());
     },
 
     url(url) {
