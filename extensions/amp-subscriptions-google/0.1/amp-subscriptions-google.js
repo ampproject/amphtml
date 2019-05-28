@@ -31,7 +31,7 @@ import {SubscriptionAnalyticsEvents} from '../../amp-subscriptions/0.1/analytics
 import {SubscriptionsScoreFactor} from '../../amp-subscriptions/0.1/score-factors.js';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {parseUrlDeprecated} from '../../../src/url';
-import { userAssert } from '../../../src/log';
+import {userAssert} from '../../../src/log';
 
 const TAG = 'amp-subscriptions-google';
 const PLATFORM_ID = 'subscribe.google.com';
@@ -397,7 +397,7 @@ export class GoogleSubscriptionsPlatform {
 
   /** @override */
   decorateUI(element, action, options) {
-    let opts = options ? options : {};
+    const opts = options ? options : {};
     /*
      * Note: contribute doesn't have a standard button
      * so we don't do anything here for it.
@@ -407,18 +407,26 @@ export class GoogleSubscriptionsPlatform {
       this.runtime_.attachButton(element, options, () => {});
     }
 
-    if (action === 'subscribe-smartbutton' ||
-        action === 'subscribe-smartbutton-light') {
+    if (
+      action === 'subscribe-smartbutton' ||
+      action === 'subscribe-smartbutton-light'
+    ) {
       element.textContent = '';
       opts.theme = 'light';
-      opts.lang = userAssert(element.getAttribute('language'), "subscribe-smartbutton must have a language attrbiute");
+      opts.lang = userAssert(
+        element.getAttribute('language'),
+        'subscribe-smartbutton must have a language attrbiute'
+      );
       this.runtime_.attachButton(element, opts, () => {});
     }
 
     if (action === 'subscribe-smartbutton-dark') {
       element.textContent = '';
       opts.lang = opts.theme = 'dark';
-      userAssert(element.getAttribute('language'), "subscribe-smartbutton must have a language attrbiute");
+      userAssert(
+        element.getAttribute('language'),
+        'subscribe-smartbutton must have a language attrbiute'
+      );
       this.runtime_.attachButton(element, opts, () => {});
     }
   }
