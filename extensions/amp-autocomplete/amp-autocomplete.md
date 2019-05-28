@@ -114,7 +114,7 @@ Example:
   </tr>
   <tr>
     <td width="40%"><strong>highlight-user-entry [optional]</strong></td>
-    <td>If <code>true</code>, exposes the <code>autocomplete-partial</code> class on the substring within the suggested item that resulted in its match with the user input. This can be used to stylize the corresponding match to stand out to the user. <strong>Defaults to false.</strong>
+    <td>If present, exposes the <code>autocomplete-partial</code> class on the substring within the suggested item that resulted in its match with the user input. This can be used to stylize the corresponding match to stand out to the user. <strong>Defaults to false.</strong>
     </td>
   </tr>
 </table>
