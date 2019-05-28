@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {getFormAsObject} from '../../src/form.js';
+import {getFormAsObject, isDisabled} from '../../src/form.js';
 
 describes.realWin('getFormAsObject', {}, env => {
   let form;
@@ -31,6 +31,19 @@ describes.realWin('getFormAsObject', {}, env => {
     input.value = 'bar';
     input.disabled = true;
     form.appendChild(input);
+
+    expect(getFormAsObject(form)).to.be.an('object').that.is.empty;
+  });
+
+  it('excludes input with disabled ancestral fieldset', () => {
+    const fieldset = env.win.document.createElement('fieldset');
+    fieldset.disabled = true;
+    const input = env.win.document.createElement('input');
+    input.type = 'text';
+    input.name = 'foo';
+    input.value = 'bar';
+    fieldset.appendChild(input);
+    form.appendChild(fieldset);
 
     expect(getFormAsObject(form)).to.be.an('object').that.is.empty;
   });
@@ -347,5 +360,35 @@ describes.realWin('getFormAsObject', {}, env => {
     expect(formDataObject)
       .to.have.property('foo2')
       .that.has.deep.members(['bar']);
+  });
+});
+
+describes.fakeWin('isDisabled', {}, env => {
+  let doc;
+
+  beforeEach(() => {
+    doc = env.win.document;
+  });
+
+  it('returns true for disabled elements', () => {
+    const disabled = doc.createElement('input');
+
+    disabled.disabled = false;
+    expect(isDisabled(disabled)).to.be.false;
+
+    disabled.disabled = true;
+    expect(isDisabled(disabled)).to.be.true;
+  });
+
+  it('returns true for elements with disabled ancestral fieldset', () => {
+    const fieldset = doc.createElement('fieldset');
+    const input = doc.createElement('input');
+    fieldset.appendChild(input);
+
+    fieldset.disabled = true;
+    expect(isDisabled(input)).to.be.true;
+
+    fieldset.disabled = false;
+    expect(isDisabled(input)).to.be.false;
   });
 });
