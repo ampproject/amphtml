@@ -337,10 +337,9 @@ export class PlatformStore {
 
   /**
    * Returns entitlements when all services are done fetching them.
-   * @private
    * @return {!Promise<!Array<!./entitlement.Entitlement>>}
    */
-  getAllPlatformsEntitlements_() {
+  getAllPlatformsEntitlements() {
     if (this.allResolvedPromise_) {
       return this.allResolvedPromise_.promise;
     }
@@ -383,7 +382,7 @@ export class PlatformStore {
    * @return {!Promise<!./subscription-platform.SubscriptionPlatform>}
    */
   selectPlatform() {
-    return this.getAllPlatformsEntitlements_().then(() => {
+    return this.getAllPlatformsEntitlements().then(() => {
       // TODO(@prateekbh): explain why sometimes a quick resolve is possible vs
       // waiting for all entitlement.
       return this.selectApplicablePlatform_();
