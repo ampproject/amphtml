@@ -28,6 +28,15 @@
       font: 8pt 'Arial', sans-serif;
       right: 0;
     }
+
+    .autocomplete-partial {
+      font-weight: bold;
+    }
+
+    #select-example .autocomplete-partial {
+      color: red;
+      text-decoration: underline;
+    }
   </style>
   <script>
       (self.AMP=self.AMP||[]).push((AMP) => {
@@ -38,11 +47,11 @@
 <body>
     <h1>Autocomplete</h1>
     <h2>Select Event</h2>
-    <p>min-characters = 0</p>
+  <p>min-characters = 0, partial red underline</p>
     <form method="post" action-xhr="/form/echo-json/post" target="_blank">
-      <amp-autocomplete filter="substring" min-characters="0" src="autocomplete-cities.example.json"
-        on="select:AMP.setState({inputSelect: event.value})">
-      <input name="input2" required>
+    <amp-autocomplete id="select-example" filter="substring" min-characters="0" highlight-user-entry
+      src="autocomplete-cities.example.json" on="select:AMP.setState({inputSelect: event.value})">
+          <input name="input2" required>
       </amp-autocomplete>
       <input name="submit-button" type="submit" value="Submit">
     <div submit-success>
@@ -63,7 +72,7 @@
       <amp-autocomplete filter="substring" min-characters="0">
       <input name="email" id="frmEmailB" placeholder="name@example.com" required autocomplete="email">
         <script type="application/json">
-          { "items" : ["Email 1", "Email 2", "Email 3"]}
+          { "items" : ["Email 1", "<span>Email</span> 2", "Email 3"]}
         </script>
       </amp-autocomplete>
       <input name="submit-button" type="submit" value="Submit">
@@ -167,8 +176,20 @@
 
     <p>submit-on-enter</p>
     <form method="post" action-xhr="/form/echo-json/post" target="_blank">
-      <amp-autocomplete filter="substring"
-        src="autocomplete-cities.example.json" submit-on-enter>
+    <amp-autocomplete filter="substring" src="autocomplete-cities.example.json" submit-on-enter>
+      <input type="text" name="input6" required>
+    </amp-autocomplete>
+    <input name="submit-button" type="submit" value="Submit">
+    <div submit-success>
+      <template type="amp-mustache">
+        Success! {{input6}}
+      </template>
+    </div>
+  </form>
+
+  <p>highlight-user-entry</p>
+  <form method="post" action-xhr="/form/echo-json/post" target="_blank">
+    <amp-autocomplete filter="substring" src="autocomplete-cities.example.json" highlight-user-entry>
           <input type="text" name="input6" required>
       </amp-autocomplete>
       <input name="submit-button" type="submit" value="Submit">
