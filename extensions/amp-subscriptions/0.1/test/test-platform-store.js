@@ -250,7 +250,7 @@ describes.realWin('Platform store', {}, () => {
       () => {
         const fakeResult = [entitlementsForService1, entitlementsForService2];
         const getAllPlatformsStub = sandbox
-          .stub(platformStore, 'getAllPlatformsEntitlements_')
+          .stub(platformStore, 'getAllPlatformsEntitlements')
           .callsFake(() => Promise.resolve(fakeResult));
         const selectApplicablePlatformStub = sandbox
           .stub(platformStore, 'selectApplicablePlatform_')

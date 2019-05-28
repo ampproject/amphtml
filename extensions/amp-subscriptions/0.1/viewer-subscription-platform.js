@@ -217,6 +217,11 @@ export class ViewerSubscriptionPlatform {
   }
 
   /** @override */
+  pingbackReturnsAllEntitlements() {
+    return this.platform_.pingbackReturnsAllEntitlements();
+  }
+
+  /** @override */
   pingback(selectedPlatform) {
     this.platform_.pingback(selectedPlatform);
   }
