@@ -32,7 +32,6 @@ import {dev, user} from '../log';
 import {endsWith} from '../string';
 import {isExperimentOn} from '../experiments';
 import {remove} from '../utils/array';
-import {toWin} from '../types';
 
 const TAG = 'FixedLayer';
 
@@ -130,10 +129,7 @@ export class FixedLayer {
       transferLayer.setLightboxMode(true);
     }
 
-    if (
-      opt_lightbox &&
-      opt_onComplete
-    ) {
+    if (opt_lightbox && opt_onComplete) {
       opt_onComplete.then(() => {
         this.scanNode_(
           dev().assertElement(opt_lightbox),
