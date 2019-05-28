@@ -312,7 +312,7 @@ class Chunks {
     /** @private @const {!PriorityQueue<Task>} */
     this.tasks_ = new PriorityQueue();
     /** @private @const {function(?IdleDeadline)} */
-    this.boundExecute_ = this.execute_.bind(this);
+    this.execute_ = this.execute_.bind(this);
     /** @private @const {function()} */
     this.schedule_ = this.schedule_.bind(this);
 
@@ -408,7 +408,7 @@ class Chunks {
       this.requestMacroTask_();
       return;
     }
-    resolved.then(this.boundExecute_(idleDeadline));
+    resolved.then(this.execute_(idleDeadline));
   }
 
   /**
@@ -437,7 +437,7 @@ class Chunks {
         // real processing is done between frames.
         15 /* minimumTimeRemaining */,
         2000 /* timeout */,
-        this.boundExecute_
+        this.execute_
       );
       return;
     }
