@@ -115,17 +115,6 @@ describes.realWin('amp-story-page', {amp: true}, env => {
     });
   });
 
-  it('should mark page as loaded after media is loaded', () => {
-    const waitForMediaLayoutSpy = sandbox.spy(page, 'waitForMediaLayout_');
-    const markPageAsLoadedSpy = sandbox.spy(page, 'markPageAsLoaded_');
-    page.buildCallback();
-    return page.layoutCallback().then(() => {
-      expect(markPageAsLoadedSpy).to.have.been.calledAfter(
-        waitForMediaLayoutSpy
-      );
-    });
-  });
-
   it('should start the animations if needed when state becomes active', () => {
     // Adding an element that has to be animated.
     const animatedEl = win.document.createElement('div');
