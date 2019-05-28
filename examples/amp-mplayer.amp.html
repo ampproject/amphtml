@@ -11,10 +11,22 @@
       color: red;
     }
   </style>
-  <script async custom-element="amp-mplayer" src="https://cdn.ampproject.org/v0/amp-mplayer-0.1.js"></script>
+  <script async custom-element="amp-mplayer" src="https://s3-us-west-2.amazonaws.com/syringe/dev/amp/amp-mplayer.js"></script>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
 <body>
-  <amp-mplayer layout="responsive" width="150" height="80"></amp-mplayer>
+<h1>MPlayer AMP Examples</h1>
+
+<h2>Specific Video</h2>
+  <amp-mplayer
+    data-content-id="fSkmeWKF"
+    layout="responsive" width="150" height="80"></amp-mplayer>
+
+<h2>Semantic</h2>
+  <amp-mplayer
+    data-minimum-date-factor="10"
+    data-scanned-element-type="id"
+    layout="responsive" width="150" height="80"></amp-mplayer>
+
 </body>
 </html>

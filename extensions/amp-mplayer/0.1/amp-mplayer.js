@@ -14,45 +14,49 @@
  * limitations under the License.
  */
 
-import {Layout} from '../../../src/layout';
+//import {Layout} from '../../../src/layout';
+import {Services} from '../../../src/services';
 import {addParamsToUrl} from '../../../src/url';
+import {createFrameFor} from '../../../src/iframe-video';
 import {dict} from '../../../src/utils/object';
-import {removeElement} from '../../../src/dom';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {removeElement} from '../../../src/dom';
+import {user} from '../../../src/log';
 
 /** @const */
 const TAG = 'amp-mplayer';
 
+/** @implements {../../../src/video-interface.VideoInterface} */
 export class AmpMPlayer extends AMP.BaseElement {
 
-  /** @implements {../../../src/video-interface.VideoInterface} */
+  /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
 
     // Declare instance variables with type annotations.
     /** @private {Element} */
-    this.iframe = null;
+    this.iframe_ = null;
 
     /** @private {?string} */
-    this.player_id = null;
+    this.playerId_ = null;
 
     /** @private {?string} */
-    this.content_id = '';
+    this.contentId_ = '';
 
     /** @private {?string} */
-    this.monti_id = null;
+    this.montiId_ = null;
 
     /** @private {?string} */
-    this.scanned_element = '';
+    this.scannedElement_ = '';
 
     /** @private {?string} */
-    this.tags = '';
+    this.tags_ = '';
 
     /** @private {?string} */
-    this.minimum_date_factor = '';
+    this.minimumDateFactor_ = '';
 
     /** @private {?string} */
-    this.scanned_element_type = '';
+    this.scannedElementType_ = '';
   }
 
   /**
@@ -62,7 +66,7 @@ export class AmpMPlayer extends AMP.BaseElement {
   preconnectCallback(onLayout) {
 
     // Host that serves player configuration and content redirects
-    this.preconnect.url("https://www.oo-syringe.com", onLayout);
+    this.preconnect.url('https://www.oo-syringe.com', onLayout);
   }
 
   /** @override */
@@ -74,8 +78,8 @@ export class AmpMPlayer extends AMP.BaseElement {
     this.readyTimeout_ = /** @type {number} */ (
       Services.timerFor(window).delay(() => {
         user().warn(TAG,
-          'Did not receive ready callback from player %s.' +
-          ' Ensure it has the videojs-amp-support plugin.', this.player_id);
+            'Did not receive ready callback from player %s.' +
+          ' Ensure it has the videojs-amp-support plugin.', this.playerId_);
       }, 3000));
   }
 
@@ -88,48 +92,56 @@ export class AmpMPlayer extends AMP.BaseElement {
     //return layout == Layout.RESPONSIVE;
   }
 
-  iframeSource() {
-    this.content_id = (element.getAttribute('data-content-id') || '');
-    this.scanned_element = (element.getAttribute('data-scanned-element') || '');
-    this.tags = (element.getAttribute('data-tags') || '');
-    this.minimum_date_factor = (element.getAttribute('data-minimum_date_factor') || '');
-    this.scanned_element_type = (element.getAttribute('data-scanned_element_type') || '');
+  /**
+   * Build Iframe source
+   * @return {string}
+   * @private
+   */
+  iframeSource_() {
+    const element = this;
+    this.contentId_ = (element.getAttribute('data-content-id') || '');
+    this.scannedElement_ = (element.getAttribute('data-scanned-element') || '');
+    this.tags_ = (element.getAttribute('data-tags') || '');
+    this.minimumDateFactor_ =
+      (element.getAttribute('data-minimum-date-factor') || '');
+    this.scannedElementType_ =
+      (element.getAttribute('data-scanned-element-type') || '');
 
     const source = '/Users/ofirshlifer/Downloads/mplayer.html' +
-      ((this.content_id !== '') ?
+      ((this.contentId_ !== '') ?
         '?content_id=' +
-        `${encodeURIComponent(this.content_id)}` :
+        `${encodeURIComponent(this.contentId_)}` :
         ('?scanned_element=' +
-          `${encodeURIComponent(this.scanned_element)}` +
+          `${encodeURIComponent(this.scannedElement_)}` +
           '&tags=' +
-          `${encodeURIComponent(this.tags)}` +
+          `${encodeURIComponent(this.tags_)}` +
           '&minimum_date_factor=' +
-          `${encodeURIComponent(this.minimum_date_factor)}` +
+          `${encodeURIComponent(this.minimumDateFactor_)}` +
           '&scanned_element_type=' +
-          `${encodeURIComponent(this.scanned_element_type)}`));
+          `${encodeURIComponent(this.scannedElementType_)}`));
 
-    const more_query_params = dict({
+    const moreQueryParams = dict({
       'player_id': (element.getAttribute('data-player-id') || undefined),
-      'monti_id': (element.getAttribute('data-monti-id') || undefined)
+      'monti_id': (element.getAttribute('data-monti-id') || undefined),
     });
 
-    return addParamsToUrl(source, more_query_params);
+    return addParamsToUrl(source, moreQueryParams);
   }
 
   /** @override */
   layoutCallback() {
     // Actually load your resource or render more expensive resources.
 
-    const iframe = createFrameFor(this, this.iframeSource());
+    const iframe = createFrameFor(this, this.iframeSource_());
     this.iframe = iframe;
     return this.loadPromise(iframe);
   }
 
   /** @override */
   unlayoutCallback() {
-    if (this.iframe) {
-      removeElement(this.iframe);
-      this.iframe = null;
+    if (this.iframe_) {
+      removeElement(this.iframe_);
+      this.iframe_ = null;
     }
     return true; // Call layoutCallback again.
   }

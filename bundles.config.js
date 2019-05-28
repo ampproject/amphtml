@@ -928,7 +928,8 @@ exports.extensionBundles = [
   {
     name: 'amp-mplayer',
     version: '0.1',
-    type: TYPES.MISC
+    latestVersion: '0.1',
+    type: TYPES.MISC,
   },
 ];
 
