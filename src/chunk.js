@@ -313,6 +313,8 @@ class Chunks {
     this.tasks_ = new PriorityQueue();
     /** @private @const {function(?IdleDeadline)} */
     this.boundExecute_ = this.execute_.bind(this);
+    /** @private @const {function()} */
+    this.schedule_ = this.schedule_.bind(this);
 
     /** @private @const {!Promise<!./service/viewer-impl.Viewer>} */
     this.viewerPromise_ = Services.viewerPromiseForDoc(ampDoc);
@@ -351,9 +353,7 @@ class Chunks {
    */
   enqueueTask_(task, priority) {
     this.tasks_.enqueue(task, priority);
-    resolved.then(() => {
-      this.schedule_();
-    });
+    resolved.then(this.schedule_);
   }
 
   /**
@@ -391,9 +391,7 @@ class Chunks {
     }
     const before = Date.now();
     t.runTask_(idleDeadline);
-    resolved.then(() => {
-      this.schedule_();
-    });
+    resolved.then(this.schedule_);
     dev().fine(TAG, t.getName_(), 'Chunk duration', Date.now() - before);
     return true;
   }
@@ -404,9 +402,12 @@ class Chunks {
    * @private
    */
   executeAsap_(idleDeadline) {
-    resolved.then(() => {
-      this.boundExecute_(idleDeadline);
-    });
+    // This
+    if (Date.now() - this.timeSinceLastExecution_ > 5) {
+      this.requestMacroTask_();
+      return;
+    }
+    resolved.then(() => this.boundExecute_(idleDeadline));
   }
 
   /**
@@ -439,6 +440,16 @@ class Chunks {
       );
       return;
     }
+    this.requestMacroTask_();
+  }
+
+  /**
+   * Requests executing of a macro task. Yields to the event queue
+   * before executing the task.
+   * Places task on browser message queue which then respectively
+   * triggers dequeuing and execution of a chunk.
+   */
+  requestMacroTask_() {
     // The message doesn't actually matter.
     this.win_./*OK*/ postMessage('amp-macro-task', '*');
   }
