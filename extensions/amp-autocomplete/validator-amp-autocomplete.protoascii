@@ -54,7 +54,7 @@ tags: {  # <amp-autocomplete>
     name: "src"
     value_url: {
       protocol: "https"
-      allow_relative: false
+      allow_relative: true
     }
   }
   attrs: { name: "submit-on-enter" }
