@@ -34,6 +34,7 @@ describes.realWin('amp-form-utils', {}, env => {
       });
 
       it("returns true if text field's value matches its default value", () => {
+        textField.value = 'default';
         expect(isFieldDefault(textField)).to.be.true;
       });
 
@@ -53,6 +54,7 @@ describes.realWin('amp-form-utils', {}, env => {
       });
 
       it("returns true if textarea's value matches its default value", () => {
+        textarea.value = 'default';
         expect(isFieldDefault(textarea)).to.be.true;
       });
 
@@ -76,6 +78,7 @@ describes.realWin('amp-form-utils', {}, env => {
       });
 
       it('returns true if the radio button is in its default state', () => {
+        optionA.checked = true;
         expect(isFieldDefault(optionA)).to.be.true;
         expect(isFieldDefault(optionB)).to.be.true;
       });
@@ -97,6 +100,7 @@ describes.realWin('amp-form-utils', {}, env => {
       });
 
       it('returns true if checkbox is in its default state', () => {
+        checkbox.checked = true;
         expect(isFieldDefault(checkbox)).to.be.true;
       });
 
@@ -121,6 +125,7 @@ describes.realWin('amp-form-utils', {}, env => {
       });
 
       it("returns true if the dropdown's selections match its default selections", () => {
+        dropdown.options[0].selected = true;
         expect(isFieldDefault(dropdown)).to.be.true;
       });
 
@@ -145,10 +150,12 @@ describes.realWin('amp-form-utils', {}, env => {
       });
 
       it("returns true if the dropdown's selections match its default selections", () => {
+        dropdown.options[0].selected = true;
         expect(isFieldDefault(dropdown)).to.be.true;
       });
 
       it("returns false if the dropdown's selections does not match its default selections", () => {
+        dropdown.options[0].selected = true;
         dropdown.options[1].selected = true;
         expect(isFieldDefault(dropdown)).to.be.false;
       });
