@@ -1,11 +1,3 @@
----
-$title: AMP for Email specification
-author: fstanis
-$order: 3
-formats:
-  - email
----
-
 <!---
 Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 
@@ -26,12 +18,12 @@ limitations under the License.
 
 AMP is a technology known for developing super fast web pages on mobile clients. AMP is a set of HTML tags backed by JavaScript that easily enables functionality with an added focus on performance and security. There are [AMP components](https://amp.dev/documentation/components/) for everything from carousels, to responsive form elements, to retrieving fresh content from remote endpoints.
 
-The AMP for Email format provides a subset of AMP components that you can use in email messages. Recipients of AMP emails can view and interact with the AMP components directly in the email.
+The AMP for Email format provides [a subset of AMP components](amp-email-components.md) that you can use in email messages. Recipients of AMP emails can view and interact with the AMP components directly in the email.
 
 
-## The AMP for Email Format
+# The AMP for Email Format
 
-### Required markup
+## Required markup
 
 The following code represents the minimum amount of markup that makes up a valid AMP email message:
 
@@ -58,45 +50,22 @@ An AMP email message MUST
 - <a name="scrpt"></a>contain a `<script async src="https://cdn.ampproject.org/v0.js"></script>` tag inside their head tag. [🔗](#scrpt)
 - <a name="boilerplate"></a>contain amp4email boilerplate (`<style amp4email-boilerplate>body{visibility:hidden}</style>`) inside their head tag to initially hide the content until AMP JS is loaded. [🔗](#boilerplate)
 
-## AMP Components
+The entire AMPHTML markup must not exceed 102,400 bytes.
 
-The following is the list of [AMP components](https://amp.dev/documentation/components/?format=email) that are currently supported in AMP email messages. The components are grouped into the following categories:
 
-* [Dynamic Content](#dynamic-content)
-* [Layout](#layout)
-* [Media](#media)
+## Supported AMP components
 
-### Dynamic Content
+*See [AMP for Email Supported Components](amp-email-components.md).*
 
-| Element | Description |
-| ------- | ----------- |
-| [`<amp-form>`](https://amp.dev/documentation/components/amp-form) | Form element. The action-xhr attribute must be used in place of the regular action attribute. Can be used in conjunction with `<template type="amp-mustache">` to render a response. |
-| [`<amp-selector>`](https://amp.dev/documentation/components/amp-selector) | A multi-select widget for use within a form. |
-| [`<amp-bind>` and `<amp-state>`](https://amp.dev/documentation/components/amp-bind) | Simple scripting language in AMP that allows the manipulation of a state machine for interactions between elements. Can also be used to add behavior on certain events.<br><br>`<amp-state>` is used to remotely fetch the initial state machine values.<br><br>**Note:** It is prohibited to bind to `[href]` or `[src]`. It is also prohibited to use the `AMP.print`, `AMP.navigateTo` and `AMP.goBack` actions. |
-| [`<amp-list>`](https://amp.dev/documentation/components/amp-list) | Remotely fetches JSON data that will be rendered by an [`<amp-mustache>`](https://amp.dev/documentation/components/amp-mustache).<br><br>**Note:** Binding to the `[src]` attribute is not allowed. Including user credentials with `credentials="include"` is also prohibited. |
-| [`<template type="amp-mustache">`](https://amp.dev/documentation/components/amp-mustache) | A Mustache template markup to render the results of an `amp-list` call. |
+## HTML requirements
 
-### Layout
-
-| Element | Description |
-| ------- | ----------- |
-| [layout attributes](https://amp.dev/documentation/guides-and-tutorials/learn/amp-html-layout/#layout-attributes)| Layout behavior is determined by the layout attribute. |
-| [`<amp-accordion>`](https://amp.dev/documentation/components/amp-accordion)| A UI element that facilitates showing/hiding different sections. |
-| [`<amp-carousel>`](https://amp.dev/documentation/components/amp-carousel) | A carousel UI component. |
-| [`<amp-sidebar>`](https://amp.dev/documentation/components/amp-sidebar) | A sidebar for navigational purposes. |
-| [`<amp-image-lightbox>`](https://amp.dev/documentation/components/amp-image-lightbox) | A lightbox for containing images. |
-| [`<amp-lightbox>`](https://amp.dev/documentation/components/amp-lightbox) | A lightbox for containing content. |
-| [`<amp-fit-text>`](https://amp.dev/documentation/components/amp-fit-text) | A helper component for fitting text within a certain area. |
-| [`<amp-timeago>`](https://amp.dev/documentation/components/amp-timeago) | Provides a convenient way of rendering timestamps. |
-
-### Media
-
-| Element | Description |
-| ------- | ----------- |
-| [`<amp-img>`](https://amp.dev/documentation/components/amp-img) | An AMP component that replaces `<img>`.<br><br>**Note:** Binding to `[src]` is not allowed. |
-| [`<amp-anim>`](https://amp.dev/documentation/components/amp-anim) | Embeds GIF files.<br><br>**Note:** Binding to `[src]` is not allowed. |
+*See [Supported HTML in AMP for Email](amp-email-html.md).*
 
 ## CSS requirements
+
+### Supported selectors and properties
+
+*See [Supported CSS in AMP for Email](amp-email-css.md).*
 
 ### Specifying CSS in an AMP document
 
@@ -121,12 +90,6 @@ All CSS in any AMP document must be included in a `<style amp-custom>` tag withi
 ```
 
 Note: The entire `<style>` tag cannot exceed 50,000 bytes. The validator will check for this.
-
-### CSS Restrictions
-The AMP4EMAIL validator spec does not contain CSS restrictions beyond the [standard AMP CSS restrictions](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages). However, email clients may have their own CSS restrictions.
-
-For example, in Gmail, the allowed list of CSS properties and values can be found at [Gmail Supported CSS Properties & Media Queries](https://developers.google.com/gmail/design/reference/supported_css).
-
 
 ## Document dimensions
 
@@ -154,144 +117,11 @@ The following AMP-specific analytic techniques are not supported:
 *   [`amp-pixel`](https://amp.dev/documentation/components/amp-pixel)
 *   [AMP Variable Substitution](https://amp.dev/documentation/guides-and-tutorials/optimize-measure/configure-analytics/analytics_basics.html#variable-substitution)
 
-### Replying/forwarding semantics
+### Component-specific considerations
 
-The email client strips out the `text/x-amp-html` part of the MIME tree when a user replies to or forwards an AMP email message. This is why it is important that an email provide alternative content in the HTML part.
+Requests for images inside [`<amp-carousel>`](https://amp.dev/documentation/components/amp-carousel) or [`<amp-accordion>`](https://amp.dev/documentation/components/amp-accordion)
+can indicate to the sender that the user is interacting with the message.
 
-
-### The amp-carousel
-
-Requests for images in the [`<amp-carousel>`](https://amp.dev/documentation/components/amp-carousel) can indicate to the sender that the user is interacting with the message.
-
-
-## Examples
-
-This section provides some [AMP for Email code examples](https://amp.dev/documentation/examples/?format=email).
-
-### Basic usage of `<amp-list>`
-
-The following is a fictional email that includes an updated list of featured products retrieved from an endpoint. This example shows the basic usage of [`<amp-list>`](https://amp.dev/documentation/components/amp-list).
-
-```html
-<!doctype html>
-<html ⚡4email>
-<head>
-  <meta charset="utf-8">
-  <script async src="https://cdn.ampproject.org/v0.js"></script>
-  <script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
-  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
-  <style amp4email-boilerplate>body{visibility:hidden}</style>
-</head>
-<body>
-  Check out these latest deals from our store!
-  <amp-list src="https://ampbyexample.com/json/cart.json" layout="fixed-height" height="80">
-    <template type="amp-mustache">
-      <div id="cart">
-        <!-- These items (and their prices) can be updated dynamically. -->
-        {{#cart_items}}
-        <div class="cart-item">
-            <span>{{name}}</span>
-            <span>{{price}}</span>
-          </div>
-        {{/cart_items}}
-        {{^cart_items}}
-          There are no featured products available. Please check back again later.
-        {{/cart_items}}
-      </div>
-    </template>
-  </amp-list>
-</body>
-</html>
-```
-
-### Basic usage of `<amp-bind>`
-
-The following is a fictional email that shows interactivity features by using [`<amp-bind>`](https://amp.dev/documentation/components/amp-bind).
-
-```html
-<!doctype html>
-<html ⚡4email>
-<head>
-  <meta charset="utf-8">
-  <script async src="https://cdn.ampproject.org/v0.js"></script>
-  <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
-  <style amp4email-boilerplate>body{visibility:hidden}</style>
-  <style amp-custom>
-    .red { background-color: red; }
-    .blue { background-color: blue; }
-    .yellow { background-color: yellow; }
-  </style>
-</head>
-<body>
-  <p [class]="state.color" class="yellow" [text]="'The current color is ' + state.color + '.'">
-    The current color is yellow
-  </p>
-  <button on="tap:AMP.setState({state: {color: 'red'}})">
-    Set color to red
-  </button>
-  <button on="tap:AMP.setState({state: {color: 'blue'}})">
-    Set color to blue
-  </button>
-</body>
-</html>
-```
-
-## Adding AMP to existing emails
-
-Email is structured as a [MIME tree](https://en.wikipedia.org/wiki/MIME). This MIME tree contains the message body and any attachments to the email.
-
-Embedding AMP within an email is simple, add a new MIME part with a content type of `text/x-amp-html` as a descendant of `multipart/alternative`. It should live alongside the existing `text/html` or `text/plain` parts. This ensures that the email message works on all clients.
-
-```html
-<amp-img alt="AMP for Email MIME Parts Diagram"
-    layout="responsive"
-    width="752" height="246"
-    src="https://github.com/ampproject/amphtml/raw/master/spec/img/amp-email-mime-parts.png">
-  <noscript>
-    <img alt="AMP for Email MIME Parts Diagram" src="img/amp-email-mime-parts.png" />
-  </noscript>
-</amp-img>
-```
-
-Important things to note:
-
-- The `text/x-amp-html` part must be nested under a `multipart/alternative` node, it will not be recognized by the email client otherwise.
-
-- Some email clients[[1]](https://openradar.appspot.com/radar?id=6054696888303616) will only render the last MIME part, so we recommend placing the `text/x-amp-html` MIME part *before* the `text/html` MIME part.
-
-See the following example:
-
-```
-From:  Person A <persona@gmail.com>
-To: Person B <personb@gmail.com>
-Subject: An AMP email!
-Content-Type: multipart/alternative; boundary="001a114634ac3555ae05525685ae"
-
---001a114634ac3555ae05525685ae
-Content-Type: text/plain; charset="UTF-8"; format=flowed; delsp=yes
-
-Hello World in plain text!
-
---001a114634ac3555ae05525685ae
-Content-Type: text/x-amp-html; charset="UTF-8"
-
-<!doctype html>
-<html ⚡4email>
-<head>
-  <meta charset="utf-8">
-  <style amp4email-boilerplate>body{visibility:hidden}</style>
-  <script async src="https://cdn.ampproject.org/v0.js"></script>
-</head>
-<body>
-Hello World in AMP!
-</body>
-</html>
---001a114634ac3555ae05525685ae--
-Content-Type: text/html; charset="UTF-8"
-
-<span>Hello World in HTML!</span>
---001a114634ac3555ae05525685ae
-```
 
 ## Feedback & Support
 
