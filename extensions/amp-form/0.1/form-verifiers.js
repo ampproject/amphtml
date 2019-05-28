@@ -15,6 +15,7 @@
  */
 
 import {LastAddedResolver} from '../../../src/utils/promise';
+import {isFieldDefault} from './utils';
 import {iterateCursor} from '../../../src/dom';
 import {user} from '../../../src/log';
 
@@ -116,27 +117,9 @@ export class FormVerifier {
       if (field.disabled) {
         continue;
       }
-      switch (field.type) {
-        case 'select-multiple':
-        case 'select-one':
-          const {options} = field;
-          for (let j = 0; j < options.length; j++) {
-            if (options[j].selected !== options[j].defaultSelected) {
-              return true;
-            }
-          }
-          break;
-        case 'checkbox':
-        case 'radio':
-          if (field.checked !== field.defaultChecked) {
-            return true;
-          }
-          break;
-        default:
-          if (field.value !== field.defaultValue) {
-            return true;
-          }
-          break;
+
+      if (!isFieldDefault(field)) {
+        return true;
       }
     }
     return false;
