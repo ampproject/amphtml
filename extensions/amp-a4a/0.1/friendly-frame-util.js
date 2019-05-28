@@ -57,7 +57,7 @@ export function renderCreativeIntoFriendlyFrame(
       'scrolling': 'no',
     })
   ));
-  // TODO(glevitzky): Ensure that applyFillContent or equivalent is called.
+  iframe.classList.add('i-amphtml-fill-content');
 
   const fontsArray = [];
   if (creativeMetadata.customStylesheets) {
