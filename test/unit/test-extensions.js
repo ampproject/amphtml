@@ -14,11 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  AmpDocShadow,
-  AmpDocShell,
-  installDocService,
-} from '../../src/service/ampdoc-impl';
+import {AmpDocShadow, installDocService} from '../../src/service/ampdoc-impl';
 import {BaseElement} from '../../src/base-element';
 import {ElementStub} from '../../src/element-stub';
 import {
@@ -362,57 +358,6 @@ describes.sandboxed('Extensions', {}, () => {
       });
     });
 
-    // TODO(dvoytenko, #11827): Make this test work on Safari.
-    it.configure()
-      .skipSafari()
-      .run(
-        'should install declared elements for AmpDocShell in shadow-doc',
-        () => {
-          const ampdocShell = new AmpDocShell(win);
-          const ampdocServiceMock = sandbox.mock(
-            Services.ampdocServiceFor(win)
-          );
-
-          ampdocServiceMock
-            .expects('isSingleDoc')
-            .returns(false)
-            .twice();
-          ampdocServiceMock
-            .expects('hasAmpDocShell')
-            .returns(true)
-            .twice();
-          ampdocServiceMock
-            .expects('getAmpDoc')
-            .withExactArgs(win.document)
-            .returns(ampdocShell)
-            .twice();
-
-          ampdocShell.declareExtension('amp-test');
-          expect(win.ampExtendedElements && win.ampExtendedElements['amp-test'])
-            .to.be.undefined;
-          expect(
-            win.ampExtendedElements && win.ampExtendedElements['amp-test-sub']
-          ).to.be.undefined;
-          expect(win.customElements.elements['amp-test']).to.not.exist;
-          expect(win.services['amp-test']).to.not.exist;
-
-          // Resolve the promise.
-          extensions.registerExtension(
-            'amp-test',
-            () => {
-              extensions.addElement('amp-test', AmpTest);
-              extensions.addElement('amp-test-sub', AmpTestSub);
-            },
-            {}
-          );
-          expect(win.ampExtendedElements['amp-test']).to.equal(AmpTest);
-          expect(win.ampExtendedElements['amp-test-sub']).to.equal(AmpTestSub);
-          expect(win.customElements.elements['amp-test']).to.exist;
-          expect(win.services['amp-test']).to.exist;
-          ampdocServiceMock.verify();
-        }
-      );
-
     it('should add doc factory in registration', () => {
       const factory = function() {};
       extensions.registerExtension(
@@ -626,52 +571,6 @@ describes.sandboxed('Extensions', {}, () => {
         expect(factory3).to.be.calledOnce;
         expect(factory3.args[0][0]).to.equal(ampdoc);
       });
-    });
-
-    it('should install declared services for AmpDocShell in shadow-doc', () => {
-      const ampdocShell = new AmpDocShell(win);
-      const ampdocServiceMock = sandbox.mock(Services.ampdocServiceFor(win));
-
-      ampdocServiceMock
-        .expects('isSingleDoc')
-        .returns(false)
-        .twice();
-      ampdocServiceMock
-        .expects('hasAmpDocShell')
-        .returns(true)
-        .twice();
-      ampdocServiceMock
-        .expects('getAmpDoc')
-        .withExactArgs(win.document)
-        .returns(ampdocShell)
-        .twice();
-
-      ampdocShell.declareExtension('amp-test');
-
-      const factory1Spy = sandbox.spy();
-      const factory2Spy = sandbox.spy();
-      const factory1 = function() {
-        factory1Spy();
-        return {a: 1};
-      };
-      const factory2 = function() {
-        factory2Spy();
-        return {a: 2};
-      };
-
-      // Resolve the promise.
-      extensions.registerExtension(
-        'amp-test',
-        () => {
-          extensions.addService('service1', factory1);
-          extensions.addService('service2', factory2);
-        },
-        {}
-      );
-      expect(factory1Spy).to.be.calledOnce;
-      expect(factory2Spy).to.be.calledOnce;
-      expect(getServiceForDoc(ampdocShell, 'service1').a).to.equal(1);
-      expect(getServiceForDoc(ampdocShell, 'service2').a).to.equal(2);
     });
 
     it('should load extension class via load extension', () => {
