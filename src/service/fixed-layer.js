@@ -131,7 +131,6 @@ export class FixedLayer {
     }
 
     if (
-      isExperimentOn(this.ampdoc.win, 'fixed-elements-in-lightbox') &&
       opt_lightbox &&
       opt_onComplete
     ) {
@@ -153,12 +152,10 @@ export class FixedLayer {
       transferLayer.setLightboxMode(false);
     }
 
-    if (isExperimentOn(this.ampdoc.win, 'fixed-elements-in-lightbox')) {
-      const fes = remove(this.elements_, fe => !!fe.lightboxed);
-      this.returnFixedElements_(fes);
-      if (!this.elements_.length) {
-        this.unobserveHiddenMutations_();
-      }
+    const fes = remove(this.elements_, fe => !!fe.lightboxed);
+    this.returnFixedElements_(fes);
+    if (!this.elements_.length) {
+      this.unobserveHiddenMutations_();
     }
   }
 
@@ -941,12 +938,6 @@ class TransferLayerBody {
     /** @private @const {!./vsync-impl.Vsync} */
     this.vsync_ = vsync;
 
-    /** @private @const {boolean} */
-    this.isLightboxExperimentOn_ = isExperimentOn(
-      toWin(doc.defaultView),
-      'fixed-elements-in-lightbox'
-    );
-
     /** @private @const {!Element} */
     this.layer_ = doc.body.cloneNode(/* deep */ false);
     this.layer_.removeAttribute('style');
@@ -972,13 +963,7 @@ class TransferLayerBody {
       padding: 'none',
       transform: 'none',
       transition: 'none',
-      visibility: 'visible',
     };
-    // This experiment uses a CSS rule for toggling transfer layer visibility,
-    // which has lower specificity than an inline style.
-    if (this.isLightboxExperimentOn_) {
-      delete styles.visibility;
-    }
     setStyles(this.layer_, assertDoesNotContainDisplay(styles));
     setInitialDisplay(this.layer_, 'block');
     doc.documentElement.appendChild(this.layer_);
@@ -993,16 +978,10 @@ class TransferLayerBody {
   setLightboxMode(on) {
     this.vsync_.mutate(() => {
       const root = this.getRoot();
-      if (this.isLightboxExperimentOn_) {
-        if (on) {
-          root.setAttribute(LIGHTBOX_MODE_ATTR, '');
-        } else {
-          root.removeAttribute(LIGHTBOX_MODE_ATTR);
-        }
+      if (on) {
+        root.setAttribute(LIGHTBOX_MODE_ATTR, '');
       } else {
-        // Legacy behavior is to hide transfer layer when entering lightbox
-        // and unhide when exiting.
-        setStyle(root, 'visibility', on ? 'hidden' : 'visible');
+        root.removeAttribute(LIGHTBOX_MODE_ATTR);
       }
     });
   }
