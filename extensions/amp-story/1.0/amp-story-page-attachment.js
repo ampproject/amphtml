@@ -141,6 +141,11 @@ export class AmpStoryPageAttachment extends AMP.BaseElement {
       ).textContent = this.element.getAttribute('data-title');
     }
 
+    if (this.element.hasAttribute('data-dark-mode')) {
+      this.headerEl_.classList.add('i-amphtml-story-page-attachment-dark-mode');
+      this.element.classList.add('i-amphtml-story-page-attachment-dark-mode');
+    }
+
     createShadowRootWithStyle(headerShadowRootEl, this.headerEl_, CSS);
     templateEl.insertBefore(headerShadowRootEl, templateEl.firstChild);
 
