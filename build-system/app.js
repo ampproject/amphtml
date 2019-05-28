@@ -403,6 +403,10 @@ app.use('/form/autocomplete/query', (req, res) => {
   }
 });
 
+app.use('/form/autocomplete/error', (req, res) => {
+  res(500);
+});
+
 const autosuggestLanguages = [
   'ActionScript',
   'AppleScript',
