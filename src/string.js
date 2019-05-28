@@ -144,3 +144,17 @@ export function stringHash32(str) {
   // Convert from 32-bit signed to unsigned.
   return String(hash >>> 0);
 }
+
+/**
+ * Trims a string on the end, removing whitespace characters.
+ * @param {string} str  A string to trim.
+ * @return {string} The string, with trailing whitespace removed.
+ */
+export function trimEnd(str) {
+  // TODO(sparhami) Does this get inlined for an ES2019 build?
+  if (str.trimEnd) {
+    return str.trimEnd();
+  }
+
+  return ('_' + str).trim().slice(1);
+}

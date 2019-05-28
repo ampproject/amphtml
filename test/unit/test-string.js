@@ -20,6 +20,7 @@ import {
   endsWith,
   expandTemplate,
   includes,
+  trimEnd,
 } from '../../src/string';
 
 describe('dashToCamelCase', () => {
@@ -136,5 +137,23 @@ describe('camelCaseToDash', () => {
     expect(camelCaseToDash('f00b4rb4z')).to.equal('f00b4rb4z');
     expect(camelCaseToDash('ABC')).to.equal('A-b-c');
     expect(camelCaseToDash('aBC')).to.equal('a-b-c');
+  });
+});
+
+describe('trimEnd', () => {
+  it('remove trailing spaces', () => {
+    expect(trimEnd('abc ')).to.equal('abc');
+  });
+
+  it('remove trailing whitespace characters', () => {
+    expect(trimEnd('abc\n\t')).to.equal('abc');
+  });
+
+  it('should keep leading spaces', () => {
+    expect(trimEnd(' abc')).to.equal(' abc');
+  });
+
+  it('should keep leading whitespace characters', () => {
+    expect(trimEnd('\n\tabc')).to.equal('\n\tabc');
   });
 });
