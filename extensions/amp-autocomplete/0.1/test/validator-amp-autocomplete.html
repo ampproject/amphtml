@@ -178,15 +178,21 @@
       <input>
     </amp-autocomplete>
 
-    <!-- Valid: amp-component with static data and suggest-first attribute -->
-    <amp-autocomplete suggest-first>
+    <!-- Valid: amp-component suggest-first attribute and filter attribute-->
+    <amp-autocomplete suggest-first filter="prefix">
       <input>
-        <script type="application/json"> {} </script>
+      <script type="application/json"> {} </script>
+    </amp-autocomplete>  
+
+    <!-- Valid: amp-component suggest-first attribute and filter!="prefix" attribute-->
+    <amp-autocomplete suggest-first filter="substring">
+      <input>
+      <script type="application/json"> {} </script>
     </amp-autocomplete>  
 
     <!-- Valid: amp-component with remote data and suggest-first attribute -->
-    <amp-autocomplete suggest-first src="https://data.com/articles.json?ref=CANONICAL_URL">
-      <input>
+    <amp-autocomplete suggest-first src="https://data.com/articles.json?ref=CANONICAL_URL" filter="prefix">
+        <input>
     </amp-autocomplete>
 
     <!-- Valid: amp-component with static data and highlight-user-entry attribute -->
@@ -315,6 +321,12 @@
     <amp-autocomplete filter="custom" src="https://data.com/articles.json?ref=CANONICAL_URL">
       <input>
     </amp-autocomplete>
+
+    <!-- Invalid: amp-component suggest-first attribute and no filter attribute-->
+    <amp-autocomplete suggest-first>
+      <input type="text">
+      <script type="application/json"> {} </script>
+    </amp-autocomplete>  
 
     <!-- Invalid: amp-autocomplete with unexpected filter -->
     <amp-autocomplete filter="random">

@@ -398,21 +398,46 @@ describes.realWin(
       });
     });
 
-    it('should call inputHandler_() on input', () => {
-      let renderSpy, toggleResultsSpy;
-      return element
-        .layoutCallback()
-        .then(() => {
-          impl.inputElement_.value = 'a';
-          renderSpy = sandbox.spy(impl, 'renderResults_');
-          toggleResultsSpy = sandbox.spy(impl, 'toggleResults_');
-          return impl.inputHandler_();
-        })
-        .then(() => {
-          expect(renderSpy).to.have.been.calledOnce;
-          expect(toggleResultsSpy).to.have.been.calledWith(true);
-          expect(impl.container_.children.length).to.equal(3);
-        });
+    describe('inputHandler_() on input', () => {
+      let renderSpy, toggleResultsSpy, updateActiveSpy;
+
+      it('should record and respond to input', () => {
+        return element
+          .layoutCallback()
+          .then(() => {
+            impl.inputElement_.value = 'a';
+            renderSpy = sandbox.spy(impl, 'renderResults_');
+            toggleResultsSpy = sandbox.spy(impl, 'toggleResults_');
+            updateActiveSpy = sandbox.spy(impl, 'updateActiveItem_');
+            expect(impl.suggestFirst_).to.be.false;
+            return impl.inputHandler_();
+          })
+          .then(() => {
+            expect(renderSpy).to.have.been.calledOnce;
+            expect(toggleResultsSpy).to.have.been.calledWith(true);
+            expect(impl.container_.children.length).to.equal(3);
+            expect(updateActiveSpy).not.to.have.been.called;
+          });
+      });
+
+      it('should suggest first item when present', () => {
+        return element
+          .layoutCallback()
+          .then(() => {
+            impl.inputElement_.value = 'a';
+            renderSpy = sandbox.spy(impl, 'renderResults_');
+            toggleResultsSpy = sandbox.spy(impl, 'toggleResults_');
+            updateActiveSpy = sandbox.spy(impl, 'updateActiveItem_');
+            impl.suggestFirst_ = true;
+            return impl.inputHandler_();
+          })
+          .then(() => {
+            expect(renderSpy).to.have.been.calledOnce;
+            expect(toggleResultsSpy).to.have.been.calledWith(true);
+            expect(impl.container_.children.length).to.equal(3);
+            expect(updateActiveSpy).to.have.been.calledWith(1);
+          });
+      });
     });
 
     describe('keyDownHandler_() on arrow keys', () => {
@@ -661,6 +686,36 @@ describes.realWin(
           expect(impl.userInput_).to.equal(impl.inputElement_.value);
           expect(fireEventSpy).to.have.been.calledWith(impl.userInput_);
         });
+    });
+
+    describe('keyDownHandler_() on Backspace', () => {
+      const event = {key: Keys.BACKSPACE};
+
+      it('should set flag to true when suggest-first is present', () => {
+        return element
+          .layoutCallback()
+          .then(() => {
+            impl.suggestFirst_ = true;
+            expect(impl.detectBackspace_).to.be.false;
+            return impl.keyDownHandler_(event);
+          })
+          .then(() => {
+            expect(impl.detectBackspace_).to.be.true;
+          });
+      });
+
+      it('should not set flag when suggest-first is absent', () => {
+        return element
+          .layoutCallback()
+          .then(() => {
+            expect(impl.suggestFirst_).to.be.false;
+            expect(impl.detectBackspace_).to.be.false;
+            return impl.keyDownHandler_(event);
+          })
+          .then(() => {
+            expect(impl.detectBackspace_).to.be.false;
+          });
+      });
     });
 
     it('should call keyDownHandler_() and fallthrough on any other key', () => {

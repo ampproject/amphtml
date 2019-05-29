@@ -39,4 +39,5 @@ export const Keys = {
   RIGHT_ARROW: 'ArrowRight',
   DOWN_ARROW: 'ArrowDown',
   TAB: 'Tab',
+  BACKSPACE: 'Backspace',
 };
