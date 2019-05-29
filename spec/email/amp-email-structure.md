@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# Structure and rendering AMP emails
+# Structure and rendering of AMP emails
 
 Email is structured as a [MIME tree](https://en.wikipedia.org/wiki/MIME). This MIME tree contains the message body and any attachments to the email.
 
@@ -29,6 +29,7 @@ To embed AMP within an email, add a new MIME part with a content type of `text/x
   </noscript>
 </amp-img>
 
+For more information about the `multipart/alternative` subtype, refer to [RFC 1521, section 7.2.3](https://tools.ietf.org/html/rfc1521#section-7.2.3).
 
 ## Additional information
 

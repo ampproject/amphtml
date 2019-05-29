@@ -53,6 +53,13 @@ An AMP email message MUST
 The entire AMPHTML markup must not exceed 102,400 bytes.
 
 
+## Structure and rendering
+
+AMP for Email relies on the standard `multipart/alternative` [MIME](https://en.wikipedia.org/wiki/MIME) subtype, as defined in
+[RFC 1521, section 7.2.3](https://tools.ietf.org/html/rfc1521#section-7.2.3).
+
+*For more information, see [Structure and rendering of AMP emails](amp-email-structure.md).
+
 ## Supported AMP components
 
 *See [AMP for Email Supported Components](amp-email-components.md).*
