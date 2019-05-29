@@ -15,19 +15,20 @@
  */
 
 export const WEBENGAGE_CONFIG = /** @type {!JsonObject} */ ({
-  'requests': {
-    'base': 'https://c.webengage.com/amp?licenseCode=${licenseCode}&luid=${clientId(we_luid)}&pageUrl=${canonicalUrl}&pageTitle=${title}&referrer=${documentReferrer}&vh=${viewportHeight}&vw=${viewportWidth}&category=application',
-    'we_amp_pageview_request': {
-      'baseUrl': '${base}&eventName=Page Viewed',
-    },
+  requests: {
+    base:
+      "https://c.webengage.com/amp?licenseCode=${licenseCode}&luid=${clientId(we_luid)}&pageUrl=${canonicalUrl}&pageTitle=${title}&referrer=${documentReferrer}&vh=${viewportHeight}&vw=${viewportWidth}&category=application",
+    we_amp_pageview_request: {
+      baseUrl: "${base}&eventName=Page Viewed"
+    }
   },
-  'extraUrlParams': {
-    'is_amp': 1,
+  extraUrlParams: {
+    is_amp: 1
   },
-  'triggers': {
-    'we_amp_pageview': {
-      'on': 'visible',
-      'request': 'we_amp_pageview_request',
-    },
-  },
+  triggers: {
+    we_amp_pageview: {
+      on: "visible",
+      request: "we_amp_pageview_request"
+    }
+  }
 });
