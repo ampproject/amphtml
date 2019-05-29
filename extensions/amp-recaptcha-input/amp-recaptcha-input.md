@@ -1,3 +1,10 @@
+---
+$category@: media
+formats:
+  - websites
+teaser:
+  text: Appends a reCAPTCHA v3 token to AMP form submissions.
+---
 <!---
 Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,17 +21,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="`amp-recaptcha-input`"></a> `amp-recaptcha-input`
+# amp-recaptcha-input
+
+Appends a <a href="https://developers.google.com/recaptcha/docs/v3">reCAPTCHA v3</a> token to <a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-form/amp-form.md">AMP form</a> submissions.
 
 <table>
-<tr>
-<td width="40%"><strong>Description</strong></td>
-<td>Appends a <a href="https://developers.google.com/recaptcha/docs/v3">reCAPTCHA v3</a> token to <a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-form/amp-form.md">AMP form</a> submissions.</td>
-</tr>
-<tr>
-<td width="40%"><strong>Status</strong></td>
-<td>Experimental. You must turn on the `amp-recaptcha-input` experiment to use this component.</td>
-</tr>
 <tr>
 <td width="40%"><strong>Required Script</strong></td>
 <td><code>&lt;script async custom-element="amp-recaptcha-input" src="https://cdn.ampproject.org/v0/amp-recaptcha-input-0.1.js">&lt;/script></code></td>
@@ -35,7 +36,7 @@ limitations under the License.
 </tr>
 <tr>
 <td width="40%"><strong>Examples</strong></td>
-<td><a href="https://github.com/ampproject/amphtml/blob/master/examples/recaptcha.amp.html">Development Example</a></td>
+<td><a href="https://amp.dev/documentation/examples/components/amp-recaptcha-input">Example on amp.dev</a></td>
 </tr>
 </table>
 
@@ -77,21 +78,25 @@ grecaptcha.execute('reCAPTCHA_site_key', {action: 'reCAPTCHA_example_action'});
 
 ## Attributes
 
-**layout (required)**
-
-Required value is `nodisplay`.
-
-**name (required)**
-
-Name of the `<amp-recaptcha-input>`. Will be used as a parameter key in the AMP form body submission.
-
-**data-sitekey (required)**
-
-[reCAPTCHA v3](https://developers.google.com/recaptcha/docs/v3) site key for the registered website.
-
-**data-action (required)**
-
-[reCAPTCHA v3](https://developers.google.com/recaptcha/docs/v3) action to be executed on form submission.
+<table>
+  <tr>
+    <td width="40%"><strong>layout (required)</strong></td>
+    <td>Required value is <code>nodisplay</code>.
+</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>name (required)</strong></td>
+    <td>Name of the <code>&lt;amp-recaptcha-input&gt;</code>. Will be used as a parameter key in the AMP form body submission.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-sitekey (required)</strong></td>
+    <td><a href="https://developers.google.com/recaptcha/docs/v3">reCAPTCHA v3</a> site key for the registered website.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-action (required)</strong></td>
+    <td><a href="https://developers.google.com/recaptcha/docs/v3">reCAPTCHA v3</a> action to be executed on form submission.</td>
+  </tr>
+</table>
 
 ## Validation
 

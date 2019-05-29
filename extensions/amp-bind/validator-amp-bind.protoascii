@@ -39,7 +39,10 @@ tags: {  # <amp-state> (json)
   spec_name: "amp-bind extension .json script"
   requires_extension: "amp-bind"
   mandatory_parent: "AMP-STATE"
-  attrs: { name: "nonce" }
+  attrs: {
+    disabled_by: "transformed"
+    name: "nonce"
+  }
   attrs: {
     name: "type"
     mandatory: true
@@ -48,13 +51,13 @@ tags: {  # <amp-state> (json)
   }
   cdata: {
     max_bytes: 100000
-    max_bytes_spec_url: "https://www.ampproject.org/docs/reference/components/dynamic/amp-bind#state"
+    max_bytes_spec_url: "https://amp.dev/documentation/components/amp-bind#state"
     blacklisted_cdata_regex: {
       regex: "<!--"
       error_message: "html comments"
     }
   }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-bind"
+  spec_url: "https://amp.dev/documentation/components/amp-bind"
 }
 tags: {  # <amp-state>
   html_format: AMP
@@ -63,10 +66,6 @@ tags: {  # <amp-state>
   requires_extension: "amp-bind"
   attrs: {
     name: "credentials"
-  }
-  attrs: {
-    name: "id"
-    mandatory: true
   }
   attrs: {
     name: "overridable"
@@ -79,12 +78,13 @@ tags: {  # <amp-state>
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
+  attr_lists: "mandatory-id-attr"
   # <amp-bind>
   attrs: { name: "[src]" }
   child_tags: {
     first_child_tag_name_oneof: "SCRIPT"
   }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-bind"
+  spec_url: "https://amp.dev/documentation/components/amp-bind"
 }
 # AMP4ADS and AMP4EMAIL enforces the the same restrictions on the 'src'
 # attribute of AMP-IMG and AMP-LIST on the src attribute of AMP-STATE. Use of
@@ -98,15 +98,12 @@ tags: {  # <amp-state>
   disallowed_ancestor: "AMP-LIST"
   disallowed_ancestor: "AMP-STATE"
   disallowed_ancestor: "TEMPLATE"
+  attr_lists: "mandatory-id-attr"
   attr_lists: "optional-src-amp4email"
-  attrs: {
-    name: "id"
-    mandatory: true
-  }
   child_tags: {
     first_child_tag_name_oneof: "SCRIPT"
   }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-bind"
+  spec_url: "https://amp.dev/documentation/components/amp-bind"
 }
 # ACTIONS <amp-state> with POST identity
 tags: { # <amp-state>
@@ -118,12 +115,8 @@ tags: { # <amp-state>
     name: "credentials"
   }
   attrs: {
-    name: "cross-origin"
+    name: "crossorigin"
     value: "amp-viewer-auth-token-via-post"
-  }
-  attrs: {
-    name: "id"
-    mandatory: true
   }
   attrs: {
     name: "overridable"
@@ -136,12 +129,13 @@ tags: { # <amp-state>
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
+  attr_lists: "mandatory-id-attr"
   # <amp-bind>
   attrs: { name: "[src]" }
   child_tags: {
     first_child_tag_name_oneof: "SCRIPT"
   }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-bind"
+  spec_url: "https://amp.dev/documentation/components/amp-bind"
 }
 tags: {  # <amp-bind-macro>
   html_format: AMP
@@ -155,9 +149,6 @@ tags: {  # <amp-bind-macro>
     name: "expression"
     mandatory: true
   }
-  attrs: {
-    name: "id"
-    mandatory: true
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-bind"
+  attr_lists: "mandatory-id-attr"
+  spec_url: "https://amp.dev/documentation/components/amp-bind"
 }

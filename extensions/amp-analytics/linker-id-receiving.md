@@ -69,7 +69,7 @@ A `cookies` example configuration looks like
     'value': 'QUERY_PARAM(example)',
   },
   'cookieName2': {
-    'value': 'LINKER_PARAM(exampleName, exampleValue)',
+    'value': 'LINKER_PARAM(exampleParamName, exampleIdName)',
   },
 }
 ```

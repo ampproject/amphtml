@@ -1,3 +1,12 @@
+---
+$category@: layout
+formats:
+  - websites
+  - ads
+  - email
+teaser:
+  text: Displays elements in a full-viewport “lightbox” modal.
+---
 <!---
 Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,13 +23,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-lightbox"></a> `amp-lightbox`
+# amp-lightbox
 
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
     <td>Displays elements in a full-viewport “lightbox” modal.</td>
-  </tr>
+</tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-lightbox" src="https://cdn.ampproject.org/v0/amp-lightbox-0.1.js">&lt;/script></code></td>
@@ -58,34 +67,41 @@ For showing images in a lightbox, there's also the [`<amp-image-lightbox>`](http
 
 ## Attributes
 
-##### animate-in (optional)
-
-Defines the style of animation for opening the lightbox. By default, this will
-be set to `fade-in`. Valid values are `fade-in`, `fly-in-bottom` and
-`fly-in-top`.
-
-**Note**: The `fly-in-*` animation presets modify the `transform` property of the 
-`amp-lightbox` element. Do not rely on transforming the `amp-lightbox` element
-directly. If you need to apply a transform, set it on a nested element instead.
-
-##### close-button (required on AMPHTML ads)
-
-Renders a close button header at the top of the lightbox. This attribute is only
-required and valid for use with [AMPHTML Ads](#a4a).
-
-##### id (required)
-
-A unique identifer for the lightbox.
-
-##### layout (required)
-
-Must be set to `nodisplay`.
-
-##### scrollable (optional)
-
-When the `scrollable` attribute is present, the content of the lightbox can scroll when overflowing the height of the lightbox.
-
-**Note**: The `scrollable` attribute is not allowed when using `<amp-lightbox>` inside an AMPHTML ad. For details, read the [Using amp-lightbox in AMPHTML ads](#a4a) section.
+<table>
+  <tr>
+    <td width="40%"><strong>animate-in (optional)</strong></td>
+    <td>Defines the style of animation for opening the lightbox. By default, this will
+be set to <code>fade-in</code>. Valid values are <code>fade-in</code>, <code>fly-in-bottom</code> and
+<code>fly-in-top</code>.
+<br><br>
+<strong>Note</strong>: The <code>fly-in-*</code> animation presets modify the <code>transform</code> property of the
+<code>amp-lightbox</code> element. Do not rely on transforming the <code>amp-lightbox</code> element
+directly. If you need to apply a transform, set it on a nested element instead.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>close-button (required on AMPHTML ads)</strong></td>
+    <td>Renders a close button header at the top of the lightbox. This attribute is only
+required and valid for use with <a href="#a4a">AMPHTML Ads</a>.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>id (required)</strong></td>
+    <td>A unique identifer for the lightbox.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>layout (required)</strong></td>
+    <td>Must be set to <code>nodisplay</code>.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>scrollable (optional)</strong></td>
+    <td>When the <code>scrollable</code> attribute is present, the content of the lightbox can scroll when overflowing the height of the lightbox.
+<br><br>
+<strong>Note</strong>: The <code>scrollable</code> attribute is not allowed when using <code>&lt;amp-lightbox&gt;</code> inside an AMPHTML ad. For details, read the <a href="#a4a">Using amp-lightbox in AMPHTML ads</a> section.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>scrollable (optional)</strong></td>
+    <td></td>
+  </tr>
+</table>
 
 ## Styling
 
@@ -144,7 +160,7 @@ In the examples below, we demonstrate how the transition looks for an AMPHTML ad
 
 <amp-img alt="lightbox ad in friendly iframe"
     layout="fixed"
-    width="360" height="480" 
+    width="360" height="480"
     src="https://github.com/ampproject/amphtml/raw/master/spec/img/lightbox-ad-fie.gif" >
   <noscript>
     <img alt="lightbox ad in friendly iframe" src="../../spec/img/lightbox-ad-fie.gif" />
@@ -155,7 +171,7 @@ In the examples below, we demonstrate how the transition looks for an AMPHTML ad
 
 <amp-img alt="lightbox ad in 3p iframe"
     layout="fixed"
-    width="360" height="480" 
+    width="360" height="480"
     src="https://github.com/ampproject/amphtml/raw/master/spec/img/lightbox-ad-3p.gif" >
   <noscript>
     <img alt="lightbox ad in 3p iframe" src="../../spec/img/lightbox-ad-3p.gif" />

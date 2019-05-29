@@ -1,3 +1,11 @@
+---
+$category@: layout
+formats:
+  - websites
+  - email
+teaser:
+  text: Provides a way to display meta content intended for temporary access such as navigation, links, buttons, menus.
+---
 <!---
 Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 
@@ -123,7 +131,7 @@ You can create a `toolbar` element that displays in the `<body>` by specifying t
 - The sidebar may implement toolbars by adding nav elements with the `toolbar` attribute and `toolbar-target` attribute.
 - The nav element must be a child of `<amp-sidebar>` and follow this format: `<nav toolbar="(media-query)" toolbar-target="elementID">`.
     - For instance, this would be a valid use of toolbar: `<nav toolbar="(max-width: 1024px)" toolbar-target="target-element">`.
-- The nav containing the toolbar attribute must only contain a single `<ul>` element, that contains `<li>` elements.
+- The nav containing the toolbar attribute must only contain a single `<ul>` or `<ol>` element, that contains `<li>` elements.
     - The `<li>` elements may contain any valid HTML elements (supported by AMP), or any of the AMP elements that `<amp-sidebar>` supports.
 - Toolbar behavior is only applied while the `toolbar` attribute media-query is valid. Also, an element with the `toolbar-target` attribute id must exist on the page for the toolbar to be applied.
 
@@ -206,7 +214,7 @@ Use of `amp-sidebar` is supported within the `amp-story` [component](https://www
 
 ### Behavior
 - The `<amp-sidebar>` must be a direct child of `<amp-story>`.
-- The sidebar defaults to the "start" side for regular AMP documents, meaning right for left-right languages and left for right-to-left languages.
+- The sidebar defaults to the "end" side, meaning right for left-right languages and left for right-to-left languages.
 - The `<amp-sidebar>` has default background color of white and is overridable in CSS.
 - Maximum width of `<amp-sidebar>` is enforced at `280px` and at `320px` for desktop experiences.
 - A 'hamburger' style button that opens/closes the sidebar will appear on the story UI.
@@ -228,7 +236,7 @@ The following example shows a simple `amp-sidebar` within an `amp-story`.
     <amp-story standalone>
       <amp-sidebar id="sidebar1" layout="nodisplay">
         <ul>
-          <li><a "href=https://www.ampproject.org"> External Link </a></li>
+          <li><a href="https://www.ampproject.org"> External Link </a></li>
           <li>Nav item 2</li>
           <li>Nav item 3</li>
         </ul>

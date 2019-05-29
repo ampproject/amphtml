@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  ancestorElementsByTag,
-  iterateCursor,
-} from './dom';
+import {ancestorElementsByTag, iterateCursor} from './dom';
 
 /** @const {string} */
 const FORM_PROP_ = '__AMP_FORM';
@@ -45,29 +42,24 @@ export function setFormForElement(element, form) {
  * @return {!JsonObject}
  */
 export function getFormAsObject(form) {
-  const {
-    elements,
-    ownerDocument,
-  } = form;
+  const {elements} = form;
   const data = /** @type {!JsonObject} */ ({});
-  const submittableTagsRegex = /^(?:input|select|textarea|button)$/i;
-  const unsubmittableTypesRegex = /^(?:button|image|file|reset)$/i;
+  // <button> is handled separately
+  const submittableTagsRegex = /^(?:input|select|textarea)$/i;
+  // type=submit is handled separately
+  const unsubmittableTypesRegex = /^(?:submit|button|image|file|reset)$/i;
   const checkableType = /^(?:checkbox|radio)$/i;
+
   for (let i = 0; i < elements.length; i++) {
     const input = elements[i];
-    const {
-      checked,
-      name,
-      multiple,
-      options,
-      tagName,
-      type,
-      value,
-    } = input;
-    if (!name || isDisabled(input) ||
-        !submittableTagsRegex.test(tagName) ||
-        unsubmittableTypesRegex.test(type) ||
-        (checkableType.test(type) && !checked)) {
+    const {checked, name, multiple, options, tagName, type, value} = input;
+    if (
+      !name ||
+      isDisabled(input) ||
+      !submittableTagsRegex.test(tagName) ||
+      unsubmittableTypesRegex.test(type) ||
+      (checkableType.test(type) && !checked)
+    ) {
       continue;
     }
 
@@ -83,20 +75,16 @@ export function getFormAsObject(form) {
       });
       continue;
     }
-
-    // In a form, the button's value is only submitted if the button itself was
-    // used to submit the form. We can detect that using the document focus.
-    // Browsers vary on the conditions that focus the form submit button.
-    // Generally, the button is only focused if the user triggers the button
-    // itself. If a script calls `button.click` or `form.submit` the button
-    // will not be focused. If the user presses enter inside a field, the button
-    // will not be focused.
-    if ((type == 'submit' || tagName == 'BUTTON')
-        && input != ownerDocument.activeElement) {
-      continue;
-    }
-
     data[name].push(value);
+  }
+
+  const submitButton = getSubmitButtonUsed(form);
+  if (submitButton && submitButton.name) {
+    const {name} = submitButton;
+    if (data[name] === undefined) {
+      data[name] = [];
+    }
+    data[submitButton.name].push(submitButton.value);
   }
 
   // Wait until the end to remove the empty values, since
@@ -112,6 +100,49 @@ export function getFormAsObject(form) {
   });
 
   return data;
+}
+
+/**
+ * Gets the submit button used to submit the form.
+ * This searches through the form elements to find:
+ * 1. The first submit button element OR
+ * 2. a focused submit button, indicating it was specifically used to submit.
+ * 3. null, if neither of the above is found.
+ * @param {!HTMLFormElement} form
+ * @return {?Element}
+ */
+export function getSubmitButtonUsed(form) {
+  const {elements} = form;
+  const {length} = elements;
+  const {activeElement} = form.ownerDocument;
+  let firstSubmitButton = null;
+
+  for (let i = 0; i < length; i++) {
+    const element = elements[i];
+
+    if (!isSubmitButton(element)) {
+      continue;
+    }
+
+    if (!firstSubmitButton) {
+      firstSubmitButton = element;
+    }
+
+    if (activeElement == element) {
+      return activeElement;
+    }
+  }
+  return firstSubmitButton;
+}
+
+/**
+ * True if the given button can submit a form.
+ * @param {!Element} element
+ * @return {boolean}
+ */
+function isSubmitButton(element) {
+  const {tagName, type} = element;
+  return tagName == 'BUTTON' || type == 'submit';
 }
 
 /**

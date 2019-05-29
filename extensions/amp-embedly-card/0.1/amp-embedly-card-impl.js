@@ -39,7 +39,6 @@ const API_KEY_ATTR_NAME = 'data-card-key';
  * See {@link ../amp-embedly-card.md} for the spec.
  */
 export class AmpEmbedlyCard extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -54,8 +53,11 @@ export class AmpEmbedlyCard extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     userAssert(
-        this.element.getAttribute('data-url'),
-        'The data-url attribute is required for <%s> %s', TAG, this.element);
+      this.element.getAttribute('data-url'),
+      'The data-url attribute is required for <%s> %s',
+      TAG,
+      this.element
+    );
 
     const ampEmbedlyKeyElement = document.querySelector(KEY_TAG);
     if (ampEmbedlyKeyElement) {
@@ -74,12 +76,19 @@ export class AmpEmbedlyCard extends AMP.BaseElement {
     const iframe = getIframe(this.win, this.element, 'embedly');
 
     const opt_is3P = true;
-    listenFor(iframe, 'embed-size', data => {
-      this./*OK*/changeHeight(data['height']);
-    }, opt_is3P);
+    listenFor(
+      iframe,
+      'embed-size',
+      data => {
+        this./*OK*/ changeHeight(data['height']);
+      },
+      opt_is3P
+    );
 
     this.applyFillContent(iframe);
-    this.getVsync().mutate(() => this.element.appendChild(iframe));
+    this.getVsync().mutate(() => {
+      this.element.appendChild(iframe);
+    });
 
     this.iframe_ = iframe;
 

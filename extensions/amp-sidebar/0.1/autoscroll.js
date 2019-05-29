@@ -30,7 +30,6 @@ import {user} from '../../../src/log';
  * @param {!Element} container
  */
 export function handleAutoscroll(ampdoc, container) {
-
   // Container could be sidebar or a clone of toolbar,
   // in the sidebar case, we need to exclude toolbar since original toolbar
   // nodes are also inside a sidebar.
@@ -42,14 +41,15 @@ export function handleAutoscroll(ampdoc, container) {
   // Verify parent is overflow auto or scroll.
   const overflow = computedStyle(ampdoc.win, container)['overflow-y'];
   if (overflow != 'scroll' && overflow != 'auto') {
-    user().error('AMP-SIDEBAR',
-        `for 'autoscroll', 'nav [toolbar]' element must be set to overflow
-        'scroll' or 'auto' for 'autoscroll' to work.`);
+    user().error(
+      'AMP-SIDEBAR',
+      `for 'autoscroll', 'nav [toolbar]' element must be set to overflow
+        'scroll' or 'auto' for 'autoscroll' to work.`
+    );
     return;
   }
 
+  const duration = 0;
   const viewport = Services.viewportForDoc(ampdoc);
-  viewport.animateScrollWithinParent(elem, container, 0, 'ease-in', 'center');
+  viewport.animateScrollWithinParent(elem, container, 'center', duration);
 }
-
-

@@ -46,6 +46,10 @@ function expect(actual, opt_message) {
     chai.use(installLengthWrapper);
     chai.use(installAboveWrapper);
     chai.use(installBelowWrapper);
+    chai.use(installIsTrueWrapper);
+    chai.use(installIsFalseWrapper);
+    chai.use(installIsOkWrapper);
+    chai.use(installIsNullWrapper);
   }
 
   return chai.expect(actual, opt_message);
@@ -54,8 +58,7 @@ function expect(actual, opt_message) {
 function installEqualWrapper(chai, utils) {
   const {Assertion} = chai;
 
-  const condition = (expected, value) => value == expected;
-  const overwrite = overwriteWithCondition(utils, condition);
+  const overwrite = overwriteAlwaysUseSuper(utils);
   Assertion.overwriteMethod('equal', overwrite);
   Assertion.overwriteMethod('equals', overwrite);
   Assertion.overwriteMethod('eq', overwrite);
@@ -66,46 +69,55 @@ function installIncludeWrapper(chai, utils) {
 
   const overwrite = overwriteAlwaysUseSuper(utils);
   Assertion.overwriteChainableMethod(
-      'include', overwrite, inheritChainingBehavior);
+    'include',
+    overwrite,
+    inheritChainingBehavior
+  );
   Assertion.overwriteChainableMethod(
-      'includes', overwrite, inheritChainingBehavior);
+    'includes',
+    overwrite,
+    inheritChainingBehavior
+  );
   Assertion.overwriteChainableMethod(
-      'contain', overwrite, inheritChainingBehavior);
+    'contain',
+    overwrite,
+    inheritChainingBehavior
+  );
   Assertion.overwriteChainableMethod(
-      'contains', overwrite, inheritChainingBehavior);
+    'contains',
+    overwrite,
+    inheritChainingBehavior
+  );
 }
 
 function installMatchWrapper(chai, utils) {
   const {Assertion} = chai;
 
-  const matchCondition = (expected, value) => expected.exec(value);
-  const overwriteMatch = overwriteWithCondition(utils, matchCondition);
-  Assertion.overwriteMethod('match', overwriteMatch);
-  Assertion.overwriteMethod('matches', overwriteMatch);
+  const overwrite = overwriteAlwaysUseSuper(utils);
+  Assertion.overwriteMethod('match', overwrite);
+  Assertion.overwriteMethod('matches', overwrite);
 }
 
 function installLengthWrapper(chai, utils) {
   const {Assertion} = chai;
 
-  const condition = (expected, value) => value.length == expected;
-  const overwrite = overwriteWithCondition(utils, condition);
+  const overwrite = overwriteAlwaysUseSuper(utils);
   Assertion.overwriteChainableMethod(
-      'length', overwrite, inheritChainingBehavior);
+    'length',
+    overwrite,
+    inheritChainingBehavior
+  );
   Assertion.overwriteChainableMethod(
-      'lengthOf', overwrite, inheritChainingBehavior);
+    'lengthOf',
+    overwrite,
+    inheritChainingBehavior
+  );
 }
 
 function installAboveWrapper(chai, utils) {
   const {Assertion} = chai;
-  const {flag} = utils;
 
-  const condition = function(expected, value) {
-    if (flag(this, 'doLength')) {
-      value = value.length;
-    }
-    return value > expected;
-  };
-  const overwrite = overwriteWithCondition(utils, condition);
+  const overwrite = overwriteAlwaysUseSuper(utils);
   Assertion.overwriteMethod('above', overwrite);
   Assertion.overwriteMethod('gt', overwrite);
   Assertion.overwriteMethod('greaterThan', overwrite);
@@ -113,49 +125,45 @@ function installAboveWrapper(chai, utils) {
 
 function installBelowWrapper(chai, utils) {
   const {Assertion} = chai;
-  const {flag} = utils;
 
-  const condition = function(expected, value) {
-    if (flag(this, 'doLength')) {
-      value = value.length;
-    }
-    return value < expected;
-  };
-  const overwrite = overwriteWithCondition(utils, condition);
+  const overwrite = overwriteAlwaysUseSuper(utils);
   Assertion.overwriteMethod('below', overwrite);
   Assertion.overwriteMethod('lt', overwrite);
   Assertion.overwriteMethod('lessThan', overwrite);
 }
 
+function installIsTrueWrapper(chai, utils) {
+  const {Assertion} = chai;
 
-function overwriteWithCondition(utils, condition) {
-  const {flag} = utils;
-
-  return function(_super) {
-    return async function(expected) {
-      const obj = this._obj;
-      const isControllerPromise = obj instanceof ControllerPromise;
-      if (!isControllerPromise) {
-        return _super.apply(this, arguments);
-      }
-      const {waitForValue} = obj;
-      if (!waitForValue) {
-        const result = await obj;
-        flag(this, 'object', result);
-        return _super.apply(this, arguments);
-      }
-
-      const boundCondition = condition.bind(this, expected);
-      const maybeNegatedCondition = flag(this, 'negate') ?
-        value => !boundCondition(value) : boundCondition;
-      flag(this, 'object', await waitForValue(maybeNegatedCondition));
-
-      return _super.apply(this, arguments);
-    };
-  };
+  const overwrite = overwriteAlwaysUseSuper(utils);
+  Assertion.overwriteProperty('isTrue', overwrite);
+  Assertion.overwriteProperty('true', overwrite);
 }
 
-// TODO: This should always be used instead of overwriteWithCondition.
+function installIsFalseWrapper(chai, utils) {
+  const {Assertion} = chai;
+
+  const overwrite = overwriteAlwaysUseSuper(utils);
+  Assertion.overwriteProperty('isFalse', overwrite);
+  Assertion.overwriteProperty('false', overwrite);
+}
+
+function installIsOkWrapper(chai, utils) {
+  const {Assertion} = chai;
+
+  const overwrite = overwriteAlwaysUseSuper(utils);
+  Assertion.overwriteProperty('isOk', overwrite);
+  Assertion.overwriteProperty('ok', overwrite);
+}
+
+function installIsNullWrapper(chai, utils) {
+  const {Assertion} = chai;
+
+  const overwrite = overwriteAlwaysUseSuper(utils);
+  Assertion.overwriteProperty('isNull', overwrite);
+  Assertion.overwriteProperty('null', overwrite);
+}
+
 function overwriteAlwaysUseSuper(utils) {
   const {flag} = utils;
 
@@ -178,6 +186,7 @@ function overwriteAlwaysUseSuper(utils) {
           flag(this, 'object', obj);
           // Run the code that checks the condition.
           _super.apply(this, arguments);
+          clearLastExpectError();
           // Let waitForValue know we are done.
           return true;
         } catch (e) {

@@ -26,8 +26,11 @@ const INSERTED_TEMPLATES = new Map();
  */
 function optimizeLiteralOutput(templateLiteral) {
   if (templateLiteral.quasis.length !== 1) {
-    console/* OK */.log('Improperly formatted `html` tagged template literal' +
-      ', more than one template element present.');
+    console /* OK */
+      .log(
+        'Improperly formatted `html` tagged template literal' +
+          ', more than one template element present.'
+      );
     return null;
   }
   return minify(templateLiteral.quasis[0].value.cooked, {
@@ -44,9 +47,11 @@ module.exports = function({types: t}) {
       TaggedTemplateExpression(path) {
         const {tag} = path.node;
 
-        if (t.isIdentifier(tag, {name: 'html'}) ||
-            (t.isCallExpression(tag) &&
-             t.isIdentifier(tag.callee, {name: 'htmlFor'}))) {
+        if (
+          t.isIdentifier(tag, {name: 'html'}) ||
+          (t.isCallExpression(tag) &&
+            t.isIdentifier(tag.callee, {name: 'htmlFor'}))
+        ) {
           // Replace a matching TemplateExpression by either inlining a
           // transpiled template or hoisting the template and referring
           // to its value.
@@ -54,13 +59,13 @@ module.exports = function({types: t}) {
           const template = optimizeLiteralOutput(path.node.quasi);
 
           if (template !== null) {
-            const templateArrayExpression = t.arrayExpression(
-                [t.stringLiteral(template)]
-            );
+            const templateArrayExpression = t.arrayExpression([
+              t.stringLiteral(template),
+            ]);
 
             if (t.isProgram(path.scope.block)) {
               path.replaceWith(
-                  t.callExpression(tag, [templateArrayExpression])
+                t.callExpression(tag, [templateArrayExpression])
               );
             } else {
               // Since the template is inline, and the block scope
@@ -73,7 +78,7 @@ module.exports = function({types: t}) {
               } else {
                 // Template not hoisted. Hoist it.
                 hoistedIdentifier = path.scope.generateUidIdentifier(
-                    'template'
+                  'template'
                 );
                 const program = path.findParent(path => path.isProgram());
 

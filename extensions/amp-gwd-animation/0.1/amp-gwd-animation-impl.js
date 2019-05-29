@@ -16,14 +16,11 @@
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
 import {dict, hasOwn} from '../../../src/utils/object';
-import {
-  escapeCssSelectorIdent,
-  scopedQuerySelector,
-  waitForBodyPromise,
-  waitForChild,
-} from '../../../src/dom';
+import {escapeCssSelectorIdent} from '../../../src/css';
 import {installServiceInEmbedScope} from '../../../src/service';
+import {scopedQuerySelector, waitForChild} from '../../../src/dom';
 import {toArray} from '../../../src/types';
+import {whenDocumentReady} from '../../../src/document-ready';
 
 /**
  * CSS class used to deactivate animations.
@@ -106,8 +103,10 @@ const LOG_ID = 'GWD';
  * @private
  */
 function getCounter(receiver, counterName) {
-  if (receiver[GOTO_COUNTER_PROP] &&
-      hasOwn(receiver[GOTO_COUNTER_PROP], counterName)) {
+  if (
+    receiver[GOTO_COUNTER_PROP] &&
+    hasOwn(receiver[GOTO_COUNTER_PROP], counterName)
+  ) {
     return receiver[GOTO_COUNTER_PROP][counterName];
   }
   return 0;
@@ -165,8 +164,9 @@ export class AmpGwdRuntimeService {
     this.boundOnAnimationEndEvent_ = this.onAnimationEndEvent_.bind(this);
 
     // Initialize once the body and DOM is ready.
-    const docReadyPromise =
-        opt_win ? waitForBodyPromise(this.doc_) : ampdoc.whenBodyAvailable();
+    const docReadyPromise = opt_win
+      ? whenDocumentReady(this.doc_)
+      : ampdoc.whenReady();
     docReadyPromise.then(() => {
       // If the page deck is not yet in the DOM, wait until it is. The page deck
       // must be present in the body before the runtime can be initialized, as
@@ -177,17 +177,26 @@ export class AmpGwdRuntimeService {
       // in a FIE.
       const body = dev().assertElement(this.doc_.body);
       waitForChild(
-          body,
-          () => !!body.querySelector(
-              `.${escapeCssSelectorIdent(GWD_PAGE_WRAPPER_CLASS)}`),
-          this.initialize_.bind(this));
+        body,
+        () =>
+          !!body.querySelector(
+            `.${escapeCssSelectorIdent(GWD_PAGE_WRAPPER_CLASS)}`
+          ),
+        this.initialize_.bind(this)
+      );
     });
   }
 
-  /** @override @nocollapse */
+  /**
+   * @param {!Window} embedWin
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   */
   static installInEmbedWindow(embedWin, ampdoc) {
     installServiceInEmbedScope(
-        embedWin, GWD_SERVICE_NAME, new AmpGwdRuntimeService(ampdoc, embedWin));
+      embedWin,
+      GWD_SERVICE_NAME,
+      new AmpGwdRuntimeService(ampdoc, embedWin)
+    );
   }
 
   /**
@@ -232,22 +241,26 @@ export class AmpGwdRuntimeService {
    */
   setCurrentPage(index) {
     const gwdPages = this.doc_.body.querySelectorAll(
-        `.${escapeCssSelectorIdent(GWD_PAGE_WRAPPER_CLASS)}`);
+      `.${escapeCssSelectorIdent(GWD_PAGE_WRAPPER_CLASS)}`
+    );
 
     if (gwdPages.length == 0) {
-      user().warn(LOG_ID,
-          'Could not set current page. No pages were found in the document.');
+      user().warn(
+        LOG_ID,
+        'Could not set current page. No pages were found in the document.'
+      );
       return;
     }
 
     // Deactivate the outgoing current page, if there is one.
     // TODO(sklobovskaya): Decide if it's worth just storing the index.
-    const activePageSelector =
-        `.${escapeCssSelectorIdent(GWD_PAGE_WRAPPER_CLASS)}.${
-          escapeCssSelectorIdent(PlaybackCssClass.PLAY)
-        }`;
-    const currentPageEl =
-        scopedQuerySelector(this.doc_.body, activePageSelector);
+    const activePageSelector = `.${escapeCssSelectorIdent(
+      GWD_PAGE_WRAPPER_CLASS
+    )}.${escapeCssSelectorIdent(PlaybackCssClass.PLAY)}`;
+    const currentPageEl = scopedQuerySelector(
+      this.doc_.body,
+      activePageSelector
+    );
 
     if (currentPageEl) {
       this.deactivatePage_(currentPageEl);
@@ -285,8 +298,8 @@ export class AmpGwdRuntimeService {
 
     // Reset other animation state on the page and all descendants.
     [pageEl]
-        .concat(toArray(pageEl.querySelectorAll('*')))
-        .forEach(el => this.resetAnimatedElement_(el));
+      .concat(toArray(pageEl.querySelectorAll('*')))
+      .forEach(el => this.resetAnimatedElement_(el));
   }
 
   /**
@@ -307,8 +320,9 @@ export class AmpGwdRuntimeService {
     // removed above, but because goto animations are activated with a special
     // class, the class must be removed manually.
     if (element.hasAttribute(CURRENT_LABEL_ANIMATION_ATTR)) {
-      const activeGotoAnimation =
-          element.getAttribute(CURRENT_LABEL_ANIMATION_ATTR);
+      const activeGotoAnimation = element.getAttribute(
+        CURRENT_LABEL_ANIMATION_ATTR
+      );
       element.classList.remove(activeGotoAnimation);
       element.removeAttribute(CURRENT_LABEL_ANIMATION_ATTR);
     }
@@ -470,8 +484,7 @@ export class AmpGwdRuntimeService {
     receiver.classList.remove(PlaybackCssClass.PAUSE);
 
     // If another goto animation is currently active on this element, stop it.
-    const currentLabel =
-        receiver.getAttribute(CURRENT_LABEL_ANIMATION_ATTR);
+    const currentLabel = receiver.getAttribute(CURRENT_LABEL_ANIMATION_ATTR);
 
     if (currentLabel) {
       receiver.classList.remove(currentLabel);
@@ -510,8 +523,11 @@ export class AmpGwdRuntimeService {
       'eventName': userEventName,
       'sourceEvent': event,
     });
-    const timelineEvent =
-        createCustomEvent(this.win_, GWD_TIMELINE_EVENT, detail);
+    const timelineEvent = createCustomEvent(
+      this.win_,
+      GWD_TIMELINE_EVENT,
+      detail
+    );
 
     this.doc_.dispatchEvent(timelineEvent);
   }
@@ -522,7 +538,10 @@ export class AmpGwdRuntimeService {
   listenForAnimationEnd_() {
     for (let i = 0; i < VENDOR_ANIMATIONEND_EVENTS.length; i++) {
       this.doc_.body.addEventListener(
-          VENDOR_ANIMATIONEND_EVENTS[i], this.boundOnAnimationEndEvent_, true);
+        VENDOR_ANIMATIONEND_EVENTS[i],
+        this.boundOnAnimationEndEvent_,
+        true
+      );
     }
   }
 
@@ -532,7 +551,10 @@ export class AmpGwdRuntimeService {
   unlistenForAnimationEnd_() {
     for (let i = 0; i < VENDOR_ANIMATIONEND_EVENTS.length; i++) {
       this.doc_.body.removeEventListener(
-          VENDOR_ANIMATIONEND_EVENTS[i], this.boundOnAnimationEndEvent_, true);
+        VENDOR_ANIMATIONEND_EVENTS[i],
+        this.boundOnAnimationEndEvent_,
+        true
+      );
     }
   }
 
@@ -553,6 +575,6 @@ function reflow(element) {
   // effects.
   const globalRef = '__AMP_GWD_TEMP';
   // Reading `offsetWidth` is what actually causes reflow.
-  self[globalRef] = element./*OK*/offsetWidth;
+  self[globalRef] = element./*OK*/ offsetWidth;
   delete self[globalRef];
 }

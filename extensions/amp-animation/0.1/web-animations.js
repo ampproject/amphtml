@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-import {CssNumberNode, CssTimeNode, isVarCss} from './css-expr-ast';
-import {Observable} from '../../../src/observable';
-import {Services} from '../../../src/services';
+import {CssNumberNode, CssTimeNode, isVarCss} from './parsers/css-expr-ast';
 import {
+  InternalWebAnimationRequestDef, // eslint-disable-line no-unused-vars
   WebAnimationDef,
-  WebAnimationPlayState,
   WebAnimationSelectorDef,
   WebAnimationSubtargetDef,
   WebAnimationTimingDef,
@@ -32,24 +30,20 @@ import {
   WebSwitchAnimationDef,
   isWhitelistedProp,
 } from './web-animation-types';
-import {
-  assertDoesNotContainDisplay,
-  computedStyle,
-  getVendorJsPropertyName,
-  setStyles,
-} from '../../../src/style';
+import {NativeWebAnimationRunner} from './runners/native-web-animation-runner';
+import {ScrollTimelineWorkletRunner} from './runners/scrolltimeline-worklet-runner';
 import {assertHttpsUrl, resolveRelativeUrl} from '../../../src/url';
-import {closestBySelector, matches} from '../../../src/dom';
+import {closestAncestorElementBySelector, matches} from '../../../src/dom';
+import {computedStyle, getVendorJsPropertyName} from '../../../src/style';
 import {dashToCamelCase, startsWith} from '../../../src/string';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {extractKeyframes} from './keyframes-extractor';
+import {extractKeyframes} from './parsers/keyframes-extractor';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject, toArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
-import {layoutRectLtwh} from '../../../src/layout-rect';
+import {isInFie} from '../../../src/friendly-iframe-embed';
 import {map} from '../../../src/utils/object';
-import {parseCss} from './css-expr';
-
+import {parseCss} from './parsers/css-expr';
 
 /** @const {string} */
 const TAG = 'amp-animation';
@@ -62,21 +56,6 @@ const TARGET_ANIM_ID = '__AMP_ANIM_ID';
  */
 let animIdCounter = 0;
 
-
-/**
- * A struct for parameters for `Element.animate` call.
- * See https://developer.mozilla.org/en-US/docs/Web/API/Element/animate
- *
- * @typedef {{
- *   target: !Element,
- *   keyframes: !WebKeyframesDef,
- *   vars: ?Object<string, *>,
- *   timing: !WebAnimationTimingDef,
- * }}
- */
-export let InternalWebAnimationRequestDef;
-
-
 /**
  * @const {!Object<string, boolean>}
  */
@@ -86,493 +65,11 @@ const SERVICE_PROPS = {
 };
 
 /**
- */
-export class AnimationRunner {
-
-  /**
-   * @param {!Array<!InternalWebAnimationRequestDef>} requests
-   */
-  constructor(requests) {
-    /** @const @protected */
-    this.requests_ = requests;
-  }
-
-  /**
-   * @return {!WebAnimationPlayState}
-   */
-  getPlayState() {
-  }
-
-  /**
-   * @param {function(!WebAnimationPlayState)} unusedHandler
-   * @return {!UnlistenDef}
-   */
-  onPlayStateChanged(unusedHandler) {
-  }
-
-  /**
-  * Initializes the players but does not change the state.
-   */
-  init() {
-  }
-
-  /**
-   * Initializes the players if not already initialized,
-   * and starts playing the animations.
-   */
-  start() {
-  }
-
-  /**
-   */
-  pause() {
-  }
-
-  /**
-   */
-  resume() {
-  }
-
-  /**
-   */
-  reverse() {
-  }
-
-  /**
-   * @param {time} unusedTime
-   */
-  seekTo(unusedTime) {
-  }
-
-  /**
-   * Seeks to a relative position within the animation timeline given a
-   * percentage (0 to 1 number).
-   * @param {number} unusedPercent between 0 and 1
-   */
-  seekToPercent(unusedPercent) {
-  }
-
-  /**
-   */
-  finish() {
-  }
-
-  /**
-   */
-  cancel() {
-  }
-
-  /**
-   * @param {!WebAnimationPlayState} unusedPlayState
-   * @private
-   */
-  setPlayState_(unusedPlayState) {
-  }
-}
-
-/**
- */
-export class AnimationWorkletRunner extends AnimationRunner {
-
-  /**
-   * @param {!Window} win
-   * @param {!Array<!InternalWebAnimationRequestDef>} requests
-   * @param {?Object=} viewportData
-   */
-  constructor(win, requests, viewportData) {
-    super(requests);
-
-    /** @const @private */
-    this.win_ = win;
-
-    /** @protected {?Array<!WorkletAnimation>} */
-    this.players_ = [];
-
-    /** @private {number} */
-    this.topRatio_ = viewportData['top-ratio'];
-
-    /** @private {number} */
-    this.bottomRatio_ = viewportData['bottom-ratio'];
-
-    /** @private {number} */
-    this.topMargin_ = viewportData['top-margin'];
-
-    /** @private {number} */
-    this.bottomMargin_ =
-      viewportData['bottom-margin'];
-  }
-
-  /**
-   * @return {string}
-   */
-  createCodeBlob_() {
-    //TODO(nainar): This code should be moved into a self-
-    // contained file.
-    // See issue: https://github.com/ampproject/amphtml/issues/19155
-    return `
-    registerAnimator('anim${++animIdCounter}', class {
-      constructor(options = {
-        'time-range': 0,
-        'start-offset': 0,
-        'end-offset': 0,
-        'top-ratio': 0,
-        'bottom-ratio': 0,
-        'element-height': 0,
-      }) {
-        this.timeRange = options['time-range'];
-        this.startOffset = options['start-offset'];
-        this.endOffset = options['end-offset'];
-        this.topRatio = options['top-ratio'];
-        this.bottomRatio = options['bottom-ratio'];
-        this.height = options['element-height'];
-      }
-      animate(currentTime, effect) {
-        if (currentTime == NaN) {
-          return;
-        }
-
-        // This function mirrors updateVisibility_ in amp-position-observer
-        const currentScrollPos =
-        ((currentTime / this.timeRange) *
-        (this.endOffset - this.startOffset)) +
-        this.startOffset;
-        const halfViewport = (this.startOffset + this.endOffset) / 2;
-        const relativePositionTop = currentScrollPos > halfViewport;
-
-        const ratioToUse = relativePositionTop ?
-        this.topRatio : this.bottomRatio;
-        const offset = this.height * ratioToUse;
-        let isVisible = false;
-
-        if (relativePositionTop) {
-          isVisible =
-          currentScrollPos + this.height >= (this.startOffset + offset);
-        } else {
-          isVisible =
-          currentScrollPos <= (this.endOffset - offset);
-        }
-        if (isVisible) {
-          effect.localTime = currentTime;
-        }
-
-      }
-    });
-    `;
-  }
-
-  /**
-  * @override
-  * Initializes the players but does not change the state.
-   */
-  init() {
-    this.requests_.map(request => {
-      // Apply vars.
-      if (request.vars) {
-        setStyles(request.target,
-            assertDoesNotContainDisplay(request.vars));
-      }
-      // TODO(nainar): This switches all animations to AnimationWorklet.
-      // Limit only to Scroll based animations for now.
-      CSS.animationWorklet.addModule(
-          URL.createObjectURL(new Blob([this.createCodeBlob_()],
-              {type: 'text/javascript'}))).then(() => {
-        const {documentElement} = this.win_.document;
-        const viewportService = Services.viewportForDoc(documentElement);
-
-        const scrollSource = viewportService.getScrollingElement();
-        const elementRect = request.target./*OK*/getBoundingClientRect();
-        const scrollTimeline = new this.win_.ScrollTimeline({
-          scrollSource,
-          orientation: 'block',
-          timeRange: request.timing.duration,
-          startScrollOffset: `${this.topMargin_}px`,
-          endScrollOffset: `${this.bottomMargin_}px`,
-          fill: request.timing.fill,
-        });
-        const keyframeEffect = new KeyframeEffect(request.target,
-            request.keyframes, request.timing);
-        const player = new this.win_.WorkletAnimation(`anim${animIdCounter}`,
-            [keyframeEffect],
-            scrollTimeline, {
-              'time-range': request.timing.duration,
-              'start-offset': this.topMargin_,
-              'end-offset': this.bottomMargin_,
-              'top-ratio': this.topRatio_,
-              'bottom-ratio': this.bottomRatio_,
-              'element-height': elementRect.height,
-            });
-        player.play();
-        this.players_.push(player);
-      });
-    });
-  }
-
-  /**
-   * Readjusts the given rect using the configured exclusion margins.
-   * @param {!../../../src/layout-rect.LayoutRectDef} rect viewport rect adjusted for margins.
-   * @private
-   */
-  applyMargins_(rect) {
-    devAssert(rect);
-    rect = layoutRectLtwh(
-        rect.left,
-        (rect.top + this.topMargin_),
-        rect.width,
-        (rect.height - this.bottomMargin_ - this.topMargin_)
-    );
-
-    return rect;
-  }
-
-  /**
-   * @override
-   * Initializes the players if not already initialized,
-   * and starts playing the animations.
-   */
-  start() {
-    if (!this.players_) {
-      this.init();
-    }
-  }
-
-  /**
-   * @override
-   */
-  cancel() {
-    if (!this.players_) {
-      return;
-    }
-    this.players_.forEach(player => {
-      player.cancel();
-    });
-  }
-
-}
-
-/**
- */
-export class WebAnimationRunner extends AnimationRunner {
-
-  /**
-   * @param {!Array<!InternalWebAnimationRequestDef>} requests
-   */
-  constructor(requests) {
-    super(requests);
-
-    /** @protected {?Array<!Animation>} */
-    this.players_ = null;
-
-    /** @private {number} */
-    this.runningCount_ = 0;
-
-    /** @private {!WebAnimationPlayState} */
-    this.playState_ = WebAnimationPlayState.IDLE;
-
-    /** @private {!Observable} */
-    this.playStateChangedObservable_ = new Observable();
-  }
-
-  /**
-   * @override
-   * @return {!WebAnimationPlayState}
-   */
-  getPlayState() {
-    return this.playState_;
-  }
-
-  /**
-   * @override
-   * @param {function(!WebAnimationPlayState)} handler
-   * @return {!UnlistenDef}
-   */
-  onPlayStateChanged(handler) {
-    return this.playStateChangedObservable_.add(handler);
-  }
-
-  /**
-   * @override
-   * Initializes the players but does not change the state.
-   */
-  init() {
-    devAssert(!this.players_);
-    this.players_ = this.requests_.map(request => {
-      // Apply vars.
-      if (request.vars) {
-        setStyles(request.target,
-            assertDoesNotContainDisplay(request.vars));
-      }
-      const player = request.target.animate(
-          request.keyframes, request.timing);
-      player.pause();
-      return player;
-    });
-    this.runningCount_ = this.players_.length;
-    this.players_.forEach(player => {
-      player.onfinish = () => {
-        this.runningCount_--;
-        if (this.runningCount_ == 0) {
-          this.setPlayState_(WebAnimationPlayState.FINISHED);
-        }
-      };
-    });
-  }
-
-  /**
-   * @override
-   * Initializes the players if not already initialized,
-   * and starts playing the animations.
-   */
-  start() {
-    if (!this.players_) {
-      this.init();
-    }
-    this.resume();
-  }
-
-  /**
-   * @override
-   */
-  pause() {
-    devAssert(this.players_);
-    this.setPlayState_(WebAnimationPlayState.PAUSED);
-    this.players_.forEach(player => {
-      if (player.playState == WebAnimationPlayState.RUNNING) {
-        player.pause();
-      }
-    });
-  }
-
-  /**
-   * @override
-   */
-  resume() {
-    devAssert(this.players_);
-    const oldRunnerPlayState = this.playState_;
-    if (oldRunnerPlayState == WebAnimationPlayState.RUNNING) {
-      return;
-    }
-    this.setPlayState_(WebAnimationPlayState.RUNNING);
-    this.runningCount_ = 0;
-    this.players_.forEach(player => {
-      if (oldRunnerPlayState != WebAnimationPlayState.PAUSED ||
-          player.playState == WebAnimationPlayState.PAUSED) {
-        player.play();
-        this.runningCount_++;
-      }
-    });
-  }
-
-  /**
-   * @override
-   */
-  reverse() {
-    devAssert(this.players_);
-    // TODO(nainar) there is no reverse call on WorkletAnimation
-    this.players_.forEach(player => {
-      player.reverse();
-    });
-  }
-
-  /**
-   * @override
-   * @param {time} time
-   */
-  seekTo(time) {
-    devAssert(this.players_);
-    this.setPlayState_(WebAnimationPlayState.PAUSED);
-    this.players_.forEach(player => {
-      player.pause();
-      player.currentTime = time;
-    });
-  }
-
-  /**
-   * @override
-   * Seeks to a relative position within the animation timeline given a
-   * percentage (0 to 1 number).
-   * @param {number} percent between 0 and 1
-   */
-  seekToPercent(percent) {
-    devAssert(percent >= 0 && percent <= 1);
-    const totalDuration = this.getTotalDuration_();
-    const time = totalDuration * percent;
-    this.seekTo(time);
-  }
-
-  /**
-   * @override
-   */
-  finish() {
-    if (!this.players_) {
-      return;
-    }
-    const players = this.players_;
-    this.players_ = null;
-    this.setPlayState_(WebAnimationPlayState.FINISHED);
-    players.forEach(player => {
-      player.finish();
-    });
-  }
-
-  /**
-   * @override
-   */
-  cancel() {
-    if (!this.players_) {
-      return;
-    }
-    this.setPlayState_(WebAnimationPlayState.IDLE);
-    this.players_.forEach(player => {
-      player.cancel();
-    });
-  }
-
-  /**
-   * @override
-   * @param {!WebAnimationPlayState} playState
-   * @private
-   */
-  setPlayState_(playState) {
-    if (this.playState_ != playState) {
-      this.playState_ = playState;
-      this.playStateChangedObservable_.fire(this.playState_);
-    }
-  }
-
-  /**
-   * @return {number} total duration in milliseconds.
-   * @throws {Error} If timeline is infinite.
-   */
-  getTotalDuration_() {
-    let maxTotalDuration = 0;
-    for (let i = 0; i < this.requests_.length; i++) {
-      const {timing} = this.requests_[i];
-
-      userAssert(isFinite(timing.iterations), 'Animation has infinite ' +
-      'timeline, we can not seek to a relative position within an infinite ' +
-      'timeline. Use "time" for seekTo or remove infinite iterations');
-
-      const iteration = timing.iterations - timing.iterationStart;
-      const totalDuration = (timing.duration * iteration) +
-          timing.delay + timing.endDelay;
-
-      if (totalDuration > maxTotalDuration) {
-        maxTotalDuration = totalDuration;
-      }
-    }
-
-    return maxTotalDuration;
-  }
-}
-
-
-/**
  * The scanner for the `WebAnimationDef` format. It calls the appropriate
  * callbacks based on the discovered animation types.
  * @abstract
  */
 class Scanner {
-
   /**
    * @param {!WebAnimationDef|!Array<!WebAnimationDef>} spec
    * @return {boolean}
@@ -639,11 +136,11 @@ class Scanner {
 
   /** @param {!Object} unusedSpec */
   onUnknownAnimation(unusedSpec) {
-    throw dev().createError('unknown animation type:' +
-        ' must have "animations" or "keyframes" field');
+    throw dev().createError(
+      'unknown animation type: must have "animations" or "keyframes" field'
+    );
   }
 }
-
 
 /**
  * Builds animation runners based on the provided spec.
@@ -674,34 +171,29 @@ export class Builder {
 
     /** @const @private {!Array<!Promise>} */
     this.loaders_ = [];
-
-    /** @private {boolean} */
-    this.useAnimationWorklet_ =
-      Services.platformFor(this.win_).isChrome() &&
-      isExperimentOn(this.win_, 'chrome-animation-worklet') &&
-      'animationWorklet' in CSS;
   }
 
   /**
    * Creates the animation runner for the provided spec. Waits for all
    * necessary resources to be loaded before the runner is resolved.
    * @param {!WebAnimationDef|!Array<!WebAnimationDef>} spec
-   * @param {boolean=} hasPositionObserver
    * @param {?WebAnimationDef=} opt_args
-   * @param {?Object=} opt_viewportData
-   * @return {!Promise<!WebAnimationRunner>}
+   * @param {?JsonObject=} opt_positionObserverData
+   * @return {!Promise<!./runners/animation-runner.AnimationRunner>}
    */
-  createRunner(spec, hasPositionObserver = false, opt_args,
-    opt_viewportData = null) {
+  createRunner(spec, opt_args, opt_positionObserverData = null) {
     return this.resolveRequests([], spec, opt_args).then(requests => {
       if (getMode().localDev || getMode().development) {
         user().fine(TAG, 'Animation: ', requests);
       }
       return Promise.all(this.loaders_).then(() => {
-        return this.useAnimationWorklet_ && hasPositionObserver ?
-          new AnimationWorkletRunner(this.win_, requests,
-              opt_viewportData) :
-          new WebAnimationRunner(requests);
+        return this.isAnimationWorkletSupported_() && opt_positionObserverData
+          ? new ScrollTimelineWorkletRunner(
+              this.win_,
+              requests,
+              opt_positionObserverData
+            )
+          : new NativeWebAnimationRunner(requests);
       });
     });
   }
@@ -717,11 +209,19 @@ export class Builder {
    * @return {!Promise<!Array<!InternalWebAnimationRequestDef>>}
    * @protected
    */
-  resolveRequests(path, spec, args,
-    target = null, index = null, vars = null, timing = null) {
+  resolveRequests(
+    path,
+    spec,
+    args,
+    target = null,
+    index = null,
+    vars = null,
+    timing = null
+  ) {
     const scanner = this.createScanner_(path, target, index, vars, timing);
-    return this.vsync_.measurePromise(
-        () => scanner.resolveRequests(spec, args));
+    return this.vsync_.measurePromise(() =>
+      scanner.resolveRequests(spec, args)
+    );
   }
 
   /**
@@ -744,19 +244,37 @@ export class Builder {
    * @private
    */
   createScanner_(path, target, index, vars, timing) {
-    return new MeasureScanner(this, this.css_, path,
-        target, index, vars, timing);
+    return new MeasureScanner(
+      this,
+      this.css_,
+      path,
+      target,
+      index,
+      vars,
+      timing
+    );
+  }
+
+  /**
+   * @return {boolean} Whether animationWorklet can be used.
+   * @private
+   */
+  isAnimationWorkletSupported_() {
+    return (
+      isExperimentOn(this.win_, 'chrome-animation-worklet') &&
+      'animationWorklet' in CSS &&
+      getMode(this.win_).runtime != 'inabox' &&
+      !isInFie(this.win_.document.documentElement)
+    );
   }
 }
 
-
 /**
  * The scanner that evaluates all expressions and builds the final
- * `WebAnimationRunner` instance for the target animation. It must be
+ * `AnimationRunner` instance for the target animation. It must be
  * executed in the "measure" vsync phase.
  */
 export class MeasureScanner extends Scanner {
-
   /**
    * @param {!Builder} builder
    * @param {!CssContextImpl} css
@@ -865,16 +383,21 @@ export class MeasureScanner extends Scanner {
 
   /** @override */
   onCompAnimation(spec) {
-    userAssert(this.path_.indexOf(spec.animation) == -1,
-        `Recursive animations are not allowed: "${spec.animation}"`);
+    userAssert(
+      this.path_.indexOf(spec.animation) == -1,
+      `Recursive animations are not allowed: "${spec.animation}"`
+    );
     const newPath = this.path_.concat(spec.animation);
     const animationElement = user().assertElement(
-        this.css_.getElementById(spec.animation),
-        `Animation not found: "${spec.animation}"`);
+      this.css_.getElementById(spec.animation),
+      `Animation not found: "${spec.animation}"`
+    );
     // Currently, only `<amp-animation>` supplies animations. In the future
     // this could become an interface.
-    userAssert(animationElement.tagName == 'AMP-ANIMATION',
-        `Element is not an animation: "${spec.animation}"`);
+    userAssert(
+      animationElement.tagName == 'AMP-ANIMATION',
+      `Element is not an animation: "${spec.animation}"`
+    );
     const otherSpecPromise = animationElement.getImpl().then(impl => {
       return impl.getAnimationSpec();
     });
@@ -885,15 +408,24 @@ export class MeasureScanner extends Scanner {
         vars_: vars,
         timing_: timing,
       } = this;
-      const promise = otherSpecPromise.then(otherSpec => {
-        if (!otherSpec) {
-          return;
-        }
-        return this.builder_.resolveRequests(
-            newPath, otherSpec, /* args */ null, target, index, vars, timing);
-      }).then(requests => {
-        requests.forEach(request => this.requests_.push(request));
-      });
+      const promise = otherSpecPromise
+        .then(otherSpec => {
+          if (!otherSpec) {
+            return;
+          }
+          return this.builder_.resolveRequests(
+            newPath,
+            otherSpec,
+            /* args */ null,
+            target,
+            index,
+            vars,
+            timing
+          );
+        })
+        .then(requests => {
+          requests.forEach(request => this.requests_.push(request));
+        });
       this.deps_.push(promise);
     });
   }
@@ -923,8 +455,10 @@ export class MeasureScanner extends Scanner {
     if (typeof specKeyframes == 'string') {
       // Keyframes name to be extracted from `<style>`.
       const keyframes = extractKeyframes(this.css_.rootNode_, specKeyframes);
-      userAssert(keyframes,
-          `Keyframes not found in stylesheet: "${specKeyframes}"`);
+      userAssert(
+        keyframes,
+        `Keyframes not found in stylesheet: "${specKeyframes}"`
+      );
       specKeyframes = keyframes;
     }
 
@@ -967,8 +501,9 @@ export class MeasureScanner extends Scanner {
       /** @type {!WebKeyframesDef} */
       const keyframes = [];
       const addStartFrame = array.length == 1 || array[0].offset > 0;
-      const startFrame = addStartFrame ? map() :
-        this.css_.resolveCssMap(array[0]);
+      const startFrame = addStartFrame
+        ? map()
+        : this.css_.resolveCssMap(array[0]);
       keyframes.push(startFrame);
       const start = addStartFrame ? 0 : 1;
       for (let i = start; i < array.length; i++) {
@@ -995,8 +530,10 @@ export class MeasureScanner extends Scanner {
 
   /** @override */
   onUnknownAnimation() {
-    throw user().createError('unknown animation type:' +
-        ' must have "animation", "animations" or "keyframes" field');
+    throw user().createError(
+      'unknown animation type:' +
+        ' must have "animation", "animations" or "keyframes" field'
+    );
   }
 
   /**
@@ -1007,8 +544,11 @@ export class MeasureScanner extends Scanner {
     if (SERVICE_PROPS[prop]) {
       return;
     }
-    userAssert(isWhitelistedProp(prop),
-        'Property is not whitelisted for animation: %s', prop);
+    userAssert(
+      isWhitelistedProp(prop),
+      'Property is not whitelisted for animation: %s',
+      prop
+    );
   }
 
   /**
@@ -1028,18 +568,15 @@ export class MeasureScanner extends Scanner {
 
     // Push new context and perform calculations.
     const targets =
-        (spec.target || spec.selector) ?
-          this.resolveTargets_(spec) :
-          [null];
+      spec.target || spec.selector ? this.resolveTargets_(spec) : [null];
     this.css_.setTargetLength(targets.length);
     targets.forEach((target, index) => {
       this.target_ = target || prevTarget;
       this.index_ = target ? index : prevIndex;
       this.css_.withTarget(this.target_, this.index_, () => {
-        const subtargetSpec =
-            this.target_ ?
-              this.matchSubtargets_(this.target_, this.index_ || 0, spec) :
-              spec;
+        const subtargetSpec = this.target_
+          ? this.matchSubtargets_(this.target_, this.index_ || 0, spec)
+          : spec;
         this.vars_ = this.mergeVars_(subtargetSpec, prevVars);
         this.css_.withVars(this.vars_, () => {
           this.timing_ = this.mergeTiming_(subtargetSpec, prevTiming);
@@ -1063,8 +600,7 @@ export class MeasureScanner extends Scanner {
   resolveTargets_(spec) {
     let targets;
     if (spec.selector) {
-      userAssert(!spec.target,
-          'Both "selector" and "target" are not allowed');
+      userAssert(!spec.target, 'Both "selector" and "target" are not allowed');
       targets = this.css_.queryElements(spec.selector);
       if (targets.length == 0) {
         user().warn(TAG, `Target not found: "${spec.selector}"`);
@@ -1075,10 +611,11 @@ export class MeasureScanner extends Scanner {
         user().error(TAG, 'string targets are deprecated');
       }
       const target = user().assertElement(
-          typeof spec.target == 'string' ?
-            this.css_.getElementById(spec.target) :
-            spec.target,
-          `Target not found: "${spec.target}"`);
+        typeof spec.target == 'string'
+          ? this.css_.getElementById(spec.target)
+          : spec.target,
+        `Target not found: "${spec.target}"`
+      );
       targets = [target];
     } else if (this.target_) {
       targets = [this.target_];
@@ -1116,9 +653,10 @@ export class MeasureScanner extends Scanner {
       return spec.matcher;
     }
     userAssert(
-        (spec.index !== undefined || spec.selector !== undefined) &&
+      (spec.index !== undefined || spec.selector !== undefined) &&
         (spec.index === undefined || spec.selector === undefined),
-        'Only one "index" or "selector" must be specified');
+      'Only one "index" or "selector" must be specified'
+    );
 
     let matcher;
     if (spec.index !== undefined) {
@@ -1133,11 +671,13 @@ export class MeasureScanner extends Scanner {
           return matches(target, specSelector);
         } catch (e) {
           throw user().createError(
-              `Bad subtarget selector: "${specSelector}"`, e);
+            `Bad subtarget selector: "${specSelector}"`,
+            e
+          );
         }
       };
     }
-    return spec.matcher = matcher;
+    return (spec.matcher = matcher);
   }
 
   /**
@@ -1177,41 +717,60 @@ export class MeasureScanner extends Scanner {
   mergeTiming_(newTiming, prevTiming) {
     // CSS time values in milliseconds.
     const duration = this.css_.resolveMillis(
-        newTiming.duration, prevTiming.duration);
-    const delay = this.css_.resolveMillis(
-        newTiming.delay, prevTiming.delay);
+      newTiming.duration,
+      prevTiming.duration
+    );
+    const delay = this.css_.resolveMillis(newTiming.delay, prevTiming.delay);
     const endDelay = this.css_.resolveMillis(
-        newTiming.endDelay, prevTiming.endDelay);
+      newTiming.endDelay,
+      prevTiming.endDelay
+    );
 
     // Numeric.
     const iterations = this.css_.resolveNumber(
-        newTiming.iterations,
-        dev().assertNumber(prevTiming.iterations));
+      newTiming.iterations,
+      dev().assertNumber(prevTiming.iterations)
+    );
     const iterationStart = this.css_.resolveNumber(
-        newTiming.iterationStart, prevTiming.iterationStart);
+      newTiming.iterationStart,
+      prevTiming.iterationStart
+    );
 
     // Identifier CSS values.
-    const easing =
-        this.css_.resolveIdent(newTiming.easing, prevTiming.easing);
-    const direction = /** @type {!WebAnimationTimingDirection} */
-        (this.css_.resolveIdent(newTiming.direction, prevTiming.direction));
-    const fill = /** @type {!WebAnimationTimingFill} */
-        (this.css_.resolveIdent(newTiming.fill, prevTiming.fill));
-
+    const easing = this.css_.resolveIdent(newTiming.easing, prevTiming.easing);
+    const direction = /** @type {!WebAnimationTimingDirection} */ (this.css_.resolveIdent(
+      newTiming.direction,
+      prevTiming.direction
+    ));
+    const fill = /** @type {!WebAnimationTimingFill} */ (this.css_.resolveIdent(
+      newTiming.fill,
+      prevTiming.fill
+    ));
 
     // Validate.
     this.validateTime_(duration, newTiming.duration, 'duration');
     this.validateTime_(delay, newTiming.delay, 'delay', /* negative */ true);
     this.validateTime_(endDelay, newTiming.endDelay, 'endDelay');
-    userAssert(iterations != null && iterations >= 0,
-        '"iterations" is invalid: %s', newTiming.iterations);
-    userAssert(iterationStart != null &&
-        iterationStart >= 0 && isFinite(iterationStart),
-    '"iterationStart" is invalid: %s', newTiming.iterationStart);
-    user().assertEnumValue(WebAnimationTimingDirection,
-        /** @type {string} */ (direction), 'direction');
-    user().assertEnumValue(WebAnimationTimingFill,
-        /** @type {string} */ (fill), 'fill');
+    userAssert(
+      iterations != null && iterations >= 0,
+      '"iterations" is invalid: %s',
+      newTiming.iterations
+    );
+    userAssert(
+      iterationStart != null && iterationStart >= 0 && isFinite(iterationStart),
+      '"iterationStart" is invalid: %s',
+      newTiming.iterationStart
+    );
+    user().assertEnumValue(
+      WebAnimationTimingDirection,
+      /** @type {string} */ (direction),
+      'direction'
+    );
+    user().assertEnumValue(
+      WebAnimationTimingFill,
+      /** @type {string} */ (fill),
+      'fill'
+    );
     return {
       duration,
       delay,
@@ -1234,21 +793,25 @@ export class MeasureScanner extends Scanner {
   validateTime_(value, newValue, field, opt_allowNegative) {
     // Ensure that positive or zero values are only allowed.
     userAssert(
-        value != null && (value >= 0 || (value < 0 && opt_allowNegative)),
-        '"%s" is invalid: %s', field, newValue);
+      value != null && (value >= 0 || (value < 0 && opt_allowNegative)),
+      '"%s" is invalid: %s',
+      field,
+      newValue
+    );
     // Make sure that the values are in milliseconds: show a warning if
     // time is fractional.
     if (newValue != null && Math.floor(value) != value && value < 1) {
-      user().warn(TAG,
-          `"${field}" is fractional.`
-          + ' Note that all times are in milliseconds.');
+      user().warn(
+        TAG,
+        `"${field}" is fractional.` +
+          ' Note that all times are in milliseconds.'
+      );
     }
   }
 }
 
-
 /**
- * @implements {./css-expr-ast.CssContext}
+ * @implements {./parsers/css-expr-ast.CssContext}
  */
 class CssContextImpl {
   /**
@@ -1269,7 +832,7 @@ class CssContextImpl {
     /** @private {!Object<string, !CSSStyleDeclaration>} */
     this.computedStyleCache_ = map();
 
-    /** @private {!Object<string, ?./css-expr-ast.CssNode>} */
+    /** @private {!Object<string, ?./parsers/css-expr-ast.CssNode>} */
     this.parsedCssCache_ = map();
 
     /** @private {?number} */
@@ -1327,7 +890,7 @@ class CssContextImpl {
    */
   queryElements(selector) {
     try {
-      return toArray(this.rootNode_./*OK*/querySelectorAll(selector));
+      return toArray(this.rootNode_./*OK*/ querySelectorAll(selector));
     } catch (e) {
       throw user().createError(`Bad query selector: "${selector}"`, e);
     }
@@ -1350,14 +913,15 @@ class CssContextImpl {
     let styles = this.computedStyleCache_[targetId];
     if (!styles) {
       styles = computedStyle(this.win_, target);
-      this.computedStyleCache_[targetId] =
-        /** @type {!CSSStyleDeclaration} */ (styles);
+      this.computedStyleCache_[
+        targetId
+      ] = /** @type {!CSSStyleDeclaration} */ (styles);
     }
 
     // Resolve a var or a property.
-    return startsWith(prop, '--') ?
-      styles.getPropertyValue(prop) :
-      styles[getVendorJsPropertyName(styles, dashToCamelCase(prop))];
+    return startsWith(prop, '--')
+      ? styles.getPropertyValue(prop)
+      : styles[getVendorJsPropertyName(styles, dashToCamelCase(prop))];
   }
 
   /**
@@ -1408,8 +972,9 @@ class CssContextImpl {
    */
   resolveCss(input) {
     // Will always return a valid string, since the default value is `''`.
-    return dev().assertString(this.resolveCss_(
-        input, /* def */ '', /* normalize */ true));
+    return dev().assertString(
+      this.resolveCss_(input, /* def */ '', /* normalize */ true)
+    );
   }
 
   /**
@@ -1500,7 +1065,7 @@ class CssContextImpl {
   /**
    * @param {*} input
    * @param {boolean} normalize
-   * @return {?./css-expr-ast.CssNode}
+   * @return {?./parsers/css-expr-ast.CssNode}
    * @private
    */
   resolveAsNode_(input, normalize) {
@@ -1529,21 +1094,25 @@ class CssContextImpl {
    * @private
    */
   requireTarget_() {
-    return user().assertElement(this.currentTarget_,
-        'Only allowed when target is specified');
+    return user().assertElement(
+      this.currentTarget_,
+      'Only allowed when target is specified'
+    );
   }
 
   /** @override */
   getVar(varName) {
     userAssert(
-        this.varPath_.indexOf(varName) == -1,
-        `Recursive variable: "${varName}"`);
+      this.varPath_.indexOf(varName) == -1,
+      `Recursive variable: "${varName}"`
+    );
     this.varPath_.push(varName);
-    const rawValue = (this.vars_ && this.vars_[varName] != undefined) ?
-      this.vars_[varName] :
-      this.currentTarget_ ?
-        this.measure(this.currentTarget_, varName) :
-        null;
+    const rawValue =
+      this.vars_ && this.vars_[varName] != undefined
+        ? this.vars_[varName]
+        : this.currentTarget_
+        ? this.measure(this.currentTarget_, varName)
+        : null;
     if (rawValue == null || rawValue === '') {
       user().warn(TAG, `Variable not found: "${varName}"`);
     }
@@ -1571,8 +1140,8 @@ class CssContextImpl {
   getViewportSize() {
     if (!this.viewportSize_) {
       this.viewportSize_ = {
-        width: this.win_./*OK*/innerWidth,
-        height: this.win_./*OK*/innerHeight,
+        width: this.win_./*OK*/ innerWidth,
+        height: this.win_./*OK*/ innerHeight,
       };
     }
     return this.viewportSize_;
@@ -1627,14 +1196,19 @@ class CssContextImpl {
    */
   getElement_(selector, selectionMethod) {
     devAssert(
-        selectionMethod == null || selectionMethod == 'closest',
-        'Unknown selection method: %s', selectionMethod);
+      selectionMethod == null || selectionMethod == 'closest',
+      'Unknown selection method: %s',
+      selectionMethod
+    );
     let element;
     try {
       if (selectionMethod == 'closest') {
-        element = closestBySelector(this.requireTarget_(), selector);
+        element = closestAncestorElementBySelector(
+          this.requireTarget_(),
+          selector
+        );
       } else {
-        element = this.rootNode_./*OK*/querySelector(selector);
+        element = this.rootNode_./*OK*/ querySelector(selector);
       }
     } catch (e) {
       throw user().createError(`Bad query selector: "${selector}"`, e);
@@ -1648,7 +1222,7 @@ class CssContextImpl {
    * @private
    */
   getElementSize_(target) {
-    const b = target./*OK*/getBoundingClientRect();
+    const b = target./*OK*/ getBoundingClientRect();
     return {width: b.width, height: b.height};
   }
 

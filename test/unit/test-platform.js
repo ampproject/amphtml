@@ -17,7 +17,6 @@
 import {Platform} from '../../src/service/platform-impl';
 
 describe('Platform', () => {
-
   let isIos;
   let isAndroid;
   let isChrome;
@@ -93,9 +92,10 @@ describe('Platform', () => {
     iosVersion = '8.0';
     iosMajorVersion = 8;
     isStandalone = true;
-    userAgent = 'Mozilla/5.0 (iPhone; CPU iPhone OS 8_0 like Mac OS X)' +
-        ' AppleWebKit/600.1.3 (KHTML, like Gecko) Version/8.0' +
-        ' Mobile/12A4345d Safari/600.1.4';
+    userAgent =
+      'Mozilla/5.0 (iPhone; CPU iPhone OS 8_0 like Mac OS X)' +
+      ' AppleWebKit/600.1.3 (KHTML, like Gecko) Version/8.0' +
+      ' Mobile/12A4345d Safari/600.1.4';
     testUserAgent(userAgent);
     testStandalone(userAgent, isStandalone);
   });
@@ -108,9 +108,10 @@ describe('Platform', () => {
     iosVersion = '9.3';
     iosMajorVersion = 9;
     isStandalone = true;
-    userAgent = 'Mozilla/5.0 (iPhone; CPU iPhone OS 9_3 like Mac OS X)' +
-        ' AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0' +
-        ' Mobile/13E230 Safari/601.1';
+    userAgent =
+      'Mozilla/5.0 (iPhone; CPU iPhone OS 9_3 like Mac OS X)' +
+      ' AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0' +
+      ' Mobile/13E230 Safari/601.1';
     testUserAgent(userAgent);
     testStandalone(userAgent, isStandalone);
   });
@@ -123,9 +124,10 @@ describe('Platform', () => {
     iosVersion = '9.3';
     iosMajorVersion = 9;
     isStandalone = true;
-    userAgent = 'Mozilla/5.0 (iPhone; CPU iPhone OS 9_3 like Mac OS X)' +
-        ' AppleWebKit/601.1.46 (KHTML, like Gecko)' +
-        ' Mobile/13E230 Safari/601.1';
+    userAgent =
+      'Mozilla/5.0 (iPhone; CPU iPhone OS 9_3 like Mac OS X)' +
+      ' AppleWebKit/601.1.46 (KHTML, like Gecko)' +
+      ' Mobile/13E230 Safari/601.1';
     testUserAgent(userAgent);
     testStandalone(userAgent, isStandalone);
   });
@@ -138,9 +140,10 @@ describe('Platform', () => {
     iosVersion = '10.2.1';
     iosMajorVersion = 10;
     isStandalone = true;
-    userAgent = 'Mozilla/5.0 (iPhone; CPU iPhone OS 10_2_1 like Mac OS X)' +
-        ' AppleWebKit/602.4.6 (KHTML, like Gecko) Version/10.0' +
-        ' Mobile/14D27 Safari/602.1';
+    userAgent =
+      'Mozilla/5.0 (iPhone; CPU iPhone OS 10_2_1 like Mac OS X)' +
+      ' AppleWebKit/602.4.6 (KHTML, like Gecko) Version/10.0' +
+      ' Mobile/14D27 Safari/602.1';
     testUserAgent(userAgent);
     testStandalone(userAgent, isStandalone);
   });
@@ -153,9 +156,10 @@ describe('Platform', () => {
     iosVersion = '7.0';
     iosMajorVersion = 7;
     isStandalone = true;
-    userAgent = 'Mozilla/5.0 (iPad; CPU OS 7_0 like Mac OS X)' +
-        ' AppleWebKit/537.51.1 (KHTML, like Gecko) Version/7.0' +
-        ' Mobile/11A465 Safari/9537.53';
+    userAgent =
+      'Mozilla/5.0 (iPad; CPU OS 7_0 like Mac OS X)' +
+      ' AppleWebKit/537.51.1 (KHTML, like Gecko) Version/7.0' +
+      ' Mobile/11A465 Safari/9537.53';
     testUserAgent(userAgent);
     testStandalone(userAgent, isStandalone);
   });
@@ -168,9 +172,10 @@ describe('Platform', () => {
     iosVersion = '10.2';
     iosMajorVersion = 10;
     isStandalone = true;
-    userAgent = 'Mozilla/5.0 (iPhone; CPU iPhone OS 10_2 like Mac OS X)' +
-        ' AppleWebKit/602.1.50 (KHTML, like Gecko) CriOS/56.0.2924.73' +
-        ' Mobile/16D32 Safari/602.1';
+    userAgent =
+      'Mozilla/5.0 (iPhone; CPU iPhone OS 10_2 like Mac OS X)' +
+      ' AppleWebKit/602.1.50 (KHTML, like Gecko) CriOS/56.0.2924.73' +
+      ' Mobile/16D32 Safari/602.1';
     testUserAgent(userAgent);
     testStandalone(userAgent, isStandalone);
   });
@@ -179,9 +184,10 @@ describe('Platform', () => {
     isSafari = true;
     isWebKit = true;
     majorVersion = 7;
-    userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) ' +
-        'AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 ' +
-        'Safari/7046A194A';
+    userAgent =
+      'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) ' +
+      'AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 ' +
+      'Safari/7046A194A';
     testUserAgent(userAgent);
     testStandalone(userAgent, isStandalone);
   });
@@ -190,9 +196,10 @@ describe('Platform', () => {
     isSafari = true;
     isWebKit = true;
     majorVersion = 12;
-    userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) ' +
-        'AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.0 ' +
-        'Safari/605.1.15';
+    userAgent =
+      'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) ' +
+      'AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.0 ' +
+      'Safari/605.1.15';
     testUserAgent(userAgent);
     testStandalone(userAgent, isStandalone);
   });
@@ -202,9 +209,10 @@ describe('Platform', () => {
     isChrome = true;
     isWebKit = true;
     majorVersion = 44;
-    userAgent = 'Mozilla/5.0 (Linux; Android 5.1.1; Nexus 6 Build/LYZ28E)' +
-        ' AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.20' +
-        ' Mobile Safari/537.36';
+    userAgent =
+      'Mozilla/5.0 (Linux; Android 5.1.1; Nexus 6 Build/LYZ28E)' +
+      ' AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.20' +
+      ' Mobile Safari/537.36';
     testUserAgent(userAgent);
     testStandalone(userAgent, isStandalone);
   });
@@ -214,9 +222,10 @@ describe('Platform', () => {
     isChrome = true;
     isWebKit = true;
     majorVersion = 61;
-    userAgent = 'Mozilla/5.0 (Linux; Android 8.0.0; Pixel XL Build/OPR6.' +
-        '170623.011) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163' +
-        '.98 Mobile Safari/537.36';
+    userAgent =
+      'Mozilla/5.0 (Linux; Android 8.0.0; Pixel XL Build/OPR6.' +
+      '170623.011) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163' +
+      '.98 Mobile Safari/537.36';
     testUserAgent(userAgent);
     testStandalone(userAgent, isStandalone);
   });
@@ -224,8 +233,9 @@ describe('Platform', () => {
   it('Firefox', () => {
     isFirefox = true;
     majorVersion = 40;
-    userAgent = 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) ' +
-        'Gecko/20100101 Firefox/40.1';
+    userAgent =
+      'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) ' +
+      'Gecko/20100101 Firefox/40.1';
     testUserAgent(userAgent);
     testStandalone(userAgent, isStandalone);
   });
@@ -238,9 +248,10 @@ describe('Platform', () => {
     iosVersion = '10.3.1';
     iosMajorVersion = 10;
     isStandalone = true;
-    userAgent = 'Mozilla/5.0 (iPhone; CPU iPhone OS 10_3_1 like Mac OS X)' +
-        ' AppleWebKit/603.1.30 (KHTML, like Gecko) FxiOS/7.5b3349' +
-        ' Mobile/14E304 Safari/603.1.30';
+    userAgent =
+      'Mozilla/5.0 (iPhone; CPU iPhone OS 10_3_1 like Mac OS X)' +
+      ' AppleWebKit/603.1.30 (KHTML, like Gecko) FxiOS/7.5b3349' +
+      ' Mobile/14E304 Safari/603.1.30';
     testUserAgent(userAgent);
     testStandalone(userAgent, isStandalone);
   });
@@ -250,9 +261,10 @@ describe('Platform', () => {
     majorVersion = 42;
     isAndroid = true;
     isWebKit = true;
-    userAgent = 'Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MTC19T)' +
-        ' AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.91 Mobile' +
-        ' Safari/537.36 OPR/42.7.2246.114996';
+    userAgent =
+      'Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MTC19T)' +
+      ' AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.91 Mobile' +
+      ' Safari/537.36 OPR/42.7.2246.114996';
     testUserAgent(userAgent);
     testStandalone(userAgent, isStandalone);
   });
@@ -265,9 +277,10 @@ describe('Platform', () => {
     iosVersion = '10.3.2';
     iosMajorVersion = 10;
     isStandalone = true;
-    userAgent = 'Mozilla/5.0 (iPhone; CPU iPhone OS 10_3_2 like Mac OS X)' +
-        ' AppleWebKit/603.2.4 (KHTML, like Gecko) OPiOS/14.0.0.104835' +
-        ' Mobile/14F89 Safari/9537.53';
+    userAgent =
+      'Mozilla/5.0 (iPhone; CPU iPhone OS 10_3_2 like Mac OS X)' +
+      ' AppleWebKit/603.2.4 (KHTML, like Gecko) OPiOS/14.0.0.104835' +
+      ' Mobile/14F89 Safari/9537.53';
     testUserAgent(userAgent);
     testStandalone(userAgent, isStandalone);
   });
@@ -275,8 +288,9 @@ describe('Platform', () => {
   it('IE', () => {
     isIe = true;
     majorVersion = 10;
-    userAgent = 'Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 7.0;' +
-        ' InfoPath.3; .NET CLR 3.1.40767; Trident/6.0; en-IN)';
+    userAgent =
+      'Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 7.0;' +
+      ' InfoPath.3; .NET CLR 3.1.40767; Trident/6.0; en-IN)';
     testUserAgent(userAgent);
     testStandalone(userAgent, isStandalone);
   });
@@ -284,8 +298,9 @@ describe('Platform', () => {
   it('IEMobile', () => {
     isIe = true;
     majorVersion = 10;
-    userAgent = 'Mozilla/5.0 (compatible; MSIE 10.0; Windows Phone 8.0;' +
-        ' Trident/6.0; IEMobile/10.0; ARM; Touch; NOKIA; Lumia 520)';
+    userAgent =
+      'Mozilla/5.0 (compatible; MSIE 10.0; Windows Phone 8.0;' +
+      ' Trident/6.0; IEMobile/10.0; ARM; Touch; NOKIA; Lumia 520)';
     testUserAgent(userAgent);
     testStandalone(userAgent, isStandalone);
   });
@@ -293,9 +308,10 @@ describe('Platform', () => {
   it('Edge', () => {
     isEdge = true;
     majorVersion = 12;
-    userAgent = 'Mozilla/5.0 (Windows NT 10.0) AppleWebKit/537.36' +
-        ' (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36' +
-        ' Edge/12.10136';
+    userAgent =
+      'Mozilla/5.0 (Windows NT 10.0) AppleWebKit/537.36' +
+      ' (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36' +
+      ' Edge/12.10136';
     testUserAgent(userAgent);
     testStandalone(userAgent, isStandalone);
   });

@@ -13,26 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import 'regenerator-runtime/runtime';
 import * as lolex from 'lolex';
 import {macroTask} from '../../testing/yield';
 
 describes.realWin('yield', {}, env => {
-
   let win;
   let clock;
 
   beforeEach(() => {
     win = env.win;
-    clock = lolex.install(
-        {target: win, toFake: ['Date', 'setTimeout', 'clearTimeout']});
+    clock = lolex.install({
+      target: win,
+      toFake: ['Date', 'setTimeout', 'clearTimeout'],
+    });
   });
 
   afterEach(() => {
     clock.uninstall();
   });
 
-  it('should work with nested promises', function* () {
+  it('should work with nested promises', function*() {
     let value = false;
 
     const nestPromise = level => {
@@ -51,12 +51,14 @@ describes.realWin('yield', {}, env => {
     expect(value).to.be.true;
   });
 
-  it('should work with promise chain', function* () {
+  it('should work with promise chain', function*() {
     let value;
 
     const chainPromise = Promise.resolve();
     for (let i = 0; i < 100; i++) {
-      chainPromise.then(() => {value = false;});
+      chainPromise.then(() => {
+        value = false;
+      });
     }
     chainPromise.then(() => {
       value = true;
@@ -66,7 +68,7 @@ describes.realWin('yield', {}, env => {
     expect(value).to.be.true;
   });
 
-  it('should work with promise inside setTimeout', function* () {
+  it('should work with promise inside setTimeout', function*() {
     let value;
     win.setTimeout(() => {
       value = false;
@@ -82,11 +84,12 @@ describes.realWin('yield', {}, env => {
     expect(value).to.be.true;
   });
 
-  it('should work with manually resolved promise inside ' +
-      'setTimeout', function* () {
+  it('should work with manually resolved promise inside setTimeout', function*() {
     let value;
     let resolver;
-    const promise = new Promise(r => {resolver = r;});
+    const promise = new Promise(r => {
+      resolver = r;
+    });
     promise.then(() => {
       value = true;
     });
@@ -100,15 +103,17 @@ describes.realWin('yield', {}, env => {
     expect(value).to.be.true;
   });
 
-  it('should block a promise', function* () {
+  it('should block a promise', function*() {
     let resolver;
-    const promise = new Promise(r => {resolver = r;}).then(() => 'yes');
+    const promise = new Promise(r => {
+      resolver = r;
+    }).then(() => 'yes');
     resolver();
     const result = yield promise;
     expect(result).to.equal('yes');
   });
 
-  it('should be able to expect throwable', function* () {
+  it('should be able to expect throwable', function*() {
     const promiseThatRejects = Promise.reject(new Error('OMG'));
     try {
       yield promiseThatRejects;

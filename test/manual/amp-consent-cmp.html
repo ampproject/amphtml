@@ -148,6 +148,9 @@
     }
   </style>
   <script async custom-element="amp-consent" src="https://cdn.ampproject.org/v0/amp-consent-0.1.js"></script>
+  <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
+  <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
+
   <style amp-boilerplate>
     body {
       -webkit-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
@@ -220,6 +223,24 @@
       PublisherLogo
     </div>
   </header>
+
+  <p>Set server forcePromptOnNext value to</p>
+
+
+  <form method="get" action-xhr="../../get-consent-v1-set" target="_top">
+    <input type="radio" id="t" name="forcePromptOnNext" value="false" checked>
+    <label for="false">False</label>
+    <input type="radio" id="f" name="forcePromptOnNext" value="true">
+    <label for="true">True</label>
+    <input type="submit" value="OK">
+    <div submit-success>
+      Success!
+    </div>
+    <div submit-error>
+      Error!
+    </div>
+  </form>
+
   <main role="main">
     <amp-ad width=300 height=250
         data-block-on-consent

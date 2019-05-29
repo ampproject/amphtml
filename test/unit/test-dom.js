@@ -18,11 +18,10 @@ import * as dom from '../../src/dom';
 import {BaseElement} from '../../src/base-element';
 import {createAmpElementForTesting} from '../../src/custom-element';
 import {loadPromise} from '../../src/event-helper';
+import {setScopeSelectorSupportedForTesting} from '../../src/css';
 import {toArray} from '../../src/types';
 
-
 describes.sandboxed('DOM', {}, env => {
-
   let sandbox;
 
   beforeEach(() => {
@@ -30,7 +29,7 @@ describes.sandboxed('DOM', {}, env => {
   });
 
   afterEach(() => {
-    dom.setScopeSelectorSupportedForTesting(undefined);
+    setScopeSelectorSupportedForTesting(undefined);
     sandbox.restore();
   });
 
@@ -92,8 +91,7 @@ describes.sandboxed('DOM', {}, env => {
       return;
     }
 
-    const desc = Object.getOwnPropertyDescriptor(Node.prototype,
-        'isConnected');
+    const desc = Object.getOwnPropertyDescriptor(Node.prototype, 'isConnected');
     try {
       delete Node.prototype.isConnected;
 
@@ -138,8 +136,7 @@ describes.sandboxed('DOM', {}, env => {
       return;
     }
 
-    const desc = Object.getOwnPropertyDescriptor(Node.prototype,
-        'getRootNode');
+    const desc = Object.getOwnPropertyDescriptor(Node.prototype, 'getRootNode');
     try {
       delete Node.prototype.getRootNode;
 
@@ -166,8 +163,8 @@ describes.sandboxed('DOM', {}, env => {
 
     expect(dom.closest(child, () => true)).to.equal(child);
     expect(dom.closestNode(child, () => true)).to.equal(child);
-    expect(dom.closestByTag(child, 'div')).to.equal(child);
-    expect(dom.closestByTag(child, 'DIV')).to.equal(child);
+    expect(dom.closestAncestorElementBySelector(child, 'div')).to.equal(child);
+    expect(dom.closestAncestorElementBySelector(child, 'DIV')).to.equal(child);
   });
 
   it('closest should stop search at opt_stopAt', () => {
@@ -187,9 +184,7 @@ describes.sandboxed('DOM', {}, env => {
 
     expect(dom.closest(grandchild, cb, child)).to.be.null;
     expect(cbSpy).to.have.callCount(4);
-
   });
-
 
   it('closest should find first match', () => {
     const parent = document.createElement('parent');
@@ -202,16 +197,23 @@ describes.sandboxed('DOM', {}, env => {
 
     expect(dom.closest(child, e => e.tagName == 'CHILD')).to.equal(child);
     expect(dom.closestNode(child, e => e.tagName == 'CHILD')).to.equal(child);
-    expect(dom.closestByTag(child, 'child')).to.equal(child);
+    expect(dom.closestAncestorElementBySelector(child, 'child')).to.equal(
+      child
+    );
 
     expect(dom.closest(child, e => e.tagName == 'ELEMENT')).to.equal(element);
-    expect(dom.closestNode(child, e => e.tagName == 'ELEMENT'))
-        .to.equal(element);
-    expect(dom.closestByTag(child, 'element')).to.equal(element);
+    expect(dom.closestNode(child, e => e.tagName == 'ELEMENT')).to.equal(
+      element
+    );
+    expect(dom.closestAncestorElementBySelector(child, 'element')).to.equal(
+      element
+    );
 
     expect(dom.closest(child, e => e.tagName == 'PARENT')).to.equal(parent);
     expect(dom.closestNode(child, e => e.tagName == 'PARENT')).to.equal(parent);
-    expect(dom.closestByTag(child, 'parent')).to.equal(parent);
+    expect(dom.closestAncestorElementBySelector(child, 'parent')).to.equal(
+      parent
+    );
   });
 
   it('closestNode should find nodes as well as elements', () => {
@@ -228,7 +230,7 @@ describes.sandboxed('DOM', {}, env => {
     expect(dom.closestNode(text, n => n.nodeType == 11)).to.equal(fragment);
   });
 
-  it('closestBySelector should find first match', () => {
+  it('closestAncestorElementBySelector should find first match', () => {
     const parent = document.createElement('parent');
     parent.className = 'parent';
     parent.id = 'parent';
@@ -243,17 +245,35 @@ describes.sandboxed('DOM', {}, env => {
     child.className = 'child';
     element.appendChild(child);
 
-    expect(dom.closestBySelector(child, 'child')).to.equal(child);
-    expect(dom.closestBySelector(child, '.child')).to.equal(child);
-    expect(dom.closestBySelector(child, '#child')).to.equal(child);
+    expect(dom.closestAncestorElementBySelector(child, 'child')).to.equal(
+      child
+    );
+    expect(dom.closestAncestorElementBySelector(child, '.child')).to.equal(
+      child
+    );
+    expect(dom.closestAncestorElementBySelector(child, '#child')).to.equal(
+      child
+    );
 
-    expect(dom.closestBySelector(child, 'element')).to.equal(element);
-    expect(dom.closestBySelector(child, '.element')).to.equal(element);
-    expect(dom.closestBySelector(child, '#element')).to.equal(element);
+    expect(dom.closestAncestorElementBySelector(child, 'element')).to.equal(
+      element
+    );
+    expect(dom.closestAncestorElementBySelector(child, '.element')).to.equal(
+      element
+    );
+    expect(dom.closestAncestorElementBySelector(child, '#element')).to.equal(
+      element
+    );
 
-    expect(dom.closestBySelector(child, 'parent')).to.equal(parent);
-    expect(dom.closestBySelector(child, '.parent')).to.equal(parent);
-    expect(dom.closestBySelector(child, '#parent')).to.equal(parent);
+    expect(dom.closestAncestorElementBySelector(child, 'parent')).to.equal(
+      parent
+    );
+    expect(dom.closestAncestorElementBySelector(child, '.parent')).to.equal(
+      parent
+    );
+    expect(dom.closestAncestorElementBySelector(child, '#parent')).to.equal(
+      parent
+    );
   });
 
   it('elementByTag should find first match', () => {
@@ -269,7 +289,6 @@ describes.sandboxed('DOM', {}, env => {
     expect(dom.elementByTag(parent, 'ELEMENT')).to.equal(element1);
   });
 
-
   it('childElement should find first match', () => {
     const parent = document.createElement('parent');
 
@@ -280,12 +299,13 @@ describes.sandboxed('DOM', {}, env => {
     parent.appendChild(element2);
 
     expect(dom.childElement(parent, () => true)).to.equal(element1);
-    expect(dom.childElement(parent, e => e.tagName == 'ELEMENT1'))
-        .to.equal(element1);
-    expect(dom.childElement(parent, e => e.tagName == 'ELEMENT2'))
-        .to.equal(element2);
-    expect(dom.childElement(parent, e => e.tagName == 'ELEMENT3'))
-        .to.be.null;
+    expect(dom.childElement(parent, e => e.tagName == 'ELEMENT1')).to.equal(
+      element1
+    );
+    expect(dom.childElement(parent, e => e.tagName == 'ELEMENT2')).to.equal(
+      element2
+    );
+    expect(dom.childElement(parent, e => e.tagName == 'ELEMENT3')).to.be.null;
   });
 
   it('childElements should find all matches', () => {
@@ -298,12 +318,15 @@ describes.sandboxed('DOM', {}, env => {
     parent.appendChild(element2);
 
     expect(dom.childElements(parent, () => true).length).to.equal(2);
-    expect(dom.childElements(parent, e => e.tagName == 'ELEMENT1').length)
-        .to.equal(1);
-    expect(dom.childElements(parent, e => e.tagName == 'ELEMENT2').length)
-        .to.equal(1);
-    expect(dom.childElements(parent, e => e.tagName == 'ELEMENT3').length)
-        .to.be.equal(0);
+    expect(
+      dom.childElements(parent, e => e.tagName == 'ELEMENT1').length
+    ).to.equal(1);
+    expect(
+      dom.childElements(parent, e => e.tagName == 'ELEMENT2').length
+    ).to.equal(1);
+    expect(
+      dom.childElements(parent, e => e.tagName == 'ELEMENT3').length
+    ).to.be.equal(0);
   });
 
   it('childNodes should find all matches', () => {
@@ -312,16 +335,21 @@ describes.sandboxed('DOM', {}, env => {
     parent.appendChild(document.createTextNode('text2'));
     parent.appendChild(document.createElement('element'));
     expect(dom.childNodes(parent, () => true).length).to.equal(3);
-    expect(dom.childNodes(parent, node => node.textContent == 'text1').length)
-        .to.equal(1);
-    expect(dom.childNodes(parent, node => node.textContent == 'text2').length)
-        .to.equal(1);
-    expect(dom.childNodes(parent, node => node.textContent == 'text3').length)
-        .to.equal(0);
-    expect(dom.childNodes(parent, node => node.tagName == 'ELEMENT').length)
-        .to.equal(1);
-    expect(dom.childNodes(parent, node => node.tagName == 'ELEMENT2').length)
-        .to.equal(0);
+    expect(
+      dom.childNodes(parent, node => node.textContent == 'text1').length
+    ).to.equal(1);
+    expect(
+      dom.childNodes(parent, node => node.textContent == 'text2').length
+    ).to.equal(1);
+    expect(
+      dom.childNodes(parent, node => node.textContent == 'text3').length
+    ).to.equal(0);
+    expect(
+      dom.childNodes(parent, node => node.tagName == 'ELEMENT').length
+    ).to.equal(1);
+    expect(
+      dom.childNodes(parent, node => node.tagName == 'ELEMENT2').length
+    ).to.equal(0);
   });
 
   function testChildElementByTag() {
@@ -345,7 +373,7 @@ describes.sandboxed('DOM', {}, env => {
   it('childElementByTag should find first match', testChildElementByTag);
 
   it('childElementByTag should find first match (polyfill)', () => {
-    dom.setScopeSelectorSupportedForTesting(false);
+    setScopeSelectorSupportedForTesting(false);
     testChildElementByTag();
   });
 
@@ -361,18 +389,22 @@ describes.sandboxed('DOM', {}, env => {
     const element3 = document.createElement('element23');
     parent.appendChild(element3);
 
-    expect(toArray(dom.childElementsByTag(parent, 'element1')))
-        .to.deep.equal([element1]);
-    expect(toArray(dom.childElementsByTag(parent, 'element23')))
-        .to.deep.equal([element2, element3]);
-    expect(toArray(dom.childElementsByTag(parent, 'element3')))
-        .to.deep.equal([]);
+    expect(toArray(dom.childElementsByTag(parent, 'element1'))).to.deep.equal([
+      element1,
+    ]);
+    expect(toArray(dom.childElementsByTag(parent, 'element23'))).to.deep.equal([
+      element2,
+      element3,
+    ]);
+    expect(toArray(dom.childElementsByTag(parent, 'element3'))).to.deep.equal(
+      []
+    );
   }
 
   it('childElementsByTag should find first match', testChildElementsByTag);
 
   it('childElementsByTag should find first match (polyfill)', () => {
-    dom.setScopeSelectorSupportedForTesting(false);
+    setScopeSelectorSupportedForTesting(false);
     testChildElementsByTag();
   });
 
@@ -403,7 +435,7 @@ describes.sandboxed('DOM', {}, env => {
   it('childElementByAttr should find first match', testChildElementByAttr);
 
   it('childElementByAttr should find first match', () => {
-    dom.setScopeSelectorSupportedForTesting(false);
+    setScopeSelectorSupportedForTesting(false);
     testChildElementByAttr();
   });
 
@@ -434,7 +466,7 @@ describes.sandboxed('DOM', {}, env => {
   it('childElementsByAttr should find all matches', testChildElementsByAttr);
 
   it('childElementsByAttr should find all matches', () => {
-    dom.setScopeSelectorSupportedForTesting(false);
+    setScopeSelectorSupportedForTesting(false);
     testChildElementsByAttr();
   });
 
@@ -469,12 +501,15 @@ describes.sandboxed('DOM', {}, env => {
     const element2 = document.createElement('element2');
     element1.appendChild(element2);
     expect(dom.ancestorElements(element2, () => true).length).to.equal(2);
-    expect(dom.ancestorElements(element2, e => e.tagName == 'ELEMENT1').length)
-        .to.equal(1);
-    expect(dom.ancestorElements(element1, e => e.tagName == 'PARENT').length)
-        .to.equal(1);
-    expect(dom.ancestorElements(parent, e => e.tagName == 'ELEMENT3').length)
-        .to.be.equal(0);
+    expect(
+      dom.ancestorElements(element2, e => e.tagName == 'ELEMENT1').length
+    ).to.equal(1);
+    expect(
+      dom.ancestorElements(element1, e => e.tagName == 'PARENT').length
+    ).to.equal(1);
+    expect(
+      dom.ancestorElements(parent, e => e.tagName == 'ELEMENT3').length
+    ).to.be.equal(0);
   });
 
   it('ancestorElementsByTag should find all matches', () => {
@@ -483,12 +518,11 @@ describes.sandboxed('DOM', {}, env => {
     parent.appendChild(element1);
     const element2 = document.createElement('element2');
     element1.appendChild(element2);
-    expect(dom.ancestorElementsByTag(element2, 'ELEMENT1').length)
-        .to.equal(1);
-    expect(dom.ancestorElementsByTag(element1, 'PARENT').length)
-        .to.equal(1);
-    expect(dom.ancestorElementsByTag(element2, 'ELEMENT3').length)
-        .to.be.equal(0);
+    expect(dom.ancestorElementsByTag(element2, 'ELEMENT1').length).to.equal(1);
+    expect(dom.ancestorElementsByTag(element1, 'PARENT').length).to.equal(1);
+    expect(dom.ancestorElementsByTag(element2, 'ELEMENT3').length).to.be.equal(
+      0
+    );
   });
 
   it('iterateCursor should loop through every element in a NodeList', () => {
@@ -528,7 +562,7 @@ describes.sandboxed('DOM', {}, env => {
   it('scopedQuerySelector should find first match', testScopedQuerySelector);
 
   it('scopedQuerySelector should find first match (polyfill)', () => {
-    dom.setScopeSelectorSupportedForTesting(false);
+    setScopeSelectorSupportedForTesting(false);
     testScopedQuerySelector();
   });
 
@@ -544,18 +578,22 @@ describes.sandboxed('DOM', {}, env => {
     const element2 = document.createElement('div');
     parent.appendChild(element2);
 
-
-    expect(toArray(dom.scopedQuerySelectorAll(parent, 'div')))
-        .to.deep.equal([element1, element2]);
-    expect(toArray(dom.scopedQuerySelectorAll(grandparent, 'div div')))
-        .to.deep.equal([element1, element2]);
+    expect(toArray(dom.scopedQuerySelectorAll(parent, 'div'))).to.deep.equal([
+      element1,
+      element2,
+    ]);
+    expect(
+      toArray(dom.scopedQuerySelectorAll(grandparent, 'div div'))
+    ).to.deep.equal([element1, element2]);
   }
 
-  it('scopedQuerySelectorAll should find all matches',
-      testScopedQuerySelectorAll);
+  it(
+    'scopedQuerySelectorAll should find all matches',
+    testScopedQuerySelectorAll
+  );
 
   it('scopedQuerySelectorAll should find all matches (polyfill)', () => {
-    dom.setScopeSelectorSupportedForTesting(false);
+    setScopeSelectorSupportedForTesting(false);
     testScopedQuerySelectorAll();
   });
 
@@ -621,8 +659,9 @@ describes.sandboxed('DOM', {}, env => {
       expect(spy).to.have.not.been.called;
       expect(mutationObserver.observe).to.be.calledOnce;
       expect(mutationObserver.observe.firstCall.args[0]).to.equal(parent);
-      expect(mutationObserver.observe.firstCall.args[1])
-          .to.deep.equal({childList: true});
+      expect(mutationObserver.observe.firstCall.args[1]).to.deep.equal({
+        childList: true,
+      });
       expect(mutationCallback).to.exist;
 
       // False callback.
@@ -672,8 +711,72 @@ describes.sandboxed('DOM', {}, env => {
     });
 
     it('should wait for body', () => {
-      return dom.waitForBodyPromise(document).then(() => {
+      return dom.waitForBodyOpenPromise(document).then(() => {
         expect(document.body).to.exist;
+      });
+    });
+
+    it('should wait for body even if doc is complete', () => {
+      return new Promise((resolve, reject) => {
+        const doc = {
+          readyState: 'complete',
+          body: null,
+          documentElement: {
+            ownerDocument: {
+              defaultView: {
+                setInterval() {
+                  return window.setInterval.apply(window, arguments);
+                },
+                clearInterval() {
+                  return window.clearInterval.apply(window, arguments);
+                },
+              },
+            },
+          },
+        };
+        setTimeout(() => {
+          doc.body = {};
+        }, 50);
+        dom.waitForBodyOpen(doc, () => {
+          try {
+            expect(doc.body).to.exist;
+            resolve();
+          } catch (e) {
+            reject(new Error("body doesn't exist"));
+          }
+        });
+      });
+    });
+
+    it('should yield body asap even if doc is not complete', () => {
+      return new Promise((resolve, reject) => {
+        const doc = {
+          readyState: 'loading',
+          body: null,
+          documentElement: {
+            ownerDocument: {
+              defaultView: {
+                setInterval() {
+                  return window.setInterval.apply(window, arguments);
+                },
+                clearInterval() {
+                  return window.clearInterval.apply(window, arguments);
+                },
+              },
+            },
+          },
+        };
+        setTimeout(() => {
+          doc.body = {};
+        }, 50);
+        dom.waitForBodyOpen(doc, () => {
+          try {
+            expect(doc.body).to.exist;
+            resolve();
+          } catch (e) {
+            reject(new Error("body doesn't exist"));
+          }
+        });
       });
     });
   });
@@ -693,8 +796,11 @@ describes.sandboxed('DOM', {}, env => {
     it('should return key-value for custom data attributes', () => {
       const element = document.createElement('element');
       element.setAttribute('data-vars-event-name', 'click');
-      const params = dom.getDataParamsFromAttributes(element, null,
-          /^vars(.+)/);
+      const params = dom.getDataParamsFromAttributes(
+        element,
+        null,
+        /^vars(.+)/
+      );
       expect(params.eventName).to.be.equal('click');
     });
   });
@@ -742,7 +848,9 @@ describes.sandboxed('DOM', {}, env => {
 
     beforeEach(() => {
       windowApi = {
-        open: () => {throw new Error('not mocked');},
+        open: () => {
+          throw new Error('not mocked');
+        },
       };
       windowMock = sandbox.mock(windowApi);
     });
@@ -753,96 +861,138 @@ describes.sandboxed('DOM', {}, env => {
 
     it('should return on first success', () => {
       const dialog = {};
-      windowMock.expects('open')
-          .withExactArgs('https://example.com/', '_blank', 'width=1')
-          .returns(dialog)
-          .once();
-      const res = dom.openWindowDialog(windowApi, 'https://example.com/',
-          '_blank', 'width=1');
+      windowMock
+        .expects('open')
+        .withExactArgs('https://example.com/', '_blank', 'width=1')
+        .returns(dialog)
+        .once();
+      const res = dom.openWindowDialog(
+        windowApi,
+        'https://example.com/',
+        '_blank',
+        'width=1'
+      );
       expect(res).to.equal(dialog);
     });
 
     it('should retry on first null', () => {
       const dialog = {};
-      windowMock.expects('open')
-          .withExactArgs('https://example.com/', '_blank', 'width=1')
-          .returns(null)
-          .once();
-      windowMock.expects('open')
-          .withExactArgs('https://example.com/', '_top')
-          .returns(dialog)
-          .once();
-      const res = dom.openWindowDialog(windowApi, 'https://example.com/',
-          '_blank', 'width=1');
+      windowMock
+        .expects('open')
+        .withExactArgs('https://example.com/', '_blank', 'width=1')
+        .returns(null)
+        .once();
+      windowMock
+        .expects('open')
+        .withExactArgs('https://example.com/', '_top')
+        .returns(dialog)
+        .once();
+      const res = dom.openWindowDialog(
+        windowApi,
+        'https://example.com/',
+        '_blank',
+        'width=1'
+      );
       expect(res).to.equal(dialog);
     });
 
     it('should retry on first undefined', () => {
       const dialog = {};
-      windowMock.expects('open')
-          .withExactArgs('https://example.com/', '_blank', 'width=1')
-          .returns(undefined)
-          .once();
-      windowMock.expects('open')
-          .withExactArgs('https://example.com/', '_top')
-          .returns(dialog)
-          .once();
-      const res = dom.openWindowDialog(windowApi, 'https://example.com/',
-          '_blank', 'width=1');
+      windowMock
+        .expects('open')
+        .withExactArgs('https://example.com/', '_blank', 'width=1')
+        .returns(undefined)
+        .once();
+      windowMock
+        .expects('open')
+        .withExactArgs('https://example.com/', '_top')
+        .returns(dialog)
+        .once();
+      const res = dom.openWindowDialog(
+        windowApi,
+        'https://example.com/',
+        '_blank',
+        'width=1'
+      );
       expect(res).to.equal(dialog);
     });
 
     it('should retry on first exception', () => {
       const dialog = {};
-      windowMock.expects('open')
-          .withExactArgs('https://example.com/', '_blank', 'width=1')
-          .throws(new Error('intentional'))
-          .once();
-      windowMock.expects('open')
-          .withExactArgs('https://example.com/', '_top')
-          .returns(dialog)
-          .once();
-      const res = dom.openWindowDialog(windowApi, 'https://example.com/',
-          '_blank', 'width=1');
+      windowMock
+        .expects('open')
+        .withExactArgs('https://example.com/', '_blank', 'width=1')
+        .throws(new Error('intentional'))
+        .once();
+      windowMock
+        .expects('open')
+        .withExactArgs('https://example.com/', '_top')
+        .returns(dialog)
+        .once();
+      const res = dom.openWindowDialog(
+        windowApi,
+        'https://example.com/',
+        '_blank',
+        'width=1'
+      );
       expect(res).to.equal(dialog);
     });
 
     it('should return the final result', () => {
-      windowMock.expects('open')
-          .withExactArgs('https://example.com/', '_blank', 'width=1')
-          .returns(undefined)
-          .once();
-      windowMock.expects('open')
-          .withExactArgs('https://example.com/', '_top')
-          .returns(null)
-          .once();
-      const res = dom.openWindowDialog(windowApi, 'https://example.com/',
-          '_blank', 'width=1');
+      windowMock
+        .expects('open')
+        .withExactArgs('https://example.com/', '_blank', 'width=1')
+        .returns(undefined)
+        .once();
+      windowMock
+        .expects('open')
+        .withExactArgs('https://example.com/', '_top')
+        .returns(null)
+        .once();
+      const res = dom.openWindowDialog(
+        windowApi,
+        'https://example.com/',
+        '_blank',
+        'width=1'
+      );
       expect(res).to.be.null;
     });
 
     it('should return the final exception', () => {
-      windowMock.expects('open')
-          .withExactArgs('https://example.com/', '_blank', 'width=1')
-          .throws(new Error('intentional1'))
-          .once();
-      windowMock.expects('open')
-          .withExactArgs('https://example.com/', '_top')
-          .throws(new Error('intentional2'))
-          .once();
-      allowConsoleError(() => { expect(() => {
-        dom.openWindowDialog(windowApi, 'https://example.com/',
-            '_blank', 'width=1');
-      }).to.throw(/intentional2/); });
+      windowMock
+        .expects('open')
+        .withExactArgs('https://example.com/', '_blank', 'width=1')
+        .throws(new Error('intentional1'))
+        .once();
+      windowMock
+        .expects('open')
+        .withExactArgs('https://example.com/', '_top')
+        .throws(new Error('intentional2'))
+        .once();
+      allowConsoleError(() => {
+        expect(() => {
+          dom.openWindowDialog(
+            windowApi,
+            'https://example.com/',
+            '_blank',
+            'width=1'
+          );
+        }).to.throw(/intentional2/);
+      });
     });
 
     it('should retry only non-top target', () => {
-      windowMock.expects('open')
-          .withExactArgs('https://example.com/', '_top', 'width=1')
-          .returns(null)
-          .once();
-      const res = dom.openWindowDialog(windowApi, 'https://example.com/',
-          '_top', 'width=1');
+      windowMock
+        .expects('open')
+        .withExactArgs('https://example.com/', '_top', 'width=1')
+        .returns(null)
+        .once();
+      const res = dom.openWindowDialog(
+        windowApi,
+        'https://example.com/',
+        '_top',
+        'width=1'
+      );
       expect(res).to.be.null;
     });
   });
@@ -873,13 +1023,6 @@ describes.sandboxed('DOM', {}, env => {
     });
   });
 
-  describe('escapeCssSelectorIdent', () => {
-
-    it('should escape', () => {
-      expect(dom.escapeCssSelectorIdent('a b')).to.equal('a\\ b');
-    });
-  });
-
   describe('escapeHtml', () => {
     it('should tolerate empty string', () => {
       expect(dom.escapeHtml('')).to.equal('');
@@ -890,8 +1033,9 @@ describes.sandboxed('DOM', {}, env => {
     });
 
     it('should subsctitute escapes', () => {
-      expect(dom.escapeHtml('a<b>&c"d\'e\`f')).to.equal(
-          'a&lt;b&gt;&amp;c&quot;d&#x27;e&#x60;f');
+      expect(dom.escapeHtml('a<b>&c"d\'e`f')).to.equal(
+        'a&lt;b&gt;&amp;c&quot;d&#x27;e&#x60;f'
+      );
     });
   });
 
@@ -936,7 +1080,6 @@ describes.sandboxed('DOM', {}, env => {
       const loaded = loadPromise(iframe);
       ampEl.appendChild(iframe);
       return loaded;
-
     });
 
     afterEach(() => {
@@ -984,29 +1127,35 @@ describes.sandboxed('DOM', {}, env => {
     expect(dom.isEnabled(a)).to.be.true;
   });
 
-  it('templateContentClone on a <template> element (browser supports' +
-      ' HTMLTemplateElement)', () => {
-    const template = document.createElement('template');
-    template.innerHTML = '<span>123</span><span>456<em>789</em></span>';
-    const content = dom.templateContentClone(template);
+  it(
+    'templateContentClone on a <template> element (browser supports' +
+      ' HTMLTemplateElement)',
+    () => {
+      const template = document.createElement('template');
+      template.innerHTML = '<span>123</span><span>456<em>789</em></span>';
+      const content = dom.templateContentClone(template);
 
-    const spans = content.querySelectorAll('span');
-    expect(spans.length).to.equal(2);
-    expect(spans[0].innerHTML).to.equal('123');
-    expect(spans[1].innerHTML).to.equal('456<em>789</em>');
-  });
+      const spans = content.querySelectorAll('span');
+      expect(spans.length).to.equal(2);
+      expect(spans[0].innerHTML).to.equal('123');
+      expect(spans[1].innerHTML).to.equal('456<em>789</em>');
+    }
+  );
 
-  it('templateContentClone on a <template> element (simulate a browser' +
-      ' that does not support HTMLTemplateElement)', () => {
-    const template = document.createElement('div');
-    template.innerHTML = '<span>123</span><span>456<em>789</em></span>';
-    const content = dom.templateContentClone(template);
+  it(
+    'templateContentClone on a <template> element (simulate a browser' +
+      ' that does not support HTMLTemplateElement)',
+    () => {
+      const template = document.createElement('div');
+      template.innerHTML = '<span>123</span><span>456<em>789</em></span>';
+      const content = dom.templateContentClone(template);
 
-    const spans = content.querySelectorAll('span');
-    expect(spans.length).to.equal(2);
-    expect(spans[0].innerHTML).to.equal('123');
-    expect(spans[1].innerHTML).to.equal('456<em>789</em>');
-  });
+      const spans = content.querySelectorAll('span');
+      expect(spans.length).to.equal(2);
+      expect(spans[0].innerHTML).to.equal('123');
+      expect(spans[1].innerHTML).to.equal('456<em>789</em>');
+    }
+  );
 
   describe('domOrderComparator', () => {
     it('should sort elements by dom order', () => {
@@ -1048,44 +1197,99 @@ describes.sandboxed('DOM', {}, env => {
   });
 });
 
-describes.realWin('DOM', {
-  amp: { /* amp spec */
-    ampdoc: 'single',
+describes.realWin(
+  'DOM',
+  {
+    amp: {
+      /* amp spec */
+      ampdoc: 'single',
+    },
   },
-}, env => {
-  let doc;
-  class TestElement extends BaseElement {}
-  describe('whenUpgradeToCustomElement function', () => {
-    beforeEach(() => {
-      doc = env.win.document;
-    });
+  env => {
+    let doc;
+    class TestElement extends BaseElement {}
+    describe('whenUpgradeToCustomElement function', () => {
+      beforeEach(() => {
+        doc = env.win.document;
+      });
 
-    it('should not continue if element is not AMP element', () => {
-      const element = doc.createElement('div');
-      allowConsoleError(() => {
-        expect(() => dom.whenUpgradedToCustomElement(element)).to.throw(
-            'element is not AmpElement');
+      it('should not continue if element is not AMP element', () => {
+        const element = doc.createElement('div');
+        allowConsoleError(() => {
+          expect(() => dom.whenUpgradedToCustomElement(element)).to.throw(
+            'element is not AmpElement'
+          );
+        });
+      });
+
+      it('should resolve if element has already upgrade', () => {
+        const element = doc.createElement('amp-img');
+        doc.body.appendChild(element);
+        return dom.whenUpgradedToCustomElement(element).then(element => {
+          expect(element.whenBuilt).to.exist;
+        });
+      });
+
+      it('should resolve when element upgrade', () => {
+        const element = doc.createElement('amp-test');
+        doc.body.appendChild(element);
+        env.win.setTimeout(() => {
+          env.win.customElements.define(
+            'amp-test',
+            createAmpElementForTesting(env.win, 'amp-test', TestElement)
+          );
+        }, 100);
+        return dom.whenUpgradedToCustomElement(element).then(element => {
+          expect(element.whenBuilt).to.exist;
+        });
       });
     });
 
-    it('should resolve if element has already upgrade', () => {
-      const element = doc.createElement('amp-img');
-      doc.body.appendChild(element);
-      return dom.whenUpgradedToCustomElement(element).then(element => {
-        expect(element.whenBuilt).to.exist;
-      });
-    });
+    describe('toggleAttribute', () => {
+      let el;
 
-    it('should resolve when element upgrade', () => {
-      const element = doc.createElement('amp-test');
-      doc.body.appendChild(element);
-      env.win.setTimeout(() => {
-        env.win.customElements.define('amp-test', createAmpElementForTesting(
-            env.win, 'amp-test', TestElement));
-      }, 100);
-      return dom.whenUpgradedToCustomElement(element).then(element => {
-        expect(element.whenBuilt).to.exist;
+      beforeEach(() => {
+        el = document.createElement('div');
+      });
+
+      it('should toggle to remove the attribute with an empty value', () => {
+        el.setAttribute('foo', '');
+        dom.toggleAttribute(el, 'foo');
+        expect(el.getAttribute('foo')).to.be.null;
+      });
+
+      it('should toggle to remove the attribute with a non-empty value', () => {
+        el.setAttribute('foo', 'asdf');
+        dom.toggleAttribute(el, 'foo');
+        expect(el.getAttribute('foo')).to.be.null;
+      });
+
+      it('should toggle to add the attribute', () => {
+        dom.toggleAttribute(el, 'foo');
+        expect(el.getAttribute('foo')).to.equal('');
+      });
+
+      it('should remove the attribute when forced', () => {
+        el.setAttribute('foo', '');
+        dom.toggleAttribute(el, 'foo', false);
+        expect(el.getAttribute('foo')).to.be.null;
+      });
+
+      it('should not add the attribute when forced off', () => {
+        dom.toggleAttribute(el, 'foo', false);
+        expect(el.getAttribute('foo')).to.be.null;
+      });
+
+      it('should add the attribute when forced and it does not exist', () => {
+        dom.toggleAttribute(el, 'foo', true);
+        expect(el.getAttribute('foo')).to.equal('');
+      });
+
+      it('should leave the attribute when forced and it exists', () => {
+        el.setAttribute('foo', 'asdf');
+        dom.toggleAttribute(el, 'foo', true);
+        expect(el.getAttribute('foo')).to.equal('asdf');
       });
     });
-  });
-});
+  }
+);

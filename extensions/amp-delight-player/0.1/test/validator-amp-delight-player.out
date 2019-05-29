@@ -33,13 +33,24 @@ FAIL
 |      <!-- Example of a valid amp-delight-player. -->
 |      <amp-delight-player
 |          data-content-id="-LJmX7wyfNmRe5LHw7Hy"
-|          layout="responsive" width="16" height="9">    
+|          layout="responsive" width="16" height="9">
 |      </amp-delight-player>
 |      <!-- Invalid example of missing content ID. -->
 |      <amp-delight-player
 >>     ^~~~~~~~~
-amp-delight-player/0.1/test/validator-amp-delight-player.html:38:4 The mandatory attribute 'data-content-id' is missing in tag 'amp-delight-player'. (see https://www.ampproject.org/docs/reference/components/amp-delight-player) [AMP_TAG_PROBLEM]
-|          layout="responsive" width="16" height="9">    
+amp-delight-player/0.1/test/validator-amp-delight-player.html:38:4 The mandatory attribute 'data-content-id' is missing in tag 'amp-delight-player'. (see https://amp.dev/documentation/components/amp-delight-player) [AMP_TAG_PROBLEM]
+|          layout="responsive" width="16" height="9">
+|      </amp-delight-player>
+|
+|      <!-- Invalid: dock without amp-video-docking extension -->
+|      <amp-delight-player
+>>     ^~~~~~~~~
+amp-delight-player/0.1/test/validator-amp-delight-player.html:43:4 The attribute 'dock' requires including the 'amp-video-docking' extension JavaScript. [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+|          data-content-id="-LLoCCZqWi18O73b6M0w"
+|          layout="fixed"
+|          width="960"
+|          height="540"
+|          dock>
 |      </amp-delight-player>
 |
 |  </body>

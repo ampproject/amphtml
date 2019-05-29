@@ -25,24 +25,26 @@ describes.realWin('FormDataWrapper', {}, env => {
   describe('entries', () => {
     let nativeEntries;
     let nativeDelete;
-    const scenarios = [{
-      description: 'when native `entries` is not available',
+    const scenarios = [
+      {
+        description: 'when native `entries` is not available',
 
-      beforeEach() {
-        nativeEntries = FormData.prototype.entries;
-        nativeDelete = FormData.prototype.delete;
-        // Remove native entries from the prototype in case the browser running
-        // the tests already have it to force the "no native `entries`"
-        // scenario.
-        FormData.prototype.entries = undefined;
-        FormData.prototype.delete = undefined;
-      },
+        beforeEach() {
+          nativeEntries = FormData.prototype.entries;
+          nativeDelete = FormData.prototype.delete;
+          // Remove native entries from the prototype in case the browser running
+          // the tests already have it to force the "no native `entries`"
+          // scenario.
+          FormData.prototype.entries = undefined;
+          FormData.prototype.delete = undefined;
+        },
 
-      afterEach() {
-        FormData.prototype.entries = nativeEntries;
-        FormData.prototype.delete = nativeDelete;
+        afterEach() {
+          FormData.prototype.entries = nativeEntries;
+          FormData.prototype.delete = nativeDelete;
+        },
       },
-    }];
+    ];
 
     // Intentionally use the non-env global to detect the browser capability
     if (FormData.prototype.entries) {
@@ -50,7 +52,7 @@ describes.realWin('FormDataWrapper', {}, env => {
         description: 'when native `entries` is available',
 
         beforeEach() {
-          // Do nothing as `FormData.prototype` already has `entires`.
+          // Do nothing as `FormData.prototype` already has `entries`.
         },
 
         afterEach() {
@@ -67,20 +69,22 @@ describes.realWin('FormDataWrapper', {}, env => {
 
         beforeEach(() => {
           sandbox.stub(Services, 'platformFor').returns({
-            isIos() { return false; },
+            isIos() {
+              return false;
+            },
           });
         });
 
         it('returns empty if no form passed and no entries appended', () => {
           const formData = createFormDataWrapper(env.win);
-          expect(fromIterator(formData.entries()))
-              .to.be.an('array').that.is.empty;
+          expect(fromIterator(formData.entries())).to.be.an('array').that.is
+            .empty;
         });
 
         describe('when entries appended', () => {
           let formData;
 
-          beforeEach(() => formData = createFormDataWrapper(env.win));
+          beforeEach(() => (formData = createFormDataWrapper(env.win)));
 
           it('returns appended string entries', () => {
             formData.append('a', '1');
@@ -136,8 +140,8 @@ describes.realWin('FormDataWrapper', {}, env => {
 
           it('returns empty if no entries in form', () => {
             const formData = createFormDataWrapper(env.win, form);
-            expect(fromIterator(formData.entries()))
-                .to.be.an('array').that.is.empty;
+            expect(fromIterator(formData.entries())).to.be.an('array').that.is
+              .empty;
           });
 
           it('returns text input entries in form', () => {
@@ -301,14 +305,94 @@ describes.realWin('FormDataWrapper', {}, env => {
             ['42', 'bang'],
           ]);
         });
+
+        it('includes the focused submit input at submit-time', () => {
+          const form = env.win.document.createElement('form');
+
+          const input = env.win.document.createElement('input');
+          input.type = 'text';
+          input.name = 'foo1';
+          input.value = 'bar';
+
+          const submit = env.win.document.createElement('input');
+          submit.type = 'submit';
+          submit.name = 'foo2';
+          submit.value = 'baz';
+
+          form.appendChild(input);
+          form.appendChild(submit);
+          env.win.document.body.appendChild(form);
+
+          submit.focus();
+          const formData = createFormDataWrapper(env.win, form);
+          expect(fromIterator(formData.entries())).to.have.deep.members([
+            ['foo1', 'bar'],
+            ['foo2', 'baz'],
+          ]);
+        });
+
+        it('includes the focused submit button at submit-time', () => {
+          const form = env.win.document.createElement('form');
+
+          const input = env.win.document.createElement('input');
+          input.type = 'text';
+          input.name = 'foo1';
+          input.value = 'bar';
+
+          const submit = env.win.document.createElement('button');
+          submit.name = 'foo2';
+          submit.innerText = 'baz';
+
+          form.appendChild(input);
+          form.appendChild(submit);
+          env.win.document.body.appendChild(form);
+
+          submit.focus();
+          const formData = createFormDataWrapper(env.win, form);
+          expect(fromIterator(formData.entries())).to.have.deep.members([
+            ['foo1', 'bar'],
+            ['foo2', ''],
+          ]);
+        });
+
+        it(
+          'includes the first submit button at submit-time if' +
+            ' none is focused',
+          () => {
+            const form = env.win.document.createElement('form');
+
+            const input = env.win.document.createElement('input');
+            input.type = 'text';
+            input.name = 'foo1';
+            input.value = 'bar';
+
+            const submit = env.win.document.createElement('button');
+            submit.name = 'foo2';
+            submit.innerText = 'baz';
+
+            form.appendChild(input);
+            form.appendChild(submit);
+            env.win.document.body.appendChild(form);
+
+            const formData = createFormDataWrapper(env.win, form);
+            expect(fromIterator(formData.entries())).to.have.deep.members([
+              ['foo1', 'bar'],
+              ['foo2', ''],
+            ]);
+          }
+        );
       });
     });
 
     describe('Ios11NativeFormDataWrapper', () => {
       beforeEach(() => {
         sandbox.stub(Services, 'platformFor').returns({
-          isIos() { return true; },
-          getMajorVersion() { return 11; },
+          isIos() {
+            return true;
+          },
+          getMajorVersion() {
+            return 11;
+          },
         });
       });
 
@@ -341,7 +425,6 @@ describes.realWin('FormDataWrapper', {}, env => {
 
     describe('PolyfillFormDataWrapper', () => {
       it('getFormData matches native behavior', () => {
-
         const form = env.win.document.createElement('form');
 
         const input = env.win.document.createElement('input');
@@ -362,13 +445,13 @@ describes.realWin('FormDataWrapper', {}, env => {
         if (FormData.prototype.entries) {
           const polyfillFormData = polyfillFormDataWrapper.getFormData();
           expect(fromIterator(polyfillFormData.entries())).to.deep.equal(
-              fromIterator(new FormData(form).entries()));
+            fromIterator(new FormData(form).entries())
+          );
         } else {
           // For testing in non-supporting browsers like IE.
           // We can't query the state of FormData, but we can check that
           // the polyfill appended to the real FormData enough.
-          const appendSpy =
-              env.sandbox.spy(FormData.prototype, 'append');
+          const appendSpy = env.sandbox.spy(FormData.prototype, 'append');
           polyfillFormDataWrapper.getFormData();
           expect(appendSpy).to.have.been.calledTwice;
         }

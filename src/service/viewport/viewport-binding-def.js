@@ -20,7 +20,6 @@
  * @interface
  */
 export class ViewportBindingDef {
-
   /**
    * Called before a first AMP element is added to resources. The final
    * preparations must be completed here. Called in the mutate context.
@@ -50,6 +49,13 @@ export class ViewportBindingDef {
    * @return {boolean}
    */
   requiresFixedLayerTransfer() {}
+
+  /**
+   * Whether the binding requires the global window's `scrollTo` to be
+   * indirected via methods of this binding.
+   * @return {boolean}
+   */
+  overrideGlobalScrollTo() {}
 
   /**
    * Whether the binding supports fix-positioned elements.

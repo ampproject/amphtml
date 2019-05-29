@@ -19,27 +19,34 @@ const documentModes = require('./document-modes');
 const {html} = require('./html');
 const {KeyValueOptions} = require('./form');
 
-
-module.exports = () => html`<div class="block">
+module.exports = () => html`
+  <div class="block">
     <form id="proxy-form" action="/proxy" target="_top">
       <label for="proxy-input">
         <span>Load URL by Proxy</span>
         <select name="mode">
           ${KeyValueOptions(documentModes)}
         </select>
-        <input type="text"
+        <input
+          type="text"
           class="text-input"
           id="proxy-input"
           name="url"
-          required aria-required="true"
+          required
+          aria-required="true"
           placeholder="https://"
-          pattern="^(https?://)?[^\\s]+$" />
+          pattern="^(https?://)?[^\\s]+$"
+        />
       </label>
       <div class="form-info">
-        <a href="https://github.com/ampproject/amphtml/blob/master/contributing/TESTING.md#document-proxy"
-          target="_blank">
+        <span>Takes canonical, AMPHTML and Google viewer URLs.</span>
+        <a
+          href="https://github.com/ampproject/amphtml/blob/master/contributing/TESTING.md#document-proxy"
+          target="_blank"
+        >
           What's this?
         </a>
       </div>
     </form>
-  </div>`;
+  </div>
+`;

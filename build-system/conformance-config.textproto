@@ -19,7 +19,7 @@ requirement: {
 
 requirement: {
   type: BANNED_PROPERTY_CALL
-  error_message: 'Use closestBySelector, closestByTag etc in src/dom.js'
+  error_message: 'Use closestAncestorElementBySelector in src/dom.js'
   value: 'Element.prototype.closest'
   whitelist: 'src/dom.js'
 }

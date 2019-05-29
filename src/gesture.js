@@ -20,9 +20,7 @@ import {devAssert} from './log';
 import {findIndex} from './utils/array';
 import {toWin} from './types';
 
-
 const PROP_ = '__AMP_Gestures';
-
 
 /**
  * A gesture object contains the type and data of the gesture such as
@@ -45,13 +43,12 @@ export class Gesture {
     this.type = type;
     /** @const {DATA} */
     this.data = data;
-    /** @const {time} */
+    /** @const {number} */
     this.time = time;
     /** @const {?Event} */
     this.event = event;
   }
 }
-
 
 /**
  * Gestures object manages all gestures on a particular element. It listens
@@ -61,7 +58,6 @@ export class Gesture {
  * between competing recognizers to decide which gesture should go forward.
  */
 export class Gestures {
-
   /**
    * Creates if not yet created and returns the shared Gestures instance for
    * the specified element.
@@ -112,8 +108,10 @@ export class Gestures {
     this.wasEventing_ = false;
 
     /** @private {!Pass} */
-    this.pass_ = new Pass(toWin(element.ownerDocument.defaultView),
-        this.doPass_.bind(this));
+    this.pass_ = new Pass(
+      toWin(element.ownerDocument.defaultView),
+      this.doPass_.bind(this)
+    );
 
     /** @private {!Observable} */
     this.pointerDownObservable_ = new Observable();
@@ -405,12 +403,16 @@ export class Gestures {
    * @visibleForTesting
    */
   signalEmit_(recognizer, data, event) {
-    devAssert(this.eventing_ == recognizer,
-        'Recognizer is not currently allowed: %s', recognizer.getType());
+    devAssert(
+      this.eventing_ == recognizer,
+      'Recognizer is not currently allowed: %s',
+      recognizer.getType()
+    );
     const overserver = this.overservers_[recognizer.getType()];
     if (overserver) {
-      overserver.fire(new Gesture(recognizer.getType(), data, Date.now(),
-          event));
+      overserver.fire(
+        new Gesture(recognizer.getType(), data, Date.now(), event)
+      );
     }
   }
 
@@ -424,8 +426,7 @@ export class Gestures {
     if (!cancelEvent) {
       const now = Date.now();
       for (let i = 0; i < this.recognizers_.length; i++) {
-        if (this.ready_[i] ||
-                (this.pending_[i] && this.pending_[i] >= now)) {
+        if (this.ready_[i] || (this.pending_[i] && this.pending_[i] >= now)) {
           cancelEvent = true;
           break;
         }
@@ -540,7 +541,6 @@ export class Gestures {
   }
 }
 
-
 /**
  * The gesture recognizer receives the pointer events from Gestures instance.
  * Based on these events, it can "recognize" the gesture it's responsible for,
@@ -569,7 +569,6 @@ export class Gestures {
  * @template DATA
  */
 export class GestureRecognizer {
-
   /**
    * @param {string} type
    * @param {!Gestures} manager
@@ -642,15 +641,13 @@ export class GestureRecognizer {
    * state. It will be in this state until it calls {@link signalEnd} or
    * the {@link acceptCancel} is called by the Gestures instance.
    */
-  acceptStart() {
-  }
+  acceptStart() {}
 
   /**
    * The Gestures instance calls this method to reset the recognizer. At this
    * point the recognizer is in the initial waiting state.
    */
-  acceptCancel() {
-  }
+  acceptCancel() {}
 
   /**
    * The Gestures instance calls this method for each "touchstart" event. If
@@ -681,6 +678,5 @@ export class GestureRecognizer {
    * next touch series.
    * @param {!Event} unusedEvent
    */
-  onTouchEnd(unusedEvent) {
-  }
+  onTouchEnd(unusedEvent) {}
 }

@@ -1,3 +1,13 @@
+---
+$category@: dynamic-content
+formats:
+  - websites
+teaser:
+  text: Provides an AMP paywall and subscription support.
+---
+# amp-access
+AMP Access or “AMP paywall and subscription support” gives Publishers control over which content can be accessed by a Reader and with what restrictions, based on the Reader’s subscription status, number of views, and other factors.
+
 # <a name="amp-access-"></a> amp-access
 
 [TOC]
@@ -19,10 +29,6 @@ limitations under the License.
 -->
 
 <table>
-  <tr>
-    <td class="col-fourty"><strong>Description</strong></td>
-    <td>AMP Access or “AMP paywall and subscription support” gives Publishers control over which content can be accessed by a Reader and with what restrictions, based on the Reader’s subscription status, number of views, and other factors.</td>
-  </tr>
   <tr>
     <td><strong>Availability</strong></td>
     <td>Stable</td>
@@ -47,7 +53,7 @@ similar features to `amp-access`. However, it supports a more specialized access
 paywall protocol. Some notable notable differences are:
 
 1. The `amp-subscriptions` entitlements response is similar to the amp-access
-authorization, but it is striclty defined and standardized.
+authorization, but it is strictly defined and standardized.
 2. The `amp-subscriptions` extension allows multiple services to be configured
 for the page to participate in access/paywall decisions. They are executed
 concurrently and prioritized based on which service returns the positive response.

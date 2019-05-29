@@ -23,23 +23,11 @@
   position: absolute !important;
 }
 
-.i-amphtml-story-focused-state-layer::before {
-  content: '' !important;
-  position: absolute !important;
-  top: 0 !important;
-  left: 0 !important;
-  width: 100% !important;
-  height: 100% !important;
-  background-color: black !important;
-  opacity: 0.55 !important;
-  transition: opacity 0.225s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
-}
-
-.i-amphtml-story-focused-state-layer.i-amphtml-hidden,
-.i-amphtml-story-focused-state-layer.i-amphtml-hidden::before {
+.i-amphtml-story-focused-state-layer.i-amphtml-hidden {
   opacity: 0 !important;
   pointer-events: none !important;
-  transition: opacity 0.15s cubic-bezier(0.4, 0.0, 1, 1) !important;
+  /* If duration is modified, also modify TOOLTIP_CLOSE_ANIMATION_MS in amp-story-embedded-component.js. */
+  transition: opacity 0.1s cubic-bezier(0.4, 0.0, 1, 1) !important;
 }
 
 .i-amphtml-story-focused-state-layer-nav-button-container {
@@ -52,12 +40,12 @@
 }
 
 .i-amphtml-story-focused-state-layer-nav-button-container.i-amphtml-story-tooltip-nav-button-left {
-  background-image: linear-gradient(90deg, rgba(33, 33, 33, 0.30) 2%, rgba(33, 33, 33, 0) 100%) !important;
+  background-image: linear-gradient(90deg, rgba(33, 33, 33, 0.15) 2%, rgba(33, 33, 33, 0) 100%) !important;
   left: 0 !important;
 }
 
 .i-amphtml-story-focused-state-layer-nav-button-container.i-amphtml-story-tooltip-nav-button-right {
-  background-image: linear-gradient(90deg, rgba(33, 33, 33, 0) 2%, rgba(33, 33, 33, 0.30) 100%) !important;
+  background-image: linear-gradient(90deg, rgba(33, 33, 33, 0) 2%, rgba(33, 33, 33, 0.15) 100%) !important;
   right: 0 !important;
 }
 
@@ -71,7 +59,8 @@
   padding: 0 !important;
   border: 0 !important;
   background-color: transparent !important;
-  transition: transform 0.225s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
+  filter: drop-shadow(0px 0px 16px rgba(0, 0, 0, 0.5)) !important;
+  transition: transform 0.2s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
 }
 
 .i-amphtml-story-focused-state-layer-nav-button.i-amphtml-story-tooltip-nav-button-left {
@@ -81,7 +70,7 @@
 
 .i-amphtml-hidden .i-amphtml-story-focused-state-layer-nav-button.i-amphtml-story-tooltip-nav-button-left {
   transform: translate3d(8px, 0, 0);
-  transition: transform 0.15s cubic-bezier(0.4, 0.0, 1, 1) !important;
+  transition: transform 0s linear .1s !important;
 }
 
 .i-amphtml-story-focused-state-layer-nav-button.i-amphtml-story-tooltip-nav-button-right {
@@ -91,7 +80,7 @@
 
 .i-amphtml-hidden .i-amphtml-story-focused-state-layer-nav-button.i-amphtml-story-tooltip-nav-button-right {
   transform: translate3d(-8px, 0, 0);
-  transition: transform 0.15s cubic-bezier(0.4, 0.0, 1, 1) !important;
+  transition: transform 0s linear .1s !important;
 }
 
 [desktop] .i-amphtml-story-focused-state-layer-nav-button-container {
@@ -101,7 +90,7 @@
 .i-amphtml-hidden > .i-amphtml-story-tooltip,
 .i-amphtml-hidden > .i-amphtml-story-tooltip.i-amphtml-tooltip-arrow-on-top {
   transform: translate3d(0, 0, 0) !important;
-  transition: transform 0s linear 0.15s !important;
+  transition: transform 0s linear 0.1s !important;
 }
 
 .i-amphtml-story-tooltip {
@@ -112,13 +101,15 @@
   position: absolute !important;
   box-sizing: border-box !important;
   text-decoration: none !important;
+  text-shadow: none !important;
+  font-weight: 500 !important;
   display: flex !important;
   justify-content: space-between !important;
   align-items: center !important;
   background: white !important;
-  box-shadow: 0 1px 3px 1px rgba(0,0,0,0.24) !important;
+  box-shadow: 0px 6px 16px rgba(0,0,0,0.16) !important;
   transform: translate3d(0, -16px, 0) !important;
-  transition: transform 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
+  transition: transform 0.2s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
 }
 
 .i-amphtml-story-tooltip.i-amphtml-tooltip-arrow-on-top {
@@ -138,19 +129,17 @@
   line-height: 20px !important;
 }
 
-.i-amphtml-story-tooltip-icon {
+.i-amphtml-story-tooltip-custom-icon {
   width: 24px !important;
   height: 24px !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  filter: drop-shadow(0px 0px 8px rgba(0, 0, 0, 0.08)) !important;
 }
 
-.i-amphtml-story-tooltip-icon.i-amphtml-hidden {
+.i-amphtml-story-tooltip-custom-icon.i-amphtml-hidden {
   display: none !important;
-}
-
-.i-amphtml-story-tooltip-icon > img {
-  object-fit: cover !important;
-  width: 100% !important;
-  height: 100% !important;
 }
 
 .i-amphtml-tooltip-action-icon {

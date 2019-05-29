@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  BookendComponentInterface,
-} from './bookend-component-interface';
+import {BookendComponentInterface} from './bookend-component-interface';
 import {addAttributesToElement} from '../../../../../src/dom';
 import {dict} from '../../../../../src/utils/object';
 import {getSourceOriginForElement, userAssertValidProtocol} from '../../utils';
@@ -51,18 +49,18 @@ let landscapeElementsDef;
  * @implements {BookendComponentInterface}
  */
 export class LandscapeComponent {
-
   /** @override */
   assertValidity(landscapeJson, element) {
-
     const requiredFields = ['title', 'image', 'url'];
-    const hasAllRequiredFields =
-        !requiredFields.some(field => !(field in landscapeJson));
+    const hasAllRequiredFields = !requiredFields.some(
+      field => !(field in landscapeJson)
+    );
     userAssert(
-        hasAllRequiredFields,
-        'Landscape component must contain ' +
+      hasAllRequiredFields,
+      'Landscape component must contain ' +
         requiredFields.map(field => '`' + field + '`').join(', ') +
-        ' fields, skipping invalid.');
+        ' fields, skipping invalid.'
+    );
 
     userAssertValidProtocol(element, landscapeJson['url']);
     userAssertValidProtocol(element, landscapeJson['image']);
@@ -91,9 +89,9 @@ export class LandscapeComponent {
 
   /** @override */
   buildElement(landscapeData, doc) {
+    landscapeData = /** @type {LandscapeComponentDef} */ (landscapeData);
     const html = htmlFor(doc);
-    const el =
-        html`
+    const el = html`
         <a class="i-amphtml-story-bookend-landscape
           i-amphtml-story-bookend-component"
           target="_top">

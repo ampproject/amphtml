@@ -20,7 +20,6 @@ import {Services} from '../../../../src/services';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {installStylesForDoc} from '../../../../src/style-installer';
 
-
 describes.realWin('AmpSubscriptions Dialog', {amp: true}, env => {
   let win, doc, ampdoc;
   let dialog;
@@ -45,10 +44,10 @@ describes.realWin('AmpSubscriptions Dialog', {amp: true}, env => {
   });
 
   it('should construct correctly', () => {
-    expect(dialog.getRoot().tagName.toLowerCase())
-        .to.equal('amp-subscriptions-dialog');
-    expect(dialog.getRoot().getAttribute('role'))
-        .to.equal('dialog');
+    expect(dialog.getRoot().tagName.toLowerCase()).to.equal(
+      'amp-subscriptions-dialog'
+    );
+    expect(dialog.getRoot().getAttribute('role')).to.equal('dialog');
     expect(dialog.getRoot().parentNode).to.equal(doc.body);
     expect(dialog.closeButton_).to.have.display('none');
 
@@ -60,23 +59,31 @@ describes.realWin('AmpSubscriptions Dialog', {amp: true}, env => {
   it('should open content when invisible', () => {
     const promise = dialog.open(content, false);
     expect(dialog.getRoot()).to.have.display('none');
-    return vsync.mutatePromise(() => {}).then(() => {
-      // First vsync displays the dialog.
-      expect(content.parentNode).to.equal(dialog.getRoot());
-      expect(dialog.isVisible()).to.be.true;
-      expect(dialog.getRoot()).to.have.display('block');
-      const styles = getComputedStyle(dialog.getRoot());
-      expect(styles.transform).to.contain('17');
-      return promise;
-    }).then(() => vsync.mutatePromise(() => {})).then(() => {
-      expect(dialog.getRoot()).to.have.display('block');
-      const styles = getComputedStyle(dialog.getRoot());
-      expect(styles.transform).to.not.contain('17');
-      expect(dialog.closeButton_).to.have.display('none');
-      expect(updatePaddingSpy).to.be.calledOnce.calledWith(17);
-      expect(addToFixedLayerSpy).to.be.calledOnce.calledWith(dialog.getRoot());
-      expect(dialog.isVisible()).to.be.true;
-    });
+    return vsync
+      .mutatePromise(() => {})
+      .then(() => {
+        // First vsync displays the dialog.
+        expect(content.parentNode).to.equal(dialog.getRoot());
+        expect(dialog.isVisible()).to.be.true;
+        expect(dialog.getRoot()).to.have.display('block');
+        const styles = getComputedStyle(dialog.getRoot());
+        expect(styles.transform).to.contain('17');
+        return promise;
+      })
+      .then(() => vsync.mutatePromise(() => {}))
+      .then(() => {
+        expect(dialog.getRoot()).to.have.display('block');
+        const styles = getComputedStyle(dialog.getRoot());
+        expect(styles.transform).to.not.contain('17');
+        expect(dialog.closeButton_).to.have.display('none');
+        expect(updatePaddingSpy).to.be.calledOnce.calledWith(17);
+        // TODO(dvoytenko, #20608): add to fixed layer, once the SwG/FL
+        // conflict is resolved.
+        // expect(addToFixedLayerSpy).to.be.calledOnce
+        //     .calledWith(dialog.getRoot());
+        expect(addToFixedLayerSpy).to.not.be.called;
+        expect(dialog.isVisible()).to.be.true;
+      });
   });
 
   it('should re-open content when visible', () => {
@@ -84,41 +91,51 @@ describes.realWin('AmpSubscriptions Dialog', {amp: true}, env => {
       style: 'height:21px',
     });
     const promise = dialog.open(content2, false);
-    return vsync.mutatePromise(() => {}).then(() => {
-      expect(content2.parentNode).to.equal(dialog.getRoot());
-      return promise;
-    }).then(() => {
-      expect(content2.parentNode).to.equal(dialog.getRoot());
-      expect(content.parentNode).to.be.null;
-      expect(dialog.getRoot()).to.have.display('block');
-      const styles = getComputedStyle(dialog.getRoot());
-      expect(styles.transform).to.not.contain('21');
-    });
+    return vsync
+      .mutatePromise(() => {})
+      .then(() => {
+        expect(content2.parentNode).to.equal(dialog.getRoot());
+        return promise;
+      })
+      .then(() => {
+        expect(content2.parentNode).to.equal(dialog.getRoot());
+        expect(content.parentNode).to.be.null;
+        expect(dialog.getRoot()).to.have.display('block');
+        const styles = getComputedStyle(dialog.getRoot());
+        expect(styles.transform).to.not.contain('21');
+      });
   });
 
   it('should close', () => {
-    return dialog.open(content, false).then(() => {
-      expect(content.parentNode).to.equal(dialog.getRoot());
-      expect(dialog.getRoot()).to.have.display('block');
-      return dialog.close();
-    }).then(() => {
-      expect(dialog.getRoot()).to.have.display('none');
-      expect(dialog.isVisible()).to.be.false;
-      expect(content.parentNode).to.equal(dialog.getRoot());
-      expect(dialog.getRoot().parentNode).to.equal(doc.body);
-    });
+    return dialog
+      .open(content, false)
+      .then(() => {
+        expect(content.parentNode).to.equal(dialog.getRoot());
+        expect(dialog.getRoot()).to.have.display('block');
+        return dialog.close();
+      })
+      .then(() => {
+        expect(dialog.getRoot()).to.have.display('none');
+        expect(dialog.isVisible()).to.be.false;
+        expect(content.parentNode).to.equal(dialog.getRoot());
+        expect(dialog.getRoot().parentNode).to.equal(doc.body);
+      });
   });
 
   it('should re-open after close', () => {
-    return dialog.open(content, false).then(() => {
-      expect(dialog.isVisible()).to.be.true;
-      return dialog.close();
-    }).then(() => {
-      expect(dialog.isVisible()).to.be.false;
-      return dialog.open(content, false);
-    }).then(() => {
-      expect(dialog.isVisible()).to.be.true;
-    });
+    return dialog
+      .open(content, false)
+      .then(() => {
+        expect(dialog.isVisible()).to.be.true;
+        return dialog.close();
+      })
+      .then(() => {
+        expect(dialog.isVisible()).to.be.false;
+        return dialog.open(content, false);
+      })
+      .then(() => {
+        expect(dialog.isVisible()).to.be.true;
+      });
   });
 
   it('should show close button', () => {

@@ -132,7 +132,7 @@ function findHtmlFilesRelativeToTestdata() {
   const testFiles = [];
   for (const entry of testSubdirs) {
     for (const candidate of readdir(path.join(entry.root, entry.subdir))) {
-      if (candidate.match(/^.*.html/g)) {
+      if (candidate.match(/\.html$/)) {
         testFiles.push(path.join(entry.subdir, candidate));
       }
     }
@@ -407,8 +407,8 @@ describe('ValidatorCssLength', () => {
        'feature_tests/css_length.html:28:2 The author stylesheet ' +
        'specified in tag \'style amp-custom\' is too long - document ' +
        'contains 50001 bytes whereas the limit is 50000 bytes. ' +
-       '(see https://www.ampproject.org/docs/reference/spec' +
-       '#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
+       '(see https://amp.dev/documentation/guides-and-tutorials/' +
+       'learn/spec/amphtml#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
     test.run();
   });
 
@@ -428,8 +428,8 @@ describe('ValidatorCssLength', () => {
        'feature_tests/css_length.html:28:2 The author stylesheet ' +
        'specified in tag \'style amp-custom\' is too long - document ' +
        'contains 50002 bytes whereas the limit is 50000 bytes. ' +
-       '(see https://www.ampproject.org/docs/reference/spec' +
-       '#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
+       '(see https://amp.dev/documentation/guides-and-tutorials/' +
+       'learn/spec/amphtml#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
     test.run();
   });
 
@@ -461,9 +461,9 @@ describe('ValidatorCssLength', () => {
        'feature_tests/css_length.html:36:6 The author stylesheet ' +
        'specified in tag \'style amp-custom\' and the combined inline ' +
        'styles is too large - document contains 50001 bytes whereas the ' +
-       'limit is 50000 bytes. (see https://www.ampproject.org/docs/guides' +
-       '/author-develop/responsive/style_pages) ' +
-       '[AUTHOR_STYLESHEET_PROBLEM]';
+       'limit is 50000 bytes. ' +
+       '(see https://amp.dev/documentation/guides-and-tutorials/' +
+       'learn/spec/amphtml#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
     test.run();
   });
 
@@ -482,9 +482,9 @@ describe('ValidatorCssLength', () => {
        'feature_tests/css_length.html:5036:6 The author stylesheet ' +
        'specified in tag \'style amp-custom\' and the combined inline ' +
        'styles is too large - document contains 50014 bytes whereas the ' +
-       'limit is 50000 bytes. (see https://www.ampproject.org/docs/guides' +
-       '/author-develop/responsive/style_pages) ' +
-       '[AUTHOR_STYLESHEET_PROBLEM]';
+       'limit is 50000 bytes. ' +
+       '(see https://amp.dev/documentation/guides-and-tutorials/' +
+       'learn/spec/amphtml#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
     test.run();
   });
 });
@@ -523,9 +523,9 @@ describe('ValidatorCssLengthWithUrls', () => {
     test.expectedOutput = 'FAIL\n' +
         'feature_tests/css_length.html:28:2 The author stylesheet ' +
         'specified in tag \'style amp-custom\' is too long - document ' +
-        'contains 50010 bytes whereas the limit is 50000 bytes. (see ' +
-        'https://www.ampproject.org/docs/reference/spec#maximum-size) ' +
-        '[AUTHOR_STYLESHEET_PROBLEM]';
+        'contains 50010 bytes whereas the limit is 50000 bytes. ' +
+        '(see https://amp.dev/documentation/guides-and-tutorials/' +
+        'learn/spec/amphtml#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
     test.run();
   });
 
@@ -549,9 +549,9 @@ describe('ValidatorCssLengthWithUrls', () => {
     test.expectedOutput = 'FAIL\n' +
         'feature_tests/css_length.html:28:2 The author stylesheet ' +
         'specified in tag \'style amp-custom\' is too long - document ' +
-        'contains 50010 bytes whereas the limit is 50000 bytes. (see ' +
-        'https://www.ampproject.org/docs/reference/spec#maximum-size) ' +
-        '[AUTHOR_STYLESHEET_PROBLEM]';
+        'contains 50010 bytes whereas the limit is 50000 bytes. ' +
+        '(see https://amp.dev/documentation/guides-and-tutorials/' +
+        'learn/spec/amphtml#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
     test.run();
   });
 
@@ -575,9 +575,9 @@ describe('ValidatorCssLengthWithUrls', () => {
     test.expectedOutput = 'FAIL\n' +
         'feature_tests/css_length.html:28:2 The author stylesheet ' +
         'specified in tag \'style amp-custom\' is too long - document ' +
-        'contains 50010 bytes whereas the limit is 50000 bytes. (see ' +
-        'https://www.ampproject.org/docs/reference/spec#maximum-size) ' +
-        '[AUTHOR_STYLESHEET_PROBLEM]';
+        'contains 50010 bytes whereas the limit is 50000 bytes. ' +
+        '(see https://amp.dev/documentation/guides-and-tutorials/' +
+        'learn/spec/amphtml#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
     test.run();
   });
 });
@@ -663,9 +663,9 @@ describe('ValidatorTransformedAmpCssLengthWithUrls', () => {
         'transformed_feature_tests/css_length.html:29:2 The author ' +
         'stylesheet specified in tag \'style amp-custom (transformed)\' ' +
         'is too long - document contains 50010 bytes whereas the limit ' +
-        'is 50000 bytes. (see ' +
-        'https://www.ampproject.org/docs/reference/spec#maximum-size) ' +
-        '[AUTHOR_STYLESHEET_PROBLEM]';
+        'is 50000 bytes. ' +
+        '(see https://amp.dev/documentation/guides-and-tutorials/' +
+        'learn/spec/amphtml#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
     test.run();
   });
 });
@@ -922,6 +922,19 @@ function attrRuleShouldMakeSense(attrSpec, tagSpec, rules) {
   it('attr_spec only has one value set', () => {
     expect(numValues).toBeLessThan(2);
   });
+  // `id` attribute must have blacklisted_value_regex set if no explicit values.
+  if ((attrSpec.name === 'id') && (numValues === 0)) {
+    it('"id" attribute must have blacklisted_value_regex set', () => {
+      expect(attrSpec.blacklistedValueRegex !== null).toBe(true);
+    });
+  }
+  // `name` attribute must have blacklisted_value_regex set if no explicit
+  // values.
+  if ((attrSpec.name === 'name') && (numValues === 0)) {
+    it('"name" attribute must have blacklisted_value_regex set', () => {
+      expect(attrSpec.blacklistedValueRegex !== null).toBe(true);
+    });
+  }
   // deprecation
   if ((attrSpec.deprecation !== null) || (attrSpec.deprecationUrl !== null)) {
     it('deprecation and deprecation_url must both be defined if one is defined',
@@ -948,25 +961,34 @@ function attrRuleShouldMakeSense(attrSpec, tagSpec, rules) {
       }
     });
   }
+  // Transformed AMP does not allow `nonce` attributes, so it must have
+  // disabled_by: "transformed".
+  if ((attrSpec.name === 'nonce') &&
+      tagSpec.htmlFormat.includes(amp.validator.HtmlFormat.Code.AMP)) {
+    it('nonce attributes must have `disabled_by: "transformed"`', () => {
+      expect(attrSpec.disabledBy.includes('transformed')).toBe(true);
+    });
+  }
 }
 
 /**
  * Helper for typeIdentifiersShouldMakeSense.
  * @param {!Object<string, number>} typeIdentifiers
- * @param {!Array<string>} tagSpecTypeIdentifiers
+ * @param {!Array<string>} specTypeIdentifiers
  * @param {string} fieldName
- * @param {string} tagSpecName
+ * @param {string} specType
+ * @param {string} specName
  */
 function typeIdentifiersAreValidAndUnique(
-  typeIdentifiers, tagSpecTypeIdentifiers, fieldName, tagSpecName) {
+  typeIdentifiers, specTypeIdentifiers, fieldName, specType, specName) {
   const encounteredTypeIdentifiers = {};
-  for (const typeIdentifier of tagSpecTypeIdentifiers) {
-    it('TagSpec \'' + tagSpecName + '\' has ' + fieldName +
+  for (const typeIdentifier of specTypeIdentifiers) {
+    it(specType + ' \'' + specName + '\' has ' + fieldName +
            ' set to an invalid type identifier: \'' + typeIdentifier + '\'',
     () => {
       expect(typeIdentifiers.hasOwnProperty(typeIdentifier)).toBe(true);
     });
-    it('TagSpec \'' + tagSpecName + '\' has duplicate ' + fieldName + ': \'' +
+    it(specType + ' \'' + specName + '\' has duplicate ' + fieldName + ': \'' +
            typeIdentifier + '\'.',
     () => {
       expect(encounteredTypeIdentifiers.hasOwnProperty(typeIdentifier))
@@ -978,27 +1000,28 @@ function typeIdentifiersAreValidAndUnique(
 
 /**
  * Helper for ValidatorRulesMakeSense.
- * @param {!amp.validator.TagSpec} tagSpec
- * @param {string} tagSpecName
+ * @param {!amp.validator.TagSpec|!amp.validator.AttrSpec} spec
+ * @param {string} specType
+ * @param {string} specName
  */
-function typeIdentifiersShouldMakeSense(tagSpec, tagSpecName) {
+function typeIdentifiersShouldMakeSense(spec, specType, specName) {
   const typeIdentifiers =
       {'amp': 0, 'amp4ads': 0, 'amp4email': 0, 'actions': 0, 'transformed': 0};
-  // both enabled_by and disabled_by must not be set on the same TagSpec.
-  it('TagSpec \'' + tagSpecName + '\' has both enabled_by and disabled_by' +
+  // both enabled_by and disabled_by must not be set on the same spec.
+  it(specType + ' \'' + specName + '\' has both enabled_by and disabled_by' +
          ' set and it must be one or the other, not both.',
   () => {
-    expect((tagSpec.enabledBy.length > 0) && (tagSpec.disabledBy.length > 0))
+    expect((spec.enabledBy.length > 0) && (spec.disabledBy.length > 0))
         .toBe(false);
   });
   // enabled_by must be a valid type identifier and each type identifier
   // listed at most once.
   typeIdentifiersAreValidAndUnique(
-      typeIdentifiers, tagSpec.enabledBy, 'enabled_by', tagSpecName);
+      typeIdentifiers, spec.enabledBy, 'enabled_by', specType, specName);
   // disabled_by must be a valid type identifier and each type identifier
   // listed at most once.
   typeIdentifiersAreValidAndUnique(
-      typeIdentifiers, tagSpec.disabledBy, 'disabled_by', tagSpecName);
+      typeIdentifiers, spec.disabledBy, 'disabled_by', specType, specName);
 }
 
 // Test which verifies some constraints on the rules file which the validator
@@ -1126,7 +1149,9 @@ describe('ValidatorRulesMakeSense', () => {
         tagWithoutSpecNameIsUnique[tagSpec.tagName] = 0;
       }
     });
-    typeIdentifiersShouldMakeSense(tagSpec, tagSpecName);
+    if ((tagSpec.enabledBy.length > 0) || (tagSpec.disabledBy.length > 0)) {
+      typeIdentifiersShouldMakeSense(tagSpec, 'tag_spec', tagSpecName);
+    }
     it('unique named_id if present', () => {
       if (tagSpec.namedId !== null &&
           tagSpec.namedId !== amp.validator.TagSpec.NamedId.NOT_SET) {
@@ -1156,6 +1181,7 @@ describe('ValidatorRulesMakeSense', () => {
         'amp-img': 0,
         'amp-layout': 0,
         'amp-lightbox': 0,
+        'amp-mraid': 0,
         'amp-mustache': 0,
         'amp-pixel': 0,
         'amp-position-observer': 0,
@@ -1235,12 +1261,21 @@ describe('ValidatorRulesMakeSense', () => {
     const attrNameIsUnique = {};
     for (const attrSpecId of tagSpec.attrs) {
       if (attrSpecId < 0) {
+        const attrName = rules.internedStrings[-1 - attrSpecId];
         it('unique attr_name within tag_spec \'' + tagSpecName + '\'', () => {
-          const attrName = rules.internedStrings[-1 - attrSpecId];
-
           expect(attrNameIsUnique.hasOwnProperty(attrName)).toBe(false);
           attrNameIsUnique[attrName] = 0;
         });
+        // Transformed AMP does not allow `nonce` attributes, so it must have
+        // disabled_by: "transformed" on the attrSpec or the tagSpec. Since this
+        // attribute does not have an attrSpec then it must be on the tagSpec.
+        // Verify that it is set on the tagSpec.
+        if ((attrName === 'nonce') &&
+            tagSpec.htmlFormat.includes(amp.validator.HtmlFormat.Code.AMP)) {
+          it('nonce attributes must have `disabled_by: "transformed"`', () => {
+            expect(tagSpec.disabledBy.includes('transformed')).toBe(true);
+          });
+        }
         continue;
       }
       const attrSpec = rules.attrs[attrSpecId];
@@ -1251,6 +1286,9 @@ describe('ValidatorRulesMakeSense', () => {
         expect(attrNameIsUnique.hasOwnProperty(attrSpec.name)).toBe(false);
         attrNameIsUnique[attrSpec.name] = 0;
       });
+      if ((attrSpec.enabledBy.length > 0) || (attrSpec.disabledBy.length > 0)) {
+        typeIdentifiersShouldMakeSense(attrSpec, 'attr_spec', attrSpec.name);
+      }
       // Special check that every <script> tag with a src attribute has a
       // whitelist check on the attribute value.
       if (tagSpec.tagName === 'SCRIPT' && attrSpec.name === 'src') {
@@ -1260,47 +1298,6 @@ describe('ValidatorRulesMakeSense', () => {
                   .toBe(true);
             });
       }
-      // TagSpecs with an ExtensionSpec are extensions. We have a few
-      // additional checks for these.
-      if (tagSpec.extensionSpec !== null) {
-        const {extensionSpec} = tagSpec;
-        it('extension must have a name field value', () => {
-          expect(extensionSpec.name).toBeDefined();
-        });
-        it('extension ' + extensionSpec.name + ' must have at least two ' +
-               'versions, latest and a numeric version, e.g `1.0`',
-        () => {
-          expect(extensionSpec.version).toBeGreaterThan(1);
-        });
-        it('extension ' + extensionSpec.name + ' versions must be `latest` ' +
-               'or a numeric value',
-        () => {
-          for (const versionString of extensionSpec.version) {
-            expect(versionString).toMatch(/^(latest|[0-9.])$/);
-          }
-          for (const versionString of extensionSpec.deprecatedVersion) {
-            expect(versionString).toMatch(/^(latest|[0-9.])$/);
-          }
-        });
-        it('extension ' + extensionSpec.name + ' deprecated_version must be ' +
-               'subset of version',
-        () => {
-          const versions = {};
-          for (const versionString of extensionSpec.version) {
-            expect(versionString).toMatch(/^(latest|[0-9.])$/);
-          }
-          for (const versionString of extensionSpec.deprecatedVersion) {
-            expect(versions.hasOwnProperty(versionString)).toBe(true);
-          }
-        });
-        it('extension ' + extensionSpec.name + ' must include the ' +
-               'attr_list: "common-extension-attrs"` attr_list ',
-        () => {
-          expect(tagSpec.attrLists.length).toEqual(1);
-          expect(tagSpec.attrLists[0]).toEqual('common-extension-attrs');
-        });
-      }
-
       if (attrSpec.dispatchKey) {
         it('tag_spec ' + tagSpecName +
            ' can not have more than one dispatch_key', () => {
@@ -1308,6 +1305,51 @@ describe('ValidatorRulesMakeSense', () => {
           seenDispatchKey = true;
         });
       }
+    }
+
+    // TagSpecs with an ExtensionSpec are extensions. We have a few
+    // additional checks for these.
+    if (tagSpec.extensionSpec !== null) {
+      const {extensionSpec} = tagSpec;
+      const versionRegexp = /^(latest|[0-9]+[.][0-9]+)$/;
+      it('extension must have a name field value', () => {
+        expect(extensionSpec.name).toBeDefined();
+      });
+      it('extension ' + extensionSpec.name + ' must have at least two ' +
+             'versions, latest and a numeric version, e.g `1.0`',
+      () => {
+        expect(extensionSpec.version.length).toBeGreaterThan(1);
+      });
+      it('extension ' + extensionSpec.name + ' versions must be `latest` ' +
+             'or a numeric value',
+      () => {
+        for (const versionString of extensionSpec.version) {
+          expect(versionString).toMatch(versionRegexp);
+        }
+        for (const versionString of extensionSpec.deprecatedVersion) {
+          expect(versionString).toMatch(versionRegexp);
+        }
+      });
+      it('extension ' + extensionSpec.name + ' deprecated_version must be ' +
+             'subset of version',
+      () => {
+        for (const versionString of extensionSpec.deprecatedVersion) {
+          expect(extensionSpec.version).toContain(versionString);
+        }
+      });
+      it('extension ' + extensionSpec.name + ' must include the ' +
+             'attr_list: "common-extension-attrs"` attr_list ',
+      () => {
+        expect(tagSpec.attrLists.length).toEqual(1);
+        // TODO: what we'd like to verify here is that this AttrList is named
+        // 'common-extension-attrs'.  Unfortunately that information isn't
+        // available to us: we just have an index into
+        // Context.rules_.parsedAttrSpecs_.parsedAttrSpecs_.
+        // getNameByAttrSpecId() looks like it would do what we want, but it's
+        // sufficiently wrapped in private context inside the validator that I
+        // don't see a way to call it.  For now just gold the current index.
+        expect(tagSpec.attrLists[0]).toEqual(17);
+      });
     }
 
     // cdata

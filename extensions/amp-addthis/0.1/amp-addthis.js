@@ -44,9 +44,7 @@ import {
   SHARE_CONFIG_KEYS,
   SHARE_EVENT,
 } from './constants';
-import {
-  ActiveToolsMonitor,
-} from './addthis-utils/monitors/active-tools-monitor';
+import {ActiveToolsMonitor} from './addthis-utils/monitors/active-tools-monitor';
 import {ClickMonitor} from './addthis-utils/monitors/click-monitor';
 import {ConfigManager} from './config-manager';
 import {DwellMonitor} from './addthis-utils/monitors/dwell-monitor';
@@ -59,6 +57,13 @@ import {callLojson} from './addthis-utils/lojson';
 import {callPjson} from './addthis-utils/pjson';
 import {createElementWithAttributes, removeElement} from '../../../src/dom';
 import {dict} from '../../../src/utils/object';
+import {
+  getAddThisMode,
+  isProductCode,
+  isPubId,
+  isWidgetId,
+} from './addthis-utils/mode';
+import {getWidgetOverload} from './addthis-utils/get-widget-id-overloaded-with-json-for-anonymous-mode';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listen} from '../../../src/event-helper';
 import {parseUrlDeprecated} from '../../../src/url';
@@ -88,7 +93,6 @@ export function getConfigManager() {
 }
 
 class AmpAddThis extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -103,6 +107,9 @@ class AmpAddThis extends AMP.BaseElement {
     this.widgetId_ = '';
 
     /** @private {string} */
+    this.productCode_ = '';
+
+    /** @private {string} */
     this.canonicalUrl_ = '';
 
     /** @private {string} */
@@ -114,38 +121,72 @@ class AmpAddThis extends AMP.BaseElement {
     /** @private {(?JsonObject<string, string>|null)} */
     this.shareConfig_ = null;
 
-    /** @private {(?Object<string, string>|null)} */
+    /** @private {(?JsonObject<AtConfigDef>)} */
     this.atConfig_ = null;
 
     /** @private {string} */
     this.widgetType_ = '';
+
+    /** @private {number} */
+    this.mode_ = -1;
+
+    /** @private {string} */
+    this.containerClassName_ = '';
   }
 
   /**
    * @override
    */
   buildCallback() {
-    const pubId = this.element.getAttribute('data-pub-id');
-    const widgetId = this.element.getAttribute('data-widget-id');
+    const pubId = this.element.getAttribute('data-pub-id') || '';
+    const widgetId = this.element.getAttribute('data-widget-id') || '';
+    const productCode = this.element.getAttribute('data-product-code') || '';
+    this.mode_ = getAddThisMode({pubId, widgetId, productCode});
+    if (this.mode_ === -1) {
+      if (isPubId(pubId)) {
+        if (!isProductCode(productCode) && !isWidgetId(widgetId)) {
+          userAssert(
+            widgetId,
+            'Widget id or product code is required for <amp-addthis> %s',
+            this.element
+          );
+        } else if (isProductCode(productCode) && isWidgetId(widgetId)) {
+          userAssert(
+            productCode,
+            'Only widget id or product code is required <amp-addthis> %s',
+            this.element
+          );
+        }
+      } else {
+        userAssert(
+          pubId,
+          'The data-pub-id attribute is required for <amp-addthis> %s',
+          this.element
+        );
+      }
+    }
 
-    // Required attributes
-    this.pubId_ = userAssert(
-        pubId,
-        'The data-pub-id attribute is required for <amp-addthis> %s',
-        this.element
-    );
-    this.widgetId_ = userAssert(
-        widgetId,
-        'The data-widget-id attribute is required for <amp-addthis> %s',
-        this.element
-    );
+    this.containerClassName_ =
+      this.element.getAttribute('data-class-name') || '';
+
+    this.pubId_ = pubId;
+    this.widgetId_ = this.mode_ === 3 ? getWidgetOverload(this) : widgetId;
+    this.productCode_ = productCode;
+
+    // sets the widget type when we use a product code for WP modes
+    if (this.productCode_ === 'shfs') {
+      this.element.setAttribute('data-widget-type', 'floating');
+    }
 
     // Optional attributes
     const ampDoc = this.getAmpDoc();
-    this.canonicalUrl_ = this.element.getAttribute('data-canonical-url') ||
-        ampDoc.getUrl();
-    this.canonicalTitle_ = this.element.getAttribute('data-canonical-title') ||
-        ampDoc.win.document.title;
+    this.canonicalUrl_ =
+      this.element.getAttribute('data-canonical-url') ||
+      Services.documentInfoForDoc(this.element).canonicalUrl ||
+      ampDoc.getUrl();
+    this.canonicalTitle_ =
+      this.element.getAttribute('data-canonical-title') ||
+      ampDoc.win.document.title;
     this.widgetType_ = this.element.getAttribute('data-widget-type');
     this.shareConfig_ = this.getShareConfigAsJsonObject_();
     this.atConfig_ = this.getATConfig_(ampDoc);
@@ -158,31 +199,31 @@ class AmpAddThis extends AMP.BaseElement {
       const viewer = Services.viewerForDoc(ampDoc);
       const loc = parseUrlDeprecated(this.canonicalUrl_);
 
-      viewer.whenFirstVisible()
-          .then(() => viewer.getReferrerUrl())
-          .then(referrer => {
-            this.referrer_ = referrer;
+      viewer
+        .whenFirstVisible()
+        .then(() => viewer.getReferrerUrl())
+        .then(referrer => {
+          this.referrer_ = referrer;
 
-            callLojson({
-              loc,
-              title: this.canonicalTitle_,
-              pubId: this.pubId_,
-              atConfig: this.atConfig_,
-              referrer,
-              ampDoc,
-            });
-
-            dwellMonitor.startForDoc(ampDoc);
-            scrollMonitor.startForDoc(ampDoc);
-            clickMonitor.startForDoc(ampDoc);
+          callLojson({
+            loc,
+            title: this.canonicalTitle_,
+            pubId: this.pubId_,
+            atConfig: this.atConfig_,
+            referrer,
+            ampDoc,
           });
+
+          dwellMonitor.startForDoc(ampDoc);
+          scrollMonitor.startForDoc(ampDoc);
+          clickMonitor.startForDoc(ampDoc);
+        });
 
       // Only the component that registers the page view listens for x-frame
       // events.
       this.setupListeners_({ampDoc, loc, pubId: this.pubId_});
     }
   }
-
 
   /**
    * @param {boolean=} opt_onLayout
@@ -208,25 +249,25 @@ class AmpAddThis extends AMP.BaseElement {
    */
   createPlaceholderCallback() {
     const placeholder = createElementWithAttributes(
-        this.win.document,
-        'div',
-        dict({
-          'placeholder': '',
-        })
+      this.win.document,
+      'div',
+      dict({
+        'placeholder': '',
+      })
     );
     setStyle(placeholder, 'background-color', '#fff');
 
     const image = createElementWithAttributes(
-        this.win.document,
-        'amp-img',
-        dict({
-          'src': `https://cache.addthiscdn.com/icons/v3/thumbs/${ICON_SIZE}x${ICON_SIZE}/addthis.png`,
-          'layout': 'fixed',
-          'width': ICON_SIZE,
-          'height': ICON_SIZE,
-          'referrerpolicy': 'origin',
-          'alt': ALT_TEXT,
-        })
+      this.win.document,
+      'amp-img',
+      dict({
+        'src': `https://cache.addthiscdn.com/icons/v3/thumbs/${ICON_SIZE}x${ICON_SIZE}/addthis.png`,
+        'layout': 'fixed',
+        'width': ICON_SIZE,
+        'height': ICON_SIZE,
+        'referrerpolicy': 'origin',
+        'alt': ALT_TEXT,
+      })
     );
 
     placeholder.appendChild(image);
@@ -236,27 +277,30 @@ class AmpAddThis extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     const iframe = createElementWithAttributes(
-        /** @type !Document */ (this.element.ownerDocument),
-        'iframe',
-        dict({
-          'frameborder': 0,
-          'title': ALT_TEXT,
-          'src': `${ORIGIN}/dc/amp-addthis.html`,
-          'id': this.widgetId_,
-        })
+      /** @type {!Document} */ (this.element.ownerDocument),
+      'iframe',
+      dict({
+        'frameborder': 0,
+        'title': ALT_TEXT,
+        'src': `${ORIGIN}/dc/amp-addthis.html`,
+        'id': this.widgetId_,
+        'pco': this.productCode_,
+        'containerClassName': this.containerClassName_,
+      })
     );
     const iframeLoadPromise = this.loadPromise(iframe);
-    setStyle(iframe, 'margin-bottom', '-5px');
 
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
-    this.iframe_ = iframe;
+    this.iframe_ = /** @type {HTMLIFrameElement} */ (iframe);
 
     configManager.register({
       pubId: this.pubId_,
       widgetId: this.widgetId_,
+      productCode: this.productCode_,
       shareConfig: this.shareConfig_,
       atConfig: this.atConfig_,
+      containerClassName: this.containerClassName_,
       iframe,
       iframeLoadPromise,
       activeToolsMonitor,
@@ -326,10 +370,11 @@ class AmpAddThis extends AMP.BaseElement {
         // Fallbacks for values that should always be defined.
         const {win} = ampDoc;
         if (key === 'ui_language') {
-          config[key] = win.document.documentElement.lang ||
-              win.navigator.language ||
-              win.navigator.userLanguage ||
-              'en';
+          config[key] =
+            win.document.documentElement.lang ||
+            win.navigator.language ||
+            win.navigator.userLanguage ||
+            'en';
         }
       }
       return config;
@@ -347,41 +392,45 @@ class AmpAddThis extends AMP.BaseElement {
    */
   setupListeners_({ampDoc, loc, pubId}) {
     // Send "engagement" analytics on page hide.
-    listen(ampDoc.win, 'pagehide', () => callEng({
-      monitors: {
-        dwellMonitor,
-        scrollMonitor,
-        clickMonitor,
-        activeToolsMonitor,
-      },
-      ampDoc,
-      loc,
-      pubId,
-    }));
+    listen(ampDoc.win, 'pagehide', () =>
+      callEng({
+        monitors: {
+          dwellMonitor,
+          scrollMonitor,
+          clickMonitor,
+          activeToolsMonitor,
+        },
+        ampDoc,
+        loc,
+        pubId,
+      })
+    );
 
     const postMessageDispatcher = new PostMessageDispatcher();
     const pmHandler = postMessageDispatcher.handleAddThisMessage.bind(
-        postMessageDispatcher
+      postMessageDispatcher
     );
 
     listen(ampDoc.win, 'message', pmHandler);
 
     // Trigger "pjson" call when a share occurs.
-    postMessageDispatcher.on(SHARE_EVENT, data => callPjson({
-      data,
-      loc,
-      pubId,
-      ampDoc,
-      title: this.canonicalTitle_,
-      atConfig: this.atConfig_,
-      referrer: this.referrer_,
-    }));
+    postMessageDispatcher.on(SHARE_EVENT, data =>
+      callPjson({
+        data,
+        loc,
+        pubId,
+        ampDoc,
+        title: this.canonicalTitle_,
+        atConfig: this.atConfig_,
+        referrer: this.referrer_,
+      })
+    );
 
     // Dispatch the configuration to the configManager on a
     // CONFIGURATION_EVENT.
     postMessageDispatcher.on(
-        CONFIGURATION_EVENT,
-        configManager.receiveConfiguration.bind(configManager)
+      CONFIGURATION_EVENT,
+      configManager.receiveConfiguration.bind(configManager)
     );
   }
 }

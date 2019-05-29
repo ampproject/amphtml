@@ -15,12 +15,12 @@
  */
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
-import {closest, escapeCssSelectorIdent} from '../../../src/dom';
+import {closest} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
+import {escapeCssSelectorIdent} from '../../../src/css';
 import {hasTapAction, timeStrToMillis} from './utils';
 import {listenOnce} from '../../../src/event-helper';
 import {map} from '../../../src/utils/object';
-
 
 /** @private @const {number} */
 const NEXT_SCREEN_AREA_RATIO = 0.75;
@@ -190,7 +190,6 @@ export class AdvancementConfig {
   }
 }
 
-
 /**
  * An AdvancementConfig implementation that composes multiple other
  * AdvancementConfig implementations by simply delegating all of its calls to
@@ -253,7 +252,6 @@ class MultipleAdvancementConfig extends AdvancementConfig {
   }
 }
 
-
 /**
  * Always provides a progress of 1.0.  Advances when the user taps the rightmost
  * 75% of the screen; triggers the previous listener when the user taps the
@@ -300,9 +298,13 @@ class ManualAdvancement extends AdvancementConfig {
    * @private
    */
   isNavigationalClick_(e) {
-    return !closest(dev().assertElement(e.target), el => {
-      return hasTapAction(el);
-    }, /* opt_stopAt */ this.element_);
+    return !closest(
+      dev().assertElement(e.target),
+      el => {
+        return hasTapAction(el);
+      },
+      /* opt_stopAt */ this.element_
+    );
   }
 
   /**
@@ -312,11 +314,14 @@ class ManualAdvancement extends AdvancementConfig {
    * @return {boolean}
    */
   isProtectedTarget_(event) {
-    return !!closest(dev().assertElement(event.target), el => {
-      return PROTECTED_ELEMENTS[el.tagName];
-    }, /* opt_stopAt */ this.element_);
+    return !!closest(
+      dev().assertElement(event.target),
+      el => {
+        return PROTECTED_ELEMENTS[el.tagName];
+      },
+      /* opt_stopAt */ this.element_
+    );
   }
-
 
   /**
    * Performs a system navigation if it is determined that the specified event
@@ -334,15 +339,15 @@ class ManualAdvancement extends AdvancementConfig {
     event.stopPropagation();
 
     // TODO(newmuis): This will need to be flipped for RTL.
-    const elRect = this.element_./*OK*/getBoundingClientRect();
+    const elRect = this.element_./*OK*/ getBoundingClientRect();
 
     // Using `left` as a fallback since Safari returns a ClientRect in some
     // cases.
-    const offsetLeft = ('x' in elRect) ? elRect.x : elRect.left;
+    const offsetLeft = 'x' in elRect ? elRect.x : elRect.left;
     const offsetWidth = elRect.width;
 
-    const nextScreenAreaMin = offsetLeft +
-        ((1 - NEXT_SCREEN_AREA_RATIO) * offsetWidth);
+    const nextScreenAreaMin =
+      offsetLeft + (1 - NEXT_SCREEN_AREA_RATIO) * offsetWidth;
     const nextScreenAreaMax = offsetLeft + offsetWidth;
 
     if (event.pageX >= nextScreenAreaMin && event.pageX < nextScreenAreaMax) {
@@ -352,7 +357,6 @@ class ManualAdvancement extends AdvancementConfig {
     }
   }
 }
-
 
 /**
  * Provides progress and advancement based on a fixed duration of time,
@@ -416,7 +420,7 @@ class TimeBasedAdvancement extends AdvancementConfig {
     }
 
     const progress =
-        (this.getCurrentTimestampMs_() - this.startTimeMs_) / this.delayMs_;
+      (this.getCurrentTimestampMs_() - this.startTimeMs_) / this.delayMs_;
 
     return Math.min(Math.max(progress, 0), 1);
   }
@@ -444,7 +448,6 @@ class TimeBasedAdvancement extends AdvancementConfig {
     return new TimeBasedAdvancement(win, Number(delayMs));
   }
 }
-
 
 /**
  * Provides progress and advances pages based on the completion percentage of
@@ -499,8 +502,10 @@ class MediaBasedAdvancement extends AdvancementConfig {
 
     if (this.element_ instanceof HTMLMediaElement) {
       return this.element_;
-    } else if (this.element_.hasAttribute('background-audio') &&
-        (tagName === 'amp-story' || tagName === 'amp-story-page')) {
+    } else if (
+      this.element_.hasAttribute('background-audio') &&
+      (tagName === 'amp-story' || tagName === 'amp-story-page')
+    ) {
       return this.element_.querySelector('.i-amphtml-story-background-audio');
     } else if (tagName === 'amp-audio') {
       return this.element_.querySelector('audio');
@@ -514,8 +519,10 @@ class MediaBasedAdvancement extends AdvancementConfig {
     super.start();
 
     // Prevents race condition when checking for video interface classname.
-    (this.element_.whenBuilt ? this.element_.whenBuilt() : Promise.resolve())
-        .then(() => this.startWhenBuilt_());
+    (this.element_.whenBuilt
+      ? this.element_.whenBuilt()
+      : Promise.resolve()
+    ).then(() => this.startWhenBuilt_());
   }
 
   /** @private */
@@ -534,15 +541,19 @@ class MediaBasedAdvancement extends AdvancementConfig {
       return;
     }
 
-    user().error('AMP-STORY-PAGE',
-        `Element with ID ${this.element_.id} is not a media element ` +
-        'supported for automatic advancement.');
+    user().error(
+      'AMP-STORY-PAGE',
+      `Element with ID ${this.element_.id} is not a media element ` +
+        'supported for automatic advancement.'
+    );
   }
 
   /** @private */
   startHtmlMediaElement_() {
-    const mediaElement = dev().assertElement(this.mediaElement_,
-        'Media element was unspecified.');
+    const mediaElement = dev().assertElement(
+      this.mediaElement_,
+      'Media element was unspecified.'
+    );
     listenOnce(mediaElement, 'ended', () => this.onAdvance());
     listenOnce(mediaElement, 'timeupdate', () => this.onProgressUpdate());
   }
@@ -553,8 +564,9 @@ class MediaBasedAdvancement extends AdvancementConfig {
       this.video_ = video;
     });
 
-    listenOnce(this.element_, VideoEvents.ENDED, () => this.onAdvance(),
-        {capture: true});
+    listenOnce(this.element_, VideoEvents.ENDED, () => this.onAdvance(), {
+      capture: true,
+    });
 
     this.timer_.poll(POLL_INTERVAL_MS, () => {
       this.onProgressUpdate();
@@ -600,9 +612,9 @@ class MediaBasedAdvancement extends AdvancementConfig {
    */
   static fromAutoAdvanceString(autoAdvanceStr, win, rootEl) {
     try {
-      const element = rootEl.querySelector(`#${
-        escapeCssSelectorIdent(autoAdvanceStr)
-      }`);
+      const element = rootEl.querySelector(
+        `#${escapeCssSelectorIdent(autoAdvanceStr)}`
+      );
 
       if (!element) {
         return null;

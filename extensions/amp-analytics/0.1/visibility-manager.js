@@ -26,7 +26,10 @@ import {dict, map} from '../../../src/utils/object';
 import {getMinOpacity} from './opacity';
 import {getMode} from '../../../src/mode';
 import {isArray, isFiniteNumber} from '../../../src/types';
-import {layoutRectLtwh} from '../../../src/layout-rect';
+import {
+  layoutPositionRelativeToScrolledViewport,
+  layoutRectLtwh,
+} from '../../../src/layout-rect';
 
 const TAG = 'amp-analytics/visibility-manager';
 
@@ -34,7 +37,6 @@ const VISIBILITY_ID_PROP = '__AMP_VIS_ID';
 
 /** @type {number} */
 let visibilityIdCounter = 1;
-
 
 /**
  * @param {!Element} element
@@ -48,7 +50,6 @@ function getElementId(element) {
   }
   return id;
 }
-
 
 /**
  * A base class for `VisibilityManagerForDoc` and `VisibilityManagerForEmbed`.
@@ -84,9 +85,17 @@ export class VisibilityManager {
     /** @const @private {!Array<!UnlistenDef>} */
     this.unsubscribe_ = [];
 
+    /** @private {number} Maximum scroll position attained */
+    this.maxScrollDepth_ = 0;
+
     if (this.parent) {
       this.parent.addChild_(this);
     }
+
+    const viewport = Services.viewportForDoc(this.ampdoc);
+    viewport.onChanged(() => {
+      this.maybeUpdateMaxScrollDepth(viewport.getScrollTop());
+    });
   }
 
   /**
@@ -168,16 +177,16 @@ export class VisibilityManager {
   isBackgroundedAtStart() {}
 
   /**
-  * Returns the root's, root's parent's and root's children's
-  * lowest opacity value
-  * @return {number}
-  * @abstract
-  */
+   * Returns the root's, root's parent's and root's children's
+   * lowest opacity value
+   * @return {number}
+   * @abstract
+   */
   getRootMinOpacity() {}
 
   /**
    * Returns the root's layout rect.
-   * @return {!../../../src/layout-rect.LayoutRectDef}}
+   * @return {!../../../src/layout-rect.LayoutRectDef}
    * @abstract
    */
   getRootLayoutBox() {}
@@ -205,6 +214,24 @@ export class VisibilityManager {
     }
   }
 
+  /**
+   * Update the maximum amount that the user has scrolled down the page.
+   * @param {number} depth
+   */
+  maybeUpdateMaxScrollDepth(depth) {
+    if (depth > this.maxScrollDepth_) {
+      this.maxScrollDepth_ = depth;
+    }
+  }
+
+  /**
+   * Gets the maximum amount that the user has scrolled down the page.
+   * @return {number} depth
+   */
+  getMaxScrollDepth() {
+    return this.maxScrollDepth_;
+  }
+
   /** @private */
   updateModels_() {
     for (let i = 0; i < this.models_.length; i++) {
@@ -224,8 +251,13 @@ export class VisibilityManager {
    */
   listenRoot(spec, readyPromise, createReportPromiseFunc, callback) {
     const calcVisibility = this.getRootVisibility.bind(this);
-    return this.createModelAndListen_(calcVisibility, spec, readyPromise,
-        createReportPromiseFunc, callback);
+    return this.createModelAndListen_(
+      calcVisibility,
+      spec,
+      readyPromise,
+      createReportPromiseFunc,
+      callback
+    );
   }
 
   /**
@@ -240,10 +272,21 @@ export class VisibilityManager {
    * @return {!UnlistenDef}
    */
   listenElement(
-    element, spec, readyPromise, createReportPromiseFunc, callback) {
+    element,
+    spec,
+    readyPromise,
+    createReportPromiseFunc,
+    callback
+  ) {
     const calcVisibility = this.getElementVisibility.bind(this, element);
-    return this.createModelAndListen_(calcVisibility, spec, readyPromise,
-        createReportPromiseFunc, callback, element);
+    return this.createModelAndListen_(
+      calcVisibility,
+      spec,
+      readyPromise,
+      createReportPromiseFunc,
+      callback,
+      element
+    );
   }
 
   /**
@@ -256,11 +299,19 @@ export class VisibilityManager {
    * @param {!Element=} opt_element
    * @return {!UnlistenDef}
    */
-  createModelAndListen_(calcVisibility, spec,
-    readyPromise, createReportPromiseFunc, callback, opt_element) {
-    if (spec['visiblePercentageThresholds'] &&
-        spec['visiblePercentageMin'] == undefined &&
-        spec['visiblePercentageMax'] == undefined) {
+  createModelAndListen_(
+    calcVisibility,
+    spec,
+    readyPromise,
+    createReportPromiseFunc,
+    callback,
+    opt_element
+  ) {
+    if (
+      spec['visiblePercentageThresholds'] &&
+      spec['visiblePercentageMin'] == undefined &&
+      spec['visiblePercentageMax'] == undefined
+    ) {
       const unlisteners = [];
       const ranges = spec['visiblePercentageThresholds'];
       if (!ranges || !isArray(ranges)) {
@@ -270,14 +321,18 @@ export class VisibilityManager {
       for (let i = 0; i < ranges.length; i++) {
         const percents = ranges[i];
         if (!isArray(percents) || percents.length != 2) {
-          user().error(TAG,
-              'visiblePercentageThresholds entry length is not 2');
+          user().error(
+            TAG,
+            'visiblePercentageThresholds entry length is not 2'
+          );
           continue;
         }
         if (!isFiniteNumber(percents[0]) || !isFiniteNumber(percents[1])) {
           // not valid number
-          user().error(TAG,
-              'visiblePercentageThresholds entry is not valid number');
+          user().error(
+            TAG,
+            'visiblePercentageThresholds entry is not valid number'
+          );
           continue;
         }
         const min = Number(percents[0]);
@@ -287,27 +342,46 @@ export class VisibilityManager {
         // special cases: if min and max are both 0, or both 100, then both
         // are inclusive. Otherwise it would not be possible to trigger an
         // event on exactly 0% or 100%.
-        if (min < 0 || max > 100 || min > max ||
-            (min == max && min != 100 && max != 0)) {
-          user().error(TAG,
-              'visiblePercentageThresholds entry invalid min/max value');
+        if (
+          min < 0 ||
+          max > 100 ||
+          min > max ||
+          (min == max && min != 100 && max != 0)
+        ) {
+          user().error(
+            TAG,
+            'visiblePercentageThresholds entry invalid min/max value'
+          );
           continue;
         }
         const newSpec = spec;
         newSpec['visiblePercentageMin'] = min;
         newSpec['visiblePercentageMax'] = max;
         const model = new VisibilityModel(newSpec, calcVisibility);
-        unlisteners.push(this.listen_(model, spec, readyPromise,
-            createReportPromiseFunc, callback, opt_element));
+        unlisteners.push(
+          this.listen_(
+            model,
+            spec,
+            readyPromise,
+            createReportPromiseFunc,
+            callback,
+            opt_element
+          )
+        );
       }
       return () => {
         unlisteners.forEach(unlistener => unlistener());
       };
     }
-
     const model = new VisibilityModel(spec, calcVisibility);
-    return this.listen_(model, spec, readyPromise,
-        createReportPromiseFunc, callback, opt_element);
+    return this.listen_(
+      model,
+      spec,
+      readyPromise,
+      createReportPromiseFunc,
+      callback,
+      opt_element
+    );
   }
 
   /**
@@ -320,18 +394,31 @@ export class VisibilityManager {
    * @return {!UnlistenDef}
    * @private
    */
-  listen_(model, spec,
-    readyPromise, createReportPromiseFunc, callback, opt_element) {
+  listen_(
+    model,
+    spec,
+    readyPromise,
+    createReportPromiseFunc,
+    callback,
+    opt_element
+  ) {
     if (createReportPromiseFunc) {
       model.setReportReady(createReportPromiseFunc);
     }
+
+    const viewport = Services.viewportForDoc(this.ampdoc);
+    const scrollDepth = viewport.getScrollTop();
+    this.maybeUpdateMaxScrollDepth(scrollDepth);
 
     // Block visibility.
     if (readyPromise) {
       model.setReady(false);
       readyPromise.then(() => {
         model.setReady(true);
+        model.maybeSetInitialScrollDepth(scrollDepth);
       });
+    } else {
+      model.maybeSetInitialScrollDepth(scrollDepth);
     }
 
     // Process the event.
@@ -348,19 +435,21 @@ export class VisibilityManager {
       let layoutBox;
       if (opt_element) {
         state['opacity'] = getMinOpacity(opt_element);
-        const resource =
-            this.resources_.getResourceForElementOptional(opt_element);
-        layoutBox =
-            resource ?
-              resource.getLayoutBox() :
-              Services.viewportForDoc(this.ampdoc).getLayoutRect(opt_element);
+        const resource = this.resources_.getResourceForElementOptional(
+          opt_element
+        );
+        layoutBox = resource
+          ? resource.getLayoutBox()
+          : viewport.getLayoutRect(opt_element);
         const intersectionRatio = this.getElementVisibility(opt_element);
         const intersectionRect = this.getElementIntersectionRect(opt_element);
-        Object.assign(state, dict({
-          'intersectionRatio': intersectionRatio,
-          'intersectionRect': JSON.stringify(intersectionRect),
-        }));
-
+        Object.assign(
+          state,
+          dict({
+            'intersectionRatio': intersectionRatio,
+            'intersectionRect': JSON.stringify(intersectionRect),
+          })
+        );
       } else {
         state['opacity'] = this.getRootMinOpacity();
         state['intersectionRatio'] = this.getRootVisibility();
@@ -369,12 +458,25 @@ export class VisibilityManager {
       model.maybeDispose();
 
       if (layoutBox) {
-        Object.assign(state, dict({
-          'elementX': layoutBox.left,
-          'elementY': layoutBox.top,
-          'elementWidth': layoutBox.width,
-          'elementHeight': layoutBox.height,
-        }));
+        Object.assign(
+          state,
+          dict({
+            'elementX': layoutBox.left,
+            'elementY': layoutBox.top,
+            'elementWidth': layoutBox.width,
+            'elementHeight': layoutBox.height,
+          })
+        );
+        state['initialScrollDepth'] = layoutPositionRelativeToScrolledViewport(
+          layoutBox,
+          viewport,
+          model.getInitialScrollDepth()
+        );
+        state['maxScrollDepth'] = layoutPositionRelativeToScrolledViewport(
+          layoutBox,
+          viewport,
+          this.getMaxScrollDepth()
+        );
       }
       callback(state);
     });
@@ -428,7 +530,6 @@ export class VisibilityManager {
   getElementIntersectionRect(unusedElement) {}
 }
 
-
 /**
  * The implementation of `VisibilityManager` for an AMP document. Two
  * distinct modes are supported: the main AMP doc and a in-a-box doc.
@@ -469,20 +570,23 @@ export class VisibilityManagerForDoc extends VisibilityManager {
       // In-a-box: visibility depends on the InOb.
       const root = this.ampdoc.getRootNode();
       const rootElement = dev().assertElement(
-          root.documentElement || root.body || root);
-      this.unsubscribe(this.observe(
-          rootElement,
-          this.setRootVisibility.bind(this)));
+        root.documentElement || root.body || root
+      );
+      this.unsubscribe(
+        this.observe(rootElement, this.setRootVisibility.bind(this))
+      );
     } else {
       // Main document: visibility is based on the viewer.
       this.setRootVisibility(this.viewer_.isVisible() ? 1 : 0);
-      this.unsubscribe(this.viewer_.onVisibilityChanged(() => {
-        const isVisible = this.viewer_.isVisible();
-        if (!isVisible) {
-          this.backgrounded_ = true;
-        }
-        this.setRootVisibility(isVisible ? 1 : 0);
-      }));
+      this.unsubscribe(
+        this.viewer_.onVisibilityChanged(() => {
+          const isVisible = this.viewer_.isVisible();
+          if (!isVisible) {
+            this.backgrounded_ = true;
+          }
+          this.setRootVisibility(isVisible ? 1 : 0);
+        })
+      );
     }
   }
 
@@ -514,7 +618,8 @@ export class VisibilityManagerForDoc extends VisibilityManager {
   getRootMinOpacity() {
     const root = this.ampdoc.getRootNode();
     const rootElement = dev().assertElement(
-        root.documentElement || root.body || root);
+      root.documentElement || root.body || root
+    );
     return getMinOpacity(rootElement);
   }
 
@@ -523,7 +628,8 @@ export class VisibilityManagerForDoc extends VisibilityManager {
     // This code is the same for "in-a-box" and standalone doc.
     const root = this.ampdoc.getRootNode();
     const rootElement = dev().assertElement(
-        root.documentElement || root.body || root);
+      root.documentElement || root.body || root
+    );
     return this.viewport_.getLayoutRect(rootElement);
   }
 
@@ -610,14 +716,16 @@ export class VisibilityManagerForDoc extends VisibilityManager {
     const {win} = this.ampdoc;
     if (nativeIntersectionObserverSupported(win)) {
       return new win.IntersectionObserver(
-          this.onIntersectionChanges_.bind(this),
-          {threshold: DEFAULT_THRESHOLD});
+        this.onIntersectionChanges_.bind(this),
+        {threshold: DEFAULT_THRESHOLD}
+      );
     }
 
     // Polyfill.
     const intersectionObserverPolyfill = new IntersectionObserverPolyfill(
-        this.onIntersectionChanges_.bind(this),
-        {threshold: DEFAULT_THRESHOLD});
+      this.onIntersectionChanges_.bind(this),
+      {threshold: DEFAULT_THRESHOLD}
+    );
     const ticker = () => {
       intersectionObserverPolyfill.tick(this.viewport_.getRect());
     };
@@ -657,14 +765,17 @@ export class VisibilityManagerForDoc extends VisibilityManager {
       let intersection = change.intersectionRect;
       // IntersectionRect type now changed from ClientRect to DOMRectReadOnly.
       // TODO(@zhouyx): Fix all InOb related type.
-      intersection = layoutRectLtwh(Number(intersection.left),
-          Number(intersection.top),
-          Number(intersection.width),
-          Number(intersection.height));
+      intersection = layoutRectLtwh(
+        Number(intersection.left),
+        Number(intersection.top),
+        Number(intersection.width),
+        Number(intersection.height)
+      );
       this.onIntersectionChange_(
-          change.target,
-          change.intersectionRatio,
-          intersection);
+        change.target,
+        change.intersectionRatio,
+        intersection
+      );
     });
   }
 
@@ -688,7 +799,6 @@ export class VisibilityManagerForDoc extends VisibilityManager {
   }
 }
 
-
 /**
  * The implementation of `VisibilityManager` for a FIE embed. This visibility
  * root delegates most of tracking functions to its parent, the ampdoc root.
@@ -707,9 +817,12 @@ export class VisibilityManagerForEmbed extends VisibilityManager {
     /** @const @private {boolean} */
     this.backgroundedAtStart_ = this.parent.isBackgrounded();
 
-    this.unsubscribe(this.parent.observe(
+    this.unsubscribe(
+      this.parent.observe(
         dev().assertElement(embed.host),
-        this.setRootVisibility.bind(this)));
+        this.setRootVisibility.bind(this)
+      )
+    );
   }
 
   /** @override */
@@ -774,5 +887,4 @@ export class VisibilityManagerForEmbed extends VisibilityManager {
     }
     return this.parent.getElementIntersectionRect(element);
   }
-
 }

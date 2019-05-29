@@ -24,6 +24,7 @@ FAIL
 |    <meta charset="utf-8">
 |    <link rel="canonical" href="./regular-html-version.html">
 |    <meta name="viewport" content="width=device-width,minimum-scale=1">
+|    <meta property="og:title" content="title_tag" />
 |    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
 |    <script async custom-element="amp-jwplayer" src="https://cdn.ampproject.org/v0/amp-jwplayer-0.1.js"></script>
@@ -31,29 +32,42 @@ FAIL
 |  <body>
 |    <!-- Example of a valid amp-jwplayer. -->
 |    <amp-jwplayer
-|        data-player-id="aBcD1234"
-|        data-media-id="5678WxYz"
+|        data-player-id="BjcwyK37"
+|        data-media-id="BZ6tc0gy"
 |        layout="responsive"
 |        width="160" height="90">
 |    </amp-jwplayer>
 |    <!-- Alternate valid example using a playlist rather than video. -->
 |    <amp-jwplayer
-|        data-player-id="aBcD1234"
-|        data-playlist-id="5678WxYz"
+|        data-player-id="BjcwyK37"
+|        data-playlist-id="482jsTAr"
 |        width="160" height="90">
+|    </amp-jwplayer>
 |    <!-- Invalid example missing a player id. -->
 |    <amp-jwplayer
 >>   ^~~~~~~~~
-amp-jwplayer/0.1/test/validator-amp-jwplayer.html:44:2 The tag 'amp-jwplayer' is missing a mandatory attribute - pick one of ['data-media-id', 'data-playlist-id']. (see https://www.ampproject.org/docs/reference/components/amp-jwplayer) [AMP_TAG_PROBLEM]
+amp-jwplayer/0.1/test/validator-amp-jwplayer.html:46:2 The tag 'amp-jwplayer' is missing a mandatory attribute - pick one of ['data-media-id', 'data-playlist-id']. (see https://amp.dev/documentation/components/amp-jwplayer) [AMP_TAG_PROBLEM]
 >>   ^~~~~~~~~
-amp-jwplayer/0.1/test/validator-amp-jwplayer.html:44:2 The mandatory attribute 'data-player-id' is missing in tag 'amp-jwplayer'. (see https://www.ampproject.org/docs/reference/components/amp-jwplayer) [AMP_TAG_PROBLEM]
-|        data-playerlist-id="5678WxYz"
+amp-jwplayer/0.1/test/validator-amp-jwplayer.html:46:2 The mandatory attribute 'data-player-id' is missing in tag 'amp-jwplayer'. (see https://amp.dev/documentation/components/amp-jwplayer) [AMP_TAG_PROBLEM]
+|        data-playerlist-id="482jsTAr"
 |        width="160" height="90">
+|    </amp-jwplayer>
 |    <!-- Invalid example missing playlist id or media-id. -->
 |    <amp-jwplayer
 >>   ^~~~~~~~~
-amp-jwplayer/0.1/test/validator-amp-jwplayer.html:48:2 The tag 'amp-jwplayer' is missing a mandatory attribute - pick one of ['data-media-id', 'data-playlist-id']. (see https://www.ampproject.org/docs/reference/components/amp-jwplayer) [AMP_TAG_PROBLEM]
-|        data-player-id="aBcD1234"
+amp-jwplayer/0.1/test/validator-amp-jwplayer.html:51:2 The tag 'amp-jwplayer' is missing a mandatory attribute - pick one of ['data-media-id', 'data-playlist-id']. (see https://amp.dev/documentation/components/amp-jwplayer) [AMP_TAG_PROBLEM]
+|        data-player-id="BjcwyK37"
 |        width="160" height="90">
+|    </amp-jwplayer>
+|    <!-- Example of a valid amp-jwplayer with contextual article matching. -->
+|    <amp-jwplayer
+|        data-player-id="BjcwyK37"
+|        data-media-id="BZ6tc0gy"
+|        data-content-search="__CONTEXTUAL__"
+|        data-content-contextual=true
+|        data-content-recency="9D"
+|        data-content-backfill=true
+|        layout="responsive" width="160" height="90">
+|    </amp-jwplayer>
 |  </body>
 |  </html>

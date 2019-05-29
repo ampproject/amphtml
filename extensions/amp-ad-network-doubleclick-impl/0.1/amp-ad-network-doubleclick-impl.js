@@ -22,18 +22,14 @@
 
 import '../../amp-a4a/0.1/real-time-config-manager';
 import {
-  AmpA4A,
-  DEFAULT_SAFEFRAME_VERSION,
-  XORIGIN_MODE,
-  assignAdUrlToError,
-} from '../../amp-a4a/0.1/amp-a4a';
-import {
+  ADX_ADY_EXP,
   AmpAnalyticsConfigDef,
   QQID_HEADER,
   SANDBOX_HEADER,
   ValidAdContainerTypes,
   addCsiSignalsToAmpAnalyticsConfig,
   extractAmpAnalyticsConfig,
+  getContainerWidth,
   getCsiAmpAnalyticsConfig,
   getCsiAmpAnalyticsVariables,
   getEnclosingContainerTypes,
@@ -47,6 +43,12 @@ import {
   maybeAppendErrorParameter,
   truncAndTimeUrl,
 } from '../../../ads/google/a4a/utils';
+import {
+  AmpA4A,
+  DEFAULT_SAFEFRAME_VERSION,
+  XORIGIN_MODE,
+  assignAdUrlToError,
+} from '../../amp-a4a/0.1/amp-a4a';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {
   DUMMY_FLUID_SIZE,
@@ -94,16 +96,17 @@ import {
   metaJsonCreativeGrouper,
 } from '../../../ads/google/a4a/line-delimited-response-handler';
 import {parseQueryString} from '../../../src/url';
-import {setStyles} from '../../../src/style';
+import {setImportantStyles, setStyles} from '../../../src/style';
 import {stringHash32} from '../../../src/string';
 import {tryParseJson} from '../../../src/json';
+import {utf8Decode} from '../../../src/utils/bytes';
 
 /** @type {string} */
 const TAG = 'amp-ad-network-doubleclick-impl';
 
 /** @const {string} */
 const DOUBLECLICK_BASE_URL =
-    'https://securepubads.g.doubleclick.net/gampad/ads';
+  'https://securepubads.g.doubleclick.net/gampad/ads';
 
 /** @const {string} */
 const RTC_SUCCESS = '2';
@@ -116,6 +119,15 @@ const DOUBLECLICK_SRA_EXP_BRANCHES = {
   SRA_CONTROL: '117152666',
   SRA: '117152667',
   SRA_NO_RECOVER: '21062235',
+};
+
+/** @const {string} */
+const FLEXIBLE_AD_SLOTS_EXP = 'flexAdSlots';
+
+/** @const @enum{string} */
+const FLEXIBLE_AD_SLOTS_BRANCHES = {
+  CONTROL: '21063173',
+  EXPERIMENT: '21063174',
 };
 
 /**
@@ -147,7 +159,6 @@ let LayoutRectOrDimsDef;
 
 /** @final */
 export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
-
   /**
    * @param {!Element} element
    */
@@ -179,11 +190,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     /** @private {?Element} */
     this.ampAnalyticsElement_ = null;
 
-    /** @type {?Object<string,*>}*/
+    /** @type {?JsonObject|Object} */
     this.jsonTargeting = null;
 
-    /** @type {number} */
-    this.adKey = 0;
+    /** @type {string} */
+    this.adKey = '0';
 
     /** @type {!Array<string>} */
     this.experimentIds = [];
@@ -240,8 +251,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.forceSafeframe = false;
     if ('forceSafeframe' in this.element.dataset) {
       if (!/^(1|(true))$/i.test(this.element.dataset['forceSafeframe'])) {
-        user().warn(TAG, 'Ignoring invalid data-force-safeframe attribute: ' +
-            this.element.dataset['forceSafeframe']);
+        user().warn(
+          TAG,
+          'Ignoring invalid data-force-safeframe attribute: ' +
+            this.element.dataset['forceSafeframe']
+        );
       } else {
         this.forceSafeframe = true;
       }
@@ -266,6 +280,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
      * @private {boolean}
      */
     this.shouldSandbox_ = false;
+
+    /** @private {boolean} */
+    this.sendFlexibleAdSlotParams_ = false;
   }
 
   /**
@@ -307,8 +324,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // being schedule due to being beyond viewport max offset.  If slot
     // comes within standard outside viewport range, then ensure throttling
     // will not be applied.
-    this.getResource().whenWithinViewport(renderOutsideViewport).then(
-        () => this.isIdleRender_ = false);
+    this.getResource()
+      .whenWithinViewport(renderOutsideViewport)
+      .then(() => (this.isIdleRender_ = false));
     return vpRange;
   }
 
@@ -331,8 +349,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * @visibleForTesting
    */
   setPageLevelExperiments(urlExperimentId) {
-    if (!isCdnProxy(this.win) && !isExperimentOn(
-        this.win, 'expDfpInvOrigDeprecated')) {
+    if (
+      !isCdnProxy(this.win) &&
+      !isExperimentOn(this.win, 'expDfpInvOrigDeprecated')
+    ) {
       this.experimentIds.push('21060933');
     }
     let forcedExperimentId;
@@ -342,30 +362,46 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         '7': DOUBLECLICK_SRA_EXP_BRANCHES.SRA_CONTROL,
         '8': DOUBLECLICK_SRA_EXP_BRANCHES.SRA,
         '9': DOUBLECLICK_SRA_EXP_BRANCHES.SRA_NO_RECOVER,
-
       }[urlExperimentId];
       if (forcedExperimentId) {
         this.experimentIds.push(forcedExperimentId);
       }
     }
-    const experimentInfoMap =
-    /** @type {!Object<string,
+    const experimentInfoMap = /** @type {!Object<string,
         !../../../src/experiments.ExperimentInfo>} */ ({
-        // Only select into SRA experiments if SRA not already explicitly
-        // enabled and refresh is not being used by any slot.
-        [DOUBLECLICK_SRA_EXP]: {
-          isTrafficEligible: () => !forcedExperimentId &&
-              !this.win.document./*OK*/querySelector(
-                  'meta[name=amp-ad-enable-refresh], ' +
-                  'amp-ad[type=doubleclick][data-enable-refresh], ' +
-                  'meta[name=amp-ad-doubleclick-sra]'),
-          branches: Object.keys(DOUBLECLICK_SRA_EXP_BRANCHES).map(
-              key => DOUBLECLICK_SRA_EXP_BRANCHES[key]),
-        },
-      });
+      // Only select into SRA experiments if SRA not already explicitly
+      // enabled and refresh is not being used by any slot.
+      [DOUBLECLICK_SRA_EXP]: {
+        isTrafficEligible: () =>
+          !forcedExperimentId &&
+          !this.win.document./*OK*/ querySelector(
+            'meta[name=amp-ad-enable-refresh], ' +
+              'amp-ad[type=doubleclick][data-enable-refresh], ' +
+              'meta[name=amp-ad-doubleclick-sra]'
+          ),
+        branches: Object.keys(DOUBLECLICK_SRA_EXP_BRANCHES).map(
+          key => DOUBLECLICK_SRA_EXP_BRANCHES[key]
+        ),
+      },
+      [FLEXIBLE_AD_SLOTS_EXP]: {
+        isTrafficEligible: () => true,
+        branches: Object.values(FLEXIBLE_AD_SLOTS_BRANCHES),
+      },
+      [[ADX_ADY_EXP.branch]]: {
+        isTrafficEligible: () => true,
+        branches: [[ADX_ADY_EXP.control], [ADX_ADY_EXP.experiment]],
+      },
+    });
     const setExps = this.randomlySelectUnsetExperiments_(experimentInfoMap);
-    Object.keys(setExps).forEach(expName =>
-      setExps[expName] && this.experimentIds.push(setExps[expName]));
+    Object.keys(setExps).forEach(
+      expName => setExps[expName] && this.experimentIds.push(setExps[expName])
+    );
+    if (
+      setExps[FLEXIBLE_AD_SLOTS_EXP] &&
+      setExps[FLEXIBLE_AD_SLOTS_EXP] == FLEXIBLE_AD_SLOTS_BRANCHES.EXPERIMENT
+    ) {
+      this.sendFlexibleAdSlotParams_ = true;
+    }
   }
 
   /**
@@ -387,19 +423,24 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @private */
   maybeDeprecationWarn_() {
-    const warnDeprecation = feature => user().warn(
-        TAG, `${feature} is no longer supported for DoubleClick.` +
+    const warnDeprecation = feature =>
+      user().warn(
+        TAG,
+        `${feature} is no longer supported for DoubleClick.` +
           'Please refer to ' +
           'https://github.com/ampproject/amphtml/issues/11834 ' +
-          'for more information');
+          'for more information'
+      );
     const usdrd = 'useSameDomainRenderingUntilDeprecated';
-    const hasUSDRD = usdrd in this.element.dataset ||
-          (tryParseJson(this.element.getAttribute('json')) || {})[usdrd];
+    const hasUSDRD =
+      usdrd in this.element.dataset ||
+      (tryParseJson(this.element.getAttribute('json')) || {})[usdrd];
     if (hasUSDRD) {
       warnDeprecation(usdrd);
     }
-    const useRemoteHtml =
-      !!this.win.document.querySelector('meta[name=amp-3p-iframe-src]');
+    const useRemoteHtml = !!this.win.document.querySelector(
+      'meta[name=amp-3p-iframe-src]'
+    );
     if (useRemoteHtml) {
       warnDeprecation('remote.html');
     }
@@ -410,25 +451,29 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     super.buildCallback();
     this.maybeDeprecationWarn_();
     this.setPageLevelExperiments(this.extractUrlExperimentId_());
-    this.useSra = (getMode().localDev && /(\?|&)force_sra=true(&|$)/.test(
-        this.win.location.search)) ||
-        !!this.win.document.querySelector(
-            'meta[name=amp-ad-doubleclick-sra]') ||
-        [DOUBLECLICK_SRA_EXP_BRANCHES.SRA,
-          DOUBLECLICK_SRA_EXP_BRANCHES.SRA_NO_RECOVER].some(
-            eid => this.experimentIds.indexOf(eid) >= 0);
+    this.useSra =
+      (getMode().localDev &&
+        /(\?|&)force_sra=true(&|$)/.test(this.win.location.search)) ||
+      !!this.win.document.querySelector('meta[name=amp-ad-doubleclick-sra]') ||
+      [
+        DOUBLECLICK_SRA_EXP_BRANCHES.SRA,
+        DOUBLECLICK_SRA_EXP_BRANCHES.SRA_NO_RECOVER,
+      ].some(eid => this.experimentIds.indexOf(eid) >= 0);
     this.identityTokenPromise_ = Services.viewerForDoc(this.getAmpDoc())
-        .whenFirstVisible().then(() =>
-          getIdentityToken(
-              this.win, this.getAmpDoc(), super.getConsentPolicy()));
+      .whenFirstVisible()
+      .then(() =>
+        getIdentityToken(this.win, this.getAmpDoc(), super.getConsentPolicy())
+      );
     this.troubleshootData_.slotId = this.element.getAttribute('data-slot');
-    this.troubleshootData_.slotIndex =
-        this.element.getAttribute('data-amp-slot-index');
+    this.troubleshootData_.slotIndex = this.element.getAttribute(
+      'data-amp-slot-index'
+    );
     if (!this.isFluidRequest_) {
       const multiSizeStr = this.element.getAttribute('data-multi-size');
-      this.isFluidRequest_ = !!multiSizeStr &&
-          multiSizeStr.indexOf('fluid') != -1;
+      this.isFluidRequest_ =
+        !!multiSizeStr && multiSizeStr.indexOf('fluid') != -1;
     }
+    this.maybeAddSinglePassExperiment();
   }
 
   /** @override */
@@ -447,8 +492,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     instances = instances || [this];
     const tokens = getPageviewStateTokensForAdRequest(instances);
     return {
-      'npa': consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
-          consentState == CONSENT_POLICY_STATE.UNKNOWN ? 1 : null,
+      'npa':
+        consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
+        consentState == CONSENT_POLICY_STATE.UNKNOWN
+          ? 1
+          : null,
       'gdfp_req': '1',
       'sfv': DEFAULT_SAFEFRAME_VERSION,
       'u_sd': this.win.devicePixelRatio,
@@ -467,32 +515,58 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     devAssert(this.jsonTargeting);
     const tfcd = this.jsonTargeting && this.jsonTargeting[TFCD];
     this.win['ampAdGoogleIfiCounter'] = this.win['ampAdGoogleIfiCounter'] || 1;
-    this.ifi_ = (this.isRefreshing && this.ifi_) ||
-        this.win['ampAdGoogleIfiCounter']++;
-    const pageLayoutBox = this.isSinglePageStoryAd ?
-      this.element.getPageLayoutBox() : null;
-    return Object.assign({
-      'iu': this.element.getAttribute('data-slot'),
-      'co': this.jsonTargeting &&
-          this.jsonTargeting['cookieOptOut'] ? '1' : null,
-      'adk': this.adKey,
-      'sz': this.isSinglePageStoryAd ? '1x1' : this.parameterSize,
-      'output': 'html',
-      'impl': 'ifr',
-      'tfcd': tfcd == undefined ? null : tfcd,
-      'adtest': isInManualExperiment(this.element) ? 'on' : null,
-      'ifi': this.ifi_,
-      'rc': this.refreshCount_ || null,
-      'frc': Number(this.fromResumeCallback) || null,
-      'fluid': this.isFluidRequest_ ? 'height' : null,
-      'fsf': this.forceSafeframe ? '1' : null,
-      'scp': serializeTargeting(
+    this.ifi_ =
+      (this.isRefreshing && this.ifi_) || this.win['ampAdGoogleIfiCounter']++;
+    const pageLayoutBox = this.isSinglePageStoryAd
+      ? this.element.getPageLayoutBox()
+      : null;
+    let psz = null;
+    let msz = null;
+    if (this.sendFlexibleAdSlotParams_) {
+      const parentWidth = getContainerWidth(
+        this.win,
+        this.element.parentElement
+      );
+      let slotWidth = getContainerWidth(
+        this.win,
+        this.element,
+        1 /* maxDepth */
+      );
+      slotWidth = slotWidth == -1 ? parentWidth : slotWidth;
+      psz = `${parentWidth}x-1`;
+      msz = `${slotWidth}x-1`;
+    }
+    return Object.assign(
+      {
+        'iu': this.element.getAttribute('data-slot'),
+        'co':
+          this.jsonTargeting && this.jsonTargeting['cookieOptOut'] ? '1' : null,
+        'adk': this.adKey,
+        'sz': this.isSinglePageStoryAd ? '1x1' : this.parameterSize,
+        'output': 'html',
+        'impl': 'ifr',
+        'tfcd': tfcd == undefined ? null : tfcd,
+        'adtest': isInManualExperiment(this.element) ? 'on' : null,
+        'ifi': this.ifi_,
+        'rc': this.refreshCount_ || null,
+        'frc': Number(this.fromResumeCallback) || null,
+        'fluid': this.isFluidRequest_ ? 'height' : null,
+        'fsf': this.forceSafeframe ? '1' : null,
+        // Both msz/psz send a height of -1 because height expansion is
+        // disallowed in AMP.
+        'msz': msz,
+        'psz': psz,
+        'scp': serializeTargeting(
           (this.jsonTargeting && this.jsonTargeting['targeting']) || null,
-          (this.jsonTargeting &&
-            this.jsonTargeting['categoryExclusions']) || null),
-      'spsa': this.isSinglePageStoryAd ?
-        `${pageLayoutBox.width}x${pageLayoutBox.height}` : null,
-    }, googleBlockParameters(this));
+          (this.jsonTargeting && this.jsonTargeting['categoryExclusions']) ||
+            null
+        ),
+        'spsa': this.isSinglePageStoryAd
+          ? `${pageLayoutBox.width}x${pageLayoutBox.height}`
+          : null,
+      },
+      googleBlockParameters(this)
+    );
   }
 
   /**
@@ -503,38 +577,42 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   populateAdUrlState(consentState) {
     this.consentState = consentState;
     // Allow for pub to override height/width via override attribute.
-    const width = Number(this.element.getAttribute('data-override-width')) ||
+    const width =
+      Number(this.element.getAttribute('data-override-width')) ||
       Number(this.element.getAttribute('width'));
-    const height = Number(this.element.getAttribute('data-override-height')) ||
+    const height =
+      Number(this.element.getAttribute('data-override-height')) ||
       Number(this.element.getAttribute('height'));
-    this.initialSize_ = this.isFluidPrimaryRequest_ ? {width: 0, height: 0} :
-      (width && height ?
-        // width/height could be 'auto' in which case we fallback to measured.
-        {width, height} : this.getIntersectionElementLayoutBox());
-    this.jsonTargeting =
-      tryParseJson(this.element.getAttribute('json')) || {};
+    this.initialSize_ = this.isFluidPrimaryRequest_
+      ? {width: 0, height: 0}
+      : width && height
+      ? // width/height could be 'auto' in which case we fallback to measured.
+        {width, height}
+      : this.getIntersectionElementLayoutBox();
+    this.jsonTargeting = tryParseJson(this.element.getAttribute('json')) || {};
     this.adKey = this.generateAdKey_(
-        `${this.initialSize_.width}x${this.initialSize_.height}`);
+      `${this.initialSize_.width}x${this.initialSize_.height}`
+    );
     this.parameterSize = this.isFluidPrimaryRequest_
       ? DUMMY_FLUID_SIZE
       : `${this.initialSize_.width}x${this.initialSize_.height}`;
     const multiSizeDataStr = this.element.getAttribute('data-multi-size');
     if (multiSizeDataStr) {
-      const multiSizeValidation = this.element
-          .getAttribute('data-multi-size-validation') || 'true';
+      const multiSizeValidation =
+        this.element.getAttribute('data-multi-size-validation') || 'true';
       // The following call will check all specified multi-size dimensions,
       // verify that they meet all requirements, and then return all the valid
       // dimensions in an array.
       const dimensions = getMultiSizeDimensions(
-          multiSizeDataStr,
-          this.initialSize_.width,
-          this.initialSize_.height,
-          multiSizeValidation == 'true',
-          this.isFluidPrimaryRequest_);
+        multiSizeDataStr,
+        this.initialSize_.width,
+        this.initialSize_.height,
+        multiSizeValidation == 'true',
+        this.isFluidPrimaryRequest_
+      );
       if (dimensions.length) {
-        this.parameterSize += '|' + dimensions
-            .map(dimension => dimension.join('x'))
-            .join('|');
+        this.parameterSize +=
+          '|' + dimensions.map(dimension => dimension.join('x')).join('|');
       }
     }
   }
@@ -551,8 +629,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (this.useSra) {
       this.sraDeferred = this.sraDeferred || new Deferred();
     }
-    if (consentState == CONSENT_POLICY_STATE.UNKNOWN &&
-        this.element.getAttribute('data-npa-on-unknown-consent') != 'true') {
+    if (
+      consentState == CONSENT_POLICY_STATE.UNKNOWN &&
+      this.element.getAttribute('data-npa-on-unknown-consent') != 'true'
+    ) {
       user().info(TAG, 'Ad request suppressed due to unknown consent');
       this.getAdUrlDeferred.resolve('');
       return Promise.resolve('');
@@ -571,24 +651,29 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // validateData, from 3p/3p/js, after noving it someplace common.
     const startTime = Date.now();
     const identityPromise = Services.timerFor(this.win)
-        .timeoutPromise(1000, this.identityTokenPromise_)
-        .catch(() => {
-          // On error/timeout, proceed.
-          return /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/({});
-        });
+      .timeoutPromise(1000, this.identityTokenPromise_)
+      .catch(() => {
+        // On error/timeout, proceed.
+        return /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/ ({});
+      });
     const checkStillCurrent = this.verifyStillCurrent();
-    Promise.all([opt_rtcResponsesPromise, identityPromise])
-        .then(results => {
-          checkStillCurrent();
-          const rtcParams = this.mergeRtcResponses_(results[0]);
-          this.identityToken = results[1];
-          googleAdUrl(
-              this, DOUBLECLICK_BASE_URL, startTime, Object.assign(
-                  this.getBlockParameters_(), this.buildIdentityParams(),
-                  this.getPageParameters(consentState), rtcParams),
-              this.experimentIds)
-              .then(adUrl => this.getAdUrlDeferred.resolve(adUrl));
-        });
+    Promise.all([opt_rtcResponsesPromise, identityPromise]).then(results => {
+      checkStillCurrent();
+      const rtcParams = this.mergeRtcResponses_(results[0]);
+      this.identityToken = results[1];
+      googleAdUrl(
+        this,
+        DOUBLECLICK_BASE_URL,
+        startTime,
+        Object.assign(
+          this.getBlockParameters_(),
+          this.buildIdentityParams(),
+          this.getPageParameters(consentState),
+          rtcParams
+        ),
+        this.experimentIds
+      ).then(adUrl => this.getAdUrlDeferred.resolve(adUrl));
+    });
     this.troubleshootData_.adUrl = this.getAdUrlDeferred.promise;
     return this.getAdUrlDeferred.promise;
   }
@@ -598,11 +683,13 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * @return {!Object<string,string>}
    */
   buildIdentityParams() {
-    return this.identityToken ? {
-      adsid: this.identityToken.token || null,
-      jar: this.identityToken.jar || null,
-      pucrd: this.identityToken.pucrd || null,
-    } : {};
+    return this.identityToken
+      ? {
+          adsid: this.identityToken.token || null,
+          jar: this.identityToken.jar || null,
+          pucrd: this.identityToken.pucrd || null,
+        }
+      : {};
   }
 
   /**
@@ -629,13 +716,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       if (rtcResponse.response) {
         if (rtcResponse.response['targeting']) {
           const rewrittenResponse = this.rewriteRtcKeys_(
-              rtcResponse.response['targeting'],
-              rtcResponse.callout);
-          this.jsonTargeting['targeting'] =
-              !!this.jsonTargeting['targeting'] ?
-                deepMerge(this.jsonTargeting['targeting'],
-                    rewrittenResponse) :
-                rewrittenResponse;
+            rtcResponse.response['targeting'],
+            rtcResponse.callout
+          );
+          this.jsonTargeting['targeting'] = !!this.jsonTargeting['targeting']
+            ? deepMerge(this.jsonTargeting['targeting'], rewrittenResponse)
+            : rewrittenResponse;
         }
         if (rtcResponse.response['categoryExclusions']) {
           if (!exclusions) {
@@ -680,11 +766,15 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       REFERRER: opt_timeout => this.getReferrer_(opt_timeout),
       TGT: () =>
         JSON.stringify(
-            (tryParseJson(
-                this.element.getAttribute('json')) || {})['targeting']),
-      ADCID: opt_timeout => getOrCreateAdCid(
-          this.getAmpDoc(), 'AMP_ECID_GOOGLE', '_ga',
-          parseInt(opt_timeout, 10)),
+          (tryParseJson(this.element.getAttribute('json')) || {})['targeting']
+        ),
+      ADCID: opt_timeout =>
+        getOrCreateAdCid(
+          this.getAmpDoc(),
+          'AMP_ECID_GOOGLE',
+          '_ga',
+          parseInt(opt_timeout, 10)
+        ),
       ATTR: name => {
         if (!whitelist[name.toLowerCase()]) {
           dev().warn('TAG', `Invalid attribute ${name}`);
@@ -707,14 +797,15 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    */
   getReferrer_(opt_timeout) {
     const timeoutInt = parseInt(opt_timeout, 10);
-    const referrerPromise = Services.viewerForDoc(this.getAmpDoc())
-        .getReferrerUrl();
+    const referrerPromise = Services.viewerForDoc(
+      this.getAmpDoc()
+    ).getReferrerUrl();
     if (isNaN(timeoutInt) || timeoutInt < 0) {
       return referrerPromise;
     }
     return Services.timerFor(this.win)
-        .timeoutPromise(timeoutInt, referrerPromise)
-        .catch(() => undefined);
+      .timeoutPromise(timeoutInt, referrerPromise)
+      .catch(() => undefined);
   }
 
   /**
@@ -744,18 +835,33 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /** @override */
+  maybeValidateAmpCreative(bytes, headers) {
+    if (headers.get('AMP-Verification-Checksum-Algorithm') !== 'djb2a-32') {
+      return super.maybeValidateAmpCreative(bytes, headers);
+    }
+    const checksum = headers.get('AMP-Verification-Checksum');
+    return Promise.resolve(
+      checksum && stringHash32(utf8Decode(bytes)) == checksum ? bytes : null
+    );
+  }
+
+  /** @override */
   extractSize(responseHeaders) {
     this.ampAnalyticsConfig_ = extractAmpAnalyticsConfig(this, responseHeaders);
     this.qqid_ = responseHeaders.get(QQID_HEADER);
     this.shouldSandbox_ = responseHeaders.get(SANDBOX_HEADER) == 'true';
-    this.troubleshootData_.creativeId =
-        dev().assertString(responseHeaders.get('google-creative-id') || '-1');
-    this.troubleshootData_.lineItemId =
-        dev().assertString(responseHeaders.get('google-lineitem-id') || '-1');
+    this.troubleshootData_.creativeId = dev().assertString(
+      responseHeaders.get('google-creative-id') || '-1'
+    );
+    this.troubleshootData_.lineItemId = dev().assertString(
+      responseHeaders.get('google-lineitem-id') || '-1'
+    );
     if (this.ampAnalyticsConfig_) {
       // Load amp-analytics extensions
-      this.extensions_./*OK*/installExtensionForDoc(
-          this.getAmpDoc(), 'amp-analytics');
+      this.extensions_./*OK*/ installExtensionForDoc(
+        this.getAmpDoc(),
+        'amp-analytics'
+      );
     }
     // If the server returned a size, use that, otherwise use the size that we
     // sent in the ad request.
@@ -777,7 +883,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (responseHeaders.get('amp-ff-pageview-tokens')) {
       this.removePageviewStateToken();
       this.setPageviewStateToken(
-          dev().assertString(responseHeaders.get('amp-ff-pageview-tokens')));
+        dev().assertString(responseHeaders.get('amp-ff-pageview-tokens'))
+      );
     }
 
     return size;
@@ -799,15 +906,17 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const height = Number(this.element.getAttribute('height'));
     return width && height
       ? {width, height}
-      // width/height could be 'auto' in which case we fallback to measured.
-      : this.getIntersectionElementLayoutBox();
+      : // width/height could be 'auto' in which case we fallback to measured.
+        this.getIntersectionElementLayoutBox();
   }
 
   /** @override */
   tearDownSlot() {
     super.tearDownSlot();
-    this.element.setAttribute('data-amp-slot-index',
-        this.win.ampAdSlotIdCounter++);
+    this.element.setAttribute(
+      'data-amp-slot-index',
+      this.win.ampAdSlotIdCounter++
+    );
     if (this.ampAnalyticsElement_) {
       removeElement(this.ampAnalyticsElement_);
       this.ampAnalyticsElement_ = null;
@@ -837,8 +946,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // non-AMP creatives.  This is not done in the scheduler to ensure as many
     // slots as possible are marked for layout given scheduler imposes 5 seconds
     // past previous execution.
-    if (this.postAdResponseExperimentFeatures['render-idle-throttle'] &&
-          this.isIdleRender_) {
+    if (
+      this.postAdResponseExperimentFeatures['render-idle-throttle'] &&
+      this.isIdleRender_
+    ) {
       if (is3pThrottled(this.win)) {
         return waitFor3pThrottle().then(() => super.renderNonAmpCreative());
       } else {
@@ -897,27 +1008,35 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   onCreativeRender(creativeMetaData, opt_onLoadPromise) {
     super.onCreativeRender(creativeMetaData);
     this.isAmpCreative_ = !!creativeMetaData;
-    if (creativeMetaData &&
-        !creativeMetaData.customElementExtensions.includes('amp-ad-exit')) {
+    if (
+      creativeMetaData &&
+      !creativeMetaData.customElementExtensions.includes('amp-ad-exit')
+    ) {
       // Capture phase click handlers on the ad if amp-ad-exit not present
       // (assume it will handle capture).
       devAssert(this.iframe);
       Navigation.installAnchorClickInterceptor(
-          this.getAmpDoc(), this.iframe.contentWindow);
+        this.getAmpDoc(),
+        this.iframe.contentWindow
+      );
     }
     if (this.ampAnalyticsConfig_) {
       devAssert(!this.ampAnalyticsElement_);
       if (isReportingEnabled(this)) {
         addCsiSignalsToAmpAnalyticsConfig(
-            this.win,
-            this.element,
-            this.ampAnalyticsConfig_,
-            this.qqid_,
-            !!creativeMetaData);
+          this.win,
+          this.element,
+          this.ampAnalyticsConfig_,
+          this.qqid_,
+          !!creativeMetaData
+        );
       }
       this.ampAnalyticsElement_ = insertAnalyticsElement(
-          this.element, this.ampAnalyticsConfig_, /*loadAnalytics*/ true,
-          !!this.postAdResponseExperimentFeatures['avr_disable_immediate']);
+        this.element,
+        this.ampAnalyticsConfig_,
+        /*loadAnalytics*/ true,
+        !!this.postAdResponseExperimentFeatures['avr_disable_immediate']
+      );
     }
     if (this.isRefreshing) {
       devAssert(this.refreshManager_);
@@ -930,11 +1049,13 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // the slot. This ensures that the creative is centered in the former case,
     // and not truncated in the latter.
     const size = this.returnedSize_ || this.getSlotSize();
-    const isMultiSizeFluid = this.isFluidRequest_ && this.returnedSize_ &&
-        // TODO(@glevitzky, 11583) Remove this clause once we stop sending back
-        // the size header for fluid ads. Fluid size headers always come back as
-        // 0x0.
-        !(size.width == 0 && size.height == 0);
+    const isMultiSizeFluid =
+      this.isFluidRequest_ &&
+      this.returnedSize_ &&
+      // TODO(@glevitzky, 11583) Remove this clause once we stop sending back
+      // the size header for fluid ads. Fluid size headers always come back as
+      // 0x0.
+      !(size.width == 0 && size.height == 0);
     setStyles(dev().assertElement(this.iframe), {
       width: `${size.width}px`,
       height: `${size.height}px`,
@@ -958,22 +1079,29 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       });
     }
 
-    this.refreshManager_ = this.refreshManager_ ||
-        getRefreshManager(this, () => {
-          if (this.useSra) {
-            user().warn(TAG, 'Refresh not compatible with SRA.');
-            return false;
-          }
-          if (getEnclosingContainerTypes(this.element).filter(container =>
-            container != ValidAdContainerTypes['AMP-CAROUSEL'] &&
-                container != ValidAdContainerTypes['AMP-STICKY-AD']).length) {
-            user().warn(TAG,
-                'Refresh not compatible with ad-containers, except for ' +
-                'AMP-CAROUSEL and AMP-STICKY-AD');
-            return false;
-          }
-          return true;
-        });
+    this.refreshManager_ =
+      this.refreshManager_ ||
+      getRefreshManager(this, () => {
+        if (this.useSra) {
+          user().warn(TAG, 'Refresh not compatible with SRA.');
+          return false;
+        }
+        if (
+          getEnclosingContainerTypes(this.element).filter(
+            container =>
+              container != ValidAdContainerTypes['AMP-CAROUSEL'] &&
+              container != ValidAdContainerTypes['AMP-STICKY-AD']
+          ).length
+        ) {
+          user().warn(
+            TAG,
+            'Refresh not compatible with ad-containers, except for ' +
+              'AMP-CAROUSEL and AMP-STICKY-AD'
+          );
+          return false;
+        }
+        return true;
+      });
 
     this.postTroubleshootMessage();
   }
@@ -989,32 +1117,56 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    *   testing.
    */
   expandFluidCreative_() {
-    if (this.isFluidRequest_ &&
-        // If a size was returned in the response, then this is a multi-size
-        // response, not a fluid response.
-        !this.returnedSize_ &&
-        this.isVerifiedAmpCreative()) {
+    if (
+      this.isFluidRequest_ &&
+      // If a size was returned in the response, then this is a multi-size
+      // response, not a fluid response.
+      !this.returnedSize_ &&
+      this.isVerifiedAmpCreative()
+    ) {
       // This is an AMP fluid creative that will be rendered in a friendly
       // frame.
-      if (!this.iframe || !this.iframe.contentWindow ||
-          !this.iframe.contentWindow.document ||
-          !this.iframe.contentWindow.document.body) {
-        dev().error(TAG, 'Attempting to expand fluid creative without ' +
+      if (
+        !this.iframe ||
+        !this.iframe.contentWindow ||
+        !this.iframe.contentWindow.document ||
+        !this.iframe.contentWindow.document.body
+      ) {
+        dev().error(
+          TAG,
+          'Attempting to expand fluid creative without ' +
             'a properly set up friendly frame. Slot id: ' +
-            this.element.getAttribute('data-amp-slot-index'));
+            this.element.getAttribute('data-amp-slot-index')
+        );
         return Promise.reject('Cannot access body of friendly frame');
       }
-      return this.attemptChangeHeight(
-          this.iframe.contentWindow.document.body./*OK*/clientHeight)
+      return this.setCssPosition_('static').then(() => {
+        return this.attemptChangeHeight(
+          this.iframe.contentWindow.document.body./*OK*/ clientHeight
+        )
           .then(() => {
             this.fireFluidDelayedImpression();
             this.reattemptToExpandFluidCreative_ = false;
           })
           .catch(() => {
             this.reattemptToExpandFluidCreative_ = true;
+            this.setCssPosition_('absolute');
           });
+      });
     }
     return Promise.resolve();
+  }
+
+  /**
+   * Sets the CSS 'position' property of this.element.
+   * @param {string} position The CSS position value.
+   * @return {!Promise} A promise that resolves when mutation is complete.
+   * @private
+   */
+  setCssPosition_(position) {
+    return this.mutateElement(() => {
+      setImportantStyles(this.element, {position});
+    }, this.element);
   }
 
   /**
@@ -1044,9 +1196,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // We want to resize only if neither returned dimension is larger than its
     // primary counterpart, and if at least one of the returned dimensions
     // differ from its primary counterpart.
-    if ((this.isFluidRequest_ && width && height) ||
-        ((width != pWidth || height != pHeight) &&
-         (width <= pWidth && height <= pHeight))) {
+    if (
+      (this.isFluidRequest_ && width && height) ||
+      ((width != pWidth || height != pHeight) &&
+        (width <= pWidth && height <= pHeight))
+    ) {
       this.attemptChangeSize(height, width).catch(() => {});
     }
   }
@@ -1065,10 +1219,19 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       if (!this.sraDeferred) {
         dev().warn(TAG, `SRA failed to include element ${this.ifi_}`);
         if (isExperimentOn(this.win, 'doubleclickSraReportExcludedBlock')) {
-          this.getAmpDoc().getBody().appendChild(createElementWithAttributes(
-              this.win.document, 'amp-pixel', dict({'src':
-              'https://pagead2.googlesyndication.com/pagead/gen_204?' +
-                  `id=${encodeURIComponent('a4a::sra')}&ifi=${this.ifi_}`})));
+          this.getAmpDoc()
+            .getBody()
+            .appendChild(
+              createElementWithAttributes(
+                this.win.document,
+                'amp-pixel',
+                dict({
+                  'src':
+                    'https://pagead2.googlesyndication.com/pagead/gen_204?' +
+                    `id=${encodeURIComponent('a4a::sra')}&ifi=${this.ifi_}`,
+                })
+              )
+            );
         }
       }
     });
@@ -1099,13 +1262,15 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         }
         // Create amp-pixel and append to document to send impression.
         this.win.document.body.appendChild(
-            createElementWithAttributes(
-                this.win.document,
-                'amp-pixel',
-                dict({
-                  'src': url,
-                  'referrerpolicy': scrubReferer ? 'no-referrer' : '',
-                })));
+          createElementWithAttributes(
+            this.win.document,
+            'amp-pixel',
+            dict({
+              'src': url,
+              'referrerpolicy': scrubReferer ? 'no-referrer' : '',
+            })
+          )
+        );
       } catch (unusedError) {}
     });
   }
@@ -1128,7 +1293,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    */
   groupSlotsForSra() {
     return groupAmpAdsByType(
-        this.win, this.element.getAttribute('type'), getNetworkId);
+      this.win,
+      this.element.getAttribute('type'),
+      getNetworkId
+    );
   }
 
   /**
@@ -1147,33 +1315,38 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // be called for all and we should cancel SRA execution.
     const checkStillCurrent = this.verifyStillCurrent();
     const noFallbackExp = this.experimentIds.includes(
-        DOUBLECLICK_SRA_EXP_BRANCHES.SRA_NO_RECOVER);
-    sraRequests = sraRequests || this.groupSlotsForSra()
-        .then(groupIdToBlocksAry => {
-          checkStillCurrent();
-          const sraRequestPromises = [];
-          Object.keys(groupIdToBlocksAry).forEach(networkId => {
-            const blocks = devAssert(groupIdToBlocksAry[networkId]);
-            // TODO: filter blocks with SRA disabled?
-            sraRequestPromises.push(Promise.all(blocks).then(instances => {
+      DOUBLECLICK_SRA_EXP_BRANCHES.SRA_NO_RECOVER
+    );
+    sraRequests =
+      sraRequests ||
+      this.groupSlotsForSra().then(groupIdToBlocksAry => {
+        checkStillCurrent();
+        const sraRequestPromises = [];
+        Object.keys(groupIdToBlocksAry).forEach(networkId => {
+          const blocks = devAssert(groupIdToBlocksAry[networkId]);
+          // TODO: filter blocks with SRA disabled?
+          sraRequestPromises.push(
+            Promise.all(blocks).then(instances => {
               devAssert(instances.length);
               checkStillCurrent();
               // Exclude any instances that do not have an adPromise_ as this
               // indicates they were invalid.
-              const typeInstances =
-              /** @type {!Array<!AmpAdNetworkDoubleclickImpl>}*/(instances)
-                    .filter(instance => {
-                      const isValid = instance.hasAdPromise();
-                      if (!isValid) {
-                        dev().info(TAG,
-                            'Ignoring instance without ad promise as ' +
-                            'likely invalid',
-                            instance.element);
-                      }
-                      return isValid;
-                    });
+              const typeInstances = /** @type {!Array<!AmpAdNetworkDoubleclickImpl>}*/ (instances).filter(
+                instance => {
+                  const isValid = instance.hasAdPromise();
+                  if (!isValid) {
+                    dev().info(
+                      TAG,
+                      'Ignoring instance without ad promise as ' +
+                        'likely invalid',
+                      instance.element
+                    );
+                  }
+                  return isValid;
+                }
+              );
               if (!typeInstances.length) {
-              // Only contained invalid elements.
+                // Only contained invalid elements.
                 return;
               }
               // If not within no recovery SRA experiment, determine if more
@@ -1184,8 +1357,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                 dev().info(TAG, `single block in network ${networkId}`);
                 // Ensure deferred exists, may not if getAdUrl did not yet
                 // execute.
-                typeInstances[0].sraDeferred = typeInstances[0].sraDeferred ||
-                  new Deferred();
+                typeInstances[0].sraDeferred =
+                  typeInstances[0].sraDeferred || new Deferred();
                 typeInstances[0].sraDeferred.resolve(null);
                 return;
               }
@@ -1193,71 +1366,87 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
               // Construct and send SRA request.
               // TODO(keithwrightbos) - how do we handle per slot 204 response?
               return constructSRARequest_(this, typeInstances)
-                  .then(sraUrlIn => {
-                    checkStillCurrent();
-                    sraUrl = sraUrlIn;
-                    return Services.xhrFor(this.win).fetch(sraUrl, {
-                      mode: 'cors',
-                      method: 'GET',
-                      credentials: 'include',
-                    });
-                  })
-                  .then(response => {
-                    checkStillCurrent();
-                    // Chunk handler called with metadata and creative for each
-                    // slot in order of URLs given which is then passed to
-                    // resolver used for sendXhrRequest.
-                    const sraRequestAdUrlResolvers =
-                    typeInstances.map(instance => instance.sraDeferred.resolve);
-                    const slotCallback = metaJsonCreativeGrouper(
-                        (creative, headersObj, done) => {
-                          checkStillCurrent();
-                          sraBlockCallbackHandler(creative, headersObj, done,
-                              sraRequestAdUrlResolvers, sraUrl);
-                        });
-                    lineDelimitedStreamer(this.win, response, slotCallback);
-                    return Promise.all(typeInstances.map(
-                        instance => instance.sraDeferred.promise));
-                  })
-                  .catch(error => {
-                    if (isCancellation(error)) {
-                      // Cancellation should be propagated to slot promises
-                      // causing their adPromise chains within A4A to handle
-                      // appropriately.
-                      typeInstances.forEach(instance => instance.sraDeferred &&
-                        instance.sraDeferred.reject(error));
-                    } else if (noFallbackExp ||
-                      !!this.win.document.querySelector(
-                          'meta[name=amp-ad-doubleclick-sra]')) {
-                      // If publisher has explicitly enabled SRA mode (not
-                      // experiment), then assume error is network failure,
-                      // collapse slot, reset url to empty string to ensure
-                      // no fallback to frame GET (given expectation of SRA
-                      // consistency), and propagate error to A4A ad promise
-                      // chain.
-                      assignAdUrlToError(/** @type {!Error} */(error), sraUrl);
-                      this.warnOnError('SRA request failure', error);
-                      // Publisher explicitly wants SRA so do not attempt to
-                      // recover as SRA guarantees cannot be enforced.
-                      typeInstances.forEach(instance => {
-                        // Reset ad url to ensure layoutCallback does not
-                        // fallback to frame get which would lose SRA
-                        // guarantees.
-                        instance.resetAdUrl();
-                        instance.attemptCollapse();
-                        instance.sraDeferred.reject(error);
-                      });
-                    } else {
-                      // Opportunistic SRA used so fallback to individual
-                      // XHR requests.
-                      typeInstances.forEach(instance =>
-                        instance.sraDeferred.resolve(null));
-                    }
+                .then(sraUrlIn => {
+                  checkStillCurrent();
+                  sraUrl = sraUrlIn;
+                  return Services.xhrFor(this.win).fetch(sraUrl, {
+                    mode: 'cors',
+                    method: 'GET',
+                    credentials: 'include',
                   });
-            }));
-          });
-          return Promise.all(sraRequestPromises);
+                })
+                .then(response => {
+                  checkStillCurrent();
+                  // Chunk handler called with metadata and creative for each
+                  // slot in order of URLs given which is then passed to
+                  // resolver used for sendXhrRequest.
+                  const sraRequestAdUrlResolvers = typeInstances.map(
+                    instance => instance.sraDeferred.resolve
+                  );
+                  const slotCallback = metaJsonCreativeGrouper(
+                    (creative, headersObj, done) => {
+                      checkStillCurrent();
+                      sraBlockCallbackHandler(
+                        creative,
+                        headersObj,
+                        done,
+                        sraRequestAdUrlResolvers,
+                        sraUrl
+                      );
+                    }
+                  );
+                  lineDelimitedStreamer(this.win, response, slotCallback);
+                  return Promise.all(
+                    typeInstances.map(instance => instance.sraDeferred.promise)
+                  );
+                })
+                .catch(error => {
+                  if (isCancellation(error)) {
+                    // Cancellation should be propagated to slot promises
+                    // causing their adPromise chains within A4A to handle
+                    // appropriately.
+                    typeInstances.forEach(
+                      instance =>
+                        instance.sraDeferred &&
+                        instance.sraDeferred.reject(error)
+                    );
+                  } else if (
+                    noFallbackExp ||
+                    !!this.win.document.querySelector(
+                      'meta[name=amp-ad-doubleclick-sra]'
+                    )
+                  ) {
+                    // If publisher has explicitly enabled SRA mode (not
+                    // experiment), then assume error is network failure,
+                    // collapse slot, reset url to empty string to ensure
+                    // no fallback to frame GET (given expectation of SRA
+                    // consistency), and propagate error to A4A ad promise
+                    // chain.
+                    assignAdUrlToError(/** @type {!Error} */ (error), sraUrl);
+                    this.warnOnError('SRA request failure', error);
+                    // Publisher explicitly wants SRA so do not attempt to
+                    // recover as SRA guarantees cannot be enforced.
+                    typeInstances.forEach(instance => {
+                      // Reset ad url to ensure layoutCallback does not
+                      // fallback to frame get which would lose SRA
+                      // guarantees.
+                      instance.resetAdUrl();
+                      instance.attemptCollapse();
+                      instance.sraDeferred.reject(error);
+                    });
+                  } else {
+                    // Opportunistic SRA used so fallback to individual
+                    // XHR requests.
+                    typeInstances.forEach(instance =>
+                      instance.sraDeferred.resolve(null)
+                    );
+                  }
+                });
+            })
+          );
         });
+        return Promise.all(sraRequestPromises);
+      });
     return sraRequests;
   }
 
@@ -1289,8 +1478,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * @visibleForTesting
    */
   getLocationQueryParameterValue(parameterName) {
-    windowLocationQueryParameters = windowLocationQueryParameters ||
-        parseQueryString((this.win.location && this.win.location.search) || '');
+    windowLocationQueryParameters =
+      windowLocationQueryParameters ||
+      parseQueryString((this.win.location && this.win.location.search) || '');
     return windowLocationQueryParameters[parameterName];
   }
 
@@ -1301,10 +1491,13 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     }
     const creativeSize = this.getCreativeSize();
     devAssert(creativeSize, 'this.getCreativeSize returned null');
-    this.safeframeApi_ = this.safeframeApi_ ||
-        new SafeframeHostApi(
-            this, this.isFluidRequest_,
-            /** @type {{height, width}} */(creativeSize));
+    this.safeframeApi_ =
+      this.safeframeApi_ ||
+      new SafeframeHostApi(
+        this,
+        this.isFluidRequest_,
+        /** @type {{height, width}} */ (creativeSize)
+      );
 
     return this.safeframeApi_.getSafeframeNameAttr();
   }
@@ -1323,29 +1516,35 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     }
     devAssert(this.troubleshootData_.adUrl, 'ad URL does not exist yet');
     return this.troubleshootData_.adUrl.then(adUrl => {
-      const slotId = this.troubleshootData_.slotId + '_' +
-          this.troubleshootData_.slotIndex;
+      const slotId =
+        this.troubleshootData_.slotId + '_' + this.troubleshootData_.slotIndex;
       const payload = dict({
-        'gutData': JSON.stringify(dict({
-          'events': [{
-            'timestamp': Date.now(),
-            'slotid': slotId,
-            'messageId': 4,
-          }],
-          'slots': [{
-            'contentUrl': adUrl || '',
-            'id': slotId,
-            'leafAdUnitName': this.troubleshootData_.slotId,
-            'domId': slotId,
-            'lineItemId': this.troubleshootData_.lineItemId,
-            'creativeId': this.troubleshootData_.creativeId,
-          }],
-        })),
+        'gutData': JSON.stringify(
+          dict({
+            'events': [
+              {
+                'timestamp': Date.now(),
+                'slotid': slotId,
+                'messageId': 4,
+              },
+            ],
+            'slots': [
+              {
+                'contentUrl': adUrl || '',
+                'id': slotId,
+                'leafAdUnitName': this.troubleshootData_.slotId,
+                'domId': slotId,
+                'lineItemId': this.troubleshootData_.lineItemId,
+                'creativeId': this.troubleshootData_.creativeId,
+              },
+            ],
+          })
+        ),
         'userAgent': navigator.userAgent,
         'referrer': this.win.location.href,
         'messageType': 'LOAD',
       });
-      this.win.opener./*OK*/postMessage(payload, '*');
+      this.win.opener./*OK*/ postMessage(payload, '*');
     });
   }
 
@@ -1394,7 +1593,6 @@ AMP.extension(TAG, '0.1', AMP => {
   AMP.registerElement(TAG, AmpAdNetworkDoubleclickImpl);
 });
 
-
 /** @visibleForTesting */
 export function resetSraStateForTesting() {
   sraRequests = null;
@@ -1412,11 +1610,11 @@ export function resetLocationQueryParametersForTesting() {
  */
 export function getNetworkId(element) {
   const networkId = /^(?:\/)?(\d+)/.exec(
-      dev().assertString(element.getAttribute('data-slot')));
+    dev().assertString(element.getAttribute('data-slot'))
+  );
   // TODO: guarantee data-ad-slot format as part of isValidElement?
   return networkId ? networkId[1] : '';
 }
-
 
 /**
  * @param {!../../../extensions/amp-a4a/0.1/amp-a4a.AmpA4A} a4a
@@ -1428,15 +1626,21 @@ function constructSRARequest_(a4a, instances) {
   devAssert(instances && instances.length);
   const startTime = Date.now();
   return Promise.all(
-      instances.map(instance => instance.getAdUrlDeferred.promise))
-      .then(() => googlePageParameters(a4a, startTime))
-      .then(googPageLevelParameters => {
-        const blockParameters = constructSRABlockParameters(instances);
-        return truncAndTimeUrl(DOUBLECLICK_BASE_URL,
-            Object.assign(blockParameters, googPageLevelParameters,
-                instances[0].getPageParameters(instances[0].consentState,
-                    instances)), startTime);
-      });
+    instances.map(instance => instance.getAdUrlDeferred.promise)
+  )
+    .then(() => googlePageParameters(a4a, startTime))
+    .then(googPageLevelParameters => {
+      const blockParameters = constructSRABlockParameters(instances);
+      return truncAndTimeUrl(
+        DOUBLECLICK_BASE_URL,
+        Object.assign(
+          blockParameters,
+          googPageLevelParameters,
+          instances[0].getPageParameters(instances[0].consentState, instances)
+        ),
+        startTime
+      );
+    });
 }
 
 /**
@@ -1449,8 +1653,7 @@ function constructSRARequest_(a4a, instances) {
 export function getPageviewStateTokensForAdRequest(instancesInAdRequest) {
   const pageviewStateTokensInAdRequest = [];
   for (const token in tokensToInstances) {
-    if (!instancesInAdRequest.includes(
-        tokensToInstances[token])) {
+    if (!instancesInAdRequest.includes(tokensToInstances[token])) {
       pageviewStateTokensInAdRequest.push(token);
     }
   }

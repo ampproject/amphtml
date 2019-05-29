@@ -44,7 +44,10 @@ tags: {  # amp-geo (json)
   spec_name: "amp-geo extension .json script"
   requires_extension: "amp-geo"
   mandatory_parent: "AMP-GEO"
-  attrs: { name: "nonce" }
+  attrs: {
+    disabled_by: "transformed"
+    name: "nonce"
+  }
   attrs: {
     name: "type"
     mandatory: true
@@ -57,7 +60,7 @@ tags: {  # amp-geo (json)
       error_message: "html comments"
     }
   }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-geo"
+  spec_url: "https://amp.dev/documentation/components/amp-geo"
 }
 
 

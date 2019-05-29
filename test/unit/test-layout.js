@@ -14,10 +14,17 @@
  * limitations under the License.
  */
 
-import {Layout, applyStaticLayout,
-  assertLength, assertLengthOrPercent, getLengthNumeral, getLengthUnits,
-  isLoadingAllowed, parseLayout, parseLength} from '../../src/layout';
-
+import {
+  Layout,
+  applyStaticLayout,
+  assertLength,
+  assertLengthOrPercent,
+  getLengthNumeral,
+  getLengthUnits,
+  isLoadingAllowed,
+  parseLayout,
+  parseLength,
+} from '../../src/layout';
 
 describe('Layout', () => {
   let div;
@@ -41,19 +48,35 @@ describe('Layout', () => {
       tagName: 'hold',
     };
     const elementsValidTagNames = [
+      // in whitelist.
       'AMP-AD',
       'AMP-ANIM',
       'AMP-BRIGHTCOVE',
+      'AMP-DAILYMOTION',
       'AMP-EMBED',
+      'AMP-FACEBOOK',
+      'AMP-FACEBOOK-COMMENTS',
+      'AMP-FACEBOOK-LIKE',
+      'AMP-FACEBOOK-PAGE',
+      'AMP-GOOGLE-DOCUMENT-EMBED',
       'AMP-IFRAME',
       'AMP-IMG',
       'AMP-INSTAGRAM',
       'AMP-LIST',
-      'AMP-OOYALA-PLAYER',
       'AMP-PINTEREST',
       'AMP-PLAYBUZZ',
-      'AMP-VIDEO',
       'AMP-YOUTUBE',
+      'AMP-VIMEO',
+
+      // matched by video player naming convention (fake)
+      'AMP-FOO-PLAYER',
+      'AMP-VIDEO-FOO',
+
+      // matched by video player naming convention (actual)
+      'AMP-JWPLAYER',
+      'AMP-OOYALA-PLAYER',
+      'AMP-VIDEO',
+      'AMP-VIDEO-IFRAME',
     ];
     elementsValidTagNames.forEach(function(tag) {
       el.tagName = tag;
@@ -73,7 +96,6 @@ describe('Layout', () => {
       el.tagName = tag;
       expect(isLoadingAllowed(el)).to.be.false;
     });
-
   });
 
   it('parseLayout - failure', () => {
@@ -145,26 +167,37 @@ describe('Layout', () => {
     expect(assertLength('10.1em')).to.equal('10.1em');
     expect(assertLength('10.1vmin')).to.equal('10.1vmin');
 
-    allowConsoleError(() => { expect(function() {
-      assertLength('10%');
-    }).to.throw(/Invalid length value/); });
-    allowConsoleError(() => { expect(function() {
-      assertLength(10);
-    }).to.throw(/Invalid length value/); });
-    allowConsoleError(() => { expect(function() {
-      assertLength('10');
-    }).to.throw(/Invalid length value/); });
-    allowConsoleError(() => { expect(function() {
-      assertLength(undefined);
-    }).to.throw(/Invalid length value/); });
-    allowConsoleError(() => { expect(function() {
-      assertLength(null);
-    }).to.throw(/Invalid length value/); });
-    allowConsoleError(() => { expect(function() {
-      assertLength('');
-    }).to.throw(/Invalid length value/); });
+    allowConsoleError(() => {
+      expect(function() {
+        assertLength('10%');
+      }).to.throw(/Invalid length value/);
+    });
+    allowConsoleError(() => {
+      expect(function() {
+        assertLength(10);
+      }).to.throw(/Invalid length value/);
+    });
+    allowConsoleError(() => {
+      expect(function() {
+        assertLength('10');
+      }).to.throw(/Invalid length value/);
+    });
+    allowConsoleError(() => {
+      expect(function() {
+        assertLength(undefined);
+      }).to.throw(/Invalid length value/);
+    });
+    allowConsoleError(() => {
+      expect(function() {
+        assertLength(null);
+      }).to.throw(/Invalid length value/);
+    });
+    allowConsoleError(() => {
+      expect(function() {
+        assertLength('');
+      }).to.throw(/Invalid length value/);
+    });
   });
-
 
   it('assertLengthOrPercent', () => {
     expect(assertLengthOrPercent('10px')).to.equal('10px');
@@ -176,23 +209,32 @@ describe('Layout', () => {
     expect(assertLengthOrPercent('10.1vmin')).to.equal('10.1vmin');
     expect(assertLengthOrPercent('10.1%')).to.equal('10.1%');
 
-    allowConsoleError(() => { expect(function() {
-      assertLengthOrPercent(10);
-    }).to.throw(/Invalid length or percent value/); });
-    allowConsoleError(() => { expect(function() {
-      assertLengthOrPercent('10');
-    }).to.throw(/Invalid length or percent value/); });
-    allowConsoleError(() => { expect(function() {
-      assertLengthOrPercent(undefined);
-    }).to.throw(/Invalid length or percent value/); });
-    allowConsoleError(() => { expect(function() {
-      assertLengthOrPercent(null);
-    }).to.throw(/Invalid length or percent value/); });
-    allowConsoleError(() => { expect(function() {
-      assertLengthOrPercent('');
-    }).to.throw(/Invalid length or percent value/); });
+    allowConsoleError(() => {
+      expect(function() {
+        assertLengthOrPercent(10);
+      }).to.throw(/Invalid length or percent value/);
+    });
+    allowConsoleError(() => {
+      expect(function() {
+        assertLengthOrPercent('10');
+      }).to.throw(/Invalid length or percent value/);
+    });
+    allowConsoleError(() => {
+      expect(function() {
+        assertLengthOrPercent(undefined);
+      }).to.throw(/Invalid length or percent value/);
+    });
+    allowConsoleError(() => {
+      expect(function() {
+        assertLengthOrPercent(null);
+      }).to.throw(/Invalid length or percent value/);
+    });
+    allowConsoleError(() => {
+      expect(function() {
+        assertLengthOrPercent('');
+      }).to.throw(/Invalid length or percent value/);
+    });
   });
-
 
   it('layout=nodisplay', () => {
     div.setAttribute('layout', 'nodisplay');
@@ -242,10 +284,10 @@ describe('Layout', () => {
     div.setAttribute('layout', 'fixed');
     allowConsoleError(() => {
       expect(() => applyStaticLayout(div)).to.throw(
-          /Expected height to be available/);
+        /Expected height to be available/
+      );
     });
   });
-
 
   it('layout=fixed-height', () => {
     div.setAttribute('layout', 'fixed-height');
@@ -274,9 +316,11 @@ describe('Layout', () => {
     div.setAttribute('layout', 'fixed-height');
     div.setAttribute('height', 200);
     div.setAttribute('width', 300);
-    allowConsoleError(() => { expect(function() {
-      applyStaticLayout(div);
-    }).to.throw(/Expected width to be either absent or equal "auto"/); });
+    allowConsoleError(() => {
+      expect(function() {
+        applyStaticLayout(div);
+      }).to.throw(/Expected width to be either absent or equal "auto"/);
+    });
   });
 
   it('layout=fixed-height - default with height', () => {
@@ -298,10 +342,10 @@ describe('Layout', () => {
     div.setAttribute('layout', 'fixed-height');
     allowConsoleError(() => {
       expect(() => applyStaticLayout(div)).to.throw(
-          /Expected height to be available/);
+        /Expected height to be available/
+      );
     });
   });
-
 
   it('layout=responsive', () => {
     div.setAttribute('layout', 'responsive');
@@ -331,7 +375,6 @@ describe('Layout', () => {
     expect(div.children[0].style.paddingTop).to.equal('200%');
   });
 
-
   it('layout=intrinsic', () => {
     div.setAttribute('layout', 'intrinsic');
     div.setAttribute('width', 100);
@@ -345,7 +388,9 @@ describe('Layout', () => {
     expect(div.children[0].tagName.toLowerCase()).to.equal('i-amphtml-sizer');
     expect(div.children[0].children.length).to.equal(1);
     expect(div.children[0].children[0].tagName.toLowerCase()).to.equal('img');
-    expect(div.children[0].children[0].src).to.equal('data:image/svg+xml;charset=utf-8,<svg height="200px" width="100px" xmlns="http://www.w3.org/2000/svg" version="1.1"/>');
+    expect(div.children[0].children[0].src).to.equal(
+      'data:image/svg+xml;charset=utf-8,<svg height="200px" width="100px" xmlns="http://www.w3.org/2000/svg" version="1.1"/>'
+    );
   });
 
   it('layout=intrinsic - default with sizes', () => {
@@ -362,7 +407,9 @@ describe('Layout', () => {
     expect(div.children[0].tagName.toLowerCase()).to.equal('i-amphtml-sizer');
     expect(div.children[0].children.length).to.equal(1);
     expect(div.children[0].children[0].tagName.toLowerCase()).to.equal('img');
-    expect(div.children[0].children[0].src).to.equal('data:image/svg+xml;charset=utf-8,<svg height="200px" width="100px" xmlns="http://www.w3.org/2000/svg" version="1.1"/>');
+    expect(div.children[0].children[0].src).to.equal(
+      'data:image/svg+xml;charset=utf-8,<svg height="200px" width="100px" xmlns="http://www.w3.org/2000/svg" version="1.1"/>'
+    );
   });
 
   it('layout=fill', () => {
@@ -417,11 +464,12 @@ describe('Layout', () => {
 
   it('layout=unknown', () => {
     div.setAttribute('layout', 'foo');
-    allowConsoleError(() => { expect(function() {
-      applyStaticLayout(div);
-    }).to.throw(/Unknown layout: foo/); });
+    allowConsoleError(() => {
+      expect(function() {
+        applyStaticLayout(div);
+      }).to.throw(/Unknown layout: foo/);
+    });
   });
-
 
   it('should configure natural dimensions; default layout', () => {
     const pixel = document.createElement('amp-pixel');
@@ -462,34 +510,46 @@ describe('Layout', () => {
     expect(pixel.style.width).to.equal('');
   });
 
-  it('should fail invalid width and height', () => {
+  it('should layout with pixel values', () => {
     const pixel = document.createElement('amp-pixel');
-
-    // Everything is good.
     pixel.setAttribute('width', '1px');
     pixel.setAttribute('height', '1px');
     expect(() => {
       applyStaticLayout(pixel);
     }).to.not.throw();
+  });
 
-    // Width=auto is also correct.
+  it('should layout with valid with auto width value', () => {
+    const pixel = document.createElement('amp-pixel');
     pixel.setAttribute('width', 'auto');
+    pixel.setAttribute('height', '1px');
     expect(() => {
       applyStaticLayout(pixel);
     }).to.not.throw();
+  });
 
+  it('should fail invalid width', () => {
+    const pixel = document.createElement('amp-pixel');
     // Width=X is invalid.
     pixel.setAttribute('width', 'X');
-    allowConsoleError(() => { expect(() => {
-      applyStaticLayout(pixel);
-    }).to.throw(/Invalid width value/); });
+    pixel.setAttribute('height', '1px');
+    allowConsoleError(() => {
+      expect(() => {
+        applyStaticLayout(pixel);
+      }).to.throw(/Invalid width value/);
+    });
+  });
 
+  it('should fail invalid height', () => {
+    const pixel = document.createElement('amp-pixel');
     // Height=X is invalid.
-    pixel.setAttribute('height', 'X');
     pixel.setAttribute('width', '1px');
-    allowConsoleError(() => { expect(() => {
-      applyStaticLayout(pixel);
-    }).to.throw(/Invalid height value/); });
+    pixel.setAttribute('height', 'X');
+    allowConsoleError(() => {
+      expect(() => {
+        applyStaticLayout(pixel);
+      }).to.throw(/Invalid height value/);
+    });
   });
 
   it('should trust server layout', () => {
@@ -536,5 +596,16 @@ describe('Layout', () => {
     allowConsoleError(() => {
       expect(() => applyStaticLayout(div)).to.throw(/failed/);
     });
+  });
+
+  it('should not re-layout cloned content', () => {
+    div.setAttribute('layout', 'responsive');
+    div.setAttribute('width', 100);
+    div.setAttribute('height', 200);
+    expect(applyStaticLayout(div)).to.equal(Layout.RESPONSIVE);
+    expect(div.querySelectorAll('i-amphtml-sizer')).to.have.length(1);
+    const clone = div.cloneNode(true);
+    expect(applyStaticLayout(clone)).to.equal(Layout.RESPONSIVE);
+    expect(clone.querySelectorAll('i-amphtml-sizer')).to.have.length(1);
   });
 });

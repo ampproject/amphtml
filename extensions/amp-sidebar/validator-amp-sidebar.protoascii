@@ -55,16 +55,22 @@ tags: {  # <amp-sidebar> not in amp-story
   amp_layout: {
     supported_layouts: NODISPLAY
   }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-sidebar"
+  mark_descendants {
+    marker: AUTOSCROLL
+  }
+  spec_url: "https://amp.dev/documentation/components/amp-sidebar"
 }
-tags: { #<amp-sidebar> in amp-story
+tags: { # <amp-sidebar> in amp-story
   html_format: AMP
   tag_name: "AMP-SIDEBAR"
   spec_name: "amp-story >> amp-sidebar"
   requires_extension: "amp-sidebar"
   mandatory_parent: "AMP-STORY"
   amp_layout: { supported_layouts: NODISPLAY }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-sidebar"
+  mark_descendants {
+    marker: AUTOSCROLL
+  }
+  spec_url: "https://amp.dev/documentation/components/amp-sidebar"
 }
 tags: {  # amp-sidebar > nav
   html_format: AMP
@@ -86,6 +92,7 @@ tags: {  # amp-sidebar > nav
   }
   child_tags: {
     mandatory_num_child_tags: 1
+    child_tag_name_oneof: "OL"
     child_tag_name_oneof: "UL"
   }
 }

@@ -15,9 +15,29 @@
  */
 
 const fs = require('fs');
-const {By, Condition, Key, until} = require('selenium-webdriver');
-const {ControllerPromise,ElementHandle} = require('./functional-test-controller');
+const {
+  ControllerPromise,
+  DOMRectDef,
+  ElementHandle,
+  Key,
+} = require('./functional-test-controller');
+const {By, Condition, Key: SeleniumKey, error} = require('selenium-webdriver');
 const {expect} = require('chai');
+
+const {NoSuchElementError} = error;
+
+const ELEMENT_WAIT_TIMEOUT = 5000;
+
+/** @enum {string} */
+const KeyToSeleniumMap = {
+  [Key.ArrowDown]: SeleniumKey.ARROW_DOWN,
+  [Key.ArrowLeft]: SeleniumKey.ARROW_LEFT,
+  [Key.ArrowRight]: SeleniumKey.ARROW_RIGHT,
+  [Key.ArrowUp]: SeleniumKey.ARROW_UP,
+  [Key.Enter]: SeleniumKey.ENTER,
+  [Key.Escape]: SeleniumKey.ESCAPE,
+  [Key.Tab]: SeleniumKey.TAB,
+};
 
 /**
  * @param {function(): !Promise<T>} valueFn
@@ -28,7 +48,7 @@ const {expect} = require('chai');
  */
 function expectCondition(valueFn, condition, opt_mutate) {
   opt_mutate = opt_mutate || (x => x);
-  return new Condition('value matches condition', async() => {
+  return new Condition('value matches condition', async () => {
     const value = await valueFn();
     const mutatedValue = await opt_mutate(value);
     return condition(mutatedValue);
@@ -51,8 +71,9 @@ function waitFor(driver, valueFn, condition, opt_mutate) {
     // (like "") do not cause driver.wait to continue waiting.
     return condition(value) ? {value} : null;
   };
-  return driver.wait(expectCondition(valueFn, conditionValue, opt_mutate))
-      .then(result => result.value); // Unbox the value.
+  return driver
+    .wait(expectCondition(valueFn, conditionValue, opt_mutate))
+    .then(result => result.value); // Unbox the value.
 }
 
 /** @implements {FunctionalTestController} */
@@ -62,6 +83,12 @@ class SeleniumWebDriverController {
    */
   constructor(driver) {
     this.driver = driver;
+
+    /** @private {?WebElement} */
+    this.shadowRoot_ = null;
+
+    /** @private {boolean} */
+    this.isXpathInstalled_ = false;
   }
 
   /**
@@ -83,6 +110,9 @@ class SeleniumWebDriverController {
   }
 
   /**
+   * This waits for an element to become available similar to Selenium's
+   * until.js#elementLocated
+   * {@link https://github.com/SeleniumHQ/selenium/blob/6a717f20/javascript/node/selenium-webdriver/lib/until.js#L237}
    * @param {string} selector
    * @return {!Promise<!ElementHandle<!WebElement>>}
    * @override
@@ -90,12 +120,30 @@ class SeleniumWebDriverController {
   async findElement(selector) {
     const bySelector = By.css(selector);
 
-    await this.driver.wait(until.elementLocated(bySelector));
-    const webElement = await this.driver.findElement(bySelector);
+    const label = 'for element to be located ' + selector;
+    const condition = new Condition(label, async () => {
+      try {
+        const root = await this.getRoot_();
+        return await root.findElement(bySelector);
+      } catch (e) {
+        // WebElement.prototype.findElement differs from
+        // WebDriver.prototype.findElement in that the WebElement method will
+        // throw a NoSuchElementError if the element is not found, and does
+        // not wait for the element to appear in the document.
+        if (e instanceof NoSuchElementError) {
+          return null;
+        }
+        throw e;
+      }
+    });
+    const webElement = await this.driver.wait(condition, ELEMENT_WAIT_TIMEOUT);
     return new ElementHandle(webElement, this);
   }
 
   /**
+   * This waits for elements to become available similar to Selenium's
+   * until.js#elementsLocated
+   * {@link https://github.com/SeleniumHQ/selenium/blob/6a717f20/javascript/node/selenium-webdriver/lib/until.js#L258}   *
    * @param {string} selector
    * @return {!Promise<!Array<!ElementHandle<!WebElement>>>}
    * @override
@@ -103,8 +151,20 @@ class SeleniumWebDriverController {
   async findElements(selector) {
     const bySelector = By.css(selector);
 
-    await this.driver.wait(until.elementLocated(bySelector));
-    const webElements = await this.driver.findElements(bySelector);
+    const label = 'for at least one element to be located ' + selector;
+    const condition = new Condition(label, async () => {
+      try {
+        const root = await this.getRoot_();
+        const elements = await root.findElements(bySelector);
+        return elements.length ? elements : null;
+      } catch (e) {
+        if (e instanceof NoSuchElementError) {
+          return null;
+        }
+        throw e;
+      }
+    });
+    const webElements = await this.driver.wait(condition, ELEMENT_WAIT_TIMEOUT);
     return webElements.map(webElement => new ElementHandle(webElement, this));
   }
 
@@ -114,10 +174,23 @@ class SeleniumWebDriverController {
    * @override
    */
   async findElementXPath(xpath) {
-    const byXpath = By.xpath(xpath);
+    await this.maybeInstallXpath_();
 
-    await this.driver.wait(until.elementLocated(byXpath));
-    const webElement = await this.driver.findElement(byXpath);
+    const label = 'for element to be located ' + xpath;
+    const webElement = await this.driver.wait(
+      new Condition(label, async () => {
+        const root = await this.getRoot_();
+        const results = await this.evaluate(
+          (xpath, root) => {
+            return window.queryXpath(xpath, root);
+          },
+          xpath,
+          root
+        );
+        return results && results[0];
+      }),
+      ELEMENT_WAIT_TIMEOUT
+    );
     return new ElementHandle(webElement, this);
   }
 
@@ -127,11 +200,62 @@ class SeleniumWebDriverController {
    * @override
    */
   async findElementsXPath(xpath) {
-    const byXpath = By.xpath(xpath);
-
-    await this.driver.wait(until.elementLocated(byXpath));
-    const webElements = await this.driver.findElements(byXpath);
+    await this.maybeInstallXpath_();
+    const label = 'for at least one element to be located ' + xpath;
+    const webElements = await this.driver.wait(
+      new Condition(label, async () => {
+        const root = await this.getRoot_();
+        const results = await this.evaluate(
+          (xpath, root) => {
+            return window.queryXpath(xpath, root);
+          },
+          xpath,
+          root
+        );
+        return results;
+      }),
+      ELEMENT_WAIT_TIMEOUT
+    );
     return webElements.map(webElement => new ElementHandle(webElement, this));
+  }
+
+  /**
+   * Install a third-party XPath library if it is not already installed.
+   * @return {!Promise}
+   */
+  async maybeInstallXpath_() {
+    if (this.isXpathInstalled_) {
+      return;
+    }
+    this.isXpathInstalled_ = true;
+
+    const scripts = await Promise.all([
+      fs.readFileAsync('third_party/wgxpath/wgxpath.js', 'utf8'),
+      fs.readFileAsync('build-system/tasks/e2e/driver/query-xpath.js', 'utf8'),
+    ]);
+    await this.driver.executeScript(scripts.join('\n\n'));
+  }
+
+  /**
+   * @return {!Promise<!ElementHandle<!WebElement>>}
+   * @override
+   */
+  async getActiveElement() {
+    const root = await this.getRoot_();
+    const getter = root => root.parentNode.activeElement;
+    const activeElement = await this.driver.executeScript(getter, root);
+    return new ElementHandle(activeElement);
+  }
+
+  /**
+   * @return {!Promise<!ElementHandle<!WebElement>>}
+   * @override
+   */
+  async getDocumentElement() {
+    const root = await this.getRoot_();
+    const getter = root => root.ownerDocument.documentElement;
+    const documentElement = await this.driver.executeScript(getter, root);
+    return new ElementHandle(documentElement);
   }
 
   /**
@@ -145,17 +269,16 @@ class SeleniumWebDriverController {
 
   /**
    * @param {!ElementHandle<!WebElement>} handle
-   * @param {string} keys
+   * @param {string|Key} keys
    * @return {!Promise}
    * @override
    */
   async type(handle, keys) {
-    const targetElement = handle ?
-      handle.getElement() :
-      await this.driver.switchTo().activeElement();
+    const targetElement = handle
+      ? handle.getElement()
+      : await this.driver.switchTo().activeElement();
 
-
-    const key = Key[keys.toUpperCase()];
+    const key = KeyToSeleniumMap[keys];
     if (key) {
       return await targetElement.sendKeys(key);
     }
@@ -171,8 +294,19 @@ class SeleniumWebDriverController {
   getElementText(handle) {
     const webElement = handle.getElement();
     return new ControllerPromise(
-        webElement.getText(),
-        this.getWaitFn_(() => webElement.getText()));
+      webElement.getText(),
+      this.getWaitFn_(() => webElement.getText())
+    );
+  }
+
+  /**
+   * @param {!ElementHandle<!WebElement>} handle
+   * @return {!Promise<string>}
+   * @override
+   */
+  getElementTagName(handle) {
+    const webElement = handle.getElement();
+    return webElement.getTagName();
   }
 
   /**
@@ -183,13 +317,16 @@ class SeleniumWebDriverController {
    */
   getElementAttribute(handle, attribute) {
     const webElement = handle.getElement();
-
+    const getter = (element, attribute) => element.getAttribute(attribute);
     return new ControllerPromise(
-        webElement.getAttribute(attribute),
-        this.getWaitFn_(() => webElement.getAttribute(attribute)));
+      this.evaluate(getter, webElement, attribute),
+      this.getWaitFn_(() => this.evaluate(getter, webElement, attribute))
+    );
   }
 
   /**
+   * Gets the element property. Note that this is different
+   * than getElementAttribute()
    * @param {!ElementHandle<!WebElement>} handle
    * @param {string} property
    * @return {!Promise<string>}
@@ -200,21 +337,87 @@ class SeleniumWebDriverController {
     const getProperty = (element, property) => element[property];
 
     return new ControllerPromise(
-        this.driver.executeScript(getProperty, webElement, property),
-        this.getWaitFn_(() => this.driver.executeScript(
-            getProperty, webElement, property)));
+      this.driver.executeScript(getProperty, webElement, property),
+      this.getWaitFn_(() =>
+        this.driver.executeScript(getProperty, webElement, property)
+      )
+    );
   }
 
   /**
    * @param {!ElementHandle<!WebElement>} handle
-   * @return {!Promise<!{x: number, y: number, height: number. width: number}>}
+   * @return {!Promise<!DOMRectDef>}
    * @override
    */
   getElementRect(handle) {
     const webElement = handle.getElement();
+    const getter = element => {
+      // Extracting the values seems to perform better than returning
+      // the raw ClientRect from the element, in terms of flakiness.
+      // The raw ClientRect also has hundredths of a pixel. We round to int.
+      const {
+        width,
+        height,
+        top,
+        bottom,
+        left,
+        right,
+      } = element./*OK*/ getBoundingClientRect();
+      return {
+        x: Math.round(left),
+        y: Math.round(top),
+        width: Math.round(width),
+        height: Math.round(height),
+        top: Math.round(top),
+        bottom: Math.round(bottom),
+        left: Math.round(left),
+        right: Math.round(right),
+      };
+    };
     return new ControllerPromise(
-        webElement.getRect(),
-        this.getWaitFn_(() => webElement.getRect()));
+      this.driver.executeScript(getter, webElement),
+      this.getWaitFn_(() => this.driver.executeScript(getter, webElement))
+    );
+  }
+
+  /**
+   * @param {!ElementHandle} handle
+   * @param {string} styleProperty
+   * @return {!Promise<string>} styleProperty
+   * @override
+   */
+  getElementCssValue(handle, styleProperty) {
+    const webElement = handle.getElement();
+    return new ControllerPromise(
+      webElement.getCssValue(styleProperty),
+      this.getWaitFn_(() => webElement.getCssValue(styleProperty))
+    );
+  }
+
+  /**
+   * @param {!ElementHandle} handle
+   * @return {!Promise<boolean>}
+   * @override
+   */
+  isElementEnabled(handle) {
+    const webElement = handle.getElement();
+    return new ControllerPromise(
+      webElement.isEnabled(),
+      this.getWaitFn_(() => webElement.isEnabled())
+    );
+  }
+
+  /**
+   * @param {!ElementHandle} handle
+   * @return {!Promise<boolean>}
+   * @override
+   */
+  isElementSelected(handle) {
+    const webElement = handle.getElement();
+    return new ControllerPromise(
+      webElement.isSelected(),
+      this.getWaitFn_(() => webElement.isSelected())
+    );
   }
 
   /**
@@ -224,58 +427,68 @@ class SeleniumWebDriverController {
    * @override
    */
   async setWindowRect(rect) {
-    const {
-      width,
-      height,
-    } = rect;
+    const {width, height} = rect;
 
-    // Calculate the window borders, so we can set the correct size to get the
-    // desired content size.
-    const results = await Promise.all([
-      this.driver.manage().window().getRect(),
-      this.driver.findElement(By.tagName('html')),
-    ]);
-    // No Array destructuring allowed?
-    const winRect = results[0];
-    const htmlElement = results[1];
+    await this.driver
+      .manage()
+      .window()
+      .setRect({
+        x: 0,
+        y: 0,
+        width,
+        height,
+      });
+
+    // Check to make sure we resized the content to the correct size.
+    const htmlElement = this.driver.findElement(By.tagName('html'));
     const htmlElementSizes = await Promise.all([
       htmlElement.getAttribute('clientWidth'),
       htmlElement.getAttribute('clientHeight'),
     ]);
     // No Array destructuring allowed?
-    const clientWidth = htmlElementSizes[0];
-    const clientHeight = htmlElementSizes[1];
+    const clientWidth = Number(htmlElementSizes[0]);
+    const clientHeight = Number(htmlElementSizes[1]);
 
-    const horizBorder = winRect.width - clientWidth;
-    const vertBorder = winRect.height - clientHeight;
+    // If we resized correctly, can just stop here. If the test is not run in
+    // headless mode, we need to do more work to size correctly.
+    if (clientWidth == width && clientHeight == height) {
+      return;
+    }
 
-    await this.driver.manage().window().setRect({
-      width: width + horizBorder,
-      height: height + vertBorder,
-    });
+    // Calculate the window borders, so we can set the correct size to get the
+    // desired content size.
+    const horizBorder = width - clientWidth;
+    const vertBorder = height - clientHeight;
+
+    await this.driver
+      .manage()
+      .window()
+      .setRect({
+        width: width + horizBorder,
+        height: height + vertBorder,
+      });
 
     // Verify the size. The browser may refuse to resize smaller than some
     // size when not running headless. It is better to fail here rather than
     // have the developer wonder why their test is failing on an unrelated
-    // expect. TODO: support running browsers in a headless mode, otherwise
-    // mobile resolutions cannot be tested due to the minimum width/height
-    // browsers impose. If non headless mode is supported, these asserts are
-    // still necessary, because the test may fail if the user is debugging them
-    // due to the min size and we want to make sure it fails fast.
-    const updatedWinRect = await this.driver.manage().window().getRect();
-    const resultWidth = updatedWinRect.width - horizBorder;
-    const resultHeight = updatedWinRect.height - vertBorder;
+    // expect.
+    const updatedHtmlElementSizes = await Promise.all([
+      htmlElement.getAttribute('clientWidth'),
+      htmlElement.getAttribute('clientHeight'),
+    ]);
+    const resultWidth = Number(updatedHtmlElementSizes[0]);
+    const resultHeight = Number(updatedHtmlElementSizes[1]);
     // TODO(sparhami) These are throwing errors, but are not causing the test
     // to fail immediately,.Figure out why, we want the test to fail here
     // instead of continuing.
     expect(resultWidth).to.equal(
-        width,
-        'Failed to resize the window to the requested width. Expected: ' +
-        `${width}, actual: ${resultWidth}.`);
+      width,
+      'Failed to resize the window to the requested width.'
+    );
     expect(resultHeight).to.equal(
-        height,
-        'Failed to resize the window to the requested height. Expected: ' +
-        `${height}, actual: ${resultHeight}.`);
+      height,
+      'Failed to resize the window to the requested height.'
+    );
   }
 
   /**
@@ -287,8 +500,9 @@ class SeleniumWebDriverController {
     const getTitle = () => document.title;
 
     return new ControllerPromise(
-        this.driver.executeScript(getTitle),
-        this.getWaitFn_(() => this.driver.executeScript(getTitle)));
+      this.driver.executeScript(getTitle),
+      this.getWaitFn_(() => this.driver.executeScript(getTitle))
+    );
   }
 
   /**
@@ -310,11 +524,14 @@ class SeleniumWebDriverController {
   async scroll(handle, opt_scrollToOptions) {
     const webElement = handle.getElement();
     const scrollTo = (element, opt_scrollToOptions) => {
-      element./*OK*/scrollTo(opt_scrollToOptions);
+      element./*OK*/ scrollTo(opt_scrollToOptions);
     };
 
     return await this.driver.executeScript(
-        scrollTo, webElement, opt_scrollToOptions);
+      scrollTo,
+      webElement,
+      opt_scrollToOptions
+    );
   }
 
   /**
@@ -326,11 +543,33 @@ class SeleniumWebDriverController {
   async scrollBy(handle, opt_scrollToOptions) {
     const webElement = handle.getElement();
     const scrollBy = (element, opt_scrollToOptions) => {
-      element./*OK*/scrollBy(opt_scrollToOptions);
+      element./*OK*/ scrollBy(opt_scrollToOptions);
     };
 
     return await this.driver.executeScript(
-        scrollBy, webElement, opt_scrollToOptions);
+      scrollBy,
+      webElement,
+      opt_scrollToOptions
+    );
+  }
+
+  /**
+   * @param {!ElementHandle<!WebElement>} handle
+   * @param {!ScrollToOptionsDef=} opt_scrollToOptions
+   * @return {!Promise}
+   * @override
+   */
+  async scrollTo(handle, opt_scrollToOptions) {
+    const webElement = handle.getElement();
+    const scrollTo = (element, opt_scrollToOptions) => {
+      element./*OK*/ scrollTo(opt_scrollToOptions);
+    };
+
+    return await this.driver.executeScript(
+      scrollTo,
+      webElement,
+      opt_scrollToOptions
+    );
   }
 
   /**
@@ -371,9 +610,8 @@ class SeleniumWebDriverController {
   /**
    * @param {!ElementHandle<!WebElement>} handle
    * @return {!Promise}
-   * @private
    */
-  async switchToFrame_(handle) {
+  async switchToFrame(handle) {
     // TODO(estherkim): add 'id' parameter, to select element inside 'handle'
     // use case: testing x-origin iframes like amp-mathml, amp-ima-video
 
@@ -385,23 +623,40 @@ class SeleniumWebDriverController {
 
   /**
    * @return {!Promise}
-   * @private
    */
-  async switchToParent_() {
+  async switchToParent() {
     // await this.driver.switchTo().parentFrame();
     await this.driver.switchTo().defaultContent();
   }
 
+  async switchToShadow(handle) {
+    const shadowHost = handle.getElement();
+    const shadowRootBody = await this.evaluate(
+      shadowHost => shadowHost.shadowRoot.body,
+      shadowHost
+    );
+    this.shadowRoot_ = shadowRootBody;
+  }
+
+  async switchToLight() {
+    this.shadowRoot_ = null;
+  }
+
   /**
-   * @param {!ElementHandle<!WebElement>} handle
-   * @param {function():(!Promise|undefined)} fn
-   * @return {!Promise}
-   * @override
+   * Get the current root
+   * @return {!Promise<!WebElement>}
    */
-  async usingFrame(handle, fn) {
-    await this.switchToFrame_(handle);
-    await fn();
-    await this.switchToParent_();
+  getRoot_() {
+    if (this.shadowRoot_) {
+      return this.shadowRoot_;
+    }
+
+    return this.evaluate(() => document.documentElement);
+  }
+
+  /** @override */
+  dispose() {
+    return this.driver.quit();
   }
 }
 

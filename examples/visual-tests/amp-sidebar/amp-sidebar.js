@@ -15,14 +15,11 @@
  */
 'use strict';
 
-const {verifyCssElements} = require('../../../build-system/tasks/visual-diff/helpers');
-
 module.exports = {
-  'open sidebar': async (page, name) => {
-    await page.tap('[on="tap:sidebar1.toggle"]');
-    await verifyCssElements(page, name,
-      /* forbiddenCss */ null,
-      /* loadingIncompleteCss */ null,
-      /* loadingCompleteCss */ ['amp-sidebar[open]']);
-  },
+  // Since the sidebar now uses animations to open/close, the screenshots will
+  // not capture the correct state (Percy does not run animations).
+  // 'open sidebar': async (page, name) => {
+  //   await page.tap('[on="tap:sidebar1.toggle"]');
+  //   await verifySelectorsVisible(page, name, ['amp-sidebar[open]']);
+  // },
 };

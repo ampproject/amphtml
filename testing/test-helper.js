@@ -63,8 +63,9 @@ export function mockServiceForDoc(sandbox, ampdoc, serviceId, methods) {
 }
 
 export function mockWindowInterface(sandbox) {
-  const methods = Object.getOwnPropertyNames(WindowInterface)
-      .filter(p => typeof WindowInterface[p] === 'function');
+  const methods = Object.getOwnPropertyNames(WindowInterface).filter(
+    p => typeof WindowInterface[p] === 'function'
+  );
   const mock = {};
   methods.forEach(method => {
     mock[method] = sandbox.stub(WindowInterface, method);
@@ -79,8 +80,10 @@ export function mockWindowInterface(sandbox) {
  * @return {!Promise}
  */
 export function whenCalled(spy, opt_callCount = 1) {
-  return poll(`Spy was called ${opt_callCount} times`,
-      () => spy.callCount === opt_callCount);
+  return poll(
+    `Spy was called ${opt_callCount} times`,
+    () => spy.callCount === opt_callCount
+  );
 }
 
 const noneValues = {
@@ -148,7 +151,6 @@ const REQUEST_URL = '//localhost:9876/amp4test/request-bank/' + browserId;
  * browser sent HTTP requests.
  */
 export class RequestBank {
-
   static getBrowserId() {
     return browserId;
   }
@@ -176,11 +178,13 @@ export class RequestBank {
    */
   static withdraw(requestId) {
     const url = `${REQUEST_URL}/withdraw/${requestId}/`;
-    return xhrServiceForTesting(window).fetchJson(url, {
-      method: 'GET',
-      ampCors: false,
-      credentials: 'omit',
-    }).then(res => res.json());
+    return xhrServiceForTesting(window)
+      .fetchJson(url, {
+        method: 'GET',
+        ampCors: false,
+        credentials: 'omit',
+      })
+      .then(res => res.json());
   }
 
   static tearDown() {
@@ -215,14 +219,17 @@ export class BrowserController {
     if (!elements.length) {
       throw new Error(`BrowserController query failed: ${selector}`);
     }
-    return poll(`"${selector}" to build`,
-        () => {
-          const someNotBuilt = [].some.call(elements,
-              e => e.classList.contains('i-amphtml-notbuilt'));
-          return !someNotBuilt;
-        },
-        /* onError */ undefined,
-        timeout);
+    return poll(
+      `"${selector}" to build`,
+      () => {
+        const someNotBuilt = [].some.call(elements, e =>
+          e.classList.contains('i-amphtml-notbuilt')
+        );
+        return !someNotBuilt;
+      },
+      /* onError */ undefined,
+      timeout
+    );
   }
 
   /**
@@ -235,22 +242,26 @@ export class BrowserController {
     if (!elements.length) {
       throw new Error(`BrowserController query failed: ${selector}`);
     }
-    return poll(`"${selector}" to layout`,
-        () => {
-          // AMP elements set `readyState` to complete when their
-          // layoutCallback() promise is resolved.
-          const someNotReady = [].some.call(elements,
-              e => e.readyState !== 'complete');
-          return !someNotReady;
-        },
-        /* onError */ undefined,
-        timeout);
+    return poll(
+      `"${selector}" to layout`,
+      () => {
+        // AMP elements set `readyState` to complete when their
+        // layoutCallback() promise is resolved.
+        const someNotReady = [].some.call(
+          elements,
+          e => e.readyState !== 'complete'
+        );
+        return !someNotReady;
+      },
+      /* onError */ undefined,
+      timeout
+    );
   }
 
   click(selector) {
     const element = this.doc_.querySelector(selector);
     if (element) {
-      element.dispatchEvent(new /*OK*/CustomEvent('click', {bubbles: true}));
+      element.dispatchEvent(new /*OK*/ CustomEvent('click', {bubbles: true}));
     }
   }
 
@@ -260,17 +271,19 @@ export class BrowserController {
 }
 
 export function createPointerEvent(type, x, y) {
-  const event = new /*OK*/CustomEvent(type, {bubbles: true});
+  const event = new /*OK*/ CustomEvent(type, {bubbles: true});
   event.clientX = x;
   event.clientY = y;
   event.pageX = x;
   event.pageY = y;
-  event.touches = [{
-    clientX: x,
-    clientY: y,
-    pageX: x,
-    pageY: y,
-  }];
+  event.touches = [
+    {
+      clientX: x,
+      clientY: y,
+      pageX: x,
+      pageY: y,
+    },
+  ];
   return event;
 }
 
@@ -306,4 +319,18 @@ export class ImagePixelVerifier {
     }
     return this.imagePixels_[this.imagePixels_.length - 1].src;
   }
+}
+
+export function measureMutateElementStub(measure, mutate) {
+  return Promise.resolve()
+    .then(measure)
+    .then(mutate);
+}
+
+export function measureElementStub(measure) {
+  return measureMutateElementStub(measure);
+}
+
+export function mutateElementStub(mutate) {
+  return measureMutateElementStub(undefined, mutate);
 }

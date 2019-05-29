@@ -1,3 +1,10 @@
+---
+$category@: media
+formats:
+  - websites
+teaser:
+  text: Displays any Playbuzz content (e.g., list, poll, etc.).
+---
 <!---
 Copyright 2017 The AMP HTML Authors.
 
@@ -14,16 +21,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name=”amp-playbuzz></a> `amp-playbuzz`
+# amp-playbuzz
+
+Displays any Playbuzz item content (e.g., list, poll, etc.)<br>
+Can be any item URL taken from <a href="http://www.playbuzz.com">playbuzz.com
 
 <table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>
-      Displays any Playbuzz item content (e.g., list, poll, etc.)<br />
-      Can be any item URL taken from <a href="http://www.playbuzz.com">playbuzz.com</a>
-    </td>
-  </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-playbuzz" src="https://cdn.ampproject.org/v0/amp-playbuzz-0.1.js">&lt;/script></code></td>
@@ -34,7 +37,6 @@ limitations under the License.
   </tr>
 </table>
 
-[TOC]
 
 ## Examples
 
@@ -70,40 +72,41 @@ With optional parameters (info, share-buttons, comments):
 
 ## Required attributes
 ### One of the following is required:
-
-**src**
-
-The URL for the Playbuzz item.
-Can be any item URL taken from <a href="http://www.playbuzz.com">playbuzz.com</a>
-
-**data-item**
-
-The item id for the Playbuzz item.
-Can be taken from the item's embed code (at the item's page at playbuzz website)
+<table>
+  <tr>
+    <td width="40%"><strong>src</strong></td>
+    <td>The URL for the Playbuzz item.
+    Can be any item URL taken from <a href="http://www.playbuzz.com">playbuzz.com</a></td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-item</strong></td>
+    <td>The item id for the Playbuzz item.
+    Can be taken from the item's embed code (at the item's page at playbuzz website)</td>
+  </tr>
+</table>
 
 **Note**: If both attributes are present, `data-item` is used.
 
 ## Optional attributes
 
-**data-item-info** (optional)
-
-Indicates whether to display data info, such as creation date, creator name, etc.
-
-
-**data-share-buttons** (optional)
-
-Indicates whether to display share buttons.
-
-
-**data-comments** (optional)
-
-Indicates whether to display users' comments.
-
-
-**common attributes**
-
-This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
-
+<table>
+  <tr>
+    <td width="40%"><strong>data-item-info </strong> (optional)</td>
+    <td>Indicates whether to display data info, such as creation date, creator name, etc.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-share-buttons</strong> (optional)</td>
+    <td>Indicates whether to display share buttons.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-comments</strong> (optional)</td>
+    <td>Indicates whether to display users' comments.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>common attributes</strong></td>
+    <td>This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.</td>
+  </tr>
+</table>
 
 ## Validation
 

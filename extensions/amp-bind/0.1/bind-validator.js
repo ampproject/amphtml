@@ -93,7 +93,7 @@ export class BindValidator {
    * @return {boolean}
    */
   canBind(tag, property) {
-    return (this.rulesForTagAndProperty_(tag, property) !== undefined);
+    return this.rulesForTagAndProperty_(tag, property) !== undefined;
   }
 
   /**
@@ -221,6 +221,30 @@ export class BindValidator {
 function createElementRules_() {
   // Initialize `rules` with tag-specific constraints.
   const rules = {
+    'AMP-AUTOCOMPLETE': {
+      'src': {
+        'allowedProtocols': {
+          'https': true,
+        },
+      },
+    },
+    'AMP-BASE-CAROUSEL': {
+      'advance-count': null,
+      'auto-advance-count': null,
+      'auto-advance-interval': null,
+      'auto-advance-loops': null,
+      'auto-advance': null,
+      'horizontal': null,
+      'initial-index': null,
+      'loop': null,
+      'mixed-length': null,
+      'side-slide-count': null,
+      'slide': null,
+      'snap-align': null,
+      'snap-by': null,
+      'snap': null,
+      'visible-count': null,
+    },
     'AMP-BRIGHTCOVE': {
       'data-account': null,
       'data-embed': null,
@@ -231,20 +255,6 @@ function createElementRules_() {
     },
     'AMP-CAROUSEL': {
       'slide': null,
-      // For carousel v2
-      'advance-count': null,
-      'auto-advance-count': null,
-      'auto-advance-interval': null,
-      'auto-advance': null,
-      'horizontal': null,
-      'initial-index': null,
-      'loop': null,
-      'mixed-length': null,
-      'side-slide-count': null,
-      'snap-align': null,
-      'snap-by': null,
-      'snap': null,
-      'visible-count': null,
     },
     'AMP-DATE-PICKER': {
       'max': null,
@@ -437,6 +447,8 @@ function createElementRules_() {
       'selectionstart': null,
       'spellcheck': null,
       'wrap': null,
+      // Non-standard property.
+      'defaulttext': null,
     },
   };
   return rules;

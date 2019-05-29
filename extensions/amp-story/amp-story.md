@@ -1,3 +1,11 @@
+---
+$category@: presentation
+formats:
+  - websites
+  - stories
+teaser:
+  text: A rich, visual storytelling format.
+---
 <!--
 Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 
@@ -22,10 +30,6 @@ limitations under the License.
     <td>A rich, visual storytelling format.</td>
   </tr>
   <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td><div><a href="https://www.ampproject.org/docs/reference/experimental.html">Experimental</a></td>
-  </tr>
-  <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js">&lt;/script></code></td>
   </tr>
@@ -43,14 +47,21 @@ limitations under the License.
 </table>
 
 {% call callout('Important', type='caution') %}
-This component is experimental and under active development. For any issues, please [file a GitHub issue](https://github.com/ampproject/amphtml/issues/new).
+This component is under active development. For any issues, please [file a GitHub issue](https://github.com/ampproject/amphtml/issues/new).
 {% endcall %}
 
 [TOC]
 
+## Version notes
+
+| Version | Description                                                            |
+| ------- | ---------------------------------------------------------------------- |
+| 1.0     | Current version, since 2018-07-16.                                     |
+| 0.1     | Initial implementation.  Deprecated, and will be removed on 2019-03-19 |
+
 ## Migrating from 0.1 to 1.0
 
-We've added new capabilities and features to AMP stories that are available in v1.0 of amp-story. You should consider migrating your stories to v1.0 to take advantage of these new features.
+As of 2018-07-16, version 0.1 is considered deprecated, and will be removed on 2019-03-19.  This may cause minor breaking changes, as your stories will automatically be upgraded to use version 1.0.  We recommend manually migrating your pages to version 1.0 before this date to ensure functionality and proper design.
 
 ### New bookend capabilities
 
@@ -305,7 +316,7 @@ The name of the story's publisher.
 
 ##### publisher-logo-src [required]
 
-A URL to the story publisher's logo in square format (1x1 aspect ratio). For example `publisher-logo-src="https://example.com/logo/1x1.png"`, where 1x1.png is a 36x36 px logo.
+A URL to the story publisher's logo in square format (1x1 aspect ratio). For example `publisher-logo-src="https://example.com/logo/1x1.png"`, where 1x1.png is a 96x96 px logo.
 
 ##### poster-portrait-src [required]
 
@@ -331,10 +342,6 @@ A URL to the [story poster](#posters) in landscape format (4x3 aspect ratio).
 
 A "poster" is an image that displays in the UI until your story is loaded. The poster can generally be the first screen of your story, although you can use any image that is representative of the story.
 
-### Children (of amp-story)
-
-The `<amp-story>` component contains one or more [`<amp-story-page>`](#pages:-amp-story-page) components, containing each of the individual screens of the story.  The first page specified in the document order is the first page shown in the story.
-
 ### Landscape orientation and full bleed desktop experience opt in
 
 If the `supports-landscape` attribute is specified on the `<amp-story>` element, it will:
@@ -354,6 +361,10 @@ Usage: `<amp-story ... supports-landscape>...</amp-story>`
   <noscript><img width="400" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/amp-story-desktop-full-bleed.gif" /></noscript>
   </amp-anim>
 </figure>
+
+### Children (of amp-story)
+
+The `<amp-story>` component contains one or more [`<amp-story-page>`](#pages:-amp-story-page) components, containing each of the individual screens of the story.  The first page specified in the document order is the first page shown in the story.
 
 ## Pages: `amp-story-page`
 
@@ -435,17 +446,16 @@ The `<amp-story-grid-layer>` component lays its children out into a grid.  Its i
 
 <div class="flex-images">
   <amp-img alt="Layer 1" layout="flex-item" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/layers-layer-1.gif" width="200" height="355">
-  <noscript><img width="200" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/layers-layer-1.gif" /></noscript>
-  </amp-img>
+  <noscript><img width="200" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/layers-layer-1.gif" /></noscript></amp-img>
   <span class="special-char">+</span>
   <amp-img alt="Layer 2" layout="flex-item" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/layers-layer-2.jpg" width="200" height="355">
   <noscript><img width="200" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/layers-layer-2.jpg" /></noscript></amp-img>
   <span class="special-char">+</span>
   <amp-img alt="Layer 3" layout="flex-item" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/layers-layer-3.jpg" width="200" height="355">
-  <noscript><img width="200" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/layers-layer-3.jpg" /></noscript></amp-img></amp-img>
+  <noscript><img width="200" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/layers-layer-3.jpg" /></noscript></amp-img>
   <span class="special-char">=</span>
   <amp-img alt="All layers" layout="flex-item" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/layers-layer-4.gif" width="200" height="355">
-  <noscript><img width="200" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/layers-layer-4.gif" /></noscript></amp-img></amp-im</amp-img>
+  <noscript><img width="200" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/layers-layer-4.gif" /></noscript></amp-img>
 </div>
 
 #### Attributes
@@ -583,6 +593,7 @@ An `amp-story-grid-layer` can contain any of the following elements:
         <li><code>&lt;amp-img></code></li>
         <li><code>&lt;amp-video></code></li>
         <li><code>&lt;source></code></li>
+        <li><code>&lt;svg></code></li>
         <li><code>&lt;track></code></li>
       </ul>
     </td>
@@ -696,6 +707,14 @@ An `amp-story-grid-layer` can contain any of the following elements:
     </td>
   </tr>
   <tr>
+    <td>Links</td>
+    <td>
+      <ul>
+        <li><code>&lt;a></code></li>
+      </ul>
+    </td>
+  </tr>
+  <tr>
     <td>Other</td>
     <td>
       <ul>
@@ -705,6 +724,73 @@ An `amp-story-grid-layer` can contain any of the following elements:
     </td>
   </tr>
 </table>
+
+#### Optional customization
+
+##### `data-text-background-color`
+
+The `data-text-background-color` attribute highlights the text of the element with a specified color. To highlight the entire block, add this attribute directly to the text element. To only highlight the text, add the attribute and text to an inner <span>. Note that works anywhere inside an `<amp-story-page>`, not just in `<amp-story-grid-layer>`.
+
+Example:
+<amp-img alt="text background color only example" layout="fixed" src="https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/img/text-background-color-ex-1.png" width="145" height="255">
+  <noscript>
+    <img alt="text background color only example" src="https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/img/text-background-color-ex-1.png" />
+  </noscript>
+</amp-img>
+```html
+<amp-story-grid-layer template="vertical">
+  <h2>
+    <span data-text-background-color="crimson">
+      Cat ipsum dolor sit amet, sleeps on my head, but lounge in doorway so if human is on laptop sit on the keyboard
+    </span>
+  </h2>
+</amp-story-grid-layer>
+```
+
+Example:
+<amp-img alt="text background color full example" layout="fixed" src="https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/img/text-background-color-ex-2.png" width="145" height="255">
+  <noscript>
+    <img alt="text background color full example" src="https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/img/text-background-color-ex-2.png" />
+  </noscript>
+</amp-img>
+```html
+<amp-story-grid-layer template="vertical">
+  <h2 data-text-background-color="crimson">
+    Cat ipsum dolor sit amet, sleeps on my head, but lounge in doorway so if human is on laptop sit on the keyboard
+  </h2>
+</amp-story-grid-layer>
+```
+
+#### Links in amp-story-grid-layer
+
+We support inline links `<a>` as a descendant of `amp-story-grid-layer`. Whenever a link is tapped a tooltip will be shown - deferring the corresponding action until the user taps again in the tooltip.
+
+#### Customizing tooltip for links
+
+You can customize the contents of the tooltip displayed on top of a user interactive element by specifying the following attributes. If they are not specified, a fallback value will be provided automatically.
+
+<figure class="centered-fig">
+  <span class="special-char">Example:</span>
+  <amp-anim alt="Embedded component example" layout="flex-item" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/amp-story-tooltip.gif" width="300" height="553">
+  <noscript><img width="300" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/amp-story-tooltip.gif" /></noscript>
+  </amp-anim>
+</figure>
+
+##### `data-tooltip-icon`
+
+Takes in a `src` where the icon image is located.
+
+##### `data-tooltip-text`
+
+A string that will be shown when the tooltip appears.
+
+Example:
+
+```html
+<a href="https://www.google.com" role="link" data-tooltip-icon="./assets/ic_amp_googblue_1x_web_24dp.png" data-tooltip-text="Go to page">
+  Click me!
+</a>
+```
 
 ### `amp-story-cta-layer`
 
@@ -746,6 +832,145 @@ The `<amp-story-cta-layer>` component allows the usage of `<a>` and `<button>` e
 The `amp-story-cta-layer` allows mostly the same descendants as `amp-story-grid-layer`, and additionally allows `<a>` and `<button>` tags.
 
 For an updated list of supported children, be sure to take a look at the [amp-story-cta-layer-allowed-descendants](https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/validator-amp-story.protoascii) field in the validation rules.
+
+## Page attachments
+
+### `amp-story-page-attachment`
+
+<amp-img alt="AMP Story page attachment" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-page-attachment.gif" width="240" height="480">
+  <noscript>
+    <img alt="AMP Story page attachment" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-page-attachment.gif" />
+  </noscript>
+</amp-img>
+
+Attach additional content to a story page!
+
+Story page attachments allow you to provide additional AMPHTML content to specific pages. This content can be revealed by users through a "swipe up" gesture, or a tap on the call to action element.
+A UI prompt to open the attachment will automatically be added at the bottom of every page that configured an attachment.
+
+The `<amp-story-page-attachment>` element must be the last child of `<amp-story-page>`, and must have the `layout="nodisplay"` attribute. The attachment AMPHTML content is expected to be provided inline in your AMP Story, within this `<amp-story-page-attachment>` tag.
+
+### Optional customization
+
+#### `data-cta-text`
+
+Customizes the call to action text displayed on the UI prompt to open the attachment.
+Default: "Swipe up"
+
+```html
+<amp-story-page-attachment layout="nodisplay" data-cta-text="Read more">...</amp-story-page-attachment>
+```
+
+#### `data-title`
+
+Displays the provided title in the page attachment header.
+Default: `null`
+
+```html
+<amp-story-page-attachment layout="nodisplay" data-title="My title">...</amp-story-page-attachment>
+```
+
+### Allowed content and components
+
+Story page attachments allow the same HTML elements as AMP Story along with additional components listed below, such as third party video players or social media embeds. This means you can add additional content that is too verbose or disallowed in an AMP Story page.
+
+<details>
+  <summary>List of allowed AMP components in a page attachment</summary>
+  <ul>
+    <li><code>&lt;amp-3d-gltf></code></li>
+    <li><code>&lt;amp-3q-player></code></li>
+    <li><code>&lt;amp-accordion></code></li>
+    <li><code>&lt;amp-audio></code></li>
+    <li><code>&lt;amp-beopinion></code></li>
+    <li><code>&lt;amp-bodymovin-animation></code></li>
+    <li><code>&lt;amp-brid-player></code></li>
+    <li><code>&lt;amp-brightcove></code></li>
+    <li><code>&lt;amp-byside-content></code></li>
+    <li><code>&lt;amp-call-tracking></code></li>
+    <li><code>&lt;amp-carousel></code></li>
+    <li><code>&lt;amp-dailymotion></code></li>
+    <li><code>&lt;amp-date-countdown></code></li>
+    <li><code>&lt;amp-embedly-card></code></li>
+    <li><code>&lt;amp-facebook></code></li>
+    <li><code>&lt;amp-facebook-comments></code></li>
+    <li><code>&lt;amp-facebook-like></code></li>
+    <li><code>&lt;amp-facebook-page></code></li>
+    <li><code>&lt;amp-fit-text></code></li>
+    <li><code>&lt;amp-fx-collection></code></li>
+    <li><code>&lt;amp-fx-flying-carpet></code></li>
+    <li><code>&lt;amp-gfycat></code></li>
+    <li><code>&lt;amp-gfycat></code></li>
+    <li><code>&lt;amp-gist></code></li>
+    <li><code>&lt;amp-gist></code></li>
+    <li><code>&lt;amp-google-document-embed></code></li>
+    <li><code>&lt;amp-google-vrview-image></code></li>
+    <li><code>&lt;amp-google-vrview-image></code></li>
+    <li><code>&lt;amp-hulu></code></li>
+    <li><code>&lt;amp-ima-video></code></li>
+    <li><code>&lt;amp-image-slider></code></li>
+    <li><code>&lt;amp-img></code></li>
+    <li><code>&lt;amp-imgur></code></li>
+    <li><code>&lt;amp-instagram></code></li>
+    <li><code>&lt;amp-izlesene></code></li>
+    <li><code>&lt;amp-jwplayer></code></li>
+    <li><code>&lt;amp-kaltura-player></code></li>
+    <li><code>&lt;amp-list></code></li>
+    <li><code>&lt;amp-list></code></li>
+    <li><code>&lt;amp-live-list></code></li>
+    <li><code>&lt;amp-live-list></code></li>
+    <li><code>&lt;amp-mathml></code></li>
+    <li><code>&lt;amp-mowplayer></code></li>
+    <li><code>&lt;amp-nexxtv-player></code></li>
+    <li><code>&lt;amp-o2-player></code></li>
+    <li><code>&lt;amp-ooyala-player></code></li>
+    <li><code>&lt;amp-pan-zoom></code></li>
+    <li><code>&lt;amp-pinterest></code></li>
+    <li><code>&lt;amp-playbuzz></code></li>
+    <li><code>&lt;amp-powr-player></code></li>
+    <li><code>&lt;amp-reach-player></code></li>
+    <li><code>&lt;amp-reddit></code></li>
+    <li><code>&lt;amp-riddle-quiz></code></li>
+    <li><code>&lt;amp-soundcloud></code></li>
+    <li><code>&lt;amp-springboard-player></code></li>
+    <li><code>&lt;amp-timeago></code></li>
+    <li><code>&lt;amp-twitter></code></li>
+    <li><code>&lt;amp-video></code></li>
+    <li><code>&lt;amp-video-iframe></code></li>
+    <li><code>&lt;amp-vimeo></code></li>
+    <li><code>&lt;amp-vine></code></li>
+    <li><code>&lt;amp-viqeo-player></code></li>
+    <li><code>&lt;amp-vk></code></li>
+    <li><code>&lt;amp-wistia-player></code></li>
+    <li><code>&lt;amp-yotpo></code></li>
+    <li><code>&lt;amp-youtube></code></li>
+  </ul>
+</details>
+
+### Example
+
+```html
+<amp-story-page id="foo">
+  <amp-story-grid-layer template="fill">
+    <amp-img src="https://example.ampproject.org/helloworld/bg1.jpg" width="900" height="1600">
+  </amp-story-grid-layer>
+  <amp-story-page-attachment layout="nodisplay">
+    <h1>My title</h1>
+    <p>Lots of interesting text with <a href="https://example.ampproject.org">links</a>!</p>
+    <p>More text and a YouTube video!</p>
+    <amp-youtube
+        data-videoid="b4Vhdr8jtx0"
+        layout="responsive"
+        width="480" height="270">
+    </amp-youtube>
+    <p>And a tweet!</p>
+    <amp-twitter
+        data-tweetid="885634330868850689"
+        layout="responsive"
+        width="480" height="270">
+    </amp-twitter>
+  </amp-story-page-attachment>
+</amp-story-page>
+```
 
 ## Animations
 
@@ -811,6 +1036,18 @@ Fly from left!
 </h2>
 ```
 
+##### animate-in-timing-function [optional]
+
+Use this attribute to specify the timing function (animation curve) of the entrance animation. The default timing function depends on the animation preset you specified.
+
+*Example*: A heading flies in from left of the page and the animation decelerates (ease-out).
+
+```html
+<h2 animate-in="fly-in-left" animate-in-timing-function="cubic-bezier(0.0, 0.0, 0.2, 1)" >
+Fly from left!
+</h2>
+```
+
 ##### animate-in-delay [optional]
 
 Use this attribute to specify the delay before starting the animation. The value must be greater than or equal to 0, in seconds or milliseconds (for example, 0.2s or 200ms). The default delay depends on the animation preset you specified.
@@ -849,6 +1086,39 @@ For example, in the following code, `object2` animates in after `object1` comple
     </div>
   </amp-story-grid-layer>
 </amp-story-page>
+```
+
+##### scale-start, scale-end [optional, only works with `zoom-in` & `zoom-out` animations]
+
+Use these two attributes to further specify the parameters of your zoom-in and zoom-out animations. The value must be greater than or equal to 0, and decimals are allowed. The default will be scale-start: 1 and scale-start: 3 for zoom-in, and the inverse for zoom-out.
+
+*Example*: An image zooming-in from 2x to 5x its size over 4 seconds.
+
+```html
+<amp-img animate-in="zoom-in" scale-start="2" scale-end="5" animate-in-duration="4s" layout="fixed" src="https://picsum.photos/720/320?image=1026" width="720" height="320">
+</amp-img>
+```
+
+##### translate-x [optional, only works with `pan-left` & `pan-right` animations]
+
+Use this attribute to specify the horizontal panning of your image in a pan-left/pan-right animation. The value must be greater than or equal to 0 in pixels. The default value will pan the whole width of the specified image.
+
+*Example*: An image panning 200px to the left over 10 seconds.
+
+```html
+<amp-img animate-in="pan-left" translate-x="200px" animate-in-duration="10s" layout="fixed" src="https://picsum.photos/720/320?image=1026" width="720" height="320">
+</amp-img>
+```
+
+##### translate-y [optional, only works with `pan-up` & `pan-down` animations]
+
+Use this attribute to specify the vertical panning of your image in a pan-up/pan-down animation. The value must be greater than or equal to 0 in pixels. The default value will pan the whole height of the specified image.
+
+*Example*: An image panning 50px down over 15 seconds.
+
+```html
+<amp-img animate-in="pan-down" translate-y="50px" animate-in-duration="15s" layout="fixed" src="https://picsum.photos/720/320?image=1026" width="720" height="320">
+</amp-img>
 ```
 
 ### Sequencing animations
@@ -913,20 +1183,40 @@ The `amp-story-bookend` is the last screen of the story. It contains related lin
   </amp-anim>
 </figure>
 
-To use it, include an `<amp-story-bookend>` tag as the child of your `<amp-story>` with the required attributes like so:
+To use it, include an `<amp-story-bookend>` tag as the child of your `<amp-story>` with the required attribute `layout=nodisplay`.
+You can then specify the JSON configuration in a separate file and import it through the `src` attribute, or you can place it inline.
+
+Importing the JSON configuration through the `src` attribute:
 
 ```html
 <amp-story standalone>
   <amp-story-page id="cover">
     ...
   </amp-story-page>
-  <!-- `src` and `layout=display` are required. -->
+  <!-- `layout=nodisplay` is required. -->
   <amp-story-bookend src="bookendv1.json" layout=nodisplay>
   </amp-story-bookend>
 <amp-story>
 ```
 
-Next, you must create a JSON file where you can customize the bookend. The overall structure of the config looks like so:
+If you don't want to fetch the bookend configuration from a server, you can also specify it inline:
+
+```html
+<amp-story standalone>
+  ...
+  <amp-story-bookend layout=nodisplay>
+    <script type="application/json">
+      {
+        "bookendVersion": "v1.0",
+        "shareProviders": [ ... ],
+        "components": [ ... ]
+     }
+    </script>
+  </amp-story-bookend>
+<amp-story>
+```
+
+Next, you must fill in the JSON configuration. This is where you customize the bookend. The overall structure of the config looks like so:
 
 ```text
 {
@@ -1166,8 +1456,8 @@ The `<amp-story-bookend>` must have a `src` attribute pointing to the JSON confi
 ## Other components usable in AMP stories
 The following are other components usable in AMP stories that require some story-specific caveats.
 
-- [amp-sidebar](https://www.ampproject.org/docs/reference/components/amp-sidebar)
 - [amp-consent](https://www.ampproject.org/docs/reference/components/amp-consent#prompt-ui-for-stories)
+- [amp-sidebar](https://www.ampproject.org/docs/reference/components/amp-sidebar)
 
 For more generally usable components see the [list of allowed children](https://www.ampproject.org/docs/reference/components/amp-story#children).
 
@@ -1177,7 +1467,7 @@ See [amp-story rules](https://github.com/ampproject/amphtml/blob/master/extensio
 
 ## Localization
 
-To localize your story, include the language code in the `lang` attribute on the `<html>` tag of your story, such as `<html lang="en">` for English.  The supported language codes are:
+To localize your story, include the language code in the `lang` attribute on the `<html>` tag of your story, such as `<html ⚡ lang="en">` for English.  The supported language codes are:
 
 * ar (Arabic)
 * de (German)
@@ -1202,7 +1492,7 @@ To localize your story, include the language code in the `lang` attribute on the
 * zh-TW (Traditional Chinese)
 * zh (Simplified Chinese)
 
-Additionally, for right-to-left languages, you may include the `dir="rtl"` attribute on the `<html>` tag of your story.  This may be used in conjunction with the language code as well, e.g. `<html lang="ar" dir="rtl">`.
+Additionally, for right-to-left languages, you may include the `dir="rtl"` attribute on the `<html>` tag of your story.  This may be used in conjunction with the language code as well, e.g. `<html ⚡ lang="ar" dir="rtl">`.
 
 ## Related resources
 

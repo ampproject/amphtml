@@ -1,3 +1,10 @@
+---
+$category@: dynamic-content
+formats:
+  - websites
+teaser:
+  text: Provides a calendar widget to select dates.
+---
 <!---
 Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,7 +21,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-date-picker"></a> `amp-date-picker`
+# amp-date-picker
 
 [TOC]
 
@@ -92,7 +99,7 @@ By specifying `mode="static"`, the `amp-date-picker` renders a static calendar v
 
 For a static date picker, you must specify a size-defined layout, which can be one of: `fixed`, `fixed-height`, `responsive`, `fill` or `flex-item`.
 
-When the `static` amp-date-picker is rendered in a `<form>`, if there are no [inputs specified with `*input-selector`](#input-selector), the amp-date-picker creates hidden input elements (e.g., `<input type="hidden" ...`). The amp-date-picker names the elements as `date` or `start-date` and `end-date`; if those names are already used in the form, the amp-date-picker attempts to name the input fields with the `id` of the `<amp-date-picker>`.
+When the `static` amp-date-picker is rendered in a `<form>`, if there are no [inputs specified with `*input-selector`](#input-selector), the amp-date-picker creates hidden input elements (e.g., `<input type="hidden" …`). The amp-date-picker names the elements as `date` or `start-date` and `end-date`; if those names are already used in the form, the amp-date-picker attempts to name the input fields with the `id` of the `<amp-date-picker>`.
 
 *Example: static date picker in a form field*
 
@@ -407,6 +414,12 @@ document that sets a minimum height for the date picker.
 }
 ```
 
+##### allow-blocked-end-date
+
+If present, this attribute allows the user to choose an end date on the first
+blocked date after their chosen start date.
+By default, this attribute is not present.
+
 ##### allow-blocked-ranges
 
 If present, this attribute allows the user to select a range containing blocked date(s).
@@ -579,6 +592,62 @@ an interaction with the calendar view, i.e. when the overlay would open.
 The date picker triggers the  `deactivate` event when the user ends
 their interaction with the calendar view, i.e. when the overlay would close.
 
+##### select
+
+The date picker triggers the `select` event when the user selects a date or
+date range. When selecting a date range, the event is emitted when the end
+date and start date are both selected.
+The `select` event contains the following properties.
+
+For a single date picker:
+
+<table>
+<tr>
+<th width="30%">Property</th>
+<th>Description</th>
+</tr>
+<tr>
+<td><code>date</code></td>
+<td>The date that was selected.</td>
+</tr>
+<tr>
+<td><code>id</code></td>
+<td>The <code>id</code> attribute of the first <a href="#templates">date template</a> that applies to this date.</td>
+</tr>
+</table>
+
+```html
+<amp-date-picker type="single" on="select: AMP.setState({date: event.date, templateSelected: event.id})" …>
+  <!-- … -->
+</amp-date-picker>
+```
+
+For a date range picker:
+
+<table>
+<tr>
+<th width="30%">Property</th>
+<th>Description</th>
+</tr>
+<tr>
+<td><code>dates</code></td>
+<td>An array of the dates that were selected. Each object in the array contains the <code>date</code> and <code>id</code> properties from the single date picker <code>change</code> event object.</td>
+</tr>
+<tr>
+<td><code>start</code></td>
+<td>A shortcut for the first date in the date range (<code>event.dates[0]</code>).
+</tr>
+<tr>
+<td><code>end</code></td>
+<td>A shortcut for the last date in the date range (<code>event.dates[event.dates.length - 1]</code>).
+</tr>
+</table>
+
+```html
+<amp-date-picker type="range" on="select: AMP.setState({dates: event.dates, firstTemplate: event.start.id})" …>
+  <!-- … -->
+</amp-date-picker>
+```
 
 ## Actions
 

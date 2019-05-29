@@ -85,24 +85,31 @@ class AmpWorker {
     const useLocal = getMode().localDev || getMode().test;
     const useRtvVersion = !useLocal;
     const url = calculateEntryPointScriptUrl(
-        loc, 'ww', useLocal, useRtvVersion);
+      loc,
+      'ww',
+      useLocal,
+      useRtvVersion
+    );
     dev().fine(TAG, 'Fetching web worker from', url);
 
     /** @private {Worker} */
     this.worker_ = null;
 
     /** @const @private {!Promise} */
-    this.fetchPromise_ = this.xhr_.fetchText(url, {
-      ampCors: false,
-    }).then(res => res.text()).then(text => {
-      // Workaround since Worker constructor only accepts same origin URLs.
-      const blob = new win.Blob([
-        text + '\n//# sourceurl=' + url,
-      ], {type: 'text/javascript'});
-      const blobUrl = win.URL.createObjectURL(blob);
-      this.worker_ = new win.Worker(blobUrl);
-      this.worker_.onmessage = this.receiveMessage_.bind(this);
-    });
+    this.fetchPromise_ = this.xhr_
+      .fetchText(url, {
+        ampCors: false,
+      })
+      .then(res => res.text())
+      .then(text => {
+        // Workaround since Worker constructor only accepts same origin URLs.
+        const blob = new win.Blob([text + '\n//# sourceurl=' + url], {
+          type: 'text/javascript',
+        });
+        const blobUrl = win.URL.createObjectURL(blob);
+        this.worker_ = new win.Worker(blobUrl);
+        this.worker_.onmessage = this.receiveMessage_.bind(this);
+      });
 
     /**
      * Array of in-flight messages pending response from worker.
@@ -142,9 +149,13 @@ class AmpWorker {
 
         const scope = this.idForWindow_(opt_localWin || this.win_);
 
-        const message =
-          /** @type {ToWorkerMessageDef} */ ({method, args, scope, id});
-        this.worker_./*OK*/postMessage(message);
+        const message = /** @type {ToWorkerMessageDef} */ ({
+          method,
+          args,
+          scope,
+          id,
+        });
+        this.worker_./*OK*/ postMessage(message);
       });
     });
   }
@@ -156,17 +167,25 @@ class AmpWorker {
    * @private
    */
   receiveMessage_(event) {
-    const {method, returnValue, id} =
-      /** @type {FromWorkerMessageDef} */ (event.data);
+    const {
+      method,
+      returnValue,
+      id,
+    } = /** @type {FromWorkerMessageDef} */ (event.data);
 
     const message = this.messages_[id];
     if (!message) {
-      dev().error(TAG, `Received unexpected message (${method}, ${id}) ` +
-          'from worker.');
+      dev().error(
+        TAG,
+        `Received unexpected message (${method}, ${id}) from worker.`
+      );
       return;
     }
-    devAssert(method == message.method, 'Received mismatched method ' +
-        `(${method}, ${id}), expected ${message.method}.`);
+    devAssert(
+      method == message.method,
+      'Received mismatched method ' +
+        `(${method}, ${id}), expected ${message.method}.`
+    );
 
     message.resolve(returnValue);
 

@@ -23,57 +23,50 @@ import {
 } from '../../../src/utils/array';
 
 describe('areEqualOrdered', function() {
-  it('should return true on empty arrays',
-      () => {
-        const result = areEqualOrdered([], []);
-        expect(result).to.be.true;
-      });
+  it('should return true on empty arrays', () => {
+    const result = areEqualOrdered([], []);
+    expect(result).to.be.true;
+  });
 
-  it('should return true on same array with primitive types of same seq',
-      () => {
-        const result = areEqualOrdered(
-            [1, 'string', true, undefined, null],
-            [1, 'string', true, undefined, null]
-        );
-        expect(result).to.be.true;
-      });
+  it('should return true on same array with primitive types of same seq', () => {
+    const result = areEqualOrdered(
+      [1, 'string', true, undefined, null],
+      [1, 'string', true, undefined, null]
+    );
+    expect(result).to.be.true;
+  });
 
-  it('should return true on same array with objects of same seq',
-      () => {
-        const o1 = {a: 1};
-        const o2 = () => { return 'arrow func'; };
-        const o3 = new Function('whatever');
-        const o4 = {};
-        const o5 = [];
-        const result = areEqualOrdered(
-            [o1, o2, o3, o4, o5],
-            [o1, o2, o3, o4, o5]
-        );
-        expect(result).to.be.true;
-      });
+  it('should return true on same array with objects of same seq', () => {
+    const o1 = {a: 1};
+    const o2 = () => {
+      return 'arrow func';
+    };
+    const o3 = new Function('whatever');
+    const o4 = {};
+    const o5 = [];
+    const result = areEqualOrdered([o1, o2, o3, o4, o5], [o1, o2, o3, o4, o5]);
+    expect(result).to.be.true;
+  });
 
-  it('should return false on same array with primitive types of different seq',
-      () => {
-        const result = areEqualOrdered(
-            [null, true, 'string', undefined, 1],
-            [1, 'string', true, undefined, null]
-        );
-        expect(result).to.be.false;
-      });
+  it('should return false on same array with primitive types of different seq', () => {
+    const result = areEqualOrdered(
+      [null, true, 'string', undefined, 1],
+      [1, 'string', true, undefined, null]
+    );
+    expect(result).to.be.false;
+  });
 
-  it('should return false on same array with objects of different seq',
-      () => {
-        const o1 = {a: 1};
-        const o2 = () => { return 'arrow func'; };
-        const o3 = new Function('whatever');
-        const o4 = {};
-        const o5 = [];
-        const result = areEqualOrdered(
-            [o4, o5, o3, o2, o1],
-            [o1, o2, o3, o4, o5]
-        );
-        expect(result).to.be.false;
-      });
+  it('should return false on same array with objects of different seq', () => {
+    const o1 = {a: 1};
+    const o2 = () => {
+      return 'arrow func';
+    };
+    const o3 = new Function('whatever');
+    const o4 = {};
+    const o5 = [];
+    const result = areEqualOrdered([o4, o5, o3, o2, o1], [o1, o2, o3, o4, o5]);
+    expect(result).to.be.false;
+  });
 
   it('should return false on array of different length', () => {
     const result = areEqualOrdered([1, 2, 3], [1, 2, 3, 3]);
@@ -88,18 +81,21 @@ describe('remove', function() {
   });
 
   it('should remove elements that return true', () => {
-    remove(array, i => i > 2);
+    const removed = remove(array, i => i > 2);
     expect(array).to.deep.equal([1, 2]);
+    expect(removed).to.deep.equal([3, 4, 5]);
   });
 
   it('handles no removals', () => {
-    remove(array, () => false);
+    const removed = remove(array, () => false);
     expect(array).to.deep.equal([1, 2, 3, 4, 5]);
+    expect(removed).to.deep.equal([]);
   });
 
   it('handles consecutive removals', () => {
-    remove(array, () => true);
+    const removed = remove(array, () => true);
     expect(array).to.deep.equal([]);
+    expect(removed).to.deep.equal([1, 2, 3, 4, 5]);
   });
 });
 
@@ -143,9 +139,9 @@ describe('fromIterator', function() {
     let index = 0;
     const iterator = {
       next() {
-        return index < 3 ?
-          {value: (index++) * 2, done: false} :
-          {value: undefined, done: true};
+        return index < 3
+          ? {value: index++ * 2, done: false}
+          : {value: undefined, done: true};
       },
     };
 

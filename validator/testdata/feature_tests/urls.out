@@ -25,7 +25,7 @@ FAIL
 |    <meta charset="utf-8">
 |    <link rel="canonical" href="javascript://llamas">
 >>   ^~~~~~~~~
-feature_tests/urls.html:25:2 Invalid URL protocol 'javascript:' for attribute 'href' in tag 'link rel=canonical'. (see https://www.ampproject.org/docs/reference/spec#required-markup) [DISALLOWED_HTML]
+feature_tests/urls.html:25:2 Invalid URL protocol 'javascript:' for attribute 'href' in tag 'link rel=canonical'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup) [DISALLOWED_HTML]
 |    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">
 |    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
 |    <script src="https://cdn.ampproject.org/v0.js" async></script>
@@ -39,32 +39,32 @@ feature_tests/urls.html:25:2 Invalid URL protocol 'javascript:' for attribute 'h
 |    <a href="https://⚡">Valid URL</a>
 |    <a href="https://">Valid URL</a>
 >>   ^~~~~~~~~
-feature_tests/urls.html:37:2 Malformed URL 'https://' for attribute 'href' in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+feature_tests/urls.html:37:2 Malformed URL 'https://' for attribute 'href' in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#links) [DISALLOWED_HTML]
 |    <a href="HtTpS://Google.com/">Valid URL</a>
 |    <a href="javascript:alert('boo')">Invalid protocol</a>
 >>   ^~~~~~~~~
-feature_tests/urls.html:39:2 Invalid URL protocol 'javascript:' for attribute 'href' in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+feature_tests/urls.html:39:2 Invalid URL protocol 'javascript:' for attribute 'href' in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#links) [DISALLOWED_HTML]
 |    <a href="JavaScript:alert('boo')">Invalid protocol</a>
 >>   ^~~~~~~~~
-feature_tests/urls.html:40:2 Invalid URL protocol 'javascript:' for attribute 'href' in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+feature_tests/urls.html:40:2 Invalid URL protocol 'javascript:' for attribute 'href' in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#links) [DISALLOWED_HTML]
 |    <a href="javascript&colon;alert(1)">Invalid protocol</a>
 >>   ^~~~~~~~~
-feature_tests/urls.html:41:2 Invalid URL protocol 'javascript:' for attribute 'href' in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+feature_tests/urls.html:41:2 Invalid URL protocol 'javascript:' for attribute 'href' in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#links) [DISALLOWED_HTML]
 |    <a href="vbscript:bar">Invalid protocol</a>
 >>   ^~~~~~~~~
-feature_tests/urls.html:42:2 Invalid URL protocol 'vbscript:' for attribute 'href' in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+feature_tests/urls.html:42:2 Invalid URL protocol 'vbscript:' for attribute 'href' in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#links) [DISALLOWED_HTML]
 |    <a href="data:baz">Invalid protocol</a>
 >>   ^~~~~~~~~
-feature_tests/urls.html:43:2 Invalid URL protocol 'data:' for attribute 'href' in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+feature_tests/urls.html:43:2 Invalid URL protocol 'data:' for attribute 'href' in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#links) [DISALLOWED_HTML]
 |    <a href="ftp://google.com/">Valid protocol</a>
 |    <!-- invalid (javascript is not an allowed protocol: singluar src element) -->
 |    <amp-img srcset="javascript:alert(1)" layout="fill"></amp-img>
 >>   ^~~~~~~~~
-feature_tests/urls.html:46:2 Invalid URL protocol 'javascript:' for attribute 'srcset' in tag 'amp-img'. (see https://www.ampproject.org/docs/reference/components/amp-img) [AMP_TAG_PROBLEM]
+feature_tests/urls.html:46:2 Invalid URL protocol 'javascript:' for attribute 'srcset' in tag 'amp-img'. (see https://amp.dev/documentation/components/amp-img) [AMP_TAG_PROBLEM]
 |    <!-- invalid (javascript is not an allwoed protocol: second src element) -->
 |    <amp-img srcset="image-1.png 1x, javascript:alert(1)" layout="fill"></amp-img>
 >>   ^~~~~~~~~
-feature_tests/urls.html:48:2 Multiple image candidates with the same width or pixel density found in attribute 'srcset' in tag 'amp-img'. (see https://www.ampproject.org/docs/reference/components/amp-img) [DISALLOWED_HTML]
+feature_tests/urls.html:48:2 Multiple image candidates with the same width or pixel density found in attribute 'srcset' in tag 'amp-img'. (see https://amp.dev/documentation/components/amp-img) [DISALLOWED_HTML]
 |    <!-- valid -->
 |    <amp-img srcset="image-1x.png 1x, image-2x.png 2x" layout="fill"></amp-img>
 |    <!-- valid -->
@@ -74,23 +74,23 @@ feature_tests/urls.html:48:2 Multiple image candidates with the same width or pi
 |    <!-- invalid (javascript is not an allowed protocol: multi src element) -->
 |    <amp-img srcset="javascript:alert('boo') 1x, foo 2x" layout="fill"></amp-img>
 >>   ^~~~~~~~~
-feature_tests/urls.html:56:2 Invalid URL protocol 'javascript:' for attribute 'srcset' in tag 'amp-img'. (see https://www.ampproject.org/docs/reference/components/amp-img) [AMP_TAG_PROBLEM]
+feature_tests/urls.html:56:2 Invalid URL protocol 'javascript:' for attribute 'srcset' in tag 'amp-img'. (see https://amp.dev/documentation/components/amp-img) [AMP_TAG_PROBLEM]
 |    <!-- invalid (javascript is not an allowed protocol: case insensitive) -->
 |    <amp-img srcset="image-1x.png 1x, JavaScript:baz 2x" layout="fill"></amp-img>
 >>   ^~~~~~~~~
-feature_tests/urls.html:58:2 Invalid URL protocol 'javascript:' for attribute 'srcset' in tag 'amp-img'. (see https://www.ampproject.org/docs/reference/components/amp-img) [AMP_TAG_PROBLEM]
+feature_tests/urls.html:58:2 Invalid URL protocol 'javascript:' for attribute 'srcset' in tag 'amp-img'. (see https://amp.dev/documentation/components/amp-img) [AMP_TAG_PROBLEM]
 |    <!-- invalid (empty) -->
 |    <amp-img srcset="" layout="fill"></amp-img>
 >>   ^~~~~~~~~
-feature_tests/urls.html:60:2 Missing URL for attribute 'srcset' in tag 'amp-img'. (see https://www.ampproject.org/docs/reference/components/amp-img) [AMP_TAG_PROBLEM]
+feature_tests/urls.html:60:2 Missing URL for attribute 'srcset' in tag 'amp-img'. (see https://amp.dev/documentation/components/amp-img) [AMP_TAG_PROBLEM]
 |    <!-- invalid (duplicate pixel density) -->
 |    <amp-img srcset="image-1x.png 1x, image-2x.png 1x" layout="fill"></amp-img>
 >>   ^~~~~~~~~
-feature_tests/urls.html:62:2 Multiple image candidates with the same width or pixel density found in attribute 'srcset' in tag 'amp-img'. (see https://www.ampproject.org/docs/reference/components/amp-img) [DISALLOWED_HTML]
+feature_tests/urls.html:62:2 Multiple image candidates with the same width or pixel density found in attribute 'srcset' in tag 'amp-img'. (see https://amp.dev/documentation/components/amp-img) [DISALLOWED_HTML]
 |    <!-- invalid (URL has spaces that are not encoded) -->
 |    <amp-img srcset="image 1x.png 1x, image 2x.png 2x" layout="fill"></amp-img>
 >>   ^~~~~~~~~
-feature_tests/urls.html:64:2 The attribute 'srcset' in tag 'amp-img' is set to the invalid value 'image 1x.png 1x, image 2x.png 2x'. (see https://www.ampproject.org/docs/reference/components/amp-img) [DISALLOWED_HTML]
+feature_tests/urls.html:64:2 The attribute 'srcset' in tag 'amp-img' is set to the invalid value 'image 1x.png 1x, image 2x.png 2x'. (see https://amp.dev/documentation/components/amp-img) [DISALLOWED_HTML]
 |    <!-- valid (URL has encoded spaces) -->
 |    <amp-img srcset=", image%201x.png 1x, image%202x.png 2x" layout="fill"></amp-img>
 |    <a href="http://foobarbazexample.com\x10.com/">Interesting Case</a>
@@ -98,52 +98,52 @@ feature_tests/urls.html:64:2 The attribute 'srcset' in tag 'amp-img' is set to t
 |    <!-- Missing src -->
 |    <amp-ad src="" width="42" height="42" type=""></amp-ad>
 >>   ^~~~~~~~~
-feature_tests/urls.html:70:2 Missing URL for attribute 'src' in tag 'amp-ad'. (see https://www.ampproject.org/docs/reference/components/amp-ad) [AMP_TAG_PROBLEM]
+feature_tests/urls.html:70:2 Missing URL for attribute 'src' in tag 'amp-ad'. (see https://amp.dev/documentation/components/amp-ad) [AMP_TAG_PROBLEM]
 |    <amp-anim src="" width="42" height="42"></amp-anim>
 >>   ^~~~~~~~~
-feature_tests/urls.html:71:2 Missing URL for attribute 'src' in tag 'amp-anim'. (see https://www.ampproject.org/docs/reference/components/amp-anim) [AMP_TAG_PROBLEM]
+feature_tests/urls.html:71:2 Missing URL for attribute 'src' in tag 'amp-anim'. (see https://amp.dev/documentation/components/amp-anim) [AMP_TAG_PROBLEM]
 >>   ^~~~~~~~~
-feature_tests/urls.html:71:2 The tag 'amp-anim' requires including the 'amp-anim' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-anim) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+feature_tests/urls.html:71:2 The tag 'amp-anim' requires including the 'amp-anim' extension JavaScript. (see https://amp.dev/documentation/components/amp-anim) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |    <amp-audio src="" layout="fixed" width="42"></amp-audio>
 >>   ^~~~~~~~~
-feature_tests/urls.html:72:2 Missing URL for attribute 'src' in tag 'amp-audio'. (see https://www.ampproject.org/docs/reference/components/amp-audio) [AMP_TAG_PROBLEM]
+feature_tests/urls.html:72:2 Missing URL for attribute 'src' in tag 'amp-audio'. (see https://amp.dev/documentation/components/amp-audio) [AMP_TAG_PROBLEM]
 >>   ^~~~~~~~~
-feature_tests/urls.html:72:2 The tag 'amp-audio' requires including the 'amp-audio' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-audio) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+feature_tests/urls.html:72:2 The tag 'amp-audio' requires including the 'amp-audio' extension JavaScript. (see https://amp.dev/documentation/components/amp-audio) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |    <amp-iframe src="" width="42" height="42"></amp-iframe>
 >>   ^~~~~~~~~
-feature_tests/urls.html:73:2 Missing URL for attribute 'src' in tag 'amp-iframe'. (see https://www.ampproject.org/docs/reference/components/amp-iframe) [AMP_TAG_PROBLEM]
+feature_tests/urls.html:73:2 Missing URL for attribute 'src' in tag 'amp-iframe'. (see https://amp.dev/documentation/components/amp-iframe) [AMP_TAG_PROBLEM]
 >>   ^~~~~~~~~
-feature_tests/urls.html:73:2 The tag 'amp-iframe' requires including the 'amp-iframe' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-iframe) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+feature_tests/urls.html:73:2 The tag 'amp-iframe' requires including the 'amp-iframe' extension JavaScript. (see https://amp.dev/documentation/components/amp-iframe) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |    <amp-img src="" layout="responsive" width="42" height="42"></amp-img>
 >>   ^~~~~~~~~
-feature_tests/urls.html:74:2 Missing URL for attribute 'src' in tag 'amp-img'. (see https://www.ampproject.org/docs/reference/components/amp-img) [AMP_TAG_PROBLEM]
+feature_tests/urls.html:74:2 Missing URL for attribute 'src' in tag 'amp-img'. (see https://amp.dev/documentation/components/amp-img) [AMP_TAG_PROBLEM]
 |    <amp-pixel src="" layout="fixed" width="42"></amp-pixel>
 |    <amp-video src="" width="42" height="42"></amp-video>
 >>   ^~~~~~~~~
-feature_tests/urls.html:76:2 Missing URL for attribute 'src' in tag 'amp-video'. (see https://www.ampproject.org/docs/reference/components/amp-video) [AMP_TAG_PROBLEM]
+feature_tests/urls.html:76:2 Missing URL for attribute 'src' in tag 'amp-video'. (see https://amp.dev/documentation/components/amp-video) [AMP_TAG_PROBLEM]
 |    <!-- src contains only whitespace: regular space followed by non-breaking
 |         space followed by tab. -->
 |    <amp-ad src="  	" width="42" height="42" type=""></amp-ad>
 >>   ^~~~~~~~~
-feature_tests/urls.html:79:2 Missing URL for attribute 'src' in tag 'amp-ad'. (see https://www.ampproject.org/docs/reference/components/amp-ad) [AMP_TAG_PROBLEM]
+feature_tests/urls.html:79:2 Missing URL for attribute 'src' in tag 'amp-ad'. (see https://amp.dev/documentation/components/amp-ad) [AMP_TAG_PROBLEM]
 |    <!-- Invalid protocol -->
 |    <amp-ad src="http://amp-ad" width="42" height="42" type=""></amp-ad>
 >>   ^~~~~~~~~
-feature_tests/urls.html:81:2 Invalid URL protocol 'http:' for attribute 'src' in tag 'amp-ad'. (see https://www.ampproject.org/docs/reference/components/amp-ad) [AMP_TAG_PROBLEM]
+feature_tests/urls.html:81:2 Invalid URL protocol 'http:' for attribute 'src' in tag 'amp-ad'. (see https://amp.dev/documentation/components/amp-ad) [AMP_TAG_PROBLEM]
 |    <amp-iframe src="http://amp-iframe" width="42" height="42"></amp-iframe>
 >>   ^~~~~~~~~
-feature_tests/urls.html:82:2 Invalid URL protocol 'http:' for attribute 'src' in tag 'amp-iframe'. (see https://www.ampproject.org/docs/reference/components/amp-iframe) [AMP_TAG_PROBLEM]
+feature_tests/urls.html:82:2 Invalid URL protocol 'http:' for attribute 'src' in tag 'amp-iframe'. (see https://amp.dev/documentation/components/amp-iframe) [AMP_TAG_PROBLEM]
 >>   ^~~~~~~~~
-feature_tests/urls.html:82:2 The tag 'amp-iframe' requires including the 'amp-iframe' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-iframe) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+feature_tests/urls.html:82:2 The tag 'amp-iframe' requires including the 'amp-iframe' extension JavaScript. (see https://amp.dev/documentation/components/amp-iframe) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |    <amp-pixel src="http://amp-pixel" layout="fixed" width="42"></amp-pixel>
 >>   ^~~~~~~~~
-feature_tests/urls.html:83:2 Invalid URL protocol 'http:' for attribute 'src' in tag 'amp-pixel'. (see https://www.ampproject.org/docs/reference/components/amp-pixel) [AMP_TAG_PROBLEM]
+feature_tests/urls.html:83:2 Invalid URL protocol 'http:' for attribute 'src' in tag 'amp-pixel'. (see https://amp.dev/documentation/components/amp-pixel) [AMP_TAG_PROBLEM]
 |    <amp-video src="http://amp-video" width="42" height="42"></amp-video>
 >>   ^~~~~~~~~
-feature_tests/urls.html:84:2 Invalid URL protocol 'http:' for attribute 'src' in tag 'amp-video'. (see https://www.ampproject.org/docs/reference/components/amp-video) [AMP_TAG_PROBLEM]
+feature_tests/urls.html:84:2 Invalid URL protocol 'http:' for attribute 'src' in tag 'amp-video'. (see https://amp.dev/documentation/components/amp-video) [AMP_TAG_PROBLEM]
 |    <a href=" j a v a s c r i p t :alert(1)">Invalid protocol</a>
 >>   ^~~~~~~~~
-feature_tests/urls.html:85:2 Invalid URL protocol 'j a v a s c r i p t :' for attribute 'href' in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+feature_tests/urls.html:85:2 Invalid URL protocol 'j a v a s c r i p t :' for attribute 'href' in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#links) [DISALLOWED_HTML]
 |
 |    <!-- Valid ipv6 addresses -->
 |    <a href="https://[2001:0db8::85a3]/">Valid</a>
@@ -156,67 +156,67 @@ feature_tests/urls.html:85:2 Invalid URL protocol 'j a v a s c r i p t :' for at
 |    <!-- Invalid ipv6 addresses -->
 |    <a href="https://[2001:0db8:85a3]/">Invalid</a>
 >>   ^~~~~~~~~
-feature_tests/urls.html:96:2 Malformed URL 'https://[2001:0db8:85a3]/' for attribute 'href' in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+feature_tests/urls.html:96:2 Malformed URL 'https://[2001:0db8:85a3]/' for attribute 'href' in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#links) [DISALLOWED_HTML]
 |    <a href="https://[20012:0db8::85a3]/">Invalid</a>
 >>   ^~~~~~~~~
-feature_tests/urls.html:97:2 Malformed URL 'https://[20012:0db8::85a3]/' for attribute 'href' in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+feature_tests/urls.html:97:2 Malformed URL 'https://[20012:0db8::85a3]/' for attribute 'href' in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#links) [DISALLOWED_HTML]
 |    <a href="https://[200g:0db8:85a3]/">Invalid</a>
 >>   ^~~~~~~~~
-feature_tests/urls.html:98:2 Malformed URL 'https://[200g:0db8:85a3]/' for attribute 'href' in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+feature_tests/urls.html:98:2 Malformed URL 'https://[200g:0db8:85a3]/' for attribute 'href' in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#links) [DISALLOWED_HTML]
 |    <a href="https://[:::1]/">Invalid</a>
 >>   ^~~~~~~~~
-feature_tests/urls.html:99:2 Malformed URL 'https://[:::1]/' for attribute 'href' in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+feature_tests/urls.html:99:2 Malformed URL 'https://[:::1]/' for attribute 'href' in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#links) [DISALLOWED_HTML]
 |    <a href="https://[0:0:0:0:0:0:1]/">Invalid</a>
 >>   ^~~~~~~~~
-feature_tests/urls.html:100:2 Malformed URL 'https://[0:0:0:0:0:0:1]/' for attribute 'href' in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+feature_tests/urls.html:100:2 Malformed URL 'https://[0:0:0:0:0:0:1]/' for attribute 'href' in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#links) [DISALLOWED_HTML]
 |    <a href="https://[0:0:0:0:0:0:0:0:1]/">Invalid</a>
 >>   ^~~~~~~~~
-feature_tests/urls.html:101:2 Malformed URL 'https://[0:0:0:0:0:0:0:0:1]/' for attribute 'href' in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+feature_tests/urls.html:101:2 Malformed URL 'https://[0:0:0:0:0:0:0:0:1]/' for attribute 'href' in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#links) [DISALLOWED_HTML]
 |    <a href="https://[0:0:0:0:0:0:0:8.8.8.8]/">Invalid</a>
 >>   ^~~~~~~~~
-feature_tests/urls.html:102:2 Malformed URL 'https://[0:0:0:0:0:0:0:8.8.8.8]/' for attribute 'href' in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+feature_tests/urls.html:102:2 Malformed URL 'https://[0:0:0:0:0:0:0:8.8.8.8]/' for attribute 'href' in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#links) [DISALLOWED_HTML]
 |    <a href="https://[0:0:0:0:0:8.8.8.8]/">Invalid</a>
 >>   ^~~~~~~~~
-feature_tests/urls.html:103:2 Malformed URL 'https://[0:0:0:0:0:8.8.8.8]/' for attribute 'href' in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+feature_tests/urls.html:103:2 Malformed URL 'https://[0:0:0:0:0:8.8.8.8]/' for attribute 'href' in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#links) [DISALLOWED_HTML]
 |    <a href="https://[0:0:0:0:0:8.8.8.8:1]/">Invalid</a>
 >>   ^~~~~~~~~
-feature_tests/urls.html:104:2 Malformed URL 'https://[0:0:0:0:0:8.8.8.8:1]/' for attribute 'href' in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+feature_tests/urls.html:104:2 Malformed URL 'https://[0:0:0:0:0:8.8.8.8:1]/' for attribute 'href' in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#links) [DISALLOWED_HTML]
 |
 |    <!-- __amp_source_origin is not an allowed value for URLs. -->
 |    <a href="__amp_source_origin">uhm, no</a>
 >>   ^~~~~~~~~
-feature_tests/urls.html:107:2 The attribute 'href' in tag 'a' is set to the invalid value '__amp_source_origin'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+feature_tests/urls.html:107:2 The attribute 'href' in tag 'a' is set to the invalid value '__amp_source_origin'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#links) [DISALLOWED_HTML]
 |    <amp-ad src="__amp_source_origin" width="42" height="42" type=""></amp-ad>
 >>   ^~~~~~~~~
-feature_tests/urls.html:108:2 The attribute 'src' in tag 'amp-ad' is set to the invalid value '__amp_source_origin'. (see https://www.ampproject.org/docs/reference/components/amp-ad) [DISALLOWED_HTML]
+feature_tests/urls.html:108:2 The attribute 'src' in tag 'amp-ad' is set to the invalid value '__amp_source_origin'. (see https://amp.dev/documentation/components/amp-ad) [DISALLOWED_HTML]
 |    <amp-anim src="__amp_source_origin" width="42" height="42"></amp-anim>
 >>   ^~~~~~~~~
-feature_tests/urls.html:109:2 The attribute 'src' in tag 'amp-anim' is set to the invalid value '__amp_source_origin'. (see https://www.ampproject.org/docs/reference/components/amp-anim) [DISALLOWED_HTML]
+feature_tests/urls.html:109:2 The attribute 'src' in tag 'amp-anim' is set to the invalid value '__amp_source_origin'. (see https://amp.dev/documentation/components/amp-anim) [DISALLOWED_HTML]
 >>   ^~~~~~~~~
-feature_tests/urls.html:109:2 The tag 'amp-anim' requires including the 'amp-anim' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-anim) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+feature_tests/urls.html:109:2 The tag 'amp-anim' requires including the 'amp-anim' extension JavaScript. (see https://amp.dev/documentation/components/amp-anim) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |    <amp-audio src="__amp_source_origin" layout="fixed" width="42"></amp-audio>
 >>   ^~~~~~~~~
-feature_tests/urls.html:110:2 The attribute 'src' in tag 'amp-audio' is set to the invalid value '__amp_source_origin'. (see https://www.ampproject.org/docs/reference/components/amp-audio) [DISALLOWED_HTML]
+feature_tests/urls.html:110:2 The attribute 'src' in tag 'amp-audio' is set to the invalid value '__amp_source_origin'. (see https://amp.dev/documentation/components/amp-audio) [DISALLOWED_HTML]
 >>   ^~~~~~~~~
-feature_tests/urls.html:110:2 The tag 'amp-audio' requires including the 'amp-audio' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-audio) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+feature_tests/urls.html:110:2 The tag 'amp-audio' requires including the 'amp-audio' extension JavaScript. (see https://amp.dev/documentation/components/amp-audio) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |    <amp-iframe src="__amp_source_origin" width="42" height="42"></amp-iframe>
 >>   ^~~~~~~~~
-feature_tests/urls.html:111:2 The attribute 'src' in tag 'amp-iframe' is set to the invalid value '__amp_source_origin'. (see https://www.ampproject.org/docs/reference/components/amp-iframe) [DISALLOWED_HTML]
+feature_tests/urls.html:111:2 The attribute 'src' in tag 'amp-iframe' is set to the invalid value '__amp_source_origin'. (see https://amp.dev/documentation/components/amp-iframe) [DISALLOWED_HTML]
 >>   ^~~~~~~~~
-feature_tests/urls.html:111:2 The tag 'amp-iframe' requires including the 'amp-iframe' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-iframe) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+feature_tests/urls.html:111:2 The tag 'amp-iframe' requires including the 'amp-iframe' extension JavaScript. (see https://amp.dev/documentation/components/amp-iframe) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |    <amp-img src="__amp_source_origin" layout="responsive" width="42" height="42"></amp-img>
 >>   ^~~~~~~~~
-feature_tests/urls.html:112:2 The attribute 'src' in tag 'amp-img' is set to the invalid value '__amp_source_origin'. (see https://www.ampproject.org/docs/reference/components/amp-img) [DISALLOWED_HTML]
+feature_tests/urls.html:112:2 The attribute 'src' in tag 'amp-img' is set to the invalid value '__amp_source_origin'. (see https://amp.dev/documentation/components/amp-img) [DISALLOWED_HTML]
 |    <amp-pixel src="__amp_source_origin" layout="fixed" width="42"></amp-pixel>
 >>   ^~~~~~~~~
-feature_tests/urls.html:113:2 The attribute 'src' in tag 'amp-pixel' is set to the invalid value '__amp_source_origin'. (see https://www.ampproject.org/docs/reference/components/amp-pixel) [DISALLOWED_HTML]
+feature_tests/urls.html:113:2 The attribute 'src' in tag 'amp-pixel' is set to the invalid value '__amp_source_origin'. (see https://amp.dev/documentation/components/amp-pixel) [DISALLOWED_HTML]
 |    <amp-video src="__amp_source_origin" width="42" height="42"></amp-video>
 >>   ^~~~~~~~~
-feature_tests/urls.html:114:2 The attribute 'src' in tag 'amp-video' is set to the invalid value '__amp_source_origin'. (see https://www.ampproject.org/docs/reference/components/amp-video) [DISALLOWED_HTML]
+feature_tests/urls.html:114:2 The attribute 'src' in tag 'amp-video' is set to the invalid value '__amp_source_origin'. (see https://amp.dev/documentation/components/amp-video) [DISALLOWED_HTML]
 |    <amp-video src="%5f_amp_source%5forigin" width="42" height="42"></amp-video>
 |  </body>
 |  </html>
 >>       ^~~~~~~~~
-feature_tests/urls.html:117:6 The tag 'amp-ad extension .js script' is missing or incorrect, but required by 'amp-ad'. This will soon be an error. (see https://www.ampproject.org/docs/reference/components/amp-ad) [DEPRECATION]
+feature_tests/urls.html:117:6 The tag 'amp-ad extension .js script' is missing or incorrect, but required by 'amp-ad'. This will soon be an error. (see https://amp.dev/documentation/components/amp-ad) [DEPRECATION]
 >>       ^~~~~~~~~
-feature_tests/urls.html:117:6 The tag 'amp-video extension .js script' is missing or incorrect, but required by 'amp-video'. This will soon be an error. (see https://www.ampproject.org/docs/reference/components/amp-video) [DEPRECATION]
+feature_tests/urls.html:117:6 The tag 'amp-video extension .js script' is missing or incorrect, but required by 'amp-video'. This will soon be an error. (see https://amp.dev/documentation/components/amp-video) [DEPRECATION]

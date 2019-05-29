@@ -22,21 +22,18 @@ import {WebAnimationPlayState} from './web-animation-types';
 import {WebAnimationService} from './web-animation-service';
 import {childElementByTag} from '../../../src/dom';
 import {clamp} from '../../../src/utils/math';
-import {getFriendlyIframeEmbedOptional}
-  from '../../../src/friendly-iframe-embed';
+import {getDetail, listen} from '../../../src/event-helper';
+import {getFriendlyIframeEmbedOptional} from '../../../src/friendly-iframe-embed';
 import {getParentWindowFrameElement} from '../../../src/service';
 import {installWebAnimationsIfNecessary} from './web-animations-polyfill';
 import {isFiniteNumber} from '../../../src/types';
-import {listen} from '../../../src/event-helper';
 import {setInitialDisplay, setStyles, toggle} from '../../../src/style';
 import {tryParseJson} from '../../../src/json';
 import {user, userAssert} from '../../../src/log';
 
 const TAG = 'amp-animation';
 
-
 export class AmpAnimation extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -59,7 +56,7 @@ export class AmpAnimation extends AMP.BaseElement {
     /** @private {?JsonObject} */
     this.configJson_ = null;
 
-    /** @private {?./web-animations.AnimationRunner} */
+    /** @private {?./runners/animation-runner.AnimationRunner} */
     this.runner_ = null;
 
     /** @private {?Promise} */
@@ -67,9 +64,6 @@ export class AmpAnimation extends AMP.BaseElement {
 
     /** @private {?Pass} */
     this.restartPass_ = null;
-
-    /** @private {boolean} */
-    this.hasPositionObserver_ = false;
   }
 
   /** @override */
@@ -80,24 +74,28 @@ export class AmpAnimation extends AMP.BaseElement {
     const trigger = this.element.getAttribute('trigger');
     if (trigger) {
       this.triggerOnVisibility_ = userAssert(
-          trigger == 'visibility',
-          'Only allowed value for "trigger" is "visibility": %s',
-          this.element);
+        trigger == 'visibility',
+        'Only allowed value for "trigger" is "visibility": %s',
+        this.element
+      );
     }
 
     // TODO(dvoytenko): Remove once we support direct parent visibility.
     if (trigger == 'visibility') {
       userAssert(
-          this.element.parentNode == this.element.ownerDocument.body ||
+        this.element.parentNode == this.element.ownerDocument.body ||
           this.element.parentNode == ampdoc.getBody(),
-          '%s is only allowed as a direct child of <body> element when trigger'
-          + ' is visibility. This restriction will be removed soon.', TAG);
+        '%s is only allowed as a direct child of <body> element when trigger' +
+          ' is visibility. This restriction will be removed soon.',
+        TAG
+      );
     }
 
     // Parse config.
     const scriptElement = userAssert(
-        childElementByTag(this.element, 'script'),
-        '"<script type=application/json>" must be present');
+      childElementByTag(this.element, 'script'),
+      '"<script type=application/json>" must be present'
+    );
     this.configJson_ = tryParseJson(scriptElement.textContent, error => {
       throw user().createError('failed to parse animation script', error);
     });
@@ -121,18 +119,20 @@ export class AmpAnimation extends AMP.BaseElement {
 
     // Restart with debounce.
     this.restartPass_ = new Pass(
-        this.win,
-        () => {
-          if (!this.pausedByAction_) {
-            this.startOrResume_();
-          }
-        },
-        /* delay */ 50);
+      this.win,
+      () => {
+        if (!this.pausedByAction_) {
+          this.startOrResume_();
+        }
+      },
+      /* delay */ 50
+    );
 
     // Visibility.
     const frameElement = getParentWindowFrameElement(this.element, ampdoc.win);
-    const embed =
-        frameElement ? getFriendlyIframeEmbedOptional(frameElement) : null;
+    const embed = frameElement
+      ? getFriendlyIframeEmbedOptional(frameElement)
+      : null;
     if (embed) {
       this.embed_ = embed;
       this.setVisible_(embed.isVisible());
@@ -155,25 +155,46 @@ export class AmpAnimation extends AMP.BaseElement {
 
     // Actions.
     this.registerDefaultAction(
-        this.startAction_.bind(this),
-        'start',
-        ActionTrust.LOW);
-    this.registerAction('restart',
-        this.restartAction_.bind(this), ActionTrust.LOW);
-    this.registerAction('pause',
-        this.pauseAction_.bind(this), ActionTrust.LOW);
-    this.registerAction('resume',
-        this.resumeAction_.bind(this), ActionTrust.LOW);
-    this.registerAction('togglePause',
-        this.togglePauseAction_.bind(this), ActionTrust.LOW);
-    this.registerAction('seekTo',
-        this.seekToAction_.bind(this), ActionTrust.LOW);
-    this.registerAction('reverse',
-        this.reverseAction_.bind(this), ActionTrust.LOW);
-    this.registerAction('finish',
-        this.finishAction_.bind(this), ActionTrust.LOW);
-    this.registerAction('cancel',
-        this.cancelAction_.bind(this), ActionTrust.LOW);
+      this.startAction_.bind(this),
+      'start',
+      ActionTrust.LOW
+    );
+    this.registerAction(
+      'restart',
+      this.restartAction_.bind(this),
+      ActionTrust.LOW
+    );
+    this.registerAction('pause', this.pauseAction_.bind(this), ActionTrust.LOW);
+    this.registerAction(
+      'resume',
+      this.resumeAction_.bind(this),
+      ActionTrust.LOW
+    );
+    this.registerAction(
+      'togglePause',
+      this.togglePauseAction_.bind(this),
+      ActionTrust.LOW
+    );
+    this.registerAction(
+      'seekTo',
+      this.seekToAction_.bind(this),
+      ActionTrust.LOW
+    );
+    this.registerAction(
+      'reverse',
+      this.reverseAction_.bind(this),
+      ActionTrust.LOW
+    );
+    this.registerAction(
+      'finish',
+      this.finishAction_.bind(this),
+      ActionTrust.LOW
+    );
+    this.registerAction(
+      'cancel',
+      this.cancelAction_.bind(this),
+      ActionTrust.LOW
+    );
   }
 
   /**
@@ -288,11 +309,16 @@ export class AmpAnimation extends AMP.BaseElement {
     // The animation will be triggered (in paused state) and seek will happen
     // regardless of visibility
     this.triggered_ = true;
-    this.hasPositionObserver_ = !!invocation.caller &&
-      invocation.caller.tagName === 'AMP-POSITION-OBSERVER';
-    const viewportData = (invocation && invocation.event) ?
-      invocation.event.additionalViewportData : null;
-    return this.createRunnerIfNeeded_(null, viewportData).then(() => {
+
+    let positionObserverData = null;
+    if (invocation.event) {
+      const detail = getDetail(/** @type {!Event} */ (invocation.event));
+      if (detail) {
+        positionObserverData = detail['positionObserverData'] || null;
+      }
+    }
+
+    return this.createRunnerIfNeeded_(null, positionObserverData).then(() => {
       this.pause_();
       this.pausedByAction_ = true;
       // time based seek
@@ -407,14 +433,16 @@ export class AmpAnimation extends AMP.BaseElement {
   /**
    * Creates the runner but animations will not start.
    * @param {?JsonObject=} opt_args
-   * @param {?Object=} opt_viewportData
+   * @param {?JsonObject=} opt_positionObserverData
    * @return {!Promise}
    * @private
    */
-  createRunnerIfNeeded_(opt_args, opt_viewportData) {
+  createRunnerIfNeeded_(opt_args, opt_positionObserverData) {
     if (!this.runnerPromise_) {
       this.runnerPromise_ = this.createRunner_(
-          opt_args, opt_viewportData).then(runner => {
+        opt_args,
+        opt_positionObserverData
+      ).then(runner => {
         this.runner_ = runner;
         this.runner_.onPlayStateChanged(this.playStateChanged_.bind(this));
         this.runner_.init();
@@ -448,35 +476,36 @@ export class AmpAnimation extends AMP.BaseElement {
 
   /**
    * @param {?JsonObject=} opt_args
-   * @param {?Object=} opt_viewportData
-   * @return {!Promise<!./web-animations.WebAnimationRunner>}
+   * @param {?JsonObject=} opt_positionObserverData
+   * @return {!Promise<!./runners/animation-runner.AnimationRunner>}
    * @private
    */
-  createRunner_(opt_args, opt_viewportData) {
+  createRunner_(opt_args, opt_positionObserverData) {
     // Force cast to `WebAnimationDef`. It will be validated during preparation
     // phase.
-    const configJson = /** @type {!./web-animation-types.WebAnimationDef} */ (
-      this.configJson_);
-    const args = /** @type {?./web-animation-types.WebAnimationDef} */ (
-      opt_args || null);
+    const configJson = /** @type {!./web-animation-types.WebAnimationDef} */ (this
+      .configJson_);
+    const args =
+      /** @type {?./web-animation-types.WebAnimationDef} */ (opt_args || null);
 
     // Ensure polyfill is installed.
     installWebAnimationsIfNecessary(this.win);
 
     const ampdoc = this.getAmpDoc();
-    const readyPromise = this.embed_ ? this.embed_.whenReady() :
-      ampdoc.whenReady();
+    const readyPromise = this.embed_
+      ? this.embed_.whenReady()
+      : ampdoc.whenReady();
     const hostWin = this.embed_ ? this.embed_.win : this.win;
     const baseUrl = this.embed_ ? this.embed_.getUrl() : ampdoc.getUrl();
     return readyPromise.then(() => {
       const builder = new Builder(
-          hostWin,
-          this.getRootNode_(),
-          baseUrl,
-          this.getVsync(),
-          this.element.getResources());
-      return builder.createRunner(configJson,
-          this.hasPositionObserver_, args, opt_viewportData);
+        hostWin,
+        this.getRootNode_(),
+        baseUrl,
+        this.getVsync(),
+        this.element.getResources()
+      );
+      return builder.createRunner(configJson, args, opt_positionObserverData);
     });
   }
 
@@ -485,9 +514,9 @@ export class AmpAnimation extends AMP.BaseElement {
    * @private
    */
   getRootNode_() {
-    return this.embed_ ?
-      this.embed_.win.document :
-      this.getAmpDoc().getRootNode();
+    return this.embed_
+      ? this.embed_.win.document
+      : this.getAmpDoc().getRootNode();
   }
 
   /** @private */
@@ -507,8 +536,6 @@ export class AmpAnimation extends AMP.BaseElement {
     }
   }
 }
-
-
 
 AMP.extension(TAG, '0.1', function(AMP) {
   AMP.registerElement(TAG, AmpAnimation);

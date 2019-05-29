@@ -47,7 +47,6 @@ const MILLISECONDS_IN_MINUTE = 60 * 1000;
 /** @const {number} */
 const MILLISECONDS_IN_SECOND = 1000;
 
-
 /** @const {Object} */
 //https://ctrlq.org/code/19899-google-translate-languages refer to google code
 const LOCALE_WORD = {
@@ -70,7 +69,6 @@ const LOCALE_WORD = {
 };
 
 export class AmpDateCountdown extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -108,13 +106,12 @@ export class AmpDateCountdown extends AMP.BaseElement {
     /** @private {!Object|null} */
     this.localeWordList_ = null;
 
-    /** @private {!Object|null} */
+    /** @private {?number} */
     this.countDownTimer_ = null;
   }
 
   /** @override */
   buildCallback() {
-
     // Store this in buildCallback() because `this.element` sometimes
     // is missing attributes in the constructor.
 
@@ -124,43 +121,45 @@ export class AmpDateCountdown extends AMP.BaseElement {
     this.endDate_ = this.element.getAttribute('end-date');
 
     /** @private {number} */
-    this.timeleftMs_
-       = Number(this.element.getAttribute('timeleft-ms'));
+    this.timeleftMs_ = Number(this.element.getAttribute('timeleft-ms'));
 
     /** @private {number} */
     this.timestampMs_ = Number(this.element.getAttribute('timestamp-ms'));
 
     /** @private {number} */
-    this.timestampSeconds_
-       = Number(this.element.getAttribute('timestamp-seconds'));
+    this.timestampSeconds_ = Number(
+      this.element.getAttribute('timestamp-seconds')
+    );
 
     /** @private {number} */
-    this.offsetSeconds_
-       = Number(this.element.getAttribute('offset-seconds'))
-       || DEFAULT_OFFSET_SECONDS;
+    this.offsetSeconds_ =
+      Number(this.element.getAttribute('offset-seconds')) ||
+      DEFAULT_OFFSET_SECONDS;
 
     /** @private {string} */
-    this.locale_
-       = (this.element.getAttribute('locale')
-       || DEFAULT_LOCALE).toLowerCase();
+    this.locale_ = (
+      this.element.getAttribute('locale') || DEFAULT_LOCALE
+    ).toLowerCase();
 
     /** @private {string} */
-    this.whenEnded_
-       = (this.element.getAttribute('when-ended')
-       || DEFAULT_WHEN_ENDED).toLowerCase();
+    this.whenEnded_ = (
+      this.element.getAttribute('when-ended') || DEFAULT_WHEN_ENDED
+    ).toLowerCase();
 
     /** @private {string} */
-    this.biggestUnit_
-       = (this.element.getAttribute('biggest-unit')
-       || DEFAULT_BIGGEST_UNIT).toUpperCase();
+    this.biggestUnit_ = (
+      this.element.getAttribute('biggest-unit') || DEFAULT_BIGGEST_UNIT
+    ).toUpperCase();
 
     /** @private {!Object|null} */
     this.localeWordList_ = this.getLocaleWord_(this.locale_);
 
-    Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible().then(() => {
-      const EPOCH = this.getEpoch_() + (this.offsetSeconds_ * 1000);
-      this.tickCountDown_(new Date(EPOCH) - new Date());
-    });
+    Services.viewerForDoc(this.getAmpDoc())
+      .whenFirstVisible()
+      .then(() => {
+        const EPOCH = this.getEpoch_() + this.offsetSeconds_ * 1000;
+        this.tickCountDown_(new Date(EPOCH) - new Date());
+      });
   }
   /** @override */
   renderOutsideViewport() {
@@ -170,7 +169,7 @@ export class AmpDateCountdown extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     const DELAY = 1000;
-    const EPOCH = this.getEpoch_() + (this.offsetSeconds_ * DELAY);
+    const EPOCH = this.getEpoch_() + this.offsetSeconds_ * DELAY;
     let differentBetween = new Date(EPOCH) - new Date() - DELAY; //substract delay (1000ms) here because of buildCallback show the initial time
     this.countDownTimer_ = this.win.setInterval(() => {
       this.tickCountDown_(differentBetween);
@@ -198,14 +197,18 @@ export class AmpDateCountdown extends AMP.BaseElement {
     const items = /** @type {!JsonObject} */ ({});
     const DIFF = this.getYDHMSFromMs_(differentBetween) || {};
     if (this.whenEnded_ === 'stop' && differentBetween < 1000) {
-      Services.actionServiceForDoc(this.element)
-          .trigger(this.element, 'timeout', null, ActionTrust.LOW);
+      Services.actionServiceForDoc(this.element).trigger(
+        this.element,
+        'timeout',
+        null,
+        ActionTrust.LOW
+      );
       this.win.clearInterval(this.countDownTimer_);
     }
     items['data'] = Object.assign(DIFF, this.localeWordList_);
     this.templates_
-        .findAndRenderTemplate(this.element, items['data'])
-        .then(this.boundRendered_);
+      .findAndRenderTemplate(this.element, items['data'])
+      .then(this.boundRendered_);
   }
 
   /**
@@ -225,9 +228,11 @@ export class AmpDateCountdown extends AMP.BaseElement {
       epoch = this.timestampSeconds_ * 1000;
     }
 
-    userAssert(!isNaN(epoch),
-        'One of end-date, timeleft-ms, timestamp-ms, timestamp-seconds ' +
-        'is required');
+    userAssert(
+      !isNaN(epoch),
+      'One of end-date, timeleft-ms, timestamp-ms, timestamp-seconds ' +
+        'is required'
+    );
     return epoch;
   }
 
@@ -259,7 +264,6 @@ export class AmpDateCountdown extends AMP.BaseElement {
    * @private
    */
   getYDHMSFromMs_(ms) {
-
     /** @enum {number} */
     const TimeUnit = {
       DAYS: 1,
@@ -268,25 +272,32 @@ export class AmpDateCountdown extends AMP.BaseElement {
       SECONDS: 4,
     };
     //Math.trunc is used instead of Math.floor to support negative past date
-    const d = TimeUnit[this.biggestUnit_] == TimeUnit.DAYS
-      ? this.supportBackDate_(Math.floor((ms) / MILLISECONDS_IN_DAY))
-      : 0;
-    const h = TimeUnit[this.biggestUnit_] == TimeUnit.HOURS
-      ? this.supportBackDate_(Math.floor((ms) / MILLISECONDS_IN_HOUR))
-      : TimeUnit[this.biggestUnit_] < TimeUnit.HOURS
-        ? this.supportBackDate_(
-            Math.floor((ms % MILLISECONDS_IN_DAY) / MILLISECONDS_IN_HOUR))
+    const d =
+      TimeUnit[this.biggestUnit_] == TimeUnit.DAYS
+        ? this.supportBackDate_(Math.floor(ms / MILLISECONDS_IN_DAY))
         : 0;
-    const m = TimeUnit[this.biggestUnit_] == TimeUnit.MINUTES
-      ? this.supportBackDate_(Math.floor((ms) / MILLISECONDS_IN_MINUTE))
-      : TimeUnit[this.biggestUnit_] < TimeUnit.MINUTES
+    const h =
+      TimeUnit[this.biggestUnit_] == TimeUnit.HOURS
+        ? this.supportBackDate_(Math.floor(ms / MILLISECONDS_IN_HOUR))
+        : TimeUnit[this.biggestUnit_] < TimeUnit.HOURS
         ? this.supportBackDate_(
-            Math.floor((ms % MILLISECONDS_IN_HOUR) / MILLISECONDS_IN_MINUTE))
+            Math.floor((ms % MILLISECONDS_IN_DAY) / MILLISECONDS_IN_HOUR)
+          )
         : 0;
-    const s = TimeUnit[this.biggestUnit_] == TimeUnit.SECONDS
-      ? this.supportBackDate_(Math.floor((ms) / MILLISECONDS_IN_SECOND))
-      : this.supportBackDate_(
-          Math.floor((ms % MILLISECONDS_IN_MINUTE) / MILLISECONDS_IN_SECOND));
+    const m =
+      TimeUnit[this.biggestUnit_] == TimeUnit.MINUTES
+        ? this.supportBackDate_(Math.floor(ms / MILLISECONDS_IN_MINUTE))
+        : TimeUnit[this.biggestUnit_] < TimeUnit.MINUTES
+        ? this.supportBackDate_(
+            Math.floor((ms % MILLISECONDS_IN_HOUR) / MILLISECONDS_IN_MINUTE)
+          )
+        : 0;
+    const s =
+      TimeUnit[this.biggestUnit_] == TimeUnit.SECONDS
+        ? this.supportBackDate_(Math.floor(ms / MILLISECONDS_IN_SECOND))
+        : this.supportBackDate_(
+            Math.floor((ms % MILLISECONDS_IN_MINUTE) / MILLISECONDS_IN_SECOND)
+          );
 
     return {
       d,

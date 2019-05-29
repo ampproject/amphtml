@@ -15,7 +15,10 @@
  */
 
 import {AmpEvents} from '../../../../src/amp-events';
-import {AutoLightboxEvents} from '../../../../src/auto-lightbox';
+import {
+  AutoLightboxEvents,
+  isActionableByTap,
+} from '../../../../src/auto-lightbox';
 import {CommonSignals} from '../../../../src/common-signals';
 import {
   LIGHTBOX_THUMBNAIL_AD,
@@ -26,7 +29,7 @@ import {Services} from '../../../../src/services';
 import {
   childElement,
   childElementByAttr,
-  closestByTag,
+  closestAncestorElementBySelector,
   elementByTag,
   iterateCursor,
 } from '../../../../src/dom';
@@ -53,6 +56,27 @@ const CAROUSEL_TAG = 'AMP-CAROUSEL';
 const FIGURE_TAG = 'FIGURE';
 const SLIDE_SELECTOR = '.amp-carousel-slide, .i-amphtml-carousel-slotted';
 
+/**
+ * @param {!Element} slide
+ * @return {!Element}
+ */
+function getBaseElementForSlide(slide) {
+  const tagName = slide.tagName.toUpperCase();
+  if (tagName == 'AMP-IMG' || tagName == 'FIGURE') {
+    return slide;
+  }
+  const figure = slide.querySelector('figure');
+  if (figure) {
+    return figure;
+  }
+  const allImages = slide.querySelectorAll('amp-img');
+  userAssert(
+    allImages.length == 1,
+    'Found more than one images or none in slide!'
+  );
+  return dev().assertElement(allImages[0]);
+}
+
 /** @typedef {{
  *  srcset: ?../../../../src/srcset.Srcset,
  *  placeholderSrc: string,
@@ -71,12 +95,10 @@ export let LightboxThumbnailDataDef;
  *   `lightbox` attribute and possibly an on-tap handler to them
  */
 export class LightboxManager {
-
   /**
    * @param {!../../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
-
     /** @const @private {!../../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
@@ -107,7 +129,6 @@ export class LightboxManager {
      * @private {!Array<!Element>}
      */
     this.seen_ = [];
-
   }
 
   /**
@@ -134,25 +155,6 @@ export class LightboxManager {
     });
 
     return this.scanPromise_;
-  }
-
-  /**
-   * Decides whether an already lightboxable element should automatically get
-   * a tap handler to open in the lightbox.
-   * @param {!Element} element
-   * @return {boolean}
-   */
-  meetsHeuristicsForTap_(element) {
-    devAssert(element);
-    devAssert(element.hasAttribute('lightbox'));
-
-    if (!ELIGIBLE_TAP_TAGS[element.tagName]) {
-      return false;
-    }
-    if (element.hasAttribute('on')) {
-      return false;
-    }
-    return true;
   }
 
   /**
@@ -186,21 +188,26 @@ export class LightboxManager {
    * @param {!Element} carousel
    */
   processLightboxCarousel_(carousel) {
-    const lightboxGroupId = carousel.getAttribute('lightbox') ||
-    'carousel' + (carousel.getAttribute('id') || this.counter_++);
+    const lightboxGroupId =
+      carousel.getAttribute('lightbox') ||
+      `carousel${carousel.getAttribute('id') || this.counter_++}`;
+
     this.getSlidesFromCarousel_(carousel).then(slides => {
       slides.forEach(slide => {
-        const shouldExcludeSlide = slide.hasAttribute('lightbox-exclude')
-            || (slide.hasAttribute('lightbox')
-                && slide.getAttribute('lightbox') !== lightboxGroupId);
-        if (!shouldExcludeSlide) {
-          if (this.seen_.includes(slide)) {
-            return;
-          }
-          slide.setAttribute('lightbox', lightboxGroupId);
-          this.seen_.push(slide);
-          this.processBaseLightboxElement_(slide, lightboxGroupId);
+        const shouldExcludeSlide =
+          slide.hasAttribute('lightbox-exclude') ||
+          (slide.hasAttribute('lightbox') &&
+            slide.getAttribute('lightbox') !== lightboxGroupId);
+        if (shouldExcludeSlide) {
+          return;
         }
+        const baseElement = getBaseElementForSlide(slide);
+        if (this.seen_.includes(baseElement)) {
+          return;
+        }
+        baseElement.setAttribute('lightbox', lightboxGroupId);
+        this.seen_.push(baseElement);
+        this.processBaseLightboxElement_(baseElement, lightboxGroupId);
       });
     });
   }
@@ -232,8 +239,10 @@ export class LightboxManager {
   unwrapLightboxedFigure_(figure, lightboxGroupId) {
     // Assume that the lightbox target is whichever element inside the figure
     // that is not the figcaption.
-    const element = childElement(figure,
-        child => child.tagName !== 'FIGCAPTION');
+    const element = childElement(
+      figure,
+      child => child.tagName !== 'FIGCAPTION'
+    );
     if (element) {
       element.setAttribute('lightbox', lightboxGroupId);
     }
@@ -248,24 +257,28 @@ export class LightboxManager {
    */
   processBaseLightboxElement_(element, lightboxGroupId) {
     if (element.tagName == FIGURE_TAG) {
-      const unwrappedFigureElement = this.unwrapLightboxedFigure_(element,
-          lightboxGroupId);
+      const unwrappedFigureElement = this.unwrapLightboxedFigure_(
+        element,
+        lightboxGroupId
+      );
       if (!unwrappedFigureElement) {
         return;
-      } else {
-        element = unwrappedFigureElement;
       }
+      element = unwrappedFigureElement;
     }
 
-    userAssert(this.baseElementIsSupported_(element),
-        'The element %s isn\'t supported in lightbox yet.', element.tagName);
+    userAssert(
+      this.baseElementIsSupported_(element),
+      "The element %s isn't supported in lightbox yet.",
+      element.tagName
+    );
 
     if (!this.lightboxGroups_[lightboxGroupId]) {
       this.lightboxGroups_[lightboxGroupId] = [];
     }
 
     this.lightboxGroups_[lightboxGroupId].push(dev().assertElement(element));
-    if (!this.meetsHeuristicsForTap_(element)) {
+    if (isActionableByTap(element)) {
       return;
     }
     const gallery = elementByTag(this.ampdoc_.getRootNode(), GALLERY_TAG);
@@ -279,9 +292,12 @@ export class LightboxManager {
    * @private
    */
   getSlidesFromCarousel_(element) {
-    return element.signals().whenSignal(CommonSignals.LOAD_END).then(() => {
-      return toArray(element./*OK*/querySelectorAll(SLIDE_SELECTOR));
-    });
+    return element
+      .signals()
+      .whenSignal(CommonSignals.LOAD_END)
+      .then(() => {
+        return toArray(element./*OK*/ querySelectorAll(SLIDE_SELECTOR));
+      });
   }
 
   /**
@@ -290,33 +306,34 @@ export class LightboxManager {
    * @return {!Promise<!Array<!Element>>}
    */
   getElementsForLightboxGroup(lightboxGroupId) {
-    return this.maybeInit()
-        .then(() => devAssert(this.lightboxGroups_[lightboxGroupId]));
+    return this.maybeInit().then(() =>
+      devAssert(this.lightboxGroups_[lightboxGroupId])
+    );
   }
 
   /**
    * Get the description for single lightboxed item.
    * @param {!Element} element
-   * @return {string|null}
+   * @return {string}
    */
   getDescription(element) {
     // If the element in question is the descendant of a figure element
     // try using the figure caption as the lightbox description.
-    const figureParent = closestByTag(element, 'figure');
+    const figureParent = closestAncestorElementBySelector(element, 'figure');
     if (figureParent) {
       const figCaption = elementByTag(figureParent, 'figcaption');
       if (figCaption) {
-        return figCaption./*OK*/innerText;
+        return figCaption./*OK*/ innerText;
       }
     }
     const ariaDescribedBy = element.getAttribute('aria-describedby');
     if (ariaDescribedBy) {
       const descriptionElement = this.ampdoc_.getElementById(ariaDescribedBy);
       if (descriptionElement) {
-        return descriptionElement./*OK*/innerText;
+        return descriptionElement./*OK*/ innerText;
       }
     }
-    return null;
+    return '';
   }
 
   /**
@@ -326,8 +343,8 @@ export class LightboxManager {
    * @private
    */
   getVideoTimestamp_(element) {
-    return VIDEO_TAGS[element.tagName] ?
-      element.getImpl().then(videoPlayer => videoPlayer.getDuration())
+    return VIDEO_TAGS[element.tagName]
+      ? element.getImpl().then(videoPlayer => videoPlayer.getDuration())
       : Promise.resolve();
   }
 
@@ -338,13 +355,12 @@ export class LightboxManager {
    * @return {!Array<!LightboxThumbnailDataDef>}
    */
   getThumbnails(lightboxGroupId) {
-    return this.lightboxGroups_[lightboxGroupId]
-        .map(element => ({
-          srcset: this.getThumbnailSrcset_(dev().assertElement(element)),
-          placeholderSrc: this.getPlaceholderForElementType_(element),
-          element,
-          timestampPromise: this.getVideoTimestamp_(element),
-        }));
+    return this.lightboxGroups_[lightboxGroupId].map(element => ({
+      srcset: this.getThumbnailSrcset_(dev().assertElement(element)),
+      placeholderSrc: this.getPlaceholderForElementType_(element),
+      element,
+      timestampPromise: this.getVideoTimestamp_(element),
+    }));
   }
 
   /**
@@ -372,7 +388,7 @@ export class LightboxManager {
   /**
    * Get thumbnail srcset for single element.
    * @param {!Element} element
-   * @return {!../../../../src/srcset.Srcset|null}
+   * @return {?../../../../src/srcset.Srcset}
    * @private
    */
   getThumbnailSrcset_(element) {
@@ -389,29 +405,28 @@ export class LightboxManager {
   /**
    * Get the srcset for the user-specified placeholder for each element
    * @param {!Element} element
-   * @return {!../../../../src/srcset.Srcset|null}
+   * @return {?../../../../src/srcset.Srcset}
    * @private
    */
   getUserPlaceholderSrcset_(element) {
     if (element.tagName == 'AMP-IMG') {
       return srcsetFromElement(element);
-    } else if (element.tagName == 'AMP-VIDEO') {
+    }
+    if (element.tagName == 'AMP-VIDEO') {
       return this.getThumbnailSrcsetForVideo_(element);
       // TODO: process placeholder logic for other components as added
-    } else {
-      const placeholder = childElementByAttr(element, 'placeholder');
-      if (placeholder) {
-        return this.getUserPlaceholderSrcset_(placeholder);
-      } else {
-        return null;
-      }
     }
+    const placeholder = childElementByAttr(element, 'placeholder');
+    if (placeholder) {
+      return this.getUserPlaceholderSrcset_(placeholder);
+    }
+    return null;
   }
 
   /**
    * Given an amp video, returns the thumbnail srcset.
    * @param {!Element} ampVideo
-   * @return {!../../../../src/srcset.Srcset|null}
+   * @return {?../../../../src/srcset.Srcset}
    */
   getThumbnailSrcsetForVideo_(ampVideo) {
     const poster = ampVideo.getAttribute('poster');

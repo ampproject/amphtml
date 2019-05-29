@@ -21,7 +21,6 @@ import {isFiniteNumber} from '../../../src/types';
 import {userAssert} from '../../../src/log';
 
 export class BaseSlides extends BaseCarousel {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -74,14 +73,18 @@ export class BaseSlides extends BaseCarousel {
       this.setupAutoplay_();
     }
 
-    this.registerAction('toggleAutoplay', invocation => {
-      const {args} = invocation;
-      if (args && args['toggleOn'] !== undefined) {
-        this.toggleAutoplay_(args['toggleOn']);
-      } else {
-        this.toggleAutoplay_(!this.hasAutoplay_);
-      }
-    }, ActionTrust.LOW);
+    this.registerAction(
+      'toggleAutoplay',
+      invocation => {
+        const {args} = invocation;
+        if (args && args['toggleOn'] !== undefined) {
+          this.toggleAutoplay_(args['toggleOn']);
+        } else {
+          this.toggleAutoplay_(!this.hasAutoplay_);
+        }
+      },
+      ActionTrust.LOW
+    );
   }
 
   /**
@@ -129,18 +132,18 @@ export class BaseSlides extends BaseCarousel {
   updateViewportState(unusedInViewport) {}
 
   /**
-  * Checks if a carousel is eligible to loop, regardless of the loop attribute.
-  * @return {boolean}
-  * @protected
-  */
+   * Checks if a carousel is eligible to loop, regardless of the loop attribute.
+   * @return {boolean}
+   * @protected
+   */
   isLoopingEligible() {
     return false;
   }
 
   /**
-  * Sets up the `autoplay` configuration.
-  * @private
-  */
+   * Sets up the `autoplay` configuration.
+   * @private
+   */
   setupAutoplay_() {
     const delayValue = Number(this.element.getAttribute('delay'));
     // If it isn't a number and is not greater than 0 then don't assign
@@ -162,18 +165,20 @@ export class BaseSlides extends BaseCarousel {
   }
 
   /**
-  * Starts the autoplay delay if allowed.
-  * @private
-  */
+   * Starts the autoplay delay if allowed.
+   * @private
+   */
   autoplay_() {
     if (!this.shouldAutoplay_ || this.autoplayLoops_ == 0) {
       return;
     }
     this.clearAutoplay();
-    this.autoplayTimeoutId_ = Services.timerFor(this.win).delay(
-        this.go.bind(
-            this, /* dir */ 1, /* animate */ true, /* autoplay */ true),
-        this.autoplayDelay_);
+    this.autoplayTimeoutId_ = /** @type {number} */ (Services.timerFor(
+      this.win
+    ).delay(
+      this.go.bind(this, /* dir */ 1, /* animate */ true, /* autoplay */ true),
+      this.autoplayDelay_
+    ));
   }
 
   /**
@@ -203,9 +208,9 @@ export class BaseSlides extends BaseCarousel {
   }
 
   /**
-  * Clear the autoplay timer.
-  * @protected
-  */
+   * Clear the autoplay timer.
+   * @protected
+   */
   clearAutoplay() {
     if (this.autoplayTimeoutId_ !== null) {
       Services.timerFor(this.win).cancel(this.autoplayTimeoutId_);
@@ -214,9 +219,9 @@ export class BaseSlides extends BaseCarousel {
   }
 
   /**
-  * Remove autoplay.
-  * @protected
-  */
+   * Remove autoplay.
+   * @protected
+   */
   removeAutoplay() {
     this.clearAutoplay();
     if (this.loopAdded_) {

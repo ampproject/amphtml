@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
+import {Services} from '../services';
 import {
   getServicePromiseForDoc,
   registerServiceBuilderForDoc,
+  rejectServicePromiseForDoc,
 } from '../service';
 
 const ServiceNames = {
@@ -25,27 +27,52 @@ const ServiceNames = {
   EXIT: 'host-exit',
 };
 
-export const HostServiceError = {
-  // The host service doesn't match its environment.  For example, a SafeFrame
-  // host service when run in something that isn't a SafeFrame.  The
-  // implementation should consider falling back to its default implementation
-  // on the regular web.
-  MISMATCH: 1,
-  // The host service is correct for its environment, but not able to function.
-  // For example, a SafeFrame host service running inside a SafeFrame
-  // implementation that is incomplete or out of date.
-  UNSUPPORTED: 2,
-};
+/**
+ * Error object for various host services. It is passed around in case
+ * of host service failures for proper error handling.
+ *
+ * - fallback: if the caller should fallback to other impl
+ *
+ * @typedef {{
+ *   fallback: boolean
+ * }}
+ */
+export let HostServiceError;
 
+/**
+ * A set of service interfaces that is used when the AMP document is loaded
+ * in an environment that does not provide regular web APIs for things like
+ * - open URL
+ * - scroll events, IntersectionObserver
+ * - expand to fullscreen
+ *
+ * The consumers of those services should get the service by calling
+ * XXXForDoc(), which returns a Promise that resolves to the service Object,
+ * or gets rejected with an error Object. (See HostServiceError)
+ *
+ * The providers of those services should install the service by calling
+ * installXXXServiceForDoc() when it's available, or
+ * rejectXXXServiceForDoc() when there is a failure.
+ */
 export class HostServices {
+  /**
+   * @param {!Element|!../service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @return {boolean}
+   */
+  static isAvailable(elementOrAmpDoc) {
+    const head = Services.ampdoc(elementOrAmpDoc).getHeadNode();
+    return !!head.querySelector('script[host-service]');
+  }
 
   /**
    * @param {!Element|!../service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @return {!Promise<!VisibilityInterface>}
    */
   static visibilityForDoc(elementOrAmpDoc) {
-    return /** @type {!Promise<!VisibilityInterface>} */ (
-      getServicePromiseForDoc(elementOrAmpDoc, ServiceNames.VISIBILITY));
+    return /** @type {!Promise<!VisibilityInterface>} */ (getServicePromiseForDoc(
+      elementOrAmpDoc,
+      ServiceNames.VISIBILITY
+    ));
   }
 
   /**
@@ -53,8 +80,20 @@ export class HostServices {
    * @param {function(new:Object, !../service/ampdoc-impl.AmpDoc)} impl
    */
   static installVisibilityServiceForDoc(elementOrAmpDoc, impl) {
-    registerServiceBuilderForDoc(elementOrAmpDoc,
-        ServiceNames.VISIBILITY, impl, /* opt_instantiate */ true);
+    registerServiceBuilderForDoc(
+      elementOrAmpDoc,
+      ServiceNames.VISIBILITY,
+      impl,
+      /* opt_instantiate */ true
+    );
+  }
+
+  /**
+   * @param {!Element|!../service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @param {!HostServiceError} error
+   */
+  static rejectVisibilityServiceForDoc(elementOrAmpDoc, error) {
+    rejectServicePromiseForDoc(elementOrAmpDoc, ServiceNames.VISIBILITY, error);
   }
 
   /**
@@ -62,8 +101,10 @@ export class HostServices {
    * @return {!Promise<!FullscreenInterface>}
    */
   static fullscreenForDoc(elementOrAmpDoc) {
-    return /** @type {!Promise<!FullscreenInterface>} */ (
-      getServicePromiseForDoc(elementOrAmpDoc, ServiceNames.FULLSCREEN));
+    return /** @type {!Promise<!FullscreenInterface>} */ (getServicePromiseForDoc(
+      elementOrAmpDoc,
+      ServiceNames.FULLSCREEN
+    ));
   }
 
   /**
@@ -71,8 +112,20 @@ export class HostServices {
    * @param {function(new:Object, !../service/ampdoc-impl.AmpDoc)} impl
    */
   static installFullscreenServiceForDoc(elementOrAmpDoc, impl) {
-    registerServiceBuilderForDoc(elementOrAmpDoc,
-        ServiceNames.FULLSCREEN, impl, /* opt_instantiate */ true);
+    registerServiceBuilderForDoc(
+      elementOrAmpDoc,
+      ServiceNames.FULLSCREEN,
+      impl,
+      /* opt_instantiate */ true
+    );
+  }
+
+  /**
+   * @param {!Element|!../service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @param {!HostServiceError} error
+   */
+  static rejectFullscreenServiceForDoc(elementOrAmpDoc, error) {
+    rejectServicePromiseForDoc(elementOrAmpDoc, ServiceNames.FULLSCREEN, error);
   }
 
   /**
@@ -80,8 +133,10 @@ export class HostServices {
    * @return {!Promise<!ExitInterface>}
    */
   static exitForDoc(elementOrAmpDoc) {
-    return /** @type {!Promise<!ExitInterface>} */ (
-      getServicePromiseForDoc(elementOrAmpDoc, ServiceNames.EXIT));
+    return /** @type {!Promise<!ExitInterface>} */ (getServicePromiseForDoc(
+      elementOrAmpDoc,
+      ServiceNames.EXIT
+    ));
   }
 
   /**
@@ -89,8 +144,20 @@ export class HostServices {
    * @param {function(new:Object, !../service/ampdoc-impl.AmpDoc)} impl
    */
   static installExitServiceForDoc(elementOrAmpDoc, impl) {
-    registerServiceBuilderForDoc(elementOrAmpDoc,
-        ServiceNames.EXIT, impl, /* opt_instantiate */ true);
+    registerServiceBuilderForDoc(
+      elementOrAmpDoc,
+      ServiceNames.EXIT,
+      impl,
+      /* opt_instantiate */ true
+    );
+  }
+
+  /**
+   * @param {!Element|!../service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @param {!HostServiceError} error
+   */
+  static rejectExitServiceForDoc(elementOrAmpDoc, error) {
+    rejectServicePromiseForDoc(elementOrAmpDoc, ServiceNames.EXIT, error);
   }
 }
 
@@ -101,14 +168,12 @@ export class HostServices {
  * @interface
  */
 export class VisibilityInterface {
-
   /**
    * Register a callback for visibility change events.
    *
    * @param {function(!VisibilityDataDef)} unusedCallback
    */
-  onVisibilityChange(unusedCallback) {
-  }
+  onVisibilityChange(unusedCallback) {}
 }
 
 /**
@@ -122,7 +187,6 @@ export class VisibilityInterface {
  */
 export let VisibilityDataDef;
 
-
 /**
  * FullscreenInterface defines interface provided by host to enable/disable
  * fullscreen mode.
@@ -130,7 +194,6 @@ export let VisibilityDataDef;
  * @interface
  */
 export class FullscreenInterface {
-
   /**
    * Request to expand the given element to fullscreen overlay.
    *
@@ -138,8 +201,7 @@ export class FullscreenInterface {
    * @return {!Promise<boolean>} promise resolves to a boolean
    *     indicating if the request was fulfilled
    */
-  enterFullscreenOverlay(unusedTargetElement) {
-  }
+  enterFullscreenOverlay(unusedTargetElement) {}
 
   /**
    * Request to exit from fullscreen overlay.
@@ -148,8 +210,7 @@ export class FullscreenInterface {
    * @return {!Promise<boolean>} promise resolves to a boolean
    *     indicating if the request was fulfilled
    */
-  exitFullscreenOverlay(unusedTargetElement) {
-  }
+  exitFullscreenOverlay(unusedTargetElement) {}
 }
 
 /**
@@ -158,7 +219,6 @@ export class FullscreenInterface {
  * @interface
  */
 export class ExitInterface {
-
   /**
    * Request to navigate to URL.
    *
@@ -166,6 +226,5 @@ export class ExitInterface {
    * @return {!Promise<boolean>} promise resolves to a boolean
    *     indicating if the request was fulfilled
    */
-  openUrl(unusedUrl) {
-  }
+  openUrl(unusedUrl) {}
 }

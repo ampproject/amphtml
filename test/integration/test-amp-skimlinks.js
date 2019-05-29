@@ -21,12 +21,12 @@ import {parseQueryString} from '../../src/url';
 // Create fake test urls to replace skimlinks API urls.
 // RequestBank allow us to check if an API request has been made
 // or not by calling RequestBank.withdraw later.
-const pageTrackingUrl = RequestBank.getUrl('pageTrackingUrl') +
-  '/track.php?data=${data}';
-const linksTrackingUrl = RequestBank.getUrl('linksTrackingUrl') +
-  '/link?data=${data}';
-const nonAffiliateTrackingUrl = RequestBank.getUrl('nonAffiliateTrackingUrl') +
-  '?call=track&data=${data}';
+const pageTrackingUrl =
+  RequestBank.getUrl('pageTrackingUrl') + '/track.php?data=${data}';
+const linksTrackingUrl =
+  RequestBank.getUrl('linksTrackingUrl') + '/link?data=${data}';
+const nonAffiliateTrackingUrl =
+  RequestBank.getUrl('nonAffiliateTrackingUrl') + '?call=track&data=${data}';
 const waypointUrl = `${RequestBank.getUrl('waypointUrl')}/`;
 
 // Simulated click event created by browser.click() does not trigger
@@ -41,7 +41,8 @@ function clickLinkAndNavigate_(doc, selector) {
   }
 }
 
-describe('amp-skimlinks', function() {
+// TODO(@slocka) Disabled due to #22154, re-enable
+describe.skip('amp-skimlinks', function() {
   const setupBasic = {
     extensions: ['amp-skimlinks'],
     body: `
@@ -113,7 +114,15 @@ describe('amp-skimlinks', function() {
       });
     });
 
-    it('Should send NA-tracking on non-merchant link click ', () => {
+    // TODO(alanorozco): Unskip on firefox
+    const itSkipFirefox = (desc, cb) =>
+      it
+        .configure()
+        .skipFirefox()
+        .run(desc, cb);
+
+    // TODO(alanorozco): Unskip on firefox
+    itSkipFirefox('should send NA-tracking on non-merchant link click ', () => {
       // Give 500ms for amp-skimlinks to set up.
       return browser.wait(500).then(() => {
         clickLinkAndNavigate('#non-merchant-link');
@@ -151,7 +160,6 @@ describe('amp-skimlinks', function() {
       });
     });
   });
-
 
   const setupNoConfig = {
     extensions: ['amp-skimlinks'],
@@ -200,7 +208,6 @@ describe('amp-skimlinks', function() {
       });
     });
   });
-
 
   const setupUnknownLinks = {
     extensions: ['amp-skimlinks'],
@@ -253,5 +260,3 @@ describe('amp-skimlinks', function() {
     });
   });
 });
-
-

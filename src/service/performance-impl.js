@@ -15,6 +15,7 @@
  */
 
 import {Services} from '../services';
+import {dev} from '../log';
 import {dict, map} from '../utils/object';
 import {getMode} from '../mode';
 import {getService, registerServiceBuilder} from '../service';
@@ -30,6 +31,12 @@ import {whenDocumentComplete} from '../document-ready';
  */
 const QUEUE_LIMIT = 50;
 
+/** @const {string} */
+const VISIBILITY_CHANGE_EVENT = 'visibilitychange';
+
+/** @const {string} */
+const BEFORE_UNLOAD_EVENT = 'beforeunload';
+
 /**
  * Fields:
  * {{
@@ -40,7 +47,6 @@ const QUEUE_LIMIT = 50;
  * @typedef {!JsonObject}
  */
 let TickEventDef;
-
 
 /**
  * Increments the value, else defaults to 0 for the given object key.
@@ -59,14 +65,12 @@ function incOrDef(obj, name) {
   }
 }
 
-
 /**
  * Performance holds the mechanism to call `tick` to stamp out important
  * events in the lifecycle of the AMP runtime. It can hold a small amount
  * of tick events to forward to the external `tick` function when it is set.
  */
 export class Performance {
-
   /**
    * @param {!Window} win
    */
@@ -104,6 +108,24 @@ export class Performance {
     /** @private {number|null} */
     this.firstViewportReady_ = null;
 
+    /**
+     * How many times a layout jank metric has been ticked.
+     *
+     * @private {number}
+     */
+    this.jankScoresTicked_ = 0;
+
+    /**
+     * The sum of all layout jank fractions triggered on the page from the
+     * Layout Jank API.
+     *
+     * @private {number}
+     */
+    this.aggregateJankScore_ = 0;
+
+    this.boundOnVisibilityChange_ = this.onVisibilityChange_.bind(this);
+    this.boundTickLayoutJankScore_ = this.tickLayoutJankScore_.bind(this);
+
     // Add RTV version as experiment ID, so we can slice the data by version.
     this.addEnabledExperiment('rtv-' + getMode(this.win).rtvVersion);
     if (isCanary(this.win)) {
@@ -112,7 +134,8 @@ export class Performance {
 
     // Tick window.onload event.
     whenDocumentComplete(win.document).then(() => this.onload_());
-    this.registerPaintTimingObserver_();
+    this.registerPerformanceObserver_();
+    this.registerFirstInputDelayPolyfillListener_();
   }
 
   /**
@@ -124,8 +147,8 @@ export class Performance {
     this.viewer_ = Services.viewerForDoc(documentElement);
     this.resources_ = Services.resourcesForDoc(documentElement);
 
-    this.isPerformanceTrackingOn_ = this.viewer_.isEmbedded() &&
-        this.viewer_.getParam('csi') === '1';
+    this.isPerformanceTrackingOn_ =
+      this.viewer_.isEmbedded() && this.viewer_.getParam('csi') === '1';
 
     // This is for redundancy. Call flush on any visibility change.
     this.viewer_.onVisibilityChanged(this.flush.bind(this));
@@ -142,6 +165,27 @@ export class Performance {
       this.tick('ofv');
       this.flush();
     });
+
+    if (this.win.PerformanceLayoutJank) {
+      // Register a handler to record the layout jank metric when the page
+      // enters the hidden lifecycle state.
+      this.win.addEventListener(
+        VISIBILITY_CHANGE_EVENT,
+        this.boundOnVisibilityChange_,
+        {capture: true}
+      );
+
+      // Safari does not reliably fire the `pagehide` or `visibilitychange`
+      // events when closing a tab, so we have to use `beforeunload`.
+      // See https://bugs.webkit.org/show_bug.cgi?id=151234
+      const platform = Services.platformFor(this.win);
+      if (platform.isSafari()) {
+        this.win.addEventListener(
+          BEFORE_UNLOAD_EVENT,
+          this.boundTickLayoutJankScore_
+        );
+      }
+    }
 
     // We don't check `isPerformanceTrackingOn` here since there are some
     // events that we call on the viewer even though performance tracking
@@ -176,13 +220,11 @@ export class Performance {
   }
 
   /**
-   * Reports first pain and first contentful paint timings.
+   * Reports performance metrics first paint, first contentful paint,
+   * and first input delay.
    * See https://github.com/WICG/paint-timing
    */
-  registerPaintTimingObserver_() {
-    if (!this.win.PerformancePaintTiming) {
-      return;
-    }
+  registerPerformanceObserver_() {
     // Chrome doesn't implement the buffered flag for PerformanceObserver.
     // That means we need to read existing entries and maintain state
     // as to whether we have reported a value yet, since in the future it may
@@ -190,27 +232,127 @@ export class Performance {
     // https://bugs.chromium.org/p/chromium/issues/detail?id=725567
     let recordedFirstPaint = false;
     let recordedFirstContentfulPaint = false;
+    let recordedFirstInputDelay = false;
     const processEntry = entry => {
       if (entry.name == 'first-paint' && !recordedFirstPaint) {
         this.tickDelta('fp', entry.startTime + entry.duration);
         recordedFirstPaint = true;
-      }
-      else if (entry.name == 'first-contentful-paint'
-          && !recordedFirstContentfulPaint) {
+      } else if (
+        entry.name == 'first-contentful-paint' &&
+        !recordedFirstContentfulPaint
+      ) {
         this.tickDelta('fcp', entry.startTime + entry.duration);
         recordedFirstContentfulPaint = true;
+      } else if (entry.entryType === 'firstInput' && !recordedFirstInputDelay) {
+        this.tickDelta('fid', entry.processingStart - entry.startTime);
+        recordedFirstInputDelay = true;
+      } else if (entry.entryType === 'layoutJank') {
+        this.aggregateJankScore_ += entry.fraction;
       }
     };
+
+    const entryTypesToObserve = [];
+    if (this.win.PerformancePaintTiming) {
+      // Programmatically read once as currently PerformanceObserver does not
+      // report past entries as of Chrome 61.
+      // https://bugs.chromium.org/p/chromium/issues/detail?id=725567
+      this.win.performance.getEntriesByType('paint').forEach(processEntry);
+      entryTypesToObserve.push('paint');
+    }
+
+    if (this.win.PerformanceEventTiming) {
+      // Programmatically read once as currently PerformanceObserver does not
+      // report past entries as of Chrome 61.
+      // https://bugs.chromium.org/p/chromium/issues/detail?id=725567
+      this.win.performance.getEntriesByType('firstInput').forEach(processEntry);
+      entryTypesToObserve.push('firstInput');
+    }
+
+    if (this.win.PerformanceLayoutJank) {
+      // Programmatically read once as currently PerformanceObserver does not
+      // report past entries as of Chrome 61.
+      // https://bugs.chromium.org/p/chromium/issues/detail?id=725567
+      this.win.performance.getEntriesByType('layoutJank').forEach(processEntry);
+      entryTypesToObserve.push('layoutJank');
+    }
+
+    if (entryTypesToObserve.length === 0) {
+      return;
+    }
+
     const observer = new this.win.PerformanceObserver(list => {
       list.getEntries().forEach(processEntry);
       this.flush();
     });
-    // Programmatically read once as currently PerformanceObserver does not
-    // report past entries as of Chrome 61.
-    // https://bugs.chromium.org/p/chromium/issues/detail?id=725567
-    this.win.performance.getEntriesByType('paint').forEach(processEntry);
 
-    observer.observe({entryTypes: ['paint']});
+    // Wrap observer.observe() in a try statement for testing, because
+    // Webkit throws an error if the entry types to observe are not natively
+    // supported.
+    try {
+      observer.observe({entryTypes: entryTypesToObserve});
+    } catch (err) {
+      dev() /*OK*/
+        .warn(err);
+    }
+  }
+
+  /**
+   * Reports the first input delay value calculated by a polyfill, if present.
+   * @see https://github.com/GoogleChromeLabs/first-input-delay
+   */
+  registerFirstInputDelayPolyfillListener_() {
+    if (!this.win.perfMetrics || !this.win.perfMetrics.onFirstInputDelay) {
+      return;
+    }
+    this.win.perfMetrics.onFirstInputDelay(delay => {
+      this.tickDelta('fid-polyfill', delay);
+      this.flush();
+    });
+  }
+
+  /**
+   * When the visibility state of the document changes to hidden,
+   * send the layout jank score.
+   */
+  onVisibilityChange_() {
+    if (this.win.document.visibilityState === 'hidden') {
+      this.tickLayoutJankScore_();
+    }
+  }
+
+  /**
+   * Tick the layout jank score metric.
+   *
+   * A value of the metric is recorded in under two names, `lj` and `lj-2`,
+   * for the first two times the page transitions into a hidden lifecycle state
+   * (when the page is navigated a way from, the tab is backgrounded for
+   * another tab, or the user backgrounds the browser application).
+   *
+   * Since we can't reliably detect when a page session finally ends,
+   * recording the value for these first two events should provide a fair
+   * amount of visibility into this metric.
+   */
+  tickLayoutJankScore_() {
+    if (this.jankScoresTicked_ === 0) {
+      this.tickDelta('lj', this.aggregateJankScore_);
+      this.flush();
+      this.jankScoresTicked_ = 1;
+    } else if (this.jankScoresTicked_ === 1) {
+      this.tickDelta('lj-2', this.aggregateJankScore_);
+      this.flush();
+      this.jankScoresTicked_ = 2;
+
+      // No more work to do, so clean up event listeners.
+      this.win.removeEventListener(
+        VISIBILITY_CHANGE_EVENT,
+        this.boundOnVisibilityChange_,
+        {capture: true}
+      );
+      this.win.removeEventListener(
+        BEFORE_UNLOAD_EVENT,
+        this.boundTickLayoutJankScore_
+      );
+    }
   }
 
   /**
@@ -223,11 +365,14 @@ export class Performance {
     // Detect deprecated first pain time API
     // https://bugs.chromium.org/p/chromium/issues/detail?id=621512
     // We'll use this until something better is available.
-    if (!this.win.PerformancePaintTiming
-        && this.win.chrome
-        && typeof this.win.chrome.loadTimes == 'function') {
-      const fpTime = (this.win.chrome.loadTimes()['firstPaintTime'] * 1000)
-          - this.win.performance.timing.navigationStart;
+    if (
+      !this.win.PerformancePaintTiming &&
+      this.win.chrome &&
+      typeof this.win.chrome.loadTimes == 'function'
+    ) {
+      const fpTime =
+        this.win.chrome.loadTimes()['firstPaintTime'] * 1000 -
+        this.win.performance.timing.navigationStart;
       if (fpTime <= 1) {
         // Throw away bad data generated from an apparent Chrome bug
         // that is fixed in later Chrome versions.
@@ -246,22 +391,21 @@ export class Performance {
     const didStartInPrerender = !this.viewer_.hasBeenVisible();
     let docVisibleTime = didStartInPrerender ? -1 : this.initTime_;
 
-    // This is only relevant if the viewer is in prerender mode.
+    // This will only be relevant if the viewer is in prerender mode.
     // (hasn't been visible yet, ever at this point)
-    if (didStartInPrerender) {
-      this.viewer_.whenFirstVisible().then(() => {
-        docVisibleTime = this.win.Date.now();
-        // Mark this first visible instance in the browser timeline.
-        this.mark('visible');
-      });
-    }
+    this.viewer_.whenFirstVisible().then(() => {
+      docVisibleTime = this.win.Date.now();
+      // Mark this first visible instance in the browser timeline.
+      this.mark('visible');
+    });
 
     this.whenViewportLayoutComplete_().then(() => {
       if (didStartInPrerender) {
-        const userPerceivedVisualCompletenesssTime = docVisibleTime > -1
-          ? (this.win.Date.now() - docVisibleTime)
-          //  Prerender was complete before visibility.
-          : 0;
+        const userPerceivedVisualCompletenesssTime =
+          docVisibleTime > -1
+            ? this.win.Date.now() - docVisibleTime
+            : //  Prerender was complete before visibility.
+              0;
         this.viewer_.whenFirstVisible().then(() => {
           // We only tick this if the page eventually becomes visible,
           // since otherwise we heavily skew the metric towards the
@@ -295,9 +439,9 @@ export class Performance {
     const {documentElement} = this.win.document;
     const size = Services.viewportForDoc(documentElement).getSize();
     const rect = layoutRectLtwh(0, 0, size.width, size.height);
-    return this.resources_.getResourcesInRect(
-        this.win, rect, /* isInPrerender */ true)
-        .then(resources => Promise.all(resources.map(r => r.loadedOnce())));
+    return this.resources_
+      .getResourcesInRect(this.win, rect, /* isInPrerender */ true)
+      .then(resources => Promise.all(resources.map(r => r.loadedOnce())));
   }
 
   /**
@@ -310,7 +454,7 @@ export class Performance {
    *     this directly.
    */
   tick(label, opt_delta) {
-    const value = (opt_delta == undefined) ? this.win.Date.now() : undefined;
+    const value = opt_delta == undefined ? this.win.Date.now() : undefined;
 
     const data = dict({
       'label': label,
@@ -331,8 +475,9 @@ export class Performance {
 
     // Store certain page visibility metrics to be exposed as analytics
     // variables.
-    const storedVal = Math.round(opt_delta != null ? Math.max(opt_delta, 0)
-				 : value - this.initTime_);
+    const storedVal = Math.round(
+      opt_delta != null ? Math.max(opt_delta, 0) : value - this.initTime_
+    );
     switch (label) {
       case 'fcp':
         this.firstContentfulPaint_ = storedVal;
@@ -353,9 +498,11 @@ export class Performance {
    * @param {string} label
    */
   mark(label) {
-    if (this.win.performance
-        && this.win.performance.mark
-        && arguments.length == 1) {
+    if (
+      this.win.performance &&
+      this.win.performance.mark &&
+      arguments.length == 1
+    ) {
       this.win.performance.mark(label);
     }
   }
@@ -381,15 +528,18 @@ export class Performance {
     this.tickDelta(label, v);
   }
 
-
   /**
    * Ask the viewer to flush the ticks
    */
   flush() {
     if (this.isMessagingReady_ && this.isPerformanceTrackingOn_) {
-      this.viewer_.sendMessage('sendCsi', dict({
-        'ampexp': this.ampexp_,
-      }), /* cancelUnsent */true);
+      this.viewer_.sendMessage(
+        'sendCsi',
+        dict({
+          'ampexp': this.ampexp_,
+        }),
+        /* cancelUnsent */ true
+      );
     }
   }
 
@@ -455,8 +605,11 @@ export class Performance {
    */
   prerenderComplete_(value) {
     if (this.viewer_) {
-      this.viewer_.sendMessage('prerenderComplete', dict({'value': value}),
-          /* cancelUnsent */true);
+      this.viewer_.sendMessage(
+        'prerenderComplete',
+        dict({'value': value}),
+        /* cancelUnsent */ true
+      );
     }
   }
 
@@ -491,7 +644,6 @@ export class Performance {
     return this.firstViewportReady_;
   }
 }
-
 
 /**
  * @param {!Window} window
