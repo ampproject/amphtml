@@ -18,8 +18,8 @@
 module.exports = {
   // Since the sidebar now uses animations to open/close, the screenshots will
   // not capture the correct state (Percy does not run animations).
-  // 'open sidebar': async (page, name) => {
-  //   await page.tap('[on="tap:sidebar1.toggle"]');
-  //   await verifySelectorsVisible(page, name, ['amp-sidebar[open]']);
-  // },
+  'open sidebar': async (page, name) => {
+    await page.tap('[on="tap:sidebar1.toggle"]');
+    await verifySelectorsVisible(page, name, ['amp-sidebar[open]']);
+  },
 };

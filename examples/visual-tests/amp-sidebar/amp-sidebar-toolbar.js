@@ -23,9 +23,9 @@ const {verifySelectorsVisible} = require('../../../build-system/tasks/visual-dif
 module.exports = {
   // Since the sidebar now uses animations to open/close, the screenshots will
   // not capture the correct state (Percy does not run animations).
-  // 'open sidebar toolbar': async (page, name) => {
-  //   await page.tap('[on="tap:sidebar.toggle"]');
-  //   await verifySelectorsVisible(page, name, ['amp-sidebar[open]']);
-  //   await verifySelectorsVisible(page, name, ['nav[toolbar]']);
-  // },
+  'open sidebar toolbar': async (page, name) => {
+    await page.tap('[on="tap:sidebar.toggle"]');
+    await verifySelectorsVisible(page, name, ['amp-sidebar[open]']);
+    await verifySelectorsVisible(page, name, ['nav[toolbar]']);
+  },
 };
