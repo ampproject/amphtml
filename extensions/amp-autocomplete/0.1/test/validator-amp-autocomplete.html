@@ -195,6 +195,17 @@
         <input>
     </amp-autocomplete>
 
+    <!-- Valid: amp-component with static data and highlight-user-entry attribute -->
+    <amp-autocomplete highlight-user-entry>
+      <input type="text">
+      <script type="application/json"> {} </script>
+    </amp-autocomplete>
+
+    <!-- Valid: amp-component with remote data and highlight-user-entry attribute -->
+    <amp-autocomplete highlight-user-entry src="https://data.com/articles.json?ref=CANONICAL_URL">
+      <input type="text">
+    </amp-autocomplete>
+
     <!-- Valid: amp-component with static data and submit-on-enter attribute -->
     <amp-autocomplete submit-on-enter>
       <input>

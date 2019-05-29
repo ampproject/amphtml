@@ -28,6 +28,15 @@
       font: 8pt 'Arial', sans-serif;
       right: 0;
     }
+
+    .autocomplete-partial {
+      font-weight: bold;
+    }
+
+    #select-example .autocomplete-partial {
+      color: red;
+      text-decoration: underline;
+    }
   </style>
   <script>
       (self.AMP=self.AMP||[]).push((AMP) => {
@@ -38,11 +47,11 @@
 <body>
     <h1>Autocomplete</h1>
     <h2>Select Event</h2>
-    <p>min-characters = 0</p>
+  <p>min-characters = 0, partial red underline</p>
     <form method="post" action-xhr="/form/echo-json/post" target="_blank">
-      <amp-autocomplete filter="substring" min-characters="0" src="autocomplete-cities.example.json"
-        on="select:AMP.setState({inputSelect: event.value})">
-      <input name="input2" required>
+    <amp-autocomplete id="select-example" filter="substring" min-characters="0" highlight-user-entry
+      src="autocomplete-cities.example.json" on="select:AMP.setState({inputSelect: event.value})">
+          <input name="input2" required>
       </amp-autocomplete>
       <input name="submit-button" type="submit" value="Submit">
     <div submit-success>
@@ -63,7 +72,7 @@
       <amp-autocomplete filter="substring" min-characters="0">
       <input name="email" id="frmEmailB" placeholder="name@example.com" required autocomplete="email">
         <script type="application/json">
-          { "items" : ["Email 1", "Email 2", "Email 3"]}
+          { "items" : ["Email 1", "<span>Email</span> 2", "Email 3"]}
         </script>
       </amp-autocomplete>
       <input name="submit-button" type="submit" value="Submit">
@@ -167,8 +176,20 @@
 
     <p>submit-on-enter</p>
     <form method="post" action-xhr="/form/echo-json/post" target="_blank">
-      <amp-autocomplete filter="substring"
-        src="autocomplete-cities.example.json" submit-on-enter>
+    <amp-autocomplete filter="substring" src="autocomplete-cities.example.json" submit-on-enter>
+      <input type="text" name="input6" required>
+    </amp-autocomplete>
+    <input name="submit-button" type="submit" value="Submit">
+    <div submit-success>
+      <template type="amp-mustache">
+        Success! {{input6}}
+      </template>
+    </div>
+  </form>
+
+  <p>highlight-user-entry</p>
+  <form method="post" action-xhr="/form/echo-json/post" target="_blank">
+    <amp-autocomplete filter="substring" src="autocomplete-cities.example.json" highlight-user-entry>
           <input type="text" name="input6" required>
       </amp-autocomplete>
       <input name="submit-button" type="submit" value="Submit">
@@ -510,7 +531,9 @@
 
     <h2>Templates in search context</h2>
     <p>Plain Text, Submit on enter</p>
-    <form method="get" action-xhr="/form/search-json/get" target="_blank">
+    <form method="post"
+        action-xhr="/form/echo-json/post"
+        target="_blank">
         <fieldset>
             <label>
                 <span>Search for</span>
@@ -531,7 +554,9 @@
     </form>
 
     <p>Rich Text, Template Child, Default Value Property</p>
-    <form method="get" action-xhr="/form/search-json/get" target="_blank">
+    <form method="post"
+        action-xhr="/form/echo-json/post"
+        target="_blank">
         <fieldset>
             <label>
                 <span>Search for</span>
@@ -572,7 +597,9 @@
     </form>
 
     <p>Rich Text, Template Child, Custom Value Property</p>
-    <form method="get" action-xhr="/form/search-json/get" target="_blank">
+    <form method="post"
+        action-xhr="/form/echo-json/post"
+        target="_blank">
         <fieldset>
             <label>
                 <span>Search for</span>
@@ -616,7 +643,9 @@
     </form>
 
     <p>Rich Text, Template Attribute, Default Value Property</p>
-    <form method="get" action-xhr="/form/search-json/get" target="_blank">
+    <form method="post"
+        action-xhr="/form/echo-json/post"
+        target="_blank">
         <fieldset>
             <label>
                 <span>Search for</span>
@@ -679,5 +708,91 @@
       </amp-autocomplete>
       <input name="submit-button" type="submit" value="Submit">
     </form>
+
+  <h2>Fallback</h2>
+  <p>Invalid src path, fallback provided</p>
+  <form method="post" action-xhr="/form/echo-json/post" target="_blank">
+    <fieldset>
+      <label>
+        Your hometown<br>
+        <amp-autocomplete filter="substring" min-characters="0" src="autocomplete-invalid.example.json">
+          <input type="text" name="city" required>
+          <div fallback>
+            Sorry, we couldn't load suggestions.
+          </div>
+        </amp-autocomplete>
+      </label>
+      <input name="submit-button" type="submit" value="Submit">
+    </fieldset>
+
+    <div submit-success>
+      <template type="amp-mustache">
+        Success! Mailing a postcard to {{city}}.
+      </template>
+    </div>
+  </form>
+
+  <p>Failing src path, fallback provided</p>
+  <form method="post" action-xhr="/form/echo-json/post" target="_blank">
+    <fieldset>
+      <label>
+        Your hometown<br>
+        <amp-autocomplete filter="substring" min-characters="0" src="/form/autocomplete/error"
+          [src]="'/form/autocomplete/error?q=' + (queryForFallback || '')">
+          <input type="text" name="city" required on="input-debounced:AMP.setState({ queryForFallback: event.value })">
+          <div fallback>
+            Sorry, we couldn't load suggestions.
+          </div>
+        </amp-autocomplete>
+      </label>
+      <input name="submit-button" type="submit" value="Submit">
+    </fieldset>
+
+    <div submit-success>
+      <template type="amp-mustache">
+        Success! Mailing a postcard to {{city}}.
+      </template>
+    </div>
+  </form>
+
+  <p>Invalid src path, no fallback provided</p>
+  <form method="post" action-xhr="/form/echo-json/post" target="_blank">
+    <fieldset>
+      <label>
+        Your hometown<br>
+        <amp-autocomplete filter="substring" min-characters="0" src="autocomplete-invalid.example.json">
+          <input type="text" name="city" required>
+        </amp-autocomplete>
+      </label>
+      <input name="submit-button" type="submit" value="Submit">
+    </fieldset>
+
+    <div submit-success>
+      <template type="amp-mustache">
+        Success! Mailing a postcard to {{city}}.
+      </template>
+    </div>
+  </form>
+
+  <p>Failing src path, no fallback provided</p>
+  <form method="post" action-xhr="/form/echo-json/post" target="_blank">
+    <fieldset>
+      <label>
+        Your hometown<br>
+        <amp-autocomplete filter="substring" min-characters="0" src="/form/autocomplete/error"
+          [src]="'/form/autocomplete/error?q=' + (queryForFallback2 || '')">
+          <input type="text" name="city" required on="input-debounced:AMP.setState({ queryForFallback2: event.value })">
+        </amp-autocomplete>
+      </label>
+      <input name="submit-button" type="submit" value="Submit">
+    </fieldset>
+
+    <div submit-success>
+      <template type="amp-mustache">
+        Success! Mailing a postcard to {{city}}.
+      </template>
+    </div>
+  </form>
 </body>
+
 </html>
