@@ -14,7 +14,12 @@
  * limitations under the License.
  */
 
-import {getFormAsObject, isDisabled, isFieldDefault} from '../../src/form.js';
+import {
+  getFormAsObject,
+  isDisabled,
+  isFieldDefault,
+  isFieldEmpty,
+} from '../../src/form.js';
 
 describes.realWin('getFormAsObject', {}, env => {
   let form;
@@ -582,6 +587,104 @@ describes.realWin('isFieldDefault', {}, env => {
       dropdown.options[0].selected = true;
       dropdown.options[1].selected = true;
       expect(isFieldDefault(dropdown)).to.be.false;
+    });
+  });
+});
+
+describes.fakeWin('isFieldEmpty', {}, env => {
+  let doc;
+
+  beforeEach(() => {
+    doc = env.win.document;
+  });
+
+  describe('text field', () => {
+    let textField;
+
+    beforeEach(() => {
+      textField = doc.createElement('input');
+      textField.type = 'text';
+    });
+
+    it('returns true if the text field is empty', () => {
+      textField.value = '';
+      expect(isFieldEmpty(textField)).to.be.true;
+    });
+
+    it('returns false if the text field is not empty', () => {
+      textField.value = 'some text';
+      expect(isFieldEmpty(textField)).to.be.false;
+    });
+  });
+
+  describe('textarea', () => {
+    let textarea;
+
+    beforeEach(() => {
+      textarea = doc.createElement('textarea');
+    });
+
+    it('returns true if the textarea is empty', () => {
+      textarea.value = '';
+      expect(isFieldEmpty(textarea)).to.be.true;
+    });
+
+    it('returns false if the textarea is not empty', () => {
+      textarea.value = 'some text';
+      expect(isFieldEmpty(textarea)).to.be.false;
+    });
+  });
+
+  describe('checkbox', () => {
+    let checkbox;
+
+    beforeEach(() => {
+      checkbox = doc.createElement('input');
+      checkbox.type = 'checkbox';
+    });
+
+    it('returns false if the checkbox is checked', () => {
+      checkbox.checked = true;
+      expect(isFieldEmpty(checkbox)).to.be.false;
+    });
+
+    it('returns true if the checkbox is not checked', () => {
+      checkbox.checked = false;
+      expect(isFieldEmpty(checkbox)).to.be.true;
+    });
+  });
+
+  describe('radio button', () => {
+    let radio;
+
+    beforeEach(() => {
+      radio = doc.createElement('input');
+      radio.type = 'radio';
+    });
+
+    it('returns false if the radio is checked', () => {
+      radio.checked = true;
+      expect(isFieldEmpty(radio)).to.be.false;
+    });
+
+    it('returns true if the radio is not checked', () => {
+      radio.checked = false;
+      expect(isFieldEmpty(radio)).to.be.true;
+    });
+  });
+
+  describe('dropdown menu', () => {
+    it('always returns false because at least one option is always selected', () => {
+      const dropdown = doc.createElement('select');
+
+      const optionA = doc.createElement('option');
+      dropdown.appendChild(optionA);
+      const optionB = doc.createElement('option');
+      dropdown.appendChild(optionB);
+
+      optionA.selected = false;
+      expect(optionA.selected).to.be.true;
+      expect(isFieldEmpty(dropdown)).to.be.false;
     });
   });
 });

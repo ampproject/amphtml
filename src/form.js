@@ -187,3 +187,24 @@ export function isFieldDefault(field) {
   }
   return true;
 }
+
+/**
+ * Checks if a form field is empty.
+ * @param {!Element} field
+ * @return {boolean}
+ */
+export function isFieldEmpty(field) {
+  switch (field.type) {
+    case 'select-multiple':
+    case 'select-one':
+      // dropdown menu has at least one option always selected
+      return false;
+    case 'checkbox':
+    case 'radio':
+      return !field.checked;
+    default:
+      return !field.value;
+  }
+
+  return true;
+}
