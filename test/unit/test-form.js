@@ -389,29 +389,29 @@ describes.fakeWin('isDisabled', {}, env => {
   });
 
   describe('elements with ancestral fieldset', () => {
-    let element, fieldset;
+    let element, elementAncestralFieldset;
 
     beforeEach(() => {
-      fieldset = doc.createElement('fieldset');
       element = doc.createElement('input');
-      fieldset.appendChild(element);
+      elementAncestralFieldset = doc.createElement('fieldset');
+      elementAncestralFieldset.appendChild(element);
     });
 
     it('returns true for enabled elements with disabled ancestral fieldset', () => {
       element.disabled = false;
-      fieldset.disabled = true;
+      elementAncestralFieldset.disabled = true;
       expect(isDisabled(element)).to.be.true;
     });
 
     it('returns false for enabled elements with enabled ancestral fieldset', () => {
       element.disabled = false;
-      fieldset.disabled = false;
+      elementAncestralFieldset.disabled = false;
       expect(isDisabled(element)).to.be.false;
     });
 
     it('returns true for disabled elements with enabled ancestral fieldset', () => {
       element.disabled = true;
-      fieldset.disabled = false;
+      elementAncestralFieldset.disabled = false;
       expect(isDisabled(element)).to.be.true;
     });
   });
