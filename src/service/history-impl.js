@@ -894,6 +894,23 @@ export class HistoryBindingVirtual_ {
   }
 
   /**
+   * Gets the history state from a response. This checks if `maybeHistoryState`
+   * is a history state, and returns it if so, falling back to `fallbackState`
+   * otherwise.
+   * @param {*} maybeHistoryState
+   * @param {!HistoryStateDef} fallbackState
+   * @return {!HistoryStateDef}
+   * @private
+   */
+  getHistoryState_(maybeHistoryState, fallbackState) {
+    if (maybeHistoryState && maybeHistoryState.stackIndex) {
+      return /** @type {!HistoryStateDef} */ (maybeHistoryState);
+    }
+
+    return fallbackState;
+  }
+
+  /**
    * `pushHistory`
    *
    *   Request:  {'stackIndex': string}
@@ -909,8 +926,7 @@ export class HistoryBindingVirtual_ {
     return this.viewer_
       .sendMessageAwaitResponse('pushHistory', message)
       .then(response => {
-        // Return the message if response is undefined.
-        const newState = /** @type {!HistoryStateDef} */ (response || message);
+        const newState = this.getHistoryState_(response, message);
         this.updateHistoryState_(newState);
         return newState;
       });
@@ -932,10 +948,12 @@ export class HistoryBindingVirtual_ {
     return this.viewer_
       .sendMessageAwaitResponse('popHistory', message)
       .then(response => {
-        // Return the new stack index if response is undefined.
-        const newState =
-          /** @type {!HistoryStateDef} */ (response ||
-          dict({'stackIndex': this.stackIndex_ - 1}));
+        const newState = this.getHistoryState_(
+          response,
+          dict({
+            'stackIndex': this.stackIndex_ - 1,
+          })
+        );
         this.updateHistoryState_(newState);
         return newState;
       });
@@ -976,7 +994,7 @@ export class HistoryBindingVirtual_ {
         /* cancelUnsent */ true
       )
       .then(response => {
-        const newState = /** @type {!HistoryStateDef} */ (response || message);
+        const newState = this.getHistoryState_(response, message);
         this.updateHistoryState_(newState);
         return newState;
       });
