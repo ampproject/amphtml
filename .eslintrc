@@ -37,6 +37,7 @@
           "deprecated",
           "export",
           "final",
+	  "nocollapse",
           "package",
           "restricted",
           "suppress",

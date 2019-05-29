@@ -281,6 +281,7 @@ export class ActionService {
   /**
    * @param {!Window} embedWin
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
+   * @nocollapse
    */
   static installInEmbedWindow(embedWin, ampdoc) {
     installServiceInEmbedScope(
