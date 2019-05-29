@@ -68,4 +68,33 @@ tags: {  # amp-subscriptions-google
   requires_extension: "amp-subscriptions"
   attr_lists: "common-extension-attrs"
 }
+tags: {  # script
+  html_format: AMP
+  tag_name: "SCRIPT"
+  spec_name: "script tag that contains encrypted material"
+  mandatory_parent: "CONTENT"
+  siblings_disallowed: true
+  requires_extension: "amp-subscriptions"
+  attrs: {
+    name: "type"
+    value: "application/octet-stream"
+    mandatory: true
+  }
+  attrs: {
+    name: "encrypted"
+    value: ""
+    mandatory: true
+  }
+}
+tags: {  # content
+  html_format: AMP
+  tag_name: "CONTENT"
+  spec_name: "content tag that contains encrypted script"
+  requires_extension: "amp-subscriptions"
+  attrs: {
+    name: "subscriptions-section"
+    value: "content"
+    mandatory: true
+  }
+}
 # related attributes are listed in validator-main.protoascii
