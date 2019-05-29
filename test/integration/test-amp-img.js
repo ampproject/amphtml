@@ -117,9 +117,11 @@ describe
   .run('Internet Explorer edge cases', () => {
     let fixture;
     beforeEach(() => {
-      return createFixtureIframe('test/fixtures/images.html', 500).then(f => {
-        fixture = f;
-      });
+      return createFixtureIframe('test/fixtures/images-ie.html', 500).then(
+        f => {
+          fixture = f;
+        }
+      );
     });
 
     // IE doesn't support the srcset attribute, so if the developer
