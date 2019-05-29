@@ -428,6 +428,10 @@ describes.realWin('isFieldDefault', {}, env => {
     let textField;
 
     beforeEach(() => {
+      // Element is inserted as HTML so that the `defaultValue` property is
+      // generated correctly, since it returns "the default value as
+      // **originally specified in the HTML** that created this object."
+      // https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement#Properties
       const html = '<input type="text" value="default">';
       doc.body.insertAdjacentHTML('afterbegin', html);
       textField = doc.querySelector('input');
@@ -448,6 +452,10 @@ describes.realWin('isFieldDefault', {}, env => {
     let textarea;
 
     beforeEach(() => {
+      // Element is inserted as HTML so that the `defaultValue` property is
+      // generated correctly, since it returns "the default value as
+      // **originally specified in the HTML** that created this object."
+      // https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement#Properties
       const html = '<textarea>default</textarea>';
       doc.body.insertAdjacentHTML('afterbegin', html);
       textarea = doc.querySelector('textarea');
@@ -468,6 +476,10 @@ describes.realWin('isFieldDefault', {}, env => {
     let optionA, optionB;
 
     beforeEach(() => {
+      // Element is inserted as HTML so that the `defaultChecked` property is
+      // generated correctly, since it returns "the default state as
+      // **originally specified in the HTML** that created this object."
+      // https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement#Properties
       const html = `
           <input type="radio" id="radio-a" name="radio" value="A" checked>
           <input type="radio" id="radio-b" name="radio" value="B">
@@ -494,6 +506,10 @@ describes.realWin('isFieldDefault', {}, env => {
     let checkbox;
 
     beforeEach(() => {
+      // Element is inserted as HTML so that the `defaultChecked` property is
+      // generated correctly, since it returns "the default state as
+      // **originally specified in the HTML** that created this object."
+      // https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement#Properties
       const html = '<input type="checkbox" checked>';
       doc.body.insertAdjacentHTML('afterbegin', html);
       checkbox = doc.querySelector('input');
@@ -514,6 +530,10 @@ describes.realWin('isFieldDefault', {}, env => {
     let dropdown;
 
     beforeEach(() => {
+      // Element is inserted as HTML so that the `defaultSelected` property is
+      // generated correctly, since it returns "the default state as
+      // **originally specified in the HTML** that created this object."
+      // https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement#Properties
       const html = `
           <select>
             <option value="A" selected>A</option>
@@ -539,6 +559,10 @@ describes.realWin('isFieldDefault', {}, env => {
     let dropdown;
 
     beforeEach(() => {
+      // Element is inserted as HTML so that the `defaultSelected` property is
+      // generated correctly, since it returns "the default state as
+      // **originally specified in the HTML** that created this object."
+      // https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement#Properties
       const html = `
           <select>
             <option value="A" selected>A</option>
