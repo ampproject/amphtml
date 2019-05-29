@@ -54,11 +54,12 @@ tags: {  # <amp-autocomplete>
     name: "src"
     value_url: {
       protocol: "https"
-      allow_relative: false
+      allow_relative: true
     }
   }
   attrs: { name: "submit-on-enter" }
   attrs: { name: "suggest-first" }
+  attrs: { name: "highlight-user-entry" }
   attrs: { name: "template" }
   # amp-bind
   attrs: {
