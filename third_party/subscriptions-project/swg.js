@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.51.1 */
+/** Version: 0.1.22.52 */
 /**
  * @license
  * Copyright 2017 The Web Activities Authors. All Rights Reserved.
@@ -157,44 +157,6 @@ class ActivityPort {
    * @return {!Promise<!ActivityResult>}
    */
   acceptResult() {}
-}
-
-
-/**
- * Activity client-side binding for messaging.
- *
- * Whether the host can or cannot receive a message depends on the type of
- * host and its state. Ensure that the code has an alternative path if
- * messaging is not available.
- *
- * @interface
- */
-class ActivityMessagingPort {
-
-  /**
-   * Returns the target window where host is loaded. May be unavailable.
-   * @return {?Window}
-   */
-  getTargetWin() {}
-
-  /**
-   * Sends a message to the host.
-   * @param {!Object} payload
-   */
-  message(payload) {}
-
-  /**
-   * Registers a callback to receive messages from the host.
-   * @param {function(!Object)} callback
-   */
-  onMessage(callback) {}
-
-  /**
-   * Creates a new communication channel or returns an existing one.
-   * @param {string=} opt_name
-   * @return {!Promise<!MessagePort>}
-   */
-  messageChannel(opt_name) {}
 }
 
 
@@ -895,7 +857,6 @@ function closePort(port) {
  * to size requests.
  *
  * @implements {ActivityPort}
- * @implements {ActivityMessagingPort}
  */
 class ActivityIframePort {
 
@@ -990,22 +951,27 @@ class ActivityIframePort {
     return this.resultPromise_;
   }
 
-  /** @override */
-  getTargetWin() {
-    return this.iframe_.contentWindow || null;
-  }
-
-  /** @override */
+  /**
+   * Sends a message to the host.
+   * @param {!Object} payload
+   */
   message(payload) {
     this.messenger_.customMessage(payload);
   }
 
-  /** @override */
+  /**
+   * Registers a callback to receive messages from the host.
+   * @param {function(!Object)} callback
+   */
   onMessage(callback) {
     this.messenger_.onCustomMessage(callback);
   }
 
-  /** @override */
+  /**
+   * Creates a new communication channel or returns an existing one.
+   * @param {string=} opt_name
+   * @return {!Promise<!MessagePort>}
+   */
   messageChannel(opt_name) {
     return this.messenger_.askChannel(opt_name);
   }
@@ -1098,7 +1064,6 @@ class ActivityIframePort {
  * client executed as a popup.
  *
  * @implements {ActivityPort}
- * @implements {ActivityMessagingPort}
  */
 class ActivityWindowPort {
 
@@ -1131,14 +1096,6 @@ class ActivityWindowPort {
     this.args_ = opt_args || null;
     /** @private @const {!ActivityOpenOptions} */
     this.options_ = opt_options || {};
-
-    /** @private {?function()} */
-    this.connectedResolver_ = null;
-
-    /** @private @const {!Promise} */
-    this.connectedPromise_ = new Promise(resolve => {
-      this.connectedResolver_ = resolve;
-    });
 
     /** @private {?function((!ActivityResult|!Promise))} */
     this.resultResolver_ = null;
@@ -1178,11 +1135,10 @@ class ActivityWindowPort {
   }
 
   /**
-   * Waits until the activity port is connected to the host.
-   * @return {!Promise}
+   * @return {?Window}
    */
-  whenConnected() {
-    return this.connectedPromise_;
+  getTargetWin() {
+    return this.targetWin_;
   }
 
   /**
@@ -1210,46 +1166,8 @@ class ActivityWindowPort {
   }
 
   /** @override */
-  getTargetWin() {
-    return this.targetWin_;
-  }
-
-  /** @override */
   acceptResult() {
     return this.resultPromise_;
-  }
-
-  /**
-   * Sends a message to the host.
-   * Whether the host can or cannot receive a message depends on the type of
-   * host and its state. Ensure that the code has an alternative path if
-   * messaging is not available.
-   * @override
-   */
-  message(payload) {
-    this.messenger_.customMessage(payload);
-  }
-
-  /**
-   * Registers a callback to receive messages from the host.
-   * Whether the host can or cannot receive a message depends on the type of
-   * host and its state. Ensure that the code has an alternative path if
-   * messaging is not available.
-   * @override
-   */
-  onMessage(callback) {
-    this.messenger_.onCustomMessage(callback);
-  }
-
-  /**
-   * Creates a new communication channel or returns an existing one.
-   * Whether the host can or cannot receive a message depends on the type of
-   * host and its state. Ensure that the code has an alternative path if
-   * messaging is not available.
-   * @override
-   */
-  messageChannel(opt_name) {
-    return this.messenger_.askChannel(opt_name);
   }
 
   /**
@@ -1483,7 +1401,6 @@ class ActivityWindowPort {
     if (cmd == 'connect') {
       // First ever message. Indicates that the receiver is listening.
       this.messenger_.sendStartCommand(this.args_);
-      this.connectedResolver_();
     } else if (cmd == 'result') {
       // The last message. Indicates that the result has been received.
       const code = /** @type {!ActivityResultCode} */ (payload['code']);
@@ -1607,7 +1524,7 @@ class ActivityPorts {
    */
   constructor(win) {
     /** @const {string} */
-    this.version = '1.24';
+    this.version = '1.22';
 
     /** @private @const {!Window} */
     this.win_ = win;
@@ -1673,26 +1590,14 @@ class ActivityPorts {
    * @return {{targetWin: ?Window}}
    */
   open(requestId, url, target, opt_args, opt_options) {
-    const port = this.openWin_(requestId, url, target, opt_args, opt_options);
+    const port = new ActivityWindowPort(
+        this.win_, requestId, url, target, opt_args, opt_options);
+    port.open().then(() => {
+      // Await result if possible. Notice that when falling back to "redirect",
+      // the result will never arrive through this port.
+      this.consumeResultAll_(requestId, port);
+    });
     return {targetWin: port.getTargetWin()};
-  }
-
-  /**
-   * Start an activity in a separate window and tries to setup messaging with
-   * this window.
-   *
-   * See `open()` method for more details, including `onResult` callback.
-   *
-   * @param {string} requestId
-   * @param {string} url
-   * @param {string} target
-   * @param {?Object=} opt_args
-   * @param {?ActivityOpenOptions=} opt_options
-   * @return {!Promise<!ActivityMessagingPort>}
-   */
-  openWithMessaging(requestId, url, target, opt_args, opt_options) {
-    const port = this.openWin_(requestId, url, target, opt_args, opt_options);
-    return port.whenConnected().then(() => port);
   }
 
   /**
@@ -1746,25 +1651,6 @@ class ActivityPorts {
    */
   onRedirectError(handler) {
     this.redirectErrorPromise_.then(handler);
-  }
-
-  /**
-   * @param {string} requestId
-   * @param {string} url
-   * @param {string} target
-   * @param {?Object=} opt_args
-   * @param {?ActivityOpenOptions=} opt_options
-   * @return {!ActivityWindowPort}
-   */
-  openWin_(requestId, url, target, opt_args, opt_options) {
-    const port = new ActivityWindowPort(
-        this.win_, requestId, url, target, opt_args, opt_options);
-    port.open().then(() => {
-      // Await result if possible. Notice that when falling back to "redirect",
-      // the result will never arrive through this port.
-      this.consumeResultAll_(requestId, port);
-    });
-    return port;
   }
 
   /**
@@ -1823,7 +1709,6 @@ class ActivityPorts {
 var activityPorts = {
   ActivityPorts,
   ActivityIframePort,
-  ActivityMessagingPort,
   ActivityMode,
   ActivityOpenOptions,
   ActivityPort,
@@ -1835,8 +1720,8 @@ var activityPorts = {
   isAbortError,
 };
 var activityPorts_1 = activityPorts.ActivityPorts;
-var activityPorts_11 = activityPorts.createAbortError;
-var activityPorts_12 = activityPorts.isAbortError;
+var activityPorts_10 = activityPorts.createAbortError;
+var activityPorts_11 = activityPorts.isAbortError;
 
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
@@ -1853,12 +1738,15 @@ var activityPorts_12 = activityPorts.isAbortError;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 /** @enum {number} */
 const AnalyticsEvent = {
   UNKNOWN: 0,
   IMPRESSION_PAYWALL: 1,
   IMPRESSION_AD: 2,
   IMPRESSION_OFFERS: 3,
+  IMPRESSION_SUBSCRIBE_BUTTON: 4,
+  IMPRESSION_SMARTBOX: 5,
   ACTION_SUBSCRIBE: 1000,
   ACTION_PAYMENT_COMPLETE: 1001,
   ACTION_ACCOUNT_CREATED: 1002,
@@ -1869,7 +1757,18 @@ const AnalyticsEvent = {
   EVENT_PAYMENT_FAILED: 2000,
   EVENT_CUSTOM: 3000,
 };
+/** @enum {number} */
+const EventOriginator = {
+  UNKNOWN_CLIENT: 0,
+  SWG_CLIENT: 1,
+  AMP_CLIENT: 2,
+  PROPENSITY_CLIENT: 3,
+  SWG_SERVER: 4,
+};
 
+/**
+ * @implements {Message}
+ */
 class AnalyticsContext {
  /**
   * @param {!Array=} data
@@ -2032,10 +1931,11 @@ class AnalyticsContext {
 
   /**
    * @return {!Array}
+   * @override
    */
   toArray() {
     return [
-      'AnalyticsContext',  // message type
+      this.label(),  // message label
       this.embedderOrigin_,  // field 1 - embedder_origin
       this.transactionId_,  // field 2 - transaction_id
       this.referringOrigin_,  // field 3 - referring_origin
@@ -2047,9 +1947,19 @@ class AnalyticsContext {
       this.label_,  // field 9 - label
     ];
   }
+
+  /**
+   * @return {string}
+   * @override
+   */
+  label() {
+    return 'AnalyticsContext';
+  }
 }
 
-
+/**
+ * @implements {Message}
+ */
 class AnalyticsEventMeta {
  /**
   * @param {!Array=} data
@@ -2093,17 +2003,28 @@ class AnalyticsEventMeta {
 
   /**
    * @return {!Array}
+   * @override
    */
   toArray() {
     return [
-      'AnalyticsEventMeta',  // message type
+      this.label(),  // message label
       this.eventOriginator_,  // field 1 - event_originator
       this.isFromUserAction_,  // field 2 - is_from_user_action
     ];
   }
+
+  /**
+   * @return {string}
+   * @override
+   */
+  label() {
+    return 'AnalyticsEventMeta';
+  }
 }
 
-
+/**
+ * @implements {Message}
+ */
 class AnalyticsRequest {
  /**
   * @param {!Array=} data
@@ -2120,6 +2041,10 @@ class AnalyticsRequest {
     /** @private {?AnalyticsEventMeta} */
     this.meta_ = (data[3] == null || data[3] == undefined) ? null : new
         AnalyticsEventMeta(data[3]);
+
+    /** @private {?EventParams} */
+    this.params_ = (data[4] == null || data[4] == undefined) ? null : new
+        EventParams(data[4]);
   }
 
   /**
@@ -2165,15 +2090,86 @@ class AnalyticsRequest {
   }
 
   /**
+   * @return {?EventParams}
+   */
+  getParams() {
+    return this.params_;
+  }
+
+  /**
+   * @param {!EventParams} value
+   */
+  setParams(value) {
+    this.params_ = value;
+  }
+
+  /**
    * @return {!Array}
+   * @override
    */
   toArray() {
     return [
-      'AnalyticsRequest',  // message type
+      this.label(),  // message label
       this.context_ ? this.context_.toArray() : [], // field 1 - context
       this.event_,  // field 2 - event
       this.meta_ ? this.meta_.toArray() : [], // field 3 - meta
+      this.params_ ? this.params_.toArray() : [], // field 4 - params
     ];
+  }
+
+  /**
+   * @return {string}
+   * @override
+   */
+  label() {
+    return 'AnalyticsRequest';
+  }
+}
+
+/**
+ * @implements {Message}
+ */
+class EventParams {
+ /**
+  * @param {!Array=} data
+  */
+  constructor(data = []) {
+
+    /** @private {?string} */
+    this.smartboxMessage_ = (data[1] == null) ? null : data[1];
+  }
+
+  /**
+   * @return {?string}
+   */
+  getSmartboxMessage() {
+    return this.smartboxMessage_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setSmartboxMessage(value) {
+    this.smartboxMessage_ = value;
+  }
+
+  /**
+   * @return {!Array}
+   * @override
+   */
+  toArray() {
+    return [
+      this.label(),  // message label
+      this.smartboxMessage_,  // field 1 - smartbox_message
+    ];
+  }
+
+  /**
+   * @return {string}
+   * @override
+   */
+  label() {
+    return 'EventParams';
   }
 }
 
@@ -2820,6 +2816,39 @@ function isObject(value) {
 }
 
 /**
+ * Checks whether `s` is a valid value of `enumObj`.
+ *
+ * @param {!Object<T>} enumObj
+ * @param {T} s
+ * @return {boolean}
+ * @template T
+ */
+function isEnumValue(enumObj, s) {
+  for (const k in enumObj) {
+    if (enumObj[k] === s) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * True if the value is a function.
+ * @param {*} value
+ */
+function isFunction(value) {
+  return value !== null && typeof value === 'function';
+}
+
+/**
+ * True if the value is either true or false.
+ * @param {?*} value
+ */
+function isBoolean(value) {
+  return value === true || value === false;
+}
+
+/**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -3058,7 +3087,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.51.1',
+    '_client': 'SwG 0.1.22.52',
   });
 }
 
@@ -3748,7 +3777,7 @@ class View {
  * @return {boolean}
  */
 function isCancelError(error) {
-  return activityPorts_12(error);
+  return activityPorts_11(error);
 }
 
 
@@ -3760,7 +3789,7 @@ function isCancelError(error) {
  * @return {!DOMException}
  */
 function createCancelError(win, opt_message) {
-  return activityPorts_11(win, opt_message);
+  return activityPorts_10(win, opt_message);
 }
 
 
@@ -4825,40 +4854,66 @@ const Event = {
    * IMPRESSION_PAYWALL event.
    * User hits a paywall.
    * Every impression should be qualified as active or passive.
+   * The field 'active' of PropensityEvent, which carries this
+   * event, must be set to true or false to indicate this.
    * If the user has run out of metering, and that’s why was shown
    * a paywall, that would be a passive impression of the paywall.
-   * For example; {‘is_active’: false}
+   * For example:
+   * const propensityEvent = {
+   *  name: 'paywall',
+   *  active: false,
+   * }
    */
   IMPRESSION_PAYWALL: 'paywall',
   /**
    * IMPRESSION_AD event.
    * User has been shown a subscription ad.
    * Every impression should be qualified as active or passive.
+   * The field 'active' of PropensityEvent, which carries this
+   * event, must be set to true or false to indicate this.
    * The JSON block can provide the name of the subscription ad
    * creative or campaign. Ad impressions are usually passive.
-   * For example; {'name': 'fall_ad', 'is_active': false}
+   * const propensityEvent = {
+   *   name: 'ad_shown',
+   *   active: false,
+   *   data: {'ad_name': 'fall_ad'}
+   * }
    */
   IMPRESSION_AD: 'ad_shown',
   /**
    * IMPRESSION_OFFERS event.
    * User has been shown a list of available offers for subscription.
    * Every impression should be qualified as active or passive.
+   * The field 'active' of PropensityEvent, which carries this
+   * event, must be set to true or false to indicate this.
    * The JSON block can provide a list of products displayed,
    * and the source to indicate why the user was shown the offer.
    * Note: source is not the same as referrer.
    * In the cases below, the user took action before seeing the offers,
    * and therefore considered active impression.
-   * For example; {'offers': ['basic-monthly', 'premium-weekly'],
-   *               'source': 'ad-click',
-                  ‘is_active’: true}
-   * For example; {‘offers’: [‘basic-monthly’, ‘premium-weekly’],
-   *              ‘source’: ‘navigate-to-offers-page’,
-   *              ‘is_active’: true}
+   * For example:
+   * const propensityEvent = {
+   *   name: 'offers_shown',
+   *   active: true,
+   *   data: {'offers': ['basic-monthly', 'premium-weekly'],
+   *           'source': 'ad-click'}
+   * }
+   * For example:
+   * const propensityEvent = {
+   *   name: 'offers_shown',
+   *   active: true,
+   *   data: {'offers': ['basic-monthly', 'premium-weekly'],
+   *           'source': ‘navigate-to-offers-page’}
+   * }
    * If the user was shown the offers as a result of paywall metering
    * expiration, it is considered a passive impression.
-   * For example; {‘offers’: [‘basic-monthly’],
-   *               ‘source’: ‘paywall-metering-expired’,
-   *               ‘is_active’: false}
+   * For example:
+   * const propensityEvent = {
+   *   name: 'offers_shown',
+   *   active: false,
+   *   data: {'offers': ['basic-monthly', 'premium-weekly'],
+   *           'source': ‘paywall-metering-expired’}
+   * }
    */
   IMPRESSION_OFFERS: 'offers_shown',
   /**
@@ -4879,17 +4934,30 @@ const Event = {
    *   or ACTION_PAYMENT_FLOW_STARTED depending on if that button
    *   took the user to a checkout page on the publishers site or
    *   directly started the payment flow).
+   * The field 'active' of PropensityEvent, which carries this
+   * event, must be set to true since this is a user action.
    * The JSON block with this event can provide additional information
    * such as the source, indicating what caused the user to navigate
    * to this page.
-   * For example; {‘source’: ‘marketing_via_email’}
+   * For example:
+   * const propensityEvent = {
+   *   name: 'subscriptions_landing_page',
+   *   active: true,
+   *   data: {'source': 'marketing_via_email'}
+   * }
    */
   ACTION_SUBSCRIPTIONS_LANDING_PAGE: 'subscriptions_landing_page',
   /**
    * ACTION_OFFER_SELECTED event.
    * User has selected an offer.
+   * The field 'active' of PropensityEvent, which carries this
+   * event, must be set to true since this is a user action.
    * The JSON block can provide the product selected.
-   * For example; {'product': 'basic-monthly'}
+   * For example: {
+   *   name: 'offer_selected',
+   *   active: true,
+   *   data: {product': 'basic-monthly'}
+   * }
    * When offer selection starts the payment flow directly,
    * use the next event ACTION_PAYMENT_FLOW_STARTED instead.
    */
@@ -4897,21 +4965,46 @@ const Event = {
   /**
    * ACTION_PAYMENT_FLOW_STARTED event.
    * User has started payment flow.
+   * The field 'active' of PropensityEvent, which carries this
+   * event, must be set to true since this is a user action.
    * The JSON block can provide the product selected.
-   * For example; {'product': 'basic-monthly'}
+   * For example:
+   * const propensityEvent = {
+   *   name: 'payment_flow_started',
+   *   active: true,
+   *   data: {product': 'basic-monthly'}
+   * }
    */
   ACTION_PAYMENT_FLOW_STARTED: 'payment_flow_start',
   /**
    * ACTION_PAYMENT_COMPLETED.
    * User has made the payment for a subscription.
+   * The field 'active' of PropensityEvent, which carries this
+   * event, must be set to true since this is a user action.
    * The JSON block can provide the product user paid for.
-   * For example; {'product': 'basic-monthly'}
+   * For example:
+   * const propensityEvent = {
+   *   name: 'payment_complete',
+   *   active: true,
+   *   data: {product': 'basic-monthly'}
+   * }
    */
   ACTION_PAYMENT_COMPLETED: 'payment_complete',
   /**
    * EVENT_CUSTOM: custom publisher event.
+   * The field 'active' of PropensityEvent, which carries this
+   * event, must be set to true or false depending on if the event
+   * was generated as a result of a user action.
    * The JSON block can provide the event name for the custom event.
-   * For example; {'name': 'email_signup'}
+   * For example:
+   * const propensityEvent = {
+   *   name: 'custom',
+   *   active: true,
+   *   data: {
+   *     'event_name': 'social_share',
+   *     'platform_used': 'whatsapp'
+   *   }
+   *  }
    */
   EVENT_CUSTOM: 'custom',
 };
@@ -13159,6 +13252,203 @@ class Propensity {
 }
 
 /**
+ * Copyright 2019 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/** @enum {number}  */
+const FilterResult = {
+  /** The event is allowed to proceed to the listeners. */
+  PROCESS_EVENT: 0,
+  /** The event is canceled and the listeners are not informed about it. */
+  CANCEL_EVENT: 1,
+};
+
+/**
+ * Defines a client event in SwG
+ * Properties:
+ * - eventType: Required. The AnalyticsEvent type that occurred.
+ * - eventOriginator: Required.  The codebase that initiated the event.
+ * - isFromUserAction: Optional.  True if the user took an action to generate
+ *   the event.
+ * - additionalParameters: Optional.  A JSON object to store generic data.
+ *
+ *  @typedef {{
+ *    eventType: !AnalyticsEvent,
+ *    eventOriginator: !EventOriginator,
+ *    isFromUserAction: ?boolean,
+ *    additionalParameters: ?Object,
+ * }}
+ */
+let ClientEvent;
+
+/**
+ * @interface
+ */
+class ClientEventManagerApi {
+  /**
+   * Call this function to log an event. The registered listeners will be
+   * invoked unless the event is filtered.
+   * @param {!function(!ClientEvent)} listener
+   */
+  registerEventListener(listener) { }
+
+  /**
+   * Register a filterer for events if you need to potentially prevent the
+   * listeners from hearing about it.  A filterer should return
+   * FilterResult.CANCEL_EVENT to prevent listeners from hearing about the
+   * event.
+   * @param {!function(!ClientEvent):FilterResult} filterer
+   */
+  registerEventFilterer(filterer) { }
+
+  /**
+   * Call this function to log an event.  It will immediately throw an error if
+   * the event is invalid.  It will then asynchronously call the filterers and
+   * stop the event if a filterer cancels it.  After that, it will call each
+   * listener asynchronously.
+   * @param {!ClientEvent} event
+   */
+  logEvent(event) { }
+}
+
+/**
+ * Copyright 2019 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Helper function to describe an issue with an event object
+ * @param {!string} valueName
+ * @param {?*} value
+ * @returns {!string}
+ */
+function createEventErrorMessage(valueName, value) {
+  return 'Event has an invalid ' + valueName + '(' + value + ')';
+}
+
+/**
+ * Throws an error if the event is invalid.
+ * @param {!../api/client-event-manager-api.ClientEvent} event
+ */
+function validateEvent(event) {
+  if (!isObject(event)) {
+    throw new Error('Event must be a valid object');
+  }
+
+  if (!isEnumValue(AnalyticsEvent, event.eventType)) {
+    throw new Error(createEventErrorMessage('eventType', event.eventType));
+  }
+
+  if (!isEnumValue(EventOriginator, event.eventOriginator)) {
+    throw new Error(createEventErrorMessage('eventOriginator',
+        event.eventOriginator));
+  }
+
+  if (!isObject(event.additionalParameters)
+      && event.additionalParameters !== null) {
+    throw new Error(createEventErrorMessage('additionalParameters',
+        event.additionalParameters));
+  }
+
+
+  if (event.isFromUserAction !== null && !isBoolean(event.isFromUserAction)) {
+    throw new Error(createEventErrorMessage('isFromUserAction',
+        event.isFromUserAction));
+  }
+}
+
+/** @implements {../api/client-event-manager-api.ClientEventManagerApi} */
+class ClientEventManager {
+  constructor() {
+    /** @private {!Array<function(!../api/client-event-manager-api.ClientEvent)>} */
+    this.listeners_ = [];
+
+    /** @private {!Array<function(!../api/client-event-manager-api.ClientEvent):!FilterResult>} */
+    this.filterers_ = [];
+
+    /** @private {?Promise} */
+    this.lastAction_ = null;
+  }
+
+  /**
+   * @overrides
+   */
+  registerEventListener(listener) {
+    if (!isFunction(listener)) {
+      throw new Error('Event manager listeners must be a function');
+    }
+    this.listeners_.push(listener);
+  }
+
+  /**
+   * @overrides
+   */
+  registerEventFilterer(filterer) {
+    if (!isFunction(filterer)) {
+      throw new Error('Event manager filterers must be a function');
+    }
+    this.filterers_.push(filterer);
+  }
+
+
+  /**
+   * @overrides
+   */
+  logEvent(event) {
+    validateEvent(event);
+    this.lastAction_ = new Promise(resolve => {
+      for (let filterer = 0; filterer < this.filterers_.length; filterer++) {
+        if (this.filterers_[filterer](event) === FilterResult.CANCEL_EVENT) {
+          resolve();
+          return;
+        }
+      }
+      for (let listener = 0; listener < this.listeners_.length; listener++) {
+        this.listeners_[listener](event);
+      }
+      resolve();
+    });
+  }
+
+  /**
+   * This function exists for the sole purpose of allowing the code to be
+   * presubmitted.  It can be removed once there is code generating a real
+   * event object somewhere.
+   */
+  useValidateEventForCompilationPurposes() {
+    validateEvent({
+      eventType: AnalyticsEvent.UNKNOWN,
+      eventOriginator: EventOriginator.UNKNOWN_CLIENT,
+      isFromUserAction: null,
+      additionalParameters: {},
+    });
+  }
+}
+
+/**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13189,6 +13479,9 @@ class ConfiguredRuntime {
    * @param {!../api/subscriptions.Config=} opt_config
    */
   constructor(winOrDoc, pageConfig, opt_integr, opt_config) {
+    /** @private @const {!ClientEventManager} */
+    this.eventManager_ = new ClientEventManager();
+
     /** @private @const {!Doc} */
     this.doc_ = resolveDoc(winOrDoc);
 
@@ -13570,6 +13863,11 @@ class ConfiguredRuntime {
   getPropensityModule() {
     return Promise.resolve(this.propensityModule_);
   }
+
+  /** @override */
+  eventManager() {
+    return this.eventManager_;
+  }
 }
 
 /**
@@ -13595,4 +13893,7 @@ export {
   Entitlement,
   Fetcher,
   SubscribeResponse,
+  ClientEventManagerApi,
+  ClientEvent,
+  FilterResult,
 };
