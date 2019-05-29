@@ -902,7 +902,7 @@ export class HistoryBindingVirtual_ {
    * @return {!HistoryStateDef}
    * @private
    */
-  getHistoryState_(maybeHistoryState, fallbackState) {
+  toHistoryState_(maybeHistoryState, fallbackState) {
     if (maybeHistoryState && maybeHistoryState.stackIndex) {
       return /** @type {!HistoryStateDef} */ (maybeHistoryState);
     }
@@ -926,7 +926,7 @@ export class HistoryBindingVirtual_ {
     return this.viewer_
       .sendMessageAwaitResponse('pushHistory', message)
       .then(response => {
-        const newState = this.getHistoryState_(response, message);
+        const newState = this.toHistoryState_(response, message);
         this.updateHistoryState_(newState);
         return newState;
       });
@@ -948,7 +948,7 @@ export class HistoryBindingVirtual_ {
     return this.viewer_
       .sendMessageAwaitResponse('popHistory', message)
       .then(response => {
-        const newState = this.getHistoryState_(
+        const newState = this.toHistoryState_(
           response,
           dict({
             'stackIndex': this.stackIndex_ - 1,
@@ -994,7 +994,7 @@ export class HistoryBindingVirtual_ {
         /* cancelUnsent */ true
       )
       .then(response => {
-        const newState = this.getHistoryState_(response, message);
+        const newState = this.toHistoryState_(response, message);
         this.updateHistoryState_(newState);
         return newState;
       });
