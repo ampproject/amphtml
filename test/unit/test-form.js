@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {getFormAsObject} from '../../src/form.js';
+import {getFormAsObject, isDisabled} from '../../src/form.js';
 
 describes.realWin('getFormAsObject', {}, env => {
   let form;
@@ -31,6 +31,19 @@ describes.realWin('getFormAsObject', {}, env => {
     input.value = 'bar';
     input.disabled = true;
     form.appendChild(input);
+
+    expect(getFormAsObject(form)).to.be.an('object').that.is.empty;
+  });
+
+  it('excludes input with disabled ancestral fieldset', () => {
+    const fieldset = env.win.document.createElement('fieldset');
+    fieldset.disabled = true;
+    const input = env.win.document.createElement('input');
+    input.type = 'text';
+    input.name = 'foo';
+    input.value = 'bar';
+    fieldset.appendChild(input);
+    form.appendChild(fieldset);
 
     expect(getFormAsObject(form)).to.be.an('object').that.is.empty;
   });
@@ -347,5 +360,59 @@ describes.realWin('getFormAsObject', {}, env => {
     expect(formDataObject)
       .to.have.property('foo2')
       .that.has.deep.members(['bar']);
+  });
+});
+
+describes.fakeWin('isDisabled', {}, env => {
+  let doc;
+
+  beforeEach(() => {
+    doc = env.win.document;
+  });
+
+  describe('elements without ancestral fieldset', () => {
+    let element;
+
+    beforeEach(() => {
+      element = doc.createElement('input');
+    });
+
+    it('returns true for disabled elements', () => {
+      element.disabled = true;
+      expect(isDisabled(element)).to.be.true;
+    });
+
+    it('returns false for enabled elements', () => {
+      element.disabled = false;
+      expect(isDisabled(element)).to.be.false;
+    });
+  });
+
+  describe('elements with ancestral fieldset', () => {
+    let element, elementAncestralFieldset;
+
+    beforeEach(() => {
+      element = doc.createElement('input');
+      elementAncestralFieldset = doc.createElement('fieldset');
+      elementAncestralFieldset.appendChild(element);
+    });
+
+    it('returns true for enabled elements with disabled ancestral fieldset', () => {
+      element.disabled = false;
+      elementAncestralFieldset.disabled = true;
+      expect(isDisabled(element)).to.be.true;
+    });
+
+    it('returns false for enabled elements with enabled ancestral fieldset', () => {
+      element.disabled = false;
+      elementAncestralFieldset.disabled = false;
+      expect(isDisabled(element)).to.be.false;
+    });
+
+    it('returns true for disabled elements with enabled ancestral fieldset', () => {
+      element.disabled = true;
+      elementAncestralFieldset.disabled = false;
+      expect(isDisabled(element)).to.be.true;
+    });
   });
 });
