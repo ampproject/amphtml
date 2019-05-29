@@ -99,6 +99,7 @@ export class LiveStoryManager {
         this.storeService_.dispatch(Action.ADD_TO_PAGE_IDS, [page.element.id]);
         lastPageEl = page.element;
       });
+      this.storeService_.dispatch(Action.ADD_NEW_PAGE_ID, lastPageEl.id);
     });
   }
 }

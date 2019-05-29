@@ -105,6 +105,7 @@ export let InteractiveComponentDef;
  *    currentPageIndex: number,
  *    pagesCount: number,
  *    pageIds: !Array<string>,
+ *    newPageAvailableId: string,
  * }}
  */
 export let State;
@@ -150,6 +151,7 @@ export const StateProperty = {
   PAGES_COUNT: 'pagesCount',
   ADVANCEMENT_MODE: 'advancementMode',
   PAGE_IDS: 'pageIds',
+  NEW_PAGE_AVAILABLE_ID: 'newPageAvailableId',
 };
 
 /** @private @const @enum {string} */
@@ -178,6 +180,7 @@ export const Action = {
   TOGGLE_SYSTEM_UI_IS_VISIBLE: 'toggleSystemUiIsVisible',
   TOGGLE_UI: 'toggleUi',
   TOGGLE_VIEWPORT_WARNING: 'toggleViewportWarning',
+  ADD_NEW_PAGE_ID: 'addNewPageId',
 };
 
 /**
@@ -205,6 +208,10 @@ const stateComparisonFunctions = {
  */
 const actions = (state, action, data) => {
   switch (action) {
+    case Action.ADD_NEW_PAGE_ID:
+      return /** @type {!State} */ (Object.assign({}, state, {
+        [StateProperty.NEW_PAGE_AVAILABLE_ID]: data,
+      }));
     case Action.ADD_TO_ACTIONS_WHITELIST:
       const newActionsWhitelist = [].concat(
         state[StateProperty.ACTIONS_WHITELIST],
@@ -471,6 +478,7 @@ export class AmpStoryStoreService {
       [StateProperty.PAGES_COUNT]: 0,
       [StateProperty.ADVANCEMENT_MODE]: '',
       [StateProperty.PAGE_IDS]: [],
+      [StateProperty.NEW_PAGE_AVAILABLE_ID]: '',
     });
   }
 
