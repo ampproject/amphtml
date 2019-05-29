@@ -61,7 +61,7 @@ import {
 } from '../../../src/utils/xhr-utils';
 import {installFormProxy} from './form-proxy';
 import {installStylesForDoc} from '../../../src/style-installer';
-import {toArray, toWin} from '../../../src/types';
+import {isArray, toArray, toWin} from '../../../src/types';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 /** @const {string} */
@@ -1116,7 +1116,13 @@ export class AmpForm {
       container.setAttribute('aria-live', 'assertive');
       if (this.templates_.hasTemplate(container)) {
         p = this.ssrTemplateHelper_
-          .renderTemplate(devAssert(container), data)
+          .renderTemplate(
+            devAssert(container),
+            devAssert(
+              typeof data == 'object' && !isArray(data),
+              'Non JSON array object expected.'
+            )
+          )
           .then(rendered => {
             rendered.id = messageId;
             rendered.setAttribute('i-amphtml-rendered', '');
