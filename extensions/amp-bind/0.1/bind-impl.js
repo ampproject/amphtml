@@ -207,6 +207,7 @@ export class Bind {
   /**
    * @param {!Window} embedWin
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @nocollapse
    */
   static installInEmbedWindow(embedWin, ampdoc) {
     installServiceInEmbedScope(embedWin, 'bind', new Bind(ampdoc, embedWin));
