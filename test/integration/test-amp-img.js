@@ -114,7 +114,7 @@ describe
 describe
   .configure()
   .ifIe()
-  .run('Internet Explorer edge cases', () => {
+  .run('Rendering of amp-img - Internet Explorer edge cases', () => {
     let fixture;
     beforeEach(() => {
       return createFixtureIframe('test/fixtures/images-ie.html', 500).then(
