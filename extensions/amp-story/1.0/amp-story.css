@@ -193,8 +193,9 @@ amp-story-page[active] {
 }
 
 .i-amphtml-story-sidebar[open] {
-  transform: translate3d(0, 0, 0) !important;
-  transition: transform 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
+  animation-timing-function: cubic-bezier(0.0, 0.0, 0.2, 1) !important;
+  animation-duration: 0.3s !important;
+  animation-name: i-amphtml-sidebar-slide-in-right;
 }
 
 [desktop] .i-amphtml-story-sidebar[open] {
@@ -205,9 +206,9 @@ amp-story-page[active] {
   max-width: 280px !important;
   min-width: 280px !important;
   width: 280px !important;
-  transform: translate3d(100%, 0, 0) !important;
-  transition: transform 0.2s cubic-bezier(0.4, 0.0, 1, 1) !important;
-  display: block !important;
+  animation-timing-function: cubic-bezier(0.4, 0.0, 1, 1)  !important;
+  animation-duration: 0.2s !important;
+  animation-name: i-amphtml-sidebar-slide-out-right;
 }
 
 .i-amphtml-story-fallback amp-story-page {
@@ -229,7 +230,7 @@ amp-story-page:not([active]) {
 
 /**
  * Note: If updating the [active] or [distance] attributes names, please also
- * update them in the amp.css file.
+ * update them in the ampdoc.css file.
  */
 amp-story-page[active],
 amp-story-page[distance="0"],
@@ -241,7 +242,7 @@ amp-story-page[distance="2"] {
   transform: translateY(100%) !important;
 }
 
-amp-story-page [text-background-color] {
+amp-story-page [data-text-background-color] {
   border-radius: 3px !important;
   line-height: 1.5em !important;
   padding: 2px 4px !important;

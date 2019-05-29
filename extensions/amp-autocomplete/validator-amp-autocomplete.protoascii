@@ -24,10 +24,10 @@ tags: {  # amp-autocomplete
   }
   attr_lists: "common-extension-attrs"
 }
-tags: {  # <amp-autocomplete src>
+tags: {  # <amp-autocomplete>
   html_format: AMP
   tag_name: "AMP-AUTOCOMPLETE"
-  spec_name: "amp-autocomplete with src attribute"
+  spec_name: "amp-autocomplete"
   requires_extension: "amp-autocomplete"
   mandatory_ancestor: "FORM"
   attrs: {
@@ -47,17 +47,19 @@ tags: {  # <amp-autocomplete src>
     name: "filter-expr"
     requires_extension: "amp-bind"
   }
+  attrs: { name: "filter-value" }
   attrs: { name: "max-entries" }
   attrs: { name: "min-characters" }
   attrs: {
     name: "src"
     value_url: {
       protocol: "https"
-      allow_relative: false
+      allow_relative: true
     }
   }
   attrs: { name: "submit-on-enter" }
   attrs: { name: "suggest-first" }
+  attrs: { name: "highlight-user-entry" }
   attrs: { name: "template" }
   # amp-bind
   attrs: {
