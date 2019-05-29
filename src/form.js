@@ -148,9 +148,8 @@ function isSubmitButton(element) {
 /**
  * Checks if a field is disabled.
  * @param {!Element} element
- * @private
  */
-function isDisabled(element) {
+export function isDisabled(element) {
   if (element.disabled) {
     return true;
   }
