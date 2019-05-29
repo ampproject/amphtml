@@ -411,6 +411,14 @@ const forbiddenTerms = {
       'extensions/amp-consent/0.1/consent-state-manager.js',
     ],
   },
+  // Global documentState service.
+  'documentStateFor': {
+    message: 'Global document API. In the process of being deprecated.',
+    whitelist: [
+      'src/service/viewer-impl.js',
+      'src/service/vsync-impl.js',
+    ],
+  },
   'getBaseCid': {
     message: requiresReviewPrivacy,
     whitelist: ['src/service/cid-impl.js', 'src/service/viewer-impl.js'],
