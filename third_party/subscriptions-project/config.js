@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.51 */
+/** Version: 0.1.22.53 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -30,7 +30,6 @@
  * limitations under the License.
  */
 
-
 /**
  * @param {!Document} doc
  * @return {string}
@@ -38,7 +37,6 @@
 function getReadyState(doc) {
   return /** @type {string} */ (doc['readyState']);
 }
-
 
 /**
  * Whether the document is ready.
@@ -110,12 +108,10 @@ function whenDocumentReady(doc) {
  * limitations under the License.
  */
 
-
 /**
  * @interface
  */
 class Doc {
-
   /**
    * @return {!Window}
    */
@@ -160,24 +156,21 @@ class Doc {
   whenReady() {}
 }
 
-
 /** @implements {Doc} */
 class GlobalDoc {
-
   /**
    * @param {!Window|!Document} winOrDoc
    */
   constructor(winOrDoc) {
     const isWin = !!winOrDoc.document;
     /** @private @const {!Window} */
-    this.win_ = isWin ?
-        /** @type {!Window} */ (winOrDoc) :
-        /** @type {!Window} */ (
-            (/** @type {!Document} */ (winOrDoc)).defaultView);
+    this.win_ = isWin
+      ? /** @type {!Window} */ (winOrDoc)
+      : /** @type {!Window} */ (/** @type {!Document} */ (winOrDoc).defaultView);
     /** @private @const {!Document} */
-    this.doc_ = isWin ?
-        /** @type {!Window} */ (winOrDoc).document :
-        /** @type {!Document} */ (winOrDoc);
+    this.doc_ = isWin
+      ? /** @type {!Window} */ (winOrDoc).document
+      : /** @type {!Document} */ (winOrDoc);
   }
 
   /** @override */
@@ -217,18 +210,17 @@ class GlobalDoc {
   }
 }
 
-
 /**
  * @param {!Document|!Window|!Doc} input
  * @return {!Doc}
  */
 function resolveDoc(input) {
   // Is it a `Document`
-  if ((/** @type {!Document} */ (input)).nodeType === /* DOCUMENT */ 9) {
+  if (/** @type {!Document} */ (input).nodeType === /* DOCUMENT */ 9) {
     return new GlobalDoc(/** @type {!Document} */ (input));
   }
   // Is it a `Window`?
-  if ((/** @type {!Window} */ (input)).document) {
+  if (/** @type {!Window} */ (input).document) {
     return new GlobalDoc(/** @type {!Window} */ (input));
   }
   return /** @type {!Doc} */ (input);
@@ -250,11 +242,9 @@ function resolveDoc(input) {
  * limitations under the License.
  */
 
-
 /**
  */
 class PageConfig {
-
   /**
    * @param {string} productOrPublicationId
    * @param {boolean} locked
@@ -332,10 +322,10 @@ class PageConfig {
  * limitations under the License.
  */
 
- /**
-  * Debug logger, only log message if #swg.log=1
-  * @param {...*} var_args [decription]
-  */
+/**
+ * Debug logger, only log message if #swg.log=1
+ * @param {...*} var_args [decription]
+ */
 function debugLog(var_args) {
   if (/swg.debug=1/.test(self.location.hash)) {
     const logArgs = Array.prototype.slice.call(arguments, 0);
@@ -415,7 +405,6 @@ function log(var_args) {
  * limitations under the License.
  */
 
-
 /**
  * Whether the element have a next node in the document order.
  * This means either:
@@ -431,8 +420,10 @@ function hasNextNodeInDocumentOrder(element, opt_stopNode) {
     if (currentElement.nextSibling) {
       return true;
     }
-  } while ((currentElement = currentElement.parentNode) &&
-            currentElement != opt_stopNode);
+  } while (
+    (currentElement = currentElement.parentNode) &&
+    currentElement != opt_stopNode
+  );
   return false;
 }
 
@@ -485,7 +476,7 @@ function isArray(value) {
  * @return {?JsonObject|undefined} May be extend to parse arrays.
  */
 function parseJson(json) {
-  return /** @type {?JsonObject} */(JSON.parse(/** @type {string} */ (json)));
+  return /** @type {?JsonObject} */ (JSON.parse(/** @type {string} */ (json)));
 }
 
 /**
@@ -545,7 +536,6 @@ const RE_ALLOWED_TYPES = new RegExp(ALLOWED_TYPES.join('|'));
 /**
  */
 class PageConfigResolver {
-
   /**
    * @param {!Window|!Document|!Doc} winOrDoc
    */
@@ -599,8 +589,9 @@ class PageConfigResolver {
       this.configResolver_(config);
       this.configResolver_ = null;
     } else if (this.doc_.isReady()) {
-      this.configResolver_(Promise.reject(
-          new Error('No config could be discovered in the page')));
+      this.configResolver_(
+        Promise.reject(new Error('No config could be discovered in the page'))
+      );
       this.configResolver_ = null;
     }
     debugLog(config);
@@ -609,8 +600,7 @@ class PageConfigResolver {
 }
 
 class TypeChecker {
-  constructor() {
-  }
+  constructor() {}
 
   /**
    * Check value from json
@@ -646,9 +636,11 @@ class TypeChecker {
   checkArray(typeArray, expectedTypes) {
     let found = false;
     typeArray.forEach(candidateType => {
-      found = found || expectedTypes.includes(
-          candidateType.replace(/^http:\/\/schema.org\//i,'')
-      );
+      found =
+        found ||
+        expectedTypes.includes(
+          candidateType.replace(/^http:\/\/schema.org\//i, '')
+        );
     });
     return found;
   }
@@ -682,22 +674,26 @@ class MetaParser {
     }
 
     // Try to find product id.
-    const productId = getMetaTag(this.doc_.getRootNode(),
-        'subscriptions-product-id');
+    const productId = getMetaTag(
+      this.doc_.getRootNode(),
+      'subscriptions-product-id'
+    );
     if (!productId) {
       return null;
     }
 
     // Is locked?
-    const accessibleForFree = getMetaTag(this.doc_.getRootNode(),
-        'subscriptions-accessible-for-free');
-    const locked = (accessibleForFree &&
-        accessibleForFree.toLowerCase() == 'false') || false;
+    const accessibleForFree = getMetaTag(
+      this.doc_.getRootNode(),
+      'subscriptions-accessible-for-free'
+    );
+    const locked =
+      (accessibleForFree && accessibleForFree.toLowerCase() == 'false') ||
+      false;
 
     return new PageConfig(productId, locked);
   }
 }
-
 
 class JsonLdParser {
   /**
@@ -722,13 +718,16 @@ class JsonLdParser {
     const domReady = this.doc_.isReady();
 
     // type: 'application/ld+json'
-    const elements = this.doc_.getRootNode().querySelectorAll(
-        'script[type="application/ld+json"]');
+    const elements = this.doc_
+      .getRootNode()
+      .querySelectorAll('script[type="application/ld+json"]');
     for (let i = 0; i < elements.length; i++) {
       const element = elements[i];
-      if (element[ALREADY_SEEN] ||
-          !element.textContent ||
-          !domReady && !hasNextNodeInDocumentOrder(element)) {
+      if (
+        element[ALREADY_SEEN] ||
+        !element.textContent ||
+        (!domReady && !hasNextNodeInDocumentOrder(element))
+      ) {
         continue;
       }
       element[ALREADY_SEEN] = true;
@@ -775,8 +774,9 @@ class JsonLdParser {
 
     // Found product id, just check for the access flag.
     const isAccessibleForFree = this.bool_(
-        this.singleValue_(json, 'isAccessibleForFree'),
-        /* default */ true);
+      this.singleValue_(json, 'isAccessibleForFree'),
+      /* default */ true
+    );
 
     return new PageConfig(productId, !isAccessibleForFree);
   }
@@ -838,7 +838,7 @@ class JsonLdParser {
   singleValue_(json, name) {
     const valueArray = this.valueArray_(json, name);
     const value = valueArray && valueArray[0];
-    return (value == null || value === '') ? null : value;
+    return value == null || value === '' ? null : value;
   }
 }
 
@@ -865,8 +865,7 @@ class MicrodataParser {
    */
   discoverAccess_(root) {
     const ALREADY_SEEN = 'alreadySeenForAccessInfo';
-    const nodeList = root
-        .querySelectorAll("[itemprop='isAccessibleForFree']");
+    const nodeList = root.querySelectorAll("[itemprop='isAccessibleForFree']");
     for (let i = 0; nodeList[i]; i++) {
       const element = nodeList[i];
       const content = element.getAttribute('content') || element.textContent;
@@ -898,8 +897,11 @@ class MicrodataParser {
    * @private
    */
   isValidElement_(current, root, alreadySeen) {
-    for (let node = current;
-        node && !node[alreadySeen]; node = node.parentNode) {
+    for (
+      let node = current;
+      node && !node[alreadySeen];
+      node = node.parentNode
+    ) {
       node[alreadySeen] = true;
       // document nodes don't have hasAttribute
       if (node.hasAttribute && node.hasAttribute('itemscope')) {
@@ -922,8 +924,7 @@ class MicrodataParser {
    */
   discoverProductId_(root) {
     const ALREADY_SEEN = 'alreadySeenForProductInfo';
-    const nodeList = root
-        .querySelectorAll('[itemprop="productID"]');
+    const nodeList = root.querySelectorAll('[itemprop="productID"]');
     for (let i = 0; nodeList[i]; i++) {
       const element = nodeList[i];
       const content = element.getAttribute('content') || element.textContent;
@@ -968,12 +969,14 @@ class MicrodataParser {
     }
 
     // Grab all the nodes with an itemtype and filter for our allowed types
-    const nodeList = Array.prototype.slice.call(
-        this.doc_.getRootNode().querySelectorAll('[itemscope][itemtype]')
-    ).filter(
-        node => this.checkType_.checkString(
-            node.getAttribute('itemtype'), ALLOWED_TYPES)
-    );
+    const nodeList = Array.prototype.slice
+      .call(this.doc_.getRootNode().querySelectorAll('[itemscope][itemtype]'))
+      .filter(node =>
+        this.checkType_.checkString(
+          node.getAttribute('itemtype'),
+          ALLOWED_TYPES
+        )
+      );
 
     for (let i = 0; nodeList[i] && config == null; i++) {
       const element = nodeList[i];
@@ -1034,9 +1037,4 @@ function getMetaTag(rootNode, name) {
  * limitations under the License.
  */
 
-
-export {
-  Doc,
-  PageConfig,
-  PageConfigResolver,
-};
+export {Doc, PageConfig, PageConfigResolver};

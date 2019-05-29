@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.51 */
+/** Version: 0.1.22.53 */
 /**
  * @license
  * Copyright 2017 The Web Activities Authors. All Rights Reserved.
@@ -33,7 +33,6 @@
 
 /*eslint no-unused-vars: 0*/
 
-
 /**
  * @enum {string}
  */
@@ -42,7 +41,6 @@ const ActivityMode = {
   POPUP: 'popup',
   REDIRECT: 'redirect',
 };
-
 
 /**
  * The result code used for `ActivityResult`.
@@ -53,7 +51,6 @@ const ActivityResultCode = {
   CANCELED: 'canceled',
   FAILED: 'failed',
 };
-
 
 /**
  * The result of an activity. The activity implementation returns this object
@@ -85,12 +82,10 @@ class ActivityResult {
     /** @const {boolean} */
     this.ok = code == ActivityResultCode.OK;
     /** @const {?Error} */
-    this.error = code == ActivityResultCode.FAILED ?
-        new Error(String(data) || '') :
-        null;
+    this.error =
+      code == ActivityResultCode.FAILED ? new Error(String(data) || '') : null;
   }
 }
-
 
 /**
  * The activity request that different types of hosts can be started with.
@@ -103,7 +98,6 @@ class ActivityResult {
  * }}
  */
 let ActivityRequest;
-
 
 /**
  * The activity "open" options used for popups and redirects.
@@ -130,7 +124,6 @@ let ActivityRequest;
  */
 let ActivityOpenOptions;
 
-
 /**
  * Activity client-side binding. The port provides limited ways to communicate
  * with the activity and receive signals and results from it. Not every type
@@ -139,7 +132,6 @@ let ActivityOpenOptions;
  * @interface
  */
 class ActivityPort {
-
   /**
    * Returns the mode of the activity: iframe, popup or redirect.
    * @return {!ActivityMode}
@@ -159,7 +151,6 @@ class ActivityPort {
   acceptResult() {}
 }
 
-
 /**
  * Activity client-side binding for messaging.
  *
@@ -170,7 +161,6 @@ class ActivityPort {
  * @interface
  */
 class ActivityMessagingPort {
-
   /**
    * Returns the target window where host is loaded. May be unavailable.
    * @return {?Window}
@@ -197,8 +187,6 @@ class ActivityMessagingPort {
   messageChannel(opt_name) {}
 }
 
-
-
 /** DOMException.ABORT_ERR name */
 const ABORT_ERR_NAME = 'AbortError';
 
@@ -207,7 +195,6 @@ const ABORT_ERR_CODE = 20;
 
 /** @type {?HTMLAnchorElement} */
 let aResolver;
-
 
 /**
  * @param {string} urlString
@@ -220,7 +207,6 @@ function parseUrl(urlString) {
   aResolver.href = urlString;
   return /** @type {!HTMLAnchorElement} */ (aResolver);
 }
-
 
 /**
  * @param {!Location|!URL|!HTMLAnchorElement} loc
@@ -242,7 +228,6 @@ function getOrigin(loc) {
   return protocol + '//' + host;
 }
 
-
 /**
  * @param {string} urlString
  * @return {string}
@@ -250,7 +235,6 @@ function getOrigin(loc) {
 function getOriginFromUrl(urlString) {
   return getOrigin(parseUrl(urlString));
 }
-
 
 /**
  * @param {string} urlString
@@ -264,7 +248,6 @@ function removeFragment(urlString) {
   return urlString.substring(0, index);
 }
 
-
 /**
  * Parses and builds Object of URL query string.
  * @param {string} query The URL query string.
@@ -275,18 +258,17 @@ function parseQueryString(query) {
     return {};
   }
   return (/^[?#]/.test(query) ? query.slice(1) : query)
-      .split('&')
-      .reduce((params, param) => {
-        const item = param.split('=');
-        const key = decodeURIComponent(item[0] || '');
-        const value = decodeURIComponent(item[1] || '');
-        if (key) {
-          params[key] = value;
-        }
-        return params;
-      }, {});
+    .split('&')
+    .reduce((params, param) => {
+      const item = param.split('=');
+      const key = decodeURIComponent(item[0] || '');
+      const value = decodeURIComponent(item[1] || '');
+      if (key) {
+        params[key] = value;
+      }
+      return params;
+    }, {});
 }
-
 
 /**
  * @param {string} queryString  A query string in the form of "a=b&c=d". Could
@@ -298,7 +280,6 @@ function getQueryParam(queryString, param) {
   return parseQueryString(queryString)[param];
 }
 
-
 /**
  * Add a query-like parameter to the fragment string.
  * @param {string} url
@@ -307,11 +288,14 @@ function getQueryParam(queryString, param) {
  * @return {string}
  */
 function addFragmentParam(url, param, value) {
-  return url +
-      (url.indexOf('#') == -1 ? '#' : '&') +
-      encodeURIComponent(param) + '=' + encodeURIComponent(value);
+  return (
+    url +
+    (url.indexOf('#') == -1 ? '#' : '&') +
+    encodeURIComponent(param) +
+    '=' +
+    encodeURIComponent(value)
+  );
 }
-
 
 /**
  * @param {string} queryString  A query string in the form of "a=b&c=d". Could
@@ -335,8 +319,7 @@ function removeQueryParam(queryString, param) {
           end = queryString.length;
         }
         queryString =
-            queryString.substring(0, index) +
-            queryString.substring(end + 1);
+          queryString.substring(0, index) + queryString.substring(end + 1);
       } else {
         index++;
       }
@@ -344,7 +327,6 @@ function removeQueryParam(queryString, param) {
   } while (index != -1 && index < queryString.length);
   return queryString;
 }
-
 
 /**
  * @param {!ActivityRequest} request
@@ -365,7 +347,6 @@ function serializeRequest(request) {
   return JSON.stringify(map);
 }
 
-
 /**
  * @param {*} error
  * @return {boolean}
@@ -374,9 +355,8 @@ function isAbortError(error) {
   if (!error || typeof error != 'object') {
     return false;
   }
-  return (error['name'] === ABORT_ERR_NAME);
+  return error['name'] === ABORT_ERR_NAME;
 }
-
 
 /**
  * Creates or emulates a DOMException of AbortError type.
@@ -390,8 +370,10 @@ function createAbortError(win, opt_message) {
   let error = null;
   if (typeof win['DOMException'] == 'function') {
     // TODO(dvoytenko): remove typecast once externs are fixed.
-    const constr = /** @type {function(new:DOMException, string, string)} */ (
-        win['DOMException']);
+    const constr =
+      /** @type {function(new:DOMException, string, string)} */ (win[
+        'DOMException'
+      ]);
     try {
       error = new constr(message, ABORT_ERR_NAME);
     } catch (e) {
@@ -400,15 +382,13 @@ function createAbortError(win, opt_message) {
   }
   if (!error) {
     // TODO(dvoytenko): remove typecast once externs are fixed.
-    const constr = /** @type {function(new:DOMException, string)} */ (
-        Error);
+    const constr = /** @type {function(new:DOMException, string)} */ (Error);
     error = new constr(message);
     error.name = ABORT_ERR_NAME;
     error.code = ABORT_ERR_CODE;
   }
   return error;
 }
-
 
 /**
  * Resolves the activity result as a promise:
@@ -430,7 +410,6 @@ function resolveResult(win, result, resolver) {
   }
 }
 
-
 /**
  * @param {!Window} win
  * @return {boolean}
@@ -441,7 +420,6 @@ function isIeBrowser(win) {
   return /Trident|MSIE|IEMobile/i.test(nav && nav.userAgent);
 }
 
-
 /**
  * @param {!Window} win
  * @return {boolean}
@@ -451,14 +429,14 @@ function isEdgeBrowser(win) {
   return /Edge/i.test(nav && nav.userAgent);
 }
 
-
 /**
  * @param {!Error} e
  */
 function throwAsync(e) {
-  setTimeout(() => {throw e;});
+  setTimeout(() => {
+    throw e;
+  });
 }
-
 
 /**
  * Polyfill of the `Node.isConnected` API. See
@@ -478,16 +456,12 @@ function isNodeConnected(node) {
   return (root && root.contains(node)) || false;
 }
 
-
-
 const SENTINEL = '__ACTIVITIES__';
-
 
 /**
  * The messenger helper for activity's port and host.
  */
 class Messenger {
-
   /**
    * @param {!Window} win
    * @param {!Window|function():?Window} targetOrCallback
@@ -679,9 +653,11 @@ class Messenger {
       const target = this.getTarget();
       // Only "connect" command is allowed to use `targetOrigin == '*'`
       const targetOrigin =
-          cmd == 'connect' ?
-          (this.targetOrigin_ != null ? this.targetOrigin_ : '*') :
-          this.getTargetOrigin();
+        cmd == 'connect'
+          ? this.targetOrigin_ != null
+            ? this.targetOrigin_
+            : '*'
+          : this.getTargetOrigin();
       target.postMessage(data, targetOrigin, opt_transfer || undefined);
     }
   }
@@ -784,7 +760,7 @@ class Messenger {
     this.port_.onmessage = event => {
       const data = event.data;
       const cmd = data && data['cmd'];
-      const payload = data && data['payload'] || null;
+      const payload = (data && data['payload']) || null;
       if (cmd) {
         this.handleCommand_(cmd, payload, event);
       }
@@ -849,7 +825,7 @@ class Messenger {
         closePort(this.port_);
         this.port_ = null;
       }
-      this.acceptsChannel_ = payload && payload['acceptsChannel'] || false;
+      this.acceptsChannel_ = (payload && payload['acceptsChannel']) || false;
       this.onCommand_(cmd, payload);
     } else if (cmd == 'start') {
       const port = event.ports && event.ports[0];
@@ -874,7 +850,6 @@ class Messenger {
   }
 }
 
-
 /**
  * @param {!MessagePort} port
  */
@@ -886,9 +861,6 @@ function closePort(port) {
   }
 }
 
-
-
-
 /**
  * The `ActivityPort` implementation for the iframe case. Unlike other types
  * of activities, iframe-based activities are always connected and can react
@@ -898,7 +870,6 @@ function closePort(port) {
  * @implements {ActivityMessagingPort}
  */
 class ActivityIframePort {
-
   /**
    * @param {!HTMLIFrameElement} iframe
    * @param {string} url
@@ -953,10 +924,11 @@ class ActivityIframePort {
 
     /** @private @const {!Messenger} */
     this.messenger_ = new Messenger(
-        this.win_,
-        () => this.iframe_.contentWindow,
-        this.targetOrigin_,
-        /* requireTarget */ true);
+      this.win_,
+      () => this.iframe_.contentWindow,
+      this.targetOrigin_,
+      /* requireTarget */ true
+    );
   }
 
   /** @override */
@@ -1061,16 +1033,17 @@ class ActivityIframePort {
       if (this.resultResolver_) {
         const code = /** @type {!ActivityResultCode} */ (payload['code']);
         const data =
-            code == ActivityResultCode.FAILED ?
-            new Error(payload['data'] || '') :
-            payload['data'];
+          code == ActivityResultCode.FAILED
+            ? new Error(payload['data'] || '')
+            : payload['data'];
         const result = new ActivityResult(
-            code,
-            data,
-            ActivityMode.IFRAME,
-            this.messenger_.getTargetOrigin(),
-            /* originVerified */ true,
-            /* secureChannel */ true);
+          code,
+          data,
+          ActivityMode.IFRAME,
+          this.messenger_.getTargetOrigin(),
+          /* originVerified */ true,
+          /* secureChannel */ true
+        );
         resolveResult(this.win_, result, this.resultResolver_);
         this.resultResolver_ = null;
         this.messenger_.sendCommand('close');
@@ -1090,9 +1063,6 @@ class ActivityIframePort {
   }
 }
 
-
-
-
 /**
  * The `ActivityPort` implementation for the standalone window activity
  * client executed as a popup.
@@ -1101,7 +1071,6 @@ class ActivityIframePort {
  * @implements {ActivityMessagingPort}
  */
 class ActivityWindowPort {
-
   /**
    * @param {!Window} win
    * @param {string} requestId
@@ -1112,11 +1081,11 @@ class ActivityWindowPort {
    */
   constructor(win, requestId, url, target, opt_args, opt_options) {
     const isValidTarget =
-        target &&
-        (target == '_blank' || target == '_top' || target[0] != '_');
+      target && (target == '_blank' || target == '_top' || target[0] != '_');
     if (!isValidTarget) {
-      throw new Error('The only allowed targets are "_blank", "_top"' +
-          ' and name targets');
+      throw new Error(
+        'The only allowed targets are "_blank", "_top"' + ' and name targets'
+      );
     }
 
     /** @private @const {!Window} */
@@ -1160,9 +1129,9 @@ class ActivityWindowPort {
 
   /** @override */
   getMode() {
-    return this.openTarget_ == '_top' ?
-        ActivityMode.REDIRECT :
-        ActivityMode.POPUP;
+    return this.openTarget_ == '_top'
+      ? ActivityMode.REDIRECT
+      : ActivityMode.POPUP;
   }
 
   /**
@@ -1269,8 +1238,7 @@ class ActivityWindowPort {
     let url = this.url_;
     if (!this.options_.skipRequestInUrl) {
       const returnUrl =
-          this.options_.returnUrl ||
-          removeFragment(this.win_.location.href);
+        this.options_.returnUrl || removeFragment(this.win_.location.href);
       const requestString = serializeRequest({
         requestId: this.requestId_,
         returnUrl,
@@ -1298,9 +1266,11 @@ class ActivityWindowPort {
       // Ignore.
     }
     // Then try with `_top` target.
-    if (!targetWin &&
-        openTarget != '_top' &&
-        !this.options_.disableRedirectFallback) {
+    if (
+      !targetWin &&
+      openTarget != '_top' &&
+      !this.options_.disableRedirectFallback
+    ) {
       openTarget = '_top';
       try {
         targetWin = this.win_.open(url, openTarget);
@@ -1344,13 +1314,17 @@ class ActivityWindowPort {
     // right width/height, it will launch in the full-screen. Other browsers
     // deal with such cases more gracefully.
     const controlsWidth =
-        isTop && this.win_.outerWidth > this.win_.innerWidth ?
-        Math.min(100, this.win_.outerWidth - this.win_.innerWidth) :
-        (isEdge ? 100 : 0);
+      isTop && this.win_.outerWidth > this.win_.innerWidth
+        ? Math.min(100, this.win_.outerWidth - this.win_.innerWidth)
+        : isEdge
+        ? 100
+        : 0;
     const controlsHeight =
-        isTop && this.win_.outerHeight > this.win_.innerHeight ?
-        Math.min(100, this.win_.outerHeight - this.win_.innerHeight) :
-        (isEdge ? 100 : 0);
+      isTop && this.win_.outerHeight > this.win_.innerHeight
+        ? Math.min(100, this.win_.outerHeight - this.win_.innerHeight)
+        : isEdge
+        ? 100
+        : 0;
     // With all the adjustments, at least 50% of the available width/height
     // should be made available to a popup.
     const maxWidth = Math.max(availWidth - controlsWidth, availWidth * 0.5);
@@ -1408,10 +1382,11 @@ class ActivityWindowPort {
     // without origin check b/c all arguments have already been passed in
     // the URL and special handling is enforced when result is delivered.
     this.messenger_ = new Messenger(
-        this.win_,
-        /** @type {!Window} */ (this.targetWin_),
-        /* targetOrigin */ null,
-        /* requireTarget */ true);
+      this.win_,
+      /** @type {!Window} */ (this.targetWin_),
+      /* targetOrigin */ null,
+      /* requireTarget */ true
+    );
     this.messenger_.connect(this.handleCommand_.bind(this));
   }
 
@@ -1427,13 +1402,16 @@ class ActivityWindowPort {
       }
       // Give a chance for the result to arrive, but otherwise consider the
       // responce to be empty.
-      this.win_.setTimeout(() => {
-        try {
-          this.result_(ActivityResultCode.CANCELED, /* data */ null);
-        } catch (e) {
-          this.disconnectWithError_(e);
-        }
-      }, opt_delayCancel ? 3000 : 0);
+      this.win_.setTimeout(
+        () => {
+          try {
+            this.result_(ActivityResultCode.CANCELED, /* data */ null);
+          } catch (e) {
+            this.disconnectWithError_(e);
+          }
+        },
+        opt_delayCancel ? 3000 : 0
+      );
     }
   }
 
@@ -1457,14 +1435,15 @@ class ActivityWindowPort {
     if (this.resultResolver_) {
       const isConnected = this.messenger_.isConnected();
       const result = new ActivityResult(
-          code,
-          data,
-          ActivityMode.POPUP,
-          isConnected ?
-              this.messenger_.getTargetOrigin() :
-              getOriginFromUrl(this.url_),
-          /* originVerified */ isConnected,
-          /* secureChannel */ isConnected);
+        code,
+        data,
+        ActivityMode.POPUP,
+        isConnected
+          ? this.messenger_.getTargetOrigin()
+          : getOriginFromUrl(this.url_),
+        /* originVerified */ isConnected,
+        /* secureChannel */ isConnected
+      );
       resolveResult(this.win_, result, this.resultResolver_);
       this.resultResolver_ = null;
     }
@@ -1488,16 +1467,15 @@ class ActivityWindowPort {
       // The last message. Indicates that the result has been received.
       const code = /** @type {!ActivityResultCode} */ (payload['code']);
       const data =
-          code == ActivityResultCode.FAILED ?
-          new Error(payload['data'] || '') :
-          payload['data'];
+        code == ActivityResultCode.FAILED
+          ? new Error(payload['data'] || '')
+          : payload['data'];
       this.result_(code, data);
     } else if (cmd == 'check') {
       this.win_.setTimeout(() => this.check_(), 200);
     }
   }
 }
-
 
 /**
  * @param {!Window} win
@@ -1532,17 +1510,17 @@ function discoverRedirectPort(win, fragment, requestId) {
   const code = response['code'];
   const data = response['data'];
   const origin = response['origin'];
-  const referrerOrigin = win.document.referrer &&
-      getOriginFromUrl(win.document.referrer);
+  const referrerOrigin =
+    win.document.referrer && getOriginFromUrl(win.document.referrer);
   const originVerified = origin == referrerOrigin;
   return new ActivityWindowRedirectPort(
-      win,
-      code,
-      data,
-      origin,
-      originVerified);
+    win,
+    code,
+    data,
+    origin,
+    originVerified
+  );
 }
-
 
 /**
  * The `ActivityPort` implementation for the standalone window activity
@@ -1551,7 +1529,6 @@ function discoverRedirectPort(win, fragment, requestId) {
  * @implements {ActivityPort}
  */
 class ActivityWindowRedirectPort {
-
   /**
    * @param {!Window} win
    * @param {!ActivityResultCode} code
@@ -1580,20 +1557,18 @@ class ActivityWindowRedirectPort {
   /** @override */
   acceptResult() {
     const result = new ActivityResult(
-        this.code_,
-        this.data_,
-        ActivityMode.REDIRECT,
-        this.targetOrigin_,
-        this.targetOriginVerified_,
-        /* secureChannel */ false);
+      this.code_,
+      this.data_,
+      ActivityMode.REDIRECT,
+      this.targetOrigin_,
+      this.targetOriginVerified_,
+      /* secureChannel */ false
+    );
     return new Promise(resolve => {
       resolveResult(this.win_, result, resolve);
     });
   }
 }
-
-
-
 
 /**
  * The page-level activities manager ports. This class is intended to be used
@@ -1601,7 +1576,6 @@ class ActivityWindowRedirectPort {
  * redirect.
  */
 class ActivityPorts {
-
   /**
    * @param {!Window} win
    */
@@ -1758,7 +1732,13 @@ class ActivityPorts {
    */
   openWin_(requestId, url, target, opt_args, opt_options) {
     const port = new ActivityWindowPort(
-        this.win_, requestId, url, target, opt_args, opt_options);
+      this.win_,
+      requestId,
+      url,
+      target,
+      opt_args,
+      opt_options
+    );
     port.open().then(() => {
       // Await result if possible. Notice that when falling back to "redirect",
       // the result will never arrive through this port.
@@ -1776,8 +1756,7 @@ class ActivityPorts {
     let port = this.resultBuffer_[requestId];
     if (!port && this.fragment_) {
       try {
-        port = discoverRedirectPort(
-            this.win_, this.fragment_, requestId);
+        port = discoverRedirectPort(this.win_, this.fragment_, requestId);
       } catch (e) {
         throwAsync(e);
         this.redirectErrorResolver_(e);
@@ -1818,8 +1797,6 @@ class ActivityPorts {
   }
 }
 
-
-
 var activityPorts = {
   ActivityPorts,
   ActivityIframePort,
@@ -1853,12 +1830,15 @@ var activityPorts_12 = activityPorts.isAbortError;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 /** @enum {number} */
 const AnalyticsEvent = {
   UNKNOWN: 0,
   IMPRESSION_PAYWALL: 1,
   IMPRESSION_AD: 2,
   IMPRESSION_OFFERS: 3,
+  IMPRESSION_SUBSCRIBE_BUTTON: 4,
+  IMPRESSION_SMARTBOX: 5,
   ACTION_SUBSCRIBE: 1000,
   ACTION_PAYMENT_COMPLETE: 1001,
   ACTION_ACCOUNT_CREATED: 1002,
@@ -1869,36 +1849,46 @@ const AnalyticsEvent = {
   EVENT_PAYMENT_FAILED: 2000,
   EVENT_CUSTOM: 3000,
 };
+/** @enum {number} */
+const EventOriginator = {
+  UNKNOWN_CLIENT: 0,
+  SWG_CLIENT: 1,
+  AMP_CLIENT: 2,
+  PROPENSITY_CLIENT: 3,
+  SWG_SERVER: 4,
+};
 
+/**
+ * @implements {Message}
+ */
 class AnalyticsContext {
- /**
-  * @param {!Array=} data
-  */
+  /**
+   * @param {!Array=} data
+   */
   constructor(data = []) {
+    /** @private {?string} */
+    this.embedderOrigin_ = data[1] == null ? null : data[1];
 
     /** @private {?string} */
-    this.embedderOrigin_ = (data[1] == null) ? null : data[1];
+    this.transactionId_ = data[2] == null ? null : data[2];
 
     /** @private {?string} */
-    this.transactionId_ = (data[2] == null) ? null : data[2];
+    this.referringOrigin_ = data[3] == null ? null : data[3];
 
     /** @private {?string} */
-    this.referringOrigin_ = (data[3] == null) ? null : data[3];
+    this.utmSource_ = data[4] == null ? null : data[4];
 
     /** @private {?string} */
-    this.utmSource_ = (data[4] == null) ? null : data[4];
+    this.utmCampaign_ = data[5] == null ? null : data[5];
 
     /** @private {?string} */
-    this.utmCampaign_ = (data[5] == null) ? null : data[5];
+    this.utmMedium_ = data[6] == null ? null : data[6];
 
     /** @private {?string} */
-    this.utmMedium_ = (data[6] == null) ? null : data[6];
-
-    /** @private {?string} */
-    this.sku_ = (data[7] == null) ? null : data[7];
+    this.sku_ = data[7] == null ? null : data[7];
 
     /** @private {?boolean} */
-    this.readyToPay_ = (data[8] == null) ? null : data[8];
+    this.readyToPay_ = data[8] == null ? null : data[8];
 
     /** @private {!Array<string>} */
     this.label_ = data[9] || [];
@@ -2032,35 +2022,45 @@ class AnalyticsContext {
 
   /**
    * @return {!Array}
+   * @override
    */
   toArray() {
     return [
-      'AnalyticsContext',  // message type
-      this.embedderOrigin_,  // field 1 - embedder_origin
-      this.transactionId_,  // field 2 - transaction_id
-      this.referringOrigin_,  // field 3 - referring_origin
-      this.utmSource_,  // field 4 - utm_source
-      this.utmCampaign_,  // field 5 - utm_campaign
-      this.utmMedium_,  // field 6 - utm_medium
-      this.sku_,  // field 7 - sku
-      this.readyToPay_,  // field 8 - ready_to_pay
-      this.label_,  // field 9 - label
+      this.label(), // message label
+      this.embedderOrigin_, // field 1 - embedder_origin
+      this.transactionId_, // field 2 - transaction_id
+      this.referringOrigin_, // field 3 - referring_origin
+      this.utmSource_, // field 4 - utm_source
+      this.utmCampaign_, // field 5 - utm_campaign
+      this.utmMedium_, // field 6 - utm_medium
+      this.sku_, // field 7 - sku
+      this.readyToPay_, // field 8 - ready_to_pay
+      this.label_, // field 9 - label
     ];
+  }
+
+  /**
+   * @return {string}
+   * @override
+   */
+  label() {
+    return 'AnalyticsContext';
   }
 }
 
-
+/**
+ * @implements {Message}
+ */
 class AnalyticsEventMeta {
- /**
-  * @param {!Array=} data
-  */
+  /**
+   * @param {!Array=} data
+   */
   constructor(data = []) {
-
     /** @private {?EventOriginator} */
-    this.eventOriginator_ = (data[1] == null) ? null : data[1];
+    this.eventOriginator_ = data[1] == null ? null : data[1];
 
     /** @private {?boolean} */
-    this.isFromUserAction_ = (data[2] == null) ? null : data[2];
+    this.isFromUserAction_ = data[2] == null ? null : data[2];
   }
 
   /**
@@ -2093,33 +2093,51 @@ class AnalyticsEventMeta {
 
   /**
    * @return {!Array}
+   * @override
    */
   toArray() {
     return [
-      'AnalyticsEventMeta',  // message type
-      this.eventOriginator_,  // field 1 - event_originator
-      this.isFromUserAction_,  // field 2 - is_from_user_action
+      this.label(), // message label
+      this.eventOriginator_, // field 1 - event_originator
+      this.isFromUserAction_, // field 2 - is_from_user_action
     ];
+  }
+
+  /**
+   * @return {string}
+   * @override
+   */
+  label() {
+    return 'AnalyticsEventMeta';
   }
 }
 
-
+/**
+ * @implements {Message}
+ */
 class AnalyticsRequest {
- /**
-  * @param {!Array=} data
-  */
+  /**
+   * @param {!Array=} data
+   */
   constructor(data = []) {
-
     /** @private {?AnalyticsContext} */
-    this.context_ = (data[1] == null || data[1] == undefined) ? null : new
-        AnalyticsContext(data[1]);
+    this.context_ =
+      data[1] == null || data[1] == undefined
+        ? null
+        : new AnalyticsContext(data[1]);
 
     /** @private {?AnalyticsEvent} */
-    this.event_ = (data[2] == null) ? null : data[2];
+    this.event_ = data[2] == null ? null : data[2];
 
     /** @private {?AnalyticsEventMeta} */
-    this.meta_ = (data[3] == null || data[3] == undefined) ? null : new
-        AnalyticsEventMeta(data[3]);
+    this.meta_ =
+      data[3] == null || data[3] == undefined
+        ? null
+        : new AnalyticsEventMeta(data[3]);
+
+    /** @private {?EventParams} */
+    this.params_ =
+      data[4] == null || data[4] == undefined ? null : new EventParams(data[4]);
   }
 
   /**
@@ -2165,15 +2183,85 @@ class AnalyticsRequest {
   }
 
   /**
+   * @return {?EventParams}
+   */
+  getParams() {
+    return this.params_;
+  }
+
+  /**
+   * @param {!EventParams} value
+   */
+  setParams(value) {
+    this.params_ = value;
+  }
+
+  /**
    * @return {!Array}
+   * @override
    */
   toArray() {
     return [
-      'AnalyticsRequest',  // message type
+      this.label(), // message label
       this.context_ ? this.context_.toArray() : [], // field 1 - context
-      this.event_,  // field 2 - event
+      this.event_, // field 2 - event
       this.meta_ ? this.meta_.toArray() : [], // field 3 - meta
+      this.params_ ? this.params_.toArray() : [], // field 4 - params
     ];
+  }
+
+  /**
+   * @return {string}
+   * @override
+   */
+  label() {
+    return 'AnalyticsRequest';
+  }
+}
+
+/**
+ * @implements {Message}
+ */
+class EventParams {
+  /**
+   * @param {!Array=} data
+   */
+  constructor(data = []) {
+    /** @private {?string} */
+    this.smartboxMessage_ = data[1] == null ? null : data[1];
+  }
+
+  /**
+   * @return {?string}
+   */
+  getSmartboxMessage() {
+    return this.smartboxMessage_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setSmartboxMessage(value) {
+    this.smartboxMessage_ = value;
+  }
+
+  /**
+   * @return {!Array}
+   * @override
+   */
+  toArray() {
+    return [
+      this.label(), // message label
+      this.smartboxMessage_, // field 1 - smartbox_message
+    ];
+  }
+
+  /**
+   * @return {string}
+   * @override
+   */
+  label() {
+    return 'EventParams';
   }
 }
 
@@ -2251,7 +2339,7 @@ function pushIfNonEmpty(array, val) {
 }
 
 function toString(val) {
-// Do check equivalent to `val instanceof Element` without cross-window bug
+  // Do check equivalent to `val instanceof Element` without cross-window bug
   if (val && val.nodeType == 1) {
     return val.tagName.toLowerCase() + (val.id ? '#' + val.id : '');
   }
@@ -2273,7 +2361,6 @@ function toString(val) {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 
 /**
  * Returns a map-like object.
@@ -2389,8 +2476,8 @@ const defaultStyles = {
   'display': 'block',
   'empty-cells': 'show',
   'filter': 'none',
-  'flex': 'none',  // flex-grow, flex-shrink, and flex-basis.
-  'flex-flow': 'row nowrap',  // flex-direction, flex-wrap.
+  'flex': 'none', // flex-grow, flex-shrink, and flex-basis.
+  'flex-flow': 'row nowrap', // flex-direction, flex-wrap.
   'float': 'none',
   'flood-color': 'rgb(0, 0, 0)',
   'flood-opacity': '1',
@@ -2400,7 +2487,7 @@ const defaultStyles = {
   'height': 'auto',
   'hyphens': 'manual',
   'image-rendering': 'auto',
-  'inline-size': '',  // Setting to 'auto' will not allow override.
+  'inline-size': '', // Setting to 'auto' will not allow override.
   'isolation': 'auto',
   'justify-content': 'normal',
   'justify-items': 'normal',
@@ -2419,10 +2506,10 @@ const defaultStyles = {
   'min-inline-size': '0',
   'min-width': '0',
   'mix-blend-mode': 'normal',
-  'object-fit': 'fill',  // Important for Safari browser.
-  'offset-distance': 'none',  // Chrome only (Experimental).
-  'offset-path': 'none',  // Chrome only (Experimental).
-  'offset-rotate': 'auto 0deg',  // Chrome only (Experimental).
+  'object-fit': 'fill', // Important for Safari browser.
+  'offset-distance': 'none', // Chrome only (Experimental).
+  'offset-path': 'none', // Chrome only (Experimental).
+  'offset-rotate': 'auto 0deg', // Chrome only (Experimental).
   'opacity': '1',
   'order': '0',
   'orphans': '2',
@@ -2439,7 +2526,7 @@ const defaultStyles = {
   'resize': 'none',
   'right': '0',
   'scroll-behavior': 'auto',
-  'tab-size': '8',  // Only Chrome, Safari (Experimental).
+  'tab-size': '8', // Only Chrome, Safari (Experimental).
   'table-layout': 'auto',
   'text-align': 'start',
   'text-align-last': 'auto',
@@ -2500,7 +2587,6 @@ function getVendorJsPropertyName_(style, titleCase) {
   return '';
 }
 
-
 /**
  * Returns the possibly prefixed JavaScript property name of a style property
  * (ex. WebkitTransitionDuration) given a camelCase'd version of the property
@@ -2538,7 +2624,6 @@ function getVendorJsPropertyName(style, camelCase, opt_bypassCache) {
   return propertyName;
 }
 
-
 /**
  * Sets the CSS styles of the specified element with !important. The styles
  * are specified as a map from CSS property names to their values.
@@ -2548,10 +2633,12 @@ function getVendorJsPropertyName(style, camelCase, opt_bypassCache) {
 function setImportantStyles(element, styles) {
   for (const k in styles) {
     element.style.setProperty(
-        getVendorJsPropertyName(styles, k), styles[k].toString(), 'important');
+      getVendorJsPropertyName(styles, k),
+      styles[k].toString(),
+      'important'
+    );
   }
 }
-
 
 /**
  * Sets the CSS style of the specified element with optional units, e.g. "px".
@@ -2562,14 +2649,17 @@ function setImportantStyles(element, styles) {
  * @param {boolean=} opt_bypassCache
  */
 function setStyle(element, property, value, opt_units, opt_bypassCache) {
-  const propertyName = getVendorJsPropertyName(element.style, property,
-      opt_bypassCache);
+  const propertyName = getVendorJsPropertyName(
+    element.style,
+    property,
+    opt_bypassCache
+  );
   if (propertyName) {
-    element.style[propertyName] =
-        /** @type {string} */ (opt_units ? value + opt_units : value);
+    element.style[propertyName] = /** @type {string} */ (opt_units
+      ? value + opt_units
+      : value);
   }
 }
-
 
 /**
  * Sets the CSS styles of the specified element. The styles
@@ -2583,7 +2673,6 @@ function setStyles(element, styles) {
   }
 }
 
-
 /**
  * Resets styles that were set dynamically (i.e. inline)
  * @param {!Element} element
@@ -2596,7 +2685,6 @@ function resetStyles(element, properties) {
   });
   setStyles(element, styleObj);
 }
-
 
 /**
  * Resets all the styles of an element to a given value. Defaults to null.
@@ -2626,7 +2714,6 @@ function resetAllStyles(element) {
 /** @const {string} */
 const styleType = 'text/css';
 
-
 /**
  * Add attributes to an element.
  * @param {!Element} element
@@ -2636,18 +2723,20 @@ const styleType = 'text/css';
 function addAttributesToElement(element, attributes) {
   for (const attr in attributes) {
     if (attr == 'style') {
-      setStyles(element,
-           /** @type !Object<string, string|boolean|number> */
-           (attributes[attr]));
+      setStyles(
+        element,
+        /** @type !Object<string, string|boolean|number> */
+        attributes[attr]
+      );
     } else {
-      element.setAttribute(attr,
-          /** @type {string|boolean|number} */ (attributes[attr]));
+      element.setAttribute(
+        attr,
+        /** @type {string|boolean|number} */ (attributes[attr])
+      );
     }
-
   }
   return element;
 }
-
 
 /**
  * Create a new element on document with specified tagName and attributes.
@@ -2676,7 +2765,6 @@ function createElement(doc, tagName, attributes, opt_content) {
   return element;
 }
 
-
 /**
  * Removes the element.
  * @param {!Element} element
@@ -2687,7 +2775,6 @@ function removeElement(element) {
   }
 }
 
-
 /**
  * Removes all children from the parent element.
  * @param {!Element} parent
@@ -2695,7 +2782,6 @@ function removeElement(element) {
 function removeChildren(parent) {
   parent.textContent = '';
 }
-
 
 /**
  * Injects the provided styles in the HEAD section of the document.
@@ -2712,7 +2798,6 @@ function injectStyleSheet(doc, styleText) {
   return styleElement;
 }
 
-
 /**
  * Polyfill of the `Node.isConnected` API. See
  * https://developer.mozilla.org/en-US/docs/Web/API/Node/isConnected.
@@ -2728,9 +2813,8 @@ function isConnected(node) {
   }
   // Polyfill.
   const root = node.ownerDocument && node.ownerDocument.documentElement;
-  return root && root.contains(node) || false;
+  return (root && root.contains(node)) || false;
 }
-
 
 /**
  * @param {!Window} win
@@ -2757,20 +2841,20 @@ function isEdgeBrowser$1(win) {
  * limitations under the License.
  */
 
-
 /**
  * @param {!Object<string, string>} map
  * @param {?string|?Element} langOrElement
  * @return {?string}
  */
 function msg(map, langOrElement) {
-  const lang =
-      !langOrElement ? '' :
-      typeof langOrElement == 'string' ? langOrElement :
-      langOrElement.lang ||
-      langOrElement.ownerDocument &&
-          langOrElement.ownerDocument.documentElement.lang;
-  let search = (lang && lang.toLowerCase() || 'en').replace(/_/g, '-');
+  const lang = !langOrElement
+    ? ''
+    : typeof langOrElement == 'string'
+    ? langOrElement
+    : langOrElement.lang ||
+      (langOrElement.ownerDocument &&
+        langOrElement.ownerDocument.documentElement.lang);
+  let search = ((lang && lang.toLowerCase()) || 'en').replace(/_/g, '-');
   while (search) {
     if (search in map) {
       return map[search];
@@ -2820,6 +2904,39 @@ function isObject(value) {
 }
 
 /**
+ * Checks whether `s` is a valid value of `enumObj`.
+ *
+ * @param {!Object<T>} enumObj
+ * @param {T} s
+ * @return {boolean}
+ * @template T
+ */
+function isEnumValue(enumObj, s) {
+  for (const k in enumObj) {
+    if (enumObj[k] === s) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * True if the value is a function.
+ * @param {*} value
+ */
+function isFunction(value) {
+  return value !== null && typeof value === 'function';
+}
+
+/**
+ * True if the value is either true or false.
+ * @param {?*} value
+ */
+function isBoolean(value) {
+  return value === true || value === false;
+}
+
+/**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -2835,13 +2952,11 @@ function isObject(value) {
  * limitations under the License.
  */
 
-
 /**
  * Cached a-tag to avoid memory allocation during URL parsing.
  * @type {HTMLAnchorElement}
  */
 let a;
-
 
 /**
  * We cached all parsed URLs. As of now there are no use cases
@@ -2873,7 +2988,7 @@ function parseUrl$1(url, opt_nocache) {
 
   const info = parseUrlWithA(a, url);
 
-  return cache[url] = info;
+  return (cache[url] = info);
 }
 
 /**
@@ -2913,8 +3028,10 @@ function parseUrlWithA(a, url) {
 
   // 2) For URLs with implicit ports, IE11 parses to default ports while
   // other browsers leave the port field empty.
-  if ((info.protocol == 'http:' && info.port == 80) ||
-      (info.protocol == 'https:' && info.port == 443)) {
+  if (
+    (info.protocol == 'http:' && info.port == 80) ||
+    (info.protocol == 'https:' && info.port == 443)
+  ) {
     info.port = '';
     info.host = info.hostname;
   }
@@ -2931,7 +3048,6 @@ function parseUrlWithA(a, url) {
   return info;
 }
 
-
 /**
  * Parses and builds Object of URL query string.
  * @param {string} query The URL query string.
@@ -2942,18 +3058,17 @@ function parseQueryString$1(query) {
     return {};
   }
   return (/^[?#]/.test(query) ? query.slice(1) : query)
-      .split('&')
-      .reduce((params, param) => {
-        const item = param.split('=');
-        const key = decodeURIComponent(item[0] || '');
-        const value = decodeURIComponent(item[1] || '');
-        if (key) {
-          params[key] = value;
-        }
-        return params;
-      }, {});
+    .split('&')
+    .reduce((params, param) => {
+      const item = param.split('=');
+      const key = decodeURIComponent(item[0] || '');
+      const value = decodeURIComponent(item[1] || '');
+      if (key) {
+        params[key] = value;
+      }
+      return params;
+    }, {});
 }
-
 
 /**
  * Adds a parameter to a query string.
@@ -3004,10 +3119,9 @@ function addQueryParam(url, param, value) {
  */
 const CACHE_KEYS = {
   'nocache': 1,
-  'hr1': 3600000,  // 1hr = 1000 * 60 * 60
-  'hr12': 43200000,  // 12hr = 1000 * 60 * 60 * 12
+  'hr1': 3600000, // 1hr = 1000 * 60 * 60
+  'hr12': 43200000, // 12hr = 1000 * 60 * 60 * 12
 };
-
 
 /**
  * @return {string}
@@ -3015,7 +3129,6 @@ const CACHE_KEYS = {
 function feOrigin() {
   return parseUrl$1('https://news.google.com').origin;
 }
-
 
 /**
  * @param {string} url Relative URL, e.g. "/service1".
@@ -3042,7 +3155,6 @@ function feUrl(url, prefix = '') {
   return feCached('https://news.google.com' + prefix + '/swg/_/ui/v1' + url);
 }
 
-
 /**
  * @param {string} url FE URL.
  * @return {string} The complete URL including cache params.
@@ -3051,17 +3163,15 @@ function feCached(url) {
   return addQueryParam(url, '_', cacheParam('hr1'));
 }
 
-
 /**
  * @param {!Object<string, ?>} args
  * @return {!Object<string, ?>}
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.51',
+    '_client': 'SwG 0.1.22.53',
   });
 }
-
 
 /**
  * @param {string} cacheKey
@@ -3110,7 +3220,6 @@ const Theme = {
   DARK: 'dark',
 };
 
-
 /**
  * The class for Smart button Api.
  */
@@ -3135,9 +3244,11 @@ class SmartSubscriptionButtonApi {
     this.activityPorts_ = deps.activities();
 
     /** @private @const {!HTMLIFrameElement} */
-    this.iframe_ =
-    /** @type {!HTMLIFrameElement} */ (
-        createElement(this.doc_, 'iframe', iframeAttributes));
+    this.iframe_ = /** @type {!HTMLIFrameElement} */ (createElement(
+      this.doc_,
+      'iframe',
+      iframeAttributes
+    ));
 
     /** @private @const {!Element} */
     this.button_ = button;
@@ -3155,8 +3266,8 @@ class SmartSubscriptionButtonApi {
     this.args_ = feArgs({
       'productId': this.deps_.pageConfig().getProductId(),
       'publicationId': this.deps_.pageConfig().getPublicationId(),
-      'theme': this.options_ && this.options_.theme || 'light',
-      'lang': this.options_ && this.options_.lang || 'en',
+      'theme': (this.options_ && this.options_.theme) || 'light',
+      'lang': (this.options_ && this.options_.lang) || 'en',
     });
   }
 
@@ -3184,18 +3295,19 @@ class SmartSubscriptionButtonApi {
       'width': '100%',
     });
     this.button_.appendChild(this.iframe_);
-    this.activityPorts_.openIframe(this.iframe_, this.src_, this.args_)
-        .then(port => {
-          port.onMessage(result => {
-            if (result['clicked']) {
-              if (!this.callback_) {
-                throw new Error('No callback!');
-              }
-              this.callback_();
-              return;
+    this.activityPorts_
+      .openIframe(this.iframe_, this.src_, this.args_)
+      .then(port => {
+        port.onMessage(result => {
+          if (result['clicked']) {
+            if (!this.callback_) {
+              throw new Error('No callback!');
             }
-          });
+            this.callback_();
+            return;
+          }
         });
+      });
     return this.iframe_;
   }
 }
@@ -3216,7 +3328,6 @@ class SmartSubscriptionButtonApi {
  * limitations under the License.
  */
 
-
 /**
  * The button title should match that of button's SVG.
  */
@@ -3228,7 +3339,7 @@ const TITLE_LANG_MAP = {
   'es': 'Suscríbete con Google',
   'es-latam': 'Suscríbete con Google',
   'es-latn': 'Suscríbete con Google',
-  'fr': 'S\'abonner avec Google',
+  'fr': "S'abonner avec Google",
   'hi': 'Google के ज़रिये सदस्यता',
   'id': 'Berlangganan dengan Google',
   'it': 'Abbonati con Google',
@@ -3248,14 +3359,12 @@ const TITLE_LANG_MAP = {
   'zh-tw': '透過 Google 訂閱',
 };
 
-
 /**
  * The button stylesheet can be found in the `/assets/swg-button.css`.
  * It's produced by the `gulp assets` task and deployed to
  * `https://news.google.com/swg/js/v1/swg-button.css`.
  */
 class ButtonApi {
-
   /**
    * @param {*} doc
    */
@@ -3279,11 +3388,13 @@ class ButtonApi {
     }
 
     // <link rel="stylesheet" href="..." type="text/css">
-    head.appendChild(createElement(this.doc_.getWin().document, 'link', {
-      'rel': 'stylesheet',
-      'type': 'text/css',
-      'href': url,
-    }));
+    head.appendChild(
+      createElement(this.doc_.getWin().document, 'link', {
+        'rel': 'stylesheet',
+        'type': 'text/css',
+        'href': url,
+      })
+    );
   }
 
   /**
@@ -3298,7 +3409,7 @@ class ButtonApi {
 
   /**
    * @param {!Element} button
-   * @param {*)} optionsOrCallback
+   * @param {../api/subscriptions.ButtonOptions|function()} optionsOrCallback
    * @param {function()=} opt_callback
    * @return {!Element}
    */
@@ -3319,14 +3430,15 @@ class ButtonApi {
 
   /**
    *
-   * @param {*)} optionsOrCallback
-   * @return {*}
+   * @param {../api/subscriptions.ButtonOptions|function()} optionsOrCallback
+   * @return {!../api/subscriptions.ButtonOptions}
    * @private
    */
   getOptions_(optionsOrCallback) {
-    const options = /** @type {*} */
-        (typeof optionsOrCallback != 'function' ?
-        optionsOrCallback : {'theme': Theme.LIGHT});
+    const options /** @type {!../api/subscriptions.ButtonOptions} */ =
+      optionsOrCallback && typeof optionsOrCallback != 'function'
+        ? optionsOrCallback
+        : {'theme': Theme.LIGHT};
 
     const theme = options['theme'];
     if (theme !== Theme.LIGHT && theme !== Theme.DARK) {
@@ -3343,33 +3455,42 @@ class ButtonApi {
    * @private
    */
   getCallback_(optionsOrCallback, opt_callback) {
-    const callback = /** @type {function()|function(Event):boolean} */ (
-      (typeof optionsOrCallback == 'function' ? optionsOrCallback : null) ||
-          opt_callback);
+    const callback =
+      /** @type {function()|function(Event):boolean} */ ((typeof optionsOrCallback ==
+      'function'
+        ? optionsOrCallback
+        : null) || opt_callback);
     return callback;
   }
 
   /**
    * @param {*} deps
    * @param {!Element} button
-   * @param {*)} optionsOrCallback
+   * @param {../api/subscriptions.ButtonOptions|function()} optionsOrCallback
    * @param {function()=} opt_callback
    * @return {!Element}
    */
   attachSmartButton(deps, button, optionsOrCallback, opt_callback) {
     const options = this.getOptions_(optionsOrCallback);
-    const callback = /** @type {function()} */
-        (this.getCallback_(optionsOrCallback, opt_callback));
+    const callback /** @type {function()} */ = this.getCallback_(
+      optionsOrCallback,
+      opt_callback
+    );
 
     // Add required CSS class, if missing.
     button.classList.add('swg-smart-button');
 
     return new SmartSubscriptionButtonApi(
-        deps, button, options, callback).start();
+      deps,
+      button,
+      options,
+      callback
+    ).start();
   }
 }
 
-const CSS = ".swg-dialog,.swg-toast{box-sizing:border-box;background-color:#fff!important}.swg-toast{position:fixed!important;bottom:0!important;max-height:46px!important;z-index:2147483647!important;border:none!important}@media (max-height:640px), (max-width:640px){.swg-dialog,.swg-toast{width:480px!important;left:-240px!important;margin-left:50vw!important;border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important}}@media (min-width:640px) and (min-height:640px){.swg-dialog{width:630px!important;left:-315px!important;margin-left:50vw!important;background-color:transparent!important;border:none!important}.swg-toast{left:0!important}}@media (max-width:480px){.swg-dialog,.swg-toast{width:100%!important;left:0!important;right:0!important;margin-left:0!important}}\n/*# sourceURL=/./src/components/dialog.css*/";
+const CSS =
+  '.swg-dialog,.swg-toast{box-sizing:border-box;background-color:#fff!important}.swg-toast{position:fixed!important;bottom:0!important;max-height:46px!important;z-index:2147483647!important;border:none!important}@media (max-height:640px), (max-width:640px){.swg-dialog,.swg-toast{width:480px!important;left:-240px!important;margin-left:50vw!important;border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important}}@media (min-width:640px) and (min-height:640px){.swg-dialog{width:630px!important;left:-315px!important;margin-left:50vw!important;background-color:transparent!important;border:none!important}.swg-toast{left:0!important}}@media (max-width:480px){.swg-dialog,.swg-toast{width:100%!important;left:0!important;right:0!important;margin-left:0!important}}\n/*# sourceURL=/./src/components/dialog.css*/';
 
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
@@ -3387,7 +3508,6 @@ const CSS = ".swg-dialog,.swg-toast{box-sizing:border-box;background-color:#fff!
  * limitations under the License.
  */
 
-
 /** @enum {number} */
 const CallbackId = {
   ENTITLEMENTS: 1,
@@ -3401,11 +3521,9 @@ const CallbackId = {
   CONTRIBUTION_RESPONSE: 9,
 };
 
-
 /**
  */
 class Callbacks {
-
   /**
    */
   constructor() {
@@ -3427,8 +3545,9 @@ class Callbacks {
    */
   triggerEntitlementsResponse(promise) {
     return this.trigger_(
-        CallbackId.ENTITLEMENTS,
-        promise.then(res => res.clone()));
+      CallbackId.ENTITLEMENTS,
+      promise.then(res => res.clone())
+    );
   }
 
   /**
@@ -3535,8 +3654,9 @@ class Callbacks {
    */
   triggerSubscribeResponse(responsePromise) {
     return this.trigger_(
-        CallbackId.SUBSCRIBE_RESPONSE,
-        responsePromise.then(res => res.clone()));
+      CallbackId.SUBSCRIBE_RESPONSE,
+      responsePromise.then(res => res.clone())
+    );
   }
 
   /**
@@ -3545,8 +3665,9 @@ class Callbacks {
    */
   triggerContributionResponse(responsePromise) {
     return this.trigger_(
-        CallbackId.CONTRIBUTION_RESPONSE,
-        responsePromise.then(res => res.clone()));
+      CallbackId.CONTRIBUTION_RESPONSE,
+      responsePromise.then(res => res.clone())
+    );
   }
 
   /**
@@ -3670,14 +3791,12 @@ class Callbacks {
  * limitations under the License.
  */
 
-
 /**
  * abstract View Class. Used to render the content within the Dialog. The
  * extended class has actual content.
  * @abstract
  */
 class View {
-
   /**
    * Empty constructor.
    */
@@ -3740,7 +3859,6 @@ class View {
  * limitations under the License.
  */
 
-
 /**
  * Whether the specified error is an AbortError type.
  * See https://heycam.github.io/webidl/#aborterror.
@@ -3750,7 +3868,6 @@ class View {
 function isCancelError(error) {
   return activityPorts_12(error);
 }
-
 
 /**
  * Creates or emulates a DOMException of AbortError type.
@@ -3762,7 +3879,6 @@ function isCancelError(error) {
 function createCancelError(win, opt_message) {
   return activityPorts_11(win, opt_message);
 }
-
 
 /**
  * A set of error utilities combined in a class to allow easy stubbing in tests.
@@ -3794,7 +3910,6 @@ class ErrorUtils {
  * limitations under the License.
  */
 
-
 /**
  * @param {!web-activities/activity-ports.ActivityPort} port
  * @param {string} requireOrigin
@@ -3803,14 +3918,17 @@ class ErrorUtils {
  * @return {!Promise<!Object>}
  */
 function acceptPortResultData(
-    port,
-    requireOrigin,
-    requireOriginVerified,
-    requireSecureChannel) {
+  port,
+  requireOrigin,
+  requireOriginVerified,
+  requireSecureChannel
+) {
   return port.acceptResult().then(result => {
-    if (result.origin != requireOrigin ||
-        requireOriginVerified && !result.originVerified ||
-        requireSecureChannel && !result.secureChannel) {
+    if (
+      result.origin != requireOrigin ||
+      (requireOriginVerified && !result.originVerified) ||
+      (requireSecureChannel && !result.secureChannel)
+    ) {
       throw new Error('channel mismatch');
     }
     return result.data;
@@ -3839,12 +3957,10 @@ const iframeAttributes$1 = {
   'scrolling': 'no',
 };
 
-
 /**
  * Class to build and render Activity iframe view.
  */
 class ActivityIframeView extends View {
-
   /**
    * @param {!Window} win
    * @param {!web-activities/activity-ports.ActivityPorts} activityPorts
@@ -3854,12 +3970,13 @@ class ActivityIframeView extends View {
    * @param {boolean=} hasLoadingIndicator
    */
   constructor(
-      win,
-      activityPorts,
-      src,
-      args,
-      shouldFadeBody = false,
-      hasLoadingIndicator = false) {
+    win,
+    activityPorts,
+    src,
+    args,
+    shouldFadeBody = false,
+    hasLoadingIndicator = false
+  ) {
     super();
 
     /** @private @const {!Window} */
@@ -3869,9 +3986,11 @@ class ActivityIframeView extends View {
     this.doc_ = this.win_.document;
 
     /** @private @const {!HTMLIFrameElement} */
-    this.iframe_ =
-        /** @type {!HTMLIFrameElement} */ (
-            createElement(this.doc_, 'iframe', iframeAttributes$1));
+    this.iframe_ = /** @type {!HTMLIFrameElement} */ (createElement(
+      this.doc_,
+      'iframe',
+      iframeAttributes$1
+    ));
 
     /** @private @const {!web-activities/activity-ports.ActivityPorts} */
     this.activityPorts_ = activityPorts;
@@ -3913,8 +4032,9 @@ class ActivityIframeView extends View {
 
   /** @override */
   init(dialog) {
-    return this.activityPorts_.openIframe(this.iframe_, this.src_, this.args_)
-        .then(port => this.onOpenIframeResponse_(port, dialog));
+    return this.activityPorts_
+      .openIframe(this.iframe_, this.src_, this.args_)
+      .then(port => this.onOpenIframeResponse_(port, dialog));
   }
 
   /**
@@ -3994,10 +4114,15 @@ class ActivityIframeView extends View {
   acceptResultAndVerify(
     requireOrigin,
     requireOriginVerified,
-    requireSecureChannel) {
+    requireSecureChannel
+  ) {
     return this.getPortPromise_().then(port => {
-      return acceptPortResultData(port, requireOrigin,
-          requireOriginVerified, requireSecureChannel);
+      return acceptPortResultData(
+        port,
+        requireOrigin,
+        requireOriginVerified,
+        requireSecureChannel
+      );
     });
   }
 
@@ -4051,7 +4176,6 @@ class ActivityIframeView extends View {
  */
 const base64UrlDecodeSubs = {'-': '+', '_': '/', '.': '='};
 
-
 /**
  * Converts a string which holds 8-bit code points, such as the result of atob,
  * into a Uint8Array with the corresponding bytes.
@@ -4069,7 +4193,6 @@ function stringToBytes(str) {
   return bytes;
 }
 
-
 /**
  * Converts a 8-bit bytes array into a string
  * @param {!Uint8Array} bytes
@@ -4085,7 +4208,6 @@ function bytesToString(bytes) {
   return array.join('');
 }
 
-
 /**
  * Interpret a byte array as a UTF-8 string.
  * @param {!BufferSource} bytes
@@ -4099,7 +4221,6 @@ function utf8DecodeSync(bytes) {
   return decodeURIComponent(escape(asciiString));
 }
 
-
 /**
  * Turn a string into UTF-8 bytes.
  * @param {string} string
@@ -4111,7 +4232,6 @@ function utf8EncodeSync(string) {
   }
   return stringToBytes(unescape(encodeURIComponent(string)));
 }
-
 
 /**
  * Converts a string which is in base64url encoding into a Uint8Array
@@ -4148,7 +4268,7 @@ function base64UrlDecodeToBytes(str) {
  * @return {?JsonObject|undefined} May be extend to parse arrays.
  */
 function parseJson(json) {
-  return /** @type {?JsonObject} */(JSON.parse(/** @type {string} */ (json)));
+  return /** @type {?JsonObject} */ (JSON.parse(/** @type {string} */ (json)));
 }
 
 /**
@@ -4187,13 +4307,11 @@ function tryParseJson(json, opt_onFailed) {
  * limitations under the License.
  */
 
-
 /**
  * Provides helper methods to decode and verify JWT tokens.
  */
 class JwtHelper {
-  constructor() {
-  }
+  constructor() {}
 
   /**
    * Decodes JWT token and returns its payload.
@@ -4252,12 +4370,10 @@ class JwtHelper {
  * limitations under the License.
  */
 
-
 /**
  * The holder of the entitlements for a service.
  */
 class Entitlements {
-
   /**
    * @param {string} service
    * @param {string} raw
@@ -4267,9 +4383,15 @@ class Entitlements {
    * @param {?boolean|undefined} isReadyToPay
    * @param {?string|undefined} decryptedDocumentKey
    */
-  constructor(service, raw, entitlements, currentProduct, ackHandler,
-    isReadyToPay, decryptedDocumentKey) {
-
+  constructor(
+    service,
+    raw,
+    entitlements,
+    currentProduct,
+    ackHandler,
+    isReadyToPay,
+    decryptedDocumentKey
+  ) {
     /** @const {string} */
     this.service = service;
     /** @const {string} */
@@ -4292,13 +4414,14 @@ class Entitlements {
    */
   clone() {
     return new Entitlements(
-        this.service,
-        this.raw,
-        this.entitlements.map(ent => ent.clone()),
-        this.product_,
-        this.ackHandler_,
-        this.isReadyToPay,
-        this.decryptedDocumentKey);
+      this.service,
+      this.raw,
+      this.entitlements.map(ent => ent.clone()),
+      this.product_,
+      this.ackHandler_,
+      this.isReadyToPay,
+      this.decryptedDocumentKey
+    );
   }
 
   /**
@@ -4326,8 +4449,10 @@ class Entitlements {
    */
   enablesAny(opt_source) {
     for (let i = 0; i < this.entitlements.length; i++) {
-      if (this.entitlements[i].products.length > 0 &&
-          (!opt_source || opt_source == this.entitlements[i].source)) {
+      if (
+        this.entitlements[i].products.length > 0 &&
+        (!opt_source || opt_source == this.entitlements[i].source)
+      ) {
         return true;
       }
     }
@@ -4368,8 +4493,10 @@ class Entitlements {
   getEntitlementFor(product, opt_source) {
     if (product && this.entitlements.length > 0) {
       for (let i = 0; i < this.entitlements.length; i++) {
-        if (this.entitlements[i].enables(product) &&
-            (!opt_source || opt_source == this.entitlements[i].source)) {
+        if (
+          this.entitlements[i].enables(product) &&
+          (!opt_source || opt_source == this.entitlements[i].source)
+        ) {
           return this.entitlements[i];
         }
       }
@@ -4386,8 +4513,10 @@ class Entitlements {
   getEntitlementForSource(source) {
     if (this.entitlements.length > 0) {
       for (let i = 0; i < this.entitlements.length; i++) {
-        if (this.entitlements[i].subscriptionToken &&
-            (source == this.entitlements[i].source)) {
+        if (
+          this.entitlements[i].subscriptionToken &&
+          source == this.entitlements[i].source
+        ) {
           return this.entitlements[i];
         }
       }
@@ -4404,12 +4533,10 @@ class Entitlements {
   }
 }
 
-
 /**
  * The single entitlement object.
  */
 class Entitlement {
-
   /**
    * @param {string} source
    * @param {!Array<string>} products
@@ -4429,9 +4556,10 @@ class Entitlement {
    */
   clone() {
     return new Entitlement(
-        this.source,
-        this.products.slice(0),
-        this.subscriptionToken);
+      this.source,
+      this.products.slice(0),
+      this.subscriptionToken
+    );
   }
 
   /**
@@ -4455,8 +4583,10 @@ class Entitlement {
     }
     // Wildcard allows this product.
     const eq = product.indexOf(':');
-    if (eq != -1 &&
-        this.products.includes(product.substring(0, eq + 1) + '*')) {
+    if (
+      eq != -1 &&
+      this.products.includes(product.substring(0, eq + 1) + '*')
+    ) {
       return true;
     }
     return this.products.includes(product);
@@ -4484,8 +4614,9 @@ class Entitlement {
    * @return {!Array<!Entitlement>}
    */
   static parseListFromJson(json) {
-    const jsonList = Array.isArray(json) ?
-        /** @type {!Array<Object>} */ (json) : [json];
+    const jsonList = Array.isArray(json)
+      ? /** @type {!Array<Object>} */ (json)
+      : [json];
     return jsonList.map(json => Entitlement.parseFromJson(json));
   }
 }
@@ -4506,11 +4637,9 @@ class Entitlement {
  * limitations under the License.
  */
 
-
 /**
  */
 class UserData {
-
   /**
    * @param {string} idToken
    * @param {!Object} data
@@ -4576,11 +4705,9 @@ class UserData {
  * limitations under the License.
  */
 
-
 /**
  */
 class SubscribeResponse {
-
   /**
    * @param {string} raw
    * @param {!PurchaseData} purchaseData
@@ -4589,8 +4716,14 @@ class SubscribeResponse {
    * @param {!string} productType
    * @param {function():!Promise} completeHandler
    */
-  constructor(raw, purchaseData, userData, entitlements, productType,
-      completeHandler) {
+  constructor(
+    raw,
+    purchaseData,
+    userData,
+    entitlements,
+    productType,
+    completeHandler
+  ) {
     /** @const {string} */
     this.raw = raw;
     /** @const {!PurchaseData} */
@@ -4610,12 +4743,13 @@ class SubscribeResponse {
    */
   clone() {
     return new SubscribeResponse(
-        this.raw,
-        this.purchaseData,
-        this.userData,
-        this.entitlements,
-        this.productType,
-        this.completeHandler_);
+      this.raw,
+      this.purchaseData,
+      this.userData,
+      this.entitlements,
+      this.productType,
+      this.completeHandler_
+    );
   }
 
   /**
@@ -4648,11 +4782,9 @@ class SubscribeResponse {
   }
 }
 
-
 /**
  */
 class PurchaseData {
-
   /**
    * @param {string} raw
    * @param {string} signature
@@ -4716,11 +4848,9 @@ class PurchaseData {
  * limitations under the License.
  */
 
-
 /**
  */
 class DeferredAccountCreationResponse {
-
   /**
    * @param {!Entitlements} entitlements
    * @param {!UserData} userData
@@ -4746,10 +4876,11 @@ class DeferredAccountCreationResponse {
    */
   clone() {
     return new DeferredAccountCreationResponse(
-        this.entitlements,
-        this.userData,
-        this.purchaseDataList,
-        this.completeHandler_);
+      this.entitlements,
+      this.userData,
+      this.purchaseDataList,
+      this.completeHandler_
+    );
   }
 
   /**
@@ -4825,40 +4956,66 @@ const Event = {
    * IMPRESSION_PAYWALL event.
    * User hits a paywall.
    * Every impression should be qualified as active or passive.
+   * The field 'active' of PropensityEvent, which carries this
+   * event, must be set to true or false to indicate this.
    * If the user has run out of metering, and that’s why was shown
    * a paywall, that would be a passive impression of the paywall.
-   * For example; {‘is_active’: false}
+   * For example:
+   * const propensityEvent = {
+   *  name: 'paywall',
+   *  active: false,
+   * }
    */
   IMPRESSION_PAYWALL: 'paywall',
   /**
    * IMPRESSION_AD event.
    * User has been shown a subscription ad.
    * Every impression should be qualified as active or passive.
+   * The field 'active' of PropensityEvent, which carries this
+   * event, must be set to true or false to indicate this.
    * The JSON block can provide the name of the subscription ad
    * creative or campaign. Ad impressions are usually passive.
-   * For example; {'name': 'fall_ad', 'is_active': false}
+   * const propensityEvent = {
+   *   name: 'ad_shown',
+   *   active: false,
+   *   data: {'ad_name': 'fall_ad'}
+   * }
    */
   IMPRESSION_AD: 'ad_shown',
   /**
    * IMPRESSION_OFFERS event.
    * User has been shown a list of available offers for subscription.
    * Every impression should be qualified as active or passive.
+   * The field 'active' of PropensityEvent, which carries this
+   * event, must be set to true or false to indicate this.
    * The JSON block can provide a list of products displayed,
    * and the source to indicate why the user was shown the offer.
    * Note: source is not the same as referrer.
    * In the cases below, the user took action before seeing the offers,
    * and therefore considered active impression.
-   * For example; {'offers': ['basic-monthly', 'premium-weekly'],
-   *               'source': 'ad-click',
-                  ‘is_active’: true}
-   * For example; {‘offers’: [‘basic-monthly’, ‘premium-weekly’],
-   *              ‘source’: ‘navigate-to-offers-page’,
-   *              ‘is_active’: true}
+   * For example:
+   * const propensityEvent = {
+   *   name: 'offers_shown',
+   *   active: true,
+   *   data: {'offers': ['basic-monthly', 'premium-weekly'],
+   *           'source': 'ad-click'}
+   * }
+   * For example:
+   * const propensityEvent = {
+   *   name: 'offers_shown',
+   *   active: true,
+   *   data: {'offers': ['basic-monthly', 'premium-weekly'],
+   *           'source': ‘navigate-to-offers-page’}
+   * }
    * If the user was shown the offers as a result of paywall metering
    * expiration, it is considered a passive impression.
-   * For example; {‘offers’: [‘basic-monthly’],
-   *               ‘source’: ‘paywall-metering-expired’,
-   *               ‘is_active’: false}
+   * For example:
+   * const propensityEvent = {
+   *   name: 'offers_shown',
+   *   active: false,
+   *   data: {'offers': ['basic-monthly', 'premium-weekly'],
+   *           'source': ‘paywall-metering-expired’}
+   * }
    */
   IMPRESSION_OFFERS: 'offers_shown',
   /**
@@ -4879,17 +5036,30 @@ const Event = {
    *   or ACTION_PAYMENT_FLOW_STARTED depending on if that button
    *   took the user to a checkout page on the publishers site or
    *   directly started the payment flow).
+   * The field 'active' of PropensityEvent, which carries this
+   * event, must be set to true since this is a user action.
    * The JSON block with this event can provide additional information
    * such as the source, indicating what caused the user to navigate
    * to this page.
-   * For example; {‘source’: ‘marketing_via_email’}
+   * For example:
+   * const propensityEvent = {
+   *   name: 'subscriptions_landing_page',
+   *   active: true,
+   *   data: {'source': 'marketing_via_email'}
+   * }
    */
   ACTION_SUBSCRIPTIONS_LANDING_PAGE: 'subscriptions_landing_page',
   /**
    * ACTION_OFFER_SELECTED event.
    * User has selected an offer.
+   * The field 'active' of PropensityEvent, which carries this
+   * event, must be set to true since this is a user action.
    * The JSON block can provide the product selected.
-   * For example; {'product': 'basic-monthly'}
+   * For example: {
+   *   name: 'offer_selected',
+   *   active: true,
+   *   data: {product': 'basic-monthly'}
+   * }
    * When offer selection starts the payment flow directly,
    * use the next event ACTION_PAYMENT_FLOW_STARTED instead.
    */
@@ -4897,21 +5067,46 @@ const Event = {
   /**
    * ACTION_PAYMENT_FLOW_STARTED event.
    * User has started payment flow.
+   * The field 'active' of PropensityEvent, which carries this
+   * event, must be set to true since this is a user action.
    * The JSON block can provide the product selected.
-   * For example; {'product': 'basic-monthly'}
+   * For example:
+   * const propensityEvent = {
+   *   name: 'payment_flow_started',
+   *   active: true,
+   *   data: {product': 'basic-monthly'}
+   * }
    */
   ACTION_PAYMENT_FLOW_STARTED: 'payment_flow_start',
   /**
    * ACTION_PAYMENT_COMPLETED.
    * User has made the payment for a subscription.
+   * The field 'active' of PropensityEvent, which carries this
+   * event, must be set to true since this is a user action.
    * The JSON block can provide the product user paid for.
-   * For example; {'product': 'basic-monthly'}
+   * For example:
+   * const propensityEvent = {
+   *   name: 'payment_complete',
+   *   active: true,
+   *   data: {product': 'basic-monthly'}
+   * }
    */
   ACTION_PAYMENT_COMPLETED: 'payment_complete',
   /**
    * EVENT_CUSTOM: custom publisher event.
+   * The field 'active' of PropensityEvent, which carries this
+   * event, must be set to true or false depending on if the event
+   * was generated as a result of a user action.
    * The JSON block can provide the event name for the custom event.
-   * For example; {'name': 'email_signup'}
+   * For example:
+   * const propensityEvent = {
+   *   name: 'custom',
+   *   active: true,
+   *   data: {
+   *     'event_name': 'social_share',
+   *     'platform_used': 'whatsapp'
+   *   }
+   *  }
    */
   EVENT_CUSTOM: 'custom',
 };
@@ -4941,7 +5136,6 @@ const PropensityType = {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 
 /** @enum {string} */
 const SubscriptionFlows = {
@@ -5019,7 +5213,6 @@ function defaultConfig() {
  * In other words, Flow = Payments + Account Creation.
  */
 
-
 /**
  * String values input by the publisher are mapped to the number values.
  * @type {!Object<string, number>}
@@ -5031,7 +5224,6 @@ const ReplaceSkuProrationModeMapping = {
   'IMMEDIATE_WITH_TIME_PRORATION': 1,
 };
 
-
 /**
  * The flow to initiate payment process.
  */
@@ -5042,9 +5234,10 @@ class PayStartFlow {
    * @param {*} productType
    */
   constructor(
-        deps,
-        skuOrSubscriptionRequest,
-        productType = ProductType.SUBSCRIPTION) {
+    deps,
+    skuOrSubscriptionRequest,
+    productType = ProductType.SUBSCRIPTION
+  ) {
     /** @private @const {*} */
     this.deps_ = deps;
 
@@ -5059,8 +5252,9 @@ class PayStartFlow {
 
     /** @private @const {*} */
     this.subscriptionRequest_ =
-        typeof skuOrSubscriptionRequest == 'string' ?
-            {'skuId': skuOrSubscriptionRequest} : skuOrSubscriptionRequest;
+      typeof skuOrSubscriptionRequest == 'string'
+        ? {'skuId': skuOrSubscriptionRequest}
+        : skuOrSubscriptionRequest;
 
     /**@private @const {!ProductType} */
     this.productType_ = productType;
@@ -5075,48 +5269,53 @@ class PayStartFlow {
    */
   start() {
     // Add the 'publicationId' key to the subscriptionRequest_ object.
-    const swgPaymentRequest =
-        Object.assign({}, this.subscriptionRequest_, {
-          'publicationId': this.pageConfig_.getPublicationId()});
+    const swgPaymentRequest = Object.assign({}, this.subscriptionRequest_, {
+      'publicationId': this.pageConfig_.getPublicationId(),
+    });
 
     // Map the proration mode to the enum value (if proration exists).
     const prorationMode = this.subscriptionRequest_.replaceSkuProrationMode;
     if (prorationMode) {
       swgPaymentRequest.replaceSkuProrationMode =
-          ReplaceSkuProrationModeMapping[prorationMode];
+        ReplaceSkuProrationModeMapping[prorationMode];
     }
 
     // Start/cancel events.
-    this.deps_.callbacks().triggerFlowStarted(
-        SubscriptionFlows.SUBSCRIBE, this.subscriptionRequest_);
+    this.deps_
+      .callbacks()
+      .triggerFlowStarted(
+        SubscriptionFlows.SUBSCRIBE,
+        this.subscriptionRequest_
+      );
     // TODO(chenshay): Create analytics for 'replace subscription'.
     this.analyticsService_.setSku(this.subscriptionRequest_.skuId);
     this.analyticsService_.logEvent(AnalyticsEvent.ACTION_SUBSCRIBE);
-    this.payClient_.start({
-      'apiVersion': 1,
-      'allowedPaymentMethods': ['CARD'],
-      'environment': 'PRODUCTION',
-      'playEnvironment': 'PROD',
-      'swg': swgPaymentRequest,
-      'i': {
-        'startTimeMs': Date.now(),
-        'googleTransactionId': this.analyticsService_.getTransactionId(),
-        'productType': this.productType_,
+    this.payClient_.start(
+      {
+        'apiVersion': 1,
+        'allowedPaymentMethods': ['CARD'],
+        'environment': 'PRODUCTION',
+        'playEnvironment': 'PROD',
+        'swg': swgPaymentRequest,
+        'i': {
+          'startTimeMs': Date.now(),
+          'googleTransactionId': this.analyticsService_.getTransactionId(),
+          'productType': this.productType_,
+        },
       },
-    }, {
-      forceRedirect:
+      {
+        forceRedirect:
           this.deps_.config().windowOpenMode == WindowOpenMode.REDIRECT,
-    });
+      }
+    );
     return Promise.resolve();
   }
 }
-
 
 /**
  * The flow for successful payments completion.
  */
 class PayCompleteFlow {
-
   /**
    * @param {*} deps
    */
@@ -5124,20 +5323,26 @@ class PayCompleteFlow {
     deps.payClient().onResponse(payPromise => {
       deps.entitlementsManager().blockNextNotification();
       const flow = new PayCompleteFlow(deps);
-      const promise =
-          validatePayResponse(deps, payPromise, flow.complete.bind(flow));
+      const promise = validatePayResponse(
+        deps,
+        payPromise,
+        flow.complete.bind(flow)
+      );
       deps.callbacks().triggerSubscribeResponse(promise);
-      return promise.then(response => {
-        flow.start(response);
-      }, reason => {
-        if (isCancelError(reason)) {
-          deps.callbacks().triggerFlowCanceled(SubscriptionFlows.SUBSCRIBE);
-        } else {
-          deps.analytics().logEvent(AnalyticsEvent.EVENT_PAYMENT_FAILED);
-          deps.jserror().error('Pay failed', reason);
+      return promise.then(
+        response => {
+          flow.start(response);
+        },
+        reason => {
+          if (isCancelError(reason)) {
+            deps.callbacks().triggerFlowCanceled(SubscriptionFlows.SUBSCRIBE);
+          } else {
+            deps.analytics().logEvent(AnalyticsEvent.EVENT_PAYMENT_FAILED);
+            deps.jserror().error('Pay failed', reason);
+          }
+          throw reason;
         }
-        throw reason;
-      });
+      );
     });
   }
 
@@ -5194,21 +5399,24 @@ class PayCompleteFlow {
     // TODO(dvoytenko, #400): cleanup once entitlements is launched everywhere.
     if (response.userData && response.entitlements) {
       args['idToken'] = response.userData.idToken;
-      this.deps_.entitlementsManager().pushNextEntitlements(
-          response.entitlements.raw);
+      this.deps_
+        .entitlementsManager()
+        .pushNextEntitlements(response.entitlements.raw);
     } else {
       args['loginHint'] = response.userData && response.userData.email;
     }
     this.activityIframeView_ = new ActivityIframeView(
-        this.win_,
-        this.activityPorts_,
-        feUrl('/payconfirmiframe'),
-        feArgs(args),
-        /* shouldFadeBody */ true);
+      this.win_,
+      this.activityPorts_,
+      feUrl('/payconfirmiframe'),
+      feArgs(args),
+      /* shouldFadeBody */ true
+    );
     this.activityIframeView_.onMessage(data => {
       if (data['entitlements']) {
-        this.deps_.entitlementsManager().pushNextEntitlements(
-            /** @type {string} */ (data['entitlements']));
+        this.deps_
+          .entitlementsManager()
+          .pushNextEntitlements(/** @type {string} */ (data['entitlements']));
         return;
       }
     });
@@ -5229,16 +5437,19 @@ class PayCompleteFlow {
     this.readyPromise_.then(() => {
       this.activityIframeView_.message({'complete': true});
     });
-    return this.activityIframeView_.acceptResult().catch(() => {
-      // Ignore errors.
-    }).then(() => {
-      this.analyticsService_.logEvent(
-          AnalyticsEvent.ACTION_ACCOUNT_ACKNOWLEDGED);
-      this.deps_.entitlementsManager().setToastShown(true);
-    });
+    return this.activityIframeView_
+      .acceptResult()
+      .catch(() => {
+        // Ignore errors.
+      })
+      .then(() => {
+        this.analyticsService_.logEvent(
+          AnalyticsEvent.ACTION_ACCOUNT_ACKNOWLEDGED
+        );
+        this.deps_.entitlementsManager().setToastShown(true);
+      });
   }
 }
-
 
 /**
  * @param {*} deps
@@ -5259,7 +5470,6 @@ function validatePayResponse(deps, payPromise, completeHandler) {
     return parseSubscriptionResponse(deps, data, completeHandler);
   });
 }
-
 
 /**
  * @param {*} deps
@@ -5303,14 +5513,14 @@ function parseSubscriptionResponse(deps, data, completeHandler) {
   }
   raw = JSON.stringify(/** @type {!JsonObject} */ (swgData));
   return new SubscribeResponse(
-      raw,
-      parsePurchaseData(swgData),
-      parseUserData(swgData),
-      parseEntitlements(deps, swgData),
-      productType,
-      completeHandler);
+    raw,
+    parsePurchaseData(swgData),
+    parseUserData(swgData),
+    parseEntitlements(deps, swgData),
+    productType,
+    completeHandler
+  );
 }
-
 
 /**
  * @param {!Object} swgData
@@ -5321,7 +5531,6 @@ function parsePurchaseData(swgData) {
   const signature = swgData['purchaseDataSignature'];
   return new PurchaseData(raw, signature);
 }
-
 
 /**
  * @param {!Object} swgData
@@ -5337,7 +5546,6 @@ function parseUserData(swgData) {
   return new UserData(idToken, jwt);
 }
 
-
 /**
  * @param {*} deps
  * @param {!Object} swgData
@@ -5351,14 +5559,13 @@ function parseEntitlements(deps, swgData) {
   return null;
 }
 
-
 /**
  * @param {!PurchaseData} purchaseData
  * @return {?string}
  */
 function parseSkuFromPurchaseDataSafe(purchaseData) {
   const json = tryParseJson(purchaseData.raw);
-  return json && json['productId'] || null;
+  return (json && json['productId']) || null;
 }
 
 /**
@@ -5377,12 +5584,10 @@ function parseSkuFromPurchaseDataSafe(purchaseData) {
  * limitations under the License.
  */
 
-
 /**
  * The class for Contributions flow.
  */
 class ContributionsFlow {
-
   /**
    * @param {*} deps
    * @param {*} options
@@ -5407,18 +5612,19 @@ class ContributionsFlow {
 
     /** @private @const {!ActivityIframeView} */
     this.activityIframeView_ = new ActivityIframeView(
-        this.win_,
-        this.activityPorts_,
-        feUrl('/contributionsiframe'),
-        feArgs({
-          'productId': deps.pageConfig().getProductId(),
-          'publicationId': deps.pageConfig().getPublicationId(),
-          'productType': ProductType.UI_CONTRIBUTION,
-          'list': options && options.list || 'default',
-          'skus': options && options.skus || null,
-          'isClosable': isClosable,
-        }),
-        /* shouldFadeBody */ true);
+      this.win_,
+      this.activityPorts_,
+      feUrl('/contributionsiframe'),
+      feArgs({
+        'productId': deps.pageConfig().getProductId(),
+        'publicationId': deps.pageConfig().getPublicationId(),
+        'productType': ProductType.UI_CONTRIBUTION,
+        'list': (options && options.list) || 'default',
+        'skus': (options && options.skus) || null,
+        'isClosable': isClosable,
+      }),
+      /* shouldFadeBody */ true
+    );
   }
 
   /**
@@ -5427,11 +5633,13 @@ class ContributionsFlow {
    */
   start() {
     // Start/cancel events.
-    this.deps_.callbacks().triggerFlowStarted(
-        SubscriptionFlows.SHOW_CONTRIBUTION_OPTIONS);
+    this.deps_
+      .callbacks()
+      .triggerFlowStarted(SubscriptionFlows.SHOW_CONTRIBUTION_OPTIONS);
     this.activityIframeView_.onCancel(() => {
-      this.deps_.callbacks().triggerFlowCanceled(
-          SubscriptionFlows.SHOW_CONTRIBUTION_OPTIONS);
+      this.deps_
+        .callbacks()
+        .triggerFlowCanceled(SubscriptionFlows.SHOW_CONTRIBUTION_OPTIONS);
     });
 
     // If result is due to OfferSelection, redirect to payments.
@@ -5444,10 +5652,10 @@ class ContributionsFlow {
       }
       if (result['sku']) {
         new PayStartFlow(
-            this.deps_,
-            /** @type {string} */ (result['sku']),
-            ProductType.UI_CONTRIBUTION)
-            .start();
+          this.deps_,
+          /** @type {string} */ (result['sku']),
+          ProductType.UI_CONTRIBUTION
+        ).start();
         return;
       }
     });
@@ -5472,13 +5680,11 @@ class ContributionsFlow {
  * limitations under the License.
  */
 
-
 /**
  * The flow to initiate deferred account process.
  * See `Subscriptions.completeDeferredAccountCreation` API.
  */
 class DeferredAccountFlow {
-
   /**
    * @param {*} deps
    * @param {*} options
@@ -5526,34 +5732,44 @@ class DeferredAccountFlow {
     }
 
     // Start/cancel events.
-    this.deps_.callbacks().triggerFlowStarted(
-        SubscriptionFlows.COMPLETE_DEFERRED_ACCOUNT_CREATION);
+    this.deps_
+      .callbacks()
+      .triggerFlowStarted(SubscriptionFlows.COMPLETE_DEFERRED_ACCOUNT_CREATION);
 
     this.activityIframeView_ = new ActivityIframeView(
-        this.win_,
-        this.activityPorts_,
-        feUrl('/recoveriframe'),
-        feArgs({
-          'publicationId': this.deps_.pageConfig().getPublicationId(),
-          'productId': this.deps_.pageConfig().getProductId(),
-          'entitlements': entitlements && entitlements.raw || null,
-          'consent': this.options_.consent,
-        }),
-        /* shouldFadeBody */ true);
+      this.win_,
+      this.activityPorts_,
+      feUrl('/recoveriframe'),
+      feArgs({
+        'publicationId': this.deps_.pageConfig().getPublicationId(),
+        'productId': this.deps_.pageConfig().getProductId(),
+        'entitlements': (entitlements && entitlements.raw) || null,
+        'consent': this.options_.consent,
+      }),
+      /* shouldFadeBody */ true
+    );
 
     this.openPromise_ = this.dialogManager_.openView(this.activityIframeView_);
-    return this.activityIframeView_.acceptResult().then(result => {
-      // The consent part is complete.
-      return this.handleConsentResponse_(/** @type {!Object} */ (result.data));
-    }, reason => {
-      if (isCancelError(reason)) {
-        this.deps_.callbacks().triggerFlowCanceled(
-            SubscriptionFlows.COMPLETE_DEFERRED_ACCOUNT_CREATION);
-      } else {
-        this.dialogManager_.completeView(this.activityIframeView_);
+    return this.activityIframeView_.acceptResult().then(
+      result => {
+        // The consent part is complete.
+        return this.handleConsentResponse_(
+          /** @type {!Object} */ (result.data)
+        );
+      },
+      reason => {
+        if (isCancelError(reason)) {
+          this.deps_
+            .callbacks()
+            .triggerFlowCanceled(
+              SubscriptionFlows.COMPLETE_DEFERRED_ACCOUNT_CREATION
+            );
+        } else {
+          this.dialogManager_.completeView(this.activityIframeView_);
+        }
+        throw reason;
       }
-      throw reason;
-    });
+    );
   }
 
   /**
@@ -5568,20 +5784,23 @@ class DeferredAccountFlow {
     const entitlementsJwt = data['entitlements'];
     const idToken = data['idToken'];
     const productType = data['productType'];
-    const entitlements = this.deps_.entitlementsManager()
-        .parseEntitlements({'signedEntitlements': entitlementsJwt});
+    const entitlements = this.deps_
+      .entitlementsManager()
+      .parseEntitlements({'signedEntitlements': entitlementsJwt});
     const userData = new UserData(
-        idToken,
-        /** @type {!Object} */ (new JwtHelper().decode(idToken)));
-    const purchaseDataList =
-        data['purchaseDataList'] ?
-        data['purchaseDataList'].map(pd =>
-            new PurchaseData(pd['data'], pd['signature'])) :
-        [
+      idToken,
+      /** @type {!Object} */ (new JwtHelper().decode(idToken))
+    );
+    const purchaseDataList = data['purchaseDataList']
+      ? data['purchaseDataList'].map(
+          pd => new PurchaseData(pd['data'], pd['signature'])
+        )
+      : [
           // TODO(dvoytenko): cleanup/deprecate.
           new PurchaseData(
-              data['purchaseData']['data'],
-              data['purchaseData']['signature']),
+            data['purchaseData']['data'],
+            data['purchaseData']['signature']
+          ),
         ];
 
     // For now, we'll use the `PayCompleteFlow` as a "creating account" flow.
@@ -5590,20 +5809,23 @@ class DeferredAccountFlow {
     const completeHandler = creatingFlow.complete.bind(creatingFlow);
 
     const response = new DeferredAccountCreationResponse(
-        entitlements,
-        userData,
-        purchaseDataList,
-        completeHandler);
+      entitlements,
+      userData,
+      purchaseDataList,
+      completeHandler
+    );
 
     // Start the "sync" flow.
-    creatingFlow.start(new SubscribeResponse(
-        '',  // raw field doesn't matter in this case
+    creatingFlow.start(
+      new SubscribeResponse(
+        '', // raw field doesn't matter in this case
         purchaseDataList[0],
         userData,
         entitlements,
         productType,
-        () => Promise.resolve()  // completeHandler doesn't matter in this case
-    ));
+        () => Promise.resolve() // completeHandler doesn't matter in this case
+      )
+    );
     return response;
   }
 }
@@ -5624,7 +5846,8 @@ class DeferredAccountFlow {
  * limitations under the License.
  */
 
-const CSS$1 = "body{padding:0;margin:0}swg-container,swg-loading,swg-loading-animate,swg-loading-image{display:block}swg-loading-container{width:100%!important;display:-webkit-box!important;display:-ms-flexbox!important;display:flex!important;-webkit-box-align:center!important;-ms-flex-align:center!important;align-items:center!important;-webkit-box-pack:center!important;-ms-flex-pack:center!important;justify-content:center!important;min-height:148px!important;height:100%!important;bottom:0!important;margin-top:5px!important;z-index:2147483647!important}@media (min-height:630px), (min-width:630px){swg-loading-container{width:560px!important;margin-left:35px!important;border-top-left-radius:8px!important;border-top-right-radius:8px!important;background-color:#fff!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important}}swg-loading{z-index:2147483647!important;width:36px;height:36px;overflow:hidden;-webkit-animation:mspin-rotate 1568.63ms infinite linear;animation:mspin-rotate 1568.63ms infinite linear}swg-loading-animate{-webkit-animation:mspin-revrot 5332ms infinite steps(4);animation:mspin-revrot 5332ms infinite steps(4)}swg-loading-image{background-image:url(https://news.google.com/swg/js/v1/loader.svg);background-size:100%;width:11664px;height:36px;-webkit-animation:swg-loading-film 5332ms infinite steps(324);animation:swg-loading-film 5332ms infinite steps(324)}@-webkit-keyframes swg-loading-film{0%{-webkit-transform:translateX(0);transform:translateX(0)}to{-webkit-transform:translateX(-11664px);transform:translateX(-11664px)}}@keyframes swg-loading-film{0%{-webkit-transform:translateX(0);transform:translateX(0)}to{-webkit-transform:translateX(-11664px);transform:translateX(-11664px)}}@-webkit-keyframes mspin-rotate{0%{-webkit-transform:rotate(0deg);transform:rotate(0deg)}to{-webkit-transform:rotate(360deg);transform:rotate(360deg)}}@keyframes mspin-rotate{0%{-webkit-transform:rotate(0deg);transform:rotate(0deg)}to{-webkit-transform:rotate(360deg);transform:rotate(360deg)}}@-webkit-keyframes mspin-revrot{0%{-webkit-transform:rotate(0deg);transform:rotate(0deg)}to{-webkit-transform:rotate(-360deg);transform:rotate(-360deg)}}@keyframes mspin-revrot{0%{-webkit-transform:rotate(0deg);transform:rotate(0deg)}to{-webkit-transform:rotate(-360deg);transform:rotate(-360deg)}}\n/*# sourceURL=/./src/ui/ui.css*/";
+const CSS$1 =
+  'body{padding:0;margin:0}swg-container,swg-loading,swg-loading-animate,swg-loading-image{display:block}swg-loading-container{width:100%!important;display:-webkit-box!important;display:-ms-flexbox!important;display:flex!important;-webkit-box-align:center!important;-ms-flex-align:center!important;align-items:center!important;-webkit-box-pack:center!important;-ms-flex-pack:center!important;justify-content:center!important;min-height:148px!important;height:100%!important;bottom:0!important;margin-top:5px!important;z-index:2147483647!important}@media (min-height:630px), (min-width:630px){swg-loading-container{width:560px!important;margin-left:35px!important;border-top-left-radius:8px!important;border-top-right-radius:8px!important;background-color:#fff!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important}}swg-loading{z-index:2147483647!important;width:36px;height:36px;overflow:hidden;-webkit-animation:mspin-rotate 1568.63ms infinite linear;animation:mspin-rotate 1568.63ms infinite linear}swg-loading-animate{-webkit-animation:mspin-revrot 5332ms infinite steps(4);animation:mspin-revrot 5332ms infinite steps(4)}swg-loading-image{background-image:url(https://news.google.com/swg/js/v1/loader.svg);background-size:100%;width:11664px;height:36px;-webkit-animation:swg-loading-film 5332ms infinite steps(324);animation:swg-loading-film 5332ms infinite steps(324)}@-webkit-keyframes swg-loading-film{0%{-webkit-transform:translateX(0);transform:translateX(0)}to{-webkit-transform:translateX(-11664px);transform:translateX(-11664px)}}@keyframes swg-loading-film{0%{-webkit-transform:translateX(0);transform:translateX(0)}to{-webkit-transform:translateX(-11664px);transform:translateX(-11664px)}}@-webkit-keyframes mspin-rotate{0%{-webkit-transform:rotate(0deg);transform:rotate(0deg)}to{-webkit-transform:rotate(360deg);transform:rotate(360deg)}}@keyframes mspin-rotate{0%{-webkit-transform:rotate(0deg);transform:rotate(0deg)}to{-webkit-transform:rotate(360deg);transform:rotate(360deg)}}@-webkit-keyframes mspin-revrot{0%{-webkit-transform:rotate(0deg);transform:rotate(0deg)}to{-webkit-transform:rotate(-360deg);transform:rotate(-360deg)}}@keyframes mspin-revrot{0%{-webkit-transform:rotate(0deg);transform:rotate(0deg)}to{-webkit-transform:rotate(-360deg);transform:rotate(-360deg)}}\n/*# sourceURL=/./src/ui/ui.css*/';
 
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
@@ -5642,7 +5865,6 @@ const CSS$1 = "body{padding:0;margin:0}swg-container,swg-loading,swg-loading-ani
  * limitations under the License.
  */
 
-
 /**
  * @param {!Document} doc
  * @return {string}
@@ -5650,7 +5872,6 @@ const CSS$1 = "body{padding:0;margin:0}swg-container,swg-loading,swg-loading-ani
 function getReadyState(doc) {
   return /** @type {string} */ (doc['readyState']);
 }
-
 
 /**
  * Whether the document is ready.
@@ -5722,24 +5943,21 @@ function whenDocumentReady(doc) {
  * limitations under the License.
  */
 
-
 /** @implements {Doc} */
 class GlobalDoc {
-
   /**
    * @param {!Window|!Document} winOrDoc
    */
   constructor(winOrDoc) {
     const isWin = !!winOrDoc.document;
     /** @private @const {!Window} */
-    this.win_ = isWin ?
-        /** @type {!Window} */ (winOrDoc) :
-        /** @type {!Window} */ (
-            (/** @type {!Document} */ (winOrDoc)).defaultView);
+    this.win_ = isWin
+      ? /** @type {!Window} */ (winOrDoc)
+      : /** @type {!Window} */ (/** @type {!Document} */ (winOrDoc).defaultView);
     /** @private @const {!Document} */
-    this.doc_ = isWin ?
-        /** @type {!Window} */ (winOrDoc).document :
-        /** @type {!Document} */ (winOrDoc);
+    this.doc_ = isWin
+      ? /** @type {!Window} */ (winOrDoc).document
+      : /** @type {!Document} */ (winOrDoc);
   }
 
   /** @override */
@@ -5779,18 +5997,17 @@ class GlobalDoc {
   }
 }
 
-
 /**
  * @param {!Document|!Window|!Doc} input
  * @return {!Doc}
  */
 function resolveDoc(input) {
   // Is it a `Document`
-  if ((/** @type {!Document} */ (input)).nodeType === /* DOCUMENT */ 9) {
+  if (/** @type {!Document} */ (input).nodeType === /* DOCUMENT */ 9) {
     return new GlobalDoc(/** @type {!Document} */ (input));
   }
   // Is it a `Window`?
-  if ((/** @type {!Window} */ (input)).document) {
+  if (/** @type {!Window} */ (input).document) {
     return new GlobalDoc(/** @type {!Window} */ (input));
   }
   return /** @type {!Doc} */ (input);
@@ -5827,9 +6044,15 @@ function transition(el, props, durationMillis, curve) {
     win.setTimeout(() => {
       win.setTimeout(resolve, durationMillis);
       const tr = `${durationMillis}ms ${curve}`;
-      setImportantStyles(el, Object.assign({
-        'transition': `transform ${tr}, opacity ${tr}`,
-      }, props));
+      setImportantStyles(
+        el,
+        Object.assign(
+          {
+            'transition': `transform ${tr}, opacity ${tr}`,
+          },
+          props
+        )
+      );
     });
   }).then(() => {
     setImportantStyles(el, {
@@ -5854,9 +6077,7 @@ function transition(el, props, durationMillis, curve) {
  * limitations under the License.
  */
 
-
 class Graypane {
-
   /**
    * @param {*} doc
    * @param {number} zIndex
@@ -5866,8 +6087,9 @@ class Graypane {
     this.doc_ = doc;
 
     /** @private @const {!Element} */
-    this.fadeBackground_ = this.doc_.getWin().document.createElement(
-        'swg-popup-background');
+    this.fadeBackground_ = this.doc_
+      .getWin()
+      .document.createElement('swg-popup-background');
     setImportantStyles(this.fadeBackground_, {
       'z-index': zIndex,
       'display': 'none',
@@ -5919,9 +6141,14 @@ class Graypane {
       'opacity': animated ? 0 : 1,
     });
     if (animated) {
-      return transition(this.fadeBackground_, {
-        'opacity': 1,
-      }, 300, 'ease-out');
+      return transition(
+        this.fadeBackground_,
+        {
+          'opacity': 1,
+        },
+        300,
+        'ease-out'
+      );
     }
   }
 
@@ -5932,9 +6159,14 @@ class Graypane {
    */
   hide(animated = true) {
     if (animated) {
-      return transition(this.fadeBackground_, {
-        'opacity': 0,
-      }, 300, 'ease-out').then(() => {
+      return transition(
+        this.fadeBackground_,
+        {
+          'opacity': 0,
+        },
+        300,
+        'ease-out'
+      ).then(() => {
         setImportantStyles(this.fadeBackground_, {'display': 'none'});
       });
     }
@@ -5958,25 +6190,25 @@ class Graypane {
  * limitations under the License.
  */
 
-
 /**
  * Loading indicator class. Builds the loading indicator view to be injected in
  * parent element <iframe class="swg-dialog"> element. Provides methods to
  * show/hide loading indicator.
  */
 class LoadingView {
-
   /**
    * @param {!Document} doc
    */
   constructor(doc) {
-
     /** @private @const {!Document} */
     this.doc_ = doc;
 
     /** @private @const {!Element} */
-    this.loadingContainer_ =
-        createElement(this.doc_, 'swg-loading-container', {});
+    this.loadingContainer_ = createElement(
+      this.doc_,
+      'swg-loading-container',
+      {}
+    );
 
     /** @private @const {!Element} */
     this.loading_ = createElement(this.doc_, 'swg-loading', {});
@@ -6018,12 +6250,18 @@ class LoadingView {
   buildLoadingIndicator_() {
     const loadingContainer = this.loading_;
 
-    const loadingIndicatorTopContainer =
-        createElement(this.doc_, 'swg-loading-animate', {});
+    const loadingIndicatorTopContainer = createElement(
+      this.doc_,
+      'swg-loading-animate',
+      {}
+    );
     loadingContainer.appendChild(loadingIndicatorTopContainer);
 
-    const loadingIndicatorChildContainer =
-        createElement(this.doc_, 'swg-loading-image', {});
+    const loadingIndicatorChildContainer = createElement(
+      this.doc_,
+      'swg-loading-image',
+      {}
+    );
     loadingIndicatorTopContainer.appendChild(loadingIndicatorChildContainer);
   }
 }
@@ -6055,19 +6293,19 @@ const friendlyIframeAttributes = {
  * The class for building friendly iframe.
  */
 class FriendlyIframe {
-
   /**
    * @param {!Document} doc
    * @param {!Object<string, string|number>=} attrs
    */
   constructor(doc, attrs = {}) {
-
     const mergedAttrs = Object.assign({}, friendlyIframeAttributes, attrs);
 
     /** @private @const {!HTMLIFrameElement} */
-    this.iframe_ =
-        /** @type {!HTMLIFrameElement} */ (
-            createElement(doc, 'iframe', mergedAttrs));
+    this.iframe_ = /** @type {!HTMLIFrameElement} */ (createElement(
+      doc,
+      'iframe',
+      mergedAttrs
+    ));
 
     // Ensure that the new iframe does not inherit any CSS styles.
     resetAllStyles(this.iframe_);
@@ -6099,8 +6337,9 @@ class FriendlyIframe {
    * @return {!Document}
    */
   getDocument() {
-    const doc = this.getElement().contentDocument ||
-        (this.getElement().contentWindow &&
+    const doc =
+      this.getElement().contentDocument ||
+      (this.getElement().contentWindow &&
         this.getElement().contentWindow.document);
 
     if (!doc) {
@@ -6191,13 +6430,11 @@ const PositionAt = {
   FULL: 'FULL',
 };
 
-
 /**
  * The class for the top level dialog.
  * @final
  */
 class Dialog {
-
   /**
    * Create a dialog for the provided doc.
    * @param {*} doc
@@ -6209,16 +6446,19 @@ class Dialog {
     this.doc_ = doc;
 
     /** @private @const {!FriendlyIframe} */
-    this.iframe_ = new FriendlyIframe(
-        doc.getWin().document, {'class': 'swg-dialog'});
+    this.iframe_ = new FriendlyIframe(doc.getWin().document, {
+      'class': 'swg-dialog',
+    });
 
     /** @private @const {!Graypane} */
     this.graypane_ = new Graypane(doc, Z_INDEX - 1);
 
-    const modifiedImportantStyles =
-        Object.assign({}, rootElementImportantStyles, importantStyles);
-    setImportantStyles(
-        this.iframe_.getElement(), modifiedImportantStyles);
+    const modifiedImportantStyles = Object.assign(
+      {},
+      rootElementImportantStyles,
+      importantStyles
+    );
+    setImportantStyles(this.iframe_.getElement(), modifiedImportantStyles);
 
     setStyles(this.iframe_.getElement(), styles);
 
@@ -6226,7 +6466,7 @@ class Dialog {
     this.loadingView_ = null;
 
     /** @private {?Element} */
-    this.container_ = null;  // Depends on constructed document inside iframe.
+    this.container_ = null; // Depends on constructed document inside iframe.
 
     /** @private {*} */
     this.view_ = null;
@@ -6253,7 +6493,7 @@ class Dialog {
     }
 
     // Attach.
-    this.doc_.getBody().appendChild(iframe.getElement());  // Fires onload.
+    this.doc_.getBody().appendChild(iframe.getElement()); // Fires onload.
     this.graypane_.attach();
 
     if (hidden) {
@@ -6304,9 +6544,14 @@ class Dialog {
     if (animated) {
       animating = this.animate_(() => {
         this.graypane_.hide(/* animate */ true);
-        return transition(this.getElement(), {
-          'transform': 'translateY(100%)',
-        }, 300, 'ease-out');
+        return transition(
+          this.getElement(),
+          {
+            'transform': 'translateY(100%)',
+          },
+          300,
+          'ease-out'
+        );
       });
     } else {
       animating = Promise.resolve();
@@ -6362,7 +6607,7 @@ class Dialog {
     }
   }
 
-   /**
+  /**
    * Transition out of an old view.
    * @private
    */
@@ -6423,11 +6668,16 @@ class Dialog {
         'opactiy': 1,
         'visibility': 'visible',
       });
-      return transition(this.getElement(), {
-        'transform': 'translateY(0)',
-        'opacity': 1,
-        'visibility': 'visible',
-      }, 300, 'ease-out');
+      return transition(
+        this.getElement(),
+        {
+          'transform': 'translateY(0)',
+          'opacity': 1,
+          'visibility': 'visible',
+        },
+        300,
+        'ease-out'
+      );
     });
     this.hidden_ = false;
   }
@@ -6455,16 +6705,26 @@ class Dialog {
             'height': `${newHeight}px`,
             'transform': `translateY(${newHeight - oldHeight}px)`,
           });
-          return transition(this.getElement(), {
-            'transform': 'translateY(0)',
-          }, 300, 'ease-out');
+          return transition(
+            this.getElement(),
+            {
+              'transform': 'translateY(0)',
+            },
+            300,
+            'ease-out'
+          );
         });
       } else {
         // Collapse.
         animating = this.animate_(() => {
-          return transition(this.getElement(), {
-            'transform': `translateY(${oldHeight - newHeight}px)`,
-          }, 300, 'ease-out').then(() => {
+          return transition(
+            this.getElement(),
+            {
+              'transform': `translateY(${oldHeight - newHeight}px)`,
+            },
+            300,
+            'ease-out'
+          ).then(() => {
             setImportantStyles(this.getElement(), {
               'height': `${newHeight}px`,
               'transform': 'translateY(0)',
@@ -6491,13 +6751,18 @@ class Dialog {
    */
   animate_(callback) {
     const wait = this.animating_ || Promise.resolve();
-    return this.animating_ = wait.then(() => {
-      return callback();
-    }, () => {
-      // Ignore errors to make sure animations don't get stuck.
-    }).then(() => {
-      this.animating_ = null;
-    });
+    return (this.animating_ = wait
+      .then(
+        () => {
+          return callback();
+        },
+        () => {
+          // Ignore errors to make sure animations don't get stuck.
+        }
+      )
+      .then(() => {
+        this.animating_ = null;
+      }));
   }
 
   /**
@@ -6507,7 +6772,7 @@ class Dialog {
    * @private
    */
   getMaxAllowedHeight_(height) {
-    return Math.min(height, this.doc_.getWin()./*OK*/innerHeight * 0.9);
+    return Math.min(height, this.doc_.getWin()./*OK*/ innerHeight * 0.9);
   }
 
   /**
@@ -6534,7 +6799,7 @@ class Dialog {
    */
   updatePaddingToHtml_(newHeight) {
     if (this.inferPosition_() == PositionAt.BOTTOM) {
-      const bottomPadding = newHeight + 20;  // Add some extra padding.
+      const bottomPadding = newHeight + 20; // Add some extra padding.
       const htmlElement = this.doc_.getRootElement();
       setImportantStyles(htmlElement, {
         'padding-bottom': `${bottomPadding}px`,
@@ -6549,7 +6814,6 @@ class Dialog {
   removePaddingToHtml_() {
     this.doc_.getRootElement().style.removeProperty('padding-bottom');
   }
-
 
   /**
    * Calculates the position of the dialog. Currently dialog is positioned at
@@ -6612,13 +6876,11 @@ class Dialog {
 
 const POPUP_Z_INDEX = 2147483647;
 
-
 /**
  * The class for the top level dialog.
  * @final
  */
 class DialogManager {
-
   /**
    * @param {*} doc
    */
@@ -6671,7 +6933,7 @@ class DialogManager {
       if (isCancelError(reason)) {
         this.completeView(view);
       }
-      throw (reason);
+      throw reason;
     });
     return this.openDialog(hidden).then(dialog => {
       return dialog.openView(view);
@@ -6763,14 +7025,12 @@ const iframeAttributes$2 = {
  * The class Notification toast.
  */
 class Toast {
-
   /**
    * @param {*} deps
    * @param {string} src
    * @param {!Object<string, ?>} args
    */
   constructor(deps, src, args) {
-
     /** @private @const {*} */
     this.doc_ = deps.doc();
 
@@ -6787,12 +7047,11 @@ class Toast {
     this.animating_ = null;
 
     /** @private @const {!HTMLIFrameElement} */
-    this.iframe_ =
-        /** @type {!HTMLIFrameElement} */ (
-            createElement(
-                this.doc_.getWin().document,
-                'iframe',
-                iframeAttributes$2));
+    this.iframe_ = /** @type {!HTMLIFrameElement} */ (createElement(
+      this.doc_.getWin().document,
+      'iframe',
+      iframeAttributes$2
+    ));
 
     setImportantStyles(this.iframe_, toastImportantStyles);
 
@@ -6815,7 +7074,7 @@ class Toast {
    * @return {!Promise}
    */
   open() {
-    this.doc_.getBody().appendChild(this.iframe_);  // Fires onload.
+    this.doc_.getBody().appendChild(this.iframe_); // Fires onload.
     return this.buildToast_();
   }
 
@@ -6824,30 +7083,37 @@ class Toast {
    */
   buildToast_() {
     const toastDurationSeconds = 7;
-    return this.activityPorts_.openIframe(
-        this.iframe_, this.src_, this.args_).then(port => {
-          return port.whenReady();
-        }).then(() => {
-          resetStyles(this.iframe_, ['height']);
+    return this.activityPorts_
+      .openIframe(this.iframe_, this.src_, this.args_)
+      .then(port => {
+        return port.whenReady();
+      })
+      .then(() => {
+        resetStyles(this.iframe_, ['height']);
 
-          this.animate_(() => {
-            setImportantStyles(this.iframe_, {
-              'transform': 'translateY(100%)',
-              'opactiy': 1,
-              'visibility': 'visible',
-            });
-            return transition(this.iframe_, {
+        this.animate_(() => {
+          setImportantStyles(this.iframe_, {
+            'transform': 'translateY(100%)',
+            'opactiy': 1,
+            'visibility': 'visible',
+          });
+          return transition(
+            this.iframe_,
+            {
               'transform': 'translateY(0)',
               'opacity': 1,
               'visibility': 'visible',
-            }, 400, 'ease-out');
-          });
-
-          // Close the Toast after the specified duration.
-          this.doc_.getWin().setTimeout(() => {
-            this.close();
-          }, (toastDurationSeconds + 1) * 1000);
+            },
+            400,
+            'ease-out'
+          );
         });
+
+        // Close the Toast after the specified duration.
+        this.doc_.getWin().setTimeout(() => {
+          this.close();
+        }, (toastDurationSeconds + 1) * 1000);
+      });
   }
 
   /**
@@ -6857,13 +7123,18 @@ class Toast {
    */
   animate_(callback) {
     const wait = this.animating_ || Promise.resolve();
-    return this.animating_ = wait.then(() => {
-      return callback();
-    }, () => {
-      // Ignore errors to make sure animations don't get stuck.
-    }).then(() => {
-      this.animating_ = null;
-    });
+    return (this.animating_ = wait
+      .then(
+        () => {
+          return callback();
+        },
+        () => {
+          // Ignore errors to make sure animations don't get stuck.
+        }
+      )
+      .then(() => {
+        this.animating_ = null;
+      }));
   }
 
   /**
@@ -6878,11 +7149,16 @@ class Toast {
         return Promise.resolve();
       }, 500);
 
-      return transition(this.iframe_, {
-        'transform': 'translateY(100%)',
-        'opacity': 1,
-        'visibility': 'visible',
-      }, 400, 'ease-out');
+      return transition(
+        this.iframe_,
+        {
+          'transform': 'translateY(100%)',
+          'opacity': 1,
+          'visibility': 'visible',
+        },
+        400,
+        'ease-out'
+      );
     });
   }
 }
@@ -6908,11 +7184,9 @@ const TOAST_STORAGE_KEY = 'toast';
 const ENTS_STORAGE_KEY = 'ents';
 const IS_READY_TO_PAY_STORAGE_KEY = 'isreadytopay';
 
-
 /**
  */
 class EntitlementsManager {
-
   /**
    * @param {!Window} win
    * @param {*} pageConfig
@@ -6963,7 +7237,9 @@ class EntitlementsManager {
   reset(opt_expectPositive) {
     this.responsePromise_ = null;
     this.positiveRetries_ = Math.max(
-        this.positiveRetries_, opt_expectPositive ? 3 : 0);
+      this.positiveRetries_,
+      opt_expectPositive ? 3 : 0
+    );
     if (opt_expectPositive) {
       this.storage_.remove(ENTS_STORAGE_KEY);
       this.storage_.remove(IS_READY_TO_PAY_STORAGE_KEY);
@@ -7005,7 +7281,7 @@ class EntitlementsManager {
   isGoogleUtmSource_() {
     // TODO(sohanirao): b/120294106
     const utmParams = parseQueryString$1(this.getQueryString_());
-    return (utmParams['utm_source'] == 'google');
+    return utmParams['utm_source'] == 'google';
   }
 
   /**
@@ -7015,14 +7291,17 @@ class EntitlementsManager {
   getEntitlements(opt_encryptedDocumentKey) {
     if (!this.responsePromise_) {
       this.responsePromise_ = this.getEntitlementsFlow_(
-          opt_encryptedDocumentKey);
+        opt_encryptedDocumentKey
+      );
     }
     return this.responsePromise_.then(response => {
       if (response.isReadyToPay != null) {
         this.analyticsService_.setReadyToPay(response.isReadyToPay);
       }
-      if (this.config_.analyticsMode == AnalyticsMode.IMPRESSIONS ||
-            this.isGoogleUtmSource_()) {
+      if (
+        this.config_.analyticsMode == AnalyticsMode.IMPRESSIONS ||
+        this.isGoogleUtmSource_()
+      ) {
         this.logPaywallImpression_();
       }
       return response;
@@ -7036,7 +7315,10 @@ class EntitlementsManager {
    */
   pushNextEntitlements(raw, opt_isReadyToPay) {
     const entitlements = this.getValidJwtEntitlements_(
-        raw, /* requireNonExpired */ true, opt_isReadyToPay);
+      raw,
+      /* requireNonExpired */ true,
+      opt_isReadyToPay
+    );
     if (entitlements && entitlements.enablesThis()) {
       this.storage_.set(ENTS_STORAGE_KEY, raw);
       return true;
@@ -7051,10 +7333,11 @@ class EntitlementsManager {
    */
   getEntitlementsFlow_(opt_encryptedDocumentKey) {
     return this.fetchEntitlementsWithCaching_(opt_encryptedDocumentKey).then(
-        entitlements => {
-          this.onEntitlementsFetched_(entitlements);
-          return entitlements;
-        });
+      entitlements => {
+        this.onEntitlementsFetched_(entitlements);
+        return entitlements;
+      }
+    );
   }
 
   /**
@@ -7072,8 +7355,10 @@ class EntitlementsManager {
       // Try cache first.
       if (raw && !opt_encryptedDocumentKey) {
         const cached = this.getValidJwtEntitlements_(
-            raw, /* requireNonExpired */ true,
-            irtpStringToBoolean(irtp));
+          raw,
+          /* requireNonExpired */ true,
+          irtpStringToBoolean(irtp)
+        );
         if (cached && cached.enablesThis()) {
           // Already have a positive response.
           this.positiveRetries_ = 0;
@@ -7151,7 +7436,10 @@ class EntitlementsManager {
     const signedData = json['signedEntitlements'];
     if (signedData) {
       const entitlements = this.getValidJwtEntitlements_(
-          signedData, /* requireNonExpired */ false, isReadyToPay);
+        signedData,
+        /* requireNonExpired */ false,
+        isReadyToPay
+      );
       if (entitlements) {
         return entitlements;
       }
@@ -7173,8 +7461,12 @@ class EntitlementsManager {
    * @return {?Entitlements}
    * @private
    */
-  getValidJwtEntitlements_(raw, requireNonExpired, opt_isReadyToPay,
-    opt_decryptedDocumentKey) {
+  getValidJwtEntitlements_(
+    raw,
+    requireNonExpired,
+    opt_isReadyToPay,
+    opt_decryptedDocumentKey
+  ) {
     try {
       const jwt = this.jwtHelper_.decode(raw);
       if (requireNonExpired) {
@@ -7185,12 +7477,21 @@ class EntitlementsManager {
         }
       }
       const entitlementsClaim = jwt['entitlements'];
-      return entitlementsClaim && this.createEntitlements_(
-          raw, entitlementsClaim, opt_isReadyToPay, opt_decryptedDocumentKey)
-          || null;
+      return (
+        (entitlementsClaim &&
+          this.createEntitlements_(
+            raw,
+            entitlementsClaim,
+            opt_isReadyToPay,
+            opt_decryptedDocumentKey
+          )) ||
+        null
+      );
     } catch (e) {
       // Ignore the error.
-      this.win_.setTimeout(() => {throw e;});
+      this.win_.setTimeout(() => {
+        throw e;
+      });
     }
     return null;
   }
@@ -7205,13 +7506,14 @@ class EntitlementsManager {
    */
   createEntitlements_(raw, json, opt_isReadyToPay, opt_decryptedDocumentKey) {
     return new Entitlements(
-        SERVICE_ID,
-        raw,
-        Entitlement.parseListFromJson(json),
-        this.pageConfig_.getProductId(),
-        this.ack_.bind(this),
-        opt_isReadyToPay,
-        opt_decryptedDocumentKey);
+      SERVICE_ID,
+      raw,
+      Entitlement.parseListFromJson(json),
+      this.pageConfig_.getProductId(),
+      this.ack_.bind(this),
+      opt_isReadyToPay,
+      opt_decryptedDocumentKey
+    );
   }
 
   /**
@@ -7228,8 +7530,9 @@ class EntitlementsManager {
     }
 
     // Notify on the received entitlements.
-    this.deps_.callbacks().triggerEntitlementsResponse(
-        Promise.resolve(entitlements));
+    this.deps_
+      .callbacks()
+      .triggerEntitlementsResponse(Promise.resolve(entitlements));
 
     // Show a toast if needed.
     this.maybeShowToast_(entitlements);
@@ -7264,10 +7567,14 @@ class EntitlementsManager {
    */
   showToast_(entitlement) {
     const source = entitlement.source || 'google';
-    return new Toast(this.deps_, feUrl('/toastiframe'), feArgs({
-      'publicationId': this.publicationId_,
-      'source': source,
-    })).open();
+    return new Toast(
+      this.deps_,
+      feUrl('/toastiframe'),
+      feArgs({
+        'publicationId': this.publicationId_,
+        'source': source,
+      })
+    ).open();
   }
 
   /**
@@ -7286,15 +7593,17 @@ class EntitlementsManager {
    * @private
    */
   fetch_(opt_encryptedDocumentKey) {
-    let url = '/publication/' +
-        encodeURIComponent(this.publicationId_) +
-        '/entitlements';
+    let url =
+      '/publication/' +
+      encodeURIComponent(this.publicationId_) +
+      '/entitlements';
     if (opt_encryptedDocumentKey) {
       //TODO(chenshay): Make this a 'Post'.
       url += '?crypt=' + encodeURIComponent(opt_encryptedDocumentKey);
     }
-    return this.fetcher_.fetchCredentialedJson(serviceUrl(url))
-        .then(json => this.parseEntitlements(json));
+    return this.fetcher_
+      .fetchCredentialedJson(serviceUrl(url))
+      .then(json => this.parseEntitlements(json));
   }
 }
 
@@ -7331,7 +7640,6 @@ function irtpStringToBoolean(value) {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 
 /**
  * @enum {string}
@@ -7387,7 +7695,6 @@ const ExperimentFlags = {
  * limitations under the License.
  */
 
-
 /** @private @const {!Array<string>} */
 const allowedMethods_ = ['GET', 'POST'];
 
@@ -7397,12 +7704,10 @@ const allowedFetchTypes_ = {
   text: 2,
 };
 
-
 /**
  * A class that polyfills Fetch API.
  */
 class Xhr {
-
   /**
    * @param {!Window} win
    */
@@ -7427,8 +7732,10 @@ class Xhr {
     // `credentials`.
     const creds = init.credentials;
     assert(
-        creds === undefined || creds == 'include' || creds == 'omit',
-        'Only credentials=include|omit support: %s', creds);
+      creds === undefined || creds == 'include' || creds == 'omit',
+      'Only credentials=include|omit support: %s',
+      creds
+    );
     // Fallback to xhr polyfill since `fetch` api does not support
     // responseType = 'document'. We do this so we don't have to do any parsing
     // and document construction on the UI thread which would be expensive.
@@ -7446,11 +7753,18 @@ class Xhr {
   fetch(input, opt_init) {
     // TODO (avimehta): Figure out if CORS needs be handled the way AMP does it.
     const init = setupInit(opt_init);
-    return this.fetch_(input, init).then(response => response, reason => {
-      const targetOrigin = parseUrl$1(input).origin;
-      throw new Error('XHR Failed fetching' +
-          ` (${targetOrigin}/...):`, reason && reason.message);
-    }).then(response => assertSuccess(response));
+    return this.fetch_(input, init)
+      .then(
+        response => response,
+        reason => {
+          const targetOrigin = parseUrl$1(input).origin;
+          throw new Error(
+            'XHR Failed fetching' + ` (${targetOrigin}/...):`,
+            reason && reason.message
+          );
+        }
+      )
+      .then(response => assertSuccess(response));
   }
 }
 
@@ -7467,10 +7781,10 @@ function normalizeMethod_(method) {
   method = method.toUpperCase();
 
   assert(
-      allowedMethods_.includes(method),
-      'Only one of %s is currently allowed. Got %s',
-      allowedMethods_.join(', '),
-      method
+    allowedMethods_.includes(method),
+    'Only one of %s is currently allowed. Got %s',
+    allowedMethods_.join(', '),
+    method
   );
 
   return method;
@@ -7492,7 +7806,6 @@ function setupInit(opt_init, opt_accept) {
   }
   return init;
 }
-
 
 /**
  * A minimal polyfill of Fetch API. It only polyfills what we currently use.
@@ -7583,7 +7896,6 @@ function isRetriable(status) {
   return status == 415 || (status >= 500 && status < 600);
 }
 
-
 /**
  * Returns the response if successful or otherwise throws an error.
  * @param {!FetchResponse} response
@@ -7605,7 +7917,6 @@ function assertSuccess(response) {
     throw err;
   });
 }
-
 
 /**
  * Response object in the Fetch API.
@@ -7670,8 +7981,9 @@ class FetchResponse {
    * @return {!Promise<!JsonObject>}
    */
   json() {
-    return /** @type {!Promise<!JsonObject>} */ (
-        this.drainText_().then(parseJson));
+    return /** @type {!Promise<!JsonObject>} */ (this.drainText_().then(
+      parseJson
+    ));
   }
 
   /**
@@ -7682,11 +7994,14 @@ class FetchResponse {
   document_() {
     assert(!this.bodyUsed, 'Body already used');
     this.bodyUsed = true;
-    assert(this.xhr_.responseXML,
-        'responseXML should exist. Make sure to return ' +
-        'Content-Type: text/html header.');
-    return /** @type {!Promise<!Document>} */ (
-        Promise.resolve(assert(this.xhr_.responseXML)));
+    assert(
+      this.xhr_.responseXML,
+      'responseXML should exist. Make sure to return ' +
+        'Content-Type: text/html header.'
+    );
+    return /** @type {!Promise<!Document>} */ (Promise.resolve(
+      assert(this.xhr_.responseXML)
+    ));
   }
 
   /**
@@ -7695,11 +8010,11 @@ class FetchResponse {
    * @return {!Promise<!ArrayBuffer>}
    */
   arrayBuffer() {
-    return /** @type {!Promise<!ArrayBuffer>} */ (
-        this.drainText_().then(utf8EncodeSync));
+    return /** @type {!Promise<!ArrayBuffer>} */ (this.drainText_().then(
+      utf8EncodeSync
+    ));
   }
 }
-
 
 /**
  * Provides access to the response headers as defined in the Fetch API.
@@ -7747,12 +8062,10 @@ class FetchResponseHeaders {
  * limitations under the License.
  */
 
-
 /**
  * @interface
  */
 class Fetcher {
-
   /**
    * @param {string} unusedUrl
    * @return {!Promise<!Object>}
@@ -7760,12 +8073,10 @@ class Fetcher {
   fetchCredentialedJson(unusedUrl) {}
 }
 
-
 /**
  * @implements {Fetcher}
  */
 class XhrFetcher {
-
   /**
    * @param {!Window} win
    */
@@ -7801,11 +8112,9 @@ class XhrFetcher {
  * limitations under the License.
  */
 
-
 /**
  */
 class JsError {
-
   /**
    * @param {*} doc
    */
@@ -7830,17 +8139,20 @@ class JsError {
       }
       const img = this.doc_.getWin().document.createElement('img');
       img.src =
-          'https://news.google.com/_/SubscribewithgoogleClientUi/jserror' +
-          '?error=' + encodeURIComponent(String(error)) +
-          '&script=' + encodeURIComponent('https://news.google.com/swg/js/v1/swg.js') +
-          '&line=' + (error.lineNumber || 1) +
-          '&trace=' + encodeURIComponent(error.stack);
+        'https://news.google.com/_/SubscribewithgoogleClientUi/jserror' +
+        '?error=' +
+        encodeURIComponent(String(error)) +
+        '&script=' +
+        encodeURIComponent('https://news.google.com/swg/js/v1/swg.js') +
+        '&line=' +
+        (error.lineNumber || 1) +
+        '&trace=' +
+        encodeURIComponent(error.stack);
       // Appending this image to DOM is not necessary.
       error.reported = true;
     });
   }
 }
-
 
 /**
  * @param {...*} var_args
@@ -7868,7 +8180,6 @@ function createErrorVargs(var_args) {
   }
   return error;
 }
-
 
 /**
  * Some exceptions (DOMException, namely) have read-only message.
@@ -7910,12 +8221,10 @@ function duplicateErrorIfNecessary(error) {
 
 const LINK_REQUEST_ID = 'swg-link';
 
-
 /**
  * The flow to initiate linkback flow.
  */
 class LinkbackFlow {
-
   /**
    * @param {*} deps
    */
@@ -7940,25 +8249,25 @@ class LinkbackFlow {
   start() {
     this.deps_.callbacks().triggerFlowStarted(SubscriptionFlows.LINK_ACCOUNT);
     const forceRedirect =
-        this.deps_.config().windowOpenMode == WindowOpenMode.REDIRECT;
+      this.deps_.config().windowOpenMode == WindowOpenMode.REDIRECT;
     const opener = this.activityPorts_.open(
-        LINK_REQUEST_ID,
-        feUrl('/linkbackstart'),
-        forceRedirect ? '_top' : '_blank',
-        feArgs({
-          'publicationId': this.pageConfig_.getPublicationId(),
-        }), {});
+      LINK_REQUEST_ID,
+      feUrl('/linkbackstart'),
+      forceRedirect ? '_top' : '_blank',
+      feArgs({
+        'publicationId': this.pageConfig_.getPublicationId(),
+      }),
+      {}
+    );
     this.dialogManager_.popupOpened(opener && opener.targetWin);
     return Promise.resolve();
   }
 }
 
-
 /**
  * The class for Link accounts flow.
  */
 class LinkCompleteFlow {
-
   /**
    * @param {*} deps
    */
@@ -7972,19 +8281,26 @@ class LinkCompleteFlow {
       deps.callbacks().triggerLinkProgress();
       deps.dialogManager().popupClosed();
       const promise = acceptPortResultData(
-          port,
-          feOrigin(),
-          /* requireOriginVerified */ false,
-          /* requireSecureChannel */ false);
-      return promise.then(response => {
-        const flow = new LinkCompleteFlow(deps, response);
-        flow.start();
-      }, reason => {
-        if (isCancelError(reason)) {
-          deps.callbacks().triggerFlowCanceled(SubscriptionFlows.LINK_ACCOUNT);
+        port,
+        feOrigin(),
+        /* requireOriginVerified */ false,
+        /* requireSecureChannel */ false
+      );
+      return promise.then(
+        response => {
+          const flow = new LinkCompleteFlow(deps, response);
+          flow.start();
+        },
+        reason => {
+          if (isCancelError(reason)) {
+            deps
+              .callbacks()
+              .triggerFlowCanceled(SubscriptionFlows.LINK_ACCOUNT);
+          }
         }
-      });
-    }    deps.activities().onResult(LINK_REQUEST_ID, handler);
+      );
+    }
+    deps.activities().onResult(LINK_REQUEST_ID, handler);
   }
 
   /**
@@ -8007,18 +8323,18 @@ class LinkCompleteFlow {
     /** @private @const {*} */
     this.callbacks_ = deps.callbacks();
 
-    const index = response && response['index'] || '0';
+    const index = (response && response['index']) || '0';
     /** @private @const {!ActivityIframeView} */
-    this.activityIframeView_ =
-        new ActivityIframeView(
-            this.win_,
-            this.activityPorts_,
-            feUrl('/linkconfirmiframe', '/u/' + index),
-            feArgs({
-              'productId': deps.pageConfig().getProductId(),
-              'publicationId': deps.pageConfig().getPublicationId(),
-            }),
-            /* shouldFadeBody */ true);
+    this.activityIframeView_ = new ActivityIframeView(
+      this.win_,
+      this.activityPorts_,
+      feUrl('/linkconfirmiframe', '/u/' + index),
+      feArgs({
+        'productId': deps.pageConfig().getProductId(),
+        'publicationId': deps.pageConfig().getPublicationId(),
+      }),
+      /* shouldFadeBody */ true
+    );
 
     /** @private {?function()} */
     this.completeResolver_ = null;
@@ -8035,20 +8351,24 @@ class LinkCompleteFlow {
    */
   start() {
     const promise = this.activityIframeView_.acceptResultAndVerify(
-        feOrigin(),
-        /* requireOriginVerified */ true,
-        /* requireSecureChannel */ true);
-    promise.then(response => {
-      this.complete_(response);
-    }).catch(reason => {
-      // Rethrow async.
-      setTimeout(() => {
-        throw reason;
+      feOrigin(),
+      /* requireOriginVerified */ true,
+      /* requireSecureChannel */ true
+    );
+    promise
+      .then(response => {
+        this.complete_(response);
+      })
+      .catch(reason => {
+        // Rethrow async.
+        setTimeout(() => {
+          throw reason;
+        });
+      })
+      .then(() => {
+        // The flow is complete.
+        this.dialogManager_.completeView(this.activityIframeView_);
       });
-    }).then(() => {
-      // The flow is complete.
-      this.dialogManager_.completeView(this.activityIframeView_);
-    });
     return this.dialogManager_.openView(this.activityIframeView_);
   }
 
@@ -8061,7 +8381,7 @@ class LinkCompleteFlow {
     this.callbacks_.resetLinkProgress();
     this.entitlementsManager_.setToastShown(true);
     this.entitlementsManager_.unblockNextNotification();
-    this.entitlementsManager_.reset(response && response['success'] || false);
+    this.entitlementsManager_.reset((response && response['success']) || false);
     if (response && response['entitlements']) {
       this.entitlementsManager_.pushNextEntitlements(response['entitlements']);
     }
@@ -8078,7 +8398,6 @@ class LinkCompleteFlow {
  * The flow to save subscription information.
  */
 class LinkSaveFlow {
-
   /**
    * @param {*} deps
    * @param {*} callback
@@ -8137,13 +8456,11 @@ class LinkSaveFlow {
     if (result['linked']) {
       // When linking succeeds, start link confirmation flow
       this.dialogManager_.popupClosed();
-      this.deps_.callbacks().triggerFlowStarted(
-          SubscriptionFlows.LINK_ACCOUNT);
+      this.deps_.callbacks().triggerFlowStarted(SubscriptionFlows.LINK_ACCOUNT);
       linkConfirm = new LinkCompleteFlow(this.deps_, result);
       startPromise = linkConfirm.start();
     } else {
-      startPromise = Promise.reject(
-          createCancelError(this.win_, 'not linked'));
+      startPromise = Promise.reject(createCancelError(this.win_, 'not linked'));
     }
     const completePromise = startPromise.then(() => {
       this.deps_.callbacks().triggerLinkProgress();
@@ -8168,55 +8485,63 @@ class LinkSaveFlow {
       'isClosable': true,
     };
     this.activityIframeView_ = new ActivityIframeView(
-        this.win_,
-        this.activityPorts_,
-        feUrl('/linksaveiframe'),
-        feArgs(iframeArgs),
-        /* shouldFadeBody */ false,
-        /* hasLoadingIndicator */ true
+      this.win_,
+      this.activityPorts_,
+      feUrl('/linksaveiframe'),
+      feArgs(iframeArgs),
+      /* shouldFadeBody */ false,
+      /* hasLoadingIndicator */ true
     );
     this.activityIframeView_.onMessage(data => {
       if (data['getLinkingInfo']) {
         this.requestPromise_ = new Promise(resolve => {
           resolve(this.callback_());
-        }).then(request => {
-          let saveRequest;
-          if (request && request.token) {
-            if (request.authCode) {
-              throw new Error('Both authCode and token are available');
+        })
+          .then(request => {
+            let saveRequest;
+            if (request && request.token) {
+              if (request.authCode) {
+                throw new Error('Both authCode and token are available');
+              } else {
+                saveRequest = {'token': request.token};
+              }
+            } else if (request && request.authCode) {
+              saveRequest = {'authCode': request.authCode};
             } else {
-              saveRequest = {'token': request.token};
+              throw new Error('Neither token or authCode is available');
             }
-          } else if (request && request.authCode) {
-            saveRequest = {'authCode': request.authCode};
-          } else {
-            throw new Error('Neither token or authCode is available');
-          }
-          this.activityIframeView_.message(saveRequest);
-        }).catch(reason => {
-          // The flow is complete.
-          this.complete_();
-          throw reason;
-        });
+            this.activityIframeView_.message(saveRequest);
+          })
+          .catch(reason => {
+            // The flow is complete.
+            this.complete_();
+            throw reason;
+          });
       }
     });
 
-    this.openPromise_ = this.dialogManager_.openView(this.activityIframeView_,
-        /* hidden */ true);
-        /** {!Promise<boolean>} */
-    return this.activityIframeView_.acceptResultAndVerify(
+    this.openPromise_ = this.dialogManager_.openView(
+      this.activityIframeView_,
+      /* hidden */ true
+    );
+    /** {!Promise<boolean>} */
+    return this.activityIframeView_
+      .acceptResultAndVerify(
         feOrigin(),
         /* requireOriginVerified */ true,
         /* requireSecureChannel */ true
-      ).then(result => {
+      )
+      .then(result => {
         return this.handleLinkSaveResponse_(result);
-      }).catch(reason => {
+      })
+      .catch(reason => {
         // In case this flow wasn't complete, complete it here
         this.complete_();
         // Handle cancellation from user, link confirm start or completion here
         if (isCancelError(reason)) {
-          this.deps_.callbacks().triggerFlowCanceled(
-              SubscriptionFlows.LINK_ACCOUNT);
+          this.deps_
+            .callbacks()
+            .triggerFlowCanceled(SubscriptionFlows.LINK_ACCOUNT);
           return false;
         }
         throw reason;
@@ -8240,7 +8565,6 @@ class LinkSaveFlow {
  * limitations under the License.
  */
 
-
 class LoginPromptApi {
   /**
    * @param {*} deps
@@ -8263,17 +8587,17 @@ class LoginPromptApi {
 
     /** @private @const {!ActivityIframeView} */
     this.activityIframeView_ = new ActivityIframeView(
-        this.win_,
-        this.activityPorts_,
-        feUrl('/loginiframe'),
-        feArgs({
-          publicationId: deps.pageConfig().getPublicationId(),
-          productId: deps.pageConfig().getProductId(),
-          // First ask the user if they want us to log them in.
-          userConsent: true,
-          // TODO(chenshay): Pass entitlements value here.
-        }),
-        /* shouldFadeBody */ true
+      this.win_,
+      this.activityPorts_,
+      feUrl('/loginiframe'),
+      feArgs({
+        publicationId: deps.pageConfig().getPublicationId(),
+        productId: deps.pageConfig().getProductId(),
+        // First ask the user if they want us to log them in.
+        userConsent: true,
+        // TODO(chenshay): Pass entitlements value here.
+      }),
+      /* shouldFadeBody */ true
     );
   }
 
@@ -8282,24 +8606,30 @@ class LoginPromptApi {
    * @return {!Promise}
    */
   start() {
-    this.deps_.callbacks().triggerFlowStarted(
-        SubscriptionFlows.SHOW_LOGIN_PROMPT);
+    this.deps_
+      .callbacks()
+      .triggerFlowStarted(SubscriptionFlows.SHOW_LOGIN_PROMPT);
 
     this.openViewPromise_ = this.dialogManager_.openView(
-        this.activityIframeView_);
+      this.activityIframeView_
+    );
 
-    return this.activityIframeView_.acceptResult().then(() => {
-      // The consent part is complete.
-      this.dialogManager_.completeView(this.activityIframeView_);
-    }, reason => {
-      if (isCancelError(reason)) {
-        this.deps_.callbacks().triggerFlowCanceled(
-            SubscriptionFlows.SHOW_LOGIN_PROMPT);
-      } else {
+    return this.activityIframeView_.acceptResult().then(
+      () => {
+        // The consent part is complete.
         this.dialogManager_.completeView(this.activityIframeView_);
+      },
+      reason => {
+        if (isCancelError(reason)) {
+          this.deps_
+            .callbacks()
+            .triggerFlowCanceled(SubscriptionFlows.SHOW_LOGIN_PROMPT);
+        } else {
+          this.dialogManager_.completeView(this.activityIframeView_);
+        }
+        throw reason;
       }
-      throw reason;
-    });
+    );
   }
 }
 
@@ -8318,7 +8648,6 @@ class LoginPromptApi {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 
 class LoginNotificationApi {
   /**
@@ -8342,17 +8671,17 @@ class LoginNotificationApi {
 
     /** @private @const {!ActivityIframeView} */
     this.activityIframeView_ = new ActivityIframeView(
-        this.win_,
-        this.activityPorts_,
-        feUrl('/loginiframe'),
-        feArgs({
-          publicationId: deps.pageConfig().getPublicationId(),
-          productId: deps.pageConfig().getProductId(),
-          // No need to ask the user. Just tell them you're logging them in.
-          userConsent: false,
-          // TODO(chenshay): Pass entitlements value here.
-        }),
-        /* shouldFadeBody */ true
+      this.win_,
+      this.activityPorts_,
+      feUrl('/loginiframe'),
+      feArgs({
+        publicationId: deps.pageConfig().getPublicationId(),
+        productId: deps.pageConfig().getProductId(),
+        // No need to ask the user. Just tell them you're logging them in.
+        userConsent: false,
+        // TODO(chenshay): Pass entitlements value here.
+      }),
+      /* shouldFadeBody */ true
     );
   }
 
@@ -8361,19 +8690,24 @@ class LoginNotificationApi {
    * @return {!Promise}
    */
   start() {
-    this.deps_.callbacks().triggerFlowStarted(
-        SubscriptionFlows.SHOW_LOGIN_NOTIFICATION);
+    this.deps_
+      .callbacks()
+      .triggerFlowStarted(SubscriptionFlows.SHOW_LOGIN_NOTIFICATION);
 
     this.openViewPromise_ = this.dialogManager_.openView(
-        this.activityIframeView_);
+      this.activityIframeView_
+    );
 
-    return this.activityIframeView_.acceptResult().then(() => {
-      // The consent part is complete.
-      this.dialogManager_.completeView(this.activityIframeView_);
-    }, reason => {
-      this.dialogManager_.completeView(this.activityIframeView_);
-      throw reason;
-    });
+    return this.activityIframeView_.acceptResult().then(
+      () => {
+        // The consent part is complete.
+        this.dialogManager_.completeView(this.activityIframeView_);
+      },
+      reason => {
+        this.dialogManager_.completeView(this.activityIframeView_);
+        throw reason;
+      }
+    );
   }
 }
 
@@ -8470,7 +8804,7 @@ Constants.ButtonType = {
  * @enum {string}
  */
 Constants.ButtonColor = {
-  DEFAULT: 'default',  // Currently defaults to black.
+  DEFAULT: 'default', // Currently defaults to black.
   BLACK: 'black',
   WHITE: 'white',
 };
@@ -8489,16 +8823,16 @@ Constants.STORAGE_KEY_PREFIX = 'google.payments.api.storage';
 
 /** @const {string} */
 Constants.IS_READY_TO_PAY_RESULT_KEY =
-    Constants.STORAGE_KEY_PREFIX + '.isreadytopay.result';
+  Constants.STORAGE_KEY_PREFIX + '.isreadytopay.result';
 
 /** @const {string} */
 Constants.UPI_CAN_MAKE_PAYMENT_CACHE_KEY =
-    Constants.STORAGE_KEY_PREFIX + '.upi.canMakePaymentCache';
-
+  Constants.STORAGE_KEY_PREFIX + '.upi.canMakePaymentCache';
 
 Constants.CLASS_PREFIX = 'google-payments-';
-Constants.IFRAME_ACTIVE_CONTAINER_CLASS =
-    `${Constants.CLASS_PREFIX}activeContainer`;
+Constants.IFRAME_ACTIVE_CONTAINER_CLASS = `${
+  Constants.CLASS_PREFIX
+}activeContainer`;
 Constants.IFRAME_CONTAINER_CLASS = `${Constants.CLASS_PREFIX}dialogContainer`;
 Constants.IFRAME_STYLE_CENTER_CLASS = `${Constants.CLASS_PREFIX}dialogCenter`;
 Constants.IFRAME_STYLE_CLASS = `${Constants.CLASS_PREFIX}dialog`;
@@ -8578,7 +8912,7 @@ Constants.IFRAME_STYLE_CENTER = `
 `;
 
 Constants.GPAY_BUTTON_WITH_CARD_INFO_IMAGE =
-    'background-image: url(https://pay.google.com/gp/p/generate_gpay_btn_img);';
+  'background-image: url(https://pay.google.com/gp/p/generate_gpay_btn_img);';
 
 Constants.BUTTON_LOCALE_TO_MIN_WIDTH = {
   'en': 152,
@@ -8682,47 +9016,47 @@ Constants.GPAY_BUTTON_WITH_OFFER_ICON_ADDITIONAL_STYLE = 'position: relative;';
 Constants.GPAY_OFFER_ICON_CLASS = 'gpay-offer-icon';
 
 Constants.GPAY_OFFER_ICON_SVG =
-    "<svg width=\"20px\" height=\"20px\" viewBox=\"0 0 20 20\" " +
-    "version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=" +
-    "\"http://www.w3.org/1999/xlink\" class=\"gpay-offer-icon\"><defs><path d=\"M19.41,9.58 L10.41,0.58 " +
-    "C10.05,0.22 9.55,0 9,0 L2,0 C0.9,0 0,0.9 0,2 L0,9 C0,9.55 0.22,10.05 " +
-    "0.59,10.42 L9.59,19.42 C9.95,19.78 10.45,20 11,20 C11.55,20 12.05,19.78 " +
-    "12.41,19.41 L19.41,12.41 C19.78,12.05 20,11.55 20,11 C20,10.45 19.77," +
-    "9.94 19.41,9.58 Z\" id=\"path-1\"></path></defs><g id=\"buttons_10.05\"" +
-    " stroke=\"none\" stroke-width=\"1\" fill=\"none\" fill-rule=\"evenodd\">" +
-    "<g id=\"Artboard\" transform=\"translate(-40.000000, -43.000000)\">" +
-    "<g id=\"Group-3\" transform=\"translate(40.000000, 43.000000)\">" +
-    "<g id=\"Group-2-Copy-2\"><g id=\"Group-Copy\"><g id=\"ic_loyalty_24px\">" +
-    "<mask id=\"mask-2\" fill=\"white\"><use xlink:href=\"#path-1\"></use>" +
-    "</mask><use id=\"gpay-Shape\" fill=\"#FF6100\" fill-rule=\"nonzero\" " +
-    "xlink:href=\"#path-1\"></use><path d=\"M3.5,5 C2.67,5 2,4.33 2,3.5 C2," +
-    "2.67 2.67,2 3.5,2 C4.33,2 5,2.67 5,3.5 C5,4.33 4.33,5 3.5,5 Z\" " +
-    "id=\"Path\" fill=\"#FFFFFF\" fill-rule=\"nonzero\" mask=\"url(#mask-2)\">" +
-    "</path></g></g></g><g id=\"Group-13-Copy-7\" transform=\"translate" +
-    "(6.000000, 6.000000)\" fill=\"#FFFFFF\" fill-rule=\"nonzero\">" +
-    "<g id=\"Group-13-Copy-2\"><path d=\"M2.15217391,4.55172414 C0.963561082," +
-    "4.55172414 1.99840144e-14,3.53278598 1.99840144e-14,2.27586207 " +
-    "C1.99840144e-14,1.01893816 0.963561082,6.30606678e-14 2.15217391,6." +
-    "30606678e-14 C3.34078674,6.30606678e-14 4.30434783,1.01893816 4.30434783," +
-    "2.27586207 C4.30434783,3.53278598 3.34078674,4.55172414 2.15217391," +
-    "4.55172414 Z M2.15217391,3.31034483 C2.69245247,3.31034483 3.13043478,2." +
-    "84719112 3.13043478,2.27586207 C3.13043478,1.70453302 2.69245247," +
-    "1.24137931 2.15217391,1.24137931 C1.61189535,1.24137931 1.17391304,1" +
-    ".70453302 1.17391304,2.27586207 C1.17391304,2.84719112 1.61189535,3." +
-    "31034483 2.15217391,3.31034483 Z\" id=\"Combined-Shape\"></path>" +
-    "<path d=\"M6.84782609,9 C5.65921326,9 4.69565217,7.98106184 4.69565217," +
-    "6.72413793 C4.69565217,5.46721402 5.65921326,4.44827586 6.84782609," +
-    "4.44827586 C8.03643892,4.44827586 9,5.46721402 9,6.72413793 C9,7.98106184" +
-    " 8.03643892,9 6.84782609,9 Z M6.84782609,7.75862069 C7.38810465," +
-    "7.75862069 7.82608696,7.29546698 7.82608696,6.72413793 C7.82608696" +
-    ",6.15280888 7.38810465,5.68965517 6.84782609,5.68965517 C6.30754753," +
-    "5.68965517 5.86956522,6.15280888 5.86956522,6.72413793 C5.86956522," +
-    "7.29546698 6.30754753,7.75862069 6.84782609,7.75862069 Z\" " +
-    "id=\"Combined-Shape\"></path><polygon id=\"Rectangle\" " +
-    "transform=\"translate(4.497720, 4.541938) rotate(34.000000) " +
-    "translate(-4.497720, -4.541938) \" points=\"3.77901778 -0.202295978 " +
-    "4.9740273 -0.171019161 5.21642263 9.28617278 4.02141311 9.25489596\">" +
-    "</polygon></g></g></g></g></g></svg>";
+  '<svg width="20px" height="20px" viewBox="0 0 20 20" ' +
+  'version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink=' +
+  '"http://www.w3.org/1999/xlink" class="gpay-offer-icon"><defs><path d="M19.41,9.58 L10.41,0.58 ' +
+  'C10.05,0.22 9.55,0 9,0 L2,0 C0.9,0 0,0.9 0,2 L0,9 C0,9.55 0.22,10.05 ' +
+  '0.59,10.42 L9.59,19.42 C9.95,19.78 10.45,20 11,20 C11.55,20 12.05,19.78 ' +
+  '12.41,19.41 L19.41,12.41 C19.78,12.05 20,11.55 20,11 C20,10.45 19.77,' +
+  '9.94 19.41,9.58 Z" id="path-1"></path></defs><g id="buttons_10.05"' +
+  ' stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">' +
+  '<g id="Artboard" transform="translate(-40.000000, -43.000000)">' +
+  '<g id="Group-3" transform="translate(40.000000, 43.000000)">' +
+  '<g id="Group-2-Copy-2"><g id="Group-Copy"><g id="ic_loyalty_24px">' +
+  '<mask id="mask-2" fill="white"><use xlink:href="#path-1"></use>' +
+  '</mask><use id="gpay-Shape" fill="#FF6100" fill-rule="nonzero" ' +
+  'xlink:href="#path-1"></use><path d="M3.5,5 C2.67,5 2,4.33 2,3.5 C2,' +
+  '2.67 2.67,2 3.5,2 C4.33,2 5,2.67 5,3.5 C5,4.33 4.33,5 3.5,5 Z" ' +
+  'id="Path" fill="#FFFFFF" fill-rule="nonzero" mask="url(#mask-2)">' +
+  '</path></g></g></g><g id="Group-13-Copy-7" transform="translate' +
+  '(6.000000, 6.000000)" fill="#FFFFFF" fill-rule="nonzero">' +
+  '<g id="Group-13-Copy-2"><path d="M2.15217391,4.55172414 C0.963561082,' +
+  '4.55172414 1.99840144e-14,3.53278598 1.99840144e-14,2.27586207 ' +
+  'C1.99840144e-14,1.01893816 0.963561082,6.30606678e-14 2.15217391,6.' +
+  '30606678e-14 C3.34078674,6.30606678e-14 4.30434783,1.01893816 4.30434783,' +
+  '2.27586207 C4.30434783,3.53278598 3.34078674,4.55172414 2.15217391,' +
+  '4.55172414 Z M2.15217391,3.31034483 C2.69245247,3.31034483 3.13043478,2.' +
+  '84719112 3.13043478,2.27586207 C3.13043478,1.70453302 2.69245247,' +
+  '1.24137931 2.15217391,1.24137931 C1.61189535,1.24137931 1.17391304,1' +
+  '.70453302 1.17391304,2.27586207 C1.17391304,2.84719112 1.61189535,3.' +
+  '31034483 2.15217391,3.31034483 Z" id="Combined-Shape"></path>' +
+  '<path d="M6.84782609,9 C5.65921326,9 4.69565217,7.98106184 4.69565217,' +
+  '6.72413793 C4.69565217,5.46721402 5.65921326,4.44827586 6.84782609,' +
+  '4.44827586 C8.03643892,4.44827586 9,5.46721402 9,6.72413793 C9,7.98106184' +
+  ' 8.03643892,9 6.84782609,9 Z M6.84782609,7.75862069 C7.38810465,' +
+  '7.75862069 7.82608696,7.29546698 7.82608696,6.72413793 C7.82608696' +
+  ',6.15280888 7.38810465,5.68965517 6.84782609,5.68965517 C6.30754753,' +
+  '5.68965517 5.86956522,6.15280888 5.86956522,6.72413793 C5.86956522,' +
+  '7.29546698 6.30754753,7.75862069 6.84782609,7.75862069 Z" ' +
+  'id="Combined-Shape"></path><polygon id="Rectangle" ' +
+  'transform="translate(4.497720, 4.541938) rotate(34.000000) ' +
+  'translate(-4.497720, -4.541938) " points="3.77901778 -0.202295978 ' +
+  '4.9740273 -0.171019161 5.21642263 9.28617278 4.02141311 9.25489596">' +
+  '</polygon></g></g></g></g></g></svg>';
 
 Constants.GPAY_OFFER_ICON_STYLE = `
 .${Constants.GPAY_OFFER_ICON_CLASS} {
@@ -8798,7 +9132,6 @@ Constants.GPAY_BUTTON_CARD_INFO_BUTTON_STYLE = `
   }
   `;
 
-
 /**
  * Trusted domain for secure context validation
  *
@@ -8866,34 +9199,42 @@ class PaymentsRequestDelegate {
     /** @type{!PaymentRequest} */
     const paymentRequest = this.createPaymentRequest_(isReadyToPayRequest);
     return new Promise((resolve, reject) => {
-      paymentRequest.canMakePayment()
-          .then(result => {
-            window.sessionStorage.setItem(
-                Constants.IS_READY_TO_PAY_RESULT_KEY, result.toString());
-            const response = {'result': result};
-            if (isReadyToPayRequest.apiVersion >= 2 &&
-                isReadyToPayRequest.existingPaymentMethodRequired) {
-              // For apiVersion 2, we always use native to only check for
-              // tokenized cards.
-              // For tokenized cards native always does a presence check so
-              // we can say that if canMakePayment is true for native for
-              // tokenizedCards then the user has a payment method which is
-              // present.
-              response['paymentMethodPresent'] = result;
-            }
-            resolve(response);
-          })
-          .catch(function(err) {
-            if (window.sessionStorage.getItem(
-                    Constants.IS_READY_TO_PAY_RESULT_KEY)) {
-              resolve({
-                'result': window.sessionStorage.getItem(
-                              Constants.IS_READY_TO_PAY_RESULT_KEY) == 'true'
-              });
-            } else {
-              resolve({'result': false});
-            }
-          });
+      paymentRequest
+        .canMakePayment()
+        .then(result => {
+          window.sessionStorage.setItem(
+            Constants.IS_READY_TO_PAY_RESULT_KEY,
+            result.toString()
+          );
+          const response = {'result': result};
+          if (
+            isReadyToPayRequest.apiVersion >= 2 &&
+            isReadyToPayRequest.existingPaymentMethodRequired
+          ) {
+            // For apiVersion 2, we always use native to only check for
+            // tokenized cards.
+            // For tokenized cards native always does a presence check so
+            // we can say that if canMakePayment is true for native for
+            // tokenizedCards then the user has a payment method which is
+            // present.
+            response['paymentMethodPresent'] = result;
+          }
+          resolve(response);
+        })
+        .catch(function(err) {
+          if (
+            window.sessionStorage.getItem(Constants.IS_READY_TO_PAY_RESULT_KEY)
+          ) {
+            resolve({
+              'result':
+                window.sessionStorage.getItem(
+                  Constants.IS_READY_TO_PAY_RESULT_KEY
+                ) == 'true',
+            });
+          } else {
+            resolve({'result': false});
+          }
+        });
     });
   }
 
@@ -8902,9 +9243,11 @@ class PaymentsRequestDelegate {
     // Creating PaymentRequest instance will call
     // Gcore isReadyToPay internally which will prefetch tempaltes.
     this.createPaymentRequest_(
-        paymentDataRequest, this.environment_,
-        paymentDataRequest.transactionInfo.currencyCode,
-        paymentDataRequest.transactionInfo.totalPrice);
+      paymentDataRequest,
+      this.environment_,
+      paymentDataRequest.transactionInfo.currencyCode,
+      paymentDataRequest.transactionInfo.totalPrice
+    );
   }
 
   /** @override */
@@ -8943,10 +9286,12 @@ class PaymentsRequestDelegate {
       data['environment'] = environment;
     }
 
-    const supportedInstruments = [{
-      'supportedMethods': ['https://google.com/pay'],
-      'data': data,
-    }];
+    const supportedInstruments = [
+      {
+        'supportedMethods': ['https://google.com/pay'],
+        'data': data,
+      },
+    ];
 
     const details = {
       'total': {
@@ -8958,8 +9303,8 @@ class PaymentsRequestDelegate {
           // this requirement.
           'currency': currencyCode || 'USD',
           'value': totalPrice || '0',
-        }
-      }
+        },
+      },
     };
 
     return new PaymentRequest(supportedInstruments, details);
@@ -8971,31 +9316,40 @@ class PaymentsRequestDelegate {
    * @private
    */
   loadPaymentDataThroughPaymentRequest_(paymentDataRequest) {
-    const currencyCode = (paymentDataRequest.transactionInfo &&
-                          paymentDataRequest.transactionInfo.currencyCode) ||
-        undefined;
-    const totalPrice = (paymentDataRequest.transactionInfo &&
-                        paymentDataRequest.transactionInfo.totalPrice) ||
-        undefined;
+    const currencyCode =
+      (paymentDataRequest.transactionInfo &&
+        paymentDataRequest.transactionInfo.currencyCode) ||
+      undefined;
+    const totalPrice =
+      (paymentDataRequest.transactionInfo &&
+        paymentDataRequest.transactionInfo.totalPrice) ||
+      undefined;
     const paymentRequest = this.createPaymentRequest_(
-        paymentDataRequest, this.environment_, currencyCode, totalPrice);
+      paymentDataRequest,
+      this.environment_,
+      currencyCode,
+      totalPrice
+    );
     this.callback_(
-        /** @type{!Promise<!PaymentData>} */
-        (paymentRequest.show()
-             .then(
-                 /**
-                  * @param {!PaymentResponse} paymentResponse
-                  * @return {!PaymentData}
-                  */
-                 (paymentResponse) => {
-                   // Should be called to dismiss any remaining UI
-                   paymentResponse.complete('success');
-                   return paymentResponse.details;
-                 })
-             .catch(function(err) {
-               err['statusCode'] = Constants.ResponseStatus.CANCELED;
-               throw err;
-             })));
+      /** @type{!Promise<!PaymentData>} */
+      paymentRequest
+        .show()
+        .then(
+          /**
+           * @param {!PaymentResponse} paymentResponse
+           * @return {!PaymentData}
+           */
+          paymentResponse => {
+            // Should be called to dismiss any remaining UI
+            paymentResponse.complete('success');
+            return paymentResponse.details;
+          }
+        )
+        .catch(function(err) {
+          err['statusCode'] = Constants.ResponseStatus.CANCELED;
+          throw err;
+        })
+    );
   }
 }
 
@@ -9018,9 +9372,7 @@ class PaymentsRequestDelegate {
 
 const MAX_Z_INDEX$1 = 2147483647;
 
-
 class Graypane$1 {
-
   /**
    * @param {!Document} doc
    */
@@ -9067,9 +9419,14 @@ class Graypane$1 {
       'display': 'block',
       'opacity': 0,
     });
-    return transition$1(this.element_, {
-      'opacity': 1,
-    }, 300, 'ease-out');
+    return transition$1(
+      this.element_,
+      {
+        'opacity': 1,
+      },
+      300,
+      'ease-out'
+    );
   }
 
   /**
@@ -9083,15 +9440,19 @@ class Graypane$1 {
       // This could be possible after redirect.
       return;
     }
-    return transition$1(this.element_, {
-      'opacity': 0,
-    }, 300, 'ease-out').then(() => {
+    return transition$1(
+      this.element_,
+      {
+        'opacity': 0,
+      },
+      300,
+      'ease-out'
+    ).then(() => {
       setImportantStyles$1(this.element_, {'display': 'none'});
       this.doc_.body.removeChild(this.element_);
     });
   }
 }
-
 
 /**
  * Sets the CSS styles of the specified element with !important. The styles
@@ -9109,7 +9470,6 @@ function setImportantStyles$1(element, styles) {
   }
 }
 
-
 /**
  * Returns a promise which is resolved after the given duration of animation
  * @param {!Element} el - Element to be observed.
@@ -9125,15 +9485,27 @@ function transition$1(el, props, durationMillis, curve) {
     win.setTimeout(() => {
       win.setTimeout(resolve, durationMillis);
       const tr = `${durationMillis}ms ${curve}`;
-      setImportantStyles$1(el, Object.assign({
-        'transition': `transform ${tr}, opacity ${tr}`,
-      }, props));
+      setImportantStyles$1(
+        el,
+        Object.assign(
+          {
+            'transition': `transform ${tr}, opacity ${tr}`,
+          },
+          props
+        )
+      );
     });
   }).then(() => {
     // Stop transition and make sure that the final properties get set.
-    setImportantStyles$1(el, Object.assign({
-      'transition': previousTransitionValue,
-    }, props));
+    setImportantStyles$1(
+      el,
+      Object.assign(
+        {
+          'transition': previousTransitionValue,
+        },
+        props
+      )
+    );
   });
 }
 
@@ -9282,15 +9654,16 @@ class PayFrameHelper {
       return;
     }
     const initOptions =
-        /** @type {!PaymentOptions} */ (window['gpayInitParams']) || {};
+      /** @type {!PaymentOptions} */ (window['gpayInitParams']) || {};
     environment = initOptions.environment || Constants.Environment.PRODUCTION;
     iframe = document.createElement('iframe');
     // Pass in origin because document.referrer inside iframe is empty in
     // certain cases
     // Can be replaced by iframe.src=... in non Google context.
     iframe.src = PayFrameHelper.getIframeUrl_(
-            window.location.origin,
-            initOptions.merchantInfo && initOptions.merchantInfo.merchantId);
+      window.location.origin,
+      initOptions.merchantInfo && initOptions.merchantInfo.merchantId
+    );
     PayFrameHelper.postMessage({
       'eventType': PostMessageEventType.LOG_PAY_FRAME_REQUESTED,
       'clientLatencyStartMs': Date.now(),
@@ -9312,8 +9685,9 @@ class PayFrameHelper {
     if (document.body) {
       PayFrameHelper.initialize_();
     } else {
-      document.addEventListener(
-          'DOMContentLoaded', () => PayFrameHelper.initialize_());
+      document.addEventListener('DOMContentLoaded', () =>
+        PayFrameHelper.initialize_()
+      );
     }
   }
 
@@ -9336,7 +9710,11 @@ class PayFrameHelper {
    * @param {function(!Event)} responseHandler
    */
   static sendAndWaitForResponse(
-      data, eventType, responseType, responseHandler) {
+    data,
+    eventType,
+    responseType,
+    responseHandler
+  ) {
     function callback(event) {
       if (event.data[responseType]) {
         responseHandler(event);
@@ -9383,14 +9761,17 @@ class PayFrameHelper {
       return;
     }
     const postMessageData = Object.assign(
-        {
-          'buyFlowActivityMode': buyFlowActivityMode,
-          'googleTransactionId': googleTransactionId,
-          'originTimeMs': originTimeMs,
-        },
-        data);
+      {
+        'buyFlowActivityMode': buyFlowActivityMode,
+        'googleTransactionId': googleTransactionId,
+        'originTimeMs': originTimeMs,
+      },
+      data
+    );
     postMessageService.postMessage(
-        postMessageData, PayFrameHelper.getIframeOrigin_());
+      postMessageData,
+      PayFrameHelper.getIframeOrigin_()
+    );
   }
 
   /**
@@ -9504,9 +9885,13 @@ class PayFrameHelper {
    */
   static getIframeUrl_(origin, merchantId) {
     // TrustedResourceUrl header needs to start with https or '//'.
-    const iframeUrl = `https://pay${environment == Constants.Environment.PREPROD ?
-             '-preprod.sandbox' :
-             environment == Constants.Environment.SANDBOX ? '.sandbox' : ''}.google.com/gp/p/ui/payframe?origin=${origin}&mid=%{merchantId}`;
+    const iframeUrl = `https://pay${
+      environment == Constants.Environment.PREPROD
+        ? '-preprod.sandbox'
+        : environment == Constants.Environment.SANDBOX
+        ? '.sandbox'
+        : ''
+    }.google.com/gp/p/ui/payframe?origin=${origin}&mid=%{merchantId}`;
     return iframeUrl;
   }
 }
@@ -9536,22 +9921,25 @@ PayFrameHelper.load();
  */
 function chromeSupportsPaymentHandler() {
   // Check if feature is enabled for user
-  if (typeof google == 'undefined' ||
-      !null) {
+  if (typeof google == 'undefined' || !null) {
     return false;
   }
 
   // Payment handler isn't supported on mobile
   const mobilePlatform = window.navigator.userAgent.match(
-      /Android|iPhone|iPad|iPod|BlackBerry|IEMobile/i);
+    /Android|iPhone|iPad|iPod|BlackBerry|IEMobile/i
+  );
   if (mobilePlatform != null) {
     return false;
   }
 
   const chromeVersion = window.navigator.userAgent.match(/Chrome\/([0-9]+)\./i);
-  return 'PaymentRequest' in window && chromeVersion != null &&
-      Number(chromeVersion[1]) >= 68 &&
-      window.navigator.vendor == 'Google Inc.';
+  return (
+    'PaymentRequest' in window &&
+    chromeVersion != null &&
+    Number(chromeVersion[1]) >= 68 &&
+    window.navigator.vendor == 'Google Inc.'
+  );
 }
 
 /**
@@ -9570,11 +9958,15 @@ function chromeSupportsPaymentRequest() {
 
   const androidPlatform = window.navigator.userAgent.match(/Android/i);
   const chromeVersion = window.navigator.userAgent.match(/Chrome\/([0-9]+)\./i);
-  return androidPlatform != null && 'PaymentRequest' in window &&
-      // Make sure skipping PaymentRequest UI when only one PaymentMethod is
-      // supported (starts on Google Chrome 59).
-      window.navigator.vendor == 'Google Inc.' && chromeVersion != null &&
-      Number(chromeVersion[1]) >= 59;
+  return (
+    androidPlatform != null &&
+    'PaymentRequest' in window &&
+    // Make sure skipping PaymentRequest UI when only one PaymentMethod is
+    // supported (starts on Google Chrome 59).
+    window.navigator.vendor == 'Google Inc.' &&
+    chromeVersion != null &&
+    Number(chromeVersion[1]) >= 59
+  );
 }
 
 /**
@@ -9584,16 +9976,22 @@ function chromeSupportsPaymentRequest() {
  */
 function doesMerchantSupportOnlyTokenizedCards(isReadyToPayRequest) {
   if (isReadyToPayRequest.apiVersion >= 2) {
-    const allowedAuthMethods =
-        extractAllowedAuthMethodsForCards_(isReadyToPayRequest);
-    if (allowedAuthMethods && allowedAuthMethods.length == 1 &&
-        allowedAuthMethods[0] == Constants.AuthMethod.CRYPTOGRAM_3DS) {
+    const allowedAuthMethods = extractAllowedAuthMethodsForCards_(
+      isReadyToPayRequest
+    );
+    if (
+      allowedAuthMethods &&
+      allowedAuthMethods.length == 1 &&
+      allowedAuthMethods[0] == Constants.AuthMethod.CRYPTOGRAM_3DS
+    ) {
       return true;
     }
   }
-  return isReadyToPayRequest.allowedPaymentMethods.length == 1 &&
-      isReadyToPayRequest.allowedPaymentMethods[0] ==
-      Constants.PaymentMethod.TOKENIZED_CARD;
+  return (
+    isReadyToPayRequest.allowedPaymentMethods.length == 1 &&
+    isReadyToPayRequest.allowedPaymentMethods[0] ==
+      Constants.PaymentMethod.TOKENIZED_CARD
+  );
 }
 
 /**
@@ -9603,10 +10001,13 @@ function doesMerchantSupportOnlyTokenizedCards(isReadyToPayRequest) {
  * @return {boolean} true if the merchant supports pan cards.
  */
 function apiV2DoesMerchantSupportSpecifiedCardType(
-    isReadyToPayRequest, apiV2AuthMethod) {
+  isReadyToPayRequest,
+  apiV2AuthMethod
+) {
   if (isReadyToPayRequest.apiVersion >= 2) {
-    const allowedAuthMethods =
-        extractAllowedAuthMethodsForCards_(isReadyToPayRequest);
+    const allowedAuthMethods = extractAllowedAuthMethodsForCards_(
+      isReadyToPayRequest
+    );
     if (allowedAuthMethods && allowedAuthMethods.includes(apiV2AuthMethod)) {
       return true;
     }
@@ -9630,9 +10031,9 @@ function validateSecureContext() {
     // for the unsupported browser.
     return null;
   }
-  return window.isSecureContext ?
-      null :
-      'Google Pay APIs should be called in secure context!';
+  return window.isSecureContext
+    ? null
+    : 'Google Pay APIs should be called in secure context!';
 }
 
 /**
@@ -9641,12 +10042,14 @@ function validateSecureContext() {
  * @param {!PaymentOptions} paymentOptions
  */
 function validatePaymentOptions(paymentOptions) {
-  if (paymentOptions.environment &&
-      !Object.values(Constants.Environment)
-           .includes(paymentOptions.environment)) {
+  if (
+    paymentOptions.environment &&
+    !Object.values(Constants.Environment).includes(paymentOptions.environment)
+  ) {
     throw new Error(
-        'Parameter environment in PaymentOptions can optionally be set to ' +
-        'PRODUCTION, otherwise it defaults to TEST.');
+      'Parameter environment in PaymentOptions can optionally be set to ' +
+        'PRODUCTION, otherwise it defaults to TEST.'
+    );
   }
 }
 
@@ -9663,9 +10066,11 @@ function validateIsReadyToPayRequest(isReadyToPayRequest) {
     if (!('apiVersionMinor' in isReadyToPayRequest)) {
       return 'apiVersionMinor must be set!';
     }
-    if (!isReadyToPayRequest.allowedPaymentMethods ||
-        !Array.isArray(isReadyToPayRequest.allowedPaymentMethods) ||
-        isReadyToPayRequest.allowedPaymentMethods.length == 0) {
+    if (
+      !isReadyToPayRequest.allowedPaymentMethods ||
+      !Array.isArray(isReadyToPayRequest.allowedPaymentMethods) ||
+      isReadyToPayRequest.allowedPaymentMethods.length == 0
+    ) {
       return 'for v2 allowedPaymentMethods must be set to an array containing a list of accepted payment methods';
     }
     for (var i = 0; i < isReadyToPayRequest.allowedPaymentMethods.length; i++) {
@@ -9675,29 +10080,40 @@ function validateIsReadyToPayRequest(isReadyToPayRequest) {
           return 'Field parameters must be setup in each allowedPaymentMethod';
         }
         var allowedCardNetworks =
-            allowedPaymentMethod['parameters']['allowedCardNetworks'];
-        if (!allowedCardNetworks || !Array.isArray(allowedCardNetworks) ||
-            allowedCardNetworks.length == 0) {
+          allowedPaymentMethod['parameters']['allowedCardNetworks'];
+        if (
+          !allowedCardNetworks ||
+          !Array.isArray(allowedCardNetworks) ||
+          allowedCardNetworks.length == 0
+        ) {
           return 'allowedCardNetworks must be setup in parameters for type CARD';
         }
         var allowedAuthMethods =
-            allowedPaymentMethod['parameters']['allowedAuthMethods'];
-        if (!allowedAuthMethods || !Array.isArray(allowedAuthMethods) ||
-            allowedAuthMethods.length == 0 ||
-            !allowedAuthMethods.every(isAuthMethodValid)) {
-          return 'allowedAuthMethods must be setup in parameters for type \'CARD\' ' +
-              ' and must contain \'CRYPTOGRAM_3DS\' and/or \'PAN_ONLY\'';
+          allowedPaymentMethod['parameters']['allowedAuthMethods'];
+        if (
+          !allowedAuthMethods ||
+          !Array.isArray(allowedAuthMethods) ||
+          allowedAuthMethods.length == 0 ||
+          !allowedAuthMethods.every(isAuthMethodValid)
+        ) {
+          return (
+            "allowedAuthMethods must be setup in parameters for type 'CARD' " +
+            " and must contain 'CRYPTOGRAM_3DS' and/or 'PAN_ONLY'"
+          );
         }
       }
     }
     return null;
   } else if (
-      !isReadyToPayRequest.allowedPaymentMethods ||
-      !Array.isArray(isReadyToPayRequest.allowedPaymentMethods) ||
-      isReadyToPayRequest.allowedPaymentMethods.length == 0 ||
-      !isReadyToPayRequest.allowedPaymentMethods.every(isPaymentMethodValid)) {
-    return 'allowedPaymentMethods must be set to an array containing \'CARD\' ' +
-        'and/or \'TOKENIZED_CARD\'!';
+    !isReadyToPayRequest.allowedPaymentMethods ||
+    !Array.isArray(isReadyToPayRequest.allowedPaymentMethods) ||
+    isReadyToPayRequest.allowedPaymentMethods.length == 0 ||
+    !isReadyToPayRequest.allowedPaymentMethods.every(isPaymentMethodValid)
+  ) {
+    return (
+      "allowedPaymentMethods must be set to an array containing 'CARD' " +
+      "and/or 'TOKENIZED_CARD'!"
+    );
   }
   return null;
 }
@@ -9739,17 +10155,24 @@ function validatePaymentDataRequest(paymentDataRequest) {
   } else if (!paymentDataRequest.transactionInfo.currencyCode) {
     return 'currencyCode in transactionInfo must be set!';
   } else if (
-      !paymentDataRequest.transactionInfo.totalPriceStatus ||
-      !Object.values(Constants.TotalPriceStatus)
-           .includes(paymentDataRequest.transactionInfo.totalPriceStatus)) {
-    return 'totalPriceStatus in transactionInfo must be set to one of' +
-        ' NOT_CURRENTLY_KNOWN, ESTIMATED or FINAL!';
+    !paymentDataRequest.transactionInfo.totalPriceStatus ||
+    !Object.values(Constants.TotalPriceStatus).includes(
+      paymentDataRequest.transactionInfo.totalPriceStatus
+    )
+  ) {
+    return (
+      'totalPriceStatus in transactionInfo must be set to one of' +
+      ' NOT_CURRENTLY_KNOWN, ESTIMATED or FINAL!'
+    );
   } else if (
-      paymentDataRequest.transactionInfo.totalPriceStatus !==
-          'NOT_CURRENTLY_KNOWN' &&
-      !paymentDataRequest.transactionInfo.totalPrice) {
-    return 'totalPrice in transactionInfo must be set when' +
-        ' totalPriceStatus is ESTIMATED or FINAL!';
+    paymentDataRequest.transactionInfo.totalPriceStatus !==
+      'NOT_CURRENTLY_KNOWN' &&
+    !paymentDataRequest.transactionInfo.totalPrice
+  ) {
+    return (
+      'totalPrice in transactionInfo must be set when' +
+      ' totalPriceStatus is ESTIMATED or FINAL!'
+    );
   }
 
   // Validate payment data request for UPI payment method
@@ -9769,14 +10192,17 @@ function validatePaymentDataRequest(paymentDataRequest) {
     } else if (!parameters['mcc']) {
       return 'mcc in allowedPaymentMethod parameters must be set!';
     } else if (!parameters['transactionReferenceId']) {
-      return 'transactionReferenceId in allowedPaymentMethod parameters' +
-          ' must be set!';
+      return (
+        'transactionReferenceId in allowedPaymentMethod parameters' +
+        ' must be set!'
+      );
     }
 
     if (paymentDataRequest['transactionInfo']['currencyCode'] !== 'INR') {
       return 'currencyCode in transactionInfo must be set to INR!';
     } else if (
-        paymentDataRequest['transactionInfo']['totalPriceStatus'] !== 'FINAL') {
+      paymentDataRequest['transactionInfo']['totalPriceStatus'] !== 'FINAL'
+    ) {
       return 'totalPriceStatus in transactionInfo must be set to FINAL!';
     } else if (!paymentDataRequest['transactionInfo']['transactionNote']) {
       return 'transactionNote in transactionInfo must be set!';
@@ -9793,8 +10219,11 @@ function validatePaymentDataRequest(paymentDataRequest) {
  * @return {?Object}
  */
 function getUpiPaymentMethod(request) {
-  if (!chromeSupportsPaymentRequest() || request.apiVersion < 2 ||
-      !request.allowedPaymentMethods) {
+  if (
+    !chromeSupportsPaymentRequest() ||
+    request.apiVersion < 2 ||
+    !request.allowedPaymentMethods
+  ) {
     return null;
   }
   return getAllowedPaymentMethodForType_(request, Constants.PaymentMethod.UPI);
@@ -9826,7 +10255,9 @@ function validatePaymentDataRequestForSwg(swgParameters) {
 function extractAllowedAuthMethodsForCards_(isReadyToPayRequest) {
   if (isReadyToPayRequest.allowedPaymentMethods) {
     const allowedPaymentMethod = getAllowedPaymentMethodForType_(
-        isReadyToPayRequest, Constants.PaymentMethod.CARD);
+      isReadyToPayRequest,
+      Constants.PaymentMethod.CARD
+    );
     if (allowedPaymentMethod && allowedPaymentMethod.parameters) {
       return allowedPaymentMethod.parameters['allowedAuthMethods'];
     }
@@ -9842,7 +10273,9 @@ function extractAllowedAuthMethodsForCards_(isReadyToPayRequest) {
  * @private
  */
 function getAllowedPaymentMethodForType_(
-    isReadyToPayRequest, paymentMethodType) {
+  isReadyToPayRequest,
+  paymentMethodType
+) {
   for (var i = 0; i < isReadyToPayRequest.allowedPaymentMethods.length; i++) {
     const allowedPaymentMethod = isReadyToPayRequest.allowedPaymentMethods[i];
     if (allowedPaymentMethod.type == paymentMethodType) {
@@ -9880,8 +10313,9 @@ function injectIframe(iframeClassName) {
   const iframeContainer = document.createElement('div');
   iframeContainer.classList.add('iframeContainer');
   /** @private @const {!HTMLIFrameElement} */
-  const iframe =
-      /** @type {!HTMLIFrameElement} */ (document.createElement('iframe'));
+  const iframe = /** @type {!HTMLIFrameElement} */ (document.createElement(
+    'iframe'
+  ));
   iframe.classList.add(iframeClassName);
   iframe.setAttribute('frameborder', '0');
   iframe.setAttribute('scrolling', 'no');
@@ -9911,8 +10345,7 @@ function injectIframe(iframeClassName) {
 const GPAY_ACTIVITY_REQUEST = 'GPAY';
 const IFRAME_CLOSE_DURATION_IN_MS = 250;
 const IFRAME_SHOW_UP_DURATION_IN_MS = 250;
-const IFRAME_SMOOTH_HEIGHT_TRANSITION =
-    `height ${IFRAME_SHOW_UP_DURATION_IN_MS}ms`;
+const IFRAME_SMOOTH_HEIGHT_TRANSITION = `height ${IFRAME_SHOW_UP_DURATION_IN_MS}ms`;
 const ERROR_PREFIX = 'Error: ';
 
 /**
@@ -9925,7 +10358,6 @@ const BrowserUserAgent = {
   FIREFOX: 'Firefox',
   SAFARI: 'Safari',
 };
-
 
 /**
  * An implementation of PaymentsClientDelegateInterface that uses the custom
@@ -9941,11 +10373,16 @@ class PaymentsWebActivityDelegate {
    *   activities manager. By default, the new manager is created.
    * @param {?string=} opt_redirectKey The redirect key used for redirect mode.
    */
-  constructor(environment, googleTransactionId, opt_useIframe,
-             opt_activities, opt_redirectKey) {
+  constructor(
+    environment,
+    googleTransactionId,
+    opt_useIframe,
+    opt_activities,
+    opt_redirectKey
+  ) {
     this.environment_ = environment;
     /** @private @const {boolean} */
-    
+
     /** @const {!ActivityPorts} */
     this.activities = opt_activities || new activityPorts_1(window);
     /** @const @private {!Graypane} */
@@ -9983,8 +10420,10 @@ class PaymentsWebActivityDelegate {
       return;
     }
     this.callback_ = callback;
-    this.activities.onResult(GPAY_ACTIVITY_REQUEST,
-                             this.onActivityResult_.bind(this));
+    this.activities.onResult(
+      GPAY_ACTIVITY_REQUEST,
+      this.onActivityResult_.bind(this)
+    );
   }
 
   /**
@@ -9995,24 +10434,24 @@ class PaymentsWebActivityDelegate {
     // Hide the graypane.
     this.graypane_.hide();
     // Only verified origins are allowed.
-    this.callback_(port.acceptResult().then(
-        (result) => {
+    this.callback_(
+      port.acceptResult().then(
+        result => {
           // Origin must always match: popup, iframe or redirect.
           if (result.origin != this.getOrigin_()) {
             throw new Error('channel mismatch');
           }
           const data = /** @type {!PaymentData} */ (result.data);
           if (data['redirectEncryptedCallbackData']) {
-            PayFrameHelper.setBuyFlowActivityMode(
-                BuyFlowActivityMode.REDIRECT);
+            PayFrameHelper.setBuyFlowActivityMode(BuyFlowActivityMode.REDIRECT);
             return this.fetchRedirectResponse_(
-                data['redirectEncryptedCallbackData'])
-                .then((decrypedJson) => {
-                  // Merge other non-encrypted fields into the final response.
-                  const clone = Object.assign({}, data);
-                  delete clone['redirectEncryptedCallbackData'];
-                  return Object.assign(clone, decrypedJson);
-                });
+              data['redirectEncryptedCallbackData']
+            ).then(decrypedJson => {
+              // Merge other non-encrypted fields into the final response.
+              const clone = Object.assign({}, data);
+              delete clone['redirectEncryptedCallbackData'];
+              return Object.assign(clone, decrypedJson);
+            });
           }
           // Unencrypted data supplied: must be a verified and secure channel.
           if (!result.originVerified || !result.secureChannel) {
@@ -10020,20 +10459,23 @@ class PaymentsWebActivityDelegate {
           }
           return data;
         },
-        (error) => {
+        error => {
           // TODO: Log the original and the inferred error to eye3.
           let originalError = error['message'];
           let inferredError = error['message'];
           try {
             // Try to parse the error message to a structured error, if it's
             // not possible, fallback to use the error message string.
-            inferredError =
-                JSON.parse(originalError.substring(ERROR_PREFIX.length));
-          } catch (e) {
-          }
-          if (inferredError['statusCode'] && [
-                'DEVELOPER_ERROR', 'MERCHANT_ACCOUNT_ERROR'
-              ].indexOf(inferredError['statusCode']) == -1) {
+            inferredError = JSON.parse(
+              originalError.substring(ERROR_PREFIX.length)
+            );
+          } catch (e) {}
+          if (
+            inferredError['statusCode'] &&
+            ['DEVELOPER_ERROR', 'MERCHANT_ACCOUNT_ERROR'].indexOf(
+              inferredError['statusCode']
+            ) == -1
+          ) {
             inferredError = {
               'statusCode': 'CANCELED',
             };
@@ -10044,7 +10486,9 @@ class PaymentsWebActivityDelegate {
             };
           }
           return Promise.reject(inferredError);
-        }));
+        }
+      )
+    );
   }
 
   /**
@@ -10103,8 +10547,9 @@ class PaymentsWebActivityDelegate {
         return;
       }
       const userAgent = window.navigator.userAgent;
-      const isIosGsa = userAgent.indexOf('GSA/') > 0 &&
-          userAgent.indexOf(BrowserUserAgent.SAFARI) > 0;
+      const isIosGsa =
+        userAgent.indexOf('GSA/') > 0 &&
+        userAgent.indexOf(BrowserUserAgent.SAFARI) > 0;
       // pop up in IGSA doesn't work.
       if (isIosGsa && !null) {
         resolve({'result': false});
@@ -10115,24 +10560,31 @@ class PaymentsWebActivityDelegate {
         resolve({'result': false});
         return;
       }
-      const isSupported = userAgent.indexOf(BrowserUserAgent.CHROME) > 0 ||
-          userAgent.indexOf(BrowserUserAgent.FIREFOX) > 0 ||
-          userAgent.indexOf(BrowserUserAgent.SAFARI) > 0;
-      if (isSupported && isReadyToPayRequest.apiVersion >= 2 &&
-          isReadyToPayRequest.existingPaymentMethodRequired) {
+      const isSupported =
+        userAgent.indexOf(BrowserUserAgent.CHROME) > 0 ||
+        userAgent.indexOf(BrowserUserAgent.FIREFOX) > 0 ||
+        userAgent.indexOf(BrowserUserAgent.SAFARI) > 0;
+      if (
+        isSupported &&
+        isReadyToPayRequest.apiVersion >= 2 &&
+        isReadyToPayRequest.existingPaymentMethodRequired
+      ) {
         isReadyToPayRequest.environment = this.environment_;
         PayFrameHelper.sendAndWaitForResponse(
-            isReadyToPayRequest, PostMessageEventType.IS_READY_TO_PAY,
-            'isReadyToPayResponse', function(event) {
-              const response = {
-                'result': isSupported,
-              };
-              if (isReadyToPayRequest.existingPaymentMethodRequired) {
-                response['paymentMethodPresent'] =
-                    event.data['isReadyToPayResponse'] == 'READY_TO_PAY';
-              }
-              resolve(response);
-            });
+          isReadyToPayRequest,
+          PostMessageEventType.IS_READY_TO_PAY,
+          'isReadyToPayResponse',
+          function(event) {
+            const response = {
+              'result': isSupported,
+            };
+            if (isReadyToPayRequest.existingPaymentMethodRequired) {
+              response['paymentMethodPresent'] =
+                event.data['isReadyToPayResponse'] == 'READY_TO_PAY';
+            }
+            resolve(response);
+          }
+        );
       } else {
         resolve({'result': isSupported});
       }
@@ -10147,8 +10599,10 @@ class PaymentsWebActivityDelegate {
     }
     const containerAndFrame = this.injectIframe_(paymentDataRequest);
     const paymentDataPromise = this.openIframe_(
-        containerAndFrame['container'], containerAndFrame['iframe'],
-        paymentDataRequest);
+      containerAndFrame['container'],
+      containerAndFrame['iframe'],
+      paymentDataRequest
+    );
     this.prefetchedObjects_ = {
       'container': containerAndFrame['container'],
       'iframe': containerAndFrame['iframe'],
@@ -10167,12 +10621,17 @@ class PaymentsWebActivityDelegate {
     }
     paymentDataRequest.environment = this.environment_;
     PayFrameHelper.setBuyFlowActivityMode(
-        paymentDataRequest['forceRedirect'] ? BuyFlowActivityMode.REDIRECT :
-                                              BuyFlowActivityMode.POPUP);
+      paymentDataRequest['forceRedirect']
+        ? BuyFlowActivityMode.REDIRECT
+        : BuyFlowActivityMode.POPUP
+    );
     const opener = this.activities.open(
-        GPAY_ACTIVITY_REQUEST, this.getHostingPageUrl_(),
-        this.getRenderMode_(paymentDataRequest), paymentDataRequest,
-        {'width': 600, 'height': 600});
+      GPAY_ACTIVITY_REQUEST,
+      this.getHostingPageUrl_(),
+      this.getRenderMode_(paymentDataRequest),
+      paymentDataRequest,
+      {'width': 600, 'height': 600}
+    );
     this.graypane_.show(opener && opener.targetWin);
   }
 
@@ -10184,9 +10643,7 @@ class PaymentsWebActivityDelegate {
    * @private
    */
   getRenderMode_(paymentDataRequest) {
-    return paymentDataRequest['forceRedirect'] ?
-        '_top' :
-        'gp-js-popup';
+    return paymentDataRequest['forceRedirect'] ? '_top' : 'gp-js-popup';
   }
 
   /**
@@ -10264,9 +10721,11 @@ class PaymentsWebActivityDelegate {
     // TODO: These should be compile time constants and not dependent
     // on the environment.
     let iframeUrl = `https://pay.google.com/gp/p/ui/pay?origin=${origin}`;
-    if (environment == Constants.Environment.SANDBOX ||
-        environment == Constants.Environment.PREPROD) {
-      iframeUrl =   `https://pay'+  (environment == Constants.Environment.PREPROD ? '-preprod' : '')+  '.sandbox.google.com/gp/p/ui/pay?origin=${origin}`;
+    if (
+      environment == Constants.Environment.SANDBOX ||
+      environment == Constants.Environment.PREPROD
+    ) {
+      iframeUrl = `https://pay'+  (environment == Constants.Environment.PREPROD ? '-preprod' : '')+  '.sandbox.google.com/gp/p/ui/pay?origin=${origin}`;
     }
     return iframeUrl;
   }
@@ -10297,19 +10756,22 @@ class PaymentsWebActivityDelegate {
    */
   injectIframe_(paymentDataRequest) {
     const containerAndFrame = injectIframe(
-        this.isVerticalCenterExperimentEnabled_(paymentDataRequest) ?
-            Constants.IFRAME_STYLE_CENTER_CLASS :
-            Constants.IFRAME_STYLE_CLASS);
+      this.isVerticalCenterExperimentEnabled_(paymentDataRequest)
+        ? Constants.IFRAME_STYLE_CENTER_CLASS
+        : Constants.IFRAME_STYLE_CLASS
+    );
     const iframe = containerAndFrame['iframe'];
     const container = containerAndFrame['container'];
     container.addEventListener(
-        'click', this.closeActionHandler_.bind(this, containerAndFrame));
+      'click',
+      this.closeActionHandler_.bind(this, containerAndFrame)
+    );
     // Hide iframe and disable resize at initialize.
     container.style.display = 'none';
     iframe.style.display = 'none';
     iframe.height = '0px';
     const transitionStyle =
-        'all ' + IFRAME_SHOW_UP_DURATION_IN_MS + 'ms ease 0s';
+      'all ' + IFRAME_SHOW_UP_DURATION_IN_MS + 'ms ease 0s';
     this.setTransition_(iframe, transitionStyle);
     this.shouldHandleResizing_ = false;
     return containerAndFrame;
@@ -10349,7 +10811,9 @@ class PaymentsWebActivityDelegate {
       // payment data request is not the same.
       this.dismissPromiseResolver_(Promise.reject({'errorCode': 'CANCELED'}));
       this.removeIframeAndContainer_(
-          containerAndFrame['container'], containerAndFrame['iframe']);
+        containerAndFrame['container'],
+        containerAndFrame['iframe']
+      );
       this.port_ && this.port_.disconnect();
     }
   }
@@ -10421,54 +10885,62 @@ class PaymentsWebActivityDelegate {
     }
     paymentDataRequest.environment = this.environment_;
     let iframeLoadStartTime;
-    const trustedUrl =
-        this.getIframeUrl(this.environment_, window.location.origin);
-    return this.activities.openIframe(iframe, trustedUrl, paymentDataRequest)
-        .then(port => {
-          // Handle custom resize message.
-          this.port_ = port;
-          port.onMessage(payload => {
-            if (payload['type'] !== 'resize' || !this.shouldHandleResizing_) {
-              // Save the resize event later after initial animation is finished
-              this.savedResizePayload_ = {
-                'height': payload['height'],
-                'transition': payload['transition']
-              };
-              return;
-            }
-            // b/111310899: Smooth out initial iFrame loading
-            if (!iframeLoadStartTime) {
-              iframeLoadStartTime = Date.now();
-            }
-            if (Date.now() <
-                iframeLoadStartTime + IFRAME_SHOW_UP_DURATION_IN_MS) {
-              this.setTransition_(iframe, payload['transition'] + ', '
-                  + IFRAME_SMOOTH_HEIGHT_TRANSITION);
-            } else {
-              this.setTransition_(iframe, payload['transition']);
-            }
-            iframe.height = payload['height'];
-          });
-          return /** @type {!Promise<!Object>} */ (port.acceptResult());
-        })
-        .then(
-            /**
-             * @param {!Object} result
-             * @return {!PaymentData}
-             */
-            result => {
-              this.removeIframeAndContainer_(container, iframe);
-              // This is only for popping the state we pushed earlier.
-              history.back();
-              const data = /** @type {!PaymentData} */ (result['data']);
-              return data;
-            },
-            error => {
-              this.removeIframeAndContainer_(container, iframe);
-              // This is only for popping the state we pushed earlier.
-              history.back();
-              return Promise.reject(error);
-            });
+    const trustedUrl = this.getIframeUrl(
+      this.environment_,
+      window.location.origin
+    );
+    return this.activities
+      .openIframe(iframe, trustedUrl, paymentDataRequest)
+      .then(port => {
+        // Handle custom resize message.
+        this.port_ = port;
+        port.onMessage(payload => {
+          if (payload['type'] !== 'resize' || !this.shouldHandleResizing_) {
+            // Save the resize event later after initial animation is finished
+            this.savedResizePayload_ = {
+              'height': payload['height'],
+              'transition': payload['transition'],
+            };
+            return;
+          }
+          // b/111310899: Smooth out initial iFrame loading
+          if (!iframeLoadStartTime) {
+            iframeLoadStartTime = Date.now();
+          }
+          if (
+            Date.now() <
+            iframeLoadStartTime + IFRAME_SHOW_UP_DURATION_IN_MS
+          ) {
+            this.setTransition_(
+              iframe,
+              payload['transition'] + ', ' + IFRAME_SMOOTH_HEIGHT_TRANSITION
+            );
+          } else {
+            this.setTransition_(iframe, payload['transition']);
+          }
+          iframe.height = payload['height'];
+        });
+        return /** @type {!Promise<!Object>} */ (port.acceptResult());
+      })
+      .then(
+        /**
+         * @param {!Object} result
+         * @return {!PaymentData}
+         */
+        result => {
+          this.removeIframeAndContainer_(container, iframe);
+          // This is only for popping the state we pushed earlier.
+          history.back();
+          const data = /** @type {!PaymentData} */ (result['data']);
+          return data;
+        },
+        error => {
+          this.removeIframeAndContainer_(container, iframe);
+          // This is only for popping the state we pushed earlier.
+          history.back();
+          return Promise.reject(error);
+        }
+      );
   }
 }
 
@@ -10537,17 +11009,19 @@ class UpiHandler {
   loadPaymentData(paymentDataRequest, upiPaymentMethod, onResultCallback) {
     const parameters = upiPaymentMethod['parameters'];
     const transactionInfo = paymentDataRequest['transactionInfo'];
-    const supportedInstruments = [{
-          'supportedMethods': ['https://tez.google.com/pay'],
-          'data': {
-            'pa': parameters['payeeVpa'],
-            'pn': parameters['payeeName'],
-            'tr': parameters['transactionReferenceId'],
-            'url': parameters['referenceUrl'],
-            'mc': parameters['mcc'],
-            'tn': transactionInfo['transactionNote'],
-          },
-        }];
+    const supportedInstruments = [
+      {
+        'supportedMethods': ['https://tez.google.com/pay'],
+        'data': {
+          'pa': parameters['payeeVpa'],
+          'pn': parameters['payeeName'],
+          'tr': parameters['transactionReferenceId'],
+          'url': parameters['referenceUrl'],
+          'mc': parameters['mcc'],
+          'tn': transactionInfo['transactionNote'],
+        },
+      },
+    ];
 
     if (parameters['transactionId']) {
       supportedInstruments[0]['data']['tid'] = parameters['transactionId'];
@@ -10561,34 +11035,40 @@ class UpiHandler {
           'value': transactionInfo['totalPrice'],
         },
       },
-      'displayItems': [{
-        'label': 'Original Amount',
-        'amount': {
-          'currency': transactionInfo['currencyCode'],
-          'value': transactionInfo['totalPrice'],
+      'displayItems': [
+        {
+          'label': 'Original Amount',
+          'amount': {
+            'currency': transactionInfo['currencyCode'],
+            'value': transactionInfo['totalPrice'],
+          },
         },
-      }],
+      ],
     };
 
     let request = new PaymentRequest(supportedInstruments, details);
 
     onResultCallback(
-        this.checkCanMakePayment_(request)
-            .then(result => {
-              if (result) {
-                return this.showUi_(request);
-              } else {
-                return this.redirectToGooglePlay_();
-              }
-            })
-            .then(paymentData => {
-              return this.processData_(
-                  paymentData, paymentDataRequest, upiPaymentMethod);
-            })
-            .catch(error => {
-              error['statusCode'] = Constants.ResponseStatus.CANCELED;
-              return Promise.reject(error);
-            }));
+      this.checkCanMakePayment_(request)
+        .then(result => {
+          if (result) {
+            return this.showUi_(request);
+          } else {
+            return this.redirectToGooglePlay_();
+          }
+        })
+        .then(paymentData => {
+          return this.processData_(
+            paymentData,
+            paymentDataRequest,
+            upiPaymentMethod
+          );
+        })
+        .catch(error => {
+          error['statusCode'] = Constants.ResponseStatus.CANCELED;
+          return Promise.reject(error);
+        })
+    );
   }
 
   /**
@@ -10615,8 +11095,9 @@ class UpiHandler {
    */
   checkCanMakePayment_(request) {
     // Checks canMakePayment cache, and use the cache result if it exists.
-    const cacheResult =
-        window.sessionStorage.getItem(Constants.UPI_CAN_MAKE_PAYMENT_CACHE_KEY);
+    const cacheResult = window.sessionStorage.getItem(
+      Constants.UPI_CAN_MAKE_PAYMENT_CACHE_KEY
+    );
     if (cacheResult) {
       return Promise.resolve(cacheResult === 'true');
     }
@@ -10635,7 +11116,9 @@ class UpiHandler {
       // Google Play again after installing Google Pay if Chrome is not closed.
       if (result) {
         window.sessionStorage.setItem(
-            Constants.UPI_CAN_MAKE_PAYMENT_CACHE_KEY, result.toString());
+          Constants.UPI_CAN_MAKE_PAYMENT_CACHE_KEY,
+          result.toString()
+        );
       }
       return result;
     });
@@ -10649,9 +11132,11 @@ class UpiHandler {
    */
   redirectToGooglePlay_() {
     window.location.replace(
-        'https://play.google.com/store/apps/details?id=com.google.android.apps.nbu.paisa.user');  // NOLINT
-    return Promise.reject(
-        {'errorMessage': 'Cannot redirect to Tez page in Google Play.'});
+      'https://play.google.com/store/apps/details?id=com.google.android.apps.nbu.paisa.user'
+    ); // NOLINT
+    return Promise.reject({
+      'errorMessage': 'Cannot redirect to Tez page in Google Play.',
+    });
   }
 
   /**
@@ -10675,14 +11160,14 @@ class UpiHandler {
           // payment failure due to invalid MPIN
           error = {
             'errorCode': PublicErrorCode.BUYER_ACCOUNT_ERROR,
-            'errorMessage': 'Payment failure due to invalid MPIN.'
+            'errorMessage': 'Payment failure due to invalid MPIN.',
           };
           break;
         case 'Z9':
           // payment failure due to insufficient funds
           error = {
             'errorCode': PublicErrorCode.BUYER_ACCOUNT_ERROR,
-            'errorMessage': 'Payment failure due to insufficient funds.'
+            'errorMessage': 'Payment failure due to insufficient funds.',
           };
           break;
         case '91':
@@ -10690,8 +11175,8 @@ class UpiHandler {
           error = {
             'errorCode': PublicErrorCode.INTERNAL_ERROR,
             'errorMessage':
-                'Payment failure due to transaction timeout or connection' +
-                ' issue.'
+              'Payment failure due to transaction timeout or connection' +
+              ' issue.',
           };
           break;
         default:
@@ -10706,10 +11191,10 @@ class UpiHandler {
       'payeeVpa': upiPaymentMethod['parameters']['payeeVpa'],
       'status': tezResponse['Status'],
       'transactionReferenceId':
-          upiPaymentMethod['parameters']['transactionReferenceId'],
-      'transactionId': upiPaymentMethod['parameters']['transactionId'] ?
-          upiPaymentMethod['parameters']['transactionId'] :
-          tezResponse['txnId'],
+        upiPaymentMethod['parameters']['transactionReferenceId'],
+      'transactionId': upiPaymentMethod['parameters']['transactionId']
+        ? upiPaymentMethod['parameters']['transactionId']
+        : tezResponse['txnId'],
       'transactionInfo': paymentDataRequest['transactionInfo'],
     };
 
@@ -10725,10 +11210,10 @@ class UpiHandler {
             // TODO: Verify that response comes from tez and
             // add signature and encrypt signed message here
             'signature': '',
-            'signedMessage': signedMessage
-          }
-        }
-      }
+            'signedMessage': signedMessage,
+          },
+        },
+      },
     };
     return Promise.resolve(paymentData);
   }
@@ -10767,63 +11252,71 @@ Dual licensed under the MIT and GPL licenses.
  *   "098F4D35"
  */
 
-class Random_uuid {}  // Private array of chars to use
-  var CHARS = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'.split('');
+class Random_uuid {} // Private array of chars to use
+var CHARS = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'.split(
+  ''
+);
 
-  Random_uuid.uuid = function (len, radix) {
-    var chars = CHARS, uuid = [], i;
-    radix = radix || chars.length;
+Random_uuid.uuid = function(len, radix) {
+  var chars = CHARS,
+    uuid = [],
+    i;
+  radix = radix || chars.length;
 
-    if (len) {
-      // Compact form
-      for (i = 0; i < len; i++) uuid[i] = chars[0 | Math.random()*radix];
+  if (len) {
+    // Compact form
+    for (i = 0; i < len; i++) uuid[i] = chars[0 | (Math.random() * radix)];
+  } else {
+    // rfc4122, version 4 form
+    var r;
+
+    // rfc4122 requires these characters
+    uuid[8] = uuid[13] = uuid[18] = uuid[23] = '-';
+    uuid[14] = '4';
+
+    // Fill in random data.  At i==19 set the high bits of clock sequence as
+    // per rfc4122, sec. 4.1.5
+    for (i = 0; i < 36; i++) {
+      if (!uuid[i]) {
+        r = 0 | (Math.random() * 16);
+        uuid[i] = chars[i == 19 ? (r & 0x3) | 0x8 : r];
+      }
+    }
+  }
+
+  return uuid.join('');
+};
+
+// A more performant, but slightly bulkier, RFC4122v4 solution.  We boost performance
+// by minimizing calls to random()
+Random_uuid.uuidFast = function() {
+  var chars = CHARS,
+    uuid = new Array(36),
+    rnd = 0,
+    r;
+  for (var i = 0; i < 36; i++) {
+    if (i == 8 || i == 13 || i == 18 || i == 23) {
+      uuid[i] = '-';
+    } else if (i == 14) {
+      uuid[i] = '4';
     } else {
-      // rfc4122, version 4 form
-      var r;
-
-      // rfc4122 requires these characters
-      uuid[8] = uuid[13] = uuid[18] = uuid[23] = '-';
-      uuid[14] = '4';
-
-      // Fill in random data.  At i==19 set the high bits of clock sequence as
-      // per rfc4122, sec. 4.1.5
-      for (i = 0; i < 36; i++) {
-        if (!uuid[i]) {
-          r = 0 | Math.random()*16;
-          uuid[i] = chars[(i == 19) ? (r & 0x3) | 0x8 : r];
-        }
-      }
+      if (rnd <= 0x02) rnd = (0x2000000 + Math.random() * 0x1000000) | 0;
+      r = rnd & 0xf;
+      rnd = rnd >> 4;
+      uuid[i] = chars[i == 19 ? (r & 0x3) | 0x8 : r];
     }
+  }
+  return uuid.join('');
+};
 
-    return uuid.join('');
-  };
-
-  // A more performant, but slightly bulkier, RFC4122v4 solution.  We boost performance
-  // by minimizing calls to random()
-  Random_uuid.uuidFast = function() {
-    var chars = CHARS, uuid = new Array(36), rnd=0, r;
-    for (var i = 0; i < 36; i++) {
-      if (i==8 || i==13 ||  i==18 || i==23) {
-        uuid[i] = '-';
-      } else if (i==14) {
-        uuid[i] = '4';
-      } else {
-        if (rnd <= 0x02) rnd = 0x2000000 + (Math.random()*0x1000000)|0;
-        r = rnd & 0xf;
-        rnd = rnd >> 4;
-        uuid[i] = chars[(i == 19) ? (r & 0x3) | 0x8 : r];
-      }
-    }
-    return uuid.join('');
-  };
-
-  // A more compact, but less performant, RFC4122v4 solution:
-  Random_uuid.uuidCompact = function() {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-      var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
-      return v.toString(16);
-    });
-  };
+// A more compact, but less performant, RFC4122v4 solution:
+Random_uuid.uuidCompact = function() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    var r = (Math.random() * 16) | 0,
+      v = c == 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+};
 
 /**
  * @license
@@ -10898,8 +11391,12 @@ class PaymentsAsyncClient {
    * @param {!ActivityPorts=} opt_activities Can be used to provide a shared
    *   activities manager. By default, the new manager is created.
    */
-  constructor(paymentOptions, onPaymentResponse, opt_useIframe,
-             opt_activities) {
+  constructor(
+    paymentOptions,
+    onPaymentResponse,
+    opt_useIframe,
+    opt_activities
+  ) {
     this.onPaymentResponse_ = onPaymentResponse;
 
     validatePaymentOptions(paymentOptions);
@@ -10909,14 +11406,14 @@ class PaymentsAsyncClient {
 
     /** @private @const {string} */
     this.environment_ =
-        paymentOptions.environment || Constants.Environment.TEST;
+      paymentOptions.environment || Constants.Environment.TEST;
     if (!PaymentsAsyncClient.googleTransactionId_) {
       PaymentsAsyncClient.googleTransactionId_ =
-          /** @type {string} */ (
-              (this.isInTrustedDomain_() && paymentOptions['i'] &&
-               paymentOptions['i']['googleTransactionId']) ?
-                  paymentOptions['i']['googleTransactionId'] :
-                  createGoogleTransactionId(this.environment_));
+        /** @type {string} */ (this.isInTrustedDomain_() &&
+        paymentOptions['i'] &&
+        paymentOptions['i']['googleTransactionId']
+          ? paymentOptions['i']['googleTransactionId']
+          : createGoogleTransactionId(this.environment_));
     }
 
     /** @private @const {!PaymentOptions} */
@@ -10924,17 +11421,21 @@ class PaymentsAsyncClient {
 
     /** @private @const {!PaymentsClientDelegateInterface} */
     this.webActivityDelegate_ = new PaymentsWebActivityDelegate(
-        this.environment_, PaymentsAsyncClient.googleTransactionId_,
-        opt_useIframe, opt_activities,
-        paymentOptions['i'] && paymentOptions['i']['redirectKey']);
+      this.environment_,
+      PaymentsAsyncClient.googleTransactionId_,
+      opt_useIframe,
+      opt_activities,
+      paymentOptions['i'] && paymentOptions['i']['redirectKey']
+    );
 
     const paymentRequestSupported = chromeSupportsPaymentRequest();
     // TODO: Remove the temporary hack that disable payments
     // request for inline flow.
     /** @private @const {?PaymentsClientDelegateInterface} */
-    this.delegate_ = paymentRequestSupported && !opt_useIframe ?
-        new PaymentsRequestDelegate(this.environment_) :
-        this.webActivityDelegate_;
+    this.delegate_ =
+      paymentRequestSupported && !opt_useIframe
+        ? new PaymentsRequestDelegate(this.environment_)
+        : this.webActivityDelegate_;
 
     this.upiHandler_ = new UpiHandler();
 
@@ -10945,20 +11446,23 @@ class PaymentsAsyncClient {
     // activity delegate when load payment data is called.
     if (chromeSupportsPaymentHandler()) {
       PayFrameHelper.setBuyFlowActivityMode(
-          BuyFlowActivityMode.PAYMENT_HANDLER);
+        BuyFlowActivityMode.PAYMENT_HANDLER
+      );
     } else if (paymentRequestSupported) {
       PayFrameHelper.setBuyFlowActivityMode(BuyFlowActivityMode.ANDROID_NATIVE);
     }
 
     PayFrameHelper.setGoogleTransactionId(
-        PaymentsAsyncClient.googleTransactionId_);
+      PaymentsAsyncClient.googleTransactionId_
+    );
     PayFrameHelper.postMessage({
       'eventType': PostMessageEventType.LOG_INITIALIZE_PAYMENTS_CLIENT,
       'clientLatencyStartMs': Date.now(),
     });
 
-    window.addEventListener(
-        'message', event => this.handleMessageEvent_(event));
+    window.addEventListener('message', event =>
+      this.handleMessageEvent_(event)
+    );
   }
 
   /**
@@ -10972,13 +11476,17 @@ class PaymentsAsyncClient {
   isReadyToPay(isReadyToPayRequest) {
     // Merge with paymentOptions, preferring values from isReadyToPayRequest
     if (isReadyToPayRequest) {
-      isReadyToPayRequest =
-          Object.assign({}, this.paymentOptions_, isReadyToPayRequest);
+      isReadyToPayRequest = Object.assign(
+        {},
+        this.paymentOptions_,
+        isReadyToPayRequest
+      );
     }
     const startTimeMs = Date.now();
     /** @type {?string} */
-    const errorMessage = validateSecureContext() ||
-        validateIsReadyToPayRequest(isReadyToPayRequest);
+    const errorMessage =
+      validateSecureContext() ||
+      validateIsReadyToPayRequest(isReadyToPayRequest);
     if (errorMessage) {
       return new Promise((resolve, reject) => {
         PaymentsAsyncClient.logDevErrorToConsole_('isReadyToPay', errorMessage);
@@ -10988,7 +11496,7 @@ class PaymentsAsyncClient {
         });
         reject({
           'statusCode': Constants.ResponseStatus.DEVELOPER_ERROR,
-          'statusMessage': errorMessage
+          'statusMessage': errorMessage,
         });
       });
     }
@@ -11019,21 +11527,27 @@ class PaymentsAsyncClient {
     if (this.upiHandler_.isUpiRequest(isReadyToPayRequest)) {
       return this.upiHandler_.isReadyToPay(isReadyToPayRequest);
     }
-    if (chromeSupportsPaymentRequest() &&
-       !isNativeDisabledInRequest(isReadyToPayRequest)) {
+    if (
+      chromeSupportsPaymentRequest() &&
+      !isNativeDisabledInRequest(isReadyToPayRequest)
+    ) {
       if (isReadyToPayRequest.apiVersion >= 2) {
         return this.isReadyToPayApiV2ForChromePaymentRequest_(
-            isReadyToPayRequest);
+          isReadyToPayRequest
+        );
       } else {
         // This is the apiVersion 1 branch.
         // If the merchant supports only Tokenized cards then just rely on
         // delegate to give us the result.
         // This will need to change once b/78519188 is fixed.
-        const webPromise =
-            this.webActivityDelegate_.isReadyToPay(isReadyToPayRequest);
+        const webPromise = this.webActivityDelegate_.isReadyToPay(
+          isReadyToPayRequest
+        );
         const nativePromise = this.delegate_.isReadyToPay(isReadyToPayRequest);
-        if (doesMerchantSupportOnlyTokenizedCards(isReadyToPayRequest) &&
-            !chromeSupportsPaymentHandler()) {
+        if (
+          doesMerchantSupportOnlyTokenizedCards(isReadyToPayRequest) &&
+          !chromeSupportsPaymentHandler()
+        ) {
           return nativePromise;
         }
         // Return webIsReadyToPay only if delegateIsReadyToPay has been
@@ -11041,8 +11555,9 @@ class PaymentsAsyncClient {
         return nativePromise.then(() => webPromise);
       }
     }
-    const webPromise =
-        this.webActivityDelegate_.isReadyToPay(isReadyToPayRequest);
+    const webPromise = this.webActivityDelegate_.isReadyToPay(
+      isReadyToPayRequest
+    );
     return webPromise;
   }
 
@@ -11057,26 +11572,35 @@ class PaymentsAsyncClient {
   isReadyToPayApiV2ForChromePaymentRequest_(isReadyToPayRequest) {
     let defaultPromise = Promise.resolve({'result': false});
     if (isReadyToPayRequest.existingPaymentMethodRequired) {
-      defaultPromise =
-          Promise.resolve({'result': false, 'paymentMethodPresent': false});
+      defaultPromise = Promise.resolve({
+        'result': false,
+        'paymentMethodPresent': false,
+      });
     }
 
     let nativePromise = defaultPromise;
-    if (apiV2DoesMerchantSupportSpecifiedCardType(
-            isReadyToPayRequest, Constants.AuthMethod.CRYPTOGRAM_3DS)) {
+    if (
+      apiV2DoesMerchantSupportSpecifiedCardType(
+        isReadyToPayRequest,
+        Constants.AuthMethod.CRYPTOGRAM_3DS
+      )
+    ) {
       // If the merchant supports tokenized cards.
       // Make a separate call to gms core to check if the user isReadyToPay
       // with just tokenized cards. We can't pass in PAN_ONLY here
       // because gms core always returns true for PAN_ONLY.
       // Leave other payment methods as is.
-      const nativeRtpRequest = /** @type {!IsReadyToPayRequest} */
-          (JSON.parse(JSON.stringify(isReadyToPayRequest)));
+      const nativeRtpRequest /** @type {!IsReadyToPayRequest} */ = JSON.parse(
+        JSON.stringify(isReadyToPayRequest)
+      );
       for (var i = 0; i < nativeRtpRequest.allowedPaymentMethods.length; i++) {
-        if (nativeRtpRequest.allowedPaymentMethods[i].type ==
-            Constants.PaymentMethod.CARD) {
-          nativeRtpRequest.allowedPaymentMethods[i]
-              .parameters['allowedAuthMethods'] =
-              [Constants.AuthMethod.CRYPTOGRAM_3DS];
+        if (
+          nativeRtpRequest.allowedPaymentMethods[i].type ==
+          Constants.PaymentMethod.CARD
+        ) {
+          nativeRtpRequest.allowedPaymentMethods[i].parameters[
+            'allowedAuthMethods'
+          ] = [Constants.AuthMethod.CRYPTOGRAM_3DS];
         }
       }
 
@@ -11084,8 +11608,12 @@ class PaymentsAsyncClient {
     }
 
     let webPromise = defaultPromise;
-    if (apiV2DoesMerchantSupportSpecifiedCardType(
-            isReadyToPayRequest, Constants.AuthMethod.PAN_ONLY)) {
+    if (
+      apiV2DoesMerchantSupportSpecifiedCardType(
+        isReadyToPayRequest,
+        Constants.AuthMethod.PAN_ONLY
+      )
+    ) {
       webPromise = this.webActivityDelegate_.isReadyToPay(isReadyToPayRequest);
     }
 
@@ -11115,16 +11643,20 @@ class PaymentsAsyncClient {
    */
   prefetchPaymentData(paymentDataRequest) {
     /** @type {?string} */
-    const errorMessage = validateSecureContext() ||
-        validatePaymentDataRequest(paymentDataRequest);
+    const errorMessage =
+      validateSecureContext() || validatePaymentDataRequest(paymentDataRequest);
     if (errorMessage) {
       PaymentsAsyncClient.logDevErrorToConsole_(
-          'prefetchPaymentData', errorMessage);
+        'prefetchPaymentData',
+        errorMessage
+      );
       return;
     }
     this.assignInternalParams_(paymentDataRequest);
-    if (chromeSupportsPaymentRequest()
-       && !isNativeDisabledInRequest(paymentDataRequest)) {
+    if (
+      chromeSupportsPaymentRequest() &&
+      !isNativeDisabledInRequest(paymentDataRequest)
+    ) {
       this.delegate_.prefetchPaymentData(paymentDataRequest);
     } else {
       // For non chrome supports always use the hosting page.
@@ -11144,21 +11676,25 @@ class PaymentsAsyncClient {
     PayFrameHelper.postMessage({
       'eventType': PostMessageEventType.LOG_BUTTON_CLICK,
     });
-    const errorMessage = validateSecureContext() ||
-        validatePaymentDataRequest(paymentDataRequest);
+    const errorMessage =
+      validateSecureContext() || validatePaymentDataRequest(paymentDataRequest);
     if (errorMessage) {
-      this.onPaymentResponse_(new Promise((resolve, reject) => {
-        PayFrameHelper.postMessage({
-          'eventType': PostMessageEventType.LOG_LOAD_PAYMENT_DATA_API,
-          'error': PublicErrorCode.DEVELOPER_ERROR,
-        });
-        PaymentsAsyncClient.logDevErrorToConsole_(
-            'loadPaymentData', errorMessage);
-        reject({
-          'statusCode': Constants.ResponseStatus.DEVELOPER_ERROR,
-          'statusMessage': errorMessage
-        });
-      }));
+      this.onPaymentResponse_(
+        new Promise((resolve, reject) => {
+          PayFrameHelper.postMessage({
+            'eventType': PostMessageEventType.LOG_LOAD_PAYMENT_DATA_API,
+            'error': PublicErrorCode.DEVELOPER_ERROR,
+          });
+          PaymentsAsyncClient.logDevErrorToConsole_(
+            'loadPaymentData',
+            errorMessage
+          );
+          reject({
+            'statusCode': Constants.ResponseStatus.DEVELOPER_ERROR,
+            'statusMessage': errorMessage,
+          });
+        })
+      );
       return;
     }
 
@@ -11168,19 +11704,25 @@ class PaymentsAsyncClient {
     const upiPaymentMethod = getUpiPaymentMethod(paymentDataRequest);
     if (upiPaymentMethod) {
       this.upiHandler_.loadPaymentData(
-          paymentDataRequest, upiPaymentMethod, this.onResult_.bind(this));
+        paymentDataRequest,
+        upiPaymentMethod,
+        this.onResult_.bind(this)
+      );
       return;
     }
 
-    const isReadyToPayResult =
-        window.sessionStorage.getItem(Constants.IS_READY_TO_PAY_RESULT_KEY);
+    const isReadyToPayResult = window.sessionStorage.getItem(
+      Constants.IS_READY_TO_PAY_RESULT_KEY
+    );
     this.loadPaymentDataApiStartTimeMs_ = Date.now();
     this.assignInternalParams_(paymentDataRequest);
     // We want to fall back to the web delegate if payment handler is supported
     // and isReadyToPay bit is not explicitly set to true (fallback to web if
     // isReadyToPay wasn't called for PH)
-    if ((chromeSupportsPaymentHandler() && isReadyToPayResult !== 'true')
-       || isNativeDisabledInRequest(paymentDataRequest)) {
+    if (
+      (chromeSupportsPaymentHandler() && isReadyToPayResult !== 'true') ||
+      isNativeDisabledInRequest(paymentDataRequest)
+    ) {
       this.webActivityDelegate_.loadPaymentData(paymentDataRequest);
     } else {
       this.delegate_.loadPaymentData(paymentDataRequest);
@@ -11245,26 +11787,26 @@ class PaymentsAsyncClient {
    */
   onResult_(response) {
     response
-        .then(result => {
+      .then(result => {
+        PayFrameHelper.postMessage({
+          'eventType': PostMessageEventType.LOG_LOAD_PAYMENT_DATA_API,
+          'clientLatencyStartMs': this.loadPaymentDataApiStartTimeMs_,
+        });
+      })
+      .catch(result => {
+        if (result['errorCode']) {
           PayFrameHelper.postMessage({
             'eventType': PostMessageEventType.LOG_LOAD_PAYMENT_DATA_API,
-            'clientLatencyStartMs': this.loadPaymentDataApiStartTimeMs_,
+            'error': /** @type {!PublicErrorCode} */ (result['errorCode']),
           });
-        })
-        .catch(result => {
-          if (result['errorCode']) {
-            PayFrameHelper.postMessage({
-              'eventType': PostMessageEventType.LOG_LOAD_PAYMENT_DATA_API,
-              'error': /** @type {!PublicErrorCode} */ (result['errorCode']),
-            });
-          } else {
-            // If user closes window we don't get a error code
-            PayFrameHelper.postMessage({
-              'eventType': PostMessageEventType.LOG_LOAD_PAYMENT_DATA_API,
-              'error': PublicErrorCode.BUYER_CANCEL,
-            });
-          }
-        });
+        } else {
+          // If user closes window we don't get a error code
+          PayFrameHelper.postMessage({
+            'eventType': PostMessageEventType.LOG_LOAD_PAYMENT_DATA_API,
+            'error': PublicErrorCode.BUYER_CANCEL,
+          });
+        }
+      });
     this.onPaymentResponse_(response);
   }
 
@@ -11278,13 +11820,12 @@ class PaymentsAsyncClient {
       'startTimeMs': Date.now(),
       'googleTransactionId': PaymentsAsyncClient.googleTransactionId_,
     };
-    paymentDataRequest['i'] = paymentDataRequest['i'] ?
-        Object.assign(internalParam, paymentDataRequest['i']) :
-        internalParam;
+    paymentDataRequest['i'] = paymentDataRequest['i']
+      ? Object.assign(internalParam, paymentDataRequest['i'])
+      : internalParam;
     return paymentDataRequest;
   }
 }
-
 
 /**
  * Whether the request specifies that the native support has to be disabled.
@@ -11338,7 +11879,6 @@ function isNativeDisabledInRequest(request) {
  *    only for the fraction under 20%.
  */
 
-
 /**
  * @enum {string}
  */
@@ -11358,7 +11898,6 @@ let experimentsString = '';
  * @type {?Object<string, boolean>}
  */
 let experimentMap = null;
-
 
 /**
  * Ensures that the experiments have been initialized and returns them.
@@ -11397,7 +11936,6 @@ function getExperiments(win) {
   }
   return experimentMap;
 }
-
 
 /**
  * @param {!Window} win
@@ -11445,8 +11983,11 @@ function parseSetExperiment(win, experimentMap, spec) {
     try {
       // Set fraction in the experiment to make it unlaunchable.
       const storageKey =
-          'subscribe.google.com:e:' + experimentId + ':' +
-          fraction + (control ? 'c' : '');
+        'subscribe.google.com:e:' +
+        experimentId +
+        ':' +
+        fraction +
+        (control ? 'c' : '');
       let selection = parseSelection(win.sessionStorage.getItem(storageKey));
       if (!selection) {
         // Is experiment/control range?
@@ -11472,17 +12013,18 @@ function parseSetExperiment(win, experimentMap, spec) {
   experimentMap[experimentId] = on;
 }
 
-
 /**
  * @param {?string} s
  * @return {?Selection}
  */
 function parseSelection(s) {
   // Do a simple if-then to inline the whole Selection enum.
-  return s == Selection.EXPERIMENT ? Selection.EXPERIMENT :
-      s == Selection.CONTROL ? Selection.CONTROL : null;
+  return s == Selection.EXPERIMENT
+    ? Selection.EXPERIMENT
+    : s == Selection.CONTROL
+    ? Selection.CONTROL
+    : null;
 }
-
 
 /**
  * Whether the specified experiment is on or off.
@@ -11494,7 +12036,6 @@ function isExperimentOn(win, experimentId) {
   return getExperiments(win)[experimentId] || false;
 }
 
-
 /**
  * Toggles the experiment on or off. Returns the actual value of the experiment
  * after toggling is done.
@@ -11505,7 +12046,6 @@ function isExperimentOn(win, experimentId) {
 function setExperiment(win, experimentId, on) {
   getExperiments(win)[experimentId] = on;
 }
-
 
 /**
  * @return {!Array<string>}
@@ -11566,7 +12106,6 @@ function payDecryptUrl() {
   return PAY_ORIGIN['PRODUCTION'] + '/gp/p/apis/buyflow/process';
 }
 
-
 /**
  */
 class PayClient {
@@ -11577,10 +12116,9 @@ class PayClient {
    */
   constructor(win, activityPorts, dialogManager) {
     /** @const @private {!PayClientBindingDef} */
-    this.binding_ =
-        isExperimentOn(win, ExperimentFlags.GPAY_API) ?
-        new PayClientBindingPayjs(win, activityPorts) :
-        new PayClientBindingSwg(win, activityPorts, dialogManager);
+    this.binding_ = isExperimentOn(win, ExperimentFlags.GPAY_API)
+      ? new PayClientBindingPayjs(win, activityPorts)
+      : new PayClientBindingSwg(win, activityPorts, dialogManager);
   }
 
   /**
@@ -11589,7 +12127,8 @@ class PayClient {
   preconnect(pre) {
     pre.prefetch(payUrl());
     pre.prefetch(
-        'https://payments.google.com/payments/v4/js/integrator.js?ss=md');
+      'https://payments.google.com/payments/v4/js/integrator.js?ss=md'
+    );
     pre.prefetch('https://clients2.google.com/gr/gr_full_2.0.6.js');
     pre.preconnect('https://www.gstatic.com/');
     pre.preconnect('https://fonts.googleapis.com/');
@@ -11620,7 +12159,6 @@ class PayClient {
   }
 }
 
-
 /**
  * @implements {PayClientBindingDef}
  */
@@ -11647,12 +12185,13 @@ class PayClientBindingSwg {
   /** @override */
   start(paymentRequest, options) {
     const opener = this.activityPorts_.open(
-        GPAY_ACTIVITY_REQUEST$1,
-        payUrl(),
-        options.forceRedirect ? '_top' : '_blank',
-        feArgs(paymentRequest),
-        {});
-    this.dialogManager_.popupOpened(opener && opener.targetWin || null);
+      GPAY_ACTIVITY_REQUEST$1,
+      payUrl(),
+      options.forceRedirect ? '_top' : '_blank',
+      feArgs(paymentRequest),
+      {}
+    );
+    this.dialogManager_.popupOpened((opener && opener.targetWin) || null);
   }
 
   /** @override */
@@ -11688,12 +12227,14 @@ class PayClientBindingSwg {
           body: data['redirectEncryptedCallbackData'],
           mode: 'cors',
         });
-        return xhr.fetch(url, init).then(response => response.json())
-            .then(response => {
-              const dataClone = Object.assign({}, data);
-              delete dataClone['redirectEncryptedCallbackData'];
-              return Object.assign(dataClone, response);
-            });
+        return xhr
+          .fetch(url, init)
+          .then(response => response.json())
+          .then(response => {
+            const dataClone = Object.assign({}, data);
+            delete dataClone['redirectEncryptedCallbackData'];
+            return Object.assign(dataClone, response);
+          });
       }
       // Data is supplied directly: must be a verified and secure channel.
       if (result.originVerified && result.secureChannel) {
@@ -11703,7 +12244,6 @@ class PayClientBindingSwg {
     });
   }
 }
-
 
 /**
  * Binding based on the https://github.com/google/payjs.
@@ -11731,12 +12271,15 @@ class PayClientBindingPayjs {
     this.redirectVerifierHelper_ = new RedirectVerifierHelper(this.win_);
 
     /** @private @const {!PaymentsAsyncClient} */
-    this.client_ = this.createClient_({
-      environment: 'PRODUCTION',
-      'i': {
-        'redirectKey': this.redirectVerifierHelper_.restoreKey(),
+    this.client_ = this.createClient_(
+      {
+        environment: 'PRODUCTION',
+        'i': {
+          'redirectKey': this.redirectVerifierHelper_.restoreKey(),
+        },
       },
-    }, this.handleResponse_.bind(this));
+      this.handleResponse_.bind(this)
+    );
 
     // Prepare new verifier pair.
     this.redirectVerifierHelper_.prepare();
@@ -11750,10 +12293,11 @@ class PayClientBindingPayjs {
    */
   createClient_(options, handler) {
     return new PaymentsAsyncClient(
-        options,
-        handler,
-        /* useIframe */ false,
-        this.activityPorts_);
+      options,
+      handler,
+      /* useIframe */ false,
+      this.activityPorts_
+    );
   }
 
   /** @override */
@@ -11768,12 +12312,15 @@ class PayClientBindingPayjs {
         'forceRedirect': options.forceRedirect || false,
       });
     }
-    setInternalParam(paymentRequest, 'disableNative',
-        // The page cannot be iframed at this time. May be relaxed later
-        // for AMP and similar contexts.
-        this.win_ != this.top_() ||
+    setInternalParam(
+      paymentRequest,
+      'disableNative',
+      // The page cannot be iframed at this time. May be relaxed later
+      // for AMP and similar contexts.
+      this.win_ != this.top_() ||
         // Experiment must be enabled.
-        !isExperimentOn(this.win_, ExperimentFlags.GPAY_NATIVE));
+        !isExperimentOn(this.win_, ExperimentFlags.GPAY_NATIVE)
+    );
     // Notice that the callback for verifier may execute asynchronously.
     this.redirectVerifierHelper_.useVerifier(verifier => {
       if (verifier) {
@@ -11830,7 +12377,6 @@ class PayClientBindingPayjs {
     return this.win_.top;
   }
 }
-
 
 /**
  * This helper generates key/verifier pair for the redirect mode. When the
@@ -11899,7 +12445,7 @@ class RedirectVerifierHelper {
           pair = null;
         }
       }
-      callback(pair && pair.verifier || null);
+      callback((pair && pair.verifier) || null);
     });
   }
 
@@ -11909,9 +12455,11 @@ class RedirectVerifierHelper {
    */
   restoreKey() {
     try {
-      return this.win_.localStorage
-          && this.win_.localStorage.getItem(REDIRECT_STORAGE_KEY)
-          || null;
+      return (
+        (this.win_.localStorage &&
+          this.win_.localStorage.getItem(REDIRECT_STORAGE_KEY)) ||
+        null
+      );
     } catch (e) {
       return null;
     }
@@ -11950,11 +12498,13 @@ class RedirectVerifierHelper {
     // c. Crypto random (crypto.getRandomValues);
     // d. SHA284 (crypto.subtle.digest).
     const crypto = this.win_.crypto;
-    if (this.win_.localStorage
-        && crypto
-        && crypto.getRandomValues
-        && crypto.subtle
-        && crypto.subtle.digest) {
+    if (
+      this.win_.localStorage &&
+      crypto &&
+      crypto.getRandomValues &&
+      crypto.subtle &&
+      crypto.subtle.digest
+    ) {
       this.pairPromise_ = new Promise((resolve, reject) => {
         // 1. Use crypto random to create a 128-bit (16 byte) redirect key.
         const keyBytes = new Uint8Array(16);
@@ -11964,23 +12514,30 @@ class RedirectVerifierHelper {
         const key = btoa(bytesToString(keyBytes));
 
         // 3. Create a hash.
-        crypto.subtle.digest({name: 'SHA-384'}, stringToBytes(key))
-            .then(buffer => {
-              const verifier = btoa(bytesToString(new Uint8Array(
-                  /** @type {!ArrayBuffer} */ (buffer))));
-              resolve({key, verifier});
-            }, reason => {
-              reject(reason);
-            });
-      }).catch(() => {
-        // Ignore failures. A failure to create a redirect verifier is often
-        // recoverable.
-        return null;
-      }).then(pair => {
-        this.pairCreated_ = true;
-        this.pair_ = pair;
-        return pair;
-      });
+        crypto.subtle.digest({name: 'SHA-384'}, stringToBytes(key)).then(
+          buffer => {
+            const verifier = btoa(
+              bytesToString(
+                new Uint8Array(/** @type {!ArrayBuffer} */ (buffer))
+              )
+            );
+            resolve({key, verifier});
+          },
+          reason => {
+            reject(reason);
+          }
+        );
+      })
+        .catch(() => {
+          // Ignore failures. A failure to create a redirect verifier is often
+          // recoverable.
+          return null;
+        })
+        .then(pair => {
+          this.pairCreated_ = true;
+          this.pair_ = pair;
+          return pair;
+        });
     } else {
       // Not supported.
       this.pairCreated_ = true;
@@ -11989,16 +12546,15 @@ class RedirectVerifierHelper {
   }
 }
 
-
 /**
  * @param {!Object} paymentRequest
  * @param {string} param
  * @param {*} value
  */
 function setInternalParam(paymentRequest, param, value) {
-  paymentRequest['i'] = Object.assign(
-      paymentRequest['i'] || {},
-      {[param]: value});
+  paymentRequest['i'] = Object.assign(paymentRequest['i'] || {}, {
+    [param]: value,
+  });
 }
 
 /**
@@ -12016,7 +12572,6 @@ function setInternalParam(paymentRequest, param, value) {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 
 class WaitForSubscriptionLookupApi {
   /**
@@ -12044,15 +12599,15 @@ class WaitForSubscriptionLookupApi {
 
     /** @private @const {!ActivityIframeView} */
     this.activityIframeView_ = new ActivityIframeView(
-        this.win_,
-        this.activityPorts_,
-        feUrl('/waitforsubscriptionlookupiframe'),
-        feArgs({
-          publicationId: deps.pageConfig().getPublicationId(),
-          productId: deps.pageConfig().getProductId(),
-        }),
-        /* shouldFadeBody */ true,
-        /* hasLoadingIndicator */ true
+      this.win_,
+      this.activityPorts_,
+      feUrl('/waitforsubscriptionlookupiframe'),
+      feArgs({
+        publicationId: deps.pageConfig().getPublicationId(),
+        productId: deps.pageConfig().getProductId(),
+      }),
+      /* shouldFadeBody */ true,
+      /* hasLoadingIndicator */ true
     );
   }
 
@@ -12062,16 +12617,20 @@ class WaitForSubscriptionLookupApi {
    */
   start() {
     this.openViewPromise_ = this.dialogManager_.openView(
-        this.activityIframeView_);
+      this.activityIframeView_
+    );
 
-    return this.accountPromise_.then(account => {
-      // Account was found.
-      this.dialogManager_.completeView(this.activityIframeView_);
-      return account;
-    }, reason => {
-      this.dialogManager_.completeView(this.activityIframeView_);
-      throw reason;
-    });
+    return this.accountPromise_.then(
+      account => {
+        // Account was found.
+        this.dialogManager_.completeView(this.activityIframeView_);
+        return account;
+      },
+      reason => {
+        this.dialogManager_.completeView(this.activityIframeView_);
+        throw reason;
+      }
+    );
   }
 }
 
@@ -12091,9 +12650,7 @@ class WaitForSubscriptionLookupApi {
  * limitations under the License.
  */
 
-
 class OffersApi {
-
   /**
    * @param {*} config
    * @param {*} fetcher
@@ -12125,10 +12682,12 @@ class OffersApi {
    */
   fetch_(productId) {
     const url = serviceUrl(
-        '/publication/' +
+      '/publication/' +
         encodeURIComponent(this.config_.getPublicationId()) +
         '/offers' +
-        '?label=' + encodeURIComponent(productId));
+        '?label=' +
+        encodeURIComponent(productId)
+    );
     // TODO(dvoytenko): switch to a non-credentialed request after launch.
     return this.fetcher_.fetchCredentialedJson(url).then(json => {
       return json['offers'] || [];
@@ -12162,7 +12721,6 @@ const OFFERS_VIEW_CLOSABLE = true;
  * The class for Offers flow.
  */
 class OffersFlow {
-
   /**
    * @param {*} deps
    * @param {*} options
@@ -12182,24 +12740,25 @@ class OffersFlow {
 
     let isClosable = options && options.isClosable;
     if (isClosable == undefined) {
-      isClosable = false;  // Default is to hide Close button.
+      isClosable = false; // Default is to hide Close button.
     }
 
     /** @private @const {!ActivityIframeView} */
     this.activityIframeView_ = new ActivityIframeView(
-        this.win_,
-        this.activityPorts_,
-        feUrl('/offersiframe'),
-        feArgs({
-          'productId': deps.pageConfig().getProductId(),
-          'publicationId': deps.pageConfig().getPublicationId(),
-          'showNative': deps.callbacks().hasSubscribeRequestCallback(),
-          'productType': ProductType.SUBSCRIPTION,
-          'list': options && options.list || 'default',
-          'skus': options && options.skus || null,
-          'isClosable': isClosable,
-        }),
-        /* shouldFadeBody */ true);
+      this.win_,
+      this.activityPorts_,
+      feUrl('/offersiframe'),
+      feArgs({
+        'productId': deps.pageConfig().getProductId(),
+        'publicationId': deps.pageConfig().getPublicationId(),
+        'showNative': deps.callbacks().hasSubscribeRequestCallback(),
+        'productType': ProductType.SUBSCRIPTION,
+        'list': (options && options.list) || 'default',
+        'skus': (options && options.skus) || null,
+        'isClosable': isClosable,
+      }),
+      /* shouldFadeBody */ true
+    );
   }
 
   /**
@@ -12208,11 +12767,9 @@ class OffersFlow {
    */
   start() {
     // Start/cancel events.
-    this.deps_.callbacks().triggerFlowStarted(
-        SubscriptionFlows.SHOW_OFFERS);
+    this.deps_.callbacks().triggerFlowStarted(SubscriptionFlows.SHOW_OFFERS);
     this.activityIframeView_.onCancel(() => {
-      this.deps_.callbacks().triggerFlowCanceled(
-          SubscriptionFlows.SHOW_OFFERS);
+      this.deps_.callbacks().triggerFlowCanceled(SubscriptionFlows.SHOW_OFFERS);
     });
 
     // If result is due to OfferSelection, redirect to payments.
@@ -12225,9 +12782,9 @@ class OffersFlow {
       }
       if (result['sku']) {
         new PayStartFlow(
-            this.deps_,
-            /** @type {string} */ (result['sku']))
-            .start();
+          this.deps_,
+          /** @type {string} */ (result['sku'])
+        ).start();
         return;
       }
       if (result['native']) {
@@ -12240,18 +12797,15 @@ class OffersFlow {
   }
 }
 
-
 /**
  * The class for subscribe option flow.
  */
 class SubscribeOptionFlow {
-
   /**
    * @param {*} deps
    * @param {*} options
    */
   constructor(deps, options) {
-
     /** @private @const {*} */
     this.deps_ = deps;
 
@@ -12266,17 +12820,18 @@ class SubscribeOptionFlow {
 
     /** @private @const {!ActivityIframeView} */
     this.activityIframeView_ = new ActivityIframeView(
-        deps.win(),
-        this.activityPorts_,
-        feUrl('/optionsiframe'),
-        feArgs({
-          'publicationId': deps.pageConfig().getPublicationId(),
-          'productId': deps.pageConfig().getProductId(),
-          'list': options && options.list || 'default',
-          'skus': options && options.skus || null,
-          'isClosable': true,
-        }),
-        /* shouldFadeBody */ false);
+      deps.win(),
+      this.activityPorts_,
+      feUrl('/optionsiframe'),
+      feArgs({
+        'publicationId': deps.pageConfig().getPublicationId(),
+        'productId': deps.pageConfig().getProductId(),
+        'list': (options && options.list) || 'default',
+        'skus': (options && options.skus) || null,
+        'isClosable': true,
+      }),
+      /* shouldFadeBody */ false
+    );
   }
 
   /**
@@ -12285,22 +12840,27 @@ class SubscribeOptionFlow {
    */
   start() {
     // Start/cancel events.
-    this.deps_.callbacks().triggerFlowStarted(
-        SubscriptionFlows.SHOW_SUBSCRIBE_OPTION);
+    this.deps_
+      .callbacks()
+      .triggerFlowStarted(SubscriptionFlows.SHOW_SUBSCRIBE_OPTION);
     this.activityIframeView_.onCancel(() => {
-      this.deps_.callbacks().triggerFlowCanceled(
-          SubscriptionFlows.SHOW_SUBSCRIBE_OPTION);
+      this.deps_
+        .callbacks()
+        .triggerFlowCanceled(SubscriptionFlows.SHOW_SUBSCRIBE_OPTION);
     });
 
     this.activityIframeView_.onMessage(data => {
       this.maybeOpenOffersFlow_(data);
     });
-    this.activityIframeView_.acceptResult().then(result => {
-      this.maybeOpenOffersFlow_(result.data);
-    }, reason => {
-      this.dialogManager_.completeView(this.activityIframeView_);
-      throw reason;
-    });
+    this.activityIframeView_.acceptResult().then(
+      result => {
+        this.maybeOpenOffersFlow_(result.data);
+      },
+      reason => {
+        this.dialogManager_.completeView(this.activityIframeView_);
+        throw reason;
+      }
+    );
     return this.dialogManager_.openView(this.activityIframeView_);
   }
 
@@ -12319,19 +12879,16 @@ class SubscribeOptionFlow {
   }
 }
 
-
 /**
  * The class for Abbreviated Offer flow.
  *
  */
 class AbbrvOfferFlow {
-
   /**
    * @param {*} deps
    * @param {*} options
    */
   constructor(deps, options = {}) {
-
     /** @private @const {*} */
     this.deps_ = deps;
 
@@ -12349,18 +12906,19 @@ class AbbrvOfferFlow {
 
     /** @private @const {!ActivityIframeView} */
     this.activityIframeView_ = new ActivityIframeView(
-        this.win_,
-        this.activityPorts_,
-        feUrl('/abbrvofferiframe'),
-        feArgs({
-          'publicationId': deps.pageConfig().getPublicationId(),
-          'productId': deps.pageConfig().getProductId(),
-          'showNative': deps.callbacks().hasSubscribeRequestCallback(),
-          'list': options && options.list || 'default',
-          'skus': options && options.skus || null,
-          'isClosable': true,
-        }),
-        /* shouldFadeBody */ false);
+      this.win_,
+      this.activityPorts_,
+      feUrl('/abbrvofferiframe'),
+      feArgs({
+        'publicationId': deps.pageConfig().getPublicationId(),
+        'productId': deps.pageConfig().getProductId(),
+        'showNative': deps.callbacks().hasSubscribeRequestCallback(),
+        'list': (options && options.list) || 'default',
+        'skus': (options && options.skus) || null,
+        'isClosable': true,
+      }),
+      /* shouldFadeBody */ false
+    );
   }
 
   /**
@@ -12369,11 +12927,13 @@ class AbbrvOfferFlow {
    */
   start() {
     // Start/cancel events.
-    this.deps_.callbacks().triggerFlowStarted(
-        SubscriptionFlows.SHOW_ABBRV_OFFER);
+    this.deps_
+      .callbacks()
+      .triggerFlowStarted(SubscriptionFlows.SHOW_ABBRV_OFFER);
     this.activityIframeView_.onCancel(() => {
-      this.deps_.callbacks().triggerFlowCanceled(
-          SubscriptionFlows.SHOW_ABBRV_OFFER);
+      this.deps_
+        .callbacks()
+        .triggerFlowCanceled(SubscriptionFlows.SHOW_ABBRV_OFFER);
     });
 
     // If the user is already subscribed, trigger login flow
@@ -12455,9 +13015,7 @@ class AbbrvOfferFlow {
  * limitations under the License.
  */
 
-
 class Preconnect {
-
   /**
    * @param {!Document} doc
    */
@@ -12532,9 +13090,7 @@ class Preconnect {
 
 const PREFIX = 'subscribe.google.com';
 
-
 class Storage {
-
   /**
    * @param {!Window} win
    */
@@ -12606,7 +13162,6 @@ class Storage {
   }
 }
 
-
 /**
  * @param {string} key
  * @return {string}
@@ -12634,8 +13189,9 @@ Dual licensed under the MIT and GPL licenses.
  * since we are only using uuidFast().
  */
 
-const CHARS$1 =
-    '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'.split('');
+const CHARS$1 = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'.split(
+  ''
+);
 
 function uuidFast() {
   const uuid = new Array(36);
@@ -12648,11 +13204,11 @@ function uuidFast() {
       uuid[i] = '4';
     } else {
       if (rnd <= 0x02) {
-        rnd = 0x2000000 + (Math.random() * 0x1000000) | 0;
+        rnd = (0x2000000 + Math.random() * 0x1000000) | 0;
       }
       r = rnd & 0xf;
       rnd = rnd >> 4;
-      uuid[i] = CHARS$1[(i == 19) ? (r & 0x3) | 0x8 : r];
+      uuid[i] = CHARS$1[i == 19 ? (r & 0x3) | 0x8 : r];
     }
   }
   return uuid.join('');
@@ -12679,13 +13235,11 @@ const iframeStyles = {
   display: 'none',
 };
 
-
 class AnalyticsService {
   /**
    * @param {*} deps
    */
   constructor(deps) {
-
     /** @private @const {*} */
     this.doc_ = deps.doc();
 
@@ -12693,9 +13247,11 @@ class AnalyticsService {
     this.activityPorts_ = deps.activities();
 
     /** @private @const {!HTMLIFrameElement} */
-    this.iframe_ =
-        /** @type {!HTMLIFrameElement} */ (createElement(
-            this.doc_.getWin().document, 'iframe', {}));
+    this.iframe_ = /** @type {!HTMLIFrameElement} */ (createElement(
+      this.doc_.getWin().document,
+      'iframe',
+      {}
+    ));
 
     setImportantStyles(this.iframe_, iframeStyles);
 
@@ -12818,11 +13374,12 @@ class AnalyticsService {
     if (!this.serviceReady_) {
       // TODO(sohanirao): Potentially do this even earlier
       this.doc_.getBody().appendChild(this.getElement());
-      this.serviceReady_ = this.activityPorts_.openIframe(
-          this.iframe_, this.src_, this.args_).then(port => {
-            this.setContext_();
-            return port.whenReady().then(() => port);
-          });
+      this.serviceReady_ = this.activityPorts_
+        .openIframe(this.iframe_, this.src_, this.args_)
+        .then(port => {
+          this.setContext_();
+          return port.whenReady().then(() => port);
+        });
     }
     return this.serviceReady_;
   }
@@ -12935,7 +13492,8 @@ class PropensityServer {
     if (!this.clientId_) {
       // Match '__gads' (name of the cookie) dropped by Ads Tag.
       const gadsmatch = this.getDocumentCookie_().match(
-          '(^|;)\\s*__gads\\s*=\\s*([^;]+)');
+        '(^|;)\\s*__gads\\s*=\\s*([^;]+)'
+      );
       // Since the cookie will be consumed using decodeURIComponent(),
       // use encodeURIComponent() here to match.
       this.clientId_ = gadsmatch && encodeURIComponent(gadsmatch.pop());
@@ -12964,9 +13522,12 @@ class PropensityServer {
     if (entitlements) {
       userState = userState + ':' + encodeURIComponent(entitlements);
     }
-    let url = adsUrl('/subopt/data?states=')
-        + encodeURIComponent(userState) + '&u_tz=240'
-        + '&v=' + this.version_;
+    let url =
+      adsUrl('/subopt/data?states=') +
+      encodeURIComponent(userState) +
+      '&u_tz=240' +
+      '&v=' +
+      this.version_;
     if (clientId) {
       url = url + '&cookie=' + clientId;
     }
@@ -12987,9 +13548,12 @@ class PropensityServer {
     if (context) {
       eventInfo = eventInfo + ':' + encodeURIComponent(context);
     }
-    let url = adsUrl('/subopt/data?events=')
-        + encodeURIComponent(eventInfo) + '&u_tz=240'
-        + '&v=' + this.version_;
+    let url =
+      adsUrl('/subopt/data?events=') +
+      encodeURIComponent(eventInfo) +
+      '&u_tz=240' +
+      '&v=' +
+      this.version_;
     if (clientId) {
       url = url + '&cookie=' + clientId;
     }
@@ -13001,14 +13565,12 @@ class PropensityServer {
    * @return {*}
    */
   parsePropensityResponse_(response) {
-    let defaultScore =
-        /** @type {*} */ ({});
+    let defaultScore = /** @type {*} */ ({});
     if (!response['header']) {
-      defaultScore =
-        /** @type {*} */ ({
-          header: {ok: false},
-          body: {result: 'No valid response'},
-        });
+      defaultScore = /** @type {*} */ ({
+        header: {ok: false},
+        body: {result: 'No valid response'},
+      });
     }
     const status = response['header'];
     if (status['ok']) {
@@ -13025,11 +13587,10 @@ class PropensityServer {
           } else {
             value = result['error_message'];
           }
-          defaultScore =
-            /** @type {*} */ ({
-              header: {ok: scoreStatus},
-              body: {result: value},
-            });
+          defaultScore = /** @type {*} */ ({
+            header: {ok: scoreStatus},
+            body: {result: value},
+          });
           break;
         }
       }
@@ -13060,17 +13621,25 @@ class PropensityServer {
       method: 'GET',
       credentials: 'include',
     });
-    let url = adsUrl('/subopt/pts?products=') + this.publicationId_
-        + '&type=' + type + '&u_tz=240'
-        + '&ref=' + referrer
-        + '&v=' + this.version_;
+    let url =
+      adsUrl('/subopt/pts?products=') +
+      this.publicationId_ +
+      '&type=' +
+      type +
+      '&u_tz=240' +
+      '&ref=' +
+      referrer +
+      '&v=' +
+      this.version_;
     if (clientId) {
       url = url + '&cookie=' + clientId;
     }
-    return this.xhr_.fetch(url, init).then(result => result.json())
-        .then(response => {
-          return this.parsePropensityResponse_(response);
-        });
+    return this.xhr_
+      .fetch(url, init)
+      .then(result => result.json())
+      .then(response => {
+        return this.parsePropensityResponse_(response);
+      });
   }
 }
 
@@ -13094,7 +13663,6 @@ class PropensityServer {
  * @implements {PropensityApi.PropensityApi}
  */
 class Propensity {
-
   /**
    * @param {!Window} win
    * @param {*} pageConfig
@@ -13103,8 +13671,10 @@ class Propensity {
     /** @private @const {!Window} */
     this.win_ = win;
     /** @private {PropensityServer} */
-    this.propensityServer_ = new PropensityServer(win,
-        pageConfig.getPublicationId());
+    this.propensityServer_ = new PropensityServer(
+      win,
+      pageConfig.getPublicationId()
+    );
   }
 
   /** @override */
@@ -13112,11 +13682,15 @@ class Propensity {
     if (!Object.values(SubscriptionState).includes(state)) {
       throw new Error('Invalid subscription state provided');
     }
-    if ((SubscriptionState.SUBSCRIBER == state ||
-         SubscriptionState.PAST_SUBSCRIBER == state)
-        && !jsonEntitlements) {
-      throw new Error('Entitlements must be provided for users with'
-          + ' active or expired subscriptions');
+    if (
+      (SubscriptionState.SUBSCRIBER == state ||
+        SubscriptionState.PAST_SUBSCRIBER == state) &&
+      !jsonEntitlements
+    ) {
+      throw new Error(
+        'Entitlements must be provided for users with' +
+          ' active or expired subscriptions'
+      );
     }
     if (jsonEntitlements && !isObject(jsonEntitlements)) {
       throw new Error('Entitlements must be an Object');
@@ -13136,8 +13710,10 @@ class Propensity {
     if (!type) {
       type = PropensityType.GENERAL;
     }
-    return this.propensityServer_.getPropensity(this.win_.document.referrer,
-        type);
+    return this.propensityServer_.getPropensity(
+      this.win_.document.referrer,
+      type
+    );
   }
 
   /** @override */
@@ -13155,6 +13731,209 @@ class Propensity {
       paramString = JSON.stringify(userEvent.data);
     }
     this.propensityServer_.sendEvent(userEvent.name, paramString);
+  }
+}
+
+/**
+ * Copyright 2019 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/** @enum {number}  */
+const FilterResult = {
+  /** The event is allowed to proceed to the listeners. */
+  PROCESS_EVENT: 0,
+  /** The event is canceled and the listeners are not informed about it. */
+  CANCEL_EVENT: 1,
+};
+
+/**
+ * Defines a client event in SwG
+ * Properties:
+ * - eventType: Required. The AnalyticsEvent type that occurred.
+ * - eventOriginator: Required.  The codebase that initiated the event.
+ * - isFromUserAction: Optional.  True if the user took an action to generate
+ *   the event.
+ * - additionalParameters: Optional.  A JSON object to store generic data.
+ *
+ *  @typedef {{
+ *    eventType: !AnalyticsEvent,
+ *    eventOriginator: !EventOriginator,
+ *    isFromUserAction: ?boolean,
+ *    additionalParameters: ?Object,
+ * }}
+ */
+let ClientEvent;
+
+/**
+ * @interface
+ */
+class ClientEventManagerApi {
+  /**
+   * Call this function to log an event. The registered listeners will be
+   * invoked unless the event is filtered.
+   * @param {!function(!ClientEvent)} listener
+   */
+  registerEventListener(listener) {}
+
+  /**
+   * Register a filterer for events if you need to potentially prevent the
+   * listeners from hearing about it.  A filterer should return
+   * FilterResult.CANCEL_EVENT to prevent listeners from hearing about the
+   * event.
+   * @param {!function(!ClientEvent):FilterResult} filterer
+   */
+  registerEventFilterer(filterer) {}
+
+  /**
+   * Call this function to log an event.  It will immediately throw an error if
+   * the event is invalid.  It will then asynchronously call the filterers and
+   * stop the event if a filterer cancels it.  After that, it will call each
+   * listener asynchronously.
+   * @param {!ClientEvent} event
+   */
+  logEvent(event) {}
+}
+
+/**
+ * Copyright 2019 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Helper function to describe an issue with an event object
+ * @param {!string} valueName
+ * @param {?*} value
+ * @returns {!string}
+ */
+function createEventErrorMessage(valueName, value) {
+  return 'Event has an invalid ' + valueName + '(' + value + ')';
+}
+
+/**
+ * Throws an error if the event is invalid.
+ * @param {!../api/client-event-manager-api.ClientEvent} event
+ */
+function validateEvent(event) {
+  if (!isObject(event)) {
+    throw new Error('Event must be a valid object');
+  }
+
+  if (!isEnumValue(AnalyticsEvent, event.eventType)) {
+    throw new Error(createEventErrorMessage('eventType', event.eventType));
+  }
+
+  if (!isEnumValue(EventOriginator, event.eventOriginator)) {
+    throw new Error(
+      createEventErrorMessage('eventOriginator', event.eventOriginator)
+    );
+  }
+
+  if (
+    !isObject(event.additionalParameters) &&
+    event.additionalParameters !== null
+  ) {
+    throw new Error(
+      createEventErrorMessage(
+        'additionalParameters',
+        event.additionalParameters
+      )
+    );
+  }
+
+  if (event.isFromUserAction !== null && !isBoolean(event.isFromUserAction)) {
+    throw new Error(
+      createEventErrorMessage('isFromUserAction', event.isFromUserAction)
+    );
+  }
+}
+
+/** @implements {../api/client-event-manager-api.ClientEventManagerApi} */
+class ClientEventManager {
+  constructor() {
+    /** @private {!Array<function(!../api/client-event-manager-api.ClientEvent)>} */
+    this.listeners_ = [];
+
+    /** @private {!Array<function(!../api/client-event-manager-api.ClientEvent):!FilterResult>} */
+    this.filterers_ = [];
+
+    /** @private {?Promise} */
+    this.lastAction_ = null;
+  }
+
+  /**
+   * @overrides
+   */
+  registerEventListener(listener) {
+    if (!isFunction(listener)) {
+      throw new Error('Event manager listeners must be a function');
+    }
+    this.listeners_.push(listener);
+  }
+
+  /**
+   * @overrides
+   */
+  registerEventFilterer(filterer) {
+    if (!isFunction(filterer)) {
+      throw new Error('Event manager filterers must be a function');
+    }
+    this.filterers_.push(filterer);
+  }
+
+  /**
+   * @overrides
+   */
+  logEvent(event) {
+    validateEvent(event);
+    this.lastAction_ = new Promise(resolve => {
+      for (let filterer = 0; filterer < this.filterers_.length; filterer++) {
+        if (this.filterers_[filterer](event) === FilterResult.CANCEL_EVENT) {
+          resolve();
+          return;
+        }
+      }
+      for (let listener = 0; listener < this.listeners_.length; listener++) {
+        this.listeners_[listener](event);
+      }
+      resolve();
+    });
+  }
+
+  /**
+   * This function exists for the sole purpose of allowing the code to be
+   * presubmitted.  It can be removed once there is code generating a real
+   * event object somewhere.
+   */
+  useValidateEventForCompilationPurposes() {
+    validateEvent({
+      eventType: AnalyticsEvent.UNKNOWN,
+      eventOriginator: EventOriginator.UNKNOWN_CLIENT,
+      isFromUserAction: null,
+      additionalParameters: {},
+    });
   }
 }
 
@@ -13179,7 +13958,6 @@ class Propensity {
  * @implements {Subscriptions}
  */
 class ConfiguredRuntime {
-
   /**
    * @param {!Window|!Document|!Doc} winOrDoc
    * @param {*} pageConfig
@@ -13189,6 +13967,9 @@ class ConfiguredRuntime {
    * @param {*} opt_config
    */
   constructor(winOrDoc, pageConfig, opt_integr, opt_config) {
+    /** @private @const {!ClientEventManager} */
+    this.eventManager_ = new ClientEventManager();
+
     /** @private @const {!Doc} */
     this.doc_ = resolveDoc(winOrDoc);
 
@@ -13216,8 +13997,8 @@ class ConfiguredRuntime {
     this.jserror_ = new JsError(this.doc_);
 
     /** @private @const {!Fetcher} */
-    this.fetcher_ = opt_integr && opt_integr.fetcher ||
-        new XhrFetcher(this.win_);
+    this.fetcher_ =
+      (opt_integr && opt_integr.fetcher) || new XhrFetcher(this.win_);
 
     /** @private @const {!Storage} */
     this.storage_ = new Storage(this.win_);
@@ -13230,7 +14011,10 @@ class ConfiguredRuntime {
 
     /** @private @const {!PayClient} */
     this.payClient_ = new PayClient(
-        this.win_, this.activityPorts_, this.dialogManager_);
+      this.win_,
+      this.activityPorts_,
+      this.dialogManager_
+    );
 
     /** @private @const {!Callbacks} */
     this.callbacks_ = new Callbacks();
@@ -13240,7 +14024,11 @@ class ConfiguredRuntime {
 
     /** @private @const {!EntitlementsManager} */
     this.entitlementsManager_ = new EntitlementsManager(
-        this.win_, this.pageConfig_, this.fetcher_, this);
+      this.win_,
+      this.pageConfig_,
+      this.fetcher_,
+      this
+    );
 
     /** @private @const {!OffersApi} */
     this.offersApi_ = new OffersApi(this.pageConfig_, this.fetcher_);
@@ -13249,8 +14037,7 @@ class ConfiguredRuntime {
     this.buttonApi_ = new ButtonApi(this.doc_);
 
     /** @private @const {!Propensity} */
-    this.propensityModule_ = new Propensity(this.win_,
-      this.pageConfig_);
+    this.propensityModule_ = new Propensity(this.win_, this.pageConfig_);
 
     const preconnect = new Preconnect(this.win_.document);
 
@@ -13345,15 +14132,13 @@ class ConfiguredRuntime {
     for (const k in config) {
       const v = config[k];
       if (k == 'windowOpenMode') {
-        if (v != WindowOpenMode.AUTO &&
-            v != WindowOpenMode.REDIRECT) {
+        if (v != WindowOpenMode.AUTO && v != WindowOpenMode.REDIRECT) {
           error = 'Unknown windowOpenMode: ' + v;
         }
       } else if (k == 'experiments') {
         v.forEach(experiment => setExperiment(this.win_, experiment, true));
       } else if (k == 'analyticsMode') {
-        if (v != AnalyticsMode.DEFAULT &&
-            v != AnalyticsMode.IMPRESSIONS) {
+        if (v != AnalyticsMode.DEFAULT && v != AnalyticsMode.IMPRESSIONS) {
           error = 'Unknown analytics mode: ' + v;
         }
       } else {
@@ -13395,8 +14180,9 @@ class ConfiguredRuntime {
 
   /** @override */
   getEntitlements(opt_encryptedDocumentKey) {
-    return this.entitlementsManager_.getEntitlements(opt_encryptedDocumentKey)
-        .then(entitlements => entitlements.clone());
+    return this.entitlementsManager_
+      .getEntitlements(opt_encryptedDocumentKey)
+      .then(entitlements => entitlements.clone());
   }
 
   /** @override */
@@ -13502,8 +14288,10 @@ class ConfiguredRuntime {
 
   /** @override */
   subscribe(skuOrSubscriptionRequest) {
-    if (typeof skuOrSubscriptionRequest != 'string' &&
-        !isExperimentOn(this.win_, ExperimentFlags.REPLACE_SUBSCRIPTION)) {
+    if (
+      typeof skuOrSubscriptionRequest != 'string' &&
+      !isExperimentOn(this.win_, ExperimentFlags.REPLACE_SUBSCRIPTION)
+    ) {
       throw new Error('Not yet launched!');
     }
     return this.documentParsed_.then(() => {
@@ -13524,7 +14312,10 @@ class ConfiguredRuntime {
 
     return this.documentParsed_.then(() => {
       return new PayStartFlow(
-          this, skuOrSubscriptionRequest, ProductType.UI_CONTRIBUTION).start();
+        this,
+        skuOrSubscriptionRequest,
+        ProductType.UI_CONTRIBUTION
+      ).start();
     });
   }
 
@@ -13563,12 +14354,21 @@ class ConfiguredRuntime {
       throw new Error('Not yet launched!');
     }
     this.buttonApi_.attachSmartButton(
-        this, button, optionsOrCallback, opt_callback);
+      this,
+      button,
+      optionsOrCallback,
+      opt_callback
+    );
   }
 
   /** @override */
   getPropensityModule() {
     return Promise.resolve(this.propensityModule_);
+  }
+
+  /** @override */
+  eventManager() {
+    return this.eventManager_;
   }
 }
 
@@ -13588,11 +14388,13 @@ class ConfiguredRuntime {
  * limitations under the License.
  */
 
-
 export {
   ConfiguredRuntime,
   Entitlements,
   Entitlement,
   Fetcher,
   SubscribeResponse,
+  ClientEventManagerApi,
+  ClientEvent,
+  FilterResult,
 };
