@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {getFormAsObject, isDisabled} from '../../src/form.js';
+import {getFormAsObject, isDisabled, isFieldDefault} from '../../src/form.js';
 
 describes.realWin('getFormAsObject', {}, env => {
   let form;
@@ -413,6 +413,175 @@ describes.fakeWin('isDisabled', {}, env => {
       element.disabled = true;
       elementAncestralFieldset.disabled = false;
       expect(isDisabled(element)).to.be.true;
+    });
+  });
+});
+
+describes.realWin('isFieldDefault', {}, env => {
+  let doc;
+
+  beforeEach(() => {
+    doc = env.win.document;
+  });
+
+  describe('text field', () => {
+    let textField;
+
+    beforeEach(() => {
+      // Element is inserted as HTML so that the `defaultValue` property is
+      // generated correctly, since it returns "the default value as
+      // **originally specified in the HTML** that created this object."
+      // https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement#Properties
+      const html = '<input type="text" value="default">';
+      doc.body.insertAdjacentHTML('afterbegin', html);
+      textField = doc.querySelector('input');
+    });
+
+    it("returns true if text field's value matches its default value", () => {
+      textField.value = 'default';
+      expect(isFieldDefault(textField)).to.be.true;
+    });
+
+    it("returns false if text field's value does not match its default value", () => {
+      textField.value = 'not default';
+      expect(isFieldDefault(textField)).to.be.false;
+    });
+  });
+
+  describe('textarea', () => {
+    let textarea;
+
+    beforeEach(() => {
+      // Element is inserted as HTML so that the `defaultValue` property is
+      // generated correctly, since it returns "the default value as
+      // **originally specified in the HTML** that created this object."
+      // https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement#Properties
+      const html = '<textarea>default</textarea>';
+      doc.body.insertAdjacentHTML('afterbegin', html);
+      textarea = doc.querySelector('textarea');
+    });
+
+    it("returns true if textarea's value matches its default value", () => {
+      textarea.value = 'default';
+      expect(isFieldDefault(textarea)).to.be.true;
+    });
+
+    it("returns false if textarea's value does not match its default value", () => {
+      textarea.value = 'not default';
+      expect(isFieldDefault(textarea)).to.be.false;
+    });
+  });
+
+  describe('radio button', () => {
+    let optionA, optionB;
+
+    beforeEach(() => {
+      // Element is inserted as HTML so that the `defaultChecked` property is
+      // generated correctly, since it returns "the default state as
+      // **originally specified in the HTML** that created this object."
+      // https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement#Properties
+      const html = `
+          <input type="radio" id="radio-a" name="radio" value="A" checked>
+          <input type="radio" id="radio-b" name="radio" value="B">
+        `;
+      doc.body.insertAdjacentHTML('afterbegin', html);
+      optionA = doc.querySelector('#radio-a');
+      optionB = doc.querySelector('#radio-b');
+    });
+
+    it('returns true if the radio button is in its default state', () => {
+      optionA.checked = true;
+      expect(isFieldDefault(optionA)).to.be.true;
+      expect(isFieldDefault(optionB)).to.be.true;
+    });
+
+    it('returns false if the radio button is not in its default state', () => {
+      optionB.checked = true;
+      expect(isFieldDefault(optionA)).to.be.false;
+      expect(isFieldDefault(optionB)).to.be.false;
+    });
+  });
+
+  describe('checkbox', () => {
+    let checkbox;
+
+    beforeEach(() => {
+      // Element is inserted as HTML so that the `defaultChecked` property is
+      // generated correctly, since it returns "the default state as
+      // **originally specified in the HTML** that created this object."
+      // https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement#Properties
+      const html = '<input type="checkbox" checked>';
+      doc.body.insertAdjacentHTML('afterbegin', html);
+      checkbox = doc.querySelector('input');
+    });
+
+    it('returns true if checkbox is in its default state', () => {
+      checkbox.checked = true;
+      expect(isFieldDefault(checkbox)).to.be.true;
+    });
+
+    it('returns false if checkbox is not in its default state', () => {
+      checkbox.checked = false;
+      expect(isFieldDefault(checkbox)).to.be.false;
+    });
+  });
+
+  describe('single select dropdown', () => {
+    let dropdown;
+
+    beforeEach(() => {
+      // Element is inserted as HTML so that the `defaultSelected` property is
+      // generated correctly, since it returns "the default state as
+      // **originally specified in the HTML** that created this object."
+      // https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement#Properties
+      const html = `
+          <select>
+            <option value="A" selected>A</option>
+            <option value="B">B</option>
+          </select>
+        `;
+      doc.body.insertAdjacentHTML('afterbegin', html);
+      dropdown = doc.querySelector('select');
+    });
+
+    it("returns true if the dropdown's selections match its default selections", () => {
+      dropdown.options[0].selected = true;
+      expect(isFieldDefault(dropdown)).to.be.true;
+    });
+
+    it("returns false if the dropdown's selections does not match its default selections", () => {
+      dropdown.options[1].selected = true;
+      expect(isFieldDefault(dropdown)).to.be.false;
+    });
+  });
+
+  describe('multi select dropdown', () => {
+    let dropdown;
+
+    beforeEach(() => {
+      // Element is inserted as HTML so that the `defaultSelected` property is
+      // generated correctly, since it returns "the default state as
+      // **originally specified in the HTML** that created this object."
+      // https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement#Properties
+      const html = `
+          <select>
+            <option value="A" selected>A</option>
+            <option value="B">B</option>
+          </select>
+        `;
+      doc.body.insertAdjacentHTML('afterbegin', html);
+      dropdown = doc.querySelector('select');
+    });
+
+    it("returns true if the dropdown's selections match its default selections", () => {
+      dropdown.options[0].selected = true;
+      expect(isFieldDefault(dropdown)).to.be.true;
+    });
+
+    it("returns false if the dropdown's selections does not match its default selections", () => {
+      dropdown.options[0].selected = true;
+      dropdown.options[1].selected = true;
+      expect(isFieldDefault(dropdown)).to.be.false;
     });
   });
 });
