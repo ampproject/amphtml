@@ -138,8 +138,13 @@ describe
   });
 
 function waitForImageToLoad(document) {
-  return poll('wait for img4 to load', () => {
-    const img = document.querySelector('img[amp-img-id="img4"]');
-    return img !== null;
-  });
+  return poll(
+    'wait for img4 to load',
+    () => {
+      const img = document.querySelector('img[amp-img-id="img4"]');
+      return img !== null;
+    },
+    () => {},
+    8000
+  );
 }
