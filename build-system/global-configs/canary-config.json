@@ -38,7 +38,7 @@
   "amp-sidebar toolbar": 1,
   "amp-story-responsive-units": 1,
   "amp-story-v1": 1,
-  "ampdoc-closest": 0.01,
+  "ampdoc-closest": 1,
   "as-use-attr-for-format": 0.01,
   "blurry-placeholder": 1,
   "chunked-amp": 1,
