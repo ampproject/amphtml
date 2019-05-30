@@ -16,6 +16,7 @@
 
 import {
   ALLOW_SOURCE_ORIGIN_HEADER,
+  fromStructuredCloneable,
   getViewerAuthTokenIfAvailable,
   getViewerInterceptResponse,
   setupAMPCors,
@@ -220,6 +221,32 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
           );
         }
       );
+    });
+  });
+
+  describe('fromStructuredCloneable', () => {
+    it('should handle JSON response', () => {
+      const jsonResponse = {
+        'body': {
+          'json': {
+            'items': [
+              {
+                'title': 'AMP Dev',
+                'url': 'http://amp.dev',
+              },
+            ],
+          },
+        },
+        'init': {
+          'headers': {
+            'Content-Type': 'application/json',
+          },
+        },
+      };
+      const resp = fromStructuredCloneable(jsonResponse, undefined);
+      return resp.json().then(json => {
+        expect(json.items).to.deep.equal(jsonResponse.body.json.items);
+      });
     });
   });
 

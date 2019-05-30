@@ -109,7 +109,8 @@ export function toStructuredCloneable(input, init) {
  * of the response in as `headers`, `status` and `statusText` properties of
  * `init`.
  *
- * 3. Include the body of the response serialized as string in `body`.
+ * 3. Include the body of the response serialized as string in `body` or as
+ * JSON array in `response[body][json]`.
  *
  * 4. Return a new object having properties `body` and `init`.
  *
@@ -136,16 +137,17 @@ export function fromStructuredCloneable(response, responseType) {
 
   const isDocumentType = responseType == 'document';
   if (!isDocumentType) {
-    // Use native `Response` type if available for performance. If response
-    // type is `document`, we must fall back to `FetchResponse` polyfill
-    // because callers would then rely on the `responseXML` property being
-    // present, which is not supported by the Response type.
     let body = response['body'];
-    if (body['json'] && isArray(body['json']['items'])) {
+    // Handle JSON response.
+    if (body && body['json']) {
       const init = {type: 'application/json'};
       body = new Blob([JSON.stringify(body['json'])], init);
     }
 
+    // Use native `Response` type if available for performance. If response
+    // type is `document`, we must fall back to `FetchResponse` polyfill
+    // because callers would then rely on the `responseXML` property being
+    // present, which is not supported by the Response type.
     return new Response(body, response['init']);
   }
 
