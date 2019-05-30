@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
+import {ATTR_PREFIX, Variants, allocateVariant} from './variant';
 import {Layout} from '../../../src/layout';
-import {Variants, allocateVariant} from './variant';
+import {Services} from '../../../src/services';
 import {devAssert, user, userAssert} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {
   installOriginExperimentsForDoc,
@@ -48,24 +50,27 @@ export class AmpExperiment extends AMP.BaseElement {
       const variantsService = responses[0];
       const enabled = responses[1];
 
-      let config = {};
+      let config = dict({});
 
       try {
-
         config = this.getConfig_();
 
         if (!enabled) {
           user().error(TAG, 'Experiment amp-experiment-1.0 is not enabled.');
 
           // Ensure downstream consumers don't wait for the promise forever.
-          variantsService.init(Promise.resolve(this.getEmptyExperimentToVariant_(config)));
+          variantsService.init(
+            Promise.resolve(this.getEmptyExperimentToVariant_(config))
+          );
 
-          return Promise.reject('Experiment amp-experiment-1.0 is not enabled.');
+          return Promise.reject(
+            'Experiment amp-experiment-1.0 is not enabled.'
+          );
         }
 
         const ampdoc = this.getAmpDoc();
 
-         // All experiments can be disabled by a hash param
+        // All experiments can be disabled by a hash param
         const viewer = Services.viewerForDoc(ampdoc);
         const override = viewer.getParam(
           ATTR_PREFIX + '_disable_all_experiments_'
@@ -156,7 +161,7 @@ export class AmpExperiment extends AMP.BaseElement {
     ));
   }
 
-    /**
+  /**
    * Function to return an empty experiment to variant
    * Object. This is useful for type checking in analytics
    * and disabling all experiments manually.
