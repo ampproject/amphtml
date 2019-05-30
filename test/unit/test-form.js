@@ -674,16 +674,16 @@ describes.fakeWin('isFieldEmpty', {}, env => {
   });
 
   describe('dropdown menu', () => {
-    it('always returns false because at least one option is always selected', () => {
+    it('always returns false', () => {
       const dropdown = doc.createElement('select');
-
       const optionA = doc.createElement('option');
-      dropdown.appendChild(optionA);
       const optionB = doc.createElement('option');
+      dropdown.appendChild(optionA);
       dropdown.appendChild(optionB);
 
       optionA.selected = false;
-      expect(optionA.selected).to.be.true;
+      optionB.selected = false;
+
       expect(isFieldEmpty(dropdown)).to.be.false;
     });
   });
