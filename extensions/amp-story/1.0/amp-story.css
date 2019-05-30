@@ -66,12 +66,12 @@ amp-story {
 }
 
 html.i-amphtml-story-standalone {
-  font-size: calc(2.5 * var(--i-amphtml-story-vmax, 8px));
+  font-size: calc(2.5 * var(--story-page-vmax, 8px));
 }
 
 html.i-amphtml-story-standalone,
 html.i-amphtml-story-standalone body {
-  font-size: calc(2.5 * var(--i-amphtml-story-vh, 8px));
+  font-size: calc(2.5 * var(--story-page-vh, 8px));
   height: 100% !important;
   margin: 0 !important;
   padding: 0 !important;
