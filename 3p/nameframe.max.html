@@ -10,7 +10,7 @@
             'input to nameframe');
       }
       document.open();
-      document.write(name_data.creative);
+      document.write(name_data.creative); // lgtm [js/eval-like-call] lgtm [js/xss]
       document.close();
       delete name_data.creative;
       window.name = JSON.stringify(name_data);
