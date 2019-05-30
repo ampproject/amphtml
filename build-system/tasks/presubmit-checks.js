@@ -414,7 +414,11 @@ const forbiddenTerms = {
   // Global documentState service.
   'globalDocumentStateFor': {
     message: 'Global document API. In the process of being deprecated.',
-    whitelist: ['src/service/viewer-impl.js', 'src/service/vsync-impl.js'],
+    whitelist: [
+      'src/services.js',
+      'src/service/viewer-impl.js',
+      'src/service/vsync-impl.js',
+    ],
   },
   'getBaseCid': {
     message: requiresReviewPrivacy,
