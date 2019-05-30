@@ -765,10 +765,9 @@ export class AmpStory extends AMP.BaseElement {
     // If the story is within a viewer that enabled the swipe capability, this
     // disables the navigation education overlay on the X axis to enable the
     // swipe to the next story feature.
-    const swipeRecognizer =
-      this.viewer_.hasCapability('swipe')
-        ? SwipeYRecognizer
-        : SwipeXYRecognizer;
+    const swipeRecognizer = this.viewer_.hasCapability('swipe')
+      ? SwipeYRecognizer
+      : SwipeXYRecognizer;
 
     // Shows "tap to navigate" hint when swiping.
     gestures.onGesture(swipeRecognizer, gesture => {
@@ -1708,9 +1707,7 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   onVisibilityChanged_() {
-    this.viewer_.isVisible()
-      ? this.resumeCallback()
-      : this.pauseCallback();
+    this.viewer_.isVisible() ? this.resumeCallback() : this.pauseCallback();
   }
 
   /**
