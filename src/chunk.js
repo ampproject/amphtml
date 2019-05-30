@@ -315,9 +315,10 @@ class Chunks {
     this.execute_ = this.execute_.bind(this);
     /** @private @const {function()} */
     this.schedule_ = this.schedule_.bind(this);
-
     /** @private @const {!Promise<!./service/viewer-impl.Viewer>} */
     this.viewerPromise_ = Services.viewerPromiseForDoc(ampDoc);
+    /** @private {number} */
+    this.timeSinceLastExecution_ = 0;
 
     this.win_.addEventListener('message', e => {
       if (getData(e) == 'amp-macro-task') {
@@ -353,7 +354,7 @@ class Chunks {
    */
   enqueueTask_(task, priority) {
     this.tasks_.enqueue(task, priority);
-    resolved.then(this.schedule_);
+    resolved.then(() => this.schedule_);
   }
 
   /**
@@ -390,8 +391,9 @@ class Chunks {
       return false;
     }
     const before = Date.now();
+    this.timeSinceLastExecution_ = before;
     t.runTask_(idleDeadline);
-    resolved.then(this.schedule_);
+    resolved.then(() => this.schedule_);
     dev().fine(TAG, t.getName_(), 'Chunk duration', Date.now() - before);
     return true;
   }
@@ -408,7 +410,7 @@ class Chunks {
       this.requestMacroTask_();
       return;
     }
-    resolved.then(this.execute_(idleDeadline));
+    resolved.then(() => this.execute_(idleDeadline));
   }
 
   /**
