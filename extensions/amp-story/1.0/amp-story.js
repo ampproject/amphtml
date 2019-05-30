@@ -438,13 +438,17 @@ export class AmpStory extends AMP.BaseElement {
 
     if (isExperimentOn(this.win, 'amp-story-branching')) {
       this.registerAction('goToPage', invocation => {
-        const {args} = invocation;
+        const {args, caller} = invocation;
         if (args) {
+          const targetPageId = args['id'];
           this.storeService_.dispatch(
             Action.SET_ADVANCEMENT_MODE,
             AdvancementMode.GO_TO_PAGE
           );
-          this.switchTo_(args['id'], NavigationDirection.NEXT);
+          if (caller.classList.contains('i-amphtml-story-new-page-control')) {
+            this.fillStoryNavigationPath_(targetPageId);
+          }
+          this.switchTo_(targetPageId, NavigationDirection.NEXT);
         }
       });
     }
@@ -1484,6 +1488,24 @@ export class AmpStory extends AMP.BaseElement {
       this.storyNavigationPath_
     );
     return this.getPageById(targetPageId);
+  }
+
+  /**
+   * Fills navigation path with pages skipped due to jumping to the latest
+   * update. These would've been otherwise filled by normal navigation.
+   * @param {string} targetPageId
+   * @private
+   */
+  fillStoryNavigationPath_(targetPageId) {
+    const pagesIds = this.storeService_.get(StateProperty.PAGE_IDS);
+    const skippedPages = pagesIds.slice(
+      pagesIds.indexOf(this.activePage_.element.id) + 1,
+      pagesIds.indexOf(targetPageId)
+    );
+
+    skippedPages.forEach(id => {
+      this.storyNavigationPath_.push(id);
+    });
   }
 
   /**
