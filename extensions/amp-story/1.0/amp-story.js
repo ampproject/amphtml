@@ -533,10 +533,10 @@ export class AmpStory extends AMP.BaseElement {
     // ../../../extensions/amp-animation/0.1/web-animations.js
     this.mutateElement(() => {
       styleEl.textContent = styleEl.textContent
-        .replace(/([\d.]+)vh/gim, 'calc($1 * var(--i-amphtml-story-vh))')
-        .replace(/([\d.]+)vw/gim, 'calc($1 * var(--i-amphtml-story-vw))')
-        .replace(/([\d.]+)vmin/gim, 'calc($1 * var(--i-amphtml-story-vmin))')
-        .replace(/([\d.]+)vmax/gim, 'calc($1 * var(--i-amphtml-story-vmax))');
+        .replace(/([\d.]+)vh/gim, 'calc($1 * var(--amp-story-page-vh))')
+        .replace(/([\d.]+)vw/gim, 'calc($1 * var(--amp-story-page-vw))')
+        .replace(/([\d.]+)vmin/gim, 'calc($1 * var(--amp-story-page-vmin))')
+        .replace(/([\d.]+)vmax/gim, 'calc($1 * var(--amp-story-page-vmax))');
     });
   }
 
@@ -584,10 +584,10 @@ export class AmpStory extends AMP.BaseElement {
         mutate: state => {
           this.win.document.documentElement.setAttribute(
             'style',
-            `--i-amphtml-story-vh: ${px(state.vh)};` +
-              `--i-amphtml-story-vw: ${px(state.vw)};` +
-              `--i-amphtml-story-vmin: ${px(state.vmin)};` +
-              `--i-amphtml-story-vmax: ${px(state.vmax)};`
+            `--amp-story-page-vh: ${px(state.vh)};` +
+              `--amp-story-page-vw: ${px(state.vw)};` +
+              `--amp-story-page-vmin: ${px(state.vmin)};` +
+              `--amp-story-page-vmax: ${px(state.vmax)};`
           );
         },
       },
