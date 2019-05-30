@@ -1083,10 +1083,15 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
         };
       });
       sandbox.stub(impl, 'attemptChangeSize').callsFake((height, width) => {
-        impl.element.setAttribute('height', height);
-        impl.element.setAttribute('width', width);
+        impl.element.style.height = `${height}px`;
+        impl.element.style.width = `${width}px`;
         return Promise.resolve();
       });
+      sandbox.stub(impl.element.getResources(), 'changeSize').callsFake(
+          (element, height, width) => {
+            element.style.height = `${height}px`;
+            element.style.width = `${width}px`;
+          });
       sandbox.stub(impl, 'getAmpAdMetadata').callsFake(() => {
         return {
           customElementExtensions: [],
@@ -1210,20 +1215,20 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
     it('should attempt resize for fluid request + fixed response case', () => {
       impl.isFluidRequest_ = true;
       impl.handleResize_(350, 300);
-      expect(impl.element.getAttribute('width')).to.equal('350');
-      expect(impl.element.getAttribute('height')).to.equal('300');
+      expect(impl.element.getAttribute('style')).to.match(/width: 350/);
+      expect(impl.element.getAttribute('style')).to.match(/height: 300/);
     });
 
     it('should attempt resize for larger width response', () => {
       impl.handleResize_(350, 50);
-      expect(impl.element.getAttribute('width')).to.equal('350');
-      expect(impl.element.getAttribute('height')).to.equal('50');
+      expect(impl.element.getAttribute('style')).to.match(/width: 350/);
+      expect(impl.element.getAttribute('style')).to.match(/height: 50/);
     });
 
     it('should not attempt resize for larger height response', () => {
       impl.handleResize_(350, 300);
-      expect(impl.element.getAttribute('width')).to.equal('200');
-      expect(impl.element.getAttribute('height')).to.equal('50');
+      expect(impl.element.getAttribute('style')).to.match(/width: 200/);
+      expect(impl.element.getAttribute('style')).to.match(/height: 50/);
     });
   });
 
