@@ -34,8 +34,7 @@ const IS_SINGLE_PASS = !!argv.single_pass;
 const IS_UNIT = !!argv.unit;
 
 const TEST_TYPE_SUBTYPES = new Map([
-  // TODO(danielrozenberg): add 'saucelabs' to integration tests when supported.
-  ['integration', ['local', 'single-pass']],
+  ['integration', ['local', 'single-pass', 'saucelabs']],
   ['unit', ['local', 'local-changes', 'saucelabs']],
   ['e2e', ['local']],
 ]);
@@ -52,11 +51,6 @@ function inferTestType() {
       type = 'unit';
     } else if (IS_INTEGRATION) {
       type = 'integration';
-
-      // TODO(danielrozenberg): report integration on saucelabs
-      if (IS_SAUCELABS) {
-        return null;
-      }
     } else {
       return null;
     }
@@ -139,10 +133,25 @@ async function reportAllExpectedTests(buildTargets) {
   }
 }
 
+/**
+ * Callback to the Karma.Server on('run_complete') event for simple test types.
+ *
+ * @param {!any} browsers
+ * @param {!Karma.TestResults} results
+ */
+function reportTestRunComplete(browsers, results) {
+  if (results.error) {
+    reportTestErrored();
+  } else {
+    reportTestFinished(results.success, results.failed);
+  }
+}
+
 module.exports = {
   reportAllExpectedTests,
   reportTestErrored,
   reportTestFinished,
+  reportTestRunComplete,
   reportTestSkipped,
   reportTestStarted,
 };
