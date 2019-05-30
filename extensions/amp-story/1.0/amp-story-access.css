@@ -91,7 +91,7 @@ amp-story-access[type=blocking].i-amphtml-story-access-visible::before {
 
 [type=notification] .i-amphtml-story-access-container {
   box-shadow: 0 -1px 2px 1px rgba(0, 0, 0, 0.12) !important;
-  max-height: calc(var(--amp-story-page-vh, 1vh) * 20) !important; /** 20vh */
+  max-height: calc(var(--story-page-vh, 1vh) * 20) !important; /** 20vh */
 }
 
 .i-amphtml-story-access-header {
