@@ -103,8 +103,6 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
     'third_party/inputmask/',
     'node_modules/',
     'build/patched-module/',
-    // Can't seem to suppress `(0, win.eval)` suspicious code warning
-    '3p/environment.js',
     // Generated code.
     'extensions/amp-access/0.1/access-expr-impl.js',
   ];
