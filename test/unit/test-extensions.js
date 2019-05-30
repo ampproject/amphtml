@@ -1153,7 +1153,7 @@ describes.sandboxed('Extensions', {}, () => {
 
     describe('installStandardServicesInEmbed', () => {
       it('verify order of adopted services for embed', () => {
-        installStandardServicesInEmbed(iframeWin, parentWin);
+        installStandardServicesInEmbed(iframeWin);
 
         const any = {}; // Input doesn't matter since services are stubbed.
         const url = Services.urlForDoc(any);

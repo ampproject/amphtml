@@ -470,7 +470,7 @@ export class Extensions {
     }
 
     // Install embeddable standard services.
-    installStandardServicesInEmbed(childWin, parentWin);
+    installStandardServicesInEmbed(childWin);
 
     // Install built-ins and legacy elements.
     copyBuiltinElementsToChildWindow(topWin, childWin);
@@ -727,10 +727,9 @@ function installPolyfillsInChildWindow(parentWin, childWin) {
 /**
  * Adopt predefined core services for the child window (friendly iframe).
  * @param {!Window} childWin
- * @param {!Window} parentWin
  * @visibleForTesting
  */
-export function installStandardServicesInEmbed(childWin, parentWin) {
+export function installStandardServicesInEmbed(childWin) {
   const frameElement = dev().assertElement(
     childWin.frameElement,
     'frameElement not found for embed'
