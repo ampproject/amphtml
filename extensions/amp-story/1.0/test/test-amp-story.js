@@ -96,6 +96,7 @@ describes.realWin(
         .stub(viewer, 'hasCapability')
         .withArgs('swipe')
         .returns(hasSwipeCapability);
+      sandbox.stub(Services, 'viewerForDoc').returns(viewer);
 
       const storeService = new AmpStoryStoreService(win);
       registerServiceBuilder(win, 'story-store', () => storeService);
