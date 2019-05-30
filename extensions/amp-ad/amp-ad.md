@@ -223,6 +223,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [AdmanMedia](../../ads/admanmedia.md)
 - [Admixer](../../ads/admixer.md)
 - [AdOcean](../../ads/adocean.md)
+- [Adop](../../ads/adop.md)
 - [AdPicker](../../ads/adpicker.md)
 - [AdPlugg](../../ads/adplugg.md)
 - [Adpon](../../ads/adpon.md)
