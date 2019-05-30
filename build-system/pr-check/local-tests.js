@@ -86,7 +86,9 @@ function main() {
       timedExecOrDie('gulp test --unit --nobuild --headless --coverage');
     }
 
-    timedExecOrDie('gulp codecov-upload');
+    if (buildTargets.has('RUNTIME')) {
+      timedExecOrDie('gulp codecov-upload');
+    }
   }
 
   stopTimer(FILENAME, FILENAME, startTime);

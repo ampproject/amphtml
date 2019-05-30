@@ -148,9 +148,8 @@ function isSubmitButton(element) {
 /**
  * Checks if a field is disabled.
  * @param {!Element} element
- * @private
  */
-function isDisabled(element) {
+export function isDisabled(element) {
   if (element.disabled) {
     return true;
   }
@@ -162,4 +161,29 @@ function isDisabled(element) {
     }
   }
   return false;
+}
+
+/**
+ * Checks if a form field is in its default state.
+ * @param {!Element} field
+ * @return {boolean}
+ */
+export function isFieldDefault(field) {
+  switch (field.type) {
+    case 'select-multiple':
+    case 'select-one':
+      const {options} = field;
+      for (let j = 0; j < options.length; j++) {
+        if (options[j].selected !== options[j].defaultSelected) {
+          return false;
+        }
+      }
+      break;
+    case 'checkbox':
+    case 'radio':
+      return field.checked === field.defaultChecked;
+    default:
+      return field.value === field.defaultValue;
+  }
+  return true;
 }
