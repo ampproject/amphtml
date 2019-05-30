@@ -35,6 +35,7 @@ const {
 const {
   reportTestErrored,
   reportTestFinished,
+  reportTestRunComplete,
   reportTestSkipped,
   reportTestStarted,
 } = require('../report-test-status');
@@ -430,13 +431,16 @@ async function runTests() {
   // Avoid Karma startup errors
   refreshKarmaWdCache();
 
+  // Notify the test-status bot that the tests are running.
+  reportTestStarted();
+
   // Run Sauce Labs tests in batches to avoid timeouts when connecting to the
   // Sauce Labs environment.
   let processExitCode;
   if (argv.saucelabs || argv.saucelabs_lite) {
     processExitCode = await runTestInBatches();
   } else {
-    processExitCode = await createKarmaServer(c);
+    processExitCode = await createKarmaServer(c, reportTestRunComplete);
   }
 
   // Exit tests
@@ -475,12 +479,31 @@ async function runTests() {
         browserId.toLowerCase().endsWith('_beta') ? 'beta' : 'stable'
       ].push(browserId);
     }
+
+    let errored = false;
+    let totalStableSuccess = 0;
+    let totalStableFailed = 0;
+    const partialTestRunCompleteFn = async (browsers, results) => {
+      if (results.error) {
+        errored = true;
+      } else {
+        totalStableSuccess += results.success;
+        totalStableFailed += results.failed;
+      }
+    };
+
     if (browsers.stable.length) {
       const allBatchesExitCodes = await runTestInBatchesWithBrowsers(
         'stable',
-        browsers.stable
+        browsers.stable,
+        partialTestRunCompleteFn
       );
-      if (allBatchesExitCodes) {
+      if (errored) {
+        await reportTestErrored();
+      } else {
+        await reportTestFinished(totalStableSuccess, totalStableFailed);
+      }
+      if (allBatchesExitCodes || errored) {
         log(
           yellow('Some tests have failed on'),
           cyan('stable'),
@@ -488,14 +511,15 @@ async function runTests() {
           cyan('beta'),
           yellow('browsers.')
         );
-        return allBatchesExitCodes;
+        return allBatchesExitCodes || Number(errored);
       }
     }
 
     if (browsers.beta.length) {
       const allBatchesExitCodes = await runTestInBatchesWithBrowsers(
         'beta',
-        browsers.beta
+        browsers.beta,
+        /* runCompleteFn */ () => {}
       );
       if (allBatchesExitCodes) {
         log(
@@ -520,9 +544,16 @@ async function runTests() {
    * @param {string} batchName a human readable name for the batch.
    * @param {!Array{string}} browsers list of SauceLabs browsers as
    *     customLaunchers IDs.
+   * @param {!Function} runCompleteFn a function to execute on the
+   *     `run_complete` event. It should take two arguments, (browser, results),
+   *     and return nothing.
    * @return {number} processExitCode
    */
-  async function runTestInBatchesWithBrowsers(batchName, browsers) {
+  async function runTestInBatchesWithBrowsers(
+    batchName,
+    browsers,
+    runCompleteFn
+  ) {
     let batch = 1;
     let startIndex = 0;
     let endIndex = batchSize;
@@ -544,7 +575,7 @@ async function runTests() {
         cyan(configBatch.browsers.length),
         green('Sauce Labs browser(s)...')
       );
-      batchExitCodes.push(await createKarmaServer(configBatch));
+      batchExitCodes.push(await createKarmaServer(configBatch, runCompleteFn));
       startIndex = batch * batchSize;
       batch++;
       endIndex = Math.min(batch * batchSize, browsers.length);
@@ -556,9 +587,12 @@ async function runTests() {
   /**
    * Creates and starts karma server
    * @param {!Object} configBatch
+   * @param {!Function} runCompleteFn a function to execute on the
+   *     `run_complete` event. It should take two arguments, (browser, results),
+   *     and return nothing.
    * @return {!Promise<number>}
    */
-  function createKarmaServer(configBatch) {
+  function createKarmaServer(configBatch, runCompleteFn) {
     let resolver;
     const deferred = new Promise(resolverIn => {
       resolver = resolverIn;
@@ -580,7 +614,6 @@ async function runTests() {
         if (!argv.saucelabs && !argv.saucelabs_lite) {
           log(green('Running tests locally...'));
         }
-        reportTestStarted();
       })
       .on('browsers_ready', function() {
         console./*OK*/ log('\n');
@@ -612,13 +645,7 @@ async function runTests() {
         console./*OK*/ log('\n');
         log(message);
       })
-      .on('run_complete', (browsers, results) => {
-        if (results.error) {
-          reportTestErrored();
-        } else {
-          reportTestFinished(results.success, results.failed);
-        }
-      })
+      .on('run_complete', runCompleteFn)
       .start();
     return deferred;
   }
