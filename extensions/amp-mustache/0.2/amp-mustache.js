@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
 import {dict} from '../../../src/utils/object';
-import {getMode} from '../../../src/mode';
 import {isExperimentOn} from '../../../src/experiments';
 import {iterateCursor, templateContentClone} from '../../../src/dom';
 import {purifyHtml, purifyTagsForTripleMustache} from '../../../src/purifier';
@@ -146,14 +144,5 @@ export class AmpMustache extends AMP.BaseTemplate {
 }
 
 AMP.extension(TAG, '0.2', function(AMP) {
-  // First, unregister template to avoid "Duplicate template type"
-  // error due to multiple versions of amp-mustache in the same unit test run.
-  // This is due to transpilation of test code to ES5 which uses require() and,
-  // unlike import, causes side effects (AMP.registerTemplate) to be run.
-  // For unit tests, it doesn't actually matter which version of amp-mustache is
-  // registered. Integration tests should only have one script version included.
-  if (getMode().test) {
-    Services.templatesFor(window).unregisterTemplate(TAG);
-  }
   AMP.registerTemplate(TAG, AmpMustache);
 });
