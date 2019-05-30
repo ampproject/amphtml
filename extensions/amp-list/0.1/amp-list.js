@@ -84,12 +84,6 @@ export class AmpList extends AMP.BaseElement {
     this.renderPass_ = new Pass(this.win, () => this.doRenderPass_());
 
     /**
-     * Local data queued for render from `src` mutation before layoutCallback.
-     * @private {?Array}
-     */
-    this.prelayoutLocalData_ = null;
-
-    /**
      * Latest fetched items to render and the promise resolver and rejecter
      * to be invoked on render success or fail, respectively.
      * @private {?RenderItems}
@@ -224,16 +218,7 @@ export class AmpList extends AMP.BaseElement {
       this.initializeLoadMoreElements_();
     }
 
-    // Don't fetch if `src` is empty string.
-    if (!!this.element.getAttribute('src')) {
-      return this.fetchList_();
-    } else if (this.prelayoutLocalData_) {
-      return this.scheduleRender_(this.prelayoutLocalData_);
-    }
-    // Clean up any "prelayout" data now that we're laid out.
-    this.prelayoutLocalData_ = null;
-
-    return Promise.resolve();
+    return this.fetchList_();
   }
 
   /**
@@ -324,14 +309,8 @@ export class AmpList extends AMP.BaseElement {
       // Remove the 'src' now that local data is used to render the list.
       this.element.setAttribute('src', '');
       const array = /** @type {!Array} */ (isArray(data) ? data : [data]);
-      // Defer to render in layoutCallback() before first layout.
-      if (this.layoutCompleted_) {
-        this.resetIfNecessary_(/* isFetch */ false);
-        return this.scheduleRender_(array);
-      } else {
-        this.prelayoutLocalData_ = array;
-      }
-      return Promise.resolve();
+      this.resetIfNecessary_(/* isFetch */ false);
+      return this.scheduleRender_(array, /* append */ false);
     };
 
     const src = mutations['src'];
@@ -575,7 +554,7 @@ export class AmpList extends AMP.BaseElement {
       .then(
         response => {
           userAssert(
-            response && response['html'],
+            response && typeof response['html'] === 'string',
             'Expected response with format {html: <string>}. Received: ',
             response
           );
@@ -603,7 +582,6 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   scheduleRender_(data, opt_append, opt_payload) {
-    devAssert(this.layoutCompleted_);
     dev().info(TAG, 'schedule:', this.element, data);
 
     const deferred = new Deferred();

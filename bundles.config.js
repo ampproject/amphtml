@@ -399,6 +399,12 @@ exports.extensionBundles = [
     type: TYPES.MISC,
   },
   {
+    name: 'amp-user-location',
+    version: '0.1',
+    latestVersion: '0.1',
+    type: TYPES.MISC,
+  },
+  {
     name: 'amp-gfycat',
     version: '0.1',
     latestVersion: '0.1',
@@ -784,6 +790,16 @@ exports.extensionBundles = [
     name: 'amp-timeago',
     version: '0.1',
     latestVersion: '0.1',
+    type: TYPES.MISC,
+  },
+  {
+    name: 'amp-truncate-text',
+    version: '0.1',
+    latestVersion: '0.1',
+    options: {
+      hasCss: true,
+      cssBinaries: ['amp-truncate-text', 'amp-truncate-text-shadow'],
+    },
     type: TYPES.MISC,
   },
   {

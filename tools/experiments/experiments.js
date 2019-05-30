@@ -398,12 +398,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/20394',
   },
   {
-    id: 'fixed-elements-in-lightbox',
-    name: 'Transfer fixed elements in lightboxes for smooth iOS scrolling',
-    spec: 'https://github.com/ampproject/amphtml/issues/20964',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/20965',
-  },
-  {
     id: 'amp-img-auto-sizes',
     name: 'Automatically generates sizes for amp-img if not given',
     spec: 'https://github.com/ampproject/amphtml/issues/19513',
@@ -441,6 +435,14 @@ const EXPERIMENTS = [
       'during prerendering, beyond the 20 elements limit.',
     spec: 'https://github.com/ampproject/amphtml/issues/21791',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/21792',
+  },
+  {
+    id: 'amp-user-location',
+    name:
+      'Expose the browser geolocation API for latitude and longitude ' +
+      'access after user interaction and approval',
+    spec: 'https://github.com/ampproject/amphtml/issues/8929',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22177',
   },
 ];
 

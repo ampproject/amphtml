@@ -55,7 +55,8 @@ const forbiddenTerms = {
       'build-system/amp4test.js',
       'build-system/app-index/boilerplate.js',
       'build-system/tasks/extension-generator/index.js',
-      'css/amp.css',
+      'css/ampdoc.css',
+      'css/ampelement.css',
       'extensions/amp-pinterest/0.1/amp-pinterest.css',
       'extensions/amp-pinterest/0.1/follow-button.js',
       'extensions/amp-pinterest/0.1/pin-widget.js',
@@ -67,7 +68,8 @@ const forbiddenTerms = {
     whitelist: [
       'build-system/tasks/extension-generator/index.js',
       'build-system/tasks/create-golden-css/css/main.css',
-      'css/amp.css',
+      'css/ampdoc.css',
+      'css/ampelement.css',
     ],
   },
   'describe\\.only': '',
@@ -299,6 +301,31 @@ const forbiddenTerms = {
       'src/service/position-observer/position-observer-impl.js',
       'src/service/video-manager-impl.js',
       'src/service/video/autoplay.js',
+    ],
+  },
+  'getServiceForDoc': {
+    message:
+      'Synchronous access to element services is unreliable. ' +
+      'Use getServicePromiseForDoc() instead.',
+    whitelist: [
+      // Do not whitelist additional "extensions/*" paths.
+      // TODO(#22414): Remove paths as they are migrated off of sync API.
+      'extensions/amp-analytics/0.1/instrumentation.js',
+      'extensions/amp-analytics/0.1/variables.js',
+      'extensions/amp-fx-collection/0.1/providers/fx-provider.js',
+      'extensions/amp-live-list/0.1/live-list-manager.js',
+      'extensions/amp-next-page/0.1/next-page-service.js',
+      'extensions/amp-position-observer/0.1/amp-position-observer.js',
+      'extensions/amp-recaptcha-input/0.1/amp-recaptcha-service.js',
+      'extensions/amp-user-notification/0.1/test/test-amp-user-notification.js',
+      'extensions/amp-video-docking/0.1/amp-video-docking.js',
+      'extensions/amp-web-push/0.1/amp-web-push-config.js',
+      'src/chunk.js',
+      'src/service.js',
+      'src/service/cid-impl.js',
+      'src/service/origin-experiments-impl.js',
+      'src/services.js',
+      'testing/test-helper.js',
     ],
   },
   'initLogConstructor|setReportError': {
@@ -869,6 +896,7 @@ const forbiddenTermsSrcInclusive = {
       'build-system/amp4test.js',
       'dist.3p/current/integration.js',
       'extensions/amp-iframe/0.1/amp-iframe.js',
+      'src/3p-frame.js',
       'src/config.js',
       'testing/local-amp-chrome-extension/background.js',
       'tools/errortracker/errortracker.go',

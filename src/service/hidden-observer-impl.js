@@ -58,7 +58,11 @@ export class HiddenObserver {
     this.observable_ = null;
   }
 
-  /** @override @nocollapse */
+  /**
+   * @param {!Window} embedWin
+   * @param {!./ampdoc-impl.AmpDoc} ampdoc
+   * @nocollapse
+   */
   static installInEmbedWindow(embedWin, ampdoc) {
     installServiceInEmbedScope(
       embedWin,

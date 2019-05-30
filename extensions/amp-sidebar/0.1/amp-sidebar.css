@@ -32,21 +32,36 @@ amp-sidebar {
 
 amp-sidebar[side="left"] {
   left: 0 !important;
-  transform: translateX(-100%) !important;
+  transform: translateX(-100%);
+  animation-name: i-amphtml-sidebar-slide-out-left;
+}
+
+amp-sidebar[side="left"][open] {
+  animation-name: i-amphtml-sidebar-slide-in-left;
 }
 
 amp-sidebar[side="right"] {
   right: 0 !important;
-  transform: translateX(100%) !important;
+  transform: translateX(100%);
+  animation-name: i-amphtml-sidebar-slide-out-right;
 }
 
-amp-sidebar[side][open] {
-  transform: translateX(0) !important;
+amp-sidebar[side="right"][open] {
+  animation-name: i-amphtml-sidebar-slide-in-right;
 }
 
 amp-sidebar[side] {
+  /*
+   * Note: This uses animations (instead of transitions) to make sure the
+   * animation always plays correctly. Previously, the display was toggled in a
+   * separate step from applying the attribute for the transition, However,
+   * runtime seems to now modify the element in a way that prevents transitions
+   * from working correctly.
+   */
   /* Use same transition as PWA App-Shell https://goo.gl/AGFioO */
-  transition: transform 233ms cubic-bezier(0,0,.21,1);
+  animation-duration: 233ms;
+  animation-timing-function: cubic-bezier(0,0,.21,1);
+  animation-fill-mode: forwards;
 }
 
 .i-amphtml-toolbar > ul, .i-amphtml-toolbar > ol {
@@ -70,4 +85,44 @@ amp-sidebar[side] {
   background-image: none !important;
   background-color: #000;
   z-index: 2147483646;
+}
+
+@keyframes i-amphtml-sidebar-slide-in-left {
+  from {
+    transform: translateX(-100%);
+  }
+
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes i-amphtml-sidebar-slide-out-left {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes i-amphtml-sidebar-slide-in-right {
+  from {
+    transform: translateX(100%);
+  }
+
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes i-amphtml-sidebar-slide-out-right {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(100%);
+  }
 }

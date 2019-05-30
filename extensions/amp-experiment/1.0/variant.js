@@ -247,11 +247,4 @@ function assertVariant(variant, experimentName, variantName) {
     variant['mutations'] && isArray(variant['mutations']),
     `${experimentName}.variants.${variantName} must have a mutations array.`
   );
-
-  // Assert the variant has mutations
-  userAssert(
-    variant['mutations'].length > 0,
-    `${experimentName}.variants.${variantName} mutations` +
-      ' must have at least one mutation.'
-  );
 }

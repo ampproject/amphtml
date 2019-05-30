@@ -268,6 +268,7 @@ export class Services {
   }
 
   /**
+   * TODO(#22414): Remove this in favor of the async API.
    * Returns a service to register callbacks we wish to execute when an
    * amp-form is submitted. This is the sync version used by amp-form only, all
    * other extensions should use `formSubmitPromiseForDoc` below.
@@ -670,6 +671,21 @@ export class Services {
       element,
       'geo',
       'amp-geo',
+      true
+    ));
+  }
+
+  /**
+   * Returns a promise for the geo service or a promise for null if
+   * the service is not available on the current page.
+   * @param {!Element|!ShadowRoot} element
+   * @return {!Promise<?../extensions/amp-user-location/0.1/user-location-service.UserLocationService>}
+   */
+  static userLocationForDocOrNull(element) {
+    return /** @type {!Promise<?../extensions/amp-user-location/0.1/user-location-service.UserLocationService>} */ (getElementServiceIfAvailableForDoc(
+      element,
+      'user-location',
+      'amp-user-location',
       true
     ));
   }

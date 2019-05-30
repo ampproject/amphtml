@@ -64,7 +64,9 @@ function main() {
     if (
       buildTargets.has('RUNTIME') ||
       buildTargets.has('FLAG_CONFIG') ||
-      buildTargets.has('INTEGRATION_TEST')
+      buildTargets.has('INTEGRATION_TEST') ||
+      buildTargets.has('E2E_TEST') ||
+      buildTargets.has('VISUAL_DIFF')
     ) {
       timedExecOrDie('gulp update-packages');
       timedExecOrDie('gulp dist --fortesting');
@@ -76,7 +78,7 @@ function main() {
         `${FILELOGPREFIX} Skipping`,
         colors.cyan('Dist, Bundle Size'),
         'because this commit does not affect the runtime, flag configs,',
-        'or integration tests'
+        'integration tests, end-to-end tests, or visual diff tests.'
       );
     }
   }

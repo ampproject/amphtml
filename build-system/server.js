@@ -21,7 +21,7 @@
  */
 const app = require('./app');
 const colors = require('ansi-colors');
-const gulp = require('gulp-help')(require('gulp'));
+const gulp = require('gulp');
 const isRunning = require('is-running');
 const log = require('fancy-log');
 const morgan = require('morgan');

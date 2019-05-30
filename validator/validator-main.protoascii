@@ -26,7 +26,7 @@ min_validator_revision_required: 375
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 873
+spec_file_revision: 882
 
 styles_spec_url: "https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages"
 script_spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags"
@@ -566,6 +566,7 @@ tags: {
     value_casei: "amp-experiment-token"
     dispatch_key: NAME_VALUE_DISPATCH
   }
+  satisfies: "amp-experiment-token"
 }
 # AMP metadata, name=amp-link-variable-allowed-origin
 # https://github.com/ampproject/amphtml/issues/8132
@@ -6361,6 +6362,7 @@ attr_lists: {
         ")(\\s|$)"
   }
   attrs: { name: "lang" }
+  attrs: { name: "slot" }
   attrs: { name: "tabindex" }
   attrs: { name: "title" }
   attrs: { name: "translate" }

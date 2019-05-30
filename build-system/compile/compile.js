@@ -16,12 +16,12 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
+const del = require('del');
 const fs = require('fs-extra');
 const gulp = require('gulp');
 const gulpIf = require('gulp-if');
 const nop = require('gulp-nop');
 const rename = require('gulp-rename');
-const rimraf = require('rimraf');
 const sourcemaps = require('gulp-sourcemaps');
 const {
   gulpClosureCompile,
@@ -79,8 +79,8 @@ exports.closureCompile = async function(
 };
 
 function cleanupBuildDir() {
-  rimraf.sync('build/fake-module');
-  rimraf.sync('build/patched-module');
+  del.sync('build/fake-module');
+  del.sync('build/patched-module');
   fs.mkdirsSync('build/patched-module/document-register-element/build');
   fs.mkdirsSync('build/fake-module/third_party/babel');
   fs.mkdirsSync('build/fake-module/src/polyfills/');
@@ -173,7 +173,6 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       'ads/google/**/*.js',
       'ads/inabox/**/*.js',
       // Files under build/. Should be sparse.
-      'build/css.js',
       'build/*.css.js',
       'build/fake-module/**/*.js',
       'build/patched-module/**/*.js',
@@ -224,6 +223,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       'third_party/caja/html-sanitizer.js',
       'third_party/closure-library/sha384-generated.js',
       'third_party/css-escape/css-escape.js',
+      'third_party/fuzzysearch/index.js',
       'third_party/mustache/**/*.js',
       'third_party/timeagojs/**/*.js',
       'third_party/vega/**/*.js',
@@ -358,7 +358,9 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       jscomp_error: [],
       // moduleLoad: Demote "module not found" errors to ignore missing files
       //     in type declarations in the swg.js bundle.
-      jscomp_warning: ['moduleLoad'],
+      // accessControls: Demote "Access to private variable" errors to allow
+      //     AMP code to access variables in other files.
+      jscomp_warning: ['moduleLoad', 'accessControls'],
       // Turn off warning for "Unknown @define" since we use define to pass
       // args such as FORTESTING to our runner.
       jscomp_off: ['unknownDefines'],

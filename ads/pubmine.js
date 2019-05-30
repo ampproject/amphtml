@@ -22,8 +22,9 @@ const pubmineOptional = ['section', 'pt', 'ht'],
 
 /**
  * @param {!Object} data
+ * @param {!Window} global
  */
-function initMasterFrame(data) {
+function initMasterFrame(data, global) {
   global['__ATA_PP'] = {
     pt: data['pt'] || 1,
     ht: data['ht'] || 1,
@@ -37,10 +38,11 @@ function initMasterFrame(data) {
 
 /**
  * @param {string} slotId
+ * @param {!Window} global
  */
-function createSlot(slotId) {
-  const containerEl = document.getElementById('c');
-  const adSlot = document.createElement('div');
+function createSlot(slotId, global) {
+  const containerEl = global.document.getElementById('c');
+  const adSlot = global.document.createElement('div');
   adSlot.setAttribute('id', slotId);
   containerEl.appendChild(adSlot);
 }
@@ -63,10 +65,10 @@ export function pubmine(global, data) {
 
   const slotId = `atatags-${sectionId}`;
 
-  createSlot(slotId);
+  createSlot(slotId, global);
   const {isMaster} = global.context;
   if (isMaster) {
-    initMasterFrame(data);
+    initMasterFrame(data, global);
   }
   const master = isMaster ? global : global.context.master;
   master['__ATA']['cmd']['push'](function() {

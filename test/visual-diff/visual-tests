@@ -32,6 +32,7 @@
   */
   "asset_globs": [
     "examples/visual-tests/**",
+    "examples/inabox-tag-integration.js"
   ],
 
   /**
@@ -612,6 +613,8 @@
       "interactive_tests": "examples/visual-tests/amp-story/amp-story-pagination-buttons.js"
     },
     {
+      // TODO(#22499): Re-enable this test once the animations run.
+      "flaky": true,
       "url": "examples/visual-tests/amp-story/amp-story-sidebar.html",
       "name": "amp-story: sidebar",
       "viewport": {"width": 1440, "height": 900},
@@ -691,6 +694,19 @@
       "url": "examples/visual-tests/amp-autocomplete/amp-autocomplete.amp.html",
       "name": "amp-autocomplete",
       "interactive_tests": "examples/visual-tests/amp-autocomplete/amp-autocomplete.js",
+    },
+    {
+      "url": "examples/visual-tests/amp-ad/amp-ad.html",
+      "name": "AMP ad",
+      "interactive_tests": "examples/visual-tests/amp-ad/amp-ad.js"
+    },
+    {
+      "url": "examples/visual-tests/amp-ad/amp-inabox.html",
+      "name": "AMP Inabox ad",
+      "loading_complete_selectors": [
+        ".view", ".activeview"
+      ],
+      "interactive_tests": "examples/visual-tests/amp-ad/amp-inabox.js"
     }
   ]
 }

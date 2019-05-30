@@ -231,7 +231,7 @@ describes.sandboxed('allocateVariant', {}, env => {
     });
   });
 
-  it('should check that has at least one mutation', () => {
+  it('should allow variants with no mutations', () => {
     allowConsoleError(() => {
       expect(() => {
         allocateVariant(ampdoc, fakeViewer, 'name', {
@@ -242,7 +242,7 @@ describes.sandboxed('allocateVariant', {}, env => {
             },
           },
         });
-      }).to.throw(/one mutation/);
+      }).to.not.throw();
     });
   });
 

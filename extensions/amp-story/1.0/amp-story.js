@@ -87,6 +87,7 @@ import {
   createElementWithAttributes,
   isRTL,
   scopedQuerySelectorAll,
+  whenUpgradedToCustomElement,
 } from '../../../src/dom';
 import {
   computedStyle,
@@ -602,7 +603,8 @@ export class AmpStory extends AMP.BaseElement {
   buildSystemLayer_() {
     this.updateAudioIcon_();
     const pageIds = this.pages_.map(page => page.element.id);
-    this.element.appendChild(this.systemLayer_.build(pageIds));
+    this.storeService_.dispatch(Action.ADD_TO_PAGE_IDS, pageIds);
+    this.element.appendChild(this.systemLayer_.build());
   }
 
   /** @private */
@@ -971,6 +973,16 @@ export class AmpStory extends AMP.BaseElement {
         this.initializeLiveStory_();
       });
 
+    // Story is being prerendered: resolve the layoutCallback when the first
+    // page is built. Other pages will only build if the document becomes
+    // visible.
+    if (!Services.viewerForDoc(this.element).hasBeenVisible()) {
+      return whenUpgradedToCustomElement(firstPageEl).then(() =>
+        firstPageEl.whenBuilt()
+      );
+    }
+
+    // Will resolve when all pages are built.
     return storyLayoutPromise;
   }
 
@@ -1040,7 +1052,9 @@ export class AmpStory extends AMP.BaseElement {
         : [this.pages_[0]];
 
     const storyLoadPromise = Promise.all(
-      pagesToWaitFor.filter(page => !!page).map(page => page.whenLoaded())
+      pagesToWaitFor
+        .filter(page => !!page)
+        .map(page => page.element.signals().whenSignal(CommonSignals.LOAD_END))
     );
 
     return this.timer_
@@ -2202,8 +2216,9 @@ export class AmpStory extends AMP.BaseElement {
     // Once the media pool is ready, registers and preloads the background
     // audio, and then gets the swapped element from the DOM to mute/unmute/play
     // it programmatically later.
-    this.activePage_
-      .whenLoaded()
+    this.activePage_.element
+      .signals()
+      .whenSignal(CommonSignals.LOAD_END)
       .then(() => {
         backgroundAudioEl = /** @type {!HTMLMediaElement} */ (backgroundAudioEl);
         this.mediaPool_.register(backgroundAudioEl);

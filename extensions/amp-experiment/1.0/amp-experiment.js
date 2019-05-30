@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import {ATTR_PREFIX, Variants, allocateVariant} from './variant';
 import {Layout} from '../../../src/layout';
-import {Services} from '../../../src/services';
+import {Variants, allocateVariant} from './variant';
 import {devAssert, user, userAssert} from '../../../src/log';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {
@@ -28,6 +27,9 @@ import {parseJson} from '../../../src/json';
 import {parseMutation} from './mutation-parser';
 
 const TAG = 'amp-experiment';
+
+/** @const {number} */
+const MAX_MUTATIONS = 70;
 
 export class AmpExperiment extends AMP.BaseElement {
   /** @override */
@@ -49,24 +51,21 @@ export class AmpExperiment extends AMP.BaseElement {
       let config = {};
 
       try {
+
         config = this.getConfig_();
 
         if (!enabled) {
           user().error(TAG, 'Experiment amp-experiment-1.0 is not enabled.');
 
           // Ensure downstream consumers don't wait for the promise forever.
-          variantsService.init(
-            Promise.resolve(this.getEmptyExperimentToVariant_(config))
-          );
+          variantsService.init(Promise.resolve(this.getEmptyExperimentToVariant_(config)));
 
-          return Promise.reject(
-            'Experiment amp-experiment-1.0 is not enabled.'
-          );
+          return Promise.reject('Experiment amp-experiment-1.0 is not enabled.');
         }
 
         const ampdoc = this.getAmpDoc();
 
-        // All experiments can be disabled by a hash param
+         // All experiments can be disabled by a hash param
         const viewer = Services.viewerForDoc(ampdoc);
         const override = viewer.getParam(
           ATTR_PREFIX + '_disable_all_experiments_'
@@ -91,16 +90,35 @@ export class AmpExperiment extends AMP.BaseElement {
         });
 
         /** @private @const {!Promise<!Object<string, ?string>>} */
-        const experimentVariants = Promise.all(variants).then(
-          this.applyExperimentVariants_.bind(this, config, experimentToVariant)
-        );
+        const experimentVariants = Promise.all(variants)
+          .then(() => {
+            this.validateExperimentToVariant_(config, experimentToVariant);
+            const applyExperimentsPromise = this.applyExperimentVariants_(
+              config,
+              experimentToVariant
+            );
+            variantsService.init(applyExperimentsPromise);
+            return applyExperimentsPromise;
+          })
+          .catch(e => {
+            // Ensure downstream consumers don't wait for the promise forever.
+            variantsService.init(
+              Promise.resolve(this.getEmptyExperimentToVariant_(config))
+            );
+            throw e;
+          });
 
-        variantsService.init(experimentVariants);
+        /**
+         * Returning the experimentVariants promise here
+         * So that the buildCallback that is waiting for
+         * the parent promise, will wait for this promise as well.
+         * And wait for the variants to be applied before finishing
+         * our buildCallback.
+         */
+        return experimentVariants;
       } catch (e) {
         // Ensure downstream consumers don't wait for the promise forever.
-        variantsService.init(
-          Promise.resolve(this.getEmptyExperimentToVariant_(config))
-        );
+        variantsService.init(Promise.resolve({}));
         throw e;
       }
     });
@@ -138,7 +156,7 @@ export class AmpExperiment extends AMP.BaseElement {
     ));
   }
 
-  /**
+    /**
    * Function to return an empty experiment to variant
    * Object. This is useful for type checking in analytics
    * and disabling all experiments manually.
@@ -152,6 +170,42 @@ export class AmpExperiment extends AMP.BaseElement {
     });
 
     return experimentToVariant;
+  }
+
+  /**
+   * Function to run validations and limitations on the current
+   * chosen Experiment / variant combination.
+   *
+   * @param {!JsonObject} config
+   * @param {!Object<string, ?string>} experimentToVariant
+   */
+  validateExperimentToVariant_(config, experimentToVariant) {
+    // Ensure that the current experiment / variant
+    // combination does not exceed the maximum mutations.
+    // NOTE: We are not validating the entire config,
+    // As that would take more time, and affect the user,
+    // vs. help the developer.
+    let totalMutations = 0;
+    const experimentToVariantKeys = Object.keys(experimentToVariant);
+
+    for (let i = 0; i < experimentToVariantKeys.length; i++) {
+      const experimentKey = experimentToVariantKeys[i];
+      const variantKey = experimentToVariant[experimentKey];
+      const variant =
+        /** @type {!JsonObject} */ (config[experimentKey]['variants'][
+          variantKey
+        ]);
+      totalMutations += variant['mutations'].length;
+    }
+
+    if (totalMutations > MAX_MUTATIONS) {
+      const numMutationsError =
+        'Max number of mutations for the total ' +
+        `applied experiments exceeded: ${totalMutations} > ` +
+        MAX_MUTATIONS;
+      user().error(TAG, numMutationsError);
+      throw new Error(numMutationsError);
+    }
   }
 
   /**

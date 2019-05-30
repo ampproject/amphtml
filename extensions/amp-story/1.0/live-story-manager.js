@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Action, getStoreService} from './amp-story-store-service';
 import {createElementWithAttributes} from '../../../src/dom';
 import {devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
@@ -30,8 +31,14 @@ export class LiveStoryManager {
    * @param {!./amp-story.AmpStory} ampStory
    */
   constructor(ampStory) {
+    /** @private @const {!./amp-story.AmpStory} */
     this.ampStory_ = ampStory;
+
+    /** @private @const {!Element} */
     this.storyEl_ = ampStory.element;
+
+    /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
+    this.storeService_ = getStoreService(this.ampStory_.win);
   }
 
   /**
@@ -89,8 +96,10 @@ export class LiveStoryManager {
         this.storyEl_.insertBefore(page.element, lastPageEl.nextElementSibling);
         this.ampStory_.addPage(page);
         this.ampStory_.insertPage(lastPageEl.id, page.element.id);
+        this.storeService_.dispatch(Action.ADD_TO_PAGE_IDS, [page.element.id]);
         lastPageEl = page.element;
       });
+      this.storeService_.dispatch(Action.ADD_NEW_PAGE_ID, lastPageEl.id);
     });
   }
 }
