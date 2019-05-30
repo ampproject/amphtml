@@ -144,7 +144,7 @@ export function fromStructuredCloneable(response, responseType) {
       body = new Blob([JSON.stringify(body['json'])], init);
     }
 
-     // Use native `Response` type if available for performance. If response
+    // Use native `Response` type if available for performance. If response
     // type is `document`, we must fall back to `FetchResponse` polyfill
     // because callers would then rely on the `responseXML` property being
     // present, which is not supported by the Response type.
