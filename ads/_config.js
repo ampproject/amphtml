@@ -146,6 +146,8 @@ export const adConfig = {
     consentHandlingOverride: true,
   },
 
+  'adop': {},
+
   'adpicker': {
     renderStartImplemented: true,
   },
