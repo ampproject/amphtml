@@ -35,7 +35,7 @@ AMP is an open source project, and we'd love your help making it better!
 ## Want to help make AMP better?
 - [CONTRIBUTING.md](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md) has information on how you can help improve AMP, including [ongoing participation](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md#ongoing-participation) through Slack, weekly design reviews, etc.
 - We strongly encourage [code contributions](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md)!
-- **We enthusiastically welcome new contributors to the AMP Project _even if you have no experience being part of an open source project_**.  We've made it easy to [get started contributing](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md#get-started-with-open-source).
+- **We enthusiastically welcome new contributors to AMP _even if you have no experience being part of an open source project_**.  We've made it easy to [get started contributing](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md#get-started-with-open-source).
 - Consider joining one of AMP's [Working Groups](https://github.com/ampproject/meta/tree/master/working-groups), where most of the day-to-day work in AMP gets done.
 
 ## Other useful information
