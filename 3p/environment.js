@@ -189,6 +189,7 @@ function instrumentEntryPoints(win) {
     const args = Array.prototype.slice.call(arguments);
     /**
      * @return {*}
+     * @suppress {uselessCode}
      */
     function wrapper() {
       next();
@@ -268,8 +269,7 @@ function minTime(time) {
  * Installs embed state listener.
  */
 export function installEmbedStateListener() {
-  /** @suppress {deprecated} */
   listenParent(window, 'embed-state', function(data) {
-    inViewport = data.inViewport;
+    inViewport = data['inViewport'];
   });
 }
