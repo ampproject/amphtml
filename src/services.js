@@ -251,6 +251,7 @@ export class Services {
   /**
    * @param {!Window} window
    * @return {!./service/document-state.DocumentState}
+   * @restricted  Only to be used for global document services, such as vsync.
    */
   static documentStateFor(window) {
     return getService(window, 'documentState');
