@@ -22,6 +22,7 @@ AMP is an open source project, and we'd love your help making it better!
 - [amp.dev](https://amp.dev) is the best place to learn more about AMP--and of course the site is made using AMP!
 - For developers using AMP, amp.dev includes
   - [guides and tutorials](https://amp.dev/documentation/guides-and-tutorials/)
+  - [examples](https://amp.dev/documentation/examples/)
   - [reference docs](https://amp.dev/documentation/components/?format=websites)
   - [example templates](https://amp.dev/documentation/templates/)
   - [tools to make using AMP easier](https://amp.dev/documentation/tools)
