@@ -204,7 +204,7 @@ const forbiddenTerms = {
     message: privateServiceFactory,
     whitelist: ['src/service/crypto-impl.js', 'src/runtime.js'],
   },
-  'installDocumentStateService': {
+  'installGlobalDocumentStateService': {
     message: privateServiceFactory,
     whitelist: ['src/service/document-state.js', 'src/runtime.js'],
   },
@@ -412,7 +412,7 @@ const forbiddenTerms = {
     ],
   },
   // Global documentState service.
-  'documentStateFor': {
+  'globalDocumentStateFor': {
     message: 'Global document API. In the process of being deprecated.',
     whitelist: ['src/service/viewer-impl.js', 'src/service/vsync-impl.js'],
   },

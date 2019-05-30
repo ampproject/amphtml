@@ -113,6 +113,6 @@ export class DocumentState {
 /**
  * @param {!Window} window
  */
-export function installDocumentStateService(window) {
+export function installGlobalDocumentStateService(window) {
   registerServiceBuilder(window, 'documentState', DocumentState);
 }
