@@ -1206,6 +1206,25 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
         expect(impl.adUrl_.length).to.be.ok;
       });
     });
+
+    it('should attempt resize for fluid request + fixed response case', () => {
+      impl.isFluidRequest_ = true;
+      impl.handleResize_(350, 300);
+      expect(impl.element.getAttribute('width')).to.equal('350');
+      expect(impl.element.getAttribute('height')).to.equal('300');
+    });
+
+    it('should attempt resize for larger width response', () => {
+      impl.handleResize_(350, 50);
+      expect(impl.element.getAttribute('width')).to.equal('350');
+      expect(impl.element.getAttribute('height')).to.equal('50');
+    });
+
+    it('should not attempt resize for larger height response', () => {
+      impl.handleResize_(350, 300);
+      expect(impl.element.getAttribute('width')).to.equal('200');
+      expect(impl.element.getAttribute('height')).to.equal('50');
+    });
   });
 
   describe('Troubleshoot for AMP pages', () => {

@@ -1193,14 +1193,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   handleResize_(width, height) {
     const pWidth = this.element.getAttribute('width');
     const pHeight = this.element.getAttribute('height');
-    // We want to resize only if neither returned dimension is larger than its
-    // primary counterpart, and if at least one of the returned dimensions
-    // differ from its primary counterpart.
-    if (
-      (this.isFluidRequest_ && width && height) ||
-      ((width != pWidth || height != pHeight) &&
-        (width <= pWidth && height <= pHeight))
-    ) {
+    const isFluidRequestAndFixedResponse =
+        this.isFluidRequest_ && width && height;
+    const returnedSizeDifferent = width != pWidth || height != pHeight;
+    const heightNotIncreased = height <= pHeight
+    if (isFluidRequestAndFixedResponse ||
+        returnedSizeDifferent && heightNotIncreased) {
       this.attemptChangeSize(height, width).catch(() => {});
     }
   }
