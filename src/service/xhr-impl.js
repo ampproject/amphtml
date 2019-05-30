@@ -63,15 +63,17 @@ export class Xhr {
    *
    * @param {string} input
    * @param {!FetchInitDef} init
+   * @param {boolean=} bypassInterceptor
    * @return {!Promise<!Response>|!Promise<!Response>}
    * @private
    */
-  fetch_(input, init) {
+  fetch_(input, init, bypassInterceptor = false) {
     return getViewerInterceptResponse(
       this.win,
       this.ampdocSingle_,
       input,
-      init
+      init,
+      bypassInterceptor
     ).then(interceptorResponse => {
       if (interceptorResponse) {
         return interceptorResponse;
@@ -101,13 +103,14 @@ export class Xhr {
    *
    * @param {string} input
    * @param {!FetchInitDef=} init
+   * @param {booean=} bypassInterceptor
    * @return {!Promise<!Response>}
    * @private
    */
-  fetchAmpCors_(input, init = {}) {
+  fetchAmpCors_(input, init = {}, bypassInterceptor = false) {
     input = setupInput(this.win, input, init);
     init = setupAMPCors(this.win, input, init);
-    return this.fetch_(input, init).then(
+    return this.fetch_(input, init, bypassInterceptor).then(
       response => {
         return verifyAmpCORSHeaders(this.win, response, init);
       },
@@ -158,11 +161,12 @@ export class Xhr {
   /**
    * @param {string} input URL
    * @param {?FetchInitDef=} opt_init Fetch options object.
+   * @param {boolean=} bypassInterceptor
    * @return {!Promise<!Response>}
    */
-  fetch(input, opt_init) {
+  fetch(input, opt_init, bypassInterceptor = false) {
     const init = setupInit(opt_init);
-    return this.fetchAmpCors_(input, init).then(response =>
+    return this.fetchAmpCors_(input, init, bypassInterceptor).then(response =>
       assertSuccess(response)
     );
   }
