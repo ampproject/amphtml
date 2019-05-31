@@ -45,8 +45,8 @@ const cssEntryPoints = [
     outCss: 'v0.css',
   },
   {
-    path: 'ampelement.css',
-    outJs: 'ampelement.css.js',
+    path: 'ampshared.css',
+    outJs: 'ampshared.css.js',
     outCss: 'v0.css',
     append: true,
   },
