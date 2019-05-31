@@ -22,7 +22,6 @@ import {
   tryDecodeUriComponent,
 } from './url';
 import {urls} from './config';
-import { url } from 'inspector';
 
 const TEST_COOKIE_NAME = '-test-amp-cookie-tmp';
 
@@ -136,26 +135,19 @@ export function getHighestAvailableDomain(win) {
     }
   }
 
-  if (isProxyOrigin(win.location.href)) {
-    // return early for proxy origin.
-    return null;
-  }
-  const parts = win.location.hostname.split('.');
-  let domain = parts[parts.length - 1];
-  let testCookieName = TEST_COOKIE_NAME;
-  const counter = 0;
-  while (getCookie(win, testCookieName)) {
-    // test cookie name conflit, append counter to test cookie name
-    testCookieName = TEST_COOKIE_NAME + counter;
-  }
-  for (let i = parts.length - 2; i >= 0; i--) {
-    domain = parts[i] + '.' + domain;
-    // Try set a cookie for testing only, expire after 1 sec
-    trySetCookie(win, testCookieName, 'delete', Date.now() + 1000, domain);
-    if (getCookie(win, testCookieName) == 'delete') {
-      // Remove the cookie for testing
-      trySetCookie(win, testCookieName, 'delete', Date.now() - 1000, domain);
-      return domain;
+  if (!isProxyOrigin(win.location.href)) {
+    const parts = win.location.hostname.split('.');
+    let domain = parts[parts.length - 1];
+    const testCookieName = getTempCookieName(win);
+    for (let i = parts.length - 2; i >= 0; i--) {
+      domain = parts[i] + '.' + domain;
+      // Try set a cookie for testing only, expire after 1 sec
+      trySetCookie(win, testCookieName, 'delete', Date.now() + 1000, domain);
+      if (getCookie(win, testCookieName) == 'delete') {
+        // Remove the cookie for testing
+        trySetCookie(win, testCookieName, 'delete', Date.now() - 1000, domain);
+        return domain;
+      }
     }
   }
 
@@ -175,8 +167,10 @@ export function getHighestAvailableDomain(win) {
 function trySetCookie(win, name, value, expirationTime, domain) {
   // We do not allow setting cookies on the domain that contains both
   // the cdn. and www. hosts.
-  if (domain == 'ampproject.org' ||
-      parseUrlDeprecated(urls.cdn).hostname.toLowerCase()) {
+  if (
+    domain == 'ampproject.org' ||
+    domain == parseUrlDeprecated(urls.cdn).hostname.toLowerCase()
+  ) {
     // Actively delete them.
     value = 'delete';
     expirationTime = 0;
@@ -232,4 +226,19 @@ function checkOriginForSettingCookie(win, options, name) {
         name
     );
   }
+}
+
+/**
+ * Return a temporaty cookie name for testing only
+ * @param {!Window} win
+ * @return {string}
+ */
+function getTempCookieName(win) {
+  let testCookieName = TEST_COOKIE_NAME;
+  const counter = 0;
+  while (getCookie(win, testCookieName)) {
+    // test cookie name conflit, append counter to test cookie name
+    testCookieName = TEST_COOKIE_NAME + counter;
+  }
+  return testCookieName;
 }
