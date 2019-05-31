@@ -120,26 +120,38 @@ export class IframeMessagingClient {
   }
 
   /**
-   *  Send a postMessage to Host Window
-   *  @param {string} type The type of message to send.
-   *  @param {JsonObject=} opt_payload The payload of message to send.
+   * Send a postMessage to Host Window
+   * @param {string} type The type of message to send.
+   * @param {JsonObject=} opt_payload The payload of message to send.
    */
   sendMessage(type, opt_payload) {
+    const msg = serializeMessage(
+      type,
+      dev().assertString(this.sentinel_),
+      opt_payload,
+      this.rtvVersion_
+    );
+
+    // opt in the userActivation feature
+    // see https://github.com/dtapuska/useractivation
+    if (this.isMessageOptionsSupported_()) {
+      this.postMessageWithUserActivation_(msg);
+    } else {
+      this.hostWindow_./*OK*/ postMessage(msg, '*');
+    }
+  }
+
+  /**
+   * @param {string} msg
+   * @suppress {checkTypes} // Can be removed after closure compiler update their externs.
+   */
+  postMessageWithUserActivation_(msg) {
     this.hostWindow_./*OK*/ postMessage(
-      serializeMessage(
-        type,
-        dev().assertString(this.sentinel_),
-        opt_payload,
-        this.rtvVersion_
-      ),
-      // opt in the userActivation feature
-      // see https://github.com/dtapuska/useractivation
-      this.isMessageOptionsSupported_()
-        ? {
-            targetOrigin: '*',
-            includeUserActivation: true,
-          }
-        : '*'
+      msg,
+      dict({
+        'targetOrigin': '*',
+        'includeUserActivation': true,
+      })
     );
   }
 
