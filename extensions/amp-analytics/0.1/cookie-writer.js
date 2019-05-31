@@ -198,10 +198,10 @@ export class CookieWriter {
    * Expand the value and write to cookie if necessary
    * @param {string} cookieName
    * @param {string} cookieValue
-   * @param {number} opt_cookieExpireDateMs
+   * @param {number} cookieExpireDateMs
    * @return {!Promise}
    */
-  expandAndWrite_(cookieName, cookieValue, opt_cookieExpireDateMs) {
+  expandAndWrite_(cookieName, cookieValue, cookieExpireDateMs) {
     // Note: Have to use `expandStringAsync` because QUERY_PARAM can wait for
     // trackImpressionPromise and resolve async
     return this.urlReplacementService_
@@ -210,7 +210,7 @@ export class CookieWriter {
         // Note: We ignore empty cookieValue, that means currently we don't
         // provide a way to overwrite or erase existing cookie
         if (value) {
-          const expireDate = Date.now() + opt_cookieExpireDateMs;
+          const expireDate = Date.now() + cookieExpireDateMs;
           setCookie(this.win_, cookieName, value, expireDate, {
             highestAvailableDomain: true,
           });
