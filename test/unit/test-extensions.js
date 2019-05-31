@@ -23,7 +23,7 @@ import {
   installStandardServicesInEmbed,
 } from '../../src/service/extensions-impl';
 import {Services} from '../../src/services';
-import {getServiceForDoc, registerServiceBuilder} from '../../src/service';
+import {getService, getServiceForDoc, registerServiceBuilder, setParentWindow} from '../../src/service';
 import {installTimerService} from '../../src/service/timer-impl';
 import {loadPromise} from '../../src/event-helper';
 import {resetScheduledElementForTesting} from '../../src/service/custom-element-registry';
@@ -957,6 +957,7 @@ describes.sandboxed('Extensions', {}, () => {
       parentWin.document.body.appendChild(iframe);
       return promise.then(() => {
         iframeWin = iframe.contentWindow;
+        setParentWindow(iframeWin, parentWin);
       });
     });
 
@@ -1003,13 +1004,14 @@ describes.sandboxed('Extensions', {}, () => {
       const actions = Services.actionServiceForDoc(any);
       const standardActions = Services.standardActionsForDoc(any);
       const navigation = Services.navigationForDoc(any);
-      const timer = Services.timerFor(any);
 
       expect(url.constructor.installInEmbedWindow).to.be.called;
       expect(actions.constructor.installInEmbedWindow).to.be.called;
       expect(standardActions.constructor.installInEmbedWindow).to.be.called;
       expect(navigation.constructor.installInEmbedWindow).to.be.called;
-      expect(timer.constructor.installInEmbedWindow).to.be.called;
+
+      // QQQQQ
+      expect(getService(iframeWin, 'timer')).to.exist;
     });
 
     it('should install extensions in child window', () => {
@@ -1160,20 +1162,17 @@ describes.sandboxed('Extensions', {}, () => {
         const actions = Services.actionServiceForDoc(any);
         const standardActions = Services.standardActionsForDoc(any);
         const navigation = Services.navigationForDoc(any);
-        const timer = Services.timerFor(any);
 
         // Expected order: url, action, standard-actions, navigation, timer.
         const one = url.constructor.installInEmbedWindow;
         const two = actions.constructor.installInEmbedWindow;
         const three = standardActions.constructor.installInEmbedWindow;
         const four = navigation.constructor.installInEmbedWindow;
-        const five = timer.constructor.installInEmbedWindow;
 
         expect(one).to.be.calledBefore(two);
         expect(two).to.be.calledBefore(three);
         expect(three).to.be.calledBefore(four);
-        expect(four).to.be.calledBefore(five);
-        expect(five).to.be.called;
+        expect(four).to.be.called;
       });
     });
   });
