@@ -29,7 +29,7 @@ import {
   installRuntimeServices,
 } from './runtime';
 import {cssText as ampDocCss} from '../build/ampdoc.css';
-import {cssText as ampElementCss} from '../build/ampelement.css';
+import {cssText as ampElementCss} from '../build/ampshared.css';
 import {fontStylesheetTimeout} from './font-stylesheet-timeout';
 import {installAutoLightboxExtension} from './auto-lightbox';
 import {installDocService} from './service/ampdoc-impl';
