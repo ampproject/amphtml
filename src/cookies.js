@@ -18,6 +18,8 @@ import {endsWith} from './string';
 import {isProxyOrigin, parseUrlDeprecated, tryDecodeUriComponent} from './url';
 import {urls} from './config';
 
+const TEST_COOKIE_NAME = '-amp-cookie-test-tmp';
+
 /**
  * Returns the value of the cookie. The cookie access is restricted and must
  * go through the privacy review. Before using this method please file a
@@ -105,20 +107,26 @@ export function setCookie(win, name, value, expirationTime, opt_options) {
 export function getHighestAvailableDomain(win) {
   // TODO(zhouyx@): Once we decide to allow publisher to put
   // <meta name='amp-cookie-scope'>. Need to respect the meta first.
+
   if (!isProxyOrigin(win.location.href)) {
     // Use the set cookie hack to find the higestAvailableDomain on non proxy
     // origin.
 
     const parts = win.location.hostname.split('.');
     let domain = parts[parts.length - 1];
-    const randomName = Math.random().toString();
+    let testCookieName = TEST_COOKIE_NAME;
+    const counter = 0;
+    while (getCookie(win, testCookieName)) {
+      // test cookie name conflit, append counter to test cookie name
+      testCookieName = TEST_COOKIE_NAME + counter;
+    }
     for (let i = parts.length - 2; i >= 0; i--) {
       domain = parts[i] + '.' + domain;
       // Try set a cookie for testing only, expire after 1 sec
-      trySetCookie(win, randomName, 'delete', Date.now() + 1000, domain);
-      if (getCookie(win, randomName) == 'delete') {
+      trySetCookie(win, testCookieName, 'delete', Date.now() + 1000, domain);
+      if (getCookie(win, testCookieName) == 'delete') {
         // Remove the cookie for testing
-        trySetCookie(win, randomName, 'test', Date.now() - 1000, domain);
+        trySetCookie(win, testCookieName, 'delete', Date.now() - 1000, domain);
         return domain;
       }
     }
@@ -148,7 +156,7 @@ export function getHighestAvailableDomain(win) {
 function trySetCookie(win, name, value, expirationTime, domain) {
   // We do not allow setting cookies on the domain that contains both
   // the cdn. and www. hosts.
-  if (domain == 'ampproject.org') {
+  if (domain == 'ampproject.org' || domain == 'cdn.ampproject.org') {
     // Actively delete them.
     value = 'delete';
     expirationTime = 0;
@@ -183,7 +191,7 @@ function checkOriginForSettingCookie(win, options, name) {
     if (options.highestAvailableDomain) {
       throw new Error(
         'Could not support higestAvailable Domain on proxy origin, ' +
-        'specify domain explicitly'
+          'specify domain explicitly'
       );
     }
     return;

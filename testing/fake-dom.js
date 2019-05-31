@@ -115,7 +115,7 @@ export class FakeWindow {
 
     /** @private {!Array<string>} */
     this.cookie_ = [];
-    this.document.publicSufficList = [];
+    this.document.publicSuffixList = [];
     this.document.lastSetCookieRaw; // used to verify cookie settings like expiration time etc
     Object.defineProperty(this.document, 'cookie', {
       get: () => {
@@ -135,7 +135,7 @@ export class FakeWindow {
         const expiresMatch = value.match(/expires=([^;]*)(;|$)/);
         const domainMatch = value.match(/domain=([^;]*)/);
         const domain = domainMatch ? domainMatch[1] : '';
-        if (this.document.publicSufficList.indexOf(domain) >= 0) {
+        if (this.document.publicSuffixList.indexOf(domain) >= 0) {
           // Can't set cookie to etld
           this.document.lastSetCookieRaw = '';
           return;

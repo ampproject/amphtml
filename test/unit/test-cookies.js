@@ -86,13 +86,20 @@ describes.fakeWin('test-cookies', {amp: true}, env => {
     expect(getHighestAvailableDomain(win)).to.equal('bar.net');
     win.location.href = 'https://foo.bar.com';
     expect(getHighestAvailableDomain(win)).to.equal('bar.com');
-    doc.publicSufficList = ['bar.com'];
+    doc.publicSuffixList = ['bar.com'];
     win.location.href = 'https://bar.com';
     expect(getHighestAvailableDomain(win)).to.be.null;
     win.location.href = 'https://bar.net';
     expect(getHighestAvailableDomain(win)).to.equal('bar.net');
     win.location.href = 'https://foo.bar.com';
     expect(getHighestAvailableDomain(win)).to.equal('foo.bar.com');
+    expect(doc.cookie).to.equal('');
+
+    // Special case, has test cookie name conflict
+    win.location.href = 'https://foo.bar.com';
+    doc.cookie = '-amp-cookie-test-tmp=test';
+    expect(getHighestAvailableDomain(win)).to.equal('foo.bar.com');
+    expect(doc.cookie).to.equal('-amp-cookie-test-tmp=test');
   });
 
   it('getHigestAvaibleDomain on proxy origin', () => {
@@ -131,7 +138,7 @@ describes.fakeWin('test-cookies', {amp: true}, env => {
     test('https://123.www.example.com/test.html', 'example.com');
     test('https://example.com/test.html', 'example.com');
     test('https://www.example.net', 'example.net');
-    doc.publicSufficList = ['example.com'];
+    doc.publicSuffixList = ['example.com'];
     test('https://123.www.example.com/test.html', 'www.example.com');
   });
 
@@ -182,6 +189,17 @@ describes.fakeWin('test-cookies', {amp: true}, env => {
     });
     expect(doc.lastSetCookieRaw).to.equal(
       `c%261=delete; path=/; domain=ampproject.org; ` +
+        'expires=Thu, 01 Jan 1970 00:00:00 GMT'
+    );
+    expect(doc.cookie).to.equal('');
+
+    // Cannot write to 'cdn.ampproject.org'
+    setCookie(win, 'c&1', 'v&1', Date.now() + BASE_CID_MAX_AGE_MILLIS, {
+      domain: 'cdn.ampproject.org',
+      allowOnProxyOrigin: true,
+    });
+    expect(doc.lastSetCookieRaw).to.equal(
+      `c%261=delete; path=/; domain=cdn.ampproject.org; ` +
         'expires=Thu, 01 Jan 1970 00:00:00 GMT'
     );
     expect(doc.cookie).to.equal('');
