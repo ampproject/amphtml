@@ -22,8 +22,9 @@ import {
   tryDecodeUriComponent,
 } from './url';
 import {urls} from './config';
+import { url } from 'inspector';
 
-const TEST_COOKIE_NAME = '-amp-cookie-test-tmp';
+const TEST_COOKIE_NAME = '-test-amp-cookie-tmp';
 
 /**
  * Returns the value of the cookie. The cookie access is restricted and must
@@ -111,6 +112,10 @@ export function setCookie(win, name, value, expirationTime, opt_options) {
  */
 export function getHighestAvailableDomain(win) {
   // <meta name='amp-cookie-scope'>. Need to respect the meta first.
+
+  // Note: The same logic applies to shadow docs. Where all shadow docs are
+  // considered to be in the same origin. And only the <meta> from
+  // shell will be respected. (Header from shadow doc will be removed)
   const metaTag = win.document.head.querySelector(
     "meta[name='amp-cookie-scope']"
   );
@@ -170,7 +175,8 @@ export function getHighestAvailableDomain(win) {
 function trySetCookie(win, name, value, expirationTime, domain) {
   // We do not allow setting cookies on the domain that contains both
   // the cdn. and www. hosts.
-  if (domain == 'ampproject.org' || domain == 'cdn.ampproject.org') {
+  if (domain == 'ampproject.org' ||
+      parseUrlDeprecated(urls.cdn).hostname.toLowerCase()) {
     // Actively delete them.
     value = 'delete';
     expirationTime = 0;
