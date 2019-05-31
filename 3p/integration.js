@@ -55,6 +55,7 @@ import {mathml} from './mathml';
 import {reddit} from './reddit';
 import {twitter} from './twitter';
 import {viqeoplayer} from './viqeoplayer';
+import {yellow_messenger} from './yellow_messenger';
 import {yotpo} from './yotpo';
 
 import {_ping_} from '../ads/_ping_';
@@ -506,6 +507,7 @@ register('yieldbot', yieldbot);
 register('yieldmo', yieldmo);
 register('yieldone', yieldone);
 register('yieldpro', yieldpro);
+register('yellow_messenger', yellow_messenger);
 register('yotpo', yotpo);
 register('zedo', zedo);
 register('zen', zen);
