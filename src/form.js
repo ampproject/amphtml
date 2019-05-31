@@ -189,7 +189,8 @@ export function isFieldDefault(field) {
 }
 
 /**
- * Checks if a form field is empty.
+ * Checks if a form field is empty. It expects a form field element,
+ * i.e. `<input>`, `<textarea>`, or `<select>`.
  * @param {!Element} field
  * @throws {Error}
  * @return {boolean}
@@ -208,6 +209,8 @@ export function isFieldEmpty(field) {
       // dropdown menu has at least one option always selected
       return false;
     default:
-      throw new Error(`${field.tagName} is not a supported field element.`);
+      throw new Error(
+        `isFieldEmpty: ${field.tagName} is not a supported field element.`
+      );
   }
 }
