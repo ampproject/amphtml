@@ -79,7 +79,11 @@ describes.fakeWin('test-cookies', {amp: true}, env => {
     expect(doc.cookie).to.equal('c%261=v%261');
   });
 
-  it('getHigestAvailableDomain on origin', () => {
+  it('getHigestAvailableDomain without meta tag', () => {
+    // Proxy Origin
+    win.location.href = 'https://foo-bar.cdn.ampproject.org/c/foo.bar.com';
+    expect(getHighestAvailableDomain(win)).to.be.null;
+
     win.location.href = 'https://bar.com';
     expect(getHighestAvailableDomain(win)).to.equal('bar.com');
     win.location.href = 'https://bar.net';
@@ -102,14 +106,42 @@ describes.fakeWin('test-cookies', {amp: true}, env => {
     expect(doc.cookie).to.equal('-amp-cookie-test-tmp=test');
   });
 
-  it('getHigestAvaibleDomain on proxy origin', () => {
-    win.location.href = 'https://foo.cdn.ampproject.org';
-    expect(getHighestAvailableDomain(win)).to.be.null;
-    const meta = doc.createElement('meta');
+  it('getHigestAvaibleDomain in valid meta tag', () => {
+    win.location.href = 'https://abc.foo.bar.com';
+    expect(getHighestAvailableDomain(win)).to.equal('bar.com');
+    let meta = doc.createElement('meta');
     meta.setAttribute('name', 'amp-cookie-scope');
-    meta.setAttribute('content', 'example.com');
+    meta.setAttribute('content', 'foo.bar.com');
     doc.head.appendChild(meta);
-    expect(getHighestAvailableDomain(win)).to.equal('example.com');
+    expect(getHighestAvailableDomain(win)).to.equal('foo.bar.com');
+
+    meta.remove();
+    win.location.href = 'https://abc-foo-bar.cdn.ampproject.org/c/foo.bar.com';
+    expect(getHighestAvailableDomain(win)).to.be.null;
+    meta = doc.createElement('meta');
+    meta.setAttribute('name', 'amp-cookie-scope');
+    meta.setAttribute('content', 'foo.bar.com');
+    doc.head.appendChild(meta);
+    expect(getHighestAvailableDomain(win)).to.equal('foo.bar.com');
+  });
+
+  it('getHigestAvaibleDomain with invalid meta tag', () => {
+    win.location.href = 'https://foo.bar.com';
+    expect(getHighestAvailableDomain(win)).to.equal('bar.com');
+    let meta = doc.createElement('meta');
+    meta.setAttribute('name', 'amp-cookie-scope');
+    meta.setAttribute('content', 'invalid.com');
+    doc.head.appendChild(meta);
+    expect(getHighestAvailableDomain(win)).to.equal('foo.bar.com');
+
+    meta.remove();
+    win.location.href = 'https://foo-bar.cdn.ampproject.org/c/foo.bar.com';
+    expect(getHighestAvailableDomain(win)).to.be.null;
+    meta = doc.createElement('meta');
+    meta.setAttribute('name', 'amp-cookie-scope');
+    meta.setAttribute('content', 'invalid.com');
+    doc.head.appendChild(meta);
+    expect(getHighestAvailableDomain(win)).to.equal('foo.bar.com');
   });
 
   it('should write the cookie to the right domain on origin', () => {

@@ -15,7 +15,12 @@
  */
 
 import {endsWith} from './string';
-import {isProxyOrigin, parseUrlDeprecated, tryDecodeUriComponent} from './url';
+import {
+  getSourceOrigin,
+  isProxyOrigin,
+  parseUrlDeprecated,
+  tryDecodeUriComponent,
+} from './url';
 import {urls} from './config';
 
 const TEST_COOKIE_NAME = '-amp-cookie-test-tmp';
@@ -105,42 +110,51 @@ export function setCookie(win, name, value, expirationTime, opt_options) {
  * @param {!Window} win
  */
 export function getHighestAvailableDomain(win) {
-  // TODO(zhouyx@): Once we decide to allow publisher to put
   // <meta name='amp-cookie-scope'>. Need to respect the meta first.
+  const metaTag = win.document.head.querySelector(
+    "meta[name='amp-cookie-scope']"
+  );
 
-  if (!isProxyOrigin(win.location.href)) {
-    // Use the set cookie hack to find the higestAvailableDomain on non proxy
-    // origin.
-
-    const parts = win.location.hostname.split('.');
-    let domain = parts[parts.length - 1];
-    let testCookieName = TEST_COOKIE_NAME;
-    const counter = 0;
-    while (getCookie(win, testCookieName)) {
-      // test cookie name conflit, append counter to test cookie name
-      testCookieName = TEST_COOKIE_NAME + counter;
-    }
-    for (let i = parts.length - 2; i >= 0; i--) {
-      domain = parts[i] + '.' + domain;
-      // Try set a cookie for testing only, expire after 1 sec
-      trySetCookie(win, testCookieName, 'delete', Date.now() + 1000, domain);
-      if (getCookie(win, testCookieName) == 'delete') {
-        // Remove the cookie for testing
-        trySetCookie(win, testCookieName, 'delete', Date.now() - 1000, domain);
-        return domain;
-      }
-    }
-  } else {
-    // Use the <meta name='amp-cookie-scope'> value if there is one
-    const metaTag = win.document.head.querySelector(
-      "meta[name='amp-cookie-scope']"
-    );
-    if (metaTag) {
-      // The content value could be an empty string. Return null instead
-      return metaTag.getAttribute('content') || null;
+  if (metaTag) {
+    // The content value could be an empty string. Return null instead
+    const cookieScope = metaTag.getAttribute('content') || '';
+    // Verify the validness of the amp-cookie-scope meta value
+    const sourceOrigin = getSourceOrigin(win.location.href);
+    // Verify the meta tag content value is valid
+    if (sourceOrigin.endsWith('.' + cookieScope)) {
+      return cookieScope;
+    } else {
+      // When the amp-cookie-scope value is invalid, fallback to the exact origin
+      // the document is contained in.
+      // sourceOrigin in the format of 'https://xxx or http://xxx'
+      return sourceOrigin.split('://')[1];
     }
   }
-  // Couldn't find the higestAvailableDomain
+
+  if (isProxyOrigin(win.location.href)) {
+    // return early for proxy origin.
+    return null;
+  }
+  const parts = win.location.hostname.split('.');
+  let domain = parts[parts.length - 1];
+  let testCookieName = TEST_COOKIE_NAME;
+  const counter = 0;
+  while (getCookie(win, testCookieName)) {
+    // test cookie name conflit, append counter to test cookie name
+    testCookieName = TEST_COOKIE_NAME + counter;
+  }
+  for (let i = parts.length - 2; i >= 0; i--) {
+    domain = parts[i] + '.' + domain;
+    // Try set a cookie for testing only, expire after 1 sec
+    trySetCookie(win, testCookieName, 'delete', Date.now() + 1000, domain);
+    if (getCookie(win, testCookieName) == 'delete') {
+      // Remove the cookie for testing
+      trySetCookie(win, testCookieName, 'delete', Date.now() - 1000, domain);
+      return domain;
+    }
+  }
+
+  // higestAvailableDomain cannot be found
   return null;
 }
 
