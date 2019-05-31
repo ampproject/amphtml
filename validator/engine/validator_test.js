@@ -433,18 +433,23 @@ describe('ValidatorCssLength', () => {
     test.run();
   });
 
-  it('accepts 0 bytes in author stylesheet and 50000 bytes in inline style',
-      () => {
-        const inlineStyle = Array(5001).join(validInlineStyleBlob);
-        assertStrictEqual(50000, inlineStyle.length);
-        const test = new ValidatorTestCase('feature_tests/css_length.html');
-        test.inlineOutput = false;
-        test.ampHtmlFileContents =
+  it('fails on 0 bytes in author stylesheet and 50000 bytes in inline style',
+     () => {
+       const inlineStyle = Array(5001).join(validInlineStyleBlob);
+       assertStrictEqual(50000, inlineStyle.length);
+       const test = new ValidatorTestCase('feature_tests/css_length.html');
+       test.inlineOutput = false;
+       test.ampHtmlFileContents =
            test.ampHtmlFileContents.replace('.replace_amp_custom {}', '')
                .replace('replace_inline_style', inlineStyle);
-        test.expectedOutput = 'PASS';
-        test.run();
-      });
+       test.expectedOutput = 'FAIL\n' +
+           'feature_tests/css_length.html:34:2 The inline style specified in ' +
+           'tag \'div\' is too long - it contains 50000 bytes whereas the ' +
+           'limit is 1000 bytes. (see https://amp.dev/documentation/guides' +
+           '-and-tutorials/learn/spec/amphtml#maximum-size) ' +
+           '[AUTHOR_STYLESHEET_PROBLEM]';
+       test.run();
+     });
 
   it('will not accept 0 bytes in author stylesheet and 50001 bytes in ' +
      'inline style',
@@ -458,12 +463,17 @@ describe('ValidatorCssLength', () => {
            .replace('replace_inline_style', inlineStyle);
     test.expectedOutputFile = null;
     test.expectedOutput = 'FAIL\n' +
-       'feature_tests/css_length.html:36:6 The author stylesheet ' +
-       'specified in tag \'style amp-custom\' and the combined inline ' +
-       'styles is too large - document contains 50001 bytes whereas the ' +
-       'limit is 50000 bytes. ' +
-       '(see https://amp.dev/documentation/guides-and-tutorials/' +
-       'learn/spec/amphtml#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
+        'feature_tests/css_length.html:34:2 The inline style specified in ' +
+        'tag \'div\' is too long - it contains 50001 bytes whereas the ' +
+        'limit is 1000 bytes. (see https://amp.dev/documentation/guides' +
+        '-and-tutorials/learn/spec/amphtml#maximum-size) ' +
+        '[AUTHOR_STYLESHEET_PROBLEM]\n' +
+        'feature_tests/css_length.html:36:6 The author stylesheet ' +
+        'specified in tag \'style amp-custom\' and the combined inline ' +
+        'styles is too large - document contains 50001 bytes whereas the ' +
+        'limit is 50000 bytes. ' +
+        '(see https://amp.dev/documentation/guides-and-tutorials/' +
+        'learn/spec/amphtml#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
     test.run();
   });
 
