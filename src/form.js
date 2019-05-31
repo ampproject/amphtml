@@ -194,17 +194,20 @@ export function isFieldDefault(field) {
  * @return {boolean}
  */
 export function isFieldEmpty(field) {
-  switch (field.type) {
-    case 'select-multiple':
-    case 'select-one':
+  switch (field.tagName) {
+    case 'INPUT':
+      if (field.type == 'checkbox' || field.type == 'radio') {
+        return !field.checked;
+      } else {
+        return !field.value;
+      }
+      break;
+    case 'TEXTAREA':
+      return !field.value;
+    case 'SELECT':
       // dropdown menu has at least one option always selected
       return false;
-    case 'checkbox':
-    case 'radio':
-      return !field.checked;
     default:
-      return !field.value;
+      throw new Error();
   }
-
-  return true;
 }
