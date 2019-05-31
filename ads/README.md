@@ -24,7 +24,7 @@ This guide provides details for ad networks to create an `amp-ad` integration fo
 - [Developer announcements for ads related API changes ](#developer-announcements-for-ads-related-API-changes)
 
 ## Overview
-Ads are just another external resource and must play within the same constraints placed on all resources in AMP. The AMP Project aims to support a large subset of existing ads with little or no changes to how the integrations work. AMP Project's long term goal is to further improve the impact of ads on the user experience through changes across the entire vertical client side stack. Although technically feasible, do not use amp-iframe to render display ads. Using amp-iframe for display ads breaks ad clicks and prevents recording viewability information.
+Ads are just another external resource and must play within the same constraints placed on all resources in AMP. AMP aims to support a large subset of existing ads with little or no changes to how the integrations work. AMP's long term goal is to further improve the impact of ads on the user experience through changes across the entire vertical client side stack. Although technically feasible, do not use amp-iframe to render display ads. Using amp-iframe for display ads breaks ad clicks and prevents recording viewability information.
 
 If you are an ad technology provider looking to integrate with AMP HTML, please also check the [general 3P inclusion guidelines](../3p/README.md#ads) and [ad service integration guidelines](./_integration-guide.md).
 
@@ -100,7 +100,7 @@ More information can be provided in a similar fashion if needed (Please file an 
 
 ### Exceptions to available APIs and information
 
-Depending on the ad server / provider, some methods of rendering ads involve a second iframe inside the AMP iframe. In these cases, the iframe sandbox methods and information will be unavailable to the ad. The AMP Project is working on a creative-level API that will enable this information to be accessible in such iframed cases, and this README will be updated when that is available. Refer to the documentation for the relevant ad servers / providers (e.g., [doubleclick.md](./google/doubleclick.md)) for more details on how to handle such cases.
+Depending on the ad server / provider, some methods of rendering ads involve a second iframe inside the AMP iframe. In these cases, the iframe sandbox methods and information will be unavailable to the ad. AMP is working on a creative-level API that will enable this information to be accessible in such iframed cases, and this README will be updated when that is available. Refer to the documentation for the relevant ad servers / providers (e.g., [doubleclick.md](./google/doubleclick.md)) for more details on how to handle such cases.
 
 ### Ad viewability
 
@@ -296,7 +296,7 @@ For ad networks that support loading via a single script tag, this form is suppo
 </amp-ad>
 ```
 
-Note, that the network still needs to be white-listed and provide a prefix to valid URLs. The AMP Project may add similar support for ad networks that support loading via an iframe tag.
+Note, that the network still needs to be white-listed and provide a prefix to valid URLs. AMP may add similar support for ad networks that support loading via an iframe tag.
 
 Technically, the `<amp-ad>` tag loads an iframe to a generic bootstrap URL that knows how to render the ad given the parameters to the tag.
 
@@ -359,4 +359,4 @@ To speed up the review process, please run `gulp lint` and `gulp check-types`, t
 
 ## Developer announcements for ads related API changes
 
-For any major Ads API related changes that introduce new functionality or cause backwards compatible changes, the AMP Project will notify the [amp-ads-announce@googlegroups.com](https://groups.google.com/d/forum/amp-ads-announce) at least 2 weeks in advance to make sure you have enough time to absorb those changes.
+For any major Ads API related changes that introduce new functionality or cause backwards compatible changes, we will notify the [amp-ads-announce@googlegroups.com](https://groups.google.com/d/forum/amp-ads-announce) at least 2 weeks in advance to make sure you have enough time to absorb those changes.

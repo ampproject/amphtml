@@ -1,6 +1,6 @@
 # Design Reviews
 
-The AMP Project community holds weekly public design reviews via video conference.  We encourage everyone in the community to attend these design reviews to discuss the design challenges being faced by the community.
+The AMP open source community holds weekly public design reviews via video conference.  We encourage everyone to attend these design reviews to discuss the design challenges being faced by the community.
 
 * [Upcoming design reviews](https://github.com/ampproject/amphtml/labels/Type%3A%20Design%20Review)
 * [Past design reviews](https://github.com/ampproject/amphtml/issues?q=label%3A%22Type%3A+Design+Review%22+is%3Aclosed)
@@ -17,7 +17,7 @@ You can optionally join the [design review Google Group](https://groups.google.c
 
 ## Design reviews are global
 
-Because AMP contributors are located all over the world we rotate the design review times to accomodate people in different time zones.  The time and date for a design review will be specified in that design review's issue.
+Because AMP contributors are located all over the world we rotate the design review times to accommodate people in different time zones.  The time and date for a design review will be specified in that design review's issue.
 
 If none of the design review times are convenient for you and you have a design you would like to discuss please reach out to mrjoro on [Slack](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md#discussion-channels).
 
@@ -30,7 +30,7 @@ The process for bringing a design to the design review is:
 * Determine if you need a design document; in many cases a fully detailed Intent-to-implement (I2I) GitHub issue or other GitHub issue describing the problem and proposed solution may be sufficient.  If you have a reviewer work with them to decide what makes sense in your case, otherwise you can ask in the [#design-review Slack channel](https://amphtml.slack.com/messages/design-review/) ([sign up](https://bit.ly/amp-slack-signup)).
 * If you are going to create a design document, create it as a shared Google Document open to public comments:
   * A short design doc is fine as long as it covers your design in sufficient detail to allow for a review by other members of the community.
-  * Take a look at [Design docs - A design doc](https://medium.com/@cramforce/design-docs-a-design-doc-a152f4484c6b) for tips on putting together a good design doc.  [Phone call tracking in AMP](https://docs.google.com/document/d/1UDMYv0f2R9CvMUSBQhxjtkSnC4984t9dJeqwm_8WiAM/edit) and [New AMP Boilerplate](https://docs.google.com/document/d/1gZFaKvcDffceJNaI3bYfuYPtYU5u2y6UhE5wBPTsJ9w/edit) are examples of past AMP Project design docs.
+  * Take a look at [Design docs - A design doc](https://medium.com/@cramforce/design-docs-a-design-doc-a152f4484c6b) for tips on putting together a good design doc.  [Phone call tracking in AMP](https://docs.google.com/document/d/1UDMYv0f2R9CvMUSBQhxjtkSnC4984t9dJeqwm_8WiAM/edit) and [New AMP Boilerplate](https://docs.google.com/document/d/1gZFaKvcDffceJNaI3bYfuYPtYU5u2y6UhE5wBPTsJ9w/edit) are examples of past AMP design docs.
   * Add this license text to the top of your design doc before sharing it with anyone else in the community (updating the year if necessary):
       ```
       Copyright 2019 The AMP HTML Authors. All Rights Reserved.
