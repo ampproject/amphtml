@@ -29,6 +29,7 @@ const {
 const {compileJs, mkdirSync} = require('./helpers');
 const {isTravisBuild} = require('../travis');
 const {jsifyCssAsync} = require('./jsify-css');
+const {compileVendorConfigs} = require('./vendor-configs');
 
 const {green, red, cyan} = colors;
 const argv = require('minimist')(process.argv.slice(2));
@@ -376,16 +377,24 @@ function buildExtension(
       buildExtension(name, version, latestVersion, hasCss, copy);
     });
   }
-  let promise = Promise.resolve();
+  const promises = [];
   if (hasCss) {
     mkdirSync('build');
     mkdirSync('build/css');
-    promise = buildExtensionCss(path, name, version, options);
+    const buildCssPromise = buildExtensionCss(path, name, version, options);
     if (options.compileOnlyCss) {
-      return promise;
+      return buildCssPromise;
     }
+
+    promises.push(buildCssPromise);
   }
-  return promise.then(() => {
+
+  // minify and copy vendor configs for amp-analytics component
+  if (name === 'amp-analytics') {
+    promises.push(compileVendorConfigs(options));
+  }
+
+  return Promise.all(promises).then(() => {
     if (argv.single_pass) {
       return Promise.resolve();
     } else {
