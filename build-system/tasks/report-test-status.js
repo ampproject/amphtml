@@ -25,13 +25,13 @@ const {isTravisPullRequestBuild} = require('../travis');
 const reportBaseUrl = 'https://amp-test-status-bot.appspot.com/v0/tests';
 
 const IS_GULP_E2E = argv._[0] === 'e2e';
-const IS_GULP_TEST = argv._[0] === 'test';
+const IS_GULP_TEST = argv._[0] === 'test' || argv._[0] === 'unit';
 
 const IS_INTEGRATION = !!argv.integration;
-const IS_LOCAL_CHANGES = !!argv['local-changes'];
+const IS_LOCAL_CHANGES = !!argv.local_changes;
 const IS_SAUCELABS = !!(argv.saucelabs || argv.saucelabs_lite);
 const IS_SINGLE_PASS = !!argv.single_pass;
-const IS_UNIT = !!argv.unit;
+const IS_UNIT = argv._[0] === 'unit';
 
 const TEST_TYPE_SUBTYPES = new Map([
   ['integration', ['local', 'single-pass', 'saucelabs']],
@@ -56,7 +56,7 @@ function inferTestType() {
     }
 
     if (IS_LOCAL_CHANGES) {
-      return `${type}/local-changes`;
+      return `${type}/local_changes`;
     } else if (IS_SAUCELABS) {
       return `${type}/saucelabs`;
     } else if (IS_SINGLE_PASS) {

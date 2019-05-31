@@ -55,8 +55,7 @@ function setConfigOverrides(config) {
   config.singleRun = !argv.watch && !argv.w;
   config.client.mocha.grep = argv.grep;
   config.client.verboseLogging = argv.verbose || argv.v;
-  config.client.captureConsole =
-    argv.verbose || argv.v || argv.files || argv.local_changes;
+  config.client.captureConsole = argv.verbose || argv.v || argv.local_changes;
 
   config.browserify.configure = function(bundle) {
     bundle.on('prebundle', function() {
@@ -115,7 +114,7 @@ function getReporterConfig() {
   }
 
   if (argv.saucelabs_lite) {
-    reporters.push('saucelabs');
+    reporters = ['super-dots', 'saucelabs', 'karmaSimpleReporter'];
   }
 
   return {'reporters': reporters};

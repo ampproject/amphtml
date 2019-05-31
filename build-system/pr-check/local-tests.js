@@ -71,7 +71,7 @@ function main() {
     timedExecOrDie('gulp update-packages');
 
     if (buildTargets.has('RUNTIME') || buildTargets.has('UNIT_TEST')) {
-      timedExecOrDie('gulp unit--nobuild --headless --local_changes');
+      timedExecOrDie('gulp unit --nobuild --headless --local_changes');
     }
 
     if (
