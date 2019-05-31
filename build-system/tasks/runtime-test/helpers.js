@@ -189,7 +189,7 @@ function getUnitTestsToRun(unitTestPaths) {
   }
 
   const tests = unitTestsToRun(unitTestPaths);
-  if (!tests) {
+  if (tests.length == 0) {
     log(
       green('INFO:'),
       'No unit tests were directly affected by local changes.'
