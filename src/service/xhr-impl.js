@@ -103,7 +103,7 @@ export class Xhr {
    *
    * @param {string} input
    * @param {!FetchInitDef=} init
-   * @param {booean=} bypassInterceptor
+   * @param {boolean=} bypassInterceptor
    * @return {!Promise<!Response>}
    * @private
    */
