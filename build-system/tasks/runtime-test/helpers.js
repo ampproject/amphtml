@@ -184,21 +184,24 @@ function getUnitTestsToRun(unitTestPaths) {
       green('INFO:'),
       'Skipping tests on local changes because this is a large refactor.'
     );
-    return reportTestSkipped();
+    reportTestSkipped();
+    return [];
   }
+
   const tests = unitTestsToRun(unitTestPaths);
-  if (tests.length == 0) {
+  if (!tests) {
     log(
       green('INFO:'),
       'No unit tests were directly affected by local changes.'
     );
-    return reportTestSkipped();
-  } else {
-    log(green('INFO:'), 'Running the following unit tests:');
-    tests.forEach(test => {
-      log(cyan(test));
-    });
+    reportTestSkipped();
+    return [];
   }
+
+  log(green('INFO:'), 'Running the following unit tests:');
+  tests.forEach(test => {
+    log(cyan(test));
+  });
 
   return tests;
 }
