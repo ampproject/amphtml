@@ -17,7 +17,7 @@
 import {Deferred} from '../utils/promise';
 import {Services} from '../services';
 import {cssText as ampDocCss} from '../../build/ampdoc.css';
-import {cssText as ampElementCss} from '../../build/ampelement.css';
+import {cssText as ampElementCss} from '../../build/ampshared.css';
 import {
   calculateExtensionScriptUrl,
   parseExtensionUrl,
@@ -382,13 +382,8 @@ export class Extensions {
     const holder = this.getCurrentExtensionHolder_(opt_forName);
     holder.docFactories.push(factory);
 
-    // If a single-doc mode, or is shadow-doc mode and has AmpDocShell,
-    // run factory right away if it's included by the doc.
-    if (
-      this.currentExtensionId_ &&
-      (this.ampdocService_.isSingleDoc() ||
-        this.ampdocService_.hasAmpDocShell())
-    ) {
+    // If a single-doc mode, run factory right away if it's included by the doc.
+    if (this.currentExtensionId_ && this.ampdocService_.isSingleDoc()) {
       const ampdoc = this.ampdocService_.getAmpDoc(this.win.document);
       const extensionId = dev().assertString(this.currentExtensionId_);
       // Note that this won't trigger for FIE extensions that are not present

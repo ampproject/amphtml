@@ -148,9 +148,8 @@ function isSubmitButton(element) {
 /**
  * Checks if a field is disabled.
  * @param {!Element} element
- * @private
  */
-function isDisabled(element) {
+export function isDisabled(element) {
   if (element.disabled) {
     return true;
   }
@@ -162,4 +161,56 @@ function isDisabled(element) {
     }
   }
   return false;
+}
+
+/**
+ * Checks if a form field is in its default state.
+ * @param {!Element} field
+ * @return {boolean}
+ */
+export function isFieldDefault(field) {
+  switch (field.type) {
+    case 'select-multiple':
+    case 'select-one':
+      const {options} = field;
+      for (let j = 0; j < options.length; j++) {
+        if (options[j].selected !== options[j].defaultSelected) {
+          return false;
+        }
+      }
+      break;
+    case 'checkbox':
+    case 'radio':
+      return field.checked === field.defaultChecked;
+    default:
+      return field.value === field.defaultValue;
+  }
+  return true;
+}
+
+/**
+ * Checks if a form field is empty. It expects a form field element,
+ * i.e. `<input>`, `<textarea>`, or `<select>`.
+ * @param {!Element} field
+ * @throws {Error}
+ * @return {boolean}
+ */
+export function isFieldEmpty(field) {
+  switch (field.tagName) {
+    case 'INPUT':
+      if (field.type == 'checkbox' || field.type == 'radio') {
+        return !field.checked;
+      } else {
+        return !field.value;
+      }
+    case 'TEXTAREA':
+      return !field.value;
+    case 'SELECT':
+      // dropdown menu has at least one option always selected
+      return false;
+    default:
+      throw new Error(
+        `isFieldEmpty: ${field.tagName} is not a supported field element.`
+      );
+  }
 }

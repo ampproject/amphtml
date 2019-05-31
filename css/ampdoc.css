@@ -172,18 +172,20 @@ html.i-amphtml-ios-embed.i-amphtml-ios-overscroll > #i-amphtml-wrapper {
   border-top: 1px solid transparent !important;
 }
 
-
 /**
- * Most transferred fixed elements are hidden when a lightbox is opened. This
- * prevents fixed elements from being displayed on top of lightboxes.
+ * Hide the fixed layer when a lightbox is opened. This prevents buggy UX where
+ * fixed elements are displayed on top of lightboxes...
  */
+#i-amphtml-wrapper + body {
+  visibility: visible;
+}
 #i-amphtml-wrapper + body[i-amphtml-lightbox] {
   visibility: hidden;
 }
 /**
- * The exception to the above is descendants of lightboxes, which we only
- * want to display when a lightbox is open (the opposite behavior!).
- * See fixed-layer.js#enterLightbox() for details.
+ * ...except for fixed-position descendants of lightboxes, which we only want
+ * to show when a lightbox is open. Note this is the opposite visibility of
+ * the fixed layer itself! See fixed-layer.js#enterLightbox() for details.
  */
 #i-amphtml-wrapper + body .i-amphtml-lightbox-element {
   visibility: hidden;

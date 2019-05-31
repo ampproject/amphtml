@@ -20,7 +20,7 @@ import {FakeLocation} from './fake-dom';
 import {FormEvents} from '../extensions/amp-form/0.1/form-events';
 import {Services} from '../src/services';
 import {cssText as ampDocCss} from '../build/ampdoc.css';
-import {cssText as ampElementCss} from '../build/ampelement.css';
+import {cssText as ampElementCss} from '../build/ampshared.css';
 import {deserializeMessage, isAmpMessage} from '../src/3p-frame-messaging';
 import {installAmpdocServices, installRuntimeServices} from '../src/runtime';
 import {install as installCustomElements} from '../src/polyfills/custom-elements';
@@ -76,7 +76,6 @@ export function createFixtureIframe(
       [BindEvents.RESCAN_TEMPLATE]: 0,
       [FormEvents.SERVICE_INIT]: 0,
     };
-    const messages = [];
     let html = __html__[fixture] // eslint-disable-line no-undef
       .replace(
         /__TEST_SERVER_PORT__/g,
@@ -104,18 +103,7 @@ export function createFixtureIframe(
       if (opt_beforeLoad) {
         opt_beforeLoad(win);
       }
-      win.addEventListener('message', event => {
-        const parsedData = parseMessageData(event.data);
-
-        if (
-          parsedData &&
-          // Either non-3P or 3P variant of the sentinel.
-          (/^amp/.test(parsedData.sentinel) ||
-            /^\d+-\d+$/.test(parsedData.sentinel))
-        ) {
-          messages.push(parsedData);
-        }
-      });
+      const messages = new MessageReceiver(win);
       // Function that returns a promise for when the given event fired at
       // least count times.
       const awaitEvent = (eventName, count) => {
@@ -602,14 +590,51 @@ export function maybeSwitchToCompiledJs(html) {
   return html;
 }
 
-/**
- * @param {*} data
- * @return {?}
- * @private
- */
-function parseMessageData(data) {
-  if (typeof data == 'string' && isAmpMessage(data)) {
-    return deserializeMessage(data);
+class MessageReceiver {
+  /**
+   * @param {!Window} win
+   */
+  constructor(win) {
+    this.events_ = [];
+    win.addEventListener('message', event => {
+      const parsedData = this.parseMessageData_(event.data);
+
+      if (
+        parsedData &&
+        // Either non-3P or 3P variant of the sentinel.
+        (/^amp/.test(parsedData.sentinel) ||
+          /^\d+-\d+$/.test(parsedData.sentinel))
+      ) {
+        this.events_.push({
+          data: parsedData,
+          userActivation: event.userActivation,
+        });
+      }
+    });
   }
-  return data;
+
+  /**
+   * @param {string} type
+   * @returns {?Event}
+   */
+  getFirstMessageEventOfType(type) {
+    for (let i = 0; i < this.events_.length; ++i) {
+      if (this.events_[i].data.type === type) {
+        return this.events_[i];
+      }
+    }
+    return null;
+  }
+
+  /**
+   * @param {*} data
+   * @return {?}
+   * @private
+   */
+  parseMessageData_(data) {
+    if (typeof data == 'string' && isAmpMessage(data)) {
+      return deserializeMessage(data);
+    }
+    return data;
+  }
 }

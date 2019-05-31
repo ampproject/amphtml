@@ -139,12 +139,48 @@ describes.realWin(
       expect(element).to.have.class('i-amphtml-autocomplete-item');
       expect(element.hasAttribute('role')).to.be.true;
       expect(element.innerText).to.equal('');
+
+      impl.highlightUserEntry_ = true;
+      element = impl.createElementFromItem_('hello');
+      expect(element).not.to.be.null;
+      expect(element).to.have.class('i-amphtml-autocomplete-item');
+      expect(element.hasAttribute('role')).to.be.true;
+      expect(element.innerHTML).to.equal('hello');
+
+      element = impl.createElementFromItem_('');
+      expect(element).not.to.be.null;
+      expect(element).to.have.class('i-amphtml-autocomplete-item');
+      expect(element.hasAttribute('role')).to.be.true;
+      expect(element.innerHTML).to.equal('');
+
+      element = impl.createElementFromItem_('hello', 'el');
+      expect(element).not.to.be.null;
+      expect(element).to.have.class('i-amphtml-autocomplete-item');
+      expect(element.hasAttribute('role')).to.be.true;
+      expect(element.innerHTML).to.equal(
+        'h<span class="autocomplete-partial">el</span>lo'
+      );
+
+      element = impl.createElementFromItem_('hello', 'HeLlO');
+      expect(element).not.to.be.null;
+      expect(element).to.have.class('i-amphtml-autocomplete-item');
+      expect(element.hasAttribute('role')).to.be.true;
+      expect(element.innerHTML).to.equal(
+        '<span class="autocomplete-partial">hello</span>'
+      );
+
+      element = impl.createElementFromItem_('hello', 'hellohello');
+      expect(element).not.to.be.null;
+      expect(element).to.have.class('i-amphtml-autocomplete-item');
+      expect(element.hasAttribute('role')).to.be.true;
+      expect(element.innerHTML).to.equal('hello');
     });
 
     describe('filterDataAndRenderResults_()', () => {
       let clearAllItemsSpy;
       let renderSpy;
       let filterDataSpy;
+
       beforeEach(() => {
         expect(impl.container_).not.to.be.null;
         expect(impl.container_.children.length).to.equal(0);
@@ -362,21 +398,46 @@ describes.realWin(
       });
     });
 
-    it('should call inputHandler_() on input', () => {
-      let renderSpy, toggleResultsSpy;
-      return element
-        .layoutCallback()
-        .then(() => {
-          impl.inputElement_.value = 'a';
-          renderSpy = sandbox.spy(impl, 'renderResults_');
-          toggleResultsSpy = sandbox.spy(impl, 'toggleResults_');
-          return impl.inputHandler_();
-        })
-        .then(() => {
-          expect(renderSpy).to.have.been.calledOnce;
-          expect(toggleResultsSpy).to.have.been.calledWith(true);
-          expect(impl.container_.children.length).to.equal(3);
-        });
+    describe('inputHandler_() on input', () => {
+      let renderSpy, toggleResultsSpy, updateActiveSpy;
+
+      it('should record and respond to input', () => {
+        return element
+          .layoutCallback()
+          .then(() => {
+            impl.inputElement_.value = 'a';
+            renderSpy = sandbox.spy(impl, 'renderResults_');
+            toggleResultsSpy = sandbox.spy(impl, 'toggleResults_');
+            updateActiveSpy = sandbox.spy(impl, 'updateActiveItem_');
+            expect(impl.suggestFirst_).to.be.false;
+            return impl.inputHandler_();
+          })
+          .then(() => {
+            expect(renderSpy).to.have.been.calledOnce;
+            expect(toggleResultsSpy).to.have.been.calledWith(true);
+            expect(impl.container_.children.length).to.equal(3);
+            expect(updateActiveSpy).not.to.have.been.called;
+          });
+      });
+
+      it('should suggest first item when present', () => {
+        return element
+          .layoutCallback()
+          .then(() => {
+            impl.inputElement_.value = 'a';
+            renderSpy = sandbox.spy(impl, 'renderResults_');
+            toggleResultsSpy = sandbox.spy(impl, 'toggleResults_');
+            updateActiveSpy = sandbox.spy(impl, 'updateActiveItem_');
+            impl.suggestFirst_ = true;
+            return impl.inputHandler_();
+          })
+          .then(() => {
+            expect(renderSpy).to.have.been.calledOnce;
+            expect(toggleResultsSpy).to.have.been.calledWith(true);
+            expect(impl.container_.children.length).to.equal(3);
+            expect(updateActiveSpy).to.have.been.calledWith(1);
+          });
+      });
     });
 
     describe('keyDownHandler_() on arrow keys', () => {
@@ -627,6 +688,36 @@ describes.realWin(
         });
     });
 
+    describe('keyDownHandler_() on Backspace', () => {
+      const event = {key: Keys.BACKSPACE};
+
+      it('should set flag to true when suggest-first is present', () => {
+        return element
+          .layoutCallback()
+          .then(() => {
+            impl.suggestFirst_ = true;
+            expect(impl.detectBackspace_).to.be.false;
+            return impl.keyDownHandler_(event);
+          })
+          .then(() => {
+            expect(impl.detectBackspace_).to.be.true;
+          });
+      });
+
+      it('should not set flag when suggest-first is absent', () => {
+        return element
+          .layoutCallback()
+          .then(() => {
+            expect(impl.suggestFirst_).to.be.false;
+            expect(impl.detectBackspace_).to.be.false;
+            return impl.keyDownHandler_(event);
+          })
+          .then(() => {
+            expect(impl.detectBackspace_).to.be.false;
+          });
+      });
+    });
+
     it('should call keyDownHandler_() and fallthrough on any other key', () => {
       const event = {key: Keys.LEFT_ARROW};
       return element.layoutCallback().then(() => {
@@ -802,6 +893,38 @@ describes.realWin(
         expect(impl.getEnabledItems_().length).to.equal(2);
         expect(impl.container_.children[2].hasAttribute('aria-disabled')).to.be
           .true;
+      });
+    });
+
+    describe('fallback on error', () => {
+      let fallbackSpy;
+      let toggleFallbackSpy;
+      let getDataSpy;
+
+      beforeEach(() => {
+        impl.element.setAttribute('src', 'invalid-path');
+        fallbackSpy = sandbox.spy(impl, 'displayFallback_');
+        toggleFallbackSpy = sandbox.spy(impl, 'toggleFallback');
+        getDataSpy = sandbox
+          .stub(impl, 'getRemoteData_')
+          .returns(Promise.reject('Error for test'));
+      });
+
+      it('should throw error when fallback is not provided', () => {
+        return element.layoutCallback().catch(e => {
+          expect(getDataSpy).to.have.been.calledOnce;
+          expect(fallbackSpy).to.have.been.calledWith(e);
+          expect(toggleFallbackSpy).not.to.have.been.called;
+        });
+      });
+
+      it('should display fallback when provided', () => {
+        sandbox.stub(impl, 'getFallback').returns(true);
+        return element.layoutCallback().then(() => {
+          expect(getDataSpy).to.have.been.calledOnce;
+          expect(fallbackSpy).to.have.been.calledWith('Error for test');
+          expect(toggleFallbackSpy).to.have.been.calledWith(true);
+        });
       });
     });
   }
