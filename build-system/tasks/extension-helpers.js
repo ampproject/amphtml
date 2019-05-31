@@ -134,6 +134,10 @@ function declareExtensionVersionAlias(name, version, latestVersion, options) {
     'name': name,
     'file': name + '-' + latestVersion + '.js',
   };
+  extensionAliasFilePath[name + '-' + version + '.js.map'] = {
+    'name': name,
+    'file': name + '-' + latestVersion + '.js.map',
+  };
   if (options.hasCss) {
     extensionAliasFilePath[name + '-' + version + '.css'] = {
       'name': name,
