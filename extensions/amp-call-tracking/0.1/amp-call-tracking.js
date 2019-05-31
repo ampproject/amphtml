@@ -17,7 +17,9 @@
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
-import {user, userAssert} from '../../../src/log';
+import {user} from '../../../src/log';
+
+const TAG = 'amp-call-tracking';
 
 /**
  * Bookkeeps all unique URL requests so that no URL is called twice.
@@ -82,15 +84,17 @@ export class AmpCallTracking extends AMP.BaseElement {
       .expandUrlAsync(user().assertString(this.configUrl_))
       .then(url => fetch_(this.win, url))
       .then(data => {
-        userAssert(
-          'phoneNumber' in data,
-          'Response must contain a non-empty phoneNumber field %s',
-          this.element
-        );
-
-        this.hyperlink_.setAttribute('href', `tel:${data['phoneNumber']}`);
-        this.hyperlink_.textContent =
-          data['formattedPhoneNumber'] || data['phoneNumber'];
+        if (data['phoneNumber']) {
+          this.hyperlink_.setAttribute('href', `tel:${data['phoneNumber']}`);
+          this.hyperlink_.textContent =
+            data['formattedPhoneNumber'] || data['phoneNumber'];
+        } else {
+          user().warn(
+            TAG,
+            'Response must contain a non-empty phoneNumber field %s',
+            this.element
+          );
+        }
       });
   }
 }
