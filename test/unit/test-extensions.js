@@ -23,7 +23,12 @@ import {
   installStandardServicesInEmbed,
 } from '../../src/service/extensions-impl';
 import {Services} from '../../src/services';
-import {getService, getServiceForDoc, registerServiceBuilder, setParentWindow} from '../../src/service';
+import {
+  getService,
+  getServiceForDoc,
+  registerServiceBuilder,
+  setParentWindow,
+} from '../../src/service';
 import {installTimerService} from '../../src/service/timer-impl';
 import {loadPromise} from '../../src/event-helper';
 import {resetScheduledElementForTesting} from '../../src/service/custom-element-registry';
