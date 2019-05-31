@@ -17,9 +17,9 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const babelify = require('babelify');
-const defaultConfig = require('../karma.conf');
+const defaultConfig = require('./karma.conf');
 const log = require('fancy-log');
-const testConfig = require('../../config');
+const testConfig = require('../config');
 const {
   createKarmaServer,
   getAdTypes,
@@ -30,13 +30,13 @@ const {
   refreshKarmaWdCache,
   runTestInBatches,
   startTestServer,
-} = require('./helpers');
-const {clean} = require('../clean');
-const {createCtrlcHandler, exitCtrlcHandler} = require('../../ctrlcHandler');
-const {css} = require('../css');
-const {dist} = require('../dist');
+} = require('./runtime-test/helpers');
+const {clean} = require('./clean');
+const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
+const {css} = require('./css');
+const {dist} = require('./dist');
 const {green, yellow, cyan, red} = require('ansi-colors');
-const {isTravisBuild} = require('../../travis');
+const {isTravisBuild} = require('../travis');
 
 function shouldNotRun() {
   if (argv.local_changes && !getUnitTestsToRun(testConfig.unitTestPaths)) {

@@ -303,7 +303,7 @@ function getBrowserConfig() {
     .set('chrome_flags', {
       browsers: ['Chrome_flags'],
       customLaunchers: {
-        // eslint-disable-next-line google-camelcase/google-camelcase
+        // eslint-disable-next-line
         Chrome_flags: {
           base: 'Chrome',
           flags: chromeFlags,
@@ -380,7 +380,7 @@ function maybePrintArgvMessages() {
       'Only running tests that match the pattern "' + cyan(argv.grep) + '".',
     coverage: 'Running tests in code coverage mode.',
     headless: 'Running tests in a headless Chrome window.',
-    // eslint-disable-next-line google-camelcase/google-camelcase
+    // eslint-disable-next-line
     local_changes:
       'Running unit tests directly affected by the files' +
       ' changed in the local branch.',
@@ -400,27 +400,11 @@ function maybePrintArgvMessages() {
       green('to see a list of all test flags.')
     );
     log(green('⤷ Use'), cyan('--nohelp'), green('to silence these messages.'));
-    if (
-      !argv.unit &&
-      !argv.integration &&
-      !argv.files &&
-      !argv.a4a &&
-      !argv['local-changes']
-    ) {
-      log(green('Running all tests.'));
-      log(
-        green('⤷ Use'),
-        cyan('--unit'),
-        green('or'),
-        cyan('--integration'),
-        green('to run just the unit tests or integration tests.')
-      );
-      log(
-        green('⤷ Use'),
-        cyan('--local-changes'),
-        green('to run unit tests from files commited to the local branch.')
-      );
-    }
+    log(
+      green('⤷ Use'),
+      cyan('--local_changes'),
+      green('to run unit tests from files commited to the local branch.')
+    );
     if (!argv.testnames && !argv.files && !argv.local_changes) {
       log(
         green('⤷ Use'),
@@ -469,27 +453,20 @@ function maybeSetCoverageConfig(config, reportName) {
     'report-config': {lcovonly: {file: reportName}},
   };
 
-  config.browserify.transform = [
-    [
-      'babelify',
-      {
-        plugins: [
-          [
-            'istanbul',
-            {
-              exclude: [
-                'ads/**/*.js',
-                'third_party/**/*.js',
-                'test/**/*.js',
-                'extensions/**/test/**/*.js',
-                'testing/**/*.js',
-              ],
-            },
-          ],
-        ],
-      },
-    ],
+  const plugin = [
+    'istanbul',
+    {
+      exclude: [
+        'ads/**/*.js',
+        'third_party/**/*.js',
+        'test/**/*.js',
+        'extensions/**/test/**/*.js',
+        'testing/**/*.js',
+      ],
+    },
   ];
+
+  config.browserify.transform = [['babelify', {plugins: [plugin]}]];
 }
 
 function karmaBrowserComplete(browser) {
