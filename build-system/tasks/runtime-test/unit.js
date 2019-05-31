@@ -38,6 +38,23 @@ const {dist} = require('../dist');
 const {green, yellow, cyan, red} = require('ansi-colors');
 const {isTravisBuild} = require('../../travis');
 
+function shouldNotRun() {
+  if (argv.local_changes && !getUnitTestsToRun(testConfig.unitTestPaths)) {
+    return true;
+  }
+
+  if (argv.saucelabs_lite) {
+    if (!process.env.SAUCE_USERNAME) {
+      throw new Error('Missing SAUCE_USERNAME Env variable');
+    }
+    if (!process.env.SAUCE_ACCESS_KEY) {
+      throw new Error('Missing SAUCE_ACCESS_KEY Env variable');
+    }
+  }
+
+  return false;
+}
+
 async function maybeBuild() {
   if (argv.nobuild) {
     return;
@@ -145,7 +162,7 @@ function setup(config) {
     .set('testServer', testServer);
 }
 
-async function teardown(env) {
+function teardown(env) {
   const exitCode = env.get('exitCode');
 
   // Exit tests
@@ -165,7 +182,7 @@ async function teardown(env) {
   }
 }
 
-async function runUnitTests(config) {
+function runUnitTests(config) {
   if (argv.saucelabs_lite) {
     return runTestInBatches(config);
   }
@@ -174,7 +191,9 @@ async function runUnitTests(config) {
 }
 
 async function unit() {
-  // TODO(estherkim): validate argv flags
+  if (shouldNotRun()) {
+    return;
+  }
 
   // TODO(alanorozco): Come up with a more elegant check?
   global.AMP_TESTING = true;

@@ -185,7 +185,7 @@ function getUnitTestsToRun(unitTestPaths) {
       'Skipping tests on local changes because this is a large refactor.'
     );
     reportTestSkipped();
-    return [];
+    return;
   }
 
   const tests = unitTestsToRun(unitTestPaths);
@@ -195,7 +195,7 @@ function getUnitTestsToRun(unitTestPaths) {
       'No unit tests were directly affected by local changes.'
     );
     reportTestSkipped();
-    return [];
+    return;
   }
 
   log(green('INFO:'), 'Running the following unit tests:');
