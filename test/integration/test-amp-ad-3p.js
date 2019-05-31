@@ -151,9 +151,7 @@ describe.configure().run('amp-ad 3P', () => {
       .then(() => {
         // test iframe will send out render-start to amp-ad
         return poll('render-start message received', () => {
-          return fixture.messages.filter(message => {
-            return message.type == 'render-start';
-          }).length;
+          return !!fixture.messages.getFirstMessageEventOfType('render-start');
         });
       })
       .then(() => {
@@ -168,12 +166,19 @@ describe.configure().run('amp-ad 3P', () => {
         expect(iframe.contentWindow.ping.resizeSuccess).to.be.undefined;
         iframe.contentWindow.context.requestResize(200, 50);
         return poll('wait for embed-size to be received', () => {
-          return fixture.messages.filter(message => {
-            return message.type == 'embed-size';
-          }).length;
+          return !!fixture.messages.getFirstMessageEventOfType('embed-size');
         });
       })
       .then(() => {
+        // The userActivation feature is known to be available on Chrome 74+
+        if (platform.isChrome() && platform.getMajorVersion() >= 74) {
+          const event = fixture.messages.getFirstMessageEventOfType(
+            'embed-size'
+          );
+          expect(event.userActivation).to.be.ok;
+          expect(event.userActivation.isActive).to.be.a('boolean');
+        }
+
         return poll(
           'wait for attemptChangeSize',
           () => {
