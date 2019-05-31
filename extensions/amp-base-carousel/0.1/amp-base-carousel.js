@@ -49,7 +49,7 @@ class AmpCarousel extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {number} */
+    /** @protected {number} */
     this.advanceCount_ = 1;
 
     /** @private {?Carousel} */

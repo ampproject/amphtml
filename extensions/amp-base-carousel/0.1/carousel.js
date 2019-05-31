@@ -213,7 +213,7 @@ export class Carousel {
     /** @private {!Array<!Element>} */
     this.afterSpacers_ = [];
 
-    /** @private {!Array<!Element>} */
+    /** @protected {!Array<!Element>} */
     this.allSpacers_ = [];
 
     /**
@@ -227,7 +227,7 @@ export class Carousel {
      * The offset from the start edge for the element at the current index.
      * This is used to preserve relative scroll position when updating the UI
      * after things have moved (e.g. on rotate).
-     * @private {number}
+     * @protected {number}
      */
     this.currentElementOffset_ = 0;
 
