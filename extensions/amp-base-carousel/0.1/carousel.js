@@ -805,10 +805,13 @@ export class Carousel {
    *    start, false otherwise.
    */
   isAtEnd() {
+    if (this.isLooping()) {
+      return false;
+    }
+
     const el = this.scrollContainer_;
-    return (
-      !this.isLooping() && el.scrollLeft + el.offsetWidth >= el.scrollWidth
-    );
+    const {width} = el./*OK*/ getBoundingClientRect();
+    return el./*OK*/ scrollLeft + width >= el./*OK*/ scrollWidth;
   }
 
   /**
@@ -816,7 +819,11 @@ export class Carousel {
    *    end, false otherwise.
    */
   isAtStart() {
-    return !this.isLooping() && this.scrollContainer_.scrollLeft <= 0;
+    if (this.isLooping()) {
+      return false;
+    }
+
+    return this.scrollContainer_./*OK*/ scrollLeft <= 0;
   }
 
   /**
