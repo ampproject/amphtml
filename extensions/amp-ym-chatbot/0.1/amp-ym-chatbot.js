@@ -14,39 +14,22 @@
  * limitations under the License.
  */
 
+import {dev, userAssert} from '../../../src/log';
 import {getIframe} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {listenFor} from '../../../src/iframe-helper';
-import {Layout} from '../../../src/layout';
-import {dev, userAssert} from '../../../src/log';
-import {htmlFor} from '../../../src/static-template';
-import {
-  createFrameFor,
-  objOrParseJson,
-  redispatch,
-} from '../../../src/iframe-video';
-import {getData, listen} from '../../../src/event-helper';
+
+import {listen} from '../../../src/event-helper';
 
 export class AmpYmChatbot extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
 
-   // /** @private {?Element} */
-   /** @private {?HTMLIFrameElement} */
+    /** @private {?HTMLIFrameElement} */
     this.iframe_ = null;
 
-    /** @private {string} */
-    this.myText_ = 'Work man';
-
-     /** @private {Array<Function>} */
-     this.unlisteners_ = [];
-
-    /** @private {?Element} */
-    this.container_ = null;
-
-    this.botId = null;
+    /** @private {?string} */
+    this.botId_ = null;
   }
 
   /**
@@ -57,67 +40,44 @@ export class AmpYmChatbot extends AMP.BaseElement {
     this.preconnect.url('https://rachana040.github.io/ym-SDK/', opt_onLayout);
   }
 
-  // /**
-  //  * @param {boolean=} opt_onLayout
-  //  * @override
-  //  */
-  // preconnectCallback(opt_onLayout) {
-  //   this.preconnect.url('https://app.yellowmessenger.com/widget/main.js', opt_onLayout);
-  // }
+  /** @override */
+  isLayoutSupported(layout) {
+    return isLayoutSizeDefined(layout);
+  }
 
   /** @override */
   buildCallback() {
-    console.log("buildhey");
+    console.log('Build!');
     const {element: el} = this;
 
-    this.botId = userAssert(
-      el.getAttribute('bot-id'),
-      'The bot-id attribute is required for <amp-ym-chatbot> %s',
+    this.botId_ = userAssert(
+      el.getAttribute('data-botid'),
+      'The data-botid attribute is required for <amp-ym-chatbot> %s',
       el
     );
-    //console.log(el.getAttribute('bot-id'));
-    //console.log(el);
-    //this.win.document.write("Hello");
-    
-    //console.log(this.applyFillContent(iframe));
-
-    // this.container_ = this.element.ownerDocument.createElement('div');
-    // this.container_.textContent = this.myText_;
-    // this.element.appendChild(this.container_);
-    // this.applyFillContent(this.container_, /* replacedContent */ true);
-    
   }
 
-  // /** @override */
-  // layoutCallback() {
-  //   const iframe = createFrameFor(
-  //     this,
-  //     'https://app.yellowmessenger.com/api/ml/prediction?bot=' +
-  //       encodeURIComponent(dev().assertString(this.botId)) +
-  //       '&text=hi&language=en'
-  //   );
-  //   this.iframe_ = iframe;
-  //   //console.log(this.iframe_);
+  /**
+   *
+   */
+  layoutCallback() {
+    console.log('Layout!');
+    const iframe = getIframe(
+      this,
+      'https://app.yellowmessenger.com/api/ml/prediction?bot=' +
+        encodeURIComponent(dev().assertString(this.botId_)) +
+        '&text=hi&language=en'
+    );
+    this.iframe_ = iframe;
 
-  //   this.unlistenMessage_ = listen(
-  //     this.win,
-  //     'message',
-  //     this.sdnBridge_.bind(this)
-  //   );
-  //   //console.log(this.unlistenMessage_);
+    this.unlistenMessage_ = listen(
+      this.win,
+      'message',
+      this.sdnBridge_.bind(this)
+    );
 
-  //   return this.loadPromise(this.iframe_).then(() => this.playerReadyPromise_);
-  // }
-
-    // this.unlistenMessage_ = listen(
-    //   this.win,
-    //   'message',
-    //   this.sdnBridge_.bind(this)
-    // );
-  //   this.element.appendChild(this.iframe_);
-  //   return this.loadPromise(this.iframe_).then(() => console.log("resolved"));
-  //   //return this.loadPromise(this.iframe_).then(() => this.playerReadyPromise_);
-  // }
+    return this.loadPromise(this.iframe_);
+  }
 
   /**
    *
@@ -132,32 +92,17 @@ export class AmpYmChatbot extends AMP.BaseElement {
     }
   }
 
+  /**
+   *
+   */
   layoutCallback() {
     //console.log("hey");
     const iframe = getIframe(this.win, this.element, 'yellow_messenger');
     console.log(iframe);
     this.applyFillContent(iframe);
-    //this.element.appendChild(iframe);
-    this.iframe_= iframe;
+    this.element.appendChild(iframe);
+    this.iframe_ = iframe;
     return this.loadPromise(iframe);
-  }
-
-
-  /** @override */
-  isLayoutSupported(layout) {
-    return layout == Layout.RESPONSIVE;
-  }
-
-  /** @override */
-  unlayoutCallback() {
-    this.unlisteners_.forEach(unlisten => unlisten());
-    this.unlisteners_.length = 0;
-
-    if (this.iframe_) {
-      removeElement(this.iframe_);
-      this.iframe_ = null;
-    }
-    return true;
   }
 }
 
