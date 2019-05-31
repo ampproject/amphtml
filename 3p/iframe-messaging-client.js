@@ -132,7 +132,14 @@ export class IframeMessagingClient {
         opt_payload,
         this.rtvVersion_
       ),
-      '*'
+      // opt in the userActivation feature
+      // see https://github.com/dtapuska/useractivation
+      this.isMessageOptionsSupported_()
+        ? {
+            targetOrigin: '*',
+            includeUserActivation: true,
+          }
+        : '*'
     );
   }
 
@@ -196,5 +203,13 @@ export class IframeMessagingClient {
     if (messageType in this.observableFor_) {
       this.observableFor_[messageType].fire(message);
     }
+  }
+
+  /**
+   * @return {boolean}
+   */
+  isMessageOptionsSupported_() {
+    // Learned from https://github.com/dtapuska/useractivation
+    return this.hostWindow_ && this.hostWindow_.postMessage.length == 1;
   }
 }
