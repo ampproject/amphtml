@@ -191,6 +191,7 @@ export function isFieldDefault(field) {
 /**
  * Checks if a form field is empty.
  * @param {!Element} field
+ * @throws {Error}
  * @return {boolean}
  */
 export function isFieldEmpty(field) {
@@ -201,13 +202,12 @@ export function isFieldEmpty(field) {
       } else {
         return !field.value;
       }
-      break;
     case 'TEXTAREA':
       return !field.value;
     case 'SELECT':
       // dropdown menu has at least one option always selected
       return false;
     default:
-      throw new Error();
+      throw new Error(`${field.tagName} is not a supported field element.`);
   }
 }

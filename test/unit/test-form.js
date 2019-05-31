@@ -687,4 +687,13 @@ describes.fakeWin('isFieldEmpty', {}, env => {
       expect(isFieldEmpty(dropdown)).to.be.false;
     });
   });
+
+  describe('unsupported elements', () => {
+    const UNSUPPORTED = 'not a supported field element.';
+
+    it('throws an error', () => {
+      const unrecognized = doc.createElement('div');
+      expect(() => isFieldEmpty(unrecognized)).to.throw(UNSUPPORTED);
+    });
+  });
 });
