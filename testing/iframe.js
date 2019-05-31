@@ -20,7 +20,7 @@ import {FakeLocation} from './fake-dom';
 import {FormEvents} from '../extensions/amp-form/0.1/form-events';
 import {Services} from '../src/services';
 import {cssText as ampDocCss} from '../build/ampdoc.css';
-import {cssText as ampElementCss} from '../build/ampelement.css';
+import {cssText as ampElementCss} from '../build/ampshared.css';
 import {deserializeMessage, isAmpMessage} from '../src/3p-frame-messaging';
 import {installAmpdocServices, installRuntimeServices} from '../src/runtime';
 import {install as installCustomElements} from '../src/polyfills/custom-elements';
