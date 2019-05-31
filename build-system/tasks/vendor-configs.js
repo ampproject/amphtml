@@ -31,7 +31,7 @@ async function vendorConfigs() {
 }
 
 /**
- * Compile all the vendor configs and drop in the build folder
+ * Compile all the vendor configs and drop in the dist folder
  * @param {Object=} opt_options
  * @return {!Promise}
  */
@@ -43,7 +43,7 @@ function compileVendorConfigs(opt_options) {
 
   if (options.watch) {
     // Do not set watchers again when we get called by the watcher.
-    const copyOptions = {...options, watch:false, calledByWatcher:true};
+    const copyOptions = {...options, watch: false, calledByWatcher: true};
     gulpWatch(srcPath, function() {
       compileVendorConfigs(copyOptions);
     });
@@ -57,7 +57,7 @@ function compileVendorConfigs(opt_options) {
       .pipe(gulpif(options.minify, jsonminify()))
       .pipe(jsonlint())
       .pipe(jsonlint.reporter()) // report any linting errors
-      // only fail if not in watcher, so watch is not interupted
+      // only fail if not in watcher, so watch is not interrupted
       .pipe(gulpif(!options.calledByWatcher, jsonlint.failOnError()))
       .pipe(gulp.dest(destPath))
   ).then(() => {
@@ -74,5 +74,4 @@ module.exports = {
   compileVendorConfigs,
 };
 
-vendorConfigs.description =
-  'Compile analytics vendor configs to dist';
+vendorConfigs.description = 'Compile analytics vendor configs to dist';

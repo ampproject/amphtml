@@ -27,9 +27,9 @@ const {
   verifyExtensionAliasBundles,
 } = require('../../bundles.config');
 const {compileJs, mkdirSync} = require('./helpers');
+const {compileVendorConfigs} = require('./vendor-configs');
 const {isTravisBuild} = require('../travis');
 const {jsifyCssAsync} = require('./jsify-css');
-const {compileVendorConfigs} = require('./vendor-configs');
 
 const {green, red, cyan} = colors;
 const argv = require('minimist')(process.argv.slice(2));
