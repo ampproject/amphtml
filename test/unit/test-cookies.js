@@ -224,16 +224,5 @@ describes.fakeWin('test-cookies', {amp: true}, env => {
         'expires=Thu, 01 Jan 1970 00:00:00 GMT'
     );
     expect(doc.cookie).to.equal('');
-
-    // Cannot write to 'cdn.ampproject.org'
-    setCookie(win, 'c&1', 'v&1', Date.now() + BASE_CID_MAX_AGE_MILLIS, {
-      domain: 'cdn.ampproject.org',
-      allowOnProxyOrigin: true,
-    });
-    expect(doc.lastSetCookieRaw).to.equal(
-      `c%261=delete; path=/; domain=cdn.ampproject.org; ` +
-        'expires=Thu, 01 Jan 1970 00:00:00 GMT'
-    );
-    expect(doc.cookie).to.equal('');
   });
 });

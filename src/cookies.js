@@ -167,10 +167,8 @@ export function getHighestAvailableDomain(win) {
 function trySetCookie(win, name, value, expirationTime, domain) {
   // We do not allow setting cookies on the domain that contains both
   // the cdn. and www. hosts.
-  if (
-    domain == 'ampproject.org' ||
-    domain == parseUrlDeprecated(urls.cdn).hostname.toLowerCase()
-  ) {
+  // Note: we need to allow cdn.ampproject.org in order to optin to experiments
+  if (domain == 'ampproject.org') {
     // Actively delete them.
     value = 'delete';
     expirationTime = 0;
