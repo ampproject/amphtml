@@ -33,7 +33,7 @@ import {
 import {Services} from './services';
 import {VisibilityState} from './visibility-state';
 import {cssText as ampDocCss} from '../build/ampdoc.css';
-import {cssText as ampElementCss} from '../build/ampshared.css';
+import {cssText as ampSharedCss} from '../build/ampshared.css';
 import {
   childElementsByTag,
   isConnectedNode,
@@ -519,7 +519,7 @@ export class MultidocManager {
     // Install runtime CSS.
     installStylesForDoc(
       ampdoc,
-      ampElementCss + ampDocCss,
+      ampDocCss + ampSharedCss,
       /* callback */ null,
       /* opt_isRuntimeCss */ true
     );
