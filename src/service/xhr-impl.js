@@ -22,7 +22,6 @@ import {
   setupInit,
   setupInput,
   setupJsonFetchInit,
-  verifyAmpCORSHeaders,
 } from '../utils/xhr-utils';
 import {getCorsUrl, parseUrlDeprecated} from '../url';
 import {getService, registerServiceBuilder} from '../service';
@@ -92,12 +91,8 @@ export class Xhr {
    * Performs the final initialization and requests the fetch. It does two
    * main things:
    * - It adds "__amp_source_origin" URL parameter with source origin
-   * - It verifies "AMP-Access-Control-Allow-Source-Origin" in the response
    * USE WITH CAUTION: setting ampCors to false disables AMP source origin check
    * but allows for caching resources cross pages.
-   *
-   * Note: requireAmpResponseSourceOrigin is deprecated. It defaults to
-   *   true. Use "ampCors: false" to disable AMP source origin check.
    *
    * @param {string} input
    * @param {!FetchInitDef=} init
@@ -107,10 +102,7 @@ export class Xhr {
   fetchAmpCors_(input, init = {}) {
     input = setupInput(this.win, input, init);
     init = setupAMPCors(this.win, input, init);
-    return this.fetch_(input, init).then(
-      response => {
-        return verifyAmpCORSHeaders(this.win, response, init);
-      },
+    return this.fetch_(input, init).catch(
       reason => {
         const targetOrigin = parseUrlDeprecated(input).origin;
         throw user().createExpectedError(

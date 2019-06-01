@@ -33,10 +33,6 @@ import {isFormDataWrapper} from '../form-data-wrapper';
 /** @private @const {!Array<string>} */
 const allowedMethods_ = ['GET', 'POST'];
 
-/** @private @const {string} */
-export const ALLOW_SOURCE_ORIGIN_HEADER =
-  'AMP-Access-Control-Allow-Source-Origin';
-
 /** @private @const {!Array<function(*):boolean>} */
 const allowedJsonBodyTypes_ = [isArray, isObject];
 
@@ -286,19 +282,6 @@ export function setupInit(opt_init, opt_accept) {
  * @return {!FetchInitDef}
  */
 export function setupAMPCors(win, input, init) {
-  // Do not append __amp_source_origin if explicitly disabled.
-  if (init.ampCors === false) {
-    init.requireAmpResponseSourceOrigin = false;
-  }
-  if (init.requireAmpResponseSourceOrigin === true) {
-    dev().error(
-      'XHR',
-      'requireAmpResponseSourceOrigin is deprecated, use ampCors instead'
-    );
-  }
-  if (init.requireAmpResponseSourceOrigin === undefined) {
-    init.requireAmpResponseSourceOrigin = true;
-  }
   // For some same origin requests, add AMP-Same-Origin: true header to allow
   // publishers to validate that this request came from their own origin.
   const currentOrigin = getWinOrigin(win);
@@ -362,38 +345,6 @@ function normalizeMethod_(method) {
     method
   );
   return method;
-}
-
-/**
- * Verifies if response has the correct headers
- * @param {!Window} win
- * @param {!Response} response
- * @param {!FetchInitDef=} init
- * @return {!Response}
- */
-export function verifyAmpCORSHeaders(win, response, init) {
-  const allowSourceOriginHeader = response.headers.get(
-    ALLOW_SOURCE_ORIGIN_HEADER
-  );
-  if (allowSourceOriginHeader) {
-    const sourceOrigin = getSourceOrigin(win.location.href);
-    // If the `AMP-Access-Control-Allow-Source-Origin` header is returned,
-    // ensure that it's equal to the current source origin.
-    userAssert(
-      allowSourceOriginHeader == sourceOrigin,
-      `Returned ${ALLOW_SOURCE_ORIGIN_HEADER} is not` +
-        ` equal to the current: ${allowSourceOriginHeader}` +
-        ` vs ${sourceOrigin}`
-    );
-  } else if (init.requireAmpResponseSourceOrigin) {
-    // If the `AMP-Access-Control-Allow-Source-Origin` header is not
-    // returned but required, return error.
-    userAssert(
-      false,
-      `Response must contain the ${ALLOW_SOURCE_ORIGIN_HEADER} header`
-    );
-  }
-  return response;
 }
 
 /**

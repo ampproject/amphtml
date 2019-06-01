@@ -624,7 +624,6 @@ describes.repeated(
                 fetchOpt: sinon.match({
                   headers: {Accept: 'application/json'},
                   method: 'GET',
-                  requireAmpResponseSourceOrigin: false,
                   responseType: 'application/json',
                 }),
               });

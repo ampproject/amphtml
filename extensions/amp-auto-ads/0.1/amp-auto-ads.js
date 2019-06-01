@@ -111,7 +111,6 @@ export class AmpAutoAds extends AMP.BaseElement {
       mode: 'cors',
       method: 'GET',
       credentials: 'omit',
-      requireAmpResponseSourceOrigin: false,
     };
     return Services.xhrFor(this.win)
       .fetchJson(configUrl, xhrInit)

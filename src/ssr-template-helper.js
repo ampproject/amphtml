@@ -18,7 +18,6 @@ import {dict} from './utils/object';
 import {
   fromStructuredCloneable,
   toStructuredCloneable,
-  verifyAmpCORSHeaders,
 } from './utils/xhr-utils';
 import {isArray} from './types';
 import {userAssert} from './log';
@@ -187,10 +186,5 @@ export class SsrTemplateHelper {
    * @param {!FetchRequestDef|string} request
    */
   verifySsrResponse(win, response, request) {
-    verifyAmpCORSHeaders(
-      win,
-      fromStructuredCloneable(response, request.fetchOpt.responseType),
-      request.fetchOpt
-    );
   }
 }

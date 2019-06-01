@@ -94,9 +94,7 @@ export class SaveButton {
       this.url
     }`;
     return this.xhr
-      .fetchJson(url, {
-        requireAmpResponseSourceOrigin: false,
-      })
+      .fetchJson(url, {})
       .then(res => res.json());
   }
 

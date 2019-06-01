@@ -245,9 +245,6 @@ describe
                 200,
                 {
                   'Content-Type': 'application/json',
-                  'Access-Control-Expose-Headers':
-                    'AMP-Access-Control-Allow-Source-Origin',
-                  'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
                 },
                 '{}'
               )
@@ -262,9 +259,6 @@ describe
                 200,
                 {
                   'Content-Type': 'application/json',
-                  'Access-Control-Expose-Headers':
-                    'AMP-Access-Control-Allow-Source-Origin',
-                  'AMP-Access-Control-Allow-Source-Origin': 'https://other.com',
                 },
                 '{}'
               )
@@ -582,9 +576,6 @@ describe
                 200,
                 {
                   'Content-Type': 'text/xml',
-                  'Access-Control-Expose-Headers':
-                    'AMP-Access-Control-Allow-Source-Origin',
-                  'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
                   'X-foo-header': 'foo data',
                   'X-bar-header': 'bar data',
                 },
@@ -701,7 +692,7 @@ describe
       let sendMessageStub;
       function getDefaultResponseOptions() {
         return {
-          headers: [['AMP-Access-Control-Allow-Source-Origin', origin]],
+          headers: [],
         };
       }
 
@@ -851,7 +842,6 @@ describe
                 init: {
                   headers: {},
                   method: 'GET',
-                  requireAmpResponseSourceOrigin: true,
                 },
               },
             }
@@ -882,7 +872,6 @@ describe
                     },
                     body: '{"a":42,"b":[24,true]}',
                     method: 'POST',
-                    requireAmpResponseSourceOrigin: true,
                   },
                 },
               }
@@ -924,7 +913,6 @@ describe
                     },
                     body: [['a', '42'], ['b', '24'], ['b', 'true']],
                     method: 'POST',
-                    requireAmpResponseSourceOrigin: true,
                   },
                 },
               }
@@ -975,7 +963,6 @@ describe
                 headers: [
                   ['a', 2],
                   ['b', false],
-                  ['AMP-Access-Control-Allow-Source-Origin', origin],
                 ],
               },
             })
@@ -989,7 +976,7 @@ describe
               expect(response.headers.get('b')).to.equal('false');
               expect(
                 response.headers.get('Amp-Access-Control-Allow-source-origin')
-              ).to.equal(origin);
+              ).to.be.null;
               expect(response).to.have.property('ok').that.is.true;
               expect(response)
                 .to.have.property('status')
@@ -1020,7 +1007,6 @@ describe
                 headers: [
                   ['a', 2],
                   ['b', false],
-                  ['AMP-Access-Control-Allow-Source-Origin', origin],
                 ],
               },
             })
@@ -1034,7 +1020,7 @@ describe
               expect(response.headers.get('b')).to.equal('false');
               expect(
                 response.headers.get('Amp-Access-Control-Allow-Source-Origin')
-              ).to.equal(origin);
+              ).to.be.null;
               expect(response).to.have.property('ok').that.is.true;
               expect(response)
                 .to.have.property('status')

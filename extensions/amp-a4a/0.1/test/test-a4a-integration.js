@@ -107,7 +107,6 @@ describe('integration test: a4a', () => {
         {name: 'ad'}
       );
       adResponse = {
-        headers: {'AMP-Access-Control-Allow-Source-Origin': 'about:srcdoc'},
         body: validCSSAmp.reserialized,
       };
       adResponse.headers[AMP_SIGNATURE_HEADER] = validCSSAmp.signatureHeader;

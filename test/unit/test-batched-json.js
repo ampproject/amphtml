@@ -130,7 +130,6 @@ describe('batchFetchJsonFor', () => {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
         'method': 'POST',
-        'requireAmpResponseSourceOrigin': false,
       };
 
       return batchFetchJsonFor(ampdoc, el, null, all, false, 'idtoken').then(
@@ -167,9 +166,7 @@ describe('batchFetchJsonFor', () => {
         .withArgs('https://data.com')
         .returns(Promise.resolve('https://data.com'));
 
-      const expectedRequest = {
-        'requireAmpResponseSourceOrigin': false,
-      };
+      const expectedRequest = {};
 
       return batchFetchJsonFor(ampdoc, el, null, all, false).then(() => {
         expect(fetchJson).to.be.calledWithExactly(

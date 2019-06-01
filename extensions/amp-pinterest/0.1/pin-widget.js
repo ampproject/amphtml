@@ -76,9 +76,7 @@ export class PinWidget {
     const baseUrl = 'https://widgets.pinterest.com/v3/pidgets/pins/info/?';
     const query = `pin_ids=${this.pinId}&sub=www&base_scheme=https`;
     return this.xhr
-      .fetchJson(baseUrl + query, {
-        requireAmpResponseSourceOrigin: false,
-      })
+      .fetchJson(baseUrl + query, {})
       .then(res => res.json())
       .then(json => {
         try {

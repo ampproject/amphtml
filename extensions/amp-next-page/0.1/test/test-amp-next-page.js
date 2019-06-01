@@ -303,9 +303,7 @@ describes.realWin(
         yield macroTask();
 
         expect(
-          fetchJsonStub.calledWithExactly(srcUrl, {
-            requireAmpResponseSourceOrigin: false,
-          })
+          fetchJsonStub.calledWithExactly(srcUrl, {})
         ).to.be.true;
         expect(registerSpy.calledWith(element, config)).to.be.true;
       });
@@ -378,8 +376,8 @@ describes.realWin(
               createXmlDoc(`
 <GSP VER="3.2">
   <ADS>
-    <AD n="1" type="text/narrow" 
-        url="https://googleads.g.doubleclick.net/aclk?adurl=https://example.com/article" 
+    <AD n="1" type="text/narrow"
+        url="https://googleads.g.doubleclick.net/aclk?adurl=https://example.com/article"
         visible_url="https://example.com/article">
     <LINE1>
       Page title
@@ -437,8 +435,8 @@ describes.realWin(
               createXmlDoc(`
 <GSP VER="3.2">
   <ADS>
-    <AD n="1" type="text/narrow" 
-        url="https://googleads.g.doubleclick.net/aclk?adurl=https://other.com/article" 
+    <AD n="1" type="text/narrow"
+        url="https://googleads.g.doubleclick.net/aclk?adurl=https://other.com/article"
         visible_url="https://other.com/article">
     <LINE1>
       Other 1
@@ -450,8 +448,8 @@ describes.realWin(
     [ { "core_image_url" : "https://other.com/image1.png" } ];
     </MEDIA_TEMPLATE_DATA>
     </AD>
-    <AD n="2" type="text/narrow" 
-        url="https://googleads.g.doubleclick.net/aclk?adurl=https://example.com/article" 
+    <AD n="2" type="text/narrow"
+        url="https://googleads.g.doubleclick.net/aclk?adurl=https://example.com/article"
         visible_url="https://example.com/article">
     <LINE1>
       Example 1
@@ -463,8 +461,8 @@ describes.realWin(
     [ { "core_image_url" : "https://example.com/image2.png" } ];
     </MEDIA_TEMPLATE_DATA>
     </AD>
-    <AD n="3" type="text/narrow" 
-        url="https://googleads.g.doubleclick.net/aclk?adurl=https://other2.com/article" 
+    <AD n="3" type="text/narrow"
+        url="https://googleads.g.doubleclick.net/aclk?adurl=https://other2.com/article"
         visible_url="https://other2.com/article">
     <LINE1>
       Other 2

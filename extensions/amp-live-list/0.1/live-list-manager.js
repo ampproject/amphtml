@@ -155,7 +155,6 @@ export class LiveListManager {
 
     // TODO(erwinm): add update time here when possible.
     return fetchDocument(this.ampdoc.win, url, {
-      requireAmpResponseSourceOrigin: false,
     }).then(this.updateLiveLists_.bind(this));
   }
 

@@ -530,7 +530,6 @@ export class AmpConsent extends AMP.BaseElement {
           credentials: 'include',
           method: 'POST',
           body: request,
-          requireAmpResponseSourceOrigin: false,
         };
         const href = this.consentConfig_['checkConsentHref'];
         assertHttpsUrl(href, this.element);

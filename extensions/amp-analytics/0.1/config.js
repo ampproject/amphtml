@@ -84,7 +84,6 @@ export class AnalyticsConfig {
     const TAG = this.getName_();
     dev().fine(TAG, 'Fetching remote config', remoteConfigUrl);
     const fetchConfig = {
-      requireAmpResponseSourceOrigin: false,
     };
     if (this.element_.hasAttribute('data-credentials')) {
       fetchConfig.credentials = this.element_.getAttribute('data-credentials');
@@ -153,7 +152,6 @@ export class AnalyticsConfig {
       const fetchConfig = {
         method: 'POST',
         body: config,
-        requireAmpResponseSourceOrigin: false,
       };
       if (this.element_.hasAttribute('data-credentials')) {
         fetchConfig.credentials = this.element_.getAttribute(

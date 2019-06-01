@@ -257,7 +257,6 @@ export class AmpUserNotification extends AMP.BaseElement {
     return this.buildGetHref_(ampUserId).then(href => {
       const getReq = {
         credentials: 'include',
-        requireAmpResponseSourceOrigin: false,
       };
       return Services.xhrFor(this.win)
         .fetchJson(href, getReq)
@@ -295,7 +294,6 @@ export class AmpUserNotification extends AMP.BaseElement {
     return {
       method: 'POST',
       credentials: 'include',
-      requireAmpResponseSourceOrigin: false,
       body,
       headers: {
         'Content-Type': enctype,
