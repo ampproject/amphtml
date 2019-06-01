@@ -1,16 +1,13 @@
-# Settings for https://codecov.io integration
-
-# See https://docs.codecov.io/docs/pull-request-comments
-comment: off
-
-# See https://docs.codecov.io/v4.3.0/docs/commit-status
-coverage:
+comment: off # https://docs.codecov.io/docs/pull-request-comments
+coverage: # https://docs.codecov.io/docs/commit-status
   status:
     project:
-      base: auto # Use base commit for PRs, parent commit for push builds
-      target: auto # Target same coverage as the base / parent commit
-      threshold: 100 # Passing check no matter what the coverage is
+      default:
+        base: auto # Use base commit for PRs, parent commit for push builds
+        target: auto # Target same coverage as the base / parent commit
+        threshold: 100 # Passing check no matter what the coverage is
     patch:
-      base: auto # Use base commit for PRs, parent commit for push builds
-      target: 100 # Target 100% coverage for diffs
-      threshold: 100 # Passing check no matter what the coverage is
+      default:
+        base: auto # Use base commit for PRs, parent commit for push builds
+        target: 100 # Target 100% coverage for diffs
+        threshold: 100 # Passing check no matter what the coverage is
