@@ -97,7 +97,7 @@ import {
   installRuntimeServices,
 } from '../src/runtime';
 import {cssText as ampDocCss} from '../build/ampdoc.css';
-import {cssText as ampElementCss} from '../build/ampshared.css';
+import {cssText as ampSharedCss} from '../build/ampshared.css';
 import {createAmpElementForTesting} from '../src/custom-element';
 import {createElementWithAttributes} from '../src/dom';
 import {doNotLoadExternalResourcesInTest} from './iframe';
@@ -853,7 +853,7 @@ function installRuntimeStylesPromise(win) {
   }
   const style = document.createElement('style');
   style.setAttribute('amp-runtime', '');
-  style./*OK*/ textContent = ampDocCss + ampElementCss;
+  style./*OK*/ textContent = ampDocCss + ampSharedCss;
   win.document.head.appendChild(style);
 }
 

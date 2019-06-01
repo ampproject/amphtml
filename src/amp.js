@@ -29,7 +29,7 @@ import {
   installRuntimeServices,
 } from './runtime';
 import {cssText as ampDocCss} from '../build/ampdoc.css';
-import {cssText as ampElementCss} from '../build/ampshared.css';
+import {cssText as ampSharedCss} from '../build/ampshared.css';
 import {fontStylesheetTimeout} from './font-stylesheet-timeout';
 import {installAutoLightboxExtension} from './auto-lightbox';
 import {installDocService} from './service/ampdoc-impl';
@@ -102,7 +102,7 @@ if (shouldMainBootstrapRun) {
     perf.tick('is');
     installStylesForDoc(
       ampdoc,
-      ampDocCss + ampElementCss,
+      ampDocCss + ampSharedCss,
       () => {
         startupChunk(self.document, function services() {
           // Core services.

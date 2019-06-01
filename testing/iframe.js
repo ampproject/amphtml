@@ -20,7 +20,7 @@ import {FakeLocation} from './fake-dom';
 import {FormEvents} from '../extensions/amp-form/0.1/form-events';
 import {Services} from '../src/services';
 import {cssText as ampDocCss} from '../build/ampdoc.css';
-import {cssText as ampElementCss} from '../build/ampshared.css';
+import {cssText as ampSharedCss} from '../build/ampshared.css';
 import {deserializeMessage, isAmpMessage} from '../src/3p-frame-messaging';
 import {installAmpdocServices, installRuntimeServices} from '../src/runtime';
 import {install as installCustomElements} from '../src/polyfills/custom-elements';
@@ -246,7 +246,7 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
       // Act like no other elements were loaded by default.
       installStylesLegacy(
         iframe.contentWindow.document,
-        ampDocCss + ampElementCss,
+        ampDocCss + ampSharedCss,
         () => {
           resolve({
             win: iframe.contentWindow,

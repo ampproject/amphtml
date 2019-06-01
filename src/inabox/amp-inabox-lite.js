@@ -26,7 +26,7 @@ import {
 import {Services} from '../services';
 import {adopt, installBuiltins, installRuntimeServices} from '../runtime';
 import {cssText as ampDocCss} from '../../build/ampdoc.css';
-import {cssText as ampElementCss} from '../../build/ampshared.css';
+import {cssText as ampSharedCss} from '../../build/ampshared.css';
 import {fontStylesheetTimeout} from '../font-stylesheet-timeout';
 import {getMode} from '../mode';
 import {installDocService} from '../service/ampdoc-impl';
@@ -85,7 +85,7 @@ self.document.documentElement.classList.add('i-amphtml-inabox');
 // TODO(lannka): remove ampDocCss for inabox rendering #22418
 const fullCss =
   ampDocCss +
-  ampElementCss +
+  ampSharedCss +
   'html.i-amphtml-inabox{width:100%!important;height:100%!important}';
 installStylesForDoc(
   ampdoc,
