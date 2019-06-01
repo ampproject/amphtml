@@ -1,13 +1,13 @@
-comment: off # https://docs.codecov.io/docs/pull-request-comments
-coverage: # https://docs.codecov.io/docs/commit-status
+comment: off
+coverage:
   status:
     project:
       default:
-        base: auto # Use base commit for PRs, parent commit for push builds
-        target: auto # Target same coverage as the base / parent commit
-        threshold: 100 # Passing check no matter what the coverage is
+        base: auto
+        target: auto
+        threshold: 100
     patch:
       default:
-        base: auto # Use base commit for PRs, parent commit for push builds
-        target: 100 # Target 100% coverage for diffs
-        threshold: 100 # Passing check no matter what the coverage is
+        base: auto
+        target: 100
+        threshold: 100
