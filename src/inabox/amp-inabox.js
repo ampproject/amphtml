@@ -44,6 +44,7 @@ import {
 } from '../style-installer';
 import {installViewerServiceForDoc} from '../service/viewer-impl';
 import {internalRuntimeVersion} from '../internal-version';
+import {isExperimentOn} from '../experiments';
 import {maybeTrackImpression} from '../impression';
 import {maybeValidate} from '../validator-integration';
 import {startupChunk} from '../chunk';
@@ -81,11 +82,11 @@ startupChunk(self.document, function initial() {
   perf.tick('is');
 
   self.document.documentElement.classList.add('i-amphtml-inabox');
-  // TODO(lannka): remove ampDocCss for inabox rendering #22418
-  const fullCss =
-    ampDocCss +
-    ampSharedCss +
-    'html.i-amphtml-inabox{width:100%!important;height:100%!important}';
+  const fullCss = isExperimentOn(self, 'inabox-css-cleanup')
+    ? ampSharedCss
+    : ampDocCss +
+      ampSharedCss +
+      'html.i-amphtml-inabox{width:100%!important;height:100%!important}';
   installStylesForDoc(
     ampdoc,
     fullCss,

@@ -456,8 +456,9 @@ export class Extensions {
     // Install runtime styles.
     installStylesLegacy(
       childWin.document,
-      // TODO(lannka): remove ampDocCss for FIE rendering #22418
-      ampDocCss + ampSharedCss,
+      isExperimentOn(this.win, 'fie-css-cleanup')
+        ? ampSharedCss
+        : ampDocCss + ampSharedCss,
       /* callback */ null,
       /* opt_isRuntimeCss */ true,
       /* opt_ext */ 'amp-runtime'
