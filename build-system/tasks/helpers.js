@@ -434,10 +434,11 @@ function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
    * @return {Promise}
    */
   function performBundle(failOnError) {
-    const startTime = Date.now();
+    let startTime;
     return toPromise(
       bundler
         .bundle()
+        .once('readable', () => (startTime = Date.now()))
         .on('error', err =>
           handleBundleError(err, failOnError, srcFilename, startTime)
         )
