@@ -43,6 +43,8 @@ const overrideKeys = [
   'thankyou',
   'titleFontSize',
   '__hideOnHomepage',
+  'originalServices',
+  'services',
 ];
 
 /**
