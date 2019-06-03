@@ -67,6 +67,20 @@ export class FormDirtiness {
   /**
    * @private
    */
+  updateDirtinessClass_() {
+    if (this.dirtyFieldCount_ == 0 || this.isSubmitting_) {
+      // `Element.classList.remove` will not throw an error if the class does
+      // not already exist
+      this.form_.classList.remove(DIRTINESS_INDICATOR_CLASS);
+    } else {
+      // `Element.classList.add` will no-op if the class already exists
+      this.form_.classList.add(DIRTINESS_INDICATOR_CLASS);
+    }
+  }
+
+  /**
+   * @private
+   */
   installEventHandlers_() {
     this.form_.addEventListener('input', this.onInput_.bind(this));
     this.form_.addEventListener('reset', this.onReset_.bind(this));
@@ -135,20 +149,6 @@ export class FormDirtiness {
   clearDirtyFields_() {
     this.isFieldNameDirty_ = {};
     this.dirtyFieldCount_ = 0;
-  }
-
-  /**
-   * @private
-   */
-  updateDirtinessClass_() {
-    if (this.dirtyFieldCount_ == 0 || this.isSubmitting_) {
-      // `Element.classList.remove` will not throw an error if the class does
-      // not already exist
-      this.form_.classList.remove(DIRTINESS_INDICATOR_CLASS);
-    } else {
-      // `Element.classList.add` will no-op if the class already exists
-      this.form_.classList.add(DIRTINESS_INDICATOR_CLASS);
-    }
   }
 }
 
