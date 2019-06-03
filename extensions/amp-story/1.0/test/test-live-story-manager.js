@@ -17,6 +17,7 @@
 import {AmpStory} from '../amp-story';
 import {AmpStoryPage} from '../amp-story-page';
 import {LiveStoryManager} from '../live-story-manager';
+import {Services} from '../../../../src/services';
 import {addAttributesToElement} from '../../../../src/dom';
 
 describes.realWin('LiveStoryManager', {amp: true}, env => {
@@ -47,6 +48,8 @@ describes.realWin('LiveStoryManager', {amp: true}, env => {
 
   beforeEach(() => {
     win = env.win;
+    const viewer = Services.viewerForDoc(env.ampdoc);
+    sandbox.stub(Services, 'viewerForDoc').returns(viewer);
     storyEl = win.document.createElement('amp-story');
     addAttributesToElement(storyEl, {
       'id': 'testStory',

@@ -30,7 +30,7 @@ import {ViewportBindingIosEmbedWrapper_} from '../../src/service/viewport/viewpo
 import {ViewportBindingNatural_} from '../../src/service/viewport/viewport-binding-natural';
 import {dev} from '../../src/log';
 import {getMode} from '../../src/mode';
-import {installDocumentStateService} from '../../src/service/document-state';
+import {installGlobalDocumentStateService} from '../../src/service/document-state';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
@@ -95,7 +95,7 @@ describes.fakeWin('Viewport', {}, env => {
     installVsyncService(windowApi);
     installPlatformService(windowApi);
     installDocService(windowApi, /* isSingleDoc */ true);
-    installDocumentStateService(windowApi);
+    installGlobalDocumentStateService(windowApi);
     ampdoc = Services.ampdocServiceFor(windowApi).getAmpDoc();
     installViewerServiceForDoc(ampdoc);
 
@@ -1444,7 +1444,7 @@ describe('Viewport META', () => {
       installVsyncService(windowApi);
       installPlatformService(windowApi);
       installDocService(windowApi, /* isSingleDoc */ true);
-      installDocumentStateService(windowApi);
+      installGlobalDocumentStateService(windowApi);
       ampdoc = Services.ampdocServiceFor(windowApi).getAmpDoc();
       installViewerServiceForDoc(ampdoc);
       binding = new ViewportBindingDef();
@@ -1545,7 +1545,7 @@ describe('createViewport', () => {
       it('should bind to "natural" when not iframed', () => {
         win.parent = win;
         installDocService(win, /* isSingleDoc */ true);
-        installDocumentStateService(win);
+        installGlobalDocumentStateService(win);
         const ampDoc = Services.ampdocServiceFor(win).getAmpDoc();
         installViewerServiceForDoc(ampDoc);
         installViewportServiceForDoc(ampDoc);
@@ -1556,7 +1556,7 @@ describe('createViewport', () => {
       it('should bind to "naturual" when iframed', () => {
         win.parent = {};
         installDocService(win, /* isSingleDoc */ true);
-        installDocumentStateService(win);
+        installGlobalDocumentStateService(win);
         const ampDoc = Services.ampdocServiceFor(win).getAmpDoc();
         installViewerServiceForDoc(ampDoc);
         installViewportServiceForDoc(ampDoc);
@@ -1582,7 +1582,7 @@ describe('createViewport', () => {
         installTimerService(win);
         installVsyncService(win);
         installDocService(win, /* isSingleDoc */ true);
-        installDocumentStateService(win);
+        installGlobalDocumentStateService(win);
         ampDoc = Services.ampdocServiceFor(win).getAmpDoc();
         installViewerServiceForDoc(ampDoc);
         viewer = Services.viewerForDoc(ampDoc);

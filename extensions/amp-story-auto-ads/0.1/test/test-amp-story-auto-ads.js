@@ -15,6 +15,7 @@
  */
 import * as analytics from '../../../../src/analytics';
 import {AmpStoryAutoAds} from '../amp-story-auto-ads';
+import {Services} from '../../../../src/services';
 import {macroTask} from '../../../../testing/yield';
 
 const NOOP = () => {};
@@ -34,6 +35,8 @@ describes.realWin(
 
     beforeEach(() => {
       win = env.win;
+      const viewer = Services.viewerForDoc(env.ampdoc);
+      sandbox.stub(Services, 'viewerForDoc').returns(viewer);
       adElement = win.document.createElement('amp-story-auto-ads');
       storyElement = win.document.createElement('amp-story');
       win.document.body.appendChild(storyElement);
