@@ -28,34 +28,32 @@ const {red, cyan} = colors;
  * Returns true if this is a Travis build.
  * @return {boolean}
  */
-exports.isTravisBuild = function() {
+function isTravisBuild() {
   return !!process.env.TRAVIS;
-};
+}
 
 /**
  * Returns true if this is a Travis PR build.
  * @return {boolean}
  */
-exports.isTravisPullRequestBuild = function() {
-  return (
-    exports.isTravisBuild() && process.env.TRAVIS_EVENT_TYPE === 'pull_request'
-  );
-};
+function isTravisPullRequestBuild() {
+  return isTravisBuild() && process.env.TRAVIS_EVENT_TYPE === 'pull_request';
+}
 
 /**
  * Returns true if this is a Travis Push build.
  * @return {boolean}
  */
-exports.isTravisPushBuild = function() {
-  return exports.isTravisBuild() && process.env.TRAVIS_EVENT_TYPE === 'push';
-};
+function isTravisPushBuild() {
+  return isTravisBuild() && process.env.TRAVIS_EVENT_TYPE === 'push';
+}
 
 /**
  * Returns the build number of the ongoing Travis build.
  * @return {string}
  */
-exports.travisBuildNumber = function() {
-  if (!exports.isTravisBuild()) {
+function travisBuildNumber() {
+  if (!isTravisBuild()) {
     log(
       red('ERROR:'),
       'This is not a Travis build. Cannot get',
@@ -63,14 +61,14 @@ exports.travisBuildNumber = function() {
     );
   }
   return process.env.TRAVIS_BUILD_NUMBER;
-};
+}
 
 /**
  * Returns the job number of the ongoing Travis build.
  * @return {string}
  */
-exports.travisJobNumber = function() {
-  if (!exports.isTravisBuild()) {
+function travisJobNumber() {
+  if (!isTravisBuild()) {
     log(
       red('ERROR:'),
       'This is not a Travis build. Cannot get',
@@ -78,14 +76,14 @@ exports.travisJobNumber = function() {
     );
   }
   return process.env.TRAVIS_JOB_NUMBER;
-};
+}
 
 /**
  * Returns the repo slug associated with the ongoing Travis build.
  * @return {string}
  */
-exports.travisRepoSlug = function() {
-  if (!exports.isTravisBuild()) {
+function travisRepoSlug() {
+  if (!isTravisBuild()) {
     log(
       red('ERROR:'),
       'This is not a Travis build. Cannot get',
@@ -93,14 +91,14 @@ exports.travisRepoSlug = function() {
     );
   }
   return process.env.TRAVIS_REPO_SLUG;
-};
+}
 
 /**
  * Returns the commit SHA being tested by the ongoing Travis PR build.
  * @return {string}
  */
-exports.travisPullRequestSha = function() {
-  if (!exports.isTravisPullRequestBuild()) {
+function travisPullRequestSha() {
+  if (!isTravisPullRequestBuild()) {
     log(
       red('ERROR:'),
       'This is not a Travis PR build. Cannot get',
@@ -108,14 +106,14 @@ exports.travisPullRequestSha = function() {
     );
   }
   return process.env.TRAVIS_PULL_REQUEST_SHA;
-};
+}
 
 /**
  * Returns the name of the branch being tested by the ongoing Travis PR build.
  * @return {string}
  */
-exports.travisPullRequestBranch = function() {
-  if (!exports.isTravisPullRequestBuild()) {
+function travisPullRequestBranch() {
+  if (!isTravisPullRequestBuild()) {
     log(
       red('ERROR:'),
       'This is not a Travis PR build. Cannot get',
@@ -123,4 +121,31 @@ exports.travisPullRequestBranch = function() {
     );
   }
   return process.env.TRAVIS_PULL_REQUEST_BRANCH;
+}
+
+/**
+ * Returns the commit SHA being tested by the ongoing Travis build.
+ * @return {string}
+ */
+function travisCommitSha() {
+  if (!isTravisBuild()) {
+    log(
+      red('ERROR:'),
+      'This is not a Travis build. Cannot get',
+      cyan('process.env.TRAVIS_COMMIT') + '.'
+    );
+  }
+  return process.env.TRAVIS_COMMIT;
+}
+
+module.exports = {
+  isTravisBuild,
+  isTravisPullRequestBuild,
+  isTravisPushBuild,
+  travisBuildNumber,
+  travisCommitSha,
+  travisJobNumber,
+  travisPullRequestBranch,
+  travisPullRequestSha,
+  travisRepoSlug,
 };

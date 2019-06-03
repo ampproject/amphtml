@@ -18,8 +18,13 @@
 const colors = require('ansi-colors');
 const fs = require('fs-extra');
 const log = require('fancy-log');
+const {
+  isTravisBuild,
+  isTravisPullRequestBuild,
+  travisCommitSha,
+  travisPullRequestSha,
+} = require('../travis');
 const {getStdout} = require('../exec');
-const {isTravisBuild, travisPullRequestSha} = require('../travis');
 const {shortSha} = require('../git');
 
 const {green, yellow, cyan} = colors;
@@ -58,7 +63,9 @@ async function codecovUpload() {
     );
     return;
   }
-  const commitSha = shortSha(travisPullRequestSha());
+  const commitSha = shortSha(
+    isTravisPullRequestBuild() ? travisPullRequestSha() : travisCommitSha()
+  );
   log(
     green('INFO:'),
     'Uploading coverage reports to',
