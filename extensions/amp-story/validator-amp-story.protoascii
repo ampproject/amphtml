@@ -786,6 +786,11 @@ tags: {  # <amp-story-page-attachment>
     mandatory: true
     value: "nodisplay"
   }
+  attrs: {
+    name: "theme"
+    value: "dark"
+    value: "light"
+  }
 }
 descendant_tag_list {
   # Whitelisting as many components as possible, unless they could result in a
