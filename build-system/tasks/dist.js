@@ -23,7 +23,6 @@ const log = require('fancy-log');
 const {
   buildAlp,
   buildExaminer,
-  buildExperiments,
   buildWebWorker,
   compileAllMinifiedTargets,
   compileJs,
@@ -265,6 +264,68 @@ function buildWebPushPublisherFile(version, fileName, watch, options) {
         fs.writeFileSync('dist/v0/' + fileName + '.html', fileContents);
       }
     });
+}
+
+/**
+ * Build all the AMP experiments.html/js.
+ *
+ * @param {!Object} options
+ */
+async function buildExperiments(options) {
+  options = options || {};
+  const path = 'tools/experiments';
+  const htmlPath = path + '/experiments.html';
+  const jsPath = path + '/experiments.js';
+  let {watch} = options;
+  if (watch === undefined) {
+    watch = argv.watch || argv.w;
+  }
+
+  // Building extensions is a 2 step process because of the renaming
+  // and CSS inlining. This watcher watches the original file, copies
+  // it to the destination and adds the CSS.
+  if (watch) {
+    // Do not set watchers again when we get called by the watcher.
+    const copy = Object.create(options);
+    copy.watch = false;
+    gulpWatch(path + '/*', function() {
+      buildExperiments(copy);
+    });
+  }
+
+  // Build HTML.
+  const html = fs.readFileSync(htmlPath, 'utf8');
+  const minHtml = html.replace(
+    '/dist.tools/experiments/experiments.js',
+    `https://${hostname}/v0/experiments.js`
+  );
+  gulp
+    .src(htmlPath)
+    .pipe(file('experiments.cdn.html', minHtml))
+    .pipe(gulp.dest('dist.tools/experiments/'));
+
+  // Build JS.
+  const js = fs.readFileSync(jsPath, 'utf8');
+  const builtName = 'experiments.max.js';
+  const minifiedName = 'experiments.js';
+  return toPromise(
+    gulp
+      .src(path + '/*.js')
+      .pipe(file(builtName, js))
+      .pipe(gulp.dest('build/experiments/'))
+  ).then(function() {
+    return compileJs(
+      './build/experiments/',
+      builtName,
+      './dist.tools/experiments/',
+      {
+        watch: false,
+        minify: options.minify || argv.minify,
+        includePolyfills: true,
+        minifiedName,
+      }
+    );
+  });
 }
 
 /**
