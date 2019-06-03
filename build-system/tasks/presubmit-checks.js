@@ -204,7 +204,7 @@ const forbiddenTerms = {
     message: privateServiceFactory,
     whitelist: ['src/service/crypto-impl.js', 'src/runtime.js'],
   },
-  'installDocumentStateService': {
+  'installGlobalDocumentStateService': {
     message: privateServiceFactory,
     whitelist: ['src/service/document-state.js', 'src/runtime.js'],
   },
@@ -409,6 +409,15 @@ const forbiddenTerms = {
       'extensions/amp-experiment/1.0/variant.js',
       'extensions/amp-user-notification/0.1/amp-user-notification.js',
       'extensions/amp-consent/0.1/consent-state-manager.js',
+    ],
+  },
+  // Global documentState service.
+  'globalDocumentStateFor': {
+    message: 'Global document API. In the process of being deprecated.',
+    whitelist: [
+      'src/services.js',
+      'src/service/viewer-impl.js',
+      'src/service/vsync-impl.js',
     ],
   },
   'getBaseCid': {
