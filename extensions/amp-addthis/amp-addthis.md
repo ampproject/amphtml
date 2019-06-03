@@ -22,8 +22,7 @@ limitations under the License.
 -->
 
 # amp-addthis
-
-Displays an <a href="https://www.addthis.com">AddThis</a> website tools embed.
+Displays <a href="https://www.addthis.com">AddThis</a>’ customizable social share buttons.
 
 <table>
   <tr>
