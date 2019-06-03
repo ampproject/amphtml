@@ -144,6 +144,11 @@ const strings = {
     description:
       'Button label for the share target that shares a link via Google+.',
   },
+  [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINE]: {
+    string: 'Line',
+    description:
+      'Button label for the share target that shares a link via Line.',
+  },
   [LocalizedStringId.AMP_STORY_SHARING_PROVIDER_NAME_LINK]: {
     string: 'Get Link',
     description:
