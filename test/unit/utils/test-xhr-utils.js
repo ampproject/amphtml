@@ -243,7 +243,7 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
       };
       const resp = fromStructuredCloneable(jsonResponse, undefined);
       return resp.json().then(json => {
-        expect(json.items).to.deep.equal(jsonResponse.body.json.items);
+        expect(json.items).to.deep.equal(jsonResponse.body.items);
       });
     });
   });
