@@ -281,6 +281,7 @@ export function setupInit(opt_init, opt_accept) {
  * @return {!FetchInitDef}
  */
 export function setupAMPCors(win, input, init) {
+  init = init || {};
   // For some same origin requests, add AMP-Same-Origin: true header to allow
   // publishers to validate that this request came from their own origin.
   const currentOrigin = getWinOrigin(win);
@@ -289,7 +290,6 @@ export function setupAMPCors(win, input, init) {
     init['headers'] = init['headers'] || {};
     init['headers']['AMP-Same-Origin'] = 'true';
   }
-
   return init;
 }
 

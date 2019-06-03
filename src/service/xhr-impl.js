@@ -62,7 +62,7 @@ export class Xhr {
    *
    * @param {string} input
    * @param {!FetchInitDef} init
-   * @return {!Promise<!Response>|!Promise<!Response>}
+   * @return {!Promise<!Response>}
    * @private
    */
   fetch_(input, init) {
@@ -102,14 +102,17 @@ export class Xhr {
   fetchAmpCors_(input, init = {}) {
     input = setupInput(this.win, input, init);
     init = setupAMPCors(this.win, input, init);
-    return this.fetch_(input, init).catch(reason => {
-      const targetOrigin = parseUrlDeprecated(input).origin;
-      throw user().createExpectedError(
-        'XHR',
-        `Failed fetching (${targetOrigin}/...):`,
-        reason && reason.message
-      );
-    });
+    return this.fetch_(input, init).then(
+      response => response,
+      reason => {
+        const targetOrigin = parseUrlDeprecated(input).origin;
+        throw user().createExpectedError(
+          'XHR',
+          `Failed fetching (${targetOrigin}/...):`,
+          reason && reason.message
+        );
+      }
+    );
   }
 
   /**
