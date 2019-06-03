@@ -47,7 +47,8 @@ export class FormDirtiness {
   }
 
   /**
-   * Processes dirtiness state when a form is being submitted.
+   * Processes dirtiness state when a form is being submitted. This puts the
+   * form in a "submitting" state, and temporarily clears the dirtiness state.
    */
   onSubmitting() {
     this.isSubmitting_ = true;
@@ -55,7 +56,8 @@ export class FormDirtiness {
   }
 
   /**
-   * Processes dirtiness state when the form submission fails.
+   * Processes dirtiness state when the form submission fails. This clears the
+   * "submitting" state and reverts the form's dirtiness state.
    */
   onSubmitError() {
     this.isSubmitting_ = false;
@@ -63,7 +65,8 @@ export class FormDirtiness {
   }
 
   /**
-   * Processes dirtiness state when the form submission succeeds.
+   * Processes dirtiness state when the form submission succeeds. This clears
+   * the "submitting" state and the form's overall dirtiness.
    */
   onSubmitSuccess() {
     this.isSubmitting_ = false;
@@ -72,6 +75,8 @@ export class FormDirtiness {
   }
 
   /**
+   * Adds the `amp-form-dirty` class when there are dirty fields and the form
+   * is not being submitted, otherwise removes the class.
    * @private
    */
   updateDirtinessClass_() {
@@ -88,6 +93,8 @@ export class FormDirtiness {
   }
 
   /**
+   * Listens to form field value changes, determines the field's dirtiness, and
+   * updates the form's overall dirtiness.
    * @param {!Event} event
    * @private
    */
@@ -98,6 +105,7 @@ export class FormDirtiness {
   }
 
   /**
+   * Listens to the form reset event, and clears the overall dirtiness.
    * @param {!Event} unusedEvent
    * @private
    */
@@ -107,6 +115,7 @@ export class FormDirtiness {
   }
 
   /**
+   * Determine the given field's dirtiness.
    * @param {!Element} field
    * @private
    */
@@ -123,6 +132,8 @@ export class FormDirtiness {
   }
 
   /**
+   * Mark the field as dirty and increase the overall dirty field count, if the
+   * field is previously clean.
    * @param {string} fieldName
    * @private
    */
@@ -134,6 +145,8 @@ export class FormDirtiness {
   }
 
   /**
+   * Mark the field as clean and decrease the overall dirty field count, if the
+   * field is previously dirty.
    * @param {string} fieldName
    * @private
    */
@@ -145,6 +158,7 @@ export class FormDirtiness {
   }
 
   /**
+   * Clears the dirty field name map and counter.
    * @private
    */
   clearDirtyFields_() {
@@ -154,6 +168,9 @@ export class FormDirtiness {
 }
 
 /**
+ * Returns true if the form should be subject to dirtiness check. Unsupported
+ * elements, disabled elements, hidden elements, or elements without the `name`
+ * attribute are skipped.
  * @param {!Element} field
  * @return {boolean}
  */
