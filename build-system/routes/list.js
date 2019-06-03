@@ -15,7 +15,6 @@
  */
 
 const cors = require('../amp-cors');
-const countries = require('../../examples/countries.json');
 const router = require('express').Router();
 
 router.use('/fruit-data/get', (req, res) => {
@@ -38,29 +37,6 @@ router.use('/vegetable-data/get', (req, res) => {
       {name: 'brocoli', quantity: 7, unitPrice: '0.02'},
     ],
   });
-});
-
-/**
- * Autosuggest endpoint
- */
-router.get('/search/countries', function(req, res) {
-  let filtered = [];
-  if (req.query.hasOwnProperty('q')) {
-    const query = req.query.q.toLowerCase();
-
-    filtered = countries.items.filter(country =>
-      country.name.toLowerCase().startsWith(query)
-    );
-  }
-
-  const results = {
-    'items': [
-      {
-        'results': filtered,
-      },
-    ],
-  };
-  res.send(results);
 });
 
 /*
