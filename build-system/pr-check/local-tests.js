@@ -44,7 +44,7 @@ function main() {
     downloadBuildOutput(FILENAME);
     timedExecOrDie('gulp update-packages');
     timedExecOrDie('gulp test --integration --nobuild --headless --coverage');
-    timedExecOrDie('gulp test --unit --nobuild --headless --coverage');
+    timedExecOrDie('gulp unit --nobuild --headless --coverage');
     timedExecOrDie('gulp codecov-upload');
   } else {
     printChangeSummary(FILENAME);
@@ -71,7 +71,7 @@ function main() {
     timedExecOrDie('gulp update-packages');
 
     if (buildTargets.has('RUNTIME') || buildTargets.has('UNIT_TEST')) {
-      timedExecOrDie('gulp test --unit --nobuild --headless --local-changes');
+      timedExecOrDie('gulp unit --nobuild --headless --local_changes');
     }
 
     if (
@@ -83,7 +83,7 @@ function main() {
     }
 
     if (buildTargets.has('RUNTIME') || buildTargets.has('UNIT_TEST')) {
-      timedExecOrDie('gulp test --unit --nobuild --headless --coverage');
+      timedExecOrDie('gulp unit --nobuild --headless --coverage');
     }
 
     if (buildTargets.has('RUNTIME')) {
