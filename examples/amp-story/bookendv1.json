@@ -4,7 +4,9 @@
     "email",
     {"provider": "facebook", "app_id": "254325784911610"},
     {"provider": "twitter", "text": "This is custom share text that I would like for the Twitter platform"},
-    "whatsapp"
+    "whatsapp",
+    "pinterest",
+    "line"
   ],
   "components": [
     {
