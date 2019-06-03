@@ -109,6 +109,9 @@ describe('integration test: a4a', () => {
       adResponse = {
         body: validCSSAmp.reserialized,
       };
+      if (!adResponse.headers) {
+        adResponse.headers = {};
+      }
       adResponse.headers[AMP_SIGNATURE_HEADER] = validCSSAmp.signatureHeader;
       installDocService(fixture.win, /* isSingleDoc */ true);
       installCryptoService(fixture.win);

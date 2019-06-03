@@ -252,48 +252,6 @@ describe
             return promise;
           });
 
-          it('should deny AMP origin for different origin in response', () => {
-            const promise = xhr.fetchJson('/get');
-            xhrCreated.then(xhr =>
-              xhr.respond(
-                200,
-                {
-                  'Content-Type': 'application/json',
-                },
-                '{}'
-              )
-            );
-            return promise.then(
-              () => {
-                throw new Error('UNREACHABLE');
-              },
-              res => {
-                expect(res).to.match(/Returned AMP-Access-.* is not equal/);
-              }
-            );
-          });
-
-          it('should require AMP origin in response for when request', () => {
-            const promise = xhr.fetchJson('/get');
-            xhrCreated.then(xhr =>
-              xhr.respond(
-                200,
-                {
-                  'Content-Type': 'application/json',
-                },
-                '{}'
-              )
-            );
-            return promise.then(
-              () => {
-                throw new Error('UNREACHABLE');
-              },
-              error => {
-                expect(error.message).to.contain('Response must contain');
-              }
-            );
-          });
-
           describe('viewer visibility', () => {
             afterEach(() => {
               test.win.fetch.restore();
@@ -971,9 +929,6 @@ describe
             .then(response => {
               expect(response.headers.get('a')).to.equal('2');
               expect(response.headers.get('b')).to.equal('false');
-              expect(
-                response.headers.get('Amp-Access-Control-Allow-source-origin')
-              ).to.be.null;
               expect(response).to.have.property('ok').that.is.true;
               expect(response)
                 .to.have.property('status')
@@ -1012,9 +967,6 @@ describe
             .then(response => {
               expect(response.headers.get('a')).to.equal('2');
               expect(response.headers.get('b')).to.equal('false');
-              expect(
-                response.headers.get('Amp-Access-Control-Allow-Source-Origin')
-              ).to.be.null;
               expect(response).to.have.property('ok').that.is.true;
               expect(response)
                 .to.have.property('status')
