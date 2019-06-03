@@ -141,7 +141,7 @@ export function fromStructuredCloneable(response, responseType) {
     // Handle response as JSON format.
     if (body) {
       const init = {type: 'application/json'};
-      body = new Blob([JSON.stringify(body)], init);
+      body = new Blob([body], init);
     }
 
     // Use native `Response` type if available for performance. If response
