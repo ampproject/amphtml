@@ -15,7 +15,6 @@
  */
 
 const cors = require('../amp-cors');
-const countries = require('../../examples/countries.json');
 const router = require('express').Router();
 
 router.use('/fruit-data/get', (req, res) => {
