@@ -1207,7 +1207,6 @@ export class AmpStory extends AMP.BaseElement {
     );
 
     return Promise.all(pageImplPromises).then(pages => {
-      this.storeService_.dispatch(Action.SET_PAGES_COUNT, pages.length);
       this.pages_ = pages;
       if (isExperimentOn(this.win, 'amp-story-branching')) {
         this.storeService_.dispatch(Action.ADD_TO_ACTIONS_WHITELIST, [
@@ -2594,8 +2593,6 @@ export class AmpStory extends AMP.BaseElement {
     if (page.isAd()) {
       this.adPages_.push(page);
     }
-
-    this.storeService_.dispatch(Action.SET_PAGES_COUNT, this.getPageCount());
   }
 
   /**
