@@ -79,35 +79,35 @@ describes.fakeWin('test-cookies', {amp: true}, env => {
     expect(doc.cookie).to.equal('c%261=v%261');
   });
 
-  it('getHigestAvailableDomain without meta tag', () => {
+  it('getHighestAvailableDomain without meta tag', () => {
     // Proxy Origin
-    win.location.href = 'https://foo-bar.cdn.ampproject.org/c/foo.bar.com';
+    win.location = 'https://foo-bar.cdn.ampproject.org/c/foo.bar.com';
     expect(getHighestAvailableDomain(win)).to.be.null;
 
-    win.location.href = 'https://bar.com';
+    win.location = 'https://bar.com';
     expect(getHighestAvailableDomain(win)).to.equal('bar.com');
-    win.location.href = 'https://bar.net';
+    win.location = 'https://bar.net';
     expect(getHighestAvailableDomain(win)).to.equal('bar.net');
-    win.location.href = 'https://foo.bar.com';
+    win.location = 'https://foo.bar.com';
     expect(getHighestAvailableDomain(win)).to.equal('bar.com');
     doc.publicSuffixList = ['bar.com'];
-    win.location.href = 'https://bar.com';
+    win.location = 'https://bar.com';
     expect(getHighestAvailableDomain(win)).to.be.null;
-    win.location.href = 'https://bar.net';
+    win.location = 'https://bar.net';
     expect(getHighestAvailableDomain(win)).to.equal('bar.net');
-    win.location.href = 'https://foo.bar.com';
+    win.location = 'https://foo.bar.com';
     expect(getHighestAvailableDomain(win)).to.equal('foo.bar.com');
     expect(doc.cookie).to.equal('');
 
     // Special case, has test cookie name conflict
-    win.location.href = 'https://foo.bar.com';
+    win.location = 'https://foo.bar.com';
     doc.cookie = '-amp-cookie-test-tmp=test';
     expect(getHighestAvailableDomain(win)).to.equal('foo.bar.com');
     expect(doc.cookie).to.equal('-amp-cookie-test-tmp=test');
   });
 
   it('getHigestAvaibleDomain in valid meta tag', () => {
-    win.location.href = 'https://abc.foo.bar.com';
+    win.location = 'https://abc.foo.bar.com';
     expect(getHighestAvailableDomain(win)).to.equal('bar.com');
     let meta = doc.createElement('meta');
     meta.setAttribute('name', 'amp-cookie-scope');
@@ -116,7 +116,7 @@ describes.fakeWin('test-cookies', {amp: true}, env => {
     expect(getHighestAvailableDomain(win)).to.equal('foo.bar.com');
 
     meta.remove();
-    win.location.href = 'https://abc-foo-bar.cdn.ampproject.org/c/foo.bar.com';
+    win.location = 'https://abc-foo-bar.cdn.ampproject.org/c/foo.bar.com';
     expect(getHighestAvailableDomain(win)).to.be.null;
     meta = doc.createElement('meta');
     meta.setAttribute('name', 'amp-cookie-scope');
@@ -126,7 +126,7 @@ describes.fakeWin('test-cookies', {amp: true}, env => {
   });
 
   it('getHigestAvaibleDomain with invalid meta tag', () => {
-    win.location.href = 'https://foo.bar.com';
+    win.location = 'https://foo.bar.com';
     expect(getHighestAvailableDomain(win)).to.equal('bar.com');
     let meta = doc.createElement('meta');
     meta.setAttribute('name', 'amp-cookie-scope');
@@ -135,7 +135,7 @@ describes.fakeWin('test-cookies', {amp: true}, env => {
     expect(getHighestAvailableDomain(win)).to.equal('foo.bar.com');
 
     meta.remove();
-    win.location.href = 'https://foo-bar.cdn.ampproject.org/c/foo.bar.com';
+    win.location = 'https://foo-bar.cdn.ampproject.org/c/foo.bar.com';
     expect(getHighestAvailableDomain(win)).to.be.null;
     meta = doc.createElement('meta');
     meta.setAttribute('name', 'amp-cookie-scope');
@@ -147,7 +147,7 @@ describes.fakeWin('test-cookies', {amp: true}, env => {
   it('should write the cookie to the right domain on origin', () => {
     function test(url, targetDomain, opt_allowProxyOrigin) {
       expect(doc.cookie).to.equal('');
-      win.location.href = url;
+      win.location = url;
       setCookie(win, 'c&1', 'v&1', Date.now() + BASE_CID_MAX_AGE_MILLIS, {
         highestAvailableDomain: true,
         allowOnProxyOrigin: opt_allowProxyOrigin,
@@ -175,7 +175,7 @@ describes.fakeWin('test-cookies', {amp: true}, env => {
   });
 
   it('write cookie to right domain on proxy', () => {
-    win.location.href = 'https://foo.cdn.ampproject.org/test.html';
+    win.location = 'https://foo.cdn.ampproject.org/test.html';
     setCookie(win, 'c&1', 'v&1', Date.now() + BASE_CID_MAX_AGE_MILLIS, {
       domain: 'foo.cdn.ampproject.org',
       allowOnProxyOrigin: true,
@@ -191,17 +191,17 @@ describes.fakeWin('test-cookies', {amp: true}, env => {
       setCookie(win, 'c&1', 'v&1', Date.now() + BASE_CID_MAX_AGE_MILLIS, {});
     }).to.throw(/Should never attempt to set cookie on proxy origin\: c\&1/);
 
-    win.location.href = 'https://CDN.ampproject.org/test.html';
+    win.location = 'https://CDN.ampproject.org/test.html';
     expect(() => {
       setCookie(win, 'c&1', 'v&1', Date.now() + BASE_CID_MAX_AGE_MILLIS, {});
     }).to.throw(/Should never attempt to set cookie on proxy origin\: c\&1/);
 
-    win.location.href = 'https://foo.bar.cdn.ampproject.org/test.html';
+    win.location = 'https://foo.bar.cdn.ampproject.org/test.html';
     expect(() => {
       setCookie(win, 'c&1', 'v&1', Date.now() + BASE_CID_MAX_AGE_MILLIS, {});
     }).to.throw(/in depth check/);
 
-    win.location.href = 'http://&&&.CDN.ampproject.org/test.html';
+    win.location = 'http://&&&.CDN.ampproject.org/test.html';
     expect(() => {
       setCookie(win, 'c&1', 'v&1', Date.now() + BASE_CID_MAX_AGE_MILLIS, {});
     }).to.throw(/in depth check/);

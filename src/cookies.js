@@ -115,9 +115,9 @@ export function getHighestAvailableDomain(win) {
   // Note: The same logic applies to shadow docs. Where all shadow docs are
   // considered to be in the same origin. And only the <meta> from
   // shell will be respected. (Header from shadow doc will be removed)
-  const metaTag = win.document.head.querySelector(
-    "meta[name='amp-cookie-scope']"
-  );
+  const metaTag =
+    win.document.head &&
+    win.document.head.querySelector("meta[name='amp-cookie-scope']");
 
   if (metaTag) {
     // The content value could be an empty string. Return null instead
@@ -151,7 +151,14 @@ export function getHighestAvailableDomain(win) {
     }
   }
 
-  // higestAvailableDomain cannot be found
+  // Proxy origin w/o <meta name='amp-cookie-scope>
+  // We cannot calculate the etld+1 without the public suffix list.
+  // Return null instead.
+  // Note: This should not affect cookie writing because we don't allow writing
+  // cookie to highestAvailableDomain on proxy origin
+  // In the case of link decoration on proxy origin,
+  // we expect the correct meta tag to be
+  // set by publisher or cache order for AMP runtime to find all subdomains.
   return null;
 }
 
