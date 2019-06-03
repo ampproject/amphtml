@@ -147,6 +147,12 @@ export class Expander {
 
       while (urlIndex < url.length && matchIndex <= matches.length) {
         if (match && urlIndex === match.start) {
+          // Collect any chars that may be prefixing the macro, if we are in
+          // a nested context trim the args.
+          if (builder.trim().length) {
+            results.push(numOfPendingCalls ? builder.trimStart() : builder);
+          }
+
           // If we know we are at the start of a macro, we figure out how to
           // resolve it, and move our pointer to after the token.
           let binding;
@@ -171,12 +177,6 @@ export class Expander {
 
           urlIndex = match.stop + 1;
           match = matches[++matchIndex];
-
-          // Collect any chars that may be prefixing the macro, if we are in
-          // a nested context trim the args.
-          if (builder.trim().length) {
-            results.push(numOfPendingCalls ? builder.trim() : builder);
-          }
 
           if (url[urlIndex] === '(') {
             // When we see a `(` we know we need to resolve one level deeper

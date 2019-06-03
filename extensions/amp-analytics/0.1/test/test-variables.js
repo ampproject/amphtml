@@ -230,6 +230,15 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
         CLIENT_ID: 'amp-12345',
       }));
 
+    it('should not trim right of string before macro', () => {
+      sandbox.useFakeTimers(123456789);
+      win.location.href = 'https://example.com/?test=yes';
+      return check(
+        '$IF(QUERY_PARAM(test), foo TIMESTAMP, ``)',
+        'foo%20123456789'
+      );
+    });
+
     it('default works without first arg', () => check('$DEFAULT(,two)', 'two'));
 
     it('default works without first arg length', () =>
