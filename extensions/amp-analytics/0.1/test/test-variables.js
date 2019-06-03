@@ -219,6 +219,12 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
       );
     });
 
+    it('handles consecutive macros w/o parens in inner arguments', () => {
+      sandbox.useFakeTimers(123456789);
+      win.location.href = 'https://example.com/?test=yes';
+      return check('$IF(QUERY_PARAM(test), 1.TIMESTAMP, ``)', '1.123456789');
+    });
+
     it('handles string + macro as inner argument', () =>
       check('$REPLACE(testCLIENT_ID(scope), amp-, ``)', 'test12345', {
         CLIENT_ID: 'amp-12345',

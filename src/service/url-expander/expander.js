@@ -172,26 +172,23 @@ export class Expander {
           urlIndex = match.stop + 1;
           match = matches[++matchIndex];
 
+          // Collect any chars that may be prefixing the macro, if we are in
+          // a nested context trim the args.
+          if (builder.trim().length) {
+            results.push(numOfPendingCalls ? builder.trim() : builder);
+          }
+
           if (url[urlIndex] === '(') {
             // When we see a `(` we know we need to resolve one level deeper
             // before continuing. We push the binding in the stack for
-            // resolution later, collect any chars that may be prefixing the
-            // macro, and then make the recursive call.
+            // resolution later, and then make the recursive call.
             urlIndex++;
             numOfPendingCalls++;
             stack.push(binding);
-            // Trim space in between args that builder has collected.
-            if (builder.trim().length) {
-              results.push(builder.trim());
-            }
             results.push(evaluateNextLevel(/* encode */ false));
           } else {
             // Many macros do not take arguments, in this case we do not need to
-            // recurse, we just store any prefix and start resolution in it's
-            // position
-            if (builder.length) {
-              results.push(builder);
-            }
+            // recurse, we just start resolution in it's position.
             results.push(this.evaluateBinding_(binding));
           }
 
