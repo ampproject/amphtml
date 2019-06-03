@@ -7,6 +7,7 @@ c
 dist.3p
 dist.tools
 examples.min
+/extensions/**/*-expr-impl.js
 node_modules
 npm-debug.log
 .idea
