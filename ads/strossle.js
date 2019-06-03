@@ -27,9 +27,6 @@ export function strossle(global, data) {
   global._strossle = global._strossle || {
     widgetId: data['widgetid'],
   };
-  global._strossle.AMPCallbacks = {
-    renderStart: global.context.renderStart,
-  };
 
   createContainer(global, data);
   loadScript(
