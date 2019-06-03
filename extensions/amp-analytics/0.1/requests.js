@@ -24,6 +24,7 @@ import {SANDBOX_AVAILABLE_VARS} from './sandbox-vars-whitelist';
 import {Services} from '../../../src/services';
 import {devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {extractDomain, extractRelativePath} from '../../../src/url';
 import {getResourceTiming} from './resource-timing';
 import {isArray, isFiniteNumber, isObject} from '../../../src/types';
 
@@ -259,9 +260,8 @@ export class RequestHandler {
           // prepend requestOrigin if available
           let baseUrl;
           if (requestOriginPromise) {
-            try {
-              baseUrl = new URL(results[0], preUrl).href;
-            } catch (e) {
+            baseUrl = resolveRelativeUrlString_(results[0], preUrl);
+            if (!baseUrl) {
               user().error(
                 TAG,
                 'Unable to construct URL with ' + preUrl + ' and ' + results[0]
@@ -480,4 +480,21 @@ function expandExtraUrlParams(
   Object.keys(params).forEach(key => expandObject(params, key));
 
   return Promise.all(requestPromises).then(() => params);
+}
+
+/**
+ * Tries to combine the given domain and relative url
+ * @param {string} relativeUrl
+ * @param {string} baseUrl
+ * @return {string|undefined}
+ */
+function resolveRelativeUrlString_(relativeUrl, baseUrl) {
+  const baseDomain = extractDomain(baseUrl);
+  const relativePath = extractRelativePath(relativeUrl);
+
+  if (baseDomain && relativePath) {
+    return baseDomain + relativePath;
+  }
+
+  return undefined;
 }

@@ -20,6 +20,8 @@ import {
   addParamsToUrl,
   assertAbsoluteHttpOrHttpsUrl,
   assertHttpsUrl,
+  extractDomain,
+  extractRelativePath,
   getCorsUrl,
   getProxyServingType,
   getSourceOrigin,
@@ -1106,5 +1108,85 @@ describe('getProxyServingType', () => {
     expect(
       getProxyServingType('https://not.cdn.ampproject.org/test/blah.com/foo/')
     ).to.equal('test');
+  });
+});
+
+describe('extractDomain', () => {
+  it('should handle query params', () => {
+    expect(extractDomain('http://google.com?test')).to.equal(
+      'http://google.com'
+    );
+  });
+
+  it('should handle anchor tags', () => {
+    expect(extractDomain('http://google.com#test')).to.equal(
+      'http://google.com'
+    );
+  });
+
+  it('should handle appended relative path', () => {
+    expect(extractDomain('http://google.com/test1/test2')).to.equal(
+      'http://google.com'
+    );
+  });
+
+  it('should handle https', () => {
+    expect(extractDomain('https://google.com/test')).to.equal(
+      'https://google.com'
+    );
+  });
+
+  it('should handle localhost', () => {
+    expect(extractDomain('http://localhost:8000')).to.equal(
+      'http://localhost:8000'
+    );
+  });
+
+  it('should handle no valid match', () => {
+    expect(extractDomain('/invalid')).to.equal(undefined);
+  });
+});
+
+describe('extractRelativePath', () => {
+  it('should handle query params', () => {
+    expect(extractRelativePath('http://google.com?test')).to.equal('?test');
+  });
+
+  it('should handle anchor tags', () => {
+    expect(extractRelativePath('http://google.com#test')).to.equal('#test');
+  });
+
+  it('should handle long relative path', () => {
+    expect(extractRelativePath('http://google.com/test1/test2')).to.equal(
+      '/test1/test2'
+    );
+  });
+
+  it('should handle https', () => {
+    expect(extractRelativePath('https://google.com/test')).to.equal('/test');
+  });
+
+  it('should handle localhost', () => {
+    expect(extractRelativePath('http://localhost:8000/test')).to.equal('/test');
+  });
+
+  it('should handle single forward slash', () => {
+    expect(extractRelativePath('/')).to.equal('/');
+  });
+
+  it('should handle relative path by itself', () => {
+    expect(extractRelativePath('/test1/test2')).to.equal('/test1/test2');
+  });
+
+  it('should handle query param by itself', () => {
+    expect(extractRelativePath('?test')).to.equal('?test');
+  });
+
+  it('should handle anchor tag by itself', () => {
+    expect(extractRelativePath('#test')).to.equal('#test');
+  });
+
+  it('should handle no valid match', () => {
+    expect(extractRelativePath('https://google.com')).to.equal(undefined);
   });
 });

@@ -649,3 +649,36 @@ export function checkCorsUrl(url) {
 export function tryDecodeUriComponent(component, opt_fallback) {
   return tryDecodeUriComponent_(component, opt_fallback);
 }
+
+/**
+ * Extract and return the domain from the given url string via regex
+ * Ex.  'http://google.com?test' -> 'http://google.com'
+ *      'https://google.com/test1/test2' -> 'https://google.com'
+ *      'http://localhost:8000/test' -> 'http://localhost:8000'
+ * @param {string} url
+ * @return {string|undefined}
+ */
+export function extractDomain(url) {
+  // regex adapted from https://stackoverflow.com/a/8498629
+  const matches = url.match(/(^https?\:\/\/[^\/?#]+)(?:[\/:?#]|$)/i);
+
+  return matches ? matches[1] : undefined;
+}
+
+/**
+ * Extract and return the relative path from the given url string via regex
+ * Ex.  'http://google.com/test' -> '/test'
+ *      'https://google.com/test1/test2' -> '/test1/test2'
+ *      '/test1/test2' -> '/test1/test2'
+ *      'http://google.com' -> undefined
+ * @param {string} url
+ * @return {string|undefined}
+ */
+export function extractRelativePath(url) {
+  // this regex matches urls starting with a domain or a relative url by itself
+  const matches = url.match(
+    /(?:^https?\:\/\/[^\/?#]+([\/?#].*))|(^[\/?#].*)$/i
+  );
+
+  return matches ? matches[1] || matches[2] : undefined;
+}
