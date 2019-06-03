@@ -920,7 +920,7 @@ export class HistoryBindingVirtual_ {
    * `popHistory`
    *
    *   Request:  {'stackIndex': string}
-   *   Response: undefined | {'stackIndex': string}
+   *   Response: undefined | boolean | {'stackIndex': string}
    *
    * @override
    */
@@ -932,10 +932,13 @@ export class HistoryBindingVirtual_ {
     return this.viewer_
       .sendMessageAwaitResponse('popHistory', message)
       .then(response => {
+        let newState = /** @type {!HistoryStateDef} */ (response);
         // Return the new stack index if response is undefined.
-        const newState =
-          /** @type {!HistoryStateDef} */ (response ||
-          dict({'stackIndex': this.stackIndex_ - 1}));
+        if (!newState || newState.stackIndex === undefined) {
+          newState = /** @type {!HistoryStateDef} */ (dict({
+            'stackIndex': this.stackIndex_ - 1,
+          }));
+        }
         this.updateHistoryState_(newState);
         return newState;
       });
