@@ -91,7 +91,7 @@ export class AmpCallTracking extends AMP.BaseElement {
         } else {
           user().warn(
             TAG,
-            'Response must contain a non-empty phoneNumber field %s',
+            'Response does not contain a phoneNumber field %s. Call tracking was not applied.',
             this.element
           );
         }
