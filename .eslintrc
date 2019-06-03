@@ -74,7 +74,7 @@
     "amphtml-internal/no-swallow-return-from-allow-console-error": 2,
     "amphtml-internal/prefer-deferred-promise": 0,
     "amphtml-internal/prefer-destructuring": 2,
-    "amphtml-internal/private-names": 2,
+    "amphtml-internal/private-prop-names": 2,
     "amphtml-internal/query-selector": 2,
     "amphtml-internal/todo-format": 0,
     "amphtml-internal/unused-private-field": 0,
