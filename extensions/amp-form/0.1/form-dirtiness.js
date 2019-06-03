@@ -27,13 +27,13 @@ export class FormDirtiness {
     /** @private @const {!HTMLFormElement} */
     this.form_ = form;
 
-    /** @private @const {number} */
+    /** @private {number} */
     this.dirtyFieldCount_ = 0;
 
-    /** @private @const {!Object<string, boolean>} */
+    /** @private {!Object<string, boolean>} */
     this.isFieldNameDirty_ = {};
 
-    /** @private @const {boolean} */
+    /** @private {boolean} */
     this.isSubmitting_ = false;
 
     this.installEventListeners_();
