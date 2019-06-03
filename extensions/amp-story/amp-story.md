@@ -861,6 +861,14 @@ Default: "Swipe up"
 <amp-story-page-attachment layout="nodisplay" data-cta-text="Read more">...</amp-story-page-attachment>
 ```
 
+#### `data-dark-mode`
+
+Enables dark mode for the page attachment header and content background.
+
+```html
+<amp-story-page-attachment layout="nodisplay" data-dark-mode>...</amp-story-page-attachment>
+```
+
 #### `data-title`
 
 Displays the provided title in the page attachment header.

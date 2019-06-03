@@ -533,10 +533,10 @@ export class AmpStory extends AMP.BaseElement {
     // ../../../extensions/amp-animation/0.1/web-animations.js
     this.mutateElement(() => {
       styleEl.textContent = styleEl.textContent
-        .replace(/([\d.]+)vh/gim, 'calc($1 * var(--i-amphtml-story-vh))')
-        .replace(/([\d.]+)vw/gim, 'calc($1 * var(--i-amphtml-story-vw))')
-        .replace(/([\d.]+)vmin/gim, 'calc($1 * var(--i-amphtml-story-vmin))')
-        .replace(/([\d.]+)vmax/gim, 'calc($1 * var(--i-amphtml-story-vmax))');
+        .replace(/([\d.]+)vh/gim, 'calc($1 * var(--story-page-vh))')
+        .replace(/([\d.]+)vw/gim, 'calc($1 * var(--story-page-vw))')
+        .replace(/([\d.]+)vmin/gim, 'calc($1 * var(--story-page-vmin))')
+        .replace(/([\d.]+)vmax/gim, 'calc($1 * var(--story-page-vmax))');
     });
   }
 
@@ -584,10 +584,10 @@ export class AmpStory extends AMP.BaseElement {
         mutate: state => {
           this.win.document.documentElement.setAttribute(
             'style',
-            `--i-amphtml-story-vh: ${px(state.vh)};` +
-              `--i-amphtml-story-vw: ${px(state.vw)};` +
-              `--i-amphtml-story-vmin: ${px(state.vmin)};` +
-              `--i-amphtml-story-vmax: ${px(state.vmax)};`
+            `--story-page-vh: ${px(state.vh)};` +
+              `--story-page-vw: ${px(state.vw)};` +
+              `--story-page-vmin: ${px(state.vmin)};` +
+              `--story-page-vmax: ${px(state.vmax)};`
           );
         },
       },
@@ -1052,7 +1052,9 @@ export class AmpStory extends AMP.BaseElement {
         : [this.pages_[0]];
 
     const storyLoadPromise = Promise.all(
-      pagesToWaitFor.filter(page => !!page).map(page => page.whenLoaded())
+      pagesToWaitFor
+        .filter(page => !!page)
+        .map(page => page.element.signals().whenSignal(CommonSignals.LOAD_END))
     );
 
     return this.timer_
@@ -2214,8 +2216,9 @@ export class AmpStory extends AMP.BaseElement {
     // Once the media pool is ready, registers and preloads the background
     // audio, and then gets the swapped element from the DOM to mute/unmute/play
     // it programmatically later.
-    this.activePage_
-      .whenLoaded()
+    this.activePage_.element
+      .signals()
+      .whenSignal(CommonSignals.LOAD_END)
       .then(() => {
         backgroundAudioEl = /** @type {!HTMLMediaElement} */ (backgroundAudioEl);
         this.mediaPool_.register(backgroundAudioEl);
