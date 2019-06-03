@@ -1,6 +1,6 @@
 # End-to-end Tests
 
-AMP contibutors embrace testing to maintain confidence that their code is executing correctly during development and maintenance of features and fixes. End-to-end (or E2E) tests aim to closely reproduce how a user would interact with a document as possible.
+AMP contributors embrace testing to maintain confidence that their code is executing correctly during development and maintenance of features and fixes. End-to-end (or E2E) tests aim to closely reproduce how a user would interact with a document as possible.
 
 * [What is an end-to-end test?](#what-is-an-end-to-end-test)
 * [Choosing which features to test](#choosing-which-features-to-test)
