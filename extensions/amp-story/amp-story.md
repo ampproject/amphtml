@@ -870,6 +870,15 @@ Default: `null`
 <amp-story-page-attachment layout="nodisplay" data-title="My title">...</amp-story-page-attachment>
 ```
 
+#### `theme`
+
+Enables light or dark mode for the page attachment header and content background.
+Values: "light" (default), "dark"
+
+```html
+<amp-story-page-attachment layout="nodisplay" theme="dark">...</amp-story-page-attachment>
+```
+
 ### Allowed content and components
 
 Story page attachments allow the same HTML elements as AMP Story along with additional components listed below, such as third party video players or social media embeds. This means you can add additional content that is too verbose or disallowed in an AMP Story page.
