@@ -909,7 +909,6 @@ export const adConfig = {
       'https://widgets.sprinklecontent.com',
       'https://images.sprinklecontent.com',
     ],
-    renderStartImplemented: true,
   },
 
   'sunmedia': {
