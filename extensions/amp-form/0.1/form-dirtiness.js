@@ -36,7 +36,7 @@ export class FormDirtiness {
     /** @private {boolean} */
     this.isSubmitting_ = false;
 
-    this.installEventListeners_();
+    this.installEventHandlers_();
   }
 
   /**
@@ -67,7 +67,7 @@ export class FormDirtiness {
   /**
    * @private
    */
-  installEventListeners_() {
+  installEventHandlers_() {
     this.form_.addEventListener('input', this.onInput_.bind(this));
     this.form_.addEventListener('reset', this.onReset_.bind(this));
   }
