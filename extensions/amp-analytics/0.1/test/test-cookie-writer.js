@@ -359,31 +359,7 @@ describes.fakeWin('amp-analytics.cookie-writer value', {amp: true}, env => {
     });
   });
 
-  it('should write cookie with default expiration (invalid string value)', () => {
-    win.location = 'https://www.example.com/';
-    const cookieWriter = new CookieWriter(
-      win,
-      win.document.body,
-      dict({
-        'cookies': {
-          'cookieMaxAge': 'invalid',
-          'aCookie': {
-            'value': 'testValue',
-          },
-        },
-      })
-    );
-    return allowConsoleError(() => {
-      return cookieWriter.write().then(() => {
-        expect(win.document.lastSetCookieRaw).to.equal(
-          'aCookie=testValue; path=/; domain=example.com; ' +
-            'expires=Tue, 01 Jan 2019 08:00:00 GMT'
-        );
-      });
-    });
-  });
-
-  it('should write cookie with default expiration (zero value)', () => {
+  it('should write cookie with custom expiration (zero value)', () => {
     win.location = 'https://www.example.com/';
     const cookieWriter = new CookieWriter(
       win,
@@ -397,25 +373,42 @@ describes.fakeWin('amp-analytics.cookie-writer value', {amp: true}, env => {
         },
       })
     );
-
-    return allowConsoleError(() => {
-      return cookieWriter.write().then(() => {
-        expect(win.document.lastSetCookieRaw).to.equal(
-          'aCookie=testValue; path=/; domain=example.com; ' +
-            'expires=Tue, 01 Jan 2019 08:00:00 GMT'
-        );
-      });
+    return cookieWriter.write().then(() => {
+      expect(win.document.lastSetCookieRaw).to.equal(
+        'aCookie=testValue; path=/; expires=Mon, 01 Jan 2018 08:00:00 GMT'
+      );
     });
   });
 
-  it('should write cookie with default expiration (negative value)', () => {
+  it('should write cookie with custom expiration (negative value)', () => {
     win.location = 'https://www.example.com/';
     const cookieWriter = new CookieWriter(
       win,
       win.document.body,
       dict({
         'cookies': {
-          'cookieMaxAge': -10,
+          'cookieMaxAge': -604800,
+          'aCookie': {
+            'value': 'testValue',
+          },
+        },
+      })
+    );
+    return cookieWriter.write().then(() => {
+      expect(win.document.lastSetCookieRaw).to.equal(
+        'aCookie=testValue; path=/; expires=Mon, 25 Dec 2017 08:00:00 GMT'
+      );
+    });
+  });
+
+  it('should write cookie with default expiration (invalid string value)', () => {
+    win.location = 'https://www.example.com/';
+    const cookieWriter = new CookieWriter(
+      win,
+      win.document.body,
+      dict({
+        'cookies': {
+          'cookieMaxAge': 'invalid',
           'aCookie': {
             'value': 'testValue',
           },
