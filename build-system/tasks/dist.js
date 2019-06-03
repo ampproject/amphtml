@@ -270,7 +270,7 @@ function buildWebPushPublisherFile(version, fileName, watch, options) {
  *
  * @param {!Object} options
  */
-async function buildExperiments(options) {
+function buildExperiments(options) {
   options = options || {};
   const path = 'tools/experiments';
   const htmlPath = path + '/experiments.html';
@@ -316,7 +316,7 @@ async function buildExperiments(options) {
  *
  * @param {!Object} options
  */
-async function buildLoginDone(options) {
+function buildLoginDone(options) {
   return buildLoginDoneVersion('0.1', options);
 }
 
@@ -326,7 +326,7 @@ async function buildLoginDone(options) {
  * @param {string} version
  * @param {!Object} options
  */
-async function buildLoginDoneVersion(version, options) {
+function buildLoginDoneVersion(version, options) {
   options = options || {};
   const path = `extensions/amp-access/${version}/`;
   const buildDir = `build/all/amp-access-${version}/`;
@@ -374,15 +374,11 @@ async function buildLoginDoneVersion(version, options) {
 }
 
 module.exports = {
-  buildExperiments,
-  buildLoginDone,
   dist,
 };
 
 /* eslint "google-camelcase/google-camelcase": 0 */
 
-buildExperiments.description = 'Builds experiments.html/js';
-buildLoginDone.description = 'Builds login-done.html/js';
 dist.description = 'Build production binaries';
 dist.flags = {
   pseudo_names:
