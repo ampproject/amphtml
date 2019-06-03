@@ -47,7 +47,7 @@ async function main() {
     timedExecOrDie('gulp update-packages');
 
     await startSauceConnect(FILENAME);
-    timedExecOrDie('gulp test --unit --nobuild --saucelabs_lite');
+    timedExecOrDie('gulp unit --nobuild --saucelabs_lite');
     timedExecOrDie('gulp test --integration --nobuild --compiled --saucelabs');
 
     stopSauceConnect(FILENAME);
@@ -76,7 +76,7 @@ async function main() {
     await startSauceConnect(FILENAME);
 
     if (buildTargets.has('RUNTIME') || buildTargets.has('UNIT_TEST')) {
-      timedExecOrDie('gulp test --unit --nobuild --saucelabs_lite');
+      timedExecOrDie('gulp unit --nobuild --saucelabs_lite');
     }
 
     if (
