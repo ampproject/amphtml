@@ -14876,7 +14876,7 @@ topological-sort@0.3.0:
   resolved "https://registry.yarnpkg.com/topological-sort/-/topological-sort-0.3.0.tgz#3ca539982c71a13f0a7b3be2ad4ae4dd437a1e3b"
   integrity sha512-BmO2t72jjJ3B9PZC3LTHyojgNynOKEvWG4GiYqyfSMUjtO6+yZK0oozlMYVA+tC6YvS3NZh4OPx6QaolEYOg6A==
 
-touch@3.1.0, touch@^3.1.0:
+touch@^3.1.0:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/touch/-/touch-3.1.0.tgz#fe365f5f75ec9ed4e56825e0bb76d24ab74af83b"
   integrity sha512-WBx8Uy5TLtOSRtIq+M03/sKDrXCLHxwDcquSP2c43Le03/9serjQBIztjRz6FkJez9D/hleyAXTBGLwwZUw9lA==
