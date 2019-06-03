@@ -124,7 +124,7 @@ export class FormDirtiness {
    */
   removeDirtyField_(fieldName) {
     if (this.isFieldNameDirty_[fieldName]) {
-      delete this.isFieldNameDirty_[fieldName];
+      this.isFieldNameDirty_[fieldName] = false;
       --this.dirtyFieldCount_;
     }
   }
