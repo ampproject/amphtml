@@ -15,6 +15,7 @@
  */
 
 import {DIRTINESS_INDICATOR_CLASS, FormDirtiness} from '../form-dirtiness';
+import {Services} from '../../../../src/services';
 
 function getForm(doc) {
   const form = doc.createElement('form');
@@ -36,7 +37,12 @@ describes.realWin('form-dirtiness', {}, env => {
   beforeEach(() => {
     doc = env.win.document;
     form = getForm(doc);
-    dirtinessHandler = new FormDirtiness(form);
+    sandbox.stub(Services, 'platformFor').returns({
+      isIos() {
+        return false;
+      },
+    });
+    dirtinessHandler = new FormDirtiness(form, env.win);
   });
 
   describe('ignored elements', () => {
@@ -98,6 +104,15 @@ describes.realWin('form-dirtiness', {}, env => {
       changeInput(textField, 'changed');
       expect(form).to.have.class(DIRTINESS_INDICATOR_CLASS);
     });
+
+    it('removes dirtiness class when its value matches the submitted value', () => {
+      changeInput(textField, 'submitted');
+      dirtinessHandler.onSubmitting();
+      dirtinessHandler.onSubmitSuccess();
+      changeInput(textField, 'submitted');
+
+      expect(form).to.not.have.class(DIRTINESS_INDICATOR_CLASS);
+    });
   });
 
   describe('textarea changes', () => {
@@ -122,6 +137,15 @@ describes.realWin('form-dirtiness', {}, env => {
     it('adds dirtiness class when textarea is changed', () => {
       changeInput(textarea, 'changed');
       expect(form).to.have.class(DIRTINESS_INDICATOR_CLASS);
+    });
+
+    it('removes dirtiness class when its value matches the submitted value', () => {
+      changeInput(textarea, 'submitted');
+      dirtinessHandler.onSubmitting();
+      dirtinessHandler.onSubmitSuccess();
+      changeInput(textarea, 'submitted');
+
+      expect(form).to.not.have.class(DIRTINESS_INDICATOR_CLASS);
     });
   });
 

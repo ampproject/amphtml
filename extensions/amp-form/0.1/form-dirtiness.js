@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {createFormDataWrapper} from '../../../src/form-data-wrapper';
 import {dev} from '../../../src/log';
 import {isDisabled, isFieldDefault, isFieldEmpty} from '../../../src/form';
 import {map} from '../../../src/utils/object';
@@ -29,16 +30,23 @@ const SUPPORTED_TYPES = {
 export class FormDirtiness {
   /**
    * @param {!HTMLFormElement} form
+   * @param {!Window} win
    */
-  constructor(form) {
+  constructor(form, win) {
     /** @private @const {!HTMLFormElement} */
     this.form_ = form;
+
+    /** @private @const {!Window} */
+    this.win_ = win;
 
     /** @private {number} */
     this.dirtyFieldCount_ = 0;
 
     /** @private {!Object<string, boolean>} */
     this.isFieldNameDirty_ = map();
+
+    /** @private {!FormData} */
+    this.submittedFormData_ = this.takeFormDataSnapshot_();
 
     /** @private {boolean} */
     this.isSubmitting_ = false;
@@ -70,8 +78,17 @@ export class FormDirtiness {
    */
   onSubmitSuccess() {
     this.isSubmitting_ = false;
+    this.submittedFormData_ = this.takeFormDataSnapshot_();
     this.clearDirtyFields_();
     this.updateDirtinessClass_();
+  }
+
+  /**
+   * @return {!FormData}
+   * @private
+   */
+  takeFormDataSnapshot_() {
+    return createFormDataWrapper(this.win_, this.form_).getFormData();
   }
 
   /**
@@ -124,11 +141,27 @@ export class FormDirtiness {
       return;
     }
 
-    if (isFieldEmpty(field) || isFieldDefault(field)) {
+    if (
+      isFieldEmpty(field) ||
+      isFieldDefault(field) ||
+      this.hasFieldBeenSubmitted_(field)
+    ) {
       this.removeDirtyField_(field.name);
     } else {
       this.addDirtyField_(field.name);
     }
+  }
+
+  /**
+   * Returns true if the form field's current value matches its most recent
+   * submitted value.
+   * @param {!Element} field
+   * @return {boolean}
+   * @private
+   */
+  hasFieldBeenSubmitted_(field) {
+    const {name, value} = field;
+    return this.submittedFormData_.get(name) === value;
   }
 
   /**
