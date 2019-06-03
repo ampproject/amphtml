@@ -17,7 +17,6 @@
 const colors = require('ansi-colors');
 const fs = require('fs-extra');
 const log = require('fancy-log');
-const minimatch = require('minimatch');
 const watch = require('gulp-watch');
 const wrappers = require('../compile-wrappers');
 const {
@@ -56,7 +55,6 @@ const MINIMAL_EXTENSION_SET = [
  *   loadPriority: ?string,
  *   cssBinaries: ?Array<string>,
  *   extraGlobs?Array<string>,
- *   bundleOnlyIfListedInFiles: ?boolean
  * }}
  */
 const ExtensionOption = {}; // eslint-disable-line no-unused-vars
@@ -357,21 +355,10 @@ function buildExtension(
   if (options.compileOnlyCss && !hasCss) {
     return Promise.resolve();
   }
-  const path = 'extensions/' + name + '/' + version;
-  const jsPath = path + '/' + name + '.js';
-  const jsTestPath = path + '/test/test-' + name + '.js';
-  if (argv.files && options.bundleOnlyIfListedInFiles) {
-    const passedFiles = Array.isArray(argv.files) ? argv.files : [argv.files];
-    const shouldBundle = passedFiles.some(glob => {
-      return minimatch(jsPath, glob) || minimatch(jsTestPath, glob);
-    });
-    if (!shouldBundle) {
-      return Promise.resolve();
-    }
-  }
   // Use a separate watcher for extensions to copy / inline CSS and compile JS
   // instead of relying on the watcher used by compileUnminifiedJs, which only
   // recompiles JS.
+  const path = 'extensions/' + name + '/' + version;
   const optionsCopy = Object.create(options);
   if (options.watch) {
     optionsCopy.watch = false;
