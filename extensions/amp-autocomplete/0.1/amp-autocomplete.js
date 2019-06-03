@@ -203,7 +203,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
       );
     }
     this.inputElement_.setAttribute('dir', 'auto');
-    this.inputElement_.setAttribute('aria-autocomplete', 'list');
+    this.inputElement_.setAttribute('aria-autocomplete', 'both');
     this.inputElement_.setAttribute('role', 'combobox');
 
     userAssert(this.inputElement_.form, `${TAG} should be inside a <form> tag`);
@@ -876,6 +876,13 @@ export class AmpAutocomplete extends AMP.BaseElement {
         this.resetActiveElement_();
         newActiveElement.classList.add('i-amphtml-autocomplete-item-active');
         newActiveElement.setAttribute('aria-selected', 'true');
+        if (!newActiveElement.hasAttribute('id')) {
+          newActiveElement.setAttribute('id', 'autocomplete-selected');
+        }
+        this.inputElement_.setAttribute(
+          'aria-activedescendant',
+          newActiveElement.getAttribute('id')
+        );
         this.activeIndex_ = activeIndex;
         this.activeElement_ = newActiveElement;
       }
@@ -916,6 +923,10 @@ export class AmpAutocomplete extends AMP.BaseElement {
       false
     );
     this.activeElement_.removeAttribute('aria-selected');
+    if (this.activeElement_.getAttribute('id') === 'autocomplete-selected') {
+      this.activeElement_.removeAttribute('id');
+    }
+    this.inputElement_.removeAttribute('aria-activedescendent');
     this.activeElement_ = null;
     this.activeIndex_ = -1;
   }
