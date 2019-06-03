@@ -27,7 +27,7 @@ import {
   upgradeOrRegisterElement,
 } from '../../src/service/custom-element-registry';
 import {createElementWithAttributes} from '../../src/dom';
-import {installDocumentStateService} from '../../src/service/document-state';
+import {installGlobalDocumentStateService} from '../../src/service/document-state';
 
 describes.realWin('CustomElement register', {amp: true}, env => {
   class ConcreteElement extends BaseElement {}
@@ -207,7 +207,7 @@ describes.realWin('CustomElement register', {amp: true}, env => {
 
       ampdoc = new AmpDocSingle(win);
 
-      installDocumentStateService(win);
+      installGlobalDocumentStateService(win);
     });
 
     afterEach(() => {
