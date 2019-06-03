@@ -22,6 +22,7 @@ import {AmpStory} from '../amp-story';
 import {AmpStoryPage} from '../amp-story-page';
 import {AmpStoryStoreService} from '../amp-story-store-service';
 import {LocalizationService} from '../../../../src/service/localization';
+import {Services} from '../../../../src/services';
 import {
   calculateTargetScalingFactor,
   targetFitsWithinPage,
@@ -46,6 +47,9 @@ describes.realWin(
       win = env.win;
 
       sandbox.stub(win.history, 'replaceState');
+
+      const viewer = Services.viewerForDoc(env.ampdoc);
+      sandbox.stub(Services, 'viewerForDoc').returns(viewer);
 
       const storeService = new AmpStoryStoreService(win);
       registerServiceBuilder(win, 'story-store', () => storeService);

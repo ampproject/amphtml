@@ -58,7 +58,7 @@ import {
 import {installCidService} from './service/cid-impl';
 import {installCryptoService} from './service/crypto-impl';
 import {installDocumentInfoServiceForDoc} from './service/document-info-impl';
-import {installDocumentStateService} from './service/document-state';
+import {installGlobalDocumentStateService} from './service/document-state';
 import {installGlobalNavigationHandlerForDoc} from './service/navigation';
 import {installGlobalSubmitListenerForDoc} from './document-submit';
 import {installHiddenObserverForDoc} from './service/hidden-observer-impl';
@@ -100,7 +100,7 @@ const TAG = 'runtime';
 export function installRuntimeServices(global) {
   installCryptoService(global);
   installBatchedXhrService(global);
-  installDocumentStateService(global);
+  installGlobalDocumentStateService(global);
   installPlatformService(global);
   installTemplatesService(global);
   installTimerService(global);

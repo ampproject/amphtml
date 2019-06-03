@@ -19,6 +19,7 @@ import {BaseElement} from '../../src/base-element';
 import {createAmpElementForTesting} from '../../src/custom-element';
 import {loadPromise} from '../../src/event-helper';
 import {setScopeSelectorSupportedForTesting} from '../../src/css';
+import {setShadowDomSupportedVersionForTesting} from '../../src/web-components';
 import {toArray} from '../../src/types';
 
 describes.sandboxed('DOM', {}, env => {
@@ -30,6 +31,7 @@ describes.sandboxed('DOM', {}, env => {
 
   afterEach(() => {
     setScopeSelectorSupportedForTesting(undefined);
+    setShadowDomSupportedVersionForTesting(undefined);
     sandbox.restore();
   });
 

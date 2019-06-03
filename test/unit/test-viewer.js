@@ -19,7 +19,7 @@ import {Viewer} from '../../src/service/viewer-impl';
 import {dev} from '../../src/log';
 import {installDocService} from '../../src/service/ampdoc-impl';
 import {installDocumentInfoServiceForDoc} from '../../src/service/document-info-impl';
-import {installDocumentStateService} from '../../src/service/document-state';
+import {installGlobalDocumentStateService} from '../../src/service/document-state';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 import {parseUrlDeprecated, removeFragment} from '../../src/url';
@@ -93,7 +93,7 @@ describe('Viewer', () => {
         windowApi.location.href = url;
       });
     installDocService(windowApi, /* isSingleDoc */ true);
-    installDocumentStateService(windowApi);
+    installGlobalDocumentStateService(windowApi);
     ampdoc = Services.ampdocServiceFor(windowApi).getAmpDoc();
     installPlatformService(windowApi);
     installTimerService(windowApi);

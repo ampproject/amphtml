@@ -96,6 +96,7 @@ describes.realWin(
         .stub(viewer, 'hasCapability')
         .withArgs('swipe')
         .returns(hasSwipeCapability);
+      sandbox.stub(Services, 'viewerForDoc').returns(viewer);
 
       const storeService = new AmpStoryStoreService(win);
       registerServiceBuilder(win, 'story-store', () => storeService);
@@ -688,9 +689,9 @@ describes.realWin(
       it('should pause the story when tab becomes inactive', () => {
         createPages(story.element, 2, ['cover', 'page-1']);
 
-        sandbox.stub(story.documentState_, 'isHidden').returns(true);
+        sandbox.stub(story.viewer_, 'isVisible').returns(false);
         const onVisibilityChangedStub = sandbox.stub(
-          story.documentState_,
+          story.viewer_,
           'onVisibilityChanged'
         );
 
@@ -710,9 +711,9 @@ describes.realWin(
       it('should play the story when tab becomes active', () => {
         createPages(story.element, 2, ['cover', 'page-1']);
 
-        sandbox.stub(story.documentState_, 'isHidden').returns(false);
+        sandbox.stub(story.viewer_, 'isVisible').returns(true);
         const onVisibilityChangedStub = sandbox.stub(
-          story.documentState_,
+          story.viewer_,
           'onVisibilityChanged'
         );
 

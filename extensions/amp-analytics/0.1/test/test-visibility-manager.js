@@ -1052,7 +1052,7 @@ describes.realWin('VisibilityManager integrated', {amp: true}, env => {
       eventResolver2 = resolve;
     });
 
-    const docState = Services.documentStateFor(win);
+    const docState = Services.globalDocumentStateFor(win);
     sandbox.stub(docState, 'isHidden').callsFake(() => false);
     sandbox.stub(viewer, 'getFirstVisibleTime').callsFake(() => startTime);
 
