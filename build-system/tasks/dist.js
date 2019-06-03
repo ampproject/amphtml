@@ -18,12 +18,10 @@ const colors = require('ansi-colors');
 const file = require('gulp-file');
 const fs = require('fs-extra');
 const gulp = require('gulp');
-const gulpWatch = require('gulp-watch');
 const log = require('fancy-log');
 const {
   buildAlp,
   buildExaminer,
-  buildExperiments,
   buildWebWorker,
   compileAllMinifiedTargets,
   compileJs,
@@ -268,11 +266,57 @@ function buildWebPushPublisherFile(version, fileName, watch, options) {
 }
 
 /**
+ * Build all the AMP experiments.html/js.
+ *
+ * @param {!Object} options
+ */
+function buildExperiments(options) {
+  options = options || {};
+  const path = 'tools/experiments';
+  const htmlPath = path + '/experiments.html';
+  const jsPath = path + '/experiments.js';
+
+  // Build HTML.
+  const html = fs.readFileSync(htmlPath, 'utf8');
+  const minHtml = html.replace(
+    '/dist.tools/experiments/experiments.js',
+    `https://${hostname}/v0/experiments.js`
+  );
+  gulp
+    .src(htmlPath)
+    .pipe(file('experiments.cdn.html', minHtml))
+    .pipe(gulp.dest('dist.tools/experiments/'));
+
+  // Build JS.
+  const js = fs.readFileSync(jsPath, 'utf8');
+  const builtName = 'experiments.max.js';
+  const minifiedName = 'experiments.js';
+  return toPromise(
+    gulp
+      .src(path + '/*.js')
+      .pipe(file(builtName, js))
+      .pipe(gulp.dest('build/experiments/'))
+  ).then(function() {
+    return compileJs(
+      './build/experiments/',
+      builtName,
+      './dist.tools/experiments/',
+      {
+        watch: false,
+        minify: options.minify || argv.minify,
+        includePolyfills: true,
+        minifiedName,
+      }
+    );
+  });
+}
+
+/**
  * Build "Login Done" page.
  *
  * @param {!Object} options
  */
-async function buildLoginDone(options) {
+function buildLoginDone(options) {
   return buildLoginDoneVersion('0.1', options);
 }
 
@@ -282,28 +326,12 @@ async function buildLoginDone(options) {
  * @param {string} version
  * @param {!Object} options
  */
-async function buildLoginDoneVersion(version, options) {
+function buildLoginDoneVersion(version, options) {
   options = options || {};
   const path = `extensions/amp-access/${version}/`;
   const buildDir = `build/all/amp-access-${version}/`;
   const htmlPath = path + 'amp-login-done.html';
   const jsPath = path + 'amp-login-done.js';
-  let {watch} = options;
-  if (watch === undefined) {
-    watch = argv.watch || argv.w;
-  }
-
-  // Building extensions is a 2 step process because of the renaming
-  // and CSS inlining. This watcher watches the original file, copies
-  // it to the destination and adds the CSS.
-  if (watch) {
-    // Do not set watchers again when we get called by the watcher.
-    const copy = Object.create(options);
-    copy.watch = false;
-    gulpWatch(path + '/*', function() {
-      buildLoginDoneVersion(version, copy);
-    });
-  }
 
   // Build HTML.
   const html = fs.readFileSync(htmlPath, 'utf8');
@@ -346,15 +374,11 @@ async function buildLoginDoneVersion(version, options) {
 }
 
 module.exports = {
-  buildExperiments,
-  buildLoginDone,
   dist,
 };
 
 /* eslint "google-camelcase/google-camelcase": 0 */
 
-buildExperiments.description = 'Builds experiments.html/js';
-buildLoginDone.description = 'Builds login-done.html/js';
 dist.description = 'Build production binaries';
 dist.flags = {
   pseudo_names:
