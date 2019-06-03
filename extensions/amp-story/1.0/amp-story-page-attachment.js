@@ -49,6 +49,14 @@ const AttachmentState = {
 };
 
 /**
+ * @enum {string}
+ */
+const AttachmentTheme = {
+  LIGHT: 'light', // default
+  DARK: 'dark',
+};
+
+/**
  * Drawer's template.
  * @param {!Element} element
  * @return {!Element}
@@ -141,9 +149,11 @@ export class AmpStoryPageAttachment extends AMP.BaseElement {
       ).textContent = this.element.getAttribute('data-title');
     }
 
-    if (this.element.hasAttribute('data-dark-mode')) {
-      this.headerEl_.classList.add('i-amphtml-story-page-attachment-dark-mode');
-      this.element.classList.add('i-amphtml-story-page-attachment-dark-mode');
+    const theme = this.element.getAttribute('theme');
+    if (theme && AttachmentTheme.DARK === theme.toLowerCase()) {
+      const darkThemeClass = 'i-amphtml-story-page-attachment-theme-dark';
+      this.headerEl_.classList.add(darkThemeClass);
+      this.element.classList.add(darkThemeClass);
     }
 
     createShadowRootWithStyle(headerShadowRootEl, this.headerEl_, CSS);
