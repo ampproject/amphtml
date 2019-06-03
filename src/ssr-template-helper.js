@@ -15,11 +15,8 @@
  */
 
 import {dict} from './utils/object';
-import {
-  fromStructuredCloneable,
-  toStructuredCloneable,
-} from './utils/xhr-utils';
 import {isArray} from './types';
+import {toStructuredCloneable} from './utils/xhr-utils';
 import {userAssert} from './log';
 
 /**
@@ -177,14 +174,5 @@ export class SsrTemplateHelper {
     });
 
     return data;
-  }
-
-  /**
-   * Constructs the fetch response and verifies AMP CORS headers.
-   * @param {!Window} win
-   * @param {!JsonObject|string|undefined} response
-   * @param {!FetchRequestDef|string} request
-   */
-  verifySsrResponse(win, response, request) {
   }
 }

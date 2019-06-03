@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {Services} from '../../../src/services';
+import {dict} from '../../../src/utils/object';
 import {
   getViewerAuthTokenIfAvailable,
   getViewerInterceptResponse,
@@ -21,8 +23,6 @@ import {
   setupInit,
   setupJsonFetchInit,
 } from '../../../src/utils/xhr-utils';
-import {Services} from '../../../src/services';
-import {dict} from '../../../src/utils/object';
 
 describes.sandboxed('utils/xhr-utils', {}, env => {
   let sandbox;

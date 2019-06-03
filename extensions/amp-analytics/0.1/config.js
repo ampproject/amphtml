@@ -83,8 +83,7 @@ export class AnalyticsConfig {
     assertHttpsUrl(remoteConfigUrl, this.element_);
     const TAG = this.getName_();
     dev().fine(TAG, 'Fetching remote config', remoteConfigUrl);
-    const fetchConfig = {
-    };
+    const fetchConfig = {};
     if (this.element_.hasAttribute('data-credentials')) {
       fetchConfig.credentials = this.element_.getAttribute('data-credentials');
     }

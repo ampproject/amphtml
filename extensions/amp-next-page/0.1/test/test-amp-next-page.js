@@ -302,9 +302,7 @@ describes.realWin(
         yield nextPage.buildCallback();
         yield macroTask();
 
-        expect(
-          fetchJsonStub.calledWithExactly(srcUrl, {})
-        ).to.be.true;
+        expect(fetchJsonStub.calledWithExactly(srcUrl, {})).to.be.true;
         expect(registerSpy.calledWith(element, config)).to.be.true;
       });
     });

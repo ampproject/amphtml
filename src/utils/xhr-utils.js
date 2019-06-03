@@ -15,12 +15,11 @@
  */
 
 import {Services} from '../services';
-import {dev, devAssert, user, userAssert} from '../log';
+import {devAssert, user, userAssert} from '../log';
 import {dict, map} from './object';
 import {fromIterator} from './array';
 import {
   getCorsUrl,
-  getSourceOrigin,
   getWinOrigin,
   isProxyOrigin,
   parseUrlDeprecated,

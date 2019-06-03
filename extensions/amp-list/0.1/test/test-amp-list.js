@@ -96,7 +96,6 @@ describes.repeated(
             isSupported: () => false,
             fetchAndRenderTemplate: () => Promise.resolve(),
             renderTemplate: sandbox.stub(),
-            verifySsrResponse: () => Promise.resolve(),
           };
 
           list = new AmpList(element);

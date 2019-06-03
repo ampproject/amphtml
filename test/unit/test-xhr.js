@@ -960,10 +960,7 @@ describe
               init: {
                 status: 242,
                 statusText: 'Magic status',
-                headers: [
-                  ['a', 2],
-                  ['b', false],
-                ],
+                headers: [['a', 2], ['b', false]],
               },
             })
           );
@@ -1004,10 +1001,7 @@ describe
               init: {
                 status: 242,
                 statusText: 'Magic status',
-                headers: [
-                  ['a', 2],
-                  ['b', false],
-                ],
+                headers: [['a', 2], ['b', false]],
               },
             })
           );
