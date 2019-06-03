@@ -475,14 +475,7 @@ function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
       });
   }
 
-  // Due to the two step build process for extensions, compileJs() is called
-  // twice, once with options.watch set to true and, once with it set to false.
-  // However, we do not need to call rebundle() twice. This avoids the duplicate
-  // compile seen when you run `gulp watch` and touch a file.
-  // TODO (rsimha): Figure out why this is needed and simplify buildExtension().
-  return options.watch === false
-    ? Promise.resolve()
-    : performBundle(/* failOnError */ true);
+  return performBundle(/* failOnError */ true);
 }
 
 /**

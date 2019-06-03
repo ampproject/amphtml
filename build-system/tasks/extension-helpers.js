@@ -369,22 +369,21 @@ function buildExtension(
       return Promise.resolve();
     }
   }
-  // Building extensions is a 2 step process because of the renaming
-  // and CSS inlining. This watcher watches the original file, copies
-  // it to the destination and adds the CSS.
+  // Use a separate watcher for extensions to copy / inline CSS and compile JS
+  // instead of relying on the watcher used by compileUnminifiedJs, which only
+  // recompiles JS.
+  const optionsCopy = Object.create(options);
   if (options.watch) {
-    // Do not set watchers again when we get called by the watcher.
-    const copy = Object.create(options);
-    copy.watch = false;
+    optionsCopy.watch = false;
     watch(path + '/*', function() {
-      buildExtension(name, version, latestVersion, hasCss, copy);
+      buildExtension(name, version, latestVersion, hasCss, optionsCopy);
     });
   }
   let promise = Promise.resolve();
   if (hasCss) {
     mkdirSync('build');
     mkdirSync('build/css');
-    promise = buildExtensionCss(path, name, version, options);
+    promise = buildExtensionCss(path, name, version, optionsCopy);
     if (options.compileOnlyCss) {
       return promise;
     }
@@ -393,7 +392,7 @@ function buildExtension(
     if (argv.single_pass) {
       return Promise.resolve();
     } else {
-      return buildExtensionJs(path, name, version, latestVersion, options);
+      return buildExtensionJs(path, name, version, latestVersion, optionsCopy);
     }
   });
 }
