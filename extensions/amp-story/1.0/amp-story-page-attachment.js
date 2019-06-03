@@ -38,6 +38,9 @@ import {resetStyles, setImportantStyles, toggle} from '../../../src/style';
 /** @const {number} */
 const TOGGLE_THRESHOLD_PX = 50;
 
+/** @const {string} */
+const DARK_THEME_CLASS = 'i-amphtml-story-page-attachment-theme-dark';
+
 /**
  * @enum {number}
  */
@@ -151,9 +154,8 @@ export class AmpStoryPageAttachment extends AMP.BaseElement {
 
     const theme = this.element.getAttribute('theme');
     if (theme && AttachmentTheme.DARK === theme.toLowerCase()) {
-      const darkThemeClass = 'i-amphtml-story-page-attachment-theme-dark';
-      this.headerEl_.classList.add(darkThemeClass);
-      this.element.classList.add(darkThemeClass);
+      this.headerEl_.classList.add(DARK_THEME_CLASS);
+      this.element.classList.add(DARK_THEME_CLASS);
     }
 
     createShadowRootWithStyle(headerShadowRootEl, this.headerEl_, CSS);
