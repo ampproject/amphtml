@@ -20,6 +20,12 @@ import {map} from '../../../src/utils/object';
 
 export const DIRTINESS_INDICATOR_CLASS = 'amp-form-dirty';
 
+/** @private {!Object<string, boolean>} */
+const SUPPORTED_TYPES = {
+  'text': true,
+  'textarea': true,
+};
+
 export class FormDirtiness {
   /**
    * @param {!HTMLFormElement} form
@@ -69,14 +75,8 @@ export class FormDirtiness {
    * @private
    */
   updateDirtinessClass_() {
-    if (this.dirtyFieldCount_ == 0 || this.isSubmitting_) {
-      // `Element.classList.remove` will not throw an error if the class does
-      // not already exist
-      this.form_.classList.remove(DIRTINESS_INDICATOR_CLASS);
-    } else {
-      // `Element.classList.add` will no-op if the class already exists
-      this.form_.classList.add(DIRTINESS_INDICATOR_CLASS);
-    }
+    const isDirty = this.dirtyFieldCount_ > 0 && !this.isSubmitting_;
+    this.form_.classList.toggle(DIRTINESS_INDICATOR_CLASS, isDirty);
   }
 
   /**
@@ -161,7 +161,7 @@ function shouldSkipDirtinessCheck(field) {
   const {type, name, hidden} = field;
 
   // TODO: add support for radio buttons, checkboxes, and dropdown menus
-  if (type !== 'text' && type !== 'textarea') {
+  if (!SUPPORTED_TYPES[type]) {
     return true;
   }
 
