@@ -228,14 +228,12 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
     it('should handle JSON response', () => {
       const jsonResponse = {
         'body': {
-          'json': {
-            'items': [
-              {
-                'title': 'AMP Dev',
-                'url': 'http://amp.dev',
-              },
-            ],
-          },
+          'items': [
+            {
+              'title': 'AMP Dev',
+              'url': 'http://amp.dev',
+            },
+          ],
         },
         'init': {
           'headers': {

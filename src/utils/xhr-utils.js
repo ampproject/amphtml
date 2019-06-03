@@ -110,7 +110,7 @@ export function toStructuredCloneable(input, init) {
  * `init`.
  *
  * 3. Include the body of the response serialized as string in `body` or as
- * JSON in `response[body][json]`.
+ * JSON in `response[body]`.
  *
  * 4. Return a new object having properties `body` and `init`.
  *
@@ -138,10 +138,10 @@ export function fromStructuredCloneable(response, responseType) {
   const isDocumentType = responseType == 'document';
   if (!isDocumentType) {
     let body = response['body'];
-    // Handle JSON response.
-    if (body && body['json']) {
+    // Handle response as JSON format.
+    if (body) {
       const init = {type: 'application/json'};
-      body = new Blob([JSON.stringify(body['json'])], init);
+      body = new Blob([JSON.stringify(body)], init);
     }
 
     // Use native `Response` type if available for performance. If response
