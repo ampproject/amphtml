@@ -54,13 +54,6 @@ const chromeFlags = [];
  * @return {!Object<string, string>}
  */
 function extractCssJsFileMap() {
-  //TODO(estherkim): consolidate arg validation logic
-  if (!fs.existsSync(EXTENSIONSCSSMAP)) {
-    log(red('ERROR:'), 'Could not find the file', cyan(EXTENSIONSCSSMAP) + '.');
-    log('Make sure', cyan('gulp css'), 'was run prior to this.');
-    process.exit();
-  }
-
   const extensionsCssMap = fs.readFileSync(EXTENSIONSCSSMAP, 'utf8');
   const extensionsCssMapJson = JSON.parse(extensionsCssMap);
   const extensions = Object.keys(extensionsCssMapJson);

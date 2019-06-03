@@ -31,10 +31,8 @@ const {
   runTestInBatches,
   startTestServer,
 } = require('./runtime-test/helpers');
-const {clean} = require('./clean');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
 const {css} = require('./css');
-const {dist} = require('./dist');
 const {green, yellow, cyan, red} = require('ansi-colors');
 const {isTravisBuild} = require('../travis');
 
@@ -55,17 +53,12 @@ function shouldNotRun() {
   return false;
 }
 
-async function maybeBuild() {
+function maybeBuild() {
   if (argv.nobuild) {
     return;
   }
 
-  if (argv.local_changes) {
-    return css();
-  }
-
-  await clean();
-  await dist();
+  return css();
 }
 
 function setConfigOverrides(config) {
