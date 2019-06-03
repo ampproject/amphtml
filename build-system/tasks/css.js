@@ -127,7 +127,6 @@ function compileCss(watch, opt_compileAll) {
   return promise
     .then(() =>
       buildExtensions({
-        bundleOnlyIfListedInFiles: false,
         compileOnlyCss: true,
         compileAll: opt_compileAll,
       })

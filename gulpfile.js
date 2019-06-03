@@ -18,11 +18,6 @@
 
 const gulp = require('gulp-help')(require('gulp'));
 const {
-  buildExperiments,
-  buildLoginDone,
-  dist,
-} = require('./build-system/tasks/dist');
-const {
   compileAccessExpr,
   compileBindExpr,
   compileCssExpr,
@@ -48,6 +43,7 @@ const {css} = require('./build-system/tasks/css');
 const {csvifySize} = require('./build-system/tasks/csvify-size');
 const {depCheck} = require('./build-system/tasks/dep-check');
 const {devDashboardTests} = require('./build-system/tasks/dev-dashboard-tests');
+const {dist} = require('./build-system/tasks/dist');
 const {e2e} = require('./build-system/tasks/e2e');
 const {firebase} = require('./build-system/tasks/firebase');
 const {getZindex} = require('./build-system/tasks/get-zindex');
@@ -71,8 +67,6 @@ const {visualDiff} = require('./build-system/tasks/visual-diff');
 gulp.task('ava', ava);
 gulp.task('babel-plugin-tests', babelPluginTests);
 gulp.task('build', build);
-gulp.task('build-experiments', buildExperiments);
-gulp.task('build-login-done', buildLoginDone);
 gulp.task('bundle-size', bundleSize);
 gulp.task('caches-json', cachesJson);
 gulp.task('changelog', changelog);
