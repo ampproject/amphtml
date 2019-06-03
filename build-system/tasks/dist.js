@@ -18,7 +18,6 @@ const colors = require('ansi-colors');
 const file = require('gulp-file');
 const fs = require('fs-extra');
 const gulp = require('gulp');
-const gulpWatch = require('gulp-watch');
 const log = require('fancy-log');
 const {
   buildAlp,
@@ -276,22 +275,6 @@ async function buildExperiments(options) {
   const path = 'tools/experiments';
   const htmlPath = path + '/experiments.html';
   const jsPath = path + '/experiments.js';
-  let {watch} = options;
-  if (watch === undefined) {
-    watch = argv.watch || argv.w;
-  }
-
-  // Building extensions is a 2 step process because of the renaming
-  // and CSS inlining. This watcher watches the original file, copies
-  // it to the destination and adds the CSS.
-  if (watch) {
-    // Do not set watchers again when we get called by the watcher.
-    const copy = Object.create(options);
-    copy.watch = false;
-    gulpWatch(path + '/*', function() {
-      buildExperiments(copy);
-    });
-  }
 
   // Build HTML.
   const html = fs.readFileSync(htmlPath, 'utf8');
@@ -349,22 +332,6 @@ async function buildLoginDoneVersion(version, options) {
   const buildDir = `build/all/amp-access-${version}/`;
   const htmlPath = path + 'amp-login-done.html';
   const jsPath = path + 'amp-login-done.js';
-  let {watch} = options;
-  if (watch === undefined) {
-    watch = argv.watch || argv.w;
-  }
-
-  // Building extensions is a 2 step process because of the renaming
-  // and CSS inlining. This watcher watches the original file, copies
-  // it to the destination and adds the CSS.
-  if (watch) {
-    // Do not set watchers again when we get called by the watcher.
-    const copy = Object.create(options);
-    copy.watch = false;
-    gulpWatch(path + '/*', function() {
-      buildLoginDoneVersion(version, copy);
-    });
-  }
 
   // Build HTML.
   const html = fs.readFileSync(htmlPath, 'utf8');
