@@ -16,6 +16,7 @@
 
 import {dev} from '../../../src/log';
 import {isDisabled, isFieldDefault, isFieldEmpty} from '../../../src/form';
+import {map} from '../../../src/utils/object';
 
 export const DIRTINESS_INDICATOR_CLASS = 'amp-form-dirty';
 
@@ -31,7 +32,7 @@ export class FormDirtiness {
     this.dirtyFieldCount_ = 0;
 
     /** @private {!Object<string, boolean>} */
-    this.isFieldNameDirty_ = {};
+    this.isFieldNameDirty_ = map();
 
     /** @private {boolean} */
     this.isSubmitting_ = false;
@@ -147,7 +148,7 @@ export class FormDirtiness {
    * @private
    */
   clearDirtyFields_() {
-    this.isFieldNameDirty_ = {};
+    this.isFieldNameDirty_ = map();
     this.dirtyFieldCount_ = 0;
   }
 }
