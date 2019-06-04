@@ -67,7 +67,7 @@ async function performBuild(watch) {
       buildAlp({watch}),
       buildExaminer({watch}),
       buildWebWorker({watch}),
-      buildExtensions({bundleOnlyIfListedInFiles: !watch, watch}),
+      buildExtensions({watch}),
       compileAllUnminifiedTargets(watch),
     ]);
   });

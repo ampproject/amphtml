@@ -45,8 +45,8 @@ const cssEntryPoints = [
     outCss: 'v0.css',
   },
   {
-    path: 'ampelement.css',
-    outJs: 'ampelement.css.js',
+    path: 'ampshared.css',
+    outJs: 'ampshared.css.js',
     outCss: 'v0.css',
     append: true,
   },
@@ -112,7 +112,7 @@ function compileCss(watch, opt_compileAll) {
 
   const startTime = Date.now();
 
-  // Used by `gulp test --local-changes` to map CSS files to JS files.
+  // Used by `gulp unit --local_changes` to map CSS files to JS files.
   fs.writeFileSync('EXTENSIONS_CSS_MAP', JSON.stringify(extensions));
 
   let promise = Promise.resolve();
@@ -127,7 +127,6 @@ function compileCss(watch, opt_compileAll) {
   return promise
     .then(() =>
       buildExtensions({
-        bundleOnlyIfListedInFiles: false,
         compileOnlyCss: true,
         compileAll: opt_compileAll,
       })
