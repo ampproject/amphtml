@@ -162,6 +162,7 @@ export const Action = {
   TOGGLE_ACCESS: 'toggleAccess',
   TOGGLE_AD: 'toggleAd',
   TOGGLE_BOOKEND: 'toggleBookend',
+  TOGGLE_CAN_SHOW_BOOKEND: 'toggleCanShowBookend',
   TOGGLE_HAS_SIDEBAR: 'toggleHasSidebar',
   TOGGLE_INFO_DIALOG: 'toggleInfoDialog',
   TOGGLE_INTERACTIVE_COMPONENT: 'toggleInteractiveComponent',
@@ -246,6 +247,10 @@ const actions = (state, action, data) => {
       return /** @type {!State} */ (Object.assign({}, state, {
         [StateProperty.BOOKEND_STATE]: !!data,
         [StateProperty.PAUSED_STATE]: !!data,
+      }));
+    case Action.TOGGLE_CAN_SHOW_BOOKEND:
+      return /** @type {!State} */ (Object.assign({}, state, {
+        [StateProperty.CAN_SHOW_BOOKEND]: !!data,
       }));
     case Action.TOGGLE_INTERACTIVE_COMPONENT:
       data = /** @type {InteractiveComponentDef} */ (data);
