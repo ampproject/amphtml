@@ -89,15 +89,16 @@ describes.realWin(
     }
 
     function stubAllocateVariant(sandbox, config) {
+      const viewer = Services.viewerForDoc(ampdoc);
       const stub = sandbox.stub(variant, 'allocateVariant');
       stub
-        .withArgs(ampdoc, 'experiment-1', config['experiment-1'])
+        .withArgs(ampdoc, viewer, 'experiment-1', config['experiment-1'])
         .returns(Promise.resolve('variant-a'));
       stub
-        .withArgs(ampdoc, 'experiment-2', config['experiment-2'])
+        .withArgs(ampdoc, viewer, 'experiment-2', config['experiment-2'])
         .returns(Promise.resolve('variant-d'));
       stub
-        .withArgs(ampdoc, 'experiment-3', config['experiment-3'])
+        .withArgs(ampdoc, viewer, 'experiment-3', config['experiment-3'])
         .returns(Promise.resolve(null));
       return stub;
     }
@@ -227,5 +228,33 @@ describes.realWin(
           expect(applyStub).to.be.calledTwice;
         });
     });
+
+    it(
+      'should not apply any experiments when ' +
+        '_disable_all_experiments_ is enabled',
+      () => {
+        addConfigElement('script');
+        stubAllocateVariant(sandbox, config);
+
+        const applyStub = sandbox.stub(experiment, 'applyMutations_');
+
+        sandbox.stub(Services, 'viewerForDoc').returns({
+          getParam: () => true,
+        });
+
+        experiment.buildCallback();
+        return Services.variantsForDocOrNull(ampdoc.getHeadNode())
+          .then(variantsService => variantsService.getVariants())
+          .then(variants => {
+            expect(variants).to.jsonEqual({
+              'experiment-1': null,
+              'experiment-2': null,
+              'experiment-3': null,
+            });
+
+            expect(applyStub).to.not.be.called;
+          });
+      }
+    );
   }
 );
