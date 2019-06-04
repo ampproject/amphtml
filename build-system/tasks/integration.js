@@ -95,12 +95,10 @@ function getFileConfig() {
   const files = testConfig.commonIntegrationTestPaths;
 
   if (argv.files) {
-    files.concat(argv.files);
-  } else {
-    files.concat(testConfig.integrationTestPaths);
+    return {'files': files.concat(argv.files)};
   }
 
-  return {'files': files};
+  return {'files': files.concat(testConfig.integrationTestPaths)};
 }
 
 function getReporterConfig() {
