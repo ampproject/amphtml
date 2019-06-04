@@ -246,19 +246,41 @@ export class ViewportBindingIosEmbedWrapper_ {
 
   /** @override */
   getContentHeight() {
-    // Don't use scrollHeight, since it returns `MAX(viewport_height,
-    // document_height)` (we only want the latter), and it doesn't account
-    // for margins.
-    const scrollingElement = this.win.document.body;
-    const rect = scrollingElement./*OK*/ getBoundingClientRect();
-    const style = computedStyle(this.win, scrollingElement);
-    // Note: unlike viewport-binding-natural.js, there's no need to calculate
-    // the "top gap" since the wrapped body _does_ account for child margins.
-    // However, the parent's paddingTop still needs to be added.
+    // The wrapped body, not this.wrapper_ itself, will have the correct height.
+    const {body} = this.win.document;
+    const {height} = body./*OK*/ getBoundingClientRect();
+
+    // Unlike viewport-binding-natural.js, there's no need to calculate the
+    // "top gap" since the wrapped body accounts for the top margin of children.
+    // However, the parent's paddingTop and "bottom gap" must be added...
+
+    // Bottom gap:
+    // As of Safari 12.1.1, the wrapped body's rect height does not include the
+    // bottom margin of children and there's no other API that does.
+    // 1. Find the last child that has a non-zero height.
+    // 2. Add its marginBottom to the height calculation.
+    let bottomGap = 0;
+    if (isExperimentOn(this.win, 'bottom-margin-in-content-height')) {
+      let n = body.lastElementChild;
+      while (n) {
+        const r = n./*OK*/ getBoundingClientRect();
+        if (r.height > 0) {
+          break;
+        } else {
+          n = n.previousElementSibling;
+        }
+      }
+      if (n) {
+        bottomGap = parseInt(computedStyle(this.win, n).marginBottom, 10);
+      }
+    }
+
+    const style = computedStyle(this.win, body);
     return (
-      rect.height +
+      height +
       this.paddingTop_ +
       parseInt(style.marginTop, 10) +
+      bottomGap +
       parseInt(style.marginBottom, 10)
     );
   }
