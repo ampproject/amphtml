@@ -19,6 +19,7 @@ const gulpif = require('gulp-if');
 const gulpWatch = require('gulp-watch');
 const jsonlint = require('gulp-jsonlint');
 const jsonminify = require('gulp-jsonminify');
+const rename = require('gulp-rename');
 const {endBuildStep, printNobuildHelp, toPromise} = require('./helpers');
 
 /**
@@ -56,9 +57,14 @@ function compileVendorConfigs(opt_options) {
       .src(srcPath)
       .pipe(gulpif(options.minify, jsonminify()))
       .pipe(jsonlint())
-      .pipe(jsonlint.reporter()) // report any linting errors
+      // report any linting errors
+      .pipe(jsonlint.reporter())
       // only fail if not in watcher, so watch is not interrupted
       .pipe(gulpif(!options.calledByWatcher, jsonlint.failOnError()))
+      // if not minifying, append .max to filename
+      .pipe(gulpif(!options.minify, rename(function (path) {
+        path.basename += '.max';
+      })))
       .pipe(gulp.dest(destPath))
   ).then(() => {
     endBuildStep(
