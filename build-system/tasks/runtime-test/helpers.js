@@ -109,6 +109,10 @@ function getBrowserConfig() {
         ],
       };
     }
+
+    throw new Error(
+      'The --saucelabs flag is valid only for `gulp unit` and `gulp integration`.'
+    );
   }
 
   const chromeFlags = [];

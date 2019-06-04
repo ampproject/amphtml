@@ -101,6 +101,10 @@ function getFileConfig() {
     testConfig.chaiAsPromised
   );
 
+  if (argv.files) {
+    return {'files': files.concat(argv.files)};
+  }
+
   if (argv.saucelabs) {
     return {'files': files.concat(testConfig.unitTestOnSaucePaths)};
   }
@@ -221,6 +225,7 @@ unit.flags = {
   'chrome_flags': '',
   'coverage': '',
   'firefox': '',
+  'files': '',
   'grep': '',
   'headless': '',
   'ie': '',
