@@ -96,7 +96,7 @@ function tryGetDocumentCookieNoInline(win) {
 export function setCookie(win, name, value, expirationTime, opt_options) {
   checkOriginForSettingCookie(win, opt_options, name);
   let domain = undefined;
-  // Respect explicitily set domain over higestAvailabeDomain
+  // Respect explicitly set domain over higestAvailabeDomain
   if (opt_options && opt_options.domain) {
     domain = opt_options.domain;
   } else if (opt_options && opt_options.highestAvailableDomain) {
@@ -234,7 +234,7 @@ function checkOriginForSettingCookie(win, options, name) {
 }
 
 /**
- * Return a temporaty cookie name for testing only
+ * Return a temporary cookie name for testing only
  * @param {!Window} win
  * @return {string}
  */
@@ -242,7 +242,7 @@ function getTempCookieName(win) {
   let testCookieName = TEST_COOKIE_NAME;
   const counter = 0;
   while (getCookie(win, testCookieName)) {
-    // test cookie name conflit, append counter to test cookie name
+    // test cookie name conflict, append counter to test cookie name
     testCookieName = TEST_COOKIE_NAME + counter;
   }
   return testCookieName;
