@@ -34,9 +34,11 @@ const SUB = ' ';
 const TEST_TIMEOUT = 20000;
 const SETUP_TIMEOUT = 30000;
 const DEFAULT_E2E_INITIAL_RECT = {width: 800, height: 600};
+const defaultBrowsers = new Set(['chrome', 'firefox']);
 
 /**
  * @typedef {{
+ *  browsers: string,
  *  headless: boolean,
  *  engine: string,
  * }}
@@ -277,11 +279,19 @@ function describeEnv(factory) {
     }
 
     function createBrowserDescribe() {
-      spec.browsers.forEach(browserName => {
-        describe(browserName, function() {
-          createVariantDescribe(browserName);
+      const {browsers} = getConfig();
+
+      const allowedBrowsers = browsers
+        ? new Set(browsers.split(',').map(x => x.trim()))
+        : defaultBrowsers;
+
+      spec.browsers
+        .filter(x => allowedBrowsers.has(x))
+        .forEach(browserName => {
+          describe(browserName, function() {
+            createVariantDescribe(browserName);
+          });
         });
-      });
     }
 
     function createVariantDescribe(browserName) {
