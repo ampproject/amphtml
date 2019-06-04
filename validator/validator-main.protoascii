@@ -6506,6 +6506,10 @@ attr_lists: {
     requires_extension: "amp-subscriptions"
   }
   attrs: {
+    name: "subscriptions-lang"
+    requires_extension: "amp-subscriptions"
+  }
+  attrs: {
     name: "subscriptions-section"
     value_casei: "actions"
     value_casei: "content"
