@@ -409,7 +409,7 @@ export class GoogleSubscriptionsPlatform {
         element.textContent = '';
         opts.theme = 'light';
         opts.lang = userAssert(
-          element.getAttribute('lang'),
+          element.getAttribute('subscriptions-lang'),
           'subscribe-smartbutton must have a language attrbiute'
         );
         this.runtime_.attachSmartButton(element, opts, () => {});
@@ -418,7 +418,7 @@ export class GoogleSubscriptionsPlatform {
         element.textContent = '';
         opts.theme = 'dark';
         opts.lang = userAssert(
-          element.getAttribute('lang'),
+          element.getAttribute('subscriptions-lang'),
           'subscribe-smartbutton must have a language attrbiute'
         );
         this.runtime_.attachSmartButton(element, opts, () => {});

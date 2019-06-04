@@ -459,7 +459,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     const elem = env.win.document.createElement('div');
     const attachStub = sandbox.stub(platform.runtime_, 'attachSmartButton');
     elem.textContent = 'some html';
-    elem.setAttribute('language', 'en');
+    elem.setAttribute('subscriptions-lang', 'en');
     platform.decorateUI(elem, 'subscribe-smartbutton');
     console.log(elem);
     expect(elem.textContent).to.be.equal('');
@@ -470,7 +470,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     const elem = env.win.document.createElement('div');
     const attachStub = sandbox.stub(platform.runtime_, 'attachSmartButton');
     elem.textContent = 'some html';
-    elem.setAttribute('language', 'en');
+    elem.setAttribute('subscriptions-lang', 'en');
     platform.decorateUI(elem, 'subscribe-smartbutton-light');
     expect(elem.textContent).to.be.equal('');
     expect(attachStub).to.be.calledWith(elem, {theme: 'light', lang: 'en'});
@@ -480,7 +480,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     const elem = env.win.document.createElement('div');
     const attachStub = sandbox.stub(platform.runtime_, 'attachSmartButton');
     elem.textContent = 'some html';
-    elem.setAttribute('language', 'en');
+    elem.setAttribute('subscriptions-lang', 'en');
     platform.decorateUI(elem, 'subscribe-smartbutton-dark');
     expect(elem.textContent).to.be.equal('');
     expect(attachStub).to.be.calledWith(elem, {theme: 'dark', lang: 'en'});
