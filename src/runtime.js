@@ -33,7 +33,7 @@ import {
 import {Services} from './services';
 import {VisibilityState} from './visibility-state';
 import {cssText as ampDocCss} from '../build/ampdoc.css';
-import {cssText as ampElementCss} from '../build/ampelement.css';
+import {cssText as ampSharedCss} from '../build/ampshared.css';
 import {
   childElementsByTag,
   isConnectedNode,
@@ -58,7 +58,7 @@ import {
 import {installCidService} from './service/cid-impl';
 import {installCryptoService} from './service/crypto-impl';
 import {installDocumentInfoServiceForDoc} from './service/document-info-impl';
-import {installDocumentStateService} from './service/document-state';
+import {installGlobalDocumentStateService} from './service/document-state';
 import {installGlobalNavigationHandlerForDoc} from './service/navigation';
 import {installGlobalSubmitListenerForDoc} from './document-submit';
 import {installHiddenObserverForDoc} from './service/hidden-observer-impl';
@@ -100,7 +100,7 @@ const TAG = 'runtime';
 export function installRuntimeServices(global) {
   installCryptoService(global);
   installBatchedXhrService(global);
-  installDocumentStateService(global);
+  installGlobalDocumentStateService(global);
   installPlatformService(global);
   installTemplatesService(global);
   installTimerService(global);
@@ -519,7 +519,7 @@ export class MultidocManager {
     // Install runtime CSS.
     installStylesForDoc(
       ampdoc,
-      ampElementCss + ampDocCss,
+      ampDocCss + ampSharedCss,
       /* callback */ null,
       /* opt_isRuntimeCss */ true
     );

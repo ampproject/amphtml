@@ -24,19 +24,17 @@ const {isTravisPullRequestBuild} = require('../travis');
 
 const reportBaseUrl = 'https://amp-test-status-bot.appspot.com/v0/tests';
 
+const IS_GULP_INTEGRATION = !!argv.integration;
+const IS_GULP_UNIT = argv._[0] === 'unit';
 const IS_GULP_E2E = argv._[0] === 'e2e';
-const IS_GULP_TEST = argv._[0] === 'test';
 
-const IS_INTEGRATION = !!argv.integration;
-const IS_LOCAL_CHANGES = !!argv['local-changes'];
+const IS_LOCAL_CHANGES = !!argv.local_changes;
 const IS_SAUCELABS = !!(argv.saucelabs || argv.saucelabs_lite);
 const IS_SINGLE_PASS = !!argv.single_pass;
-const IS_UNIT = !!argv.unit;
 
 const TEST_TYPE_SUBTYPES = new Map([
-  // TODO(danielrozenberg): add 'saucelabs' to integration tests when supported.
-  ['integration', ['local', 'single-pass']],
-  ['unit', ['local', 'local-changes', 'saucelabs']],
+  ['integration', ['local', 'single-pass', 'saucelabs']],
+  ['unit', ['local', 'local_changes', 'saucelabs']],
   ['e2e', ['local']],
 ]);
 const TEST_TYPE_BUILD_TARGETS = new Map([
@@ -46,34 +44,32 @@ const TEST_TYPE_BUILD_TARGETS = new Map([
 ]);
 
 function inferTestType() {
-  if (IS_GULP_TEST) {
-    let type;
-    if (IS_UNIT) {
-      type = 'unit';
-    } else if (IS_INTEGRATION) {
-      type = 'integration';
-
-      // TODO(danielrozenberg): report integration on saucelabs
-      if (IS_SAUCELABS) {
-        return null;
-      }
-    } else {
-      return null;
-    }
-
-    if (IS_LOCAL_CHANGES) {
-      return `${type}/local-changes`;
-    } else if (IS_SAUCELABS) {
-      return `${type}/saucelabs`;
-    } else if (IS_SINGLE_PASS) {
-      return `${type}/single-pass`;
-    } else {
-      return `${type}/local`;
-    }
-  } else if (IS_GULP_E2E) {
+  if (IS_GULP_E2E) {
     return 'e2e/local';
   }
-  return null;
+
+  let type;
+  if (IS_GULP_UNIT) {
+    type = 'unit';
+  } else if (IS_GULP_INTEGRATION) {
+    type = 'integration';
+  } else {
+    return null;
+  }
+
+  if (IS_LOCAL_CHANGES) {
+    return `${type}/local_changes`;
+  }
+
+  if (IS_SAUCELABS) {
+    return `${type}/saucelabs`;
+  }
+
+  if (IS_SINGLE_PASS) {
+    return `${type}/single-pass`;
+  }
+
+  return `${type}/local`;
 }
 
 function postReport(type, action) {
@@ -139,10 +135,25 @@ async function reportAllExpectedTests(buildTargets) {
   }
 }
 
+/**
+ * Callback to the Karma.Server on('run_complete') event for simple test types.
+ *
+ * @param {!any} browsers
+ * @param {!Karma.TestResults} results
+ */
+function reportTestRunComplete(browsers, results) {
+  if (results.error) {
+    reportTestErrored();
+  } else {
+    reportTestFinished(results.success, results.failed);
+  }
+}
+
 module.exports = {
   reportAllExpectedTests,
   reportTestErrored,
   reportTestFinished,
+  reportTestRunComplete,
   reportTestSkipped,
   reportTestStarted,
 };

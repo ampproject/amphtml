@@ -56,7 +56,7 @@ const forbiddenTerms = {
       'build-system/app-index/boilerplate.js',
       'build-system/tasks/extension-generator/index.js',
       'css/ampdoc.css',
-      'css/ampelement.css',
+      'css/ampshared.css',
       'extensions/amp-pinterest/0.1/amp-pinterest.css',
       'extensions/amp-pinterest/0.1/follow-button.js',
       'extensions/amp-pinterest/0.1/pin-widget.js',
@@ -69,7 +69,7 @@ const forbiddenTerms = {
       'build-system/tasks/extension-generator/index.js',
       'build-system/tasks/create-golden-css/css/main.css',
       'css/ampdoc.css',
-      'css/ampelement.css',
+      'css/ampshared.css',
     ],
   },
   'describe\\.only': '',
@@ -204,7 +204,7 @@ const forbiddenTerms = {
     message: privateServiceFactory,
     whitelist: ['src/service/crypto-impl.js', 'src/runtime.js'],
   },
-  'installDocumentStateService': {
+  'installGlobalDocumentStateService': {
     message: privateServiceFactory,
     whitelist: ['src/service/document-state.js', 'src/runtime.js'],
   },
@@ -409,6 +409,15 @@ const forbiddenTerms = {
       'extensions/amp-experiment/1.0/variant.js',
       'extensions/amp-user-notification/0.1/amp-user-notification.js',
       'extensions/amp-consent/0.1/consent-state-manager.js',
+    ],
+  },
+  // Global documentState service.
+  'globalDocumentStateFor': {
+    message: 'Global document API. In the process of being deprecated.',
+    whitelist: [
+      'src/services.js',
+      'src/service/viewer-impl.js',
+      'src/service/vsync-impl.js',
     ],
   },
   'getBaseCid': {

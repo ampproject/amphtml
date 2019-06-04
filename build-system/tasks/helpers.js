@@ -23,14 +23,12 @@ const file = require('gulp-file');
 const fs = require('fs-extra');
 const gulp = require('gulp');
 const gulpWatch = require('gulp-watch');
-const lazypipe = require('lazypipe');
 const log = require('fancy-log');
 const path = require('path');
 const regexpSourcemaps = require('gulp-regexp-sourcemaps');
 const rename = require('gulp-rename');
 const source = require('vinyl-source-stream');
 const sourcemaps = require('gulp-sourcemaps');
-const touch = require('touch');
 const watchify = require('watchify');
 const wrappers = require('../compile-wrappers');
 const {altMainBundles} = require('../../bundles.config');
@@ -417,66 +415,47 @@ function finishBundle(srcFilename, destDir, destFilename, options) {
  */
 function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
   const entryPoint = path.join(srcDir, srcFilename);
-  let bundler = browserify(entryPoint, {debug: true}).transform(babelify);
-  if (options.watch) {
-    bundler = watchify(bundler);
-  }
-
-  // Default wrapper for `gulp build`.
-  // We don't need an explicit function wrapper like we do for `gulp dist`
-  // because Babel handles that for you.
+  const destFilename = options.toName || srcFilename;
   const wrapper = options.wrapper || wrappers.none;
   const devWrapper = wrapper.replace('<%= contents %>', '$1');
 
-  const lazybuild = lazypipe()
-    .pipe(
-      source,
-      srcFilename
-    )
-    .pipe(buffer)
-    .pipe(
-      sourcemaps.init.bind(sourcemaps),
-      {loadMaps: true}
-    )
-    .pipe(
-      regexpSourcemaps,
-      /\$internalRuntimeVersion\$/g,
-      internalRuntimeVersion,
-      'runtime-version'
-    )
-    .pipe(
-      regexpSourcemaps,
-      /([^]+)/,
-      devWrapper,
-      'wrapper'
-    );
+  let bundler = browserify({
+    entries: entryPoint,
+    debug: true,
+  }).transform(babelify);
 
-  const lazywrite = lazypipe()
-    .pipe(
-      sourcemaps.write.bind(sourcemaps),
-      './'
-    )
-    .pipe(
-      gulp.dest.bind(gulp),
-      destDir
-    );
+  if (options.watch) {
+    bundler = watchify(bundler);
+    bundler.on('update', () => performBundle(/* failOnError */ false));
+  }
 
-  const destFilename = options.toName || srcFilename;
   /**
    * @param {boolean} failOnError
    * @return {Promise}
    */
-  function rebundle(failOnError) {
-    const startTime = Date.now();
+  function performBundle(failOnError) {
+    let startTime;
     return toPromise(
       bundler
         .bundle()
+        .once('readable', () => (startTime = Date.now()))
         .on('error', err =>
           handleBundleError(err, failOnError, srcFilename, startTime)
         )
-        .pipe(lazybuild())
+        .pipe(source(srcFilename))
+        .pipe(buffer())
+        .pipe(sourcemaps.init({loadMaps: true}))
+        .pipe(
+          regexpSourcemaps(
+            /\$internalRuntimeVersion\$/g,
+            internalRuntimeVersion,
+            'runtime-version'
+          )
+        )
+        .pipe(regexpSourcemaps(/([^]+)/, devWrapper, 'wrapper'))
         .pipe(rename(destFilename))
-        .pipe(lazywrite())
+        .pipe(sourcemaps.write('.'))
+        .pipe(gulp.dest(destDir))
         .on('end', () =>
           finishBundle(srcFilename, destDir, destFilename, options)
         )
@@ -496,27 +475,7 @@ function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
       });
   }
 
-  if (options.watch) {
-    bundler.on('update', function() {
-      rebundle(/* failOnError */ false);
-      // Touch file in unit test set. This triggers rebundling of tests because
-      // karma only considers changes to tests files themselves re-bundle
-      // worthy.
-      touch('test/_init_tests.js');
-    });
-  }
-
-  if (options.watch === false) {
-    // Due to the two step build process, compileJs() is called twice, once with
-    // options.watch set to true and, once with it set to false. However, we do
-    // not need to call rebundle() twice. This avoids the duplicate compile seen
-    // when you run `gulp watch` and touch a file.
-    return Promise.resolve();
-  } else {
-    // This is the default options.watch === true case, and also covers the
-    // `gulp build` / `gulp dist` cases where options.watch is undefined.
-    return rebundle(/* failOnError */ true);
-  }
+  return performBundle(/* failOnError */ true);
 }
 
 /**
@@ -710,68 +669,6 @@ function thirdPartyBootstrap(input, outputName, shouldMinify) {
 }
 
 /**
- * Build all the AMP experiments.html/js.
- *
- * @param {!Object} options
- */
-async function buildExperiments(options) {
-  options = options || {};
-  const path = 'tools/experiments';
-  const htmlPath = path + '/experiments.html';
-  const jsPath = path + '/experiments.js';
-  let {watch} = options;
-  if (watch === undefined) {
-    watch = argv.watch || argv.w;
-  }
-
-  // Building extensions is a 2 step process because of the renaming
-  // and CSS inlining. This watcher watches the original file, copies
-  // it to the destination and adds the CSS.
-  if (watch) {
-    // Do not set watchers again when we get called by the watcher.
-    const copy = Object.create(options);
-    copy.watch = false;
-    gulpWatch(path + '/*', function() {
-      buildExperiments(copy);
-    });
-  }
-
-  // Build HTML.
-  const html = fs.readFileSync(htmlPath, 'utf8');
-  const minHtml = html.replace(
-    '/dist.tools/experiments/experiments.js',
-    `https://${hostname}/v0/experiments.js`
-  );
-  gulp
-    .src(htmlPath)
-    .pipe(file('experiments.cdn.html', minHtml))
-    .pipe(gulp.dest('dist.tools/experiments/'));
-
-  // Build JS.
-  const js = fs.readFileSync(jsPath, 'utf8');
-  const builtName = 'experiments.max.js';
-  const minifiedName = 'experiments.js';
-  return toPromise(
-    gulp
-      .src(path + '/*.js')
-      .pipe(file(builtName, js))
-      .pipe(gulp.dest('build/experiments/'))
-  ).then(function() {
-    return compileJs(
-      './build/experiments/',
-      builtName,
-      './dist.tools/experiments/',
-      {
-        watch: false,
-        minify: options.minify || argv.minify,
-        includePolyfills: true,
-        minifiedName,
-      }
-    );
-  });
-}
-
-/**
  * Build ALP JS.
  *
  * @param {!Object} options
@@ -849,7 +746,6 @@ function toPromise(readable) {
 module.exports = {
   buildAlp,
   buildExaminer,
-  buildExperiments,
   buildWebWorker,
   compileAllMinifiedTargets,
   compileAllUnminifiedTargets,

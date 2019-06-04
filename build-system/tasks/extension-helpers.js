@@ -17,7 +17,6 @@
 const colors = require('ansi-colors');
 const fs = require('fs-extra');
 const log = require('fancy-log');
-const minimatch = require('minimatch');
 const watch = require('gulp-watch');
 const wrappers = require('../compile-wrappers');
 const {
@@ -56,7 +55,6 @@ const MINIMAL_EXTENSION_SET = [
  *   loadPriority: ?string,
  *   cssBinaries: ?Array<string>,
  *   extraGlobs?Array<string>,
- *   bundleOnlyIfListedInFiles: ?boolean
  * }}
  */
 const ExtensionOption = {}; // eslint-disable-line no-unused-vars
@@ -133,6 +131,10 @@ function declareExtensionVersionAlias(name, version, latestVersion, options) {
   extensionAliasFilePath[name + '-' + version + '.js'] = {
     'name': name,
     'file': name + '-' + latestVersion + '.js',
+  };
+  extensionAliasFilePath[name + '-' + version + '.js.map'] = {
+    'name': name,
+    'file': name + '-' + latestVersion + '.js.map',
   };
   if (options.hasCss) {
     extensionAliasFilePath[name + '-' + version + '.css'] = {
@@ -353,34 +355,22 @@ function buildExtension(
   if (options.compileOnlyCss && !hasCss) {
     return Promise.resolve();
   }
+  // Use a separate watcher for extensions to copy / inline CSS and compile JS
+  // instead of relying on the watcher used by compileUnminifiedJs, which only
+  // recompiles JS.
   const path = 'extensions/' + name + '/' + version;
-  const jsPath = path + '/' + name + '.js';
-  const jsTestPath = path + '/test/test-' + name + '.js';
-  if (argv.files && options.bundleOnlyIfListedInFiles) {
-    const passedFiles = Array.isArray(argv.files) ? argv.files : [argv.files];
-    const shouldBundle = passedFiles.some(glob => {
-      return minimatch(jsPath, glob) || minimatch(jsTestPath, glob);
-    });
-    if (!shouldBundle) {
-      return Promise.resolve();
-    }
-  }
-  // Building extensions is a 2 step process because of the renaming
-  // and CSS inlining. This watcher watches the original file, copies
-  // it to the destination and adds the CSS.
+  const optionsCopy = Object.create(options);
   if (options.watch) {
-    // Do not set watchers again when we get called by the watcher.
-    const copy = Object.create(options);
-    copy.watch = false;
+    optionsCopy.watch = false;
     watch(path + '/*', function() {
-      buildExtension(name, version, latestVersion, hasCss, copy);
+      buildExtension(name, version, latestVersion, hasCss, optionsCopy);
     });
   }
   let promise = Promise.resolve();
   if (hasCss) {
     mkdirSync('build');
     mkdirSync('build/css');
-    promise = buildExtensionCss(path, name, version, options);
+    promise = buildExtensionCss(path, name, version, optionsCopy);
     if (options.compileOnlyCss) {
       return promise;
     }
@@ -389,7 +379,7 @@ function buildExtension(
     if (argv.single_pass) {
       return Promise.resolve();
     } else {
-      return buildExtensionJs(path, name, version, latestVersion, options);
+      return buildExtensionJs(path, name, version, latestVersion, optionsCopy);
     }
   });
 }

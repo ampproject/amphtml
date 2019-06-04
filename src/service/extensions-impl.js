@@ -17,7 +17,7 @@
 import {Deferred} from '../utils/promise';
 import {Services} from '../services';
 import {cssText as ampDocCss} from '../../build/ampdoc.css';
-import {cssText as ampElementCss} from '../../build/ampelement.css';
+import {cssText as ampSharedCss} from '../../build/ampshared.css';
 import {
   calculateExtensionScriptUrl,
   parseExtensionUrl,
@@ -457,7 +457,7 @@ export class Extensions {
     installStylesLegacy(
       childWin.document,
       // TODO(lannka): remove ampDocCss for FIE rendering #22418
-      ampDocCss + ampElementCss,
+      ampDocCss + ampSharedCss,
       /* callback */ null,
       /* opt_isRuntimeCss */ true,
       /* opt_ext */ 'amp-runtime'

@@ -509,16 +509,22 @@ export class SubscriptionService {
    */
   performPingback_() {
     if (this.viewTrackerPromise_) {
+      const localPlatform = this.platformStore_.getLocalPlatform();
       return this.viewTrackerPromise_
         .then(() => {
-          return this.platformStore_.getGrantEntitlement();
-        })
-        .then(grantStateEntitlement => {
-          const localPlatform = this.platformStore_.getLocalPlatform();
-          if (localPlatform.isPingbackEnabled()) {
-            localPlatform.pingback(
-              grantStateEntitlement || Entitlement.empty('local')
+          if (localPlatform.pingbackReturnsAllEntitlements()) {
+            return this.platformStore_.getAllPlatformsEntitlements();
+          }
+          return this.platformStore_
+            .getGrantEntitlement()
+            .then(
+              grantStateEntitlement =>
+                grantStateEntitlement || Entitlement.empty('local')
             );
+        })
+        .then(resolveEntitlements => {
+          if (localPlatform.isPingbackEnabled()) {
+            localPlatform.pingback(resolveEntitlements);
           }
         });
     }

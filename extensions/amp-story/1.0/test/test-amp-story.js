@@ -26,6 +26,7 @@ import {ActionTrust} from '../../../../src/action-constants';
 import {AmpStory} from '../amp-story';
 import {AmpStoryBookend} from '../bookend/amp-story-bookend';
 import {AmpStoryConsent} from '../amp-story-consent';
+import {CommonSignals} from '../../../../src/common-signals';
 import {Keys} from '../../../../src/utils/key-codes';
 import {LocalizationService} from '../../../../src/service/localization';
 import {MediaType} from '../media-pool';
@@ -95,6 +96,7 @@ describes.realWin(
         .stub(viewer, 'hasCapability')
         .withArgs('swipe')
         .returns(hasSwipeCapability);
+      sandbox.stub(Services, 'viewerForDoc').returns(viewer);
 
       const storeService = new AmpStoryStoreService(win);
       registerServiceBuilder(win, 'story-store', () => storeService);
@@ -687,9 +689,9 @@ describes.realWin(
       it('should pause the story when tab becomes inactive', () => {
         createPages(story.element, 2, ['cover', 'page-1']);
 
-        sandbox.stub(story.documentState_, 'isHidden').returns(true);
+        sandbox.stub(story.viewer_, 'isVisible').returns(false);
         const onVisibilityChangedStub = sandbox.stub(
-          story.documentState_,
+          story.viewer_,
           'onVisibilityChanged'
         );
 
@@ -709,9 +711,9 @@ describes.realWin(
       it('should play the story when tab becomes active', () => {
         createPages(story.element, 2, ['cover', 'page-1']);
 
-        sandbox.stub(story.documentState_, 'isHidden').returns(false);
+        sandbox.stub(story.viewer_, 'isVisible').returns(true);
         const onVisibilityChangedStub = sandbox.stub(
-          story.documentState_,
+          story.viewer_,
           'onVisibilityChanged'
         );
 
@@ -939,13 +941,19 @@ describes.realWin(
           .resolves();
 
         createPages(story.element, 2, ['cover', 'page-1']);
-
-        return story.layoutCallback().then(() => {
-          expect(story.backgroundAudioEl_).to.exist;
-          expect(story.backgroundAudioEl_.src).to.equal(src);
-          expect(registerStub).to.have.been.calledOnce;
-          expect(preloadStub).to.have.been.calledOnce;
-        });
+        story
+          .layoutCallback()
+          .then(() =>
+            story.activePage_.element
+              .signals()
+              .whenSignal(CommonSignals.LOAD_END)
+          )
+          .then(() => {
+            expect(story.backgroundAudioEl_).to.exist;
+            expect(story.backgroundAudioEl_.src).to.equal(src);
+            expect(registerStub).to.have.been.calledOnce;
+            expect(preloadStub).to.have.been.calledOnce;
+          });
       });
 
       it('should bless the media on unmute', () => {

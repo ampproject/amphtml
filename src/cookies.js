@@ -15,8 +15,15 @@
  */
 
 import {endsWith} from './string';
-import {isProxyOrigin, parseUrlDeprecated, tryDecodeUriComponent} from './url';
+import {
+  getSourceOrigin,
+  isProxyOrigin,
+  parseUrlDeprecated,
+  tryDecodeUriComponent,
+} from './url';
 import {urls} from './config';
+
+const TEST_COOKIE_NAME = '-test-amp-cookie-tmp';
 
 /**
  * Returns the value of the cookie. The cookie access is restricted and must
@@ -83,27 +90,76 @@ function tryGetDocumentCookieNoInline(win) {
  *     - highestAvailableDomain: If true, set the cookie at the widest domain
  *       scope allowed by the browser. E.g. on example.com if we are currently
  *       on www.example.com.
- *     - domain: Explicit domain to set.
+ *     - domain: Explicit domain to set. domain overrides HigestAvailableDomain
  *     - allowOnProxyOrigin: Allow setting a cookie on the AMP Cache.
  */
 export function setCookie(win, name, value, expirationTime, opt_options) {
   checkOriginForSettingCookie(win, opt_options, name);
-  if (opt_options && opt_options.highestAvailableDomain) {
+  let domain = undefined;
+  // Respect explicitly set domain over higestAvailabeDomain
+  if (opt_options && opt_options.domain) {
+    domain = opt_options.domain;
+  } else if (opt_options && opt_options.highestAvailableDomain) {
+    domain = getHighestAvailableDomain(win);
+  }
+  trySetCookie(win, name, value, expirationTime, domain);
+}
+
+/**
+ * Attemp to find the HighestAvailableDomain on
+ * @param {!Window} win
+ */
+export function getHighestAvailableDomain(win) {
+  // <meta name='amp-cookie-scope'>. Need to respect the meta first.
+
+  // Note: The same logic applies to shadow docs. Where all shadow docs are
+  // considered to be in the same origin. And only the <meta> from
+  // shell will be respected. (Header from shadow doc will be removed)
+  const metaTag =
+    win.document.head &&
+    win.document.head.querySelector("meta[name='amp-cookie-scope']");
+
+  if (metaTag) {
+    // The content value could be an empty string. Return null instead
+    const cookieScope = metaTag.getAttribute('content') || '';
+    // Verify the validness of the amp-cookie-scope meta value
+    const sourceOrigin = getSourceOrigin(win.location.href);
+    // Verify the meta tag content value is valid
+    if (sourceOrigin.endsWith('.' + cookieScope)) {
+      return cookieScope;
+    } else {
+      // When the amp-cookie-scope value is invalid, fallback to the exact origin
+      // the document is contained in.
+      // sourceOrigin in the format of 'https://xxx or http://xxx'
+      return sourceOrigin.split('://')[1];
+    }
+  }
+
+  if (!isProxyOrigin(win.location.href)) {
     const parts = win.location.hostname.split('.');
     let domain = parts[parts.length - 1];
+    const testCookieName = getTempCookieName(win);
     for (let i = parts.length - 2; i >= 0; i--) {
       domain = parts[i] + '.' + domain;
-      trySetCookie(win, name, value, expirationTime, domain);
-      if (getCookie(win, name) == value) {
-        return;
+      // Try set a cookie for testing only, expire after 1 sec
+      trySetCookie(win, testCookieName, 'delete', Date.now() + 1000, domain);
+      if (getCookie(win, testCookieName) == 'delete') {
+        // Remove the cookie for testing
+        trySetCookie(win, testCookieName, 'delete', Date.now() - 1000, domain);
+        return domain;
       }
     }
   }
-  let domain = undefined;
-  if (opt_options && opt_options.domain) {
-    domain = opt_options.domain;
-  }
-  trySetCookie(win, name, value, expirationTime, domain);
+
+  // Proxy origin w/o <meta name='amp-cookie-scope>
+  // We cannot calculate the etld+1 without the public suffix list.
+  // Return null instead.
+  // Note: This should not affect cookie writing because we don't allow writing
+  // cookie to highestAvailableDomain on proxy origin
+  // In the case of link decoration on proxy origin,
+  // we expect the correct meta tag to be
+  // set by publisher or cache order for AMP runtime to find all subdomains.
+  return null;
 }
 
 /**
@@ -118,6 +174,7 @@ export function setCookie(win, name, value, expirationTime, opt_options) {
 function trySetCookie(win, name, value, expirationTime, domain) {
   // We do not allow setting cookies on the domain that contains both
   // the cdn. and www. hosts.
+  // Note: we need to allow cdn.ampproject.org in order to optin to experiments
   if (domain == 'ampproject.org') {
     // Actively delete them.
     value = 'delete';
@@ -150,8 +207,15 @@ function trySetCookie(win, name, value, expirationTime, domain) {
  */
 function checkOriginForSettingCookie(win, options, name) {
   if (options && options.allowOnProxyOrigin) {
+    if (options.highestAvailableDomain) {
+      throw new Error(
+        'Could not support higestAvailable Domain on proxy origin, ' +
+          'specify domain explicitly'
+      );
+    }
     return;
   }
+
   if (isProxyOrigin(win.location.href)) {
     throw new Error(
       'Should never attempt to set cookie on proxy origin: ' + name
@@ -167,4 +231,19 @@ function checkOriginForSettingCookie(win, options, name) {
         name
     );
   }
+}
+
+/**
+ * Return a temporary cookie name for testing only
+ * @param {!Window} win
+ * @return {string}
+ */
+function getTempCookieName(win) {
+  let testCookieName = TEST_COOKIE_NAME;
+  const counter = 0;
+  while (getCookie(win, testCookieName)) {
+    // test cookie name conflict, append counter to test cookie name
+    testCookieName = TEST_COOKIE_NAME + counter;
+  }
+  return testCookieName;
 }

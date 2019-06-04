@@ -28,7 +28,7 @@ import {
 } from './utils';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
-import {closest} from '../../../src/dom';
+import {closest, isAmpElement} from '../../../src/dom';
 import {dev} from '../../../src/log';
 import {getState} from '../../../src/history';
 import {htmlFor} from '../../../src/static-template';
@@ -38,6 +38,9 @@ import {resetStyles, setImportantStyles, toggle} from '../../../src/style';
 /** @const {number} */
 const TOGGLE_THRESHOLD_PX = 50;
 
+/** @const {string} */
+const DARK_THEME_CLASS = 'i-amphtml-story-page-attachment-theme-dark';
+
 /**
  * @enum {number}
  */
@@ -46,6 +49,14 @@ const AttachmentState = {
   DRAGGING_TO_CLOSE: 1,
   DRAGGING_TO_OPEN: 2,
   OPEN: 3,
+};
+
+/**
+ * @enum {string}
+ */
+const AttachmentTheme = {
+  LIGHT: 'light', // default
+  DARK: 'dark',
 };
 
 /**
@@ -84,6 +95,9 @@ export class AmpStoryPageAttachment extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
+
+    /** @private {!Array<!Element>} AMP components within the attachment. */
+    this.ampComponents_ = [];
 
     /** @private {?Element} */
     this.containerEl_ = null;
@@ -141,6 +155,12 @@ export class AmpStoryPageAttachment extends AMP.BaseElement {
       ).textContent = this.element.getAttribute('data-title');
     }
 
+    const theme = this.element.getAttribute('theme');
+    if (theme && AttachmentTheme.DARK === theme.toLowerCase()) {
+      this.headerEl_.classList.add(DARK_THEME_CLASS);
+      this.element.classList.add(DARK_THEME_CLASS);
+    }
+
     createShadowRootWithStyle(headerShadowRootEl, this.headerEl_, CSS);
     templateEl.insertBefore(headerShadowRootEl, templateEl.firstChild);
 
@@ -163,8 +183,26 @@ export class AmpStoryPageAttachment extends AMP.BaseElement {
     // actually need it.
     toggle(this.containerEl_, false);
     toggle(this.element, true);
+  }
 
+  /** @override */
+  layoutCallback() {
     this.initializeListeners_();
+
+    const walker = this.win.document.createTreeWalker(
+      this.element,
+      NodeFilter.SHOW_ELEMENT,
+      null /** filter */,
+      false /** entityReferenceExpansion */
+    );
+    while (walker.nextNode()) {
+      const el = dev().assertElement(walker.currentNode);
+      if (isAmpElement(el)) {
+        this.ampComponents_.push(el);
+        this.setAsOwner(el);
+      }
+    }
+    return Promise.resolve();
   }
 
   /**
@@ -482,6 +520,10 @@ export class AmpStoryPageAttachment extends AMP.BaseElement {
 
       this.element.classList.add('i-amphtml-story-page-attachment-open');
       toggle(dev().assertElement(this.containerEl_), true);
+    }).then(() => {
+      this.scheduleLayout(this.ampComponents_);
+      this.scheduleResume(this.ampComponents_);
+      this.updateInViewport(this.ampComponents_, true);
     });
 
     const currentHistoryState = /** @type {!Object} */ (getState(
@@ -540,6 +582,9 @@ export class AmpStoryPageAttachment extends AMP.BaseElement {
         () => toggle(dev().assertElement(this.containerEl_), false),
         250
       );
+    }).then(() => {
+      this.schedulePause(this.ampComponents_);
+      this.updateInViewport(this.ampComponents_, false);
     });
 
     setHistoryState(this.win, HistoryState.ATTACHMENT_PAGE_ID, null);

@@ -341,8 +341,8 @@ export class AmpStory extends AMP.BaseElement {
     /** @private @const {!../../../src/service/platform-impl.Platform} */
     this.platform_ = Services.platformFor(this.win);
 
-    /** @private @const {!../../../src/service/document-state.DocumentState} */
-    this.documentState_ = Services.documentStateFor(this.win);
+    /** @private @const {!../../../src/service/viewer-impl.Viewer} */
+    this.viewer_ = Services.viewerForDoc(this.element);
 
     /**
      * Store the current paused state, to make sure the story does not play on
@@ -533,10 +533,10 @@ export class AmpStory extends AMP.BaseElement {
     // ../../../extensions/amp-animation/0.1/web-animations.js
     this.mutateElement(() => {
       styleEl.textContent = styleEl.textContent
-        .replace(/([\d.]+)vh/gim, 'calc($1 * var(--i-amphtml-story-vh))')
-        .replace(/([\d.]+)vw/gim, 'calc($1 * var(--i-amphtml-story-vw))')
-        .replace(/([\d.]+)vmin/gim, 'calc($1 * var(--i-amphtml-story-vmin))')
-        .replace(/([\d.]+)vmax/gim, 'calc($1 * var(--i-amphtml-story-vmax))');
+        .replace(/([\d.]+)vh/gim, 'calc($1 * var(--story-page-vh))')
+        .replace(/([\d.]+)vw/gim, 'calc($1 * var(--story-page-vw))')
+        .replace(/([\d.]+)vmin/gim, 'calc($1 * var(--story-page-vmin))')
+        .replace(/([\d.]+)vmax/gim, 'calc($1 * var(--story-page-vmax))');
     });
   }
 
@@ -584,10 +584,10 @@ export class AmpStory extends AMP.BaseElement {
         mutate: state => {
           this.win.document.documentElement.setAttribute(
             'style',
-            `--i-amphtml-story-vh: ${px(state.vh)};` +
-              `--i-amphtml-story-vw: ${px(state.vw)};` +
-              `--i-amphtml-story-vmin: ${px(state.vmin)};` +
-              `--i-amphtml-story-vmax: ${px(state.vmax)};`
+            `--story-page-vh: ${px(state.vh)};` +
+              `--story-page-vw: ${px(state.vw)};` +
+              `--story-page-vmin: ${px(state.vmin)};` +
+              `--story-page-vmax: ${px(state.vmax)};`
           );
         },
       },
@@ -751,9 +751,7 @@ export class AmpStory extends AMP.BaseElement {
       }
     });
 
-    // TODO(#16795): Remove once the runtime triggers pause/resume callbacks
-    // on document visibility change (eg: user switches tab).
-    this.documentState_.onVisibilityChanged(() => this.onVisibilityChanged_());
+    this.viewer_.onVisibilityChanged(() => this.onVisibilityChanged_());
 
     this.getViewport().onResize(debounce(this.win, () => this.onResize(), 300));
     this.installGestureRecognizers_();
@@ -767,11 +765,9 @@ export class AmpStory extends AMP.BaseElement {
     // If the story is within a viewer that enabled the swipe capability, this
     // disables the navigation education overlay on the X axis to enable the
     // swipe to the next story feature.
-    const viewerService = Services.viewerForDoc(this.element);
-    const swipeRecognizer =
-      viewerService && viewerService.hasCapability('swipe')
-        ? SwipeYRecognizer
-        : SwipeXYRecognizer;
+    const swipeRecognizer = this.viewer_.hasCapability('swipe')
+      ? SwipeYRecognizer
+      : SwipeXYRecognizer;
 
     // Shows "tap to navigate" hint when swiping.
     gestures.onGesture(swipeRecognizer, gesture => {
@@ -956,7 +952,7 @@ export class AmpStory extends AMP.BaseElement {
         // Preloads and prerenders the share menu.
         this.shareMenu_.build();
 
-        const infoDialog = Services.viewerForDoc(this.element).isEmbedded()
+        const infoDialog = this.viewer_.isEmbedded()
           ? new InfoDialog(this.win, this.element)
           : null;
         if (infoDialog) {
@@ -976,7 +972,7 @@ export class AmpStory extends AMP.BaseElement {
     // Story is being prerendered: resolve the layoutCallback when the first
     // page is built. Other pages will only build if the document becomes
     // visible.
-    if (!Services.viewerForDoc(this.element).hasBeenVisible()) {
+    if (!this.viewer_.hasBeenVisible()) {
       return whenUpgradedToCustomElement(firstPageEl).then(() =>
         firstPageEl.whenBuilt()
       );
@@ -1052,7 +1048,9 @@ export class AmpStory extends AMP.BaseElement {
         : [this.pages_[0]];
 
     const storyLoadPromise = Promise.all(
-      pagesToWaitFor.filter(page => !!page).map(page => page.whenLoaded())
+      pagesToWaitFor
+        .filter(page => !!page)
+        .map(page => page.element.signals().whenSignal(CommonSignals.LOAD_END))
     );
 
     return this.timer_
@@ -1205,7 +1203,6 @@ export class AmpStory extends AMP.BaseElement {
     );
 
     return Promise.all(pageImplPromises).then(pages => {
-      this.storeService_.dispatch(Action.SET_PAGES_COUNT, pages.length);
       this.pages_ = pages;
       if (isExperimentOn(this.win, 'amp-story-branching')) {
         this.storeService_.dispatch(Action.ADD_TO_ACTIONS_WHITELIST, [
@@ -1709,9 +1706,7 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   onVisibilityChanged_() {
-    this.documentState_.isHidden()
-      ? this.pauseCallback()
-      : this.resumeCallback();
+    this.viewer_.isVisible() ? this.resumeCallback() : this.pauseCallback();
   }
 
   /**
@@ -2214,8 +2209,9 @@ export class AmpStory extends AMP.BaseElement {
     // Once the media pool is ready, registers and preloads the background
     // audio, and then gets the swapped element from the DOM to mute/unmute/play
     // it programmatically later.
-    this.activePage_
-      .whenLoaded()
+    this.activePage_.element
+      .signals()
+      .whenSignal(CommonSignals.LOAD_END)
       .then(() => {
         backgroundAudioEl = /** @type {!HTMLMediaElement} */ (backgroundAudioEl);
         this.mediaPool_.register(backgroundAudioEl);
@@ -2591,8 +2587,6 @@ export class AmpStory extends AMP.BaseElement {
     if (page.isAd()) {
       this.adPages_.push(page);
     }
-
-    this.storeService_.dispatch(Action.SET_PAGES_COUNT, this.getPageCount());
   }
 
   /**

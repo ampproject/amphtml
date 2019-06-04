@@ -103,8 +103,8 @@ export let InteractiveComponentDef;
  *    consentId: ?string,
  *    currentPageId: string,
  *    currentPageIndex: number,
- *    pagesCount: number,
  *    pageIds: !Array<string>,
+ *    newPageAvailableId: string,
  * }}
  */
 export let State;
@@ -147,9 +147,9 @@ export const StateProperty = {
   CONSENT_ID: 'consentId',
   CURRENT_PAGE_ID: 'currentPageId',
   CURRENT_PAGE_INDEX: 'currentPageIndex',
-  PAGES_COUNT: 'pagesCount',
   ADVANCEMENT_MODE: 'advancementMode',
   PAGE_IDS: 'pageIds',
+  NEW_PAGE_AVAILABLE_ID: 'newPageAvailableId',
 };
 
 /** @private @const @enum {string} */
@@ -158,7 +158,6 @@ export const Action = {
   ADD_TO_PAGE_IDS: 'addToPageIds',
   CHANGE_PAGE: 'setCurrentPageId',
   SET_CONSENT_ID: 'setConsentId',
-  SET_PAGES_COUNT: 'setPagesCount',
   SET_ADVANCEMENT_MODE: 'setAdvancementMode',
   TOGGLE_ACCESS: 'toggleAccess',
   TOGGLE_AD: 'toggleAd',
@@ -178,6 +177,7 @@ export const Action = {
   TOGGLE_SYSTEM_UI_IS_VISIBLE: 'toggleSystemUiIsVisible',
   TOGGLE_UI: 'toggleUi',
   TOGGLE_VIEWPORT_WARNING: 'toggleViewportWarning',
+  ADD_NEW_PAGE_ID: 'addNewPageId',
 };
 
 /**
@@ -205,6 +205,10 @@ const stateComparisonFunctions = {
  */
 const actions = (state, action, data) => {
   switch (action) {
+    case Action.ADD_NEW_PAGE_ID:
+      return /** @type {!State} */ (Object.assign({}, state, {
+        [StateProperty.NEW_PAGE_AVAILABLE_ID]: data,
+      }));
     case Action.ADD_TO_ACTIONS_WHITELIST:
       const newActionsWhitelist = [].concat(
         state[StateProperty.ACTIONS_WHITELIST],
@@ -330,10 +334,6 @@ const actions = (state, action, data) => {
       return /** @type {!State} */ (Object.assign({}, state, {
         [StateProperty.CURRENT_PAGE_ID]: data.id,
         [StateProperty.CURRENT_PAGE_INDEX]: data.index,
-      }));
-    case Action.SET_PAGES_COUNT:
-      return /** @type {!State} */ (Object.assign({}, state, {
-        [StateProperty.PAGES_COUNT]: data,
       }));
     case Action.SET_ADVANCEMENT_MODE:
       return /** @type {!State} */ (Object.assign({}, state, {
@@ -467,10 +467,9 @@ export class AmpStoryStoreService {
       [StateProperty.CONSENT_ID]: null,
       [StateProperty.CURRENT_PAGE_ID]: '',
       [StateProperty.CURRENT_PAGE_INDEX]: 0,
-      // TODO(#22398): replace usage of PAGES_COUNT with PAGE_IDS.length.
-      [StateProperty.PAGES_COUNT]: 0,
       [StateProperty.ADVANCEMENT_MODE]: '',
       [StateProperty.PAGE_IDS]: [],
+      [StateProperty.NEW_PAGE_AVAILABLE_ID]: '',
     });
   }
 

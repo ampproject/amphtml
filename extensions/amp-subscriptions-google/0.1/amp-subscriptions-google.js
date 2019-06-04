@@ -313,6 +313,11 @@ export class GoogleSubscriptionsPlatform {
     return false;
   }
 
+  /** @override */
+  pingbackReturnsAllEntitlements() {
+    return false;
+  }
+
   /**
    * Performs the pingback to the subscription platform
    */
