@@ -6,6 +6,7 @@ formats:
   - dynamic-content
 teaser:
   text: Request the user's precise location.
+experimental: true
 ---
 <!--
 Copyright 2019 The AMP HTML Authors. All Rights Reserved.

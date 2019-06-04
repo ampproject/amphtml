@@ -4,6 +4,7 @@ formats:
   - websites
 teaser:
   text: Provides zooming and panning for arbitrary content.
+experimental: true
 ---
 <!---
 Copyright 2018 The AMP HTML Authors. All Rights Reserved.
@@ -30,7 +31,7 @@ Provides zooming and panning for arbitrary content.
 <table>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
-    <td><div><a href="https://www.ampproject.org/docs/reference/experimental.html">Experimental</a></td>
+    <td><div><a href="https://amp.dev/documentation/guides-and-tutorials/learn/experimental">Experimental</a></td>
   </tr>
   <tr>
     <td><strong>Required Script</strong></td>
