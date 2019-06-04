@@ -30,10 +30,12 @@ const ORIGINAL_ALLOW_LIST = {
 };
 
 describes.realWin('amp-experiment attribute-allow-list', {}, () => {
-  function getAllowedAttributeMutationEntryParams(opt_attributeName, opt_value) {
-
+  function getAllowedAttributeMutationEntryParams(
+    opt_attributeName,
+    opt_value
+  ) {
     const element = {
-      tagName: 'DIV'
+      tagName: 'DIV',
     };
 
     const params = [];
