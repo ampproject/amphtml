@@ -715,6 +715,14 @@ An `amp-story-grid-layer` can contain any of the following elements:
     </td>
   </tr>
   <tr>
+    <td>Embedded Components</td>
+    <td>
+      <ul>
+        <li><code>&lt;amp-twitter></code></li>
+      </ul>
+    </td>
+  </tr>
+  <tr>
     <td>Other</td>
     <td>
       <ul>
@@ -765,16 +773,32 @@ Example:
 
 We support inline links `<a>` as a descendant of `amp-story-grid-layer`. Whenever a link is tapped a tooltip will be shown - deferring the corresponding action until the user taps again in the tooltip.
 
-#### Customizing tooltip for links
+#### Interactive components
 
-You can customize the contents of the tooltip displayed on top of a user interactive element by specifying the following attributes. If they are not specified, a fallback value will be provided automatically.
+We support embedding components such as `<amp-twitter>` inside `amp-story-grid-layer`. By default they are not interactive in the story (i.e. tapping on them will not have any effect), but by using the `interactive` attribute, you can make them be fully interactive.
 
+When clicked, the component will be shown in a lightbox-like mode. Here, a user can choose to further interact with the embed, or close the lightbox and go back to the story.
+
+Example:
 <figure class="centered-fig">
   <span class="special-char">Example:</span>
   <amp-anim alt="Embedded component example" layout="flex-item" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/amp-story-tooltip.gif" width="300" height="553">
   <noscript><img width="300" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/amp-story-tooltip.gif" /></noscript>
   </amp-anim>
 </figure>
+
+```html
+<amp-twitter width="100"
+  height="100"
+  layout="responsive"
+  data-tweetid="1102562523524579328"
+  interactive>
+</amp-twitter>
+```
+
+#### Customizing tooltip for links or interactive components
+
+You can customize the contents of the tooltip displayed on top of a user interactive element by specifying the following attributes. If they are not specified, a fallback value will be provided automatically.
 
 ##### `data-tooltip-icon`
 
@@ -1457,7 +1481,8 @@ The `<amp-story-bookend>` must have a `src` attribute pointing to the JSON confi
 The following are other components usable in AMP stories that require some story-specific caveats.
 
 - [amp-consent](https://www.ampproject.org/docs/reference/components/amp-consent#prompt-ui-for-stories)
-- [amp-sidebar](https://www.ampproject.org/docs/reference/components/amp-sidebar)
+- [amp-sidebar](https://www.ampproject.org/docs/reference/components/amp-sidebar#sidebar-for-stories)
+- [amp-twitter](https://amp.dev/documentation/components/amp-twitter)
 
 For more generally usable components see the [list of allowed children](https://www.ampproject.org/docs/reference/components/amp-story#children).
 
