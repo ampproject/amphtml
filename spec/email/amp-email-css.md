@@ -136,7 +136,7 @@ Warning: [Attribute selector](https://developer.mozilla.org/en-US/docs/Web/CSS/A
 *   [`cursor`](https://developer.mozilla.org/en-US/docs/Web/CSS/cursor)
 *   [`direction`](https://developer.mozilla.org/en-US/docs/Web/CSS/direction)
 *   [`display`](https://developer.mozilla.org/en-US/docs/Web/CSS/display)
-*   [`elevation`](https://developer.mozilla.org/en-US/docs/Web/CSS/elevation)
+*   `elevation`
 *   [`empty-cells`](https://developer.mozilla.org/en-US/docs/Web/CSS/empty-cells)
 *   [`flex`](https://developer.mozilla.org/en-US/docs/Web/CSS/flex)
 *   [`flex-basis`](https://developer.mozilla.org/en-US/docs/Web/CSS/flex-basis)
@@ -181,20 +181,12 @@ Warning: [Attribute selector](https://developer.mozilla.org/en-US/docs/Web/CSS/A
 *   [`height`](https://developer.mozilla.org/en-US/docs/Web/CSS/height)
 *   [`hyphens`](https://developer.mozilla.org/en-US/docs/Web/CSS/hyphens)
 *   [`image-orientation`](https://developer.mozilla.org/en-US/docs/Web/CSS/image-orientation)
-*   [`image-resolution`](https://developer.mozilla.org/en-US/docs/Web/CSS/image-resolution)
-*   [`ime-mode`](https://developer.mozilla.org/en-US/docs/Web/CSS/ime-mode)
+*   `image-resolution`
 *   [`inline-size`](https://developer.mozilla.org/en-US/docs/Web/CSS/inline-size)
 *   [`isolation`](https://developer.mozilla.org/en-US/docs/Web/CSS/isolation)
 *   [`justify-content`](https://developer.mozilla.org/en-US/docs/Web/CSS/justify-content)
 *   [`justify-items`](https://developer.mozilla.org/en-US/docs/Web/CSS/justify-items)
 *   [`justify-self`](https://developer.mozilla.org/en-US/docs/Web/CSS/justify-self)
-*   [`layout-flow`](https://developer.mozilla.org/en-US/docs/Web/CSS/layout-flow)
-*   [`layout-grid`](https://developer.mozilla.org/en-US/docs/Web/CSS/layout-grid)
-*   [`layout-grid-char`](https://developer.mozilla.org/en-US/docs/Web/CSS/layout-grid-char)
-*   [`layout-grid-char-spacing`](https://developer.mozilla.org/en-US/docs/Web/CSS/layout-grid-char-spacing)
-*   [`layout-grid-line`](https://developer.mozilla.org/en-US/docs/Web/CSS/layout-grid-line)
-*   [`layout-grid-mode`](https://developer.mozilla.org/en-US/docs/Web/CSS/layout-grid-mode)
-*   [`layout-grid-type`](https://developer.mozilla.org/en-US/docs/Web/CSS/layout-grid-type)
 *   [`left`](https://developer.mozilla.org/en-US/docs/Web/CSS/left)
 *   [`letter-spacing`](https://developer.mozilla.org/en-US/docs/Web/CSS/letter-spacing)
 *   [`line-break`](https://developer.mozilla.org/en-US/docs/Web/CSS/line-break)
@@ -207,7 +199,6 @@ Warning: [Attribute selector](https://developer.mozilla.org/en-US/docs/Web/CSS/A
 *   [`margin-left`](https://developer.mozilla.org/en-US/docs/Web/CSS/margin-left)
 *   [`margin-right`](https://developer.mozilla.org/en-US/docs/Web/CSS/margin-right)
 *   [`margin-top`](https://developer.mozilla.org/en-US/docs/Web/CSS/margin-top)
-*   [`marker-offset`](https://developer.mozilla.org/en-US/docs/Web/CSS/marker-offset)
 *   [`max-height`](https://developer.mozilla.org/en-US/docs/Web/CSS/max-height)
 *   [`max-width`](https://developer.mozilla.org/en-US/docs/Web/CSS/max-width)
 *   [`min-height`](https://developer.mozilla.org/en-US/docs/Web/CSS/min-height)
@@ -224,8 +215,8 @@ Warning: [Attribute selector](https://developer.mozilla.org/en-US/docs/Web/CSS/A
 *   [`outline-style`](https://developer.mozilla.org/en-US/docs/Web/CSS/outline-style)
 *   [`outline-width`](https://developer.mozilla.org/en-US/docs/Web/CSS/outline-width)
 *   [`overflow`](https://developer.mozilla.org/en-US/docs/Web/CSS/overflow)
-*   [`overflow-X`](https://developer.mozilla.org/en-US/docs/Web/CSS/overflow-X)
-*   [`overflow-Y`](https://developer.mozilla.org/en-US/docs/Web/CSS/overflow-Y)
+*   [`overflow-x`](https://developer.mozilla.org/en-US/docs/Web/CSS/overflow-x)
+*   [`overflow-y`](https://developer.mozilla.org/en-US/docs/Web/CSS/overflow-y)
 *   [`overflow-wrap`](https://developer.mozilla.org/en-US/docs/Web/CSS/overflow-wrap)
 *   [`overflow-x`](https://developer.mozilla.org/en-US/docs/Web/CSS/overflow-x)
 *   [`overflow-y`](https://developer.mozilla.org/en-US/docs/Web/CSS/overflow-y)
@@ -234,32 +225,28 @@ Warning: [Attribute selector](https://developer.mozilla.org/en-US/docs/Web/CSS/A
 *   [`padding-left`](https://developer.mozilla.org/en-US/docs/Web/CSS/padding-left)
 *   [`padding-right`](https://developer.mozilla.org/en-US/docs/Web/CSS/padding-right)
 *   [`padding-top`](https://developer.mozilla.org/en-US/docs/Web/CSS/padding-top)
-*   [`page-break-after`](https://developer.mozilla.org/en-US/docs/Web/CSS/page-break-after)
-*   [`page-break-before`](https://developer.mozilla.org/en-US/docs/Web/CSS/page-break-before)
-*   [`page-break-inside`](https://developer.mozilla.org/en-US/docs/Web/CSS/page-break-inside)
-*   [`pause`](https://developer.mozilla.org/en-US/docs/Web/CSS/pause)
-*   [`pause-after`](https://developer.mozilla.org/en-US/docs/Web/CSS/pause-after)
-*   [`pause-before`](https://developer.mozilla.org/en-US/docs/Web/CSS/pause-before)
+*   `pause`
+*   `pause-after`
+*   `pause-before`
 *   [`perspective`](https://developer.mozilla.org/en-US/docs/Web/CSS/perspective)
 *   [`perspective-origin`](https://developer.mozilla.org/en-US/docs/Web/CSS/perspective-origin)
-*   [`pitch`](https://developer.mozilla.org/en-US/docs/Web/CSS/pitch)
-*   [`pitch-range`](https://developer.mozilla.org/en-US/docs/Web/CSS/pitch-range)
+*   `pitch`
+*   `pitch-range`
 *   [`place-items`](https://developer.mozilla.org/en-US/docs/Web/CSS/place-items)
 *   [`position`](https://developer.mozilla.org/en-US/docs/Web/CSS/position)
 *   [`quotes`](https://developer.mozilla.org/en-US/docs/Web/CSS/quotes)
 *   [`resize`](https://developer.mozilla.org/en-US/docs/Web/CSS/resize)
-*   [`richness`](https://developer.mozilla.org/en-US/docs/Web/CSS/richness)
+*   `richness`
 *   [`right`](https://developer.mozilla.org/en-US/docs/Web/CSS/right)
-*   [`speak`](https://developer.mozilla.org/en-US/docs/Web/CSS/speak)
-*   [`speak-header`](https://developer.mozilla.org/en-US/docs/Web/CSS/speak-header)
-*   [`speak-numeral`](https://developer.mozilla.org/en-US/docs/Web/CSS/speak-numeral)
-*   [`speak-punctuation`](https://developer.mozilla.org/en-US/docs/Web/CSS/speak-punctuation)
-*   [`speech-rate`](https://developer.mozilla.org/en-US/docs/Web/CSS/speech-rate)
-*   [`stress`](https://developer.mozilla.org/en-US/docs/Web/CSS/stress)
+*   `speak`
+*   `speak-header`
+*   `speak-numeral`
+*   `speak-punctuation`
+*   `speech-rate`
+*   `stress`
 *   [`table-layout`](https://developer.mozilla.org/en-US/docs/Web/CSS/table-layout)
 *   [`text-align`](https://developer.mozilla.org/en-US/docs/Web/CSS/text-align)
 *   [`text-align-last`](https://developer.mozilla.org/en-US/docs/Web/CSS/text-align-last)
-*   [`text-autospace`](https://developer.mozilla.org/en-US/docs/Web/CSS/text-autospace)
 *   [`text-combine-upright`](https://developer.mozilla.org/en-US/docs/Web/CSS/text-combine-upright)
 *   [`text-decoration`](https://developer.mozilla.org/en-US/docs/Web/CSS/text-decoration)
 *   [`text-decoration-color`](https://developer.mozilla.org/en-US/docs/Web/CSS/text-decoration-color)
@@ -272,7 +259,6 @@ Warning: [Attribute selector](https://developer.mozilla.org/en-US/docs/Web/CSS/A
 *   [`text-emphasis-style`](https://developer.mozilla.org/en-US/docs/Web/CSS/text-emphasis-style)
 *   [`text-indent`](https://developer.mozilla.org/en-US/docs/Web/CSS/text-indent)
 *   [`text-justify`](https://developer.mozilla.org/en-US/docs/Web/CSS/text-justify)
-*   [`text-kashida-space`](https://developer.mozilla.org/en-US/docs/Web/CSS/text-kashida-space)
 *   [`text-orientation`](https://developer.mozilla.org/en-US/docs/Web/CSS/text-orientation)
 *   [`text-overflow`](https://developer.mozilla.org/en-US/docs/Web/CSS/text-overflow)
 *   [`text-shadow`](https://developer.mozilla.org/en-US/docs/Web/CSS/text-shadow)
@@ -286,7 +272,7 @@ Warning: [Attribute selector](https://developer.mozilla.org/en-US/docs/Web/CSS/A
 *   [`unicode-bidi`](https://developer.mozilla.org/en-US/docs/Web/CSS/unicode-bidi)
 *   [`vertical-align`](https://developer.mozilla.org/en-US/docs/Web/CSS/vertical-align)
 *   [`visibility`](https://developer.mozilla.org/en-US/docs/Web/CSS/visibility)
-*   [`voice-family`](https://developer.mozilla.org/en-US/docs/Web/CSS/voice-family)
+*   `voice-family`
 *   [`white-space`](https://developer.mozilla.org/en-US/docs/Web/CSS/white-space)
 *   [`width`](https://developer.mozilla.org/en-US/docs/Web/CSS/width)
 *   [`word-break`](https://developer.mozilla.org/en-US/docs/Web/CSS/word-break)
@@ -294,7 +280,6 @@ Warning: [Attribute selector](https://developer.mozilla.org/en-US/docs/Web/CSS/A
 *   [`word-wrap`](https://developer.mozilla.org/en-US/docs/Web/CSS/word-wrap)
 *   [`writing-mode`](https://developer.mozilla.org/en-US/docs/Web/CSS/writing-mode)
 *   [`z-index`](https://developer.mozilla.org/en-US/docs/Web/CSS/z-index)
-*   [`zoom`](https://developer.mozilla.org/en-US/docs/Web/CSS/zoom)
 
 ### Additional restrictions
 
@@ -314,14 +299,14 @@ List of [media features](https://developer.mozilla.org/en-US/docs/Web/CSS/Media_
 supported for conditionally applying rules via `@media` queries.
 
 *   [`device-width`](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/device-width)
+      *   `max-device-width`
+      *   `min-device-width`
 *   [`hover`](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/hover)
-*   [`max-device-width`](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/max-device-width)
-*   [`max-resolution`](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/max-resolution)
-*   [`max-width`](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/max-width)
-*   [`min-device-width`](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/min-device-width)
-*   [`min-resolution`](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/min-resolution)
-*   [`min-width`](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/min-width)
 *   [`orientation`](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/orientation)
 *   [`pointer`](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/pointer)
 *   [`resolution`](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/resolution)
+      *   `max-resolution`
+      *   `min-resolution`
 *   [`width`](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/width)
+      *   `max-width`
+      *   `min-width`
