@@ -25,7 +25,7 @@ limitations under the License.
 *   [ID selector](https://developer.mozilla.org/en-US/docs/Web/CSS/ID_selectors) `#idname`
 *   [Universal selector](https://developer.mozilla.org/en-US/docs/Web/CSS/Universal_selectors) `*`
 
-Warning: [Attribute selectors](https://developer.mozilla.org/en-US/docs/Web/CSS/Attribute_selectors)
+Warning: [Attribute selector](https://developer.mozilla.org/en-US/docs/Web/CSS/Attribute_selectors)
 `[attr=value]` are not currently supported by all email providers.
 
 ### Combinators
