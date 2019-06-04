@@ -400,20 +400,38 @@ export class ViewportBindingIosEmbedShadowRoot_ {
     // Don't use scrollHeight, since it returns `MAX(viewport_height,
     // document_height)` (we only want the latter), and it doesn't account
     // for margins.
-    const bodyWrapper = this.wrapper_;
-    const rect = bodyWrapper./*OK*/ getBoundingClientRect();
-    const style = computedStyle(this.win, bodyWrapper);
+    const content = this.wrapper_;
+    const rect = content./*OK*/ getBoundingClientRect();
+
     // The Y-position of any element can be offset by the vertical margin
     // of its first child, and this is _not_ accounted for in `rect.height`.
     // This "top gap" causes smaller than expected contentHeight, so calculate
     // and add it manually. Note that the "top gap" includes any padding-top
-    // on ancestor elements and the scroller's border-top. The "bottom gap"
-    // remains unaddressed.
+    // on ancestor elements and the scroller's border-top.
     const topGapPlusPaddingAndBorder = rect.top + this.getScrollTop();
+
+    let bottomGap = 0;
+    if (isExperimentOn(this.win, 'bottom-margin-in-content-height')) {
+      let n = this.win.document.body.lastElementChild;
+      while (n) {
+        const r = n./*OK*/ getBoundingClientRect();
+        if (r.height > 0) {
+          break;
+        } else {
+          n = n.previousElementSibling;
+        }
+      }
+      if (n) {
+        bottomGap = parseInt(computedStyle(this.win, n).marginBottom, 10);
+      }
+    }
+
+    const style = computedStyle(this.win, content);
     return (
       rect.height +
       topGapPlusPaddingAndBorder +
       parseInt(style.marginTop, 10) +
+      bottomGap +
       parseInt(style.marginBottom, 10)
     );
   }

@@ -247,8 +247,8 @@ export class ViewportBindingIosEmbedWrapper_ {
   /** @override */
   getContentHeight() {
     // The wrapped body, not this.wrapper_ itself, will have the correct height.
-    const {body} = this.win.document;
-    const {height} = body./*OK*/ getBoundingClientRect();
+    const content = this.win.document.body;
+    const {height} = content./*OK*/ getBoundingClientRect();
 
     // Unlike viewport-binding-natural.js, there's no need to calculate the
     // "top gap" since the wrapped body accounts for the top margin of children.
@@ -261,7 +261,7 @@ export class ViewportBindingIosEmbedWrapper_ {
     // 2. Add its marginBottom to the height calculation.
     let bottomGap = 0;
     if (isExperimentOn(this.win, 'bottom-margin-in-content-height')) {
-      let n = body.lastElementChild;
+      let n = content.lastElementChild;
       while (n) {
         const r = n./*OK*/ getBoundingClientRect();
         if (r.height > 0) {
@@ -275,7 +275,7 @@ export class ViewportBindingIosEmbedWrapper_ {
       }
     }
 
-    const style = computedStyle(this.win, body);
+    const style = computedStyle(this.win, content);
     return (
       height +
       this.paddingTop_ +
