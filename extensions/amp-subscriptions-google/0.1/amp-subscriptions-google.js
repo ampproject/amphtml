@@ -398,36 +398,33 @@ export class GoogleSubscriptionsPlatform {
   /** @override */
   decorateUI(element, action, options) {
     const opts = options ? options : {};
-    /*
-     * Note: contribute doesn't have a standard button
-     * so we don't do anything here for it.
-     */
-    if (action === 'subscribe') {
-      element.textContent = '';
-      this.runtime_.attachButton(element, options, () => {});
-    }
 
-    if (
-      action === 'subscribe-smartbutton' ||
-      action === 'subscribe-smartbutton-light'
-    ) {
-      element.textContent = '';
-      opts.theme = 'light';
-      opts.lang = userAssert(
-        element.getAttribute('language'),
-        'subscribe-smartbutton must have a language attrbiute'
-      );
-      this.runtime_.attachButton(element, opts, () => {});
-    }
-
-    if (action === 'subscribe-smartbutton-dark') {
-      element.textContent = '';
-      opts.lang = opts.theme = 'dark';
-      userAssert(
-        element.getAttribute('language'),
-        'subscribe-smartbutton must have a language attrbiute'
-      );
-      this.runtime_.attachButton(element, opts, () => {});
+    switch (action) {
+      case 'subscribe':
+        element.textContent = '';
+        this.runtime_.attachButton(element, options, () => {});
+        break;
+      case 'subscribe-smartbutton':
+      case 'subscribe-smartbutton-light':
+        element.textContent = '';
+        opts.theme = 'light';
+        opts.lang = userAssert(
+          element.getAttribute('lang'),
+          'subscribe-smartbutton must have a language attrbiute'
+        );
+        this.runtime_.attachSmartButton(element, opts, () => {});
+        break;
+      case 'subscribe-smartbutton-dark':
+        element.textContent = '';
+        opts.theme = 'dark';
+        opts.lang = userAssert(
+          element.getAttribute('lang'),
+          'subscribe-smartbutton must have a language attrbiute'
+        );
+        this.runtime_.attachSmartButton(element, opts, () => {});
+        break;
+      default:
+      // do nothing
     }
   }
 }

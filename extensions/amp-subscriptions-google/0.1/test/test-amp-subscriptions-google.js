@@ -455,6 +455,48 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     expect(decorateStub).to.be.calledWith(elem);
   });
 
+  it('should attach smartbutton given to decorateUI', () => {
+    const elem = env.win.document.createElement('div');
+    const attachStub = sandbox.stub(platform.runtime_, 'attachSmartButton');
+    elem.textContent = 'some html';
+    elem.setAttribute('language', 'en');
+    platform.decorateUI(elem, 'subscribe-smartbutton');
+    console.log(elem);
+    expect(elem.textContent).to.be.equal('');
+    expect(attachStub).to.be.calledWith(elem, {lang: 'en', theme: 'light'});
+  });
+
+  it('should use light smartbutton theme', () => {
+    const elem = env.win.document.createElement('div');
+    const attachStub = sandbox.stub(platform.runtime_, 'attachSmartButton');
+    elem.textContent = 'some html';
+    elem.setAttribute('language', 'en');
+    platform.decorateUI(elem, 'subscribe-smartbutton-light');
+    expect(elem.textContent).to.be.equal('');
+    expect(attachStub).to.be.calledWith(elem, {theme: 'light', lang: 'en'});
+  });
+
+  it('should use dark smartbutton theme', () => {
+    const elem = env.win.document.createElement('div');
+    const attachStub = sandbox.stub(platform.runtime_, 'attachSmartButton');
+    elem.textContent = 'some html';
+    elem.setAttribute('language', 'en');
+    platform.decorateUI(elem, 'subscribe-smartbutton-dark');
+    expect(elem.textContent).to.be.equal('');
+    expect(attachStub).to.be.calledWith(elem, {theme: 'dark', lang: 'en'});
+  });
+
+  it('should throw if smartButton language is missing', () => {
+    //expectAsyncConsoleError(/must have a language attrbiute​​​/);
+    const elem = env.win.document.createElement('div');
+    elem.textContent = 'some html';
+    expect(() => {
+      allowConsoleError(() => {
+        platform.decorateUI(elem, 'subscribe-smartbutton');
+      });
+    }).to.throw(/language/);
+  });
+
   it('should show offers if subscribe action is delegated', () => {
     const executeStub = platform.runtime_.showOffers;
     platform.executeAction('subscribe');
