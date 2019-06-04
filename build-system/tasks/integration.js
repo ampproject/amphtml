@@ -30,17 +30,13 @@ const {
   runTestInBatches,
   startTestServer,
 } = require('./runtime-test/helpers');
+const {clean} = require('./clean');
 const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
-const {css} = require('./css');
-const {getUnitTestsToRun} = require('./runtime-test/helpers-unit');
+const {dist} = require('./dist');
 const {green, yellow, cyan, red} = require('ansi-colors');
 const {isTravisBuild} = require('../travis');
 
 function shouldNotRun() {
-  if (argv.local_changes && !getUnitTestsToRun(testConfig.unitTestPaths)) {
-    return true;
-  }
-
   if (argv.saucelabs) {
     if (!process.env.SAUCE_USERNAME) {
       throw new Error('Missing SAUCE_USERNAME Env variable');
@@ -53,20 +49,21 @@ function shouldNotRun() {
   return false;
 }
 
-function maybeBuild() {
+async function maybeBuild() {
   if (argv.nobuild) {
     return;
   }
-
-  return css();
+  argv.fortesting = true;
+  argv.compiled = true;
+  await clean();
+  await dist();
 }
 
 function setConfigOverrides(config) {
   config.singleRun = !argv.watch && !argv.w;
   config.client.mocha.grep = !!argv.grep;
   config.client.verboseLogging = !!argv.verbose || !!argv.v;
-  config.client.captureConsole =
-    !!argv.verbose || !!argv.v || !!argv.local_changes;
+  config.client.captureConsole = !!argv.verbose || !!argv.v || !!argv.files;
 
   config.browserify.configure = function(bundle) {
     bundle.on('prebundle', function() {
@@ -81,42 +78,35 @@ function setConfigOverrides(config) {
     });
   };
 
-  // config.client is available in test browser via window.parent.karma.config
+  // c.client is available in test browser via window.parent.karma.config
   config.client.amp = {
-    useCompiledJs: false, // never compiled for unit tests
+    useCompiledJs: !!argv.compiled,
     saucelabs: !!argv.saucelabs,
-    singlePass: false, // never single pass for unit tests
+    singlePass: !!argv.single_pass,
     adTypes: getAdTypes(),
     mochaTimeout: defaultConfig.client.mocha.timeout,
-    propertiesObfuscated: false, // never single pass for unit tests
+    propertiesObfuscated: !!argv.single_pass,
     testServerPort: defaultConfig.client.testServerPort,
     testOnIe: config.browsers.includes('IE'),
   };
 }
 
 function getFileConfig() {
-  const files = testConfig.commonUnitTestPaths.concat(
-    testConfig.chaiAsPromised
-  );
+  const files = testConfig.commonIntegrationTestPaths;
 
-  if (argv.saucelabs) {
-    return {'files': files.concat(testConfig.unitTestOnSaucePaths)};
+  if (argv.files) {
+    files.concat(argv.files);
+  } else {
+    files.concat(testConfig.integrationTestPaths);
   }
 
-  if (argv.local_changes) {
-    return {'files': files.concat(getUnitTestsToRun(testConfig.unitTestPaths))};
-  }
-
-  return {'files': files.concat(testConfig.unitTestPaths)};
+  return {'files': files};
 }
 
 function getReporterConfig() {
   let {reporters} = defaultConfig;
 
-  if (
-    (!isTravisBuild() && (argv.testnames || argv.local_changes)) ||
-    (argv.files && !argv.saucelabs)
-  ) {
+  if ((!isTravisBuild() && argv.testnames) || (argv.files && !argv.saucelabs)) {
     reporters = ['mocha'];
   }
 
@@ -137,10 +127,18 @@ function getTestConfig() {
   const reporters = getReporterConfig();
   const config = Object.assign({}, defaultConfig, browsers, files, reporters);
 
-  maybeSetCoverageConfig(config, 'lcov-unit.info');
+  maybeSetCoverageConfig(config, 'lcov-integration.info');
   setConfigOverrides(config);
 
   return config;
+}
+
+function runIntegrationTests(config) {
+  if (argv.saucelabs) {
+    return runTestInBatches(config);
+  }
+
+  return createKarmaServer(config);
 }
 
 function setup(config) {
@@ -148,7 +146,7 @@ function setup(config) {
   refreshKarmaWdCache();
 
   const testServer = startTestServer(config.client.testServerPort);
-  const handlerProcess = createCtrlcHandler('gulp unit');
+  const handlerProcess = createCtrlcHandler('gulp integration');
 
   return new Map()
     .set('handlerProcess', handlerProcess)
@@ -175,55 +173,31 @@ function teardown(env) {
   }
 }
 
-function runUnitTests(config) {
-  if (argv.saucelabs) {
-    return runTestInBatches(config);
-  }
-
-  return createKarmaServer(config);
-}
-
-async function unit() {
+async function integration() {
   if (shouldNotRun()) {
     return;
   }
 
   // TODO(alanorozco): Come up with a more elegant check?
   global.AMP_TESTING = true;
-  process.env.SERVE_MODE = 'default';
+  process.env.SERVE_MODE = argv.compiled ? 'compiled' : 'default';
 
-  await maybeBuild();
-  await maybePrintArgvMessages();
+  maybeBuild();
+  maybePrintArgvMessages();
 
   const config = getTestConfig();
   const env = setup(config);
 
-  const exitCode = await runUnitTests(config);
+  const exitCode = await runIntegrationTests(config);
 
   env.set('exitCode', exitCode);
   teardown(env);
 }
 
 module.exports = {
-  unit,
+  integration,
 };
 
-unit.description = 'Runs unit tests';
+integration.description = 'Runs integration tests';
 //TODO(estherkim): fill this out
-unit.flags = {
-  'local_changes': '',
-  'saucelabs': '',
-  'chrome_canary': '',
-  'chrome_flags': '',
-  'coverage': '',
-  'firefox': '',
-  'grep': '',
-  'headless': '',
-  'ie': '',
-  'nobuild': '',
-  'nohelp': '',
-  'safari': '',
-  'testnames': '',
-  'verbose': '',
-  'watch': '',
-};
+integration.flags = {};

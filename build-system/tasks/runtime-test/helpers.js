@@ -16,12 +16,9 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const deglob = require('globs-to-files');
-const findImports = require('find-imports');
 const fs = require('fs');
 const gulp = require('gulp');
 const log = require('fancy-log');
-const minimatch = require('minimatch');
 const opn = require('opn');
 const path = require('path');
 const webserver = require('gulp-webserver');
@@ -29,59 +26,19 @@ const webserver = require('gulp-webserver');
 const {
   reportTestErrored,
   reportTestFinished,
-  reportTestSkipped,
   reportTestStarted,
 } = require('../report-test-status');
 const {app} = require('../../test-server');
 const {exec} = require('../../exec');
-const {gitDiffNameOnlyMaster} = require('../../git');
 const {green, yellow, cyan, red} = require('ansi-colors');
 const {isTravisBuild} = require('../../travis');
 const {Server} = require('karma');
 
 const BATCHSIZE = 4; // Number of Sauce Lab browsers
-const EXTENSIONSCSSMAP = 'EXTENSIONS_CSS_MAP';
-const LARGE_REFACTOR_THRESHOLD = 50;
-const ROOT_DIR = path.resolve(__dirname, '../../../');
-
 const CHROMEBASE = argv.chrome_canary ? 'ChromeCanary' : 'Chrome';
 const chromeFlags = [];
-
-/**
- * Extracts a mapping from CSS files to JS files from a well known file
- * generated during `gulp css`.
- *
- * @return {!Object<string, string>}
- */
-function extractCssJsFileMap() {
-  const extensionsCssMap = fs.readFileSync(EXTENSIONSCSSMAP, 'utf8');
-  const extensionsCssMapJson = JSON.parse(extensionsCssMap);
-  const extensions = Object.keys(extensionsCssMapJson);
-  const cssJsFileMap = {};
-
-  // Adds an entry that maps a CSS file to a JS file
-  function addCssJsEntry(cssData, cssBinaryName, cssJsFileMap) {
-    const cssFilePath =
-      `extensions/${cssData['name']}/${cssData['version']}/` +
-      `${cssBinaryName}.css`;
-    const jsFilePath = `build/${cssBinaryName}-${cssData['version']}.css.js`;
-    cssJsFileMap[cssFilePath] = jsFilePath;
-  }
-
-  extensions.forEach(extension => {
-    const cssData = extensionsCssMapJson[extension];
-    if (cssData['hasCss']) {
-      addCssJsEntry(cssData, cssData['name'], cssJsFileMap);
-      if (cssData.hasOwnProperty('cssBinaries')) {
-        const cssBinaries = cssData['cssBinaries'];
-        cssBinaries.forEach(cssBinary => {
-          addCssJsEntry(cssData, cssBinary, cssJsFileMap);
-        });
-      }
-    }
-  });
-  return cssJsFileMap;
-}
+const IS_GULP_UNIT = argv._[0] === 'unit';
+const IS_GULP_INTEGRATION = argv._[0] === 'integration';
 
 /**
  * Returns an array of ad types.
@@ -123,148 +80,6 @@ function getAdTypes() {
 }
 
 /**
- * Returns the list of files imported by a JS file
- *
- * @param {string} jsFile
- * @return {!Array<string>}
- */
-function getImports(jsFile) {
-  const imports = findImports([jsFile], {
-    flatten: true,
-    packageImports: false,
-    absoluteImports: true,
-    relativeImports: true,
-  });
-  const files = [];
-  const jsFileDir = path.dirname(jsFile);
-  imports.forEach(function(file) {
-    const fullPath = path.resolve(jsFileDir, `${file}.js`);
-    if (fs.existsSync(fullPath)) {
-      const relativePath = path.relative(ROOT_DIR, fullPath);
-      files.push(relativePath);
-    }
-  });
-  return files;
-}
-
-/**
- * Retrieves the set of JS source files that import the given CSS file.
- *
- * @param {string} cssFile
- * @param {!Object<string, string>} cssJsFileMap
- * @return {!Array<string>}
- */
-function getJsFilesFor(cssFile, cssJsFileMap) {
-  const jsFiles = [];
-  if (cssJsFileMap.hasOwnProperty(cssFile)) {
-    const cssFileDir = path.dirname(cssFile);
-    const jsFilesInDir = fs.readdirSync(cssFileDir).filter(file => {
-      return path.extname(file) == '.js';
-    });
-    jsFilesInDir.forEach(jsFile => {
-      const jsFilePath = `${cssFileDir}/${jsFile}`;
-      if (getImports(jsFilePath).includes(cssJsFileMap[cssFile])) {
-        jsFiles.push(jsFilePath);
-      }
-    });
-  }
-  return jsFiles;
-}
-
-function getUnitTestsToRun(unitTestPaths) {
-  if (isLargeRefactor()) {
-    log(
-      green('INFO:'),
-      'Skipping tests on local changes because this is a large refactor.'
-    );
-    reportTestSkipped();
-    return;
-  }
-
-  const tests = unitTestsToRun(unitTestPaths);
-  if (tests.length == 0) {
-    log(
-      green('INFO:'),
-      'No unit tests were directly affected by local changes.'
-    );
-    reportTestSkipped();
-    return;
-  }
-
-  log(green('INFO:'), 'Running the following unit tests:');
-  tests.forEach(test => {
-    log(cyan(test));
-  });
-
-  return tests;
-}
-
-/**
- * Extracts the list of unit tests to run based on the changes in the local
- * branch.
- *
- * @param {!Array<string>} unitTestPaths
- * @return {!Array<string>}
- */
-function unitTestsToRun(unitTestPaths) {
-  const cssJsFileMap = extractCssJsFileMap();
-  const filesChanged = gitDiffNameOnlyMaster();
-  const testsToRun = [];
-  let srcFiles = [];
-
-  function isUnitTest(file) {
-    return unitTestPaths.some(pattern => {
-      return minimatch(file, pattern);
-    });
-  }
-
-  function shouldRunTest(testFile, srcFiles) {
-    const filesImported = getImports(testFile);
-    return (
-      filesImported.filter(function(file) {
-        return srcFiles.includes(file);
-      }).length > 0
-    );
-  }
-
-  // Retrieves the set of unit tests that should be run
-  // for a set of source files.
-  function getTestsFor(srcFiles) {
-    const allUnitTests = deglob.sync(unitTestPaths);
-    return allUnitTests
-      .filter(testFile => {
-        return shouldRunTest(testFile, srcFiles);
-      })
-      .map(fullPath => path.relative(ROOT_DIR, fullPath));
-  }
-
-  filesChanged.forEach(file => {
-    if (!fs.existsSync(file)) {
-      if (!isTravisBuild()) {
-        log(green('INFO:'), 'Skipping', cyan(file), 'because it was deleted');
-      }
-    } else if (isUnitTest(file)) {
-      testsToRun.push(file);
-    } else if (path.extname(file) == '.js') {
-      srcFiles.push(file);
-    } else if (path.extname(file) == '.css') {
-      srcFiles = srcFiles.concat(getJsFilesFor(file, cssJsFileMap));
-    }
-  });
-
-  if (srcFiles.length > 0) {
-    log(green('INFO:'), 'Determining which unit tests to run...');
-    const moreTestsToRun = getTestsFor(srcFiles);
-    moreTestsToRun.forEach(test => {
-      if (!testsToRun.includes(test)) {
-        testsToRun.push(test);
-      }
-    });
-  }
-  return testsToRun;
-}
-
-/**
  * Mitigates https://github.com/karma-runner/karma-sauce-launcher/issues/117
  * by refreshing the wd cache so that Karma can launch without an error.
  */
@@ -272,17 +87,31 @@ function refreshKarmaWdCache() {
   exec('node ./node_modules/wd/scripts/build-browser-scripts.js');
 }
 
-/**
- * Returns true if the PR is a large refactor.
- * (Used to skip testing local changes.)
- * @return {boolean}
- */
-function isLargeRefactor() {
-  const filesChanged = gitDiffNameOnlyMaster();
-  return filesChanged.length >= LARGE_REFACTOR_THRESHOLD;
-}
-
 function getBrowserConfig() {
+  if (argv.saucelabs) {
+    if (IS_GULP_UNIT) {
+      return {browsers: ['SL_Safari_12', 'SL_Firefox']};
+    }
+
+    if (IS_GULP_INTEGRATION) {
+      return {
+        browsers: [
+          'SL_Chrome',
+          'SL_Firefox',
+          'SL_Edge_17',
+          'SL_Safari_12',
+          'SL_IE_11',
+          // TODO(amp-infra): Evaluate and add more platforms here.
+          //'SL_Chrome_Android_7',
+          //'SL_iOS_11',
+          //'SL_iOS_12',
+          'SL_Chrome_Beta',
+          'SL_Firefox_Beta',
+        ],
+      };
+    }
+  }
+
   const chromeFlags = [];
   if (argv.chrome_flags) {
     argv.chrome_flags.split(',').forEach(flag => {
@@ -315,23 +144,7 @@ function getBrowserConfig() {
         },
       },
     })
-    .set('safari', {browsers: ['Safari']})
-    .set('saucelabs', {
-      browsers: [
-        'SL_Chrome',
-        'SL_Firefox',
-        'SL_Edge_17',
-        'SL_Safari_12',
-        'SL_IE_11',
-        // TODO(amp-infra): Evaluate and add more platforms here.
-        //'SL_Chrome_Android_7',
-        //'SL_iOS_11',
-        //'SL_iOS_12',
-        'SL_Chrome_Beta',
-        'SL_Firefox_Beta',
-      ],
-    })
-    .set('saucelabs_lite', {browsers: ['SL_Safari_12', 'SL_Firefox']});
+    .set('safari', {browsers: ['Safari']});
 
   for (const key of Array.from(options.keys())) {
     if (argv[key]) {
@@ -354,8 +167,7 @@ function maybePrintArgvMessages() {
     ie: 'Running tests on IE.',
     edge: 'Running tests on Edge.',
     'chrome_canary': 'Running tests on Chrome Canary.',
-    saucelabs: 'Running integration tests on Sauce Labs browsers.',
-    saucelabs_lite: 'Running tests on a subset of Sauce Labs browsers.', // eslint-disable-line google-camelcase/google-camelcase
+    saucelabs: 'Running tests on Sauce Labs browsers.',
     nobuild: 'Skipping build.',
     watch:
       'Enabling watch mode. Editing and saving a file will cause the' +
@@ -503,7 +315,7 @@ function karmaRunComplete(results) {
 }
 
 function karmaRunStart() {
-  if (!argv.saucelabs && !argv.saucelabs_lite) {
+  if (!argv.saucelabs) {
     log(green('Running tests locally...'));
   }
   reportTestStarted();
@@ -649,12 +461,9 @@ module.exports = {
   createKarmaServer,
   getAdTypes,
   getBrowserConfig,
-  getUnitTestsToRun,
-  isLargeRefactor,
   maybeSetCoverageConfig,
   maybePrintArgvMessages,
   refreshKarmaWdCache,
   runTestInBatches,
   startTestServer,
-  unitTestsToRun,
 };
