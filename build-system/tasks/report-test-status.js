@@ -24,12 +24,12 @@ const {isTravisPullRequestBuild} = require('../travis');
 
 const reportBaseUrl = 'https://amp-test-status-bot.appspot.com/v0/tests';
 
-const IS_GULP_INTEGRATION = !!argv.integration;
+const IS_GULP_INTEGRATION = argv._[0] === 'integration';
 const IS_GULP_UNIT = argv._[0] === 'unit';
 const IS_GULP_E2E = argv._[0] === 'e2e';
 
 const IS_LOCAL_CHANGES = !!argv.local_changes;
-const IS_SAUCELABS = !!(argv.saucelabs || argv.saucelabs_lite);
+const IS_SAUCELABS = !!argv.saucelabs;
 const IS_SINGLE_PASS = !!argv.single_pass;
 
 const TEST_TYPE_SUBTYPES = new Map([
