@@ -191,17 +191,30 @@ describes.realWin('form-dirtiness', {}, env => {
   });
 
   describe('#onSubmitSuccess', () => {
-    it('clears the dirtiness class', () => {
-      const input = doc.createElement('input');
+    let input;
+
+    beforeEach(() => {
+      input = doc.createElement('input');
       input.type = 'text';
       input.name = 'text';
       form.appendChild(input);
+    });
 
+    it('clears the dirtiness class', () => {
       changeInput(input, 'changed');
       dirtinessHandler.onSubmitting();
       dirtinessHandler.onSubmitSuccess();
 
       expect(form).to.not.have.class(DIRTINESS_INDICATOR_CLASS);
+    });
+
+    it('tracks new changes after the form has been submitted', () => {
+      changeInput(input, 'changed');
+      dirtinessHandler.onSubmitting();
+      dirtinessHandler.onSubmitSuccess();
+      changeInput(input, 'changed again');
+
+      expect(form).to.have.class(DIRTINESS_INDICATOR_CLASS);
     });
   });
 });
