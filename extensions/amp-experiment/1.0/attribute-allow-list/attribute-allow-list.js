@@ -15,6 +15,7 @@
  */
 
 import {
+  AllowedAttributeMutationEntry,
   DefaultAllowedURLAttributeMutationEntry,
   DefaultStyleAllowedAttributeMutationEntry,
 } from './allowed-attribute-mutation-entry';
@@ -67,6 +68,9 @@ export function getAllowedAttributeMutationEntry(
 export const attributeMutationAllowList = {
   'style': {
     '*': new DefaultStyleAllowedAttributeMutationEntry(),
+  },
+  'class': {
+    '*': new AllowedAttributeMutationEntry(),
   },
   'src': {
     '*': new DefaultAllowedURLAttributeMutationEntry(),
