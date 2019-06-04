@@ -142,14 +142,24 @@ export class Expander {
 
     const evaluateNextLevel = encode => {
       let builder = '';
-      const results = [];
+      let results = [];
+      const args = [];
 
       while (urlIndex < url.length && matchIndex <= matches.length) {
         if (match && urlIndex === match.start) {
+          // Collect any chars that may be prefixing the macro, if we are in
+          // a nested context trim the args.
+          if (builder.trim().length) {
+            results.push(numOfPendingCalls ? builder.trimStart() : builder);
+          }
+
+          // If we know we are at the start of a macro, we figure out how to
+          // resolve it, and move our pointer to after the token.
           let binding;
-          // find out where this keyword is coming from
+          // Find out where this macro is coming from. Could be from the passed
+          // in optional bindings, or the global variable source.
           if (this.bindings_ && hasOwn(this.bindings_, match.name)) {
-            // the optional bindings
+            // Macro is from optional bindings.
             binding = {
               // This construction helps us save the match name and determine
               // precedence of resolution choices in #expandBinding_ later.
@@ -158,7 +168,7 @@ export class Expander {
               encode,
             };
           } else {
-            // or the global source
+            // Macro is from the global source.
             binding = Object.assign({}, this.variableSource_.get(match.name), {
               name: match.name,
               encode,
@@ -169,19 +179,16 @@ export class Expander {
           match = matches[++matchIndex];
 
           if (url[urlIndex] === '(') {
-            // if we hit a left parenthesis we still need to get args
+            // When we see a `(` we know we need to resolve one level deeper
+            // before continuing. We push the binding in the stack for
+            // resolution later, and then make the recursive call.
             urlIndex++;
             numOfPendingCalls++;
             stack.push(binding);
-            // trim space in between args
-            if (builder.trim().length) {
-              results.push(builder);
-            }
             results.push(evaluateNextLevel(/* encode */ false));
           } else {
-            if (builder.length) {
-              results.push(builder);
-            }
+            // Many macros do not take arguments, in this case we do not need to
+            // recurse, we just start resolution in it's position.
             results.push(this.evaluateBinding_(binding));
           }
 
@@ -205,15 +212,21 @@ export class Expander {
           url[urlIndex] === ',' &&
           !ignoringChars
         ) {
+          // Commas tell us to create a new argument when in nested context and
+          // not ignoring them due to backticks. We push any string built so far,
+          // create a new array for the next argument, and reset our string
+          // builder.
           if (builder.length) {
             const nextArg = nextArgShouldBeRaw ? builder : builder.trim();
             results.push(nextArg);
             nextArgShouldBeRaw = false;
           }
-          // support existing two comma format
-          // eg CLIENT_ID(__ga,,ga-url)
+          args.push(results);
+          results = [];
+          // Support existing two comma format by pushing an empty string as
+          // argument. eg CLIENT_ID(__ga,,ga-url)
           if (url[urlIndex + 1] === ',') {
-            results.push(''); // TODO(ccordry): may want this to be undefined at some point
+            args.push(['']);
             urlIndex++;
           }
           builder = '';
@@ -221,27 +234,37 @@ export class Expander {
         }
 
         // Invoke a function on every right parenthesis unless the stack is
-        // empty.
+        // empty. This is where we actually evaluate any macro that takes an
+        // argument. We pop the macro resover off the stack, and take anying left
+        // in our string builder and add it as the final section of the final
+        // arg. Then we call the resolver.
         else if (numOfPendingCalls && url[urlIndex] === ')' && !ignoringChars) {
           urlIndex++;
           numOfPendingCalls--;
           const binding = stack.pop();
           const nextArg = nextArgShouldBeRaw ? builder : builder.trim();
-          results.push(nextArg);
+          if (nextArg) {
+            results.push(nextArg);
+          }
+          args.push(results);
           nextArgShouldBeRaw = false;
-          const value = this.evaluateBinding_(binding, /* opt_args */ results);
+          const value = this.evaluateBinding_(binding, /* opt_args */ args);
           return value;
         } else {
+          // This is the most common case. Just building a string as we walk
+          // along.
           builder += url[urlIndex];
           urlIndex++;
         }
 
-        //capture trailing characters
+        // Capture any trailing characters.
         if (urlIndex === url.length && builder.length) {
           results.push(builder);
         }
       }
 
+      // TODO: If there is a single item in results, we should preserve it's
+      // type when returning here and the async version below.
       if (this.sync_) {
         return results.join('');
       }
@@ -260,9 +283,14 @@ export class Expander {
   /**
    * Called when a binding is ready to be resolved. Determines which version of
    * binding to use and if syncronous or asyncronous version should be called.
-   * @param {Object<string, *>} bindingInfo An object containing the name of macro
-   *   and value to be resolved.
-   * @param {Array=} opt_args Arguments passed to the macro.
+   * @param {Object<string, *>} bindingInfo An object containing the name of
+   *    macro and value to be resolved.
+   * @param {Array=} opt_args Arguments passed to the macro. Arguments come as
+   *    an array of arrays that will be eventually passed to a function.apply
+   *    invocation. For example: FOO(BARBAR, 123) => When we are ready to evaluate
+   *    the FOO binding opt_args will be [[Result of BAR, Result of BAR], [123]].
+   *    This structure is so that the outer array will have the correct number of
+   *    arguments, but we still can resolve each macro separately.
    */
   evaluateBinding_(bindingInfo, opt_args) {
     const {encode, name} = bindingInfo;
@@ -307,7 +335,9 @@ export class Expander {
     try {
       if (typeof binding === 'function') {
         if (opt_args) {
-          value = Promise.all(opt_args).then(args => binding.apply(null, args));
+          value = this.processArgsAsync_(opt_args).then(args =>
+            binding.apply(null, args)
+          );
         } else {
           value = tryResolve(binding);
         }
@@ -342,6 +372,22 @@ export class Expander {
   }
 
   /**
+   * Flattens the inner layer of an array of arrays so that the result can be
+   * passed to a function.apply call. Must wait for any inner macros to resolve.
+   * This will cast all arguments to string before calling the macro.
+   *  [[Result of BAR, Result of BAR], 123]. => ['resultresult', '123']
+   * @param {!Array<!Array>} argsArray
+   * @return {!Promise<Array<string>>}
+   */
+  processArgsAsync_(argsArray) {
+    return Promise.all(
+      argsArray.map(argArray => {
+        return Promise.all(argArray).then(resolved => resolved.join(''));
+      })
+    );
+  }
+
+  /**
    * Resolves binding to value to be substituted asyncronously.
    * @param {*} binding Container for sync/async resolutions.
    * @param {string} name
@@ -350,8 +396,10 @@ export class Expander {
    */
   evaluateBindingSync_(binding, name, opt_args) {
     try {
-      const value =
-        typeof binding === 'function' ? binding.apply(null, opt_args) : binding;
+      let value = binding;
+      if (typeof binding === 'function') {
+        value = binding.apply(null, this.processArgsSync_(opt_args));
+      }
 
       let result;
 
@@ -368,6 +416,7 @@ export class Expander {
       ) {
         // Normal case.
         this.maybeCollectVars_(name, value, opt_args);
+        // TODO: We should try to preserve type here.
         result = value.toString();
       } else {
         // Most likely a broken binding gets us here.
@@ -383,6 +432,22 @@ export class Expander {
       this.maybeCollectVars_(name, '', opt_args);
       return '';
     }
+  }
+
+  /**
+   * Flattens the inner layer of an array of arrays so that the result can be
+   * passed to a function.apply call. Will not wait for any promise to resolve.
+   * This will cast all arguments to string before calling the macro.
+   *  [[Result of BAR, Result of BAR], 123]. => ['resultresult', '123']
+   * @param {Array<!Array>|undefined} argsArray
+   */
+  processArgsSync_(argsArray) {
+    if (!argsArray) {
+      return argsArray;
+    }
+    return argsArray.map(argArray => {
+      return argArray.join('');
+    });
   }
 
   /**
