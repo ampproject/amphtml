@@ -45,8 +45,8 @@ export class FormDirtiness {
     /** @private {!Object<string, boolean>} */
     this.isFieldNameDirty_ = map();
 
-    /** @private {!FormData} */
-    this.submittedFormData_ = this.takeFormDataSnapshot_();
+    /** @private {?FormData} */
+    this.submittedFormData_ = null;
 
     /** @private {boolean} */
     this.isSubmitting_ = false;
@@ -160,6 +160,9 @@ export class FormDirtiness {
    * @private
    */
   isFieldSameAsLastSubmission_(field) {
+    if (!this.submittedFormData_) {
+      return false;
+    }
     const {name, value} = field;
     return this.submittedFormData_.get(name) === value;
   }
