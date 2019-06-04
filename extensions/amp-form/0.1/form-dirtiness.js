@@ -144,7 +144,7 @@ export class FormDirtiness {
     if (
       isFieldEmpty(field) ||
       isFieldDefault(field) ||
-      this.hasFieldBeenSubmitted_(field)
+      this.isFieldSameAsLastSubmission_(field)
     ) {
       this.removeDirtyField_(field.name);
     } else {
@@ -159,7 +159,7 @@ export class FormDirtiness {
    * @return {boolean}
    * @private
    */
-  hasFieldBeenSubmitted_(field) {
+  isFieldSameAsLastSubmission_(field) {
     const {name, value} = field;
     return this.submittedFormData_.get(name) === value;
   }
