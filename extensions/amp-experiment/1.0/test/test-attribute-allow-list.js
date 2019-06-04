@@ -30,15 +30,23 @@ const ORIGINAL_ALLOW_LIST = {
 };
 
 describes.realWin('amp-experiment attribute-allow-list', {}, () => {
-  function getAttributeMutation(opt_attributeName, opt_value) {
-    return {
+  function getAllowedAttributeMutationEntryParams(opt_attributeName, opt_value) {
+
+    const element = {
+      tagName: 'DIV'
+    };
+
+    const params = [];
+    params[0] = {
       type: 'attributes',
-      targetElement: {
-        tagName: 'DIV',
-      },
+      targetElements: [element],
       attributeName: opt_attributeName || 'style',
       value: opt_value || 'color: #FF0000',
     };
+    params[1] = element;
+    params[2] = MUTATION_NAME;
+
+    return params;
   }
 
   class FakeAllowedAttributeMutationEntry extends AllowedAttributeMutationEntry {}
@@ -49,9 +57,9 @@ describes.realWin('amp-experiment attribute-allow-list', {}, () => {
   });
 
   it('should allow a valid attribute, value', () => {
-    const allowedAttributeMutationEntry = getAllowedAttributeMutationEntry(
-      getAttributeMutation(),
-      MUTATION_NAME
+    const allowedAttributeMutationEntry = getAllowedAttributeMutationEntry.apply(
+      null,
+      getAllowedAttributeMutationEntryParams()
     );
 
     expect(allowedAttributeMutationEntry).to.be.ok;
@@ -66,9 +74,9 @@ describes.realWin('amp-experiment attribute-allow-list', {}, () => {
       '*': new AllowedAttributeMutationEntry(),
     };
 
-    const allowedAttributeMutationEntry = getAllowedAttributeMutationEntry(
-      getAttributeMutation(testAttributeName),
-      MUTATION_NAME
+    const allowedAttributeMutationEntry = getAllowedAttributeMutationEntry.apply(
+      null,
+      getAllowedAttributeMutationEntryParams(testAttributeName)
     );
 
     expect(allowedAttributeMutationEntry).to.be.ok;
@@ -83,9 +91,9 @@ describes.realWin('amp-experiment attribute-allow-list', {}, () => {
       'div': new AllowedAttributeMutationEntry(),
     };
 
-    const allowedAttributeMutationEntry = getAllowedAttributeMutationEntry(
-      getAttributeMutation(testAttributeName),
-      MUTATION_NAME
+    const allowedAttributeMutationEntry = getAllowedAttributeMutationEntry.apply(
+      null,
+      getAllowedAttributeMutationEntryParams(testAttributeName)
     );
 
     expect(allowedAttributeMutationEntry).to.be.ok;
@@ -100,9 +108,9 @@ describes.realWin('amp-experiment attribute-allow-list', {}, () => {
       '*': new FakeAllowedAttributeMutationEntry(),
     };
 
-    const allowedAttributeMutationEntry = getAllowedAttributeMutationEntry(
-      getAttributeMutation(testAttributeName),
-      MUTATION_NAME
+    const allowedAttributeMutationEntry = getAllowedAttributeMutationEntry.apply(
+      null,
+      getAllowedAttributeMutationEntryParams(testAttributeName)
     );
 
     expect(allowedAttributeMutationEntry).to.be.ok;
@@ -119,9 +127,9 @@ describes.realWin('amp-experiment attribute-allow-list', {}, () => {
 
     expectAsyncConsoleError(/attributeName/);
     try {
-      getAllowedAttributeMutationEntry(
-        getAttributeMutation(testAttributeName),
-        MUTATION_NAME
+      getAllowedAttributeMutationEntry.apply(
+        null,
+        getAllowedAttributeMutationEntryParams(testAttributeName)
       );
       expect(false).to.be.ok;
     } catch (e) {
@@ -137,9 +145,9 @@ describes.realWin('amp-experiment attribute-allow-list', {}, () => {
 
     expectAsyncConsoleError(/attributeName/);
     try {
-      getAllowedAttributeMutationEntry(
-        getAttributeMutation(testAttributeName),
-        MUTATION_NAME
+      getAllowedAttributeMutationEntry.apply(
+        null,
+        getAllowedAttributeMutationEntryParams(testAttributeName)
       );
       expect(false).to.be.ok;
     } catch (e) {

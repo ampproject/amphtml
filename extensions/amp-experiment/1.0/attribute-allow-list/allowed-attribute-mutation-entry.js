@@ -31,7 +31,7 @@ export class AllowedAttributeMutationEntry {
    * @return {boolean}
    */
   validate(mutationRecord, element) {
-    if (mutationRecord['value']) {
+    if (mutationRecord['value'] && element) {
       return true;
     }
   }

@@ -33,7 +33,7 @@ const TAG = 'amp-experiment allowed-mutations';
 export function getAllowedAttributeMutationEntry(
   mutationRecord,
   element,
-  stringifiedMutation,
+  stringifiedMutation
 ) {
   // Assert the mutation attribute is one of the following keys
   const mutationAttributeName = mutationRecord['attributeName'];
@@ -58,7 +58,8 @@ export function getAllowedAttributeMutationEntry(
   }
 
   if (!allowedAttributeMutationEntry) {
-    const error = `Mutation ${stringifiedMutation} has an unsupported attributeName` +
+    const error =
+      `Mutation ${stringifiedMutation} has an unsupported attributeName` +
       ` for the element ${element}.`;
     user().error(TAG, error);
     throw new Error(error);

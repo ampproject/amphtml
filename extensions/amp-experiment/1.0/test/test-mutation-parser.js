@@ -26,19 +26,26 @@ describes.realWin('amp-experiment mutation-parser', {}, env => {
     doc = win.document;
   });
 
-  function setupMutationSelector() {
-    const targetId = 'mutation-parser-test';
-    const targetElement = createElementWithAttributes(doc, 'div', {
-      'id': targetId,
-    });
+  function setupMutationSelector(opt_numberOfElements) {
+    const targetClass = 'mutation-parser-test';
 
-    doc.body.appendChild(targetElement);
+    if (!opt_numberOfElements || opt_numberOfElements < 1) {
+      opt_numberOfElements = 1;
+    }
 
-    return `#${targetId}`;
+    for (let i = 0; i < opt_numberOfElements; i++) {
+      const targetElement = createElementWithAttributes(doc, 'div', {
+        'class': targetClass,
+      });
+
+      doc.body.appendChild(targetElement);
+    }
+
+    return `.${targetClass}`;
   }
 
-  function getAttributeMutation(opt_attributeName, opt_value) {
-    const selector = setupMutationSelector();
+  function getAttributeMutation(opt_attributeName, opt_value, opt_numberOfElements) {
+    const selector = setupMutationSelector(opt_numberOfElements);
 
     return {
       type: 'attributes',
@@ -60,8 +67,17 @@ describes.realWin('amp-experiment mutation-parser', {}, env => {
 
   it('should allow a valid mutation', () => {
     const mutation = getAttributeMutation();
-    const mutationOperation = parseMutation(mutation, doc);
-    expect(mutationOperation).to.be.ok;
+    const mutationRecord = parseMutation(mutation, doc);
+    expect(mutationRecord).to.be.ok;
+    expect(mutationRecord.mutations.length).to.be.equal(1);
+  });
+
+  it('should select multiple elements from a selector', () => {
+    const numberOfMutations = 10;
+    const mutation = getAttributeMutation(undefined, undefined, numberOfMutations);
+    const mutationRecord = parseMutation(mutation, doc);
+    expect(mutationRecord).to.be.ok;
+    expect(mutationRecord.mutations.length).to.be.equal(numberOfMutations);
   });
 
   it('should error when no mutation', () => {
@@ -213,12 +229,15 @@ describes.realWin('amp-experiment mutation-parser', {}, env => {
       });
     });
 
-    it('should return an operation that, changes attribute of selector', () => {
+    it('should return a mutation recrord that, ' +
+      'has mutatations to change the attribute of a selector', () => {
       const expectedStyle = 'color: #FFF';
       const mutation = getAttributeMutation('style', expectedStyle);
-      const mutationOperation = parseMutation(mutation, doc);
+      const mutationRecord = parseMutation(mutation, doc);
 
-      mutationOperation();
+      mutationRecord.mutations.forEach(mutationFunction => {
+        mutationFunction();
+      });
 
       expect(
         doc.querySelector(mutation['target']).getAttribute('style')
@@ -243,12 +262,15 @@ describes.realWin('amp-experiment mutation-parser', {}, env => {
       });
     });
 
-    it('should return an operation that, changes textContent of selector', () => {
+    it('should return an mutation record that, ' +
+      'has mutations to change textContent of a selector', () => {
       const expectedTextContent = 'Expected';
       const mutation = getCharacterDataMutation(expectedTextContent);
-      const mutationOperation = parseMutation(mutation, doc);
+      const mutationRecord = parseMutation(mutation, doc);
 
-      mutationOperation();
+      mutationRecord.mutations.forEach(mutationFunction => {
+        mutationFunction();
+      });
 
       expect(doc.querySelector(mutation['target']).textContent).to.be.equal(
         expectedTextContent

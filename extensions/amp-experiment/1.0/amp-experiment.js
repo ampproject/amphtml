@@ -275,7 +275,7 @@ export class AmpExperiment extends AMP.BaseElement {
         const mutationRecord = parseMutation(mutation, this.win.document);
 
         totalMutations += mutationRecord.mutations;
-        if(totalMutations > MAX_MUTATIONS) {
+        if (totalMutations > MAX_MUTATIONS) {
           const numMutationsError =
             'Max number of mutations for the total ' +
             `applied experiments exceeded: ${totalMutations} > ` +
@@ -284,7 +284,9 @@ export class AmpExperiment extends AMP.BaseElement {
           throw new Error(numMutationsError);
         }
 
-        mutationOperations = mutationOperations.concat(mutationRecord.mutations);
+        mutationOperations = mutationOperations.concat(
+          mutationRecord.mutations
+        );
       });
       mutationOperations.forEach(mutationOperation => mutationOperation());
     });

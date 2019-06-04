@@ -15,8 +15,8 @@
  */
 
 import {getAllowedAttributeMutationEntry} from './attribute-allow-list/attribute-allow-list';
-import {isObject} from '../../../src/types';
-import {toArray} from '../../../src/types';
+import {isObject, toArray} from '../../../src/types';
+
 import {user, userAssert} from '../../../src/log';
 
 const TAG = 'amp-experiment mutation-parser';
