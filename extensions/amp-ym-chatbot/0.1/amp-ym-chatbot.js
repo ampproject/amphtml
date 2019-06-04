@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-import {dev, userAssert} from '../../../src/log';
 import {getIframe} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
-
-import {listen} from '../../../src/event-helper';
+import {userAssert} from '../../../src/log';
 
 export class AmpYmChatbot extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -55,41 +53,6 @@ export class AmpYmChatbot extends AMP.BaseElement {
       'The data-botid attribute is required for <amp-ym-chatbot> %s',
       el
     );
-  }
-
-  /**
-   *
-   */
-  layoutCallback() {
-    console.log('Layout!');
-    const iframe = getIframe(
-      this,
-      'https://app.yellowmessenger.com/api/ml/prediction?bot=' +
-        encodeURIComponent(dev().assertString(this.botId_)) +
-        '&text=hi&language=en'
-    );
-    this.iframe_ = iframe;
-
-    this.unlistenMessage_ = listen(
-      this.win,
-      'message',
-      this.sdnBridge_.bind(this)
-    );
-
-    return this.loadPromise(this.iframe_);
-  }
-
-  /**
-   *
-   * @param {!Event} event
-   * @private
-   */
-  sdnBridge_(event) {
-    if (event.source) {
-      if (event.source != this.iframe_.contentWindow) {
-        return;
-      }
-    }
   }
 
   /**
