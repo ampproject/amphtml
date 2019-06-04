@@ -53,6 +53,7 @@
   "font-display-swap": 1,
   "hidden-mutation-observer": 1,
   "ios-fixed-no-transfer": 0,
+  "inabox-remove-height-auto": 1,
   "linker-form": 1,
   "linker-meta-opt-in": 1,
   "no-initial-intersection": 1,
