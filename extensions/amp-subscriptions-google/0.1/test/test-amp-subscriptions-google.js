@@ -461,7 +461,6 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     elem.textContent = 'some html';
     elem.setAttribute('subscriptions-lang', 'en');
     platform.decorateUI(elem, 'subscribe-smartbutton');
-    console.log(elem);
     expect(elem.textContent).to.be.equal('');
     expect(attachStub).to.be.calledWith(elem, {lang: 'en', theme: 'light'});
   });
