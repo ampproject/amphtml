@@ -16,6 +16,7 @@
 #
 """A build script which (thus far) works on Ubuntu 14."""
 
+from __future__ import print_function
 import argparse
 import glob
 import logging
@@ -32,7 +33,7 @@ def Die(msg):
   Args:
     msg: The error message to emit
   """
-  print >> sys.stderr, msg
+  print(msg, file=sys.stderr)
   sys.exit(1)
 
 
@@ -563,7 +564,7 @@ def GenerateTestRunner(out_dir):
              });
              jasmine.execute();
           """ % extensions_dir)
-  os.chmod('%s/test_runner' % out_dir, 0750)
+  os.chmod('%s/test_runner' % out_dir, 0o750)
   logging.info('... success')
 
 
