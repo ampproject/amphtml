@@ -24,11 +24,7 @@ router.use('/form/post/success', function(req, res) {
   delete req.query.__amp_source_origin;
   res.json({
     name: 'John Miller',
-    interests: [
-      {title: 'Football'},
-      {title: 'Basketball'},
-      {title: 'Writing'},
-    ],
+    interests: [{title: 'Football'}, {title: 'Basketball'}, {title: 'Writing'}],
   });
 });
 
