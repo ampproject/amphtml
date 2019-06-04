@@ -31,7 +31,6 @@ const jsdom = require('jsdom');
 const multer = require('multer');
 const path = require('path');
 const request = require('request');
-const {appTestEndpoints} = require('./app-test');
 const pc = process;
 const runVideoTestBench = require('./app-video-testbench');
 const {
@@ -50,6 +49,7 @@ app.use('/amp4test', require('./amp4test').app);
 app.use('/analytics', require('./routes/analytics'));
 app.use('/list/', require('./routes/list'));
 app.use('/user-location/', require('./routes/user-location'));
+app.use('/test', require('./routes/test'));
 
 // Append ?csp=1 to the URL to turn on the CSP header.
 // TODO: shall we turn on CSP all the time?
@@ -1002,8 +1002,6 @@ app.get(
       });
   }
 );
-
-appTestEndpoints(app);
 
 function escapeRegExp(string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
