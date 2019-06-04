@@ -35,6 +35,7 @@ const {css} = require('./css');
 const {getUnitTestsToRun} = require('./runtime-test/helpers-unit');
 const {green, yellow, cyan, red} = require('ansi-colors');
 const {isTravisBuild} = require('../travis');
+const {reportTestStarted} = require('./report-test-status');
 
 function shouldNotRun() {
   if (argv.local_changes && !getUnitTestsToRun(testConfig.unitTestPaths)) {
@@ -90,7 +91,8 @@ function setConfigOverrides(config) {
     mochaTimeout: defaultConfig.client.mocha.timeout,
     propertiesObfuscated: false, // never single pass for unit tests
     testServerPort: defaultConfig.client.testServerPort,
-    testOnIe: config.browsers.includes('IE'),
+    testOnIe:
+      config.browsers.includes('IE') || config.browsers.includes('SL_IE_11'),
   };
 }
 
@@ -176,6 +178,8 @@ function teardown(env) {
 }
 
 function runUnitTests(config) {
+  reportTestStarted();
+
   if (argv.saucelabs) {
     return runTestInBatches(config);
   }

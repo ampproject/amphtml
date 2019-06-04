@@ -26,7 +26,6 @@ const webserver = require('gulp-webserver');
 const {
   reportTestErrored,
   reportTestFinished,
-  reportTestStarted,
 } = require('../report-test-status');
 const {app} = require('../../test-server');
 const {exec} = require('../../exec');
@@ -318,7 +317,6 @@ function karmaRunStart() {
   if (!argv.saucelabs) {
     log(green('Running tests locally...'));
   }
-  reportTestStarted();
 }
 
 function startTestServer(port) {

@@ -35,6 +35,7 @@ const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
 const {dist} = require('./dist');
 const {green, yellow, cyan, red} = require('ansi-colors');
 const {isTravisBuild} = require('../travis');
+const {reportTestStarted} = require('./report-test-status');
 
 function shouldNotRun() {
   if (argv.saucelabs) {
@@ -87,7 +88,8 @@ function setConfigOverrides(config) {
     mochaTimeout: defaultConfig.client.mocha.timeout,
     propertiesObfuscated: !!argv.single_pass,
     testServerPort: defaultConfig.client.testServerPort,
-    testOnIe: config.browsers.includes('IE'),
+    testOnIe:
+      config.browsers.includes('IE') || config.browsers.includes('SL_IE_11'),
   };
 }
 
@@ -132,6 +134,8 @@ function getTestConfig() {
 }
 
 function runIntegrationTests(config) {
+  reportTestStarted();
+
   if (argv.saucelabs) {
     return runTestInBatches(config);
   }
