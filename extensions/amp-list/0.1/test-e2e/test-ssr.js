@@ -42,8 +42,6 @@ describes.endtoend(
         await expect(controller.getElementText(listItems[0])).to.equal(
           'Pineapple'
         );
-
-        await controller.takeScreenshot('screenshots/amp-list-ssr.png');
       });
   }
 );
@@ -68,8 +66,6 @@ describes.endtoend(
       // Verify that all items rendered.
       const listItems = await getListItems(controller);
       await expect(listItems).to.have.length(5);
-
-      await controller.takeScreenshot('screenshots/amp-list.png');
     });
   }
 );
