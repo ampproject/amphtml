@@ -427,6 +427,11 @@ export class AmpStory extends AMP.BaseElement {
 
     this.storeService_.dispatch(Action.TOGGLE_UI, this.getUIType_());
 
+    // Disables the bookend entirely if the story is within a group of stories.
+    if (this.viewer_.hasCapability('swipe')) {
+      this.storeService_.dispatch(Action.TOGGLE_CAN_SHOW_BOOKEND, false);
+    }
+
     this.navigationState_.observe(stateChangeEvent => {
       this.variableService_.onNavigationStateChange(stateChangeEvent);
       this.analyticsService_.onNavigationStateChange(stateChangeEvent);
@@ -676,10 +681,12 @@ export class AmpStory extends AMP.BaseElement {
       this.replay_();
     });
 
-    this.element.addEventListener(EventType.SHOW_NO_PREVIOUS_PAGE_HELP, () => {
-      if (this.storeService_.get(StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP)) {
-        this.ampStoryHint_.showFirstPageHintOverlay();
-      }
+    this.element.addEventListener(EventType.NO_NEXT_PAGE, () => {
+      this.onNoNextPage_();
+    });
+
+    this.element.addEventListener(EventType.NO_PREVIOUS_PAGE, () => {
+      this.onNoPreviousPage_();
     });
 
     this.advancement_.addOnTapNavigationListener(direction => {
@@ -1224,21 +1231,24 @@ export class AmpStory extends AMP.BaseElement {
       this.activePage_,
       'No active page set when navigating to next page.'
     );
+    activePage.next(opt_isAutomaticAdvance);
+  }
 
-    const lastPage = this.pages_[this.getPageCount() - 1];
-    if (
-      activePage.element.hasAttribute(Attributes.ADVANCE_TO) ||
-      activePage.element.hasAttribute(Attributes.PUBLIC_ADVANCE_TO) ||
-      activePage !== lastPage
-    ) {
-      activePage.next(opt_isAutomaticAdvance);
-    } else {
-      this.hasBookend_().then(hasBookend => {
-        if (hasBookend) {
-          this.showBookend_();
-        }
-      });
+  /**
+   * Handles EventType.NO_NEXT_PAGE events.
+   * @private
+   */
+  onNoNextPage_() {
+    if (this.viewer_.hasCapability('swipe')) {
+      this.viewer_./*OK*/ sendMessage('selectDocument', dict({'next': true}));
+      return;
     }
+
+    this.hasBookend_().then(hasBookend => {
+      if (hasBookend) {
+        this.showBookend_();
+      }
+    });
   }
 
   /**
@@ -1251,6 +1261,24 @@ export class AmpStory extends AMP.BaseElement {
       'No active page set when navigating to previous page.'
     );
     activePage.previous();
+  }
+
+  /**
+   * Handles EventType.NO_PREVIOUS_PAGE events.
+   * @private
+   */
+  onNoPreviousPage_() {
+    if (this.viewer_.hasCapability('swipe')) {
+      this.viewer_./*OK*/ sendMessage(
+        'selectDocument',
+        dict({'previous': true})
+      );
+      return;
+    }
+
+    if (this.storeService_.get(StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP)) {
+      this.ampStoryHint_.showFirstPageHintOverlay();
+    }
   }
 
   /**
@@ -2254,7 +2282,10 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   maybePreloadBookend_() {
-    if (!this.activePage_) {
+    if (
+      !this.activePage_ ||
+      !this.storeService_.get(StateProperty.CAN_SHOW_BOOKEND)
+    ) {
       return;
     }
 
