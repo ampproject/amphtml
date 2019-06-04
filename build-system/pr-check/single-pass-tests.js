@@ -43,7 +43,7 @@ function main() {
     timedExecOrDie('gulp update-packages');
     timedExecOrDie('gulp dist --fortesting --single_pass --pseudo_names');
     timedExecOrDie(
-      'gulp test --integration --nobuild --compiled --single_pass --headless'
+      'gulp integration --nobuild --compiled --single_pass --headless'
     );
   } else {
     printChangeSummary(FILENAME);
@@ -58,8 +58,7 @@ function main() {
       timedExecOrDie('gulp update-packages');
       timedExecOrDie('gulp dist --fortesting --single_pass --pseudo_names');
       timedExecOrDie(
-        'gulp test --integration ' +
-          '--nobuild --compiled --single_pass --headless'
+        'gulp integration --nobuild --compiled --single_pass --headless'
       );
     } else {
       console.log(
