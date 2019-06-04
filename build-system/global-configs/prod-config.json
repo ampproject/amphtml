@@ -29,7 +29,7 @@
   "amp-auto-lightbox": 1,
   "amp-consent-v2": 1,
   "amp-date-picker": 1,
-  "amp-force-prerender-visible-elements": 0.01,
+  "amp-force-prerender-visible-elements": 0.1,
   "amp-ima-video": 1,
   "amp-img-auto-sizes": 1,
   "amp-list-load-more": 1,
