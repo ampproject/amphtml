@@ -51,7 +51,6 @@ describes.endtoend(
         pageWidth * (2 * (SLIDE_COUNT - 1) + 1)
       );
       await waitForCarouselImg(controller, 0);
-      await controller.takeScreenshot('screenshots/render.png');
     });
 
     it('should layout the two adjacent slides', async () => {
@@ -78,7 +77,6 @@ describes.endtoend(
       // We should have snapped to the edge of the slide rather than the
       // requested scroll position.
       await expect(prop(el, 'scrollLeft')).to.equal(snappedScrollLeft);
-      await controller.takeScreenshot('screenshots/snapped.png');
     });
 
     it('should reset the window after scroll', async () => {
@@ -102,7 +100,6 @@ describes.endtoend(
       // since the windowing should have been reset around the new element.
       await expect(prop(el, 'scrollWidth')).to.equal(scrollWidth);
       await expect(prop(el, 'scrollLeft')).to.equal(scrollLeft);
-      await controller.takeScreenshot('screenshots/after-reset.png');
     });
 
     it('should have the correct scroll position when resizing', async () => {
@@ -133,7 +130,6 @@ describes.endtoend(
         'x': 0,
         'width': 900,
       });
-      await controller.takeScreenshot('screenshots/after-resize.png');
     });
 
     describe('looping', () => {
@@ -153,7 +149,6 @@ describes.endtoend(
         await controller.scroll(el, {left: requestedScrollLeft});
 
         await expect(prop(el, 'scrollLeft')).to.equal(snappedScrollLeft);
-        await controller.takeScreenshot('screenshots/loop-past-start.png');
       });
 
       it('should show the first slide when looping', async () => {
@@ -178,7 +173,6 @@ describes.endtoend(
         await controller.scroll(el, {left: requestedScrollLeft});
 
         await expect(prop(el, 'scrollLeft')).to.equal(snappedScrollLeft);
-        await controller.takeScreenshot('screenshots/loop-past-end.png');
       });
 
       // When resting the last few slides should be translated to the left.
@@ -204,9 +198,6 @@ describes.endtoend(
           x: 0,
           width: slideWidth,
         });
-        await controller.takeScreenshot(
-          'screenshots/loop-move-forwards-to-end.png'
-        );
       });
 
       // When resting the first few slides should be translated to the right.
@@ -233,9 +224,6 @@ describes.endtoend(
           x: 0,
           width: slideWidth,
         });
-        await controller.takeScreenshot(
-          'screenshots/loop-move-backwards-to-second.png'
-        );
       });
     });
   }

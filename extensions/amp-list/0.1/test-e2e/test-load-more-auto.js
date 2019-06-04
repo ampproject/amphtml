@@ -62,8 +62,6 @@ describes.endtoend(
       await expect(controller.getElementCssValue(seeMore, 'display')).to.equal(
         'block'
       );
-
-      await controller.takeScreenshot('screenshots/amp-list-load-more.png');
     });
 
     it.skip('should load more items on scroll', async () => {
