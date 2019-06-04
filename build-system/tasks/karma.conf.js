@@ -223,15 +223,15 @@ module.exports = {
       },
       SAUCE_TIMEOUT_CONFIG
     ),
-    SL_Safari_12: Object.assign(
-      {
-        base: 'SauceLabs',
-        browserName: 'safari',
-        platform: 'macOS 10.13',
-        version: '12.0',
-      },
-      SAUCE_TIMEOUT_CONFIG
-    ),
+    //SL_Safari_12: Object.assign(
+      //{
+        //base: 'SauceLabs',
+        //browserName: 'safari',
+        //platform: 'macOS 10.13',
+        //version: '12.0',
+      //},
+      //SAUCE_TIMEOUT_CONFIG
+    //),
     SL_Safari_11: Object.assign(
       {
         base: 'SauceLabs',
