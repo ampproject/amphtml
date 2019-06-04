@@ -27,9 +27,10 @@ export class AllowedAttributeMutationEntry {
    * for the attribute change. Subclasses
    * may override.
    * @param {!Object} mutationRecord
+   * @param {!Element} element
    * @return {boolean}
    */
-  validate(mutationRecord) {
+  validate(mutationRecord, element) {
     if (mutationRecord['value']) {
       return true;
     }
@@ -39,9 +40,10 @@ export class AllowedAttributeMutationEntry {
    * Function to apply the mutation.
    * Subclasses may override
    * @param {!Object} mutationRecord
+   * @param {!Element} element
    */
-  mutate(mutationRecord) {
-    mutationRecord['targetElement'].setAttribute(
+  mutate(mutationRecord, element) {
+    element.setAttribute(
       mutationRecord['attributeName'],
       mutationRecord['value']
     );

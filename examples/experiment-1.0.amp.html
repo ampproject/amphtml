@@ -19,10 +19,11 @@
 </head>
 <body>
   <h1>Title TBD</h1>
+  <h2>Subtitle to test multiple elements</h2>
 
   <ul>
     <li><a href="#amp-x-background-color-test=yellow" target="_blank">#amp-x-background-color-test=yellow</a></li>
-    <li><a href="#amp-x-background-color-test=green" target="_blank">#amp-x-background-color-test=green</a></li>
+    <li><a href="#amp-x-background-color-test=red" target="_blank">#amp-x-background-color-test=red</a></li>
   </ul>
 
   <amp-experiment>
@@ -36,7 +37,7 @@
               "mutations": [
                 {
                   "type": "attributes",
-                  "target": "h1",
+                  "target": "h1, h2",
                   "attributeName": "style",
                   "value": "background-color: #FFFF00"
                 }
@@ -47,7 +48,7 @@
               "mutations": [
                 {
                   "type": "attributes",
-                  "target": "h1",
+                  "target": "h1, h2",
                   "attributeName": "style",
                   "value": "background-color: #FF0000"
                 }

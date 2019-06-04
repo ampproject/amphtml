@@ -16,6 +16,7 @@
 
 import {getAllowedAttributeMutationEntry} from './attribute-allow-list/attribute-allow-list';
 import {isObject} from '../../../src/types';
+import {toArray} from '../../../src/types';
 import {user, userAssert} from '../../../src/log';
 
 const TAG = 'amp-experiment mutation-parser';
@@ -29,48 +30,55 @@ const MUTATION_TYPES = ['attributes', 'characterData', 'childList'];
 
 /**
  * Function to find all selectors of the mutation
- * and return a function to apply the identified
- * MutationRecord
+ * and return an object with the parsed mutation record
  * @param {!JsonObject} mutation
  * @param {!Document} document
- * @return {!Function}
+ * @return {!Object}
  */
 export function parseMutation(mutation, document) {
   const mutationRecord = assertMutationRecordFormat(mutation);
 
   const stringifiedMutation = JSON.stringify(mutation);
 
-  setSelectorToElement(mutationRecord, document);
+  setSelectorToElements(mutationRecord, document);
+
+  mutationRecord.mutations = [];
 
   if (mutationRecord['type'] === 'attributes') {
     assertAttributeMutationFormat(mutationRecord, stringifiedMutation);
 
-    // Get the AttribeMutationEntry
-    // From the Attribute allow list
-    const allowedAttributeMutationEntry = getAllowedAttributeMutationEntry(
-      mutationRecord,
-      stringifiedMutation
-    );
+    mutationRecord.targetElements.forEach(element => {
+      // Get the AttribeMutationEntry
+      // From the Attribute allow list
+      const allowedAttributeMutationEntry = getAllowedAttributeMutationEntry(
+        mutationRecord,
+        element,
+        stringifiedMutation
+      );
 
-    // Assert the attribute mutation passes it's check
-    // that is allowed and validated.
-    userAssert(
-      allowedAttributeMutationEntry.validate(mutationRecord),
-      'Mutation %s has an an unsupported value.',
-      stringifiedMutation
-    );
+      // Assert the attribute mutation passes it's check
+      // that is allowed and validated.
+      userAssert(
+        allowedAttributeMutationEntry.validate(mutationRecord, element),
+        'Mutation %s has an an unsupported value for element %s.',
+        stringifiedMutation,
+        element
+      );
 
-    // Return the corresponding mutation
-    // For the allowed attribute mutation
-    return allowedAttributeMutationEntry.mutate.bind(this, mutationRecord);
+      mutationRecord.mutations.push(() => {
+        allowedAttributeMutationEntry.mutate(mutationRecord, element);
+      });
+    });
   } else if (mutationRecord['type'] === 'characterData') {
     // TODO (torch2424) #21705: When we implement the mutation record
     // interface, have our validate() noop.
     assertCharacterDataMutationFormat(mutationRecord, stringifiedMutation);
 
-    return () => {
-      mutationRecord['targetElement'].textContent = mutationRecord['value'];
-    };
+    mutationRecord.targetElements.forEach(element => {
+      mutationRecord.mutations.push(() => {
+        element.textContent = mutationRecord['value'];
+      });
+    });
   } else {
     // childList type of mutation
 
@@ -81,8 +89,10 @@ export function parseMutation(mutation, document) {
 
     // TODO (torch2424): Remove this NOOP after reviews
     // This is done to allow for small(er) PRS
-    return () => {};
+    mutationRecord.mutate = () => {};
   }
+
+  return mutationRecord;
 }
 
 /**
@@ -174,14 +184,16 @@ function assertCharacterDataMutationFormat(
  * @param {!Object} mutationRecord
  * @param {!Document} document
  */
-function setSelectorToElement(mutationRecord, document) {
-  const targetElement = document.querySelector(mutationRecord['target']);
+function setSelectorToElements(mutationRecord, document) {
+  const targetElements = toArray(
+    document.querySelectorAll(mutationRecord['target'])
+  );
 
   userAssert(
-    targetElement !== null,
+    targetElements.length > 0,
     'No element on the document matches the selector, %s .',
     mutationRecord['target']
   );
 
-  mutationRecord['targetElement'] = targetElement;
+  mutationRecord.targetElements = targetElements;
 }

@@ -262,12 +262,30 @@ export class AmpExperiment extends AMP.BaseElement {
   applyMutations_(experimentName, variantObject) {
     const doc = this.getAmpDoc();
     return doc.whenReady().then(() => {
-      // Parse / Validate all of our mutations
-      const mutationOperations = variantObject['mutations'].map(mutation =>
-        parseMutation(mutation, this.win.document)
-      );
+      /**
+       * Do a two step process:
+       * 1. Parse / Validate all mutations, so we can
+       * Bail out early if any mutation has an error, or
+       * exceeds the mutation limit
+       * 2. Apply all of the parsed mutations.
+       */
+      let totalMutations = 0;
+      let mutationOperations = [];
+      variantObject['mutations'].forEach(mutation => {
+        const mutationRecord = parseMutation(mutation, this.win.document);
 
-      // Apply our mutations
+        totalMutations += mutationRecord.mutations;
+        if(totalMutations > MAX_MUTATIONS) {
+          const numMutationsError =
+            'Max number of mutations for the total ' +
+            `applied experiments exceeded: ${totalMutations} > ` +
+            MAX_MUTATIONS;
+          user().error(TAG, numMutationsError);
+          throw new Error(numMutationsError);
+        }
+
+        mutationOperations = mutationOperations.concat(mutationRecord.mutations);
+      });
       mutationOperations.forEach(mutationOperation => mutationOperation());
     });
   }

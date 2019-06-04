@@ -26,12 +26,14 @@ const TAG = 'amp-experiment allowed-mutations';
  * Function to validate the attribute mutation
  * should be allowed, and return its mutation
  * @param {!Object} mutationRecord
+ * @param {!Element} element
  * @param {string} stringifiedMutation
  * @return {!./allowed-attribute-mutation-entry.AllowedAttributeMutationEntry}
  */
 export function getAllowedAttributeMutationEntry(
   mutationRecord,
-  stringifiedMutation
+  element,
+  stringifiedMutation,
 ) {
   // Assert the mutation attribute is one of the following keys
   const mutationAttributeName = mutationRecord['attributeName'];
@@ -42,7 +44,7 @@ export function getAllowedAttributeMutationEntry(
   );
 
   // Find our allow list entry
-  const mutationTagName = mutationRecord['targetElement'].tagName.toLowerCase();
+  const mutationTagName = element.tagName.toLowerCase();
 
   // Search through the allow list for our
   // Allowed attribute entry
@@ -56,7 +58,8 @@ export function getAllowedAttributeMutationEntry(
   }
 
   if (!allowedAttributeMutationEntry) {
-    const error = `Mutation ${stringifiedMutation} has an unsupported attributeName.`;
+    const error = `Mutation ${stringifiedMutation} has an unsupported attributeName` +
+      ` for the element ${element}.`;
     user().error(TAG, error);
     throw new Error(error);
   }
