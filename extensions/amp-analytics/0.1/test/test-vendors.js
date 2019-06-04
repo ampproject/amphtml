@@ -125,7 +125,7 @@ describes.realWin('amp-analytics', {
           config.triggers = {};
         });
 
-        console.log('config', config);
+        console.log('config values', config);
         for (const name in config.requests) {
           it('should produce request: ' + name +
               '. If this test fails update vendor-requests.json', function* () {
