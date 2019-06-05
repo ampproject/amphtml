@@ -218,8 +218,6 @@ Warning: [Attribute selector](https://developer.mozilla.org/en-US/docs/Web/CSS/A
 *   [`overflow-x`](https://developer.mozilla.org/en-US/docs/Web/CSS/overflow-x)
 *   [`overflow-y`](https://developer.mozilla.org/en-US/docs/Web/CSS/overflow-y)
 *   [`overflow-wrap`](https://developer.mozilla.org/en-US/docs/Web/CSS/overflow-wrap)
-*   [`overflow-x`](https://developer.mozilla.org/en-US/docs/Web/CSS/overflow-x)
-*   [`overflow-y`](https://developer.mozilla.org/en-US/docs/Web/CSS/overflow-y)
 *   [`padding`](https://developer.mozilla.org/en-US/docs/Web/CSS/padding)
 *   [`padding-bottom`](https://developer.mozilla.org/en-US/docs/Web/CSS/padding-bottom)
 *   [`padding-left`](https://developer.mozilla.org/en-US/docs/Web/CSS/padding-left)
