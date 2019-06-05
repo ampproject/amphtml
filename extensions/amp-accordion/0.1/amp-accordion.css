@@ -20,7 +20,9 @@
   margin: 0;
 }
 
-/* heading */
+/* heading
+ * TODO(dvoytenko): remove most of these styles, except maybe for `cursor`.
+ */
 .i-amphtml-accordion-header {
   cursor: pointer;
   background-color: #efefef;
