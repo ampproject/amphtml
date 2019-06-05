@@ -36,8 +36,23 @@ const {Server} = require('karma');
 const BATCHSIZE = 4; // Number of Sauce Lab browsers
 const CHROMEBASE = argv.chrome_canary ? 'ChromeCanary' : 'Chrome';
 const chromeFlags = [];
-const IS_GULP_UNIT = argv._[0] === 'unit';
-const IS_GULP_INTEGRATION = argv._[0] === 'integration';
+
+/**
+ * Validates arguments before test runs
+ * @return {boolean}
+ */
+function shouldNotRun() {
+  if (argv.saucelabs) {
+    if (!process.env.SAUCE_USERNAME) {
+      throw new Error('Missing SAUCE_USERNAME Env variable');
+    }
+    if (!process.env.SAUCE_ACCESS_KEY) {
+      throw new Error('Missing SAUCE_ACCESS_KEY Env variable');
+    }
+  }
+
+  return false;
+}
 
 /**
  * Returns an array of ad types.
@@ -84,76 +99,6 @@ function getAdTypes() {
  */
 function refreshKarmaWdCache() {
   exec('node ./node_modules/wd/scripts/build-browser-scripts.js');
-}
-
-function getBrowserConfig() {
-  if (argv.saucelabs) {
-    if (IS_GULP_UNIT) {
-      return {browsers: ['SL_Safari_12', 'SL_Firefox']};
-    }
-
-    if (IS_GULP_INTEGRATION) {
-      return {
-        browsers: [
-          'SL_Chrome',
-          'SL_Firefox',
-          'SL_Edge_17',
-          'SL_Safari_12',
-          'SL_IE_11',
-          // TODO(amp-infra): Evaluate and add more platforms here.
-          //'SL_Chrome_Android_7',
-          //'SL_iOS_11',
-          //'SL_iOS_12',
-          'SL_Chrome_Beta',
-          'SL_Firefox_Beta',
-        ],
-      };
-    }
-
-    throw new Error(
-      'The --saucelabs flag is valid only for `gulp unit` and `gulp integration`.'
-    );
-  }
-
-  const chromeFlags = [];
-  if (argv.chrome_flags) {
-    argv.chrome_flags.split(',').forEach(flag => {
-      chromeFlags.push('--'.concat(flag));
-    });
-  }
-
-  const options = new Map();
-  options
-    .set('chrome_canary', {browsers: ['ChromeCanary']})
-    .set('chrome_flags', {
-      browsers: ['Chrome_flags'],
-      customLaunchers: {
-        // eslint-disable-next-line
-        Chrome_flags: {
-          base: 'Chrome',
-          flags: chromeFlags,
-        },
-      },
-    })
-    .set('edge', {browsers: ['Edge']})
-    .set('firefox', {browsers: ['Firefox']})
-    .set('headless', {browsers: ['Chrome_no_extensions_headless']})
-    .set('ie', {
-      browsers: ['IE'],
-      customLaunchers: {
-        IeNoAddOns: {
-          base: 'IE',
-          flags: ['-extoff'],
-        },
-      },
-    })
-    .set('safari', {browsers: ['Safari']});
-
-  for (const key of Array.from(options.keys())) {
-    if (argv[key]) {
-      return options.get(key);
-    }
-  }
 }
 
 /**
@@ -247,34 +192,6 @@ function maybePrintCoverageMessage() {
   const url = 'file://' + path.resolve('test/coverage/index.html');
   log(green('INFO:'), 'Generated code coverage report at', cyan(url));
   opn(url, {wait: false});
-}
-
-function maybeSetCoverageConfig(config, reportName) {
-  if (!argv.coverage) {
-    return;
-  }
-
-  config.plugins.push('karma-coverage-istanbul-reporter');
-  config.coverageIstanbulReporter = {
-    dir: 'test/coverage',
-    reports: isTravisBuild() ? ['lcovonly'] : ['html', 'text', 'text-summary'],
-    'report-config': {lcovonly: {file: reportName}},
-  };
-
-  const plugin = [
-    'istanbul',
-    {
-      exclude: [
-        'ads/**/*.js',
-        'third_party/**/*.js',
-        'test/**/*.js',
-        'extensions/**/test/**/*.js',
-        'testing/**/*.js',
-      ],
-    },
-  ];
-
-  config.browserify.transform = [['babelify', {plugins: [plugin]}]];
 }
 
 function karmaBrowserComplete(browser) {
@@ -462,10 +379,9 @@ async function createKarmaServer(config) {
 module.exports = {
   createKarmaServer,
   getAdTypes,
-  getBrowserConfig,
-  maybeSetCoverageConfig,
   maybePrintArgvMessages,
   refreshKarmaWdCache,
   runTestInBatches,
+  shouldNotRun,
   startTestServer,
 };
