@@ -20,7 +20,6 @@ import {
   setupAMPCors,
   setupInit,
   setupInput,
-  verifyAmpCORSHeaders,
 } from './utils/xhr-utils';
 import {dict} from './utils/object';
 import {user} from './log';
@@ -50,10 +49,7 @@ export function fetchDocument(win, input, opt_init) {
           .text()
           .then(body => new DOMParser().parseFromString(body, 'text/html'));
       }
-      return xhrRequest(input, init).then(({xhr, response}) => {
-        verifyAmpCORSHeaders(win, response, init);
-        return xhr.responseXML;
-      });
+      return xhrRequest(input, init).then(({xhr}) => xhr.responseXML);
     }
   );
 }

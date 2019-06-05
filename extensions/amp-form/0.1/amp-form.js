@@ -700,7 +700,7 @@ export class AmpForm {
         );
       })
       .then(
-        response => this.handleSsrTemplateSuccess_(response, request),
+        response => this.handleSsrTemplateSuccess_(response),
         error => {
           const detail = dict();
           if (error && error.message) {
@@ -736,14 +736,10 @@ export class AmpForm {
   /**
    * Transition the form to the submit success state.
    * @param {!JsonObject} response
-   * @param {!FetchRequestDef} request
    * @return {!Promise}
    * @private
    */
-  handleSsrTemplateSuccess_(response, request) {
-    // Construct the fetch response to reuse the methods in-place for
-    // amp CORs validation.
-    this.ssrTemplateHelper_.verifySsrResponse(this.win_, response, request);
+  handleSsrTemplateSuccess_(response) {
     return this.handleSubmitSuccess_(tryResolve(() => response));
   }
 

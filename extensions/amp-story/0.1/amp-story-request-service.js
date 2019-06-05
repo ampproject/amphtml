@@ -63,7 +63,6 @@ export class AmpStoryRequestService {
 
     const rawUrl = this.storyElement_.getAttribute(attributeName);
     const opts = {};
-    opts.requireAmpResponseSourceOrigin = false;
 
     return Services.urlReplacementsForDoc(this.storyElement_)
       .expandUrlAsync(user().assertString(rawUrl))

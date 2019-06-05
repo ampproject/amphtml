@@ -103,7 +103,6 @@ describe('amp-a4a', () => {
     });
     adResponse = {
       headers: {
-        'AMP-Access-Control-Allow-Source-Origin': 'about:srcdoc',
         'AMP-Fast-Fetch-Signature': validCSSAmp.signatureHeader,
       },
       body: validCSSAmp.reserialized,

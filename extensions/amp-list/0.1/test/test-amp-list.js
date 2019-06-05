@@ -96,7 +96,6 @@ describes.repeated(
             isSupported: () => false,
             fetchAndRenderTemplate: () => Promise.resolve(),
             renderTemplate: sandbox.stub(),
-            verifySsrResponse: () => Promise.resolve(),
           };
 
           list = new AmpList(element);
@@ -624,7 +623,6 @@ describes.repeated(
                 fetchOpt: sinon.match({
                   headers: {Accept: 'application/json'},
                   method: 'GET',
-                  requireAmpResponseSourceOrigin: false,
                   responseType: 'application/json',
                 }),
               });

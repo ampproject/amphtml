@@ -412,9 +412,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
       );
 
       return new AnalyticsConfig(element).loadConfig().then(config => {
-        expect(xhrStub).to.be.calledWith('//config1', {
-          requireAmpResponseSourceOrigin: false,
-        });
+        expect(xhrStub).to.be.calledWith('//config1', {});
         expect(config['vars']['title']).to.equal('remote');
         // iframe transport from remote config is ignored
         expect(config['transport']['iframe']).to.be.undefined;
@@ -465,7 +463,6 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
       return new AnalyticsConfig(element).loadConfig().then(config => {
         expect(xhrStub).to.be.calledWith('//config1', {
           credentials: 'include',
-          requireAmpResponseSourceOrigin: false,
         });
         expect(config['vars']['title']).to.equal('remote');
       });
@@ -507,7 +504,6 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
             triggers: [{on: 'visible', request: 'foo'}],
           },
           method: 'POST',
-          requireAmpResponseSourceOrigin: false,
         });
 
         expect(config['requests']['foo']).to.deep.equal({
@@ -561,7 +557,6 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
             },
           },
           method: 'POST',
-          requireAmpResponseSourceOrigin: false,
         });
       });
     });
@@ -604,7 +599,6 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
             },
           },
           method: 'POST',
-          requireAmpResponseSourceOrigin: false,
         });
       });
     });
@@ -640,7 +634,6 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
             triggers: [{on: 'visible', request: 'foo'}],
           },
           method: 'POST',
-          requireAmpResponseSourceOrigin: false,
         });
       });
     });
@@ -681,7 +674,6 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
             },
           },
           method: 'POST',
-          requireAmpResponseSourceOrigin: false,
         });
       });
     });
@@ -720,7 +712,6 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
             triggers: [{on: 'visible', request: 'foo'}],
           },
           method: 'POST',
-          requireAmpResponseSourceOrigin: false,
         });
 
         expect(config['requests']['foo']).to.deep.equal({
