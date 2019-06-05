@@ -136,9 +136,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
      * The element id if present or random number.
      * @private {number|string}
      */
-    this.prefix_ = element.id
-      ? element.id
-      : Math.floor(Math.random() * Math.floor(100));
+    this.prefix_ = element.id ? element.id : Math.floor(Math.random() * 100);
 
     /**
      * The reference to the <div> that contains template-rendered children.
