@@ -186,6 +186,15 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
       );
     });
 
+    it('should be no-op if request is initialized to bypass', () => {
+      ampDocSingle = null;
+      return getViewerInterceptResponse(win, ampDocSingle, input, {
+        bypassInterceptor: true,
+      }).then(() => {
+        expect(viewerForDoc).to.not.have.been.called;
+      });
+    });
+
     it('should be no-op if amp doc does not support xhr interception', () => {
       doc.removeAttribute('allow-xhr-interception');
       input = 'https://www.googz.org';

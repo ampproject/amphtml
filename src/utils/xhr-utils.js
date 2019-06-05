@@ -194,19 +194,12 @@ export function fromStructuredCloneable(response, responseType) {
  * @param {string} input The URL of the XHR which may get intercepted.
  * @param {!FetchInitDef} init The options of the XHR which may get
  *     intercepted.
- * @param {boolean=} bypassInterceptor
  * @return {!Promise<!Response|undefined>}
  *     A response returned by the interceptor if XHR is intercepted or
  *     `Promise<undefined>` otherwise.
  * @private
  */
-export function getViewerInterceptResponse(
-  win,
-  ampdocSingle,
-  input,
-  init,
-  bypassInterceptor
-) {
+export function getViewerInterceptResponse(win, ampdocSingle, input, init) {
   if (!ampdocSingle) {
     return Promise.resolve();
   }
@@ -215,7 +208,7 @@ export function getViewerInterceptResponse(
   if (
     isProxyOrigin(input) ||
     !viewer.hasCapability('xhrInterceptor') ||
-    bypassInterceptor
+    !!init.bypassInterceptor
   ) {
     return whenFirstVisible;
   }
