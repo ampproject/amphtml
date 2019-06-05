@@ -41,14 +41,11 @@ tags: {  # amp-access (json)
     dispatch_key: NAME_VALUE_DISPATCH
   }
   attrs: {
-    disabled_by: "transformed"
-    name: "nonce"
-  }
-  attrs: {
     name: "type"
     mandatory: true
     value_casei: "application/json"
   }
+  attr_lists: "nonce-attr"
   cdata: {
     blacklisted_cdata_regex: {
       regex: "<!--"

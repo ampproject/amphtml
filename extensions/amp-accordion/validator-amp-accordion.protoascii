@@ -36,7 +36,12 @@ tags: {  # <amp-accordion>
   tag_name: "AMP-ACCORDION"
   requires_extension: "amp-accordion"
   attrs: { name: "animate" value: "" }
-  attrs: { name: "disable-session-states" value: "" }
+  attrs: {
+    # session-states are always disabled in AMP4EMAIL
+    disabled_by: "amp4email"
+    name: "disable-session-states"
+    value: ""
+  }
   attrs: { name: "expand-single-section" value: "" }
   attr_lists: "extended-amp-global"
   child_tags: {
