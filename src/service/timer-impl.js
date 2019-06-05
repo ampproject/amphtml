@@ -170,6 +170,7 @@ export class Timer {
   /**
    * @param {!Window} embedWin
    * @param {!./ampdoc-impl.AmpDoc} unusedAmpDoc
+   * @nocollapse
    */
   static installInEmbedWindow(embedWin, unusedAmpDoc) {
     installServiceInEmbedScope(embedWin, TAG, new Timer(embedWin));

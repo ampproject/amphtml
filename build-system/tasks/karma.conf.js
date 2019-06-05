@@ -228,7 +228,7 @@ module.exports = {
         base: 'SauceLabs',
         browserName: 'safari',
         platform: 'macOS 10.13',
-        version: '12.0',
+        version: '12.1',
       },
       SAUCE_TIMEOUT_CONFIG
     ),

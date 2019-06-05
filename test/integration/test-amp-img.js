@@ -18,6 +18,7 @@ import {AmpEvents} from '../../src/amp-events';
 import {
   createFixtureIframe,
   expectBodyToBecomeVisible,
+  poll,
 } from '../../testing/iframe.js';
 
 describe
@@ -106,36 +107,44 @@ describe
         expect(ampImage.querySelectorAll('img').length).to.equal(1);
       });
     });
-
-    const body = `
-  <amp-img id="img0" srcset="/examples/img/hero@1x.jpg 641w,
-                   /examples/img/hero@2x.jpg 1282w"
-    width=641 height=480 layout=responsive></amp-img>
-  `;
-
-    describes.integration(
-      'Internet Explorer edge cases',
-      {
-        body,
-      },
-      env => {
-        let win;
-        beforeEach(() => {
-          win = env.win;
-        });
-
-        // IE doesn't support the srcset attribute, so if the developer
-        // provides a srcset but no src to amp-img, it should set the src
-        // attribute to the first entry in srcset.
-        it.configure()
-          .ifIe()
-          .run('should guarantee src if srcset is not supported', () => {
-            const ampImg = win.document.getElementById('img0');
-            const img = ampImg.querySelector('img');
-            expect(img.getAttribute('src')).to.equal(
-              '/examples/img/hero@1x.jpg'
-            );
-          });
-      }
-    );
   });
+
+// Move IE tests into its own `describe()`
+// so that Mocha picks up its 'ifIe()' configuration
+describe
+  .configure()
+  .ifIe()
+  .run('Rendering of amp-img - Internet Explorer edge cases', () => {
+    let fixture;
+    beforeEach(() => {
+      return createFixtureIframe('test/fixtures/images-ie.html', 500).then(
+        f => {
+          fixture = f;
+        }
+      );
+    });
+
+    // IE doesn't support the srcset attribute, so if the developer
+    // provides a srcset but no src to amp-img, it should set the src
+    // attribute to the first entry in srcset.
+    it('should guarantee src if srcset is not supported', () => {
+      const imageLoadedPromise = waitForImageToLoad(fixture.doc);
+      return imageLoadedPromise.then(() => {
+        const ampImg = fixture.doc.getElementById('img4');
+        const img = ampImg.querySelector('img[amp-img-id="img4"]');
+        expect(img.getAttribute('src')).to.equal('/examples/img/hero@1x.jpg');
+      });
+    });
+  });
+
+function waitForImageToLoad(document) {
+  return poll(
+    'wait for img4 to load',
+    () => {
+      const img = document.querySelector('img[amp-img-id="img4"]');
+      return img !== null;
+    },
+    () => {},
+    8000
+  );
+}

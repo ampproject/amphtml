@@ -90,8 +90,6 @@ export function waitForChildPromise(parent, checkFunc) {
 
 /**
  * Waits for document's body to be available and ready.
- * Will be deprecated soon; use {@link AmpDoc#waitForBodyOpen} or
- * @{link DocumentState#onBodyAvailable} instead.
  * @param {!Document} doc
  * @param {function()} callback
  */
