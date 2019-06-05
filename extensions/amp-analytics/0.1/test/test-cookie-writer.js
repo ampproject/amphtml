@@ -375,7 +375,8 @@ describes.fakeWin('amp-analytics.cookie-writer value', {amp: true}, env => {
     );
     return cookieWriter.write().then(() => {
       expect(win.document.lastSetCookieRaw).to.equal(
-        'aCookie=testValue; path=/; expires=Mon, 01 Jan 2018 08:00:00 GMT'
+        'aCookie=testValue; path=/; domain=example.com; ' +
+          'expires=Mon, 01 Jan 2018 08:00:00 GMT'
       );
     });
   });
@@ -396,7 +397,8 @@ describes.fakeWin('amp-analytics.cookie-writer value', {amp: true}, env => {
     );
     return cookieWriter.write().then(() => {
       expect(win.document.lastSetCookieRaw).to.equal(
-        'aCookie=testValue; path=/; expires=Mon, 25 Dec 2017 08:00:00 GMT'
+        'aCookie=testValue; path=/; domain=example.com; ' +
+          'expires=Mon, 25 Dec 2017 08:00:00 GMT'
       );
     });
   });

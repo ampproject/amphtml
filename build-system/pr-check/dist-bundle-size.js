@@ -66,7 +66,8 @@ function main() {
       buildTargets.has('FLAG_CONFIG') ||
       buildTargets.has('INTEGRATION_TEST') ||
       buildTargets.has('E2E_TEST') ||
-      buildTargets.has('VISUAL_DIFF')
+      buildTargets.has('VISUAL_DIFF') ||
+      buildTargets.has('UNIT_TEST')
     ) {
       timedExecOrDie('gulp update-packages');
       timedExecOrDie('gulp dist --fortesting');
