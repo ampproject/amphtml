@@ -62,9 +62,14 @@ function compileVendorConfigs(opt_options) {
       // only fail if not in watcher, so watch is not interrupted
       .pipe(gulpif(!options.calledByWatcher, jsonlint.failOnError()))
       // if not minifying, append .max to filename
-      .pipe(gulpif(!options.minify, rename(function (path) {
-        path.basename += '.max';
-      })))
+      .pipe(
+        gulpif(
+          !options.minify,
+          rename(function(path) {
+            path.basename += '.max';
+          })
+        )
+      )
       .pipe(gulp.dest(destPath))
   ).then(() => {
     endBuildStep(
