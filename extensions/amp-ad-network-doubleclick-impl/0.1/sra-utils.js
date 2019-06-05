@@ -190,26 +190,57 @@ export function isAdTest(impls) {
  * @visibleForTesting
  */
 export function getTargetingAndExclusions(impls) {
+  let commonKVs = null;
+  // Find common key/values.
+  for (let i = 0; i < impls.length; i++) {
+    const impl = impls[i];
+    if (!impl.jsonTargeting || !impl.jsonTargeting['targeting']) {
+      commonKVs = null;
+      break;
+    }
+    if (commonKVs) {
+      Object.keys(commonKVs).map(key => {
+        if (commonKVs[key] != impl.jsonTargeting['targeting'][key]) {
+          delete commonKVs[key];
+        }
+      });
+    } else {
+      // Need to create a copy otherwise later delete operations will modify
+      // first slot's targeting.
+      commonKVs = Object.assign({}, impl.jsonTargeting['targeting']);
+    }
+  }
   let hasScp = false;
   const scps = [];
+  const hasTargeting = impl =>
+    impl.jsonTargeting &&
+    (impl.jsonTargeting['targeting'] ||
+      impl.jsonTargeting['categoryExclusions']);
   impls.forEach(impl => {
-    if (
-      impl.jsonTargeting &&
-      (impl.jsonTargeting['targeting'] ||
-        impl.jsonTargeting['categoryExclusions'])
-    ) {
+    if (hasTargeting(impl)) {
       hasScp = true;
       scps.push(
         serializeTargeting(
           impl.jsonTargeting['targeting'] || null,
-          impl.jsonTargeting['categoryExclusions'] || null
+          impl.jsonTargeting['categoryExclusions'] || null,
+          commonKVs
         )
       );
     } else {
       scps.push('');
     }
   });
-  return hasScp ? {'prev_scp': scps.join('|')} : null;
+  if (!commonKVs && !hasScp) {
+    return null;
+  }
+  const result = {};
+  if (commonKVs && Object.keys(commonKVs).length) {
+    result['csp'] = serializeTargeting(commonKVs, null, null);
+  }
+  if (hasScp) {
+    result['prev_scp'] = scps.join('|');
+  }
+  return result;
 }
 
 /**
@@ -322,11 +353,18 @@ export function getIsFluid(impls) {
 /**
  * @param {?Object<string, (!Array<string>|string)>} targeting
  * @param {?(!Array<string>|string)} categoryExclusions
+ * @param {?Object<string, (!Array<string>|string)>} commonTargeting
  * @return {?string}
  */
-export function serializeTargeting(targeting, categoryExclusions) {
+export function serializeTargeting(
+  targeting,
+  categoryExclusions,
+  commonTargeting
+) {
   const serialized = targeting
-    ? Object.keys(targeting).map(key => serializeItem_(key, targeting[key]))
+    ? Object.keys(targeting)
+        .filter(key => !commonTargeting || commonTargeting[key] === undefined)
+        .map(key => serializeItem_(key, targeting[key]))
     : [];
   if (categoryExclusions) {
     serialized.push(serializeItem_('excl_cat', categoryExclusions));
