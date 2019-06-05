@@ -68,7 +68,7 @@ The `story-audio-unmuted` trigger is fired when the user initiates an interactio
 
 ### Page attachment enter trigger (`"on": "story-page-attachment-enter"`)
 
-The `story-page-attachment-enter` trigger is fired when a page attachment is open by the user.
+The `story-page-attachment-enter` trigger is fired when a page attachment is opened by the user.
 
 ### Page attachment exit trigger (`"on": "story-page-attachment-exit"`)
 
