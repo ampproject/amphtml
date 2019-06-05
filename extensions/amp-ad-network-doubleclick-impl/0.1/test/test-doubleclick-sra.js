@@ -208,6 +208,24 @@ describes.realWin('Doubleclick SRA', config, env => {
         'prev_scp': '|a=1&b=2|c=1&d=l%3Dd&excl_cat=a,b|',
       });
     });
+    it('should move common targeting into csp parameter', () => {
+      impls[0] = {jsonTargeting: {targeting: {a: 1, b: 2, c: 3, d: 4, e: 5}}};
+      impls[1] = {jsonTargeting: {targeting: {a: 1, b: 2, c: 3, d: 4}}};
+      impls[2] = {jsonTargeting: {targeting: {a: 2, b: 2, c: 4, d: 4}}};
+      impls[3] = {jsonTargeting: {targeting: {b: 2, d: 4}}};
+      expect(getTargetingAndExclusions(impls)).to.jsonEqual({
+        'csp': 'b=2&d=4',
+        'prev_scp': 'a=1&c=3&e=5|a=1&c=3|a=2&c=4|',
+      });
+    });
+    it('should not use csp parameter if slot has no targeting', () => {
+      impls[0] = {jsonTargeting: {targeting: {a: 1, b: 2}}};
+      impls[1] = {jsonTargeting: {}};
+      impls[2] = {jsonTargeting: {targeting: {a: 1, b: 2}}};
+      expect(getTargetingAndExclusions(impls)).to.jsonEqual({
+        'prev_scp': 'a=1&b=2||a=1&b=2',
+      });
+    });
     it('should determine experiment ids', () => {
       expect(getExperimentIds(impls)).to.be.null;
       impls[0] = {
