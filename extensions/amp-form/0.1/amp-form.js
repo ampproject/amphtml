@@ -580,13 +580,7 @@ export class AmpForm {
       SUBMIT_TIMEOUT
     ).then(
       () => this.handlePresubmitSuccess_(trust),
-      error => {
-        const detail = dict();
-        if (error && error.message) {
-          detail['error'] = error.message;
-        }
-        return this.handleSubmitFailure_(error, detail);
-      }
+      e => this.handleSubmitFailure_(e, /* json */ null, /* skipSsr */ true)
     );
   }
 
@@ -901,6 +895,7 @@ export class AmpForm {
     let promise;
     if (e && e.response) {
       const error = /** @type {!Error} */ (e);
+      // `response` is set on the thrown error by xhr-utils.js#assertSuccess().
       promise = error.response.json().catch(() => null);
     } else {
       promise = Promise.resolve(null);
@@ -915,15 +910,16 @@ export class AmpForm {
   /**
    * Transition the form the the submit error state.
    * @param {*} error
-   * @param {!JsonObject} json
+   * @param {?JsonObject} json
+   * @param {boolean} skipSsr
    * @return {!Promise}
    * @private
    */
-  handleSubmitFailure_(error, json) {
+  handleSubmitFailure_(error, json, skipSsr = false) {
     this.setState_(FormState.SUBMIT_ERROR);
-    user().error(TAG, 'Form submission failed: %s', error);
+    user().error(TAG, 'amp-form submit failed: %s', error);
     return tryResolve(() => {
-      this.renderTemplate_(json).then(() => {
+      this.renderTemplate_(json, skipSsr).then(() => {
         this.triggerAction_(FormEvents.SUBMIT_ERROR, json);
       });
     });
@@ -1098,21 +1094,23 @@ export class AmpForm {
 
   /**
    * Renders a template based on the form state and its presence in the form.
-   * @param {!JsonObject} data
+   * @param {?JsonObject} data
+   * @param {boolean} skipSsr
    * @return {!Promise}
    * @private
    */
-  renderTemplate_(data) {
+  renderTemplate_(data, skipSsr = false) {
+    let promise = Promise.resolve();
+
     const container = this.form_./*OK*/ querySelector(`[${this.state_}]`);
-    let p = Promise.resolve();
     if (container) {
       const messageId = `rendered-message-${this.id_}`;
       container.setAttribute('role', 'alert');
       container.setAttribute('aria-labeledby', messageId);
       container.setAttribute('aria-live', 'assertive');
       if (this.templates_.hasTemplate(container)) {
-        p = this.ssrTemplateHelper_
-          .renderTemplate(devAssert(container), data)
+        promise = this.ssrTemplateHelper_
+          .renderTemplate(devAssert(container), data, skipSsr)
           .then(rendered => {
             rendered.id = messageId;
             rendered.setAttribute('i-amphtml-rendered', '');
@@ -1138,12 +1136,10 @@ export class AmpForm {
         this.resources_.mutateElement(container, () => {});
       }
     }
-
     if (getMode().test) {
-      this.renderTemplatePromise_ = p;
+      this.renderTemplatePromise_ = promise;
     }
-
-    return p;
+    return promise;
   }
 
   /**

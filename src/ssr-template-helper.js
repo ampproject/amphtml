@@ -98,14 +98,16 @@ export class SsrTemplateHelper {
   /**
    * @param {!Element} element
    * @param {(?JsonObject|string|undefined|!Array)} data
+   * @param {boolean} skipSsr
    * @return {!Promise}
    */
-  renderTemplate(element, data) {
+  renderTemplate(element, data, skipSsr = false) {
     let renderTemplatePromise;
-    if (this.isSupported()) {
+    if (this.isSupported() && !skipSsr) {
       userAssert(
-        typeof data['html'] === 'string',
-        'Server side html response must be defined'
+        data && typeof data['html'] === 'string',
+        'SSR template data missing "html" property: %s',
+        data
       );
       renderTemplatePromise = this.templates_.findAndSetHtmlForTemplate(
         element,
@@ -119,7 +121,7 @@ export class SsrTemplateHelper {
     } else {
       renderTemplatePromise = this.templates_.findAndRenderTemplate(
         element,
-        /** @type {!JsonObject} */ (data)
+        /** @type {!JsonObject} */ (data || dict())
       );
     }
 
