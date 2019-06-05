@@ -5,6 +5,7 @@ formats:
   - email
 teaser:
   text: Truncates text with an ellipsis, optionally showing an overflow element.
+experimental: true
 ---
 <!--
 Copyright 2019 The AMP HTML Authors. All Rights Reserved.
@@ -31,7 +32,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
-    <td><div><a href="https://www.ampproject.org/docs/reference/experimental.html">Experimental</a>; You must turn on the `amp-truncate-text` experiment to use this component.</div></td>
+    <td><div><a href="https://amp.dev/documentation/guides-and-tutorials/learn/experimental">Experimental</a>; You must turn on the `amp-truncate-text` experiment to use this component.</div></td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>

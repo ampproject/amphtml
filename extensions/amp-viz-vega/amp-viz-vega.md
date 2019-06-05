@@ -4,6 +4,7 @@ formats:
   - websites
 teaser:
   text: Displays visualizations created by using Vega visualization grammar.
+experimental: true
 ---
 <!---
 Copyright 2016 The AMP HTML Authors. All Rights Reserved.
@@ -28,7 +29,7 @@ Displays visualizations created using <a href="https://vega.github.io/vega/">Veg
 <table>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
-    <td><a href="https://www.ampproject.org/docs/reference/experimental.html">Experimental</a></td>
+    <td><a href="https://amp.dev/documentation/guides-and-tutorials/learn/experimental">Experimental</a></td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>

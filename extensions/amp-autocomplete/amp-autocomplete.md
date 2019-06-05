@@ -4,6 +4,7 @@ formats:
  - websites
 teaser:
   text: Suggests completed results corresponding to the user input as they type into the input field.
+experimental: true
 ---
 <!--
 Copyright 2019 The AMP HTML Authors. All Rights Reserved.
