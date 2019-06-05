@@ -77,7 +77,7 @@ Example:
 -->
 <amp-addthis
   width="320"
-  height="92"
+  height="92"``
   data-pub-id="ra-5c191331410932ff"
   data-widget-id="mv93"
   data-widget-type="inline">
