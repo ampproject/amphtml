@@ -19,7 +19,7 @@ import {ViewportBindingIosEmbedShadowRoot_} from '../../src/service/viewport/vie
 import {ViewportBindingIosEmbedWrapper_} from '../../src/service/viewport/viewport-binding-ios-embed-wrapper';
 import {ViewportBindingNatural_} from '../../src/service/viewport/viewport-binding-natural';
 import {installDocService} from '../../src/service/ampdoc-impl';
-import {installDocumentStateService} from '../../src/service/document-state';
+import {installGlobalDocumentStateService} from '../../src/service/document-state';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installVsyncService} from '../../src/service/vsync-impl';
 import {toggleExperiment} from '../../src/experiments';
@@ -51,7 +51,7 @@ describes.realWin('ViewportBindingNatural', {ampCss: true}, env => {
     installPlatformService(win);
     installVsyncService(win);
     installDocService(win, /* isSingleDoc */ true);
-    installDocumentStateService(win);
+    installGlobalDocumentStateService(win);
     ampdoc = Services.ampdocServiceFor(win).getAmpDoc();
     binding = new ViewportBindingNatural_(ampdoc, viewer);
     binding.connect();
@@ -242,7 +242,7 @@ describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
     child.textContent = 'test';
     win.document.body.appendChild(child);
     installDocService(win, /* isSingleDoc */ true);
-    installDocumentStateService(win);
+    installGlobalDocumentStateService(win);
     installVsyncService(win);
     installPlatformService(win);
     vsync = Services.vsyncFor(win);
@@ -550,7 +550,7 @@ describes.realWin('ViewportBindingIosEmbedShadowRoot_', {ampCss: true}, env => {
         win.document.head.appendChild(styleEl);
 
         installDocService(win, /* isSingleDoc */ true);
-        installDocumentStateService(win);
+        installGlobalDocumentStateService(win);
         installVsyncService(win);
         vsync = Services.vsyncFor(win);
         binding = new ViewportBindingIosEmbedShadowRoot_(win);

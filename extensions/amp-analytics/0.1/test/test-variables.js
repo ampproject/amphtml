@@ -210,6 +210,35 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
       return expect(expanded).to.eventually.equal(output);
     }
 
+    it('handles consecutive macros in inner arguments', () => {
+      sandbox.useFakeTimers(123456789);
+      win.location.href = 'https://example.com/?test=yes';
+      return check(
+        '$IF(QUERY_PARAM(test), 1.$SUBSTR(TIMESTAMP, 0, 10)QUERY_PARAM(test), ``)',
+        '1.123456789yes'
+      );
+    });
+
+    it('handles consecutive macros w/o parens in inner arguments', () => {
+      sandbox.useFakeTimers(123456789);
+      win.location.href = 'https://example.com/?test=yes';
+      return check('$IF(QUERY_PARAM(test), 1.TIMESTAMP, ``)', '1.123456789');
+    });
+
+    it('handles string + macro as inner argument', () =>
+      check('$REPLACE(testCLIENT_ID(scope), amp-, ``)', 'test12345', {
+        CLIENT_ID: 'amp-12345',
+      }));
+
+    it('should not trim right of string before macro', () => {
+      sandbox.useFakeTimers(123456789);
+      win.location.href = 'https://example.com/?test=yes';
+      return check(
+        '$IF(QUERY_PARAM(test), foo TIMESTAMP, ``)',
+        'foo%20123456789'
+      );
+    });
+
     it('default works without first arg', () => check('$DEFAULT(,two)', 'two'));
 
     it('default works without first arg length', () =>
