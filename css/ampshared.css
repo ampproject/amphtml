@@ -518,18 +518,8 @@ amp-accordion > section > * {
 }
 
 amp-accordion,
-amp-accordion > section,
-.i-amphtml-accordion-header,
-.i-amphtml-accordion-content {
+amp-accordion > section {
   margin: 0;
-}
-
-/* heading element*/
-.i-amphtml-accordion-header {
-  cursor: pointer;
-  background-color: #efefef;
-  padding-right: 20px;
-  border: solid 1px #dfdfdf;
 }
 
 /* Collapse content by default. */
