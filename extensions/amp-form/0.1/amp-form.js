@@ -580,7 +580,13 @@ export class AmpForm {
       SUBMIT_TIMEOUT
     ).then(
       () => this.handlePresubmitSuccess_(trust),
-      e => this.handleSubmitFailure_(e, /* json */ null, /* skipSsr */ true)
+      error => {
+        const detail = dict();
+        if (error && error.message) {
+          detail['error'] = error.message;
+        }
+        return this.handleSubmitFailure_(error, detail);
+      }
     );
   }
 
@@ -694,14 +700,10 @@ export class AmpForm {
         );
       })
       .then(
-        response => this.handleSsrTemplateSuccess_(response),
-        error => {
-          const detail = dict();
-          if (error && error.message) {
-            detail['error'] = error.message;
-          }
-          return this.handleSubmitFailure_(error, detail);
-        }
+        jsonPromise => this.handleSubmitSuccess_(jsonPromise),
+        // If SSR fails, then skip the normal SSR path and just render the
+        // error template with null data.
+        e => this.handleSubmitFailure_(e, /* json */ null, /* skipSsr */ true)
       );
   }
 
@@ -725,16 +727,6 @@ export class AmpForm {
       errorTemplate = this.templates_.maybeFindTemplate(errorContainer);
     }
     return {successTemplate, errorTemplate};
-  }
-
-  /**
-   * Transition the form to the submit success state.
-   * @param {!JsonObject} response
-   * @return {!Promise}
-   * @private
-   */
-  handleSsrTemplateSuccess_(response) {
-    return this.handleSubmitSuccess_(tryResolve(() => response));
   }
 
   /**
@@ -911,7 +903,9 @@ export class AmpForm {
    * Transition the form the the submit error state.
    * @param {*} error
    * @param {?JsonObject} json
-   * @param {boolean} skipSsr
+   * @param {boolean} skipSsr Default is false. If true, skips SSR path and
+   *   renders `data` via normal template path instead. Should only be used
+   *   in error case.
    * @return {!Promise}
    * @private
    */
@@ -1095,7 +1089,9 @@ export class AmpForm {
   /**
    * Renders a template based on the form state and its presence in the form.
    * @param {?JsonObject} data
-   * @param {boolean} skipSsr
+   * @param {boolean} skipSsr Default is false. If true, skips SSR path and
+   *   renders `data` via normal template path instead. Should only be used
+   *   in error case.
    * @return {!Promise}
    * @private
    */

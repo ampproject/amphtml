@@ -72,7 +72,7 @@ export class SsrTemplateHelper {
    *     the payload. If provided, finding the template in the passed in
    *     element is not attempted.
    * @param {!Object=} opt_attributes Additional JSON to send to viewer.
-   * return {!Promise<{data:{?JsonObject|string|undefined}}>}
+   * @return {!Promise<!JsonObject>}
    */
   fetchAndRenderTemplate(
     element,
@@ -98,34 +98,37 @@ export class SsrTemplateHelper {
   /**
    * @param {!Element} element
    * @param {(?JsonObject|string|undefined|!Array)} data
-   * @param {boolean} skipSsr
+   * @param {boolean} skipSsr Default is false. If true, skips SSR path and
+   *   renders `data` via normal template path instead. Should only be used
+   *   in error case.
    * @return {!Promise}
    */
   renderTemplate(element, data, skipSsr = false) {
-    let renderTemplatePromise;
+    userAssert(
+      !skipSsr || data === null,
+      'SSR may only be skipped when rendering null data.'
+    );
     if (this.isSupported() && !skipSsr) {
       userAssert(
         data && typeof data['html'] === 'string',
         'SSR template data missing "html" property: %s',
         data
       );
-      renderTemplatePromise = this.templates_.findAndSetHtmlForTemplate(
+      return this.templates_.findAndSetHtmlForTemplate(
         element,
         /** @type {string} */ (data['html'])
       );
     } else if (isArray(data)) {
-      renderTemplatePromise = this.templates_.findAndRenderTemplateArray(
+      return this.templates_.findAndRenderTemplateArray(
         element,
         /** @type {!Array} */ (data)
       );
     } else {
-      renderTemplatePromise = this.templates_.findAndRenderTemplate(
+      return this.templates_.findAndRenderTemplate(
         element,
         /** @type {!JsonObject} */ (data || dict())
       );
     }
-
-    return renderTemplatePromise;
   }
 
   /**
