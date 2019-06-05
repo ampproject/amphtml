@@ -536,6 +536,17 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       psz = `${parentWidth}x-1`;
       msz = `${slotWidth}x-1`;
     }
+    if (!this.useSra) {
+      console.log(
+        'targeting',
+        serializeTargeting(
+          (this.jsonTargeting && this.jsonTargeting['targeting']) || null,
+          (this.jsonTargeting && this.jsonTargeting['categoryExclusions']) ||
+            null,
+          null
+        )
+      );
+    }
     return Object.assign(
       {
         'iu': this.element.getAttribute('data-slot'),
@@ -559,7 +570,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         'scp': serializeTargeting(
           (this.jsonTargeting && this.jsonTargeting['targeting']) || null,
           (this.jsonTargeting && this.jsonTargeting['categoryExclusions']) ||
-            null
+            null,
+          null
         ),
         'spsa': this.isSinglePageStoryAd
           ? `${pageLayoutBox.width}x${pageLayoutBox.height}`
