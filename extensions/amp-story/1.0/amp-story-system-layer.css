@@ -156,7 +156,8 @@
   left: 48px !important;
 }
 
-[i-amphtml-story-messagedisplay="noshow"] .i-amphtml-message-container {
+[i-amphtml-story-messagedisplay="noshow"] .i-amphtml-message-container,
+[i-amphtml-story-has-new-page="noshow"] .i-amphtml-story-has-new-page-text {
   transition: opacity 0.2s cubic-bezier(0.4, 0.0, 1, 1), transform 0.0s 0.2s !important;
   transform: translateX(10px) !important;
   opacity: 0 !important;
@@ -166,7 +167,8 @@
   transform: translateX(-10px) !important;
 }
 
-[i-amphtml-story-messagedisplay="show"] .i-amphtml-message-container {
+[i-amphtml-story-messagedisplay="show"] .i-amphtml-message-container,
+.last-page-active[i-amphtml-story-has-new-page="show"] .i-amphtml-story-has-new-page-text {
   transition: opacity 0.2s cubic-bezier(0.0, 0.0, 0.2, 1), transform 0.2s cubic-bezier(0.4, 0.0, 0.2, 1) !important;
   opacity: 1 !important;
   transform: translateX(0px) !important;
@@ -190,8 +192,7 @@
 .i-amphtml-story-mute-text,
 .i-amphtml-story-unmute-sound-text,
 .i-amphtml-story-unmute-no-sound-text,
-.i-amphtml-story-sidebar-control,
-.i-amphtml-story-new-page-control   {
+.i-amphtml-story-sidebar-control {
   display: none !important;
 }
 
@@ -243,13 +244,13 @@
   display: none !important;
 }
 
-.i-amphtml-story-new-page-control {
-  /* TODO(enriqe): this is a placehoder, replace when new icon is ready. */
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 48 48" fill="#FFFFFF"><path d="M0 0h48v48H0z" fill="none"/><path d="M22 34h4V22h-4v12zm2-30C12.95 4 4 12.95 4 24s8.95 20 20 20 20-8.95 20-20S35.05 4 24 4zm0 36c-8.82 0-16-7.18-16-16S15.18 8 24 8s16 7.18 16 16-7.18 16-16 16zm-2-22h4v-4h-4v4z"/></svg>') !important;
-}
-
-[i-amphtml-story-has-new-page] .i-amphtml-story-new-page-control {
-  display: block !important;
+.i-amphtml-story-has-new-page-text {
+  display: flex !important;
+  align-items: center !important;
+  color: #fff !important;
+  font-size: 16px !important;
+  text-shadow: 0px 0px 6px rgba(0, 0, 0, 0.36) !important;
+  opacity: 0 !important;
 }
 
 .i-amphtml-embedded.first-page-active .i-amphtml-story-info-control {

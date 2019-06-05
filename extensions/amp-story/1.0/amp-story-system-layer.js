@@ -19,7 +19,6 @@ import {
   UIType,
   getStoreService,
 } from './amp-story-store-service';
-import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-story-system-layer-1.0.css';
 import {
   DevelopmentModeLog,
@@ -69,13 +68,10 @@ const INFO_CLASS = 'i-amphtml-story-info-control';
 const SIDEBAR_CLASS = 'i-amphtml-story-sidebar-control';
 
 /** @private @const {string} */
-const NEW_PAGE_AVAILABLE_CLASS = 'i-amphtml-story-new-page-control';
-
-/** @private @const {string} */
 const HAS_NEW_PAGE_ATTRIBUTE = 'i-amphtml-story-has-new-page';
 
 /** @private @const {number} */
-const HIDE_AUDIO_MESSAGE_TIMEOUT_MS = 1500;
+const HIDE_MESSAGE_TIMEOUT_MS = 1500;
 
 /** @private @const {!./simple-template.ElementDef} */
 const TEMPLATE = {
@@ -88,6 +84,13 @@ const TEMPLATE = {
       tag: 'div',
       attrs: dict({'class': 'i-amphtml-story-system-layer-buttons'}),
       children: [
+        {
+          tag: 'div',
+          attrs: dict({
+            'class': 'i-amphtml-story-has-new-page-text',
+          }),
+          localizedStringId: LocalizedStringId.AMP_STORY_HAS_NEW_PAGE_TEXT,
+        },
         {
           tag: 'div',
           attrs: dict({
@@ -163,13 +166,6 @@ const TEMPLATE = {
             'class': SIDEBAR_CLASS + ' i-amphtml-story-button',
           }),
         },
-        {
-          tag: 'div',
-          attrs: dict({
-            'role': 'button',
-            'class': NEW_PAGE_AVAILABLE_CLASS + ' i-amphtml-story-button',
-          }),
-        },
       ],
     },
   ],
@@ -184,7 +180,7 @@ const TEMPLATE = {
  *   - share button
  *   - domain info button
  *   - sidebar
- *   - new page updates available button
+ *   - story updated label (for live stories)
  */
 export class SystemLayer {
   /**
@@ -236,6 +232,9 @@ export class SystemLayer {
 
     /** @private {?number|?string} */
     this.timeoutId_ = null;
+
+    /** @private {?number|?string} */
+    this.storyHasNewPageTimeoutId_ = null;
   }
 
   /**
@@ -291,6 +290,7 @@ export class SystemLayer {
     }
 
     this.getShadowRoot().setAttribute(MESSAGE_DISPLAY_CLASS, 'noshow');
+    this.getShadowRoot().setAttribute(HAS_NEW_PAGE_ATTRIBUTE, 'noshow');
     return this.getRoot();
   }
 
@@ -328,20 +328,6 @@ export class SystemLayer {
         this.onInfoClick_();
       } else if (matches(target, `.${SIDEBAR_CLASS}, .${SIDEBAR_CLASS} *`)) {
         this.onSidebarClick_();
-      } else if (
-        matches(
-          target,
-          `.${NEW_PAGE_AVAILABLE_CLASS}, .${NEW_PAGE_AVAILABLE_CLASS} *`
-        )
-      ) {
-        // Forward event to amp-story.
-        Services.actionServiceForDoc(this.parentEl_).trigger(
-          target,
-          'tap',
-          event,
-          ActionTrust.HIGH
-        );
-        this.toggleNewPageAvailableButton_(false);
       }
     });
 
@@ -424,8 +410,8 @@ export class SystemLayer {
       }
     );
 
-    this.storeService_.subscribe(StateProperty.NEW_PAGE_AVAILABLE_ID, id => {
-      this.onNewPageAvailable_(id);
+    this.storeService_.subscribe(StateProperty.NEW_PAGE_AVAILABLE_ID, () => {
+      this.onNewPageAvailable_();
     });
   }
 
@@ -548,29 +534,32 @@ export class SystemLayer {
   }
 
   /**
-   * Hides audio message after elapsed time.
+   * Hides message after elapsed time.
+   * @param {?number|?string} timeoutId
+   * @param {string} message
    * @private
    */
-  hideAudioMessageAfterTimeout_() {
-    if (this.timeoutId_) {
-      this.timer_.cancel(this.timeoutId_);
+  hideMessageAfterTimeout_(timeoutId, message) {
+    if (timeoutId) {
+      this.timer_.cancel(timeoutId);
     }
-    this.timeoutId_ = this.timer_.delay(
-      () => this.hideAudioMessageInternal_(),
-      HIDE_AUDIO_MESSAGE_TIMEOUT_MS
+    timeoutId = this.timer_.delay(
+      () => this.hideMessageInternal_(message),
+      HIDE_MESSAGE_TIMEOUT_MS
     );
   }
 
   /**
-   * Hides audio message.
+   * Hides message.
+   * @param {string} message
    * @private
    */
-  hideAudioMessageInternal_() {
+  hideMessageInternal_(message) {
     if (!this.isBuilt_) {
       return;
     }
     this.vsync_.mutate(() => {
-      this.getShadowRoot().setAttribute(MESSAGE_DISPLAY_CLASS, 'noshow');
+      this.getShadowRoot().setAttribute(message, 'noshow');
     });
   }
 
@@ -617,7 +606,13 @@ export class SystemLayer {
    */
   onPageIndexUpdate_(index) {
     this.vsync_.mutate(() => {
+      const lastIndex =
+        this.storeService_.get(StateProperty.PAGE_IDS).length - 1;
       this.getShadowRoot().classList.toggle('first-page-active', index === 0);
+      this.getShadowRoot().classList.toggle(
+        'last-page-active',
+        index === lastIndex
+      );
     });
   }
 
@@ -643,7 +638,7 @@ export class SystemLayer {
     this.storeService_.dispatch(Action.TOGGLE_MUTED, mute);
     this.vsync_.mutate(() => {
       this.getShadowRoot().setAttribute(MESSAGE_DISPLAY_CLASS, 'show');
-      this.hideAudioMessageAfterTimeout_();
+      this.hideMessageAfterTimeout_(this.timeoutId_, MESSAGE_DISPLAY_CLASS);
     });
   }
 
@@ -674,30 +669,16 @@ export class SystemLayer {
   }
 
   /**
-   * Updates the "see new update" button with the new page id.
-   * When clicked it will take the user to the newest page.
-   * @param {string} id
+   * Shows the "story updated" label when a new page was added to the story.
    * @private
    */
-  onNewPageAvailable_(id) {
-    const button = this.buttonsContainer_.querySelector(
-      '.i-amphtml-story-new-page-control'
-    );
+  onNewPageAvailable_() {
     this.vsync_.mutate(() => {
-      button.setAttribute('on', `tap:${this.parentEl_.id}.goToPage(id=${id})`);
-    });
-    this.toggleNewPageAvailableButton_(true);
-  }
-
-  /**
-   * Displays or hides the "see new update" button.
-   * @param {boolean} isVisible
-   */
-  toggleNewPageAvailableButton_(isVisible) {
-    this.vsync_.mutate(() => {
-      isVisible
-        ? this.getShadowRoot().setAttribute(HAS_NEW_PAGE_ATTRIBUTE, '')
-        : this.getShadowRoot().removeAttribute(HAS_NEW_PAGE_ATTRIBUTE);
+      this.getShadowRoot().setAttribute(HAS_NEW_PAGE_ATTRIBUTE, 'show');
+      this.hideMessageAfterTimeout_(
+        this.storyHasNewPageTimeoutId_,
+        HAS_NEW_PAGE_ATTRIBUTE
+      );
     });
   }
 

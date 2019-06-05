@@ -98,6 +98,11 @@ const strings = {
     string: 'Play video',
     description: 'Label for a button to play the video visible on the page.',
   },
+  [LocalizedStringId.AMP_STORY_HAS_NEW_PAGE_TEXT]: {
+    string: 'Story updated',
+    description:
+      'Label indicating that the story has been updated with (a) new page(s).',
+  },
   [LocalizedStringId.AMP_STORY_HINT_UI_NEXT_LABEL]: {
     string: 'Tap Next',
     description:
