@@ -101,7 +101,7 @@ const strings = {
   [LocalizedStringId.AMP_STORY_HAS_NEW_PAGE_TEXT]: {
     string: 'Story updated',
     description:
-      'Label indicating that the story has been updated with (a) new page(s).',
+      'Label that indicates that additional content has been added to a story',
   },
   [LocalizedStringId.AMP_STORY_HINT_UI_NEXT_LABEL]: {
     string: 'Tap Next',

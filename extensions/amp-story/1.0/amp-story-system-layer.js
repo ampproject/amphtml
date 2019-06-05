@@ -232,9 +232,6 @@ export class SystemLayer {
 
     /** @private {?number|?string} */
     this.timeoutId_ = null;
-
-    /** @private {?number|?string} */
-    this.storyHasNewPageTimeoutId_ = null;
   }
 
   /**
@@ -535,15 +532,14 @@ export class SystemLayer {
 
   /**
    * Hides message after elapsed time.
-   * @param {?number|?string} timeoutId
    * @param {string} message
    * @private
    */
-  hideMessageAfterTimeout_(timeoutId, message) {
-    if (timeoutId) {
-      this.timer_.cancel(timeoutId);
+  hideMessageAfterTimeout_(message) {
+    if (this.timeoutId_) {
+      this.timer_.cancel(this.timeoutId_);
     }
-    timeoutId = this.timer_.delay(
+    this.timeoutId_ = this.timer_.delay(
       () => this.hideMessageInternal_(message),
       HIDE_MESSAGE_TIMEOUT_MS
     );
@@ -638,7 +634,7 @@ export class SystemLayer {
     this.storeService_.dispatch(Action.TOGGLE_MUTED, mute);
     this.vsync_.mutate(() => {
       this.getShadowRoot().setAttribute(MESSAGE_DISPLAY_CLASS, 'show');
-      this.hideMessageAfterTimeout_(this.timeoutId_, MESSAGE_DISPLAY_CLASS);
+      this.hideMessageAfterTimeout_(MESSAGE_DISPLAY_CLASS);
     });
   }
 
@@ -675,10 +671,7 @@ export class SystemLayer {
   onNewPageAvailable_() {
     this.vsync_.mutate(() => {
       this.getShadowRoot().setAttribute(HAS_NEW_PAGE_ATTRIBUTE, 'show');
-      this.hideMessageAfterTimeout_(
-        this.storyHasNewPageTimeoutId_,
-        HAS_NEW_PAGE_ATTRIBUTE
-      );
+      this.hideMessageAfterTimeout_(HAS_NEW_PAGE_ATTRIBUTE);
     });
   }
 
