@@ -150,19 +150,18 @@ tags: { # amp-list-load-more
 # The button element variant allowed in amp-list-load-more.
 tags: {
   html_format: AMP
-  html_format: AMP4ADS
-  html_format: AMP4EMAIL
-  html_format: ACTIONS
   requires_extension: "amp-list"
   tag_name: "BUTTON"
   spec_name: "amp-list-load-more button[load-more-clickable]"
-  mandatory_ancestor: "AMP-LIST-LOAD-MORE"
+  mandatory_parent: "AMP-LIST-LOAD-MORE"
   attrs: {
     name: "disabled"
     value: ""
   }
   attrs: {
     name: "load-more-clickable"
+    mandatory: true
+    dispatch_key: NAME_VALUE_DISPATCH
     value: ""
   }
   attrs: {
@@ -177,6 +176,7 @@ tags: {
   attrs: { name: "value" }
   attr_lists: "name-attr"
 }
+
 # AMP4EMAIL disallows mustache in src attribute.
 tags: {  # <amp-list>
   html_format: AMP4EMAIL
