@@ -44,19 +44,19 @@ Capture analytics data from an AMP document.
 Before you start using AMP analytics on your site, you need to decide whether you will you use third-party analytics tools to analyze user engagement, or your own in-house solution.
 
 {% call callout('Read on', type='read') %}
-Learn all about AMP analytics in the [Configure Analytics](https://www.ampproject.org/docs/guides/analytics_amp) guide.
+Learn all about AMP analytics in the [Configure Analytics](https://amp.dev/documentation/guides-and-tutorials/optimize-measure/configure-analytics/) guide.
 {% endcall %}
 
 ### Sending data to an analytics vendor <a name="analytics-vendors"></a>
 
-AMP analytics is specifically designed to measure once and report to many. If you are already working with one or more analytics vendors, check the list of [Analytics Vendors](https://www.ampproject.org/docs/guides/analytics/analytics-vendors.html) to see if they’ve integrated their solution with AMP.
+AMP analytics is specifically designed to measure once and report to many. If you are already working with one or more analytics vendors, check the list of [Analytics Vendors]() to see if they’ve integrated their solution with AMP.
 
 For integrated AMP analytics vendors:
 
-1.  In the `<amp-analytics>` tag, add the `type`attribute and set its value to the specified [vendor](https://www.ampproject.org/docs/guides/analytics/analytics-vendors.html).
+1.  In the `<amp-analytics>` tag, add the `type`attribute and set its value to the specified [vendor](https://amp.dev/documentation/guides-and-tutorials/optimize-measure/configure-analytics/analytics-vendors).
 2. Determine what data you want to capture and track, and specify those details in the configuration data. See the vendor's documentation for  instructions on how to capture analytics data.
 
-If the analytics vendor hasn’t integrated with AMP, reach out to the vendor to ask for their support. We also encourage you to create an issue in the AMP project requesting that the vendor be added. See also [Integrating your analytics tools in AMP HTML](../amp-analytics/integrating-analytics.md). Alternatively, work with your vendor to send the data to their specified URL. Learn more in the [Sending data in-house](#sending-data-in-house) section below.
+If the analytics vendor hasn’t integrated with AMP, reach out to the vendor to ask for their support. We also encourage you to let us know by [filing an issue](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md#report-a-bug) requesting that the vendor be added. See also [Integrating your analytics tools in AMP HTML](../amp-analytics/integrating-analytics.md). Alternatively, work with your vendor to send the data to their specified URL. Learn more in the [Sending data in-house](#sending-data-in-house) section below.
 
 *Example: Sending data to a third-party analytics provider*
 
@@ -121,7 +121,7 @@ Here's a simple example that tracks page views.  Every time a page is visible, t
 ```
 
 {% call callout('Tip', type='success') %}
-For some common tracking use cases (e.g., page views, page clicks, scrolling, etc.) see [Analytics: Use Cases](https://www.ampproject.org/docs/guides/analytics/use_cases).
+For some common tracking use cases (e.g., page views, page clicks, scrolling, etc.) see [Analytics: Use Cases](https://amp.dev/documentation/guides-and-tutorials/optimize-measure/configure-analytics/use_cases).
 {% endcall %}
 
 
@@ -823,7 +823,7 @@ These are the valid attributes for the `amp-analytics` component:
 
 **type**
 
-Specifies the type of vendor.  For details, see the list of [Analytics vendors](https://www.ampproject.org/docs/guides/analytics/analytics-vendors.html).
+Specifies the type of vendor.  For details, see the list of [Analytics vendors](https://amp.dev/documentation/guides-and-tutorials/optimize-measure/configure-analytics/analytics-vendors).
 
 Example:
 
