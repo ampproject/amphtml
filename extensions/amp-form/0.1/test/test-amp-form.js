@@ -237,7 +237,6 @@ describes.repeated(
             sandbox.spy(xhrUtils, 'setupInput');
             sandbox.spy(xhrUtils, 'setupAMPCors');
             sandbox.stub(xhrUtils, 'fromStructuredCloneable');
-            sandbox.stub(xhrUtils, 'verifyAmpCORSHeaders');
 
             return getSsrAmpFormPromise.then(ampForm => {
               const form = ampForm.form_;
@@ -301,7 +300,6 @@ describes.repeated(
             sandbox.spy(xhrUtils, 'setupInput');
             sandbox.spy(xhrUtils, 'setupAMPCors');
             sandbox.stub(xhrUtils, 'fromStructuredCloneable');
-            sandbox.stub(xhrUtils, 'verifyAmpCORSHeaders');
 
             return getSsrAmpFormPromise.then(ampForm => {
               const form = ampForm.form_;
