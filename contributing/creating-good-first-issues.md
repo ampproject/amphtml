@@ -1,6 +1,6 @@
 # Creating Good First Issues
 
-The AMP Project welcomes new contributors and we want to make it as easy as possible for them to contribute.  For many new contributors (who may not have open source/Git/AMP/etc. experience) it can be difficult to figure out how to get started.
+AMP welcomes new contributors and we want to make it as easy as possible for them to contribute.  For many new contributors (who may not have open source/Git/AMP/etc. experience) it can be difficult to figure out how to get started.
 
 To help these new contributors get oriented we curate [Good First Issues](https://github.com/ampproject/amphtml/labels/good%20first%20issue).  A Good First Issue is a starter issue that a new contributor can use to get comfortable contributing to the AMP Project.
 
@@ -19,7 +19,7 @@ Keep these qualities in mind when creating your Good First Issues:
 
 ## How to create a Good First Issue
 
-* When you identify an issue that would make a Good First Issue, create a new issue using the [Good First Issues Template](good-first-issues-template.md) (inspired by Hoodie's [template](https://github.com/hoodiehq/camp/blob/gh-pages/ISSUE_TEMPLATE.md)).  Copy the [raw markdown](https://raw.githubusercontent.com/ampproject/amphtml/master/contributing/good-first-issues-template.md) into your issue and follow the guidance in the comments.
+* When you identify an issue that would make a Good First Issue, create a new issue using the [Good First Issues Template](good-first-issues-template.md) (inspired by Hoodie's [template](https://github.com/hoodiehq/camp/blob/gh-pages/.github/ISSUE_TEMPLATE.md)).  Copy the [raw markdown](https://raw.githubusercontent.com/ampproject/amphtml/master/contributing/good-first-issues-template.md) into your issue and follow the guidance in the comments.
 * Add the [Good First Issue label](https://github.com/ampproject/amphtml/labels/good%20first%20issue) and add the issue to the [Good First Issues milestone](https://github.com/ampproject/amphtml/milestone/25).  (The redundancy is intentional.  Most other open source projects use a label for tracking these types of issues, so we do too... but we also ensure every bug is triaged to the right milestone.)
 * If you come across a good candidate for a Good First Issue but are momentarily unable to spend the time filling out the template add the [GFI Candidate](https://github.com/ampproject/amphtml/labels/GFI%20Candidate) label to the issue.  The time spent converting GFI Candidates to Good First Issues will pay off for the AMP Project so please remember to come back to issues you labeled as a GFI Candidate.
 
@@ -27,6 +27,6 @@ Keep these qualities in mind when creating your Good First Issues:
 
 * We ask new contributors to claim a Good First Issue by adding a comment.  Please keep an eye out for these and respond as soon as possible on the issue welcoming the new contributor and letting them know they can ask you questions.
 * Please add the [GFI Claimed!](https://github.com/ampproject/amphtml/labels/GFI%20Claimed!) label to the issue once someone claims it so others can quickly see that someone is working on it.
-* Encourage the person working on the GFI to [join the AMP Project](https://goo.gl/forms/T65peVtfQfEoDWeD3), which will let us assign the GFI to them.  (Alternatively you can let [mrjoro](https://amphtml.slack.com/team/mrjoro/) know and he can send an invite to the new contributor directly.)
+* Encourage the person working on the GFI to [join the ampproject GitHub org](https://goo.gl/forms/T65peVtfQfEoDWeD3), which will let us assign the GFI to them.  (Alternatively you can let [mrjoro](https://amphtml.slack.com/team/mrjoro/) know and he can send an invite to the new contributor directly.)
 * Keep an eye on the new contributor's progress on the GFI, and offer to help if they seem stuck or if you haven't heard any updates in a few days.
 * Once the GFI is complete help the new contributor find other projects to work on in AMP based on their interests.
