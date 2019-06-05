@@ -65,7 +65,7 @@ describes.realWin('Requests', {amp: 1}, env => {
       });
 
       it('should prepend request origin', function*() {
-        const r = {'baseUrl': '/r1', 'requestOrigin': 'http://example.com'};
+        const r = {'baseUrl': '/r1', 'origin': 'http://example.com'};
         const handler = createRequestHandler(r, spy);
         const expansionOptions = new ExpansionOptions({});
 
@@ -75,7 +75,7 @@ describes.realWin('Requests', {amp: 1}, env => {
       });
 
       it('should expand request origin', function*() {
-        const r = {'baseUrl': '/r2', 'requestOrigin': '${documentReferrer}'};
+        const r = {'baseUrl': '/r2', 'origin': '${documentReferrer}'};
         const handler = createRequestHandler(r, spy);
         const expansionOptions = new ExpansionOptions({
           'documentReferrer': 'http://example.com',
@@ -87,7 +87,7 @@ describes.realWin('Requests', {amp: 1}, env => {
       });
 
       it('should expand nested request origin', function*() {
-        const r = {'baseUrl': '/r3', 'requestOrigin': '${a}'};
+        const r = {'baseUrl': '/r3', 'origin': '${a}'};
         const handler = createRequestHandler(r, spy);
         const expansionOptions = new ExpansionOptions({
           'a': '${b}',

@@ -664,21 +664,3 @@ export function extractDomain(url) {
 
   return matches ? matches[1] : undefined;
 }
-
-/**
- * Extract and return the relative path from the given url string via regex
- * Ex.  'http://google.com/test' -> '/test'
- *      'https://google.com/test1/test2' -> '/test1/test2'
- *      '/test1/test2' -> '/test1/test2'
- *      'http://google.com' -> undefined
- * @param {string} url
- * @return {string|undefined}
- */
-export function extractRelativePath(url) {
-  // this regex matches urls starting with a domain or a relative url by itself
-  const matches = url.match(
-    /(?:^https?\:\/\/[^\/?#]+([\/?#].*))|(^[\/?#].*)$/i
-  );
-
-  return matches ? matches[1] || matches[2] : undefined;
-}

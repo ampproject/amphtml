@@ -479,9 +479,7 @@ export function expandConfigRequest(config) {
     }
   }
 
-  config = handleTopLevelAttributes_(config);
-
-  return config;
+  return handleTopLevelAttributes_(config);
 }
 
 /**
@@ -509,8 +507,8 @@ function handleTopLevelAttributes_(config) {
 
     for (const requestName in config['requests']) {
       // only add top level request origin into request if it doesn't have one
-      if (!hasOwn(config['requests'][requestName], 'requestOrigin')) {
-        config['requests'][requestName]['requestOrigin'] = requestOrigin;
+      if (!hasOwn(config['requests'][requestName], 'origin')) {
+        config['requests'][requestName]['origin'] = requestOrigin;
       }
     }
   }

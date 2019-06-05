@@ -24,7 +24,7 @@ import {SANDBOX_AVAILABLE_VARS} from './sandbox-vars-whitelist';
 import {Services} from '../../../src/services';
 import {devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {extractDomain, extractRelativePath} from '../../../src/url';
+import {extractDomain} from '../../../src/url';
 import {getResourceTiming} from './resource-timing';
 import {isArray, isFiniteNumber, isObject} from '../../../src/types';
 
@@ -50,7 +50,7 @@ export class RequestHandler {
     this.win = this.ampdoc_.win;
 
     /** @const {string} !if specified, all requests are prepended with this */
-    this.requestOrigin_ = request['requestOrigin'];
+    this.requestOrigin_ = request['origin'];
 
     /** @const {string} */
     this.baseUrl = devAssert(request['baseUrl']);
@@ -473,23 +473,6 @@ function expandExtraUrlParams(
 }
 
 /**
- * Tries to combine the given domain and relative url
- * @param {string} relativeUrl
- * @param {string} baseUrl
- * @return {string|undefined}
- */
-function resolveRelativeUrlString_(relativeUrl, baseUrl) {
-  const baseDomain = extractDomain(baseUrl);
-  const relativePath = extractRelativePath(relativeUrl);
-
-  if (baseDomain && relativePath) {
-    return baseDomain + relativePath;
-  }
-
-  return undefined;
-}
-
-/**
  * Composes a request URL given a base and requestOrigin
  * @private
  * @param {string} baseUrl
@@ -497,18 +480,23 @@ function resolveRelativeUrlString_(relativeUrl, baseUrl) {
  * @return {string}
  */
 function composeRequestUrl_(baseUrl, opt_requestOrigin) {
+  if (opt_requestOrigin === '') {
+    user().error(TAG, 'Request Origin cannot be an empty string');
+    return '';
+  }
   // prepend requestOrigin if available
-  if (opt_requestOrigin) {
-    const requestUrl = resolveRelativeUrlString_(baseUrl, opt_requestOrigin);
-    if (!requestUrl) {
+  else if (opt_requestOrigin) {
+    const domain = extractDomain(opt_requestOrigin);
+
+    if (!domain) {
       user().error(
         TAG,
-        'Unable to construct URL with ' + opt_requestOrigin + ' and ' + baseUrl
+        'Unable to extract domain from requestOrigin: ' + opt_requestOrigin
       );
       return '';
     }
 
-    return requestUrl;
+    return domain + baseUrl;
   }
 
   return baseUrl;
