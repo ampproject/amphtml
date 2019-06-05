@@ -142,29 +142,6 @@ export class RequestHandler {
     if (!this.baseUrlPromise_) {
       expansionOption.freezeVar('extraUrlParams');
 
-      // expand requestOrigin if it is declared
-      if (this.requestOrigin_) {
-        // do not encode vars in request origin
-        const requestOriginExpansionOpt = new ExpansionOptions(
-          expansionOption.vars,
-          expansionOption.iterations,
-          true // opt_noEncode
-        );
-
-        this.requestOriginPromise_ = this.variableService_
-          // expand variables in request origin
-          .expandTemplate(this.requestOrigin_, requestOriginExpansionOpt)
-          // substitute in URL values e.g. DOCUMENT_REFERRER -> https://example.com
-          .then(expandedRequestOrigin => {
-            return this.urlReplacementService_.expandUrlAsync(
-              expandedRequestOrigin,
-              bindings,
-              this.whiteList_,
-              true // opt_noEncode
-            );
-          });
-      }
-
       this.baseUrlTemplatePromise_ = this.variableService_.expandTemplate(
         this.baseUrl,
         expansionOption
@@ -177,6 +154,29 @@ export class RequestHandler {
           this.whiteList_
         );
       });
+    }
+
+    // expand requestOrigin if it is declared
+    if (!this.requestOriginPromise_ && this.requestOrigin_) {
+      // do not encode vars in request origin
+      const requestOriginExpansionOpt = new ExpansionOptions(
+        expansionOption.vars,
+        expansionOption.iterations,
+        true // opt_noEncode
+      );
+
+      this.requestOriginPromise_ = this.variableService_
+        // expand variables in request origin
+        .expandTemplate(this.requestOrigin_, requestOriginExpansionOpt)
+        // substitute in URL values e.g. DOCUMENT_REFERRER -> https://example.com
+        .then(expandedRequestOrigin => {
+          return this.urlReplacementService_.expandUrlAsync(
+            expandedRequestOrigin,
+            bindings,
+            this.whiteList_,
+            true // opt_noEncode
+          );
+        });
     }
 
     const params = Object.assign({}, configParams, trigger['extraUrlParams']);
@@ -255,43 +255,33 @@ export class RequestHandler {
 
     preconnectPromise.then(preUrl => {
       this.preconnect_.url(preUrl, true);
-      Promise.all([baseUrlPromise, Promise.all(segmentPromises)]).then(
-        results => {
-          // prepend requestOrigin if available
-          let baseUrl;
-          if (requestOriginPromise) {
-            baseUrl = resolveRelativeUrlString_(results[0], preUrl);
-            if (!baseUrl) {
-              user().error(
-                TAG,
-                'Unable to construct URL with ' + preUrl + ' and ' + results[0]
-              );
-              return;
-            }
-          } else {
-            baseUrl = results[0];
-          }
+    });
 
-          const batchSegments = results[1];
-          if (batchSegments.length === 0) {
-            return;
-          }
-          // TODO: iframePing will not work with batch. Add a config validation.
-          if (trigger['iframePing']) {
-            userAssert(
-              trigger['on'] == 'visible',
-              'iframePing is only available on page view requests.'
-            );
-            this.transport_.sendRequestUsingIframe(baseUrl, batchSegments[0]);
-          } else {
-            this.transport_.sendRequest(
-              baseUrl,
-              batchSegments,
-              !!this.batchInterval_
-            );
-          }
-        }
-      );
+    Promise.all([
+      baseUrlPromise,
+      Promise.all(segmentPromises),
+      requestOriginPromise,
+    ]).then(results => {
+      const requestUrl = composeRequestUrl_(results[0], results[2]);
+
+      const batchSegments = results[1];
+      if (batchSegments.length === 0) {
+        return;
+      }
+      // TODO: iframePing will not work with batch. Add a config validation.
+      if (trigger['iframePing']) {
+        userAssert(
+          trigger['on'] == 'visible',
+          'iframePing is only available on page view requests.'
+        );
+        this.transport_.sendRequestUsingIframe(requestUrl, batchSegments[0]);
+      } else {
+        this.transport_.sendRequest(
+          requestUrl,
+          batchSegments,
+          !!this.batchInterval_
+        );
+      }
     });
   }
 
@@ -497,4 +487,29 @@ function resolveRelativeUrlString_(relativeUrl, baseUrl) {
   }
 
   return undefined;
+}
+
+/**
+ * Composes a request URL given a base and requestOrigin
+ * @private
+ * @param {string} baseUrl
+ * @param {string=} opt_requestOrigin
+ * @return {string}
+ */
+function composeRequestUrl_(baseUrl, opt_requestOrigin) {
+  // prepend requestOrigin if available
+  if (opt_requestOrigin) {
+    const requestUrl = resolveRelativeUrlString_(baseUrl, opt_requestOrigin);
+    if (!requestUrl) {
+      user().error(
+        TAG,
+        'Unable to construct URL with ' + opt_requestOrigin + ' and ' + baseUrl
+      );
+      return '';
+    }
+
+    return requestUrl;
+  }
+
+  return baseUrl;
 }

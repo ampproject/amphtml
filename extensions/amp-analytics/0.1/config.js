@@ -66,30 +66,7 @@ export class AnalyticsConfig {
 
     return this.fetchRemoteConfig_()
       .then(this.processConfigs_.bind(this))
-      .then(this.handleTopLevelAttributes_.bind(this))
       .then(() => this.config_);
-  }
-
-  /**
-   * Handles top level fields in config
-   */
-  handleTopLevelAttributes_() {
-    // handle a top level requestOrigin
-    if (
-      hasOwn(this.config_, 'requests') &&
-      hasOwn(this.config_, 'requestOrigin')
-    ) {
-      const requestOrigin = this.config_['requestOrigin'];
-
-      for (const requestName in this.config_['requests']) {
-        // only add top level request origin into request if it doesn't have one
-        if (!hasOwn(this.config_['requests'][requestName], 'requestOrigin')) {
-          this.config_['requests'][requestName][
-            'requestOrigin'
-          ] = requestOrigin;
-        }
-      }
-    }
   }
 
   /**
@@ -501,6 +478,9 @@ export function expandConfigRequest(config) {
       config['requests'][k] = expandRequestStr(config['requests'][k]);
     }
   }
+
+  config = handleTopLevelAttributes_(config);
+
   return config;
 }
 
@@ -515,4 +495,25 @@ function expandRequestStr(request) {
   return {
     'baseUrl': request,
   };
+}
+
+/**
+ * Handles top level fields in the given config
+ * @param {!JsonObject} config
+ * @return {JsonObject}
+ */
+function handleTopLevelAttributes_(config) {
+  // handle a top level requestOrigin
+  if (hasOwn(config, 'requests') && hasOwn(config, 'requestOrigin')) {
+    const requestOrigin = config['requestOrigin'];
+
+    for (const requestName in config['requests']) {
+      // only add top level request origin into request if it doesn't have one
+      if (!hasOwn(config['requests'][requestName], 'requestOrigin')) {
+        config['requests'][requestName]['requestOrigin'] = requestOrigin;
+      }
+    }
+  }
+
+  return config;
 }
