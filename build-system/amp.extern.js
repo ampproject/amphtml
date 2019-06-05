@@ -33,8 +33,7 @@
  *   credentials: (string|undefined),
  *   headers: (!JsonObject|undefined),
  *   method: (string|undefined),
- *   requireAmpResponseSourceOrigin: (boolean|undefined),
- *   ampCors: (boolean|undefined)
+ *   ampCors: (boolean|undefined),
  * }}
  */
 var FetchInitDef;
