@@ -236,8 +236,6 @@ function invoke(win, clickUrl) {
   return Services.xhrFor(win)
     .fetchJson(clickUrl, {
       credentials: 'include',
-      // All origins are allows to send these requests.
-      requireAmpResponseSourceOrigin: false,
     })
     .then(res => {
       // Treat 204 no content response specially

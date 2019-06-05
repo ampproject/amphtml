@@ -33,7 +33,6 @@ describes.sandboxed('fetch', {}, () => {
           200,
           {
             'Content-Type': 'text/xml',
-            'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
           },
           '<html></html>'
         )

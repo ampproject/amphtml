@@ -58,9 +58,6 @@ describes.realWin('DocumentFetcher', {amp: true}, function() {
           200,
           {
             'Content-Type': 'text/xml',
-            'Access-Control-Expose-Headers':
-              'AMP-Access-Control-Allow-Source-Origin',
-            'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
           },
           '<html><body>Foo</body></html>'
         );
@@ -75,7 +72,6 @@ describes.realWin('DocumentFetcher', {amp: true}, function() {
           400,
           {
             'Content-Type': 'text/xml',
-            'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
           },
           '<html></html>'
         )
@@ -92,9 +88,6 @@ describes.realWin('DocumentFetcher', {amp: true}, function() {
           415,
           {
             'Content-Type': 'text/xml',
-            'Access-Control-Expose-Headers':
-              'AMP-Access-Control-Allow-Source-Origin',
-            'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
           },
           '<html></html>'
         )
@@ -111,9 +104,6 @@ describes.realWin('DocumentFetcher', {amp: true}, function() {
           415,
           {
             'Content-Type': 'text/xml',
-            'Access-Control-Expose-Headers':
-              'AMP-Access-Control-Allow-Source-Origin',
-            'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
           },
           '<html></html>'
         )
@@ -130,9 +120,6 @@ describes.realWin('DocumentFetcher', {amp: true}, function() {
           200,
           {
             'Content-Type': 'application/json',
-            'Access-Control-Expose-Headers':
-              'AMP-Access-Control-Allow-Source-Origin',
-            'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
           },
           '{"hello": "world"}'
         )
@@ -177,7 +164,7 @@ describes.realWin('DocumentFetcher', {amp: true}, function() {
     }
     function getDefaultResponseOptions() {
       return {
-        headers: [['AMP-Access-Control-Allow-Source-Origin', origin]],
+        headers: [],
       };
     }
     it('should return correct document response', () => {
@@ -185,7 +172,7 @@ describes.realWin('DocumentFetcher', {amp: true}, function() {
         Promise.resolve({
           body: '<html><body>Foo</body></html>',
           init: {
-            headers: [['AMP-Access-Control-Allow-Source-Origin', origin]],
+            headers: [],
           },
         })
       );

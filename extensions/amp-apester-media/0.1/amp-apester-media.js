@@ -215,9 +215,7 @@ class AmpApesterMedia extends AMP.BaseElement {
   queryMedia_() {
     const url = this.buildUrl_();
     return Services.xhrFor(this.win)
-      .fetchJson(url, {
-        requireAmpResponseSourceOrigin: false,
-      })
+      .fetchJson(url, {})
       .then(res => {
         if (res.status === 200) {
           return res.json();

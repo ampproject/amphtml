@@ -146,7 +146,6 @@ describe('impression', () => {
       expect(url).to.equal('https://www.example.com');
       expect(params).to.jsonEqual({
         credentials: 'include',
-        requireAmpResponseSourceOrigin: false,
       });
     });
 
@@ -163,7 +162,6 @@ describe('impression', () => {
       expect(url).to.equal('https://www.example.com');
       expect(params).to.jsonEqual({
         credentials: 'include',
-        requireAmpResponseSourceOrigin: false,
       });
     });
 
@@ -181,7 +179,6 @@ describe('impression', () => {
       expect(url).to.equal('https://www.example.com');
       expect(params).to.jsonEqual({
         credentials: 'include',
-        requireAmpResponseSourceOrigin: false,
       });
     });
 
