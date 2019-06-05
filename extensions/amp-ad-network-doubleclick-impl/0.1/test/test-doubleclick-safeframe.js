@@ -439,6 +439,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
     });
 
     it('should handle cancellation', () => {
+      expectAsyncConsoleError(/cancellation/i, 1);
       sandbox
         ./*OK*/ stub(safeframeHost.baseInstance_, 'getPageLayoutBox')
         .returns({
