@@ -33,7 +33,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
-     <td>Stable</td>
+     <td>Launched</td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
