@@ -16,6 +16,8 @@ limitations under the License.
 
 # Supported CSS in AMP for Email
 
+This document outlines the CSS features currently supported inside AMP emails.
+
 ## Supported CSS selectors
 
 ### Simple selectors
