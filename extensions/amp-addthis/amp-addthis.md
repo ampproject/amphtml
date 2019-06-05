@@ -3,7 +3,7 @@ $category@: social
 formats:
   - websites
 teaser:
-  text: Displays AddThis’ customizable social share buttons.
+  text: Displays AddThis customizable social share buttons.
 ---
 <!---
 Copyright 2018 The AMP HTML Authors. All Rights Reserved.
@@ -22,7 +22,7 @@ limitations under the License.
 -->
 
 # amp-addthis
-Displays <a href="https://www.addthis.com">AddThis</a>’ customizable social share buttons.
+Displays <a href="https://www.addthis.com">AddThis</a> customizable social share buttons.
 
 <table>
   <tr>
@@ -77,7 +77,7 @@ Example:
 -->
 <amp-addthis
   width="320"
-  height="92"``
+  height="92"
   data-pub-id="ra-5c191331410932ff"
   data-widget-id="mv93"
   data-widget-type="inline">
