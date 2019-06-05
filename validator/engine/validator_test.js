@@ -1215,6 +1215,7 @@ describe('ValidatorRulesMakeSense', () => {
       const whitelistedAmp4EmailExtensions = {
         'AMP-ACCORDION': 0,
         'AMP-ANIM': 0,
+        'AMP-BIND-MACRO': 0,
         'AMP-CAROUSEL': 0,
         'AMP-FIT-TEXT': 0,
         'AMP-IMG': 0,
@@ -1358,7 +1359,7 @@ describe('ValidatorRulesMakeSense', () => {
         // getNameByAttrSpecId() looks like it would do what we want, but it's
         // sufficiently wrapped in private context inside the validator that I
         // don't see a way to call it.  For now just gold the current index.
-        expect(tagSpec.attrLists[0]).toEqual(17);
+        expect(tagSpec.attrLists[0]).toEqual(18);
       });
     }
 
