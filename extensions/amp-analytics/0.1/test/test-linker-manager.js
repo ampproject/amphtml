@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as Cookies from '../../../../src/cookies';
 import {
   LinkerManager,
   areFriendlyDomains,
@@ -28,7 +29,6 @@ import {
 import {installVariableServiceForTesting} from '../variables';
 import {mockWindowInterface} from '../../../../testing/test-helper';
 import {toggleExperiment} from '../../../../src/experiments';
-import * as Cookies from '../../../../src/cookies';
 
 describes.realWin('Linker Manager', {amp: true}, env => {
   let sandbox;
@@ -278,7 +278,6 @@ describes.realWin('Linker Manager', {amp: true}, env => {
 
   describe('destination domains match', () => {
     it('should respect destinationDomains config', () => {
-
       const config = {
         linkers: {
           enabled: true,
@@ -300,7 +299,9 @@ describes.realWin('Linker Manager', {amp: true}, env => {
       return lm.init().then(() => {
         // testLinker1 should apply to both canonical and source
         // testLinker2 should not
-        const canonicalDomainUrl = clickAnchor('https://www.canonical.com/path');
+        const canonicalDomainUrl = clickAnchor(
+          'https://www.canonical.com/path'
+        );
         expect(canonicalDomainUrl).to.contain('testLinker1=');
         expect(canonicalDomainUrl).to.not.contain('testLinker2=');
 
@@ -393,12 +394,16 @@ describes.realWin('Linker Manager', {amp: true}, env => {
         expect(thirdLevel).to.not.contain('testLinker2=');
         expect(thirdLevel).to.not.contain('testLinker3=');
 
-        const multiTLDDomainEnabled = clickAnchor('https://foo.bar.com.uk/path');
+        const multiTLDDomainEnabled = clickAnchor(
+          'https://foo.bar.com.uk/path'
+        );
         expect(multiTLDDomainEnabled).to.contain('testLinker2=');
         expect(multiTLDDomainEnabled).to.not.contain('testLinker1=');
         expect(multiTLDDomainEnabled).to.not.contain('testLinker3=');
 
-        const multiTLDDomainDisabled = clickAnchor('https://amp.foo.com.uk/path');
+        const multiTLDDomainDisabled = clickAnchor(
+          'https://amp.foo.com.uk/path'
+        );
         expect(multiTLDDomainDisabled).to.not.contain('testLinker1=');
         expect(multiTLDDomainDisabled).to.not.contain('testLinker2=');
         expect(multiTLDDomainDisabled).to.not.contain('testLinker3=');
@@ -470,7 +475,6 @@ describes.realWin('Linker Manager', {amp: true}, env => {
       });
     });
   });
-
 
   it('should respect proxyOnly config', () => {
     windowInterface.getLocation.returns({

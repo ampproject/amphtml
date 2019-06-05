@@ -22,9 +22,9 @@ import {addMissingParamsToUrl, addParamToUrl} from '../../../src/url';
 import {createElementWithAttributes} from '../../../src/dom';
 import {createLinker} from './linker';
 import {dict} from '../../../src/utils/object';
+import {getHighestAvailableDomain} from '../../../src/cookies';
 import {isObject} from '../../../src/types';
 import {user} from '../../../src/log';
-import {getHighestAvailableDomain} from '../../../src/cookies';
 
 /** @const {string} */
 const TAG = 'amp-analytics/linker-manager';
@@ -88,8 +88,7 @@ export class LinkerManager {
       return;
     }
 
-    this.highestAvailableDomain_ =
-        getHighestAvailableDomain(this.ampdoc_.win);
+    this.highestAvailableDomain_ = getHighestAvailableDomain(this.ampdoc_.win);
 
     this.config_ = this.processConfig_(
       /** @type {!JsonObject} */ (this.config_)
@@ -325,26 +324,30 @@ export class LinkerManager {
 
     const {sourceUrl, canonicalUrl} = Services.documentInfoForDoc(this.ampdoc_);
     const canonicalOrigin = this.urlService_.parse(canonicalUrl).hostname;
-    const isFriendlyCanonicalOrigin =
-        areFriendlyDomains(canonicalOrigin, hostname);
+    const isFriendlyCanonicalOrigin = areFriendlyDomains(
+      canonicalOrigin,
+      hostname
+    );
     // Default to all subdomains matching (if there's one) plus canonicalOrigin
 
     if (this.highestAvailableDomain_) {
-      const wildCardMatching = '*.' + this.highestAvailableDomain_;
       const destinationDomain = [
         this.highestAvailableDomain_,
         '*' + this.highestAvailableDomain_,
       ];
-      return this.destinationDomainsMatch_(destinationDomain, hostname) ||
-          isFriendlyCanonicalOrigin;
+      return (
+        this.destinationDomainsMatch_(destinationDomain, hostname) ||
+        isFriendlyCanonicalOrigin
+      );
     }
 
     // In the case where highestAvailableDomain cannot be found.
     // (proxyOrigin, no <meta name='amp-cookie-scope'> found)
     // default to friendly domain matching.
     const sourceOrigin = this.urlService_.parse(sourceUrl).hostname;
-    return areFriendlyDomains(sourceOrigin, hostname) ||
-        isFriendlyCanonicalOrigin
+    return (
+      areFriendlyDomains(sourceOrigin, hostname) || isFriendlyCanonicalOrigin
+    );
   }
 
   /**
