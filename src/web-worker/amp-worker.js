@@ -19,7 +19,6 @@ import {calculateEntryPointScriptUrl} from '../service/extension-location';
 import {dev, devAssert} from '../log';
 import {getMode} from '../mode';
 import {getService, registerServiceBuilder} from '../service';
-import {setupInit} from '../utils/xhr-utils';
 
 const TAG = 'web-worker';
 
@@ -98,16 +97,10 @@ class AmpWorker {
 
     /** @const @private {!Promise} */
     this.fetchPromise_ = this.xhr_
-      .fetch(
-        url,
-        setupInit(
-          {
-            ampCors: false,
-          },
-          'text/plain'
-        ),
-        true
-      )
+      .fetchText(url, {
+        ampCors: false,
+        bypassInterceptor: true,
+      })
       .then(res => res.text())
       .then(text => {
         // Workaround since Worker constructor only accepts same origin URLs.
