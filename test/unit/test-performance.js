@@ -18,7 +18,7 @@ import * as lolex from 'lolex';
 import {Services} from '../../src/services';
 import {getMode} from '../../src/mode';
 import {installPerformanceService} from '../../src/service/performance-impl';
-import {installRuntimeServices} from '../../src/runtime';
+import {installRuntimeServices} from '../../src/service/core-services';
 
 describes.realWin('performance', {amp: true}, env => {
   let sandbox;
