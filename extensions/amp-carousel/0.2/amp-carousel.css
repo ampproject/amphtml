@@ -1,43 +1,37 @@
 @import '../../amp-base-carousel/0.1/carousel.css';
 
-amp-carousel {
-  display: block;
-  overflow: hidden;
-}
-
 amp-carousel .i-amphtml-carousel-scroll[horizontal="true"] {
   padding-bottom: 0 !important;
 }
 
 amp-carousel:not([type="slides"]) .i-amphtml-carousel-scroll {
+  display: block !important;
   white-space: nowrap !important;
-}
-
-amp-carousel:not([type="slides"]) .i-amphtml-carousel-slotted {
-  display: inline-block !important;
-  width: auto !important;
-  /*
-   * Puts a space between items, for browsers that do not support the
-   * properties below.
-   */
-  padding-left: 8px;
-  /*
-   * Makes sure padding between items is correct in RTL mode. The end padding
-   * is to override the padding-left above in RTL mode.
-   */
-  padding-inline-start: 8px;
-  padding-inline-end: 0;
-}
-
-amp-carousel:not([type="slides"]) .i-amphtml-carousel-slotted:first-of-type {
-  padding-left: 0px;
-  padding-inline-start: 0;
-  padding-inline-end: 0;
-  
 }
 
 amp-carousel:not([type="slides"]) .i-amphtml-carousel-content {
   position: static;
+}
+
+.amp-scrollable-carousel-slide {
+  display: inline-block !important;
+  /*
+   * Puts a space between items, for browsers that do not support the
+   * properties below.
+   */
+   margin-left: 8px;
+  /*
+   * Makes sure padding between items is correct in RTL mode. The end padding
+   * is to override the padding-left above in RTL mode.
+   */
+  margin-inline-start: 8px;
+  margin-inline-end: 0;
+}
+
+.amp-scrollable-carousel-slide:first-child {
+  margin-left: 0px;
+  margin-inline-start: 0;
+  margin-inline-end: 0;
 }
 
 /*
@@ -72,7 +66,6 @@ amp-carousel[dir="rtl"] .amp-carousel-button {
   margin: 16px;
   border-style: none;
   border-radius: 2px;
-  pointer-events: all;
   background-color: rgba(0, 0, 0, .5);
   background-position: 50% 50%;
   background-repeat: no-repeat;
@@ -98,27 +91,14 @@ amp-carousel[dir="rtl"] .amp-carousel-button {
   background-size: 18px 18px;
 }
 
-.i-amphtml-slide-item {
+.i-amphtml-carousel-slide-item {
+  position: relative !important;
   display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  position: relative !important;
-}
-
-.i-amphtml-slide-item > * {
-  height: 100%;
-  width: 100%;
-  overflow: hidden !important;
-}
-
-amp-carousel[type="slides"] .i-amphtml-carousel-slide-item {
-  position: relative !important;
-  display: flex;
   justify-content: center !important;
   align-items: center !important;
 }
 
-amp-carousel[type="slides"] .i-amphtml-carousel-slide {
+.i-amphtml-carousel-slide-item > *{
   width: 100%;
   height: 100%;
   overflow: hidden !important;

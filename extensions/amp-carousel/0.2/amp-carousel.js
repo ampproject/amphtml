@@ -120,18 +120,7 @@ class AmpCarousel extends AMP.BaseElement {
       initialIndex: Number(this.element.getAttribute('slide')),
       runMutate: cb => this.mutateElement(cb),
     });
-    this.configureCarousel_();
-
-    // Do some manual "slot" distribution
-    this.slides_ = slides.map(slide => {
-      const wrapper = document.createElement('div');
-      wrapper.className =
-        'i-amphtml-carousel-slotted i-amphtml-carousel-slide-item';
-      wrapper.appendChild(slide);
-      slide.classList.add('i-amphtml-carousel-slide');
-      this.scrollContainer_.appendChild(wrapper);
-      return wrapper;
-    });
+    this.configureCarousel_(slides);
 
     // Setup actions and listeners
     this.setupActions_();
@@ -287,9 +276,10 @@ class AmpCarousel extends AMP.BaseElement {
   }
 
   /**
+   * @param {!Array<!Element>} slides
    * @private
    */
-  configureCarousel_() {
+  configureCarousel_(slides) {
     const dir = this.element.getAttribute('dir');
     const loop = this.element.hasAttribute('loop');
     const autoplay = this.element.getAttribute('autoplay');
@@ -306,7 +296,7 @@ class AmpCarousel extends AMP.BaseElement {
     this.carousel_.updateAutoAdvanceLoops(autoAdvanceLoops);
     this.carousel_.updateAutoAdvanceInterval(autoAdvanceInterval);
     this.toggleAutoplay_(autoAdvance);
-    this.updateType_(type);
+    this.updateType_(type, slides);
   }
 
   /**
@@ -435,18 +425,57 @@ class AmpCarousel extends AMP.BaseElement {
 
   /**
    * @param {string} type
+   * @param {!Array<!Element>} slides
    */
-  updateType_(type) {
-    this.type_ =
-      type == CarouselType.SLIDES ? CarouselType.SLIDES : CarouselType.CAROUSEL;
+  updateType_(type, slides) {
+    const isSlides = type == CarouselType.SLIDES;
 
-    this.carousel_.updateHideScrollbar(this.type_ == CarouselType.SLIDES);
-    this.carousel_.updateMixedLength(this.type_ == CarouselType.CAROUSEL);
-    this.carousel_.updateSnap(this.type_ == CarouselType.SLIDES);
-    const buttonRole =
-      this.type_ == CarouselType.SLIDES ? 'button' : 'presentation';
+    this.type_ = isSlides ? CarouselType.SLIDES : CarouselType.CAROUSEL;
+    this.carousel_.updateHideScrollbar(isSlides);
+    this.carousel_.updateMixedLength(!isSlides);
+    this.carousel_.updateSnap(isSlides);
+    const buttonRole = isSlides ? 'button' : 'presentation';
     this.prevButton_.setAttribute('role', buttonRole);
     this.nextButton_.setAttribute('role', buttonRole);
+
+    // Do some manual "slot" distribution
+
+    this.slides_ = slides.map(slide => {
+      if (isSlides) {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'i-amphtml-carousel-slotted';
+        wrapper.appendChild(slide);
+        return wrapper;
+      }
+
+      return slide;
+    });
+    this.slides_.forEach(slide => {
+      this.scrollContainer_.appendChild(slide);
+
+      if (isSlides) {
+        slide.classList.add('i-amphtml-carousel-slide-item');
+        slide.firstElementChild.classList.add('amp-carousel-slide');
+      } else {
+        slide.classList.add('amp-carousel-slide');
+        slide.classList.add('amp-scrollable-carousel-slide');
+      }
+    });
+  }
+
+  /**
+   * Updates the current index, resuming the current slide and pausing all
+   * others.
+   * @param {number} index
+   */
+  updateCurrentIndex_(index) {
+    this.slides_.forEach((slide, i) => {
+      if (i == index) {
+        this.scheduleResume(slide);
+      } else {
+        this.schedulePause(slide);
+      }
+    });
   }
 
   /**
@@ -490,6 +519,7 @@ class AmpCarousel extends AMP.BaseElement {
     this.element.dispatchCustomEvent(name, data);
     this.hadTouch_ = this.hadTouch_ || actionSource == ActionSource.TOUCH;
     this.updateUi_();
+    this.updateCurrentIndex_(index);
   }
 }
 
