@@ -66,6 +66,14 @@ The `story-audio-muted` trigger is fired when the user initiates an interaction 
 
 The `story-audio-unmuted` trigger is fired when the user initiates an interaction to unmute the audio for the current story.
 
+### Tooltip opened trigger (`"on": "story-tooltip-opened"`)
+
+The `story-tooltip-opened` trigger is fired when a tooltip is opened by the user.
+
+### Tooltip closed trigger (`"on": "story-tooltip-closed"`)
+
+The `story-tooltip-closed` trigger is fired when a tooltip is closed by the user.
+
 ## Story variables
 
 AMP story contributes the following URL substitutions:
