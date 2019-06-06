@@ -21,9 +21,11 @@ import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 /** @enum {string} */
 export const StoryEventType = {
-  PAGE_VISIBLE: 'story-page-visible',
   BOOKEND_ENTER: 'story-bookend-enter',
   BOOKEND_EXIT: 'story-bookend-exit',
+  PAGE_ATTACHMENT_ENTER: 'story-page-attachment-enter',
+  PAGE_ATTACHMENT_EXIT: 'story-page-attachment-exit',
+  PAGE_VISIBLE: 'story-page-visible',
   STORY_MUTED: 'story-audio-muted',
   STORY_UNMUTED: 'story-audio-unmuted',
 };
@@ -96,6 +98,16 @@ export class StoryAnalyticsService {
     const event = isMuted
       ? StoryEventType.STORY_MUTED
       : StoryEventType.STORY_UNMUTED;
+    this.triggerEvent_(event);
+  }
+
+  /**
+   * @param {boolean} isOpen
+   */
+  onPageAttachmentStateChange(isOpen) {
+    const event = isOpen
+      ? StoryEventType.PAGE_ATTACHMENT_ENTER
+      : StoryEventType.PAGE_ATTACHMENT_EXIT;
     this.triggerEvent_(event);
   }
 
