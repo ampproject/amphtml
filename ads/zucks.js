@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {loadScript, validateData, writeScript} from '../3p/3p';
+import {loadScript, validateData} from '../3p/3p';
 
 /**
  * @param {!Window} global
@@ -41,13 +41,10 @@ export function zucks(global, data) {
         parent: `#${elementId}`,
       });
     });
+  } else if (data['adtype'] === 'native') {
+    loadScript(global, `https://j.zucks.net.zimg.jp/n?f=${data['frameId']}`);
+  } else {
+    loadScript(global, `https://j.zucks.net.zimg.jp/j?f=${data['frameId']}`);
   }
 
-  let script = `https://j.zucks.net.zimg.jp/j?f=${data['frameId']}`;
-
-  if (data['adtype'] === 'native') {
-    script = `https://j.zucks.net.zimg.jp/n?f=${data['frameId']}`;
-  }
-
-  writeScript(global, script);
 }
