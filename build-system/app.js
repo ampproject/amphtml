@@ -91,10 +91,6 @@ if (!global.AMP_TESTING) {
 // e.g. /serve_mode_change?mode=(default|compiled|cdn)
 // (See ./app-index/settings.js)
 app.get('/serve_mode_change', (req, res) => {
-  const sourceOrigin = req.query['__amp_source_origin'];
-  if (sourceOrigin) {
-    res.setHeader('AMP-Access-Control-Allow-Source-Origin', sourceOrigin);
-  }
   const {mode} = req.query;
   if (isValidServeMode(mode)) {
     setServeMode(mode);
@@ -243,10 +239,6 @@ app.use('/api/dont-show', (req, res) => {
 });
 
 app.use('/api/echo/query', (req, res) => {
-  const sourceOrigin = req.query['__amp_source_origin'];
-  if (sourceOrigin) {
-    res.setHeader('AMP-Access-Control-Allow-Source-Origin', sourceOrigin);
-  }
   res.json(JSON.parse(req.query.data));
 });
 
@@ -449,10 +441,6 @@ app.use('/form/verify-search-json/post', (req, res) => {
 });
 
 app.use('/share-tracking/get-outgoing-fragment', (req, res) => {
-  res.setHeader(
-    'AMP-Access-Control-Allow-Source-Origin',
-    req.protocol + '://' + req.headers.host
-  );
   res.json({
     fragment: '54321',
   });
@@ -879,22 +867,6 @@ app.use('/inabox/:version/', (req, res) => {
     res.end(result);
   });
 });
-
-app.use('/examples/analytics.config.json', (req, res, next) => {
-  res.setHeader('AMP-Access-Control-Allow-Source-Origin', getUrlPrefix(req));
-  next();
-});
-
-app.use(
-  ['/examples/*', '/extensions/*', '/test/manual/*'],
-  (req, res, next) => {
-    const sourceOrigin = req.query['__amp_source_origin'];
-    if (sourceOrigin) {
-      res.setHeader('AMP-Access-Control-Allow-Source-Origin', sourceOrigin);
-    }
-    next();
-  }
-);
 
 /**
  * Append ?sleep=5 to any included JS file in examples to emulate delay in
