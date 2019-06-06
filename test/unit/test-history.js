@@ -708,6 +708,27 @@ describes.sandboxed('HistoryBindingVirtual', {}, env => {
         expect(onStateUpdated).to.be.calledWithMatch({stackIndex: 1, title});
       });
     });
+
+    it('handles bad viewer responses', () => {
+      const title = 'title';
+      viewer.sendMessageAwaitResponse
+        .withArgs('pushHistory', {stackIndex: 1, title})
+        .returns(Promise.resolve(true));
+
+      return history.push({title}).then(state => {
+        expect(viewer.sendMessageAwaitResponse).to.be.calledOnce;
+        expect(viewer.sendMessageAwaitResponse).to.be.calledWithMatch(
+          'pushHistory',
+          {stackIndex: 1, title}
+        );
+
+        expect(state.stackIndex).to.equal(1);
+        expect(history.stackIndex_).to.equal(1);
+
+        expect(onStateUpdated).to.be.calledOnce;
+        expect(onStateUpdated).to.be.calledWithMatch({stackIndex: 1, title});
+      });
+    });
   });
 
   describe('`popHistory` API', () => {
@@ -734,6 +755,22 @@ describes.sandboxed('HistoryBindingVirtual', {}, env => {
         expect(onStateUpdated).to.be.calledWithMatch({
           stackIndex: -123,
           title: 'title',
+        });
+      });
+    });
+
+    it('handles bad viewer responses', () => {
+      viewer.sendMessageAwaitResponse
+        .withArgs('popHistory', sinon.match({stackIndex: 0}))
+        .returns(Promise.resolve(true));
+
+      return history.pop(0).then(state => {
+        expect(state).to.deep.equal({stackIndex: -1});
+        expect(history.stackIndex_).to.equal(-1);
+
+        expect(onStateUpdated).to.be.calledOnce;
+        expect(onStateUpdated).to.be.calledWithMatch({
+          stackIndex: -1,
         });
       });
     });
@@ -767,6 +804,23 @@ describes.sandboxed('HistoryBindingVirtual', {}, env => {
         expect(onStateUpdated).to.be.calledWithMatch({
           stackIndex: 123,
           title: 'different',
+        });
+      });
+    });
+
+    it('handles bad viewer responses', () => {
+      viewer.sendMessageAwaitResponse
+        .withArgs('replaceHistory', {stackIndex: 123, title: 'title'})
+        .returns(Promise.resolve(true));
+
+      return history.replace({stackIndex: 123, title: 'title'}).then(state => {
+        expect(history.stackIndex_).to.equal(123);
+        expect(state).to.deep.equal({stackIndex: 123, title: 'title'});
+
+        expect(onStateUpdated).to.be.calledOnce;
+        expect(onStateUpdated).to.be.calledWithMatch({
+          stackIndex: 123,
+          title: 'title',
         });
       });
     });
