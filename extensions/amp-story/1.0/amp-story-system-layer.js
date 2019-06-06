@@ -19,6 +19,7 @@ import {
   UIType,
   getStoreService,
 } from './amp-story-store-service';
+import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-story-system-layer-1.0.css';
 import {
   DevelopmentModeLog,
@@ -66,6 +67,12 @@ const INFO_CLASS = 'i-amphtml-story-info-control';
 
 /** @private @const {string} */
 const SIDEBAR_CLASS = 'i-amphtml-story-sidebar-control';
+
+/** @private @const {string} */
+const NEW_PAGE_AVAILABLE_CLASS = 'i-amphtml-story-new-page-control';
+
+/** @private @const {string} */
+const HAS_NEW_PAGE_ATTRIBUTE = 'i-amphtml-story-has-new-page';
 
 /** @private @const {number} */
 const HIDE_AUDIO_MESSAGE_TIMEOUT_MS = 1500;
@@ -156,6 +163,13 @@ const TEMPLATE = {
             'class': SIDEBAR_CLASS + ' i-amphtml-story-button',
           }),
         },
+        {
+          tag: 'div',
+          attrs: dict({
+            'role': 'button',
+            'class': NEW_PAGE_AVAILABLE_CLASS + ' i-amphtml-story-button',
+          }),
+        },
       ],
     },
   ],
@@ -166,7 +180,11 @@ const TEMPLATE = {
  * Chrome contains:
  *   - mute/unmute button
  *   - story progress bar
- *   - bookend close butotn
+ *   - bookend close button
+ *   - share button
+ *   - domain info button
+ *   - sidebar
+ *   - new page updates available button
  */
 export class SystemLayer {
   /**
@@ -310,6 +328,20 @@ export class SystemLayer {
         this.onInfoClick_();
       } else if (matches(target, `.${SIDEBAR_CLASS}, .${SIDEBAR_CLASS} *`)) {
         this.onSidebarClick_();
+      } else if (
+        matches(
+          target,
+          `.${NEW_PAGE_AVAILABLE_CLASS}, .${NEW_PAGE_AVAILABLE_CLASS} *`
+        )
+      ) {
+        // Forward event to amp-story.
+        Services.actionServiceForDoc(this.parentEl_).trigger(
+          target,
+          'tap',
+          event,
+          ActionTrust.HIGH
+        );
+        this.toggleNewPageAvailableButton_(false);
       }
     });
 
@@ -391,6 +423,10 @@ export class SystemLayer {
         this.onSystemUiIsVisibleStateUpdate_(isVisible);
       }
     );
+
+    this.storeService_.subscribe(StateProperty.NEW_PAGE_AVAILABLE_ID, id => {
+      this.onNewPageAvailable_(id);
+    });
   }
 
   /**
@@ -497,6 +533,7 @@ export class SystemLayer {
           );
     });
   }
+
   /**
    * Reacts to muted state updates.
    * @param {boolean} isMuted
@@ -634,6 +671,34 @@ export class SystemLayer {
    */
   onSidebarClick_() {
     this.storeService_.dispatch(Action.TOGGLE_SIDEBAR, true);
+  }
+
+  /**
+   * Updates the "see new update" button with the new page id.
+   * When clicked it will take the user to the newest page.
+   * @param {string} id
+   * @private
+   */
+  onNewPageAvailable_(id) {
+    const button = this.buttonsContainer_.querySelector(
+      '.i-amphtml-story-new-page-control'
+    );
+    this.vsync_.mutate(() => {
+      button.setAttribute('on', `tap:${this.parentEl_.id}.goToPage(id=${id})`);
+    });
+    this.toggleNewPageAvailableButton_(true);
+  }
+
+  /**
+   * Displays or hides the "see new update" button.
+   * @param {boolean} isVisible
+   */
+  toggleNewPageAvailableButton_(isVisible) {
+    this.vsync_.mutate(() => {
+      isVisible
+        ? this.getShadowRoot().setAttribute(HAS_NEW_PAGE_ATTRIBUTE, '')
+        : this.getShadowRoot().removeAttribute(HAS_NEW_PAGE_ATTRIBUTE);
+    });
   }
 
   /**

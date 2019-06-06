@@ -96,7 +96,6 @@ describes.repeated(
             isSupported: () => false,
             fetchAndRenderTemplate: () => Promise.resolve(),
             renderTemplate: sandbox.stub(),
-            verifySsrResponse: () => Promise.resolve(),
           };
 
           list = new AmpList(element);
@@ -387,11 +386,11 @@ describes.repeated(
             });
           });
 
-          it('fetch should not be called if `src` is missing or empty', () => {
+          it('fetch should resolve if `src` is empty', () => {
             const spy = sandbox.spy(list, 'fetchList_');
             element.setAttribute('src', '');
             return list.layoutCallback().then(() => {
-              expect(spy).to.not.be.called;
+              expect(spy).to.be.called;
             });
           });
 
@@ -624,7 +623,6 @@ describes.repeated(
                 fetchOpt: sinon.match({
                   headers: {Accept: 'application/json'},
                   method: 'GET',
-                  requireAmpResponseSourceOrigin: false,
                   responseType: 'application/json',
                 }),
               });
@@ -721,9 +719,10 @@ describes.repeated(
             );
           });
 
-          it('should not render if [src] mutates with data (before layout)', () => {
-            // Not allowed before layout.
-            listMock.expects('scheduleRender_').never();
+          // Unlike [src] mutations with URLs, local data mutations should
+          // always render immediately.
+          it('should render if [src] mutates with data (before layout)', () => {
+            listMock.expects('scheduleRender_').once();
 
             element.setAttribute('src', 'https://new.com/list.json');
             list.mutatedAttributesCallback({'src': [{title: 'Title1'}]});

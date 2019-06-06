@@ -4,6 +4,7 @@ formats:
   - websites
 teaser:
   text: Allows rendering of custom UI components running on third-party JavaScript.
+experimental: true
 ---
 # amp-script
 

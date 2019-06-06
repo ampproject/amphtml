@@ -22,6 +22,7 @@ import {addMissingParamsToUrl, addParamToUrl} from '../../../src/url';
 import {createElementWithAttributes} from '../../../src/dom';
 import {createLinker} from './linker';
 import {dict} from '../../../src/utils/object';
+import {getHighestAvailableDomain} from '../../../src/cookies';
 import {isObject} from '../../../src/types';
 import {user} from '../../../src/log';
 
@@ -71,6 +72,9 @@ export class LinkerManager {
 
     /** @const @private {!./variables.VariableService} */
     this.variableService_ = variableServiceForDoc(this.ampdoc_);
+
+    /** @private {?string} */
+    this.highestAvailableDomain_ = null;
   }
 
   /**
@@ -83,6 +87,8 @@ export class LinkerManager {
     if (!isObject(this.config_)) {
       return;
     }
+
+    this.highestAvailableDomain_ = getHighestAvailableDomain(this.ampdoc_.win);
 
     this.config_ = this.processConfig_(
       /** @type {!JsonObject} */ (this.config_)
@@ -302,23 +308,13 @@ export class LinkerManager {
       return false;
     }
 
-    // If domains are given we check for exact match or wildcard match.
+    // If destinationDomain is specified specifically, respect it.
     if (domains) {
-      for (let i = 0; i < domains.length; i++) {
-        const domain = domains[i];
-        // Exact match.
-        if (domain === hostname) {
-          return true;
-        }
-        // Allow wildcard subdomain matching.
-        if (domain.indexOf('*') !== -1 && isWildCardMatch(hostname, domain)) {
-          return true;
-        }
-      }
-      return false;
+      return this.destinationDomainsMatch_(domains, hostname);
     }
 
-    // If no domains given, default to friendly domain matching.
+    // Fallback to default behavior
+
     // Don't append linker for exact domain match, relative urls, or
     // fragments.
     const winHostname = WindowInterface.getHostname(this.ampdoc_.win);
@@ -327,12 +323,52 @@ export class LinkerManager {
     }
 
     const {sourceUrl, canonicalUrl} = Services.documentInfoForDoc(this.ampdoc_);
-    const sourceOrigin = this.urlService_.parse(sourceUrl).hostname;
     const canonicalOrigin = this.urlService_.parse(canonicalUrl).hostname;
-    return (
-      areFriendlyDomains(sourceOrigin, hostname) ||
-      areFriendlyDomains(canonicalOrigin, hostname)
+    const isFriendlyCanonicalOrigin = areFriendlyDomains(
+      canonicalOrigin,
+      hostname
     );
+    // Default to all subdomains matching (if there's one) plus canonicalOrigin
+
+    if (this.highestAvailableDomain_) {
+      const destinationDomain = [
+        this.highestAvailableDomain_,
+        '*' + this.highestAvailableDomain_,
+      ];
+      return (
+        this.destinationDomainsMatch_(destinationDomain, hostname) ||
+        isFriendlyCanonicalOrigin
+      );
+    }
+
+    // In the case where highestAvailableDomain cannot be found.
+    // (proxyOrigin, no <meta name='amp-cookie-scope'> found)
+    // default to friendly domain matching.
+    const sourceOrigin = this.urlService_.parse(sourceUrl).hostname;
+    return (
+      areFriendlyDomains(sourceOrigin, hostname) || isFriendlyCanonicalOrigin
+    );
+  }
+
+  /**
+   * Helper method to find out if hostname match the destinationDomain array.
+   * @param {Array<string>} domains
+   * @param {string} hostname
+   * @return {boolean}
+   */
+  destinationDomainsMatch_(domains, hostname) {
+    for (let i = 0; i < domains.length; i++) {
+      const domain = domains[i];
+      // Exact match.
+      if (domain === hostname) {
+        return true;
+      }
+      // Allow wildcard subdomain matching.
+      if (domain.indexOf('*') !== -1 && isWildCardMatch(hostname, domain)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**
