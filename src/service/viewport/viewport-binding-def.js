@@ -1,3 +1,6 @@
+import {computedStyle} from '../../style';
+import {isExperimentOn} from '../../experiments';
+
 /**
  * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
  *
@@ -199,4 +202,31 @@ export class ViewportBindingDef {
    * @return {boolean}
    */
   getScrollingElementScrollsLikeViewport() {}
+}
+
+/**
+ * Returns the margin-bottom of the last child of `element` with non-zero
+ * height, if any. Otherwise, returns 0.
+ *
+ * As of Safari 12.1.1, the getBoundingClientRect().height does not include the
+ * bottom margin of children and there's no other API that does.
+ *
+ * @param {!Window} win
+ * @param {!Element} element
+ * @return {number}
+ */
+export function marginBottomOfLastChild(win, element) {
+  if (!isExperimentOn(win, 'bottom-margin-in-content-height')) {
+    return 0;
+  }
+  let n = element.lastElementChild;
+  while (n) {
+    const r = n./*OK*/ getBoundingClientRect();
+    if (r.height > 0) {
+      break;
+    } else {
+      n = n.previousElementSibling;
+    }
+  }
+  return n ? parseInt(computedStyle(win, n).marginBottom, 10) : 0;
 }

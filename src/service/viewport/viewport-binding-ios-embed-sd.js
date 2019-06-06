@@ -16,7 +16,10 @@
 
 import {Observable} from '../../observable';
 import {Services} from '../../services';
-import {ViewportBindingDef} from './viewport-binding-def';
+import {
+  ViewportBindingDef,
+  marginBottomOfLastChild,
+} from './viewport-binding-def';
 import {
   assertDoesNotContainDisplay,
   computedStyle,
@@ -409,22 +412,7 @@ export class ViewportBindingIosEmbedShadowRoot_ {
     // and add it manually. Note that the "top gap" includes any padding-top
     // on ancestor elements and the scroller's border-top.
     const topGapPlusPaddingAndBorder = rect.top + this.getScrollTop();
-
-    let bottomGap = 0;
-    if (isExperimentOn(this.win, 'bottom-margin-in-content-height')) {
-      let n = this.win.document.body.lastElementChild;
-      while (n) {
-        const r = n./*OK*/ getBoundingClientRect();
-        if (r.height > 0) {
-          break;
-        } else {
-          n = n.previousElementSibling;
-        }
-      }
-      if (n) {
-        bottomGap = parseInt(computedStyle(this.win, n).marginBottom, 10);
-      }
-    }
+    const bottomGap = marginBottomOfLastChild(this.win, this.win.document.body);
 
     const style = computedStyle(this.win, content);
     return (

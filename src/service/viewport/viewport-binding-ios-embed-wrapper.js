@@ -16,7 +16,10 @@
 
 import {Observable} from '../../observable';
 import {Services} from '../../services';
-import {ViewportBindingDef} from './viewport-binding-def';
+import {
+  ViewportBindingDef,
+  marginBottomOfLastChild,
+} from './viewport-binding-def';
 import {computedStyle, px, setImportantStyles} from '../../style';
 import {dev} from '../../log';
 import {isExperimentOn} from '../../experiments';
@@ -253,27 +256,7 @@ export class ViewportBindingIosEmbedWrapper_ {
     // Unlike viewport-binding-natural.js, there's no need to calculate the
     // "top gap" since the wrapped body accounts for the top margin of children.
     // However, the parent's paddingTop and "bottom gap" must be added...
-
-    // Bottom gap:
-    // As of Safari 12.1.1, the wrapped body's rect height does not include the
-    // bottom margin of children and there's no other API that does.
-    // 1. Find the last child that has a non-zero height.
-    // 2. Add its marginBottom to the height calculation.
-    let bottomGap = 0;
-    if (isExperimentOn(this.win, 'bottom-margin-in-content-height')) {
-      let n = content.lastElementChild;
-      while (n) {
-        const r = n./*OK*/ getBoundingClientRect();
-        if (r.height > 0) {
-          break;
-        } else {
-          n = n.previousElementSibling;
-        }
-      }
-      if (n) {
-        bottomGap = parseInt(computedStyle(this.win, n).marginBottom, 10);
-      }
-    }
+    const bottomGap = marginBottomOfLastChild(this.win, content);
 
     const style = computedStyle(this.win, content);
     return (
