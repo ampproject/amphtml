@@ -292,6 +292,9 @@ export class Carousel {
      */
     this.forwards_ = true;
 
+    /** @private {boolean} */
+    this.hideScrollbar_ = true;
+
     /**
      * TODO(sparhami) Rename this to `activeIndex`. We do not want to expose
      * this as it changes, only when the user stops scrolling. Also change
@@ -525,6 +528,15 @@ export class Carousel {
   }
 
   /**
+   * @param {boolean} hideScrollbar Whether or not the scrollbar should be
+   *    hidden.
+   */
+  updateHideScrollbar(hideScrollbar) {
+    this.hideScrollbar_ = hideScrollbar;
+    this.updateUi();
+  }
+
+  /**
    * @param {boolean} horizontal Whether the scrollable should lay out
    *    horizontally or vertically.
    */
@@ -609,6 +621,7 @@ export class Carousel {
         'user-scrollable',
         this.userScrollable_
       );
+      this.scrollContainer_.setAttribute('hide-scrollbar', this.hideScrollbar_);
       this.scrollContainer_.setAttribute('horizontal', this.axis_ == Axis.X);
       this.scrollContainer_.setAttribute('loop', this.loop_);
       this.scrollContainer_.setAttribute('snap', this.snap_);

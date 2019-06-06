@@ -50,7 +50,7 @@
  * the scrollbars for all browsers.
  * TODO(sparhami) Find a solution for the clipping on all browsers.
  */
-.i-amphtml-carousel-scroll::-webkit-scrollbar {
+.i-amphtml-carousel-scroll[hide-scrollbar="true"]::-webkit-scrollbar {
   display: none;
 }
 
