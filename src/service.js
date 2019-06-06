@@ -70,6 +70,8 @@ export function getExistingServiceForDocInEmbedScope(
   id,
   opt_fallbackToTopWin
 ) {
+  // QQQQQ: lookup the ampdoc definition as well.
+  // QQQQQ: then remove this method entirely.
   const document = element.ownerDocument;
   const win = toWin(document.defaultView);
   // First, try to resolve via local embed window (if applicable).
