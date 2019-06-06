@@ -1,3 +1,4 @@
+import {Services} from '../../services';
 import {computedStyle} from '../../style';
 import {isExperimentOn} from '../../experiments';
 
@@ -216,7 +217,10 @@ export class ViewportBindingDef {
  * @return {number}
  */
 export function marginBottomOfLastChild(win, element) {
-  if (!isExperimentOn(win, 'bottom-margin-in-content-height')) {
+  if (
+    !isExperimentOn(win, 'bottom-margin-in-content-height') ||
+    !Services.platformFor(win).isSafari()
+  ) {
     return 0;
   }
   let n = element.lastElementChild;
