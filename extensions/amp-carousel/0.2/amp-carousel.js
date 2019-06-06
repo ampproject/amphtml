@@ -50,14 +50,18 @@ class AmpCarousel extends AMP.BaseElement {
       },
       ActionTrust.LOW
     );
+    this.registerAction(
+      'toggleAutoplay',
+      ({args = {}}) => {
+        this.toggleAutoplay_(args['toggleOn']);
+      },
+      ActionTrust.LOW
+    );
   }
 
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
-
-    /** @private {number} */
-    this.advanceCount_ = 1;
 
     /** @private {?Carousel} */
     this.carousel_ = null;
@@ -70,6 +74,9 @@ class AmpCarousel extends AMP.BaseElement {
 
     /** @private {string} */
     this.type_ = 'carousel';
+
+    /** @private {boolean} */
+    this.autoplay_ = false;
 
     /** @private {?Element} */
     this.nextButton_ = null;
@@ -208,7 +215,7 @@ class AmpCarousel extends AMP.BaseElement {
    * of the component.
    */
   next() {
-    if (this.type_ == 'carousel') {
+    if (this.type_ == CarouselType.CAROUSEL) {
       this.moveScrollOneViewport_(true);
       return;
     }
@@ -223,7 +230,7 @@ class AmpCarousel extends AMP.BaseElement {
    * directionality of the component.
    */
   prev() {
-    if (this.type_ == 'carousel') {
+    if (this.type_ == CarouselType.CAROUSEL) {
       this.moveScrollOneViewport_(false);
       return;
     }
@@ -288,17 +295,20 @@ class AmpCarousel extends AMP.BaseElement {
   configureCarousel_() {
     const dir = this.element.getAttribute('dir');
     const loop = this.element.hasAttribute('loop');
-    const autoAdvance = this.element.hasAttribute('autoplay');
-    const autoAdvanceInterval = Math.max(
-      this.element.getAttribute('delay') || 5000,
-      1000
-    );
+    const autoplay = this.element.getAttribute('autoplay');
+    const delay = this.element.getAttribute('delay');
     const type = this.element.getAttribute('type');
+    const autoAdvance = !!autoplay;
+    const autoAdvanceLoops = autoplay
+      ? Number(autoplay)
+      : Number.POSITIVE_INFINITY;
+    const autoAdvanceInterval = Math.max(Number(delay) || 5000, 1000);
 
     this.carousel_.updateForwards(dir != 'rtl');
     this.carousel_.updateLoop(loop || autoAdvance);
-    this.carousel_.updateAutoAdvance(autoAdvance);
+    this.carousel_.updateAutoAdvanceLoops(autoAdvanceLoops);
     this.carousel_.updateAutoAdvanceInterval(autoAdvanceInterval);
+    this.toggleAutoplay_(autoAdvance);
     this.updateType_(type);
   }
 
@@ -345,6 +355,16 @@ class AmpCarousel extends AMP.BaseElement {
       actionSource == ActionSource.TOUCH ||
       actionSource == ActionSource.GENERIC_HIGH_TRUST
     );
+  }
+
+  /**
+   * Toggles the current autoplay state, or forces it if the enable
+   *  argument is given.
+   * @param {boolean=} enable
+   */
+  toggleAutoplay_(enable) {
+    this.autoplay_ = enable !== undefined ? enable : !this.autoplay_;
+    this.carousel_.updateAutoAdvance(this.autoplay_);
   }
 
   /**
