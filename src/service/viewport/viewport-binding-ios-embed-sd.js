@@ -406,20 +406,26 @@ export class ViewportBindingIosEmbedShadowRoot_ {
     const content = this.wrapper_;
     const rect = content./*OK*/ getBoundingClientRect();
 
-    // The Y-position of any element can be offset by the vertical margin
+    // The Y-position of `content` can be offset by the vertical margin
     // of its first child, and this is _not_ accounted for in `rect.height`.
-    // This "top gap" causes smaller than expected contentHeight, so calculate
-    // and add it manually. Note that the "top gap" includes any padding-top
-    // on ancestor elements and the scroller's border-top.
-    const topGapPlusPaddingAndBorder = rect.top + this.getScrollTop();
-    const bottomGap = marginBottomOfLastChild(this.win, this.win.document.body);
+    // This causes smaller than expected content height, so add it manually.
+    // Note this "top" value already includes padding-top of ancestor elements
+    // and getBorderTop().
+    const top = rect.top + this.getScrollTop();
+
+    // As of Safari 12.1.1, the getBoundingClientRect().height does not include
+    // the bottom margin of children and there's no other API that does.
+    const childMarginBottom = marginBottomOfLastChild(
+      this.win,
+      this.win.document.body
+    );
 
     const style = computedStyle(this.win, content);
     return (
-      rect.height +
-      topGapPlusPaddingAndBorder +
+      top +
       parseInt(style.marginTop, 10) +
-      bottomGap +
+      rect.height +
+      childMarginBottom +
       parseInt(style.marginBottom, 10)
     );
   }

@@ -1,4 +1,3 @@
-import {Services} from '../../services';
 import {computedStyle} from '../../style';
 import {isExperimentOn} from '../../experiments';
 
@@ -209,18 +208,12 @@ export class ViewportBindingDef {
  * Returns the margin-bottom of the last child of `element` with non-zero
  * height, if any. Otherwise, returns 0.
  *
- * As of Safari 12.1.1, the getBoundingClientRect().height does not include the
- * bottom margin of children and there's no other API that does.
- *
  * @param {!Window} win
  * @param {!Element} element
  * @return {number}
  */
 export function marginBottomOfLastChild(win, element) {
-  if (
-    !isExperimentOn(win, 'bottom-margin-in-content-height') ||
-    !Services.platformFor(win).isSafari()
-  ) {
+  if (!isExperimentOn(win, 'margin-bottom-in-content-height')) {
     return 0;
   }
   let n = element.lastElementChild;
