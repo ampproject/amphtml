@@ -15,6 +15,7 @@
  */
 
 import * as variant from '../variant';
+import * as mutation from '../mutation-parser';
 import {AmpExperiment} from '../amp-experiment';
 import {Services} from '../../../../src/services';
 import {toggleExperiment} from '../../../../src/experiments';
@@ -172,18 +173,18 @@ describes.realWin(
 
     it(
       'should throw if the chosen experiment / ' +
-        'variant config has too many mutations',
+        'variant config has too many mutation operations',
       () => {
         const tooManyMutationsConfig = {
           'experiment-1': {
             variants: {
               'variant-a': {
                 weight: 50,
-                mutations: new Array(200).fill({}),
+                mutations: new Array(20).fill({}),
               },
               'variant-b': {
                 weight: 50,
-                mutations: new Array(200).fill({}),
+                mutations: new Array(20).fill({}),
               },
             },
           },
@@ -195,6 +196,11 @@ describes.realWin(
           JSON.stringify(tooManyMutationsConfig)
         );
         stubAllocateVariant(sandbox, tooManyMutationsConfig);
+
+        // Stub parsing mutation records
+        sandbox.stub(mutation, 'parseMutation').returns({
+          mutations: new Array(10).fill(() => {})
+        });
 
         expectAsyncConsoleError(/Max number of mutations/);
         return experiment.buildCallback().then(
@@ -213,7 +219,6 @@ describes.realWin(
       stubAllocateVariant(sandbox, config);
 
       const applyStub = sandbox.stub(experiment, 'applyMutations_');
-      sandbox.stub(experiment, 'validateExperimentToVariant_');
 
       experiment.buildCallback();
       return Services.variantsForDocOrNull(ampdoc.getHeadNode())

@@ -89,7 +89,7 @@ export function parseMutation(mutation, document) {
 
     // TODO (torch2424): Remove this NOOP after reviews
     // This is done to allow for small(er) PRS
-    mutationRecord.mutate = () => {};
+    mutationRecord.mutations.push(() => {});
   }
 
   return mutationRecord;
