@@ -150,6 +150,7 @@ tags: { # amp-list-load-more
 # The button element variant allowed in amp-list-load-more.
 tags: {
   html_format: AMP
+  html_format: EXPERIMENTAL
   requires_extension: "amp-list"
   tag_name: "BUTTON"
   spec_name: "amp-list-load-more button[load-more-clickable]"
