@@ -39,6 +39,7 @@ const Variable = {
  * service synchronously from the amp-story codebase without running into race
  * conditions.
  * @param {!Window} win
+ * @return {!AmpStoryVariableService}
  */
 export const getVariableService = win => {
   let service = Services.storyVariableService(win);
