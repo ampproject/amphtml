@@ -210,7 +210,11 @@ describes.realWin(
           })
           .then(() => {
             const p = listenOncePromise(bc, VideoEvents.LOADEDMETADATA);
-            fakePostMessage(bc, {event: 'loadedmetadata', muted: false, playing: false});
+            fakePostMessage(bc, {
+              event: 'loadedmetadata',
+              muted: false,
+              playing: false,
+            });
             return p;
           })
           .then(() => {
