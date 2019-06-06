@@ -380,7 +380,7 @@ function buildExtension(
   }
 
   // minify and copy vendor configs for amp-analytics component
-  if (name === 'amp-analytics') {
+  if (name === 'amp-analytics' && argv.compile_vendor_configs) {
     promises.push(compileVendorConfigs(options));
   }
 
