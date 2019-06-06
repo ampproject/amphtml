@@ -43,10 +43,6 @@ function log(...messages) {
 }
 
 app.use('/compose-doc', function(req, res) {
-  const sourceOrigin = req.query['__amp_source_origin'];
-  if (sourceOrigin) {
-    res.setHeader('AMP-Access-Control-Allow-Source-Origin', sourceOrigin);
-  }
   res.setHeader('X-XSS-Protection', '0');
 
   const {body, css, experiments, extensions, spec} = req.query;
@@ -189,10 +185,6 @@ app.use('/request-bank/:bid/teardown/', (req, res) => {
  * Serves a fake ad for test-amp-ad-fake.js
  */
 app.get('/a4a/:bid', (req, res) => {
-  const sourceOrigin = req.query['__amp_source_origin'];
-  if (sourceOrigin) {
-    res.setHeader('AMP-Access-Control-Allow-Source-Origin', sourceOrigin);
-  }
   const {bid} = req.params;
   const body = `
   <a href=https://ampbyexample.com target=_blank>
