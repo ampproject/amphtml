@@ -95,6 +95,7 @@
           <option>[Select a vendor]</option>
           <!-- This should be in alphabetical order. _ping_ should be the first -->
           <option>_ping_</option>
+          <option>didomi</option>
         </select>
         <input type="submit" value="Go">
         <button type="button" class="clearLocalStorage" onclick="localStorage.clear(); alert('localStorage Cleared!')">Clear localStorage</button>
@@ -133,6 +134,34 @@
         </div>
       </amp-consent>
       <!-- End _ping_ example -->
+
+      <!-- didomi example -->
+      <amp-consent id='didomi' layout='nodisplay' type='didomi'>
+          <script type="application/json">
+            {
+              "consents": {},
+              "postPromptUI": "postPromptUI",
+              "clientConfig": {
+                "config": {
+                  "app": {
+                    "apiKey": "03f1af55-a479-4c1f-891a-7481345171ce",
+                    "name": "AMP - Didomi",
+                    "vendors": {
+                      "iab": {
+                        "all": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          </script>
+          <div id="postPromptUI">
+            Post Prompt UI
+            <button on="tap:didomi.prompt(consent=didomi)" role="button">Manage</button>
+          </div>
+        </amp-consent>
+        <!-- End didomi example -->
 
     </div>
   </body>
