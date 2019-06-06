@@ -559,11 +559,6 @@ export class AmpList extends AMP.BaseElement {
             response
           );
           request.fetchOpt.responseType = 'application/json';
-          this.ssrTemplateHelper_.verifySsrResponse(
-            this.win,
-            response,
-            request
-          );
           return response;
         },
         error => {
