@@ -443,6 +443,10 @@ class AmpCarousel extends AMP.BaseElement {
     this.carousel_.updateHideScrollbar(this.type_ == CarouselType.SLIDES);
     this.carousel_.updateMixedLength(this.type_ == CarouselType.CAROUSEL);
     this.carousel_.updateSnap(this.type_ == CarouselType.SLIDES);
+    const buttonRole =
+      this.type_ == CarouselType.SLIDES ? 'button' : 'presentation';
+    this.prevButton_.setAttribute('role', buttonRole);
+    this.nextButton_.setAttribute('role', buttonRole);
   }
 
   /**
