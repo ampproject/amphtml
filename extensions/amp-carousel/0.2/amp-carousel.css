@@ -76,7 +76,6 @@ amp-carousel[dir="rtl"] .amp-carousel-button {
   background-color: rgba(0, 0, 0, .5);
   background-position: 50% 50%;
   background-repeat: no-repeat;
-  transform: translateY(-50%);
   z-index: 10;
   /* Reenable pointer events stopped at the parent container. */
   pointer-events: all;
