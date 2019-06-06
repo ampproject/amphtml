@@ -29,16 +29,6 @@ function setCorsHeaders(req, res, next) {
   res.setHeader('Access-Control-Allow-Origin', req.headers.origin || '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  if (req.query.__amp_source_origin) {
-    res.setHeader(
-      'Access-Control-Expose-Headers',
-      'AMP-Access-Control-Allow-Source-Origin'
-    );
-    res.setHeader(
-      'AMP-Access-Control-Allow-Source-Origin',
-      req.query.__amp_source_origin
-    );
-  }
   next();
 }
 app.use(setCorsHeaders);
