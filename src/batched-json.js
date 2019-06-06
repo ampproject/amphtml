@@ -112,8 +112,6 @@ export function requestForBatchFetch(element, replacement, refresh) {
     const fetchOpt = {};
     if (element.hasAttribute('credentials')) {
       fetchOpt.credentials = element.getAttribute('credentials');
-    } else {
-      fetchOpt.requireAmpResponseSourceOrigin = false;
     }
     // https://hacks.mozilla.org/2016/03/referrer-and-cache-control-apis-for-fetch/
     if (refresh) {

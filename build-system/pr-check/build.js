@@ -62,7 +62,8 @@ function main() {
     if (
       buildTargets.has('RUNTIME') ||
       buildTargets.has('FLAG_CONFIG') ||
-      buildTargets.has('INTEGRATION_TEST')
+      buildTargets.has('INTEGRATION_TEST') ||
+      buildTargets.has('UNIT_TEST')
     ) {
       timedExecOrDie('gulp update-packages');
       timedExecOrDie('gulp build --fortesting');

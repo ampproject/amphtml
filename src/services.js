@@ -250,14 +250,6 @@ export class Services {
 
   /**
    * @param {!Window} window
-   * @return {!./service/document-state.DocumentState}
-   */
-  static documentStateFor(window) {
-    return getService(window, 'documentState');
-  }
-
-  /**
-   * @param {!Window} window
    * @return {!./service/extensions-impl.Extensions}
    */
   static extensionsFor(window) {
@@ -293,6 +285,15 @@ export class Services {
       elementOrAmpDoc,
       'form-submit-service'
     ));
+  }
+
+  /**
+   * @param {!Window} window
+   * @return {!./service/document-state.DocumentState}
+   * @restricted  Only to be used for global document services, such as vsync.
+   */
+  static globalDocumentStateFor(window) {
+    return getService(window, 'documentState');
   }
 
   /**

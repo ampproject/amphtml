@@ -14,6 +14,18 @@
  * limitations under the License.
  */
 
-/*
- * TODO(lannka): to be filled. #22418
+/* heading/clontent */
+.i-amphtml-accordion-header,
+.i-amphtml-accordion-content {
+  margin: 0;
+}
+
+/* heading
+ * TODO(dvoytenko): remove most of these styles, except maybe for `cursor`.
  */
+.i-amphtml-accordion-header {
+  cursor: pointer;
+  background-color: #efefef;
+  padding-right: 20px;
+  border: solid 1px #dfdfdf;
+}

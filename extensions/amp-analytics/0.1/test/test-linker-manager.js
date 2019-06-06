@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as Cookies from '../../../../src/cookies';
 import {
   LinkerManager,
   areFriendlyDomains,
@@ -275,163 +276,203 @@ describes.realWin('Linker Manager', {amp: true}, env => {
     });
   });
 
-  it('should respect destinationDomains config', () => {
-    const config = {
-      linkers: {
-        enabled: true,
-        testLinker1: {
-          ids: {
-            id: '111',
+  describe('destination domains match', () => {
+    it('should respect destinationDomains config', () => {
+      const config = {
+        linkers: {
+          enabled: true,
+          testLinker1: {
+            ids: {
+              id: '111',
+            },
+          },
+          testLinker2: {
+            ids: {
+              id: '222',
+            },
+            destinationDomains: ['foo.com', 'bar.com'],
           },
         },
-        testLinker2: {
-          ids: {
-            id: '222',
-          },
-          destinationDomains: ['foo.com', 'bar.com'],
-        },
-      },
-    };
+      };
 
-    const lm = new LinkerManager(ampdoc, config, /* type */ null, element);
-    return lm.init().then(() => {
-      // testLinker1 should apply to both canonical and source
-      // testLinker2 should not
-      const canonicalDomainUrl = clickAnchor('https://www.canonical.com/path');
-      expect(canonicalDomainUrl).to.contain('testLinker1=');
-      expect(canonicalDomainUrl).to.not.contain('testLinker2=');
+      const lm = new LinkerManager(ampdoc, config, /* type */ null, element);
+      return lm.init().then(() => {
+        // testLinker1 should apply to both canonical and source
+        // testLinker2 should not
+        const canonicalDomainUrl = clickAnchor(
+          'https://www.canonical.com/path'
+        );
+        expect(canonicalDomainUrl).to.contain('testLinker1=');
+        expect(canonicalDomainUrl).to.not.contain('testLinker2=');
 
-      const sourceDomainUrl = clickAnchor('https://www.source.com/path');
-      expect(sourceDomainUrl).to.contain('testLinker1=');
-      expect(sourceDomainUrl).to.not.contain('testLinker2=');
+        const sourceDomainUrl = clickAnchor('https://www.source.com/path');
+        expect(sourceDomainUrl).to.contain('testLinker1=');
+        expect(sourceDomainUrl).to.not.contain('testLinker2=');
 
-      // testLinker2 should apply to both foo and bar
-      // testLinker1 should not
-      const fooUrl = clickAnchor('https://foo.com/path');
-      expect(fooUrl).to.not.contain('testLinker1=');
-      expect(fooUrl).to.contain('testLinker2=');
+        // testLinker2 should apply to both foo and bar
+        // testLinker1 should not
+        const fooUrl = clickAnchor('https://foo.com/path');
+        expect(fooUrl).to.not.contain('testLinker1=');
+        expect(fooUrl).to.contain('testLinker2=');
 
-      const barDomainUrl = clickAnchor('https://bar.com/path');
-      expect(barDomainUrl).to.not.contain('testLinker1=');
-      expect(barDomainUrl).to.contain('testLinker2=');
+        const barDomainUrl = clickAnchor('https://bar.com/path');
+        expect(barDomainUrl).to.not.contain('testLinker1=');
+        expect(barDomainUrl).to.contain('testLinker2=');
+      });
     });
-  });
 
-  it('should respect default destinationDomains config', () => {
-    const config = {
-      linkers: {
-        enabled: true,
-        destinationDomains: ['foo.com'],
-        testLinker1: {
-          ids: {
-            id: '111',
+    it('should respect default destinationDomains config', () => {
+      const config = {
+        linkers: {
+          enabled: true,
+          destinationDomains: ['foo.com'],
+          testLinker1: {
+            ids: {
+              id: '111',
+            },
+          },
+          testLinker2: {
+            ids: {
+              id: '222',
+            },
+            destinationDomains: ['bar.com'],
           },
         },
-        testLinker2: {
-          ids: {
-            id: '222',
-          },
-          destinationDomains: ['bar.com'],
-        },
-      },
-    };
+      };
 
-    const lm = new LinkerManager(ampdoc, config, /* type */ null, element);
-    return lm.init().then(() => {
-      const fooDomainUrl = clickAnchor('https://foo.com/path');
-      const barDomainUrl = clickAnchor('https://bar.com/path');
+      const lm = new LinkerManager(ampdoc, config, /* type */ null, element);
+      return lm.init().then(() => {
+        const fooDomainUrl = clickAnchor('https://foo.com/path');
+        const barDomainUrl = clickAnchor('https://bar.com/path');
 
-      expect(fooDomainUrl).to.contain('testLinker1=');
-      expect(fooDomainUrl).to.not.contain('testLinker2=');
-      expect(barDomainUrl).to.contain('testLinker2=');
-      expect(barDomainUrl).to.not.contain('testLinker1=');
+        expect(fooDomainUrl).to.contain('testLinker1=');
+        expect(fooDomainUrl).to.not.contain('testLinker2=');
+        expect(barDomainUrl).to.contain('testLinker2=');
+        expect(barDomainUrl).to.not.contain('testLinker1=');
+      });
     });
-  });
 
-  it('should accept wildcard domains', () => {
-    const config = {
-      linkers: {
-        enabled: true,
-        destinationDomains: ['*.foo.com'],
-        testLinker1: {
-          ids: {
-            id: '111',
+    it('should accept wildcard domains', () => {
+      const config = {
+        linkers: {
+          enabled: true,
+          destinationDomains: ['*.foo.com'],
+          testLinker1: {
+            ids: {
+              id: '111',
+            },
+          },
+          testLinker2: {
+            ids: {
+              id: '222',
+            },
+            destinationDomains: ['*.bar.com*'],
+          },
+          testLinker3: {
+            ids: {
+              id: '333',
+            },
+            destinationDomains: ['*.baz.co*'],
           },
         },
-        testLinker2: {
-          ids: {
-            id: '222',
-          },
-          destinationDomains: ['*.bar.com*'],
-        },
-        testLinker3: {
-          ids: {
-            id: '333',
-          },
-          destinationDomains: ['*.baz.co*'],
-        },
-      },
-    };
+      };
 
-    const lm = new LinkerManager(ampdoc, config, /* type */ null, element);
-    return lm.init().then(() => {
-      const subdomain = clickAnchor('https://amp.foo.com/path');
-      expect(subdomain).to.contain('testLinker1=');
-      expect(subdomain).to.not.contain('testLinker2=');
-      expect(subdomain).to.not.contain('testLinker3=');
+      const lm = new LinkerManager(ampdoc, config, /* type */ null, element);
+      return lm.init().then(() => {
+        const subdomain = clickAnchor('https://amp.foo.com/path');
+        expect(subdomain).to.contain('testLinker1=');
+        expect(subdomain).to.not.contain('testLinker2=');
+        expect(subdomain).to.not.contain('testLinker3=');
 
-      const noDot = clickAnchor('https://foo.com/path');
-      expect(noDot).to.not.contain('testLinker1=');
-      expect(noDot).to.not.contain('testLinker2=');
-      expect(noDot).to.not.contain('testLinker3=');
+        const noDot = clickAnchor('https://foo.com/path');
+        expect(noDot).to.not.contain('testLinker1=');
+        expect(noDot).to.not.contain('testLinker2=');
+        expect(noDot).to.not.contain('testLinker3=');
 
-      const thirdLevel = clickAnchor('https://a.b.foo.com/path');
-      expect(thirdLevel).to.contain('testLinker1=');
-      expect(thirdLevel).to.not.contain('testLinker2=');
-      expect(thirdLevel).to.not.contain('testLinker3=');
+        const thirdLevel = clickAnchor('https://a.b.foo.com/path');
+        expect(thirdLevel).to.contain('testLinker1=');
+        expect(thirdLevel).to.not.contain('testLinker2=');
+        expect(thirdLevel).to.not.contain('testLinker3=');
 
-      const multiTLDDomainEnabled = clickAnchor('https://foo.bar.com.uk/path');
-      expect(multiTLDDomainEnabled).to.contain('testLinker2=');
-      expect(multiTLDDomainEnabled).to.not.contain('testLinker1=');
-      expect(multiTLDDomainEnabled).to.not.contain('testLinker3=');
+        const multiTLDDomainEnabled = clickAnchor(
+          'https://foo.bar.com.uk/path'
+        );
+        expect(multiTLDDomainEnabled).to.contain('testLinker2=');
+        expect(multiTLDDomainEnabled).to.not.contain('testLinker1=');
+        expect(multiTLDDomainEnabled).to.not.contain('testLinker3=');
 
-      const multiTLDDomainDisabled = clickAnchor('https://amp.foo.com.uk/path');
-      expect(multiTLDDomainDisabled).to.not.contain('testLinker1=');
-      expect(multiTLDDomainDisabled).to.not.contain('testLinker2=');
-      expect(multiTLDDomainDisabled).to.not.contain('testLinker3=');
+        const multiTLDDomainDisabled = clickAnchor(
+          'https://amp.foo.com.uk/path'
+        );
+        expect(multiTLDDomainDisabled).to.not.contain('testLinker1=');
+        expect(multiTLDDomainDisabled).to.not.contain('testLinker2=');
+        expect(multiTLDDomainDisabled).to.not.contain('testLinker3=');
 
-      const co = clickAnchor('https://www.baz.com/path');
-      expect(co).to.contain('testLinker3=');
-      expect(co).not.to.contain('testLinker1=');
-      expect(co).not.to.contain('testLinker2=');
+        const co = clickAnchor('https://www.baz.com/path');
+        expect(co).to.contain('testLinker3=');
+        expect(co).not.to.contain('testLinker1=');
+        expect(co).not.to.contain('testLinker2=');
+      });
     });
-  });
 
-  it('should match friendly domain if destinationDomains unspecified', () => {
-    const config = {
-      linkers: {
-        enabled: true,
-        testLinker1: {
-          ids: {
-            id: '111',
+    it('should match all subdomain and w/o destinationDomains', () => {
+      sandbox.stub(Cookies, 'getHighestAvailableDomain').returns('test.com');
+      const config = {
+        linkers: {
+          enabled: true,
+          testLinker1: {
+            ids: {
+              id: '111',
+            },
           },
         },
-      },
-    };
+      };
 
-    const lm = new LinkerManager(ampdoc, config, /* type */ null, element);
-    return lm.init().then(() => {
-      const url1 = clickAnchor('https://www.source.com/path');
-      const url2 = clickAnchor('https://amp.www.source.com/path');
-      const url3 = clickAnchor('https://canonical.com/path');
-      const url4 = clickAnchor('https://amp.www.canonical.com/path');
-      const url5 = clickAnchor('https://amp.google.com/path');
+      const lm = new LinkerManager(ampdoc, config, /* type */ null, element);
+      return lm.init().then(() => {
+        const url1 = clickAnchor('https://www.source.com/path');
+        const url2 = clickAnchor('https://foo.test.com');
+        const url3 = clickAnchor('https://test.com');
+        const url4 = clickAnchor('https://canonical.com/path');
+        const url5 = clickAnchor('https://amp.www.canonical.com/path');
+        const url6 = clickAnchor('https://amp.google.com/path');
 
-      expect(url1).to.contain('testLinker1=');
-      expect(url2).to.contain('testLinker1=');
-      expect(url3).to.contain('testLinker1=');
-      expect(url4).to.contain('testLinker1=');
-      expect(url5).to.not.contain('testLinker1=');
+        expect(url1).to.not.contain('testLinker1=');
+        expect(url2).to.contain('testLinker1=');
+        expect(url3).to.contain('testLinker1=');
+        expect(url4).to.contain('testLinker1=');
+        expect(url5).to.contain('testLinker1=');
+        expect(url6).to.not.contain('testLinker1=');
+      });
+    });
+
+    it('should match friendly domain as fallback', () => {
+      sandbox.stub(Cookies, 'getHighestAvailableDomain').returns(null);
+      const config = {
+        linkers: {
+          enabled: true,
+          testLinker1: {
+            ids: {
+              id: '111',
+            },
+          },
+        },
+      };
+
+      const lm = new LinkerManager(ampdoc, config, /* type */ null, element);
+      return lm.init().then(() => {
+        const url1 = clickAnchor('https://www.source.com/path');
+        const url2 = clickAnchor('https://amp.www.source.com/path');
+        const url3 = clickAnchor('https://canonical.com/path');
+        const url4 = clickAnchor('https://amp.www.canonical.com/path');
+        const url5 = clickAnchor('https://amp.google.com/path');
+
+        expect(url1).to.contain('testLinker1=');
+        expect(url2).to.contain('testLinker1=');
+        expect(url3).to.contain('testLinker1=');
+        expect(url4).to.contain('testLinker1=');
+        expect(url5).to.not.contain('testLinker1=');
+      });
     });
   });
 
