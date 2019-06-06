@@ -128,14 +128,26 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
       );
     });
 
+    it('should be no-op if request is initialized to bypass', () => {
+      ampDocSingle = null;
+      // Given the bypass flag and since the context of this running
+      // is a test, thus mode.localDev is true.
+      return getViewerInterceptResponse(win, ampDocSingle, input, {
+        bypassInterceptorDev: true,
+      }).then(() => {
+        // Expect no interception.
+        expect(viewerForDoc).to.not.have.been.called;
+      });
+    });
+
     it('should be no-op if amp doc does not support xhr interception', () => {
       doc.removeAttribute('allow-xhr-interception');
       input = 'https://www.googz.org';
-      return getViewerInterceptResponse(win, ampDocSingle, input, init).then(
-        () => {
-          expect(viewer.sendMessageAwaitResponse).to.not.have.been.called;
-        }
-      );
+      return getViewerInterceptResponse(win, ampDocSingle, input, {
+        bypassInterceptorDev: false,
+      }).then(() => {
+        expect(viewer.sendMessageAwaitResponse).to.not.have.been.called;
+      });
     });
 
     it('should send xhr request to viewer', () => {
